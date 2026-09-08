@@ -1,0 +1,19 @@
+# Entornos y artefactos de Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+
+# Salidas de prueba: nunca al repo
+*.xlsx
+*.zip
+salida/
+
+# Datos reales de contribuyentes: NUNCA. Este repo es publico.
+privado/
+*.privado.*

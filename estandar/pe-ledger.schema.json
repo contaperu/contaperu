@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Zetrix1111/contaperu/estandar/pe-ledger.schema.json",
+  "title": "pe-ledger",
+  "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
+  "type": "object",
+  "required": ["pe_ledger", "libro"],
+  "additionalProperties": false,
+  "patternProperties": {
+    "^_": {
+      "description": "Cualquier clave que empiece con guion bajo es una anotación del productor. Se transporta y se ignora."
+    }
+  },
+  "properties": {
+    "pe_ledger": {
+      "description": "Versión del estándar que habla este documento.",
+      "type": "string",
+      "const": "0.1"
+    },
+    "libro": { "$ref": "#/$defs/libro" },
+    "comprobantes": {
+      "description": "Los documentos soporte del periodo.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/comprobante" }
+    },
+    "asiento": {
+      "description": "Líneas de diario ya armadas. Opcional: un productor puede entregar solo comprobantes y pedir que se genere el asiento.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/linea" }
+    },
+    "emisor": {
+      "description": "Quién generó este documento (software, versión). Informativo.",
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+
+  "$defs": {
+    "importe": {
+      "description": "Monto de 2 decimales, siempre positivo. Se acepta texto (exacto, recomendado) o número.",
+      "anyOf": [
+        { "type": "string", "pattern": "^$|^[0-9]+(\\.[0-9]{1,2})?$" },
+        { "type": "number", "minimum": 0 }
+      ]
+    },
+    "fecha": {
+      "description": "AAAA-MM-DD, o vacío si no aplica.",
+      "type": ["string", "null"],
+      "pattern": "^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+
+    "libro": {
+      "description": "Cabecera tributaria: un RUC, un mes, ventas o compras.",
+      "type": "object",
+      "required": ["ruc", "periodo", "tipo"],
+      "additionalProperties": false,
+      "properties": {
+        "ruc": { "type": "string", "pattern": "^[0-9]{11}$", "description": "RUC del contribuyente dueño del libro." },
+        "razon_social": { "type": "string" },
+        "periodo": { "type": "string", "pattern": "^20[0-9]{2}(0[1-9]|1[0-2])$", "description": "AAAAMM." },
+        "tipo": { "enum": ["venta", "compra"] }
+      }
+    },
+
+    "comprobante": {
+      "type": "object",
+      "required": ["tipo_cp", "fecha_emision", "total"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo_cp": {
+          "type": "string",
+          "pattern": "^[0-9A-Z]{2}$",
+          "description": "Tabla 10 de SUNAT: 01 factura, 02 recibo por honorarios, 03 boleta, 07 nota de crédito, 08 nota de débito, 14 recibo de servicios públicos, 50 DUA."
+        },
+        "serie": { "type": "string", "description": "F001, E001, B001. Vacía en los que no la llevan, como el recibo de servicios públicos." },
+        "numero": { "type": "string" },
+        "numero_final": { "type": "string", "description": "Solo rangos: boletas consolidadas del día." },
+        "fecha_emision": { "$ref": "#/$defs/fecha" },
+        "fecha_vencimiento": { "$ref": "#/$defs/fecha" },
+
+        "contraparte_tipo_doc": { "enum": ["0", "1", "4", "6", "7", "A"], "description": "Tabla 1: 6 RUC, 1 DNI, 4 carné de extranjería, 7 pasaporte, A cédula diplomática, 0 otros." },
+        "contraparte_doc": { "type": "string" },
+        "contraparte_nombre": { "type": "string" },
+
+        "moneda": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217: PEN, USD, EUR." },
+        "tipo_cambio": {
+          "description": "El que publica SUNAT para la fecha de emisión. 3 decimales.",
+          "anyOf": [
+            { "type": "string", "pattern": "^$|^[0-9]+(\\.[0-9]{1,3})?$" },
+            { "type": "number", "exclusiveMinimum": 0 },
+            { "type": "null" }
+          ]
+        },
+
+        "base_gravada": { "$ref": "#/$defs/importe" },
+        "igv": { "$ref": "#/$defs/importe" },
+        "dscto_base": { "$ref": "#/$defs/importe" },
+        "dscto_igv": { "$ref": "#/$defs/importe" },
+        "exonerado": { "$ref": "#/$defs/importe" },
+        "inafecto": { "$ref": "#/$defs/importe" },
+        "exportacion": { "$ref": "#/$defs/importe" },
+        "isc": { "$ref": "#/$defs/importe" },
+        "base_ivap": { "$ref": "#/$defs/importe" },
+        "ivap": { "$ref": "#/$defs/importe" },
+        "icbper": { "$ref": "#/$defs/importe" },
+        "otros": { "$ref": "#/$defs/importe" },
+        "total": { "$ref": "#/$defs/importe" },
+        "retencion": {
+          "$ref": "#/$defs/importe",
+          "description": "Retención de renta de 4ta que MUESTRA el recibo por honorarios. No es la retención del IGV, que no entra en ningún asiento."
+        },
+
+        "destino_igv": { "enum": ["DG", "DGNG", "DNG"], "description": "Solo compras: gravadas, mixtas, no gravadas." },
+        "valor_no_gravado": {
+          "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }],
+          "description": "Si falta, se toma exonerado más inafecto."
+        },
+        "anio_dua": { "type": "string" },
+        "cod_dep_aduanera": { "type": "string" },
+        "clasif_bienes": { "type": "string" },
+
+        "ref_fecha": { "$ref": "#/$defs/fecha" },
+        "ref_tipo_cp": { "type": "string", "description": "Documento que modifica una nota de crédito o débito." },
+        "ref_serie": { "type": "string" },
+        "ref_numero": { "type": "string" },
+
+        "detraccion": { "anyOf": [{ "$ref": "#/$defs/detraccion" }, { "type": "null" }] },
+        "id_contrato": { "type": "string" },
+
+        "concepto": { "type": "string", "description": "La glosa del asiento." },
+        "cuenta_contable": { "type": "string", "description": "Cuenta de gasto o de ingreso del plan del contribuyente." },
+        "centro_costo": { "type": "string" },
+
+        "origen": { "enum": ["xml", "pdf_texto", "vision", "manual", "sire"], "description": "De dónde salió el dato. Trazabilidad, no lógica." },
+        "confianza": {
+          "anyOf": [{ "type": "string" }, { "type": "number", "minimum": 0, "maximum": 1 }],
+          "description": "De 0 a 1. Menos de 1 solo tiene sentido en lo leído por una IA."
+        },
+        "archivo_nombre": { "type": "string" },
+        "datos_raw": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Espacio libre del productor. El núcleo lo transporta y NO lo interpreta."
+        },
+
+        "estado": { "type": "string", "description": "Lo rellena la validación: ok, observado, duplicado." },
+        "excluida": { "type": "boolean", "description": "Marcada para no exportarse." },
+        "observaciones": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/observacion" }
+        }
+      }
+    },
+
+    "observacion": {
+      "type": "object",
+      "required": ["codigo", "nivel", "texto"],
+      "additionalProperties": false,
+      "properties": {
+        "codigo": { "type": "string" },
+        "nivel": { "enum": ["error", "aviso"], "description": "error bloquea la exportación; aviso no." },
+        "texto": { "type": "string" }
+      }
+    },
+
+    "detraccion": {
+      "description": "El bloque de dos tiempos. Al registrar la compra la detracción está PROVISIONADA y no se conoce la constancia; cuando se deposita en el Banco de la Nación se inyecta el número y pasa a PAGADO. El asiento provisional usa un número comodín.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "codigo": { "type": "string", "pattern": "^$|^[0-9]{3}$", "description": "Anexo I de la RS 183-2004, 3 dígitos. Vacío si no se reconoce." },
+        "porcentaje": {
+          "anyOf": [{ "type": "string" }, { "type": "number", "minimum": 0, "maximum": 100 }, { "type": "null" }],
+          "description": "Tasa en porcentaje: 4, 10, 12."
+        },
+        "monto": { "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }], "description": "En soles: la detracción se deposita siempre en soles." },
+        "cuenta": { "type": "string", "description": "Cuenta de detracciones del proveedor en el Banco de la Nación." },
+        "estado": { "enum": ["PROVISIONADO", "PAGADO"], "description": "Por defecto PROVISIONADO." },
+        "nro_constancia": { "type": "string", "description": "Constancia de depósito. Vacío mientras no se pague." },
+        "fecha_constancia": { "$ref": "#/$defs/fecha" }
+      }
+    },
+
+    "linea": {
+      "description": "Una línea de diario, sin nada de ningún ERP. Es lo que cualquier sistema contable sabe recibir.",
+      "type": "object",
+      "required": ["cuenta", "debe_haber", "importe"],
+      "additionalProperties": false,
+      "properties": {
+        "sub_diario": { "type": "string", "description": "Libro auxiliar donde cae el asiento. Cada empresa usa los suyos." },
+        "correlativo": { "type": "string", "description": "Número del asiento dentro del sub-diario y el mes." },
+        "fecha": { "$ref": "#/$defs/fecha" },
+        "cuenta": { "type": "string", "description": "Cuenta del plan contable del contribuyente." },
+        "debe_haber": { "enum": ["D", "H"] },
+        "importe": { "$ref": "#/$defs/importe" },
+        "moneda": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "tipo_cambio": { "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "null" }] },
+        "glosa": { "type": "string" },
+        "contraparte_doc": { "type": "string", "description": "El anexo: RUC del proveedor o del cliente." },
+        "centro_costo": { "type": "string" },
+        "anexo_auxiliar": { "type": "string", "description": "Segundo anexo, cuando la empresa lleva el centro de costo también en la línea del tercero." },
+        "documento": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tipo": { "type": "string", "description": "Tipo de documento en el vocabulario del ERP destino." },
+            "serie_numero": { "type": "string" },
+            "fecha_emision": { "$ref": "#/$defs/fecha" },
+            "fecha_vencimiento": { "$ref": "#/$defs/fecha" }
+          }
+        },
+        "referencia": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Documento que modifica una nota de crédito o débito.",
+          "properties": {
+            "tipo": { "type": "string" },
+            "serie_numero": { "type": "string" },
+            "fecha": { "$ref": "#/$defs/fecha" }
+          }
+        },
+        "detraccion": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Presente solo en la línea de detracción.",
+          "properties": {
+            "codigo_interno": { "type": "string" },
+            "tasa": { "anyOf": [{ "type": "string" }, { "type": "number" }] },
+            "base": { "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }] }
+          }
+        },
+        "tasa_igv": { "anyOf": [{ "type": "string" }, { "type": "number" }] }
+      }
+    }
+  }
+}

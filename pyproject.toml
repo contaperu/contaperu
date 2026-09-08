@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "contaperu"
+version = "0.1.0"
+description = "Nucleo contable abierto del Peru: lee comprobantes de SUNAT, arma la partida doble y exporta a los ERP tradicionales. Sin estado, sin base de datos."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "Global Procesos AI S.A.C." }]
+keywords = ["contabilidad", "peru", "sunat", "sire", "concar", "pcge", "mcp", "asientos"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Financial and Insurance Industry",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: Spanish",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Office/Business :: Financial :: Accounting",
+]
+
+# El nucleo pesa lo minimo: solo el parser XML endurecido.
+dependencies = ["defusedxml>=0.7,<1"]
+
+[project.optional-dependencies]
+excel = ["openpyxl>=3.1,<4"]              # driver de CONCAR (.xlsx)
+schema = ["jsonschema>=4,<5"]             # validar contra pe-ledger.schema.json
+mcp = ["mcp>=1.2,<2", "jsonschema>=4,<5"] # servidor MCP
+todo = ["contaperu[excel,schema,mcp]"]
+dev = ["contaperu[todo]", "pytest>=8,<9"]
+
+[project.scripts]
+contaperu = "contaperu.cli:main"
+contaperu-mcp = "contaperu.mcp.servidor:main"
+
+[project.urls]
+Repositorio = "https://github.com/Zetrix1111/contaperu"
+
+[tool.hatch.build.targets.wheel]
+packages = ["contaperu"]
+
+[tool.hatch.build.targets.sdist]
+include = ["contaperu", "estandar", "tests", "README.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
