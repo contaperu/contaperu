@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 from . import comparar_sire
-from . import drivers, generar as gen, validar
+from . import __version__, drivers, generar as gen, validar
 from .lectores import archivos
 from .modelo import Comprobante, Libro
 
@@ -129,6 +129,7 @@ def main(argv: list[str] | None = None) -> int:
     _consola_utf8()
     ap = argparse.ArgumentParser(prog="contaperu", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--version", action="version", version=f"contaperu {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     g = sub.add_parser("generar", help="XML/ZIP locales → TXT + ZIP para el SIRE")
