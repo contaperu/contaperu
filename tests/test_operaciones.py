@@ -115,3 +115,20 @@ def test_la_configuracion_que_sale_se_puede_volver_a_meter():
 def test_tambien_se_acepta_la_forma_anidada_de_las_aplicaciones():
     anidada = op.configuracion({"concar": {"cuentas": {"igv": "401199"}}})
     assert anidada["cuentas"]["igv"] == "401199"
+
+
+def test_un_xml_suelto_en_base64_se_lee(tmp_path):
+    """Regresion: el contenido llegaba con el nombre 'entrada.zip', que forzaba la rama del
+    ZIP, y un XML perfectamente valido se rechazaba con 'el ZIP esta danado'. Mandar un
+    archivo en base64 es justo lo natural desde un agente."""
+    from util import XML
+
+    xml = (XML / "20131312955-01-F001-123.xml").read_bytes()
+    libro = {"ruc": "20131312955", "razon_social": "EMISOR DE PRUEBA SAC",
+             "periodo": "202601", "tipo": "venta"}
+
+    doc = op.leer_xml(base64.b64encode(xml).decode(), libro, es_base64=True)
+
+    assert len(doc["comprobantes"]) == 1 and doc["_lectura"]["errores"] == []
+    # Y el mismo XML como texto da exactamente lo mismo.
+    assert doc["comprobantes"] == op.leer_xml(xml.decode("utf-8"), libro)["comprobantes"]

@@ -10,6 +10,12 @@ estados financieros incorrectos en empresas que no tienen forma de saberlo. Las 
 publicarán **con la cita del artículo de la resolución al lado de cada mapeo**, no de memoria
 ni por analogía con otro plan.
 
+**Por qué solo existe el modo `renombrar`.** Sustituir una cuenta por otra es inequívoco: la
+misma línea, la misma cantidad, el mismo sentido, otra cuenta. El **neteo** —que una cuenta
+desaparezca y su importe se reste de otra— no lo es: hay que decidir si la línea cambia de
+sentido o no, y eso lo define la norma, no el sentido común. Se implementará cuando el texto
+esté delante, porque escribirlo antes sería exactamente lo que este archivo dice que no se hace.
+
 Si tienes el texto oficial y quieres ayudar, esa es hoy la contribución más útil al proyecto.
 
 Formato de `pcge2026.json`:
@@ -18,8 +24,7 @@ Formato de `pcge2026.json`:
       "version": "2026",
       "fuente": "R.M. 002-2026-EF/30",
       "mapeos": [
-        {"de": "<cuenta o prefijo>", "a": "<cuenta>", "modo": "renombrar|netear",
-         "contra": "<cuenta contra la que netea, si modo=netear>",
+        {"de": "<cuenta o prefijo>", "a": "<cuenta>", "modo": "renombrar",
          "cita": "<articulo o anexo que lo dice>", "nota": "<matiz, si lo hay>"}
       ]
     }
@@ -33,7 +38,7 @@ from typing import Any
 
 TABLA = pathlib.Path(__file__).with_name("pcge2026.json")
 
-MODOS = ("renombrar", "netear")
+MODOS = ("renombrar",)
 
 
 class TablaInvalida(ValueError):
@@ -42,10 +47,9 @@ class TablaInvalida(ValueError):
 
 @dataclass(frozen=True)
 class Mapeo:
-    de: str
-    a: str
-    modo: str
-    contra: str = ""
+    de: str        # cuenta o prefijo de cuenta al que se aplica
+    a: str         # cuenta con la que se sustituye
+    modo: str      # de momento solo "renombrar"; ver el docstring del módulo
     cita: str = ""
     nota: str = ""
 
@@ -83,15 +87,15 @@ def cargar(ruta: pathlib.Path | None = None) -> tuple[list[Mapeo], dict]:
         if not m.get("de") or not m.get("a"):
             raise TablaInvalida(f"El mapeo {i} no dice de qué cuenta a cuál.")
         if m.get("modo") not in MODOS:
-            raise TablaInvalida(f"El mapeo {i} tiene un modo desconocido: {m.get('modo')!r}")
-        if m["modo"] == "netear" and not m.get("contra"):
-            raise TablaInvalida(f"El mapeo {i} netea pero no dice contra qué cuenta.")
+            raise TablaInvalida(
+                f"El mapeo {i} tiene un modo desconocido: {m.get('modo')!r}. "
+                f"De momento solo existe {MODOS[0]!r}: el neteo llega con la norma.")
         if not m.get("cita"):
             raise TablaInvalida(
                 f"El mapeo {i} ({m['de']} -> {m['a']}) no cita la norma que lo respalda. "
                 "En este proyecto ninguna regla contable entra sin fuente."
             )
-        mapeos.append(Mapeo(**{k: m.get(k, "") for k in ("de", "a", "modo", "contra", "cita", "nota")}))
+        mapeos.append(Mapeo(**{k: m.get(k, "") for k in ("de", "a", "modo", "cita", "nota")}))
     return mapeos, datos
 
 
@@ -105,6 +109,9 @@ def adaptar(lineas: list[dict[str, Any]], ruta: pathlib.Path | None = None) -> t
 
     Mientras la tabla esté vacía devuelve las líneas **tal cual**, sin tocar nada, y el informe
     dice `sin_tabla`. Nunca inventa una equivalencia.
+
+    Los mapeos se prueban EN ORDEN y gana el primero que case, así que lo específico va antes
+    que lo general: `741101` antes que `74`.
     """
     mapeos, datos = cargar(ruta)
     informe = Informe(version=str(datos.get("version") or ""), fuente=str(datos.get("fuente") or ""),
@@ -120,11 +127,6 @@ def adaptar(lineas: list[dict[str, Any]], ruta: pathlib.Path | None = None) -> t
             if not _aplica(cuenta, m.de):
                 continue
             nueva["cuenta"] = m.a
-            if m.modo == "netear":
-                # Netear invierte el sentido contra la cuenta destino: lo que era un ingreso
-                # por separado pasa a restar del ingreso principal.
-                nueva["debe_haber"] = "H" if nueva.get("debe_haber") == "D" else "D"
-                nueva["cuenta"] = m.contra
             informe.aplicados.append({
                 "de": cuenta, "a": nueva["cuenta"], "modo": m.modo, "cita": m.cita,
                 "glosa": nueva.get("glosa", ""),

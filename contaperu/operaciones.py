@@ -16,7 +16,7 @@ from typing import Any
 
 from . import asiento as asi
 from . import detracciones, drivers, generar as gen, pcge, partida_doble, validar
-from .lectores import archivos as lectura_archivos, sire_txt, xml_ubl
+from .lectores import archivos as lectura_archivos, sire_txt
 from .modelo import Comprobante, Libro
 
 PE_LEDGER = "0.1"
@@ -102,12 +102,20 @@ def _bytes_de(contenido: str, es_base64: bool) -> bytes:
     return contenido.encode("utf-8")
 
 
+def _nombre_de(datos: bytes) -> str:
+    """Un nombre coherente con lo que los bytes dicen que es. Lo que llega por el protocolo no
+    tiene nombre de archivo, y el lector clasifica por extension o por bytes magicos."""
+    return "entrada.zip" if datos[:4] == b"PK" else "comprobante.xml"
+
+
 def leer_xml(contenido: str, libro: dict, es_base64: bool = False) -> dict:
     """XML UBL 2.1 de SUNAT (uno, o un ZIP con varios) -> documento `pe-ledger`."""
     lib = libro_de({"libro": libro})
+    datos = _bytes_de(contenido, es_base64)
     lote = lectura_archivos.Lote()
-    lectura_archivos.expandir("entrada.zip" if es_base64 else "comprobante.xml",
-                              _bytes_de(contenido, es_base64), lote=lote)
+    # El nombre NO decide si es un ZIP: lo deciden los bytes. Llamarlo ".zip" hacia que un
+    # XML suelto en base64 —lo natural desde un agente— se rechazara como "ZIP danado".
+    lectura_archivos.expandir(_nombre_de(datos), datos, lote=lote)
     res = lectura_archivos.convertir_xml(lote, lib)
     comprobantes = lectura_archivos.ordenar(res.comprobantes)
     validar.revisar(comprobantes, lib)

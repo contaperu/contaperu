@@ -28,7 +28,7 @@ import io
 import zipfile
 from decimal import Decimal
 
-from ..modelo import Comprobante, Libro, fecha as _fecha
+from ..modelo import Comprobante, Libro
 
 ORIGEN = "sire"
 

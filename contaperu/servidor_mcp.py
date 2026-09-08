@@ -181,10 +181,11 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
     """
     resultado = operaciones.exportar(documento, driver, configuracion, correlativos, incluir_observados)
     b64 = resultado.get("contenido_base64") or resultado.get("zip_base64") or ""
-    if len(b64) > MAXIMO_ARCHIVO:
+    pesa = len(b64) * 3 // 4          # el base64 abulta un tercio mas que los bytes
+    if pesa > MAXIMO_ARCHIVO:
         raise DocumentoInvalido(
-            f"El archivo pesa más de {MAXIMO_ARCHIVO // (1024 * 1024)} MB. "
-            "Divide el periodo en lotes más pequeños.")
+            f"El archivo pesa {pesa // (1024 * 1024)} MB y el tope por llamada es "
+            f"{MAXIMO_ARCHIVO // (1024 * 1024)} MB. Divide el periodo en lotes mas pequenos.")
     return resultado
 
 

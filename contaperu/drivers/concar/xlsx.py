@@ -3,10 +3,7 @@ punto de entrada `construir` que exige el contrato de `generar.py`.
 """
 from __future__ import annotations
 
-import calendar
 import io
-from datetime import date
-from decimal import Decimal
 from typing import Any
 
 from ...modelo import Comprobante, Libro
@@ -15,7 +12,7 @@ from ...asiento.lineas import a_lineas
 from ...formato import Opciones
 from ...asiento.construir import (MonedaSinCodigo, SinCuenta, TipoSinMapa, asiento, mes_del_libro,
                       etiquetas_sub_diario, filas_sin_cuenta, monedas_sin_codigo, numerar, tipos_sin_mapa)
-from ...asiento.datos import (ANCHOS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, D2,
+from ...asiento.datos import (ANCHOS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
                     EXCEL_HEADERS, FORMATOS, OPCIONES)
 
 
