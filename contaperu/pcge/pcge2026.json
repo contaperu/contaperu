@@ -1,0 +1,6 @@
+{
+  "version": "2026",
+  "fuente": "",
+  "_pendiente": "Las equivalencias del PCGE 2026 se publican con la cita del articulo de la resolucion al lado de cada mapeo. Mientras esta lista este vacia, adaptar() devuelve las lineas intactas y lo dice en su informe. Ver contaperu/pcge/adaptar.py y el README.",
+  "mapeos": []
+}

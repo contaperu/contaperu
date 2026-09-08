@@ -1,0 +1,431 @@
+"""Parte 7: Excel de asientos para CONCAR. Reglas del manual de asientos de referencia (lo que
+usa hoy para los masivos de un estudio contable) sobre la mecánica del formato: PEN con IGV → 3 filas; USD →
+`US`, P, 421202 y T.C. en G con conversión C; boleta → 13/BV sin IGV; RH → 15 a 424101; NC
+invierte; detracción → sub-diario 10 + AI–AL; más lo que un generador anterior hacía mal: MM del periodo,
+correlativos obligatorios, cuenta obligatoria."""
+import io
+import uuid
+from datetime import date
+from decimal import Decimal
+
+import openpyxl
+import pytest
+
+from contaperu import generar as gen
+from contaperu.modelo import Comprobante, Libro
+from contaperu import asiento as concar
+from contaperu.drivers import concar as driver_concar
+
+COMPRAS = Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA SAC", periodo="202608", tipo="compra")
+VENTAS = Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA", periodo="202608", tipo="venta")
+MES = (date(2026, 8, 1), date(2026, 8, 31))   # limites del periodo 202608 (la fecha va por comprobante)
+EMISION, VENCE = date(2026, 8, 11), date(2026, 8, 18)
+CONTAB = concar.config_de(None)
+
+
+def cp(**k):
+    base = dict(tipo_cp="01", serie="F001", numero="00000123", fecha_emision="2026-08-11", fecha_vencimiento="2026-08-18",
+                contraparte_tipo_doc="6", contraparte_doc="20607777773", contraparte_nombre="ELECTROMECANICA DE PRUEBA S.R.L.",
+                moneda="PEN", base_gravada="100", igv="18", total="118", concepto="Grillete tipo lira 5/8 para torre de alta tension linea 2",
+                cuenta_contable="631101", centro_costo="OBRA01")
+    base.update(k)
+    return Comprobante(**base)
+
+
+def debe_haber(filas):
+    return (sum(Decimal(str(f["O"])) for f in filas if f["N"] == "D"), sum(Decimal(str(f["O"])) for f in filas if f["N"] == "H"))
+
+
+# ── El asiento ────────────────────────────────────────────────────────────────
+
+def test_factura_pen_con_igv_tres_filas():
+    filas = concar.asiento(cp(), CONTAB, MES, "080020")
+    assert len(filas) == 3
+    gasto, igv, cxp = filas
+    assert [f["N"] for f in filas] == ["D", "D", "H"]
+    assert [f["K"] for f in filas] == ["631101", "401111", "421201"]
+    assert [f["O"] for f in filas] == [100.0, 18.0, 118.0]
+    assert [f["Q"] for f in filas] == [100.0, 18.0, 118.0] and all(f["P"] == "" for f in filas)   # soles → Q, P vacío
+    assert gasto["M"] == "OBRA01" and igv["M"] == "" and cxp["M"] == ""                           # centro de costo (M) solo en el gasto
+    assert cxp["X"] == "OBRA01" and gasto["X"] == "" and igv["X"] == ""                           # … y en el anexo auxiliar del proveedor (doble anexo)
+    assert cxp["L"] == "20607777773" and gasto["L"] == "" and igv["L"] == ""                      # anexo (RUC) solo en el proveedor
+    for f in filas:
+        assert (f["B"], f["C"], f["D"], f["E"], f["G"], f["H"], f["I"], f["J"]) == ("11", "080020", EMISION, "MN", "", "V", "S", EMISION)
+        assert (f["R"], f["S"], f["T"], f["U"], f["AO"], f["A"], f["AI"]) == ("FT", "F001-123", EMISION, VENCE, 18, "", "")
+        assert len(f) == 41 and list(f.keys()) == concar.COLUMNAS
+    # Glosas en MAYÚSCULAS; la principal (F) es la misma en las 3 filas; el "IGV - " va solo en la detalle (W)
+    assert gasto["F"] == igv["F"] == cxp["F"] == "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2"[:40].upper()
+    assert gasto["W"] == "GRILLETE TIPO LIRA 5/8 PARA TO" and len(gasto["W"]) == 30
+    assert igv["W"] == "IGV - GRILLETE TIPO LIRA 5/8 P" and len(igv["W"]) == 30
+    assert debe_haber(filas) == (Decimal("118"), Decimal("118"))
+
+
+def test_dolares_con_tipo_de_cambio_del_comprobante():
+    usd = concar.asiento(cp(moneda="USD", tipo_cambio="3.550"), CONTAB, MES, "080001")
+    assert usd[0]["E"] == "US" and usd[0]["P"] == 100.0 and usd[0]["Q"] == "" and usd[2]["K"] == "421202"
+    assert usd[0]["G"] == 3.55 and usd[0]["H"] == "C"            # el T.C. de SUNAT del comprobante, conversión especial
+    sin_tc = concar.asiento(cp(moneda="USD"), CONTAB, MES, "080001")
+    assert sin_tc[0]["G"] == "" and sin_tc[0]["H"] == "V"        # sin T.C. → CONCAR lo busca en su tabla
+    with pytest.raises(concar.MonedaSinCodigo) as e:
+        concar.asiento(cp(moneda="EUR"), CONTAB, MES, "080001")
+    assert e.value.monedas == ["EUR"] and concar.monedas_sin_codigo([cp(moneda="EUR"), cp()], CONTAB) == ["EUR"]
+
+
+def test_boleta_honorarios_nota_de_credito_y_tasa():
+    # Boleta: no da crédito fiscal → todo al gasto, sin línea de IGV ni tasa, aunque traiga IGV
+    bv = concar.asiento(cp(tipo_cp="03", serie="B001", numero="55"), CONTAB, MES, "080001")
+    assert len(bv) == 2 and bv[0]["B"] == "13" and bv[0]["R"] == "BV" and bv[0]["S"] == "B001-55"
+    assert [f["O"] for f in bv] == [118.0, 118.0] and bv[0]["AO"] == "" and bv[1]["K"] == "421201"
+    # Recibo por honorarios: sin IGV, cuenta por pagar 424101/424102, sin anexo auxiliar
+    rh = concar.asiento(cp(tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0", inafecto="220", total="220"), CONTAB, MES, "080001")
+    assert len(rh) == 2 and rh[0]["B"] == "15" and rh[0]["R"] == "RH" and rh[0]["AO"] == ""
+    assert [f["O"] for f in rh] == [220.0, 220.0] and [f["N"] for f in rh] == ["D", "H"] and rh[1]["K"] == "424101" and rh[1]["X"] == ""
+    assert concar.asiento(cp(tipo_cp="02", moneda="USD", tipo_cambio="3.5"), CONTAB, MES, "080001")[1]["K"] == "424102"
+    # Nota de crédito: invierte (proveedor al Debe, gasto e IGV al Haber) y lleva el documento que modifica
+    nc = concar.asiento(cp(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="F001", ref_numero="00000123", ref_fecha="2026-08-01"),
+                        CONTAB, MES, "080002")
+    assert [f["N"] for f in nc] == ["H", "H", "D"] and nc[0]["R"] == "NC" and nc[0]["B"] == "11"
+    assert (nc[0]["Z"], nc[0]["AA"], nc[0]["AB"]) == ("FT", "F001-123", date(2026, 8, 1))
+    assert debe_haber(nc) == (Decimal("118"), Decimal("118"))
+    nd = concar.asiento(cp(tipo_cp="08", serie="FD01", numero="3"), CONTAB, MES, "080003")
+    assert [f["N"] for f in nd] == ["D", "D", "H"]                # la nota de débito es una compra normal
+    # Tasa IGV derivada: 10.5 % de restaurantes → 10; sin IGV → vacía
+    rest = concar.asiento(cp(base_gravada="100", igv="10.5", total="110.5"), CONTAB, MES, "080004")
+    assert rest[0]["AO"] == 10 and rest[1]["O"] == 10.5
+    inaf = concar.asiento(cp(base_gravada="0", igv="0", inafecto="118"), CONTAB, MES, "080005")
+    assert len(inaf) == 2 and inaf[0]["AO"] == ""
+    assert concar.tasa_igv(Decimal("18"), Decimal("0")) == 18      # base gravada 0 con IGV: respaldo
+    sin_venc = concar.asiento(cp(fecha_vencimiento=None), CONTAB, MES, "080001")
+    assert sin_venc[0]["U"] == EMISION                           # sin vencimiento → la de emisión
+    sin_concepto = concar.asiento(cp(concepto=""), CONTAB, MES, "080001")
+    assert sin_concepto[0]["F"] == "ELECTROMECANICA DE PRUEBA S.R.L."   # glosa: si no hay concepto, el proveedor
+
+
+def test_fecha_por_comprobante():
+    """D y J (regla de un contador, 30-ago-2026, compras Y ventas): cada comprobante se asienta con
+    SU fecha de emisión; el extemporáneo (mes anterior) cae al primer día del periodo y un
+    emitido después del periodo, al último — en CONCAR el asiento cae en el mes de esa fecha
+    y todo debe caer en el mes del proceso. T y U siguen siendo las del documento."""
+    del_mes = concar.asiento(cp(), CONTAB, MES, "080001")
+    assert all(f["D"] == EMISION and f["J"] == EMISION for f in del_mes)
+    junio = concar.asiento(cp(fecha_emision="2026-06-15"), CONTAB, MES, "080002")
+    assert all(f["D"] == date(2026, 8, 1) and f["J"] == date(2026, 8, 1) for f in junio)
+    assert junio[0]["T"] == date(2026, 6, 15)                     # Fecha de Documento: SIEMPRE la original
+    post = concar.asiento(cp(fecha_emision="2026-09-02", fecha_vencimiento="2026-09-10"), CONTAB, MES, "080003")
+    assert all(f["D"] == date(2026, 8, 31) and f["J"] == date(2026, 8, 31) for f in post)
+    assert post[0]["T"] == date(2026, 9, 2) and post[0]["U"] == date(2026, 9, 10)
+    sin_fecha = concar.asiento(cp(fecha_emision=None, fecha_vencimiento=None), CONTAB, MES, "080004")
+    assert all(f["D"] == date(2026, 8, 1) for f in sin_fecha)     # FECHA_FALTA: al primer día
+    venta_jul = concar.asiento(cp(fecha_emision="2026-07-20", cuenta_contable=""), CONTAB, MES, "080005", venta=True)
+    assert all(f["D"] == date(2026, 8, 1) and f["J"] == date(2026, 8, 1) for f in venta_jul)
+
+
+def test_recibo_por_honorarios_con_retencion_de_4ta():
+    """El recibo que MUESTRA retención parte el asiento: gasto por el total, la retención
+    en su cuenta y a la cuenta por pagar solo el neto. Sin retención (lo normal con
+    suspensión) sigue siendo de dos líneas: nunca se calcula el 8 % solo."""
+    rh = lambda **k: cp(tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0",
+                        inafecto="2000", total="2000", concepto="Asesoria contable", **k)
+    con = concar.asiento(rh(retencion="160"), CONTAB, MES, "080005")
+    assert len(con) == 3 and [f["N"] for f in con] == ["D", "H", "H"]
+    assert [f["K"] for f in con] == ["631101", "401721", "424101"]
+    assert [f["O"] for f in con] == [2000.0, 160.0, 1840.0]        # gasto total · retención · NETO
+    assert con[1]["W"] == "RET 4TA - ASESORIA CONTABLE"[:30] and con[1]["L"] == "" and con[1]["M"] == ""
+    assert con[2]["L"] == "20607777773"                             # el RUC va en la línea del profesional
+    assert all(f["B"] == "15" and f["R"] == "RH" and f["AO"] == "" for f in con)
+    assert debe_haber(con) == (Decimal("2000"), Decimal("2000"))
+    # Sin retención: dos líneas, el total completo a la cuenta por pagar
+    sin = concar.asiento(rh(), CONTAB, MES, "080006")
+    assert len(sin) == 2 and [f["O"] for f in sin] == [2000.0, 2000.0]
+    # La cuenta de la retención se configura por RUC
+    contab = concar.config_de({"concar": {"cuentas": {"retencion_4ta": "401722"}}})
+    assert concar.asiento(rh(retencion="160"), contab, MES, "080007")[1]["K"] == "401722"
+    # En dólares, el neto va a 424102 y la retención también en USD
+    usd = concar.asiento(rh(retencion="16", moneda="USD", tipo_cambio="3.55"), CONTAB, MES, "080008")
+    assert usd[1]["P"] == 16.0 and usd[2]["K"] == "424102" and usd[2]["P"] == 1984.0
+    # Una retención en algo que no es recibo por honorarios NO parte el asiento
+    assert len(concar.asiento(cp(retencion="18"), CONTAB, MES, "080009")) == 3
+    assert concar.asiento(cp(retencion="18"), CONTAB, MES, "080009")[2]["O"] == 118.0
+
+
+def test_el_interruptor_de_centros_de_costo():
+    """Hay CONCARs que no llevan centros de costo: apagado, las columnas M (centro de
+    costo) y X (anexo auxiliar) salen vacías aunque el comprobante traiga uno."""
+    con = concar.asiento(cp(), CONTAB, MES, "080001")
+    assert con[0]["M"] == "OBRA01" and con[2]["X"] == "OBRA01"          # encendido (por defecto)
+    contab = concar.config_de({"concar": {"usa_centros_costo": False}})
+    sin = concar.asiento(cp(), contab, MES, "080001")
+    assert sin[0]["M"] == "" and sin[2]["X"] == ""
+    assert [f["O"] for f in sin] == [100.0, 18.0, 118.0]                 # el asiento no cambia en nada más
+
+
+def test_factura_con_detraccion_va_al_sub_diario_10():
+    """La factura con detracción, calcada dun Excel real de produccion (06-sep-2026): el total COMPLETO al
+    proveedor (421201) y dos líneas más por el monto detraído — el proveedor al Debe y 421203 al Haber
+    con tipo DT, comodín 9999999999, glosa «DETRACCION - …» y AI–AL. El monto va en soles enteros."""
+    det = {"codigo": "037", "porcentaje": "12", "monto": "14.16", "cuenta": "00-000-123456"}
+    c = cp(detraccion=det)
+    assert concar.tiene_detraccion(c) and concar.sub_diario(c, CONTAB) == "10" and concar.tipo_concar(c, CONTAB) == "FT"
+    filas = concar.asiento(c, CONTAB, MES, "080001")
+    assert len(filas) == 5 and all(f["B"] == "10" for f in filas)
+    gasto, igv, cxp, det_prov, det_ = filas
+    assert (cxp["K"], cxp["N"], cxp["O"], cxp["AI"]) == ("421201", "H", 118.0, "")      # el total completo, sin AI
+    assert (det_prov["K"], det_prov["L"], det_prov["N"], det_prov["O"], det_prov["R"], det_prov["S"], det_prov["X"]) == \
+        ("421201", "20607777773", "D", 14.0, "FT", "F001-123", "OBRA01")
+    assert (det_["K"], det_["L"], det_["N"], det_["O"], det_["Q"]) == ("421203", "20607777773", "H", 14.0, 14.0)   # 118 × 12 % = 14.16 → 14
+    assert (det_["R"], det_["S"], det_["M"], det_["X"]) == ("DT", "9999999999", "", "")
+    assert det_["W"] == ("DETRACCION - " + gasto["F"])[:30]
+    assert (det_["AI"], det_["AJ"], det_["AK"], det_["AL"], det_["AO"]) == ("03701", 12.0, "", 118.0, 18)
+    assert (gasto["AI"], igv["AI"], cxp["AI"]) == ("", "", "") and debe_haber(filas) == (Decimal("132"), Decimal("132"))
+    # Dólares: la detracción se deposita en SOLES → 118 × 3.5 = 413 × 12 % = 49.56 → 50 soles → 14.29 US en la línea
+    usd = concar.asiento(cp(detraccion=det, moneda="USD", tipo_cambio="3.5"), CONTAB, MES, "080001")
+    assert len(usd) == 5 and usd[2]["K"] == "421202" and usd[3]["K"] == "421202"
+    assert (usd[4]["K"], usd[4]["O"], usd[4]["P"], usd[4]["Q"], usd[4]["AK"], usd[4]["AL"]) == ("421203", 14.29, 14.29, "", 118.0, "")
+    assert len(concar.asiento(cp(detraccion=det, moneda="USD", tipo_cambio=None), CONTAB, MES, "080001")) == 3   # sin T.C. no se puede calcular
+    propia = concar.config_de({"concar": {"cuentas": {"cxp_detraccion": {"PEN": "421209"}}}})
+    assert concar.asiento(c, propia, MES, "080001")[4]["K"] == "421209"       # la cuenta sale de la tabla de Configuración
+    # Elegida en pantalla (05-sep-2026): el desplegable de Revisión guarda {codigo, porcentaje de la tabla,
+    # monto informativo, cuenta ""} y el asiento es el mismo que con la detracción del XML.
+    pantalla = cp(detraccion={"codigo": "037", "porcentaje": "12", "monto": "14.16", "cuenta": ""})
+    fp = concar.asiento(pantalla, CONTAB, MES, "080001")
+    assert [f["B"] for f in fp] == ["10"] * 5 and (fp[4]["K"], fp[4]["AI"], fp[4]["AJ"]) == ("421203", "03701", 12.0)
+    # Código fuera de la tabla y sin tasa: no se sabe cuánto detraer → el asiento normal de 3 líneas
+    otro = concar.asiento(cp(detraccion={"codigo": "031", "porcentaje": "", "monto": "0"}), CONTAB, MES, "080001")
+    assert len(otro) == 3 and otro[2]["K"] == "421201" and otro[2]["AI"] == ""
+    en_tabla = concar.asiento(cp(detraccion={"codigo": "012", "porcentaje": "", "monto": "0"}), CONTAB, MES, "080001")[4]
+    assert (en_tabla["AI"], en_tabla["AJ"]) == ("01201", 12.0)
+    sin_tasa = concar.asiento(cp(detraccion={"codigo": "019"}), CONTAB, MES, "080001")[4]
+    assert (sin_tasa["AI"], sin_tasa["AJ"], sin_tasa["O"]) == ("01903", 10.0, 12.0)     # 118 × 10 % = 11.8 → 12
+    # El sub-diario NO manda: la empresa que lo lleva todo en el 11 hace el mismo asiento de 5 líneas
+    contab = concar.config_de({"concar": {"sub_diario_detraccion": "", "detraccion_codigos": {"037": "03799"}}})
+    en11 = concar.asiento(c, contab, MES, "080001")
+    assert concar.sub_diario(c, contab) == "11" and [f["B"] for f in en11] == ["11"] * 5 and en11[4]["AI"] == "03799"
+    # El recibo por honorarios nunca lleva detracción
+    rh = cp(tipo_cp="02", detraccion=det)
+    assert concar.sub_diario(rh, CONTAB) == "15" and all(f["AI"] == "" and f["R"] != "DT" for f in concar.asiento(rh, CONTAB, MES, "080001"))
+    assert not concar.tiene_detraccion(cp(detraccion={"codigo": "", "porcentaje": "0"})) and not concar.tiene_detraccion(cp(detraccion=None))
+
+
+def test_asiento_con_detraccion_calca_un_excel_real():
+    """La factura E001-871 dun Excel real que un CONCAR de produccion acepto en CONCAR (06-sep-2026): las cinco filas, celda a celda."""
+    c = cp(serie="E001", numero="871", fecha_emision="2026-08-10", fecha_vencimiento="2026-08-27",
+           contraparte_doc="20602222226", contraparte_nombre="PROVEEDOR DE PRUEBA SAC",
+           base_gravada="4200", igv="756", total="4956", concepto="SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
+           cuenta_contable="659999", centro_costo="CC-64", detraccion={"codigo": "027", "porcentaje": "4"})
+    filas = concar.asiento(c, CONTAB, MES, "080084")
+    col = lambda k: [f[k] for f in filas]
+    assert len(filas) == 5
+    assert col("B") == ["10"] * 5 and col("C") == ["080084"] * 5 and col("E") == ["MN"] * 5 and col("H") == ["V"] * 5 and col("I") == ["S"] * 5
+    assert col("F") == ["SERVICIO DE TRANSPORTE DE MATERIALES BEN"] * 5
+    assert col("K") == ["659999", "401111", "421201", "421201", "421203"]
+    assert col("L") == ["", "", "20602222226", "20602222226", "20602222226"]
+    assert col("M") == ["CC-64", "", "", "", ""] and col("X") == ["", "", "CC-64", "CC-64", ""]
+    assert col("N") == ["D", "D", "H", "D", "H"]
+    assert col("O") == [4200.0, 756.0, 4956.0, 198.0, 198.0] and col("Q") == col("O") and col("P") == [""] * 5
+    assert col("R") == ["FT", "FT", "FT", "FT", "DT"] and col("S") == ["E001-871"] * 4 + ["9999999999"]
+    assert col("D") == [date(2026, 8, 10)] * 5 and col("T") == [date(2026, 8, 10)] * 5 and col("U") == [date(2026, 8, 27)] * 5
+    assert col("W") == ["SERVICIO DE TRANSPORTE DE MATE", "IGV - SERVICIO DE TRANSPORTE D", "SERVICIO DE TRANSPORTE DE MATE",
+                        "SERVICIO DE TRANSPORTE DE MATE", "DETRACCION - SERVICIO DE TRANS"]
+    assert col("AI") == ["", "", "", "", "02702"] and col("AJ") == ["", "", "", "", 4.0]
+    assert col("AL") == ["", "", "", "", 4956.0] and col("AK") == [""] * 5
+    assert col("AO") == [18] * 5 and debe_haber(filas) == (Decimal("5154"), Decimal("5154"))
+
+
+def test_asiento_de_ventas_espejo_del_skill():
+    """Ventas (skill ventas.md): cliente 121201/121202 al Debe por el total, ingreso 701101 al
+    Haber por el valor venta, IGV 401111 al Haber; sub-diario 05; NC invierte; cada venta con
+    su fecha de emisión; la boleta de venta SÍ lleva su IGV; la detracción no se registra."""
+    fv = concar.asiento(cp(cuenta_contable=""), CONTAB, MES, "080009", venta=True)   # sin cuenta en la fila → default 701101
+    cli_, ing, igv = fv
+    assert [f["N"] for f in fv] == ["D", "H", "H"] and [f["K"] for f in fv] == ["121201", "701101", "401111"]
+    assert [f["O"] for f in fv] == [118.0, 100.0, 18.0]
+    assert cli_["L"] == "20607777773" and ing["L"] == "" and cli_["X"] == "OBRA01"    # anexo RUC + anexo auxiliar en el cliente
+    assert ing["M"] == "OBRA01" and cli_["M"] == ""                                   # centro de costo en el ingreso
+    assert all(f["B"] == "05" and f["D"] == EMISION and f["J"] == EMISION for f in fv)  # cada venta en su fecha
+    assert fv[0]["AO"] == 18 and fv[0]["R"] == "FT"
+    assert debe_haber(fv) == (Decimal("118"), Decimal("118"))
+    # La cuenta de ingreso: default real 701101; la fila o el RUC pueden cambiarla
+    assert concar.asiento(cp(cuenta_contable="702101"), CONTAB, MES, "080001", venta=True)[1]["K"] == "702101"
+    contab = concar.config_de({"concar": {"cuentas": {"ventas": "701201", "clientes": {"USD": "121209"}}}})
+    v2 = concar.asiento(cp(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), contab, MES, "080001", venta=True)
+    assert v2[1]["K"] == "701201" and v2[0]["K"] == "121209" and v2[0]["E"] == "US" and v2[0]["G"] == 3.55
+    assert concar.filas_sin_cuenta([cp(cuenta_contable="")], CONTAB, venta=True) == []
+    # Boleta de venta emitida: SÍ lleva su IGV (la regla "sin crédito" es solo de compras)
+    bv = concar.asiento(cp(tipo_cp="03", serie="B001", numero="9", cuenta_contable=""), CONTAB, MES, "080002", venta=True)
+    assert len(bv) == 3 and bv[0]["B"] == "05" and bv[0]["R"] == "BV" and bv[2]["K"] == "401111" and bv[0]["AO"] == 18
+    # NC de venta: invierte (ingreso D, IGV D, cliente H) con su documento de referencia
+    nc = concar.asiento(cp(tipo_cp="07", serie="FC01", numero="3", cuenta_contable="", ref_tipo_cp="01", ref_serie="F001", ref_numero="00000123", ref_fecha="2026-08-01"),
+                        CONTAB, MES, "080003", venta=True)
+    assert [f["N"] for f in nc] == ["D", "D", "H"] and [f["K"] for f in nc] == ["701101", "401111", "121201"]
+    assert nc[0]["Z"] == "FT" and nc[0]["AA"] == "F001-123" and debe_haber(nc) == (Decimal("118"), Decimal("118"))
+    # La detracción en ventas no se registra: sigue en el 05 y sin columnas AI-AL
+    det = cp(detraccion={"codigo": "037", "porcentaje": "12", "monto": "14.16"})
+    assert concar.sub_diario(det, CONTAB, venta=True) == "05"
+    assert concar.asiento(det, CONTAB, MES, "080004", venta=True)[0]["AI"] == ""
+    # Numeración de ventas: un solo sub-diario 05
+    cs = [cp(numero="1"), cp(tipo_cp="03", serie="B001", numero="2")]
+    numeros, rangos = concar.numerar(cs, CONTAB, "202608", {"05": 9}, venta=True)
+    assert [numeros[id(c)] for c in cs] == ["080009", "080010"] and rangos["05"]["hasta"] == 10
+
+
+def test_el_codigo_sunat_manda_y_lo_de_concar_se_deriva():
+    """Un tipo SUNAT sin sigla/sub-diario configurado no se inventa; por RUC se puede añadir o cambiar."""
+    assert concar.tipo_concar(cp(tipo_cp="02"), CONTAB) == "RH" and concar.sub_diario(cp(tipo_cp="02"), CONTAB) == "15"
+    luz = cp(tipo_cp="14", serie="", numero="12345")             # recibo de luz: SUNAT 14 → RC en el 11 (el contador, 23-ago-2026)
+    assert concar.tipo_concar(luz, CONTAB) == "RC" and concar.sub_diario(luz, CONTAB) == "11"
+    assert concar.asiento(luz, CONTAB, MES, "080001")[0]["S"] == "12345" and len(concar.asiento(luz, CONTAB, MES, "080001")) == 3
+    bancario = cp(tipo_cp="13", serie="", numero="77")           # documento bancario: sin entrada por defecto
+    assert concar.tipo_concar(bancario, CONTAB) == "" and concar.tipos_sin_mapa([bancario, cp()], CONTAB) == ["13"]
+    with pytest.raises(concar.TipoSinMapa) as e:
+        driver_concar.construir(COMPRAS, [bancario], CONTAB, {"11": 1})
+    assert e.value.tipos == ["13"]
+    contab = concar.config_de({"concar": {"tipos": {"13": {"concar": "DB", "sub_diario": "11"}, "01": {"concar": "FA", "sub_diario": "12"}}}})
+    assert concar.tipos_sin_mapa([bancario], contab) == []
+    assert concar.asiento(bancario, contab, MES, "080001")[0]["R"] == "DB"
+    assert concar.asiento(cp(), contab, MES, "080001")[0]["B"] == "12" and concar.asiento(cp(), contab, MES, "080001")[0]["R"] == "FA"
+    assert concar.sub_diario(cp(tipo_cp="03"), contab) == "13"   # lo no tocado conserva el default
+
+
+def test_la_configuracion_de_la_cuenta_vale_para_todos_sus_rucs():
+    """Herencia de la 033: valores del código → la CUENTA (el estudio) → el RUC.
+    El estudio configura una vez y sirve para sus 30 RUCs; el que difiera cambia
+    solo lo suyo y hereda el resto (merge en profundidad)."""
+    cuenta = {"concar": {"cuentas": {"gasto": "631101", "cxp": {"PEN": "421101"}},
+                         "tipos": {"20": {"concar": "CO", "sub_diario": "11"}}}}
+    # Sin nada del RUC: manda la cuenta
+    c1 = concar.config_de(None, cuenta)
+    assert c1["cuentas"]["gasto"] == "631101" and c1["cuentas"]["cxp"]["PEN"] == "421101"
+    assert c1["cuentas"]["cxp"]["USD"] == "421202"          # lo que la cuenta no tocó sigue igual
+    assert c1["cuentas"]["igv"] == "401111" and c1["tipos"]["01"]["concar"] == "FT"
+    assert c1["tipos"]["20"]["concar"] == "CO"              # un tipo añadido por el estudio
+    # El RUC cambia SOLO lo suyo y hereda el resto
+    ruc = {"concar": {"cuentas": {"gasto": "659301", "cxp": {"USD": "421203"}}}}
+    c2 = concar.config_de(ruc, cuenta)
+    assert c2["cuentas"]["gasto"] == "659301"               # el RUC manda
+    assert c2["cuentas"]["cxp"] == {"PEN": "421101", "USD": "421203"}   # se funden los dos niveles
+    assert c2["tipos"]["20"]["concar"] == "CO"              # lo del estudio sigue ahí
+    # Sin cuenta ni RUC, todo sigue como antes de la 033
+    assert concar.config_de(None) == concar.config_de(None, None) == CONTAB
+
+
+def test_cuenta_obligatoria_y_default_del_ruc():
+    with pytest.raises(concar.SinCuenta):
+        concar.asiento(cp(cuenta_contable=""), CONTAB, MES, "080001")
+    contab = concar.config_de({"concar": {"cuentas": {"gasto": "659901", "cxp": {"USD": "421203"}}}})
+    filas = concar.asiento(cp(cuenta_contable="", moneda="USD"), contab, MES, "080001")
+    assert filas[0]["K"] == "659901" and filas[2]["K"] == "421203"
+    assert contab["cuentas"]["cxp"]["PEN"] == "421201" and contab["cuentas"]["igv"] == "401111"   # lo no tocado se conserva
+    assert contab["cuentas"]["honorarios"] == {"PEN": "424101", "USD": "424102"}
+    assert concar.filas_sin_cuenta([cp(cuenta_contable=""), cp()], CONTAB)[0].numero == "00000123"
+    assert concar.filas_sin_cuenta([cp(cuenta_contable="")], contab) == []
+    # El centro de costo, igual (06-sep-2026): obligatorio con los centros encendidos; nada si están apagados
+    assert [c.numero for c in concar.filas_sin_centro([cp(centro_costo=""), cp(centro_costo="  "), cp()], CONTAB)] == ["00000123", "00000123"]
+    assert concar.filas_sin_centro([cp(centro_costo="")], concar.config_de({"concar": {"usa_centros_costo": False}})) == []
+
+
+# ── Numeración MMNNNN por sub-diario ─────────────────────────────────────────
+
+def test_numerar_por_sub_diario_con_el_mes_del_periodo():
+    cs = [cp(numero="1"), cp(tipo_cp="03", serie="B001", numero="2"), cp(numero="3"), cp(tipo_cp="02", serie="E001", numero="4", igv="0"),
+          cp(numero="5", detraccion={"codigo": "037", "porcentaje": "12"})]
+    numeros, rangos = concar.numerar(cs, CONTAB, "202608", {"11": 20, "13": 1, "15": 5, "10": 8})
+    assert [numeros[id(c)] for c in cs] == ["080020", "080001", "080021", "080005", "080008"]
+    assert rangos["11"] == {"desde": 20, "hasta": 21, "n": 2, "desde_cod": "080020", "hasta_cod": "080021", "desborda": False}
+    assert rangos["13"]["hasta"] == 1 and rangos["15"]["hasta"] == 5 and rangos["10"]["hasta"] == 8
+    with pytest.raises(concar.CorrelativoFaltante) as e:
+        concar.numerar(cs, CONTAB, "202608", {"11": 20})
+    assert e.value.sub_diarios == ["13", "15", "10"]
+    _, r = concar.numerar(cs[:1], CONTAB, "202612", {"11": 9999})
+    assert r["11"]["desde_cod"] == "129999"
+    _, r = concar.numerar(cs[:3], CONTAB, "202612", {"11": 9999, "13": 1})
+    assert r["11"]["desborda"] is True
+
+
+# ── El .xlsx ─────────────────────────────────────────────────────────────────
+
+def test_xlsx_con_la_plantilla_de_concar():
+    xlsx, resumen = driver_concar.construir(COMPRAS, [cp(), cp(tipo_cp="03", serie="B001", numero="55", igv="0", base_gravada="0", inafecto="118")],
+                                     CONTAB, {"11": 20, "13": 1})
+    wb = openpyxl.load_workbook(io.BytesIO(xlsx))
+    ws = wb["CONCAR"]
+    encabezados = [ws.cell(row=1, column=i).value for i in range(1, 42)]
+    assert encabezados == list(concar.EXCEL_HEADERS["row1"].values())
+    assert encabezados[0] == "WE" and encabezados[40] == "Tasa IGV" and ws.cell(row=1, column=42).value is None
+    assert ws["C2"].value.startswith("Los dos primeros dígitos son el mes") and ws["B3"].value == "4 Caracteres"
+    # Formato de la plantilla de un contador (30-ago-2026): titulo azul marino con letra
+    # blanca bold, notas SIN relleno, alturas 45/120/30 (+15.8 por fila de datos),
+    # panel congelado en A4 y autofiltro sobre la fila de formatos.
+    assert ws["A1"].fill.start_color.rgb.endswith("191970") and ws["A1"].font.bold and ws["A1"].font.color.rgb.endswith("FFFFFF")
+    assert ws["A2"].fill.patternType is None and ws["A3"].font.bold
+    assert (ws.row_dimensions[1].height, ws.row_dimensions[2].height, ws.row_dimensions[3].height) == (45, 120, 30)
+    assert ws.row_dimensions[4].height == 15.8 and ws.freeze_panes == "A4" and ws.auto_filter.ref == "A3:AO3"
+    # OJO: acceder a column_dimensions["AO"] la CREA con el default de openpyxl (13);
+    # el "sin ancho propio" se pregunta por membresia, no por el valor.
+    assert "AO" not in ws.column_dimensions and ws.column_dimensions["F"].width == 41.43
+    # Datos desde la fila 4: factura (3 filas) + boleta sin IGV (2 filas)
+    assert [ws[f"N{r}"].value for r in range(4, 9)] == ["D", "D", "H", "D", "H"]
+    assert [ws[f"C{r}"].value for r in range(4, 9)] == ["080020"] * 3 + ["080001"] * 2
+    assert ws["C4"].number_format == "@" and ws["K5"].number_format == "@"                       # texto: CONCAR lee caracteres
+    assert ws["O4"].value == 100.0 and ws["O4"].number_format == "#,##0.00" and ws["K5"].value == "401111"
+    assert ws["D4"].value.date() == EMISION and ws["D4"].number_format == "dd/mm/yyyy"            # fecha real de Excel
+    assert ws["T4"].value.date() == EMISION and ws["U4"].value.date() == VENCE and ws["J4"].value.date() == EMISION
+    assert ws["L6"].value == "20607777773" and ws["M4"].value == "OBRA01" and ws["X6"].value == "OBRA01" and ws["S7"].value == "B001-55"
+    assert ws["B7"].value == "13" and ws["R7"].value == "BV" and ws["AO7"].value is None and ws["AO4"].value == 18
+    assert ws["O4"].font.name == "Aptos Narrow"
+    assert resumen["filas_excel"] == 5 and resumen["debe"] == resumen["haber"] == "236.00"
+    assert resumen["sub_diarios"]["11"]["hasta_cod"] == "080020" and resumen["sub_diarios"]["13"]["etiqueta"] == "Boletas de venta"
+    assert resumen["fechas"] == "por comprobante (extemporáneos al 01/08/2026)"
+
+
+def test_generar_con_plantilla_concar():
+    exp = gen.generar(COMPRAS, [cp(), cp(numero="2", excluida=True)], "concar", contab=CONTAB, correlativos={"11": 1})
+    assert exp.nombre == exp.archivo == "CONCAR_20601111111_202608_COMPRAS.xlsx"
+    assert exp.formato == "concar_xlsx" and exp.content_type.endswith("spreadsheetml.sheet")
+    assert exp.contenido[:2] == b"PK" and exp.zip == b"" and exp.nombre_zip == ""
+    assert exp.n_filas == 1 and exp.resumen["comprobantes"] == 1 and exp.resumen["excluidos"] == 1 and exp.resumen["filas_excel"] == 3
+    expv = gen.generar(VENTAS, [cp()], "concar", contab=CONTAB, correlativos={"05": 1})
+    assert expv.nombre == "CONCAR_20601111111_202608_VENTAS.xlsx" and expv.resumen["sub_diarios"]["05"]["etiqueta"] == "Ventas"
+    with pytest.raises(concar.SinCuenta):
+        gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", contab=CONTAB, correlativos={"11": 1})
+    with pytest.raises(concar.MonedaSinCodigo):
+        gen.generar(COMPRAS, [cp(moneda="EUR")], "concar", contab=CONTAB, correlativos={"11": 1})
+
+
+# ── Endpoint ──────────────────────────────────────────────────────────────────
+
+def _fila(pro, **k):
+    base = dict(cp(**k).a_dict(), id=str(uuid.uuid4()), proceso_id=pro["id"], empresa_id=pro["empresa_id"],
+                cliente_id=pro["cliente_id"], origen="manual", estado="ok", excluida=False, observaciones=[])
+    return base
+
+
+def test_sub_diario_general_de_compras_gobierna_los_tipos_sin_registro_propio():
+    # Factura, ticket y nota caen al general; renumerarlo los mueve a TODOS a la vez
+    contab = concar.config_de({"concar": {"sub_diario_compras": "20"}})
+    assert concar.sub_diario(cp(), contab) == "20"
+    assert concar.sub_diario(cp(tipo_cp="12"), contab) == "20"
+    assert concar.sub_diario(cp(tipo_cp="07"), contab) == "20"
+    # Boletas y honorarios NO se mueven: tienen registro propio
+    assert concar.sub_diario(cp(tipo_cp="03"), contab) == "13"
+    assert concar.sub_diario(cp(tipo_cp="02"), contab) == "15"
+    # La detracción sigue ganando al general
+    det = cp(detraccion={"codigo": "012", "porcentaje": 10})
+    assert concar.sub_diario(det, contab) == "10"
+    # Y un tipos.NN.sub_diario puesto por el estudio gana al general (override fino por jsonb)
+    fino = concar.config_de({"concar": {"sub_diario_compras": "20", "tipos": {"01": {"sub_diario": "77"}}}})
+    assert concar.sub_diario(cp(), fino) == "77" and concar.sub_diario(cp(tipo_cp="12"), fino) == "20"
+
+
+def test_etiquetas_sub_diario_siguen_a_la_renumeracion():
+    # Con los defaults, el mapa clásico
+    assert concar.etiquetas_sub_diario(CONTAB) == {
+        "05": "Ventas", "11": "Compras", "10": "Compras con detracción",
+        "13": "Boletas de venta", "15": "Recibos por honorarios",
+    }
+    # El estudio renumera honorarios a 33: el 33 sale etiquetado, el 15 desaparece
+    contab = concar.config_de({"concar": {"tipos": {"02": {"sub_diario": "33"}}}})
+    et = concar.etiquetas_sub_diario(contab)
+    assert et["33"] == "Recibos por honorarios" and "15" not in et
+    # Un CONCAR que no separa la detracción: dos usos comparten número y se leen juntos
+    junto = concar.config_de({"concar": {"sub_diario_detraccion": "11"}})
+    assert concar.etiquetas_sub_diario(junto)["11"] == "Compras · Compras con detracción"

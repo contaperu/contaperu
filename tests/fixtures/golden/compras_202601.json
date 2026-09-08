@@ -1,0 +1,15 @@
+{
+  "_nota": "Las 3 filas de LE2060123456720260100080100001111.txt (compras, PLE 8.1) como datos estructurados. Incluye un recibo de servicios públicos (tipo 14, sin serie) y una serie electrónica E001.",
+  "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"},
+  "comprobantes": [
+    {"tipo_cp": "01", "serie": "F001", "numero": "00045680", "fecha_emision": "2026-01-10", "fecha_vencimiento": "2026-02-10",
+     "contraparte_tipo_doc": "6", "contraparte_doc": "20677777771", "contraparte_nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+     "base_gravada": "40000.00", "igv": "7200.00", "total": "47200.00"},
+    {"tipo_cp": "01", "serie": "E001", "numero": "00012347", "fecha_emision": "2026-01-18", "fecha_vencimiento": "2026-02-18",
+     "contraparte_tipo_doc": "6", "contraparte_doc": "20633333336", "contraparte_nombre": "IMPORTADORA ASIA PACIFICO SRL",
+     "base_gravada": "25000.00", "igv": "4500.00", "total": "29500.00"},
+    {"tipo_cp": "14", "serie": "", "numero": "12345679", "fecha_emision": "2026-01-25", "fecha_vencimiento": "2026-02-25",
+     "contraparte_tipo_doc": "6", "contraparte_doc": "20605555552", "contraparte_nombre": "ELECTRICIDAD DE PRUEBA SAA",
+     "base_gravada": "1800.00", "igv": "324.00", "total": "2124.00"}
+  ]
+}
