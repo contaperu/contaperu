@@ -114,7 +114,19 @@ def cmd_comparar(args: argparse.Namespace) -> int:
     return 1 if (r["diferencias"] or r["solo_en_sunat"] or r["solo_nuestros"]) else 0
 
 
+def _consola_utf8() -> None:
+    """La consola de Windows usa cp1252 por defecto y revienta con una flecha o una tilde.
+    Un contador peruano trabaja en Windows: que la herramienta se caiga al IMPRIMIR, con los
+    archivos ya generados, es de las cosas mas absurdas que pueden pasar."""
+    for flujo in (sys.stdout, sys.stderr):
+        try:
+            flujo.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):     # ya redirigido, o no es una consola
+            pass
+
+
 def main(argv: list[str] | None = None) -> int:
+    _consola_utf8()
     ap = argparse.ArgumentParser(prog="contaperu", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)

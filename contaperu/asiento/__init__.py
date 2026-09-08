@@ -49,7 +49,7 @@ from .datos import (ANCHOS, COLUMNAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS
 from .construir import (CorrelativoFaltante, MonedaSinCodigo, SinCuenta, TipoSinMapa,
                         asiento, config_de, cuenta_gasto, cuenta_honorarios, cuenta_venta,
                         etiquetas_sub_diario, filas_sin_centro, filas_sin_cuenta,
-                        merge_config, monedas_sin_codigo, nombre, numerar,
+                        merge_config, mes_del_libro, monedas_sin_codigo, nombre, numerar,
                         resolve_cxp_account, sub_diario, sub_diarios_presentes,
                         tasa_igv, tiene_detraccion, tipo_concar, tipos_sin_mapa)
 from .lineas import LineaDiario, a_lineas, desde_fila
@@ -63,7 +63,7 @@ __all__ = [
     "CorrelativoFaltante", "MonedaSinCodigo", "SinCuenta", "TipoSinMapa",
     "asiento", "config_de", "cuenta_gasto", "cuenta_honorarios", "cuenta_venta",
     "etiquetas_sub_diario", "filas_sin_centro", "filas_sin_cuenta",
-    "merge_config", "monedas_sin_codigo", "nombre", "numerar",
+    "merge_config", "mes_del_libro", "monedas_sin_codigo", "nombre", "numerar",
     "resolve_cxp_account", "sub_diario", "sub_diarios_presentes",
     "tasa_igv", "tiene_detraccion", "tipo_concar", "tipos_sin_mapa",
     "LineaDiario", "a_lineas", "desde_fila",

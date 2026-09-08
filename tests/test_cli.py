@@ -41,3 +41,15 @@ def test_errores_bloquean_salvo_flag(tmp_path, capsys):
 def test_desde_json(tmp_path):
     assert cli.main(["desde-json", str(GOLDEN / "compras_202601.json"), "--driver", "sire", "--salida", str(tmp_path)]) == 0
     assert (tmp_path / "LE2060123456720260100080400021112.TXT").read_bytes().count(b"\r\n") == 3
+
+
+def test_la_consola_de_windows_no_tumba_el_cli(monkeypatch):
+    """La consola de Windows es cp1252 y el CLI imprime flechas y tildes. Que se caiga al
+    IMPRIMIR, con los archivos ya escritos, seria absurdo."""
+    from contaperu.cli import _consola_utf8
+
+    class SinReconfigure:
+        encoding = "cp1252"
+
+    monkeypatch.setattr("sys.stdout", SinReconfigure())
+    _consola_utf8()          # no revienta aunque el flujo no sepa reconfigurarse

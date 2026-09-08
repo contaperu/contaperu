@@ -33,13 +33,18 @@ dev = ["contaperu[todo]", "pytest>=8,<9"]
 
 [project.scripts]
 contaperu = "contaperu.cli:main"
-contaperu-mcp = "contaperu.mcp.servidor:main"
+contaperu-mcp = "contaperu.servidor_mcp:main"
 
 [project.urls]
 Repositorio = "https://github.com/Zetrix1111/contaperu"
 
 [tool.hatch.build.targets.wheel]
 packages = ["contaperu"]
+
+# El esquema del estandar vive UNA sola vez, en la raiz, pero viaja dentro del paquete:
+# el servidor MCP lo publica como recurso y tiene que encontrarlo tambien instalado.
+[tool.hatch.build.targets.wheel.force-include]
+"estandar/pe-ledger.schema.json" = "contaperu/estandar/pe-ledger.schema.json"
 
 [tool.hatch.build.targets.sdist]
 include = ["contaperu", "estandar", "tests", "README.md", "LICENSE"]
