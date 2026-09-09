@@ -30,6 +30,7 @@ import sys
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import BlobResourceContents, CallToolResult, EmbeddedResource, TextContent
 
 from . import __version__, catalogos, detracciones, drivers, operaciones
 from .operaciones import DocumentoInvalido
@@ -50,6 +51,25 @@ ESQUEMA = _ruta_del_esquema()
 # Tope del archivo que se devuelve por el protocolo. Un Excel de un mes normal pesa unas
 # decenas de kilobytes; varios megas casi siempre significan que había que partir el lote.
 MAXIMO_ARCHIVO = 4 * 1024 * 1024
+
+
+def _adjunto(nombre: str, b64: str, mime: str) -> EmbeddedResource:
+    """Devuelve un archivo COMO ARCHIVO, no como una tira de texto dentro de un campo.
+
+    El protocolo habla JSON y un `.xlsx` es un ZIP: no cabe tal cual, hay que meterlo en base64.
+    Pero eso no es «otro formato» —al decodificarlo vuelve el mismo archivo, byte a byte—, y la
+    diferencia entre que el cliente lo ofrezca para guardar o lo enseñe como un muro de letras
+    está en el envoltorio: un recurso incrustado con su `blob` y su `mimeType`, en vez de un
+    campo `contenido_base64` que nadie sabe reconocer.
+    """
+    return EmbeddedResource(
+        type="resource",
+        resource=BlobResourceContents(
+            uri=f"contaperu://salida/{nombre}",
+            mimeType=mime.split(";")[0].strip() or "application/octet-stream",
+            blob=b64,
+        ),
+    )
 
 INSTRUCCIONES = """\
 Núcleo contable del Perú. Convierte comprobantes de SUNAT en asientos y en los archivos que
@@ -75,6 +95,9 @@ ni un tipo de documento, ni una equivalencia del PCGE.
 """
 
 mcp = FastMCP("contaperu", instructions=INSTRUCCIONES)
+# FastMCP no deja poner la version en su constructor y, sin esto, el servidor se presenta en el
+# saludo con la version del SDK: «contaperu 1.30.0», que no es ninguna version de contaperu.
+mcp._mcp_server.version = __version__
 
 
 # --- recursos: lo que conviene leer antes de llamar a nada -------------------------
@@ -168,25 +191,40 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
 
 @mcp.tool()
 def exportar(documento: dict, driver: str = "concar", configuracion: dict | None = None,
-             correlativos: dict | None = None, incluir_observados: bool = False) -> dict:
+             correlativos: dict | None = None, incluir_observados: bool = False) -> CallToolResult:
     """Genera el archivo que espera un sistema contable, ya listo para importar.
 
+    Devuelve dos cosas: un resumen en JSON (nombre del archivo, filas, debe y haber) y **el
+    archivo adjunto**, para guardarlo tal cual.
+
     Drivers disponibles (ver el recurso `contaperu://drivers`):
-      - `concar` — el Excel de asientos de 41 columnas. Vuelve en `contenido_base64`.
-      - `sire`   — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT. Vuelve en
-                   `texto`, y su ZIP en `zip_base64`.
-      - `csv`    — las líneas de diario en columnas, para cualquier otro destino.
+      - `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.
+      - `sire`   — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el contenido
+                   va en `texto` y el ZIP que sube a SUNAT, adjunto.
+      - `csv`    — las líneas de diario en columnas, en `texto` y también adjunto.
 
     Antes de escribir nada comprueba que el asiento cuadre; si no cuadra, falla.
     """
     resultado = operaciones.exportar(documento, driver, configuracion, correlativos, incluir_observados)
-    b64 = resultado.get("contenido_base64") or resultado.get("zip_base64") or ""
-    pesa = len(b64) * 3 // 4          # el base64 abulta un tercio mas que los bytes
+    # Los bytes salen del resumen y entran en los adjuntos: repetirlos en el JSON seria mandar
+    # el archivo dos veces, y la copia en texto es justo la que el cliente no sabe guardar.
+    contenido = resultado.pop("contenido_base64", "") or ""
+    zip_b64 = resultado.pop("zip_base64", "") or ""
+    pesa = (len(contenido) + len(zip_b64)) * 3 // 4   # el base64 abulta un tercio mas que los bytes
     if pesa > MAXIMO_ARCHIVO:
         raise DocumentoInvalido(
             f"El archivo pesa {pesa // (1024 * 1024)} MB y el tope por llamada es "
             f"{MAXIMO_ARCHIVO // (1024 * 1024)} MB. Divide el periodo en lotes mas pequenos.")
-    return resultado
+
+    adjuntos = []
+    if contenido:
+        adjuntos.append(_adjunto(resultado["archivo"], contenido,
+                                 resultado.get("content_type") or "application/octet-stream"))
+    if zip_b64:
+        adjuntos.append(_adjunto(resultado["archivo_zip"], zip_b64, "application/zip"))
+    resumen = TextContent(type="text",
+                          text=json.dumps(resultado, ensure_ascii=False, indent=1))
+    return CallToolResult(content=[resumen, *adjuntos])
 
 
 @mcp.tool()

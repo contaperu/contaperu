@@ -10,6 +10,7 @@ import json
 
 import pytest
 
+import contaperu
 from contaperu.servidor_mcp import mcp
 
 from util import XML
@@ -33,6 +34,16 @@ def llamar(herramienta: str, **argumentos):
     return json.loads(bloques[0].text)
 
 
+def exportar(**argumentos):
+    """`exportar` no devuelve solo JSON: devuelve el resumen y el archivo adjunto.
+
+    Se separan aquí para que cada test diga cuál de las dos cosas está mirando.
+    """
+    resultado = asyncio.run(mcp.call_tool("exportar", argumentos))
+    resumen, *adjuntos = resultado.content
+    return json.loads(resumen.text), [a.resource for a in adjuntos]
+
+
 def leer_recurso(uri: str) -> str:
     contenidos = list(asyncio.run(mcp.read_resource(uri)))
     return contenidos[0].content
@@ -45,6 +56,11 @@ def test_estan_las_nueve_herramientas():
         "generar_asiento", "exportar", "leer_xml_ubl", "leer_propuesta_sire",
         "adaptar_pcge2026", "normalizar_detracciones",
     }
+
+
+def test_el_servidor_se_presenta_con_SU_version():
+    """Sin ponersela a mano, FastMCP saluda con la version del SDK: «contaperu 1.30.0»."""
+    assert mcp._mcp_server.version == contaperu.__version__
 
 
 def test_cada_herramienta_se_explica_sola():
@@ -86,23 +102,44 @@ def test_la_partida_doble_se_puede_comprobar_sola():
     assert llamar("validar_partida_doble", asiento=asiento)["cuadra"] is False
 
 
-def test_exportar_a_concar_devuelve_el_excel_en_base64():
-    r = llamar("exportar", documento=DOCUMENTO, driver="concar")
+def test_exportar_a_concar_devuelve_el_excel_COMO_ARCHIVO():
+    """El Excel tiene que llegar como archivo, no como una tira de base64 dentro del JSON.
+
+    Es la diferencia entre que el cliente lo ofrezca para guardar y que lo enseñe como un muro
+    de letras: hace falta el recurso incrustado con su `blob` y su `mimeType`.
+    """
+    r, adjuntos = exportar(documento=DOCUMENTO, driver="concar")
     assert r["archivo"].endswith(".xlsx") and r["formato"] == "concar_xlsx"
-    import base64
-    assert base64.b64decode(r["contenido_base64"])[:2] == b"PK"      # es un .xlsx de verdad
     assert r["resumen"]["debe"] == r["resumen"]["haber"] == "5154.00"
+    assert "contenido_base64" not in r, "los bytes van en el adjunto, no repetidos en el JSON"
+
+    excel, = adjuntos
+    assert excel.mimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    assert str(excel.uri).endswith(r["archivo"])
+    import base64
+    import io
+
+    import openpyxl
+    crudo = base64.b64decode(excel.blob)
+    assert crudo[:2] == b"PK"                                   # es un .xlsx de verdad
+    assert openpyxl.load_workbook(io.BytesIO(crudo)).active.max_row > 1
 
 
-def test_exportar_al_sire_devuelve_texto_y_su_zip():
-    r = llamar("exportar", documento=DOCUMENTO, driver="sire")
+def test_exportar_al_sire_devuelve_texto_y_su_zip_adjunto():
+    r, adjuntos = exportar(documento=DOCUMENTO, driver="sire")
     assert r["archivo"].endswith(".TXT") and r["texto"].count("|") > 30
-    assert r["zip_base64"] and r["archivo_zip"].endswith(".zip")
+    assert "zip_base64" not in r and r["archivo_zip"].endswith(".zip")
+    zip_, = adjuntos
+    assert zip_.mimeType == "application/zip"
+    import base64
+    assert base64.b64decode(zip_.blob)[:2] == b"PK"
 
 
 def test_exportar_a_csv_es_legible():
-    r = llamar("exportar", documento=DOCUMENTO, driver="csv")
+    r, adjuntos = exportar(documento=DOCUMENTO, driver="csv")
     assert r["texto"].splitlines()[0].startswith("sub_diario;correlativo")
+    csv, = adjuntos
+    assert csv.mimeType == "text/csv"                # sin el `; charset=utf-8` del content-type
 
 
 def test_leer_un_xml_de_sunat():
@@ -139,6 +176,6 @@ def test_un_comprobante_con_error_bloquea_la_exportacion():
     doc = json.loads(json.dumps(DOCUMENTO))
     doc["comprobantes"][0]["total"] = "9999"          # deja de cuadrar con base + IGV
     with pytest.raises(Exception, match="bloquean|observaciones"):
-        llamar("exportar", documento=doc, driver="concar")
-    forzado = llamar("exportar", documento=doc, driver="concar", incluir_observados=True)
-    assert forzado["archivo"].endswith(".xlsx")
+        exportar(documento=doc, driver="concar")
+    forzado, adjuntos = exportar(documento=doc, driver="concar", incluir_observados=True)
+    assert forzado["archivo"].endswith(".xlsx") and len(adjuntos) == 1
