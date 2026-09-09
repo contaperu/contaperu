@@ -30,6 +30,7 @@ import sys
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import BlobResourceContents, CallToolResult, EmbeddedResource, TextContent
 
 from . import __version__, catalogos, detracciones, drivers, operaciones
@@ -286,6 +287,29 @@ def normalizar_detracciones(documento: dict, configuracion: dict | None = None) 
 
 # --- arranque ----------------------------------------------------------------------
 
+# Nombres por los que un servidor local se deja llamar. El SDK los pone solo cuando se escucha
+# en 127.0.0.1; aqui se mantienen tambien al escuchar en 0.0.0.0, que es lo normal dentro de un
+# contenedor, para que `curl localhost:8000/mcp` siga sirviendo para comprobar que esta vivo.
+LOCALES = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
+
+
+def seguridad(dominios: list[str]) -> TransportSecuritySettings:
+    """Los nombres de host por los que este servidor acepta que le llamen.
+
+    El SDK rechaza con un 421 cualquier peticion cuyo `Host` no reconozca. Es la defensa
+    contra el *DNS rebinding*: una pagina cualquiera hace que el navegador de la victima
+    resuelva un dominio suyo a la direccion del servidor y le hable como si fuera del mismo
+    origen. Por eso publicarlo detras de un proxy obliga a decir el nombre publico: sin
+    `--dominio`, el servidor solo se reconoce a si mismo como «localhost» y desde fuera todo
+    da 421 aunque el proxy y el certificado esten perfectos.
+    """
+    return TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=[*LOCALES, *dominios, *(f"{d}:*" for d in dominios)],
+        allowed_origins=[f"http://{h}" for h in LOCALES] + [f"https://{d}" for d in dominios],
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         prog="contaperu-mcp",
@@ -294,12 +318,26 @@ def main(argv: list[str] | None = None) -> int:
                     help="stdio (por defecto) para un cliente local; http para servirlo en red")
     ap.add_argument("--host", default="127.0.0.1", help="solo con --transporte http")
     ap.add_argument("--puerto", type=int, default=8000, help="solo con --transporte http")
+    ap.add_argument("--dominio", action="append", default=[], metavar="NOMBRE",
+                    help="nombre publico por el que se sirve, si va detras de un proxy "
+                         "(repetible). Sin esto solo se atienden peticiones a localhost")
     ap.add_argument("--version", action="version", version=f"contaperu {__version__}")
     args = ap.parse_args(argv)
 
     if args.transporte in ("http", "sse"):
         mcp.settings.host = args.host
         mcp.settings.port = args.puerto
+    if args.transporte == "http":
+        # Sin sesiones: cada peticion se atiende sola y el servidor no guarda nada entre una y
+        # otra, que es lo que este modulo dice de si mismo. Ademas quita de en medio el unico
+        # recurso que un desconocido podria ir acumulando en un servidor sin autenticacion:
+        # sesiones abiertas (el SDK admite 10.000 y las mantiene media hora).
+        mcp.settings.stateless_http = True
+        mcp.settings.transport_security = seguridad(args.dominio)
+        if not args.dominio and args.host not in ("127.0.0.1", "localhost", "::1"):
+            print("aviso: sin --dominio solo se atienden peticiones cuyo Host sea localhost; "
+                  "desde fuera responde 421. Al publicarlo detras de un proxy hay que declarar "
+                  "el nombre publico:  --dominio contaperu.ejemplo.com", file=sys.stderr)
     transporte: Any = {"http": "streamable-http"}.get(args.transporte, args.transporte)
     mcp.run(transport=transporte)
     return 0

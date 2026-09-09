@@ -11,7 +11,7 @@ import json
 import pytest
 
 import contaperu
-from contaperu.servidor_mcp import mcp
+from contaperu.servidor_mcp import LOCALES, mcp, seguridad
 
 from util import XML
 
@@ -61,6 +61,19 @@ def test_estan_las_nueve_herramientas():
 def test_el_servidor_se_presenta_con_SU_version():
     """Sin ponersela a mano, FastMCP saluda con la version del SDK: «contaperu 1.30.0»."""
     assert mcp._mcp_server.version == contaperu.__version__
+
+
+def test_publicarlo_detras_de_un_proxy_exige_declarar_el_dominio():
+    """Sin declararlo, el SDK responde 421 a todo lo que llegue por el nombre publico.
+
+    Paso al levantarlo por primera vez: el proxy bien, el certificado bien, y aun asi ni una
+    peticion entraba desde internet, porque el servidor solo se reconocia como «localhost».
+    """
+    s = seguridad(["contaperu.ejemplo.com"])
+    assert "contaperu.ejemplo.com" in s.allowed_hosts
+    assert "https://contaperu.ejemplo.com" in s.allowed_origins
+    assert "localhost:*" in s.allowed_hosts       # y localhost sigue valiendo para comprobar
+    assert seguridad([]).allowed_hosts == LOCALES
 
 
 def test_cada_herramienta_se_explica_sola():

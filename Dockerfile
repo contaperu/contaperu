@@ -2,9 +2,14 @@
 #
 #   docker build -t contaperu-mcp .
 #
-#   docker run -i --rm contaperu-mcp                          # el MCP, por stdio (cliente local)
-#   docker run --rm -p 8000:8000 contaperu-mcp #       contaperu-mcp --transporte http --host 0.0.0.0        # el MCP, remoto (Streamable HTTP en /mcp)
-#   docker run --rm -v "$PWD:/data" contaperu-mcp #       contaperu desde-json /data/mes.json --salida /data/salida    # exportar a un ARCHIVO
+#   docker run -i --rm contaperu-mcp
+#       el MCP por entrada y salida estandar, para un cliente local (Claude Desktop, un IDE)
+#
+#   docker run --rm -p 8000:8000 contaperu-mcp contaperu-mcp --transporte http --host 0.0.0.0
+#       el MCP remoto: Streamable HTTP en /mcp, que es lo que enchufa un conector
+#
+#   docker run --rm -v "$PWD:/data" contaperu-mcp contaperu desde-json /data/mes.json --salida /data/salida
+#       la CLI: exportar a un archivo, sin levantar ningun servidor
 #
 # La imagen no necesita red, ni credenciales, ni volumenes: el servidor no guarda nada. El
 # volumen del tercer ejemplo es solo para que la CLI deje el .xlsx en tu carpeta.
