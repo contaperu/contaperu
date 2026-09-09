@@ -315,6 +315,13 @@ def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprob
     cc = (c.centro_costo or "").strip() if contab.get("usa_centros_costo", True) else ""      # apagado: M y X van vacías
     serie, num = (c.serie or "").strip(), fmt_numero(c.numero, op)
     serie_numero = f"{serie}-{num}" if serie and num else (serie or num)
+    # UNA sola glosa para las DOS columnas (confirmado por un contador, 2026): F la lleva a 40 y W a 30, y lo
+    # único que cambia entre ellas es el largo que admite el ERP. En las líneas derivadas W antepone lo que
+    # las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—, que cuenta dentro de esos 30.
+    # No es un descuido pendiente de arreglar: durante meses se arrastró un "pendiente" que pedía en F un
+    # concepto genérico clasificado distinto del de W; salía de un manual externo, no del sistema que genera
+    # los asientos, y se descartó. Si el comprobante no trae concepto se usa el nombre de la contraparte,
+    # para que ninguna fila del Excel salga sin glosa. Fijado en `test_asiento_concar.py`.
     glosa = ((c.concepto or "").strip() or (c.contraparte_nombre or "").strip()).upper()
     tasa = tasa_igv(igv, Decimal(c.base_gravada or 0), contab.get("tasa_igv", 18))
     tc = c.tipo_cambio if es_usd and c.tipo_cambio else None

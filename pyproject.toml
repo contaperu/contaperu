@@ -36,7 +36,7 @@ contaperu = "contaperu.cli:main"
 contaperu-mcp = "contaperu.servidor_mcp:main"
 
 [project.urls]
-Repositorio = "https://github.com/Zetrix1111/contaperu"
+Repositorio = "https://github.com/Zetrix1111/open-contaperu"
 
 [tool.hatch.build.targets.wheel]
 packages = ["contaperu"]
