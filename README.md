@@ -69,16 +69,75 @@ contaperu generar --tipo compra --ruc 20601111111 --razon "MI EMPRESA SAC" \
 
 ## Para un agente de IA: el servidor MCP
 
-```bash
-contaperu-mcp                                        # por stdio (Claude Desktop, IDEs)
-contaperu-mcp --transporte http --host 0.0.0.0       # por HTTP
-docker run -i --rm contaperu-mcp                     # sin instalar nada
-```
-
 Nueve herramientas: `configuracion_por_defecto`, `validar_comprobantes`, `validar_partida_doble`,
 `generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones` y
 `adaptar_pcge2026`. Y tres recursos de lectura: el esquema del estándar, los catálogos de SUNAT y los
 drivers disponibles.
+
+El Excel y el ZIP del SIRE vuelven **como archivos** —recursos incrustados con su tipo—, así que el cliente
+los ofrece para guardar en vez de enseñar una tira de letras.
+
+### En tu propia máquina (stdio)
+
+```bash
+docker build -t contaperu-mcp .
+docker run -i --rm --network none contaperu-mcp
+```
+
+El `--network none` no es una precaución: es la demostración de que no hace falta red. En Claude Desktop,
+en `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "contaperu": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "--network", "none", "contaperu-mcp"]
+    }
+  }
+}
+```
+
+### Servido en red, para conectarlo como conector remoto
+
+```bash
+docker run -d --name contaperu-mcp --restart unless-stopped -p 8000:8000 contaperu-mcp \
+    contaperu-mcp --transporte http --host 0.0.0.0 --dominio contaperu.tudominio.com
+```
+
+Habla **Streamable HTTP** en `/mcp`, así que la URL del conector es `https://contaperu.tudominio.com/mcp`.
+**Sin token y sin OAuth**, y es una decisión, no un descuido: la especificación dice que la autorización es
+[OPCIONAL](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization), y aquí no habría a
+quién autenticar — este servidor no tiene usuarios, ni cuentas, ni base de datos, ni sale a la red. Quien
+tenga la URL puede gastarte CPU; no puede leer nada de nadie, porque no hay nada guardado. (Si lo que
+necesitas es un conector *por usuario*, con su login y sus datos, eso es otra pieza y va por encima de esta.)
+
+**`--dominio` no es opcional al publicarlo.** El SDK del protocolo rechaza con un 421 toda petición cuyo
+`Host` no reconozca —es la defensa contra el *DNS rebinding*— y por defecto solo se reconoce como
+`localhost`: sin declararlo, el certificado y el proxy están perfectos y aun así no entra ni una petición.
+
+Detrás de un proxy basta con pasarle las peticiones tal cual. Con Caddy:
+
+```caddyfile
+contaperu.tudominio.com {
+	request_body {
+		max_size 4MB
+	}
+	reverse_proxy contaperu-mcp:8000
+}
+```
+
+Nada de reescribir rutas ni de inyectar cabeceras. Y como no lleva autenticación, el freno sensato es de
+recursos: el tope de cuerpo de arriba, y memoria y CPU acotadas en el contenedor.
+
+### Una imagen, dos puertas
+
+La misma imagen sirve el MCP y ejecuta la CLI, según lo que le pases:
+
+```bash
+docker run --rm -v "$PWD:/data" contaperu-mcp \
+    contaperu desde-json /data/mes.json --salida /data/salida
+```
 
 El servidor **no guarda nada y no sale a la red**. Cada llamada recibe todo lo que necesita y devuelve todo
 lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna deja rastro.
