@@ -38,10 +38,10 @@ contaperu-mcp = "contaperu.servidor_mcp:main"
 
 # PyPI solo pone icono a las claves que reconoce, y en ingles.
 [project.urls]
-Homepage = "https://github.com/global-procesos-ai/contaperu"
-Repository = "https://github.com/global-procesos-ai/contaperu"
-Issues = "https://github.com/global-procesos-ai/contaperu/issues"
-Changelog = "https://github.com/global-procesos-ai/contaperu/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/contaperu/contaperu"
+Repository = "https://github.com/contaperu/contaperu"
+Issues = "https://github.com/contaperu/contaperu/issues"
+Changelog = "https://github.com/contaperu/contaperu/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["contaperu"]

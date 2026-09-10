@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: Un fallo de seguridad
-    url: https://github.com/global-procesos-ai/contaperu/blob/main/SECURITY.md
+    url: https://github.com/contaperu/contaperu/blob/main/SECURITY.md
     about: No lo abras aquí. Se reporta en privado, y SECURITY.md dice cómo.
   - name: Quiero añadir un driver para mi sistema contable
-    url: https://github.com/global-procesos-ai/contaperu/blob/main/CONTRIBUTING.md
+    url: https://github.com/contaperu/contaperu/blob/main/CONTRIBUTING.md
     about: CONTRIBUTING.md explica la interfaz y los cuatro requisitos para que se acepte.

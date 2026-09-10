@@ -66,5 +66,5 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/global-procesos-ai/contaperu/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/global-procesos-ai/contaperu/releases/tag/v0.2.0
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/contaperu/contaperu/releases/tag/v0.2.0

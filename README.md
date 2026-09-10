@@ -1,6 +1,6 @@
 # ContaPerú
 
-[![tests](https://github.com/global-procesos-ai/contaperu/actions/workflows/tests.yml/badge.svg)](https://github.com/global-procesos-ai/contaperu/actions/workflows/tests.yml)
+[![tests](https://github.com/contaperu/contaperu/actions/workflows/tests.yml/badge.svg)](https://github.com/contaperu/contaperu/actions/workflows/tests.yml)
 [![PyPI](https://img.shields.io/pypi/v/contaperu.svg)](https://pypi.org/project/contaperu/)
 [![Python](https://img.shields.io/pypi/pyversions/contaperu.svg)](https://pypi.org/project/contaperu/)
 [![licencia MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)

@@ -11,7 +11,7 @@ integración desde cero. El estándar no reemplaza a ninguno: es el idioma inter
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/global-procesos-ai/contaperu/pe-ledger-0.1/estandar/pe-ledger.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.1/estandar/pe-ledger.schema.json
 ```
 
 Cuelga del tag **del estándar** (`pe-ledger-0.1`), no del de la librería: la versión del paquete sube

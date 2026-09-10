@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/global-procesos-ai/contaperu/pe-ledger-0.1/estandar/pe-ledger.schema.json",
+  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.1/estandar/pe-ledger.schema.json",
   "title": "pe-ledger",
   "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
   "type": "object",
