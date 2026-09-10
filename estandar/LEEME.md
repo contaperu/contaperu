@@ -8,6 +8,15 @@ una IA que lee un PDF no tiene dónde depositar lo que extrajo; y quien cambia d
 integración desde cero. El estándar no reemplaza a ninguno: es el idioma intermedio.
 
 **Esquema formal:** [`pe-ledger.schema.json`](pe-ledger.schema.json) (JSON Schema draft 2020-12).
+Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
+
+```
+https://raw.githubusercontent.com/global-procesos-ai/contaperu/pe-ledger-0.1/estandar/pe-ledger.schema.json
+```
+
+Cuelga del tag **del estándar** (`pe-ledger-0.1`), no del de la librería: la versión del paquete sube
+cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
+sirve como estándar. Mientras el estándar siga en 0.1, esa URL devuelve exactamente el mismo archivo.
 
 ```bash
 python -m contaperu.cli validar mi-documento.json

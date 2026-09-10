@@ -23,6 +23,8 @@ comporta distinto es justo lo que SemVer sirve para evitar.
   que sale una versión del paquete.
 - CI endurecido: acciones fijadas por SHA, permisos mínimos, CodeQL, Dependabot y publicación en
   PyPI por OIDC —sin ningún token guardado en el repositorio.
+- Los tests de la regla del centro de costo: **152 en total**, sin red y sin credenciales, sobre
+  Python 3.11, 3.12 y 3.13.
 
 ### Cambiado
 - **El centro de costo lo decide la CUENTA, no un interruptor global.** Hasta ahora la columna M se
@@ -62,7 +64,7 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
 - **PCGE 2026**: adaptación del plan contable.
 - **CLI** (`contaperu`) y **servidor MCP** (`contaperu-mcp`), que devuelve el Excel como archivo, no
   como texto, y admite publicarse tras un proxy declarando el dominio.
-- 152 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
+- 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
 [Sin publicar]: https://github.com/global-procesos-ai/contaperu/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/global-procesos-ai/contaperu/releases/tag/v0.2.0

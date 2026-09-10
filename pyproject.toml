@@ -52,7 +52,8 @@ packages = ["contaperu"]
 "estandar/pe-ledger.schema.json" = "contaperu/estandar/pe-ledger.schema.json"
 
 [tool.hatch.build.targets.sdist]
-include = ["contaperu", "estandar", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
+include = ["contaperu", "estandar", "tests", "README.md", "LICENSE", "CHANGELOG.md",
+           "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
