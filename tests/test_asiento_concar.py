@@ -160,6 +160,72 @@ def test_el_interruptor_de_centros_de_costo():
     assert [f["O"] for f in sin] == [100.0, 18.0, 118.0]                 # el asiento no cambia en nada más
 
 
+def test_la_cuenta_decide_si_el_centro_va_a_la_M():
+    """El contador, 09-sep-2026: «la cuenta 63 y 65 tiene habilitado el centro de costo en la
+    columna M, pero cuando es una cuenta 60 por defecto no se debe asignar un centro de costo».
+    En CONCAR esa marca vive en cada cuenta del plan; aquí, en `cuentas_con_centro` por prefijo.
+
+    OJO al leer este test: el fixture usa 631101, que SÍ está en la lista de fábrica. Por eso
+    ningún test anterior se enteró del cambio, y por eso hace falta este.
+    """
+    # Las de la lista de fábrica: 63, 65 y —para que ventas no cambie— 70.
+    assert concar.asiento(cp(), CONTAB, MES, "080001")[0]["M"] == "OBRA01"                      # 631101
+    assert concar.asiento(cp(cuenta_contable="659999"), CONTAB, MES, "080001")[0]["M"] == "OBRA01"
+    # Las que NO: ni M ni X. Son las clases reales de un constructor: 603 compras, 627 seguros.
+    for cuenta in ("601101", "603201", "627401", "681401"):
+        gasto = concar.asiento(cp(cuenta_contable=cuenta), CONTAB, MES, "080001")[0]
+        assert (gasto["K"], gasto["M"], gasto["X"]) == (cuenta, "", ""), cuenta
+    # Y el doble anexo del proveedor NO depende de esto: sigue llevando el centro.
+    assert concar.asiento(cp(cuenta_contable="603201"), CONTAB, MES, "080001")[2]["X"] == "OBRA01"
+    # Ventas sin cambios: 701101 está en la lista, que es exactamente para lo que se metió el 70.
+    venta = concar.asiento(cp(cuenta_contable=""), CONTAB, MES, "080001", venta=True)
+    assert venta[1]["K"] == "701101" and venta[1]["M"] == "OBRA01"
+    # Casa por prefijo, no por los dos primeros dígitos: "6311" no alcanza a 631201.
+    largo = concar.config_de({"concar": {"cuentas_con_centro": ["6311"]}})
+    assert concar.asiento(cp(), largo, MES, "080001")[0]["M"] == "OBRA01"                        # 631101
+    assert concar.asiento(cp(cuenta_contable="631201"), largo, MES, "080001")[0]["M"] == ""
+    # Lista VACÍA es una respuesta legítima —ninguna cuenta lo lleva— y no es lo mismo que ausente.
+    vacia = concar.config_de({"concar": {"cuentas_con_centro": []}})
+    assert concar.asiento(cp(), vacia, MES, "080001")[0]["M"] == ""
+    assert concar.lleva_centro("631101", {}) is True                                             # sin la clave: los de fábrica
+
+
+def test_el_centro_de_referencia_en_la_X_del_gasto():
+    """«Algunas empresas optan en colocar la columna X como referencia el centro de costo»
+    (el contador, 09-sep-2026). Apagado de fábrica: la X de CONCAR solo admite dato si esa
+    cuenta tiene anexo referencia, y escribirla donde no toca puede tumbar la importación."""
+    ref = concar.config_de({"concar": {"cc_referencia_en_x": True}})
+    gasto, _, prov = concar.asiento(cp(cuenta_contable="603201"), ref, MES, "080001")
+    assert (gasto["M"], gasto["X"]) == ("", "OBRA01")          # la referencia, en su propia línea
+    assert prov["X"] == "OBRA01"                                # y el doble anexo, intacto a la vez
+    # A las cuentas que SÍ lo llevan en M, el interruptor no las toca.
+    con_m = concar.asiento(cp(), ref, MES, "080001")[0]
+    assert (con_m["M"], con_m["X"]) == ("OBRA01", "")
+    # El interruptor maestro manda sobre los dos.
+    apagado = concar.config_de({"concar": {"cc_referencia_en_x": True, "usa_centros_costo": False}})
+    sin = concar.asiento(cp(cuenta_contable="603201"), apagado, MES, "080001")[0]
+    assert (sin["M"], sin["X"]) == ("", "")
+    # La línea de la detracción sigue limpia aunque la referencia esté encendida.
+    det = concar.asiento(cp(cuenta_contable="603201", detraccion={"codigo": "027", "porcentaje": 4}), ref, MES, "100001")
+    assert (det[-1]["R"], det[-1]["M"], det[-1]["X"]) == ("DT", "", "")
+
+
+def test_el_centro_solo_es_obligatorio_donde_se_escribe():
+    """Una cuenta que no lleva centro no puede bloquear la exportación de un mes."""
+    assert concar.filas_sin_centro([cp(cuenta_contable="603201", centro_costo="")], CONTAB) == []
+    assert concar.filas_sin_centro([cp(cuenta_contable="627401", centro_costo="")], CONTAB) == []
+    assert [c.numero for c in concar.filas_sin_centro([cp(centro_costo="")], CONTAB)] == ["00000123"]
+    # Ni siquiera con la referencia en X encendida: esa X es una referencia, y una referencia
+    # que se puede dejar en blanco no puede impedir exportar.
+    ref = concar.config_de({"concar": {"cc_referencia_en_x": True}})
+    assert concar.filas_sin_centro([cp(cuenta_contable="603201", centro_costo="")], ref) == []
+    # Ventas: sin el flag la cuenta se resolveria como gasto. Con `cuentas.gasto` vacío en los
+    # DEFAULTS eso da cuenta vacía → no bloquea; con el flag cae en 701101 → sí bloquea.
+    vacio = cp(cuenta_contable="", centro_costo="")
+    assert concar.filas_sin_centro([vacio], CONTAB) == []
+    assert [c.numero for c in concar.filas_sin_centro([vacio], CONTAB, venta=True)] == ["00000123"]
+
+
 def test_factura_con_detraccion_va_al_sub_diario_10():
     """La factura con detracción, calcada dun Excel real de produccion (06-sep-2026): el total COMPLETO al
     proveedor (421201) y dos líneas más por el monto detraído — el proveedor al Debe y 421203 al Haber

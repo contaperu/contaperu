@@ -31,6 +31,16 @@ def factura(**k) -> Comprobante:
     return Comprobante(**base)
 
 
+def test_el_centro_de_referencia_viaja_como_anexo_auxiliar():
+    """Con `cc_referencia_en_x`, el centro de una cuenta que no lo lleva en M sale del asiento
+    por el campo `anexo_auxiliar` del estándar, no por `centro_costo`. Es correcto —la X es la
+    X— pero conviene fijarlo aquí y no descubrirlo desde el MCP o desde el driver CSV."""
+    ref = asi.config_de({"concar": {"cc_referencia_en_x": True}})
+    filas = asi.asiento(factura(cuenta_contable="603201"), ref, MES, "080001")
+    gasto = asi.desde_fila(filas[0])
+    assert gasto.centro_costo == "" and gasto.anexo_auxiliar == "CC-64"
+
+
 def test_la_linea_neutral_dice_lo_mismo_que_la_columna():
     filas = asi.asiento(factura(), CONTAB, MES, "080084")
     gasto, igv, proveedor = asi.a_lineas(filas, CONTAB)
