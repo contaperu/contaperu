@@ -4,6 +4,22 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [0.5.0] — 2026-09-10
+
+### Cambiado
+- **El monto de la detracción tiene una sola cifra: la del motor.** El cálculo que vivía privado en el
+  asiento (total × tasa en soles enteros, con el T.C. si es en dólares) es ahora `detracciones.monto()`, y
+  lo usan el asiento y `detracciones.normalizar()`, que desde hoy anota en cada detracción su `monto` y la
+  tasa de la tabla para ese código (`tasa_tabla`). Hasta ahora el portal enseñaba otra cifra —calculada en
+  el navegador con decimales, o la que la IA leyó del PDF— que no siempre era la que iba a CONCAR.
+  `normalizar()` no toca la tasa del comprobante: la huella del asiento depende de ella.
+
+### Añadido
+- `detracciones.monto()`, `detracciones.tasa()` y `detracciones.tasa_de_tabla()`.
+- **Aviso `DETRACCION_TASA_DISTINTA`** cuando la tasa con la que va a salir la detracción no es la de la
+  tabla del contribuyente para ese código: el caso de una IA que lee un 10 % en un código del 12 %. Aviso
+  y no error, porque la del comprobante puede ser legítima.
+
 ## [0.4.0] — 2026-09-10
 
 ### Cambiado

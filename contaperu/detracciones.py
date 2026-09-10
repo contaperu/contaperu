@@ -10,12 +10,32 @@ la detracción queda en blanco**. Nada se adivina; si toca, la elige una persona
 
 La tabla efectiva sale de la configuración (`detraccion_codigos`), que es la misma que usa el
 asiento — así no hay dos verdades sobre qué códigos existen.
+
+**Y el monto lo calcula el motor, una sola vez** (10-sep-2026). Hasta ese día había dos cifras: la
+del asiento (total × tasa en soles enteros) y la que enseñaba el portal —calculada en el navegador con
+decimales, o la que la IA leyó del PDF—, y no siempre coincidían. Ahora `monto()` es la única: la usan
+el asiento y `normalizar()`, y lo que ve la persona es lo que va a CONCAR.
 """
 from __future__ import annotations
 
-from typing import Iterable
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Any, Iterable
 
 from .modelo import Comprobante
+
+D2 = Decimal("0.01")
+
+
+def _num(v: Any) -> Decimal:
+    try:
+        return Decimal(str(v if v not in (None, "") else 0))
+    except Exception:
+        return Decimal(0)
+
+
+def _texto_tasa(t: Decimal) -> str:
+    """12 → «12», 4.5 → «4.5»: sin ceros de más, que es como se escribe una tasa."""
+    return format(t.normalize(), "f")
 
 
 def codigos_de(contab: dict) -> set[str]:
@@ -35,10 +55,46 @@ def normalizar_una(det, codigos: set[str]) -> dict | None:
     return dict(det, codigo=cod)
 
 
-def normalizar(comprobantes: Iterable[Comprobante], contab: dict) -> list[Comprobante]:
-    """Deja en blanco la detracción cuyo código no reconoce el contribuyente.
+def tasa_de_tabla(codigo: Any, contab: dict) -> Decimal:
+    """La tasa que el contribuyente tiene para ese código en su tabla; 0 si no la tiene."""
+    return _num((contab.get("detraccion_tasas") or {}).get(str(codigo or "").strip()))
 
-    Devuelve **solo los comprobantes que cambió**, para que quien llame sepa qué guardar.
+
+def tasa(c: Comprobante, contab: dict) -> Decimal:
+    """La tasa con la que se calcula: la del comprobante y, si no la trae, la de la tabla."""
+    d = c.detraccion if isinstance(c.detraccion, dict) else {}
+    t = _num(d.get("porcentaje"))
+    return t if t > 0 else tasa_de_tabla(d.get("codigo"), contab)
+
+
+def monto(c: Comprobante, contab: dict) -> tuple[Decimal, Decimal]:
+    """El monto de la detracción (Excel real validado en CONCAR, 2026): total × tasa en SOLES ENTEROS —
+    la detracción se deposita en soles (4 956 × 4 % = 198.24 → 198). En dólares la base se convierte
+    con el T.C. del comprobante y el monto vuelve a dólares para la línea, porque el asiento va en US.
+    Devuelve (soles, en la moneda del comprobante); (0, 0) si no hay tasa o falta el T.C."""
+    t = tasa(c, contab)
+    es_usd = (c.moneda or "PEN").upper() == "USD"
+    tc = c.tipo_cambio if es_usd and c.tipo_cambio else None
+    if t <= 0 or (es_usd and not tc):
+        return Decimal(0), Decimal(0)
+    total = Decimal(c.total or 0).quantize(D2)
+    cambio = Decimal(str(tc)) if es_usd else Decimal(1)
+    base_soles = (total * cambio).quantize(D2, rounding=ROUND_HALF_UP)
+    soles = (base_soles * t / Decimal(100)).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    en_moneda = (soles / cambio).quantize(D2, rounding=ROUND_HALF_UP) if es_usd else soles
+    return soles, en_moneda
+
+
+def normalizar(comprobantes: Iterable[Comprobante], contab: dict) -> list[Comprobante]:
+    """Deja en blanco la detracción cuyo código no reconoce el contribuyente, y a la que queda le
+    anota lo que dice el motor: su `monto` (soles enteros, lo que va a CONCAR) y la tasa de la tabla
+    para ese código (`tasa_tabla`), que `validar` compara con la del comprobante.
+
+    **La tasa del comprobante no se toca**: es la que leyó la IA o la que eligió la persona, y la
+    huella con que se sabe si un comprobante cambió después de exportarse depende de ella.
+
+    Devuelve **solo los comprobantes que cambió**, para que quien llame sepa qué guardar. Es
+    idempotente: repetirla sobre lo ya normalizado no cambia nada.
     """
     con = [c for c in comprobantes if c.detraccion]
     if not con:
@@ -46,9 +102,19 @@ def normalizar(comprobantes: Iterable[Comprobante], contab: dict) -> list[Compro
     codigos = codigos_de(contab)
     cambiados = []
     for c in con:
+        antes = c.detraccion
         nuevo = normalizar_una(c.detraccion, codigos)
-        if nuevo != c.detraccion:
+        if nuevo is not None:
             c.detraccion = nuevo
+            soles, _ = monto(c, contab)
+            nuevo = dict(nuevo, monto=str(soles) if soles > 0 else "")
+            de_tabla = tasa_de_tabla(nuevo["codigo"], contab)
+            if de_tabla > 0:
+                nuevo["tasa_tabla"] = _texto_tasa(de_tabla)
+            else:
+                nuevo.pop("tasa_tabla", None)
+        c.detraccion = nuevo
+        if nuevo != antes:
             cambiados.append(c)
     return cambiados
 

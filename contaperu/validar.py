@@ -115,6 +115,22 @@ def validar(c: Comprobante, libro: Libro) -> None:
     if c.total == 0 and not c.es_nota:
         a("TOTAL_CERO", "Importe total en cero")
 
+    # --- Detracción ------------------------------------------------------------------------------
+    # La tasa con la que va a salir, contra la de la tabla del contribuyente para ese código (la anota
+    # `detracciones.normalizar`). Si no coinciden, casi siempre es que la IA leyó mal la tasa —John,
+    # 10-sep-2026: «la IA lee un 10 % y el código es del 12 %»—. Aviso y no error: la del comprobante
+    # puede ser legítima. Desaparece en cuanto se vuelve a elegir el código, que aplica la de la tabla.
+    det = c.detraccion if isinstance(c.detraccion, dict) else None
+    if det and det.get("porcentaje") not in (None, "") and det.get("tasa_tabla") not in (None, ""):
+        try:
+            leida, de_tabla = Decimal(str(det["porcentaje"])), Decimal(str(det["tasa_tabla"]))
+        except Exception:  # noqa: BLE001 — una tasa ilegible no es motivo para romper la validación
+            leida = de_tabla = None
+        if leida is not None and leida != de_tabla:
+            a("DETRACCION_TASA_DISTINTA",
+              f"La detracción {det.get('codigo')} va al {format(leida.normalize(), 'f')} % y tu tabla dice "
+              f"{format(de_tabla.normalize(), 'f')} %: si es la de la tabla, vuelve a elegir el código")
+
     # --- Notas de crédito / débito -------------------------------------------------------
     if c.es_nota:
         if not (c.ref_tipo_cp and c.ref_numero):

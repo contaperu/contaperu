@@ -13,6 +13,10 @@ from typing import Any
 from ..modelo import Comprobante, Libro
 from ..formato import Opciones, fmt_numero
 from ..igv import tasa as tasa_de_importes
+# El monto de la detracción vive en `detracciones` desde el 10-sep-2026: una sola implementación,
+# que usan este asiento y la normalización que alimenta la pantalla.
+from ..detracciones import monto as monto_detraccion
+from ..detracciones import tasa as tasa_detraccion
 from .datos import (COLUMNAS, D2, DEFAULTS, FLAG_CONVERSION, NUMERO_DETRACCION_PENDIENTE, OPCIONES, TIPO_DOC_DETRACCION,
                     TIPO_BOLETA, TIPO_CONVERSION, TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA)
 
@@ -295,38 +299,17 @@ def tasa_igv(igv: Decimal, base_gravada: Decimal) -> Any:
 
 
 def _detraccion_cols(c: Comprobante, contab: dict, total: Decimal, es_usd: bool) -> dict[str, Any]:
-    """Columnas AI–AL de la LÍNEA DE DETRACCIÓN (421203, tipo DT) de la factura afecta:
-    código interno de la T.G. 28, tasa y el total del documento como base."""
+    """Columnas AI–AL de la LÍNEA DE DETRACCIÓN (421203, tipo DR) de la factura afecta:
+    código interno de la T.G. 28, tasa y el total del documento como base. La tasa es la misma con
+    la que se calcula el monto: la decide `detracciones.tasa`, no una segunda copia aquí."""
     if not tiene_detraccion(c) or c.tipo_cp == TIPO_HONORARIOS:
         return {}
     d = c.detraccion or {}
     sunat = str(d.get("codigo") or "").strip()
     interno = str((contab.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
-    tasa = _num(d.get("porcentaje"))
-    if tasa <= 0 and sunat:
-        tasa = _num((contab.get("detraccion_tasas") or {}).get(sunat))
+    tasa = tasa_detraccion(c, contab)
     return {"AI": interno, "AJ": float(tasa) if tasa > 0 else "",
             "AK": float(total) if es_usd else "", "AL": float(total) if not es_usd else ""}
-
-
-def _monto_detraccion(c: Comprobante, contab: dict, total: Decimal, tc, es_usd: bool) -> tuple[Decimal, Decimal]:
-    """El monto de la detracción (Excel real validado en CONCAR, 2026): total × tasa en SOLES ENTEROS —
-    la detracción se deposita en soles (4 956 × 4 % = 198.24 → 198). En dólares la base se convierte
-    con el T.C. del comprobante y el monto vuelve a dólares para la línea, porque el asiento va en US.
-    Devuelve (soles, en la moneda del comprobante); (0, 0) si no hay tasa o falta el T.C."""
-    d = c.detraccion if isinstance(c.detraccion, dict) else {}
-    sunat = str(d.get("codigo") or "").strip()
-    tasa = _num(d.get("porcentaje"))
-    if tasa <= 0 and sunat:
-        tasa = _num((contab.get("detraccion_tasas") or {}).get(sunat))
-    if tasa <= 0 or (es_usd and not tc):
-        return Decimal(0), Decimal(0)
-    tasa = Decimal(str(tasa))
-    cambio = Decimal(str(tc)) if es_usd else Decimal(1)
-    base_soles = (total * cambio).quantize(D2, rounding=ROUND_HALF_UP)
-    soles = (base_soles * tasa / Decimal(100)).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-    en_moneda = (soles / cambio).quantize(D2, rounding=ROUND_HALF_UP) if es_usd else soles
-    return soles, en_moneda
 
 
 def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprobante: str,
@@ -436,7 +419,7 @@ def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprob
     # 05-sep, que mandaba el total entero a 421203.)
     fila_det_prov = fila_det = None
     if not venta and not es_honorarios and tiene_detraccion(c):
-        _, monto_det = _monto_detraccion(c, contab, total, tc, es_usd)
+        _, monto_det = monto_detraccion(c, contab)
         if monto_det > 0:
             fila_det_prov = fila_base(monto_det)
             fila_det_prov.update({"K": cuenta_ter, "L": ruc, "N": d_gasto, "X": x_ter})
