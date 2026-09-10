@@ -12,6 +12,7 @@ from typing import Any
 
 from ..modelo import Comprobante, Libro
 from ..formato import Opciones, fmt_numero
+from ..igv import tasa as tasa_de_importes
 from .datos import (COLUMNAS, D2, DEFAULTS, FLAG_CONVERSION, NUMERO_DETRACCION_PENDIENTE, OPCIONES, TIPO_DOC_DETRACCION,
                     TIPO_BOLETA, TIPO_CONVERSION, TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA)
 
@@ -278,16 +279,19 @@ def numerar(comprobantes: list[Comprobante], contab: dict, periodo: str,
 
 # ── El asiento ───────────────────────────────────────────────────────────────
 
-def tasa_igv(igv: Decimal, base_gravada: Decimal, respaldo: Any = 18) -> Any:
-    """Columna AO: CONCAR admite 0, 10 y 18. Se deriva de IGV/base gravada (10.5 % de
-    restaurantes → 10); sin IGV va vacía (así lo lleva un registro real)."""
-    if igv <= 0:
-        return ""
-    if base_gravada <= 0:
-        return int(respaldo or 18)
-    ratio = igv / base_gravada * 100
-    return 10 if abs(ratio - Decimal("10.5")) <= Decimal("1.5") or abs(ratio - 10) <= 1 else \
-        (18 if abs(ratio - 18) <= Decimal("1.5") else int(ratio.to_integral_value(rounding=ROUND_HALF_UP)))
+def tasa_igv(igv: Decimal, base_gravada: Decimal) -> Any:
+    """Columna AO: la tasa DEL COMPROBANTE, sacada de su base y su IGV, redondeada a entero.
+
+    Nada escrito a mano (John, 10-sep-2026): la tasa es la de cada comprobante —18, 10.5 o 0— y
+    CONCAR solo admite enteros, así que se redondea al exportar (ROUND_HALF_UP, como todo el motor).
+    Hasta ese día había un 18 de respaldo para «IGV sin base» y una regla que llevaba el 10.5 al 10:
+    las dos suponían una tasa en vez de leerla. Sin IGV la celda va vacía (así la lleva un registro
+    real), y sin base de la que leerla también: ese comprobante no llega aquí, la validación lo para
+    antes con IGV_NO_CUADRA. OJO: la plantilla describe la columna con «valores validos 0,10,18»
+    (`datos.py`), así que un 10.5 % que salga 11 hay que comprobarlo con la primera importación real.
+    """
+    t = tasa_de_importes(igv, base_gravada)
+    return "" if t is None else int(t.to_integral_value(rounding=ROUND_HALF_UP))
 
 
 def _detraccion_cols(c: Comprobante, contab: dict, total: Decimal, es_usd: bool) -> dict[str, Any]:
@@ -354,7 +358,7 @@ def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprob
     # los asientos, y se descartó. Si el comprobante no trae concepto se usa el nombre de la contraparte,
     # para que ninguna fila del Excel salga sin glosa. Fijado en `test_asiento_concar.py`.
     glosa = ((c.concepto or "").strip() or (c.contraparte_nombre or "").strip()).upper()
-    tasa = tasa_igv(igv, Decimal(c.base_gravada or 0), contab.get("tasa_igv", 18))
+    tasa = tasa_igv(igv, Decimal(c.base_gravada or 0))
     tc = c.tipo_cambio if es_usd and c.tipo_cambio else None
     f_emision = c.fecha_emision
     f_venc = c.fecha_vencimiento or f_emision

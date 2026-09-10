@@ -90,12 +90,12 @@ def test_boleta_honorarios_nota_de_credito_y_tasa():
     assert debe_haber(nc) == (Decimal("118"), Decimal("118"))
     nd = concar.asiento(cp(tipo_cp="08", serie="FD01", numero="3"), CONTAB, MES, "080003")
     assert [f["N"] for f in nd] == ["D", "D", "H"]                # la nota de débito es una compra normal
-    # Tasa IGV derivada: 10.5 % de restaurantes → 10; sin IGV → vacía
+    # Tasa IGV: la del comprobante, redondeada a entero (10.5 % → 11, John 10-sep-2026); sin IGV → vacía
     rest = concar.asiento(cp(base_gravada="100", igv="10.5", total="110.5"), CONTAB, MES, "080004")
-    assert rest[0]["AO"] == 10 and rest[1]["O"] == 10.5
+    assert rest[0]["AO"] == 11 and rest[1]["O"] == 10.5
     inaf = concar.asiento(cp(base_gravada="0", igv="0", inafecto="118"), CONTAB, MES, "080005")
     assert len(inaf) == 2 and inaf[0]["AO"] == ""
-    assert concar.tasa_igv(Decimal("18"), Decimal("0")) == 18      # base gravada 0 con IGV: respaldo
+    assert concar.tasa_igv(Decimal("18"), Decimal("0")) == ""      # IGV sin base: no hay tasa que leer, y no se inventa
     sin_venc = concar.asiento(cp(fecha_vencimiento=None), CONTAB, MES, "080001")
     assert sin_venc[0]["U"] == EMISION                           # sin vencimiento → la de emisión
     sin_concepto = concar.asiento(cp(concepto=""), CONTAB, MES, "080001")

@@ -4,7 +4,24 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [0.4.0] — 2026-09-10
+
+### Cambiado
+- **La tasa del IGV ya no se supone en ninguna parte: sale de cada comprobante** (decisión de John,
+  10-sep-2026: puede ser 18, 10.5 o 0). `asiento.tasa_igv()` —la columna AO del Excel de CONCAR— es
+  ahora la tasa del comprobante (IGV ÷ base) redondeada a entero, porque CONCAR solo admite enteros.
+  Desaparecen el **18 de respaldo** para un IGV sin base (ese comprobante no llega al asiento: la
+  validación lo para con `IGV_NO_CUADRA`) y la regla que llevaba el **10.5 al 10**; las dos suponían
+  una tasa en vez de leerla. Sale también `tasa_igv` de `asiento.DEFAULTS`. **Cambio de
+  comportamiento:** un comprobante al 10.5 % sale ahora con AO = 11, no 10 — y la plantilla describe
+  la columna con «valores validos 0,10,18», así que hay que comprobarlo con la primera importación real
+  que lo traiga. Hoy no hay ninguno en producción: los 99 comprobantes con IGV están al 18 %.
+
+### Añadido
+- **`contaperu.igv`**: `tasa(igv, base)` y `aplicar_igv(comprobante, igv)`, el recálculo de importes
+  cuando se escribe el IGV que trae el papel, sin tocar el total. Con IGV el comprobante es afecto y
+  la base se deduce; sin IGV cae en inafecto. Lo consume el portal, que hasta ahora hacía esta cuenta
+  en el navegador dividiendo entre 1.18.
 
 ### Corregido
 - **La versión se escribía a mano en dos sitios y se separaron.** Llegaron a convivir **tres**:

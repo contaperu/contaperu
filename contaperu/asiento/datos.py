@@ -131,7 +131,6 @@ DEFAULTS: dict[str, Any] = {
     # tiene seleccionado Tipo de Anexo Referencia» — escribirla donde no toca puede hacer que
     # rechace la importación. Es INDEPENDIENTE de `cc_en_anexo_auxiliar`, que es la X del tercero.
     "cc_referencia_en_x": False,
-    "tasa_igv": 18,   # la tasa se deriva de IGV/base; esto es el respaldo si la base gravada es 0
 }
 ETIQUETAS_SUB_DIARIO = {"05": "Ventas", "10": "Facturas con detracción", "11": "Facturas, tickets y notas",
                         "13": "Boletas de venta", "15": "Recibos por honorarios"}
