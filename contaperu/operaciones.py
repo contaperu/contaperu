@@ -19,7 +19,8 @@ from . import detracciones, drivers, generar as gen, pcge, partida_doble, valida
 from .lectores import archivos as lectura_archivos, sire_txt
 from .modelo import Comprobante, Libro
 
-PE_LEDGER = "0.1"
+# Ojo: NO se redefine aquí. Era la segunda copia del mismo número.
+from ._version import PE_LEDGER  # noqa: E402  (constante, no un módulo)
 
 # Tope de seguridad. Un mes de una PYME son decenas o cientos de comprobantes; muchos miles en
 # una sola llamada es casi siempre un error de quien llama, y conviene decirlo en vez de

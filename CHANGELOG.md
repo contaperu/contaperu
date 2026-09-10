@@ -6,6 +6,34 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Corregido
+- **La versión se escribía a mano en dos sitios y se separaron.** Llegaron a convivir **tres**:
+  `0.3.0` en `pyproject.toml`, `0.2.0` en `contaperu/__init__.py` y `0.1.0` en la metadata de la
+  instalación editable — y la del medio era la que el servidor MCP le decía a su cliente al
+  presentarse, y la que imprimía `contaperu --version`. Ahora se escribe **una sola vez**, en
+  `contaperu/_version.py`, y `pyproject.toml` la lee de ahí (`[tool.hatch.version]`). No al revés:
+  leerla con `importlib.metadata` parece más limpio pero en una instalación editable esa metadata se
+  congela el día que se instaló — así apareció el `0.1.0`. `PE_LEDGER` también estaba duplicado
+  (`__init__.py` y `operaciones.py`) y ahora sale del mismo módulo.
+- **La línea de comandos no pasaba por la fachada.** No importaba `operaciones` ni una vez:
+  construía `Libro` y `Comprobante` por su cuenta y serializaba el documento a mano, así que emitía
+  un JSON **sin la clave `pe_ledger`** mientras el servidor MCP sí la ponía — el mismo comprobante,
+  dos documentos distintos según la puerta, hasta el punto de que un test tenía que añadir la clave
+  para poder validar contra el esquema. Ahora las dos puertas leen y escriben por `operaciones`, y
+  `desde-json` gana de paso lo que se saltaba: el motivo legible cuando falta el bloque `libro` y el
+  tope de 5.000 comprobantes.
+
+### Añadido
+- **`tests/test_frontera.py`** — la frontera deja de sostenerse por convención. Comprueba que el
+  núcleo no importa ninguna puerta ni el SDK del protocolo, que no sale a la red ni lee variables de
+  entorno ni mira el reloj, que cada puerta pasa por la fachada, y que **las dos puertas producen el
+  mismo documento para el mismo XML** (normalizando `archivo_nombre`, que es procedencia: el CLI
+  recibe una ruta y el MCP bytes).
+- **`tests/conftest.py`** — los tests corren **sin red de verdad**. Antes era un comentario en el
+  YAML del CI; ahora un candado bloquea toda conexión que no sea a localhost y hay un test que
+  comprueba que el candado muerde, con una IP y no con un nombre — con un nombre, la resolución DNS
+  falla antes en una máquina sin red y el test pasaría en verde sin ejercitar nada.
+
 ### Cambiado
 - **La línea de la detracción se calca de un Excel que CONCAR ACEPTÓ** (set-2026), no del borrador de
   la plantilla. El tipo de documento pasa de **`DT` a `DR`**: el `DT` anterior nunca llegó a

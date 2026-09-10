@@ -17,9 +17,14 @@ import sys
 from pathlib import Path
 
 from . import comparar_sire
-from . import __version__, drivers, generar as gen, validar
+from . import __version__, drivers, generar as gen, operaciones, validar
 from .lectores import archivos
-from .modelo import Comprobante, Libro
+from .modelo import Libro
+
+# Esta puerta pasa por `operaciones` para todo lo que la fachada sabe hacer —leer un documento y
+# escribirlo— y baja al núcleo solo donde la fachada no aplica: `gen.generar` devuelve los BYTES del
+# archivo, que es lo que aquí hay que escribir en disco, mientras `operaciones.exportar` los
+# devuelve en base64 porque su contrato es JSON. Codificar para decodificar sería peor.
 
 
 def _tabla(comprobantes: list[Comprobante]) -> str:
@@ -82,9 +87,12 @@ def cmd_generar(args: argparse.Namespace) -> int:
     print()
     if args.json:
         Path(args.json).parent.mkdir(parents=True, exist_ok=True)
+        # `operaciones.documento` y no un dict a mano: era la fuente de un desajuste real — este
+        # comando emitía un JSON SIN la clave `pe_ledger`, y el golden de los tests tenía que
+        # añadírsela para poder validar contra el esquema del estándar.
         Path(args.json).write_text(
-            json.dumps({"libro": libro.__dict__, "comprobantes": [c.a_dict() for c in comprobantes]},
-                       ensure_ascii=False, indent=1), encoding="utf-8")
+            json.dumps(operaciones.documento(libro, comprobantes), ensure_ascii=False, indent=1),
+            encoding="utf-8")
         print(f"Datos estructurados → {args.json}")
     if not comprobantes:
         print("No hay comprobantes que exportar.", file=sys.stderr)
@@ -94,8 +102,15 @@ def cmd_generar(args: argparse.Namespace) -> int:
 
 def cmd_desde_json(args: argparse.Namespace) -> int:
     datos = json.loads(Path(args.json).read_text(encoding="utf-8"))
-    libro = Libro(**datos["libro"])
-    comprobantes = [Comprobante.de_dict(d) for d in datos["comprobantes"]]
+    # Por la fachada: así este comando gana lo que antes se saltaba al construir los objetos a mano
+    # —el motivo legible cuando falta el bloque `libro`, y el tope de 5.000 comprobantes— y lee el
+    # documento con las MISMAS reglas que el servidor MCP.
+    try:
+        libro = operaciones.libro_de(datos)
+        comprobantes = operaciones.comprobantes_de(datos)
+    except operaciones.DocumentoInvalido as e:
+        print(f"El archivo no es un documento pe-ledger válido: {e}", file=sys.stderr)
+        return 2
     if args.revisar:
         validar.revisar(comprobantes, libro)
         print(_tabla(comprobantes))

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "contaperu"
-version = "0.3.0"
+dynamic = ["version"]          # se lee de contaperu/_version.py (ver [tool.hatch.version])
 description = "Nucleo contable abierto del Peru: lee comprobantes de SUNAT, arma la partida doble y exporta a los ERP tradicionales. Sin estado, sin base de datos."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -42,6 +42,11 @@ Homepage = "https://github.com/contaperu/contaperu"
 Repository = "https://github.com/contaperu/contaperu"
 Issues = "https://github.com/contaperu/contaperu/issues"
 Changelog = "https://github.com/contaperu/contaperu/blob/main/CHANGELOG.md"
+
+# La versión se escribe UNA vez, en el código, y el empaquetado la lee de ahí. Al revés no
+# funciona: `importlib.metadata` en una instalación editable devuelve la del día que se instaló.
+[tool.hatch.version]
+path = "contaperu/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["contaperu"]

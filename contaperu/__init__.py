@@ -27,8 +27,9 @@ from . import (asiento, catalogos, detracciones, drivers, formato, generar, lect
                operaciones, partida_doble, pcge, validar)
 from .modelo import Comprobante, Libro, Observacion
 
-__version__ = "0.2.0"
-PE_LEDGER = "0.1"          # versión del estándar de datos, distinta de la de la librería
+# Los dos números viven en `_version.py`, que es de donde los lee también `pyproject.toml`:
+# escribirlos a mano en dos sitios ya los separó una vez (ver el docstring de ese módulo).
+from ._version import PE_LEDGER, __version__
 
 __all__ = [
     "Comprobante", "Libro", "Observacion",
