@@ -18,6 +18,9 @@ jobs:
     permissions:
       security-events: write   # para publicar los hallazgos en la pestana Security
       contents: read
+      actions: read            # la accion consulta la API de Actions para resolver su propia
+                               # ejecucion; sin esto responde "Resource not accessible by
+                               # integration" y el analisis ni siquiera empieza.
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: github/codeql-action/init@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3
