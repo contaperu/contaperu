@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Las dependencias del paquete. El nucleo solo tiene una (defusedxml), pero los
+  # extras y las herramientas de desarrollo tambien envejecen.
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Las propias acciones del CI: van fijadas por SHA, y esto es lo que avisa
+  # cuando ese SHA se queda atras.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

@@ -1,0 +1,44 @@
+name: publicar en PyPI
+
+# Se dispara al publicar una release en GitHub (no en cada push a main).
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - run: pip install build
+      - run: python -m build
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: paquete
+          path: dist/
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    # El entorno permite exigir una aprobacion manual antes de publicar:
+    # se configura en Settings -> Environments -> pypi.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/contaperu/
+    permissions:
+      # OIDC: PyPI verifica que el paquete sale de ESTE repositorio y de este
+      # workflow. No hay ningun token guardado en los secrets, asi que no hay
+      # ninguno que robar ni que rotar. Se llama "trusted publishing".
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: paquete
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
