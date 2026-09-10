@@ -437,8 +437,20 @@ def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprob
             fila_det_prov = fila_base(monto_det)
             fila_det_prov.update({"K": cuenta_ter, "L": ruc, "N": d_gasto, "X": x_ter})
             fila_det = fila_base(monto_det)
+            # Z/AA/AB dicen DE QUÉ DOCUMENTO sale esta detracción, y en una factura ese documento es
+            # el propio comprobante: es lo que CONCAR aceptó (Z=FT, AA=E001-871, AB=la emisión).
+            # En una NOTA, `fila_base` ya dejó ahí la referencia del documento que la nota corrige y
+            # se RESPETA: no hay ningún archivo validado que diga que deba ser otra, y cambiarla
+            # sería inventarse una regla. Pendiente de comprobar con una nota de crédito real.
+            if not fila_det.get("Z"):
+                fila_det.update({"Z": tipo_concar(c, contab), "AA": serie_numero[:20], "AB": f_emision})
+            # El área NO se corta a los 3 caracteres que pide la plantilla, y es deliberado: cortar
+            # `9001` a `900` mandaría el apunte a OTRA área en silencio. La glosa se corta porque
+            # sobra texto; un código no, porque sobraría significado. Entero, CONCAR lo rechaza y se ve.
             fila_det.update({"K": resolve_cxp_detraccion_account(contab["cuentas"], moneda), "L": ruc, "N": d_prov,
-                             "R": TIPO_DOC_DETRACCION, "S": NUMERO_DETRACCION_PENDIENTE,
+                             "R": str(contab.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
+                             "S": NUMERO_DETRACCION_PENDIENTE,
+                             "V": str(contab.get("detraccion_area") or ""),
                              "W": f"DETRACCION - {glosa}"[:30], "M": "", "X": "",
                              **_detraccion_cols(c, contab, total, es_usd)})
     if venta and not invierte:

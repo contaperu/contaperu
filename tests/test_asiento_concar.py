@@ -207,7 +207,7 @@ def test_el_centro_de_referencia_en_la_X_del_gasto():
     assert (sin["M"], sin["X"]) == ("", "")
     # La línea de la detracción sigue limpia aunque la referencia esté encendida.
     det = concar.asiento(cp(cuenta_contable="603201", detraccion={"codigo": "027", "porcentaje": 4}), ref, MES, "100001")
-    assert (det[-1]["R"], det[-1]["M"], det[-1]["X"]) == ("DT", "", "")
+    assert (det[-1]["R"], det[-1]["M"], det[-1]["X"]) == ("DR", "", "")
 
 
 def test_el_centro_solo_es_obligatorio_donde_se_escribe():
@@ -240,7 +240,7 @@ def test_factura_con_detraccion_va_al_sub_diario_10():
     assert (det_prov["K"], det_prov["L"], det_prov["N"], det_prov["O"], det_prov["R"], det_prov["S"], det_prov["X"]) == \
         ("421201", "20607777773", "D", 14.0, "FT", "F001-123", "OBRA01")
     assert (det_["K"], det_["L"], det_["N"], det_["O"], det_["Q"]) == ("421203", "20607777773", "H", 14.0, 14.0)   # 118 × 12 % = 14.16 → 14
-    assert (det_["R"], det_["S"], det_["M"], det_["X"]) == ("DT", "9999999999", "", "")
+    assert (det_["R"], det_["S"], det_["M"], det_["X"]) == ("DR", "9999999999", "", "")
     assert det_["W"] == ("DETRACCION - " + gasto["F"])[:30]
     assert (det_["AI"], det_["AJ"], det_["AK"], det_["AL"], det_["AO"]) == ("03701", 12.0, "", 118.0, 18)
     assert (gasto["AI"], igv["AI"], cxp["AI"]) == ("", "", "") and debe_haber(filas) == (Decimal("132"), Decimal("132"))
@@ -269,8 +269,78 @@ def test_factura_con_detraccion_va_al_sub_diario_10():
     assert concar.sub_diario(c, contab) == "11" and [f["B"] for f in en11] == ["11"] * 5 and en11[4]["AI"] == "03799"
     # El recibo por honorarios nunca lleva detracción
     rh = cp(tipo_cp="02", detraccion=det)
-    assert concar.sub_diario(rh, CONTAB) == "15" and all(f["AI"] == "" and f["R"] != "DT" for f in concar.asiento(rh, CONTAB, MES, "080001"))
+    assert concar.sub_diario(rh, CONTAB) == "15" and all(f["AI"] == "" and f["R"] != "DR" for f in concar.asiento(rh, CONTAB, MES, "080001"))
     assert not concar.tiene_detraccion(cp(detraccion={"codigo": "", "porcentaje": "0"})) and not concar.tiene_detraccion(cp(detraccion=None))
+
+
+def test_el_codigo_de_area_es_de_la_empresa_y_solo_va_en_la_detraccion():
+    """La columna V (Tabla General 26 de CONCAR) sale del Excel que un CONCAR real aceptó.
+
+    Es un número PROPIO de cada empresa, no una constante contable, así que sale vacío de fábrica:
+    ponerle uno por defecto metería los apuntes de todo el mundo en un área que nadie eligió. Y va
+    en la línea de la detracción y en ninguna otra — en el archivo validado las otras cuatro la
+    tenían en blanco.
+    """
+    c = cp(detraccion={"codigo": "027", "porcentaje": "4"})
+
+    # Sin configurar: nada cambia para quien ya exportaba.
+    assert [f["V"] for f in concar.asiento(c, CONTAB, MES, "080001")] == [""] * 5
+
+    con_area = concar.config_de({"concar": {"detraccion_area": "900"}})
+    filas = concar.asiento(c, con_area, MES, "080001")
+    assert [f["V"] for f in filas] == ["", "", "", "", "900"]
+    # Y no se cuela en el resto del asiento ni en un comprobante sin detracción.
+    sin_det = concar.asiento(cp(), con_area, MES, "080001")
+    assert len(sin_det) == 3 and [f["V"] for f in sin_det] == [""] * 3
+
+
+def test_el_codigo_de_area_no_se_recorta():
+    """La plantilla dice «3 Caracteres», pero recortar un CÓDIGO es peor que pasarse.
+
+    `9001` recortado a `900` manda el apunte a OTRA área **en silencio** y nadie se entera hasta que
+    cuadran el área a fin de mes. Entero, CONCAR lo rechaza en la importación y se ve al momento.
+    Es la diferencia con la glosa, que sí se corta: ahí sobra texto, aquí sobraría significado.
+    """
+    c = cp(detraccion={"codigo": "027", "porcentaje": "4"})
+    filas = concar.asiento(c, concar.config_de({"concar": {"detraccion_area": "9001"}}), MES, "080001")
+    assert filas[-1]["V"] == "9001"
+
+
+def test_el_tipo_de_documento_de_la_detraccion_es_configurable():
+    """`DR` es lo que aceptó un CONCAR real, pero la Tabla General 06 la numera cada contribuyente."""
+    c = cp(detraccion={"codigo": "027", "porcentaje": "4"})
+    assert concar.asiento(c, CONTAB, MES, "080001")[-1]["R"] == "DR"
+    otro = concar.config_de({"concar": {"detraccion_tipo_doc": "DT"}})
+    assert concar.asiento(c, otro, MES, "080001")[-1]["R"] == "DT"
+
+
+def test_la_detraccion_referencia_al_documento_del_que_sale():
+    """Z/AA/AB en la línea de la detracción: de qué documento sale este depósito.
+
+    En una factura ese documento es el propio comprobante, y es lo que CONCAR aceptó. Las otras
+    cuatro líneas siguen sin referencia: en el archivo validado estaban en blanco.
+    """
+    filas = concar.asiento(cp(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080001")
+    assert [f["Z"] for f in filas] == ["", "", "", "", "FT"]
+    assert [f["AA"] for f in filas] == ["", "", "", "", "F001-123"]
+    assert [f["AB"] for f in filas] == ["", "", "", "", date(2026, 8, 11)]
+
+
+def test_una_nota_con_detraccion_conserva_la_referencia_a_la_factura():
+    """El caso que la regla nueva podía pisar sin querer.
+
+    Una nota de crédito ya llevaba en Z/AA/AB la factura que corrige, en TODAS sus líneas. La
+    detracción no se la quita: no hay ningún archivo validado que diga que una nota deba referenciar
+    a sí misma, y cambiarlo sería inventarse una regla contable. Queda pendiente de comprobar con
+    una nota de crédito real que entre en CONCAR.
+    """
+    nc = cp(tipo_cp="07", serie="FC01", numero="9", detraccion={"codigo": "027", "porcentaje": "4"},
+            ref_tipo_cp="01", ref_serie="F001", ref_numero="123", ref_fecha="2026-08-10")
+    filas = concar.asiento(nc, CONTAB, MES, "080001")
+    assert len(filas) == 5 and filas[-1]["R"] == "DR"
+    # La referencia es la FACTURA (F001-123), no la propia nota (FC01-9), en las cinco líneas.
+    assert [f["AA"] for f in filas] == ["F001-123"] * 5
+    assert filas[-1]["Z"] == "FT" and filas[-1]["AB"] == date(2026, 8, 10)
 
 
 def test_asiento_con_detraccion_calca_un_excel_real():
@@ -289,13 +359,19 @@ def test_asiento_con_detraccion_calca_un_excel_real():
     assert col("M") == ["CC-64", "", "", "", ""] and col("X") == ["", "", "CC-64", "CC-64", ""]
     assert col("N") == ["D", "D", "H", "D", "H"]
     assert col("O") == [4200.0, 756.0, 4956.0, 198.0, 198.0] and col("Q") == col("O") and col("P") == [""] * 5
-    assert col("R") == ["FT", "FT", "FT", "FT", "DT"] and col("S") == ["E001-871"] * 4 + ["9999999999"]
+    assert col("R") == ["FT", "FT", "FT", "FT", "DR"] and col("S") == ["E001-871"] * 4 + ["9999999999"]
     assert col("D") == [date(2026, 8, 10)] * 5 and col("T") == [date(2026, 8, 10)] * 5 and col("U") == [date(2026, 8, 27)] * 5
     assert col("W") == ["SERVICIO DE TRANSPORTE DE MATE", "IGV - SERVICIO DE TRANSPORTE D", "SERVICIO DE TRANSPORTE DE MATE",
                         "SERVICIO DE TRANSPORTE DE MATE", "DETRACCION - SERVICIO DE TRANS"]
     assert col("AI") == ["", "", "", "", "02702"] and col("AJ") == ["", "", "", "", 4.0]
     assert col("AL") == ["", "", "", "", 4956.0] and col("AK") == [""] * 5
     assert col("AO") == [18] * 5 and debe_haber(filas) == (Decimal("5154"), Decimal("5154"))
+    # La referencia: solo la línea de la detracción dice de qué documento sale, y ese documento es
+    # la propia factura. Las otras cuatro no la llevan — así estaba en el archivo validado.
+    assert col("Z") == ["", "", "", "", "FT"] and col("AA") == ["", "", "", "", "E001-871"]
+    assert col("AB") == ["", "", "", "", date(2026, 8, 10)]
+    # Y el área sale VACÍA mientras el contribuyente no ponga la suya: `CONTAB` no la configura.
+    assert col("V") == [""] * 5
 
 
 def test_asiento_de_ventas_espejo_del_skill():

@@ -67,4 +67,4 @@ def test_una_detraccion_limpiada_no_llega_al_asiento():
     filas = asi.asiento(c, dict(CONTAB, cuentas=dict(CONTAB["cuentas"], gasto="659999")),
                         (__import__("datetime").date(2026, 8, 1), __import__("datetime").date(2026, 8, 31)),
                         "080001")
-    assert len(filas) == 3 and all(f["R"] != "DT" for f in filas)
+    assert len(filas) == 3 and all(f["R"] != "DR" for f in filas)

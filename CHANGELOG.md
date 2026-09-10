@@ -6,7 +6,27 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Cambiado
+- **La línea de la detracción se calca de un Excel que CONCAR ACEPTÓ** (set-2026), no del borrador de
+  la plantilla. El tipo de documento pasa de **`DT` a `DR`**: el `DT` anterior nunca llegó a
+  importarse en un CONCAR de verdad. **Es un cambio de comportamiento** — quien ya exporte facturas
+  con detracción verá `DR` donde antes veía `DT`—, y por eso la sigla queda además configurable
+  (`detraccion_tipo_doc`): la Tabla General 06 la numera cada contribuyente.
+- La misma línea estrena la **referencia al documento del que sale la detracción** (columnas Z, AA y
+  AB: tipo, serie-número y fecha de emisión del comprobante). Es lo que traía el archivo validado, y
+  solo la lleva esa línea: las otras cuatro del asiento siguen sin referencia. **En una nota de
+  crédito o débito no se pisa la que ya había** —la del documento que la nota corrige—, porque no
+  hay ningún archivo validado que diga que deba ser otra; queda pendiente de comprobar con una nota
+  real.
+
 ### Añadido
+- **`detraccion_area`**: el código de área (Tabla General 26 de CONCAR) de la línea de la detracción,
+  columna V. Va **vacío de fábrica** a propósito: es un número propio de cada empresa, no una
+  constante contable, y ponerle uno por defecto metería los apuntes de todo el mundo en un área que
+  nadie eligió. **No se recorta a los 3 caracteres** que pide la plantilla: cortar `0612` a `061`
+  mandaría el apunte a otra área en silencio, mientras que entero CONCAR lo rechaza y se ve. Es la
+  diferencia con la glosa, que sí se corta — ahí sobra texto, aquí sobraría significado.
+- **`detraccion_tipo_doc`**, la sigla de arriba, con `DR` de serie.
 - **El catálogo oficial del PCGE 2026**: `contaperu/pcge/catalogo2026.json`, 1615 cuentas con su
   nombre y la **página impresa** de la norma que lo dice (77 madre · 311 de tres dígitos · 641 de
   cuatro · 586 de cinco). Es el dato que le faltaba al motor: sin él, quien registra una compra

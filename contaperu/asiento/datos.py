@@ -17,6 +17,14 @@ OPCIONES = Opciones(fecha="DD/MM/AAAA", extension=".xlsx")
 FORMATOS = {"compra": "concar_xlsx", "venta": "concar_xlsx"}
 CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
+# La línea de la detracción, calcada del Excel real que CONCAR ACEPTÓ (set-2026): tipo de documento
+# **DR** y el comodín del número —la constancia del depósito no se conoce al provisionar, se paga
+# días después—. El `DT` que hubo hasta entonces salía del borrador de la plantilla y nunca llegó a
+# importarse en un CONCAR de verdad; el archivo validado dice DR. Es la sigla de la Tabla General 06,
+# que cada contribuyente numera a su gusto: por eso `detraccion_tipo_doc` puede cambiarla.
+TIPO_DOC_DETRACCION = "DR"
+NUMERO_DETRACCION_PENDIENTE = "9999999999"
+
 # ── Valores por defecto (manual de asientos de referencia; sobreescribibles por RUC) ──
 # `cuentas.gasto` va VACÍO a propósito: en la práctica es el comodín "63/65", que no es
 # una cuenta. Aquí la pone la fila (`cuenta_contable`) o el RUC (`config.concar.cuentas.gasto`).
@@ -77,6 +85,14 @@ DEFAULTS: dict[str, Any] = {
     # (orientacion.sunat.gob.pe), cruzados POR NOMBRE con el Catálogo 54: en esa página la columna
     # "código" es el numeral dentro del anexo, no el código del comprobante (ahí "14" es Leche,
     # que en el catálogo es 023, mientras 014 son Carnes). Cruzarlo por número sale mal.
+    # La sigla de la Tabla General 06 con la que el sistema del contribuyente reconoce esta línea.
+    # `DR` es la que aceptó un CONCAR real; se deja editable porque la T.G. 06 la numera cada empresa.
+    "detraccion_tipo_doc": TIPO_DOC_DETRACCION,
+    # El área (Tabla General 26) a la que CONCAR carga la línea de la detracción. **Vacía a
+    # propósito**: es un número propio de cada empresa, no una constante contable, y ponerle uno de
+    # fábrica metería los apuntes de todo el mundo en un área que nadie eligió. Solo se escribe en
+    # la línea de la detracción, que es la única que la llevaba en el archivo validado.
+    "detraccion_area": "",
     "detraccion_tasas": {"008": 4, "009": 10, "010": 15, "012": 12, "019": 10, "020": 12,
                          "021": 10, "022": 12, "024": 10, "025": 10, "026": 10, "027": 4,
                          "030": 4, "037": 12},
@@ -123,10 +139,6 @@ TIPO_HONORARIOS, TIPO_BOLETA, TIPOS_INVIERTEN, TIPOS_NOTA = "02", "03", ("07",),
 
 TIPO_CONVERSION = "V"       # CONCAR busca el T.C. en su tabla; con T.C. en G pasa a 'C' (especial)
 FLAG_CONVERSION = "S"
-# La línea de la detracción (Excel real validado en CONCAR, 2026): tipo de documento DT y el comodín del
-# número — la constancia del depósito no se conoce al provisionar (se paga días después).
-TIPO_DOC_DETRACCION = "DT"
-NUMERO_DETRACCION_PENDIENTE = "9999999999"
 COLUMNAS_IMPORTE = ("O", "P", "Q", "AD", "AE", "AK", "AL")
 COLUMNAS_FECHA = ("D", "J", "T", "U", "AB", "AH")
 COLUMNAS_TEXTO = ("B", "C", "E", "F", "H", "I", "K", "L", "M", "N", "R", "S", "V", "W", "X", "Y", "Z", "AA", "AI")
