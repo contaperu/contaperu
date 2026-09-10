@@ -1,0 +1,25 @@
+name: Algo se rompe
+description: Un fallo del programa — excepción, cuelgue, salida corrupta
+labels: ["error"]
+body:
+  - type: textarea
+    id: pasa
+    attributes:
+      label: Qué pasa
+      description: Incluye el traceback completo si lo hay.
+    validations:
+      required: true
+  - type: textarea
+    id: reproducir
+    attributes:
+      label: Cómo reproducirlo
+      description: Los pasos mínimos. Con datos anonimizados.
+    validations:
+      required: true
+  - type: input
+    id: entorno
+    attributes:
+      label: Versión y Python
+      placeholder: "contaperu 0.1.0 · Python 3.12 · Windows 11"
+    validations:
+      required: true

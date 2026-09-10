@@ -1,5 +1,10 @@
 # ContaPerú
 
+[![tests](https://github.com/Zetrix1111/open-contaperu/actions/workflows/tests.yml/badge.svg)](https://github.com/Zetrix1111/open-contaperu/actions/workflows/tests.yml)
+[![PyPI](https://img.shields.io/pypi/v/contaperu.svg)](https://pypi.org/project/contaperu/)
+[![Python](https://img.shields.io/pypi/pyversions/contaperu.svg)](https://pypi.org/project/contaperu/)
+[![licencia MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)
+
 **Núcleo contable abierto del Perú.** Lee los comprobantes que emite SUNAT, arma la partida doble y los
 exporta al formato que pide cada sistema contable. Sin base de datos, sin estado, sin llamadas a la red:
 entra un JSON, sale un JSON o un archivo.
@@ -210,7 +215,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-146 tests, sin red y sin credenciales.
+148 tests, sin red y sin credenciales.
 
 Lo más valioso que puedes aportar es un **driver de salida** para un ERP que hoy no está — ver
 [CONTRIBUTING.md](CONTRIBUTING.md) — o un **caso real** que el motor resuelva mal: un asiento que tu sistema
@@ -218,3 +223,19 @@ rechazó, un comprobante raro que se leyó torcido.
 
 Regla del proyecto: **ninguna regla contable entra sin una fuente.** La norma, la resolución o el archivo
 real que la justifica va al lado, en el código.
+
+---
+
+## In English
+
+**ContaPerú is the open accounting core for Peru.** It reads the electronic receipts issued through
+SUNAT (Peru's tax authority), builds the double-entry journal and exports it to the format each
+local accounting system expects — CONCAR, the SIRE tax filing, or plain CSV. No database, no state,
+no network calls: JSON in, JSON or a file out.
+
+It also defines **`pe-ledger`**, an open interchange format for Peruvian accounting documents
+(`estandar/`), with a formal JSON Schema. The rules aren't designed on paper: they come from real
+files that production accounting systems and SUNAT actually accepted.
+
+Install with `pip install contaperu`. The docs are in Spanish, because that's the language of the
+domain and of the people who use it — but issues and pull requests in English are welcome.

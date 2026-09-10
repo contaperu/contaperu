@@ -18,6 +18,7 @@ classifiers = [
   "Natural Language :: Spanish",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Office/Business :: Financial :: Accounting",
 ]
 
@@ -35,8 +36,12 @@ dev = ["contaperu[todo]", "pytest>=8,<9"]
 contaperu = "contaperu.cli:main"
 contaperu-mcp = "contaperu.servidor_mcp:main"
 
+# PyPI solo pone icono a las claves que reconoce, y en ingles.
 [project.urls]
-Repositorio = "https://github.com/Zetrix1111/open-contaperu"
+Homepage = "https://github.com/Zetrix1111/open-contaperu"
+Repository = "https://github.com/Zetrix1111/open-contaperu"
+Issues = "https://github.com/Zetrix1111/open-contaperu/issues"
+Changelog = "https://github.com/Zetrix1111/open-contaperu/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["contaperu"]
@@ -47,7 +52,7 @@ packages = ["contaperu"]
 "estandar/pe-ledger.schema.json" = "contaperu/estandar/pe-ledger.schema.json"
 
 [tool.hatch.build.targets.sdist]
-include = ["contaperu", "estandar", "tests", "README.md", "LICENSE"]
+include = ["contaperu", "estandar", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

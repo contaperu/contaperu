@@ -1,0 +1,37 @@
+name: Una regla contable está mal
+description: El motor resuelve un caso distinto a como lo espera tu sistema o la norma
+labels: ["regla contable"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Este es el issue que más vale del proyecto: un caso real que el motor resuelve mal.
+        **Anonimiza todo** — ni RUC de empresas que existen, ni razones sociales reales.
+  - type: textarea
+    id: comprobante
+    attributes:
+      label: El comprobante (anonimizado)
+      description: Tipo, serie, importes, moneda y lo que tenga de particular (detracción, nota de crédito, honorarios…). Pega el XML o el JSON si puedes.
+      placeholder: "01 · F001-123 · PEN · base 100.00 · IGV 18.00 · total 118.00 · con detracción 12 %"
+    validations:
+      required: true
+  - type: textarea
+    id: produjo
+    attributes:
+      label: Lo que el motor produjo
+      description: Las líneas del asiento, la fila del TXT o el error que devolvió.
+    validations:
+      required: true
+  - type: textarea
+    id: esperaba
+    attributes:
+      label: Lo que tu sistema esperaba
+      description: Y, si puedes, **la fuente**: la norma, la resolución o el archivo real que lo respalda. Ninguna regla entra aquí sin fuente, y para corregir una vale lo mismo.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión
+      description: "`contaperu --version`"
+      placeholder: "0.1.0"
