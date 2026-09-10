@@ -6,6 +6,37 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Añadido
+- **El catálogo oficial del PCGE 2026**: `contaperu/pcge/catalogo2026.json`, 1615 cuentas con su
+  nombre y la **página impresa** de la norma que lo dice (77 madre · 311 de tres dígitos · 641 de
+  cuatro · 586 de cinco). Es el dato que le faltaba al motor: sin él, quien registra una compra
+  escribe `631101` y no hay nada contra lo que contrastarlo.
+- `contaperu/pcge/catalogo.py` — `existe()`, `nombre_de()`, `buscar()` y **`resolver()`**. La regla
+  que gobierna el módulo: **una cuenta que no está en el catálogo NO es un error**. El PCGE llega a
+  cinco dígitos y cada empresa abre sus divisionarias debajo, así que `resolver()` devuelve la
+  cuenta exacta o **su antecesora más larga** —de `603201` sale `6032 Suministros`—, que es
+  información útil y no un rechazo. Medido contra un plan de cuentas real en producción: **137 de
+  137 cuentas son de seis dígitos, ninguna existe literalmente en la norma y las 137 resuelven a su
+  madre**. Un `existe()` que bloqueara habría bloqueado el plan entero.
+- `herramientas/extraer_pcge2026.py`, que genera ese JSON desde el PDF oficial. El PDF **no entra
+  al repositorio** (2 MB y no es nuestro); entra el extracto y el script con el que se hizo, para
+  poder rehacerlo y auditarlo cuando salga una modificatoria.
+- En el servidor MCP, el recurso **`contaperu://catalogos/pcge2026`** y la herramienta
+  **`buscar_cuenta_pcge`** (por nombre o por código). Son **diez** herramientas ahora.
+
+### Cambiado
+- `adaptar_pcge2026` sigue con la tabla vacía, pero ahora dice **por qué**: este proyecto nace en
+  2026 y trabaja con el PCGE 2026 desde el primer asiento, así que no hay plan anterior del que
+  traducir. No es una tarea pendiente — es el riel para el día que una modificatoria sustituya
+  cuentas, y ese día entrará como datos con su cita, no como código.
+
+### Corregido
+- Dentro de `contaperu.pcge` conviven **dos `cargar()`**: el de la tabla de adaptación, que devuelve
+  `(mapeos, datos)`, y el del catálogo, que devuelve el diccionario de la norma. El servidor MCP
+  llamaba al que no era y servía una lista donde el cliente esperaba un objeto — no reventaba,
+  devolvía otra cosa. Ahora el submódulo `catalogo` se exporta con nombre propio y las llamadas se
+  escriben `pcge.catalogo.…`; lo vigila el test que lee el recurso por el protocolo.
+
 ## [0.2.0] — 2026-09-10
 
 **La primera versión pública.** La 0.1.0 existió pero nunca salió del disco: se instaló como wheel
