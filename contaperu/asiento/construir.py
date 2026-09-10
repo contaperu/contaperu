@@ -183,6 +183,30 @@ def cuenta_venta(c: Comprobante, contab: dict) -> str:
     return (c.cuenta_contable or "").strip() or str((contab.get("cuentas") or {}).get("ventas") or DEFAULTS["cuentas"]["ventas"]).strip()
 
 
+def cuenta_de_fila(c: Comprobante, contab: dict, venta: bool = False) -> str:
+    """La cuenta que acaba en la columna K de la línea principal.
+
+    Existe para que la regla del centro de costo (`lleva_centro`) mire EXACTAMENTE la misma
+    cuenta que se escribe, y no una segunda resolución que se desincronice con el tiempo.
+    """
+    return cuenta_venta(c, contab) if venta else cuenta_gasto(c, contab)
+
+
+def lleva_centro(cuenta: str, contab: dict) -> bool:
+    """¿Esta cuenta lleva el centro de costo en la columna M?
+
+    En CONCAR la marca «C. Costo habilitado» vive en cada cuenta del plan; aquí se declara por
+    prefijo en `cuentas_con_centro`. Distinguir AUSENTE de VACÍA importa: sin la clave (un dict
+    armado a mano, un consumidor viejo) valen los prefijos de fábrica; con la lista vacía, el
+    estudio está diciendo que ninguna cuenta lo lleva. Un `or []` confundiría los dos casos.
+    """
+    if not contab.get("usa_centros_costo", True):
+        return False
+    prefijos = contab["cuentas_con_centro"] if "cuentas_con_centro" in contab else DEFAULTS["cuentas_con_centro"]
+    cuenta = (cuenta or "").strip()
+    return bool(cuenta) and any(cuenta.startswith(p) for p in (str(x).strip() for x in (prefijos or [])) if p)
+
+
 def sub_diarios_presentes(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> dict[str, int]:
     """{sub_diario: cuántos comprobantes} en el orden en que aparecen."""
     out: dict[str, int] = {}
@@ -194,18 +218,25 @@ def sub_diarios_presentes(comprobantes: list[Comprobante], contab: dict, venta: 
 
 
 def filas_sin_cuenta(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
-    if venta:
-        return [c for c in comprobantes if not cuenta_venta(c, contab)]
-    return [c for c in comprobantes if not cuenta_gasto(c, contab)]
+    return [c for c in comprobantes if not cuenta_de_fila(c, contab, venta)]
 
 
-def filas_sin_centro(comprobantes: list[Comprobante], contab: dict) -> list[Comprobante]:
-    """Con `usa_centros_costo` encendido, el centro de costo es OBLIGATORIO en el Excel (el contador,
-    06-sep-2026): CONCAR lo pide en la columna M de la línea principal, compras y ventas.
-    Apagado, ni se exige ni se exporta (M y X van vacías)."""
+def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
+    """Las filas a las que les falta un centro de costo que SÍ hace falta.
+
+    El centro es obligatorio solo donde de verdad se escribe: en la columna M de las cuentas de
+    `cuentas_con_centro` (el contador, 06-sep-2026 y 09-sep-2026). Una cuenta fuera de la lista
+    NO bloquea nunca, ni siquiera con `cc_referencia_en_x` encendido: esa X es una referencia, y
+    una referencia que se puede dejar en blanco no puede impedir exportar un mes.
+
+    `venta` va opcional a propósito, calcando a `filas_sin_cuenta`: esto es una librería que se
+    instala fuera, y un positional obligatorio sería romper su API pública por una regla interna
+    de CONCAR. Ojo al llamarla: sin el flag, un libro de ventas resolvería la cuenta como gasto.
+    """
     if not contab.get("usa_centros_costo", True):
         return []
-    return [c for c in comprobantes if not (c.centro_costo or "").strip()]
+    return [c for c in comprobantes
+            if not (c.centro_costo or "").strip() and lleva_centro(cuenta_de_fila(c, contab, venta), contab)]
 
 
 def nombre(libro: Libro, op: Opciones = OPCIONES) -> str:
@@ -300,7 +331,7 @@ def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprob
     moneda_code = (contab.get("monedas_codigo") or {}).get(moneda)
     if not moneda_code:
         raise MonedaSinCodigo([moneda])
-    cuenta = cuenta_venta(c, contab) if venta else cuenta_gasto(c, contab)
+    cuenta = cuenta_de_fila(c, contab, venta)
     if not cuenta:
         raise SinCuenta([c])
     es_usd = moneda == "USD"
@@ -365,7 +396,14 @@ def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprob
         retenido = total
     filas = []
     principal = fila_base(base)                    # gasto (compras) / ingreso por venta (ventas)
-    principal.update({"K": cuenta, "M": cc, "N": d_gasto})
+    # La CUENTA decide dónde va el centro (el contador, 09-sep-2026): en la M si la lleva
+    # habilitada en CONCAR, y si no, en la X de esta misma línea cuando el estudio la usa como
+    # referencia. Nunca en las dos. `cc_en_anexo_auxiliar` (la X del tercero) es otra cosa y no
+    # depende de esto: por eso `cc` de arriba se queda como estaba.
+    cc_en_m = lleva_centro(cuenta, contab)
+    principal.update({"K": cuenta, "N": d_gasto,
+                      "M": cc if cc_en_m else "",
+                      "X": cc if (not cc_en_m and contab.get("cc_referencia_en_x")) else ""})
     fila_igv = None
     if igv > 0:
         fila_igv = fila_base(igv)

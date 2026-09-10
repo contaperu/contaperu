@@ -97,8 +97,24 @@ DEFAULTS: dict[str, Any] = {
     # columnas M y X salen vacías aunque el comprobante traiga uno, y la aplicación que lo use
     # deja de pedirlo: hay CONCARs que no los usan.
     "usa_centros_costo": True,
+    # QUÉ cuentas lo llevan, por PREFIJO (el contador, 09-sep-2026): «la cuenta 63 y 65 tiene
+    # habilitado el centro de costo en la columna M, pero cuando es una cuenta 60 por defecto no
+    # se debe asignar un centro de costo». En CONCAR esa marca vive en cada cuenta del plan, no
+    # en un interruptor global; aquí se declara por prefijo, que es lo que un estudio sabe decir.
+    # El `70` va incluido para que las VENTAS no cambien: el ingreso siempre llevó su centro en M.
+    # Casa por `startswith`, igual que los mapeos del PCGE, así que "6311" también vale.
+    # Lista VACÍA es una respuesta legítima (ninguna cuenta lo lleva) y no es lo mismo que
+    # ausente (los tres de fábrica): ver `lleva_centro`.
+    "cuentas_con_centro": ["63", "65", "70"],
     # El centro de costo va también en el anexo auxiliar (X) de la línea del proveedor ("doble anexo").
     "cc_en_anexo_auxiliar": True,
+    # Y en las cuentas que NO lo llevan en M, el centro puede ir a la X de SU PROPIA línea, como
+    # referencia: «algunas empresas optan en colocar la columna X como referencia el centro de
+    # costo» (el contador, 09-sep-2026). Apagado de fábrica, y por dos motivos: es una opción y no
+    # la norma, y la propia plantilla de CONCAR avisa de que X solo se llena «si Cuenta Contable
+    # tiene seleccionado Tipo de Anexo Referencia» — escribirla donde no toca puede hacer que
+    # rechace la importación. Es INDEPENDIENTE de `cc_en_anexo_auxiliar`, que es la X del tercero.
+    "cc_referencia_en_x": False,
     "tasa_igv": 18,   # la tasa se deriva de IGV/base; esto es el respaldo si la base gravada es 0
 }
 ETIQUETAS_SUB_DIARIO = {"05": "Ventas", "10": "Facturas con detracción", "11": "Facturas, tickets y notas",
