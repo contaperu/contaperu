@@ -27,7 +27,7 @@ from . import (asiento, catalogos, detracciones, drivers, formato, generar, lect
                operaciones, partida_doble, pcge, validar)
 from .modelo import Comprobante, Libro, Observacion
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 PE_LEDGER = "0.1"          # versión del estándar de datos, distinta de la de la librería
 
 __all__ = [

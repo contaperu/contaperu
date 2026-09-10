@@ -215,7 +215,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-148 tests, sin red y sin credenciales.
+152 tests, sin red y sin credenciales.
 
 Lo más valioso que puedes aportar es un **driver de salida** para un ERP que hoy no está — ver
 [CONTRIBUTING.md](CONTRIBUTING.md) — o un **caso real** que el motor resuelva mal: un asiento que tu sistema
