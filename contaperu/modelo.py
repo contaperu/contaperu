@@ -1,4 +1,4 @@
-"""Modelo canónico del motor: un `Comprobante` = una fila de `el registro de compras o ventas`.
+"""Modelo canónico del motor: un `Comprobante` = una fila del registro de compras o ventas.
 
 Aquí está TODO lo que necesitan las cuatro salidas (PLE 14.1 / 8.1 y SIRE
 Anexo 3 / 11); las plantillas solo ordenan y formatean. Reglas:
@@ -238,7 +238,7 @@ class Comprobante:
         if not any(o.codigo == codigo for o in self.observaciones):
             self.observaciones.append(Observacion(codigo, nivel, texto))
 
-    # --- Serialización (fixtures JSON y almacenamiento externo) ----------------
+    # --- Serialización (fixtures JSON y almacenamiento externo) -----------
     def a_dict(self) -> dict:
         d: dict[str, Any] = {}
         for f in fields(self):

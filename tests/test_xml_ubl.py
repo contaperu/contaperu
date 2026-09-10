@@ -53,7 +53,7 @@ def test_boleta_con_dni_y_latin1():
     c = xml_ubl.parsear(leer("20131312955-03-B001-55.xml"), "venta")
     assert (c.tipo_cp, c.serie, c.numero) == ("03", "B001", "55")
     assert (c.contraparte_tipo_doc, c.contraparte_doc) == ("1", "12345678")
-    assert c.contraparte_nombre == "APELLIDO DE PRUEBA, ÁNGEL"
+    assert c.contraparte_nombre == "APELLIDO DE PRUEBA, ÁNGEL"   # con tilde: es lo que prueba el latin-1
     assert c.fecha_vencimiento is None and c.datos_raw["forma_pago"] == "Contado"
     assert (c.base_gravada, c.igv, c.total) == (Decimal("100.00"), Decimal("18.00"), Decimal("118.00"))
     validar.revisar([c], VENTAS)

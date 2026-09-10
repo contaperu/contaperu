@@ -1,8 +1,9 @@
-"""Parte 7: Excel de asientos para CONCAR. Reglas del manual de asientos de referencia (lo que
-usa hoy para los masivos de un estudio contable) sobre la mecánica del formato: PEN con IGV → 3 filas; USD →
-`US`, P, 421202 y T.C. en G con conversión C; boleta → 13/BV sin IGV; RH → 15 a 424101; NC
-invierte; detracción → sub-diario 10 + AI–AL; más lo que un generador anterior hacía mal: MM del periodo,
-correlativos obligatorios, cuenta obligatoria."""
+"""Excel de asientos para CONCAR: la mecánica del formato, caso por caso.
+
+PEN con IGV → 3 filas; USD → `US`, P, 421202 y T.C. en G con conversión C; boleta → 13/BV sin
+IGV; recibo por honorarios → 15 a 424101; nota de crédito invierte; detracción → sub-diario 10
++ AI–AL. Incluye los tres errores que un generador anterior cometía y que aquí se prueban a
+propósito: el MM del periodo, los correlativos obligatorios y la cuenta obligatoria."""
 import io
 import uuid
 from datetime import date
@@ -232,7 +233,7 @@ def test_asiento_con_detraccion_calca_un_excel_real():
 
 
 def test_asiento_de_ventas_espejo_del_skill():
-    """Ventas (skill ventas.md): cliente 121201/121202 al Debe por el total, ingreso 701101 al
+    """Ventas: cliente 121201/121202 al Debe por el total, ingreso 701101 al
     Haber por el valor venta, IGV 401111 al Haber; sub-diario 05; NC invierte; cada venta con
     su fecha de emisión; la boleta de venta SÍ lleva su IGV; la detracción no se registra."""
     fv = concar.asiento(cp(cuenta_contable=""), CONTAB, MES, "080009", venta=True)   # sin cuenta en la fila → default 701101

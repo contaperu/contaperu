@@ -115,7 +115,7 @@ class Resultado:
     comprobantes: list[Comprobante] = field(default_factory=list)
     errores: list[dict] = field(default_factory=list)
     ignorados: list[str] = field(default_factory=list)   # CDR y similares
-    pendientes_ia: list[Entrada] = field(default_factory=list)  # PDF/foto: los lee la IA (Parte 6)
+    pendientes_ia: list[Entrada] = field(default_factory=list)  # PDF/foto: los lee la IA, fuera de esta librería
 
 
 def convertir_xml(lote: Lote, libro: Libro) -> Resultado:
