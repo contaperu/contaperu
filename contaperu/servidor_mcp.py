@@ -33,7 +33,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import BlobResourceContents, CallToolResult, EmbeddedResource, TextContent
 
-from . import __version__, catalogos, detracciones, drivers, operaciones
+from . import __version__, catalogos, detracciones, drivers, operaciones, pcge
 from .operaciones import DocumentoInvalido
 
 
@@ -90,6 +90,8 @@ Reglas que conviene tener claras antes de armar un documento:
     retención del IGV del 3 % NO es una detracción y no entra en el asiento.
   - Cada contribuyente tiene su plan de cuentas y sus sub-diarios: van en `configuracion`.
     `configuracion_por_defecto` devuelve un punto de partida razonable, no la verdad de nadie.
+  - Antes de inventar una cuenta contable, `buscar_cuenta_pcge`. Que una cuenta no esté en el PCGE
+    no la invalida —las divisionarias las abre cada empresa—, pero conviene saberlo.
 
 Si algo no se puede hacer bien, la herramienta falla y dice por qué. No se inventa una cuenta,
 ni un tipo de documento, ni una equivalencia del PCGE.
@@ -120,6 +122,18 @@ def catalogos_sunat() -> str:
         "notas": sorted(catalogos.NOTAS),
         "fuera_del_registro_sunat": sorted(catalogos.FUERA_DEL_REGISTRO_SUNAT),
     }, ensure_ascii=False, indent=1)
+
+
+@mcp.resource("contaperu://catalogos/pcge2026", mime_type="application/json")
+def catalogo_pcge2026() -> str:
+    """El catálogo oficial de cuentas del Plan Contable General Empresarial 2026: cada cuenta con
+    su nombre y la página de la norma que lo dice.
+
+    Sirve para dos cosas: poner el nombre de una cuenta, y comprobar que la cuenta que se va a
+    escribir existe. **Que una cuenta no esté aquí no la invalida**: el PCGE llega a cinco dígitos
+    y cada empresa abre sus divisionarias debajo — `603201` es válida y no aparece en la norma.
+    """
+    return json.dumps(pcge.catalogo.cargar(), ensure_ascii=False, indent=1)
 
 
 @mcp.resource("contaperu://drivers", mime_type="application/json")
@@ -253,13 +267,43 @@ def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) ->
 
 
 @mcp.tool()
+def buscar_cuenta_pcge(texto: str = "", codigo: str = "") -> dict:
+    """Busca una cuenta en el Plan Contable General Empresarial 2026, por nombre o por código.
+
+    Con `texto` devuelve las cuentas cuyo nombre lo contiene (sin distinguir tildes ni mayúsculas).
+    Con `codigo` devuelve esa cuenta y, si no está en la norma, **la cuenta madre que la gobierna**:
+    de `603201` sale `6032 Suministros`, porque el PCGE llega a cinco dígitos y las divisionarias
+    las abre cada empresa. Un código que no resuelve ni por su elemento está mal escrito.
+
+    Úsala antes de decidir la `cuenta_contable` de un comprobante: es la diferencia entre elegir
+    una cuenta que existe y proponer uno que suena bien.
+    """
+    norma = pcge.catalogo.cargar()
+    salida: dict = {"version": norma.get("version", ""), "fuente": norma.get("fuente", "")}
+    if codigo:
+        salida["cuenta"] = pcge.resolver(codigo)
+    if texto:
+        salida["encontradas"] = pcge.buscar(texto)
+    if not codigo and not texto:
+        raise DocumentoInvalido("Dime qué buscar: un `texto` del nombre o un `codigo` de cuenta.")
+    return salida
+
+
+@mcp.tool()
 def adaptar_pcge2026(asiento: list[dict]) -> dict:
     """Adapta las cuentas de un asiento al Plan Contable General Empresarial 2026.
 
-    **Aviso importante: la tabla de equivalencias está vacía.** Mientras no se publiquen con la
-    cita del artículo de la resolución que las respalda, esta herramienta devuelve el asiento
-    intacto y lo dice en su informe. Es deliberado: una equivalencia inventada produce estados
-    financieros incorrectos en la contabilidad de quien confíe en ella.
+    **La tabla de equivalencias está vacía, y hoy eso es lo correcto**: este proyecto nace en 2026
+    y trabaja con el PCGE 2026 desde el primer asiento, así que no hay plan anterior del que
+    traducir. La herramienta existe como riel para el día que una modificatoria sustituya cuentas;
+    mientras tanto devuelve el asiento intacto y lo dice en su informe (`sin_tabla`).
+
+    Cuando llegue esa modificatoria, cada equivalencia entrará **con la cita del artículo que la
+    respalda** —el cargador se niega a leer un mapeo sin ella—, porque una equivalencia inventada
+    produce estados financieros incorrectos en la contabilidad de quien confíe en esto.
+
+    Para saber si una cuenta existe o cómo se llama, la herramienta es `buscar_cuenta_pcge`; esta
+    no es esa.
     """
     return operaciones.adaptar_pcge(asiento)
 

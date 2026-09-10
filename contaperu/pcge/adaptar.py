@@ -1,14 +1,23 @@
 """Adaptación al Plan Contable General Empresarial 2026.
 
-**La tabla está vacía a propósito.** Este módulo lee las equivalencias de `pcge2026.json` y no
-tiene ninguna regla escrita en el código: mientras el archivo no traiga mapeos, `adaptar()`
-devuelve las líneas intactas y dice que no hizo nada.
+**La tabla está vacía, y no es una tarea pendiente: es el estado correcto hoy.** Este proyecto
+nace en 2026 y trabaja con el PCGE 2026 desde el primer asiento — no hay plan anterior del que
+traducir, y nadie va a traer aquí una cuenta del PCGE 2019. Este módulo lee las equivalencias de
+`pcge2026.json` y no tiene ninguna regla escrita en el código: mientras el archivo no traiga
+mapeos, `adaptar()` devuelve las líneas intactas y dice que no hizo nada.
 
-El motivo es serio. Este repositorio es público y lo puede usar cualquiera para su
+Lo que sí hace falta es el **riel**, y por eso el módulo existe: el día que una modificatoria
+sustituya cuentas, el cambio será un archivo de datos y no una versión del programa.
+
+El listón para llenarlo es serio. Este repositorio es público y lo puede usar cualquiera para su
 contabilidad real: una equivalencia mal puesta —netear una cuenta que no correspondía— produce
-estados financieros incorrectos en empresas que no tienen forma de saberlo. Las reglas se
-publicarán **con la cita del artículo de la resolución al lado de cada mapeo**, no de memoria
-ni por analogía con otro plan.
+estados financieros incorrectos en empresas que no tienen forma de saberlo. Las reglas entran
+**con la cita del artículo de la resolución al lado de cada mapeo** —`cargar()` se niega a leer un
+mapeo sin ella—, no de memoria ni por analogía con otro plan.
+
+**Esto no es el catálogo.** Los nombres oficiales de las cuentas y su existencia viven en
+`catalogo.py`, que sí trae dato: 1615 cuentas de la norma. Son dos cosas distintas en el mismo
+paquete.
 
 **Por qué solo existe el modo `renombrar`.** Sustituir una cuenta por otra es inequívoco: la
 misma línea, la misma cantidad, el mismo sentido, otra cuenta. El **neteo** —que una cuenta
@@ -16,7 +25,8 @@ desaparezca y su importe se reste de otra— no lo es: hay que decidir si la lí
 sentido o no, y eso lo define la norma, no el sentido común. Se implementará cuando el texto
 esté delante, porque escribirlo antes sería exactamente lo que este archivo dice que no se hace.
 
-Si tienes el texto oficial y quieres ayudar, esa es hoy la contribución más útil al proyecto.
+Si algún día sale una modificatoria y tienes su texto oficial delante, esa es la contribución
+que hace falta aquí: el JSON con las citas, no código.
 
 Formato de `pcge2026.json`:
 

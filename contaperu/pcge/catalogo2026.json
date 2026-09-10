@@ -1,0 +1,6467 @@
+{
+ "version": "2026",
+ "fuente": "Plan Contable General Empresarial 2026 (PCGE 2026), Consejo Normativo de Contabilidad. Capítulo II — Clasificación y catálogo de cuentas.",
+ "nota": "Extraído del PDF oficial con herramientas/extraer_pcge2026.py. `pagina` es el número IMPRESO en el documento, para poder citar la cuenta sin abrirlo. Una cuenta que no está aquí no es un error: cada empresa abre sus propias divisionarias.",
+ "cuentas": {
+  "10": {
+   "nombre": "EFECTIVO Y EQUIVALENTES AL EFECTIVO",
+   "pagina": 17
+  },
+  "101": {
+   "nombre": "Caja",
+   "pagina": 17
+  },
+  "102": {
+   "nombre": "Fondos fijos",
+   "pagina": 17
+  },
+  "103": {
+   "nombre": "Efectivo y cheques en tránsito",
+   "pagina": 17
+  },
+  "1031": {
+   "nombre": "Efectivo en tránsito",
+   "pagina": 17
+  },
+  "1032": {
+   "nombre": "Cheques en tránsito",
+   "pagina": 17
+  },
+  "104": {
+   "nombre": "Cuentas corrientes en instituciones financieras",
+   "pagina": 17
+  },
+  "1041": {
+   "nombre": "Cuentas corrientes operativas",
+   "pagina": 17
+  },
+  "1042": {
+   "nombre": "Cuentas corrientes para fines específicos",
+   "pagina": 17
+  },
+  "105": {
+   "nombre": "Otros equivalentes al efectivo",
+   "pagina": 17
+  },
+  "1051": {
+   "nombre": "Otros equivalentes al efectivo",
+   "pagina": 17
+  },
+  "106": {
+   "nombre": "Depósitos en instituciones financieras",
+   "pagina": 17
+  },
+  "1061": {
+   "nombre": "Depósitos de ahorro",
+   "pagina": 17
+  },
+  "1062": {
+   "nombre": "Depósitos a plazo",
+   "pagina": 17
+  },
+  "107": {
+   "nombre": "Fondos sujetos a restricción",
+   "pagina": 17
+  },
+  "1071": {
+   "nombre": "Fondos en garantía",
+   "pagina": 17
+  },
+  "1072": {
+   "nombre": "Fondos retenidos por mandato de la autoridad",
+   "pagina": 17
+  },
+  "1073": {
+   "nombre": "Otros fondos sujetos a restricción",
+   "pagina": 17
+  },
+  "11": {
+   "nombre": "INVERSIONES FINANCIERAS",
+   "pagina": 17
+  },
+  "111": {
+   "nombre": "Inversiones financieras medidas al costo amortizado",
+   "pagina": 17
+  },
+  "1111": {
+   "nombre": "Instrumentos de deuda",
+   "pagina": 17
+  },
+  "1119": {
+   "nombre": "Otros instrumentos financieros",
+   "pagina": 17
+  },
+  "112": {
+   "nombre": "Inversiones financieras medidas al valor razonable con cambios en resultados",
+   "pagina": 17
+  },
+  "1121": {
+   "nombre": "Instrumentos de deuda",
+   "pagina": 17
+  },
+  "1122": {
+   "nombre": "Instrumentos de patrimonio",
+   "pagina": 17
+  },
+  "1123": {
+   "nombre": "Derivados financieros",
+   "pagina": 17
+  },
+  "1129": {
+   "nombre": "Otros instrumentos financieros",
+   "pagina": 17
+  },
+  "113": {
+   "nombre": "Inversiones financieras medidas al valor razonable con cambios en otros resultados integrales",
+   "pagina": 17
+  },
+  "1131": {
+   "nombre": "Instrumentos de deuda",
+   "pagina": 17
+  },
+  "1132": {
+   "nombre": "Instrumentos de patrimonio",
+   "pagina": 17
+  },
+  "1139": {
+   "nombre": "Otros instrumentos financieros",
+   "pagina": 17
+  },
+  "12": {
+   "nombre": "CUENTAS POR COBRAR COMERCIALES – TERCEROS",
+   "pagina": 17
+  },
+  "121": {
+   "nombre": "Facturas, boletas y otros comprobantes por cobrar",
+   "pagina": 17
+  },
+  "1211": {
+   "nombre": "No emitidas",
+   "pagina": 17
+  },
+  "1212": {
+   "nombre": "En cartera",
+   "pagina": 17
+  },
+  "1213": {
+   "nombre": "En cobranza",
+   "pagina": 17
+  },
+  "1214": {
+   "nombre": "En descuento",
+   "pagina": 17
+  },
+  "122": {
+   "nombre": "Anticipos recibidos",
+   "pagina": 17
+  },
+  "123": {
+   "nombre": "Letras por cobrar",
+   "pagina": 17
+  },
+  "1232": {
+   "nombre": "En cartera",
+   "pagina": 17
+  },
+  "1233": {
+   "nombre": "En cobranza",
+   "pagina": 17
+  },
+  "1234": {
+   "nombre": "En descuento",
+   "pagina": 17
+  },
+  "13": {
+   "nombre": "CUENTAS POR COBRAR COMERCIALES – RELACIONADAS",
+   "pagina": 18
+  },
+  "131": {
+   "nombre": "Facturas, boletas y otros comprobantes por cobrar",
+   "pagina": 18
+  },
+  "1311": {
+   "nombre": "No emitidas",
+   "pagina": 18
+  },
+  "1312": {
+   "nombre": "En cartera",
+   "pagina": 18
+  },
+  "1313": {
+   "nombre": "En cobranza",
+   "pagina": 18
+  },
+  "1314": {
+   "nombre": "En descuento",
+   "pagina": 18
+  },
+  "132": {
+   "nombre": "Anticipos recibidos",
+   "pagina": 18
+  },
+  "1321": {
+   "nombre": "Anticipos recibidos",
+   "pagina": 18
+  },
+  "133": {
+   "nombre": "Letras por cobrar",
+   "pagina": 18
+  },
+  "1332": {
+   "nombre": "En cartera",
+   "pagina": 18
+  },
+  "1333": {
+   "nombre": "En cobranza",
+   "pagina": 18
+  },
+  "1334": {
+   "nombre": "En descuento",
+   "pagina": 18
+  },
+  "14": {
+   "nombre": "CUENTAS POR COBRAR AL PERSONAL, A LOS ACCIONISTAS (SOCIOS) Y DIRECTORES",
+   "pagina": 18
+  },
+  "141": {
+   "nombre": "Personal",
+   "pagina": 18
+  },
+  "1411": {
+   "nombre": "Préstamos",
+   "pagina": 18
+  },
+  "1412": {
+   "nombre": "Adelanto de remuneraciones",
+   "pagina": 18
+  },
+  "1413": {
+   "nombre": "Entregas a rendir cuenta",
+   "pagina": 18
+  },
+  "1419": {
+   "nombre": "Otras cuentas por cobrar al personal",
+   "pagina": 18
+  },
+  "142": {
+   "nombre": "Accionistas (o socios)",
+   "pagina": 18
+  },
+  "1421": {
+   "nombre": "Suscripciones por cobrar a socios o accionistas",
+   "pagina": 18
+  },
+  "1422": {
+   "nombre": "Préstamos",
+   "pagina": 18
+  },
+  "143": {
+   "nombre": "Directores",
+   "pagina": 18
+  },
+  "1431": {
+   "nombre": "Préstamos",
+   "pagina": 18
+  },
+  "1432": {
+   "nombre": "Adelanto de dietas",
+   "pagina": 18
+  },
+  "1433": {
+   "nombre": "Entregas a rendir cuenta",
+   "pagina": 18
+  },
+  "149": {
+   "nombre": "Diversas",
+   "pagina": 18
+  },
+  "15": {
+   "nombre": "ACTIVOS DEL CONTRATO Y COSTOS DE CONTRATOS CON CLIENTES",
+   "pagina": 18
+  },
+  "151": {
+   "nombre": "Activos del contrato",
+   "pagina": 18
+  },
+  "152": {
+   "nombre": "Costos para obtener contratos",
+   "pagina": 18
+  },
+  "1521": {
+   "nombre": "Comisiones",
+   "pagina": 18
+  },
+  "1522": {
+   "nombre": "Costos de obtención de contrato PPA",
+   "pagina": 18
+  },
+  "1523": {
+   "nombre": "Otros",
+   "pagina": 18
+  },
+  "153": {
+   "nombre": "Costos para cumplir con el contrato",
+   "pagina": 18
+  },
+  "1531": {
+   "nombre": "Mano de obra directa",
+   "pagina": 18
+  },
+  "1532": {
+   "nombre": "Materiales directos",
+   "pagina": 18
+  },
+  "1533": {
+   "nombre": "Supervisión de contrato",
+   "pagina": 18
+  },
+  "1534": {
+   "nombre": "Otros",
+   "pagina": 18
+  },
+  "16": {
+   "nombre": "CUENTAS POR COBRAR DIVERSAS – TERCEROS",
+   "pagina": 18
+  },
+  "161": {
+   "nombre": "Préstamos",
+   "pagina": 18
+  },
+  "1611": {
+   "nombre": "Con garantía",
+   "pagina": 18
+  },
+  "1612": {
+   "nombre": "Sin garantía",
+   "pagina": 18
+  },
+  "162": {
+   "nombre": "Reclamaciones a terceros",
+   "pagina": 18
+  },
+  "1621": {
+   "nombre": "Compañías aseguradoras",
+   "pagina": 18
+  },
+  "1622": {
+   "nombre": "Transportadoras",
+   "pagina": 18
+  },
+  "1623": {
+   "nombre": "Servicios públicos",
+   "pagina": 18
+  },
+  "1624": {
+   "nombre": "Tributos",
+   "pagina": 18
+  },
+  "1629": {
+   "nombre": "Otras",
+   "pagina": 18
+  },
+  "163": {
+   "nombre": "Intereses, regalías y dividendos",
+   "pagina": 18
+  },
+  "1631": {
+   "nombre": "Intereses",
+   "pagina": 18
+  },
+  "1632": {
+   "nombre": "Regalías",
+   "pagina": 19
+  },
+  "1633": {
+   "nombre": "Dividendos",
+   "pagina": 19
+  },
+  "164": {
+   "nombre": "Depósitos otorgados en garantía",
+   "pagina": 19
+  },
+  "1641": {
+   "nombre": "Préstamos de instituciones financieras",
+   "pagina": 19
+  },
+  "1642": {
+   "nombre": "Préstamos de instituciones no financieras",
+   "pagina": 19
+  },
+  "1643": {
+   "nombre": "Depósitos en garantía por alquileres",
+   "pagina": 19
+  },
+  "1649": {
+   "nombre": "Otros depósitos en garantía",
+   "pagina": 19
+  },
+  "165": {
+   "nombre": "Venta de activo inmovilizado",
+   "pagina": 19
+  },
+  "1651": {
+   "nombre": "Inversiones Financieras",
+   "pagina": 19
+  },
+  "1652": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 19
+  },
+  "1653": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 19
+  },
+  "1654": {
+   "nombre": "Activos intangibles",
+   "pagina": 19
+  },
+  "1655": {
+   "nombre": "Activos biológicos",
+   "pagina": 19
+  },
+  "1659": {
+   "nombre": "Otros activos inmovilizados",
+   "pagina": 19
+  },
+  "167": {
+   "nombre": "Tributos por acreditar",
+   "pagina": 19
+  },
+  "1671": {
+   "nombre": "Pagos a cuenta del impuesto a las ganancias",
+   "pagina": 19
+  },
+  "1672": {
+   "nombre": "Pagos a cuenta de ITAN",
+   "pagina": 19
+  },
+  "1673": {
+   "nombre": "IGV por acreditar en compras",
+   "pagina": 19
+  },
+  "1674": {
+   "nombre": "IGV por acreditar no domiciliados",
+   "pagina": 19
+  },
+  "1675": {
+   "nombre": "Obras por impuestos",
+   "pagina": 19
+  },
+  "169": {
+   "nombre": "Otras cuentas por cobrar diversas",
+   "pagina": 19
+  },
+  "1691": {
+   "nombre": "Entregas a rendir cuenta a terceros",
+   "pagina": 19
+  },
+  "1699": {
+   "nombre": "Otras cuentas por cobrar diversas",
+   "pagina": 19
+  },
+  "17": {
+   "nombre": "CUENTAS POR COBRAR DIVERSAS – RELACIONADAS",
+   "pagina": 19
+  },
+  "171": {
+   "nombre": "Préstamos",
+   "pagina": 19
+  },
+  "1711": {
+   "nombre": "Con garantía",
+   "pagina": 19
+  },
+  "1712": {
+   "nombre": "Sin garantía",
+   "pagina": 19
+  },
+  "173": {
+   "nombre": "Intereses, regalías y dividendos",
+   "pagina": 19
+  },
+  "1731": {
+   "nombre": "Intereses",
+   "pagina": 19
+  },
+  "1732": {
+   "nombre": "Regalías",
+   "pagina": 19
+  },
+  "1733": {
+   "nombre": "Dividendos",
+   "pagina": 19
+  },
+  "174": {
+   "nombre": "Depósitos otorgados en garantía",
+   "pagina": 19
+  },
+  "1741": {
+   "nombre": "Préstamos de instituciones financieras",
+   "pagina": 19
+  },
+  "1742": {
+   "nombre": "Préstamos de instituciones no financieras",
+   "pagina": 19
+  },
+  "1743": {
+   "nombre": "Depósitos en garantía por alquileres",
+   "pagina": 19
+  },
+  "1749": {
+   "nombre": "Otros depósitos en garantía",
+   "pagina": 19
+  },
+  "175": {
+   "nombre": "Venta de activo inmovilizado",
+   "pagina": 19
+  },
+  "1751": {
+   "nombre": "Inversiones financieras",
+   "pagina": 19
+  },
+  "1752": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 19
+  },
+  "1753": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 19
+  },
+  "1754": {
+   "nombre": "Activos intangibles",
+   "pagina": 19
+  },
+  "1755": {
+   "nombre": "Activos biológicos",
+   "pagina": 19
+  },
+  "1759": {
+   "nombre": "Otros activos inmovilizados",
+   "pagina": 19
+  },
+  "179": {
+   "nombre": "Otras cuentas por cobrar diversas",
+   "pagina": 19
+  },
+  "18": {
+   "nombre": "SERVICIOS Y OTROS CONTRATADOS POR ANTICIPADO",
+   "pagina": 19
+  },
+  "182": {
+   "nombre": "Seguros",
+   "pagina": 19
+  },
+  "183": {
+   "nombre": "Alquileres",
+   "pagina": 19
+  },
+  "189": {
+   "nombre": "Otros gastos contratados por anticipado",
+   "pagina": 19
+  },
+  "19": {
+   "nombre": "DETERIORO POR PÉRDIDA CREDITICIA ESPERADA O INCURRIDA",
+   "pagina": 19
+  },
+  "191": {
+   "nombre": "Cuentas por cobrar comerciales – Terceros",
+   "pagina": 19
+  },
+  "1911": {
+   "nombre": "Facturas, boletas y otros comprobantes por cobrar",
+   "pagina": 20
+  },
+  "1913": {
+   "nombre": "Letras por cobrar",
+   "pagina": 20
+  },
+  "192": {
+   "nombre": "Cuentas por cobrar comerciales – Relacionadas",
+   "pagina": 20
+  },
+  "1921": {
+   "nombre": "Facturas, boletas y otros comprobantes por cobrar",
+   "pagina": 20
+  },
+  "1923": {
+   "nombre": "Letras por cobrar",
+   "pagina": 20
+  },
+  "193": {
+   "nombre": "Cuentas por cobrar al personal, a los accionistas (socios) y directores",
+   "pagina": 20
+  },
+  "1931": {
+   "nombre": "Personal",
+   "pagina": 20
+  },
+  "1932": {
+   "nombre": "Accionistas (o socios)",
+   "pagina": 20
+  },
+  "1933": {
+   "nombre": "Directores",
+   "pagina": 20
+  },
+  "1939": {
+   "nombre": "Diversas",
+   "pagina": 20
+  },
+  "194": {
+   "nombre": "Cuentas por cobrar diversas – Terceros",
+   "pagina": 20
+  },
+  "1941": {
+   "nombre": "Préstamos",
+   "pagina": 20
+  },
+  "1942": {
+   "nombre": "Reclamaciones a terceros",
+   "pagina": 20
+  },
+  "1943": {
+   "nombre": "Intereses, regalías y dividendos",
+   "pagina": 20
+  },
+  "1944": {
+   "nombre": "Depósitos otorgados en garantía",
+   "pagina": 20
+  },
+  "1945": {
+   "nombre": "Venta de propiedades, planta y equipo",
+   "pagina": 20
+  },
+  "1946": {
+   "nombre": "Activos por instrumentos financieros",
+   "pagina": 20
+  },
+  "1949": {
+   "nombre": "Otras cuentas por cobrar diversas",
+   "pagina": 20
+  },
+  "195": {
+   "nombre": "Cuentas por cobrar diversas – Relacionadas",
+   "pagina": 20
+  },
+  "1951": {
+   "nombre": "Préstamos",
+   "pagina": 20
+  },
+  "1953": {
+   "nombre": "Intereses, regalías y dividendos",
+   "pagina": 20
+  },
+  "1954": {
+   "nombre": "Depósitos otorgados en garantía",
+   "pagina": 20
+  },
+  "1955": {
+   "nombre": "Venta de propiedades, planta y equipo",
+   "pagina": 20
+  },
+  "1956": {
+   "nombre": "Activos por instrumentos financieros",
+   "pagina": 20
+  },
+  "1957": {
+   "nombre": "Préstamo a largo plazo a asociadas / negocios conjuntos",
+   "pagina": 20
+  },
+  "1959": {
+   "nombre": "Otras cuentas por cobrar diversas",
+   "pagina": 20
+  },
+  "196": {
+   "nombre": "Activos del contrato ELEMENTO 2: ACTIVO REALIZABLE",
+   "pagina": 20
+  },
+  "20": {
+   "nombre": "MERCADERIAS",
+   "pagina": 20
+  },
+  "201": {
+   "nombre": "Mercaderías",
+   "pagina": 20
+  },
+  "2011": {
+   "nombre": "Mercaderías",
+   "pagina": 20
+  },
+  "20111": {
+   "nombre": "Costo",
+   "pagina": 20
+  },
+  "20114": {
+   "nombre": "Valor razonable",
+   "pagina": 20
+  },
+  "21": {
+   "nombre": "PRODUCTOS TERMINADOS",
+   "pagina": 20
+  },
+  "211": {
+   "nombre": "Productos terminados",
+   "pagina": 20
+  },
+  "2111": {
+   "nombre": "Productos terminados",
+   "pagina": 20
+  },
+  "21111": {
+   "nombre": "Costo",
+   "pagina": 20
+  },
+  "21114": {
+   "nombre": "Valor razonable",
+   "pagina": 20
+  },
+  "215": {
+   "nombre": "Inventario de servicios prestados",
+   "pagina": 20
+  },
+  "2151": {
+   "nombre": "Servicios prestados",
+   "pagina": 20
+  },
+  "21511": {
+   "nombre": "Costo",
+   "pagina": 20
+  },
+  "22": {
+   "nombre": "SUBPRODUCTOS, DESECHOS Y DESPERDICIOS",
+   "pagina": 20
+  },
+  "221": {
+   "nombre": "Subproductos",
+   "pagina": 20
+  },
+  "222": {
+   "nombre": "Desechos y desperdicios",
+   "pagina": 20
+  },
+  "23": {
+   "nombre": "PRODUCTOS EN PROCESO",
+   "pagina": 20
+  },
+  "231": {
+   "nombre": "Productos en proceso",
+   "pagina": 20
+  },
+  "2311": {
+   "nombre": "Productos en proceso",
+   "pagina": 20
+  },
+  "23111": {
+   "nombre": "Costo",
+   "pagina": 20
+  },
+  "23113": {
+   "nombre": "Costos por préstamos",
+   "pagina": 20
+  },
+  "235": {
+   "nombre": "Inventario de servicios en proceso",
+   "pagina": 21
+  },
+  "2351": {
+   "nombre": "Servicios en proceso",
+   "pagina": 21
+  },
+  "23511": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "24": {
+   "nombre": "MATERIAS PRIMAS",
+   "pagina": 21
+  },
+  "241": {
+   "nombre": "Materias primas",
+   "pagina": 21
+  },
+  "2411": {
+   "nombre": "Materias primas",
+   "pagina": 21
+  },
+  "24111": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "24114": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "25": {
+   "nombre": "MATERIALES AUXILIARES, SUMINISTROS Y REPUESTOS",
+   "pagina": 21
+  },
+  "251": {
+   "nombre": "Materiales auxiliares",
+   "pagina": 21
+  },
+  "252": {
+   "nombre": "Suministros",
+   "pagina": 21
+  },
+  "2521": {
+   "nombre": "Combustibles",
+   "pagina": 21
+  },
+  "2522": {
+   "nombre": "Lubricantes",
+   "pagina": 21
+  },
+  "2523": {
+   "nombre": "Energía",
+   "pagina": 21
+  },
+  "2524": {
+   "nombre": "Otros suministros",
+   "pagina": 21
+  },
+  "253": {
+   "nombre": "Repuestos",
+   "pagina": 21
+  },
+  "26": {
+   "nombre": "ENVASES Y EMBALAJES",
+   "pagina": 21
+  },
+  "261": {
+   "nombre": "Envases",
+   "pagina": 21
+  },
+  "262": {
+   "nombre": "Embalajes",
+   "pagina": 21
+  },
+  "27": {
+   "nombre": "ACTIVOS NO CORRIENTES MANTENIDOS PARA LA VENTA",
+   "pagina": 21
+  },
+  "271": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 21
+  },
+  "2711": {
+   "nombre": "Terrenos",
+   "pagina": 21
+  },
+  "27111": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27114": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "2712": {
+   "nombre": "Edificaciones",
+   "pagina": 21
+  },
+  "27121": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27124": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "272": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 21
+  },
+  "2720": {
+   "nombre": "Planta productora en producción",
+   "pagina": 21
+  },
+  "27201": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27204": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "2721": {
+   "nombre": "Planta productora en desarrollo",
+   "pagina": 21
+  },
+  "27211": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27214": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "2722": {
+   "nombre": "Terrenos",
+   "pagina": 21
+  },
+  "27221": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27224": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "2723": {
+   "nombre": "Edificaciones",
+   "pagina": 21
+  },
+  "27231": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27234": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "2724": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 21
+  },
+  "27241": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27244": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "2725": {
+   "nombre": "Unidades de transporte",
+   "pagina": 21
+  },
+  "27251": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27254": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "2726": {
+   "nombre": "Muebles y enseres",
+   "pagina": 21
+  },
+  "27261": {
+   "nombre": "Costo",
+   "pagina": 21
+  },
+  "27264": {
+   "nombre": "Valor razonable",
+   "pagina": 21
+  },
+  "2727": {
+   "nombre": "Equipos diversos",
+   "pagina": 21
+  },
+  "27271": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27274": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "2728": {
+   "nombre": "Piezas de repuesto y unidades de reemplazo",
+   "pagina": 22
+  },
+  "27281": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27284": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "2729": {
+   "nombre": "Obras en curso",
+   "pagina": 22
+  },
+  "27291": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27294": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "273": {
+   "nombre": "Activos intangibles",
+   "pagina": 22
+  },
+  "2731": {
+   "nombre": "Concesiones, licencias y derechos",
+   "pagina": 22
+  },
+  "27311": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27314": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "2732": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 22
+  },
+  "27321": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27324": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "2733": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 22
+  },
+  "27331": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27334": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "2734": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 22
+  },
+  "27341": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27344": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "2735": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 22
+  },
+  "27351": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27354": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "2739": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 22
+  },
+  "27391": {
+   "nombre": "Costo",
+   "pagina": 22
+  },
+  "27394": {
+   "nombre": "Valor razonable",
+   "pagina": 22
+  },
+  "279": {
+   "nombre": "Deterioro acumulado",
+   "pagina": 22
+  },
+  "2791": {
+   "nombre": "Propiedad de inversión",
+   "pagina": 22
+  },
+  "27912": {
+   "nombre": "Terrenos",
+   "pagina": 22
+  },
+  "27913": {
+   "nombre": "Edificaciones",
+   "pagina": 22
+  },
+  "2793": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 22
+  },
+  "27930": {
+   "nombre": "Plantas productoras en producción",
+   "pagina": 22
+  },
+  "27931": {
+   "nombre": "Planta productora en desarrollo",
+   "pagina": 22
+  },
+  "27932": {
+   "nombre": "Terrenos",
+   "pagina": 22
+  },
+  "27933": {
+   "nombre": "Edificaciones",
+   "pagina": 22
+  },
+  "27934": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 22
+  },
+  "27935": {
+   "nombre": "Unidades de transporte",
+   "pagina": 22
+  },
+  "27936": {
+   "nombre": "Muebles y enseres",
+   "pagina": 22
+  },
+  "27937": {
+   "nombre": "Equipos diversos",
+   "pagina": 22
+  },
+  "27938": {
+   "nombre": "Piezas de repuesto y unidades de reemplazo",
+   "pagina": 22
+  },
+  "2794": {
+   "nombre": "Activos intangibles",
+   "pagina": 22
+  },
+  "27941": {
+   "nombre": "Concesiones, licencias y otros derechos",
+   "pagina": 22
+  },
+  "27942": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 22
+  },
+  "27943": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 22
+  },
+  "27944": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 22
+  },
+  "27945": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 22
+  },
+  "27949": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 22
+  },
+  "28": {
+   "nombre": "INVENTARIOS POR RECIBIR",
+   "pagina": 22
+  },
+  "281": {
+   "nombre": "Mercaderías",
+   "pagina": 22
+  },
+  "284": {
+   "nombre": "Materias primas",
+   "pagina": 23
+  },
+  "285": {
+   "nombre": "Materiales auxiliares, suministros y repuestos",
+   "pagina": 23
+  },
+  "286": {
+   "nombre": "Envases y embalajes",
+   "pagina": 23
+  },
+  "29": {
+   "nombre": "DESVALORIZACIÓN DE INVENTARIOS",
+   "pagina": 23
+  },
+  "291": {
+   "nombre": "Mercaderías",
+   "pagina": 23
+  },
+  "2911": {
+   "nombre": "Mercaderías",
+   "pagina": 23
+  },
+  "29111": {
+   "nombre": "Costo",
+   "pagina": 23
+  },
+  "292": {
+   "nombre": "Productos terminados",
+   "pagina": 23
+  },
+  "2921": {
+   "nombre": "Productos terminados",
+   "pagina": 23
+  },
+  "29211": {
+   "nombre": "Costo",
+   "pagina": 23
+  },
+  "29213": {
+   "nombre": "Costos por préstamos",
+   "pagina": 23
+  },
+  "2925": {
+   "nombre": "Inventario de servicios prestados",
+   "pagina": 23
+  },
+  "29251": {
+   "nombre": "Costo",
+   "pagina": 23
+  },
+  "293": {
+   "nombre": "Subproductos, desechos y desperdicios",
+   "pagina": 23
+  },
+  "2931": {
+   "nombre": "Subproductos",
+   "pagina": 23
+  },
+  "2932": {
+   "nombre": "Desechos y desperdicios",
+   "pagina": 23
+  },
+  "294": {
+   "nombre": "Productos en proceso",
+   "pagina": 23
+  },
+  "2941": {
+   "nombre": "Productos en proceso",
+   "pagina": 23
+  },
+  "29411": {
+   "nombre": "Costo",
+   "pagina": 23
+  },
+  "29413": {
+   "nombre": "Costos por préstamos",
+   "pagina": 23
+  },
+  "2945": {
+   "nombre": "Inventario de servicios en proceso",
+   "pagina": 23
+  },
+  "295": {
+   "nombre": "Materias primas",
+   "pagina": 23
+  },
+  "2951": {
+   "nombre": "Materias primas",
+   "pagina": 23
+  },
+  "29511": {
+   "nombre": "Costo",
+   "pagina": 23
+  },
+  "296": {
+   "nombre": "Materiales auxiliares, suministros y repuestos",
+   "pagina": 23
+  },
+  "2961": {
+   "nombre": "Materiales auxiliares",
+   "pagina": 23
+  },
+  "2962": {
+   "nombre": "Suministros",
+   "pagina": 23
+  },
+  "2963": {
+   "nombre": "Repuestos",
+   "pagina": 23
+  },
+  "297": {
+   "nombre": "Envases y embalajes",
+   "pagina": 23
+  },
+  "2971": {
+   "nombre": "Envases",
+   "pagina": 23
+  },
+  "2972": {
+   "nombre": "Embalajes",
+   "pagina": 23
+  },
+  "298": {
+   "nombre": "Inventarios por recibir",
+   "pagina": 23
+  },
+  "2981": {
+   "nombre": "Mercaderías",
+   "pagina": 23
+  },
+  "2982": {
+   "nombre": "Materias primas",
+   "pagina": 23
+  },
+  "2983": {
+   "nombre": "Materiales auxiliares, suministros y repuestos",
+   "pagina": 23
+  },
+  "2984": {
+   "nombre": "Envases y embalajes ELEMENTO 3: ACTIVO INMOVILIZADO",
+   "pagina": 23
+  },
+  "30": {
+   "nombre": "INVERSIONES EN SUBSIDIARIAS, ASOCIADAS Y NEGOCIOS CONJUNTOS",
+   "pagina": 23
+  },
+  "301": {
+   "nombre": "Subsidiarias",
+   "pagina": 23
+  },
+  "3011": {
+   "nombre": "Costo",
+   "pagina": 23
+  },
+  "3012": {
+   "nombre": "Método de participación",
+   "pagina": 23
+  },
+  "302": {
+   "nombre": "Asociadas",
+   "pagina": 23
+  },
+  "3021": {
+   "nombre": "Costo",
+   "pagina": 23
+  },
+  "3022": {
+   "nombre": "Método de participación",
+   "pagina": 23
+  },
+  "303": {
+   "nombre": "Negocios conjuntos",
+   "pagina": 23
+  },
+  "3031": {
+   "nombre": "Costo",
+   "pagina": 23
+  },
+  "3032": {
+   "nombre": "Método de participación",
+   "pagina": 23
+  },
+  "31": {
+   "nombre": "PROPIEDADES DE INVERSIÓN",
+   "pagina": 23
+  },
+  "311": {
+   "nombre": "Terrenos",
+   "pagina": 23
+  },
+  "3111": {
+   "nombre": "Urbanos",
+   "pagina": 24
+  },
+  "31111": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "31113": {
+   "nombre": "Costos por préstamos",
+   "pagina": 24
+  },
+  "31114": {
+   "nombre": "Valor razonable",
+   "pagina": 24
+  },
+  "3112": {
+   "nombre": "Rurales",
+   "pagina": 24
+  },
+  "31121": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "31123": {
+   "nombre": "Costos por préstamos",
+   "pagina": 24
+  },
+  "31124": {
+   "nombre": "Valor razonable",
+   "pagina": 24
+  },
+  "312": {
+   "nombre": "Edificaciones",
+   "pagina": 24
+  },
+  "3121": {
+   "nombre": "Edificaciones",
+   "pagina": 24
+  },
+  "31211": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "31213": {
+   "nombre": "Costos por préstamos",
+   "pagina": 24
+  },
+  "31214": {
+   "nombre": "Valor razonable",
+   "pagina": 24
+  },
+  "313": {
+   "nombre": "Construcciones en curso",
+   "pagina": 24
+  },
+  "3131": {
+   "nombre": "Edificaciones",
+   "pagina": 24
+  },
+  "31311": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "31313": {
+   "nombre": "Costos por préstamos",
+   "pagina": 24
+  },
+  "31314": {
+   "nombre": "Valor razonable",
+   "pagina": 24
+  },
+  "32": {
+   "nombre": "ACTIVOS POR DERECHO DE USO",
+   "pagina": 24
+  },
+  "321": {
+   "nombre": "Propiedades de inversión - Arrendamiento financiero",
+   "pagina": 24
+  },
+  "3211": {
+   "nombre": "Terrenos",
+   "pagina": 24
+  },
+  "32111": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32114": {
+   "nombre": "Valor razonable",
+   "pagina": 24
+  },
+  "3212": {
+   "nombre": "Edificaciones",
+   "pagina": 24
+  },
+  "32121": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32124": {
+   "nombre": "Valor razonable",
+   "pagina": 24
+  },
+  "322": {
+   "nombre": "Propiedades, planta y equipo - Arrendamiento financiero",
+   "pagina": 24
+  },
+  "3220": {
+   "nombre": "Planta productora en producción",
+   "pagina": 24
+  },
+  "32201": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32202": {
+   "nombre": "Revaluación",
+   "pagina": 24
+  },
+  "3221": {
+   "nombre": "Planta productora en desarrollo",
+   "pagina": 24
+  },
+  "32211": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32212": {
+   "nombre": "Revaluación",
+   "pagina": 24
+  },
+  "3222": {
+   "nombre": "Terrenos",
+   "pagina": 24
+  },
+  "32221": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32222": {
+   "nombre": "Revaluación",
+   "pagina": 24
+  },
+  "3223": {
+   "nombre": "Edificaciones",
+   "pagina": 24
+  },
+  "32231": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32232": {
+   "nombre": "Revaluación",
+   "pagina": 24
+  },
+  "3224": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 24
+  },
+  "32241": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32242": {
+   "nombre": "Revaluación",
+   "pagina": 24
+  },
+  "3225": {
+   "nombre": "Unidades de transporte",
+   "pagina": 24
+  },
+  "32251": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32252": {
+   "nombre": "Revaluación",
+   "pagina": 24
+  },
+  "3226": {
+   "nombre": "Muebles y enseres",
+   "pagina": 24
+  },
+  "32261": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32262": {
+   "nombre": "Revaluación",
+   "pagina": 24
+  },
+  "3227": {
+   "nombre": "Equipos diversos",
+   "pagina": 24
+  },
+  "32271": {
+   "nombre": "Costo",
+   "pagina": 24
+  },
+  "32272": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "3228": {
+   "nombre": "Piezas de repuesto y unidades de reemplazo",
+   "pagina": 25
+  },
+  "32281": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "32282": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "33": {
+   "nombre": "PROPIEDADES, PLANTA Y EQUIPO",
+   "pagina": 25
+  },
+  "330": {
+   "nombre": "Planta productora",
+   "pagina": 25
+  },
+  "3301": {
+   "nombre": "Planta productora en producción",
+   "pagina": 25
+  },
+  "33011": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33012": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "3302": {
+   "nombre": "Planta productora en desarrollo",
+   "pagina": 25
+  },
+  "33021": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33022": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "33023": {
+   "nombre": "Costos por préstamos",
+   "pagina": 25
+  },
+  "331": {
+   "nombre": "Terrenos",
+   "pagina": 25
+  },
+  "3311": {
+   "nombre": "Terrenos",
+   "pagina": 25
+  },
+  "33111": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33112": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "33113": {
+   "nombre": "Costos por préstamos",
+   "pagina": 25
+  },
+  "332": {
+   "nombre": "Edificaciones",
+   "pagina": 25
+  },
+  "3321": {
+   "nombre": "Edificaciones",
+   "pagina": 25
+  },
+  "33211": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33212": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "33213": {
+   "nombre": "Costos por préstamos",
+   "pagina": 25
+  },
+  "3324": {
+   "nombre": "Instalaciones",
+   "pagina": 25
+  },
+  "33241": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33242": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "33243": {
+   "nombre": "Costos por préstamos",
+   "pagina": 25
+  },
+  "3325": {
+   "nombre": "Mejoras en locales arrendados",
+   "pagina": 25
+  },
+  "33251": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33252": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "33253": {
+   "nombre": "Costos por préstamos",
+   "pagina": 25
+  },
+  "333": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 25
+  },
+  "3331": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 25
+  },
+  "33311": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33312": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "33313": {
+   "nombre": "Costos por préstamos",
+   "pagina": 25
+  },
+  "334": {
+   "nombre": "Unidades de transporte",
+   "pagina": 25
+  },
+  "3341": {
+   "nombre": "Vehículos motorizados",
+   "pagina": 25
+  },
+  "33411": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33412": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "3342": {
+   "nombre": "Vehículos no motorizados",
+   "pagina": 25
+  },
+  "33421": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33422": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "335": {
+   "nombre": "Muebles y enseres",
+   "pagina": 25
+  },
+  "3351": {
+   "nombre": "Muebles",
+   "pagina": 25
+  },
+  "33511": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33512": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "3352": {
+   "nombre": "Enseres",
+   "pagina": 25
+  },
+  "33521": {
+   "nombre": "Costo",
+   "pagina": 25
+  },
+  "33522": {
+   "nombre": "Revaluación",
+   "pagina": 25
+  },
+  "336": {
+   "nombre": "Equipos diversos",
+   "pagina": 26
+  },
+  "3361": {
+   "nombre": "Equipo para procesamiento de información",
+   "pagina": 26
+  },
+  "33611": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33612": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "3362": {
+   "nombre": "Equipo de comunicación",
+   "pagina": 26
+  },
+  "33621": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33622": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "33623": {
+   "nombre": "Costos por préstamos",
+   "pagina": 26
+  },
+  "3363": {
+   "nombre": "Equipo de seguridad",
+   "pagina": 26
+  },
+  "33631": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33632": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "33633": {
+   "nombre": "Costos por préstamos",
+   "pagina": 26
+  },
+  "3364": {
+   "nombre": "Equipo de medio ambiente",
+   "pagina": 26
+  },
+  "33641": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33642": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "3369": {
+   "nombre": "Otros equipos",
+   "pagina": 26
+  },
+  "33691": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33692": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "337": {
+   "nombre": "Piezas de repuesto y unidades de reemplazo",
+   "pagina": 26
+  },
+  "3371": {
+   "nombre": "Piezas de repuesto",
+   "pagina": 26
+  },
+  "33711": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33712": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "3372": {
+   "nombre": "Unidades de reemplazo",
+   "pagina": 26
+  },
+  "33721": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33722": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "338": {
+   "nombre": "Unidades por recibir",
+   "pagina": 26
+  },
+  "3381": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 26
+  },
+  "33811": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33812": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "3382": {
+   "nombre": "Equipo de transporte",
+   "pagina": 26
+  },
+  "33821": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33822": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "3383": {
+   "nombre": "Muebles y enseres",
+   "pagina": 26
+  },
+  "33831": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33832": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "3386": {
+   "nombre": "Equipos diversos",
+   "pagina": 26
+  },
+  "33861": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33862": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "3387": {
+   "nombre": "Piezas de repuesto y unidades de reemplazo",
+   "pagina": 26
+  },
+  "33871": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33872": {
+   "nombre": "Revaluación",
+   "pagina": 26
+  },
+  "339": {
+   "nombre": "Obras en curso",
+   "pagina": 26
+  },
+  "3391": {
+   "nombre": "Adecuación de terrenos",
+   "pagina": 26
+  },
+  "33911": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33913": {
+   "nombre": "Costos por préstamos",
+   "pagina": 26
+  },
+  "3392": {
+   "nombre": "Edificaciones en curso",
+   "pagina": 26
+  },
+  "33921": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33923": {
+   "nombre": "Costos por préstamos",
+   "pagina": 26
+  },
+  "3393": {
+   "nombre": "Maquinaria en montaje",
+   "pagina": 26
+  },
+  "33931": {
+   "nombre": "Costo",
+   "pagina": 26
+  },
+  "33933": {
+   "nombre": "Costos por préstamos",
+   "pagina": 27
+  },
+  "34": {
+   "nombre": "ACTIVOS INTANGIBLES",
+   "pagina": 27
+  },
+  "341": {
+   "nombre": "Concesiones, licencias y otros derechos",
+   "pagina": 27
+  },
+  "3411": {
+   "nombre": "Derechos por concesiones",
+   "pagina": 27
+  },
+  "34111": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34112": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "34113": {
+   "nombre": "Costos por préstamos",
+   "pagina": 27
+  },
+  "3412": {
+   "nombre": "Licencias",
+   "pagina": 27
+  },
+  "34121": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34122": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "3419": {
+   "nombre": "Otros derechos",
+   "pagina": 27
+  },
+  "34191": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34192": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "342": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 27
+  },
+  "3421": {
+   "nombre": "Patentes",
+   "pagina": 27
+  },
+  "34211": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34212": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "3422": {
+   "nombre": "Marcas",
+   "pagina": 27
+  },
+  "34221": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34222": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "343": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 27
+  },
+  "3431": {
+   "nombre": "Aplicaciones informáticas",
+   "pagina": 27
+  },
+  "34311": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34312": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "34313": {
+   "nombre": "Costos por préstamos",
+   "pagina": 27
+  },
+  "344": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 27
+  },
+  "3441": {
+   "nombre": "Costos de exploración",
+   "pagina": 27
+  },
+  "34411": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34412": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "34413": {
+   "nombre": "Costos por préstamos",
+   "pagina": 27
+  },
+  "3442": {
+   "nombre": "Costos de desarrollo",
+   "pagina": 27
+  },
+  "34421": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34422": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "34423": {
+   "nombre": "Costos por préstamos",
+   "pagina": 27
+  },
+  "345": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 27
+  },
+  "3451": {
+   "nombre": "Fórmulas",
+   "pagina": 27
+  },
+  "34511": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34512": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "34513": {
+   "nombre": "Costos por préstamos",
+   "pagina": 27
+  },
+  "3452": {
+   "nombre": "Diseños y prototipos",
+   "pagina": 27
+  },
+  "34521": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "34522": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "34523": {
+   "nombre": "Costos por préstamos",
+   "pagina": 27
+  },
+  "347": {
+   "nombre": "Plusvalía",
+   "pagina": 27
+  },
+  "3471": {
+   "nombre": "Plusvalía",
+   "pagina": 27
+  },
+  "348": {
+   "nombre": "Criptoactivos",
+   "pagina": 27
+  },
+  "3481": {
+   "nombre": "Costo",
+   "pagina": 27
+  },
+  "3482": {
+   "nombre": "Revaluación",
+   "pagina": 27
+  },
+  "349": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 27
+  },
+  "3491": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 27
+  },
+  "34911": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "34912": {
+   "nombre": "Revaluación",
+   "pagina": 28
+  },
+  "35": {
+   "nombre": "ACTIVOS BIOLÓGICOS",
+   "pagina": 28
+  },
+  "351": {
+   "nombre": "Activos biológicos en producción",
+   "pagina": 28
+  },
+  "3511": {
+   "nombre": "De origen animal",
+   "pagina": 28
+  },
+  "35111": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "35114": {
+   "nombre": "Valor razonable",
+   "pagina": 28
+  },
+  "3512": {
+   "nombre": "De origen vegetal",
+   "pagina": 28
+  },
+  "35121": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "35124": {
+   "nombre": "Valor razonable",
+   "pagina": 28
+  },
+  "352": {
+   "nombre": "Activos biológicos en desarrollo",
+   "pagina": 28
+  },
+  "3521": {
+   "nombre": "De origen animal",
+   "pagina": 28
+  },
+  "35211": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "35213": {
+   "nombre": "Costos por préstamos",
+   "pagina": 28
+  },
+  "35214": {
+   "nombre": "Valor razonable",
+   "pagina": 28
+  },
+  "3522": {
+   "nombre": "De origen vegetal",
+   "pagina": 28
+  },
+  "35221": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "35223": {
+   "nombre": "Costos por préstamos",
+   "pagina": 28
+  },
+  "35224": {
+   "nombre": "Valor razonable",
+   "pagina": 28
+  },
+  "36": {
+   "nombre": "DETERIORO DE ACTIVO INMOVILIZADO",
+   "pagina": 28
+  },
+  "361": {
+   "nombre": "Deterioro de propiedades de inversión",
+   "pagina": 28
+  },
+  "3611": {
+   "nombre": "Terrenos",
+   "pagina": 28
+  },
+  "36111": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "3612": {
+   "nombre": "Edificaciones",
+   "pagina": 28
+  },
+  "36121": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "3613": {
+   "nombre": "Construcciones en curso - Edificaciones",
+   "pagina": 28
+  },
+  "36131": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "362": {
+   "nombre": "Deterioro de propiedades de inversión - Arrendamiento financiero",
+   "pagina": 28
+  },
+  "3621": {
+   "nombre": "Terrenos",
+   "pagina": 28
+  },
+  "36211": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "3622": {
+   "nombre": "Edificaciones",
+   "pagina": 28
+  },
+  "36221": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "363": {
+   "nombre": "Deterioro de propiedades, planta y equipo - Arrendamiento financiero",
+   "pagina": 28
+  },
+  "3631": {
+   "nombre": "Terrenos",
+   "pagina": 28
+  },
+  "36311": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "36312": {
+   "nombre": "Revaluación",
+   "pagina": 28
+  },
+  "3632": {
+   "nombre": "Edificaciones",
+   "pagina": 28
+  },
+  "36321": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "36322": {
+   "nombre": "Revaluación",
+   "pagina": 28
+  },
+  "3633": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 28
+  },
+  "36331": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "36332": {
+   "nombre": "Revaluación",
+   "pagina": 28
+  },
+  "3634": {
+   "nombre": "Unidades de transporte",
+   "pagina": 28
+  },
+  "36341": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "36342": {
+   "nombre": "Revaluación",
+   "pagina": 28
+  },
+  "3635": {
+   "nombre": "Muebles y enseres",
+   "pagina": 28
+  },
+  "36351": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "36352": {
+   "nombre": "Revaluación",
+   "pagina": 28
+  },
+  "3636": {
+   "nombre": "Equipos diversos",
+   "pagina": 28
+  },
+  "36361": {
+   "nombre": "Costo",
+   "pagina": 28
+  },
+  "36362": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3637": {
+   "nombre": "Plantas productoras",
+   "pagina": 29
+  },
+  "36371": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36372": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "364": {
+   "nombre": "Deterioro de propiedades, planta y equipo",
+   "pagina": 29
+  },
+  "3640": {
+   "nombre": "Planta productora en producción y desarrollo",
+   "pagina": 29
+  },
+  "36401": {
+   "nombre": "Planta productora en producción - Costo",
+   "pagina": 29
+  },
+  "36402": {
+   "nombre": "Planta productora en producción - Revaluación",
+   "pagina": 29
+  },
+  "36404": {
+   "nombre": "Planta productora en desarrollo - Costo",
+   "pagina": 29
+  },
+  "36405": {
+   "nombre": "Planta productora en desarrollo - Revaluación",
+   "pagina": 29
+  },
+  "3641": {
+   "nombre": "Terrenos",
+   "pagina": 29
+  },
+  "36411": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36412": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3642": {
+   "nombre": "Edificaciones, instalaciones y mejoras en locales arrendados",
+   "pagina": 29
+  },
+  "36421": {
+   "nombre": "Edificaciones – Costo",
+   "pagina": 29
+  },
+  "36422": {
+   "nombre": "Edificaciones - Revaluación",
+   "pagina": 29
+  },
+  "36424": {
+   "nombre": "Instalaciones – Costo",
+   "pagina": 29
+  },
+  "36425": {
+   "nombre": "Instalaciones - Revaluación",
+   "pagina": 29
+  },
+  "36427": {
+   "nombre": "Mejoras en locales arrendados - Costo",
+   "pagina": 29
+  },
+  "36428": {
+   "nombre": "Mejoras en locales arrendados - Revaluación",
+   "pagina": 29
+  },
+  "3643": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 29
+  },
+  "36431": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36432": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3644": {
+   "nombre": "Unidades de transporte",
+   "pagina": 29
+  },
+  "36441": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36442": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3645": {
+   "nombre": "Muebles y enseres",
+   "pagina": 29
+  },
+  "36451": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36452": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3646": {
+   "nombre": "Equipos diversos",
+   "pagina": 29
+  },
+  "36461": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36462": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3647": {
+   "nombre": "Piezas de repuesto y unidades de reemplazo",
+   "pagina": 29
+  },
+  "36471": {
+   "nombre": "Piezas de repuesto - Costo",
+   "pagina": 29
+  },
+  "36472": {
+   "nombre": "Piezas de repuesto - Revaluación",
+   "pagina": 29
+  },
+  "36474": {
+   "nombre": "Unidades de reemplazo - Costo",
+   "pagina": 29
+  },
+  "36475": {
+   "nombre": "Unidades de reemplazo - Revaluación",
+   "pagina": 29
+  },
+  "3649": {
+   "nombre": "Obras en curso",
+   "pagina": 29
+  },
+  "36491": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "365": {
+   "nombre": "Deterioro de activos intangibles",
+   "pagina": 29
+  },
+  "3651": {
+   "nombre": "Concesiones, licencias y otros derechos",
+   "pagina": 29
+  },
+  "36511": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36512": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3652": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 29
+  },
+  "36521": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36522": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3653": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 29
+  },
+  "36531": {
+   "nombre": "Costo",
+   "pagina": 29
+  },
+  "36532": {
+   "nombre": "Revaluación",
+   "pagina": 29
+  },
+  "3654": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 29
+  },
+  "36541": {
+   "nombre": "Costo de exploración - Costo",
+   "pagina": 30
+  },
+  "36542": {
+   "nombre": "Costo de exploración - Revaluación",
+   "pagina": 30
+  },
+  "36544": {
+   "nombre": "Costo de desarrollo - Costo",
+   "pagina": 30
+  },
+  "36545": {
+   "nombre": "Costo de desarrollo - Revaluación",
+   "pagina": 30
+  },
+  "3655": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 30
+  },
+  "36551": {
+   "nombre": "Costo",
+   "pagina": 30
+  },
+  "36552": {
+   "nombre": "Revaluación",
+   "pagina": 30
+  },
+  "3657": {
+   "nombre": "Plusvalía",
+   "pagina": 30
+  },
+  "3658": {
+   "nombre": "Criptoactivos",
+   "pagina": 30
+  },
+  "36581": {
+   "nombre": "Costo",
+   "pagina": 30
+  },
+  "36582": {
+   "nombre": "Revaluación",
+   "pagina": 30
+  },
+  "3659": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 30
+  },
+  "36591": {
+   "nombre": "Costo",
+   "pagina": 30
+  },
+  "36592": {
+   "nombre": "Revaluación",
+   "pagina": 30
+  },
+  "366": {
+   "nombre": "Deterioro de activos biológicos",
+   "pagina": 30
+  },
+  "3661": {
+   "nombre": "Activos biológicos en producción",
+   "pagina": 30
+  },
+  "36611": {
+   "nombre": "Costo",
+   "pagina": 30
+  },
+  "3662": {
+   "nombre": "Activos biológicos en desarrollo",
+   "pagina": 30
+  },
+  "36621": {
+   "nombre": "Costo",
+   "pagina": 30
+  },
+  "367": {
+   "nombre": "Deterioro de inversiones en subsidiarias, asociadas y negocios conjuntos",
+   "pagina": 30
+  },
+  "3671": {
+   "nombre": "Subsidiarias",
+   "pagina": 30
+  },
+  "36711": {
+   "nombre": "Costo",
+   "pagina": 30
+  },
+  "3672": {
+   "nombre": "Asociadas",
+   "pagina": 30
+  },
+  "36721": {
+   "nombre": "Costo",
+   "pagina": 30
+  },
+  "3673": {
+   "nombre": "Negocios conjuntos",
+   "pagina": 30
+  },
+  "36731": {
+   "nombre": "Costo",
+   "pagina": 30
+  },
+  "37": {
+   "nombre": "ACTIVO POR IMPUESTO A LAS GANANCIAS DIFERIDO",
+   "pagina": 30
+  },
+  "371": {
+   "nombre": "Impuesto a las ganancias diferido",
+   "pagina": 30
+  },
+  "3711": {
+   "nombre": "Impuesto a las ganancias diferido – Patrimonio",
+   "pagina": 30
+  },
+  "3712": {
+   "nombre": "Impuesto a las ganancias diferido – Resultados",
+   "pagina": 30
+  },
+  "38": {
+   "nombre": "OTROS ACTIVOS",
+   "pagina": 30
+  },
+  "381": {
+   "nombre": "Bienes de arte y cultura",
+   "pagina": 30
+  },
+  "3811": {
+   "nombre": "Obras de arte",
+   "pagina": 30
+  },
+  "3812": {
+   "nombre": "Biblioteca",
+   "pagina": 30
+  },
+  "3813": {
+   "nombre": "Otros",
+   "pagina": 30
+  },
+  "382": {
+   "nombre": "Diversos",
+   "pagina": 30
+  },
+  "3821": {
+   "nombre": "Monedas y joyas",
+   "pagina": 30
+  },
+  "3822": {
+   "nombre": "Bienes entregados en comodato",
+   "pagina": 30
+  },
+  "3823": {
+   "nombre": "Bienes recibidos en pago (adjudicados y realizables)",
+   "pagina": 30
+  },
+  "3829": {
+   "nombre": "Otros",
+   "pagina": 30
+  },
+  "39": {
+   "nombre": "DEPRECIACIÓN y AMORTIZACIÓN ACUMULADAS",
+   "pagina": 30
+  },
+  "391": {
+   "nombre": "Depreciación acumulada de propiedades de inversión",
+   "pagina": 30
+  },
+  "3911": {
+   "nombre": "Propiedades de inversión – Costo",
+   "pagina": 30
+  },
+  "39111": {
+   "nombre": "Edificaciones",
+   "pagina": 30
+  },
+  "3912": {
+   "nombre": "Propiedades de inversión – Costos por préstamos",
+   "pagina": 30
+  },
+  "39121": {
+   "nombre": "Edificaciones",
+   "pagina": 30
+  },
+  "392": {
+   "nombre": "Depreciación acumulada de propiedades de inversión - Arrendamiento financiero",
+   "pagina": 30
+  },
+  "3921": {
+   "nombre": "Propiedades de inversión – Arrendamiento financiero – Costo",
+   "pagina": 30
+  },
+  "39211": {
+   "nombre": "Edificaciones",
+   "pagina": 30
+  },
+  "393": {
+   "nombre": "Depreciación acumulada de propiedades, planta y equipo - Arrendamiento financiero",
+   "pagina": 31
+  },
+  "3931": {
+   "nombre": "Propiedades, planta y equipo - Arrendamiento financiero – Costo",
+   "pagina": 31
+  },
+  "39311": {
+   "nombre": "Plantas productoras",
+   "pagina": 31
+  },
+  "39312": {
+   "nombre": "Edificaciones",
+   "pagina": 31
+  },
+  "39313": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 31
+  },
+  "39314": {
+   "nombre": "Unidades de transporte",
+   "pagina": 31
+  },
+  "39315": {
+   "nombre": "Muebles y enseres",
+   "pagina": 31
+  },
+  "39316": {
+   "nombre": "Equipos diversos",
+   "pagina": 31
+  },
+  "3932": {
+   "nombre": "Propiedades, planta y equipo - Arrendamiento financiero – Revaluación",
+   "pagina": 31
+  },
+  "39321": {
+   "nombre": "Plantas productoras",
+   "pagina": 31
+  },
+  "39322": {
+   "nombre": "Edificaciones",
+   "pagina": 31
+  },
+  "39323": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 31
+  },
+  "39324": {
+   "nombre": "Unidades de transporte",
+   "pagina": 31
+  },
+  "39325": {
+   "nombre": "Muebles y enseres",
+   "pagina": 31
+  },
+  "39326": {
+   "nombre": "Equipos diversos",
+   "pagina": 31
+  },
+  "395": {
+   "nombre": "Depreciación acumulada de propiedades, planta y equipo",
+   "pagina": 31
+  },
+  "3951": {
+   "nombre": "Propiedades, planta y equipo – Costo",
+   "pagina": 31
+  },
+  "39511": {
+   "nombre": "Plantas productoras",
+   "pagina": 31
+  },
+  "39512": {
+   "nombre": "Edificaciones, instalaciones y mejoras en locales arrendados",
+   "pagina": 31
+  },
+  "39513": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 31
+  },
+  "39514": {
+   "nombre": "Unidades de transporte",
+   "pagina": 31
+  },
+  "39515": {
+   "nombre": "Muebles y enseres",
+   "pagina": 31
+  },
+  "39516": {
+   "nombre": "Equipos diversos",
+   "pagina": 31
+  },
+  "39517": {
+   "nombre": "Herramientas",
+   "pagina": 31
+  },
+  "39518": {
+   "nombre": "Unidades de reemplazo",
+   "pagina": 31
+  },
+  "3952": {
+   "nombre": "Propiedades, planta y equipo – Revaluación",
+   "pagina": 31
+  },
+  "39521": {
+   "nombre": "Plantas productoras",
+   "pagina": 31
+  },
+  "39522": {
+   "nombre": "Edificaciones, instalaciones y mejoras en locales arrendados",
+   "pagina": 31
+  },
+  "39523": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 31
+  },
+  "39524": {
+   "nombre": "Unidades de transporte",
+   "pagina": 31
+  },
+  "39525": {
+   "nombre": "Muebles y enseres",
+   "pagina": 31
+  },
+  "39526": {
+   "nombre": "Equipos diversos",
+   "pagina": 31
+  },
+  "39527": {
+   "nombre": "Herramientas",
+   "pagina": 31
+  },
+  "39528": {
+   "nombre": "Unidades de reemplazo",
+   "pagina": 31
+  },
+  "3953": {
+   "nombre": "Propiedades, planta y equipo – Costos por préstamos",
+   "pagina": 31
+  },
+  "39531": {
+   "nombre": "Plantas productoras en desarrollo",
+   "pagina": 31
+  },
+  "39532": {
+   "nombre": "Edificaciones, instalaciones y mejoras en locales arrendados",
+   "pagina": 31
+  },
+  "39533": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 31
+  },
+  "39536": {
+   "nombre": "Equipos diversos",
+   "pagina": 31
+  },
+  "396": {
+   "nombre": "Amortización acumulada",
+   "pagina": 31
+  },
+  "3961": {
+   "nombre": "Activos intangibles – Costo",
+   "pagina": 31
+  },
+  "39611": {
+   "nombre": "Concesiones, licencias y otros derechos",
+   "pagina": 31
+  },
+  "39612": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 31
+  },
+  "39613": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 31
+  },
+  "39614": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 31
+  },
+  "39615": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 31
+  },
+  "39619": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 31
+  },
+  "3962": {
+   "nombre": "Activos intangibles – Revaluación",
+   "pagina": 32
+  },
+  "39621": {
+   "nombre": "Concesiones, licencias y otros derechos",
+   "pagina": 32
+  },
+  "39622": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 32
+  },
+  "39623": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 32
+  },
+  "39624": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 32
+  },
+  "39625": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 32
+  },
+  "39629": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 32
+  },
+  "3963": {
+   "nombre": "Activos intangibles – Costos por préstamos",
+   "pagina": 32
+  },
+  "39631": {
+   "nombre": "Concesiones",
+   "pagina": 32
+  },
+  "39633": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 32
+  },
+  "39634": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 32
+  },
+  "39635": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 32
+  },
+  "39639": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 32
+  },
+  "398": {
+   "nombre": "Depreciación acumulada - Activos biológicos",
+   "pagina": 32
+  },
+  "3981": {
+   "nombre": "Activos biológicos en producción – Costo",
+   "pagina": 32
+  },
+  "39811": {
+   "nombre": "Activos biológicos de origen animal",
+   "pagina": 32
+  },
+  "39812": {
+   "nombre": "Activos biológicos de origen vegetal",
+   "pagina": 32
+  },
+  "3982": {
+   "nombre": "Activos biológicos en producción - Costos por préstamos",
+   "pagina": 32
+  },
+  "39821": {
+   "nombre": "Activos biológicos de origen animal",
+   "pagina": 32
+  },
+  "39822": {
+   "nombre": "Activos biológicos de origen vegetal ELEMENTO 4: PASIVO",
+   "pagina": 32
+  },
+  "40": {
+   "nombre": "TRIBUTOS, CONTRAPRESTACIONES Y APORTES AL SISTEMA PÚBLICO DE PENSIONES Y DE SALUD POR PAGAR",
+   "pagina": 32
+  },
+  "401": {
+   "nombre": "Gobierno nacional",
+   "pagina": 32
+  },
+  "4011": {
+   "nombre": "Impuesto general a las ventas",
+   "pagina": 32
+  },
+  "40111": {
+   "nombre": "IGV – Cuenta propia",
+   "pagina": 32
+  },
+  "40112": {
+   "nombre": "IGV – Servicios prestados por no domiciliados",
+   "pagina": 32
+  },
+  "40113": {
+   "nombre": "IGV – Régimen de percepciones",
+   "pagina": 32
+  },
+  "40114": {
+   "nombre": "IGV – Régimen de retenciones",
+   "pagina": 32
+  },
+  "40115": {
+   "nombre": "IGV – Importaciones",
+   "pagina": 32
+  },
+  "40116": {
+   "nombre": "IGV – Destinado a operaciones gravadas",
+   "pagina": 32
+  },
+  "40117": {
+   "nombre": "IGV - Destinado a operaciones comunes",
+   "pagina": 32
+  },
+  "4012": {
+   "nombre": "Impuesto selectivo al consumo",
+   "pagina": 32
+  },
+  "4015": {
+   "nombre": "Derechos aduaneros",
+   "pagina": 32
+  },
+  "40151": {
+   "nombre": "Derechos arancelarios",
+   "pagina": 32
+  },
+  "40152": {
+   "nombre": "Otros derechos arancelarios",
+   "pagina": 32
+  },
+  "4017": {
+   "nombre": "Impuesto a las ganancias",
+   "pagina": 32
+  },
+  "40171": {
+   "nombre": "Renta de tercera categoría",
+   "pagina": 32
+  },
+  "40172": {
+   "nombre": "Renta de cuarta categoría",
+   "pagina": 32
+  },
+  "40173": {
+   "nombre": "Renta de quinta categoría",
+   "pagina": 32
+  },
+  "40174": {
+   "nombre": "Renta de no domiciliados",
+   "pagina": 32
+  },
+  "40175": {
+   "nombre": "Otras retenciones",
+   "pagina": 32
+  },
+  "4018": {
+   "nombre": "Otros impuestos y contraprestaciones",
+   "pagina": 32
+  },
+  "40181": {
+   "nombre": "Impuesto a las transacciones financieras",
+   "pagina": 32
+  },
+  "40182": {
+   "nombre": "Impuesto a los juegos de casino y tragamonedas",
+   "pagina": 32
+  },
+  "40183": {
+   "nombre": "Tasas por la prestación de servicios públicos",
+   "pagina": 32
+  },
+  "40184": {
+   "nombre": "Regalías",
+   "pagina": 32
+  },
+  "40185": {
+   "nombre": "Impuesto a los dividendos",
+   "pagina": 32
+  },
+  "40186": {
+   "nombre": "Impuesto temporal a los activos netos",
+   "pagina": 32
+  },
+  "40189": {
+   "nombre": "Otros impuestos",
+   "pagina": 33
+  },
+  "402": {
+   "nombre": "Certificados tributarios",
+   "pagina": 33
+  },
+  "403": {
+   "nombre": "Instituciones públicas",
+   "pagina": 33
+  },
+  "4031": {
+   "nombre": "ESSALUD",
+   "pagina": 33
+  },
+  "4032": {
+   "nombre": "ONP",
+   "pagina": 33
+  },
+  "4033": {
+   "nombre": "Contribución al SENATI",
+   "pagina": 33
+  },
+  "4034": {
+   "nombre": "Contribución al SENCICO",
+   "pagina": 33
+  },
+  "4039": {
+   "nombre": "Otras instituciones",
+   "pagina": 33
+  },
+  "405": {
+   "nombre": "Gobiernos regionales",
+   "pagina": 33
+  },
+  "406": {
+   "nombre": "Gobiernos locales",
+   "pagina": 33
+  },
+  "4061": {
+   "nombre": "Impuestos",
+   "pagina": 33
+  },
+  "40611": {
+   "nombre": "Impuesto al patrimonio vehicular",
+   "pagina": 33
+  },
+  "40612": {
+   "nombre": "Impuesto a las apuestas",
+   "pagina": 33
+  },
+  "40613": {
+   "nombre": "Impuesto a los juegos",
+   "pagina": 33
+  },
+  "40614": {
+   "nombre": "Impuesto de alcabala",
+   "pagina": 33
+  },
+  "40615": {
+   "nombre": "Impuesto predial",
+   "pagina": 33
+  },
+  "40616": {
+   "nombre": "Impuesto a los espectáculos públicos no deportivos",
+   "pagina": 33
+  },
+  "4062": {
+   "nombre": "Contribuciones",
+   "pagina": 33
+  },
+  "4063": {
+   "nombre": "Tasas",
+   "pagina": 33
+  },
+  "40631": {
+   "nombre": "Licencia de apertura de establecimientos",
+   "pagina": 33
+  },
+  "40632": {
+   "nombre": "Transporte público",
+   "pagina": 33
+  },
+  "40633": {
+   "nombre": "Estacionamiento de vehículos",
+   "pagina": 33
+  },
+  "40634": {
+   "nombre": "Servicios públicos o arbitrios",
+   "pagina": 33
+  },
+  "40635": {
+   "nombre": "Servicios administrativos o derechos",
+   "pagina": 33
+  },
+  "409": {
+   "nombre": "Sanciones y otros costos administrativos",
+   "pagina": 33
+  },
+  "41": {
+   "nombre": "REMUNERACIONES Y PARTICIPACIONES POR PAGAR",
+   "pagina": 33
+  },
+  "411": {
+   "nombre": "Remuneraciones por pagar",
+   "pagina": 33
+  },
+  "4111": {
+   "nombre": "Sueldos y salarios por pagar",
+   "pagina": 33
+  },
+  "4112": {
+   "nombre": "Comisiones por pagar",
+   "pagina": 33
+  },
+  "4113": {
+   "nombre": "Remuneraciones en especie por pagar",
+   "pagina": 33
+  },
+  "4114": {
+   "nombre": "Gratificaciones por pagar",
+   "pagina": 33
+  },
+  "4115": {
+   "nombre": "Vacaciones por pagar",
+   "pagina": 33
+  },
+  "4116": {
+   "nombre": "Obligación por pago basado en acciones",
+   "pagina": 33
+  },
+  "413": {
+   "nombre": "Participaciones de los trabajadores por pagar",
+   "pagina": 33
+  },
+  "415": {
+   "nombre": "Beneficios sociales de los trabajadores por pagar",
+   "pagina": 33
+  },
+  "4151": {
+   "nombre": "Compensación por tiempo de servicios",
+   "pagina": 33
+  },
+  "4152": {
+   "nombre": "Adelanto de compensación por tiempo de servicios",
+   "pagina": 33
+  },
+  "4153": {
+   "nombre": "Pensiones y jubilaciones",
+   "pagina": 33
+  },
+  "417": {
+   "nombre": "Administradoras de fondos de pensiones",
+   "pagina": 33
+  },
+  "419": {
+   "nombre": "Otras remuneraciones y participaciones por pagar",
+   "pagina": 33
+  },
+  "42": {
+   "nombre": "CUENTAS POR PAGAR COMERCIALES - TERCEROS",
+   "pagina": 33
+  },
+  "421": {
+   "nombre": "Facturas, boletas y otros comprobantes por pagar",
+   "pagina": 33
+  },
+  "4211": {
+   "nombre": "No emitidas",
+   "pagina": 33
+  },
+  "4212": {
+   "nombre": "Emitidas",
+   "pagina": 33
+  },
+  "422": {
+   "nombre": "Anticipos otorgados",
+   "pagina": 33
+  },
+  "423": {
+   "nombre": "Letras por pagar",
+   "pagina": 33
+  },
+  "424": {
+   "nombre": "Honorarios por pagar",
+   "pagina": 33
+  },
+  "425": {
+   "nombre": "Acuerdos de financiamiento",
+   "pagina": 33
+  },
+  "43": {
+   "nombre": "CUENTAS POR PAGAR COMERCIALES - RELACIONADAS",
+   "pagina": 33
+  },
+  "431": {
+   "nombre": "Facturas, boletas y otros comprobantes por pagar",
+   "pagina": 33
+  },
+  "4311": {
+   "nombre": "No emitidas",
+   "pagina": 34
+  },
+  "4312": {
+   "nombre": "Emitidas",
+   "pagina": 34
+  },
+  "432": {
+   "nombre": "Anticipos otorgados",
+   "pagina": 34
+  },
+  "4321": {
+   "nombre": "Anticipos otorgados",
+   "pagina": 34
+  },
+  "433": {
+   "nombre": "Letras por pagar",
+   "pagina": 34
+  },
+  "4331": {
+   "nombre": "Letras por pagar",
+   "pagina": 34
+  },
+  "434": {
+   "nombre": "Honorarios por pagar",
+   "pagina": 34
+  },
+  "4341": {
+   "nombre": "Honorarios por pagar",
+   "pagina": 34
+  },
+  "44": {
+   "nombre": "CUENTAS POR PAGAR A LOS ACCIONISTAS (SOCIOS, PARTÍCIPES) Y DIRECTORES",
+   "pagina": 34
+  },
+  "441": {
+   "nombre": "Accionistas (socios, partícipes)",
+   "pagina": 34
+  },
+  "4411": {
+   "nombre": "Préstamos",
+   "pagina": 34
+  },
+  "4412": {
+   "nombre": "Dividendos",
+   "pagina": 34
+  },
+  "4419": {
+   "nombre": "Otras cuentas por pagar",
+   "pagina": 34
+  },
+  "442": {
+   "nombre": "Directores",
+   "pagina": 34
+  },
+  "4421": {
+   "nombre": "Dietas",
+   "pagina": 34
+  },
+  "4429": {
+   "nombre": "Otras cuentas por pagar",
+   "pagina": 34
+  },
+  "45": {
+   "nombre": "OBLIGACIONES FINANCIERAS",
+   "pagina": 34
+  },
+  "451": {
+   "nombre": "Préstamos de instituciones financieras y otras entidades",
+   "pagina": 34
+  },
+  "4511": {
+   "nombre": "Instituciones financieras",
+   "pagina": 34
+  },
+  "4512": {
+   "nombre": "Otras entidades",
+   "pagina": 34
+  },
+  "452": {
+   "nombre": "Contratos de arrendamiento financiero",
+   "pagina": 34
+  },
+  "453": {
+   "nombre": "Obligaciones emitidas",
+   "pagina": 34
+  },
+  "4531": {
+   "nombre": "Bonos emitidos",
+   "pagina": 34
+  },
+  "4532": {
+   "nombre": "Bonos titulizados",
+   "pagina": 34
+  },
+  "4533": {
+   "nombre": "Papeles comerciales",
+   "pagina": 34
+  },
+  "4539": {
+   "nombre": "Otras obligaciones",
+   "pagina": 34
+  },
+  "454": {
+   "nombre": "Otros Instrumentos financieros por pagar",
+   "pagina": 34
+  },
+  "4541": {
+   "nombre": "Letras",
+   "pagina": 34
+  },
+  "4542": {
+   "nombre": "Papeles comerciales",
+   "pagina": 34
+  },
+  "4543": {
+   "nombre": "Bonos",
+   "pagina": 34
+  },
+  "4544": {
+   "nombre": "Pagarés",
+   "pagina": 34
+  },
+  "4545": {
+   "nombre": "Facturas conformadas",
+   "pagina": 34
+  },
+  "4549": {
+   "nombre": "Otras obligaciones financieras",
+   "pagina": 34
+  },
+  "455": {
+   "nombre": "Costos por préstamos por pagar",
+   "pagina": 34
+  },
+  "4551": {
+   "nombre": "Préstamos de instituciones financieras y otras entidades",
+   "pagina": 34
+  },
+  "45511": {
+   "nombre": "Instituciones financieras",
+   "pagina": 34
+  },
+  "45512": {
+   "nombre": "Otras entidades",
+   "pagina": 34
+  },
+  "4552": {
+   "nombre": "Contratos de arrendamiento financiero",
+   "pagina": 34
+  },
+  "4553": {
+   "nombre": "Obligaciones emitidas",
+   "pagina": 34
+  },
+  "45531": {
+   "nombre": "Bonos emitidos",
+   "pagina": 34
+  },
+  "45532": {
+   "nombre": "Bonos titulizados",
+   "pagina": 34
+  },
+  "45533": {
+   "nombre": "Papeles comerciales",
+   "pagina": 34
+  },
+  "45539": {
+   "nombre": "Otras obligaciones",
+   "pagina": 34
+  },
+  "4554": {
+   "nombre": "Otros instrumentos financieros por pagar",
+   "pagina": 34
+  },
+  "45541": {
+   "nombre": "Letras",
+   "pagina": 34
+  },
+  "45542": {
+   "nombre": "Papeles comerciales",
+   "pagina": 34
+  },
+  "45543": {
+   "nombre": "Bonos",
+   "pagina": 34
+  },
+  "45544": {
+   "nombre": "Pagarés",
+   "pagina": 34
+  },
+  "45545": {
+   "nombre": "Facturas conformadas",
+   "pagina": 34
+  },
+  "45549": {
+   "nombre": "Otras obligaciones financieras",
+   "pagina": 35
+  },
+  "456": {
+   "nombre": "Préstamos con compromisos de recompra",
+   "pagina": 35
+  },
+  "46": {
+   "nombre": "CUENTAS POR PAGAR DIVERSAS – TERCEROS",
+   "pagina": 35
+  },
+  "461": {
+   "nombre": "Reclamaciones de terceros",
+   "pagina": 35
+  },
+  "462": {
+   "nombre": "Pasivos por arrendamiento por derecho de uso",
+   "pagina": 35
+  },
+  "463": {
+   "nombre": "Pasivos por reembolsos",
+   "pagina": 35
+  },
+  "4631": {
+   "nombre": "Pasivos por devoluciones esperadas",
+   "pagina": 35
+  },
+  "4632": {
+   "nombre": "Pasivos por contraprestación variable",
+   "pagina": 35
+  },
+  "46321": {
+   "nombre": "Descuentos",
+   "pagina": 35
+  },
+  "46322": {
+   "nombre": "Bonificaciones",
+   "pagina": 35
+  },
+  "46323": {
+   "nombre": "Incentivos",
+   "pagina": 35
+  },
+  "4633": {
+   "nombre": "Contraprestación pagadera a clientes",
+   "pagina": 35
+  },
+  "464": {
+   "nombre": "Pasivos por instrumentos financieros",
+   "pagina": 35
+  },
+  "4641": {
+   "nombre": "Instrumentos financieros primarios",
+   "pagina": 35
+  },
+  "4642": {
+   "nombre": "Instrumentos financieros derivados",
+   "pagina": 35
+  },
+  "46421": {
+   "nombre": "Cartera de negociación",
+   "pagina": 35
+  },
+  "46422": {
+   "nombre": "Instrumentos de cobertura",
+   "pagina": 35
+  },
+  "465": {
+   "nombre": "Pasivos por compra de activo inmovilizado",
+   "pagina": 35
+  },
+  "4651": {
+   "nombre": "Inversiones financieras",
+   "pagina": 35
+  },
+  "4652": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 35
+  },
+  "4653": {
+   "nombre": "Activos adquiridos en arrendamiento financiero",
+   "pagina": 35
+  },
+  "4654": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 35
+  },
+  "4655": {
+   "nombre": "Activos intangibles",
+   "pagina": 35
+  },
+  "4656": {
+   "nombre": "Activos biológicos",
+   "pagina": 35
+  },
+  "466": {
+   "nombre": "Participación de terceros en acuerdos conjuntos",
+   "pagina": 35
+  },
+  "467": {
+   "nombre": "Depósitos recibidos en garantía",
+   "pagina": 35
+  },
+  "469": {
+   "nombre": "Otras cuentas por pagar diversas",
+   "pagina": 35
+  },
+  "4691": {
+   "nombre": "Subsidios gubernamentales",
+   "pagina": 35
+  },
+  "4692": {
+   "nombre": "Donaciones condicionadas",
+   "pagina": 35
+  },
+  "4693": {
+   "nombre": "Cánones",
+   "pagina": 35
+  },
+  "4699": {
+   "nombre": "Otras cuentas por pagar",
+   "pagina": 35
+  },
+  "47": {
+   "nombre": "CUENTAS POR PAGAR DIVERSAS – RELACIONADAS",
+   "pagina": 35
+  },
+  "471": {
+   "nombre": "Préstamos",
+   "pagina": 35
+  },
+  "472": {
+   "nombre": "Costos por préstamos",
+   "pagina": 35
+  },
+  "473": {
+   "nombre": "Anticipos recibidos",
+   "pagina": 35
+  },
+  "474": {
+   "nombre": "Regalías",
+   "pagina": 35
+  },
+  "475": {
+   "nombre": "Dividendos",
+   "pagina": 35
+  },
+  "476": {
+   "nombre": "Depósitos recibidos en garantía",
+   "pagina": 35
+  },
+  "477": {
+   "nombre": "Pasivo por compra de activo inmovilizado",
+   "pagina": 35
+  },
+  "4771": {
+   "nombre": "Inversiones financieras",
+   "pagina": 35
+  },
+  "4772": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 35
+  },
+  "4773": {
+   "nombre": "Activos adquiridos en arrendamiento financiero",
+   "pagina": 35
+  },
+  "4774": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 35
+  },
+  "4775": {
+   "nombre": "Activos intangibles",
+   "pagina": 35
+  },
+  "4776": {
+   "nombre": "Activos biológicos",
+   "pagina": 35
+  },
+  "479": {
+   "nombre": "Otras cuentas por pagar diversas",
+   "pagina": 35
+  },
+  "4791": {
+   "nombre": "Otras cuentas por pagar diversas",
+   "pagina": 35
+  },
+  "48": {
+   "nombre": "PROVISIONES",
+   "pagina": 35
+  },
+  "481": {
+   "nombre": "Provisión para litigios",
+   "pagina": 35
+  },
+  "482": {
+   "nombre": "Provisión por desmantelamiento, retiro o rehabilitación del inmovilizado",
+   "pagina": 35
+  },
+  "483": {
+   "nombre": "Provisión para reestructuraciones",
+   "pagina": 36
+  },
+  "484": {
+   "nombre": "Provisión para protección y remediación del medio ambiente",
+   "pagina": 36
+  },
+  "485": {
+   "nombre": "Provisión para gastos de responsabilidad social",
+   "pagina": 36
+  },
+  "486": {
+   "nombre": "Provisión para garantías",
+   "pagina": 36
+  },
+  "489": {
+   "nombre": "Otras provisiones",
+   "pagina": 36
+  },
+  "49": {
+   "nombre": "PASIVO DIFERIDO",
+   "pagina": 36
+  },
+  "491": {
+   "nombre": "Impuesto a las ganancias diferido",
+   "pagina": 36
+  },
+  "4911": {
+   "nombre": "Impuesto a las ganancias diferido – Patrimonio",
+   "pagina": 36
+  },
+  "4912": {
+   "nombre": "Impuesto a las ganancias diferido – Resultados",
+   "pagina": 36
+  },
+  "492": {
+   "nombre": "Ganancia por venta de activo con arrendamiento posterior",
+   "pagina": 36
+  },
+  "493": {
+   "nombre": "Subsidios recibidos diferidos",
+   "pagina": 36
+  },
+  "494": {
+   "nombre": "Pasivo del contrato",
+   "pagina": 36
+  },
+  "4941": {
+   "nombre": "Programa de fidelización de clientes",
+   "pagina": 36
+  },
+  "4942": {
+   "nombre": "Contrato de consultoría TI",
+   "pagina": 36
+  },
+  "4943": {
+   "nombre": "Otros ELEMENTO 5: PATRIMONIO",
+   "pagina": 36
+  },
+  "50": {
+   "nombre": "CAPITAL",
+   "pagina": 36
+  },
+  "501": {
+   "nombre": "Capital social",
+   "pagina": 36
+  },
+  "5011": {
+   "nombre": "Acciones",
+   "pagina": 36
+  },
+  "5012": {
+   "nombre": "Participaciones",
+   "pagina": 36
+  },
+  "502": {
+   "nombre": "Acciones en tesorería",
+   "pagina": 36
+  },
+  "51": {
+   "nombre": "ACCIONES DE INVERSIÓN",
+   "pagina": 36
+  },
+  "511": {
+   "nombre": "Acciones de inversión",
+   "pagina": 36
+  },
+  "512": {
+   "nombre": "Acciones de inversión en tesorería",
+   "pagina": 36
+  },
+  "52": {
+   "nombre": "CAPITAL ADICIONAL",
+   "pagina": 36
+  },
+  "521": {
+   "nombre": "Primas (descuento) de acciones",
+   "pagina": 36
+  },
+  "522": {
+   "nombre": "Capitalizaciones en trámite",
+   "pagina": 36
+  },
+  "5221": {
+   "nombre": "Aportes",
+   "pagina": 36
+  },
+  "5222": {
+   "nombre": "Reservas",
+   "pagina": 36
+  },
+  "5223": {
+   "nombre": "Acreencias",
+   "pagina": 36
+  },
+  "5224": {
+   "nombre": "Utilidades",
+   "pagina": 36
+  },
+  "5225": {
+   "nombre": "Componente de patrimonio en instrumentos financieros compuestos",
+   "pagina": 36
+  },
+  "523": {
+   "nombre": "Reducciones de capital pendientes de formalización",
+   "pagina": 36
+  },
+  "524": {
+   "nombre": "Pago basado en acciones",
+   "pagina": 36
+  },
+  "56": {
+   "nombre": "RESULTADOS NO REALIZADOS",
+   "pagina": 36
+  },
+  "561": {
+   "nombre": "Diferencia de cambio de inversión neta en el extranjero",
+   "pagina": 36
+  },
+  "562": {
+   "nombre": "Instrumentos financieros – Coberturas",
+   "pagina": 36
+  },
+  "565": {
+   "nombre": "Resultado en activos o pasivos financieros – Compra o venta convencional o fecha de liquidación",
+   "pagina": 36
+  },
+  "5651": {
+   "nombre": "Ganancia",
+   "pagina": 36
+  },
+  "5652": {
+   "nombre": "Pérdida",
+   "pagina": 36
+  },
+  "57": {
+   "nombre": "EXCEDENTE DE REVALUACIÓN",
+   "pagina": 36
+  },
+  "571": {
+   "nombre": "Excedente de revaluación",
+   "pagina": 36
+  },
+  "5712": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 36
+  },
+  "57121": {
+   "nombre": "Adquisición directa",
+   "pagina": 36
+  },
+  "57122": {
+   "nombre": "Arrendamiento financiero",
+   "pagina": 36
+  },
+  "5713": {
+   "nombre": "Activos intangibles",
+   "pagina": 36
+  },
+  "5715": {
+   "nombre": "Impuesto a las ganancias diferido",
+   "pagina": 36
+  },
+  "58": {
+   "nombre": "RESERVAS",
+   "pagina": 37
+  },
+  "581": {
+   "nombre": "Reinversión",
+   "pagina": 37
+  },
+  "582": {
+   "nombre": "Legal",
+   "pagina": 37
+  },
+  "583": {
+   "nombre": "Contractuales",
+   "pagina": 37
+  },
+  "584": {
+   "nombre": "Estatutarias",
+   "pagina": 37
+  },
+  "585": {
+   "nombre": "Facultativas",
+   "pagina": 37
+  },
+  "586": {
+   "nombre": "Participación en otros cambios patrimoniales de entidades relacionadas",
+   "pagina": 37
+  },
+  "589": {
+   "nombre": "Otras reservas",
+   "pagina": 37
+  },
+  "59": {
+   "nombre": "RESULTADOS ACUMULADOS",
+   "pagina": 37
+  },
+  "591": {
+   "nombre": "Utilidades no distribuidas",
+   "pagina": 37
+  },
+  "5911": {
+   "nombre": "Utilidades acumuladas",
+   "pagina": 37
+  },
+  "5912": {
+   "nombre": "Efecto de corrección de errores de años anteriores",
+   "pagina": 37
+  },
+  "5913": {
+   "nombre": "Efecto de cambio de política contable",
+   "pagina": 37
+  },
+  "592": {
+   "nombre": "Pérdidas acumuladas",
+   "pagina": 37
+  },
+  "5921": {
+   "nombre": "Pérdidas acumuladas",
+   "pagina": 37
+  },
+  "5922": {
+   "nombre": "Efecto de corrección de errores de años anteriores",
+   "pagina": 37
+  },
+  "5923": {
+   "nombre": "Efecto de cambio de política contable",
+   "pagina": 37
+  },
+  "593": {
+   "nombre": "Efectos de adopción por primera vez de las NIIF ELEMENTO 6: GASTOS POR NATURALEZA",
+   "pagina": 37
+  },
+  "60": {
+   "nombre": "COMPRAS",
+   "pagina": 37
+  },
+  "601": {
+   "nombre": "Mercaderías",
+   "pagina": 37
+  },
+  "6011": {
+   "nombre": "Mercaderías",
+   "pagina": 37
+  },
+  "602": {
+   "nombre": "Materias primas",
+   "pagina": 37
+  },
+  "603": {
+   "nombre": "Materiales auxiliares, suministros y repuestos",
+   "pagina": 37
+  },
+  "6031": {
+   "nombre": "Materiales auxiliares",
+   "pagina": 37
+  },
+  "6032": {
+   "nombre": "Suministros",
+   "pagina": 37
+  },
+  "6033": {
+   "nombre": "Repuestos",
+   "pagina": 37
+  },
+  "604": {
+   "nombre": "Envases y embalajes",
+   "pagina": 37
+  },
+  "6041": {
+   "nombre": "Envases",
+   "pagina": 37
+  },
+  "6042": {
+   "nombre": "Embalajes",
+   "pagina": 37
+  },
+  "605": {
+   "nombre": "Descuentos obtenidos por pronto pago",
+   "pagina": 37
+  },
+  "606": {
+   "nombre": "Descuentos, rebajas y bonificaciones obtenidos por compras",
+   "pagina": 37
+  },
+  "6061": {
+   "nombre": "Descuentos, rebajas y bonificaciones obtenidos",
+   "pagina": 37
+  },
+  "60611": {
+   "nombre": "Terceros",
+   "pagina": 37
+  },
+  "60612": {
+   "nombre": "Relacionadas",
+   "pagina": 37
+  },
+  "609": {
+   "nombre": "Costos vinculados con las compras",
+   "pagina": 37
+  },
+  "6091": {
+   "nombre": "Costos vinculados con las compras de mercaderías",
+   "pagina": 37
+  },
+  "60911": {
+   "nombre": "Transporte",
+   "pagina": 37
+  },
+  "60912": {
+   "nombre": "Seguros",
+   "pagina": 37
+  },
+  "60913": {
+   "nombre": "Derechos aduaneros",
+   "pagina": 37
+  },
+  "60914": {
+   "nombre": "Comisiones",
+   "pagina": 37
+  },
+  "60919": {
+   "nombre": "Otros costos",
+   "pagina": 37
+  },
+  "6092": {
+   "nombre": "Costos vinculados con las compras de materias primas",
+   "pagina": 37
+  },
+  "60921": {
+   "nombre": "Transporte",
+   "pagina": 37
+  },
+  "60922": {
+   "nombre": "Seguros",
+   "pagina": 37
+  },
+  "60923": {
+   "nombre": "Derechos aduaneros",
+   "pagina": 37
+  },
+  "60924": {
+   "nombre": "Comisiones",
+   "pagina": 37
+  },
+  "60925": {
+   "nombre": "Otros costos",
+   "pagina": 37
+  },
+  "6093": {
+   "nombre": "Costos vinculados con las compras de materiales, suministros y repuestos",
+   "pagina": 37
+  },
+  "60931": {
+   "nombre": "Transporte",
+   "pagina": 38
+  },
+  "60932": {
+   "nombre": "Seguros",
+   "pagina": 38
+  },
+  "60933": {
+   "nombre": "Derechos aduaneros",
+   "pagina": 38
+  },
+  "60934": {
+   "nombre": "Comisiones",
+   "pagina": 38
+  },
+  "60935": {
+   "nombre": "Otros costos",
+   "pagina": 38
+  },
+  "6094": {
+   "nombre": "Costos vinculados con las compras de envases y embalajes",
+   "pagina": 38
+  },
+  "60941": {
+   "nombre": "Transporte",
+   "pagina": 38
+  },
+  "60942": {
+   "nombre": "Seguros",
+   "pagina": 38
+  },
+  "60943": {
+   "nombre": "Derechos aduaneros",
+   "pagina": 38
+  },
+  "60944": {
+   "nombre": "Comisiones",
+   "pagina": 38
+  },
+  "60945": {
+   "nombre": "Otros costos",
+   "pagina": 38
+  },
+  "61": {
+   "nombre": "VARIACIÓN DE INVENTARIOS",
+   "pagina": 38
+  },
+  "611": {
+   "nombre": "Mercaderías",
+   "pagina": 38
+  },
+  "6111": {
+   "nombre": "Mercaderías",
+   "pagina": 38
+  },
+  "612": {
+   "nombre": "Materias primas",
+   "pagina": 38
+  },
+  "6121": {
+   "nombre": "Materias primas",
+   "pagina": 38
+  },
+  "613": {
+   "nombre": "Materiales auxiliares, suministros y repuestos",
+   "pagina": 38
+  },
+  "6131": {
+   "nombre": "Materiales auxiliares",
+   "pagina": 38
+  },
+  "6132": {
+   "nombre": "Suministros",
+   "pagina": 38
+  },
+  "6133": {
+   "nombre": "Repuestos",
+   "pagina": 38
+  },
+  "614": {
+   "nombre": "Envases y embalajes",
+   "pagina": 38
+  },
+  "6141": {
+   "nombre": "Envases",
+   "pagina": 38
+  },
+  "6142": {
+   "nombre": "Embalajes",
+   "pagina": 38
+  },
+  "62": {
+   "nombre": "GASTOS DE PERSONAL Y DIRECTORES",
+   "pagina": 38
+  },
+  "621": {
+   "nombre": "Remuneraciones",
+   "pagina": 38
+  },
+  "6211": {
+   "nombre": "Sueldos y salarios",
+   "pagina": 38
+  },
+  "6212": {
+   "nombre": "Comisiones",
+   "pagina": 38
+  },
+  "6213": {
+   "nombre": "Remuneraciones en especie",
+   "pagina": 38
+  },
+  "6214": {
+   "nombre": "Gratificaciones",
+   "pagina": 38
+  },
+  "6215": {
+   "nombre": "Vacaciones",
+   "pagina": 38
+  },
+  "6216": {
+   "nombre": "Pago basado en acciones",
+   "pagina": 38
+  },
+  "622": {
+   "nombre": "Otras remuneraciones",
+   "pagina": 38
+  },
+  "623": {
+   "nombre": "Indemnizaciones al personal",
+   "pagina": 38
+  },
+  "624": {
+   "nombre": "Capacitación",
+   "pagina": 38
+  },
+  "625": {
+   "nombre": "Atención al personal",
+   "pagina": 38
+  },
+  "627": {
+   "nombre": "Seguridad, previsión social y otras contribuciones",
+   "pagina": 38
+  },
+  "6271": {
+   "nombre": "Régimen de prestaciones de salud",
+   "pagina": 38
+  },
+  "6272": {
+   "nombre": "Régimen de pensiones - Aporte de empresa",
+   "pagina": 38
+  },
+  "6273": {
+   "nombre": "Seguro complementario de trabajo de riesgo, accidentes de trabajo y enfermedades profesionales",
+   "pagina": 38
+  },
+  "6274": {
+   "nombre": "Seguro de vida",
+   "pagina": 38
+  },
+  "6275": {
+   "nombre": "Seguros particulares de prestaciones de salud – EPS y otros particulares",
+   "pagina": 38
+  },
+  "6276": {
+   "nombre": "Caja de beneficios de seguridad social del pescador",
+   "pagina": 38
+  },
+  "6277": {
+   "nombre": "Contribuciones al SENATI",
+   "pagina": 38
+  },
+  "628": {
+   "nombre": "Retribuciones al directorio",
+   "pagina": 38
+  },
+  "629": {
+   "nombre": "Beneficios sociales de los trabajadores",
+   "pagina": 38
+  },
+  "6291": {
+   "nombre": "Compensación por tiempo de servicio",
+   "pagina": 38
+  },
+  "6292": {
+   "nombre": "Pensiones y jubilaciones",
+   "pagina": 38
+  },
+  "6293": {
+   "nombre": "Otros beneficios post-empleo",
+   "pagina": 39
+  },
+  "6294": {
+   "nombre": "Participación en las utilidades",
+   "pagina": 39
+  },
+  "63": {
+   "nombre": "GASTOS DE SERVICIOS PRESTADOS POR TERCEROS",
+   "pagina": 39
+  },
+  "631": {
+   "nombre": "Transporte, correos y gastos de viaje",
+   "pagina": 39
+  },
+  "6311": {
+   "nombre": "Transporte",
+   "pagina": 39
+  },
+  "63111": {
+   "nombre": "De carga",
+   "pagina": 39
+  },
+  "63112": {
+   "nombre": "De pasajeros",
+   "pagina": 39
+  },
+  "6312": {
+   "nombre": "Correos",
+   "pagina": 39
+  },
+  "6313": {
+   "nombre": "Alojamiento",
+   "pagina": 39
+  },
+  "6314": {
+   "nombre": "Alimentación",
+   "pagina": 39
+  },
+  "6315": {
+   "nombre": "Otros gastos de viaje",
+   "pagina": 39
+  },
+  "632": {
+   "nombre": "Asesoría y consultoría",
+   "pagina": 39
+  },
+  "6321": {
+   "nombre": "Administrativa",
+   "pagina": 39
+  },
+  "6322": {
+   "nombre": "Legal y tributaria",
+   "pagina": 39
+  },
+  "6323": {
+   "nombre": "Auditoría y contable",
+   "pagina": 39
+  },
+  "6324": {
+   "nombre": "Mercadotecnia",
+   "pagina": 39
+  },
+  "6325": {
+   "nombre": "Medioambiental",
+   "pagina": 39
+  },
+  "6326": {
+   "nombre": "Investigación y desarrollo",
+   "pagina": 39
+  },
+  "6327": {
+   "nombre": "Producción",
+   "pagina": 39
+  },
+  "6328": {
+   "nombre": "Responsabilidad social",
+   "pagina": 39
+  },
+  "6329": {
+   "nombre": "Otros",
+   "pagina": 39
+  },
+  "633": {
+   "nombre": "Producción encargada a terceros",
+   "pagina": 39
+  },
+  "634": {
+   "nombre": "Mantenimiento y reparaciones",
+   "pagina": 39
+  },
+  "6341": {
+   "nombre": "Propiedad de inversión",
+   "pagina": 39
+  },
+  "6342": {
+   "nombre": "Activos por derecho de uso",
+   "pagina": 39
+  },
+  "6343": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 39
+  },
+  "6344": {
+   "nombre": "Activos intangibles",
+   "pagina": 39
+  },
+  "6345": {
+   "nombre": "Activos biológicos",
+   "pagina": 39
+  },
+  "635": {
+   "nombre": "Alquileres",
+   "pagina": 39
+  },
+  "6351": {
+   "nombre": "Terrenos",
+   "pagina": 39
+  },
+  "6352": {
+   "nombre": "Edificaciones",
+   "pagina": 39
+  },
+  "6353": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 39
+  },
+  "6354": {
+   "nombre": "Equipo de transporte",
+   "pagina": 39
+  },
+  "6355": {
+   "nombre": "Muebles y enseres",
+   "pagina": 39
+  },
+  "6356": {
+   "nombre": "Equipos diversos",
+   "pagina": 39
+  },
+  "636": {
+   "nombre": "Servicios básicos",
+   "pagina": 39
+  },
+  "6361": {
+   "nombre": "Energía eléctrica",
+   "pagina": 39
+  },
+  "6362": {
+   "nombre": "Gas",
+   "pagina": 39
+  },
+  "6363": {
+   "nombre": "Agua",
+   "pagina": 39
+  },
+  "6364": {
+   "nombre": "Teléfono",
+   "pagina": 39
+  },
+  "6365": {
+   "nombre": "Internet",
+   "pagina": 39
+  },
+  "6366": {
+   "nombre": "Radio",
+   "pagina": 39
+  },
+  "6367": {
+   "nombre": "Cable",
+   "pagina": 39
+  },
+  "637": {
+   "nombre": "Publicidad, publicaciones y relaciones públicas",
+   "pagina": 39
+  },
+  "6371": {
+   "nombre": "Publicidad",
+   "pagina": 39
+  },
+  "6372": {
+   "nombre": "Publicaciones",
+   "pagina": 39
+  },
+  "6373": {
+   "nombre": "Relaciones públicas",
+   "pagina": 39
+  },
+  "638": {
+   "nombre": "Servicios de contratistas",
+   "pagina": 39
+  },
+  "639": {
+   "nombre": "Otros servicios prestados por terceros",
+   "pagina": 39
+  },
+  "6391": {
+   "nombre": "Gastos bancarios",
+   "pagina": 39
+  },
+  "6392": {
+   "nombre": "Gastos de laboratorio",
+   "pagina": 40
+  },
+  "64": {
+   "nombre": "GASTOS POR TRIBUTOS",
+   "pagina": 40
+  },
+  "641": {
+   "nombre": "Gobierno nacional",
+   "pagina": 40
+  },
+  "6411": {
+   "nombre": "Impuesto general a las ventas y selectivo al consumo",
+   "pagina": 40
+  },
+  "6412": {
+   "nombre": "Impuesto a las transacciones financieras",
+   "pagina": 40
+  },
+  "6413": {
+   "nombre": "Impuesto temporal a los activos netos",
+   "pagina": 40
+  },
+  "6414": {
+   "nombre": "Impuesto a los juegos de casino y máquinas tragamonedas",
+   "pagina": 40
+  },
+  "6415": {
+   "nombre": "Regalías mineras",
+   "pagina": 40
+  },
+  "6416": {
+   "nombre": "Cánones",
+   "pagina": 40
+  },
+  "6419": {
+   "nombre": "Otros",
+   "pagina": 40
+  },
+  "642": {
+   "nombre": "Gobierno regional",
+   "pagina": 40
+  },
+  "643": {
+   "nombre": "Gobierno local",
+   "pagina": 40
+  },
+  "6431": {
+   "nombre": "Impuesto predial",
+   "pagina": 40
+  },
+  "6432": {
+   "nombre": "Arbitrios municipales y seguridad ciudadana",
+   "pagina": 40
+  },
+  "6433": {
+   "nombre": "Impuesto al patrimonio vehicular",
+   "pagina": 40
+  },
+  "6434": {
+   "nombre": "Licencia de funcionamiento",
+   "pagina": 40
+  },
+  "6439": {
+   "nombre": "Otros",
+   "pagina": 40
+  },
+  "644": {
+   "nombre": "Otros gastos por tributos",
+   "pagina": 40
+  },
+  "6442": {
+   "nombre": "Contribución al SENCICO",
+   "pagina": 40
+  },
+  "6443": {
+   "nombre": "Otros",
+   "pagina": 40
+  },
+  "645": {
+   "nombre": "Gastos en deuda tributaria",
+   "pagina": 40
+  },
+  "6451": {
+   "nombre": "Intereses",
+   "pagina": 40
+  },
+  "6452": {
+   "nombre": "Intereses - fraccionamiento",
+   "pagina": 40
+  },
+  "6453": {
+   "nombre": "Multas",
+   "pagina": 40
+  },
+  "6454": {
+   "nombre": "Costas y otros",
+   "pagina": 40
+  },
+  "65": {
+   "nombre": "OTROS GASTOS DE GESTION",
+   "pagina": 40
+  },
+  "650": {
+   "nombre": "Gestión medioambiental y responsabilidad social",
+   "pagina": 40
+  },
+  "651": {
+   "nombre": "Seguros",
+   "pagina": 40
+  },
+  "652": {
+   "nombre": "Regalías",
+   "pagina": 40
+  },
+  "653": {
+   "nombre": "Suscripciones",
+   "pagina": 40
+  },
+  "654": {
+   "nombre": "Licencias y derechos de vigencia",
+   "pagina": 40
+  },
+  "655": {
+   "nombre": "Costo neto de enajenación de activos inmovilizados y operaciones discontinuadas",
+   "pagina": 40
+  },
+  "6551": {
+   "nombre": "Costo neto de enajenación de activos inmovilizados",
+   "pagina": 40
+  },
+  "65511": {
+   "nombre": "Inversiones financieras",
+   "pagina": 40
+  },
+  "65512": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 40
+  },
+  "65513": {
+   "nombre": "Activos por derecho de uso - arrendamiento financiero",
+   "pagina": 40
+  },
+  "65514": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 40
+  },
+  "65515": {
+   "nombre": "Activos intangibles",
+   "pagina": 40
+  },
+  "65516": {
+   "nombre": "Activos biológicos",
+   "pagina": 40
+  },
+  "6552": {
+   "nombre": "Operaciones discontinuadas – Abandono de activos",
+   "pagina": 41
+  },
+  "65521": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 41
+  },
+  "65522": {
+   "nombre": "Activos por derecho de uso - Arrendamiento financiero",
+   "pagina": 41
+  },
+  "65523": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 41
+  },
+  "65524": {
+   "nombre": "Activos intangibles",
+   "pagina": 41
+  },
+  "65525": {
+   "nombre": "Activos biológicos",
+   "pagina": 41
+  },
+  "656": {
+   "nombre": "Suministros",
+   "pagina": 41
+  },
+  "657": {
+   "nombre": "Pérdida por participación en resultados de entidades relacionadas",
+   "pagina": 41
+  },
+  "6571": {
+   "nombre": "Pérdida por participación en subsidiarias y asociadas bajo el método de participación patrimonial",
+   "pagina": 41
+  },
+  "6572": {
+   "nombre": "Pérdida por participación en negocios conjuntos",
+   "pagina": 41
+  },
+  "658": {
+   "nombre": "Diferencia de cambio",
+   "pagina": 41
+  },
+  "6581": {
+   "nombre": "Operación",
+   "pagina": 41
+  },
+  "6582": {
+   "nombre": "Inversión",
+   "pagina": 41
+  },
+  "659": {
+   "nombre": "Otros gastos de gestión",
+   "pagina": 41
+  },
+  "6591": {
+   "nombre": "Donaciones",
+   "pagina": 41
+  },
+  "6592": {
+   "nombre": "Sanciones administrativas",
+   "pagina": 41
+  },
+  "6593": {
+   "nombre": "Otros gastos de gestión",
+   "pagina": 41
+  },
+  "66": {
+   "nombre": "PÉRDIDA POR MEDICIÓN DE ACTIVOS NO FINANCIEROS AL VALOR RAZONABLE Y VALOR RAZONABLE MENOS COSTOS DE VENTA",
+   "pagina": 41
+  },
+  "661": {
+   "nombre": "Activo realizable",
+   "pagina": 41
+  },
+  "6611": {
+   "nombre": "Mercaderías",
+   "pagina": 41
+  },
+  "6612": {
+   "nombre": "Productos terminados",
+   "pagina": 41
+  },
+  "6613": {
+   "nombre": "Activos no corrientes mantenidos para la venta",
+   "pagina": 41
+  },
+  "66131": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 41
+  },
+  "66132": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 41
+  },
+  "66133": {
+   "nombre": "Activos intangibles",
+   "pagina": 41
+  },
+  "66134": {
+   "nombre": "Activos biológicos",
+   "pagina": 41
+  },
+  "662": {
+   "nombre": "Activo inmovilizado",
+   "pagina": 41
+  },
+  "6621": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 41
+  },
+  "6622": {
+   "nombre": "Activos biológicos",
+   "pagina": 41
+  },
+  "67": {
+   "nombre": "GASTOS FINANCIEROS",
+   "pagina": 41
+  },
+  "671": {
+   "nombre": "Gastos en operaciones de endeudamiento y otros",
+   "pagina": 41
+  },
+  "6711": {
+   "nombre": "Préstamos de instituciones financieras y otras entidades",
+   "pagina": 41
+  },
+  "6712": {
+   "nombre": "Contratos de arrendamiento financiero",
+   "pagina": 41
+  },
+  "6713": {
+   "nombre": "Emisión y colocación de instrumentos representativos de deuda y patrimonio",
+   "pagina": 41
+  },
+  "6714": {
+   "nombre": "Documentos vendidos o descontados",
+   "pagina": 41
+  },
+  "672": {
+   "nombre": "Pérdida por instrumentos financieros derivados",
+   "pagina": 41
+  },
+  "6721": {
+   "nombre": "Relacionados con obtención de financiación",
+   "pagina": 41
+  },
+  "6722": {
+   "nombre": "Inversiones financieras",
+   "pagina": 41
+  },
+  "6723": {
+   "nombre": "Instrumentos financieros representativos de derecho patrimonial",
+   "pagina": 41
+  },
+  "673": {
+   "nombre": "Intereses por préstamos y otras obligaciones",
+   "pagina": 41
+  },
+  "6731": {
+   "nombre": "Préstamos de instituciones financieras y otras entidades",
+   "pagina": 41
+  },
+  "67311": {
+   "nombre": "Instituciones financieras",
+   "pagina": 41
+  },
+  "67312": {
+   "nombre": "Otras entidades",
+   "pagina": 41
+  },
+  "6732": {
+   "nombre": "Contratos de arrendamiento financiero",
+   "pagina": 41
+  },
+  "6733": {
+   "nombre": "Otros instrumentos financieros por pagar",
+   "pagina": 41
+  },
+  "6734": {
+   "nombre": "Documentos vendidos o descontados",
+   "pagina": 42
+  },
+  "6735": {
+   "nombre": "Obligaciones emitidas",
+   "pagina": 42
+  },
+  "6736": {
+   "nombre": "Obligaciones comerciales",
+   "pagina": 42
+  },
+  "674": {
+   "nombre": "Gastos en operaciones de factoraje (factoring)",
+   "pagina": 42
+  },
+  "6741": {
+   "nombre": "Pérdida en instrumentos vendidos",
+   "pagina": 42
+  },
+  "676": {
+   "nombre": "Diferencia de cambio",
+   "pagina": 42
+  },
+  "6761": {
+   "nombre": "Activos monetarios",
+   "pagina": 42
+  },
+  "6762": {
+   "nombre": "Pasivos monetarios",
+   "pagina": 42
+  },
+  "677": {
+   "nombre": "Pérdida por medición de activos y pasivos financieros al valor razonable",
+   "pagina": 42
+  },
+  "6771": {
+   "nombre": "Inversiones financieras medidas a valor razonable con cambio en resultados",
+   "pagina": 42
+  },
+  "6772": {
+   "nombre": "Otras inversiones financieras",
+   "pagina": 42
+  },
+  "6773": {
+   "nombre": "Otros",
+   "pagina": 42
+  },
+  "679": {
+   "nombre": "Otros gastos financieros",
+   "pagina": 42
+  },
+  "6791": {
+   "nombre": "Primas por opciones",
+   "pagina": 42
+  },
+  "6792": {
+   "nombre": "Gastos financieros en medición a valor descontado",
+   "pagina": 42
+  },
+  "6793": {
+   "nombre": "Gastos financieros en actualización de activos por derecho de uso",
+   "pagina": 42
+  },
+  "6799": {
+   "nombre": "Otros gastos financieros",
+   "pagina": 42
+  },
+  "68": {
+   "nombre": "VALUACIÓN Y DETERIORO DE ACTIVOS Y PROVISIONES",
+   "pagina": 42
+  },
+  "681": {
+   "nombre": "Depreciación de propiedades de inversión",
+   "pagina": 42
+  },
+  "6811": {
+   "nombre": "Propiedades de inversión – Costo",
+   "pagina": 42
+  },
+  "68111": {
+   "nombre": "Edificaciones",
+   "pagina": 42
+  },
+  "6812": {
+   "nombre": "Propiedades de inversión – Costos por préstamos",
+   "pagina": 42
+  },
+  "68121": {
+   "nombre": "Edificaciones",
+   "pagina": 42
+  },
+  "682": {
+   "nombre": "Depreciación de propiedades de inversión - Arrendamiento financiero",
+   "pagina": 42
+  },
+  "6821": {
+   "nombre": "Propiedades de inversión – Arrendamiento financiero – Costo",
+   "pagina": 42
+  },
+  "68211": {
+   "nombre": "Edificaciones",
+   "pagina": 42
+  },
+  "683": {
+   "nombre": "Depreciación de propiedades, planta y equipo",
+   "pagina": 42
+  },
+  "6831": {
+   "nombre": "Propiedades, planta y equipo – Costo",
+   "pagina": 42
+  },
+  "68311": {
+   "nombre": "Plantas productoras",
+   "pagina": 42
+  },
+  "68312": {
+   "nombre": "Edificaciones, instalaciones y mejoras en locales arrendados",
+   "pagina": 42
+  },
+  "68313": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 42
+  },
+  "68314": {
+   "nombre": "Unidades de transporte",
+   "pagina": 42
+  },
+  "68315": {
+   "nombre": "Muebles y enseres",
+   "pagina": 42
+  },
+  "68316": {
+   "nombre": "Equipos diversos",
+   "pagina": 42
+  },
+  "68317": {
+   "nombre": "Herramientas",
+   "pagina": 42
+  },
+  "68318": {
+   "nombre": "Unidades de reemplazo",
+   "pagina": 42
+  },
+  "6832": {
+   "nombre": "Propiedades, planta y equipo – Revaluación",
+   "pagina": 42
+  },
+  "68321": {
+   "nombre": "Plantas productoras",
+   "pagina": 42
+  },
+  "68322": {
+   "nombre": "Edificaciones, instalaciones y mejoras en locales arrendados",
+   "pagina": 42
+  },
+  "68323": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 42
+  },
+  "68324": {
+   "nombre": "Unidades de transporte",
+   "pagina": 42
+  },
+  "68325": {
+   "nombre": "Muebles y enseres",
+   "pagina": 42
+  },
+  "68326": {
+   "nombre": "Equipos diversos",
+   "pagina": 42
+  },
+  "68327": {
+   "nombre": "Herramientas",
+   "pagina": 42
+  },
+  "68328": {
+   "nombre": "Unidades de reemplazo",
+   "pagina": 42
+  },
+  "6833": {
+   "nombre": "Propiedades, planta y equipo - Costos por préstamos",
+   "pagina": 42
+  },
+  "68331": {
+   "nombre": "Plantas productoras en desarrollo",
+   "pagina": 42
+  },
+  "68332": {
+   "nombre": "Edificaciones, instalaciones y mejoras en locales arrendados",
+   "pagina": 42
+  },
+  "68333": {
+   "nombre": "Maquinaria y equipo de explotación",
+   "pagina": 42
+  },
+  "68334": {
+   "nombre": "Equipos diversos",
+   "pagina": 43
+  },
+  "684": {
+   "nombre": "Depreciación de propiedades, planta y equipo - Arrendamiento financiero",
+   "pagina": 43
+  },
+  "6841": {
+   "nombre": "Propiedades, planta y equipo - Arrendamiento financiero – Costo",
+   "pagina": 43
+  },
+  "68411": {
+   "nombre": "Plantas productoras",
+   "pagina": 43
+  },
+  "68412": {
+   "nombre": "Edificaciones",
+   "pagina": 43
+  },
+  "68413": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 43
+  },
+  "68414": {
+   "nombre": "Unidades de transporte",
+   "pagina": 43
+  },
+  "68415": {
+   "nombre": "Muebles y enseres",
+   "pagina": 43
+  },
+  "68416": {
+   "nombre": "Equipos diversos",
+   "pagina": 43
+  },
+  "6842": {
+   "nombre": "Propiedades, planta y equipo - Arrendamiento financiero – Revaluación",
+   "pagina": 43
+  },
+  "68421": {
+   "nombre": "Plantas productoras",
+   "pagina": 43
+  },
+  "68422": {
+   "nombre": "Edificaciones",
+   "pagina": 43
+  },
+  "68423": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 43
+  },
+  "68424": {
+   "nombre": "Unidades de transporte",
+   "pagina": 43
+  },
+  "68425": {
+   "nombre": "Muebles y enseres",
+   "pagina": 43
+  },
+  "68426": {
+   "nombre": "Equipos diversos",
+   "pagina": 43
+  },
+  "685": {
+   "nombre": "Depreciación de activos biológicos en producción",
+   "pagina": 43
+  },
+  "6851": {
+   "nombre": "Activos biológicos en producción – Costo",
+   "pagina": 43
+  },
+  "68511": {
+   "nombre": "Activos biológicos de origen animal",
+   "pagina": 43
+  },
+  "68512": {
+   "nombre": "Activos biológicos de origen vegetal",
+   "pagina": 43
+  },
+  "6852": {
+   "nombre": "Activos biológicos en producción - Costos por préstamos",
+   "pagina": 43
+  },
+  "68521": {
+   "nombre": "Activos biológicos de origen animal",
+   "pagina": 43
+  },
+  "68522": {
+   "nombre": "Activos biológicos de origen vegetal",
+   "pagina": 43
+  },
+  "686": {
+   "nombre": "Amortización de activos intangibles",
+   "pagina": 43
+  },
+  "6861": {
+   "nombre": "Activos intangibles – Costo",
+   "pagina": 43
+  },
+  "68611": {
+   "nombre": "Concesiones, licencias y otros derechos",
+   "pagina": 43
+  },
+  "68612": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 43
+  },
+  "68613": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 43
+  },
+  "68614": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 43
+  },
+  "68615": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 43
+  },
+  "68619": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 43
+  },
+  "6862": {
+   "nombre": "Activos intangibles – Revaluación",
+   "pagina": 43
+  },
+  "68621": {
+   "nombre": "Concesiones, licencias y otros derechos",
+   "pagina": 43
+  },
+  "68622": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 43
+  },
+  "68623": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 43
+  },
+  "68624": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 43
+  },
+  "68625": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 43
+  },
+  "68629": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 43
+  },
+  "6863": {
+   "nombre": "Activos intangibles – Costos por préstamos",
+   "pagina": 43
+  },
+  "68631": {
+   "nombre": "Concesiones",
+   "pagina": 43
+  },
+  "68632": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 43
+  },
+  "68633": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 43
+  },
+  "68634": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 43
+  },
+  "68635": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 43
+  },
+  "687": {
+   "nombre": "Valuación de activos",
+   "pagina": 43
+  },
+  "6871": {
+   "nombre": "Deterioro por pérdida crediticia esperada o incurrida",
+   "pagina": 43
+  },
+  "68711": {
+   "nombre": "Cuentas por cobrar comerciales – Terceros",
+   "pagina": 43
+  },
+  "68712": {
+   "nombre": "Cuentas por cobrar comerciales – Relacionadas",
+   "pagina": 43
+  },
+  "68713": {
+   "nombre": "Cuentas por cobrar al personal, a los accionistas (socios) y directores",
+   "pagina": 43
+  },
+  "68714": {
+   "nombre": "Cuentas por cobrar diversas – Terceros",
+   "pagina": 44
+  },
+  "68715": {
+   "nombre": "Cuentas por cobrar diversas – Relacionadas",
+   "pagina": 44
+  },
+  "68716": {
+   "nombre": "Activos del contrato",
+   "pagina": 44
+  },
+  "68717": {
+   "nombre": "Préstamo a largo plazo a asociadas / negocios conjuntos",
+   "pagina": 44
+  },
+  "6873": {
+   "nombre": "Deterioro de inversiones en subsidiarias, asociadas y negocios conjuntos",
+   "pagina": 44
+  },
+  "68731": {
+   "nombre": "Subsidiarias",
+   "pagina": 44
+  },
+  "68732": {
+   "nombre": "Asociadas",
+   "pagina": 44
+  },
+  "68733": {
+   "nombre": "Negocios conjuntos",
+   "pagina": 44
+  },
+  "688": {
+   "nombre": "Deterioro del valor de los activos",
+   "pagina": 44
+  },
+  "6881": {
+   "nombre": "Deterioro de propiedades de inversión",
+   "pagina": 44
+  },
+  "68811": {
+   "nombre": "Terrenos",
+   "pagina": 44
+  },
+  "68812": {
+   "nombre": "Edificaciones",
+   "pagina": 44
+  },
+  "68813": {
+   "nombre": "Construcciones en curso",
+   "pagina": 44
+  },
+  "6882": {
+   "nombre": "Deterioro de propiedades de inversión - arrendamiento financiero",
+   "pagina": 44
+  },
+  "68821": {
+   "nombre": "Terrenos",
+   "pagina": 44
+  },
+  "68822": {
+   "nombre": "Edificaciones",
+   "pagina": 44
+  },
+  "6883": {
+   "nombre": "Deterioro de propiedades, planta y equipo - Arrendamiento financiero",
+   "pagina": 44
+  },
+  "68831": {
+   "nombre": "Plantas productoras",
+   "pagina": 44
+  },
+  "68832": {
+   "nombre": "Terrenos",
+   "pagina": 44
+  },
+  "68833": {
+   "nombre": "Edificaciones",
+   "pagina": 44
+  },
+  "68834": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 44
+  },
+  "68835": {
+   "nombre": "Unidades de transporte",
+   "pagina": 44
+  },
+  "68836": {
+   "nombre": "Muebles y enseres",
+   "pagina": 44
+  },
+  "68837": {
+   "nombre": "Equipos diversos",
+   "pagina": 44
+  },
+  "6884": {
+   "nombre": "Deterioro de propiedades, planta y equipo",
+   "pagina": 44
+  },
+  "68841": {
+   "nombre": "Planta productora",
+   "pagina": 44
+  },
+  "68842": {
+   "nombre": "Terrenos",
+   "pagina": 44
+  },
+  "68843": {
+   "nombre": "Edificaciones",
+   "pagina": 44
+  },
+  "68844": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 44
+  },
+  "68845": {
+   "nombre": "Unidades de transporte",
+   "pagina": 44
+  },
+  "68846": {
+   "nombre": "Muebles y enseres",
+   "pagina": 44
+  },
+  "68847": {
+   "nombre": "Equipo/s diversos",
+   "pagina": 44
+  },
+  "68848": {
+   "nombre": "Piezas de repuesto y unidades de reemplazo",
+   "pagina": 44
+  },
+  "68849": {
+   "nombre": "Obras en curso",
+   "pagina": 44
+  },
+  "6885": {
+   "nombre": "Deterioro de activos intangibles",
+   "pagina": 44
+  },
+  "68851": {
+   "nombre": "Concesiones, licencias y otros derechos",
+   "pagina": 44
+  },
+  "68852": {
+   "nombre": "Patentes y propiedad industrial",
+   "pagina": 44
+  },
+  "68853": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 44
+  },
+  "68854": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 44
+  },
+  "68855": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 44
+  },
+  "68857": {
+   "nombre": "Plusvalía",
+   "pagina": 44
+  },
+  "68858": {
+   "nombre": "Criptoactivos",
+   "pagina": 44
+  },
+  "68859": {
+   "nombre": "Otros activos intangibles",
+   "pagina": 44
+  },
+  "6886": {
+   "nombre": "Costos de contrato con clientes",
+   "pagina": 44
+  },
+  "68861": {
+   "nombre": "Costos del contrato",
+   "pagina": 44
+  },
+  "68862": {
+   "nombre": "Costos para obtener contratos",
+   "pagina": 44
+  },
+  "6889": {
+   "nombre": "Deterioro de activos biológicos en producción",
+   "pagina": 44
+  },
+  "68891": {
+   "nombre": "Activos biológicos de origen animal",
+   "pagina": 44
+  },
+  "68892": {
+   "nombre": "Activos biológicos de origen vegetal",
+   "pagina": 45
+  },
+  "689": {
+   "nombre": "Provisiones",
+   "pagina": 45
+  },
+  "6891": {
+   "nombre": "Provisión para litigios",
+   "pagina": 45
+  },
+  "6892": {
+   "nombre": "Provisión por desmantelamiento, retiro o rehabilitación del inmovilizado",
+   "pagina": 45
+  },
+  "6893": {
+   "nombre": "Provisión para reestructuraciones",
+   "pagina": 45
+  },
+  "6894": {
+   "nombre": "Provisión para protección y remediación del medio ambiente",
+   "pagina": 45
+  },
+  "6895": {
+   "nombre": "Provisión para gastos de responsabilidad social",
+   "pagina": 45
+  },
+  "6896": {
+   "nombre": "Provisión para garantías",
+   "pagina": 45
+  },
+  "6897": {
+   "nombre": "Provisión de pasivo por arrendamiento",
+   "pagina": 45
+  },
+  "6899": {
+   "nombre": "Otras provisiones",
+   "pagina": 45
+  },
+  "69": {
+   "nombre": "COSTO DE VENTAS",
+   "pagina": 45
+  },
+  "691": {
+   "nombre": "Mercaderías",
+   "pagina": 45
+  },
+  "6911": {
+   "nombre": "Mercaderías – exportación",
+   "pagina": 45
+  },
+  "69111": {
+   "nombre": "Terceros",
+   "pagina": 45
+  },
+  "69112": {
+   "nombre": "Relacionadas",
+   "pagina": 45
+  },
+  "6912": {
+   "nombre": "Mercaderías - venta local",
+   "pagina": 45
+  },
+  "69121": {
+   "nombre": "Terceros",
+   "pagina": 45
+  },
+  "69122": {
+   "nombre": "Relacionadas",
+   "pagina": 45
+  },
+  "692": {
+   "nombre": "Productos terminados",
+   "pagina": 45
+  },
+  "6921": {
+   "nombre": "Productos terminados – Exportación",
+   "pagina": 45
+  },
+  "69211": {
+   "nombre": "Terceros",
+   "pagina": 45
+  },
+  "69212": {
+   "nombre": "Relacionadas",
+   "pagina": 45
+  },
+  "6922": {
+   "nombre": "Productos terminados - Venta local",
+   "pagina": 45
+  },
+  "69221": {
+   "nombre": "Terceros",
+   "pagina": 45
+  },
+  "69222": {
+   "nombre": "Relacionadas",
+   "pagina": 45
+  },
+  "6924": {
+   "nombre": "Costos de producción no absorbido – Productos terminados",
+   "pagina": 45
+  },
+  "6925": {
+   "nombre": "Costo de ineficiencia – Productos terminados",
+   "pagina": 45
+  },
+  "693": {
+   "nombre": "Servicios prestados",
+   "pagina": 45
+  },
+  "6931": {
+   "nombre": "Servicios – Exportación",
+   "pagina": 45
+  },
+  "69311": {
+   "nombre": "Terceros",
+   "pagina": 45
+  },
+  "69312": {
+   "nombre": "Relacionadas",
+   "pagina": 45
+  },
+  "6932": {
+   "nombre": "Servicios – Local",
+   "pagina": 45
+  },
+  "69321": {
+   "nombre": "Terceros",
+   "pagina": 45
+  },
+  "69322": {
+   "nombre": "Relacionadas",
+   "pagina": 45
+  },
+  "694": {
+   "nombre": "Subproductos, desechos y desperdicios",
+   "pagina": 45
+  },
+  "6941": {
+   "nombre": "Subproductos",
+   "pagina": 45
+  },
+  "69411": {
+   "nombre": "Terceros",
+   "pagina": 45
+  },
+  "69412": {
+   "nombre": "Relacionadas",
+   "pagina": 45
+  },
+  "6942": {
+   "nombre": "Desechos y desperdicios",
+   "pagina": 45
+  },
+  "69421": {
+   "nombre": "Terceros",
+   "pagina": 45
+  },
+  "69422": {
+   "nombre": "Relacionadas",
+   "pagina": 45
+  },
+  "695": {
+   "nombre": "Gastos por deterioro de inventarios al costo",
+   "pagina": 45
+  },
+  "6951": {
+   "nombre": "Mercaderías",
+   "pagina": 45
+  },
+  "6952": {
+   "nombre": "Productos terminados",
+   "pagina": 45
+  },
+  "6953": {
+   "nombre": "Subproductos, desechos y desperdicios",
+   "pagina": 45
+  },
+  "6954": {
+   "nombre": "Productos en proceso",
+   "pagina": 45
+  },
+  "6955": {
+   "nombre": "Materias primas",
+   "pagina": 45
+  },
+  "6956": {
+   "nombre": "Materiales auxiliares, suministros y repuestos",
+   "pagina": 45
+  },
+  "6957": {
+   "nombre": "Envases y embalajes",
+   "pagina": 45
+  },
+  "6958": {
+   "nombre": "Inventarios por recibir ELEMENTO 7: INGRESOS POR NATURALEZA",
+   "pagina": 46
+  },
+  "70": {
+   "nombre": "VENTAS",
+   "pagina": 46
+  },
+  "701": {
+   "nombre": "Mercaderías",
+   "pagina": 46
+  },
+  "7011": {
+   "nombre": "Mercaderías - venta de exportación",
+   "pagina": 46
+  },
+  "70111": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70112": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "7012": {
+   "nombre": "Mercaderías - venta local",
+   "pagina": 46
+  },
+  "70121": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70122": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "702": {
+   "nombre": "Productos terminados",
+   "pagina": 46
+  },
+  "7021": {
+   "nombre": "Productos terminados - venta de exportación",
+   "pagina": 46
+  },
+  "70211": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70212": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "7022": {
+   "nombre": "Productos terminados - venta local",
+   "pagina": 46
+  },
+  "70221": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70222": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "703": {
+   "nombre": "Servicios prestados",
+   "pagina": 46
+  },
+  "7031": {
+   "nombre": "Servicios – exportación",
+   "pagina": 46
+  },
+  "70311": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70312": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "7032": {
+   "nombre": "Servicios – local",
+   "pagina": 46
+  },
+  "70321": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70322": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "704": {
+   "nombre": "Subproductos, desechos y desperdicios",
+   "pagina": 46
+  },
+  "7041": {
+   "nombre": "Subproductos",
+   "pagina": 46
+  },
+  "70411": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70412": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "7042": {
+   "nombre": "Desechos y desperdicios",
+   "pagina": 46
+  },
+  "70421": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70422": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "706": {
+   "nombre": "Descuentos concedidos por pronto pago",
+   "pagina": 46
+  },
+  "707": {
+   "nombre": "Ingresos de actividades ordinarias como agente",
+   "pagina": 46
+  },
+  "709": {
+   "nombre": "Devoluciones sobre ventas",
+   "pagina": 46
+  },
+  "7090": {
+   "nombre": "Mercaderías - Venta de exportación",
+   "pagina": 46
+  },
+  "70901": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "7091": {
+   "nombre": "Mercaderías - Venta local",
+   "pagina": 46
+  },
+  "70911": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70912": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "7092": {
+   "nombre": "Productos terminados - Venta de exportación",
+   "pagina": 46
+  },
+  "70921": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70922": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "7093": {
+   "nombre": "Productos terminados - Venta local",
+   "pagina": 46
+  },
+  "70931": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70932": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "7094": {
+   "nombre": "Inventarios de servicios rechazados",
+   "pagina": 46
+  },
+  "70941": {
+   "nombre": "Terceros",
+   "pagina": 46
+  },
+  "70942": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "7095": {
+   "nombre": "Subproductos, desechos y desperdicios",
+   "pagina": 47
+  },
+  "70951": {
+   "nombre": "Terceros",
+   "pagina": 47
+  },
+  "70952": {
+   "nombre": "Relacionadas",
+   "pagina": 47
+  },
+  "7096": {
+   "nombre": "Devoluciones esperadas",
+   "pagina": 47
+  },
+  "7097": {
+   "nombre": "Contraprestación variable",
+   "pagina": 47
+  },
+  "70971": {
+   "nombre": "Descuentos",
+   "pagina": 47
+  },
+  "70972": {
+   "nombre": "Bonificaciones",
+   "pagina": 47
+  },
+  "70973": {
+   "nombre": "Incentivos",
+   "pagina": 47
+  },
+  "7098": {
+   "nombre": "Contraprestación pagadera a clientes",
+   "pagina": 47
+  },
+  "7099": {
+   "nombre": "Otros",
+   "pagina": 47
+  },
+  "70991": {
+   "nombre": "Programa de fidelización de clientes",
+   "pagina": 47
+  },
+  "70992": {
+   "nombre": "Relacionadas",
+   "pagina": 46
+  },
+  "70993": {
+   "nombre": "Otros",
+   "pagina": 47
+  },
+  "71": {
+   "nombre": "VARIACIÓN DE LA PRODUCCIÓN ALMACENADA",
+   "pagina": 47
+  },
+  "711": {
+   "nombre": "Variación de productos terminados",
+   "pagina": 47
+  },
+  "7111": {
+   "nombre": "Productos terminados",
+   "pagina": 47
+  },
+  "712": {
+   "nombre": "Variación de subproductos, desechos y desperdicios",
+   "pagina": 47
+  },
+  "7121": {
+   "nombre": "Subproductos",
+   "pagina": 47
+  },
+  "7122": {
+   "nombre": "Desechos y desperdicios",
+   "pagina": 47
+  },
+  "713": {
+   "nombre": "Variación de productos en proceso",
+   "pagina": 47
+  },
+  "7131": {
+   "nombre": "Productos en proceso de manufactura",
+   "pagina": 47
+  },
+  "714": {
+   "nombre": "Variación de envases y embalajes",
+   "pagina": 47
+  },
+  "7141": {
+   "nombre": "Envases",
+   "pagina": 47
+  },
+  "7142": {
+   "nombre": "Embalajes",
+   "pagina": 47
+  },
+  "715": {
+   "nombre": "Variación de inventarios de servicios",
+   "pagina": 47
+  },
+  "7151": {
+   "nombre": "Inventarios de servicios en proceso",
+   "pagina": 47
+  },
+  "72": {
+   "nombre": "PRODUCCIÓN DE ACTIVO INMOVILIZADO",
+   "pagina": 47
+  },
+  "721": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 47
+  },
+  "7211": {
+   "nombre": "Edificaciones",
+   "pagina": 47
+  },
+  "722": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 47
+  },
+  "7220": {
+   "nombre": "Planta productora",
+   "pagina": 47
+  },
+  "7221": {
+   "nombre": "Edificaciones",
+   "pagina": 47
+  },
+  "7222": {
+   "nombre": "Maquinarias y otros equipos de explotación",
+   "pagina": 47
+  },
+  "7223": {
+   "nombre": "Unidades de transporte",
+   "pagina": 47
+  },
+  "7224": {
+   "nombre": "Muebles y enseres",
+   "pagina": 47
+  },
+  "7225": {
+   "nombre": "Equipos diversos",
+   "pagina": 47
+  },
+  "7226": {
+   "nombre": "Piezas de repuestos y unidades de reemplazo",
+   "pagina": 47
+  },
+  "723": {
+   "nombre": "Activos intangibles",
+   "pagina": 47
+  },
+  "7231": {
+   "nombre": "Programas de computadora (software)",
+   "pagina": 47
+  },
+  "7232": {
+   "nombre": "Costos de exploración y desarrollo",
+   "pagina": 47
+  },
+  "7233": {
+   "nombre": "Fórmulas, diseños y prototipos",
+   "pagina": 47
+  },
+  "724": {
+   "nombre": "Activos biológicos",
+   "pagina": 47
+  },
+  "7241": {
+   "nombre": "Activos biológicos en desarrollo de origen animal",
+   "pagina": 47
+  },
+  "7242": {
+   "nombre": "Activos biológicos en desarrollo de origen vegetal",
+   "pagina": 47
+  },
+  "725": {
+   "nombre": "Costos por préstamos capitalizados",
+   "pagina": 47
+  },
+  "7251": {
+   "nombre": "Costos por préstamos – Propiedades de inversión",
+   "pagina": 47
+  },
+  "72512": {
+   "nombre": "Edificaciones",
+   "pagina": 47
+  },
+  "7252": {
+   "nombre": "Costos por préstamos – Propiedades, planta y equipo",
+   "pagina": 47
+  },
+  "72521": {
+   "nombre": "Plantas productoras en desarrollo",
+   "pagina": 47
+  },
+  "72522": {
+   "nombre": "Edificaciones",
+   "pagina": 47
+  },
+  "72523": {
+   "nombre": "Maquinarias y otros equipos de explotación",
+   "pagina": 48
+  },
+  "72524": {
+   "nombre": "Unidades de transporte",
+   "pagina": 48
+  },
+  "72525": {
+   "nombre": "Muebles y enseres",
+   "pagina": 48
+  },
+  "72526": {
+   "nombre": "Equipos diversos",
+   "pagina": 48
+  },
+  "7253": {
+   "nombre": "Costos por préstamos – Activos intangibles",
+   "pagina": 48
+  },
+  "7254": {
+   "nombre": "Costos por préstamos – Activos biológicos en desarrollo",
+   "pagina": 48
+  },
+  "72541": {
+   "nombre": "Activos biológicos de origen animal",
+   "pagina": 48
+  },
+  "72542": {
+   "nombre": "Activos biológicos de origen vegetal",
+   "pagina": 48
+  },
+  "75": {
+   "nombre": "OTROS INGRESOS DE GESTIÓN",
+   "pagina": 48
+  },
+  "750": {
+   "nombre": "Ganancia por instrumento financiero derivado",
+   "pagina": 48
+  },
+  "7501": {
+   "nombre": "Operación",
+   "pagina": 48
+  },
+  "7502": {
+   "nombre": "Inversión",
+   "pagina": 48
+  },
+  "751": {
+   "nombre": "Servicios en beneficio del personal",
+   "pagina": 48
+  },
+  "752": {
+   "nombre": "Comisiones y corretajes",
+   "pagina": 48
+  },
+  "753": {
+   "nombre": "Regalías",
+   "pagina": 48
+  },
+  "754": {
+   "nombre": "Alquileres",
+   "pagina": 48
+  },
+  "7540": {
+   "nombre": "Plantas productoras",
+   "pagina": 48
+  },
+  "7541": {
+   "nombre": "Terrenos",
+   "pagina": 48
+  },
+  "7542": {
+   "nombre": "Edificaciones",
+   "pagina": 48
+  },
+  "7543": {
+   "nombre": "Maquinarias y equipos de explotación",
+   "pagina": 48
+  },
+  "7544": {
+   "nombre": "Unidades de transporte",
+   "pagina": 48
+  },
+  "7545": {
+   "nombre": "Equipos diversos",
+   "pagina": 48
+  },
+  "755": {
+   "nombre": "Recuperación de cuentas de valuación y deterioro de cuentas de activos inmovilizados",
+   "pagina": 48
+  },
+  "7551": {
+   "nombre": "Recuperación de deterioro de pérdida crediticia esperada o incurrida",
+   "pagina": 48
+  },
+  "7552": {
+   "nombre": "Recuperación de deterioro de inventarios",
+   "pagina": 48
+  },
+  "7553": {
+   "nombre": "Recuperación de deterioro de inversiones financieras",
+   "pagina": 48
+  },
+  "7554": {
+   "nombre": "Recuperación de deterioro de propiedades de inversión",
+   "pagina": 48
+  },
+  "7555": {
+   "nombre": "Recuperación de deterioro de propiedades, planta y equipo",
+   "pagina": 48
+  },
+  "7556": {
+   "nombre": "Recuperación de deterioro de activos intangibles",
+   "pagina": 48
+  },
+  "7557": {
+   "nombre": "Recuperación de deterioro de activos biológicos",
+   "pagina": 48
+  },
+  "756": {
+   "nombre": "Enajenación de activos inmovilizados",
+   "pagina": 48
+  },
+  "7561": {
+   "nombre": "Inversiones financieras",
+   "pagina": 48
+  },
+  "75611": {
+   "nombre": "Operación",
+   "pagina": 48
+  },
+  "75612": {
+   "nombre": "Inversión",
+   "pagina": 48
+  },
+  "7562": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 48
+  },
+  "75621": {
+   "nombre": "Operación",
+   "pagina": 48
+  },
+  "75622": {
+   "nombre": "Inversión",
+   "pagina": 48
+  },
+  "7564": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 48
+  },
+  "75641": {
+   "nombre": "Operación",
+   "pagina": 48
+  },
+  "75642": {
+   "nombre": "Inversión",
+   "pagina": 48
+  },
+  "7565": {
+   "nombre": "Activos intangibles",
+   "pagina": 48
+  },
+  "75651": {
+   "nombre": "Operación",
+   "pagina": 48
+  },
+  "75652": {
+   "nombre": "Inversión",
+   "pagina": 48
+  },
+  "757": {
+   "nombre": "Participación en resultados de entidades relacionadas",
+   "pagina": 48
+  },
+  "7571": {
+   "nombre": "Participación en los resultados de subsidiarias y asociadas bajo el método de participación patrimonial",
+   "pagina": 48
+  },
+  "7572": {
+   "nombre": "Ingresos por participaciones en negocios conjuntos",
+   "pagina": 48
+  },
+  "758": {
+   "nombre": "Diferencia de cambio",
+   "pagina": 48
+  },
+  "7581": {
+   "nombre": "Operación",
+   "pagina": 48
+  },
+  "7582": {
+   "nombre": "Inversión",
+   "pagina": 49
+  },
+  "759": {
+   "nombre": "Otros ingresos de gestión",
+   "pagina": 49
+  },
+  "7591": {
+   "nombre": "Subsidios gubernamentales",
+   "pagina": 49
+  },
+  "7592": {
+   "nombre": "Reclamos al seguro",
+   "pagina": 49
+  },
+  "7593": {
+   "nombre": "Donaciones",
+   "pagina": 49
+  },
+  "7594": {
+   "nombre": "Devoluciones tributarias",
+   "pagina": 49
+  },
+  "7595": {
+   "nombre": "Ganancia por venta de activos con arrendamiento posterior",
+   "pagina": 49
+  },
+  "7596": {
+   "nombre": "Rendimientos ganados",
+   "pagina": 49
+  },
+  "75961": {
+   "nombre": "Depósitos en instituciones financieras",
+   "pagina": 49
+  },
+  "75962": {
+   "nombre": "Cuentas por cobrar comerciales",
+   "pagina": 49
+  },
+  "7599": {
+   "nombre": "Otros ingresos de gestión",
+   "pagina": 49
+  },
+  "76": {
+   "nombre": "GANANCIA POR MEDICIÓN DE ACTIVOS NO FINANCIEROS AL VALOR RAZONABLE",
+   "pagina": 49
+  },
+  "761": {
+   "nombre": "Activo realizable",
+   "pagina": 49
+  },
+  "7611": {
+   "nombre": "Mercaderías",
+   "pagina": 49
+  },
+  "7612": {
+   "nombre": "Productos terminados",
+   "pagina": 49
+  },
+  "7613": {
+   "nombre": "Activos no corrientes mantenidos para la venta",
+   "pagina": 49
+  },
+  "76131": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 49
+  },
+  "76132": {
+   "nombre": "Propiedades, planta y equipo",
+   "pagina": 49
+  },
+  "76133": {
+   "nombre": "Activos intangibles",
+   "pagina": 49
+  },
+  "76134": {
+   "nombre": "Activos biológicos",
+   "pagina": 49
+  },
+  "762": {
+   "nombre": "Activo inmovilizado",
+   "pagina": 49
+  },
+  "7621": {
+   "nombre": "Propiedades de inversión",
+   "pagina": 49
+  },
+  "7622": {
+   "nombre": "Activos biológicos",
+   "pagina": 49
+  },
+  "77": {
+   "nombre": "INGRESOS FINANCIEROS",
+   "pagina": 49
+  },
+  "771": {
+   "nombre": "Ganancia por instrumento financiero derivado",
+   "pagina": 49
+  },
+  "7711": {
+   "nombre": "Relacionados con obtención de financiación",
+   "pagina": 49
+  },
+  "7712": {
+   "nombre": "Inversiones financieras",
+   "pagina": 49
+  },
+  "7713": {
+   "nombre": "Instrumentos financieros representativos de derecho patrimonial",
+   "pagina": 49
+  },
+  "773": {
+   "nombre": "Dividendos",
+   "pagina": 49
+  },
+  "774": {
+   "nombre": "Ingresos en operaciones de factoraje (factoring)",
+   "pagina": 49
+  },
+  "776": {
+   "nombre": "Diferencia de cambio",
+   "pagina": 49
+  },
+  "7761": {
+   "nombre": "Activos monetarios",
+   "pagina": 49
+  },
+  "7762": {
+   "nombre": "Pasivos monetarios",
+   "pagina": 49
+  },
+  "777": {
+   "nombre": "Ganancia por medición de activos y pasivos financieros al valor razonable",
+   "pagina": 49
+  },
+  "7771": {
+   "nombre": "Inversiones Financieras",
+   "pagina": 49
+  },
+  "7772": {
+   "nombre": "Otras inversiones",
+   "pagina": 49
+  },
+  "778": {
+   "nombre": "Intereses por préstamos medidos bajo tasa efectiva",
+   "pagina": 49
+  },
+  "779": {
+   "nombre": "Otros ingresos financieros",
+   "pagina": 49
+  },
+  "7792": {
+   "nombre": "Ingresos financieros en medición a valor descontado",
+   "pagina": 49
+  },
+  "7793": {
+   "nombre": "Otros ingresos financieros",
+   "pagina": 49
+  },
+  "78": {
+   "nombre": "CARGAS CUBIERTAS POR PROVISIONES",
+   "pagina": 49
+  },
+  "781": {
+   "nombre": "Cargas cubiertas por provisiones",
+   "pagina": 49
+  },
+  "79": {
+   "nombre": "CARGAS IMPUTABLES A CUENTAS DE COSTOS Y GASTOS",
+   "pagina": 49
+  },
+  "791": {
+   "nombre": "Cargas imputables a cuentas de costos y gastos",
+   "pagina": 49
+  },
+  "792": {
+   "nombre": "Gastos financieros imputables a cuentas de inventarios ELEMENTO 8: SALDOS INTERMEDIARIOS DE GESTIÓN Y DETERMINACIÓN",
+   "pagina": 49
+  },
+  "80": {
+   "nombre": "MARGEN COMERCIAL",
+   "pagina": 49
+  },
+  "801": {
+   "nombre": "Margen comercial",
+   "pagina": 50
+  },
+  "81": {
+   "nombre": "PRODUCCIÓN DEL EJERCICIO",
+   "pagina": 50
+  },
+  "811": {
+   "nombre": "Producción de bienes",
+   "pagina": 50
+  },
+  "812": {
+   "nombre": "Producción de servicios",
+   "pagina": 50
+  },
+  "813": {
+   "nombre": "Producción de activo inmovilizado",
+   "pagina": 50
+  },
+  "82": {
+   "nombre": "VALOR AGREGADO",
+   "pagina": 50
+  },
+  "821": {
+   "nombre": "Valor agregado",
+   "pagina": 50
+  },
+  "83": {
+   "nombre": "EXCEDENTE BRUTO (INSUFICIENCIA BRUTA) DE EXPLOTACIÓN",
+   "pagina": 50
+  },
+  "831": {
+   "nombre": "Excedente bruto (insuficiencia bruta) de explotación",
+   "pagina": 50
+  },
+  "84": {
+   "nombre": "RESULTADO DE OPERACIÓN",
+   "pagina": 50
+  },
+  "841": {
+   "nombre": "Resultado de operación",
+   "pagina": 50
+  },
+  "85": {
+   "nombre": "RESULTADO ANTES DE IMPUESTO A LAS GANANCIAS Y FINANCIAMIENTO",
+   "pagina": 50
+  },
+  "86": {
+   "nombre": "RESULTADO ANTES DE IMPUESTO A LAS GANANCIAS",
+   "pagina": 50
+  },
+  "88": {
+   "nombre": "IMPUESTO A LAS GANANCIAS",
+   "pagina": 50
+  },
+  "881": {
+   "nombre": "Impuesto a las ganancias – Corriente",
+   "pagina": 50
+  },
+  "882": {
+   "nombre": "Impuesto a las ganancias – Diferido",
+   "pagina": 50
+  },
+  "883": {
+   "nombre": "Impuesto a las ganancias – Diferencia de cambio",
+   "pagina": 50
+  },
+  "8831": {
+   "nombre": "Ganancia por diferencia de cambio",
+   "pagina": 50
+  },
+  "8832": {
+   "nombre": "Pérdida por diferencia de cambio",
+   "pagina": 50
+  },
+  "89": {
+   "nombre": "DETERMINACIÓN DEL RESULTADO DEL EJERCICIO",
+   "pagina": 50
+  },
+  "891": {
+   "nombre": "Utilidad",
+   "pagina": 50
+  },
+  "892": {
+   "nombre": "Pérdida ELEMENTO 9: GASTOS POR CATEGORÍA",
+   "pagina": 50
+  },
+  "91": {
+   "nombre": "GASTOS DE OPERACIÓN",
+   "pagina": 50
+  },
+  "92": {
+   "nombre": "GASTOS DE INVERSIÓN",
+   "pagina": 50
+  },
+  "93": {
+   "nombre": "GASTOS DE FINANCIAMIENTO",
+   "pagina": 50
+  }
+ }
+}

@@ -49,12 +49,17 @@ def leer_recurso(uri: str) -> str:
     return contenidos[0].content
 
 
-def test_estan_las_nueve_herramientas():
+def test_estan_las_diez_herramientas():
+    """El conjunto EXACTO, no un `in`: una herramienta que se cuela sin querer tambien es un fallo.
+
+    Quien conecta esto a su Claude ve esta lista y nada mas; anadir una es una decision, y este
+    test es donde se declara.
+    """
     nombres = {t.name for t in asyncio.run(mcp.list_tools())}
     assert nombres == {
         "configuracion_por_defecto", "validar_comprobantes", "validar_partida_doble",
         "generar_asiento", "exportar", "leer_xml_ubl", "leer_propuesta_sire",
-        "adaptar_pcge2026", "normalizar_detracciones",
+        "adaptar_pcge2026", "normalizar_detracciones", "buscar_cuenta_pcge",
     }
 
 
@@ -86,7 +91,7 @@ def test_cada_herramienta_se_explica_sola():
 def test_los_recursos_son_legibles():
     uris = {str(r.uri) for r in asyncio.run(mcp.list_resources())}
     assert uris == {"contaperu://estandar/pe-ledger", "contaperu://catalogos/sunat",
-                    "contaperu://drivers"}
+                    "contaperu://drivers", "contaperu://catalogos/pcge2026"}
     esquema = json.loads(leer_recurso("contaperu://estandar/pe-ledger"))
     assert esquema["title"] == "pe-ledger"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
@@ -94,6 +99,9 @@ def test_los_recursos_son_legibles():
     drivers = json.loads(leer_recurso("contaperu://drivers"))
     assert set(drivers) == {"sire", "concar", "csv"}
     assert drivers["concar"]["tipo"] == "archivo" and drivers["sire"]["tipo"] == "texto"
+    pcge = json.loads(leer_recurso("contaperu://catalogos/pcge2026"))
+    assert "PCGE 2026" in pcge["fuente"] and len(pcge["cuentas"]) > 1500
+    assert pcge["cuentas"]["706"]["nombre"] == "Descuentos concedidos por pronto pago"
 
 
 def test_generar_asiento_por_el_protocolo():
@@ -162,6 +170,36 @@ def test_leer_un_xml_de_sunat():
                       "periodo": "202601", "tipo": "venta"})
     assert len(r["comprobantes"]) == 1 and r["comprobantes"][0]["serie"] == "F001"
     assert r["comprobantes"][0]["origen"] == "xml"
+
+
+def test_buscar_una_cuenta_del_pcge_por_el_protocolo():
+    """La herramienta que le da a un modelo de lenguaje contra que contrastar la cuenta que propone.
+
+    Va por `call_tool` a proposito: dentro del servidor conviven DOS `cargar` —el de la tabla de
+    adaptacion y el del catalogo— y llamar al que no era devuelve algo con la forma equivocada sin
+    reventar. Solo se ve mirando lo que sale por el protocolo.
+    """
+    r = llamar("buscar_cuenta_pcge", codigo="603201")
+    assert "PCGE 2026" in r["fuente"]
+    # No esta en la norma y NO es un error: cada empresa abre sus divisionarias.
+    assert r["cuenta"]["codigo"] == "6032" and r["cuenta"]["exacta"] is False
+
+    r = llamar("buscar_cuenta_pcge", codigo="706")
+    assert r["cuenta"]["exacta"] is True
+    assert r["cuenta"]["nombre"] == "Descuentos concedidos por pronto pago"
+
+    r = llamar("buscar_cuenta_pcge", texto="pronto pago")
+    codigos = {c["codigo"] for c in r["encontradas"]}
+    assert {"605", "706"} <= codigos          # el descuento obtenido y el concedido
+
+    with pytest.raises(Exception, match="texto|codigo"):
+        llamar("buscar_cuenta_pcge")
+
+
+def test_un_codigo_que_no_existe_ni_por_su_elemento_no_resuelve():
+    """`99999` no es una divisionaria de nadie: el elemento 9 llega a 97, asi que esta mal escrito."""
+    r = llamar("buscar_cuenta_pcge", codigo="99999")
+    assert r["cuenta"] is None
 
 
 def test_el_pcge_avisa_de_que_no_tiene_tabla():
