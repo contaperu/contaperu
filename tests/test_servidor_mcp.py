@@ -49,7 +49,7 @@ def leer_recurso(uri: str) -> str:
     return contenidos[0].content
 
 
-def test_estan_las_diez_herramientas():
+def test_estan_las_once_herramientas():
     """El conjunto EXACTO, no un `in`: una herramienta que se cuela sin querer tambien es un fallo.
 
     Quien conecta esto a su Claude ve esta lista y nada mas; anadir una es una decision, y este
@@ -59,8 +59,21 @@ def test_estan_las_diez_herramientas():
     assert nombres == {
         "configuracion_por_defecto", "validar_comprobantes", "validar_partida_doble",
         "generar_asiento", "exportar", "leer_xml_ubl", "leer_propuesta_sire",
-        "adaptar_pcge2026", "normalizar_detracciones", "buscar_cuenta_pcge",
+        "adaptar_pcge2026", "normalizar_detracciones", "buscar_cuenta_pcge", "diagnosticar",
     }
+
+
+def test_diagnosticar_por_el_protocolo():
+    """Un agente pregunta que falta ANTES de exportar, y la respuesta ya viene por serie-numero."""
+    listo = llamar("diagnosticar", documento=DOCUMENTO)
+    assert listo["listo_para_exportar"] is True and listo["saldrian"] == ["E001-871"]
+    assert listo["detracciones_pendientes"][0]["serie_numero"] == "E001-871"
+    assert listo["sub_diarios"]["10"]["empieza_en"] == 1
+    sin_cuenta = json.loads(json.dumps(DOCUMENTO))
+    sin_cuenta["comprobantes"][0]["cuenta_contable"] = ""
+    r = llamar("diagnosticar", documento=sin_cuenta)
+    assert r["listo_para_exportar"] is False and r["faltantes"]["sin_cuenta"] == ["E001-871"]
+    assert r["por_que_no"] == ["1 sin cuenta contable"]
 
 
 def test_el_servidor_se_presenta_con_SU_version():

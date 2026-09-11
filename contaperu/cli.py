@@ -118,6 +118,46 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores)
 
 
+def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
+    print(f"{titulo}: {', '.join(str(e) for e in elementos) if elementos else vacio}")
+
+
+def cmd_diagnosticar(args: argparse.Namespace) -> int:
+    """Qué bloquea, qué falta y qué saldría, antes de generar nada."""
+    datos = json.loads(Path(args.json).read_text(encoding="utf-8"))
+    contab = json.loads(Path(args.config).read_text(encoding="utf-8")) if args.config else None
+    try:
+        d = operaciones.diagnosticar(datos, contab, driver=args.driver)
+    except operaciones.DocumentoInvalido as e:
+        print(f"El archivo no es un documento pe-ledger válido: {e}", file=sys.stderr)
+        return 2
+    lib, t = d["libro"], d["totales"]
+    print(f"Libro: {lib['tipo'].upper()} {lib['periodo']} · RUC {lib['ruc']} · destino {d['driver']}")
+    print(f"Comprobantes: {t['comprobantes']} · saldrían {t['saldrian']} · excluidos {t['excluidos']} · "
+          f"fuera del registro {t['fuera_del_registro']} · con error {t['con_error']} · con aviso {t['con_aviso']}")
+    print()
+    for bloque, marca in (("bloqueantes", "!!"), ("avisos", " ·")):
+        for item in d[bloque]:
+            for o in item["observaciones"]:
+                print(f"  {marca} {item['serie_numero']:<18} [{o['codigo']}] {o['texto']}")
+    for clave, titulo in (("sin_cuenta", "Sin cuenta contable"), ("sin_centro_de_costo", "Sin centro de costo"),
+                          ("tipos_sin_equivalencia", "Tipos sin equivalencia"),
+                          ("monedas_sin_codigo", "Monedas sin código"),
+                          ("sub_diarios_sin_correlativo", "Sub-diarios sin correlativo (arrancan en 1)")):
+        if d["faltantes"].get(clave):
+            _lista(titulo, d["faltantes"][clave])
+    if d["detracciones_pendientes"]:
+        _lista("Detracciones pendientes de constancia", [p["serie_numero"] for p in d["detracciones_pendientes"]])
+    for s, r in d["sub_diarios"].items():
+        print(f"  Sub-diario {s} ({r['etiqueta']}): {r['comprobantes']} comprobantes desde el {r['empieza_en']}")
+    print()
+    if d["listo_para_exportar"]:
+        print(f"LISTO para exportar: {len(d['saldrian'])} comprobantes.")
+        return 0
+    print("NO está listo: " + "; ".join(d["por_que_no"]) + ".")
+    return 1
+
+
 def cmd_comparar(args: argparse.Namespace) -> int:
     """Nuestro archivo del SIRE contra la exportación del detalle que da SUNAT."""
     try:
@@ -167,6 +207,12 @@ def main(argv: list[str] | None = None) -> int:
     d.add_argument("--revisar", action="store_true", help="aplicar las validaciones antes de generar")
     d.add_argument("--incluir-errores", action="store_true")
     d.set_defaults(fn=cmd_desde_json)
+
+    x = sub.add_parser("diagnosticar", help="qué bloquea, qué falta y qué saldría, antes de generar nada")
+    x.add_argument("json", help="documento pe-ledger")
+    x.add_argument("--driver", default="concar", choices=list(drivers.DRIVERS))
+    x.add_argument("--config", help="JSON con la configuración contable del contribuyente")
+    x.set_defaults(fn=cmd_diagnosticar)
 
     c = sub.add_parser("comparar", help="nuestro TXT del SIRE vs la exportación del detalle de SUNAT")
     c.add_argument("--nuestro", required=True, help="TXT o ZIP que genera la aplicación que lo use (reemplazar propuesta)")

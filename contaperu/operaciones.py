@@ -12,6 +12,7 @@ base64 porque un JSON no sabe llevar bytes.
 from __future__ import annotations
 
 import base64
+from decimal import Decimal
 from typing import Any
 
 from . import asiento as asi
@@ -233,6 +234,118 @@ def exportar(doc: dict, driver: str = "concar", contab: dict | None = None,
             salida["texto"] = contenido.decode("utf-8-sig", errors="replace")
         salida["contenido_base64"] = base64.b64encode(contenido).decode()
     return salida
+
+
+def _serie_numero(c: Comprobante) -> str:
+    return f"{c.serie}-{c.numero}".strip("-")
+
+
+def _detraccion_pendiente(c: Comprobante) -> bool:
+    """¿La detracción de este comprobante espera todavía su constancia del Banco de la Nación?
+
+    El estándar define `detraccion.estado` (PROVISIONADO | PAGADO) y `nro_constancia`, pero hoy
+    ningún lector los escribe —la conciliación de constancias está pendiente de un archivo real—,
+    así que «pendiente» se lee de la forma más honesta: no está PAGADO y no hay constancia. Un
+    productor que sí los rellene obtiene la respuesta correcta sin cambiar nada aquí.
+    """
+    d = c.detraccion if isinstance(c.detraccion, dict) else None
+    if not d or not asi.tiene_detraccion(c):
+        return False
+    return str(d.get("estado") or "").upper() != "PAGADO" and not str(d.get("nro_constancia") or "").strip()
+
+
+def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | None = None,
+                 driver: str = "concar") -> dict:
+    """Todo lo que hay que mirar de un mes ANTES de exportarlo, en una sola respuesta.
+
+    Es la operación pensada para un agente —o para una persona con prisa—: en vez de lanzar la
+    exportación y ver qué excepción salta a mitad de camino, responde de una vez qué bloquea, qué
+    falta y qué saldría. No añade ninguna regla contable: reúne comprobaciones que ya existen
+    (`validar.revisar`, `filas_sin_cuenta`, `filas_sin_centro`, `tipos_sin_mapa`,
+    `monedas_sin_codigo`, la numeración por sub-diario) y las cuenta por su serie-número.
+
+    Pura y sin estado. **No lanza** por lo que le falte al mes: lo describe. Solo rechaza un
+    documento que no es un documento (sin `libro`, o comprobantes ilegibles).
+    """
+    libro = libro_de(doc)
+    todos = comprobantes_de(doc)
+    conf = configuracion(contab)
+    detracciones.normalizar(todos, conf)
+    validar.revisar(todos, libro)
+    mod = drivers.obtener(driver)
+    venta = libro.es_venta
+
+    excluidos = [c for c in todos if c.excluida]
+    fuera = gen.fuera_de([c for c in todos if not c.excluida], getattr(mod, "EXCLUYE_TIPOS", None))
+    candidatos = [c for c in todos if not c.excluida and c not in fuera]
+    con_error = [c for c in candidatos if c.tiene_errores]
+    con_aviso = [c for c in candidatos if c.observaciones and not c.tiene_errores]
+
+    # Lo que pide un driver de ASIENTOS y un registro tributario (el SIRE) no: cuenta, centro,
+    # equivalencias del tipo, código de la moneda y el correlativo de cada sub-diario.
+    faltantes: dict[str, Any] = {}
+    sub_diarios: dict[str, Any] = {}
+    if drivers.contrato.necesita_asiento(mod):
+        sin_mapa = asi.tipos_sin_mapa(candidatos, conf)
+        con_mapa = [c for c in candidatos if c.tipo_cp not in sin_mapa]
+        presentes = asi.sub_diarios_presentes(con_mapa, conf, venta)
+        corr = {s: 1 for s in presentes}
+        corr.update(correlativos or {})
+        faltantes = {
+            "sin_cuenta": [_serie_numero(c) for c in asi.filas_sin_cuenta(candidatos, conf, venta)],
+            "sin_centro_de_costo": [_serie_numero(c) for c in asi.filas_sin_centro(candidatos, conf, venta)],
+            "tipos_sin_equivalencia": sin_mapa,
+            "monedas_sin_codigo": asi.monedas_sin_codigo(candidatos, conf),
+            "sub_diarios_sin_correlativo": [s for s in presentes if s not in (correlativos or {})],
+        }
+        etiquetas = asi.etiquetas_sub_diario(conf)
+        sub_diarios = {s: {"etiqueta": etiquetas.get(s, s), "comprobantes": n, "empieza_en": corr[s]}
+                       for s, n in presentes.items()}
+
+    por_que_no: list[str] = []
+    if not candidatos:
+        por_que_no.append("no hay comprobantes que exportar")
+    if con_error:
+        por_que_no.append(f"{len(con_error)} comprobantes con observaciones que bloquean")
+    for clave, texto in (("sin_cuenta", "sin cuenta contable"),
+                         ("sin_centro_de_costo", "sin centro de costo en una cuenta que lo lleva"),
+                         ("tipos_sin_equivalencia", "de un tipo sin equivalencia en el sistema de destino"),
+                         ("monedas_sin_codigo", "en una moneda que el sistema de destino no admite")):
+        if faltantes.get(clave):
+            por_que_no.append(f"{len(faltantes[clave])} {texto}")
+
+    por_contraparte: dict[str, dict] = {}
+    for c in candidatos:
+        clave = c.contraparte_doc or "(sin documento)"
+        r = por_contraparte.setdefault(clave, {"nombre": c.contraparte_nombre, "comprobantes": 0,
+                                               "total": Decimal("0.00"), "moneda": c.moneda})
+        r["comprobantes"] += 1
+        r["total"] += c.total if not c.es_nota_credito else -c.total
+    for r in por_contraparte.values():
+        r["total"] = str(r["total"])
+
+    return {
+        "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
+        "driver": driver,
+        "listo_para_exportar": not por_que_no,
+        "por_que_no": por_que_no,
+        "totales": {"comprobantes": len(todos), "saldrian": len(candidatos), "excluidos": len(excluidos),
+                    "fuera_del_registro": len(fuera), "con_error": len(con_error), "con_aviso": len(con_aviso)},
+        "bloqueantes": [{"serie_numero": _serie_numero(c),
+                         "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "error"]}
+                        for c in con_error],
+        "avisos": [{"serie_numero": _serie_numero(c),
+                    "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "aviso"]}
+                   for c in con_aviso],
+        "faltantes": faltantes,
+        "detracciones_pendientes": [
+            {"serie_numero": _serie_numero(c), "codigo": str((c.detraccion or {}).get("codigo") or ""),
+             "monto": str((c.detraccion or {}).get("monto") or "")}
+            for c in candidatos if _detraccion_pendiente(c)],
+        "resumen_por_contraparte": por_contraparte,
+        "sub_diarios": sub_diarios,
+        "saldrian": [_serie_numero(c) for c in candidatos if not c.tiene_errores],
+    }
 
 
 def adaptar_pcge(lineas: list[dict]) -> dict:

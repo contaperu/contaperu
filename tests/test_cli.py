@@ -43,6 +43,21 @@ def test_desde_json(tmp_path):
     assert (tmp_path / "LE2060123456720260100080400021112.TXT").read_bytes().count(b"\r\n") == 3
 
 
+def test_diagnosticar_dice_que_falta_y_luego_que_esta_listo(tmp_path, capsys):
+    """Antes de generar nada: el golden no trae cuenta de gasto, y con la del RUC queda listo."""
+    golden = str(GOLDEN / "compras_202601.json")
+    assert cli.main(["diagnosticar", golden]) == 1
+    out = capsys.readouterr().out
+    assert "NO está listo: 3 sin cuenta contable" in out and "Sin cuenta contable:" in out
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}), encoding="utf-8")
+    assert cli.main(["diagnosticar", golden, "--config", str(config)]) == 0
+    out = capsys.readouterr().out
+    assert "LISTO para exportar: 3 comprobantes." in out and "Sub-diario 11 (Compras): 3 comprobantes desde el 1" in out
+    # Para el SIRE no hay cuentas que pedir: el mismo golden está listo tal cual.
+    assert cli.main(["diagnosticar", golden, "--driver", "sire"]) == 0
+
+
 def test_la_consola_de_windows_no_tumba_el_cli(monkeypatch):
     """La consola de Windows es cp1252 y el CLI imprime flechas y tildes. Que se caiga al
     IMPRIMIR, con los archivos ya escritos, seria absurdo."""

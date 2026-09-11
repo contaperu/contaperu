@@ -206,6 +206,25 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
 
 
 @mcp.tool()
+def diagnosticar(documento: dict, configuracion: dict | None = None, correlativos: dict | None = None,
+                 driver: str = "concar") -> dict:
+    """Dice todo lo que hay que mirar de un mes ANTES de exportarlo. **Llámala antes de `exportar`.**
+
+    En una sola respuesta: si el mes está listo (`listo_para_exportar`) y, si no, por qué
+    (`por_que_no`); qué comprobantes tienen observaciones que bloquean y cuáles solo avisos, por su
+    serie-número; qué falta para el sistema de destino —cuenta contable, centro de costo, tipos de
+    comprobante sin equivalencia, monedas que no admite, sub-diarios sin correlativo—; qué
+    detracciones esperan todavía su constancia; un resumen por proveedor o cliente; desde qué
+    correlativo arrancaría cada sub-diario; y la lista de lo que saldría.
+
+    No corrige nada ni inventa nada: un comprobante sin cuenta se arregla donde se revisa, y aquí
+    solo se dice cuál es. Es la herramienta para enseñarle a la persona qué va a salir antes de
+    generar un archivo que luego se importa en su sistema contable.
+    """
+    return operaciones.diagnosticar(documento, configuracion, correlativos, driver)
+
+
+@mcp.tool()
 def exportar(documento: dict, driver: str = "concar", configuracion: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False) -> CallToolResult:
     """Genera el archivo que espera un sistema contable, ya listo para importar.
