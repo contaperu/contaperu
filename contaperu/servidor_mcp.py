@@ -141,7 +141,8 @@ def drivers_disponibles() -> str:
     """Los formatos de salida disponibles y qué libros genera cada uno."""
     return json.dumps({
         nombre: {"formatos": mod.FORMATOS,
-                 "tipo": "archivo" if hasattr(mod, "construir") else "texto",
+                 "tipo": "texto" if drivers.contrato.forma(mod) == "linea" else "archivo",
+                 "forma": drivers.contrato.forma(mod),
                  "descripcion": (mod.__doc__ or "").strip().splitlines()[0]}
         for nombre, mod in drivers.DRIVERS.items()
     }, ensure_ascii=False, indent=1)

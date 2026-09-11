@@ -211,7 +211,7 @@ def exportar(doc: dict, driver: str = "concar", contab: dict | None = None,
     libro, comprobantes, conf = _preparar(doc, contab, incluir_observados)
     mod = drivers.obtener(driver)
     params: dict[str, Any] = {}
-    if hasattr(mod, "construir"):
+    if drivers.contrato.necesita_asiento(mod):
         venta = libro.es_venta
         corr = {s: 1 for s in asi.sub_diarios_presentes(comprobantes, conf, venta)}
         corr.update(correlativos or {})

@@ -50,7 +50,8 @@ def _escribir(exp: gen.Exportado, salida: Path) -> None:
 def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, salida: Path,
                    incluir_errores: bool) -> int:
     # "todas" = los drivers de TXT (el Excel de CONCAR necesita correlativos y cuentas: va por la aplicación que lo use)
-    nombres = [n for n, m in drivers.DRIVERS.items() if not hasattr(m, "construir")] if driver == "todas" else [driver]
+    nombres = ([n for n, m in drivers.DRIVERS.items() if drivers.contrato.forma(m) == "linea"]
+               if driver == "todas" else [driver])
     codigo = 0
     for p in nombres:
         if libro.tipo not in drivers.obtener(p).FORMATOS:

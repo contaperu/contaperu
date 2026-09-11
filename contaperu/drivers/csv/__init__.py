@@ -19,6 +19,7 @@ import csv as _csv  # stdlib: los imports absolutos no chocan con el nombre de e
 import io
 from typing import Any
 
+from ...asiento.lineas import LineaDiario
 from ...asiento.motor import lineas_del_libro
 from ...formato import Opciones
 from ...modelo import Comprobante, Libro
@@ -71,26 +72,31 @@ def _valor(linea: dict, ruta: str) -> Any:
     return (linea.get(padre) or {}).get(hijo, "")
 
 
-def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict,
-              correlativos: dict[str, int], op: Opciones = OPCIONES,
-              separador: str = SEPARADOR, bom: bool = True) -> tuple[bytes, dict]:
-    """Comprobantes → CSV de líneas de diario + resumen."""
-    neutrales, rangos = lineas_del_libro(libro, comprobantes, contab, correlativos, op)
-    lineas = [ln.a_dict() for ln in neutrales]
-    cuadre = partida_doble.exigir(lineas)
+def desde_lineas(libro: Libro, lineas: list[LineaDiario], contab: dict, op: Opciones = OPCIONES,
+                 separador: str = SEPARADOR, bom: bool = True) -> tuple[bytes, dict]:
+    """Líneas neutrales (ya numeradas y cuadradas por el núcleo) → CSV.
 
+    Es el driver de asientos más sencillo que puede escribirse con la forma `desde_lineas` del
+    contrato, y por eso sirve de plantilla: traduce vocabulario y nada más."""
+    filas = [ln.a_dict() for ln in lineas]
     buf = io.StringIO(newline="")
     escritor = _csv.writer(buf, delimiter=separador, lineterminator="\r\n",
                            quoting=_csv.QUOTE_MINIMAL)
     escritor.writerow([cab for _, cab in COLUMNAS])
-    for linea in lineas:
-        escritor.writerow([_valor(linea, ruta) for ruta, _ in COLUMNAS])
+    for fila in filas:
+        escritor.writerow([_valor(fila, ruta) for ruta, _ in COLUMNAS])
 
     texto = buf.getvalue()
-    contenido = ("﻿" + texto if bom else texto).encode("utf-8")
-    resumen = {
-        "filas": len(lineas),
-        "sub_diarios": dict(rangos),
-        "debe": str(cuadre.debe), "haber": str(cuadre.haber),
-    }
-    return contenido, resumen
+    return ("﻿" + texto if bom else texto).encode("utf-8"), {"filas": len(filas)}
+
+
+def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict,
+              correlativos: dict[str, int], op: Opciones = OPCIONES,
+              separador: str = SEPARADOR, bom: bool = True) -> tuple[bytes, dict]:
+    """Comprobantes → CSV + resumen. Se conserva por compatibilidad con la 0.6: el núcleo ya no la
+    usa —`generar` arma las líneas y llama a `desde_lineas`—, pero es API pública."""
+    neutrales, rangos = lineas_del_libro(libro, comprobantes, contab, correlativos, op)
+    cuadre = partida_doble.exigir(neutrales)
+    contenido, _ = desde_lineas(libro, neutrales, contab, op, separador, bom)
+    return contenido, {"filas": len(neutrales), "sub_diarios": dict(rangos),
+                       "debe": str(cuadre.debe), "haber": str(cuadre.haber)}

@@ -28,25 +28,49 @@ historia de un repositorio público no sale nunca más.
 
 ## Añadir un driver de salida
 
-Un driver traduce las líneas de diario al formato que importa un sistema contable. Vive en
-`contaperu/drivers/<sistema>/` y expone:
+Un driver traduce el asiento al formato que importa un sistema contable. El contrato completo está en
+[`contaperu/drivers/contrato.py`](contaperu/drivers/contrato.py); para un driver de **asientos** nuevo
+(SISCONT, STARSOFT, CONTASIS…) la forma es `desde_lineas`: el núcleo arma las líneas neutrales de
+`pe-ledger`, las numera y exige que cuadren, y tu driver solo las traduce. No tienes que reimplementar
+ni una cuenta, ni un sentido, ni la detracción.
 
 ```python
-NOMBRE = "contasis"
-FORMATOS = ("txt",)          # o ("xlsx",), ("csv",)…
+from contaperu.formato import Opciones
 
-def construir(libro, comprobantes, contab, correlativos, op=OPCIONES) -> tuple[bytes, dict]:
-    """Devuelve el archivo y un resumen. O bien, para salidas de texto línea a línea:"""
+NOMBRE = "siscont"
+FORMATOS = {"compra": "siscont_asiento", "venta": "siscont_asiento"}
+OPCIONES = Opciones(fecha="DD/MM/AAAA", extension=".txt")
+CONTENT_TYPE = "text/plain; charset=utf-8"
 
-def linea(c, libro, idx, op=OPCIONES) -> str:
+def nombre(libro, op=OPCIONES) -> str:
+    return f"SISCONT_{libro.ruc}_{libro.periodo}{op.extension}"
+
+def desde_lineas(libro, lineas, contab, op=OPCIONES) -> tuple[bytes, dict]:
+    # Cada línea trae `rol` (principal, igv, tercero, detraccion…), `cuenta`, `debe_haber`, `importe`
+    # como texto exacto, `documento.tipo_cp` (el código SUNAT), la glosa entera… Tradúcelas y devuelve
+    # los bytes del archivo y un resumen.
     ...
 ```
 
-Se registra en `contaperu/drivers/__init__.py`. Requisitos para que se acepte:
+El driver CSV ([`contaperu/drivers/csv`](contaperu/drivers/csv/__init__.py)) es el ejemplo más corto de
+esta forma. Las otras dos —`linea` para un TXT por comprobante, como el SIRE, y `construir` para un
+archivo armado desde los comprobantes, como CONCAR— siguen existiendo.
+
+**Dos maneras de publicarlo:**
+
+- **Como paquete propio**, sin esperar a nadie: declara en tu `pyproject.toml`
+  `[project.entry-points."contaperu.drivers"]` → `siscont = "contaperu_siscont"` y, con los dos
+  instalados, tu driver aparece en la CLI, en la fachada y en el servidor MCP.
+- **Dentro de este repositorio**, en `contaperu/drivers/<sistema>/` y en `DE_SERIE` de
+  `contaperu/drivers/__init__.py`.
+
+Esté donde esté, `tests/test_contrato_drivers.py` lo examina: cumple el contrato y exporta el golden de
+compras con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
 
 1. **Un test con un caso real** que el sistema de destino haya aceptado de verdad. Un driver que nadie ha
    importado en su ERP no se publica: sería prometer algo que no consta.
-2. **El asiento debe cuadrar.** El driver llama a `partida_doble.cuadra()` antes de escribir bytes.
+2. **El asiento debe cuadrar.** Con `desde_lineas` lo exige el núcleo antes de llamarte; con `construir`,
+   el driver llama a `partida_doble.exigir()` antes de escribir bytes.
 3. **Nada de red, nada de disco, nada de estado.** Entra por parámetro, sale por retorno.
 4. **Un tipo de comprobante sin equivalente detiene la exportación**, no se inventa uno. Es la regla más
    importante: es preferible un error claro a un asiento silenciosamente mal.

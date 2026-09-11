@@ -16,7 +16,9 @@ import zipfile
 from dataclasses import dataclass
 from decimal import Decimal
 
-from . import drivers
+from . import drivers, partida_doble
+from .asiento.motor import lineas_del_libro
+from .drivers import contrato
 from .modelo import Comprobante, Libro
 from .formato import Opciones
 
@@ -101,6 +103,20 @@ def _resumen(comprobantes: list[Comprobante], incluidos: list[Comprobante], erro
     }
 
 
+def _desde_lineas(mod, libro: Libro, comprobantes: list[Comprobante], op: Opciones,
+                  contab: dict | None = None, correlativos: dict[str, int] | None = None) -> tuple[bytes, dict]:
+    """Un driver de asientos de la forma `desde_lineas`: el núcleo arma las líneas neutrales, las
+    numera y exige que cuadren; el driver solo las traduce. Así la contabilidad se escribe una vez
+    para todos los ERP, y un driver nuevo no puede equivocarse en una cuenta ni en un sentido."""
+    if contab is None or correlativos is None:
+        raise ValueError(f"El driver {mod.NOMBRE!r} arma asientos: necesita `contab` y `correlativos`")
+    lineas, rangos = lineas_del_libro(libro, comprobantes, contab, correlativos, op)
+    cuadre = partida_doble.exigir(lineas)
+    contenido, extra = mod.desde_lineas(libro, lineas, contab, op)
+    return contenido, {"filas": len(lineas), "sub_diarios": dict(rangos),
+                       "debe": str(cuadre.debe), "haber": str(cuadre.haber), **extra}
+
+
 def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_DEFAULT,
             opciones: Opciones | None = None, incluir_errores: bool = False, **params) -> Exportado:
     """`params` son los de la driver binaria (CONCAR: `contab`, `correlativos`)."""
@@ -117,8 +133,12 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers
     if errores and not incluir_errores:
         raise ErroresBloqueantes(errores)
 
-    if hasattr(mod, "construir"):
-        contenido, extra = mod.construir(libro, incluidos, op=op, **params)
+    forma = contrato.forma(mod)
+    if forma in ("desde_lineas", "construir"):
+        if forma == "desde_lineas":
+            contenido, extra = _desde_lineas(mod, libro, incluidos, op, **params)
+        else:
+            contenido, extra = mod.construir(libro, incluidos, op=op, **params)
         nombre = mod.nombre(libro, op)
         return Exportado(
             nombre=nombre, nombre_zip="", formato=formato, driver=driver, txt=b"", zip=b"",

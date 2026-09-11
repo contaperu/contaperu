@@ -1,38 +1,83 @@
-"""Registro de drivers de salida. Un driver traduce el asiento al formato que importa
-un sistema contable concreto.
+"""Registro de drivers de salida. Un driver traduce el asiento —o el registro— al formato que
+importa un sistema contable concreto. Lo que tiene que exponer está en `contrato.py`.
 
-Cada driver expone:
-
-- `NOMBRE`, `OPCIONES` (los valores por defecto de formato), `FORMATOS`
-  ({'venta': …, 'compra': …} — el identificador de la salida que produce)
-- `nombre(libro, op)` → el nombre del archivo
-- y **o bien** `linea(comprobante, libro, idx, op)` → una línea de un archivo de texto,
-  **o bien** `construir(libro, comprobantes, **params) -> (bytes, resumen)` para un archivo
-  binario entero, que además declara `CONTENT_TYPE`.
-- opcionalmente `EXCLUYE_TIPOS`: los comprobantes que este destino no debe llevar.
-
-Dar de alta un driver = un paquete más aquí y una entrada en `DRIVERS`. Ningún otro archivo
-del núcleo cambia. Ver `CONTRIBUTING.md`.
-
-Los dos que vienen de serie salen de la contabilidad peruana real:
+Los tres que vienen de serie salen de la contabilidad peruana real:
 
 - **`sire`** — el TXT que se sube a SUNAT para reemplazar la propuesta del Registro de Ventas
   (RVIE) o de Compras (RCE). Es lo que la norma exige hoy: el PLE quedó reemplazado por el SIRE
   para estos dos registros.
 - **`concar`** — el Excel de asientos que importa CONCAR, uno de los sistemas contables más
   usados del país.
+- **`csv`** — las líneas de diario neutrales, para quien todavía no tiene driver.
+
+**Drivers de terceros, sin tocar este repositorio.** Un paquete instalado que declare en su
+`pyproject.toml`
+
+    [project.entry-points."contaperu.drivers"]
+    siscont = "contaperu_siscont"
+
+aparece aquí solo, con su `NOMBRE`, en la CLI, en la fachada y en el servidor MCP. Es lo que permite
+que la comunidad mantenga el driver de su ERP a su ritmo. Dos reglas: los de serie ganan ante un
+nombre repetido, y un driver que no cumple el contrato —o que revienta al importarse— se ignora con
+un `AvisoDriver` en vez de tumbar el registro entero. Para entrar AL repositorio sigue haciendo falta
+un archivo real aceptado por ese ERP (ver `CONTRIBUTING.md`).
 """
 from __future__ import annotations
 
+import warnings
+from importlib.metadata import entry_points
 from types import ModuleType
 
-from . import concar, csv, sire
+from . import concar, contrato, csv, sire
 from ..formato import Opciones
 
-DRIVERS: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv}
+GRUPO = "contaperu.drivers"
+DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv}
 DRIVER_DEFAULT = "sire"
 
-__all__ = ["DRIVERS", "DRIVER_DEFAULT", "Opciones", "concar", "csv", "formato", "obtener", "sire"]
+__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_DEFAULT", "GRUPO", "AvisoDriver", "Opciones", "concar",
+           "contrato", "csv", "de_terceros", "formato", "obtener", "recargar", "sire"]
+
+
+class AvisoDriver(UserWarning):
+    """Un driver de terceros no se pudo registrar. No detiene nada: ese driver no aparece."""
+
+
+def de_terceros() -> dict[str, ModuleType]:
+    """Los drivers de los paquetes instalados que se declaran en el grupo `contaperu.drivers`."""
+    encontrados: dict[str, ModuleType] = {}
+    for entrada in entry_points(group=GRUPO):
+        try:
+            mod = entrada.load()
+        except Exception as e:     # código ajeno: cualquier fallo al importarlo es suyo, no del registro
+            warnings.warn(f"El driver {entrada.name!r} no se pudo importar: {e}", AvisoDriver, stacklevel=2)
+            continue
+        problemas = contrato.incumplimientos(mod)
+        if problemas:
+            warnings.warn(f"El driver {entrada.name!r} no cumple el contrato: {'; '.join(problemas)}",
+                          AvisoDriver, stacklevel=2)
+            continue
+        if mod.NOMBRE in DE_SERIE or mod.NOMBRE in encontrados:
+            warnings.warn(f"El driver {entrada.name!r} se llama {mod.NOMBRE!r}, que ya está registrado; "
+                          "se ignora", AvisoDriver, stacklevel=2)
+            continue
+        encontrados[mod.NOMBRE] = mod
+    return encontrados
+
+
+# Se muta en sitio y no se reasigna: quien hizo `from contaperu.drivers import DRIVERS` ve lo mismo.
+DRIVERS: dict[str, ModuleType] = {}
+
+
+def recargar() -> dict[str, ModuleType]:
+    """Vuelve a buscar los drivers de terceros (p. ej. tras instalar uno sin reiniciar)."""
+    DRIVERS.clear()
+    DRIVERS.update(DE_SERIE)
+    DRIVERS.update(de_terceros())
+    return DRIVERS
+
+
+recargar()
 
 
 def obtener(nombre: str) -> ModuleType:
