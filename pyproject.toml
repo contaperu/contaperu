@@ -30,7 +30,7 @@ excel = ["openpyxl>=3.1,<4"]              # driver de CONCAR (.xlsx)
 schema = ["jsonschema>=4,<5"]             # validar contra pe-ledger.schema.json
 mcp = ["mcp>=1.2,<2", "jsonschema>=4,<5"] # servidor MCP
 todo = ["contaperu[excel,schema,mcp]"]
-dev = ["contaperu[todo]", "pytest>=8,<9"]
+dev = ["contaperu[todo]", "pytest>=8,<10"]
 
 [project.scripts]
 contaperu = "contaperu.cli:main"
