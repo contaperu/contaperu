@@ -1,9 +1,13 @@
 """La línea de diario neutral: el asiento sin el vocabulario de ningún ERP.
 
-`construir.asiento()` devuelve las filas en las columnas del Excel de CONCAR ('A'..'AO')
-porque este código nació generando ese archivo. Aquí se proyectan al bloque `asiento` del
-estándar `pe-ledger`, que es lo que consume cualquier otro destino: el CSV genérico, un driver
-de terceros o un agente de IA a través del servidor MCP.
+Es el bloque `asiento` del estándar `pe-ledger` y, desde la 0.7, la FUENTE del asiento: la arma
+`motor.asiento_neutral()` y de ella salen todos los destinos — el Excel de CONCAR como una proyección
+(`drivers/concar/proyeccion.py`), el CSV genérico, los drivers de terceros y los agentes de IA a
+través del servidor MCP.
+
+`desde_fila()` y `a_lineas()` hacen el camino inverso (de columnas de CONCAR a línea neutral) y se
+conservan por compatibilidad: era como se obtenía la línea cuando el asiento nacía en columnas. No
+rellenan los campos que llegaron después (`rol`, `tipo_cp`, el código SUNAT de la detracción).
 
 La tabla de equivalencias de abajo es, de paso, la documentación de qué significa cada columna
 del formato de CONCAR — que en su manual solo tiene una letra por nombre.
@@ -55,11 +59,17 @@ def _numero(v: Any) -> Any:
 
 @dataclass
 class LineaDiario:
-    """Una línea del asiento, en el vocabulario de `pe-ledger`."""
+    """Una línea del asiento, en el vocabulario de `pe-ledger`.
+
+    `documento` y `referencia` llevan `tipo` (la sigla del ERP, por compatibilidad) y `tipo_cp` (el
+    código SUNAT de la Tabla 10, que es el que manda). `glosa` va entera: el corte es del driver.
+    `tasa_igv` es la del comprobante como texto (`"18"`, `"10.5"`), sin redondear a entero.
+    """
 
     cuenta: str
     debe_haber: str            # 'D' | 'H'
     importe: str
+    rol: str = ""              # ver `motor.ROLES`: principal, igv, retencion_4ta, tercero…
     sub_diario: str = ""
     correlativo: str = ""
     fecha: str = ""

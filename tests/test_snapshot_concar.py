@@ -125,8 +125,12 @@ def serializar_filas(caso) -> list[dict]:
 
 
 def serializar_lineas(caso) -> list[dict]:
-    _, _, _, extra = caso
-    return [ln.a_dict() for ln in asi.a_lineas(filas_de(caso), contab_de(extra))]
+    """Las líneas neutrales que arma el motor. Se congelaron primero desde las columnas de CONCAR
+    (v0.6) y se regeneraron UNA vez al invertir el asiento (0.7), con un diff revisado que solo
+    añadía `rol`, `tipo_cp` y el código SUNAT de la detracción, dejaba la glosa sin cortar y la tasa
+    del IGV como texto exacto. Ningún importe, cuenta ni sentido cambió."""
+    _, campos, venta, extra = caso
+    return [ln.a_dict() for ln in asi.asiento_neutral(cp(**campos), contab_de(extra), MES, "080001", venta=venta)]
 
 
 def regenerar() -> None:

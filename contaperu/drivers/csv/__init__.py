@@ -19,8 +19,7 @@ import csv as _csv  # stdlib: los imports absolutos no chocan con el nombre de e
 import io
 from typing import Any
 
-from ...asiento import a_lineas, asiento, numerar
-from ...asiento.construir import mes_del_libro
+from ...asiento.motor import lineas_del_libro
 from ...formato import Opciones
 from ...modelo import Comprobante, Libro
 from ... import partida_doble
@@ -76,13 +75,8 @@ def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict,
               correlativos: dict[str, int], op: Opciones = OPCIONES,
               separador: str = SEPARADOR, bom: bool = True) -> tuple[bytes, dict]:
     """Comprobantes → CSV de líneas de diario + resumen."""
-    venta = libro.es_venta
-    numeros, rangos = numerar(comprobantes, contab, libro.periodo, correlativos, venta)
-    mes = mes_del_libro(libro)
-    filas: list[dict[str, Any]] = []
-    for c in comprobantes:
-        filas.extend(asiento(c, contab, mes, numeros[id(c)], op, venta))
-    lineas = [ln.a_dict() for ln in a_lineas(filas, contab)]
+    neutrales, rangos = lineas_del_libro(libro, comprobantes, contab, correlativos, op)
+    lineas = [ln.a_dict() for ln in neutrales]
     cuadre = partida_doble.exigir(lineas)
 
     buf = io.StringIO(newline="")

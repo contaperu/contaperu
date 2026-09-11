@@ -8,12 +8,13 @@ from typing import Any
 
 from ...modelo import Comprobante, Libro
 from ... import partida_doble
-from ...asiento.lineas import a_lineas
 from ...formato import Opciones
-from ...asiento.construir import (MonedaSinCodigo, SinCuenta, TipoSinMapa, asiento, mes_del_libro,
+from ...asiento.construir import (MonedaSinCodigo, SinCuenta, TipoSinMapa, mes_del_libro,
                       etiquetas_sub_diario, filas_sin_cuenta, monedas_sin_codigo, numerar, tipos_sin_mapa)
 from ...asiento.datos import (ANCHOS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
                     EXCEL_HEADERS, FORMATOS, OPCIONES)
+from ...asiento.motor import asiento_neutral
+from . import proyeccion
 
 
 def build_xlsx(filas: list[dict[str, Any]]) -> bytes:
@@ -88,12 +89,15 @@ def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict, corre
     # dentro de ellos (regla del 30-ago-2026; el detalle vive en asiento()).
     mes = mes_del_libro(libro)
     numeros, rangos = numerar(comprobantes, contab, libro.periodo, correlativos, venta)
-    filas: list[dict[str, Any]] = []
+    # La contabilidad sale en lineas neutrales; aqui solo se proyectan a las columnas de CONCAR.
+    lineas, filas = [], []
     for c in comprobantes:
-        filas.extend(asiento(c, contab, mes, numeros[id(c)], op, venta))
+        propias = asiento_neutral(c, contab, mes, numeros[id(c)], op, venta)
+        lineas.extend(propias)
+        filas.extend(proyeccion.filas(c, propias, contab))
     # El asiento tiene que cuadrar ANTES de escribir un solo byte. Por construccion siempre
     # cuadra, asi que esto es una red de seguridad: si salta, hay un error de verdad.
-    cuadre = partida_doble.exigir(a_lineas(filas, contab))
+    cuadre = partida_doble.exigir(lineas)
     resumen = {
         "filas_excel": len(filas), "fechas": "por comprobante (extemporáneos al " + mes[0].strftime("%d/%m/%Y") + ")",
         "sub_diarios": {s: {"etiqueta": etiquetas_sub_diario(contab).get(s, s), **r} for s, r in rangos.items()},

@@ -35,11 +35,13 @@ exportación se detiene y dice cuál falta.
 
 ---
 
-Nota de arquitectura, sin adornos: hoy las filas nacen ya en las columnas del Excel de CONCAR
-(claves 'A'..'AO'), porque este código nació generando ese archivo. `lineas.py` las proyecta al
-vocabulario neutral de `pe-ledger`, que es lo que consumen el driver CSV y el servidor MCP.
-Cuando exista un segundo driver nativo, la dirección se invierte: la línea neutral pasa a ser
-la fuente y CONCAR, una proyección más.
+Nota de arquitectura: el asiento nace en líneas neutrales de `pe-ledger` (`motor.py`) y cada ERP
+es una proyección de ellas. CONCAR fue el primero y el código nació generando su Excel, así que
+durante un año las filas nacieron en sus columnas ('A'..'AO') y la línea neutral se sacaba después;
+desde el 11-sep-2026 (0.7) la dirección está invertida — la línea es la fuente y el Excel de CONCAR,
+una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una celda al invertirse
+(`tests/test_snapshot_concar.py`). `asiento()` sigue devolviendo las columnas de CONCAR por
+compatibilidad; lo nuevo se escribe contra `asiento_neutral()` y `lineas_del_libro()`.
 """
 from .datos import (ANCHOS, COLUMNAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
                     CONTENT_TYPE, D2, DEFAULTS, ETIQUETAS_SUB_DIARIO, EXCEL_HEADERS,
@@ -53,6 +55,7 @@ from .construir import (CorrelativoFaltante, MonedaSinCodigo, SinCuenta, TipoSin
                         resolve_cxp_account, sub_diario, sub_diarios_presentes,
                         tasa_igv, tiene_detraccion, tipo_concar, tipos_sin_mapa)
 from .lineas import LineaDiario, a_lineas, desde_fila
+from .motor import ROLES, asiento_neutral, glosa_de, lineas_del_libro
 
 __all__ = [
     "ANCHOS", "COLUMNAS", "COLUMNAS_FECHA", "COLUMNAS_IMPORTE", "COLUMNAS_TEXTO",
@@ -67,4 +70,5 @@ __all__ = [
     "resolve_cxp_account", "sub_diario", "sub_diarios_presentes",
     "tasa_igv", "tiene_detraccion", "tipo_concar", "tipos_sin_mapa",
     "LineaDiario", "a_lineas", "desde_fila",
+    "ROLES", "asiento_neutral", "glosa_de", "lineas_del_libro",
 ]

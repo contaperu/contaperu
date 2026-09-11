@@ -97,6 +97,30 @@ está en dólares: por eso `monto` es en soles aunque el resto del comprobante e
 
 ---
 
+## Las líneas del asiento, para quien escribe un driver
+
+Desde la librería 0.7 el asiento **nace** en estas líneas y cada sistema contable es una traducción de
+ellas (el Excel de CONCAR incluido). Por eso cada línea dice lo que un driver necesita para traducir sin
+adivinar:
+
+- **`rol`** — qué papel cumple: `principal` (el gasto en compras, el ingreso en ventas), `igv`,
+  `retencion_4ta`, `tercero` (el proveedor o el cliente), `detraccion_tercero` y `detraccion`. Un ERP
+  que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su cuenta, que la elige
+  cada empresa.
+- **`documento.tipo_cp`** y **`referencia.tipo_cp`** — el código SUNAT (Tabla 10). Es el que manda
+  (regla 4). `documento.tipo` sigue llevando la sigla del ERP por compatibilidad. La línea `detraccion`
+  no lleva `tipo_cp`: su documento es la constancia pendiente, no un comprobante de SUNAT.
+- **`detraccion.codigo`** — el código SUNAT del bien o servicio (Catálogo 54), al lado del interno.
+- **`glosa`** va entera, con su prefijo (`IGV - `, `RET 4TA - `, `DETRACCION - `). Cortarla al largo
+  que admite cada ERP es trabajo del driver.
+- **`tasa_igv`** es la del comprobante como texto (`"18"`, `"10.5"`). Si un ERP solo admite enteros,
+  redondea él.
+
+Son campos **opcionales añadidos**, así que no cambian la versión del estándar (ver *Versionado*): un
+consumidor de la 0.2 que no los conozca los ignora.
+
+---
+
 ## Campos que conviene mirar dos veces
 
 | Campo | Cuidado |

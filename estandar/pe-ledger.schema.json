@@ -193,6 +193,10 @@
         "cuenta": { "type": "string", "description": "Cuenta del plan contable del contribuyente." },
         "debe_haber": { "enum": ["D", "H"] },
         "importe": { "$ref": "#/$defs/importe" },
+        "rol": {
+          "enum": ["principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion"],
+          "description": "Qué papel cumple la línea en el asiento: el gasto o ingreso, el IGV, la retención de 4ta, el proveedor o cliente, y las dos líneas de la detracción. Un driver la encuentra por su rol, no por su cuenta."
+        },
         "moneda": { "type": "string", "pattern": "^[A-Z]{3}$" },
         "tipo_cambio": { "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "null" }] },
         "glosa": { "type": "string" },
@@ -204,6 +208,7 @@
           "additionalProperties": false,
           "properties": {
             "tipo": { "type": "string", "description": "Tipo de documento en el vocabulario del ERP destino." },
+            "tipo_cp": { "type": "string", "description": "El código SUNAT del documento (Tabla 10). Es el que manda; `tipo` se conserva por compatibilidad. Ausente en la línea de la detracción, cuyo documento no es un comprobante de SUNAT." },
             "serie_numero": { "type": "string" },
             "fecha_emision": { "$ref": "#/$defs/fecha" },
             "fecha_vencimiento": { "$ref": "#/$defs/fecha" }
@@ -215,6 +220,7 @@
           "description": "Documento que modifica una nota de crédito o débito.",
           "properties": {
             "tipo": { "type": "string" },
+            "tipo_cp": { "type": "string", "description": "El código SUNAT del documento referido (Tabla 10)." },
             "serie_numero": { "type": "string" },
             "fecha": { "$ref": "#/$defs/fecha" }
           }
@@ -224,6 +230,7 @@
           "additionalProperties": false,
           "description": "Presente solo en la línea de detracción.",
           "properties": {
+            "codigo": { "type": "string", "description": "El código SUNAT del bien o servicio (Catálogo 54)." },
             "codigo_interno": { "type": "string" },
             "tasa": { "anyOf": [{ "type": "string" }, { "type": "number" }] },
             "base": { "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }] }

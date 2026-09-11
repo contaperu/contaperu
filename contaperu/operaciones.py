@@ -191,12 +191,9 @@ def generar_asiento(doc: dict, contab: dict | None = None, correlativos: dict | 
     venta = libro.es_venta
     corr = {s: 1 for s in asi.sub_diarios_presentes(comprobantes, conf, venta)}
     corr.update(correlativos or {})
-    numeros, rangos = asi.numerar(comprobantes, conf, libro.periodo, corr, venta)
-    mes = asi.mes_del_libro(libro)
-    filas = []
-    for c in comprobantes:
-        filas.extend(asi.asiento(c, conf, mes, numeros[id(c)], venta=venta))
-    lineas = [ln.a_dict() for ln in asi.a_lineas(filas, conf)]
+    # Directo a las líneas neutrales: sin pasar por las columnas de ningún ERP.
+    neutrales, rangos = asi.lineas_del_libro(libro, comprobantes, conf, corr)
+    lineas = [ln.a_dict() for ln in neutrales]
     cuadre = partida_doble.cuadra(lineas)
     salida = documento(libro, lineas=lineas)
     salida["_asiento"] = {"lineas": len(lineas), "sub_diarios": dict(rangos), "cuadre": cuadre.a_dict()}

@@ -81,13 +81,15 @@ def test_el_driver_se_niega_a_escribir_un_asiento_descuadrado(monkeypatch):
                     contraparte_doc="20601111111", base_gravada="100", igv="18", total="118",
                     cuenta_contable="659999")
 
-    original = asi.construir.asiento
+    # Desde la 0.7 el driver cuadra las líneas neutrales —de ellas salen las filas—, así que es
+    # ahí donde se rompe el espejo de la última línea.
+    original = asi.motor.asiento_neutral
 
     def asiento_roto(*a, **k):
-        filas = original(*a, **k)
-        filas[-1]["O"] = 999.0        # se rompe el espejo de la ultima linea
-        return filas
+        lineas = original(*a, **k)
+        lineas[-1].importe = "999.00"
+        return lineas
 
-    monkeypatch.setattr(driver_concar.xlsx, "asiento", asiento_roto)
+    monkeypatch.setattr(driver_concar.xlsx, "asiento_neutral", asiento_roto)
     with pytest.raises(partida_doble.Descuadre):
         driver_concar.construir(libro, [c], CONTAB, {"11": 1})

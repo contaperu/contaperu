@@ -1,7 +1,9 @@
-"""La LÓGICA del asiento CONCAR: configuración efectiva, clasificación de cada
-comprobante (sigla, sub-diario, cuentas), numeración por sub-diario y las 2-4
-filas de la partida doble. Las reglas de negocio y su porqué, en el docstring
-del paquete (`__init__.py`).
+"""Lo que el asiento necesita saber antes de armarse: configuración efectiva, clasificación de
+cada comprobante (sigla, sub-diario, cuentas) y numeración por sub-diario. Las reglas de negocio y
+su porqué, en el docstring del paquete (`__init__.py`).
+
+Las líneas de la partida doble se arman en `motor.py`, en el vocabulario neutral de `pe-ledger`;
+`asiento()` se queda aquí como la puerta de siempre hacia las columnas de CONCAR.
 """
 from __future__ import annotations
 
@@ -11,14 +13,9 @@ from decimal import Decimal, ROUND_HALF_UP
 from typing import Any
 
 from ..modelo import Comprobante, Libro
-from ..formato import Opciones, fmt_numero
+from ..formato import Opciones
 from ..igv import tasa as tasa_de_importes
-# El monto de la detracción vive en `detracciones` desde el 10-sep-2026: una sola implementación,
-# que usan este asiento y la normalización que alimenta la pantalla.
-from ..detracciones import monto as monto_detraccion
-from ..detracciones import tasa as tasa_detraccion
-from .datos import (COLUMNAS, D2, DEFAULTS, FLAG_CONVERSION, NUMERO_DETRACCION_PENDIENTE, OPCIONES, TIPO_DOC_DETRACCION,
-                    TIPO_BOLETA, TIPO_CONVERSION, TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA)
+from .datos import DEFAULTS, OPCIONES, TIPO_BOLETA, TIPO_HONORARIOS
 
 
 class SinCuenta(Exception):
@@ -298,166 +295,22 @@ def tasa_igv(igv: Decimal, base_gravada: Decimal) -> Any:
     return "" if t is None else int(t.to_integral_value(rounding=ROUND_HALF_UP))
 
 
-def _detraccion_cols(c: Comprobante, contab: dict, total: Decimal, es_usd: bool) -> dict[str, Any]:
-    """Columnas AI–AL de la LÍNEA DE DETRACCIÓN (421203, tipo DR) de la factura afecta:
-    código interno de la T.G. 28, tasa y el total del documento como base. La tasa es la misma con
-    la que se calcula el monto: la decide `detracciones.tasa`, no una segunda copia aquí."""
-    if not tiene_detraccion(c) or c.tipo_cp == TIPO_HONORARIOS:
-        return {}
-    d = c.detraccion or {}
-    sunat = str(d.get("codigo") or "").strip()
-    interno = str((contab.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
-    tasa = tasa_detraccion(c, contab)
-    return {"AI": interno, "AJ": float(tasa) if tasa > 0 else "",
-            "AK": float(total) if es_usd else "", "AL": float(total) if not es_usd else ""}
-
-
 def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprobante: str,
             op: Opciones = OPCIONES, venta: bool = False) -> list[dict[str, Any]]:
-    moneda = (c.moneda or "PEN").upper()
-    moneda_code = (contab.get("monedas_codigo") or {}).get(moneda)
-    if not moneda_code:
-        raise MonedaSinCodigo([moneda])
-    cuenta = cuenta_de_fila(c, contab, venta)
-    if not cuenta:
-        raise SinCuenta([c])
-    es_usd = moneda == "USD"
-    es_honorarios, es_boleta = (not venta and c.tipo_cp == TIPO_HONORARIOS), (not venta and c.tipo_cp == TIPO_BOLETA)
-    invierte = c.tipo_cp in TIPOS_INVIERTEN
-    total = Decimal(c.total or 0).quantize(D2)
-    # Compras: boleta y recibo por honorarios no dan crédito fiscal → todo al gasto, sin línea
-    # de IGV. En VENTAS la boleta emitida SÍ lleva su IGV (débito fiscal del emisor).
-    igv = Decimal(0) if (es_boleta or es_honorarios) else Decimal(c.igv or 0).quantize(D2)
-    base = (total - igv).quantize(D2)
-    ruc = (c.contraparte_doc or "").strip()
-    cc = (c.centro_costo or "").strip() if contab.get("usa_centros_costo", True) else ""      # apagado: M y X van vacías
-    serie, num = (c.serie or "").strip(), fmt_numero(c.numero, op)
-    serie_numero = f"{serie}-{num}" if serie and num else (serie or num)
-    # UNA sola glosa para las DOS columnas (confirmado por un contador, 2026): F la lleva a 40 y W a 30, y lo
-    # único que cambia entre ellas es el largo que admite el ERP. En las líneas derivadas W antepone lo que
-    # las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—, que cuenta dentro de esos 30.
-    # No es un descuido pendiente de arreglar: durante meses se arrastró un "pendiente" que pedía en F un
-    # concepto genérico clasificado distinto del de W; salía de un manual externo, no del sistema que genera
-    # los asientos, y se descartó. Si el comprobante no trae concepto se usa el nombre de la contraparte,
-    # para que ninguna fila del Excel salga sin glosa. Fijado en `test_asiento_concar.py`.
-    glosa = ((c.concepto or "").strip() or (c.contraparte_nombre or "").strip()).upper()
-    tasa = tasa_igv(igv, Decimal(c.base_gravada or 0))
-    tc = c.tipo_cambio if es_usd and c.tipo_cambio else None
-    f_emision = c.fecha_emision
-    f_venc = c.fecha_vencimiento or f_emision
-    # D y J (compras Y ventas): cada comprobante se
-    # asienta con SU fecha de emisión; el extemporáneo (mes anterior) cae al
-    # primer día del periodo, y un emitido después del periodo (error
-    # FECHA_POSTERIOR, que no bloquea el Excel) al último día — en CONCAR el
-    # asiento cae en el mes de esta fecha y todo debe caer en el mes del proceso.
-    # T (Fecha de Documento) y U (Vencimiento) siguen siendo las del documento.
-    primero, ultimo = mes
-    f_asiento = min(max(f_emision, primero), ultimo) if f_emision else primero
-    # Sentido de la partida: compras = gasto D / proveedor H; ventas = ingreso H / cliente D.
-    # La nota de crédito invierte el caso que toque.
-    normal = ("H", "D") if venta else ("D", "H")
-    d_gasto, d_prov = (normal[::-1] if invierte else normal)
+    """Un comprobante → sus filas del Excel de CONCAR (claves 'A'..'AO').
 
-    def fila_base(importe: Decimal) -> dict[str, Any]:
-        f = {col: "" for col in COLUMNAS}
-        f.update({
-            "B": sub_diario(c, contab, venta), "C": numero_comprobante, "D": f_asiento, "E": moneda_code,
-            "F": glosa[:40], "G": float(tc) if tc else "", "H": "C" if tc else TIPO_CONVERSION,
-            "I": FLAG_CONVERSION, "J": f_asiento,
-            "O": float(importe), "P": float(importe) if es_usd else "", "Q": float(importe) if not es_usd else "",
-            "R": tipo_concar(c, contab), "S": serie_numero[:20], "T": f_emision, "U": f_venc, "W": glosa[:30], "AO": tasa,
-        })
-        if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
-            ref_num = fmt_numero(c.ref_numero, op)
-            ref = f"{c.ref_serie}-{ref_num}" if c.ref_serie and ref_num else (c.ref_serie or ref_num)
-            m_ref = _mapa(c, contab, c.ref_tipo_cp)
-            f.update({"Z": str(m_ref["concar"]) if m_ref else "", "AA": ref[:20], "AB": c.ref_fecha or ""})
-        return f
+    Se conserva con su firma y su salida de siempre porque es API pública: la usan el portal y los
+    drivers de terceros. Desde la 0.7 ya no contiene la lógica: el asiento se arma en líneas
+    neutrales (`motor.asiento_neutral`) y se proyecta a CONCAR (`drivers/concar/proyeccion.py`).
+    Quien no necesite las columnas de CONCAR debería llamar directamente a `asiento_neutral`.
+    """
+    # Tardío a propósito: el driver de CONCAR importa este módulo y no puede importarse arriba.
+    from ..drivers.concar import proyeccion
+    from .motor import asiento_neutral
 
-    # Recibo por honorarios con retención de 4ta: el gasto va por el TOTAL, la
-    # retención al Haber en su cuenta de tributos, y a la cuenta por pagar solo el
-    # NETO que se le paga al profesional (regla de contabilidad). Sin retención
-    # -lo normal con suspensión-, el total completo va a la cuenta por pagar.
-    retenido = Decimal(c.retencion or 0).quantize(D2) if es_honorarios else Decimal(0)
-    if retenido > total:
-        retenido = total
-    filas = []
-    principal = fila_base(base)                    # gasto (compras) / ingreso por venta (ventas)
-    # La CUENTA decide dónde va el centro (el contador, 09-sep-2026): en la M si la lleva
-    # habilitada en CONCAR, y si no, en la X de esta misma línea cuando el estudio la usa como
-    # referencia. Nunca en las dos. `cc_en_anexo_auxiliar` (la X del tercero) es otra cosa y no
-    # depende de esto: por eso `cc` de arriba se queda como estaba.
-    cc_en_m = lleva_centro(cuenta, contab)
-    principal.update({"K": cuenta, "N": d_gasto,
-                      "M": cc if cc_en_m else "",
-                      "X": cc if (not cc_en_m and contab.get("cc_referencia_en_x")) else ""})
-    fila_igv = None
-    if igv > 0:
-        fila_igv = fila_base(igv)
-        fila_igv.update({"K": str(contab["cuentas"]["igv"]), "W": f"IGV - {glosa}"[:30], "N": d_gasto})
-    fila_ret = None
-    if retenido > 0:
-        fila_ret = fila_base(retenido)
-        fila_ret.update({"K": str((contab.get("cuentas") or {}).get("retencion_4ta") or DEFAULTS["cuentas"]["retencion_4ta"]),
-                         "W": f"RET 4TA - {glosa}"[:30], "N": d_prov})
-    tercero = fila_base(total - retenido)          # proveedor (compras) / cliente (ventas)
-    if venta:
-        cuenta_ter = _cuenta_por_moneda(contab["cuentas"].get("clientes"), moneda, DEFAULTS["cuentas"]["clientes"]["PEN"])
-    elif es_honorarios:
-        cuenta_ter = cuenta_honorarios(contab["cuentas"], moneda)
-    else:
-        cuenta_ter = resolve_cxp_account(contab["cuentas"], moneda)
-    x_ter = cc if (contab.get("cc_en_anexo_auxiliar") and not es_honorarios) else ""
-    tercero.update({"K": cuenta_ter, "L": ruc, "N": d_prov, "X": x_ter})
-    # La detracción, calcada del Excel real validado en CONCAR (2026): el total COMPLETO
-    # queda en el proveedor (421201/421202) y se añaden DOS líneas por el monto detraído — el proveedor
-    # al Debe (se le pagará menos) y la cuenta de detracciones (Configuración → Por pagar →
-    # «Detracciones», 421203 en las dos monedas) al Haber, con tipo DT, el comodín 9999999999 (la
-    # constancia no se conoce al provisionar), la glosa «DETRACCION - …» y las columnas AI–AL.
-    # Lo dispara que la factura TENGA detracción, no el sub-diario: la empresa que lo lleva todo en el
-    # 11 hace el mismo asiento. Solo compras; el recibo por honorarios nunca. (Reemplaza la regla del
-    # 05-sep, que mandaba el total entero a 421203.)
-    fila_det_prov = fila_det = None
-    if not venta and not es_honorarios and tiene_detraccion(c):
-        _, monto_det = monto_detraccion(c, contab)
-        if monto_det > 0:
-            fila_det_prov = fila_base(monto_det)
-            fila_det_prov.update({"K": cuenta_ter, "L": ruc, "N": d_gasto, "X": x_ter})
-            fila_det = fila_base(monto_det)
-            # Z/AA/AB dicen DE QUÉ DOCUMENTO sale esta detracción, y en una factura ese documento es
-            # el propio comprobante: es lo que CONCAR aceptó (Z=FT, AA=E001-871, AB=la emisión).
-            # En una NOTA, `fila_base` ya dejó ahí la referencia del documento que la nota corrige y
-            # se RESPETA: no hay ningún archivo validado que diga que deba ser otra, y cambiarla
-            # sería inventarse una regla. Pendiente de comprobar con una nota de crédito real.
-            if not fila_det.get("Z"):
-                fila_det.update({"Z": tipo_concar(c, contab), "AA": serie_numero[:20], "AB": f_emision})
-            # El área NO se corta a los 3 caracteres que pide la plantilla, y es deliberado: cortar
-            # `9001` a `900` mandaría el apunte a OTRA área en silencio. La glosa se corta porque
-            # sobra texto; un código no, porque sobraría significado. Entero, CONCAR lo rechaza y se ve.
-            fila_det.update({"K": resolve_cxp_detraccion_account(contab["cuentas"], moneda), "L": ruc, "N": d_prov,
-                             "R": str(contab.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
-                             "S": NUMERO_DETRACCION_PENDIENTE,
-                             "V": str(contab.get("detraccion_area") or ""),
-                             "W": f"DETRACCION - {glosa}"[:30], "M": "", "X": "",
-                             **_detraccion_cols(c, contab, total, es_usd)})
-    if venta and not invierte:
-        # Venta normal: cliente (D) · ingreso (H) · IGV (H)  — el orden del manual de asientos
-        filas.append(tercero)
-        filas.append(principal)
-        if fila_igv is not None:
-            filas.append(fila_igv)
-    else:
-        # Compras (y NC de venta, que invierte): principal · IGV · retención · tercero
-        filas.append(principal)
-        if fila_igv is not None:
-            filas.append(fila_igv)
-        if fila_ret is not None:
-            filas.append(fila_ret)
-        filas.append(tercero)
-        if fila_det_prov is not None:
-            filas.append(fila_det_prov)
-            filas.append(fila_det)
-    return filas
+    # La moneda se comprueba antes que nada, como siempre: un EUR no llega a buscar su cuenta.
+    proyeccion.codigo_moneda(c.moneda, contab)
+    return proyeccion.filas(c, asiento_neutral(c, contab, mes, numero_comprobante, op, venta), contab)
 
 
 def mes_del_libro(libro: Libro) -> tuple[date, date]:
