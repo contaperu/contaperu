@@ -54,7 +54,7 @@ def test_la_version_de_la_libreria_no_es_la_del_estandar_y_cada_una_vive_una_vez
     —en `__init__.py` y en `operaciones.py`—, así que se comprueba que ahora sea el mismo objeto."""
     from contaperu import operaciones
 
-    assert contaperu.PE_LEDGER == "0.1" and contaperu.__version__ != contaperu.PE_LEDGER
+    assert contaperu.PE_LEDGER == "0.2" and contaperu.__version__ != contaperu.PE_LEDGER
     assert operaciones.PE_LEDGER is contaperu.PE_LEDGER
 
 

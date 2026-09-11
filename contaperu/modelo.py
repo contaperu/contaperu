@@ -145,8 +145,11 @@ class Comprobante:
     tipo_cambio: Decimal | None = None
     base_gravada: Decimal = CERO
     igv: Decimal = CERO
-    dscto_base: Decimal = CERO      # ventas 14.1 campo 15 (NC de periodos anteriores)
-    dscto_igv: Decimal = CERO       # ventas 14.1 campo 17
+    # base_gravada e igv son SIEMPRE el importe neto de la operación. Los dos descuentos no suman ni restan
+    # al total: dicen qué parte de esa base y ese IGV informa el SIRE en sus columnas de descuento (una NC de
+    # descuento global va entera ahí, así la registra SUNAT). Semántica completa en estandar/LEEME.md.
+    dscto_base: Decimal = CERO      # SIRE ventas, Anexo 3 campo 16 («Dscto BI»)
+    dscto_igv: Decimal = CERO       # SIRE ventas, Anexo 3 campo 18 («Dscto IGV / IPM»)
     exonerado: Decimal = CERO
     inafecto: Decimal = CERO
     exportacion: Decimal = CERO

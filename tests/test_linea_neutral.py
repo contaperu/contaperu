@@ -85,7 +85,7 @@ def test_las_lineas_validan_contra_el_estandar():
     """Lo que produce el motor tiene que caber en el bloque `asiento` de pe-ledger."""
     validador = Draft202012Validator(json.loads(ESQUEMA.read_text(encoding="utf-8")))
     doc = {
-        "pe_ledger": "0.1",
+        "pe_ledger": "0.2",
         "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                   "periodo": "202608", "tipo": "compra"},
         "asiento": [ln.a_dict() for ln in asi.a_lineas(

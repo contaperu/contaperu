@@ -60,7 +60,8 @@ def test_la_nota_de_credito_conserva_los_campos_de_descuento():
     """Si SUNAT la tiene como descuento (16 y 18), vuelve a salir igual: ida y vuelta."""
     c = sire_txt.parsear(texto(NOTA), VENTAS)[0]
     assert c.dscto_base == Decimal("9985.36") and c.dscto_igv == Decimal("1797.36")
-    assert c.base_gravada == Decimal("0.00") and c.igv == Decimal("0.00")
+    # Base e IGV netos (15 + 16, 17 + 18): la nota ES su descuento, no un comprobante en cero.
+    assert c.base_gravada == Decimal("9985.36") and c.igv == Decimal("1797.36")
     assert (c.ref_tipo_cp, c.ref_serie, c.ref_numero) == ("01", "F001", "257")
     assert str(c.ref_fecha) == "2026-07-31"
 

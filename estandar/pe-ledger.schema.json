@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.1/estandar/pe-ledger.schema.json",
+  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.2/estandar/pe-ledger.schema.json",
   "title": "pe-ledger",
   "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
   "type": "object",
@@ -15,7 +15,7 @@
     "pe_ledger": {
       "description": "Versión del estándar que habla este documento.",
       "type": "string",
-      "const": "0.1"
+      "const": "0.2"
     },
     "libro": { "$ref": "#/$defs/libro" },
     "comprobantes": {
@@ -92,10 +92,10 @@
           ]
         },
 
-        "base_gravada": { "$ref": "#/$defs/importe" },
-        "igv": { "$ref": "#/$defs/importe" },
-        "dscto_base": { "$ref": "#/$defs/importe" },
-        "dscto_igv": { "$ref": "#/$defs/importe" },
+        "base_gravada": { "$ref": "#/$defs/importe", "description": "Base imponible NETA de la operación, tras cualquier descuento (desde pe-ledger 0.2)." },
+        "igv": { "$ref": "#/$defs/importe", "description": "IGV neto de la operación." },
+        "dscto_base": { "$ref": "#/$defs/importe", "description": "Parte de base_gravada que el registro informa como descuento (SIRE ventas, campo 16). No entra en el total." },
+        "dscto_igv": { "$ref": "#/$defs/importe", "description": "Parte del igv que el registro informa como descuento (SIRE ventas, campo 18). No entra en el total." },
         "exonerado": { "$ref": "#/$defs/importe" },
         "inafecto": { "$ref": "#/$defs/importe" },
         "exportacion": { "$ref": "#/$defs/importe" },

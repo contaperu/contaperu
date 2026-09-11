@@ -63,6 +63,10 @@ def _cabecera(c: Comprobante, libro: Libro, op: Opciones, vencimiento: bool = Tr
     ]
 
 
+def _firmado(v, op: Opciones) -> str:
+    return fmt_monto(abs(v), op, v < 0)
+
+
 def linea_rvie(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) -> str:
     """Anexo 3 — 33 campos informados; del 34 al 40 se encarga la Administración.
 
@@ -71,6 +75,14 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) 
     """
     neg = negativo(c, op)
     m = lambda d, n=neg: fmt_monto(d, op, n)  # noqa: E731
+    # Base e IGV son netos y los descuentos, la parte que el registro informa aparte (estandar/LEEME.md). El
+    # total es la suma con signo de los campos —así viene en la exportación real de SUNAT—, de modo que el 15
+    # lleva la base más lo que se informa en el 16 (s·base + descuento, con s el signo de la operación): una NC
+    # de descuento entera escribe 15 = 0 y 16 = −base, como la registra SUNAT, y no la cuenta dos veces.
+    s = -1 if neg else 1
+    base15, igv17 = s * c.base_gravada + c.dscto_base, s * c.igv + c.dscto_igv
+    if neg:
+        assert base15 <= 0 and igv17 <= 0, f"{c.serie}-{c.numero}: DSCTO_MAYOR_QUE_BASE (el campo 15 cambiaría de signo)"
     campos = _cabecera(c, libro, op, vencimiento=c.tipo_cp in cat.EXIGEN_VENCIMIENTO) + [
         fmt_numero(c.numero, op),            # 9 número (o inicial del rango)
         fmt_numero(c.numero_final, op),      # 10 número final del rango
@@ -78,9 +90,9 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) 
         sanear(c.contraparte_doc, op),       # 12 número de documento
         sanear(c.contraparte_nombre, op),    # 13 razón social / nombres
         m(c.exportacion),                    # 14 valor facturado de exportación
-        m(c.base_gravada),                   # 15 base imponible gravada
+        _firmado(base15, op),                # 15 base imponible gravada (s·base + descuento)
         fmt_monto(c.dscto_base, op, True),   # 16 descuento de la base (negativo)
-        m(c.igv),                            # 17 IGV / IPM
+        _firmado(igv17, op),                 # 17 IGV / IPM (s·igv + descuento)
         fmt_monto(c.dscto_igv, op, True),    # 18 descuento del IGV (negativo)
         m(c.exonerado),                      # 19 exonerado
         m(c.inafecto),                       # 20 inafecto

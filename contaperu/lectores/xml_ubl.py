@@ -162,21 +162,25 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
         base_gravada = monto(_t(totales, "cbc:LineExtensionAmount"))
 
     # --- Descuento global (campos 16 y 18 del SIRE) --------------------------
-    # `AllowanceCharge` con `ChargeIndicator=false` a nivel de documento es un
-    # DESCUENTO global, y el registro tiene columnas propias para él ("Dscto BI" y
-    # "Dscto IGV"): no es lo mismo que una base más pequeña. Se vio contrastando
-    # agosto contra la propuesta de SUNAT (26-ago-2026): dos notas de crédito del
-    # mismo mes caían en columnas distintas. Sin esto, los dos campos del modelo
-    # existían y nadie los llenaba nunca.
-    dscto_base = Decimal("0.00")
-    for ac in raiz.findall("cac:AllowanceCharge", NS):
-        if (_t(ac, "cbc:ChargeIndicator") or "").strip().lower() == "false":
-            dscto_base += monto(_t(ac, "cbc:Amount"))
-    # El IGV del descuento no viene desglosado: se deriva con la tasa del propio
-    # comprobante (si no hay base gravada, no hay tasa que derivar y queda en cero).
-    dscto_igv = Decimal("0.00")
-    if dscto_base and base_gravada:
-        dscto_igv = (dscto_base * igv / base_gravada).quantize(Decimal("0.01"))
+    # La base y el IGV que da el XML (TaxableAmount, TaxAmount) ya son NETOS del descuento, y así se guardan.
+    # Un AllowanceCharge de documento con ChargeIndicator=false no se suma ni se resta: se anota y decide UNA
+    # cosa, en qué columnas del SIRE va una NOTA DE CRÉDITO DE VENTAS cuyo descuento es todo su importe. Es el
+    # caso contrastado con la propuesta de SUNAT (la FC01-45, 26-ago-2026): la registró entera en los campos 16
+    # y 18. En lo demás —facturas, notas de débito, compras (el RCE no tiene esas columnas), notas parciales—
+    # no hay fuente que diga otra cosa y el descuento queda en cero. El motivo de la nota NO lo decide: la
+    # E001-233 real es «04 Descuento global» sin AllowanceCharge y SUNAT la tiene en base e IGV (11-sep-2026).
+    # Tampoco se filtra por AllowanceChargeReasonCode mientras no haya un XML real que lo respalde; queda
+    # anotado en `datos_raw["descuentos_globales"]` para poder hacerlo.
+    descuentos = [{"codigo": _t(ac, "cbc:AllowanceChargeReasonCode"), "importe": str(monto(_t(ac, "cbc:Amount")))}
+                  for ac in raiz.findall("cac:AllowanceCharge", NS)
+                  if (_t(ac, "cbc:ChargeIndicator") or "").strip().lower() == "false"]
+    suma_descuentos = sum((Decimal(d["importe"]) for d in descuentos), Decimal("0.00"))
+    dscto_base = dscto_igv = Decimal("0.00")
+    if (tipo_cp in ("07", "87") and tipo_libro == "venta" and base_gravada > 0
+            and abs(suma_descuentos - base_gravada) <= Decimal("0.05")):
+        # Entera: los importes exactos de la nota —ni el del AllowanceCharge ni un IGV derivado por tasa—,
+        # así el campo 15 del SIRE queda en cero y nunca cambia de signo.
+        dscto_base, dscto_igv = base_gravada, igv
 
     # --- Formas de pago, detracción, retención ------------------------------
     cuotas: list = []
@@ -245,6 +249,7 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
         "tax_inclusive": _t(totales, "cbc:TaxInclusiveAmount"),
         "retencion": retencion,
         "motivo_nota": motivo,
+        **({"descuentos_globales": descuentos} if descuentos else {}),
     }
     return Comprobante(
         tipo_cp=tipo_cp,

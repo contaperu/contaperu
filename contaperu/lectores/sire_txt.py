@@ -115,6 +115,10 @@ def _valor(campos: list[str], i: int) -> str:
     return campos[i].strip() if i < len(campos) else ""
 
 
+def _con_signo(v: str) -> Decimal:
+    return Decimal((v or "0").replace(",", ""))
+
+
 def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
     pos = POS_VENTA if libro.es_venta else POS_COMPRA
     datos = {k: _valor(campos, i) for k, i in pos.items()}
@@ -142,6 +146,17 @@ def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
         no_gravado = _valor(campos, VALOR_NO_GRAVADO)
         if no_gravado:
             datos["valor_no_gravado"] = no_gravado
+    if libro.es_venta:
+        # Base e IGV netos, descuentos aparte (estandar/LEEME.md). SUNAT escribe cada campo con su signo y el
+        # total es la suma de todos: en las diez filas de la exportación real de agosto, el campo 26 es
+        # exactamente la suma con signo de los campos 14 a 25 (11-sep-2026). Por eso la base neta es 15 + 16 y
+        # el IGV neto 17 + 18 —una NC de descuento (15 = 0, 16 = −9985.36) tiene base 9985.36—, y hay que
+        # leerlos CON signo: `Comprobante` los guarda en positivo y se perdería de qué lado estaba cada uno.
+        b15, d16, i17, d18 = (_con_signo(datos[k]) for k in ("base_gravada", "dscto_base", "igv", "dscto_igv"))
+        if d16 > 0 or d18 > 0:
+            raise ValueError("los descuentos (campos 16 y 18) vienen en positivo y SUNAT los escribe en negativo")
+        datos.update(base_gravada=str(abs(b15 + d16)), dscto_base=str(abs(d16)),
+                     igv=str(abs(i17 + d18)), dscto_igv=str(abs(d18)))
     return Comprobante(
         **datos,
         # `concepto` se queda vacío: la propuesta no lo trae y el Excel de CONCAR ya

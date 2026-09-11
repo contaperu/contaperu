@@ -4,6 +4,29 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [0.6.0] — 2026-09-11
+
+### Cambiado
+- **La base y el IGV son siempre netos; los descuentos ya no entran en el total** (estándar `pe-ledger` 0.2).
+  `dscto_base`/`dscto_igv` pasan a decir qué parte de la base y del IGV informa el SIRE en sus campos 16 y 18.
+  Una nota de crédito de descuento global —la FC01-45 del contraste de agosto— llegaba distinta por cada
+  puerta, y las dos se bloqueaban con `TOTAL_NO_CUADRA`: del XML, con la base **y** el descuento, y el TXT del
+  SIRE la contaba dos veces; de la propuesta de SUNAT, con base e IGV en cero, así que el asiento de CONCAR
+  perdía la línea del IGV y el portal la pintaba «Inafecto». Ahora las dos dan base 9985.36, IGV 1797.36 y el
+  descuento igual, validan, y el TXT la escribe como SUNAT (15 = 0.00, 16 = −9985.36).
+- El TXT del SIRE escribe el campo 15 como `signo · base + descuento` (y el 17 igual): el total es la suma con
+  signo de los campos, como en la exportación real de SUNAT. El lector de la propuesta hace lo inverso, y
+  rechaza un descuento en positivo.
+- El lector XML solo llena el descuento en una NC de ventas cuyo descuento de documento es todo su importe;
+  en facturas, notas de débito y compras queda en cero, porque la base del XML ya es neta. Cada descuento de
+  documento queda anotado en `datos_raw["descuentos_globales"]`.
+- `igv.aplicar_igv` devuelve también los dos descuentos: una nota entera como descuento sigue entera.
+
+### Añadido
+- `igv.aplicar_total()`: el total que dice el papel sin tocar el IGV; lo absorbe el importe principal (la
+  regla de la celda «Total» del portal, que hasta hoy calculaba el navegador).
+- Error `DSCTO_MAYOR_QUE_BASE`.
+
 ## [0.5.0] — 2026-09-10
 
 ### Cambiado

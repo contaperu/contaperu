@@ -159,9 +159,10 @@ NC_CON_DESCUENTO = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 def test_descuento_global_va_a_sus_propias_columnas():
+    """La base y el IGV son los netos del XML, y la NC va ENTERA como descuento (campos 16 y 18)."""
     c = xml_ubl.parsear(NC_CON_DESCUENTO.encode("utf-8"), "venta")
-    assert c.dscto_base == Decimal("9985.36")
-    assert c.dscto_igv == Decimal("1797.36")      # derivado con la tasa del propio comprobante
+    assert (c.base_gravada, c.igv) == (Decimal("9985.36"), Decimal("1797.36"))
+    assert (c.dscto_base, c.dscto_igv) == (c.base_gravada, c.igv)      # los importes exactos de la nota
 
 
 def test_sin_descuento_los_dos_campos_quedan_en_cero():

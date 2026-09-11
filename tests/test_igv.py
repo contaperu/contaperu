@@ -60,3 +60,60 @@ def test_la_columna_ao_es_la_tasa_del_comprobante_redondeada_a_entero():
     assert tasa_igv(D("10.5"), D("100")) == 11
     assert tasa_igv(D("0"), D("100")) == ""
     assert tasa_igv(D("18"), D("0")) == ""       # sin base no hay tasa que leer, y no se inventa
+
+
+# ── La nota de crédito de descuento global y la celda «Total» (11-sep-2026) ──────────────────────────
+
+def nc_descuento(**k):
+    return cp(tipo_cp="07", base_gravada="100", igv="18", dscto_base="100", dscto_igv="18", total="118", **k)
+
+
+def test_los_descuentos_no_mueven_la_base_al_recalcular():
+    """Antes `_cargos` restaba el descuento y la base de una NC de descuento salía casi al doble."""
+    assert igv.aplicar_igv(nc_descuento(), "18")["base_gravada"] == D("100")
+
+
+def test_una_nota_entera_como_descuento_sigue_entera_al_cambiar_el_igv():
+    r = igv.aplicar_igv(nc_descuento(), "10")
+    assert (r["base_gravada"], r["igv"], r["dscto_base"], r["dscto_igv"]) == (D("108"), D("10"), D("108"), D("10"))
+
+
+def test_sin_igv_el_descuento_se_va_con_la_base():
+    r = igv.aplicar_igv(nc_descuento(), "0")
+    assert (r["inafecto"], r["dscto_base"], r["dscto_igv"]) == (D("118"), 0, 0)
+
+
+def test_un_descuento_parcial_que_ya_no_cabe_se_dice():
+    with pytest.raises(igv.IgvImposible, match="descuento"):
+        igv.aplicar_igv(cp(tipo_cp="07", base_gravada="100", igv="18", dscto_base="50", dscto_igv="9",
+                           total="118"), "5")
+
+
+def test_el_total_lo_absorbe_la_base_y_el_igv_se_queda():
+    r = igv.aplicar_total(cp(base_gravada="100", igv="18", total="118"), "236")
+    assert (r["total"], r["base_gravada"]) == (D("236"), D("218")) and "igv" not in r
+
+
+def test_el_total_se_recalcula_aunque_la_ia_lo_hubiera_leido_mal():
+    """Sumar la diferencia arrastraba el error: 100 + (118 − 1180) daba una base negativa."""
+    assert igv.aplicar_total(cp(base_gravada="100", igv="18", total="1180"), "118")["base_gravada"] == D("100")
+
+
+def test_sin_base_lo_absorbe_el_importe_sin_igv():
+    r = igv.aplicar_total(cp(base_gravada="0", igv="0", inafecto="50", total="50"), "80")
+    assert r == {"total": D("80"), "inafecto": D("80"), "dscto_base": 0, "dscto_igv": 0}
+
+
+def test_un_total_que_no_alcanza_o_no_es_numero_se_dice():
+    with pytest.raises(igv.TotalImposible, match="menor"):
+        igv.aplicar_total(cp(base_gravada="100", igv="18", total="118"), "10")
+    with pytest.raises(igv.TotalImposible, match="número"):
+        igv.aplicar_total(cp(), "abc")
+    with pytest.raises(igv.TotalImposible, match="negativo"):
+        igv.aplicar_total(cp(), "-5")
+
+
+def test_una_nota_entera_como_descuento_sigue_entera_al_cambiar_el_total():
+    r = igv.aplicar_total(nc_descuento(), "236")
+    assert (r["base_gravada"], r["dscto_base"], r["dscto_igv"]) == (D("218"), D("218"), D("18"))
+

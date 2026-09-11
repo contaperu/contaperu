@@ -11,10 +11,10 @@ integración desde cero. El estándar no reemplaza a ninguno: es el idioma inter
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.1/estandar/pe-ledger.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.2/estandar/pe-ledger.schema.json
 ```
 
-Cuelga del tag **del estándar** (`pe-ledger-0.1`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`pe-ledger-0.2`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
 sirve como estándar. Mientras el estándar siga en 0.1, esa URL devuelve exactamente el mismo archivo.
 
@@ -28,7 +28,7 @@ python -m contaperu.cli validar mi-documento.json
 
 ```json
 {
-  "pe_ledger": "0.1",
+  "pe_ledger": "0.2",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -101,6 +101,8 @@ está en dólares: por eso `monto` es en soles aunque el resto del comprobante e
 
 | Campo | Cuidado |
 |---|---|
+| `base_gravada`, `igv` | El importe **neto** de la operación, tras cualquier descuento. Así lo dan el `TaxableAmount` y el `TaxAmount` del XML, y así cuadra el total: base + IGV + no gravados + cargos. |
+| `dscto_base`, `dscto_igv` | **No suman ni restan.** Dicen qué parte de la base y del IGV informa el registro en sus columnas de descuento (SIRE ventas, campos 16 y 18). Una nota de crédito de descuento global va **entera** ahí —así la registra SUNAT— y entonces valen lo mismo que `base_gravada` e `igv`. |
 | `retencion` | Es la **retención de renta de 4ta** que muestra un recibo por honorarios. **No** es la retención del IGV del 3 %, que no entra en ningún asiento y que las IAs confunden constantemente con una detracción. |
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
 | `tipo_cambio` | El que **publica SUNAT para la fecha de emisión**, con 3 decimales. No el del día del pago. |
@@ -123,6 +125,11 @@ está en dólares: por eso `monto` es en soles aunque el resto del comprobante e
 `0.1` es la primera versión publicada y se deriva de un modelo que lleva un año generando el Excel de CONCAR
 y el TXT del SIRE de empresas reales — no de un diseño en papel. Lo que falte, faltará porque nadie lo ha
 necesitado todavía; se añade con un caso real detrás, no por si acaso.
+
+**`0.2` (11-sep-2026) cambia el significado de dos campos**, y por eso sube: `base_gravada` e `igv` pasan a ser
+siempre netos y `dscto_base`/`dscto_igv` dejan de restarse del total. En `0.1` el descuento se restaba de una
+base bruta, pero el XML de SUNAT da la base ya neta, así que una nota de crédito de descuento global salía
+contada dos veces. Un documento `0.1` sin descuentos significa exactamente lo mismo en `0.2`.
 
 ---
 

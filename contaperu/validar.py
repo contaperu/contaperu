@@ -102,9 +102,10 @@ def validar(c: Comprobante, libro: Libro) -> None:
                 a("IGV_TASA_REDUCIDA", f"IGV al {Decimal(reducida) * 100:.1f} % (tasa reducida); verifica que corresponda")
             else:
                 e("IGV_NO_CUADRA", f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} (esperado {esperado:.2f})")
+    # Sin los descuentos: la base y el IGV ya son netos (estandar/LEEME.md, pe-ledger 0.2).
     esperado_total = (
         c.base_gravada + c.igv + c.exonerado + c.inafecto + c.exportacion + c.isc
-        + c.base_ivap + c.ivap + c.icbper + c.otros - c.dscto_base - c.dscto_igv
+        + c.base_ivap + c.ivap + c.icbper + c.otros
     )
     if not _cuadra(c.total, esperado_total):
         anticipo = Decimal(str(c.datos_raw.get("anticipo") or "0"))
@@ -112,6 +113,11 @@ def validar(c: Comprobante, libro: Libro) -> None:
             a("ANTICIPO", f"El total descuenta un anticipo de {anticipo}; revisa la base a anotar")
         else:
             e("TOTAL_NO_CUADRA", f"Total {c.total} no cuadra con base + IGV + no gravado + otros ({esperado_total:.2f})")
+    # En una NC los descuentos van con el mismo signo que la base (SIRE, campos 15 y 16): son la parte de la
+    # base y del IGV que se informa aparte, así que no pueden pasarlos, o el campo 15 cambiaría de signo.
+    if c.es_nota_credito and (c.dscto_base > c.base_gravada or c.dscto_igv > c.igv):
+        e("DSCTO_MAYOR_QUE_BASE", f"La parte que va como descuento ({c.dscto_base}; IGV {c.dscto_igv}) no puede "
+                                  f"ser mayor que la base ({c.base_gravada}) y el IGV ({c.igv}) de la nota")
     if c.total == 0 and not c.es_nota:
         a("TOTAL_CERO", "Importe total en cero")
 
