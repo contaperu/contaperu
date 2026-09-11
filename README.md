@@ -72,12 +72,20 @@ contaperu generar --tipo compra --ruc 20601111111 --razon "MI EMPRESA SAC" \
     --periodo 202608 --driver sire --salida ./salida  comprobantes/*.xml
 ```
 
+Antes de generar el archivo de un sistema contable, pregunta qué falta:
+
+```bash
+contaperu diagnosticar mes.json --driver concar --config mi-empresa.json
+contaperu desde-json mes.json --driver concar --config mi-empresa.json --salida ./salida
+```
+
 ## Para un agente de IA: el servidor MCP
 
-Nueve herramientas: `configuracion_por_defecto`, `validar_comprobantes`, `validar_partida_doble`,
-`generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones` y
-`adaptar_pcge2026`. Y tres recursos de lectura: el esquema del estándar, los catálogos de SUNAT y los
-drivers disponibles.
+Once herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
+`configuracion_por_defecto`, `validar_comprobantes`, `validar_partida_doble`, `generar_asiento`,
+`exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`, `buscar_cuenta_pcge` y
+`adaptar_pcge2026`. Y cuatro recursos de lectura: el esquema del estándar, los catálogos de SUNAT, el
+catálogo del PCGE 2026 y los drivers disponibles.
 
 El Excel y el ZIP del SIRE vuelven **como archivos** —recursos incrustados con su tipo—, así que el cliente
 los ofrece para guardar en vez de enseñar una tira de letras.
@@ -173,6 +181,20 @@ Y **la partida doble**, sin tolerancia: un céntimo de diferencia detiene la exp
 **Exporta** a CONCAR (Excel de 41 columnas), al SIRE (TXT de reemplazo del RVIE y del RCE) y a un CSV
 genérico con las líneas de diario, para cualquier destino que todavía no tenga driver.
 
+**Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta
+para el sistema de destino (cuenta, centro de costo, tipos sin equivalencia, monedas, correlativos),
+qué detracciones esperan constancia y qué saldría. Una sola respuesta, por serie-número, sin corregir
+ni inventar nada.
+
+## Cómo está construido
+
+Tres niveles, de abajo arriba: un **núcleo** que sabe contabilidad peruana y nada más; **drivers** que
+conocen el formato de un sistema concreto y nada de contabilidad; y encima, la capa para **agentes**.
+El asiento nace en las líneas neutrales del estándar `pe-ledger` y cada ERP es una proyección de ellas
+—CONCAR incluido—, así que un driver nuevo solo traduce vocabulario: las cuentas, los sentidos y la
+detracción los pone el núcleo una vez para todos. Un driver de la comunidad se enchufa por *entry
+points* sin tocar este repositorio. Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md).
+
 ## Qué **no** hace
 
 - **No lee PDFs ni fotos.** Eso lo hace bien un modelo de lenguaje; aquí entra el dato ya estructurado.
@@ -192,9 +214,11 @@ genérico con las líneas de diario, para cualquier destino que todavía no teng
 | Asiento: compras, ventas, honorarios, notas y detracción | listo |
 | Drivers CONCAR, SIRE y CSV | listo |
 | Servidor MCP y CLI | listo |
+| `diagnosticar`: la capa para agentes | listo |
+| Contrato de driver y drivers de terceros por *entry points* | listo |
 | Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
-| Drivers de CONTASIS y SISCONT | abierto a la comunidad |
+| Drivers de CONTASIS, SISCONT y STARSOFT | abierto a la comunidad — ver [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ### Sobre el PCGE 2026
 
@@ -215,7 +239,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-152 tests, sin red y sin credenciales.
+333 tests, sin red y sin credenciales.
 
 Lo más valioso que puedes aportar es un **driver de salida** para un ERP que hoy no está — ver
 [CONTRIBUTING.md](CONTRIBUTING.md) — o un **caso real** que el motor resuelva mal: un asiento que tu sistema

@@ -4,6 +4,57 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [0.7.0] — 2026-09-11
+
+Infraestructura para escalar: el núcleo deja de estar atado al formato de un ERP, un driver nuevo se
+enchufa sin tocar el repositorio, y un agente puede preguntar qué falta antes de exportar. **Ninguna
+regla contable cambia**: el Excel de CONCAR sale idéntico celda a celda (lo prueba un snapshot de 42
+casos congelado antes del refactor).
+
+### Cambiado
+- **El asiento nace en líneas neutrales; CONCAR pasa a ser una proyección.** La lógica contable sale
+  de `asiento.construir.asiento()` a `asiento/motor.py` (`asiento_neutral`, `lineas_del_libro`), que
+  arma las líneas de `pe-ledger` directamente; el Excel se proyecta desde ellas en
+  `drivers/concar/proyeccion.py`. Hasta ahora la línea «neutral» se sacaba releyendo las columnas de
+  CONCAR y heredaba su vocabulario. `asiento()` conserva su firma y su salida: es API pública.
+- **La línea neutral dice más**: `rol` (`principal`, `igv`, `retencion_4ta`, `tercero`,
+  `detraccion_tercero`, `detraccion`), `documento.tipo_cp` y `referencia.tipo_cp` (el código SUNAT,
+  al lado de la sigla del ERP), `detraccion.codigo`, la glosa **entera** (el corte a 40/30 es de
+  CONCAR) y `tasa_igv` como texto exacto (`"10.5"`; redondear es cosa del ERP). Son campos opcionales
+  añadidos: el estándar sigue en `pe-ledger` 0.2.
+- **El registro de drivers carga los de terceros** por entry points (grupo `contaperu.drivers`). Los de
+  serie ganan ante un nombre repetido; uno que no cumple el contrato o revienta al importarse se ignora
+  con un `AvisoDriver` en vez de tumbar el registro. `drivers.DRIVERS` se muta en sitio, así que quien
+  ya lo importó ve lo mismo; `drivers.recargar()` vuelve a buscar.
+- **El driver CSV pasa a la forma `desde_lineas`** y sirve de plantilla; conserva `construir` por
+  compatibilidad.
+- **La CLI llega a todos los drivers.** `desde-json --driver csv|concar` reventaba con un `TypeError`
+  porque nunca pasaba la configuración ni los correlativos (venía así desde antes); ahora entran por
+  `--config` y los correlativos arrancan en 1, como en `operaciones.exportar`. Lo que falte se dice y
+  remite a `contaperu diagnosticar`. Los JSON de entrada se leen con `utf-8-sig`: el Bloc de notas y
+  `Out-File` de PowerShell escriben BOM.
+
+### Añadido
+- **`operaciones.diagnosticar`**, herramienta MCP `diagnosticar` y comando `contaperu diagnosticar`:
+  en una sola respuesta, si el mes está listo y por qué no, bloqueantes y avisos por serie-número, qué
+  falta para el destino (cuenta, centro de costo, tipos sin equivalencia, monedas, sub-diarios sin
+  correlativo), detracciones sin constancia, resumen por contraparte y desde qué correlativo arranca
+  cada sub-diario. No añade reglas: reúne comprobaciones que ya existían y las describe en vez de
+  lanzarlas. Deja fijado que el centro de costo lo **avisa** el diagnóstico pero el driver de CONCAR
+  sigue sin pararlo: cambiar eso es una decisión aparte.
+- **`drivers/contrato.py`**: las tres formas de driver (`linea`, `construir` y la nueva
+  `desde_lineas`, que solo ve líneas neutrales ya numeradas y cuadradas), `incumplimientos()` para
+  decir qué le falta a uno, y `tests/test_contrato_drivers.py`, el examen que pasa cualquier driver
+  registrado.
+- **`tests/test_snapshot_concar.py`**: 42 casos con las 41 columnas del Excel congeladas celda a celda
+  (y las líneas neutrales aparte). Regenerarlo es una decisión contable con fuente, no un trámite.
+- **`ARQUITECTURA.md`**: los tres niveles, el flujo comprobante → línea neutral → proyección, núcleo /
+  fachada / puertas, cómo se enchufa un driver y lo que no se negocia.
+
+### Corregido
+- El README decía nueve herramientas y tres recursos en el MCP; eran diez y cuatro (faltaban
+  `buscar_cuenta_pcge` y el catálogo del PCGE 2026). Ahora son once y cuatro.
+
 ## [0.6.0] — 2026-09-11
 
 ### Cambiado
