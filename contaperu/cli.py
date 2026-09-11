@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 from . import comparar_sire
-from . import __version__, drivers, generar as gen, operaciones, validar
+from . import __version__, asiento as asi, drivers, generar as gen, operaciones, validar
 from .lectores import archivos
 from .modelo import Libro
 
@@ -40,27 +40,53 @@ def _tabla(comprobantes: list[Comprobante]) -> str:
     return "\n".join(filas)
 
 
+def _leer_json(ruta: str) -> dict:
+    """Un JSON que escribió una persona en Windows —el Bloc de notas, `Out-File` de PowerShell— suele
+    llevar BOM, y `json.loads` lo rechaza. `utf-8-sig` lo quita si está y no cambia nada si no está."""
+    return json.loads(Path(ruta).read_text(encoding="utf-8-sig"))
+
+
 def _escribir(exp: gen.Exportado, salida: Path) -> None:
     salida.mkdir(parents=True, exist_ok=True)
-    (salida / exp.nombre).write_bytes(exp.txt)
-    (salida / exp.nombre_zip).write_bytes(exp.zip)
-    print(f"  {exp.driver:<5} {exp.formato:<9} {exp.n_filas:>3} filas  → {salida / exp.nombre_zip}")
+    if exp.txt:
+        # Un registro en texto: el TXT y el ZIP con el que se sube a SUNAT.
+        (salida / exp.nombre).write_bytes(exp.txt)
+        (salida / exp.nombre_zip).write_bytes(exp.zip)
+        destino = salida / exp.nombre_zip
+    else:
+        # Un archivo de asientos (el Excel de CONCAR, el CSV, el de un driver de terceros): tal cual.
+        destino = salida / exp.archivo
+        destino.write_bytes(exp.contenido)
+    print(f"  {exp.driver:<5} {exp.formato:<9} {exp.n_filas:>3} filas  → {destino}")
 
 
 def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, salida: Path,
-                   incluir_errores: bool) -> int:
-    # "todas" = los drivers de TXT (el Excel de CONCAR necesita correlativos y cuentas: va por la aplicación que lo use)
+                   incluir_errores: bool, contab: dict | None = None) -> int:
+    # "todas" = los drivers de TXT. Los de asientos (CONCAR, CSV, los de terceros) se piden por su
+    # nombre: necesitan la configuración contable del contribuyente, que entra por --config, y sus
+    # correlativos arrancan en 1 —los mismos valores de partida que usa `operaciones.exportar`—.
     nombres = ([n for n, m in drivers.DRIVERS.items() if drivers.contrato.forma(m) == "linea"]
                if driver == "todas" else [driver])
     codigo = 0
     for p in nombres:
-        if libro.tipo not in drivers.obtener(p).FORMATOS:
+        mod = drivers.obtener(p)
+        if libro.tipo not in mod.FORMATOS:
             print(f"  {p:<5} no genera libros de {libro.tipo}", file=sys.stderr)
             continue
+        params: dict = {}
+        if drivers.contrato.necesita_asiento(mod):
+            conf = operaciones.configuracion(contab)
+            incluidos = gen.seleccionar(comprobantes)
+            params = {"contab": conf,
+                      "correlativos": {s: 1 for s in asi.sub_diarios_presentes(incluidos, conf, libro.es_venta)}}
         try:
-            _escribir(gen.generar(libro, comprobantes, p, incluir_errores=incluir_errores), salida)
+            _escribir(gen.generar(libro, comprobantes, p, incluir_errores=incluir_errores, **params), salida)
         except gen.ErroresBloqueantes as e:
             print(f"  {p:<5} NO generado: {e}. Corrige o usa --incluir-errores", file=sys.stderr)
+            codigo = 1
+        except (asi.SinCuenta, asi.TipoSinMapa, asi.MonedaSinCodigo) as e:
+            # Lo que le falta al mes para ese destino. `contaperu diagnosticar` lo lista por serie-número.
+            print(f"  {p:<5} NO generado: {e}. Revísalo con `contaperu diagnosticar`", file=sys.stderr)
             codigo = 1
     return codigo
 
@@ -102,7 +128,7 @@ def cmd_generar(args: argparse.Namespace) -> int:
 
 
 def cmd_desde_json(args: argparse.Namespace) -> int:
-    datos = json.loads(Path(args.json).read_text(encoding="utf-8"))
+    datos = _leer_json(args.json)
     # Por la fachada: así este comando gana lo que antes se saltaba al construir los objetos a mano
     # —el motivo legible cuando falta el bloque `libro`, y el tope de 5.000 comprobantes— y lee el
     # documento con las MISMAS reglas que el servidor MCP.
@@ -115,7 +141,8 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     if args.revisar:
         validar.revisar(comprobantes, libro)
         print(_tabla(comprobantes))
-    return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores)
+    contab = _leer_json(args.config) if args.config else None
+    return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores, contab)
 
 
 def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
@@ -124,8 +151,8 @@ def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
 
 def cmd_diagnosticar(args: argparse.Namespace) -> int:
     """Qué bloquea, qué falta y qué saldría, antes de generar nada."""
-    datos = json.loads(Path(args.json).read_text(encoding="utf-8"))
-    contab = json.loads(Path(args.config).read_text(encoding="utf-8")) if args.config else None
+    datos = _leer_json(args.json)
+    contab = _leer_json(args.config) if args.config else None
     try:
         d = operaciones.diagnosticar(datos, contab, driver=args.driver)
     except operaciones.DocumentoInvalido as e:
@@ -206,6 +233,7 @@ def main(argv: list[str] | None = None) -> int:
     d.add_argument("--salida", default="salida")
     d.add_argument("--revisar", action="store_true", help="aplicar las validaciones antes de generar")
     d.add_argument("--incluir-errores", action="store_true")
+    d.add_argument("--config", help="JSON con la configuración contable (la piden los drivers de asientos: concar, csv…)")
     d.set_defaults(fn=cmd_desde_json)
 
     x = sub.add_parser("diagnosticar", help="qué bloquea, qué falta y qué saldría, antes de generar nada")

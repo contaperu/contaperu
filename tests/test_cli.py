@@ -43,6 +43,31 @@ def test_desde_json(tmp_path):
     assert (tmp_path / "LE2060123456720260100080400021112.TXT").read_bytes().count(b"\r\n") == 3
 
 
+def test_desde_json_llega_a_los_drivers_de_asientos(tmp_path, capsys):
+    """La puerta de la CLI alcanza a TODOS los drivers, no solo a los de texto.
+
+    Hasta la 0.7 pedir `--driver csv` o `concar` reventaba con un TypeError: la CLI nunca pasaba la
+    configuración ni los correlativos que un driver de asientos necesita. Ahora entran por --config y
+    los correlativos arrancan en 1, igual que en `operaciones.exportar`. Es lo que hace que un driver
+    de la comunidad enchufado por entry point se pueda probar desde la terminal.
+    """
+    golden = str(GOLDEN / "compras_202601.json")
+    config = tmp_path / "config.json"
+    # CON BOM a propósito: es lo que escriben el Bloc de notas y `Out-File` de PowerShell en Windows,
+    # que es donde trabaja un contador peruano. Un JSON con BOM tiene que leerse igual que sin él.
+    config.write_bytes(b"\xef\xbb\xbf" + json.dumps({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}).encode())
+    salida = tmp_path / "s"
+    assert cli.main(["desde-json", golden, "--driver", "csv", "--salida", str(salida), "--config", str(config)]) == 0
+    csv = (salida / "asiento_20601234567_202601_compra.csv").read_bytes().decode("utf-8-sig")
+    assert csv.startswith("sub_diario;correlativo;fecha;cuenta") and csv.count("\r\n") == 1 + 9   # 3 facturas × 3 líneas
+    assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(salida), "--config", str(config)]) == 0
+    assert (salida / "CONCAR_20601234567_202601_COMPRAS.xlsx").read_bytes()[:2] == b"PK"
+    assert "concar concar_xlsx   3 filas" in capsys.readouterr().out
+    # Sin la cuenta de gasto el driver se niega, y la CLI dice a dónde ir a mirar en vez de un traceback.
+    assert cli.main(["desde-json", golden, "--driver", "csv", "--salida", str(salida)]) == 1
+    assert "contaperu diagnosticar" in capsys.readouterr().err
+
+
 def test_diagnosticar_dice_que_falta_y_luego_que_esta_listo(tmp_path, capsys):
     """Antes de generar nada: el golden no trae cuenta de gasto, y con la del RUC queda listo."""
     golden = str(GOLDEN / "compras_202601.json")
