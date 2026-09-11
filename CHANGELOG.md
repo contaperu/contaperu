@@ -4,6 +4,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+### Añadido
+- **`REFERENCIAS.md`**: cómo modelan el asiento, los impuestos, las dimensiones, la escritura y la
+  idempotencia la API de QuickBooks Online, la de Xero y las APIs unificadas de EE. UU. (Merge, Codat,
+  Rutter, Apideck), comparado campo a campo con `pe-ledger`; qué no se toma y por qué; y una propuesta
+  de campos **opcionales** para el estándar (`id_externo`, `dimensiones`, `estado` de la línea,
+  `_exportacion.huella`, `faltantes[].pedir_a`, `EXIGE` en el contrato de driver), pendiente de decidir.
+  Solo documentación: ni el código ni el esquema cambian.
+
 ## [0.7.0] — 2026-09-11
 
 Infraestructura para escalar: el núcleo deja de estar atado al formato de un ERP, un driver nuevo se

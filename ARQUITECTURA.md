@@ -166,7 +166,9 @@ tienen fuente**, nunca con una regla nueva escrita para el agente.
 - **Nivel 2 — un lenguaje común**: cuando aparezcan más aplicaciones peruanas especializadas
   (compras, tesorería, logística), todas necesitarán representar facturas, proveedores, centros de
   costo, impuestos y asientos. `pe-ledger` ya es ese idioma intermedio; crecerá con casos reales
-  detrás, no por si acaso.
+  detrás, no por si acaso. Lo que las APIs unificadas de EE. UU. (Merge, Codat, Rutter, Apideck)
+  enseñan sobre ese idioma, y los campos opcionales que de ahí se proponen, en
+  [REFERENCIAS.md](REFERENCIAS.md).
 - **Nivel 3 — agentes**: más preguntas respondidas desde el núcleo (`diagnosticar` es la primera),
   la conciliación de constancias de detracción cuando haya un archivo real del Banco de la Nación, y
   las equivalencias del PCGE 2026 con la cita del artículo al lado de cada mapeo.

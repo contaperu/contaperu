@@ -194,6 +194,8 @@ El asiento nace en las líneas neutrales del estándar `pe-ledger` y cada ERP es
 —CONCAR incluido—, así que un driver nuevo solo traduce vocabulario: las cuentas, los sentidos y la
 detracción los pone el núcleo una vez para todos. Un driver de la comunidad se enchufa por *entry
 points* sin tocar este repositorio. Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md).
+Lo que se tomó de QuickBooks, Xero y las APIs unificadas de EE. UU. —y lo que no—, en
+[REFERENCIAS.md](REFERENCIAS.md).
 
 ## Qué **no** hace
 
