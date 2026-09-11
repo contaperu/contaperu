@@ -1,0 +1,2741 @@
+{
+ "factura_pen": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "factura_usd_con_tc": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421202",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "factura_usd_sin_tc": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421202",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "boleta_en_compras": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "13",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "BV",
+    "serie_numero": "B001-55",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "13",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "BV",
+    "serie_numero": "B001-55",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  }
+ ],
+ "honorarios_sin_retencion": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "2000.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ASESORIA CONTABLE",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "424101",
+   "debe_haber": "H",
+   "importe": "2000.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ASESORIA CONTABLE",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  }
+ ],
+ "honorarios_con_retencion": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "2000.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ASESORIA CONTABLE",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "401721",
+   "debe_haber": "H",
+   "importe": "160.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "RET 4TA - ASESORIA CONTABLE",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "424101",
+   "debe_haber": "H",
+   "importe": "1840.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ASESORIA CONTABLE",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  }
+ ],
+ "honorarios_usd_con_retencion": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "2000.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "ASESORIA CONTABLE",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "401721",
+   "debe_haber": "H",
+   "importe": "16.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "RET 4TA - ASESORIA CONTABLE",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "424102",
+   "debe_haber": "H",
+   "importe": "1984.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "ASESORIA CONTABLE",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  }
+ ],
+ "honorarios_retencion_propia": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "2000.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ASESORIA CONTABLE",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "401722",
+   "debe_haber": "H",
+   "importe": "160.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "RET 4TA - ASESORIA CONTABLE",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "424101",
+   "debe_haber": "H",
+   "importe": "1840.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ASESORIA CONTABLE",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  }
+ ],
+ "nota_de_credito_compra": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "H",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "H",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "nota_de_debito_compra": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "ND",
+    "serie_numero": "FD01-3",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "ND",
+    "serie_numero": "FD01-3",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "ND",
+    "serie_numero": "FD01-3",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "igv_reducido": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 11
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "10.50",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 11
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "110.50",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 11
+  }
+ ],
+ "inafecto": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  }
+ ],
+ "sin_vencimiento": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-11"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-11"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-11"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "sin_concepto": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ELECTROMECANICA DE PRUEBA S.R.",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - ELECTROMECANICA DE PRUEB",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ELECTROMECANICA DE PRUEBA S.R.",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "extemporaneo": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-06-15",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-06-15",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-06-15",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "posterior_al_periodo": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-31",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-09-02",
+    "fecha_vencimiento": "2026-09-10"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-31",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-09-02",
+    "fecha_vencimiento": "2026-09-10"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-31",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-09-02",
+    "fecha_vencimiento": "2026-09-10"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "sin_fecha": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_pen": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "14.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "H",
+   "importe": "14.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "DETRACCION - GRILLETE TIPO LIR",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "DR",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-11"
+   },
+   "detraccion": {
+    "codigo_interno": "03701",
+    "tasa": 12.0,
+    "base": "118.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_usd": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.5,
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.5,
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421202",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.5,
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421202",
+   "debe_haber": "D",
+   "importe": "14.29",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.5,
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "H",
+   "importe": "14.29",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.5,
+   "glosa": "DETRACCION - GRILLETE TIPO LIR",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "DR",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-11"
+   },
+   "detraccion": {
+    "codigo_interno": "03701",
+    "tasa": 12.0,
+    "base": "118.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_usd_sin_tc": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421202",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_excel_real": [
+  {
+   "cuenta": "659999",
+   "debe_haber": "D",
+   "importe": "4200.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATE",
+   "centro_costo": "CC-64",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "756.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "IGV - SERVICIO DE TRANSPORTE D",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "4956.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATE",
+   "contraparte_doc": "20602222226",
+   "anexo_auxiliar": "CC-64",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "198.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATE",
+   "contraparte_doc": "20602222226",
+   "anexo_auxiliar": "CC-64",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "H",
+   "importe": "198.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "DETRACCION - SERVICIO DE TRANS",
+   "contraparte_doc": "20602222226",
+   "documento": {
+    "tipo": "DR",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha": "2026-08-10"
+   },
+   "detraccion": {
+    "codigo_interno": "02702",
+    "tasa": 4.0,
+    "base": "4956.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_codigo_sin_tasa": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_tasa_de_tabla": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "12.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "H",
+   "importe": "12.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "DETRACCION - GRILLETE TIPO LIR",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "DR",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-11"
+   },
+   "detraccion": {
+    "codigo_interno": "01903",
+    "tasa": 10.0,
+    "base": "118.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_en_el_11": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "14.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "H",
+   "importe": "14.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "DETRACCION - GRILLETE TIPO LIR",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "DR",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-11"
+   },
+   "detraccion": {
+    "codigo_interno": "03799",
+    "tasa": 12.0,
+    "base": "118.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_area_y_tipo_doc": [
+  {
+   "cuenta": "659999",
+   "debe_haber": "D",
+   "importe": "4200.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATE",
+   "centro_costo": "CC-64",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "756.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "IGV - SERVICIO DE TRANSPORTE D",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "4956.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATE",
+   "contraparte_doc": "20602222226",
+   "anexo_auxiliar": "CC-64",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "198.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATE",
+   "contraparte_doc": "20602222226",
+   "anexo_auxiliar": "CC-64",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "H",
+   "importe": "198.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-10",
+   "moneda": "PEN",
+   "glosa": "DETRACCION - SERVICIO DE TRANS",
+   "contraparte_doc": "20602222226",
+   "documento": {
+    "tipo": "DT",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-10",
+    "fecha_vencimiento": "2026-08-27"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "E001-871",
+    "fecha": "2026-08-10"
+   },
+   "detraccion": {
+    "codigo_interno": "02702",
+    "tasa": 4.0,
+    "base": "4956.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "detraccion_cuenta_propia": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "14.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421209",
+   "debe_haber": "H",
+   "importe": "14.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "DETRACCION - GRILLETE TIPO LIR",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "DR",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-11"
+   },
+   "detraccion": {
+    "codigo_interno": "03701",
+    "tasa": 12.0,
+    "base": "118.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "nota_con_detraccion": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "H",
+   "importe": "100.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "H",
+   "importe": "18.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "5.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "D",
+   "importe": "5.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "DETRACCION - GRILLETE TIPO LIR",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "DR",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "detraccion": {
+    "codigo_interno": "02702",
+    "tasa": 4.0,
+    "base": "118.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "honorarios_con_detraccion": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "2000.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ASESORIA CONTABLE",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "424101",
+   "debe_haber": "H",
+   "importe": "2000.00",
+   "sub_diario": "15",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "ASESORIA CONTABLE",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "RH",
+    "serie_numero": "E001-7",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  }
+ ],
+ "recibo_servicios_publicos": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "RC",
+    "serie_numero": "12345",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "RC",
+    "serie_numero": "12345",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "RC",
+    "serie_numero": "12345",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "cuenta_sin_centro": [
+  {
+   "cuenta": "603201",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "centro_referencia_en_x": [
+  {
+   "cuenta": "603201",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "centro_referencia_con_detraccion": [
+  {
+   "cuenta": "603201",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "D",
+   "importe": "5.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "H",
+   "importe": "5.00",
+   "sub_diario": "10",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "DETRACCION - GRILLETE TIPO LIR",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "DR",
+    "serie_numero": "9999999999",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-11"
+   },
+   "detraccion": {
+    "codigo_interno": "02702",
+    "tasa": 4.0,
+    "base": "118.00"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "sin_centros_de_costo": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "ninguna_cuenta_lleva_centro": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "gasto_y_cxp_del_ruc": [
+  {
+   "cuenta": "659901",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421203",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "tipo_renombrado_por_el_ruc": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "12",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FA",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "12",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FA",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "12",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FA",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "venta_factura": [
+  {
+   "cuenta": "121201",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "701101",
+   "debe_haber": "H",
+   "importe": "100.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "H",
+   "importe": "18.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "venta_usd_cuentas_del_ruc": [
+  {
+   "cuenta": "121209",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "701201",
+   "debe_haber": "H",
+   "importe": "100.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "H",
+   "importe": "18.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "USD",
+   "tipo_cambio": 3.55,
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "venta_boleta": [
+  {
+   "cuenta": "121201",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "BV",
+    "serie_numero": "B001-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "701101",
+   "debe_haber": "H",
+   "importe": "100.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "BV",
+    "serie_numero": "B001-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "H",
+   "importe": "18.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "BV",
+    "serie_numero": "B001-9",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "venta_nota_de_credito": [
+  {
+   "cuenta": "701101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-3",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-3",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "121201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "NC",
+    "serie_numero": "FC01-3",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "referencia": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha": "2026-08-01"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "venta_con_detraccion": [
+  {
+   "cuenta": "121201",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "631101",
+   "debe_haber": "H",
+   "importe": "100.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "H",
+   "importe": "18.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ],
+ "venta_extemporanea": [
+  {
+   "cuenta": "121201",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-07-20",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "701101",
+   "debe_haber": "H",
+   "importe": "100.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TO",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-07-20",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "H",
+   "importe": "18.00",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-01",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 P",
+   "documento": {
+    "tipo": "FT",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-07-20",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": 18
+  }
+ ]
+}
