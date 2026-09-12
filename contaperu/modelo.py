@@ -24,6 +24,9 @@ _TRES = Decimal("0.001")
 
 TIPOS_LIBRO = ("venta", "compra")
 ORIGENES = ("xml", "pdf_texto", "vision", "manual", "sire")  # sire = importado de la propuesta de SUNAT
+# Lo que declara el documento sobre su pago. En la factura electrónica es obligatorio desde 2021 (UBL
+# `PaymentTerms FormaPago`: «Contado», o «Credito» con sus cuotas). Vacío = el documento no lo dice.
+CONDICIONES_PAGO = ("contado", "credito")
 
 
 def monto(v: Any) -> Decimal:
@@ -136,6 +139,7 @@ class Comprobante:
     numero_final: str = ""          # solo rangos (boletas consolidadas del día)
     fecha_emision: date | None = None
     fecha_vencimiento: date | None = None
+    condicion_pago: str = ""        # contado | credito (CONDICIONES_PAGO); vacío = el documento no lo dice
     # Contraparte: el cliente en ventas, el proveedor en compras
     contraparte_tipo_doc: str = "6"  # Tabla 1: 6 RUC, 1 DNI, 4 CE, 7 pasaporte, 0 otros
     contraparte_doc: str = ""
@@ -177,9 +181,13 @@ class Comprobante:
     ref_numero: str = ""
     detraccion: dict | None = None  # {codigo, porcentaje, monto, cuenta, fecha_constancia, nro_constancia}
     id_contrato: str = ""
-    # Contable (CONCAR)
+    # Imputación contable: la decide el contador para ESTE documento; vacía = la de la configuración del RUC
     concepto: str = ""
-    cuenta_contable: str = ""
+    cuenta_contable: str = ""       # la de la base: el gasto en compras, el ingreso en ventas
+    # La del total —el proveedor en compras, el cliente en ventas— cuando no es la del RUC por moneda
+    # (un 4699 para un gasto de representación). La resuelve `asiento.cuenta_tercero`, una sola vez
+    # para todos los drivers: el asiento de CONCAR y el registro de CONTASIS dicen la misma cuenta.
+    cuenta_tercero: str = ""
     centro_costo: str = ""
     # Procedencia
     origen: str = "xml"
@@ -205,6 +213,9 @@ class Comprobante:
         self.moneda = (self.moneda or "PEN").upper()
         self.contraparte_tipo_doc = self.contraparte_tipo_doc or "6"
         self.destino_igv = (self.destino_igv or "DG").upper()
+        self.condicion_pago = self.condicion_pago.lower().replace("é", "e")
+        if self.condicion_pago and self.condicion_pago not in CONDICIONES_PAGO:
+            raise ValueError(f"condicion_pago inválida: {self.condicion_pago!r} (contado | credito)")
         self.confianza = Decimal(str(self.confianza)).quantize(_DOS)
         self.observaciones = [
             o if isinstance(o, Observacion) else Observacion(**o) for o in (self.observaciones or [])
@@ -281,5 +292,5 @@ _CAMPOS_TEXTO = (
     "tipo_cp", "serie", "numero", "numero_final", "contraparte_tipo_doc", "contraparte_doc",
     "contraparte_nombre", "moneda", "destino_igv", "anio_dua", "cod_dep_aduanera",
     "clasif_bienes", "ref_tipo_cp", "ref_serie", "ref_numero", "id_contrato",
-    "concepto", "cuenta_contable", "centro_costo", "archivo_nombre",
+    "concepto", "cuenta_contable", "cuenta_tercero", "centro_costo", "archivo_nombre", "condicion_pago",
 )

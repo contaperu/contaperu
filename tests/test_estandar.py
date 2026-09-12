@@ -70,7 +70,8 @@ def test_lo_que_produce_el_modelo_valida(validador):
     c = Comprobante(tipo_cp="01", serie="F001", numero="123", fecha_emision="2026-01-10",
                     contraparte_doc="20601111111", contraparte_nombre="PROVEEDOR DE PRUEBA SAC",
                     base_gravada="100", igv="18", total="118",
-                    detraccion={"codigo": "027", "porcentaje": 4})
+                    detraccion={"codigo": "027", "porcentaje": 4},
+                    condicion_pago="credito", cuenta_tercero="469901")
     doc = documento(comprobantes=[c.a_dict()])
     assert list(validador.iter_errors(doc)) == []
 
@@ -90,6 +91,8 @@ def test_se_rechaza_lo_que_no_es_del_estandar(validador):
         documento(libro={"ruc": "20601111111", "periodo": "202601", "tipo": "otro"}),
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "10/01/2026", "total": "1"}]),
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "-5"}]),
+        documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "1",
+                                 "condicion_pago": "a 30 dias"}]),                      # ni contado ni credito
     ]
     for doc in malos:
         assert list(validador.iter_errors(doc)), doc
@@ -102,3 +105,13 @@ def test_la_version_del_estandar_no_es_la_de_la_libreria(esquema):
 
     assert esquema["properties"]["pe_ledger"]["const"] == PE_LEDGER
     assert contaperu.__version__ != PE_LEDGER
+
+
+def test_la_condicion_de_pago_se_normaliza_y_lo_demas_se_rechaza():
+    """Como la escribe una persona («Crédito») se normaliza; lo que no es ninguna de las dos se rechaza al
+    construir el comprobante, igual que un `origen` desconocido: mejor fallar que inventar."""
+    assert Comprobante(condicion_pago=" Crédito ").condicion_pago == "credito"
+    assert Comprobante(condicion_pago="CONTADO").condicion_pago == "contado"
+    assert Comprobante().condicion_pago == ""
+    with pytest.raises(ValueError, match="condicion_pago"):
+        Comprobante(condicion_pago="a 30 dias")

@@ -41,13 +41,41 @@ python -m contaperu.cli validar mi-documento.json
 **`libro`** — la cabecera tributaria. Un RUC, un mes (`AAAAMM`), y `venta` o `compra`. Es obligatoria: sin
 saber de quién y de cuándo es, un comprobante suelto no es contabilidad.
 
-**`comprobantes`** — los documentos soporte, con los campos tal como los define SUNAT. Es lo que sale de un
-XML UBL, de la propuesta del SIRE o de leer un PDF. Un documento puede traer solo este bloque y pedir que
-se le genere el asiento.
+**`comprobantes`** — los **registros**: cada documento soporte con los campos tal como los define SUNAT, más
+la imputación contable que el contador decide para ese documento (la cuenta de la base, la del total, el
+centro de costo). Es lo que sale de un XML UBL, de la propuesta del SIRE o de leer un PDF. Con este bloque
+basta: un sistema que importa registros sale de él directamente, y a uno que importa asientos se le genera.
 
 **`asiento`** — las líneas de diario, **sin nada de ningún ERP**: cuenta, debe o haber, importe, moneda,
 glosa, centro de costo. Es el bloque que permite que un sistema contable consuma el resultado sin saber qué
 lo generó. Es opcional: quien ya lo tiene armado lo manda, quien no, lo pide.
+
+---
+
+## Dónde va cada dato
+
+El registro, la configuración del contribuyente y el driver de salida nunca guardan lo mismo: cada dato
+tiene un solo dueño.
+
+| Si el dato… | Va en | Ejemplo |
+|---|---|---|
+| Está impreso en el documento o en su XML | **el registro** | fecha, serie, importes, `condicion_pago` |
+| Lo decide el contador para ESE documento | **el registro**, opcional; si falta, la configuración | `cuenta_contable`; `cuenta_tercero` cuando no es la de siempre |
+| Es igual para todo el contribuyente | **la configuración** (fuera del documento) | la cuenta por pagar en soles, la del IGV, las siglas de CONCAR |
+| Se calcula con lo anterior | **nadie lo guarda**: lo deriva el driver | el signo de la nota de crédito, los soles de una factura en dólares, el % de IGV, el correlativo |
+
+**Las cuentas se resuelven una sola vez, en el núcleo** (`asiento.cuenta_de_fila` y `asiento.cuenta_tercero`),
+para todos los drivers. Si un registro manda su total a la `4699`, esa cuenta sale igual en el asiento de
+CONCAR y en la columna de un sistema que importa registros. Ningún driver elige una cuenta.
+
+## Dos familias de salida, un solo documento
+
+- **Registro** — una fila por comprobante, sin asiento: el TXT del SIRE, y los sistemas contables que
+  importan su registro de compras y de ventas y arman el asiento ellos mismos (CONTASIS, en construcción).
+- **Asiento** — el núcleo convierte los registros en líneas de diario una sola vez y el driver las traduce:
+  el Excel de CONCAR, el CSV y los sistemas que importan asientos.
+
+Un sistema nuevo solo elige familia: el documento del que sale es el mismo.
 
 ---
 
@@ -131,6 +159,8 @@ consumidor de la 0.2 que no los conozca los ignora.
 | `dscto_base`, `dscto_igv` | **No suman ni restan.** Dicen qué parte de la base y del IGV informa el registro en sus columnas de descuento (SIRE ventas, campos 16 y 18). Una nota de crédito de descuento global va **entera** ahí —así la registra SUNAT— y entonces valen lo mismo que `base_gravada` e `igv`. |
 | `retencion` | Es la **retención de renta de 4ta** que muestra un recibo por honorarios. **No** es la retención del IGV del 3 %, que no entra en ningún asiento y que las IAs confunden constantemente con una detracción. |
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
+| `condicion_pago` | `contado` o `credito`: lo que **declara** el documento. En la factura electrónica viene en `PaymentTerms FormaPago`, y una factura con cuotas es a crédito. Vacío no significa contado: significa que el documento no lo dice. |
+| `cuenta_tercero` | Vacía en casi todos los registros: la cuenta del proveedor o del cliente sale de la configuración, por moneda. Solo se escribe cuando ESE documento va a otra (un gasto de representación a la `4699`), y entonces manda en todos los drivers. |
 | `tipo_cambio` | El que **publica SUNAT para la fecha de emisión**, con 3 decimales. No el del día del pago. |
 | `serie` | Vacía en los comprobantes que no la llevan (recibo de servicios públicos, tipo `14`). Que esté vacía no es un error. |
 | `contraparte_doc` | Puede ir vacío en boletas a consumidor final. |
@@ -156,6 +186,10 @@ necesitado todavía; se añade con un caso real detrás, no por si acaso.
 siempre netos y `dscto_base`/`dscto_igv` dejan de restarse del total. En `0.1` el descuento se restaba de una
 base bruta, pero el XML de SUNAT da la base ya neta, así que una nota de crédito de descuento global salía
 contada dos veces. Un documento `0.1` sin descuentos significa exactamente lo mismo en `0.2`.
+
+**Dentro de la `0.2`** (12-sep-2026) entran dos campos opcionales del comprobante, `condicion_pago` y
+`cuenta_tercero`, para que un sistema que importa registros salga del documento sin datos de fuera. No
+cambian el significado de nada: un documento sin ellos se exporta exactamente igual que antes.
 
 ---
 
@@ -190,6 +224,18 @@ que el motor transporta sin interpretar:
 
 Lo que sí entró de esa propuesta: `_exportacion` (arriba), `EXIGE` en el contrato de driver y `pedir_a` en
 `diagnosticar` (`ARQUITECTURA.md`).
+
+Y cuatro que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso real o una decisión:
+
+| Dónde | Nombre | Qué será |
+|---|---|---|
+| comprobante | `medio_pago` | El código de medio de pago de SUNAT (`001` depósito en cuenta…), si resulta ser dato de cada documento y no un valor del contribuyente |
+| comprobante | `retencion_igv` | `{porcentaje, monto}`: la retención del IGV del 3 %, que el XML trae en `PaymentTerms Retencion`. **No es `retencion`**, que es la renta de 4ta |
+| comprobante | `percepcion` | El régimen de percepciones del IGV |
+| comprobante | `no_domiciliado` | El número del comprobante que emite un sujeto no domiciliado |
+
+El segundo centro de costo y el código de presupuesto de CONTASIS irían en `dimensiones`, el nombre ya
+reservado de la tabla de arriba.
 
 ---
 

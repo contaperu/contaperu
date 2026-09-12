@@ -93,6 +93,11 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
     ("ninguna_cuenta_lleva_centro", {}, False, {"cuentas_con_centro": []}),
     ("gasto_y_cxp_del_ruc", dict(cuenta_contable="", moneda="USD"), False,
      {"cuentas": {"gasto": "659901", "cxp": {"USD": "421203"}}}),
+    # La cuenta del total que escribe el contador en el registro (12-sep-2026) manda sobre la del RUC, también
+    # en la línea que descuenta la detracción al proveedor; la de la detracción sigue siendo la suya.
+    ("cuenta_tercero_del_registro", dict(cuenta_tercero="469901"), False, None),
+    ("cuenta_tercero_con_detraccion", dict(cuenta_tercero="469901", detraccion=DET), False, None),
+    ("venta_cuenta_tercero_del_registro", dict(cuenta_contable="", cuenta_tercero="121209"), True, None),
     ("tipo_renombrado_por_el_ruc", {}, False, {"tipos": {"01": {"concar": "FA", "sub_diario": "12"}}}),
     ("venta_factura", dict(cuenta_contable=""), True, None),
     ("venta_usd_cuentas_del_ruc", dict(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), True,

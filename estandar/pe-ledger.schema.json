@@ -19,7 +19,7 @@
     },
     "libro": { "$ref": "#/$defs/libro" },
     "comprobantes": {
-      "description": "Los documentos soporte del periodo.",
+      "description": "Los registros del periodo: cada documento soporte con su imputación contable. Con este bloque basta para exportar a un sistema que importa registros y para generar el asiento.",
       "type": "array",
       "items": { "$ref": "#/$defs/comprobante" }
     },
@@ -77,6 +77,7 @@
         "numero_final": { "type": "string", "description": "Solo rangos: boletas consolidadas del día." },
         "fecha_emision": { "$ref": "#/$defs/fecha" },
         "fecha_vencimiento": { "$ref": "#/$defs/fecha" },
+        "condicion_pago": { "enum": ["", "contado", "credito"], "description": "Lo que declara el documento sobre su pago (en la factura electrónica, PaymentTerms FormaPago; con cuotas es credito). Vacío = el documento no lo dice." },
 
         "contraparte_tipo_doc": { "enum": ["0", "1", "4", "6", "7", "A"], "description": "Tabla 1: 6 RUC, 1 DNI, 4 carné de extranjería, 7 pasaporte, A cédula diplomática, 0 otros." },
         "contraparte_doc": { "type": "string" },
@@ -128,7 +129,8 @@
         "id_contrato": { "type": "string" },
 
         "concepto": { "type": "string", "description": "La glosa del asiento." },
-        "cuenta_contable": { "type": "string", "description": "Cuenta de gasto o de ingreso del plan del contribuyente." },
+        "cuenta_contable": { "type": "string", "description": "Cuenta de la base del plan del contribuyente: el gasto en compras, el ingreso en ventas." },
+        "cuenta_tercero": { "type": "string", "description": "Cuenta del total —el proveedor en compras, el cliente en ventas— cuando no es la del contribuyente por moneda. Vacía = la de su configuración." },
         "centro_costo": { "type": "string" },
 
         "origen": { "enum": ["xml", "pdf_texto", "vision", "manual", "sire"], "description": "De dónde salió el dato. Trazabilidad, no lógica." },

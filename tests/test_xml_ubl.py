@@ -32,6 +32,7 @@ def test_factura_como_venta():
     assert c.detraccion == {"codigo": "022", "porcentaje": "12", "monto": "153.60", "cuenta": "00-000-123456"}
     assert c.concepto.startswith("Servicio de consultor")
     assert c.datos_raw["emisor"]["doc"] == EMISOR and c.datos_raw["forma_pago"] == "Credito"
+    assert c.condicion_pago == "credito"                     # la forma de pago pasa al registro
     assert c.origen == "xml" and c.confianza == Decimal("1.00") and c.archivo_nombre == "F001-123.xml"
     validar.revisar([c], VENTAS)
     assert c.observaciones == [] and c.estado == "ok"
@@ -55,6 +56,7 @@ def test_boleta_con_dni_y_latin1():
     assert (c.contraparte_tipo_doc, c.contraparte_doc) == ("1", "12345678")
     assert c.contraparte_nombre == "APELLIDO DE PRUEBA, ÁNGEL"   # con tilde: es lo que prueba el latin-1
     assert c.fecha_vencimiento is None and c.datos_raw["forma_pago"] == "Contado"
+    assert c.condicion_pago == "contado"
     assert (c.base_gravada, c.igv, c.total) == (Decimal("100.00"), Decimal("18.00"), Decimal("118.00"))
     validar.revisar([c], VENTAS)
     assert c.estado == "ok"
@@ -170,3 +172,9 @@ def test_sin_descuento_los_dos_campos_quedan_en_cero():
     c = xml_ubl.parsear(NC_CON_DESCUENTO.replace("false", "true").encode("utf-8"), "venta")
     assert c.dscto_base == Decimal("0.00") and c.dscto_igv == Decimal("0.00")
     assert c.base_gravada == Decimal("9985.36")
+
+
+def test_sin_forma_de_pago_la_condicion_queda_vacia():
+    """Vacío no es contado: es que el documento no lo dice. La nota de crédito de prueba no la trae."""
+    c = xml_ubl.parsear(leer("20131312955-07-FC01-7.xml"), "venta", "FC01-7.xml")
+    assert c.datos_raw["forma_pago"] == "" and c.condicion_pago == ""

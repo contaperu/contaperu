@@ -213,6 +213,10 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
         if cuenta:
             detraccion["cuenta"] = cuenta
     vencimiento = max(cuotas) if cuotas else fecha(_t(raiz, "cbc:DueDate") or None)
+    # La condición de pago pasa al registro (`Comprobante.condicion_pago`); `datos_raw.forma_pago` sigue
+    # guardando el texto tal como vino. Una factura con cuotas es a crédito aunque no lo diga en letras.
+    fp = forma_pago.strip().lower()
+    condicion_pago = "credito" if cuotas or fp.startswith(("credito", "crédito")) else ("contado" if fp == "contado" else "")
 
     # --- Documento modificado (notas) ----------------------------------------
     ref_serie = ref_numero = ref_tipo = ""
@@ -257,6 +261,7 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
         numero=numero,
         fecha_emision=fecha(_t(raiz, "cbc:IssueDate") or None),
         fecha_vencimiento=vencimiento,
+        condicion_pago=condicion_pago,
         contraparte_tipo_doc=contraparte["tipo_doc"] or "6",
         contraparte_doc=contraparte["doc"],
         contraparte_nombre=contraparte["nombre"],

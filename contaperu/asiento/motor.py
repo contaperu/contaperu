@@ -26,9 +26,8 @@ from ..detracciones import tasa as tasa_detraccion
 from ..formato import Opciones, fmt_numero
 from ..igv import tasa as tasa_de_importes
 from ..modelo import Comprobante, Libro
-from .construir import (SinCuenta, _cuenta_por_moneda, _mapa, cuenta_de_fila, cuenta_honorarios,
-                        lleva_centro, mes_del_libro, numerar, resolve_cxp_account,
-                        resolve_cxp_detraccion_account, sub_diario, tiene_detraccion, tipo_concar)
+from .construir import (SinCuenta, _mapa, cuenta_de_fila, cuenta_tercero, lleva_centro, mes_del_libro,
+                        numerar, resolve_cxp_detraccion_account, sub_diario, tiene_detraccion, tipo_concar)
 from .datos import (D2, DEFAULTS, NUMERO_DETRACCION_PENDIENTE, OPCIONES, TIPO_BOLETA, TIPO_DOC_DETRACCION,
                     TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA)
 from .lineas import LineaDiario
@@ -147,12 +146,7 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
     cuenta_ret = str((contab.get("cuentas") or {}).get("retencion_4ta") or DEFAULTS["cuentas"]["retencion_4ta"])
     linea_ret = (linea("retencion_4ta", retenido, cuenta_ret, d_prov, f"RET 4TA - {glosa}")
                  if retenido > 0 else None)
-    if venta:
-        cuenta_ter = _cuenta_por_moneda(contab["cuentas"].get("clientes"), moneda, DEFAULTS["cuentas"]["clientes"]["PEN"])
-    elif es_honorarios:
-        cuenta_ter = cuenta_honorarios(contab["cuentas"], moneda)
-    else:
-        cuenta_ter = resolve_cxp_account(contab["cuentas"], moneda)
+    cuenta_ter = cuenta_tercero(c, contab, venta)
     x_ter = cc if (contab.get("cc_en_anexo_auxiliar") and not es_honorarios) else ""
     tercero = linea("tercero", total - retenido, cuenta_ter, d_prov,      # proveedor (compras) / cliente (ventas)
                     contraparte_doc=ruc, anexo_auxiliar=x_ter)

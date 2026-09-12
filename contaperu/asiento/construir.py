@@ -139,6 +139,25 @@ def cuenta_honorarios(cuentas: dict, moneda: str) -> str:
     return _cuenta_por_moneda(cuentas.get("honorarios"), moneda, DEFAULTS["cuentas"]["honorarios"]["PEN"])
 
 
+def cuenta_tercero(c: Comprobante, contab: dict, venta: bool = False) -> str:
+    """La cuenta del total: el cliente en ventas, el proveedor en compras (el recibo por honorarios, la suya).
+
+    Manda la del registro (`Comprobante.cuenta_tercero`) cuando el contador la escribió para ese documento
+    —un gasto de representación a la 4699—; si no, la de la configuración por moneda. Vivía dentro de
+    `asiento_neutral`; salió aquí el 12-sep-2026 para que la resuelva UNA función para todos los drivers
+    —el asiento de CONCAR y el registro de CONTASIS—, como `cuenta_de_fila` resuelve la de la base."""
+    propia = (c.cuenta_tercero or "").strip()
+    if propia:
+        return propia
+    moneda = (c.moneda or "PEN").upper()
+    cuentas = contab.get("cuentas") or {}
+    if venta:
+        return _cuenta_por_moneda(cuentas.get("clientes"), moneda, DEFAULTS["cuentas"]["clientes"]["PEN"])
+    if c.tipo_cp == TIPO_HONORARIOS:
+        return cuenta_honorarios(cuentas, moneda)
+    return resolve_cxp_account(cuentas, moneda)
+
+
 # ── Clasificación de cada comprobante ────────────────────────────────────────
 
 def _mapa(c: Comprobante, contab: dict, tipo: str | None = None) -> dict | None:

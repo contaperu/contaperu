@@ -4,6 +4,32 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+El registro de `pe-ledger` se completa para que un sistema que importa **registros** —no asientos— salga
+directamente del documento. Lo pidió John al integrar CONTASIS (12-sep-2026), cuyo importador recibe el
+registro de compras y de ventas y arma el asiento él mismo. Todo es opcional: el estándar sigue en `0.2` y
+**el Excel de CONCAR no cambia** — los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a
+celda.
+
+### Añadido
+- **`condicion_pago`** (`contado` | `credito`) en el comprobante: lo que declara el documento sobre su pago.
+  En la factura electrónica es obligatorio (`PaymentTerms FormaPago`), y el lector de XML ya lo leía y lo
+  dejaba en `datos_raw.forma_pago`; ahora es campo del registro, y una factura con cuotas es a crédito. Vacío
+  no es contado: es que el documento no lo dice. «Crédito» o «CONTADO» se normalizan; otro valor se rechaza.
+- **`cuenta_tercero`** en el comprobante: la cuenta del total —el proveedor en compras, el cliente en
+  ventas— cuando ese documento no va a la del contribuyente por moneda. El caso real: un gasto de
+  representación a la 4699, en el registro de compras de CONTASIS que entregó John. Vacía, todo sale como
+  antes.
+- **`asiento.cuenta_tercero(c, contab, venta)`**: resuelve esa cuenta una sola vez para todos los drivers.
+  Vivía dentro de `asiento_neutral`; se sacó primero sin cambiar nada —el snapshot de CONCAR, intacto— y
+  después se le dio prioridad al campo del registro. Tres casos nuevos en el snapshot fijan que la cuenta del
+  registro manda en la línea del proveedor, también en la que le descuenta la detracción, y en ventas.
+- `estandar/LEEME.md`: **dónde va cada dato** (el registro, la configuración del contribuyente o el driver) y
+  **las dos familias de salida** (registro y asiento) que salen del mismo documento. Y los nombres reservados
+  que pide CONTASIS y que esperan un caso real o una decisión: `medio_pago`, `retencion_igv`, `percepcion` y
+  `no_domiciliado`.
+
 ## [0.9.0] — 2026-09-12
 
 Una regla que estaba sin fuente, corregida contra la norma: **un comprobante de compras del mes anterior no

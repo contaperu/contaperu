@@ -132,3 +132,30 @@ def test_un_xml_suelto_en_base64_se_lee(tmp_path):
     assert len(doc["comprobantes"]) == 1 and doc["_lectura"]["errores"] == []
     # Y el mismo XML como texto da exactamente lo mismo.
     assert doc["comprobantes"] == op.leer_xml(xml.decode("utf-8"), libro)["comprobantes"]
+
+
+def test_los_campos_del_registro_viajan_intactos():
+    """`condicion_pago` y `cuenta_tercero` entran y salen por cada operación sin que nadie los pierda, y la
+    cuenta del registro manda en el asiento: la línea del proveedor lleva la que escribió el contador."""
+    from util import XML
+
+    base = {"tipo_cp": "01", "serie": "F001", "numero": "7", "fecha_emision": "2026-01-10",
+            "contraparte_doc": "20602222226", "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+            "base_gravada": "100", "igv": "18", "total": "118", "cuenta_contable": "659999"}
+    doc = {"libro": LIBRO, "comprobantes": [dict(base, condicion_pago="credito", cuenta_tercero="469901")]}
+
+    revisado = op.revisar(doc)["comprobantes"][0]
+    assert (revisado["condicion_pago"], revisado["cuenta_tercero"]) == ("credito", "469901")
+
+    def cuentas_del_tercero(documento):
+        return [ln["cuenta"] for ln in op.generar_asiento(documento)["asiento"] if ln["rol"] == "tercero"]
+
+    assert cuentas_del_tercero(doc) == ["469901"]
+    # Vacía: la de la configuración por moneda, exactamente como antes de que existiera el campo.
+    assert cuentas_del_tercero({"libro": LIBRO, "comprobantes": [base]}) == ["421201"]
+
+    assert "469901" in op.exportar(doc, "csv")["texto"]
+
+    ventas = {"ruc": "20131312955", "razon_social": "EMISOR DE PRUEBA S.A.C.", "periodo": "202601", "tipo": "venta"}
+    xml = base64.b64encode((XML / "20131312955-01-F001-123.xml").read_bytes()).decode()
+    assert op.leer_xml(xml, ventas, es_base64=True)["comprobantes"][0]["condicion_pago"] == "credito"
