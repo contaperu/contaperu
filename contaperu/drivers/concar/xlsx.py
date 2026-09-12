@@ -9,11 +9,13 @@ from typing import Any
 from ...modelo import Comprobante, Libro
 from ... import partida_doble
 from ...formato import Opciones
-from ...asiento.construir import (MonedaSinCodigo, SinCuenta, TipoSinMapa, mes_del_libro,
-                      etiquetas_sub_diario, filas_sin_cuenta, monedas_sin_codigo, numerar, tipos_sin_mapa)
+from ...asiento.construir import (CorrelativoDesborda, mes_del_libro, etiquetas_sub_diario,
+                      exigir_requisitos, numerar)
 from ...asiento.datos import (ANCHOS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
-                    EXCEL_HEADERS, FORMATOS, OPCIONES)
+                    EXCEL_HEADERS, EXIGE, FORMATOS, OPCIONES)
+from ...asiento.huella import huella
 from ...asiento.motor import asiento_neutral
+from ..contrato import EXIGE_NUCLEO
 from . import proyeccion
 
 
@@ -76,19 +78,18 @@ def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict, corre
     if FORMATOS.get(libro.tipo) is None:
         raise ValueError("Tipo de libro no soportado")
     venta = libro.es_venta
-    sin_mapa = tipos_sin_mapa(comprobantes, contab)
-    if sin_mapa:
-        raise TipoSinMapa(sin_mapa)
-    sin_moneda = monedas_sin_codigo(comprobantes, contab)
-    if sin_moneda:
-        raise MonedaSinCodigo(sin_moneda)
-    sin = filas_sin_cuenta(comprobantes, contab, venta)
-    if sin:
-        raise SinCuenta(sin)
+    # Lo que CONCAR no puede importar sin: lo del núcleo (tipo con equivalencia, cuenta) y lo que
+    # este driver declara en EXIGE (centro de costo donde la cuenta lo lleva, moneda con código).
+    exigir_requisitos(comprobantes, contab, venta, EXIGE_NUCLEO | EXIGE)
     # Los limites del mes del proceso: cada asiento se fecha por comprobante
     # dentro de ellos (regla del 30-ago-2026; el detalle vive en asiento()).
     mes = mes_del_libro(libro)
     numeros, rangos = numerar(comprobantes, contab, libro.periodo, correlativos, venta)
+    # CONCAR numera con MM + cuatro dígitos: un sub-diario que pase de 9999 no se importa. Hasta el
+    # 11-sep-2026 lo comprobaba el portal antes de llamar aquí; la regla es de este formato.
+    desbordan = {s: r["hasta"] for s, r in rangos.items() if r.get("desborda")}
+    if desbordan:
+        raise CorrelativoDesborda(desbordan)
     # La contabilidad sale en lineas neutrales; aqui solo se proyectan a las columnas de CONCAR.
     lineas, filas = [], []
     for c in comprobantes:
@@ -102,5 +103,8 @@ def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict, corre
         "filas_excel": len(filas), "fechas": "por comprobante (extemporáneos al " + mes[0].strftime("%d/%m/%Y") + ")",
         "sub_diarios": {s: {"etiqueta": etiquetas_sub_diario(contab).get(s, s), **r} for s, r in rangos.items()},
         "debe": str(cuadre.debe), "haber": str(cuadre.haber),
+        # La huella del contenido (asiento/huella.py): con ella quien guarde este resumen reconoce la
+        # tanda si vuelve a salir. Va aquí porque este resumen es lo que el portal persiste.
+        "huella": huella(lineas),
     }
     return build_xlsx(filas), resumen

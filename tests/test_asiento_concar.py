@@ -572,3 +572,25 @@ def test_etiquetas_sub_diario_siguen_a_la_renumeracion():
     # Un CONCAR que no separa la detracción: dos usos comparten número y se leen juntos
     junto = concar.config_de({"concar": {"sub_diario_detraccion": "11"}})
     assert concar.etiquetas_sub_diario(junto)["11"] == "Compras · Compras con detracción"
+
+
+# ── Lo que el driver de CONCAR se niega a escribir (0.8.0) ─────────────────────
+
+def test_el_driver_se_niega_sin_centro_donde_la_cuenta_lo_lleva():
+    """La regla del contador (06-sep-2026), que hasta la 0.7 solo aplicaba el portal: obligatorio donde
+    la cuenta lo lleva en la M. Decisión de John (11-sep-2026): la hace cumplir el driver."""
+    with pytest.raises(concar.SinCentro) as e:
+        driver_concar.construir(COMPRAS, [cp(centro_costo="")], CONTAB, {"11": 1})
+    assert [c.numero for c in e.value.comprobantes] == ["00000123"]
+    # Una cuenta que no lleva centro (603201 no empieza por 63, 65 ni 70) sale igual sin él.
+    contenido, _ = driver_concar.construir(COMPRAS, [cp(cuenta_contable="603201", centro_costo="")], CONTAB, {"11": 1})
+    assert contenido[:2] == b"PK"
+
+
+def test_el_driver_se_niega_si_el_correlativo_pasa_de_9999():
+    """CONCAR numera con MM + cuatro dígitos; el portal lo comprobaba por su cuenta hasta la 0.8."""
+    with pytest.raises(concar.CorrelativoDesborda) as e:
+        driver_concar.construir(COMPRAS, [cp(), cp(numero="124")], CONTAB, {"11": 9999})
+    assert e.value.sub_diarios == {"11": 10000} and "supera los 4 dígitos" in str(e.value)
+    contenido, resumen = driver_concar.construir(COMPRAS, [cp()], CONTAB, {"11": 9999})
+    assert contenido[:2] == b"PK" and resumen["sub_diarios"]["11"]["hasta"] == 9999

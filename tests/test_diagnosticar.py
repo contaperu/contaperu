@@ -62,6 +62,7 @@ def test_los_avisos_no_bloquean_pero_se_ven():
      "de un tipo sin equivalencia en el sistema de destino"),
     ({"moneda": "EUR", "tipo_cambio": "4.1"}, "monedas_sin_codigo",
      "en una moneda que el sistema de destino no admite"),
+    ({"centro_costo": ""}, "sin_centro_de_costo", "sin centro de costo en una cuenta que lo lleva"),
 ])
 def test_cada_faltante_se_describe_sin_lanzar(cambio, clave, motivo):
     d = op.diagnosticar(doc(dict(FACTURA, **cambio)))
@@ -72,21 +73,23 @@ def test_cada_faltante_se_describe_sin_lanzar(cambio, clave, motivo):
         op.exportar(doc(dict(FACTURA, **cambio)), "concar")
 
 
-def test_el_centro_de_costo_lo_avisa_el_diagnostico_aunque_el_driver_no_lo_pare():
-    """La única comprobación que el diagnóstico hace y el driver de CONCAR no.
-
-    `filas_sin_centro` existe desde el 06-sep-2026 con la regla del contador (obligatorio donde la
-    cuenta lo lleva en la columna M) y la aplica el portal antes de exportar; el driver, no: un Excel
-    con la M vacía se genera igual. Aquí el diagnóstico lo dice —es lo que un agente necesita saber
-    ANTES de generar— y este test fija que hoy `exportar` sigue sin pararlo, para que el día que se
-    decida que lo pare, se haga a propósito y no por accidente.
+def test_el_centro_de_costo_lo_para_el_driver_desde_la_0_8():
+    """Hasta la 0.7 era la única comprobación que el diagnóstico hacía y el driver de CONCAR no: un
+    Excel con la M vacía se generaba igual, y la regla del contador (06-sep-2026: obligatorio donde la
+    cuenta lo lleva) la aplicaba solo el portal. Decisión de John (11-sep-2026): el driver la hace
+    cumplir —la declara en `EXIGE`— y la regla vive en el motor. Lo que exportar se niega a hacer es
+    exactamente lo que el diagnóstico dice, como con la cuenta.
     """
+    from contaperu import asiento as asi
     sin_centro = doc(dict(FACTURA, centro_costo=""))
     d = op.diagnosticar(sin_centro)
     assert d["listo_para_exportar"] is False
     assert d["por_que_no"] == ["1 sin centro de costo en una cuenta que lo lleva"]
     assert d["faltantes"]["sin_centro_de_costo"] == ["E001-871"]
-    assert op.exportar(sin_centro, "concar")["archivo"].endswith(".xlsx")
+    assert "centro_costo" in d["exige"]
+    with pytest.raises(asi.SinCentro) as e:
+        op.exportar(sin_centro, "concar")
+    assert [c.numero for c in e.value.comprobantes] == ["871"]
 
 
 def test_el_tipo_sin_equivalencia_no_se_confunde_con_falta_de_cuenta():
@@ -154,3 +157,54 @@ def test_el_golden_de_compras_se_diagnostica_con_la_cuenta_del_ruc():
 def test_solo_un_documento_que_no_es_documento_lanza():
     with pytest.raises(op.DocumentoInvalido, match="Falta el bloque"):
         op.diagnosticar({"comprobantes": []})
+
+
+# ── Para ese destino, y a quién pedírselo (0.8.0) ──────────────────────────────
+
+def test_el_csv_no_bloquea_por_centro_ni_por_moneda():
+    """Lo que deja un mes «no listo» depende del destino: el CSV escribe la moneda en ISO y el centro que
+    haya, así que ni EUR ni una M vacía lo paran. `faltantes` lo sigue diciendo, informando."""
+    d = op.diagnosticar(doc(dict(FACTURA, centro_costo="", moneda="EUR", tipo_cambio="4.1")), driver="csv")
+    assert d["exige"] == ["cuenta_contable", "tipo_cp"]
+    assert d["listo_para_exportar"] is True and d["por_que_no"] == [] and d["que_falta"] == []
+    assert d["faltantes"]["monedas_sin_codigo"] == ["EUR"] and d["faltantes"]["sin_centro_de_costo"] == ["E001-871"]
+    # Y la exportación de verdad sale: el diagnóstico no dice nada que ella no haga.
+    assert op.exportar(doc(dict(FACTURA, centro_costo="", moneda="EUR", tipo_cambio="4.1")), "csv")["archivo"].endswith(".csv")
+
+
+def test_lo_que_falta_dice_a_quien_pedirselo():
+    """Un agente redacta la pregunta a quien toca: al contador lo que se ve en el documento o en el
+    plan de cuentas; al sistema, la configuración del destino."""
+    d = op.diagnosticar(doc(dict(FACTURA, igv="99", total="4299"),                    # el IGV no es el 18 %
+                            dict(FACTURA, numero="872", cuenta_contable=""),
+                            dict(FACTURA, numero="873", cuenta_contable=""),
+                            dict(FACTURA, tipo_cp="13", serie="", numero="77")))    # sin equivalencia
+    assert [(q["motivo"], q["comprobantes"], q["pedir_a"]) for q in d["que_falta"]] == [
+        ("IGV_NO_CUADRA", ["E001-871"], "contador"),
+        ("tipos_sin_equivalencia", ["77"], "sistema"),
+        ("sin_cuenta", ["E001-872", "E001-873"], "contador"),
+    ]
+    assert d["que_falta"][1]["texto"].endswith(": 13")
+    assert all(q["texto"] for q in d["que_falta"])
+
+
+def test_la_tabla_pedir_a_cubre_todos_los_codigos_de_validar():
+    """Si alguien añade una observación sin decir a quién se le pide, este test lo dice."""
+    import ast
+    import pathlib
+
+    import contaperu.validar as validar
+    codigos = set()
+    for n in ast.walk(ast.parse(pathlib.Path(validar.__file__).read_text(encoding="utf-8"))):
+        if isinstance(n, ast.Call) and n.args and isinstance(n.args[0], ast.Constant) and isinstance(n.args[0].value, str):
+            f = n.func
+            if (isinstance(f, ast.Name) and f.id in ("e", "a")) or (isinstance(f, ast.Attribute) and f.attr == "observar"):
+                codigos.add(n.args[0].value)
+    assert codigos, "no se encontró ningún código en validar.py"
+    faltan = sorted(codigos - set(op.PEDIR_A))
+    assert faltan == [], f"códigos sin pedir_a: {faltan}"
+    assert set(op.PEDIR_A.values()) <= {op.CONTADOR, op.SISTEMA, op.PROVEEDOR}
+    # `proveedor` está reservado: el motor no puede afirmar que lo que falta esté en el papel.
+    assert op.PROVEEDOR not in op.PEDIR_A.values()
+    for clave in ("sin_cuenta", "sin_centro_de_costo", "tipos_sin_equivalencia", "monedas_sin_codigo"):
+        assert clave in op.PEDIR_A

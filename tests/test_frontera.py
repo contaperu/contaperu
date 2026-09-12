@@ -65,7 +65,8 @@ def test_el_nucleo_no_importa_el_sdk_del_protocolo():
     """`mcp` es una dependencia OPCIONAL (extra `[mcp]`) y solo la puerta puede tocarla.
 
     Si se colara en el núcleo, `pip install contaperu` dejaría de bastar para generar un asiento —y
-    el contenedor del portal, que instala solo `[excel]`, reventaría al importar.
+    cualquier instalación con solo `[excel]` reventaría al importar. (El contenedor del portal instala
+    también `[mcp]` desde que monta su propio conector, 10-sep-2026; la regla es la misma.)
     """
     culpables = [str(f.relative_to(PAQUETE)) for f in modulos_del_nucleo() if "mcp" in importa(f)]
     assert culpables == [], f"estos módulos del núcleo importan el SDK de MCP: {culpables}"

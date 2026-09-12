@@ -93,3 +93,13 @@ def test_la_consola_de_windows_no_tumba_el_cli(monkeypatch):
 
     monkeypatch.setattr("sys.stdout", SinReconfigure())
     _consola_utf8()          # no revienta aunque el flujo no sepa reconfigurarse
+
+
+def test_sin_centro_la_cli_remite_a_diagnosticar(tmp_path, capsys):
+    """Desde la 0.8 CONCAR se niega sin centro de costo donde la cuenta lo lleva; la CLI lo dice sin traceback."""
+    golden = str(GOLDEN / "compras_202601.json")
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps({"cuentas": {"gasto": "659999"}}), encoding="utf-8")     # centros encendidos
+    assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(tmp_path / "s"), "--config", str(config)]) == 1
+    err = capsys.readouterr().err
+    assert "sin centro de costo" in err and "contaperu diagnosticar" in err and "Traceback" not in err

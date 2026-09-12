@@ -29,6 +29,9 @@ NOMBRE = "csv"
 OPCIONES = Opciones(fecha="AAAA-MM-DD", extension=".csv")
 FORMATOS = {"compra": "csv_asiento", "venta": "csv_asiento"}
 CONTENT_TYPE = "text/csv; charset=utf-8"
+# No exige nada más que el núcleo: escribe la moneda en ISO y el centro de costo que haya. Un mes sin
+# centros sale igual, con la columna vacía.
+EXIGE = frozenset()
 
 SEPARADOR = ";"
 

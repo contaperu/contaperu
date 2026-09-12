@@ -42,9 +42,32 @@ class MonedaSinCodigo(Exception):
         self.monedas = monedas
 
 
+class SinCentro(Exception):
+    """Comprobantes sin centro de costo en una cuenta que SÍ lo lleva (columna M de CONCAR).
+
+    La regla es del contador (06-sep-2026: obligatorio donde de verdad se escribe) y hasta el
+    11-sep-2026 la aplicaba solo el portal antes de exportar; el driver de CONCAR la hace cumplir
+    desde entonces (decisión de John), como la de la cuenta.
+    """
+
+    def __init__(self, comprobantes: list[Comprobante]):
+        super().__init__(f"{len(comprobantes)} comprobante(s) sin centro de costo en una cuenta que lo lleva")
+        self.comprobantes = comprobantes
+
+
 class CorrelativoFaltante(Exception):
     def __init__(self, sub_diarios: list[str]):
         super().__init__("Falta el correlativo de los sub-diarios " + ", ".join(sub_diarios))
+        self.sub_diarios = sub_diarios
+
+
+class CorrelativoDesborda(Exception):
+    """Un sub-diario pasaría de 9999: CONCAR numera el asiento con MM + cuatro dígitos (`numerar`),
+    y un quinto dígito no cabe en su importación. `sub_diarios` es {sub-diario: hasta dónde llegaría}."""
+
+    def __init__(self, sub_diarios: dict[str, int]):
+        super().__init__("; ".join(f"El sub-diario {s} llegaría a {n}: supera los 4 dígitos que admite CONCAR"
+                                   for s, n in sub_diarios.items()))
         self.sub_diarios = sub_diarios
 
 
@@ -239,6 +262,46 @@ def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool 
         return []
     return [c for c in comprobantes
             if not (c.centro_costo or "").strip() and lleva_centro(cuenta_de_fila(c, contab, venta), contab)]
+
+
+# Qué clave de `faltantes` responde a cada requisito del contrato de driver (`contrato.exige`), en el
+# orden en que se comprueban: primero lo que impide clasificar (tipo, moneda), luego lo de cada línea.
+REQUISITO_DE = {"tipos_sin_equivalencia": "tipo_cp", "monedas_sin_codigo": "moneda",
+                "sin_cuenta": "cuenta_contable", "sin_centro_de_costo": "centro_costo"}
+
+
+def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = False,
+                   exige: frozenset[str] | set[str] = frozenset()) -> dict[str, list]:
+    """Lo que les falta a estos comprobantes para un destino que EXIGE eso — solo las claves exigidas.
+
+    No lanza: describe. Es la misma comprobación que `exigir_requisitos` hace cumplir, y la que
+    `diagnosticar` cuenta por serie-número; una sola lista de reglas para las tres.
+    """
+    salida: dict[str, list] = {}
+    if "tipo_cp" in exige:
+        salida["tipos_sin_equivalencia"] = tipos_sin_mapa(comprobantes, contab)
+    if "moneda" in exige:
+        salida["monedas_sin_codigo"] = monedas_sin_codigo(comprobantes, contab)
+    if "cuenta_contable" in exige:
+        salida["sin_cuenta"] = filas_sin_cuenta(comprobantes, contab, venta)
+    if "centro_costo" in exige:
+        salida["sin_centro_de_costo"] = filas_sin_centro(comprobantes, contab, venta)
+    return salida
+
+
+def exigir_requisitos(comprobantes: list[Comprobante], contab: dict, venta: bool = False,
+                      exige: frozenset[str] | set[str] = frozenset()) -> None:
+    """Hace cumplir `faltantes_para`: la primera falta, en el orden de siempre, detiene la exportación
+    con su excepción (tipo → moneda → cuenta → centro). Un tipo sin equivalencia no se inventa."""
+    falta = faltantes_para(comprobantes, contab, venta, exige)
+    if falta.get("tipos_sin_equivalencia"):
+        raise TipoSinMapa(falta["tipos_sin_equivalencia"])
+    if falta.get("monedas_sin_codigo"):
+        raise MonedaSinCodigo(falta["monedas_sin_codigo"])
+    if falta.get("sin_cuenta"):
+        raise SinCuenta(falta["sin_cuenta"])
+    if falta.get("sin_centro_de_costo"):
+        raise SinCentro(falta["sin_centro_de_costo"])
 
 
 def nombre(libro: Libro, op: Opciones = OPCIONES) -> str:

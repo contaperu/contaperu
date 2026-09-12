@@ -79,7 +79,7 @@ def test_el_driver_se_niega_a_escribir_un_asiento_descuadrado(monkeypatch):
                   periodo="202608", tipo="compra")
     c = Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-08-11",
                     contraparte_doc="20601111111", base_gravada="100", igv="18", total="118",
-                    cuenta_contable="659999")
+                    cuenta_contable="659999", centro_costo="OBRA01")   # con centro: este test es del descuadre
 
     # Desde la 0.7 el driver cuadra las líneas neutrales —de ellas salen las filas—, así que es
     # ahí donde se rompe el espejo de la última línea.

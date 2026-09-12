@@ -12,6 +12,7 @@ base64 porque un JSON no sabe llevar bytes.
 from __future__ import annotations
 
 import base64
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -31,6 +32,46 @@ MAXIMO_COMPROBANTES = 5000
 
 class DocumentoInvalido(ValueError):
     """El documento no cumple el estándar lo bastante como para poder trabajar con él."""
+
+
+# --- a quién se le pide lo que falta ------------------------------------------------
+
+CONTADOR, SISTEMA, PROVEEDOR = "contador", "sistema", "proveedor"
+
+# Quién resuelve cada cosa que `diagnosticar` puede encontrar. No es una regla contable: las reglas
+# ya existen (`validar.py`, `asiento.faltantes_para`); esto solo dice a quién preguntar, para que un
+# agente no adivine (la idea viene del *Accounting agent* de Intuit, ver `REFERENCIAS.md`). El criterio:
+# **contador** = se decide mirando el documento o el plan de cuentas; **sistema** = configuración del
+# destino o un dato público que no está en el papel (el T.C. lo publica SUNAT). **`proveedor` queda
+# reservado**: el motor ve un documento y no puede afirmar que lo que falta esté en el papel del
+# proveedor; entrará con un caso real (la constancia de detracción conciliada, por ejemplo).
+# `tests/test_diagnosticar.py` recorre `validar.py` y comprueba que ningún código se quede fuera.
+PEDIR_A: dict[str, str] = {
+    # lo que falta para el destino (claves de `faltantes`)
+    "sin_cuenta": CONTADOR, "sin_centro_de_costo": CONTADOR,
+    "tipos_sin_equivalencia": SISTEMA, "monedas_sin_codigo": SISTEMA, "sub_diarios_sin_correlativo": SISTEMA,
+    # errores de la validación
+    "ANIO_DUA_FALTA": CONTADOR, "CONTRAPARTE_FALTA": CONTADOR, "DNI_INVALIDO": CONTADOR,
+    "DSCTO_MAYOR_QUE_BASE": CONTADOR, "DUPLICADO": CONTADOR, "DUPLICADO_PERIODO_ANTERIOR": CONTADOR,
+    "FECHA_FALTA": CONTADOR, "FECHA_POSTERIOR": CONTADOR, "IGV_NO_CUADRA": CONTADOR,
+    "MONEDA_INVALIDA": CONTADOR, "NOTA_SIN_FECHA_REF": CONTADOR, "NOTA_SIN_REFERENCIA": CONTADOR,
+    "NUMERO_FALTA": CONTADOR, "RETENCION_MAYOR": CONTADOR, "RUC_INVALIDO": CONTADOR, "SERIE_FALTA": CONTADOR,
+    "TC_FALTA": SISTEMA, "TOTAL_NO_CUADRA": CONTADOR, "VENCIMIENTO_FALTA": CONTADOR,
+    "XML_DE_OTRO_RUC": CONTADOR, "XML_PARA_OTRO_RUC": CONTADOR,
+    # avisos (no bloquean; están para que la tabla sea completa)
+    "ADQUIRENTE_NO_COINCIDE": CONTADOR, "ANTICIPO": CONTADOR, "BOLETA_SIN_DOC": CONTADOR,
+    "COMPRA_BOLETA": CONTADOR, "DETRACCION_TASA_DISTINTA": CONTADOR, "EMISOR_NO_COINCIDE": CONTADOR,
+    "GRATUITAS": CONTADOR, "IGV_TASA_REDUCIDA": CONTADOR, "NOMBRE_FALTA": CONTADOR,
+    "PERIODO_ANTERIOR": CONTADOR, "RETENCION_NO_APLICA": CONTADOR, "RETENCION_TASA": CONTADOR,
+    "SIRE_SIN_DETALLE": CONTADOR, "TIPO_CP_DESCONOCIDO": CONTADOR, "TOTAL_CERO": CONTADOR,
+}
+
+TEXTO_FALTANTE = {
+    "sin_cuenta": "sin cuenta contable",
+    "sin_centro_de_costo": "sin centro de costo en una cuenta que lo lleva",
+    "tipos_sin_equivalencia": "de un tipo sin equivalencia en el sistema de destino",
+    "monedas_sin_codigo": "en una moneda que el sistema de destino no admite",
+}
 
 
 # --- conversión entre el estándar y el modelo --------------------------------------
@@ -197,18 +238,34 @@ def generar_asiento(doc: dict, contab: dict | None = None, correlativos: dict | 
     lineas = [ln.a_dict() for ln in neutrales]
     cuadre = partida_doble.cuadra(lineas)
     salida = documento(libro, lineas=lineas)
-    salida["_asiento"] = {"lineas": len(lineas), "sub_diarios": dict(rangos), "cuadre": cuadre.a_dict()}
+    salida["_asiento"] = {"lineas": len(lineas), "sub_diarios": dict(rangos), "cuadre": cuadre.a_dict(),
+                          "huella": asi.huella(neutrales)}
     return salida
 
 
+def _fecha_de(fecha: str | None) -> str | None:
+    """La fecha de una exportación la pone quien llama —el núcleo no mira el reloj— y solo se
+    comprueba que sea una fecha (`AAAA-MM-DD`): es una anotación, no un dato contable."""
+    if fecha in (None, ""):
+        return None
+    try:
+        return date.fromisoformat(str(fecha)).isoformat()
+    except ValueError:
+        raise DocumentoInvalido(f"`fecha` tiene que ser AAAA-MM-DD, no {fecha!r}.") from None
+
+
 def exportar(doc: dict, driver: str = "concar", contab: dict | None = None,
-             correlativos: dict | None = None, incluir_observados: bool = False) -> dict:
+             correlativos: dict | None = None, incluir_observados: bool = False,
+             fecha: str | None = None) -> dict:
     """Genera el archivo que pide un sistema contable.
 
     El resultado trae `texto` cuando la salida es legible (el TXT del SIRE, el CSV) y
     `contenido_base64` cuando son bytes (el Excel de CONCAR). Siempre trae el nombre de archivo
-    que el destino espera.
+    que el destino espera, y `_exportacion`: el driver, el archivo, la **huella** del asiento que
+    salió (solo en los drivers de asientos; `asiento/huella.py`) y la `fecha` si quien llama la dio.
+    Es la anotación con la que un productor reconoce una tanda que ya exportó (`REFERENCIAS.md`).
     """
+    cuando = _fecha_de(fecha)
     libro, comprobantes, conf = _preparar(doc, contab, incluir_observados)
     mod = drivers.obtener(driver)
     params: dict[str, Any] = {}
@@ -222,6 +279,9 @@ def exportar(doc: dict, driver: str = "concar", contab: dict | None = None,
     salida: dict[str, Any] = {
         "driver": driver, "formato": exp.formato, "archivo": exp.nombre,
         "filas": exp.n_filas, "resumen": exp.resumen,
+        "_exportacion": {"driver": driver, "archivo": exp.nombre,
+                         **({"huella": exp.resumen["huella"]} if exp.resumen.get("huella") else {}),
+                         **({"fecha": cuando} if cuando else {})},
     }
     if exp.txt:
         salida["texto"] = exp.txt.decode("utf-8", errors="replace")
@@ -254,6 +314,39 @@ def _detraccion_pendiente(c: Comprobante) -> bool:
     return str(d.get("estado") or "").upper() != "PAGADO" and not str(d.get("nro_constancia") or "").strip()
 
 
+def _que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], faltantes: dict,
+               exige: frozenset[str]) -> list[dict]:
+    """Lo que bloquea la exportación a ESE destino, agrupado por motivo y con a quién pedírselo.
+
+    Un agente redacta «faltan cuentas contables en E001-871 y E001-872», no dos preguntas: por eso va
+    por motivo. Solo lo que bloquea: los errores de la validación y los faltantes que el driver exige.
+    """
+    salida: list[dict] = []
+    por_codigo: dict[str, list[str]] = {}
+    textos: dict[str, str] = {}
+    for c in con_error:
+        for o in c.observaciones:
+            if o.nivel == "error":
+                por_codigo.setdefault(o.codigo, []).append(_serie_numero(c))
+                textos.setdefault(o.codigo, o.texto)
+    for codigo in sorted(por_codigo):
+        salida.append({"motivo": codigo, "texto": textos[codigo], "comprobantes": por_codigo[codigo],
+                       "pedir_a": PEDIR_A.get(codigo, CONTADOR)})
+    for clave, requisito in asi.REQUISITO_DE.items():
+        if requisito not in exige or not faltantes.get(clave):
+            continue
+        if clave == "tipos_sin_equivalencia":
+            cuales = [_serie_numero(c) for c in candidatos if c.tipo_cp in faltantes[clave]]
+            texto = f"{TEXTO_FALTANTE[clave]}: {', '.join(faltantes[clave])}"
+        elif clave == "monedas_sin_codigo":
+            cuales = [_serie_numero(c) for c in candidatos if c.moneda in faltantes[clave]]
+            texto = f"{TEXTO_FALTANTE[clave]}: {', '.join(faltantes[clave])}"
+        else:
+            cuales, texto = list(faltantes[clave]), TEXTO_FALTANTE[clave]
+        salida.append({"motivo": clave, "texto": texto, "comprobantes": cuales, "pedir_a": PEDIR_A[clave]})
+    return salida
+
+
 def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | None = None,
                  driver: str = "concar") -> dict:
     """Todo lo que hay que mirar de un mes ANTES de exportarlo, en una sola respuesta.
@@ -274,6 +367,9 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
     validar.revisar(todos, libro)
     mod = drivers.obtener(driver)
     venta = libro.es_venta
+    # Lo que ESE destino exige (`contrato.exige`): decide qué faltante deja el mes «no listo». El CSV
+    # no exige centro ni moneda con código; CONCAR, los dos; el SIRE, nada de esto.
+    exige = drivers.contrato.exige(mod)
 
     excluidos = [c for c in todos if c.excluida]
     fuera = gen.fuera_de([c for c in todos if not c.excluida], getattr(mod, "EXCLUYE_TIPOS", None))
@@ -307,12 +403,10 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
         por_que_no.append("no hay comprobantes que exportar")
     if con_error:
         por_que_no.append(f"{len(con_error)} comprobantes con observaciones que bloquean")
-    for clave, texto in (("sin_cuenta", "sin cuenta contable"),
-                         ("sin_centro_de_costo", "sin centro de costo en una cuenta que lo lleva"),
-                         ("tipos_sin_equivalencia", "de un tipo sin equivalencia en el sistema de destino"),
-                         ("monedas_sin_codigo", "en una moneda que el sistema de destino no admite")):
-        if faltantes.get(clave):
-            por_que_no.append(f"{len(faltantes[clave])} {texto}")
+    for clave in ("sin_cuenta", "sin_centro_de_costo", "tipos_sin_equivalencia", "monedas_sin_codigo"):
+        # Solo lo que el destino exige deja el mes «no listo»; lo demás sigue en `faltantes`, informando.
+        if faltantes.get(clave) and asi.REQUISITO_DE[clave] in exige:
+            por_que_no.append(f"{len(faltantes[clave])} {TEXTO_FALTANTE[clave]}")
 
     por_contraparte: dict[str, dict] = {}
     for c in candidatos:
@@ -327,8 +421,10 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
     return {
         "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
         "driver": driver,
+        "exige": sorted(exige),
         "listo_para_exportar": not por_que_no,
         "por_que_no": por_que_no,
+        "que_falta": _que_falta(con_error, candidatos, faltantes, exige),
         "totales": {"comprobantes": len(todos), "saldrian": len(candidatos), "excluidos": len(excluidos),
                     "fuera_del_registro": len(fuera), "con_error": len(con_error), "con_aviso": len(con_aviso)},
         "bloqueantes": [{"serie_numero": _serie_numero(c),

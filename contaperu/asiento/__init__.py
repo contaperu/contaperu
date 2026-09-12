@@ -48,12 +48,15 @@ from .datos import (ANCHOS, COLUMNAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS
                     FLAG_CONVERSION, FORMATOS, NOMBRE, NUMERO_DETRACCION_PENDIENTE, OPCIONES,
                     TIPO_BOLETA, TIPO_CONVERSION, TIPO_DOC_DETRACCION, TIPO_HONORARIOS,
                     TIPOS_INVIERTEN, TIPOS_NOTA)
-from .construir import (CorrelativoFaltante, MonedaSinCodigo, SinCuenta, TipoSinMapa,
+from .construir import (REQUISITO_DE, CorrelativoDesborda, CorrelativoFaltante, MonedaSinCodigo,
+                        SinCentro, SinCuenta, TipoSinMapa,
                         asiento, config_de, cuenta_de_fila, cuenta_gasto, cuenta_honorarios,
-                        cuenta_venta, etiquetas_sub_diario, filas_sin_centro, filas_sin_cuenta,
+                        cuenta_venta, etiquetas_sub_diario, exigir_requisitos, faltantes_para,
+                        filas_sin_centro, filas_sin_cuenta,
                         lleva_centro, merge_config, mes_del_libro, monedas_sin_codigo, nombre, numerar,
                         resolve_cxp_account, sub_diario, sub_diarios_presentes,
                         tasa_igv, tiene_detraccion, tipo_concar, tipos_sin_mapa)
+from .huella import huella
 from .lineas import LineaDiario, a_lineas, desde_fila
 from .motor import ROLES, asiento_neutral, glosa_de, lineas_del_libro
 
@@ -63,9 +66,11 @@ __all__ = [
     "FLAG_CONVERSION", "FORMATOS", "NOMBRE", "NUMERO_DETRACCION_PENDIENTE", "OPCIONES",
     "TIPO_BOLETA", "TIPO_CONVERSION", "TIPO_DOC_DETRACCION", "TIPO_HONORARIOS",
     "TIPOS_INVIERTEN", "TIPOS_NOTA",
-    "CorrelativoFaltante", "MonedaSinCodigo", "SinCuenta", "TipoSinMapa",
+    "REQUISITO_DE", "CorrelativoDesborda", "CorrelativoFaltante", "MonedaSinCodigo", "SinCentro",
+    "SinCuenta", "TipoSinMapa",
     "asiento", "config_de", "cuenta_de_fila", "cuenta_gasto", "cuenta_honorarios",
-    "cuenta_venta", "etiquetas_sub_diario", "filas_sin_centro", "filas_sin_cuenta",
+    "cuenta_venta", "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para",
+    "filas_sin_centro", "filas_sin_cuenta", "huella",
     "lleva_centro", "merge_config", "mes_del_libro", "monedas_sin_codigo", "nombre", "numerar",
     "resolve_cxp_account", "sub_diario", "sub_diarios_presentes",
     "tasa_igv", "tiene_detraccion", "tipo_concar", "tipos_sin_mapa",

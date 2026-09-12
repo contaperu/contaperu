@@ -143,6 +143,7 @@ def drivers_disponibles() -> str:
         nombre: {"formatos": mod.FORMATOS,
                  "tipo": "texto" if drivers.contrato.forma(mod) == "linea" else "archivo",
                  "forma": drivers.contrato.forma(mod),
+                 "exige": sorted(drivers.contrato.exige(mod)),
                  "descripcion": (mod.__doc__ or "").strip().splitlines()[0]}
         for nombre, mod in drivers.DRIVERS.items()
     }, ensure_ascii=False, indent=1)
@@ -217,6 +218,11 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
     detracciones esperan todavía su constancia; un resumen por proveedor o cliente; desde qué
     correlativo arrancaría cada sub-diario; y la lista de lo que saldría.
 
+    `exige` dice qué pide ese destino (el CSV no exige centro de costo; CONCAR sí), y `que_falta`
+    agrupa por motivo lo que de verdad bloquea, con **`pedir_a`**: `contador` si se resuelve mirando
+    el documento o el plan de cuentas, `sistema` si es configuración del destino o un dato público
+    que no está en el papel. Úsalo para redactar la pregunta a quien toca, en vez de adivinar.
+
     No corrige nada ni inventa nada: un comprobante sin cuenta se arregla donde se revisa, y aquí
     solo se dice cuál es. Es la herramienta para enseñarle a la persona qué va a salir antes de
     generar un archivo que luego se importa en su sistema contable.
@@ -226,11 +232,14 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
 
 @mcp.tool()
 def exportar(documento: dict, driver: str = "concar", configuracion: dict | None = None,
-             correlativos: dict | None = None, incluir_observados: bool = False) -> CallToolResult:
+             correlativos: dict | None = None, incluir_observados: bool = False,
+             fecha: str = "") -> CallToolResult:
     """Genera el archivo que espera un sistema contable, ya listo para importar.
 
-    Devuelve dos cosas: un resumen en JSON (nombre del archivo, filas, debe y haber) y **el
-    archivo adjunto**, para guardarlo tal cual.
+    Devuelve dos cosas: un resumen en JSON (nombre del archivo, filas, debe y haber, y en
+    `_exportacion` la **huella** del asiento que salió: si vuelves a exportar lo mismo, la huella se
+    repite, y el Excel de CONCAR se SUMA al importarlo dos veces) y **el archivo adjunto**, para
+    guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.
 
     Drivers disponibles (ver el recurso `contaperu://drivers`):
       - `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.
@@ -240,7 +249,8 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
 
     Antes de escribir nada comprueba que el asiento cuadre; si no cuadra, falla.
     """
-    resultado = operaciones.exportar(documento, driver, configuracion, correlativos, incluir_observados)
+    resultado = operaciones.exportar(documento, driver, configuracion, correlativos, incluir_observados,
+                                     fecha=fecha or None)
     # Los bytes salen del resumen y entran en los adjuntos: repetirlos en el JSON seria mandar
     # el archivo dos veces, y la copia en texto es justo la que el cliente no sabe guardar.
     contenido = resultado.pop("contenido_base64", "") or ""

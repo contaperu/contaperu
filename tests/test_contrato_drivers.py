@@ -19,8 +19,11 @@ from contaperu.drivers import contrato
 from contaperu.formato import Opciones
 from util import GOLDEN
 
-# El golden no trae cuenta de gasto (sale del RUC en la vida real): se la pone la configuración.
-CONTAB = {"cuentas": {"gasto": "659999"}}
+# El golden no trae cuenta de gasto (sale del RUC en la vida real): se la pone la configuración. Tampoco
+# trae centros de costo —viene de SUNAT, que no los conoce—, y desde la 0.8 CONCAR exige el centro donde
+# la cuenta lo lleva: este RUC declara que no los usa. Con centros (CONTAB_CON_CENTROS) se niega.
+CONTAB = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
+CONTAB_CON_CENTROS = {"cuentas": {"gasto": "659999"}}
 
 
 def documento_de_compras() -> dict:
@@ -51,6 +54,60 @@ def test_la_forma_de_cada_driver_de_serie():
     assert contrato.forma(drivers.concar) == "construir"
     # El CSV expone las dos de archivo (conserva `construir` por compatibilidad): gana la nueva.
     assert contrato.forma(drivers.csv) == "desde_lineas"
+
+
+def test_lo_que_exige_cada_driver_de_serie():
+    """`exige` = lo del núcleo (cuenta y tipo con equivalencia) más lo que el driver declara."""
+    assert contrato.exige(drivers.concar) == {"cuenta_contable", "tipo_cp", "centro_costo", "moneda"}
+    assert contrato.exige(drivers.csv) == {"cuenta_contable", "tipo_cp"}
+    assert contrato.exige(drivers.sire) == frozenset() and not hasattr(drivers.sire, "EXIGE")
+
+
+def test_un_requisito_fuera_del_catalogo_no_pasa_el_contrato():
+    raro = driver_de_prueba()
+    raro.EXIGE = {"anexo"}
+    assert contrato.incumplimientos(raro) == ["EXIGE solo admite ['centro_costo', 'moneda']; sobra ['anexo']"]
+    texto = driver_de_prueba()
+    texto.EXIGE = "centro_costo"                 # un str también es iterable: no vale
+    assert contrato.incumplimientos(texto) == ["EXIGE es un conjunto de textos"]
+
+
+def test_un_driver_de_texto_no_declara_exige():
+    tributario = types.ModuleType("tributario")
+    tributario.NOMBRE, tributario.FORMATOS, tributario.OPCIONES = "trib", {"venta": "trib"}, Opciones()
+    tributario.nombre = lambda libro, op=None: "x.txt"
+    tributario.linea = lambda c, libro, idx, op=None: ""
+    assert contrato.incumplimientos(tributario) == []
+    tributario.EXIGE = frozenset()
+    assert contrato.incumplimientos(tributario) == [
+        "EXIGE solo lo declara un driver de asientos: un registro tributario no arma asientos"]
+
+
+def test_lo_que_el_driver_exige_lo_hace_cumplir_el_nucleo(con_terceros):
+    """Un driver `desde_lineas` nunca ve los comprobantes: si exige el centro, lo detiene el núcleo."""
+    from contaperu import asiento as asi
+    exigente = driver_de_prueba("exigente")
+    exigente.EXIGE = frozenset({"centro_costo"})
+    con_terceros(_Entrada("exigente", exigente))
+    with pytest.raises(asi.SinCentro):
+        op.exportar(documento_de_compras(), "exigente", CONTAB_CON_CENTROS)
+    assert op.exportar(documento_de_compras(), "exigente", CONTAB)["archivo"].endswith(".txt")
+
+
+def test_el_csv_no_exige_centro_y_concar_si():
+    from contaperu import asiento as asi
+    assert op.exportar(documento_de_compras(), "csv", CONTAB_CON_CENTROS)["archivo"].endswith(".csv")
+    with pytest.raises(asi.SinCentro):
+        op.exportar(documento_de_compras(), "concar", CONTAB_CON_CENTROS)
+
+
+def test_las_claves_del_resumen_son_contrato():
+    """El portal guarda `resumen` tal cual y lee de él los rangos («hasta») y, desde la 0.8, la huella."""
+    r = op.exportar(documento_de_compras(), "concar", CONTAB)["resumen"]
+    assert {"filas_excel", "fechas", "sub_diarios", "debe", "haber", "huella"} <= set(r)
+    assert {"desde", "hasta", "n", "desde_cod", "hasta_cod", "desborda", "etiqueta"} <= set(r["sub_diarios"]["11"])
+    r2 = op.exportar(documento_de_compras(), "csv", CONTAB)["resumen"]
+    assert {"filas", "sub_diarios", "debe", "haber", "huella"} <= set(r2)
 
 
 def test_el_contrato_dice_que_falta():

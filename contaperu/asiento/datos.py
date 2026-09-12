@@ -16,6 +16,11 @@ NOMBRE = "concar"
 OPCIONES = Opciones(fecha="DD/MM/AAAA", extension=".xlsx")
 FORMATOS = {"compra": "concar_xlsx", "venta": "concar_xlsx"}
 CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+# Lo que CONCAR no puede importar sin (contrato de driver, `EXIGE`): el centro de costo en las cuentas
+# que lo llevan en la columna M —el contador, 06-sep-2026: obligatorio donde de verdad se escribe— y
+# una moneda con código en su Tabla General 03 (solo MN y US). Desde el 11-sep-2026 lo hace cumplir el
+# propio driver; hasta entonces solo lo avisaba `diagnosticar` y lo negaba el portal por su cuenta.
+EXIGE = frozenset({"centro_costo", "moneda"})
 
 # La línea de la detracción, calcada del Excel real que CONCAR ACEPTÓ (set-2026): tipo de documento
 # **DR** y el comodín del número —la constancia del depósito no se conoce al provisionar, se paga

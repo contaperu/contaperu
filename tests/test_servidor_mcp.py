@@ -74,6 +74,10 @@ def test_diagnosticar_por_el_protocolo():
     r = llamar("diagnosticar", documento=sin_cuenta)
     assert r["listo_para_exportar"] is False and r["faltantes"]["sin_cuenta"] == ["E001-871"]
     assert r["por_que_no"] == ["1 sin cuenta contable"]
+    # Y a quién pedírselo (0.8.0): la cuenta la pone el contador.
+    assert r["que_falta"] == [{"motivo": "sin_cuenta", "texto": "sin cuenta contable",
+                               "comprobantes": ["E001-871"], "pedir_a": "contador"}]
+    assert r["exige"] == ["centro_costo", "cuenta_contable", "moneda", "tipo_cp"]
 
 
 def test_el_servidor_se_presenta_con_SU_version():

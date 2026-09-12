@@ -84,7 +84,7 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
         except gen.ErroresBloqueantes as e:
             print(f"  {p:<5} NO generado: {e}. Corrige o usa --incluir-errores", file=sys.stderr)
             codigo = 1
-        except (asi.SinCuenta, asi.TipoSinMapa, asi.MonedaSinCodigo) as e:
+        except (asi.SinCuenta, asi.SinCentro, asi.TipoSinMapa, asi.MonedaSinCodigo, asi.CorrelativoDesborda) as e:
             # Lo que le falta al mes para ese destino. `contaperu diagnosticar` lo lista por serie-número.
             print(f"  {p:<5} NO generado: {e}. Revísalo con `contaperu diagnosticar`", file=sys.stderr)
             codigo = 1
@@ -175,6 +175,10 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
             _lista(titulo, d["faltantes"][clave])
     if d["detracciones_pendientes"]:
         _lista("Detracciones pendientes de constancia", [p["serie_numero"] for p in d["detracciones_pendientes"]])
+    if d.get("que_falta"):
+        quien = {"contador": "Pedir al contador", "sistema": "Ajustar en el sistema", "proveedor": "Pedir al proveedor"}
+        for q in d["que_falta"]:
+            print(f"  -> {quien.get(q['pedir_a'], q['pedir_a'])}: {q['texto']} ({', '.join(q['comprobantes'])})")
     for s, r in d["sub_diarios"].items():
         print(f"  Sub-diario {s} ({r['etiqueta']}): {r['comprobantes']} comprobantes desde el {r['empieza_en']}")
     print()

@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from . import drivers, partida_doble
+from .asiento.construir import exigir_requisitos
+from .asiento.huella import huella
 from .asiento.motor import lineas_del_libro
 from .drivers import contrato
 from .modelo import Comprobante, Libro
@@ -110,11 +112,14 @@ def _desde_lineas(mod, libro: Libro, comprobantes: list[Comprobante], op: Opcion
     para todos los ERP, y un driver nuevo no puede equivocarse en una cuenta ni en un sentido."""
     if contab is None or correlativos is None:
         raise ValueError(f"El driver {mod.NOMBRE!r} arma asientos: necesita `contab` y `correlativos`")
+    # Lo que ese destino exige (`contrato.exige`: lo del núcleo más su EXIGE) se comprueba ANTES de
+    # armar nada: un driver `desde_lineas` nunca ve los comprobantes, así que solo el núcleo puede.
+    exigir_requisitos(comprobantes, contab, libro.es_venta, contrato.exige(mod))
     lineas, rangos = lineas_del_libro(libro, comprobantes, contab, correlativos, op)
     cuadre = partida_doble.exigir(lineas)
     contenido, extra = mod.desde_lineas(libro, lineas, contab, op)
     return contenido, {"filas": len(lineas), "sub_diarios": dict(rangos),
-                       "debe": str(cuadre.debe), "haber": str(cuadre.haber), **extra}
+                       "debe": str(cuadre.debe), "haber": str(cuadre.haber), "huella": huella(lineas), **extra}
 
 
 def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_DEFAULT,
