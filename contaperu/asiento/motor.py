@@ -26,8 +26,9 @@ from ..detracciones import tasa as tasa_detraccion
 from ..formato import Opciones, fmt_numero
 from ..igv import base_imputable, igv_del_asiento, tasa as tasa_de_importes
 from ..modelo import Comprobante, Libro
-from .construir import (SinCuenta, _mapa, cuenta_de_fila, cuenta_tercero, lleva_centro, mes_del_libro,
-                        numerar, resolve_cxp_detraccion_account, sub_diario, tiene_detraccion, tipo_concar)
+from .construir import (RepartoNoCuadra, SinCuenta, _mapa, cuenta_tercero, lleva_centro, mes_del_libro, numerar,
+                        partes_de, reparto_no_cuadra, resolve_cxp_detraccion_account, sub_diario,
+                        tiene_detraccion, tipo_concar)
 from .datos import (D2, DEFAULTS, NUMERO_DETRACCION_PENDIENTE, OPCIONES, TIPO_DOC_DETRACCION,
                     TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA)
 from .lineas import LineaDiario
@@ -75,19 +76,21 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
     """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
     del manual de asientos."""
     moneda = (c.moneda or "PEN").upper()
-    # La base va a la cuenta y el centro de la fila o, si el contador la repartió (`imputaciones`,
-    # 12-sep-2026), a una línea por parte. Una parte sin cuenta detiene el asiento igual que una fila sin ella.
-    partes = ([(i.cuenta_contable, i.centro_costo, i.importe) for i in c.imputaciones] if c.imputaciones
-              else [(cuenta_de_fila(c, contab, venta), c.centro_costo, None)])
+    # A qué cuentas va la base: lo decide la imputación del documento, que llega aparte (una línea por parte si
+    # trae reparto), o lo de siempre (`partes_de`). Una parte sin cuenta detiene el asiento igual que una fila sin
+    # ella, y un reparto que no suma la base también: ese asiento no cuadraría.
+    partes = partes_de(c, contab, venta)
     if not all(cuenta for cuenta, _, _ in partes):
         raise SinCuenta([c])
+    if reparto_no_cuadra(c, contab, venta):
+        raise RepartoNoCuadra([c])
     es_usd = moneda == "USD"
     es_honorarios = not venta and c.tipo_cp == TIPO_HONORARIOS
     invierte = c.tipo_cp in TIPOS_INVIERTEN
     total = Decimal(c.total or 0).quantize(D2)
     # Compras: boleta y recibo por honorarios no dan crédito fiscal → todo al gasto, sin línea de IGV. En
     # VENTAS la boleta emitida SÍ lleva su IGV (débito fiscal del emisor). La regla vive en `igv.py`: la
-    # validación la necesita igual para comprobar que un reparto cuadra con la base.
+    # comprobación de que un reparto cuadra con la base la necesita igual.
     igv = igv_del_asiento(c, venta)
     base = base_imputable(c, venta)
     ruc = (c.contraparte_doc or "").strip()

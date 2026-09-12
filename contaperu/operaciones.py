@@ -48,7 +48,7 @@ CONTADOR, SISTEMA, PROVEEDOR = "contador", "sistema", "proveedor"
 # `tests/test_diagnosticar.py` recorre `validar.py` y comprueba que ningún código se quede fuera.
 PEDIR_A: dict[str, str] = {
     # lo que falta para el destino (claves de `faltantes`)
-    "sin_cuenta": CONTADOR, "sin_centro_de_costo": CONTADOR,
+    "sin_cuenta": CONTADOR, "reparto_no_cuadra": CONTADOR, "sin_centro_de_costo": CONTADOR,
     "tipos_sin_equivalencia": SISTEMA, "monedas_sin_codigo": SISTEMA, "sub_diarios_sin_correlativo": SISTEMA,
     # errores de la validación
     "ANIO_DUA_FALTA": CONTADOR, "CONTRAPARTE_FALTA": CONTADOR, "DNI_INVALIDO": CONTADOR,
@@ -57,7 +57,6 @@ PEDIR_A: dict[str, str] = {
     "MONEDA_INVALIDA": CONTADOR, "NOTA_SIN_FECHA_REF": CONTADOR, "NOTA_SIN_REFERENCIA": CONTADOR,
     "NUMERO_FALTA": CONTADOR, "RETENCION_MAYOR": CONTADOR, "RUC_INVALIDO": CONTADOR, "SERIE_FALTA": CONTADOR,
     "TC_FALTA": SISTEMA, "TOTAL_NO_CUADRA": CONTADOR, "VENCIMIENTO_FALTA": CONTADOR,
-    "IMPUTACIONES_NO_CUADRAN": CONTADOR, "IMPUTACIONES_Y_CUENTA": CONTADOR,
     "XML_DE_OTRO_RUC": CONTADOR, "XML_PARA_OTRO_RUC": CONTADOR,
     # avisos (no bloquean; están para que la tabla sea completa)
     "ADQUIRENTE_NO_COINCIDE": CONTADOR, "ANTICIPO": CONTADOR, "BOLETA_SIN_DOC": CONTADOR,
@@ -69,6 +68,7 @@ PEDIR_A: dict[str, str] = {
 
 TEXTO_FALTANTE = {
     "sin_cuenta": "sin cuenta contable",
+    "reparto_no_cuadra": "con un reparto entre cuentas que no suma la base del asiento",
     "sin_centro_de_costo": "sin centro de costo en una cuenta que lo lleva",
     "tipos_sin_equivalencia": "de un tipo sin equivalencia en el sistema de destino",
     "monedas_sin_codigo": "en una moneda que el sistema de destino no admite",
@@ -133,6 +133,29 @@ def configuracion(contab: dict | None = None) -> dict:
         return asi.config_de(None)
     encima = contab.get("concar") if "concar" in contab else contab
     return asi.merge_config(asi.config_de(None), encima or {})
+
+
+def _con_imputacion(conf: dict, imputacion: dict | None, comprobantes: list[Comprobante]) -> dict:
+    """La imputación de cada documento llega APARTE del documento, por `id_externo` (John, 12-sep-2026: las
+    cuentas viven en la aplicación, no en el riel). Se lee aquí, en la puerta, para que un error de forma se diga
+    con su motivo, y se le entrega al núcleo dentro de la configuración, que es lo que ya recibe todo el asiento.
+
+    Una imputación cuyo `id_externo` no es de ningún documento se rechaza: una llave mal escrita haría salir ese
+    documento con la cuenta por defecto, sin error y sin aviso."""
+    if not imputacion:
+        return conf
+    if not isinstance(imputacion, dict):
+        raise DocumentoInvalido("`imputacion` es un objeto: {id_externo: {cuenta_contable, centro_costo, "
+                                "cuenta_tercero, reparto}}.")
+    try:
+        leida = {str(k): asi.Imputacion.de(v) for k, v in imputacion.items()}
+    except ValueError as e:
+        raise DocumentoInvalido(f"Una imputación no se pudo leer: {e}") from None
+    huerfanas = sorted(set(leida) - {(c.id_externo or "").strip() for c in comprobantes})
+    if huerfanas:
+        raise DocumentoInvalido("La imputación habla de documentos que no están (id_externo): "
+                                + ", ".join(huerfanas) + ".")
+    return {**conf, "imputaciones": leida}
 
 
 # --- lectura -----------------------------------------------------------------------
@@ -211,12 +234,13 @@ def cuadrar(lineas: list[dict]) -> dict:
 
 # --- asiento y exportación ---------------------------------------------------------
 
-def _preparar(doc: dict, contab: dict | None, incluir_observados: bool):
+def _preparar(doc: dict, contab: dict | None, incluir_observados: bool, imputacion: dict | None = None):
     libro = libro_de(doc)
-    comprobantes = [c for c in comprobantes_de(doc) if not c.excluida]
+    todos = comprobantes_de(doc)
+    comprobantes = [c for c in todos if not c.excluida]
     if not comprobantes:
         raise DocumentoInvalido("No hay comprobantes que procesar.")
-    conf = configuracion(contab)
+    conf = _con_imputacion(configuracion(contab), imputacion, todos)
     validar.revisar(comprobantes, libro)
     if not incluir_observados:
         con_error = [c for c in comprobantes if c.tiene_errores]
@@ -228,9 +252,9 @@ def _preparar(doc: dict, contab: dict | None, incluir_observados: bool):
 
 
 def generar_asiento(doc: dict, contab: dict | None = None, correlativos: dict | None = None,
-                    incluir_observados: bool = False) -> dict:
+                    incluir_observados: bool = False, imputacion: dict | None = None) -> dict:
     """Comprobantes -> líneas de diario del estándar, sin formato de ningún ERP."""
-    libro, comprobantes, conf = _preparar(doc, contab, incluir_observados)
+    libro, comprobantes, conf = _preparar(doc, contab, incluir_observados, imputacion)
     venta = libro.es_venta
     corr = {s: 1 for s in asi.sub_diarios_presentes(comprobantes, conf, venta)}
     corr.update(correlativos or {})
@@ -257,7 +281,7 @@ def _fecha_de(fecha: str | None) -> str | None:
 
 def exportar(doc: dict, driver: str = "concar", contab: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False,
-             fecha: str | None = None) -> dict:
+             fecha: str | None = None, imputacion: dict | None = None) -> dict:
     """Genera el archivo que pide un sistema contable.
 
     El resultado trae `texto` cuando la salida es legible (el TXT del SIRE, el CSV) y
@@ -267,7 +291,7 @@ def exportar(doc: dict, driver: str = "concar", contab: dict | None = None,
     Es la anotación con la que un productor reconoce una tanda que ya exportó (`REFERENCIAS.md`).
     """
     cuando = _fecha_de(fecha)
-    libro, comprobantes, conf = _preparar(doc, contab, incluir_observados)
+    libro, comprobantes, conf = _preparar(doc, contab, incluir_observados, imputacion)
     mod = drivers.obtener(driver)
     params: dict[str, Any] = {}
     if drivers.contrato.necesita_asiento(mod):
@@ -349,7 +373,7 @@ def _que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falt
 
 
 def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | None = None,
-                 driver: str = "concar") -> dict:
+                 driver: str = "concar", imputacion: dict | None = None) -> dict:
     """Todo lo que hay que mirar de un mes ANTES de exportarlo, en una sola respuesta.
 
     Es la operación pensada para un agente —o para una persona con prisa—: en vez de lanzar la
@@ -363,7 +387,7 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
     """
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
-    conf = configuracion(contab)
+    conf = _con_imputacion(configuracion(contab), imputacion, todos)
     detracciones.normalizar(todos, conf)
     validar.revisar(todos, libro)
     mod = drivers.obtener(driver)
@@ -390,6 +414,7 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
         corr.update(correlativos or {})
         faltantes = {
             "sin_cuenta": [_serie_numero(c) for c in asi.filas_sin_cuenta(candidatos, conf, venta)],
+            "reparto_no_cuadra": [_serie_numero(c) for c in asi.repartos_que_no_cuadran(candidatos, conf, venta)],
             "sin_centro_de_costo": [_serie_numero(c) for c in asi.filas_sin_centro(candidatos, conf, venta)],
             "tipos_sin_equivalencia": sin_mapa,
             "monedas_sin_codigo": asi.monedas_sin_codigo(candidatos, conf),
@@ -404,7 +429,8 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
         por_que_no.append("no hay comprobantes que exportar")
     if con_error:
         por_que_no.append(f"{len(con_error)} comprobantes con observaciones que bloquean")
-    for clave in ("sin_cuenta", "sin_centro_de_costo", "tipos_sin_equivalencia", "monedas_sin_codigo"):
+    for clave in ("sin_cuenta", "reparto_no_cuadra", "sin_centro_de_costo", "tipos_sin_equivalencia",
+                  "monedas_sin_codigo"):
         # Solo lo que el destino exige deja el mes «no listo»; lo demás sigue en `faltantes`, informando.
         if faltantes.get(clave) and asi.REQUISITO_DE[clave] in exige:
             por_que_no.append(f"{len(faltantes[clave])} {TEXTO_FALTANTE[clave]}")

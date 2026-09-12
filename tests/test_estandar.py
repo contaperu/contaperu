@@ -14,7 +14,7 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from contaperu import PE_LEDGER
-from contaperu.modelo import Comprobante, Imputacion, Libro
+from contaperu.modelo import Comprobante, Libro
 
 from util import GOLDEN
 
@@ -49,7 +49,7 @@ def test_el_esquema_es_valido(validador):
 
 def test_el_esquema_cubre_el_modelo_entero(esquema):
     """Uno a uno con las dataclasses: ni un campo de más ni uno de menos."""
-    for nombre, cls in (("comprobante", Comprobante), ("imputacion", Imputacion), ("libro", Libro)):
+    for nombre, cls in (("comprobante", Comprobante), ("libro", Libro)):
         del_modelo = {f.name for f in fields(cls)}
         del_esquema = set(esquema["$defs"][nombre]["properties"])
         assert del_modelo == del_esquema, (
@@ -71,8 +71,7 @@ def test_lo_que_produce_el_modelo_valida(validador):
                     contraparte_doc="20601111111", contraparte_nombre="PROVEEDOR DE PRUEBA SAC",
                     base_gravada="100", igv="18", total="118",
                     detraccion={"codigo": "027", "porcentaje": 4},
-                    condicion_pago="credito", cuenta_tercero="469901",
-                    imputaciones=[{"importe": "100", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"}])
+                    condicion_pago="credito", id_externo="fila-123")
     doc = documento(comprobantes=[c.a_dict()])
     assert list(validador.iter_errors(doc)) == []
 
@@ -94,8 +93,6 @@ def test_se_rechaza_lo_que_no_es_del_estandar(validador):
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "-5"}]),
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "1",
                                  "condicion_pago": "a 30 dias"}]),                      # ni contado ni credito
-        documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "1",
-                                 "imputaciones": [{"importe": "1"}]}]),                  # una parte sin cuenta
     ]
     for doc in malos:
         assert list(validador.iter_errors(doc)), doc
@@ -118,3 +115,12 @@ def test_la_condicion_de_pago_se_normaliza_y_lo_demas_se_rechaza():
     assert Comprobante().condicion_pago == ""
     with pytest.raises(ValueError, match="condicion_pago"):
         Comprobante(condicion_pago="a 30 dias")
+
+
+def test_las_decisiones_contables_no_son_del_documento(esquema):
+    """Las cuentas viven en la aplicación y llegan aparte, en la imputación (John, 12-sep-2026): que el
+    comprobante no vuelva a crecer con ellas. Los dos campos que ya tenía quedan marcados como legado."""
+    propiedades = esquema["$defs"]["comprobante"]["properties"]
+    assert not {"cuenta_tercero", "imputaciones", "imputacion", "reparto"} & set(propiedades)
+    for legado in ("cuenta_contable", "centro_costo"):
+        assert propiedades[legado]["description"].startswith("LEGADO"), legado

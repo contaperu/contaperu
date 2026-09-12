@@ -134,55 +134,79 @@ def test_un_xml_suelto_en_base64_se_lee(tmp_path):
     assert doc["comprobantes"] == op.leer_xml(xml.decode("utf-8"), libro)["comprobantes"]
 
 
-def test_los_campos_del_registro_viajan_intactos():
-    """`condicion_pago` y `cuenta_tercero` entran y salen por cada operación sin que nadie los pierda, y la
-    cuenta del registro manda en el asiento: la línea del proveedor lleva la que escribió el contador."""
+
+def test_la_condicion_de_pago_y_el_id_externo_viajan_en_el_documento():
+    """Son hechos del documento: entran y salen por cada operación sin que nadie los pierda."""
     from util import XML
 
-    base = {"tipo_cp": "01", "serie": "F001", "numero": "7", "fecha_emision": "2026-01-10",
-            "contraparte_doc": "20602222226", "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
-            "base_gravada": "100", "igv": "18", "total": "118", "cuenta_contable": "659999"}
-    doc = {"libro": LIBRO, "comprobantes": [dict(base, condicion_pago="credito", cuenta_tercero="469901")]}
-
+    doc = {"libro": LIBRO, "comprobantes": [dict(BASE, condicion_pago="credito", id_externo="fila-7")]}
     revisado = op.revisar(doc)["comprobantes"][0]
-    assert (revisado["condicion_pago"], revisado["cuenta_tercero"]) == ("credito", "469901")
-
-    def cuentas_del_tercero(documento):
-        return [ln["cuenta"] for ln in op.generar_asiento(documento)["asiento"] if ln["rol"] == "tercero"]
-
-    assert cuentas_del_tercero(doc) == ["469901"]
-    # Vacía: la de la configuración por moneda, exactamente como antes de que existiera el campo.
-    assert cuentas_del_tercero({"libro": LIBRO, "comprobantes": [base]}) == ["421201"]
-
-    assert "469901" in op.exportar(doc, "csv")["texto"]
+    assert (revisado["condicion_pago"], revisado["id_externo"]) == ("credito", "fila-7")
 
     ventas = {"ruc": "20131312955", "razon_social": "EMISOR DE PRUEBA S.A.C.", "periodo": "202601", "tipo": "venta"}
     xml = base64.b64encode((XML / "20131312955-01-F001-123.xml").read_bytes()).decode()
     assert op.leer_xml(xml, ventas, es_base64=True)["comprobantes"][0]["condicion_pago"] == "credito"
 
 
-def test_un_reparto_entre_cuentas_da_una_linea_por_parte():
-    """`imputaciones` reparte la base: el asiento lleva una línea de gasto por parte, y el IGV y el proveedor no
-    cambian. A una parte sin cuenta le falta la cuenta igual que a una fila entera (12-sep-2026)."""
+BASE = {"tipo_cp": "01", "serie": "F001", "numero": "8", "fecha_emision": "2026-01-10",
+        "contraparte_doc": "20602222226", "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+        "base_gravada": "100", "igv": "18", "total": "118", "id_externo": "fila-8"}
+
+
+def _del_rol(asiento: dict, *roles: str) -> list[tuple[str, str]]:
+    return [(ln["cuenta"], ln["importe"]) for ln in asiento["asiento"] if ln["rol"] in roles]
+
+
+def test_la_imputacion_llega_aparte_y_manda_sobre_el_legado():
+    """Las cuentas viven en la aplicación (John, 12-sep-2026): llegan aparte, por `id_externo`, y cada campo manda
+    sobre su gemelo de legado del comprobante. Sin imputación, todo sale como siempre, y el documento no se toca."""
+    doc = {"libro": LIBRO, "comprobantes": [dict(BASE, cuenta_contable="659999")]}
+    assert _del_rol(op.generar_asiento(doc), "principal", "tercero") == [("659999", "100.00"), ("421201", "118.00")]
+
+    imputacion = {"fila-8": {"cuenta_contable": "637301", "cuenta_tercero": "469901"}}
+    assert _del_rol(op.generar_asiento(doc, imputacion=imputacion), "principal", "tercero") == [
+        ("637301", "100.00"), ("469901", "118.00")]
+    # Solo la cuenta del total: la de la base sigue siendo la de legado.
+    solo_total = {"fila-8": {"cuenta_tercero": "469901"}}
+    assert _del_rol(op.generar_asiento(doc, imputacion=solo_total), "principal") == [("659999", "100.00")]
+
+    assert "469901" in op.exportar(doc, "csv", imputacion=imputacion)["texto"]
+    assert "cuenta_tercero" not in op.revisar(doc)["comprobantes"][0]
+
+
+def test_el_reparto_da_una_linea_por_parte_y_tiene_que_cuadrar():
+    """El reparto divide la base: una línea de gasto por parte, con el IGV y el proveedor intactos. Si no suma la
+    base del asiento, `diagnosticar` lo dice y exportar se niega; a una parte sin cuenta le falta la cuenta."""
     from decimal import Decimal
 
-    base = {"tipo_cp": "01", "serie": "F001", "numero": "8", "fecha_emision": "2026-01-10",
-            "contraparte_doc": "20602222226", "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
-            "base_gravada": "100", "igv": "18", "total": "118"}
+    from contaperu.asiento import RepartoNoCuadra
+
+    doc = {"libro": LIBRO, "comprobantes": [BASE]}
     reparto = [{"importe": "60", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
                {"importe": "40", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]
-    doc = {"libro": LIBRO, "comprobantes": [dict(base, imputaciones=reparto)]}
-
-    assert op.revisar(doc)["comprobantes"][0]["imputaciones"] == [
-        dict(reparto[0], importe="60.00"), dict(reparto[1], importe="40.00")]
-
-    lineas = op.generar_asiento(doc)["asiento"]
-    assert [(ln["cuenta"], ln["importe"]) for ln in lineas if ln["rol"] == "principal"] == [
-        ("636301", "60.00"), ("632201", "40.00")]
-    assert [ln["importe"] for ln in lineas if ln["rol"] in ("igv", "tercero")] == ["18.00", "118.00"]
+    asiento = op.generar_asiento(doc, imputacion={"fila-8": {"reparto": reparto}})
+    assert _del_rol(asiento, "principal") == [("636301", "60.00"), ("632201", "40.00")]
+    assert [importe for _, importe in _del_rol(asiento, "igv", "tercero")] == ["18.00", "118.00"]
+    lineas = asiento["asiento"]
     assert (sum(Decimal(ln["importe"]) for ln in lineas if ln["debe_haber"] == "D")
             == sum(Decimal(ln["importe"]) for ln in lineas if ln["debe_haber"] == "H"))
 
-    sin_cuenta = {"libro": LIBRO, "comprobantes": [
-        dict(base, imputaciones=[dict(reparto[0], cuenta_contable=""), reparto[1]])]}
-    assert len(op.diagnosticar(sin_cuenta, driver="csv")["faltantes"]["sin_cuenta"]) == 1
+    corto = {"fila-8": {"reparto": reparto[:1]}}
+    d = op.diagnosticar(doc, driver="csv", imputacion=corto)
+    assert len(d["faltantes"]["reparto_no_cuadra"]) == 1 and d["listo_para_exportar"] is False
+    with pytest.raises(RepartoNoCuadra):
+        op.exportar(doc, "csv", imputacion=corto)
+
+    sin_cuenta = {"fila-8": {"reparto": [dict(reparto[0], cuenta_contable=""), reparto[1]]}}
+    assert len(op.diagnosticar(doc, driver="csv", imputacion=sin_cuenta)["faltantes"]["sin_cuenta"]) == 1
+
+
+def test_una_imputacion_ambigua_o_de_otro_documento_se_rechaza_en_la_puerta():
+    """Un reparto con cuenta al lado no dice cuál manda; una llave que no es de ningún documento haría salir ese
+    documento con la cuenta por defecto sin avisar. Las dos se rechazan antes de armar nada."""
+    doc = {"libro": LIBRO, "comprobantes": [BASE]}
+    ambigua = {"fila-8": {"reparto": [{"importe": "100", "cuenta_contable": "636301"}], "cuenta_contable": "659999"}}
+    with pytest.raises(op.DocumentoInvalido, match="reparto"):
+        op.generar_asiento(doc, imputacion=ambigua)
+    with pytest.raises(op.DocumentoInvalido, match="fila-9"):
+        op.generar_asiento(doc, imputacion={"fila-9": {"cuenta_contable": "659999"}})

@@ -41,10 +41,11 @@ python -m contaperu.cli validar mi-documento.json
 **`libro`** — la cabecera tributaria. Un RUC, un mes (`AAAAMM`), y `venta` o `compra`. Es obligatoria: sin
 saber de quién y de cuándo es, un comprobante suelto no es contabilidad.
 
-**`comprobantes`** — los **registros**: cada documento soporte con los campos tal como los define SUNAT, más
-la imputación contable que el contador decide para ese documento (la cuenta de la base, la del total, el
-centro de costo). Es lo que sale de un XML UBL, de la propuesta del SIRE o de leer un PDF. Con este bloque
-basta: un sistema que importa registros sale de él directamente, y a uno que importa asientos se le genera.
+**`comprobantes`** — los **registros**: los hechos de cada documento soporte, con los campos tal como los
+define SUNAT. Es lo que sale de un XML UBL, de la propuesta del SIRE, de leer un PDF o del archivo de otro
+sistema: el documento es el riel, y es el mismo para cualquier entorno. **Las cuentas no van aquí**: llegan
+aparte, en la imputación (ver *Documento, imputación y configuración*). Con este bloque basta para un sistema que
+importa registros, y para generar el asiento de uno que importa asientos.
 
 **`asiento`** — las líneas de diario, **sin nada de ningún ERP**: cuenta, debe o haber, importe, moneda,
 glosa, centro de costo. Es el bloque que permite que un sistema contable consuma el resultado sin saber qué
@@ -52,21 +53,38 @@ lo generó. Es opcional: quien ya lo tiene armado lo manda, quien no, lo pide.
 
 ---
 
-## Dónde va cada dato
+## Documento, imputación y configuración
 
-El registro, la configuración del contribuyente y el driver de salida nunca guardan lo mismo: cada dato
-tiene un solo dueño.
+**Las cuentas contables viven en la aplicación, no en el documento** (decisión de John, 12-sep-2026). El motor
+recibe tres piezas, y cada dato tiene un solo dueño:
 
-| Si el dato… | Va en | Ejemplo |
-|---|---|---|
-| Está impreso en el documento o en su XML | **el registro** | fecha, serie, importes, `condicion_pago` |
-| Lo decide el contador para ESE documento | **el registro**, opcional; si falta, la configuración | `cuenta_contable` o, si la base se reparte, `imputaciones`; `cuenta_tercero` cuando no es la de siempre |
-| Es igual para todo el contribuyente | **la configuración** (fuera del documento) | la cuenta por pagar en soles, la del IGV, las siglas de CONCAR |
-| Se calcula con lo anterior | **nadie lo guarda**: lo deriva el driver | el signo de la nota de crédito, los soles de una factura en dólares, el % de IGV, el correlativo |
+| Pieza | Qué lleva | Quién la pone | ¿Cambia por entorno? |
+|---|---|---|---|
+| **Documento** (`pe-ledger`) | Los hechos del comprobante: fechas, serie, contraparte, importes, `condicion_pago`… | Los lectores, desde cualquier input | No |
+| **Imputación** | Lo que el entorno decide para cada documento: su cuenta, su centro de costo, la cuenta del total y el reparto | La aplicación, desde la Revisión | Sí |
+| **Configuración** | Lo que vale para todo el entorno: cuentas por defecto, sub-diarios, siglas del destino | La aplicación | Sí |
 
-**Las cuentas se resuelven una sola vez, en el núcleo** (`asiento.cuenta_de_fila` y `asiento.cuenta_tercero`),
-para todos los drivers. Si un registro manda su total a la `4699`, esa cuenta sale igual en el asiento de
-CONCAR y en la columna de un sistema que importa registros. Ningún driver elige una cuenta.
+Lo que se calcula con esas tres —el signo de la nota de crédito, los soles de una factura en dólares, el % de
+IGV, el correlativo— **no lo guarda nadie**: lo deriva el driver.
+
+**La imputación llega dentro de la configuración, bajo `imputaciones`, con el `id_externo` del comprobante como
+llave**; desde la fachada, es el argumento `imputacion` de `exportar`, `diagnosticar` y `generar_asiento`:
+
+    {"fila-123": {"cuenta_contable": "6011020", "centro_costo": "OBRA01", "cuenta_tercero": "4699",
+                  "reparto": [{"importe": "60.00", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
+                              {"importe": "40.00", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]}}
+
+- **Campo a campo:** cada campo de la imputación manda sobre su gemelo de legado del comprobante
+  (`cuenta_contable`, `centro_costo`); lo que no trae sale de lo de siempre y, detrás, de la configuración.
+- **El reparto divide solo la base** —el gasto o el ingreso—: el IGV y el total son del documento. Sus partes
+  suman la base del asiento: el total menos el IGV con línea propia (en compras, la boleta y el recibo por
+  honorarios van enteros). Si no, el mes no está listo (`reparto_no_cuadra`) y el asiento no se arma.
+- **Se rechazan en la puerta** un reparto con cuenta o centro al lado, que no dice cuál manda, y una imputación
+  cuyo `id_externo` no es de ningún documento: una llave mal escrita haría salir ese documento con la cuenta por
+  defecto, sin aviso.
+- **Las cuentas se resuelven una sola vez, en el núcleo** (`asiento.partes_de`, `asiento.cuenta_tercero`), para
+  todos los drivers: la que decide la imputación sale igual en el asiento de CONCAR y en la columna de un sistema
+  que importa registros.
 
 ## Dos familias de salida, un solo documento
 
@@ -160,8 +178,8 @@ consumidor de la 0.2 que no los conozca los ignora.
 | `retencion` | Es la **retención de renta de 4ta** que muestra un recibo por honorarios. **No** es la retención del IGV del 3 %, que no entra en ningún asiento y que las IAs confunden constantemente con una detracción. |
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
 | `condicion_pago` | `contado` o `credito`: lo que **declara** el documento. En la factura electrónica viene en `PaymentTerms FormaPago`, y una factura con cuotas es a crédito. Vacío no significa contado: significa que el documento no lo dice. |
-| `cuenta_tercero` | Vacía en casi todos los registros: la cuenta del proveedor o del cliente sale de la configuración, por moneda. Solo se escribe cuando ESE documento va a otra (un gasto de representación a la `4699`), y entonces manda en todos los drivers. |
-| `imputaciones` | El reparto de la **base** —el gasto o el ingreso— entre varias cuentas o centros, una parte por cuenta con su importe. **Solo la base**: el IGV y el total son del documento, y la cuenta del IGV y la del proveedor, de la configuración. Con reparto, `cuenta_contable` y `centro_costo` de la raíz van vacíos, y las partes suman la base del asiento: el total menos el IGV con línea propia (en compras, la boleta y el recibo por honorarios van enteros). Cada parte da una línea de gasto o ingreso en el asiento y una fila en un sistema que importa registros. |
+| `id_externo` | El id con el que la aplicación que produce el documento conoce ese comprobante (su fila). Es la llave de su imputación: sin él, al documento no le llega ninguna. |
+| `cuenta_contable`, `centro_costo` | **Legado.** No son hechos del documento: son decisiones de cada entorno y llegan en la imputación, que manda sobre ellos. Se aceptan mientras la aplicación no la pase, y salen en la `0.3`. |
 | `tipo_cambio` | El que **publica SUNAT para la fecha de emisión**, con 3 decimales. No el del día del pago. |
 | `serie` | Vacía en los comprobantes que no la llevan (recibo de servicios públicos, tipo `14`). Que esté vacía no es un error. |
 | `contraparte_doc` | Puede ir vacío en boletas a consumidor final. |
@@ -188,10 +206,11 @@ siempre netos y `dscto_base`/`dscto_igv` dejan de restarse del total. En `0.1` e
 base bruta, pero el XML de SUNAT da la base ya neta, así que una nota de crédito de descuento global salía
 contada dos veces. Un documento `0.1` sin descuentos significa exactamente lo mismo en `0.2`.
 
-**Dentro de la `0.2`** (12-sep-2026) entran tres campos opcionales del comprobante, `condicion_pago`,
-`cuenta_tercero` e `imputaciones`, para que un sistema que importa registros salga del documento sin datos de
-fuera y para que una factura pueda repartirse entre varias cuentas. No cambian el significado de nada: un
-documento sin ellos se exporta exactamente igual que antes.
+**Dentro de la `0.2`** (12-sep-2026) entran dos campos opcionales del comprobante, `condicion_pago` e
+`id_externo`, y **`cuenta_contable` y `centro_costo` pasan a legado**: se siguen aceptando, pero la imputación
+—que llega aparte— manda sobre ellos. Nada cambia de significado: un documento sin imputación se exporta
+exactamente igual que antes. Quitarlos del comprobante sí cambiaría la forma del estándar, y por eso salen en la
+`0.3`.
 
 ---
 
@@ -220,7 +239,7 @@ que el motor transporta sin interpretar:
 
 | Dónde | Nombre | Qué será |
 |---|---|---|
-| comprobante, línea | `id_externo` | El id con el que el sistema de origen o de destino conoce ese comprobante o asiento (Merge `remote_id`, Rutter `platform_id`) |
+| línea | `id_externo` | El id con el que el sistema de destino conoce ese asiento (Merge `remote_id`, Rutter `platform_id`). En el comprobante ya entró (12-sep-2026): es la llave de la imputación |
 | comprobante, línea | `dimensiones` | `[{tipo, codigo}]`: área, proyecto, obra… más allá del `centro_costo`, que sigue siendo la primera (Xero `Tracking[]`) |
 | línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: `estado` ya existe en el comprobante (`ok \| observada \| duplicada`) y en la detracción (`PROVISIONADO \| PAGADO`) con otro sentido |
 
@@ -237,8 +256,8 @@ Y cuatro que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso re
 | comprobante | `no_domiciliado` | El número del comprobante que emite un sujeto no domiciliado |
 
 El segundo centro de costo y el código de presupuesto de CONTASIS irían en `dimensiones`, el nombre ya
-reservado de la tabla de arriba, y con la base repartida, en cada parte. El CONTASIS de John no los usa
-(12-sep-2026), así que sigue reservado.
+reservado de la tabla de arriba, y como son decisiones de cada entorno, en la imputación y no en el documento.
+El CONTASIS de John no los usa (12-sep-2026), así que sigue reservado.
 
 ---
 

@@ -131,28 +131,6 @@ class Observacion:
 
 
 @dataclass
-class Imputacion:
-    """Una parte de la base de un comprobante, con su cuenta y su centro de costo (12-sep-2026).
-
-    Reparte SOLO la base —el gasto en compras, el ingreso en ventas—: el IGV y el total son del documento, y
-    la cuenta del IGV y la del proveedor salen de la configuración. Las partes suman la base del asiento
-    (`igv.base_imputable`), y lo comprueba `validar`."""
-
-    importe: Decimal = CERO
-    cuenta_contable: str = ""
-    centro_costo: str = ""
-
-    def __post_init__(self) -> None:
-        self.importe = monto(self.importe)
-        self.cuenta_contable = " ".join(str(self.cuenta_contable or "").split())
-        self.centro_costo = " ".join(str(self.centro_costo or "").split())
-
-    def a_dict(self) -> dict:
-        return {"importe": str(self.importe), "cuenta_contable": self.cuenta_contable,
-                "centro_costo": self.centro_costo}
-
-
-@dataclass
 class Comprobante:
     # Identificación
     tipo_cp: str = "01"             # código SUNAT de 2 dígitos (01 factura, 03 boleta, 07 NC, 08 ND, 14 servicios…)
@@ -203,21 +181,20 @@ class Comprobante:
     ref_numero: str = ""
     detraccion: dict | None = None  # {codigo, porcentaje, monto, cuenta, fecha_constancia, nro_constancia}
     id_contrato: str = ""
-    # Imputación contable: la decide el contador para ESTE documento; vacía = la de la configuración del RUC
+    # La glosa del documento. Y dos campos de LEGADO (pe-ledger 0.1 y 0.2): la cuenta y el centro no son hechos del
+    # documento sino decisiones de cada entorno, y llegan aparte, en la imputación (`asiento.Imputacion`, por
+    # `id_externo`), que manda sobre ellos. Se aceptan mientras la aplicación no la pase, y salen en pe-ledger 0.3
+    # (John, 12-sep-2026: las cuentas viven en la aplicación, no en el documento).
     concepto: str = ""
-    cuenta_contable: str = ""       # la de la base: el gasto en compras, el ingreso en ventas
-    # La del total —el proveedor en compras, el cliente en ventas— cuando no es la del RUC por moneda
-    # (un 4699 para un gasto de representación). La resuelve `asiento.cuenta_tercero`, una sola vez
-    # para todos los drivers: el asiento de CONCAR y el registro de CONTASIS dicen la misma cuenta.
-    cuenta_tercero: str = ""
-    centro_costo: str = ""
-    # El reparto de la base entre varias cuentas o centros (12-sep-2026). Vacío = el caso simple de arriba:
-    # una cuenta y un centro para todo el comprobante. Con reparto, esos dos van vacíos (lo comprueba `validar`).
-    imputaciones: list[Imputacion] = field(default_factory=list)
+    cuenta_contable: str = ""       # legado: la de la base (el gasto en compras, el ingreso en ventas)
+    centro_costo: str = ""          # legado
     # Procedencia
     origen: str = "xml"
     confianza: Decimal = Decimal("1.00")
     archivo_nombre: str = ""
+    # El id con el que la aplicación que produce el documento conoce este comprobante (su fila). Es la llave con
+    # la que le llega aparte su imputación: la cuenta, el centro y el reparto de ESTE documento.
+    id_externo: str = ""
     datos_raw: dict = field(default_factory=dict)
     # Revisión (las rellena validar.py / el usuario)
     estado: str = "ok"
@@ -244,9 +221,6 @@ class Comprobante:
         self.confianza = Decimal(str(self.confianza)).quantize(_DOS)
         self.observaciones = [
             o if isinstance(o, Observacion) else Observacion(**o) for o in (self.observaciones or [])
-        ]
-        self.imputaciones = [
-            i if isinstance(i, Imputacion) else Imputacion(**i) for i in (self.imputaciones or [])
         ]
         if self.origen not in ORIGENES:
             raise ValueError(f"origen inválido: {self.origen!r}")
@@ -291,8 +265,6 @@ class Comprobante:
                 v = v.isoformat()
             elif f.name == "observaciones":
                 v = [o.a_dict() for o in v]
-            elif f.name == "imputaciones":
-                v = [i.a_dict() for i in v]
             d[f.name] = v
         return d
 
@@ -322,5 +294,5 @@ _CAMPOS_TEXTO = (
     "tipo_cp", "serie", "numero", "numero_final", "contraparte_tipo_doc", "contraparte_doc",
     "contraparte_nombre", "moneda", "destino_igv", "anio_dua", "cod_dep_aduanera",
     "clasif_bienes", "ref_tipo_cp", "ref_serie", "ref_numero", "id_contrato",
-    "concepto", "cuenta_contable", "cuenta_tercero", "centro_costo", "archivo_nombre", "condicion_pago",
+    "concepto", "cuenta_contable", "centro_costo", "archivo_nombre", "condicion_pago", "id_externo",
 )

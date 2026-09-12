@@ -6,41 +6,42 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
-El registro de `pe-ledger` se completa para que un sistema que importa **registros** —no asientos— salga
-directamente del documento. Lo pidió John al integrar CONTASIS (12-sep-2026), cuyo importador recibe el
-registro de compras y de ventas y arma el asiento él mismo. Todo es opcional: el estándar sigue en `0.2` y
-**el Excel de CONCAR no cambia** — los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a
-celda.
+**El documento lleva los hechos; las cuentas llegan aparte.** Decisión de John (12-sep-2026) al integrar CONTASIS:
+el JSON universal `pe-ledger` es el riel que recibe cualquier input, y las cuentas contables viven en la
+aplicación —en la configuración de cada entorno y en lo que el contador decide en su Revisión—. El motor recibe
+tres piezas: el documento, la imputación de cada documento y la configuración. **El Excel de CONCAR no cambia**:
+los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. El estándar sigue en `0.2`.
 
 ### Añadido
-- **`condicion_pago`** (`contado` | `credito`) en el comprobante: lo que declara el documento sobre su pago.
-  En la factura electrónica es obligatorio (`PaymentTerms FormaPago`), y el lector de XML ya lo leía y lo
-  dejaba en `datos_raw.forma_pago`; ahora es campo del registro, y una factura con cuotas es a crédito. Vacío
-  no es contado: es que el documento no lo dice. «Crédito» o «CONTADO» se normalizan; otro valor se rechaza.
-- **`cuenta_tercero`** en el comprobante: la cuenta del total —el proveedor en compras, el cliente en
-  ventas— cuando ese documento no va a la del contribuyente por moneda. El caso real: un gasto de
-  representación a la 4699, en el registro de compras de CONTASIS que entregó John. Vacía, todo sale como
-  antes.
-- **`imputaciones`** en el comprobante: el reparto de la **base** —el gasto o el ingreso— entre varias cuentas
-  o centros de costo, que una sola cuenta por comprobante no podía expresar (una factura con una parte de
-  sistemas y otra de desarrollo). Reparte solo la base: el IGV y el total siguen siendo del documento, como
-  los define SUNAT, y la cuenta del IGV y la del proveedor salen de la configuración. El asiento lleva una
-  línea de gasto o ingreso por parte; sin reparto, sale exactamente como antes. Lo pidió John a partir del
-  modelo de Codat, que pone la cuenta en cada línea de la factura; la plantilla de CONTASIS admite varias
-  filas por documento.
-- **`IMPUTACIONES_NO_CUADRAN`** e **`IMPUTACIONES_Y_CUENTA`** (errores de `validar`): las partes suman la base
-  del asiento, y con reparto la cuenta y el centro de la fila van vacíos.
+- **`condicion_pago`** (`contado` | `credito`) en el comprobante: lo que declara el documento sobre su pago. En la
+  factura electrónica es obligatorio (`PaymentTerms FormaPago`), y el lector de XML ya lo leía y lo dejaba en
+  `datos_raw.forma_pago`; ahora es campo, y una factura con cuotas es a crédito. Vacío no es contado: es que el
+  documento no lo dice. «Crédito» o «CONTADO» se normalizan; otro valor se rechaza.
+- **`id_externo`** en el comprobante (era un nombre reservado): el id con el que la aplicación conoce el
+  documento, y la llave de su imputación.
+- **La imputación** (`asiento.Imputacion`): la cuenta, el centro de costo, la cuenta del total y el **reparto** de
+  un documento, que llegan aparte, en la configuración bajo `imputaciones` y por `id_externo`; en la fachada, el
+  argumento `imputacion` de `exportar`, `diagnosticar` y `generar_asiento`. Cada campo manda sobre su gemelo de
+  legado del comprobante. El reparto divide solo la base —el caso: una factura con una parte de sistemas y otra de
+  desarrollo; la plantilla de CONTASIS admite varias filas por documento—, y el asiento lleva una línea de gasto o
+  ingreso por parte. Un reparto con cuenta o centro al lado, o la imputación de un `id_externo` que no está, se
+  rechazan en la puerta.
+- **`reparto_no_cuadra`** (en `diagnosticar` y `faltantes_para`) y **`asiento.RepartoNoCuadra`**: las partes suman
+  la base del asiento, sin tolerancia; si no, el mes no está listo y `asiento_neutral` no arma ese asiento. La
+  excepción hereda de `SinCuenta`, así que quien ya la atrapaba la atrapa igual.
+- **`asiento.partes_de` y `asiento.cuenta_tercero`**: resuelven la cuenta de la base y la del total una sola vez
+  para todos los drivers. La del total vivía dentro de `asiento_neutral`; se sacó primero sin cambiar nada.
 - **`igv.base_imputable` e `igv.igv_del_asiento`**: la regla de que en compras la boleta y el recibo por
-  honorarios no dan crédito fiscal salió de `asiento_neutral` para que la usen igual el asiento y la
-  validación.
-- **`asiento.cuenta_tercero(c, contab, venta)`**: resuelve esa cuenta una sola vez para todos los drivers.
-  Vivía dentro de `asiento_neutral`; se sacó primero sin cambiar nada —el snapshot de CONCAR, intacto— y
-  después se le dio prioridad al campo del registro. Tres casos nuevos en el snapshot fijan que la cuenta del
-  registro manda en la línea del proveedor, también en la que le descuenta la detracción, y en ventas.
-- `estandar/LEEME.md`: **dónde va cada dato** (el registro, la configuración del contribuyente o el driver) y
-  **las dos familias de salida** (registro y asiento) que salen del mismo documento. Y los nombres reservados
-  que pide CONTASIS y que esperan un caso real o una decisión: `medio_pago`, `retencion_igv`, `percepcion` y
-  `no_domiciliado`.
+  honorarios no dan crédito fiscal salió de `asiento_neutral`, porque la comprobación del reparto la necesita
+  igual.
+- `estandar/LEEME.md`: **documento, imputación y configuración**, con la forma de la imputación, y **las dos
+  familias de salida** (registro y asiento). Y los nombres reservados que pide CONTASIS: `medio_pago`,
+  `retencion_igv`, `percepcion` y `no_domiciliado`.
+
+### Obsoleto
+- **`cuenta_contable` y `centro_costo` del comprobante pasan a legado**: se aceptan, pero la imputación manda sobre
+  ellos, y salen en `pe-ledger 0.3`. En esta rama hubo antes un `cuenta_tercero` y unas `imputaciones` dentro del
+  comprobante: nunca se publicaron, y salieron al separar la imputación del documento.
 
 ## [0.9.0] — 2026-09-12
 

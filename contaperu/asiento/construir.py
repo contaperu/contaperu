@@ -14,8 +14,9 @@ from typing import Any
 
 from ..modelo import Comprobante, Libro
 from ..formato import Opciones
-from ..igv import tasa as tasa_de_importes
+from ..igv import base_imputable, tasa as tasa_de_importes
 from .datos import DEFAULTS, OPCIONES, TIPO_BOLETA, TIPO_HONORARIOS
+from .imputacion import Imputacion
 
 
 class SinCuenta(Exception):
@@ -52,6 +53,17 @@ class SinCentro(Exception):
 
     def __init__(self, comprobantes: list[Comprobante]):
         super().__init__(f"{len(comprobantes)} comprobante(s) sin centro de costo en una cuenta que lo lleva")
+        self.comprobantes = comprobantes
+
+
+class RepartoNoCuadra(SinCuenta):
+    """Comprobantes cuyo reparto (el de su imputación) no suma la base del asiento. Hereda de `SinCuenta` a
+    propósito: es una imputación que no se puede asentar, y quien ya atrapaba la falta de cuenta —la CLI, la
+    aplicación— la atrapa sin cambiar nada."""
+
+    def __init__(self, comprobantes: list[Comprobante]):
+        Exception.__init__(self, f"{len(comprobantes)} comprobante(s) con un reparto entre cuentas que no suma "
+                                 "la base del asiento")
         self.comprobantes = comprobantes
 
 
@@ -139,16 +151,40 @@ def cuenta_honorarios(cuentas: dict, moneda: str) -> str:
     return _cuenta_por_moneda(cuentas.get("honorarios"), moneda, DEFAULTS["cuentas"]["honorarios"]["PEN"])
 
 
+# ── La imputación de cada documento: llega aparte, por `id_externo` (12-sep-2026) ──
+
+def imputacion_de(c: Comprobante, contab: dict) -> Imputacion | None:
+    """La imputación de ESTE documento, si la configuración trae una con su `id_externo`; si no, None."""
+    ide = (c.id_externo or "").strip()
+    valor = (contab.get("imputaciones") or {}).get(ide) if ide else None
+    return Imputacion.de(valor) if valor is not None else None
+
+
+def partes_de(c: Comprobante, contab: dict, venta: bool = False) -> list[tuple[str, str, Decimal | None]]:
+    """A qué cuentas va la base del documento: `[(cuenta, centro, importe)]`, con importe None = la base entera.
+
+    Con reparto en su imputación, una parte por cada una. Si no, una sola, campo a campo: la cuenta y el centro de
+    la imputación mandan sobre los de legado del comprobante, y lo que falte sale de lo de siempre (la cuenta
+    por defecto de la configuración, detrás). Es la única resolución: el asiento y las faltas de cuenta y de
+    centro leen esto."""
+    imp = imputacion_de(c, contab)
+    if imp is not None and imp.reparto:
+        return [(p.cuenta_contable, p.centro_costo, p.importe) for p in imp.reparto]
+    cuenta = (imp.cuenta_contable if imp is not None else "") or cuenta_de_fila(c, contab, venta)
+    centro = (imp.centro_costo if imp is not None else "") or c.centro_costo
+    return [(cuenta, centro, None)]
+
+
 def cuenta_tercero(c: Comprobante, contab: dict, venta: bool = False) -> str:
     """La cuenta del total: el cliente en ventas, el proveedor en compras (el recibo por honorarios, la suya).
 
-    Manda la del registro (`Comprobante.cuenta_tercero`) cuando el contador la escribió para ese documento
-    —un gasto de representación a la 4699—; si no, la de la configuración por moneda. Vivía dentro de
-    `asiento_neutral`; salió aquí el 12-sep-2026 para que la resuelva UNA función para todos los drivers
-    —el asiento de CONCAR y el registro de CONTASIS—, como `cuenta_de_fila` resuelve la de la base."""
-    propia = (c.cuenta_tercero or "").strip()
-    if propia:
-        return propia
+    Manda la de la imputación del documento cuando el contador la decidió —un gasto de representación a la
+    4699—; si no, la de la configuración por moneda. Vivía dentro de `asiento_neutral`; salió aquí el
+    12-sep-2026 para que la resuelva UNA función para todos los drivers —el asiento de CONCAR y el registro de
+    CONTASIS—, como `partes_de` resuelve la de la base."""
+    imp = imputacion_de(c, contab)
+    if imp is not None and imp.cuenta_tercero:
+        return imp.cuenta_tercero
     moneda = (c.moneda or "PEN").upper()
     cuentas = contab.get("cuentas") or {}
     if venta:
@@ -262,11 +298,9 @@ def sub_diarios_presentes(comprobantes: list[Comprobante], contab: dict, venta: 
 
 
 def filas_sin_cuenta(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
-    """Las filas sin cuenta. Con la base repartida (`imputaciones`), le falta si a una de sus partes le falta:
-    una parte no toma la cuenta por defecto del RUC, porque repartir entre la misma cuenta no reparte nada."""
-    return [c for c in comprobantes
-            if (any(not i.cuenta_contable for i in c.imputaciones) if c.imputaciones
-                else not cuenta_de_fila(c, contab, venta))]
+    """Las filas sin cuenta: basta con que a una parte de su base le falte (`partes_de`). Una parte del reparto
+    no toma la cuenta por defecto: repartir entre la misma cuenta no reparte nada."""
+    return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, contab, venta))]
 
 
 def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
@@ -285,18 +319,31 @@ def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool 
         return []
 
     def falta(c: Comprobante) -> bool:
-        # Con la base repartida, cada parte lleva su cuenta y su centro: basta con que a una le falte.
-        if c.imputaciones:
-            return any(not i.centro_costo and lleva_centro(i.cuenta_contable, contab) for i in c.imputaciones)
-        return not (c.centro_costo or "").strip() and lleva_centro(cuenta_de_fila(c, contab, venta), contab)
+        # Cada parte de la base con su cuenta y su centro (`partes_de`): basta con que a una le falte.
+        return any(not (centro or "").strip() and lleva_centro(cuenta, contab)
+                   for cuenta, centro, _ in partes_de(c, contab, venta))
 
     return [c for c in comprobantes if falta(c)]
+
+
+def reparto_no_cuadra(c: Comprobante, contab: dict, venta: bool = False) -> bool:
+    """¿El reparto de su imputación deja de sumar la base del asiento? Sin tolerancia, como la partida doble:
+    un reparto que no cuadra da un asiento que no cuadra."""
+    imp = imputacion_de(c, contab)
+    if imp is None or not imp.reparto:
+        return False
+    return sum((p.importe for p in imp.reparto), Decimal("0.00")) != base_imputable(c, venta)
+
+
+def repartos_que_no_cuadran(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
+    return [c for c in comprobantes if reparto_no_cuadra(c, contab, venta)]
 
 
 # Qué clave de `faltantes` responde a cada requisito del contrato de driver (`contrato.exige`), en el
 # orden en que se comprueban: primero lo que impide clasificar (tipo, moneda), luego lo de cada línea.
 REQUISITO_DE = {"tipos_sin_equivalencia": "tipo_cp", "monedas_sin_codigo": "moneda",
-                "sin_cuenta": "cuenta_contable", "sin_centro_de_costo": "centro_costo"}
+                "sin_cuenta": "cuenta_contable", "reparto_no_cuadra": "cuenta_contable",
+                "sin_centro_de_costo": "centro_costo"}
 
 
 def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = False,
@@ -313,6 +360,7 @@ def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = 
         salida["monedas_sin_codigo"] = monedas_sin_codigo(comprobantes, contab)
     if "cuenta_contable" in exige:
         salida["sin_cuenta"] = filas_sin_cuenta(comprobantes, contab, venta)
+        salida["reparto_no_cuadra"] = repartos_que_no_cuadran(comprobantes, contab, venta)
     if "centro_costo" in exige:
         salida["sin_centro_de_costo"] = filas_sin_centro(comprobantes, contab, venta)
     return salida
@@ -321,7 +369,7 @@ def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = 
 def exigir_requisitos(comprobantes: list[Comprobante], contab: dict, venta: bool = False,
                       exige: frozenset[str] | set[str] = frozenset()) -> None:
     """Hace cumplir `faltantes_para`: la primera falta, en el orden de siempre, detiene la exportación
-    con su excepción (tipo → moneda → cuenta → centro). Un tipo sin equivalencia no se inventa."""
+    con su excepción (tipo → moneda → cuenta → reparto → centro). Un tipo sin equivalencia no se inventa."""
     falta = faltantes_para(comprobantes, contab, venta, exige)
     if falta.get("tipos_sin_equivalencia"):
         raise TipoSinMapa(falta["tipos_sin_equivalencia"])
@@ -329,6 +377,8 @@ def exigir_requisitos(comprobantes: list[Comprobante], contab: dict, venta: bool
         raise MonedaSinCodigo(falta["monedas_sin_codigo"])
     if falta.get("sin_cuenta"):
         raise SinCuenta(falta["sin_cuenta"])
+    if falta.get("reparto_no_cuadra"):
+        raise RepartoNoCuadra(falta["reparto_no_cuadra"])
     if falta.get("sin_centro_de_costo"):
         raise SinCentro(falta["sin_centro_de_costo"])
 
