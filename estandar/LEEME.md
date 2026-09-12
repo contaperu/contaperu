@@ -1,4 +1,4 @@
-# pe-ledger 0.1 — el documento contable universal del Perú
+# pe-ledger 0.2 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -16,7 +16,9 @@ https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.2/estandar/pe-
 
 Cuelga del tag **del estándar** (`pe-ledger-0.2`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
-sirve como estándar. Mientras el estándar siga en 0.1, esa URL devuelve exactamente el mismo archivo.
+sirve como estándar. **El tag `pe-ledger-0.2` avanza con cada cambio aditivo** —un campo opcional nuevo no
+sube la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la 0.2; un cambio
+de significado sube a 0.3 y estrena su propio tag.
 
 ```bash
 python -m contaperu.cli validar mi-documento.json
@@ -154,6 +156,40 @@ necesitado todavía; se añade con un caso real detrás, no por si acaso.
 siempre netos y `dscto_base`/`dscto_igv` dejan de restarse del total. En `0.1` el descuento se restaba de una
 base bruta, pero el XML de SUNAT da la base ya neta, así que una nota de crédito de descuento global salía
 contada dos veces. Un documento `0.1` sin descuentos significa exactamente lo mismo en `0.2`.
+
+---
+
+## Anotaciones que produce el motor
+
+Las claves que empiezan con `_` son anotaciones: se transportan, se ignoran y nunca llevan datos con
+significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la librería):
+
+- **`_exportacion`** — en la respuesta de `exportar`: `{driver, archivo, huella, fecha}`. La **huella** es el
+  sha256 del contenido del asiento que salió: las líneas neutrales, en su orden, **sin el correlativo**,
+  serializadas con `json.dumps(sort_keys=True, ensure_ascii=False, separators=(",", ":"))`. Responde «¿este
+  contenido ya salió?» —la misma tanda exportada otra vez tras un «deshacer» arranca en otro número y lleva la
+  misma huella—, que es lo que hace falta para avisar de un lote repetido: el Excel de CONCAR se suma al
+  importarlo dos veces. Un registro tributario (el TXT del SIRE) no la lleva: no hay asiento. La `fecha`
+  (`AAAA-MM-DD`) la pone quien llama; el motor no mira el reloj. La fórmula es contrato: cambiarla se anuncia.
+- **`_asiento.huella`** — en la respuesta de `generar_asiento`, la misma huella de esas líneas.
+
+Un productor que guarde un documento puede copiar `_exportacion` en su raíz tal cual: el esquema admite ahí
+cualquier clave `_`. Dentro de un comprobante o de una línea, no.
+
+## Nombres reservados
+
+Tres campos que `REFERENCIAS.md` propone y que **no** entran hasta que haya un caso real detrás (11-sep-2026).
+El nombre está tomado —el día que entren, entran así— y mientras tanto un productor los lleva en `datos_raw`,
+que el motor transporta sin interpretar:
+
+| Dónde | Nombre | Qué será |
+|---|---|---|
+| comprobante, línea | `id_externo` | El id con el que el sistema de origen o de destino conoce ese comprobante o asiento (Merge `remote_id`, Rutter `platform_id`) |
+| comprobante, línea | `dimensiones` | `[{tipo, codigo}]`: área, proyecto, obra… más allá del `centro_costo`, que sigue siendo la primera (Xero `Tracking[]`) |
+| línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: `estado` ya existe en el comprobante (`ok \| observado \| duplicado`) y en la detracción (`PROVISIONADO \| PAGADO`) con otro sentido |
+
+Lo que sí entró de esa propuesta: `_exportacion` (arriba), `EXIGE` en el contrato de driver y `pedir_a` en
+`diagnosticar` (`ARQUITECTURA.md`).
 
 ---
 

@@ -124,6 +124,13 @@ Con `desde_lineas` el núcleo arma el asiento, lo numera y exige que cuadre **an
 driver; el driver solo traduce. Es la forma que hace que un driver de SISCONT o STARSOFT no pueda
 equivocarse en una cuenta ni en un sentido, porque nunca los decide.
 
+Y **declara qué exige** (`EXIGE`, desde la 0.8): lo que ese ERP no puede importar sin y que el núcleo,
+si no se lo dicen, deja pasar —`centro_costo` en las cuentas que lo llevan, `moneda` con código en el
+destino—. La cuenta contable y la equivalencia del tipo las exige el núcleo a todos. Con eso
+`diagnosticar` decide si un mes está listo **para ese destino** (el CSV no bloquea por centro; CONCAR
+sí) y el núcleo lo hace cumplir antes de armar nada (`asiento.exigir_requisitos`). La idea es la de
+Codat `options` y Merge `/meta` (`REFERENCIAS.md`): el destino dice qué necesita antes de escribir.
+
 Se publica de dos maneras:
 
 - **Como paquete propio**, por entry points (`[project.entry-points."contaperu.drivers"]`). El
@@ -144,6 +151,12 @@ por serie-número, qué falta para el destino (cuenta, centro de costo, tipos si
 correlativos), qué detracciones esperan constancia, el resumen por contraparte y desde qué correlativo
 arranca cada sub-diario. No corrige ni inventa: describe. Está en la fachada, en el MCP y en la CLI, y
 no añade ninguna regla contable —reúne comprobaciones que ya existían y las cuenta en vez de lanzarlas.
+
+Desde la 0.8 responde además **para qué destino** (`exige`) y **a quién pedir** lo que falta
+(`que_falta[].pedir_a`: `contador` si se resuelve mirando el documento o el plan de cuentas; `sistema`
+si es configuración del destino o un dato público que no está en el papel; `proveedor` reservado). Y
+cada exportación deja su **huella** (`_exportacion.huella`, `asiento/huella.py`): la misma tanda
+exportada dos veces lleva la misma, que es lo que permite avisar de que ese contenido ya salió.
 
 Esa es la forma en que crecerá esta capa: **cada pregunta de un agente se responde con reglas que ya
 tienen fuente**, nunca con una regla nueva escrita para el agente.

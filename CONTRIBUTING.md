@@ -41,6 +41,9 @@ NOMBRE = "siscont"
 FORMATOS = {"compra": "siscont_asiento", "venta": "siscont_asiento"}
 OPCIONES = Opciones(fecha="DD/MM/AAAA", extension=".txt")
 CONTENT_TYPE = "text/plain; charset=utf-8"
+# Lo que tu ERP no puede importar sin, de entre lo que el núcleo deja pasar: "centro_costo", "moneda".
+# La cuenta contable y la equivalencia del tipo las exige el núcleo por ti.
+EXIGE = frozenset()
 
 def nombre(libro, op=OPCIONES) -> str:
     return f"SISCONT_{libro.ruc}_{libro.periodo}{op.extension}"
@@ -74,6 +77,9 @@ compras con el asiento cuadrado. Requisitos para que un driver entre **al reposi
 3. **Nada de red, nada de disco, nada de estado.** Entra por parámetro, sale por retorno.
 4. **Un tipo de comprobante sin equivalente detiene la exportación**, no se inventa uno. Es la regla más
    importante: es preferible un error claro a un asiento silenciosamente mal.
+5. **Declara en `EXIGE` lo que tu ERP no puede importar sin** (`centro_costo`, `moneda`), y nada más: es
+   lo que `diagnosticar` usa para decir si un mes está listo para tu destino, y lo que el núcleo hace
+   cumplir antes de llamarte. Un requisito fuera de ese catálogo no pasa el contrato.
 
 ## Estilo
 

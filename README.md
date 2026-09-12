@@ -210,13 +210,13 @@ Lo que se tomó de QuickBooks, Xero y las APIs unificadas de EE. UU. —y lo que
 
 | Pieza | Estado |
 |---|---|
-| El estándar `pe-ledger` 0.1 y su esquema | listo |
+| El estándar `pe-ledger` 0.2 y su esquema | listo |
 | Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
 | Validación del comprobante y de la partida doble | listo |
 | Asiento: compras, ventas, honorarios, notas y detracción | listo |
 | Drivers CONCAR, SIRE y CSV | listo |
 | Servidor MCP y CLI | listo |
-| `diagnosticar`: la capa para agentes | listo |
+| `diagnosticar`: la capa para agentes — qué falta, para qué destino y a quién pedírselo | listo |
 | Contrato de driver y drivers de terceros por *entry points* | listo |
 | Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |

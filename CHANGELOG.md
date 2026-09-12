@@ -4,15 +4,54 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [0.8.0] — 2026-09-11
+
+Lo que `REFERENCIAS.md` proponía y tenía un caso real detrás (decisión de John, 11-sep-2026): el
+destino declara qué exige, cada exportación deja su huella, y `diagnosticar` dice a quién pedir lo que
+falta. **El Excel de CONCAR validado no cambia**: los 42 casos de `tests/test_snapshot_concar.py` siguen
+idénticos celda a celda.
+
+### Cambiado
+- **El driver de CONCAR se detiene sin centro de costo** donde la cuenta lo lleva (`SinCentro`) y cuando
+  un sub-diario pasaría de 9999 (`CorrelativoDesborda`). Las dos reglas existían —la del contador del
+  06-sep-2026 y la de los cuatro dígitos de CONCAR— pero las aplicaba solo el portal antes de llamar al
+  motor; el driver generaba igual. Es un **cambio de comportamiento** para quien use el motor sin el
+  portal: un mes que antes salía con la M vacía ahora se niega y dice cuáles. Lo declara `EXIGE`.
+- **`diagnosticar` decide «listo» por lo que exige el destino** (`exige` en la respuesta): el CSV no
+  bloquea por centro ni por moneda; CONCAR sí. `faltantes` conserva sus cinco claves, informando.
+- La CLI remite a `contaperu diagnosticar` también ante `SinCentro` y `CorrelativoDesborda`.
 
 ### Añadido
+- **`EXIGE` en el contrato de driver** (`drivers/contrato.py`): lo que ese ERP no puede importar sin y
+  que el núcleo, si no se lo dicen, deja pasar (`centro_costo`, `moneda`). La cuenta y la equivalencia
+  del tipo las exige el núcleo a todo driver de asientos. `contrato.exige(mod)` devuelve la unión;
+  `incumplimientos()` rechaza un requisito fuera del catálogo y un `EXIGE` en un driver de texto. El
+  recurso MCP `contaperu://drivers` lo publica.
+- `asiento.faltantes_para()` y `asiento.exigir_requisitos()`: una sola lista de comprobaciones para el
+  driver (que lanza), el núcleo (`generar._desde_lineas`, para los drivers `desde_lineas`) y
+  `diagnosticar` (que describe).
+- **La huella del asiento** (`asiento/huella.py`): sha256 del contenido de las líneas neutrales, en su
+  orden y sin el correlativo. Va en `resumen["huella"]` de todo driver de asientos, en `_asiento.huella`
+  de `generar_asiento` y en **`_exportacion`** de `exportar` (`{driver, archivo, huella, fecha}`). La
+  misma tanda exportada otra vez —tras un «deshacer»— lleva la misma huella: es lo que permite avisar
+  de que ese contenido ya salió, porque el Excel de CONCAR se **suma** al importarlo dos veces. La
+  `fecha` la pone quien llama (`exportar(..., fecha="AAAA-MM-DD")`, también en el MCP); el núcleo no
+  mira el reloj. La fórmula es contrato y `tests/test_huella.py` la fija con un valor literal.
+- **`que_falta` y `pedir_a` en `diagnosticar`**: lo que bloquea para ese destino, agrupado por motivo,
+  con a quién pedírselo —`contador` si se resuelve mirando el documento o el plan de cuentas,
+  `sistema` si es configuración del destino o un dato público que no está en el papel—. La tabla
+  (`operaciones.PEDIR_A`) cubre todos los códigos de `validar.py` y un test lo comprueba recorriendo el
+  módulo. `proveedor` queda reservado. La CLI lo imprime.
 - **`REFERENCIAS.md`**: cómo modelan el asiento, los impuestos, las dimensiones, la escritura y la
   idempotencia la API de QuickBooks Online, la de Xero y las APIs unificadas de EE. UU. (Merge, Codat,
-  Rutter, Apideck), comparado campo a campo con `pe-ledger`; qué no se toma y por qué; y una propuesta
-  de campos **opcionales** para el estándar (`id_externo`, `dimensiones`, `estado` de la línea,
-  `_exportacion.huella`, `faltantes[].pedir_a`, `EXIGE` en el contrato de driver), pendiente de decidir.
-  Solo documentación: ni el código ni el esquema cambian.
+  Rutter, Apideck), comparado campo a campo con `pe-ledger`; qué no se toma y por qué; y la propuesta
+  de campos opcionales de la que sale esta versión. `id_externo`, `dimensiones` y `estado` de la línea
+  quedan como **nombres reservados** (`estandar/LEEME.md`) hasta que haya un caso real.
+
+### Corregido
+- `README.md` y `estandar/LEEME.md` decían pe-ledger 0.1; es 0.2 desde la 0.6.0. Y el docstring de
+  `test_frontera` decía que el portal instala solo `[excel]`: instala también `[mcp]` desde que monta su
+  conector.
 
 ## [0.7.0] — 2026-09-11
 

@@ -190,8 +190,14 @@ redactar la pregunta correcta sin que el núcleo adivine nada.
 
 Todo lo de abajo es **aditivo**: campos opcionales que un consumidor de la 0.2 ignora sin romperse, así
 que la versión del estándar no sube (ver `estandar/LEEME.md` §Versionado). Y ninguno es una regla
-contable: son transporte y trazabilidad. Están aquí como propuesta, pendiente de decidir; no están
-implementados.
+contable: son transporte y trazabilidad.
+
+**Decidido el 11-sep-2026 (librería 0.8.0), con la regla del estándar —crece con casos reales detrás, no por
+si acaso—:** entraron los tres que tenían caso real hoy: **`_exportacion`** con la huella (el Excel de CONCAR
+se suma al importarlo dos veces), **`EXIGE`** en el contrato de driver (el portal se negaba sin centro de
+costo y el motor solo avisaba: una regla viviendo fuera del motor) y **`pedir_a`** (como
+`diagnosticar.que_falta[].pedir_a`; `proveedor` reservado). Los otros tres —`id_externo`, `dimensiones` y
+`estado` de la línea— quedan como **nombres reservados** en `estandar/LEEME.md` hasta que haya un caso.
 
 | Dónde | Campo | Lo inspira | Qué caso peruano lo necesita | Qué test lo fijaría |
 |---|---|---|---|---|
