@@ -49,11 +49,14 @@ def test_los_errores_bloquean_y_van_por_serie_numero():
 
 
 def test_los_avisos_no_bloquean_pero_se_ven():
-    d = op.diagnosticar(doc(dict(FACTURA, fecha_emision="2026-07-20")))    # extemporáneo: aviso
+    d = op.diagnosticar(doc(dict(FACTURA, fecha_emision="2025-07-20")))    # 13 meses: fuera del plazo de anotación
     assert d["listo_para_exportar"] is True
     assert d["avisos"][0]["serie_numero"] == "E001-871"
-    assert d["avisos"][0]["observaciones"][0]["codigo"] == "PERIODO_ANTERIOR"
+    assert d["avisos"][0]["observaciones"][0]["codigo"] == "CREDITO_FISCAL_FUERA_DE_PLAZO"
     assert d["totales"]["con_aviso"] == 1
+    # El del mes pasado se anota aquí sin más (Ley 29215, art. 2): ni aviso ni «observado».
+    d = op.diagnosticar(doc(dict(FACTURA, fecha_emision="2026-07-20")))
+    assert d["avisos"] == [] and d["totales"]["con_aviso"] == 0 and d["listo_para_exportar"] is True
 
 
 @pytest.mark.parametrize("cambio,clave,motivo", [

@@ -58,6 +58,28 @@ def test_fechas():
     assert codigos(cp(fecha_emision=None)) == ["FECHA_FALTA"]
 
 
+def test_compras_el_mes_anterior_no_es_observacion():
+    """Ley 29215, art. 2: la compra se anota en el mes de emisión o en los 12 siguientes. Dentro del
+    plazo no hay nada que observar (John, 12-sep-2026: el aviso pintaba de ámbar un recibo de luz del
+    mes pasado); fuera de él, un aviso que no bloquea. En ventas no hay plazo: sigue PERIODO_ANTERIOR."""
+    c = cp(fecha_emision="2025-11-30")
+    assert codigos(c, COMPRAS) == [] and c.estado == "ok"
+    assert codigos(cp(fecha_emision="2025-01-31"), COMPRAS) == []              # justo 12 meses: dentro
+    c = cp(fecha_emision="2024-12-31")                                          # 13: fuera
+    assert codigos(c, COMPRAS) == ["CREDITO_FISCAL_FUERA_DE_PLAZO"] and not c.tiene_errores
+    assert codigos(cp(fecha_emision="2024-06-30"), COMPRAS) == ["CREDITO_FISCAL_FUERA_DE_PLAZO"]
+    # el caso de la pantalla: recibo de luz emitido el mes pasado, que vence en este
+    recibo = cp(tipo_cp="14", serie="", numero="123", contraparte_doc="20603333331",
+                fecha_emision="2025-12-29", fecha_vencimiento="2026-01-10")
+    assert codigos(recibo, COMPRAS) == []
+    # en un documento aduanero la referencia es el pago del impuesto («o del pago del Impuesto»)
+    dua = cp(tipo_cp="50", serie="118", numero="1", anio_dua="2024",
+             fecha_emision="2024-12-15", fecha_vencimiento="2025-01-20")
+    assert codigos(dua, COMPRAS) == []
+    # en ventas no hay plazo: el código es otro y no depende de la antigüedad
+    assert codigos(cp(fecha_emision="2024-06-30"), VENTAS) == ["PERIODO_ANTERIOR"]
+
+
 def test_contraparte():
     assert codigos(cp(contraparte_doc="20609999999")) == ["RUC_INVALIDO"]
     assert codigos(cp(contraparte_doc="")) == ["CONTRAPARTE_FALTA"]

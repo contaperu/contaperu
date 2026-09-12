@@ -18,9 +18,23 @@ from .modelo import Comprobante, Libro, solo_digitos
 
 TOLERANCIA = Decimal("0.05")
 
+# Plazo para anotar una compra en el Registro de Compras: «el mes de su emisión o del pago del
+# Impuesto, según sea el caso, o … los 12 (doce) meses siguientes» (Ley 29215, art. 2, texto del
+# D.Leg. 1116). Dentro del plazo no hay observación: el extemporáneo se anota en este periodo y el
+# crédito fiscal se ejerce aquí. El D.Leg. 1669 (28-sep-2024) lo baja a 0 meses (electrónicos), 2
+# (físicos) y 3 (con detracción), pero rige recién con la R.S. que SUNAT no ha publicado (verificado
+# el 12-sep-2026); lo emitido antes de esa vigencia conserva los 12. Ese día cambia esta constante
+# y entra la distinción por `origen`/`detraccion`, con su cita al lado.
+PLAZO_ANOTACION_MESES = 12
+
 
 def _cuadra(a: Decimal, b: Decimal) -> bool:
     return abs(a - b) <= TOLERANCIA
+
+
+def _meses_hasta(libro: Libro, fecha) -> int:
+    """Meses enteros desde el mes de `fecha` hasta el periodo del libro (0 = el mismo mes)."""
+    return (libro.anio - fecha.year) * 12 + (libro.mes - fecha.month)
 
 
 def validar(c: Comprobante, libro: Libro) -> None:
@@ -49,7 +63,17 @@ def validar(c: Comprobante, libro: Libro) -> None:
         if ym > (libro.anio, libro.mes):
             e("FECHA_POSTERIOR", f"Emitido el {c.fecha_emision:%d/%m/%Y}, después del periodo {libro.periodo}")
         elif ym < (libro.anio, libro.mes):
-            a("PERIODO_ANTERIOR", f"Emitido en un periodo anterior ({c.fecha_emision:%m/%Y}); se anota como extemporáneo (al Excel de CONCAR va con fecha 01/{libro.mes:02d}/{libro.anio})")
+            if libro.es_venta:
+                # En ventas no hay plazo de anotación: la obligación nace con la emisión (Ley del IGV,
+                # art. 4), así que una venta del mes pasado anotada aquí es IGV del mes pasado.
+                a("PERIODO_ANTERIOR", f"Emitido en {c.fecha_emision:%m/%Y}: en ventas el IGV nace en la fecha de emisión (Ley del IGV, art. 4), no en la de anotación")
+            else:
+                # Compras: dentro del plazo se anota aquí y no hay nada que observar (PLAZO_ANOTACION_MESES).
+                # La referencia es la emisión; en un documento aduanero, la fecha de pago del impuesto
+                # («o del pago del Impuesto»), que el RCE lleva en el campo 6.
+                ref = c.fecha_vencimiento if c.tipo_cp in cat.ADUANEROS and c.fecha_vencimiento else c.fecha_emision
+                if _meses_hasta(libro, ref) > PLAZO_ANOTACION_MESES:
+                    a("CREDITO_FISCAL_FUERA_DE_PLAZO", f"Emitido en {c.fecha_emision:%m/%Y}, hace más de {PLAZO_ANOTACION_MESES} meses: fuera del plazo de anotación en el Registro de Compras (Ley 29215, art. 2)")
     if not libro.es_venta:
         # Retención de 4ta: solo existe en el recibo por honorarios y nunca puede
         # pasarse del total (el neto que se paga saldría negativo en el asiento).
