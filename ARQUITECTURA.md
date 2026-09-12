@@ -54,8 +54,12 @@ XML UBL / TXT del SIRE / JSON pe-ledger
           └──► operaciones.generar_asiento  ──► el bloque `asiento` del estándar
 ```
 
-Aparte va el SIRE: es un **registro tributario**, no un asiento. Se escribe desde el comprobante
-(`linea(c, libro, idx, op)`), una línea por documento, y por eso su driver no pasa por el motor.
+Aparte va la familia **registro**: una fila por comprobante, sin asiento, así que sus drivers no pasan por el
+motor. El SIRE es un registro tributario y se escribe desde el comprobante (`linea(c, libro, idx, op)`). Un
+sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS, en
+construcción) recibe los comprobantes con la configuración (`desde_comprobantes`) y lleva cuentas, pero no las
+decide: las lee de `asiento.partes_de` y `asiento.cuenta_tercero`, la misma resolución que usa el motor para el
+asiento de CONCAR.
 
 ### La decisión que lo ordena todo: la línea neutral es la fuente
 
@@ -111,12 +115,13 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
 
 ## Cómo se enchufa un driver
 
-Un driver expone `NOMBRE`, `FORMATOS`, `OPCIONES`, `nombre()` y **una** de tres formas
-(`drivers/contrato.py`):
+Un driver expone `NOMBRE`, `FORMATOS`, `OPCIONES`, `nombre()` y **una** de cuatro formas,
+de dos familias (`drivers/contrato.py`):
 
 | Forma | Recibe | Para qué |
 |---|---|---|
 | `linea(c, libro, idx, op) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
+| `desde_comprobantes(libro, comprobantes, contab, op)` | los comprobantes y la configuración, con la imputación de cada documento | el registro de un sistema contable que arma el asiento él mismo (CONTASIS, en construcción) |
 | `construir(libro, comprobantes, contab, correlativos, op)` | los comprobantes | un archivo armado desde el comprobante (CONCAR, por historia) |
 | `desde_lineas(libro, lineas, contab, op)` | las **líneas neutrales**, ya numeradas y cuadradas | **un driver de asientos nuevo** |
 
@@ -124,9 +129,15 @@ Con `desde_lineas` el núcleo arma el asiento, lo numera y exige que cuadre **an
 driver; el driver solo traduce. Es la forma que hace que un driver de SISCONT o STARSOFT no pueda
 equivocarse en una cuenta ni en un sentido, porque nunca los decide.
 
+Con `desde_comprobantes` no hay asiento que armar ni que numerar, pero sí cuentas que llevar: el núcleo exige la
+cuenta de cada documento antes de llamar al driver, y el driver la lee de la misma resolución que usa el asiento.
+Tampoco decide ninguna.
+
 Y **declara qué exige** (`EXIGE`, desde la 0.8): lo que ese ERP no puede importar sin y que el núcleo,
 si no se lo dicen, deja pasar —`centro_costo` en las cuentas que lo llevan, `moneda` con código en el
-destino—. La cuenta contable y la equivalencia del tipo las exige el núcleo a todos. Con eso
+destino—. La cuenta contable la exige el núcleo a todo driver que lleva cuentas, y la equivalencia del
+tipo, de la que sale el sub-diario, a los de asientos (uno de registro puede exigir el centro, no la
+moneda). Con eso
 `diagnosticar` decide si un mes está listo **para ese destino** (el CSV no bloquea por centro; CONCAR
 sí) y el núcleo lo hace cumplir antes de armar nada (`asiento.exigir_requisitos`). La idea es la de
 Codat `options` y Merge `/meta` (`REFERENCIAS.md`): el destino dice qué necesita antes de escribir.

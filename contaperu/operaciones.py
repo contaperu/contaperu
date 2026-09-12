@@ -6,8 +6,8 @@ hablar con diccionarios en vez de con los objetos del modelo. Todas las funcione
 misma salida.
 
 El contrato es sencillo: los documentos son los del estándar (ver `estandar/LEEME.md`), la
-configuración contable del contribuyente entra por parámetro, y los archivos binarios salen en
-base64 porque un JSON no sabe llevar bytes.
+configuración contable del contribuyente y la imputación de cada documento entran por parámetro, y los
+archivos binarios salen en base64 porque un JSON no sabe llevar bytes.
 """
 from __future__ import annotations
 
@@ -135,13 +135,16 @@ def configuracion(contab: dict | None = None) -> dict:
     return asi.merge_config(asi.config_de(None), encima or {})
 
 
-def _con_imputacion(conf: dict, imputacion: dict | None, comprobantes: list[Comprobante]) -> dict:
+def con_imputacion(conf: dict, imputacion: dict | None, comprobantes: list[Comprobante]) -> dict:
     """La imputación de cada documento llega APARTE del documento, por `id_externo` (John, 12-sep-2026: las
     cuentas viven en la aplicación, no en el riel). Se lee aquí, en la puerta, para que un error de forma se diga
     con su motivo, y se le entrega al núcleo dentro de la configuración, que es lo que ya recibe todo el asiento.
 
     Una imputación cuyo `id_externo` no es de ningún documento se rechaza: una llave mal escrita haría salir ese
-    documento con la cuenta por defecto, sin error y sin aviso."""
+    documento con la cuenta por defecto, sin error y sin aviso.
+
+    Es pública porque la CLI la usa: escribe los bytes del archivo y por eso llama al núcleo sin pasar por
+    `exportar` (ver `cli.py`)."""
     if not imputacion:
         return conf
     if not isinstance(imputacion, dict):
@@ -240,7 +243,7 @@ def _preparar(doc: dict, contab: dict | None, incluir_observados: bool, imputaci
     comprobantes = [c for c in todos if not c.excluida]
     if not comprobantes:
         raise DocumentoInvalido("No hay comprobantes que procesar.")
-    conf = _con_imputacion(configuracion(contab), imputacion, todos)
+    conf = con_imputacion(configuracion(contab), imputacion, todos)
     validar.revisar(comprobantes, libro)
     if not incluir_observados:
         con_error = [c for c in comprobantes if c.tiene_errores]
@@ -293,12 +296,15 @@ def exportar(doc: dict, driver: str = "concar", contab: dict | None = None,
     cuando = _fecha_de(fecha)
     libro, comprobantes, conf = _preparar(doc, contab, incluir_observados, imputacion)
     mod = drivers.obtener(driver)
+    # Lo que pide la forma del driver: la configuración, todo el que lleva cuentas (también el registro de un
+    # sistema contable); los correlativos, además, el que arma asientos.
     params: dict[str, Any] = {}
+    if drivers.contrato.necesita_config(mod):
+        params["contab"] = conf
     if drivers.contrato.necesita_asiento(mod):
-        venta = libro.es_venta
-        corr = {s: 1 for s in asi.sub_diarios_presentes(comprobantes, conf, venta)}
+        corr = {s: 1 for s in asi.sub_diarios_presentes(comprobantes, conf, libro.es_venta)}
         corr.update(correlativos or {})
-        params = {"contab": conf, "correlativos": corr}
+        params["correlativos"] = corr
     exp = gen.generar(libro, comprobantes, driver, incluir_errores=incluir_observados, **params)
 
     salida: dict[str, Any] = {
@@ -387,7 +393,7 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
     """
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
-    conf = _con_imputacion(configuracion(contab), imputacion, todos)
+    conf = con_imputacion(configuracion(contab), imputacion, todos)
     detracciones.normalizar(todos, conf)
     validar.revisar(todos, libro)
     mod = drivers.obtener(driver)
@@ -402,24 +408,28 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
     con_error = [c for c in candidatos if c.tiene_errores]
     con_aviso = [c for c in candidatos if c.observaciones and not c.tiene_errores]
 
-    # Lo que pide un driver de ASIENTOS y un registro tributario (el SIRE) no: cuenta, centro,
-    # equivalencias del tipo, código de la moneda y el correlativo de cada sub-diario.
+    # Lo que pide todo driver que lleva cuentas —los de asientos y el registro de un sistema contable— y el
+    # registro tributario (el SIRE) no: la cuenta, el reparto y el centro de cada documento. Y lo que pide solo el
+    # que arma asientos: la equivalencia del tipo, el código de la moneda y el correlativo de cada sub-diario.
     faltantes: dict[str, Any] = {}
     sub_diarios: dict[str, Any] = {}
+    if drivers.contrato.necesita_config(mod):
+        faltantes = {
+            "sin_cuenta": [_serie_numero(c) for c in asi.filas_sin_cuenta(candidatos, conf, venta)],
+            "reparto_no_cuadra": [_serie_numero(c) for c in asi.repartos_que_no_cuadran(candidatos, conf, venta)],
+            "sin_centro_de_costo": [_serie_numero(c) for c in asi.filas_sin_centro(candidatos, conf, venta)],
+        }
     if drivers.contrato.necesita_asiento(mod):
         sin_mapa = asi.tipos_sin_mapa(candidatos, conf)
         con_mapa = [c for c in candidatos if c.tipo_cp not in sin_mapa]
         presentes = asi.sub_diarios_presentes(con_mapa, conf, venta)
         corr = {s: 1 for s in presentes}
         corr.update(correlativos or {})
-        faltantes = {
-            "sin_cuenta": [_serie_numero(c) for c in asi.filas_sin_cuenta(candidatos, conf, venta)],
-            "reparto_no_cuadra": [_serie_numero(c) for c in asi.repartos_que_no_cuadran(candidatos, conf, venta)],
-            "sin_centro_de_costo": [_serie_numero(c) for c in asi.filas_sin_centro(candidatos, conf, venta)],
+        faltantes.update({
             "tipos_sin_equivalencia": sin_mapa,
             "monedas_sin_codigo": asi.monedas_sin_codigo(candidatos, conf),
             "sub_diarios_sin_correlativo": [s for s in presentes if s not in (correlativos or {})],
-        }
+        })
         etiquetas = asi.etiquetas_sub_diario(conf)
         sub_diarios = {s: {"etiqueta": etiquetas.get(s, s), "comprobantes": n, "empieza_en": corr[s]}
                        for s, n in presentes.items()}

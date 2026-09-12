@@ -116,6 +116,7 @@ def test_los_recursos_son_legibles():
     drivers = json.loads(leer_recurso("contaperu://drivers"))
     assert set(drivers) == {"sire", "concar", "csv"}
     assert drivers["concar"]["tipo"] == "archivo" and drivers["sire"]["tipo"] == "texto"
+    assert drivers["sire"]["familia"] == "registro" and drivers["csv"]["familia"] == "asiento"
     pcge = json.loads(leer_recurso("contaperu://catalogos/pcge2026"))
     assert "PCGE 2026" in pcge["fuente"] and len(pcge["cuentas"]) > 1500
     assert pcge["cuentas"]["706"]["nombre"] == "Descuentos concedidos por pronto pago"
@@ -247,3 +248,21 @@ def test_un_comprobante_con_error_bloquea_la_exportacion():
         exportar(documento=doc, driver="concar")
     forzado, adjuntos = exportar(documento=doc, driver="concar", incluir_observados=True)
     assert forzado["archivo"].endswith(".xlsx") and len(adjuntos) == 1
+
+
+def test_la_imputacion_llega_por_el_protocolo():
+    """Las decisiones contables de cada comprobante llegan aparte del documento, por su `id_externo`, en las tres
+    herramientas que arman, revisan o exportan el asiento."""
+    documento = json.loads(json.dumps(DOCUMENTO))
+    documento["comprobantes"][0]["id_externo"] = "fila-871"
+    imputacion = {"fila-871": {"cuenta_contable": "636301", "cuenta_tercero": "469901"}}
+    r = llamar("generar_asiento", documento=documento, imputacion=imputacion)
+    # La cuenta del total manda también en la línea que le descuenta la detracción al proveedor.
+    assert [ln["cuenta"] for ln in r["asiento"]] == ["636301", "401111", "469901", "469901", "421203"]
+
+    corto = {"fila-871": {"reparto": [{"importe": "100", "cuenta_contable": "636301", "centro_costo": "CC-64"}]}}
+    d = llamar("diagnosticar", documento=documento, imputacion=corto)
+    assert d["faltantes"]["reparto_no_cuadra"] == ["E001-871"] and d["listo_para_exportar"] is False
+
+    resumen, _ = exportar(documento=documento, driver="csv", imputacion=imputacion)
+    assert ";636301;D;" in resumen["texto"]

@@ -1,5 +1,6 @@
 """Generar el archivo de salida de un libro: el TXT del registro (y el ZIP con el
-que se sube a SUNAT) o, con la driver `concar`, el Excel de asientos.
+que se sube a SUNAT) o el archivo de un driver que lleva cuentas: el Excel de asientos
+de CONCAR, el CSV, el registro de un sistema contable.
 
 - Respeta el orden de entrada: el que ordena es quien llama (la API por fecha
   y serie-número; los golden, tal cual vienen).
@@ -122,9 +123,22 @@ def _desde_lineas(mod, libro: Libro, comprobantes: list[Comprobante], op: Opcion
                        "debe": str(cuadre.debe), "haber": str(cuadre.haber), "huella": huella(lineas), **extra}
 
 
+def _desde_comprobantes(mod, libro: Libro, comprobantes: list[Comprobante], op: Opciones,
+                        contab: dict | None = None) -> tuple[bytes, dict]:
+    """Un driver de registro de la forma `desde_comprobantes`: el sistema contable que importa su registro y arma
+    el asiento él mismo. No hay asiento que armar ni que numerar, pero sí cuentas que llevar: el núcleo exige lo
+    que ese destino pide (`contrato.exige`) ANTES de llamarlo, y el driver lee cada cuenta de `asiento.partes_de`
+    y `asiento.cuenta_tercero`, la misma resolución que usa el asiento. Sin asiento no hay cuadre ni huella."""
+    if contab is None:
+        raise ValueError(f"El driver {mod.NOMBRE!r} lleva cuentas: necesita `contab`")
+    exigir_requisitos(comprobantes, contab, libro.es_venta, contrato.exige(mod))
+    return mod.desde_comprobantes(libro, comprobantes, contab, op)
+
+
 def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_DEFAULT,
             opciones: Opciones | None = None, incluir_errores: bool = False, **params) -> Exportado:
-    """`params` son los de la driver binaria (CONCAR: `contab`, `correlativos`)."""
+    """`params` son los que pide la forma del driver: `contab`, todo el que lleva cuentas
+    (`contrato.necesita_config`), y además `correlativos`, el que arma asientos (`contrato.necesita_asiento`)."""
     mod = drivers.obtener(driver)
     op = opciones or mod.OPCIONES
     formato = drivers.formato(driver, libro.tipo)
@@ -139,9 +153,11 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers
         raise ErroresBloqueantes(errores)
 
     forma = contrato.forma(mod)
-    if forma in ("desde_lineas", "construir"):
+    if forma in ("desde_lineas", "desde_comprobantes", "construir"):
         if forma == "desde_lineas":
             contenido, extra = _desde_lineas(mod, libro, incluidos, op, **params)
+        elif forma == "desde_comprobantes":
+            contenido, extra = _desde_comprobantes(mod, libro, incluidos, op, **params)
         else:
             contenido, extra = mod.construir(libro, incluidos, op=op, **params)
         nombre = mod.nombre(libro, op)

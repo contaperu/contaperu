@@ -93,7 +93,9 @@ llave**; desde la fachada, es el argumento `imputacion` de `exportar`, `diagnost
 - **Asiento** — el núcleo convierte los registros en líneas de diario una sola vez y el driver las traduce:
   el Excel de CONCAR, el CSV y los sistemas que importan asientos.
 
-Un sistema nuevo solo elige familia: el documento del que sale es el mismo.
+Un sistema nuevo solo elige familia: el documento del que sale es el mismo. En el contrato de drivers
+(`contaperu/drivers/contrato.py`), la familia registro son las formas `linea` y `desde_comprobantes`, y la
+familia asiento, `construir` y `desde_lineas`.
 
 ---
 

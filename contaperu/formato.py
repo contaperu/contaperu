@@ -13,6 +13,7 @@ from dataclasses import dataclass, replace
 from datetime import date
 from decimal import Decimal
 
+from .igv import por_destino
 from .modelo import Comprobante, fecha as a_fecha
 
 
@@ -114,12 +115,7 @@ def armar_linea(campos: list[str], op: Opciones) -> str:
 
 def columnas_igv_compras(c: Comprobante, op: Opciones) -> list[str]:
     """Las 6 columnas de base/IGV de compras según el destino de la adquisición:
-    DG (gravadas), DGNG (gravadas y no gravadas), DNG (no gravadas)."""
+    DG (gravadas), DGNG (gravadas y no gravadas), DNG (no gravadas). La división es de `igv.por_destino`;
+    aquí solo se escribe, con el signo de la nota de crédito."""
     neg = negativo(c, op)
-    bi, igv = fmt_monto(c.base_gravada, op, neg), fmt_monto(c.igv, op, neg)
-    cero = op.cero
-    if c.destino_igv == "DGNG":
-        return [cero, cero, bi, igv, cero, cero]
-    if c.destino_igv == "DNG":
-        return [cero, cero, cero, cero, bi, igv]
-    return [bi, igv, cero, cero, cero, cero]
+    return [fmt_monto(v, op, neg) for pareja in por_destino(c) for v in pareja]

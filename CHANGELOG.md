@@ -37,6 +37,28 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
 - `estandar/LEEME.md`: **documento, imputación y configuración**, con la forma de la imputación, y **las dos
   familias de salida** (registro y asiento). Y los nombres reservados que pide CONTASIS: `medio_pago`,
   `retencion_igv`, `percepcion` y `no_domiciliado`.
+- **La familia registro en el contrato de drivers: la forma `desde_comprobantes(libro, comprobantes, contab,
+  op)`**, para un sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo
+  (CONTASIS, en construcción). El driver recibe los comprobantes y la configuración, con la imputación dentro,
+  y lee cada cuenta de `asiento.partes_de` y `asiento.cuenta_tercero`: no decide ninguna. El núcleo no le arma
+  asiento ni le numera nada, y le exige la cuenta antes de llamarlo (`contrato.EXIGE_NUCLEO_REGISTRO`); puede
+  exigir además el centro de costo (`EXIGE_POSIBLES_REGISTRO`). La equivalencia del tipo y el código de la
+  moneda son de la configuración del asiento y no le aplican. `diagnosticar` le cuenta la cuenta, el reparto y
+  el centro, sin sub-diarios.
+- **`contrato.familia(mod)`** (`registro` | `asiento`) y **`contrato.necesita_config(mod)`**: la configuración la
+  pide todo driver que lleva cuentas; los correlativos, solo el que arma asientos (`necesita_asiento`, que no
+  cambia). El recurso `contaperu://drivers` del MCP dice la familia de cada driver.
+- **`igv.por_destino`**: la base y el IGV de una compra en las tres parejas del destino de la adquisición (DG,
+  DGNG, DNG). Vivía dentro de `formato.columnas_igv_compras`, la del SIRE, y la plantilla de importación de
+  CONTASIS lleva las mismas seis columnas (J–O): la regla no puede vivir dos veces. El TXT del SIRE no cambia.
+- **La imputación entra por las dos puertas**: `--imputacion` en `contaperu desde-json` y en `contaperu
+  diagnosticar`, y el argumento `imputacion` en las herramientas `generar_asiento`, `diagnosticar` y `exportar`
+  del MCP. `operaciones.con_imputacion` es pública: la CLI escribe bytes y llama al núcleo sin pasar por
+  `exportar`.
+
+### Cambiado
+- `contrato.incumplimientos` explica de otra manera por qué un driver de la forma `linea` no declara `EXIGE`
+  («no lleva cuentas»): ya no es cosa solo de los de asientos, porque uno de registro también lo declara.
 
 ### Obsoleto
 - **`cuenta_contable` y `centro_costo` del comprobante pasan a legado**: se aceptan, pero la imputación manda sobre

@@ -103,3 +103,27 @@ def test_sin_centro_la_cli_remite_a_diagnosticar(tmp_path, capsys):
     assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(tmp_path / "s"), "--config", str(config)]) == 1
     err = capsys.readouterr().err
     assert "sin centro de costo" in err and "contaperu diagnosticar" in err and "Traceback" not in err
+
+
+def test_la_imputacion_entra_por_la_terminal(tmp_path, capsys):
+    """La imputación de cada documento llega aparte, por `id_externo`, igual que por la fachada: --imputacion en
+    `desde-json` y en `diagnosticar`. Una llave que no es de ningún documento se rechaza antes de escribir nada."""
+    doc = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
+    doc["comprobantes"][0]["id_externo"] = "fila-1"
+    documento, config, imputacion = tmp_path / "mes.json", tmp_path / "config.json", tmp_path / "imputacion.json"
+    documento.write_text(json.dumps(doc), encoding="utf-8")
+    config.write_text(json.dumps({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}), encoding="utf-8")
+    imputacion.write_text(json.dumps({"fila-1": {"cuenta_contable": "636301"}}), encoding="utf-8")
+    salida = tmp_path / "s"
+    orden = ["desde-json", str(documento), "--driver", "csv", "--salida", str(salida), "--config", str(config)]
+    assert cli.main(orden + ["--imputacion", str(imputacion)]) == 0
+    csv = (salida / "asiento_20601234567_202601_compra.csv").read_bytes().decode("utf-8-sig")
+    assert csv.count(";636301;D;") == 1 and csv.count(";659999;D;") == 2
+
+    # Sin la cuenta de gasto del RUC, al primero le llega la suya y a los otros dos les sigue faltando.
+    assert cli.main(["diagnosticar", str(documento), "--imputacion", str(imputacion)]) == 1
+    assert "NO está listo: 2 sin cuenta contable" in capsys.readouterr().out
+
+    imputacion.write_text(json.dumps({"fila-9": {"cuenta_contable": "636301"}}), encoding="utf-8")
+    assert cli.main(orden + ["--imputacion", str(imputacion)]) == 2
+    assert "fila-9" in capsys.readouterr().err

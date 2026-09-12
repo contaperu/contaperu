@@ -1,25 +1,38 @@
 """El contrato de un driver de salida: lo que tiene que exponer para que el núcleo lo use.
 
-Hay tres formas, y un driver implementa una:
+El mismo documento sale de dos maneras —como registro o como asiento (`estandar/LEEME.md`, «Dos familias de
+salida, un solo documento»)—, y hay cuatro formas de driver. Un driver implementa una:
+
+**Familia registro** — una fila por comprobante, sin asiento:
 
 - **`linea(c, libro, idx, op) -> str`** — un archivo de texto, una línea por comprobante. Es el TXT
-  del SIRE: un registro tributario, que se escribe desde el comprobante y no desde el asiento.
+  del SIRE: un registro tributario, que se escribe desde el comprobante y no lleva cuentas.
+- **`desde_comprobantes(libro, comprobantes, contab, op) -> (bytes, resumen)`** — el archivo de un sistema
+  contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS, en
+  construcción). Recibe los comprobantes y la configuración, con la imputación de cada documento dentro, y
+  **no decide ninguna cuenta**: las lee de `asiento.partes_de` (la de la base, o sus partes si hay reparto) y
+  de `asiento.cuenta_tercero` (la del total), que las resuelven igual que para el asiento de CONCAR. No numera:
+  el correlativo es del asiento, y el asiento lo arma el destino. El núcleo exige la cuenta ANTES de llamarlo.
+
+**Familia asiento** — las líneas de la partida doble:
+
 - **`construir(libro, comprobantes, contab, correlativos, op) -> (bytes, resumen)`** — un archivo
   entero armado a partir de los comprobantes. Es la forma del Excel de CONCAR, que nació antes que
   la línea neutral.
 - **`desde_lineas(libro, lineas, contab, op) -> (bytes, resumen)`** — un archivo de asientos armado
   a partir de las LÍNEAS NEUTRALES de `pe-ledger` (`asiento.LineaDiario`), ya numeradas y cuadradas.
-  **Es la forma para un driver de asientos nuevo** (SISCONT, STARSOFT, CONTASIS…): el driver solo
+  **Es la forma para un driver de asientos nuevo** (SISCONT, STARSOFT…): el driver solo
   traduce vocabulario, y la contabilidad —cuentas, sentidos, detracción, numeración— la pone el núcleo
   una sola vez para todos. El núcleo exige el cuadre ANTES de llamarlo.
 
 Todas exponen además `NOMBRE`, `FORMATOS` ({'venta'|'compra': identificador de la salida}),
-`OPCIONES` (una `formato.Opciones`) y `nombre(libro, op) -> str`; las dos de archivo, su
-`CONTENT_TYPE`. Opcional: `EXCLUYE_TIPOS`, los tipos SUNAT que ese destino no lleva; y, en un driver de
-asientos, `EXIGE`: lo que ese ERP no puede importar sin y que el núcleo, si no se lo dicen, deja pasar
-(`EXIGE_POSIBLES`). La cuenta contable y la equivalencia del tipo los exige el núcleo a todo driver de
-asientos, se declare o no (`EXIGE_NUCLEO`): sin ellos no hay línea que armar. `exige(mod)` devuelve la
-unión, y es lo que `diagnosticar` lee para decidir si un mes está listo **para ese destino** — la idea
+`OPCIONES` (una `formato.Opciones`) y `nombre(libro, op) -> str`; las tres de archivo, su
+`CONTENT_TYPE`. Opcional: `EXCLUYE_TIPOS`, los tipos SUNAT que ese destino no lleva; y, en un driver que
+lleva cuentas, `EXIGE`: lo que ese sistema no puede importar sin y que el núcleo, si no se lo dicen, deja
+pasar (`EXIGE_POSIBLES`; en uno de registro, `EXIGE_POSIBLES_REGISTRO`). Lo que el núcleo exige se declare o
+no (`EXIGE_NUCLEO`, `EXIGE_NUCLEO_REGISTRO`) es aquello sin lo que no hay nada que escribir: la cuenta
+contable, y en un asiento además la equivalencia del tipo, de la que sale el sub-diario. `exige(mod)` devuelve
+la unión, y es lo que `diagnosticar` lee para decidir si un mes está listo **para ese destino** — la idea
 viene de Codat `options` y Merge `/meta` (ver `REFERENCIAS.md`): el destino declara qué exige antes de
 que nadie escriba un byte.
 
@@ -39,7 +52,8 @@ if TYPE_CHECKING:
 
 # En orden de preferencia: si un driver expone dos (el CSV conserva `construir` por compatibilidad),
 # el núcleo usa la primera.
-FORMAS = ("desde_lineas", "construir", "linea")
+FORMAS = ("desde_lineas", "desde_comprobantes", "construir", "linea")
+FAMILIA = {"linea": "registro", "desde_comprobantes": "registro", "construir": "asiento", "desde_lineas": "asiento"}
 TIPOS_LIBRO = ("venta", "compra")
 
 # Lo que un driver de asientos PUEDE exigir (el núcleo sabe generar sin ello): el centro de costo en
@@ -47,6 +61,12 @@ TIPOS_LIBRO = ("venta", "compra")
 # la cuenta contable de cada línea y la equivalencia del tipo SUNAT (de ella sale el sub-diario).
 EXIGE_POSIBLES = frozenset({"centro_costo", "moneda"})
 EXIGE_NUCLEO = frozenset({"cuenta_contable", "tipo_cp"})
+# Y a uno de registro que lleva cuentas (`desde_comprobantes`), el núcleo le exige la cuenta —la columna con la
+# que el destino arma su asiento— y nada del sub-diario ni de su equivalencia, que son del asiento. Puede exigir
+# el centro de costo. La moneda no: su código (`monedas_codigo`) es el de la configuración del asiento, y un
+# registro escribe la moneda en su propio vocabulario.
+EXIGE_POSIBLES_REGISTRO = frozenset({"centro_costo"})
+EXIGE_NUCLEO_REGISTRO = frozenset({"cuenta_contable"})
 
 
 class Driver(Protocol):
@@ -59,6 +79,14 @@ class Driver(Protocol):
 
 class DriverTexto(Driver, Protocol):
     def linea(self, c: Comprobante, libro: Libro, idx: int, op: Opciones = ...) -> str: ...
+
+
+class DriverRegistro(Driver, Protocol):
+    CONTENT_TYPE: str
+    EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_REGISTRO
+
+    def desde_comprobantes(self, libro: Libro, comprobantes: list[Comprobante], contab: dict,
+                           op: Opciones = ...) -> tuple[bytes, dict]: ...
 
 
 class DriverArchivo(Driver, Protocol):
@@ -78,20 +106,35 @@ class DriverAsientos(Driver, Protocol):
 
 
 def forma(mod: Any) -> str:
-    """Cuál de las tres formas implementa el driver (la preferida si expone varias); '' si ninguna."""
+    """Cuál de las cuatro formas implementa el driver (la preferida si expone varias); '' si ninguna."""
     return next((f for f in FORMAS if callable(getattr(mod, f, None))), "")
 
 
+def familia(mod: Any) -> str:
+    """'registro' (una fila por comprobante: `linea`, `desde_comprobantes`) o 'asiento' (`construir`,
+    `desde_lineas`); '' si no implementa ninguna forma."""
+    return FAMILIA.get(forma(mod), "")
+
+
+def necesita_config(mod: Any) -> bool:
+    """¿Necesita la configuración contable del contribuyente? Todo driver que lleva cuentas: los de asientos y el
+    registro de un sistema contable (`desde_comprobantes`). El registro tributario (`linea`), no."""
+    return forma(mod) in ("desde_lineas", "construir", "desde_comprobantes")
+
+
 def necesita_asiento(mod: Any) -> bool:
-    """¿Necesita la configuración contable y los correlativos? Las dos formas de archivo, sí."""
-    return forma(mod) in ("desde_lineas", "construir")
+    """¿Arma asientos, y necesita por eso además los correlativos? Las dos formas de la familia asiento."""
+    return familia(mod) == "asiento"
 
 
 def exige(mod: Any) -> frozenset[str]:
-    """Todo lo que ese destino exige para exportar: lo del núcleo más lo que el driver declara en
-    `EXIGE`. Un registro tributario (forma `linea`) no exige nada de esto: no arma asientos."""
-    if forma(mod) != "linea" and forma(mod):
-        return EXIGE_NUCLEO | frozenset(getattr(mod, "EXIGE", None) or ())
+    """Todo lo que ese destino exige para exportar: lo del núcleo para su forma más lo que el driver declara en
+    `EXIGE`. Un registro tributario (forma `linea`) no exige nada de esto: no lleva cuentas."""
+    declarado = frozenset(getattr(mod, "EXIGE", None) or ())
+    if necesita_asiento(mod):
+        return EXIGE_NUCLEO | declarado
+    if forma(mod) == "desde_comprobantes":
+        return EXIGE_NUCLEO_REGISTRO | declarado
     return frozenset()
 
 
@@ -120,10 +163,11 @@ def incumplimientos(mod: Any) -> list[str]:
         problemas.append("EXCLUYE_TIPOS son códigos SUNAT en texto")
     declarado = getattr(mod, "EXIGE", None)
     if declarado is not None:
+        posibles = EXIGE_POSIBLES_REGISTRO if f == "desde_comprobantes" else EXIGE_POSIBLES
         if f == "linea":
-            problemas.append("EXIGE solo lo declara un driver de asientos: un registro tributario no arma asientos")
+            problemas.append("EXIGE no lo declara un registro tributario (forma `linea`): no lleva cuentas")
         elif isinstance(declarado, str) or not all(isinstance(x, str) for x in declarado):
             problemas.append("EXIGE es un conjunto de textos")
-        elif set(declarado) - EXIGE_POSIBLES:
-            problemas.append(f"EXIGE solo admite {sorted(EXIGE_POSIBLES)}; sobra {sorted(set(declarado) - EXIGE_POSIBLES)}")
+        elif set(declarado) - posibles:
+            problemas.append(f"EXIGE solo admite {sorted(posibles)}; sobra {sorted(set(declarado) - posibles)}")
     return problemas

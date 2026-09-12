@@ -69,6 +69,23 @@ def base_imputable(c: Comprobante, venta: bool) -> Decimal:
     return (Decimal(c.total or 0).quantize(D2) - igv_del_asiento(c, venta)).quantize(D2)
 
 
+def por_destino(c: Comprobante) -> tuple[tuple[Decimal, Decimal], tuple[Decimal, Decimal], tuple[Decimal, Decimal]]:
+    """La base y el IGV de una compra en las tres parejas del destino de la adquisición (`destino_igv`), en el
+    orden de los registros de compras: gravadas destinadas a operaciones gravadas (DG), a gravadas y no gravadas
+    (DGNG) y a no gravadas (DNG). La pareja entera va a su destino y las otras dos quedan en cero; un destino
+    que no es DGNG ni DNG cuenta como DG.
+
+    Fuente: el Anexo 11 del SIRE (RS 040-2022, campos 15-20). La plantilla de importación de CONTASIS lleva las
+    mismas seis columnas (J-O). Vivía dentro de `formato.columnas_igv_compras`, la del SIRE; salió aquí el
+    12-sep-2026 para que no viva dos veces."""
+    pareja, cero = (c.base_gravada, c.igv), (CERO, CERO)
+    if c.destino_igv == "DGNG":
+        return cero, pareja, cero
+    if c.destino_igv == "DNG":
+        return cero, cero, pareja
+    return pareja, cero, cero
+
+
 def _cargos(c: Comprobante) -> Decimal:
     """Lo que forma el total y no es base gravada, IGV ni importe sin IGV: ISC, IVAP, ICBPER y otros
     cargos. Los descuentos no: la base y el IGV ya son netos. Es la fórmula del total de `validar.py` sin

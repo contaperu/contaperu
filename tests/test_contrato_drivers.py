@@ -80,7 +80,7 @@ def test_un_driver_de_texto_no_declara_exige():
     assert contrato.incumplimientos(tributario) == []
     tributario.EXIGE = frozenset()
     assert contrato.incumplimientos(tributario) == [
-        "EXIGE solo lo declara un driver de asientos: un registro tributario no arma asientos"]
+        "EXIGE no lo declara un registro tributario (forma `linea`): no lleva cuentas"]
 
 
 def test_lo_que_el_driver_exige_lo_hace_cumplir_el_nucleo(con_terceros):
@@ -191,3 +191,129 @@ def test_un_driver_roto_se_ignora_con_aviso_y_no_tumba_el_registro(con_terceros)
 def test_el_registro_queda_limpio_despues():
     """El fixture de arriba restaura el registro: los tests que vengan después ven los de serie."""
     assert set(drivers.DRIVERS) == set(drivers.DE_SERIE)
+
+
+# --- la familia registro: un sistema contable que importa su registro y arma el asiento él mismo ------------
+
+def driver_de_registro(nombre: str = "registro") -> types.ModuleType:
+    """Un driver de la forma `desde_comprobantes`, del tamaño de un ejemplo: una fila por cada parte de la base de
+    cada comprobante, con las cuentas que resuelve el núcleo. No decide ninguna."""
+    from contaperu import asiento as asi
+
+    m = types.ModuleType(f"contaperu_{nombre}")
+    m.NOMBRE = nombre
+    m.FORMATOS = {"compra": f"{nombre}_registro", "venta": f"{nombre}_registro"}
+    m.OPCIONES = Opciones(extension=".txt")
+    m.CONTENT_TYPE = "text/plain; charset=utf-8"
+    m.nombre = lambda libro, op=m.OPCIONES: f"{nombre}_{libro.ruc}_{libro.periodo}{op.extension}"
+
+    def desde_comprobantes(libro, comprobantes, contab, op=m.OPCIONES):
+        venta = libro.es_venta
+        filas = [f"{c.serie}-{c.numero}|{cuenta}|{centro}|{'' if importe is None else importe}|"
+                 f"{asi.cuenta_tercero(c, contab, venta)}"
+                 for c in comprobantes for cuenta, centro, importe in asi.partes_de(c, contab, venta)]
+        return "\n".join(filas).encode("utf-8"), {"filas": len(filas)}
+
+    m.desde_comprobantes = desde_comprobantes
+    return m
+
+
+def test_las_dos_familias_y_lo_que_pide_cada_forma():
+    """Registro (una fila por comprobante) o asiento. Lo que pide cada forma sale de ahí: la configuración, todo
+    driver que lleva cuentas; los correlativos, solo el que arma asientos."""
+    registro = driver_de_registro()
+    assert contrato.incumplimientos(registro) == [] and contrato.forma(registro) == "desde_comprobantes"
+    todos = (drivers.sire, registro, drivers.concar, drivers.csv)
+    assert [contrato.familia(m) for m in todos] == ["registro", "registro", "asiento", "asiento"]
+    assert [contrato.necesita_config(m) for m in todos] == [False, True, True, True]
+    assert [contrato.necesita_asiento(m) for m in todos] == [False, False, True, True]
+    # El núcleo le exige la cuenta y nada del sub-diario; puede sumar el centro, y la moneda de CONCAR no.
+    assert contrato.exige(registro) == {"cuenta_contable"}
+    registro.EXIGE = frozenset({"centro_costo"})
+    assert contrato.incumplimientos(registro) == []
+    assert contrato.exige(registro) == {"cuenta_contable", "centro_costo"}
+    registro.EXIGE = frozenset({"moneda"})
+    assert contrato.incumplimientos(registro) == ["EXIGE solo admite ['centro_costo']; sobra ['moneda']"]
+
+
+def test_un_registro_sale_sin_asiento_y_con_las_cuentas_del_asiento(con_terceros):
+    """El núcleo no le arma asiento —ni sub-diarios, ni cuadre, ni huella—, pero cada cuenta es la que llevaría el
+    asiento, porque sale de la misma resolución: ningún driver decide una cuenta."""
+    con_terceros(_Entrada("registro", driver_de_registro()))
+    doc = documento_de_compras()
+    r = op.exportar(doc, "registro", CONTAB)
+    filas = [f.split("|") for f in r["texto"].splitlines()]
+    assert len(filas) == r["resumen"]["filas"] == r["filas"] == len(doc["comprobantes"])
+    asiento = op.generar_asiento(doc, CONTAB)["asiento"]
+    assert [f[1] for f in filas] == [ln["cuenta"] for ln in asiento if ln["rol"] == "principal"]
+    assert [f[4] for f in filas] == [ln["cuenta"] for ln in asiento if ln["rol"] == "tercero"]
+    assert not {"sub_diarios", "debe", "haber", "huella"} & set(r["resumen"])
+    assert r["archivo"] == "registro_20601234567_202601.txt" and "huella" not in r["_exportacion"]
+
+
+def test_al_registro_le_llega_la_imputacion_y_no_le_pide_la_equivalencia_del_tipo(con_terceros):
+    """La imputación de cada documento le llega dentro de la configuración, como al asiento: un reparto, una fila
+    por parte. Y la equivalencia del tipo es del asiento (de ella sale el sub-diario): sin ella el CSV se niega y
+    el registro sale."""
+    from contaperu import asiento as asi
+    from contaperu.igv import base_imputable
+    from contaperu.modelo import Comprobante
+
+    con_terceros(_Entrada("registro", driver_de_registro()))
+    doc = documento_de_compras()
+    primero = doc["comprobantes"][0]
+    primero["id_externo"] = "fila-1"
+    base = base_imputable(Comprobante.de_dict(primero), False)
+    mitad = (base / 2).quantize(base)
+    reparto = [{"importe": str(mitad), "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
+               {"importe": str(base - mitad), "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]
+    r = op.exportar(doc, "registro", CONTAB, imputacion={"fila-1": {"reparto": reparto}})
+    filas = [f.split("|") for f in r["texto"].splitlines()]
+    assert len(filas) == len(doc["comprobantes"]) + 1
+    assert [f[1:4] for f in filas[:2]] == [["636301", "SISTEMAS", f"{mitad:.2f}"],
+                                           ["632201", "DESARROLLO", f"{base - mitad:.2f}"]]
+
+    sin_equivalencia = dict(CONTAB, tipos={c["tipo_cp"]: {"concar": ""} for c in doc["comprobantes"]})
+    with pytest.raises(asi.TipoSinMapa):
+        op.exportar(doc, "csv", sin_equivalencia)
+    assert op.exportar(doc, "registro", sin_equivalencia)["resumen"]["filas"] == len(doc["comprobantes"])
+
+
+def test_el_registro_exige_la_cuenta_antes_de_escribir_y_diagnosticar_lo_dice(con_terceros):
+    """Sin cuenta, el driver ni se llama; lo que declara en EXIGE lo hace cumplir el núcleo. `diagnosticar` le
+    cuenta la cuenta, el reparto y el centro, sin sub-diarios, y solo lo exigido deja el mes «no listo»."""
+    from contaperu import asiento as asi
+
+    exigente = driver_de_registro("exigente")
+    exigente.EXIGE = frozenset({"centro_costo"})
+    con_terceros(_Entrada("registro", driver_de_registro()), _Entrada("exigente", exigente))
+    doc = documento_de_compras()
+    with pytest.raises(asi.SinCuenta):
+        op.exportar(doc, "registro")
+    with pytest.raises(asi.SinCentro):
+        op.exportar(doc, "exigente", CONTAB_CON_CENTROS)
+
+    d = op.diagnosticar(doc, driver="registro")
+    assert d["exige"] == ["cuenta_contable"] and d["listo_para_exportar"] is False
+    assert set(d["faltantes"]) == {"sin_cuenta", "reparto_no_cuadra", "sin_centro_de_costo"}
+    assert d["por_que_no"] == [f"{len(doc['comprobantes'])} sin cuenta contable"] and d["sub_diarios"] == {}
+    con_centros = op.diagnosticar(doc, CONTAB_CON_CENTROS, driver="registro")
+    assert con_centros["faltantes"]["sin_centro_de_costo"] and con_centros["listo_para_exportar"] is True
+    assert op.diagnosticar(doc, CONTAB_CON_CENTROS, driver="exigente")["listo_para_exportar"] is False
+
+
+def test_la_terminal_alcanza_al_registro_con_su_configuracion_y_su_imputacion(con_terceros, tmp_path):
+    from contaperu import cli
+
+    con_terceros(_Entrada("registro", driver_de_registro()))
+    doc = documento_de_compras()
+    doc["comprobantes"][0]["id_externo"] = "fila-1"
+    documento, config, imputacion = tmp_path / "mes.json", tmp_path / "config.json", tmp_path / "imputacion.json"
+    documento.write_text(json.dumps(doc), encoding="utf-8")
+    config.write_text(json.dumps(CONTAB), encoding="utf-8")
+    imputacion.write_text(json.dumps({"fila-1": {"cuenta_contable": "636301"}}), encoding="utf-8")
+    salida = tmp_path / "s"
+    assert cli.main(["desde-json", str(documento), "--driver", "registro", "--salida", str(salida),
+                     "--config", str(config), "--imputacion", str(imputacion)]) == 0
+    filas = (salida / "registro_20601234567_202601.txt").read_text(encoding="utf-8").splitlines()
+    assert [f.split("|")[1] for f in filas] == ["636301", "659999", "659999"]

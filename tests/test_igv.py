@@ -117,3 +117,12 @@ def test_una_nota_entera_como_descuento_sigue_entera_al_cambiar_el_total():
     r = igv.aplicar_total(nc_descuento(), "236")
     assert (r["base_gravada"], r["dscto_base"], r["dscto_igv"]) == (D("218"), D("218"), D("18"))
 
+
+def test_la_compra_se_divide_por_el_destino_de_la_adquisicion():
+    """Base e IGV van enteros a una de las tres parejas del registro de compras —gravadas (DG), gravadas y no
+    gravadas (DGNG), no gravadas (DNG)— y las otras dos quedan en cero. El registro de compras del SIRE y la
+    plantilla de CONTASIS llevan esas seis columnas: la división vive aquí una vez."""
+    pareja, cero = (D("100"), D("18")), (D("0"), D("0"))
+    assert igv.por_destino(cp(base_gravada="100", igv="18")) == (pareja, cero, cero)
+    assert igv.por_destino(cp(base_gravada="100", igv="18", destino_igv="dgng")) == (cero, pareja, cero)
+    assert igv.por_destino(cp(base_gravada="100", igv="18", destino_igv="DNG")) == (cero, cero, pareja)

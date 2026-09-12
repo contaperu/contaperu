@@ -30,7 +30,7 @@ historia de un repositorio público no sale nunca más.
 
 Un driver traduce el asiento al formato que importa un sistema contable. El contrato completo está en
 [`contaperu/drivers/contrato.py`](contaperu/drivers/contrato.py); para un driver de **asientos** nuevo
-(SISCONT, STARSOFT, CONTASIS…) la forma es `desde_lineas`: el núcleo arma las líneas neutrales de
+(SISCONT, STARSOFT…) la forma es `desde_lineas`: el núcleo arma las líneas neutrales de
 `pe-ledger`, las numera y exige que cuadren, y tu driver solo las traduce. No tienes que reimplementar
 ni una cuenta, ni un sentido, ni la detracción.
 
@@ -56,8 +56,15 @@ def desde_lineas(libro, lineas, contab, op=OPCIONES) -> tuple[bytes, dict]:
 ```
 
 El driver CSV ([`contaperu/drivers/csv`](contaperu/drivers/csv/__init__.py)) es el ejemplo más corto de
-esta forma. Las otras dos —`linea` para un TXT por comprobante, como el SIRE, y `construir` para un
-archivo armado desde los comprobantes, como CONCAR— siguen existiendo.
+esta forma.
+
+Si tu sistema no importa asientos sino su **registro** de compras y de ventas, y arma el asiento él mismo
+(CONTASIS), la forma es `desde_comprobantes(libro, comprobantes, contab, op)`: recibes los comprobantes y la
+configuración, y cada cuenta la lees de `asiento.partes_de` (la de la base, o una por parte si hay reparto) y de
+`asiento.cuenta_tercero` (la del total), que la resuelven igual que para el asiento, con la imputación de cada
+documento dentro. El núcleo exige la cuenta antes de llamarte. Las otras dos formas —`linea` para un TXT por
+comprobante, como el SIRE, y `construir` para un archivo armado desde los comprobantes, como CONCAR— siguen
+existiendo.
 
 **Dos maneras de publicarlo:**
 
@@ -77,7 +84,7 @@ compras con el asiento cuadrado. Requisitos para que un driver entre **al reposi
 3. **Nada de red, nada de disco, nada de estado.** Entra por parámetro, sale por retorno.
 4. **Un tipo de comprobante sin equivalente detiene la exportación**, no se inventa uno. Es la regla más
    importante: es preferible un error claro a un asiento silenciosamente mal.
-5. **Declara en `EXIGE` lo que tu ERP no puede importar sin** (`centro_costo`, `moneda`), y nada más: es
+5. **Declara en `EXIGE` lo que tu ERP no puede importar sin** (`centro_costo`, `moneda`; en uno de registro, solo `centro_costo`), y nada más: es
    lo que `diagnosticar` usa para decir si un mes está listo para tu destino, y lo que el núcleo hace
    cumplir antes de llamarte. Un requisito fuera de ese catálogo no pasa el contrato.
 

@@ -54,19 +54,22 @@ def _escribir(exp: gen.Exportado, salida: Path) -> None:
         (salida / exp.nombre_zip).write_bytes(exp.zip)
         destino = salida / exp.nombre_zip
     else:
-        # Un archivo de asientos (el Excel de CONCAR, el CSV, el de un driver de terceros): tal cual.
+        # Un archivo (el Excel de CONCAR, el CSV, el registro de un sistema contable, el de un driver de
+        # terceros): tal cual.
         destino = salida / exp.archivo
         destino.write_bytes(exp.contenido)
     print(f"  {exp.driver:<5} {exp.formato:<9} {exp.n_filas:>3} filas  → {destino}")
 
 
 def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, salida: Path,
-                   incluir_errores: bool, contab: dict | None = None) -> int:
-    # "todas" = los drivers de TXT. Los de asientos (CONCAR, CSV, los de terceros) se piden por su
-    # nombre: necesitan la configuración contable del contribuyente, que entra por --config, y sus
-    # correlativos arrancan en 1 —los mismos valores de partida que usa `operaciones.exportar`—.
+                   incluir_errores: bool, conf: dict | None = None) -> int:
+    # "todas" = los drivers de TXT. Los que llevan cuentas (CONCAR, el CSV, el registro de un sistema contable,
+    # los de terceros) se piden por su nombre: necesitan la configuración contable del contribuyente —la de
+    # --config, con la imputación de --imputacion dentro—, y los de asientos, además sus correlativos, que
+    # arrancan en 1: los mismos valores de partida que usa `operaciones.exportar`.
     nombres = ([n for n, m in drivers.DRIVERS.items() if drivers.contrato.forma(m) == "linea"]
                if driver == "todas" else [driver])
+    conf = operaciones.configuracion() if conf is None else conf
     codigo = 0
     for p in nombres:
         mod = drivers.obtener(p)
@@ -74,11 +77,11 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
             print(f"  {p:<5} no genera libros de {libro.tipo}", file=sys.stderr)
             continue
         params: dict = {}
+        if drivers.contrato.necesita_config(mod):
+            params["contab"] = conf
         if drivers.contrato.necesita_asiento(mod):
-            conf = operaciones.configuracion(contab)
             incluidos = gen.seleccionar(comprobantes)
-            params = {"contab": conf,
-                      "correlativos": {s: 1 for s in asi.sub_diarios_presentes(incluidos, conf, libro.es_venta)}}
+            params["correlativos"] = {s: 1 for s in asi.sub_diarios_presentes(incluidos, conf, libro.es_venta)}
         try:
             _escribir(gen.generar(libro, comprobantes, p, incluir_errores=incluir_errores, **params), salida)
         except gen.ErroresBloqueantes as e:
@@ -142,7 +145,13 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
         validar.revisar(comprobantes, libro)
         print(_tabla(comprobantes))
     contab = _leer_json(args.config) if args.config else None
-    return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores, contab)
+    imputacion = _leer_json(args.imputacion) if args.imputacion else None
+    try:
+        conf = operaciones.con_imputacion(operaciones.configuracion(contab), imputacion, comprobantes)
+    except operaciones.DocumentoInvalido as e:
+        print(f"La imputación no se puede usar con este documento: {e}", file=sys.stderr)
+        return 2
+    return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores, conf)
 
 
 def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
@@ -153,10 +162,12 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
     """Qué bloquea, qué falta y qué saldría, antes de generar nada."""
     datos = _leer_json(args.json)
     contab = _leer_json(args.config) if args.config else None
+    imputacion = _leer_json(args.imputacion) if args.imputacion else None
     try:
-        d = operaciones.diagnosticar(datos, contab, driver=args.driver)
+        d = operaciones.diagnosticar(datos, contab, driver=args.driver, imputacion=imputacion)
     except operaciones.DocumentoInvalido as e:
-        print(f"El archivo no es un documento pe-ledger válido: {e}", file=sys.stderr)
+        # El documento que no se puede leer, o una imputación que no es de él: el motivo va en `e`.
+        print(f"No se puede diagnosticar: {e}", file=sys.stderr)
         return 2
     lib, t = d["libro"], d["totales"]
     print(f"Libro: {lib['tipo'].upper()} {lib['periodo']} · RUC {lib['ruc']} · destino {d['driver']}")
@@ -167,7 +178,8 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         for item in d[bloque]:
             for o in item["observaciones"]:
                 print(f"  {marca} {item['serie_numero']:<18} [{o['codigo']}] {o['texto']}")
-    for clave, titulo in (("sin_cuenta", "Sin cuenta contable"), ("sin_centro_de_costo", "Sin centro de costo"),
+    for clave, titulo in (("sin_cuenta", "Sin cuenta contable"), ("reparto_no_cuadra", "Reparto que no suma la base"),
+                          ("sin_centro_de_costo", "Sin centro de costo"),
                           ("tipos_sin_equivalencia", "Tipos sin equivalencia"),
                           ("monedas_sin_codigo", "Monedas sin código"),
                           ("sub_diarios_sin_correlativo", "Sub-diarios sin correlativo (arrancan en 1)")):
@@ -212,6 +224,11 @@ def _consola_utf8() -> None:
             pass
 
 
+# La imputación de cada documento llega aparte del documento, igual que por la fachada (`operaciones.con_imputacion`).
+AYUDA_IMPUTACION = ("JSON con la imputación de cada documento, por su id_externo: "
+                    "{id: {cuenta_contable, centro_costo, cuenta_tercero, reparto}}")
+
+
 def main(argv: list[str] | None = None) -> int:
     _consola_utf8()
     ap = argparse.ArgumentParser(prog="contaperu", description=__doc__,
@@ -237,13 +254,15 @@ def main(argv: list[str] | None = None) -> int:
     d.add_argument("--salida", default="salida")
     d.add_argument("--revisar", action="store_true", help="aplicar las validaciones antes de generar")
     d.add_argument("--incluir-errores", action="store_true")
-    d.add_argument("--config", help="JSON con la configuración contable (la piden los drivers de asientos: concar, csv…)")
+    d.add_argument("--config", help="JSON con la configuración contable (la piden los drivers que llevan cuentas: concar, csv…)")
+    d.add_argument("--imputacion", help=AYUDA_IMPUTACION)
     d.set_defaults(fn=cmd_desde_json)
 
     x = sub.add_parser("diagnosticar", help="qué bloquea, qué falta y qué saldría, antes de generar nada")
     x.add_argument("json", help="documento pe-ledger")
     x.add_argument("--driver", default="concar", choices=list(drivers.DRIVERS))
     x.add_argument("--config", help="JSON con la configuración contable del contribuyente")
+    x.add_argument("--imputacion", help=AYUDA_IMPUTACION)
     x.set_defaults(fn=cmd_diagnosticar)
 
     c = sub.add_parser("comparar", help="nuestro TXT del SIRE vs la exportación del detalle de SUNAT")

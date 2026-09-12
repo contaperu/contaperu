@@ -90,6 +90,10 @@ Reglas que conviene tener claras antes de armar un documento:
     retención del IGV del 3 % NO es una detracción y no entra en el asiento.
   - Cada contribuyente tiene su plan de cuentas y sus sub-diarios: van en `configuracion`.
     `configuracion_por_defecto` devuelve un punto de partida razonable, no la verdad de nadie.
+  - La cuenta, el centro de costo, la cuenta del total y el reparto de CADA comprobante los decide
+    quien revisa, y no van en el documento: llegan aparte, en `imputacion`, por el `id_externo` del
+    comprobante — {"fila-8": {"cuenta_contable": "636301", "centro_costo": "OBRA01"}}. Lo que no
+    traiga sale de la `configuracion`.
   - Antes de inventar una cuenta contable, `buscar_cuenta_pcge`. Que una cuenta no esté en el PCGE
     no la invalida —las divisionarias las abre cada empresa—, pero conviene saberlo.
 
@@ -143,6 +147,7 @@ def drivers_disponibles() -> str:
         nombre: {"formatos": mod.FORMATOS,
                  "tipo": "texto" if drivers.contrato.forma(mod) == "linea" else "archivo",
                  "forma": drivers.contrato.forma(mod),
+                 "familia": drivers.contrato.familia(mod),
                  "exige": sorted(drivers.contrato.exige(mod)),
                  "descripcion": (mod.__doc__ or "").strip().splitlines()[0]}
         for nombre, mod in drivers.DRIVERS.items()
@@ -192,7 +197,8 @@ def validar_partida_doble(asiento: list[dict]) -> dict:
 
 @mcp.tool()
 def generar_asiento(documento: dict, configuracion: dict | None = None,
-                    correlativos: dict | None = None, incluir_observados: bool = False) -> dict:
+                    correlativos: dict | None = None, incluir_observados: bool = False,
+                    imputacion: dict | None = None) -> dict:
     """Convierte los comprobantes en líneas de diario, sin el formato de ningún sistema.
 
     Devuelve el bloque `asiento` del estándar: cuenta, debe o haber, importe, moneda, glosa,
@@ -202,13 +208,18 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
     `correlativos` dice por qué número empieza cada sub-diario ({"11": 1}); si no se pasa,
     empieza en 1. Con `incluir_observados` se genera aunque haya comprobantes con errores —
     útil para ver qué saldría, arriesgado para presentar.
+
+    `imputacion` trae lo que se decidió para cada comprobante, por su `id_externo`: su
+    `cuenta_contable`, su `centro_costo`, la `cuenta_tercero` (la del total) o un `reparto` de la base
+    entre cuentas ([{importe, cuenta_contable, centro_costo}], que tiene que sumar la base). Cada campo
+    manda sobre lo que diga el comprobante; lo que no traiga sale de la configuración.
     """
-    return operaciones.generar_asiento(documento, configuracion, correlativos, incluir_observados)
+    return operaciones.generar_asiento(documento, configuracion, correlativos, incluir_observados, imputacion)
 
 
 @mcp.tool()
 def diagnosticar(documento: dict, configuracion: dict | None = None, correlativos: dict | None = None,
-                 driver: str = "concar") -> dict:
+                 driver: str = "concar", imputacion: dict | None = None) -> dict:
     """Dice todo lo que hay que mirar de un mes ANTES de exportarlo. **Llámala antes de `exportar`.**
 
     En una sola respuesta: si el mes está listo (`listo_para_exportar`) y, si no, por qué
@@ -225,21 +236,23 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
 
     No corrige nada ni inventa nada: un comprobante sin cuenta se arregla donde se revisa, y aquí
     solo se dice cuál es. Es la herramienta para enseñarle a la persona qué va a salir antes de
-    generar un archivo que luego se importa en su sistema contable.
+    generar un archivo que luego se importa en su sistema contable. `imputacion` es la misma de
+    `generar_asiento`: un reparto que no suma la base sale en `faltantes.reparto_no_cuadra`.
     """
-    return operaciones.diagnosticar(documento, configuracion, correlativos, driver)
+    return operaciones.diagnosticar(documento, configuracion, correlativos, driver, imputacion)
 
 
 @mcp.tool()
 def exportar(documento: dict, driver: str = "concar", configuracion: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False,
-             fecha: str = "") -> CallToolResult:
+             fecha: str = "", imputacion: dict | None = None) -> CallToolResult:
     """Genera el archivo que espera un sistema contable, ya listo para importar.
 
     Devuelve dos cosas: un resumen en JSON (nombre del archivo, filas, debe y haber, y en
     `_exportacion` la **huella** del asiento que salió: si vuelves a exportar lo mismo, la huella se
     repite, y el Excel de CONCAR se SUMA al importarlo dos veces) y **el archivo adjunto**, para
     guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.
+    `imputacion` es la misma de `generar_asiento`.
 
     Drivers disponibles (ver el recurso `contaperu://drivers`):
       - `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.
@@ -250,7 +263,7 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
     Antes de escribir nada comprueba que el asiento cuadre; si no cuadra, falla.
     """
     resultado = operaciones.exportar(documento, driver, configuracion, correlativos, incluir_observados,
-                                     fecha=fecha or None)
+                                     fecha=fecha or None, imputacion=imputacion)
     # Los bytes salen del resumen y entran en los adjuntos: repetirlos en el JSON seria mandar
     # el archivo dos veces, y la copia en texto es justo la que el cliente no sabe guardar.
     contenido = resultado.pop("contenido_base64", "") or ""
