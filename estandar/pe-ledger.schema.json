@@ -143,7 +143,7 @@
           "description": "Espacio libre del productor. El núcleo lo transporta y NO lo interpreta."
         },
 
-        "estado": { "type": "string", "description": "Lo rellena la validación: ok, observado, duplicado." },
+        "estado": { "type": "string", "description": "Lo rellena la validación: ok, observada, duplicada." },
         "excluida": { "type": "boolean", "description": "Marcada para no exportarse." },
         "observaciones": {
           "type": "array",

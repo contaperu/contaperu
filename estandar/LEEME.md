@@ -186,7 +186,7 @@ que el motor transporta sin interpretar:
 |---|---|---|
 | comprobante, línea | `id_externo` | El id con el que el sistema de origen o de destino conoce ese comprobante o asiento (Merge `remote_id`, Rutter `platform_id`) |
 | comprobante, línea | `dimensiones` | `[{tipo, codigo}]`: área, proyecto, obra… más allá del `centro_costo`, que sigue siendo la primera (Xero `Tracking[]`) |
-| línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: `estado` ya existe en el comprobante (`ok \| observado \| duplicado`) y en la detracción (`PROVISIONADO \| PAGADO`) con otro sentido |
+| línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: `estado` ya existe en el comprobante (`ok \| observada \| duplicada`) y en la detracción (`PROVISIONADO \| PAGADO`) con otro sentido |
 
 Lo que sí entró de esa propuesta: `_exportacion` (arriba), `EXIGE` en el contrato de driver y `pedir_a` en
 `diagnosticar` (`ARQUITECTURA.md`).

@@ -163,7 +163,8 @@ lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna d
 propuesta que SUNAT entrega en el SIRE.
 
 **Valida** lo que se puede validar sin salir a ningún sitio: el RUC por su dígito verificador, que el IGV
-cuadre con la base, que el total sea la suma de sus partes, que la fecha caiga en el periodo, los duplicados.
+cuadre con la base, que el total sea la suma de sus partes, que la fecha no sea posterior al periodo (y, en
+compras, que no pasen los 12 meses de anotación de la Ley 29215), los duplicados.
 Y **la partida doble**, sin tolerancia: un céntimo de diferencia detiene la exportación.
 
 **Arma el asiento** de compras y de ventas, incluidos los casos que suelen salir mal:

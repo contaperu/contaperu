@@ -4,6 +4,33 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [0.9.0] — 2026-09-12
+
+Una regla que estaba sin fuente, corregida contra la norma: **un comprobante de compras del mes anterior no
+es una observación**. John lo vio en pantalla (un recibo de luz del 29/08 pintado de ámbar dentro del mes 09)
+y la Ley 29215, art. 2, dice que la compra se anota en el mes de emisión **o en los 12 siguientes**.
+
+### Cambiado
+- **En compras, el comprobante emitido en un mes anterior ya no produce observación** mientras esté dentro
+  del plazo de anotación (Ley 29215, art. 2, texto del D.Leg. 1116: «el mes de su emisión o del pago del
+  Impuesto, según sea el caso, o … los 12 (doce) meses siguientes»). Hasta ahora `PERIODO_ANTERIOR` avisaba
+  a cualquier fecha anterior —de un mes o de dos años— sin norma detrás, y como todo aviso convertía la fila
+  en «observada». Es un **cambio de comportamiento**: las filas que hoy salen observadas solo por eso pasan a
+  «ok» al revalidar. En un documento aduanero la referencia es la fecha de pago del impuesto (campo 6 del
+  RCE): el «o del pago del Impuesto» del artículo.
+- **En ventas el aviso `PERIODO_ANTERIOR` se queda** —ahí no hay plazo: el IGV nace con la emisión (Ley del
+  IGV, art. 4)— y su texto ahora lo dice así. Deja de hablar del Excel de CONCAR: eso ya lo dice el resumen
+  de la exportación («extemporáneos al 01/MM»).
+
+### Añadido
+- **`CREDITO_FISCAL_FUERA_DE_PLAZO`** (aviso, no bloquea): la compra emitida hace más de 12 meses. Dice el
+  hecho —fuera del plazo de anotación— y deja la decisión sobre el crédito fiscal al contador. Está en
+  `PEDIR_A` (contador).
+- `validar.PLAZO_ANOTACION_MESES = 12`, con la nota de relevo: el **D.Leg. 1669** (28-sep-2024) lo baja a 0
+  meses para los electrónicos, 2 para los físicos y 3 con detracción, pero rige recién con la Resolución de
+  Superintendencia que SUNAT no ha publicado (verificado el 12-sep-2026), y lo emitido antes de esa vigencia
+  conserva los 12. Ese día cambia la constante y entra la distinción por `origen` y `detraccion`, con su cita.
+
 ## [0.8.0] — 2026-09-11
 
 Lo que `REFERENCIAS.md` proponía y tenía un caso real detrás (decisión de John, 11-sep-2026): el
