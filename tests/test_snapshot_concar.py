@@ -98,6 +98,20 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
     ("cuenta_tercero_del_registro", dict(cuenta_tercero="469901"), False, None),
     ("cuenta_tercero_con_detraccion", dict(cuenta_tercero="469901", detraccion=DET), False, None),
     ("venta_cuenta_tercero_del_registro", dict(cuenta_contable="", cuenta_tercero="121209"), True, None),
+    # El reparto de la base entre cuentas y centros (12-sep-2026): una línea de gasto o ingreso por parte, con
+    # su centro donde la cuenta lo lleva; el doble anexo del tercero, solo si todas comparten centro.
+    ("imputaciones_dos_cuentas", dict(cuenta_contable="", centro_costo="", imputaciones=[
+        {"importe": "60", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
+        {"importe": "40", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]), False, None),
+    ("imputaciones_boleta_con_igv_al_gasto", dict(tipo_cp="03", serie="B001", numero="55", cuenta_contable="",
+        centro_costo="", imputaciones=[{"importe": "100", "cuenta_contable": "631101", "centro_costo": "OBRA01"},
+                                       {"importe": "18", "cuenta_contable": "659999"}]), False, None),
+    ("imputaciones_mismo_centro_doble_anexo", dict(cuenta_contable="", centro_costo="", imputaciones=[
+        {"importe": "60", "cuenta_contable": "631101", "centro_costo": "OBRA01"},
+        {"importe": "40", "cuenta_contable": "632201", "centro_costo": "OBRA01"}]), False,
+     {"cc_en_anexo_auxiliar": True}),
+    ("venta_imputaciones", dict(cuenta_contable="", centro_costo="", imputaciones=[
+        {"importe": "70", "cuenta_contable": "701101"}, {"importe": "30", "cuenta_contable": "704101"}]), True, None),
     ("tipo_renombrado_por_el_ruc", {}, False, {"tipos": {"01": {"concar": "FA", "sub_diario": "12"}}}),
     ("venta_factura", dict(cuenta_contable=""), True, None),
     ("venta_usd_cuentas_del_ruc", dict(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), True,

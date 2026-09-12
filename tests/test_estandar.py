@@ -14,7 +14,7 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from contaperu import PE_LEDGER
-from contaperu.modelo import Comprobante, Libro
+from contaperu.modelo import Comprobante, Imputacion, Libro
 
 from util import GOLDEN
 
@@ -49,7 +49,7 @@ def test_el_esquema_es_valido(validador):
 
 def test_el_esquema_cubre_el_modelo_entero(esquema):
     """Uno a uno con las dataclasses: ni un campo de más ni uno de menos."""
-    for nombre, cls in (("comprobante", Comprobante), ("libro", Libro)):
+    for nombre, cls in (("comprobante", Comprobante), ("imputacion", Imputacion), ("libro", Libro)):
         del_modelo = {f.name for f in fields(cls)}
         del_esquema = set(esquema["$defs"][nombre]["properties"])
         assert del_modelo == del_esquema, (
@@ -71,7 +71,8 @@ def test_lo_que_produce_el_modelo_valida(validador):
                     contraparte_doc="20601111111", contraparte_nombre="PROVEEDOR DE PRUEBA SAC",
                     base_gravada="100", igv="18", total="118",
                     detraccion={"codigo": "027", "porcentaje": 4},
-                    condicion_pago="credito", cuenta_tercero="469901")
+                    condicion_pago="credito", cuenta_tercero="469901",
+                    imputaciones=[{"importe": "100", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"}])
     doc = documento(comprobantes=[c.a_dict()])
     assert list(validador.iter_errors(doc)) == []
 
@@ -93,6 +94,8 @@ def test_se_rechaza_lo_que_no_es_del_estandar(validador):
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "-5"}]),
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "1",
                                  "condicion_pago": "a 30 dias"}]),                      # ni contado ni credito
+        documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "1",
+                                 "imputaciones": [{"importe": "1"}]}]),                  # una parte sin cuenta
     ]
     for doc in malos:
         assert list(validador.iter_errors(doc)), doc

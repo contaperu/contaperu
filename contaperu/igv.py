@@ -47,6 +47,27 @@ def tasa(igv, base_gravada) -> Decimal | None:
     return igv / base * 100
 
 
+# En compras, la boleta de venta y el recibo por honorarios no dan crédito fiscal: la boleta no permite
+# ejercerlo (Reglamento de Comprobantes de Pago, art. 4, num. 3) y el recibo por honorarios no lleva IGV. Si
+# traen un IGV, es costo y va con la base. En ventas no aplica: la boleta emitida lleva su débito fiscal.
+SIN_CREDITO_FISCAL = ("02", "03")
+
+
+def igv_del_asiento(c: Comprobante, venta: bool) -> Decimal:
+    """El IGV que va en su propia línea del asiento: el del comprobante, salvo en compras de un tipo sin
+    crédito fiscal, donde es cero y ese importe se queda en la base."""
+    if not venta and c.tipo_cp in SIN_CREDITO_FISCAL:
+        return Decimal(0)
+    return Decimal(c.igv or 0).quantize(D2)
+
+
+def base_imputable(c: Comprobante, venta: bool) -> Decimal:
+    """Lo que va a la cuenta de la base —el gasto en compras, el ingreso en ventas—: el total menos el IGV
+    con línea propia. Es lo que reparten las `imputaciones` del comprobante, y por eso lo usan igual el
+    asiento (`asiento_neutral`) y la validación (`IMPUTACIONES_NO_CUADRAN`): la regla vive una vez."""
+    return (Decimal(c.total or 0).quantize(D2) - igv_del_asiento(c, venta)).quantize(D2)
+
+
 def _cargos(c: Comprobante) -> Decimal:
     """Lo que forma el total y no es base gravada, IGV ni importe sin IGV: ISC, IVAP, ICBPER y otros
     cargos. Los descuentos no: la base y el IGV ya son netos. Es la fórmula del total de `validar.py` sin

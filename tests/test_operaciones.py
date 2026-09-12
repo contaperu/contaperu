@@ -159,3 +159,30 @@ def test_los_campos_del_registro_viajan_intactos():
     ventas = {"ruc": "20131312955", "razon_social": "EMISOR DE PRUEBA S.A.C.", "periodo": "202601", "tipo": "venta"}
     xml = base64.b64encode((XML / "20131312955-01-F001-123.xml").read_bytes()).decode()
     assert op.leer_xml(xml, ventas, es_base64=True)["comprobantes"][0]["condicion_pago"] == "credito"
+
+
+def test_un_reparto_entre_cuentas_da_una_linea_por_parte():
+    """`imputaciones` reparte la base: el asiento lleva una línea de gasto por parte, y el IGV y el proveedor no
+    cambian. A una parte sin cuenta le falta la cuenta igual que a una fila entera (12-sep-2026)."""
+    from decimal import Decimal
+
+    base = {"tipo_cp": "01", "serie": "F001", "numero": "8", "fecha_emision": "2026-01-10",
+            "contraparte_doc": "20602222226", "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+            "base_gravada": "100", "igv": "18", "total": "118"}
+    reparto = [{"importe": "60", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
+               {"importe": "40", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]
+    doc = {"libro": LIBRO, "comprobantes": [dict(base, imputaciones=reparto)]}
+
+    assert op.revisar(doc)["comprobantes"][0]["imputaciones"] == [
+        dict(reparto[0], importe="60.00"), dict(reparto[1], importe="40.00")]
+
+    lineas = op.generar_asiento(doc)["asiento"]
+    assert [(ln["cuenta"], ln["importe"]) for ln in lineas if ln["rol"] == "principal"] == [
+        ("636301", "60.00"), ("632201", "40.00")]
+    assert [ln["importe"] for ln in lineas if ln["rol"] in ("igv", "tercero")] == ["18.00", "118.00"]
+    assert (sum(Decimal(ln["importe"]) for ln in lineas if ln["debe_haber"] == "D")
+            == sum(Decimal(ln["importe"]) for ln in lineas if ln["debe_haber"] == "H"))
+
+    sin_cuenta = {"libro": LIBRO, "comprobantes": [
+        dict(base, imputaciones=[dict(reparto[0], cuenta_contable=""), reparto[1]])]}
+    assert len(op.diagnosticar(sin_cuenta, driver="csv")["faltantes"]["sin_cuenta"]) == 1

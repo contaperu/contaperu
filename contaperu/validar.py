@@ -14,6 +14,7 @@ from decimal import Decimal
 from typing import Iterable
 
 from . import catalogos as cat
+from .igv import base_imputable
 from .modelo import Comprobante, Libro, solo_digitos
 
 TOLERANCIA = Decimal("0.05")
@@ -137,6 +138,16 @@ def validar(c: Comprobante, libro: Libro) -> None:
             a("ANTICIPO", f"El total descuenta un anticipo de {anticipo}; revisa la base a anotar")
         else:
             e("TOTAL_NO_CUADRA", f"Total {c.total} no cuadra con base + IGV + no gravado + otros ({esperado_total:.2f})")
+    # El reparto de la base entre cuentas (`imputaciones`, 12-sep-2026) suma exactamente la base del asiento —el
+    # total menos el IGV con línea propia, `igv.base_imputable`—: si no, el asiento no cuadra. Sin tolerancia,
+    # igual que la partida doble. Y con reparto, la cuenta y el centro de la fila van vacíos.
+    if c.imputaciones:
+        base_asiento = base_imputable(c, libro.es_venta)
+        suma = sum((i.importe for i in c.imputaciones), Decimal("0.00"))
+        if suma != base_asiento:
+            e("IMPUTACIONES_NO_CUADRAN", f"El reparto entre cuentas suma {suma} y la base del asiento es {base_asiento}")
+        if c.cuenta_contable or c.centro_costo:
+            e("IMPUTACIONES_Y_CUENTA", "Tiene reparto entre cuentas y además cuenta o centro en la fila: deja solo el reparto")
     # En una NC los descuentos van con el mismo signo que la base (SIRE, campos 15 y 16): son la parte de la
     # base y del IGV que se informa aparte, así que no pueden pasarlos, o el campo 15 cambiaría de signo.
     if c.es_nota_credito and (c.dscto_base > c.base_gravada or c.dscto_igv > c.igv):

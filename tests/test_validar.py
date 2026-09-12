@@ -144,3 +144,19 @@ def test_compras_boleta_y_aviso_700_solo_en_ventas():
     assert codigos(boleta, COMPRAS) == ["COMPRA_BOLETA"]
     boleta.destino_igv = "DNG"
     assert codigos(boleta, COMPRAS) == []
+
+
+def test_el_reparto_entre_cuentas_cuadra_con_la_base_del_asiento():
+    """`imputaciones` reparte la base del asiento: el total menos el IGV que tiene línea propia. En compras la
+    boleta no da crédito fiscal, así que su IGV va con la base; en ventas, no (12-sep-2026)."""
+    dos = [{"importe": "60", "cuenta_contable": "636301"}, {"importe": "40", "cuenta_contable": "632201"}]
+    assert "IMPUTACIONES_NO_CUADRAN" not in codigos(cp(imputaciones=dos), COMPRAS)
+    assert "IMPUTACIONES_NO_CUADRAN" in codigos(cp(imputaciones=dos[:1]), COMPRAS)
+
+    boleta = [{"importe": "100", "cuenta_contable": "631101"}, {"importe": "18", "cuenta_contable": "659999"}]
+    assert "IMPUTACIONES_NO_CUADRAN" not in codigos(cp(tipo_cp="03", serie="B001", imputaciones=boleta), COMPRAS)
+    assert "IMPUTACIONES_NO_CUADRAN" in codigos(cp(tipo_cp="03", serie="B001", imputaciones=boleta), VENTAS)
+
+    # Con reparto, la cuenta y el centro de la fila van vacíos: tener las dos cosas es ambiguo.
+    assert "IMPUTACIONES_Y_CUENTA" in codigos(cp(imputaciones=dos, cuenta_contable="636301"), COMPRAS)
+    assert "IMPUTACIONES_Y_CUENTA" not in codigos(cp(imputaciones=dos), COMPRAS)

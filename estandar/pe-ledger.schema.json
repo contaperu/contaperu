@@ -131,6 +131,11 @@
         "concepto": { "type": "string", "description": "La glosa del asiento." },
         "cuenta_contable": { "type": "string", "description": "Cuenta de la base del plan del contribuyente: el gasto en compras, el ingreso en ventas." },
         "cuenta_tercero": { "type": "string", "description": "Cuenta del total —el proveedor en compras, el cliente en ventas— cuando no es la del contribuyente por moneda. Vacía = la de su configuración." },
+        "imputaciones": {
+          "description": "El reparto de la base —el gasto en compras, el ingreso en ventas— entre varias cuentas o centros de costo. Solo la base: el IGV y el total son del documento. Si viene, cuenta_contable y centro_costo de la raíz van vacíos, y los importes suman la base del asiento (el total menos el IGV que tiene línea propia).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/imputacion" }
+        },
         "centro_costo": { "type": "string" },
 
         "origen": { "enum": ["xml", "pdf_texto", "vision", "manual", "sire"], "description": "De dónde salió el dato. Trazabilidad, no lógica." },
@@ -151,6 +156,18 @@
           "type": "array",
           "items": { "$ref": "#/$defs/observacion" }
         }
+      }
+    },
+
+    "imputacion": {
+      "description": "Una parte de la base con su cuenta y, si la lleva, su centro de costo.",
+      "type": "object",
+      "required": ["importe", "cuenta_contable"],
+      "additionalProperties": false,
+      "properties": {
+        "importe": { "$ref": "#/$defs/importe" },
+        "cuenta_contable": { "type": "string", "minLength": 1, "description": "Cuenta de la base del plan del contribuyente." },
+        "centro_costo": { "type": "string" }
       }
     },
 

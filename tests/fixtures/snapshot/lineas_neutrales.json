@@ -2820,6 +2820,306 @@
    "tasa_igv": "18"
   }
  ],
+ "imputaciones_dos_cuentas": [
+  {
+   "cuenta": "636301",
+   "debe_haber": "D",
+   "importe": "60.00",
+   "rol": "principal",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "centro_costo": "SISTEMAS",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "632201",
+   "debe_haber": "D",
+   "importe": "40.00",
+   "rol": "principal",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "centro_costo": "DESARROLLO",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "rol": "igv",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "rol": "tercero",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  }
+ ],
+ "imputaciones_boleta_con_igv_al_gasto": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "100.00",
+   "rol": "principal",
+   "sub_diario": "13",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "BV",
+    "tipo_cp": "03",
+    "serie_numero": "B001-55",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "659999",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "rol": "principal",
+   "sub_diario": "13",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "documento": {
+    "tipo": "BV",
+    "tipo_cp": "03",
+    "serie_numero": "B001-55",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "rol": "tercero",
+   "sub_diario": "13",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "BV",
+    "tipo_cp": "03",
+    "serie_numero": "B001-55",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   }
+  }
+ ],
+ "imputaciones_mismo_centro_doble_anexo": [
+  {
+   "cuenta": "631101",
+   "debe_haber": "D",
+   "importe": "60.00",
+   "rol": "principal",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "632201",
+   "debe_haber": "D",
+   "importe": "40.00",
+   "rol": "principal",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "centro_costo": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "D",
+   "importe": "18.00",
+   "rol": "igv",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "421201",
+   "debe_haber": "H",
+   "importe": "118.00",
+   "rol": "tercero",
+   "sub_diario": "11",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "contraparte_doc": "20607777773",
+   "anexo_auxiliar": "OBRA01",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  }
+ ],
+ "venta_imputaciones": [
+  {
+   "cuenta": "121201",
+   "debe_haber": "D",
+   "importe": "118.00",
+   "rol": "tercero",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "contraparte_doc": "20607777773",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "701101",
+   "debe_haber": "H",
+   "importe": "70.00",
+   "rol": "principal",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "704101",
+   "debe_haber": "H",
+   "importe": "30.00",
+   "rol": "principal",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  },
+  {
+   "cuenta": "401111",
+   "debe_haber": "H",
+   "importe": "18.00",
+   "rol": "igv",
+   "sub_diario": "05",
+   "correlativo": "080001",
+   "fecha": "2026-08-11",
+   "moneda": "PEN",
+   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "documento": {
+    "tipo": "FT",
+    "tipo_cp": "01",
+    "serie_numero": "F001-123",
+    "fecha_emision": "2026-08-11",
+    "fecha_vencimiento": "2026-08-18"
+   },
+   "tasa_igv": "18"
+  }
+ ],
  "tipo_renombrado_por_el_ruc": [
   {
    "cuenta": "631101",

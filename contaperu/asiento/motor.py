@@ -24,11 +24,11 @@ from decimal import ROUND_HALF_UP, Decimal
 from ..detracciones import monto as monto_detraccion
 from ..detracciones import tasa as tasa_detraccion
 from ..formato import Opciones, fmt_numero
-from ..igv import tasa as tasa_de_importes
+from ..igv import base_imputable, igv_del_asiento, tasa as tasa_de_importes
 from ..modelo import Comprobante, Libro
 from .construir import (SinCuenta, _mapa, cuenta_de_fila, cuenta_tercero, lleva_centro, mes_del_libro,
                         numerar, resolve_cxp_detraccion_account, sub_diario, tiene_detraccion, tipo_concar)
-from .datos import (D2, DEFAULTS, NUMERO_DETRACCION_PENDIENTE, OPCIONES, TIPO_BOLETA, TIPO_DOC_DETRACCION,
+from .datos import (D2, DEFAULTS, NUMERO_DETRACCION_PENDIENTE, OPCIONES, TIPO_DOC_DETRACCION,
                     TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA)
 from .lineas import LineaDiario
 
@@ -72,21 +72,30 @@ def _detraccion(c: Comprobante, contab: dict, total: Decimal) -> dict:
 
 def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprobante: str,
                     op: Opciones = OPCIONES, venta: bool = False) -> list[LineaDiario]:
-    """Un comprobante → sus líneas de diario (de 2 a 5), en el orden del manual de asientos."""
+    """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
+    del manual de asientos."""
     moneda = (c.moneda or "PEN").upper()
-    cuenta = cuenta_de_fila(c, contab, venta)
-    if not cuenta:
+    # La base va a la cuenta y el centro de la fila o, si el contador la repartió (`imputaciones`,
+    # 12-sep-2026), a una línea por parte. Una parte sin cuenta detiene el asiento igual que una fila sin ella.
+    partes = ([(i.cuenta_contable, i.centro_costo, i.importe) for i in c.imputaciones] if c.imputaciones
+              else [(cuenta_de_fila(c, contab, venta), c.centro_costo, None)])
+    if not all(cuenta for cuenta, _, _ in partes):
         raise SinCuenta([c])
     es_usd = moneda == "USD"
-    es_honorarios, es_boleta = (not venta and c.tipo_cp == TIPO_HONORARIOS), (not venta and c.tipo_cp == TIPO_BOLETA)
+    es_honorarios = not venta and c.tipo_cp == TIPO_HONORARIOS
     invierte = c.tipo_cp in TIPOS_INVIERTEN
     total = Decimal(c.total or 0).quantize(D2)
-    # Compras: boleta y recibo por honorarios no dan crédito fiscal → todo al gasto, sin línea
-    # de IGV. En VENTAS la boleta emitida SÍ lleva su IGV (débito fiscal del emisor).
-    igv = Decimal(0) if (es_boleta or es_honorarios) else Decimal(c.igv or 0).quantize(D2)
-    base = (total - igv).quantize(D2)
+    # Compras: boleta y recibo por honorarios no dan crédito fiscal → todo al gasto, sin línea de IGV. En
+    # VENTAS la boleta emitida SÍ lleva su IGV (débito fiscal del emisor). La regla vive en `igv.py`: la
+    # validación la necesita igual para comprobar que un reparto cuadra con la base.
+    igv = igv_del_asiento(c, venta)
+    base = base_imputable(c, venta)
     ruc = (c.contraparte_doc or "").strip()
-    cc = (c.centro_costo or "").strip() if contab.get("usa_centros_costo", True) else ""      # apagado: sin centro
+    usa_centros = contab.get("usa_centros_costo", True)                                   # apagado: sin centro
+    # El doble anexo del tercero lleva el centro del comprobante; con la base repartida, solo si todas las
+    # partes comparten uno: con dos centros distintos no hay uno que poner.
+    centros = {(centro or "").strip() for _, centro, _ in partes}
+    cc = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
     serie, num = (c.serie or "").strip(), fmt_numero(c.numero, op)
     serie_numero = f"{serie}-{num}" if serie and num else (serie or num)
     # UNA sola glosa para todas las líneas (confirmado por un contador, 2026); las derivadas anteponen lo
@@ -137,10 +146,14 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
     # La CUENTA decide dónde va el centro (el contador, 09-sep-2026): en su línea si la cuenta lo lleva
     # habilitado, y si no, como referencia (anexo auxiliar) cuando el estudio la usa así. Nunca en los
     # dos. El doble anexo del tercero (`cc_en_anexo_auxiliar`) es otra cosa y no depende de esto.
-    cc_en_linea = lleva_centro(cuenta, contab)
-    principal = linea("principal", base, cuenta, d_gasto,                 # gasto (compras) / ingreso (ventas)
-                      centro_costo=cc if cc_en_linea else "",
-                      anexo_auxiliar=cc if (not cc_en_linea and contab.get("cc_referencia_en_x")) else "")
+    def principal(cuenta: str, centro: str, importe: Decimal) -> LineaDiario:   # gasto (compras) / ingreso (ventas)
+        centro = (centro or "").strip() if usa_centros else ""
+        en_linea = lleva_centro(cuenta, contab)
+        return linea("principal", importe, cuenta, d_gasto, centro_costo=centro if en_linea else "",
+                     anexo_auxiliar=centro if (not en_linea and contab.get("cc_referencia_en_x")) else "")
+
+    principales = [principal(cuenta, centro, base if importe is None else importe)
+                   for cuenta, centro, importe in partes]
     linea_igv = (linea("igv", igv, str(contab["cuentas"]["igv"]), d_gasto, f"IGV - {glosa}")
                  if igv > 0 else None)
     cuenta_ret = str((contab.get("cuentas") or {}).get("retencion_4ta") or DEFAULTS["cuentas"]["retencion_4ta"])
@@ -177,10 +190,10 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
 
     if venta and not invierte:
         # Venta normal: cliente (D) · ingreso (H) · IGV (H) — el orden del manual de asientos.
-        orden = [tercero, principal, linea_igv]
+        orden = [tercero, *principales, linea_igv]
     else:
         # Compras (y NC de venta, que invierte): principal · IGV · retención · tercero · detracción.
-        orden = [principal, linea_igv, linea_ret, tercero, det_tercero, det]
+        orden = [*principales, linea_igv, linea_ret, tercero, det_tercero, det]
     return [ln for ln in orden if ln is not None]
 
 

@@ -60,7 +60,7 @@ tiene un solo dueño.
 | Si el dato… | Va en | Ejemplo |
 |---|---|---|
 | Está impreso en el documento o en su XML | **el registro** | fecha, serie, importes, `condicion_pago` |
-| Lo decide el contador para ESE documento | **el registro**, opcional; si falta, la configuración | `cuenta_contable`; `cuenta_tercero` cuando no es la de siempre |
+| Lo decide el contador para ESE documento | **el registro**, opcional; si falta, la configuración | `cuenta_contable` o, si la base se reparte, `imputaciones`; `cuenta_tercero` cuando no es la de siempre |
 | Es igual para todo el contribuyente | **la configuración** (fuera del documento) | la cuenta por pagar en soles, la del IGV, las siglas de CONCAR |
 | Se calcula con lo anterior | **nadie lo guarda**: lo deriva el driver | el signo de la nota de crédito, los soles de una factura en dólares, el % de IGV, el correlativo |
 
@@ -161,6 +161,7 @@ consumidor de la 0.2 que no los conozca los ignora.
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
 | `condicion_pago` | `contado` o `credito`: lo que **declara** el documento. En la factura electrónica viene en `PaymentTerms FormaPago`, y una factura con cuotas es a crédito. Vacío no significa contado: significa que el documento no lo dice. |
 | `cuenta_tercero` | Vacía en casi todos los registros: la cuenta del proveedor o del cliente sale de la configuración, por moneda. Solo se escribe cuando ESE documento va a otra (un gasto de representación a la `4699`), y entonces manda en todos los drivers. |
+| `imputaciones` | El reparto de la **base** —el gasto o el ingreso— entre varias cuentas o centros, una parte por cuenta con su importe. **Solo la base**: el IGV y el total son del documento, y la cuenta del IGV y la del proveedor, de la configuración. Con reparto, `cuenta_contable` y `centro_costo` de la raíz van vacíos, y las partes suman la base del asiento: el total menos el IGV con línea propia (en compras, la boleta y el recibo por honorarios van enteros). Cada parte da una línea de gasto o ingreso en el asiento y una fila en un sistema que importa registros. |
 | `tipo_cambio` | El que **publica SUNAT para la fecha de emisión**, con 3 decimales. No el del día del pago. |
 | `serie` | Vacía en los comprobantes que no la llevan (recibo de servicios públicos, tipo `14`). Que esté vacía no es un error. |
 | `contraparte_doc` | Puede ir vacío en boletas a consumidor final. |
@@ -187,9 +188,10 @@ siempre netos y `dscto_base`/`dscto_igv` dejan de restarse del total. En `0.1` e
 base bruta, pero el XML de SUNAT da la base ya neta, así que una nota de crédito de descuento global salía
 contada dos veces. Un documento `0.1` sin descuentos significa exactamente lo mismo en `0.2`.
 
-**Dentro de la `0.2`** (12-sep-2026) entran dos campos opcionales del comprobante, `condicion_pago` y
-`cuenta_tercero`, para que un sistema que importa registros salga del documento sin datos de fuera. No
-cambian el significado de nada: un documento sin ellos se exporta exactamente igual que antes.
+**Dentro de la `0.2`** (12-sep-2026) entran tres campos opcionales del comprobante, `condicion_pago`,
+`cuenta_tercero` e `imputaciones`, para que un sistema que importa registros salga del documento sin datos de
+fuera y para que una factura pueda repartirse entre varias cuentas. No cambian el significado de nada: un
+documento sin ellos se exporta exactamente igual que antes.
 
 ---
 
@@ -235,7 +237,8 @@ Y cuatro que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso re
 | comprobante | `no_domiciliado` | El número del comprobante que emite un sujeto no domiciliado |
 
 El segundo centro de costo y el código de presupuesto de CONTASIS irían en `dimensiones`, el nombre ya
-reservado de la tabla de arriba.
+reservado de la tabla de arriba, y con la base repartida, en cada parte. El CONTASIS de John no los usa
+(12-sep-2026), así que sigue reservado.
 
 ---
 

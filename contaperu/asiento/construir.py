@@ -262,7 +262,11 @@ def sub_diarios_presentes(comprobantes: list[Comprobante], contab: dict, venta: 
 
 
 def filas_sin_cuenta(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
-    return [c for c in comprobantes if not cuenta_de_fila(c, contab, venta)]
+    """Las filas sin cuenta. Con la base repartida (`imputaciones`), le falta si a una de sus partes le falta:
+    una parte no toma la cuenta por defecto del RUC, porque repartir entre la misma cuenta no reparte nada."""
+    return [c for c in comprobantes
+            if (any(not i.cuenta_contable for i in c.imputaciones) if c.imputaciones
+                else not cuenta_de_fila(c, contab, venta))]
 
 
 def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
@@ -279,8 +283,14 @@ def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool 
     """
     if not contab.get("usa_centros_costo", True):
         return []
-    return [c for c in comprobantes
-            if not (c.centro_costo or "").strip() and lleva_centro(cuenta_de_fila(c, contab, venta), contab)]
+
+    def falta(c: Comprobante) -> bool:
+        # Con la base repartida, cada parte lleva su cuenta y su centro: basta con que a una le falte.
+        if c.imputaciones:
+            return any(not i.centro_costo and lleva_centro(i.cuenta_contable, contab) for i in c.imputaciones)
+        return not (c.centro_costo or "").strip() and lleva_centro(cuenta_de_fila(c, contab, venta), contab)
+
+    return [c for c in comprobantes if falta(c)]
 
 
 # Qué clave de `faltantes` responde a cada requisito del contrato de driver (`contrato.exige`), en el

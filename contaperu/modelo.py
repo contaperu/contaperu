@@ -131,6 +131,28 @@ class Observacion:
 
 
 @dataclass
+class Imputacion:
+    """Una parte de la base de un comprobante, con su cuenta y su centro de costo (12-sep-2026).
+
+    Reparte SOLO la base —el gasto en compras, el ingreso en ventas—: el IGV y el total son del documento, y
+    la cuenta del IGV y la del proveedor salen de la configuración. Las partes suman la base del asiento
+    (`igv.base_imputable`), y lo comprueba `validar`."""
+
+    importe: Decimal = CERO
+    cuenta_contable: str = ""
+    centro_costo: str = ""
+
+    def __post_init__(self) -> None:
+        self.importe = monto(self.importe)
+        self.cuenta_contable = " ".join(str(self.cuenta_contable or "").split())
+        self.centro_costo = " ".join(str(self.centro_costo or "").split())
+
+    def a_dict(self) -> dict:
+        return {"importe": str(self.importe), "cuenta_contable": self.cuenta_contable,
+                "centro_costo": self.centro_costo}
+
+
+@dataclass
 class Comprobante:
     # Identificación
     tipo_cp: str = "01"             # código SUNAT de 2 dígitos (01 factura, 03 boleta, 07 NC, 08 ND, 14 servicios…)
@@ -189,6 +211,9 @@ class Comprobante:
     # para todos los drivers: el asiento de CONCAR y el registro de CONTASIS dicen la misma cuenta.
     cuenta_tercero: str = ""
     centro_costo: str = ""
+    # El reparto de la base entre varias cuentas o centros (12-sep-2026). Vacío = el caso simple de arriba:
+    # una cuenta y un centro para todo el comprobante. Con reparto, esos dos van vacíos (lo comprueba `validar`).
+    imputaciones: list[Imputacion] = field(default_factory=list)
     # Procedencia
     origen: str = "xml"
     confianza: Decimal = Decimal("1.00")
@@ -219,6 +244,9 @@ class Comprobante:
         self.confianza = Decimal(str(self.confianza)).quantize(_DOS)
         self.observaciones = [
             o if isinstance(o, Observacion) else Observacion(**o) for o in (self.observaciones or [])
+        ]
+        self.imputaciones = [
+            i if isinstance(i, Imputacion) else Imputacion(**i) for i in (self.imputaciones or [])
         ]
         if self.origen not in ORIGENES:
             raise ValueError(f"origen inválido: {self.origen!r}")
@@ -263,6 +291,8 @@ class Comprobante:
                 v = v.isoformat()
             elif f.name == "observaciones":
                 v = [o.a_dict() for o in v]
+            elif f.name == "imputaciones":
+                v = [i.a_dict() for i in v]
             d[f.name] = v
         return d
 

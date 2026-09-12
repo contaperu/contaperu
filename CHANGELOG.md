@@ -21,6 +21,18 @@ celda.
   ventas— cuando ese documento no va a la del contribuyente por moneda. El caso real: un gasto de
   representación a la 4699, en el registro de compras de CONTASIS que entregó John. Vacía, todo sale como
   antes.
+- **`imputaciones`** en el comprobante: el reparto de la **base** —el gasto o el ingreso— entre varias cuentas
+  o centros de costo, que una sola cuenta por comprobante no podía expresar (una factura con una parte de
+  sistemas y otra de desarrollo). Reparte solo la base: el IGV y el total siguen siendo del documento, como
+  los define SUNAT, y la cuenta del IGV y la del proveedor salen de la configuración. El asiento lleva una
+  línea de gasto o ingreso por parte; sin reparto, sale exactamente como antes. Lo pidió John a partir del
+  modelo de Codat, que pone la cuenta en cada línea de la factura; la plantilla de CONTASIS admite varias
+  filas por documento.
+- **`IMPUTACIONES_NO_CUADRAN`** e **`IMPUTACIONES_Y_CUENTA`** (errores de `validar`): las partes suman la base
+  del asiento, y con reparto la cuenta y el centro de la fila van vacíos.
+- **`igv.base_imputable` e `igv.igv_del_asiento`**: la regla de que en compras la boleta y el recibo por
+  honorarios no dan crédito fiscal salió de `asiento_neutral` para que la usen igual el asiento y la
+  validación.
 - **`asiento.cuenta_tercero(c, contab, venta)`**: resuelve esa cuenta una sola vez para todos los drivers.
   Vivía dentro de `asiento_neutral`; se sacó primero sin cambiar nada —el snapshot de CONCAR, intacto— y
   después se le dio prioridad al campo del registro. Tres casos nuevos en el snapshot fijan que la cuenta del
