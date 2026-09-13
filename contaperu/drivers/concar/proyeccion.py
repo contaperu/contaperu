@@ -15,7 +15,7 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.resolucion import MonedaSinCodigo
+from ...asiento.faltas import MonedaSinCodigo
 from ...asiento.lineas import LineaDiario
 from ...asiento.motor import lineas_del_comprobante, glosa_de
 from ...formato import Opciones

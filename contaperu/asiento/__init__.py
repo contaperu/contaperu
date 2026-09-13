@@ -44,13 +44,15 @@ una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una cel
 CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()` y `lineas_del_libro()`.
 """
 from .configuracion import CONFIG_DE_FABRICA, D2, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
-from .resolucion import (REQUISITO_DE, CorrelativoFaltante, MonedaSinCodigo, RepartoNoAdmitido, RepartoNoCuadra,
-                         SinCentro, SinCuenta, TipoSinMapa, comprobantes_sin_centro, comprobantes_sin_cuenta,
-                         con_reparto, config_de, cuenta_honorarios, cuenta_por_pagar, cuenta_por_pagar_detraccion,
-                         cuenta_tercero, equivalencia_tipo, etiquetas_sub_diario, exigir_requisitos, faltantes_para,
-                         fundir_config, imputacion_de, limites_del_periodo, lleva_centro, monedas_sin_codigo, numerar,
-                         partes_de, reparto_no_cuadra, repartos_que_no_cuadran, sigla_documento, sub_diario,
-                         sub_diarios_presentes, tiene_detraccion, tipos_sin_mapa)
+from .faltas import (CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA, Falta, MonedaSinCodigo, NoExportable,
+                     RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCuenta, SubDiarioSinCorrelativo,
+                     TipoSinEquivalencia)
+from .resolucion import (comprobantes_sin_centro, comprobantes_sin_cuenta, con_reparto, config_de, cuenta_honorarios,
+                         cuenta_por_pagar, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
+                         etiquetas_sub_diario, exigir_requisitos, faltantes_para, fundir_config, imputacion_de,
+                         limites_del_periodo, lleva_centro, monedas_sin_codigo, numerar, partes_de, reparto_no_cuadra,
+                         repartos_que_no_cuadran, sigla_documento, sub_diario, sub_diarios_presentes,
+                         tiene_detraccion, tipos_sin_equivalencia)
 from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
@@ -58,12 +60,12 @@ from .motor import ROLES, glosa_de, lineas_del_comprobante, lineas_del_libro
 
 __all__ = [
     "CONFIG_DE_FABRICA", "D2", "NUMERO_DETRACCION_PENDIENTE", "TIPO_DOC_DETRACCION",
-    "REQUISITO_DE", "CorrelativoFaltante", "MonedaSinCodigo", "RepartoNoAdmitido", "RepartoNoCuadra",
-    "SinCentro", "SinCuenta", "TipoSinMapa", "comprobantes_sin_centro", "comprobantes_sin_cuenta",
-    "con_reparto", "config_de", "cuenta_honorarios", "cuenta_por_pagar", "cuenta_por_pagar_detraccion",
-    "cuenta_tercero", "equivalencia_tipo", "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para",
-    "fundir_config", "imputacion_de", "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar",
-    "partes_de", "reparto_no_cuadra", "repartos_que_no_cuadran", "sigla_documento", "sub_diario",
-    "sub_diarios_presentes", "tiene_detraccion", "tipos_sin_mapa",
+    "CONTADOR", "FALTA", "FALTAS", "PROVEEDOR", "SISTEMA", "Falta", "MonedaSinCodigo", "NoExportable",
+    "RepartoNoAdmitido", "RepartoNoCuadra", "SinCentro", "SinCuenta", "SubDiarioSinCorrelativo", "TipoSinEquivalencia",
+    "comprobantes_sin_centro", "comprobantes_sin_cuenta", "con_reparto", "config_de", "cuenta_honorarios",
+    "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo", "etiquetas_sub_diario",
+    "exigir_requisitos", "faltantes_para", "fundir_config", "imputacion_de", "limites_del_periodo", "lleva_centro",
+    "monedas_sin_codigo", "numerar", "partes_de", "reparto_no_cuadra", "repartos_que_no_cuadran", "sigla_documento",
+    "sub_diario", "sub_diarios_presentes", "tiene_detraccion", "tipos_sin_equivalencia",
     "huella", "Imputacion", "Parte", "LineaDiario", "ROLES", "glosa_de", "lineas_del_comprobante", "lineas_del_libro",
 ]

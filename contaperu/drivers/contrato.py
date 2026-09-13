@@ -48,6 +48,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Protocol
 
+from ..asiento.faltas import NoExportable
 from ..formato import Opciones
 from ..modelo import Comprobante, Libro
 
@@ -144,13 +145,16 @@ def exige(modulo: Any) -> frozenset[str]:
     return frozenset()
 
 
-class NoCabe(ValueError):
+class NoCabe(NoExportable):
     """Comprobantes que el formato del destino no puede llevar, por motivo (lo dice el driver en `no_caben`). El
     núcleo se niega antes de escribir nada, igual que con un tipo sin equivalencia."""
 
+    clave = "no_caben"
+
     def __init__(self, motivos: dict[str, list[Comprobante]]):
-        cuantos = len({id(c) for lista in motivos.values() for c in lista})
-        super().__init__(f"{cuantos} comprobante(s) que el formato del destino no puede llevar: " + "; ".join(motivos))
+        unicos = list({id(c): c for lista in motivos.values() for c in lista}.values())
+        mensaje = f"{len(unicos)} comprobante(s) que el formato del destino no puede llevar: " + "; ".join(motivos)
+        super().__init__(mensaje, unicos)
         self.motivos = motivos
 
 

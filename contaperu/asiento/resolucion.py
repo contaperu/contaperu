@@ -16,72 +16,8 @@ from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..igv import base_imputable
 from ..modelo import Comprobante, Libro
 from .configuracion import CONFIG_DE_FABRICA
+from .faltas import FALTAS, SubDiarioSinCorrelativo, TipoSinEquivalencia
 from .imputacion import Imputacion
-
-
-class SinCuenta(Exception):
-    """Comprobantes incluidos sin cuenta contable (ni en su imputación ni por defecto en la configuración)."""
-
-    def __init__(self, comprobantes: list[Comprobante]):
-        super().__init__(f"{len(comprobantes)} comprobante(s) sin cuenta contable")
-        self.comprobantes = comprobantes
-
-
-class TipoSinMapa(Exception):
-    """Comprobantes cuyo tipo SUNAT no tiene sigla configurada (`tipos.NN.sigla`): no se inventa una."""
-
-    def __init__(self, tipos: list[str]):
-        super().__init__("Tipos SUNAT sin sigla configurada: " + ", ".join(tipos))
-        self.tipos = tipos
-
-
-class MonedaSinCodigo(Exception):
-    """Comprobantes en una moneda sin código en el sistema de destino (`monedas_codigo`)."""
-
-    def __init__(self, monedas: list[str]):
-        super().__init__("Monedas sin código en el sistema de destino: " + ", ".join(monedas))
-        self.monedas = monedas
-
-
-class SinCentro(Exception):
-    """Comprobantes sin centro de costo en una cuenta que SÍ lo lleva (columna M de CONCAR).
-
-    La regla es del contador (06-sep-2026: obligatorio donde de verdad se escribe) y hasta el
-    11-sep-2026 la aplicaba solo el portal antes de exportar; el driver de CONCAR la hace cumplir
-    desde entonces (decisión de John), como la de la cuenta.
-    """
-
-    def __init__(self, comprobantes: list[Comprobante]):
-        super().__init__(f"{len(comprobantes)} comprobante(s) sin centro de costo en una cuenta que lo lleva")
-        self.comprobantes = comprobantes
-
-
-class RepartoNoCuadra(SinCuenta):
-    """Comprobantes cuyo reparto (el de su imputación) no suma la base del asiento. Hereda de `SinCuenta` a
-    propósito: es una imputación que no se puede asentar, y quien ya atrapaba la falta de cuenta —la CLI, la
-    aplicación— la atrapa sin cambiar nada."""
-
-    def __init__(self, comprobantes: list[Comprobante]):
-        Exception.__init__(self, f"{len(comprobantes)} comprobante(s) con un reparto entre cuentas que no suma "
-                                 "la base del asiento")
-        self.comprobantes = comprobantes
-
-
-class RepartoNoAdmitido(SinCuenta):
-    """Comprobantes con la base repartida entre varias cuentas (un `reparto` en su imputación) para un destino que
-    lleva UNA cuenta por documento: CONTASIS arma un asiento por fila (John, 12-sep-2026). Hereda de `SinCuenta`
-    por lo mismo que `RepartoNoCuadra`: es una imputación que ese destino no puede llevar."""
-
-    def __init__(self, comprobantes: list[Comprobante]):
-        Exception.__init__(self, f"{len(comprobantes)} comprobante(s) con la base repartida entre varias cuentas, "
-                                 "y el sistema de destino lleva una sola por documento")
-        self.comprobantes = comprobantes
-
-
-class CorrelativoFaltante(Exception):
-    def __init__(self, sub_diarios: list[str]):
-        super().__init__("Falta el correlativo de los sub-diarios " + ", ".join(sub_diarios))
-        self.sub_diarios = sub_diarios
 
 
 # ── Configuración por RUC ─────────────────────────────────────────────────────
@@ -236,7 +172,7 @@ def sub_diario(c: Comprobante, config: dict, es_venta: bool = False) -> str:
                or CONFIG_DE_FABRICA["sub_diario_compras"])
 
 
-def tipos_sin_mapa(comprobantes: list[Comprobante], config: dict) -> list[str]:
+def tipos_sin_equivalencia(comprobantes: list[Comprobante], config: dict) -> list[str]:
     """Códigos SUNAT presentes que no tienen sigla configurada (en orden de aparición)."""
     vistos: list[str] = []
     for c in comprobantes:
@@ -338,14 +274,6 @@ def con_reparto(comprobantes: list[Comprobante], config: dict) -> list[Comproban
     return [c for c in comprobantes if (imputacion := imputacion_de(c, config)) is not None and imputacion.reparto]
 
 
-# Qué clave de `faltantes` responde a cada requisito del contrato de driver (`contrato.exige`), en el
-# orden en que se comprueban: primero lo que impide clasificar (tipo, moneda), luego lo de cada línea.
-REQUISITO_DE = {"tipos_sin_equivalencia": "tipo_cp", "monedas_sin_codigo": "moneda",
-                "reparto_no_admitido": "cuenta_unica",
-                "sin_cuenta": "cuenta_contable", "reparto_no_cuadra": "cuenta_contable",
-                "sin_centro_de_costo": "centro_costo"}
-
-
 def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
                    exige: frozenset[str] | set[str] = frozenset()) -> dict[str, list]:
     """Lo que les falta a estos comprobantes para un destino que EXIGE eso — solo las claves exigidas.
@@ -355,7 +283,7 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
     """
     salida: dict[str, list] = {}
     if "tipo_cp" in exige:
-        salida["tipos_sin_equivalencia"] = tipos_sin_mapa(comprobantes, config)
+        salida["tipos_sin_equivalencia"] = tipos_sin_equivalencia(comprobantes, config)
     if "moneda" in exige:
         salida["monedas_sin_codigo"] = monedas_sin_codigo(comprobantes, config)
     if "cuenta_unica" in exige:
@@ -370,22 +298,13 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
 
 def exigir_requisitos(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
                       exige: frozenset[str] | set[str] = frozenset()) -> None:
-    """Hace cumplir `faltantes_para`: la primera falta, en el orden de siempre, detiene la exportación
-    con su excepción (tipo → moneda → reparto no admitido → cuenta → reparto que no cuadra → centro). Un tipo
-    sin equivalencia no se inventa."""
+    """Hace cumplir `faltantes_para`: la primera falta, en el orden de `FALTAS` (tipo → moneda → reparto no admitido →
+    cuenta → reparto que no cuadra → centro), detiene la exportación con su excepción. Un tipo sin equivalencia no se
+    inventa."""
     falta = faltantes_para(comprobantes, config, es_venta, exige)
-    if falta.get("tipos_sin_equivalencia"):
-        raise TipoSinMapa(falta["tipos_sin_equivalencia"])
-    if falta.get("monedas_sin_codigo"):
-        raise MonedaSinCodigo(falta["monedas_sin_codigo"])
-    if falta.get("reparto_no_admitido"):
-        raise RepartoNoAdmitido(falta["reparto_no_admitido"])
-    if falta.get("sin_cuenta"):
-        raise SinCuenta(falta["sin_cuenta"])
-    if falta.get("reparto_no_cuadra"):
-        raise RepartoNoCuadra(falta["reparto_no_cuadra"])
-    if falta.get("sin_centro_de_costo"):
-        raise SinCentro(falta["sin_centro_de_costo"])
+    for regla in FALTAS:
+        if regla.excepcion is not None and falta.get(regla.clave):
+            raise regla.excepcion(falta[regla.clave])
 
 
 # ── Numeración: MM + correlativo de 4 dígitos por sub-diario ──────────────────
@@ -396,13 +315,13 @@ def numerar(comprobantes: list[Comprobante], config: dict, periodo: str,
     recibido (el natural del registro). Devuelve también el rango usado por sub-diario,
     que es lo que se recuerda para proponer el siguiente."""
     mes_mm = str(periodo)[4:6]
-    sin_mapa = tipos_sin_mapa(comprobantes, config)
-    if sin_mapa:
-        raise TipoSinMapa(sin_mapa)
+    sin_equivalencia = tipos_sin_equivalencia(comprobantes, config)
+    if sin_equivalencia:
+        raise TipoSinEquivalencia(sin_equivalencia)
     presentes = sub_diarios_presentes(comprobantes, config, es_venta)
     faltan = [s for s in presentes if s not in correlativos]
     if faltan:
-        raise CorrelativoFaltante(faltan)
+        raise SubDiarioSinCorrelativo(faltan)
     contadores = {s: int(correlativos[s]) for s in presentes}
     if any(n < 1 for n in contadores.values()):
         raise ValueError("Los correlativos empiezan en 1")

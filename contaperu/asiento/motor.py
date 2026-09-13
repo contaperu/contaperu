@@ -27,9 +27,10 @@ from ..formato import Opciones, formatear_numero
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import Comprobante, Libro
 from .configuracion import CONFIG_DE_FABRICA, D2, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
-from .resolucion import (RepartoNoCuadra, SinCuenta, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
-                         limites_del_periodo, lleva_centro, numerar, partes_de, reparto_no_cuadra, sigla_documento,
-                         sub_diario, tiene_detraccion)
+from .faltas import RepartoNoCuadra, SinCuenta
+from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
+                         lleva_centro, numerar, partes_de, reparto_no_cuadra, sigla_documento, sub_diario,
+                         tiene_detraccion)
 from .lineas import LineaDiario
 
 # El papel de cada línea en el asiento. Es lo que un driver necesita para traducir sin adivinar: un

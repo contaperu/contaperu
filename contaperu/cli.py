@@ -91,8 +91,7 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
         except gen.ErroresBloqueantes as error:
             print(f"  {nombre_driver:<5} NO generado: {error}. Corrige o usa --incluir-errores", file=sys.stderr)
             codigo = 1
-        except (asi.SinCuenta, asi.SinCentro, asi.TipoSinMapa, asi.MonedaSinCodigo, drivers.concar.CorrelativoDesborda,
-                drivers.contrato.NoCabe) as error:
+        except asi.NoExportable as error:
             # Lo que le falta al mes para ese destino. `contaperu diagnosticar` lo lista por serie-número.
             print(f"  {nombre_driver:<5} NO generado: {error}. Revísalo con `contaperu diagnosticar`", file=sys.stderr)
             codigo = 1
@@ -184,16 +183,13 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         for entrada in diagnostico[bloque]:
             for observacion in entrada["observaciones"]:
                 print(f"  {marca} {entrada['serie_numero']:<18} [{observacion['codigo']}] {observacion['texto']}")
-    for clave, titulo in (("reparto_no_admitido", "Reparto que el destino no admite"),
-                          ("sin_cuenta", "Sin cuenta contable"), ("reparto_no_cuadra", "Reparto que no suma la base"),
-                          ("sin_centro_de_costo", "Sin centro de costo"),
-                          ("tipos_sin_equivalencia", "Tipos sin equivalencia"),
-                          ("monedas_sin_codigo", "Monedas sin código"),
-                          ("sub_diarios_sin_correlativo", "Sub-diarios sin correlativo (arrancan en 1)")):
-        if diagnostico["faltantes"].get(clave):
-            _lista(titulo, diagnostico["faltantes"][clave])
-    for motivo, cuales in diagnostico["faltantes"].get("no_caben", {}).items():
-        _lista(f"No cabe en el formato ({motivo})", cuales)
+    for falta in asi.FALTAS:
+        if falta.clave == "no_caben":
+            # Lo que no cabe llega por motivo, cada uno con su lista.
+            for motivo, cuales in diagnostico["faltantes"].get("no_caben", {}).items():
+                _lista(f"{falta.titulo} ({motivo})", cuales)
+        elif diagnostico["faltantes"].get(falta.clave):
+            _lista(falta.titulo, diagnostico["faltantes"][falta.clave])
     if diagnostico["detracciones_pendientes"]:
         _lista("Detracciones pendientes de constancia",
                [pendiente["serie_numero"] for pendiente in diagnostico["detracciones_pendientes"]])

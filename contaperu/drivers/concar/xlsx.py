@@ -9,6 +9,7 @@ from typing import Any
 from ...modelo import Comprobante, Libro
 from ... import partida_doble
 from ...formato import Opciones
+from ...asiento.faltas import NoExportable
 from ...asiento.resolucion import etiquetas_sub_diario, exigir_requisitos, limites_del_periodo, numerar
 from ...asiento.huella import huella
 from ...asiento.motor import lineas_del_comprobante
@@ -18,9 +19,11 @@ from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPO
                     HOJA, OPCIONES, PANEL)
 
 
-class CorrelativoDesborda(Exception):
+class CorrelativoDesborda(NoExportable):
     """Un sub-diario pasaría de 9999: CONCAR numera el asiento con MM + cuatro dígitos (`asiento.numerar`),
     y un quinto dígito no cabe en su importación. `sub_diarios` es {sub-diario: hasta dónde llegaría}."""
+
+    clave = "sub_diario_desborda"
 
     def __init__(self, sub_diarios: dict[str, int]):
         super().__init__("; ".join(f"El sub-diario {s} llegaría a {n}: supera los 4 dígitos que admite CONCAR"

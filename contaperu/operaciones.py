@@ -18,6 +18,7 @@ from typing import Any
 
 from . import asiento as asi
 from . import detracciones, drivers, generar as gen, pcge, partida_doble, validar
+from .asiento.faltas import CONTADOR, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
 from .lectores import archivos as lectura_archivos, sire_txt
 from .modelo import Comprobante, Libro
 
@@ -36,8 +37,6 @@ class DocumentoInvalido(ValueError):
 
 # --- a quién se le pide lo que falta ------------------------------------------------
 
-CONTADOR, SISTEMA, PROVEEDOR = "contador", "sistema", "proveedor"
-
 # Quién resuelve cada cosa que `diagnosticar` puede encontrar. No es una regla contable: las reglas
 # ya existen (`validar.py`, `asiento.faltantes_para`); esto solo dice a quién preguntar, para que un
 # agente no adivine (la idea viene del *Accounting agent* de Intuit, ver `REFERENCIAS.md`). El criterio:
@@ -47,10 +46,8 @@ CONTADOR, SISTEMA, PROVEEDOR = "contador", "sistema", "proveedor"
 # proveedor; entrará con un caso real (la constancia de detracción conciliada, por ejemplo).
 # `tests/test_diagnosticar.py` recorre `validar.py` y comprueba que ningún código se quede fuera.
 PEDIR_A: dict[str, str] = {
-    # lo que falta para el destino (claves de `faltantes`)
-    "sin_cuenta": CONTADOR, "reparto_no_cuadra": CONTADOR, "reparto_no_admitido": CONTADOR,
-    "sin_centro_de_costo": CONTADOR, "no_caben": CONTADOR,
-    "tipos_sin_equivalencia": SISTEMA, "monedas_sin_codigo": SISTEMA, "sub_diarios_sin_correlativo": SISTEMA,
+    # lo que falta para el destino (claves de `faltantes`): lo dice su tabla, `asiento.FALTAS`
+    **{falta.clave: falta.pedir_a for falta in FALTAS},
     # errores de la validación
     "ANIO_DUA_FALTA": CONTADOR, "CONTRAPARTE_FALTA": CONTADOR, "DNI_INVALIDO": CONTADOR,
     "DSCTO_MAYOR_QUE_BASE": CONTADOR, "DUPLICADO": CONTADOR, "DUPLICADO_PERIODO_ANTERIOR": CONTADOR,
@@ -65,15 +62,6 @@ PEDIR_A: dict[str, str] = {
     "EMISOR_NO_COINCIDE": CONTADOR, "GRATUITAS": CONTADOR, "IGV_TASA_REDUCIDA": CONTADOR, "NOMBRE_FALTA": CONTADOR,
     "PERIODO_ANTERIOR": CONTADOR, "RETENCION_NO_APLICA": CONTADOR, "RETENCION_TASA": CONTADOR,
     "SIRE_SIN_DETALLE": CONTADOR, "TIPO_CP_DESCONOCIDO": CONTADOR, "TOTAL_CERO": CONTADOR,
-}
-
-TEXTO_FALTANTE = {
-    "sin_cuenta": "sin cuenta contable",
-    "reparto_no_cuadra": "con un reparto entre cuentas que no suma la base del asiento",
-    "reparto_no_admitido": "con la base repartida entre varias cuentas, que el sistema de destino no admite",
-    "sin_centro_de_costo": "sin centro de costo en una cuenta que lo lleva",
-    "tipos_sin_equivalencia": "de un tipo sin equivalencia en el sistema de destino",
-    "monedas_sin_codigo": "en una moneda que el sistema de destino no admite",
 }
 
 
@@ -363,18 +351,19 @@ def _que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falt
     for codigo in sorted(por_codigo):
         salida.append({"motivo": codigo, "texto": textos[codigo], "comprobantes": por_codigo[codigo],
                        "pedir_a": PEDIR_A.get(codigo, CONTADOR)})
-    for clave, requisito in asi.REQUISITO_DE.items():
-        if requisito not in exige or not faltantes.get(clave):
+    for falta in FALTAS:
+        clave = falta.clave
+        if not falta.requisito or falta.requisito not in exige or not faltantes.get(clave):
             continue
         if clave == "tipos_sin_equivalencia":
             cuales = [_serie_numero(c) for c in candidatos if c.tipo_cp in faltantes[clave]]
-            texto = f"{TEXTO_FALTANTE[clave]}: {', '.join(faltantes[clave])}"
+            texto = f"{falta.texto}: {', '.join(faltantes[clave])}"
         elif clave == "monedas_sin_codigo":
             cuales = [_serie_numero(c) for c in candidatos if c.moneda in faltantes[clave]]
-            texto = f"{TEXTO_FALTANTE[clave]}: {', '.join(faltantes[clave])}"
+            texto = f"{falta.texto}: {', '.join(faltantes[clave])}"
         else:
-            cuales, texto = list(faltantes[clave]), TEXTO_FALTANTE[clave]
-        salida.append({"motivo": clave, "texto": texto, "comprobantes": cuales, "pedir_a": PEDIR_A[clave]})
+            cuales, texto = list(faltantes[clave]), falta.texto
+        salida.append({"motivo": clave, "texto": texto, "comprobantes": cuales, "pedir_a": falta.pedir_a})
     for motivo, cuales in (faltantes.get("no_caben") or {}).items():
         salida.append({"motivo": "no_caben", "texto": motivo, "comprobantes": cuales, "pedir_a": PEDIR_A["no_caben"]})
     return salida
@@ -387,7 +376,7 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
     Es la operación pensada para un agente —o para una persona con prisa—: en vez de lanzar la
     exportación y ver qué excepción salta a mitad de camino, responde de una vez qué bloquea, qué
     falta y qué saldría. No añade ninguna regla contable: reúne comprobaciones que ya existen
-    (`validar.revisar`, `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_mapa`,
+    (`validar.revisar`, `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_equivalencia`,
     `monedas_sin_codigo`, la numeración por sub-diario) y las cuenta por su serie-número.
 
     Pura y sin estado. **No lanza** por lo que le falte al mes: lo describe. Solo rechaza un
@@ -410,36 +399,28 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
     con_error = [c for c in candidatos if c.tiene_errores]
     con_aviso = [c for c in candidatos if c.observaciones and not c.tiene_errores]
 
-    # Lo que pide todo driver que lleva cuentas —los de asientos y el registro de un sistema contable— y el
-    # registro tributario (el SIRE) no: la cuenta, el reparto y el centro de cada documento. Y lo que pide solo el
-    # que arma asientos: la equivalencia del tipo, el código de la moneda y el correlativo de cada sub-diario.
-    faltantes: dict[str, Any] = {}
-    sub_diarios: dict[str, Any] = {}
+    # Lo que se mira: lo que ese destino exige y, además, lo que solo informa —la cuenta y el centro a todo el que lleva
+    # cuentas, el tipo y la moneda al que arma asientos—, con la misma regla que hace cumplir el núcleo
+    # (`asiento.faltantes_para`). El reparto que un destino no admite aparece solo si lo exige, y lo que su formato no
+    # puede llevar, si el driver lo declara (`no_caben`).
+    mirar = set(exige)
     if drivers.contrato.lleva_cuentas(modulo):
-        faltantes = {
-            "sin_cuenta": [_serie_numero(c) for c in asi.comprobantes_sin_cuenta(candidatos, config, es_venta)],
-            "reparto_no_cuadra": [_serie_numero(c) for c in asi.repartos_que_no_cuadran(candidatos, config, es_venta)],
-            "sin_centro_de_costo": [_serie_numero(c)
-                                    for c in asi.comprobantes_sin_centro(candidatos, config, es_venta)],
-        }
-        # Lo que solo cuenta para el destino que lo pide: el reparto, si lleva una cuenta por documento, y lo que su
-        # formato no puede llevar (`no_caben`). A quien no lo declara no le aparece la clave.
-        if "cuenta_unica" in exige:
-            faltantes["reparto_no_admitido"] = [_serie_numero(c) for c in asi.con_reparto(candidatos, config)]
-        if callable(getattr(modulo, "no_caben", None)):
-            faltantes["no_caben"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
-                                     in drivers.contrato.no_caben(modulo, libro, candidatos, config).items()}
+        mirar |= {"cuenta_contable", "centro_costo"}
     if drivers.contrato.arma_asientos(modulo):
-        sin_mapa = asi.tipos_sin_mapa(candidatos, config)
-        con_mapa = [c for c in candidatos if c.tipo_cp not in sin_mapa]
-        presentes = asi.sub_diarios_presentes(con_mapa, config, es_venta)
+        mirar |= {"tipo_cp", "moneda"}
+    codigos = ("tipos_sin_equivalencia", "monedas_sin_codigo")      # se dicen por su código, no por comprobante
+    faltantes: dict[str, Any] = {clave: cuales if clave in codigos else [_serie_numero(c) for c in cuales]
+                                 for clave, cuales in asi.faltantes_para(candidatos, config, es_venta, mirar).items()}
+    if drivers.contrato.lleva_cuentas(modulo) and callable(getattr(modulo, "no_caben", None)):
+        faltantes["no_caben"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
+                                 in drivers.contrato.no_caben(modulo, libro, candidatos, config).items()}
+    sub_diarios: dict[str, Any] = {}
+    if drivers.contrato.arma_asientos(modulo):
+        con_equivalencia = [c for c in candidatos if c.tipo_cp not in faltantes["tipos_sin_equivalencia"]]
+        presentes = asi.sub_diarios_presentes(con_equivalencia, config, es_venta)
         corr = {s: 1 for s in presentes}
         corr.update(correlativos or {})
-        faltantes.update({
-            "tipos_sin_equivalencia": sin_mapa,
-            "monedas_sin_codigo": asi.monedas_sin_codigo(candidatos, config),
-            "sub_diarios_sin_correlativo": [s for s in presentes if s not in (correlativos or {})],
-        })
+        faltantes["sub_diarios_sin_correlativo"] = [s for s in presentes if s not in (correlativos or {})]
         etiquetas = asi.etiquetas_sub_diario(config)
         sub_diarios = {s: {"etiqueta": etiquetas.get(s, s), "comprobantes": n, "empieza_en": corr[s]}
                        for s, n in presentes.items()}
@@ -449,11 +430,10 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
         por_que_no.append("no hay comprobantes que exportar")
     if con_error:
         por_que_no.append(f"{len(con_error)} comprobantes con observaciones que bloquean")
-    for clave in ("reparto_no_admitido", "sin_cuenta", "reparto_no_cuadra", "sin_centro_de_costo",
-                  "tipos_sin_equivalencia", "monedas_sin_codigo"):
+    for falta in FALTAS:
         # Solo lo que el destino exige deja el mes «no listo»; lo demás sigue en `faltantes`, informando.
-        if faltantes.get(clave) and asi.REQUISITO_DE[clave] in exige:
-            por_que_no.append(f"{len(faltantes[clave])} {TEXTO_FALTANTE[clave]}")
+        if falta.requisito in exige and faltantes.get(falta.clave):
+            por_que_no.append(f"{len(faltantes[falta.clave])} {falta.texto}")
     # Lo que no cabe en el formato del destino lo declara el propio driver: siempre bloquea.
     for motivo, cuales in (faltantes.get("no_caben") or {}).items():
         por_que_no.append(f"{len(cuales)} {motivo}")

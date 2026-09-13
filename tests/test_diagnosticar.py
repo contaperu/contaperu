@@ -206,7 +206,7 @@ def test_la_tabla_pedir_a_cubre_todos_los_codigos_de_validar():
     for n in ast.walk(ast.parse(pathlib.Path(validar.__file__).read_text(encoding="utf-8"))):
         if isinstance(n, ast.Call) and n.args and isinstance(n.args[0], ast.Constant) and isinstance(n.args[0].value, str):
             f = n.func
-            if (isinstance(f, ast.Name) and f.id in ("e", "a")) or (isinstance(f, ast.Attribute) and f.attr == "observar"):
+            if (isinstance(f, ast.Name) and f.id in ("error", "aviso")) or (isinstance(f, ast.Attribute) and f.attr == "observar"):
                 codigos.add(n.args[0].value)
     assert codigos, "no se encontró ningún código en validar.py"
     faltan = sorted(codigos - set(op.PEDIR_A))
@@ -216,3 +216,21 @@ def test_la_tabla_pedir_a_cubre_todos_los_codigos_de_validar():
     assert op.PROVEEDOR not in op.PEDIR_A.values()
     for clave in ("sin_cuenta", "sin_centro_de_costo", "tipos_sin_equivalencia", "monedas_sin_codigo"):
         assert clave in op.PEDIR_A
+
+
+def test_una_sola_tabla_de_faltas():
+    """Clave, requisito, excepción, texto, a quién pedirla y título viven en `asiento.FALTAS`, en el orden de la
+    comprobación. Cada excepción hereda de `NoExportable` y lleva la clave de su fila; la CLI atrapa solo esa base."""
+    from contaperu import asiento as asi
+    from contaperu.drivers import concar, contrato
+
+    assert [f.clave for f in asi.FALTAS] == ["tipos_sin_equivalencia", "monedas_sin_codigo", "reparto_no_admitido",
+                                            "sin_cuenta", "reparto_no_cuadra", "sin_centro_de_costo",
+                                            "sub_diarios_sin_correlativo", "no_caben"]
+    for falta in asi.FALTAS:
+        assert falta.texto and falta.titulo and falta.pedir_a == op.PEDIR_A[falta.clave]
+        if falta.excepcion is not None:
+            assert issubclass(falta.excepcion, asi.NoExportable) and falta.excepcion.clave == falta.clave
+    assert issubclass(contrato.NoCabe, asi.NoExportable) and contrato.NoCabe.clave == "no_caben"
+    assert issubclass(concar.CorrelativoDesborda, asi.NoExportable)
+    assert not issubclass(asi.RepartoNoCuadra, asi.SinCuenta) and not issubclass(asi.RepartoNoAdmitido, asi.SinCuenta)

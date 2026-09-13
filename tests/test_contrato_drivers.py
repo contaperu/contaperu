@@ -276,7 +276,7 @@ def test_al_registro_le_llega_la_imputacion_y_no_le_pide_la_equivalencia_del_tip
                                            ["632201", "DESARROLLO", f"{base - mitad:.2f}"]]
 
     sin_equivalencia = dict(CONTAB, tipos={c["tipo_cp"]: {"sigla": ""} for c in doc["comprobantes"]})
-    with pytest.raises(asi.TipoSinMapa):
+    with pytest.raises(asi.TipoSinEquivalencia):
         op.exportar(doc, "csv", sin_equivalencia)
     assert op.exportar(doc, "registro", sin_equivalencia)["resumen"]["filas"] == len(doc["comprobantes"])
 
@@ -344,7 +344,7 @@ def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros)
     assert d["exige"] == ["cuenta_contable", "cuenta_unica"] and d["listo_para_exportar"] is False
     assert d["faltantes"]["reparto_no_admitido"] == [etiqueta]
     assert d["por_que_no"] == ["1 con la base repartida entre varias cuentas, que el sistema de destino no admite"]
-    assert {"motivo": "reparto_no_admitido", "texto": op.TEXTO_FALTANTE["reparto_no_admitido"],
+    assert {"motivo": "reparto_no_admitido", "texto": asi.FALTA["reparto_no_admitido"].texto,
             "comprobantes": [etiqueta], "pedir_a": "contador"} in d["que_falta"]
     with pytest.raises(asi.RepartoNoAdmitido):
         op.exportar(doc, "unica", CONTAB, imputacion=imputacion)
