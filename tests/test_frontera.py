@@ -106,6 +106,15 @@ def test_el_nucleo_no_usa_el_reloj():
     assert culpables == [], f"el núcleo mira el reloj: {culpables}"
 
 
+def test_el_motor_no_supone_ninguna_aplicacion():
+    """El motor es de cualquier aplicación que se construya encima (John, 13-sep-2026): no nombra las tablas, la forma
+    de guardar ni el nombre de ninguna. Recibe la configuración y la imputación, y genera."""
+    prohibidos = ("contab_", "config_contable", "supabase", "contab-core")
+    culpables = [f"{str(f.relative_to(PAQUETE)).replace(chr(92), '/')}: {aguja}" for f in sorted(PAQUETE.rglob("*.py"))
+                 for aguja in prohibidos if aguja in f.read_text(encoding="utf-8").lower()]
+    assert culpables == [], f"el motor supone una aplicación: {culpables}"
+
+
 @pytest.mark.parametrize("puerta", sorted(PUERTAS))
 def test_cada_puerta_pasa_por_la_fachada(puerta):
     """Una puerta traduce un protocolo; no reimplementa el trabajo.

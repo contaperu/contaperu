@@ -7,8 +7,10 @@ prueba con uno de mentira.
 """
 from __future__ import annotations
 
+import ast
 import base64
 import json
+import pathlib
 import types
 
 import pytest
@@ -16,7 +18,7 @@ import pytest
 from contaperu import drivers
 from contaperu import operaciones as op
 from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
-from contaperu.configuracion import Campo, Columna
+from contaperu.configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from contaperu.drivers import contrato
 from contaperu.formato import Opciones
 from util import GOLDEN
@@ -485,3 +487,129 @@ def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
     tributario.CONFIGURACION = ()
     assert contrato.incumplimientos(tributario) == [
         "CONFIGURACION y COLUMNAS_ELEGIBLES son de un driver que lleva cuentas: un registro tributario no se configura"]
+
+    con_moneda = driver_de_prueba()
+    con_moneda.EXIGE = frozenset({"moneda"})
+    assert contrato.incumplimientos(con_moneda) == [
+        "un driver que exige `moneda` declara `monedas_codigo` en CONFIGURACION: de ahí lee el núcleo el código de "
+        "cada moneda"]
+
+
+# --- los vigilantes de «un sistema nuevo solo toca su paquete» (John, 13-sep-2026) -------------------------------
+
+GENERALES = {c.clave for c in CONFIGURACION_GENERAL}
+DEL_ASIENTO = {c.clave for c in CONFIGURACION_DEL_ASIENTO}
+PAQUETE = pathlib.Path(drivers.__file__).resolve().parents[1]
+
+
+class _Espia(dict):
+    """Una configuración que anota cada clave que se le lee."""
+
+    def __init__(self, datos: dict, leidas: set[str]):
+        super().__init__(datos)
+        self.leidas = leidas
+
+    def get(self, clave, defecto=None):
+        self.leidas.add(clave)
+        return super().get(clave, defecto)
+
+    def __getitem__(self, clave):
+        self.leidas.add(clave)
+        return super().__getitem__(clave)
+
+    def __contains__(self, clave):
+        self.leidas.add(clave)
+        return super().__contains__(clave)
+
+
+def _propias(modulo) -> set[str]:
+    """Las claves de la sección de un driver: las que declara, y `columnas` si declara columnas elegibles."""
+    return ({c.clave for c in contrato.configuracion(modulo)}
+            | ({"columnas"} if contrato.columnas_elegibles(modulo) else set()))
+
+
+def _meses_que_pasan_por_todo() -> list[tuple[dict, dict]]:
+    """Un mes de compras y uno de ventas que recorren todo lo que se puede leer de la configuración: una factura con
+    detracción, otra en dólares, una nota de crédito, un recibo por honorarios y una boleta, con su imputación."""
+    compras = documento_de_compras()
+    base = compras["comprobantes"][0]
+    compras["comprobantes"] += [
+        dict(base, numero="9001", detraccion={"codigo": "027", "porcentaje": 4}),
+        dict(base, numero="9002", moneda="USD", tipo_cambio="3.500"),
+        dict(base, tipo_cp="07", serie="FC01", numero="9003", ref_tipo_cp="01", ref_serie=base["serie"],
+             ref_numero=base["numero"], ref_fecha=base["fecha_emision"]),
+        dict(base, tipo_cp="02", serie="E001", numero="9004", base_gravada="0", igv="0", inafecto="1000",
+             total="1000", retencion="80"),
+        dict(base, tipo_cp="03", serie="B001", numero="9005"),
+    ]
+    ventas = json.loads((GOLDEN / "ventas_202512.json").read_text(encoding="utf-8"))
+    meses = []
+    for doc, cuenta in ((compras, "631101"), (ventas, "701101")):
+        for n, c in enumerate(doc["comprobantes"], 1):
+            c["id_externo"] = f"leida-{n}"
+        meses.append((doc, {c["id_externo"]: {"cuenta_contable": cuenta, "centro_costo": "OBRA01"}
+                            for c in doc["comprobantes"]}))
+    return meses
+
+
+@pytest.mark.parametrize("nombre", ["concar", "contasis", "csv"])
+def test_lo_que_se_lee_de_la_configuracion_esta_declarado_y_lo_declarado_se_lee(nombre, monkeypatch):
+    """Se exportan un mes de compras y uno de ventas que pasan por todo, y se anota cada clave que se lee de la
+    configuración, la lea el driver o el núcleo por él. Lo leído tiene que estar declarado —lo general, su sección, la
+    imputación—, y lo que su sección declara tiene que leerse: una clave que nadie lee se configura para nada."""
+    from contaperu import generar as gen
+
+    leidas: set[str] = set()
+    original = gen._config_para
+    monkeypatch.setattr(gen, "_config_para", lambda modulo, config: _Espia(original(modulo, config), leidas))
+    for doc, imputacion in _meses_que_pasan_por_todo():
+        op.exportar(doc, nombre, {}, imputacion=imputacion, incluir_observados=True)
+    modulo = drivers.obtener(nombre)
+    assert leidas - (GENERALES | _propias(modulo) | {"imputaciones"}) == set(), f"{nombre} lee claves sin declarar"
+    assert _propias(modulo) - leidas == set(), f"{nombre} declara claves que no lee"
+
+
+def _claves_leidas(archivo: pathlib.Path) -> set[str]:
+    """Las claves que un módulo lee de la configuración por su nombre: `config.get("x")`, `config["x"]`,
+    `(config or {}).get("x")` y `"x" in config`."""
+    def es_config(nodo) -> bool:
+        return ((isinstance(nodo, ast.Name) and nodo.id == "config")
+                or (isinstance(nodo, ast.BoolOp) and es_config(nodo.values[0])))
+
+    def texto(nodo) -> str | None:
+        return nodo.value if isinstance(nodo, ast.Constant) and isinstance(nodo.value, str) else None
+
+    claves: set[str] = set()
+    for nodo in ast.walk(ast.parse(archivo.read_text(encoding="utf-8"))):
+        if (isinstance(nodo, ast.Call) and isinstance(nodo.func, ast.Attribute) and nodo.func.attr == "get"
+                and es_config(nodo.func.value) and nodo.args and texto(nodo.args[0])):
+            claves.add(texto(nodo.args[0]))
+        elif isinstance(nodo, ast.Subscript) and es_config(nodo.value) and texto(nodo.slice):
+            claves.add(texto(nodo.slice))
+        elif (isinstance(nodo, ast.Compare) and len(nodo.ops) == 1 and isinstance(nodo.ops[0], ast.In)
+              and es_config(nodo.comparators[0]) and texto(nodo.left)):
+            claves.add(texto(nodo.left))
+    return claves
+
+
+@pytest.mark.parametrize("nombre", sorted(drivers.DE_SERIE))
+def test_ningun_driver_lee_por_su_nombre_una_clave_que_no_declara(nombre):
+    """La misma regla, leída en el código: cada `config.get("x")` de un driver es de lo general, de su sección o la
+    imputación. Caza también lo que el mes de prueba no llega a recorrer."""
+    modulo = drivers.obtener(nombre)
+    permitidas = GENERALES | _propias(modulo) | {"imputaciones"}
+    ajenas = {str(f.relative_to(PAQUETE)).replace("\\", "/"): sorted(_claves_leidas(f) - permitidas)
+              for f in sorted(pathlib.Path(modulo.__file__).parent.rglob("*.py"))}
+    assert {f: claves for f, claves in ajenas.items() if claves} == {}
+
+
+def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
+    """El núcleo no vuelve a leer claves de un sistema (como leía las dos de la X de CONCAR hasta el 13-sep-2026). Las
+    dos excepciones leen por el driver que las declara: `columnas`, el contrato (`centro_en_anexo`); y
+    `monedas_codigo`, el requisito `moneda`, que solo exige quien la declara (lo comprueba `incumplimientos`)."""
+    archivos = [*sorted((PAQUETE / "asiento").rglob("*.py")), PAQUETE / "igv.py", PAQUETE / "detracciones.py",
+                PAQUETE / "generar.py", PAQUETE / "drivers" / "contrato.py"]
+    permitidas = GENERALES | DEL_ASIENTO | {"imputaciones", "columnas", "monedas_codigo"}
+    ajenas = {str(f.relative_to(PAQUETE)).replace("\\", "/"): sorted(_claves_leidas(f) - permitidas) for f in archivos}
+    assert {f: claves for f, claves in ajenas.items() if claves} == {}
+    assert "monedas_codigo" in _propias(drivers.concar) and "moneda" in drivers.concar.EXIGE

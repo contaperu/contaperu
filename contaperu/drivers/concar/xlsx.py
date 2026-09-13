@@ -90,7 +90,7 @@ def escribir_xlsx(filas: list[dict[str, Any]]) -> bytes:
 
 def construir(libro: Libro, comprobantes: list[Comprobante], config: dict, correlativos: dict[str, int],
               opciones: Opciones = OPCIONES) -> tuple[bytes, dict]:
-    """Comprobantes (ya seleccionados y en orden) → bytes del .xlsx + resumen para `contab_exportaciones`."""
+    """Comprobantes (ya seleccionados y en orden) → bytes del .xlsx + el resumen que guarda quien exporta."""
     if FORMATOS.get(libro.tipo) is None:
         raise ValueError("Tipo de libro no soportado")
     es_venta = libro.es_venta
@@ -123,7 +123,7 @@ def construir(libro: Libro, comprobantes: list[Comprobante], config: dict, corre
         "sub_diarios": {s: {"etiqueta": etiquetas_sub_diario(config).get(s, s), **r} for s, r in rangos.items()},
         "debe": str(cuadre.debe), "haber": str(cuadre.haber),
         # La huella del contenido (asiento/huella.py): con ella quien guarde este resumen reconoce la
-        # tanda si vuelve a salir. Va aquí porque este resumen es lo que el portal persiste.
+        # exportación si vuelve a salir. Va aquí porque este resumen es lo que se guarda.
         "huella": huella(lineas),
     }
     return escribir_xlsx(filas), resumen

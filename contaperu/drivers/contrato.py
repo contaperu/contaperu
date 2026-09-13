@@ -284,6 +284,11 @@ def _incumplimientos_de_la_configuracion(modulo: Any) -> list[str]:
             problemas.append("un driver de asientos incluye en CONFIGURACION las claves del asiento "
                              "(asiento.CONFIGURACION_DEL_ASIENTO), que el núcleo lee al armar sus líneas; faltan: "
                              + ", ".join(faltan))
+    exigido = getattr(modulo, "EXIGE", None)
+    if (arma_asientos(modulo) and isinstance(exigido, (set, frozenset, list, tuple)) and "moneda" in exigido
+            and "monedas_codigo" not in {c.clave for c in configuracion(modulo) if isinstance(c, Campo)}):
+        problemas.append("un driver que exige `moneda` declara `monedas_codigo` en CONFIGURACION: de ahí lee el núcleo "
+                         "el código de cada moneda")
     if columnas is not None:
         problemas += _incumplimientos_de_las_columnas(modulo, columnas)
     return problemas
