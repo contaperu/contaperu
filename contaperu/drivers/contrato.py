@@ -149,7 +149,7 @@ class NoCabe(NoExportable):
     """Comprobantes que el formato del destino no puede llevar, por motivo (lo dice el driver en `no_caben`). El
     núcleo se niega antes de escribir nada, igual que con un tipo sin equivalencia."""
 
-    clave = "no_caben"
+    clave = "no_cabe"
 
     def __init__(self, motivos: dict[str, list[Comprobante]]):
         unicos = list({id(c): c for lista in motivos.values() for c in lista}.values())

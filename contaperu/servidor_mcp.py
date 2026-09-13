@@ -237,7 +237,7 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
     No corrige nada ni inventa nada: un comprobante sin cuenta se arregla donde se revisa, y aquí
     solo se dice cuál es. Es la herramienta para enseñarle a la persona qué va a salir antes de
     generar un archivo que luego se importa en su sistema contable. `imputacion` es la misma de
-    `generar_asiento`: un reparto que no suma la base sale en `faltantes.reparto_no_cuadra`.
+    `generar_asiento`: un reparto que no suma la base sale en `faltantes.reparto_que_no_cuadra`.
     """
     return operaciones.diagnosticar(documento, configuracion, correlativos, driver, imputacion)
 
@@ -248,7 +248,7 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
              fecha: str = "", imputacion: dict | None = None) -> CallToolResult:
     """Genera el archivo que espera un sistema contable, ya listo para importar.
 
-    Devuelve dos cosas: un resumen en JSON (nombre del archivo, filas, debe y haber, y en
+    Devuelve dos cosas: un resumen en JSON (nombre del archivo, comprobantes, debe y haber, y en
     `_exportacion` la **huella** del asiento que salió: si vuelves a exportar lo mismo, la huella se
     repite, y el Excel de CONCAR se SUMA al importarlo dos veces) y **el archivo adjunto**, para
     guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.

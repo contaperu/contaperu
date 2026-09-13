@@ -176,7 +176,7 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
     libro, totales = diagnostico["libro"], diagnostico["totales"]
     print(f"Libro: {libro['tipo'].upper()} {libro['periodo']} · RUC {libro['ruc']} · destino {diagnostico['driver']}")
     print(f"Comprobantes: {totales['comprobantes']} · saldrían {totales['saldrian']} · "
-          f"excluidos {totales['excluidos']} · fuera del registro {totales['fuera_del_registro']} · "
+          f"excluidos {totales['excluidos']} · fuera del destino {totales['fuera_del_destino']} · "
           f"con error {totales['con_error']} · con aviso {totales['con_aviso']}")
     print()
     for bloque, marca in (("bloqueantes", "!!"), ("avisos", " ·")):
@@ -184,9 +184,9 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
             for observacion in entrada["observaciones"]:
                 print(f"  {marca} {entrada['serie_numero']:<18} [{observacion['codigo']}] {observacion['texto']}")
     for falta in asi.FALTAS:
-        if falta.clave == "no_caben":
+        if falta.clave == "no_cabe":
             # Lo que no cabe llega por motivo, cada uno con su lista.
-            for motivo, cuales in diagnostico["faltantes"].get("no_caben", {}).items():
+            for motivo, cuales in diagnostico["faltantes"].get("no_cabe", {}).items():
                 _lista(f"{falta.titulo} ({motivo})", cuales)
         elif diagnostico["faltantes"].get(falta.clave):
             _lista(falta.titulo, diagnostico["faltantes"][falta.clave])

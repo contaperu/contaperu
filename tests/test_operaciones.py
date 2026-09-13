@@ -197,7 +197,7 @@ def test_el_reparto_da_una_linea_por_parte_y_tiene_que_cuadrar():
 
     corto = {"fila-8": {"reparto": reparto[:1]}}
     d = op.diagnosticar(doc, driver="csv", imputacion=corto)
-    assert len(d["faltantes"]["reparto_no_cuadra"]) == 1 and d["listo_para_exportar"] is False
+    assert len(d["faltantes"]["reparto_que_no_cuadra"]) == 1 and d["listo_para_exportar"] is False
     with pytest.raises(RepartoNoCuadra):
         op.exportar(doc, "csv", imputacion=corto)
 

@@ -131,7 +131,7 @@ def test_generar_asiento_por_el_protocolo():
 
 def test_validar_comprobantes_devuelve_el_documento_revisado():
     r = llamar("validar_comprobantes", documento=DOCUMENTO)
-    assert r["_revision"]["total"] == 1 and r["_revision"]["con_error"] == 0
+    assert r["_revision"]["comprobantes"] == 1 and r["_revision"]["con_error"] == 0
     assert r["comprobantes"][0]["estado"] == "ok"
 
 
@@ -263,7 +263,7 @@ def test_la_imputacion_llega_por_el_protocolo():
 
     corto = {"fila-871": {"reparto": [{"importe": "100", "cuenta_contable": "636301", "centro_costo": "CC-64"}]}}
     d = llamar("diagnosticar", documento=documento, imputacion=corto)
-    assert d["faltantes"]["reparto_no_cuadra"] == ["E001-871"] and d["listo_para_exportar"] is False
+    assert d["faltantes"]["reparto_que_no_cuadra"] == ["E001-871"] and d["listo_para_exportar"] is False
 
     resumen, _ = exportar(documento=documento, driver="csv", imputacion=imputacion)
     assert ";636301;D;" in resumen["texto"]

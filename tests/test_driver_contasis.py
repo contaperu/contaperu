@@ -52,7 +52,7 @@ def test_el_recibo_por_honorarios_queda_fuera_del_archivo():
     rh = dict(FACTURA, tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0", inafecto="1000",
               total="1000")
     r = op.exportar(doc(FACTURA, rh), "contasis", CONTAB)
-    assert r["filas"] == 1 and r["resumen"]["fuera_del_registro"] == 1 and hoja(r).max_row == 1
+    assert r["comprobantes"] == 1 and r["resumen"]["fuera_del_destino"] == 1 and hoja(r).max_row == 1
 
 
 @pytest.mark.parametrize("motivo, cambios, libro, imputacion", [
@@ -66,7 +66,7 @@ def test_lo_que_contasis_no_puede_llevar_se_dice_antes_y_no_sale(motivo, cambios
     d = doc(dict(FACTURA, **cambios), **libro)
     texto = contasis.datos.MOTIVOS[motivo]
     diag = op.diagnosticar(d, CONTAB, driver="contasis", imputacion=imputacion)
-    assert list(diag["faltantes"]["no_caben"]) == [texto] and diag["listo_para_exportar"] is False
+    assert list(diag["faltantes"]["no_cabe"]) == [texto] and diag["listo_para_exportar"] is False
     with pytest.raises(contrato.NoCabe):
         op.exportar(d, "contasis", CONTAB, incluir_observados=True, imputacion=imputacion)
 
@@ -75,7 +75,7 @@ def test_un_centro_mas_largo_que_su_columna_no_se_corta():
     d = doc(dict(FACTURA, id_externo="f1"))
     diag = op.diagnosticar(d, {"cuentas": {"cxp": {"PEN": "4212"}}}, driver="contasis",
                            imputacion={"f1": {"cuenta_contable": "631101", "centro_costo": "OBRA-00001"}})
-    assert list(diag["faltantes"]["no_caben"]) == [contasis.datos.MOTIVOS["largo"]]
+    assert list(diag["faltantes"]["no_cabe"]) == [contasis.datos.MOTIVOS["largo"]]
 
 
 def test_un_nombre_o_una_glosa_largos_se_cortan_y_no_detienen_nada():
@@ -99,4 +99,4 @@ def test_para_contasis_no_se_piden_sub_diarios_ni_equivalencias():
     """El sub-diario se elige al importar en CONTASIS y el tipo va con su código SUNAT: no hay nada de eso que pedir."""
     diag = op.diagnosticar(doc(FACTURA), CONTAB, driver="contasis")
     assert diag["exige"] == ["cuenta_contable", "cuenta_unica"] and diag["sub_diarios"] == {}
-    assert diag["listo_para_exportar"] is True and diag["faltantes"]["no_caben"] == {}
+    assert diag["listo_para_exportar"] is True and diag["faltantes"]["no_cabe"] == {}

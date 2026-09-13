@@ -106,8 +106,8 @@ def test_el_csv_no_exige_centro_y_concar_si():
 def test_las_claves_del_resumen_son_contrato():
     """El portal guarda `resumen` tal cual y lee de él los rangos («hasta») y, desde la 0.8, la huella."""
     r = op.exportar(documento_de_compras(), "concar", CONTAB)["resumen"]
-    assert {"filas_excel", "fechas", "sub_diarios", "debe", "haber", "huella"} <= set(r)
-    assert {"desde", "hasta", "n", "desde_cod", "hasta_cod", "desborda", "etiqueta"} <= set(r["sub_diarios"]["11"])
+    assert {"filas", "fechas", "sub_diarios", "debe", "haber", "huella"} <= set(r)
+    assert {"desde", "hasta", "comprobantes", "desde_codigo", "hasta_codigo", "desborda", "etiqueta"} <= set(r["sub_diarios"]["11"])
     r2 = op.exportar(documento_de_compras(), "csv", CONTAB)["resumen"]
     assert {"filas", "sub_diarios", "debe", "haber", "huella"} <= set(r2)
 
@@ -245,7 +245,7 @@ def test_un_registro_sale_sin_asiento_y_con_las_cuentas_del_asiento(con_terceros
     doc = documento_de_compras()
     r = op.exportar(doc, "registro", CONTAB)
     filas = [f.split("|") for f in r["texto"].splitlines()]
-    assert len(filas) == r["resumen"]["filas"] == r["filas"] == len(doc["comprobantes"])
+    assert len(filas) == r["resumen"]["filas"] == r["comprobantes"] == len(doc["comprobantes"])
     asiento = op.generar_asiento(doc, CONTAB)["asiento"]
     assert [f[1] for f in filas] == [ln["cuenta"] for ln in asiento if ln["rol"] == "principal"]
     assert [f[4] for f in filas] == [ln["cuenta"] for ln in asiento if ln["rol"] == "tercero"]
@@ -297,10 +297,10 @@ def test_el_registro_exige_la_cuenta_antes_de_escribir_y_diagnosticar_lo_dice(co
 
     d = op.diagnosticar(doc, driver="registro")
     assert d["exige"] == ["cuenta_contable"] and d["listo_para_exportar"] is False
-    assert set(d["faltantes"]) == {"sin_cuenta", "reparto_no_cuadra", "sin_centro_de_costo"}
+    assert set(d["faltantes"]) == {"sin_cuenta", "reparto_que_no_cuadra", "sin_centro"}
     assert d["por_que_no"] == [f"{len(doc['comprobantes'])} sin cuenta contable"] and d["sub_diarios"] == {}
     con_centros = op.diagnosticar(doc, CONTAB_CON_CENTROS, driver="registro")
-    assert con_centros["faltantes"]["sin_centro_de_costo"] and con_centros["listo_para_exportar"] is True
+    assert con_centros["faltantes"]["sin_centro"] and con_centros["listo_para_exportar"] is True
     assert op.diagnosticar(doc, CONTAB_CON_CENTROS, driver="exigente")["listo_para_exportar"] is False
 
 
@@ -376,14 +376,14 @@ def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_ter
 
     d = op.diagnosticar(doc, CONTAB, driver="soles")
     etiqueta = d["saldrian"][0]
-    assert d["faltantes"]["no_caben"] == {"en una moneda que el destino no admite": [etiqueta]}
+    assert d["faltantes"]["no_cabe"] == {"en una moneda que el destino no admite": [etiqueta]}
     assert d["listo_para_exportar"] is False and d["por_que_no"] == ["1 en una moneda que el destino no admite"]
-    assert {"motivo": "no_caben", "texto": "en una moneda que el destino no admite", "comprobantes": [etiqueta],
+    assert {"motivo": "no_cabe", "texto": "en una moneda que el destino no admite", "comprobantes": [etiqueta],
             "pedir_a": "contador"} in d["que_falta"]
     with pytest.raises(contrato.NoCabe) as e:
         op.exportar(doc, "soles", CONTAB)
     assert list(e.value.motivos) == ["en una moneda que el destino no admite"] and not llamado
-    assert "no_caben" not in op.diagnosticar(doc, CONTAB, driver="csv")["faltantes"]
+    assert "no_cabe" not in op.diagnosticar(doc, CONTAB, driver="csv")["faltantes"]
 
     documento, config = tmp_path / "mes.json", tmp_path / "config.json"
     documento.write_text(json.dumps(doc), encoding="utf-8")

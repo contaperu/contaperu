@@ -34,7 +34,7 @@ class NoExportable(Exception):
 class TipoSinEquivalencia(NoExportable):
     """Comprobantes cuyo tipo SUNAT no tiene sigla configurada (`tipos.NN.sigla`): no se inventa una."""
 
-    clave = "tipos_sin_equivalencia"
+    clave = "tipo_sin_equivalencia"
 
     def __init__(self, tipos: list[str]):
         super().__init__("Tipos SUNAT sin sigla configurada: " + ", ".join(tipos))
@@ -44,7 +44,7 @@ class TipoSinEquivalencia(NoExportable):
 class MonedaSinCodigo(NoExportable):
     """Comprobantes en una moneda sin código en el sistema de destino (`monedas_codigo`)."""
 
-    clave = "monedas_sin_codigo"
+    clave = "moneda_sin_codigo"
 
     def __init__(self, monedas: list[str]):
         super().__init__("Monedas sin código en el sistema de destino: " + ", ".join(monedas))
@@ -76,7 +76,7 @@ class RepartoNoCuadra(NoExportable):
     `SinCuenta` para que quien atrapaba la falta de cuenta la atrapara sin cambiar nada; ahora eso lo da `NoExportable`,
     y un reparto que no cuadra deja de pasar por una cuenta que falta."""
 
-    clave = "reparto_no_cuadra"
+    clave = "reparto_que_no_cuadra"
 
     def __init__(self, comprobantes: list[Comprobante]):
         super().__init__(f"{len(comprobantes)} comprobante(s) con un reparto entre cuentas que no suma la base del "
@@ -91,7 +91,7 @@ class SinCentro(NoExportable):
     desde entonces (decisión de John), como la de la cuenta.
     """
 
-    clave = "sin_centro_de_costo"
+    clave = "sin_centro"
 
     def __init__(self, comprobantes: list[Comprobante]):
         super().__init__(f"{len(comprobantes)} comprobante(s) sin centro de costo en una cuenta que lo lleva",
@@ -101,7 +101,7 @@ class SinCentro(NoExportable):
 class SubDiarioSinCorrelativo(NoExportable):
     """Sub-diarios presentes sin correlativo de partida: el asiento no se puede numerar."""
 
-    clave = "sub_diarios_sin_correlativo"
+    clave = "sub_diario_sin_correlativo"
 
     def __init__(self, sub_diarios: list[str]):
         super().__init__("Falta el correlativo de los sub-diarios " + ", ".join(sub_diarios))
@@ -119,22 +119,22 @@ class Falta:
 
 
 FALTAS: tuple[Falta, ...] = (
-    Falta("tipos_sin_equivalencia", "tipo_cp", TipoSinEquivalencia,
+    Falta("tipo_sin_equivalencia", "tipo_cp", TipoSinEquivalencia,
           "de un tipo sin equivalencia en el sistema de destino", SISTEMA, "Tipos sin equivalencia"),
-    Falta("monedas_sin_codigo", "moneda", MonedaSinCodigo,
+    Falta("moneda_sin_codigo", "moneda", MonedaSinCodigo,
           "en una moneda que el sistema de destino no admite", SISTEMA, "Monedas sin código"),
     Falta("reparto_no_admitido", "cuenta_unica", RepartoNoAdmitido,
           "con la base repartida entre varias cuentas, que el sistema de destino no admite", CONTADOR,
           "Reparto que el destino no admite"),
     Falta("sin_cuenta", "cuenta_contable", SinCuenta, "sin cuenta contable", CONTADOR, "Sin cuenta contable"),
-    Falta("reparto_no_cuadra", "cuenta_contable", RepartoNoCuadra,
+    Falta("reparto_que_no_cuadra", "cuenta_contable", RepartoNoCuadra,
           "con un reparto entre cuentas que no suma la base del asiento", CONTADOR, "Reparto que no suma la base"),
-    Falta("sin_centro_de_costo", "centro_costo", SinCentro,
+    Falta("sin_centro", "centro_costo", SinCentro,
           "sin centro de costo en una cuenta que lo lleva", CONTADOR, "Sin centro de costo"),
     # Estas dos no bloquean por un requisito: el correlativo que falta arranca en 1, y lo que no cabe en el formato lo
     # declara el driver, con su motivo y su excepción (`contrato.NoCabe`).
-    Falta("sub_diarios_sin_correlativo", "", SubDiarioSinCorrelativo, "sub-diarios sin correlativo", SISTEMA,
+    Falta("sub_diario_sin_correlativo", "", SubDiarioSinCorrelativo, "sub-diarios sin correlativo", SISTEMA,
           "Sub-diarios sin correlativo (arrancan en 1)"),
-    Falta("no_caben", "", None, "que el formato del destino no puede llevar", CONTADOR, "No cabe en el formato"),
+    Falta("no_cabe", "", None, "que el formato del destino no puede llevar", CONTADOR, "No cabe en el formato"),
 )
 FALTA: dict[str, Falta] = {falta.clave: falta for falta in FALTAS}

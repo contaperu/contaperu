@@ -77,7 +77,7 @@ llave**; desde la fachada, es el argumento `imputacion` de `exportar`, `diagnost
 - **Lo que no trae** sale de la configuración del entorno: el comprobante no lleva cuentas.
 - **El reparto divide solo la base** —el gasto o el ingreso—: el IGV y el total son del documento. Sus partes
   suman la base del asiento: el total menos el IGV con línea propia (en compras, la boleta y el recibo por
-  honorarios van enteros). Si no, el mes no está listo (`reparto_no_cuadra`) y el asiento no se arma.
+  honorarios van enteros). Si no, el mes no está listo (`reparto_que_no_cuadra`) y el asiento no se arma.
 - **Se rechazan en la puerta** un reparto con cuenta o centro al lado, que no dice cuál manda, y una imputación
   cuyo `id_externo` no es de ningún documento: una llave mal escrita haría salir ese documento con la cuenta por
   defecto, sin aviso.

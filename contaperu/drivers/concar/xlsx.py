@@ -116,7 +116,7 @@ def construir(libro: Libro, comprobantes: list[Comprobante], config: dict, corre
     # cuadra, asi que esto es una red de seguridad: si salta, hay un error de verdad.
     cuadre = partida_doble.exigir(lineas)
     resumen = {
-        "filas_excel": len(filas),
+        "filas": len(filas),
         "fechas": "por comprobante (extemporáneos al " + limites[0].strftime("%d/%m/%Y") + ")",
         "sub_diarios": {s: {"etiqueta": etiquetas_sub_diario(config).get(s, s), **r} for s, r in rangos.items()},
         "debe": str(cuadre.debe), "haber": str(cuadre.haber),

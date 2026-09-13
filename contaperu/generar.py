@@ -96,11 +96,11 @@ def _resumen(comprobantes: list[Comprobante], incluidos: list[Comprobante], erro
         "comprobantes": len(incluidos),
         "excluidos": sum(1 for c in comprobantes if c.excluida),
         "duplicados": sum(1 for c in comprobantes if c.estado == "duplicada" and not c.excluida),
-        "con_avisos": sum(1 for c in incluidos if c.observaciones and not c.tiene_errores),
-        "con_errores": len(errores),
+        "con_aviso": sum(1 for c in incluidos if c.observaciones and not c.tiene_errores),
+        "con_error": len(errores),
         # Comprobantes que esta driver no puede llevar (recibos por honorarios en
         # el SIRE): se anota para que el histórico no parezca que se perdieron.
-        "fuera_del_registro": len(fuera or []),
+        "fuera_del_destino": len(fuera or []),
         "total": str(sum((c.total * signo(c) for c in incluidos), Decimal("0.00"))),
         "igv": str(sum((c.igv * signo(c) for c in incluidos), Decimal("0.00"))),
     }

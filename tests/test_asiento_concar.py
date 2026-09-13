@@ -479,13 +479,13 @@ def test_numerar_por_sub_diario_con_el_mes_del_periodo():
           cp(numero="5", detraccion={"codigo": "037", "porcentaje": "12"})]
     numeros, rangos = concar.numerar(cs, CONTAB, "202608", {"11": 20, "13": 1, "15": 5, "10": 8})
     assert [numeros[id(c)] for c in cs] == ["080020", "080001", "080021", "080005", "080008"]
-    assert rangos["11"] == {"desde": 20, "hasta": 21, "n": 2, "desde_cod": "080020", "hasta_cod": "080021", "desborda": False}
+    assert rangos["11"] == {"desde": 20, "hasta": 21, "comprobantes": 2, "desde_codigo": "080020", "hasta_codigo": "080021", "desborda": False}
     assert rangos["13"]["hasta"] == 1 and rangos["15"]["hasta"] == 5 and rangos["10"]["hasta"] == 8
     with pytest.raises(concar.SubDiarioSinCorrelativo) as e:
         concar.numerar(cs, CONTAB, "202608", {"11": 20})
     assert e.value.sub_diarios == ["13", "15", "10"]
     _, r = concar.numerar(cs[:1], CONTAB, "202612", {"11": 9999})
-    assert r["11"]["desde_cod"] == "129999"
+    assert r["11"]["desde_codigo"] == "129999"
     _, r = concar.numerar(cs[:3], CONTAB, "202612", {"11": 9999, "13": 1})
     assert r["11"]["desborda"] is True
 
@@ -521,8 +521,8 @@ def test_xlsx_con_la_plantilla_de_concar():
     assert ws["L6"].value == "20607777773" and ws["M4"].value == "OBRA01" and ws["X6"].value == "OBRA01" and ws["S7"].value == "B001-55"
     assert ws["B7"].value == "13" and ws["R7"].value == "BV" and ws["AO7"].value is None and ws["AO4"].value == 18
     assert ws["O4"].font.name == "Aptos Narrow"
-    assert resumen["filas_excel"] == 5 and resumen["debe"] == resumen["haber"] == "236.00"
-    assert resumen["sub_diarios"]["11"]["hasta_cod"] == "080020" and resumen["sub_diarios"]["13"]["etiqueta"] == "Boletas de venta"
+    assert resumen["filas"] == 5 and resumen["debe"] == resumen["haber"] == "236.00"
+    assert resumen["sub_diarios"]["11"]["hasta_codigo"] == "080020" and resumen["sub_diarios"]["13"]["etiqueta"] == "Boletas de venta"
     assert resumen["fechas"] == "por comprobante (extemporáneos al 01/08/2026)"
 
 
@@ -531,7 +531,7 @@ def test_generar_con_plantilla_concar():
     assert exp.nombre == exp.archivo == "CONCAR_20601111111_202608_COMPRAS.xlsx"
     assert exp.formato == "concar_xlsx" and exp.content_type.endswith("spreadsheetml.sheet")
     assert exp.contenido[:2] == b"PK" and exp.comprimido == b"" and exp.nombre_comprimido == ""
-    assert exp.comprobantes == 1 and exp.resumen["comprobantes"] == 1 and exp.resumen["excluidos"] == 1 and exp.resumen["filas_excel"] == 3
+    assert exp.comprobantes == 1 and exp.resumen["comprobantes"] == 1 and exp.resumen["excluidos"] == 1 and exp.resumen["filas"] == 3
     expv = gen.generar(VENTAS, [cp()], "concar", config=CONTAB, correlativos={"05": 1})
     assert expv.nombre == "CONCAR_20601111111_202608_VENTAS.xlsx" and expv.resumen["sub_diarios"]["05"]["etiqueta"] == "Ventas"
     with pytest.raises(concar.SinCuenta):

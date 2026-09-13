@@ -283,16 +283,16 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
     """
     salida: dict[str, list] = {}
     if "tipo_cp" in exige:
-        salida["tipos_sin_equivalencia"] = tipos_sin_equivalencia(comprobantes, config)
+        salida["tipo_sin_equivalencia"] = tipos_sin_equivalencia(comprobantes, config)
     if "moneda" in exige:
-        salida["monedas_sin_codigo"] = monedas_sin_codigo(comprobantes, config)
+        salida["moneda_sin_codigo"] = monedas_sin_codigo(comprobantes, config)
     if "cuenta_unica" in exige:
         salida["reparto_no_admitido"] = con_reparto(comprobantes, config)
     if "cuenta_contable" in exige:
         salida["sin_cuenta"] = comprobantes_sin_cuenta(comprobantes, config, es_venta)
-        salida["reparto_no_cuadra"] = repartos_que_no_cuadran(comprobantes, config, es_venta)
+        salida["reparto_que_no_cuadra"] = repartos_que_no_cuadran(comprobantes, config, es_venta)
     if "centro_costo" in exige:
-        salida["sin_centro_de_costo"] = comprobantes_sin_centro(comprobantes, config, es_venta)
+        salida["sin_centro"] = comprobantes_sin_centro(comprobantes, config, es_venta)
     return salida
 
 
@@ -326,16 +326,16 @@ def numerar(comprobantes: list[Comprobante], config: dict, periodo: str,
     if any(n < 1 for n in contadores.values()):
         raise ValueError("Los correlativos empiezan en 1")
     numeros: dict[int, str] = {}
-    rangos: dict[str, dict] = {s: {"desde": n, "hasta": n - 1, "n": 0} for s, n in contadores.items()}
+    rangos: dict[str, dict] = {s: {"desde": n, "hasta": n - 1, "comprobantes": 0} for s, n in contadores.items()}
     for c in comprobantes:
         s = sub_diario(c, config, es_venta)
         n = contadores[s]
         numeros[id(c)] = f"{mes_mm}{n:04d}"
         rangos[s]["hasta"] = n
-        rangos[s]["n"] += 1
+        rangos[s]["comprobantes"] += 1
         contadores[s] = n + 1
     for s, r in rangos.items():
-        r["desde_cod"], r["hasta_cod"] = f"{mes_mm}{r['desde']:04d}", f"{mes_mm}{r['hasta']:04d}"
+        r["desde_codigo"], r["hasta_codigo"] = f"{mes_mm}{r['desde']:04d}", f"{mes_mm}{r['hasta']:04d}"
         r["desborda"] = r["hasta"] > 9999
     return numeros, rangos
 

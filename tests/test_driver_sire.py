@@ -148,11 +148,11 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
 
     cs = [c(), c(tipo_cp="02", serie="E001", numero="9", base_gravada="0", igv="0", inafecto="500", total="500"), c(numero="2")]
     exp = g.generar(libro, cs, "sire")
-    assert exp.comprobantes == 2 and exp.resumen["fuera_del_registro"] == 1
+    assert exp.comprobantes == 2 and exp.resumen["fuera_del_destino"] == 1
     assert b"E001" not in exp.texto and exp.texto.count(b"\r\n") == 2
     # El Excel de CONCAR sí se lo lleva (mismo mes, misma revisión)
     for x in cs:
         imputar(x, cuenta_contable="631101", centro_costo="OBRA01")   # la 631101 lleva centro y CONCAR lo exige (0.8)
     exc = g.generar(libro, cs, "concar", config=con_imputaciones(concar.config_de(None)),
                     correlativos={"11": 1, "15": 1})
-    assert exc.comprobantes == 3 and exc.resumen["fuera_del_registro"] == 0
+    assert exc.comprobantes == 3 and exc.resumen["fuera_del_destino"] == 0

@@ -207,11 +207,11 @@ def revisar(doc: dict, config: dict | None = None) -> dict:
     avisos = [c for c in comprobantes if c.observaciones and not c.tiene_errores]
     salida = documento(libro, comprobantes)
     salida["_revision"] = {
-        "total": len(comprobantes),
+        "comprobantes": len(comprobantes),
         "con_error": len(errores),
         "con_aviso": len(avisos),
         "detracciones_descartadas": len(limpiadas),
-        "bloquean_la_exportacion": [
+        "bloqueantes": [
             {"serie_numero": f"{c.serie}-{c.numero}".strip("-"),
              "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "error"]}
             for c in errores
@@ -297,7 +297,7 @@ def exportar(doc: dict, driver: str = "concar", config: dict | None = None,
 
     salida: dict[str, Any] = {
         "driver": driver, "formato": exp.formato, "archivo": exp.nombre,
-        "filas": exp.comprobantes, "resumen": exp.resumen,
+        "comprobantes": exp.comprobantes, "resumen": exp.resumen,
         "_exportacion": {"driver": driver, "archivo": exp.nombre,
                          **({"huella": exp.resumen["huella"]} if exp.resumen.get("huella") else {}),
                          **({"fecha": cuando} if cuando else {})},
@@ -355,17 +355,17 @@ def _que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falt
         clave = falta.clave
         if not falta.requisito or falta.requisito not in exige or not faltantes.get(clave):
             continue
-        if clave == "tipos_sin_equivalencia":
+        if clave == "tipo_sin_equivalencia":
             cuales = [_serie_numero(c) for c in candidatos if c.tipo_cp in faltantes[clave]]
             texto = f"{falta.texto}: {', '.join(faltantes[clave])}"
-        elif clave == "monedas_sin_codigo":
+        elif clave == "moneda_sin_codigo":
             cuales = [_serie_numero(c) for c in candidatos if c.moneda in faltantes[clave]]
             texto = f"{falta.texto}: {', '.join(faltantes[clave])}"
         else:
             cuales, texto = list(faltantes[clave]), falta.texto
         salida.append({"motivo": clave, "texto": texto, "comprobantes": cuales, "pedir_a": falta.pedir_a})
-    for motivo, cuales in (faltantes.get("no_caben") or {}).items():
-        salida.append({"motivo": "no_caben", "texto": motivo, "comprobantes": cuales, "pedir_a": PEDIR_A["no_caben"]})
+    for motivo, cuales in (faltantes.get("no_cabe") or {}).items():
+        salida.append({"motivo": "no_cabe", "texto": motivo, "comprobantes": cuales, "pedir_a": PEDIR_A["no_cabe"]})
     return salida
 
 
@@ -408,19 +408,19 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
         mirar |= {"cuenta_contable", "centro_costo"}
     if drivers.contrato.arma_asientos(modulo):
         mirar |= {"tipo_cp", "moneda"}
-    codigos = ("tipos_sin_equivalencia", "monedas_sin_codigo")      # se dicen por su código, no por comprobante
+    codigos = ("tipo_sin_equivalencia", "moneda_sin_codigo")      # se dicen por su código, no por comprobante
     faltantes: dict[str, Any] = {clave: cuales if clave in codigos else [_serie_numero(c) for c in cuales]
                                  for clave, cuales in asi.faltantes_para(candidatos, config, es_venta, mirar).items()}
     if drivers.contrato.lleva_cuentas(modulo) and callable(getattr(modulo, "no_caben", None)):
-        faltantes["no_caben"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
+        faltantes["no_cabe"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
                                  in drivers.contrato.no_caben(modulo, libro, candidatos, config).items()}
     sub_diarios: dict[str, Any] = {}
     if drivers.contrato.arma_asientos(modulo):
-        con_equivalencia = [c for c in candidatos if c.tipo_cp not in faltantes["tipos_sin_equivalencia"]]
+        con_equivalencia = [c for c in candidatos if c.tipo_cp not in faltantes["tipo_sin_equivalencia"]]
         presentes = asi.sub_diarios_presentes(con_equivalencia, config, es_venta)
         corr = {s: 1 for s in presentes}
         corr.update(correlativos or {})
-        faltantes["sub_diarios_sin_correlativo"] = [s for s in presentes if s not in (correlativos or {})]
+        faltantes["sub_diario_sin_correlativo"] = [s for s in presentes if s not in (correlativos or {})]
         etiquetas = asi.etiquetas_sub_diario(config)
         sub_diarios = {s: {"etiqueta": etiquetas.get(s, s), "comprobantes": n, "empieza_en": corr[s]}
                        for s, n in presentes.items()}
@@ -435,7 +435,7 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
         if falta.requisito in exige and faltantes.get(falta.clave):
             por_que_no.append(f"{len(faltantes[falta.clave])} {falta.texto}")
     # Lo que no cabe en el formato del destino lo declara el propio driver: siempre bloquea.
-    for motivo, cuales in (faltantes.get("no_caben") or {}).items():
+    for motivo, cuales in (faltantes.get("no_cabe") or {}).items():
         por_que_no.append(f"{len(cuales)} {motivo}")
 
     por_contraparte: dict[str, dict] = {}
@@ -456,7 +456,7 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
         "por_que_no": por_que_no,
         "que_falta": _que_falta(con_error, candidatos, faltantes, exige),
         "totales": {"comprobantes": len(todos), "saldrian": len(candidatos), "excluidos": len(excluidos),
-                    "fuera_del_registro": len(fuera), "con_error": len(con_error), "con_aviso": len(con_aviso)},
+                    "fuera_del_destino": len(fuera), "con_error": len(con_error), "con_aviso": len(con_aviso)},
         "bloqueantes": [{"serie_numero": _serie_numero(c),
                          "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "error"]}
                         for c in con_error],
