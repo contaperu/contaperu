@@ -50,16 +50,14 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 from ..asiento.faltas import NoExportable
 from ..formato import Opciones
-from ..modelo import Comprobante, Libro
+from ..modelo import TIPOS_LIBRO, Comprobante, Libro
 
 if TYPE_CHECKING:
     from ..asiento.lineas import LineaDiario
 
-# En orden de preferencia: si un driver expone dos (el CSV conserva `construir` por compatibilidad),
-# el núcleo usa la primera.
+# En orden de preferencia: si un driver expone dos, el núcleo usa la primera.
 FORMAS = ("desde_lineas", "desde_comprobantes", "construir", "linea")
 FAMILIA = {"linea": "registro", "desde_comprobantes": "registro", "construir": "asiento", "desde_lineas": "asiento"}
-TIPOS_LIBRO = ("venta", "compra")
 
 # Lo que un driver de asientos PUEDE exigir (el núcleo sabe generar sin ello): el centro de costo en
 # las cuentas que lo llevan, y que la moneda tenga código en el destino. Lo que exige el núcleo a todos:

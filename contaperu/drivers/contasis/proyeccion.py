@@ -15,10 +15,8 @@ from ...asiento.resolucion import cuenta_tercero, lleva_centro, partes_de
 from ...asiento.motor import glosa_de
 from ...formato import Opciones, formatear_numero, negativo
 from ...igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
-from ...modelo import Comprobante, Libro
+from ...modelo import CENTIMO, Comprobante, Libro
 from . import datos
-
-D2 = Decimal("0.01")
 
 
 def _importes(c: Comprobante, es_venta: bool) -> dict[str, Decimal]:
@@ -41,7 +39,7 @@ def _en_soles(importes: dict[str, Decimal], tipo: str, tc: Decimal) -> dict[str,
     absorbe la base —la columna sin IGV de mayor importe— para que la fila siga sumando su total. Un documento que no
     cuadraba en dólares no se toca: no se esconde un descuadre que no es del redondeo."""
     total, igvs = datos.TOTAL[tipo], datos.COLUMNAS_IGV[tipo]
-    soles = {k: (v * tc).quantize(D2, rounding=ROUND_HALF_UP) for k, v in importes.items()}
+    soles = {k: (v * tc).quantize(CENTIMO, rounding=ROUND_HALF_UP) for k, v in importes.items()}
     partes = [k for k in soles if k != total]
     if sum((importes[k] for k in partes), Decimal(0)) == importes[total]:
         diferencia = soles[total] - sum((soles[k] for k in partes), Decimal(0))

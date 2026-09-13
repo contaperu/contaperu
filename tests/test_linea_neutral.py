@@ -14,6 +14,7 @@ from jsonschema import Draft202012Validator
 
 from contaperu import asiento as asi
 from contaperu.drivers import concar as driver_concar
+from contaperu import generar as gen
 from contaperu.drivers import csv as driver_csv
 from contaperu.modelo import Comprobante, Libro
 from util import comprobante, con_imputaciones
@@ -161,9 +162,17 @@ def libro_compras() -> Libro:
                  periodo="202608", tipo="compra")
 
 
+def _csv(**opciones_csv) -> bytes:
+    """El CSV de una factura como lo arma el núcleo: las líneas numeradas y cuadradas, y el driver que las escribe."""
+    libro = libro_compras()
+    lineas, _ = asi.lineas_del_libro(libro, [factura()], CONTAB, {"11": 1})
+    return driver_csv.desde_lineas(libro, lineas, CONTAB, **opciones_csv)[0]
+
+
 def test_el_csv_escribe_una_fila_por_linea():
-    contenido, resumen = driver_csv.construir(libro_compras(), [factura()], CONTAB, {"11": 1})
-    texto = contenido.decode("utf-8-sig")
+    exp = gen.generar(libro_compras(), [factura()], "csv", config=CONTAB, correlativos={"11": 1})
+    resumen = exp.resumen
+    texto = exp.contenido.decode("utf-8-sig")
     filas = [f for f in texto.split("\r\n") if f]
     assert len(filas) == 4                      # cabecera + 3 lineas
     assert filas[0].startswith("sub_diario;correlativo;fecha;cuenta;debe_haber;importe")
@@ -172,15 +181,12 @@ def test_el_csv_escribe_una_fila_por_linea():
 
 
 def test_el_csv_lleva_bom_para_que_excel_no_rompa_las_tildes():
-    contenido, _ = driver_csv.construir(libro_compras(), [factura()], CONTAB, {"11": 1})
-    assert contenido.startswith(b"\xef\xbb\xbf")
-    sin_bom, _ = driver_csv.construir(libro_compras(), [factura()], CONTAB, {"11": 1}, bom=False)
-    assert not sin_bom.startswith(b"\xef\xbb\xbf")
+    assert _csv().startswith(b"\xef\xbb\xbf")
+    assert not _csv(bom=False).startswith(b"\xef\xbb\xbf")
 
 
 def test_el_separador_se_puede_cambiar():
-    contenido, _ = driver_csv.construir(libro_compras(), [factura()], CONTAB, {"11": 1}, separador=",")
-    assert contenido.decode("utf-8-sig").startswith("sub_diario,correlativo")
+    assert _csv(separador=",").decode("utf-8-sig").startswith("sub_diario,correlativo")
 
 
 def test_el_csv_esta_registrado_como_driver():

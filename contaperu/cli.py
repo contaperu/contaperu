@@ -5,7 +5,7 @@
 
     contaperu desde-json tests/fixtures/golden/ventas_202512.json --driver sire
 
-Herramienta de diagnóstico: genera el TXT del SIRE fuera dla aplicación que lo use (la fase de
+Herramienta de diagnóstico: genera el TXT del SIRE fuera de la aplicación que lo use (la fase de
 la prueba real en SUNAT se cerró el 25-ago-2026) y compara propuestas con
 `comparar`. "todas" = los drivers de TXT, que hoy es solo el SIRE.
 """
@@ -19,7 +19,7 @@ from pathlib import Path
 from . import comparar_sire
 from . import __version__, asiento as asi, drivers, generar as gen, operaciones, validar
 from .lectores import archivos
-from .modelo import Libro
+from .modelo import Comprobante, Libro, serie_y_numero
 
 # Esta puerta pasa por `operaciones` para todo lo que la fachada sabe hacer —leer un documento y
 # escribirlo— y baja al núcleo solo donde la fachada no aplica: `gen.generar` devuelve los BYTES del
@@ -30,7 +30,7 @@ from .modelo import Libro
 def _tabla(comprobantes: list[Comprobante]) -> str:
     filas = ["  #  TIPO  SERIE-NUMERO        FECHA       CONTRAPARTE                          TOTAL        ESTADO"]
     for i, c in enumerate(comprobantes, 1):
-        serie_numero = f"{c.serie}-{c.numero}" if c.serie else c.numero
+        serie_numero = serie_y_numero(c.serie, c.numero)
         fecha = c.fecha_emision.strftime("%d/%m/%Y") if c.fecha_emision else "--/--/----"
         nombre = (c.contraparte_nombre or "")[:36]
         marca = "EXCL" if c.excluida else c.estado.upper()
@@ -81,9 +81,7 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
             continue
         correlativos = None
         if drivers.contrato.arma_asientos(modulo):
-            incluidos = gen.seleccionar(comprobantes)
-            presentes = asi.sub_diarios_presentes(incluidos, config, libro.es_venta)
-            correlativos = {sub_diario: 1 for sub_diario in presentes}
+            correlativos = asi.correlativos_de_partida(gen.seleccionar(comprobantes), config, libro.es_venta)
         try:
             _escribir(gen.generar(libro, comprobantes, nombre_driver, incluir_errores=incluir_errores,
                                   config=config if drivers.contrato.lleva_cuentas(modulo) else None,
@@ -247,7 +245,7 @@ def main(argv: list[str] | None = None) -> int:
     sub_generar = subcomandos.add_parser("generar", help="XML/ZIP locales → TXT + ZIP para el SIRE")
     sub_generar.add_argument("--tipo", required=True, choices=["venta", "compra"])
     sub_generar.add_argument("--ruc", required=True)
-    sub_generar.add_argument("--razon", required=True, help="razón social del generador (va en la driver sire)")
+    sub_generar.add_argument("--razon", required=True, help="razón social del generador (va en el driver sire)")
     sub_generar.add_argument("--periodo", required=True, help="AAAAMM")
     sub_generar.add_argument("--driver", default="todas", choices=["todas", *drivers.DRIVERS])
     sub_generar.add_argument("--salida", default="salida")

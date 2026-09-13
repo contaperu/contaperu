@@ -20,7 +20,7 @@ from ...asiento.lineas import LineaDiario
 from ...asiento.motor import lineas_del_comprobante, glosa_de
 from ...formato import Opciones
 from ...igv import tasa_calculada
-from ...modelo import Comprobante
+from ...modelo import CENTIMO, Comprobante
 from .datos import COLUMNAS, MARCA_CONVERSION, OPCIONES, TIPO_CONVERSION
 
 
@@ -147,7 +147,7 @@ def _importe_exacto(v: Any) -> str:
     aquí vuelven a ser exactos, que es como viajan en el estándar."""
     if v is None or v == "":
         return ""
-    return str(Decimal(str(v)).quantize(Decimal("0.01")))
+    return str(Decimal(str(v)).quantize(CENTIMO))
 
 
 def _numero_o_vacio(v: Any) -> Any:

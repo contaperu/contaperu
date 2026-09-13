@@ -48,10 +48,10 @@ NOTAS = frozenset({"07", "08", "87", "88"})
 ADUANEROS = frozenset({"50", "51", "52", "53", "54"})
 # Comprobantes que pueden ir sin documento de la contraparte (consumidor final).
 SIN_CONTRAPARTE_OK = frozenset({"03", "12", "13", "16", "36", "00"})
-# Comprobantes que NO se anotan en el registro que se declara a SUNAT (SIRE/PLE):
+# Comprobantes que NO se anotan en el registro que se declara a SUNAT (el SIRE):
 # el recibo por honorarios (02) — regla de contabilidad. SÍ entran
 # al asiento contable (Excel de CONCAR, sub-diario 15): son gasto de la empresa.
-# Se filtran en `generar()` según lo que declare cada plantilla (`EXCLUYE_TIPOS`).
+# Se filtran en `generar()` según lo que declare cada driver (`EXCLUYE_TIPOS`).
 FUERA_DEL_REGISTRO_SUNAT = frozenset({"02"})
 
 # Tipos con un tratamiento propio en el asiento: el recibo por honorarios (su cuenta y su retención de 4ta), la boleta

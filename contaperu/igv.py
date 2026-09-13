@@ -24,11 +24,9 @@ from __future__ import annotations
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from . import catalogos as cat
-from .modelo import Comprobante
+from .modelo import CENTIMO, CERO, Comprobante
 from .validar import TOLERANCIA
 
-CERO = Decimal("0")
-D2 = Decimal("0.01")
 
 
 class IgvImposible(ValueError):
@@ -61,8 +59,8 @@ def tasa_legal(igv, base_gravada) -> Decimal | None:
         return None
     for t in (cat.TASA_IGV, *cat.TASAS_IGV_REDUCIDAS):
         if abs(igv - base * Decimal(t)) <= TOLERANCIA:
-            return (Decimal(t) * 100).quantize(D2)
-    return (igv / base * 100).quantize(D2, rounding=ROUND_HALF_UP)
+            return (Decimal(t) * 100).quantize(CENTIMO)
+    return (igv / base * 100).quantize(CENTIMO, rounding=ROUND_HALF_UP)
 
 
 # En compras, la boleta de venta y el recibo por honorarios no dan crédito fiscal: la boleta no permite
@@ -76,7 +74,7 @@ def igv_del_asiento(c: Comprobante, es_venta: bool) -> Decimal:
     crédito fiscal, donde es cero y ese importe se queda en la base."""
     if not es_venta and c.tipo_cp in SIN_CREDITO_FISCAL:
         return Decimal(0)
-    return Decimal(c.igv or 0).quantize(D2)
+    return Decimal(c.igv or 0).quantize(CENTIMO)
 
 
 def base_imputable(c: Comprobante, es_venta: bool) -> Decimal:
@@ -84,7 +82,7 @@ def base_imputable(c: Comprobante, es_venta: bool) -> Decimal:
     con línea propia. Es lo que divide el reparto de la imputación de un documento, y por eso lo usan igual
     el asiento (`lineas_del_comprobante`) y la comprobación del reparto (`asiento.reparto_no_cuadra`): la regla vive
     una vez."""
-    return (Decimal(c.total or 0).quantize(D2) - igv_del_asiento(c, es_venta)).quantize(D2)
+    return (Decimal(c.total or 0).quantize(CENTIMO) - igv_del_asiento(c, es_venta)).quantize(CENTIMO)
 
 
 def por_destino(c: Comprobante) -> tuple[tuple[Decimal, Decimal], tuple[Decimal, Decimal], tuple[Decimal, Decimal]]:
@@ -132,7 +130,7 @@ def aplicar_igv(c: Comprobante, igv) -> dict[str, Decimal]:
     resto del comprobante no se toca. Lanza `IgvImposible` si el IGV no es un número, es negativo o no cabe.
     """
     try:
-        nuevo = Decimal(str(igv).replace(",", ".").strip() or "0").quantize(D2, rounding=ROUND_HALF_UP)
+        nuevo = Decimal(str(igv).replace(",", ".").strip() or "0").quantize(CENTIMO, rounding=ROUND_HALF_UP)
     except InvalidOperation:
         raise IgvImposible("El IGV debe ser un número") from None
     if nuevo < 0:
@@ -157,7 +155,7 @@ def aplicar_igv(c: Comprobante, igv) -> dict[str, Decimal]:
         raise IgvImposible("Ese IGV supera el total del comprobante")
     if nuevo != 0:
         _seguir_descuento(c, fila, IgvImposible)
-    return {k: Decimal(v).quantize(D2, rounding=ROUND_HALF_UP) for k, v in fila.items()}
+    return {k: Decimal(v).quantize(CENTIMO, rounding=ROUND_HALF_UP) for k, v in fila.items()}
 
 
 PRINCIPALES = ("base_gravada", "inafecto", "exonerado", "exportacion")
@@ -175,7 +173,7 @@ def aplicar_total(c: Comprobante, total) -> dict[str, Decimal]:
     `validar`. Devuelve el total, el principal y los descuentos; lanza `TotalImposible` si no cabe.
     """
     try:
-        nuevo = Decimal(str(total).replace(",", ".").strip() or "0").quantize(D2, rounding=ROUND_HALF_UP)
+        nuevo = Decimal(str(total).replace(",", ".").strip() or "0").quantize(CENTIMO, rounding=ROUND_HALF_UP)
     except InvalidOperation:
         raise TotalImposible("El total debe ser un número") from None
     if nuevo < 0:
@@ -191,4 +189,4 @@ def aplicar_total(c: Comprobante, total) -> dict[str, Decimal]:
         fila["igv"] = c.igv
         _seguir_descuento(c, fila, TotalImposible)
         del fila["igv"]
-    return {k: Decimal(v).quantize(D2, rounding=ROUND_HALF_UP) for k, v in fila.items()}
+    return {k: Decimal(v).quantize(CENTIMO, rounding=ROUND_HALF_UP) for k, v in fila.items()}

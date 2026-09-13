@@ -14,7 +14,7 @@ from typing import Any
 
 from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..igv import base_imputable
-from ..modelo import Comprobante, Libro
+from ..modelo import Comprobante, Libro, a_decimal
 from .configuracion import CONFIG_DE_FABRICA
 from .faltas import FALTAS, SubDiarioSinCorrelativo, TipoSinEquivalencia
 from .imputacion import Imputacion
@@ -144,16 +144,9 @@ def sigla_documento(c: Comprobante, config: dict | None = None) -> str:
     return str(equivalencia["sigla"]) if equivalencia else ""
 
 
-def _num(v: Any) -> Decimal:
-    try:
-        return Decimal(str(v if v not in (None, "") else 0))
-    except Exception:
-        return Decimal(0)
-
-
 def tiene_detraccion(c: Comprobante) -> bool:
     d = c.detraccion if isinstance(c.detraccion, dict) else {}
-    return bool(str(d.get("codigo") or "").strip()) or _num(d.get("porcentaje")) > 0
+    return bool(str(d.get("codigo") or "").strip()) or a_decimal(d.get("porcentaje")) > 0
 
 
 def sub_diario(c: Comprobante, config: dict, es_venta: bool = False) -> str:
@@ -214,6 +207,14 @@ def lleva_centro(cuenta: str, config: dict) -> bool:
     prefijos = config["cuentas_con_centro"] if "cuentas_con_centro" in config else CONFIG_DE_FABRICA["cuentas_con_centro"]
     cuenta = (cuenta or "").strip()
     return bool(cuenta) and any(cuenta.startswith(p) for p in (str(x).strip() for x in (prefijos or [])) if p)
+
+
+def correlativos_de_partida(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
+                            dados: dict[str, int] | None = None) -> dict[str, int]:
+    """Por dónde arranca cada sub-diario presente: el correlativo que se dio y, si no se dio, el 1. Es el valor de
+    partida de `exportar`, `generar_asiento`, `diagnosticar` y la CLI; antes cada una lo armaba por su cuenta."""
+    dados = dados or {}
+    return {sub: dados.get(sub, 1) for sub in sub_diarios_presentes(comprobantes, config, es_venta)}
 
 
 def sub_diarios_presentes(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> dict[str, int]:

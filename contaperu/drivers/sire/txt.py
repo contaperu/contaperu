@@ -1,9 +1,9 @@
-"""Plantilla `sire`: el archivo de "Reemplazar propuesta" del SIRE según los
+"""Driver `sire`: el archivo de "Reemplazar propuesta" del SIRE según los
 anexos oficiales — Anexo 3 de la RS 112-2021 (RVIE, ventas) y Anexo 11 de la
 RS 040-2022 (RCE, compras). Referencia: los archivos de estructura que publica SUNAT (plantillas XLSX de
 SUNAT) y el manual del SIRE, p. 33.
 
-Diferencias con `ple`: empieza por RUC y un ID libre del generador, periodo
+Lo que lo distingue: empieza por RUC y un ID libre del generador, periodo
 AAAAMM, campo CAR vacío, fechas DD/MM/AAAA y CRLF.
 
 **Contrastado contra un archivo REAL aceptado por SUNAT** (RVIE de julio de

@@ -18,8 +18,8 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Iterable
 
-CERO = Decimal("0.00")
-D2 = Decimal("0.01")
+from .modelo import CENTIMO, CERO
+
 
 
 class Descuadre(Exception):
@@ -57,7 +57,7 @@ def _monto(v: Any) -> Decimal:
     if v is None or v == "":
         return CERO
     try:
-        return Decimal(str(v)).quantize(D2)
+        return Decimal(str(v)).quantize(CENTIMO)
     except InvalidOperation as e:
         raise ValueError(f"Importe inválido en una línea del asiento: {v!r}") from e
 
@@ -82,10 +82,10 @@ def cuadra(lineas: Iterable[Any]) -> Cuadre:
             haber += _monto(importe)
         else:
             sin_sentido += 1
-    diferencia = (debe - haber).quantize(D2)
+    diferencia = (debe - haber).quantize(CENTIMO)
     return Cuadre(
         cuadra=(diferencia == CERO and sin_sentido == 0),
-        debe=debe.quantize(D2), haber=haber.quantize(D2), diferencia=diferencia,
+        debe=debe.quantize(CENTIMO), haber=haber.quantize(CENTIMO), diferencia=diferencia,
         lineas=total, sin_sentido=sin_sentido,
     )
 

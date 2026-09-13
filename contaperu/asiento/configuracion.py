@@ -10,7 +10,6 @@ Aquí no hay lógica: si cambia un valor de fábrica, se toca este archivo y nad
 """
 from __future__ import annotations
 
-from decimal import Decimal
 from typing import Any
 
 # La línea de la detracción, calcada del Excel real que CONCAR ACEPTÓ (set-2026): tipo de documento
@@ -128,5 +127,3 @@ CONFIG_DE_FABRICA: dict[str, Any] = {
     # rechace la importación. Es INDEPENDIENTE de `centro_en_anexo_del_tercero`, que es la X del tercero.
     "centro_como_referencia": False,
 }
-
-D2 = Decimal("0.01")

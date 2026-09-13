@@ -22,7 +22,7 @@ from .asiento.resolucion import exigir_requisitos
 from .asiento.huella import huella
 from .asiento.motor import lineas_del_libro
 from .drivers import contrato
-from .modelo import Comprobante, Libro
+from .modelo import Comprobante, Libro, serie_y_numero
 from .formato import Opciones
 
 
@@ -36,7 +36,7 @@ class ErroresBloqueantes(Exception):
 class Exportado:
     nombre: str          # nombre oficial del TXT (o del Excel)
     nombre_comprimido: str   # '' en los drivers de archivo
-    formato: str         # 'ple_141' | 'ple_081' | 'sire_rvie' | 'sire_rce' | 'concar_xlsx'
+    formato: str         # 'sire_rvie', 'sire_rce', 'concar_xlsx', 'contasis_xlsx', 'csv_asiento' o el de un tercero
     driver: str
     texto: bytes             # el TXT; b'' en los drivers de archivo
     comprimido: bytes        # el ZIP del TXT; b'' en los drivers de archivo
@@ -55,7 +55,7 @@ class Exportado:
 
 
 def etiqueta(c: Comprobante) -> str:
-    return f"{c.tipo_cp} {c.serie}-{c.numero}".strip()
+    return f"{c.tipo_cp} {serie_y_numero(c.serie, c.numero)}".strip()
 
 
 def errores_de(comprobantes: list[Comprobante]) -> list[dict]:
@@ -75,7 +75,7 @@ def seleccionar(comprobantes: list[Comprobante]) -> list[Comprobante]:
 
 
 def fuera_de(comprobantes: list[Comprobante], tipos) -> list[Comprobante]:
-    """Los que esta driver no puede llevar (hoy: el recibo por honorarios no se
+    """Los que este driver no puede llevar (hoy: el recibo por honorarios no se
     anota en el registro que se declara a SUNAT, pero sí en el asiento contable)."""
     return [c for c in comprobantes if c.tipo_cp in (tipos or frozenset())]
 
@@ -98,7 +98,7 @@ def _resumen(comprobantes: list[Comprobante], incluidos: list[Comprobante], erro
         "duplicados": sum(1 for c in comprobantes if c.estado == "duplicada" and not c.excluida),
         "con_aviso": sum(1 for c in incluidos if c.observaciones and not c.tiene_errores),
         "con_error": len(errores),
-        # Comprobantes que esta driver no puede llevar (recibos por honorarios en
+        # Comprobantes que este driver no puede llevar (recibos por honorarios en
         # el SIRE): se anota para que el histórico no parezca que se perdieron.
         "fuera_del_destino": len(fuera or []),
         "total": str(sum((c.total * signo(c) for c in incluidos), Decimal("0.00"))),
@@ -148,7 +148,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers
     opciones = opciones or modulo.OPCIONES
     formato = drivers.formato_de(driver, libro.tipo)
     incluidos = seleccionar(comprobantes)
-    # Cada driver se lleva lo que le toca: el TXT del SIRE/PLE deja fuera los
+    # Cada driver se lleva lo que le toca: el TXT del SIRE deja fuera los
     # recibos por honorarios; el Excel de CONCAR los lleva a su sub-diario.
     fuera = fuera_de(incluidos, getattr(modulo, "EXCLUYE_TIPOS", None))
     if fuera:

@@ -19,14 +19,14 @@ pero al lado viaja `tipo_cp`, el código SUNAT, que es el que manda.
 from __future__ import annotations
 
 from datetime import date
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import Decimal
 
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
 from ..detracciones import monto_detraccion, tasa_detraccion
 from ..formato import Opciones, formatear_numero
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
-from ..modelo import Comprobante, Libro
-from .configuracion import CONFIG_DE_FABRICA, D2, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
+from ..modelo import CENTIMO, Comprobante, Libro, serie_y_numero, texto_tasa
+from .configuracion import CONFIG_DE_FABRICA, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinCuenta
 from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
                          lleva_centro, numerar, partes_de, reparto_no_cuadra, sigla_documento, sub_diario,
@@ -47,11 +47,6 @@ def glosa_de(c: Comprobante) -> str:
 
 def _iso(fecha: date | None) -> str:
     return fecha.isoformat() if fecha else ""
-
-
-def _texto_tasa(tasa: Decimal) -> str:
-    """18 → «18», 10.5 → «10.5»: la tasa del comprobante a 2 decimales, sin ceros de más."""
-    return format(tasa.quantize(D2, rounding=ROUND_HALF_UP).normalize(), "f")
 
 
 def _limpio(campos: dict) -> dict:
@@ -87,7 +82,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     es_usd = moneda == "USD"
     es_honorarios = not es_venta and c.tipo_cp == TIPO_HONORARIOS
     invierte = c.tipo_cp in TIPOS_INVIERTEN
-    total = Decimal(c.total or 0).quantize(D2)
+    total = Decimal(c.total or 0).quantize(CENTIMO)
     # Compras: boleta y recibo por honorarios no dan crédito fiscal → todo al gasto, sin línea de IGV. En
     # VENTAS la boleta emitida SÍ lleva su IGV (débito fiscal del emisor). La regla vive en `igv.py`: la
     # comprobación de que un reparto cuadra con la base la necesita igual.
@@ -100,12 +95,12 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     centros = {(centro or "").strip() for _, centro, _ in partes}
     centro_comun = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
     serie, numero = (c.serie or "").strip(), formatear_numero(c.numero, opciones)
-    serie_numero = f"{serie}-{numero}" if serie and numero else (serie or numero)
+    serie_numero = serie_y_numero(serie, numero)
     # UNA sola glosa para todas las líneas (confirmado por un contador, 2026); las derivadas anteponen lo
     # que las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—. Cortarla es cosa del driver.
     glosa = glosa_de(c)
     tasa_leida = tasa_calculada(igv, Decimal(c.base_gravada or 0))
-    tasa = "" if tasa_leida is None else _texto_tasa(tasa_leida)
+    tasa = "" if tasa_leida is None else texto_tasa(tasa_leida)
     tc = float(c.tipo_cambio) if es_usd and c.tipo_cambio else ""
     emision = c.fecha_emision
     vencimiento = c.fecha_vencimiento or emision
@@ -128,12 +123,12 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
         numero_ref = formatear_numero(c.ref_numero, opciones)
         equivalencia_ref = equivalencia_tipo(c, config, c.ref_tipo_cp)
         referencia = {"tipo": str(equivalencia_ref["sigla"]) if equivalencia_ref else "", "tipo_cp": c.ref_tipo_cp,
-                      "serie_numero": f"{c.ref_serie}-{numero_ref}" if c.ref_serie and numero_ref else (c.ref_serie or numero_ref),
+                      "serie_numero": serie_y_numero(c.ref_serie, numero_ref),
                       "fecha": _iso(c.ref_fecha)}
 
     def linea(rol: str, importe: Decimal, cuenta_linea: str, sentido: str, glosa_linea: str = glosa,
               **extra) -> LineaDiario:
-        campos = dict(cuenta=cuenta_linea, debe_haber=sentido, importe=str(Decimal(importe).quantize(D2)),
+        campos = dict(cuenta=cuenta_linea, debe_haber=sentido, importe=str(Decimal(importe).quantize(CENTIMO)),
                       rol=rol, sub_diario=sub_diario_asiento, correlativo=correlativo, fecha=_iso(fecha_asiento),
                       moneda=moneda, tipo_cambio=tc, glosa=glosa_linea, documento=_limpio(documento),
                       referencia=_limpio(referencia), tasa_igv=tasa)
@@ -143,7 +138,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # Recibo por honorarios con retención de 4ta: el gasto va por el TOTAL, la retención al Haber en
     # su cuenta de tributos, y a la cuenta por pagar solo el NETO que se le paga al profesional (regla
     # de contabilidad). Sin retención —lo normal con suspensión— el total completo va a la cuenta por pagar.
-    retenido = Decimal(c.retencion or 0).quantize(D2) if es_honorarios else Decimal(0)
+    retenido = Decimal(c.retencion or 0).quantize(CENTIMO) if es_honorarios else Decimal(0)
     if retenido > total:
         retenido = total
     # La CUENTA decide dónde va el centro (el contador, 09-sep-2026): en su línea si la cuenta lo lleva

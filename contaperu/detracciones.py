@@ -21,21 +21,7 @@ from __future__ import annotations
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Iterable
 
-from .modelo import Comprobante
-
-D2 = Decimal("0.01")
-
-
-def _num(v: Any) -> Decimal:
-    try:
-        return Decimal(str(v if v not in (None, "") else 0))
-    except Exception:
-        return Decimal(0)
-
-
-def _texto_tasa(t: Decimal) -> str:
-    """12 → «12», 4.5 → «4.5»: sin ceros de más, que es como se escribe una tasa."""
-    return format(t.normalize(), "f")
+from .modelo import CENTIMO, Comprobante, a_decimal, texto_tasa
 
 
 def codigos_de(config: dict) -> set[str]:
@@ -57,13 +43,13 @@ def normalizar_una(det, codigos: set[str]) -> dict | None:
 
 def tasa_de_tabla(codigo: Any, config: dict) -> Decimal:
     """La tasa que el contribuyente tiene para ese código en su tabla; 0 si no la tiene."""
-    return _num((config.get("detraccion_tasas") or {}).get(str(codigo or "").strip()))
+    return a_decimal((config.get("detraccion_tasas") or {}).get(str(codigo or "").strip()))
 
 
 def tasa_detraccion(c: Comprobante, config: dict) -> Decimal:
     """La tasa con la que se calcula: la del comprobante y, si no la trae, la de la tabla."""
     d = c.detraccion if isinstance(c.detraccion, dict) else {}
-    t = _num(d.get("porcentaje"))
+    t = a_decimal(d.get("porcentaje"))
     return t if t > 0 else tasa_de_tabla(d.get("codigo"), config)
 
 
@@ -77,11 +63,11 @@ def monto_detraccion(c: Comprobante, config: dict) -> tuple[Decimal, Decimal]:
     tc = c.tipo_cambio if es_usd and c.tipo_cambio else None
     if t <= 0 or (es_usd and not tc):
         return Decimal(0), Decimal(0)
-    total = Decimal(c.total or 0).quantize(D2)
+    total = Decimal(c.total or 0).quantize(CENTIMO)
     cambio = Decimal(str(tc)) if es_usd else Decimal(1)
-    base_soles = (total * cambio).quantize(D2, rounding=ROUND_HALF_UP)
+    base_soles = (total * cambio).quantize(CENTIMO, rounding=ROUND_HALF_UP)
     soles = (base_soles * t / Decimal(100)).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-    en_moneda = (soles / cambio).quantize(D2, rounding=ROUND_HALF_UP) if es_usd else soles
+    en_moneda = (soles / cambio).quantize(CENTIMO, rounding=ROUND_HALF_UP) if es_usd else soles
     return soles, en_moneda
 
 
@@ -110,7 +96,7 @@ def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Compro
             nuevo = dict(nuevo, monto=str(soles) if soles > 0 else "")
             de_tabla = tasa_de_tabla(nuevo["codigo"], config)
             if de_tabla > 0:
-                nuevo["tasa_tabla"] = _texto_tasa(de_tabla)
+                nuevo["tasa_tabla"] = texto_tasa(de_tabla)
             else:
                 nuevo.pop("tasa_tabla", None)
         c.detraccion = nuevo

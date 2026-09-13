@@ -1,12 +1,12 @@
 """Modelo canónico del motor: un `Comprobante` = una fila del registro de compras o ventas.
 
-Aquí está TODO lo que necesitan las cuatro salidas (PLE 14.1 / 8.1 y SIRE
-Anexo 3 / 11); las plantillas solo ordenan y formatean. Reglas:
+Aquí está TODO lo que necesitan las salidas —el SIRE (Anexos 3 y 11) y los sistemas contables—; los drivers
+solo ordenan y formatean. Reglas:
 
 - Importes en `Decimal` con 2 decimales y SIEMPRE positivos: el signo de las
-  notas de crédito lo pone la plantilla, no el dato (así la celda editable del
+  notas de crédito lo pone el driver, no el dato (así la celda editable del
   portal no obliga a escribir negativos).
-- Fechas como `date`; las plantillas las escriben en el formato que toque.
+- Fechas como `date`; los drivers las escriben en el formato que toque.
 - Los campos de revisión (`estado`, `observaciones`, `excluida`) los rellenan
   `validar.py` y el usuario; el motor nunca los inventa.
 """
@@ -19,7 +19,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from typing import Any
 
 CERO = Decimal("0.00")
-_DOS = Decimal("0.01")
+CENTIMO = Decimal("0.01")     # el cuántum de todo importe: una sola fuente para el motor
 _TRES = Decimal("0.001")
 
 TIPOS_LIBRO = ("venta", "compra")
@@ -27,6 +27,26 @@ ORIGENES = ("xml", "pdf_texto", "vision", "manual", "sire")  # sire = importado 
 # Lo que declara el documento sobre su pago. En la factura electrónica es obligatorio desde 2021 (UBL
 # `PaymentTerms FormaPago`: «Contado», o «Credito» con sus cuotas). Vacío = el documento no lo dice.
 CONDICIONES_PAGO = ("contado", "credito")
+
+
+def a_decimal(v: Any) -> Decimal:
+    """Un número cualquiera (una tasa, un porcentaje) a `Decimal`, sin redondear y sin quitarle el signo; vacío o
+    ilegible, 0. Para importes está `monto`, que además los deja en 2 decimales y en positivo."""
+    try:
+        return Decimal(str(v if v not in (None, "") else 0))
+    except Exception:
+        return Decimal(0)
+
+
+def texto_tasa(tasa: Decimal) -> str:
+    """Una tasa como se escribe: a 2 decimales y sin ceros de más (18 → «18», 10.5 → «10.5», 4.50 → «4.5»)."""
+    return format(tasa.quantize(CENTIMO, rounding=ROUND_HALF_UP).normalize(), "f")
+
+
+def serie_y_numero(serie: str, numero: str) -> str:
+    """«F001-123», o solo la parte que haya: un documento sin serie (un DUA, un recibo de servicios) se nombra por su
+    número, y sin número por su serie."""
+    return f"{serie}-{numero}" if serie and numero else (serie or numero)
 
 
 def monto(v: Any) -> Decimal:
@@ -45,7 +65,7 @@ def monto(v: Any) -> Decimal:
             d = Decimal(s)
         except InvalidOperation as e:
             raise ValueError(f"Importe inválido: {v!r}") from e
-    return abs(d).quantize(_DOS, rounding=ROUND_HALF_UP)
+    return abs(d).quantize(CENTIMO, rounding=ROUND_HALF_UP)
 
 
 def tipo_cambio(v: Any) -> Decimal | None:
@@ -215,7 +235,7 @@ class Comprobante:
         self.condicion_pago = self.condicion_pago.lower().replace("é", "e")
         if self.condicion_pago and self.condicion_pago not in CONDICIONES_PAGO:
             raise ValueError(f"condicion_pago inválida: {self.condicion_pago!r} (contado | credito)")
-        self.confianza = Decimal(str(self.confianza)).quantize(_DOS)
+        self.confianza = Decimal(str(self.confianza)).quantize(CENTIMO)
         self.observaciones = [
             o if isinstance(o, Observacion) else Observacion(**o) for o in (self.observaciones or [])
         ]

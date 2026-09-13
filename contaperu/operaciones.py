@@ -20,7 +20,7 @@ from . import asiento as asi
 from . import detracciones, drivers, generar as gen, pcge, partida_doble, validar
 from .asiento.faltas import CONTADOR, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
 from .lectores import archivos as lectura_archivos, sire_txt
-from .modelo import Comprobante, Libro
+from .modelo import Comprobante, Libro, serie_y_numero
 
 # Ojo: NO se redefine aquí. Era la segunda copia del mismo número.
 from ._version import OPEN_ACCOUNTING  # noqa: E402  (constante, no un módulo)
@@ -212,7 +212,7 @@ def revisar(doc: dict, config: dict | None = None) -> dict:
         "con_aviso": len(avisos),
         "detracciones_descartadas": len(limpiadas),
         "bloqueantes": [
-            {"serie_numero": f"{c.serie}-{c.numero}".strip("-"),
+            {"serie_numero": _serie_numero(c),
              "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "error"]}
             for c in errores
         ],
@@ -249,8 +249,7 @@ def generar_asiento(doc: dict, config: dict | None = None, correlativos: dict | 
     """Comprobantes -> líneas de diario del estándar, sin formato de ningún ERP."""
     libro, comprobantes, config = _preparar(doc, config, incluir_observados, imputacion)
     es_venta = libro.es_venta
-    corr = {s: 1 for s in asi.sub_diarios_presentes(comprobantes, config, es_venta)}
-    corr.update(correlativos or {})
+    corr = asi.correlativos_de_partida(comprobantes, config, es_venta, correlativos)
     # Directo a las líneas neutrales: sin pasar por las columnas de ningún ERP.
     neutrales, rangos = asi.lineas_del_libro(libro, comprobantes, config, corr)
     lineas = [ln.a_dict() for ln in neutrales]
@@ -290,8 +289,7 @@ def exportar(doc: dict, driver: str = "concar", config: dict | None = None,
     # sistema contable); los correlativos, además, el que arma asientos.
     corr = None
     if drivers.contrato.arma_asientos(modulo):
-        corr = {s: 1 for s in asi.sub_diarios_presentes(comprobantes, config, libro.es_venta)}
-        corr.update(correlativos or {})
+        corr = asi.correlativos_de_partida(comprobantes, config, libro.es_venta, correlativos)
     exp = gen.generar(libro, comprobantes, driver, incluir_errores=incluir_observados,
                       config=config if drivers.contrato.lleva_cuentas(modulo) else None, correlativos=corr)
 
@@ -316,7 +314,7 @@ def exportar(doc: dict, driver: str = "concar", config: dict | None = None,
 
 
 def _serie_numero(c: Comprobante) -> str:
-    return f"{c.serie}-{c.numero}".strip("-")
+    return serie_y_numero(c.serie, c.numero)
 
 
 def _detraccion_pendiente(c: Comprobante) -> bool:
@@ -418,8 +416,7 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
     if drivers.contrato.arma_asientos(modulo):
         con_equivalencia = [c for c in candidatos if c.tipo_cp not in faltantes["tipo_sin_equivalencia"]]
         presentes = asi.sub_diarios_presentes(con_equivalencia, config, es_venta)
-        corr = {s: 1 for s in presentes}
-        corr.update(correlativos or {})
+        corr = asi.correlativos_de_partida(con_equivalencia, config, es_venta, correlativos)
         faltantes["sub_diario_sin_correlativo"] = [s for s in presentes if s not in (correlativos or {})]
         etiquetas = asi.etiquetas_sub_diario(config)
         sub_diarios = {s: {"etiqueta": etiquetas.get(s, s), "comprobantes": n, "empieza_en": corr[s]}

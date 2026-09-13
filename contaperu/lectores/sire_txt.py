@@ -86,7 +86,7 @@ def leer_lineas(datos: bytes) -> list[list[str]]:
 def es_sire(datos: bytes) -> bool:
     """¿Esto es una propuesta del SIRE? Se mira el contenido, no el nombre.
 
-    Acepta el TXT suelto y el ZIP tal cual lo entrega SUNAT (dentro dla aplicación que lo use los
+    Acepta el TXT suelto y el ZIP tal cual lo entrega SUNAT (dentro de la aplicación que lo use los
     ZIP ya vienen abiertos, pero desde la CLI o los tests entra el ZIP entero).
     """
     try:
@@ -128,7 +128,7 @@ def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
     for k in FECHAS:
         datos[k] = datos.get(k) or None
     # SUNAT exporta `1.000` cuando la moneda es PEN, pero el registro solo pide el
-    # T.C. si la moneda NO es soles — y así lo escribe la plantilla (`tc_pen=""`).
+    # T.C. si la moneda NO es soles — y así lo escribe el driver (`tc_pen=""`).
     # Guardar ese 1.000 sería un dato que el comprobante no tiene y que se
     # contradice con el archivo que este mismo motor genera (regla de contabilidad).
     if datos.get("moneda", "").strip().upper() in ("", "PEN"):

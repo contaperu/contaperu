@@ -20,10 +20,8 @@ import io
 from typing import Any
 
 from ...asiento.lineas import LineaDiario
-from ...asiento.motor import lineas_del_libro
 from ...formato import Opciones
-from ...modelo import Comprobante, Libro
-from ... import partida_doble
+from ...modelo import Libro
 
 NOMBRE = "csv"
 OPCIONES = Opciones(fecha="AAAA-MM-DD", extension=".csv")
@@ -91,15 +89,3 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones
 
     texto = buf.getvalue()
     return ("﻿" + texto if bom else texto).encode("utf-8"), {"filas": len(filas)}
-
-
-def construir(libro: Libro, comprobantes: list[Comprobante], config: dict,
-              correlativos: dict[str, int], opciones: Opciones = OPCIONES,
-              separador: str = SEPARADOR, bom: bool = True) -> tuple[bytes, dict]:
-    """Comprobantes → CSV + resumen. Se conserva por compatibilidad con la 0.6: el núcleo ya no la
-    usa —`generar` arma las líneas y llama a `desde_lineas`—, pero es API pública."""
-    neutrales, rangos = lineas_del_libro(libro, comprobantes, config, correlativos, opciones)
-    cuadre = partida_doble.exigir(neutrales)
-    contenido, _ = desde_lineas(libro, neutrales, config, opciones, separador, bom)
-    return contenido, {"filas": len(neutrales), "sub_diarios": dict(rangos),
-                       "debe": str(cuadre.debe), "haber": str(cuadre.haber)}
