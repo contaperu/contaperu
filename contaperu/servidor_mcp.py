@@ -150,9 +150,20 @@ def drivers_disponibles() -> str:
                  "forma": drivers.contrato.forma(modulo),
                  "familia": drivers.contrato.familia(modulo),
                  "exige": sorted(drivers.contrato.exige(modulo)),
+                 # ¿Tiene sección en la configuración? Lo que se configura, en `contaperu://configuracion`.
+                 "configurable": bool(drivers.contrato.seccion_por_defecto(modulo)),
                  "descripcion": (modulo.__doc__ or "").strip().splitlines()[0]}
         for nombre, modulo in drivers.DRIVERS.items()
     }, ensure_ascii=False, indent=1)
+
+
+@mcp.resource("contaperu://configuracion", mime_type="application/json")
+def configuracion_declarada() -> str:
+    """Qué se configura y cómo: lo general y la sección de cada sistema contable, cada clave con su tipo, su valor
+    por defecto, su patrón y sus textos, y en qué columnas de su archivo puede ir cada dato (el centro de costo, por
+    ejemplo). Es lo que una aplicación lee para pintar su pantalla de configuración, y contra lo que se valida la
+    `configuracion` de las herramientas."""
+    return json.dumps(operaciones.describir_configuracion(), ensure_ascii=False, indent=1)
 
 
 # --- herramientas ------------------------------------------------------------------
@@ -200,7 +211,7 @@ def validar_partida_doble(asiento: list[dict]) -> dict:
 @mcp.tool()
 def generar_asiento(documento: dict, configuracion: dict | None = None,
                     correlativos: dict | None = None, incluir_observados: bool = False,
-                    imputacion: dict | None = None) -> dict:
+                    imputacion: dict | None = None, driver: str = "concar") -> dict:
     """Convierte los comprobantes en líneas de diario, sin el formato de ningún sistema.
 
     Devuelve el bloque `asiento` del estándar: cuenta, debe o haber, importe, moneda, glosa,
@@ -215,8 +226,12 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
     `cuenta_contable`, su `centro_costo`, la `cuenta_tercero` (la del total) o un `reparto` de la base
     entre cuentas ([{importe, cuenta_contable, centro_costo}], que tiene que sumar la base). Lo que no
     traiga sale de la configuración.
+
+    `driver` es el sistema de asientos cuya sección de la configuración se aplica (`concar` o `csv`):
+    sus siglas, sus sub-diarios y las columnas en que pone el centro de costo.
     """
-    return operaciones.generar_asiento(documento, configuracion, correlativos, incluir_observados, imputacion)
+    return operaciones.generar_asiento(documento, configuracion, correlativos, incluir_observados, imputacion,
+                                       driver)
 
 
 @mcp.tool()
@@ -240,6 +255,8 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
     solo se dice cuál es. Es la herramienta para enseñarle a la persona qué va a salir antes de
     generar un archivo que luego se importa en su sistema contable. `imputacion` es la misma de
     `generar_asiento`: un reparto que no suma la base sale en `faltantes.reparto_que_no_cuadra`.
+    Si la `configuracion` no cumple lo que se declara en `contaperu://configuracion`, lo dice en
+    `errores_de_configuracion`, cada error con su ruta.
     """
     return operaciones.diagnosticar(documento, configuracion, correlativos, driver, imputacion)
 

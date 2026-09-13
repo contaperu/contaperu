@@ -38,6 +38,18 @@ def test_errores_bloquean_salvo_flag(tmp_path, capsys):
     assert (tmp_path / "s" / "LE2013131295520260100140400021112.zip").exists()
 
 
+def test_la_cli_dice_que_se_configura(capsys):
+    """Para escribir un --config sin adivinar: lo que se configura de un sistema, o los valores por defecto."""
+    assert cli.main(["configuracion", "--driver", "contasis"]) == 0
+    descripcion = json.loads(capsys.readouterr().out)
+    assert descripcion["sistema"] == "contasis" and descripcion["campos"][0]["clave"] == "medio_pago"
+    assert [c["clave"] for c in descripcion["general"]["campos"]][:2] == ["cuentas", "usa_centros_costo"]
+    assert cli.main(["configuracion", "--por-defecto", "--driver", "contasis"]) == 0
+    partida = json.loads(capsys.readouterr().out)
+    assert partida["contasis"] == {"medio_pago": "001", "columnas": {"centro_costo": ["centro_costo"]}}
+    assert "concar" not in partida and partida["cuentas"]["igv"] == "401111"
+
+
 def test_desde_json(tmp_path):
     assert cli.main(["desde-json", str(GOLDEN / "compras_202601.json"), "--driver", "sire", "--salida", str(tmp_path)]) == 0
     assert (tmp_path / "LE2060123456720260100080400021112.TXT").read_bytes().count(b"\r\n") == 3

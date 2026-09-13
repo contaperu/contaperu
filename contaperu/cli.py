@@ -215,6 +215,20 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_configuracion(args: argparse.Namespace) -> int:
+    """Qué se configura, o sus valores por defecto en la forma de --config, en JSON: para escribir un --config sin
+    adivinar."""
+    if args.por_defecto:
+        datos = operaciones.configuracion_por_defecto()
+        if args.driver:
+            datos = {clave: valor for clave, valor in datos.items()
+                     if clave not in drivers.DRIVERS or clave == args.driver}
+    else:
+        datos = operaciones.describir_configuracion(args.driver or "")
+    print(json.dumps(datos, ensure_ascii=False, indent=1))
+    return 0
+
+
 def cmd_comparar(args: argparse.Namespace) -> int:
     """Nuestro archivo del SIRE contra la exportación del detalle que da SUNAT."""
     try:
@@ -283,6 +297,14 @@ def main(argv: list[str] | None = None) -> int:
     sub_diagnosticar.add_argument("--config", help="JSON con la configuración contable del contribuyente")
     sub_diagnosticar.add_argument("--imputacion", help=AYUDA_IMPUTACION)
     sub_diagnosticar.set_defaults(fn=cmd_diagnosticar)
+
+    sub_configuracion = subcomandos.add_parser(
+        "configuracion", help="qué se configura: lo general y la sección de cada sistema, en JSON")
+    sub_configuracion.add_argument("--driver", choices=list(drivers.DRIVERS),
+                                   help="solo lo general y la sección de este sistema")
+    sub_configuracion.add_argument("--por-defecto", action="store_true",
+                                   help="los valores por defecto, en la forma de --config")
+    sub_configuracion.set_defaults(fn=cmd_configuracion)
 
     sub_comparar = subcomandos.add_parser("comparar",
                                           help="nuestro TXT del SIRE vs la exportación del detalle de SUNAT")

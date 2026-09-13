@@ -187,6 +187,19 @@ def configuracion_por_defecto() -> dict:
     return salida
 
 
+def describir_configuracion(driver: str = "") -> dict:
+    """Qué se configura, en JSON: lo general y, por cada sistema que se configura, sus campos —tipo, valor por defecto,
+    patrón, título y ayuda— y en qué columnas de su archivo puede ir cada dato. Es lo que una aplicación construida
+    con el motor le pide para pintar su pantalla de configuración, en vez de copiarla. Con `driver`, lo general y solo
+    la sección de ese sistema."""
+    general = _declaracion.describir(CONFIGURACION_GENERAL)
+    if driver:
+        return {"general": general, **drivers.contrato.describir(drivers.obtener(driver))}
+    return {"general": general,
+            "sistemas": {nombre: drivers.contrato.describir(modulo) for nombre, modulo in drivers.DRIVERS.items()
+                         if drivers.contrato.seccion_por_defecto(modulo)}}
+
+
 def con_imputacion(config: dict, imputacion: dict | None, comprobantes: list[Comprobante]) -> dict:
     """La imputación de cada documento llega APARTE del documento, por `id_externo` (John, 12-sep-2026: las
     cuentas viven en la aplicación, no en el riel). Se lee aquí, en la puerta, para que un error de forma se diga

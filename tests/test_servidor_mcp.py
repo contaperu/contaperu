@@ -109,7 +109,7 @@ def test_cada_herramienta_se_explica_sola():
 def test_los_recursos_son_legibles():
     uris = {str(r.uri) for r in asyncio.run(mcp.list_resources())}
     assert uris == {"contaperu://estandar/open-accounting", "contaperu://catalogos/sunat",
-                    "contaperu://drivers", "contaperu://catalogos/pcge2026"}
+                    "contaperu://drivers", "contaperu://catalogos/pcge2026", "contaperu://configuracion"}
     esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
     assert esquema["title"] == "open-accounting"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
@@ -118,6 +118,11 @@ def test_los_recursos_son_legibles():
     assert set(drivers) == {"sire", "concar", "csv", "contasis"}
     assert drivers["concar"]["tipo"] == "archivo" and drivers["sire"]["tipo"] == "texto"
     assert drivers["sire"]["familia"] == "registro" and drivers["csv"]["familia"] == "asiento"
+    assert drivers["contasis"]["configurable"] is True and drivers["sire"]["configurable"] is False
+    configuracion = json.loads(leer_recurso("contaperu://configuracion"))
+    assert set(configuracion["sistemas"]) == {"concar", "contasis", "csv"}
+    assert [c["columna"] for c in configuracion["sistemas"]["contasis"]["columnas"]["centro_costo"]] == [
+        "centro_costo", "centro_costo_2"]
     pcge = json.loads(leer_recurso("contaperu://catalogos/pcge2026"))
     assert "PCGE 2026" in pcge["fuente"] and len(pcge["cuentas"]) > 1500
     assert pcge["cuentas"]["706"]["nombre"] == "Descuentos concedidos por pronto pago"
@@ -133,6 +138,18 @@ def test_validar_comprobantes_devuelve_el_documento_revisado():
     r = llamar("validar_comprobantes", documento=DOCUMENTO)
     assert r["_revision"]["comprobantes"] == 1 and r["_revision"]["con_error"] == 0
     assert r["comprobantes"][0]["estado"] == "ok"
+
+
+def test_generar_asiento_con_la_seccion_de_su_sistema():
+    """`generar_asiento` aplica la sección del sistema de asientos que se le diga: las columnas que elige para el
+    centro deciden los anexos de las líneas, como en su archivo. Uno que no arma asientos se dice."""
+    solo_m = {"concar": {"columnas": {"centro_costo": ["centro_costo"]}}}
+    concar = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, configuracion=solo_m)
+    assert not any(ln.get("anexo_auxiliar") for ln in concar["asiento"])
+    csv = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, configuracion=solo_m, driver="csv")
+    assert [ln.get("anexo_auxiliar") for ln in csv["asiento"] if ln["rol"] == "tercero"] == ["CC-64"]
+    with pytest.raises(Exception, match="no arma asientos"):
+        llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, driver="contasis")
 
 
 def test_la_partida_doble_se_puede_comprobar_sola():
