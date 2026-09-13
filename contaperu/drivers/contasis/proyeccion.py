@@ -19,8 +19,8 @@ from ...igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
 from ...modelo import CENTIMO, Comprobante, Libro
 from . import datos
 
-# Los valores por defecto de la sección de CONTASIS: el respaldo si la configuración que llega no trae uno.
-_POR_DEFECTO = por_defecto(datos.CONFIGURACION)
+# Los valores por defecto de la sección de CONTASIS, con sus columnas: el respaldo si la configuración no trae uno.
+_POR_DEFECTO = por_defecto(datos.CONFIGURACION, datos.COLUMNAS_ELEGIBLES)
 
 
 def _importes(c: Comprobante, es_venta: bool) -> dict[str, Decimal]:
@@ -60,6 +60,11 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
     cuenta, centro, _ = partes_de(c, config, es_venta)[0]      # una sola parte: el núcleo ya exigió `cuenta_unica`
     # El centro, donde la cuenta lo lleva: la misma regla que pone el centro en la columna M de CONCAR.
     centro = centro if config.get("usa_centros_costo", True) and lleva_centro(cuenta, config) else ""
+    # Y el mismo centro en la segunda columna de centro de costos, si la configuración la elige (John, 13-sep-2026).
+    elegidas = (config.get("columnas") or {}).get("centro_costo")
+    if elegidas is None:
+        elegidas = _POR_DEFECTO["columnas"]["centro_costo"]
+    centro_2 = centro if "centro_costo_2" in elegidas else ""
     es_usd = c.moneda == "USD"
     importes = _importes(c, es_venta)
     if es_usd and c.tipo_cambio:
@@ -87,7 +92,7 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
             "H": c.contraparte_nombre, **importes,
             "Q": comunes["cambio"], "R": comunes["ref_fecha"], "S": comunes["ref_tipo"], "T": comunes["ref_serie"],
             "U": comunes["ref_numero"], "V": comunes["moneda"], "W": comunes["dolares"], "X": c.fecha_vencimiento,
-            "Y": comunes["condicion"], "Z": centro, "AA": "", "AB": cuenta,
+            "Y": comunes["condicion"], "Z": centro, "AA": centro_2, "AB": cuenta,
             "AC": (cuentas.get("otros_tributos") or "") if importes["O"] else "", "AD": comunes["tercero"],
             # El régimen especial (detracción, percepción, retención) va vacío (John, 12-sep-2026).
             "AE": None, "AF": None, "AG": None, "AH": "", "AI": "", "AJ": None, "AK": "",
@@ -104,7 +109,7 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
         "X": comunes["ref_fecha"], "Y": comunes["ref_tipo"], "Z": comunes["ref_serie"], "AA": comunes["ref_numero"],
         "AB": comunes["moneda"], "AC": comunes["dolares"], "AD": c.fecha_vencimiento, "AE": comunes["condicion"],
         "AF": cuenta, "AG": (cuentas.get("otros_tributos") or "") if importes["R"] else "", "AH": comunes["tercero"],
-        "AI": centro, "AJ": "",
+        "AI": centro, "AJ": centro_2,
         "AK": None, "AL": None, "AM": None, "AN": "", "AO": "", "AP": None, "AQ": "",
         "AR": None if c.tipo_cp in SIN_CREDITO_FISCAL else tasa_legal(c.igv, c.base_gravada),
         "AS": comunes["glosa"], "AT": "", "AU": None, "AV": c.clasif_bienes, "AW": importes["AW"],

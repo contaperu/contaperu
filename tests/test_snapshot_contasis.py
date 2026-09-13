@@ -41,6 +41,8 @@ NC = dict(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="F
 PLAN_CORTO = {"cuentas": {"cxp": {"PEN": "4212", "USD": "4212"}, "clientes": {"PEN": "1212", "USD": "1212"}}}
 LARGA = ("Adquisición de materiales eléctricos para el mantenimiento preventivo de la subestación norte "
          "y sus líneas de alimentación")
+# El centro de costo también en la segunda columna de centro de costos (John, 13-sep-2026).
+CENTRO_2 = {"contasis": {"columnas": {"centro_costo": ["centro_costo", "centro_costo_2"]}}}
 
 # (nombre, campos del comprobante, venta, configuración del RUC encima de la de fábrica)
 CASOS: list[tuple[str, dict, bool, dict | None]] = [
@@ -82,10 +84,17 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
      {"imputaciones": {"f1": {"cuenta_contable": "637301", "cuenta_tercero": "469901"}}}),
     ("sin_centros_de_costo", {}, False, {"usa_centros_costo": False}),
     ("cuenta_que_no_lleva_centro", dict(cuenta_contable="603201"), False, None),
+    # Las columnas del centro las elige la sección de CONTASIS: la segunda lleva el mismo centro, con la misma regla de
+    # la cuenta; y qué cuentas lo llevan es de la contabilidad general.
+    ("centro_costo_2", {}, False, CENTRO_2),
+    ("centro_costo_2_con_cuenta_que_no_lo_lleva", dict(cuenta_contable="603201"), False, CENTRO_2),
+    ("cuentas_con_centro_propias", dict(cuenta_contable="603201"), False, {"cuentas_con_centro": ["60"]}),
+    ("ninguna_cuenta_lleva_centro", {}, False, {"cuentas_con_centro": []}),
     ("igv_redondeado_por_item", dict(base_gravada="54.24", igv="9.75", total="63.99"), False, None),
     ("igv_reducido", dict(base_gravada="100", igv="10.5", total="110.5"), False, None),
     ("clasificacion_de_bienes", dict(clasif_bienes="1"), False, None),
     ("venta_factura", dict(cuenta_contable=""), True, None),
+    ("venta_centro_costo_2", dict(cuenta_contable=""), True, CENTRO_2),
     ("venta_plan_corto", dict(cuenta_contable="70121"), True, PLAN_CORTO),
     ("venta_boleta_con_dni", dict(tipo_cp="03", serie="B001", numero="9", cuenta_contable="",
                                   contraparte_tipo_doc="1", contraparte_doc="45678912",
