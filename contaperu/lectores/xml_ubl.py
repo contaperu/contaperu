@@ -170,7 +170,7 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
     # no hay fuente que diga otra cosa y el descuento queda en cero. El motivo de la nota NO lo decide: la
     # E001-233 real es «04 Descuento global» sin AllowanceCharge y SUNAT la tiene en base e IGV (11-sep-2026).
     # Tampoco se filtra por AllowanceChargeReasonCode mientras no haya un XML real que lo respalde; queda
-    # anotado en `datos_raw["descuentos_globales"]` para poder hacerlo.
+    # anotado en `datos_originales["descuentos_globales"]` para poder hacerlo.
     descuentos = [{"codigo": _t(ac, "cbc:AllowanceChargeReasonCode"), "importe": str(monto(_t(ac, "cbc:Amount")))}
                   for ac in raiz.findall("cac:AllowanceCharge", NS)
                   if (_t(ac, "cbc:ChargeIndicator") or "").strip().lower() == "false"]
@@ -213,7 +213,7 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
         if cuenta:
             detraccion["cuenta"] = cuenta
     vencimiento = max(cuotas) if cuotas else fecha(_t(raiz, "cbc:DueDate") or None)
-    # La condición de pago pasa al registro (`Comprobante.condicion_pago`); `datos_raw.forma_pago` sigue
+    # La condición de pago pasa al registro (`Comprobante.condicion_pago`); `datos_originales.forma_pago` sigue
     # guardando el texto tal como vino. Una factura con cuotas es a crédito aunque no lo diga en letras.
     fp = forma_pago.strip().lower()
     condicion_pago = "credito" if cuotas or fp.startswith(("credito", "crédito")) else ("contado" if fp == "contado" else "")
@@ -240,7 +240,7 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
     linea_tag = {"Invoice": "cac:InvoiceLine", "CreditNote": "cac:CreditNoteLine", "DebitNote": "cac:DebitNoteLine"}[local]
     concepto = _t(raiz, f"{linea_tag}/cac:Item/cbc:Description")[:100]
 
-    datos_raw = {
+    datos_originales = {
         "ubl": version,
         "raiz": local,
         "emisor": emisor,
@@ -291,5 +291,5 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
         origen="xml",
         confianza=Decimal("1.00"),
         archivo_nombre=archivo_nombre,
-        datos_raw=datos_raw,
+        datos_originales=datos_originales,
     )

@@ -35,10 +35,30 @@ def cp(**k) -> Comprobante:
     base = dict(tipo_cp="01", serie="F001", numero="00000123", fecha_emision="2026-08-11",
                 fecha_vencimiento="2026-08-18", contraparte_tipo_doc="6", contraparte_doc="20607777773",
                 contraparte_nombre="ELECTROMECANICA DE PRUEBA S.R.L.", moneda="PEN", base_gravada="100",
-                igv="18", total="118", concepto="Grillete tipo lira 5/8 para torre de alta tension linea 2",
-                cuenta_contable="631101", centro_costo="OBRA01")
+                igv="18", total="118", concepto="Grillete tipo lira 5/8 para torre de alta tension linea 2")
     base.update(k)
     return Comprobante(**base)
+
+
+# La cuenta y el centro que escribe cada caso ya no son del comprobante (open-accounting 0.3): van en su imputación, por
+# `id_externo`, fundidos con la que el caso ya traiga —la del caso manda campo a campo, y un reparto va solo—.
+CUENTA_DEL_CASO = {"cuenta_contable": "631101", "centro_costo": "OBRA01"}
+
+
+def armar(caso) -> tuple[Comprobante, dict, bool]:
+    _, campos, venta, extra = caso
+    campos = {**CUENTA_DEL_CASO, **campos}
+    legado = {k: v for k in CUENTA_DEL_CASO if (v := campos.pop(k))}
+    campos.setdefault("id_externo", "f1")
+    extra = dict(extra or {})
+    imputaciones = dict(extra.get("imputaciones") or {})
+    propia = dict(imputaciones.get(campos["id_externo"]) or {})
+    if not propia.get("reparto"):
+        propia = {**legado, **propia}
+    if propia:
+        imputaciones[campos["id_externo"]] = propia
+        extra["imputaciones"] = imputaciones
+    return cp(**campos), contab_de(extra), venta
 
 
 RH = dict(tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0", inafecto="2000",
@@ -146,8 +166,8 @@ def _celda(v):
 
 
 def filas_de(caso) -> list[dict]:
-    _, campos, venta, extra = caso
-    return asi.asiento(cp(**campos), contab_de(extra), MES, "080001", venta=venta)
+    c, contab, venta = armar(caso)
+    return asi.asiento(c, contab, MES, "080001", venta=venta)
 
 
 def serializar_filas(caso) -> list[dict]:
@@ -159,8 +179,8 @@ def serializar_lineas(caso) -> list[dict]:
     (v0.6) y se regeneraron UNA vez al invertir el asiento (0.7), con un diff revisado que solo
     añadía `rol`, `tipo_cp` y el código SUNAT de la detracción, dejaba la glosa sin cortar y la tasa
     del IGV como texto exacto. Ningún importe, cuenta ni sentido cambió."""
-    _, campos, venta, extra = caso
-    return [ln.a_dict() for ln in asi.asiento_neutral(cp(**campos), contab_de(extra), MES, "080001", venta=venta)]
+    c, contab, venta = armar(caso)
+    return [ln.a_dict() for ln in asi.asiento_neutral(c, contab, MES, "080001", venta=venta)]
 
 
 def regenerar() -> None:

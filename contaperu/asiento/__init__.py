@@ -3,7 +3,7 @@
 Aquí vive la contabilidad de verdad. Las reglas, con su fuente al lado:
 
 **Compras** — 3 líneas normalmente:
-  1. GASTO (Debe)        total − IGV · la cuenta de la fila o la del contribuyente · centro de costo
+  1. GASTO (Debe)        total − IGV · la de su imputación o la del contribuyente · centro de costo
   2. IGV crédito (Debe)  solo si hay IGV; nunca en boletas ni en recibos por honorarios,
                          que no dan crédito fiscal
   3. PROVEEDOR (Haber)   total − retención · cuenta por pagar según la moneda · anexo = RUC
@@ -35,7 +35,7 @@ exportación se detiene y dice cuál falta.
 
 ---
 
-Nota de arquitectura: el asiento nace en líneas neutrales de `pe-ledger` (`motor.py`) y cada ERP
+Nota de arquitectura: el asiento nace en líneas neutrales de `open-accounting` (`motor.py`) y cada ERP
 es una proyección de ellas. CONCAR fue el primero y el código nació generando su Excel, así que
 durante un año las filas nacieron en sus columnas ('A'..'AO') y la línea neutral se sacaba después;
 desde el 11-sep-2026 (0.7) la dirección está invertida — la línea es la fuente y el Excel de CONCAR,

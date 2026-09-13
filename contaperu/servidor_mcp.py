@@ -40,11 +40,11 @@ from .operaciones import DocumentoInvalido
 def _ruta_del_esquema() -> pathlib.Path:
     """Instalado, el esquema viaja dentro del paquete; en el repositorio vive en la raiz."""
     aqui = pathlib.Path(__file__).resolve().parent
-    for candidata in (aqui / "estandar" / "pe-ledger.schema.json",
-                      aqui.parent / "estandar" / "pe-ledger.schema.json"):
+    for candidata in (aqui / "estandar" / "open-accounting.schema.json",
+                      aqui.parent / "estandar" / "open-accounting.schema.json"):
         if candidata.exists():
             return candidata
-    raise FileNotFoundError("No encuentro pe-ledger.schema.json")
+    raise FileNotFoundError("No encuentro open-accounting.schema.json")
 
 
 ESQUEMA = _ruta_del_esquema()
@@ -78,7 +78,7 @@ importan los sistemas contables peruanos. Todo es determinista y sin estado.
 
 El camino normal:
   1. `leer_xml_ubl` o `leer_propuesta_sire` si tienes archivos de SUNAT; si ya tienes los datos
-     estructurados, arma tú el documento `pe-ledger` (mira el recurso del esquema).
+     estructurados, arma tú el documento `open-accounting` (mira el recurso del esquema).
   2. `validar_comprobantes` para ver qué observaciones hay antes de nada.
   3. `generar_asiento` para las líneas de diario, o `exportar` directamente al formato del ERP.
 
@@ -109,9 +109,9 @@ mcp._mcp_server.version = __version__
 
 # --- recursos: lo que conviene leer antes de llamar a nada -------------------------
 
-@mcp.resource("contaperu://estandar/pe-ledger", mime_type="application/schema+json")
-def esquema_pe_ledger() -> str:
-    """El esquema JSON del documento contable `pe-ledger`, con cada campo documentado."""
+@mcp.resource("contaperu://estandar/open-accounting", mime_type="application/schema+json")
+def esquema_open_accounting() -> str:
+    """El esquema JSON del documento contable `open-accounting`, con cada campo documentado."""
     return ESQUEMA.read_text(encoding="utf-8")
 
 
@@ -170,7 +170,7 @@ def configuracion_por_defecto() -> dict:
 
 @mcp.tool()
 def validar_comprobantes(documento: dict, configuracion: dict | None = None) -> dict:
-    """Revisa los comprobantes de un documento `pe-ledger` y devuelve el mismo documento con
+    """Revisa los comprobantes de un documento `open-accounting` y devuelve el mismo documento con
     `estado` y `observaciones` puestos en cada uno.
 
     Comprueba lo que se puede comprobar sin salir a ningún sitio: que el RUC sea un RUC, que el
@@ -211,8 +211,8 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
 
     `imputacion` trae lo que se decidió para cada comprobante, por su `id_externo`: su
     `cuenta_contable`, su `centro_costo`, la `cuenta_tercero` (la del total) o un `reparto` de la base
-    entre cuentas ([{importe, cuenta_contable, centro_costo}], que tiene que sumar la base). Cada campo
-    manda sobre lo que diga el comprobante; lo que no traiga sale de la configuración.
+    entre cuentas ([{importe, cuenta_contable, centro_costo}], que tiene que sumar la base). Lo que no
+    traiga sale de la configuración.
     """
     return operaciones.generar_asiento(documento, configuracion, correlativos, incluir_observados, imputacion)
 
@@ -289,7 +289,7 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
 
 @mcp.tool()
 def leer_xml_ubl(contenido: str, libro: dict, es_base64: bool = False) -> dict:
-    """Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `pe-ledger`.
+    """Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `open-accounting`.
 
     Acepta un XML suelto como texto, o un ZIP en base64 con varios dentro (`es_base64: true`).
     Descarta lo que no es un comprobante — las constancias de recepción (CDR) y las hojas de
@@ -302,7 +302,7 @@ def leer_xml_ubl(contenido: str, libro: dict, es_base64: bool = False) -> dict:
 @mcp.tool()
 def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) -> dict:
     """Lee el TXT de la propuesta que SUNAT entrega en el SIRE y devuelve un documento
-    `pe-ledger`.
+    `open-accounting`.
 
     Es lo que el contribuyente descarga de su SIRE con lo que SUNAT cree que compró o vendió;
     a partir de ahí se compara con la realidad y se corrige. Acepta el TXT como texto o el ZIP

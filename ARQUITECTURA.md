@@ -18,7 +18,7 @@ para quien vaya a contribuir, y la lista de decisiones que no hay que volver a d
 ├─────────────────────────────────────────────────────────────┤
 │  1 · NÚCLEO                                                 │
 │      modelo · lectores · validación · asiento · detracciones│
-│      IGV · partida doble · PCGE · el estándar `pe-ledger`   │
+│      IGV · partida doble · PCGE · el estándar `open-accounting`   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -35,7 +35,7 @@ que se puede confiar en cada capa porque la de abajo ya está probada con archiv
 ## El flujo de un comprobante
 
 ```
-XML UBL / TXT del SIRE / JSON pe-ledger
+XML UBL / TXT del SIRE / JSON open-accounting
           │
           ▼
    lectores/  ──►  Comprobante (modelo.py: Decimal, positivo, fechas date)
@@ -70,7 +70,7 @@ redondeada a entero— y un segundo driver de asientos habría tenido que reinte
 CONCAR para escribir las suyas.
 
 Desde la 0.7 la dirección está invertida. `asiento/motor.py` arma las líneas en el vocabulario de
-`pe-ledger` y CONCAR es una proyección más. Lo que hace posible el cambio sin riesgo es
+`open-accounting` y CONCAR es una proyección más. Lo que hace posible el cambio sin riesgo es
 `tests/test_snapshot_concar.py`: 42 casos con las 41 columnas congeladas celda a celda **antes** del
 refactor. Ese Excel lleva un año importándose en CONCARs de producción; el snapshot es la garantía de
 que no cambió ni una celda, y la regla para el futuro: **regenerarlo es una decisión contable con
@@ -101,7 +101,7 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
                 NÚCLEO  (no sabe que las puertas existen)
 ```
 
-- **La fachada** (`operaciones.py`) habla en documentos `pe-ledger`: `leer_xml`,
+- **La fachada** (`operaciones.py`) habla en documentos `open-accounting`: `leer_xml`,
   `leer_propuesta_sire`, `revisar`, `generar_asiento`, `exportar`, `diagnosticar`, `cuadrar`,
   `adaptar_pcge`. Todas puras: sin disco, sin red, sin estado. Los bytes salen en base64 porque un
   JSON no sabe llevar bytes.
@@ -191,7 +191,7 @@ tienen fuente**, nunca con una regla nueva escrita para el agente.
   archivo real cada uno.
 - **Nivel 2 — un lenguaje común**: cuando aparezcan más aplicaciones peruanas especializadas
   (compras, tesorería, logística), todas necesitarán representar facturas, proveedores, centros de
-  costo, impuestos y asientos. `pe-ledger` ya es ese idioma intermedio; crecerá con casos reales
+  costo, impuestos y asientos. `open-accounting` ya es ese idioma intermedio; crecerá con casos reales
   detrás, no por si acaso. Lo que las APIs unificadas de EE. UU. (Merge, Codat, Rutter, Apideck)
   enseñan sobre ese idioma, y los campos opcionales que de ahí se proponen, en
   [REFERENCIAS.md](REFERENCIAS.md).

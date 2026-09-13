@@ -2,7 +2,7 @@
 
 Este documento recoge lo que hacen la API de QuickBooks Online, la de Xero y las **APIs unificadas**
 (Merge, Codat, Rutter, Apideck) que ponen un modelo común encima de decenas de sistemas contables — y
-lo compara, campo a campo, con `pe-ledger`. Termina con una propuesta concreta de qué añadir al
+lo compara, campo a campo, con `open-accounting`. Termina con una propuesta concreta de qué añadir al
 estándar y qué no. Investigación hecha el 11-sep-2026 sobre la documentación pública de cada uno; las
 fuentes están al final.
 
@@ -22,7 +22,7 @@ datos y reglas; los agentes, después.
 
 ## El asiento, comparado
 
-| | QuickBooks Online | Xero | Merge | Rutter | Apideck | **pe-ledger** |
+| | QuickBooks Online | Xero | Merge | Rutter | Apideck | **open-accounting** |
 |---|---|---|---|---|---|---|
 | Objeto | `JournalEntry` | `ManualJournal` | `JournalEntry` | `JournalEntry` | `JournalEntry` | bloque `asiento` |
 | Línea | `Line.JournalEntryLineDetail` | `JournalLines[]` | `JournalLine` | `line_items[]` | `line_items[]` | `linea` |
@@ -39,11 +39,11 @@ datos y reglas; los agentes, después.
 | Estado | — | `Status: DRAFT\|POSTED\|VOIDED\|DELETED` | `posting_status: UNPOSTED\|POSTED` | — | `status: draft\|pending_approval\|approved\|posted\|voided…` | — |
 | Id en el otro sistema | `Id` | `ManualJournalID` | `remote_id` | `platform_id` | `downstream_id` | — |
 | Versión / concurrencia | `SyncToken` | `UpdatedDateUTC` | `modified_at` | `updated_at` | `row_version` | — |
-| Lo no mapeado | — | — | `remote_data`, `remote_fields` | `platform_data`, `additional_fields` | `pass_through`, `custom_mappings` | `datos_raw` (comprobante) |
+| Lo no mapeado | — | — | `remote_data`, `remote_fields` | `platform_data`, `additional_fields` | `pass_through`, `custom_mappings` | `datos_originales` (comprobante) |
 | Moneda y T.C. | `CurrencyRef`, `ExchangeRate`, `HomeTotalAmt` | — | `currency`, `exchange_rate` | `currency_code`, `currency_rate` | `currency`, `currency_rate` | `moneda`, `tipo_cambio` |
 
 Lo primero que se ve: **todos convergen en lo mismo** —cuenta, sentido, importe, impuesto, dimensión,
-contraparte— y `pe-ledger` ya lo tiene. Lo segundo: en dos decisiones el estándar peruano va **mejor**
+contraparte— y `open-accounting` ya lo tiene. Lo segundo: en dos decisiones el estándar peruano va **mejor**
 que la mayoría para su caso. `debe_haber` explícito en vez de un signo evita el error más común al
 integrar (restar dos veces una nota de crédito); y los importes como texto evitan que un `float` de
 JSON pierda un céntimo. Lo tercero: el `rol` de la línea no lo tiene nadie, y es lo que permite que un
@@ -59,7 +59,7 @@ precio más impuesto, «los ingresos y la obligación tributaria salen mal los d
 *Automated Sales Tax* **sobrescribe** el `TaxCode` que mandes con el que él calcula. La recomendación
 transversal de las unificadas es mandar el impuesto **explícito** y no delegar en el motor del ERP.
 
-**Qué hace pe-ledger.** Exactamente eso, desde la 0.2: base e IGV siempre netos, la línea `igv` lleva
+**Qué hace open-accounting.** Exactamente eso, desde la 0.2: base e IGV siempre netos, la línea `igv` lleva
 su importe, y `tasa_igv` se lee del comprobante (18, 10.5 o 0) y no de una configuración. Ningún
 driver recalcula el IGV.
 
@@ -75,7 +75,7 @@ eso ya lo sabe cualquier driver por la cabecera.
 Intacct. Las unificadas lo aplanan en `tracking_categories[]` por línea, y Apideck recomienda usar esa
 misma lista para la **entidad** en escenarios multi-empresa, en vez de un parámetro por endpoint.
 
-**Qué hace pe-ledger.** Un `centro_costo` y un `anexo_auxiliar` por línea; la entidad es `libro.ruc`.
+**Qué hace open-accounting.** Un `centro_costo` y un `anexo_auxiliar` por línea; la entidad es `libro.ruc`.
 Basta para CONCAR (columna M y columna X) y para un estudio con treinta RUC.
 
 **Qué tomar.** Una lista opcional `dimensiones: [{tipo, codigo}]` en comprobante y línea, para el ERP
@@ -90,7 +90,7 @@ ese tipo de dato (campos obligatorios, largos máximos, enums, nombres para la p
 con `status: Pending | Success | Failed | TimedOut`, `validation.errors[{itemId, message}]` y
 `changes[{recordRef, type}]` — nunca una excepción a mitad de camino.
 
-**Qué hace pe-ledger.** `drivers/contrato.py::incumplimientos()` es el «options» del driver, y
+**Qué hace open-accounting.** `drivers/contrato.py::incumplimientos()` es el «options» del driver, y
 `operaciones.diagnosticar` es el `validation.errors`: responde por serie-número qué falta, sin lanzar.
 
 **Qué tomar.** Que **cada driver declare lo que exige** (`EXIGE = {"cuenta", "centro", "correlativo",
@@ -106,7 +106,7 @@ Xero acepta `Idempotency-Key` en PUT/POST/PATCH desde 2023 y recomienda deduplic
 **guardar el id externo de todo lo que se escribe y buscarlo antes de crear**, porque «los webhooks
 pueden disparar dos veces el mismo evento».
 
-**Qué hace pe-ledger.** El modelo tiene `clave` de duplicados (tipo, serie, número, documento de la
+**Qué hace open-accounting.** El modelo tiene `clave` de duplicados (tipo, serie, número, documento de la
 contraparte), que es la clave de negocio del comprobante. No tiene un id del sistema destino ni una
 huella del asiento generado.
 
@@ -125,12 +125,12 @@ huella es lo que permite avisarlo.
 `source_id`; Merge, `remote_data` con el objeto crudo del ERP; Codat, `supplementalData`. La norma que
 enseña Apideck a los desarrolladores: no se borra, se revierte.
 
-**Qué hace pe-ledger.** Cada línea lleva `documento` y `referencia` —de qué comprobante sale y, si es
-una nota, a cuál corrige—, y el comprobante lleva `datos_raw` que el núcleo transporta y jamás lee.
+**Qué hace open-accounting.** Cada línea lleva `documento` y `referencia` —de qué comprobante sale y, si es
+una nota, a cuál corrige—, y el comprobante lleva `datos_originales` que el núcleo transporta y jamás lee.
 Los importes van siempre en positivo y la nota de crédito invierte: nunca hay un asiento negativo que
 «borre» otro.
 
-**Qué tomar.** El **estado del asiento**. Hoy el bloque `asiento` de pe-ledger es siempre una
+**Qué tomar.** El **estado del asiento**. Hoy el bloque `asiento` de open-accounting es siempre una
 propuesta; no puede decir «esto ya se importó en CONCAR» ni «esto se anuló». Un `estado:
 propuesto | exportado | importado | anulado` opcional por línea (o por documento) es lo que Merge
 llama `posting_status` y Xero `Status`, y lo que un portal necesita para no re-exportar lo importado.
@@ -141,11 +141,11 @@ llama `posting_status` y Xero `Status`, y lo que un portal necesita para no re-e
 `platform_data` y `additional_fields`; Apideck `pass_through` con rutas JSONPath y `custom_mappings`.
 Es la válvula que evita que el modelo común crezca por cada campo raro de cada plataforma.
 
-**Qué hace pe-ledger.** Regla 5 del estándar: «lo que no se entiende, se transporta», con `datos_raw`
+**Qué hace open-accounting.** Regla 5 del estándar: «lo que no se entiende, se transporta», con `datos_originales`
 en el comprobante y las claves `_` como anotaciones del productor.
 
 **Qué tomar.** Nada: es el mismo diseño. Solo conviene documentar en `LEEME.md` que un driver puede
-leer `datos_raw` para lo específico de su ERP —como Rutter con `additional_fields`— sin que el núcleo lo
+leer `datos_originales` para lo específico de su ERP —como Rutter con `additional_fields`— sin que el núcleo lo
 interprete.
 
 ### 7. Los agentes llegaron después del núcleo, y piden en vez de adivinar
@@ -158,7 +158,7 @@ y gestiona la ida y vuelta con el contador antes de actualizar; el *Payments age
 redacta recordatorios; el *Finance agent* hace KPIs, escenarios y *benchmarking*. El humano revisa y
 aprueba. Y QuickBooks no empezó por ahí: los agentes se apoyan en años de núcleo de datos y reglas.
 
-**Qué hace pe-ledger.** `diagnosticar` responde «¿qué falta?» por serie-número, y las reglas del
+**Qué hace open-accounting.** `diagnosticar` responde «¿qué falta?» por serie-número, y las reglas del
 servidor MCP del estudio dicen lo mismo que Intuit: enseñar qué sale antes de generar, y no ofrecerse a
 corregir —un comprobante sin cuenta se arregla donde se revisa.
 
@@ -172,7 +172,7 @@ redactar la pregunta correcta sin que el núcleo adivine nada.
 - **El signo en vez de Debe/Haber.** Merge, Rutter y Xero usan un importe con signo. Es más compacto y
   peor para el caso peruano: la nota de crédito ya invierte el asiento, y un signo encima de eso es la
   fuente del error de «restar dos veces». `debe_haber` explícito se queda.
-- **Importes numéricos.** Todos mandan números. `pe-ledger` manda texto y acepta número por
+- **Importes numéricos.** Todos mandan números. `open-accounting` manda texto y acepta número por
   compatibilidad; la contabilidad no perdona el `float`.
 - **El motor de impuestos del destino.** QuickBooks sobrescribe el `TaxCode`; ContaPerú no delega
   jamás el IGV en el ERP. El impuesto va explícito, en su línea, con su tasa.
@@ -180,13 +180,13 @@ redactar la pregunta correcta sin que el núcleo adivine nada.
   que habla con otra API con estado. ContaPerú no tiene estado ni sale a la red: entra un documento,
   sale un documento. Lo que sí se toma de ahí es la **idea** —id externo y huella— sin el mecanismo.
 - **La entidad como parámetro.** Las unificadas necesitan `company_id` o `subsidiary_id` en cada
-  llamada porque su cliente ve muchas empresas a la vez. En `pe-ledger` la entidad es `libro.ruc` y un
+  llamada porque su cliente ve muchas empresas a la vez. En `open-accounting` la entidad es `libro.ruc` y un
   documento es de un RUC y un mes: no hace falta más.
 - **Un modelo de factura y proveedor propio.** Codat, Merge y Apideck modelan `Invoice`, `Bill`,
-  `Contact`, `Item`. En Perú ese modelo ya existe y lo define SUNAT: el comprobante de `pe-ledger` son
+  `Contact`, `Item`. En Perú ese modelo ya existe y lo define SUNAT: el comprobante de `open-accounting` son
   los campos de la Tabla 10 y del SIRE, no una abstracción nueva.
 
-## Propuesta para `pe-ledger`: campos opcionales
+## Propuesta para `open-accounting`: campos opcionales
 
 Todo lo de abajo es **aditivo**: campos opcionales que un consumidor de la 0.2 ignora sin romperse, así
 que la versión del estándar no sube (ver `estandar/LEEME.md` §Versionado). Y ninguno es una regla
@@ -209,7 +209,7 @@ costo y el motor solo avisaba: una regla viviendo fuera del motor) y **`pedir_a`
 | contrato de driver | `EXIGE: set[str]` declarativo | Codat `GET …/options/{dataType}`, Merge `/meta` | Un driver de asientos que no usa centros de costo no debe bloquear por ellos | `diagnosticar` marca «no listo» solo por lo que el driver elegido exige; el test de conformidad comprueba que `EXIGE` sea un subconjunto conocido |
 
 Lo que **no** cambia con esto: `debe_haber`, importes en texto, base neta, `rol`, `documento`,
-`referencia`, `datos_raw`. La propuesta añade en los bordes; el centro del estándar se queda como está
+`referencia`, `datos_originales`. La propuesta añade en los bordes; el centro del estándar se queda como está
 porque, comparado con lo de fuera, no hay nada que corregir.
 
 ## Fuentes

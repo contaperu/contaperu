@@ -2,7 +2,7 @@
 cada comprobante (sigla, sub-diario, cuentas) y numeración por sub-diario. Las reglas de negocio y
 su porqué, en el docstring del paquete (`__init__.py`).
 
-Las líneas de la partida doble se arman en `motor.py`, en el vocabulario neutral de `pe-ledger`;
+Las líneas de la partida doble se arman en `motor.py`, en el vocabulario neutral de `open-accounting`;
 `asiento()` se queda aquí como la puerta de siempre hacia las columnas de CONCAR.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from .imputacion import Imputacion
 
 
 class SinCuenta(Exception):
-    """Comprobantes incluidos sin cuenta contable (ni en la fila ni por defecto en el RUC)."""
+    """Comprobantes incluidos sin cuenta contable (ni en su imputación ni por defecto en la configuración)."""
 
     def __init__(self, comprobantes: list[Comprobante]):
         super().__init__(f"{len(comprobantes)} comprobante(s) sin cuenta contable")
@@ -174,15 +174,14 @@ def imputacion_de(c: Comprobante, contab: dict) -> Imputacion | None:
 def partes_de(c: Comprobante, contab: dict, venta: bool = False) -> list[tuple[str, str, Decimal | None]]:
     """A qué cuentas va la base del documento: `[(cuenta, centro, importe)]`, con importe None = la base entera.
 
-    Con reparto en su imputación, una parte por cada una. Si no, una sola, campo a campo: la cuenta y el centro de
-    la imputación mandan sobre los de legado del comprobante, y lo que falte sale de lo de siempre (la cuenta
-    por defecto de la configuración, detrás). Es la única resolución: el asiento y las faltas de cuenta y de
-    centro leen esto."""
+    Con reparto en su imputación, una parte por cada una. Si no, una sola: la cuenta y el centro de la imputación, y
+    la cuenta que no traiga, la de la configuración. Es la única resolución: el asiento, los drivers de registro y
+    las faltas de cuenta y de centro leen esto."""
     imp = imputacion_de(c, contab)
     if imp is not None and imp.reparto:
         return [(p.cuenta_contable, p.centro_costo, p.importe) for p in imp.reparto]
     cuenta = (imp.cuenta_contable if imp is not None else "") or cuenta_de_fila(c, contab, venta)
-    centro = (imp.centro_costo if imp is not None else "") or c.centro_costo
+    centro = imp.centro_costo if imp is not None else ""
     return [(cuenta, centro, None)]
 
 
@@ -265,13 +264,12 @@ def monedas_sin_codigo(comprobantes: list[Comprobante], contab: dict) -> list[st
 
 
 def cuenta_gasto(c: Comprobante, contab: dict) -> str:
-    return (c.cuenta_contable or "").strip() or str((contab.get("cuentas") or {}).get("gasto") or "").strip()
+    return str((contab.get("cuentas") or {}).get("gasto") or "").strip()
 
 
 def cuenta_venta(c: Comprobante, contab: dict) -> str:
-    """Ventas: la cuenta de ingreso de la fila o la del RUC; a diferencia del gasto,
-    aquí SÍ hay un default real (el habitual)."""
-    return (c.cuenta_contable or "").strip() or str((contab.get("cuentas") or {}).get("ventas") or DEFAULTS["cuentas"]["ventas"]).strip()
+    """Ventas: la cuenta de ingreso del RUC; a diferencia del gasto, aquí SÍ hay un default real (el habitual)."""
+    return str((contab.get("cuentas") or {}).get("ventas") or DEFAULTS["cuentas"]["ventas"]).strip()
 
 
 def cuenta_de_fila(c: Comprobante, contab: dict, venta: bool = False) -> str:

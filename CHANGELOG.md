@@ -12,10 +12,10 @@ de la base y la del total— y arma el asiento él mismo: cada columna sale de l
 asiento de CONCAR, y ningún driver decide una cuenta.
 
 **El documento lleva los hechos; las cuentas llegan aparte.** Decisión de John (12-sep-2026) al integrar CONTASIS:
-el JSON universal `pe-ledger` es el riel que recibe cualquier input, y las cuentas contables viven en la
+el JSON universal `open-accounting` es el riel que recibe cualquier input, y las cuentas contables viven en la
 aplicación —en la configuración de cada entorno y en lo que el contador decide en su Revisión—. El motor recibe
 tres piezas: el documento, la imputación de cada documento y la configuración. **El Excel de CONCAR no cambia**:
-los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. El estándar sigue en `0.2`.
+los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. El estándar pasa a la `0.3` y se llama `open-accounting`.
 
 ### Añadido
 - **El driver `contasis`** (`drivers/contasis/`): el Excel de «FORMATO REGISTRO DE COMPRAS» y «FORMATO REGISTRO DE
@@ -91,13 +91,18 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
   `drivers.contrato.NoCabe` antes de llamar a un driver `desde_comprobantes`, y la CLI lo dice sin traceback.
 
 ### Cambiado
+- **El estándar se llama `open-accounting`** (antes `pe-ledger`) y pasa a la `0.3`: la clave del documento es
+  `open_accounting`, el esquema `estandar/open-accounting.schema.json`, la constante `OPEN_ACCOUNTING` y el recurso
+  del MCP `contaperu://estandar/open-accounting`. `datos_raw` pasa a `datos_originales`. Rompe a quien lea los
+  nombres viejos; contab-core se ajusta en la misma tanda.
 - `contrato.incumplimientos` explica de otra manera por qué un driver de la forma `linea` no declara `EXIGE`
   («no lleva cuentas»): ya no es cosa solo de los de asientos, porque uno de registro también lo declara.
 
-### Obsoleto
-- **`cuenta_contable` y `centro_costo` del comprobante pasan a legado**: se aceptan, pero la imputación manda sobre
-  ellos, y salen en `pe-ledger 0.3`. En esta rama hubo antes un `cuenta_tercero` y unas `imputaciones` dentro del
-  comprobante: nunca se publicaron, y salieron al separar la imputación del documento.
+### Retirado
+- **`cuenta_contable` y `centro_costo` salen del comprobante** (`open-accounting 0.3`): la cuenta y el centro de cada
+  documento llegan solo en la imputación, y un documento que todavía los trae se rechaza en vez de perderlos en
+  silencio. En esta rama hubo antes un `cuenta_tercero` y unas `imputaciones` dentro del comprobante: nunca se
+  publicaron, y salieron al separar la imputación del documento.
 
 ## [0.9.0] — 2026-09-12
 

@@ -164,7 +164,7 @@ def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
         origen=ORIGEN,
         confianza=Decimal("1.00"),      # es el dato de SUNAT, no la lectura de una IA
         archivo_nombre=archivo_nombre,
-        datos_raw={"sire": campos},     # la fila cruda, para rastrear de dónde salió cada valor
+        datos_originales={"sire": campos},     # la fila cruda, para rastrear de dónde salió cada valor
     )
 
 

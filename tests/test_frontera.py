@@ -112,7 +112,7 @@ def test_cada_puerta_pasa_por_la_fachada(puerta):
 
     Cuando una se salta `operaciones` y arma los objetos por su cuenta, deja de haber una capa sobre
     otra y pasa a haber dos clientes paralelos del núcleo — que es como el CLI acabó emitiendo un
-    JSON sin la clave `pe_ledger` que el MCP sí ponía.
+    JSON sin la clave `open_accounting` que el MCP sí ponía.
     """
     assert FACHADA in importa(PAQUETE / f"{puerta}.py"), (
         f"{puerta}.py no importa `operaciones`: está hablando con el núcleo por su cuenta")
@@ -151,7 +151,7 @@ def test_las_dos_puertas_producen_el_MISMO_documento(tmp_path):
 
     Es la prueba de que las puertas son adaptadores y no dos programas parecidos. **Antes no lo
     daban**: el CLI construía `Libro` y `Comprobante` por su cuenta y serializaba a mano, así que su
-    JSON salía SIN la clave `pe_ledger` —la que dice contra qué versión del estándar se escribió—
+    JSON salía SIN la clave `open_accounting` —la que dice contra qué versión del estándar se escribió—
     mientras el MCP sí la ponía. El mismo comprobante, dos documentos distintos según la puerta.
 
     Se comparan enteros, no campo elegido: un documento que difiere en cualquier cosa ya no es el
@@ -191,4 +191,4 @@ def test_las_dos_puertas_producen_el_MISMO_documento(tmp_path):
             c["archivo_nombre"] = ""
 
     assert del_cli == del_mcp, "las dos puertas ya no producen el mismo documento"
-    assert del_cli["pe_ledger"], "el documento salió sin la versión del estándar"
+    assert del_cli["open_accounting"], "el documento salió sin la versión del estándar"

@@ -6,7 +6,7 @@ Están aquí, en un módulo sin importaciones, por dos motivos:
   escribía a mano en los dos sitios y se separaron sin que nadie lo notara: llegaron a convivir
   **tres** —`0.3.0` en el empaquetado, `0.2.0` en el código y `0.1.0` en la metadata instalada—,
   mientras el servidor MCP se presentaba ante el Claude del contador con la del medio.
-- **Sin ciclos.** `operaciones.py` también necesita `PE_LEDGER`, y no puede pedírselo a `__init__`
+- **Sin ciclos.** `operaciones.py` también necesita `OPEN_ACCOUNTING`, y no puede pedírselo a `__init__`
   porque `__init__` lo importa a él. Un módulo hoja que no importa nada rompe el nudo.
 
 No leer la versión con `importlib.metadata`: en una instalación editable (`pip install -e`) esa
@@ -17,7 +17,7 @@ from __future__ import annotations
 
 __version__ = "0.10.0"
 
-# La versión del ESTÁNDAR de datos, que es otro reloj: `pe-ledger` es el formato que se publica para
+# La versión del ESTÁNDAR de datos, que es otro reloj: `open-accounting` es el formato que se publica para
 # que otros lo usen y cambia poquísimo, mientras la librería cambia cada vez que se corrige un
 # asiento. Confundirlos sería peor que no versionar. Su esquema vive en `estandar/`.
-PE_LEDGER = "0.2"
+OPEN_ACCOUNTING = "0.3"

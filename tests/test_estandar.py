@@ -1,4 +1,4 @@
-"""El estándar `pe-ledger` y su esquema.
+"""El estándar `open-accounting` y su esquema.
 
 El test que más vale de este archivo es `test_el_esquema_cubre_el_modelo_entero`: si alguien
 añade un campo al `Comprobante` y se olvida del esquema, el estándar y el código dejan de decir
@@ -13,12 +13,12 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
-from contaperu import PE_LEDGER
+from contaperu import OPEN_ACCOUNTING
 from contaperu.modelo import Comprobante, Libro
 
 from util import GOLDEN
 
-ESQUEMA = Path(__file__).resolve().parents[1] / "estandar" / "pe-ledger.schema.json"
+ESQUEMA = Path(__file__).resolve().parents[1] / "estandar" / "open-accounting.schema.json"
 
 
 @pytest.fixture(scope="module")
@@ -34,7 +34,7 @@ def validador(esquema) -> Draft202012Validator:
 
 def documento(**extra) -> dict:
     base = {
-        "pe_ledger": PE_LEDGER,
+        "open_accounting": OPEN_ACCOUNTING,
         "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                   "periodo": "202601", "tipo": "compra"},
         "comprobantes": [],
@@ -44,7 +44,7 @@ def documento(**extra) -> dict:
 
 
 def test_el_esquema_es_valido(validador):
-    assert validador.schema["title"] == "pe-ledger"
+    assert validador.schema["title"] == "open-accounting"
 
 
 def test_el_esquema_cubre_el_modelo_entero(esquema):
@@ -61,7 +61,7 @@ def test_el_esquema_cubre_el_modelo_entero(esquema):
 @pytest.mark.parametrize("archivo", ["compras_202601.json", "ventas_202512.json"])
 def test_los_golden_validan(validador, archivo):
     datos = json.loads((GOLDEN / archivo).read_text(encoding="utf-8"))
-    doc = dict({"pe_ledger": PE_LEDGER}, **datos)
+    doc = dict({"open_accounting": OPEN_ACCOUNTING}, **datos)
     assert list(validador.iter_errors(doc)) == []
 
 
@@ -103,8 +103,8 @@ def test_la_version_del_estandar_no_es_la_de_la_libreria(esquema):
     que el formato de intercambio cambie."""
     import contaperu
 
-    assert esquema["properties"]["pe_ledger"]["const"] == PE_LEDGER
-    assert contaperu.__version__ != PE_LEDGER
+    assert esquema["properties"]["open_accounting"]["const"] == OPEN_ACCOUNTING
+    assert contaperu.__version__ != OPEN_ACCOUNTING
 
 
 def test_la_condicion_de_pago_se_normaliza_y_lo_demas_se_rechaza():
@@ -118,9 +118,12 @@ def test_la_condicion_de_pago_se_normaliza_y_lo_demas_se_rechaza():
 
 
 def test_las_decisiones_contables_no_son_del_documento(esquema):
-    """Las cuentas viven en la aplicación y llegan aparte, en la imputación (John, 12-sep-2026): que el
-    comprobante no vuelva a crecer con ellas. Los dos campos que ya tenía quedan marcados como legado."""
+    """Las cuentas viven en la aplicación y llegan aparte, en la imputación (John, 12-sep-2026). Desde open-accounting
+    0.3 el comprobante tampoco lleva la cuenta ni el centro, y un documento que todavía los trae se rechaza: perder su
+    cuenta en silencio sería peor que no aceptarlo."""
     propiedades = esquema["$defs"]["comprobante"]["properties"]
-    assert not {"cuenta_tercero", "imputaciones", "imputacion", "reparto"} & set(propiedades)
-    for legado in ("cuenta_contable", "centro_costo"):
-        assert propiedades[legado]["description"].startswith("LEGADO"), legado
+    assert not {"cuenta_contable", "centro_costo", "cuenta_tercero", "imputaciones", "imputacion",
+                "reparto"} & set(propiedades)
+    with pytest.raises(ValueError, match="imputación"):
+        Comprobante.de_dict({"tipo_cp": "01", "cuenta_contable": "659999"})
+    assert Comprobante.de_dict({"tipo_cp": "01", "cuenta_contable": "", "centro_costo": None}).tipo_cp == "01"

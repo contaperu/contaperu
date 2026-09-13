@@ -15,10 +15,16 @@ from jsonschema import Draft202012Validator
 from contaperu import asiento as asi
 from contaperu.drivers import csv as driver_csv
 from contaperu.modelo import Comprobante, Libro
+from util import comprobante, con_imputaciones
 
-CONTAB = asi.config_de(None)
+def configuracion(*capas) -> dict:
+    """La configuración (de fábrica, o con sus capas) con las imputaciones de los comprobantes de prueba."""
+    return con_imputaciones(asi.config_de(*capas))
+
+
+CONTAB = configuracion(None)
 MES = (date(2026, 8, 1), date(2026, 8, 31))
-ESQUEMA = Path(__file__).resolve().parents[1] / "estandar" / "pe-ledger.schema.json"
+ESQUEMA = Path(__file__).resolve().parents[1] / "estandar" / "open-accounting.schema.json"
 
 
 def factura(**k) -> Comprobante:
@@ -28,14 +34,14 @@ def factura(**k) -> Comprobante:
                 total="4956", concepto="SERVICIO DE TRANSPORTE", cuenta_contable="659999",
                 centro_costo="CC-64")
     base.update(k)
-    return Comprobante(**base)
+    return comprobante(**base)
 
 
 def test_el_centro_de_referencia_viaja_como_anexo_auxiliar():
     """Con `cc_referencia_en_x`, el centro de una cuenta que no lo lleva en M sale del asiento
     por el campo `anexo_auxiliar` del estándar, no por `centro_costo`. Es correcto —la X es la
     X— pero conviene fijarlo aquí y no descubrirlo desde el MCP o desde el driver CSV."""
-    ref = asi.config_de({"concar": {"cc_referencia_en_x": True}})
+    ref = configuracion({"concar": {"cc_referencia_en_x": True}})
     filas = asi.asiento(factura(cuenta_contable="603201"), ref, MES, "080001")
     gasto = asi.desde_fila(filas[0])
     assert gasto.centro_costo == "" and gasto.anexo_auxiliar == "CC-64"
@@ -82,10 +88,10 @@ def test_a_dict_no_arrastra_claves_vacias():
 
 
 def test_las_lineas_validan_contra_el_estandar():
-    """Lo que produce el motor tiene que caber en el bloque `asiento` de pe-ledger."""
+    """Lo que produce el motor tiene que caber en el bloque `asiento` de open-accounting."""
     validador = Draft202012Validator(json.loads(ESQUEMA.read_text(encoding="utf-8")))
     doc = {
-        "pe_ledger": "0.2",
+        "open_accounting": "0.3",
         "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                   "periodo": "202608", "tipo": "compra"},
         "asiento": [ln.a_dict() for ln in asi.a_lineas(
@@ -139,7 +145,7 @@ def test_lo_que_arma_el_motor_valida_contra_el_estandar():
               + asi.asiento_neutral(nc, CONTAB, MES, "080085")
               + asi.asiento_neutral(factura(tipo_cp="02", retencion="336", igv="0", base_gravada="0",
                                             inafecto="4956"), CONTAB, MES, "080086"))
-    doc = {"pe_ledger": "0.2",
+    doc = {"open_accounting": "0.3",
            "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                      "periodo": "202608", "tipo": "compra"},
            "asiento": [ln.a_dict() for ln in lineas]}

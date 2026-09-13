@@ -45,7 +45,7 @@ def test_igv_no_cuadra_y_tasa_reducida():
 
 def test_total_no_cuadra_y_anticipo():
     assert codigos(cp(total="200")) == ["TOTAL_NO_CUADRA"]
-    c = cp(total="98", datos_raw={"anticipo": "20"})
+    c = cp(total="98", datos_originales={"anticipo": "20"})
     assert codigos(c) == ["ANTICIPO"]
     assert codigos(cp(exonerado="50", total="168")) == []
 

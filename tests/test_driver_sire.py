@@ -15,6 +15,7 @@ from contaperu import generar as g
 from contaperu.modelo import Comprobante
 from contaperu.drivers import sire
 from util import campos, cargar_golden
+from util import con_imputaciones, imputar
 
 
 @pytest.mark.parametrize("json_golden,n_campos,nombre", [
@@ -151,7 +152,7 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
     assert b"E001" not in exp.txt and exp.txt.count(b"\r\n") == 2
     # El Excel de CONCAR sí se lo lleva (mismo mes, misma revisión)
     for x in cs:
-        x.cuenta_contable, x.centro_costo = "631101", "OBRA01"   # la 631101 lleva centro y CONCAR lo exige (0.8)
-    exc = g.generar(libro, cs, "concar", contab=concar.config_de(None),
+        imputar(x, cuenta_contable="631101", centro_costo="OBRA01")   # la 631101 lleva centro y CONCAR lo exige (0.8)
+    exc = g.generar(libro, cs, "concar", contab=con_imputaciones(concar.config_de(None)),
                     correlativos={"11": 1, "15": 1})
     assert exc.n_filas == 3 and exc.resumen["fuera_del_registro"] == 0

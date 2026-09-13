@@ -119,7 +119,7 @@ def cmd_generar(args: argparse.Namespace) -> int:
     if args.json:
         Path(args.json).parent.mkdir(parents=True, exist_ok=True)
         # `operaciones.documento` y no un dict a mano: era la fuente de un desajuste real — este
-        # comando emitía un JSON SIN la clave `pe_ledger`, y el golden de los tests tenía que
+        # comando emitía un JSON SIN la clave `open_accounting`, y el golden de los tests tenía que
         # añadírsela para poder validar contra el esquema del estándar.
         Path(args.json).write_text(
             json.dumps(operaciones.documento(libro, comprobantes), ensure_ascii=False, indent=1),
@@ -140,7 +140,7 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
         libro = operaciones.libro_de(datos)
         comprobantes = operaciones.comprobantes_de(datos)
     except operaciones.DocumentoInvalido as e:
-        print(f"El archivo no es un documento pe-ledger válido: {e}", file=sys.stderr)
+        print(f"El archivo no es un documento open-accounting válido: {e}", file=sys.stderr)
         return 2
     if args.revisar:
         validar.revisar(comprobantes, libro)
@@ -263,7 +263,7 @@ def main(argv: list[str] | None = None) -> int:
     d.set_defaults(fn=cmd_desde_json)
 
     x = sub.add_parser("diagnosticar", help="qué bloquea, qué falta y qué saldría, antes de generar nada")
-    x.add_argument("json", help="documento pe-ledger")
+    x.add_argument("json", help="documento open-accounting")
     x.add_argument("--driver", default="concar", choices=list(drivers.DRIVERS))
     x.add_argument("--config", help="JSON con la configuración contable del contribuyente")
     x.add_argument("--imputacion", help=AYUDA_IMPUTACION)

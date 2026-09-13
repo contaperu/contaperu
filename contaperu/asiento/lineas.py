@@ -1,6 +1,6 @@
 """La línea de diario neutral: el asiento sin el vocabulario de ningún ERP.
 
-Es el bloque `asiento` del estándar `pe-ledger` y, desde la 0.7, la FUENTE del asiento: la arma
+Es el bloque `asiento` del estándar `open-accounting` y, desde la 0.7, la FUENTE del asiento: la arma
 `motor.asiento_neutral()` y de ella salen todos los destinos — el Excel de CONCAR como una proyección
 (`drivers/concar/proyeccion.py`), el CSV genérico, los drivers de terceros y los agentes de IA a
 través del servidor MCP.
@@ -59,7 +59,7 @@ def _numero(v: Any) -> Any:
 
 @dataclass
 class LineaDiario:
-    """Una línea del asiento, en el vocabulario de `pe-ledger`.
+    """Una línea del asiento, en el vocabulario de `open-accounting`.
 
     `documento` y `referencia` llevan `tipo` (la sigla del ERP, por compatibilidad) y `tipo_cp` (el
     código SUNAT de la Tabla 10, que es el que manda). `glosa` va entera: el corte es del driver.
@@ -85,7 +85,7 @@ class LineaDiario:
     tasa_igv: Any = ""
 
     def a_dict(self) -> dict:
-        """Sin las claves vacías: un documento `pe-ledger` no lleva ruido."""
+        """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""
         d = asdict(self)
         return {k: v for k, v in d.items() if v not in ("", {}, None)}
 

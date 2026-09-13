@@ -181,13 +181,10 @@ class Comprobante:
     ref_numero: str = ""
     detraccion: dict | None = None  # {codigo, porcentaje, monto, cuenta, fecha_constancia, nro_constancia}
     id_contrato: str = ""
-    # La glosa del documento. Y dos campos de LEGADO (pe-ledger 0.1 y 0.2): la cuenta y el centro no son hechos del
-    # documento sino decisiones de cada entorno, y llegan aparte, en la imputación (`asiento.Imputacion`, por
-    # `id_externo`), que manda sobre ellos. Se aceptan mientras la aplicación no la pase, y salen en pe-ledger 0.3
-    # (John, 12-sep-2026: las cuentas viven en la aplicación, no en el documento).
+    # La glosa del documento. La cuenta y el centro no están aquí: no son hechos del documento sino decisiones de cada
+    # entorno, y llegan aparte, en la imputación (`asiento.Imputacion`, por `id_externo`). Salieron del comprobante en
+    # open-accounting 0.3 (John, 12-sep-2026: las cuentas viven en la aplicación, no en el documento).
     concepto: str = ""
-    cuenta_contable: str = ""       # legado: la de la base (el gasto en compras, el ingreso en ventas)
-    centro_costo: str = ""          # legado
     # Procedencia
     origen: str = "xml"
     confianza: Decimal = Decimal("1.00")
@@ -195,7 +192,7 @@ class Comprobante:
     # El id con el que la aplicación que produce el documento conoce este comprobante (su fila). Es la llave con
     # la que le llega aparte su imputación: la cuenta, el centro y el reparto de ESTE documento.
     id_externo: str = ""
-    datos_raw: dict = field(default_factory=dict)
+    datos_originales: dict = field(default_factory=dict)
     # Revisión (las rellena validar.py / el usuario)
     estado: str = "ok"
     excluida: bool = False
@@ -270,6 +267,12 @@ class Comprobante:
 
     @classmethod
     def de_dict(cls, d: dict) -> "Comprobante":
+        """Lo desconocido se ignora; lo que salió del comprobante en open-accounting 0.3, no: un documento que todavía
+        trae la cuenta o el centro se rechaza, porque ignorarlos lo dejaría sin cuenta y sin aviso."""
+        retirados = [k for k in RETIRADOS_EN_0_3 if str(d.get(k) or "").strip()]
+        if retirados:
+            raise ValueError(f"{', '.join(retirados)} ya no va en el comprobante (open-accounting 0.3): la cuenta y "
+                             "el centro de cada documento llegan en la imputación, por id_externo")
         conocidos = {f.name for f in fields(cls)}
         return cls(**{k: v for k, v in d.items() if k in conocidos})
 
@@ -290,9 +293,12 @@ _CAMPOS_MONTO = (
     "isc", "base_ivap", "ivap", "icbper", "otros", "total", "retencion",
 )
 _CAMPOS_FECHA = ("fecha_emision", "fecha_vencimiento", "ref_fecha")
+# Los campos que salieron del comprobante en open-accounting 0.3: llegan en la imputación.
+RETIRADOS_EN_0_3 = ("cuenta_contable", "centro_costo")
+
 _CAMPOS_TEXTO = (
     "tipo_cp", "serie", "numero", "numero_final", "contraparte_tipo_doc", "contraparte_doc",
     "contraparte_nombre", "moneda", "destino_igv", "anio_dua", "cod_dep_aduanera",
     "clasif_bienes", "ref_tipo_cp", "ref_serie", "ref_numero", "id_contrato",
-    "concepto", "cuenta_contable", "centro_costo", "archivo_nombre", "condicion_pago", "id_externo",
+    "concepto", "archivo_nombre", "condicion_pago", "id_externo",
 )

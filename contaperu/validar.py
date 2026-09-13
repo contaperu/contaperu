@@ -126,13 +126,13 @@ def validar(c: Comprobante, libro: Libro) -> None:
                 a("IGV_TASA_REDUCIDA", f"IGV al {Decimal(reducida) * 100:.1f} % (tasa reducida); verifica que corresponda")
             else:
                 e("IGV_NO_CUADRA", f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} (esperado {esperado:.2f})")
-    # Sin los descuentos: la base y el IGV ya son netos (estandar/LEEME.md, pe-ledger 0.2).
+    # Sin los descuentos: la base y el IGV ya son netos (estandar/LEEME.md, open-accounting 0.2).
     esperado_total = (
         c.base_gravada + c.igv + c.exonerado + c.inafecto + c.exportacion + c.isc
         + c.base_ivap + c.ivap + c.icbper + c.otros
     )
     if not _cuadra(c.total, esperado_total):
-        anticipo = Decimal(str(c.datos_raw.get("anticipo") or "0"))
+        anticipo = Decimal(str(c.datos_originales.get("anticipo") or "0"))
         if anticipo > 0 and _cuadra(c.total, esperado_total - anticipo):
             a("ANTICIPO", f"El total descuenta un anticipo de {anticipo}; revisa la base a anotar")
         else:
@@ -170,19 +170,19 @@ def validar(c: Comprobante, libro: Libro) -> None:
 
     # --- Procedencia -------------------------------------------------------------------------
     if c.origen == "xml":
-        emisor = solo_digitos((c.datos_raw.get("emisor") or {}).get("doc", ""))
-        adquirente = solo_digitos((c.datos_raw.get("adquirente") or {}).get("doc", ""))
+        emisor = solo_digitos((c.datos_originales.get("emisor") or {}).get("doc", ""))
+        adquirente = solo_digitos((c.datos_originales.get("adquirente") or {}).get("doc", ""))
         if libro.es_venta and emisor and emisor != libro.ruc:
             e("XML_DE_OTRO_RUC", f"El XML lo emitió el RUC {emisor}, no {libro.ruc}: no es una venta de este cliente")
         if not libro.es_venta and adquirente and adquirente != libro.ruc:
             e("XML_PARA_OTRO_RUC", f"El XML está emitido al RUC {adquirente}, no a {libro.ruc}: no es una compra de este cliente")
-        gratuitas = Decimal(str(c.datos_raw.get("gratuitas") or "0"))
+        gratuitas = Decimal(str(c.datos_originales.get("gratuitas") or "0"))
         if gratuitas > 0:
             a("GRATUITAS", f"Incluye operaciones gratuitas por {gratuitas} (no van al registro)")
     if c.origen in ("pdf_texto", "vision"):
         # La IA puede confundir emisor y cliente o leer mal un dígito: se avisa, no se bloquea.
-        emisor = solo_digitos((c.datos_raw.get("emisor") or {}).get("doc", ""))
-        adquirente = solo_digitos((c.datos_raw.get("adquirente") or {}).get("doc", ""))
+        emisor = solo_digitos((c.datos_originales.get("emisor") or {}).get("doc", ""))
+        adquirente = solo_digitos((c.datos_originales.get("adquirente") or {}).get("doc", ""))
         if libro.es_venta and len(emisor) == 11 and emisor != libro.ruc:
             a("EMISOR_NO_COINCIDE", f"La IA leyó como emisor el RUC {emisor}, no {libro.ruc}: ¿es una venta de este cliente?")
         if not libro.es_venta and len(adquirente) == 11 and adquirente != libro.ruc:

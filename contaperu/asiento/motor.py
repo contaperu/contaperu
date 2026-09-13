@@ -1,7 +1,7 @@
 """El asiento en líneas neutrales: la contabilidad, sin el vocabulario de ningún ERP.
 
 Aquí vive la LÓGICA del asiento —qué cuentas, qué sentido, cuántas líneas, en qué fecha— y sale ya
-en el bloque `asiento` del estándar `pe-ledger`. Las reglas, con su fuente al lado, están en el
+en el bloque `asiento` del estándar `open-accounting`. Las reglas, con su fuente al lado, están en el
 docstring del paquete (`__init__.py`); este módulo las aplica.
 
 Hasta el 11-sep-2026 esta lógica escribía directamente las columnas del Excel de CONCAR ('A'..'AO')
@@ -55,7 +55,7 @@ def _texto_tasa(t: Decimal) -> str:
 
 
 def _limpio(d: dict) -> dict:
-    """Sin las claves vacías: un documento `pe-ledger` no lleva ruido."""
+    """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""
     return {k: v for k, v in d.items() if v not in ("", None)}
 
 

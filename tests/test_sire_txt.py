@@ -53,7 +53,7 @@ def test_lee_una_factura_con_su_glosa():
     # SUNAT exporta 1.000 en soles; el registro solo pide el T.C. si no es PEN, y la
     # plantilla lo escribe vacío: guardarlo se contradiria con lo que generamos.
     assert c.tipo_cambio is None
-    assert c.datos_raw["sire"][8] == "1032"      # queda la fila cruda para rastrear
+    assert c.datos_originales["sire"][8] == "1032"      # queda la fila cruda para rastrear
 
 
 def test_la_nota_de_credito_conserva_los_campos_de_descuento():

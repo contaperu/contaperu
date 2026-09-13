@@ -1,4 +1,4 @@
-"""Operaciones de alto nivel: documento `pe-ledger` entra, documento `pe-ledger` sale.
+"""Operaciones de alto nivel: documento `open-accounting` entra, documento `open-accounting` sale.
 
 Es la capa que consume el servidor MCP, y sirve igual a cualquier aplicación que prefiera
 hablar con diccionarios en vez de con los objetos del modelo. Todas las funciones de aquí son
@@ -22,7 +22,7 @@ from .lectores import archivos as lectura_archivos, sire_txt
 from .modelo import Comprobante, Libro
 
 # Ojo: NO se redefine aquí. Era la segunda copia del mismo número.
-from ._version import PE_LEDGER  # noqa: E402  (constante, no un módulo)
+from ._version import OPEN_ACCOUNTING  # noqa: E402  (constante, no un módulo)
 
 # Tope de seguridad. Un mes de una PYME son decenas o cientos de comprobantes; muchos miles en
 # una sola llamada es casi siempre un error de quien llama, y conviene decirlo en vez de
@@ -106,9 +106,9 @@ def comprobantes_de(doc: dict) -> list[Comprobante]:
 
 def documento(libro: Libro, comprobantes: list[Comprobante] | None = None,
               lineas: list[dict] | None = None, **extra) -> dict:
-    """Arma un documento `pe-ledger` con lo que se le dé."""
+    """Arma un documento `open-accounting` con lo que se le dé."""
     doc: dict[str, Any] = {
-        "pe_ledger": PE_LEDGER,
+        "open_accounting": OPEN_ACCOUNTING,
         "libro": {"ruc": libro.ruc, "razon_social": libro.razon_social,
                   "periodo": libro.periodo, "tipo": libro.tipo},
     }
@@ -181,7 +181,7 @@ def _nombre_de(datos: bytes) -> str:
 
 
 def leer_xml(contenido: str, libro: dict, es_base64: bool = False) -> dict:
-    """XML UBL 2.1 de SUNAT (uno, o un ZIP con varios) -> documento `pe-ledger`."""
+    """XML UBL 2.1 de SUNAT (uno, o un ZIP con varios) -> documento `open-accounting`."""
     lib = libro_de({"libro": libro})
     datos = _bytes_de(contenido, es_base64)
     lote = lectura_archivos.Lote()
@@ -197,7 +197,7 @@ def leer_xml(contenido: str, libro: dict, es_base64: bool = False) -> dict:
 
 
 def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) -> dict:
-    """El TXT (o el ZIP) de la propuesta que entrega SUNAT -> documento `pe-ledger`."""
+    """El TXT (o el ZIP) de la propuesta que entrega SUNAT -> documento `open-accounting`."""
     lib = libro_de({"libro": libro})
     comprobantes = sire_txt.parsear(_bytes_de(contenido, es_base64), lib)
     comprobantes = lectura_archivos.ordenar(comprobantes)

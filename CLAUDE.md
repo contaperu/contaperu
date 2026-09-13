@@ -6,7 +6,7 @@ dice dónde buscarlo.
 
 ## Qué es
 
-`contaperu` es **el núcleo contable abierto del Perú**: el estándar de datos `pe-ledger`, el motor que lee
+`contaperu` es **el núcleo contable abierto del Perú**: el estándar de datos `open-accounting`, el motor que lee
 comprobantes (el XML de SUNAT, la propuesta del SIRE), los valida, arma el asiento y lo exporta a CONCAR, al SIRE y a
 un CSV genérico, y un servidor MCP para que un agente de IA lo use. Licencia **MIT**; lo mantiene **Global Procesos
 AI S.A.C.** (Lima). El repositorio (`github.com/contaperu/contaperu`) está **privado por ahora** y se abrirá cuando
@@ -36,7 +36,7 @@ Tres niveles, de abajo arriba: un **núcleo** que sabe contabilidad peruana y na
 destino y nada de contabilidad (`drivers/concar`, `drivers/sire`, `drivers/csv`, `drivers/contasis`, y los de terceros por *entry
 points*, con el contrato de `drivers/contrato.py`); y encima la capa para **agentes** (`operaciones`,
 `servidor_mcp`, `cli`; `diagnosticar` es su primera pregunta). El asiento nace en las **líneas de diario neutrales**
-del estándar `pe-ledger` y cada ERP es una proyección de ellas: un driver nuevo solo traduce vocabulario. Todo esto,
+del estándar `open-accounting` y cada ERP es una proyección de ellas: un driver nuevo solo traduce vocabulario. Todo esto,
 con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LEEME.md`.
 
 ## Quién lo consume, y el peaje
@@ -71,10 +71,10 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 
 - **Commits en prosa, sin prefijos**, que cuenten la decisión, terminando con la línea `Co-Authored-By` del modelo que
   los hizo (`Co-Authored-By: Claude <modelo> <noreply@anthropic.com>`).
-- **La versión vive en `contaperu/_version.py`**: `__version__` del paquete y `PE_LEDGER` del estándar son dos
+- **La versión vive en `contaperu/_version.py`**: `__version__` del paquete y `OPEN_ACCOUNTING` del estándar son dos
   relojes distintos. `CHANGELOG.md` explica cada versión con su porqué, y **un cambio de comportamiento se anuncia
   como tal** (quien use el motor sin la app lo nota). Dos series de tags: `vX.Y.Z` para el paquete y
-  `pe-ledger-0.X` para el estándar, que avanza con cada cambio aditivo del esquema.
+  `open-accounting-0.X` para el estándar, que avanza con cada cambio aditivo del esquema.
 - **Un test por regla, y mutaciones cuando la regla es fina**: si al romper una línea ningún test cae, falta el test.
   El snapshot de CONCAR se corre en cada paso; si cambia, cambia a propósito y se dice.
 
@@ -96,7 +96,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 | `README.md` | La portada: el problema, instalar, un ejemplo de diez líneas, el MCP, qué sabe hacer y qué no, estado |
 | `ARQUITECTURA.md` | Los tres niveles, el flujo de un comprobante, la línea neutral, cómo se enchufa un driver, lo que no se negocia, la hoja de ruta |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
-| `estandar/LEEME.md` | El estándar `pe-ledger`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
+| `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU.; de aquí salió la 0.8.0 |
 | `CHANGELOG.md` | Cada versión con su porqué; la bitácora del motor vive aquí y en ningún otro sitio |
 | `SECURITY.md` · `CODE_OF_CONDUCT.md` | Cómo reportar una vulnerabilidad; cómo se convive en el proyecto |

@@ -16,17 +16,20 @@ from contaperu.servidor_mcp import LOCALES, mcp, seguridad
 from util import XML
 
 DOCUMENTO = {
-    "pe_ledger": "0.2",
+    "open_accounting": "0.3",
     "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
               "periodo": "202608", "tipo": "compra"},
     "comprobantes": [{
         "tipo_cp": "01", "serie": "E001", "numero": "871", "fecha_emision": "2026-08-10",
         "fecha_vencimiento": "2026-08-27", "contraparte_doc": "20602222226",
         "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC", "base_gravada": "4200", "igv": "756",
-        "total": "4956", "concepto": "SERVICIO DE TRANSPORTE", "cuenta_contable": "659999",
-        "centro_costo": "CC-64", "detraccion": {"codigo": "027", "porcentaje": 4},
+        "total": "4956", "concepto": "SERVICIO DE TRANSPORTE", "id_externo": "fila-871",
+        "detraccion": {"codigo": "027", "porcentaje": 4},
     }],
 }
+
+# La cuenta y el centro del comprobante de ejemplo llegan aparte, en la imputación (open-accounting 0.3).
+IMPUTACION = {"fila-871": {"cuenta_contable": "659999", "centro_costo": "CC-64"}}
 
 
 def llamar(herramienta: str, **argumentos):
@@ -65,13 +68,11 @@ def test_estan_las_once_herramientas():
 
 def test_diagnosticar_por_el_protocolo():
     """Un agente pregunta que falta ANTES de exportar, y la respuesta ya viene por serie-numero."""
-    listo = llamar("diagnosticar", documento=DOCUMENTO)
+    listo = llamar("diagnosticar", documento=DOCUMENTO, imputacion=IMPUTACION)
     assert listo["listo_para_exportar"] is True and listo["saldrian"] == ["E001-871"]
     assert listo["detracciones_pendientes"][0]["serie_numero"] == "E001-871"
     assert listo["sub_diarios"]["10"]["empieza_en"] == 1
-    sin_cuenta = json.loads(json.dumps(DOCUMENTO))
-    sin_cuenta["comprobantes"][0]["cuenta_contable"] = ""
-    r = llamar("diagnosticar", documento=sin_cuenta)
+    r = llamar("diagnosticar", documento=DOCUMENTO, imputacion={"fila-871": {"centro_costo": "CC-64"}})
     assert r["listo_para_exportar"] is False and r["faltantes"]["sin_cuenta"] == ["E001-871"]
     assert r["por_que_no"] == ["1 sin cuenta contable"]
     # Y a quién pedírselo (0.8.0): la cuenta la pone el contador.
@@ -107,10 +108,10 @@ def test_cada_herramienta_se_explica_sola():
 
 def test_los_recursos_son_legibles():
     uris = {str(r.uri) for r in asyncio.run(mcp.list_resources())}
-    assert uris == {"contaperu://estandar/pe-ledger", "contaperu://catalogos/sunat",
+    assert uris == {"contaperu://estandar/open-accounting", "contaperu://catalogos/sunat",
                     "contaperu://drivers", "contaperu://catalogos/pcge2026"}
-    esquema = json.loads(leer_recurso("contaperu://estandar/pe-ledger"))
-    assert esquema["title"] == "pe-ledger"
+    esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
+    assert esquema["title"] == "open-accounting"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
     assert catalogos["tipos_comprobante"]["01"] == "Factura"
     drivers = json.loads(leer_recurso("contaperu://drivers"))
@@ -123,7 +124,7 @@ def test_los_recursos_son_legibles():
 
 
 def test_generar_asiento_por_el_protocolo():
-    r = llamar("generar_asiento", documento=DOCUMENTO)
+    r = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION)
     assert [ln["cuenta"] for ln in r["asiento"]] == ["659999", "401111", "421201", "421201", "421203"]
     assert r["_asiento"]["cuadre"]["cuadra"] is True
 
@@ -135,7 +136,7 @@ def test_validar_comprobantes_devuelve_el_documento_revisado():
 
 
 def test_la_partida_doble_se_puede_comprobar_sola():
-    asiento = llamar("generar_asiento", documento=DOCUMENTO)["asiento"]
+    asiento = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION)["asiento"]
     assert llamar("validar_partida_doble", asiento=asiento)["cuadra"] is True
     asiento[0]["importe"] = "1.00"
     assert llamar("validar_partida_doble", asiento=asiento)["cuadra"] is False
@@ -147,7 +148,7 @@ def test_exportar_a_concar_devuelve_el_excel_COMO_ARCHIVO():
     Es la diferencia entre que el cliente lo ofrezca para guardar y que lo enseñe como un muro
     de letras: hace falta el recurso incrustado con su `blob` y su `mimeType`.
     """
-    r, adjuntos = exportar(documento=DOCUMENTO, driver="concar")
+    r, adjuntos = exportar(documento=DOCUMENTO, driver="concar", imputacion=IMPUTACION)
     assert r["archivo"].endswith(".xlsx") and r["formato"] == "concar_xlsx"
     assert r["resumen"]["debe"] == r["resumen"]["haber"] == "5154.00"
     assert "contenido_base64" not in r, "los bytes van en el adjunto, no repetidos en el JSON"
@@ -175,7 +176,7 @@ def test_exportar_al_sire_devuelve_texto_y_su_zip_adjunto():
 
 
 def test_exportar_a_csv_es_legible():
-    r, adjuntos = exportar(documento=DOCUMENTO, driver="csv")
+    r, adjuntos = exportar(documento=DOCUMENTO, driver="csv", imputacion=IMPUTACION)
     assert r["texto"].splitlines()[0].startswith("sub_diario;correlativo")
     csv, = adjuntos
     assert csv.mimeType == "text/csv"                # sin el `; charset=utf-8` del content-type
@@ -221,7 +222,7 @@ def test_un_codigo_que_no_existe_ni_por_su_elemento_no_resuelve():
 
 
 def test_el_pcge_avisa_de_que_no_tiene_tabla():
-    asiento = llamar("generar_asiento", documento=DOCUMENTO)["asiento"]
+    asiento = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION)["asiento"]
     r = llamar("adaptar_pcge2026", asiento=asiento)
     assert r["informe"]["sin_tabla"] is True and r["informe"]["cambios"] == 0
     assert r["asiento"] == asiento
@@ -238,15 +239,15 @@ def test_normalizar_detracciones_descarta_lo_que_no_reconoce():
 
 def test_un_documento_sin_libro_falla_diciendo_por_que():
     with pytest.raises(Exception, match="libro"):
-        llamar("generar_asiento", documento={"pe_ledger": "0.2", "comprobantes": []})
+        llamar("generar_asiento", documento={"open_accounting": "0.3", "comprobantes": []})
 
 
 def test_un_comprobante_con_error_bloquea_la_exportacion():
     doc = json.loads(json.dumps(DOCUMENTO))
     doc["comprobantes"][0]["total"] = "9999"          # deja de cuadrar con base + IGV
     with pytest.raises(Exception, match="bloquean|observaciones"):
-        exportar(documento=doc, driver="concar")
-    forzado, adjuntos = exportar(documento=doc, driver="concar", incluir_observados=True)
+        exportar(documento=doc, driver="concar", imputacion=IMPUTACION)
+    forzado, adjuntos = exportar(documento=doc, driver="concar", incluir_observados=True, imputacion=IMPUTACION)
     assert forzado["archivo"].endswith(".xlsx") and len(adjuntos) == 1
 
 

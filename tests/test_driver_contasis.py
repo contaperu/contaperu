@@ -14,12 +14,13 @@ LIBRO = {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo
 FACTURA = {"tipo_cp": "01", "serie": "F001", "numero": "00000123", "fecha_emision": "2026-08-11",
            "fecha_vencimiento": "2026-08-18", "contraparte_tipo_doc": "6", "contraparte_doc": "20607777773",
            "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC", "base_gravada": "100", "igv": "18", "total": "118",
-           "concepto": "Compra de materiales", "cuenta_contable": "601101"}
-CONTAB = {"cuentas": {"cxp": {"PEN": "4212", "USD": "4212"}}, "usa_centros_costo": False}
+           "concepto": "Compra de materiales"}
+CONTAB = {"cuentas": {"gasto": "601101", "ventas": "701101", "cxp": {"PEN": "4212", "USD": "4212"}},
+          "usa_centros_costo": False}
 
 
 def doc(*comprobantes: dict, **libro) -> dict:
-    return {"pe_ledger": "0.2", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
+    return {"open_accounting": "0.3", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
 
 
 def hoja(resultado: dict):
@@ -43,7 +44,7 @@ def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     anchos = contasis.datos.ANCHOS["compra"]
     assert all(abs(ws.column_dimensions[letra].width - anchos[letra]) < 0.01 for letra, *_ in contasis.datos.COMPRAS)
     assert anchos["B"] >= 12 and anchos["I"] >= 38 and anchos["K"] >= 12 and anchos["AS"] >= 26
-    ventas = op.exportar(doc(dict(FACTURA, cuenta_contable="701101"), tipo="venta"), "contasis", CONTAB)
+    ventas = op.exportar(doc(FACTURA, tipo="venta"), "contasis", CONTAB)
     assert hoja(ventas).title == "FORMATO_VENTAS" and ventas["archivo"].endswith("_VENTAS.xlsx")
 
 
@@ -54,27 +55,26 @@ def test_el_recibo_por_honorarios_queda_fuera_del_archivo():
     assert r["filas"] == 1 and r["resumen"]["fuera_del_registro"] == 1 and hoja(r).max_row == 1
 
 
-@pytest.mark.parametrize("motivo, cambios, libro", [
-    ("moneda", dict(moneda="EUR", tipo_cambio="4.100"), {}),
-    ("cambio", dict(moneda="USD"), {}),
-    ("rango", dict(tipo_cp="03", serie="B001", numero="1", numero_final="80", cuenta_contable="701101"),
-     {"tipo": "venta"}),
-    ("ivap", dict(base_gravada="0", igv="0", base_ivap="100", ivap="4", total="104", cuenta_contable="701101"),
-     {"tipo": "venta"}),
-    ("largo", dict(cuenta_contable="60110100001"), {}),
+@pytest.mark.parametrize("motivo, cambios, libro, imputacion", [
+    ("moneda", dict(moneda="EUR", tipo_cambio="4.100"), {}, None),
+    ("cambio", dict(moneda="USD"), {}, None),
+    ("rango", dict(tipo_cp="03", serie="B001", numero="1", numero_final="80"), {"tipo": "venta"}, None),
+    ("ivap", dict(base_gravada="0", igv="0", base_ivap="100", ivap="4", total="104"), {"tipo": "venta"}, None),
+    ("largo", dict(id_externo="f1"), {}, {"f1": {"cuenta_contable": "60110100001"}}),
 ], ids=["moneda", "cambio", "rango", "ivap", "largo"])
-def test_lo_que_contasis_no_puede_llevar_se_dice_antes_y_no_sale(motivo, cambios, libro):
+def test_lo_que_contasis_no_puede_llevar_se_dice_antes_y_no_sale(motivo, cambios, libro, imputacion):
     d = doc(dict(FACTURA, **cambios), **libro)
     texto = contasis.datos.MOTIVOS[motivo]
-    diag = op.diagnosticar(d, CONTAB, driver="contasis")
+    diag = op.diagnosticar(d, CONTAB, driver="contasis", imputacion=imputacion)
     assert list(diag["faltantes"]["no_caben"]) == [texto] and diag["listo_para_exportar"] is False
     with pytest.raises(contrato.NoCabe):
-        op.exportar(d, "contasis", CONTAB, incluir_observados=True)
+        op.exportar(d, "contasis", CONTAB, incluir_observados=True, imputacion=imputacion)
 
 
 def test_un_centro_mas_largo_que_su_columna_no_se_corta():
-    d = doc(dict(FACTURA, cuenta_contable="631101", centro_costo="OBRA-00001"))
-    diag = op.diagnosticar(d, {"cuentas": {"cxp": {"PEN": "4212"}}}, driver="contasis")
+    d = doc(dict(FACTURA, id_externo="f1"))
+    diag = op.diagnosticar(d, {"cuentas": {"cxp": {"PEN": "4212"}}}, driver="contasis",
+                           imputacion={"f1": {"cuenta_contable": "631101", "centro_costo": "OBRA-00001"}})
     assert list(diag["faltantes"]["no_caben"]) == [contasis.datos.MOTIVOS["largo"]]
 
 
@@ -88,7 +88,7 @@ def test_un_nombre_o_una_glosa_largos_se_cortan_y_no_detienen_nada():
 
 
 def test_una_factura_con_reparto_no_sale_a_contasis():
-    d = doc(dict(FACTURA, id_externo="f1", cuenta_contable=""))
+    d = doc(dict(FACTURA, id_externo="f1"))
     imputacion = {"f1": {"reparto": [{"importe": "60", "cuenta_contable": "636301"},
                                      {"importe": "40", "cuenta_contable": "632201"}]}}
     diag = op.diagnosticar(d, CONTAB, driver="contasis", imputacion=imputacion)

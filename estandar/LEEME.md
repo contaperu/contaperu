@@ -1,4 +1,4 @@
-# pe-ledger 0.2 — el documento contable universal del Perú
+# open-accounting 0.3 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -7,18 +7,18 @@ Existe porque hoy no hay ninguno. CONCAR, CONTASIS y SISCONT importan cada uno s
 una IA que lee un PDF no tiene dónde depositar lo que extrajo; y quien cambia de sistema contable rehace la
 integración desde cero. El estándar no reemplaza a ninguno: es el idioma intermedio.
 
-**Esquema formal:** [`pe-ledger.schema.json`](pe-ledger.schema.json) (JSON Schema draft 2020-12).
+**Esquema formal:** [`open-accounting.schema.json`](open-accounting.schema.json) (JSON Schema draft 2020-12).
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.2/estandar/pe-ledger.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json
 ```
 
-Cuelga del tag **del estándar** (`pe-ledger-0.2`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`open-accounting-0.3`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
-sirve como estándar. **El tag `pe-ledger-0.2` avanza con cada cambio aditivo** —un campo opcional nuevo no
-sube la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la 0.2; un cambio
-de significado sube a 0.3 y estrena su propio tag.
+sirve como estándar. **El tag `open-accounting-0.3` avanza con cada cambio aditivo** —un campo opcional nuevo no
+sube la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la 0.3; un cambio
+de significado sube a 0.4 y estrena su propio tag.
 
 ```bash
 python -m contaperu.cli validar mi-documento.json
@@ -30,7 +30,7 @@ python -m contaperu.cli validar mi-documento.json
 
 ```json
 {
-  "pe_ledger": "0.2",
+  "open_accounting": "0.3",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -60,7 +60,7 @@ recibe tres piezas, y cada dato tiene un solo dueño:
 
 | Pieza | Qué lleva | Quién la pone | ¿Cambia por entorno? |
 |---|---|---|---|
-| **Documento** (`pe-ledger`) | Los hechos del comprobante: fechas, serie, contraparte, importes, `condicion_pago`… | Los lectores, desde cualquier input | No |
+| **Documento** (`open-accounting`) | Los hechos del comprobante: fechas, serie, contraparte, importes, `condicion_pago`… | Los lectores, desde cualquier input | No |
 | **Imputación** | Lo que el entorno decide para cada documento: su cuenta, su centro de costo, la cuenta del total y el reparto | La aplicación, desde la Revisión | Sí |
 | **Configuración** | Lo que vale para todo el entorno: cuentas por defecto, sub-diarios, siglas del destino | La aplicación | Sí |
 
@@ -74,8 +74,7 @@ llave**; desde la fachada, es el argumento `imputacion` de `exportar`, `diagnost
                   "reparto": [{"importe": "60.00", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
                               {"importe": "40.00", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]}}
 
-- **Campo a campo:** cada campo de la imputación manda sobre su gemelo de legado del comprobante
-  (`cuenta_contable`, `centro_costo`); lo que no trae sale de lo de siempre y, detrás, de la configuración.
+- **Lo que no trae** sale de la configuración del entorno: el comprobante no lleva cuentas.
 - **El reparto divide solo la base** —el gasto o el ingreso—: el IGV y el total son del documento. Sus partes
   suman la base del asiento: el total menos el IGV con línea propia (en compras, la boleta y el recibo por
   honorarios van enteros). Si no, el mes no está listo (`reparto_no_cuadra`) y el asiento no se arma.
@@ -115,7 +114,7 @@ pero quien produce el documento debería mandar texto.
 crédito…), nunca la sigla del ERP de destino. La traducción a `FT`, `BV` o lo que use cada sistema es
 trabajo del driver, y un tipo sin equivalente **detiene la exportación en vez de inventarse una**.
 
-**5. Lo que no se entiende, se transporta.** `datos_raw` es un objeto libre donde el productor guarda lo
+**5. Lo que no se entiende, se transporta.** `datos_originales` es un objeto libre donde el productor guarda lo
 suyo. El núcleo lo lleva de un extremo al otro y no lo lee jamás.
 
 ---
@@ -181,7 +180,6 @@ consumidor de la 0.2 que no los conozca los ignora.
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
 | `condicion_pago` | `contado` o `credito`: lo que **declara** el documento. En la factura electrónica viene en `PaymentTerms FormaPago`, y una factura con cuotas es a crédito. Vacío no significa contado: significa que el documento no lo dice. |
 | `id_externo` | El id con el que la aplicación que produce el documento conoce ese comprobante (su fila). Es la llave de su imputación: sin él, al documento no le llega ninguna. |
-| `cuenta_contable`, `centro_costo` | **Legado.** No son hechos del documento: son decisiones de cada entorno y llegan en la imputación, que manda sobre ellos. Se aceptan mientras la aplicación no la pase, y salen en la `0.3`. |
 | `tipo_cambio` | El que **publica SUNAT para la fecha de emisión**, con 3 decimales. No el del día del pago. |
 | `serie` | Vacía en los comprobantes que no la llevan (recibo de servicios públicos, tipo `14`). Que esté vacía no es un error. |
 | `contraparte_doc` | Puede ir vacío en boletas a consumidor final. |
@@ -192,7 +190,7 @@ consumidor de la 0.2 que no los conozca los ignora.
 
 ## Versionado
 
-`pe_ledger` es la versión del estándar, no la de la librería. La regla:
+`open_accounting` es la versión del estándar, no la de la librería. La regla:
 
 - **Añadir un campo opcional** no sube la versión mayor. Un consumidor viejo lo ignora.
 - **Quitar un campo, renombrarlo o cambiar su significado** sube la versión y se documenta aquí.
@@ -213,6 +211,12 @@ contada dos veces. Un documento `0.1` sin descuentos significa exactamente lo mi
 —que llega aparte— manda sobre ellos. Nada cambia de significado: un documento sin imputación se exporta
 exactamente igual que antes. Quitarlos del comprobante sí cambiaría la forma del estándar, y por eso salen en la
 `0.3`.
+
+**`0.3` (12-sep-2026) cambia el nombre y la forma.** El estándar se llamaba `pe-ledger` y pasa a llamarse
+`open-accounting`: la clave del documento es `open_accounting`, y el esquema, `open-accounting.schema.json`. Salen del
+comprobante `cuenta_contable` y `centro_costo`, que llegan solo en la imputación, y `datos_raw` pasa a
+`datos_originales`. Un documento que todavía trae cuenta o centro en el comprobante se rechaza, en vez de perderlos
+en silencio.
 
 ---
 
@@ -236,7 +240,7 @@ cualquier clave `_`. Dentro de un comprobante o de una línea, no.
 ## Nombres reservados
 
 Tres campos que `REFERENCIAS.md` propone y que **no** entran hasta que haya un caso real detrás (11-sep-2026).
-El nombre está tomado —el día que entren, entran así— y mientras tanto un productor los lleva en `datos_raw`,
+El nombre está tomado —el día que entren, entran así— y mientras tanto un productor los lleva en `datos_originales`,
 que el motor transporta sin interpretar:
 
 | Dónde | Nombre | Qué será |
@@ -266,8 +270,8 @@ El CONTASIS de John no los usa (12-sep-2026), así que sigue reservado.
 ## Lo que este estándar **no** intenta ser
 
 - **No es un plan de cuentas.** Las cuentas son las del contribuyente; el estándar solo las transporta.
-- **No es un formato de factura electrónica.** Eso es UBL 2.1, y SUNAT ya lo define. `pe-ledger` empieza
+- **No es un formato de factura electrónica.** Eso es UBL 2.1, y SUNAT ya lo define. `open-accounting` empieza
   donde la factura termina.
 - **No es un libro electrónico.** El TXT del SIRE y los archivos del PLE son salidas, no el estándar.
 - **No lleva estado.** No hay identificadores de base de datos, ni usuarios, ni empresas: un documento
-  `pe-ledger` se entiende solo, en cualquier máquina, sin consultar nada.
+  `open-accounting` se entiende solo, en cualquier máquina, sin consultar nada.

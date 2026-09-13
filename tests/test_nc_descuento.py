@@ -4,7 +4,7 @@ Regla de John: base = neto, IGV aparte, total = base + IGV. La misma nota llegab
 puerta —del XML con la base Y el descuento (contada dos veces en el TXT del SIRE), de la propuesta de SUNAT
 con la base en cero (asiento sin IGV, «Inafecto» en pantalla)— y las dos se bloqueaban con TOTAL_NO_CUADRA.
 Ahora la base y el IGV son siempre netos y los descuentos dicen qué parte informa el SIRE en sus campos 16
-y 18 (estandar/LEEME.md, pe-ledger 0.2).
+y 18 (estandar/LEEME.md, open-accounting 0.2).
 
 Fuente: la exportación real de agosto. En sus diez filas el campo 26 es la suma con signo de los campos 14 a
 25, y SUNAT registró la FC01-45 entera en 16 y 18 y la E001-233 (motivo «descuento global», sin
@@ -24,6 +24,7 @@ from contaperu.modelo import Comprobante
 from test_sire_txt import FACTURA, NOTA, VENTAS, texto
 from test_xml_ubl import NC_CON_DESCUENTO
 from util import campos, cargar_golden
+from util import con_imputaciones, imputar
 
 FIXTURES = Path(__file__).parent / "fixtures" / "xml"
 MES = (date(2026, 8, 1), date(2026, 8, 31))
@@ -78,8 +79,8 @@ def test_ida_y_vuelta_contra_la_fila_de_sunat():
 def test_el_asiento_revierte_tambien_el_igv():
     """Leída de la propuesta la nota tenía IGV 0, y el asiento mandaba todo el total a la 70."""
     c = de_la_propuesta()
-    c.cuenta_contable, c.centro_costo = "701111", "OBRA01"
-    filas = concar.asiento(c, concar.config_de(None), MES, "050001", venta=True)
+    imputar(c, cuenta_contable="701111", centro_costo="OBRA01")
+    filas = concar.asiento(c, con_imputaciones(concar.config_de(None)), MES, "050001", venta=True)
     assert sorted(D(str(f["O"])) for f in filas) == [D("1797.36"), D("9985.36"), D("11782.72")]
 
 
@@ -138,7 +139,7 @@ def test_xml_el_descuento_solo_decide_en_una_nc_de_ventas_entera():
     parcial = xml_ubl.parsear(NC_CON_DESCUENTO.replace(">9985.36</cbc:Amount>", ">5000.00</cbc:Amount>")
                               .encode("utf-8"), "venta")
     assert (parcial.dscto_base, parcial.dscto_igv) == (0, 0)
-    assert parcial.datos_raw["descuentos_globales"] == [{"codigo": "", "importe": "5000.00"}]
+    assert parcial.datos_originales["descuentos_globales"] == [{"codigo": "", "importe": "5000.00"}]
 
 
 def _suma(f):

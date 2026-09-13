@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/pe-ledger-0.2/estandar/pe-ledger.schema.json",
-  "title": "pe-ledger",
+  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json",
+  "title": "open-accounting",
   "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
   "type": "object",
-  "required": ["pe_ledger", "libro"],
+  "required": ["open_accounting", "libro"],
   "additionalProperties": false,
   "patternProperties": {
     "^_": {
@@ -12,10 +12,10 @@
     }
   },
   "properties": {
-    "pe_ledger": {
+    "open_accounting": {
       "description": "Versión del estándar que habla este documento.",
       "type": "string",
-      "const": "0.2"
+      "const": "0.3"
     },
     "libro": { "$ref": "#/$defs/libro" },
     "comprobantes": {
@@ -93,7 +93,7 @@
           ]
         },
 
-        "base_gravada": { "$ref": "#/$defs/importe", "description": "Base imponible NETA de la operación, tras cualquier descuento (desde pe-ledger 0.2)." },
+        "base_gravada": { "$ref": "#/$defs/importe", "description": "Base imponible NETA de la operación, tras cualquier descuento (desde open-accounting 0.2)." },
         "igv": { "$ref": "#/$defs/importe", "description": "IGV neto de la operación." },
         "dscto_base": { "$ref": "#/$defs/importe", "description": "Parte de base_gravada que el registro informa como descuento (SIRE ventas, campo 16). No entra en el total." },
         "dscto_igv": { "$ref": "#/$defs/importe", "description": "Parte del igv que el registro informa como descuento (SIRE ventas, campo 18). No entra en el total." },
@@ -129,8 +129,6 @@
         "id_contrato": { "type": "string" },
 
         "concepto": { "type": "string", "description": "La glosa del asiento." },
-        "cuenta_contable": { "type": "string", "description": "LEGADO: la cuenta de la base. No es un hecho del documento: llega aparte, en la imputación, que manda sobre este campo. Sale en pe-ledger 0.3." },
-        "centro_costo": { "type": "string", "description": "LEGADO: como cuenta_contable. Sale en pe-ledger 0.3." },
 
         "origen": { "enum": ["xml", "pdf_texto", "vision", "manual", "sire"], "description": "De dónde salió el dato. Trazabilidad, no lógica." },
         "confianza": {
@@ -139,7 +137,7 @@
         },
         "archivo_nombre": { "type": "string" },
         "id_externo": { "type": "string", "description": "El id con el que la aplicación que produce el documento conoce este comprobante. Es la llave de su imputación, que llega aparte." },
-        "datos_raw": {
+        "datos_originales": {
           "type": "object",
           "additionalProperties": true,
           "description": "Espacio libre del productor. El núcleo lo transporta y NO lo interpreta."

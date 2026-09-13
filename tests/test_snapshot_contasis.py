@@ -30,8 +30,7 @@ def cp(**k) -> Comprobante:
     base = dict(tipo_cp="01", serie="F001", numero="00000123", fecha_emision="2026-08-11",
                 fecha_vencimiento="2026-08-18", contraparte_tipo_doc="6", contraparte_doc="20607777773",
                 contraparte_nombre="ELECTROMECANICA DE PRUEBA S.R.L.", moneda="PEN", base_gravada="100",
-                igv="18", total="118", concepto="Grillete tipo lira 5/8 para torre de alta tensión",
-                cuenta_contable="631101", centro_costo="OBRA01")
+                igv="18", total="118", concepto="Grillete tipo lira 5/8 para torre de alta tensión")
     base.update(k)
     return Comprobante(**base)
 
@@ -107,9 +106,30 @@ def contab_de(extra: dict | None) -> dict:
     return asi.config_de({"concar": extra} if extra else None)
 
 
-def fila_de(caso) -> dict:
+# La cuenta y el centro que escribe cada caso ya no son del comprobante (open-accounting 0.3): van en su imputación, por
+# `id_externo`, fundidos con la que el caso ya traiga —la del caso manda campo a campo, y un reparto va solo—.
+CUENTA_DEL_CASO = {"cuenta_contable": "631101", "centro_costo": "OBRA01"}
+
+
+def armar(caso) -> tuple[Comprobante, dict, bool]:
     _, campos, venta, extra = caso
-    return contasis.fila(cp(**campos), VENTAS if venta else COMPRAS, contab_de(extra))
+    campos = {**CUENTA_DEL_CASO, **campos}
+    legado = {k: v for k in CUENTA_DEL_CASO if (v := campos.pop(k))}
+    campos.setdefault("id_externo", "f1")
+    extra = dict(extra or {})
+    imputaciones = dict(extra.get("imputaciones") or {})
+    propia = dict(imputaciones.get(campos["id_externo"]) or {})
+    if not propia.get("reparto"):
+        propia = {**legado, **propia}
+    if propia:
+        imputaciones[campos["id_externo"]] = propia
+        extra["imputaciones"] = imputaciones
+    return cp(**campos), contab_de(extra), venta
+
+
+def fila_de(caso) -> dict:
+    c, contab, venta = armar(caso)
+    return contasis.fila(c, VENTAS if venta else COMPRAS, contab)
 
 
 def _celda(v):

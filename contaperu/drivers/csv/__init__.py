@@ -1,7 +1,7 @@
 """Driver CSV genérico: el asiento en columnas, para quien no tiene un driver propio.
 
 Es la salida de último recurso y, a la vez, la más honesta: escribe las líneas de diario del
-estándar `pe-ledger` tal cual, una por fila, sin traducir nada al vocabulario de ningún ERP.
+estándar `open-accounting` tal cual, una por fila, sin traducir nada al vocabulario de ningún ERP.
 Sirve para revisar un asiento en Excel, para cargarlo en un sistema que acepte texto plano y
 para escribir un driver nuevo teniendo delante lo que hay que traducir.
 

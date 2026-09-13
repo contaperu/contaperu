@@ -31,7 +31,7 @@ historia de un repositorio público no sale nunca más.
 Un driver traduce el asiento al formato que importa un sistema contable. El contrato completo está en
 [`contaperu/drivers/contrato.py`](contaperu/drivers/contrato.py); para un driver de **asientos** nuevo
 (SISCONT, STARSOFT…) la forma es `desde_lineas`: el núcleo arma las líneas neutrales de
-`pe-ledger`, las numera y exige que cuadren, y tu driver solo las traduce. No tienes que reimplementar
+`open-accounting`, las numera y exige que cuadren, y tu driver solo las traduce. No tienes que reimplementar
 ni una cuenta, ni un sentido, ni la detracción.
 
 ```python

@@ -31,8 +31,8 @@ resultado**, y una cuenta mal puesta o un asiento descuadrado se descubre meses 
 
 ContaPerú aporta las dos piezas que faltan:
 
-1. **[`pe-ledger`](estandar/LEEME.md)** — un estándar JSON para el documento contable peruano: el libro, los
-   comprobantes y las líneas de diario. Con su [esquema formal](estandar/pe-ledger.schema.json).
+1. **[`open-accounting`](estandar/LEEME.md)** — un estándar JSON para el documento contable peruano: el libro, los
+   comprobantes y las líneas de diario. Con su [esquema formal](estandar/open-accounting.schema.json).
 2. **Un motor determinista** que valida ese documento, arma el asiento y lo traduce al formato de cada ERP.
 
 No es un diseño en papel: el motor lleva un año generando el Excel de CONCAR y el TXT del SIRE de empresas
@@ -191,7 +191,7 @@ ni inventar nada.
 
 Tres niveles, de abajo arriba: un **núcleo** que sabe contabilidad peruana y nada más; **drivers** que
 conocen el formato de un sistema concreto y nada de contabilidad; y encima, la capa para **agentes**.
-El asiento nace en las líneas neutrales del estándar `pe-ledger` y cada ERP es una proyección de ellas
+El asiento nace en las líneas neutrales del estándar `open-accounting` y cada ERP es una proyección de ellas
 —CONCAR incluido—, así que un driver nuevo solo traduce vocabulario: las cuentas, los sentidos y la
 detracción los pone el núcleo una vez para todos. Un driver de la comunidad se enchufa por *entry
 points* sin tocar este repositorio. Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md).
@@ -211,7 +211,7 @@ Lo que se tomó de QuickBooks, Xero y las APIs unificadas de EE. UU. —y lo que
 
 | Pieza | Estado |
 |---|---|
-| El estándar `pe-ledger` 0.2 y su esquema | listo |
+| El estándar `open-accounting` 0.3 y su esquema | listo |
 | Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
 | Validación del comprobante y de la partida doble | listo |
 | Asiento: compras, ventas, honorarios, notas y detracción | listo |
@@ -261,7 +261,7 @@ SUNAT (Peru's tax authority), builds the double-entry journal and exports it to 
 local accounting system expects — CONCAR, the SIRE tax filing, or plain CSV. No database, no state,
 no network calls: JSON in, JSON or a file out.
 
-It also defines **`pe-ledger`**, an open interchange format for Peruvian accounting documents
+It also defines **`open-accounting`**, an open interchange format for Peruvian accounting documents
 (`estandar/`), with a formal JSON Schema. The rules aren't designed on paper: they come from real
 files that production accounting systems and SUNAT actually accepted.
 

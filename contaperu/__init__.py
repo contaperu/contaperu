@@ -19,7 +19,7 @@ El camino completo, de un XML a un Excel de asientos:
     exp = generar.generar(libro, comprobantes, "concar",
                           contab=configuracion, correlativos={"11": 1})
 
-El estándar de datos que habla es `pe-ledger`; su esquema está en `estandar/`.
+El estándar de datos que habla es `open-accounting`; su esquema está en `estandar/`.
 """
 from __future__ import annotations
 
@@ -29,10 +29,10 @@ from .modelo import Comprobante, Libro, Observacion
 
 # Los dos números viven en `_version.py`, que es de donde los lee también `pyproject.toml`:
 # escribirlos a mano en dos sitios ya los separó una vez (ver el docstring de ese módulo).
-from ._version import PE_LEDGER, __version__
+from ._version import OPEN_ACCOUNTING, __version__
 
 __all__ = [
     "Comprobante", "Libro", "Observacion",
     "asiento", "catalogos", "detracciones", "drivers", "formato", "generar", "lectores",
-    "operaciones", "partida_doble", "pcge", "validar", "PE_LEDGER", "__version__",
+    "operaciones", "partida_doble", "pcge", "validar", "OPEN_ACCOUNTING", "__version__",
 ]

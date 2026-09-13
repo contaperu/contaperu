@@ -1,6 +1,6 @@
 """La imputación de un documento: lo que un entorno decide sobre él, y que llega APARTE del documento.
 
-Decisión de John (12-sep-2026): el documento `pe-ledger` es el riel que lleva los hechos de cualquier input —el
+Decisión de John (12-sep-2026): el documento `open-accounting` es el riel que lleva los hechos de cualquier input —el
 XML, un PDF, la propuesta del SIRE, el archivo de otro sistema—, y **las cuentas viven en la aplicación**: en la
 configuración de cada entorno y en lo que el contador decide en su Revisión. Por eso la cuenta, el centro de
 costo, la cuenta del total y el reparto de un documento no están en el comprobante: llegan en la configuración,
@@ -10,9 +10,8 @@ bajo `imputaciones`, con el `id_externo` del comprobante como llave.
        "fila-123": {"cuenta_contable": "6011020", "centro_costo": "OBRA01", "cuenta_tercero": "4699",
                     "reparto": [{"importe": "60.00", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"}]}}}
 
-**Qué manda, campo a campo.** Cada campo de la imputación manda sobre su gemelo de legado del comprobante
-(`cuenta_contable`, `centro_costo`); lo que la imputación no trae sale de lo de siempre y, detrás, de la
-configuración. Lo resuelve `construir.partes_de` una sola vez para todos los drivers.
+**Qué trae.** La cuenta de la base, el centro, la cuenta del total y el reparto de UN documento. Lo que no
+traiga sale de la configuración del entorno: desde open-accounting 0.3 el comprobante no lleva cuentas.
 
 **El reparto** divide SOLO la base —el gasto o el ingreso—: el IGV y el total son del documento. Sus partes suman
 la base del asiento (`igv.base_imputable`), y lo comprueba `construir.reparto_no_cuadra`. Un reparto con cuenta o

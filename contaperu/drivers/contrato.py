@@ -19,7 +19,7 @@ salida, un solo documento»)—, y hay cuatro formas de driver. Un driver implem
   entero armado a partir de los comprobantes. Es la forma del Excel de CONCAR, que nació antes que
   la línea neutral.
 - **`desde_lineas(libro, lineas, contab, op) -> (bytes, resumen)`** — un archivo de asientos armado
-  a partir de las LÍNEAS NEUTRALES de `pe-ledger` (`asiento.LineaDiario`), ya numeradas y cuadradas.
+  a partir de las LÍNEAS NEUTRALES de `open-accounting` (`asiento.LineaDiario`), ya numeradas y cuadradas.
   **Es la forma para un driver de asientos nuevo** (SISCONT, STARSOFT…): el driver solo
   traduce vocabulario, y la contabilidad —cuentas, sentidos, detracción, numeración— la pone el núcleo
   una sola vez para todos. El núcleo exige el cuadre ANTES de llamarlo.

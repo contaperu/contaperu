@@ -31,7 +31,7 @@ def test_factura_como_venta():
     assert (c.base_gravada, c.igv, c.exonerado, c.total) == (Decimal("1000.00"), Decimal("180.00"), Decimal("100.00"), Decimal("1280.00"))
     assert c.detraccion == {"codigo": "022", "porcentaje": "12", "monto": "153.60", "cuenta": "00-000-123456"}
     assert c.concepto.startswith("Servicio de consultor")
-    assert c.datos_raw["emisor"]["doc"] == EMISOR and c.datos_raw["forma_pago"] == "Credito"
+    assert c.datos_originales["emisor"]["doc"] == EMISOR and c.datos_originales["forma_pago"] == "Credito"
     assert c.condicion_pago == "credito"                     # la forma de pago pasa al registro
     assert c.origen == "xml" and c.confianza == Decimal("1.00") and c.archivo_nombre == "F001-123.xml"
     validar.revisar([c], VENTAS)
@@ -55,7 +55,7 @@ def test_boleta_con_dni_y_latin1():
     assert (c.tipo_cp, c.serie, c.numero) == ("03", "B001", "55")
     assert (c.contraparte_tipo_doc, c.contraparte_doc) == ("1", "12345678")
     assert c.contraparte_nombre == "APELLIDO DE PRUEBA, ÁNGEL"   # con tilde: es lo que prueba el latin-1
-    assert c.fecha_vencimiento is None and c.datos_raw["forma_pago"] == "Contado"
+    assert c.fecha_vencimiento is None and c.datos_originales["forma_pago"] == "Contado"
     assert c.condicion_pago == "contado"
     assert (c.base_gravada, c.igv, c.total) == (Decimal("100.00"), Decimal("18.00"), Decimal("118.00"))
     validar.revisar([c], VENTAS)
@@ -66,7 +66,7 @@ def test_nota_de_credito():
     c = xml_ubl.parsear(leer("20131312955-07-FC01-7.xml"), "venta")
     assert (c.tipo_cp, c.serie, c.numero) == ("07", "FC01", "7")
     assert (c.ref_tipo_cp, c.ref_serie, c.ref_numero, c.ref_fecha) == ("01", "F001", "123", None)
-    assert c.datos_raw["motivo_nota"]["codigo"] == "01"
+    assert c.datos_originales["motivo_nota"]["codigo"] == "01"
     assert (c.base_gravada, c.igv, c.total) == (Decimal("200.00"), Decimal("36.00"), Decimal("236.00"))
     validar.revisar([c], VENTAS)
     assert [o.codigo for o in c.observaciones] == ["NOTA_SIN_FECHA_REF"]   # el XML no trae la fecha del doc modificado
@@ -177,4 +177,4 @@ def test_sin_descuento_los_dos_campos_quedan_en_cero():
 def test_sin_forma_de_pago_la_condicion_queda_vacia():
     """Vacío no es contado: es que el documento no lo dice. La nota de crédito de prueba no la trae."""
     c = xml_ubl.parsear(leer("20131312955-07-FC01-7.xml"), "venta", "FC01-7.xml")
-    assert c.datos_raw["forma_pago"] == "" and c.condicion_pago == ""
+    assert c.datos_originales["forma_pago"] == "" and c.condicion_pago == ""

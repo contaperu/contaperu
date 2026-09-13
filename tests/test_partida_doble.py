@@ -10,8 +10,9 @@ from contaperu import asiento as asi
 from contaperu import partida_doble
 from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Comprobante, Libro
+from util import comprobante, con_imputaciones
 
-CONTAB = asi.config_de(None)
+CONTAB = con_imputaciones(asi.config_de(None))
 MES = (date(2026, 8, 1), date(2026, 8, 31))
 
 
@@ -57,7 +58,7 @@ def test_el_asiento_real_siempre_cuadra():
                     base_gravada="100", igv="18", total="118",
                     cuenta_contable="659999", centro_costo="CC-01")
         base.update(k)
-        return Comprobante(**base)
+        return comprobante(**base)
 
     casos = {
         "factura": cp(),
@@ -77,7 +78,7 @@ def test_el_driver_se_niega_a_escribir_un_asiento_descuadrado(monkeypatch):
     """La red de seguridad de verdad: si el asiento no cierra, no se escribe el archivo."""
     libro = Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA SAC",
                   periodo="202608", tipo="compra")
-    c = Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-08-11",
+    c = comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-08-11",
                     contraparte_doc="20601111111", base_gravada="100", igv="18", total="118",
                     cuenta_contable="659999", centro_costo="OBRA01")   # con centro: este test es del descuadre
 
