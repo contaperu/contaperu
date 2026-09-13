@@ -159,7 +159,7 @@ de compras con el asiento cuadrado.
 
 `diagnosticar` es la operación pensada para que un agente —o una persona con prisa— pregunte **antes**
 de exportar y reciba, en una sola respuesta: si el mes está listo y por qué no, qué bloquea y qué avisa
-por serie-número, qué falta para el destino (cuenta, centro de costo, tipos sin equivalencia, monedas,
+por serie-número, qué falta para el destino (cuenta, centro de costo, tipos sin sigla, monedas,
 correlativos), qué detracciones esperan constancia, el resumen por contraparte y desde qué correlativo
 arranca cada sub-diario. No corrige ni inventa: describe. Está en la fachada, en el MCP y en la CLI, y
 no añade ninguna regla contable —reúne comprobaciones que ya existían y las cuenta en vez de lanzarlas.
@@ -178,7 +178,7 @@ tienen fuente**, nunca con una regla nueva escrita para el agente.
 1. **Ninguna regla contable sin fuente.** La norma, la resolución o el archivo real que la justifica va
    al lado, en el código. Un refactor mueve reglas; no las escribe.
 2. **El Excel de CONCAR validado no cambia.** `test_snapshot_concar.py` lo vigila celda a celda.
-3. **Un tipo sin equivalencia detiene la exportación.** Nunca se inventa una sigla.
+3. **Un tipo sin sigla detiene la exportación.** Nunca se inventa una sigla.
 4. **Sin red, sin disco, sin estado, sin reloj en el núcleo.** `test_frontera.py` y `conftest.py`.
 5. **`Decimal` de punta a punta**, `float` solo en el borde de escritura del archivo.
 6. **Nunca datos reales en el repositorio.** Dos RUC seguros: `20131312955` y `20601234567`.

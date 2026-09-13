@@ -123,7 +123,7 @@ Los nombres del núcleo:
 | `merge_config`, `resolve_cxp_account`, `resolve_cxp_detraccion_account` | `fundir_config`, `cuenta_por_pagar`, `cuenta_por_pagar_detraccion` |
 | `build_xlsx`, `DRIVER_DEFAULT` | `escribir_xlsx`, `DRIVER_POR_DEFECTO` |
 | `fmt_fecha`, `fmt_monto`, `fmt_tc`, `fmt_numero` | `formatear_fecha`, `formatear_monto`, `formatear_cambio`, `formatear_numero` |
-| `filas_sin_cuenta`, `filas_sin_centro`, `tipos_sin_mapa` | `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_equivalencia` |
+| `filas_sin_cuenta`, `filas_sin_centro`, `tipos_sin_mapa` | `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_sigla` |
 | `cuenta_gasto`, `cuenta_venta`, `cuenta_de_fila` | fuera: la cuenta de la base la resuelve `partes_de` |
 | `asiento_neutral(c, contab, mes, numero_comprobante, op, venta)`, `mes_del_libro` | `lineas_del_comprobante(c, config, limites, correlativo, opciones, es_venta)`, `limites_del_periodo` |
 | `contrato.necesita_config`, `necesita_asiento`, `EXIGE_POSIBLES`, `EXIGE_NUCLEO` | `lleva_cuentas`, `arma_asientos`, `EXIGE_POSIBLES_ASIENTO`, `EXIGE_NUCLEO_ASIENTO` |
@@ -136,7 +136,7 @@ Los nombres del núcleo:
 | `xml_ubl.parsear(data, tipo_libro)` | `parsear(datos, libro)`, como el lector del SIRE |
 | `lectores.archivos.Resultado`, `partida_doble.Resultado`, `pcge.cargar`, `pcge.catalogo.cargar` | `ResultadoLectura`, `Cuadre`, `cargar_equivalencias`, `cargar_catalogo` |
 | `asiento.REQUISITO_DE`, `operaciones.TEXTO_FALTANTE` | `asiento.FALTAS` (y `asiento.FALTA`, por clave) |
-| `TipoSinMapa`, `CorrelativoFaltante` | `TipoSinEquivalencia`, `SubDiarioSinCorrelativo` |
+| `TipoSinMapa`, `CorrelativoFaltante`, `MonedaSinCodigo` | `SinSigla`, `SinCorrelativo`, `SinCodigoDeMoneda` |
 | `RepartoNoCuadra` y `RepartoNoAdmitido` heredan de `SinCuenta` | todas las excepciones de exportar heredan de `NoExportable` |
 | `asiento.D2` | `modelo.CENTIMO` |
 
@@ -144,15 +144,15 @@ Las respuestas de la fachada, el MCP y la CLI (las herramientas, sus parámetros
 
 | Antes | Después |
 |---|---|
-| `faltantes`: `sin_centro_de_costo`, `tipos_sin_equivalencia`, `monedas_sin_codigo`, `sub_diarios_sin_correlativo`, `reparto_no_cuadra`, `no_caben` | `sin_centro`, `tipo_sin_equivalencia`, `moneda_sin_codigo`, `sub_diario_sin_correlativo`, `reparto_que_no_cuadra`, `no_cabe` (también en `que_falta[].motivo`) |
+| `faltantes`: `sin_centro_de_costo`, `tipos_sin_equivalencia`, `monedas_sin_codigo`, `sub_diarios_sin_correlativo`, `reparto_no_cuadra`, `no_caben` | con `sin_*`, como el modal de contab-core: `sin_centro`, `sin_sigla`, `sin_codigo_de_moneda`, `sin_correlativo`, `reparto_que_no_cuadra`, `no_cabe` (también en `que_falta[].motivo`) |
 | `exportar.filas` | `exportar.comprobantes` |
 | `fuera_del_registro`, en el resumen y en `diagnosticar.totales` | `fuera_del_destino` |
 | `con_avisos`, `con_errores` en el resumen | `con_aviso`, `con_error`, como en `diagnosticar` |
 | `_revision.total`, `_revision.bloquean_la_exportacion` | `_revision.comprobantes`, `_revision.bloqueantes` |
 | el resumen de CONCAR `filas_excel`; por sub-diario `n`, `desde_cod`, `hasta_cod` | `filas`; `comprobantes`, `desde_codigo`, `hasta_codigo` |
 
-`por_que_no` y la lista de la CLI siguen el orden de `asiento.FALTAS`: tipo, moneda, reparto no admitido, cuenta,
-reparto que no cuadra y centro.
+`por_que_no` y la lista de la CLI siguen el orden de `asiento.FALTAS`: sigla, código de moneda, reparto no admitido,
+cuenta, reparto que no cuadra y centro.
 
 ### Retirado
 - `Opciones.correlativo` (el campo 3 del PLE), `formato.fmt_fecha_libre` y `drivers.csv.construir`, que además se

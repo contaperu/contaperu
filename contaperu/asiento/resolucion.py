@@ -16,7 +16,7 @@ from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..igv import base_imputable
 from ..modelo import Comprobante, Libro, a_decimal
 from .configuracion import CONFIG_POR_DEFECTO
-from .faltas import FALTAS, SubDiarioSinCorrelativo, TipoSinEquivalencia
+from .faltas import FALTAS, SinCorrelativo, SinSigla
 from .imputacion import Imputacion
 
 
@@ -162,7 +162,7 @@ def sub_diario(c: Comprobante, config: dict, es_venta: bool = False) -> str:
                or CONFIG_POR_DEFECTO["sub_diario_compras"])
 
 
-def tipos_sin_equivalencia(comprobantes: list[Comprobante], config: dict) -> list[str]:
+def tipos_sin_sigla(comprobantes: list[Comprobante], config: dict) -> list[str]:
     """Códigos SUNAT presentes que no tienen sigla configurada (en orden de aparición)."""
     vistos: list[str] = []
     for c in comprobantes:
@@ -281,9 +281,9 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
     """
     salida: dict[str, list] = {}
     if "tipo_cp" in exige:
-        salida["tipo_sin_equivalencia"] = tipos_sin_equivalencia(comprobantes, config)
+        salida["sin_sigla"] = tipos_sin_sigla(comprobantes, config)
     if "moneda" in exige:
-        salida["moneda_sin_codigo"] = monedas_sin_codigo(comprobantes, config)
+        salida["sin_codigo_de_moneda"] = monedas_sin_codigo(comprobantes, config)
     if "cuenta_unica" in exige:
         salida["reparto_no_admitido"] = con_reparto(comprobantes, config)
     if "cuenta_contable" in exige:
@@ -297,7 +297,7 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
 def exigir_requisitos(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
                       exige: frozenset[str] | set[str] = frozenset()) -> None:
     """Hace cumplir `faltantes_para`: la primera falta, en el orden de `FALTAS` (tipo → moneda → reparto no admitido →
-    cuenta → reparto que no cuadra → centro), detiene la exportación con su excepción. Un tipo sin equivalencia no se
+    cuenta → reparto que no cuadra → centro), detiene la exportación con su excepción. Un tipo sin sigla no se
     inventa."""
     falta = faltantes_para(comprobantes, config, es_venta, exige)
     for regla in FALTAS:
@@ -313,13 +313,13 @@ def numerar(comprobantes: list[Comprobante], config: dict, periodo: str,
     recibido (el natural del registro). Devuelve también el rango usado por sub-diario,
     que es lo que se recuerda para proponer el siguiente."""
     mes_mm = str(periodo)[4:6]
-    sin_equivalencia = tipos_sin_equivalencia(comprobantes, config)
+    sin_equivalencia = tipos_sin_sigla(comprobantes, config)
     if sin_equivalencia:
-        raise TipoSinEquivalencia(sin_equivalencia)
+        raise SinSigla(sin_equivalencia)
     presentes = sub_diarios_presentes(comprobantes, config, es_venta)
     faltan = [s for s in presentes if s not in correlativos]
     if faltan:
-        raise SubDiarioSinCorrelativo(faltan)
+        raise SinCorrelativo(faltan)
     contadores = {s: int(correlativos[s]) for s in presentes}
     if any(n < 1 for n in contadores.values()):
         raise ValueError("Los correlativos empiezan en 1")

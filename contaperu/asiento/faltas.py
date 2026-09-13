@@ -31,20 +31,20 @@ class NoExportable(Exception):
         self.comprobantes = list(comprobantes or [])
 
 
-class TipoSinEquivalencia(NoExportable):
-    """Comprobantes cuyo tipo SUNAT no tiene sigla configurada (`tipos.NN.sigla`): no se inventa una."""
+class SinSigla(NoExportable):
+    """Comprobantes de un tipo SUNAT sin sigla configurada (`tipos.NN.sigla`): no se inventa una."""
 
-    clave = "tipo_sin_equivalencia"
+    clave = "sin_sigla"
 
     def __init__(self, tipos: list[str]):
         super().__init__("Tipos SUNAT sin sigla configurada: " + ", ".join(tipos))
         self.tipos = tipos
 
 
-class MonedaSinCodigo(NoExportable):
+class SinCodigoDeMoneda(NoExportable):
     """Comprobantes en una moneda sin código en el sistema de destino (`monedas_codigo`)."""
 
-    clave = "moneda_sin_codigo"
+    clave = "sin_codigo_de_moneda"
 
     def __init__(self, monedas: list[str]):
         super().__init__("Monedas sin código en el sistema de destino: " + ", ".join(monedas))
@@ -98,10 +98,10 @@ class SinCentro(NoExportable):
                          comprobantes)
 
 
-class SubDiarioSinCorrelativo(NoExportable):
+class SinCorrelativo(NoExportable):
     """Sub-diarios presentes sin correlativo de partida: el asiento no se puede numerar."""
 
-    clave = "sub_diario_sin_correlativo"
+    clave = "sin_correlativo"
 
     def __init__(self, sub_diarios: list[str]):
         super().__init__("Falta el correlativo de los sub-diarios " + ", ".join(sub_diarios))
@@ -119,9 +119,9 @@ class Falta:
 
 
 FALTAS: tuple[Falta, ...] = (
-    Falta("tipo_sin_equivalencia", "tipo_cp", TipoSinEquivalencia,
-          "de un tipo sin equivalencia en el sistema de destino", SISTEMA, "Tipos sin equivalencia"),
-    Falta("moneda_sin_codigo", "moneda", MonedaSinCodigo,
+    Falta("sin_sigla", "tipo_cp", SinSigla,
+          "de un tipo sin sigla en el sistema de destino", SISTEMA, "Tipos sin sigla"),
+    Falta("sin_codigo_de_moneda", "moneda", SinCodigoDeMoneda,
           "en una moneda que el sistema de destino no admite", SISTEMA, "Monedas sin código"),
     Falta("reparto_no_admitido", "cuenta_unica", RepartoNoAdmitido,
           "con la base repartida entre varias cuentas, que el sistema de destino no admite", CONTADOR,
@@ -133,7 +133,7 @@ FALTAS: tuple[Falta, ...] = (
           "sin centro de costo en una cuenta que lo lleva", CONTADOR, "Sin centro de costo"),
     # Estas dos no bloquean por un requisito: el correlativo que falta arranca en 1, y lo que no cabe en el formato lo
     # declara el driver, con su motivo y su excepción (`contrato.NoCabe`).
-    Falta("sub_diario_sin_correlativo", "", SubDiarioSinCorrelativo, "sub-diarios sin correlativo", SISTEMA,
+    Falta("sin_correlativo", "", SinCorrelativo, "sub-diarios sin correlativo", SISTEMA,
           "Sub-diarios sin correlativo (arrancan en 1)"),
     Falta("no_cabe", "", None, "que el formato del destino no puede llevar", CONTADOR, "No cabe en el formato"),
 )

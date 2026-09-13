@@ -15,7 +15,7 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.faltas import MonedaSinCodigo
+from ...asiento.faltas import SinCodigoDeMoneda
 from ...asiento.lineas import LineaDiario
 from ...asiento.motor import lineas_del_comprobante, glosa_de
 from ...formato import Opciones
@@ -30,7 +30,7 @@ def codigo_moneda(moneda: str, config: dict) -> str:
     moneda = (moneda or "PEN").upper()
     codigo = (config.get("monedas_codigo") or {}).get(moneda)
     if not codigo:
-        raise MonedaSinCodigo([moneda])
+        raise SinCodigoDeMoneda([moneda])
     return codigo
 
 

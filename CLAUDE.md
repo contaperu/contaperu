@@ -60,7 +60,7 @@ Las siete reglas completas están en `ARQUITECTURA.md` §«Lo que no se negocia�
 1. **Ninguna regla contable sin fuente.** La norma, la resolución o el archivo real va al lado, en el código. Un
    refactor mueve reglas; no las escribe.
 2. **El Excel de CONCAR validado no cambia.** `tests/test_snapshot_concar.py` lo vigila celda a celda (42 casos).
-3. **Un tipo sin equivalencia detiene la exportación.** Nunca se inventa una sigla.
+3. **Un tipo sin sigla detiene la exportación.** Nunca se inventa una sigla.
 4. **Sin red, sin disco, sin estado, sin reloj en el núcleo** (`tests/test_frontera.py`): la fecha la pone quien llama.
 5. **`Decimal` de punta a punta**, `float` solo en el borde de escritura del archivo.
 6. **Nunca datos reales en el repositorio.** RUC seguros: `20131312955` y `20601234567`. Un archivo real se usa solo

@@ -44,16 +44,16 @@ una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una cel
 CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()` y `lineas_del_libro()`.
 """
 from .configuracion import CONFIG_POR_DEFECTO, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
-from .faltas import (CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA, Falta, MonedaSinCodigo, NoExportable,
-                     RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCuenta, SubDiarioSinCorrelativo,
-                     TipoSinEquivalencia)
+from .faltas import (CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA, Falta, SinCodigoDeMoneda, NoExportable,
+                     RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCuenta, SinCorrelativo,
+                     SinSigla)
 from .resolucion import (comprobantes_sin_centro, comprobantes_sin_cuenta, con_reparto, config_aplicada,
                          correlativos_de_partida, cuenta_honorarios,
                          cuenta_por_pagar, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
                          etiquetas_sub_diario, exigir_requisitos, faltantes_para, fundir_config, imputacion_de,
                          limites_del_periodo, lleva_centro, monedas_sin_codigo, numerar, partes_de, reparto_no_cuadra,
                          repartos_que_no_cuadran, sigla_documento, sub_diario, sub_diarios_presentes,
-                         tiene_detraccion, tipos_sin_equivalencia)
+                         tiene_detraccion, tipos_sin_sigla)
 from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
@@ -61,13 +61,13 @@ from .motor import ROLES, glosa_de, lineas_del_comprobante, lineas_del_libro
 
 __all__ = [
     "CONFIG_POR_DEFECTO", "NUMERO_DETRACCION_PENDIENTE", "TIPO_DOC_DETRACCION", "CONTADOR", "FALTA", "FALTAS",
-    "PROVEEDOR", "SISTEMA", "Falta", "MonedaSinCodigo", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
-    "SinCentro", "SinCuenta", "SubDiarioSinCorrelativo", "TipoSinEquivalencia", "comprobantes_sin_centro",
+    "PROVEEDOR", "SISTEMA", "Falta", "SinCodigoDeMoneda", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
+    "SinCentro", "SinCuenta", "SinCorrelativo", "SinSigla", "comprobantes_sin_centro",
     "comprobantes_sin_cuenta", "con_reparto", "config_aplicada", "correlativos_de_partida", "cuenta_honorarios",
     "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo",
     "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para", "fundir_config", "imputacion_de",
     "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar", "partes_de", "reparto_no_cuadra",
     "repartos_que_no_cuadran", "sigla_documento", "sub_diario", "sub_diarios_presentes", "tiene_detraccion",
-    "tipos_sin_equivalencia", "huella", "Imputacion", "Parte", "LineaDiario", "ROLES", "glosa_de",
+    "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "ROLES", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro",
 ]

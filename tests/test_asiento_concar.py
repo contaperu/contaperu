@@ -73,7 +73,7 @@ def test_dolares_con_tipo_de_cambio_del_comprobante():
     assert usd[0]["G"] == 3.55 and usd[0]["H"] == "C"            # el T.C. de SUNAT del comprobante, conversión especial
     sin_tc = driver_concar.filas_de_comprobante(cp(moneda="USD"), CONTAB, MES, "080001")
     assert sin_tc[0]["G"] == "" and sin_tc[0]["H"] == "V"        # sin T.C. → CONCAR lo busca en su tabla
-    with pytest.raises(concar.MonedaSinCodigo) as e:
+    with pytest.raises(concar.SinCodigoDeMoneda) as e:
         driver_concar.filas_de_comprobante(cp(moneda="EUR"), CONTAB, MES, "080001")
     assert e.value.monedas == ["EUR"] and concar.monedas_sin_codigo([cp(moneda="EUR"), cp()], CONTAB) == ["EUR"]
 
@@ -424,12 +424,12 @@ def test_el_codigo_sunat_manda_y_lo_de_concar_se_deriva():
     assert concar.sigla_documento(luz, CONTAB) == "RC" and concar.sub_diario(luz, CONTAB) == "11"
     assert driver_concar.filas_de_comprobante(luz, CONTAB, MES, "080001")[0]["S"] == "12345" and len(driver_concar.filas_de_comprobante(luz, CONTAB, MES, "080001")) == 3
     bancario = cp(tipo_cp="13", serie="", numero="77")           # documento bancario: sin entrada por defecto
-    assert concar.sigla_documento(bancario, CONTAB) == "" and concar.tipos_sin_equivalencia([bancario, cp()], CONTAB) == ["13"]
-    with pytest.raises(concar.TipoSinEquivalencia) as e:
+    assert concar.sigla_documento(bancario, CONTAB) == "" and concar.tipos_sin_sigla([bancario, cp()], CONTAB) == ["13"]
+    with pytest.raises(concar.SinSigla) as e:
         driver_concar.construir(COMPRAS, [bancario], CONTAB, {"11": 1})
     assert e.value.tipos == ["13"]
     config = configuracion({"tipos": {"13": {"sigla": "DB", "sub_diario": "11"}, "01": {"sigla": "FA", "sub_diario": "12"}}})
-    assert concar.tipos_sin_equivalencia([bancario], config) == []
+    assert concar.tipos_sin_sigla([bancario], config) == []
     assert driver_concar.filas_de_comprobante(bancario, config, MES, "080001")[0]["R"] == "DB"
     assert driver_concar.filas_de_comprobante(cp(), config, MES, "080001")[0]["B"] == "12" and driver_concar.filas_de_comprobante(cp(), config, MES, "080001")[0]["R"] == "FA"
     assert concar.sub_diario(cp(tipo_cp="03"), config) == "13"   # lo no tocado conserva el default
@@ -472,7 +472,7 @@ def test_numerar_por_sub_diario_con_el_mes_del_periodo():
     assert [numeros[id(c)] for c in cs] == ["080020", "080001", "080021", "080005", "080008"]
     assert rangos["11"] == {"desde": 20, "hasta": 21, "comprobantes": 2, "desde_codigo": "080020", "hasta_codigo": "080021", "desborda": False}
     assert rangos["13"]["hasta"] == 1 and rangos["15"]["hasta"] == 5 and rangos["10"]["hasta"] == 8
-    with pytest.raises(concar.SubDiarioSinCorrelativo) as e:
+    with pytest.raises(concar.SinCorrelativo) as e:
         concar.numerar(cs, CONTAB, "202608", {"11": 20})
     assert e.value.sub_diarios == ["13", "15", "10"]
     _, r = concar.numerar(cs[:1], CONTAB, "202612", {"11": 9999})
@@ -527,7 +527,7 @@ def test_generar_con_plantilla_concar():
     assert expv.nombre == "CONCAR_20601111111_202608_VENTAS.xlsx" and expv.resumen["sub_diarios"]["05"]["etiqueta"] == "Ventas"
     with pytest.raises(concar.SinCuenta):
         gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", config=CONTAB, correlativos={"11": 1})
-    with pytest.raises(concar.MonedaSinCodigo):
+    with pytest.raises(concar.SinCodigoDeMoneda):
         gen.generar(COMPRAS, [cp(moneda="EUR")], "concar", config=CONTAB, correlativos={"11": 1})
 
 

@@ -145,7 +145,7 @@ def exige(modulo: Any) -> frozenset[str]:
 
 class NoCabe(NoExportable):
     """Comprobantes que el formato del destino no puede llevar, por motivo (lo dice el driver en `no_caben`). El
-    núcleo se niega antes de escribir nada, igual que con un tipo sin equivalencia."""
+    núcleo se niega antes de escribir nada, igual que con un tipo sin sigla."""
 
     clave = "no_cabe"
 

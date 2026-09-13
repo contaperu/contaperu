@@ -38,10 +38,10 @@ def test_un_mes_limpio_esta_listo_y_dice_que_saldria():
     assert d["sub_diarios"] == {"11": {"etiqueta": "Compras", "comprobantes": 2, "empieza_en": 1}}
     assert d["resumen_por_contraparte"]["20602222226"] == {
         "nombre": "PROVEEDOR DE PRUEBA SAC", "comprobantes": 2, "total": "5074.00", "moneda": "PEN"}
-    for clave in ("sin_cuenta", "sin_centro", "tipo_sin_equivalencia", "moneda_sin_codigo"):
+    for clave in ("sin_cuenta", "sin_centro", "sin_sigla", "sin_codigo_de_moneda"):
         assert d["faltantes"][clave] == []
     # Sin correlativos dados, lo dice —arrancaría en 1— pero no es motivo para no estar listo.
-    assert d["faltantes"]["sub_diario_sin_correlativo"] == ["11"]
+    assert d["faltantes"]["sin_correlativo"] == ["11"]
 
 
 def test_los_errores_bloquean_y_van_por_serie_numero():
@@ -66,9 +66,9 @@ def test_los_avisos_no_bloquean_pero_se_ven():
 
 @pytest.mark.parametrize("cambio,clave,motivo", [
     ({"cuenta_contable": ""}, "sin_cuenta", "sin cuenta contable"),
-    ({"tipo_cp": "13", "serie": "", "numero": "77"}, "tipo_sin_equivalencia",
-     "de un tipo sin equivalencia en el sistema de destino"),
-    ({"moneda": "EUR", "tipo_cambio": "4.1"}, "moneda_sin_codigo",
+    ({"tipo_cp": "13", "serie": "", "numero": "77"}, "sin_sigla",
+     "de un tipo sin sigla en el sistema de destino"),
+    ({"moneda": "EUR", "tipo_cambio": "4.1"}, "sin_codigo_de_moneda",
      "en una moneda que el sistema de destino no admite"),
     ({"centro_costo": ""}, "sin_centro", "sin centro de costo en una cuenta que lo lleva"),
 ])
@@ -103,7 +103,7 @@ def test_el_centro_de_costo_lo_para_el_driver_desde_la_0_8():
 def test_el_tipo_sin_equivalencia_no_se_confunde_con_falta_de_cuenta():
     """Un tipo sin mapa dice SU problema; no arrastra al resto de comprobaciones."""
     d = diagnosticar(doc(dict(FACTURA, tipo_cp="13", serie="", numero="77")))
-    assert d["faltantes"]["tipo_sin_equivalencia"] == ["13"]
+    assert d["faltantes"]["sin_sigla"] == ["13"]
     assert d["faltantes"]["sin_cuenta"] == [] and d["sub_diarios"] == {}
 
 
@@ -117,7 +117,7 @@ def test_los_correlativos_se_ensenan_antes_de_exportar():
     con_det = dict(FACTURA, numero="872", detraccion={"codigo": "027", "porcentaje": 4})
     d = diagnosticar(doc(FACTURA, con_det), correlativos={"11": 41})
     assert d["sub_diarios"]["11"]["empieza_en"] == 41 and d["sub_diarios"]["10"]["empieza_en"] == 1
-    assert d["faltantes"]["sub_diario_sin_correlativo"] == ["10"]     # informa; no bloquea
+    assert d["faltantes"]["sin_correlativo"] == ["10"]     # informa; no bloquea
     assert d["listo_para_exportar"] is True
 
 
@@ -175,7 +175,7 @@ def test_el_csv_no_bloquea_por_centro_ni_por_moneda():
     d = diagnosticar(doc(dict(FACTURA, centro_costo="", moneda="EUR", tipo_cambio="4.1")), driver="csv")
     assert d["exige"] == ["cuenta_contable", "tipo_cp"]
     assert d["listo_para_exportar"] is True and d["por_que_no"] == [] and d["que_falta"] == []
-    assert d["faltantes"]["moneda_sin_codigo"] == ["EUR"] and d["faltantes"]["sin_centro"] == ["E001-871"]
+    assert d["faltantes"]["sin_codigo_de_moneda"] == ["EUR"] and d["faltantes"]["sin_centro"] == ["E001-871"]
     # Y la exportación de verdad sale: el diagnóstico no dice nada que ella no haga.
     assert exportar(doc(dict(FACTURA, centro_costo="", moneda="EUR", tipo_cambio="4.1")), "csv")["archivo"].endswith(".csv")
 
@@ -186,10 +186,10 @@ def test_lo_que_falta_dice_a_quien_pedirselo():
     d = diagnosticar(doc(dict(FACTURA, igv="99", total="4299"),                    # el IGV no es el 18 %
                             dict(FACTURA, numero="872", cuenta_contable=""),
                             dict(FACTURA, numero="873", cuenta_contable=""),
-                            dict(FACTURA, tipo_cp="13", serie="", numero="77")))    # sin equivalencia
+                            dict(FACTURA, tipo_cp="13", serie="", numero="77")))    # sin sigla
     assert [(q["motivo"], q["comprobantes"], q["pedir_a"]) for q in d["que_falta"]] == [
         ("IGV_NO_CUADRA", ["E001-871"], "contador"),
-        ("tipo_sin_equivalencia", ["77"], "sistema"),
+        ("sin_sigla", ["77"], "sistema"),
         ("sin_cuenta", ["E001-872", "E001-873"], "contador"),
     ]
     assert d["que_falta"][1]["texto"].endswith(": 13")
@@ -214,7 +214,7 @@ def test_la_tabla_pedir_a_cubre_todos_los_codigos_de_validar():
     assert set(op.PEDIR_A.values()) <= {op.CONTADOR, op.SISTEMA, op.PROVEEDOR}
     # `proveedor` está reservado: el motor no puede afirmar que lo que falta esté en el papel.
     assert op.PROVEEDOR not in op.PEDIR_A.values()
-    for clave in ("sin_cuenta", "sin_centro", "tipo_sin_equivalencia", "moneda_sin_codigo"):
+    for clave in ("sin_cuenta", "sin_centro", "sin_sigla", "sin_codigo_de_moneda"):
         assert clave in op.PEDIR_A
 
 
@@ -224,9 +224,9 @@ def test_una_sola_tabla_de_faltas():
     from contaperu import asiento as asi
     from contaperu.drivers import concar, contrato
 
-    assert [f.clave for f in asi.FALTAS] == ["tipo_sin_equivalencia", "moneda_sin_codigo", "reparto_no_admitido",
+    assert [f.clave for f in asi.FALTAS] == ["sin_sigla", "sin_codigo_de_moneda", "reparto_no_admitido",
                                             "sin_cuenta", "reparto_que_no_cuadra", "sin_centro",
-                                            "sub_diario_sin_correlativo", "no_cabe"]
+                                            "sin_correlativo", "no_cabe"]
     for falta in asi.FALTAS:
         assert falta.texto and falta.titulo and falta.pedir_a == op.PEDIR_A[falta.clave]
         if falta.excepcion is not None:

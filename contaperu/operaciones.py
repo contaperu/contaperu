@@ -346,10 +346,10 @@ def _que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falt
         clave = falta.clave
         if not falta.requisito or falta.requisito not in exige or not faltantes.get(clave):
             continue
-        if clave == "tipo_sin_equivalencia":
+        if clave == "sin_sigla":
             cuales = [_serie_numero(c) for c in candidatos if c.tipo_cp in faltantes[clave]]
             texto = f"{falta.texto}: {', '.join(faltantes[clave])}"
-        elif clave == "moneda_sin_codigo":
+        elif clave == "sin_codigo_de_moneda":
             cuales = [_serie_numero(c) for c in candidatos if c.moneda in faltantes[clave]]
             texto = f"{falta.texto}: {', '.join(faltantes[clave])}"
         else:
@@ -367,7 +367,7 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
     Es la operación pensada para un agente —o para una persona con prisa—: en vez de lanzar la
     exportación y ver qué excepción salta a mitad de camino, responde de una vez qué bloquea, qué
     falta y qué saldría. No añade ninguna regla contable: reúne comprobaciones que ya existen
-    (`validar.revisar`, `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_equivalencia`,
+    (`validar.revisar`, `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_sigla`,
     `monedas_sin_codigo`, la numeración por sub-diario) y las cuenta por su serie-número.
 
     Pura y sin estado. **No lanza** por lo que le falte al mes: lo describe. Solo rechaza un
@@ -399,7 +399,7 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
         mirar |= {"cuenta_contable", "centro_costo"}
     if drivers.contrato.arma_asientos(modulo):
         mirar |= {"tipo_cp", "moneda"}
-    codigos = ("tipo_sin_equivalencia", "moneda_sin_codigo")      # se dicen por su código, no por comprobante
+    codigos = ("sin_sigla", "sin_codigo_de_moneda")      # se dicen por su código, no por comprobante
     faltantes: dict[str, Any] = {clave: cuales if clave in codigos else [_serie_numero(c) for c in cuales]
                                  for clave, cuales in asi.faltantes_para(candidatos, config, es_venta, mirar).items()}
     if drivers.contrato.lleva_cuentas(modulo) and callable(getattr(modulo, "no_caben", None)):
@@ -407,10 +407,10 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
                                  in drivers.contrato.no_caben(modulo, libro, candidatos, config).items()}
     sub_diarios: dict[str, Any] = {}
     if drivers.contrato.arma_asientos(modulo):
-        con_equivalencia = [c for c in candidatos if c.tipo_cp not in faltantes["tipo_sin_equivalencia"]]
+        con_equivalencia = [c for c in candidatos if c.tipo_cp not in faltantes["sin_sigla"]]
         presentes = asi.sub_diarios_presentes(con_equivalencia, config, es_venta)
         corr = asi.correlativos_de_partida(con_equivalencia, config, es_venta, correlativos)
-        faltantes["sub_diario_sin_correlativo"] = [s for s in presentes if s not in (correlativos or {})]
+        faltantes["sin_correlativo"] = [s for s in presentes if s not in (correlativos or {})]
         etiquetas = asi.etiquetas_sub_diario(config)
         sub_diarios = {s: {"etiqueta": etiquetas.get(s, s), "comprobantes": n, "empieza_en": corr[s]}
                        for s, n in presentes.items()}

@@ -183,7 +183,7 @@ Y **la partida doble**, sin tolerancia: un céntimo de diferencia detiene la exp
 genérico con las líneas de diario, para cualquier destino que todavía no tenga driver.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta
-para el sistema de destino (cuenta, centro de costo, tipos sin equivalencia, monedas, correlativos),
+para el sistema de destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos),
 qué detracciones esperan constancia y qué saldría. Una sola respuesta, por serie-número, sin corregir
 ni inventar nada.
 
