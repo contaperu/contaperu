@@ -57,6 +57,22 @@ def test_las_columnas_son_las_de_la_plantilla(tipo):
     assert [(letra, clase, largo) for letra, _, clase, largo in D.COLUMNAS[tipo]] == de_la_plantilla
 
 
+@pytest.mark.parametrize("tipo", ["compra", "venta"])
+def test_ninguna_columna_es_mas_angosta_que_en_la_plantilla(tipo):
+    """Los anchos del driver parten de los de la plantilla oficial: ninguno queda por debajo."""
+    openpyxl = pytest.importorskip("openpyxl")
+    from openpyxl.utils import get_column_letter
+
+    ws = openpyxl.load_workbook(PRIVADO / PLANTILLAS[tipo]).active
+    for dimension in ws.column_dimensions.values():
+        if not dimension.width:
+            continue
+        for i in range(dimension.min, dimension.max + 1):
+            letra = get_column_letter(i)
+            if letra in D.ANCHOS[tipo]:
+                assert D.ANCHOS[tipo][letra] >= round(dimension.width, 2) - 0.01, f"{letra}: más angosta que en la plantilla"
+
+
 def _forma(valor) -> str | None:
     """None para lo vacío (una celda vacía o solo espacios); si no, la clase de la celda."""
     if valor is None or (isinstance(valor, str) and not valor.strip()):

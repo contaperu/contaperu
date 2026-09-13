@@ -39,6 +39,10 @@ def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     assert ws["J1"].value == 100 and ws["J1"].number_format == "#,##0.00"
     assert ws["W1"].value == 1 and ws["W1"].number_format == "#,##0.0000"
     assert ws["C1"].number_format == "@" and ws["L1"].value is None and ws["AK1"].value is None
+    # Cada columna con su ancho, para que el archivo se lea al abrirlo: las fechas, el nombre y los importes caben.
+    anchos = contasis.datos.ANCHOS["compra"]
+    assert all(abs(ws.column_dimensions[letra].width - anchos[letra]) < 0.01 for letra, *_ in contasis.datos.COMPRAS)
+    assert anchos["B"] >= 12 and anchos["I"] >= 38 and anchos["K"] >= 12 and anchos["AS"] >= 26
     ventas = op.exportar(doc(dict(FACTURA, cuenta_contable="701101"), tipo="venta"), "contasis", CONTAB)
     assert hoja(ventas).title == "FORMATO_VENTAS" and ventas["archivo"].endswith("_VENTAS.xlsx")
 

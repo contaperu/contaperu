@@ -27,7 +27,9 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
   - la nota de crédito en negativo, el % IGV legal y la glosa cortada a 60;
   - la boleta de compras, entera en no gravadas, y la detracción vacía;
   - el recibo por honorarios queda fuera del archivo (`EXCLUYE_TIPOS`);
-  - una cuenta por documento (`cuenta_unica`) y el medio de pago del entorno (`medio_pago`, `001` de fábrica).
+  - una cuenta por documento (`cuenta_unica`) y el medio de pago del entorno (`medio_pago`, `001` de fábrica);
+  - anchos de columna para que el archivo se lea al abrirlo: los de la plantilla, los que ensanchó John al revisar
+    el primer archivo generado, y ninguna fecha por debajo de lo que la deja ver.
 
   Lo que no cabe —otra moneda, dólares sin T.C., un rango de boletas, IVAP, un código más largo que su columna— lo
   dice `no_caben`. `tests/test_snapshot_contasis.py` congela las filas celda a celda, y

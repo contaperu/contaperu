@@ -22,6 +22,8 @@ def build_xlsx(libro: Libro, filas: list[dict[str, Any]]) -> bytes:
     ws = wb.active
     ws.title = datos.HOJAS[libro.tipo]
     columnas = datos.COLUMNAS[libro.tipo]
+    for letra, _, _, _ in columnas:
+        ws.column_dimensions[letra].width = datos.ANCHOS[libro.tipo][letra]
     for n, fila in enumerate(filas, start=1):
         for letra, _, clase, _ in columnas:
             valor = fila.get(letra)
