@@ -89,7 +89,7 @@ llave**; desde la fachada, es el argumento `imputacion` de `exportar`, `diagnost
 ## Dos familias de salida, un solo documento
 
 - **Registro** — una fila por comprobante, sin asiento: el TXT del SIRE, y los sistemas contables que
-  importan su registro de compras y de ventas y arman el asiento ellos mismos (CONTASIS, en construcción).
+  importan su registro de compras y de ventas y arman el asiento ellos mismos (CONTASIS).
 - **Asiento** — el núcleo convierte los registros en líneas de diario una sola vez y el driver las traduce:
   el Excel de CONCAR, el CSV y los sistemas que importan asientos.
 

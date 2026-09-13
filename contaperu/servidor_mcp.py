@@ -259,6 +259,8 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
       - `sire`   — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el contenido
                    va en `texto` y el ZIP que sube a SUNAT, adjunto.
       - `csv`    — las líneas de diario en columnas, en `texto` y también adjunto.
+      - `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como `.xlsx`:
+                   una fila por comprobante, sin sub-diario (se elige al importar).
 
     Antes de escribir nada comprueba que el asiento cuadre; si no cuadra, falla.
     """

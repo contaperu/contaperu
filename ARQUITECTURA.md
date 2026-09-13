@@ -56,8 +56,8 @@ XML UBL / TXT del SIRE / JSON pe-ledger
 
 Aparte va la familia **registro**: una fila por comprobante, sin asiento, así que sus drivers no pasan por el
 motor. El SIRE es un registro tributario y se escribe desde el comprobante (`linea(c, libro, idx, op)`). Un
-sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS, en
-construcción) recibe los comprobantes con la configuración (`desde_comprobantes`) y lleva cuentas, pero no las
+sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS, pendiente
+de aceptación) recibe los comprobantes con la configuración (`desde_comprobantes`) y lleva cuentas, pero no las
 decide: las lee de `asiento.partes_de` y `asiento.cuenta_tercero`, la misma resolución que usa el motor para el
 asiento de CONCAR.
 
@@ -121,7 +121,7 @@ de dos familias (`drivers/contrato.py`):
 | Forma | Recibe | Para qué |
 |---|---|---|
 | `linea(c, libro, idx, op) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
-| `desde_comprobantes(libro, comprobantes, contab, op)` | los comprobantes y la configuración, con la imputación de cada documento | el registro de un sistema contable que arma el asiento él mismo (CONTASIS, en construcción) |
+| `desde_comprobantes(libro, comprobantes, contab, op)` | los comprobantes y la configuración, con la imputación de cada documento | el registro de un sistema contable que arma el asiento él mismo (CONTASIS, pendiente de aceptación) |
 | `construir(libro, comprobantes, contab, correlativos, op)` | los comprobantes | un archivo armado desde el comprobante (CONCAR, por historia) |
 | `desde_lineas(libro, lineas, contab, op)` | las **líneas neutrales**, ya numeradas y cuadradas | **un driver de asientos nuevo** |
 
@@ -186,8 +186,9 @@ tienen fuente**, nunca con una regla nueva escrita para el agente.
 
 ## Hoja de ruta
 
-- **Nivel 1 — compatibilidad con lo que existe** (prioridad hoy): CONCAR y SIRE listos; SISCONT,
-  STARSOFT y CONTASIS abiertos a la comunidad, por entry points, con un archivo real cada uno.
+- **Nivel 1 — compatibilidad con lo que existe** (prioridad hoy): CONCAR y SIRE listos; CONTASIS
+  escrito y pendiente de aceptación; SISCONT y STARSOFT abiertos a la comunidad, por entry points, con un
+  archivo real cada uno.
 - **Nivel 2 — un lenguaje común**: cuando aparezcan más aplicaciones peruanas especializadas
   (compras, tesorería, logística), todas necesitarán representar facturas, proveedores, centros de
   costo, impuestos y asientos. `pe-ledger` ya es ese idioma intermedio; crecerá con casos reales

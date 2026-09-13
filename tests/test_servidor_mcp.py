@@ -114,7 +114,7 @@ def test_los_recursos_son_legibles():
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
     assert catalogos["tipos_comprobante"]["01"] == "Factura"
     drivers = json.loads(leer_recurso("contaperu://drivers"))
-    assert set(drivers) == {"sire", "concar", "csv"}
+    assert set(drivers) == {"sire", "concar", "csv", "contasis"}
     assert drivers["concar"]["tipo"] == "archivo" and drivers["sire"]["tipo"] == "texto"
     assert drivers["sire"]["familia"] == "registro" and drivers["csv"]["familia"] == "asiento"
     pcge = json.loads(leer_recurso("contaperu://catalogos/pcge2026"))

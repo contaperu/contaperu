@@ -8,8 +8,7 @@ salida, un solo documento»)—, y hay cuatro formas de driver. Un driver implem
 - **`linea(c, libro, idx, op) -> str`** — un archivo de texto, una línea por comprobante. Es el TXT
   del SIRE: un registro tributario, que se escribe desde el comprobante y no lleva cuentas.
 - **`desde_comprobantes(libro, comprobantes, contab, op) -> (bytes, resumen)`** — el archivo de un sistema
-  contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS, en
-  construcción). Recibe los comprobantes y la configuración, con la imputación de cada documento dentro, y
+  contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS). Recibe los comprobantes y la configuración, con la imputación de cada documento dentro, y
   **no decide ninguna cuenta**: las lee de `asiento.partes_de` (la de la base, o sus partes si hay reparto) y
   de `asiento.cuenta_tercero` (la del total), que las resuelven igual que para el asiento de CONCAR. No numera:
   el correlativo es del asiento, y el asiento lo arma el destino. El núcleo exige la cuenta ANTES de llamarlo.

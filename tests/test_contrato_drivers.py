@@ -54,12 +54,14 @@ def test_la_forma_de_cada_driver_de_serie():
     assert contrato.forma(drivers.concar) == "construir"
     # El CSV expone las dos de archivo (conserva `construir` por compatibilidad): gana la nueva.
     assert contrato.forma(drivers.csv) == "desde_lineas"
+    assert contrato.forma(drivers.contasis) == "desde_comprobantes"
 
 
 def test_lo_que_exige_cada_driver_de_serie():
     """`exige` = lo del núcleo (cuenta y tipo con equivalencia) más lo que el driver declara."""
     assert contrato.exige(drivers.concar) == {"cuenta_contable", "tipo_cp", "centro_costo", "moneda"}
     assert contrato.exige(drivers.csv) == {"cuenta_contable", "tipo_cp"}
+    assert contrato.exige(drivers.contasis) == {"cuenta_contable", "cuenta_unica"}
     assert contrato.exige(drivers.sire) == frozenset() and not hasattr(drivers.sire, "EXIGE")
 
 

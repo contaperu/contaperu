@@ -221,7 +221,8 @@ Lo que se tomó de QuickBooks, Xero y las APIs unificadas de EE. UU. —y lo que
 | Contrato de driver y drivers de terceros por *entry points* | listo |
 | Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
-| Drivers de CONTASIS, SISCONT y STARSOFT | abierto a la comunidad — ver [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Driver CONTASIS (registro de compras y de ventas en Excel) | escrito contra la plantilla oficial y un registro que CONTASIS importó; **pendiente de que CONTASIS importe un archivo generado** |
+| Drivers de SISCONT y STARSOFT | abierto a la comunidad — ver [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ### Sobre el PCGE 2026
 

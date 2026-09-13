@@ -33,7 +33,7 @@ publicar**: subirlo a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y
 
 Tres niveles, de abajo arriba: un **núcleo** que sabe contabilidad peruana y nada más (`modelo`, `lectores`,
 `validar`, `asiento`, `igv`, `detracciones`, `partida_doble`, `pcge`); **drivers** que conocen el formato de un
-destino y nada de contabilidad (`drivers/concar`, `drivers/sire`, `drivers/csv`, y los de terceros por *entry
+destino y nada de contabilidad (`drivers/concar`, `drivers/sire`, `drivers/csv`, `drivers/contasis`, y los de terceros por *entry
 points*, con el contrato de `drivers/contrato.py`); y encima la capa para **agentes** (`operaciones`,
 `servidor_mcp`, `cli`; `diagnosticar` es su primera pregunta). El asiento nace en las **líneas de diario neutrales**
 del estándar `pe-ledger` y cada ERP es una proyección de ellas: un driver nuevo solo traduce vocabulario. Todo esto,
@@ -103,7 +103,9 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 
 ## Pendiente que depende de datos, no de código
 
-- Drivers de **SISCONT, STARSOFT y CONTASIS**: cada uno exige un archivo real que ese sistema haya importado.
+- Drivers de **SISCONT y STARSOFT**: cada uno exige un archivo real que ese sistema haya importado. El de
+  **CONTASIS** está escrito contra su plantilla oficial y un registro que CONTASIS importó; falta que importe un
+  archivo generado por el driver.
 - **Conciliación de constancias de detracción**: un archivo real del Banco de la Nación.
 - **Equivalencias del PCGE 2026**: con la cita del artículo al lado de cada mapeo; el cargador rechaza un mapeo sin
   fuente.

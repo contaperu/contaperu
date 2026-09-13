@@ -1,13 +1,16 @@
 """Registro de drivers de salida. Un driver traduce el asiento —o el registro— al formato que
 importa un sistema contable concreto. Lo que tiene que exponer está en `contrato.py`.
 
-Los tres que vienen de serie salen de la contabilidad peruana real:
+Los cuatro que vienen de serie salen de la contabilidad peruana real:
 
 - **`sire`** — el TXT que se sube a SUNAT para reemplazar la propuesta del Registro de Ventas
   (RVIE) o de Compras (RCE). Es lo que la norma exige hoy: el PLE quedó reemplazado por el SIRE
   para estos dos registros.
 - **`concar`** — el Excel de asientos que importa CONCAR, uno de los sistemas contables más
   usados del país.
+- **`contasis`** — el registro de compras o de ventas en Excel que importa CONTASIS, que arma el
+  asiento él mismo: una fila por comprobante. Escrito contra su plantilla oficial y un registro que
+  CONTASIS importó; pendiente de que importe un archivo generado.
 - **`csv`** — las líneas de diario neutrales, para quien todavía no tiene driver.
 
 **Drivers de terceros, sin tocar este repositorio.** Un paquete instalado que declare en su
@@ -28,14 +31,15 @@ import warnings
 from importlib.metadata import entry_points
 from types import ModuleType
 
-from . import concar, contrato, csv, sire
+from . import concar, contasis, contrato, csv, sire
 from ..formato import Opciones
 
 GRUPO = "contaperu.drivers"
-DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv}
+DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
+                                   contasis.NOMBRE: contasis}
 DRIVER_DEFAULT = "sire"
 
-__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_DEFAULT", "GRUPO", "AvisoDriver", "Opciones", "concar",
+__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_DEFAULT", "GRUPO", "AvisoDriver", "Opciones", "concar", "contasis",
            "contrato", "csv", "de_terceros", "formato", "obtener", "recargar", "sire"]
 
 

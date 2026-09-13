@@ -4,7 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [0.10.0] — sin etiquetar: espera a que CONTASIS importe un archivo generado
+
+**CONTASIS entra como driver de serie**, con lo que hizo falta para que un segundo sistema contable salga del mismo
+documento que CONCAR. CONTASIS importa su registro de compras y de ventas —una fila por comprobante, con la cuenta
+de la base y la del total— y arma el asiento él mismo: cada columna sale de la misma función del núcleo que usa el
+asiento de CONCAR, y ningún driver decide una cuenta.
 
 **El documento lleva los hechos; las cuentas llegan aparte.** Decisión de John (12-sep-2026) al integrar CONTASIS:
 el JSON universal `pe-ledger` es el riel que recibe cualquier input, y las cuentas contables viven en la
@@ -13,6 +18,21 @@ tres piezas: el documento, la imputación de cada documento y la configuración.
 los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. El estándar sigue en `0.2`.
 
 ### Añadido
+- **El driver `contasis`** (`drivers/contasis/`): el Excel de «FORMATO REGISTRO DE COMPRAS» y «FORMATO REGISTRO DE
+  VENTAS» del Sistema Experto Contable 26.00 (NewContaSis), con sus 50 y 44 columnas transcritas de la plantilla
+  oficial, sin sus filas de notas y con su pestaña. Las reglas de formato las revisó John contra un registro que
+  CONTASIS importó (12-sep-2026):
+  - textos rellenos con espacios hasta su largo, y serie y número sin ceros a la izquierda;
+  - importes en soles: en dólares, cada columna × T.C. y el total en «equivalente en dólares»;
+  - la nota de crédito en negativo, el % IGV legal y la glosa cortada a 60;
+  - la boleta de compras, entera en no gravadas, y la detracción vacía;
+  - el recibo por honorarios queda fuera del archivo (`EXCLUYE_TIPOS`);
+  - una cuenta por documento (`cuenta_unica`) y el medio de pago del entorno (`medio_pago`, `001` de fábrica).
+
+  Lo que no cabe —otra moneda, dólares sin T.C., un rango de boletas, IVAP, un código más largo que su columna— lo
+  dice `no_caben`. `tests/test_snapshot_contasis.py` congela las filas celda a celda, y
+  `tests/test_plantilla_contasis.py` compara columnas y celdas con la plantilla y el registro validado cuando están
+  en `tests/fixtures/privado/contasis/` (fuera de Git).
 - **`condicion_pago`** (`contado` | `credito`) en el comprobante: lo que declara el documento sobre su pago. En la
   factura electrónica es obligatorio (`PaymentTerms FormaPago`), y el lector de XML ya lo leía y lo dejaba en
   `datos_raw.forma_pago`; ahora es campo, y una factura con cuotas es a crédito. Vacío no es contado: es que el
@@ -39,7 +59,7 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
   `retencion_igv`, `percepcion` y `no_domiciliado`.
 - **La familia registro en el contrato de drivers: la forma `desde_comprobantes(libro, comprobantes, contab,
   op)`**, para un sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo
-  (CONTASIS, en construcción). El driver recibe los comprobantes y la configuración, con la imputación dentro,
+  (CONTASIS). El driver recibe los comprobantes y la configuración, con la imputación dentro,
   y lee cada cuenta de `asiento.partes_de` y `asiento.cuenta_tercero`: no decide ninguna. El núcleo no le arma
   asiento ni le numera nada, y le exige la cuenta antes de llamarlo (`contrato.EXIGE_NUCLEO_REGISTRO`); puede
   exigir además el centro de costo (`EXIGE_POSIBLES_REGISTRO`). La equivalencia del tipo y el código de la
