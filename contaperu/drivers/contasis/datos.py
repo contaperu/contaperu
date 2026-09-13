@@ -175,9 +175,6 @@ MONEDAS = {"PEN": "S", "USD": "D"}
 CONDICIONES = {"contado": "CON", "credito": "CRE"}
 # Un documento que no dice su condición va de contado: así llevan todas sus filas los dos registros validados.
 CONDICION_SIN_DATO = "CON"
-# Medio de pago de ventas (la tabla del comentario de la plantilla): el del entorno, en la configuración
-# (`medio_pago`); si no lo tiene, 001 «depósito en cuenta», el de todas las filas del registro validado.
-MEDIO_PAGO_DE_FABRICA = "001"
 
 # Lo que el registro de CONTASIS no puede llevar (`no_caben`): cada motivo se lee detrás de un número.
 MOTIVOS = {

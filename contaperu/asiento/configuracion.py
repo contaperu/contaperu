@@ -2,7 +2,7 @@
 
 Lleva contabilidad general —cuentas por defecto, centros de costo, detracciones— y las claves que un sistema contable
 de destino necesita que se configuren por entorno: la sigla de cada tipo de comprobante (`tipos.NN.sigla`), los
-sub-diarios y el código de moneda de CONCAR. Los datos de FORMATO de cada destino —columnas, cabeceras, anchos— no
+sub-diarios y el código de moneda de CONCAR, y el medio de pago de CONTASIS. Los datos de FORMATO de cada destino —columnas, cabeceras, anchos— no
 están aquí: viven en su driver (`drivers/concar/datos.py`, `drivers/contasis/datos.py`).
 
 Aquí no hay lógica: si cambia un valor por defecto, se toca este archivo y nada más. Hasta el 12-sep-2026 era
@@ -35,6 +35,10 @@ CONFIG_POR_DEFECTO: dict[str, Any] = {
         "igv": "401111",                                     # IGV (crédito fiscal en compras, débito en ventas)
         "clientes": {"PEN": "121201", "USD": "121202"},      # ventas: cuentas por cobrar
         "ventas": "701101",                                   # ventas: ingreso (el habitual)
+        # Las cuentas de los otros tributos y del ICBPER, que el registro de CONTASIS lleva cuando su columna trae
+        # importe. Vacías a propósito: son cuentas de cada empresa, y sin ellas la columna sale en blanco.
+        "otros_tributos": "",
+        "icbper": "",
     },
     # Código SUNAT (Tabla 10) → {sigla (en CONCAR, su columna R y su T.G. 06), sub-diario}. Los habituales:
     # 11 compras, 13 boletas, 15 honorarios (y 10 para la factura con detracción, ver abajo). Los
@@ -126,4 +130,7 @@ CONFIG_POR_DEFECTO: dict[str, Any] = {
     # tiene seleccionado Tipo de Anexo Referencia» — escribirla donde no toca puede hacer que
     # rechace la importación. Es INDEPENDIENTE de `centro_en_anexo_del_tercero`, que es la X del tercero.
     "centro_como_referencia": False,
+    # El medio de pago de las VENTAS en el registro de CONTASIS (la tabla del comentario de su plantilla): 001 «depósito
+    # en cuenta», el de todas las filas del registro que CONTASIS importó. Es del entorno, no de cada documento.
+    "medio_pago": "001",
 }
