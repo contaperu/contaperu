@@ -124,15 +124,8 @@ CONFIG_POR_DEFECTO: dict[str, Any] = {
     # Lista VACÍA es una respuesta legítima (ninguna cuenta lo lleva) y no es lo mismo que
     # ausente (los tres de fábrica): ver `lleva_centro`.
     "cuentas_con_centro": ["63", "65", "70"],
-    # El centro de costo va también en el anexo auxiliar (X) de la línea del proveedor ("doble anexo").
-    "centro_en_anexo_del_tercero": True,
-    # Y en las cuentas que NO lo llevan en M, el centro puede ir a la X de SU PROPIA línea, como
-    # referencia: «algunas empresas optan en colocar la columna X como referencia el centro de
-    # costo» (el contador, 09-sep-2026). Apagado de fábrica, y por dos motivos: es una opción y no
-    # la norma, y la propia plantilla de CONCAR avisa de que X solo se llena «si Cuenta Contable
-    # tiene seleccionado Tipo de Anexo Referencia» — escribirla donde no toca puede hacer que
-    # rechace la importación. Es INDEPENDIENTE de `centro_en_anexo_del_tercero`, que es la X del tercero.
-    "centro_como_referencia": False,
+    # En qué otras columnas va el centro (la X del proveedor, la X de su propia línea) ya no es un interruptor de aquí:
+    # lo elige la sección de cada sistema entre las columnas que su driver declara (`COLUMNAS_ELEGIBLES`).
     # El medio de pago de las VENTAS en el registro de CONTASIS (la tabla del comentario de su plantilla): 001 «depósito
     # en cuenta», el de todas las filas del registro que CONTASIS importó. Es del entorno, no de cada documento.
     "medio_pago": "001",

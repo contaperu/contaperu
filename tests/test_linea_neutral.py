@@ -40,10 +40,11 @@ def factura(**k) -> Comprobante:
 
 
 def test_el_centro_de_referencia_viaja_como_anexo_auxiliar():
-    """Con `centro_como_referencia`, el centro de una cuenta que no lo lleva en M sale del asiento
+    """Con la X del gasto elegida en `columnas`, el centro de una cuenta que no lo lleva en M sale del asiento
     por el campo `anexo_auxiliar` del estándar, no por `centro_costo`. Es correcto —la X es la
     X— pero conviene fijarlo aquí y no descubrirlo desde el MCP o desde el driver CSV."""
-    ref = configuracion({"centro_como_referencia": True})
+    columnas = ["centro_costo", "anexo_auxiliar", "anexo_auxiliar_del_tercero"]
+    ref = configuracion({"columnas": {"centro_costo": columnas}})
     filas = driver_concar.filas_de_comprobante(factura(cuenta_contable="603201"), ref, MES, "080001")
     gasto = driver_concar.desde_fila(filas[0])
     assert gasto.centro_costo == "" and gasto.anexo_auxiliar == "CC-64"

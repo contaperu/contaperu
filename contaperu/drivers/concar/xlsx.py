@@ -13,8 +13,8 @@ from ...asiento.faltas import NoExportable
 from ...asiento.resolucion import etiquetas_sub_diario, exigir_requisitos, limites_del_periodo, numerar
 from ...asiento.huella import huella
 from ...asiento.motor import lineas_del_comprobante
-from ..contrato import EXIGE_NUCLEO_ASIENTO
-from . import proyeccion
+from ..contrato import EXIGE_NUCLEO_ASIENTO, centro_en_anexo
+from . import datos, proyeccion
 from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, EXIGE, FORMATOS,
                     HOJA, OPCIONES, PANEL)
 
@@ -106,10 +106,12 @@ def construir(libro: Libro, comprobantes: list[Comprobante], config: dict, corre
     desbordan = {s: r["hasta"] for s, r in rangos.items() if r.get("desborda")}
     if desbordan:
         raise CorrelativoDesborda(desbordan)
-    # La contabilidad sale en lineas neutrales; aqui solo se proyectan a las columnas de CONCAR.
+    # La contabilidad sale en lineas neutrales; aqui solo se proyectan a las columnas de CONCAR. En cuáles va el
+    # centro de costo lo eligen las columnas de la configuración.
+    anexos = centro_en_anexo(datos, config)
     lineas, filas = [], []
     for c in comprobantes:
-        propias = lineas_del_comprobante(c, config, limites, numeros[id(c)], opciones, es_venta)
+        propias = lineas_del_comprobante(c, config, limites, numeros[id(c)], opciones, es_venta, anexos)
         lineas.extend(propias)
         filas.extend(proyeccion.filas(c, propias, config))
     # El asiento tiene que cuadrar ANTES de escribir un solo byte. Por construccion siempre

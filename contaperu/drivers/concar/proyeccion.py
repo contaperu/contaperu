@@ -21,6 +21,8 @@ from ...asiento.motor import lineas_del_comprobante, glosa_de
 from ...formato import Opciones
 from ...igv import tasa_calculada
 from ...modelo import CENTIMO, Comprobante
+from ..contrato import centro_en_anexo
+from . import datos
 from .datos import COLUMNAS, MARCA_CONVERSION, OPCIONES, TIPO_CONVERSION
 
 
@@ -97,7 +99,8 @@ def filas_de_comprobante(c: Comprobante, config: dict, limites: tuple[date, date
     que el núcleo no importe un driver. La moneda se comprueba antes que nada, como siempre: un EUR no llega a buscar
     su cuenta."""
     codigo_moneda(c.moneda, config)
-    return filas(c, lineas_del_comprobante(c, config, limites, correlativo, opciones, es_venta), config)
+    lineas = lineas_del_comprobante(c, config, limites, correlativo, opciones, es_venta, centro_en_anexo(datos, config))
+    return filas(c, lineas, config)
 
 
 def tasa_igv_entera(igv: Decimal, base_gravada: Decimal) -> Any:

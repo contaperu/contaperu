@@ -23,7 +23,7 @@ from pathlib import Path
 import pytest
 
 from contaperu import asiento as asi
-from contaperu.drivers import concar as driver_concar
+from contaperu.drivers import concar as driver_concar, contrato
 from contaperu.modelo import Comprobante
 
 SNAPSHOT = Path(__file__).parent / "fixtures" / "snapshot"
@@ -72,6 +72,8 @@ REAL = dict(serie="E001", numero="871", fecha_emision="2026-08-10", fecha_vencim
             base_gravada="4200", igv="756", total="4956",
             concepto="SERVICIO DE TRANSPORTE DE MATERIALES BENCE", cuenta_contable="659999",
             centro_costo="CC-64", detraccion={"codigo": "027", "porcentaje": "4"})
+# El centro también en la X de la línea del gasto, como referencia, además del doble anexo del tercero.
+REFERENCIA_EN_X = {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar", "anexo_auxiliar_del_tercero"]}}
 
 # (nombre, campos del comprobante, venta, configuración del RUC encima de la de fábrica)
 CASOS: list[tuple[str, dict, bool, dict | None]] = [
@@ -107,9 +109,14 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
     ("honorarios_con_detraccion", dict(RH, detraccion=DET), False, None),
     ("recibo_servicios_publicos", dict(tipo_cp="14", serie="", numero="12345"), False, None),
     ("cuenta_sin_centro", dict(cuenta_contable="603201"), False, None),
-    ("centro_referencia_en_x", dict(cuenta_contable="603201"), False, {"centro_como_referencia": True}),
+    ("centro_referencia_en_x", dict(cuenta_contable="603201"), False, REFERENCIA_EN_X),
     ("centro_referencia_con_detraccion", dict(cuenta_contable="603201", detraccion={"codigo": "027", "porcentaje": 4}),
-     False, {"centro_como_referencia": True}),
+     False, REFERENCIA_EN_X),
+    # Las columnas del centro las elige la configuración del sistema (13-sep-2026): sin el doble anexo del tercero, y
+    # solo con la referencia en la X del gasto.
+    ("sin_anexo_del_tercero", {}, False, {"columnas": {"centro_costo": ["centro_costo"]}}),
+    ("solo_referencia_sin_tercero", dict(cuenta_contable="603201"), False,
+     {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar"]}}),
     ("sin_centros_de_costo", {}, False, {"usa_centros_costo": False}),
     ("ninguna_cuenta_lleva_centro", {}, False, {"cuentas_con_centro": []}),
     ("gasto_y_cxp_del_ruc", dict(cuenta_contable="", moneda="USD"), False,
@@ -138,7 +145,7 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
          {"importe": "100", "cuenta_contable": "631101", "centro_costo": "OBRA01"},
          {"importe": "18", "cuenta_contable": "659999"}]}}}),
     ("reparto_mismo_centro_doble_anexo", dict(cuenta_contable="", centro_costo="", id_externo="f1"), False,
-     {"centro_en_anexo_del_tercero": True, "imputaciones": {"f1": {"reparto": [
+     {"imputaciones": {"f1": {"reparto": [
          {"importe": "60", "cuenta_contable": "631101", "centro_costo": "OBRA01"},
          {"importe": "40", "cuenta_contable": "632201", "centro_costo": "OBRA01"}]}}}),
     ("venta_reparto", dict(cuenta_contable="", centro_costo="", id_externo="f1"), True,
@@ -181,7 +188,9 @@ def serializar_lineas(caso) -> list[dict]:
     añadía `rol`, `tipo_cp` y el código SUNAT de la detracción, dejaba la glosa sin cortar y la tasa
     del IGV como texto exacto. Ningún importe, cuenta ni sentido cambió."""
     c, config, es_venta = armar(caso)
-    return [ln.a_dict() for ln in asi.lineas_del_comprobante(c, config, MES, "080001", es_venta=es_venta)]
+    anexos = contrato.centro_en_anexo(driver_concar, config)
+    return [ln.a_dict() for ln in asi.lineas_del_comprobante(c, config, MES, "080001", es_venta=es_venta,
+                                                              centro_en_anexo=anexos)]
 
 
 def regenerar() -> None:

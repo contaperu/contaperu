@@ -235,8 +235,8 @@ def comprobantes_sin_centro(comprobantes: list[Comprobante], config: dict, es_ve
 
     El centro es obligatorio solo donde de verdad se escribe: en la columna M de las cuentas de
     `cuentas_con_centro` (el contador, 06-sep-2026 y 09-sep-2026). Una cuenta fuera de la lista
-    NO bloquea nunca, ni siquiera con `centro_como_referencia` encendido: esa X es una referencia, y
-    una referencia que se puede dejar en blanco no puede impedir exportar un mes.
+    NO bloquea nunca, ni siquiera con la X de su línea elegida como referencia: una referencia que se
+    puede dejar en blanco no puede impedir exportar un mes.
 
     `es_venta` va opcional a propósito, calcando a `comprobantes_sin_cuenta`: esto es una librería que se
     instala fuera, y un positional obligatorio sería romper su API pública por una regla interna

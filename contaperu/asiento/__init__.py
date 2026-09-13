@@ -57,7 +57,7 @@ from .resolucion import (comprobantes_sin_centro, comprobantes_sin_cuenta, con_r
 from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
-from .motor import ROLES, glosa_de, lineas_del_comprobante, lineas_del_libro
+from .motor import CENTRO_EN_ANEXO, ROLES, glosa_de, lineas_del_comprobante, lineas_del_libro
 
 __all__ = [
     "CONFIG_POR_DEFECTO", "NUMERO_DETRACCION_PENDIENTE", "TIPO_DOC_DETRACCION", "CONTADOR", "FALTA", "FALTAS",
@@ -68,6 +68,6 @@ __all__ = [
     "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para", "fundir_config", "imputacion_de",
     "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar", "partes_de", "reparto_no_cuadra",
     "repartos_que_no_cuadran", "sigla_documento", "sub_diario", "sub_diarios_presentes", "tiene_detraccion",
-    "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "ROLES", "glosa_de",
+    "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro",
 ]

@@ -59,6 +59,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 from .. import configuracion as _declaracion
 from ..asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from ..asiento.faltas import NoExportable
+from ..asiento.motor import CENTRO_EN_ANEXO
 from ..configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from ..formato import Opciones
 from ..modelo import TIPOS_LIBRO, Comprobante, Libro
@@ -180,6 +181,19 @@ def seccion_por_defecto(modulo: Any) -> dict:
 def describir(modulo: Any) -> dict:
     """La sección del driver en JSON, para pintar su pantalla: sus campos y sus columnas elegibles."""
     return {"sistema": modulo.NOMBRE, **_declaracion.describir(configuracion(modulo), columnas_elegibles(modulo))}
+
+
+def centro_en_anexo(modulo: Any, config: dict) -> frozenset[str]:
+    """Qué líneas neutrales llevan el centro en su anexo auxiliar para ESTE driver: las de las columnas que la
+    configuración eligió para el centro (`columnas.centro_costo`) o, si no eligió, las marcadas de fábrica. Un driver
+    que no declara columnas lleva lo del estándar (`asiento.CENTRO_EN_ANEXO`)."""
+    declaradas = columnas_elegibles(modulo).get("centro_costo")
+    if not declaradas:
+        return CENTRO_EN_ANEXO
+    elegidas = ((config or {}).get("columnas") or {}).get("centro_costo")
+    if elegidas is None:
+        elegidas = [c.columna for c in declaradas if c.fija or c.marcada]
+    return frozenset(c.rol for c in declaradas if c.campo == "anexo_auxiliar" and c.columna in elegidas)
 
 
 class NoCabe(NoExportable):

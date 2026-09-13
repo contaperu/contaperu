@@ -37,6 +37,10 @@ from .lineas import LineaDiario
 # ERP que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su cuenta, que la
 # elige cada empresa.
 ROLES = ("principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion")
+# Las líneas que llevan además el centro de costo en su anexo auxiliar. Lo del estándar es la del tercero —el «doble
+# anexo», también en la línea que le descuenta la detracción—; cada driver lo cambia con las columnas que su sistema
+# elige (`drivers.contrato.centro_en_anexo`). La principal lo lleva ahí solo cuando su cuenta no lo lleva en la suya.
+CENTRO_EN_ANEXO = frozenset({"tercero"})
 
 
 def glosa_de(c: Comprobante) -> str:
@@ -67,9 +71,11 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal) -> dict:
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
-                    opciones: Opciones = Opciones(), es_venta: bool = False) -> list[LineaDiario]:
+                           opciones: Opciones = Opciones(), es_venta: bool = False,
+                           centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO) -> list[LineaDiario]:
     """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
-    del manual de asientos."""
+    del manual de asientos. `centro_en_anexo` dice qué líneas llevan además el centro en su anexo auxiliar
+    (`principal`, `tercero`)."""
     moneda = (c.moneda or "PEN").upper()
     # A qué cuentas va la base: lo decide la imputación del documento, que llega aparte (una línea por parte si
     # trae reparto), o lo de siempre (`partes_de`). Una parte sin cuenta detiene el asiento igual que una fila sin
@@ -142,13 +148,13 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     if retenido > total:
         retenido = total
     # La CUENTA decide dónde va el centro (el contador, 09-sep-2026): en su línea si la cuenta lo lleva
-    # habilitado, y si no, como referencia (anexo auxiliar) cuando el estudio la usa así. Nunca en los
-    # dos. El doble anexo del tercero (`centro_en_anexo_del_tercero`) es otra cosa y no depende de esto.
+    # habilitado, y si no, como referencia (anexo auxiliar) cuando el sistema lo elige así. Nunca en los
+    # dos. El doble anexo del tercero es otra cosa y no depende de esto.
     def principal(cuenta: str, centro: str, importe: Decimal) -> LineaDiario:   # gasto (compras) / ingreso (ventas)
         centro = (centro or "").strip() if usa_centros else ""
         en_linea = lleva_centro(cuenta, config)
         return linea("principal", importe, cuenta, sentido_base, centro_costo=centro if en_linea else "",
-                     anexo_auxiliar=centro if (not en_linea and config.get("centro_como_referencia")) else "")
+                     anexo_auxiliar=centro if (not en_linea and "principal" in centro_en_anexo) else "")
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
@@ -158,7 +164,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     linea_retencion = (linea("retencion_4ta", retenido, cuenta_retencion, sentido_tercero, f"RET 4TA - {glosa}")
                        if retenido > 0 else None)
     cuenta_del_tercero = cuenta_tercero(c, config, es_venta)
-    anexo_tercero = centro_comun if (config.get("centro_en_anexo_del_tercero") and not es_honorarios) else ""
+    anexo_tercero = centro_comun if ("tercero" in centro_en_anexo and not es_honorarios) else ""
     # El tercero: el proveedor en compras, el cliente en ventas.
     tercero = linea("tercero", total - retenido, cuenta_del_tercero, sentido_tercero,
                     contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
@@ -198,8 +204,9 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     return [ln for ln in orden if ln is not None]
 
 
-def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict,
-                     correlativos: dict[str, int], opciones: Opciones = Opciones()) -> tuple[list[LineaDiario], dict[str, dict]]:
+def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict, correlativos: dict[str, int],
+                     opciones: Opciones = Opciones(), centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
+                     ) -> tuple[list[LineaDiario], dict[str, dict]]:
     """Todos los comprobantes de un libro → sus líneas, numeradas por sub-diario (`MMNNNN`).
 
     Devuelve también el rango de correlativos que usó cada sub-diario, que es lo que se recuerda
@@ -209,5 +216,5 @@ def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict
     limites = limites_del_periodo(libro)
     lineas: list[LineaDiario] = []
     for c in comprobantes:
-        lineas.extend(lineas_del_comprobante(c, config, limites, numeros[id(c)], opciones, es_venta))
+        lineas.extend(lineas_del_comprobante(c, config, limites, numeros[id(c)], opciones, es_venta, centro_en_anexo))
     return lineas, rangos

@@ -28,6 +28,8 @@ def configuracion(config_contable: dict | None = None) -> dict:
 
 
 CONTAB = configuracion(None)
+# El centro también en la X de la línea del gasto, como referencia, además del doble anexo del tercero.
+REFERENCIA_EN_X = {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar", "anexo_auxiliar_del_tercero"]}}
 
 
 def cp(**k):
@@ -198,9 +200,9 @@ def test_la_cuenta_decide_si_el_centro_va_a_la_M():
 
 def test_el_centro_de_referencia_en_la_X_del_gasto():
     """«Algunas empresas optan en colocar la columna X como referencia el centro de costo»
-    (el contador, 09-sep-2026). Apagado de fábrica: la X de CONCAR solo admite dato si esa
+    (el contador, 09-sep-2026). Sin marcar de fábrica: la X de CONCAR solo admite dato si esa
     cuenta tiene anexo referencia, y escribirla donde no toca puede tumbar la importación."""
-    ref = configuracion({"centro_como_referencia": True})
+    ref = configuracion(REFERENCIA_EN_X)
     gasto, _, prov = driver_concar.filas_de_comprobante(cp(cuenta_contable="603201"), ref, MES, "080001")
     assert (gasto["M"], gasto["X"]) == ("", "OBRA01")          # la referencia, en su propia línea
     assert prov["X"] == "OBRA01"                                # y el doble anexo, intacto a la vez
@@ -208,12 +210,31 @@ def test_el_centro_de_referencia_en_la_X_del_gasto():
     con_m = driver_concar.filas_de_comprobante(cp(), ref, MES, "080001")[0]
     assert (con_m["M"], con_m["X"]) == ("OBRA01", "")
     # El interruptor maestro manda sobre los dos.
-    apagado = configuracion({"centro_como_referencia": True, "usa_centros_costo": False})
+    apagado = configuracion({**REFERENCIA_EN_X, "usa_centros_costo": False})
     sin = driver_concar.filas_de_comprobante(cp(cuenta_contable="603201"), apagado, MES, "080001")[0]
     assert (sin["M"], sin["X"]) == ("", "")
     # La línea de la detracción sigue limpia aunque la referencia esté encendida.
     det = driver_concar.filas_de_comprobante(cp(cuenta_contable="603201", detraccion={"codigo": "027", "porcentaje": 4}), ref, MES, "100001")
     assert (det[-1]["R"], det[-1]["M"], det[-1]["X"]) == ("DR", "", "")
+
+
+def test_las_columnas_elegidas_deciden_en_que_anexo_va_el_centro():
+    """El centro se guarda una vez y la configuración de CONCAR elige sus columnas (13-sep-2026): la M va siempre; la
+    X del tercero, marcada de fábrica, se puede quitar, y la X del gasto se puede elegir sin la del tercero."""
+    from contaperu import drivers
+    from contaperu.drivers import contrato
+
+    assert contrato.centro_en_anexo(driver_concar, CONTAB) == {"tercero"}
+    solo_m = configuracion({"columnas": {"centro_costo": ["centro_costo"]}})
+    assert contrato.centro_en_anexo(driver_concar, solo_m) == frozenset()
+    gasto, _, proveedor = driver_concar.filas_de_comprobante(cp(), solo_m, MES, "080001")
+    assert (gasto["M"], gasto["X"], proveedor["X"]) == ("OBRA01", "", "")
+    solo_referencia = configuracion({"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar"]}})
+    gasto, _, proveedor = driver_concar.filas_de_comprobante(cp(cuenta_contable="603201"), solo_referencia, MES,
+                                                             "080001")
+    assert (gasto["M"], gasto["X"], proveedor["X"]) == ("", "OBRA01", "")
+    # Un driver que no declara columnas lleva lo del estándar: el centro en el anexo del tercero.
+    assert contrato.centro_en_anexo(drivers.csv, solo_m) == {"tercero"}
 
 
 def test_el_centro_solo_es_obligatorio_donde_se_escribe():
@@ -223,7 +244,7 @@ def test_el_centro_solo_es_obligatorio_donde_se_escribe():
     assert [c.numero for c in concar.comprobantes_sin_centro([cp(centro_costo="")], CONTAB)] == ["00000123"]
     # Ni siquiera con la referencia en X encendida: esa X es una referencia, y una referencia
     # que se puede dejar en blanco no puede impedir exportar.
-    ref = configuracion({"centro_como_referencia": True})
+    ref = configuracion(REFERENCIA_EN_X)
     assert concar.comprobantes_sin_centro([cp(cuenta_contable="603201", centro_costo="")], ref) == []
     # Ventas: sin el flag la cuenta se resolveria como gasto. Con `cuentas.gasto` vacío en los
     # CONFIG_POR_DEFECTO eso da cuenta vacía → no bloquea; con el flag cae en 701101 → sí bloquea.

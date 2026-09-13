@@ -116,7 +116,8 @@ def _desde_lineas(modulo, libro: Libro, comprobantes: list[Comprobante], opcione
     # Lo que ese destino exige (`contrato.exige`: lo del núcleo más su EXIGE) se comprueba ANTES de
     # armar nada: un driver `desde_lineas` nunca ve los comprobantes, así que solo el núcleo puede.
     exigir_requisitos(comprobantes, config, libro.es_venta, contrato.exige(modulo))
-    lineas, rangos = lineas_del_libro(libro, comprobantes, config, correlativos, opciones)
+    lineas, rangos = lineas_del_libro(libro, comprobantes, config, correlativos, opciones,
+                                      contrato.centro_en_anexo(modulo, config))
     cuadre = partida_doble.exigir(lineas)
     contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones)
     return contenido, {"filas": len(lineas), "sub_diarios": dict(rangos),
