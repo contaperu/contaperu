@@ -44,30 +44,30 @@ def glosa_de(c: Comprobante) -> str:
     return ((c.concepto or "").strip() or (c.contraparte_nombre or "").strip()).upper()
 
 
-def _iso(d: date | None) -> str:
-    return d.isoformat() if d else ""
+def _iso(fecha: date | None) -> str:
+    return fecha.isoformat() if fecha else ""
 
 
-def _texto_tasa(t: Decimal) -> str:
+def _texto_tasa(tasa: Decimal) -> str:
     """18 → «18», 10.5 → «10.5»: la tasa del comprobante a 2 decimales, sin ceros de más."""
-    return format(t.quantize(D2, rounding=ROUND_HALF_UP).normalize(), "f")
+    return format(tasa.quantize(D2, rounding=ROUND_HALF_UP).normalize(), "f")
 
 
-def _limpio(d: dict) -> dict:
+def _limpio(campos: dict) -> dict:
     """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""
-    return {k: v for k, v in d.items() if v not in ("", None)}
+    return {k: v for k, v in campos.items() if v not in ("", None)}
 
 
 def _detraccion(c: Comprobante, config: dict, total: Decimal) -> dict:
     """El bloque de la línea de detracción: el código SUNAT, el interno del contribuyente (T.G. 28 de
     CONCAR: el de SUNAT + 2 propios, o SUNAT + "01" si no lo configuró), la tasa —la misma con la que
     se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base."""
-    d = c.detraccion or {}
-    sunat = str(d.get("codigo") or "").strip()
+    bloque = c.detraccion or {}
+    sunat = str(bloque.get("codigo") or "").strip()
     interno = str((config.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
-    t = tasa_detraccion(c, config)
+    tasa = tasa_detraccion(c, config)
     return _limpio({"codigo": sunat, "codigo_interno": interno,
-                    "tasa": float(t) if t > 0 else "", "base": str(total)})
+                    "tasa": float(tasa) if tasa > 0 else "", "base": str(total)})
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
@@ -97,43 +97,43 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # El doble anexo del tercero lleva el centro del comprobante; con la base repartida, solo si todas las
     # partes comparten uno: con dos centros distintos no hay uno que poner.
     centros = {(centro or "").strip() for _, centro, _ in partes}
-    cc = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
-    serie, num = (c.serie or "").strip(), formatear_numero(c.numero, opciones)
-    serie_numero = f"{serie}-{num}" if serie and num else (serie or num)
+    centro_comun = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
+    serie, numero = (c.serie or "").strip(), formatear_numero(c.numero, opciones)
+    serie_numero = f"{serie}-{numero}" if serie and numero else (serie or numero)
     # UNA sola glosa para todas las líneas (confirmado por un contador, 2026); las derivadas anteponen lo
     # que las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—. Cortarla es cosa del driver.
     glosa = glosa_de(c)
-    t = tasa_calculada(igv, Decimal(c.base_gravada or 0))
-    tasa = "" if t is None else _texto_tasa(t)
+    tasa_leida = tasa_calculada(igv, Decimal(c.base_gravada or 0))
+    tasa = "" if tasa_leida is None else _texto_tasa(tasa_leida)
     tc = float(c.tipo_cambio) if es_usd and c.tipo_cambio else ""
-    f_emision = c.fecha_emision
-    f_venc = c.fecha_vencimiento or f_emision
+    emision = c.fecha_emision
+    vencimiento = c.fecha_vencimiento or emision
     # Cada comprobante se asienta con SU fecha de emisión; el extemporáneo (mes anterior) cae al
     # primer día del periodo, y uno emitido después del periodo (error FECHA_POSTERIOR, que no bloquea
     # el Excel) al último: el asiento cae en el mes de esta fecha y todo debe caer en el mes del
     # proceso (un contador, 30-ago-2026). La fecha del documento se conserva aparte, siempre.
     primero, ultimo = limites
-    f_asiento = min(max(f_emision, primero), ultimo) if f_emision else primero
+    fecha_asiento = min(max(emision, primero), ultimo) if emision else primero
     # Sentido de la partida: compras = gasto D / proveedor H; ventas = ingreso H / cliente D.
     # La nota de crédito invierte el caso que toque.
     normal = ("H", "D") if es_venta else ("D", "H")
-    d_gasto, d_prov = (normal[::-1] if invierte else normal)
-    sd = sub_diario(c, config, es_venta)
+    sentido_base, sentido_tercero = (normal[::-1] if invierte else normal)
+    sub_diario_asiento = sub_diario(c, config, es_venta)
 
     documento = {"tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp, "serie_numero": serie_numero,
-                 "fecha_emision": _iso(f_emision), "fecha_vencimiento": _iso(f_venc)}
+                 "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
     referencia: dict[str, str] = {}
     if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
-        ref_num = formatear_numero(c.ref_numero, opciones)
-        m_ref = equivalencia_tipo(c, config, c.ref_tipo_cp)
-        referencia = {"tipo": str(m_ref["sigla"]) if m_ref else "", "tipo_cp": c.ref_tipo_cp,
-                      "serie_numero": f"{c.ref_serie}-{ref_num}" if c.ref_serie and ref_num else (c.ref_serie or ref_num),
+        numero_ref = formatear_numero(c.ref_numero, opciones)
+        equivalencia_ref = equivalencia_tipo(c, config, c.ref_tipo_cp)
+        referencia = {"tipo": str(equivalencia_ref["sigla"]) if equivalencia_ref else "", "tipo_cp": c.ref_tipo_cp,
+                      "serie_numero": f"{c.ref_serie}-{numero_ref}" if c.ref_serie and numero_ref else (c.ref_serie or numero_ref),
                       "fecha": _iso(c.ref_fecha)}
 
     def linea(rol: str, importe: Decimal, cuenta_linea: str, sentido: str, glosa_linea: str = glosa,
               **extra) -> LineaDiario:
         campos = dict(cuenta=cuenta_linea, debe_haber=sentido, importe=str(Decimal(importe).quantize(D2)),
-                      rol=rol, sub_diario=sd, correlativo=correlativo, fecha=_iso(f_asiento),
+                      rol=rol, sub_diario=sub_diario_asiento, correlativo=correlativo, fecha=_iso(fecha_asiento),
                       moneda=moneda, tipo_cambio=tc, glosa=glosa_linea, documento=_limpio(documento),
                       referencia=_limpio(referencia), tasa_igv=tasa)
         campos.update(extra)
@@ -151,51 +151,54 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     def principal(cuenta: str, centro: str, importe: Decimal) -> LineaDiario:   # gasto (compras) / ingreso (ventas)
         centro = (centro or "").strip() if usa_centros else ""
         en_linea = lleva_centro(cuenta, config)
-        return linea("principal", importe, cuenta, d_gasto, centro_costo=centro if en_linea else "",
+        return linea("principal", importe, cuenta, sentido_base, centro_costo=centro if en_linea else "",
                      anexo_auxiliar=centro if (not en_linea and config.get("centro_como_referencia")) else "")
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
-    linea_igv = (linea("igv", igv, str(config["cuentas"]["igv"]), d_gasto, f"IGV - {glosa}")
+    linea_igv = (linea("igv", igv, str(config["cuentas"]["igv"]), sentido_base, f"IGV - {glosa}")
                  if igv > 0 else None)
-    cuenta_ret = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_DE_FABRICA["cuentas"]["retencion_4ta"])
-    linea_ret = (linea("retencion_4ta", retenido, cuenta_ret, d_prov, f"RET 4TA - {glosa}")
-                 if retenido > 0 else None)
-    cuenta_ter = cuenta_tercero(c, config, es_venta)
-    x_ter = cc if (config.get("centro_en_anexo_del_tercero") and not es_honorarios) else ""
-    tercero = linea("tercero", total - retenido, cuenta_ter, d_prov,      # proveedor (compras) / cliente (ventas)
-                    contraparte_doc=ruc, anexo_auxiliar=x_ter)
+    cuenta_retencion = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_DE_FABRICA["cuentas"]["retencion_4ta"])
+    linea_retencion = (linea("retencion_4ta", retenido, cuenta_retencion, sentido_tercero, f"RET 4TA - {glosa}")
+                       if retenido > 0 else None)
+    cuenta_del_tercero = cuenta_tercero(c, config, es_venta)
+    anexo_tercero = centro_comun if (config.get("centro_en_anexo_del_tercero") and not es_honorarios) else ""
+    # El tercero: el proveedor en compras, el cliente en ventas.
+    tercero = linea("tercero", total - retenido, cuenta_del_tercero, sentido_tercero,
+                    contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
 
     # La detracción, calcada del Excel real validado en CONCAR (2026): el total COMPLETO queda en el
     # proveedor y se añaden DOS líneas por el monto detraído — el proveedor al Debe (se le pagará menos)
     # y la cuenta de detracciones al Haber, con su propio tipo de documento y el comodín 9999999999
     # (la constancia no existe todavía al provisionar). Lo dispara que la factura TENGA detracción, no
     # el sub-diario. Solo compras; el recibo por honorarios nunca.
-    det_tercero = det = None
+    linea_detraccion_tercero = linea_detraccion = None
     if not es_venta and not es_honorarios and tiene_detraccion(c):
-        _, monto_det = monto_detraccion(c, config)
-        if monto_det > 0:
-            det_tercero = linea("detraccion_tercero", monto_det, cuenta_ter, d_gasto,
-                                contraparte_doc=ruc, anexo_auxiliar=x_ter)
+        _, detraido = monto_detraccion(c, config)
+        if detraido > 0:
+            linea_detraccion_tercero = linea("detraccion_tercero", detraido, cuenta_del_tercero, sentido_base,
+                                             contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
             # De QUÉ documento sale esta detracción: en una factura, del propio comprobante (lo que
             # CONCAR aceptó). En una NOTA que ya referencia la factura que corrige se RESPETA esa
             # referencia: ningún archivo validado dice otra cosa. Pendiente de una NC real.
-            ref_det = referencia if referencia.get("tipo") else {
+            referencia_detraccion = referencia if referencia.get("tipo") else {
                 "tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp,
-                "serie_numero": serie_numero, "fecha": _iso(f_emision)}
-            det = linea("detraccion", monto_det, cuenta_por_pagar_detraccion(config["cuentas"], moneda), d_prov,
-                        f"DETRACCION - {glosa}", contraparte_doc=ruc,
-                        documento=_limpio({"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
-                                           "serie_numero": NUMERO_DETRACCION_PENDIENTE,
-                                           "fecha_emision": _iso(f_emision), "fecha_vencimiento": _iso(f_venc)}),
-                        referencia=_limpio(ref_det), detraccion=_detraccion(c, config, total))
+                "serie_numero": serie_numero, "fecha": _iso(emision)}
+            cuenta_detraccion = cuenta_por_pagar_detraccion(config["cuentas"], moneda)
+            documento_detraccion = {"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
+                                    "serie_numero": NUMERO_DETRACCION_PENDIENTE,
+                                    "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
+            linea_detraccion = linea("detraccion", detraido, cuenta_detraccion, sentido_tercero,
+                                     f"DETRACCION - {glosa}", contraparte_doc=ruc,
+                                     documento=_limpio(documento_detraccion), referencia=_limpio(referencia_detraccion),
+                                     detraccion=_detraccion(c, config, total))
 
     if es_venta and not invierte:
         # Venta normal: cliente (D) · ingreso (H) · IGV (H) — el orden del manual de asientos.
         orden = [tercero, *principales, linea_igv]
     else:
         # Compras (y NC de venta, que invierte): principal · IGV · retención · tercero · detracción.
-        orden = [*principales, linea_igv, linea_ret, tercero, det_tercero, det]
+        orden = [*principales, linea_igv, linea_retencion, tercero, linea_detraccion_tercero, linea_detraccion]
     return [ln for ln in orden if ln is not None]
 
 

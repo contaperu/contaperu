@@ -30,13 +30,15 @@ from .modelo import Libro
 def _tabla(comprobantes: list[Comprobante]) -> str:
     filas = ["  #  TIPO  SERIE-NUMERO        FECHA       CONTRAPARTE                          TOTAL        ESTADO"]
     for i, c in enumerate(comprobantes, 1):
-        sn = f"{c.serie}-{c.numero}" if c.serie else c.numero
-        f = c.fecha_emision.strftime("%d/%m/%Y") if c.fecha_emision else "--/--/----"
+        serie_numero = f"{c.serie}-{c.numero}" if c.serie else c.numero
+        fecha = c.fecha_emision.strftime("%d/%m/%Y") if c.fecha_emision else "--/--/----"
         nombre = (c.contraparte_nombre or "")[:36]
         marca = "EXCL" if c.excluida else c.estado.upper()
-        filas.append(f"{i:3d}  {c.tipo_cp:<4}  {sn:<18}  {f}  {nombre:<36} {c.moneda} {c.total:>11}  {marca}")
-        for o in c.observaciones:
-            filas.append(f"        {'!!' if o.nivel == 'error' else ' ·'} [{o.codigo}] {o.texto}")
+        filas.append(f"{i:3d}  {c.tipo_cp:<4}  {serie_numero:<18}  {fecha}  {nombre:<36} "
+                     f"{c.moneda} {c.total:>11}  {marca}")
+        for observacion in c.observaciones:
+            nivel = "!!" if observacion.nivel == "error" else " ·"
+            filas.append(f"        {nivel} [{observacion.codigo}] {observacion.texto}")
     return "\n".join(filas)
 
 
@@ -67,30 +69,32 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
     # los de terceros) se piden por su nombre: necesitan la configuración contable del contribuyente —la de
     # --config, con la imputación de --imputacion dentro—, y los de asientos, además sus correlativos, que
     # arrancan en 1: los mismos valores de partida que usa `operaciones.exportar`.
-    nombres = ([n for n, m in drivers.DRIVERS.items() if drivers.contrato.forma(m) == "linea"]
+    nombres = ([nombre for nombre, registrado in drivers.DRIVERS.items()
+                if drivers.contrato.forma(registrado) == "linea"]
                if driver == "todas" else [driver])
     config = operaciones.configuracion() if config is None else config
     codigo = 0
-    for p in nombres:
-        modulo = drivers.obtener(p)
+    for nombre_driver in nombres:
+        modulo = drivers.obtener(nombre_driver)
         if libro.tipo not in modulo.FORMATOS:
-            print(f"  {p:<5} no genera libros de {libro.tipo}", file=sys.stderr)
+            print(f"  {nombre_driver:<5} no genera libros de {libro.tipo}", file=sys.stderr)
             continue
         correlativos = None
         if drivers.contrato.arma_asientos(modulo):
             incluidos = gen.seleccionar(comprobantes)
-            correlativos = {s: 1 for s in asi.sub_diarios_presentes(incluidos, config, libro.es_venta)}
+            presentes = asi.sub_diarios_presentes(incluidos, config, libro.es_venta)
+            correlativos = {sub_diario: 1 for sub_diario in presentes}
         try:
-            _escribir(gen.generar(libro, comprobantes, p, incluir_errores=incluir_errores,
+            _escribir(gen.generar(libro, comprobantes, nombre_driver, incluir_errores=incluir_errores,
                                   config=config if drivers.contrato.lleva_cuentas(modulo) else None,
                                   correlativos=correlativos), salida)
-        except gen.ErroresBloqueantes as e:
-            print(f"  {p:<5} NO generado: {e}. Corrige o usa --incluir-errores", file=sys.stderr)
+        except gen.ErroresBloqueantes as error:
+            print(f"  {nombre_driver:<5} NO generado: {error}. Corrige o usa --incluir-errores", file=sys.stderr)
             codigo = 1
         except (asi.SinCuenta, asi.SinCentro, asi.TipoSinMapa, asi.MonedaSinCodigo, drivers.concar.CorrelativoDesborda,
-                drivers.contrato.NoCabe) as e:
+                drivers.contrato.NoCabe) as error:
             # Lo que le falta al mes para ese destino. `contaperu diagnosticar` lo lista por serie-número.
-            print(f"  {p:<5} NO generado: {e}. Revísalo con `contaperu diagnosticar`", file=sys.stderr)
+            print(f"  {nombre_driver:<5} NO generado: {error}. Revísalo con `contaperu diagnosticar`", file=sys.stderr)
             codigo = 1
     return codigo
 
@@ -99,20 +103,20 @@ def cmd_generar(args: argparse.Namespace) -> int:
     libro = Libro(ruc=args.ruc, razon_social=args.razon, periodo=args.periodo, tipo=args.tipo)
     lote = archivos.Lote()
     for ruta in args.archivos:
-        p = Path(ruta)
-        if not p.is_file():
+        archivo = Path(ruta)
+        if not archivo.is_file():
             lote.error(ruta, "No existe")
             continue
-        archivos.expandir(p.name, p.read_bytes(), lote=lote)
-    res = archivos.convertir_xml(lote, libro)
-    comprobantes = archivos.ordenar(res.comprobantes)
+        archivos.expandir(archivo.name, archivo.read_bytes(), lote=lote)
+    lectura = archivos.convertir_xml(lote, libro)
+    comprobantes = archivos.ordenar(lectura.comprobantes)
     validar.revisar(comprobantes, libro)
 
     print(f"Libro: {libro.tipo.upper()} {libro.periodo} · RUC {libro.ruc} · {libro.razon_social}")
-    print(f"Archivos: {len(lote.entradas)} leídos · {len(res.ignorados)} ignorados (CDR, hojas de estilo) · "
-          f"{len(res.pendientes_ia)} PDF/imagen (pendientes de IA) · {len(res.errores)} con error")
-    for e in res.errores:
-        print(f"  !! {e['archivo']}: {e['motivo']}")
+    print(f"Archivos: {len(lote.entradas)} leídos · {len(lectura.ignorados)} ignorados (CDR, hojas de estilo) · "
+          f"{len(lectura.pendientes_ia)} PDF/imagen (pendientes de IA) · {len(lectura.errores)} con error")
+    for error in lectura.errores:
+        print(f"  !! {error['archivo']}: {error['motivo']}")
     print()
     print(_tabla(comprobantes))
     print()
@@ -139,8 +143,8 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     try:
         libro = operaciones.libro_de(datos)
         comprobantes = operaciones.comprobantes_de(datos)
-    except operaciones.DocumentoInvalido as e:
-        print(f"El archivo no es un documento open-accounting válido: {e}", file=sys.stderr)
+    except operaciones.DocumentoInvalido as error:
+        print(f"El archivo no es un documento open-accounting válido: {error}", file=sys.stderr)
         return 2
     if args.revisar:
         validar.revisar(comprobantes, libro)
@@ -149,14 +153,14 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     imputacion = _leer_json(args.imputacion) if args.imputacion else None
     try:
         config = operaciones.con_imputacion(operaciones.configuracion(config), imputacion, comprobantes)
-    except operaciones.DocumentoInvalido as e:
-        print(f"La imputación no se puede usar con este documento: {e}", file=sys.stderr)
+    except operaciones.DocumentoInvalido as error:
+        print(f"La imputación no se puede usar con este documento: {error}", file=sys.stderr)
         return 2
     return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores, config)
 
 
 def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
-    print(f"{titulo}: {', '.join(str(e) for e in elementos) if elementos else vacio}")
+    print(f"{titulo}: {', '.join(str(elemento) for elemento in elementos) if elementos else vacio}")
 
 
 def cmd_diagnosticar(args: argparse.Namespace) -> int:
@@ -165,56 +169,60 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
     config = _leer_json(args.config) if args.config else None
     imputacion = _leer_json(args.imputacion) if args.imputacion else None
     try:
-        d = operaciones.diagnosticar(datos, config, driver=args.driver, imputacion=imputacion)
-    except operaciones.DocumentoInvalido as e:
+        diagnostico = operaciones.diagnosticar(datos, config, driver=args.driver, imputacion=imputacion)
+    except operaciones.DocumentoInvalido as error:
         # El documento que no se puede leer, o una imputación que no es de él: el motivo va en `e`.
-        print(f"No se puede diagnosticar: {e}", file=sys.stderr)
+        print(f"No se puede diagnosticar: {error}", file=sys.stderr)
         return 2
-    lib, t = d["libro"], d["totales"]
-    print(f"Libro: {lib['tipo'].upper()} {lib['periodo']} · RUC {lib['ruc']} · destino {d['driver']}")
-    print(f"Comprobantes: {t['comprobantes']} · saldrían {t['saldrian']} · excluidos {t['excluidos']} · "
-          f"fuera del registro {t['fuera_del_registro']} · con error {t['con_error']} · con aviso {t['con_aviso']}")
+    libro, totales = diagnostico["libro"], diagnostico["totales"]
+    print(f"Libro: {libro['tipo'].upper()} {libro['periodo']} · RUC {libro['ruc']} · destino {diagnostico['driver']}")
+    print(f"Comprobantes: {totales['comprobantes']} · saldrían {totales['saldrian']} · "
+          f"excluidos {totales['excluidos']} · fuera del registro {totales['fuera_del_registro']} · "
+          f"con error {totales['con_error']} · con aviso {totales['con_aviso']}")
     print()
     for bloque, marca in (("bloqueantes", "!!"), ("avisos", " ·")):
-        for item in d[bloque]:
-            for o in item["observaciones"]:
-                print(f"  {marca} {item['serie_numero']:<18} [{o['codigo']}] {o['texto']}")
+        for entrada in diagnostico[bloque]:
+            for observacion in entrada["observaciones"]:
+                print(f"  {marca} {entrada['serie_numero']:<18} [{observacion['codigo']}] {observacion['texto']}")
     for clave, titulo in (("reparto_no_admitido", "Reparto que el destino no admite"),
                           ("sin_cuenta", "Sin cuenta contable"), ("reparto_no_cuadra", "Reparto que no suma la base"),
                           ("sin_centro_de_costo", "Sin centro de costo"),
                           ("tipos_sin_equivalencia", "Tipos sin equivalencia"),
                           ("monedas_sin_codigo", "Monedas sin código"),
                           ("sub_diarios_sin_correlativo", "Sub-diarios sin correlativo (arrancan en 1)")):
-        if d["faltantes"].get(clave):
-            _lista(titulo, d["faltantes"][clave])
-    for motivo, cuales in d["faltantes"].get("no_caben", {}).items():
+        if diagnostico["faltantes"].get(clave):
+            _lista(titulo, diagnostico["faltantes"][clave])
+    for motivo, cuales in diagnostico["faltantes"].get("no_caben", {}).items():
         _lista(f"No cabe en el formato ({motivo})", cuales)
-    if d["detracciones_pendientes"]:
-        _lista("Detracciones pendientes de constancia", [p["serie_numero"] for p in d["detracciones_pendientes"]])
-    if d.get("que_falta"):
+    if diagnostico["detracciones_pendientes"]:
+        _lista("Detracciones pendientes de constancia",
+               [pendiente["serie_numero"] for pendiente in diagnostico["detracciones_pendientes"]])
+    if diagnostico.get("que_falta"):
         quien = {"contador": "Pedir al contador", "sistema": "Ajustar en el sistema", "proveedor": "Pedir al proveedor"}
-        for q in d["que_falta"]:
-            print(f"  -> {quien.get(q['pedir_a'], q['pedir_a'])}: {q['texto']} ({', '.join(q['comprobantes'])})")
-    for s, r in d["sub_diarios"].items():
-        print(f"  Sub-diario {s} ({r['etiqueta']}): {r['comprobantes']} comprobantes desde el {r['empieza_en']}")
+        for falta in diagnostico["que_falta"]:
+            destinatario = quien.get(falta["pedir_a"], falta["pedir_a"])
+            print(f"  -> {destinatario}: {falta['texto']} ({', '.join(falta['comprobantes'])})")
+    for sub_diario, rango in diagnostico["sub_diarios"].items():
+        print(f"  Sub-diario {sub_diario} ({rango['etiqueta']}): {rango['comprobantes']} comprobantes "
+              f"desde el {rango['empieza_en']}")
     print()
-    if d["listo_para_exportar"]:
-        print(f"LISTO para exportar: {len(d['saldrian'])} comprobantes.")
+    if diagnostico["listo_para_exportar"]:
+        print(f"LISTO para exportar: {len(diagnostico['saldrian'])} comprobantes.")
         return 0
-    print("NO está listo: " + "; ".join(d["por_que_no"]) + ".")
+    print("NO está listo: " + "; ".join(diagnostico["por_que_no"]) + ".")
     return 1
 
 
 def cmd_comparar(args: argparse.Namespace) -> int:
     """Nuestro archivo del SIRE contra la exportación del detalle que da SUNAT."""
     try:
-        reg = comparar_sire.registro_de([args.nuestro, args.sunat], args.registro)
-    except ValueError as e:
-        print(e)
+        registro = comparar_sire.registro_de([args.nuestro, args.sunat], args.registro)
+    except ValueError as error:
+        print(error)
         return 2
-    r = comparar_sire.comparar(comparar_sire.leer(args.nuestro), comparar_sire.leer(args.sunat), reg)
-    print(comparar_sire.informe(r))
-    return 1 if (r["diferencias"] or r["solo_en_sunat"] or r["solo_nuestros"]) else 0
+    comparacion = comparar_sire.comparar(comparar_sire.leer(args.nuestro), comparar_sire.leer(args.sunat), registro)
+    print(comparar_sire.informe(comparacion))
+    return 1 if (comparacion["diferencias"] or comparacion["solo_en_sunat"] or comparacion["solo_nuestros"]) else 0
 
 
 def _consola_utf8() -> None:
@@ -235,48 +243,55 @@ AYUDA_IMPUTACION = ("JSON con la imputación de cada documento, por su id_extern
 
 def main(argv: list[str] | None = None) -> int:
     _consola_utf8()
-    ap = argparse.ArgumentParser(prog="contaperu", description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--version", action="version", version=f"contaperu {__version__}")
-    sub = ap.add_subparsers(dest="cmd", required=True)
+    analizador = argparse.ArgumentParser(prog="contaperu", description=__doc__,
+                                         formatter_class=argparse.RawDescriptionHelpFormatter)
+    analizador.add_argument("--version", action="version", version=f"contaperu {__version__}")
+    subcomandos = analizador.add_subparsers(dest="cmd", required=True)
 
-    g = sub.add_parser("generar", help="XML/ZIP locales → TXT + ZIP para el SIRE")
-    g.add_argument("--tipo", required=True, choices=["venta", "compra"])
-    g.add_argument("--ruc", required=True)
-    g.add_argument("--razon", required=True, help="razón social del generador (va en la driver sire)")
-    g.add_argument("--periodo", required=True, help="AAAAMM")
-    g.add_argument("--driver", default="todas", choices=["todas", *drivers.DRIVERS])
-    g.add_argument("--salida", default="salida")
-    g.add_argument("--incluir-errores", action="store_true", help="generar aunque haya observaciones de error")
-    g.add_argument("--json", help="volcar los comprobantes leídos a este JSON (para fixtures)")
-    g.add_argument("archivos", nargs="+")
-    g.set_defaults(fn=cmd_generar)
+    sub_generar = subcomandos.add_parser("generar", help="XML/ZIP locales → TXT + ZIP para el SIRE")
+    sub_generar.add_argument("--tipo", required=True, choices=["venta", "compra"])
+    sub_generar.add_argument("--ruc", required=True)
+    sub_generar.add_argument("--razon", required=True, help="razón social del generador (va en la driver sire)")
+    sub_generar.add_argument("--periodo", required=True, help="AAAAMM")
+    sub_generar.add_argument("--driver", default="todas", choices=["todas", *drivers.DRIVERS])
+    sub_generar.add_argument("--salida", default="salida")
+    sub_generar.add_argument("--incluir-errores", action="store_true",
+                             help="generar aunque haya observaciones de error")
+    sub_generar.add_argument("--json", help="volcar los comprobantes leídos a este JSON (para fixtures)")
+    sub_generar.add_argument("archivos", nargs="+")
+    sub_generar.set_defaults(fn=cmd_generar)
 
-    d = sub.add_parser("desde-json", help="JSON de comprobantes (formato de los golden) → TXT + ZIP")
-    d.add_argument("json")
-    d.add_argument("--driver", default="todas", choices=["todas", *drivers.DRIVERS])
-    d.add_argument("--salida", default="salida")
-    d.add_argument("--revisar", action="store_true", help="aplicar las validaciones antes de generar")
-    d.add_argument("--incluir-errores", action="store_true")
-    d.add_argument("--config", help="JSON con la configuración contable (la piden los drivers que llevan cuentas: concar, csv…)")
-    d.add_argument("--imputacion", help=AYUDA_IMPUTACION)
-    d.set_defaults(fn=cmd_desde_json)
+    sub_desde_json = subcomandos.add_parser("desde-json",
+                                            help="JSON de comprobantes (formato de los golden) → TXT + ZIP")
+    sub_desde_json.add_argument("json")
+    sub_desde_json.add_argument("--driver", default="todas", choices=["todas", *drivers.DRIVERS])
+    sub_desde_json.add_argument("--salida", default="salida")
+    sub_desde_json.add_argument("--revisar", action="store_true", help="aplicar las validaciones antes de generar")
+    sub_desde_json.add_argument("--incluir-errores", action="store_true")
+    sub_desde_json.add_argument("--config", help="JSON con la configuración contable (la piden los drivers que "
+                                                 "llevan cuentas: concar, csv…)")
+    sub_desde_json.add_argument("--imputacion", help=AYUDA_IMPUTACION)
+    sub_desde_json.set_defaults(fn=cmd_desde_json)
 
-    x = sub.add_parser("diagnosticar", help="qué bloquea, qué falta y qué saldría, antes de generar nada")
-    x.add_argument("json", help="documento open-accounting")
-    x.add_argument("--driver", default="concar", choices=list(drivers.DRIVERS))
-    x.add_argument("--config", help="JSON con la configuración contable del contribuyente")
-    x.add_argument("--imputacion", help=AYUDA_IMPUTACION)
-    x.set_defaults(fn=cmd_diagnosticar)
+    sub_diagnosticar = subcomandos.add_parser("diagnosticar",
+                                              help="qué bloquea, qué falta y qué saldría, antes de generar nada")
+    sub_diagnosticar.add_argument("json", help="documento open-accounting")
+    sub_diagnosticar.add_argument("--driver", default="concar", choices=list(drivers.DRIVERS))
+    sub_diagnosticar.add_argument("--config", help="JSON con la configuración contable del contribuyente")
+    sub_diagnosticar.add_argument("--imputacion", help=AYUDA_IMPUTACION)
+    sub_diagnosticar.set_defaults(fn=cmd_diagnosticar)
 
-    c = sub.add_parser("comparar", help="nuestro TXT del SIRE vs la exportación del detalle de SUNAT")
-    c.add_argument("--nuestro", required=True, help="TXT o ZIP que genera la aplicación que lo use (reemplazar propuesta)")
-    c.add_argument("--sunat", required=True, help="TXT o ZIP de la exportación del detalle (menú Exportar → ticket)")
-    c.add_argument("--registro", default="", choices=["", "venta", "compra"],
-                   help="normalmente se deduce del nombre (1404 ventas / 0804 compras); fuérzalo si no")
-    c.set_defaults(fn=cmd_comparar)
+    sub_comparar = subcomandos.add_parser("comparar",
+                                          help="nuestro TXT del SIRE vs la exportación del detalle de SUNAT")
+    sub_comparar.add_argument("--nuestro", required=True,
+                              help="TXT o ZIP que genera la aplicación que lo use (reemplazar propuesta)")
+    sub_comparar.add_argument("--sunat", required=True,
+                              help="TXT o ZIP de la exportación del detalle (menú Exportar → ticket)")
+    sub_comparar.add_argument("--registro", default="", choices=["", "venta", "compra"],
+                              help="normalmente se deduce del nombre (1404 ventas / 0804 compras); fuérzalo si no")
+    sub_comparar.set_defaults(fn=cmd_comparar)
 
-    args = ap.parse_args(argv)
+    args = analizador.parse_args(argv)
     return args.fn(args)
 
 

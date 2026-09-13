@@ -63,17 +63,17 @@ def es_cdr(datos: bytes) -> bool:
         return False
 
 
-def _t(el: Element | None, ruta: str) -> str:
-    if el is None:
+def _t(elemento: Element | None, ruta: str) -> str:
+    if elemento is None:
         return ""
-    hijo = el.find(ruta, NS)
+    hijo = elemento.find(ruta, NS)
     return (hijo.text or "").strip() if hijo is not None else ""
 
 
-def _attr(el: Element | None, ruta: str, nombre: str) -> str:
-    if el is None:
+def _attr(elemento: Element | None, ruta: str, nombre: str) -> str:
+    if elemento is None:
         return ""
-    hijo = el.find(ruta, NS)
+    hijo = elemento.find(ruta, NS)
     return (hijo.get(nombre) or "").strip() if hijo is not None else ""
 
 
@@ -86,26 +86,26 @@ def _partir_id(texto: str) -> tuple[str, str]:
     return "", texto
 
 
-def _parte(el: Element | None) -> dict:
+def _parte(elemento: Element | None) -> dict:
     """Emisor o adquirente: tipo y número de documento y razón social."""
-    if el is None:
+    if elemento is None:
         return {"tipo_doc": "", "doc": "", "nombre": ""}
-    party = el.find("cac:Party", NS)
-    doc = _t(party, "cac:PartyTaxScheme/cbc:CompanyID")
-    scheme = _attr(party, "cac:PartyTaxScheme/cbc:CompanyID", "schemeID")
+    entidad = elemento.find("cac:Party", NS)
+    doc = _t(entidad, "cac:PartyTaxScheme/cbc:CompanyID")
+    esquema = _attr(entidad, "cac:PartyTaxScheme/cbc:CompanyID", "schemeID")
     if not doc:
-        doc = _t(party, "cac:PartyIdentification/cbc:ID")
-        scheme = _attr(party, "cac:PartyIdentification/cbc:ID", "schemeID")
+        doc = _t(entidad, "cac:PartyIdentification/cbc:ID")
+        esquema = _attr(entidad, "cac:PartyIdentification/cbc:ID", "schemeID")
     if not doc:  # estilo antiguo que algunos emisores mantienen
-        doc = _t(el, "cbc:CustomerAssignedAccountID")
-        scheme = _t(el, "cbc:AdditionalAccountID")
+        doc = _t(elemento, "cbc:CustomerAssignedAccountID")
+        esquema = _t(elemento, "cbc:AdditionalAccountID")
     nombre = (
-        _t(party, "cac:PartyLegalEntity/cbc:RegistrationName")
-        or _t(party, "cac:PartyTaxScheme/cbc:RegistrationName")
-        or _t(party, "cac:PartyName/cbc:Name")
-        or _t(el, "cac:Party/cac:PartyLegalEntity/cbc:RegistrationName")
+        _t(entidad, "cac:PartyLegalEntity/cbc:RegistrationName")
+        or _t(entidad, "cac:PartyTaxScheme/cbc:RegistrationName")
+        or _t(entidad, "cac:PartyName/cbc:Name")
+        or _t(elemento, "cac:Party/cac:PartyLegalEntity/cbc:RegistrationName")
     )
-    tipo_doc = cat.SCHEME_A_TIPO_DOC.get(scheme.upper(), scheme.upper() or "")
+    tipo_doc = cat.SCHEME_A_TIPO_DOC.get(esquema.upper(), esquema.upper() or "")
     if not tipo_doc:
         tipo_doc = "6" if len(solo_digitos(doc)) == 11 else ("1" if len(solo_digitos(doc)) == 8 else "0")
     return {"tipo_doc": tipo_doc, "doc": doc.strip(), "nombre": " ".join(nombre.split())}
@@ -134,13 +134,13 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
 
     # --- Tributos por código del Catálogo 05 ------------------------------
     acumulado: dict[str, list[Decimal]] = {}
-    for ts in raiz.findall("cac:TaxTotal/cac:TaxSubtotal", NS):
-        codigo = _t(ts, "cac:TaxCategory/cac:TaxScheme/cbc:ID")
-        base = monto(_t(ts, "cbc:TaxableAmount"))
-        tributo = monto(_t(ts, "cbc:TaxAmount"))
-        acc = acumulado.setdefault(codigo, [Decimal("0.00"), Decimal("0.00")])
-        acc[0] += base
-        acc[1] += tributo
+    for subtotal in raiz.findall("cac:TaxTotal/cac:TaxSubtotal", NS):
+        codigo = _t(subtotal, "cac:TaxCategory/cac:TaxScheme/cbc:ID")
+        base = monto(_t(subtotal, "cbc:TaxableAmount"))
+        tributo = monto(_t(subtotal, "cbc:TaxAmount"))
+        suma = acumulado.setdefault(codigo, [Decimal("0.00"), Decimal("0.00")])
+        suma[0] += base
+        suma[1] += tributo
 
     def base_de(codigo: str) -> Decimal:
         return acumulado.get(codigo, [Decimal("0.00"), Decimal("0.00")])[0]
@@ -171,10 +171,10 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
     # E001-233 real es «04 Descuento global» sin AllowanceCharge y SUNAT la tiene en base e IGV (11-sep-2026).
     # Tampoco se filtra por AllowanceChargeReasonCode mientras no haya un XML real que lo respalde; queda
     # anotado en `datos_originales["descuentos_globales"]` para poder hacerlo.
-    descuentos = [{"codigo": _t(ac, "cbc:AllowanceChargeReasonCode"), "importe": str(monto(_t(ac, "cbc:Amount")))}
-                  for ac in raiz.findall("cac:AllowanceCharge", NS)
-                  if (_t(ac, "cbc:ChargeIndicator") or "").strip().lower() == "false"]
-    suma_descuentos = sum((Decimal(d["importe"]) for d in descuentos), Decimal("0.00"))
+    descuentos = [{"codigo": _t(cargo, "cbc:AllowanceChargeReasonCode"), "importe": str(monto(_t(cargo, "cbc:Amount")))}
+                  for cargo in raiz.findall("cac:AllowanceCharge", NS)
+                  if (_t(cargo, "cbc:ChargeIndicator") or "").strip().lower() == "false"]
+    suma_descuentos = sum((Decimal(descuento["importe"]) for descuento in descuentos), Decimal("0.00"))
     dscto_base = dscto_igv = Decimal("0.00")
     if (tipo_cp in ("07", "87") and libro.es_venta and base_gravada > 0
             and abs(suma_descuentos - base_gravada) <= Decimal("0.05")):
@@ -187,36 +187,37 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
     forma_pago = ""
     detraccion: dict | None = None
     retencion: dict | None = None
-    for pt in raiz.findall("cac:PaymentTerms", NS):
-        ident = _t(pt, "cbc:ID")
-        medio = _t(pt, "cbc:PaymentMeansID")
+    for termino in raiz.findall("cac:PaymentTerms", NS):
+        ident = _t(termino, "cbc:ID")
+        medio = _t(termino, "cbc:PaymentMeansID")
         if ident == "FormaPago":
             if medio.lower().startswith("cuota"):
-                f = fecha(_t(pt, "cbc:PaymentDueDate") or None)
-                if f:
-                    cuotas.append(f)
+                cuota = fecha(_t(termino, "cbc:PaymentDueDate") or None)
+                if cuota:
+                    cuotas.append(cuota)
             elif medio:
                 forma_pago = medio
         elif ident == "Detraccion":
             detraccion = {
                 "codigo": medio,
-                "porcentaje": _t(pt, "cbc:PaymentPercent"),
-                "monto": str(monto(_t(pt, "cbc:Amount"))),
+                "porcentaje": _t(termino, "cbc:PaymentPercent"),
+                "monto": str(monto(_t(termino, "cbc:Amount"))),
             }
         elif ident == "Retencion":
-            retencion = {"porcentaje": _t(pt, "cbc:PaymentPercent"), "monto": str(monto(_t(pt, "cbc:Amount")))}
+            retencion = {"porcentaje": _t(termino, "cbc:PaymentPercent"),
+                         "monto": str(monto(_t(termino, "cbc:Amount")))}
     if detraccion is not None:
         cuenta = ""
-        for pm in raiz.findall("cac:PaymentMeans", NS):
-            if _t(pm, "cbc:ID") == "Detraccion":
-                cuenta = _t(pm, "cac:PayeeFinancialAccount/cbc:ID")
+        for medio_pago in raiz.findall("cac:PaymentMeans", NS):
+            if _t(medio_pago, "cbc:ID") == "Detraccion":
+                cuenta = _t(medio_pago, "cac:PayeeFinancialAccount/cbc:ID")
         if cuenta:
             detraccion["cuenta"] = cuenta
     vencimiento = max(cuotas) if cuotas else fecha(_t(raiz, "cbc:DueDate") or None)
     # La condición de pago pasa al registro (`Comprobante.condicion_pago`); `datos_originales.forma_pago` sigue
     # guardando el texto tal como vino. Una factura con cuotas es a crédito aunque no lo diga en letras.
-    fp = forma_pago.strip().lower()
-    condicion_pago = "credito" if cuotas or fp.startswith(("credito", "crédito")) else ("contado" if fp == "contado" else "")
+    forma_normalizada = forma_pago.strip().lower()
+    condicion_pago = "credito" if cuotas or forma_normalizada.startswith(("credito", "crédito")) else ("contado" if forma_normalizada == "contado" else "")
 
     # --- Documento modificado (notas) ----------------------------------------
     ref_serie = ref_numero = ref_tipo = ""
@@ -226,19 +227,19 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         if ref is not None:
             ref_serie, ref_numero = _partir_id(_t(ref, "cbc:ID"))
             ref_tipo = _t(ref, "cbc:DocumentTypeCode")[:2]
-        disc = raiz.find("cac:DiscrepancyResponse", NS)
-        if disc is not None:
+        discrepancia = raiz.find("cac:DiscrepancyResponse", NS)
+        if discrepancia is not None:
             motivo = {
-                "referencia": _t(disc, "cbc:ReferenceID"),
-                "codigo": _t(disc, "cbc:ResponseCode"),
-                "descripcion": _t(disc, "cbc:Description"),
+                "referencia": _t(discrepancia, "cbc:ReferenceID"),
+                "codigo": _t(discrepancia, "cbc:ResponseCode"),
+                "descripcion": _t(discrepancia, "cbc:Description"),
             }
             if not ref_numero and motivo["referencia"]:
                 ref_serie, ref_numero = _partir_id(motivo["referencia"])
 
     # --- Concepto: la primera línea ------------------------------------------
-    linea_tag = {"Invoice": "cac:InvoiceLine", "CreditNote": "cac:CreditNoteLine", "DebitNote": "cac:DebitNoteLine"}[local]
-    concepto = _t(raiz, f"{linea_tag}/cac:Item/cbc:Description")[:100]
+    etiqueta_linea = {"Invoice": "cac:InvoiceLine", "CreditNote": "cac:CreditNoteLine", "DebitNote": "cac:DebitNoteLine"}[local]
+    concepto = _t(raiz, f"{etiqueta_linea}/cac:Item/cbc:Description")[:100]
 
     datos_originales = {
         "ubl": version,

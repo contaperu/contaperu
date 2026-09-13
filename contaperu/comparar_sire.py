@@ -90,8 +90,8 @@ def registro_de(rutas: list[str | Path], forzado: str = "") -> Registro:
     """
     if forzado:
         return VENTAS if forzado == "venta" else COMPRAS
-    marcas = {("1404" in Path(r).name) and "venta" or ("0804" in Path(r).name) and "compra"
-              for r in rutas}
+    marcas = {("1404" in Path(ruta).name) and "venta" or ("0804" in Path(ruta).name) and "compra"
+              for ruta in rutas}
     marcas.discard(False)
     if marcas == {"venta"}:
         return VENTAS
@@ -101,67 +101,72 @@ def registro_de(rutas: list[str | Path], forzado: str = "") -> Registro:
                      "(se busca 1404 o 0804). Indícalo con --registro venta|compra.")
 
 
-def clave(f: list[str], reg: Registro = VENTAS) -> tuple:
+def clave(fila: list[str], reg: Registro = VENTAS) -> tuple:
     """Identidad del comprobante: tipo + serie + número, y en COMPRAS también el proveedor."""
-    campo = lambda i: f[i - 1].strip() if len(f) >= i else ""  # noqa: E731
-    k = (f[6].strip(), f[7].strip().upper(), campo(reg.i_numero).lstrip("0"))
-    return k + (campo(reg.i_contraparte),) if reg.i_contraparte else k
+    campo = lambda posicion: fila[posicion - 1].strip() if len(fila) >= posicion else ""  # noqa: E731
+    identidad = (fila[6].strip(), fila[7].strip().upper(), campo(reg.i_numero).lstrip("0"))
+    return identidad + (campo(reg.i_contraparte),) if reg.i_contraparte else identidad
 
 
-def _norm(i: int, v: str, reg: Registro = VENTAS) -> str:
-    v = (v or "").strip()
-    if i in reg.importes or i == reg.i_tc:   # importes y tipo de cambio
-        if v in ("", "0", "0.00", "1.000"):  # el TC en soles va vacío en el reemplazo
+def _norm(posicion: int, valor: str, reg: Registro = VENTAS) -> str:
+    valor = (valor or "").strip()
+    if posicion in reg.importes or posicion == reg.i_tc:   # importes y tipo de cambio
+        if valor in ("", "0", "0.00", "1.000"):  # el TC en soles va vacío en el reemplazo
             return ""
         try:
-            return str(Decimal(v).normalize())
+            return str(Decimal(valor).normalize())
         except InvalidOperation:
-            return v
-    if i == reg.i_numero:                    # número: 0000256 y 256 son el mismo
-        return v.lstrip("0")
-    return v
+            return valor
+    if posicion == reg.i_numero:                    # número: 0000256 y 256 son el mismo
+        return valor.lstrip("0")
+    return valor
 
 
 def comparar(nuestras: list[list[str]], suyas: list[list[str]], reg: Registro = VENTAS) -> dict:
     """Alinea por comprobante y devuelve qué falta, qué sobra y qué no coincide."""
-    mias = {clave(f, reg): f for f in nuestras}
-    suyas_d = {clave(f, reg): f for f in suyas}
-    comunes = sorted(set(mias) & set(suyas_d))
-    difs = []
-    for k in comunes:
-        a, b = suyas_d[k], mias[k]
-        for i in range(1, min(len(reg.campos), len(a), len(b)) + 1):
-            if i in IGNORAR:
+    nuestras_por_clave = {clave(fila, reg): fila for fila in nuestras}
+    suyas_por_clave = {clave(fila, reg): fila for fila in suyas}
+    comunes = sorted(set(nuestras_por_clave) & set(suyas_por_clave))
+    diferencias = []
+    for identidad in comunes:
+        de_sunat, nuestra = suyas_por_clave[identidad], nuestras_por_clave[identidad]
+        for posicion in range(1, min(len(reg.campos), len(de_sunat), len(nuestra)) + 1):
+            if posicion in IGNORAR:
                 continue
-            va, vb = _norm(i, a[i - 1], reg), _norm(i, b[i - 1], reg)
-            if va != vb:
-                difs.append({"comprobante": "-".join(k), "campo": i,
-                             "nombre": reg.campos[i - 1], "sunat": a[i - 1], "nuestro": b[i - 1]})
+            valor_sunat = _norm(posicion, de_sunat[posicion - 1], reg)
+            valor_nuestro = _norm(posicion, nuestra[posicion - 1], reg)
+            if valor_sunat != valor_nuestro:
+                diferencias.append({"comprobante": "-".join(identidad), "campo": posicion,
+                                    "nombre": reg.campos[posicion - 1],
+                                    "sunat": de_sunat[posicion - 1], "nuestro": nuestra[posicion - 1]})
     return {
         "registro": reg.tipo,
         "comunes": comunes,
-        "solo_en_sunat": sorted(set(suyas_d) - set(mias)),
-        "solo_nuestros": sorted(set(mias) - set(suyas_d)),
-        "diferencias": difs,
+        "solo_en_sunat": sorted(set(suyas_por_clave) - set(nuestras_por_clave)),
+        "solo_nuestros": sorted(set(nuestras_por_clave) - set(suyas_por_clave)),
+        "diferencias": diferencias,
     }
 
 
-def informe(r: dict) -> str:
-    lineas = [f"Registro de {r.get('registro', 'venta')}s: {len(r['comunes'])} comprobantes en los dos - "
-              f"{len(r['solo_en_sunat'])} solo en SUNAT · {len(r['solo_nuestros'])} solo nuestros"]
+def informe(comparacion: dict) -> str:
+    lineas = [f"Registro de {comparacion.get('registro', 'venta')}s: {len(comparacion['comunes'])} comprobantes "
+              f"en los dos - {len(comparacion['solo_en_sunat'])} solo en SUNAT · "
+              f"{len(comparacion['solo_nuestros'])} solo nuestros"]
     # Con el proveedor en la clave (compras), un RUC mal escrito deja de ser una
     # diferencia de campo y aparece como uno que falta + otro que sobra. Se dice, para
     # que no parezcan dos problemas cuando es uno.
-    sospechosos = {k[:3] for k in r["solo_en_sunat"]} & {k[:3] for k in r["solo_nuestros"]}
-    for k in r["solo_en_sunat"]:
-        lineas.append(f"  FALTA en lo nuestro: {'-'.join(k)}")
-    for k in r["solo_nuestros"]:
-        lineas.append(f"  SOBRA (SUNAT no lo tiene): {'-'.join(k)}")
-    for k in sorted(sospechosos):
-        lineas.append(f"  ^ {'-'.join(k)} está en los dos con distinto proveedor: revisa el RUC")
-    if not r["diferencias"]:
-        lineas.append("  Sin diferencias en los campos informados." if r["comunes"] else "  Nada que comparar.")
-    for d in r["diferencias"]:
-        lineas.append(f"  {d['comprobante']} - campo {d['campo']} ({d['nombre']}): "
-                      f"SUNAT [{d['sunat']}] != nuestro [{d['nuestro']}]")
+    sospechosos = ({identidad[:3] for identidad in comparacion["solo_en_sunat"]}
+                   & {identidad[:3] for identidad in comparacion["solo_nuestros"]})
+    for identidad in comparacion["solo_en_sunat"]:
+        lineas.append(f"  FALTA en lo nuestro: {'-'.join(identidad)}")
+    for identidad in comparacion["solo_nuestros"]:
+        lineas.append(f"  SOBRA (SUNAT no lo tiene): {'-'.join(identidad)}")
+    for identidad in sorted(sospechosos):
+        lineas.append(f"  ^ {'-'.join(identidad)} está en los dos con distinto proveedor: revisa el RUC")
+    if not comparacion["diferencias"]:
+        lineas.append("  Sin diferencias en los campos informados." if comparacion["comunes"]
+                      else "  Nada que comparar.")
+    for diferencia in comparacion["diferencias"]:
+        lineas.append(f"  {diferencia['comprobante']} - campo {diferencia['campo']} ({diferencia['nombre']}): "
+                      f"SUNAT [{diferencia['sunat']}] != nuestro [{diferencia['nuestro']}]")
     return "\n".join(lineas)

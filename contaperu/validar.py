@@ -39,93 +39,100 @@ def _meses_hasta(libro: Libro, fecha) -> int:
 
 def validar(c: Comprobante, libro: Libro) -> None:
     """Aplica todas las reglas a un comprobante (añade observaciones, no las borra)."""
-    e, a = (lambda cod, txt: c.observar(cod, "error", txt)), (lambda cod, txt: c.observar(cod, "aviso", txt))
+    def error(codigo: str, texto: str) -> None:
+        c.observar(codigo, "error", texto)
+
+    def aviso(codigo: str, texto: str) -> None:
+        c.observar(codigo, "aviso", texto)
 
     # --- Identificación ------------------------------------------------------
     if c.tipo_cp not in cat.TIPOS_CP:
-        a("TIPO_CP_DESCONOCIDO", f"Tipo de comprobante {c.tipo_cp!r} no está en el catálogo")
+        aviso("TIPO_CP_DESCONOCIDO", f"Tipo de comprobante {c.tipo_cp!r} no está en el catálogo")
     if not c.numero:
-        e("NUMERO_FALTA", "Falta el número del comprobante")
+        error("NUMERO_FALTA", "Falta el número del comprobante")
     if not c.serie and c.tipo_cp in ("01", "03", "07", "08"):
-        e("SERIE_FALTA", "Falta la serie del comprobante")
+        error("SERIE_FALTA", "Falta la serie del comprobante")
 
     # La propuesta del SIRE es el REGISTRO, no el comprobante: trae importes y partes,
     # pero no el detalle. Se avisa aquí para que no se descubra al exportar a CONCAR.
     if c.origen == "sire":
-        a("SIRE_SIN_DETALLE", "Importado de la propuesta del SIRE: SUNAT da los importes y las partes, "
-                              "pero no el detalle del comprobante (falta el concepto y la cuenta contable)")
+        aviso("SIRE_SIN_DETALLE", "Importado de la propuesta del SIRE: SUNAT da los importes y las partes, "
+                                  "pero no el detalle del comprobante (falta el concepto y la cuenta contable)")
 
     # --- Fechas ---------------------------------------------------------------
     if c.fecha_emision is None:
-        e("FECHA_FALTA", "Falta la fecha de emisión")
+        error("FECHA_FALTA", "Falta la fecha de emisión")
     else:
-        ym = (c.fecha_emision.year, c.fecha_emision.month)
-        if ym > (libro.anio, libro.mes):
-            e("FECHA_POSTERIOR", f"Emitido el {c.fecha_emision:%d/%m/%Y}, después del periodo {libro.periodo}")
-        elif ym < (libro.anio, libro.mes):
+        anio_mes = (c.fecha_emision.year, c.fecha_emision.month)
+        if anio_mes > (libro.anio, libro.mes):
+            error("FECHA_POSTERIOR", f"Emitido el {c.fecha_emision:%d/%m/%Y}, después del periodo {libro.periodo}")
+        elif anio_mes < (libro.anio, libro.mes):
             if libro.es_venta:
                 # En ventas no hay plazo de anotación: la obligación nace con la emisión (Ley del IGV,
                 # art. 4), así que una venta del mes pasado anotada aquí es IGV del mes pasado.
-                a("PERIODO_ANTERIOR", f"Emitido en {c.fecha_emision:%m/%Y}: en ventas el IGV nace en la fecha de emisión (Ley del IGV, art. 4), no en la de anotación")
+                aviso("PERIODO_ANTERIOR", f"Emitido en {c.fecha_emision:%m/%Y}: en ventas el IGV nace en la fecha de emisión (Ley del IGV, art. 4), no en la de anotación")
             else:
                 # Compras: dentro del plazo se anota aquí y no hay nada que observar (PLAZO_ANOTACION_MESES).
                 # La referencia es la emisión; en un documento aduanero, la fecha de pago del impuesto
                 # («o del pago del Impuesto»), que el RCE lleva en el campo 6.
-                ref = c.fecha_vencimiento if c.tipo_cp in cat.ADUANEROS and c.fecha_vencimiento else c.fecha_emision
-                if _meses_hasta(libro, ref) > PLAZO_ANOTACION_MESES:
-                    a("CREDITO_FISCAL_FUERA_DE_PLAZO", f"Emitido en {c.fecha_emision:%m/%Y}, hace más de {PLAZO_ANOTACION_MESES} meses: fuera del plazo de anotación en el Registro de Compras (Ley 29215, art. 2)")
+                fecha_referencia = (c.fecha_vencimiento if c.tipo_cp in cat.ADUANEROS and c.fecha_vencimiento
+                                    else c.fecha_emision)
+                if _meses_hasta(libro, fecha_referencia) > PLAZO_ANOTACION_MESES:
+                    aviso("CREDITO_FISCAL_FUERA_DE_PLAZO", f"Emitido en {c.fecha_emision:%m/%Y}, hace más de {PLAZO_ANOTACION_MESES} meses: fuera del plazo de anotación en el Registro de Compras (Ley 29215, art. 2)")
     if not libro.es_venta:
         # Retención de 4ta: solo existe en el recibo por honorarios y nunca puede
         # pasarse del total (el neto que se paga saldría negativo en el asiento).
         if c.retencion > 0:
             if c.tipo_cp != "02":
-                a("RETENCION_NO_APLICA", "La retención de 4ta solo se registra en recibos por honorarios; aquí no se usará")
+                aviso("RETENCION_NO_APLICA", "La retención de 4ta solo se registra en recibos por honorarios; aquí no se usará")
             elif c.retencion > c.total:
-                e("RETENCION_MAYOR", f"La retención ({c.retencion}) es mayor que el total del recibo ({c.total})")
+                error("RETENCION_MAYOR", f"La retención ({c.retencion}) es mayor que el total del recibo ({c.total})")
             elif c.total > 0:
                 # La retención de 4ta es el 8 % del honorario BRUTO. Si el porcentaje sale
                 # lejos de 8, casi siempre es que el total quedó con el NETO recibido (que
                 # ya tiene la retención descontada): 26.09 sobre 300 da 8.7 %, sobre 326.09 da 8.
                 tasa = (c.retencion / c.total * 100).quantize(Decimal("0.01"))
                 if abs(tasa - Decimal("8")) > Decimal("0.5"):
-                    a("RETENCION_TASA", f"La retención es el {tasa} % del total: revisa que el total sea el honorario bruto, no el neto recibido")
+                    aviso("RETENCION_TASA", f"La retención es el {tasa} % del total: revisa que el total sea el honorario bruto, no el neto recibido")
         if c.tipo_cp in cat.EXIGEN_VENCIMIENTO and c.fecha_vencimiento is None:
-            e("VENCIMIENTO_FALTA", f"El tipo {c.tipo_cp} exige fecha de vencimiento o de pago")
+            error("VENCIMIENTO_FALTA", f"El tipo {c.tipo_cp} exige fecha de vencimiento o de pago")
         if c.tipo_cp in cat.ADUANEROS and not c.anio_dua:
-            e("ANIO_DUA_FALTA", "Los documentos aduaneros llevan el año de la DUA")
+            error("ANIO_DUA_FALTA", "Los documentos aduaneros llevan el año de la DUA")
 
     # --- Contraparte ------------------------------------------------------------
-    doc = solo_digitos(c.contraparte_doc) if c.contraparte_tipo_doc in ("1", "6") else c.contraparte_doc
+    documento = solo_digitos(c.contraparte_doc) if c.contraparte_tipo_doc in ("1", "6") else c.contraparte_doc
     quien = "cliente" if libro.es_venta else "proveedor"
-    if not doc:
+    if not documento:
         if c.tipo_cp not in cat.SIN_CONTRAPARTE_OK:
-            e("CONTRAPARTE_FALTA", f"Falta el documento del {quien}")
+            error("CONTRAPARTE_FALTA", f"Falta el documento del {quien}")
         elif libro.es_venta and c.total >= Decimal("700.00") and c.tipo_cp == "03" and not c.numero_final:
-            a("BOLETA_SIN_DOC", "Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)")
-    elif c.contraparte_tipo_doc == "6" and not cat.ruc_valido(doc):
-        e("RUC_INVALIDO", f"El RUC del {quien} ({c.contraparte_doc}) no es válido")
-    elif c.contraparte_tipo_doc == "1" and len(doc) != 8:
-        e("DNI_INVALIDO", f"El DNI del {quien} ({c.contraparte_doc}) debe tener 8 dígitos")
+            aviso("BOLETA_SIN_DOC", "Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)")
+    elif c.contraparte_tipo_doc == "6" and not cat.ruc_valido(documento):
+        error("RUC_INVALIDO", f"El RUC del {quien} ({c.contraparte_doc}) no es válido")
+    elif c.contraparte_tipo_doc == "1" and len(documento) != 8:
+        error("DNI_INVALIDO", f"El DNI del {quien} ({c.contraparte_doc}) debe tener 8 dígitos")
     if not libro.es_venta and c.tipo_cp == "03" and c.igv > 0 and c.destino_igv != "DNG":
-        a("COMPRA_BOLETA", "Boleta de venta recibida: no da crédito fiscal, su IGV es costo. En el lápiz, 'Uso de la compra' → 'Solo para ventas sin IGV'")
+        aviso("COMPRA_BOLETA", "Boleta de venta recibida: no da crédito fiscal, su IGV es costo. En el lápiz, 'Uso de la compra' → 'Solo para ventas sin IGV'")
     if not c.contraparte_nombre and c.tipo_cp not in cat.SIN_CONTRAPARTE_OK:
-        a("NOMBRE_FALTA", f"Falta la razón social del {quien}")
+        aviso("NOMBRE_FALTA", f"Falta la razón social del {quien}")
 
     # --- Moneda -------------------------------------------------------------------
     if len(c.moneda) != 3 or not c.moneda.isalpha():
-        e("MONEDA_INVALIDA", f"Moneda {c.moneda!r} no es un código ISO")
+        error("MONEDA_INVALIDA", f"Moneda {c.moneda!r} no es un código ISO")
     elif c.moneda != "PEN" and not c.tipo_cambio:
-        e("TC_FALTA", f"Comprobante en {c.moneda}: falta el tipo de cambio (SUNAT lo exige)")
+        error("TC_FALTA", f"Comprobante en {c.moneda}: falta el tipo de cambio (SUNAT lo exige)")
 
     # --- Importes --------------------------------------------------------------------
     if c.base_gravada > 0 or c.igv > 0:
         esperado = c.base_gravada * Decimal(cat.TASA_IGV)
         if not _cuadra(c.igv, esperado):
-            reducida = next((t for t in cat.TASAS_IGV_REDUCIDAS if _cuadra(c.igv, c.base_gravada * Decimal(t))), None)
+            reducida = next((candidata for candidata in cat.TASAS_IGV_REDUCIDAS
+                             if _cuadra(c.igv, c.base_gravada * Decimal(candidata))), None)
             if reducida:
-                a("IGV_TASA_REDUCIDA", f"IGV al {Decimal(reducida) * 100:.1f} % (tasa reducida); verifica que corresponda")
+                aviso("IGV_TASA_REDUCIDA", f"IGV al {Decimal(reducida) * 100:.1f} % (tasa reducida); verifica que corresponda")
             else:
-                e("IGV_NO_CUADRA", f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} (esperado {esperado:.2f})")
+                error("IGV_NO_CUADRA",
+                      f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} (esperado {esperado:.2f})")
     # Sin los descuentos: la base y el IGV ya son netos (estandar/LEEME.md, open-accounting 0.2).
     esperado_total = (
         c.base_gravada + c.igv + c.exonerado + c.inafecto + c.exportacion + c.isc
@@ -134,59 +141,60 @@ def validar(c: Comprobante, libro: Libro) -> None:
     if not _cuadra(c.total, esperado_total):
         anticipo = Decimal(str(c.datos_originales.get("anticipo") or "0"))
         if anticipo > 0 and _cuadra(c.total, esperado_total - anticipo):
-            a("ANTICIPO", f"El total descuenta un anticipo de {anticipo}; revisa la base a anotar")
+            aviso("ANTICIPO", f"El total descuenta un anticipo de {anticipo}; revisa la base a anotar")
         else:
-            e("TOTAL_NO_CUADRA", f"Total {c.total} no cuadra con base + IGV + no gravado + otros ({esperado_total:.2f})")
+            error("TOTAL_NO_CUADRA", f"Total {c.total} no cuadra con base + IGV + no gravado + otros ({esperado_total:.2f})")
     # En una NC los descuentos van con el mismo signo que la base (SIRE, campos 15 y 16): son la parte de la
     # base y del IGV que se informa aparte, así que no pueden pasarlos, o el campo 15 cambiaría de signo.
     if c.es_nota_credito and (c.dscto_base > c.base_gravada or c.dscto_igv > c.igv):
-        e("DSCTO_MAYOR_QUE_BASE", f"La parte que va como descuento ({c.dscto_base}; IGV {c.dscto_igv}) no puede "
-                                  f"ser mayor que la base ({c.base_gravada}) y el IGV ({c.igv}) de la nota")
+        error("DSCTO_MAYOR_QUE_BASE", f"La parte que va como descuento ({c.dscto_base}; IGV {c.dscto_igv}) no puede "
+                                      f"ser mayor que la base ({c.base_gravada}) y el IGV ({c.igv}) de la nota")
     if c.total == 0 and not c.es_nota:
-        a("TOTAL_CERO", "Importe total en cero")
+        aviso("TOTAL_CERO", "Importe total en cero")
 
     # --- Detracción ------------------------------------------------------------------------------
     # La tasa con la que va a salir, contra la de la tabla del contribuyente para ese código (la anota
     # `detracciones.normalizar`). Si no coinciden, casi siempre es que la IA leyó mal la tasa —John,
     # 10-sep-2026: «la IA lee un 10 % y el código es del 12 %»—. Aviso y no error: la del comprobante
     # puede ser legítima. Desaparece en cuanto se vuelve a elegir el código, que aplica la de la tabla.
-    det = c.detraccion if isinstance(c.detraccion, dict) else None
-    if det and det.get("porcentaje") not in (None, "") and det.get("tasa_tabla") not in (None, ""):
+    detraccion = c.detraccion if isinstance(c.detraccion, dict) else None
+    if detraccion and detraccion.get("porcentaje") not in (None, "") and detraccion.get("tasa_tabla") not in (None, ""):
         try:
-            leida, de_tabla = Decimal(str(det["porcentaje"])), Decimal(str(det["tasa_tabla"]))
+            leida, de_tabla = Decimal(str(detraccion["porcentaje"])), Decimal(str(detraccion["tasa_tabla"]))
         except Exception:  # noqa: BLE001 — una tasa ilegible no es motivo para romper la validación
             leida = de_tabla = None
         if leida is not None and leida != de_tabla:
-            a("DETRACCION_TASA_DISTINTA",
-              f"La detracción {det.get('codigo')} va al {format(leida.normalize(), 'f')} % y tu tabla dice "
-              f"{format(de_tabla.normalize(), 'f')} %: si es la de la tabla, vuelve a elegir el código")
+            aviso("DETRACCION_TASA_DISTINTA",
+                  f"La detracción {detraccion.get('codigo')} va al {format(leida.normalize(), 'f')} % y tu tabla dice "
+                  f"{format(de_tabla.normalize(), 'f')} %: si es la de la tabla, vuelve a elegir el código")
 
     # --- Notas de crédito / débito -------------------------------------------------------
     if c.es_nota:
         if not (c.ref_tipo_cp and c.ref_numero):
-            e("NOTA_SIN_REFERENCIA", "La nota no indica el comprobante que modifica (tipo, serie y número)")
+            error("NOTA_SIN_REFERENCIA", "La nota no indica el comprobante que modifica (tipo, serie y número)")
         if c.ref_fecha is None:
-            e("NOTA_SIN_FECHA_REF", "Falta la fecha del comprobante modificado (el XML no la trae; complétala)")
+            error("NOTA_SIN_FECHA_REF", "Falta la fecha del comprobante modificado (el XML no la trae; complétala)")
 
     # --- Procedencia -------------------------------------------------------------------------
     if c.origen == "xml":
         emisor = solo_digitos((c.datos_originales.get("emisor") or {}).get("doc", ""))
         adquirente = solo_digitos((c.datos_originales.get("adquirente") or {}).get("doc", ""))
         if libro.es_venta and emisor and emisor != libro.ruc:
-            e("XML_DE_OTRO_RUC", f"El XML lo emitió el RUC {emisor}, no {libro.ruc}: no es una venta de este cliente")
+            error("XML_DE_OTRO_RUC",
+                  f"El XML lo emitió el RUC {emisor}, no {libro.ruc}: no es una venta de este cliente")
         if not libro.es_venta and adquirente and adquirente != libro.ruc:
-            e("XML_PARA_OTRO_RUC", f"El XML está emitido al RUC {adquirente}, no a {libro.ruc}: no es una compra de este cliente")
+            error("XML_PARA_OTRO_RUC", f"El XML está emitido al RUC {adquirente}, no a {libro.ruc}: no es una compra de este cliente")
         gratuitas = Decimal(str(c.datos_originales.get("gratuitas") or "0"))
         if gratuitas > 0:
-            a("GRATUITAS", f"Incluye operaciones gratuitas por {gratuitas} (no van al registro)")
+            aviso("GRATUITAS", f"Incluye operaciones gratuitas por {gratuitas} (no van al registro)")
     if c.origen in ("pdf_texto", "vision"):
         # La IA puede confundir emisor y cliente o leer mal un dígito: se avisa, no se bloquea.
         emisor = solo_digitos((c.datos_originales.get("emisor") or {}).get("doc", ""))
         adquirente = solo_digitos((c.datos_originales.get("adquirente") or {}).get("doc", ""))
         if libro.es_venta and len(emisor) == 11 and emisor != libro.ruc:
-            a("EMISOR_NO_COINCIDE", f"La IA leyó como emisor el RUC {emisor}, no {libro.ruc}: ¿es una venta de este cliente?")
+            aviso("EMISOR_NO_COINCIDE", f"La IA leyó como emisor el RUC {emisor}, no {libro.ruc}: ¿es una venta de este cliente?")
         if not libro.es_venta and len(adquirente) == 11 and adquirente != libro.ruc:
-            a("ADQUIRENTE_NO_COINCIDE", f"La IA leyó que está emitido al RUC {adquirente}, no a {libro.ruc}: ¿es una compra de este cliente?")
+            aviso("ADQUIRENTE_NO_COINCIDE", f"La IA leyó que está emitido al RUC {adquirente}, no a {libro.ruc}: ¿es una compra de este cliente?")
         # Que un comprobante no lleve IGV NO es una observación (regla de contabilidad): la
         # columna "Afecto a IGV" ya lo dice en la propia tabla y se corrige ahí mismo con
         # el desplegable. Avisarlo además convertía en "observado" —el color de "esto

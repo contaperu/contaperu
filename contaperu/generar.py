@@ -180,20 +180,20 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers
     if cuerpo:
         cuerpo += opciones.nueva_linea
     if opciones.sanear:
-        txt = cuerpo.encode(opciones.codificacion)      # tras sanear() es ASCII: no puede fallar
+        texto = cuerpo.encode(opciones.codificacion)      # tras sanear() es ASCII: no puede fallar
     else:
-        txt = cuerpo.encode("cp1252", errors="replace")  # lo que históricamente exigían los libros electrónicos
+        texto = cuerpo.encode("cp1252", errors="replace")  # lo que históricamente exigían los libros electrónicos
 
     nombre = modulo.nombre(libro, opciones)
     nombre_comprimido = nombre.rsplit(".", 1)[0] + ".zip"
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+    memoria = io.BytesIO()
+    with zipfile.ZipFile(memoria, "w", zipfile.ZIP_DEFLATED) as archivo_zip:
         info = zipfile.ZipInfo(nombre, date_time=(1980, 1, 1, 0, 0, 0))
         info.compress_type = zipfile.ZIP_DEFLATED
-        z.writestr(info, txt)
+        archivo_zip.writestr(info, texto)
 
     return Exportado(
         nombre=nombre, nombre_comprimido=nombre_comprimido, formato=formato, driver=driver,
-        texto=txt, comprimido=buf.getvalue(), comprobantes=len(incluidos),
+        texto=texto, comprimido=memoria.getvalue(), comprobantes=len(incluidos),
         resumen=_resumen(comprobantes, incluidos, errores, opciones, fuera),
     )

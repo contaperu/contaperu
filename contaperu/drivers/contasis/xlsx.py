@@ -18,23 +18,23 @@ def escribir_xlsx(libro: Libro, filas: list[dict[str, Any]]) -> bytes:
     con el formato de su clase. Una celda `None` no se escribe."""
     import openpyxl
 
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = datos.HOJAS[libro.tipo]
+    libro_excel = openpyxl.Workbook()
+    hoja = libro_excel.active
+    hoja.title = datos.HOJAS[libro.tipo]
     columnas = datos.COLUMNAS[libro.tipo]
     for letra, _, _, _ in columnas:
-        ws.column_dimensions[letra].width = datos.ANCHOS[libro.tipo][letra]
-    for n, fila in enumerate(filas, start=1):
+        hoja.column_dimensions[letra].width = datos.ANCHOS[libro.tipo][letra]
+    for numero_fila, fila in enumerate(filas, start=1):
         for letra, _, clase, _ in columnas:
             valor = fila.get(letra)
             if valor is None:
                 continue
-            celda = ws[f"{letra}{n}"]
+            celda = hoja[f"{letra}{numero_fila}"]
             celda.value = valor
             celda.number_format = datos.FORMATO_CELDA[clase]
-    buf = io.BytesIO()
-    wb.save(buf)
-    return buf.getvalue()
+    salida = io.BytesIO()
+    libro_excel.save(salida)
+    return salida.getvalue()
 
 
 def desde_comprobantes(libro: Libro, comprobantes: list[Comprobante], config: dict,

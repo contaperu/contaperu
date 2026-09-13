@@ -36,53 +36,53 @@ def escribir_xlsx(filas: list[dict[str, Any]]) -> bytes:
     import openpyxl
     from openpyxl.styles import Alignment, Font, PatternFill
 
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = HOJA
+    libro_excel = openpyxl.Workbook()
+    hoja = libro_excel.active
+    hoja.title = HOJA
     # Formato de la plantilla oficial de CONCAR: titulos
     # en azul marino con letra blanca, notas sin relleno con la fila alta, panel
     # congelado en A4 y autofiltro sobre la fila de formatos.
-    fill_titulo = PatternFill(start_color="191970", end_color="191970", fill_type="solid")
-    font_titulo = Font(name="Aptos Narrow", size=11, bold=True, color="FFFFFF")
-    font_nota = Font(name="Aptos Narrow", size=11)
-    font_datos = Font(name="Aptos Narrow", size=11)
-    align_titulo = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    align_nota = Alignment(vertical="top", wrap_text=True)
-    align_formato = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    for col, header in CABECERAS["titulos"].items():
-        cell = ws[f"{col}1"]
-        cell.value, cell.fill, cell.font, cell.alignment = header, fill_titulo, font_titulo, align_titulo
-    for col, desc in CABECERAS["notas"].items():
-        cell = ws[f"{col}2"]
-        cell.value, cell.font, cell.alignment = desc, font_nota, align_nota
-    for col, fmt in CABECERAS["formatos"].items():
-        cell = ws[f"{col}3"]
-        cell.value, cell.font, cell.alignment = fmt, font_nota, align_formato
-    ws["A3"].font = Font(name="Aptos Narrow", size=11, bold=True)
-    ws.row_dimensions[1].height = 45
-    ws.row_dimensions[2].height = 120
-    ws.row_dimensions[3].height = 30
-    for idx, fila in enumerate(filas, start=4):
-        ws.row_dimensions[idx].height = 15.8
-        for col, valor in fila.items():
+    relleno_titulo = PatternFill(start_color="191970", end_color="191970", fill_type="solid")
+    letra_titulo = Font(name="Aptos Narrow", size=11, bold=True, color="FFFFFF")
+    letra_nota = Font(name="Aptos Narrow", size=11)
+    letra_datos = Font(name="Aptos Narrow", size=11)
+    alineado_titulo = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    alineado_nota = Alignment(vertical="top", wrap_text=True)
+    alineado_formato = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    for columna, titulo in CABECERAS["titulos"].items():
+        celda = hoja[f"{columna}1"]
+        celda.value, celda.fill, celda.font, celda.alignment = titulo, relleno_titulo, letra_titulo, alineado_titulo
+    for columna, nota in CABECERAS["notas"].items():
+        celda = hoja[f"{columna}2"]
+        celda.value, celda.font, celda.alignment = nota, letra_nota, alineado_nota
+    for columna, formato in CABECERAS["formatos"].items():
+        celda = hoja[f"{columna}3"]
+        celda.value, celda.font, celda.alignment = formato, letra_nota, alineado_formato
+    hoja["A3"].font = Font(name="Aptos Narrow", size=11, bold=True)
+    hoja.row_dimensions[1].height = 45
+    hoja.row_dimensions[2].height = 120
+    hoja.row_dimensions[3].height = 30
+    for numero_fila, fila in enumerate(filas, start=4):
+        hoja.row_dimensions[numero_fila].height = 15.8
+        for columna, valor in fila.items():
             if valor == "" or valor is None:
                 continue
-            cell = ws[f"{col}{idx}"]
-            cell.value = valor
-            cell.font = font_datos
-            if col in COLUMNAS_FECHA:
-                cell.number_format = "dd/mm/yyyy"
-            elif col in COLUMNAS_IMPORTE and isinstance(valor, (int, float)):
-                cell.number_format = "#,##0.00"
-            elif col in COLUMNAS_TEXTO:
-                cell.number_format = "@"
-    for col, ancho in ANCHOS.items():
-        ws.column_dimensions[col].width = ancho
-    ws.freeze_panes = PANEL
-    ws.auto_filter.ref = AUTOFILTRO
-    buf = io.BytesIO()
-    wb.save(buf)
-    return buf.getvalue()
+            celda = hoja[f"{columna}{numero_fila}"]
+            celda.value = valor
+            celda.font = letra_datos
+            if columna in COLUMNAS_FECHA:
+                celda.number_format = "dd/mm/yyyy"
+            elif columna in COLUMNAS_IMPORTE and isinstance(valor, (int, float)):
+                celda.number_format = "#,##0.00"
+            elif columna in COLUMNAS_TEXTO:
+                celda.number_format = "@"
+    for columna, ancho in ANCHOS.items():
+        hoja.column_dimensions[columna].width = ancho
+    hoja.freeze_panes = PANEL
+    hoja.auto_filter.ref = AUTOFILTRO
+    salida = io.BytesIO()
+    libro_excel.save(salida)
+    return salida.getvalue()
 
 
 def construir(libro: Libro, comprobantes: list[Comprobante], config: dict, correlativos: dict[str, int],
