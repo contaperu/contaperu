@@ -2,7 +2,7 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
-`pe-ledger`** va por su cuenta y se documenta en `estandar/LEEME.md`.
+`open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
 ## [0.10.0] — sin etiquetar: espera a que CONTASIS importe un archivo generado
 
@@ -15,7 +15,14 @@ asiento de CONCAR, y ningún driver decide una cuenta.
 el JSON universal `open-accounting` es el riel que recibe cualquier input, y las cuentas contables viven en la
 aplicación —en la configuración de cada entorno y en lo que el contador decide en su Revisión—. El motor recibe
 tres piezas: el documento, la imputación de cada documento y la configuración. **El Excel de CONCAR no cambia**:
-los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. El estándar pasa a la `0.3` y se llama `open-accounting`.
+los casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. El estándar pasa a la `0.3` y se llama
+`open-accounting`.
+
+**La configuración se declara, va por secciones y la valida el motor.** Decisión de John (13-sep-2026): el dato se
+guarda una vez, la contabilidad general también, y lo propio de cada sistema contable —sus códigos y en qué columnas
+de su archivo va cada dato— vive en su sección: `{"cuentas": …, "concar": {"tipos": …, "columnas": …}, "contasis":
+{"medio_pago": …}}`. El motor es de cualquier aplicación que se construya encima: cada driver declara lo que se
+configura en su sección, el motor lo valida antes de generar y se lo describe a quien pinte la pantalla.
 
 ### Añadido
 - **El driver `contasis`** (`drivers/contasis/`): el Excel de «FORMATO REGISTRO DE COMPRAS» y «FORMATO REGISTRO DE
@@ -28,8 +35,9 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
   - la boleta de compras, entera en no gravadas, y la detracción vacía;
   - el recibo por honorarios queda fuera del archivo (`EXCLUYE_TIPOS`);
   - una cuenta por documento (`cuenta_unica`), el medio de pago del entorno y las cuentas de otros tributos e ICBPER,
-    que se configuran como el resto: `CONFIG_POR_DEFECTO` gana `medio_pago` (`001`), `cuentas.otros_tributos` y
+    que se configuran como el resto: su sección declara `medio_pago` (`001`), y lo general, `cuentas.otros_tributos` y
     `cuentas.icbper` (vacías);
+  - el centro de costo también en su segunda columna de centro de costos, si su sección la elige (`columnas`);
   - anchos de columna para que el archivo se lea al abrirlo: los de la plantilla, los que ensanchó John al revisar
     el primer archivo generado, y ninguna fecha por debajo de lo que la deja ver.
 
@@ -95,12 +103,40 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
   `concar.CorrelativoDesborda`: quien exporta atrapa una sola. **`asiento.correlativos_de_partida`**, el correlativo
   de partida de cada sub-diario. Y en `modelo`, **`CENTIMO`**, **`a_decimal`**, **`texto_tasa`** y
   **`serie_y_numero`**: cada uno es la única copia de lo que se repetía.
+- **La configuración declarada** (`contaperu/configuracion.py`): `Campo` (clave, tipo, valor por defecto, patrón,
+  título, ayuda) y `Columna` (en qué columna de un archivo puede ir un dato, con su letra en compras y ventas, fija o
+  marcada), con `validar`, `por_defecto`, `describir` y `ConfiguracionInvalida`, que trae todos los errores con su
+  ruta. Se declara en tres sitios: lo general en `CONFIGURACION_GENERAL`, lo que lee el asiento en
+  `asiento.CONFIGURACION_DEL_ASIENTO` y lo propio de cada sistema en su driver (`CONFIGURACION` y
+  `COLUMNAS_ELEGIBLES`). El contrato gana `configuracion`, `columnas_elegibles`, `seccion_por_defecto`, `describir`,
+  `centro_en_anexo` y `DATOS_CON_COLUMNAS`, e `incumplimientos` examina lo declarado.
+- **`columnas`: en qué columnas va el centro de costo**, elegidas en la sección de cada sistema. En CONCAR, la M,
+  fija; la X de la línea del gasto como referencia, y la X del tercero, marcada de fábrica. En CONTASIS, su columna de
+  centro de costos, fija, y la segunda. Una aplicación guarda el centro una vez y elige dónde sale.
+- **En la fachada:** `operaciones.errores_de_configuracion`, `configuracion_por_defecto` (la forma guardada, con los
+  valores por defecto de cada sección) y `describir_configuracion` (lo que se configura, para pintar una pantalla).
+  `diagnosticar` dice `errores_de_configuracion` y el motivo `configuracion_invalida` en vez de lanzar, y
+  `generar_asiento` recibe `driver`.
+- **En las puertas:** el recurso `contaperu://configuracion` y la clave `configurable` en `contaperu://drivers` del
+  MCP, el `driver` de su `generar_asiento`, y `contaperu configuracion [--driver] [--por-defecto]` en la CLI.
+- **Los vigilantes de la configuración:** una configuración espía comprueba, por driver, que lo que se lee está
+  declarado y lo declarado se lee; dos pruebas leen el código para que ni un driver ni el núcleo pidan por su nombre
+  una clave que no les toca; y `test_frontera` comprueba que el motor no nombra ninguna aplicación.
 
 ### Cambiado (rompe)
 Sin alias ni compatibilidad hacia atrás (John, 12-sep-2026: era el momento de rebajar la deuda de nombres, con la
 arquitectura recién cambiada y contab-core sin usuarios activos, que se ajusta en la misma tanda). Los tres snapshots
 —el Excel de CONCAR, el registro de CONTASIS y las líneas neutrales— no cambian ni una celda, y julio rehecho desde
-los registros que CONTASIS importó sale igual que antes de los renombres.
+los registros que CONTASIS importó sale igual que antes de los renombres. Con la configuración por secciones
+(13-sep-2026) solo cambió la entrada de un caso: el área de la detracción de `detraccion_area_y_tipo_doc` era `9001`, y
+la sección de CONCAR rechaza un área de más de sus 3 caracteres.
+
+- **La configuración va por secciones y se valida entera**: lo general en la raíz y lo de cada sistema en su sección.
+  Una clave de un sistema en la raíz —la forma plana de antes—, una retirada o una desconocida detienen la generación
+  con `ConfiguracionInvalida` y un mensaje que dice adónde va (`CLAVES_RETIRADAS`). `generar` también la comprueba,
+  para quien lo llama directamente.
+- **La tabla de detracciones que se reconocen** son las claves de `detraccion_tasas`, que es general (`null`: se
+  reconoce sin tasa); `detraccion_codigos` queda para el código interno de CONCAR.
 
 - **El estándar se llama `open-accounting`** (antes `pe-ledger`) y pasa a la `0.3`: la clave del documento es
   `open_accounting`, el esquema `estandar/open-accounting.schema.json`, la constante `OPEN_ACCOUNTING` y el recurso
@@ -115,11 +151,11 @@ Los nombres del núcleo:
 
 | Antes | Después |
 |---|---|
-| `asiento/datos.py`, `DEFAULTS` | `asiento/configuracion.py`, `CONFIG_POR_DEFECTO`; los datos del Excel, en `drivers/concar/datos.py` |
+| `asiento/datos.py`, `DEFAULTS` | lo general en `contaperu/configuracion.py` (`CONFIG_POR_DEFECTO`, sin lo de ningún sistema), lo del asiento en `asiento/configuracion.py` (`CONFIGURACION_DEL_ASIENTO`) y lo de cada sistema en su driver; los datos del Excel, en `drivers/concar/datos.py` |
 | `EXCEL_HEADERS` (`row1`, `row2`, `row3`), `FLAG_CONVERSION` | `drivers.concar.datos.CABECERAS` (`titulos`, `notas`, `formatos`), `MARCA_CONVERSION` |
 | `asiento.asiento`, `asiento.tasa_igv`, `asiento.nombre`, `asiento.CorrelativoDesborda` | `drivers.concar.filas_de_comprobante`, `tasa_igv_entera`, `nombre`, `CorrelativoDesborda` |
 | `asiento.desde_fila`, `asiento.a_lineas`, `ETIQUETAS_SUB_DIARIO` | `drivers.concar.desde_fila` y `a_lineas`; la tabla sin uso, fuera (queda `etiquetas_sub_diario`) |
-| la configuración bajo la clave `concar`; `tipos.NN.concar`, `cc_referencia_en_x`, `cc_en_anexo_auxiliar` | plana, sin clave intermedia; `tipos.NN.sigla`, `centro_como_referencia`, `centro_en_anexo_del_tercero` |
+| la configuración bajo la clave `concar`; `tipos.NN.concar`, `cc_referencia_en_x`, `cc_en_anexo_auxiliar` | lo general en la raíz y lo de cada sistema en su sección; `concar.tipos.NN.sigla`; el centro en la X, con las columnas `anexo_auxiliar` y `anexo_auxiliar_del_tercero` de `concar.columnas.centro_costo` |
 | `tipo_concar`, `_mapa` | `sigla_documento`, `equivalencia_tipo` |
 | `asiento/construir.py` | `asiento/resolucion.py` |
 | `merge_config`, `resolve_cxp_account`, `resolve_cxp_detraccion_account` | `fundir_config`, `cuenta_por_pagar`, `cuenta_por_pagar_detraccion` |
@@ -133,7 +169,7 @@ Los nombres del núcleo:
 | `generar(…, **params)` con `contab`; `generar.lineas` | `generar(…, config=…, correlativos=…)`; `lineas_de_texto` |
 | `Exportado.txt`, `.zip`, `.nombre_zip`, `.n_filas` | `.texto`, `.comprimido`, `.nombre_comprimido`, `.comprobantes` |
 | `igv.tasa`, `detracciones.monto`, `detracciones.tasa`, `drivers.formato` | `tasa_calculada`, `monto_detraccion`, `tasa_detraccion`, `formato_de` |
-| `asiento.config_de(config_cliente, config_cuenta)` con sus tres capas; `operaciones.configuracion`, que aceptaba la forma anidada | `asiento.config_aplicada(config_contable)` y `operaciones.config_aplicada`: `CONFIG_POR_DEFECTO` con la configuración del entorno encima, plana (como la guarda contab-core desde su 049) |
+| `asiento.config_de(config_cliente, config_cuenta)` con sus tres capas; `operaciones.configuracion`, que aceptaba la forma anidada | `operaciones.config_aplicada(configuracion, driver)`: lo general con sus valores por defecto y encima la sección del destino con los suyos, plana; validada entera |
 | los parámetros `contab` y `conf`, `op`, `mod`, `venta` | `config`, `opciones`, `modulo`, `es_venta` |
 | `xml_ubl.parsear(data, tipo_libro)` | `parsear(datos, libro)`, como el lector del SIRE |
 | `lectores.archivos.Resultado`, `partida_doble.Resultado`, `pcge.cargar`, `pcge.catalogo.cargar` | `ResultadoLectura`, `Cuadre`, `cargar_equivalencias`, `cargar_catalogo` |
@@ -141,6 +177,8 @@ Los nombres del núcleo:
 | `TipoSinMapa`, `CorrelativoFaltante`, `MonedaSinCodigo` | `SinSigla`, `SinCorrelativo`, `SinCodigoDeMoneda` |
 | `RepartoNoCuadra` y `RepartoNoAdmitido` heredan de `SinCuenta` | todas las excepciones de exportar heredan de `NoExportable` |
 | `asiento.D2` | `modelo.CENTIMO` |
+| `lineas_del_comprobante` y `lineas_del_libro` leían `centro_como_referencia` y `centro_en_anexo_del_tercero` | el parámetro `centro_en_anexo` (`principal`, `tercero`), que calcula `contrato.centro_en_anexo` desde las columnas elegidas |
+| el parámetro `config` de `exportar`, `diagnosticar`, `generar_asiento` y `revisar` | `configuracion`, la forma guardada (`config` queda para la aplicada) |
 
 Las respuestas de la fachada, el MCP y la CLI (las herramientas, sus parámetros y las opciones no cambian):
 
@@ -152,6 +190,7 @@ Las respuestas de la fachada, el MCP y la CLI (las herramientas, sus parámetros
 | `con_avisos`, `con_errores` en el resumen | `con_aviso`, `con_error`, como en `diagnosticar` |
 | `_revision.total`, `_revision.bloquean_la_exportacion` | `_revision.comprobantes`, `_revision.bloqueantes` |
 | el resumen de CONCAR `filas_excel`; por sub-diario `n`, `desde_cod`, `hasta_cod` | `filas`; `comprobantes`, `desde_codigo`, `hasta_codigo` |
+| la herramienta `configuracion_por_defecto` devolvía la configuración plana | la forma por secciones, que se puede volver a pasar |
 
 `por_que_no` y la lista de la CLI siguen el orden de `asiento.FALTAS`: sigla, código de moneda, reparto no admitido,
 cuenta, reparto que no cuadra y centro.
@@ -159,6 +198,8 @@ cuenta, reparto que no cuadra y centro.
 ### Retirado
 - `Opciones.correlativo` (el campo 3 del PLE), `formato.fmt_fecha_libre` y `drivers.csv.construir`, que además se
   saltaba los requisitos del destino: no los usaba nadie.
+- `asiento.config_aplicada` (queda `operaciones.config_aplicada`, que conoce los drivers) y, en la configuración,
+  `centro_como_referencia` y `centro_en_anexo_del_tercero`: los reemplazan las columnas del centro de CONCAR.
 - **`cuenta_contable` y `centro_costo` salen del comprobante** (`open-accounting 0.3`): la cuenta y el centro de cada
   documento llegan solo en la imputación, y un documento que todavía los trae se rechaza en vez de perderlos en
   silencio. En esta rama hubo antes un `cuenta_tercero` y unas `imputaciones` dentro del comprobante: nunca se

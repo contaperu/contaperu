@@ -143,6 +143,13 @@ moneda). Con eso
 sí) y el núcleo lo hace cumplir antes de armar nada (`asiento.exigir_requisitos`). La idea es la de
 Codat `options` y Merge `/meta` (`REFERENCIAS.md`): el destino dice qué necesita antes de escribir.
 
+Y **declara lo que se configura** (desde la 0.10): las claves de su sección (`CONFIGURACION`) y en qué columnas de su
+archivo puede ir un dato (`COLUMNAS_ELEGIBLES`). La configuración se guarda con lo general en la raíz y una sección
+por sistema; `operaciones.config_aplicada(configuracion, driver)` la valida entera y le entrega al núcleo lo general
+con la sección del destino encima. Así el motor sirve a cualquier aplicación: cada una guarda la configuración de sus
+empresas y le pide al motor qué se configura (`contaperu://configuracion`), en vez de copiarlo. Un driver solo lee lo
+que declara, y el núcleo solo lo general y lo del asiento: lo vigila `tests/test_contrato_drivers.py`.
+
 Se publica de dos maneras:
 
 - **Como paquete propio**, por entry points (`[project.entry-points."contaperu.drivers"]`). El

@@ -62,10 +62,24 @@ recibe tres piezas, y cada dato tiene un solo dueño:
 |---|---|---|---|
 | **Documento** (`open-accounting`) | Los hechos del comprobante: fechas, serie, contraparte, importes, `condicion_pago`… | Los lectores, desde cualquier input | No |
 | **Imputación** | Lo que el entorno decide para cada documento: su cuenta, su centro de costo, la cuenta del total y el reparto | La aplicación, desde la Revisión | Sí |
-| **Configuración** | Lo que vale para todo el entorno: cuentas por defecto, sub-diarios, siglas del destino | La aplicación | Sí |
+| **Configuración** | Lo que vale para todo el entorno: lo general (cuentas por defecto, centros de costo, tasas de detracción) en la raíz, y lo de cada sistema contable —sus siglas, sus sub-diarios, en qué columnas va cada dato— en su sección | La aplicación, con lo que declara el motor | Sí |
 
 Lo que se calcula con esas tres —el signo de la nota de crédito, los soles de una factura en dólares, el % de
 IGV, el correlativo— **no lo guarda nadie**: lo deriva el driver.
+
+**La configuración la declara el motor y la guarda la aplicación** (John, 13-sep-2026). Su forma es lo general en la
+raíz y una sección por sistema contable:
+
+    {"cuentas": {"gasto": "659999"}, "usa_centros_costo": true,
+     "concar": {"tipos": {"01": {"sigla": "FT"}},
+                "columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar_del_tercero"]}},
+     "contasis": {"medio_pago": "001", "columnas": {"centro_costo": ["centro_costo", "centro_costo_2"]}}}
+
+Cada driver declara lo que se configura en su sección y en qué columnas de su archivo puede ir cada dato
+(`columnas`): el dato —el centro de costo, por ejemplo— se guarda una vez y cada sistema elige dónde sale. Lo que se
+configura, con sus tipos, valores por defecto, patrones y textos, está en el recurso `contaperu://configuracion` del
+MCP (y en `contaperu configuracion` por la CLI), y el motor valida contra eso lo que recibe antes de generar: una
+clave que no existe se dice, no se ignora.
 
 **La imputación llega dentro de la configuración, bajo `imputaciones`, con el `id_externo` del comprobante como
 llave**; desde la fachada, es el argumento `imputacion` de `exportar`, `diagnosticar` y `generar_asiento`:

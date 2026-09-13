@@ -35,6 +35,8 @@ Un driver traduce el asiento al formato que importa un sistema contable. El cont
 ni una cuenta, ni un sentido, ni la detracción.
 
 ```python
+from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
+from contaperu.configuracion import Campo
 from contaperu.formato import Opciones
 
 NOMBRE = "siscont"
@@ -44,6 +46,9 @@ CONTENT_TYPE = "text/plain; charset=utf-8"
 # Lo que tu ERP no puede importar sin, de entre lo que el núcleo deja pasar: "centro_costo", "moneda".
 # La cuenta contable y la equivalencia del tipo las exige el núcleo por ti.
 EXIGE = frozenset()
+# Lo que se configura en tu sección: lo que el núcleo lee al armar el asiento, y lo propio de tu formato.
+CONFIGURACION = (*CONFIGURACION_DEL_ASIENTO,
+                 Campo("libro", "texto", "01", titulo="Libro de tu sistema", patron=r"^[0-9]{2}$"))
 
 def nombre(libro, opciones=OPCIONES) -> str:
     return f"SISCONT_{libro.ruc}_{libro.periodo}{opciones.extension}"
@@ -90,6 +95,11 @@ compras con el asiento cuadrado. Requisitos para que un driver entre **al reposi
 6. **Lo que tu formato no puede llevar, en `no_caben`** (una moneda que no tiene, un código más largo que su
    columna), por motivo: `diagnosticar` lo dice antes y el núcleo se niega antes de llamarte. Un código no se
    corta y una moneda no se inventa.
+7. **Declara lo que se configura en tu sección** (`CONFIGURACION`, con `configuracion.Campo`) y, si tu formato
+   puede llevar un dato en más de una columna, **en cuáles** (`COLUMNAS_ELEGIBLES`, con `configuracion.Columna`:
+   una fija y las demás a elegir). Un driver de asientos incluye `asiento.CONFIGURACION_DEL_ASIENTO`. Lo que
+   declaras es lo que el motor valida, lo que una aplicación pinta en su pantalla y lo único que tu driver puede
+   leer: `tests/test_contrato_drivers.py` lo comprueba con una configuración espía y leyendo tu código.
 
 ## Estilo
 

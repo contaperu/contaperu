@@ -72,9 +72,10 @@ contaperu generar --tipo compra --ruc 20601111111 --razon "MI EMPRESA SAC" \
     --periodo 202608 --driver sire --salida ./salida  comprobantes/*.xml
 ```
 
-Antes de generar el archivo de un sistema contable, pregunta qué falta:
+Antes de generar el archivo de un sistema contable, parte de su configuración y pregunta qué falta:
 
 ```bash
+contaperu configuracion --driver concar --por-defecto > mi-empresa.json
 contaperu diagnosticar mes.json --driver concar --config mi-empresa.json
 contaperu desde-json mes.json --driver concar --config mi-empresa.json --salida ./salida
 ```
@@ -84,8 +85,8 @@ contaperu desde-json mes.json --driver concar --config mi-empresa.json --salida 
 Once herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
 `configuracion_por_defecto`, `validar_comprobantes`, `validar_partida_doble`, `generar_asiento`,
 `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`, `buscar_cuenta_pcge` y
-`adaptar_pcge2026`. Y cuatro recursos de lectura: el esquema del estándar, los catálogos de SUNAT, el
-catálogo del PCGE 2026 y los drivers disponibles.
+`adaptar_pcge2026`. Y cinco recursos de lectura: el esquema del estándar, los catálogos de SUNAT, el
+catálogo del PCGE 2026, los drivers disponibles y lo que se configura de cada uno.
 
 El Excel y el ZIP del SIRE vuelven **como archivos** —recursos incrustados con su tipo—, así que el cliente
 los ofrece para guardar en vez de enseñar una tira de letras.

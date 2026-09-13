@@ -85,8 +85,8 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 - Batería: `pytest` (unos segundos; el snapshot va dentro). Antes de etiquetar, `diagnosticar` y `exportar` sobre un
   caso real en local, solo lectura.
 - Un driver nuevo pide **un archivo real que ese ERP haya aceptado**: `CONTRIBUTING.md` §«Añadir un driver de
-  salida». El contrato (`NOMBRE`, `FORMATOS`, `OPCIONES`, una de las cuatro formas, `EXIGE`) lo comprueba
-  `drivers.contrato.incumplimientos()`.
+  salida». El contrato (`NOMBRE`, `FORMATOS`, `OPCIONES`, una de las cuatro formas, `EXIGE`, y lo que se
+  configura: `CONFIGURACION` y `COLUMNAS_ELEGIBLES`) lo comprueba `drivers.contrato.incumplimientos()`.
 - Se planifica y se ejecuta por partes, con el OK de John entre cada una.
 
 ## Los documentos
