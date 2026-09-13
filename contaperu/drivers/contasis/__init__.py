@@ -19,7 +19,8 @@ Cómo se escribe el archivo (las fuentes de cada regla, en `datos.py`):
 - **Compras:** base e IGV por destino (`igv.por_destino`); la boleta, sin crédito fiscal, entera en no gravadas.
 - **Cuentas:** la de la base y el centro, de `asiento.partes_de` (el centro solo donde la cuenta lo lleva); la del
   total, de `asiento.cuenta_tercero`; las de otros tributos e ICBPER, de la configuración (`cuentas.otros_tributos`,
-  `cuentas.icbper`) cuando su columna lleva importe. **Medio de pago** (ventas): `medio_pago`, `001` por defecto (`CONFIG_POR_DEFECTO`).
+  `cuentas.icbper`) cuando su columna lleva importe. **Medio de pago** (ventas): `medio_pago`, `001` por defecto
+  (`CONFIG_POR_DEFECTO`).
 - **Lo que no va:** el recibo por honorarios (`EXCLUYE_TIPOS`), el régimen especial y la constancia de detracción
   (vacíos), y un reparto entre cuentas (`EXIGE = {"cuenta_unica"}`). Lo que no cabe —otra moneda, dólares sin T.C.,
   un rango de boletas, IVAP, un código más largo que su columna— lo dice `no_caben` antes de exportar.

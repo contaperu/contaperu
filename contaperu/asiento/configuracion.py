@@ -2,8 +2,9 @@
 
 Lleva contabilidad general —cuentas por defecto, centros de costo, detracciones— y las claves que un sistema contable
 de destino necesita que se configuren por entorno: la sigla de cada tipo de comprobante (`tipos.NN.sigla`), los
-sub-diarios y el código de moneda de CONCAR, y el medio de pago de CONTASIS. Los datos de FORMATO de cada destino —columnas, cabeceras, anchos— no
-están aquí: viven en su driver (`drivers/concar/datos.py`, `drivers/contasis/datos.py`).
+sub-diarios y el código de moneda de CONCAR, y el medio de pago de CONTASIS. Los datos de FORMATO de cada
+destino —columnas, cabeceras, anchos— no están aquí: viven en su driver (`drivers/concar/datos.py`,
+`drivers/contasis/datos.py`).
 
 Aquí no hay lógica: si cambia un valor por defecto, se toca este archivo y nada más. Hasta el 12-sep-2026 era
 `asiento/datos.py` y llevaba también los datos del Excel de CONCAR.
