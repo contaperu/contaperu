@@ -29,9 +29,9 @@ Cómo se escribe el archivo (las fuentes de cada regla, en `datos.py`):
 CONTASIS importe un archivo generado por este driver.
 """
 from . import datos
-from .datos import CONTENT_TYPE, EXCLUYE_TIPOS, EXIGE, FORMATOS, NOMBRE, OPCIONES
+from .datos import COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, EXCLUYE_TIPOS, EXIGE, FORMATOS, NOMBRE, OPCIONES
 from .proyeccion import fila, no_caben, valores
 from .xlsx import escribir_xlsx, desde_comprobantes, nombre
 
-__all__ = ["CONTENT_TYPE", "EXCLUYE_TIPOS", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "escribir_xlsx", "datos",
-           "desde_comprobantes", "fila", "no_caben", "nombre", "valores"]
+__all__ = ["COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "EXCLUYE_TIPOS", "EXIGE", "FORMATOS", "NOMBRE",
+           "OPCIONES", "escribir_xlsx", "datos", "desde_comprobantes", "fila", "no_caben", "nombre", "valores"]

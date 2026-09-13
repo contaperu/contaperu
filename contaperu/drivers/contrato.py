@@ -40,6 +40,14 @@ formato no puede llevar aunque la contabilidad esté completa —una moneda que 
 columna—. `diagnosticar` lo lista antes de exportar y el núcleo se niega con `NoCabe` antes de escribir un byte
 (hoy, en la forma `desde_comprobantes`): un código no se corta ni una moneda se inventa.
 
+Y en un driver que lleva cuentas, lo que se configura en su sección (`CONFIGURACION`, una tupla de
+`configuracion.Campo`) y en qué columnas de su archivo puede ir un dato (`COLUMNAS_ELEGIBLES`, de
+`configuracion.Columna`). Un driver de asientos declara al menos las claves del asiento
+(`asiento.CONFIGURACION_DEL_ASIENTO`), que el núcleo lee al armar sus líneas. De lo declarado salen los valores por
+defecto de su sección, su validación y la descripción con la que una aplicación pinta su pantalla
+(`seccion_por_defecto`, `describir`): cada aplicación construida con el motor configura cada sistema según lo que
+necesita cada empresa, sin copiar nada.
+
 Los `Protocol` de abajo son la documentación tipada; lo que el registro comprueba de verdad al cargar
 un driver de terceros es `incumplimientos()`, y `tests/test_contrato_drivers.py` es el examen que pasa
 cualquier driver registrado.
@@ -48,7 +56,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Protocol
 
+from .. import configuracion as _declaracion
+from ..asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from ..asiento.faltas import NoExportable
+from ..configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from ..formato import Opciones
 from ..modelo import TIPOS_LIBRO, Comprobante, Libro
 
@@ -72,6 +83,14 @@ EXIGE_NUCLEO_ASIENTO = frozenset({"cuenta_contable", "tipo_cp"})
 # vocabulario lo dice su `no_caben`.
 EXIGE_POSIBLES_REGISTRO = frozenset({"centro_costo", "cuenta_unica"})
 EXIGE_NUCLEO_REGISTRO = frozenset({"cuenta_contable"})
+
+# Los datos que un sistema contable elige en qué columnas de su archivo escribir (`COLUMNAS_ELEGIBLES`). Hoy, el centro
+# de costo (John, 13-sep-2026): se guarda una vez y la sección de cada sistema elige dónde sale.
+DATOS_CON_COLUMNAS = frozenset({"centro_costo"})
+# Las líneas neutrales que pueden llevar el centro en su anexo auxiliar (`asiento.lineas_del_comprobante`).
+_LINEAS_CON_ANEXO = frozenset({"principal", "tercero"})
+# Lo que ninguna sección puede declarar: lo general y lo que el núcleo reserva.
+_CLAVES_QUE_NO_SON_DE_UNA_SECCION = frozenset({c.clave for c in CONFIGURACION_GENERAL} | {"columnas", "imputaciones"})
 
 
 class Driver(Protocol):
@@ -143,6 +162,26 @@ def exige(modulo: Any) -> frozenset[str]:
     return frozenset()
 
 
+def configuracion(modulo: Any) -> tuple[Campo, ...]:
+    """Lo que se configura en la sección del driver (su `CONFIGURACION`); vacío si no declara nada."""
+    return tuple(getattr(modulo, "CONFIGURACION", None) or ())
+
+
+def columnas_elegibles(modulo: Any) -> dict[str, tuple[Columna, ...]]:
+    """En qué columnas de su archivo puede ir cada dato (su `COLUMNAS_ELEGIBLES`); vacío si no declara ninguna."""
+    return {dato: tuple(declaradas) for dato, declaradas in (getattr(modulo, "COLUMNAS_ELEGIBLES", None) or {}).items()}
+
+
+def seccion_por_defecto(modulo: Any) -> dict:
+    """Los valores por defecto de la sección del driver, como se guardan, con sus `columnas` fijas y marcadas."""
+    return _declaracion.por_defecto(configuracion(modulo), columnas_elegibles(modulo))
+
+
+def describir(modulo: Any) -> dict:
+    """La sección del driver en JSON, para pintar su pantalla: sus campos y sus columnas elegibles."""
+    return {"sistema": modulo.NOMBRE, **_declaracion.describir(configuracion(modulo), columnas_elegibles(modulo))}
+
+
 class NoCabe(NoExportable):
     """Comprobantes que el formato del destino no puede llevar, por motivo (lo dice el driver en `no_caben`). El
     núcleo se niega antes de escribir nada, igual que con un tipo sin sigla."""
@@ -198,4 +237,76 @@ def incumplimientos(modulo: Any) -> list[str]:
             problemas.append(f"EXIGE solo admite {sorted(posibles)}; sobra {sorted(set(declarado) - posibles)}")
     if hasattr(modulo, "no_caben") and not callable(getattr(modulo, "no_caben")):
         problemas.append("no_caben es una función: no_caben(libro, comprobantes, config)")
+    return problemas + _incumplimientos_de_la_configuracion(modulo)
+
+
+def _incumplimientos_de_la_configuracion(modulo: Any) -> list[str]:
+    declarada = getattr(modulo, "CONFIGURACION", None)
+    columnas = getattr(modulo, "COLUMNAS_ELEGIBLES", None)
+    if (declarada is not None or columnas is not None) and not lleva_cuentas(modulo):
+        return ["CONFIGURACION y COLUMNAS_ELEGIBLES son de un driver que lleva cuentas: un registro tributario no se "
+                "configura"]
+    problemas: list[str] = []
+    if declarada is not None:
+        if isinstance(declarada, (str, bytes, dict)) or not all(isinstance(c, Campo) for c in declarada):
+            problemas.append("CONFIGURACION es una tupla de configuracion.Campo")
+        else:
+            claves = [c.clave for c in declarada]
+            repetidas = sorted({k for k in claves if claves.count(k) > 1})
+            if repetidas:
+                problemas.append(f"CONFIGURACION repite claves: {', '.join(repetidas)}")
+            reservadas = sorted(set(claves) & _CLAVES_QUE_NO_SON_DE_UNA_SECCION)
+            if reservadas:
+                problemas.append("CONFIGURACION no declara claves de lo general ni reservadas: "
+                                 + ", ".join(reservadas))
+            errores = _declaracion.validar(_declaracion.por_defecto(tuple(declarada)), tuple(declarada))
+            if errores:
+                problemas.append("los valores por defecto de CONFIGURACION no cumplen lo declarado: "
+                                 + "; ".join(errores))
+    if arma_asientos(modulo):
+        propias = {c.clave for c in configuracion(modulo) if isinstance(c, Campo)}
+        faltan = [c.clave for c in CONFIGURACION_DEL_ASIENTO if c.clave not in propias]
+        if faltan:
+            problemas.append("un driver de asientos incluye en CONFIGURACION las claves del asiento "
+                             "(asiento.CONFIGURACION_DEL_ASIENTO), que el núcleo lee al armar sus líneas; faltan: "
+                             + ", ".join(faltan))
+    if columnas is not None:
+        problemas += _incumplimientos_de_las_columnas(modulo, columnas)
+    return problemas
+
+
+def _incumplimientos_de_las_columnas(modulo: Any, columnas: Any) -> list[str]:
+    if not isinstance(columnas, dict):
+        return ["COLUMNAS_ELEGIBLES es un dict {dato: (configuracion.Columna, …)}"]
+    problemas: list[str] = []
+    libros = sorted(getattr(modulo, "FORMATOS", None) or {})
+    de_asientos = arma_asientos(modulo)
+    for dato, declaradas in columnas.items():
+        if dato not in DATOS_CON_COLUMNAS:
+            problemas.append(f"COLUMNAS_ELEGIBLES: {dato!r} no se elige por columnas; los que sí: "
+                             f"{', '.join(sorted(DATOS_CON_COLUMNAS))}")
+            continue
+        if (isinstance(declaradas, (str, bytes)) or not declaradas
+                or not all(isinstance(c, Columna) for c in declaradas)):
+            problemas.append(f"COLUMNAS_ELEGIBLES[{dato!r}] es una tupla de configuracion.Columna")
+            continue
+        nombres = [c.columna for c in declaradas]
+        if len(set(nombres)) != len(nombres):
+            problemas.append(f"COLUMNAS_ELEGIBLES[{dato!r}] repite columnas")
+        if sum(1 for c in declaradas if c.fija) != 1:
+            problemas.append(f"COLUMNAS_ELEGIBLES[{dato!r}] lleva una sola columna fija: la principal")
+        for c in declaradas:
+            if sorted(c.letra) != libros:
+                problemas.append(f"COLUMNAS_ELEGIBLES[{dato!r}]: la letra de {c.columna!r} va por cada libro de "
+                                 f"FORMATOS ({', '.join(libros)})")
+            if de_asientos:
+                llena = ((c.campo == "centro_costo" and c.rol == "principal" and c.fija)
+                         or (c.campo == "anexo_auxiliar" and c.rol in _LINEAS_CON_ANEXO and not c.fija))
+                if not llena:
+                    problemas.append(f"COLUMNAS_ELEGIBLES[{dato!r}]: en un driver de asientos, {c.columna!r} dice qué "
+                                     "línea neutral la llena: la fija, con el centro_costo de la principal; las demás, "
+                                     "con el anexo_auxiliar de la principal o del tercero")
+            elif c.rol or c.campo:
+                problemas.append(f"COLUMNAS_ELEGIBLES[{dato!r}]: {c.columna!r} no lleva rol ni campo, que son de las "
+                                 "líneas neutrales de un driver de asientos")
     return problemas

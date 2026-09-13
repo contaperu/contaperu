@@ -19,6 +19,7 @@ import csv as _csv  # stdlib: los imports absolutos no chocan con el nombre de e
 import io
 from typing import Any
 
+from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from ...asiento.lineas import LineaDiario
 from ...formato import Opciones
 from ...modelo import Libro
@@ -30,6 +31,8 @@ CONTENT_TYPE = "text/csv; charset=utf-8"
 # No exige nada más que el núcleo: escribe la moneda en ISO y el centro de costo que haya. Un mes sin
 # centros sale igual, con la columna vacía.
 EXIGE = frozenset()
+# Se configura lo que el núcleo lee al armar el asiento, y nada propio: escribe las líneas tal cual.
+CONFIGURACION = CONFIGURACION_DEL_ASIENTO
 
 SEPARADOR = ";"
 

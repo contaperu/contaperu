@@ -10,6 +10,7 @@ Las fuentes son dos, y las dos viven fuera de Git, en `tests/fixtures/privado/co
 """
 from __future__ import annotations
 
+from ...configuracion import Campo, Columna
 from ...formato import Opciones
 
 NOMBRE = "contasis"
@@ -21,6 +22,15 @@ OPCIONES = Opciones(extension=".xlsx")
 EXCLUYE_TIPOS = frozenset({"02"})
 # CONTASIS arma un asiento por fila con UNA cuenta de la base (John, 12-sep-2026): un reparto entre cuentas no sale.
 EXIGE = frozenset({"cuenta_unica"})
+
+# Lo que se configura en la sección `contasis`. El medio de pago de las VENTAS (la tabla del comentario de su
+# plantilla): 001 «depósito en cuenta», el de todas las filas del registro que CONTASIS importó. Es de la empresa, no
+# de cada documento.
+CONFIGURACION = (
+    Campo("medio_pago", "texto", "001", titulo="Medio de pago de las ventas", grupo="registro", patron=r"^[0-9]{3}$",
+          ayuda="El código de la tabla de medios de pago de CONTASIS que llevan tus ventas: 001 es depósito en "
+                "cuenta."),
+)
 
 # La pestaña conserva su nombre, y el archivo va sin las filas 1-13 de la plantilla: su nota 3 dice «Eliminar la Fila
 # 1 a 13 dejando solo los ingresos realizados» (John, 12-sep-2026: «el mismo formato lo dice»).
@@ -131,6 +141,15 @@ VENTAS: tuple[tuple[str, str, str, int], ...] = (
 )
 
 COLUMNAS = {"compra": COMPRAS, "venta": VENTAS}
+
+# En qué columnas puede ir el centro de costo (John, 13-sep-2026): la principal, siempre que la cuenta de la base lo
+# lleve (la misma regla que la columna M de CONCAR); y la segunda, con el mismo centro, si la empresa la usa.
+COLUMNAS_ELEGIBLES = {"centro_costo": (
+    Columna("centro_costo", "Código de centro de costos", {"compra": "AI", "venta": "Z"}, fija=True,
+            ayuda="Cuando la cuenta de la base lleva centro de costo."),
+    Columna("centro_costo_2", "Código de centro de costos 2", {"compra": "AJ", "venta": "AA"},
+            ayuda="El mismo centro de costo también en esta columna, si tu CONTASIS la usa."),
+)}
 
 # Los formatos de celda del registro validado: la fecha con el formato 14 de Excel (la fecha corta del sistema), los
 # importes y porcentajes con dos decimales, el tipo de cambio con cuatro y los textos como texto.

@@ -124,6 +124,23 @@ def test_describir_da_json_para_pintar_la_pantalla():
         "fija": False, "marcada": False, "ayuda": ""}
 
 
+def test_las_declaraciones_repartidas_reproducen_la_configuracion_por_defecto_de_hoy():
+    """Declarar no cambia ni un valor: lo general, lo del asiento y la sección de cada sistema, juntos, son la
+    `CONFIG_POR_DEFECTO` plana de hoy; y las columnas marcadas de CONCAR dicen lo mismo que sus dos interruptores."""
+    from contaperu.asiento.configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_DEL_ASIENTO
+    from contaperu.configuracion import CONFIGURACION_GENERAL
+    from contaperu.drivers import concar, contasis, contrato
+
+    secciones = {clave: valor for driver in (concar, contasis)
+                 for clave, valor in contrato.seccion_por_defecto(driver).items() if clave != "columnas"}
+    hoy = dict(CONFIG_POR_DEFECTO)
+    referencia, anexo_del_tercero = hoy.pop("centro_como_referencia"), hoy.pop("centro_en_anexo_del_tercero")
+    assert {**por_defecto(CONFIGURACION_GENERAL), **por_defecto(CONFIGURACION_DEL_ASIENTO), **secciones} == hoy
+    columnas = contrato.seccion_por_defecto(concar)["columnas"]["centro_costo"]
+    assert ("anexo_auxiliar" in columnas) is referencia
+    assert ("anexo_auxiliar_del_tercero" in columnas) is anexo_del_tercero
+
+
 def test_configuracion_invalida_lleva_todos_los_errores():
     errores = validar({"usa_centros_costo": "no", "otra": 1}, CAMPOS)
     with pytest.raises(ConfiguracionInvalida) as e:

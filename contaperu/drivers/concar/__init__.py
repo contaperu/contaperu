@@ -6,9 +6,10 @@ línea neutral a sus columnas (`proyeccion.py`) y la escritura del .xlsx con el 
 el contrato (`xlsx.py`).
 """
 from . import datos, proyeccion
-from .datos import CONTENT_TYPE, EXIGE, FORMATOS, NOMBRE, OPCIONES
+from .datos import COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, EXIGE, FORMATOS, NOMBRE, OPCIONES
 from .proyeccion import a_lineas, desde_fila, filas_de_comprobante, tasa_igv_entera
 from .xlsx import CorrelativoDesborda, construir, escribir_xlsx, nombre
 
-__all__ = ["CONTENT_TYPE", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "CorrelativoDesborda", "a_lineas", "construir",
-           "datos", "desde_fila", "escribir_xlsx", "filas_de_comprobante", "nombre", "proyeccion", "tasa_igv_entera"]
+__all__ = ["COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES",
+           "CorrelativoDesborda", "a_lineas", "construir", "datos", "desde_fila", "escribir_xlsx",
+           "filas_de_comprobante", "nombre", "proyeccion", "tasa_igv_entera"]

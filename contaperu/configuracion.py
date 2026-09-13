@@ -13,7 +13,10 @@ un `Campo`, y de esa única declaración salen tres cosas que antes vivían en t
 Y un sistema contable declara además en qué columnas de su archivo puede ir un dato (`Columna`): el dato se guarda
 una vez y la configuración de ese sistema elige dónde sale.
 
-Aquí solo está la maquinaria, sin reglas contables y sin dependencias: la usan el núcleo y los drivers.
+La configuración se declara en tres sitios, cada uno con lo suyo: lo general de la contabilidad, que sirve a
+cualquier sistema, aquí (`CONFIGURACION_GENERAL`); lo que el núcleo lee al armar un asiento, en
+`asiento/configuracion.py`; y lo propio de cada sistema contable, en su driver (`CONFIGURACION` y
+`COLUMNAS_ELEGIBLES`, en su `datos.py`). La maquinaria no tiene dependencias: la usan el núcleo y los drivers.
 """
 from __future__ import annotations
 
@@ -227,3 +230,85 @@ def describir(campos: tuple[Campo, ...], columnas: dict[str, tuple[Columna, ...]
                     "marcada": c.marcada, "ayuda": c.ayuda} for c in declaradas]
             for dato, declaradas in columnas.items()}
     return descripcion
+
+
+# ── Lo general de la contabilidad: sirve a cualquier sistema contable ────────────────────────────────────────────────
+
+_CUENTA = r"^([0-9]{2,12})?$"      # de 2 a 12 dígitos, como la valida la pantalla; vacía = sin cuenta
+
+
+def _cuenta_por_moneda(clave: str, titulo: str, soles: str, dolares: str, ayuda: str) -> Campo:
+    return Campo(clave, "objeto", titulo=titulo, ayuda=ayuda, grupo="cuentas", campos=(
+        Campo("PEN", "texto", soles, titulo="Soles", grupo="cuentas", patron=_CUENTA),
+        Campo("USD", "texto", dolares, titulo="Dólares", grupo="cuentas", patron=_CUENTA)))
+
+
+CONFIGURACION_GENERAL: tuple[Campo, ...] = (
+    Campo("cuentas", "objeto", titulo="Cuentas", grupo="cuentas", campos=(
+        # VACÍA a propósito: en la práctica es el comodín «63/65», que no es una cuenta. La pone la imputación de cada
+        # documento o la configuración de la empresa.
+        Campo("gasto", "texto", "", titulo="Cuenta de gasto por defecto", grupo="cuentas", patron=_CUENTA,
+              ayuda="La que se usa cuando el comprobante no trae ninguna. Vacía, se elige en cada comprobante."),
+        _cuenta_por_moneda("cxp", "Facturas, boletas y tickets por pagar", "421201", "421202",
+                           "Las compras normales a un proveedor con RUC."),
+        # La factura afecta a detracción (SUNAT) lleva su propia cuenta por pagar, la MISMA en las dos monedas.
+        _cuenta_por_moneda("cxp_detraccion", "Detracciones por pagar", "421203", "421203",
+                           "La línea de la detracción de las facturas afectas; el proveedor sigue en la suya."),
+        _cuenta_por_moneda("honorarios", "Recibos por honorarios por pagar", "424101", "424102",
+                           "Lo que le debes al profesional independiente."),
+        Campo("retencion_4ta", "texto", "401721", titulo="Renta de 4ta que le retienes", grupo="cuentas",
+              patron=_CUENTA, ayuda="Solo cuando el recibo por honorarios muestra la retención."),
+        Campo("igv", "texto", "401111", titulo="IGV", grupo="cuentas", patron=_CUENTA,
+              ayuda="Crédito fiscal en las compras, débito fiscal en las ventas."),
+        _cuenta_por_moneda("clientes", "Facturas y boletas emitidas por cobrar", "121201", "121202",
+                           "La cuenta por cobrar del cliente."),
+        Campo("ventas", "texto", "701101", titulo="Cuenta de ingreso por defecto", grupo="cuentas", patron=_CUENTA,
+              ayuda="La que se usa cuando la venta no trae ninguna."),
+        # Vacías a propósito: son cuentas de cada empresa, y sin ellas su columna sale en blanco (el registro de
+        # CONTASIS las lleva cuando su columna trae importe).
+        Campo("otros_tributos", "texto", "", titulo="Otros tributos y cargos", grupo="cuentas", patron=_CUENTA,
+              ayuda="La cuenta de los otros tributos y cargos del documento. Vacía, esa columna sale en blanco."),
+        Campo("icbper", "texto", "", titulo="ICBPER", grupo="cuentas", patron=_CUENTA,
+              ayuda="La cuenta del impuesto a las bolsas de plástico. Vacía, esa columna sale en blanco."),
+    )),
+    # ¿Esta empresa lleva centros de costo (obras, proyectos, áreas)? Apagado, el centro no sale en ninguna columna
+    # aunque el documento traiga uno, y la aplicación deja de pedirlo: hay empresas que no los usan.
+    Campo("usa_centros_costo", "booleano", True, titulo="Usa centros de costo", grupo="centros",
+          ayuda="Apagado, el centro de costo deja de pedirse y de salir en el archivo."),
+    # La lista de la empresa. El motor no la lee —el centro de cada documento llega en su imputación—, pero se declara
+    # para que una aplicación sepa dónde guardarla.
+    Campo("centros_costo", "lista", titulo="Centros de costo", grupo="centros",
+          ayuda="Los centros de costo de la empresa, con su código y su nombre.",
+          valores=Campo("", "objeto", grupo="centros", campos=(Campo("codigo", "texto", titulo="Código"),
+                                                               Campo("nombre", "texto", titulo="Nombre")))),
+    # QUÉ cuentas lo llevan, por PREFIJO (el contador, 09-sep-2026): «la cuenta 63 y 65 tiene habilitado el centro de
+    # costo, pero cuando es una cuenta 60 por defecto no se debe asignar un centro de costo». En el sistema contable
+    # esa marca vive en cada cuenta del plan; aquí se declara por prefijo, que es lo que un estudio sabe decir. El `70`
+    # va para que las ventas lleven su centro. Casa por `startswith`, así que "6311" también vale. Lista VACÍA es una
+    # respuesta legítima (ninguna cuenta lo lleva) y no es lo mismo que ausente (los de fábrica): ver `lleva_centro`.
+    Campo("cuentas_con_centro", "lista", ["63", "65", "70"], titulo="Cuentas que llevan centro de costo",
+          grupo="centros", ayuda="Por el inicio de la cuenta: 63 y 65 sí, 60 no.",
+          valores=Campo("", "texto", grupo="centros", patron=r"^[0-9]{1,6}$")),
+    # Tasa por código SUNAT, por si el comprobante no la trae. De los apéndices vigentes del SPOT
+    # (orientacion.sunat.gob.pe), cruzados POR NOMBRE con el Catálogo 54: en esa página la columna "código" es el
+    # numeral dentro del anexo, no el código del comprobante (ahí "14" es Leche, que en el catálogo es 023, mientras
+    # 014 son Carnes). Cruzarlo por número sale mal.
+    Campo("detraccion_tasas", "mapa", {"008": 4, "009": 10, "010": 15, "012": 12, "019": 10, "020": 12, "021": 10,
+                                       "022": 12, "024": 10, "025": 10, "026": 10, "027": 4, "030": 4, "037": 12},
+          titulo="Tasa de cada detracción", grupo="detracciones", claves=r"^[0-9]{3}$",
+          ayuda="El porcentaje por código SUNAT, para el comprobante que no lo trae.",
+          valores=Campo("", "numero", grupo="detracciones")),
+    # Nombre oficial (Catálogo 54 de SUNAT, Anexo N.° 8): la pantalla dice "030 · Contratos de construcción" en vez de
+    # un código a secas. El motor no lo lee.
+    Campo("detraccion_nombres", "mapa", {
+        "008": "Madera", "009": "Arena y piedra", "010": "Residuos, subproductos, desechos, recortes y desperdicios",
+        "012": "Intermediación laboral y tercerización", "019": "Arrendamiento de bienes muebles",
+        "020": "Mantenimiento y reparación de bienes muebles", "021": "Movimiento de carga",
+        "022": "Otros servicios empresariales", "024": "Comisión mercantil",
+        "025": "Fabricación de bienes por encargo", "026": "Servicio de transporte de personas",
+        "027": "Servicio de transporte de bienes por vía terrestre", "030": "Contratos de construcción",
+        "037": "Demás servicios gravados con el IGV"},
+          titulo="Nombre de cada detracción", grupo="detracciones", claves=r"^[0-9]{3}$",
+          ayuda="El nombre del Catálogo 54 de SUNAT, para que un código diga algo.",
+          valores=Campo("", "texto", grupo="detracciones")),
+)

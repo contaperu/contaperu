@@ -6,6 +6,8 @@ Aquí no hay lógica: si CONCAR cambia una columna, se toca este archivo y nada 
 """
 from __future__ import annotations
 
+from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO
+from ...configuracion import Campo, Columna
 from ...formato import Opciones
 
 NOMBRE = "concar"
@@ -17,6 +19,23 @@ CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.shee
 # una moneda con código en su Tabla General 03 (solo MN y US). Desde el 11-sep-2026 lo hace cumplir el
 # propio driver; hasta entonces solo lo avisaba `diagnosticar` y lo negaba el portal por su cuenta.
 EXIGE = frozenset({"centro_costo", "moneda"})
+
+# Lo que se configura en la sección `concar`: lo que el núcleo lee al armar el asiento, y lo propio de este formato.
+CONFIGURACION = (
+    *CONFIGURACION_DEL_ASIENTO,
+    # Columna E, el código de la T.G. 03. CONCAR solo admite MN y US (rechaza ME): otra moneda detiene la exportación.
+    Campo("monedas_codigo", "objeto", titulo="Monedas", grupo="monedas", campos=(
+        Campo("PEN", "texto", "MN", titulo="Los soles se llaman", grupo="monedas",
+              ayuda="Cómo escribe tu sistema la moneda nacional."),
+        Campo("USD", "texto", "US", titulo="Los dólares se llaman", grupo="monedas",
+              ayuda="Ojo: CONCAR usa US, no ME."))),
+    # Columna V de la línea de la detracción: el área de la T.G. 26. VACÍA a propósito: es un número propio de cada
+    # empresa, y uno de fábrica metería los apuntes de todo el mundo en un área que nadie eligió. No se corta a los 3
+    # caracteres de la plantilla: un código cortado es OTRA área.
+    Campo("detraccion_area", "texto", "", titulo="Área de la detracción", grupo="detracciones",
+          patron=r"^[A-Z0-9]{0,3}$", ayuda="El código de área de tu CONCAR para la línea de la detracción (por "
+                                            "ejemplo 061). Vacío, no se escribe."),
+)
 
 TIPO_CONVERSION = "V"       # CONCAR busca el T.C. en su tabla; con T.C. en G pasa a 'C' (especial)
 MARCA_CONVERSION = "S"      # la columna I, «Flag de Conversión de Moneda»
@@ -107,3 +126,25 @@ ANCHOS = {
     "W": 41.14, "X": 15.71, "Y": 18.71, "Z": 14.71, "AA": 16.71, "AB": 14.71, "AC": 15.71, "AF": 19.71,
     "AI": 17.71, "AJ": 22.71, "AM": 18.71,
 }
+
+# En qué columnas puede ir el centro de costo (John, 13-sep-2026: el dato se guarda una vez y la sección de cada sistema
+# elige dónde sale). Cada una dice qué campo de qué línea neutral la llena: la M, el centro de la línea del gasto o del
+# ingreso; la X, su anexo auxiliar.
+COLUMNAS_ELEGIBLES = {"centro_costo": (
+    # La principal, siempre: la M de la línea cuya cuenta lleva centro (`cuentas_con_centro`).
+    Columna("centro_costo", "Código de Centro de Costo", {"compra": "M", "venta": "M"}, fija=True,
+            ayuda="En la línea del gasto o del ingreso, cuando su cuenta lleva centro de costo.",
+            rol="principal", campo="centro_costo"),
+    # «Algunas empresas optan en colocar la columna X como referencia el centro de costo» (el contador, 09-sep-2026).
+    # Sin marcar: la plantilla avisa de que X solo se llena «si Cuenta Contable tiene seleccionado Tipo de Anexo
+    # Referencia», y escribirla donde no toca puede hacer que CONCAR rechace la importación. Nunca va en M y X a la vez.
+    Columna("anexo_auxiliar", "Código de Anexo Auxiliar", {"compra": "X", "venta": "X"},
+            ayuda="En la línea del gasto o del ingreso cuya cuenta NO lleva centro, como referencia. Solo si esa "
+                  "cuenta tiene anexo referencia en tu CONCAR.",
+            rol="principal", campo="anexo_auxiliar"),
+    # El «doble anexo»: el centro también en la línea del proveedor o del cliente, como en el Excel que CONCAR aceptó.
+    Columna("anexo_auxiliar_del_tercero", "Código de Anexo Auxiliar", {"compra": "X", "venta": "X"}, marcada=True,
+            ayuda="En la línea del proveedor o del cliente. Nunca en un recibo por honorarios, ni cuando la base se "
+                  "reparte entre centros distintos.",
+            rol="tercero", campo="anexo_auxiliar"),
+)}

@@ -15,6 +15,8 @@ import pytest
 
 from contaperu import drivers
 from contaperu import operaciones as op
+from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
+from contaperu.configuracion import Campo, Columna
 from contaperu.drivers import contrato
 from contaperu.formato import Opciones
 from util import GOLDEN
@@ -142,6 +144,7 @@ def driver_de_prueba(nombre: str = "prueba") -> types.ModuleType:
     m.FORMATOS = {"compra": f"{nombre}_asiento"}
     m.OPCIONES = Opciones(extension=".txt")
     m.CONTENT_TYPE = "text/plain; charset=utf-8"
+    m.CONFIGURACION = CONFIGURACION_DEL_ASIENTO       # arma asientos: el núcleo lee esas claves al armar sus líneas
     m.nombre = lambda libro, op=m.OPCIONES: f"{nombre}_{libro.ruc}_{libro.periodo}{op.extension}"
 
     def desde_lineas(libro, lineas, config, op=m.OPCIONES):
@@ -398,3 +401,87 @@ def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_ter
     roto = driver_de_registro("roto")
     roto.no_caben = "no"
     assert contrato.incumplimientos(roto) == ["no_caben es una función: no_caben(libro, comprobantes, config)"]
+
+
+# --- la configuración que declara cada driver (13-sep-2026) --------------------------------------------------------
+
+def test_cada_driver_de_serie_declara_lo_que_se_configura_en_su_seccion():
+    """Lo del asiento lo declaran los dos drivers de asientos; CONCAR suma lo de su formato, y CONTASIS solo lo suyo.
+    El SIRE no se configura: no lleva cuentas."""
+    del_asiento = [c.clave for c in CONFIGURACION_DEL_ASIENTO]
+    assert [c.clave for c in contrato.configuracion(drivers.concar)] == [*del_asiento, "monedas_codigo",
+                                                                          "detraccion_area"]
+    assert [c.clave for c in contrato.configuracion(drivers.csv)] == del_asiento
+    assert [c.clave for c in contrato.configuracion(drivers.contasis)] == ["medio_pago"]
+    assert contrato.configuracion(drivers.sire) == () and contrato.columnas_elegibles(drivers.sire) == {}
+    assert contrato.seccion_por_defecto(drivers.contasis) == {"medio_pago": "001",
+                                                              "columnas": {"centro_costo": ["centro_costo"]}}
+    concar = contrato.seccion_por_defecto(drivers.concar)
+    assert concar["columnas"] == {"centro_costo": ["centro_costo", "anexo_auxiliar_del_tercero"]}
+    assert concar["monedas_codigo"] == {"PEN": "MN", "USD": "US"}
+    assert concar["tipos"]["02"] == {"sigla": "RH", "sub_diario": "15"}
+    assert "columnas" not in contrato.seccion_por_defecto(drivers.csv)
+    descripcion = contrato.describir(drivers.contasis)
+    json.dumps(descripcion)
+    assert descripcion["sistema"] == "contasis" and descripcion["campos"][0]["patron"] == "^[0-9]{3}$"
+    assert [c["columna"] for c in descripcion["columnas"]["centro_costo"]] == ["centro_costo", "centro_costo_2"]
+
+
+def test_las_columnas_elegibles_llevan_el_titulo_y_la_letra_de_su_excel():
+    from contaperu.drivers.concar.datos import CABECERAS
+    from contaperu.drivers.contasis.datos import COLUMNAS
+
+    for c in contrato.columnas_elegibles(drivers.concar)["centro_costo"]:
+        assert {CABECERAS["titulos"][letra] for letra in c.letra.values()} == {c.titulo}, c.columna
+    for c in contrato.columnas_elegibles(drivers.contasis)["centro_costo"]:
+        for libro, letra in c.letra.items():
+            assert {l: nombre for l, nombre, _, _ in COLUMNAS[libro]}[letra] == c.titulo, (c.columna, libro)
+
+
+def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
+    """Un driver de terceros declara su sección como los de serie, y el registro lo examina al cargarlo."""
+    sin_asiento = driver_de_prueba()
+    del sin_asiento.CONFIGURACION
+    assert contrato.incumplimientos(sin_asiento) == [
+        "un driver de asientos incluye en CONFIGURACION las claves del asiento (asiento.CONFIGURACION_DEL_ASIENTO), "
+        "que el núcleo lee al armar sus líneas; faltan: tipos, sub_diario_ventas, sub_diario_compras, "
+        "sub_diario_detraccion, detraccion_tipo_doc, detraccion_codigos"]
+
+    repetida = driver_de_registro()
+    repetida.CONFIGURACION = (Campo("x", "texto"), Campo("x", "texto"), Campo("cuentas", "texto"))
+    assert contrato.incumplimientos(repetida) == [
+        "CONFIGURACION repite claves: x", "CONFIGURACION no declara claves de lo general ni reservadas: cuentas"]
+    mal_defecto = driver_de_registro()
+    mal_defecto.CONFIGURACION = (Campo("medio_pago", "texto", "1", patron="^[0-9]{3}$"),)
+    assert contrato.incumplimientos(mal_defecto) == [
+        'los valores por defecto de CONFIGURACION no cumplen lo declarado: `medio_pago`: el texto "1" no cumple el '
+        'patrón ^[0-9]{3}$']
+    mal_defecto.CONFIGURACION = {"medio_pago": "001"}
+    assert contrato.incumplimientos(mal_defecto) == ["CONFIGURACION es una tupla de configuracion.Campo"]
+
+    columnas = driver_de_registro()
+    columnas.COLUMNAS_ELEGIBLES = {
+        "centro_costo": (Columna("a", "A", {"compra": "A", "venta": "A"}, fija=True),
+                         Columna("b", "B", {"compra": "B"}, fija=True, rol="tercero")),
+        "cuenta_contable": (Columna("c", "C", {}),)}
+    assert contrato.incumplimientos(columnas) == [
+        "COLUMNAS_ELEGIBLES['centro_costo'] lleva una sola columna fija: la principal",
+        "COLUMNAS_ELEGIBLES['centro_costo']: la letra de 'b' va por cada libro de FORMATOS (compra, venta)",
+        "COLUMNAS_ELEGIBLES['centro_costo']: 'b' no lleva rol ni campo, que son de las líneas neutrales de un driver "
+        "de asientos",
+        "COLUMNAS_ELEGIBLES: 'cuenta_contable' no se elige por columnas; los que sí: centro_costo"]
+    asientos = driver_de_prueba()
+    asientos.COLUMNAS_ELEGIBLES = {"centro_costo": (
+        Columna("m", "M", {"compra": "M"}, fija=True, rol="principal", campo="centro_costo"),
+        Columna("x", "X", {"compra": "X"}, rol="igv", campo="anexo_auxiliar"))}
+    assert contrato.incumplimientos(asientos) == [
+        "COLUMNAS_ELEGIBLES['centro_costo']: en un driver de asientos, 'x' dice qué línea neutral la llena: la fija, "
+        "con el centro_costo de la principal; las demás, con el anexo_auxiliar de la principal o del tercero"]
+
+    tributario = types.ModuleType("tributario")
+    tributario.NOMBRE, tributario.FORMATOS, tributario.OPCIONES = "trib", {"venta": "trib"}, Opciones()
+    tributario.nombre = lambda libro, op=None: "x.txt"
+    tributario.linea = lambda c, libro, idx, op=None: ""
+    tributario.CONFIGURACION = ()
+    assert contrato.incumplimientos(tributario) == [
+        "CONFIGURACION y COLUMNAS_ELEGIBLES son de un driver que lleva cuentas: un registro tributario no se configura"]
