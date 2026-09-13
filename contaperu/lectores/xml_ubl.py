@@ -19,7 +19,7 @@ from xml.etree.ElementTree import Element
 from defusedxml import ElementTree as DET
 
 from .. import catalogos as cat
-from ..modelo import Comprobante, fecha, monto, solo_digitos
+from ..modelo import Comprobante, Libro, fecha, monto, solo_digitos
 
 NS = {
     "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
@@ -43,22 +43,22 @@ class EsCdr(XmlInvalido):
     """Es la constancia de recepción (CDR) de SUNAT, no un comprobante."""
 
 
-def _raiz(data: bytes) -> tuple[Element, str]:
-    if not isinstance(data, (bytes, bytearray)):
+def _raiz(datos: bytes) -> tuple[Element, str]:
+    if not isinstance(datos, (bytes, bytearray)):
         raise TypeError("parsear() espera bytes")
-    if data.startswith(b"\xef\xbb\xbf"):
-        data = data[3:]
+    if datos.startswith(b"\xef\xbb\xbf"):
+        datos = datos[3:]
     try:
-        raiz = DET.fromstring(data)
+        raiz = DET.fromstring(datos)
     except Exception as e:  # ParseError, DefusedXmlException…
         raise XmlInvalido(f"XML mal formado: {e}") from e
     local = raiz.tag.rsplit("}", 1)[-1]
     return raiz, local
 
 
-def es_cdr(data: bytes) -> bool:
+def es_cdr(datos: bytes) -> bool:
     try:
-        return _raiz(data)[1] == RAIZ_CDR
+        return _raiz(datos)[1] == RAIZ_CDR
     except XmlInvalido:
         return False
 
@@ -111,10 +111,10 @@ def _parte(el: Element | None) -> dict:
     return {"tipo_doc": tipo_doc, "doc": doc.strip(), "nombre": " ".join(nombre.split())}
 
 
-def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comprobante:
+def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante:
     """Convierte un XML de SUNAT en un `Comprobante` visto desde el libro:
     en ventas la contraparte es el adquirente; en compras, el emisor."""
-    raiz, local = _raiz(data)
+    raiz, local = _raiz(datos)
     if local == RAIZ_CDR:
         raise EsCdr("Es el CDR (constancia de recepción), no un comprobante")
     if local not in RAICES:
@@ -130,7 +130,7 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
 
     emisor = _parte(raiz.find("cac:AccountingSupplierParty", NS))
     adquirente = _parte(raiz.find("cac:AccountingCustomerParty", NS))
-    contraparte = adquirente if tipo_libro == "venta" else emisor
+    contraparte = adquirente if libro.es_venta else emisor
 
     # --- Tributos por código del Catálogo 05 ------------------------------
     acumulado: dict[str, list[Decimal]] = {}
@@ -176,7 +176,7 @@ def parsear(data: bytes, tipo_libro: str, archivo_nombre: str = "") -> Comproban
                   if (_t(ac, "cbc:ChargeIndicator") or "").strip().lower() == "false"]
     suma_descuentos = sum((Decimal(d["importe"]) for d in descuentos), Decimal("0.00"))
     dscto_base = dscto_igv = Decimal("0.00")
-    if (tipo_cp in ("07", "87") and tipo_libro == "venta" and base_gravada > 0
+    if (tipo_cp in ("07", "87") and libro.es_venta and base_gravada > 0
             and abs(suma_descuentos - base_gravada) <= Decimal("0.05")):
         # Entera: los importes exactos de la nota —ni el del AllowanceCharge ni un IGV derivado por tasa—,
         # así el campo 15 del SIRE queda en cero y nunca cambia de signo.

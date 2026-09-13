@@ -25,7 +25,7 @@ def test_sin_tabla_no_cambia_nada():
 
 
 def test_la_tabla_que_viene_de_serie_esta_vacia():
-    mapeos, datos = pcge.cargar()
+    mapeos, datos = pcge.cargar_equivalencias()
     assert mapeos == []
     assert datos["version"] == "2026" and datos["mapeos"] == []
 

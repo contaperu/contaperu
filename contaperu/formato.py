@@ -62,7 +62,7 @@ def sanear(texto: str, op: Opciones) -> str:
     return " ".join(s.split())
 
 
-def fmt_fecha(d: date | None, op: Opciones) -> str:
+def formatear_fecha(d: date | None, op: Opciones) -> str:
     if d is None:
         return ""
     if op.fecha == "AAAAMMDD":
@@ -72,7 +72,7 @@ def fmt_fecha(d: date | None, op: Opciones) -> str:
     raise ValueError(f"Formato de fecha desconocido: {op.fecha!r}")
 
 
-def fmt_monto(d: Decimal, op: Opciones, negativo: bool = False) -> str:
+def formatear_monto(d: Decimal, op: Opciones, negativo: bool = False) -> str:
     """`d` viene siempre positivo del modelo; el signo se decide aquí."""
     if d == 0:
         return op.cero
@@ -80,13 +80,13 @@ def fmt_monto(d: Decimal, op: Opciones, negativo: bool = False) -> str:
     return f"-{s}" if negativo else s
 
 
-def fmt_tc(c: Comprobante, op: Opciones) -> str:
+def formatear_cambio(c: Comprobante, op: Opciones) -> str:
     if c.moneda == "PEN":
         return op.tc_pen
     return f"{c.tipo_cambio:.3f}" if c.tipo_cambio else ""
 
 
-def fmt_numero(numero: str, op: Opciones) -> str:
+def formatear_numero(numero: str, op: Opciones) -> str:
     """Número del comprobante tal como va al archivo. Por defecto SIN ceros a la izquierda
     (`00028806` → `28806`): decisión de formato para el SIRE y, más adelante, para CONCAR —
     SUNAT identifica el comprobante por su número y los ceros son cosmética del emisor."""
@@ -99,7 +99,7 @@ def fmt_numero(numero: str, op: Opciones) -> str:
 def fmt_fecha_libre(v, op: Opciones) -> str:
     """Para fechas que viven en un dict (detracción): acepta date o texto."""
     try:
-        return fmt_fecha(a_fecha(v), op)
+        return formatear_fecha(a_fecha(v), op)
     except ValueError:
         return ""
 
@@ -118,4 +118,4 @@ def columnas_igv_compras(c: Comprobante, op: Opciones) -> list[str]:
     DG (gravadas), DGNG (gravadas y no gravadas), DNG (no gravadas). La división es de `igv.por_destino`;
     aquí solo se escribe, con el signo de la nota de crédito."""
     neg = negativo(c, op)
-    return [fmt_monto(v, op, neg) for pareja in por_destino(c) for v in pareja]
+    return [formatear_monto(v, op, neg) for pareja in por_destino(c) for v in pareja]

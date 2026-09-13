@@ -27,9 +27,9 @@ def test_estructura(json_golden, n_campos, nombre):
     exp = g.generar(libro, comprobantes, "sire")
 
     assert exp.nombre == nombre
-    assert exp.nombre_zip == nombre[:-4] + ".zip"
-    assert exp.txt.endswith(b"\r\n") and b"\n" not in exp.txt.replace(b"\r\n", b"")
-    lineas = exp.txt.decode("ascii").split("\r\n")[:-1]
+    assert exp.nombre_comprimido == nombre[:-4] + ".zip"
+    assert exp.texto.endswith(b"\r\n") and b"\n" not in exp.texto.replace(b"\r\n", b"")
+    lineas = exp.texto.decode("ascii").split("\r\n")[:-1]
     assert len(lineas) == len(comprobantes)
     for linea in lineas:
         assert linea.endswith("|"), linea             # palote final, como el archivo aceptado
@@ -49,7 +49,7 @@ def test_ventas_primera_linea_literal():
     """La forma exacta que SUNAT aceptó: 33 campos, palote final y el vencimiento VACÍO
     (campo 6) en una factura — solo lo llevan los tipos que lo exigen."""
     libro, comprobantes = cargar_golden("ventas_202512.json")
-    linea = g.lineas(libro, comprobantes[:1], "sire")[0]
+    linea = g.lineas_de_texto(libro, comprobantes[:1], "sire")[0]
     assert linea == (
         "20601234567|EMPRESA DE PRUEBA SAC|202512||02/12/2025||01|F001|1001||6|20609999999|"
         "DISTRIBUIDORA COMERCIAL DEL NORTE SAC|0.00|25000.00|0.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|"
@@ -60,11 +60,11 @@ def test_ventas_primera_linea_literal():
 def test_compras_tipo_14_y_destino():
     libro, comprobantes = cargar_golden("compras_202601.json")
     recibo = comprobantes[2]
-    f = campos(g.lineas(libro, [recibo], "sire")[0], palote_final=False)
+    f = campos(g.lineas_de_texto(libro, [recibo], "sire")[0], palote_final=False)
     assert f[6] == "14" and f[7] == "" and f[9] == "12345679"
     assert f[14:20] == ["1800.00", "324.00", "0.00", "0.00", "0.00", "0.00"]   # DG
     recibo.destino_igv = "DNG"
-    f = campos(g.lineas(libro, [recibo], "sire")[0], palote_final=False)
+    f = campos(g.lineas_de_texto(libro, [recibo], "sire")[0], palote_final=False)
     assert f[14:20] == ["0.00", "0.00", "0.00", "0.00", "1800.00", "324.00"]
 
 
@@ -74,7 +74,7 @@ def test_nota_de_credito_en_negativo_y_referencia():
                      contraparte_doc="20131312955", contraparte_nombre="CLIENTE SAC",
                      base_gravada="100", igv="18", total="118",
                      ref_fecha="2025-12-02", ref_tipo_cp="01", ref_serie="F001", ref_numero="1001")
-    f = campos(g.lineas(libro, [nc], "sire")[0], palote_final=False)
+    f = campos(g.lineas_de_texto(libro, [nc], "sire")[0], palote_final=False)
     assert f[14] == "-100.00" and f[16] == "-18.00" and f[25] == "-118.00"
     assert f[28:32] == ["02/12/2025", "01", "F001", "1001"]
 
@@ -84,9 +84,9 @@ def test_usd_con_tipo_cambio_y_pen_sin_tc():
     usd = Comprobante(tipo_cp="01", serie="F001", numero="9", fecha_emision="2025-12-21",
                       contraparte_doc="20131312955", contraparte_nombre="X", moneda="USD",
                       tipo_cambio="3.7512", base_gravada="500", igv="90", total="590")
-    f = campos(g.lineas(libro, [usd], "sire")[0], palote_final=False)
+    f = campos(g.lineas_de_texto(libro, [usd], "sire")[0], palote_final=False)
     assert f[26] == "USD" and f[27] == "3.751"
-    f = campos(g.lineas(libro, comprobantes[:1], "sire")[0], palote_final=False)
+    f = campos(g.lineas_de_texto(libro, comprobantes[:1], "sire")[0], palote_final=False)
     assert f[26] == "PEN" and f[27] == ""           # en el SIRE: obligatorio solo si ≠ PEN
 
 
@@ -96,15 +96,15 @@ def test_saneado_ascii():
                     contraparte_doc="20131312955", contraparte_nombre="PEÑA & CÍA S.A.C. | Lima/Perú",
                     base_gravada="100", igv="18", total="118")
     exp = g.generar(libro, [c], "sire")
-    assert "PENA & CIA S.A.C. Lima-Peru" in exp.txt.decode("ascii")
-    assert exp.txt.isascii()
+    assert "PENA & CIA S.A.C. Lima-Peru" in exp.texto.decode("ascii")
+    assert exp.texto.isascii()
 
 
 def test_rvie_vacios_es_opcion():
     """Si SUNAT algún día pide los 34-40 presentes, es una opción, no código."""
     libro, comprobantes = cargar_golden("ventas_202512.json")
     op = sire.OPCIONES.con(rvie_vacios=7)
-    f = campos(g.lineas(libro, comprobantes[:1], "sire", op)[0], palote_final=True)
+    f = campos(g.lineas_de_texto(libro, comprobantes[:1], "sire", op)[0], palote_final=True)
     assert len(f) == 40
 
 
@@ -122,8 +122,8 @@ def test_los_vacios_del_final_de_COMPRAS_son_una_opcion_no_codigo():
     aceptado, y el arreglo no puede pedir tocar la plantilla.
     """
     libro, comprobantes = cargar_golden("compras_202601.json")
-    largo = campos(g.lineas(libro, comprobantes[:1], "sire")[0], palote_final=True)
-    corto = campos(g.lineas(libro, comprobantes[:1], "sire", sire.OPCIONES.con(rce_vacios=0))[0], palote_final=True)
+    largo = campos(g.lineas_de_texto(libro, comprobantes[:1], "sire")[0], palote_final=True)
+    corto = campos(g.lineas_de_texto(libro, comprobantes[:1], "sire", sire.OPCIONES.con(rce_vacios=0))[0], palote_final=True)
     assert len(largo) == 41 and len(corto) == 37
     assert corto == largo[:37]        # lo informado no cambia: solo se van los de SUNAT
 
@@ -148,11 +148,11 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
 
     cs = [c(), c(tipo_cp="02", serie="E001", numero="9", base_gravada="0", igv="0", inafecto="500", total="500"), c(numero="2")]
     exp = g.generar(libro, cs, "sire")
-    assert exp.n_filas == 2 and exp.resumen["fuera_del_registro"] == 1
-    assert b"E001" not in exp.txt and exp.txt.count(b"\r\n") == 2
+    assert exp.comprobantes == 2 and exp.resumen["fuera_del_registro"] == 1
+    assert b"E001" not in exp.texto and exp.texto.count(b"\r\n") == 2
     # El Excel de CONCAR sí se lo lleva (mismo mes, misma revisión)
     for x in cs:
         imputar(x, cuenta_contable="631101", centro_costo="OBRA01")   # la 631101 lleva centro y CONCAR lo exige (0.8)
-    exc = g.generar(libro, cs, "concar", contab=con_imputaciones(concar.config_de(None)),
+    exc = g.generar(libro, cs, "concar", config=con_imputaciones(concar.config_de(None)),
                     correlativos={"11": 1, "15": 1})
-    assert exc.n_filas == 3 and exc.resumen["fuera_del_registro"] == 0
+    assert exc.comprobantes == 3 and exc.resumen["fuera_del_registro"] == 0

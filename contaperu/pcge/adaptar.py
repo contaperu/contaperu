@@ -12,7 +12,7 @@ sustituya cuentas, el cambio será un archivo de datos y no una versión del pro
 El listón para llenarlo es serio. Este repositorio es público y lo puede usar cualquiera para su
 contabilidad real: una equivalencia mal puesta —netear una cuenta que no correspondía— produce
 estados financieros incorrectos en empresas que no tienen forma de saberlo. Las reglas entran
-**con la cita del artículo de la resolución al lado de cada mapeo** —`cargar()` se niega a leer un
+**con la cita del artículo de la resolución al lado de cada mapeo** —`cargar_equivalencias()` se niega a leer un
 mapeo sin ella—, no de memoria ni por analogía con otro plan.
 
 **Esto no es el catálogo.** Los nombres oficiales de las cuentas y su existencia viven en
@@ -86,7 +86,7 @@ class Informe:
         }
 
 
-def cargar(ruta: pathlib.Path | None = None) -> tuple[list[Mapeo], dict]:
+def cargar_equivalencias(ruta: pathlib.Path | None = None) -> tuple[list[Mapeo], dict]:
     """Los mapeos de la tabla. Lista vacía mientras la norma no esté codificada."""
     p = ruta or TABLA
     if not p.exists():
@@ -123,7 +123,7 @@ def adaptar(lineas: list[dict[str, Any]], ruta: pathlib.Path | None = None) -> t
     Los mapeos se prueban EN ORDEN y gana el primero que case, así que lo específico va antes
     que lo general: `741101` antes que `74`.
     """
-    mapeos, datos = cargar(ruta)
+    mapeos, datos = cargar_equivalencias(ruta)
     informe = Informe(version=str(datos.get("version") or ""), fuente=str(datos.get("fuente") or ""),
                       sin_tabla=not mapeos)
     if not mapeos:

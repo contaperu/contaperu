@@ -9,10 +9,10 @@ from typing import Any
 from ...modelo import Comprobante, Libro
 from ... import partida_doble
 from ...formato import Opciones
-from ...asiento.construir import etiquetas_sub_diario, exigir_requisitos, mes_del_libro, numerar
+from ...asiento.resolucion import etiquetas_sub_diario, exigir_requisitos, limites_del_periodo, numerar
 from ...asiento.huella import huella
-from ...asiento.motor import asiento_neutral
-from ..contrato import EXIGE_NUCLEO
+from ...asiento.motor import lineas_del_comprobante
+from ..contrato import EXIGE_NUCLEO_ASIENTO
 from . import proyeccion
 from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, EXIGE, FORMATOS,
                     HOJA, OPCIONES, PANEL)
@@ -32,7 +32,7 @@ def nombre(libro: Libro, op: Opciones = OPCIONES) -> str:
     return f"CONCAR_{libro.ruc}_{libro.periodo}_{'VENTAS' if libro.es_venta else 'COMPRAS'}{op.extension}"
 
 
-def build_xlsx(filas: list[dict[str, Any]]) -> bytes:
+def escribir_xlsx(filas: list[dict[str, Any]]) -> bytes:
     import openpyxl
     from openpyxl.styles import Alignment, Font, PatternFill
 
@@ -93,10 +93,10 @@ def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict, corre
     venta = libro.es_venta
     # Lo que CONCAR no puede importar sin: lo del núcleo (tipo con equivalencia, cuenta) y lo que
     # este driver declara en EXIGE (centro de costo donde la cuenta lo lleva, moneda con código).
-    exigir_requisitos(comprobantes, contab, venta, EXIGE_NUCLEO | EXIGE)
+    exigir_requisitos(comprobantes, contab, venta, EXIGE_NUCLEO_ASIENTO | EXIGE)
     # Los limites del mes del proceso: cada asiento se fecha por comprobante
-    # dentro de ellos (regla del 30-ago-2026; el detalle vive en asiento()).
-    mes = mes_del_libro(libro)
+    # dentro de ellos (regla del 30-ago-2026; el detalle vive en `asiento.lineas_del_comprobante`).
+    limites = limites_del_periodo(libro)
     numeros, rangos = numerar(comprobantes, contab, libro.periodo, correlativos, venta)
     # CONCAR numera con MM + cuatro dígitos: un sub-diario que pase de 9999 no se importa. Hasta el
     # 11-sep-2026 lo comprobaba el portal antes de llamar aquí; la regla es de este formato.
@@ -106,18 +106,19 @@ def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict, corre
     # La contabilidad sale en lineas neutrales; aqui solo se proyectan a las columnas de CONCAR.
     lineas, filas = [], []
     for c in comprobantes:
-        propias = asiento_neutral(c, contab, mes, numeros[id(c)], op, venta)
+        propias = lineas_del_comprobante(c, contab, limites, numeros[id(c)], op, venta)
         lineas.extend(propias)
         filas.extend(proyeccion.filas(c, propias, contab))
     # El asiento tiene que cuadrar ANTES de escribir un solo byte. Por construccion siempre
     # cuadra, asi que esto es una red de seguridad: si salta, hay un error de verdad.
     cuadre = partida_doble.exigir(lineas)
     resumen = {
-        "filas_excel": len(filas), "fechas": "por comprobante (extemporáneos al " + mes[0].strftime("%d/%m/%Y") + ")",
+        "filas_excel": len(filas),
+        "fechas": "por comprobante (extemporáneos al " + limites[0].strftime("%d/%m/%Y") + ")",
         "sub_diarios": {s: {"etiqueta": etiquetas_sub_diario(contab).get(s, s), **r} for s, r in rangos.items()},
         "debe": str(cuadre.debe), "haber": str(cuadre.haber),
         # La huella del contenido (asiento/huella.py): con ella quien guarde este resumen reconoce la
         # tanda si vuelve a salir. Va aquí porque este resumen es lo que el portal persiste.
         "huella": huella(lineas),
     }
-    return build_xlsx(filas), resumen
+    return escribir_xlsx(filas), resumen

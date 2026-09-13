@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from . import drivers, partida_doble
-from .asiento.construir import exigir_requisitos
+from .asiento.resolucion import exigir_requisitos
 from .asiento.huella import huella
 from .asiento.motor import lineas_del_libro
 from .drivers import contrato
@@ -35,12 +35,12 @@ class ErroresBloqueantes(Exception):
 @dataclass
 class Exportado:
     nombre: str          # nombre oficial del TXT (o del Excel)
-    nombre_zip: str      # '' en las drivers binarias
+    nombre_comprimido: str   # '' en los drivers de archivo
     formato: str         # 'ple_141' | 'ple_081' | 'sire_rvie' | 'sire_rce' | 'concar_xlsx'
     driver: str
-    txt: bytes           # b'' en las drivers binarias
-    zip: bytes           # b'' en las drivers binarias
-    n_filas: int
+    texto: bytes             # el TXT; b'' en los drivers de archivo
+    comprimido: bytes        # el ZIP del TXT; b'' en los drivers de archivo
+    comprobantes: int        # cuántos comprobantes salieron
     resumen: dict
     # Lo que se guarda en Storage y se descarga: el ZIP del TXT, o el Excel tal cual.
     archivo: str = ""
@@ -49,9 +49,9 @@ class Exportado:
 
     def __post_init__(self) -> None:
         if not self.archivo:
-            self.archivo = self.nombre_zip or self.nombre
+            self.archivo = self.nombre_comprimido or self.nombre
         if not self.contenido:
-            self.contenido = self.zip
+            self.contenido = self.comprimido
 
 
 def etiqueta(c: Comprobante) -> str:
@@ -80,8 +80,8 @@ def fuera_de(comprobantes: list[Comprobante], tipos) -> list[Comprobante]:
     return [c for c in comprobantes if c.tipo_cp in (tipos or frozenset())]
 
 
-def lineas(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_DEFAULT,
-           opciones: Opciones | None = None) -> list[str]:
+def lineas_de_texto(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_POR_DEFECTO,
+                    opciones: Opciones | None = None) -> list[str]:
     mod = drivers.obtener(driver)
     op = opciones or mod.OPCIONES
     return [mod.linea(c, libro, i, op) for i, c in enumerate(comprobantes, start=1)]
@@ -112,7 +112,7 @@ def _desde_lineas(mod, libro: Libro, comprobantes: list[Comprobante], op: Opcion
     numera y exige que cuadren; el driver solo las traduce. Así la contabilidad se escribe una vez
     para todos los ERP, y un driver nuevo no puede equivocarse en una cuenta ni en un sentido."""
     if contab is None or correlativos is None:
-        raise ValueError(f"El driver {mod.NOMBRE!r} arma asientos: necesita `contab` y `correlativos`")
+        raise ValueError(f"El driver {mod.NOMBRE!r} arma asientos: necesita `config` y `correlativos`")
     # Lo que ese destino exige (`contrato.exige`: lo del núcleo más su EXIGE) se comprueba ANTES de
     # armar nada: un driver `desde_lineas` nunca ve los comprobantes, así que solo el núcleo puede.
     exigir_requisitos(comprobantes, contab, libro.es_venta, contrato.exige(mod))
@@ -131,7 +131,7 @@ def _desde_comprobantes(mod, libro: Libro, comprobantes: list[Comprobante], op: 
     driver lee cada cuenta de `asiento.partes_de`
     y `asiento.cuenta_tercero`, la misma resolución que usa el asiento. Sin asiento no hay cuadre ni huella."""
     if contab is None:
-        raise ValueError(f"El driver {mod.NOMBRE!r} lleva cuentas: necesita `contab`")
+        raise ValueError(f"El driver {mod.NOMBRE!r} lleva cuentas: necesita `config`")
     exigir_requisitos(comprobantes, contab, libro.es_venta, contrato.exige(mod))
     fuera = contrato.no_caben(mod, libro, comprobantes, contab)
     if fuera:
@@ -139,13 +139,14 @@ def _desde_comprobantes(mod, libro: Libro, comprobantes: list[Comprobante], op: 
     return mod.desde_comprobantes(libro, comprobantes, contab, op)
 
 
-def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_DEFAULT,
-            opciones: Opciones | None = None, incluir_errores: bool = False, **params) -> Exportado:
-    """`params` son los que pide la forma del driver: `contab`, todo el que lleva cuentas
-    (`contrato.necesita_config`), y además `correlativos`, el que arma asientos (`contrato.necesita_asiento`)."""
+def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_POR_DEFECTO,
+            opciones: Opciones | None = None, incluir_errores: bool = False, config: dict | None = None,
+            correlativos: dict[str, int] | None = None) -> Exportado:
+    """`config`, la configuración contable, la pide todo driver que lleva cuentas (`contrato.lleva_cuentas`), y
+    `correlativos`, además, el que arma asientos (`contrato.arma_asientos`)."""
     mod = drivers.obtener(driver)
     op = opciones or mod.OPCIONES
-    formato = drivers.formato(driver, libro.tipo)
+    formato = drivers.formato_de(driver, libro.tipo)
     incluidos = seleccionar(comprobantes)
     # Cada driver se lleva lo que le toca: el TXT del SIRE/PLE deja fuera los
     # recibos por honorarios; el Excel de CONCAR los lleva a su sub-diario.
@@ -159,19 +160,21 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers
     forma = contrato.forma(mod)
     if forma in ("desde_lineas", "desde_comprobantes", "construir"):
         if forma == "desde_lineas":
-            contenido, extra = _desde_lineas(mod, libro, incluidos, op, **params)
+            contenido, extra = _desde_lineas(mod, libro, incluidos, op, config, correlativos)
         elif forma == "desde_comprobantes":
-            contenido, extra = _desde_comprobantes(mod, libro, incluidos, op, **params)
+            contenido, extra = _desde_comprobantes(mod, libro, incluidos, op, config)
         else:
-            contenido, extra = mod.construir(libro, incluidos, op=op, **params)
+            if config is None or correlativos is None:
+                raise ValueError(f"El driver {mod.NOMBRE!r} arma asientos: necesita `config` y `correlativos`")
+            contenido, extra = mod.construir(libro, incluidos, config, correlativos, op)
         nombre = mod.nombre(libro, op)
         return Exportado(
-            nombre=nombre, nombre_zip="", formato=formato, driver=driver, txt=b"", zip=b"",
-            n_filas=len(incluidos), resumen={**_resumen(comprobantes, incluidos, errores, op, fuera), **extra},
+            nombre=nombre, nombre_comprimido="", formato=formato, driver=driver, texto=b"", comprimido=b"",
+            comprobantes=len(incluidos), resumen={**_resumen(comprobantes, incluidos, errores, op, fuera), **extra},
             archivo=nombre, contenido=contenido, content_type=getattr(mod, "CONTENT_TYPE", "application/octet-stream"),
         )
 
-    cuerpo = op.nueva_linea.join(lineas(libro, incluidos, driver, op))
+    cuerpo = op.nueva_linea.join(lineas_de_texto(libro, incluidos, driver, op))
     if cuerpo:
         cuerpo += op.nueva_linea
     if op.sanear:
@@ -180,7 +183,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers
         txt = cuerpo.encode("cp1252", errors="replace")  # lo que históricamente exigían los libros electrónicos
 
     nombre = mod.nombre(libro, op)
-    nombre_zip = nombre.rsplit(".", 1)[0] + ".zip"
+    nombre_comprimido = nombre.rsplit(".", 1)[0] + ".zip"
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         info = zipfile.ZipInfo(nombre, date_time=(1980, 1, 1, 0, 0, 0))
@@ -188,6 +191,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers
         z.writestr(info, txt)
 
     return Exportado(
-        nombre=nombre, nombre_zip=nombre_zip, formato=formato, driver=driver, txt=txt, zip=buf.getvalue(),
-        n_filas=len(incluidos), resumen=_resumen(comprobantes, incluidos, errores, op, fuera),
+        nombre=nombre, nombre_comprimido=nombre_comprimido, formato=formato, driver=driver,
+        texto=txt, comprimido=buf.getvalue(), comprobantes=len(incluidos),
+        resumen=_resumen(comprobantes, incluidos, errores, op, fuera),
     )

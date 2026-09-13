@@ -11,9 +11,9 @@ from datetime import date, datetime, time
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.construir import cuenta_tercero, lleva_centro, partes_de
+from ...asiento.resolucion import cuenta_tercero, lleva_centro, partes_de
 from ...asiento.motor import glosa_de
-from ...formato import Opciones, fmt_numero, negativo
+from ...formato import Opciones, formatear_numero, negativo
 from ...igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
 from ...modelo import Comprobante, Libro
 from . import datos
@@ -76,12 +76,13 @@ def valores(c: Comprobante, libro: Libro, contab: dict, op: Opciones = datos.OPC
         "ref_fecha": c.ref_fecha if nota else None,
         "ref_tipo": c.ref_tipo_cp if nota else "",
         "ref_serie": c.ref_serie if nota else "",
-        "ref_numero": fmt_numero(c.ref_numero, op) if nota else "",
+        "ref_numero": formatear_numero(c.ref_numero, op) if nota else "",
     }
     if venta:
         return {
-            "A": c.fecha_emision, "B": c.fecha_vencimiento, "C": c.tipo_cp, "D": c.serie, "E": fmt_numero(c.numero, op),
-            "F": c.contraparte_tipo_doc, "G": c.contraparte_doc, "H": c.contraparte_nombre, **importes,
+            "A": c.fecha_emision, "B": c.fecha_vencimiento, "C": c.tipo_cp, "D": c.serie,
+            "E": formatear_numero(c.numero, op), "F": c.contraparte_tipo_doc, "G": c.contraparte_doc,
+            "H": c.contraparte_nombre, **importes,
             "Q": comunes["cambio"], "R": comunes["ref_fecha"], "S": comunes["ref_tipo"], "T": comunes["ref_serie"],
             "U": comunes["ref_numero"], "V": comunes["moneda"], "W": comunes["dolares"], "X": c.fecha_vencimiento,
             "Y": comunes["condicion"], "Z": centro, "AA": "", "AB": cuenta,
@@ -94,7 +95,7 @@ def valores(c: Comprobante, libro: Libro, contab: dict, op: Opciones = datos.OPC
         }
     return {
         "A": c.fecha_emision, "B": c.fecha_vencimiento, "C": c.tipo_cp, "D": c.serie or c.cod_dep_aduanera,
-        "E": c.anio_dua, "F": fmt_numero(c.numero, op), "G": c.contraparte_tipo_doc, "H": c.contraparte_doc,
+        "E": c.anio_dua, "F": formatear_numero(c.numero, op), "G": c.contraparte_tipo_doc, "H": c.contraparte_doc,
         "I": c.contraparte_nombre, **importes,
         # El no domiciliado y la constancia de la detracción van vacíos (John, 12-sep-2026: «no pongas nada»).
         "T": "", "U": "", "V": None, "W": comunes["cambio"],
@@ -151,7 +152,7 @@ def no_caben(libro: Libro, comprobantes: list[Comprobante], contab: dict) -> dic
         if c.moneda == "USD" and not c.tipo_cambio:
             salida[datos.MOTIVOS["cambio"]].append(c)
             continue
-        if c.numero_final and fmt_numero(c.numero_final, op) != fmt_numero(c.numero, op):
+        if c.numero_final and formatear_numero(c.numero_final, op) != formatear_numero(c.numero, op):
             salida[datos.MOTIVOS["rango"]].append(c)
         if c.base_ivap or c.ivap:
             salida[datos.MOTIVOS["ivap"]].append(c)

@@ -62,7 +62,7 @@ def test_desde_json_llega_a_los_drivers_de_asientos(tmp_path, capsys):
     assert csv.startswith("sub_diario;correlativo;fecha;cuenta") and csv.count("\r\n") == 1 + 9   # 3 facturas × 3 líneas
     assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(salida), "--config", str(config)]) == 0
     assert (salida / "CONCAR_20601234567_202601_COMPRAS.xlsx").read_bytes()[:2] == b"PK"
-    assert "concar concar_xlsx   3 filas" in capsys.readouterr().out
+    assert "concar concar_xlsx   3 comprobantes" in capsys.readouterr().out
     # Sin la cuenta de gasto el driver se niega, y la CLI dice a dónde ir a mirar en vez de un traceback.
     assert cli.main(["desde-json", golden, "--driver", "csv", "--salida", str(salida)]) == 1
     assert "contaperu diagnosticar" in capsys.readouterr().err

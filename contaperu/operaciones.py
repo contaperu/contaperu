@@ -134,7 +134,7 @@ def configuracion(contab: dict | None = None) -> dict:
     if not contab:
         return asi.config_de(None)
     encima = contab.get("contabilidad") if "contabilidad" in contab else contab
-    return asi.merge_config(asi.config_de(None), encima or {})
+    return asi.fundir_config(asi.config_de(None), encima or {})
 
 
 def con_imputacion(conf: dict, imputacion: dict | None, comprobantes: list[Comprobante]) -> dict:
@@ -300,26 +300,24 @@ def exportar(doc: dict, driver: str = "concar", contab: dict | None = None,
     mod = drivers.obtener(driver)
     # Lo que pide la forma del driver: la configuración, todo el que lleva cuentas (también el registro de un
     # sistema contable); los correlativos, además, el que arma asientos.
-    params: dict[str, Any] = {}
-    if drivers.contrato.necesita_config(mod):
-        params["contab"] = conf
-    if drivers.contrato.necesita_asiento(mod):
+    corr = None
+    if drivers.contrato.arma_asientos(mod):
         corr = {s: 1 for s in asi.sub_diarios_presentes(comprobantes, conf, libro.es_venta)}
         corr.update(correlativos or {})
-        params["correlativos"] = corr
-    exp = gen.generar(libro, comprobantes, driver, incluir_errores=incluir_observados, **params)
+    exp = gen.generar(libro, comprobantes, driver, incluir_errores=incluir_observados,
+                      config=conf if drivers.contrato.lleva_cuentas(mod) else None, correlativos=corr)
 
     salida: dict[str, Any] = {
         "driver": driver, "formato": exp.formato, "archivo": exp.nombre,
-        "filas": exp.n_filas, "resumen": exp.resumen,
+        "filas": exp.comprobantes, "resumen": exp.resumen,
         "_exportacion": {"driver": driver, "archivo": exp.nombre,
                          **({"huella": exp.resumen["huella"]} if exp.resumen.get("huella") else {}),
                          **({"fecha": cuando} if cuando else {})},
     }
-    if exp.txt:
-        salida["texto"] = exp.txt.decode("utf-8", errors="replace")
-        salida["zip_base64"] = base64.b64encode(exp.zip).decode()
-        salida["archivo_zip"] = exp.nombre_zip
+    if exp.texto:
+        salida["texto"] = exp.texto.decode("utf-8", errors="replace")
+        salida["zip_base64"] = base64.b64encode(exp.comprimido).decode()
+        salida["archivo_zip"] = exp.nombre_comprimido
     else:
         contenido = exp.contenido
         salida["content_type"] = exp.content_type
@@ -389,7 +387,7 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
     Es la operación pensada para un agente —o para una persona con prisa—: en vez de lanzar la
     exportación y ver qué excepción salta a mitad de camino, responde de una vez qué bloquea, qué
     falta y qué saldría. No añade ninguna regla contable: reúne comprobaciones que ya existen
-    (`validar.revisar`, `filas_sin_cuenta`, `filas_sin_centro`, `tipos_sin_mapa`,
+    (`validar.revisar`, `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_mapa`,
     `monedas_sin_codigo`, la numeración por sub-diario) y las cuenta por su serie-número.
 
     Pura y sin estado. **No lanza** por lo que le falte al mes: lo describe. Solo rechaza un
@@ -417,11 +415,11 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
     # que arma asientos: la equivalencia del tipo, el código de la moneda y el correlativo de cada sub-diario.
     faltantes: dict[str, Any] = {}
     sub_diarios: dict[str, Any] = {}
-    if drivers.contrato.necesita_config(mod):
+    if drivers.contrato.lleva_cuentas(mod):
         faltantes = {
-            "sin_cuenta": [_serie_numero(c) for c in asi.filas_sin_cuenta(candidatos, conf, venta)],
+            "sin_cuenta": [_serie_numero(c) for c in asi.comprobantes_sin_cuenta(candidatos, conf, venta)],
             "reparto_no_cuadra": [_serie_numero(c) for c in asi.repartos_que_no_cuadran(candidatos, conf, venta)],
-            "sin_centro_de_costo": [_serie_numero(c) for c in asi.filas_sin_centro(candidatos, conf, venta)],
+            "sin_centro_de_costo": [_serie_numero(c) for c in asi.comprobantes_sin_centro(candidatos, conf, venta)],
         }
         # Lo que solo cuenta para el destino que lo pide: el reparto, si lleva una cuenta por documento, y lo que su
         # formato no puede llevar (`no_caben`). A quien no lo declara no le aparece la clave.
@@ -430,7 +428,7 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
         if callable(getattr(mod, "no_caben", None)):
             faltantes["no_caben"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
                                      in drivers.contrato.no_caben(mod, libro, candidatos, conf).items()}
-    if drivers.contrato.necesita_asiento(mod):
+    if drivers.contrato.arma_asientos(mod):
         sin_mapa = asi.tipos_sin_mapa(candidatos, conf)
         con_mapa = [c for c in candidatos if c.tipo_cp not in sin_mapa]
         presentes = asi.sub_diarios_presentes(con_mapa, conf, venta)

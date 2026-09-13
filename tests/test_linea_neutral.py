@@ -105,7 +105,7 @@ def test_las_lineas_validan_contra_el_estandar():
 # --- el motor: la línea neutral como fuente (0.7) -------------------------------------
 
 def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
-    lineas = asi.asiento_neutral(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
+    lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
     assert [ln.rol for ln in lineas] == ["principal", "igv", "tercero", "detraccion_tercero", "detraccion"]
     assert all(ln.rol in asi.ROLES for ln in lineas)
     assert lineas[0].documento["tipo_cp"] == "01" and lineas[0].documento["tipo"] == "FT"
@@ -117,7 +117,7 @@ def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
 
 def test_la_glosa_de_la_linea_va_entera_y_el_corte_es_del_driver():
     concepto = "SERVICIO DE TRANSPORTE DE MATERIALES DE CONSTRUCCION A LA OBRA"
-    lineas = asi.asiento_neutral(factura(concepto=concepto), CONTAB, MES, "080001")
+    lineas = asi.lineas_del_comprobante(factura(concepto=concepto), CONTAB, MES, "080001")
     assert lineas[0].glosa == concepto and lineas[1].glosa == "IGV - " + concepto
     filas = driver_concar.filas_de_comprobante(factura(concepto=concepto), CONTAB, MES, "080001")
     assert filas[0]["W"] == concepto[:30] and filas[0]["F"] == concepto[:40]
@@ -125,14 +125,14 @@ def test_la_glosa_de_la_linea_va_entera_y_el_corte_es_del_driver():
 
 def test_la_tasa_del_igv_viaja_exacta_y_concar_la_redondea():
     reducida = factura(base_gravada="100", igv="10.5", total="110.5")
-    assert asi.asiento_neutral(reducida, CONTAB, MES, "080001")[0].tasa_igv == "10.5"
+    assert asi.lineas_del_comprobante(reducida, CONTAB, MES, "080001")[0].tasa_igv == "10.5"
     assert driver_concar.filas_de_comprobante(reducida, CONTAB, MES, "080001")[0]["AO"] == 11
 
 
 def test_una_nota_de_credito_lleva_los_dos_codigos_de_su_referencia():
     nc = factura(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="E001",
                  ref_numero="871", ref_fecha="2026-08-01")
-    principal = asi.asiento_neutral(nc, CONTAB, MES, "080001")[0]
+    principal = asi.lineas_del_comprobante(nc, CONTAB, MES, "080001")[0]
     assert principal.documento["tipo_cp"] == "07" and principal.debe_haber == "H"
     assert principal.referencia == {"tipo": "FT", "tipo_cp": "01", "serie_numero": "E001-871",
                                     "fecha": "2026-08-01"}
@@ -142,9 +142,9 @@ def test_lo_que_arma_el_motor_valida_contra_el_estandar():
     validador = Draft202012Validator(json.loads(ESQUEMA.read_text(encoding="utf-8")))
     nc = factura(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="E001", ref_numero="871",
                  ref_fecha="2026-08-01", detraccion={"codigo": "027", "porcentaje": "4"})
-    lineas = (asi.asiento_neutral(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
-              + asi.asiento_neutral(nc, CONTAB, MES, "080085")
-              + asi.asiento_neutral(factura(tipo_cp="02", retencion="336", igv="0", base_gravada="0",
+    lineas = (asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
+              + asi.lineas_del_comprobante(nc, CONTAB, MES, "080085")
+              + asi.lineas_del_comprobante(factura(tipo_cp="02", retencion="336", igv="0", base_gravada="0",
                                             inafecto="4956"), CONTAB, MES, "080086"))
     doc = {"open_accounting": "0.3",
            "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -187,6 +187,6 @@ def test_el_csv_esta_registrado_como_driver():
     from contaperu import drivers
 
     assert drivers.obtener("csv") is driver_csv
-    assert drivers.formato("csv", "compra") == "csv_asiento"
+    assert drivers.formato_de("csv", "compra") == "csv_asiento"
     with pytest.raises(ValueError):
         drivers.obtener("un-erp-que-no-existe")

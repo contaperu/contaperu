@@ -45,7 +45,7 @@ def test_exporta_el_golden_de_compras(nombre):
     crudo = base64.b64decode(r.get("contenido_base64") or r.get("zip_base64") or "")
     assert crudo, f"{nombre} no produjo bytes"
     assert r["archivo"] == mod.nombre(op.libro_de(doc), mod.OPCIONES)
-    if contrato.necesita_asiento(mod):
+    if contrato.arma_asientos(mod):
         assert r["resumen"]["debe"] == r["resumen"]["haber"], f"{nombre}: el asiento no cuadra"
 
 
@@ -227,8 +227,8 @@ def test_las_dos_familias_y_lo_que_pide_cada_forma():
     assert contrato.incumplimientos(registro) == [] and contrato.forma(registro) == "desde_comprobantes"
     todos = (drivers.sire, registro, drivers.concar, drivers.csv)
     assert [contrato.familia(m) for m in todos] == ["registro", "registro", "asiento", "asiento"]
-    assert [contrato.necesita_config(m) for m in todos] == [False, True, True, True]
-    assert [contrato.necesita_asiento(m) for m in todos] == [False, False, True, True]
+    assert [contrato.lleva_cuentas(m) for m in todos] == [False, True, True, True]
+    assert [contrato.arma_asientos(m) for m in todos] == [False, False, True, True]
     # El núcleo le exige la cuenta y nada del sub-diario; puede sumar el centro, y la moneda de CONCAR no.
     assert contrato.exige(registro) == {"cuenta_contable"}
     registro.EXIGE = frozenset({"centro_costo"})

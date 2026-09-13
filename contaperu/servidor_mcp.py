@@ -137,7 +137,7 @@ def catalogo_pcge2026() -> str:
     escribir existe. **Que una cuenta no esté aquí no la invalida**: el PCGE llega a cinco dígitos
     y cada empresa abre sus divisionarias debajo — `603201` es válida y no aparece en la norma.
     """
-    return json.dumps(pcge.catalogo.cargar(), ensure_ascii=False, indent=1)
+    return json.dumps(pcge.catalogo.cargar_catalogo(), ensure_ascii=False, indent=1)
 
 
 @mcp.resource("contaperu://drivers", mime_type="application/json")
@@ -323,7 +323,7 @@ def buscar_cuenta_pcge(texto: str = "", codigo: str = "") -> dict:
     Úsala antes de decidir la `cuenta_contable` de un comprobante: es la diferencia entre elegir
     una cuenta que existe y proponer uno que suena bien.
     """
-    norma = pcge.catalogo.cargar()
+    norma = pcge.catalogo.cargar_catalogo()
     salida: dict = {"version": norma.get("version", ""), "fuente": norma.get("fuente", "")}
     if codigo:
         salida["cuenta"] = pcge.resolver(codigo)

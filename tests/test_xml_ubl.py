@@ -22,7 +22,7 @@ def leer(nombre: str) -> bytes:
 
 
 def test_factura_como_venta():
-    c = xml_ubl.parsear(leer("20131312955-01-F001-123.xml"), "venta", "F001-123.xml")
+    c = xml_ubl.parsear(leer("20131312955-01-F001-123.xml"), VENTAS, "F001-123.xml")
     assert (c.tipo_cp, c.serie, c.numero) == ("01", "F001", "123")
     assert c.fecha_emision == date(2026, 1, 10)
     assert c.fecha_vencimiento == date(2026, 2, 10)          # la cuota manda sobre cbc:DueDate
@@ -39,7 +39,7 @@ def test_factura_como_venta():
 
 
 def test_factura_como_compra_y_de_otro_ruc():
-    c = xml_ubl.parsear(leer("20131312955-01-F001-123.xml"), "compra")
+    c = xml_ubl.parsear(leer("20131312955-01-F001-123.xml"), COMPRAS)
     assert c.contraparte_doc == EMISOR and c.contraparte_nombre == "EMISOR DE PRUEBA S.A.C."
     validar.revisar([c], COMPRAS)
     assert c.estado == "ok"
@@ -51,7 +51,7 @@ def test_factura_como_compra_y_de_otro_ruc():
 
 
 def test_boleta_con_dni_y_latin1():
-    c = xml_ubl.parsear(leer("20131312955-03-B001-55.xml"), "venta")
+    c = xml_ubl.parsear(leer("20131312955-03-B001-55.xml"), VENTAS)
     assert (c.tipo_cp, c.serie, c.numero) == ("03", "B001", "55")
     assert (c.contraparte_tipo_doc, c.contraparte_doc) == ("1", "12345678")
     assert c.contraparte_nombre == "APELLIDO DE PRUEBA, ÁNGEL"   # con tilde: es lo que prueba el latin-1
@@ -63,7 +63,7 @@ def test_boleta_con_dni_y_latin1():
 
 
 def test_nota_de_credito():
-    c = xml_ubl.parsear(leer("20131312955-07-FC01-7.xml"), "venta")
+    c = xml_ubl.parsear(leer("20131312955-07-FC01-7.xml"), VENTAS)
     assert (c.tipo_cp, c.serie, c.numero) == ("07", "FC01", "7")
     assert (c.ref_tipo_cp, c.ref_serie, c.ref_numero, c.ref_fecha) == ("01", "F001", "123", None)
     assert c.datos_originales["motivo_nota"]["codigo"] == "01"
@@ -76,7 +76,7 @@ def test_nota_de_credito():
 
 
 def test_factura_usd_con_icbper():
-    c = xml_ubl.parsear(leer("20131312955-01-F001-124.xml"), "venta")
+    c = xml_ubl.parsear(leer("20131312955-01-F001-124.xml"), VENTAS)
     assert c.moneda == "USD" and c.icbper == Decimal("0.50") and c.total == Decimal("590.50")
     validar.revisar([c], VENTAS)
     assert [o.codigo for o in c.observaciones] == ["TC_FALTA"]
@@ -87,15 +87,15 @@ def test_factura_usd_con_icbper():
 
 def test_ubl20_y_cdr_se_rechazan_con_claridad():
     with pytest.raises(xml_ubl.XmlNoSoportado, match="UBL 2.0"):
-        xml_ubl.parsear(leer("ubl20-antiguo.xml"), "venta")
+        xml_ubl.parsear(leer("ubl20-antiguo.xml"), VENTAS)
     with pytest.raises(xml_ubl.EsCdr):
-        xml_ubl.parsear(leer("R-20131312955-01-F001-123.xml"), "venta")
+        xml_ubl.parsear(leer("R-20131312955-01-F001-123.xml"), VENTAS)
     assert xml_ubl.es_cdr(leer("R-20131312955-01-F001-123.xml"))
     assert not xml_ubl.es_cdr(leer("20131312955-03-B001-55.xml"))
     with pytest.raises(xml_ubl.XmlInvalido):
-        xml_ubl.parsear(b"<html>no</html>", "venta")
+        xml_ubl.parsear(b"<html>no</html>", VENTAS)
     with pytest.raises(xml_ubl.XmlInvalido):
-        xml_ubl.parsear(b"\xef\xbb\xbf<Invoice xmlns='urn:oasis:names:specification:ubl:schema:xsd:Invoice-2'><x/></Invoice", "venta")
+        xml_ubl.parsear(b"\xef\xbb\xbf<Invoice xmlns='urn:oasis:names:specification:ubl:schema:xsd:Invoice-2'><x/></Invoice", VENTAS)
 
 
 def test_zip_con_cdr_anidado_y_tope():
@@ -127,9 +127,9 @@ def test_zip_con_cdr_anidado_y_tope():
 
 
 def test_ordenar():
-    a = xml_ubl.parsear(leer("20131312955-01-F001-124.xml"), "venta")   # 20/01
-    b = xml_ubl.parsear(leer("20131312955-01-F001-123.xml"), "venta")   # 10/01
-    c = xml_ubl.parsear(leer("20131312955-03-B001-55.xml"), "venta")    # 12/01
+    a = xml_ubl.parsear(leer("20131312955-01-F001-124.xml"), VENTAS)   # 20/01
+    b = xml_ubl.parsear(leer("20131312955-01-F001-123.xml"), VENTAS)   # 10/01
+    c = xml_ubl.parsear(leer("20131312955-03-B001-55.xml"), VENTAS)    # 12/01
     assert [x.numero for x in archivos.ordenar([a, b, c])] == ["123", "55", "124"]
 
 
@@ -162,19 +162,19 @@ NC_CON_DESCUENTO = """<?xml version="1.0" encoding="UTF-8"?>
 
 def test_descuento_global_va_a_sus_propias_columnas():
     """La base y el IGV son los netos del XML, y la NC va ENTERA como descuento (campos 16 y 18)."""
-    c = xml_ubl.parsear(NC_CON_DESCUENTO.encode("utf-8"), "venta")
+    c = xml_ubl.parsear(NC_CON_DESCUENTO.encode("utf-8"), VENTAS)
     assert (c.base_gravada, c.igv) == (Decimal("9985.36"), Decimal("1797.36"))
     assert (c.dscto_base, c.dscto_igv) == (c.base_gravada, c.igv)      # los importes exactos de la nota
 
 
 def test_sin_descuento_los_dos_campos_quedan_en_cero():
     """La NC normal (importe como línea gravada) sigue yendo a base e IGV."""
-    c = xml_ubl.parsear(NC_CON_DESCUENTO.replace("false", "true").encode("utf-8"), "venta")
+    c = xml_ubl.parsear(NC_CON_DESCUENTO.replace("false", "true").encode("utf-8"), VENTAS)
     assert c.dscto_base == Decimal("0.00") and c.dscto_igv == Decimal("0.00")
     assert c.base_gravada == Decimal("9985.36")
 
 
 def test_sin_forma_de_pago_la_condicion_queda_vacia():
     """Vacío no es contado: es que el documento no lo dice. La nota de crédito de prueba no la trae."""
-    c = xml_ubl.parsear(leer("20131312955-07-FC01-7.xml"), "venta", "FC01-7.xml")
+    c = xml_ubl.parsear(leer("20131312955-07-FC01-7.xml"), VENTAS, "FC01-7.xml")
     assert c.datos_originales["forma_pago"] == "" and c.condicion_pago == ""

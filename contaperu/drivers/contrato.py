@@ -28,8 +28,8 @@ Todas exponen además `NOMBRE`, `FORMATOS` ({'venta'|'compra': identificador de 
 `OPCIONES` (una `formato.Opciones`) y `nombre(libro, op) -> str`; las tres de archivo, su
 `CONTENT_TYPE`. Opcional: `EXCLUYE_TIPOS`, los tipos SUNAT que ese destino no lleva; y, en un driver que
 lleva cuentas, `EXIGE`: lo que ese sistema no puede importar sin y que el núcleo, si no se lo dicen, deja
-pasar (`EXIGE_POSIBLES`; en uno de registro, `EXIGE_POSIBLES_REGISTRO`). Lo que el núcleo exige se declare o
-no (`EXIGE_NUCLEO`, `EXIGE_NUCLEO_REGISTRO`) es aquello sin lo que no hay nada que escribir: la cuenta
+pasar (`EXIGE_POSIBLES_ASIENTO`; en uno de registro, `EXIGE_POSIBLES_REGISTRO`). Lo que el núcleo exige se declare o
+no (`EXIGE_NUCLEO_ASIENTO`, `EXIGE_NUCLEO_REGISTRO`) es aquello sin lo que no hay nada que escribir: la cuenta
 contable, y en un asiento además la equivalencia del tipo, de la que sale el sub-diario. `exige(mod)` devuelve
 la unión, y es lo que `diagnosticar` lee para decidir si un mes está listo **para ese destino** — la idea
 viene de Codat `options` y Merge `/meta` (ver `REFERENCIAS.md`): el destino declara qué exige antes de
@@ -63,8 +63,8 @@ TIPOS_LIBRO = ("venta", "compra")
 # Lo que un driver de asientos PUEDE exigir (el núcleo sabe generar sin ello): el centro de costo en
 # las cuentas que lo llevan, y que la moneda tenga código en el destino. Lo que exige el núcleo a todos:
 # la cuenta contable de cada línea y la equivalencia del tipo SUNAT (de ella sale el sub-diario).
-EXIGE_POSIBLES = frozenset({"centro_costo", "moneda"})
-EXIGE_NUCLEO = frozenset({"cuenta_contable", "tipo_cp"})
+EXIGE_POSIBLES_ASIENTO = frozenset({"centro_costo", "moneda"})
+EXIGE_NUCLEO_ASIENTO = frozenset({"cuenta_contable", "tipo_cp"})
 # Y a uno de registro que lleva cuentas (`desde_comprobantes`), el núcleo le exige la cuenta —la columna con la
 # que el destino arma su asiento— y nada del sub-diario ni de su equivalencia, que son del asiento. Puede exigir
 # el centro de costo, y `cuenta_unica`: que ningún documento reparta su base entre varias cuentas, porque el destino
@@ -83,11 +83,11 @@ class Driver(Protocol):
     def nombre(self, libro: Libro, op: Opciones = ...) -> str: ...
 
 
-class DriverTexto(Driver, Protocol):
+class DriverRegistroTexto(Driver, Protocol):
     def linea(self, c: Comprobante, libro: Libro, idx: int, op: Opciones = ...) -> str: ...
 
 
-class DriverRegistro(Driver, Protocol):
+class DriverRegistroArchivo(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_REGISTRO
 
@@ -95,17 +95,17 @@ class DriverRegistro(Driver, Protocol):
                            op: Opciones = ...) -> tuple[bytes, dict]: ...
 
 
-class DriverArchivo(Driver, Protocol):
+class DriverAsientoComprobantes(Driver, Protocol):
     CONTENT_TYPE: str
-    EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES
+    EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
 
     def construir(self, libro: Libro, comprobantes: list[Comprobante], contab: dict,
                   correlativos: dict[str, int], op: Opciones = ...) -> tuple[bytes, dict]: ...
 
 
-class DriverAsientos(Driver, Protocol):
+class DriverAsientoLineas(Driver, Protocol):
     CONTENT_TYPE: str
-    EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES
+    EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
 
     def desde_lineas(self, libro: Libro, lineas: list[LineaDiario], contab: dict,
                      op: Opciones = ...) -> tuple[bytes, dict]: ...
@@ -122,13 +122,13 @@ def familia(mod: Any) -> str:
     return FAMILIA.get(forma(mod), "")
 
 
-def necesita_config(mod: Any) -> bool:
+def lleva_cuentas(mod: Any) -> bool:
     """¿Necesita la configuración contable del contribuyente? Todo driver que lleva cuentas: los de asientos y el
     registro de un sistema contable (`desde_comprobantes`). El registro tributario (`linea`), no."""
     return forma(mod) in ("desde_lineas", "construir", "desde_comprobantes")
 
 
-def necesita_asiento(mod: Any) -> bool:
+def arma_asientos(mod: Any) -> bool:
     """¿Arma asientos, y necesita por eso además los correlativos? Las dos formas de la familia asiento."""
     return familia(mod) == "asiento"
 
@@ -137,8 +137,8 @@ def exige(mod: Any) -> frozenset[str]:
     """Todo lo que ese destino exige para exportar: lo del núcleo para su forma más lo que el driver declara en
     `EXIGE`. Un registro tributario (forma `linea`) no exige nada de esto: no lleva cuentas."""
     declarado = frozenset(getattr(mod, "EXIGE", None) or ())
-    if necesita_asiento(mod):
-        return EXIGE_NUCLEO | declarado
+    if arma_asientos(mod):
+        return EXIGE_NUCLEO_ASIENTO | declarado
     if forma(mod) == "desde_comprobantes":
         return EXIGE_NUCLEO_REGISTRO | declarado
     return frozenset()
@@ -187,7 +187,7 @@ def incumplimientos(mod: Any) -> list[str]:
         problemas.append("EXCLUYE_TIPOS son códigos SUNAT en texto")
     declarado = getattr(mod, "EXIGE", None)
     if declarado is not None:
-        posibles = EXIGE_POSIBLES_REGISTRO if f == "desde_comprobantes" else EXIGE_POSIBLES
+        posibles = EXIGE_POSIBLES_REGISTRO if f == "desde_comprobantes" else EXIGE_POSIBLES_ASIENTO
         if f == "linea":
             problemas.append("EXIGE no lo declara un registro tributario (forma `linea`): no lleva cuentas")
         elif isinstance(declarado, str) or not all(isinstance(x, str) for x in declarado):

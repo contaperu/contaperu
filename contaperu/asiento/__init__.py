@@ -41,29 +41,29 @@ durante un año las filas nacieron en sus columnas ('A'..'AO') y la línea neutr
 desde el 11-sep-2026 (0.7) la dirección está invertida — la línea es la fuente y el Excel de CONCAR,
 una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una celda al invertirse
 (`tests/test_snapshot_concar.py`). Desde la 0.10 las columnas de
-CONCAR y sus datos viven en su driver; el núcleo arma `asiento_neutral()` y `lineas_del_libro()`.
+CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()` y `lineas_del_libro()`.
 """
 from .configuracion import CONFIG_DE_FABRICA, D2, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
-from .construir import (REQUISITO_DE, CorrelativoFaltante, MonedaSinCodigo, RepartoNoAdmitido, RepartoNoCuadra,
-                        SinCentro, SinCuenta, TipoSinMapa, con_reparto, config_de, cuenta_de_fila, cuenta_gasto,
-                        cuenta_honorarios, cuenta_tercero, cuenta_venta, equivalencia_tipo, etiquetas_sub_diario,
-                        exigir_requisitos, faltantes_para, filas_sin_centro, filas_sin_cuenta, imputacion_de,
-                        lleva_centro, merge_config, mes_del_libro, monedas_sin_codigo, numerar, partes_de,
-                        reparto_no_cuadra, repartos_que_no_cuadran, resolve_cxp_account, sigla_documento,
-                        sub_diario, sub_diarios_presentes, tiene_detraccion, tipos_sin_mapa)
+from .resolucion import (REQUISITO_DE, CorrelativoFaltante, MonedaSinCodigo, RepartoNoAdmitido, RepartoNoCuadra,
+                         SinCentro, SinCuenta, TipoSinMapa, comprobantes_sin_centro, comprobantes_sin_cuenta,
+                         con_reparto, config_de, cuenta_honorarios, cuenta_por_pagar, cuenta_por_pagar_detraccion,
+                         cuenta_tercero, equivalencia_tipo, etiquetas_sub_diario, exigir_requisitos, faltantes_para,
+                         fundir_config, imputacion_de, limites_del_periodo, lleva_centro, monedas_sin_codigo, numerar,
+                         partes_de, reparto_no_cuadra, repartos_que_no_cuadran, sigla_documento, sub_diario,
+                         sub_diarios_presentes, tiene_detraccion, tipos_sin_mapa)
 from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
-from .motor import ROLES, asiento_neutral, glosa_de, lineas_del_libro
+from .motor import ROLES, glosa_de, lineas_del_comprobante, lineas_del_libro
 
 __all__ = [
     "CONFIG_DE_FABRICA", "D2", "NUMERO_DETRACCION_PENDIENTE", "TIPO_DOC_DETRACCION",
     "REQUISITO_DE", "CorrelativoFaltante", "MonedaSinCodigo", "RepartoNoAdmitido", "RepartoNoCuadra",
-    "SinCentro", "SinCuenta", "TipoSinMapa", "con_reparto", "config_de", "cuenta_de_fila", "cuenta_gasto",
-    "cuenta_honorarios", "cuenta_tercero", "cuenta_venta", "equivalencia_tipo", "etiquetas_sub_diario",
-    "exigir_requisitos", "faltantes_para", "filas_sin_centro", "filas_sin_cuenta", "imputacion_de",
-    "lleva_centro", "merge_config", "mes_del_libro", "monedas_sin_codigo", "numerar", "partes_de",
-    "reparto_no_cuadra", "repartos_que_no_cuadran", "resolve_cxp_account", "sigla_documento",
-    "sub_diario", "sub_diarios_presentes", "tiene_detraccion", "tipos_sin_mapa",
-    "huella", "Imputacion", "Parte", "LineaDiario", "ROLES", "asiento_neutral", "glosa_de", "lineas_del_libro",
+    "SinCentro", "SinCuenta", "TipoSinMapa", "comprobantes_sin_centro", "comprobantes_sin_cuenta",
+    "con_reparto", "config_de", "cuenta_honorarios", "cuenta_por_pagar", "cuenta_por_pagar_detraccion",
+    "cuenta_tercero", "equivalencia_tipo", "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para",
+    "fundir_config", "imputacion_de", "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar",
+    "partes_de", "reparto_no_cuadra", "repartos_que_no_cuadran", "sigla_documento", "sub_diario",
+    "sub_diarios_presentes", "tiene_detraccion", "tipos_sin_mapa",
+    "huella", "Imputacion", "Parte", "LineaDiario", "ROLES", "glosa_de", "lineas_del_comprobante", "lineas_del_libro",
 ]

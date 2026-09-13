@@ -30,7 +30,7 @@ CONTASIS importe un archivo generado por este driver.
 from . import datos
 from .datos import CONTENT_TYPE, EXCLUYE_TIPOS, EXIGE, FORMATOS, NOMBRE, OPCIONES
 from .proyeccion import fila, no_caben, valores
-from .xlsx import build_xlsx, desde_comprobantes, nombre
+from .xlsx import escribir_xlsx, desde_comprobantes, nombre
 
-__all__ = ["CONTENT_TYPE", "EXCLUYE_TIPOS", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "build_xlsx", "datos",
+__all__ = ["CONTENT_TYPE", "EXCLUYE_TIPOS", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "escribir_xlsx", "datos",
            "desde_comprobantes", "fila", "no_caben", "nombre", "valores"]

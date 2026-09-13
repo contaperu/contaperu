@@ -111,23 +111,23 @@ def expandir(nombre: str, datos: bytes, tope: int = TOPE_ARCHIVOS, lote: Lote | 
 
 
 @dataclass
-class Resultado:
+class ResultadoLectura:
     comprobantes: list[Comprobante] = field(default_factory=list)
     errores: list[dict] = field(default_factory=list)
     ignorados: list[str] = field(default_factory=list)   # CDR y similares
     pendientes_ia: list[Entrada] = field(default_factory=list)  # PDF/foto: los lee la IA, fuera de esta librería
 
 
-def convertir_xml(lote: Lote, libro: Libro) -> Resultado:
+def convertir_xml(lote: Lote, libro: Libro) -> ResultadoLectura:
     """Convierte las entradas XML de un lote. Los PDF/imágenes quedan en
     `pendientes_ia`; el resto se reporta."""
-    r = Resultado(errores=list(lote.errores))
+    r = ResultadoLectura(errores=list(lote.errores))
     for e in lote.entradas:
         if e.es_auxiliar:
             r.ignorados.append(e.nombre)
         elif e.es_xml:
             try:
-                r.comprobantes.append(xml_ubl.parsear(e.datos, libro.tipo, archivo_nombre=e.nombre))
+                r.comprobantes.append(xml_ubl.parsear(e.datos, libro, archivo_nombre=e.nombre))
             except xml_ubl.EsCdr:
                 r.ignorados.append(e.nombre)
             except xml_ubl.XmlInvalido as ex:

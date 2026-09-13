@@ -14,7 +14,7 @@ bajo `imputaciones`, con el `id_externo` del comprobante como llave.
 traiga sale de la configuración del entorno: desde open-accounting 0.3 el comprobante no lleva cuentas.
 
 **El reparto** divide SOLO la base —el gasto o el ingreso—: el IGV y el total son del documento. Sus partes suman
-la base del asiento (`igv.base_imputable`), y lo comprueba `construir.reparto_no_cuadra`. Un reparto con cuenta o
+la base del asiento (`igv.base_imputable`), y lo comprueba `resolucion.reparto_no_cuadra`. Un reparto con cuenta o
 centro al lado es ambiguo —¿cuál manda?— y se rechaza al leerlo, en vez de elegir uno en silencio.
 
 Aquí solo vive la forma: ninguna regla contable.

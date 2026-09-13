@@ -39,7 +39,7 @@ class TotalImposible(ValueError):
     """El total pedido no se puede aplicar a ese comprobante; el mensaje va tal cual a la persona."""
 
 
-def tasa(igv, base_gravada) -> Decimal | None:
+def tasa_calculada(igv, base_gravada) -> Decimal | None:
     """La tasa del comprobante, en %, tal como sale de sus importes. `None` si no hay de dónde leerla
     (sin IGV, o un IGV sin base). Sin redondear: quien la necesite entera —la columna AO de CONCAR— la
     redondea él."""
@@ -82,7 +82,7 @@ def igv_del_asiento(c: Comprobante, venta: bool) -> Decimal:
 def base_imputable(c: Comprobante, venta: bool) -> Decimal:
     """Lo que va a la cuenta de la base —el gasto en compras, el ingreso en ventas—: el total menos el IGV
     con línea propia. Es lo que divide el reparto de la imputación de un documento, y por eso lo usan igual
-    el asiento (`asiento_neutral`) y la comprobación del reparto (`asiento.reparto_no_cuadra`): la regla vive
+    el asiento (`lineas_del_comprobante`) y la comprobación del reparto (`asiento.reparto_no_cuadra`): la regla vive
     una vez."""
     return (Decimal(c.total or 0).quantize(D2) - igv_del_asiento(c, venta)).quantize(D2)
 

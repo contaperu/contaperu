@@ -181,7 +181,7 @@ def serializar_lineas(caso) -> list[dict]:
     añadía `rol`, `tipo_cp` y el código SUNAT de la detracción, dejaba la glosa sin cortar y la tasa
     del IGV como texto exacto. Ningún importe, cuenta ni sentido cambió."""
     c, contab, venta = armar(caso)
-    return [ln.a_dict() for ln in asi.asiento_neutral(c, contab, MES, "080001", venta=venta)]
+    return [ln.a_dict() for ln in asi.lineas_del_comprobante(c, contab, MES, "080001", venta=venta)]
 
 
 def regenerar() -> None:

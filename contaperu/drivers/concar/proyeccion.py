@@ -15,11 +15,11 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.construir import MonedaSinCodigo
+from ...asiento.resolucion import MonedaSinCodigo
 from ...asiento.lineas import LineaDiario
-from ...asiento.motor import asiento_neutral, glosa_de
+from ...asiento.motor import lineas_del_comprobante, glosa_de
 from ...formato import Opciones
-from ...igv import tasa as tasa_de_importes
+from ...igv import tasa_calculada
 from ...modelo import Comprobante
 from .datos import COLUMNAS, MARCA_CONVERSION, OPCIONES, TIPO_CONVERSION
 
@@ -89,7 +89,7 @@ def filas(c: Comprobante, lineas: list[LineaDiario], contab: dict) -> list[dict[
     return [fila(ln, c, contab) for ln in lineas]
 
 
-def filas_de_comprobante(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprobante: str,
+def filas_de_comprobante(c: Comprobante, contab: dict, limites: tuple[date, date], correlativo: str,
                          op: Opciones = OPCIONES, venta: bool = False) -> list[dict[str, Any]]:
     """Un comprobante → sus filas del Excel de CONCAR (claves 'A'..'AO'): su asiento neutral, proyectado.
 
@@ -97,7 +97,7 @@ def filas_de_comprobante(c: Comprobante, contab: dict, mes: tuple[date, date], n
     que el núcleo no importe un driver. La moneda se comprueba antes que nada, como siempre: un EUR no llega a buscar
     su cuenta."""
     codigo_moneda(c.moneda, contab)
-    return filas(c, asiento_neutral(c, contab, mes, numero_comprobante, op, venta), contab)
+    return filas(c, lineas_del_comprobante(c, contab, limites, correlativo, op, venta), contab)
 
 
 def tasa_igv_entera(igv: Decimal, base_gravada: Decimal) -> Any:
@@ -111,7 +111,7 @@ def tasa_igv_entera(igv: Decimal, base_gravada: Decimal) -> Any:
     antes con IGV_NO_CUADRA. OJO: la plantilla describe la columna con «valores validos 0,10,18»
     (`datos.py`), así que un 10.5 % que salga 11 hay que comprobarlo con la primera importación real.
     """
-    t = tasa_de_importes(igv, base_gravada)
+    t = tasa_calculada(igv, base_gravada)
     return "" if t is None else int(t.to_integral_value(rounding=ROUND_HALF_UP))
 
 

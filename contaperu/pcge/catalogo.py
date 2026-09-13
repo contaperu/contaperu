@@ -25,7 +25,7 @@ CATALOGO = pathlib.Path(__file__).resolve().parent / "catalogo2026.json"
 
 
 @lru_cache(maxsize=1)
-def cargar() -> dict:
+def cargar_catalogo() -> dict:
     """El catálogo entero: `{"version", "fuente", "nota", "cuentas": {codigo: {nombre, pagina}}}`.
 
     Cacheado: son 1615 cuentas y se consultan una por fila de un registro de compras.
@@ -36,7 +36,7 @@ def cargar() -> dict:
 
 
 def cuentas() -> dict[str, dict]:
-    return cargar().get("cuentas") or {}
+    return cargar_catalogo().get("cuentas") or {}
 
 
 def _limpio(codigo: str) -> str:

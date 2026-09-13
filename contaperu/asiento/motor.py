@@ -22,15 +22,14 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
-from ..detracciones import monto as monto_detraccion
-from ..detracciones import tasa as tasa_detraccion
-from ..formato import Opciones, fmt_numero
-from ..igv import base_imputable, igv_del_asiento, tasa as tasa_de_importes
+from ..detracciones import monto_detraccion, tasa_detraccion
+from ..formato import Opciones, formatear_numero
+from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import Comprobante, Libro
 from .configuracion import CONFIG_DE_FABRICA, D2, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
-from .construir import (RepartoNoCuadra, SinCuenta, cuenta_tercero, equivalencia_tipo, lleva_centro, mes_del_libro,
-                        numerar, partes_de, reparto_no_cuadra, resolve_cxp_detraccion_account, sigla_documento,
-                        sub_diario, tiene_detraccion)
+from .resolucion import (RepartoNoCuadra, SinCuenta, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
+                         limites_del_periodo, lleva_centro, numerar, partes_de, reparto_no_cuadra, sigla_documento,
+                         sub_diario, tiene_detraccion)
 from .lineas import LineaDiario
 
 # El papel de cada línea en el asiento. Es lo que un driver necesita para traducir sin adivinar: un
@@ -62,7 +61,7 @@ def _limpio(d: dict) -> dict:
 def _detraccion(c: Comprobante, contab: dict, total: Decimal) -> dict:
     """El bloque de la línea de detracción: el código SUNAT, el interno del contribuyente (T.G. 28 de
     CONCAR: el de SUNAT + 2 propios, o SUNAT + "01" si no lo configuró), la tasa —la misma con la que
-    se calcula el monto, que decide `detracciones.tasa`— y el total del documento como base."""
+    se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base."""
     d = c.detraccion or {}
     sunat = str(d.get("codigo") or "").strip()
     interno = str((contab.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
@@ -71,7 +70,7 @@ def _detraccion(c: Comprobante, contab: dict, total: Decimal) -> dict:
                     "tasa": float(t) if t > 0 else "", "base": str(total)})
 
 
-def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprobante: str,
+def lineas_del_comprobante(c: Comprobante, contab: dict, limites: tuple[date, date], correlativo: str,
                     op: Opciones = Opciones(), venta: bool = False) -> list[LineaDiario]:
     """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
     del manual de asientos."""
@@ -99,12 +98,12 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
     # partes comparten uno: con dos centros distintos no hay uno que poner.
     centros = {(centro or "").strip() for _, centro, _ in partes}
     cc = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
-    serie, num = (c.serie or "").strip(), fmt_numero(c.numero, op)
+    serie, num = (c.serie or "").strip(), formatear_numero(c.numero, op)
     serie_numero = f"{serie}-{num}" if serie and num else (serie or num)
     # UNA sola glosa para todas las líneas (confirmado por un contador, 2026); las derivadas anteponen lo
     # que las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—. Cortarla es cosa del driver.
     glosa = glosa_de(c)
-    t = tasa_de_importes(igv, Decimal(c.base_gravada or 0))
+    t = tasa_calculada(igv, Decimal(c.base_gravada or 0))
     tasa = "" if t is None else _texto_tasa(t)
     tc = float(c.tipo_cambio) if es_usd and c.tipo_cambio else ""
     f_emision = c.fecha_emision
@@ -113,7 +112,7 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
     # primer día del periodo, y uno emitido después del periodo (error FECHA_POSTERIOR, que no bloquea
     # el Excel) al último: el asiento cae en el mes de esta fecha y todo debe caer en el mes del
     # proceso (un contador, 30-ago-2026). La fecha del documento se conserva aparte, siempre.
-    primero, ultimo = mes
+    primero, ultimo = limites
     f_asiento = min(max(f_emision, primero), ultimo) if f_emision else primero
     # Sentido de la partida: compras = gasto D / proveedor H; ventas = ingreso H / cliente D.
     # La nota de crédito invierte el caso que toque.
@@ -125,7 +124,7 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
                  "fecha_emision": _iso(f_emision), "fecha_vencimiento": _iso(f_venc)}
     referencia: dict[str, str] = {}
     if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
-        ref_num = fmt_numero(c.ref_numero, op)
+        ref_num = formatear_numero(c.ref_numero, op)
         m_ref = equivalencia_tipo(c, contab, c.ref_tipo_cp)
         referencia = {"tipo": str(m_ref["sigla"]) if m_ref else "", "tipo_cp": c.ref_tipo_cp,
                       "serie_numero": f"{c.ref_serie}-{ref_num}" if c.ref_serie and ref_num else (c.ref_serie or ref_num),
@@ -134,7 +133,7 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
     def linea(rol: str, importe: Decimal, cuenta_linea: str, sentido: str, glosa_linea: str = glosa,
               **extra) -> LineaDiario:
         campos = dict(cuenta=cuenta_linea, debe_haber=sentido, importe=str(Decimal(importe).quantize(D2)),
-                      rol=rol, sub_diario=sd, correlativo=numero_comprobante, fecha=_iso(f_asiento),
+                      rol=rol, sub_diario=sd, correlativo=correlativo, fecha=_iso(f_asiento),
                       moneda=moneda, tipo_cambio=tc, glosa=glosa_linea, documento=_limpio(documento),
                       referencia=_limpio(referencia), tasa_igv=tasa)
         campos.update(extra)
@@ -184,7 +183,7 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
             ref_det = referencia if referencia.get("tipo") else {
                 "tipo": sigla_documento(c, contab), "tipo_cp": c.tipo_cp,
                 "serie_numero": serie_numero, "fecha": _iso(f_emision)}
-            det = linea("detraccion", monto_det, resolve_cxp_detraccion_account(contab["cuentas"], moneda), d_prov,
+            det = linea("detraccion", monto_det, cuenta_por_pagar_detraccion(contab["cuentas"], moneda), d_prov,
                         f"DETRACCION - {glosa}", contraparte_doc=ruc,
                         documento=_limpio({"tipo": str(contab.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
                                            "serie_numero": NUMERO_DETRACCION_PENDIENTE,
@@ -208,8 +207,8 @@ def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], contab: dict
     para proponer el siguiente. Es la entrada de cualquier driver de asientos."""
     venta = libro.es_venta
     numeros, rangos = numerar(comprobantes, contab, libro.periodo, correlativos, venta)
-    mes = mes_del_libro(libro)
+    limites = limites_del_periodo(libro)
     lineas: list[LineaDiario] = []
     for c in comprobantes:
-        lineas.extend(asiento_neutral(c, contab, mes, numeros[id(c)], op, venta))
+        lineas.extend(lineas_del_comprobante(c, contab, limites, numeros[id(c)], op, venta))
     return lineas, rangos

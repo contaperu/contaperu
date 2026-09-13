@@ -13,7 +13,7 @@ asiento — así no hay dos verdades sobre qué códigos existen.
 
 **Y el monto lo calcula el motor, una sola vez** (10-sep-2026). Hasta ese día había dos cifras: la
 del asiento (total × tasa en soles enteros) y la que enseñaba el portal —calculada en el navegador con
-decimales, o la que la IA leyó del PDF—, y no siempre coincidían. Ahora `monto()` es la única: la usan
+decimales, o la que la IA leyó del PDF—, y no siempre coincidían. Ahora `monto_detraccion()` es la única: la usan
 el asiento y `normalizar()`, y lo que ve la persona es lo que va a CONCAR.
 """
 from __future__ import annotations
@@ -60,19 +60,19 @@ def tasa_de_tabla(codigo: Any, contab: dict) -> Decimal:
     return _num((contab.get("detraccion_tasas") or {}).get(str(codigo or "").strip()))
 
 
-def tasa(c: Comprobante, contab: dict) -> Decimal:
+def tasa_detraccion(c: Comprobante, contab: dict) -> Decimal:
     """La tasa con la que se calcula: la del comprobante y, si no la trae, la de la tabla."""
     d = c.detraccion if isinstance(c.detraccion, dict) else {}
     t = _num(d.get("porcentaje"))
     return t if t > 0 else tasa_de_tabla(d.get("codigo"), contab)
 
 
-def monto(c: Comprobante, contab: dict) -> tuple[Decimal, Decimal]:
+def monto_detraccion(c: Comprobante, contab: dict) -> tuple[Decimal, Decimal]:
     """El monto de la detracción (Excel real validado en CONCAR, 2026): total × tasa en SOLES ENTEROS —
     la detracción se deposita en soles (4 956 × 4 % = 198.24 → 198). En dólares la base se convierte
     con el T.C. del comprobante y el monto vuelve a dólares para la línea, porque el asiento va en US.
     Devuelve (soles, en la moneda del comprobante); (0, 0) si no hay tasa o falta el T.C."""
-    t = tasa(c, contab)
+    t = tasa_detraccion(c, contab)
     es_usd = (c.moneda or "PEN").upper() == "USD"
     tc = c.tipo_cambio if es_usd and c.tipo_cambio else None
     if t <= 0 or (es_usd and not tc):
@@ -106,7 +106,7 @@ def normalizar(comprobantes: Iterable[Comprobante], contab: dict) -> list[Compro
         nuevo = normalizar_una(c.detraccion, codigos)
         if nuevo is not None:
             c.detraccion = nuevo
-            soles, _ = monto(c, contab)
+            soles, _ = monto_detraccion(c, contab)
             nuevo = dict(nuevo, monto=str(soles) if soles > 0 else "")
             de_tabla = tasa_de_tabla(nuevo["codigo"], contab)
             if de_tabla > 0:

@@ -21,11 +21,13 @@ from contaperu.drivers import concar as driver_concar
 from contaperu import comparar_sire, validar
 from contaperu import generar as g
 from contaperu.lectores import sire_txt, xml_ubl
-from contaperu.modelo import Comprobante
+from contaperu.modelo import Comprobante, Libro
 from test_sire_txt import FACTURA, NOTA, VENTAS, texto
 from test_xml_ubl import NC_CON_DESCUENTO
 from util import campos, cargar_golden
 from util import con_imputaciones, imputar
+
+COMPRAS = Libro(ruc=VENTAS.ruc, razon_social=VENTAS.razon_social, periodo=VENTAS.periodo, tipo="compra")
 
 FIXTURES = Path(__file__).parent / "fixtures" / "xml"
 MES = (date(2026, 8, 1), date(2026, 8, 31))
@@ -37,7 +39,7 @@ def importes(c):
 
 
 def del_xml():
-    return xml_ubl.parsear(NC_CON_DESCUENTO.encode("utf-8"), "venta")
+    return xml_ubl.parsear(NC_CON_DESCUENTO.encode("utf-8"), VENTAS)
 
 
 def de_la_propuesta():
@@ -45,7 +47,7 @@ def de_la_propuesta():
 
 
 def linea(c, libro=VENTAS):
-    return campos(g.lineas(libro, [c], "sire")[0], palote_final=False)
+    return campos(g.lineas_de_texto(libro, [c], "sire")[0], palote_final=False)
 
 
 def codigos(c, libro=VENTAS):
@@ -107,7 +109,7 @@ def test_la_propuesta_con_un_descuento_en_positivo_no_se_lee():
 # ── Lo que no es una nota de descuento no cambia ─────────────────────────────
 
 def test_una_nc_normal_sigue_en_base_e_igv():
-    c = xml_ubl.parsear((FIXTURES / "20131312955-07-FC01-7.xml").read_bytes(), "venta")
+    c = xml_ubl.parsear((FIXTURES / "20131312955-07-FC01-7.xml").read_bytes(), VENTAS)
     assert (c.dscto_base, c.dscto_igv) == (0, 0)
     assert linea(c)[14:18] == ["-200.00", "0.00", "-36.00", "0.00"]
 
@@ -132,13 +134,13 @@ def test_una_nota_de_debito_escribe_la_base_con_su_descuento():
 
 
 def test_xml_el_descuento_solo_decide_en_una_nc_de_ventas_entera():
-    factura = xml_ubl.parsear(NC_CON_DESCUENTO.replace("CreditNote", "Invoice").encode("utf-8"), "venta")
+    factura = xml_ubl.parsear(NC_CON_DESCUENTO.replace("CreditNote", "Invoice").encode("utf-8"), VENTAS)
     assert factura.tipo_cp == "01" and (factura.dscto_base, factura.dscto_igv) == (0, 0)
     assert factura.base_gravada == D("9985.36") and "TOTAL_NO_CUADRA" not in codigos(factura)
-    compra = xml_ubl.parsear(NC_CON_DESCUENTO.encode("utf-8"), "compra")
+    compra = xml_ubl.parsear(NC_CON_DESCUENTO.encode("utf-8"), COMPRAS)
     assert (compra.dscto_base, compra.dscto_igv) == (0, 0)
     parcial = xml_ubl.parsear(NC_CON_DESCUENTO.replace(">9985.36</cbc:Amount>", ">5000.00</cbc:Amount>")
-                              .encode("utf-8"), "venta")
+                              .encode("utf-8"), VENTAS)
     assert (parcial.dscto_base, parcial.dscto_igv) == (0, 0)
     assert parcial.datos_originales["descuentos_globales"] == [{"codigo": "", "importe": "5000.00"}]
 

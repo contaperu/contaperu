@@ -1,7 +1,7 @@
 """La línea de diario neutral: el asiento sin el vocabulario de ningún ERP.
 
 Es el bloque `asiento` del estándar `open-accounting` y, desde la 0.7, la FUENTE del asiento: la arma
-`motor.asiento_neutral()` y de ella salen todos los destinos — el Excel de CONCAR como una proyección
+`motor.lineas_del_comprobante()` y de ella salen todos los destinos — el Excel de CONCAR como una proyección
 (`drivers/concar/proyeccion.py`), el CSV genérico, los drivers de terceros y los agentes de IA a
 través del servidor MCP.
 

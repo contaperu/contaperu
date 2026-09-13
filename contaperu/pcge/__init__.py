@@ -9,14 +9,13 @@ Dos cosas distintas viven aqui:
   esta VACIA a proposito. Ninguna regla contable entra sin la cita de la norma que la respalda, y
   ademas este proyecto nace ya en 2026: no hay plan viejo del que traducir.
 
-**Ojo con `cargar`:** hay dos, y hacen cosas distintas. `pcge.cargar()` es el de la tabla de
-adaptacion y devuelve `(mapeos, datos)`; el del catalogo es `pcge.catalogo.cargar()` y devuelve el
-diccionario de la norma. Confundirlos no revienta, devuelve otra cosa: por eso el submodulo
-`catalogo` se exporta con nombre propio y las llamadas al catalogo se escriben `pcge.catalogo.…`.
+**Cada uno se carga con su nombre:** `pcge.cargar_equivalencias()` lee la tabla de adaptacion y devuelve
+`(mapeos, datos)`; `pcge.cargar_catalogo()` lee la norma y devuelve su diccionario. Hasta el 12-sep-2026 las dos se
+llamaban `cargar`, y confundirlas no reventaba: devolvia otra cosa.
 """
 from . import catalogo
-from .adaptar import Informe, Mapeo, TablaInvalida, adaptar, cargar
-from .catalogo import buscar, existe, nombre_de, resolver
+from .adaptar import Informe, Mapeo, TablaInvalida, adaptar, cargar_equivalencias
+from .catalogo import buscar, cargar_catalogo, existe, nombre_de, resolver
 
-__all__ = ["Informe", "Mapeo", "TablaInvalida", "adaptar", "cargar", "catalogo",
-           "buscar", "existe", "nombre_de", "resolver"]
+__all__ = ["Informe", "Mapeo", "TablaInvalida", "adaptar", "cargar_equivalencias", "catalogo",
+           "buscar", "cargar_catalogo", "existe", "nombre_de", "resolver"]

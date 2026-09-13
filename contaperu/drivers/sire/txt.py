@@ -22,7 +22,7 @@ from __future__ import annotations
 from ... import catalogos as cat
 from ...modelo import Comprobante, Libro
 from ...formato import (
-    Opciones, armar_linea, columnas_igv_compras, fmt_fecha, fmt_monto, fmt_numero, fmt_tc,
+    Opciones, armar_linea, columnas_igv_compras, formatear_fecha, formatear_monto, formatear_numero, formatear_cambio,
     negativo, sanear,
 )
 
@@ -56,15 +56,15 @@ def _cabecera(c: Comprobante, libro: Libro, op: Opciones, vencimiento: bool = Tr
         sanear(libro.razon_social, op),      # 2 ID (libre, hasta 1500: se usa la razón social)
         libro.periodo,                       # 3 periodo AAAAMM
         "",                                  # 4 CAR SUNAT (vacío en el reemplazo)
-        fmt_fecha(c.fecha_emision, op),      # 5 fecha de emisión
-        fmt_fecha(c.fecha_vencimiento, op) if vencimiento else "",   # 6 vencimiento / pago
+        formatear_fecha(c.fecha_emision, op),      # 5 fecha de emisión
+        formatear_fecha(c.fecha_vencimiento, op) if vencimiento else "",   # 6 vencimiento / pago
         c.tipo_cp,                           # 7 tipo de comprobante
         sanear(c.serie, op),                 # 8 serie
     ]
 
 
 def _firmado(v, op: Opciones) -> str:
-    return fmt_monto(abs(v), op, v < 0)
+    return formatear_monto(abs(v), op, v < 0)
 
 
 def linea_rvie(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) -> str:
@@ -74,7 +74,7 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) 
     lo manda el archivo que SUNAT aceptó, y una fecha de más es una validación de más.
     """
     neg = negativo(c, op)
-    m = lambda d, n=neg: fmt_monto(d, op, n)  # noqa: E731
+    m = lambda d, n=neg: formatear_monto(d, op, n)  # noqa: E731
     # Base e IGV son netos y los descuentos, la parte que el registro informa aparte (estandar/LEEME.md). El
     # total es la suma con signo de los campos —así viene en la exportación real de SUNAT—, de modo que el 15
     # lleva la base más lo que se informa en el 16 (s·base + descuento, con s el signo de la operación): una NC
@@ -84,16 +84,16 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) 
     if neg:
         assert base15 <= 0 and igv17 <= 0, f"{c.serie}-{c.numero}: DSCTO_MAYOR_QUE_BASE (el campo 15 cambiaría de signo)"
     campos = _cabecera(c, libro, op, vencimiento=c.tipo_cp in cat.EXIGEN_VENCIMIENTO) + [
-        fmt_numero(c.numero, op),            # 9 número (o inicial del rango)
-        fmt_numero(c.numero_final, op),      # 10 número final del rango
+        formatear_numero(c.numero, op),            # 9 número (o inicial del rango)
+        formatear_numero(c.numero_final, op),      # 10 número final del rango
         c.contraparte_tipo_doc,              # 11 tipo de documento del cliente
         sanear(c.contraparte_doc, op),       # 12 número de documento
         sanear(c.contraparte_nombre, op),    # 13 razón social / nombres
         m(c.exportacion),                    # 14 valor facturado de exportación
         _firmado(base15, op),                # 15 base imponible gravada (s·base + descuento)
-        fmt_monto(c.dscto_base, op, True),   # 16 descuento de la base (negativo)
+        formatear_monto(c.dscto_base, op, True),   # 16 descuento de la base (negativo)
         _firmado(igv17, op),                 # 17 IGV / IPM (s·igv + descuento)
-        fmt_monto(c.dscto_igv, op, True),    # 18 descuento del IGV (negativo)
+        formatear_monto(c.dscto_igv, op, True),    # 18 descuento del IGV (negativo)
         m(c.exonerado),                      # 19 exonerado
         m(c.inafecto),                       # 20 inafecto
         m(c.isc),                            # 21 ISC
@@ -103,11 +103,11 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) 
         m(c.otros),                          # 25 otros tributos y cargos
         m(c.total),                          # 26 importe total
         c.moneda,                            # 27 moneda
-        fmt_tc(c, op),                       # 28 tipo de cambio
-        fmt_fecha(c.ref_fecha, op),          # 29 fecha del comprobante modificado
+        formatear_cambio(c, op),                       # 28 tipo de cambio
+        formatear_fecha(c.ref_fecha, op),          # 29 fecha del comprobante modificado
         c.ref_tipo_cp,                       # 30 tipo del comprobante modificado
         sanear(c.ref_serie, op),             # 31 serie del comprobante modificado
-        fmt_numero(c.ref_numero, op),        # 32 número del comprobante modificado
+        formatear_numero(c.ref_numero, op),        # 32 número del comprobante modificado
         sanear(c.id_contrato, op),           # 33 identificador del proyecto / contrato
     ] + [""] * op.rvie_vacios                # 34-40 los completa la Administración
     assert len(campos) == 33 + op.rvie_vacios, len(campos)
@@ -123,11 +123,11 @@ def linea_rce(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) -
     que NO se mandan. Si compras devuelve el 453, `rce_vacios=0`.
     """
     neg = negativo(c, op)
-    m = lambda d, n=neg: fmt_monto(d, op, n)  # noqa: E731
+    m = lambda d, n=neg: formatear_monto(d, op, n)  # noqa: E731
     campos = _cabecera(c, libro, op) + [
         sanear(c.anio_dua, op),              # 9 año de emisión de la DUA
-        fmt_numero(c.numero, op),            # 10 número (o inicial del rango)
-        fmt_numero(c.numero_final, op),      # 11 número final del rango
+        formatear_numero(c.numero, op),            # 10 número (o inicial del rango)
+        formatear_numero(c.numero_final, op),      # 11 número final del rango
         c.contraparte_tipo_doc,              # 12 tipo de documento del proveedor
         sanear(c.contraparte_doc, op),       # 13 número de documento
         sanear(c.contraparte_nombre, op),    # 14 razón social / nombres
@@ -138,12 +138,12 @@ def linea_rce(c: Comprobante, libro: Libro, idx: int, op: Opciones = OPCIONES) -
         m(c.otros),                          # 24 otros tributos y cargos
         m(c.total),                          # 25 importe total
         c.moneda,                            # 26 moneda
-        fmt_tc(c, op),                       # 27 tipo de cambio
-        fmt_fecha(c.ref_fecha, op),          # 28 fecha del comprobante modificado
+        formatear_cambio(c, op),                       # 27 tipo de cambio
+        formatear_fecha(c.ref_fecha, op),          # 28 fecha del comprobante modificado
         c.ref_tipo_cp,                       # 29 tipo del comprobante modificado
         sanear(c.ref_serie, op),             # 30 serie del comprobante modificado
         sanear(c.cod_dep_aduanera, op),      # 31 código de la dependencia aduanera
-        fmt_numero(c.ref_numero, op),        # 32 número del comprobante modificado
+        formatear_numero(c.ref_numero, op),        # 32 número del comprobante modificado
         sanear(c.clasif_bienes, op),         # 33 clasificación de bienes y servicios
         sanear(c.id_contrato, op),           # 34 identificador del proyecto (operadores)
         "",                                  # 35 porcentaje de participación

@@ -218,18 +218,18 @@ def test_el_centro_de_referencia_en_la_X_del_gasto():
 
 def test_el_centro_solo_es_obligatorio_donde_se_escribe():
     """Una cuenta que no lleva centro no puede bloquear la exportación de un mes."""
-    assert concar.filas_sin_centro([cp(cuenta_contable="603201", centro_costo="")], CONTAB) == []
-    assert concar.filas_sin_centro([cp(cuenta_contable="627401", centro_costo="")], CONTAB) == []
-    assert [c.numero for c in concar.filas_sin_centro([cp(centro_costo="")], CONTAB)] == ["00000123"]
+    assert concar.comprobantes_sin_centro([cp(cuenta_contable="603201", centro_costo="")], CONTAB) == []
+    assert concar.comprobantes_sin_centro([cp(cuenta_contable="627401", centro_costo="")], CONTAB) == []
+    assert [c.numero for c in concar.comprobantes_sin_centro([cp(centro_costo="")], CONTAB)] == ["00000123"]
     # Ni siquiera con la referencia en X encendida: esa X es una referencia, y una referencia
     # que se puede dejar en blanco no puede impedir exportar.
     ref = configuracion({"contabilidad": {"centro_como_referencia": True}})
-    assert concar.filas_sin_centro([cp(cuenta_contable="603201", centro_costo="")], ref) == []
+    assert concar.comprobantes_sin_centro([cp(cuenta_contable="603201", centro_costo="")], ref) == []
     # Ventas: sin el flag la cuenta se resolveria como gasto. Con `cuentas.gasto` vacío en los
     # CONFIG_DE_FABRICA eso da cuenta vacía → no bloquea; con el flag cae en 701101 → sí bloquea.
     vacio = cp(cuenta_contable="", centro_costo="")
-    assert concar.filas_sin_centro([vacio], CONTAB) == []
-    assert [c.numero for c in concar.filas_sin_centro([vacio], CONTAB, venta=True)] == ["00000123"]
+    assert concar.comprobantes_sin_centro([vacio], CONTAB) == []
+    assert [c.numero for c in concar.comprobantes_sin_centro([vacio], CONTAB, venta=True)] == ["00000123"]
 
 
 def test_factura_con_detraccion_va_al_sub_diario_10():
@@ -398,7 +398,7 @@ def test_asiento_de_ventas_espejo_del_skill():
     contab = configuracion({"contabilidad": {"cuentas": {"ventas": "701201", "clientes": {"USD": "121209"}}}})
     v2 = driver_concar.filas_de_comprobante(cp(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), contab, MES, "080001", venta=True)
     assert v2[1]["K"] == "701201" and v2[0]["K"] == "121209" and v2[0]["E"] == "US" and v2[0]["G"] == 3.55
-    assert concar.filas_sin_cuenta([cp(cuenta_contable="")], CONTAB, venta=True) == []
+    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], CONTAB, venta=True) == []
     # Boleta de venta emitida: SÍ lleva su IGV (la regla "sin crédito" es solo de compras)
     bv = driver_concar.filas_de_comprobante(cp(tipo_cp="03", serie="B001", numero="9", cuenta_contable=""), CONTAB, MES, "080002", venta=True)
     assert len(bv) == 3 and bv[0]["B"] == "05" and bv[0]["R"] == "BV" and bv[2]["K"] == "401111" and bv[0]["AO"] == 18
@@ -465,11 +465,11 @@ def test_cuenta_obligatoria_y_default_del_ruc():
     assert filas[0]["K"] == "659901" and filas[2]["K"] == "421203"
     assert contab["cuentas"]["cxp"]["PEN"] == "421201" and contab["cuentas"]["igv"] == "401111"   # lo no tocado se conserva
     assert contab["cuentas"]["honorarios"] == {"PEN": "424101", "USD": "424102"}
-    assert concar.filas_sin_cuenta([cp(cuenta_contable=""), cp()], CONTAB)[0].numero == "00000123"
-    assert concar.filas_sin_cuenta([cp(cuenta_contable="")], contab) == []
+    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable=""), cp()], CONTAB)[0].numero == "00000123"
+    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], contab) == []
     # El centro de costo, igual (06-sep-2026): obligatorio con los centros encendidos; nada si están apagados
-    assert [c.numero for c in concar.filas_sin_centro([cp(centro_costo=""), cp(centro_costo="  "), cp()], CONTAB)] == ["00000123", "00000123"]
-    assert concar.filas_sin_centro([cp(centro_costo="")], configuracion({"contabilidad": {"usa_centros_costo": False}})) == []
+    assert [c.numero for c in concar.comprobantes_sin_centro([cp(centro_costo=""), cp(centro_costo="  "), cp()], CONTAB)] == ["00000123", "00000123"]
+    assert concar.comprobantes_sin_centro([cp(centro_costo="")], configuracion({"contabilidad": {"usa_centros_costo": False}})) == []
 
 
 # ── Numeración MMNNNN por sub-diario ─────────────────────────────────────────
@@ -527,17 +527,17 @@ def test_xlsx_con_la_plantilla_de_concar():
 
 
 def test_generar_con_plantilla_concar():
-    exp = gen.generar(COMPRAS, [cp(), cp(numero="2", excluida=True)], "concar", contab=CONTAB, correlativos={"11": 1})
+    exp = gen.generar(COMPRAS, [cp(), cp(numero="2", excluida=True)], "concar", config=CONTAB, correlativos={"11": 1})
     assert exp.nombre == exp.archivo == "CONCAR_20601111111_202608_COMPRAS.xlsx"
     assert exp.formato == "concar_xlsx" and exp.content_type.endswith("spreadsheetml.sheet")
-    assert exp.contenido[:2] == b"PK" and exp.zip == b"" and exp.nombre_zip == ""
-    assert exp.n_filas == 1 and exp.resumen["comprobantes"] == 1 and exp.resumen["excluidos"] == 1 and exp.resumen["filas_excel"] == 3
-    expv = gen.generar(VENTAS, [cp()], "concar", contab=CONTAB, correlativos={"05": 1})
+    assert exp.contenido[:2] == b"PK" and exp.comprimido == b"" and exp.nombre_comprimido == ""
+    assert exp.comprobantes == 1 and exp.resumen["comprobantes"] == 1 and exp.resumen["excluidos"] == 1 and exp.resumen["filas_excel"] == 3
+    expv = gen.generar(VENTAS, [cp()], "concar", config=CONTAB, correlativos={"05": 1})
     assert expv.nombre == "CONCAR_20601111111_202608_VENTAS.xlsx" and expv.resumen["sub_diarios"]["05"]["etiqueta"] == "Ventas"
     with pytest.raises(concar.SinCuenta):
-        gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", contab=CONTAB, correlativos={"11": 1})
+        gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", config=CONTAB, correlativos={"11": 1})
     with pytest.raises(concar.MonedaSinCodigo):
-        gen.generar(COMPRAS, [cp(moneda="EUR")], "concar", contab=CONTAB, correlativos={"11": 1})
+        gen.generar(COMPRAS, [cp(moneda="EUR")], "concar", config=CONTAB, correlativos={"11": 1})
 
 
 # ── Endpoint ──────────────────────────────────────────────────────────────────

@@ -37,10 +37,10 @@ from ..formato import Opciones
 GRUPO = "contaperu.drivers"
 DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
                                    contasis.NOMBRE: contasis}
-DRIVER_DEFAULT = "sire"
+DRIVER_POR_DEFECTO = "sire"
 
-__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_DEFAULT", "GRUPO", "AvisoDriver", "Opciones", "concar", "contasis",
-           "contrato", "csv", "de_terceros", "formato", "obtener", "recargar", "sire"]
+__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones", "concar", "contasis",
+           "contrato", "csv", "de_terceros", "formato_de", "obtener", "recargar", "sire"]
 
 
 class AvisoDriver(UserWarning):
@@ -91,7 +91,7 @@ def obtener(nombre: str) -> ModuleType:
         raise ValueError(f"Driver desconocido: {nombre!r}. Disponibles: {', '.join(DRIVERS)}") from None
 
 
-def formato(nombre: str, tipo_libro: str) -> str:
+def formato_de(nombre: str, tipo_libro: str) -> str:
     """'sire' + 'venta' → 'sire_rvie': el identificador de lo que se acaba de producir."""
     formatos = obtener(nombre).FORMATOS
     if tipo_libro not in formatos:

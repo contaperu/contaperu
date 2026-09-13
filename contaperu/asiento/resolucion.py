@@ -86,30 +86,30 @@ class CorrelativoFaltante(Exception):
 
 # ── Configuración por RUC ─────────────────────────────────────────────────────
 
-def merge_config(defaults: dict, overrides: dict) -> dict:
+def fundir_config(defaults: dict, overrides: dict) -> dict:
     """Overrides sobre defaults, dict a dict (un sistema anterior lo hacía a 1 nivel: sobreescribir `cxp.USD`
     borraba `cxp.PEN`; aquí se funde en profundidad)."""
-    out: dict = {k: (merge_config(v, {}) if isinstance(v, dict) else v) for k, v in (defaults or {}).items()}
+    out: dict = {k: (fundir_config(v, {}) if isinstance(v, dict) else v) for k, v in (defaults or {}).items()}
     if not isinstance(overrides, dict):
         return out
     for k, v in overrides.items():
         if isinstance(out.get(k), dict) and isinstance(v, dict):
-            out[k] = merge_config(out[k], v)
+            out[k] = fundir_config(out[k], v)
         else:
             out[k] = v
     return out
 
 
-def config_de(config_cliente: dict | None, config_cuenta: dict | None = None) -> dict:
+def config_de(del_ruc: dict | None, del_estudio: dict | None = None) -> dict:
     """Configuración contable efectiva, del general al particular:
 
         CONFIG_DE_FABRICA (código)  →  la CUENTA (el estudio)  →  el RUC (excepciones)
 
     Cada capa trae lo suyo bajo la clave `contabilidad`. La del RUC sobreescribe solo las claves que difieran y
-    hereda el resto — `merge_config` funde en profundidad, así que la cuenta puede poner `cxp.PEN` y el RUC solo
+    hereda el resto — `fundir_config` funde en profundidad, así que la cuenta puede poner `cxp.PEN` y el RUC solo
     `cxp.USD` sin borrarse entre ellos."""
-    base = merge_config(CONFIG_DE_FABRICA, ((config_cuenta or {}).get("contabilidad") or {}))
-    return merge_config(base, ((config_cliente or {}).get("contabilidad") or {}))
+    base = fundir_config(CONFIG_DE_FABRICA, ((del_estudio or {}).get("contabilidad") or {}))
+    return fundir_config(base, ((del_ruc or {}).get("contabilidad") or {}))
 
 
 def etiquetas_sub_diario(contab: dict) -> dict[str, str]:
@@ -138,11 +138,11 @@ def _cuenta_por_moneda(valor: Any, moneda: str, fallback: str) -> str:
     return str(valor) if valor else fallback
 
 
-def resolve_cxp_account(cuentas: dict, moneda: str) -> str:
+def cuenta_por_pagar(cuentas: dict, moneda: str) -> str:
     return _cuenta_por_moneda(cuentas.get("cxp"), moneda, CONFIG_DE_FABRICA["cuentas"]["cxp"]["PEN"])
 
 
-def resolve_cxp_detraccion_account(cuentas: dict, moneda: str) -> str:
+def cuenta_por_pagar_detraccion(cuentas: dict, moneda: str) -> str:
     """La cuenta por pagar de la factura afecta a detracción (421203 en las dos monedas por defecto)."""
     return _cuenta_por_moneda(cuentas.get("cxp_detraccion"), moneda, CONFIG_DE_FABRICA["cuentas"]["cxp_detraccion"]["PEN"])
 
@@ -169,7 +169,7 @@ def partes_de(c: Comprobante, contab: dict, venta: bool = False) -> list[tuple[s
     imp = imputacion_de(c, contab)
     if imp is not None and imp.reparto:
         return [(p.cuenta_contable, p.centro_costo, p.importe) for p in imp.reparto]
-    cuenta = (imp.cuenta_contable if imp is not None else "") or cuenta_de_fila(c, contab, venta)
+    cuenta = (imp.cuenta_contable if imp is not None else "") or _cuenta_de_respaldo(contab, venta)
     centro = imp.centro_costo if imp is not None else ""
     return [(cuenta, centro, None)]
 
@@ -178,7 +178,7 @@ def cuenta_tercero(c: Comprobante, contab: dict, venta: bool = False) -> str:
     """La cuenta del total: el cliente en ventas, el proveedor en compras (el recibo por honorarios, la suya).
 
     Manda la de la imputación del documento cuando el contador la decidió —un gasto de representación a la
-    4699—; si no, la de la configuración por moneda. Vivía dentro de `asiento_neutral`; salió aquí el
+    4699—; si no, la de la configuración por moneda. Vivía dentro de `lineas_del_comprobante`; salió aquí el
     12-sep-2026 para que la resuelva UNA función para todos los drivers —el asiento de CONCAR y el registro de
     CONTASIS—, como `partes_de` resuelve la de la base."""
     imp = imputacion_de(c, contab)
@@ -190,7 +190,7 @@ def cuenta_tercero(c: Comprobante, contab: dict, venta: bool = False) -> str:
         return _cuenta_por_moneda(cuentas.get("clientes"), moneda, CONFIG_DE_FABRICA["cuentas"]["clientes"]["PEN"])
     if c.tipo_cp == TIPO_HONORARIOS:
         return cuenta_honorarios(cuentas, moneda)
-    return resolve_cxp_account(cuentas, moneda)
+    return cuenta_por_pagar(cuentas, moneda)
 
 
 # ── Clasificación de cada comprobante ────────────────────────────────────────
@@ -254,22 +254,14 @@ def monedas_sin_codigo(comprobantes: list[Comprobante], contab: dict) -> list[st
     return vistas
 
 
-def cuenta_gasto(c: Comprobante, contab: dict) -> str:
-    return str((contab.get("cuentas") or {}).get("gasto") or "").strip()
-
-
-def cuenta_venta(c: Comprobante, contab: dict) -> str:
-    """Ventas: la cuenta de ingreso del RUC; a diferencia del gasto, aquí SÍ hay un default real (el habitual)."""
-    return str((contab.get("cuentas") or {}).get("ventas") or CONFIG_DE_FABRICA["cuentas"]["ventas"]).strip()
-
-
-def cuenta_de_fila(c: Comprobante, contab: dict, venta: bool = False) -> str:
-    """La cuenta que acaba en la columna K de la línea principal.
-
-    Existe para que la regla del centro de costo (`lleva_centro`) mire EXACTAMENTE la misma
-    cuenta que se escribe, y no una segunda resolución que se desincronice con el tiempo.
-    """
-    return cuenta_venta(c, contab) if venta else cuenta_gasto(c, contab)
+def _cuenta_de_respaldo(contab: dict, venta: bool = False) -> str:
+    """La cuenta de la base cuando la imputación del documento no trae una: la de ingreso en ventas, que SÍ tiene un
+    valor de fábrica real (el habitual), y la de gasto en compras, que va vacía a propósito (`configuracion.py`).
+    Solo lee la configuración; la resolución entera, con la imputación delante, es `partes_de`."""
+    cuentas = contab.get("cuentas") or {}
+    if venta:
+        return str(cuentas.get("ventas") or CONFIG_DE_FABRICA["cuentas"]["ventas"]).strip()
+    return str(cuentas.get("gasto") or "").strip()
 
 
 def lleva_centro(cuenta: str, contab: dict) -> bool:
@@ -297,13 +289,13 @@ def sub_diarios_presentes(comprobantes: list[Comprobante], contab: dict, venta: 
     return out
 
 
-def filas_sin_cuenta(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
+def comprobantes_sin_cuenta(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
     """Las filas sin cuenta: basta con que a una parte de su base le falte (`partes_de`). Una parte del reparto
     no toma la cuenta por defecto: repartir entre la misma cuenta no reparte nada."""
     return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, contab, venta))]
 
 
-def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
+def comprobantes_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
     """Las filas a las que les falta un centro de costo que SÍ hace falta.
 
     El centro es obligatorio solo donde de verdad se escribe: en la columna M de las cuentas de
@@ -311,7 +303,7 @@ def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool 
     NO bloquea nunca, ni siquiera con `centro_como_referencia` encendido: esa X es una referencia, y
     una referencia que se puede dejar en blanco no puede impedir exportar un mes.
 
-    `venta` va opcional a propósito, calcando a `filas_sin_cuenta`: esto es una librería que se
+    `venta` va opcional a propósito, calcando a `comprobantes_sin_cuenta`: esto es una librería que se
     instala fuera, y un positional obligatorio sería romper su API pública por una regla interna
     de CONCAR. Ojo al llamarla: sin el flag, un libro de ventas resolvería la cuenta como gasto.
     """
@@ -368,10 +360,10 @@ def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = 
     if "cuenta_unica" in exige:
         salida["reparto_no_admitido"] = con_reparto(comprobantes, contab)
     if "cuenta_contable" in exige:
-        salida["sin_cuenta"] = filas_sin_cuenta(comprobantes, contab, venta)
+        salida["sin_cuenta"] = comprobantes_sin_cuenta(comprobantes, contab, venta)
         salida["reparto_no_cuadra"] = repartos_que_no_cuadran(comprobantes, contab, venta)
     if "centro_costo" in exige:
-        salida["sin_centro_de_costo"] = filas_sin_centro(comprobantes, contab, venta)
+        salida["sin_centro_de_costo"] = comprobantes_sin_centro(comprobantes, contab, venta)
     return salida
 
 
@@ -428,7 +420,7 @@ def numerar(comprobantes: list[Comprobante], contab: dict, periodo: str,
     return numeros, rangos
 
 
-def mes_del_libro(libro: Libro) -> tuple[date, date]:
+def limites_del_periodo(libro: Libro) -> tuple[date, date]:
     """El primer y el ultimo dia del periodo del libro.
 
     Es el marco dentro del que cae la fecha de cada asiento: un comprobante extemporaneo

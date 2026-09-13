@@ -4,7 +4,7 @@ El caso que motiva la tabla: una IA lee «retención 3 %» en una factura y devu
 código «000». Si ese código llega al asiento, se provisiona una detracción que no existe.
 
 El caso que motiva el monto (10-sep-2026): la pantalla enseñaba una cifra —calculada en el navegador o
-leída del PDF— y a CONCAR iba otra. Ahora las dos salen de `detracciones.monto()`.
+leída del PDF— y a CONCAR iba otra. Ahora las dos salen de `detracciones.monto_detraccion()`.
 """
 from __future__ import annotations
 
@@ -85,21 +85,21 @@ def test_una_detraccion_limpiada_no_llega_al_asiento():
 def test_el_monto_va_en_soles_enteros():
     """Del Excel real validado en CONCAR: 4 956 × 4 % = 198.24 → 198. Y el caso que destapó el problema:
     330.40 al 12 % son 40, no los 33.65 que enseñaba la pantalla."""
-    assert detracciones.monto(comprobante({"codigo": "027", "porcentaje": 4}, total="4956"), TABLA) == \
+    assert detracciones.monto_detraccion(comprobante({"codigo": "027", "porcentaje": 4}, total="4956"), TABLA) == \
         (Decimal("198"), Decimal("198"))
-    assert detracciones.monto(comprobante({"codigo": "037", "porcentaje": 12}, total="330.40"), TABLA)[0] == 40
+    assert detracciones.monto_detraccion(comprobante({"codigo": "037", "porcentaje": 12}, total="330.40"), TABLA)[0] == 40
 
 
 def test_en_dolares_se_deposita_en_soles():
     c = comprobante({"codigo": "037", "porcentaje": 12}, total="1000", moneda="USD", tipo_cambio="3.5")
-    assert detracciones.monto(c, TABLA) == (Decimal("420"), Decimal("120.00"))
+    assert detracciones.monto_detraccion(c, TABLA) == (Decimal("420"), Decimal("120.00"))
     sin_tc = comprobante({"codigo": "037", "porcentaje": 12}, total="1000", moneda="USD")
-    assert detracciones.monto(sin_tc, TABLA) == (0, 0)
+    assert detracciones.monto_detraccion(sin_tc, TABLA) == (0, 0)
 
 
 def test_sin_tasa_en_el_comprobante_usa_la_de_la_tabla():
     c = comprobante({"codigo": "037"}, total="330.40")
-    assert detracciones.tasa(c, TABLA) == 12 and detracciones.monto(c, TABLA)[0] == 40
+    assert detracciones.tasa_detraccion(c, TABLA) == 12 and detracciones.monto_detraccion(c, TABLA)[0] == 40
 
 
 def test_el_asiento_usa_el_mismo_monto():

@@ -25,7 +25,7 @@ D2 = Decimal("0.01")
 class Descuadre(Exception):
     """El asiento no cuadra. Lleva el resultado para poder decir por cuánto."""
 
-    def __init__(self, resultado: "Resultado") -> None:
+    def __init__(self, resultado: "Cuadre") -> None:
         self.resultado = resultado
         super().__init__(
             f"El asiento no cuadra: debe {resultado.debe} != haber {resultado.haber} "
@@ -34,7 +34,7 @@ class Descuadre(Exception):
 
 
 @dataclass(frozen=True)
-class Resultado:
+class Cuadre:
     cuadra: bool
     debe: Decimal
     haber: Decimal
@@ -69,7 +69,7 @@ def _campos(linea: Any) -> tuple[str, Any]:
     return str(getattr(linea, "debe_haber", "") or "").strip().upper(), getattr(linea, "importe", None)
 
 
-def cuadra(lineas: Iterable[Any]) -> Resultado:
+def cuadra(lineas: Iterable[Any]) -> Cuadre:
     """Suma el Debe y el Haber de las líneas de diario y dice si cierran."""
     debe = haber = CERO
     total = sin_sentido = 0
@@ -83,14 +83,14 @@ def cuadra(lineas: Iterable[Any]) -> Resultado:
         else:
             sin_sentido += 1
     diferencia = (debe - haber).quantize(D2)
-    return Resultado(
+    return Cuadre(
         cuadra=(diferencia == CERO and sin_sentido == 0),
         debe=debe.quantize(D2), haber=haber.quantize(D2), diferencia=diferencia,
         lineas=total, sin_sentido=sin_sentido,
     )
 
 
-def exigir(lineas: Iterable[Any]) -> Resultado:
+def exigir(lineas: Iterable[Any]) -> Cuadre:
     """Como `cuadra`, pero levanta `Descuadre` si no cierra. Es lo que llama un driver
     antes de escribir un archivo."""
     r = cuadra(lineas)

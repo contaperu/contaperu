@@ -59,7 +59,7 @@ def test_cada_cuenta_trae_la_pagina_que_la_respalda():
     """Sin la página, discutir un nombre obliga a abrir el PDF otra vez."""
     c = catalogo.cuentas()
     assert all(isinstance(v["pagina"], int) and v["pagina"] > 0 for v in c.values())
-    assert "PCGE 2026" in catalogo.cargar()["fuente"]
+    assert "PCGE 2026" in catalogo.cargar_catalogo()["fuente"]
 
 
 def test_la_busqueda_ignora_tildes_y_mayusculas():
@@ -79,7 +79,7 @@ def test_el_catalogo_no_es_la_tabla_de_equivalencias():
     mapeo. Que el catálogo trajera datos NO debe leerse nunca como que la tabla ya trae reglas.
     """
     assert catalogo.cuentas()                       # el catálogo, lleno
-    mapeos, _ = pcge.cargar()                       # la tabla, vacía
+    mapeos, _ = pcge.cargar_equivalencias()                       # la tabla, vacía
     assert mapeos == []
     lineas = [{"cuenta": "631101", "glosa": "Flete"}]
     salida, informe = pcge.adaptar(lineas)

@@ -29,7 +29,7 @@ def test_la_tasa_no_esta_escrita_en_ninguna_parte():
     """Un comprobante al 10.5 % se recalcula igual que uno al 18: nadie le impone el 18."""
     r = igv.aplicar_igv(cp(inafecto="110.50", total="110.50"), "10.50")
     assert r["base_gravada"] == D("100.00")
-    assert igv.tasa(r["igv"], r["base_gravada"]) == D("10.5")
+    assert igv.tasa_calculada(r["igv"], r["base_gravada"]) == D("10.5")
 
 
 def test_quitar_el_igv_lo_manda_a_inafecto():

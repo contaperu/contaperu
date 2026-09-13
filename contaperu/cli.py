@@ -48,17 +48,17 @@ def _leer_json(ruta: str) -> dict:
 
 def _escribir(exp: gen.Exportado, salida: Path) -> None:
     salida.mkdir(parents=True, exist_ok=True)
-    if exp.txt:
+    if exp.texto:
         # Un registro en texto: el TXT y el ZIP con el que se sube a SUNAT.
-        (salida / exp.nombre).write_bytes(exp.txt)
-        (salida / exp.nombre_zip).write_bytes(exp.zip)
-        destino = salida / exp.nombre_zip
+        (salida / exp.nombre).write_bytes(exp.texto)
+        (salida / exp.nombre_comprimido).write_bytes(exp.comprimido)
+        destino = salida / exp.nombre_comprimido
     else:
         # Un archivo (el Excel de CONCAR, el CSV, el registro de un sistema contable, el de un driver de
         # terceros): tal cual.
         destino = salida / exp.archivo
         destino.write_bytes(exp.contenido)
-    print(f"  {exp.driver:<5} {exp.formato:<9} {exp.n_filas:>3} filas  → {destino}")
+    print(f"  {exp.driver:<5} {exp.formato:<9} {exp.comprobantes:>3} comprobantes  → {destino}")
 
 
 def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, salida: Path,
@@ -76,14 +76,14 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
         if libro.tipo not in mod.FORMATOS:
             print(f"  {p:<5} no genera libros de {libro.tipo}", file=sys.stderr)
             continue
-        params: dict = {}
-        if drivers.contrato.necesita_config(mod):
-            params["contab"] = conf
-        if drivers.contrato.necesita_asiento(mod):
+        correlativos = None
+        if drivers.contrato.arma_asientos(mod):
             incluidos = gen.seleccionar(comprobantes)
-            params["correlativos"] = {s: 1 for s in asi.sub_diarios_presentes(incluidos, conf, libro.es_venta)}
+            correlativos = {s: 1 for s in asi.sub_diarios_presentes(incluidos, conf, libro.es_venta)}
         try:
-            _escribir(gen.generar(libro, comprobantes, p, incluir_errores=incluir_errores, **params), salida)
+            _escribir(gen.generar(libro, comprobantes, p, incluir_errores=incluir_errores,
+                                  config=conf if drivers.contrato.lleva_cuentas(mod) else None,
+                                  correlativos=correlativos), salida)
         except gen.ErroresBloqueantes as e:
             print(f"  {p:<5} NO generado: {e}. Corrige o usa --incluir-errores", file=sys.stderr)
             codigo = 1

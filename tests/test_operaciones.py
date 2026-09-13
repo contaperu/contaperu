@@ -79,7 +79,7 @@ def test_leer_la_propuesta_del_sire():
     from contaperu import generar as gen
 
     libro, comprobantes = cargar_golden("compras_202601.json")
-    txt = gen.generar(libro, comprobantes, "sire", incluir_errores=True).txt.decode("utf-8")
+    txt = gen.generar(libro, comprobantes, "sire", incluir_errores=True).texto.decode("utf-8")
 
     doc = op.leer_propuesta_sire(txt, {"ruc": libro.ruc, "razon_social": libro.razon_social,
                                        "periodo": libro.periodo, "tipo": libro.tipo})
