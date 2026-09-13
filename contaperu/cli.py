@@ -64,21 +64,22 @@ def _escribir(exp: gen.Exportado, salida: Path) -> None:
 
 
 def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, salida: Path,
-                   incluir_errores: bool, config: dict | None = None) -> int:
+                   incluir_errores: bool, configuracion: dict | None = None, imputacion: dict | None = None) -> int:
     # "todas" = los drivers de TXT. Los que llevan cuentas (CONCAR, el CSV, el registro de un sistema contable,
     # los de terceros) se piden por su nombre: necesitan la configuración contable del contribuyente —la de
-    # --config, con la imputación de --imputacion dentro—, y los de asientos, además sus correlativos, que
-    # arrancan en 1: los mismos valores de partida que usa `operaciones.exportar`.
+    # --config, aplicada para cada uno, con la imputación de --imputacion dentro—, y los de asientos, además sus
+    # correlativos, que arrancan en 1: los mismos valores de partida que usa `operaciones.exportar`.
     nombres = ([nombre for nombre, registrado in drivers.DRIVERS.items()
                 if drivers.contrato.forma(registrado) == "linea"]
                if driver == "todas" else [driver])
-    config = operaciones.config_aplicada() if config is None else config
     codigo = 0
     for nombre_driver in nombres:
         modulo = drivers.obtener(nombre_driver)
         if libro.tipo not in modulo.FORMATOS:
             print(f"  {nombre_driver:<5} no genera libros de {libro.tipo}", file=sys.stderr)
             continue
+        config = operaciones.con_imputacion(operaciones.config_aplicada(configuracion, nombre_driver), imputacion,
+                                            comprobantes)
         correlativos = None
         if drivers.contrato.arma_asientos(modulo):
             correlativos = asi.correlativos_de_partida(gen.seleccionar(comprobantes), config, libro.es_venta)
@@ -148,12 +149,16 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
         print(_tabla(comprobantes))
     config = _leer_json(args.config) if args.config else None
     imputacion = _leer_json(args.imputacion) if args.imputacion else None
+    errores = operaciones.errores_de_configuracion(config)
+    if errores:
+        print("La configuración no se puede usar:\n" + "\n".join(f"  !! {error}" for error in errores), file=sys.stderr)
+        return 2
     try:
-        config = operaciones.con_imputacion(operaciones.config_aplicada(config), imputacion, comprobantes)
+        operaciones.con_imputacion({}, imputacion, comprobantes)
     except operaciones.DocumentoInvalido as error:
         print(f"La imputación no se puede usar con este documento: {error}", file=sys.stderr)
         return 2
-    return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores, config)
+    return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores, config, imputacion)
 
 
 def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
@@ -177,6 +182,8 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
           f"excluidos {totales['excluidos']} · fuera del destino {totales['fuera_del_destino']} · "
           f"con error {totales['con_error']} · con aviso {totales['con_aviso']}")
     print()
+    for error in diagnostico.get("errores_de_configuracion") or []:
+        print(f"  !! Configuración: {error}")
     for bloque, marca in (("bloqueantes", "!!"), ("avisos", " ·")):
         for entrada in diagnostico[bloque]:
             for observacion in entrada["observaciones"]:
@@ -195,7 +202,8 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         quien = {"contador": "Pedir al contador", "sistema": "Ajustar en el sistema", "proveedor": "Pedir al proveedor"}
         for falta in diagnostico["que_falta"]:
             destinatario = quien.get(falta["pedir_a"], falta["pedir_a"])
-            print(f"  -> {destinatario}: {falta['texto']} ({', '.join(falta['comprobantes'])})")
+            cuales = f" ({', '.join(falta['comprobantes'])})" if falta["comprobantes"] else ""
+            print(f"  -> {destinatario}: {falta['texto']}{cuales}")
     for sub_diario, rango in diagnostico["sub_diarios"].items():
         print(f"  Sub-diario {sub_diario} ({rango['etiqueta']}): {rango['comprobantes']} comprobantes "
               f"desde el {rango['empieza_en']}")
@@ -262,8 +270,9 @@ def main(argv: list[str] | None = None) -> int:
     sub_desde_json.add_argument("--salida", default="salida")
     sub_desde_json.add_argument("--revisar", action="store_true", help="aplicar las validaciones antes de generar")
     sub_desde_json.add_argument("--incluir-errores", action="store_true")
-    sub_desde_json.add_argument("--config", help="JSON con la configuración contable (la piden los drivers que "
-                                                 "llevan cuentas: concar, csv…)")
+    sub_desde_json.add_argument("--config", help="JSON con la configuración contable: lo general en la raíz y lo de "
+                                                 "cada sistema en su sección (la piden los drivers que llevan "
+                                                 "cuentas: concar, contasis, csv…)")
     sub_desde_json.add_argument("--imputacion", help=AYUDA_IMPUTACION)
     sub_desde_json.set_defaults(fn=cmd_desde_json)
 

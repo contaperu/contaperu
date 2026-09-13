@@ -23,6 +23,7 @@ from pathlib import Path
 import pytest
 
 from contaperu import asiento as asi
+from contaperu import operaciones as op
 from contaperu.drivers import concar as driver_concar, contrato
 from contaperu.modelo import Comprobante
 
@@ -73,9 +74,11 @@ REAL = dict(serie="E001", numero="871", fecha_emision="2026-08-10", fecha_vencim
             concepto="SERVICIO DE TRANSPORTE DE MATERIALES BENCE", cuenta_contable="659999",
             centro_costo="CC-64", detraccion={"codigo": "027", "porcentaje": "4"})
 # El centro también en la X de la línea del gasto, como referencia, además del doble anexo del tercero.
-REFERENCIA_EN_X = {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar", "anexo_auxiliar_del_tercero"]}}
+REFERENCIA_EN_X = {"concar": {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar",
+                                                              "anexo_auxiliar_del_tercero"]}}}
 
-# (nombre, campos del comprobante, venta, configuración del RUC encima de la de fábrica)
+# (nombre, campos del comprobante, venta, configuración del RUC encima de la de fábrica: lo general en la raíz y lo de
+# CONCAR en su sección)
 CASOS: list[tuple[str, dict, bool, dict | None]] = [
     ("factura_pen", {}, False, None),
     ("factura_usd_con_tc", dict(moneda="USD", tipo_cambio="3.550"), False, None),
@@ -102,8 +105,10 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
     ("detraccion_codigo_sin_tasa", dict(detraccion={"codigo": "031", "porcentaje": "", "monto": "0"}), False, None),
     ("detraccion_tasa_de_tabla", dict(detraccion={"codigo": "019"}), False, None),
     ("detraccion_en_el_11", dict(detraccion=DET), False,
-     {"sub_diario_detraccion": "", "detraccion_codigos": {"037": "03799"}}),
-    ("detraccion_area_y_tipo_doc", REAL, False, {"detraccion_area": "9001", "detraccion_tipo_doc": "DT"}),
+     {"concar": {"sub_diario_detraccion": "", "detraccion_codigos": {"037": "03799"}}}),
+    # El área era "9001" hasta el 13-sep-2026, cuando la configuración de CONCAR pasó a rechazar un área de más de sus
+    # 3 caracteres: que no se recorte lo prueba `test_asiento_concar.test_el_codigo_de_area_no_se_recorta`.
+    ("detraccion_area_y_tipo_doc", REAL, False, {"concar": {"detraccion_area": "900", "detraccion_tipo_doc": "DT"}}),
     ("detraccion_cuenta_propia", dict(detraccion=DET), False, {"cuentas": {"cxp_detraccion": {"PEN": "421209"}}}),
     ("nota_con_detraccion", dict(NC, detraccion={"codigo": "027", "porcentaje": "4"}), False, None),
     ("honorarios_con_detraccion", dict(RH, detraccion=DET), False, None),
@@ -114,9 +119,9 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
      False, REFERENCIA_EN_X),
     # Las columnas del centro las elige la configuración del sistema (13-sep-2026): sin el doble anexo del tercero, y
     # solo con la referencia en la X del gasto.
-    ("sin_anexo_del_tercero", {}, False, {"columnas": {"centro_costo": ["centro_costo"]}}),
+    ("sin_anexo_del_tercero", {}, False, {"concar": {"columnas": {"centro_costo": ["centro_costo"]}}}),
     ("solo_referencia_sin_tercero", dict(cuenta_contable="603201"), False,
-     {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar"]}}),
+     {"concar": {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar"]}}}),
     ("sin_centros_de_costo", {}, False, {"usa_centros_costo": False}),
     ("ninguna_cuenta_lleva_centro", {}, False, {"cuentas_con_centro": []}),
     ("gasto_y_cxp_del_ruc", dict(cuenta_contable="", moneda="USD"), False,
@@ -151,7 +156,7 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
     ("venta_reparto", dict(cuenta_contable="", centro_costo="", id_externo="f1"), True,
      {"imputaciones": {"f1": {"reparto": [
          {"importe": "70", "cuenta_contable": "701101"}, {"importe": "30", "cuenta_contable": "704101"}]}}}),
-    ("tipo_renombrado_por_el_ruc", {}, False, {"tipos": {"01": {"sigla": "FA", "sub_diario": "12"}}}),
+    ("tipo_renombrado_por_el_ruc", {}, False, {"concar": {"tipos": {"01": {"sigla": "FA", "sub_diario": "12"}}}}),
     ("venta_factura", dict(cuenta_contable=""), True, None),
     ("venta_usd_cuentas_del_ruc", dict(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), True,
      {"cuentas": {"ventas": "701201", "clientes": {"USD": "121209"}}}),
@@ -163,7 +168,11 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
 
 
 def contab_de(extra: dict | None) -> dict:
-    return asi.config_aplicada(extra)
+    """La configuración aplicada para CONCAR, con la imputación del caso, que llega aparte."""
+    extra = dict(extra or {})
+    imputaciones = extra.pop("imputaciones", None)
+    config = op.config_aplicada(extra, "concar")
+    return {**config, "imputaciones": imputaciones} if imputaciones else config
 
 
 def _celda(v):

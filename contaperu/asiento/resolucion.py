@@ -13,14 +13,19 @@ from decimal import Decimal
 from typing import Any
 
 from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
+from ..configuracion import CONFIG_POR_DEFECTO, por_defecto
 from ..igv import base_imputable
 from ..modelo import Comprobante, Libro, a_decimal
-from .configuracion import CONFIG_POR_DEFECTO
+from .configuracion import CONFIGURACION_DEL_ASIENTO
 from .faltas import FALTAS, SinCorrelativo, SinSigla
 from .imputacion import Imputacion
 
 
-# ── Configuración por RUC ─────────────────────────────────────────────────────
+# ── La configuración ──────────────────────────────────────────────────────────
+
+# Los valores por defecto de lo que lee el asiento: el respaldo cuando la configuración que llega no trae una clave.
+_DEL_ASIENTO = por_defecto(CONFIGURACION_DEL_ASIENTO)
+
 
 def fundir_config(defaults: dict, overrides: dict) -> dict:
     """Overrides sobre defaults, dict a dict (un sistema anterior lo hacía a 1 nivel: sobreescribir `cxp.USD`
@@ -34,15 +39,6 @@ def fundir_config(defaults: dict, overrides: dict) -> dict:
         else:
             out[k] = v
     return out
-
-
-def config_aplicada(config_contable: dict | None = None) -> dict:
-    """La configuración que se aplica a un entorno: `CONFIG_POR_DEFECTO` con su `config_contable` fundida encima.
-
-    Plana, como la guarda la aplicación: la configuración es del entorno, sin capas ni clave intermedia (John,
-    12-sep-2026; hasta entonces había una capa del estudio y cada capa iba bajo `contabilidad`). `fundir_config` funde
-    en profundidad: el entorno puede cambiar solo `cuentas.cxp.USD` y hereda el resto."""
-    return fundir_config(CONFIG_POR_DEFECTO, config_contable or {})
 
 
 def etiquetas_sub_diario(config: dict) -> dict[str, str]:
@@ -137,7 +133,7 @@ def equivalencia_tipo(c: Comprobante, config: dict, tipo: str | None = None) -> 
 
 def sigla_documento(c: Comprobante, config: dict | None = None) -> str:
     """La sigla con la que el sistema de destino llama al tipo del comprobante (en CONCAR, su Tabla General 06)."""
-    equivalencia = equivalencia_tipo(c, config or CONFIG_POR_DEFECTO)
+    equivalencia = equivalencia_tipo(c, config or _DEL_ASIENTO)
     return str(equivalencia["sigla"]) if equivalencia else ""
 
 
@@ -154,12 +150,12 @@ def sub_diario(c: Comprobante, config: dict, es_venta: bool = False) -> str:
     if not equivalencia:
         return ""
     if es_venta:
-        return str(config.get("sub_diario_ventas") or CONFIG_POR_DEFECTO["sub_diario_ventas"])
+        return str(config.get("sub_diario_ventas") or _DEL_ASIENTO["sub_diario_ventas"])
     de_detraccion = str(config.get("sub_diario_detraccion") or "").strip()
     if de_detraccion and c.tipo_cp != TIPO_HONORARIOS and tiene_detraccion(c):
         return de_detraccion
     return str(equivalencia.get("sub_diario") or config.get("sub_diario_compras")
-               or CONFIG_POR_DEFECTO["sub_diario_compras"])
+               or _DEL_ASIENTO["sub_diario_compras"])
 
 
 def tipos_sin_sigla(comprobantes: list[Comprobante], config: dict) -> list[str]:

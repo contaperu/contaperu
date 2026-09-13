@@ -101,22 +101,30 @@ def test_la_configuracion_que_sale_se_puede_volver_a_meter():
 
     Si esto no funcionara, los cambios se ignorarian EN SILENCIO y el asiento saldria con
     las cuentas de serie sin que nadie se enterara."""
-    mia = op.config_aplicada()
+    mia = op.configuracion_por_defecto()
     mia["cuentas"]["gasto"] = "631201"
-    mia["sub_diario_compras"] = "07"
+    mia["concar"]["sub_diario_compras"] = "07"
 
-    efectiva = op.config_aplicada(mia)
+    efectiva = op.config_aplicada(mia, "concar")
 
     assert efectiva["cuentas"]["gasto"] == "631201"
     assert efectiva["sub_diario_compras"] == "07"
     assert efectiva["cuentas"]["igv"] == "401111"          # lo demas intacto
 
 
-def test_la_configuracion_va_plana():
-    """Desde el 12-sep-2026 no hay clave intermedia: la configuración del entorno llega tal cual la guarda la
-    aplicación, y un `{"contabilidad": ...}` ya no se desenvuelve."""
-    assert op.config_aplicada({"cuentas": {"igv": "401199"}})["cuentas"]["igv"] == "401199"
-    assert op.config_aplicada({"contabilidad": {"cuentas": {"igv": "401199"}}})["cuentas"]["igv"] == "401111"
+def test_la_configuracion_va_por_secciones():
+    """Desde el 13-sep-2026 lo general va en la raíz y lo de cada sistema en su sección (John): la sección del destino
+    se aplica encima de lo general y las demás no se mezclan. Un `{"contabilidad": ...}` no se desenvuelve: se dice."""
+    guardada = {"cuentas": {"igv": "401199"}, "concar": {"tipos": {"01": {"sigla": "FA"}}},
+                "contasis": {"medio_pago": "003"}}
+    concar = op.config_aplicada(guardada, "concar")
+    assert concar["cuentas"]["igv"] == "401199" and concar["tipos"]["01"] == {"sigla": "FA"}
+    assert concar["tipos"]["03"]["sigla"] == "BV" and "medio_pago" not in concar
+    contasis = op.config_aplicada(guardada, "contasis")
+    assert contasis["cuentas"]["igv"] == "401199" and contasis["medio_pago"] == "003" and "tipos" not in contasis
+    assert "tipos" not in op.config_aplicada(guardada) and "concar" not in op.config_aplicada(guardada, "concar")
+    with pytest.raises(op.ConfiguracionInvalida, match="sin clave intermedia"):
+        op.config_aplicada({"contabilidad": {"cuentas": {"igv": "401199"}}})
 
 
 def test_un_xml_suelto_en_base64_se_lee(tmp_path):

@@ -17,10 +17,11 @@ import zipfile
 from dataclasses import dataclass
 from decimal import Decimal
 
-from . import drivers, partida_doble
-from .asiento.resolucion import exigir_requisitos
+from . import configuracion as _declaracion, drivers, partida_doble
+from .asiento.resolucion import exigir_requisitos, fundir_config
 from .asiento.huella import huella
 from .asiento.motor import lineas_del_libro
+from .configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
 from .drivers import contrato
 from .modelo import Comprobante, Libro, serie_y_numero
 from .formato import Opciones
@@ -140,6 +141,23 @@ def _desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], o
     return modulo.desde_comprobantes(libro, comprobantes, config, opciones)
 
 
+def _config_para(modulo, config: dict) -> dict:
+    """La configuración con la que se llama a un driver que lleva cuentas: la ya aplicada para él
+    (`operaciones.config_aplicada(configuracion, driver)`), comprobada contra lo que se configura para él —lo general y
+    su sección— y completada con sus valores por defecto. Quien llama aquí directamente recibe los mismos errores que
+    por la fachada, en vez de exportar con el valor de fábrica una clave que nadie leyó."""
+    secciones = [clave for clave in config if clave in drivers.DRIVERS]
+    if secciones:
+        raise ConfiguracionInvalida([f"`{clave}` es la sección de un sistema: aquí llega la configuración ya aplicada "
+                                     "(`operaciones.config_aplicada(configuracion, driver)`)" for clave in secciones])
+    errores = _declaracion.validar({k: v for k, v in config.items() if k != "imputaciones"},
+                                   (*CONFIGURACION_GENERAL, *contrato.configuracion(modulo)),
+                                   contrato.columnas_elegibles(modulo))
+    if errores:
+        raise ConfiguracionInvalida(errores)
+    return fundir_config({**CONFIG_POR_DEFECTO, **contrato.seccion_por_defecto(modulo)}, config)
+
+
 def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_POR_DEFECTO,
             opciones: Opciones | None = None, incluir_errores: bool = False, config: dict | None = None,
             correlativos: dict[str, int] | None = None) -> Exportado:
@@ -160,6 +178,8 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers
 
     forma = contrato.forma(modulo)
     if forma in ("desde_lineas", "desde_comprobantes", "construir"):
+        if config is not None:
+            config = _config_para(modulo, config)
         if forma == "desde_lineas":
             contenido, extra = _desde_lineas(modulo, libro, incluidos, opciones, config, correlativos)
         elif forma == "desde_comprobantes":

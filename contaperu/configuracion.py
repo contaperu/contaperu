@@ -313,3 +313,17 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
           ayuda="El nombre del Catálogo 54 de SUNAT, para que un código diga algo.",
           valores=Campo("", "texto", grupo="detracciones")),
 )
+
+# Los valores por defecto de lo general, como se guardan en la raíz. Cada sistema suma los de su sección
+# (`drivers.contrato.seccion_por_defecto`), y `operaciones.configuracion_por_defecto` junta todo.
+CONFIG_POR_DEFECTO: dict[str, Any] = por_defecto(CONFIGURACION_GENERAL)
+
+# Las claves que ya no existen, con lo que las reemplaza: quien las mande sabe adónde se fueron.
+_COLUMNA_DE_CONCAR = "la columna `{}` en `concar.columnas.centro_costo`"
+CLAVES_RETIRADAS: dict[str, str] = {
+    "centro_como_referencia": _COLUMNA_DE_CONCAR.format("anexo_auxiliar"),
+    "cc_referencia_en_x": _COLUMNA_DE_CONCAR.format("anexo_auxiliar"),
+    "centro_en_anexo_del_tercero": _COLUMNA_DE_CONCAR.format("anexo_auxiliar_del_tercero"),
+    "cc_en_anexo_auxiliar": _COLUMNA_DE_CONCAR.format("anexo_auxiliar_del_tercero"),
+    "contabilidad": "lo general en la raíz y lo de cada sistema en su sección, sin clave intermedia",
+}

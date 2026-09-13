@@ -22,11 +22,12 @@ from datetime import date
 from decimal import Decimal
 
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
+from ..configuracion import CONFIG_POR_DEFECTO
 from ..detracciones import monto_detraccion, tasa_detraccion
 from ..formato import Opciones, formatear_numero
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, serie_y_numero, texto_tasa
-from .configuracion import CONFIG_POR_DEFECTO, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
+from .configuracion import NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinCuenta
 from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
                          lleva_centro, numerar, partes_de, reparto_no_cuadra, sigla_documento, sub_diario,

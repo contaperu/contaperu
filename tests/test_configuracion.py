@@ -124,17 +124,107 @@ def test_describir_da_json_para_pintar_la_pantalla():
         "fija": False, "marcada": False, "ayuda": ""}
 
 
-def test_las_declaraciones_repartidas_reproducen_la_configuracion_por_defecto_de_hoy():
-    """Declarar no cambia ni un valor: lo general, lo del asiento y la sección de cada sistema, juntos, son la
-    `CONFIG_POR_DEFECTO` plana de hoy."""
-    from contaperu.asiento.configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_DEL_ASIENTO
-    from contaperu.configuracion import CONFIGURACION_GENERAL
-    from contaperu.drivers import concar, contasis, contrato
+def test_la_configuracion_de_partida_es_lo_general_y_una_seccion_por_sistema():
+    """Lo general en la raíz y la sección de cada sistema que se configura (John, 13-sep-2026). Aplicada para un
+    destino sale plana —lo general y lo de ese sistema—, que es como la lee el núcleo."""
+    from contaperu import operaciones as op
+    from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
+    from contaperu.configuracion import CONFIG_POR_DEFECTO
 
-    secciones = {clave: valor for driver in (concar, contasis)
-                 for clave, valor in contrato.seccion_por_defecto(driver).items() if clave != "columnas"}
-    assert {**por_defecto(CONFIGURACION_GENERAL), **por_defecto(CONFIGURACION_DEL_ASIENTO), **secciones} == \
-        CONFIG_POR_DEFECTO
+    partida = op.configuracion_por_defecto()
+    assert set(partida) - set(CONFIG_POR_DEFECTO) == {"concar", "contasis", "csv"}
+    assert {clave: partida[clave] for clave in CONFIG_POR_DEFECTO} == CONFIG_POR_DEFECTO
+    assert op.errores_de_configuracion(partida) == []
+    del_asiento = {c.clave for c in CONFIGURACION_DEL_ASIENTO}
+    assert set(op.config_aplicada(partida, "concar")) == \
+        set(CONFIG_POR_DEFECTO) | del_asiento | {"monedas_codigo", "detraccion_area", "columnas"}
+    assert set(op.config_aplicada(partida, "csv")) == set(CONFIG_POR_DEFECTO) | del_asiento
+    assert set(op.config_aplicada(partida, "contasis")) == set(CONFIG_POR_DEFECTO) | {"medio_pago", "columnas"}
+    assert op.config_aplicada(partida, "sire") == op.config_aplicada(partida) == op.config_aplicada()
+
+
+def test_la_configuracion_se_valida_entera_y_cada_error_dice_adonde_va():
+    """Una clave que nadie lee exportaría con el valor de fábrica sin avisar: la forma plana de antes, una clave
+    retirada, una inventada o una mal escrita, cada una con su motivo y su ruta."""
+    from contaperu import operaciones as op
+
+    errores = op.errores_de_configuracion({
+        "tipos": {"01": {"sigla": "FA"}},
+        "medio_pago": "003",
+        "centro_como_referencia": True,
+        "tasa_igv": 18,
+        "imputaciones": {},
+        "sire": {},
+        "usa_centros_costo": "no",
+        "concar": {"medio_pago": "001", "columnas": {"centro_costo": ["centro_costo", "centro_costo_2"]}},
+        "contasis": {"medio_pago": "3"},
+    })
+    assert errores == [
+        "`tipos` va dentro de la sección de su sistema (concar o csv), no en la raíz",
+        "`medio_pago` va dentro de la sección de su sistema (contasis), no en la raíz",
+        "`centro_como_referencia` ya no existe: es la columna `anexo_auxiliar` en `concar.columnas.centro_costo`",
+        "`tasa_igv`: clave desconocida; en la raíz va lo general (cuentas, usa_centros_costo, centros_costo, "
+        "cuentas_con_centro, detraccion_tasas, detraccion_nombres) y una sección por sistema (concar, csv, contasis)",
+        "`imputaciones` no va en la configuración: la imputación de cada documento llega aparte (`imputacion`)",
+        "`sire` no tiene sección: ese sistema no lleva cuentas y no se configura",
+        '`usa_centros_costo`: se esperaba verdadero o falso y llegó el texto "no"',
+        "`concar.medio_pago`: clave desconocida; las que hay: tipos, sub_diario_ventas, sub_diario_compras, "
+        "sub_diario_detraccion, detraccion_tipo_doc, detraccion_codigos, monedas_codigo, detraccion_area",
+        '`concar.columnas.centro_costo`: "centro_costo_2" no es una de sus columnas; las que hay: centro_costo, '
+        'anexo_auxiliar, anexo_auxiliar_del_tercero',
+        '`contasis.medio_pago`: el texto "3" no cumple el patrón ^[0-9]{3}$',
+    ]
+
+
+def test_una_configuracion_que_no_cumple_no_se_aplica_ni_genera():
+    """Por la fachada se detiene al aplicarla; y `generar`, que recibe la ya aplicada, la comprueba para su driver: una
+    aplicación que lo llama directamente no se salta nada."""
+    from contaperu import generar as gen
+    from contaperu import operaciones as op
+    from util import cargar_golden
+
+    with pytest.raises(ConfiguracionInvalida) as e:
+        op.config_aplicada({"sub_diario_compras": "11"}, "concar")
+    assert e.value.errores == ["`sub_diario_compras` va dentro de la sección de su sistema (concar o csv), no en la "
+                               "raíz"]
+    libro, comprobantes = cargar_golden("compras_202601.json")
+    with pytest.raises(ConfiguracionInvalida) as e:
+        gen.generar(libro, comprobantes, "concar", config=op.configuracion_por_defecto(), correlativos={"11": 1})
+    assert e.value.errores[0].startswith("`concar` es la sección de un sistema: aquí llega la configuración ya "
+                                         "aplicada")
+    with pytest.raises(ConfiguracionInvalida) as e:
+        gen.generar(libro, comprobantes, "concar", config=op.config_aplicada(None, "contasis"), correlativos={"11": 1})
+    assert len(e.value.errores) == 1 and e.value.errores[0].startswith("`medio_pago`: clave desconocida")
+
+
+def test_diagnosticar_dice_la_configuracion_que_no_se_puede_aplicar():
+    from contaperu import operaciones as op
+    from util import GOLDEN
+
+    doc = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
+    d = op.diagnosticar(doc, {"medio_pago": "003"}, driver="contasis")
+    assert d["listo_para_exportar"] is False and d["por_que_no"] == ["la configuración tiene 1 error"]
+    assert d["errores_de_configuracion"] == [
+        "`medio_pago` va dentro de la sección de su sistema (contasis), no en la raíz"]
+    assert (d["que_falta"][0]["motivo"], d["que_falta"][0]["pedir_a"]) == ("configuracion_invalida", "sistema")
+    assert d["totales"]["comprobantes"] == len(doc["comprobantes"]) and d["saldrian"] == []
+    en_su_seccion = op.diagnosticar(doc, {"contasis": {"medio_pago": "003"}}, driver="contasis")
+    assert en_su_seccion["errores_de_configuracion"] == []
+
+
+def test_la_cli_dice_la_configuracion_que_no_se_puede_usar(tmp_path, capsys):
+    from contaperu import cli
+    from util import GOLDEN
+
+    golden = str(GOLDEN / "compras_202601.json")
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps({"tipos": {"01": {"sigla": "FA"}}}), encoding="utf-8")
+    assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(tmp_path / "s"),
+                     "--config", str(config)]) == 2
+    err = capsys.readouterr().err
+    assert "`tipos` va dentro de la sección de su sistema (concar o csv)" in err and "Traceback" not in err
+    assert cli.main(["diagnosticar", golden, "--config", str(config)]) == 1
+    assert "!! Configuración: `tipos` va dentro de la sección" in capsys.readouterr().out
 
 
 def test_configuracion_invalida_lleva_todos_los_errores():

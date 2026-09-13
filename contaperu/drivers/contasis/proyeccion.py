@@ -11,13 +11,16 @@ from datetime import date, datetime, time
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.configuracion import CONFIG_POR_DEFECTO
 from ...asiento.resolucion import cuenta_tercero, lleva_centro, partes_de
 from ...asiento.motor import glosa_de
+from ...configuracion import por_defecto
 from ...formato import Opciones, formatear_numero, negativo
 from ...igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
 from ...modelo import CENTIMO, Comprobante, Libro
 from . import datos
+
+# Los valores por defecto de la sección de CONTASIS: el respaldo si la configuración que llega no trae uno.
+_POR_DEFECTO = por_defecto(datos.CONFIGURACION)
 
 
 def _importes(c: Comprobante, es_venta: bool) -> dict[str, Decimal]:
@@ -89,7 +92,7 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
             # El régimen especial (detracción, percepción, retención) va vacío (John, 12-sep-2026).
             "AE": None, "AF": None, "AG": None, "AH": "", "AI": "", "AJ": None, "AK": "",
             "AL": tasa_legal(c.igv, c.base_gravada), "AM": comunes["glosa"],
-            "AN": str(config.get("medio_pago") or CONFIG_POR_DEFECTO["medio_pago"]), "AO": "", "AP": None,
+            "AN": str(config.get("medio_pago") or _POR_DEFECTO["medio_pago"]), "AO": "", "AP": None,
             "AR": (cuentas.get("icbper") or "") if importes["AQ"] else "",
         }
     return {

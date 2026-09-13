@@ -88,7 +88,8 @@ Reglas que conviene tener claras antes de armar un documento:
   - `tipo_cp` es el código de la Tabla 10 de SUNAT, no la sigla del sistema contable.
   - La `retencion` de un comprobante es la de renta de 4ta de un recibo por honorarios. La
     retención del IGV del 3 % NO es una detracción y no entra en el asiento.
-  - Cada contribuyente tiene su plan de cuentas y sus sub-diarios: van en `configuracion`.
+  - Cada contribuyente tiene su plan de cuentas y sus sub-diarios: van en `configuracion`, con lo
+    general en la raíz y lo de cada sistema contable en su sección (`concar`, `contasis`).
     `configuracion_por_defecto` devuelve un punto de partida razonable, no la verdad de nadie.
   - La cuenta, el centro de costo, la cuenta del total y el reparto de CADA comprobante los decide
     quien revisa, y no van en el documento: llegan aparte, en `imputacion`, por el `id_externo` del
@@ -158,14 +159,15 @@ def drivers_disponibles() -> str:
 
 @mcp.tool()
 def configuracion_por_defecto() -> dict:
-    """La configuración contable de partida: cuentas, sub-diarios, equivalencias de tipos de
-    comprobante y la tabla de detracciones.
+    """La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas
+    de detracción— y una sección por sistema contable con lo suyo (`concar`: siglas y sub-diarios,
+    códigos, columnas del centro de costo; `contasis`: medio de pago y columnas del centro de costo).
 
     Es un punto de partida razonable, no la verdad de ningún contribuyente: el plan de cuentas
     y los sub-diarios los decide cada empresa. Cópiala, cámbiale lo que toque y pásala como
-    `configuracion` en las demás herramientas.
+    `configuracion` en las demás herramientas: se valida entera, y lo que no existe se dice.
     """
-    return operaciones.config_aplicada()
+    return operaciones.configuracion_por_defecto()
 
 
 @mcp.tool()

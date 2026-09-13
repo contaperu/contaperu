@@ -5,6 +5,7 @@ import copy
 import json
 from pathlib import Path
 
+from contaperu.configuracion import CONFIGURACION_GENERAL
 from contaperu.modelo import Comprobante, Libro
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -52,6 +53,17 @@ def comprobante(**campos) -> Comprobante:
 def con_imputaciones(config: dict) -> dict:
     """La configuración con las imputaciones de los comprobantes de prueba."""
     return {**config, "imputaciones": IMPUTACIONES}
+
+
+def en_secciones(config: dict | None, sistema: str) -> dict | None:
+    """Una configuración de prueba escrita plana, como la lee el núcleo → como se guarda desde el 13-sep-2026: lo
+    general en la raíz y lo demás en la sección de `sistema`. Las pruebas del asiento prueban reglas, no la forma."""
+    if config is None:
+        return None
+    generales = {c.clave for c in CONFIGURACION_GENERAL}
+    salida = {clave: valor for clave, valor in config.items() if clave in generales}
+    propias = {clave: valor for clave, valor in config.items() if clave not in generales}
+    return {**salida, sistema: propias} if propias else salida
 
 
 def separar_imputacion(documento: dict) -> tuple[dict, dict]:

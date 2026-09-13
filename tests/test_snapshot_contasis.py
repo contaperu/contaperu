@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from contaperu import asiento as asi
+from contaperu import operaciones as op
 from contaperu.drivers import contasis
 from contaperu.modelo import Comprobante, Libro
 
@@ -95,7 +95,7 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
     ("venta_exportacion", dict(cuenta_contable="", base_gravada="0", igv="0", exportacion="1000", total="1000"),
      True, None),
     ("venta_exonerada", dict(cuenta_contable="", base_gravada="0", igv="0", exonerado="118"), True, None),
-    ("venta_medio_de_pago_del_entorno", dict(cuenta_contable=""), True, {"medio_pago": "003"}),
+    ("venta_medio_de_pago_del_entorno", dict(cuenta_contable=""), True, {"contasis": {"medio_pago": "003"}}),
     ("venta_icbper_con_su_cuenta", dict(cuenta_contable="", icbper="0.50", total="118.50"), True,
      {"cuentas": {"icbper": "401891"}}),
     ("venta_credito", dict(cuenta_contable="", condicion_pago="credito", fecha_vencimiento="2026-09-10"), True, None),
@@ -103,7 +103,11 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
 
 
 def contab_de(extra: dict | None) -> dict:
-    return asi.config_aplicada(extra)
+    """La configuración aplicada para CONTASIS, con la imputación del caso, que llega aparte."""
+    extra = dict(extra or {})
+    imputaciones = extra.pop("imputaciones", None)
+    config = op.config_aplicada(extra, "contasis")
+    return {**config, "imputaciones": imputaciones} if imputaciones else config
 
 
 # La cuenta y el centro que escribe cada caso ya no son del comprobante (open-accounting 0.3): van en su imputación, por

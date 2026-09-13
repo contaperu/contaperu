@@ -17,8 +17,10 @@ from decimal import Decimal
 from typing import Any
 
 from . import asiento as asi
+from . import configuracion as _declaracion
 from . import detracciones, drivers, generar as gen, pcge, partida_doble, validar
 from .asiento.faltas import CONTADOR, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
+from .configuracion import CLAVES_RETIRADAS, CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
 from .lectores import archivos as lectura_archivos, sire_txt
 from .modelo import Comprobante, Libro, serie_y_numero
 
@@ -48,6 +50,8 @@ class DocumentoInvalido(ValueError):
 PEDIR_A: dict[str, str] = {
     # lo que falta para el destino (claves de `faltantes`): lo dice su tabla, `asiento.FALTAS`
     **{falta.clave: falta.pedir_a for falta in FALTAS},
+    # una configuración que no cumple lo declarado se arregla donde se configura
+    "configuracion_invalida": SISTEMA,
     # errores de la validación
     "ANIO_DUA_FALTA": CONTADOR, "CONTRAPARTE_FALTA": CONTADOR, "DNI_INVALIDO": CONTADOR,
     "DSCTO_MAYOR_QUE_BASE": CONTADOR, "DUPLICADO": CONTADOR, "DUPLICADO_PERIODO_ANTERIOR": CONTADOR,
@@ -108,14 +112,79 @@ def documento(libro: Libro, comprobantes: list[Comprobante] | None = None,
     return doc
 
 
-def config_aplicada(config_contable: dict | None = None) -> dict:
-    """La configuración contable que se aplica: los valores por defecto con la del entorno encima, fundidos en
-    profundidad (`asiento.config_aplicada`). Sin argumentos devuelve los valores por defecto.
+def errores_de_configuracion(configuracion: dict | None) -> list[str]:
+    """Lo que la configuración no cumple, un error por línea con su ruta; lista vacía = se puede aplicar.
 
-    Lo que devuelve **se puede volver a pasar tal cual**: es lo que hace cualquiera —persona o agente— al pedir la
-    configuración de partida, cambiarle una cuenta y devolverla. Va plana; la forma anidada que se aceptaba hasta el
-    12-sep-2026 (`{"contabilidad": {...}}`) ya no existe."""
-    return asi.config_aplicada(config_contable)
+    Se valida entera: lo general contra lo que declara el motor y cada sección contra lo que declara su driver, también
+    la de un sistema al que hoy no se exporta, porque una clave mal escrita ahí se descubriría el día que se use. Una
+    clave de un sistema puesta en la raíz —la forma plana de antes del 13-sep-2026— dice a qué sección va, y una
+    retirada, qué la reemplaza."""
+    if configuracion is None:
+        return []
+    if not isinstance(configuracion, dict):
+        return _declaracion.validar(configuracion, CONFIGURACION_GENERAL)
+    generales = [c.clave for c in CONFIGURACION_GENERAL]
+    sistemas = {nombre: modulo for nombre, modulo in drivers.DRIVERS.items() if drivers.contrato.lleva_cuentas(modulo)}
+    va_en: dict[str, list[str]] = {}
+    for nombre, modulo in sistemas.items():
+        for campo in drivers.contrato.configuracion(modulo):
+            va_en.setdefault(campo.clave, []).append(nombre)
+        if drivers.contrato.columnas_elegibles(modulo):
+            va_en.setdefault("columnas", []).append(nombre)
+    errores: list[str] = []
+    for clave, valor in configuracion.items():
+        if clave in generales:
+            errores += _declaracion.validar({clave: valor}, CONFIGURACION_GENERAL)
+        elif clave in sistemas:
+            errores += _declaracion.validar(valor, drivers.contrato.configuracion(sistemas[clave]),
+                                            drivers.contrato.columnas_elegibles(sistemas[clave]), donde=clave)
+        elif clave in CLAVES_RETIRADAS:
+            errores.append(f"`{clave}` ya no existe: es {CLAVES_RETIRADAS[clave]}")
+        elif clave in va_en:
+            errores.append(f"`{clave}` va dentro de la sección de su sistema ({' o '.join(va_en[clave])}), "
+                           "no en la raíz")
+        elif clave == "imputaciones":
+            errores.append("`imputaciones` no va en la configuración: la imputación de cada documento llega aparte "
+                           "(`imputacion`)")
+        elif clave in drivers.DRIVERS:
+            errores.append(f"`{clave}` no tiene sección: ese sistema no lleva cuentas y no se configura")
+        else:
+            errores.append(f"`{clave}`: clave desconocida; en la raíz va lo general ({', '.join(generales)}) y una "
+                           f"sección por sistema ({', '.join(sistemas)})")
+    return errores
+
+
+def config_aplicada(configuracion: dict | None = None, driver: str = "") -> dict:
+    """La configuración con la que se genera hacia `driver`: lo general con sus valores por defecto debajo, y encima la
+    sección de ese sistema con los suyos, todo plano, como lo lee el núcleo. Sin `driver` —o con uno que no lleva
+    cuentas, como el SIRE—, solo lo general.
+
+    Se guarda con lo general en la raíz y una sección por sistema (John, 13-sep-2026): `{"cuentas": {...},
+    "concar": {"tipos": {...}, "columnas": {...}}, "contasis": {"medio_pago": "003"}}`, fundida en profundidad sobre
+    los valores por defecto (una empresa puede cambiar solo `cuentas.cxp.USD` y hereda el resto). Se valida entera
+    (`errores_de_configuracion`) y un error la detiene con `ConfiguracionInvalida`: una clave que nadie lee exportaría
+    con el valor de fábrica sin avisar. Lo que devuelve es para generar; la forma que se guarda, con sus valores por
+    defecto, la da `configuracion_por_defecto`."""
+    errores = errores_de_configuracion(configuracion)
+    if errores:
+        raise ConfiguracionInvalida(errores)
+    guardada = configuracion or {}
+    aplicada = asi.fundir_config(CONFIG_POR_DEFECTO, {k: v for k, v in guardada.items() if k not in drivers.DRIVERS})
+    if not driver:
+        return aplicada
+    modulo = drivers.obtener(driver)
+    return {**aplicada, **asi.fundir_config(drivers.contrato.seccion_por_defecto(modulo), guardada.get(driver) or {})}
+
+
+def configuracion_por_defecto() -> dict:
+    """La configuración de partida en la forma en que se guarda: lo general y la sección de cada sistema que se
+    configura, con sus valores por defecto. Se puede cambiar y volver a pasar tal cual."""
+    salida = asi.fundir_config(CONFIG_POR_DEFECTO, {})
+    for nombre, modulo in drivers.DRIVERS.items():
+        seccion = drivers.contrato.seccion_por_defecto(modulo)
+        if seccion:
+            salida[nombre] = seccion
+    return salida
 
 
 def con_imputacion(config: dict, imputacion: dict | None, comprobantes: list[Comprobante]) -> dict:
@@ -188,12 +257,12 @@ def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) ->
 
 # --- validación --------------------------------------------------------------------
 
-def revisar(doc: dict, config: dict | None = None) -> dict:
+def revisar(doc: dict, configuracion: dict | None = None) -> dict:
     """Aplica las reglas deterministas y devuelve el documento con `estado` y
     `observaciones` puestos, más un resumen de lo que hay que mirar."""
     libro = libro_de(doc)
     comprobantes = comprobantes_de(doc)
-    config = config_aplicada(config)
+    config = config_aplicada(configuracion)
     limpiadas = detracciones.normalizar(comprobantes, config)
     validar.revisar(comprobantes, libro)
     errores = [c for c in comprobantes if c.tiene_errores]
@@ -220,13 +289,14 @@ def cuadrar(lineas: list[dict]) -> dict:
 
 # --- asiento y exportación ---------------------------------------------------------
 
-def _preparar(doc: dict, config: dict | None, incluir_observados: bool, imputacion: dict | None = None):
+def _preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, imputacion: dict | None = None,
+              driver: str = ""):
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
     comprobantes = [c for c in todos if not c.excluida]
     if not comprobantes:
         raise DocumentoInvalido("No hay comprobantes que procesar.")
-    config = con_imputacion(config_aplicada(config), imputacion, todos)
+    config = con_imputacion(config_aplicada(configuracion, driver), imputacion, todos)
     validar.revisar(comprobantes, libro)
     if not incluir_observados:
         con_error = [c for c in comprobantes if c.tiene_errores]
@@ -237,14 +307,23 @@ def _preparar(doc: dict, config: dict | None, incluir_observados: bool, imputaci
     return libro, comprobantes, config
 
 
-def generar_asiento(doc: dict, config: dict | None = None, correlativos: dict | None = None,
-                    incluir_observados: bool = False, imputacion: dict | None = None) -> dict:
-    """Comprobantes -> líneas de diario del estándar, sin formato de ningún ERP."""
-    libro, comprobantes, config = _preparar(doc, config, incluir_observados, imputacion)
+def generar_asiento(doc: dict, configuracion: dict | None = None, correlativos: dict | None = None,
+                    incluir_observados: bool = False, imputacion: dict | None = None, driver: str = "concar") -> dict:
+    """Comprobantes -> líneas de diario del estándar, sin formato de ningún ERP.
+
+    Con la configuración del sistema de `driver`, que tiene que armar asientos: sus siglas, sus sub-diarios y las
+    columnas en que pone el centro de costo deciden lo que llevan las líneas, que son las mismas de su archivo."""
+    modulo = drivers.obtener(driver)
+    if not drivers.contrato.arma_asientos(modulo):
+        con_asientos = [nombre for nombre, m in drivers.DRIVERS.items() if drivers.contrato.arma_asientos(m)]
+        raise ValueError(f"El driver {driver!r} no arma asientos: las líneas salen con la configuración de uno que "
+                         f"sí ({', '.join(con_asientos)})")
+    libro, comprobantes, config = _preparar(doc, configuracion, incluir_observados, imputacion, driver)
     es_venta = libro.es_venta
     corr = asi.correlativos_de_partida(comprobantes, config, es_venta, correlativos)
     # Directo a las líneas neutrales: sin pasar por las columnas de ningún ERP.
-    neutrales, rangos = asi.lineas_del_libro(libro, comprobantes, config, corr)
+    neutrales, rangos = asi.lineas_del_libro(libro, comprobantes, config, corr,
+                                             centro_en_anexo=drivers.contrato.centro_en_anexo(modulo, config))
     lineas = [ln.a_dict() for ln in neutrales]
     cuadre = partida_doble.cuadra(lineas)
     salida = documento(libro, lineas=lineas)
@@ -264,7 +343,7 @@ def _fecha_de(fecha: str | None) -> str | None:
         raise DocumentoInvalido(f"`fecha` tiene que ser AAAA-MM-DD, no {fecha!r}.") from None
 
 
-def exportar(doc: dict, driver: str = "concar", config: dict | None = None,
+def exportar(doc: dict, driver: str = "concar", configuracion: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False,
              fecha: str | None = None, imputacion: dict | None = None) -> dict:
     """Genera el archivo que pide un sistema contable.
@@ -276,7 +355,7 @@ def exportar(doc: dict, driver: str = "concar", config: dict | None = None,
     Es la anotación con la que un productor reconoce una tanda que ya exportó (`REFERENCIAS.md`).
     """
     cuando = _fecha_de(fecha)
-    libro, comprobantes, config = _preparar(doc, config, incluir_observados, imputacion)
+    libro, comprobantes, config = _preparar(doc, configuracion, incluir_observados, imputacion, driver)
     modulo = drivers.obtener(driver)
     # Lo que pide la forma del driver: la configuración, todo el que lleva cuentas (también el registro de un
     # sistema contable); los correlativos, además, el que arma asientos.
@@ -360,7 +439,28 @@ def _que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falt
     return salida
 
 
-def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | None = None,
+def _sin_configuracion(libro: Libro, driver: str, exige: frozenset[str], todos: list[Comprobante],
+                       errores: list[str]) -> dict:
+    """El diagnóstico de un mes cuya configuración no se puede aplicar: sin ella no hay nada que medir, así que dice eso
+    —cada error con su ruta— y a quién pedírselo, con la forma de siempre."""
+    return {
+        "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
+        "driver": driver,
+        "exige": sorted(exige),
+        "listo_para_exportar": False,
+        "por_que_no": [f"la configuración tiene {len(errores)} {'error' if len(errores) == 1 else 'errores'}"],
+        "que_falta": [{"motivo": "configuracion_invalida", "comprobantes": [],
+                       "texto": "la configuración no cumple lo que declaran el motor y su sistema",
+                       "pedir_a": PEDIR_A["configuracion_invalida"]}],
+        "errores_de_configuracion": errores,
+        "totales": {"comprobantes": len(todos), "saldrian": 0, "excluidos": sum(1 for c in todos if c.excluida),
+                    "fuera_del_destino": 0, "con_error": 0, "con_aviso": 0},
+        "bloqueantes": [], "avisos": [], "faltantes": {}, "detracciones_pendientes": [],
+        "resumen_por_contraparte": {}, "sub_diarios": {}, "saldrian": [],
+    }
+
+
+def diagnosticar(doc: dict, configuracion: dict | None = None, correlativos: dict | None = None,
                  driver: str = "concar", imputacion: dict | None = None) -> dict:
     """Todo lo que hay que mirar de un mes ANTES de exportarlo, en una sola respuesta.
 
@@ -370,19 +470,23 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
     (`validar.revisar`, `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_sigla`,
     `monedas_sin_codigo`, la numeración por sub-diario) y las cuenta por su serie-número.
 
-    Pura y sin estado. **No lanza** por lo que le falte al mes: lo describe. Solo rechaza un
+    Pura y sin estado. **No lanza** por lo que le falte al mes: lo describe. Tampoco por una
+    configuración que no se puede aplicar: la dice en `errores_de_configuracion`. Solo rechaza un
     documento que no es un documento (sin `libro`, o comprobantes ilegibles).
     """
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
-    config = con_imputacion(config_aplicada(config), imputacion, todos)
-    detracciones.normalizar(todos, config)
-    validar.revisar(todos, libro)
     modulo = drivers.obtener(driver)
-    es_venta = libro.es_venta
     # Lo que ESE destino exige (`contrato.exige`): decide qué faltante deja el mes «no listo». El CSV
     # no exige centro ni moneda con código; CONCAR, los dos; el SIRE, nada de esto.
     exige = drivers.contrato.exige(modulo)
+    errores = errores_de_configuracion(configuracion)
+    if errores:
+        return _sin_configuracion(libro, driver, exige, todos, errores)
+    config = con_imputacion(config_aplicada(configuracion, driver), imputacion, todos)
+    detracciones.normalizar(todos, config)
+    validar.revisar(todos, libro)
+    es_venta = libro.es_venta
 
     excluidos = [c for c in todos if c.excluida]
     fuera = gen.fuera_de([c for c in todos if not c.excluida], getattr(modulo, "EXCLUYE_TIPOS", None))
@@ -445,6 +549,7 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
         "listo_para_exportar": not por_que_no,
         "por_que_no": por_que_no,
         "que_falta": _que_falta(con_error, candidatos, faltantes, exige),
+        "errores_de_configuracion": [],
         "totales": {"comprobantes": len(todos), "saldrian": len(candidatos), "excluidos": len(excluidos),
                     "fuera_del_destino": len(fuera), "con_error": len(con_error), "con_aviso": len(con_aviso)},
         "bloqueantes": [{"serie_numero": _serie_numero(c),
