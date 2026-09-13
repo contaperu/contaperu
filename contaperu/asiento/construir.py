@@ -67,6 +67,17 @@ class RepartoNoCuadra(SinCuenta):
         self.comprobantes = comprobantes
 
 
+class RepartoNoAdmitido(SinCuenta):
+    """Comprobantes con la base repartida entre varias cuentas (un `reparto` en su imputación) para un destino que
+    lleva UNA cuenta por documento: CONTASIS arma un asiento por fila (John, 12-sep-2026). Hereda de `SinCuenta`
+    por lo mismo que `RepartoNoCuadra`: es una imputación que ese destino no puede llevar."""
+
+    def __init__(self, comprobantes: list[Comprobante]):
+        Exception.__init__(self, f"{len(comprobantes)} comprobante(s) con la base repartida entre varias cuentas, "
+                                 "y el sistema de destino lleva una sola por documento")
+        self.comprobantes = comprobantes
+
+
 class CorrelativoFaltante(Exception):
     def __init__(self, sub_diarios: list[str]):
         super().__init__("Falta el correlativo de los sub-diarios " + ", ".join(sub_diarios))
@@ -339,9 +350,16 @@ def repartos_que_no_cuadran(comprobantes: list[Comprobante], contab: dict, venta
     return [c for c in comprobantes if reparto_no_cuadra(c, contab, venta)]
 
 
+def con_reparto(comprobantes: list[Comprobante], contab: dict) -> list[Comprobante]:
+    """Los que reparten su base entre varias cuentas (`reparto` en su imputación): lo que no admite un destino que
+    exige `cuenta_unica`."""
+    return [c for c in comprobantes if (imp := imputacion_de(c, contab)) is not None and imp.reparto]
+
+
 # Qué clave de `faltantes` responde a cada requisito del contrato de driver (`contrato.exige`), en el
 # orden en que se comprueban: primero lo que impide clasificar (tipo, moneda), luego lo de cada línea.
 REQUISITO_DE = {"tipos_sin_equivalencia": "tipo_cp", "monedas_sin_codigo": "moneda",
+                "reparto_no_admitido": "cuenta_unica",
                 "sin_cuenta": "cuenta_contable", "reparto_no_cuadra": "cuenta_contable",
                 "sin_centro_de_costo": "centro_costo"}
 
@@ -358,6 +376,8 @@ def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = 
         salida["tipos_sin_equivalencia"] = tipos_sin_mapa(comprobantes, contab)
     if "moneda" in exige:
         salida["monedas_sin_codigo"] = monedas_sin_codigo(comprobantes, contab)
+    if "cuenta_unica" in exige:
+        salida["reparto_no_admitido"] = con_reparto(comprobantes, contab)
     if "cuenta_contable" in exige:
         salida["sin_cuenta"] = filas_sin_cuenta(comprobantes, contab, venta)
         salida["reparto_no_cuadra"] = repartos_que_no_cuadran(comprobantes, contab, venta)
@@ -369,12 +389,15 @@ def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = 
 def exigir_requisitos(comprobantes: list[Comprobante], contab: dict, venta: bool = False,
                       exige: frozenset[str] | set[str] = frozenset()) -> None:
     """Hace cumplir `faltantes_para`: la primera falta, en el orden de siempre, detiene la exportación
-    con su excepción (tipo → moneda → cuenta → reparto → centro). Un tipo sin equivalencia no se inventa."""
+    con su excepción (tipo → moneda → reparto no admitido → cuenta → reparto que no cuadra → centro). Un tipo
+    sin equivalencia no se inventa."""
     falta = faltantes_para(comprobantes, contab, venta, exige)
     if falta.get("tipos_sin_equivalencia"):
         raise TipoSinMapa(falta["tipos_sin_equivalencia"])
     if falta.get("monedas_sin_codigo"):
         raise MonedaSinCodigo(falta["monedas_sin_codigo"])
+    if falta.get("reparto_no_admitido"):
+        raise RepartoNoAdmitido(falta["reparto_no_admitido"])
     if falta.get("sin_cuenta"):
         raise SinCuenta(falta["sin_cuenta"])
     if falta.get("reparto_no_cuadra"):

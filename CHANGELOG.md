@@ -55,6 +55,18 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
   diagnosticar`, y el argumento `imputacion` en las herramientas `generar_asiento`, `diagnosticar` y `exportar`
   del MCP. `operaciones.con_imputacion` es pública: la CLI escribe bytes y llama al núcleo sin pasar por
   `exportar`.
+- **`igv.tasa_legal`**: la tasa legal del IGV que cuadra con la base y el IGV (la general o una reducida del
+  catálogo), con la tolerancia de `validar`; si ninguna cuadra, la del cociente a 2 decimales. Es la que pide un
+  registro («Porcentaje I.G.V. — Ejemplo: 18.00», plantilla de CONTASIS): el registro que CONTASIS validó escribe
+  18 aunque base e IGV, redondeados ítem a ítem, den 17.98. `igv.tasa` no cambia, ni la tasa entera de CONCAR.
+- **`cuenta_unica`**, un requisito que puede declarar un driver de registro: su destino lleva una cuenta por
+  documento y no admite un reparto de la base (CONTASIS arma un asiento por fila, John 12-sep-2026).
+  `diagnosticar` lo dice como `reparto_no_admitido` —a quién pedirlo: al contador— y el núcleo se niega con
+  `asiento.RepartoNoAdmitido`, que hereda de `SinCuenta`. A quien no lo declara no le aparece.
+- **`no_caben(libro, comprobantes, contab)`**, opcional en el contrato de drivers: lo que un formato no puede
+  llevar aunque la contabilidad esté completa (una moneda que no tiene, un código más largo que su columna).
+  `diagnosticar` lo lista en `faltantes.no_caben`, por motivo, y deja el mes «no listo»; el núcleo se niega con
+  `drivers.contrato.NoCabe` antes de llamar a un driver `desde_comprobantes`, y la CLI lo dice sin traceback.
 
 ### Cambiado
 - `contrato.incumplimientos` explica de otra manera por qué un driver de la forma `linea` no declara `EXIGE`

@@ -84,9 +84,12 @@ compras con el asiento cuadrado. Requisitos para que un driver entre **al reposi
 3. **Nada de red, nada de disco, nada de estado.** Entra por parámetro, sale por retorno.
 4. **Un tipo de comprobante sin equivalente detiene la exportación**, no se inventa uno. Es la regla más
    importante: es preferible un error claro a un asiento silenciosamente mal.
-5. **Declara en `EXIGE` lo que tu ERP no puede importar sin** (`centro_costo`, `moneda`; en uno de registro, solo `centro_costo`), y nada más: es
+5. **Declara en `EXIGE` lo que tu ERP no puede importar sin** (`centro_costo`, `moneda`; en uno de registro, `centro_costo` y `cuenta_unica`), y nada más: es
    lo que `diagnosticar` usa para decir si un mes está listo para tu destino, y lo que el núcleo hace
    cumplir antes de llamarte. Un requisito fuera de ese catálogo no pasa el contrato.
+6. **Lo que tu formato no puede llevar, en `no_caben`** (una moneda que no tiene, un código más largo que su
+   columna), por motivo: `diagnosticar` lo dice antes y el núcleo se niega antes de llamarte. Un código no se
+   corta y una moneda no se inventa.
 
 ## Estilo
 

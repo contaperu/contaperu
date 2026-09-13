@@ -48,7 +48,8 @@ CONTADOR, SISTEMA, PROVEEDOR = "contador", "sistema", "proveedor"
 # `tests/test_diagnosticar.py` recorre `validar.py` y comprueba que ningún código se quede fuera.
 PEDIR_A: dict[str, str] = {
     # lo que falta para el destino (claves de `faltantes`)
-    "sin_cuenta": CONTADOR, "reparto_no_cuadra": CONTADOR, "sin_centro_de_costo": CONTADOR,
+    "sin_cuenta": CONTADOR, "reparto_no_cuadra": CONTADOR, "reparto_no_admitido": CONTADOR,
+    "sin_centro_de_costo": CONTADOR, "no_caben": CONTADOR,
     "tipos_sin_equivalencia": SISTEMA, "monedas_sin_codigo": SISTEMA, "sub_diarios_sin_correlativo": SISTEMA,
     # errores de la validación
     "ANIO_DUA_FALTA": CONTADOR, "CONTRAPARTE_FALTA": CONTADOR, "DNI_INVALIDO": CONTADOR,
@@ -69,6 +70,7 @@ PEDIR_A: dict[str, str] = {
 TEXTO_FALTANTE = {
     "sin_cuenta": "sin cuenta contable",
     "reparto_no_cuadra": "con un reparto entre cuentas que no suma la base del asiento",
+    "reparto_no_admitido": "con la base repartida entre varias cuentas, que el sistema de destino no admite",
     "sin_centro_de_costo": "sin centro de costo en una cuenta que lo lleva",
     "tipos_sin_equivalencia": "de un tipo sin equivalencia en el sistema de destino",
     "monedas_sin_codigo": "en una moneda que el sistema de destino no admite",
@@ -375,6 +377,8 @@ def _que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falt
         else:
             cuales, texto = list(faltantes[clave]), TEXTO_FALTANTE[clave]
         salida.append({"motivo": clave, "texto": texto, "comprobantes": cuales, "pedir_a": PEDIR_A[clave]})
+    for motivo, cuales in (faltantes.get("no_caben") or {}).items():
+        salida.append({"motivo": "no_caben", "texto": motivo, "comprobantes": cuales, "pedir_a": PEDIR_A["no_caben"]})
     return salida
 
 
@@ -419,6 +423,13 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
             "reparto_no_cuadra": [_serie_numero(c) for c in asi.repartos_que_no_cuadran(candidatos, conf, venta)],
             "sin_centro_de_costo": [_serie_numero(c) for c in asi.filas_sin_centro(candidatos, conf, venta)],
         }
+        # Lo que solo cuenta para el destino que lo pide: el reparto, si lleva una cuenta por documento, y lo que su
+        # formato no puede llevar (`no_caben`). A quien no lo declara no le aparece la clave.
+        if "cuenta_unica" in exige:
+            faltantes["reparto_no_admitido"] = [_serie_numero(c) for c in asi.con_reparto(candidatos, conf)]
+        if callable(getattr(mod, "no_caben", None)):
+            faltantes["no_caben"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
+                                     in drivers.contrato.no_caben(mod, libro, candidatos, conf).items()}
     if drivers.contrato.necesita_asiento(mod):
         sin_mapa = asi.tipos_sin_mapa(candidatos, conf)
         con_mapa = [c for c in candidatos if c.tipo_cp not in sin_mapa]
@@ -439,11 +450,14 @@ def diagnosticar(doc: dict, contab: dict | None = None, correlativos: dict | Non
         por_que_no.append("no hay comprobantes que exportar")
     if con_error:
         por_que_no.append(f"{len(con_error)} comprobantes con observaciones que bloquean")
-    for clave in ("sin_cuenta", "reparto_no_cuadra", "sin_centro_de_costo", "tipos_sin_equivalencia",
-                  "monedas_sin_codigo"):
+    for clave in ("reparto_no_admitido", "sin_cuenta", "reparto_no_cuadra", "sin_centro_de_costo",
+                  "tipos_sin_equivalencia", "monedas_sin_codigo"):
         # Solo lo que el destino exige deja el mes «no listo»; lo demás sigue en `faltantes`, informando.
         if faltantes.get(clave) and asi.REQUISITO_DE[clave] in exige:
             por_que_no.append(f"{len(faltantes[clave])} {TEXTO_FALTANTE[clave]}")
+    # Lo que no cabe en el formato del destino lo declara el propio driver: siempre bloquea.
+    for motivo, cuales in (faltantes.get("no_caben") or {}).items():
+        por_que_no.append(f"{len(cuales)} {motivo}")
 
     por_contraparte: dict[str, dict] = {}
     for c in candidatos:

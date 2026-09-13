@@ -233,7 +233,7 @@ def test_las_dos_familias_y_lo_que_pide_cada_forma():
     assert contrato.incumplimientos(registro) == []
     assert contrato.exige(registro) == {"cuenta_contable", "centro_costo"}
     registro.EXIGE = frozenset({"moneda"})
-    assert contrato.incumplimientos(registro) == ["EXIGE solo admite ['centro_costo']; sobra ['moneda']"]
+    assert contrato.incumplimientos(registro) == ["EXIGE solo admite ['centro_costo', 'cuenta_unica']; sobra ['moneda']"]
 
 
 def test_un_registro_sale_sin_asiento_y_con_las_cuentas_del_asiento(con_terceros):
@@ -317,3 +317,82 @@ def test_la_terminal_alcanza_al_registro_con_su_configuracion_y_su_imputacion(co
                      "--config", str(config), "--imputacion", str(imputacion)]) == 0
     filas = (salida / "registro_20601234567_202601.txt").read_text(encoding="utf-8").splitlines()
     assert [f.split("|")[1] for f in filas] == ["636301", "659999", "659999"]
+
+
+def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros):
+    """`cuenta_unica`: el destino lleva una cuenta por fila y arma un asiento por fila (CONTASIS, John
+    12-sep-2026). El reparto se dice antes, con a quién pedírselo, y el núcleo se niega; a un destino que no lo
+    declara —un registro cualquiera, el CSV de asientos— no le cambia nada. Un driver de asientos no lo declara."""
+    from contaperu import asiento as asi
+    from contaperu.igv import base_imputable
+    from contaperu.modelo import Comprobante
+
+    unica = driver_de_registro("unica")
+    unica.EXIGE = frozenset({"cuenta_unica"})
+    con_terceros(_Entrada("unica", unica), _Entrada("registro", driver_de_registro()))
+    doc = documento_de_compras()
+    primero = doc["comprobantes"][0]
+    primero["id_externo"] = "fila-1"
+    base = base_imputable(Comprobante.de_dict(primero), False)
+    imputacion = {"fila-1": {"reparto": [{"importe": str(base - 1), "cuenta_contable": "636301"},
+                                         {"importe": "1", "cuenta_contable": "632201"}]}}
+
+    d = op.diagnosticar(doc, CONTAB, driver="unica", imputacion=imputacion)
+    etiqueta = d["saldrian"][0]
+    assert d["exige"] == ["cuenta_contable", "cuenta_unica"] and d["listo_para_exportar"] is False
+    assert d["faltantes"]["reparto_no_admitido"] == [etiqueta]
+    assert d["por_que_no"] == ["1 con la base repartida entre varias cuentas, que el sistema de destino no admite"]
+    assert {"motivo": "reparto_no_admitido", "texto": op.TEXTO_FALTANTE["reparto_no_admitido"],
+            "comprobantes": [etiqueta], "pedir_a": "contador"} in d["que_falta"]
+    with pytest.raises(asi.RepartoNoAdmitido):
+        op.exportar(doc, "unica", CONTAB, imputacion=imputacion)
+
+    assert "reparto_no_admitido" not in op.diagnosticar(doc, CONTAB, driver="registro", imputacion=imputacion)["faltantes"]
+    assert op.exportar(doc, "registro", CONTAB, imputacion=imputacion)["resumen"]["filas"] == len(doc["comprobantes"]) + 1
+    assert op.exportar(doc, "csv", CONTAB, imputacion=imputacion)["archivo"].endswith(".csv")
+    asientos = driver_de_prueba("asientos")
+    asientos.EXIGE = frozenset({"cuenta_unica"})
+    assert contrato.incumplimientos(asientos) == ["EXIGE solo admite ['centro_costo', 'moneda']; sobra ['cuenta_unica']"]
+
+
+def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_terceros, tmp_path, capsys):
+    """`no_caben`: lo que el formato no puede llevar aunque la contabilidad esté completa. `diagnosticar` lo lista
+    por motivo y el mes no está listo; exportar se niega sin llegar a llamar al driver, y la CLI lo dice sin
+    traceback. A un driver que no lo declara no le aparece la clave."""
+    from contaperu import cli
+
+    llamado = []
+    solo_soles = driver_de_registro("soles")
+    original = solo_soles.desde_comprobantes
+    solo_soles.desde_comprobantes = lambda *a, **k: llamado.append(1) or original(*a, **k)
+    solo_soles.no_caben = lambda libro, comprobantes, contab: {
+        "en una moneda que el destino no admite": [c for c in comprobantes if c.moneda != "PEN"],
+        "con un motivo que no aplica a este mes": []}
+    con_terceros(_Entrada("soles", solo_soles))
+    doc = documento_de_compras()
+    doc["comprobantes"][0].update(moneda="EUR", tipo_cambio="4.100")
+
+    d = op.diagnosticar(doc, CONTAB, driver="soles")
+    etiqueta = d["saldrian"][0]
+    assert d["faltantes"]["no_caben"] == {"en una moneda que el destino no admite": [etiqueta]}
+    assert d["listo_para_exportar"] is False and d["por_que_no"] == ["1 en una moneda que el destino no admite"]
+    assert {"motivo": "no_caben", "texto": "en una moneda que el destino no admite", "comprobantes": [etiqueta],
+            "pedir_a": "contador"} in d["que_falta"]
+    with pytest.raises(contrato.NoCabe) as e:
+        op.exportar(doc, "soles", CONTAB)
+    assert list(e.value.motivos) == ["en una moneda que el destino no admite"] and not llamado
+    assert "no_caben" not in op.diagnosticar(doc, CONTAB, driver="csv")["faltantes"]
+
+    documento, config = tmp_path / "mes.json", tmp_path / "config.json"
+    documento.write_text(json.dumps(doc), encoding="utf-8")
+    config.write_text(json.dumps(CONTAB), encoding="utf-8")
+    assert cli.main(["desde-json", str(documento), "--driver", "soles", "--salida", str(tmp_path / "s"),
+                     "--config", str(config)]) == 1
+    err = capsys.readouterr().err
+    assert "no puede llevar" in err and "Traceback" not in err
+    assert cli.main(["diagnosticar", str(documento), "--driver", "soles", "--config", str(config)]) == 1
+    assert "No cabe en el formato (en una moneda que el destino no admite)" in capsys.readouterr().out
+
+    roto = driver_de_registro("roto")
+    roto.no_caben = "no"
+    assert contrato.incumplimientos(roto) == ["no_caben es una función: no_caben(libro, comprobantes, contab)"]

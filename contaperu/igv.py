@@ -23,7 +23,9 @@ from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
+from . import catalogos as cat
 from .modelo import Comprobante
+from .validar import TOLERANCIA
 
 CERO = Decimal("0")
 D2 = Decimal("0.01")
@@ -45,6 +47,22 @@ def tasa(igv, base_gravada) -> Decimal | None:
     if igv <= 0 or base <= 0:
         return None
     return igv / base * 100
+
+
+def tasa_legal(igv, base_gravada) -> Decimal | None:
+    """La tasa legal del IGV que cuadra con la base y el IGV del comprobante, en %: la general
+    (`catalogos.TASA_IGV`) o una reducida (`catalogos.TASAS_IGV_REDUCIDAS`), con la misma tolerancia con la que
+    `validar` las reconoce. Es la que declara un registro que pide «el porcentaje del IGV»: la plantilla de
+    CONTASIS dice «Ejemplo: 18.00», y el registro que CONTASIS validó escribe 18 aunque base e IGV, redondeados ítem
+    a ítem, den 17.98. `None` si no hay de dónde leerla; si ninguna tasa legal cuadra —el IGV_NO_CUADRA que ya
+    bloquea la exportación—, la del cociente, a 2 decimales."""
+    igv, base = Decimal(igv or 0), Decimal(base_gravada or 0)
+    if igv <= 0 or base <= 0:
+        return None
+    for t in (cat.TASA_IGV, *cat.TASAS_IGV_REDUCIDAS):
+        if abs(igv - base * Decimal(t)) <= TOLERANCIA:
+            return (Decimal(t) * 100).quantize(D2)
+    return (igv / base * 100).quantize(D2, rounding=ROUND_HALF_UP)
 
 
 # En compras, la boleta de venta y el recibo por honorarios no dan crédito fiscal: la boleta no permite

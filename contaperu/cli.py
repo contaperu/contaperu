@@ -87,7 +87,8 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
         except gen.ErroresBloqueantes as e:
             print(f"  {p:<5} NO generado: {e}. Corrige o usa --incluir-errores", file=sys.stderr)
             codigo = 1
-        except (asi.SinCuenta, asi.SinCentro, asi.TipoSinMapa, asi.MonedaSinCodigo, asi.CorrelativoDesborda) as e:
+        except (asi.SinCuenta, asi.SinCentro, asi.TipoSinMapa, asi.MonedaSinCodigo, asi.CorrelativoDesborda,
+                drivers.contrato.NoCabe) as e:
             # Lo que le falta al mes para ese destino. `contaperu diagnosticar` lo lista por serie-número.
             print(f"  {p:<5} NO generado: {e}. Revísalo con `contaperu diagnosticar`", file=sys.stderr)
             codigo = 1
@@ -178,13 +179,16 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         for item in d[bloque]:
             for o in item["observaciones"]:
                 print(f"  {marca} {item['serie_numero']:<18} [{o['codigo']}] {o['texto']}")
-    for clave, titulo in (("sin_cuenta", "Sin cuenta contable"), ("reparto_no_cuadra", "Reparto que no suma la base"),
+    for clave, titulo in (("reparto_no_admitido", "Reparto que el destino no admite"),
+                          ("sin_cuenta", "Sin cuenta contable"), ("reparto_no_cuadra", "Reparto que no suma la base"),
                           ("sin_centro_de_costo", "Sin centro de costo"),
                           ("tipos_sin_equivalencia", "Tipos sin equivalencia"),
                           ("monedas_sin_codigo", "Monedas sin código"),
                           ("sub_diarios_sin_correlativo", "Sub-diarios sin correlativo (arrancan en 1)")):
         if d["faltantes"].get(clave):
             _lista(titulo, d["faltantes"][clave])
+    for motivo, cuales in d["faltantes"].get("no_caben", {}).items():
+        _lista(f"No cabe en el formato ({motivo})", cuales)
     if d["detracciones_pendientes"]:
         _lista("Detracciones pendientes de constancia", [p["serie_numero"] for p in d["detracciones_pendientes"]])
     if d.get("que_falta"):

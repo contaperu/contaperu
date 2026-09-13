@@ -127,11 +127,15 @@ def _desde_comprobantes(mod, libro: Libro, comprobantes: list[Comprobante], op: 
                         contab: dict | None = None) -> tuple[bytes, dict]:
     """Un driver de registro de la forma `desde_comprobantes`: el sistema contable que importa su registro y arma
     el asiento él mismo. No hay asiento que armar ni que numerar, pero sí cuentas que llevar: el núcleo exige lo
-    que ese destino pide (`contrato.exige`) ANTES de llamarlo, y el driver lee cada cuenta de `asiento.partes_de`
+    que ese destino pide (`contrato.exige`) y lo que su formato no lleva (`no_caben`) ANTES de llamarlo, y el
+    driver lee cada cuenta de `asiento.partes_de`
     y `asiento.cuenta_tercero`, la misma resolución que usa el asiento. Sin asiento no hay cuadre ni huella."""
     if contab is None:
         raise ValueError(f"El driver {mod.NOMBRE!r} lleva cuentas: necesita `contab`")
     exigir_requisitos(comprobantes, contab, libro.es_venta, contrato.exige(mod))
+    fuera = contrato.no_caben(mod, libro, comprobantes, contab)
+    if fuera:
+        raise contrato.NoCabe(fuera)
     return mod.desde_comprobantes(libro, comprobantes, contab, op)
 
 

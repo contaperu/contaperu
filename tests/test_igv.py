@@ -126,3 +126,16 @@ def test_la_compra_se_divide_por_el_destino_de_la_adquisicion():
     assert igv.por_destino(cp(base_gravada="100", igv="18")) == (pareja, cero, cero)
     assert igv.por_destino(cp(base_gravada="100", igv="18", destino_igv="dgng")) == (cero, pareja, cero)
     assert igv.por_destino(cp(base_gravada="100", igv="18", destino_igv="DNG")) == (cero, cero, pareja)
+
+
+def test_la_tasa_legal_es_la_que_cuadra_y_no_el_cociente():
+    """Lo que declara un registro en «% IGV»: la tasa legal que cuadra con base e IGV, con la tolerancia de
+    `validar`. El registro de CONTASIS validado escribe 18 aunque el IGV, redondeado ítem a ítem, dé 17.98."""
+    assert igv.tasa_legal("18", "100") == D("18.00")
+    assert igv.tasa_legal("9.75", "54.24") == D("18.00")        # el cociente da 17.98
+    assert igv.tasa_legal("10.50", "100") == D("10.50")
+    assert igv.tasa_legal("10.53", "100") == D("10.50")         # la reducida, no el cociente
+    assert igv.tasa_legal("10", "100") == D("10.00")
+    assert igv.tasa_legal("8", "100") == D("8.00")
+    assert igv.tasa_legal("25", "100") == D("25.00")            # ninguna legal cuadra: el cociente
+    assert igv.tasa_legal("0", "100") is None and igv.tasa_legal("18", "0") is None

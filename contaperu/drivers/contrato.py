@@ -36,6 +36,11 @@ la unión, y es lo que `diagnosticar` lee para decidir si un mes está listo **p
 viene de Codat `options` y Merge `/meta` (ver `REFERENCIAS.md`): el destino declara qué exige antes de
 que nadie escriba un byte.
 
+Y opcional en cualquier forma, `no_caben(libro, comprobantes, contab) -> {motivo: [comprobantes]}`: lo que su
+formato no puede llevar aunque la contabilidad esté completa —una moneda que no tiene, un código más largo que su
+columna—. `diagnosticar` lo lista antes de exportar y el núcleo se niega con `NoCabe` antes de escribir un byte
+(hoy, en la forma `desde_comprobantes`): un código no se corta ni una moneda se inventa.
+
 Los `Protocol` de abajo son la documentación tipada; lo que el registro comprueba de verdad al cargar
 un driver de terceros es `incumplimientos()`, y `tests/test_contrato_drivers.py` es el examen que pasa
 cualquier driver registrado.
@@ -63,9 +68,11 @@ EXIGE_POSIBLES = frozenset({"centro_costo", "moneda"})
 EXIGE_NUCLEO = frozenset({"cuenta_contable", "tipo_cp"})
 # Y a uno de registro que lleva cuentas (`desde_comprobantes`), el núcleo le exige la cuenta —la columna con la
 # que el destino arma su asiento— y nada del sub-diario ni de su equivalencia, que son del asiento. Puede exigir
-# el centro de costo. La moneda no: su código (`monedas_codigo`) es el de la configuración del asiento, y un
-# registro escribe la moneda en su propio vocabulario.
-EXIGE_POSIBLES_REGISTRO = frozenset({"centro_costo"})
+# el centro de costo, y `cuenta_unica`: que ningún documento reparta su base entre varias cuentas, porque el destino
+# lleva una por fila y arma un asiento por fila (CONTASIS, John 12-sep-2026). La moneda no: su código
+# (`monedas_codigo`) es el de la configuración del asiento; lo que un registro no puede escribir en su propio
+# vocabulario lo dice su `no_caben`.
+EXIGE_POSIBLES_REGISTRO = frozenset({"centro_costo", "cuenta_unica"})
 EXIGE_NUCLEO_REGISTRO = frozenset({"cuenta_contable"})
 
 
@@ -138,6 +145,24 @@ def exige(mod: Any) -> frozenset[str]:
     return frozenset()
 
 
+class NoCabe(ValueError):
+    """Comprobantes que el formato del destino no puede llevar, por motivo (lo dice el driver en `no_caben`). El
+    núcleo se niega antes de escribir nada, igual que con un tipo sin equivalencia."""
+
+    def __init__(self, motivos: dict[str, list[Comprobante]]):
+        cuantos = len({id(c) for lista in motivos.values() for c in lista})
+        super().__init__(f"{cuantos} comprobante(s) que el formato del destino no puede llevar: " + "; ".join(motivos))
+        self.motivos = motivos
+
+
+def no_caben(mod: Any, libro: Libro, comprobantes: list[Comprobante], contab: dict) -> dict[str, list[Comprobante]]:
+    """Lo que el driver dice que no cabe en su formato (su `no_caben`, opcional), sin los motivos vacíos."""
+    declarado = getattr(mod, "no_caben", None)
+    if not callable(declarado):
+        return {}
+    return {motivo: list(lista) for motivo, lista in (declarado(libro, comprobantes, contab) or {}).items() if lista}
+
+
 def incumplimientos(mod: Any) -> list[str]:
     """Lo que le falta a un driver para cumplir el contrato. Lista vacía = cumple."""
     problemas: list[str] = []
@@ -170,4 +195,6 @@ def incumplimientos(mod: Any) -> list[str]:
             problemas.append("EXIGE es un conjunto de textos")
         elif set(declarado) - posibles:
             problemas.append(f"EXIGE solo admite {sorted(posibles)}; sobra {sorted(set(declarado) - posibles)}")
+    if hasattr(mod, "no_caben") and not callable(getattr(mod, "no_caben")):
+        problemas.append("no_caben es una función: no_caben(libro, comprobantes, contab)")
     return problemas

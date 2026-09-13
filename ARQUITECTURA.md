@@ -131,7 +131,8 @@ equivocarse en una cuenta ni en un sentido, porque nunca los decide.
 
 Con `desde_comprobantes` no hay asiento que armar ni que numerar, pero sí cuentas que llevar: el núcleo exige la
 cuenta de cada documento antes de llamar al driver, y el driver la lee de la misma resolución que usa el asiento.
-Tampoco decide ninguna.
+Tampoco decide ninguna. Lo que su formato no puede llevar —una moneda, un código más largo que su columna— lo
+declara en `no_caben`: `diagnosticar` lo dice antes y el núcleo se niega antes de llamarlo.
 
 Y **declara qué exige** (`EXIGE`, desde la 0.8): lo que ese ERP no puede importar sin y que el núcleo,
 si no se lo dicen, deja pasar —`centro_costo` en las cuentas que lo llevan, `moneda` con código en el
