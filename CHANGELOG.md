@@ -43,33 +43,32 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
   documento, y la llave de su imputación.
 - **La imputación** (`asiento.Imputacion`): la cuenta, el centro de costo, la cuenta del total y el **reparto** de
   un documento, que llegan aparte, en la configuración bajo `imputaciones` y por `id_externo`; en la fachada, el
-  argumento `imputacion` de `exportar`, `diagnosticar` y `generar_asiento`. Cada campo manda sobre su gemelo de
-  legado del comprobante. El reparto divide solo la base —el caso: una factura con una parte de sistemas y otra de
+  argumento `imputacion` de `exportar`, `diagnosticar` y `generar_asiento`. El
+  reparto divide solo la base —el caso: una factura con una parte de sistemas y otra de
   desarrollo; la plantilla de CONTASIS admite varias filas por documento—, y el asiento lleva una línea de gasto o
   ingreso por parte. Un reparto con cuenta o centro al lado, o la imputación de un `id_externo` que no está, se
   rechazan en la puerta.
-- **`reparto_no_cuadra`** (en `diagnosticar` y `faltantes_para`) y **`asiento.RepartoNoCuadra`**: las partes suman
-  la base del asiento, sin tolerancia; si no, el mes no está listo y `asiento_neutral` no arma ese asiento. La
-  excepción hereda de `SinCuenta`, así que quien ya la atrapaba la atrapa igual.
+- **`reparto_que_no_cuadra`** (en `diagnosticar` y `faltantes_para`) y **`asiento.RepartoNoCuadra`**: las partes
+  suman la base del asiento, sin tolerancia; si no, el mes no está listo y `lineas_del_comprobante` no arma ese
+  asiento.
 - **`asiento.partes_de` y `asiento.cuenta_tercero`**: resuelven la cuenta de la base y la del total una sola vez
-  para todos los drivers. La del total vivía dentro de `asiento_neutral`; se sacó primero sin cambiar nada.
+  para todos los drivers. La del total vivía dentro de `lineas_del_comprobante`; se sacó primero sin cambiar nada.
 - **`igv.base_imputable` e `igv.igv_del_asiento`**: la regla de que en compras la boleta y el recibo por
-  honorarios no dan crédito fiscal salió de `asiento_neutral`, porque la comprobación del reparto la necesita
+  honorarios no dan crédito fiscal salió de `lineas_del_comprobante`, porque la comprobación del reparto la necesita
   igual.
 - `estandar/LEEME.md`: **documento, imputación y configuración**, con la forma de la imputación, y **las dos
   familias de salida** (registro y asiento). Y los nombres reservados que pide CONTASIS: `medio_pago`,
   `retencion_igv`, `percepcion` y `no_domiciliado`.
-- **La familia registro en el contrato de drivers: la forma `desde_comprobantes(libro, comprobantes, contab,
-  op)`**, para un sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo
+- **La familia registro en el contrato de drivers: la forma `desde_comprobantes(libro, comprobantes, config,
+  opciones)`**, para un sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo
   (CONTASIS). El driver recibe los comprobantes y la configuración, con la imputación dentro,
   y lee cada cuenta de `asiento.partes_de` y `asiento.cuenta_tercero`: no decide ninguna. El núcleo no le arma
   asiento ni le numera nada, y le exige la cuenta antes de llamarlo (`contrato.EXIGE_NUCLEO_REGISTRO`); puede
   exigir además el centro de costo (`EXIGE_POSIBLES_REGISTRO`). La equivalencia del tipo y el código de la
   moneda son de la configuración del asiento y no le aplican. `diagnosticar` le cuenta la cuenta, el reparto y
   el centro, sin sub-diarios.
-- **`contrato.familia(mod)`** (`registro` | `asiento`) y **`contrato.necesita_config(mod)`**: la configuración la
-  pide todo driver que lleva cuentas; los correlativos, solo el que arma asientos (`necesita_asiento`, que no
-  cambia). El recurso `contaperu://drivers` del MCP dice la familia de cada driver.
+- **`contrato.familia(modulo)`** (`registro` | `asiento`) y **`contrato.lleva_cuentas(modulo)`**: la configuración
+  la pide todo driver que lleva cuentas; los correlativos, solo el que arma asientos (`arma_asientos`). El recurso `contaperu://drivers` del MCP dice la familia de cada driver.
 - **`igv.por_destino`**: la base y el IGV de una compra en las tres parejas del destino de la adquisición (DG,
   DGNG, DNG). Vivía dentro de `formato.columnas_igv_compras`, la del SIRE, y la plantilla de importación de
   CONTASIS lleva las mismas seis columnas (J–O): la regla no puede vivir dos veces. El TXT del SIRE no cambia.
@@ -80,25 +79,84 @@ los 42 casos de `tests/test_snapshot_concar.py` salen idénticos celda a celda. 
 - **`igv.tasa_legal`**: la tasa legal del IGV que cuadra con la base y el IGV (la general o una reducida del
   catálogo), con la tolerancia de `validar`; si ninguna cuadra, la del cociente a 2 decimales. Es la que pide un
   registro («Porcentaje I.G.V. — Ejemplo: 18.00», plantilla de CONTASIS): el registro que CONTASIS validó escribe
-  18 aunque base e IGV, redondeados ítem a ítem, den 17.98. `igv.tasa` no cambia, ni la tasa entera de CONCAR.
+  18 aunque base e IGV, redondeados ítem a ítem, den 17.98. `igv.tasa_calculada` no cambia, ni la tasa entera de CONCAR.
 - **`cuenta_unica`**, un requisito que puede declarar un driver de registro: su destino lleva una cuenta por
   documento y no admite un reparto de la base (CONTASIS arma un asiento por fila, John 12-sep-2026).
   `diagnosticar` lo dice como `reparto_no_admitido` —a quién pedirlo: al contador— y el núcleo se niega con
-  `asiento.RepartoNoAdmitido`, que hereda de `SinCuenta`. A quien no lo declara no le aparece.
-- **`no_caben(libro, comprobantes, contab)`**, opcional en el contrato de drivers: lo que un formato no puede
+  `asiento.RepartoNoAdmitido`. A quien no lo declara no le aparece.
+- **`no_caben(libro, comprobantes, config)`**, opcional en el contrato de drivers: lo que un formato no puede
   llevar aunque la contabilidad esté completa (una moneda que no tiene, un código más largo que su columna).
-  `diagnosticar` lo lista en `faltantes.no_caben`, por motivo, y deja el mes «no listo»; el núcleo se niega con
+  `diagnosticar` lo lista en `faltantes.no_cabe`, por motivo, y deja el mes «no listo»; el núcleo se niega con
   `drivers.contrato.NoCabe` antes de llamar a un driver `desde_comprobantes`, y la CLI lo dice sin traceback.
+- **`asiento.FALTAS`**, la única tabla de lo que impide exportar (clave, requisito, excepción, texto, a quién pedirla
+  y título de la CLI), y **`asiento.NoExportable`**, la base de sus excepciones y de `contrato.NoCabe` y
+  `concar.CorrelativoDesborda`: quien exporta atrapa una sola. **`asiento.correlativos_de_partida`**, el correlativo
+  de partida de cada sub-diario. Y en `modelo`, **`CENTIMO`**, **`a_decimal`**, **`texto_tasa`** y
+  **`serie_y_numero`**: cada uno es la única copia de lo que se repetía.
 
-### Cambiado
+### Cambiado (rompe)
+Sin alias ni compatibilidad hacia atrás (John, 12-sep-2026: era el momento de rebajar la deuda de nombres, con la
+arquitectura recién cambiada y contab-core sin usuarios activos, que se ajusta en la misma tanda). Los tres snapshots
+—el Excel de CONCAR, el registro de CONTASIS y las líneas neutrales— no cambian ni una celda, y julio rehecho desde
+los registros que CONTASIS importó sale igual que antes de los renombres.
+
 - **El estándar se llama `open-accounting`** (antes `pe-ledger`) y pasa a la `0.3`: la clave del documento es
   `open_accounting`, el esquema `estandar/open-accounting.schema.json`, la constante `OPEN_ACCOUNTING` y el recurso
   del MCP `contaperu://estandar/open-accounting`. `datos_raw` pasa a `datos_originales`. Rompe a quien lea los
   nombres viejos; contab-core se ajusta en la misma tanda.
+- **CONCAR sale del núcleo**, con el mismo reparto que CONTASIS (`drivers/concar/datos.py`, `proyeccion.py` y
+  `xlsx.py`): el núcleo ya no importa ningún driver.
 - `contrato.incumplimientos` explica de otra manera por qué un driver de la forma `linea` no declara `EXIGE`
   («no lleva cuentas»): ya no es cosa solo de los de asientos, porque uno de registro también lo declara.
 
+Los nombres del núcleo:
+
+| Antes | Después |
+|---|---|
+| `asiento/datos.py`, `DEFAULTS` | `asiento/configuracion.py`, `CONFIG_DE_FABRICA`; los datos del Excel, en `drivers/concar/datos.py` |
+| `EXCEL_HEADERS` (`row1`, `row2`, `row3`), `FLAG_CONVERSION` | `drivers.concar.datos.CABECERAS` (`titulos`, `notas`, `formatos`), `MARCA_CONVERSION` |
+| `asiento.asiento`, `asiento.tasa_igv`, `asiento.nombre`, `asiento.CorrelativoDesborda` | `drivers.concar.filas_de_comprobante`, `tasa_igv_entera`, `nombre`, `CorrelativoDesborda` |
+| `asiento.desde_fila`, `asiento.a_lineas`, `ETIQUETAS_SUB_DIARIO` | `drivers.concar.desde_fila` y `a_lineas`; la tabla sin uso, fuera (queda `etiquetas_sub_diario`) |
+| configuración `concar`, `tipos.NN.concar`, `cc_referencia_en_x`, `cc_en_anexo_auxiliar` | `contabilidad`, `tipos.NN.sigla`, `centro_como_referencia`, `centro_en_anexo_del_tercero` |
+| `tipo_concar`, `_mapa` | `sigla_documento`, `equivalencia_tipo` |
+| `asiento/construir.py` | `asiento/resolucion.py` |
+| `merge_config`, `resolve_cxp_account`, `resolve_cxp_detraccion_account` | `fundir_config`, `cuenta_por_pagar`, `cuenta_por_pagar_detraccion` |
+| `build_xlsx`, `DRIVER_DEFAULT` | `escribir_xlsx`, `DRIVER_POR_DEFECTO` |
+| `fmt_fecha`, `fmt_monto`, `fmt_tc`, `fmt_numero` | `formatear_fecha`, `formatear_monto`, `formatear_cambio`, `formatear_numero` |
+| `filas_sin_cuenta`, `filas_sin_centro`, `tipos_sin_mapa` | `comprobantes_sin_cuenta`, `comprobantes_sin_centro`, `tipos_sin_equivalencia` |
+| `cuenta_gasto`, `cuenta_venta`, `cuenta_de_fila` | fuera: la cuenta de la base la resuelve `partes_de` |
+| `asiento_neutral(c, contab, mes, numero_comprobante, op, venta)`, `mes_del_libro` | `lineas_del_comprobante(c, config, limites, correlativo, opciones, es_venta)`, `limites_del_periodo` |
+| `contrato.necesita_config`, `necesita_asiento`, `EXIGE_POSIBLES`, `EXIGE_NUCLEO` | `lleva_cuentas`, `arma_asientos`, `EXIGE_POSIBLES_ASIENTO`, `EXIGE_NUCLEO_ASIENTO` |
+| `DriverTexto`, `DriverRegistro`, `DriverArchivo`, `DriverAsientos` | `DriverRegistroTexto`, `DriverRegistroArchivo`, `DriverAsientoComprobantes`, `DriverAsientoLineas` |
+| `generar(…, **params)` con `contab`; `generar.lineas` | `generar(…, config=…, correlativos=…)`; `lineas_de_texto` |
+| `Exportado.txt`, `.zip`, `.nombre_zip`, `.n_filas` | `.texto`, `.comprimido`, `.nombre_comprimido`, `.comprobantes` |
+| `igv.tasa`, `detracciones.monto`, `detracciones.tasa`, `drivers.formato` | `tasa_calculada`, `monto_detraccion`, `tasa_detraccion`, `formato_de` |
+| `config_de(config_cliente, config_cuenta)` | `config_de(del_ruc, del_estudio)` |
+| los parámetros `contab` y `conf`, `op`, `mod`, `venta` | `config`, `opciones`, `modulo`, `es_venta` |
+| `xml_ubl.parsear(data, tipo_libro)` | `parsear(datos, libro)`, como el lector del SIRE |
+| `lectores.archivos.Resultado`, `partida_doble.Resultado`, `pcge.cargar`, `pcge.catalogo.cargar` | `ResultadoLectura`, `Cuadre`, `cargar_equivalencias`, `cargar_catalogo` |
+| `asiento.REQUISITO_DE`, `operaciones.TEXTO_FALTANTE` | `asiento.FALTAS` (y `asiento.FALTA`, por clave) |
+| `TipoSinMapa`, `CorrelativoFaltante` | `TipoSinEquivalencia`, `SubDiarioSinCorrelativo` |
+| `RepartoNoCuadra` y `RepartoNoAdmitido` heredan de `SinCuenta` | todas las excepciones de exportar heredan de `NoExportable` |
+| `asiento.D2` | `modelo.CENTIMO` |
+
+Las respuestas de la fachada, el MCP y la CLI (las herramientas, sus parámetros y las opciones no cambian):
+
+| Antes | Después |
+|---|---|
+| `faltantes`: `sin_centro_de_costo`, `tipos_sin_equivalencia`, `monedas_sin_codigo`, `sub_diarios_sin_correlativo`, `reparto_no_cuadra`, `no_caben` | `sin_centro`, `tipo_sin_equivalencia`, `moneda_sin_codigo`, `sub_diario_sin_correlativo`, `reparto_que_no_cuadra`, `no_cabe` (también en `que_falta[].motivo`) |
+| `exportar.filas` | `exportar.comprobantes` |
+| `fuera_del_registro`, en el resumen y en `diagnosticar.totales` | `fuera_del_destino` |
+| `con_avisos`, `con_errores` en el resumen | `con_aviso`, `con_error`, como en `diagnosticar` |
+| `_revision.total`, `_revision.bloquean_la_exportacion` | `_revision.comprobantes`, `_revision.bloqueantes` |
+| el resumen de CONCAR `filas_excel`; por sub-diario `n`, `desde_cod`, `hasta_cod` | `filas`; `comprobantes`, `desde_codigo`, `hasta_codigo` |
+
+`por_que_no` y la lista de la CLI siguen el orden de `asiento.FALTAS`: tipo, moneda, reparto no admitido, cuenta,
+reparto que no cuadra y centro.
+
 ### Retirado
+- `Opciones.correlativo` (el campo 3 del PLE), `formato.fmt_fecha_libre` y `drivers.csv.construir`, que además se
+  saltaba los requisitos del destino: no los usaba nadie.
 - **`cuenta_contable` y `centro_costo` salen del comprobante** (`open-accounting 0.3`): la cuenta y el centro de cada
   documento llegan solo en la imputación, y un documento que todavía los trae se rechaza en vez de perderlos en
   silencio. En esta rama hubo antes un `cuenta_tercero` y unas `imputaciones` dentro del comprobante: nunca se
