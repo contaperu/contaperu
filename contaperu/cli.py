@@ -87,7 +87,7 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
         except gen.ErroresBloqueantes as e:
             print(f"  {p:<5} NO generado: {e}. Corrige o usa --incluir-errores", file=sys.stderr)
             codigo = 1
-        except (asi.SinCuenta, asi.SinCentro, asi.TipoSinMapa, asi.MonedaSinCodigo, asi.CorrelativoDesborda,
+        except (asi.SinCuenta, asi.SinCentro, asi.TipoSinMapa, asi.MonedaSinCodigo, drivers.concar.CorrelativoDesborda,
                 drivers.contrato.NoCabe) as e:
             # Lo que le falta al mes para ese destino. `contaperu diagnosticar` lo lista por serie-número.
             print(f"  {p:<5} NO generado: {e}. Revísalo con `contaperu diagnosticar`", file=sys.stderr)

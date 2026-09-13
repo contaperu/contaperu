@@ -54,6 +54,10 @@ SIN_CONTRAPARTE_OK = frozenset({"03", "12", "13", "16", "36", "00"})
 # Se filtran en `generar()` según lo que declare cada plantilla (`EXCLUYE_TIPOS`).
 FUERA_DEL_REGISTRO_SUNAT = frozenset({"02"})
 
+# Tipos con un tratamiento propio en el asiento: el recibo por honorarios (su cuenta y su retención de 4ta), la boleta
+# (su registro), la nota de crédito (invierte el asiento) y las notas (llevan el documento que modifican).
+TIPO_HONORARIOS, TIPO_BOLETA, TIPOS_INVIERTEN, TIPOS_NOTA = "02", "03", ("07",), ("07", "08")
+
 # Tabla 1: tipo de documento de identidad.
 TIPOS_DOC_IDENTIDAD: dict[str, str] = {
     "0": "Otros",

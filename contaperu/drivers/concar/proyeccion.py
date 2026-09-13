@@ -12,14 +12,16 @@ contabilidad de su formato (11-sep-2026).
 from __future__ import annotations
 
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.construir import MonedaSinCodigo, tasa_igv
-from ...asiento.datos import COLUMNAS, FLAG_CONVERSION, TIPO_CONVERSION
+from ...asiento.construir import MonedaSinCodigo
 from ...asiento.lineas import LineaDiario
-from ...asiento.motor import glosa_de
+from ...asiento.motor import asiento_neutral, glosa_de
+from ...formato import Opciones
+from ...igv import tasa as tasa_de_importes
 from ...modelo import Comprobante
+from .datos import COLUMNAS, MARCA_CONVERSION, OPCIONES, TIPO_CONVERSION
 
 
 def codigo_moneda(moneda: str, contab: dict) -> str:
@@ -55,7 +57,7 @@ def fila(linea: LineaDiario, c: Comprobante, contab: dict) -> dict[str, Any]:
         "F": glosa_de(c)[:40], "W": linea.glosa[:30],
         # Con el T.C. del comprobante la conversión es especial ('C'); sin él, CONCAR lo busca en su tabla.
         "G": linea.tipo_cambio if linea.tipo_cambio else "",
-        "H": "C" if linea.tipo_cambio else TIPO_CONVERSION, "I": FLAG_CONVERSION, "J": _fecha(linea.fecha),
+        "H": "C" if linea.tipo_cambio else TIPO_CONVERSION, "I": MARCA_CONVERSION, "J": _fecha(linea.fecha),
         "K": linea.cuenta, "L": linea.contraparte_doc, "M": linea.centro_costo, "N": linea.debe_haber,
         "O": importe, "P": importe if es_usd else "", "Q": importe if not es_usd else "",
         "R": doc.get("tipo", ""), "S": doc.get("serie_numero", "")[:20],
@@ -66,7 +68,7 @@ def fila(linea: LineaDiario, c: Comprobante, contab: dict) -> dict[str, Any]:
         # AO: CONCAR solo admite la tasa entera. Se redondea desde los importes del comprobante y no
         # desde la tasa de la línea, que ya va redondeada a 2 decimales: redondear dos veces puede
         # dar otro entero.
-        "AO": tasa_igv(c.igv, c.base_gravada) if linea.tasa_igv not in ("", None) else "",
+        "AO": tasa_igv_entera(c.igv, c.base_gravada) if linea.tasa_igv not in ("", None) else "",
     })
     if linea.rol == "detraccion":
         # El área (T.G. 26) es un número propio de cada empresa y solo va en esta fila (Excel validado).
@@ -85,3 +87,120 @@ def fila(linea: LineaDiario, c: Comprobante, contab: dict) -> dict[str, Any]:
 def filas(c: Comprobante, lineas: list[LineaDiario], contab: dict) -> list[dict[str, Any]]:
     """Las líneas de UN comprobante → sus filas del Excel."""
     return [fila(ln, c, contab) for ln in lineas]
+
+
+def filas_de_comprobante(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprobante: str,
+                         op: Opciones = OPCIONES, venta: bool = False) -> list[dict[str, Any]]:
+    """Un comprobante → sus filas del Excel de CONCAR (claves 'A'..'AO'): su asiento neutral, proyectado.
+
+    Era `asiento.asiento()`, la puerta de siempre hacia las columnas de CONCAR; salió del núcleo el 12-sep-2026 para
+    que el núcleo no importe un driver. La moneda se comprueba antes que nada, como siempre: un EUR no llega a buscar
+    su cuenta."""
+    codigo_moneda(c.moneda, contab)
+    return filas(c, asiento_neutral(c, contab, mes, numero_comprobante, op, venta), contab)
+
+
+def tasa_igv_entera(igv: Decimal, base_gravada: Decimal) -> Any:
+    """Columna AO: la tasa DEL COMPROBANTE, sacada de su base y su IGV, redondeada a entero.
+
+    Nada escrito a mano (John, 10-sep-2026): la tasa es la de cada comprobante —18, 10.5 o 0— y
+    CONCAR solo admite enteros, así que se redondea al exportar (ROUND_HALF_UP, como todo el motor).
+    Hasta ese día había un 18 de respaldo para «IGV sin base» y una regla que llevaba el 10.5 al 10:
+    las dos suponían una tasa en vez de leerla. Sin IGV la celda va vacía (así la lleva un registro
+    real), y sin base de la que leerla también: ese comprobante no llega aquí, la validación lo para
+    antes con IGV_NO_CUADRA. OJO: la plantilla describe la columna con «valores validos 0,10,18»
+    (`datos.py`), así que un 10.5 % que salga 11 hay que comprobarlo con la primera importación real.
+    """
+    t = tasa_de_importes(igv, base_gravada)
+    return "" if t is None else int(t.to_integral_value(rounding=ROUND_HALF_UP))
+
+
+# ── El camino inverso: de las columnas de CONCAR a la línea neutral ──────────────────────────────────────────────
+# Era como se obtenía la línea cuando el asiento nacía en columnas (hasta la 0.7), y se conserva con su driver. No
+# rellena los campos que llegaron después (`rol`, `tipo_cp`, el código SUNAT de la detracción). La tabla es, de paso,
+# la documentación de qué significa cada columna del formato de CONCAR, que en su manual solo tiene una letra por nombre.
+COLUMNA_A_CAMPO = {
+    "B": "sub_diario",          "C": "correlativo",        "D": "fecha del asiento",
+    "E": "moneda (código del ERP)", "F": "glosa de la cabecera", "G": "tipo de cambio",
+    "H": "tipo de conversión",  "I": "flag de conversión", "J": "fecha de la operación",
+    "K": "cuenta",              "L": "anexo (documento de la contraparte)",
+    "M": "centro de costo",     "N": "debe o haber",       "O": "importe original",
+    "P": "importe en dólares",  "Q": "importe en soles",   "R": "tipo de documento",
+    "S": "serie y número",      "T": "fecha del documento", "U": "fecha de vencimiento",
+    "W": "glosa del detalle",   "X": "anexo auxiliar",
+    "Z": "tipo del documento de referencia", "AA": "serie y número de la referencia",
+    "AB": "fecha de la referencia",
+    "AI": "código interno de detracción", "AJ": "tasa de detracción",
+    "AK": "base de la detracción en dólares", "AL": "base de la detracción en soles",
+    "AO": "tasa del IGV",
+}
+
+
+def _texto_de(v: Any) -> str:
+    if isinstance(v, date):
+        return v.isoformat()
+    return "" if v is None else str(v).strip()
+
+
+def _importe_exacto(v: Any) -> str:
+    """A texto con 2 decimales. Los importes salen del asiento como float para openpyxl;
+    aquí vuelven a ser exactos, que es como viajan en el estándar."""
+    if v is None or v == "":
+        return ""
+    return str(Decimal(str(v)).quantize(Decimal("0.01")))
+
+
+def _numero_o_vacio(v: Any) -> Any:
+    return v if isinstance(v, (int, float)) else (v or "")
+
+
+def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario:
+    """Una fila en columnas de CONCAR -> una línea de diario neutral.
+
+    `monedas` traduce el código del ERP al ISO 4217 ('MN' -> 'PEN'); si no se pasa, el código
+    se transporta tal cual.
+    """
+    monedas = monedas or {}
+    codigo = _texto_de(fila.get("E"))
+    documento = {
+        "tipo": _texto_de(fila.get("R")),
+        "serie_numero": _texto_de(fila.get("S")),
+        "fecha_emision": _texto_de(fila.get("T")),
+        "fecha_vencimiento": _texto_de(fila.get("U")),
+    }
+    referencia = {
+        "tipo": _texto_de(fila.get("Z")),
+        "serie_numero": _texto_de(fila.get("AA")),
+        "fecha": _texto_de(fila.get("AB")),
+    }
+    detraccion = {
+        "codigo_interno": _texto_de(fila.get("AI")),
+        "tasa": _numero_o_vacio(fila.get("AJ")),
+        "base": _importe_exacto(fila.get("AK") or fila.get("AL")),
+    }
+    return LineaDiario(
+        cuenta=_texto_de(fila.get("K")),
+        debe_haber=_texto_de(fila.get("N")),
+        importe=_importe_exacto(fila.get("O")),
+        sub_diario=_texto_de(fila.get("B")),
+        correlativo=_texto_de(fila.get("C")),
+        fecha=_texto_de(fila.get("D")),
+        moneda=monedas.get(codigo, codigo),
+        tipo_cambio=_numero_o_vacio(fila.get("G")),
+        glosa=_texto_de(fila.get("W")),
+        contraparte_doc=_texto_de(fila.get("L")),
+        centro_costo=_texto_de(fila.get("M")),
+        anexo_auxiliar=_texto_de(fila.get("X")),
+        documento={k: v for k, v in documento.items() if v},
+        referencia={k: v for k, v in referencia.items() if v},
+        detraccion={k: v for k, v in detraccion.items() if v not in ("", None)},
+        tasa_igv=_numero_o_vacio(fila.get("AO")),
+    )
+
+
+def a_lineas(filas: list[dict], contab: dict | None = None) -> list[LineaDiario]:
+    """Todas las filas de un asiento -> líneas neutrales. `contab` solo se usa para
+    devolverle a la moneda su código ISO."""
+    codigos = (contab or {}).get("monedas_codigo") or {}
+    monedas = {v: k for k, v in codigos.items()}
+    return [desde_fila(f, monedas) for f in filas]

@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from contaperu import asiento as concar
+from contaperu.drivers import concar as driver_concar
 from contaperu import comparar_sire, validar
 from contaperu import generar as g
 from contaperu.lectores import sire_txt, xml_ubl
@@ -80,7 +81,7 @@ def test_el_asiento_revierte_tambien_el_igv():
     """Leída de la propuesta la nota tenía IGV 0, y el asiento mandaba todo el total a la 70."""
     c = de_la_propuesta()
     imputar(c, cuenta_contable="701111", centro_costo="OBRA01")
-    filas = concar.asiento(c, con_imputaciones(concar.config_de(None)), MES, "050001", venta=True)
+    filas = driver_concar.filas_de_comprobante(c, con_imputaciones(concar.config_de(None)), MES, "050001", venta=True)
     assert sorted(D(str(f["O"])) for f in filas) == [D("1797.36"), D("9985.36"), D("11782.72")]
 
 

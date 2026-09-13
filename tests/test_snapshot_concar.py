@@ -1,7 +1,7 @@
 """El Excel de CONCAR, congelado celda a celda.
 
 Existe para poder mover la lógica del asiento sin miedo. Las filas A..AO que produce
-`asiento.asiento()` para cada caso de la tabla del README (y los que salieron de archivos reales)
+`drivers.concar.filas_de_comprobante()` para cada caso de la tabla del README (y los que salieron de archivos reales)
 quedan escritas en `fixtures/snapshot/concar_filas.json`; si un refactor cambia una sola celda —su
 valor o su tipo: un `18` entero no es un `18.0`, y openpyxl los escribe distinto— este test falla.
 
@@ -23,6 +23,7 @@ from pathlib import Path
 import pytest
 
 from contaperu import asiento as asi
+from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Comprobante
 
 SNAPSHOT = Path(__file__).parent / "fixtures" / "snapshot"
@@ -106,9 +107,9 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
     ("honorarios_con_detraccion", dict(RH, detraccion=DET), False, None),
     ("recibo_servicios_publicos", dict(tipo_cp="14", serie="", numero="12345"), False, None),
     ("cuenta_sin_centro", dict(cuenta_contable="603201"), False, None),
-    ("centro_referencia_en_x", dict(cuenta_contable="603201"), False, {"cc_referencia_en_x": True}),
+    ("centro_referencia_en_x", dict(cuenta_contable="603201"), False, {"centro_como_referencia": True}),
     ("centro_referencia_con_detraccion", dict(cuenta_contable="603201", detraccion={"codigo": "027", "porcentaje": 4}),
-     False, {"cc_referencia_en_x": True}),
+     False, {"centro_como_referencia": True}),
     ("sin_centros_de_costo", {}, False, {"usa_centros_costo": False}),
     ("ninguna_cuenta_lleva_centro", {}, False, {"cuentas_con_centro": []}),
     ("gasto_y_cxp_del_ruc", dict(cuenta_contable="", moneda="USD"), False,
@@ -137,13 +138,13 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
          {"importe": "100", "cuenta_contable": "631101", "centro_costo": "OBRA01"},
          {"importe": "18", "cuenta_contable": "659999"}]}}}),
     ("reparto_mismo_centro_doble_anexo", dict(cuenta_contable="", centro_costo="", id_externo="f1"), False,
-     {"cc_en_anexo_auxiliar": True, "imputaciones": {"f1": {"reparto": [
+     {"centro_en_anexo_del_tercero": True, "imputaciones": {"f1": {"reparto": [
          {"importe": "60", "cuenta_contable": "631101", "centro_costo": "OBRA01"},
          {"importe": "40", "cuenta_contable": "632201", "centro_costo": "OBRA01"}]}}}),
     ("venta_reparto", dict(cuenta_contable="", centro_costo="", id_externo="f1"), True,
      {"imputaciones": {"f1": {"reparto": [
          {"importe": "70", "cuenta_contable": "701101"}, {"importe": "30", "cuenta_contable": "704101"}]}}}),
-    ("tipo_renombrado_por_el_ruc", {}, False, {"tipos": {"01": {"concar": "FA", "sub_diario": "12"}}}),
+    ("tipo_renombrado_por_el_ruc", {}, False, {"tipos": {"01": {"sigla": "FA", "sub_diario": "12"}}}),
     ("venta_factura", dict(cuenta_contable=""), True, None),
     ("venta_usd_cuentas_del_ruc", dict(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), True,
      {"cuentas": {"ventas": "701201", "clientes": {"USD": "121209"}}}),
@@ -155,7 +156,7 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
 
 
 def contab_de(extra: dict | None) -> dict:
-    return asi.config_de({"concar": extra} if extra else None)
+    return asi.config_de({"contabilidad": extra} if extra else None)
 
 
 def _celda(v):
@@ -167,7 +168,7 @@ def _celda(v):
 
 def filas_de(caso) -> list[dict]:
     c, contab, venta = armar(caso)
-    return asi.asiento(c, contab, MES, "080001", venta=venta)
+    return driver_concar.filas_de_comprobante(c, contab, MES, "080001", venta=venta)
 
 
 def serializar_filas(caso) -> list[dict]:

@@ -1,10 +1,14 @@
 """Driver CONCAR: el Excel de asientos de 41 columnas (carga masiva).
 
-El asiento en si vive en `contaperu.asiento`, porque es contabilidad y no formato;
-aqui solo queda la escritura del .xlsx y el contrato que exige `generar.py`.
+El asiento vive en `contaperu.asiento`, porque es contabilidad y no formato. Aquí queda lo que es de CONCAR, con el
+mismo reparto que el driver de CONTASIS: sus datos (`datos.py`: columnas, cabeceras, anchos), la proyección de la
+línea neutral a sus columnas (`proyeccion.py`) y la escritura del .xlsx con el punto de entrada `construir` que exige
+el contrato (`xlsx.py`).
 """
-from ...asiento.construir import nombre
-from ...asiento.datos import CONTENT_TYPE, EXIGE, FORMATOS, NOMBRE, OPCIONES
-from .xlsx import build_xlsx, construir
+from . import datos, proyeccion
+from .datos import CONTENT_TYPE, EXIGE, FORMATOS, NOMBRE, OPCIONES
+from .proyeccion import a_lineas, desde_fila, filas_de_comprobante, tasa_igv_entera
+from .xlsx import CorrelativoDesborda, build_xlsx, construir, nombre
 
-__all__ = ["CONTENT_TYPE", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "build_xlsx", "construir", "nombre"]
+__all__ = ["CONTENT_TYPE", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "CorrelativoDesborda", "a_lineas", "build_xlsx",
+           "construir", "datos", "desde_fila", "filas_de_comprobante", "nombre", "proyeccion", "tasa_igv_entera"]

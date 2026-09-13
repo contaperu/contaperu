@@ -127,13 +127,13 @@ def configuracion(contab: dict | None = None) -> dict:
     Acepta las dos formas, y esto importa: lo que devuelve esta función **se puede volver a
     pasar tal cual**, que es lo que hace cualquiera —persona o agente— al pedir la
     configuración de partida, cambiarle una cuenta y devolverla. La forma anidada
-    (`{"concar": {...}}`) existe porque así la guardan las aplicaciones que separan la
+    (`{"contabilidad": {...}}`) existe porque así la guardan las aplicaciones que separan la
     configuración del estudio de la de cada RUC; para eso está `asiento.config_de`, con sus
     tres capas.
     """
     if not contab:
         return asi.config_de(None)
-    encima = contab.get("concar") if "concar" in contab else contab
+    encima = contab.get("contabilidad") if "contabilidad" in contab else contab
     return asi.merge_config(asi.config_de(None), encima or {})
 
 

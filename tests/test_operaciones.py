@@ -113,7 +113,7 @@ def test_la_configuracion_que_sale_se_puede_volver_a_meter():
 
 
 def test_tambien_se_acepta_la_forma_anidada_de_las_aplicaciones():
-    anidada = op.configuracion({"concar": {"cuentas": {"igv": "401199"}}})
+    anidada = op.configuracion({"contabilidad": {"cuentas": {"igv": "401199"}}})
     assert anidada["cuentas"]["igv"] == "401199"
 
 

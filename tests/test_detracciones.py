@@ -12,6 +12,7 @@ from datetime import date
 from decimal import Decimal
 
 from contaperu import asiento as asi
+from contaperu.drivers import concar as driver_concar
 from contaperu import detracciones, validar
 from contaperu.modelo import Comprobante, Libro
 
@@ -74,7 +75,7 @@ def test_una_detraccion_limpiada_no_llega_al_asiento():
     """La consecuencia real de la regla: sin código válido no hay líneas de detracción."""
     c = comprobante({"codigo": "000", "porcentaje": 3})
     detracciones.normalizar([c], CONTAB)
-    filas = asi.asiento(c, dict(CONTAB, cuentas=dict(CONTAB["cuentas"], gasto="659999")),
+    filas = driver_concar.filas_de_comprobante(c, dict(CONTAB, cuentas=dict(CONTAB["cuentas"], gasto="659999")),
                         (date(2026, 8, 1), date(2026, 8, 31)), "080001")
     assert len(filas) == 3 and all(f["R"] != "DR" for f in filas)
 
@@ -105,7 +106,7 @@ def test_el_asiento_usa_el_mismo_monto():
     """Una sola implementación: lo que ve la persona es lo que sale en las líneas de la detracción."""
     c = comprobante({"codigo": "037", "porcentaje": 12}, total="330.40", base_gravada="280", igv="50.40")
     contab = dict(TABLA, cuentas=dict(TABLA["cuentas"], gasto="659999"))
-    filas = asi.asiento(c, contab, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
+    filas = driver_concar.filas_de_comprobante(c, contab, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
     detraccion = [f for f in filas if f["R"] == "DR"]
     assert detraccion and all(f["O"] == 40 for f in detraccion)
 

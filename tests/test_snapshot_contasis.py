@@ -103,7 +103,7 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
 
 
 def contab_de(extra: dict | None) -> dict:
-    return asi.config_de({"concar": extra} if extra else None)
+    return asi.config_de({"contabilidad": extra} if extra else None)
 
 
 # La cuenta y el centro que escribe cada caso ya no son del comprobante (open-accounting 0.3): van en su imputación, por

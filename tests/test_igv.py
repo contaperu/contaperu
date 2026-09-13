@@ -8,7 +8,7 @@ from decimal import Decimal as D
 import pytest
 
 from contaperu import igv
-from contaperu.asiento import tasa_igv
+from contaperu.drivers.concar import tasa_igv_entera as tasa_igv
 from contaperu.modelo import Comprobante
 
 

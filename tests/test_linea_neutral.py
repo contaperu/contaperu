@@ -13,6 +13,7 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from contaperu import asiento as asi
+from contaperu.drivers import concar as driver_concar
 from contaperu.drivers import csv as driver_csv
 from contaperu.modelo import Comprobante, Libro
 from util import comprobante, con_imputaciones
@@ -38,18 +39,18 @@ def factura(**k) -> Comprobante:
 
 
 def test_el_centro_de_referencia_viaja_como_anexo_auxiliar():
-    """Con `cc_referencia_en_x`, el centro de una cuenta que no lo lleva en M sale del asiento
+    """Con `centro_como_referencia`, el centro de una cuenta que no lo lleva en M sale del asiento
     por el campo `anexo_auxiliar` del estándar, no por `centro_costo`. Es correcto —la X es la
     X— pero conviene fijarlo aquí y no descubrirlo desde el MCP o desde el driver CSV."""
-    ref = configuracion({"concar": {"cc_referencia_en_x": True}})
-    filas = asi.asiento(factura(cuenta_contable="603201"), ref, MES, "080001")
-    gasto = asi.desde_fila(filas[0])
+    ref = configuracion({"contabilidad": {"centro_como_referencia": True}})
+    filas = driver_concar.filas_de_comprobante(factura(cuenta_contable="603201"), ref, MES, "080001")
+    gasto = driver_concar.desde_fila(filas[0])
     assert gasto.centro_costo == "" and gasto.anexo_auxiliar == "CC-64"
 
 
 def test_la_linea_neutral_dice_lo_mismo_que_la_columna():
-    filas = asi.asiento(factura(), CONTAB, MES, "080084")
-    gasto, igv, proveedor = asi.a_lineas(filas, CONTAB)
+    filas = driver_concar.filas_de_comprobante(factura(), CONTAB, MES, "080084")
+    gasto, igv, proveedor = driver_concar.a_lineas(filas, CONTAB)
 
     assert gasto.cuenta == "659999" and gasto.debe_haber == "D" and gasto.importe == "4200.00"
     assert gasto.centro_costo == "CC-64" and gasto.moneda == "PEN"
@@ -64,14 +65,14 @@ def test_la_linea_neutral_dice_lo_mismo_que_la_columna():
 
 def test_el_codigo_de_moneda_del_erp_vuelve_a_iso():
     """En el Excel la moneda es 'MN' o 'US'; en el estándar, PEN y USD."""
-    pen = asi.a_lineas(asi.asiento(factura(), CONTAB, MES, "080001"), CONTAB)[0]
-    usd = asi.a_lineas(asi.asiento(factura(moneda="USD", tipo_cambio="3.5"), CONTAB, MES, "080002"), CONTAB)[0]
+    pen = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(), CONTAB, MES, "080001"), CONTAB)[0]
+    usd = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(moneda="USD", tipo_cambio="3.5"), CONTAB, MES, "080002"), CONTAB)[0]
     assert pen.moneda == "PEN" and usd.moneda == "USD" and usd.tipo_cambio == 3.5
 
 
 def test_la_linea_de_detraccion_lleva_su_bloque():
-    filas = asi.asiento(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
-    lineas = asi.a_lineas(filas, CONTAB)
+    filas = driver_concar.filas_de_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
+    lineas = driver_concar.a_lineas(filas, CONTAB)
     assert len(lineas) == 5
     det = lineas[-1]
     assert det.cuenta == "421203" and det.debe_haber == "H" and det.importe == "198.00"
@@ -81,7 +82,7 @@ def test_la_linea_de_detraccion_lleva_su_bloque():
 
 
 def test_a_dict_no_arrastra_claves_vacias():
-    linea = asi.a_lineas(asi.asiento(factura(), CONTAB, MES, "080001"), CONTAB)[1]  # el IGV
+    linea = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(), CONTAB, MES, "080001"), CONTAB)[1]  # el IGV
     d = linea.a_dict()
     assert "centro_costo" not in d and "referencia" not in d and "detraccion" not in d
     assert d["cuenta"] == "401111"
@@ -94,8 +95,8 @@ def test_las_lineas_validan_contra_el_estandar():
         "open_accounting": "0.3",
         "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                   "periodo": "202608", "tipo": "compra"},
-        "asiento": [ln.a_dict() for ln in asi.a_lineas(
-            asi.asiento(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084"),
+        "asiento": [ln.a_dict() for ln in driver_concar.a_lineas(
+            driver_concar.filas_de_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084"),
             CONTAB)],
     }
     assert list(validador.iter_errors(doc)) == []
@@ -118,14 +119,14 @@ def test_la_glosa_de_la_linea_va_entera_y_el_corte_es_del_driver():
     concepto = "SERVICIO DE TRANSPORTE DE MATERIALES DE CONSTRUCCION A LA OBRA"
     lineas = asi.asiento_neutral(factura(concepto=concepto), CONTAB, MES, "080001")
     assert lineas[0].glosa == concepto and lineas[1].glosa == "IGV - " + concepto
-    filas = asi.asiento(factura(concepto=concepto), CONTAB, MES, "080001")
+    filas = driver_concar.filas_de_comprobante(factura(concepto=concepto), CONTAB, MES, "080001")
     assert filas[0]["W"] == concepto[:30] and filas[0]["F"] == concepto[:40]
 
 
 def test_la_tasa_del_igv_viaja_exacta_y_concar_la_redondea():
     reducida = factura(base_gravada="100", igv="10.5", total="110.5")
     assert asi.asiento_neutral(reducida, CONTAB, MES, "080001")[0].tasa_igv == "10.5"
-    assert asi.asiento(reducida, CONTAB, MES, "080001")[0]["AO"] == 11
+    assert driver_concar.filas_de_comprobante(reducida, CONTAB, MES, "080001")[0]["AO"] == 11
 
 
 def test_una_nota_de_credito_lleva_los_dos_codigos_de_su_referencia():

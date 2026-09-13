@@ -110,8 +110,8 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
   algo que se rompe solo: el núcleo no puede importar una puerta, ni el SDK del protocolo, ni salir a
   la red, ni mirar el reloj; y cada puerta tiene que pasar por la fachada.
 - **El portal** (otro repositorio) es una tercera puerta que importa `contaperu.asiento` y
-  `contaperu.operaciones`. Por eso `asiento.asiento()` conserva su firma aunque ya no contenga la
-  lógica: es API pública.
+  `contaperu.operaciones`. Desde la 0.10 el núcleo no conoce ningún formato: las columnas de CONCAR
+  salen de su driver (`drivers.concar.filas_de_comprobante`), igual que las de CONTASIS.
 
 ## Cómo se enchufa un driver
 

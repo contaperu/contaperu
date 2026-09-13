@@ -3,19 +3,19 @@ cada comprobante (sigla, sub-diario, cuentas) y numeración por sub-diario. Las 
 su porqué, en el docstring del paquete (`__init__.py`).
 
 Las líneas de la partida doble se arman en `motor.py`, en el vocabulario neutral de `open-accounting`;
-`asiento()` se queda aquí como la puerta de siempre hacia las columnas de CONCAR.
+las columnas de CONCAR, en su driver (`drivers/concar/proyeccion.py`).
 """
 from __future__ import annotations
 
 import calendar
 from datetime import date
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from typing import Any
 
+from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
+from ..igv import base_imputable
 from ..modelo import Comprobante, Libro
-from ..formato import Opciones
-from ..igv import base_imputable, tasa as tasa_de_importes
-from .datos import DEFAULTS, OPCIONES, TIPO_BOLETA, TIPO_HONORARIOS
+from .configuracion import CONFIG_DE_FABRICA
 from .imputacion import Imputacion
 
 
@@ -28,18 +28,18 @@ class SinCuenta(Exception):
 
 
 class TipoSinMapa(Exception):
-    """Comprobantes cuyo tipo SUNAT no tiene sigla/sub-diario de CONCAR configurado."""
+    """Comprobantes cuyo tipo SUNAT no tiene sigla configurada (`tipos.NN.sigla`): no se inventa una."""
 
     def __init__(self, tipos: list[str]):
-        super().__init__("Tipos SUNAT sin código CONCAR: " + ", ".join(tipos))
+        super().__init__("Tipos SUNAT sin sigla configurada: " + ", ".join(tipos))
         self.tipos = tipos
 
 
 class MonedaSinCodigo(Exception):
-    """Comprobantes en una moneda que CONCAR no admite (solo MN y US)."""
+    """Comprobantes en una moneda sin código en el sistema de destino (`monedas_codigo`)."""
 
     def __init__(self, monedas: list[str]):
-        super().__init__("Monedas sin código CONCAR: " + ", ".join(monedas))
+        super().__init__("Monedas sin código en el sistema de destino: " + ", ".join(monedas))
         self.monedas = monedas
 
 
@@ -84,16 +84,6 @@ class CorrelativoFaltante(Exception):
         self.sub_diarios = sub_diarios
 
 
-class CorrelativoDesborda(Exception):
-    """Un sub-diario pasaría de 9999: CONCAR numera el asiento con MM + cuatro dígitos (`numerar`),
-    y un quinto dígito no cabe en su importación. `sub_diarios` es {sub-diario: hasta dónde llegaría}."""
-
-    def __init__(self, sub_diarios: dict[str, int]):
-        super().__init__("; ".join(f"El sub-diario {s} llegaría a {n}: supera los 4 dígitos que admite CONCAR"
-                                   for s, n in sub_diarios.items()))
-        self.sub_diarios = sub_diarios
-
-
 # ── Configuración por RUC ─────────────────────────────────────────────────────
 
 def merge_config(defaults: dict, overrides: dict) -> dict:
@@ -111,16 +101,15 @@ def merge_config(defaults: dict, overrides: dict) -> dict:
 
 
 def config_de(config_cliente: dict | None, config_cuenta: dict | None = None) -> dict:
-    """Configuración CONCAR efectiva, del general al particular:
+    """Configuración contable efectiva, del general al particular:
 
-        DEFAULTS (código)  →  la CUENTA (el estudio)  →  el RUC (excepciones)
+        CONFIG_DE_FABRICA (código)  →  la CUENTA (el estudio)  →  el RUC (excepciones)
 
-    La cuenta (`contab_config.config`) vale para todos sus RUCs; el RUC
-    (`contab_clientes.config`) sobreescribe solo las claves que difieran y
-    hereda el resto — `merge_config` funde en profundidad, así que la cuenta
-    puede poner `cxp.PEN` y el RUC solo `cxp.USD` sin borrarse entre ellos."""
-    base = merge_config(DEFAULTS, ((config_cuenta or {}).get("concar") or {}))
-    return merge_config(base, ((config_cliente or {}).get("concar") or {}))
+    Cada capa trae lo suyo bajo la clave `contabilidad`. La del RUC sobreescribe solo las claves que difieran y
+    hereda el resto — `merge_config` funde en profundidad, así que la cuenta puede poner `cxp.PEN` y el RUC solo
+    `cxp.USD` sin borrarse entre ellos."""
+    base = merge_config(CONFIG_DE_FABRICA, ((config_cuenta or {}).get("contabilidad") or {}))
+    return merge_config(base, ((config_cliente or {}).get("contabilidad") or {}))
 
 
 def etiquetas_sub_diario(contab: dict) -> dict[str, str]:
@@ -150,16 +139,16 @@ def _cuenta_por_moneda(valor: Any, moneda: str, fallback: str) -> str:
 
 
 def resolve_cxp_account(cuentas: dict, moneda: str) -> str:
-    return _cuenta_por_moneda(cuentas.get("cxp"), moneda, DEFAULTS["cuentas"]["cxp"]["PEN"])
+    return _cuenta_por_moneda(cuentas.get("cxp"), moneda, CONFIG_DE_FABRICA["cuentas"]["cxp"]["PEN"])
 
 
 def resolve_cxp_detraccion_account(cuentas: dict, moneda: str) -> str:
     """La cuenta por pagar de la factura afecta a detracción (421203 en las dos monedas por defecto)."""
-    return _cuenta_por_moneda(cuentas.get("cxp_detraccion"), moneda, DEFAULTS["cuentas"]["cxp_detraccion"]["PEN"])
+    return _cuenta_por_moneda(cuentas.get("cxp_detraccion"), moneda, CONFIG_DE_FABRICA["cuentas"]["cxp_detraccion"]["PEN"])
 
 
 def cuenta_honorarios(cuentas: dict, moneda: str) -> str:
-    return _cuenta_por_moneda(cuentas.get("honorarios"), moneda, DEFAULTS["cuentas"]["honorarios"]["PEN"])
+    return _cuenta_por_moneda(cuentas.get("honorarios"), moneda, CONFIG_DE_FABRICA["cuentas"]["honorarios"]["PEN"])
 
 
 # ── La imputación de cada documento: llega aparte, por `id_externo` (12-sep-2026) ──
@@ -198,7 +187,7 @@ def cuenta_tercero(c: Comprobante, contab: dict, venta: bool = False) -> str:
     moneda = (c.moneda or "PEN").upper()
     cuentas = contab.get("cuentas") or {}
     if venta:
-        return _cuenta_por_moneda(cuentas.get("clientes"), moneda, DEFAULTS["cuentas"]["clientes"]["PEN"])
+        return _cuenta_por_moneda(cuentas.get("clientes"), moneda, CONFIG_DE_FABRICA["cuentas"]["clientes"]["PEN"])
     if c.tipo_cp == TIPO_HONORARIOS:
         return cuenta_honorarios(cuentas, moneda)
     return resolve_cxp_account(cuentas, moneda)
@@ -206,15 +195,17 @@ def cuenta_tercero(c: Comprobante, contab: dict, venta: bool = False) -> str:
 
 # ── Clasificación de cada comprobante ────────────────────────────────────────
 
-def _mapa(c: Comprobante, contab: dict, tipo: str | None = None) -> dict | None:
-    # Solo exige la sigla: el sub-diario tiene general (sub_diario_compras) desde el 29-ago-2026.
+def equivalencia_tipo(c: Comprobante, contab: dict, tipo: str | None = None) -> dict | None:
+    """La equivalencia del tipo SUNAT en la configuración (`tipos.NN`) si tiene sigla; si no, None. Solo exige la
+    sigla: el sub-diario tiene general (`sub_diario_compras`) desde el 29-ago-2026."""
     m = (contab.get("tipos") or {}).get(tipo if tipo is not None else c.tipo_cp)
-    return m if isinstance(m, dict) and m.get("concar") else None
+    return m if isinstance(m, dict) and m.get("sigla") else None
 
 
-def tipo_concar(c: Comprobante, contab: dict | None = None) -> str:
-    m = _mapa(c, contab or DEFAULTS)
-    return str(m["concar"]) if m else ""
+def sigla_documento(c: Comprobante, contab: dict | None = None) -> str:
+    """La sigla con la que el sistema de destino llama al tipo del comprobante (en CONCAR, su Tabla General 06)."""
+    m = equivalencia_tipo(c, contab or CONFIG_DE_FABRICA)
+    return str(m["sigla"]) if m else ""
 
 
 def _num(v: Any) -> Decimal:
@@ -233,22 +224,22 @@ def sub_diario(c: Comprobante, contab: dict, venta: bool = False) -> str:
     """Por USO: ventas → sub_diario_ventas; compras con detracción → sub_diario_detraccion;
     un tipo con registro propio (boletas 13, honorarios 15) → el suyo; el resto → sub_diario_compras.
     Estas cuatro fuentes son lo que una aplicación deja configurar."""
-    m = _mapa(c, contab)
+    m = equivalencia_tipo(c, contab)
     if not m:
         return ""
     if venta:
-        return str(contab.get("sub_diario_ventas") or DEFAULTS["sub_diario_ventas"])
+        return str(contab.get("sub_diario_ventas") or CONFIG_DE_FABRICA["sub_diario_ventas"])
     sd = str(contab.get("sub_diario_detraccion") or "").strip()
     if sd and c.tipo_cp != TIPO_HONORARIOS and tiene_detraccion(c):
         return sd
-    return str(m.get("sub_diario") or contab.get("sub_diario_compras") or DEFAULTS["sub_diario_compras"])
+    return str(m.get("sub_diario") or contab.get("sub_diario_compras") or CONFIG_DE_FABRICA["sub_diario_compras"])
 
 
 def tipos_sin_mapa(comprobantes: list[Comprobante], contab: dict) -> list[str]:
-    """Códigos SUNAT presentes que no tienen sigla/sub-diario de CONCAR (en orden de aparición)."""
+    """Códigos SUNAT presentes que no tienen sigla configurada (en orden de aparición)."""
     vistos: list[str] = []
     for c in comprobantes:
-        if not _mapa(c, contab) and c.tipo_cp not in vistos:
+        if not equivalencia_tipo(c, contab) and c.tipo_cp not in vistos:
             vistos.append(c.tipo_cp)
     return vistos
 
@@ -269,7 +260,7 @@ def cuenta_gasto(c: Comprobante, contab: dict) -> str:
 
 def cuenta_venta(c: Comprobante, contab: dict) -> str:
     """Ventas: la cuenta de ingreso del RUC; a diferencia del gasto, aquí SÍ hay un default real (el habitual)."""
-    return str((contab.get("cuentas") or {}).get("ventas") or DEFAULTS["cuentas"]["ventas"]).strip()
+    return str((contab.get("cuentas") or {}).get("ventas") or CONFIG_DE_FABRICA["cuentas"]["ventas"]).strip()
 
 
 def cuenta_de_fila(c: Comprobante, contab: dict, venta: bool = False) -> str:
@@ -291,7 +282,7 @@ def lleva_centro(cuenta: str, contab: dict) -> bool:
     """
     if not contab.get("usa_centros_costo", True):
         return False
-    prefijos = contab["cuentas_con_centro"] if "cuentas_con_centro" in contab else DEFAULTS["cuentas_con_centro"]
+    prefijos = contab["cuentas_con_centro"] if "cuentas_con_centro" in contab else CONFIG_DE_FABRICA["cuentas_con_centro"]
     cuenta = (cuenta or "").strip()
     return bool(cuenta) and any(cuenta.startswith(p) for p in (str(x).strip() for x in (prefijos or [])) if p)
 
@@ -317,7 +308,7 @@ def filas_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool 
 
     El centro es obligatorio solo donde de verdad se escribe: en la columna M de las cuentas de
     `cuentas_con_centro` (el contador, 06-sep-2026 y 09-sep-2026). Una cuenta fuera de la lista
-    NO bloquea nunca, ni siquiera con `cc_referencia_en_x` encendido: esa X es una referencia, y
+    NO bloquea nunca, ni siquiera con `centro_como_referencia` encendido: esa X es una referencia, y
     una referencia que se puede dejar en blanco no puede impedir exportar un mes.
 
     `venta` va opcional a propósito, calcando a `filas_sin_cuenta`: esto es una librería que se
@@ -404,10 +395,6 @@ def exigir_requisitos(comprobantes: list[Comprobante], contab: dict, venta: bool
         raise SinCentro(falta["sin_centro_de_costo"])
 
 
-def nombre(libro: Libro, op: Opciones = OPCIONES) -> str:
-    return f"CONCAR_{libro.ruc}_{libro.periodo}_{'VENTAS' if libro.es_venta else 'COMPRAS'}{op.extension}"
-
-
 # ── Numeración: MM + correlativo de 4 dígitos por sub-diario ──────────────────
 
 def numerar(comprobantes: list[Comprobante], contab: dict, periodo: str,
@@ -439,41 +426,6 @@ def numerar(comprobantes: list[Comprobante], contab: dict, periodo: str,
         r["desde_cod"], r["hasta_cod"] = f"{mes_mm}{r['desde']:04d}", f"{mes_mm}{r['hasta']:04d}"
         r["desborda"] = r["hasta"] > 9999
     return numeros, rangos
-
-
-# ── El asiento ───────────────────────────────────────────────────────────────
-
-def tasa_igv(igv: Decimal, base_gravada: Decimal) -> Any:
-    """Columna AO: la tasa DEL COMPROBANTE, sacada de su base y su IGV, redondeada a entero.
-
-    Nada escrito a mano (John, 10-sep-2026): la tasa es la de cada comprobante —18, 10.5 o 0— y
-    CONCAR solo admite enteros, así que se redondea al exportar (ROUND_HALF_UP, como todo el motor).
-    Hasta ese día había un 18 de respaldo para «IGV sin base» y una regla que llevaba el 10.5 al 10:
-    las dos suponían una tasa en vez de leerla. Sin IGV la celda va vacía (así la lleva un registro
-    real), y sin base de la que leerla también: ese comprobante no llega aquí, la validación lo para
-    antes con IGV_NO_CUADRA. OJO: la plantilla describe la columna con «valores validos 0,10,18»
-    (`datos.py`), así que un 10.5 % que salga 11 hay que comprobarlo con la primera importación real.
-    """
-    t = tasa_de_importes(igv, base_gravada)
-    return "" if t is None else int(t.to_integral_value(rounding=ROUND_HALF_UP))
-
-
-def asiento(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprobante: str,
-            op: Opciones = OPCIONES, venta: bool = False) -> list[dict[str, Any]]:
-    """Un comprobante → sus filas del Excel de CONCAR (claves 'A'..'AO').
-
-    Se conserva con su firma y su salida de siempre porque es API pública: la usan el portal y los
-    drivers de terceros. Desde la 0.7 ya no contiene la lógica: el asiento se arma en líneas
-    neutrales (`motor.asiento_neutral`) y se proyecta a CONCAR (`drivers/concar/proyeccion.py`).
-    Quien no necesite las columnas de CONCAR debería llamar directamente a `asiento_neutral`.
-    """
-    # Tardío a propósito: el driver de CONCAR importa este módulo y no puede importarse arriba.
-    from ..drivers.concar import proyeccion
-    from .motor import asiento_neutral
-
-    # La moneda se comprueba antes que nada, como siempre: un EUR no llega a buscar su cuenta.
-    proyeccion.codigo_moneda(c.moneda, contab)
-    return proyeccion.filas(c, asiento_neutral(c, contab, mes, numero_comprobante, op, venta), contab)
 
 
 def mes_del_libro(libro: Libro) -> tuple[date, date]:

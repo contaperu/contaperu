@@ -9,14 +9,27 @@ from typing import Any
 from ...modelo import Comprobante, Libro
 from ... import partida_doble
 from ...formato import Opciones
-from ...asiento.construir import (CorrelativoDesborda, mes_del_libro, etiquetas_sub_diario,
-                      exigir_requisitos, numerar)
-from ...asiento.datos import (ANCHOS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
-                    EXCEL_HEADERS, EXIGE, FORMATOS, OPCIONES)
+from ...asiento.construir import etiquetas_sub_diario, exigir_requisitos, mes_del_libro, numerar
 from ...asiento.huella import huella
 from ...asiento.motor import asiento_neutral
 from ..contrato import EXIGE_NUCLEO
 from . import proyeccion
+from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, EXIGE, FORMATOS,
+                    HOJA, OPCIONES, PANEL)
+
+
+class CorrelativoDesborda(Exception):
+    """Un sub-diario pasaría de 9999: CONCAR numera el asiento con MM + cuatro dígitos (`asiento.numerar`),
+    y un quinto dígito no cabe en su importación. `sub_diarios` es {sub-diario: hasta dónde llegaría}."""
+
+    def __init__(self, sub_diarios: dict[str, int]):
+        super().__init__("; ".join(f"El sub-diario {s} llegaría a {n}: supera los 4 dígitos que admite CONCAR"
+                                   for s, n in sub_diarios.items()))
+        self.sub_diarios = sub_diarios
+
+
+def nombre(libro: Libro, op: Opciones = OPCIONES) -> str:
+    return f"CONCAR_{libro.ruc}_{libro.periodo}_{'VENTAS' if libro.es_venta else 'COMPRAS'}{op.extension}"
 
 
 def build_xlsx(filas: list[dict[str, Any]]) -> bytes:
@@ -25,7 +38,7 @@ def build_xlsx(filas: list[dict[str, Any]]) -> bytes:
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "CONCAR"
+    ws.title = HOJA
     # Formato de la plantilla oficial de CONCAR: titulos
     # en azul marino con letra blanca, notas sin relleno con la fila alta, panel
     # congelado en A4 y autofiltro sobre la fila de formatos.
@@ -36,13 +49,13 @@ def build_xlsx(filas: list[dict[str, Any]]) -> bytes:
     align_titulo = Alignment(horizontal="center", vertical="center", wrap_text=True)
     align_nota = Alignment(vertical="top", wrap_text=True)
     align_formato = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    for col, header in EXCEL_HEADERS["row1"].items():
+    for col, header in CABECERAS["titulos"].items():
         cell = ws[f"{col}1"]
         cell.value, cell.fill, cell.font, cell.alignment = header, fill_titulo, font_titulo, align_titulo
-    for col, desc in EXCEL_HEADERS["row2"].items():
+    for col, desc in CABECERAS["notas"].items():
         cell = ws[f"{col}2"]
         cell.value, cell.font, cell.alignment = desc, font_nota, align_nota
-    for col, fmt in EXCEL_HEADERS["row3"].items():
+    for col, fmt in CABECERAS["formatos"].items():
         cell = ws[f"{col}3"]
         cell.value, cell.font, cell.alignment = fmt, font_nota, align_formato
     ws["A3"].font = Font(name="Aptos Narrow", size=11, bold=True)
@@ -65,8 +78,8 @@ def build_xlsx(filas: list[dict[str, Any]]) -> bytes:
                 cell.number_format = "@"
     for col, ancho in ANCHOS.items():
         ws.column_dimensions[col].width = ancho
-    ws.freeze_panes = "A4"
-    ws.auto_filter.ref = "A3:AO3"
+    ws.freeze_panes = PANEL
+    ws.auto_filter.ref = AUTOFILTRO
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()

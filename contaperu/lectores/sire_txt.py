@@ -18,7 +18,7 @@ comprobante, la cuenta contable, el centro de costo y el detalle de la detracci�
 datos del comprobante, no del registro; `validar.py` lo avisa con `SIRE_SIN_DETALLE`.
 El **concepto se queda VACÍO a propósito** (regla de contabilidad): copiarle el nombre de
 la contraparte repetía en la columna un dato que ya está en la suya, y no ganaba nada
-—`concar.glosa` ya cae al nombre de la contraparte cuando el concepto está vacío, así
+—`asiento.glosa_de` ya cae al nombre de la contraparte cuando el concepto está vacío, así
 que el Excel sale idéntico— mientras que la celda llena aparentaba un dato que el
 archivo no da y estorbaba para escribir el de verdad.
 """
@@ -160,7 +160,7 @@ def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
     return Comprobante(
         **datos,
         # `concepto` se queda vacío: la propuesta no lo trae y el Excel de CONCAR ya
-        # cae al nombre de la contraparte por su cuenta (`concar.py`, `glosa`).
+        # cae al nombre de la contraparte por su cuenta (`asiento.glosa_de`).
         origen=ORIGEN,
         confianza=Decimal("1.00"),      # es el dato de SUNAT, no la lectura de una IA
         archivo_nombre=archivo_nombre,

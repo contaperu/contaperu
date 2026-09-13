@@ -69,8 +69,8 @@ def test_el_asiento_real_siempre_cuadra():
         "en dolares": cp(moneda="USD", tipo_cambio="3.5"),
     }
     for nombre, c in casos.items():
-        filas = asi.asiento(c, CONTAB, MES, "080001")
-        r = partida_doble.cuadra(asi.a_lineas(filas, CONTAB))
+        filas = driver_concar.filas_de_comprobante(c, CONTAB, MES, "080001")
+        r = partida_doble.cuadra(driver_concar.a_lineas(filas, CONTAB))
         assert r.cuadra, f"{nombre} no cuadra: {r.a_dict()}"
 
 

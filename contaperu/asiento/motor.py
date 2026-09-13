@@ -21,16 +21,16 @@ from __future__ import annotations
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
+from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
 from ..detracciones import monto as monto_detraccion
 from ..detracciones import tasa as tasa_detraccion
 from ..formato import Opciones, fmt_numero
 from ..igv import base_imputable, igv_del_asiento, tasa as tasa_de_importes
 from ..modelo import Comprobante, Libro
-from .construir import (RepartoNoCuadra, SinCuenta, _mapa, cuenta_tercero, lleva_centro, mes_del_libro, numerar,
-                        partes_de, reparto_no_cuadra, resolve_cxp_detraccion_account, sub_diario,
-                        tiene_detraccion, tipo_concar)
-from .datos import (D2, DEFAULTS, NUMERO_DETRACCION_PENDIENTE, OPCIONES, TIPO_DOC_DETRACCION,
-                    TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA)
+from .configuracion import CONFIG_DE_FABRICA, D2, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
+from .construir import (RepartoNoCuadra, SinCuenta, cuenta_tercero, equivalencia_tipo, lleva_centro, mes_del_libro,
+                        numerar, partes_de, reparto_no_cuadra, resolve_cxp_detraccion_account, sigla_documento,
+                        sub_diario, tiene_detraccion)
 from .lineas import LineaDiario
 
 # El papel de cada línea en el asiento. Es lo que un driver necesita para traducir sin adivinar: un
@@ -72,7 +72,7 @@ def _detraccion(c: Comprobante, contab: dict, total: Decimal) -> dict:
 
 
 def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero_comprobante: str,
-                    op: Opciones = OPCIONES, venta: bool = False) -> list[LineaDiario]:
+                    op: Opciones = Opciones(), venta: bool = False) -> list[LineaDiario]:
     """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
     del manual de asientos."""
     moneda = (c.moneda or "PEN").upper()
@@ -121,13 +121,13 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
     d_gasto, d_prov = (normal[::-1] if invierte else normal)
     sd = sub_diario(c, contab, venta)
 
-    documento = {"tipo": tipo_concar(c, contab), "tipo_cp": c.tipo_cp, "serie_numero": serie_numero,
+    documento = {"tipo": sigla_documento(c, contab), "tipo_cp": c.tipo_cp, "serie_numero": serie_numero,
                  "fecha_emision": _iso(f_emision), "fecha_vencimiento": _iso(f_venc)}
     referencia: dict[str, str] = {}
     if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
         ref_num = fmt_numero(c.ref_numero, op)
-        m_ref = _mapa(c, contab, c.ref_tipo_cp)
-        referencia = {"tipo": str(m_ref["concar"]) if m_ref else "", "tipo_cp": c.ref_tipo_cp,
+        m_ref = equivalencia_tipo(c, contab, c.ref_tipo_cp)
+        referencia = {"tipo": str(m_ref["sigla"]) if m_ref else "", "tipo_cp": c.ref_tipo_cp,
                       "serie_numero": f"{c.ref_serie}-{ref_num}" if c.ref_serie and ref_num else (c.ref_serie or ref_num),
                       "fecha": _iso(c.ref_fecha)}
 
@@ -148,22 +148,22 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
         retenido = total
     # La CUENTA decide dónde va el centro (el contador, 09-sep-2026): en su línea si la cuenta lo lleva
     # habilitado, y si no, como referencia (anexo auxiliar) cuando el estudio la usa así. Nunca en los
-    # dos. El doble anexo del tercero (`cc_en_anexo_auxiliar`) es otra cosa y no depende de esto.
+    # dos. El doble anexo del tercero (`centro_en_anexo_del_tercero`) es otra cosa y no depende de esto.
     def principal(cuenta: str, centro: str, importe: Decimal) -> LineaDiario:   # gasto (compras) / ingreso (ventas)
         centro = (centro or "").strip() if usa_centros else ""
         en_linea = lleva_centro(cuenta, contab)
         return linea("principal", importe, cuenta, d_gasto, centro_costo=centro if en_linea else "",
-                     anexo_auxiliar=centro if (not en_linea and contab.get("cc_referencia_en_x")) else "")
+                     anexo_auxiliar=centro if (not en_linea and contab.get("centro_como_referencia")) else "")
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
     linea_igv = (linea("igv", igv, str(contab["cuentas"]["igv"]), d_gasto, f"IGV - {glosa}")
                  if igv > 0 else None)
-    cuenta_ret = str((contab.get("cuentas") or {}).get("retencion_4ta") or DEFAULTS["cuentas"]["retencion_4ta"])
+    cuenta_ret = str((contab.get("cuentas") or {}).get("retencion_4ta") or CONFIG_DE_FABRICA["cuentas"]["retencion_4ta"])
     linea_ret = (linea("retencion_4ta", retenido, cuenta_ret, d_prov, f"RET 4TA - {glosa}")
                  if retenido > 0 else None)
     cuenta_ter = cuenta_tercero(c, contab, venta)
-    x_ter = cc if (contab.get("cc_en_anexo_auxiliar") and not es_honorarios) else ""
+    x_ter = cc if (contab.get("centro_en_anexo_del_tercero") and not es_honorarios) else ""
     tercero = linea("tercero", total - retenido, cuenta_ter, d_prov,      # proveedor (compras) / cliente (ventas)
                     contraparte_doc=ruc, anexo_auxiliar=x_ter)
 
@@ -182,7 +182,7 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
             # CONCAR aceptó). En una NOTA que ya referencia la factura que corrige se RESPETA esa
             # referencia: ningún archivo validado dice otra cosa. Pendiente de una NC real.
             ref_det = referencia if referencia.get("tipo") else {
-                "tipo": tipo_concar(c, contab), "tipo_cp": c.tipo_cp,
+                "tipo": sigla_documento(c, contab), "tipo_cp": c.tipo_cp,
                 "serie_numero": serie_numero, "fecha": _iso(f_emision)}
             det = linea("detraccion", monto_det, resolve_cxp_detraccion_account(contab["cuentas"], moneda), d_prov,
                         f"DETRACCION - {glosa}", contraparte_doc=ruc,
@@ -201,7 +201,7 @@ def asiento_neutral(c: Comprobante, contab: dict, mes: tuple[date, date], numero
 
 
 def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], contab: dict,
-                     correlativos: dict[str, int], op: Opciones = OPCIONES) -> tuple[list[LineaDiario], dict[str, dict]]:
+                     correlativos: dict[str, int], op: Opciones = Opciones()) -> tuple[list[LineaDiario], dict[str, dict]]:
     """Todos los comprobantes de un libro → sus líneas, numeradas por sub-diario (`MMNNNN`).
 
     Devuelve también el rango de correlativos que usó cada sub-diario, que es lo que se recuerda

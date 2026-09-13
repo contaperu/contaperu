@@ -275,7 +275,7 @@ def test_al_registro_le_llega_la_imputacion_y_no_le_pide_la_equivalencia_del_tip
     assert [f[1:4] for f in filas[:2]] == [["636301", "SISTEMAS", f"{mitad:.2f}"],
                                            ["632201", "DESARROLLO", f"{base - mitad:.2f}"]]
 
-    sin_equivalencia = dict(CONTAB, tipos={c["tipo_cp"]: {"concar": ""} for c in doc["comprobantes"]})
+    sin_equivalencia = dict(CONTAB, tipos={c["tipo_cp"]: {"sigla": ""} for c in doc["comprobantes"]})
     with pytest.raises(asi.TipoSinMapa):
         op.exportar(doc, "csv", sin_equivalencia)
     assert op.exportar(doc, "registro", sin_equivalencia)["resumen"]["filas"] == len(doc["comprobantes"])
