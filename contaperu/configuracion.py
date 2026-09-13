@@ -292,12 +292,13 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
     # Tasa por código SUNAT, por si el comprobante no la trae. De los apéndices vigentes del SPOT
     # (orientacion.sunat.gob.pe), cruzados POR NOMBRE con el Catálogo 54: en esa página la columna "código" es el
     # numeral dentro del anexo, no el código del comprobante (ahí "14" es Leche, que en el catálogo es 023, mientras
-    # 014 son Carnes). Cruzarlo por número sale mal.
+    # 014 son Carnes). Cruzarlo por número sale mal. Sus claves son además la TABLA de códigos que la empresa reconoce
+    # (`detracciones.codigos_de`): un código con `null` se reconoce sin tasa, y la toma del comprobante.
     Campo("detraccion_tasas", "mapa", {"008": 4, "009": 10, "010": 15, "012": 12, "019": 10, "020": 12, "021": 10,
                                        "022": 12, "024": 10, "025": 10, "026": 10, "027": 4, "030": 4, "037": 12},
           titulo="Tasa de cada detracción", grupo="detracciones", claves=r"^[0-9]{3}$",
-          ayuda="El porcentaje por código SUNAT, para el comprobante que no lo trae.",
-          valores=Campo("", "numero", grupo="detracciones")),
+          ayuda="Los códigos de detracción que reconoces, con su porcentaje para el comprobante que no lo trae.",
+          valores=Campo("", "numero", grupo="detracciones", admite_nulo=True)),
     # Nombre oficial (Catálogo 54 de SUNAT, Anexo N.° 8): la pantalla dice "030 · Contratos de construcción" en vez de
     # un código a secas. El motor no lo lee.
     Campo("detraccion_nombres", "mapa", {

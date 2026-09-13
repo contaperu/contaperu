@@ -64,9 +64,14 @@ def test_sin_detracciones_no_hace_nada():
 
 
 def test_la_tabla_sale_de_la_configuracion_del_contribuyente():
-    """Quien no reconozca un código no lo tiene: la tabla es suya, no del motor."""
-    propia = asi.config_aplicada({"detraccion_codigos": {"037": "03701"}})
-    assert detracciones.normalizar_una({"codigo": "037"}, detracciones.codigos_de(propia))
+    """Quien no reconozca un código no lo tiene: la tabla es suya, no del motor. Y es la de sus tasas, que es de la
+    contabilidad general: el código interno de CONCAR (`detraccion_codigos`) no decide qué se reconoce."""
+    propia = {"detraccion_tasas": {"037": 12, "031": None}}
+    assert detracciones.codigos_de(propia) == {"037", "031"}
+    assert detracciones.normalizar_una({"codigo": "31"}, detracciones.codigos_de(propia)) == {"codigo": "031"}
+    assert detracciones.tasa_de_tabla("031", propia) == 0          # reconocido sin tasa: la trae el comprobante
+    solo_de_concar = {"detraccion_codigos": {"027": "02701"}}
+    assert detracciones.normalizar_una({"codigo": "027"}, detracciones.codigos_de(solo_de_concar)) is None
     vacia = detracciones.codigos_de({})
     assert detracciones.normalizar_una({"codigo": "027"}, vacia) is None
 

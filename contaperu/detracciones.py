@@ -8,8 +8,9 @@ inventado, casi siempre «000». Ese código llegaba al asiento como si fuera re
 La regla, de un contador: **si el código no está en la tabla de detracciones del contribuyente,
 la detracción queda en blanco**. Nada se adivina; si toca, la elige una persona.
 
-La tabla efectiva sale de la configuración (`detraccion_codigos`), que es la misma que usa el
-asiento — así no hay dos verdades sobre qué códigos existen.
+La tabla efectiva sale de lo general de la configuración: las claves de `detraccion_tasas`, con su tasa o
+con `null` si se reconoce sin tasa (13-sep-2026). Hasta entonces la daba `detraccion_codigos`, que es el código
+interno de CONCAR para cada una: un entorno sin ese sistema —CONTASIS, solo el SIRE— se habría quedado sin tabla.
 
 **Y el monto lo calcula el motor, una sola vez** (10-sep-2026). Hasta ese día había dos cifras: la
 del asiento (total × tasa en soles enteros) y la que enseñaba el portal —calculada en el navegador con
@@ -25,8 +26,8 @@ from .modelo import CENTIMO, Comprobante, a_decimal, texto_tasa
 
 
 def codigos_de(config: dict) -> set[str]:
-    """Los códigos de detracción que el contribuyente reconoce."""
-    return {str(k) for k in (config.get("detraccion_codigos") or {})}
+    """Los códigos de detracción que el contribuyente reconoce: los de su tabla de tasas, tengan tasa o no."""
+    return {str(k) for k in (config.get("detraccion_tasas") or {})}
 
 
 def normalizar_una(det, codigos: set[str]) -> dict | None:
