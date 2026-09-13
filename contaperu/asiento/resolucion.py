@@ -15,7 +15,7 @@ from typing import Any
 from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..igv import base_imputable
 from ..modelo import Comprobante, Libro, a_decimal
-from .configuracion import CONFIG_DE_FABRICA
+from .configuracion import CONFIG_POR_DEFECTO
 from .faltas import FALTAS, SubDiarioSinCorrelativo, TipoSinEquivalencia
 from .imputacion import Imputacion
 
@@ -36,16 +36,13 @@ def fundir_config(defaults: dict, overrides: dict) -> dict:
     return out
 
 
-def config_de(del_ruc: dict | None, del_estudio: dict | None = None) -> dict:
-    """Configuración contable efectiva, del general al particular:
+def config_aplicada(config_contable: dict | None = None) -> dict:
+    """La configuración que se aplica a un entorno: `CONFIG_POR_DEFECTO` con su `config_contable` fundida encima.
 
-        CONFIG_DE_FABRICA (código)  →  la CUENTA (el estudio)  →  el RUC (excepciones)
-
-    Cada capa trae lo suyo bajo la clave `contabilidad`. La del RUC sobreescribe solo las claves que difieran y
-    hereda el resto — `fundir_config` funde en profundidad, así que la cuenta puede poner `cxp.PEN` y el RUC solo
-    `cxp.USD` sin borrarse entre ellos."""
-    base = fundir_config(CONFIG_DE_FABRICA, ((del_estudio or {}).get("contabilidad") or {}))
-    return fundir_config(base, ((del_ruc or {}).get("contabilidad") or {}))
+    Plana, como la guarda la aplicación: la configuración es del entorno, sin capas ni clave intermedia (John,
+    12-sep-2026; hasta entonces había una capa del estudio y cada capa iba bajo `contabilidad`). `fundir_config` funde
+    en profundidad: el entorno puede cambiar solo `cuentas.cxp.USD` y hereda el resto."""
+    return fundir_config(CONFIG_POR_DEFECTO, config_contable or {})
 
 
 def etiquetas_sub_diario(config: dict) -> dict[str, str]:
@@ -75,16 +72,16 @@ def _cuenta_por_moneda(valor: Any, moneda: str, fallback: str) -> str:
 
 
 def cuenta_por_pagar(cuentas: dict, moneda: str) -> str:
-    return _cuenta_por_moneda(cuentas.get("cxp"), moneda, CONFIG_DE_FABRICA["cuentas"]["cxp"]["PEN"])
+    return _cuenta_por_moneda(cuentas.get("cxp"), moneda, CONFIG_POR_DEFECTO["cuentas"]["cxp"]["PEN"])
 
 
 def cuenta_por_pagar_detraccion(cuentas: dict, moneda: str) -> str:
     """La cuenta por pagar de la factura afecta a detracción (421203 en las dos monedas por defecto)."""
-    return _cuenta_por_moneda(cuentas.get("cxp_detraccion"), moneda, CONFIG_DE_FABRICA["cuentas"]["cxp_detraccion"]["PEN"])
+    return _cuenta_por_moneda(cuentas.get("cxp_detraccion"), moneda, CONFIG_POR_DEFECTO["cuentas"]["cxp_detraccion"]["PEN"])
 
 
 def cuenta_honorarios(cuentas: dict, moneda: str) -> str:
-    return _cuenta_por_moneda(cuentas.get("honorarios"), moneda, CONFIG_DE_FABRICA["cuentas"]["honorarios"]["PEN"])
+    return _cuenta_por_moneda(cuentas.get("honorarios"), moneda, CONFIG_POR_DEFECTO["cuentas"]["honorarios"]["PEN"])
 
 
 # ── La imputación de cada documento: llega aparte, por `id_externo` (12-sep-2026) ──
@@ -123,7 +120,7 @@ def cuenta_tercero(c: Comprobante, config: dict, es_venta: bool = False) -> str:
     moneda = (c.moneda or "PEN").upper()
     cuentas = config.get("cuentas") or {}
     if es_venta:
-        return _cuenta_por_moneda(cuentas.get("clientes"), moneda, CONFIG_DE_FABRICA["cuentas"]["clientes"]["PEN"])
+        return _cuenta_por_moneda(cuentas.get("clientes"), moneda, CONFIG_POR_DEFECTO["cuentas"]["clientes"]["PEN"])
     if c.tipo_cp == TIPO_HONORARIOS:
         return cuenta_honorarios(cuentas, moneda)
     return cuenta_por_pagar(cuentas, moneda)
@@ -140,7 +137,7 @@ def equivalencia_tipo(c: Comprobante, config: dict, tipo: str | None = None) -> 
 
 def sigla_documento(c: Comprobante, config: dict | None = None) -> str:
     """La sigla con la que el sistema de destino llama al tipo del comprobante (en CONCAR, su Tabla General 06)."""
-    equivalencia = equivalencia_tipo(c, config or CONFIG_DE_FABRICA)
+    equivalencia = equivalencia_tipo(c, config or CONFIG_POR_DEFECTO)
     return str(equivalencia["sigla"]) if equivalencia else ""
 
 
@@ -157,12 +154,12 @@ def sub_diario(c: Comprobante, config: dict, es_venta: bool = False) -> str:
     if not equivalencia:
         return ""
     if es_venta:
-        return str(config.get("sub_diario_ventas") or CONFIG_DE_FABRICA["sub_diario_ventas"])
+        return str(config.get("sub_diario_ventas") or CONFIG_POR_DEFECTO["sub_diario_ventas"])
     de_detraccion = str(config.get("sub_diario_detraccion") or "").strip()
     if de_detraccion and c.tipo_cp != TIPO_HONORARIOS and tiene_detraccion(c):
         return de_detraccion
     return str(equivalencia.get("sub_diario") or config.get("sub_diario_compras")
-               or CONFIG_DE_FABRICA["sub_diario_compras"])
+               or CONFIG_POR_DEFECTO["sub_diario_compras"])
 
 
 def tipos_sin_equivalencia(comprobantes: list[Comprobante], config: dict) -> list[str]:
@@ -190,7 +187,7 @@ def _cuenta_de_respaldo(config: dict, es_venta: bool = False) -> str:
     Solo lee la configuración; la resolución entera, con la imputación delante, es `partes_de`."""
     cuentas = config.get("cuentas") or {}
     if es_venta:
-        return str(cuentas.get("ventas") or CONFIG_DE_FABRICA["cuentas"]["ventas"]).strip()
+        return str(cuentas.get("ventas") or CONFIG_POR_DEFECTO["cuentas"]["ventas"]).strip()
     return str(cuentas.get("gasto") or "").strip()
 
 
@@ -204,7 +201,7 @@ def lleva_centro(cuenta: str, config: dict) -> bool:
     """
     if not config.get("usa_centros_costo", True):
         return False
-    prefijos = config["cuentas_con_centro"] if "cuentas_con_centro" in config else CONFIG_DE_FABRICA["cuentas_con_centro"]
+    prefijos = config["cuentas_con_centro"] if "cuentas_con_centro" in config else CONFIG_POR_DEFECTO["cuentas_con_centro"]
     cuenta = (cuenta or "").strip()
     return bool(cuenta) and any(cuenta.startswith(p) for p in (str(x).strip() for x in (prefijos or [])) if p)
 

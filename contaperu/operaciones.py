@@ -108,21 +108,14 @@ def documento(libro: Libro, comprobantes: list[Comprobante] | None = None,
     return doc
 
 
-def configuracion(config: dict | None = None) -> dict:
-    """La configuración contable efectiva: los valores por defecto con lo del contribuyente
-    encima, fundidos en profundidad. Sin argumentos devuelve los de serie.
+def config_aplicada(config_contable: dict | None = None) -> dict:
+    """La configuración contable que se aplica: los valores por defecto con la del entorno encima, fundidos en
+    profundidad (`asiento.config_aplicada`). Sin argumentos devuelve los valores por defecto.
 
-    Acepta las dos formas, y esto importa: lo que devuelve esta función **se puede volver a
-    pasar tal cual**, que es lo que hace cualquiera —persona o agente— al pedir la
-    configuración de partida, cambiarle una cuenta y devolverla. La forma anidada
-    (`{"contabilidad": {...}}`) existe porque así la guardan las aplicaciones que separan la
-    configuración del estudio de la de cada RUC; para eso está `asiento.config_de`, con sus
-    tres capas.
-    """
-    if not config:
-        return asi.config_de(None)
-    encima = config.get("contabilidad") if "contabilidad" in config else config
-    return asi.fundir_config(asi.config_de(None), encima or {})
+    Lo que devuelve **se puede volver a pasar tal cual**: es lo que hace cualquiera —persona o agente— al pedir la
+    configuración de partida, cambiarle una cuenta y devolverla. Va plana; la forma anidada que se aceptaba hasta el
+    12-sep-2026 (`{"contabilidad": {...}}`) ya no existe."""
+    return asi.config_aplicada(config_contable)
 
 
 def con_imputacion(config: dict, imputacion: dict | None, comprobantes: list[Comprobante]) -> dict:
@@ -200,7 +193,7 @@ def revisar(doc: dict, config: dict | None = None) -> dict:
     `observaciones` puestos, más un resumen de lo que hay que mirar."""
     libro = libro_de(doc)
     comprobantes = comprobantes_de(doc)
-    config = configuracion(config)
+    config = config_aplicada(config)
     limpiadas = detracciones.normalizar(comprobantes, config)
     validar.revisar(comprobantes, libro)
     errores = [c for c in comprobantes if c.tiene_errores]
@@ -233,7 +226,7 @@ def _preparar(doc: dict, config: dict | None, incluir_observados: bool, imputaci
     comprobantes = [c for c in todos if not c.excluida]
     if not comprobantes:
         raise DocumentoInvalido("No hay comprobantes que procesar.")
-    config = con_imputacion(configuracion(config), imputacion, todos)
+    config = con_imputacion(config_aplicada(config), imputacion, todos)
     validar.revisar(comprobantes, libro)
     if not incluir_observados:
         con_error = [c for c in comprobantes if c.tiene_errores]
@@ -382,7 +375,7 @@ def diagnosticar(doc: dict, config: dict | None = None, correlativos: dict | Non
     """
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
-    config = con_imputacion(configuracion(config), imputacion, todos)
+    config = con_imputacion(config_aplicada(config), imputacion, todos)
     detracciones.normalizar(todos, config)
     validar.revisar(todos, libro)
     modulo = drivers.obtener(driver)

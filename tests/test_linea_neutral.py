@@ -19,9 +19,9 @@ from contaperu.drivers import csv as driver_csv
 from contaperu.modelo import Comprobante, Libro
 from util import comprobante, con_imputaciones
 
-def configuracion(*capas) -> dict:
-    """La configuración (de fábrica, o con sus capas) con las imputaciones de los comprobantes de prueba."""
-    return con_imputaciones(asi.config_de(*capas))
+def configuracion(config_contable: dict | None = None) -> dict:
+    """La configuración aplicada (la del entorno sobre la de por defecto) con las imputaciones de las pruebas."""
+    return con_imputaciones(asi.config_aplicada(config_contable))
 
 
 CONTAB = configuracion(None)
@@ -43,7 +43,7 @@ def test_el_centro_de_referencia_viaja_como_anexo_auxiliar():
     """Con `centro_como_referencia`, el centro de una cuenta que no lo lleva en M sale del asiento
     por el campo `anexo_auxiliar` del estándar, no por `centro_costo`. Es correcto —la X es la
     X— pero conviene fijarlo aquí y no descubrirlo desde el MCP o desde el driver CSV."""
-    ref = configuracion({"contabilidad": {"centro_como_referencia": True}})
+    ref = configuracion({"centro_como_referencia": True})
     filas = driver_concar.filas_de_comprobante(factura(cuenta_contable="603201"), ref, MES, "080001")
     gasto = driver_concar.desde_fila(filas[0])
     assert gasto.centro_costo == "" and gasto.anexo_auxiliar == "CC-64"

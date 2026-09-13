@@ -1,11 +1,11 @@
-"""La configuración contable de fábrica: lo que vale para cualquier entorno hasta que su configuración diga otra cosa.
+"""La configuración contable por defecto: lo que vale para cualquier entorno hasta que su configuración diga otra cosa.
 
 Lleva contabilidad general —cuentas por defecto, centros de costo, detracciones— y las claves que un sistema contable
 de destino necesita que se configuren por entorno: la sigla de cada tipo de comprobante (`tipos.NN.sigla`), los
 sub-diarios y el código de moneda de CONCAR. Los datos de FORMATO de cada destino —columnas, cabeceras, anchos— no
 están aquí: viven en su driver (`drivers/concar/datos.py`, `drivers/contasis/datos.py`).
 
-Aquí no hay lógica: si cambia un valor de fábrica, se toca este archivo y nada más. Hasta el 12-sep-2026 era
+Aquí no hay lógica: si cambia un valor por defecto, se toca este archivo y nada más. Hasta el 12-sep-2026 era
 `asiento/datos.py` y llevaba también los datos del Excel de CONCAR.
 """
 from __future__ import annotations
@@ -22,8 +22,8 @@ NUMERO_DETRACCION_PENDIENTE = "9999999999"
 
 # ── Valores por defecto (manual de asientos de referencia; sobreescribibles por RUC) ──
 # `cuentas.gasto` va VACÍO a propósito: en la práctica es el comodín "63/65", que no es
-# una cuenta. Aquí la pone la imputación o el RUC (`config.contabilidad.cuentas.gasto`).
-CONFIG_DE_FABRICA: dict[str, Any] = {
+# una cuenta. Aquí la pone la imputación o la configuración del entorno (`config_contable.cuentas.gasto`).
+CONFIG_POR_DEFECTO: dict[str, Any] = {
     "cuentas": {
         "gasto": "",
         "cxp": {"PEN": "421201", "USD": "421202"},          # facturas por pagar: soles / dólares

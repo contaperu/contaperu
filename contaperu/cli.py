@@ -72,7 +72,7 @@ def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, s
     nombres = ([nombre for nombre, registrado in drivers.DRIVERS.items()
                 if drivers.contrato.forma(registrado) == "linea"]
                if driver == "todas" else [driver])
-    config = operaciones.configuracion() if config is None else config
+    config = operaciones.config_aplicada() if config is None else config
     codigo = 0
     for nombre_driver in nombres:
         modulo = drivers.obtener(nombre_driver)
@@ -149,7 +149,7 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     config = _leer_json(args.config) if args.config else None
     imputacion = _leer_json(args.imputacion) if args.imputacion else None
     try:
-        config = operaciones.con_imputacion(operaciones.configuracion(config), imputacion, comprobantes)
+        config = operaciones.con_imputacion(operaciones.config_aplicada(config), imputacion, comprobantes)
     except operaciones.DocumentoInvalido as error:
         print(f"La imputación no se puede usar con este documento: {error}", file=sys.stderr)
         return 2

@@ -43,11 +43,11 @@ una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una cel
 (`tests/test_snapshot_concar.py`). Desde la 0.10 las columnas de
 CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()` y `lineas_del_libro()`.
 """
-from .configuracion import CONFIG_DE_FABRICA, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
+from .configuracion import CONFIG_POR_DEFECTO, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
 from .faltas import (CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA, Falta, MonedaSinCodigo, NoExportable,
                      RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCuenta, SubDiarioSinCorrelativo,
                      TipoSinEquivalencia)
-from .resolucion import (comprobantes_sin_centro, comprobantes_sin_cuenta, con_reparto, config_de,
+from .resolucion import (comprobantes_sin_centro, comprobantes_sin_cuenta, con_reparto, config_aplicada,
                          correlativos_de_partida, cuenta_honorarios,
                          cuenta_por_pagar, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
                          etiquetas_sub_diario, exigir_requisitos, faltantes_para, fundir_config, imputacion_de,
@@ -60,10 +60,10 @@ from .lineas import LineaDiario
 from .motor import ROLES, glosa_de, lineas_del_comprobante, lineas_del_libro
 
 __all__ = [
-    "CONFIG_DE_FABRICA", "NUMERO_DETRACCION_PENDIENTE", "TIPO_DOC_DETRACCION", "CONTADOR", "FALTA", "FALTAS",
+    "CONFIG_POR_DEFECTO", "NUMERO_DETRACCION_PENDIENTE", "TIPO_DOC_DETRACCION", "CONTADOR", "FALTA", "FALTAS",
     "PROVEEDOR", "SISTEMA", "Falta", "MonedaSinCodigo", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
     "SinCentro", "SinCuenta", "SubDiarioSinCorrelativo", "TipoSinEquivalencia", "comprobantes_sin_centro",
-    "comprobantes_sin_cuenta", "con_reparto", "config_de", "correlativos_de_partida", "cuenta_honorarios",
+    "comprobantes_sin_cuenta", "con_reparto", "config_aplicada", "correlativos_de_partida", "cuenta_honorarios",
     "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo",
     "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para", "fundir_config", "imputacion_de",
     "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar", "partes_de", "reparto_no_cuadra",

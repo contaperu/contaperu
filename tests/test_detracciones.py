@@ -16,7 +16,7 @@ from contaperu.drivers import concar as driver_concar
 from contaperu import detracciones, validar
 from contaperu.modelo import Comprobante, Libro
 
-CONTAB = asi.config_de(None)
+CONTAB = asi.config_aplicada()
 CODIGOS = detracciones.codigos_de(CONTAB)
 # Una tabla explícita para todo lo que depende de las tasas: no se apoya en lo que traigan los defaults.
 TABLA = dict(CONTAB, detraccion_codigos={"027": "02701", "037": "03701"}, detraccion_tasas={"027": 4, "037": 12})
@@ -65,7 +65,7 @@ def test_sin_detracciones_no_hace_nada():
 
 def test_la_tabla_sale_de_la_configuracion_del_contribuyente():
     """Quien no reconozca un código no lo tiene: la tabla es suya, no del motor."""
-    propia = asi.config_de({"detraccion_codigos": {"037": "03701"}})
+    propia = asi.config_aplicada({"detraccion_codigos": {"037": "03701"}})
     assert detracciones.normalizar_una({"codigo": "037"}, detracciones.codigos_de(propia))
     vacia = detracciones.codigos_de({})
     assert detracciones.normalizar_una({"codigo": "027"}, vacia) is None

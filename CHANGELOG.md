@@ -113,11 +113,11 @@ Los nombres del núcleo:
 
 | Antes | Después |
 |---|---|
-| `asiento/datos.py`, `DEFAULTS` | `asiento/configuracion.py`, `CONFIG_DE_FABRICA`; los datos del Excel, en `drivers/concar/datos.py` |
+| `asiento/datos.py`, `DEFAULTS` | `asiento/configuracion.py`, `CONFIG_POR_DEFECTO`; los datos del Excel, en `drivers/concar/datos.py` |
 | `EXCEL_HEADERS` (`row1`, `row2`, `row3`), `FLAG_CONVERSION` | `drivers.concar.datos.CABECERAS` (`titulos`, `notas`, `formatos`), `MARCA_CONVERSION` |
 | `asiento.asiento`, `asiento.tasa_igv`, `asiento.nombre`, `asiento.CorrelativoDesborda` | `drivers.concar.filas_de_comprobante`, `tasa_igv_entera`, `nombre`, `CorrelativoDesborda` |
 | `asiento.desde_fila`, `asiento.a_lineas`, `ETIQUETAS_SUB_DIARIO` | `drivers.concar.desde_fila` y `a_lineas`; la tabla sin uso, fuera (queda `etiquetas_sub_diario`) |
-| configuración `concar`, `tipos.NN.concar`, `cc_referencia_en_x`, `cc_en_anexo_auxiliar` | `contabilidad`, `tipos.NN.sigla`, `centro_como_referencia`, `centro_en_anexo_del_tercero` |
+| la configuración bajo la clave `concar`; `tipos.NN.concar`, `cc_referencia_en_x`, `cc_en_anexo_auxiliar` | plana, sin clave intermedia; `tipos.NN.sigla`, `centro_como_referencia`, `centro_en_anexo_del_tercero` |
 | `tipo_concar`, `_mapa` | `sigla_documento`, `equivalencia_tipo` |
 | `asiento/construir.py` | `asiento/resolucion.py` |
 | `merge_config`, `resolve_cxp_account`, `resolve_cxp_detraccion_account` | `fundir_config`, `cuenta_por_pagar`, `cuenta_por_pagar_detraccion` |
@@ -131,7 +131,7 @@ Los nombres del núcleo:
 | `generar(…, **params)` con `contab`; `generar.lineas` | `generar(…, config=…, correlativos=…)`; `lineas_de_texto` |
 | `Exportado.txt`, `.zip`, `.nombre_zip`, `.n_filas` | `.texto`, `.comprimido`, `.nombre_comprimido`, `.comprobantes` |
 | `igv.tasa`, `detracciones.monto`, `detracciones.tasa`, `drivers.formato` | `tasa_calculada`, `monto_detraccion`, `tasa_detraccion`, `formato_de` |
-| `config_de(config_cliente, config_cuenta)` | `config_de(del_ruc, del_estudio)` |
+| `asiento.config_de(config_cliente, config_cuenta)` con sus tres capas; `operaciones.configuracion`, que aceptaba la forma anidada | `asiento.config_aplicada(config_contable)` y `operaciones.config_aplicada`: `CONFIG_POR_DEFECTO` con la configuración del entorno encima, plana (como la guarda contab-core desde su 049) |
 | los parámetros `contab` y `conf`, `op`, `mod`, `venta` | `config`, `opciones`, `modulo`, `es_venta` |
 | `xml_ubl.parsear(data, tipo_libro)` | `parsear(datos, libro)`, como el lector del SIRE |
 | `lectores.archivos.Resultado`, `partida_doble.Resultado`, `pcge.cargar`, `pcge.catalogo.cargar` | `ResultadoLectura`, `Cuadre`, `cargar_equivalencias`, `cargar_catalogo` |

@@ -83,7 +83,7 @@ def test_el_asiento_revierte_tambien_el_igv():
     """Leída de la propuesta la nota tenía IGV 0, y el asiento mandaba todo el total a la 70."""
     c = de_la_propuesta()
     imputar(c, cuenta_contable="701111", centro_costo="OBRA01")
-    config = con_imputaciones(concar.config_de(None))
+    config = con_imputaciones(concar.config_aplicada())
     filas = driver_concar.filas_de_comprobante(c, config, MES, "050001", es_venta=True)
     assert sorted(D(str(f["O"])) for f in filas) == [D("1797.36"), D("9985.36"), D("11782.72")]
 

@@ -88,8 +88,8 @@ def test_leer_la_propuesta_del_sire():
 
 
 def test_la_configuracion_de_partida_se_puede_sobreescribir():
-    de_serie = op.configuracion()
-    mia = op.configuracion({"cuentas": {"igv": "401112"}})
+    de_serie = op.config_aplicada()
+    mia = op.config_aplicada({"cuentas": {"igv": "401112"}})
     assert de_serie["cuentas"]["igv"] == "401111"
     assert mia["cuentas"]["igv"] == "401112"
     # Lo que no se toca se conserva: la fusion es en profundidad, no un reemplazo.
@@ -101,20 +101,22 @@ def test_la_configuracion_que_sale_se_puede_volver_a_meter():
 
     Si esto no funcionara, los cambios se ignorarian EN SILENCIO y el asiento saldria con
     las cuentas de serie sin que nadie se enterara."""
-    mia = op.configuracion()
+    mia = op.config_aplicada()
     mia["cuentas"]["gasto"] = "631201"
     mia["sub_diario_compras"] = "07"
 
-    efectiva = op.configuracion(mia)
+    efectiva = op.config_aplicada(mia)
 
     assert efectiva["cuentas"]["gasto"] == "631201"
     assert efectiva["sub_diario_compras"] == "07"
     assert efectiva["cuentas"]["igv"] == "401111"          # lo demas intacto
 
 
-def test_tambien_se_acepta_la_forma_anidada_de_las_aplicaciones():
-    anidada = op.configuracion({"contabilidad": {"cuentas": {"igv": "401199"}}})
-    assert anidada["cuentas"]["igv"] == "401199"
+def test_la_configuracion_va_plana():
+    """Desde el 12-sep-2026 no hay clave intermedia: la configuración del entorno llega tal cual la guarda la
+    aplicación, y un `{"contabilidad": ...}` ya no se desenvuelve."""
+    assert op.config_aplicada({"cuentas": {"igv": "401199"}})["cuentas"]["igv"] == "401199"
+    assert op.config_aplicada({"contabilidad": {"cuentas": {"igv": "401199"}}})["cuentas"]["igv"] == "401111"
 
 
 def test_un_xml_suelto_en_base64_se_lee(tmp_path):

@@ -156,7 +156,7 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
 
 
 def contab_de(extra: dict | None) -> dict:
-    return asi.config_de({"contabilidad": extra} if extra else None)
+    return asi.config_aplicada(extra)
 
 
 def _celda(v):

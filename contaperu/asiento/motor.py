@@ -26,7 +26,7 @@ from ..detracciones import monto_detraccion, tasa_detraccion
 from ..formato import Opciones, formatear_numero
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, serie_y_numero, texto_tasa
-from .configuracion import CONFIG_DE_FABRICA, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
+from .configuracion import CONFIG_POR_DEFECTO, NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinCuenta
 from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
                          lleva_centro, numerar, partes_de, reparto_no_cuadra, sigla_documento, sub_diario,
@@ -154,7 +154,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                    for cuenta, centro, importe in partes]
     linea_igv = (linea("igv", igv, str(config["cuentas"]["igv"]), sentido_base, f"IGV - {glosa}")
                  if igv > 0 else None)
-    cuenta_retencion = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_DE_FABRICA["cuentas"]["retencion_4ta"])
+    cuenta_retencion = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"])
     linea_retencion = (linea("retencion_4ta", retenido, cuenta_retencion, sentido_tercero, f"RET 4TA - {glosa}")
                        if retenido > 0 else None)
     cuenta_del_tercero = cuenta_tercero(c, config, es_venta)

@@ -12,7 +12,7 @@ from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Comprobante, Libro
 from util import comprobante, con_imputaciones
 
-CONTAB = con_imputaciones(asi.config_de(None))
+CONTAB = con_imputaciones(asi.config_aplicada())
 MES = (date(2026, 8, 1), date(2026, 8, 31))
 
 

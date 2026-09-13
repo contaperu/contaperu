@@ -165,7 +165,7 @@ def configuracion_por_defecto() -> dict:
     y los sub-diarios los decide cada empresa. Cópiala, cámbiale lo que toque y pásala como
     `configuracion` en las demás herramientas.
     """
-    return operaciones.configuracion()
+    return operaciones.config_aplicada()
 
 
 @mcp.tool()
@@ -363,7 +363,7 @@ def normalizar_detracciones(documento: dict, configuracion: dict | None = None) 
     factura pasa de S/ 700, y que no toca el registro de compras) por una detracción.
     """
     comprobantes = operaciones.comprobantes_de(documento)
-    config = operaciones.configuracion(configuracion)
+    config = operaciones.config_aplicada(configuracion)
     limpiadas = detracciones.normalizar(comprobantes, config)
     salida = operaciones.documento(operaciones.libro_de(documento), comprobantes)
     salida["_detracciones"] = {

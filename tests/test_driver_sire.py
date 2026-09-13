@@ -153,6 +153,6 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
     # El Excel de CONCAR sí se lo lleva (mismo mes, misma revisión)
     for x in cs:
         imputar(x, cuenta_contable="631101", centro_costo="OBRA01")   # la 631101 lleva centro y CONCAR lo exige (0.8)
-    exc = g.generar(libro, cs, "concar", config=con_imputaciones(concar.config_de(None)),
+    exc = g.generar(libro, cs, "concar", config=con_imputaciones(concar.config_aplicada()),
                     correlativos={"11": 1, "15": 1})
     assert exc.comprobantes == 3 and exc.resumen["fuera_del_destino"] == 0
