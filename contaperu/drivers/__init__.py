@@ -52,20 +52,20 @@ def de_terceros() -> dict[str, ModuleType]:
     encontrados: dict[str, ModuleType] = {}
     for entrada in entry_points(group=GRUPO):
         try:
-            mod = entrada.load()
+            modulo = entrada.load()
         except Exception as e:     # código ajeno: cualquier fallo al importarlo es suyo, no del registro
             warnings.warn(f"El driver {entrada.name!r} no se pudo importar: {e}", AvisoDriver, stacklevel=2)
             continue
-        problemas = contrato.incumplimientos(mod)
+        problemas = contrato.incumplimientos(modulo)
         if problemas:
             warnings.warn(f"El driver {entrada.name!r} no cumple el contrato: {'; '.join(problemas)}",
                           AvisoDriver, stacklevel=2)
             continue
-        if mod.NOMBRE in DE_SERIE or mod.NOMBRE in encontrados:
-            warnings.warn(f"El driver {entrada.name!r} se llama {mod.NOMBRE!r}, que ya está registrado; "
+        if modulo.NOMBRE in DE_SERIE or modulo.NOMBRE in encontrados:
+            warnings.warn(f"El driver {entrada.name!r} se llama {modulo.NOMBRE!r}, que ya está registrado; "
                           "se ignora", AvisoDriver, stacklevel=2)
             continue
-        encontrados[mod.NOMBRE] = mod
+        encontrados[modulo.NOMBRE] = modulo
     return encontrados
 
 

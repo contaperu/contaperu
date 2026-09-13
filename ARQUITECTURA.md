@@ -55,7 +55,7 @@ XML UBL / TXT del SIRE / JSON open-accounting
 ```
 
 Aparte va la familia **registro**: una fila por comprobante, sin asiento, así que sus drivers no pasan por el
-motor. El SIRE es un registro tributario y se escribe desde el comprobante (`linea(c, libro, idx, op)`). Un
+motor. El SIRE es un registro tributario y se escribe desde el comprobante (`linea(c, libro, idx, opciones)`). Un
 sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS, pendiente
 de aceptación) recibe los comprobantes con la configuración (`desde_comprobantes`) y lleva cuentas, pero no las
 decide: las lee de `asiento.partes_de` y `asiento.cuenta_tercero`, la misma resolución que usa el motor para el
@@ -120,10 +120,10 @@ de dos familias (`drivers/contrato.py`):
 
 | Forma | Recibe | Para qué |
 |---|---|---|
-| `linea(c, libro, idx, op) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
-| `desde_comprobantes(libro, comprobantes, contab, op)` | los comprobantes y la configuración, con la imputación de cada documento | el registro de un sistema contable que arma el asiento él mismo (CONTASIS, pendiente de aceptación) |
-| `construir(libro, comprobantes, contab, correlativos, op)` | los comprobantes | un archivo armado desde el comprobante (CONCAR, por historia) |
-| `desde_lineas(libro, lineas, contab, op)` | las **líneas neutrales**, ya numeradas y cuadradas | **un driver de asientos nuevo** |
+| `linea(c, libro, idx, opciones) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
+| `desde_comprobantes(libro, comprobantes, config, opciones)` | los comprobantes y la configuración, con la imputación de cada documento | el registro de un sistema contable que arma el asiento él mismo (CONTASIS, pendiente de aceptación) |
+| `construir(libro, comprobantes, config, correlativos, opciones)` | los comprobantes | un archivo armado desde el comprobante (CONCAR, por historia) |
+| `desde_lineas(libro, lineas, config, opciones)` | las **líneas neutrales**, ya numeradas y cuadradas | **un driver de asientos nuevo** |
 
 Con `desde_lineas` el núcleo arma el asiento, lo numera y exige que cuadre **antes** de llamar al
 driver; el driver solo traduce. Es la forma que hace que un driver de SISCONT o STARSOFT no pueda

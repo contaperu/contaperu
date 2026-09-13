@@ -58,47 +58,47 @@ def _limpio(d: dict) -> dict:
     return {k: v for k, v in d.items() if v not in ("", None)}
 
 
-def _detraccion(c: Comprobante, contab: dict, total: Decimal) -> dict:
+def _detraccion(c: Comprobante, config: dict, total: Decimal) -> dict:
     """El bloque de la línea de detracción: el código SUNAT, el interno del contribuyente (T.G. 28 de
     CONCAR: el de SUNAT + 2 propios, o SUNAT + "01" si no lo configuró), la tasa —la misma con la que
     se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base."""
     d = c.detraccion or {}
     sunat = str(d.get("codigo") or "").strip()
-    interno = str((contab.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
-    t = tasa_detraccion(c, contab)
+    interno = str((config.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
+    t = tasa_detraccion(c, config)
     return _limpio({"codigo": sunat, "codigo_interno": interno,
                     "tasa": float(t) if t > 0 else "", "base": str(total)})
 
 
-def lineas_del_comprobante(c: Comprobante, contab: dict, limites: tuple[date, date], correlativo: str,
-                    op: Opciones = Opciones(), venta: bool = False) -> list[LineaDiario]:
+def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
+                    opciones: Opciones = Opciones(), es_venta: bool = False) -> list[LineaDiario]:
     """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
     del manual de asientos."""
     moneda = (c.moneda or "PEN").upper()
     # A qué cuentas va la base: lo decide la imputación del documento, que llega aparte (una línea por parte si
     # trae reparto), o lo de siempre (`partes_de`). Una parte sin cuenta detiene el asiento igual que una fila sin
     # ella, y un reparto que no suma la base también: ese asiento no cuadraría.
-    partes = partes_de(c, contab, venta)
+    partes = partes_de(c, config, es_venta)
     if not all(cuenta for cuenta, _, _ in partes):
         raise SinCuenta([c])
-    if reparto_no_cuadra(c, contab, venta):
+    if reparto_no_cuadra(c, config, es_venta):
         raise RepartoNoCuadra([c])
     es_usd = moneda == "USD"
-    es_honorarios = not venta and c.tipo_cp == TIPO_HONORARIOS
+    es_honorarios = not es_venta and c.tipo_cp == TIPO_HONORARIOS
     invierte = c.tipo_cp in TIPOS_INVIERTEN
     total = Decimal(c.total or 0).quantize(D2)
     # Compras: boleta y recibo por honorarios no dan crédito fiscal → todo al gasto, sin línea de IGV. En
     # VENTAS la boleta emitida SÍ lleva su IGV (débito fiscal del emisor). La regla vive en `igv.py`: la
     # comprobación de que un reparto cuadra con la base la necesita igual.
-    igv = igv_del_asiento(c, venta)
-    base = base_imputable(c, venta)
+    igv = igv_del_asiento(c, es_venta)
+    base = base_imputable(c, es_venta)
     ruc = (c.contraparte_doc or "").strip()
-    usa_centros = contab.get("usa_centros_costo", True)                                   # apagado: sin centro
+    usa_centros = config.get("usa_centros_costo", True)                                   # apagado: sin centro
     # El doble anexo del tercero lleva el centro del comprobante; con la base repartida, solo si todas las
     # partes comparten uno: con dos centros distintos no hay uno que poner.
     centros = {(centro or "").strip() for _, centro, _ in partes}
     cc = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
-    serie, num = (c.serie or "").strip(), formatear_numero(c.numero, op)
+    serie, num = (c.serie or "").strip(), formatear_numero(c.numero, opciones)
     serie_numero = f"{serie}-{num}" if serie and num else (serie or num)
     # UNA sola glosa para todas las líneas (confirmado por un contador, 2026); las derivadas anteponen lo
     # que las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—. Cortarla es cosa del driver.
@@ -116,16 +116,16 @@ def lineas_del_comprobante(c: Comprobante, contab: dict, limites: tuple[date, da
     f_asiento = min(max(f_emision, primero), ultimo) if f_emision else primero
     # Sentido de la partida: compras = gasto D / proveedor H; ventas = ingreso H / cliente D.
     # La nota de crédito invierte el caso que toque.
-    normal = ("H", "D") if venta else ("D", "H")
+    normal = ("H", "D") if es_venta else ("D", "H")
     d_gasto, d_prov = (normal[::-1] if invierte else normal)
-    sd = sub_diario(c, contab, venta)
+    sd = sub_diario(c, config, es_venta)
 
-    documento = {"tipo": sigla_documento(c, contab), "tipo_cp": c.tipo_cp, "serie_numero": serie_numero,
+    documento = {"tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp, "serie_numero": serie_numero,
                  "fecha_emision": _iso(f_emision), "fecha_vencimiento": _iso(f_venc)}
     referencia: dict[str, str] = {}
     if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
-        ref_num = formatear_numero(c.ref_numero, op)
-        m_ref = equivalencia_tipo(c, contab, c.ref_tipo_cp)
+        ref_num = formatear_numero(c.ref_numero, opciones)
+        m_ref = equivalencia_tipo(c, config, c.ref_tipo_cp)
         referencia = {"tipo": str(m_ref["sigla"]) if m_ref else "", "tipo_cp": c.ref_tipo_cp,
                       "serie_numero": f"{c.ref_serie}-{ref_num}" if c.ref_serie and ref_num else (c.ref_serie or ref_num),
                       "fecha": _iso(c.ref_fecha)}
@@ -150,19 +150,19 @@ def lineas_del_comprobante(c: Comprobante, contab: dict, limites: tuple[date, da
     # dos. El doble anexo del tercero (`centro_en_anexo_del_tercero`) es otra cosa y no depende de esto.
     def principal(cuenta: str, centro: str, importe: Decimal) -> LineaDiario:   # gasto (compras) / ingreso (ventas)
         centro = (centro or "").strip() if usa_centros else ""
-        en_linea = lleva_centro(cuenta, contab)
+        en_linea = lleva_centro(cuenta, config)
         return linea("principal", importe, cuenta, d_gasto, centro_costo=centro if en_linea else "",
-                     anexo_auxiliar=centro if (not en_linea and contab.get("centro_como_referencia")) else "")
+                     anexo_auxiliar=centro if (not en_linea and config.get("centro_como_referencia")) else "")
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
-    linea_igv = (linea("igv", igv, str(contab["cuentas"]["igv"]), d_gasto, f"IGV - {glosa}")
+    linea_igv = (linea("igv", igv, str(config["cuentas"]["igv"]), d_gasto, f"IGV - {glosa}")
                  if igv > 0 else None)
-    cuenta_ret = str((contab.get("cuentas") or {}).get("retencion_4ta") or CONFIG_DE_FABRICA["cuentas"]["retencion_4ta"])
+    cuenta_ret = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_DE_FABRICA["cuentas"]["retencion_4ta"])
     linea_ret = (linea("retencion_4ta", retenido, cuenta_ret, d_prov, f"RET 4TA - {glosa}")
                  if retenido > 0 else None)
-    cuenta_ter = cuenta_tercero(c, contab, venta)
-    x_ter = cc if (contab.get("centro_en_anexo_del_tercero") and not es_honorarios) else ""
+    cuenta_ter = cuenta_tercero(c, config, es_venta)
+    x_ter = cc if (config.get("centro_en_anexo_del_tercero") and not es_honorarios) else ""
     tercero = linea("tercero", total - retenido, cuenta_ter, d_prov,      # proveedor (compras) / cliente (ventas)
                     contraparte_doc=ruc, anexo_auxiliar=x_ter)
 
@@ -172,8 +172,8 @@ def lineas_del_comprobante(c: Comprobante, contab: dict, limites: tuple[date, da
     # (la constancia no existe todavía al provisionar). Lo dispara que la factura TENGA detracción, no
     # el sub-diario. Solo compras; el recibo por honorarios nunca.
     det_tercero = det = None
-    if not venta and not es_honorarios and tiene_detraccion(c):
-        _, monto_det = monto_detraccion(c, contab)
+    if not es_venta and not es_honorarios and tiene_detraccion(c):
+        _, monto_det = monto_detraccion(c, config)
         if monto_det > 0:
             det_tercero = linea("detraccion_tercero", monto_det, cuenta_ter, d_gasto,
                                 contraparte_doc=ruc, anexo_auxiliar=x_ter)
@@ -181,16 +181,16 @@ def lineas_del_comprobante(c: Comprobante, contab: dict, limites: tuple[date, da
             # CONCAR aceptó). En una NOTA que ya referencia la factura que corrige se RESPETA esa
             # referencia: ningún archivo validado dice otra cosa. Pendiente de una NC real.
             ref_det = referencia if referencia.get("tipo") else {
-                "tipo": sigla_documento(c, contab), "tipo_cp": c.tipo_cp,
+                "tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp,
                 "serie_numero": serie_numero, "fecha": _iso(f_emision)}
-            det = linea("detraccion", monto_det, cuenta_por_pagar_detraccion(contab["cuentas"], moneda), d_prov,
+            det = linea("detraccion", monto_det, cuenta_por_pagar_detraccion(config["cuentas"], moneda), d_prov,
                         f"DETRACCION - {glosa}", contraparte_doc=ruc,
-                        documento=_limpio({"tipo": str(contab.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
+                        documento=_limpio({"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
                                            "serie_numero": NUMERO_DETRACCION_PENDIENTE,
                                            "fecha_emision": _iso(f_emision), "fecha_vencimiento": _iso(f_venc)}),
-                        referencia=_limpio(ref_det), detraccion=_detraccion(c, contab, total))
+                        referencia=_limpio(ref_det), detraccion=_detraccion(c, config, total))
 
-    if venta and not invierte:
+    if es_venta and not invierte:
         # Venta normal: cliente (D) · ingreso (H) · IGV (H) — el orden del manual de asientos.
         orden = [tercero, *principales, linea_igv]
     else:
@@ -199,16 +199,16 @@ def lineas_del_comprobante(c: Comprobante, contab: dict, limites: tuple[date, da
     return [ln for ln in orden if ln is not None]
 
 
-def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], contab: dict,
-                     correlativos: dict[str, int], op: Opciones = Opciones()) -> tuple[list[LineaDiario], dict[str, dict]]:
+def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict,
+                     correlativos: dict[str, int], opciones: Opciones = Opciones()) -> tuple[list[LineaDiario], dict[str, dict]]:
     """Todos los comprobantes de un libro → sus líneas, numeradas por sub-diario (`MMNNNN`).
 
     Devuelve también el rango de correlativos que usó cada sub-diario, que es lo que se recuerda
     para proponer el siguiente. Es la entrada de cualquier driver de asientos."""
-    venta = libro.es_venta
-    numeros, rangos = numerar(comprobantes, contab, libro.periodo, correlativos, venta)
+    es_venta = libro.es_venta
+    numeros, rangos = numerar(comprobantes, config, libro.periodo, correlativos, es_venta)
     limites = limites_del_periodo(libro)
     lineas: list[LineaDiario] = []
     for c in comprobantes:
-        lineas.extend(lineas_del_comprobante(c, contab, limites, numeros[id(c)], op, venta))
+        lineas.extend(lineas_del_comprobante(c, config, limites, numeros[id(c)], opciones, es_venta))
     return lineas, rangos

@@ -38,9 +38,9 @@ def _texto_tasa(t: Decimal) -> str:
     return format(t.normalize(), "f")
 
 
-def codigos_de(contab: dict) -> set[str]:
+def codigos_de(config: dict) -> set[str]:
     """Los códigos de detracción que el contribuyente reconoce."""
-    return {str(k) for k in (contab.get("detraccion_codigos") or {})}
+    return {str(k) for k in (config.get("detraccion_codigos") or {})}
 
 
 def normalizar_una(det, codigos: set[str]) -> dict | None:
@@ -55,24 +55,24 @@ def normalizar_una(det, codigos: set[str]) -> dict | None:
     return dict(det, codigo=cod)
 
 
-def tasa_de_tabla(codigo: Any, contab: dict) -> Decimal:
+def tasa_de_tabla(codigo: Any, config: dict) -> Decimal:
     """La tasa que el contribuyente tiene para ese código en su tabla; 0 si no la tiene."""
-    return _num((contab.get("detraccion_tasas") or {}).get(str(codigo or "").strip()))
+    return _num((config.get("detraccion_tasas") or {}).get(str(codigo or "").strip()))
 
 
-def tasa_detraccion(c: Comprobante, contab: dict) -> Decimal:
+def tasa_detraccion(c: Comprobante, config: dict) -> Decimal:
     """La tasa con la que se calcula: la del comprobante y, si no la trae, la de la tabla."""
     d = c.detraccion if isinstance(c.detraccion, dict) else {}
     t = _num(d.get("porcentaje"))
-    return t if t > 0 else tasa_de_tabla(d.get("codigo"), contab)
+    return t if t > 0 else tasa_de_tabla(d.get("codigo"), config)
 
 
-def monto_detraccion(c: Comprobante, contab: dict) -> tuple[Decimal, Decimal]:
+def monto_detraccion(c: Comprobante, config: dict) -> tuple[Decimal, Decimal]:
     """El monto de la detracción (Excel real validado en CONCAR, 2026): total × tasa en SOLES ENTEROS —
     la detracción se deposita en soles (4 956 × 4 % = 198.24 → 198). En dólares la base se convierte
     con el T.C. del comprobante y el monto vuelve a dólares para la línea, porque el asiento va en US.
     Devuelve (soles, en la moneda del comprobante); (0, 0) si no hay tasa o falta el T.C."""
-    t = tasa_detraccion(c, contab)
+    t = tasa_detraccion(c, config)
     es_usd = (c.moneda or "PEN").upper() == "USD"
     tc = c.tipo_cambio if es_usd and c.tipo_cambio else None
     if t <= 0 or (es_usd and not tc):
@@ -85,7 +85,7 @@ def monto_detraccion(c: Comprobante, contab: dict) -> tuple[Decimal, Decimal]:
     return soles, en_moneda
 
 
-def normalizar(comprobantes: Iterable[Comprobante], contab: dict) -> list[Comprobante]:
+def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Comprobante]:
     """Deja en blanco la detracción cuyo código no reconoce el contribuyente, y a la que queda le
     anota lo que dice el motor: su `monto` (soles enteros, lo que va a CONCAR) y la tasa de la tabla
     para ese código (`tasa_tabla`), que `validar` compara con la del comprobante.
@@ -99,16 +99,16 @@ def normalizar(comprobantes: Iterable[Comprobante], contab: dict) -> list[Compro
     con = [c for c in comprobantes if c.detraccion]
     if not con:
         return []
-    codigos = codigos_de(contab)
+    codigos = codigos_de(config)
     cambiados = []
     for c in con:
         antes = c.detraccion
         nuevo = normalizar_una(c.detraccion, codigos)
         if nuevo is not None:
             c.detraccion = nuevo
-            soles, _ = monto_detraccion(c, contab)
+            soles, _ = monto_detraccion(c, config)
             nuevo = dict(nuevo, monto=str(soles) if soles > 0 else "")
-            de_tabla = tasa_de_tabla(nuevo["codigo"], contab)
+            de_tabla = tasa_de_tabla(nuevo["codigo"], config)
             if de_tabla > 0:
                 nuevo["tasa_tabla"] = _texto_tasa(de_tabla)
             else:

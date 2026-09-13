@@ -71,20 +71,20 @@ def tasa_legal(igv, base_gravada) -> Decimal | None:
 SIN_CREDITO_FISCAL = ("02", "03")
 
 
-def igv_del_asiento(c: Comprobante, venta: bool) -> Decimal:
+def igv_del_asiento(c: Comprobante, es_venta: bool) -> Decimal:
     """El IGV que va en su propia línea del asiento: el del comprobante, salvo en compras de un tipo sin
     crédito fiscal, donde es cero y ese importe se queda en la base."""
-    if not venta and c.tipo_cp in SIN_CREDITO_FISCAL:
+    if not es_venta and c.tipo_cp in SIN_CREDITO_FISCAL:
         return Decimal(0)
     return Decimal(c.igv or 0).quantize(D2)
 
 
-def base_imputable(c: Comprobante, venta: bool) -> Decimal:
+def base_imputable(c: Comprobante, es_venta: bool) -> Decimal:
     """Lo que va a la cuenta de la base —el gasto en compras, el ingreso en ventas—: el total menos el IGV
     con línea propia. Es lo que divide el reparto de la imputación de un documento, y por eso lo usan igual
     el asiento (`lineas_del_comprobante`) y la comprobación del reparto (`asiento.reparto_no_cuadra`): la regla vive
     una vez."""
-    return (Decimal(c.total or 0).quantize(D2) - igv_del_asiento(c, venta)).quantize(D2)
+    return (Decimal(c.total or 0).quantize(D2) - igv_del_asiento(c, es_venta)).quantize(D2)
 
 
 def por_destino(c: Comprobante) -> tuple[tuple[Decimal, Decimal], tuple[Decimal, Decimal], tuple[Decimal, Decimal]]:

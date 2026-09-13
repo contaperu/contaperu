@@ -144,13 +144,13 @@ def catalogo_pcge2026() -> str:
 def drivers_disponibles() -> str:
     """Los formatos de salida disponibles y qué libros genera cada uno."""
     return json.dumps({
-        nombre: {"formatos": mod.FORMATOS,
-                 "tipo": "texto" if drivers.contrato.forma(mod) == "linea" else "archivo",
-                 "forma": drivers.contrato.forma(mod),
-                 "familia": drivers.contrato.familia(mod),
-                 "exige": sorted(drivers.contrato.exige(mod)),
-                 "descripcion": (mod.__doc__ or "").strip().splitlines()[0]}
-        for nombre, mod in drivers.DRIVERS.items()
+        nombre: {"formatos": modulo.FORMATOS,
+                 "tipo": "texto" if drivers.contrato.forma(modulo) == "linea" else "archivo",
+                 "forma": drivers.contrato.forma(modulo),
+                 "familia": drivers.contrato.familia(modulo),
+                 "exige": sorted(drivers.contrato.exige(modulo)),
+                 "descripcion": (modulo.__doc__ or "").strip().splitlines()[0]}
+        for nombre, modulo in drivers.DRIVERS.items()
     }, ensure_ascii=False, indent=1)
 
 
@@ -363,13 +363,13 @@ def normalizar_detracciones(documento: dict, configuracion: dict | None = None) 
     factura pasa de S/ 700, y que no toca el registro de compras) por una detracción.
     """
     comprobantes = operaciones.comprobantes_de(documento)
-    conf = operaciones.configuracion(configuracion)
-    limpiadas = detracciones.normalizar(comprobantes, conf)
+    config = operaciones.configuracion(configuracion)
+    limpiadas = detracciones.normalizar(comprobantes, config)
     salida = operaciones.documento(operaciones.libro_de(documento), comprobantes)
     salida["_detracciones"] = {
         "revisadas": sum(1 for c in comprobantes if c.detraccion) + len(limpiadas),
         "descartadas": len(limpiadas),
-        "codigos_reconocidos": sorted(detracciones.codigos_de(conf)),
+        "codigos_reconocidos": sorted(detracciones.codigos_de(config)),
     }
     return salida
 

@@ -9,8 +9,8 @@ from ...modelo import Comprobante, Libro
 from . import datos, proyeccion
 
 
-def nombre(libro: Libro, op: Opciones = datos.OPCIONES) -> str:
-    return f"CONTASIS_{libro.ruc}_{libro.periodo}_{'VENTAS' if libro.es_venta else 'COMPRAS'}{op.extension}"
+def nombre(libro: Libro, opciones: Opciones = datos.OPCIONES) -> str:
+    return f"CONTASIS_{libro.ruc}_{libro.periodo}_{'VENTAS' if libro.es_venta else 'COMPRAS'}{opciones.extension}"
 
 
 def escribir_xlsx(libro: Libro, filas: list[dict[str, Any]]) -> bytes:
@@ -37,9 +37,9 @@ def escribir_xlsx(libro: Libro, filas: list[dict[str, Any]]) -> bytes:
     return buf.getvalue()
 
 
-def desde_comprobantes(libro: Libro, comprobantes: list[Comprobante], contab: dict,
-                       op: Opciones = datos.OPCIONES) -> tuple[bytes, dict]:
+def desde_comprobantes(libro: Libro, comprobantes: list[Comprobante], config: dict,
+                       opciones: Opciones = datos.OPCIONES) -> tuple[bytes, dict]:
     """Comprobantes → el .xlsx y su resumen. Llegan ya seleccionados, con la cuenta exigida y sin nada que no quepa
     (lo hace el núcleo antes de llamar); una fila por comprobante, en el orden en que llegan."""
-    filas = [proyeccion.fila(c, libro, contab, op) for c in comprobantes]
+    filas = [proyeccion.fila(c, libro, config, opciones) for c in comprobantes]
     return escribir_xlsx(libro, filas), {"filas": len(filas)}

@@ -105,8 +105,8 @@ def test_sin_tasa_en_el_comprobante_usa_la_de_la_tabla():
 def test_el_asiento_usa_el_mismo_monto():
     """Una sola implementación: lo que ve la persona es lo que sale en las líneas de la detracción."""
     c = comprobante({"codigo": "037", "porcentaje": 12}, total="330.40", base_gravada="280", igv="50.40")
-    contab = dict(TABLA, cuentas=dict(TABLA["cuentas"], gasto="659999"))
-    filas = driver_concar.filas_de_comprobante(c, contab, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
+    config = dict(TABLA, cuentas=dict(TABLA["cuentas"], gasto="659999"))
+    filas = driver_concar.filas_de_comprobante(c, config, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
     detraccion = [f for f in filas if f["R"] == "DR"]
     assert detraccion and all(f["O"] == 40 for f in detraccion)
 

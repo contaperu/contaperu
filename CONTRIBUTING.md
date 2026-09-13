@@ -45,10 +45,10 @@ CONTENT_TYPE = "text/plain; charset=utf-8"
 # La cuenta contable y la equivalencia del tipo las exige el núcleo por ti.
 EXIGE = frozenset()
 
-def nombre(libro, op=OPCIONES) -> str:
-    return f"SISCONT_{libro.ruc}_{libro.periodo}{op.extension}"
+def nombre(libro, opciones=OPCIONES) -> str:
+    return f"SISCONT_{libro.ruc}_{libro.periodo}{opciones.extension}"
 
-def desde_lineas(libro, lineas, contab, op=OPCIONES) -> tuple[bytes, dict]:
+def desde_lineas(libro, lineas, config, opciones=OPCIONES) -> tuple[bytes, dict]:
     # Cada línea trae `rol` (principal, igv, tercero, detraccion…), `cuenta`, `debe_haber`, `importe`
     # como texto exacto, `documento.tipo_cp` (el código SUNAT), la glosa entera… Tradúcelas y devuelve
     # los bytes del archivo y un resumen.
@@ -59,7 +59,7 @@ El driver CSV ([`contaperu/drivers/csv`](contaperu/drivers/csv/__init__.py)) es 
 esta forma.
 
 Si tu sistema no importa asientos sino su **registro** de compras y de ventas, y arma el asiento él mismo
-(CONTASIS), la forma es `desde_comprobantes(libro, comprobantes, contab, op)`: recibes los comprobantes y la
+(CONTASIS), la forma es `desde_comprobantes(libro, comprobantes, config, opciones)`: recibes los comprobantes y la
 configuración, y cada cuenta la lees de `asiento.partes_de` (la de la base, o una por parte si hay reparto) y de
 `asiento.cuenta_tercero` (la del total), que la resuelven igual que para el asiento, con la imputación de cada
 documento dentro. El núcleo exige la cuenta antes de llamarte. Las otras dos formas —`linea` para un TXT por

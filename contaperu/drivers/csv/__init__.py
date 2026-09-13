@@ -64,8 +64,8 @@ COLUMNAS: list[tuple[str, str]] = [
 ]
 
 
-def nombre(libro: Libro, op: Opciones = OPCIONES) -> str:
-    return f"asiento_{libro.ruc}_{libro.periodo}_{libro.tipo}{op.extension}"
+def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
+    return f"asiento_{libro.ruc}_{libro.periodo}_{libro.tipo}{opciones.extension}"
 
 
 def _valor(linea: dict, ruta: str) -> Any:
@@ -75,7 +75,7 @@ def _valor(linea: dict, ruta: str) -> Any:
     return (linea.get(padre) or {}).get(hijo, "")
 
 
-def desde_lineas(libro: Libro, lineas: list[LineaDiario], contab: dict, op: Opciones = OPCIONES,
+def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones: Opciones = OPCIONES,
                  separador: str = SEPARADOR, bom: bool = True) -> tuple[bytes, dict]:
     """Líneas neutrales (ya numeradas y cuadradas por el núcleo) → CSV.
 
@@ -93,13 +93,13 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], contab: dict, op: Opci
     return ("﻿" + texto if bom else texto).encode("utf-8"), {"filas": len(filas)}
 
 
-def construir(libro: Libro, comprobantes: list[Comprobante], contab: dict,
-              correlativos: dict[str, int], op: Opciones = OPCIONES,
+def construir(libro: Libro, comprobantes: list[Comprobante], config: dict,
+              correlativos: dict[str, int], opciones: Opciones = OPCIONES,
               separador: str = SEPARADOR, bom: bool = True) -> tuple[bytes, dict]:
     """Comprobantes → CSV + resumen. Se conserva por compatibilidad con la 0.6: el núcleo ya no la
     usa —`generar` arma las líneas y llama a `desde_lineas`—, pero es API pública."""
-    neutrales, rangos = lineas_del_libro(libro, comprobantes, contab, correlativos, op)
+    neutrales, rangos = lineas_del_libro(libro, comprobantes, config, correlativos, opciones)
     cuadre = partida_doble.exigir(neutrales)
-    contenido, _ = desde_lineas(libro, neutrales, contab, op, separador, bom)
+    contenido, _ = desde_lineas(libro, neutrales, config, opciones, separador, bom)
     return contenido, {"filas": len(neutrales), "sub_diarios": dict(rangos),
                        "debe": str(cuadre.debe), "haber": str(cuadre.haber)}

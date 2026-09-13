@@ -47,7 +47,7 @@ CUENTA_DEL_CASO = {"cuenta_contable": "631101", "centro_costo": "OBRA01"}
 
 
 def armar(caso) -> tuple[Comprobante, dict, bool]:
-    _, campos, venta, extra = caso
+    _, campos, es_venta, extra = caso
     campos = {**CUENTA_DEL_CASO, **campos}
     legado = {k: v for k in CUENTA_DEL_CASO if (v := campos.pop(k))}
     campos.setdefault("id_externo", "f1")
@@ -59,7 +59,7 @@ def armar(caso) -> tuple[Comprobante, dict, bool]:
     if propia:
         imputaciones[campos["id_externo"]] = propia
         extra["imputaciones"] = imputaciones
-    return cp(**campos), contab_de(extra), venta
+    return cp(**campos), contab_de(extra), es_venta
 
 
 RH = dict(tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0", inafecto="2000",
@@ -167,8 +167,8 @@ def _celda(v):
 
 
 def filas_de(caso) -> list[dict]:
-    c, contab, venta = armar(caso)
-    return driver_concar.filas_de_comprobante(c, contab, MES, "080001", venta=venta)
+    c, config, es_venta = armar(caso)
+    return driver_concar.filas_de_comprobante(c, config, MES, "080001", es_venta=es_venta)
 
 
 def serializar_filas(caso) -> list[dict]:
@@ -180,8 +180,8 @@ def serializar_lineas(caso) -> list[dict]:
     (v0.6) y se regeneraron UNA vez al invertir el asiento (0.7), con un diff revisado que solo
     añadía `rol`, `tipo_cp` y el código SUNAT de la detracción, dejaba la glosa sin cortar y la tasa
     del IGV como texto exacto. Ningún importe, cuenta ni sentido cambió."""
-    c, contab, venta = armar(caso)
-    return [ln.a_dict() for ln in asi.lineas_del_comprobante(c, contab, MES, "080001", venta=venta)]
+    c, config, es_venta = armar(caso)
+    return [ln.a_dict() for ln in asi.lineas_del_comprobante(c, config, MES, "080001", es_venta=es_venta)]
 
 
 def regenerar() -> None:

@@ -112,7 +112,7 @@ CUENTA_DEL_CASO = {"cuenta_contable": "631101", "centro_costo": "OBRA01"}
 
 
 def armar(caso) -> tuple[Comprobante, dict, bool]:
-    _, campos, venta, extra = caso
+    _, campos, es_venta, extra = caso
     campos = {**CUENTA_DEL_CASO, **campos}
     legado = {k: v for k in CUENTA_DEL_CASO if (v := campos.pop(k))}
     campos.setdefault("id_externo", "f1")
@@ -124,12 +124,12 @@ def armar(caso) -> tuple[Comprobante, dict, bool]:
     if propia:
         imputaciones[campos["id_externo"]] = propia
         extra["imputaciones"] = imputaciones
-    return cp(**campos), contab_de(extra), venta
+    return cp(**campos), contab_de(extra), es_venta
 
 
 def fila_de(caso) -> dict:
-    c, contab, venta = armar(caso)
-    return contasis.fila(c, VENTAS if venta else COMPRAS, contab)
+    c, config, es_venta = armar(caso)
+    return contasis.fila(c, VENTAS if es_venta else COMPRAS, config)
 
 
 def _celda(v):
@@ -178,6 +178,7 @@ def test_cada_fila_suma_su_total(caso):
     """Así viene cada fila del registro validado: el total es la suma de sus importes (en compras, J…R y el ICBPER;
     en ventas, I…O y el ICBPER), también en dólares después de convertir."""
     f = fila_de(caso)
-    venta = caso[2]
-    partes = ("I", "J", "K", "L", "M", "N", "O", "AQ") if venta else ("J", "K", "L", "M", "N", "O", "P", "Q", "R", "AW")
-    assert round(sum(f.get(letra) or 0 for letra in partes), 2) == round(f.get("P" if venta else "S") or 0, 2)
+    es_venta = caso[2]
+    partes = (("I", "J", "K", "L", "M", "N", "O", "AQ") if es_venta
+              else ("J", "K", "L", "M", "N", "O", "P", "Q", "R", "AW"))
+    assert round(sum(f.get(letra) or 0 for letra in partes), 2) == round(f.get("P" if es_venta else "S") or 0, 2)

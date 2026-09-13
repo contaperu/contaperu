@@ -144,7 +144,7 @@ def driver_de_prueba(nombre: str = "prueba") -> types.ModuleType:
     m.CONTENT_TYPE = "text/plain; charset=utf-8"
     m.nombre = lambda libro, op=m.OPCIONES: f"{nombre}_{libro.ruc}_{libro.periodo}{op.extension}"
 
-    def desde_lineas(libro, lineas, contab, op=m.OPCIONES):
+    def desde_lineas(libro, lineas, config, op=m.OPCIONES):
         texto = "\n".join(f"{ln.rol}|{ln.cuenta}|{ln.debe_haber}|{ln.importe}" for ln in lineas)
         return texto.encode("utf-8"), {"lineas_escritas": len(lineas)}
 
@@ -209,11 +209,11 @@ def driver_de_registro(nombre: str = "registro") -> types.ModuleType:
     m.CONTENT_TYPE = "text/plain; charset=utf-8"
     m.nombre = lambda libro, op=m.OPCIONES: f"{nombre}_{libro.ruc}_{libro.periodo}{op.extension}"
 
-    def desde_comprobantes(libro, comprobantes, contab, op=m.OPCIONES):
-        venta = libro.es_venta
+    def desde_comprobantes(libro, comprobantes, config, op=m.OPCIONES):
+        es_venta = libro.es_venta
         filas = [f"{c.serie}-{c.numero}|{cuenta}|{centro}|{'' if importe is None else importe}|"
-                 f"{asi.cuenta_tercero(c, contab, venta)}"
-                 for c in comprobantes for cuenta, centro, importe in asi.partes_de(c, contab, venta)]
+                 f"{asi.cuenta_tercero(c, config, es_venta)}"
+                 for c in comprobantes for cuenta, centro, importe in asi.partes_de(c, config, es_venta)]
         return "\n".join(filas).encode("utf-8"), {"filas": len(filas)}
 
     m.desde_comprobantes = desde_comprobantes
@@ -367,7 +367,7 @@ def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_ter
     solo_soles = driver_de_registro("soles")
     original = solo_soles.desde_comprobantes
     solo_soles.desde_comprobantes = lambda *a, **k: llamado.append(1) or original(*a, **k)
-    solo_soles.no_caben = lambda libro, comprobantes, contab: {
+    solo_soles.no_caben = lambda libro, comprobantes, config: {
         "en una moneda que el destino no admite": [c for c in comprobantes if c.moneda != "PEN"],
         "con un motivo que no aplica a este mes": []}
     con_terceros(_Entrada("soles", solo_soles))
@@ -397,4 +397,4 @@ def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_ter
 
     roto = driver_de_registro("roto")
     roto.no_caben = "no"
-    assert contrato.incumplimientos(roto) == ["no_caben es una función: no_caben(libro, comprobantes, contab)"]
+    assert contrato.incumplimientos(roto) == ["no_caben es una función: no_caben(libro, comprobantes, config)"]

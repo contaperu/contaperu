@@ -112,15 +112,15 @@ def config_de(del_ruc: dict | None, del_estudio: dict | None = None) -> dict:
     return fundir_config(base, ((del_ruc or {}).get("contabilidad") or {}))
 
 
-def etiquetas_sub_diario(contab: dict) -> dict[str, str]:
+def etiquetas_sub_diario(config: dict) -> dict[str, str]:
     """{numero: uso} segun la config vigente, para el modal de exportar y el resumen.
     Si el estudio renumera (honorarios → 33), el 33 sale etiquetado. Dos usos con el
     mismo numero se unen con " · " (p. ej. un CONCAR que no separa la detraccion)."""
-    tipos = contab.get("tipos") or {}
+    tipos = config.get("tipos") or {}
     usos = [
-        (str(contab.get("sub_diario_ventas") or "05"), "Ventas"),
-        (str(contab.get("sub_diario_compras") or "11"), "Compras"),
-        (str(contab.get("sub_diario_detraccion") or "").strip(), "Compras con detracción"),
+        (str(config.get("sub_diario_ventas") or "05"), "Ventas"),
+        (str(config.get("sub_diario_compras") or "11"), "Compras"),
+        (str(config.get("sub_diario_detraccion") or "").strip(), "Compras con detracción"),
         (str((tipos.get(TIPO_BOLETA) or {}).get("sub_diario") or "").strip(), "Boletas de venta"),
         (str((tipos.get(TIPO_HONORARIOS) or {}).get("sub_diario") or "").strip(), "Recibos por honorarios"),
     ]
@@ -153,40 +153,40 @@ def cuenta_honorarios(cuentas: dict, moneda: str) -> str:
 
 # ── La imputación de cada documento: llega aparte, por `id_externo` (12-sep-2026) ──
 
-def imputacion_de(c: Comprobante, contab: dict) -> Imputacion | None:
+def imputacion_de(c: Comprobante, config: dict) -> Imputacion | None:
     """La imputación de ESTE documento, si la configuración trae una con su `id_externo`; si no, None."""
     ide = (c.id_externo or "").strip()
-    valor = (contab.get("imputaciones") or {}).get(ide) if ide else None
+    valor = (config.get("imputaciones") or {}).get(ide) if ide else None
     return Imputacion.de(valor) if valor is not None else None
 
 
-def partes_de(c: Comprobante, contab: dict, venta: bool = False) -> list[tuple[str, str, Decimal | None]]:
+def partes_de(c: Comprobante, config: dict, es_venta: bool = False) -> list[tuple[str, str, Decimal | None]]:
     """A qué cuentas va la base del documento: `[(cuenta, centro, importe)]`, con importe None = la base entera.
 
     Con reparto en su imputación, una parte por cada una. Si no, una sola: la cuenta y el centro de la imputación, y
     la cuenta que no traiga, la de la configuración. Es la única resolución: el asiento, los drivers de registro y
     las faltas de cuenta y de centro leen esto."""
-    imp = imputacion_de(c, contab)
+    imp = imputacion_de(c, config)
     if imp is not None and imp.reparto:
         return [(p.cuenta_contable, p.centro_costo, p.importe) for p in imp.reparto]
-    cuenta = (imp.cuenta_contable if imp is not None else "") or _cuenta_de_respaldo(contab, venta)
+    cuenta = (imp.cuenta_contable if imp is not None else "") or _cuenta_de_respaldo(config, es_venta)
     centro = imp.centro_costo if imp is not None else ""
     return [(cuenta, centro, None)]
 
 
-def cuenta_tercero(c: Comprobante, contab: dict, venta: bool = False) -> str:
+def cuenta_tercero(c: Comprobante, config: dict, es_venta: bool = False) -> str:
     """La cuenta del total: el cliente en ventas, el proveedor en compras (el recibo por honorarios, la suya).
 
     Manda la de la imputación del documento cuando el contador la decidió —un gasto de representación a la
     4699—; si no, la de la configuración por moneda. Vivía dentro de `lineas_del_comprobante`; salió aquí el
     12-sep-2026 para que la resuelva UNA función para todos los drivers —el asiento de CONCAR y el registro de
     CONTASIS—, como `partes_de` resuelve la de la base."""
-    imp = imputacion_de(c, contab)
+    imp = imputacion_de(c, config)
     if imp is not None and imp.cuenta_tercero:
         return imp.cuenta_tercero
     moneda = (c.moneda or "PEN").upper()
-    cuentas = contab.get("cuentas") or {}
-    if venta:
+    cuentas = config.get("cuentas") or {}
+    if es_venta:
         return _cuenta_por_moneda(cuentas.get("clientes"), moneda, CONFIG_DE_FABRICA["cuentas"]["clientes"]["PEN"])
     if c.tipo_cp == TIPO_HONORARIOS:
         return cuenta_honorarios(cuentas, moneda)
@@ -195,16 +195,16 @@ def cuenta_tercero(c: Comprobante, contab: dict, venta: bool = False) -> str:
 
 # ── Clasificación de cada comprobante ────────────────────────────────────────
 
-def equivalencia_tipo(c: Comprobante, contab: dict, tipo: str | None = None) -> dict | None:
+def equivalencia_tipo(c: Comprobante, config: dict, tipo: str | None = None) -> dict | None:
     """La equivalencia del tipo SUNAT en la configuración (`tipos.NN`) si tiene sigla; si no, None. Solo exige la
     sigla: el sub-diario tiene general (`sub_diario_compras`) desde el 29-ago-2026."""
-    m = (contab.get("tipos") or {}).get(tipo if tipo is not None else c.tipo_cp)
+    m = (config.get("tipos") or {}).get(tipo if tipo is not None else c.tipo_cp)
     return m if isinstance(m, dict) and m.get("sigla") else None
 
 
-def sigla_documento(c: Comprobante, contab: dict | None = None) -> str:
+def sigla_documento(c: Comprobante, config: dict | None = None) -> str:
     """La sigla con la que el sistema de destino llama al tipo del comprobante (en CONCAR, su Tabla General 06)."""
-    m = equivalencia_tipo(c, contab or CONFIG_DE_FABRICA)
+    m = equivalencia_tipo(c, config or CONFIG_DE_FABRICA)
     return str(m["sigla"]) if m else ""
 
 
@@ -220,32 +220,32 @@ def tiene_detraccion(c: Comprobante) -> bool:
     return bool(str(d.get("codigo") or "").strip()) or _num(d.get("porcentaje")) > 0
 
 
-def sub_diario(c: Comprobante, contab: dict, venta: bool = False) -> str:
+def sub_diario(c: Comprobante, config: dict, es_venta: bool = False) -> str:
     """Por USO: ventas → sub_diario_ventas; compras con detracción → sub_diario_detraccion;
     un tipo con registro propio (boletas 13, honorarios 15) → el suyo; el resto → sub_diario_compras.
     Estas cuatro fuentes son lo que una aplicación deja configurar."""
-    m = equivalencia_tipo(c, contab)
+    m = equivalencia_tipo(c, config)
     if not m:
         return ""
-    if venta:
-        return str(contab.get("sub_diario_ventas") or CONFIG_DE_FABRICA["sub_diario_ventas"])
-    sd = str(contab.get("sub_diario_detraccion") or "").strip()
+    if es_venta:
+        return str(config.get("sub_diario_ventas") or CONFIG_DE_FABRICA["sub_diario_ventas"])
+    sd = str(config.get("sub_diario_detraccion") or "").strip()
     if sd and c.tipo_cp != TIPO_HONORARIOS and tiene_detraccion(c):
         return sd
-    return str(m.get("sub_diario") or contab.get("sub_diario_compras") or CONFIG_DE_FABRICA["sub_diario_compras"])
+    return str(m.get("sub_diario") or config.get("sub_diario_compras") or CONFIG_DE_FABRICA["sub_diario_compras"])
 
 
-def tipos_sin_mapa(comprobantes: list[Comprobante], contab: dict) -> list[str]:
+def tipos_sin_mapa(comprobantes: list[Comprobante], config: dict) -> list[str]:
     """Códigos SUNAT presentes que no tienen sigla configurada (en orden de aparición)."""
     vistos: list[str] = []
     for c in comprobantes:
-        if not equivalencia_tipo(c, contab) and c.tipo_cp not in vistos:
+        if not equivalencia_tipo(c, config) and c.tipo_cp not in vistos:
             vistos.append(c.tipo_cp)
     return vistos
 
 
-def monedas_sin_codigo(comprobantes: list[Comprobante], contab: dict) -> list[str]:
-    codigos = contab.get("monedas_codigo") or {}
+def monedas_sin_codigo(comprobantes: list[Comprobante], config: dict) -> list[str]:
+    codigos = config.get("monedas_codigo") or {}
     vistas: list[str] = []
     for c in comprobantes:
         m = (c.moneda or "PEN").upper()
@@ -254,17 +254,17 @@ def monedas_sin_codigo(comprobantes: list[Comprobante], contab: dict) -> list[st
     return vistas
 
 
-def _cuenta_de_respaldo(contab: dict, venta: bool = False) -> str:
+def _cuenta_de_respaldo(config: dict, es_venta: bool = False) -> str:
     """La cuenta de la base cuando la imputación del documento no trae una: la de ingreso en ventas, que SÍ tiene un
     valor de fábrica real (el habitual), y la de gasto en compras, que va vacía a propósito (`configuracion.py`).
     Solo lee la configuración; la resolución entera, con la imputación delante, es `partes_de`."""
-    cuentas = contab.get("cuentas") or {}
-    if venta:
+    cuentas = config.get("cuentas") or {}
+    if es_venta:
         return str(cuentas.get("ventas") or CONFIG_DE_FABRICA["cuentas"]["ventas"]).strip()
     return str(cuentas.get("gasto") or "").strip()
 
 
-def lleva_centro(cuenta: str, contab: dict) -> bool:
+def lleva_centro(cuenta: str, config: dict) -> bool:
     """¿Esta cuenta lleva el centro de costo en la columna M?
 
     En CONCAR la marca «C. Costo habilitado» vive en cada cuenta del plan; aquí se declara por
@@ -272,30 +272,30 @@ def lleva_centro(cuenta: str, contab: dict) -> bool:
     armado a mano, un consumidor viejo) valen los prefijos de fábrica; con la lista vacía, el
     estudio está diciendo que ninguna cuenta lo lleva. Un `or []` confundiría los dos casos.
     """
-    if not contab.get("usa_centros_costo", True):
+    if not config.get("usa_centros_costo", True):
         return False
-    prefijos = contab["cuentas_con_centro"] if "cuentas_con_centro" in contab else CONFIG_DE_FABRICA["cuentas_con_centro"]
+    prefijos = config["cuentas_con_centro"] if "cuentas_con_centro" in config else CONFIG_DE_FABRICA["cuentas_con_centro"]
     cuenta = (cuenta or "").strip()
     return bool(cuenta) and any(cuenta.startswith(p) for p in (str(x).strip() for x in (prefijos or [])) if p)
 
 
-def sub_diarios_presentes(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> dict[str, int]:
+def sub_diarios_presentes(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> dict[str, int]:
     """{sub_diario: cuántos comprobantes} en el orden en que aparecen."""
     out: dict[str, int] = {}
     for c in comprobantes:
-        s = sub_diario(c, contab, venta)
+        s = sub_diario(c, config, es_venta)
         if s:
             out[s] = out.get(s, 0) + 1
     return out
 
 
-def comprobantes_sin_cuenta(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
+def comprobantes_sin_cuenta(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
     """Las filas sin cuenta: basta con que a una parte de su base le falte (`partes_de`). Una parte del reparto
     no toma la cuenta por defecto: repartir entre la misma cuenta no reparte nada."""
-    return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, contab, venta))]
+    return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, config, es_venta))]
 
 
-def comprobantes_sin_centro(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
+def comprobantes_sin_centro(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
     """Las filas a las que les falta un centro de costo que SÍ hace falta.
 
     El centro es obligatorio solo donde de verdad se escribe: en la columna M de las cuentas de
@@ -303,38 +303,38 @@ def comprobantes_sin_centro(comprobantes: list[Comprobante], contab: dict, venta
     NO bloquea nunca, ni siquiera con `centro_como_referencia` encendido: esa X es una referencia, y
     una referencia que se puede dejar en blanco no puede impedir exportar un mes.
 
-    `venta` va opcional a propósito, calcando a `comprobantes_sin_cuenta`: esto es una librería que se
+    `es_venta` va opcional a propósito, calcando a `comprobantes_sin_cuenta`: esto es una librería que se
     instala fuera, y un positional obligatorio sería romper su API pública por una regla interna
     de CONCAR. Ojo al llamarla: sin el flag, un libro de ventas resolvería la cuenta como gasto.
     """
-    if not contab.get("usa_centros_costo", True):
+    if not config.get("usa_centros_costo", True):
         return []
 
     def falta(c: Comprobante) -> bool:
         # Cada parte de la base con su cuenta y su centro (`partes_de`): basta con que a una le falte.
-        return any(not (centro or "").strip() and lleva_centro(cuenta, contab)
-                   for cuenta, centro, _ in partes_de(c, contab, venta))
+        return any(not (centro or "").strip() and lleva_centro(cuenta, config)
+                   for cuenta, centro, _ in partes_de(c, config, es_venta))
 
     return [c for c in comprobantes if falta(c)]
 
 
-def reparto_no_cuadra(c: Comprobante, contab: dict, venta: bool = False) -> bool:
+def reparto_no_cuadra(c: Comprobante, config: dict, es_venta: bool = False) -> bool:
     """¿El reparto de su imputación deja de sumar la base del asiento? Sin tolerancia, como la partida doble:
     un reparto que no cuadra da un asiento que no cuadra."""
-    imp = imputacion_de(c, contab)
+    imp = imputacion_de(c, config)
     if imp is None or not imp.reparto:
         return False
-    return sum((p.importe for p in imp.reparto), Decimal("0.00")) != base_imputable(c, venta)
+    return sum((p.importe for p in imp.reparto), Decimal("0.00")) != base_imputable(c, es_venta)
 
 
-def repartos_que_no_cuadran(comprobantes: list[Comprobante], contab: dict, venta: bool = False) -> list[Comprobante]:
-    return [c for c in comprobantes if reparto_no_cuadra(c, contab, venta)]
+def repartos_que_no_cuadran(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
+    return [c for c in comprobantes if reparto_no_cuadra(c, config, es_venta)]
 
 
-def con_reparto(comprobantes: list[Comprobante], contab: dict) -> list[Comprobante]:
+def con_reparto(comprobantes: list[Comprobante], config: dict) -> list[Comprobante]:
     """Los que reparten su base entre varias cuentas (`reparto` en su imputación): lo que no admite un destino que
     exige `cuenta_unica`."""
-    return [c for c in comprobantes if (imp := imputacion_de(c, contab)) is not None and imp.reparto]
+    return [c for c in comprobantes if (imp := imputacion_de(c, config)) is not None and imp.reparto]
 
 
 # Qué clave de `faltantes` responde a cada requisito del contrato de driver (`contrato.exige`), en el
@@ -345,7 +345,7 @@ REQUISITO_DE = {"tipos_sin_equivalencia": "tipo_cp", "monedas_sin_codigo": "mone
                 "sin_centro_de_costo": "centro_costo"}
 
 
-def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = False,
+def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
                    exige: frozenset[str] | set[str] = frozenset()) -> dict[str, list]:
     """Lo que les falta a estos comprobantes para un destino que EXIGE eso — solo las claves exigidas.
 
@@ -354,25 +354,25 @@ def faltantes_para(comprobantes: list[Comprobante], contab: dict, venta: bool = 
     """
     salida: dict[str, list] = {}
     if "tipo_cp" in exige:
-        salida["tipos_sin_equivalencia"] = tipos_sin_mapa(comprobantes, contab)
+        salida["tipos_sin_equivalencia"] = tipos_sin_mapa(comprobantes, config)
     if "moneda" in exige:
-        salida["monedas_sin_codigo"] = monedas_sin_codigo(comprobantes, contab)
+        salida["monedas_sin_codigo"] = monedas_sin_codigo(comprobantes, config)
     if "cuenta_unica" in exige:
-        salida["reparto_no_admitido"] = con_reparto(comprobantes, contab)
+        salida["reparto_no_admitido"] = con_reparto(comprobantes, config)
     if "cuenta_contable" in exige:
-        salida["sin_cuenta"] = comprobantes_sin_cuenta(comprobantes, contab, venta)
-        salida["reparto_no_cuadra"] = repartos_que_no_cuadran(comprobantes, contab, venta)
+        salida["sin_cuenta"] = comprobantes_sin_cuenta(comprobantes, config, es_venta)
+        salida["reparto_no_cuadra"] = repartos_que_no_cuadran(comprobantes, config, es_venta)
     if "centro_costo" in exige:
-        salida["sin_centro_de_costo"] = comprobantes_sin_centro(comprobantes, contab, venta)
+        salida["sin_centro_de_costo"] = comprobantes_sin_centro(comprobantes, config, es_venta)
     return salida
 
 
-def exigir_requisitos(comprobantes: list[Comprobante], contab: dict, venta: bool = False,
+def exigir_requisitos(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
                       exige: frozenset[str] | set[str] = frozenset()) -> None:
     """Hace cumplir `faltantes_para`: la primera falta, en el orden de siempre, detiene la exportación
     con su excepción (tipo → moneda → reparto no admitido → cuenta → reparto que no cuadra → centro). Un tipo
     sin equivalencia no se inventa."""
-    falta = faltantes_para(comprobantes, contab, venta, exige)
+    falta = faltantes_para(comprobantes, config, es_venta, exige)
     if falta.get("tipos_sin_equivalencia"):
         raise TipoSinMapa(falta["tipos_sin_equivalencia"])
     if falta.get("monedas_sin_codigo"):
@@ -389,16 +389,16 @@ def exigir_requisitos(comprobantes: list[Comprobante], contab: dict, venta: bool
 
 # ── Numeración: MM + correlativo de 4 dígitos por sub-diario ──────────────────
 
-def numerar(comprobantes: list[Comprobante], contab: dict, periodo: str,
-            correlativos: dict[str, int], venta: bool = False) -> tuple[dict[int, str], dict[str, dict]]:
+def numerar(comprobantes: list[Comprobante], config: dict, periodo: str,
+            correlativos: dict[str, int], es_venta: bool = False) -> tuple[dict[int, str], dict[str, dict]]:
     """Asigna a cada comprobante (por `id()` del objeto) su número `MMNNNN`, en el orden
     recibido (el natural del registro). Devuelve también el rango usado por sub-diario,
     que es lo que se recuerda para proponer el siguiente."""
     mes_mm = str(periodo)[4:6]
-    sin_mapa = tipos_sin_mapa(comprobantes, contab)
+    sin_mapa = tipos_sin_mapa(comprobantes, config)
     if sin_mapa:
         raise TipoSinMapa(sin_mapa)
-    presentes = sub_diarios_presentes(comprobantes, contab, venta)
+    presentes = sub_diarios_presentes(comprobantes, config, es_venta)
     faltan = [s for s in presentes if s not in correlativos]
     if faltan:
         raise CorrelativoFaltante(faltan)
@@ -408,7 +408,7 @@ def numerar(comprobantes: list[Comprobante], contab: dict, periodo: str,
     numeros: dict[int, str] = {}
     rangos: dict[str, dict] = {s: {"desde": n, "hasta": n - 1, "n": 0} for s, n in contadores.items()}
     for c in comprobantes:
-        s = sub_diario(c, contab, venta)
+        s = sub_diario(c, config, es_venta)
         n = contadores[s]
         numeros[id(c)] = f"{mes_mm}{n:04d}"
         rangos[s]["hasta"] = n

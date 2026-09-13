@@ -17,7 +17,7 @@ El camino completo, de un XML a un Excel de asientos:
     comprobantes = lectores.archivos.ordenar(res.comprobantes)
     validar.revisar(comprobantes, libro)
     exp = generar.generar(libro, comprobantes, "concar",
-                          contab=configuracion, correlativos={"11": 1})
+                          config=configuracion, correlativos={"11": 1})
 
 El estándar de datos que habla es `open-accounting`; su esquema está en `estandar/`.
 """

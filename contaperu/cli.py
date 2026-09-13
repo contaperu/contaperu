@@ -62,27 +62,27 @@ def _escribir(exp: gen.Exportado, salida: Path) -> None:
 
 
 def _generar_todas(libro: Libro, comprobantes: list[Comprobante], driver: str, salida: Path,
-                   incluir_errores: bool, conf: dict | None = None) -> int:
+                   incluir_errores: bool, config: dict | None = None) -> int:
     # "todas" = los drivers de TXT. Los que llevan cuentas (CONCAR, el CSV, el registro de un sistema contable,
     # los de terceros) se piden por su nombre: necesitan la configuración contable del contribuyente —la de
     # --config, con la imputación de --imputacion dentro—, y los de asientos, además sus correlativos, que
     # arrancan en 1: los mismos valores de partida que usa `operaciones.exportar`.
     nombres = ([n for n, m in drivers.DRIVERS.items() if drivers.contrato.forma(m) == "linea"]
                if driver == "todas" else [driver])
-    conf = operaciones.configuracion() if conf is None else conf
+    config = operaciones.configuracion() if config is None else config
     codigo = 0
     for p in nombres:
-        mod = drivers.obtener(p)
-        if libro.tipo not in mod.FORMATOS:
+        modulo = drivers.obtener(p)
+        if libro.tipo not in modulo.FORMATOS:
             print(f"  {p:<5} no genera libros de {libro.tipo}", file=sys.stderr)
             continue
         correlativos = None
-        if drivers.contrato.arma_asientos(mod):
+        if drivers.contrato.arma_asientos(modulo):
             incluidos = gen.seleccionar(comprobantes)
-            correlativos = {s: 1 for s in asi.sub_diarios_presentes(incluidos, conf, libro.es_venta)}
+            correlativos = {s: 1 for s in asi.sub_diarios_presentes(incluidos, config, libro.es_venta)}
         try:
             _escribir(gen.generar(libro, comprobantes, p, incluir_errores=incluir_errores,
-                                  config=conf if drivers.contrato.lleva_cuentas(mod) else None,
+                                  config=config if drivers.contrato.lleva_cuentas(modulo) else None,
                                   correlativos=correlativos), salida)
         except gen.ErroresBloqueantes as e:
             print(f"  {p:<5} NO generado: {e}. Corrige o usa --incluir-errores", file=sys.stderr)
@@ -145,14 +145,14 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     if args.revisar:
         validar.revisar(comprobantes, libro)
         print(_tabla(comprobantes))
-    contab = _leer_json(args.config) if args.config else None
+    config = _leer_json(args.config) if args.config else None
     imputacion = _leer_json(args.imputacion) if args.imputacion else None
     try:
-        conf = operaciones.con_imputacion(operaciones.configuracion(contab), imputacion, comprobantes)
+        config = operaciones.con_imputacion(operaciones.configuracion(config), imputacion, comprobantes)
     except operaciones.DocumentoInvalido as e:
         print(f"La imputación no se puede usar con este documento: {e}", file=sys.stderr)
         return 2
-    return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores, conf)
+    return _generar_todas(libro, comprobantes, args.driver, Path(args.salida), args.incluir_errores, config)
 
 
 def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
@@ -162,10 +162,10 @@ def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
 def cmd_diagnosticar(args: argparse.Namespace) -> int:
     """Qué bloquea, qué falta y qué saldría, antes de generar nada."""
     datos = _leer_json(args.json)
-    contab = _leer_json(args.config) if args.config else None
+    config = _leer_json(args.config) if args.config else None
     imputacion = _leer_json(args.imputacion) if args.imputacion else None
     try:
-        d = operaciones.diagnosticar(datos, contab, driver=args.driver, imputacion=imputacion)
+        d = operaciones.diagnosticar(datos, config, driver=args.driver, imputacion=imputacion)
     except operaciones.DocumentoInvalido as e:
         # El documento que no se puede leer, o una imputación que no es de él: el motivo va en `e`.
         print(f"No se puede diagnosticar: {e}", file=sys.stderr)

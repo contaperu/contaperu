@@ -49,73 +49,73 @@ class Opciones:
 _CONTROLES = re.compile(r"[\x00-\x1f\x7f]")
 
 
-def sanear(texto: str, op: Opciones) -> str:
+def sanear(texto: str, opciones: Opciones) -> str:
     """Texto apto para un campo del TXT: nunca lleva '|' (es el separador) ni
-    saltos de línea. Con `op.sanear`, además se convierte a ASCII (tildes fuera,
+    saltos de línea. Con `opciones.sanear`, además se convierte a ASCII (tildes fuera,
     Ñ → N) y '/' y '\\' → '-' (la Tabla 12 los prohíbe). El '&' se conserva: las
     razones sociales lo llevan."""
     s = _CONTROLES.sub(" ", str(texto or "")).replace("|", " ")
-    if op.sanear:
+    if opciones.sanear:
         s = unicodedata.normalize("NFKD", s)
         s = s.encode("ascii", "ignore").decode("ascii")
         s = s.replace("/", "-").replace("\\", "-")
     return " ".join(s.split())
 
 
-def formatear_fecha(d: date | None, op: Opciones) -> str:
+def formatear_fecha(d: date | None, opciones: Opciones) -> str:
     if d is None:
         return ""
-    if op.fecha == "AAAAMMDD":
+    if opciones.fecha == "AAAAMMDD":
         return d.strftime("%Y%m%d")
-    if op.fecha == "DD/MM/AAAA":
+    if opciones.fecha == "DD/MM/AAAA":
         return d.strftime("%d/%m/%Y")
-    raise ValueError(f"Formato de fecha desconocido: {op.fecha!r}")
+    raise ValueError(f"Formato de fecha desconocido: {opciones.fecha!r}")
 
 
-def formatear_monto(d: Decimal, op: Opciones, negativo: bool = False) -> str:
+def formatear_monto(d: Decimal, opciones: Opciones, negativo: bool = False) -> str:
     """`d` viene siempre positivo del modelo; el signo se decide aquí."""
     if d == 0:
-        return op.cero
+        return opciones.cero
     s = f"{d:.2f}"
     return f"-{s}" if negativo else s
 
 
-def formatear_cambio(c: Comprobante, op: Opciones) -> str:
+def formatear_cambio(c: Comprobante, opciones: Opciones) -> str:
     if c.moneda == "PEN":
-        return op.tc_pen
+        return opciones.tc_pen
     return f"{c.tipo_cambio:.3f}" if c.tipo_cambio else ""
 
 
-def formatear_numero(numero: str, op: Opciones) -> str:
+def formatear_numero(numero: str, opciones: Opciones) -> str:
     """Número del comprobante tal como va al archivo. Por defecto SIN ceros a la izquierda
     (`00028806` → `28806`): decisión de formato para el SIRE y, más adelante, para CONCAR —
     SUNAT identifica el comprobante por su número y los ceros son cosmética del emisor."""
     n = (numero or "").strip()
-    if op.sin_ceros and n.isdigit():
+    if opciones.sin_ceros and n.isdigit():
         return n.lstrip("0") or "0"
     return n
 
 
-def fmt_fecha_libre(v, op: Opciones) -> str:
+def fmt_fecha_libre(v, opciones: Opciones) -> str:
     """Para fechas que viven en un dict (detracción): acepta date o texto."""
     try:
-        return formatear_fecha(a_fecha(v), op)
+        return formatear_fecha(a_fecha(v), opciones)
     except ValueError:
         return ""
 
 
-def negativo(c: Comprobante, op: Opciones) -> bool:
-    return op.signo_nc and c.es_nota_credito
+def negativo(c: Comprobante, opciones: Opciones) -> bool:
+    return opciones.signo_nc and c.es_nota_credito
 
 
-def armar_linea(campos: list[str], op: Opciones) -> str:
+def armar_linea(campos: list[str], opciones: Opciones) -> str:
     linea = "|".join(campos)
-    return linea + "|" if op.palote_final else linea
+    return linea + "|" if opciones.palote_final else linea
 
 
-def columnas_igv_compras(c: Comprobante, op: Opciones) -> list[str]:
+def columnas_igv_compras(c: Comprobante, opciones: Opciones) -> list[str]:
     """Las 6 columnas de base/IGV de compras según el destino de la adquisición:
     DG (gravadas), DGNG (gravadas y no gravadas), DNG (no gravadas). La división es de `igv.por_destino`;
     aquí solo se escribe, con el signo de la nota de crédito."""
-    neg = negativo(c, op)
-    return [formatear_monto(v, op, neg) for pareja in por_destino(c) for v in pareja]
+    neg = negativo(c, opciones)
+    return [formatear_monto(v, opciones, neg) for pareja in por_destino(c) for v in pareja]

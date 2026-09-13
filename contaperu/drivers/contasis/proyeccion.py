@@ -21,9 +21,9 @@ from . import datos
 D2 = Decimal("0.01")
 
 
-def _importes(c: Comprobante, venta: bool) -> dict[str, Decimal]:
+def _importes(c: Comprobante, es_venta: bool) -> dict[str, Decimal]:
     """Los importes de la fila, columna por columna, en la moneda del documento y en positivo."""
-    if venta:
+    if es_venta:
         return {"I": c.exportacion, "J": c.base_gravada, "K": c.exonerado, "L": c.inafecto, "M": c.isc,
                 "N": c.igv, "O": c.otros, "AQ": c.icbper, "P": c.total}
     cargos = {"Q": c.isc, "R": c.otros, "AW": c.icbper, "S": c.total}
@@ -51,37 +51,37 @@ def _en_soles(importes: dict[str, Decimal], tipo: str, tc: Decimal) -> dict[str,
     return soles
 
 
-def valores(c: Comprobante, libro: Libro, contab: dict, op: Opciones = datos.OPCIONES) -> dict[str, Any]:
+def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.OPCIONES) -> dict[str, Any]:
     """Lo que va en cada columna antes del formato de celda: textos sin rellenar, importes en `Decimal` (en soles y
     con el signo de la nota de crédito) y fechas como `date`. `no_caben` mira aquí los largos."""
-    venta = libro.es_venta
-    cuenta, centro, _ = partes_de(c, contab, venta)[0]      # una sola parte: el núcleo ya exigió `cuenta_unica`
+    es_venta = libro.es_venta
+    cuenta, centro, _ = partes_de(c, config, es_venta)[0]      # una sola parte: el núcleo ya exigió `cuenta_unica`
     # El centro, donde la cuenta lo lleva: la misma regla que pone el centro en la columna M de CONCAR.
-    centro = centro if contab.get("usa_centros_costo", True) and lleva_centro(cuenta, contab) else ""
+    centro = centro if config.get("usa_centros_costo", True) and lleva_centro(cuenta, config) else ""
     es_usd = c.moneda == "USD"
-    importes = _importes(c, venta)
+    importes = _importes(c, es_venta)
     if es_usd and c.tipo_cambio:
         importes = _en_soles(importes, libro.tipo, Decimal(str(c.tipo_cambio)))
-    signo = Decimal(-1) if negativo(c, op) else Decimal(1)
+    signo = Decimal(-1) if negativo(c, opciones) else Decimal(1)
     importes = {k: v * signo for k, v in importes.items()}
-    cuentas = contab.get("cuentas") or {}
+    cuentas = config.get("cuentas") or {}
     nota = c.es_nota
     comunes = {
         "moneda": datos.MONEDAS.get(c.moneda, ""),
         "dolares": c.total * signo if es_usd else None,
         "cambio": (c.tipo_cambio if es_usd else Decimal(1)),
         "condicion": datos.CONDICIONES.get(c.condicion_pago, datos.CONDICION_SIN_DATO),
-        "tercero": cuenta_tercero(c, contab, venta),
+        "tercero": cuenta_tercero(c, config, es_venta),
         "glosa": glosa_de(c),
         "ref_fecha": c.ref_fecha if nota else None,
         "ref_tipo": c.ref_tipo_cp if nota else "",
         "ref_serie": c.ref_serie if nota else "",
-        "ref_numero": formatear_numero(c.ref_numero, op) if nota else "",
+        "ref_numero": formatear_numero(c.ref_numero, opciones) if nota else "",
     }
-    if venta:
+    if es_venta:
         return {
             "A": c.fecha_emision, "B": c.fecha_vencimiento, "C": c.tipo_cp, "D": c.serie,
-            "E": formatear_numero(c.numero, op), "F": c.contraparte_tipo_doc, "G": c.contraparte_doc,
+            "E": formatear_numero(c.numero, opciones), "F": c.contraparte_tipo_doc, "G": c.contraparte_doc,
             "H": c.contraparte_nombre, **importes,
             "Q": comunes["cambio"], "R": comunes["ref_fecha"], "S": comunes["ref_tipo"], "T": comunes["ref_serie"],
             "U": comunes["ref_numero"], "V": comunes["moneda"], "W": comunes["dolares"], "X": c.fecha_vencimiento,
@@ -90,12 +90,12 @@ def valores(c: Comprobante, libro: Libro, contab: dict, op: Opciones = datos.OPC
             # El régimen especial (detracción, percepción, retención) va vacío (John, 12-sep-2026).
             "AE": None, "AF": None, "AG": None, "AH": "", "AI": "", "AJ": None, "AK": "",
             "AL": tasa_legal(c.igv, c.base_gravada), "AM": comunes["glosa"],
-            "AN": str(contab.get("medio_pago") or datos.MEDIO_PAGO_DE_FABRICA), "AO": "", "AP": None,
+            "AN": str(config.get("medio_pago") or datos.MEDIO_PAGO_DE_FABRICA), "AO": "", "AP": None,
             "AR": (cuentas.get("icbper") or "") if importes["AQ"] else "",
         }
     return {
         "A": c.fecha_emision, "B": c.fecha_vencimiento, "C": c.tipo_cp, "D": c.serie or c.cod_dep_aduanera,
-        "E": c.anio_dua, "F": formatear_numero(c.numero, op), "G": c.contraparte_tipo_doc, "H": c.contraparte_doc,
+        "E": c.anio_dua, "F": formatear_numero(c.numero, opciones), "G": c.contraparte_tipo_doc, "H": c.contraparte_doc,
         "I": c.contraparte_nombre, **importes,
         # El no domiciliado y la constancia de la detracción van vacíos (John, 12-sep-2026: «no pongas nada»).
         "T": "", "U": "", "V": None, "W": comunes["cambio"],
@@ -114,12 +114,12 @@ def _fecha(d: date | None) -> datetime | None:
     return datetime.combine(d, time.min) if d else None
 
 
-def fila(c: Comprobante, libro: Libro, contab: dict, op: Opciones = datos.OPCIONES) -> dict[str, Any]:
+def fila(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.OPCIONES) -> dict[str, Any]:
     """La fila tal como va a las celdas, por letra: textos rellenos con espacios hasta su largo, fechas como
     `datetime`, importes, tipo de cambio y porcentajes como `float`. Un cero o un dato que no va, `None`: la celda
     queda vacía."""
     tipo = libro.tipo
-    crudos = valores(c, libro, contab, op)
+    crudos = valores(c, libro, config, opciones)
     salida: dict[str, Any] = {}
     for letra, _, clase, largo in datos.COLUMNAS[tipo]:
         valor = crudos.get(letra)
@@ -139,11 +139,11 @@ def fila(c: Comprobante, libro: Libro, contab: dict, op: Opciones = datos.OPCION
     return salida
 
 
-def no_caben(libro: Libro, comprobantes: list[Comprobante], contab: dict) -> dict[str, list[Comprobante]]:
+def no_caben(libro: Libro, comprobantes: list[Comprobante], config: dict) -> dict[str, list[Comprobante]]:
     """Lo que el registro de CONTASIS no puede llevar, por motivo (`datos.MOTIVOS`). Un código no se corta: una
     cuenta o una serie cortadas serían otra cuenta y otra serie."""
     tipo = libro.tipo
-    op = datos.OPCIONES
+    opciones = datos.OPCIONES
     salida: dict[str, list[Comprobante]] = {texto: [] for texto in datos.MOTIVOS.values()}
     for c in comprobantes:
         if c.moneda not in datos.MONEDAS:
@@ -152,11 +152,11 @@ def no_caben(libro: Libro, comprobantes: list[Comprobante], contab: dict) -> dic
         if c.moneda == "USD" and not c.tipo_cambio:
             salida[datos.MOTIVOS["cambio"]].append(c)
             continue
-        if c.numero_final and formatear_numero(c.numero_final, op) != formatear_numero(c.numero, op):
+        if c.numero_final and formatear_numero(c.numero_final, opciones) != formatear_numero(c.numero, opciones):
             salida[datos.MOTIVOS["rango"]].append(c)
         if c.base_ivap or c.ivap:
             salida[datos.MOTIVOS["ivap"]].append(c)
-        crudos = valores(c, libro, contab, op)
+        crudos = valores(c, libro, config, opciones)
         if any(len(" ".join(str(crudos.get(letra) or "").split())) > largo
                for letra, _, clase, largo in datos.COLUMNAS[tipo]
                if clase == datos.TEXTO and letra not in datos.SE_CORTAN[tipo]):

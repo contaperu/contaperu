@@ -24,11 +24,11 @@ from ...modelo import Comprobante
 from .datos import COLUMNAS, MARCA_CONVERSION, OPCIONES, TIPO_CONVERSION
 
 
-def codigo_moneda(moneda: str, contab: dict) -> str:
+def codigo_moneda(moneda: str, config: dict) -> str:
     """Columna E: el código de la T.G. 03. CONCAR solo admite MN y US (rechaza ME); otra moneda
     detiene la exportación en vez de inventarse un código."""
     moneda = (moneda or "PEN").upper()
-    codigo = (contab.get("monedas_codigo") or {}).get(moneda)
+    codigo = (config.get("monedas_codigo") or {}).get(moneda)
     if not codigo:
         raise MonedaSinCodigo([moneda])
     return codigo
@@ -43,7 +43,7 @@ def _importe(texto: Any) -> Any:
     return float(Decimal(str(texto))) if texto not in ("", None) else ""
 
 
-def fila(linea: LineaDiario, c: Comprobante, contab: dict) -> dict[str, Any]:
+def fila(linea: LineaDiario, c: Comprobante, config: dict) -> dict[str, Any]:
     """Una línea neutral → una fila del Excel (claves 'A'..'AO', en el orden de la plantilla)."""
     es_usd = linea.moneda == "USD"
     importe = _importe(linea.importe)
@@ -51,7 +51,7 @@ def fila(linea: LineaDiario, c: Comprobante, contab: dict) -> dict[str, Any]:
     f: dict[str, Any] = {col: "" for col in COLUMNAS}
     f.update({
         "B": linea.sub_diario, "C": linea.correlativo, "D": _fecha(linea.fecha),
-        "E": codigo_moneda(linea.moneda, contab),
+        "E": codigo_moneda(linea.moneda, config),
         # F: la glosa de la cabecera, igual en todas las filas del comprobante; W: la de la línea, con
         # su prefijo. Una sola glosa, dos largos: lo único que cambia es lo que admite CONCAR.
         "F": glosa_de(c)[:40], "W": linea.glosa[:30],
@@ -73,7 +73,7 @@ def fila(linea: LineaDiario, c: Comprobante, contab: dict) -> dict[str, Any]:
     if linea.rol == "detraccion":
         # El área (T.G. 26) es un número propio de cada empresa y solo va en esta fila (Excel validado).
         # No se corta a los 3 caracteres de la plantilla: cortar un código lo manda a OTRA área en silencio.
-        f["V"] = str(contab.get("detraccion_area") or "")
+        f["V"] = str(config.get("detraccion_area") or "")
     if ref:
         f.update({"Z": ref.get("tipo", ""), "AA": ref.get("serie_numero", "")[:20],
                   "AB": _fecha(ref.get("fecha"))})
@@ -84,20 +84,20 @@ def fila(linea: LineaDiario, c: Comprobante, contab: dict) -> dict[str, Any]:
     return f
 
 
-def filas(c: Comprobante, lineas: list[LineaDiario], contab: dict) -> list[dict[str, Any]]:
+def filas(c: Comprobante, lineas: list[LineaDiario], config: dict) -> list[dict[str, Any]]:
     """Las líneas de UN comprobante → sus filas del Excel."""
-    return [fila(ln, c, contab) for ln in lineas]
+    return [fila(ln, c, config) for ln in lineas]
 
 
-def filas_de_comprobante(c: Comprobante, contab: dict, limites: tuple[date, date], correlativo: str,
-                         op: Opciones = OPCIONES, venta: bool = False) -> list[dict[str, Any]]:
+def filas_de_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
+                         opciones: Opciones = OPCIONES, es_venta: bool = False) -> list[dict[str, Any]]:
     """Un comprobante → sus filas del Excel de CONCAR (claves 'A'..'AO'): su asiento neutral, proyectado.
 
     Era `asiento.asiento()`, la puerta de siempre hacia las columnas de CONCAR; salió del núcleo el 12-sep-2026 para
     que el núcleo no importe un driver. La moneda se comprueba antes que nada, como siempre: un EUR no llega a buscar
     su cuenta."""
-    codigo_moneda(c.moneda, contab)
-    return filas(c, lineas_del_comprobante(c, contab, limites, correlativo, op, venta), contab)
+    codigo_moneda(c.moneda, config)
+    return filas(c, lineas_del_comprobante(c, config, limites, correlativo, opciones, es_venta), config)
 
 
 def tasa_igv_entera(igv: Decimal, base_gravada: Decimal) -> Any:
@@ -198,9 +198,9 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
     )
 
 
-def a_lineas(filas: list[dict], contab: dict | None = None) -> list[LineaDiario]:
-    """Todas las filas de un asiento -> líneas neutrales. `contab` solo se usa para
+def a_lineas(filas: list[dict], config: dict | None = None) -> list[LineaDiario]:
+    """Todas las filas de un asiento -> líneas neutrales. `config` solo se usa para
     devolverle a la moneda su código ISO."""
-    codigos = (contab or {}).get("monedas_codigo") or {}
+    codigos = (config or {}).get("monedas_codigo") or {}
     monedas = {v: k for k, v in codigos.items()}
     return [desde_fila(f, monedas) for f in filas]
