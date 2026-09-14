@@ -9,7 +9,8 @@ El camino inverso —de las columnas de CONCAR a la línea— vive con su driver
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+import copy
+from dataclasses import asdict, dataclass, field, fields
 from typing import Any
 
 @dataclass
@@ -43,3 +44,20 @@ class LineaDiario:
         """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""
         d = asdict(self)
         return {k: v for k, v in d.items() if v not in ("", {}, None)}
+
+    @classmethod
+    def de_dict(cls, d: dict) -> "LineaDiario":
+        """Una línea del bloque `asiento` de un documento → `LineaDiario`. Rechaza (`ValueError`) una clave que no es de
+        la línea, una línea sin cuenta, sin sentido o sin importe, y un sentido que no es D ni H: una línea que llega
+        por JSON no se completa adivinando."""
+        if not isinstance(d, dict):
+            raise ValueError("Una línea del asiento tiene que ser un objeto")
+        desconocidas = sorted(set(d) - {f.name for f in fields(cls)})
+        if desconocidas:
+            raise ValueError(f"Claves que no son de una línea del asiento: {', '.join(desconocidas)}")
+        faltan = [clave for clave in ("cuenta", "debe_haber", "importe") if not str(d.get(clave) or "").strip()]
+        if faltan:
+            raise ValueError(f"A la línea del asiento le falta: {', '.join(faltan)}")
+        if d["debe_haber"] not in ("D", "H"):
+            raise ValueError(f"debe_haber tiene que ser D o H, no {d['debe_haber']!r}")
+        return cls(**copy.deepcopy(d))

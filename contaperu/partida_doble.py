@@ -18,11 +18,12 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Iterable
 
+from .errores import ErrorContaperu
 from .modelo import CENTIMO, CERO
 
 
 
-class Descuadre(Exception):
+class Descuadre(ErrorContaperu):
     """El asiento no cuadra. Lleva el resultado para poder decir por cuánto."""
 
     def __init__(self, resultado: "Cuadre") -> None:

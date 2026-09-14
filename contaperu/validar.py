@@ -16,7 +16,7 @@ from typing import Iterable
 from . import catalogos as cat
 from .modelo import Comprobante, Libro, solo_digitos
 
-TOLERANCIA = Decimal("0.05")
+TOLERANCIA = cat.TOLERANCIA_IGV
 
 # Plazo para anotar una compra en el Registro de Compras: «el mes de su emisión o del pago del
 # Impuesto, según sea el caso, o … los 12 (doce) meses siguientes» (Ley 29215, art. 2, texto del

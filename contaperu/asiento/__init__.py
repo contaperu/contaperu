@@ -51,7 +51,8 @@ from .resolucion import (comprobantes_sin_centro, comprobantes_sin_cuenta, con_r
                          correlativos_de_partida, cuenta_honorarios,
                          cuenta_por_pagar, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
                          etiquetas_sub_diario, exigir_requisitos, faltantes_para, fundir_config, imputacion_de,
-                         limites_del_periodo, lleva_centro, monedas_sin_codigo, numerar, partes_de, reparto_no_cuadra,
+                         limites_del_periodo, lleva_centro, monedas_sin_codigo, numerar, numerar_en_orden, partes_de,
+                         reparto_no_cuadra,
                          repartos_que_no_cuadran, sigla_documento, sub_diario, sub_diarios_presentes,
                          tiene_detraccion, tipos_sin_sigla)
 from .huella import huella
@@ -66,7 +67,8 @@ __all__ = [
     "comprobantes_sin_cuenta", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",
     "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo",
     "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para", "fundir_config", "imputacion_de",
-    "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar", "partes_de", "reparto_no_cuadra",
+    "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar", "numerar_en_orden", "partes_de",
+    "reparto_no_cuadra",
     "repartos_que_no_cuadran", "sigla_documento", "sub_diario", "sub_diarios_presentes", "tiene_detraccion",
     "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro",

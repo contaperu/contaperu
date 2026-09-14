@@ -307,7 +307,17 @@ def numerar(comprobantes: list[Comprobante], config: dict, periodo: str,
             correlativos: dict[str, int], es_venta: bool = False) -> tuple[dict[int, str], dict[str, dict]]:
     """Asigna a cada comprobante (por `id()` del objeto) su número `MMNNNN`, en el orden
     recibido (el natural del registro). Devuelve también el rango usado por sub-diario,
-    que es lo que se recuerda para proponer el siguiente."""
+    que es lo que se recuerda para proponer el siguiente.
+
+    Es la forma de la 0.x, que ata el resultado a la identidad de cada objeto; la del motor es `numerar_en_orden`."""
+    numeros, rangos = numerar_en_orden(comprobantes, config, periodo, correlativos, es_venta)
+    return {id(c): numero for c, numero in zip(comprobantes, numeros)}, rangos
+
+
+def numerar_en_orden(comprobantes: list[Comprobante], config: dict, periodo: str,
+                     correlativos: dict[str, int], es_venta: bool = False) -> tuple[list[str], dict[str, dict]]:
+    """El número `MMNNNN` de cada comprobante, en el orden recibido y en la misma posición, y el rango usado por
+    sub-diario. No depende de la identidad de los objetos: dos llamadas con los mismos datos dan lo mismo."""
     mes_mm = str(periodo)[4:6]
     sin_equivalencia = tipos_sin_sigla(comprobantes, config)
     if sin_equivalencia:
@@ -319,12 +329,12 @@ def numerar(comprobantes: list[Comprobante], config: dict, periodo: str,
     contadores = {s: int(correlativos[s]) for s in presentes}
     if any(n < 1 for n in contadores.values()):
         raise ValueError("Los correlativos empiezan en 1")
-    numeros: dict[int, str] = {}
+    numeros: list[str] = []
     rangos: dict[str, dict] = {s: {"desde": n, "hasta": n - 1, "comprobantes": 0} for s, n in contadores.items()}
     for c in comprobantes:
         s = sub_diario(c, config, es_venta)
         n = contadores[s]
-        numeros[id(c)] = f"{mes_mm}{n:04d}"
+        numeros.append(f"{mes_mm}{n:04d}")
         rangos[s]["hasta"] = n
         rangos[s]["comprobantes"] += 1
         contadores[s] = n + 1

@@ -23,11 +23,12 @@ from .asiento.huella import huella
 from .asiento.motor import lineas_del_libro
 from .configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
 from .drivers import contrato
+from .errores import ErrorContaperu
 from .modelo import Comprobante, Libro, serie_y_numero
 from .formato import Opciones
 
 
-class ErroresBloqueantes(Exception):
+class ErroresBloqueantes(ErrorContaperu):
     def __init__(self, errores: list[dict]):
         super().__init__(f"{len(errores)} comprobante(s) con errores que bloquean la exportación")
         self.errores = errores

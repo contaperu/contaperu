@@ -7,6 +7,8 @@ son el Catálogo 05 de la factura electrónica (UBL 2.1).
 """
 from __future__ import annotations
 
+from decimal import Decimal
+
 # Tipo de comprobante (2 dígitos). Se listan los que un estudio contable ve de verdad.
 TIPOS_CP: dict[str, str] = {
     "00": "Otros",
@@ -86,6 +88,9 @@ TRIBUTO_OTROS = "9999"
 # (restaurantes y hoteles) se aceptan con aviso, no como error.
 TASA_IGV = "0.18"
 TASAS_IGV_REDUCIDAS = ("0.10", "0.105", "0.08")
+# Cuánto puede separarse el IGV escrito del calculado por redondeos del emisor. Vivía en `validar.py` y la leía
+# también `igv.py`, que por eso dependía de la validación entera (1.0: las dependencias ocultas se cortan).
+TOLERANCIA_IGV = Decimal("0.05")
 
 # schemeID del Catálogo 06 → Tabla 1 (coinciden salvo matices).
 SCHEME_A_TIPO_DOC = {"0": "0", "1": "1", "4": "4", "6": "6", "7": "7", "A": "A", "-": "0"}

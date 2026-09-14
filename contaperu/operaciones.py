@@ -21,6 +21,7 @@ from . import configuracion as _declaracion
 from . import detracciones, drivers, generar as gen, pcge, partida_doble, validar
 from .asiento.faltas import CONTADOR, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
 from .configuracion import CLAVES_RETIRADAS, CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
+from .errores import ErrorContaperu
 from .lectores import archivos as lectura_archivos, sire_txt
 from .modelo import Comprobante, Libro, serie_y_numero
 
@@ -33,7 +34,7 @@ from ._version import OPEN_ACCOUNTING  # noqa: E402  (constante, no un módulo)
 MAXIMO_COMPROBANTES = 5000
 
 
-class DocumentoInvalido(ValueError):
+class DocumentoInvalido(ErrorContaperu, ValueError):
     """El documento no cumple el estándar lo bastante como para poder trabajar con él."""
 
 

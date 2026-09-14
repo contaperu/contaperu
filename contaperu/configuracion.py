@@ -25,6 +25,8 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from .errores import ErrorContaperu
+
 _ESPERADO = {"texto": "un texto", "booleano": "verdadero o falso", "numero": "un número", "lista": "una lista",
              "mapa": "un objeto", "objeto": "un objeto"}
 
@@ -67,7 +69,7 @@ class Columna:
     campo: str = ""
 
 
-class ConfiguracionInvalida(ValueError):
+class ConfiguracionInvalida(ErrorContaperu, ValueError):
     """La configuración no cumple lo declarado. `errores` los trae todos, cada uno con su ruta, para arreglarlos de
     una vez y no de uno en uno."""
 
