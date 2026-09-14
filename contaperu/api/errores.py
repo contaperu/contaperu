@@ -10,6 +10,7 @@ from ..asiento.faltas import (NoExportable, RepartoNoAdmitido, RepartoNoCuadra, 
 from ..configuracion import ConfiguracionInvalida
 from ..drivers.concar import CorrelativoDesborda
 from ..drivers.contrato import NoCabe
+from ..drivers.sire import CampoCambiaDeSigno
 from ..errores import DocumentoInvalido, ErrorContaperu, ErroresBloqueantes
 from ..igv import IgvImposible, TotalImposible
 from ..lectores.sire_txt import SireInvalido
@@ -17,7 +18,7 @@ from ..lectores.xml_ubl import XmlInvalido
 from ..partida_doble import Descuadre
 from ..pcge.adaptar import TablaInvalida
 
-__all__ = ["ConfiguracionInvalida", "CorrelativoDesborda", "Descuadre", "DocumentoInvalido", "ErrorContaperu",
+__all__ = ["CampoCambiaDeSigno", "ConfiguracionInvalida", "CorrelativoDesborda", "Descuadre", "DocumentoInvalido", "ErrorContaperu",
            "ErroresBloqueantes", "IgvImposible", "NoCabe", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
            "SinCentro", "SinCodigoDeMoneda", "SinCorrelativo", "SinCuenta", "SinSigla", "SireInvalido",
            "TablaInvalida", "TotalImposible", "XmlInvalido", "problema"]

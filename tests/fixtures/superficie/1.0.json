@@ -1,5 +1,6 @@
 {
  "contaperu.api": {
+  "CampoCambiaDeSigno": "clase",
   "Comprobante": "clase",
   "ConfiguracionInvalida": "clase",
   "CorrelativoDesborda": "clase",
@@ -442,6 +443,7 @@
  },
  "contaperu.drivers.sire": {
   "CANAL": "",
+  "CampoCambiaDeSigno": "",
   "EXCLUYE_TIPOS": "",
   "FORMATOS": "",
   "LIBRO_COMPRAS": "",

@@ -159,3 +159,18 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
     exc = g.generar(libro, cs, "concar", config=con_imputaciones(prep.config_aplicada(None, "concar")),
                     correlativos={"11": 1, "15": 1})
     assert exc.comprobantes == 3 and exc.resumen["fuera_del_destino"] == 0
+
+
+def test_una_nota_que_cambiaria_de_signo_no_se_escribe_y_dice_cual():
+    """Hasta la 0.10 esto era un `assert`: con `python -O` el TXT habría salido con el campo 15 en positivo."""
+    from contaperu import api
+    from contaperu.drivers import sire
+    from contaperu.modelo import Comprobante, Libro
+
+    libro = Libro(ruc="20131312955", razon_social="EMISOR DE PRUEBA S.A.C.", periodo="202601", tipo="venta")
+    nota = Comprobante(tipo_cp="07", serie="FC01", numero="1", fecha_emision="2026-01-10", contraparte_tipo_doc="6",
+                       contraparte_doc="20601234567", base_gravada="100", igv="18", total="118", dscto_base="150")
+    with pytest.raises(api.CampoCambiaDeSigno, match="DSCTO_MAYOR_QUE_BASE") as error:
+        sire.linea(nota, libro, 1)
+    assert isinstance(error.value, api.NoExportable) and error.value.comprobantes == [nota]
+    assert error.value.clave == "campo_cambia_de_signo"

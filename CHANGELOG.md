@@ -133,6 +133,10 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   regenerarse» con el número de la constancia. En un destino que suma lo importado, regenerarlo duplica; el segundo
   tiempo es una decisión contable que entrará con su fuente y un archivo real.
 
+- **El TXT del SIRE no usa `assert`.** Una nota de crédito cuyo descuento cambiaría de signo el campo 15 o el 17 del
+  RVIE se niega con `CampoCambiaDeSigno`, un `NoExportable` que trae la nota, en vez de un `AssertionError` que
+  `python -O` se saltaba. Un test impide `assert` en todo el paquete.
+
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
   avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen

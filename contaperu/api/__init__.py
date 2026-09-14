@@ -22,7 +22,7 @@ from ..modelo import Comprobante, Libro, Observacion, serie_y_numero
 from ..pipeline.preparacion import MAXIMO_CLAVES_PREVIAS, MAXIMO_COMPROBANTES
 from ..pipeline.salida import Exportado
 from .documento import documento_de
-from .errores import (ConfiguracionInvalida, CorrelativoDesborda, Descuadre, DocumentoInvalido, ErrorContaperu,
+from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesborda, Descuadre, DocumentoInvalido, ErrorContaperu,
                       ErroresBloqueantes, IgvImposible, NoCabe, NoExportable, RepartoNoAdmitido, RepartoNoCuadra,
                       SinCentro, SinCodigoDeMoneda, SinCorrelativo, SinCuenta, SinSigla, SireInvalido, TablaInvalida,
                       TotalImposible, XmlInvalido, problema)
@@ -46,7 +46,7 @@ __all__ = [
     # errores
     "ErrorContaperu", "DocumentoInvalido", "ConfiguracionInvalida", "ErroresBloqueantes", "NoExportable", "NoCabe",
     "SinCuenta", "SinCentro", "SinSigla", "SinCodigoDeMoneda", "SinCorrelativo", "RepartoNoCuadra",
-    "RepartoNoAdmitido", "CorrelativoDesborda", "Descuadre", "XmlInvalido", "SireInvalido", "IgvImposible",
+    "RepartoNoAdmitido", "CorrelativoDesborda", "CampoCambiaDeSigno", "Descuadre", "XmlInvalido", "SireInvalido", "IgvImposible",
     "TotalImposible", "TablaInvalida", "problema",
     # versiones y avisos
     "RutaObsoleta", "OPEN_ACCOUNTING", "__version__",

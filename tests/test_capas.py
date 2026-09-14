@@ -248,3 +248,11 @@ def test_lo_peruano_por_contenido_sigue_donde_se_dice(ruta):
     import importlib
     modulo, _, nombre = ruta.partition(":")
     assert hasattr(importlib.import_module(modulo), nombre)
+
+
+def test_no_hay_assert_en_el_paquete():
+    """Un `assert` desaparece con `python -O`: lo que protege un archivo no puede depender de cómo se arranca Python. Lo
+    que no se cumple se dice con una excepción del motor."""
+    culpables = [f"{modulo}:{nodo.lineno}" for modulo, archivo in MODULOS.items()
+                 for nodo, _ in _recorrer(ast.parse(archivo.read_text(encoding="utf-8"))) if isinstance(nodo, ast.Assert)]
+    assert culpables == []
