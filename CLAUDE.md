@@ -7,14 +7,14 @@ dice dónde buscarlo.
 ## Qué es
 
 `contaperu` es **el núcleo contable abierto del Perú**: el estándar de datos `open-accounting`, el motor que lee
-comprobantes (el XML de SUNAT, la propuesta del SIRE), los valida, arma el asiento y lo exporta a CONCAR, al SIRE y a
-un CSV genérico, y un servidor MCP para que un agente de IA lo use. Licencia **MIT**; lo mantiene **Global Procesos
-AI S.A.C.** (Lima). El repositorio (`github.com/contaperu/contaperu`) está **privado por ahora** y se abrirá cuando
-John lo decida: **lo que entra en internet no sale**, tampoco del historial de git, así que se escribe desde hoy
-como si ya fuera público (nada real de nadie, nada de infraestructura ajena a este repo). **Distribuir es
-publicar**: subirlo a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y el OK explícito de John.
+comprobantes (el XML de SUNAT, la propuesta del SIRE), los valida, arma el asiento y lo exporta a CONCAR, a CONTASIS, al
+SIRE y a un CSV genérico, y un servidor MCP para que un agente de IA lo use. Licencia **MIT**; lo mantiene **Global
+Procesos AI S.A.C.** (Lima). El repositorio (`github.com/contaperu/contaperu`) está **privado por ahora** y se abrirá
+cuando John lo decida: **lo que entra en internet no sale**, tampoco del historial de git, así que se escribe desde hoy
+como si ya fuera público (nada real de nadie, nada de infraestructura ajena a este repo). **Distribuir es publicar**:
+subirlo a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y el OK explícito de John.
 
-## De qué visión sale (copia del `VISION.md` de Global Procesos AI, 12-sep-2026)
+## De qué visión sale (copia del `VISION.md` de Global Procesos AI, 13-sep-2026)
 
 - **Misión:** devolverle a las personas el tiempo que hoy se les va en trabajo repetitivo, con automatización e IA al
   alcance de cualquier empresa, **montadas encima de los sistemas que ya usan**.
@@ -24,7 +24,7 @@ publicar**: subirlo a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y
   depende de nadie).
 - Su sitio en la hoja de ruta: es **el motor de la línea 2**, la capa contable inteligente sobre CONCAR o cualquier
   sistema (el producto Contabilidad Inteligente), cuyo MVP es cargar comprobantes → revisar → exportar a un clic el
-  Excel de asientos para CONCAR y/o el TXT del SIRE. Regla vigente del producto: **se afina lo que existe, no se
+  Excel de CONCAR o de CONTASIS y/o el TXT del SIRE. Regla vigente del producto: **se afina lo que existe, no se
   añaden módulos**; en el motor eso significa que cada regla entra con su fuente y su caso real, no por si acaso.
 - Es una copia y no una importación, a propósito: este repo se abrirá y no puede depender de un archivo del disco de
   nadie. Si la visión cambia, se actualiza esta sección con la fecha.
@@ -59,7 +59,7 @@ Las siete reglas completas están en `ARQUITECTURA.md` §«Lo que no se negocia�
 
 1. **Ninguna regla contable sin fuente.** La norma, la resolución o el archivo real va al lado, en el código. Un
    refactor mueve reglas; no las escribe.
-2. **El Excel de CONCAR validado no cambia.** `tests/test_snapshot_concar.py` lo vigila celda a celda (42 casos).
+2. **El Excel de CONCAR validado no cambia.** `tests/test_snapshot_concar.py` lo vigila celda a celda (52 casos).
 3. **Un tipo sin sigla detiene la exportación.** Nunca se inventa una sigla.
 4. **Sin red, sin disco, sin estado, sin reloj en el núcleo** (`tests/test_frontera.py`): la fecha la pone quien llama.
 5. **`Decimal` de punta a punta**, `float` solo en el borde de escritura del archivo.

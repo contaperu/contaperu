@@ -196,8 +196,9 @@ contable: son transporte y trazabilidad.
 si acaso—:** entraron los tres que tenían caso real hoy: **`_exportacion`** con la huella (el Excel de CONCAR
 se suma al importarlo dos veces), **`EXIGE`** en el contrato de driver (el portal se negaba sin centro de
 costo y el motor solo avisaba: una regla viviendo fuera del motor) y **`pedir_a`** (como
-`diagnosticar.que_falta[].pedir_a`; `proveedor` reservado). Los otros tres —`id_externo`, `dimensiones` y
-`estado` de la línea— quedan como **nombres reservados** en `estandar/LEEME.md` hasta que haya un caso.
+`diagnosticar.que_falta[].pedir_a`; `proveedor` reservado). De los otros tres, `id_externo`
+entró en el comprobante con la librería 0.10.0 (el caso llegó: la imputación de cada documento viaja por él), y
+`dimensiones` y `estado` de la línea quedan como **nombres reservados** en `estandar/LEEME.md` hasta que haya un caso.
 
 | Dónde | Campo | Lo inspira | Qué caso peruano lo necesita | Qué test lo fijaría |
 |---|---|---|---|---|

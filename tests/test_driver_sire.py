@@ -1,11 +1,12 @@
 """La plantilla `sire` sigue los anexos oficiales (Anexo 3 RVIE / Anexo 11 RCE).
 
-La estructura de VENTAS está contrastada contra un archivo REAL aceptado por SUNAT
-(RVIE de julio de un estudio contable, 25-ago-2026): 33 campos y palote final, sin los campos
-34-40 que completa la Administración. El archivo no vive en el repo —es data de un
-cliente—, así que aquí se prueba la forma que se comprobó con él: número de campos,
-cabecera, fechas DD/MM/AAAA, CRLF, nombre del archivo, signo de las notas de crédito,
-tipo de cambio y saneado a ASCII.
+La estructura de VENTAS está contrastada contra un archivo REAL aceptado por SUNAT (RVIE de julio de
+un estudio contable, 25-ago-2026): 33 campos y palote final, sin los campos 34-40 que completa la
+Administración; la de COMPRAS, contra el RCE real presentado del mismo mes (27-ago-2026): 41 campos
+y palote final, con los 38-41 vacíos pero presentes. Los archivos no viven en el repo —son data de
+un cliente—, así que aquí se prueba la forma que se comprobó con ellos: número de campos, cabecera,
+fechas DD/MM/AAAA, CRLF, nombre del archivo, signo de las notas de crédito, tipo de cambio y saneado
+a ASCII.
 """
 from decimal import Decimal
 
@@ -119,8 +120,8 @@ def test_los_vacios_del_final_de_COMPRAS_son_una_opcion_no_codigo():
 
     Ventas ya pasó por esto: la nota del Anexo 3 decía que los 34-40 "los completa la
     Administración" y hubo que dejar de mandarlos. La del Anexo 11 dice lo contrario
-    ("deberán mostrarse vacíos"), así que van; pero no está comprobado contra un RCE
-    aceptado, y el arreglo no puede pedir tocar la plantilla.
+    ("deberán mostrarse vacíos"), así que van, y así salió idéntico al RCE real presentado
+    (27-ago-2026); pero si SUNAT cambia de idea, el arreglo no puede pedir tocar el driver.
     """
     libro, comprobantes = cargar_golden("compras_202601.json")
     largo = campos(g.lineas_de_texto(libro, comprobantes[:1], "sire")[0], palote_final=True)

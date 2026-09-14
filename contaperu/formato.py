@@ -33,11 +33,11 @@ class Opciones:
     # Mandarlos vacíos era lo que hacía el generador antes y da 40 campos por fila.
     rvie_vacios: int = 0
     # SIRE Anexo 11 (compras): aquí la nota de SUNAT dice lo CONTRARIO que en ventas —
-    # "los campos 38 al 41 deberán mostrarse vacíos"—, así que van (37 + 4). No está
-    # comprobado contra un RCE aceptado: si SUNAT devuelve el 453 en compras, la
-    # respuesta es `rce_vacios=0`, sin tocar código. Que en ventas la nota fuera
-    # "los completa la Administración" y aun así hubiera que quitarlos es el motivo
-    # de que esto sea una opción y no un número escrito en el driver.
+    # "los campos 38 al 41 deberán mostrarse vacíos"—, así que van (37 + 4). Comprobado
+    # contra un RCE real presentado (julio de 2026, contrastado el 27-ago-2026): el archivo
+    # generado salió idéntico, 41 campos y palote. Que en ventas la nota fuera "los completa
+    # la Administración" y aun así hubiera que quitarlos es el motivo de que siga siendo una
+    # opción y no un número escrito en el driver: si SUNAT cambia de idea, `rce_vacios=0`.
     rce_vacios: int = 4
     codificacion: str = "ascii"
 

@@ -44,7 +44,7 @@ reales, y el estándar se deriva de su modelo, no al revés.
 
 ```bash
 pip install contaperu              # el núcleo
-pip install "contaperu[excel]"     # + exportar a CONCAR (.xlsx)
+pip install "contaperu[excel]"     # + exportar a CONCAR y CONTASIS (.xlsx)
 pip install "contaperu[mcp]"       # + el servidor MCP
 pip install "contaperu[todo]"      # todo
 ```
@@ -180,8 +180,9 @@ Y **la partida doble**, sin tolerancia: un céntimo de diferencia detiene la exp
 | Comprobante en dólares | el tipo de cambio del comprobante, y la detracción convertida a soles |
 | Comprobante extemporáneo | se asienta dentro del periodo, conservando la fecha del documento |
 
-**Exporta** a CONCAR (Excel de 41 columnas), al SIRE (TXT de reemplazo del RVIE y del RCE) y a un CSV
-genérico con las líneas de diario, para cualquier destino que todavía no tenga driver.
+**Exporta** a CONCAR (Excel de asientos de 41 columnas), a CONTASIS (su registro de compras y de ventas en
+Excel), al SIRE (TXT de reemplazo del RVIE y del RCE) y a un CSV genérico con las líneas de diario, para cualquier
+destino que todavía no tenga driver.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta
 para el sistema de destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos),
@@ -244,7 +245,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-333 tests, sin red y sin credenciales.
+533 tests, sin red y sin credenciales.
 
 Lo más valioso que puedes aportar es un **driver de salida** para un ERP que hoy no está — ver
 [CONTRIBUTING.md](CONTRIBUTING.md) — o un **caso real** que el motor resuelva mal: un asiento que tu sistema
@@ -259,7 +260,7 @@ real que la justifica va al lado, en el código.
 
 **ContaPerú is the open accounting core for Peru.** It reads the electronic receipts issued through
 SUNAT (Peru's tax authority), builds the double-entry journal and exports it to the format each
-local accounting system expects — CONCAR, the SIRE tax filing, or plain CSV. No database, no state,
+local accounting system expects — CONCAR, CONTASIS, the SIRE tax filing, or plain CSV. No database, no state,
 no network calls: JSON in, JSON or a file out.
 
 It also defines **`open-accounting`**, an open interchange format for Peruvian accounting documents

@@ -13,7 +13,7 @@ para quien vaya a contribuir, y la lista de decisiones que no hay que volver a d
 │      «¿qué falta?», «¿qué saldría?», «¿qué bloquea?»        │
 ├─────────────────────────────────────────────────────────────┤
 │  2 · DRIVERS                                                │
-│      sire (TXT) · concar (Excel) · csv · los de terceros    │
+│      sire (TXT) · concar y contasis (Excel) · csv · terceros│
 │      cada uno traduce vocabulario; ninguno decide contabilidad│
 ├─────────────────────────────────────────────────────────────┤
 │  1 · NÚCLEO                                                 │
@@ -174,8 +174,8 @@ no añade ninguna regla contable —reúne comprobaciones que ya existían y las
 Desde la 0.8 responde además **para qué destino** (`exige`) y **a quién pedir** lo que falta
 (`que_falta[].pedir_a`: `contador` si se resuelve mirando el documento o el plan de cuentas; `sistema`
 si es configuración del destino o un dato público que no está en el papel; `proveedor` reservado). Y
-cada exportación deja su **huella** (`_exportacion.huella`, `asiento/huella.py`): la misma tanda
-exportada dos veces lleva la misma, que es lo que permite avisar de que ese contenido ya salió.
+cada exportación deja su **huella** (`_exportacion.huella`, `asiento/huella.py`): la misma
+exportación repetida lleva la misma, que es lo que permite avisar de que ese contenido ya salió.
 
 Esa es la forma en que crecerá esta capa: **cada pregunta de un agente se responde con reglas que ya
 tienen fuente**, nunca con una regla nueva escrita para el agente.

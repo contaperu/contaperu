@@ -20,8 +20,11 @@ sirve como estándar. **El tag `open-accounting-0.3` avanza con cada cambio adit
 sube la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la 0.3; un cambio
 de significado sube a 0.4 y estrena su propio tag.
 
+Para comprobar un documento con el motor —lo lee con las mismas reglas que el servidor MCP y dice qué bloquea y qué
+falta—:
+
 ```bash
-python -m contaperu.cli validar mi-documento.json
+python -m contaperu.cli diagnosticar mi-documento.json
 ```
 
 ---
@@ -242,7 +245,7 @@ significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la libr
 - **`_exportacion`** — en la respuesta de `exportar`: `{driver, archivo, huella, fecha}`. La **huella** es el
   sha256 del contenido del asiento que salió: las líneas neutrales, en su orden, **sin el correlativo**,
   serializadas con `json.dumps(sort_keys=True, ensure_ascii=False, separators=(",", ":"))`. Responde «¿este
-  contenido ya salió?» —la misma tanda exportada otra vez tras un «deshacer» arranca en otro número y lleva la
+  contenido ya salió?» —la misma exportación repetida tras un «deshacer» arranca en otro número y lleva la
   misma huella—, que es lo que hace falta para avisar de un lote repetido: el Excel de CONCAR se suma al
   importarlo dos veces. Un registro tributario (el TXT del SIRE) no la lleva: no hay asiento. La `fecha`
   (`AAAA-MM-DD`) la pone quien llama; el motor no mira el reloj. La fórmula es contrato: cambiarla se anuncia.
@@ -286,6 +289,6 @@ El CONTASIS de John no los usa (12-sep-2026), así que sigue reservado.
 - **No es un plan de cuentas.** Las cuentas son las del contribuyente; el estándar solo las transporta.
 - **No es un formato de factura electrónica.** Eso es UBL 2.1, y SUNAT ya lo define. `open-accounting` empieza
   donde la factura termina.
-- **No es un libro electrónico.** El TXT del SIRE y los archivos del PLE son salidas, no el estándar.
+- **No es un libro electrónico.** El TXT del SIRE y los Excel de CONCAR y de CONTASIS son salidas, no el estándar.
 - **No lleva estado.** No hay identificadores de base de datos, ni usuarios, ni empresas: un documento
   `open-accounting` se entiende solo, en cualquier máquina, sin consultar nada.

@@ -11,7 +11,8 @@ un contribuyente real, 25-ago-2026): cada línea lleva **33 campos y termina en 
 campos 34-40, que "completa la Administración", NO se mandan — mandarlos vacíos
 daba 40 campos por fila, que es exactamente el error 453 "la fila no cumple con
 la estructura". En compras (Anexo 11) la nota de SUNAT es distinta: los campos
-38-41 "deberán mostrarse vacíos", así que ahí sí van presentes (37 + 4).
+38-41 "deberán mostrarse vacíos", así que ahí sí van presentes (37 + 4), y así salió
+idéntico al RCE real presentado del mismo mes (contrastado el 27-ago-2026).
 
 Nombre (Tabla 13 / Tabla 6): LE + RUC + AAAAMM + 00 + libro (140400 / 080400)
 + 02 (reemplaza la propuesta) + 1 (operativa) + 1 (con información) + 1 (soles)
@@ -117,10 +118,11 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCI
 def linea_rce(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCIONES) -> str:
     """Anexo 11 — 37 campos informados + los 38-41 vacíos (`rce_vacios`).
 
-    OJO: esto NO está contrastado contra un RCE aceptado. Se mandan porque la nota (2)
+    Contrastado contra un RCE REAL presentado (julio de un contribuyente real, 27-ago-2026):
+    el archivo generado salió idéntico, 41 campos y palote. Se mandan porque la nota (2)
     del Anexo 11 lo pide de forma explícita ("deberán mostrarse vacíos"), al revés que
     la del Anexo 3 de ventas ("los completa la Administración"), que resultó significar
-    que NO se mandan. Si compras devuelve el 453, `rce_vacios=0`.
+    que NO se mandan. Sigue siendo una opción: si compras devolviera el 453, `rce_vacios=0`.
     """
     neg = negativo(c, opciones)
     m = lambda d, n=neg: formatear_monto(d, opciones, n)  # noqa: E731
