@@ -260,7 +260,7 @@ en silencio.
 Las claves que empiezan con `_` son anotaciones: se transportan, se ignoran y nunca llevan datos con
 significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la librería):
 
-- **`_exportacion`** — en la respuesta de `exportar`: `{driver, archivo, huella, fecha}`. La **huella** es el
+- **`_exportacion`** — en la respuesta de `exportar`: `{driver, archivo, huella, fecha, comprobantes, motor}`. La **huella** es el
   sha256 del contenido del asiento que salió: las líneas neutrales, en su orden, **sin el correlativo**,
   serializadas con `json.dumps(sort_keys=True, ensure_ascii=False, separators=(",", ":"))`. Responde «¿este
   contenido ya salió?» —la misma exportación repetida tras un «deshacer» arranca en otro número y lleva la
@@ -268,6 +268,12 @@ significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la libr
   importarlo dos veces. Un registro tributario (el TXT del SIRE) no la lleva: no hay asiento. La `fecha`
   (`AAAA-MM-DD`) la pone quien llama; el motor no mira el reloj. La fórmula es contrato: cambiarla se anuncia.
 - **`_asiento.huella`** — en la respuesta de `generar_asiento`, la misma huella de esas líneas.
+- **`comprobantes`** — en `_exportacion` y en `_asiento` (desde la 1.0), lo que salió de cada comprobante: su
+  `identidad` («La identidad de un comprobante»), el tramo `lineas` `[desde, hasta)` de las líneas del asiento que le
+  tocan y la `huella` de ese tramo. Los tramos son una partición exacta y cada uno cuadra. Un registro que no arma
+  asiento —el TXT del SIRE, el de CONTASIS— lleva solo la identidad.
+- **`motor`** — en `_exportacion` y en `_asiento` (desde la 1.0), la versión de la librería que produjo la respuesta.
+  No entra en ninguna huella: la misma tanda exportada con otra versión sigue siendo la misma tanda.
 
 Un productor que guarde un documento puede copiar `_exportacion` en su raíz tal cual: el esquema admite ahí
 cualquier clave `_`. Dentro de un comprobante o de una línea, no.

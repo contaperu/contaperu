@@ -86,9 +86,19 @@ def _respuesta(respuesta: dict) -> dict:
     return respuesta
 
 
+def _sin_version(respuesta):
+    """La versión del motor (`_asiento.motor`, `_exportacion.motor`) cambia con cada versión y no es comportamiento: se
+    congela como una marca."""
+    if isinstance(respuesta, dict):
+        for bloque in ("_asiento", "_exportacion"):
+            if isinstance(respuesta.get(bloque), dict) and "motor" in respuesta[bloque]:
+                respuesta[bloque]["motor"] = "(versión del motor)"
+    return respuesta
+
+
 def _llamar(funcion) -> dict:
     try:
-        return funcion()
+        return _sin_version(funcion())
     except Exception as error:                     # lo que se niega también es comportamiento
         return {"_error": type(error).__name__, "_mensaje": str(error)}
 

@@ -436,7 +436,55 @@
     "lineas": 9,
     "sin_sentido": 0
    },
-   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
   }
  },
  "exportar/concar": {
@@ -454,7 +502,6 @@
    "total": "78824.00",
    "igv": "12024.00",
    "filas": 9,
-   "fechas": "por comprobante (extemporáneos al 01/01/2026)",
    "sub_diarios": {
     "11": {
      "etiqueta": "Compras",
@@ -468,12 +515,61 @@
    },
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "fechas": "por comprobante (extemporáneos al 01/01/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_20601234567_202601_COMPRAS.xlsx",
-   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "_hojas": {
@@ -2488,7 +2584,6 @@
    "total": "78824.00",
    "igv": "12024.00",
    "filas": 9,
-   "fechas": "por comprobante (extemporáneos al 01/01/2026)",
    "sub_diarios": {
     "11": {
      "etiqueta": "Compras",
@@ -2502,12 +2597,61 @@
    },
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "fechas": "por comprobante (extemporáneos al 01/01/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_20601234567_202601_COMPRAS.xlsx",
-   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "_hojas": {
@@ -4589,7 +4733,40 @@
   },
   "_exportacion": {
    "driver": "contasis",
-   "archivo": "CONTASIS_20601234567_202601_COMPRAS.xlsx"
+   "archivo": "CONTASIS_20601234567_202601_COMPRAS.xlsx",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "_hojas": {
@@ -5161,7 +5338,40 @@
   },
   "_exportacion": {
    "driver": "contasis",
-   "archivo": "CONTASIS_20601234567_202601_COMPRAS.xlsx"
+   "archivo": "CONTASIS_20601234567_202601_COMPRAS.xlsx",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "_hojas": {
@@ -5990,7 +6200,55 @@
     "lineas": 9,
     "sin_sentido": 0
    },
-   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
   }
  },
  "exportar/csv": {
@@ -6025,7 +6283,55 @@
   "_exportacion": {
    "driver": "csv",
    "archivo": "asiento_20601234567_202601_compra.csv",
-   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
   "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv\r\n11;010001;2026-01-10;659999;D;40000.00;PEN;;MAYORISTA NACIONAL DE PRODUCTOS SAC;;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18\r\n11;010001;2026-01-10;401111;D;7200.00;PEN;;IGV - MAYORISTA NACIONAL DE PRODUCTOS SAC;;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18\r\n11;010001;2026-01-10;421201;H;47200.00;PEN;;MAYORISTA NACIONAL DE PRODUCTOS SAC;20677777771;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18\r\n11;010002;2026-01-18;659999;D;25000.00;PEN;;IMPORTADORA ASIA PACIFICO SRL;;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18\r\n11;010002;2026-01-18;401111;D;4500.00;PEN;;IGV - IMPORTADORA ASIA PACIFICO SRL;;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18\r\n11;010002;2026-01-18;421201;H;29500.00;PEN;;IMPORTADORA ASIA PACIFICO SRL;20633333336;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18\r\n11;010003;2026-01-25;659999;D;1800.00;PEN;;ELECTRICIDAD DE PRUEBA SAA;;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18\r\n11;010003;2026-01-25;401111;D;324.00;PEN;;IGV - ELECTRICIDAD DE PRUEBA SAA;;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18\r\n11;010003;2026-01-25;421201;H;2124.00;PEN;;ELECTRICIDAD DE PRUEBA SAA;20605555552;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18\r\n"
@@ -6062,7 +6368,55 @@
   "_exportacion": {
    "driver": "csv",
    "archivo": "asiento_20601234567_202601_compra.csv",
-   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
   "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv\r\n11;010001;2026-01-10;659999;D;40000.00;PEN;;MAYORISTA NACIONAL DE PRODUCTOS SAC;;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18\r\n11;010001;2026-01-10;401111;D;7200.00;PEN;;IGV - MAYORISTA NACIONAL DE PRODUCTOS SAC;;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18\r\n11;010001;2026-01-10;421201;H;47200.00;PEN;;MAYORISTA NACIONAL DE PRODUCTOS SAC;20677777771;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18\r\n11;010002;2026-01-18;659999;D;25000.00;PEN;;IMPORTADORA ASIA PACIFICO SRL;;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18\r\n11;010002;2026-01-18;401111;D;4500.00;PEN;;IGV - IMPORTADORA ASIA PACIFICO SRL;;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18\r\n11;010002;2026-01-18;421201;H;29500.00;PEN;;IMPORTADORA ASIA PACIFICO SRL;20633333336;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18\r\n11;010003;2026-01-25;659999;D;1800.00;PEN;;ELECTRICIDAD DE PRUEBA SAA;;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18\r\n11;010003;2026-01-25;401111;D;324.00;PEN;;IGV - ELECTRICIDAD DE PRUEBA SAA;;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18\r\n11;010003;2026-01-25;421201;H;2124.00;PEN;;ELECTRICIDAD DE PRUEBA SAA;20605555552;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18\r\n"
@@ -6139,7 +6493,40 @@
   },
   "_exportacion": {
    "driver": "sire",
-   "archivo": "LE2060123456720260100080400021112.TXT"
+   "archivo": "LE2060123456720260100080400021112.TXT",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202601||10/01/2026|10/02/2026|01|F001||45680||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|40000.00|7200.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|47200.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||18/01/2026|18/02/2026|01|E001||12347||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|25000.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||25/01/2026|25/02/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|1800.00|324.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2124.00|PEN||||||||||||||||\r\n",
   "archivo_zip": "LE2060123456720260100080400021112.zip"
@@ -6161,7 +6548,40 @@
   },
   "_exportacion": {
    "driver": "sire",
-   "archivo": "LE2060123456720260100080400021112.TXT"
+   "archivo": "LE2060123456720260100080400021112.TXT",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202601||10/01/2026|10/02/2026|01|F001||45680||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|40000.00|7200.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|47200.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||18/01/2026|18/02/2026|01|E001||12347||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|25000.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||25/01/2026|25/02/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|1800.00|324.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2124.00|PEN||||||||||||||||\r\n",
   "archivo_zip": "LE2060123456720260100080400021112.zip"

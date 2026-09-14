@@ -1635,7 +1635,190 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74"
+   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "c2177f9c350fa874b528f67502a86c5a9fb69532b5ea0625e602c4d8b7aad0ab"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "dd2e6e5aac5c68791cf7e3a511ac354caaf9835f71d1b655508d64e0c1dac057"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "e74e74853326d952aa4f171a95596d839fe8daccf4edf77ad75a419b8a948b7a"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "95e9a567650d7da88b3d5f9fce5de46f9fa72c9cc47ea5e1554ff027f7ac232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "18b1f513dfbdab3142f723ae722333c087639a1dc4089e383ad9d184a5ed93e3"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "b789afa63a44877b92998be029798da7201426e16a2c37d2ed93fd2ab2497a84"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "315a2900eefb6d50fb45d828fdf0f3a2feffd449650997e1157491c806111247"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "283a09f267cf89a42e9cdeea93ae9e86b4aec30718034d4624edd2d50f0202f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "9671b97328c9b073d461d3fd3d2e1b71b133274f2ee511bc4371837f654aaa36"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "925e80f5f5d5aa5e8b3477c8817617288bab9ee4e2d2edc9954773a128834c0b"
+    }
+   ],
+   "motor": "(versión del motor)"
   }
  },
  "exportar/concar": {
@@ -1653,7 +1836,6 @@
    "total": "13615.00",
    "igv": "1665.00",
    "filas": 39,
-   "fechas": "por comprobante (extemporáneos al 01/08/2026)",
    "sub_diarios": {
     "11": {
      "etiqueta": "Compras",
@@ -1694,12 +1876,196 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74"
+   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74",
+   "fechas": "por comprobante (extemporáneos al 01/08/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_20601234567_202608_COMPRAS.xlsx",
-   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74"
+   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "c2177f9c350fa874b528f67502a86c5a9fb69532b5ea0625e602c4d8b7aad0ab"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "dd2e6e5aac5c68791cf7e3a511ac354caaf9835f71d1b655508d64e0c1dac057"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "e74e74853326d952aa4f171a95596d839fe8daccf4edf77ad75a419b8a948b7a"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "95e9a567650d7da88b3d5f9fce5de46f9fa72c9cc47ea5e1554ff027f7ac232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "18b1f513dfbdab3142f723ae722333c087639a1dc4089e383ad9d184a5ed93e3"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "b789afa63a44877b92998be029798da7201426e16a2c37d2ed93fd2ab2497a84"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "315a2900eefb6d50fb45d828fdf0f3a2feffd449650997e1157491c806111247"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "283a09f267cf89a42e9cdeea93ae9e86b4aec30718034d4624edd2d50f0202f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "9671b97328c9b073d461d3fd3d2e1b71b133274f2ee511bc4371837f654aaa36"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "925e80f5f5d5aa5e8b3477c8817617288bab9ee4e2d2edc9954773a128834c0b"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "_hojas": {
@@ -8694,7 +9060,6 @@
    "total": "13615.00",
    "igv": "1665.00",
    "filas": 39,
-   "fechas": "por comprobante (extemporáneos al 01/08/2026)",
    "sub_diarios": {
     "11": {
      "etiqueta": "Compras",
@@ -8735,12 +9100,196 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74"
+   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74",
+   "fechas": "por comprobante (extemporáneos al 01/08/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_20601234567_202608_COMPRAS.xlsx",
-   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74"
+   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "c2177f9c350fa874b528f67502a86c5a9fb69532b5ea0625e602c4d8b7aad0ab"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "dd2e6e5aac5c68791cf7e3a511ac354caaf9835f71d1b655508d64e0c1dac057"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "e74e74853326d952aa4f171a95596d839fe8daccf4edf77ad75a419b8a948b7a"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "95e9a567650d7da88b3d5f9fce5de46f9fa72c9cc47ea5e1554ff027f7ac232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "18b1f513dfbdab3142f723ae722333c087639a1dc4089e383ad9d184a5ed93e3"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "b789afa63a44877b92998be029798da7201426e16a2c37d2ed93fd2ab2497a84"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "315a2900eefb6d50fb45d828fdf0f3a2feffd449650997e1157491c806111247"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "283a09f267cf89a42e9cdeea93ae9e86b4aec30718034d4624edd2d50f0202f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "9671b97328c9b073d461d3fd3d2e1b71b133274f2ee511bc4371837f654aaa36"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "925e80f5f5d5aa5e8b3477c8817617288bab9ee4e2d2edc9954773a128834c0b"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "_hojas": {
@@ -16873,7 +17422,190 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74"
+   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "c2177f9c350fa874b528f67502a86c5a9fb69532b5ea0625e602c4d8b7aad0ab"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "dd2e6e5aac5c68791cf7e3a511ac354caaf9835f71d1b655508d64e0c1dac057"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "e74e74853326d952aa4f171a95596d839fe8daccf4edf77ad75a419b8a948b7a"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "95e9a567650d7da88b3d5f9fce5de46f9fa72c9cc47ea5e1554ff027f7ac232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "18b1f513dfbdab3142f723ae722333c087639a1dc4089e383ad9d184a5ed93e3"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "b789afa63a44877b92998be029798da7201426e16a2c37d2ed93fd2ab2497a84"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "315a2900eefb6d50fb45d828fdf0f3a2feffd449650997e1157491c806111247"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "283a09f267cf89a42e9cdeea93ae9e86b4aec30718034d4624edd2d50f0202f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "9671b97328c9b073d461d3fd3d2e1b71b133274f2ee511bc4371837f654aaa36"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "925e80f5f5d5aa5e8b3477c8817617288bab9ee4e2d2edc9954773a128834c0b"
+    }
+   ],
+   "motor": "(versión del motor)"
   }
  },
  "exportar/csv": {
@@ -16932,7 +17664,190 @@
   "_exportacion": {
    "driver": "csv",
    "archivo": "asiento_20601234567_202608_compra.csv",
-   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74"
+   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "c2177f9c350fa874b528f67502a86c5a9fb69532b5ea0625e602c4d8b7aad0ab"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "dd2e6e5aac5c68791cf7e3a511ac354caaf9835f71d1b655508d64e0c1dac057"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "e74e74853326d952aa4f171a95596d839fe8daccf4edf77ad75a419b8a948b7a"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "95e9a567650d7da88b3d5f9fce5de46f9fa72c9cc47ea5e1554ff027f7ac232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "18b1f513dfbdab3142f723ae722333c087639a1dc4089e383ad9d184a5ed93e3"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "b789afa63a44877b92998be029798da7201426e16a2c37d2ed93fd2ab2497a84"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "315a2900eefb6d50fb45d828fdf0f3a2feffd449650997e1157491c806111247"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "283a09f267cf89a42e9cdeea93ae9e86b4aec30718034d4624edd2d50f0202f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "9671b97328c9b073d461d3fd3d2e1b71b133274f2ee511bc4371837f654aaa36"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "925e80f5f5d5aa5e8b3477c8817617288bab9ee4e2d2edc9954773a128834c0b"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
   "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv\r\n11;080001;2026-08-03;631101;D;1000.00;PEN;;GRILLETES Y CONECTORES;;OBRA01;;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18\r\n11;080001;2026-08-03;401111;D;180.00;PEN;;IGV - GRILLETES Y CONECTORES;;;;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18\r\n11;080001;2026-08-03;421201;H;1180.00;PEN;;GRILLETES Y CONECTORES;20607777773;;OBRA01;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18\r\n11;080002;2026-08-05;631101;D;500.00;USD;3.75;REPUESTOS IMPORTADOS;;OBRA01;;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18\r\n11;080002;2026-08-05;401111;D;90.00;USD;3.75;IGV - REPUESTOS IMPORTADOS;;;;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18\r\n11;080002;2026-08-05;421202;H;590.00;USD;3.75;REPUESTOS IMPORTADOS;20602222226;;OBRA01;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18\r\n11;080003;2026-08-12;631101;H;100.00;PEN;;DEVOLUCION DE GRILLETES;;OBRA01;;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18\r\n11;080003;2026-08-12;401111;H;18.00;PEN;;IGV - DEVOLUCION DE GRILLETES;;;;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18\r\n11;080003;2026-08-12;421201;D;118.00;PEN;;DEVOLUCION DE GRILLETES;20607777773;;OBRA01;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18\r\n11;080004;2026-08-13;631101;D;50.00;PEN;;INTERES POR PAGO TARDIO;;OBRA01;;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18\r\n11;080004;2026-08-13;401111;D;9.00;PEN;;IGV - INTERES POR PAGO TARDIO;;;;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18\r\n11;080004;2026-08-13;421201;H;59.00;PEN;;INTERES POR PAGO TARDIO;20607777773;;OBRA01;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18\r\n10;080001;2026-08-10;631101;D;4200.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;OBRA01;;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18\r\n10;080001;2026-08-10;401111;D;756.00;PEN;;IGV - SERVICIO DE TRANSPORTE DE MATERIALES;;;;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18\r\n10;080001;2026-08-10;421201;H;4956.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18\r\n10;080001;2026-08-10;421201;D;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18\r\n10;080001;2026-08-10;421203;H;198.00;PEN;;DETRACCION - SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;;DR;9999999999;2026-08-10;2026-08-27;FT;E001-871;2026-08-10;02702;4.0;4956.00;18\r\n10;080002;2026-08-14;631101;D;2000.00;USD;3.7;MANTENIMIENTO DE EQUIPOS;;OBRA01;;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18\r\n10;080002;2026-08-14;401111;D;360.00;USD;3.7;IGV - MANTENIMIENTO DE EQUIPOS;;;;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18\r\n10;080002;2026-08-14;421202;H;2360.00;USD;3.7;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18\r\n10;080002;2026-08-14;421202;D;283.24;USD;3.7;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18\r\n10;080002;2026-08-14;421203;H;283.24;USD;3.7;DETRACCION - MANTENIMIENTO DE EQUIPOS;20633333336;;;DR;9999999999;2026-08-14;2026-09-13;FT;F002-45;2026-08-14;03701;12.0;2360.00;18\r\n15;080001;2026-08-18;632101;D;1500.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;OBRA01;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;\r\n15;080001;2026-08-18;401721;H;120.00;PEN;;RET 4TA - ASESORIA CONTABLE DE AGOSTO;;;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;\r\n15;080001;2026-08-18;424101;H;1380.00;PEN;;ASESORIA CONTABLE DE AGOSTO;20607777773;;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;\r\n15;080002;2026-08-19;632101;D;1200.00;PEN;;ASESORIA TRIBUTARIA;;OBRA01;;RH;E001-16;2026-08-19;2026-08-19;;;;;;;\r\n15;080002;2026-08-19;424101;H;1200.00;PEN;;ASESORIA TRIBUTARIA;20607777773;;;RH;E001-16;2026-08-19;2026-08-19;;;;;;;\r\n13;080001;2026-08-20;631101;D;118.00;PEN;;UTILES DE OFICINA;;OBRA01;;BV;B001-88;2026-08-20;2026-08-20;;;;;;;\r\n13;080001;2026-08-20;421201;H;118.00;PEN;;UTILES DE OFICINA;20605555552;;OBRA01;BV;B001-88;2026-08-20;2026-08-20;;;;;;;\r\n11;080005;2026-08-01;631101;D;300.00;PEN;;MATERIALES DE JUNIO;;OBRA01;;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18\r\n11;080005;2026-08-01;401111;D;54.00;PEN;;IGV - MATERIALES DE JUNIO;;;;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18\r\n11;080005;2026-08-01;421201;H;354.00;PEN;;MATERIALES DE JUNIO;20677777771;;OBRA01;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18\r\n11;080006;2026-08-25;636301;D;600.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;SISTEMAS;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18\r\n11;080006;2026-08-25;632201;D;400.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;DESARROLLO;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18\r\n11;080006;2026-08-25;401111;D;180.00;PEN;;IGV - LICENCIAS Y EQUIPOS DE OFICINA;;;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18\r\n11;080006;2026-08-25;421201;H;1180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;20677777771;;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18\r\n11;080007;2026-08-26;631101;D;200.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;OBRA01;;RC;12345679;2026-08-26;2026-09-10;;;;;;;18\r\n11;080007;2026-08-26;401111;D;36.00;PEN;;IGV - ENERGIA ELECTRICA DE AGOSTO;;;;RC;12345679;2026-08-26;2026-09-10;;;;;;;18\r\n11;080007;2026-08-26;421201;H;236.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;20605555552;;OBRA01;RC;12345679;2026-08-26;2026-09-10;;;;;;;18\r\n"
@@ -16993,7 +17908,190 @@
   "_exportacion": {
    "driver": "csv",
    "archivo": "asiento_20601234567_202608_compra.csv",
-   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74"
+   "huella": "86fcb801ce4527326d1c1a9c06fa68918f59a7f77552623f92f098b53dda3c74",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "c2177f9c350fa874b528f67502a86c5a9fb69532b5ea0625e602c4d8b7aad0ab"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "dd2e6e5aac5c68791cf7e3a511ac354caaf9835f71d1b655508d64e0c1dac057"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "e74e74853326d952aa4f171a95596d839fe8daccf4edf77ad75a419b8a948b7a"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "95e9a567650d7da88b3d5f9fce5de46f9fa72c9cc47ea5e1554ff027f7ac232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "18b1f513dfbdab3142f723ae722333c087639a1dc4089e383ad9d184a5ed93e3"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "b789afa63a44877b92998be029798da7201426e16a2c37d2ed93fd2ab2497a84"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "315a2900eefb6d50fb45d828fdf0f3a2feffd449650997e1157491c806111247"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "283a09f267cf89a42e9cdeea93ae9e86b4aec30718034d4624edd2d50f0202f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "9671b97328c9b073d461d3fd3d2e1b71b133274f2ee511bc4371837f654aaa36"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "925e80f5f5d5aa5e8b3477c8817617288bab9ee4e2d2edc9954773a128834c0b"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
   "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv\r\n11;080001;2026-08-03;631101;D;1000.00;PEN;;GRILLETES Y CONECTORES;;OBRA01;;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18\r\n11;080001;2026-08-03;401111;D;180.00;PEN;;IGV - GRILLETES Y CONECTORES;;;;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18\r\n11;080001;2026-08-03;421201;H;1180.00;PEN;;GRILLETES Y CONECTORES;20607777773;;OBRA01;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18\r\n11;080002;2026-08-05;631101;D;500.00;USD;3.75;REPUESTOS IMPORTADOS;;OBRA01;;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18\r\n11;080002;2026-08-05;401111;D;90.00;USD;3.75;IGV - REPUESTOS IMPORTADOS;;;;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18\r\n11;080002;2026-08-05;421202;H;590.00;USD;3.75;REPUESTOS IMPORTADOS;20602222226;;OBRA01;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18\r\n11;080003;2026-08-12;631101;H;100.00;PEN;;DEVOLUCION DE GRILLETES;;OBRA01;;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18\r\n11;080003;2026-08-12;401111;H;18.00;PEN;;IGV - DEVOLUCION DE GRILLETES;;;;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18\r\n11;080003;2026-08-12;421201;D;118.00;PEN;;DEVOLUCION DE GRILLETES;20607777773;;OBRA01;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18\r\n11;080004;2026-08-13;631101;D;50.00;PEN;;INTERES POR PAGO TARDIO;;OBRA01;;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18\r\n11;080004;2026-08-13;401111;D;9.00;PEN;;IGV - INTERES POR PAGO TARDIO;;;;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18\r\n11;080004;2026-08-13;421201;H;59.00;PEN;;INTERES POR PAGO TARDIO;20607777773;;OBRA01;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18\r\n10;080001;2026-08-10;631101;D;4200.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;OBRA01;;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18\r\n10;080001;2026-08-10;401111;D;756.00;PEN;;IGV - SERVICIO DE TRANSPORTE DE MATERIALES;;;;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18\r\n10;080001;2026-08-10;421201;H;4956.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18\r\n10;080001;2026-08-10;421201;D;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18\r\n10;080001;2026-08-10;421203;H;198.00;PEN;;DETRACCION - SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;;DR;9999999999;2026-08-10;2026-08-27;FT;E001-871;2026-08-10;02702;4.0;4956.00;18\r\n10;080002;2026-08-14;631101;D;2000.00;USD;3.7;MANTENIMIENTO DE EQUIPOS;;OBRA01;;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18\r\n10;080002;2026-08-14;401111;D;360.00;USD;3.7;IGV - MANTENIMIENTO DE EQUIPOS;;;;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18\r\n10;080002;2026-08-14;421202;H;2360.00;USD;3.7;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18\r\n10;080002;2026-08-14;421202;D;283.24;USD;3.7;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18\r\n10;080002;2026-08-14;421203;H;283.24;USD;3.7;DETRACCION - MANTENIMIENTO DE EQUIPOS;20633333336;;;DR;9999999999;2026-08-14;2026-09-13;FT;F002-45;2026-08-14;03701;12.0;2360.00;18\r\n15;080001;2026-08-18;632101;D;1500.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;OBRA01;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;\r\n15;080001;2026-08-18;401721;H;120.00;PEN;;RET 4TA - ASESORIA CONTABLE DE AGOSTO;;;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;\r\n15;080001;2026-08-18;424101;H;1380.00;PEN;;ASESORIA CONTABLE DE AGOSTO;20607777773;;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;\r\n15;080002;2026-08-19;632101;D;1200.00;PEN;;ASESORIA TRIBUTARIA;;OBRA01;;RH;E001-16;2026-08-19;2026-08-19;;;;;;;\r\n15;080002;2026-08-19;424101;H;1200.00;PEN;;ASESORIA TRIBUTARIA;20607777773;;;RH;E001-16;2026-08-19;2026-08-19;;;;;;;\r\n13;080001;2026-08-20;631101;D;118.00;PEN;;UTILES DE OFICINA;;OBRA01;;BV;B001-88;2026-08-20;2026-08-20;;;;;;;\r\n13;080001;2026-08-20;421201;H;118.00;PEN;;UTILES DE OFICINA;20605555552;;OBRA01;BV;B001-88;2026-08-20;2026-08-20;;;;;;;\r\n11;080005;2026-08-01;631101;D;300.00;PEN;;MATERIALES DE JUNIO;;OBRA01;;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18\r\n11;080005;2026-08-01;401111;D;54.00;PEN;;IGV - MATERIALES DE JUNIO;;;;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18\r\n11;080005;2026-08-01;421201;H;354.00;PEN;;MATERIALES DE JUNIO;20677777771;;OBRA01;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18\r\n11;080006;2026-08-25;636301;D;600.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;SISTEMAS;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18\r\n11;080006;2026-08-25;632201;D;400.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;DESARROLLO;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18\r\n11;080006;2026-08-25;401111;D;180.00;PEN;;IGV - LICENCIAS Y EQUIPOS DE OFICINA;;;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18\r\n11;080006;2026-08-25;421201;H;1180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;20677777771;;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18\r\n11;080007;2026-08-26;631101;D;200.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;OBRA01;;RC;12345679;2026-08-26;2026-09-10;;;;;;;18\r\n11;080007;2026-08-26;401111;D;36.00;PEN;;IGV - ENERGIA ELECTRICA DE AGOSTO;;;;RC;12345679;2026-08-26;2026-09-10;;;;;;;18\r\n11;080007;2026-08-26;421201;H;236.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;20605555552;;OBRA01;RC;12345679;2026-08-26;2026-09-10;;;;;;;18\r\n"
@@ -17111,7 +18209,110 @@
   },
   "_exportacion": {
    "driver": "sire",
-   "archivo": "LE2060123456720260800080400021112.TXT"
+   "archivo": "LE2060123456720260800080400021112.TXT",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202608||03/08/2026|02/09/2026|01|F001||101||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||05/08/2026|04/09/2026|01|F001||102||6|20602222226|PROVEEDOR DE PRUEBA SAC|500.00|90.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|590.00|USD|3.750|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||12/08/2026||07|FC01||5||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|-100.00|-18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|-118.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||13/08/2026||08|FD01||2||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|50.00|9.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|59.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||10/08/2026|27/08/2026|01|E001||871||6|20602222226|PROVEEDOR DE PRUEBA SAC|4200.00|756.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|4956.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||14/08/2026|13/09/2026|01|F002||45||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|2000.00|360.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2360.00|USD|3.700|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/08/2026||03|B001||88||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|100.00|18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|118.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/06/2026|20/07/2026|01|F001||90||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|300.00|54.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|354.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||25/08/2026|24/09/2026|01|F001||103||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||26/08/2026|10/09/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|200.00|36.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|236.00|PEN||||||||||||||||\r\n",
   "archivo_zip": "LE2060123456720260800080400021112.zip"
@@ -17133,7 +18334,110 @@
   },
   "_exportacion": {
    "driver": "sire",
-   "archivo": "LE2060123456720260800080400021112.TXT"
+   "archivo": "LE2060123456720260800080400021112.TXT",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202608||03/08/2026|02/09/2026|01|F001||101||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||05/08/2026|04/09/2026|01|F001||102||6|20602222226|PROVEEDOR DE PRUEBA SAC|500.00|90.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|590.00|USD|3.750|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||12/08/2026||07|FC01||5||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|-100.00|-18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|-118.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||13/08/2026||08|FD01||2||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|50.00|9.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|59.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||10/08/2026|27/08/2026|01|E001||871||6|20602222226|PROVEEDOR DE PRUEBA SAC|4200.00|756.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|4956.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||14/08/2026|13/09/2026|01|F002||45||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|2000.00|360.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2360.00|USD|3.700|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/08/2026||03|B001||88||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|100.00|18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|118.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/06/2026|20/07/2026|01|F001||90||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|300.00|54.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|354.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||25/08/2026|24/09/2026|01|F001||103||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||26/08/2026|10/09/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|200.00|36.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|236.00|PEN||||||||||||||||\r\n",
   "archivo_zip": "LE2060123456720260800080400021112.zip"

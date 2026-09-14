@@ -854,7 +854,6 @@
    "total": "277300.00",
    "igv": "42300.00",
    "filas": 33,
-   "fechas": "por comprobante (extemporáneos al 01/12/2025)",
    "sub_diarios": {
     "05": {
      "etiqueta": "Ventas",
@@ -868,12 +867,170 @@
    },
    "debe": "277300.00",
    "haber": "277300.00",
-   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596"
+   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596",
+   "fechas": "por comprobante (extemporáneos al 01/12/2025)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_20601234567_202512_VENTAS.xlsx",
-   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596"
+   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9f7ab2050f8d605d6922a29cc047ddca92cda29a15ec130faa6dedf90bea2ced"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "095506cc20a55976a44908251cd4ae6d5972733ff8d5157a63caaa8ed83b8752"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "0207debe15acdd4676cfe9af65a2d0038e15e302a164ddb516b989e981bbf5fa"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "19a5b9f1cbc9ac9aa85ff5bf006205daaa6146e26ea3eeb11954340b3b067070"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     },
+     "lineas": [
+      12,
+      15
+     ],
+     "huella": "1f1eb7f0e52b79bd8e5b715ec6a4fe7a52d3bdfbfbd2253f12a5c9ac01694b7f"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     },
+     "lineas": [
+      15,
+      18
+     ],
+     "huella": "6a97a25a7d487a0ce300db82f40c91bf5eaa54969b42aa93684a5141b3d5c9b2"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     },
+     "lineas": [
+      18,
+      21
+     ],
+     "huella": "036ee14bfa32033dde6e2e8866ef2931f5bfd6675f191e235f82f20cf4230df6"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     },
+     "lineas": [
+      21,
+      24
+     ],
+     "huella": "e75b36a0004c6b65d3d0077d2ab8e456709302a335654ab4124b0a0a303a232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     },
+     "lineas": [
+      24,
+      27
+     ],
+     "huella": "b7d3d7bb073f603d9cfd216dee413a1d3e3bb630152c7119ebfc641e816249d2"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     },
+     "lineas": [
+      27,
+      30
+     ],
+     "huella": "366ad002450c0c6e384e23c1f5c1378a1eaf0d42af4ad44315671516e6ff0461"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     },
+     "lineas": [
+      30,
+      33
+     ],
+     "huella": "5fe5d1ca7ef9eb16f5962a60926620c93c9ecdffc326b259797dd2f7a2c9e9f2"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "_hojas": {
@@ -7071,7 +7228,109 @@
   },
   "_exportacion": {
    "driver": "contasis",
-   "archivo": "CONTASIS_20601234567_202512_VENTAS.xlsx"
+   "archivo": "CONTASIS_20601234567_202512_VENTAS.xlsx",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "_hojas": {
@@ -9100,7 +9359,164 @@
   "_exportacion": {
    "driver": "csv",
    "archivo": "asiento_20601234567_202512_venta.csv",
-   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596"
+   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9f7ab2050f8d605d6922a29cc047ddca92cda29a15ec130faa6dedf90bea2ced"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "095506cc20a55976a44908251cd4ae6d5972733ff8d5157a63caaa8ed83b8752"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "0207debe15acdd4676cfe9af65a2d0038e15e302a164ddb516b989e981bbf5fa"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "19a5b9f1cbc9ac9aa85ff5bf006205daaa6146e26ea3eeb11954340b3b067070"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     },
+     "lineas": [
+      12,
+      15
+     ],
+     "huella": "1f1eb7f0e52b79bd8e5b715ec6a4fe7a52d3bdfbfbd2253f12a5c9ac01694b7f"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     },
+     "lineas": [
+      15,
+      18
+     ],
+     "huella": "6a97a25a7d487a0ce300db82f40c91bf5eaa54969b42aa93684a5141b3d5c9b2"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     },
+     "lineas": [
+      18,
+      21
+     ],
+     "huella": "036ee14bfa32033dde6e2e8866ef2931f5bfd6675f191e235f82f20cf4230df6"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     },
+     "lineas": [
+      21,
+      24
+     ],
+     "huella": "e75b36a0004c6b65d3d0077d2ab8e456709302a335654ab4124b0a0a303a232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     },
+     "lineas": [
+      24,
+      27
+     ],
+     "huella": "b7d3d7bb073f603d9cfd216dee413a1d3e3bb630152c7119ebfc641e816249d2"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     },
+     "lineas": [
+      27,
+      30
+     ],
+     "huella": "366ad002450c0c6e384e23c1f5c1378a1eaf0d42af4ad44315671516e6ff0461"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     },
+     "lineas": [
+      30,
+      33
+     ],
+     "huella": "5fe5d1ca7ef9eb16f5962a60926620c93c9ecdffc326b259797dd2f7a2c9e9f2"
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
   "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv\r\n05;120001;2025-12-02;121201;D;29500.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;20609999999;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18\r\n05;120001;2025-12-02;701101;H;25000.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18\r\n05;120001;2025-12-02;401111;H;4500.00;PEN;;IGV - DISTRIBUIDORA COMERCIAL DEL NORTE SAC;;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18\r\n05;120002;2025-12-04;121201;D;21830.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;20633333336;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18\r\n05;120002;2025-12-04;701101;H;18500.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18\r\n05;120002;2025-12-04;401111;H;3330.00;PEN;;IGV - INVERSIONES TECNOLOGICAS PERU SRL;;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18\r\n05;120003;2025-12-05;121201;D;37760.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;20655555553;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18\r\n05;120003;2025-12-05;701101;H;32000.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18\r\n05;120003;2025-12-05;401111;H;5760.00;PEN;;IGV - CORPORACION INDUSTRIAL ANDINA SAC;;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18\r\n05;120004;2025-12-08;121201;D;53100.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;20688888884;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18\r\n05;120004;2025-12-08;701101;H;45000.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18\r\n05;120004;2025-12-08;401111;H;8100.00;PEN;;IGV - GRUPO EMPRESARIAL LIMA SAC;;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18\r\n05;120005;2025-12-10;121201;D;18290.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;20644444440;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18\r\n05;120005;2025-12-10;701101;H;15500.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18\r\n05;120005;2025-12-10;401111;H;2790.00;PEN;;IGV - COMERCIALIZADORA INTEGRAL DEL SUR EIRL;;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18\r\n05;120006;2025-12-12;121201;D;33040.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;20666666667;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18\r\n05;120006;2025-12-12;701101;H;28000.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18\r\n05;120006;2025-12-12;401111;H;5040.00;PEN;;IGV - SERVICIOS LOGISTICOS NACIONALES SA;;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18\r\n05;120007;2025-12-15;121201;D;24780.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;20301234567;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18\r\n05;120007;2025-12-15;701101;H;21000.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18\r\n05;120007;2025-12-15;401111;H;3780.00;PEN;;IGV - IMPORTADORA Y EXPORTADORA CENTRAL SAC;;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18\r\n05;120008;2025-12-03;121201;D;1003.00;PEN;;CLIENTE CONSUMIDOR FINAL;42589632;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18\r\n05;120008;2025-12-03;701101;H;850.00;PEN;;CLIENTE CONSUMIDOR FINAL;;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18\r\n05;120008;2025-12-03;401111;H;153.00;PEN;;IGV - CLIENTE CONSUMIDOR FINAL;;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18\r\n05;120009;2025-12-06;121201;D;1416.00;PEN;;CONSUMIDOR VARIOS;45678912;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18\r\n05;120009;2025-12-06;701101;H;1200.00;PEN;;CONSUMIDOR VARIOS;;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18\r\n05;120009;2025-12-06;401111;H;216.00;PEN;;IGV - CONSUMIDOR VARIOS;;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18\r\n05;120010;2025-12-09;121201;D;50681.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18\r\n05;120010;2025-12-09;701101;H;42950.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18\r\n05;120010;2025-12-09;401111;H;7731.00;PEN;;IGV - CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18\r\n05;120011;2025-12-19;121201;D;5900.00;PEN;;MI CLIENTE MANUAL S.A.C.;20123456789;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18\r\n05;120011;2025-12-19;701101;H;5000.00;PEN;;MI CLIENTE MANUAL S.A.C.;;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18\r\n05;120011;2025-12-19;401111;H;900.00;PEN;;IGV - MI CLIENTE MANUAL S.A.C.;;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18\r\n"
@@ -9309,7 +9725,109 @@
   },
   "_exportacion": {
    "driver": "sire",
-   "archivo": "LE2060123456720251200140400021112.TXT"
+   "archivo": "LE2060123456720251200140400021112.TXT",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202512||02/12/2025||01|F001|1001||6|20609999999|DISTRIBUIDORA COMERCIAL DEL NORTE SAC|0.00|25000.00|0.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||04/12/2025||01|F001|1002||6|20633333336|INVERSIONES TECNOLOGICAS PERU SRL|0.00|18500.00|0.00|3330.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|21830.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||05/12/2025||01|F001|1003||6|20655555553|CORPORACION INDUSTRIAL ANDINA SAC|0.00|32000.00|0.00|5760.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|37760.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||08/12/2025||01|F001|1004||6|20688888884|GRUPO EMPRESARIAL LIMA SAC|0.00|45000.00|0.00|8100.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|53100.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||10/12/2025||01|F001|1005||6|20644444440|COMERCIALIZADORA INTEGRAL DEL SUR EIRL|0.00|15500.00|0.00|2790.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|18290.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||12/12/2025||01|F001|1006||6|20666666667|SERVICIOS LOGISTICOS NACIONALES SA|0.00|28000.00|0.00|5040.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|33040.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||15/12/2025||01|F001|1007||6|20301234567|IMPORTADORA Y EXPORTADORA CENTRAL SAC|0.00|21000.00|0.00|3780.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|24780.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||03/12/2025||03|B001|5001||6|42589632|CLIENTE CONSUMIDOR FINAL|0.00|850.00|0.00|153.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1003.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||06/12/2025||03|B001|5002||6|45678912|CONSUMIDOR VARIOS|0.00|1200.00|0.00|216.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1416.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||09/12/2025||03|B001|5003||6||CLIENTES VARIOS - CONSOLIDADO DIARIO|0.00|42950.00|0.00|7731.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|50681.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||19/12/2025||01|F001|1234||6|20123456789|MI CLIENTE MANUAL S.A.C.|0.00|5000.00|0.00|900.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|5900.00|PEN|||||||\r\n",
   "archivo_zip": "LE2060123456720251200140400021112.zip"

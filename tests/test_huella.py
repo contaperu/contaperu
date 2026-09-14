@@ -29,6 +29,11 @@ def lineas(**cambios):
     return d["asiento"], d["_asiento"]["huella"]
 
 
+def _sin_detalle(exportacion: dict) -> dict:
+    """`_exportacion` sin lo que dice de cada comprobante ni la versión del motor (hitos 0.4 y B2)."""
+    return {k: v for k, v in exportacion.items() if k not in ("comprobantes", "motor")}
+
+
 def test_la_misma_entrada_da_la_misma_huella_y_es_la_de_siempre():
     _, a = lineas()
     _, b = lineas()
@@ -69,14 +74,14 @@ def test_es_del_asiento_y_no_del_archivo():
     csv = exportar(d, driver="csv")
     assert concar["_exportacion"]["huella"] == csv["_exportacion"]["huella"] == HUELLA_FACTURA
     assert concar["resumen"]["huella"] == csv["resumen"]["huella"] == HUELLA_FACTURA   # lo que persiste el portal
-    assert concar["_exportacion"] == {"driver": "concar", "archivo": "CONCAR_20601111111_202608_COMPRAS.xlsx",
-                                      "huella": HUELLA_FACTURA}
+    assert _sin_detalle(concar["_exportacion"]) == {"driver": "concar", "archivo": "CONCAR_20601111111_202608_COMPRAS.xlsx",
+                                                    "huella": HUELLA_FACTURA}
 
 
 def test_el_sire_no_lleva_huella():
     """Es un registro tributario, no un asiento: no hay líneas de las que sacarla."""
     e = exportar(doc(FACTURA), driver="sire")["_exportacion"]
-    assert e == {"driver": "sire", "archivo": e["archivo"]} and "huella" not in e
+    assert _sin_detalle(e) == {"driver": "sire", "archivo": e["archivo"]} and "huella" not in e
 
 
 def test_la_fecha_la_pone_quien_llama():
@@ -91,3 +96,31 @@ def test_la_fecha_la_pone_quien_llama():
 def test_acepta_lineas_o_sus_diccionarios():
     ln, _ = lineas()
     assert asi.huella(ln) == asi.huella([dict(x) for x in ln])
+
+
+def test_cada_comprobante_lleva_su_tramo_su_identidad_y_su_huella():
+    """Hito 0.4: los tramos son una partición exacta de las líneas, cada uno cuadra y su huella es la de sus líneas; la
+    de la tanda no cambia. En un registro, que no arma asiento, solo la identidad. Y la versión del motor (B2)."""
+    from decimal import Decimal
+
+    d = doc(FACTURA, dict(FACTURA, numero="872"))
+    asiento = generar_asiento(d, driver="concar")
+    comprobantes = asiento["_asiento"]["comprobantes"]
+    tramos = [c["lineas"] for c in comprobantes]
+    assert tramos[0][0] == 0 and tramos[-1][1] == len(asiento["asiento"])
+    assert all(a[1] == b[0] for a, b in zip(tramos, tramos[1:]))
+    for c in comprobantes:
+        lineas_del_tramo = asiento["asiento"][c["lineas"][0]:c["lineas"][1]]
+        debe = sum(Decimal(ln["importe"]) for ln in lineas_del_tramo if ln["debe_haber"] == "D")
+        haber = sum(Decimal(ln["importe"]) for ln in lineas_del_tramo if ln["debe_haber"] == "H")
+        assert debe == haber and c["huella"] == asi.huella(lineas_del_tramo)
+    assert [c["identidad"]["numero"] for c in comprobantes] == ["871", "872"]
+    assert comprobantes[0]["identidad"] == {"ruc": "20601111111", "libro": "compra", "tipo_cp": "01", "serie": "E001",
+                                            "numero": "871", "contraparte_doc": "20602222226"}
+    assert asiento["_asiento"]["motor"] == api.__version__
+    solo = generar_asiento(doc(FACTURA), driver="concar")["_asiento"]
+    assert solo["huella"] == solo["comprobantes"][0]["huella"] == HUELLA_FACTURA
+    exportacion = exportar(d, driver="concar")["_exportacion"]
+    assert exportacion["comprobantes"] == comprobantes and exportacion["motor"] == api.__version__
+    del_sire = exportar(d, driver="sire")["_exportacion"]["comprobantes"]
+    assert del_sire == [{"identidad": c["identidad"]} for c in comprobantes]

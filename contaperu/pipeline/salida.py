@@ -12,12 +12,13 @@ from __future__ import annotations
 import base64
 import io
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any
 
 from .. import asiento as asi
 from .. import drivers
+from .._version import __version__
 from ..drivers import contrato
 from ..errores import ErroresBloqueantes
 from ..modelo import Comprobante, Libro
@@ -40,6 +41,9 @@ class Exportado:
     archivo: str = ""
     contenido: bytes = b""
     content_type: str = "application/zip"
+    # Lo que la respuesta dice de cada comprobante que salió (hito 0.4): su identidad y, en un asiento, su tramo de
+    # líneas y su huella.
+    por_comprobante: list = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if not self.archivo:
@@ -95,8 +99,11 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
     if forma in ("desde_lineas", "desde_comprobantes", "construir"):
         if config is not None:
             config = armado.config_para(modulo, config)
+        detalle = armado.identidades(libro, incluidos)
         if forma == "desde_lineas":
-            contenido, extra = armado.desde_lineas(modulo, libro, incluidos, opciones, config, correlativos)
+            contenido, extra, lineas, indice = armado.desde_lineas_con_indice(modulo, libro, incluidos, opciones,
+                                                                              config, correlativos)
+            detalle = armado.por_comprobante(libro, incluidos, lineas, indice)
         elif forma == "desde_comprobantes":
             contenido, extra = armado.desde_comprobantes(modulo, libro, incluidos, opciones, config)
         else:
@@ -109,7 +116,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
             comprobantes=len(incluidos),
             resumen={**_resumen(comprobantes, incluidos, errores, opciones, fuera), **extra},
             archivo=nombre, contenido=contenido,
-            content_type=getattr(modulo, "CONTENT_TYPE", "application/octet-stream"),
+            content_type=getattr(modulo, "CONTENT_TYPE", "application/octet-stream"), por_comprobante=detalle,
         )
 
     cuerpo = opciones.nueva_linea.join(lineas_de_texto(libro, incluidos, driver, opciones))
@@ -132,6 +139,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
         nombre=nombre, nombre_comprimido=nombre_comprimido, formato=formato, driver=driver,
         texto=texto, comprimido=memoria.getvalue(), comprobantes=len(incluidos),
         resumen=_resumen(comprobantes, incluidos, errores, opciones, fuera),
+        por_comprobante=armado.identidades(libro, incluidos),
     )
 
 
@@ -159,7 +167,8 @@ def respuesta(exp: Exportado, cuando: str | None = None) -> dict:
         "comprobantes": exp.comprobantes, "resumen": exp.resumen,
         "_exportacion": {"driver": exp.driver, "archivo": exp.nombre,
                          **({"huella": exp.resumen["huella"]} if exp.resumen.get("huella") else {}),
-                         **({"fecha": cuando} if cuando else {})},
+                         **({"fecha": cuando} if cuando else {}),
+                         "comprobantes": exp.por_comprobante, "motor": __version__},
     }
     if exp.texto:
         salida["texto"] = exp.texto.decode("utf-8", errors="replace")

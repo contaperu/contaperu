@@ -63,6 +63,13 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   tipo, la serie y el número sin ceros; en compras, el documento del proveedor; en ventas, no el del cliente; nunca el
   periodo.
 
+- **Cada comprobante en la respuesta** (hito 0.4): `_asiento.comprobantes` y `_exportacion.comprobantes` dicen de
+  cada uno su identidad, el tramo `[desde, hasta)` de las líneas del asiento que le toca y la huella de ese tramo. Los
+  tramos son una partición exacta y cada uno cuadra; la huella de la tanda no cambia. En un registro (el SIRE,
+  CONTASIS), solo la identidad. `Exportado.por_comprobante` lo lleva en Python.
+- **`motor`** (hito B2): la versión de la librería que produjo la respuesta, en `_asiento` y `_exportacion`, fuera de
+  toda huella.
+
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
