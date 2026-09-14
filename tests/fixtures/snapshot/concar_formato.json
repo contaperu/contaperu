@@ -1,0 +1,9220 @@
+{
+ "casos_202608.json": {
+  "CONCAR": {
+   "columnas": 41,
+   "panel": "A4",
+   "autofiltro": "A3:AO3",
+   "anchos": {
+    "A": 17.29,
+    "AA": 16.71,
+    "AB": 14.71,
+    "AC": 15.71,
+    "AF": 19.71,
+    "AI": 17.71,
+    "AJ": 22.71,
+    "AM": 18.71,
+    "B": 12.71,
+    "C": 18.71,
+    "D": 13.71,
+    "E": 11.71,
+    "F": 41.43,
+    "G": 18.71,
+    "I": 16.71,
+    "J": 14.71,
+    "K": 15.71,
+    "M": 16.71,
+    "N": 12.71,
+    "O": 18.71,
+    "R": 17.71,
+    "T": 16.71,
+    "V": 15.71,
+    "W": 41.14,
+    "X": 15.71,
+    "Y": 18.71,
+    "Z": 14.71
+   },
+   "altos": {
+    "1": 45.0,
+    "2": 120.0,
+    "3": 30.0,
+    "4": 15.8,
+    "5": 15.8,
+    "6": 15.8
+   },
+   "celdas": [
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "WE"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Sub Diario"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Número de Comprobante"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha de Comprobante"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Moneda"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Glosa Principal"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Cambio"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Conversión"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Flag de Conversión de Moneda"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha Tipo de Cambio"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Cuenta Contable"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Anexo"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Centro de Costo"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Debe / Haber"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe Original"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe en Dólares"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe en Soles"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Documento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Número de Documento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha de Documento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha de Vencimiento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Area"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Glosa Detalle"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Anexo Auxiliar"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Medio de Pago"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Documento de Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Número de Documento Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha Documento Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Nro Máq. Registradora Tipo Doc. Ref."
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Base Imponible Documento Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "IGV Documento Provisión"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo Referencia en estado MQ"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Número Serie Caja Registradora"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha de Operación"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Tasa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tasa Detracción/Percepción"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe Base Detracción/Percepción Dólares"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe Base Detracción/Percepción Soles"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo Cambio para 'F'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe de IGV sin derecho crédito fiscal"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tasa IGV"
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Contabilidad"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Ver T.G. 02"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Los dos primeros dígitos son el mes y los otros 4 siguientes un correlativo"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ],
+      "valor": null
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Ver T.G. 03"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ],
+      "valor": null
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Llenar  solo si Tipo de Conversión es 'C'. Debe estar entre >=0 y <=9999.999999"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Solo: 'C'= Especial, 'M'=Compra, 'V'=Venta , 'F' De acuerdo a fecha"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Solo: 'S' = Si se convierte, 'N'= No se convierte"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si  Tipo de Conversión 'F'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Debe existir en el Plan de Cuentas"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene seleccionado Tipo de Anexo, debe existir en la tabla de Anexos"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado C. Costo, Ver T.G. 05"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "'D' ó 'H'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Importe original de la cuenta contable. Obligatorio, debe estar entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Importe de la Cuenta Contable en Dólares. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estar entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Importe de la Cuenta Contable en Soles. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estra entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado el Documento Referencia Ver T.G. 06"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado el Documento Referencia Incluye Serie y Número"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado el Documento Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitada la Fecha de Vencimiento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitada el Area. Ver T.G. 26"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ],
+      "valor": null
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene seleccionado Tipo de Anexo Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado Tipo Medio Pago. Ver T.G. 'S1'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NA' ó 'ND' Ver T.G. 06"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND', incluye Serie y Número"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND'. Solo cuando el Tipo Documento de Referencia 'TK'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable teien Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene Habilitado Documento Referencia 2. Cuando Tipo de Documento es 'TK', consignar la fecha de emision del ticket"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene configurada la Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene conf. en Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29. Debe estar entre >=0 y <=999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Especificar solo si Tipo Conversión es 'F'. Se permite 'M' Compra y 'V' Venta."
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Especificar solo para comprobantes de compras con IGV sin derecho de crédito Fiscal. Se detalle solo en la cuenta 42xxxx"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Obligatorio para comprobantes de compras, valores validos 0,10,18."
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tamaño/Formato"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "4 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "6 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "2 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "40 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 11, 6"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "1 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "1 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "12 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "18 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "6 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "1 Carácter"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "2 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "20 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "3 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "30 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "18 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "8 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "2 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "20 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "20 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "'MQ'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "15 caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "5 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "1 Caracter"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ]
+   ]
+  }
+ },
+ "ventas_202512.json": {
+  "CONCAR": {
+   "columnas": 41,
+   "panel": "A4",
+   "autofiltro": "A3:AO3",
+   "anchos": {
+    "A": 17.29,
+    "AA": 16.71,
+    "AB": 14.71,
+    "AC": 15.71,
+    "AF": 19.71,
+    "AI": 17.71,
+    "AJ": 22.71,
+    "AM": 18.71,
+    "B": 12.71,
+    "C": 18.71,
+    "D": 13.71,
+    "E": 11.71,
+    "F": 41.43,
+    "G": 18.71,
+    "I": 16.71,
+    "J": 14.71,
+    "K": 15.71,
+    "M": 16.71,
+    "N": 12.71,
+    "O": 18.71,
+    "R": 17.71,
+    "T": 16.71,
+    "V": 15.71,
+    "W": 41.14,
+    "X": 15.71,
+    "Y": 18.71,
+    "Z": 14.71
+   },
+   "altos": {
+    "1": 45.0,
+    "2": 120.0,
+    "3": 30.0,
+    "4": 15.8,
+    "5": 15.8,
+    "6": 15.8
+   },
+   "celdas": [
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "WE"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Sub Diario"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Número de Comprobante"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha de Comprobante"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Moneda"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Glosa Principal"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Cambio"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Conversión"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Flag de Conversión de Moneda"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha Tipo de Cambio"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Cuenta Contable"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Anexo"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Centro de Costo"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Debe / Haber"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe Original"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe en Dólares"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe en Soles"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Documento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Número de Documento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha de Documento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha de Vencimiento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Area"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Glosa Detalle"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Código de Anexo Auxiliar"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Medio de Pago"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Documento de Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Número de Documento Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha Documento Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Nro Máq. Registradora Tipo Doc. Ref."
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Base Imponible Documento Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "IGV Documento Provisión"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo Referencia en estado MQ"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Número Serie Caja Registradora"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Fecha de Operación"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo de Tasa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tasa Detracción/Percepción"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe Base Detracción/Percepción Dólares"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe Base Detracción/Percepción Soles"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tipo Cambio para 'F'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Importe de IGV sin derecho crédito fiscal"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       "00FFFFFF"
+      ],
+      "relleno": [
+       "solid",
+       "00191970"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tasa IGV"
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Contabilidad"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Ver T.G. 02"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Los dos primeros dígitos son el mes y los otros 4 siguientes un correlativo"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ],
+      "valor": null
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Ver T.G. 03"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ],
+      "valor": null
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Llenar  solo si Tipo de Conversión es 'C'. Debe estar entre >=0 y <=9999.999999"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Solo: 'C'= Especial, 'M'=Compra, 'V'=Venta , 'F' De acuerdo a fecha"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Solo: 'S' = Si se convierte, 'N'= No se convierte"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si  Tipo de Conversión 'F'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Debe existir en el Plan de Cuentas"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene seleccionado Tipo de Anexo, debe existir en la tabla de Anexos"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado C. Costo, Ver T.G. 05"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "'D' ó 'H'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Importe original de la cuenta contable. Obligatorio, debe estar entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Importe de la Cuenta Contable en Dólares. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estar entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Importe de la Cuenta Contable en Soles. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estra entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado el Documento Referencia Ver T.G. 06"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado el Documento Referencia Incluye Serie y Número"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado el Documento Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitada la Fecha de Vencimiento"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitada el Area. Ver T.G. 26"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ],
+      "valor": null
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene seleccionado Tipo de Anexo Referencia"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Cuenta Contable tiene habilitado Tipo Medio Pago. Ver T.G. 'S1'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NA' ó 'ND' Ver T.G. 06"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND', incluye Serie y Número"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND'. Solo cuando el Tipo Documento de Referencia 'TK'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable teien Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene Habilitado Documento Referencia 2. Cuando Tipo de Documento es 'TK', consignar la fecha de emision del ticket"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene configurada la Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene conf. en Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29. Debe estar entre >=0 y <=999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Especificar solo si Tipo Conversión es 'F'. Se permite 'M' Compra y 'V' Venta."
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Especificar solo para comprobantes de compras con IGV sin derecho de crédito Fiscal. Se detalle solo en la cuenta 42xxxx"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       "top",
+       true
+      ],
+      "valor": "Obligatorio para comprobantes de compras, valores validos 0,10,18."
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       true,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Tamaño/Formato"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "4 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "6 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "2 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "40 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 11, 6"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "1 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "1 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "12 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "18 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "6 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "1 Carácter"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "2 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "20 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "3 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "30 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "18 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "8 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "2 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "20 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "20 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "'MQ'"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "15 caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "dd/mm/aaaa"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "5 Caracteres"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "1 Caracter"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       "center",
+       "center",
+       true
+      ],
+      "valor": "Numérico 14,2"
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ],
+    [
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "dd/mm/yyyy",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Aptos Narrow",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ]
+   ]
+  }
+ }
+}
