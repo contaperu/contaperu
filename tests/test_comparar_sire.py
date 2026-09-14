@@ -51,12 +51,12 @@ def test_lee_txt_o_zip_y_salta_la_cabecera_de_la_exportacion(tmp_path):
     cabecera = "Ruc|Razon Social|Periodo|CAR SUNAT|Fecha de emisión"
     txt = tmp_path / "export.txt"
     txt.write_text(cabecera + "\n" + "|".join(SUYA), encoding="utf-8")
-    assert len(cs.leer(txt)) == 1                      # la cabecera no cuenta como comprobante
+    assert len(cs.leer_bytes(txt.read_bytes())) == 1                      # la cabecera no cuenta como comprobante
 
     z = tmp_path / "nuestro.zip"
     with zipfile.ZipFile(z, "w") as zf:
         zf.writestr("LE20601111111202607.TXT", "|".join(NUESTRA) + "\r\n")
-    assert cs.leer(z)[0][7] == "F001"                  # lee el TXT de dentro del ZIP
+    assert cs.leer_bytes(z.read_bytes())[0][7] == "F001"                  # lee el TXT de dentro del ZIP
 
 
 # --- compras (Anexo 11) ------------------------------------------------------
@@ -122,3 +122,13 @@ def test_el_informe_avisa_cuando_solo_cambia_el_proveedor():
     inf = cs.informe(cs.comparar([otro], [COMPRA_SUYA], cs.COMPRAS))
     assert "FALTA en lo nuestro" in inf and "SOBRA" in inf
     assert "01-F001-123 está en los dos con distinto proveedor: revisa el RUC" in inf
+
+
+def test_leer_desde_una_ruta_sigue_valiendo_con_aviso(tmp_path):
+    """`leer(ruta)` es la forma de la 0.x: desde la 1.0 el disco lo lee la CLI y aquí entran bytes."""
+    import pytest
+    from contaperu._obsoleto import RutaObsoleta
+    txt = tmp_path / "export.txt"
+    txt.write_text("|".join(SUYA), encoding="utf-8")
+    with pytest.warns(RutaObsoleta):
+        assert len(cs.leer(txt)) == 1

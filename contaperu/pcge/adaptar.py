@@ -42,16 +42,21 @@ Formato de `pcge2026.json`:
 from __future__ import annotations
 
 import json
-import pathlib
+import os
 from dataclasses import dataclass, field
 from typing import Any
 
-TABLA = pathlib.Path(__file__).with_name("pcge2026.json")
+from .. import _datos
+from .._obsoleto import avisar
+from ..errores import ErrorContaperu
+
+# La tabla viaja dentro del paquete y la lee `_datos`: el núcleo no abre archivos (1.0, hito 0.5).
+TABLA = "pcge/pcge2026.json"
 
 MODOS = ("renombrar",)
 
 
-class TablaInvalida(ValueError):
+class TablaInvalida(ErrorContaperu, ValueError):
     """La tabla del PCGE existe pero está mal formada. Mejor fallar que adaptar a medias."""
 
 
@@ -86,12 +91,26 @@ class Informe:
         }
 
 
-def cargar_equivalencias(ruta: pathlib.Path | None = None) -> tuple[list[Mapeo], dict]:
-    """Los mapeos de la tabla. Lista vacía mientras la norma no esté codificada."""
-    p = ruta or TABLA
-    if not p.exists():
+def _tabla(datos: dict | str | os.PathLike | None, vieja: str, nueva: str) -> dict:
+    """La tabla como diccionario: la que llega, la que viaja con el paquete si no llega ninguna, o la de un archivo
+    cuando llega una ruta, que es la forma de la 0.x y avisa."""
+    if datos is None:
+        return _datos.leer_json(TABLA) or {}
+    if isinstance(datos, dict):
+        return datos
+    avisar(vieja, nueva, nivel=4)
+    crudo = _datos.leer_archivo(datos)
+    return json.loads(crudo.decode("utf-8")) if crudo is not None else {}
+
+
+def cargar_equivalencias(datos: dict | str | os.PathLike | None = None) -> tuple[list[Mapeo], dict]:
+    """Los mapeos de la tabla: la que viaja con el paquete, o la que llega como diccionario en `datos`. Lista vacía
+    mientras la norma no esté codificada. Desde la 1.0 el núcleo no lee disco: una ruta de archivo sigue aceptándose,
+    con aviso, hasta la 2.0."""
+    tabla = _tabla(datos, "pcge.cargar_equivalencias(ruta)", "pcge.cargar_equivalencias(datos)")
+    if not tabla:
         return [], {}
-    datos = json.loads(p.read_text(encoding="utf-8"))
+    datos = tabla
     mapeos = []
     for i, m in enumerate(datos.get("mapeos") or []):
         if not m.get("de") or not m.get("a"):
@@ -114,7 +133,8 @@ def _aplica(cuenta: str, de: str) -> bool:
     return bool(cuenta) and cuenta.startswith(de)
 
 
-def adaptar(lineas: list[dict[str, Any]], ruta: pathlib.Path | None = None) -> tuple[list[dict], Informe]:
+def adaptar(lineas: list[dict[str, Any]], ruta: str | os.PathLike | None = None, *,
+            datos: dict | None = None) -> tuple[list[dict], Informe]:
     """Líneas de diario -> líneas con las cuentas del PCGE 2026 + el informe de lo que cambió.
 
     Mientras la tabla esté vacía devuelve las líneas **tal cual**, sin tocar nada, y el informe
@@ -123,7 +143,11 @@ def adaptar(lineas: list[dict[str, Any]], ruta: pathlib.Path | None = None) -> t
     Los mapeos se prueban EN ORDEN y gana el primero que case, así que lo específico va antes
     que lo general: `741101` antes que `74`.
     """
-    mapeos, datos = cargar_equivalencias(ruta)
+    if ruta is not None:
+        tabla = _tabla(ruta, "pcge.adaptar(lineas, ruta)", "pcge.adaptar(lineas, datos=...)")
+    else:
+        tabla = _tabla(datos, "", "")
+    mapeos, datos = cargar_equivalencias(tabla) if tabla else ([], {})
     informe = Informe(version=str(datos.get("version") or ""), fuente=str(datos.get("fuente") or ""),
                       sin_tabla=not mapeos)
     if not mapeos:

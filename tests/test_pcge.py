@@ -10,6 +10,7 @@ import json
 import pytest
 
 from contaperu import pcge
+from contaperu._obsoleto import RutaObsoleta
 
 LINEAS = [
     {"cuenta": "741101", "debe_haber": "D", "importe": "100.00", "glosa": "DESCUENTO CONCEDIDO"},
@@ -38,7 +39,7 @@ def test_un_mapeo_sin_cita_no_se_acepta(tmp_path):
         "mapeos": [{"de": "741", "a": "701101", "modo": "renombrar"}],
     }), encoding="utf-8")
     with pytest.raises(pcge.TablaInvalida, match="no cita la norma"):
-        pcge.adaptar(LINEAS, ruta=tabla)
+        pcge.adaptar(LINEAS, datos=json.loads(tabla.read_text(encoding="utf-8")))
 
 
 def test_un_mapeo_mal_declarado_no_se_acepta(tmp_path):
@@ -48,7 +49,7 @@ def test_un_mapeo_mal_declarado_no_se_acepta(tmp_path):
                   {"de": "741", "a": "", "modo": "renombrar", "cita": "art. 1"}):
         tabla.write_text(json.dumps({"version": "2026", "mapeos": [mapeo]}), encoding="utf-8")
         with pytest.raises(pcge.TablaInvalida):
-            pcge.adaptar(LINEAS, ruta=tabla)
+            pcge.adaptar(LINEAS, datos=json.loads(tabla.read_text(encoding="utf-8")))
 
 
 def test_el_neteo_no_existe_todavia(tmp_path):
@@ -60,7 +61,7 @@ def test_el_neteo_no_existe_todavia(tmp_path):
         "mapeos": [{"de": "741", "a": "701101", "modo": "netear", "cita": "art. 1"}],
     }), encoding="utf-8")
     with pytest.raises(pcge.TablaInvalida, match="neteo llega con la norma"):
-        pcge.adaptar(LINEAS, ruta=tabla)
+        pcge.adaptar(LINEAS, datos=json.loads(tabla.read_text(encoding="utf-8")))
 
 
 def test_con_una_tabla_valida_renombra(tmp_path):
@@ -71,7 +72,7 @@ def test_con_una_tabla_valida_renombra(tmp_path):
         "mapeos": [{"de": "741", "a": "709901", "modo": "renombrar",
                     "cita": "articulo de ejemplo, solo para el test"}],
     }), encoding="utf-8")
-    salida, informe = pcge.adaptar(LINEAS, ruta=tabla)
+    salida, informe = pcge.adaptar(LINEAS, datos=json.loads(tabla.read_text(encoding="utf-8")))
     assert not informe.sin_tabla and informe.hubo_cambios
     # Cambia la cuenta y NADA mas: mismo importe, mismo sentido, misma glosa.
     assert salida[0]["cuenta"] == "709901" and salida[0]["debe_haber"] == "D"
@@ -88,5 +89,18 @@ def test_gana_el_primer_mapeo_que_case(tmp_path):
         "mapeos": [{"de": "741101", "a": "709901", "modo": "renombrar", "cita": "art. 1"},
                    {"de": "74", "a": "709999", "modo": "renombrar", "cita": "art. 2"}],
     }), encoding="utf-8")
-    salida, _ = pcge.adaptar(LINEAS, ruta=tabla)
+    salida, _ = pcge.adaptar(LINEAS, datos=json.loads(tabla.read_text(encoding="utf-8")))
     assert salida[0]["cuenta"] == "709901"
+
+
+def test_una_tabla_por_ruta_sigue_valiendo_con_aviso(tmp_path):
+    """La forma de la 0.x (la tabla en un archivo) sigue funcionando hasta la 2.0, y avisa: el núcleo ya no lee disco."""
+    tabla = tmp_path / "pcge.json"
+    tabla.write_text(json.dumps({"version": "2026", "mapeos": [
+        {"de": "741", "a": "709901", "modo": "renombrar", "cita": "art. 1"}]}), encoding="utf-8")
+    with pytest.warns(RutaObsoleta):
+        salida, _ = pcge.adaptar(LINEAS, ruta=tabla)
+    assert salida[0]["cuenta"] == "709901"
+    with pytest.warns(RutaObsoleta):
+        mapeos, _ = pcge.cargar_equivalencias(tabla)
+    assert mapeos[0].a == "709901"

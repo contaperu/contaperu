@@ -244,7 +244,8 @@ def cmd_comparar(args: argparse.Namespace) -> int:
     except ValueError as error:
         print(error)
         return 2
-    comparacion = comparar_sire.comparar(comparar_sire.leer(args.nuestro), comparar_sire.leer(args.sunat), registro)
+    comparacion = comparar_sire.comparar(comparar_sire.leer_bytes(Path(args.nuestro).read_bytes()),
+                                         comparar_sire.leer_bytes(Path(args.sunat).read_bytes()), registro)
     print(comparar_sire.informe(comparacion))
     return 1 if (comparacion["diferencias"] or comparacion["solo_en_sunat"] or comparacion["solo_nuestros"]) else 0
 

@@ -16,12 +16,13 @@ cualquiera pueda rehacerlo y auditarlo cuando salga una modificatoria.
 """
 from __future__ import annotations
 
-import json
-import pathlib
 import unicodedata
 from functools import lru_cache
 
-CATALOGO = pathlib.Path(__file__).resolve().parent / "catalogo2026.json"
+from .. import _datos
+
+# El dato viaja dentro del paquete y lo lee `_datos`: el núcleo no abre archivos (1.0, hito 0.5).
+DATO = "pcge/catalogo2026.json"
 
 
 @lru_cache(maxsize=1)
@@ -30,9 +31,7 @@ def cargar_catalogo() -> dict:
 
     Cacheado: son 1615 cuentas y se consultan una por fila de un registro de compras.
     """
-    if not CATALOGO.exists():
-        return {"version": "", "fuente": "", "cuentas": {}}
-    return json.loads(CATALOGO.read_text(encoding="utf-8"))
+    return _datos.leer_json(DATO) or {"version": "", "fuente": "", "cuentas": {}}
 
 
 def cuentas() -> dict[str, dict]:

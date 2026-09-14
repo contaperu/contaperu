@@ -69,19 +69,76 @@ def de_terceros() -> dict[str, ModuleType]:
     return encontrados
 
 
-# Se muta en sitio y no se reasigna: quien hizo `from contaperu.drivers import DRIVERS` ve lo mismo.
-DRIVERS: dict[str, ModuleType] = {}
+class _Registro(dict):
+    """Los drivers registrados: los de serie y los de terceros.
+
+    Los de terceros se buscan la primera vez que alguien mira el registro, no al importar el paquete (1.0): leer los
+    metadatos de lo instalado es trabajo que un `import contaperu.drivers` no tiene por qué pagar. Se muta en sitio y
+    no se reasigna: quien hizo `from contaperu.drivers import DRIVERS` ve lo mismo."""
+
+    _listo = False
+
+    def _asegurar(self) -> None:
+        if not self._listo:
+            recargar()
+
+    def __getitem__(self, clave):
+        self._asegurar()
+        return super().__getitem__(clave)
+
+    def __contains__(self, clave) -> bool:
+        self._asegurar()
+        return super().__contains__(clave)
+
+    def __iter__(self):
+        self._asegurar()
+        return super().__iter__()
+
+    def __len__(self) -> int:
+        self._asegurar()
+        return super().__len__()
+
+    def __repr__(self) -> str:
+        self._asegurar()
+        return super().__repr__()
+
+    def __eq__(self, otro) -> bool:
+        self._asegurar()
+        return super().__eq__(otro)
+
+    __hash__ = None
+
+    def get(self, clave, defecto=None):
+        self._asegurar()
+        return super().get(clave, defecto)
+
+    def keys(self):
+        self._asegurar()
+        return super().keys()
+
+    def values(self):
+        self._asegurar()
+        return super().values()
+
+    def items(self):
+        self._asegurar()
+        return super().items()
+
+    def copy(self) -> dict[str, ModuleType]:
+        self._asegurar()
+        return dict(super().items())
+
+
+DRIVERS: dict[str, ModuleType] = _Registro()
 
 
 def recargar() -> dict[str, ModuleType]:
     """Vuelve a buscar los drivers de terceros (p. ej. tras instalar uno sin reiniciar)."""
-    DRIVERS.clear()
-    DRIVERS.update(DE_SERIE)
-    DRIVERS.update(de_terceros())
+    DRIVERS._listo = True
+    dict.clear(DRIVERS)
+    dict.update(DRIVERS, DE_SERIE)
+    dict.update(DRIVERS, de_terceros())
     return DRIVERS
-
-
-recargar()
 
 
 def obtener(nombre: str) -> ModuleType:
