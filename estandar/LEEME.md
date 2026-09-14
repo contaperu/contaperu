@@ -187,7 +187,7 @@ adivinar:
   redondea él.
 
 Son campos **opcionales añadidos**, así que no cambian la versión del estándar (ver *Versionado*): un
-consumidor de la 0.2 que no los conozca los ignora.
+consumidor de la 0.3 que no los conozca los ignora.
 
 ---
 

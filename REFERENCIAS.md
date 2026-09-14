@@ -100,6 +100,10 @@ con `status: Pending | Success | Failed | TimedOut`, `validation.errors[{itemId,
 **Qué tomar.** Que **cada driver declare lo que exige** (`EXIGE = {"cuenta", "centro", "correlativo",
 "moneda"}`) y `diagnosticar` lo lea de ahí, en vez de asumir que todo driver de asientos exige lo mismo
 que CONCAR. Un driver de SISCONT que no use centros de costo no debería marcar «no listo» por ellos.
+Así quedó (librería 0.8.0, `drivers/contrato.py`): la cuenta y la equivalencia del tipo las exige el núcleo a todo
+driver de asientos, que declara solo lo que añade (`centro_costo`, `moneda`); el correlativo no se exige, porque el
+que falta arranca en 1. Desde la 0.10.0, a uno de registro el núcleo le exige la cuenta, y puede declarar
+`centro_costo` y `cuenta_unica`.
 
 ### 4. Idempotencia: guardar el id externo y buscarlo antes de crear
 
@@ -111,8 +115,9 @@ Xero acepta `Idempotency-Key` en PUT/POST/PATCH desde 2023 y recomienda deduplic
 pueden disparar dos veces el mismo evento».
 
 **Qué hace open-accounting.** El modelo tiene `clave` de duplicados (tipo, serie, número, documento de la
-contraparte), que es la clave de negocio del comprobante. No tiene un id del sistema destino ni una
-huella del asiento generado.
+contraparte), que es la clave de negocio del comprobante. Cuando se escribió esto no tenía un id externo ni una
+huella del asiento generado; hoy tiene los dos: la huella en `_exportacion` (librería 0.8.0) e `id_externo` en el
+comprobante (0.10.0), el id con el que la aplicación conoce el documento.
 
 **Qué tomar.** `id_externo` opcional en comprobante y línea (el id con el que el sistema origen o
 destino conoce ese registro), y una anotación `_exportacion: {driver, archivo, huella, fecha}` con la
@@ -194,7 +199,7 @@ redactar la pregunta correcta sin que el núcleo adivine nada.
 
 ## Propuesta para `open-accounting`: campos opcionales
 
-Todo lo de abajo es **aditivo**: campos opcionales que un consumidor de la 0.2 ignora sin romperse, así
+Todo lo de abajo es **aditivo**: campos opcionales que un consumidor de la 0.3 ignora sin romperse, así
 que la versión del estándar no sube (ver `estandar/LEEME.md` §Versionado). Y ninguno es una regla
 contable: son transporte y trazabilidad.
 

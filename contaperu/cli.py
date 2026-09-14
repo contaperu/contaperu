@@ -1,13 +1,21 @@
-"""CLI del motor: generar el TXT del SIRE desde XML locales, sin API ni portal.
+"""CLI del motor: el archivo de cada sistema contable, desde XML locales o un documento, sin API ni portal.
 
-    contaperu generar --tipo venta --ruc 20601234567 --razon "MI EMPRESA SAC" \
+    contaperu generar --tipo venta --ruc 20601234567 --razon "MI EMPRESA SAC" \\
         --periodo 202512 --driver todas --salida ./salida  comprobantes/*.xml  lote.zip
 
     contaperu desde-json tests/fixtures/golden/ventas_202512.json --driver sire
 
-Herramienta de diagnóstico: genera el TXT del SIRE fuera de la aplicación que lo use (la fase de
-la prueba real en SUNAT se cerró el 25-ago-2026) y compara propuestas con
-`comparar`. "todas" = los drivers de TXT, que hoy es solo el SIRE.
+Cinco subcomandos:
+
+  generar        XML o ZIP locales → el archivo del driver; --json vuelca además el documento leído
+  desde-json     un documento open-accounting → el archivo del driver, con --config e --imputacion
+  diagnosticar   qué bloquea, qué falta y qué saldría para un driver, antes de generar nada
+  configuracion  qué se configura (lo general y la sección de cada sistema) o sus valores por defecto
+  comparar       nuestro TXT del SIRE contra la exportación del detalle que da SUNAT
+
+El archivo del driver es el TXT y el ZIP del SIRE, el Excel de CONCAR o de CONTASIS, o el CSV. "todas" = los
+drivers de TXT, que hoy es solo el SIRE; los que llevan cuentas se piden por su nombre, y `generar` no recibe
+--config ni --imputacion: para eso está `desde-json`.
 """
 from __future__ import annotations
 
@@ -264,7 +272,8 @@ def main(argv: list[str] | None = None) -> int:
     analizador.add_argument("--version", action="version", version=f"contaperu {__version__}")
     subcomandos = analizador.add_subparsers(dest="cmd", required=True)
 
-    sub_generar = subcomandos.add_parser("generar", help="XML/ZIP locales → TXT + ZIP para el SIRE")
+    sub_generar = subcomandos.add_parser("generar", help="XML/ZIP locales → el archivo del driver (TXT y ZIP del "
+                                                         "SIRE, Excel de CONCAR o CONTASIS, CSV)")
     sub_generar.add_argument("--tipo", required=True, choices=["venta", "compra"])
     sub_generar.add_argument("--ruc", required=True)
     sub_generar.add_argument("--razon", required=True, help="razón social del generador (va en el driver sire)")
@@ -278,7 +287,8 @@ def main(argv: list[str] | None = None) -> int:
     sub_generar.set_defaults(fn=cmd_generar)
 
     sub_desde_json = subcomandos.add_parser("desde-json",
-                                            help="JSON de comprobantes (formato de los golden) → TXT + ZIP")
+                                            help="documento open-accounting en JSON → el archivo del driver (TXT "
+                                                 "y ZIP del SIRE, Excel de CONCAR o CONTASIS, CSV)")
     sub_desde_json.add_argument("json")
     sub_desde_json.add_argument("--driver", default="todas", choices=["todas", *drivers.DRIVERS])
     sub_desde_json.add_argument("--salida", default="salida")

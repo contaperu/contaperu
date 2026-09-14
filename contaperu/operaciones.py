@@ -361,11 +361,12 @@ def exportar(doc: dict, driver: str = "concar", configuracion: dict | None = Non
              fecha: str | None = None, imputacion: dict | None = None) -> dict:
     """Genera el archivo que pide un sistema contable.
 
-    El resultado trae `texto` cuando la salida es legible (el TXT del SIRE, el CSV) y
-    `contenido_base64` cuando son bytes (el Excel de CONCAR). Siempre trae el nombre de archivo
-    que el destino espera, y `_exportacion`: el driver, el archivo, la **huella** del asiento que
-    salió (solo en los drivers de asientos; `asiento/huella.py`) y la `fecha` si quien llama la dio.
-    Es la anotación con la que un productor reconoce una tanda que ya exportó (`REFERENCIAS.md`).
+    El resultado trae `texto` cuando la salida es legible (el TXT del SIRE, el CSV). El TXT llega además
+    comprimido, en `zip_base64`; cualquier otro archivo, en `contenido_base64`: el Excel de CONCAR o de
+    CONTASIS, y también el CSV. Siempre trae el nombre de archivo que el destino espera, y `_exportacion`:
+    el driver, el archivo, la **huella** del asiento que salió (solo en los drivers de asientos;
+    `asiento/huella.py`) y la `fecha` si quien llama la dio. Es la anotación con la que un productor
+    reconoce lo que ya exportó (`REFERENCIAS.md`).
     """
     cuando = _fecha_de(fecha)
     libro, comprobantes, config = _preparar(doc, configuracion, incluir_observados, imputacion, driver)

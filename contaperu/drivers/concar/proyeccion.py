@@ -7,7 +7,7 @@ sentido, cuántas líneas— ya viene resuelta en la línea (`asiento/motor.py`)
 
 La regla de este módulo: **el Excel no cambia ni una celda** respecto del que se validó en
 producción. Lo vigila `tests/test_snapshot_concar.py`, con 42 casos congelados antes de separar la
-contabilidad de su formato (11-sep-2026).
+contabilidad de su formato (11-sep-2026); hoy son 52.
 """
 from __future__ import annotations
 

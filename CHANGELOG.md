@@ -132,7 +132,7 @@ configura en su sección, el motor lo valida antes de generar y se lo describe a
 
 ### Cambiado (rompe)
 Sin alias ni compatibilidad hacia atrás (John, 12-sep-2026: era el momento de rebajar la deuda de nombres, con la
-arquitectura recién cambiada y contab-core sin usuarios activos, que se ajusta en la misma tanda). Los tres snapshots
+arquitectura recién cambiada y contab-core sin usuarios activos, que se ajusta a la vez). Los tres snapshots
 —el Excel de CONCAR, el registro de CONTASIS y las líneas neutrales— no cambian ni una celda, y julio rehecho desde
 los registros que CONTASIS importó sale igual que antes de los renombres. Con la configuración por secciones
 (13-sep-2026) solo cambió la entrada de un caso: el área de la detracción de `detraccion_area_y_tipo_doc` era `9001`, y
@@ -148,7 +148,7 @@ la sección de CONCAR rechaza un área de más de sus 3 caracteres.
 - **El estándar se llama `open-accounting`** (antes `pe-ledger`) y pasa a la `0.3`: la clave del documento es
   `open_accounting`, el esquema `estandar/open-accounting.schema.json`, la constante `OPEN_ACCOUNTING` y el recurso
   del MCP `contaperu://estandar/open-accounting`. `datos_raw` pasa a `datos_originales`. Rompe a quien lea los
-  nombres viejos; contab-core se ajusta en la misma tanda.
+  nombres viejos; contab-core se ajusta a la vez.
 - **CONCAR sale del núcleo**, con el mismo reparto que CONTASIS (`drivers/concar/datos.py`, `proyeccion.py` y
   `xlsx.py`): el núcleo ya no importa ningún driver.
 - `contrato.incumplimientos` explica de otra manera por qué un driver de la forma `linea` no declara `EXIGE`

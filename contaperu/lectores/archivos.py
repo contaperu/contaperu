@@ -82,7 +82,7 @@ def expandir(nombre: str, datos: bytes, tope: int = TOPE_ARCHIVOS, lote: Lote | 
     entrada = Entrada(nombre, datos)
     if not entrada.es_zip:
         if len(lote.entradas) >= tope:
-            lote.error(nombre, f"Supera el tope de {tope} archivos por tanda")
+            lote.error(nombre, f"Supera el tope de {tope} archivos por lote")
         else:
             lote.entradas.append(entrada)
         return lote
@@ -101,7 +101,7 @@ def expandir(nombre: str, datos: bytes, tope: int = TOPE_ARCHIVOS, lote: Lote | 
                 lote.error(etiqueta, "ZIP dentro de un ZIP: descomprímelo antes de subirlo")
                 continue
             if len(lote.entradas) >= tope:
-                lote.error(etiqueta, f"Supera el tope de {tope} archivos por tanda")
+                lote.error(etiqueta, f"Supera el tope de {tope} archivos por lote")
                 continue
             try:
                 lote.entradas.append(Entrada(etiqueta, z.read(info)))

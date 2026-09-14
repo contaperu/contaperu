@@ -72,7 +72,7 @@ CONCAR para escribir las suyas.
 Desde la 0.7 la dirección está invertida. `asiento/motor.py` arma las líneas en el vocabulario de
 `open-accounting` y CONCAR es una proyección más. Lo que hace posible el cambio sin riesgo es
 `tests/test_snapshot_concar.py`: 42 casos con las 41 columnas congeladas celda a celda **antes** del
-refactor. Ese Excel lleva un año importándose en CONCARs de producción; el snapshot es la garantía de
+refactor (hoy son 52). Ese Excel lleva un año importándose en CONCARs de producción; el snapshot es la garantía de
 que no cambió ni una celda, y la regla para el futuro: **regenerarlo es una decisión contable con
 fuente, nunca un trámite.**
 

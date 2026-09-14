@@ -1,17 +1,17 @@
 """La huella del asiento: una cifra que dice «este contenido ya salió».
 
-El Excel de CONCAR **se suma** al importarlo: importar dos veces la misma tanda duplica los asientos, y
+El Excel de CONCAR **se suma** al importarlo: importar dos veces la misma exportación duplica los asientos, y
 es el error más caro del flujo real. Las APIs de fuera lo atajan con un id externo y una clave de
 idempotencia (QuickBooks `SyncToken`, Xero `Idempotency-Key`; ver `REFERENCIAS.md`); aquí, donde el
 destino es un archivo y no una API, lo que se puede hacer es dejar en cada exportación una huella
-determinista de lo que salió, para que quien la guarde reconozca la tanda si vuelve a aparecer.
+determinista de lo que salió, para que quien la guarde reconozca la exportación si vuelve a aparecer.
 
 Es la huella del **contenido del asiento**, no del archivo:
 
 - va sobre las líneas neutrales (`LineaDiario.a_dict()`), **en el orden en que salen** —el orden es
   parte del asiento: principal, IGV, retención, tercero, detracción— y no se reordenan;
-- **sin el `correlativo`**: la misma tanda exportada otra vez tras un «deshacer» arranca en otro
-  número y sigue siendo la misma tanda. La pregunta que responde es «¿este contenido ya salió?»;
+- **sin el `correlativo`**: la misma exportación, repetida tras un «deshacer», arranca en otro
+  número y sigue siendo la misma. La pregunta que responde es «¿este contenido ya salió?»;
   la del correlativo la responden los bytes del archivo;
 - con todo lo demás: sub-diario, fecha del asiento, cuentas, sentidos, importes (texto exacto),
   glosas, documento, referencia y detracción. Un céntimo la cambia; una configuración que mueva el
