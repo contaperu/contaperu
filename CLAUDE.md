@@ -94,14 +94,19 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 | Documento | Qué responde |
 |---|---|
 | `README.md` | La portada: el problema, instalar, un ejemplo de diez líneas, el MCP, qué sabe hacer y qué no, estado |
-| `ARQUITECTURA.md` | Los tres niveles, el flujo de un comprobante, la línea neutral, cómo se enchufa un driver, lo que no se negocia, la hoja de ruta |
+| `ARQUITECTURA.md` | Los tres niveles, el flujo de un comprobante, la línea neutral, cómo se enchufa un driver, lo que no se negocia |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU.; de aquí salió la 0.8.0 |
+| `INTEROPERABILIDAD.md` | Su continuación: lo que enseñan los proyectos abiertos, los estándares (PLE, SAF-T, ISO 20022) y MCP, y cómo entrarían el banco y las facturas de proveedores. Investigación: cada propuesta espera su caso real |
+| `HOJA-DE-RUTA.md` | En qué orden crece el motor: la Fase 0 y los cinco frentes (drivers legacy, puerta para cualquier ERP, leer y validar más, el banco, el estándar), con la referencia de EE. UU., hitos con criterio de salida y el dato que destraba cada uno |
 | `CHANGELOG.md` | Cada versión con su porqué; la bitácora del motor vive aquí y en ningún otro sitio |
 | `SECURITY.md` · `CODE_OF_CONDUCT.md` | Cómo reportar una vulnerabilidad; cómo se convive en el proyecto |
 
 ## Pendiente que depende de datos, no de código
+
+El orden completo y qué destraba cada hito, en `HOJA-DE-RUTA.md` (§4, «Lo que hay que conseguir»). Aquí, lo que ya
+espera un archivo o una norma:
 
 - Drivers de **SISCONT y STARSOFT**: cada uno exige un archivo real que ese sistema haya importado, como pasó con
   **CONTASIS**, aceptado el 13-sep-2026 al importar los archivos que genera su driver.

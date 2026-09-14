@@ -196,15 +196,13 @@ tienen fuente**, nunca con una regla nueva escrita para el agente.
 
 ## Hoja de ruta
 
-- **Nivel 1 — compatibilidad con lo que existe** (prioridad hoy): CONCAR, SIRE y CONTASIS
-  listos; SISCONT y STARSOFT abiertos a la comunidad, por entry points, con un
-  archivo real cada uno.
-- **Nivel 2 — un lenguaje común**: cuando aparezcan más aplicaciones peruanas especializadas
-  (compras, tesorería, logística), todas necesitarán representar facturas, proveedores, centros de
-  costo, impuestos y asientos. `open-accounting` ya es ese idioma intermedio; crecerá con casos reales
-  detrás, no por si acaso. Lo que las APIs unificadas de EE. UU. (Merge, Codat, Rutter, Apideck)
-  enseñan sobre ese idioma, y los campos opcionales que de ahí se proponen, en
-  [REFERENCIAS.md](REFERENCIAS.md).
-- **Nivel 3 — agentes**: más preguntas respondidas desde el núcleo (`diagnosticar` es la primera),
-  la conciliación de constancias de detracción cuando haya un archivo real del Banco de la Nación, y
-  las equivalencias del PCGE 2026 con la cita del artículo al lado de cada mapeo.
+El orden en que crece el motor, y el dato o el código que destraba cada paso, viven en
+[HOJA-DE-RUTA.md](HOJA-DE-RUTA.md): una fase para afinar lo que existe y cinco frentes —los drivers de SISCONT y
+STARSOFT, la puerta para que cualquier ERP integre el motor, leer y validar más con las reglas oficiales de SUNAT, el
+banco como punto de partida del proceso contable y un estándar que mejora siempre—, cada uno con la referencia de cómo
+lo resuelve EE. UU. y sus hitos con criterio de salida. Aquí no se repiten. El diseño de cada pieza está en
+[INTEROPERABILIDAD.md](INTEROPERABILIDAD.md), y lo tomado de las APIs de EE. UU., en [REFERENCIAS.md](REFERENCIAS.md).
+
+La idea que la ordena sigue siendo la de esta arquitectura: primero la compatibilidad con los sistemas que ya existen,
+después un lenguaje común (`open-accounting`, que crece con casos reales detrás) y, encima, más preguntas de agentes
+respondidas con reglas que ya tienen fuente.

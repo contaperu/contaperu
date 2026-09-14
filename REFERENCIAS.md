@@ -6,6 +6,10 @@ lo compara, campo a campo, con `open-accounting`. Termina con una propuesta conc
 estándar y qué no. Investigación hecha el 11-sep-2026 sobre la documentación pública de cada uno; las
 fuentes están al final.
 
+Su continuación —los proyectos abiertos, los estándares (el PLE, SAF-T, XBRL GL, ISO 20022), la especificación
+MCP y dos entradas que el motor todavía no tiene, el banco y las facturas de proveedores— está en
+[INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
+
 ## Por qué mirar a EE. UU.
 
 El problema que ContaPerú resuelve —cada sistema contable importa su propio archivo plano, con sus

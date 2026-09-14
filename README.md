@@ -208,7 +208,8 @@ El asiento nace en las líneas neutrales del estándar `open-accounting` y cada 
 detracción los pone el núcleo una vez para todos. Un driver de la comunidad se enchufa por *entry
 points* sin tocar este repositorio. Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md).
 Lo que se tomó de QuickBooks, Xero y las APIs unificadas de EE. UU. —y lo que no—, en
-[REFERENCIAS.md](REFERENCIAS.md).
+[REFERENCIAS.md](REFERENCIAS.md). Lo que enseñan los proyectos abiertos, y cómo entrarían el banco y las
+facturas de proveedores —que el motor todavía no hace—, en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
 
 ## Qué **no** hace
 
@@ -235,6 +236,8 @@ Lo que se tomó de QuickBooks, Xero y las APIs unificadas de EE. UU. —y lo que
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
 | Drivers de SISCONT y STARSOFT | abierto a la comunidad — ver [CONTRIBUTING.md](CONTRIBUTING.md) |
+
+Lo que no está listo no tiene fecha: tiene un orden y un dato que lo destraba, en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).
 
 ### Sobre el PCGE 2026
 
