@@ -94,7 +94,7 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal) -> dict:
     interno = str((config.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
     tasa = tasa_detraccion(c, config)
     return _limpio({"codigo": sunat, "codigo_interno": interno,
-                    "tasa": float(tasa) if tasa > 0 else "", "base": str(total)})
+                    "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total)})
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
@@ -134,7 +134,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     glosa = glosa_de(c)
     tasa_leida = tasa_calculada(igv, Decimal(c.base_gravada or 0))
     tasa = "" if tasa_leida is None else texto_tasa(tasa_leida)
-    tc = float(c.tipo_cambio) if es_usd and c.tipo_cambio else ""
+    tc = str(c.tipo_cambio) if es_usd and c.tipo_cambio else ""     # texto exacto: `float` solo en una celda
     emision = c.fecha_emision
     vencimiento = c.fecha_vencimiento or emision
     # Cada comprobante se asienta con SU fecha de emisión; el extemporáneo (mes anterior) cae al

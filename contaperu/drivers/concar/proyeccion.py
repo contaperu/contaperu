@@ -62,7 +62,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         # su prefijo. Una sola glosa, dos largos: lo único que cambia es lo que admite CONCAR.
         "F": cabecera.glosa[:40], "W": linea.glosa[:30],
         # Con el T.C. del comprobante la conversión es especial ('C'); sin él, CONCAR lo busca en su tabla.
-        "G": linea.tipo_cambio if linea.tipo_cambio else "",
+        "G": celdas.numero(linea.tipo_cambio) if linea.tipo_cambio else "",
         "H": "C" if linea.tipo_cambio else TIPO_CONVERSION, "I": MARCA_CONVERSION, "J": _fecha(linea.fecha),
         "K": linea.cuenta, "L": linea.contraparte_doc, "M": linea.centro_costo, "N": linea.debe_haber,
         "O": importe, "P": importe if es_usd else "", "Q": importe if not es_usd else "",
@@ -86,7 +86,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
                   "AB": _fecha(ref.get("fecha"))})
     if det:
         base = _importe(det.get("base"))
-        f.update({"AI": det.get("codigo_interno", ""), "AJ": det.get("tasa", ""),
+        f.update({"AI": det.get("codigo_interno", ""), "AJ": celdas.numero(det.get("tasa", "")),
                   "AK": base if es_usd else "", "AL": base if not es_usd else ""})
     return f
 
@@ -183,7 +183,7 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
     }
     detraccion = {
         "codigo_interno": _texto_de(fila.get("AI")),
-        "tasa": _numero_o_vacio(fila.get("AJ")),
+        "tasa": celdas.texto_exacto(fila.get("AJ")),
         "base": _importe_exacto(fila.get("AK") or fila.get("AL")),
     }
     return LineaDiario(
@@ -194,7 +194,7 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
         correlativo=_texto_de(fila.get("C")),
         fecha=_texto_de(fila.get("D")),
         moneda=monedas.get(codigo, codigo),
-        tipo_cambio=_numero_o_vacio(fila.get("G")),
+        tipo_cambio=celdas.texto_exacto(fila.get("G")),
         glosa=_texto_de(fila.get("W")),
         contraparte_doc=_texto_de(fila.get("L")),
         centro_costo=_texto_de(fila.get("M")),

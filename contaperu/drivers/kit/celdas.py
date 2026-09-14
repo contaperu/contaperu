@@ -15,6 +15,19 @@ def importe(texto: Any) -> Any:
     return float(Decimal(str(texto))) if texto not in ("", None) else ""
 
 
+def numero(texto: Any) -> Any:
+    """Un número exacto que no es un importe —un tipo de cambio, una tasa— → `float` para la celda; vacío si no hay."""
+    return importe(texto)
+
+
+def texto_exacto(valor: Any) -> str:
+    """Lo que trae una celda numérica → su texto exacto y sin ceros de más (`3.55` → «3.55», `4.0` → «4»); vacío si
+    no hay. Es el camino inverso de `numero`."""
+    if valor in ("", None):
+        return ""
+    return format(Decimal(str(valor)).normalize(), "f")
+
+
 def fecha(texto: str | None, vacio: Any = "") -> Any:
     """Una fecha ISO (`AAAA-MM-DD`) → `date`; `vacio` si no hay fecha."""
     return date.fromisoformat(texto) if texto else vacio

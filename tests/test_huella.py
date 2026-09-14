@@ -40,11 +40,13 @@ def test_la_misma_entrada_da_la_misma_huella_y_es_la_de_siempre():
     assert a == b == HUELLA_FACTURA
 
 
-# La misma FACTURA en dólares y con detracción (rama `motor-v1`, etapa 1, 14-sep-2026). La 1.0 pasa el tipo de cambio y
-# la tasa de la detracción a texto dentro de la línea (hito 0.6), y eso cambia estas dos huellas a propósito, sin tocar
-# la de soles. Se fijan antes para que el cambio se vea y se anuncie, en vez de pasar desapercibido.
-HUELLA_USD = "7bea763c65e20607bf0caacfff17b7f41e57e9618634807e900fa51b03928300"
-HUELLA_DETRACCION = "a51a1da1befd246b0deea4fb81f4b1e43d3033c61aa0fea56654fb2b50b8b582"
+# La misma FACTURA en dólares y con detracción. Se fijaron con la 0.10 (rama `motor-v1`, etapa 1, 14-sep-2026) y cambiaron
+# a propósito en la 1.0, sin tocar la de soles, cuando el tipo de cambio y la tasa de la detracción pasaron a texto
+# exacto dentro de la línea (hito 0.6, anunciado en el CHANGELOG). Con la 0.10 eran
+# 7bea763c65e20607bf0caacfff17b7f41e57e9618634807e900fa51b03928300 y
+# a51a1da1befd246b0deea4fb81f4b1e43d3033c61aa0fea56654fb2b50b8b582.
+HUELLA_USD = "0e447ed2e85b0e7aff589d4fd3d6a77d615a3568a7cad6bdbddc2df93641992b"
+HUELLA_DETRACCION = "7a04e181fe431229ed1b4ee4a3336ae03f8150f9b3e5245dce36c94f63cbc8b7"
 
 
 def test_la_huella_en_dolares_y_con_detraccion_es_la_de_siempre():

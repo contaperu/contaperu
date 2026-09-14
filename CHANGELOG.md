@@ -110,6 +110,12 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   la cuenta lo lleva y una moneda con código— y por lo que no cabe en su formato. Mirar sin exigir es `diagnosticar`, o
   `generar_asiento` hacia el CSV. El desborde de un sub-diario no se lanza: queda en `_asiento.sub_diarios`.
 
+- **El tipo de cambio y la tasa de la detracción viajan como texto exacto en la línea neutral** (hito 0.6):
+  `"3.550"` y `"4"` en vez de `3.55` y `4.0`, y `float` solo al escribir la celda. El Excel de CONCAR no cambia. Cambian,
+  y es a propósito, la huella de las tandas en dólares o con detracción —una huella guardada con la 0.10 para esas
+  tandas no coincide con la nueva; la de soles, sí— y cómo se escriben esas dos columnas en el CSV. El camino inverso
+  (`drivers.concar.a_lineas`) también devuelve texto.
+
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
   avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen

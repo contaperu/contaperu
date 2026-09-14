@@ -72,7 +72,7 @@ def test_el_codigo_de_moneda_del_erp_vuelve_a_iso():
     """En el Excel la moneda es 'MN' o 'US'; en el estándar, PEN y USD."""
     pen = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(), CONTAB, MES, "080001"), CONTAB)[0]
     usd = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(moneda="USD", tipo_cambio="3.5"), CONTAB, MES, "080002"), CONTAB)[0]
-    assert pen.moneda == "PEN" and usd.moneda == "USD" and usd.tipo_cambio == 3.5
+    assert pen.moneda == "PEN" and usd.moneda == "USD" and usd.tipo_cambio == "3.5"
 
 
 def test_la_linea_de_detraccion_lleva_su_bloque():
@@ -82,7 +82,7 @@ def test_la_linea_de_detraccion_lleva_su_bloque():
     det = lineas[-1]
     assert det.cuenta == "421203" and det.debe_haber == "H" and det.importe == "198.00"
     assert det.documento["tipo"] == "DR" and det.documento["serie_numero"] == "9999999999"
-    assert det.detraccion == {"codigo_interno": "02702", "tasa": 4.0, "base": "4956.00"}
+    assert det.detraccion == {"codigo_interno": "02702", "tasa": "4", "base": "4956.00"}
     assert det.glosa.startswith("DETRACCION - ")
 
 
