@@ -21,7 +21,7 @@ from contaperu.pipeline import preparacion as prep
 from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from contaperu.configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from contaperu.drivers import contrato
-from contaperu.formato import Opciones
+from contaperu.drivers.kit import Opciones
 from util import GOLDEN
 
 # El golden no trae cuenta de gasto (sale del RUC en la vida real): se la pone la configuración. Tampoco
@@ -56,8 +56,7 @@ def test_exporta_el_golden_de_compras(nombre):
 
 def test_la_forma_de_cada_driver_de_serie():
     assert contrato.forma(drivers.sire) == "linea"
-    assert contrato.forma(drivers.concar) == "construir"
-    # El CSV expone las dos de archivo (conserva `construir` por compatibilidad): gana la nueva.
+    assert contrato.forma(drivers.concar) == "desde_lineas"      # hasta la 0.10, `construir`
     assert contrato.forma(drivers.csv) == "desde_lineas"
     assert contrato.forma(drivers.contasis) == "desde_comprobantes"
 
@@ -144,6 +143,8 @@ def driver_de_prueba(nombre: str = "prueba") -> types.ModuleType:
     """Un driver de asientos de la forma `desde_lineas`, del tamaño de un ejemplo."""
     m = types.ModuleType(f"contaperu_{nombre}")
     m.NOMBRE = nombre
+    m.CANAL = "legacy"
+    m.EXIGE = frozenset()
     m.FORMATOS = {"compra": f"{nombre}_asiento"}
     m.OPCIONES = Opciones(extension=".txt")
     m.CONTENT_TYPE = "text/plain; charset=utf-8"
@@ -210,6 +211,8 @@ def driver_de_registro(nombre: str = "registro") -> types.ModuleType:
 
     m = types.ModuleType(f"contaperu_{nombre}")
     m.NOMBRE = nombre
+    m.CANAL = "legacy"
+    m.EXIGE = frozenset()
     m.FORMATOS = {"compra": f"{nombre}_registro", "venta": f"{nombre}_registro"}
     m.OPCIONES = Opciones(extension=".txt")
     m.CONTENT_TYPE = "text/plain; charset=utf-8"
@@ -614,3 +617,92 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
     ajenas = {str(f.relative_to(PAQUETE)).replace("\\", "/"): sorted(_claves_leidas(f) - permitidas) for f in archivos}
     assert {f: claves for f, claves in ajenas.items() if claves} == {}
     assert "monedas_codigo" in _propias(drivers.concar) and "moneda" in drivers.concar.EXIGE
+
+
+# --- el canal: a quién se entrega lo que sale (1.0) --------------------------------------------------------------
+
+def test_cada_driver_de_serie_declara_su_canal():
+    assert {n: contrato.canal(m) for n, m in drivers.DE_SERIE.items()} == {
+        "sire": "tributario", "concar": "legacy", "csv": "intercambio", "contasis": "legacy"}
+    assert all(contrato.declara_canal(m) for m in drivers.DE_SERIE.values())
+    assert api.drivers_disponibles()["concar"]["canal"] == "legacy"
+
+
+def test_las_reglas_de_cada_canal():
+    tributario_de_asientos = driver_de_prueba("t")
+    tributario_de_asientos.CANAL = "tributario"
+    assert contrato.incumplimientos(tributario_de_asientos) == [
+        "un driver tributario escribe un registro de texto para SUNAT: su forma es `linea`"]
+    intercambio_de_registro = driver_de_registro("i")
+    intercambio_de_registro.CANAL = "intercambio"
+    assert contrato.incumplimientos(intercambio_de_registro) == [
+        "un driver de intercambio proyecta la línea neutral: su forma es `desde_lineas`"]
+    legacy_sin_exige = driver_de_prueba("l")
+    del legacy_sin_exige.EXIGE
+    assert contrato.incumplimientos(legacy_sin_exige) == [
+        "un driver legacy declara EXIGE: lo que su sistema no puede importar sin (vacío si nada)"]
+    legacy_de_texto = types.ModuleType("texto")
+    legacy_de_texto.NOMBRE, legacy_de_texto.FORMATOS, legacy_de_texto.OPCIONES = "x", {"venta": "x"}, Opciones()
+    legacy_de_texto.CANAL, legacy_de_texto.nombre = "legacy", (lambda libro, op=None: "x.txt")
+    legacy_de_texto.linea = lambda c, libro, idx, op=None: ""
+    assert contrato.incumplimientos(legacy_de_texto) == [
+        "un driver legacy lleva cuentas: su forma es desde_lineas o desde_comprobantes",
+        "un driver legacy declara EXIGE: lo que su sistema no puede importar sin (vacío si nada)"]
+
+
+@pytest.mark.parametrize("valor,motivo", [("api_erp", "reservado"), ("banco", "no existe")])
+def test_un_canal_reservado_o_desconocido_no_pasa(valor, motivo):
+    driver = driver_de_prueba()
+    driver.CANAL = valor
+    [problema] = contrato.incumplimientos(driver)
+    assert motivo in problema and (valor != "api_erp" or "A5" in problema)
+
+
+def test_un_tercero_sin_canal_avisa_y_se_trata_como_legacy(con_terceros):
+    sin_canal = driver_de_prueba("sincanal")
+    del sin_canal.CANAL
+    with pytest.warns(drivers.AvisoDriver, match="no declara CANAL"):
+        registrados = con_terceros(_Entrada("sincanal", sin_canal))
+    assert "sincanal" in registrados and contrato.canal(sin_canal) == "legacy"
+
+
+def test_la_forma_construir_de_un_tercero_avisa_y_sigue_exportando(con_terceros):
+    viejo = driver_de_prueba("viejo")
+    del viejo.desde_lineas
+
+    def construir(libro, comprobantes, config, correlativos, op=viejo.OPCIONES):
+        return b"hecho a mano", {"filas": len(comprobantes)}
+
+    viejo.construir = construir
+    with pytest.warns(drivers.AvisoDriver, match="construir"):
+        con_terceros(_Entrada("viejo", viejo))
+    r = api.exportar(documento_de_compras(), driver="viejo", configuracion=CONTAB)
+    assert base64.b64decode(r["contenido_base64"]) == b"hecho a mano" and r["resumen"]["filas"] == 3
+
+
+def test_el_indice_llega_a_quien_lo_acepta(con_terceros):
+    recibido = {}
+    con_indice = driver_de_prueba("conindice")
+
+    def desde_lineas(libro, lineas, config, op=con_indice.OPCIONES, *, indice=()):
+        recibido["lineas"], recibido["indice"] = lineas, indice
+        return b"", {}
+
+    con_indice.desde_lineas = desde_lineas
+    sin_indice = driver_de_prueba("sinindice")
+    assert contrato.acepta_indice(con_indice) and not contrato.acepta_indice(sin_indice)
+    con_terceros(_Entrada("conindice", con_indice), _Entrada("sinindice", sin_indice))
+    api.exportar(documento_de_compras(), driver="conindice", configuracion=CONTAB)
+    lineas, indice = recibido["lineas"], recibido["indice"]
+    assert len(indice) == 3 and indice[0].desde == 0 and indice[-1].hasta == len(lineas)
+    assert all(a.hasta == b.desde for a, b in zip(indice, indice[1:]))
+    assert api.exportar(documento_de_compras(), driver="sinindice", configuracion=CONTAB)["resumen"]["filas"] == 9
+
+
+def test_lo_que_no_cabe_detiene_tambien_la_forma_desde_lineas(con_terceros):
+    corto = driver_de_prueba("corto")
+    corto.no_caben = lambda libro, comprobantes, config: {"de prueba: ninguno cabe": list(comprobantes)}
+    con_terceros(_Entrada("corto", corto))
+    with pytest.raises(contrato.NoCabe):
+        api.exportar(documento_de_compras(), driver="corto", configuracion=CONTAB)
+    assert api.diagnosticar(documento_de_compras(), driver="corto", configuracion=CONTAB)["faltantes"]["no_cabe"]

@@ -21,13 +21,15 @@ Nombre (Tabla 13 / Tabla 6): LE + RUC + AAAAMM + 00 + libro (140400 / 080400)
 from __future__ import annotations
 
 from ... import catalogos as cat
+from ...igv import por_destino
 from ...modelo import Comprobante, Libro
-from ...formato import (
-    Opciones, armar_linea, columnas_igv_compras, formatear_fecha, formatear_monto, formatear_numero, formatear_cambio,
-    negativo, sanear,
+from ..kit import (
+    Opciones, armar_linea, formatear_fecha, formatear_monto, formatear_numero, formatear_cambio, negativo, sanear,
 )
 
 NOMBRE = "sire"
+# Un registro que se presenta a SUNAT (`drivers.contrato.CANALES`).
+CANAL = "tributario"
 # Lo que no se anota en el registro que se declara a SUNAT (hoy: el recibo por
 # honorarios). El Excel de CONCAR no declara esto, así que sí los lleva.
 EXCLUYE_TIPOS = cat.FUERA_DEL_REGISTRO_SUNAT
@@ -40,6 +42,14 @@ FORMATOS = {"venta": "sire_rvie", "compra": "sire_rce"}
 LIBRO_VENTAS = "140400"
 LIBRO_COMPRAS = "080400"
 OPORTUNIDAD_REEMPLAZO = "02"
+
+
+def columnas_igv_compras(c: Comprobante, opciones: Opciones) -> list[str]:
+    """Las 6 columnas de base/IGV de compras según el destino de la adquisición:
+    DG (gravadas), DGNG (gravadas y no gravadas), DNG (no gravadas). La división es de `igv.por_destino`;
+    aquí solo se escribe, con el signo de la nota de crédito."""
+    neg = negativo(c, opciones)
+    return [formatear_monto(v, opciones, neg) for pareja in por_destino(c) for v in pareja]
 
 
 def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:

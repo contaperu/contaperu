@@ -46,10 +46,17 @@ def desde_lineas(modulo, libro: Libro, comprobantes: list[Comprobante], opciones
     # Lo que ese destino exige (`contrato.exige`: lo del núcleo más su EXIGE) se comprueba ANTES de
     # armar nada: un driver `desde_lineas` nunca ve los comprobantes, así que solo el núcleo puede.
     exigir_requisitos(comprobantes, config, libro.es_venta, contrato.exige(modulo))
-    lineas, rangos = asi.lineas_del_libro(libro, comprobantes, config, correlativos, opciones,
-                                          contrato.centro_en_anexo(modulo, config))
+    # Lo que su formato no puede llevar detiene también a un driver de asientos, antes de armar nada.
+    fuera = contrato.no_caben(modulo, libro, comprobantes, config)
+    if fuera:
+        raise contrato.NoCabe(fuera)
+    lineas, rangos, indice = asi.lineas_e_indice_del_libro(libro, comprobantes, config, correlativos, opciones,
+                                                           contrato.centro_en_anexo(modulo, config))
     cuadre = partida_doble.exigir(lineas)
-    contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones)
+    if contrato.acepta_indice(modulo):
+        contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones, indice=indice)
+    else:
+        contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones)
     return contenido, {"filas": len(lineas), "sub_diarios": dict(rangos),
                        "debe": str(cuadre.debe), "haber": str(cuadre.haber), "huella": huella(lineas), **extra}
 

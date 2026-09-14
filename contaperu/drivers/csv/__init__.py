@@ -21,10 +21,12 @@ from typing import Any
 
 from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from ...asiento.lineas import LineaDiario
-from ...formato import Opciones
+from ..kit import Opciones
 from ...modelo import Libro
 
 NOMBRE = "csv"
+# Un formato neutral para leer o integrar: proyecta la línea neutral (`drivers.contrato.CANALES`).
+CANAL = "intercambio"
 OPCIONES = Opciones(fecha="AAAA-MM-DD", extension=".csv")
 FORMATOS = {"compra": "csv_asiento", "venta": "csv_asiento"}
 CONTENT_TYPE = "text/csv; charset=utf-8"

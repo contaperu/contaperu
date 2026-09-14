@@ -15,10 +15,12 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
+from ...asiento.configuracion import MONEDAS_CODIGO
 from ...asiento.faltas import SinCodigoDeMoneda
+from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
-from ...asiento.motor import lineas_del_comprobante, glosa_de
-from ...formato import Opciones
+from ...asiento.motor import cabecera_de, glosa_de, lineas_del_comprobante  # noqa: F401  (glosa_de: nombre de la 0.10)
+from ..kit import Opciones, celdas
 from ...igv import tasa_calculada
 from ...modelo import CENTIMO, Comprobante
 from ..contrato import centro_en_anexo
@@ -30,23 +32,25 @@ def codigo_moneda(moneda: str, config: dict) -> str:
     """Columna E: el código de la T.G. 03. CONCAR solo admite MN y US (rechaza ME); otra moneda
     detiene la exportación en vez de inventarse un código."""
     moneda = (moneda or "PEN").upper()
-    codigo = (config.get("monedas_codigo") or {}).get(moneda)
+    codigo = (config.get(MONEDAS_CODIGO) or {}).get(moneda)
     if not codigo:
         raise SinCodigoDeMoneda([moneda])
     return codigo
 
 
-def _fecha(texto: str | None, vacio: Any = "") -> Any:
-    return date.fromisoformat(texto) if texto else vacio
+# Los importes viajan como texto exacto; openpyxl los quiere `float` para darles formato numérico (`drivers.kit.celdas`).
+_fecha = celdas.fecha
+_importe = celdas.importe
 
 
-def _importe(texto: Any) -> Any:
-    """Los importes viajan como texto exacto; openpyxl los quiere `float` para darles formato numérico."""
-    return float(Decimal(str(texto))) if texto not in ("", None) else ""
+def _cabecera(c: Comprobante | Cabecera) -> Cabecera:
+    return c if isinstance(c, Cabecera) else cabecera_de(c)
 
 
-def fila(linea: LineaDiario, c: Comprobante, config: dict) -> dict[str, Any]:
-    """Una línea neutral → una fila del Excel (claves 'A'..'AO', en el orden de la plantilla)."""
+def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[str, Any]:
+    """Una línea neutral → una fila del Excel (claves 'A'..'AO', en el orden de la plantilla). `c` es la cabecera del
+    comprobante (`asiento.indice`) o el propio comprobante: de ahí salen la glosa de la F y la tasa de la AO."""
+    cabecera = _cabecera(c)
     es_usd = linea.moneda == "USD"
     importe = _importe(linea.importe)
     doc, ref, det = linea.documento or {}, linea.referencia or {}, linea.detraccion or {}
@@ -56,7 +60,7 @@ def fila(linea: LineaDiario, c: Comprobante, config: dict) -> dict[str, Any]:
         "E": codigo_moneda(linea.moneda, config),
         # F: la glosa de la cabecera, igual en todas las filas del comprobante; W: la de la línea, con
         # su prefijo. Una sola glosa, dos largos: lo único que cambia es lo que admite CONCAR.
-        "F": glosa_de(c)[:40], "W": linea.glosa[:30],
+        "F": cabecera.glosa[:40], "W": linea.glosa[:30],
         # Con el T.C. del comprobante la conversión es especial ('C'); sin él, CONCAR lo busca en su tabla.
         "G": linea.tipo_cambio if linea.tipo_cambio else "",
         "H": "C" if linea.tipo_cambio else TIPO_CONVERSION, "I": MARCA_CONVERSION, "J": _fecha(linea.fecha),
@@ -70,7 +74,8 @@ def fila(linea: LineaDiario, c: Comprobante, config: dict) -> dict[str, Any]:
         # AO: CONCAR solo admite la tasa entera. Se redondea desde los importes del comprobante y no
         # desde la tasa de la línea, que ya va redondeada a 2 decimales: redondear dos veces puede
         # dar otro entero.
-        "AO": tasa_igv_entera(c.igv, c.base_gravada) if linea.tasa_igv not in ("", None) else "",
+        "AO": (tasa_igv_entera(Decimal(cabecera.igv), Decimal(cabecera.base_gravada))
+               if linea.tasa_igv not in ("", None) else ""),
     })
     if linea.rol == "detraccion":
         # El área (T.G. 26) es un número propio de cada empresa y solo va en esta fila (Excel validado).
@@ -86,9 +91,10 @@ def fila(linea: LineaDiario, c: Comprobante, config: dict) -> dict[str, Any]:
     return f
 
 
-def filas(c: Comprobante, lineas: list[LineaDiario], config: dict) -> list[dict[str, Any]]:
-    """Las líneas de UN comprobante → sus filas del Excel."""
-    return [fila(ln, c, config) for ln in lineas]
+def filas(c: Comprobante | Cabecera, lineas: list[LineaDiario], config: dict) -> list[dict[str, Any]]:
+    """Las líneas de UN comprobante → sus filas del Excel. `c` es su cabecera o el propio comprobante."""
+    cabecera = _cabecera(c)
+    return [fila(ln, cabecera, config) for ln in lineas]
 
 
 def filas_de_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
@@ -153,8 +159,7 @@ def _importe_exacto(v: Any) -> str:
     return str(Decimal(str(v)).quantize(CENTIMO))
 
 
-def _numero_o_vacio(v: Any) -> Any:
-    return v if isinstance(v, (int, float)) else (v or "")
+_numero_o_vacio = celdas.numero_o_vacio
 
 
 def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario:
@@ -204,6 +209,6 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
 def a_lineas(filas: list[dict], config: dict | None = None) -> list[LineaDiario]:
     """Todas las filas de un asiento -> líneas neutrales. `config` solo se usa para
     devolverle a la moneda su código ISO."""
-    codigos = (config or {}).get("monedas_codigo") or {}
+    codigos = (config or {}).get(MONEDAS_CODIGO) or {}
     monedas = {v: k for k, v in codigos.items()}
     return [desde_fila(f, monedas) for f in filas]

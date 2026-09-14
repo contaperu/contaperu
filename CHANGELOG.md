@@ -40,6 +40,20 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 - `contaperu.puertas`: la CLI y el servidor MCP, que hablan solo con la api, y lo que comparten (topes y nombres de host
   permitidos). `test_capas` lo hace cumplir y la lista de excepciones queda vacía.
 
+- **El canal de cada driver** (`CANAL`): a quién se entrega lo que sale. `legacy`, un sistema contable instalado que
+  importa un archivo (CONCAR, CONTASIS); `tributario`, un registro que se presenta a SUNAT (el SIRE); `intercambio`, un
+  formato neutral (el CSV). El contrato hace cumplir las reglas de cada uno y rechaza `api_erp`, reservado para escribir
+  en la API de un ERP moderno (hito A5). `api.drivers_disponibles` y el recurso `contaperu://drivers` dicen el canal.
+- **El índice del asiento** (`asiento.indice`, hito 0.4 en el motor): `asiento.lineas_e_indice_del_libro` devuelve,
+  con las líneas, qué tramo es de qué comprobante y una `Cabecera` con sus hechos (identidad, contraparte, glosa,
+  importes), fuera de las líneas y de la huella. Un driver `desde_lineas` que acepta `indice` lo recibe.
+- `drivers.kit`: lo que comparten los drivers —`Opciones`, `OpcionesArchivo` para un driver de archivo nuevo, el formato
+  de texto, las celdas y el libro de Excel—.
+- `drivers.contrato.canal`, `declara_canal`, `acepta_indice`, `CANALES` y `CANALES_RESERVADOS`;
+  `asiento.MONEDAS_CODIGO`, la única clave de la sección de un sistema que lee el núcleo, con nombre.
+- Un driver de prueba de asientos por JSON (`tests/drivers_de_prueba/diario_json.py`), de canal `legacy`, con índice y
+  `no_caben`: prueba que el contrato ya cubre lo que pedirá STARSOFT, sin publicar ningún driver.
+
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
@@ -59,6 +73,17 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   conservan sus nombres, sus argumentos y sus respuestas.
 - `api.revisar` acepta la `imputacion` y comprueba que cada una hable de un documento que está.
 
+- **CONCAR pasa a la forma `desde_lineas`** y la orquestación del asiento queda en un solo sitio, el pipeline. El
+  Excel no cambia ni una celda: la glosa de la columna F y la tasa de la AO salen de la cabecera del comprobante, y la
+  AO se sigue redondeando una sola vez desde su IGV y su base (IGV 175.00 sobre 1000.03 da 17, no 18). El resumen
+  conserva sus claves y sus valores; el desborde de un sub-diario se detecta igual, antes de escribir.
+- **`no_caben` detiene también a un driver `desde_lineas`**, antes de armar el asiento; hasta ahora solo lo hacía con
+  la forma `desde_comprobantes`. Ningún driver de serie de asientos lo declara, así que sus salidas no cambian.
+- Un driver de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy`; uno con la forma
+  `construir` sigue exportando, con un `AvisoDriver`.
+- CONTASIS y CONCAR escriben su Excel con el kit común. `drivers.csv.CANAL`, `drivers.sire.CANAL` y
+  `drivers.sire.txt.columnas_igv_compras`, que vivía en `formato`.
+
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
   avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen
@@ -67,6 +92,9 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   avisa con la ruta nueva, `contaperu.api`. `contaperu.generar`: `api.exportar_archivo`, `api.Exportado` y
   `api.ErroresBloqueantes`. `contaperu.cli` y `contaperu.servidor_mcp`: `contaperu.puertas.cli` y
   `contaperu.puertas.servidor_mcp`. Son el mismo objeto por las dos rutas (`generar.Exportado is api.Exportado`).
+- **`drivers.concar.construir`** (y `drivers.concar.xlsx.construir`): da las mismas celdas y el mismo resumen y avisa;
+  el Excel de CONCAR se pide a `api.exportar_archivo`. **`contaperu.formato`** entero: `contaperu.drivers.kit`.
+  La forma `construir` de un driver de terceros se retira en la 2.0.
 
 ## [0.10.0] — 2026-09-13
 

@@ -143,13 +143,14 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
 # --- lo que el motor sabe -----------------------------------------------------------
 
 def drivers_disponibles() -> dict:
-    """Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, lo que exige, si
-    se configura y su descripción."""
+    """Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal
+    (`legacy`, `tributario` o `intercambio`), lo que exige, si se configura y su descripción."""
     return {
         nombre: {"formatos": modulo.FORMATOS,
                  "tipo": "texto" if contrato.forma(modulo) == "linea" else "archivo",
                  "forma": contrato.forma(modulo),
                  "familia": contrato.familia(modulo),
+                 "canal": contrato.canal(modulo),
                  "exige": sorted(contrato.exige(modulo)),
                  "configurable": bool(contrato.seccion_por_defecto(modulo)),
                  "descripcion": ((modulo.__doc__ or "").strip().splitlines() or [""])[0]}

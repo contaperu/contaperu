@@ -15,17 +15,28 @@ salida, un solo documento»)—, y hay cuatro formas de driver. Un driver implem
 
 **Familia asiento** — las líneas de la partida doble:
 
-- **`construir(libro, comprobantes, config, correlativos, opciones) -> (bytes, resumen)`** — un archivo
-  entero armado a partir de los comprobantes. Es la forma del Excel de CONCAR, que nació antes que
-  la línea neutral.
-- **`desde_lineas(libro, lineas, config, opciones) -> (bytes, resumen)`** — un archivo de asientos armado
-  a partir de las LÍNEAS NEUTRALES de `open-accounting` (`asiento.LineaDiario`), ya numeradas y cuadradas.
-  **Es la forma para un driver de asientos nuevo** (SISCONT, STARSOFT…): el driver solo
-  traduce vocabulario, y la contabilidad —cuentas, sentidos, detracción, numeración— la pone el núcleo
-  una sola vez para todos. El núcleo exige el cuadre ANTES de llamarlo.
+- **`desde_lineas(libro, lineas, config, opciones, *, indice=()) -> (bytes, resumen)`** — un archivo de asientos
+  armado a partir de las LÍNEAS NEUTRALES de `open-accounting` (`asiento.LineaDiario`), ya numeradas y cuadradas.
+  **Es la forma de todo driver de asientos**, CONCAR incluido desde la 1.0: el driver solo traduce vocabulario, y la
+  contabilidad —cuentas, sentidos, detracción, numeración— la pone el núcleo una sola vez para todos. El núcleo exige
+  el cuadre ANTES de llamarlo. Si la firma acepta `indice`, recibe además qué tramo de líneas es de qué comprobante,
+  con la cabecera de sus hechos (`asiento.indice`): lo que un formato escribe en cada fila y la línea no guarda.
+- **`construir(libro, comprobantes, config, correlativos, opciones) -> (bytes, resumen)`** — un archivo entero armado
+  a partir de los comprobantes. Era la forma del Excel de CONCAR hasta la 0.10; un driver de terceros que la use
+  sigue funcionando con un `AvisoDriver`, y se retira en la 2.0.
+
+**El canal** — a QUIÉN se entrega lo que sale (la familia dice QUÉ se entrega). Cada driver declara su `CANAL`:
+
+- **`legacy`** — un sistema contable instalado que importa un archivo (CONCAR, CONTASIS; STARSOFT y SISCONT cuando
+  entren). Lleva cuentas y declara `EXIGE`, lo que su sistema no puede importar sin (vacío si nada).
+- **`tributario`** — un registro que se presenta a SUNAT (el SIRE). Forma `linea`, sin cuentas ni configuración.
+- **`intercambio`** — un formato neutral para leer o integrar (el CSV). Forma `desde_lineas`: proyecta la línea.
+
+`api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado (hito A5): el contrato lo rechaza. Un driver
+de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy` durante la 1.x.
 
 Todas exponen además `NOMBRE`, `FORMATOS` ({'venta'|'compra': identificador de la salida}),
-`OPCIONES` (una `formato.Opciones`) y `nombre(libro, opciones) -> str`; las tres de archivo, su
+`OPCIONES` (una `kit.Opciones`, o una `kit.OpcionesArchivo` en un driver de archivo) y `nombre(libro, opciones) -> str`; las tres de archivo, su
 `CONTENT_TYPE`. Opcional: `EXCLUYE_TIPOS`, los tipos SUNAT que ese destino no lleva; y, en un driver que
 lleva cuentas, `EXIGE`: lo que ese sistema no puede importar sin y que el núcleo, si no se lo dicen, deja
 pasar (`EXIGE_POSIBLES_ASIENTO`; en uno de registro, `EXIGE_POSIBLES_REGISTRO`). Lo que el núcleo exige se declare o
@@ -37,8 +48,8 @@ que nadie escriba un byte.
 
 Y opcional en cualquier forma, `no_caben(libro, comprobantes, config) -> {motivo: [comprobantes]}`: lo que su
 formato no puede llevar aunque la contabilidad esté completa —una moneda que no tiene, un código más largo que su
-columna—. `diagnosticar` lo lista antes de exportar y el núcleo se niega con `NoCabe` antes de escribir un byte
-(hoy, en la forma `desde_comprobantes`): un código no se corta ni una moneda se inventa.
+columna—. `diagnosticar` lo lista antes de exportar y el núcleo se niega con `NoCabe` antes de escribir un byte, en
+toda forma que lleva cuentas: un código no se corta ni una moneda se inventa.
 
 Y en un driver que lleva cuentas, lo que se configura en su sección (`CONFIGURACION`, una tupla de
 `configuracion.Campo`) y en qué columnas de su archivo puede ir un dato (`COLUMNAS_ELEGIBLES`, de
@@ -54,18 +65,34 @@ cualquier driver registrado.
 """
 from __future__ import annotations
 
+import inspect
 from typing import TYPE_CHECKING, Any, Protocol
 
 from .. import configuracion as _declaracion
-from ..asiento.configuracion import CONFIGURACION_DEL_ASIENTO
+from ..asiento.configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO
 from ..asiento.faltas import NoExportable
 from ..asiento.motor import CENTRO_EN_ANEXO
 from ..configuracion import CONFIGURACION_GENERAL, Campo, Columna
-from ..formato import Opciones
 from ..modelo import TIPOS_LIBRO, Comprobante, Libro
+from .kit import Opciones, OpcionesArchivo
 
 if TYPE_CHECKING:
+    from ..asiento.indice import ComprobanteDelAsiento
     from ..asiento.lineas import LineaDiario
+
+# A quién se entrega lo que sale. Un eje distinto de la familia (registro o asiento), que dice qué se entrega.
+CANALES = {
+    "legacy": "un sistema contable instalado que importa un archivo",
+    "tributario": "un registro que se presenta a SUNAT",
+    "intercambio": "un formato neutral para leer o integrar",
+}
+# Lo que tiene nombre y todavía no existe: el contrato lo rechaza diciendo por qué.
+CANALES_RESERVADOS = {
+    "api_erp": "escribir el cuerpo de la API de un ERP moderno es el hito A5 de la hoja de ruta, fuera de la 1.0: el "
+               "envío y los reintentos son de la aplicación",
+}
+# Cómo se trata durante la 1.x un driver de terceros que no declara su canal.
+CANAL_POR_DEFECTO = "legacy"
 
 # En orden de preferencia: si un driver expone dos, el núcleo usa la primera.
 FORMAS = ("desde_lineas", "desde_comprobantes", "construir", "linea")
@@ -126,8 +153,8 @@ class DriverAsientoLineas(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
 
-    def desde_lineas(self, libro: Libro, lineas: list[LineaDiario], config: dict,
-                     opciones: Opciones = ...) -> tuple[bytes, dict]: ...
+    def desde_lineas(self, libro: Libro, lineas: list[LineaDiario], config: dict, opciones: Opciones = ..., *,
+                     indice: tuple[ComprobanteDelAsiento, ...] = ...) -> tuple[bytes, dict]: ...
 
 
 def forma(modulo: Any) -> str:
@@ -139,6 +166,28 @@ def familia(modulo: Any) -> str:
     """'registro' (una fila por comprobante: `linea`, `desde_comprobantes`) o 'asiento' (`construir`,
     `desde_lineas`); '' si no implementa ninguna forma."""
     return FAMILIA.get(forma(modulo), "")
+
+
+def canal(modulo: Any) -> str:
+    """A quién se entrega lo que sale: el `CANAL` que declara el driver, o `legacy` si no lo declara (1.x)."""
+    return getattr(modulo, "CANAL", None) or CANAL_POR_DEFECTO
+
+
+def declara_canal(modulo: Any) -> bool:
+    return bool(getattr(modulo, "CANAL", None))
+
+
+def acepta_indice(modulo: Any) -> bool:
+    """¿Su `desde_lineas` recibe el índice de cada comprobante? Lo decide su firma: un parámetro `indice` o `**kwargs`.
+    Así un driver de terceros escrito antes de la 1.0 sigue funcionando sin él."""
+    funcion = getattr(modulo, "desde_lineas", None)
+    if not callable(funcion):
+        return False
+    try:
+        parametros = inspect.signature(funcion).parameters.values()
+    except (TypeError, ValueError):
+        return False
+    return any(p.name == "indice" or p.kind is p.VAR_KEYWORD for p in parametros)
 
 
 def lleva_cuentas(modulo: Any) -> bool:
@@ -228,11 +277,14 @@ def incumplimientos(modulo: Any) -> list[str]:
         problemas.append("falta FORMATOS ({'venta'|'compra': identificador})")
     elif set(formatos) - set(TIPOS_LIBRO):
         problemas.append(f"FORMATOS solo admite las claves {TIPOS_LIBRO}")
-    if not isinstance(getattr(modulo, "OPCIONES", None), Opciones):
-        problemas.append("falta OPCIONES (una formato.Opciones)")
+    opciones = getattr(modulo, "OPCIONES", None)
+    f = forma(modulo)
+    if f == "linea" and not isinstance(opciones, Opciones):
+        problemas.append("falta OPCIONES (una kit.Opciones)")
+    elif f != "linea" and not isinstance(opciones, (Opciones, OpcionesArchivo)):
+        problemas.append("falta OPCIONES (una kit.Opciones o una kit.OpcionesArchivo)")
     if not callable(getattr(modulo, "nombre", None)):
         problemas.append("falta nombre(libro, opciones)")
-    f = forma(modulo)
     if not f:
         problemas.append("no implementa ninguna forma: " + ", ".join(FORMAS))
     elif f != "linea" and not isinstance(getattr(modulo, "CONTENT_TYPE", None), str):
@@ -251,7 +303,31 @@ def incumplimientos(modulo: Any) -> list[str]:
             problemas.append(f"EXIGE solo admite {sorted(posibles)}; sobra {sorted(set(declarado) - posibles)}")
     if hasattr(modulo, "no_caben") and not callable(getattr(modulo, "no_caben")):
         problemas.append("no_caben es una función: no_caben(libro, comprobantes, config)")
-    return problemas + _incumplimientos_de_la_configuracion(modulo)
+    return problemas + _incumplimientos_del_canal(modulo, f) + _incumplimientos_de_la_configuracion(modulo)
+
+
+def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
+    declarado = getattr(modulo, "CANAL", None)
+    if declarado is None:
+        return []
+    if declarado in CANALES_RESERVADOS:
+        return [f"CANAL {declarado!r} está reservado y no se admite en la 1.0: {CANALES_RESERVADOS[declarado]}"]
+    if declarado not in CANALES:
+        return [f"CANAL {declarado!r} no existe; los canales son {', '.join(CANALES)}"]
+    if not f:
+        return []
+    if declarado == "legacy":
+        problemas = []
+        if not lleva_cuentas(modulo):
+            problemas.append("un driver legacy lleva cuentas: su forma es desde_lineas o desde_comprobantes")
+        if not hasattr(modulo, "EXIGE"):
+            problemas.append("un driver legacy declara EXIGE: lo que su sistema no puede importar sin (vacío si nada)")
+        return problemas
+    if declarado == "tributario" and f != "linea":
+        return ["un driver tributario escribe un registro de texto para SUNAT: su forma es `linea`"]
+    if declarado == "intercambio" and f != "desde_lineas":
+        return ["un driver de intercambio proyecta la línea neutral: su forma es `desde_lineas`"]
+    return []
 
 
 def _incumplimientos_de_la_configuracion(modulo: Any) -> list[str]:
@@ -286,7 +362,7 @@ def _incumplimientos_de_la_configuracion(modulo: Any) -> list[str]:
                              + ", ".join(faltan))
     exigido = getattr(modulo, "EXIGE", None)
     if (arma_asientos(modulo) and isinstance(exigido, (set, frozenset, list, tuple)) and "moneda" in exigido
-            and "monedas_codigo" not in {c.clave for c in configuracion(modulo) if isinstance(c, Campo)}):
+            and MONEDAS_CODIGO not in {c.clave for c in configuracion(modulo) if isinstance(c, Campo)}):
         problemas.append("un driver que exige `moneda` declara `monedas_codigo` en CONFIGURACION: de ahí lee el núcleo "
                          "el código de cada moneda")
     if columnas is not None:

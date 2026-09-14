@@ -16,7 +16,7 @@ from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..configuracion import CONFIG_POR_DEFECTO, por_defecto
 from ..igv import base_imputable
 from ..modelo import Comprobante, Libro, a_decimal
-from .configuracion import CONFIGURACION_DEL_ASIENTO
+from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO
 from .faltas import FALTAS, SinCorrelativo, SinSigla
 from .imputacion import Imputacion
 
@@ -168,7 +168,7 @@ def tipos_sin_sigla(comprobantes: list[Comprobante], config: dict) -> list[str]:
 
 
 def monedas_sin_codigo(comprobantes: list[Comprobante], config: dict) -> list[str]:
-    codigos = config.get("monedas_codigo") or {}
+    codigos = config.get(MONEDAS_CODIGO) or {}
     vistas: list[str] = []
     for c in comprobantes:
         moneda = (c.moneda or "PEN").upper()

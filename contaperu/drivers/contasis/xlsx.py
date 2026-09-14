@@ -1,11 +1,11 @@
 """El .xlsx que importa CONTASIS y el punto de entrada `desde_comprobantes` del contrato."""
 from __future__ import annotations
 
-import io
 from typing import Any
 
-from ...formato import Opciones
 from ...modelo import Comprobante, Libro
+from ..kit import Opciones
+from ..kit import xlsx as kit_xlsx
 from . import datos, proyeccion
 
 
@@ -16,11 +16,7 @@ def nombre(libro: Libro, opciones: Opciones = datos.OPCIONES) -> str:
 def escribir_xlsx(libro: Libro, filas: list[dict[str, Any]]) -> bytes:
     """Las filas, desde la fila 1 —sin las 13 de notas y cabeceras de la plantilla— en la pestaña oficial, cada celda
     con el formato de su clase. Una celda `None` no se escribe."""
-    import openpyxl
-
-    libro_excel = openpyxl.Workbook()
-    hoja = libro_excel.active
-    hoja.title = datos.HOJAS[libro.tipo]
+    libro_excel, hoja = kit_xlsx.libro_con_hoja(datos.HOJAS[libro.tipo])
     columnas = datos.COLUMNAS[libro.tipo]
     for letra, _, _, _ in columnas:
         hoja.column_dimensions[letra].width = datos.ANCHOS[libro.tipo][letra]
@@ -32,9 +28,7 @@ def escribir_xlsx(libro: Libro, filas: list[dict[str, Any]]) -> bytes:
             celda = hoja[f"{letra}{numero_fila}"]
             celda.value = valor
             celda.number_format = datos.FORMATO_CELDA[clase]
-    salida = io.BytesIO()
-    libro_excel.save(salida)
-    return salida.getvalue()
+    return kit_xlsx.a_bytes(libro_excel)
 
 
 def desde_comprobantes(libro: Libro, comprobantes: list[Comprobante], config: dict,

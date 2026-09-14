@@ -12,7 +12,7 @@ from contaperu.pipeline import preparacion as prep
 from contaperu import partida_doble
 from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Comprobante, Libro
-from util import comprobante, con_imputaciones
+from util import comprobante, con_imputaciones, construir_concar
 
 CONTAB = con_imputaciones(prep.config_aplicada(None, "concar"))
 MES = (date(2026, 8, 1), date(2026, 8, 31))
@@ -93,6 +93,6 @@ def test_el_driver_se_niega_a_escribir_un_asiento_descuadrado(monkeypatch):
         lineas[-1].importe = "999.00"
         return lineas
 
-    monkeypatch.setattr(driver_concar.xlsx, "lineas_del_comprobante", asiento_roto)
+    monkeypatch.setattr(asi.motor, "lineas_del_comprobante", asiento_roto)
     with pytest.raises(partida_doble.Descuadre):
-        driver_concar.construir(libro, [c], CONTAB, {"11": 1})
+        construir_concar(libro, [c], CONTAB, {"11": 1})

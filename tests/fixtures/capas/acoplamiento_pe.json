@@ -34,9 +34,6 @@
  "contaperu.drivers.contasis.proyeccion": [
   "contaperu.igv"
  ],
- "contaperu.formato": [
-  "contaperu.igv"
- ],
  "contaperu.lectores": [
   "contaperu.lectores.sire_txt",
   "contaperu.lectores.xml_ubl"

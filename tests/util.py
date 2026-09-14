@@ -88,3 +88,13 @@ def por_la_fachada(operacion):
             kwargs["imputacion"] = {**imputacion, **(kwargs.get("imputacion") or {})}
         return operacion(documento, *args, **kwargs)
     return llamada
+
+
+def construir_concar(libro: Libro, comprobantes: list[Comprobante], config: dict, correlativos: dict[str, int],
+                     opciones=None) -> tuple[bytes, dict]:
+    """El Excel de CONCAR y su resumen para comprobantes ya seleccionados, como hacía `drivers.concar.construir` en la
+    0.10: el mismo camino del pipeline (exigir, lo que no cabe, numerar, cuadrar, proyectar), sin revisar ni
+    seleccionar."""
+    from contaperu.drivers import concar
+    from contaperu.pipeline import armado
+    return armado.desde_lineas(concar, libro, comprobantes, opciones or concar.OPCIONES, config, correlativos)

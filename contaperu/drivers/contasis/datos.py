@@ -11,9 +11,11 @@ Las fuentes son dos, y las dos viven fuera de Git, en `tests/fixtures/privado/co
 from __future__ import annotations
 
 from ...configuracion import Campo, Columna
-from ...formato import Opciones
+from ..kit import Opciones
 
 NOMBRE = "contasis"
+# Un sistema contable instalado que importa un archivo (`drivers.contrato.CANALES`).
+CANAL = "legacy"
 FORMATOS = {"compra": "contasis_xlsx", "venta": "contasis_xlsx"}
 CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 OPCIONES = Opciones(extension=".xlsx")

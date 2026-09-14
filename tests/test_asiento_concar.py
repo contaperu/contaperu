@@ -18,7 +18,8 @@ from contaperu.pipeline import preparacion as prep
 from contaperu.modelo import Comprobante, Libro
 from contaperu import asiento as concar
 from contaperu.drivers import concar as driver_concar
-from util import comprobante, con_imputaciones, en_secciones
+from contaperu._obsoleto import RutaObsoleta
+from util import comprobante, con_imputaciones, construir_concar, en_secciones
 
 COMPRAS = Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA SAC", periodo="202608", tipo="compra")
 VENTAS = Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA", periodo="202608", tipo="venta")
@@ -454,7 +455,7 @@ def test_el_codigo_sunat_manda_y_lo_de_concar_se_deriva():
     bancario = cp(tipo_cp="13", serie="", numero="77")           # documento bancario: sin entrada por defecto
     assert concar.sigla_documento(bancario, CONTAB) == "" and concar.tipos_sin_sigla([bancario, cp()], CONTAB) == ["13"]
     with pytest.raises(concar.SinSigla) as e:
-        driver_concar.construir(COMPRAS, [bancario], CONTAB, {"11": 1})
+        construir_concar(COMPRAS, [bancario], CONTAB, {"11": 1})
     assert e.value.tipos == ["13"]
     config = configuracion({"tipos": {"13": {"sigla": "DB", "sub_diario": "11"}, "01": {"sigla": "FA", "sub_diario": "12"}}})
     assert concar.tipos_sin_sigla([bancario], config) == []
@@ -512,7 +513,7 @@ def test_numerar_por_sub_diario_con_el_mes_del_periodo():
 # ── El .xlsx ─────────────────────────────────────────────────────────────────
 
 def test_xlsx_con_la_plantilla_de_concar():
-    xlsx, resumen = driver_concar.construir(COMPRAS, [cp(), cp(tipo_cp="03", serie="B001", numero="55", igv="0", base_gravada="0", inafecto="118")],
+    xlsx, resumen = construir_concar(COMPRAS, [cp(), cp(tipo_cp="03", serie="B001", numero="55", igv="0", base_gravada="0", inafecto="118")],
                                      CONTAB, {"11": 20, "13": 1})
     wb = openpyxl.load_workbook(io.BytesIO(xlsx))
     ws = wb["CONCAR"]
@@ -605,17 +606,71 @@ def test_el_driver_se_niega_sin_centro_donde_la_cuenta_lo_lleva():
     """La regla del contador (06-sep-2026), que hasta la 0.7 solo aplicaba el portal: obligatorio donde
     la cuenta lo lleva en la M. Decisión de John (11-sep-2026): la hace cumplir el driver."""
     with pytest.raises(concar.SinCentro) as e:
-        driver_concar.construir(COMPRAS, [cp(centro_costo="")], CONTAB, {"11": 1})
+        construir_concar(COMPRAS, [cp(centro_costo="")], CONTAB, {"11": 1})
     assert [c.numero for c in e.value.comprobantes] == ["00000123"]
     # Una cuenta que no lleva centro (603201 no empieza por 63, 65 ni 70) sale igual sin él.
-    contenido, _ = driver_concar.construir(COMPRAS, [cp(cuenta_contable="603201", centro_costo="")], CONTAB, {"11": 1})
+    contenido, _ = construir_concar(COMPRAS, [cp(cuenta_contable="603201", centro_costo="")], CONTAB, {"11": 1})
     assert contenido[:2] == b"PK"
 
 
 def test_el_driver_se_niega_si_el_correlativo_pasa_de_9999():
     """CONCAR numera con MM + cuatro dígitos; el portal lo comprobaba por su cuenta hasta la 0.8."""
     with pytest.raises(driver_concar.CorrelativoDesborda) as e:
-        driver_concar.construir(COMPRAS, [cp(), cp(numero="124")], CONTAB, {"11": 9999})
+        construir_concar(COMPRAS, [cp(), cp(numero="124")], CONTAB, {"11": 9999})
     assert e.value.sub_diarios == {"11": 10000} and "supera los 4 dígitos" in str(e.value)
-    contenido, resumen = driver_concar.construir(COMPRAS, [cp()], CONTAB, {"11": 9999})
+    contenido, resumen = construir_concar(COMPRAS, [cp()], CONTAB, {"11": 9999})
     assert contenido[:2] == b"PK" and resumen["sub_diarios"]["11"]["hasta"] == 9999
+
+
+# ── CONCAR en la forma `desde_lineas` (1.0) ─────────────────────────────────────
+
+def _celdas(contenido: bytes) -> list[tuple]:
+    return list(openpyxl.load_workbook(io.BytesIO(contenido))["CONCAR"].iter_rows(values_only=True))
+
+
+def test_la_tasa_de_la_ao_sale_del_comprobante_y_no_de_la_linea_redondeada():
+    """IGV 175.00 sobre base 1000.03: el 17.4995 % da 17 redondeando una sola vez. Desde la tasa de la línea, que ya va
+    redondeada a 17.50, daría 18. Por eso la AO se calcula con la cabecera del comprobante que trae el índice."""
+    c = cp(base_gravada="1000.03", igv="175.00", total="1175.03")
+    linea = concar.lineas_del_comprobante(c, CONTAB, MES, "080001")[0]
+    assert Decimal(str(linea.tasa_igv)) == Decimal("17.50")
+    contenido, _ = construir_concar(COMPRAS, [c], CONTAB, {"11": 1})
+    assert _celdas(contenido)[3][40] == 17
+    assert driver_concar.filas_de_comprobante(c, CONTAB, MES, "080001")[0]["AO"] == 17
+
+
+def test_el_indice_parte_las_lineas_por_comprobante_con_su_cabecera():
+    cs = [cp(), cp(numero="124"), cp(tipo_cp="03", serie="B001", numero="55", igv="0", base_gravada="0", inafecto="118")]
+    lineas, rangos, indice = concar.lineas_e_indice_del_libro(COMPRAS, cs, CONTAB, {"11": 20, "13": 1})
+    assert [(e.desde, e.hasta) for e in indice] == [(0, 3), (3, 6), (6, 8)] and len(lineas) == 8
+    assert [(e.sub_diario, e.correlativo) for e in indice] == [("11", "080020"), ("11", "080021"), ("13", "080001")]
+    assert all({ln.correlativo for ln in e.lineas(lineas)} == {e.correlativo} for e in indice)
+    assert indice[0].cabecera.glosa == concar.glosa_de(cs[0]) and Decimal(indice[2].cabecera.igv) == 0
+    assert indice[1].a_dict()["lineas"] == [3, 6]
+
+
+def test_el_resumen_de_concar_es_el_de_la_numeracion():
+    cs = [cp(), cp(numero="124"), cp(tipo_cp="03", serie="B001", numero="55", igv="0", base_gravada="0", inafecto="118")]
+    _, resumen = construir_concar(COMPRAS, cs, CONTAB, {"11": 20, "13": 1})
+    _, rangos = concar.numerar_en_orden(cs, CONTAB, "202608", {"11": 20, "13": 1})
+    etiquetas = concar.etiquetas_sub_diario(CONTAB)
+    assert resumen["sub_diarios"] == {s: {"etiqueta": etiquetas.get(s, s), **r} for s, r in rangos.items()}
+    assert resumen["fechas"] == "por comprobante (extemporáneos al 01/08/2026)" and resumen["filas"] == 8
+
+
+def test_construir_sigue_resolviendo_con_aviso_y_da_el_mismo_excel():
+    cs = [cp(), cp(numero="124", moneda="USD", tipo_cambio="3.75"),
+          cp(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="F001", ref_numero="123",
+             ref_fecha="2026-08-11")]
+    with pytest.warns(RutaObsoleta, match="construir"):
+        construir = driver_concar.construir
+    viejo, resumen_viejo = construir(COMPRAS, cs, CONTAB, {"11": 7})
+    nuevo, resumen_nuevo = construir_concar(COMPRAS, cs, CONTAB, {"11": 7})
+    assert resumen_viejo == resumen_nuevo
+    assert _celdas(viejo) == _celdas(nuevo)
+
+
+def test_sin_indice_concar_no_escribe():
+    lineas = concar.lineas_del_comprobante(cp(), CONTAB, MES, "080001")
+    with pytest.raises(ValueError, match="indice"):
+        driver_concar.desde_lineas(COMPRAS, lineas, CONTAB)

@@ -13,7 +13,7 @@ from ..asiento.resolucion import exigir_requisitos, fundir_config  # noqa: F401
 from ..configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida  # noqa: F401
 from ..drivers import contrato  # noqa: F401
 from ..errores import ErroresBloqueantes  # noqa: F401
-from ..formato import Opciones
+from ..drivers.kit import Opciones
 from ..modelo import Comprobante, Libro, serie_y_numero  # noqa: F401
 from ..pipeline import salida as _salida
 from ..pipeline.salida import Exportado  # noqa: F401
