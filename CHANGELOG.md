@@ -126,6 +126,9 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   sube en uno y no aparece un «XML inválido». El motor reconoce el PDF, el JPEG, el PNG y el WEBP por sus primeros
   bytes, porque lo que llega por un protocolo no trae nombre de archivo.
 
+- **El CSV lleva tres columnas más al final** (B5): `rol`, `doc_tipo_cp` y `ref_tipo_cp`, lo que un driver necesita
+  para traducir sin adivinar. Las columnas de siempre no se mueven.
+
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
   avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen

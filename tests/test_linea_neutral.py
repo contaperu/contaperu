@@ -201,3 +201,20 @@ def test_el_csv_esta_registrado_como_driver():
     assert drivers.formato_de("csv", "compra") == "csv_asiento"
     with pytest.raises(ValueError):
         drivers.obtener("un-erp-que-no-existe")
+
+
+def test_el_csv_lleva_el_rol_y_los_codigos_sunat():
+    """B5: lo que un driver necesita para no adivinar sale en tres columnas al final, llenas."""
+    import csv
+    import io
+
+    from contaperu import api
+    from util import GOLDEN
+
+    documento = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
+    texto = api.exportar(documento, driver="csv", configuracion={"cuentas": {"gasto": "659999"},
+                                                                  "usa_centros_costo": False})["texto"]
+    filas = list(csv.DictReader(io.StringIO(texto.lstrip("\ufeff")), delimiter=";"))
+    assert list(filas[0])[-3:] == ["rol", "doc_tipo_cp", "ref_tipo_cp"]
+    assert [f["rol"] for f in filas[:3]] == ["principal", "igv", "tercero"]
+    assert all(f["doc_tipo_cp"] for f in filas) and {f["ref_tipo_cp"] for f in filas} == {""}

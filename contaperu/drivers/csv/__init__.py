@@ -64,6 +64,11 @@ COLUMNAS: list[tuple[str, str]] = [
     ("detraccion.tasa", "detraccion_tasa"),
     ("detraccion.base", "detraccion_base"),
     ("tasa_igv", "tasa_igv"),
+    # Lo que un driver necesita para traducir sin adivinar (B5, 1.0): el papel de la línea y los códigos SUNAT del
+    # documento y de su referencia. Van al final para no mover las columnas de siempre.
+    ("rol", "rol"),
+    ("documento.tipo_cp", "doc_tipo_cp"),
+    ("referencia.tipo_cp", "ref_tipo_cp"),
 ]
 
 
