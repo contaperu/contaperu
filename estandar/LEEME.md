@@ -172,8 +172,10 @@ El estándar lo resuelve con un bloque de estado dentro del comprobante:
 
 - **`PROVISIONADO`** (por defecto) — la compra está registrada, la detracción se debe. El asiento se genera
   igual, con un número de documento comodín en la línea de la detracción.
-- **`PAGADO`** — se depositó. Se inyectan `nro_constancia` y `fecha_constancia`, y el asiento puede
-  regenerarse con el número real.
+- **`PAGADO`** — se depositó. Se inyectan `nro_constancia` y `fecha_constancia`. **El asiento ya importado no se
+  regenera**: en un destino que suma lo que importa, como CONCAR, volver a importarlo duplica los asientos. Qué
+  registra el segundo tiempo —el pago de la detracción, con su constancia— es una decisión contable que entrará con
+  su fuente y un archivo real aceptado (hitos D1 y D6 de la hoja de ruta), no una regeneración.
 
 El paso de uno a otro es una operación aparte, sin estado: entra el documento provisional y el archivo de
 constancias, sale el documento actualizado. **El monto se deposita siempre en soles**, incluso si la factura
