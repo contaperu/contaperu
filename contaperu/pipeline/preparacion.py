@@ -16,12 +16,14 @@ from .. import detracciones, drivers, validar
 from .._version import OPEN_ACCOUNTING
 from ..configuracion import CLAVES_RETIRADAS, CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
 from ..errores import DocumentoInvalido
-from ..modelo import Comprobante, Libro, serie_y_numero
+from ..modelo import Comprobante, Libro, clave_de, serie_y_numero
 
 # Tope de seguridad. Un mes de una PYME son decenas o cientos de comprobantes; muchos miles en
 # una sola llamada es casi siempre un error de quien llama, y conviene decirlo en vez de
 # quedarse pensando.
 MAXIMO_COMPROBANTES = 5000
+# Y el de lo ya anotado en otros periodos: años de un RUC con mucho movimiento caben holgados.
+MAXIMO_CLAVES_PREVIAS = 50000
 
 
 # --- conversión entre el estándar y el modelo --------------------------------------
@@ -186,6 +188,27 @@ def con_imputacion(config: dict, imputacion: dict | None, comprobantes: list[Com
 
 # --- lo que llega por parámetro ----------------------------------------------------
 
+def claves_previas_de(claves: Any) -> list[tuple[str, str, str, str]]:
+    """Lo ya anotado en otros periodos del mismo RUC, como lo compara la validación: cada clave viaja en JSON como
+    `[tipo_cp, serie, numero, contraparte_doc]` y se normaliza igual que la del comprobante (`modelo.clave_de`), así que
+    «00000123» es «123». En ventas el cliente no cuenta (`estandar/LEEME.md`, «La identidad de un comprobante»)."""
+    if claves is None:
+        return []
+    if isinstance(claves, (str, bytes, dict)) or not isinstance(claves, (list, tuple)):
+        raise DocumentoInvalido("`claves_previas` es una lista de [tipo_cp, serie, numero, contraparte_doc].")
+    if len(claves) > MAXIMO_CLAVES_PREVIAS:
+        raise DocumentoInvalido(f"{len(claves)} claves previas en una sola llamada; el tope es {MAXIMO_CLAVES_PREVIAS}. "
+                                "Pasa solo las del RUC y de los periodos en que se pueden repetir.")
+    normalizadas = []
+    for clave in claves:
+        if (not isinstance(clave, (list, tuple)) or len(clave) != 4
+                or not all(parte is None or isinstance(parte, (str, int)) for parte in clave)):
+            raise DocumentoInvalido(f"Una clave previa no se pudo leer ({clave!r}): es [tipo_cp, serie, numero, "
+                                    "contraparte_doc].")
+        normalizadas.append(clave_de(*("" if parte is None else str(parte) for parte in clave)))
+    return normalizadas
+
+
 def bytes_de(contenido: str, es_base64: bool) -> bytes:
     if es_base64:
         try:
@@ -208,15 +231,18 @@ def fecha_de(fecha: str | None) -> str | None:
 
 # --- los pasos de un mes -----------------------------------------------------------
 
-def revisar(doc: dict, configuracion: dict | None = None, imputacion: dict | None = None) -> dict:
+def revisar(doc: dict, configuracion: dict | None = None, imputacion: dict | None = None,
+            claves_previas: Any = None) -> dict:
     """Aplica las reglas deterministas y devuelve el documento con `estado` y `observaciones` puestos, más un resumen
-    de lo que hay que mirar. Con `imputacion`, además comprueba que cada una hable de un documento que está."""
+    de lo que hay que mirar. Con `imputacion`, además comprueba que cada una hable de un documento que está; con
+    `claves_previas`, que ningún comprobante esté ya anotado en otro periodo."""
     libro = libro_de(doc)
     comprobantes = comprobantes_de(doc)
+    previas = claves_previas_de(claves_previas)
     config = config_aplicada(configuracion)
     con_imputacion(config, imputacion, comprobantes)
     limpiadas = detracciones.normalizar(comprobantes, config)
-    validar.revisar(comprobantes, libro)
+    validar.revisar(comprobantes, libro, previas)
     errores = [c for c in comprobantes if c.tiene_errores]
     avisos = [c for c in comprobantes if c.observaciones and not c.tiene_errores]
     salida = documento(libro, comprobantes)
@@ -250,16 +276,17 @@ def normalizar_detracciones(doc: dict, configuracion: dict | None = None) -> dic
 
 
 def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, imputacion: dict | None = None,
-             driver: str = "") -> tuple[Libro, list[Comprobante], dict]:
+             driver: str = "", claves_previas: Any = None) -> tuple[Libro, list[Comprobante], dict]:
     """El libro, los comprobantes que no se excluyeron —revisados— y la configuración aplicada hacia `driver` con la
     imputación dentro. Sin `incluir_observados`, un comprobante con observaciones que bloquean detiene todo."""
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
+    previas = claves_previas_de(claves_previas)
     comprobantes = [c for c in todos if not c.excluida]
     if not comprobantes:
         raise DocumentoInvalido("No hay comprobantes que procesar.")
     config = con_imputacion(config_aplicada(configuracion, driver), imputacion, todos)
-    validar.revisar(comprobantes, libro)
+    validar.revisar(comprobantes, libro, previas)
     if not incluir_observados:
         con_error = [c for c in comprobantes if c.tiene_errores]
         if con_error:

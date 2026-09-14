@@ -136,10 +136,11 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
 
 
 def exportar_archivo(doc: dict, *, driver: str, configuracion: dict | None = None, correlativos: dict | None = None,
-                     incluir_observados: bool = False, imputacion: dict | None = None) -> Exportado:
+                     incluir_observados: bool = False, imputacion: dict | None = None,
+                     claves_previas: Any = None) -> Exportado:
     """El archivo de un documento hacia `driver`, en bytes: preparar, numerar desde los correlativos dados (o desde 1) y
     generar."""
-    libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver)
+    libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     modulo = drivers.obtener(driver)
     # Lo que pide la forma del driver: la configuración, todo el que lleva cuentas (también el registro de un
     # sistema contable); los correlativos, además, el que arma asientos.
@@ -174,10 +175,11 @@ def respuesta(exp: Exportado, cuando: str | None = None) -> dict:
 
 
 def exportar(doc: dict, *, driver: str, configuracion: dict | None = None, correlativos: dict | None = None,
-             incluir_observados: bool = False, fecha: str | None = None, imputacion: dict | None = None) -> dict:
+             incluir_observados: bool = False, fecha: str | None = None, imputacion: dict | None = None,
+             claves_previas: Any = None) -> dict:
     """Genera el archivo que pide un sistema contable y lo responde en JSON (`respuesta`). La fecha, si se da, se
     comprueba antes que nada."""
     cuando = fecha_de(fecha)
     exp = exportar_archivo(doc, driver=driver, configuracion=configuracion, correlativos=correlativos,
-                           incluir_observados=incluir_observados, imputacion=imputacion)
+                           incluir_observados=incluir_observados, imputacion=imputacion, claves_previas=claves_previas)
     return respuesta(exp, cuando)

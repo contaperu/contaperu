@@ -40,11 +40,14 @@ def leer_archivos(archivos: Sequence[tuple[str, bytes | None]], libro: dict) -> 
 
 # --- revisar ------------------------------------------------------------------------
 
-def revisar(documento: dict, *, configuracion: dict | None = None, imputacion: dict | None = None) -> dict:
+def revisar(documento: dict, *, configuracion: dict | None = None, imputacion: dict | None = None,
+            claves_previas: list | None = None) -> dict:
     """Revisa los comprobantes y devuelve el mismo documento con `estado` y `observaciones` puestos en cada uno, y en
     `_revision` lo que hay que mirar. Descarta las detracciones que la tabla del contribuyente no reconoce. Con
-    `imputacion`, comprueba también que cada una hable de un documento que está."""
-    return preparacion.revisar(documento, configuracion, imputacion)
+    `imputacion`, comprueba también que cada una hable de un documento que está. `claves_previas` es lo ya anotado en
+    otros periodos del mismo RUC, cada una como `[tipo_cp, serie, numero, contraparte_doc]`: lo que coincide sale con
+    `DUPLICADO_PERIODO_ANTERIOR` (hasta `MAXIMO_CLAVES_PREVIAS`)."""
+    return preparacion.revisar(documento, configuracion, imputacion, claves_previas)
 
 
 def normalizar_detracciones(documento: dict, *, configuracion: dict | None = None) -> dict:
@@ -55,41 +58,45 @@ def normalizar_detracciones(documento: dict, *, configuracion: dict | None = Non
 
 
 def diagnosticar(documento: dict, *, driver: str, configuracion: dict | None = None, imputacion: dict | None = None,
-                 correlativos: dict | None = None) -> dict:
+                 correlativos: dict | None = None, claves_previas: list | None = None) -> dict:
     """Todo lo que hay que mirar de un mes antes de exportarlo hacia `driver`, en una sola respuesta: si está listo y
     por qué no, qué bloquea, qué falta y a quién pedírselo, qué saldría y desde qué correlativo. No lanza por lo que
     le falte al mes ni por una configuración que no se puede aplicar: lo describe."""
     return diagnostico.diagnosticar(documento, driver=driver, configuracion=configuracion, correlativos=correlativos,
-                                    imputacion=imputacion)
+                                    imputacion=imputacion, claves_previas=claves_previas)
 
 
 # --- asentar y exportar -------------------------------------------------------------
 
 def generar_asiento(documento: dict, *, driver: str, configuracion: dict | None = None,
                     imputacion: dict | None = None, correlativos: dict | None = None,
-                    incluir_observados: bool = False) -> dict:
+                    incluir_observados: bool = False, claves_previas: list | None = None) -> dict:
     """Convierte los comprobantes en líneas de diario del estándar, con la configuración del sistema de asientos
     `driver` (sus siglas, sus sub-diarios, las columnas del centro de costo) y sin su formato. `_asiento` trae el
     número de líneas, los rangos por sub-diario, el cuadre y la huella."""
     return armado.generar_asiento(documento, driver=driver, configuracion=configuracion, correlativos=correlativos,
-                                  incluir_observados=incluir_observados, imputacion=imputacion)
+                                  incluir_observados=incluir_observados, imputacion=imputacion,
+                                  claves_previas=claves_previas)
 
 
 def exportar(documento: dict, *, driver: str, configuracion: dict | None = None, imputacion: dict | None = None,
-             correlativos: dict | None = None, incluir_observados: bool = False, fecha: str | None = None) -> dict:
+             correlativos: dict | None = None, incluir_observados: bool = False, fecha: str | None = None,
+             claves_previas: list | None = None) -> dict:
     """Genera el archivo que importa el sistema `driver` y lo devuelve en JSON: `texto` cuando es legible, el archivo en
     base64 y `_exportacion` con el driver, el archivo, la huella del asiento y la `fecha` que ponga quien llama."""
     return salida.exportar(documento, driver=driver, configuracion=configuracion, correlativos=correlativos,
-                           incluir_observados=incluir_observados, fecha=fecha, imputacion=imputacion)
+                           incluir_observados=incluir_observados, fecha=fecha, imputacion=imputacion,
+                           claves_previas=claves_previas)
 
 
 def exportar_archivo(documento: dict, *, driver: str, configuracion: dict | None = None,
                      imputacion: dict | None = None, correlativos: dict | None = None,
-                     incluir_observados: bool = False) -> Exportado:
+                     incluir_observados: bool = False, claves_previas: list | None = None) -> Exportado:
     """Lo mismo que `exportar`, con el archivo en bytes (`Exportado`): para quien lo escribe a disco o lo sirve tal
     cual."""
     return salida.exportar_archivo(documento, driver=driver, configuracion=configuracion, correlativos=correlativos,
-                                   incluir_observados=incluir_observados, imputacion=imputacion)
+                                   incluir_observados=incluir_observados, imputacion=imputacion,
+                                   claves_previas=claves_previas)
 
 
 def cuadrar(lineas: list[dict]) -> dict:

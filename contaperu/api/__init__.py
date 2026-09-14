@@ -19,7 +19,7 @@ from .._obsoleto import RutaObsoleta
 from .._version import OPEN_ACCOUNTING, __version__
 from ..asiento.faltas import FALTAS
 from ..modelo import Comprobante, Libro, Observacion, serie_y_numero
-from ..pipeline.preparacion import MAXIMO_COMPROBANTES
+from ..pipeline.preparacion import MAXIMO_CLAVES_PREVIAS, MAXIMO_COMPROBANTES
 from ..pipeline.salida import Exportado
 from .documento import documento_de
 from .errores import (ConfiguracionInvalida, CorrelativoDesborda, Descuadre, DocumentoInvalido, ErrorContaperu,
@@ -42,6 +42,7 @@ __all__ = [
     "OPERACIONES", "Operacion",
     # lo que devuelve o recibe
     "Exportado", "Comprobante", "Libro", "Observacion", "FALTAS", "serie_y_numero", "MAXIMO_COMPROBANTES",
+    "MAXIMO_CLAVES_PREVIAS",
     # errores
     "ErrorContaperu", "DocumentoInvalido", "ConfiguracionInvalida", "ErroresBloqueantes", "NoExportable", "NoCabe",
     "SinCuenta", "SinCentro", "SinSigla", "SinCodigoDeMoneda", "SinCorrelativo", "RepartoNoCuadra",

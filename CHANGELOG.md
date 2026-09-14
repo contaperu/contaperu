@@ -54,6 +54,15 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 - Un driver de prueba de asientos por JSON (`tests/drivers_de_prueba/diario_json.py`), de canal `legacy`, con índice y
   `no_caben`: prueba que el contrato ya cubre lo que pedirá STARSOFT, sin publicar ningún driver.
 
+- **`claves_previas` por las tres puertas** (hito 0.1): `api.revisar`, `diagnosticar`, `generar_asiento`, `exportar` y
+  `exportar_archivo`, las herramientas del MCP y `--claves-previas` en `contaperu desde-json` y `diagnosticar`. Lo ya
+  anotado en otros periodos del mismo RUC viaja como `[tipo_cp, serie, numero, contraparte_doc]`, se normaliza igual
+  que la clave del comprobante («00000123» casa con «123») y lo que coincide sale con `DUPLICADO_PERIODO_ANTERIOR`,
+  que se pide al contador. Tope: `api.MAXIMO_CLAVES_PREVIAS`, 50 000; por encima, `DocumentoInvalido`.
+- **La identidad de un comprobante, escrita** (hito 0.0, `estandar/LEEME.md`): el RUC y el tipo del libro, más el
+  tipo, la serie y el número sin ceros; en compras, el documento del proveedor; en ventas, no el del cliente; nunca el
+  periodo.
+
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
@@ -83,6 +92,11 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   `construir` sigue exportando, con un `AvisoDriver`.
 - CONTASIS y CONCAR escriben su Excel con el kit común. `drivers.csv.CANAL`, `drivers.sire.CANAL` y
   `drivers.sire.txt.columnas_igv_compras`, que vivía en `formato`.
+
+- **En ventas, dos comprobantes con el mismo tipo, serie y número son el mismo aunque el cliente difiera**:
+  `validar.revisar` los marca como duplicados, también contra las claves previas. Es la identidad del hito 0.0; en
+  compras no cambia nada. `validar.marcar_duplicados` recibe `sin_contraparte` para decidirlo y por defecto hace lo de
+  siempre.
 
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y

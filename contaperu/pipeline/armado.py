@@ -78,7 +78,7 @@ def desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], op
 
 
 def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None, correlativos: dict | None = None,
-                    incluir_observados: bool = False, imputacion: dict | None = None) -> dict:
+                    incluir_observados: bool = False, imputacion: dict | None = None, claves_previas: Any = None) -> dict:
     """Comprobantes -> líneas de diario del estándar, sin formato de ningún ERP.
 
     Con la configuración del sistema de `driver`, que tiene que armar asientos: sus siglas, sus sub-diarios y las
@@ -88,7 +88,7 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
         con_asientos = [nombre for nombre, m in drivers.DRIVERS.items() if contrato.arma_asientos(m)]
         raise ValueError(f"El driver {driver!r} no arma asientos: las líneas salen con la configuración de uno que "
                          f"sí ({', '.join(con_asientos)})")
-    libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver)
+    libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     corr = asi.correlativos_de_partida(comprobantes, config, libro.es_venta, correlativos)
     # Directo a las líneas neutrales: sin pasar por las columnas de ningún ERP.
     neutrales, rangos = asi.lineas_del_libro(libro, comprobantes, config, corr,

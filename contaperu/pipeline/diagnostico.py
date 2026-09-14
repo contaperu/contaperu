@@ -13,7 +13,8 @@ from .. import detracciones, drivers, validar
 from ..asiento.faltas import CONTADOR, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
 from ..drivers import contrato
 from ..modelo import Comprobante, Libro
-from .preparacion import comprobantes_de, con_imputacion, config_aplicada, errores_de_configuracion, libro_de
+from .preparacion import (claves_previas_de, comprobantes_de, con_imputacion, config_aplicada,
+                          errores_de_configuracion, libro_de)
 from .preparacion import serie_numero as _serie_numero
 from .seleccion import fuera_de
 
@@ -121,7 +122,7 @@ def _sin_configuracion(libro: Libro, driver: str, exige: frozenset[str], todos: 
 
 
 def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, correlativos: dict | None = None,
-                 imputacion: dict | None = None) -> dict:
+                 imputacion: dict | None = None, claves_previas: Any = None) -> dict:
     """Todo lo que hay que mirar de un mes ANTES de exportarlo, en una sola respuesta.
 
     Pura y sin estado. **No lanza** por lo que le falte al mes: lo describe. Tampoco por una configuración que no se
@@ -130,6 +131,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     """
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
+    previas = claves_previas_de(claves_previas)
     modulo = drivers.obtener(driver)
     # Lo que ESE destino exige (`contrato.exige`): decide qué faltante deja el mes «no listo». El CSV
     # no exige centro ni moneda con código; CONCAR, los dos; el SIRE, nada de esto.
@@ -139,7 +141,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
         return _sin_configuracion(libro, driver, exige, todos, errores)
     config = con_imputacion(config_aplicada(configuracion, driver), imputacion, todos)
     detracciones.normalizar(todos, config)
-    validar.revisar(todos, libro)
+    validar.revisar(todos, libro, previas)
     es_venta = libro.es_venta
 
     excluidos = [c for c in todos if c.excluida]

@@ -81,6 +81,9 @@ Reglas que conviene tener claras antes de armar un documento:
     quien revisa, y no van en el documento: llegan aparte, en `imputacion`, por el `id_externo` del
     comprobante — {"fila-8": {"cuenta_contable": "636301", "centro_costo": "OBRA01"}}. Lo que no
     traiga sale de la `configuracion`.
+  - Lo ya anotado en otros periodos del mismo RUC llega en `claves_previas`, cada uno como
+    [tipo_cp, serie, numero, contraparte_doc]: un comprobante que coincide sale con
+    DUPLICADO_PERIODO_ANTERIOR, porque SUNAT lo rechazaría. En ventas el cliente no cuenta.
   - Antes de inventar una cuenta contable, `buscar_cuenta_pcge`. Que una cuenta no esté en el PCGE
     no la invalida —las divisionarias las abre cada empresa—, pero conviene saberlo.
 
@@ -153,21 +156,23 @@ def configuracion_por_defecto() -> dict:
 
 
 @mcp.tool()
-def validar_comprobantes(documento: dict, configuracion: dict | None = None) -> dict:
+def validar_comprobantes(documento: dict, configuracion: dict | None = None,
+                         claves_previas: list[list[str]] | None = None) -> dict:
     """Revisa los comprobantes de un documento `open-accounting` y devuelve el mismo documento con
     `estado` y `observaciones` puestos en cada uno.
 
     Comprueba lo que se puede comprobar sin salir a ningún sitio: que el RUC sea un RUC, que el
     IGV cuadre con la base, que el total sea la suma de sus partes, que la fecha no sea posterior
     al periodo (error; una venta de un mes anterior solo avisa, y una compra anterior, solo pasados
-    los 12 meses del plazo de anotación), que no haya duplicados. Las observaciones de nivel `error`
+    los 12 meses del plazo de anotación), que no haya duplicados —en el lote y, con `claves_previas`, contra lo ya
+    anotado en otros periodos—. Las observaciones de nivel `error`
     bloquean la exportación; las de nivel `aviso` no.
 
     También descarta las detracciones cuyo código no está en la tabla del contribuyente, que es
     de donde salen los códigos inventados cuando una IA confunde la retención del IGV con una
     detracción.
     """
-    return api.revisar(documento, configuracion=configuracion)
+    return api.revisar(documento, configuracion=configuracion, claves_previas=claves_previas)
 
 
 @mcp.tool()
@@ -183,7 +188,8 @@ def validar_partida_doble(asiento: list[dict]) -> dict:
 @mcp.tool()
 def generar_asiento(documento: dict, configuracion: dict | None = None,
                     correlativos: dict | None = None, incluir_observados: bool = False,
-                    imputacion: dict | None = None, driver: str = "concar") -> dict:
+                    imputacion: dict | None = None, driver: str = "concar",
+                    claves_previas: list[list[str]] | None = None) -> dict:
     """Convierte los comprobantes en líneas de diario, sin el formato de ningún sistema.
 
     Devuelve el bloque `asiento` del estándar: cuenta, debe o haber, importe, moneda, glosa,
@@ -203,12 +209,14 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
     sus siglas, sus sub-diarios y las columnas en que pone el centro de costo.
     """
     return api.generar_asiento(documento, driver=driver, configuracion=configuracion, imputacion=imputacion,
-                               correlativos=correlativos, incluir_observados=incluir_observados)
+                               correlativos=correlativos, incluir_observados=incluir_observados,
+                               claves_previas=claves_previas)
 
 
 @mcp.tool()
 def diagnosticar(documento: dict, configuracion: dict | None = None, correlativos: dict | None = None,
-                 driver: str = "concar", imputacion: dict | None = None) -> dict:
+                 driver: str = "concar", imputacion: dict | None = None,
+                 claves_previas: list[list[str]] | None = None) -> dict:
     """Dice todo lo que hay que mirar de un mes ANTES de exportarlo. **Llámala antes de `exportar`.**
 
     En una sola respuesta: si el mes está listo (`listo_para_exportar`) y, si no, por qué
@@ -232,13 +240,14 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
     `errores_de_configuracion`, cada error con su ruta.
     """
     return api.diagnosticar(documento, driver=driver, configuracion=configuracion, imputacion=imputacion,
-                            correlativos=correlativos)
+                            correlativos=correlativos, claves_previas=claves_previas)
 
 
 @mcp.tool()
 def exportar(documento: dict, driver: str = "concar", configuracion: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False,
-             fecha: str = "", imputacion: dict | None = None) -> CallToolResult:
+             fecha: str = "", imputacion: dict | None = None,
+             claves_previas: list[list[str]] | None = None) -> CallToolResult:
     """Genera el archivo que espera un sistema contable, ya listo para importar.
 
     Devuelve dos cosas: un resumen en JSON (nombre del archivo, comprobantes, debe y haber, y en
@@ -260,7 +269,8 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
     por lo que no cabe en su formato (`no_cabe`).
     """
     resultado = api.exportar(documento, driver=driver, configuracion=configuracion, imputacion=imputacion,
-                             correlativos=correlativos, incluir_observados=incluir_observados, fecha=fecha or None)
+                             correlativos=correlativos, incluir_observados=incluir_observados, fecha=fecha or None,
+                             claves_previas=claves_previas)
     # Los bytes salen del resumen y entran en los adjuntos: repetirlos en el JSON seria mandar
     # el archivo dos veces, y la copia en texto es justo la que el cliente no sabe guardar.
     contenido = resultado.pop("contenido_base64", "") or ""

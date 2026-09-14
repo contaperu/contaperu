@@ -117,6 +117,20 @@ familia asiento, `construir` y `desde_lineas`.
 
 ---
 
+## La identidad de un comprobante
+
+Un comprobante es el mismo, venga por donde venga, si coinciden el RUC y el tipo del libro (`libro.ruc`, `libro.tipo`)
+y su tipo, su serie y su número (`tipo_cp`, `serie`, `numero`; el número sin ceros a la izquierda: «00000123» es
+«123»). **En compras entra también el documento del proveedor** (`contraparte_doc`): cada proveedor numera por su
+cuenta, y dos pueden repetir serie y número. **En ventas no entra el del cliente**: la serie y el número los numera el
+propio contribuyente y no se repiten, y el cliente de una boleta muchas veces ni se conoce; `comparar_sire` lo deja
+fuera por la misma razón. **El periodo no forma parte de la identidad**: un comprobante ya anotado en otro mes sigue
+siendo el mismo, y por eso SUNAT lo rechaza (error 452).
+
+Es la clave con la que el motor detecta duplicados —dentro del lote y contra `claves_previas`, lo ya anotado en otros
+periodos del mismo RUC, que viaja como `[tipo_cp, serie, numero, contraparte_doc]`— y la que devuelve de cada
+comprobante al asentar y al exportar.
+
 ## Las cinco reglas que hay que entender
 
 **1. Los importes van siempre en positivo.** Una nota de crédito no lleva importes negativos: lleva

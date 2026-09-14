@@ -209,19 +209,25 @@ def validar(c: Comprobante, libro: Libro) -> None:
 
 
 def marcar_duplicados(comprobantes: Iterable[Comprobante], claves_previas: Iterable[tuple] = (),
-                      claves_proceso: Iterable[tuple] = ()) -> int:
+                      claves_proceso: Iterable[tuple] = (), sin_contraparte: bool = False) -> int:
     """Marca como `duplicada` la 2.ª y siguientes apariciones de una misma clave
     dentro del lote (o ya guardadas en este proceso: `claves_proceso`), y
     cualquier aparición de una clave ya anotada en OTRO periodo del mismo RUC
     (`claves_previas`; SUNAT la rechazaría: error 452). Las filas excluidas no
-    cuentan. Devuelve cuántas marcó."""
-    previas = set(claves_previas)
-    vistas: set[tuple] = set(claves_proceso)
+    cuentan. Devuelve cuántas marcó.
+
+    Con `sin_contraparte` —en ventas, donde la identidad no lleva al cliente (`estandar/LEEME.md`, «La identidad de un
+    comprobante»)— dos comprobantes con el mismo tipo, serie y número son el mismo aunque el cliente difiera."""
+    def identidad(clave: tuple) -> tuple:
+        return (*tuple(clave)[:3], "") if sin_contraparte else tuple(clave)
+
+    previas = {identidad(k) for k in claves_previas}
+    vistas: set[tuple] = {identidad(k) for k in claves_proceso}
     n = 0
     for c in comprobantes:
         if c.excluida:
             continue
-        k = c.clave
+        k = identidad(c.clave)
         if k in previas:
             c.estado = "duplicada"
             c.observar("DUPLICADO_PERIODO_ANTERIOR", "error", "Ya fue anotado en otro periodo de este RUC (SUNAT lo rechaza: error 452)")
@@ -248,7 +254,7 @@ def revisar(comprobantes: list[Comprobante], libro: Libro, claves_previas: Itera
         c.observaciones = []
         c.estado = "ok"
         validar(c, libro)
-    marcar_duplicados(comprobantes, claves_previas, claves_proceso)
+    marcar_duplicados(comprobantes, claves_previas, claves_proceso, sin_contraparte=libro.es_venta)
     for c in comprobantes:
         fijar_estado(c)
     return comprobantes

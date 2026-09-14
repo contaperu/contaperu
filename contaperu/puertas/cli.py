@@ -67,7 +67,8 @@ def _escribir(exp: api.Exportado, salida: Path) -> None:
 
 
 def _generar_todas(documento: dict, driver: str, salida: Path, incluir_errores: bool,
-                   configuracion: dict | None = None, imputacion: dict | None = None) -> int:
+                   configuracion: dict | None = None, imputacion: dict | None = None,
+                   claves_previas: list | None = None) -> int:
     # "todas" = los drivers de TXT. Los que llevan cuentas (CONCAR, el CSV, el registro de un sistema contable,
     # los de terceros) se piden por su nombre: necesitan la configuración contable del contribuyente —la de
     # --config—, y los de asientos arrancan sus correlativos en 1, como en `api.exportar`.
@@ -82,7 +83,8 @@ def _generar_todas(documento: dict, driver: str, salida: Path, incluir_errores: 
             continue
         try:
             exp = api.exportar_archivo(documento, driver=nombre_driver, configuracion=configuracion,
-                                       imputacion=imputacion, incluir_observados=incluir_errores)
+                                       imputacion=imputacion, incluir_observados=incluir_errores,
+                                       claves_previas=claves_previas)
         except api.NoExportable as error:
             # Lo que le falta al mes para ese destino. `contaperu diagnosticar` lo lista por serie-número.
             print(f"  {nombre_driver:<5} NO generado: {error}. Revísalo con `contaperu diagnosticar`", file=sys.stderr)
@@ -133,6 +135,7 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     datos = _leer_json(args.json)
     config = _leer_json(args.config) if args.config else None
     imputacion = _leer_json(args.imputacion) if args.imputacion else None
+    previas = _leer_json(args.claves_previas) if args.claves_previas else None
     errores = api.errores_de_configuracion(config)
     if errores:
         print("La configuración no se puede usar:\n" + "\n".join(f"  !! {error}" for error in errores), file=sys.stderr)
@@ -140,13 +143,13 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     # Siempre se revisa: el documento, la imputación contra sus documentos y cada comprobante, con las mismas reglas
     # que la api aplica al exportar. --revisar enseña además la tabla.
     try:
-        revisado = api.revisar(datos, configuracion=config, imputacion=imputacion)
+        revisado = api.revisar(datos, configuracion=config, imputacion=imputacion, claves_previas=previas)
     except api.DocumentoInvalido as error:
         print(f"No se puede usar: {error}", file=sys.stderr)
         return 2
     if args.revisar:
         print(_tabla(revisado["comprobantes"]))
-    return _generar_todas(datos, args.driver, Path(args.salida), args.incluir_errores, config, imputacion)
+    return _generar_todas(datos, args.driver, Path(args.salida), args.incluir_errores, config, imputacion, previas)
 
 
 def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
@@ -158,8 +161,10 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
     datos = _leer_json(args.json)
     config = _leer_json(args.config) if args.config else None
     imputacion = _leer_json(args.imputacion) if args.imputacion else None
+    previas = _leer_json(args.claves_previas) if args.claves_previas else None
     try:
-        diagnostico = api.diagnosticar(datos, driver=args.driver, configuracion=config, imputacion=imputacion)
+        diagnostico = api.diagnosticar(datos, driver=args.driver, configuracion=config, imputacion=imputacion,
+                                       claves_previas=previas)
     except api.DocumentoInvalido as error:
         # El documento que no se puede leer, o una imputación que no es de él: el motivo va en `e`.
         print(f"No se puede diagnosticar: {error}", file=sys.stderr)
@@ -243,6 +248,8 @@ def _consola_utf8() -> None:
 # La imputación de cada documento llega aparte del documento, igual que por la api.
 AYUDA_IMPUTACION = ("JSON con la imputación de cada documento, por su id_externo: "
                     "{id: {cuenta_contable, centro_costo, cuenta_tercero, reparto}}")
+AYUDA_CLAVES_PREVIAS = ("JSON con lo ya anotado en otros periodos de este RUC: "
+                        "[[tipo_cp, serie, numero, contraparte_doc], ...]; lo que coincide no se exporta")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -280,6 +287,7 @@ def main(argv: list[str] | None = None) -> int:
                                                  "cada sistema en su sección (la piden los drivers que llevan "
                                                  "cuentas: concar, contasis, csv…)")
     sub_desde_json.add_argument("--imputacion", help=AYUDA_IMPUTACION)
+    sub_desde_json.add_argument("--claves-previas", help=AYUDA_CLAVES_PREVIAS)
     sub_desde_json.set_defaults(fn=cmd_desde_json)
 
     sub_diagnosticar = subcomandos.add_parser("diagnosticar",
@@ -288,6 +296,7 @@ def main(argv: list[str] | None = None) -> int:
     sub_diagnosticar.add_argument("--driver", default="concar", choices=sistemas)
     sub_diagnosticar.add_argument("--config", help="JSON con la configuración contable del contribuyente")
     sub_diagnosticar.add_argument("--imputacion", help=AYUDA_IMPUTACION)
+    sub_diagnosticar.add_argument("--claves-previas", help=AYUDA_CLAVES_PREVIAS)
     sub_diagnosticar.set_defaults(fn=cmd_diagnosticar)
 
     sub_configuracion = subcomandos.add_parser(
