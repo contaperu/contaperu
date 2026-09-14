@@ -240,3 +240,14 @@ def test_generar_asiento_exige_lo_mismo_que_exportar():
     repetido = {"libro": LIBRO, "comprobantes": [BASE, dict(BASE, id_externo="fila-9")]}
     r = api.generar_asiento(repetido, driver="csv", configuracion=con_centros, incluir_observados=True)
     assert len({ln["correlativo"] for ln in r["asiento"]}) == 1      # el duplicado no sale, como en el archivo
+
+
+@pytest.mark.parametrize("bytes_", [b"%PDF-1.7\n%\xe2\xe3\n1 0 obj", b"\xff\xd8\xff\xe0\x00\x10JFIF",
+                                    b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"], ids=["pdf", "jpg", "png"])
+def test_un_pdf_o_una_foto_quedan_pendientes_de_leer(bytes_):
+    """Hito 0.7: lo lee un modelo de lenguaje, fuera del motor; aquí no es un «XML inválido»."""
+    import base64
+
+    documento = api.leer_xml(base64.b64encode(bytes_).decode(), LIBRO, es_base64=True)
+    assert documento["_lectura"] == {"ignorados": 0, "errores": [], "pendientes_de_leer": 1}
+    assert documento["comprobantes"] == []

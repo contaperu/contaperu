@@ -13,9 +13,19 @@ from ..lectores import sire_txt
 from .preparacion import bytes_de, documento, libro_de
 
 
+# Los bytes con que empieza un PDF o una imagen: lo que llega por un protocolo no trae nombre de archivo.
+_FIRMAS = ((b"%PDF-", "comprobante.pdf"), (b"\xff\xd8\xff", "comprobante.jpg"), (b"\x89PNG\r\n\x1a\n", "comprobante.png"))
+
+
 def _nombre_de(datos: bytes) -> str:
     """Un nombre coherente con lo que los bytes dicen que es. Lo que llega por un protocolo no
-    tiene nombre de archivo, y el lector clasifica por extension o por bytes magicos."""
+    tiene nombre de archivo, y el lector clasifica por extension o por bytes magicos. Un PDF o una foto se nombran
+    como lo que son (hito 0.7): así cuentan como pendientes de leer y no como un XML inválido."""
+    for firma, nombre in _FIRMAS:
+        if datos.startswith(firma):
+            return nombre
+    if datos[:4] == b"RIFF" and datos[8:12] == b"WEBP":
+        return "comprobante.webp"
     return "entrada.zip" if datos[:4] == b"PK" else "comprobante.xml"
 
 

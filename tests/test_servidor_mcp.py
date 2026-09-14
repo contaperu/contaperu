@@ -284,3 +284,13 @@ def test_la_imputacion_llega_por_el_protocolo():
 
     resumen, _ = exportar(documento=documento, driver="csv", imputacion=imputacion)
     assert ";636301;D;" in resumen["texto"]
+
+
+def test_un_pdf_por_el_protocolo_queda_pendiente_de_leer():
+    """Hito 0.7: un agente que manda el PDF de la factura en vez del XML recibe «pendiente de leer», no un error."""
+    import base64
+
+    libro = DOCUMENTO["libro"]
+    leido = llamar("leer_xml_ubl", contenido=base64.b64encode(b"%PDF-1.7\n1 0 obj").decode(), libro=libro,
+                   es_base64=True)
+    assert leido["_lectura"]["pendientes_de_leer"] == 1 and leido["_lectura"]["errores"] == []

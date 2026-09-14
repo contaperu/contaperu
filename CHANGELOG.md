@@ -122,6 +122,10 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   `por_moneda`, con un total por moneda, y `total` y `moneda` son los de la primera moneda en que aparece. El
   serie-número sigue escribiéndose como en el documento, con sus ceros: igualarlo al de la línea queda por confirmar.
 
+- **Un PDF o una foto enviados a `leer_xml` cuentan como pendientes de leer** (hito 0.7): `_lectura.pendientes_de_leer`
+  sube en uno y no aparece un «XML inválido». El motor reconoce el PDF, el JPEG, el PNG y el WEBP por sus primeros
+  bytes, porque lo que llega por un protocolo no trae nombre de archivo.
+
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
   avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen
