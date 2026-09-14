@@ -73,6 +73,19 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 - **Anotaciones MCP** (hito 0.2): las once herramientas se anuncian con `readOnlyHint: true` y `openWorldHint: false`,
   así un cliente puede llamarlas sin pedir confirmación por un efecto que no tienen.
 
+- **OpenConta** (hito B3): el contrato de la puerta HTTP, en formato OpenAPI 3.1, generado desde `api.OPERACIONES` y
+  versionado en `contaperu/api/openconta.json` (`api.contrato_openconta()`). Cada operación con su cuerpo, su salida y sus
+  rechazos RFC 9457; los esquemas del estándar y de la api, en `components.schemas`; sin `servers`.
+  `herramientas/generar_openconta.py` lo reescribe y, con `--comprobar`, falla si no está al día; un test exige que
+  regenerarlo no cambie ni un byte, que las respuestas reales validen contra su salida y los documentos de ejemplo
+  contra su entrada.
+- **La tabla de operaciones declara su entrada y su salida** (hito B1): cada `Operacion` trae `entrada`, el JSON Schema
+  2020-12 de sus parámetros sacado de su firma, y `esquema_de_salida`, con `$ref` al esquema del estándar. Los esquemas
+  de las salidas viajan en `contaperu/api/esquemas/`.
+- **El esquema de la respuesta de `diagnosticar`** (hito B2), también en la forma de una configuración que no se puede
+  aplicar: `api.esquema_diagnostico()` y el recurso `contaperu://esquemas/diagnostico`. El SDK del MCP no deja
+  declararlo como `outputSchema` de la herramienta sin cambiar lo que responde.
+
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.

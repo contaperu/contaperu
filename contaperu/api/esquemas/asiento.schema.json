@@ -1,0 +1,62 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/asiento.schema.json",
+ "title": "Asiento generado",
+ "description": "Un documento `open-accounting` con las líneas del asiento y `_asiento`: cuántas líneas, el rango de cada sub-diario, el cuadre, la huella, lo que salió de cada comprobante y la versión del motor.",
+ "allOf": [
+  {
+   "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json"
+  },
+  {
+   "type": "object",
+   "properties": {
+    "_asiento": {
+     "type": "object",
+     "properties": {
+      "lineas": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "sub_diarios": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "object"
+       }
+      },
+      "cuadre": {
+       "$ref": "cuadre.schema.json"
+      },
+      "huella": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$",
+       "description": "sha256 del contenido del asiento, sin el correlativo (`estandar/LEEME.md`)."
+      },
+      "comprobantes": {
+       "type": "array",
+       "items": {
+        "$ref": "comprobante_de_la_respuesta.schema.json"
+       }
+      },
+      "motor": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "lineas",
+      "sub_diarios",
+      "cuadre",
+      "huella",
+      "comprobantes",
+      "motor"
+     ],
+     "additionalProperties": false
+    }
+   },
+   "required": [
+    "asiento",
+    "_asiento"
+   ],
+   "additionalProperties": true
+  }
+ ]
+}

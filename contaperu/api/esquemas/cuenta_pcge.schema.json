@@ -1,0 +1,68 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/cuenta_pcge.schema.json",
+ "title": "Cuenta del PCGE 2026",
+ "description": "Lo que se encontró en el catálogo oficial: la cuenta de un código —o la madre que lo gobierna, con `exacta` falso— y las cuentas cuyo nombre contiene el texto.",
+ "type": "object",
+ "properties": {
+  "version": {
+   "type": "string"
+  },
+  "fuente": {
+   "type": "string"
+  },
+  "cuenta": {
+   "anyOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "properties": {
+      "codigo": {
+       "type": "string"
+      },
+      "nombre": {
+       "type": "string"
+      },
+      "pagina": {},
+      "exacta": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "codigo",
+      "nombre",
+      "exacta"
+     ],
+     "additionalProperties": false
+    }
+   ]
+  },
+  "encontradas": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "codigo": {
+      "type": "string"
+     },
+     "nombre": {
+      "type": "string"
+     },
+     "pagina": {}
+    },
+    "required": [
+     "codigo",
+     "nombre"
+    ],
+    "additionalProperties": false
+   }
+  }
+ },
+ "required": [
+  "version",
+  "fuente"
+ ],
+ "additionalProperties": false
+}

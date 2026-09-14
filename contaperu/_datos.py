@@ -48,6 +48,22 @@ def esquema_open_accounting() -> dict:
     return json.loads(texto_del_esquema())
 
 
+def leer_esquema(nombre: str) -> dict:
+    """Un esquema de la api (`contaperu/api/esquemas/<nombre>.schema.json`)."""
+    datos = leer_json(f"api/esquemas/{nombre}.schema.json")
+    if datos is None:
+        raise FileNotFoundError(f"No encuentro el esquema {nombre!r} de la api")
+    return datos
+
+
+def openconta() -> dict:
+    """El contrato OpenConta que viaja con esta versión (`contaperu/api/openconta.json`)."""
+    datos = leer_json("api/openconta.json")
+    if datos is None:
+        raise FileNotFoundError("No encuentro contaperu/api/openconta.json")
+    return datos
+
+
 def leer_archivo(ruta: str | os.PathLike) -> bytes | None:
     """Los bytes de un archivo que nombró quien llama, o None si no existe. Solo para las rutas de la 0.x."""
     ruta = Path(ruta)

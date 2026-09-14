@@ -32,7 +32,7 @@ schema = ["jsonschema>=4,<5"]             # validar contra open-accounting.schem
 # defensa del Host; el trabajo `minimos` de `.github/workflows/tests.yml` la instala tal cual.
 mcp = ["mcp>=1.30,<2", "jsonschema>=4,<5"]
 todo = ["contaperu[excel,schema,mcp]"]
-dev = ["contaperu[todo]", "pytest>=8,<9"]
+dev = ["contaperu[todo]", "pytest>=8,<9", "openapi-spec-validator>=0.7,<1"]
 
 [project.scripts]
 contaperu = "contaperu.puertas.cli:main"

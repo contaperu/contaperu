@@ -1,0 +1,67 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/comprobante_de_la_respuesta.schema.json",
+ "title": "Un comprobante en la respuesta",
+ "description": "Lo que salió de un comprobante: su identidad y, en un asiento, el tramo [desde, hasta) de sus líneas y la huella de ese tramo.",
+ "type": "object",
+ "properties": {
+  "identidad": {
+   "type": "object",
+   "properties": {
+    "ruc": {
+     "type": "string"
+    },
+    "libro": {
+     "enum": [
+      "venta",
+      "compra"
+     ]
+    },
+    "tipo_cp": {
+     "type": "string"
+    },
+    "serie": {
+     "type": "string"
+    },
+    "numero": {
+     "type": "string"
+    },
+    "contraparte_doc": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ruc",
+    "libro",
+    "tipo_cp",
+    "serie",
+    "numero"
+   ],
+   "additionalProperties": false
+  },
+  "lineas": {
+   "type": "array",
+   "prefixItems": [
+    {
+     "type": "integer",
+     "minimum": 0
+    },
+    {
+     "type": "integer",
+     "minimum": 0
+    }
+   ],
+   "minItems": 2,
+   "maxItems": 2
+  },
+  "huella": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$",
+   "description": "sha256 del contenido del asiento, sin el correlativo (`estandar/LEEME.md`)."
+  }
+ },
+ "required": [
+  "identidad"
+ ],
+ "additionalProperties": false
+}

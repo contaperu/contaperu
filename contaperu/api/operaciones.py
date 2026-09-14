@@ -187,6 +187,16 @@ def esquema_open_accounting() -> dict:
     return _datos.esquema_open_accounting()
 
 
+def esquema_diagnostico() -> dict:
+    """El JSON Schema de la respuesta de `diagnosticar`, también cuando la configuración no se puede aplicar."""
+    return _datos.leer_esquema("diagnostico")
+
+
+def contrato_openconta() -> dict:
+    """El contrato OpenConta de la puerta HTTP, en formato OpenAPI 3.1: el que viaja con esta versión del motor."""
+    return _datos.openconta()
+
+
 def comparar_sire(nuestro: bytes, sunat: bytes, *, registro: str = "", nombres: Sequence[str] = ()) -> dict:
     """Compara el TXT del SIRE que generó el motor con la exportación del detalle que da SUNAT, por comprobante: qué
     falta, qué sobra y qué no coincide, y en `informe` lo mismo en texto. El registro —`venta` o `compra`— se deduce de

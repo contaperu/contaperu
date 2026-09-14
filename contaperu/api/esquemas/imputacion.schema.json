@@ -1,0 +1,50 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/imputacion.schema.json",
+ "title": "Imputación",
+ "description": "Lo que se decidió para cada documento, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total o un reparto de la base entre cuentas que sume la base. Llega aparte del documento.",
+ "type": "object",
+ "additionalProperties": {
+  "type": "object",
+  "properties": {
+   "cuenta_contable": {
+    "type": "string"
+   },
+   "centro_costo": {
+    "type": "string"
+   },
+   "cuenta_tercero": {
+    "type": "string"
+   },
+   "reparto": {
+    "type": "array",
+    "items": {
+     "type": "object",
+     "properties": {
+      "importe": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "number"
+        }
+       ]
+      },
+      "cuenta_contable": {
+       "type": "string"
+      },
+      "centro_costo": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "importe"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
+  "additionalProperties": false
+ }
+}

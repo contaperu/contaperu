@@ -143,6 +143,13 @@ def configuracion_declarada() -> str:
     return json.dumps(api.describir_configuracion(), ensure_ascii=False, indent=1)
 
 
+@mcp.resource("contaperu://esquemas/diagnostico", mime_type="application/schema+json")
+def esquema_diagnostico() -> str:
+    """El JSON Schema de la respuesta de `diagnosticar`, también cuando la configuración no se puede aplicar. El SDK no
+    deja declararlo como `outputSchema` de la herramienta sin cambiar lo que responde, así que viaja como recurso."""
+    return json.dumps(api.esquema_diagnostico(), ensure_ascii=False, indent=1)
+
+
 # --- herramientas ------------------------------------------------------------------
 
 @mcp.tool(annotations=SOLO_LECTURA)
@@ -243,7 +250,8 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
     generar un archivo que luego se importa en su sistema contable. `imputacion` es la misma de
     `generar_asiento`: un reparto que no suma la base sale en `faltantes.reparto_que_no_cuadra`.
     Si la `configuracion` no cumple lo que se declara en `contaperu://configuracion`, lo dice en
-    `errores_de_configuracion`, cada error con su ruta.
+    `errores_de_configuracion`, cada error con su ruta. La forma de la respuesta está en el recurso
+    `contaperu://esquemas/diagnostico`.
     """
     return api.diagnosticar(documento, driver=driver, configuracion=configuracion, imputacion=imputacion,
                             correlativos=correlativos, claves_previas=claves_previas)

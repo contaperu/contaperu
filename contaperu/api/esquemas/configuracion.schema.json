@@ -1,0 +1,7 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/configuracion.schema.json",
+ "title": "Configuración contable",
+ "description": "Lo general en la raíz y una sección por sistema que se configura. Qué claves admite cada parte lo dice `describir_configuracion`; el motor la valida entera y se niega con la ruta de cada error.",
+ "type": "object"
+}

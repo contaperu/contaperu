@@ -1,0 +1,279 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/diagnostico.schema.json",
+ "title": "Diagnóstico",
+ "description": "Todo lo que hay que mirar de un mes antes de exportarlo hacia un destino. Tiene la misma forma cuando la configuración no se puede aplicar: entonces `errores_de_configuracion` dice por qué y lo demás va vacío.",
+ "type": "object",
+ "properties": {
+  "libro": {
+   "type": "object",
+   "properties": {
+    "ruc": {
+     "type": "string"
+    },
+    "periodo": {
+     "type": "string"
+    },
+    "tipo": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ruc",
+    "periodo",
+    "tipo"
+   ],
+   "additionalProperties": false
+  },
+  "driver": {
+   "type": "string"
+  },
+  "exige": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "listo_para_exportar": {
+   "type": "boolean"
+  },
+  "por_que_no": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "que_falta": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "motivo": {
+      "type": "string"
+     },
+     "texto": {
+      "type": "string"
+     },
+     "comprobantes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "pedir_a": {
+      "enum": [
+       "contador",
+       "sistema",
+       "proveedor"
+      ]
+     }
+    },
+    "required": [
+     "motivo",
+     "texto",
+     "comprobantes",
+     "pedir_a"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "errores_de_configuracion": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "totales": {
+   "type": "object",
+   "properties": {
+    "comprobantes": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "saldrian": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "excluidos": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "fuera_del_destino": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "con_error": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "con_aviso": {
+     "type": "integer",
+     "minimum": 0
+    }
+   },
+   "required": [
+    "comprobantes",
+    "saldrian",
+    "excluidos",
+    "fuera_del_destino",
+    "con_error",
+    "con_aviso"
+   ],
+   "additionalProperties": false
+  },
+  "bloqueantes": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "serie_numero": {
+      "type": "string"
+     },
+     "observaciones": {
+      "type": "array",
+      "items": {
+       "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json#/$defs/observacion"
+      }
+     }
+    },
+    "required": [
+     "serie_numero",
+     "observaciones"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "avisos": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "serie_numero": {
+      "type": "string"
+     },
+     "observaciones": {
+      "type": "array",
+      "items": {
+       "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json#/$defs/observacion"
+      }
+     }
+    },
+    "required": [
+     "serie_numero",
+     "observaciones"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "faltantes": {
+   "type": "object"
+  },
+  "detracciones_pendientes": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "serie_numero": {
+      "type": "string"
+     },
+     "codigo": {
+      "type": "string"
+     },
+     "monto": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "serie_numero",
+     "codigo",
+     "monto"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "resumen_por_contraparte": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "properties": {
+     "nombre": {
+      "type": "string"
+     },
+     "comprobantes": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "total": {
+      "type": "string"
+     },
+     "moneda": {
+      "type": "string"
+     },
+     "por_moneda": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "nombre",
+     "comprobantes",
+     "total",
+     "moneda",
+     "por_moneda"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "sub_diarios": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "properties": {
+     "etiqueta": {
+      "type": "string"
+     },
+     "comprobantes": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "empieza_en": {
+      "type": "integer",
+      "minimum": 1
+     }
+    },
+    "required": [
+     "etiqueta",
+     "comprobantes",
+     "empieza_en"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "saldrian": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  }
+ },
+ "required": [
+  "libro",
+  "driver",
+  "exige",
+  "listo_para_exportar",
+  "por_que_no",
+  "que_falta",
+  "errores_de_configuracion",
+  "totales",
+  "bloqueantes",
+  "avisos",
+  "faltantes",
+  "detracciones_pendientes",
+  "resumen_por_contraparte",
+  "sub_diarios",
+  "saldrian"
+ ],
+ "additionalProperties": false
+}

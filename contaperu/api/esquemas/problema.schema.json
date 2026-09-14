@@ -1,0 +1,35 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/problema.schema.json",
+ "title": "Problema",
+ "description": "Un rechazo, como «problem details» del RFC 9457 (`application/problem+json`). `clave` lo nombra de forma estable; `errores`, si el error los trae, los lista.",
+ "type": "object",
+ "properties": {
+  "type": {
+   "type": "string"
+  },
+  "status": {
+   "type": "integer"
+  },
+  "title": {
+   "type": "string"
+  },
+  "detail": {
+   "type": "string"
+  },
+  "clave": {
+   "type": "string"
+  },
+  "errores": {
+   "type": "array"
+  }
+ },
+ "required": [
+  "type",
+  "status",
+  "title",
+  "detail",
+  "clave"
+ ],
+ "additionalProperties": false
+}
