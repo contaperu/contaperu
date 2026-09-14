@@ -25,7 +25,7 @@ class Opciones:
     tc_pen: str = "1.000"         # tipo de cambio cuando la moneda es PEN ('' = vacío)
     cero: str = "0.00"            # cómo se escribe un importe a cero ('' = vacío)
     signo_nc: bool = True         # notas de crédito con importes en negativo
-    sin_ceros: bool = True        # quitar los ceros a la izquierda del número (regla de contabilidad: SIRE y CONCAR)
+    sin_ceros: bool = True        # el número sin ceros a la izquierda (regla de contabilidad: SIRE, CONCAR y CONTASIS)
     sanear: bool = True           # quitar tildes/Ñ/controles → ASCII puro
     extension: str = ".txt"
     # SIRE Anexo 3: los campos 34-40 los "completa la Administración" y el archivo REAL que
