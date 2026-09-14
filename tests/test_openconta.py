@@ -56,7 +56,8 @@ def test_es_openapi_3_1_y_cada_operacion_de_la_tabla_tiene_su_ruta():
     assert contrato["info"]["title"] == "OpenConta" and contrato["info"]["version"] == api.__version__
     assert contrato["info"]["x-open-accounting"] == api.OPEN_ACCOUNTING
     rutas = {(ruta, metodo) for ruta, metodos in contrato["paths"].items() for metodo in metodos}
-    assert rutas == {(op.ruta, op.metodo.lower()) for op in api.OPERACIONES}
+    assert rutas == {(op.ruta, op.metodo.lower()) for op in api.OPERACIONES} | {("/salud", "get"),
+                                                                                ("/openconta.json", "get")}
     for op in api.OPERACIONES:
         assert contrato["paths"][op.ruta][op.metodo.lower()]["operationId"] == op.nombre
 

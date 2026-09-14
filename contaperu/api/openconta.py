@@ -99,6 +99,21 @@ def _operacion(op) -> dict[str, Any]:
     return salida
 
 
+def _rutas_de_la_puerta() -> dict[str, Any]:
+    """Las dos rutas de la puerta HTTP que no son operaciones de la api: `/salud` y el propio contrato."""
+    salud = {"type": "object", "additionalProperties": False, "required": ["estado", "motor", "open_accounting"],
+             "properties": {"estado": {"const": "ok"}, "motor": {"type": "string"}, "open_accounting": {"type": "string"}}}
+    host = {"421": {"$ref": "#/components/responses/HostNoPermitido"}}
+    return {
+        "/salud": {"get": {"operationId": "salud", "summary": "Si el servidor está vivo, y con qué versión del motor.",
+                           "responses": {"200": {"description": "Vivo.", "content": {"application/json": {
+                               "schema": salud}}}, **host}}},
+        "/openconta.json": {"get": {"operationId": "openconta", "summary": "Este contrato.",
+                                    "responses": {"200": {"description": "El contrato OpenConta.", "content": {
+                                        "application/json": {"schema": {"type": "object"}}}}, **host}}},
+    }
+
+
 def generar() -> dict[str, Any]:
     """El contrato OpenConta, armado desde la tabla de operaciones con el código de hoy."""
     return {
@@ -115,7 +130,7 @@ def generar() -> dict[str, Any]:
             "license": {"name": "MIT", "identifier": "MIT"},
             "x-open-accounting": OPEN_ACCOUNTING,
         },
-        "paths": {op.ruta: {op.metodo.lower(): _operacion(op)} for op in OPERACIONES},
+        "paths": {**{op.ruta: {op.metodo.lower(): _operacion(op)} for op in OPERACIONES}, **_rutas_de_la_puerta()},
         "components": {"schemas": _esquemas(), "responses": RESPUESTAS},
     }
 

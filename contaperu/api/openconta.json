@@ -638,6 +638,65 @@
      }
     }
    }
+  },
+  "/salud": {
+   "get": {
+    "operationId": "salud",
+    "summary": "Si el servidor está vivo, y con qué versión del motor.",
+    "responses": {
+     "200": {
+      "description": "Vivo.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": false,
+         "required": [
+          "estado",
+          "motor",
+          "open_accounting"
+         ],
+         "properties": {
+          "estado": {
+           "const": "ok"
+          },
+          "motor": {
+           "type": "string"
+          },
+          "open_accounting": {
+           "type": "string"
+          }
+         }
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     }
+    }
+   }
+  },
+  "/openconta.json": {
+   "get": {
+    "operationId": "openconta",
+    "summary": "Este contrato.",
+    "responses": {
+     "200": {
+      "description": "El contrato OpenConta.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     }
+    }
+   }
   }
  },
  "components": {

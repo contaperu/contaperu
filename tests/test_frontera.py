@@ -1,8 +1,8 @@
 """La frontera entre el núcleo y sus puertas, comprobada por dependencia y no por buena voluntad.
 
 `contaperu` es un núcleo de reglas contables con varias **puertas** delgadas encima: la línea de
-comandos (`puertas/cli.py`), el servidor MCP (`puertas/servidor_mcp.py`) y —desde otro repositorio— el API del portal
-contable. Las puertas hablan con la api (`contaperu/api/`), y la api con el núcleo. La propiedad que lo hace valer para los tres a la vez es que **el núcleo no sabe que las
+comandos (`puertas/cli.py`), el servidor MCP (`puertas/servidor_mcp.py`), la puerta HTTP (`puertas/servidor_http.py`) y
+—desde otro repositorio— el API del portal contable. Las puertas hablan con la api (`contaperu/api/`), y la api con el núcleo. La propiedad que lo hace valer para los tres a la vez es que **el núcleo no sabe que las
 puertas existen**: si mañana `asiento/` importara `servidor_mcp`, instalar la librería para hacer un
 Excel arrastraría el SDK del protocolo, y una corrección del MCP podría cambiar un asiento.
 
@@ -120,7 +120,7 @@ def test_el_motor_no_supone_ninguna_aplicacion():
     assert culpables == [], f"el motor supone una aplicación: {culpables}"
 
 
-@pytest.mark.parametrize("puerta", ["cli", "servidor_mcp"])
+@pytest.mark.parametrize("puerta", ["cli", "servidor_mcp", "servidor_http"])
 def test_cada_puerta_pasa_por_la_fachada(puerta):
     """Una puerta traduce un protocolo; no reimplementa el trabajo.
 

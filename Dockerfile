@@ -8,6 +8,9 @@
 #   docker run --rm -p 8000:8000 contaperu-mcp contaperu-mcp --transporte http --host 0.0.0.0
 #       el MCP remoto: Streamable HTTP en /mcp, que es lo que enchufa un conector
 #
+#   docker run --rm -p 8080:8080 contaperu-mcp contaperu-http --host 0.0.0.0 --dominio contaperu.ejemplo.com
+#       la puerta HTTP para un ERP, con su contrato en /openconta.json
+#
 #   docker run --rm -v "$PWD:/data" contaperu-mcp contaperu desde-json /data/mes.json --salida /data/salida
 #       la CLI: exportar a un archivo, sin levantar ningun servidor
 #
@@ -21,16 +24,17 @@ COPY pyproject.toml README.md LICENSE ./
 COPY estandar ./estandar
 COPY contaperu ./contaperu
 
-RUN pip install --no-cache-dir ".[mcp,excel]"
+RUN pip install --no-cache-dir ".[mcp,http,excel]"
 
 # Sin privilegios: no hace falta ninguno.
 RUN useradd --create-home --uid 10001 contaperu
 USER contaperu
 
-EXPOSE 8000
+EXPOSE 8000 8080
 
 # ENTRYPOINT vacio a proposito: con `contaperu-mcp` fijo, la imagen solo sabria ser el servidor
 # MCP y para exportar con la CLI habria que pelearse con --entrypoint. Asi, `docker run <imagen>`
-# levanta el MCP (el CMD) y `docker run <imagen> contaperu ...` usa la CLI. Una imagen, dos puertas.
+# levanta el MCP (el CMD), `docker run <imagen> contaperu-http ...` la puerta HTTP y `docker run <imagen> contaperu ...`
+# la CLI. Una imagen, tres puertas.
 ENTRYPOINT []
 CMD ["contaperu-mcp"]

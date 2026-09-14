@@ -86,6 +86,14 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   aplicar: `api.esquema_diagnostico()` y el recurso `contaperu://esquemas/diagnostico`. El SDK del MCP no deja
   declararlo como `outputSchema` de la herramienta sin cambiar lo que responde.
 
+- **La puerta HTTP** (hito B4): `contaperu-http`, con el extra `contaperu[http]` (Starlette y uvicorn). Cada operación
+  de `api.OPERACIONES` es una ruta —`POST /v1/exportar`, `GET /v1/drivers`…—, más `/salud` y `/openconta.json`, que
+  sirve el contrato. Sin estado; comparte con el MCP la defensa del `Host` (421 a un nombre que no se declaró con
+  `--dominio`) y los topes: el cuerpo se lee por trozos y se corta a 10 MiB (413), y el archivo que devuelve
+  `exportar`, a 4 MiB. Los rechazos son RFC 9457: 400 cuerpo mal formado, 422 con la `clave` del error, 500 sin
+  detalle. `puertas.servidor_http.crear_app` la da como aplicación ASGI. Las tres puertas dan el mismo documento y el
+  mismo diagnóstico.
+
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
@@ -155,6 +163,8 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 
 - El extra `mcp` pide `mcp>=1.30`, la versión más antigua con la que se probó el servidor (el `>=1.2` de antes no
   tenía las anotaciones ni la defensa del Host que ya usaba). Un trabajo de CI, `minimos`, instala ese mínimo tal cual.
+
+- La imagen de Docker instala también la puerta HTTP y expone el 8080; su `CMD` sigue siendo `contaperu-mcp`.
 
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
