@@ -28,7 +28,9 @@ dependencies = ["defusedxml>=0.7,<1"]
 [project.optional-dependencies]
 excel = ["openpyxl>=3.1,<4"]              # driver de CONCAR (.xlsx)
 schema = ["jsonschema>=4,<5"]             # validar contra open-accounting.schema.json
-mcp = ["mcp>=1.2,<2", "jsonschema>=4,<5"] # servidor MCP
+# servidor MCP. 1.30 es la versión más antigua con la que se probó: anotaciones de herramienta, servidor sin sesiones y
+# defensa del Host; el trabajo `minimos` de `.github/workflows/tests.yml` la instala tal cual.
+mcp = ["mcp>=1.30,<2", "jsonschema>=4,<5"]
 todo = ["contaperu[excel,schema,mcp]"]
 dev = ["contaperu[todo]", "pytest>=8,<9"]
 

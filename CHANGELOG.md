@@ -70,6 +70,9 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 - **`motor`** (hito B2): la versión de la librería que produjo la respuesta, en `_asiento` y `_exportacion`, fuera de
   toda huella.
 
+- **Anotaciones MCP** (hito 0.2): las once herramientas se anuncian con `readOnlyHint: true` y `openWorldHint: false`,
+  así un cliente puede llamarlas sin pedir confirmación por un efecto que no tienen.
+
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
@@ -136,6 +139,9 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 - **El TXT del SIRE no usa `assert`.** Una nota de crédito cuyo descuento cambiaría de signo el campo 15 o el 17 del
   RVIE se niega con `CampoCambiaDeSigno`, un `NoExportable` que trae la nota, en vez de un `AssertionError` que
   `python -O` se saltaba. Un test impide `assert` en todo el paquete.
+
+- El extra `mcp` pide `mcp>=1.30`, la versión más antigua con la que se probó el servidor (el `>=1.2` de antes no
+  tenía las anotaciones ni la defensa del Host que ya usaba). Un trabajo de CI, `minimos`, instala ese mínimo tal cual.
 
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y

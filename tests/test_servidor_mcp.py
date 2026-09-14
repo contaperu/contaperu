@@ -294,3 +294,13 @@ def test_un_pdf_por_el_protocolo_queda_pendiente_de_leer():
     leido = llamar("leer_xml_ubl", contenido=base64.b64encode(b"%PDF-1.7\n1 0 obj").decode(), libro=libro,
                    es_base64=True)
     assert leido["_lectura"]["pendientes_de_leer"] == 1 and leido["_lectura"]["errores"] == []
+
+
+def test_cada_herramienta_se_anuncia_de_solo_lectura_y_sin_salir_a_ningun_sitio():
+    """Hito 0.2: `readOnlyHint` y `openWorldHint` en las once, recorriendo lo que ve el cliente."""
+    herramientas = asyncio.run(mcp.list_tools())
+    assert len(herramientas) == 11
+    for herramienta in herramientas:
+        anotaciones = herramienta.annotations
+        assert anotaciones is not None and anotaciones.readOnlyHint is True, herramienta.name
+        assert anotaciones.openWorldHint is False, herramienta.name

@@ -26,3 +26,15 @@ jobs:
       - run: pip install -e ".[dev]"
       # Sin red y sin credenciales: si un test necesita cualquiera de las dos, esta mal planteado.
       - run: pytest -q
+
+  minimos:
+    # Hito 0.2: el mínimo de `mcp` que declara pyproject.toml, instalado tal cual. Si el servidor usa algo más nuevo que
+    # ese mínimo, falla aquí y no en la instalación de quien lo use.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]" "mcp==1.30.0"
+      - run: pytest -q

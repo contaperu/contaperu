@@ -31,12 +31,12 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
-from mcp.types import BlobResourceContents, CallToolResult, EmbeddedResource, TextContent
+from mcp.types import BlobResourceContents, CallToolResult, EmbeddedResource, TextContent, ToolAnnotations
 
 from .. import _datos, api
 from .comun import LOCALES, MAXIMO_ARCHIVO, hosts_permitidos, origenes_permitidos, peso_de_base64
 
-__all__ = ["INSTRUCCIONES", "LOCALES", "MAXIMO_ARCHIVO", "main", "mcp", "seguridad"]
+__all__ = ["INSTRUCCIONES", "LOCALES", "MAXIMO_ARCHIVO", "SOLO_LECTURA", "main", "mcp", "seguridad"]
 
 
 def _adjunto(nombre: str, b64: str, mime: str) -> EmbeddedResource:
@@ -96,6 +96,10 @@ mcp = FastMCP("contaperu", instructions=INSTRUCCIONES)
 # saludo con la version del SDK: «contaperu 1.30.0», que no es ninguna version de contaperu.
 mcp._mcp_server.version = api.__version__
 
+# Hito 0.2: cada herramienta se anuncia de solo lectura y sin salir a ningún sitio —no guarda nada, no toca el disco ni
+# la red—, así que un cliente puede llamarla sin pedir confirmación por un efecto que no tiene.
+SOLO_LECTURA = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
+
 
 # --- recursos: lo que conviene leer antes de llamar a nada -------------------------
 
@@ -141,7 +145,7 @@ def configuracion_declarada() -> str:
 
 # --- herramientas ------------------------------------------------------------------
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def configuracion_por_defecto() -> dict:
     """La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas
     de detracción— y una sección por sistema contable con lo suyo (`concar`: siglas y sub-diarios,
@@ -155,7 +159,7 @@ def configuracion_por_defecto() -> dict:
     return api.configuracion_por_defecto()
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def validar_comprobantes(documento: dict, configuracion: dict | None = None,
                          claves_previas: list[list[str]] | None = None) -> dict:
     """Revisa los comprobantes de un documento `open-accounting` y devuelve el mismo documento con
@@ -175,7 +179,7 @@ def validar_comprobantes(documento: dict, configuracion: dict | None = None,
     return api.revisar(documento, configuracion=configuracion, claves_previas=claves_previas)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def validar_partida_doble(asiento: list[dict]) -> dict:
     """Comprueba que la suma del Debe sea exactamente igual a la del Haber.
 
@@ -185,7 +189,7 @@ def validar_partida_doble(asiento: list[dict]) -> dict:
     return api.cuadrar(asiento)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def generar_asiento(documento: dict, configuracion: dict | None = None,
                     correlativos: dict | None = None, incluir_observados: bool = False,
                     imputacion: dict | None = None, driver: str = "concar",
@@ -215,7 +219,7 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
                                claves_previas=claves_previas)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def diagnosticar(documento: dict, configuracion: dict | None = None, correlativos: dict | None = None,
                  driver: str = "concar", imputacion: dict | None = None,
                  claves_previas: list[list[str]] | None = None) -> dict:
@@ -245,7 +249,7 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
                             correlativos=correlativos, claves_previas=claves_previas)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def exportar(documento: dict, driver: str = "concar", configuracion: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False,
              fecha: str = "", imputacion: dict | None = None,
@@ -294,7 +298,7 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
     return CallToolResult(content=[resumen, *adjuntos])
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def leer_xml_ubl(contenido: str, libro: dict, es_base64: bool = False) -> dict:
     """Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `open-accounting`.
 
@@ -306,7 +310,7 @@ def leer_xml_ubl(contenido: str, libro: dict, es_base64: bool = False) -> dict:
     return api.leer_xml(contenido, libro, es_base64=es_base64)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) -> dict:
     """Lee el TXT de la propuesta que SUNAT entrega en el SIRE y devuelve un documento
     `open-accounting`.
@@ -318,7 +322,7 @@ def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) ->
     return api.leer_propuesta_sire(contenido, libro, es_base64=es_base64)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def buscar_cuenta_pcge(texto: str = "", codigo: str = "") -> dict:
     """Busca una cuenta en el Plan Contable General Empresarial 2026, por nombre o por código.
 
@@ -333,7 +337,7 @@ def buscar_cuenta_pcge(texto: str = "", codigo: str = "") -> dict:
     return api.buscar_cuenta_pcge(texto=texto, codigo=codigo)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def adaptar_pcge2026(asiento: list[dict]) -> dict:
     """Adapta las cuentas de un asiento al Plan Contable General Empresarial 2026.
 
@@ -352,7 +356,7 @@ def adaptar_pcge2026(asiento: list[dict]) -> dict:
     return api.adaptar_pcge(asiento)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def normalizar_detracciones(documento: dict, configuracion: dict | None = None) -> dict:
     """Contrasta la detracción de cada comprobante con la tabla del contribuyente y deja en
     blanco la que no reconozca.
