@@ -56,8 +56,8 @@ XML UBL / TXT del SIRE / JSON open-accounting
 
 Aparte va la familia **registro**: una fila por comprobante, sin asiento, así que sus drivers no pasan por el
 motor. El SIRE es un registro tributario y se escribe desde el comprobante (`linea(c, libro, idx, opciones)`). Un
-sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS, pendiente
-de aceptación) recibe los comprobantes con la configuración (`desde_comprobantes`) y lleva cuentas, pero no las
+sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS)
+recibe los comprobantes con la configuración (`desde_comprobantes`) y lleva cuentas, pero no las
 decide: las lee de `asiento.partes_de` y `asiento.cuenta_tercero`, la misma resolución que usa el motor para el
 asiento de CONCAR.
 
@@ -121,7 +121,7 @@ de dos familias (`drivers/contrato.py`):
 | Forma | Recibe | Para qué |
 |---|---|---|
 | `linea(c, libro, idx, opciones) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
-| `desde_comprobantes(libro, comprobantes, config, opciones)` | los comprobantes y la configuración, con la imputación de cada documento | el registro de un sistema contable que arma el asiento él mismo (CONTASIS, pendiente de aceptación) |
+| `desde_comprobantes(libro, comprobantes, config, opciones)` | los comprobantes y la configuración, con la imputación de cada documento | el registro de un sistema contable que arma el asiento él mismo (CONTASIS) |
 | `construir(libro, comprobantes, config, correlativos, opciones)` | los comprobantes | un archivo armado desde el comprobante (CONCAR, por historia) |
 | `desde_lineas(libro, lineas, config, opciones)` | las **líneas neutrales**, ya numeradas y cuadradas | **un driver de asientos nuevo** |
 
@@ -193,8 +193,8 @@ tienen fuente**, nunca con una regla nueva escrita para el agente.
 
 ## Hoja de ruta
 
-- **Nivel 1 — compatibilidad con lo que existe** (prioridad hoy): CONCAR y SIRE listos; CONTASIS
-  escrito y pendiente de aceptación; SISCONT y STARSOFT abiertos a la comunidad, por entry points, con un
+- **Nivel 1 — compatibilidad con lo que existe** (prioridad hoy): CONCAR, SIRE y CONTASIS
+  listos; SISCONT y STARSOFT abiertos a la comunidad, por entry points, con un
   archivo real cada uno.
 - **Nivel 2 — un lenguaje común**: cuando aparezcan más aplicaciones peruanas especializadas
   (compras, tesorería, logística), todas necesitarán representar facturas, proveedores, centros de

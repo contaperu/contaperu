@@ -103,9 +103,8 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 
 ## Pendiente que depende de datos, no de código
 
-- Drivers de **SISCONT y STARSOFT**: cada uno exige un archivo real que ese sistema haya importado. El de
-  **CONTASIS** está escrito contra su plantilla oficial y un registro que CONTASIS importó; falta que importe un
-  archivo generado por el driver.
+- Drivers de **SISCONT y STARSOFT**: cada uno exige un archivo real que ese sistema haya importado, como pasó con
+  **CONTASIS**, aceptado el 13-sep-2026 al importar los archivos que genera su driver.
 - **Conciliación de constancias de detracción**: un archivo real del Banco de la Nación.
 - **Equivalencias del PCGE 2026**: con la cita del artículo al lado de cada mapeo; el cargador rechaza un mapeo sin
   fuente.

@@ -9,8 +9,8 @@ Los cuatro que vienen de serie salen de la contabilidad peruana real:
 - **`concar`** — el Excel de asientos que importa CONCAR, uno de los sistemas contables más
   usados del país.
 - **`contasis`** — el registro de compras o de ventas en Excel que importa CONTASIS, que arma el
-  asiento él mismo: una fila por comprobante. Escrito contra su plantilla oficial y un registro que
-  CONTASIS importó; pendiente de que importe un archivo generado.
+  asiento él mismo: una fila por comprobante. Escrito contra su plantilla oficial y aceptado:
+  CONTASIS importó los archivos que genera (13-sep-2026).
 - **`csv`** — las líneas de diario neutrales, para quien todavía no tiene driver.
 
 **Drivers de terceros, sin tocar este repositorio.** Un paquete instalado que declare en su

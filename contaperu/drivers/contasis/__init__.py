@@ -26,8 +26,8 @@ Cómo se escribe el archivo (las fuentes de cada regla, en `datos.py`):
   (vacíos), y un reparto entre cuentas (`EXIGE = {"cuenta_unica"}`). Lo que no cabe —otra moneda, dólares sin T.C.,
   un rango de boletas, IVAP, un código más largo que su columna— lo dice `no_caben` antes de exportar.
 
-**Pendiente de aceptación:** escrito contra la plantilla oficial y un registro que CONTASIS importó; falta que
-CONTASIS importe un archivo generado por este driver.
+**Aceptado** (13-sep-2026): CONTASIS importó el registro de compras y el de ventas de un mes real generados por este
+driver, escrito contra la plantilla oficial y un registro que CONTASIS ya había importado.
 """
 from . import datos
 from .datos import COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, EXCLUYE_TIPOS, EXIGE, FORMATOS, NOMBRE, OPCIONES
