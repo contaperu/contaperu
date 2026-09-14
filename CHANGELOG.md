@@ -8,6 +8,39 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.
 
+### Añadido
+- **`ErrorContaperu`** (`contaperu.errores`): la base común de todas las excepciones del motor, con una `clave` estable
+  por clase («sin_cuenta», «configuracion_invalida», «xml_invalido»). Las excepciones de siempre conservan sus bases:
+  atraparlas como en la 0.10 sigue funcionando.
+- **`RutaObsoleta`**: el aviso con que las rutas de la 0.10 que cambian de sitio dicen qué usar. Avisa al usar la ruta,
+  no al importar el módulo, y se silencia con `warnings.filterwarnings("ignore", category=contaperu.RutaObsoleta)`.
+- `Libro.a_dict` y `Libro.de_dict`, `LineaDiario.de_dict` (rechaza claves ajenas y un sentido que no es D ni H),
+  `modelo.numero_sin_ceros`, `asiento.numerar_en_orden` (el número de cada comprobante en su posición, sin depender del
+  `id()` de los objetos), `comparar_sire.leer_bytes` y `pcge.adaptar(lineas, datos=...)`.
+- `modelo.identidad_de`: la identidad estable del comprobante del hito 0.0 (RUC y tipo del libro, tipo, serie y número
+  sin ceros; en compras, el proveedor). Todavía no la usa ninguna salida.
+- Una red de seguridad de tests antes de mover nada: la superficie pública de la 0.10 congelada, lo que usa
+  `contab-core`, la respuesta de la fachada por documento y destino, el Excel de CONCAR por el camino de producción
+  caso a caso y la forma de las hojas de Excel.
+- `tests/test_capas.py`: cada módulo pertenece a una capa y solo importa de las de abajo; el núcleo y los drivers no
+  abren archivos (hito 0.5); el acoplamiento con lo peruano queda congelado y visible (hito J0).
+
+### Cambiado
+- **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
+  `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
+- El registro de drivers busca los de terceros la primera vez que alguien lo mira, no al importar el paquete.
+- **El núcleo no abre archivos** (hito 0.5): el catálogo y la tabla del PCGE se leen como datos empaquetados
+  (`contaperu/_datos.py`, con `importlib.resources`), y la CLI lee el disco antes de comparar con el SIRE.
+- `igv` deja de importar la validación entera por una constante: la tolerancia vive en `catalogos.TOLERANCIA_IGV`
+  (`validar.TOLERANCIA` e `igv.TOLERANCIA` siguen siendo el mismo valor).
+- El asiento deja de depender de las opciones de los drivers: `lineas_del_comprobante` y `lineas_del_libro` leen
+  `sin_ceros` de las opciones que lleguen, y sin opciones quitan los ceros como siempre.
+
+### Obsoleto
+- `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
+  avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen
+  resolviendo desde ahí, con aviso.
+
 ## [0.10.0] — 2026-09-13
 
 **CONTASIS entra como driver de serie**, con lo que hizo falta para que un segundo sistema contable salga del mismo

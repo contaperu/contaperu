@@ -1,0 +1,46 @@
+{
+ "contaperu.asiento.motor": [
+  "contaperu.catalogos",
+  "contaperu.detracciones",
+  "contaperu.igv"
+ ],
+ "contaperu.asiento.resolucion": [
+  "contaperu.catalogos",
+  "contaperu.igv"
+ ],
+ "contaperu.cli": [
+  "contaperu.comparar_sire",
+  "contaperu.validar"
+ ],
+ "contaperu.drivers": [
+  "contaperu.drivers.sire"
+ ],
+ "contaperu.drivers.concar.proyeccion": [
+  "contaperu.igv"
+ ],
+ "contaperu.drivers.contasis.proyeccion": [
+  "contaperu.igv"
+ ],
+ "contaperu.formato": [
+  "contaperu.igv"
+ ],
+ "contaperu.lectores": [
+  "contaperu.lectores.sire_txt",
+  "contaperu.lectores.xml_ubl"
+ ],
+ "contaperu.lectores.archivos": [
+  "contaperu.lectores.sire_txt",
+  "contaperu.lectores.xml_ubl"
+ ],
+ "contaperu.operaciones": [
+  "contaperu.detracciones",
+  "contaperu.lectores.sire_txt",
+  "contaperu.pcge",
+  "contaperu.validar"
+ ],
+ "contaperu.servidor_mcp": [
+  "contaperu.catalogos",
+  "contaperu.detracciones",
+  "contaperu.pcge"
+ ]
+}
