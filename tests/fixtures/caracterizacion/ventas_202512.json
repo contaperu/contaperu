@@ -666,7 +666,7 @@
   "errores_de_configuracion": [],
   "totales": {
    "comprobantes": 11,
-   "saldrian": 11,
+   "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
    "con_error": 5,
@@ -752,67 +752,100 @@
     "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
     "comprobantes": 1,
     "total": "29500.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
    },
    "20633333336": {
     "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
     "comprobantes": 1,
     "total": "21830.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
    },
    "20655555553": {
     "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
     "comprobantes": 1,
     "total": "37760.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
    },
    "20688888884": {
     "nombre": "GRUPO EMPRESARIAL LIMA SAC",
     "comprobantes": 1,
     "total": "53100.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
    },
    "20644444440": {
     "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
     "comprobantes": 1,
     "total": "18290.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
    },
    "20666666667": {
     "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
     "comprobantes": 1,
     "total": "33040.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
    },
    "20301234567": {
     "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
     "comprobantes": 1,
     "total": "24780.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
    },
    "42589632": {
     "nombre": "CLIENTE CONSUMIDOR FINAL",
     "comprobantes": 1,
     "total": "1003.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
    },
    "45678912": {
     "nombre": "CONSUMIDOR VARIOS",
     "comprobantes": 1,
     "total": "1416.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
    },
    "(sin documento)": {
     "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
     "comprobantes": 1,
     "total": "50681.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
    },
    "20123456789": {
     "nombre": "MI CLIENTE MANUAL S.A.C.",
     "comprobantes": 1,
     "total": "5900.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
    }
   },
   "sub_diarios": {
@@ -7046,7 +7079,7 @@
   "errores_de_configuracion": [],
   "totales": {
    "comprobantes": 11,
-   "saldrian": 11,
+   "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
    "con_error": 5,
@@ -7129,67 +7162,100 @@
     "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
     "comprobantes": 1,
     "total": "29500.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
    },
    "20633333336": {
     "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
     "comprobantes": 1,
     "total": "21830.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
    },
    "20655555553": {
     "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
     "comprobantes": 1,
     "total": "37760.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
    },
    "20688888884": {
     "nombre": "GRUPO EMPRESARIAL LIMA SAC",
     "comprobantes": 1,
     "total": "53100.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
    },
    "20644444440": {
     "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
     "comprobantes": 1,
     "total": "18290.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
    },
    "20666666667": {
     "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
     "comprobantes": 1,
     "total": "33040.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
    },
    "20301234567": {
     "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
     "comprobantes": 1,
     "total": "24780.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
    },
    "42589632": {
     "nombre": "CLIENTE CONSUMIDOR FINAL",
     "comprobantes": 1,
     "total": "1003.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
    },
    "45678912": {
     "nombre": "CONSUMIDOR VARIOS",
     "comprobantes": 1,
     "total": "1416.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
    },
    "(sin documento)": {
     "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
     "comprobantes": 1,
     "total": "50681.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
    },
    "20123456789": {
     "nombre": "MI CLIENTE MANUAL S.A.C.",
     "comprobantes": 1,
     "total": "5900.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
    }
   },
   "sub_diarios": {},
@@ -9152,7 +9218,7 @@
   "errores_de_configuracion": [],
   "totales": {
    "comprobantes": 11,
-   "saldrian": 11,
+   "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
    "con_error": 5,
@@ -9240,67 +9306,100 @@
     "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
     "comprobantes": 1,
     "total": "29500.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
    },
    "20633333336": {
     "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
     "comprobantes": 1,
     "total": "21830.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
    },
    "20655555553": {
     "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
     "comprobantes": 1,
     "total": "37760.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
    },
    "20688888884": {
     "nombre": "GRUPO EMPRESARIAL LIMA SAC",
     "comprobantes": 1,
     "total": "53100.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
    },
    "20644444440": {
     "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
     "comprobantes": 1,
     "total": "18290.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
    },
    "20666666667": {
     "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
     "comprobantes": 1,
     "total": "33040.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
    },
    "20301234567": {
     "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
     "comprobantes": 1,
     "total": "24780.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
    },
    "42589632": {
     "nombre": "CLIENTE CONSUMIDOR FINAL",
     "comprobantes": 1,
     "total": "1003.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
    },
    "45678912": {
     "nombre": "CONSUMIDOR VARIOS",
     "comprobantes": 1,
     "total": "1416.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
    },
    "(sin documento)": {
     "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
     "comprobantes": 1,
     "total": "50681.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
    },
    "20123456789": {
     "nombre": "MI CLIENTE MANUAL S.A.C.",
     "comprobantes": 1,
     "total": "5900.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
    }
   },
   "sub_diarios": {
@@ -9550,7 +9649,7 @@
   "errores_de_configuracion": [],
   "totales": {
    "comprobantes": 11,
-   "saldrian": 11,
+   "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
    "con_error": 5,
@@ -9627,67 +9726,100 @@
     "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
     "comprobantes": 1,
     "total": "29500.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
    },
    "20633333336": {
     "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
     "comprobantes": 1,
     "total": "21830.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
    },
    "20655555553": {
     "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
     "comprobantes": 1,
     "total": "37760.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
    },
    "20688888884": {
     "nombre": "GRUPO EMPRESARIAL LIMA SAC",
     "comprobantes": 1,
     "total": "53100.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
    },
    "20644444440": {
     "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
     "comprobantes": 1,
     "total": "18290.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
    },
    "20666666667": {
     "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
     "comprobantes": 1,
     "total": "33040.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
    },
    "20301234567": {
     "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
     "comprobantes": 1,
     "total": "24780.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
    },
    "42589632": {
     "nombre": "CLIENTE CONSUMIDOR FINAL",
     "comprobantes": 1,
     "total": "1003.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
    },
    "45678912": {
     "nombre": "CONSUMIDOR VARIOS",
     "comprobantes": 1,
     "total": "1416.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
    },
    "(sin documento)": {
     "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
     "comprobantes": 1,
     "total": "50681.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
    },
    "20123456789": {
     "nombre": "MI CLIENTE MANUAL S.A.C.",
     "comprobantes": 1,
     "total": "5900.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
    }
   },
   "sub_diarios": {},
@@ -9834,6 +9966,6 @@
  },
  "cli_diagnosticar/concar": {
   "codigo": 1,
-  "salida": "Libro: VENTA 202512 · RUC 20601234567 · destino concar\nComprobantes: 11 · saldrían 11 · excluidos 0 · fuera del destino 0 · con error 5 · con aviso 1\n\n  !! F001-00001001      [RUC_INVALIDO] El RUC del cliente (20609999999) no es válido\n  !! F001-00001007      [RUC_INVALIDO] El RUC del cliente (20301234567) no es válido\n  !! B001-00005001      [RUC_INVALIDO] El RUC del cliente (42589632) no es válido\n  !! B001-00005002      [RUC_INVALIDO] El RUC del cliente (45678912) no es válido\n  !! F001-00001234      [RUC_INVALIDO] El RUC del cliente (20123456789) no es válido\n   · B001-00005003      [BOLETA_SIN_DOC] Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)\nSub-diarios sin correlativo (arrancan en 1): 05\n  -> Pedir al contador: El RUC del cliente (20609999999) no es válido (F001-00001001, F001-00001007, B001-00005001, B001-00005002, F001-00001234)\n  Sub-diario 05 (Ventas): 11 comprobantes desde el 1\n\nNO está listo: 5 comprobantes con observaciones que bloquean.\n"
+  "salida": "Libro: VENTA 202512 · RUC 20601234567 · destino concar\nComprobantes: 11 · saldrían 6 · excluidos 0 · fuera del destino 0 · con error 5 · con aviso 1\n\n  !! F001-00001001      [RUC_INVALIDO] El RUC del cliente (20609999999) no es válido\n  !! F001-00001007      [RUC_INVALIDO] El RUC del cliente (20301234567) no es válido\n  !! B001-00005001      [RUC_INVALIDO] El RUC del cliente (42589632) no es válido\n  !! B001-00005002      [RUC_INVALIDO] El RUC del cliente (45678912) no es válido\n  !! F001-00001234      [RUC_INVALIDO] El RUC del cliente (20123456789) no es válido\n   · B001-00005003      [BOLETA_SIN_DOC] Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)\nSub-diarios sin correlativo (arrancan en 1): 05\n  -> Pedir al contador: El RUC del cliente (20609999999) no es válido (F001-00001001, F001-00001007, B001-00005001, B001-00005002, F001-00001234)\n  Sub-diario 05 (Ventas): 11 comprobantes desde el 1\n\nNO está listo: 5 comprobantes con observaciones que bloquean.\n"
  }
 }

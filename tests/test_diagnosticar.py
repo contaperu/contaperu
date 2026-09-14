@@ -38,7 +38,8 @@ def test_un_mes_limpio_esta_listo_y_dice_que_saldria():
                             "con_error": 0, "con_aviso": 0}
     assert d["sub_diarios"] == {"11": {"etiqueta": "Compras", "comprobantes": 2, "empieza_en": 1}}
     assert d["resumen_por_contraparte"]["20602222226"] == {
-        "nombre": "PROVEEDOR DE PRUEBA SAC", "comprobantes": 2, "total": "5074.00", "moneda": "PEN"}
+        "nombre": "PROVEEDOR DE PRUEBA SAC", "comprobantes": 2, "total": "5074.00", "moneda": "PEN",
+        "por_moneda": {"PEN": "5074.00"}}
     for clave in ("sin_cuenta", "sin_centro", "sin_sigla", "sin_codigo_de_moneda"):
         assert d["faltantes"][clave] == []
     # Sin correlativos dados, lo dice —arrancaría en 1— pero no es motivo para no estar listo.
@@ -235,3 +236,17 @@ def test_una_sola_tabla_de_faltas():
     assert issubclass(contrato.NoCabe, asi.NoExportable) and contrato.NoCabe.clave == "no_cabe"
     assert issubclass(concar.CorrelativoDesborda, asi.NoExportable)
     assert not issubclass(asi.RepartoNoCuadra, asi.SinCuenta) and not issubclass(asi.RepartoNoAdmitido, asi.SinCuenta)
+
+
+def test_lo_que_saldria_se_cuenta_igual_en_totales_y_en_la_lista():
+    """Hito 0.8: `totales.saldrian` contaba los candidatos, también los que bloquean; la lista, solo los que saldrían."""
+    d = diagnosticar(doc(FACTURA, dict(FACTURA, numero="872", igv="99")), driver="concar")
+    assert d["saldrian"] == ["E001-871"] and d["totales"]["saldrian"] == len(d["saldrian"]) == 1
+
+
+def test_el_resumen_por_contraparte_no_suma_soles_con_dolares():
+    """Hito 0.8: dos monedas del mismo RUC no dan un único total."""
+    usd = dict(FACTURA, numero="872", moneda="USD", tipo_cambio="3.750", total="118", base_gravada="100", igv="18")
+    r = diagnosticar(doc(FACTURA, usd), driver="concar")["resumen_por_contraparte"]["20602222226"]
+    assert r["por_moneda"] == {"PEN": "4956.00", "USD": "118.00"}
+    assert (r["moneda"], r["total"], r["comprobantes"]) == ("PEN", "4956.00", 2)

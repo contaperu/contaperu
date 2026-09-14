@@ -204,19 +204,28 @@
     "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
     "comprobantes": 1,
     "total": "47200.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
    },
    "20633333336": {
     "nombre": "IMPORTADORA ASIA PACIFICO SRL",
     "comprobantes": 1,
     "total": "29500.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
    },
    "20605555552": {
     "nombre": "ELECTRICIDAD DE PRUEBA SAA",
     "comprobantes": 1,
     "total": "2124.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
    }
   },
   "sub_diarios": {
@@ -4689,19 +4698,28 @@
     "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
     "comprobantes": 1,
     "total": "47200.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
    },
    "20633333336": {
     "nombre": "IMPORTADORA ASIA PACIFICO SRL",
     "comprobantes": 1,
     "total": "29500.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
    },
    "20605555552": {
     "nombre": "ELECTRICIDAD DE PRUEBA SAA",
     "comprobantes": 1,
     "total": "2124.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
    }
   },
   "sub_diarios": {},
@@ -5968,19 +5986,28 @@
     "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
     "comprobantes": 1,
     "total": "47200.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
    },
    "20633333336": {
     "nombre": "IMPORTADORA ASIA PACIFICO SRL",
     "comprobantes": 1,
     "total": "29500.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
    },
    "20605555552": {
     "nombre": "ELECTRICIDAD DE PRUEBA SAA",
     "comprobantes": 1,
     "total": "2124.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
    }
   },
   "sub_diarios": {
@@ -6450,19 +6477,28 @@
     "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
     "comprobantes": 1,
     "total": "47200.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
    },
    "20633333336": {
     "nombre": "IMPORTADORA ASIA PACIFICO SRL",
     "comprobantes": 1,
     "total": "29500.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
    },
    "20605555552": {
     "nombre": "ELECTRICIDAD DE PRUEBA SAA",
     "comprobantes": 1,
     "total": "2124.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
    }
   },
   "sub_diarios": {},

@@ -116,6 +116,12 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   tandas no coincide con la nueva; la de soles, sí— y cómo se escriben esas dos columnas en el CSV. El camino inverso
   (`drivers.concar.a_lineas`) también devuelve texto.
 
+- **`diagnosticar` cuenta igual lo que saldría** (hito 0.8): `totales.saldrian` es el largo de la lista `saldrian`;
+  hasta ahora contaba también los comprobantes que bloquean.
+- **`diagnosticar` no suma soles con dólares** en `resumen_por_contraparte` (hito 0.8): cada contraparte trae
+  `por_moneda`, con un total por moneda, y `total` y `moneda` son los de la primera moneda en que aparece. El
+  serie-número sigue escribiéndose como en el documento, con sus ceros: igualarlo al de la línea queda por confirmar.
+
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
   avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen

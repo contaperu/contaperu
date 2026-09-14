@@ -677,31 +677,47 @@
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
     "comprobantes": 5,
     "total": "3821.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "3821.00"
+    }
    },
    "20602222226": {
     "nombre": "PROVEEDOR DE PRUEBA SAC",
     "comprobantes": 2,
-    "total": "5546.00",
-    "moneda": "USD"
+    "total": "590.00",
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "590.00",
+     "PEN": "4956.00"
+    }
    },
    "20633333336": {
     "nombre": "IMPORTADORA ASIA PACIFICO SRL",
     "comprobantes": 1,
     "total": "2360.00",
-    "moneda": "USD"
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "2360.00"
+    }
    },
    "20605555552": {
     "nombre": "ELECTRICIDAD DE PRUEBA SAA",
     "comprobantes": 2,
     "total": "354.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "354.00"
+    }
    },
    "20677777771": {
     "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
     "comprobantes": 2,
     "total": "1534.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1534.00"
+    }
    }
   },
   "sub_diarios": {
@@ -16342,31 +16358,47 @@
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
     "comprobantes": 3,
     "total": "1121.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1121.00"
+    }
    },
    "20602222226": {
     "nombre": "PROVEEDOR DE PRUEBA SAC",
     "comprobantes": 2,
-    "total": "5546.00",
-    "moneda": "USD"
+    "total": "590.00",
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "590.00",
+     "PEN": "4956.00"
+    }
    },
    "20633333336": {
     "nombre": "IMPORTADORA ASIA PACIFICO SRL",
     "comprobantes": 1,
     "total": "2360.00",
-    "moneda": "USD"
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "2360.00"
+    }
    },
    "20605555552": {
     "nombre": "ELECTRICIDAD DE PRUEBA SAA",
     "comprobantes": 2,
     "total": "354.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "354.00"
+    }
    },
    "20677777771": {
     "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
     "comprobantes": 2,
     "total": "1534.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1534.00"
+    }
    }
   },
   "sub_diarios": {},
@@ -16464,31 +16496,47 @@
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
     "comprobantes": 5,
     "total": "3821.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "3821.00"
+    }
    },
    "20602222226": {
     "nombre": "PROVEEDOR DE PRUEBA SAC",
     "comprobantes": 2,
-    "total": "5546.00",
-    "moneda": "USD"
+    "total": "590.00",
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "590.00",
+     "PEN": "4956.00"
+    }
    },
    "20633333336": {
     "nombre": "IMPORTADORA ASIA PACIFICO SRL",
     "comprobantes": 1,
     "total": "2360.00",
-    "moneda": "USD"
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "2360.00"
+    }
    },
    "20605555552": {
     "nombre": "ELECTRICIDAD DE PRUEBA SAA",
     "comprobantes": 2,
     "total": "354.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "354.00"
+    }
    },
    "20677777771": {
     "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
     "comprobantes": 2,
     "total": "1534.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1534.00"
+    }
    }
   },
   "sub_diarios": {
@@ -18147,31 +18195,47 @@
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
     "comprobantes": 3,
     "total": "1121.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1121.00"
+    }
    },
    "20602222226": {
     "nombre": "PROVEEDOR DE PRUEBA SAC",
     "comprobantes": 2,
-    "total": "5546.00",
-    "moneda": "USD"
+    "total": "590.00",
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "590.00",
+     "PEN": "4956.00"
+    }
    },
    "20633333336": {
     "nombre": "IMPORTADORA ASIA PACIFICO SRL",
     "comprobantes": 1,
     "total": "2360.00",
-    "moneda": "USD"
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "2360.00"
+    }
    },
    "20605555552": {
     "nombre": "ELECTRICIDAD DE PRUEBA SAA",
     "comprobantes": 2,
     "total": "354.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "354.00"
+    }
    },
    "20677777771": {
     "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
     "comprobantes": 2,
     "total": "1534.00",
-    "moneda": "PEN"
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1534.00"
+    }
    }
   },
   "sub_diarios": {},

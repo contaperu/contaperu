@@ -188,15 +188,21 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     for motivo, cuales in (faltantes.get("no_cabe") or {}).items():
         por_que_no.append(f"{len(cuales)} {motivo}")
 
+    # Por contraparte y por moneda: soles y dólares no se suman. `total` y `moneda` son los de la primera moneda en que
+    # aparece la contraparte, y `por_moneda` los trae todos.
     por_contraparte: dict[str, dict] = {}
     for c in candidatos:
         clave = c.contraparte_doc or "(sin documento)"
-        r = por_contraparte.setdefault(clave, {"nombre": c.contraparte_nombre, "comprobantes": 0,
-                                               "total": Decimal("0.00"), "moneda": c.moneda})
+        r = por_contraparte.setdefault(clave, {"nombre": c.contraparte_nombre, "comprobantes": 0, "total": "",
+                                               "moneda": c.moneda, "por_moneda": {}})
         r["comprobantes"] += 1
-        r["total"] += c.total if not c.es_nota_credito else -c.total
+        r["por_moneda"][c.moneda] = (r["por_moneda"].get(c.moneda, Decimal("0.00"))
+                                     + (c.total if not c.es_nota_credito else -c.total))
     for r in por_contraparte.values():
-        r["total"] = str(r["total"])
+        r["por_moneda"] = {moneda: str(total) for moneda, total in r["por_moneda"].items()}
+        r["total"] = r["por_moneda"][r["moneda"]]
+    # Lo que saldría: la misma lista que se cuenta en `totales`.
+    saldrian = [_serie_numero(c) for c in candidatos if not c.tiene_errores]
 
     return {
         "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
@@ -206,7 +212,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
         "por_que_no": por_que_no,
         "que_falta": que_falta(con_error, candidatos, faltantes, exige),
         "errores_de_configuracion": [],
-        "totales": {"comprobantes": len(todos), "saldrian": len(candidatos), "excluidos": len(excluidos),
+        "totales": {"comprobantes": len(todos), "saldrian": len(saldrian), "excluidos": len(excluidos),
                     "fuera_del_destino": len(fuera), "con_error": len(con_error), "con_aviso": len(con_aviso)},
         "bloqueantes": [{"serie_numero": _serie_numero(c),
                          "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "error"]}
@@ -221,5 +227,5 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
             for c in candidatos if detraccion_pendiente(c)],
         "resumen_por_contraparte": por_contraparte,
         "sub_diarios": sub_diarios,
-        "saldrian": [_serie_numero(c) for c in candidatos if not c.tiene_errores],
+        "saldrian": saldrian,
     }
