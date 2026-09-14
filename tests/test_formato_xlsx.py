@@ -20,7 +20,7 @@ from pathlib import Path
 
 import pytest
 
-from contaperu import operaciones as op
+from contaperu import api
 from test_caracterizacion import IMPUTACION_CASOS, SIN_CENTROS, cargar_documento
 
 openpyxl = pytest.importorskip("openpyxl")
@@ -75,7 +75,7 @@ def formas_de(driver: str) -> dict:
     _, cabecera, meses = EXCEL[driver]
     salida = {}
     for archivo, configuracion, imputacion in meses:
-        respuesta = op.exportar(cargar_documento(archivo), driver, configuracion, None, True, None, imputacion)
+        respuesta = api.exportar(cargar_documento(archivo), driver=driver, configuracion=configuracion, correlativos=None, incluir_observados=True, fecha=None, imputacion=imputacion)
         salida[archivo] = forma(base64.b64decode(respuesta["contenido_base64"]), cabecera)
     return json.loads(json.dumps(salida, ensure_ascii=False, default=str))
 

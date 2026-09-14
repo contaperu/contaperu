@@ -7,13 +7,14 @@ from decimal import Decimal
 import pytest
 
 from contaperu import asiento as asi
-from contaperu import operaciones as op
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu import partida_doble
 from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Comprobante, Libro
 from util import comprobante, con_imputaciones
 
-CONTAB = con_imputaciones(op.config_aplicada(None, "concar"))
+CONTAB = con_imputaciones(prep.config_aplicada(None, "concar"))
 MES = (date(2026, 8, 1), date(2026, 8, 31))
 
 

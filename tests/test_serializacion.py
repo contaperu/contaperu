@@ -13,7 +13,8 @@ from pathlib import Path
 import pytest
 
 from contaperu import asiento as asi
-from contaperu import operaciones as op
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.asiento.lineas import LineaDiario
 from contaperu.configuracion import ConfiguracionInvalida
 from contaperu.errores import ErrorContaperu
@@ -62,8 +63,8 @@ def test_el_numero_sin_ceros(numero, esperado):
 
 def test_numerar_en_orden_da_lo_mismo_que_numerar_sin_depender_de_la_identidad():
     documento = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
-    comprobantes = op.comprobantes_de(documento)
-    config = op.config_aplicada({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}, "concar")
+    comprobantes = prep.comprobantes_de(documento)
+    config = prep.config_aplicada({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}, "concar")
     en_orden, rangos = asi.numerar_en_orden(comprobantes, config, "202601", {"11": 5})
     por_id, rangos_viejos = asi.numerar(comprobantes, config, "202601", {"11": 5})
     assert en_orden == ["010005", "010006", "010007"] == [por_id[id(c)] for c in comprobantes]
@@ -84,4 +85,4 @@ def test_cada_error_tiene_su_clave_y_conserva_sus_bases():
     assert asi.NoExportable.clave == ""                      # la base de las faltas no nombra ninguna
     assert issubclass(ConfiguracionInvalida, ValueError) and ConfiguracionInvalida.clave == "configuracion_invalida"
     assert issubclass(XmlInvalido, ValueError) and XmlInvalido.clave == "xml_invalido"
-    assert issubclass(op.DocumentoInvalido, (ErrorContaperu, ValueError)) and op.DocumentoInvalido.clave == "documento_invalido"
+    assert issubclass(api.DocumentoInvalido, (ErrorContaperu, ValueError)) and api.DocumentoInvalido.clave == "documento_invalido"

@@ -22,7 +22,7 @@ from datetime import date, datetime
 import pytest
 
 from contaperu import asiento as asi
-from contaperu import operaciones as op
+from contaperu import api
 from test_snapshot_concar import CASOS, FILAS, armar
 
 openpyxl = pytest.importorskip("openpyxl")
@@ -49,7 +49,7 @@ def exportar_caso(caso) -> dict:
     configuracion = {clave: valor for clave, valor in (extra or {}).items() if clave != "imputaciones"}
     documento = {"open_accounting": "0.3", "libro": dict(LIBRO, tipo="venta" if es_venta else "compra"),
                  "comprobantes": [c.a_dict()]}
-    return op.exportar(documento, "concar", configuracion, CORRELATIVOS, True, None, config.get("imputaciones"))
+    return api.exportar(documento, driver="concar", configuracion=configuracion, correlativos=CORRELATIVOS, incluir_observados=True, fecha=None, imputacion=config.get("imputaciones"))
 
 
 def _normal(valor):

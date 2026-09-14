@@ -6,8 +6,10 @@ exportar. Este test guarda, con el código de la v0.10.0, la respuesta de `opera
 detracción, honorarios, boleta, reparto y extemporáneo— contra cada driver de serie, también cuando la operación se
 niega. Guarda además lo que imprime `contaperu diagnosticar`.
 
-Cada diferencia que la 1.0 introduzca tiene que aparecer aquí y estar anunciada en el CHANGELOG, en el commit que la
-trae. Regenerar es una decisión, no un trámite: se mira el diff del JSON respuesta por respuesta.
+Desde la etapa 3 de la 1.0 se caracteriza por las dos rutas: la API nueva (`contaperu.api`, con el documento primero y
+lo demás por su nombre) y la de la 0.10 (`contaperu.operaciones`, con sus firmas posicionales), que tienen que responder
+lo mismo. Cada diferencia que la 1.0 introduzca tiene que aparecer aquí y estar anunciada en el CHANGELOG, en el commit
+que la trae. Regenerar es una decisión, no un trámite: se mira el diff del JSON respuesta por respuesta.
 
 Del Excel se guardan las celdas leídas con su tipo, no los bytes (openpyxl pone la fecha del reloj en el archivo); del
 SIRE y del CSV, el texto.
@@ -21,14 +23,16 @@ import copy
 import io
 import json
 import tempfile
+import warnings
 from contextlib import redirect_stdout
 from datetime import date, datetime
 from pathlib import Path
 
 import pytest
 
-from contaperu import cli
-from contaperu import operaciones as op
+from contaperu import api
+from contaperu._obsoleto import RutaObsoleta
+from contaperu.puertas import cli
 from util import GOLDEN
 
 CARACTERIZACION = Path(__file__).parent / "fixtures" / "caracterizacion"
@@ -107,22 +111,48 @@ def _cli_diagnosticar(documento: dict, configuracion: dict, imputacion: dict | N
     return {"codigo": codigo, "salida": texto.replace("\r\n", "\n")}
 
 
-def caracterizar(nombre: str) -> dict:
+RUTAS = ("api", "0.10")
+
+
+def _operaciones(ruta: str, configuracion: dict, imputacion: dict | None) -> dict:
+    """Las cuatro operaciones que se caracterizan, por la API nueva o por la ruta de la 0.10 con sus firmas."""
+    if ruta == "0.10":
+        viejo = __import__("contaperu.operaciones", fromlist=["exportar"])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RutaObsoleta)
+            revisar, diagnosticar = viejo.revisar, viejo.diagnosticar
+            generar_asiento, exportar = viejo.generar_asiento, viejo.exportar
+        return {
+            "revisar": lambda doc: revisar(doc, configuracion),
+            "diagnosticar": lambda doc, driver: diagnosticar(doc, configuracion, None, driver, imputacion),
+            "generar_asiento": lambda doc, driver: generar_asiento(doc, configuracion, None, False, imputacion, driver),
+            "exportar": lambda doc, driver, observados: exportar(doc, driver, configuracion, None, observados, None,
+                                                                 imputacion),
+        }
+    return {
+        "revisar": lambda doc: api.revisar(doc, configuracion=configuracion),
+        "diagnosticar": lambda doc, driver: api.diagnosticar(doc, driver=driver, configuracion=configuracion,
+                                                             imputacion=imputacion),
+        "generar_asiento": lambda doc, driver: api.generar_asiento(doc, driver=driver, configuracion=configuracion,
+                                                                   imputacion=imputacion),
+        "exportar": lambda doc, driver, observados: api.exportar(doc, driver=driver, configuracion=configuracion,
+                                                                 imputacion=imputacion, incluir_observados=observados),
+    }
+
+
+def caracterizar(nombre: str, ruta: str = "api") -> dict:
     archivo, configuracion, imputacion = DOCUMENTOS[nombre]
+    op = _operaciones(ruta, configuracion, imputacion)
 
     def doc() -> dict:
         return cargar_documento(archivo)
 
-    salida = {"revisar": _llamar(lambda: op.revisar(doc(), configuracion))}
+    salida = {"revisar": _llamar(lambda: op["revisar"](doc()))}
     for driver in DRIVERS:
-        salida[f"diagnosticar/{driver}"] = _llamar(
-            lambda: op.diagnosticar(doc(), configuracion, None, driver, imputacion))
-        salida[f"generar_asiento/{driver}"] = _llamar(
-            lambda: op.generar_asiento(doc(), configuracion, None, False, imputacion, driver))
-        salida[f"exportar/{driver}"] = _llamar(
-            lambda: _respuesta(op.exportar(doc(), driver, configuracion, None, False, None, imputacion)))
-        salida[f"exportar_con_observados/{driver}"] = _llamar(
-            lambda: _respuesta(op.exportar(doc(), driver, configuracion, None, True, None, imputacion)))
+        salida[f"diagnosticar/{driver}"] = _llamar(lambda: op["diagnosticar"](doc(), driver))
+        salida[f"generar_asiento/{driver}"] = _llamar(lambda: op["generar_asiento"](doc(), driver))
+        salida[f"exportar/{driver}"] = _llamar(lambda: _respuesta(op["exportar"](doc(), driver, False)))
+        salida[f"exportar_con_observados/{driver}"] = _llamar(lambda: _respuesta(op["exportar"](doc(), driver, True)))
     salida["cli_diagnosticar/concar"] = _llamar(lambda: _cli_diagnosticar(doc(), configuracion, imputacion, "concar"))
     return json.loads(json.dumps(salida, ensure_ascii=False, default=str))
 
@@ -142,11 +172,12 @@ def _cargar(nombre: str) -> dict:
     return json.loads(_ruta(nombre).read_text(encoding="utf-8"))
 
 
+@pytest.mark.parametrize("ruta", RUTAS)
 @pytest.mark.parametrize("nombre", sorted(DOCUMENTOS))
-def test_la_fachada_responde_lo_mismo_que_quedo_congelado(nombre):
+def test_la_fachada_responde_lo_mismo_que_quedo_congelado(nombre, ruta):
     pytest.importorskip("openpyxl")
     esperado = _cargar(nombre)
-    obtenido = caracterizar(nombre)
+    obtenido = caracterizar(nombre, ruta)
     assert set(obtenido) == set(esperado), f"{nombre}: cambió qué se caracteriza"
     distintas = [clave for clave in esperado if obtenido[clave] != esperado[clave]]
     assert not distintas, f"{nombre}: cambió la respuesta de {distintas}"

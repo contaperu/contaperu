@@ -16,7 +16,8 @@ import types
 import pytest
 
 from contaperu import drivers
-from contaperu import operaciones as op
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from contaperu.configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from contaperu.drivers import contrato
@@ -45,10 +46,10 @@ def test_exporta_el_golden_de_compras(nombre):
     if "compra" not in mod.FORMATOS:
         pytest.skip(f"{nombre} no genera libros de compras")
     doc = documento_de_compras()
-    r = op.exportar(doc, nombre, CONTAB)
+    r = api.exportar(doc, driver=nombre, configuracion=CONTAB)
     crudo = base64.b64decode(r.get("contenido_base64") or r.get("zip_base64") or "")
     assert crudo, f"{nombre} no produjo bytes"
-    assert r["archivo"] == mod.nombre(op.libro_de(doc), mod.OPCIONES)
+    assert r["archivo"] == mod.nombre(prep.libro_de(doc), mod.OPCIONES)
     if contrato.arma_asientos(mod):
         assert r["resumen"]["debe"] == r["resumen"]["haber"], f"{nombre}: el asiento no cuadra"
 
@@ -96,23 +97,23 @@ def test_lo_que_el_driver_exige_lo_hace_cumplir_el_nucleo(con_terceros):
     exigente.EXIGE = frozenset({"centro_costo"})
     con_terceros(_Entrada("exigente", exigente))
     with pytest.raises(asi.SinCentro):
-        op.exportar(documento_de_compras(), "exigente", CONTAB_CON_CENTROS)
-    assert op.exportar(documento_de_compras(), "exigente", CONTAB)["archivo"].endswith(".txt")
+        api.exportar(documento_de_compras(), driver="exigente", configuracion=CONTAB_CON_CENTROS)
+    assert api.exportar(documento_de_compras(), driver="exigente", configuracion=CONTAB)["archivo"].endswith(".txt")
 
 
 def test_el_csv_no_exige_centro_y_concar_si():
     from contaperu import asiento as asi
-    assert op.exportar(documento_de_compras(), "csv", CONTAB_CON_CENTROS)["archivo"].endswith(".csv")
+    assert api.exportar(documento_de_compras(), driver="csv", configuracion=CONTAB_CON_CENTROS)["archivo"].endswith(".csv")
     with pytest.raises(asi.SinCentro):
-        op.exportar(documento_de_compras(), "concar", CONTAB_CON_CENTROS)
+        api.exportar(documento_de_compras(), driver="concar", configuracion=CONTAB_CON_CENTROS)
 
 
 def test_las_claves_del_resumen_son_contrato():
     """El portal guarda `resumen` tal cual y lee de él los rangos («hasta») y, desde la 0.8, la huella."""
-    r = op.exportar(documento_de_compras(), "concar", CONTAB)["resumen"]
+    r = api.exportar(documento_de_compras(), driver="concar", configuracion=CONTAB)["resumen"]
     assert {"filas", "fechas", "sub_diarios", "debe", "haber", "huella"} <= set(r)
     assert {"desde", "hasta", "comprobantes", "desde_codigo", "hasta_codigo", "desborda", "etiqueta"} <= set(r["sub_diarios"]["11"])
-    r2 = op.exportar(documento_de_compras(), "csv", CONTAB)["resumen"]
+    r2 = api.exportar(documento_de_compras(), driver="csv", configuracion=CONTAB)["resumen"]
     assert {"filas", "sub_diarios", "debe", "haber", "huella"} <= set(r2)
 
 
@@ -172,7 +173,7 @@ def con_terceros(monkeypatch):
 def test_un_driver_de_terceros_se_enchufa_sin_tocar_el_nucleo(con_terceros):
     registrados = con_terceros(_Entrada("prueba", driver_de_prueba()))
     assert "prueba" in registrados and set(drivers.DE_SERIE) <= set(registrados)
-    r = op.exportar(documento_de_compras(), "prueba", CONTAB)
+    r = api.exportar(documento_de_compras(), driver="prueba", configuracion=CONTAB)
     lineas = r["texto"].splitlines()
     # El driver solo tradujo: la contabilidad (rol, cuenta, sentido, cuadre) la puso el núcleo.
     assert lineas[0].startswith("principal|659999|D|")
@@ -248,10 +249,10 @@ def test_un_registro_sale_sin_asiento_y_con_las_cuentas_del_asiento(con_terceros
     asiento, porque sale de la misma resolución: ningún driver decide una cuenta."""
     con_terceros(_Entrada("registro", driver_de_registro()))
     doc = documento_de_compras()
-    r = op.exportar(doc, "registro", CONTAB)
+    r = api.exportar(doc, driver="registro", configuracion=CONTAB)
     filas = [f.split("|") for f in r["texto"].splitlines()]
     assert len(filas) == r["resumen"]["filas"] == r["comprobantes"] == len(doc["comprobantes"])
-    asiento = op.generar_asiento(doc, CONTAB)["asiento"]
+    asiento = api.generar_asiento(doc, driver="concar", configuracion=CONTAB)["asiento"]
     assert [f[1] for f in filas] == [ln["cuenta"] for ln in asiento if ln["rol"] == "principal"]
     assert [f[4] for f in filas] == [ln["cuenta"] for ln in asiento if ln["rol"] == "tercero"]
     assert not {"sub_diarios", "debe", "haber", "huella"} & set(r["resumen"])
@@ -274,7 +275,7 @@ def test_al_registro_le_llega_la_imputacion_y_no_le_pide_la_equivalencia_del_tip
     mitad = (base / 2).quantize(base)
     reparto = [{"importe": str(mitad), "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
                {"importe": str(base - mitad), "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]
-    r = op.exportar(doc, "registro", CONTAB, imputacion={"fila-1": {"reparto": reparto}})
+    r = api.exportar(doc, driver="registro", configuracion=CONTAB, imputacion={"fila-1": {"reparto": reparto}})
     filas = [f.split("|") for f in r["texto"].splitlines()]
     assert len(filas) == len(doc["comprobantes"]) + 1
     assert [f[1:4] for f in filas[:2]] == [["636301", "SISTEMAS", f"{mitad:.2f}"],
@@ -282,8 +283,8 @@ def test_al_registro_le_llega_la_imputacion_y_no_le_pide_la_equivalencia_del_tip
 
     sin_equivalencia = dict(CONTAB, csv={"tipos": {c["tipo_cp"]: {"sigla": ""} for c in doc["comprobantes"]}})
     with pytest.raises(asi.SinSigla):
-        op.exportar(doc, "csv", sin_equivalencia)
-    assert op.exportar(doc, "registro", sin_equivalencia)["resumen"]["filas"] == len(doc["comprobantes"])
+        api.exportar(doc, driver="csv", configuracion=sin_equivalencia)
+    assert api.exportar(doc, driver="registro", configuracion=sin_equivalencia)["resumen"]["filas"] == len(doc["comprobantes"])
 
 
 def test_el_registro_exige_la_cuenta_antes_de_escribir_y_diagnosticar_lo_dice(con_terceros):
@@ -296,21 +297,21 @@ def test_el_registro_exige_la_cuenta_antes_de_escribir_y_diagnosticar_lo_dice(co
     con_terceros(_Entrada("registro", driver_de_registro()), _Entrada("exigente", exigente))
     doc = documento_de_compras()
     with pytest.raises(asi.SinCuenta):
-        op.exportar(doc, "registro")
+        api.exportar(doc, driver="registro")
     with pytest.raises(asi.SinCentro):
-        op.exportar(doc, "exigente", CONTAB_CON_CENTROS)
+        api.exportar(doc, driver="exigente", configuracion=CONTAB_CON_CENTROS)
 
-    d = op.diagnosticar(doc, driver="registro")
+    d = api.diagnosticar(doc, driver="registro")
     assert d["exige"] == ["cuenta_contable"] and d["listo_para_exportar"] is False
     assert set(d["faltantes"]) == {"sin_cuenta", "reparto_que_no_cuadra", "sin_centro"}
     assert d["por_que_no"] == [f"{len(doc['comprobantes'])} sin cuenta contable"] and d["sub_diarios"] == {}
-    con_centros = op.diagnosticar(doc, CONTAB_CON_CENTROS, driver="registro")
+    con_centros = api.diagnosticar(doc, configuracion=CONTAB_CON_CENTROS, driver="registro")
     assert con_centros["faltantes"]["sin_centro"] and con_centros["listo_para_exportar"] is True
-    assert op.diagnosticar(doc, CONTAB_CON_CENTROS, driver="exigente")["listo_para_exportar"] is False
+    assert api.diagnosticar(doc, configuracion=CONTAB_CON_CENTROS, driver="exigente")["listo_para_exportar"] is False
 
 
 def test_la_terminal_alcanza_al_registro_con_su_configuracion_y_su_imputacion(con_terceros, tmp_path):
-    from contaperu import cli
+    from contaperu.puertas import cli
 
     con_terceros(_Entrada("registro", driver_de_registro()))
     doc = documento_de_compras()
@@ -344,7 +345,7 @@ def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros)
     imputacion = {"fila-1": {"reparto": [{"importe": str(base - 1), "cuenta_contable": "636301"},
                                          {"importe": "1", "cuenta_contable": "632201"}]}}
 
-    d = op.diagnosticar(doc, CONTAB, driver="unica", imputacion=imputacion)
+    d = api.diagnosticar(doc, configuracion=CONTAB, driver="unica", imputacion=imputacion)
     etiqueta = d["saldrian"][0]
     assert d["exige"] == ["cuenta_contable", "cuenta_unica"] and d["listo_para_exportar"] is False
     assert d["faltantes"]["reparto_no_admitido"] == [etiqueta]
@@ -352,11 +353,11 @@ def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros)
     assert {"motivo": "reparto_no_admitido", "texto": asi.FALTA["reparto_no_admitido"].texto,
             "comprobantes": [etiqueta], "pedir_a": "contador"} in d["que_falta"]
     with pytest.raises(asi.RepartoNoAdmitido):
-        op.exportar(doc, "unica", CONTAB, imputacion=imputacion)
+        api.exportar(doc, driver="unica", configuracion=CONTAB, imputacion=imputacion)
 
-    assert "reparto_no_admitido" not in op.diagnosticar(doc, CONTAB, driver="registro", imputacion=imputacion)["faltantes"]
-    assert op.exportar(doc, "registro", CONTAB, imputacion=imputacion)["resumen"]["filas"] == len(doc["comprobantes"]) + 1
-    assert op.exportar(doc, "csv", CONTAB, imputacion=imputacion)["archivo"].endswith(".csv")
+    assert "reparto_no_admitido" not in api.diagnosticar(doc, configuracion=CONTAB, driver="registro", imputacion=imputacion)["faltantes"]
+    assert api.exportar(doc, driver="registro", configuracion=CONTAB, imputacion=imputacion)["resumen"]["filas"] == len(doc["comprobantes"]) + 1
+    assert api.exportar(doc, driver="csv", configuracion=CONTAB, imputacion=imputacion)["archivo"].endswith(".csv")
     asientos = driver_de_prueba("asientos")
     asientos.EXIGE = frozenset({"cuenta_unica"})
     assert contrato.incumplimientos(asientos) == ["EXIGE solo admite ['centro_costo', 'moneda']; sobra ['cuenta_unica']"]
@@ -366,7 +367,7 @@ def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_ter
     """`no_caben`: lo que el formato no puede llevar aunque la contabilidad esté completa. `diagnosticar` lo lista
     por motivo y el mes no está listo; exportar se niega sin llegar a llamar al driver, y la CLI lo dice sin
     traceback. A un driver que no lo declara no le aparece la clave."""
-    from contaperu import cli
+    from contaperu.puertas import cli
 
     llamado = []
     solo_soles = driver_de_registro("soles")
@@ -379,16 +380,16 @@ def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_ter
     doc = documento_de_compras()
     doc["comprobantes"][0].update(moneda="EUR", tipo_cambio="4.100")
 
-    d = op.diagnosticar(doc, CONTAB, driver="soles")
+    d = api.diagnosticar(doc, configuracion=CONTAB, driver="soles")
     etiqueta = d["saldrian"][0]
     assert d["faltantes"]["no_cabe"] == {"en una moneda que el destino no admite": [etiqueta]}
     assert d["listo_para_exportar"] is False and d["por_que_no"] == ["1 en una moneda que el destino no admite"]
     assert {"motivo": "no_cabe", "texto": "en una moneda que el destino no admite", "comprobantes": [etiqueta],
             "pedir_a": "contador"} in d["que_falta"]
     with pytest.raises(contrato.NoCabe) as e:
-        op.exportar(doc, "soles", CONTAB)
+        api.exportar(doc, driver="soles", configuracion=CONTAB)
     assert list(e.value.motivos) == ["en una moneda que el destino no admite"] and not llamado
-    assert "no_cabe" not in op.diagnosticar(doc, CONTAB, driver="csv")["faltantes"]
+    assert "no_cabe" not in api.diagnosticar(doc, configuracion=CONTAB, driver="csv")["faltantes"]
 
     documento, config = tmp_path / "mes.json", tmp_path / "config.json"
     documento.write_text(json.dumps(doc), encoding="utf-8")
@@ -557,13 +558,13 @@ def test_lo_que_se_lee_de_la_configuracion_esta_declarado_y_lo_declarado_se_lee(
     """Se exportan un mes de compras y uno de ventas que pasan por todo, y se anota cada clave que se lee de la
     configuración, la lea el driver o el núcleo por él. Lo leído tiene que estar declarado —lo general, su sección, la
     imputación—, y lo que su sección declara tiene que leerse: una clave que nadie lee se configura para nada."""
-    from contaperu import generar as gen
+    from contaperu.pipeline import armado
 
     leidas: set[str] = set()
-    original = gen._config_para
-    monkeypatch.setattr(gen, "_config_para", lambda modulo, config: _Espia(original(modulo, config), leidas))
+    original = armado.config_para
+    monkeypatch.setattr(armado, "config_para", lambda modulo, config: _Espia(original(modulo, config), leidas))
     for doc, imputacion in _meses_que_pasan_por_todo():
-        op.exportar(doc, nombre, {}, imputacion=imputacion, incluir_observados=True)
+        api.exportar(doc, driver=nombre, configuracion={}, imputacion=imputacion, incluir_observados=True)
     modulo = drivers.obtener(nombre)
     assert leidas - (GENERALES | _propias(modulo) | {"imputaciones"}) == set(), f"{nombre} lee claves sin declarar"
     assert _propias(modulo) - leidas == set(), f"{nombre} declara claves que no lee"

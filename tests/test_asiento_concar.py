@@ -12,8 +12,9 @@ from decimal import Decimal
 import openpyxl
 import pytest
 
-from contaperu import generar as gen
-from contaperu import operaciones as op
+from contaperu.pipeline import salida as gen
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.modelo import Comprobante, Libro
 from contaperu import asiento as concar
 from contaperu.drivers import concar as driver_concar
@@ -26,7 +27,7 @@ EMISION, VENCE = date(2026, 8, 11), date(2026, 8, 18)
 def configuracion(config_contable: dict | None = None) -> dict:
     """La configuración aplicada para CONCAR (la del entorno sobre la de por defecto) con las imputaciones de las
     pruebas. Se escribe plana y se guarda en su sección (`util.en_secciones`)."""
-    return con_imputaciones(op.config_aplicada(en_secciones(config_contable, "concar"), "concar"))
+    return con_imputaciones(prep.config_aplicada(en_secciones(config_contable, "concar"), "concar"))
 
 
 CONTAB = configuracion(None)
@@ -334,7 +335,7 @@ def test_el_codigo_de_area_no_se_recorta():
     c = cp(detraccion={"codigo": "027", "porcentaje": "4"})
     filas = driver_concar.filas_de_comprobante(c, dict(CONTAB, detraccion_area="9001"), MES, "080001")
     assert filas[-1]["V"] == "9001"
-    with pytest.raises(op.ConfiguracionInvalida) as e:
+    with pytest.raises(api.ConfiguracionInvalida) as e:
         configuracion({"detraccion_area": "9001"})
     assert e.value.errores == ['`concar.detraccion_area`: el texto "9001" no cumple el patrón ^[A-Z0-9]{0,3}$']
 
@@ -467,7 +468,7 @@ def test_la_configuracion_del_entorno_se_funde_con_los_valores_por_defecto():
     no toca conserva su valor por defecto, también dentro de un mismo grupo (`fundir_config` funde en profundidad)."""
     entorno = {"cuentas": {"gasto": "659301", "cxp": {"USD": "421203"}},
                "concar": {"tipos": {"20": {"sigla": "CO", "sub_diario": "11"}}}}
-    c = con_imputaciones(op.config_aplicada(entorno, "concar"))
+    c = con_imputaciones(prep.config_aplicada(entorno, "concar"))
     assert c["cuentas"]["gasto"] == "659301"                              # el entorno manda
     assert c["cuentas"]["cxp"] == {"PEN": "421201", "USD": "421203"}      # se funde dentro del grupo
     assert c["cuentas"]["igv"] == "401111" and c["tipos"]["01"]["sigla"] == "FT"

@@ -1,4 +1,21 @@
 {
+ "contaperu._compat.operaciones": [
+  "contaperu.detracciones",
+  "contaperu.lectores.sire_txt",
+  "contaperu.pcge",
+  "contaperu.validar"
+ ],
+ "contaperu.api.errores": [
+  "contaperu.igv",
+  "contaperu.lectores.sire_txt",
+  "contaperu.lectores.xml_ubl",
+  "contaperu.pcge.adaptar"
+ ],
+ "contaperu.api.operaciones": [
+  "contaperu.catalogos",
+  "contaperu.comparar_sire",
+  "contaperu.pcge"
+ ],
  "contaperu.asiento.motor": [
   "contaperu.catalogos",
   "contaperu.detracciones",
@@ -7,10 +24,6 @@
  "contaperu.asiento.resolucion": [
   "contaperu.catalogos",
   "contaperu.igv"
- ],
- "contaperu.cli": [
-  "contaperu.comparar_sire",
-  "contaperu.validar"
  ],
  "contaperu.drivers": [
   "contaperu.drivers.sire"
@@ -32,15 +45,16 @@
   "contaperu.lectores.sire_txt",
   "contaperu.lectores.xml_ubl"
  ],
- "contaperu.operaciones": [
+ "contaperu.pipeline.diagnostico": [
   "contaperu.detracciones",
-  "contaperu.lectores.sire_txt",
-  "contaperu.pcge",
   "contaperu.validar"
  ],
- "contaperu.servidor_mcp": [
-  "contaperu.catalogos",
+ "contaperu.pipeline.lectura": [
+  "contaperu.lectores.sire_txt",
+  "contaperu.validar"
+ ],
+ "contaperu.pipeline.preparacion": [
   "contaperu.detracciones",
-  "contaperu.pcge"
+  "contaperu.validar"
  ]
 }

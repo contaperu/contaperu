@@ -23,7 +23,8 @@ from pathlib import Path
 import pytest
 
 from contaperu import asiento as asi
-from contaperu import operaciones as op
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import concar as driver_concar, contrato
 from contaperu.modelo import Comprobante
 
@@ -171,7 +172,7 @@ def contab_de(extra: dict | None) -> dict:
     """La configuración aplicada para CONCAR, con la imputación del caso, que llega aparte."""
     extra = dict(extra or {})
     imputaciones = extra.pop("imputaciones", None)
-    config = op.config_aplicada(extra, "concar")
+    config = prep.config_aplicada(extra, "concar")
     return {**config, "imputaciones": imputaciones} if imputaciones else config
 
 

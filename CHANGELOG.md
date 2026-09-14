@@ -25,6 +25,21 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 - `tests/test_capas.py`: cada módulo pertenece a una capa y solo importa de las de abajo; el núcleo y los drivers no
   abren archivos (hito 0.5); el acoplamiento con lo peruano queda congelado y visible (hito J0).
 
+- **`contaperu.api`**, la API pública de la 1.0: `leer_xml`, `leer_propuesta_sire`, `leer_archivos`, `documento_de`,
+  `revisar`, `normalizar_detracciones`, `diagnosticar`, `generar_asiento`, `exportar`, `exportar_archivo` (el archivo
+  en bytes, como `Exportado`), `cuadrar`, `buscar_cuenta_pcge`, `adaptar_pcge`, la configuración, los drivers y
+  catálogos disponibles, el esquema del estándar, `comparar_sire` y todos los errores. **El documento va primero y lo
+  demás por su nombre, y `driver` no tiene valor por defecto.** Su superficie queda congelada con su firma
+  (`tests/test_superficie_publica.py`), junto con los nombres del nivel de extensión.
+- `api.OPERACIONES`: cada operación con la ruta HTTP y el nombre del MCP por los que se expone. Es la fuente de las
+  puertas; un test comprueba que el MCP expone exactamente esas herramientas y recursos.
+- `api.problema(error)`: un error como «problem details» del RFC 9457, con su `clave`; lo que no es un error del motor no
+  enseña su texto.
+- `contaperu.pipeline` (interno): la preparación, la lectura, la selección, el armado del asiento, la salida y el
+  diagnóstico, cada uno en su módulo y escritos una sola vez.
+- `contaperu.puertas`: la CLI y el servidor MCP, que hablan solo con la api, y lo que comparten (topes y nombres de host
+  permitidos). `test_capas` lo hace cumplir y la lista de excepciones queda vacía.
+
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
@@ -36,10 +51,22 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 - El asiento deja de depender de las opciones de los drivers: `lineas_del_comprobante` y `lineas_del_libro` leen
   `sin_ceros` de las opciones que lleguen, y sin opciones quitan los ceros como siempre.
 
+- **La CLI habla solo con la api.** `contaperu desde-json` revisa siempre el documento, la imputación y cada comprobante
+  —`--revisar` ahora solo enseña la tabla—, y un rechazo se imprime con el mensaje de la api. Un documento o una
+  imputación que no se pueden usar responden con el código 2 y el motivo en una sola línea; en `contaperu generar`, un
+  RUC o un periodo mal escritos también, en vez de un traceback.
+- Los comandos `contaperu` y `contaperu-mcp` arrancan desde `contaperu.puertas`. Las herramientas y los recursos del MCP
+  conservan sus nombres, sus argumentos y sus respuestas.
+- `api.revisar` acepta la `imputacion` y comprueba que cada una hable de un documento que está.
+
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
   avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen
   resolviendo desde ahí, con aviso.
+- **`contaperu.operaciones`** (todo el módulo): sigue funcionando con las firmas y los valores por defecto de la 0.10 y
+  avisa con la ruta nueva, `contaperu.api`. `contaperu.generar`: `api.exportar_archivo`, `api.Exportado` y
+  `api.ErroresBloqueantes`. `contaperu.cli` y `contaperu.servidor_mcp`: `contaperu.puertas.cli` y
+  `contaperu.puertas.servidor_mcp`. Son el mismo objeto por las dos rutas (`generar.Exportado is api.Exportado`).
 
 ## [0.10.0] — 2026-09-13
 

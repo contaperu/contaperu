@@ -2,7 +2,7 @@
 import json
 import zipfile
 
-from contaperu import cli
+from contaperu.puertas import cli
 from util import GOLDEN, XML
 
 
@@ -98,7 +98,7 @@ def test_diagnosticar_dice_que_falta_y_luego_que_esta_listo(tmp_path, capsys):
 def test_la_consola_de_windows_no_tumba_el_cli(monkeypatch):
     """La consola de Windows es cp1252 y el CLI imprime flechas y tildes. Que se caiga al
     IMPRIMIR, con los archivos ya escritos, seria absurdo."""
-    from contaperu.cli import _consola_utf8
+    from contaperu.puertas.cli import _consola_utf8
 
     class SinReconfigure:
         encoding = "cp1252"

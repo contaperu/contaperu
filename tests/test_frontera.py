@@ -1,8 +1,8 @@
 """La frontera entre el núcleo y sus puertas, comprobada por dependencia y no por buena voluntad.
 
 `contaperu` es un núcleo de reglas contables con varias **puertas** delgadas encima: la línea de
-comandos (`cli.py`), el servidor MCP (`servidor_mcp.py`) y —desde otro repositorio— el API del portal
-contable. La propiedad que lo hace valer para los tres a la vez es que **el núcleo no sabe que las
+comandos (`puertas/cli.py`), el servidor MCP (`puertas/servidor_mcp.py`) y —desde otro repositorio— el API del portal
+contable. Las puertas hablan con la api (`contaperu/api/`), y la api con el núcleo. La propiedad que lo hace valer para los tres a la vez es que **el núcleo no sabe que las
 puertas existen**: si mañana `asiento/` importara `servidor_mcp`, instalar la librería para hacer un
 Excel arrastraría el SDK del protocolo, y una corrección del MCP podría cambiar un asiento.
 
@@ -20,16 +20,21 @@ PAQUETE = pathlib.Path(__file__).resolve().parents[1] / "contaperu"
 
 # Las puertas: módulos que el núcleo NO puede importar. Son adaptadores — hablan un protocolo de
 # fuera (argv y stdout; JSON-RPC) y dependen de cosas que el núcleo no necesita.
-PUERTAS = {"cli", "servidor_mcp"}
+PUERTAS = {"cli", "servidor_mcp", "servidor_http", "puertas"}
 
-# Lo único que la fachada puede necesitar de fuera del núcleo. `_version` es un módulo hoja.
-FACHADA = "operaciones"
+# Por donde pasan las puertas para llegar al motor.
+FACHADA = "api"
+
+# Lo que no es núcleo: las puertas, la api, las rutas de la 0.x y los módulos de la 0.x que las publican.
+CARPETAS_FUERA = {"puertas", "api", "_compat"}
+MODULOS_FUERA = {"cli.py", "servidor_mcp.py", "operaciones.py"}
 
 
 def modulos_del_nucleo() -> list[pathlib.Path]:
-    """Todo `contaperu/**.py` menos las puertas y menos la fachada."""
-    fuera = PUERTAS | {FACHADA}
-    return [f for f in sorted(PAQUETE.rglob("*.py")) if f.stem not in fuera]
+    """Todo `contaperu/**.py` menos las puertas, la api y las rutas de la 0.x."""
+    return [f for f in sorted(PAQUETE.rglob("*.py"))
+            if not set(f.relative_to(PAQUETE).parts[:-1]) & CARPETAS_FUERA
+            and not (f.parent == PAQUETE and f.name in MODULOS_FUERA)]
 
 
 def importa(archivo: pathlib.Path) -> set[str]:
@@ -115,16 +120,16 @@ def test_el_motor_no_supone_ninguna_aplicacion():
     assert culpables == [], f"el motor supone una aplicación: {culpables}"
 
 
-@pytest.mark.parametrize("puerta", sorted(PUERTAS))
+@pytest.mark.parametrize("puerta", ["cli", "servidor_mcp"])
 def test_cada_puerta_pasa_por_la_fachada(puerta):
     """Una puerta traduce un protocolo; no reimplementa el trabajo.
 
-    Cuando una se salta `operaciones` y arma los objetos por su cuenta, deja de haber una capa sobre
+    Cuando una se salta la api y arma los objetos por su cuenta, deja de haber una capa sobre
     otra y pasa a haber dos clientes paralelos del núcleo — que es como el CLI acabó emitiendo un
     JSON sin la clave `open_accounting` que el MCP sí ponía.
     """
-    assert FACHADA in importa(PAQUETE / f"{puerta}.py"), (
-        f"{puerta}.py no importa `operaciones`: está hablando con el núcleo por su cuenta")
+    assert FACHADA in importa(PAQUETE / "puertas" / f"{puerta}.py"), (
+        f"puertas/{puerta}.py no importa la api: está hablando con el núcleo por su cuenta")
 
 
 def test_el_guardian_de_la_red_muerde(sin_red):
@@ -168,8 +173,8 @@ def test_las_dos_puertas_producen_el_MISMO_documento(tmp_path):
     """
     import json
 
-    from contaperu import cli
-    from contaperu.servidor_mcp import mcp
+    from contaperu.puertas import cli
+    from contaperu.puertas.servidor_mcp import mcp
     from util import XML
 
     fuente = XML / "20131312955-01-F001-123.xml"

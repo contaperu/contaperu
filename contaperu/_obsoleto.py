@@ -39,17 +39,22 @@ def resolver(destino: str) -> Any:
     return objeto
 
 
-def reexportar(modulo: str, destinos: dict[str, str], *, avisa: bool = True) -> tuple[Callable, Callable]:
+def reexportar(modulo: str, destinos: dict[str, str], *, avisa: bool = True,
+               nuevas: dict[str, str] | None = None) -> tuple[Callable, Callable]:
     """El `__getattr__` y el `__dir__` de un módulo cuyos nombres viven en otro sitio.
 
     `destinos` es `{"nombre": "paquete.modulo:atributo"}`. Cada nombre se resuelve al pedirlo, y avisa con
-    `RutaObsoleta` si `avisa`. Un nombre que no está en `destinos` da el `AttributeError` de siempre."""
+    `RutaObsoleta` si `avisa`. El aviso recomienda `nuevas[nombre]` si está —la ruta pública que la reemplaza, cuando
+    el destino es la copia de la 0.x en `_compat`— y el propio destino si no. Un nombre que no está en `destinos` da el
+    `AttributeError` de siempre."""
+    nuevas = nuevas or {}
+
     def __getattr__(nombre: str) -> Any:
         destino = destinos.get(nombre)
         if destino is None:
             raise AttributeError(f"module {modulo!r} has no attribute {nombre!r}")
         if avisa:
-            avisar(f"{modulo}.{nombre}", destino.replace(":", "."))
+            avisar(f"{modulo}.{nombre}", nuevas.get(nombre) or destino.replace(":", "."))
         return resolver(destino)
 
     def __dir__() -> list[str]:

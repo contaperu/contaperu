@@ -33,8 +33,8 @@ todo = ["contaperu[excel,schema,mcp]"]
 dev = ["contaperu[todo]", "pytest>=8,<9"]
 
 [project.scripts]
-contaperu = "contaperu.cli:main"
-contaperu-mcp = "contaperu.servidor_mcp:main"
+contaperu = "contaperu.puertas.cli:main"
+contaperu-mcp = "contaperu.puertas.servidor_mcp:main"
 
 # PyPI solo pone icono a las claves que reconoce, y en ingles.
 [project.urls]
@@ -63,3 +63,6 @@ include = ["contaperu", "estandar", "tests", "README.md", "LICENSE", "CHANGELOG.
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Una ruta de la 0.x usada sin decirlo es un error: la batería habla con la 1.0, y lo que prueba la compatibilidad
+# lo dice con `pytest.warns` o `warnings.catch_warnings` (`contaperu/_obsoleto.py`).
+filterwarnings = ["error::contaperu._obsoleto.RutaObsoleta"]

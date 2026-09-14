@@ -12,8 +12,9 @@ from decimal import Decimal
 
 import pytest
 
-from contaperu import generar as g
-from contaperu import operaciones as op
+from contaperu.pipeline import salida as g
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.modelo import Comprobante
 from contaperu.drivers import sire
 from util import campos, cargar_golden
@@ -155,6 +156,6 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
     # El Excel de CONCAR sí se lo lleva (mismo mes, misma revisión)
     for x in cs:
         imputar(x, cuenta_contable="631101", centro_costo="OBRA01")   # la 631101 lleva centro y CONCAR lo exige (0.8)
-    exc = g.generar(libro, cs, "concar", config=con_imputaciones(op.config_aplicada(None, "concar")),
+    exc = g.generar(libro, cs, "concar", config=con_imputaciones(prep.config_aplicada(None, "concar")),
                     correlativos={"11": 1, "15": 1})
     assert exc.comprobantes == 3 and exc.resumen["fuera_del_destino"] == 0

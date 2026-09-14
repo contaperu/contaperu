@@ -11,7 +11,7 @@ import json
 import pytest
 
 import contaperu
-from contaperu.servidor_mcp import LOCALES, mcp, seguridad
+from contaperu.puertas.servidor_mcp import LOCALES, mcp, seguridad
 
 from util import XML
 

@@ -68,17 +68,9 @@ PUEDE = {
     "puertas": {"base", "api", "puertas"},
 }
 
-# Lo que todavía importa una capa que no le toca, con su motivo. Tiene que quedar vacía cuando las puertas hablen
-# solo con la api (etapa 3 de la 1.0).
-_CLI = "la CLI arma el libro, lee archivos y genera por su cuenta; pasa a la api en la etapa 3"
-_MCP = "el MCP compone dos herramientas y lee catálogos y drivers en la puerta; pasa a la api en la etapa 3 (B1)"
-TOLERADAS: dict[tuple[str, str], str] = {
-    **{("contaperu.cli", destino): _CLI for destino in (
-        "contaperu.asiento", "contaperu.comparar_sire", "contaperu.drivers", "contaperu.generar", "contaperu.lectores",
-        "contaperu.lectores.archivos", "contaperu.modelo", "contaperu.validar")},
-    **{("contaperu.servidor_mcp", destino): _MCP for destino in (
-        "contaperu.catalogos", "contaperu.detracciones", "contaperu.drivers", "contaperu.pcge")},
-}
+# Lo que todavía importa una capa que no le toca, con su motivo. Vacía desde que las puertas hablan solo con la api
+# (etapa 3 de la 1.0): una excepción nueva entra aquí con su motivo, a la vista.
+TOLERADAS: dict[tuple[str, str], str] = {}
 
 
 def capa(modulo: str) -> str:
@@ -154,6 +146,20 @@ def test_las_toleradas_siguen_existiendo():
     """Una excepción que ya no hace falta se quita de la lista, para que no tape una nueva."""
     sobran = [par for par in TOLERADAS if par[1] not in importaciones(par[0])]
     assert sobran == []
+
+
+def test_las_puertas_hablan_solo_con_la_api():
+    """Una puerta traduce un protocolo: si importara el núcleo o el pipeline, dejaría de haber una api entre ellas y el
+    motor, y el mismo documento podría salir distinto según por dónde llega."""
+    culpables = {m: sorted(d for d in importaciones(m) if capa(d) not in ("base", "api", "puertas"))
+                 for m in MODULOS if capa(m) == "puertas"}
+    assert {m: d for m, d in culpables.items() if d} == {}
+
+
+def test_los_drivers_no_saben_por_que_puerta_llego_el_documento():
+    culpables = {m: sorted(d for d in importaciones(m) if capa(d) in ("pipeline", "api", "puertas"))
+                 for m in MODULOS if capa(m) == "drivers"}
+    assert {m: d for m, d in culpables.items() if d} == {}
 
 
 def test_nadie_importa_las_rutas_viejas():

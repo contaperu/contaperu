@@ -14,8 +14,9 @@ from jsonschema import Draft202012Validator
 
 from contaperu import asiento as asi
 from contaperu.drivers import concar as driver_concar
-from contaperu import generar as gen
-from contaperu import operaciones as op
+from contaperu.pipeline import salida as gen
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import csv as driver_csv
 from contaperu.modelo import Comprobante, Libro
 from util import comprobante, con_imputaciones, en_secciones
@@ -23,7 +24,7 @@ from util import comprobante, con_imputaciones, en_secciones
 def configuracion(config_contable: dict | None = None) -> dict:
     """La configuración aplicada para CONCAR (la del entorno sobre la de por defecto) con las imputaciones de las
     pruebas. Se escribe plana y se guarda en su sección (`util.en_secciones`)."""
-    return con_imputaciones(op.config_aplicada(en_secciones(config_contable, "concar"), "concar"))
+    return con_imputaciones(prep.config_aplicada(en_secciones(config_contable, "concar"), "concar"))
 
 
 CONTAB = configuracion(None)
@@ -173,7 +174,7 @@ def _csv(**opciones_csv) -> bytes:
 
 
 def test_el_csv_escribe_una_fila_por_linea():
-    config = con_imputaciones(op.config_aplicada(None, "csv"))      # la del CSV: sin lo propio de CONCAR
+    config = con_imputaciones(prep.config_aplicada(None, "csv"))      # la del CSV: sin lo propio de CONCAR
     exp = gen.generar(libro_compras(), [factura()], "csv", config=config, correlativos={"11": 1})
     resumen = exp.resumen
     texto = exp.contenido.decode("utf-8-sig")

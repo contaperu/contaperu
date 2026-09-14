@@ -7,15 +7,16 @@ import zipfile
 
 import pytest
 
-from contaperu import operaciones as op
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 
 LIBRO = {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
          "periodo": "202601", "tipo": "compra"}
 
 
 def test_el_documento_que_sale_declara_la_version_del_estandar():
-    doc = op.documento(op.libro_de({"libro": LIBRO}), [])
-    assert doc["open_accounting"] == op.OPEN_ACCOUNTING and doc["libro"]["ruc"] == "20601111111"
+    doc = prep.documento(prep.libro_de({"libro": LIBRO}), [])
+    assert doc["open_accounting"] == api.OPEN_ACCOUNTING and doc["libro"]["ruc"] == "20601111111"
 
 
 def test_un_libro_imposible_se_rechaza_con_su_motivo():
@@ -25,20 +26,20 @@ def test_un_libro_imposible_se_rechaza_con_su_motivo():
         ({"libro": {"ruc": "20601111111", "periodo": "202613", "tipo": "compra"}}, "Periodo"),
         ({"libro": {"ruc": "20601111111", "periodo": "202601", "tipo": "inventario"}}, "Tipo de libro"),
     ):
-        with pytest.raises(op.DocumentoInvalido, match=trozo):
-            op.libro_de(malo)
+        with pytest.raises(api.DocumentoInvalido, match=trozo):
+            prep.libro_de(malo)
 
 
 def test_hay_un_tope_de_comprobantes_por_llamada():
     """Un mes de una PYME son decenas o cientos; miles casi siempre es un error de quien llama."""
-    doc = {"libro": LIBRO, "comprobantes": [{"tipo_cp": "01"}] * (op.MAXIMO_COMPROBANTES + 1)}
-    with pytest.raises(op.DocumentoInvalido, match="tope"):
-        op.comprobantes_de(doc)
+    doc = {"libro": LIBRO, "comprobantes": [{"tipo_cp": "01"}] * (api.MAXIMO_COMPROBANTES + 1)}
+    with pytest.raises(api.DocumentoInvalido, match="tope"):
+        prep.comprobantes_de(doc)
 
 
 def test_exportar_sin_comprobantes_no_genera_un_archivo_vacio():
-    with pytest.raises(op.DocumentoInvalido, match="No hay comprobantes"):
-        op.exportar({"libro": LIBRO, "comprobantes": []})
+    with pytest.raises(api.DocumentoInvalido, match="No hay comprobantes"):
+        api.exportar({"libro": LIBRO, "comprobantes": []}, driver="concar")
 
 
 def test_los_excluidos_no_entran_en_la_exportacion():
@@ -49,7 +50,7 @@ def test_los_excluidos_no_entran_en_la_exportacion():
         dict(base, numero="1"),
         dict(base, numero="2", excluida=True),
     ]}
-    r = op.generar_asiento(doc, {"cuentas": {"gasto": "659999"}})
+    r = api.generar_asiento(doc, driver="concar", configuracion={"cuentas": {"gasto": "659999"}})
     assert len({ln["documento"]["serie_numero"] for ln in r["asiento"]}) == 1
 
 
@@ -63,33 +64,33 @@ def test_leer_un_zip_en_base64():
             z.write(XML / nombre, nombre)
     b64 = base64.b64encode(buf.getvalue()).decode()
 
-    doc = op.leer_xml(b64, dict(LIBRO, tipo="venta", periodo="202601"), es_base64=True)
+    doc = api.leer_xml(b64, dict(LIBRO, tipo="venta", periodo="202601"), es_base64=True)
     assert len(doc["comprobantes"]) == 2
     assert doc["_lectura"]["errores"] == []
 
 
 def test_un_base64_roto_lo_dice():
-    with pytest.raises(op.DocumentoInvalido, match="base64"):
-        op.leer_xml("esto no es base64 %%%", LIBRO, es_base64=True)
+    with pytest.raises(api.DocumentoInvalido, match="base64"):
+        api.leer_xml("esto no es base64 %%%", LIBRO, es_base64=True)
 
 
 def test_leer_la_propuesta_del_sire():
     """Se lee lo que SUNAT propone y se devuelve como documento del estándar."""
     from util import cargar_golden
-    from contaperu import generar as gen
+    from contaperu.pipeline import salida as gen
 
     libro, comprobantes = cargar_golden("compras_202601.json")
     txt = gen.generar(libro, comprobantes, "sire", incluir_errores=True).texto.decode("utf-8")
 
-    doc = op.leer_propuesta_sire(txt, {"ruc": libro.ruc, "razon_social": libro.razon_social,
+    doc = api.leer_propuesta_sire(txt, {"ruc": libro.ruc, "razon_social": libro.razon_social,
                                        "periodo": libro.periodo, "tipo": libro.tipo})
     assert len(doc["comprobantes"]) == len(comprobantes)
     assert all(c["origen"] == "sire" for c in doc["comprobantes"])
 
 
 def test_la_configuracion_de_partida_se_puede_sobreescribir():
-    de_serie = op.config_aplicada()
-    mia = op.config_aplicada({"cuentas": {"igv": "401112"}})
+    de_serie = prep.config_aplicada()
+    mia = prep.config_aplicada({"cuentas": {"igv": "401112"}})
     assert de_serie["cuentas"]["igv"] == "401111"
     assert mia["cuentas"]["igv"] == "401112"
     # Lo que no se toca se conserva: la fusion es en profundidad, no un reemplazo.
@@ -101,11 +102,11 @@ def test_la_configuracion_que_sale_se_puede_volver_a_meter():
 
     Si esto no funcionara, los cambios se ignorarian EN SILENCIO y el asiento saldria con
     las cuentas de serie sin que nadie se enterara."""
-    mia = op.configuracion_por_defecto()
+    mia = api.configuracion_por_defecto()
     mia["cuentas"]["gasto"] = "631201"
     mia["concar"]["sub_diario_compras"] = "07"
 
-    efectiva = op.config_aplicada(mia, "concar")
+    efectiva = prep.config_aplicada(mia, "concar")
 
     assert efectiva["cuentas"]["gasto"] == "631201"
     assert efectiva["sub_diario_compras"] == "07"
@@ -117,14 +118,14 @@ def test_la_configuracion_va_por_secciones():
     se aplica encima de lo general y las demás no se mezclan. Un `{"contabilidad": ...}` no se desenvuelve: se dice."""
     guardada = {"cuentas": {"igv": "401199"}, "concar": {"tipos": {"01": {"sigla": "FA"}}},
                 "contasis": {"medio_pago": "003"}}
-    concar = op.config_aplicada(guardada, "concar")
+    concar = prep.config_aplicada(guardada, "concar")
     assert concar["cuentas"]["igv"] == "401199" and concar["tipos"]["01"] == {"sigla": "FA"}
     assert concar["tipos"]["03"]["sigla"] == "BV" and "medio_pago" not in concar
-    contasis = op.config_aplicada(guardada, "contasis")
+    contasis = prep.config_aplicada(guardada, "contasis")
     assert contasis["cuentas"]["igv"] == "401199" and contasis["medio_pago"] == "003" and "tipos" not in contasis
-    assert "tipos" not in op.config_aplicada(guardada) and "concar" not in op.config_aplicada(guardada, "concar")
-    with pytest.raises(op.ConfiguracionInvalida, match="sin clave intermedia"):
-        op.config_aplicada({"contabilidad": {"cuentas": {"igv": "401199"}}})
+    assert "tipos" not in prep.config_aplicada(guardada) and "concar" not in prep.config_aplicada(guardada, "concar")
+    with pytest.raises(api.ConfiguracionInvalida, match="sin clave intermedia"):
+        prep.config_aplicada({"contabilidad": {"cuentas": {"igv": "401199"}}})
 
 
 def test_un_xml_suelto_en_base64_se_lee(tmp_path):
@@ -137,11 +138,11 @@ def test_un_xml_suelto_en_base64_se_lee(tmp_path):
     libro = {"ruc": "20131312955", "razon_social": "EMISOR DE PRUEBA SAC",
              "periodo": "202601", "tipo": "venta"}
 
-    doc = op.leer_xml(base64.b64encode(xml).decode(), libro, es_base64=True)
+    doc = api.leer_xml(base64.b64encode(xml).decode(), libro, es_base64=True)
 
     assert len(doc["comprobantes"]) == 1 and doc["_lectura"]["errores"] == []
     # Y el mismo XML como texto da exactamente lo mismo.
-    assert doc["comprobantes"] == op.leer_xml(xml.decode("utf-8"), libro)["comprobantes"]
+    assert doc["comprobantes"] == api.leer_xml(xml.decode("utf-8"), libro)["comprobantes"]
 
 
 
@@ -150,12 +151,12 @@ def test_la_condicion_de_pago_y_el_id_externo_viajan_en_el_documento():
     from util import XML
 
     doc = {"libro": LIBRO, "comprobantes": [dict(BASE, condicion_pago="credito", id_externo="fila-7")]}
-    revisado = op.revisar(doc)["comprobantes"][0]
+    revisado = api.revisar(doc)["comprobantes"][0]
     assert (revisado["condicion_pago"], revisado["id_externo"]) == ("credito", "fila-7")
 
     ventas = {"ruc": "20131312955", "razon_social": "EMISOR DE PRUEBA S.A.C.", "periodo": "202601", "tipo": "venta"}
     xml = base64.b64encode((XML / "20131312955-01-F001-123.xml").read_bytes()).decode()
-    assert op.leer_xml(xml, ventas, es_base64=True)["comprobantes"][0]["condicion_pago"] == "credito"
+    assert api.leer_xml(xml, ventas, es_base64=True)["comprobantes"][0]["condicion_pago"] == "credito"
 
 
 BASE = {"tipo_cp": "01", "serie": "F001", "numero": "8", "fecha_emision": "2026-01-10",
@@ -173,19 +174,19 @@ def test_la_cuenta_llega_solo_en_la_imputacion():
     puerta: perder su cuenta en silencio sería peor."""
     doc = {"libro": LIBRO, "comprobantes": [BASE]}
     config = {"cuentas": {"gasto": "659999"}}
-    assert _del_rol(op.generar_asiento(doc, config), "principal", "tercero") == [("659999", "100.00"), ("421201", "118.00")]
+    assert _del_rol(api.generar_asiento(doc, driver="concar", configuracion=config), "principal", "tercero") == [("659999", "100.00"), ("421201", "118.00")]
 
     imputacion = {"fila-8": {"cuenta_contable": "637301", "cuenta_tercero": "469901"}}
-    assert _del_rol(op.generar_asiento(doc, config, imputacion=imputacion), "principal", "tercero") == [
+    assert _del_rol(api.generar_asiento(doc, driver="concar", configuracion=config, imputacion=imputacion), "principal", "tercero") == [
         ("637301", "100.00"), ("469901", "118.00")]
     # Solo la cuenta del total: la de la base sale de la configuración.
     solo_total = {"fila-8": {"cuenta_tercero": "469901"}}
-    assert _del_rol(op.generar_asiento(doc, config, imputacion=solo_total), "principal") == [("659999", "100.00")]
+    assert _del_rol(api.generar_asiento(doc, driver="concar", configuracion=config, imputacion=solo_total), "principal") == [("659999", "100.00")]
 
-    assert "469901" in op.exportar(doc, "csv", config, imputacion=imputacion)["texto"]
-    assert "cuenta_contable" not in op.revisar(doc)["comprobantes"][0]
-    with pytest.raises(op.DocumentoInvalido, match="imputación"):
-        op.generar_asiento({"libro": LIBRO, "comprobantes": [dict(BASE, cuenta_contable="659999")]})
+    assert "469901" in api.exportar(doc, driver="csv", configuracion=config, imputacion=imputacion)["texto"]
+    assert "cuenta_contable" not in api.revisar(doc)["comprobantes"][0]
+    with pytest.raises(api.DocumentoInvalido, match="imputación"):
+        api.generar_asiento({"libro": LIBRO, "comprobantes": [dict(BASE, cuenta_contable="659999")]}, driver="concar")
 
 
 def test_el_reparto_da_una_linea_por_parte_y_tiene_que_cuadrar():
@@ -198,7 +199,7 @@ def test_el_reparto_da_una_linea_por_parte_y_tiene_que_cuadrar():
     doc = {"libro": LIBRO, "comprobantes": [BASE]}
     reparto = [{"importe": "60", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
                {"importe": "40", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]
-    asiento = op.generar_asiento(doc, imputacion={"fila-8": {"reparto": reparto}})
+    asiento = api.generar_asiento(doc, driver="concar", imputacion={"fila-8": {"reparto": reparto}})
     assert _del_rol(asiento, "principal") == [("636301", "60.00"), ("632201", "40.00")]
     assert [importe for _, importe in _del_rol(asiento, "igv", "tercero")] == ["18.00", "118.00"]
     lineas = asiento["asiento"]
@@ -206,13 +207,13 @@ def test_el_reparto_da_una_linea_por_parte_y_tiene_que_cuadrar():
             == sum(Decimal(ln["importe"]) for ln in lineas if ln["debe_haber"] == "H"))
 
     corto = {"fila-8": {"reparto": reparto[:1]}}
-    d = op.diagnosticar(doc, driver="csv", imputacion=corto)
+    d = api.diagnosticar(doc, driver="csv", imputacion=corto)
     assert len(d["faltantes"]["reparto_que_no_cuadra"]) == 1 and d["listo_para_exportar"] is False
     with pytest.raises(RepartoNoCuadra):
-        op.exportar(doc, "csv", imputacion=corto)
+        api.exportar(doc, driver="csv", imputacion=corto)
 
     sin_cuenta = {"fila-8": {"reparto": [dict(reparto[0], cuenta_contable=""), reparto[1]]}}
-    assert len(op.diagnosticar(doc, driver="csv", imputacion=sin_cuenta)["faltantes"]["sin_cuenta"]) == 1
+    assert len(api.diagnosticar(doc, driver="csv", imputacion=sin_cuenta)["faltantes"]["sin_cuenta"]) == 1
 
 
 def test_una_imputacion_ambigua_o_de_otro_documento_se_rechaza_en_la_puerta():
@@ -220,7 +221,7 @@ def test_una_imputacion_ambigua_o_de_otro_documento_se_rechaza_en_la_puerta():
     documento con la cuenta por defecto sin avisar. Las dos se rechazan antes de armar nada."""
     doc = {"libro": LIBRO, "comprobantes": [BASE]}
     ambigua = {"fila-8": {"reparto": [{"importe": "100", "cuenta_contable": "636301"}], "cuenta_contable": "659999"}}
-    with pytest.raises(op.DocumentoInvalido, match="reparto"):
-        op.generar_asiento(doc, imputacion=ambigua)
-    with pytest.raises(op.DocumentoInvalido, match="fila-9"):
-        op.generar_asiento(doc, imputacion={"fila-9": {"cuenta_contable": "659999"}})
+    with pytest.raises(api.DocumentoInvalido, match="reparto"):
+        api.generar_asiento(doc, driver="concar", imputacion=ambigua)
+    with pytest.raises(api.DocumentoInvalido, match="fila-9"):
+        api.generar_asiento(doc, driver="concar", imputacion={"fila-9": {"cuenta_contable": "659999"}})

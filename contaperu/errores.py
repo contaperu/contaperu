@@ -25,3 +25,15 @@ class ErrorContaperu(Exception):
         super().__init_subclass__(**kwargs)
         if "clave" not in cls.__dict__:
             cls.clave = _serpiente(cls.__name__)
+
+
+class DocumentoInvalido(ErrorContaperu, ValueError):
+    """El documento no cumple el estándar lo bastante como para poder trabajar con él."""
+
+
+class ErroresBloqueantes(ErrorContaperu):
+    """Quedan comprobantes con observaciones de nivel `error` y no se pidió exportarlos igual. `errores` los lista."""
+
+    def __init__(self, errores: list[dict]):
+        super().__init__(f"{len(errores)} comprobante(s) con errores que bloquean la exportación")
+        self.errores = errores
