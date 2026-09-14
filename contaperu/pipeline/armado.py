@@ -17,6 +17,7 @@ from ..configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, Configura
 from ..drivers import contrato
 from ..modelo import Comprobante, Libro
 from .preparacion import documento, preparar
+from .seleccion import fuera_de, seleccionar
 
 
 def config_para(modulo, config: dict) -> dict:
@@ -82,16 +83,26 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
     """Comprobantes -> líneas de diario del estándar, sin formato de ningún ERP.
 
     Con la configuración del sistema de `driver`, que tiene que armar asientos: sus siglas, sus sub-diarios y las
-    columnas en que pone el centro de costo deciden lo que llevan las líneas, que son las mismas de su archivo."""
+    columnas en que pone el centro de costo deciden lo que llevan las líneas, que son las mismas de su archivo. Es
+    `exportar` sin escribir el archivo, y exige lo mismo; mirar sin exigir es `diagnosticar`."""
     modulo = drivers.obtener(driver)
     if not contrato.arma_asientos(modulo):
         con_asientos = [nombre for nombre, m in drivers.DRIVERS.items() if contrato.arma_asientos(m)]
         raise ValueError(f"El driver {driver!r} no arma asientos: las líneas salen con la configuración de uno que "
                          f"sí ({', '.join(con_asientos)})")
     libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
-    corr = asi.correlativos_de_partida(comprobantes, config, libro.es_venta, correlativos)
+    # Lo mismo que saldría en su archivo: sin excluidos ni duplicados, sin lo que ese destino no lleva, y exigiendo lo que
+    # exige y lo que no cabe en su formato. El desborde de un sub-diario no se lanza aquí: se lee en `sub_diarios`.
+    incluidos = seleccionar(comprobantes)
+    fuera = fuera_de(incluidos, getattr(modulo, "EXCLUYE_TIPOS", None))
+    incluidos = [c for c in incluidos if c not in fuera]
+    exigir_requisitos(incluidos, config, libro.es_venta, contrato.exige(modulo))
+    no_caben = contrato.no_caben(modulo, libro, incluidos, config)
+    if no_caben:
+        raise contrato.NoCabe(no_caben)
+    corr = asi.correlativos_de_partida(incluidos, config, libro.es_venta, correlativos)
     # Directo a las líneas neutrales: sin pasar por las columnas de ningún ERP.
-    neutrales, rangos = asi.lineas_del_libro(libro, comprobantes, config, corr,
+    neutrales, rangos = asi.lineas_del_libro(libro, incluidos, config, corr,
                                              centro_en_anexo=contrato.centro_en_anexo(modulo, config))
     lineas = [ln.a_dict() for ln in neutrales]
     cuadre = partida_doble.cuadra(lineas)

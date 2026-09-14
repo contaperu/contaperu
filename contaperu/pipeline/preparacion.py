@@ -278,7 +278,11 @@ def normalizar_detracciones(doc: dict, configuracion: dict | None = None) -> dic
 def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, imputacion: dict | None = None,
              driver: str = "", claves_previas: Any = None) -> tuple[Libro, list[Comprobante], dict]:
     """El libro, los comprobantes que no se excluyeron —revisados— y la configuración aplicada hacia `driver` con la
-    imputación dentro. Sin `incluir_observados`, un comprobante con observaciones que bloquean detiene todo."""
+    imputación dentro. Sin `incluir_observados`, un comprobante con observaciones que bloquean detiene todo.
+
+    No descarta las detracciones que la tabla del contribuyente no reconoce, a diferencia de `revisar` y `diagnosticar`:
+    hacerlo al exportar mueve de sub-diario una factura cuyo código no está en la tabla y cambia el Excel de CONCAR
+    validado (caso `detraccion_codigo_sin_tasa` del snapshot). Queda pendiente de decidir."""
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
     previas = claves_previas_de(claves_previas)

@@ -206,7 +206,9 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
     traiga sale de la configuración.
 
     `driver` es el sistema de asientos cuya sección de la configuración se aplica (`concar` o `csv`):
-    sus siglas, sus sub-diarios y las columnas en que pone el centro de costo.
+    sus siglas, sus sub-diarios y las columnas en que pone el centro de costo. Exige lo mismo que
+    `exportar` hacia ese sistema —en CONCAR, el centro de costo y una moneda con código—; para ver qué
+    falta sin que se niegue, `diagnosticar`.
     """
     return api.generar_asiento(documento, driver=driver, configuracion=configuracion, imputacion=imputacion,
                                correlativos=correlativos, incluir_observados=incluir_observados,

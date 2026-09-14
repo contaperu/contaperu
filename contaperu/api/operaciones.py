@@ -72,8 +72,9 @@ def generar_asiento(documento: dict, *, driver: str, configuracion: dict | None 
                     imputacion: dict | None = None, correlativos: dict | None = None,
                     incluir_observados: bool = False, claves_previas: list | None = None) -> dict:
     """Convierte los comprobantes en líneas de diario del estándar, con la configuración del sistema de asientos
-    `driver` (sus siglas, sus sub-diarios, las columnas del centro de costo) y sin su formato. `_asiento` trae el
-    número de líneas, los rangos por sub-diario, el cuadre y la huella."""
+    `driver` (sus siglas, sus sub-diarios, las columnas del centro de costo) y sin su formato. Es `exportar` sin
+    escribir el archivo: exige lo que exige ese destino y lo que no cabe en su formato. `_asiento` trae el número de
+    líneas, los rangos por sub-diario, el cuadre y la huella."""
     return armado.generar_asiento(documento, driver=driver, configuracion=configuracion, correlativos=correlativos,
                                   incluir_observados=incluir_observados, imputacion=imputacion,
                                   claves_previas=claves_previas)

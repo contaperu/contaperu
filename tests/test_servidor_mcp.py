@@ -273,7 +273,7 @@ def test_la_imputacion_llega_por_el_protocolo():
     herramientas que arman, revisan o exportan el asiento."""
     documento = json.loads(json.dumps(DOCUMENTO))
     documento["comprobantes"][0]["id_externo"] = "fila-871"
-    imputacion = {"fila-871": {"cuenta_contable": "636301", "cuenta_tercero": "469901"}}
+    imputacion = {"fila-871": {"cuenta_contable": "636301", "cuenta_tercero": "469901", "centro_costo": "CC-64"}}
     r = llamar("generar_asiento", documento=documento, imputacion=imputacion)
     # La cuenta del total manda también en la línea que le descuenta la detracción al proveedor.
     assert [ln["cuenta"] for ln in r["asiento"]] == ["636301", "401111", "469901", "469901", "421203"]

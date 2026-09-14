@@ -50,7 +50,7 @@ def test_los_excluidos_no_entran_en_la_exportacion():
         dict(base, numero="1"),
         dict(base, numero="2", excluida=True),
     ]}
-    r = api.generar_asiento(doc, driver="concar", configuracion={"cuentas": {"gasto": "659999"}})
+    r = api.generar_asiento(doc, driver="concar", configuracion={"cuentas": {"gasto": "659999"}, "usa_centros_costo": False})
     assert len({ln["documento"]["serie_numero"] for ln in r["asiento"]}) == 1
 
 
@@ -173,7 +173,7 @@ def test_la_cuenta_llega_solo_en_la_imputacion():
     `id_externo`, y lo que no traiga sale de la configuración. Un documento que todavía los trae se rechaza en la
     puerta: perder su cuenta en silencio sería peor."""
     doc = {"libro": LIBRO, "comprobantes": [BASE]}
-    config = {"cuentas": {"gasto": "659999"}}
+    config = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
     assert _del_rol(api.generar_asiento(doc, driver="concar", configuracion=config), "principal", "tercero") == [("659999", "100.00"), ("421201", "118.00")]
 
     imputacion = {"fila-8": {"cuenta_contable": "637301", "cuenta_tercero": "469901"}}
@@ -225,3 +225,18 @@ def test_una_imputacion_ambigua_o_de_otro_documento_se_rechaza_en_la_puerta():
         api.generar_asiento(doc, driver="concar", imputacion=ambigua)
     with pytest.raises(api.DocumentoInvalido, match="fila-9"):
         api.generar_asiento(doc, driver="concar", imputacion={"fila-9": {"cuenta_contable": "659999"}})
+
+
+def test_generar_asiento_exige_lo_mismo_que_exportar():
+    """Es `exportar` sin escribir el archivo (1.0): se niega por lo que el destino exige y deja fuera lo que no saldría.
+    Mirar sin exigir es `diagnosticar`, o el CSV, que no exige centro."""
+    doc = {"libro": LIBRO, "comprobantes": [BASE]}
+    con_centros = {"cuentas": {"gasto": "659999"}}          # la 659999 lleva centro y el documento no trae
+    with pytest.raises(api.SinCentro):
+        api.generar_asiento(doc, driver="concar", configuracion=con_centros)
+    with pytest.raises(api.SinCentro):
+        api.exportar(doc, driver="concar", configuracion=con_centros)
+    assert api.generar_asiento(doc, driver="csv", configuracion=con_centros)["asiento"]
+    repetido = {"libro": LIBRO, "comprobantes": [BASE, dict(BASE, id_externo="fila-9")]}
+    r = api.generar_asiento(repetido, driver="csv", configuracion=con_centros, incluir_observados=True)
+    assert len({ln["correlativo"] for ln in r["asiento"]}) == 1      # el duplicado no sale, como en el archivo
