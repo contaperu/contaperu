@@ -29,7 +29,8 @@ configura en su sección, el motor lo valida antes de generar y se lo describe a
   VENTAS» del Sistema Experto Contable 26.00 (NewContaSis), con sus 50 y 44 columnas transcritas de la plantilla
   oficial, sin sus filas de notas y con su pestaña. Las reglas de formato las revisó John contra un registro que
   CONTASIS importó (12-sep-2026):
-  - textos rellenos con espacios hasta su largo, y serie y número sin ceros a la izquierda;
+  - textos rellenos con espacios hasta su largo, la serie tal como la trae el comprobante y el número sin ceros a
+    la izquierda;
   - importes en soles: en dólares, cada columna × T.C. y el total en «equivalente en dólares»;
   - la nota de crédito en negativo, el % IGV legal y la glosa cortada a 60;
   - la boleta de compras, entera en no gravadas, y la detracción vacía;
@@ -52,8 +53,9 @@ configura en su sección, el motor lo valida antes de generar y se lo describe a
 - **`id_externo`** en el comprobante (era un nombre reservado): el id con el que la aplicación conoce el
   documento, y la llave de su imputación.
 - **La imputación** (`asiento.Imputacion`): la cuenta, el centro de costo, la cuenta del total y el **reparto** de
-  un documento, que llegan aparte, en la configuración bajo `imputaciones` y por `id_externo`; en la fachada, el
-  argumento `imputacion` de `exportar`, `diagnosticar` y `generar_asiento`. El
+  un documento, que llegan aparte y por `id_externo`: en la fachada, el argumento `imputacion` de `exportar`,
+  `diagnosticar` y `generar_asiento`. En la configuración guardada, `imputaciones` es un error; la fachada se la
+  entrega al núcleo dentro de la configuración aplicada (`operaciones.con_imputacion`). El
   reparto divide solo la base —el caso: una factura con una parte de sistemas y otra de
   desarrollo; la plantilla de CONTASIS admite varias filas por documento—, y el asiento lleva una línea de gasto o
   ingreso por parte. Un reparto con cuenta o centro al lado, o la imputación de un `id_externo` que no está, se

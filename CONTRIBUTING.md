@@ -93,8 +93,9 @@ compras con el asiento cuadrado. Requisitos para que un driver entre **al reposi
    lo que `diagnosticar` usa para decir si un mes está listo para tu destino, y lo que el núcleo hace
    cumplir antes de llamarte. Un requisito fuera de ese catálogo no pasa el contrato.
 6. **Lo que tu formato no puede llevar, en `no_caben`** (una moneda que no tiene, un código más largo que su
-   columna), por motivo: `diagnosticar` lo dice antes y el núcleo se niega antes de llamarte. Un código no se
-   corta y una moneda no se inventa.
+   columna), por motivo: en un driver que lleva cuentas, `diagnosticar` lo dice antes. El núcleo se niega con
+   `NoCabe` antes de llamarte solo en la forma `desde_comprobantes`; en las demás, lo informa `diagnosticar` y no
+   te detiene nadie, así que tu driver no escribe lo que no cabe. Un código no se corta y una moneda no se inventa.
 7. **Declara lo que se configura en tu sección** (`CONFIGURACION`, con `configuracion.Campo`) y, si tu formato
    puede llevar un dato en más de una columna, **en cuáles** (`COLUMNAS_ELEGIBLES`, con `configuracion.Columna`:
    una fija y las demás a elegir). Un driver de asientos incluye `asiento.CONFIGURACION_DEL_ASIENTO`. Lo que

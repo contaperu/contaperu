@@ -56,13 +56,16 @@ from contaperu import operaciones as op
 
 libro = {"ruc": "20601111111", "razon_social": "MI EMPRESA SAC",
          "periodo": "202608", "tipo": "compra"}
+# La cuenta de gasto por defecto viene vacía: sin ella (aquí o en la imputación de cada comprobante) no hay asiento
+# (`SinCuenta`). Una 60 no lleva centro de costo; una 63 o una 65 lo pediría (`cuentas_con_centro`).
+configuracion = {"cuentas": {"gasto": "601101"}}
 
 doc = op.leer_xml(open("factura.xml", encoding="utf-8").read(), libro)
 doc = op.revisar(doc)                     # observaciones por comprobante
 print(doc["_revision"])
 
-asiento = op.generar_asiento(doc)         # líneas de diario, sin formato de ERP
-excel = op.exportar(doc, "concar")        # el .xlsx, en base64
+asiento = op.generar_asiento(doc, configuracion)     # líneas de diario, sin formato de ERP
+salida = op.exportar(doc, "concar", configuracion)   # un dict; el .xlsx va en salida["contenido_base64"]
 ```
 
 Y desde la línea de comandos:

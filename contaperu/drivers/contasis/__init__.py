@@ -9,8 +9,9 @@ aquí no se decide ninguna cuenta.
 Cómo se escribe el archivo (las fuentes de cada regla, en `datos.py`):
 
 - **Archivo:** `.xlsx`, sin las filas 1-13 de la plantilla y con su pestaña (`FORMATO_COMPRAS`, `FORMATO_VENTAS`).
-- **Textos:** rellenos con espacios hasta su largo, también los vacíos; serie y número sin ceros a la izquierda.
-  El nombre va de corrido; la glosa (`asiento.glosa_de`), cortada a 60.
+- **Textos:** rellenos con espacios hasta su largo, también los vacíos; la serie, tal como la trae el comprobante, y
+  el número sin ceros a la izquierda (`formato.formatear_numero`). El nombre va de corrido; la glosa
+  (`asiento.glosa_de`), cortada a 60.
 - **Fechas:** celdas de fecha. **Importes:** números con dos decimales, y un cero es una celda vacía. **Tipo de
   cambio:** `1` en soles.
 - **Dólares:** cada importe × T.C. y el total, total × T.C.; si el redondeo los separa, lo absorbe la base. El total

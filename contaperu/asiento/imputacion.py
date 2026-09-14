@@ -3,12 +3,15 @@
 Decisión de John (12-sep-2026): el documento `open-accounting` es el riel que lleva los hechos de cualquier input —el
 XML, un PDF, la propuesta del SIRE, el archivo de otro sistema—, y **las cuentas viven en la aplicación**: en la
 configuración de cada entorno y en lo que el contador decide en su Revisión. Por eso la cuenta, el centro de
-costo, la cuenta del total y el reparto de un documento no están en el comprobante: llegan en la configuración,
-bajo `imputaciones`, con el `id_externo` del comprobante como llave.
+costo, la cuenta del total y el reparto de un documento no están en el comprobante: llegan aparte, en el argumento
+`imputacion` de la fachada (`operaciones.exportar`, `diagnosticar`, `generar_asiento`), con el `id_externo` del
+comprobante como llave. No van en la configuración guardada, donde `imputaciones` es un error:
+`operaciones.con_imputacion` las lee en la puerta y se las entrega al núcleo dentro de la configuración aplicada, bajo
+`imputaciones`, que es donde las busca `resolucion`.
 
-    {"imputaciones": {
-       "fila-123": {"cuenta_contable": "6011020", "centro_costo": "OBRA01", "cuenta_tercero": "4699",
-                    "reparto": [{"importe": "60.00", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"}]}}}
+    {"fila-123": {"cuenta_contable": "6011020", "centro_costo": "OBRA01", "cuenta_tercero": "4699"},
+     "fila-124": {"reparto": [{"importe": "60.00", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
+                              {"importe": "40.00", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]}}
 
 **Qué trae.** La cuenta de la base, el centro, la cuenta del total y el reparto de UN documento. Lo que no
 traiga sale de la configuración del entorno: desde open-accounting 0.3 el comprobante no lleva cuentas.

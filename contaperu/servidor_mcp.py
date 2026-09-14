@@ -89,7 +89,7 @@ Reglas que conviene tener claras antes de armar un documento:
   - La `retencion` de un comprobante es la de renta de 4ta de un recibo por honorarios. La
     retención del IGV del 3 % NO es una detracción y no entra en el asiento.
   - Cada contribuyente tiene su plan de cuentas y sus sub-diarios: van en `configuracion`, con lo
-    general en la raíz y lo de cada sistema contable en su sección (`concar`, `contasis`).
+    general en la raíz y lo de cada sistema contable en su sección (`concar`, `csv`, `contasis`).
     `configuracion_por_defecto` devuelve un punto de partida razonable, no la verdad de nadie.
   - La cuenta, el centro de costo, la cuenta del total y el reparto de CADA comprobante los decide
     quien revisa, y no van en el documento: llegan aparte, en `imputacion`, por el `id_externo` del
@@ -172,7 +172,8 @@ def configuracion_declarada() -> str:
 def configuracion_por_defecto() -> dict:
     """La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas
     de detracción— y una sección por sistema contable con lo suyo (`concar`: siglas y sub-diarios,
-    códigos, columnas del centro de costo; `contasis`: medio de pago y columnas del centro de costo).
+    códigos, columnas del centro de costo; `csv`: siglas, sub-diarios y códigos de la detracción;
+    `contasis`: medio de pago y columnas del centro de costo).
 
     Es un punto de partida razonable, no la verdad de ningún contribuyente: el plan de cuentas
     y los sub-diarios los decide cada empresa. Cópiala, cámbiale lo que toque y pásala como
@@ -187,9 +188,10 @@ def validar_comprobantes(documento: dict, configuracion: dict | None = None) -> 
     `estado` y `observaciones` puestos en cada uno.
 
     Comprueba lo que se puede comprobar sin salir a ningún sitio: que el RUC sea un RUC, que el
-    IGV cuadre con la base, que el total sea la suma de sus partes, que la fecha caiga en el
-    periodo, que no haya duplicados. Las observaciones de nivel `error` bloquean la exportación;
-    las de nivel `aviso` no.
+    IGV cuadre con la base, que el total sea la suma de sus partes, que la fecha no sea posterior
+    al periodo (error; una venta de un mes anterior solo avisa, y una compra anterior, solo pasados
+    los 12 meses del plazo de anotación), que no haya duplicados. Las observaciones de nivel `error`
+    bloquean la exportación; las de nivel `aviso` no.
 
     También descarta las detracciones cuyo código no está en la tabla del contribuyente, que es
     de donde salen los códigos inventados cuando una IA confunde la retención del IGV con una
@@ -242,7 +244,8 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
     En una sola respuesta: si el mes está listo (`listo_para_exportar`) y, si no, por qué
     (`por_que_no`); qué comprobantes tienen observaciones que bloquean y cuáles solo avisos, por su
     serie-número; qué falta para el sistema de destino —cuenta contable, centro de costo, tipos de
-    comprobante sin sigla, monedas que no admite, sub-diarios sin correlativo—; qué
+    comprobante sin sigla, monedas que no admite, un reparto entre cuentas que no admite
+    (`reparto_no_admitido`), lo que no cabe en su formato (`no_cabe`), sub-diarios sin correlativo—; qué
     detracciones esperan todavía su constancia; un resumen por proveedor o cliente; desde qué
     correlativo arrancaría cada sub-diario; y la lista de lo que saldría.
 
@@ -281,7 +284,9 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
       - `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como `.xlsx`:
                    una fila por comprobante, sin sub-diario (se elige al importar).
 
-    Antes de escribir nada comprueba que el asiento cuadre; si no cuadra, falla.
+    Antes de escribir nada, en los drivers que arman asiento (`concar`, `csv`) comprueba que cuadre; si
+    no cuadra, falla. `contasis` y `sire` no arman asiento: `contasis` se niega antes por lo que exige y
+    por lo que no cabe en su formato (`no_cabe`).
     """
     resultado = operaciones.exportar(documento, driver, configuracion, correlativos, incluir_observados,
                                      fecha=fecha or None, imputacion=imputacion)

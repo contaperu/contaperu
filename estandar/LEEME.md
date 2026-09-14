@@ -84,13 +84,15 @@ configura, con sus tipos, valores por defecto, patrones y textos, está en el re
 MCP (y en `contaperu configuracion` por la CLI), y el motor valida contra eso lo que recibe antes de generar: una
 clave que no existe se dice, no se ignora.
 
-**La imputación llega dentro de la configuración, bajo `imputaciones`, con el `id_externo` del comprobante como
-llave**; desde la fachada, es el argumento `imputacion` de `exportar`, `diagnosticar` y `generar_asiento`:
+**La imputación llega aparte, con el `id_externo` del comprobante como llave**: desde la fachada, es el argumento
+`imputacion` de `exportar`, `diagnosticar` y `generar_asiento` (`--imputacion` en la CLI):
 
-    {"fila-123": {"cuenta_contable": "6011020", "centro_costo": "OBRA01", "cuenta_tercero": "4699",
-                  "reparto": [{"importe": "60.00", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
+    {"fila-123": {"cuenta_contable": "6011020", "centro_costo": "OBRA01", "cuenta_tercero": "4699"},
+     "fila-124": {"reparto": [{"importe": "60.00", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
                               {"importe": "40.00", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]}}
 
+- **No va en la configuración guardada**: ahí `imputaciones` es un error. La fachada la lee en la puerta
+  (`operaciones.con_imputacion`) y se la entrega al núcleo dentro de la configuración aplicada, bajo `imputaciones`.
 - **Lo que no trae** sale de la configuración del entorno: el comprobante no lleva cuentas.
 - **El reparto divide solo la base** —el gasto o el ingreso—: el IGV y el total son del documento. Sus partes
   suman la base del asiento: el total menos el IGV con línea propia (en compras, la boleta y el recibo por
@@ -132,7 +134,9 @@ crédito…), nunca la sigla del ERP de destino. La traducción a `FT`, `BV` o l
 trabajo del driver, y un tipo sin equivalente **detiene la exportación en vez de inventarse una**.
 
 **5. Lo que no se entiende, se transporta.** `datos_originales` es un objeto libre donde el productor guarda lo
-suyo. El núcleo lo lleva de un extremo al otro y no lo lee jamás.
+suyo. El núcleo lo lleva de un extremo al otro y no lo interpreta, salvo las cuatro claves que escribe su propio
+lector de XML (`lectores/xml_ubl.py`) y que lee la validación (`validar.py`): `anticipo`, `emisor`, `adquirente` y
+`gratuitas`. Un productor que las escriba les da ese mismo sentido.
 
 ---
 
@@ -278,9 +282,11 @@ Y cuatro que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso re
 | comprobante | `percepcion` | El régimen de percepciones del IGV |
 | comprobante | `no_domiciliado` | El número del comprobante que emite un sujeto no domiciliado |
 
-El segundo centro de costo y el código de presupuesto de CONTASIS irían en `dimensiones`, el nombre ya
-reservado de la tabla de arriba, y como son decisiones de cada entorno, en la imputación y no en el documento.
-El CONTASIS de John no los usa (12-sep-2026), así que sigue reservado.
+Lo que ya sale en la segunda columna de centro de costos de CONTASIS es el **mismo** centro del documento, si la
+sección `contasis` la elige en `columnas.centro_costo` (13-sep-2026, `drivers/contasis/datos.py`): el mismo dato en
+otra columna, no una dimensión. Un segundo centro **distinto** y el código de presupuesto irían en `dimensiones`, el
+nombre ya reservado de la tabla de arriba, y como son decisiones de cada entorno, en la imputación y no en el
+documento. El CONTASIS de John no los usa (12-sep-2026), así que sigue reservado.
 
 ---
 

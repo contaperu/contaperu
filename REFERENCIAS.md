@@ -126,7 +126,8 @@ huella es lo que permite avisarlo.
 enseña Apideck a los desarrolladores: no se borra, se revierte.
 
 **Qué hace open-accounting.** Cada línea lleva `documento` y `referencia` —de qué comprobante sale y, si es
-una nota, a cuál corrige—, y el comprobante lleva `datos_originales` que el núcleo transporta y jamás lee.
+una nota, a cuál corrige—, y el comprobante lleva `datos_originales`, que el núcleo transporta sin interpretar
+(salvo las cuatro claves que escribe su propio lector de XML: `anticipo`, `emisor`, `adquirente` y `gratuitas`).
 Los importes van siempre en positivo y la nota de crédito invierte: nunca hay un asiento negativo que
 «borre» otro.
 
@@ -142,7 +143,8 @@ llama `posting_status` y Xero `Status`, y lo que un portal necesita para no re-e
 Es la válvula que evita que el modelo común crezca por cada campo raro de cada plataforma.
 
 **Qué hace open-accounting.** Regla 5 del estándar: «lo que no se entiende, se transporta», con `datos_originales`
-en el comprobante y las claves `_` como anotaciones del productor.
+en el comprobante —que el núcleo no interpreta, salvo las cuatro claves de su lector de XML— y las claves `_` como
+anotaciones del productor.
 
 **Qué tomar.** Nada: es el mismo diseño. Solo conviene documentar en `LEEME.md` que un driver puede
 leer `datos_originales` para lo específico de su ERP —como Rutter con `additional_fields`— sin que el núcleo lo

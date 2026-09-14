@@ -140,7 +140,7 @@
         "datos_originales": {
           "type": "object",
           "additionalProperties": true,
-          "description": "Espacio libre del productor. El núcleo lo transporta y NO lo interpreta."
+          "description": "Espacio libre del productor. El núcleo lo transporta y no lo interpreta, salvo las cuatro claves que escribe su propio lector de XML y que lee la validación: anticipo, emisor, adquirente y gratuitas."
         },
 
         "estado": { "type": "string", "description": "Lo rellena la validación: ok, observada, duplicada." },
