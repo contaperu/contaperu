@@ -37,9 +37,11 @@ ni una cuenta, ni un sentido, ni la detracción.
 ```python
 from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from contaperu.configuracion import Campo
-from contaperu.formato import Opciones
+from contaperu.drivers.kit import Opciones
 
 NOMBRE = "siscont"
+# A quién se entrega: "legacy" es un sistema contable instalado que importa un archivo.
+CANAL = "legacy"
 FORMATOS = {"compra": "siscont_asiento", "venta": "siscont_asiento"}
 OPCIONES = Opciones(fecha="DD/MM/AAAA", extension=".txt")
 CONTENT_TYPE = "text/plain; charset=utf-8"
@@ -53,10 +55,11 @@ CONFIGURACION = (*CONFIGURACION_DEL_ASIENTO,
 def nombre(libro, opciones=OPCIONES) -> str:
     return f"SISCONT_{libro.ruc}_{libro.periodo}{opciones.extension}"
 
-def desde_lineas(libro, lineas, config, opciones=OPCIONES) -> tuple[bytes, dict]:
+def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tuple[bytes, dict]:
     # Cada línea trae `rol` (principal, igv, tercero, detraccion…), `cuenta`, `debe_haber`, `importe`
-    # como texto exacto, `documento.tipo_cp` (el código SUNAT), la glosa entera… Tradúcelas y devuelve
-    # los bytes del archivo y un resumen.
+    # como texto exacto, `documento.tipo_cp` (el código SUNAT), la glosa entera… `indice` dice qué tramo
+    # de líneas es de qué comprobante, con su cabecera (glosa, base, IGV, total, contraparte). Tradúcelas
+    # y devuelve los bytes del archivo y un resumen.
     ...
 ```
 
@@ -67,15 +70,15 @@ Si tu sistema no importa asientos sino su **registro** de compras y de ventas, y
 (CONTASIS), la forma es `desde_comprobantes(libro, comprobantes, config, opciones)`: recibes los comprobantes y la
 configuración, y cada cuenta la lees de `asiento.partes_de` (la de la base, o una por parte si hay reparto) y de
 `asiento.cuenta_tercero` (la del total), que la resuelven igual que para el asiento, con la imputación de cada
-documento dentro. El núcleo exige la cuenta antes de llamarte. Las otras dos formas —`linea` para un TXT por
-comprobante, como el SIRE, y `construir` para un archivo armado desde los comprobantes, como CONCAR— siguen
-existiendo.
+documento dentro. El núcleo exige la cuenta antes de llamarte. Para un TXT por comprobante, como el SIRE, la forma es
+`linea`. `construir`, la forma de CONCAR hasta la 0.10, sigue funcionando con un aviso y se retira en la 2.0: un driver
+nuevo no la usa.
 
 **Dos maneras de publicarlo:**
 
 - **Como paquete propio**, sin esperar a nadie: declara en tu `pyproject.toml`
   `[project.entry-points."contaperu.drivers"]` → `siscont = "contaperu_siscont"` y, con los dos
-  instalados, tu driver aparece en la CLI, en la fachada y en el servidor MCP.
+  instalados, tu driver aparece en la CLI, en la api, en el servidor MCP y en la puerta HTTP.
 - **Dentro de este repositorio**, en `contaperu/drivers/<sistema>/` y en `DE_SERIE` de
   `contaperu/drivers/__init__.py`.
 
@@ -86,8 +89,8 @@ con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
 
 1. **Un test con un caso real** que el sistema de destino haya aceptado de verdad. Un driver que nadie ha
    importado en su ERP no se publica: sería prometer algo que no consta.
-2. **El asiento debe cuadrar.** Con `desde_lineas` lo exige el núcleo antes de llamarte; con `construir`,
-   el driver llama a `partida_doble.exigir()` antes de escribir bytes.
+2. **El asiento debe cuadrar.** Con `desde_lineas` lo exige el núcleo antes de llamarte, y tu driver no decide
+   ninguna cuenta ni ningún sentido.
 3. **Nada de red, nada de disco, nada de estado.** Entra por parámetro, sale por retorno.
 4. **Un tipo de comprobante sin equivalente detiene la exportación**, no se inventa uno. Es la regla más
    importante: es preferible un error claro a un asiento silenciosamente mal.
@@ -95,22 +98,25 @@ con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
    lo que `diagnosticar` usa para decir si un mes está listo para tu destino, y lo que el núcleo hace
    cumplir antes de llamarte. Un requisito fuera de ese catálogo no pasa el contrato.
 6. **Lo que tu formato no puede llevar, en `no_caben`** (una moneda que no tiene, un código más largo que su
-   columna), por motivo: en un driver que lleva cuentas, `diagnosticar` lo dice antes. El núcleo se niega con
-   `NoCabe` antes de llamarte solo en la forma `desde_comprobantes`; en las demás, lo informa `diagnosticar` y no
-   te detiene nadie, así que tu driver no escribe lo que no cabe. Un código no se corta y una moneda no se inventa.
+   columna), por motivo: en un driver que lleva cuentas, `diagnosticar` lo dice antes y el núcleo se niega con
+   `NoCabe` antes de llamarte, en cualquier forma. Un código no se corta y una moneda no se inventa.
 7. **Declara lo que se configura en tu sección** (`CONFIGURACION`, con `configuracion.Campo`) y, si tu formato
    puede llevar un dato en más de una columna, **en cuáles** (`COLUMNAS_ELEGIBLES`, con `configuracion.Columna`:
    una fija y las demás a elegir). Un driver de asientos incluye `asiento.CONFIGURACION_DEL_ASIENTO`. Lo que
    declaras es lo que el motor valida, lo que una aplicación pinta en su pantalla y lo único que tu driver puede
    leer: `tests/test_contrato_drivers.py` lo comprueba con una configuración espía y leyendo tu código.
 8. **Lo que tu destino no lleva, en `EXCLUYE_TIPOS`** (códigos SUNAT en texto: el SIRE y CONTASIS dejan fuera el
-   recibo por honorarios, `02`). El núcleo lo quita antes de llamarte (`generar.fuera_de`), así que tu driver no lo
+   recibo por honorarios, `02`). El núcleo lo quita antes de llamarte (`pipeline.seleccion.fuera_de`), así que tu driver no lo
    recibe, y lo cuenta en `fuera_del_destino`, en el resumen y en los totales de `diagnosticar`, para que no parezca
    que se perdió.
 9. **Si tu driver se niega con una excepción propia, hereda de `asiento.NoExportable` y lleva su `clave`**, como
    `CorrelativoDesborda` de CONCAR (`sub_diario_desborda`: un sub-diario que pasaría de 9999). De lo que impide
    exportar, la CLI solo atrapa esa base y dice el motivo sin traceback; quien exporta lee su `clave` y sus
-   `comprobantes`.
+   `comprobantes`, y la puerta HTTP la responde como un 422 con esa `clave`.
+10. **Declara tu `CANAL`**: `legacy` si tu sistema contable importa un archivo, `tributario` si es un registro que se
+    presenta a SUNAT, `intercambio` si es un formato neutral. El contrato hace cumplir sus reglas (un `legacy` lleva
+    cuentas y declara `EXIGE`); `api_erp` está reservado para escribir en la API de un ERP moderno y todavía no se
+    admite.
 
 ## Estilo
 

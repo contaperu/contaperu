@@ -89,80 +89,129 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
 | `tasa_igv` | La del comprobante, como texto exacto (`"10.5"`). Redondear es cosa del que solo admite enteros. |
 | `detraccion.codigo` | El código SUNAT del bien o servicio, al lado del interno del contribuyente. |
 
-## Núcleo, fachada y puertas
+## Capas, api y puertas
+
+Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abajo. No es una convención:
+`tests/test_capas.py` lo comprueba módulo a módulo, y la lista de excepciones está vacía.
 
 ```
-   cli.py ─────────┐                  ┌───────── servidor_mcp.py
-   (argv, stdout)  │                  │          (JSON-RPC, adjuntos)
-                   ▼                  ▼
-              operaciones.py  ── la FACHADA: dict entra, dict sale
-                   │
-                   ▼
-                NÚCLEO  (no sabe que las puertas existen)
+ ENTRADA                                                         SALIDA (drivers, por canal)
+ ERP en otro lenguaje ─HTTP/OpenConta─► puertas/servidor_http ─┐        ┌─ legacy:      concar · contasis
+ Agente de IA ────────MCP────────────► puertas/servidor_mcp ──┼─► api ─► pipeline ─► núcleo ─┼─ tributario:  sire
+ Contador ────────────CLI────────────► puertas/cli ───────────┘        └─ intercambio: csv
 ```
 
-- **La fachada** (`operaciones.py`) habla en documentos `open-accounting`: `leer_xml`,
-  `leer_propuesta_sire`, `revisar`, `generar_asiento`, `exportar`, `diagnosticar`, `cuadrar`,
-  `adaptar_pcge`. Y de la configuración: `errores_de_configuracion`, `configuracion_por_defecto` (la forma que se
-  guarda), `describir_configuracion` (lo que se configura, para pintar una pantalla) y `config_aplicada`; y
-  `con_imputacion`, que lee la imputación de cada documento y se la entrega al núcleo dentro de la configuración.
-  Todas puras: sin disco, sin red, sin estado. Los bytes salen en base64 porque un JSON no sabe llevar bytes.
-- **Las puertas** son adaptadores delgados: traducen un protocolo y delegan. La CLI escribe archivos;
-  el MCP devuelve adjuntos. Ninguna reimplementa trabajo, y `tests/test_frontera.py` lo convierte en
-  algo que se rompe solo: el núcleo no puede importar una puerta, ni el SDK del protocolo, ni salir a
-  la red, ni mirar el reloj; y cada puerta tiene que pasar por la fachada.
-- **El portal** (otro repositorio) es una tercera puerta que importa `contaperu.asiento` y
-  `contaperu.operaciones`. Desde la 0.10 el núcleo no conoce ningún formato: las columnas de CONCAR
-  salen de su driver (`drivers.concar.filas_de_comprobante`), igual que las de CONTASIS.
+| Capa | Módulos | Qué sabe |
+|---|---|---|
+| base | `_version`, `_obsoleto`, `_datos`, `errores` | la versión, el aviso de las rutas viejas, los datos empaquetados, la base de los errores |
+| núcleo | `modelo`, `catalogos`, `configuracion`, `igv`, `detracciones`, `validar`, `partida_doble`, `asiento`, `pcge`, `lectores`, `comparar_sire` | contabilidad peruana, sin disco, sin red y sin reloj |
+| drivers | `drivers/` (`contrato`, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
+| pipeline | `pipeline/` (`preparacion`, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
+| api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa, estable durante la 1.x |
+| puertas | `puertas/` (`cli`, `servidor_mcp`, `servidor_http`, `comun`) | un protocolo; solo hablan con la api |
+| compat | `_compat/` | las rutas de la 0.10; nadie las importa |
+
+- **El pipeline** es el único dueño de la preparación: del documento al libro y los comprobantes, la configuración
+  aplicada hacia un destino con la imputación dentro, las claves previas, la selección de lo que sale, lo que exige el
+  destino y lo que no cabe en su formato, la numeración, las líneas con su índice, el cuadre y la huella. `revisar`,
+  `diagnosticar`, `generar_asiento` y `exportar` recorren los mismos pasos, cada una hasta donde le toca;
+  `generar_asiento` es `exportar` sin escribir el archivo.
+- **La api** (`contaperu.api`) habla en documentos `open-accounting`: el documento primero, lo demás por su nombre,
+  `driver` sin valor por defecto. Su superficie queda congelada con su firma (`tests/test_superficie_publica.py`), y
+  debajo queda el nivel de extensión —`modelo`, `asiento`, `drivers.contrato`, `drivers.kit`…— para quien escribe un
+  driver. Cada error hereda de `ErrorContaperu` y lleva una `clave` estable; `api.problema` lo dice como RFC 9457.
+- **La tabla de operaciones** (`api.OPERACIONES`) declara de cada operación su entrada (JSON Schema 2020-12, sacada de
+  su firma), su salida, su ruta HTTP y su nombre en el MCP. De ella salen las herramientas y recursos del MCP, las
+  rutas de la puerta HTTP y **OpenConta**, el contrato en formato OpenAPI 3.1 que se versiona en
+  `api/openconta.json`.
+- **Las puertas** traducen un protocolo y delegan. Comparten en `puertas/comun.py` los topes y la defensa del `Host`,
+  y `tests/test_frontera.py` impide que el núcleo importe una puerta, el SDK del MCP, la red o el reloj. Las tres dan
+  el mismo documento y el mismo diagnóstico.
+- **Las rutas de la 0.10** (`operaciones`, `generar`, `cli`, `servidor_mcp`, `formato`, `drivers.concar.construir`)
+  siguen resolviendo al mismo objeto, con sus firmas, y avisan con `RutaObsoleta` al usarse. Se retiran en la 2.0.
+- **El portal** (otro repositorio) usa la api y el nivel de extensión; el `resumen` de cada exportación, que guarda tal
+  cual, conserva sus claves.
+- **Lo peruano, a la vista** (hito J0): qué módulos importan uno peruano queda congelado en
+  `tests/fixtures/capas/acoplamiento_pe.json`, y un acoplamiento nuevo no entra sin verse. Separar la jurisdicción
+  (J2-J6) espera un cliente real fuera del Perú.
 
 ## Cómo se enchufa un driver
 
-Un driver expone `NOMBRE`, `FORMATOS`, `OPCIONES`, `nombre()` y **una** de cuatro formas,
-de dos familias (`drivers/contrato.py`):
+Un driver expone `NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, `nombre()` y **una** forma (`drivers/contrato.py`):
 
 | Forma | Recibe | Para qué |
 |---|---|---|
 | `linea(c, libro, idx, opciones) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
-| `desde_comprobantes(libro, comprobantes, config, opciones)` | los comprobantes y la configuración, con la imputación de cada documento | el registro de un sistema contable que arma el asiento él mismo (CONTASIS) |
-| `construir(libro, comprobantes, config, correlativos, opciones)` | los comprobantes | un archivo armado desde el comprobante (CONCAR, por historia) |
-| `desde_lineas(libro, lineas, config, opciones)` | las **líneas neutrales**, ya numeradas y cuadradas | **un driver de asientos nuevo** |
+| `desde_comprobantes(libro, comprobantes, config, opciones)` | los comprobantes y la configuración, con la imputación | el registro de un sistema contable que arma el asiento él mismo (CONTASIS) |
+| `desde_lineas(libro, lineas, config, opciones, *, indice=())` | las **líneas neutrales**, numeradas y cuadradas, y el índice de cada comprobante | **todo driver de asientos**, CONCAR incluido desde la 1.0 |
+| `construir(libro, comprobantes, config, correlativos, opciones)` | los comprobantes | la forma de CONCAR hasta la 0.10; un tercero que la use sigue funcionando con aviso hasta la 2.0 |
 
-Con `desde_lineas` el núcleo arma el asiento, lo numera y exige que cuadre **antes** de llamar al
-driver; el driver solo traduce. Es la forma que hace que un driver de SISCONT o STARSOFT no pueda
-equivocarse en una cuenta ni en un sentido, porque nunca los decide.
+Con `desde_lineas` el pipeline arma el asiento, lo numera y exige que cuadre **antes** de llamar al driver; el driver
+solo traduce. Si su firma acepta `indice`, recibe además qué tramo de líneas es de qué comprobante y una **cabecera**
+con sus hechos (`asiento.indice.Cabecera`: identidad, contraparte, glosa, base, IGV y total en texto exacto), fuera de
+las líneas y de la huella. Es lo que permite escribir en cada fila lo que la línea no guarda: CONCAR saca de ahí la
+glosa de su columna F y la tasa entera de la AO, que se redondea una sola vez desde el IGV y la base del comprobante.
 
-Con `desde_comprobantes` no hay asiento que armar ni que numerar, pero sí cuentas que llevar: el núcleo exige la
-cuenta de cada documento antes de llamar al driver, y el driver la lee de la misma resolución que usa el asiento.
-Tampoco decide ninguna. Lo que su formato no puede llevar —una moneda, un código más largo que su columna— lo
-declara en `no_caben`: `diagnosticar` lo dice antes y el núcleo se niega antes de llamarlo.
+**El canal dice a quién se entrega** (la familia dice qué se entrega), y el contrato hace cumplir sus reglas:
 
-Y **declara qué exige** (`EXIGE`, desde la 0.8): lo que ese ERP no puede importar sin y que el núcleo,
-si no se lo dicen, deja pasar —`centro_costo` en las cuentas que lo llevan, `moneda` con código en el
-destino—. La cuenta contable la exige el núcleo a todo driver que lleva cuentas, y la equivalencia del
-tipo, de la que sale el sub-diario, a los de asientos (uno de registro puede exigir el centro y `cuenta_unica`
-—una cuenta por documento, sin reparto de la base: si no, `reparto_no_admitido`—, pero no la moneda). Con eso
-`diagnosticar` decide si un mes está listo **para ese destino** (el CSV no bloquea por centro; CONCAR
-sí) y el núcleo lo hace cumplir antes de armar nada (`asiento.exigir_requisitos`). La idea es la de
-Codat `options` y Merge `/meta` (`REFERENCIAS.md`): el destino dice qué necesita antes de escribir.
+| Canal | Qué es | Reglas | Drivers |
+|---|---|---|---|
+| `legacy` | un sistema contable instalado que importa un archivo | lleva cuentas; declara `EXIGE` | concar, contasis; STARSOFT y SISCONT cuando entren |
+| `tributario` | un registro que se presenta a SUNAT | forma `linea`, sin cuentas ni configuración | sire |
+| `intercambio` | un formato neutral para leer o integrar | forma `desde_lineas` | csv |
 
-Y **declara lo que se configura** (desde la 0.10): las claves de su sección (`CONFIGURACION`) y en qué columnas de su
-archivo puede ir un dato (`COLUMNAS_ELEGIBLES`). La configuración se guarda con lo general en la raíz y una sección
-por sistema; `operaciones.config_aplicada(configuracion, driver)` la valida entera y le entrega al núcleo lo general
-con la sección del destino encima. Así el motor sirve a cualquier aplicación: cada una guarda la configuración de sus
-empresas y le pide al motor qué se configura (`contaperu://configuracion`), en vez de copiarlo. Un driver solo lee lo
-que declara, y el núcleo solo lo general y lo del asiento: lo vigila `tests/test_contrato_drivers.py`.
+`api_erp` —escribir el cuerpo de la API de un ERP moderno— queda **reservado** (hito A5): el contrato lo rechaza. Un
+driver de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy` durante la 1.x.
+
+Y **declara qué exige** (`EXIGE`): lo que ese ERP no puede importar sin y que el núcleo, si no se lo dicen, deja pasar
+—`centro_costo` en las cuentas que lo llevan, `moneda` con código en el destino; en uno de registro, `centro_costo` y
+`cuenta_unica`—. La cuenta contable la exige el núcleo a todo driver que lleva cuentas, y la equivalencia del tipo, de
+la que sale el sub-diario, a los de asientos. Con eso `diagnosticar` decide si un mes está listo **para ese destino**,
+y el pipeline lo hace cumplir antes de armar nada. Lo que su formato no puede llevar —una moneda, un código más largo
+que su columna— lo declara en `no_caben`: `diagnosticar` lo dice antes y el pipeline se niega con `NoCabe`, en toda
+forma que lleva cuentas.
+
+Y **declara lo que se configura**: las claves de su sección (`CONFIGURACION`) y en qué columnas de su archivo puede ir
+un dato (`COLUMNAS_ELEGIBLES`). La configuración se guarda con lo general en la raíz y una sección por sistema, se
+valida entera y el núcleo recibe lo general con la sección del destino encima. Un driver solo lee lo que declara, y el
+núcleo solo lo general, lo del asiento y `MONEDAS_CODIGO`: lo vigila `tests/test_contrato_drivers.py`. Lo que todos los
+drivers comparten para escribir —las opciones, el formato de texto, las celdas y el libro de Excel— está en
+`drivers/kit/`.
 
 Se publica de dos maneras:
 
-- **Como paquete propio**, por entry points (`[project.entry-points."contaperu.drivers"]`). El
-  registro (`drivers/__init__.py`) lo carga al importarse; los de serie ganan ante un nombre repetido
-  y uno que no cumple el contrato se ignora con un `AvisoDriver` en vez de tumbar el registro. Así la
-  comunidad mantiene el driver de su ERP a su ritmo.
-- **Dentro del repositorio**, en `drivers/<sistema>/` y en `DE_SERIE`. Para eso hace falta un archivo
-  real que ese ERP haya aceptado: un driver que nadie ha importado no se publica.
+- **Como paquete propio**, por entry points (`[project.entry-points."contaperu.drivers"]`). El registro lo busca la
+  primera vez que se consulta; los de serie ganan ante un nombre repetido y uno que no cumple el contrato se ignora con
+  un `AvisoDriver` en vez de tumbar el registro.
+- **Dentro del repositorio**, en `drivers/<sistema>/` y en `DE_SERIE`. Para eso hace falta un archivo real que ese ERP
+  haya aceptado.
 
-Esté donde esté, `tests/test_contrato_drivers.py` lo examina: cumple el contrato y exporta el golden
+Esté donde esté, `tests/test_contrato_drivers.py` lo examina: cumple el contrato, declara su canal y exporta el golden
 de compras con el asiento cuadrado.
+
+### STARSOFT: qué se sabe y qué falta
+
+- **Qué se sabe.** STARSOFT importa asientos, y su API lista seis endpoints sin esquema publicado. El contrato v1 ya
+  cubre lo que un driver así necesita: canal `legacy`, forma `desde_lineas` con el índice y la cabecera de cada
+  comprobante, un cuerpo que no es un Excel y un `no_caben` propio. Lo prueba un driver de mentira,
+  `tests/drivers_de_prueba/diario_json.py`, enchufado por entry points.
+- **Qué falta.** Un archivo o una respuesta de su API que STARSOFT haya aceptado, y el esquema de su cuerpo; su libro
+  «Standar» pediría enmendar `libro.tipo` en el estándar. Hasta entonces no se publica ningún driver ni esqueleto: uno
+  dentro del paquete quedaría congelado por SemVer sin haber importado nada.
+- **Si se escribe en su API y no en un archivo**, el envío y los reintentos son de la aplicación, no del motor: la
+  identidad y la huella de cada comprobante (`_exportacion.comprobantes`) son la clave de idempotencia. Lo que le falte
+  a la línea va en la cabecera, no en la huella.
+
+### Lo que queda preparado, sin símbolo público
+
+| Punto | Qué hay en la 1.0 | Hito |
+|---|---|---|
+| Lectores de terceros | nombre reservado `lectores.contrato` y grupo `contaperu.lectores`: identificar, extraer, deduplicar | B7 |
+| El banco | paquete reservado `contaperu/banco/` en la capa núcleo; los conectores, fuera del paquete | D1-D7 |
+| Reglas de SUNAT como datos | `_datos.leer_json("datos/sunat/…")`; `catalogos` las cargará sin cambiar sus nombres | C1-C2 |
+| CDR y no domiciliados | `lectores/cdr.py` reservado; los roles pueden crecer sin romper un driver | C3, C12 |
+| Otra jurisdicción | J0 como test, J1 como efecto de las capas, `jurisdicciones/pe` reservado, `open-accounting` 0.4 para J5 | J0-J6 |
+| La API de un ERP moderno | canal `api_erp` reservado y rechazado | A5 |
 
 ## La capa para agentes
 

@@ -36,20 +36,39 @@ tabla de hitos con su propuesta y lo que no se hace. La tabla usa estas columnas
 
 ## 1 · Dónde estamos
 
-Librería **0.10.0** y estándar **`open-accounting` 0.3** (`contaperu/_version.py`).
+Librería **1.0.0rc1** en la rama `motor-v1`, pendiente de fusionar, y estándar **`open-accounting` 0.3**
+(`contaperu/_version.py`).
 
 | Pieza | Hoy |
 |---|---|
 | Lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. PDF y fotos quedan pendientes para quien use IA |
 | Validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote |
 | Asiento | Línea neutral con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
-| Drivers de serie | CONCAR (asientos), CONTASIS (registro), SIRE (TXT) y CSV, más los de terceros por el grupo `contaperu.drivers` (`contaperu/drivers/__init__.py:37`) |
-| Puertas | Fachada `operaciones`, CLI y servidor MCP con 11 herramientas y 5 recursos; hay un `Dockerfile` |
+| Drivers de serie | CONCAR (asientos) y CONTASIS (registro), de canal legacy; SIRE (TXT), tributario; CSV, intercambio. Más los de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`) |
+| Puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 11 herramientas y 6 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. Las rutas de la 0.10 siguen con aviso |
 | Pendiente que depende de datos | SISCONT y STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
 
 ### Cumplidos
 
-Ninguno todavía. Cada hito cumplido se anota aquí como `id · versión`.
+Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANGELOG.
+
+- 0.0 · 1.0.0
+- 0.1 · 1.0.0
+- 0.2 · 1.0.0
+- 0.3 · 1.0.0
+- 0.4 · 1.0.0
+- 0.5 · 1.0.0
+- 0.6 · 1.0.0
+- 0.7 · 1.0.0
+- 0.8 · 1.0.0 (el serie-número de `diagnosticar` sigue como en el documento; igualarlo al de la línea queda por confirmar)
+- B1 · 1.0.0
+- B2 · 1.0.0 (el esquema de `diagnosticar` viaja como recurso: el SDK no admite `outputSchema` sin cambiar la respuesta)
+- B3 · 1.0.0 (el contrato se llama OpenConta; su archivo sigue el formato OpenAPI 3.1)
+- B4 · 1.0.0 (adelantado sin esperar al integrador, por decisión de John del 14-sep-2026)
+- B5 · 1.0.0
+- B6 · 1.0.0
+- J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
+- J1 · 1.0.0 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)
 
 ---
 

@@ -6,7 +6,7 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
-Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.
+Rumbo a la **1.0.0**, en la rama `motor-v1`; la candidata es la **1.0.0rc1**. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.
 
 ### Añadido
 - **`ErrorContaperu`** (`contaperu.errores`): la base común de todas las excepciones del motor, con una `clave` estable
@@ -94,6 +94,14 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
   detalle. `puertas.servidor_http.crear_app` la da como aplicación ASGI. Las tres puertas dan el mismo documento y el
   mismo diagnóstico.
 
+- **`INTEGRAR.md`** (hito B6): cómo integrar el motor en un ERP —qué puerta elegir, la librería, la CLI por lotes, HTTP
+  con OpenConta, el MCP, un driver propio en sus dos niveles y lo que promete la 1.x—. Sus ejemplos se ejecutan en la
+  batería (`tests/test_integrar.py`).
+- CI: la batería también en Windows con Python 3.12; comprobar que OpenConta está al día; un trabajo que construye la
+  rueda, la instala en un entorno limpio y arranca los tres comandos con sus datos empaquetados. Publicar exige antes
+  la batería verde, que la etiqueta sea `v` más la versión del código, el CHANGELOG con esa versión fechada y
+  `twine check`.
+
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
@@ -166,6 +174,11 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 
 - La imagen de Docker instala también la puerta HTTP y expone el 8080; su `CMD` sigue siendo `contaperu-mcp`.
 
+- **Versión 1.0.0rc1** y `Development Status :: 5 - Production/Stable`. `README.md`, `ARQUITECTURA.md` (las capas, el
+  pipeline, el contrato v1 con sus canales, «STARSOFT: qué se sabe y qué falta» y lo que queda preparado),
+  `CONTRIBUTING.md`, `CLAUDE.md`, `SECURITY.md` (la política de la 1.x) y la hoja de ruta, con sus hitos cumplidos,
+  describen la 1.0.
+
 ### Obsoleto
 - `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
   avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen
@@ -177,6 +190,35 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`. La 1.0 fija una API pública establ
 - **`drivers.concar.construir`** (y `drivers.concar.xlsx.construir`): da las mismas celdas y el mismo resumen y avisa;
   el Excel de CONCAR se pide a `api.exportar_archivo`. **`contaperu.formato`** entero: `contaperu.drivers.kit`.
   La forma `construir` de un driver de terceros se retira en la 2.0.
+
+### Cómo migrar desde la 0.10
+
+Nada deja de funcionar: cada ruta de la 0.10 resuelve al mismo objeto, con su firma, y avisa con `RutaObsoleta` qué usar.
+Para silenciar el aviso mientras se migra: `warnings.filterwarnings("ignore", category=contaperu.RutaObsoleta)`.
+
+| En la 0.10 | En la 1.0 |
+|---|---|
+| `from contaperu import operaciones as op` | `from contaperu import api` |
+| `op.exportar(doc, "concar", config, correlativos)` | `api.exportar(doc, driver="concar", configuracion=config, correlativos=correlativos)` |
+| `op.generar_asiento(doc, config, None, False, imputacion, "csv")` | `api.generar_asiento(doc, driver="csv", configuracion=config, imputacion=imputacion)` |
+| `op.diagnosticar(doc, config, driver="concar")` | `api.diagnosticar(doc, driver="concar", configuracion=config)` |
+| `op.revisar(doc, config)` · `op.leer_xml(contenido, libro, True)` | `api.revisar(doc, configuracion=config)` · `api.leer_xml(contenido, libro, es_base64=True)` |
+| `op.documento(libro, comprobantes)` | `api.documento_de(libro, comprobantes)` |
+| `op.config_aplicada`, `op.con_imputacion`, `op.libro_de`, `op.comprobantes_de` | dentro de cada operación; el paso suelto está en `contaperu.pipeline.preparacion`, que es interno |
+| `generar.generar(libro, comprobantes, "concar", config=..., correlativos=...)` | `api.exportar_archivo(documento, driver="concar", configuracion=...)` |
+| `generar.Exportado`, `generar.ErroresBloqueantes`, `op.DocumentoInvalido` | `api.Exportado`, `api.ErroresBloqueantes`, `api.DocumentoInvalido` |
+| `drivers.concar.construir(...)` | `api.exportar_archivo`; un driver nuevo, `desde_lineas` |
+| `from contaperu.formato import Opciones` | `from contaperu.drivers.kit import Opciones` |
+| `contaperu.cli`, `contaperu.servidor_mcp` | `contaperu.puertas.cli`, `contaperu.puertas.servidor_mcp`; los comandos no cambian |
+| `comparar_sire.leer(ruta)` · `pcge.cargar_equivalencias(ruta)` | `comparar_sire.leer_bytes(datos)` · `pcge.cargar_equivalencias(datos)` |
+
+No cambian de sitio ni avisan: `asiento.*`, `drivers.concar.filas_de_comprobante`, `igv.aplicar_igv`,
+`igv.aplicar_total`, `detracciones.normalizar`, `detracciones.monto_detraccion`, `validar.marcar_duplicados`,
+`validar.revisar` y `modelo.clave_de`. El `resumen` de cada exportación conserva sus claves.
+
+Lo que sí cambia de comportamiento está arriba en negrita. Lo que no se aplicó y queda por decidir: descartar al
+exportar las detracciones que la tabla del contribuyente no reconoce (movería de sub-diario una factura y cambiaría el
+Excel de CONCAR validado), e igualar el serie-número de `diagnosticar` al de la línea.
 
 ## [0.10.0] — 2026-09-13
 

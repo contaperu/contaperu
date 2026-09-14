@@ -46,56 +46,40 @@ reales, y el estándar se deriva de su modelo, no al revés.
 pip install contaperu              # el núcleo
 pip install "contaperu[excel]"     # + exportar a CONCAR y CONTASIS (.xlsx)
 pip install "contaperu[mcp]"       # + el servidor MCP
+pip install "contaperu[http]"      # + la puerta HTTP para un ERP en cualquier lenguaje
 pip install "contaperu[todo]"      # todo
 ```
 
 ## De un XML de SUNAT a un asiento, en diez líneas
 
 ```python
-from contaperu import operaciones as op
+from pathlib import Path
 
-libro = {"ruc": "20601111111", "razon_social": "MI EMPRESA SAC",
-         "periodo": "202608", "tipo": "compra"}
-# La cuenta de gasto por defecto viene vacía: sin ella (aquí o en la imputación de cada comprobante) no hay asiento
-# (`SinCuenta`). Una 60 no lleva centro de costo; una 63 o una 65 lo pediría (`cuentas_con_centro`).
-configuracion = {"cuentas": {"gasto": "601101"}}
+from contaperu import api
 
-doc = op.leer_xml(open("factura.xml", encoding="utf-8").read(), libro)
-doc = op.revisar(doc)                     # observaciones por comprobante
-print(doc["_revision"])
+libro = {"ruc": "20601234567", "razon_social": "MI EMPRESA SAC", "periodo": "202608", "tipo": "compra"}
+documento = api.leer_xml(Path("F001-123.xml").read_text(encoding="utf-8"), libro)
+# La cuenta de gasto por defecto viene vacía: va aquí o en la imputación de cada comprobante, por su `id_externo`.
+configuracion = {"cuentas": {"gasto": "603201"}}
 
-asiento = op.generar_asiento(doc, configuracion)     # líneas de diario, sin formato de ERP
-salida = op.exportar(doc, "concar", configuracion)   # un dict; el .xlsx va en salida["contenido_base64"]
+diagnostico = api.diagnosticar(documento, driver="concar", configuracion=configuracion)
+print(diagnostico["listo_para_exportar"], diagnostico["por_que_no"])
+archivo = api.exportar_archivo(documento, driver="concar", configuracion=configuracion)
+Path(archivo.archivo).write_bytes(archivo.contenido)            # el Excel que importa CONCAR
 ```
 
-Y desde la línea de comandos:
-
-```bash
-contaperu generar --tipo compra --ruc 20601111111 --razon "MI EMPRESA SAC" \
-    --periodo 202608 --driver sire --salida ./salida  comprobantes/*.xml
-```
-
-Antes de generar el archivo de un sistema contable, parte de su configuración y pregunta qué falta:
-
-```bash
-contaperu configuracion --driver concar --por-defecto > mi-empresa.json
-contaperu diagnosticar mes.json --driver concar --config mi-empresa.json
-contaperu desde-json mes.json --driver concar --config mi-empresa.json --salida ./salida
-```
-
-La cuenta, el centro de costo, la cuenta del total y el reparto de cada documento no van en el comprobante: llegan
-aparte, en la **imputación**, con el `id_externo` del comprobante como llave. Es el argumento `imputacion` de
-`generar_asiento`, `diagnosticar` y `exportar` (en la fachada y en el MCP) y `--imputacion` en `contaperu
-diagnosticar` y `desde-json`; lo que no trae sale de la configuración. Su forma, en
-[estandar/LEEME.md](estandar/LEEME.md) (*Documento, imputación y configuración*).
+`contaperu.api` es la API pública de la 1.0: el documento primero, todo lo demás por su nombre, y el mismo nombre y la
+misma firma hasta la 2.0. Cómo integrarlo en un ERP —desde Python, por lotes, por MCP o por HTTP desde cualquier
+lenguaje—, en [INTEGRAR.md](INTEGRAR.md).
 
 ## Para un agente de IA: el servidor MCP
 
 Once herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
 `configuracion_por_defecto`, `validar_comprobantes`, `validar_partida_doble`, `generar_asiento`,
 `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`, `buscar_cuenta_pcge` y
-`adaptar_pcge2026`. Y cinco recursos de lectura: el esquema del estándar, los catálogos de SUNAT, el
-catálogo del PCGE 2026, los drivers disponibles y lo que se configura de cada uno.
+`adaptar_pcge2026`, todas anunciadas de solo lectura. Y seis recursos: el esquema del estándar, los catálogos de
+SUNAT, el catálogo del PCGE 2026, los drivers disponibles, lo que se configura de cada uno y el esquema de la respuesta
+de `diagnosticar`.
 
 El Excel y el ZIP del SIRE vuelven **como archivos** —recursos incrustados con su tipo—, así que el cliente
 los ofrece para guardar en vez de enseñar una tira de letras.
@@ -153,17 +137,34 @@ contaperu.tudominio.com {
 Nada de reescribir rutas ni de inyectar cabeceras. Y como no lleva autenticación, el freno sensato es de
 recursos: el tope de cuerpo de arriba, y memoria y CPU acotadas en el contenedor.
 
-### Una imagen, dos puertas
+### Una imagen, tres puertas
 
-La misma imagen sirve el MCP y ejecuta la CLI, según lo que le pases:
+La misma imagen sirve el MCP, la puerta HTTP y la CLI, según lo que le pases:
 
 ```bash
+docker run --rm -p 8080:8080 contaperu-mcp contaperu-http --host 0.0.0.0 --dominio contaperu.ejemplo.com
+
 docker run --rm -v "$PWD:/data" contaperu-mcp \
     contaperu desde-json /data/mes.json --salida /data/salida
 ```
 
 El servidor **no guarda nada y no sale a la red**. Cada llamada recibe todo lo que necesita y devuelve todo
 lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna deja rastro.
+
+---
+
+## Para un ERP en cualquier lenguaje: la puerta HTTP
+
+```bash
+pip install "contaperu[http,excel]"
+contaperu-http --host 127.0.0.1 --puerto 8080
+curl -s http://localhost:8080/openconta.json -o openconta.json
+```
+
+Cada operación de la api es una ruta (`POST /v1/exportar`, `POST /v1/diagnosticar`, `GET /v1/drivers`…) y el contrato
+que las describe, **OpenConta**, se sirve en `/openconta.json` en formato OpenAPI 3.1: cualquier generador arma el
+cliente de tu lenguaje con él. Sin estado, con la misma defensa del `Host` y los mismos topes que el MCP, y rechazos
+RFC 9457 con una `clave` estable. La guía, en [INTEGRAR.md](INTEGRAR.md).
 
 ---
 
@@ -201,8 +202,10 @@ ni inventar nada.
 
 ## Cómo está construido
 
-Tres niveles, de abajo arriba: un **núcleo** que sabe contabilidad peruana y nada más; **drivers** que
-conocen el formato de un sistema concreto y nada de contabilidad; y encima, la capa para **agentes**.
+Por capas que un test hace cumplir: un **núcleo** que sabe contabilidad peruana y nada más; **drivers** que
+conocen el formato de un sistema concreto y nada de contabilidad, cada uno con su canal (un sistema legacy, un
+registro tributario, un formato de intercambio); un **pipeline** único que prepara y arma cada mes; la **api**
+pública; y tres **puertas** —CLI, MCP y HTTP— que solo hablan con la api.
 El asiento nace en las líneas neutrales del estándar `open-accounting` y cada ERP es una proyección de ellas
 —CONCAR incluido—, así que un driver nuevo solo traduce vocabulario: las cuentas, los sentidos y la
 detracción los pone el núcleo una vez para todos. Un driver de la comunidad se enchufa por *entry
@@ -230,13 +233,14 @@ entrarían el banco y las facturas de proveedores —que el motor todavía no ha
 | Validación del comprobante y de la partida doble | listo |
 | Asiento: compras, ventas, honorarios, notas y detracción | listo |
 | Drivers CONCAR, SIRE y CSV | listo |
-| Servidor MCP y CLI | listo |
+| API pública estable, `contaperu.api`, con las rutas de la 0.10 funcionando con aviso durante la 1.x | listo |
+| Servidor MCP, CLI y puerta HTTP con el contrato OpenConta | listo |
 | `diagnosticar`: la capa para agentes — qué falta, para qué destino y a quién pedírselo | listo |
 | Contrato de driver y drivers de terceros por *entry points* | listo |
 | Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
-| Drivers de SISCONT y STARSOFT | abierto a la comunidad — ver [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Drivers de SISCONT y STARSOFT | el contrato ya cubre lo que necesitan; esperan un archivo real aceptado — ver [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 Lo que no está listo no tiene fecha: tiene un orden y un dato que lo destraba, en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).
 
@@ -259,7 +263,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-533 tests, sin red y sin credenciales.
+Más de 800 tests, sin red y sin credenciales.
 
 Lo más valioso que puedes aportar es un **driver de salida** para un ERP que hoy no está — ver
 [CONTRIBUTING.md](CONTRIBUTING.md) — o un **caso real** que el motor resuelva mal: un asiento que tu sistema
@@ -281,5 +285,7 @@ It also defines **`open-accounting`**, an open interchange format for Peruvian a
 (`estandar/`), with a formal JSON Schema. The rules aren't designed on paper: they come from real
 files that production accounting systems and SUNAT actually accepted.
 
-Install with `pip install contaperu`. The docs are in Spanish, because that's the language of the
+A stable Python API (`contaperu.api`), an MCP server for AI agents and a stateless HTTP port described by the
+**OpenConta** contract (an OpenAPI 3.1 document) let any ERP use it, in any language. Install with
+`pip install contaperu`. The docs are in Spanish, because that's the language of the
 domain and of the people who use it — but issues and pull requests in English are welcome.

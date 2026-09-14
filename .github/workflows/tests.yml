@@ -12,10 +12,16 @@ permissions:
 
 jobs:
   pytest:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest]
         python: ["3.11", "3.12", "3.13"]
+        # Un contador peruano trabaja en Windows: la consola, las rutas y los fines de línea se prueban también ahí.
+        include:
+          - os: windows-latest
+            python: "3.12"
     steps:
       # Las acciones van fijadas por SHA, no por etiqueta: una etiqueta se puede
       # mover y ejecutariamos codigo que nadie reviso.
@@ -26,6 +32,8 @@ jobs:
       - run: pip install -e ".[dev]"
       # Sin red y sin credenciales: si un test necesita cualquiera de las dos, esta mal planteado.
       - run: pytest -q
+      # El contrato OpenConta versionado tiene que ser el que genera el codigo.
+      - run: python herramientas/generar_openconta.py --comprobar
 
   minimos:
     # Hito 0.2: el mínimo de `mcp` que declara pyproject.toml, instalado tal cual. Si el servidor usa algo más nuevo que
@@ -38,3 +46,22 @@ jobs:
           python-version: "3.11"
       - run: pip install -e ".[dev]" "mcp==1.30.0"
       - run: pytest -q
+
+  rueda:
+    # La rueda que se publicaria, instalada en un entorno limpio y fuera del repositorio: los datos empaquetados
+    # (catalogo del PCGE, esquemas, OpenConta) viajan dentro y los tres comandos arrancan.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - run: pip install build
+      - run: python -m build
+      - run: python -m venv /tmp/limpio && /tmp/limpio/bin/pip install "$(ls dist/*.whl)[mcp,http,excel]"
+      - working-directory: /tmp
+        run: |
+          /tmp/limpio/bin/contaperu --version
+          /tmp/limpio/bin/contaperu-mcp --version
+          /tmp/limpio/bin/contaperu-http --version
+          /tmp/limpio/bin/python -c "from contaperu import api; import sys; sys.exit(0 if api.catalogo_pcge()['cuentas'] and api.contrato_openconta()['openapi'] == '3.1.0' and api.esquema_open_accounting()['title'] == 'open-accounting' and api.esquema_diagnostico()['title'] else 1)"
