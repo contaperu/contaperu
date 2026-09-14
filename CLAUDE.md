@@ -98,14 +98,14 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU.; de aquí salió la 0.8.0 |
-| `INTEROPERABILIDAD.md` | Su continuación: lo que enseñan los proyectos abiertos, los estándares (PLE, SAF-T, ISO 20022) y MCP, y cómo entrarían el banco y las facturas de proveedores. Investigación: cada propuesta espera su caso real |
-| `HOJA-DE-RUTA.md` | En qué orden crece el motor: la Fase 0 y los cinco frentes (drivers legacy, puerta para cualquier ERP, leer y validar más, el banco, el estándar), con la referencia de EE. UU., hitos con criterio de salida y el dato que destraba cada uno |
+| `INTEROPERABILIDAD.md` | Su continuación, y toda la investigación en un solo lugar, en cuatro partes: el marco (el ciclo de EE. UU. comparado con el peruano); las etapas del ciclo (recibir la factura, validar, asentar, exportar al destino, pagar y conciliar, declarar); lo transversal (modelos de referencia, el estándar, la arquitectura con MCP, otra jurisdicción); y el inventario de propuestas y descartes, con sus fuentes. Cada propuesta cita su hito y espera su caso real |
+| `HOJA-DE-RUTA.md` | En qué orden crece el motor: qué sigue, la Fase 0 y los seis frentes (drivers legacy, puerta para cualquier ERP, leer y validar más, el banco, el estándar y otra jurisdicción), hitos con criterio de salida y el dato que destraba cada uno. Solo orden: cada hito cita su propuesta de `INTEROPERABILIDAD.md` por número |
 | `CHANGELOG.md` | Cada versión con su porqué; la bitácora del motor vive aquí y en ningún otro sitio |
 | `SECURITY.md` · `CODE_OF_CONDUCT.md` | Cómo reportar una vulnerabilidad; cómo se convive en el proyecto |
 
 ## Pendiente que depende de datos, no de código
 
-El orden completo y qué destraba cada hito, en `HOJA-DE-RUTA.md` (§4, «Lo que hay que conseguir»). Aquí, lo que ya
+El orden completo y qué destraba cada hito, en `HOJA-DE-RUTA.md` (§5, «Lo que hay que conseguir»). Aquí, lo que ya
 espera un archivo o una norma:
 
 - Drivers de **SISCONT y STARSOFT**: cada uno exige un archivo real que ese sistema haya importado, como pasó con

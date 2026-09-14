@@ -197,10 +197,11 @@ tienen fuente**, nunca con una regla nueva escrita para el agente.
 ## Hoja de ruta
 
 El orden en que crece el motor, y el dato o el código que destraba cada paso, viven en
-[HOJA-DE-RUTA.md](HOJA-DE-RUTA.md): una fase para afinar lo que existe y cinco frentes —los drivers de SISCONT y
+[HOJA-DE-RUTA.md](HOJA-DE-RUTA.md): una fase para afinar lo que existe y seis frentes —los drivers de SISCONT y
 STARSOFT, la puerta para que cualquier ERP integre el motor, leer y validar más con las reglas oficiales de SUNAT, el
-banco como punto de partida del proceso contable y un estándar que mejora siempre—, cada uno con la referencia de cómo
-lo resuelve EE. UU. y sus hitos con criterio de salida. Aquí no se repiten. El diseño de cada pieza está en
+banco como punto de partida del proceso contable, un estándar que mejora siempre y la puerta a otra jurisdicción,
+condicionada a un cliente real fuera del Perú—, cada uno con sus hitos y su criterio de salida. Aquí no se repiten. La
+investigación y el diseño de cada pieza, ordenados por el ciclo contable y con el de EE. UU. como referencia, están en
 [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md), y lo tomado de las APIs de EE. UU., en [REFERENCIAS.md](REFERENCIAS.md).
 
 La idea que la ordena sigue siendo la de esta arquitectura: primero la compatibilidad con los sistemas que ya existen,

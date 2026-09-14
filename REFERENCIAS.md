@@ -6,9 +6,9 @@ lo compara, campo a campo, con `open-accounting`. Termina con una propuesta conc
 estándar y qué no. Investigación hecha el 11-sep-2026 sobre la documentación pública de cada uno; las
 fuentes están al final.
 
-Su continuación —los proyectos abiertos, los estándares (el PLE, SAF-T, XBRL GL, ISO 20022), la especificación
-MCP y dos entradas que el motor todavía no tiene, el banco y las facturas de proveedores— está en
-[INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
+Su continuación —el ciclo contable de EE. UU. comparado con el peruano, los proyectos abiertos, los estándares (el
+PLE, SAF-T, XBRL GL, ISO 20022), la especificación MCP, dos entradas que el motor todavía no tiene, el banco y las
+facturas de proveedores, y la puerta a otra jurisdicción— está en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
 
 ## Por qué mirar a EE. UU.
 

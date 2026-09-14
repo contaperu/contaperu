@@ -208,8 +208,9 @@ El asiento nace en las líneas neutrales del estándar `open-accounting` y cada 
 detracción los pone el núcleo una vez para todos. Un driver de la comunidad se enchufa por *entry
 points* sin tocar este repositorio. Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md).
 Lo que se tomó de QuickBooks, Xero y las APIs unificadas de EE. UU. —y lo que no—, en
-[REFERENCIAS.md](REFERENCIAS.md). Lo que enseñan los proyectos abiertos, y cómo entrarían el banco y las
-facturas de proveedores —que el motor todavía no hace—, en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
+[REFERENCIAS.md](REFERENCIAS.md). Lo que enseñan el ciclo contable de EE. UU. y los proyectos abiertos, y cómo
+entrarían el banco y las facturas de proveedores —que el motor todavía no hace—, en
+[INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
 
 ## Qué **no** hace
 
