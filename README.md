@@ -83,6 +83,12 @@ contaperu diagnosticar mes.json --driver concar --config mi-empresa.json
 contaperu desde-json mes.json --driver concar --config mi-empresa.json --salida ./salida
 ```
 
+La cuenta, el centro de costo, la cuenta del total y el reparto de cada documento no van en el comprobante: llegan
+aparte, en la **imputación**, con el `id_externo` del comprobante como llave. Es el argumento `imputacion` de
+`generar_asiento`, `diagnosticar` y `exportar` (en la fachada y en el MCP) y `--imputacion` en `contaperu
+diagnosticar` y `desde-json`; lo que no trae sale de la configuración. Su forma, en
+[estandar/LEEME.md](estandar/LEEME.md) (*Documento, imputación y configuración*).
+
 ## Para un agente de IA: el servidor MCP
 
 Once herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
@@ -188,7 +194,8 @@ Excel), al SIRE (TXT de reemplazo del RVIE y del RCE) y a un CSV genérico con l
 destino que todavía no tenga driver.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta
-para el sistema de destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos),
+para el sistema de destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos, un reparto que no
+suma la base o que el destino no admite, lo que no cabe en su formato),
 qué detracciones esperan constancia y qué saldría. Una sola respuesta, por serie-número, sin corregir
 ni inventar nada.
 

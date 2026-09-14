@@ -148,7 +148,8 @@ def fila(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.
 
 def no_caben(libro: Libro, comprobantes: list[Comprobante], config: dict) -> dict[str, list[Comprobante]]:
     """Lo que el registro de CONTASIS no puede llevar, por motivo (`datos.MOTIVOS`). Un código no se corta: una
-    cuenta o una serie cortadas serían otra cuenta y otra serie."""
+    cuenta o una serie cortadas serían otra cuenta y otra serie. Por eso el largo se mira en toda columna de texto
+    salvo las que sí se cortan, el nombre y la glosa (`datos.SE_CORTAN`)."""
     tipo = libro.tipo
     opciones = datos.OPCIONES
     salida: dict[str, list[Comprobante]] = {texto: [] for texto in datos.MOTIVOS.values()}

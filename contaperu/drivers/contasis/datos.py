@@ -195,7 +195,8 @@ CONDICIONES = {"contado": "CON", "credito": "CRE"}
 # Un documento que no dice su condición va de contado: así llevan todas sus filas los dos registros validados.
 CONDICION_SIN_DATO = "CON"
 
-# Lo que el registro de CONTASIS no puede llevar (`no_caben`): cada motivo se lee detrás de un número.
+# Lo que el registro de CONTASIS no puede llevar (`no_caben`): cada motivo se lee detrás de un número. El «largo» lo
+# mira `proyeccion.no_caben` en toda columna de texto que no se corta (`SE_CORTAN`), no solo en las que nombra su texto.
 MOTIVOS = {
     "moneda": "en una moneda que CONTASIS no admite (solo soles y dólares)",
     "cambio": "en dólares sin tipo de cambio, que CONTASIS necesita para llevarlos a soles",

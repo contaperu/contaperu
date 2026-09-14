@@ -46,6 +46,10 @@ configura en su sección, el motor lo valida antes de generar y se lo describe a
   dice `no_caben`. `tests/test_snapshot_contasis.py` congela las filas celda a celda, y
   `tests/test_plantilla_contasis.py` compara columnas y celdas con la plantilla y el registro validado cuando están
   en `tests/fixtures/privado/contasis/` (fuera de Git).
+
+  Su formato es `contasis_xlsx`, en compras y en ventas (`FORMATOS`). **Aceptado el 13-sep-2026:** CONTASIS importó
+  los dos Excel que genera el driver, el registro de compras y el de ventas de un mes real, con los anchos ya
+  fijados. Los del 12-sep-2026 eran registros que CONTASIS ya había importado; estos los generó el driver.
 - **`condicion_pago`** (`contado` | `credito`) en el comprobante: lo que declara el documento sobre su pago. En la
   factura electrónica es obligatorio (`PaymentTerms FormaPago`), y el lector de XML ya lo leía y lo dejaba en
   `datos_raw.forma_pago`; ahora es campo, y una factura con cuotas es a crédito. Vacío no es contado: es que el
@@ -102,9 +106,10 @@ configura en su sección, el motor lo valida antes de generar y se lo describe a
   `drivers.contrato.NoCabe` antes de llamar a un driver `desde_comprobantes`, y la CLI lo dice sin traceback.
 - **`asiento.FALTAS`**, la única tabla de lo que impide exportar (clave, requisito, excepción, texto, a quién pedirla
   y título de la CLI), y **`asiento.NoExportable`**, la base de sus excepciones y de `contrato.NoCabe` y
-  `concar.CorrelativoDesborda`: quien exporta atrapa una sola. **`asiento.correlativos_de_partida`**, el correlativo
-  de partida de cada sub-diario. Y en `modelo`, **`CENTIMO`**, **`a_decimal`**, **`texto_tasa`** y
-  **`serie_y_numero`**: cada uno es la única copia de lo que se repetía.
+  `concar.CorrelativoDesborda`: quien exporta atrapa una sola y lee su `clave`, la de su fila de `FALTAS` o la propia
+  de un driver (`CorrelativoDesborda` lleva `sub_diario_desborda`: un sub-diario que pasaría de 9999).
+  **`asiento.correlativos_de_partida`**, el correlativo de partida de cada sub-diario. Y en `modelo`, **`CENTIMO`**,
+  **`a_decimal`**, **`texto_tasa`** y **`serie_y_numero`**: cada uno es la única copia de lo que se repetía.
 - **La configuración declarada** (`contaperu/configuracion.py`): `Campo` (clave, tipo, valor por defecto, patrón,
   título, ayuda) y `Columna` (en qué columna de un archivo puede ir un dato, con su letra en compras y ventas, fija o
   marcada), con `validar`, `por_defecto`, `describir` y `ConfiguracionInvalida`, que trae todos los errores con su

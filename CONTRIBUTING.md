@@ -79,8 +79,10 @@ existiendo.
 - **Dentro de este repositorio**, en `contaperu/drivers/<sistema>/` y en `DE_SERIE` de
   `contaperu/drivers/__init__.py`.
 
-Esté donde esté, `tests/test_contrato_drivers.py` lo examina: cumple el contrato y exporta el golden de
-compras con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
+Esté donde esté, lo que comprueba el contrato es `drivers.contrato.incumplimientos()` (lista vacía = cumple): el
+registro lo llama al cargar un driver de terceros y, si le falta algo, lo ignora con un `AvisoDriver`.
+`tests/test_contrato_drivers.py` se lo pide a cada driver registrado y además le hace exportar el golden de compras
+con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
 
 1. **Un test con un caso real** que el sistema de destino haya aceptado de verdad. Un driver que nadie ha
    importado en su ERP no se publica: sería prometer algo que no consta.
@@ -101,6 +103,14 @@ compras con el asiento cuadrado. Requisitos para que un driver entre **al reposi
    una fija y las demás a elegir). Un driver de asientos incluye `asiento.CONFIGURACION_DEL_ASIENTO`. Lo que
    declaras es lo que el motor valida, lo que una aplicación pinta en su pantalla y lo único que tu driver puede
    leer: `tests/test_contrato_drivers.py` lo comprueba con una configuración espía y leyendo tu código.
+8. **Lo que tu destino no lleva, en `EXCLUYE_TIPOS`** (códigos SUNAT en texto: el SIRE y CONTASIS dejan fuera el
+   recibo por honorarios, `02`). El núcleo lo quita antes de llamarte (`generar.fuera_de`), así que tu driver no lo
+   recibe, y lo cuenta en `fuera_del_destino`, en el resumen y en los totales de `diagnosticar`, para que no parezca
+   que se perdió.
+9. **Si tu driver se niega con una excepción propia, hereda de `asiento.NoExportable` y lleva su `clave`**, como
+   `CorrelativoDesborda` de CONCAR (`sub_diario_desborda`: un sub-diario que pasaría de 9999). De lo que impide
+   exportar, la CLI solo atrapa esa base y dice el motivo sin traceback; quien exporta lee su `clave` y sus
+   `comprobantes`.
 
 ## Estilo
 

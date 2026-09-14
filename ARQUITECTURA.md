@@ -103,8 +103,10 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
 
 - **La fachada** (`operaciones.py`) habla en documentos `open-accounting`: `leer_xml`,
   `leer_propuesta_sire`, `revisar`, `generar_asiento`, `exportar`, `diagnosticar`, `cuadrar`,
-  `adaptar_pcge`. Todas puras: sin disco, sin red, sin estado. Los bytes salen en base64 porque un
-  JSON no sabe llevar bytes.
+  `adaptar_pcge`. Y de la configuración: `errores_de_configuracion`, `configuracion_por_defecto` (la forma que se
+  guarda), `describir_configuracion` (lo que se configura, para pintar una pantalla) y `config_aplicada`; y
+  `con_imputacion`, que lee la imputación de cada documento y se la entrega al núcleo dentro de la configuración.
+  Todas puras: sin disco, sin red, sin estado. Los bytes salen en base64 porque un JSON no sabe llevar bytes.
 - **Las puertas** son adaptadores delgados: traducen un protocolo y delegan. La CLI escribe archivos;
   el MCP devuelve adjuntos. Ninguna reimplementa trabajo, y `tests/test_frontera.py` lo convierte en
   algo que se rompe solo: el núcleo no puede importar una puerta, ni el SDK del protocolo, ni salir a
@@ -137,8 +139,8 @@ declara en `no_caben`: `diagnosticar` lo dice antes y el núcleo se niega antes 
 Y **declara qué exige** (`EXIGE`, desde la 0.8): lo que ese ERP no puede importar sin y que el núcleo,
 si no se lo dicen, deja pasar —`centro_costo` en las cuentas que lo llevan, `moneda` con código en el
 destino—. La cuenta contable la exige el núcleo a todo driver que lleva cuentas, y la equivalencia del
-tipo, de la que sale el sub-diario, a los de asientos (uno de registro puede exigir el centro, no la
-moneda). Con eso
+tipo, de la que sale el sub-diario, a los de asientos (uno de registro puede exigir el centro y `cuenta_unica`
+—una cuenta por documento, sin reparto de la base: si no, `reparto_no_admitido`—, pero no la moneda). Con eso
 `diagnosticar` decide si un mes está listo **para ese destino** (el CSV no bloquea por centro; CONCAR
 sí) y el núcleo lo hace cumplir antes de armar nada (`asiento.exigir_requisitos`). La idea es la de
 Codat `options` y Merge `/meta` (`REFERENCIAS.md`): el destino dice qué necesita antes de escribir.
@@ -167,7 +169,8 @@ de compras con el asiento cuadrado.
 `diagnosticar` es la operación pensada para que un agente —o una persona con prisa— pregunte **antes**
 de exportar y reciba, en una sola respuesta: si el mes está listo y por qué no, qué bloquea y qué avisa
 por serie-número, qué falta para el destino (cuenta, centro de costo, tipos sin sigla, monedas,
-correlativos), qué detracciones esperan constancia, el resumen por contraparte y desde qué correlativo
+correlativos, un reparto que no suma la base o que el destino no admite, y lo que no cabe en su formato: la tabla
+es `asiento.FALTAS`), qué detracciones esperan constancia, el resumen por contraparte y desde qué correlativo
 arranca cada sub-diario. No corrige ni inventa: describe. Está en la fachada, en el MCP y en la CLI, y
 no añade ninguna regla contable —reúne comprobaciones que ya existían y las cuenta en vez de lanzarlas.
 
