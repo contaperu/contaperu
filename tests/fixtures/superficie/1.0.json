@@ -393,6 +393,7 @@
   "OpcionesArchivo": "",
   "armar_linea": "",
   "celdas": "",
+  "columnas": "",
   "formatear_cambio": "",
   "formatear_fecha": "",
   "formatear_monto": "",
@@ -442,9 +443,11 @@
  "contaperu.drivers.csv": {
   "CANAL": "",
   "COLUMNAS": "",
+  "COLUMNAS_DE_LINEA": "",
   "CONFIGURACION": "",
   "CONFIGURACION_DEL_ASIENTO": "",
   "CONTENT_TYPE": "",
+  "ColumnaDeLinea": "",
   "EXIGE": "",
   "FORMATOS": "",
   "Libro": "",
@@ -454,6 +457,7 @@
   "Opciones": "",
   "SEPARADOR": "",
   "desde_lineas": "",
+  "escribir_csv": "",
   "nombre": ""
  },
  "contaperu.drivers.sire": {

@@ -46,6 +46,12 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   `drivers_disponibles` también dice; un driver neutral es de canal `intercambio`, no declara claves legacy y el
   núcleo solo le exige la cuenta. `asiento.lineas_del_comprobante` y `lineas_e_indice_del_libro` aceptan
   `vocabulario`. CONCAR, CONTASIS, el CSV y sus snapshots no cambian.
+- **Drivers declarativos para formatos simples** (`drivers.kit.columnas`): un CSV o un TXT de columnas se describe como
+  una tabla de `ColumnaDeLinea` —cabecera, campo de la línea neutral que la llena y su **fuente**, obligatoria— en
+  `COLUMNAS_DE_LINEA`, y `escribir_csv` lo escribe, sin código de proyección. El contrato examina la tabla. El driver
+  CSV de serie pasa a estar escrito así y sale byte a byte igual; su `COLUMNAS` de pares (ruta, cabecera) se conserva
+  para quien lo lea. Declarar el largo de una columna y negarse con `no_caben` queda para cuando un formato real lo
+  pida: los largos se miden en la línea, y `no_caben` recibe los comprobantes.
 
 ## [1.0.0] — 2026-09-14
 

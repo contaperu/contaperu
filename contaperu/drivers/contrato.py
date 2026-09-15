@@ -59,6 +59,10 @@ formato no puede llevar aunque la contabilidad esté completa —una moneda que 
 columna—. `diagnosticar` lo lista antes de exportar y el núcleo se niega con `NoCabe` antes de escribir un byte, en
 toda forma que lleva cuentas: un código no se corta ni una moneda se inventa.
 
+Y opcional en un driver `desde_lineas` de columnas simples, `COLUMNAS_DE_LINEA` (1.1): el formato declarado como tabla
+de `kit.columnas.ColumnaDeLinea` —cabecera, campo de la línea que la llena y su fuente—, que escribe `kit.columnas`. El
+contrato exige que cada columna diga su fuente y lea un campo que existe.
+
 Y en un driver que lleva cuentas, lo que se configura en su sección (`CONFIGURACION`, una tupla de
 `configuracion.Campo`) y en qué columnas de su archivo puede ir un dato (`COLUMNAS_ELEGIBLES`, de
 `configuracion.Columna`). Un driver de asientos declara al menos las claves del asiento
@@ -83,6 +87,7 @@ from ..asiento.motor import CENTRO_EN_ANEXO
 from ..configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from ..modelo import TIPOS_LIBRO, Comprobante, Libro
 from .kit import Opciones, OpcionesArchivo
+from .kit import columnas as _columnas_de_linea
 
 if TYPE_CHECKING:
     from ..asiento.indice import ComprobanteDelAsiento
@@ -336,6 +341,11 @@ def incumplimientos(modulo: Any) -> list[str]:
             problemas.append(f"EXIGE solo admite {sorted(posibles)}; sobra {sorted(set(declarado) - posibles)}")
     if hasattr(modulo, "no_caben") and not callable(getattr(modulo, "no_caben")):
         problemas.append("no_caben es una función: no_caben(libro, comprobantes, config)")
+    declaradas = getattr(modulo, "COLUMNAS_DE_LINEA", None)
+    if declaradas is not None:
+        if f != "desde_lineas":
+            problemas.append("COLUMNAS_DE_LINEA es de un driver `desde_lineas`: sus columnas leen la línea neutral")
+        problemas += _columnas_de_linea.problemas(declaradas)
     return (problemas + _incumplimientos_del_canal(modulo, f) + _incumplimientos_del_vocabulario(modulo, f)
             + _incumplimientos_de_la_configuracion(modulo))
 

@@ -66,6 +66,30 @@ def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tupl
 El driver CSV ([`contaperu/drivers/csv`](contaperu/drivers/csv/__init__.py)) es el ejemplo más corto de
 esta forma.
 
+**Si tu formato es una tabla simple** —un CSV o un TXT de columnas—, no escribas la proyección: **declárala**. Cada
+columna dice qué campo de la línea neutral la llena y de dónde sale que vaya ahí, y `kit.columnas` escribe el archivo:
+
+```python
+from contaperu.drivers.kit.columnas import ColumnaDeLinea, escribir_csv
+
+PLANTILLA = "La plantilla de importación de tu sistema, con su versión y su hoja"
+COLUMNAS_DE_LINEA = (
+    ColumnaDeLinea("CUENTA", "cuenta", PLANTILLA),
+    ColumnaDeLinea("DEBE_HABER", "debe_haber", PLANTILLA),
+    ColumnaDeLinea("IMPORTE", "importe", PLANTILLA, clase="importe"),
+    ColumnaDeLinea("DOCUMENTO", "documento.serie_numero", PLANTILLA),
+)
+
+def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tuple[bytes, dict]:
+    lineas = list(lineas)
+    return escribir_csv(lineas, COLUMNAS_DE_LINEA, separador="|", bom=False), {"filas": len(lineas)}
+```
+
+El contrato exige que cada columna diga su fuente y lea un campo que existe (`kit.columnas.rutas()`), y
+`contaperu verificar-driver` te lo dice antes de proponerlo. El CSV de serie está escrito así. Cuando tu formato mezcla
+datos de la cabecera del comprobante, cortes o reglas que una tabla no dice —como el Excel de CONCAR—, escribe la
+proyección en código.
+
 Si tu sistema no importa asientos sino su **registro** de compras y de ventas, y arma el asiento él mismo
 (CONTASIS), la forma es `desde_comprobantes(libro, comprobantes, config, opciones)`: recibes los comprobantes y la
 configuración, y cada cuenta la lees de `asiento.partes_de` (la de la base, o una por parte si hay reparto) y de
