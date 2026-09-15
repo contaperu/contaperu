@@ -6,7 +6,9 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
-Rumbo a la **1.0.0**, ya en `main`; la candidata es la **1.0.0rc1**. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.
+## [1.0.0] — 2026-09-14
+
+**La 1.0.0**, probada antes como la candidata **1.0.0rc1**. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.
 
 ### Añadido
 - **`ErrorContaperu`** (`contaperu.errores`): la base común de todas las excepciones del motor, con una `clave` estable
@@ -186,7 +188,7 @@ Rumbo a la **1.0.0**, ya en `main`; la candidata es la **1.0.0rc1**. La 1.0 fija
 
 - La imagen de Docker instala también la puerta HTTP y expone el 8080; su `CMD` sigue siendo `contaperu-mcp`.
 
-- **Versión 1.0.0rc1** y `Development Status :: 5 - Production/Stable`. `README.md`, `ARQUITECTURA.md` (las capas, el
+- **Versión 1.0.0** (antes, la candidata 1.0.0rc1) y `Development Status :: 5 - Production/Stable`. `README.md`, `ARQUITECTURA.md` (las capas, el
   pipeline, el contrato v1 con sus canales, «STARSOFT: qué se sabe y qué falta» y lo que queda preparado),
   `CONTRIBUTING.md`, `CLAUDE.md`, `SECURITY.md` (la política de la 1.x) y la hoja de ruta, con sus hitos cumplidos,
   describen la 1.0.
@@ -764,5 +766,6 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v0.10.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/contaperu/contaperu/compare/v0.10.0...v1.0.0
 [0.2.0]: https://github.com/contaperu/contaperu/releases/tag/v0.2.0

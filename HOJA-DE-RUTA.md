@@ -36,7 +36,7 @@ tabla de hitos con su propuesta y lo que no se hace. La tabla usa estas columnas
 
 ## 1 · Dónde estamos
 
-Librería **1.0.0rc1** en `main`, sin etiquetar todavía, y estándar **`open-accounting` 0.3**
+Librería **1.0.0** y estándar **`open-accounting` 0.3**
 (`contaperu/_version.py`).
 
 | Pieza | Hoy |
@@ -50,28 +50,25 @@ Librería **1.0.0rc1** en `main`, sin etiquetar todavía, y estándar **`open-ac
 
 ### Cumplidos
 
-Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANGELOG. De la 1.0 todavía ninguno: por la
-regla del §7, un hito pasa aquí en el cambio que pone la fecha de su versión en el CHANGELOG.
+Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANGELOG.
 
-Hechos en la 1.0.0rc1, que pasan a cumplidos cuando la 1.0.0 lleve su fecha:
-
-- 0.0 · 1.0.0rc1
-- 0.1 · 1.0.0rc1
-- 0.2 · 1.0.0rc1
-- 0.3 · 1.0.0rc1
-- 0.4 · 1.0.0rc1
-- 0.5 · 1.0.0rc1
-- 0.6 · 1.0.0rc1
-- 0.7 · 1.0.0rc1
-- 0.8 · 1.0.0rc1 (el serie-número de `diagnosticar` sigue como en el documento; igualarlo al de la línea queda por confirmar)
-- B1 · 1.0.0rc1
-- B2 · 1.0.0rc1 (el esquema de `diagnosticar` viaja como recurso: el SDK no admite `outputSchema` sin cambiar la respuesta)
-- B3 · 1.0.0rc1 (el contrato se llama OpenConta; su archivo sigue el formato OpenAPI 3.1)
-- B4 · 1.0.0rc1 (adelantado sin esperar al integrador, por decisión de John del 14-sep-2026)
-- B5 · 1.0.0rc1
-- B6 · 1.0.0rc1
-- J0 · 1.0.0rc1 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
-- J1 · 1.0.0rc1 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)
+- 0.0 · 1.0.0
+- 0.1 · 1.0.0
+- 0.2 · 1.0.0
+- 0.3 · 1.0.0
+- 0.4 · 1.0.0
+- 0.5 · 1.0.0
+- 0.6 · 1.0.0
+- 0.7 · 1.0.0
+- 0.8 · 1.0.0 (el serie-número de `diagnosticar` sigue como en el documento; igualarlo al de la línea queda por confirmar)
+- B1 · 1.0.0
+- B2 · 1.0.0 (el esquema de `diagnosticar` viaja como recurso: el SDK no admite `outputSchema` sin cambiar la respuesta)
+- B3 · 1.0.0 (el contrato se llama OpenConta; su archivo sigue el formato OpenAPI 3.1)
+- B4 · 1.0.0 (adelantado sin esperar al integrador, por decisión de John del 14-sep-2026)
+- B5 · 1.0.0
+- B6 · 1.0.0
+- J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
+- J1 · 1.0.0 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)
 
 ---
 
