@@ -8,6 +8,9 @@ crédito y débito, recibo por honorarios—, valida el IGV y las detracciones, 
 doble** y los exporta al formato que pide tu sistema contable: el Excel de **CONCAR** o de **CONTASIS** y el TXT del
 **SIRE** (RVIE y RCE). Sin base de datos, sin estado, sin llamadas a la red: entra un JSON, sale un JSON o un archivo.
 
+**La contabilidad automatizada no es un problema de cada empresa: es de arquitectura colectiva.** Un estándar abierto y
+un motor abierto, construidos entre todos, para los sistemas que ya existen y para los ERP que vienen.
+
 **Encima de tu sistema contable, no en su lugar.** Nadie tiene que dejar CONCAR ni cambiar su forma de trabajar: el
 motor le quita la digitación.
 
@@ -15,7 +18,24 @@ Licencia MIT. Se dona a la comunidad contable peruana.
 
 ---
 
-## Qué resuelve, en palabras de contador
+## Por qué abierta: arquitectura colectiva
+
+Hasta hoy, cada empresa ha resuelto la automatización contable por su cuenta: su integración con SUNAT, su plantilla
+para CONCAR, su macro para CONTASIS, su script para el ERP de turno. Son miles de soluciones aisladas que hacen lo mismo
+—leer un comprobante, validar el IGV, armar el asiento, exportarlo— y que vuelven a equivocarse en los mismos casos: la
+detracción, la nota de crédito, el comprobante en dólares.
+
+Eso no se arregla con una mejor organización interna de cada empresa. Se arregla con **una base común y abierta**:
+
+- **Un estándar abierto**, [`open-accounting`](estandar/LEEME.md), para que todos los sistemas hablen el mismo idioma.
+- **Un motor abierto** que aplica las reglas contables peruanas una sola vez, cada una con su fuente, y que cualquiera
+  puede revisar y mejorar.
+- **Salidas para todos:** el SIRE; los sistemas legacy mientras evolucionan, sin que nadie tenga que abandonarlos; y
+  los ERP que vienen, que no tendrán que reinventar el IGV porque nacerán sobre un estándar.
+
+Nadie queda amarrado a un proveedor, y lo que aprende uno lo aprovechan todos.
+
+### Qué resuelve, en palabras de contador
 
 El software contable peruano nació en los noventa y no se habla entre sí: cada sistema importa su propio archivo plano,
 con sus columnas y sus siglas. Cuando además aparece una IA capaz de leer cien facturas en un minuto, el cuello de
@@ -40,7 +60,7 @@ cada regla lleva al lado la norma o el archivo real que la justifica.
 
 ## Cómo funciona
 
-![Dos entradas llegan al documento común open-accounting dentro de un ERP externo: las facturas en XML y la propuesta del SIRE; de ahí salen el TXT del SIRE, los asientos o el registro de CONCAR o CONTASIS y el documento para otro ERP](diagramas/arquitectura-general.svg)
+![Arquitectura colectiva: los comprobantes electrónicos y la propuesta del SIRE entran al estándar abierto open-accounting; de ahí al motor, que la comunidad abierta mejora; y el motor entrega a tres grupos: el SIRE, los sistemas legacy (CONCAR, CONTASIS y, próximamente, STARSOFT) y los ERP que vienen](diagramas/arquitectura-colectiva.svg)
 
 ContaPerú no es una aplicación que se abre: es el motor que va **dentro de un ERP externo**, sea un sistema contable en
 la nube, un portal para estudios o el sistema de gestión de una empresa. En el ERP externo el contador carga, revisa y
@@ -52,10 +72,17 @@ documento:
 2. **La propuesta del SIRE.** El TXT de SUNAT ya empaqueta todos los comprobantes del contribuyente en el periodo: con
    ese solo archivo, el mes entero llega a `open-accounting`.
 
-Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega lo que pida el destino: el TXT del
-registro, listo para subir al SIRE; los asientos de CONCAR o el registro de CONTASIS; o el documento en JSON, con su
-diagnóstico, para otro ERP. Cualquier entrada puede terminar en cualquiera de las tres salidas. Las cuentas, los
-sentidos del debe y el haber y la detracción los decide el motor una sola vez, igual para todos los destinos.
+Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega lo que pida cada grupo de destinos:
+
+- **SIRE:** el TXT de reemplazo del registro de ventas (RVIE) y del de compras (RCE), listo para subir a SUNAT.
+- **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y el registro de
+  CONTASIS; SISCONT y STARSOFT esperan un archivo que ese sistema haya aceptado.
+- **ERP:** los sistemas nuevos, en cualquier lenguaje, que reciben el documento en JSON con su diagnóstico, el CSV con
+  las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
+
+Cualquier entrada puede terminar en cualquiera de los tres grupos. Las cuentas, los sentidos del debe y el haber y la
+detracción los decide el motor una sola vez, igual para todos los destinos. Y al costado del motor está la comunidad:
+quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 
 ## El motor por dentro
 
@@ -114,6 +141,9 @@ en [INTEGRAR.md](INTEGRAR.md).
 
 | Palabra | Qué es, en términos contables |
 |---|---|
+| **Arquitectura colectiva** | Resolver la contabilidad automatizada una vez, en abierto y entre todos, en vez de que cada empresa construya su propia integración |
+| **SIRE** | El Sistema Integrado de Registros Electrónicos de SUNAT, donde se presentan el registro de ventas (RVIE) y el de compras (RCE) |
+| **Legacy** | Un sistema contable instalado que importa un archivo plano: CONCAR, CONTASIS, SISCONT, STARSOFT |
 | **Driver** | El traductor al formato de un sistema contable: sabe en qué columna va cada dato de CONCAR o de CONTASIS, pero nunca decide una cuenta |
 | **`open-accounting`** | El documento común: el libro, sus comprobantes y su asiento, escrito de una forma que cualquier sistema entiende |
 | **Núcleo** | La parte que sabe contabilidad peruana: valida el comprobante, calcula el IGV y arma el asiento |
@@ -150,9 +180,12 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 | Comprobante en dólares | el tipo de cambio del comprobante, y la detracción convertida a soles |
 | Comprobante extemporáneo | se asienta dentro del periodo, conservando la fecha del documento |
 
-**Exporta** a CONCAR (Excel de asientos de 41 columnas), a CONTASIS (su registro de compras y de ventas en Excel), al
-SIRE (TXT de reemplazo del RVIE y del RCE) y a un CSV genérico con las líneas de diario, para cualquier destino que
-todavía no tenga driver.
+**Exporta**, por grupo de destino:
+
+- **SIRE:** el TXT de reemplazo del RVIE y del RCE.
+- **Legacy:** a CONCAR (Excel de asientos de 41 columnas) y a CONTASIS (su registro de compras y de ventas en Excel).
+- **ERP:** el documento `open-accounting` en JSON y un CSV genérico con las líneas de diario, para cualquier destino que
+  todavía no tenga driver.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta para el sistema de
 destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos, un reparto que no suma la base o que el
@@ -173,20 +206,29 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 
 | Pieza | Estado |
 |---|---|
-| El estándar `open-accounting` 0.3 y su esquema | listo |
+| **Entradas** | |
 | Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
-| Validación del comprobante y de la partida doble | listo |
-| Asiento: compras, ventas, honorarios, notas y detracción | listo |
-| Drivers CONCAR, SIRE y CSV | listo |
-| Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
-| API pública estable, `contaperu.api`, con las rutas de la 0.10 funcionando con aviso durante la 1.x | listo |
-| Servidor MCP, CLI y puerta HTTP con el contrato OpenConta | listo |
-| `diagnosticar`: qué falta, para qué destino y a quién pedírselo | listo |
+| Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
+| **Estándar y comunidad** | |
+| El estándar `open-accounting` 0.3 y su esquema | listo |
 | Contrato de driver y drivers de terceros por *entry points* | listo |
 | Paquete en PyPI | **próximo**: hoy se instala desde el código |
+| **Motor** | |
+| Validación del comprobante y de la partida doble | listo |
+| Asiento: compras, ventas, honorarios, notas y detracción | listo |
+| `diagnosticar`: qué falta, para qué destino y a quién pedírselo | listo |
+| API pública estable, `contaperu.api`, con las rutas de la 0.10 funcionando con aviso durante la 1.x | listo |
+| Servidor MCP y CLI | listo |
 | Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
-| Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
+| **SIRE** | |
+| Driver SIRE (TXT de reemplazo del RVIE y del RCE) | listo |
+| **Legacy** | |
+| Driver CONCAR (Excel de asientos) | listo |
+| Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
 | Drivers de SISCONT y STARSOFT | el contrato ya cubre lo que necesitan; esperan un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
+| **ERP** | |
+| Driver CSV y el documento `open-accounting` en JSON | listo |
+| Puerta HTTP con el contrato OpenConta | listo |
 
 Lo que no está listo no tiene fecha: tiene un orden y un dato que lo destraba, en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).
 
@@ -203,6 +245,9 @@ Si tienes el texto oficial y quieres ayudar, es la contribución más útil que 
 ---
 
 ## Cómo aportar
+
+**La contabilidad abierta se construye entre todos.** El motor mejora con cada regla corregida, cada formato compartido
+y cada driver nuevo, y lo que aporta uno lo aprovechan todos.
 
 La regla que manda en todo el proyecto: **ninguna regla contable entra sin una fuente.** La norma, la resolución o el
 archivo real que la justifica va al lado, en el código. Por eso quien más puede aportar es quien lleva la contabilidad
@@ -397,7 +442,8 @@ Contabilidad peruana · software contable Perú · motor contable · código abi
 comprobantes de pago electrónicos · factura electrónica · boleta de venta · nota de crédito · recibo por honorarios ·
 XML UBL 2.1 · registro de compras · registro de ventas · asientos contables · partida doble · libro diario ·
 PCGE 2026 · IGV · detracciones · retención de cuarta categoría · CONCAR · CONTASIS · SISCONT · STARSOFT · estudio
-contable · automatización contable · inteligencia artificial · MCP · OpenAPI · ERP
+contable · automatización contable · contabilidad abierta · arquitectura colectiva · inteligencia artificial · MCP ·
+OpenAPI · ERP
 
 ---
 
@@ -407,6 +453,10 @@ contable · automatización contable · inteligencia artificial · MCP · OpenAP
 SUNAT (Peru's tax authority), builds the double-entry journal and exports it to the format each
 local accounting system expects — CONCAR, CONTASIS, the SIRE tax filing, or plain CSV. No database, no state,
 no network calls: JSON in, JSON or a file out.
+
+Its premise: automated accounting is not a problem each company should solve alone, but a matter of **collective
+architecture** — one open standard and one open engine, built together, serving the SIRE, legacy systems while they
+evolve, and the ERPs still to come.
 
 It also defines **`open-accounting`**, an open interchange format for Peruvian accounting documents
 (`estandar/`), with a formal JSON Schema. The rules aren't designed on paper: they come from real
