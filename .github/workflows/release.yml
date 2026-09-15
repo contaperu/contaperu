@@ -1,44 +1,179 @@
-name: publicar en PyPI
+name: publicar una versión
 
-# Se dispara al publicar una release en GitHub (no en cada push a main).
+# Una versión sale de un tag `vX.Y.Z` empujado a GitHub, nunca de un push a main: lo que no se etiqueta no le llega a
+# nadie, y por eso se puede trabajar en main. El paquete queda en una Release de GitHub —la rueda, el sdist y sus sumas
+# SHA-256—, que es de donde lo descarga quien integra el motor mientras el repositorio sea privado. Quien integra fija
+# esa versión exacta y actualiza cuando decide.
+#
+# La Release la crea este workflow con su propio token, y una release creada así no dispara otros workflows. Hasta el
+# 14-sep-2026 era al revés: publicar una release a mano disparaba la subida a PyPI sin comprobar nada.
+#
+# PyPI queda fuera del camino automático: distribuir es publicar, y pide revisión y el OK de John. Se hace a mano
+# (Actions → este workflow → Run workflow, con «pypi» marcado) y sube los MISMOS archivos de la Release, comprobados
+# contra sus sumas: lo que llega a PyPI es byte a byte lo que ya se descargaba de GitHub.
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      etiqueta:
+        description: "Etiqueta que ya existe en el repositorio (p. ej. v0.10.0)"
+        required: true
+        type: string
+      pypi:
+        description: "Subir a PyPI la Release de esa etiqueta, que ya tiene que existir (pide el OK de John)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+# Dos ejecuciones sobre la misma etiqueta no corren a la vez.
+concurrency:
+  group: version-${{ inputs.etiqueta || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  # En un push es el nombre del tag; a mano, la entrada. Cada trabajo comprueba su forma antes de usarla.
+  ETIQUETA: ${{ inputs.etiqueta || github.ref_name }}
+
 jobs:
-  construir:
+  verificar:
+    # Antes de construir nada: la etiqueta tiene forma de versión y es la del código, la batería pasa en ESE commit y el
+    # CHANGELOG trae la versión con su fecha (una pre-release se publica con lo que está «Sin publicar»).
+    if: ${{ !inputs.pypi }}
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
+      - name: La etiqueta tiene forma de versión
+        run: |
+          [[ "$ETIQUETA" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]] \
+            || { echo "la etiqueta no tiene forma de versión: vX.Y.Z, o vX.Y.ZrcN para una pre-release"; exit 1; }
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: refs/tags/${{ env.ETIQUETA }}
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
-      - run: pip install build
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+      - name: El contrato OpenConta es el que genera el código (desde la 1.0)
+        run: if [ -f herramientas/generar_openconta.py ]; then python herramientas/generar_openconta.py --comprobar; fi
+      - name: La etiqueta es la versión del código y el CHANGELOG la trae
+        id: version
+        run: |
+          VERSION=$(python -c "from contaperu import __version__; print(__version__)")
+          test "$ETIQUETA" = "v$VERSION" || { echo "la etiqueta no es v$VERSION, la versión de contaperu/_version.py"; exit 1; }
+          if [[ "$VERSION" =~ (a|b|rc)[0-9]+$ ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            # Los encabezados de siempre llevan raya (—) y Keep a Changelog, guion (-): valen los dos.
+            VERSION_RE="${VERSION//./\\.}"
+            grep -Eq "^## \[$VERSION_RE\] (-|—) [0-9]{4}-[0-9]{2}-[0-9]{2}" CHANGELOG.md \
+              || { echo "el CHANGELOG no trae ## [$VERSION] con su fecha"; exit 1; }
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  construir:
+    needs: verificar
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.verificar.outputs.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: refs/tags/${{ env.ETIQUETA }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
       - run: python -m build
+      - run: twine check dist/*
+      - name: La rueda instala y arranca en un entorno limpio, fuera del repositorio
+        working-directory: /tmp
+        run: |
+          python -m venv /tmp/limpio
+          /tmp/limpio/bin/pip install "$(ls "$GITHUB_WORKSPACE"/dist/*.whl)[excel,mcp]"
+          /tmp/limpio/bin/contaperu --version | grep -F "$VERSION"
+      - name: Las sumas SHA-256, que quien integra comprueba antes de instalar
+        working-directory: dist
+        run: sha256sum -- * > SHA256SUMS && cat SHA256SUMS
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: paquete
           path: dist/
+          if-no-files-found: error
 
-  publicar:
-    needs: construir
+  release:
+    needs: [verificar, construir]
     runs-on: ubuntu-latest
-    # El entorno permite exigir una aprobacion manual antes de publicar:
-    # se configura en Settings -> Environments -> pypi.
-    environment:
-      name: pypi
-      url: https://pypi.org/project/contaperu/
     permissions:
-      # OIDC: PyPI verifica que el paquete sale de ESTE repositorio y de este
-      # workflow. No hay ningun token guardado en los secrets, asi que no hay
-      # ninguno que robar ni que rotar. Se llama "trusted publishing".
-      id-token: write
+      contents: write # crear la Release: es el único trabajo que escribe en el repositorio
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.verificar.outputs.version }}
+      PRERELEASE: ${{ needs.verificar.outputs.prerelease }}
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: refs/tags/${{ env.ETIQUETA }}
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: paquete
           path: dist/
+      - name: Las notas salen del CHANGELOG
+        run: |
+          if [ "$PRERELEASE" = true ]; then CABECERA="## [Sin publicar]"; else CABECERA="## [$VERSION]"; fi
+          awk -v cab="$CABECERA" 'index($0, cab) == 1 {dentro = 1; next} dentro && /^## \[/ {exit} dentro {print}' \
+            CHANGELOG.md > notas.md
+          grep -q . notas.md || { echo "el CHANGELOG no tiene nada bajo $CABECERA"; exit 1; }
+          {
+            echo
+            echo "---"
+            echo
+            echo "La rueda, el sdist y \`SHA256SUMS\`. Para fijar esta versión: descarga la rueda, compruébala con"
+            echo "\`sha256sum -c SHA256SUMS --ignore-missing\` e instálala por su ruta. Si hay algo que adaptar al"
+            echo "actualizar, lo dice la sección «Cómo migrar» de esta versión."
+          } >> notas.md
+      - name: La Release, que no se reemplaza nunca
+        run: |
+          if gh release view "$ETIQUETA" > /dev/null 2>&1; then
+            echo "la Release $ETIQUETA ya existe: una versión publicada no se cambia, se saca otra"; exit 1
+          fi
+          PRE=()
+          if [ "$PRERELEASE" = true ]; then PRE=(--prerelease); fi
+          gh release create "$ETIQUETA" dist/* --verify-tag --title "contaperu $VERSION" --notes-file notas.md "${PRE[@]}"
+
+  pypi:
+    # Solo a mano y solo sobre una Release que ya existe: sube sus mismos archivos, comprobados contra sus sumas.
+    if: ${{ inputs.pypi }}
+    runs-on: ubuntu-latest
+    # El entorno permite exigir una aprobación manual antes de publicar: Settings → Environments → pypi.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/contaperu/
+    permissions:
+      contents: read # descargar la Release de un repositorio privado
+      # OIDC: PyPI verifica que el paquete sale de ESTE repositorio y de este workflow. No hay ningún token guardado en
+      # los secrets, así que no hay ninguno que robar ni que rotar. Se llama «trusted publishing».
+      id-token: write
+    steps:
+      - name: La etiqueta tiene forma de versión
+        run: |
+          [[ "$ETIQUETA" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]] \
+            || { echo "la etiqueta no tiene forma de versión: vX.Y.Z, o vX.Y.ZrcN para una pre-release"; exit 1; }
+      - name: Los archivos de la Release, comprobados contra sus sumas
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          mkdir dist && cd dist
+          gh release download "$ETIQUETA" --pattern "*.whl" --pattern "*.tar.gz" --pattern SHA256SUMS
+          sha256sum -c SHA256SUMS
+          rm SHA256SUMS
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
