@@ -104,6 +104,14 @@ Rumbo a la **1.0.0**, ya en `main`; la candidata es la **1.0.0rc1**. La 1.0 fija
   `SHA256SUMS`. PyPI va aparte y a mano.
 
 ### Cambiado
+- **Un ZIP ya no se descomprime sin tope.** `archivos.expandir` y la propuesta del SIRE dentro de su ZIP leen cada
+  entrada con tres topes (`lectores/_zip.py`):
+  - 64 MB por archivo descomprimido;
+  - 128 MB por ZIP;
+  - una proporción de compresión de 200 a 1.
+
+  Lo que pasa de uno queda como error del lote, con su motivo, y el resto sigue; en la propuesta del SIRE es
+  `SireInvalido`. Antes, un ZIP de unos kilobytes podía expandirse hasta agotar la memoria de quien lo abría.
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
 - El registro de drivers busca los de terceros la primera vez que alguien lo mira, no al importar el paquete.

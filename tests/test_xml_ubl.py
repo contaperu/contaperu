@@ -126,6 +126,37 @@ def test_zip_con_cdr_anidado_y_tope():
     assert archivos.expandir("roto.zip", b"PK\x03\x04basura").errores[0]["motivo"].startswith("El ZIP")
 
 
+def _zip_de(**entradas: bytes) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for nombre, datos in entradas.items():
+            z.writestr(nombre, datos)
+    return buf.getvalue()
+
+
+def test_un_zip_desmedido_no_se_abre(monkeypatch):
+    """Un ZIP de kilobytes que se expande a gigas agotaría la memoria de quien lo abre. Cada entrada tiene tope de tamaño
+    y de proporción, y cada ZIP, tope total; lo que pasa de uno queda como error y el resto sigue. Los topes se rebajan
+    aquí para no crear gigas en la batería."""
+    from contaperu.lectores import _zip
+
+    # proporción: ceros que comprimen miles de veces
+    lote = archivos.expandir("bomba.zip", _zip_de(**{"ceros.xml": b"\0" * 200_000, "bien.xml": b"<x/>"}))
+    assert [e.nombre for e in lote.entradas] == ["bomba.zip/bien.xml"]
+    assert lote.errores[0]["archivo"] == "bomba.zip/ceros.xml" and "comprime" in lote.errores[0]["motivo"]
+
+    monkeypatch.setattr(_zip, "PROPORCION_MAXIMA", 10**9)
+    # tope por archivo
+    monkeypatch.setattr(_zip, "MAXIMO_POR_ARCHIVO", 1000)
+    lote = archivos.expandir("grande.zip", _zip_de(**{"a.xml": b"<x/>" * 400, "b.xml": b"<x/>"}))
+    assert [e.nombre for e in lote.entradas] == ["grande.zip/b.xml"] and "por archivo" in lote.errores[0]["motivo"]
+    # tope por ZIP
+    monkeypatch.setattr(_zip, "MAXIMO_POR_ARCHIVO", 10**9)
+    monkeypatch.setattr(_zip, "MAXIMO_POR_ZIP", 1000)
+    lote = archivos.expandir("mes.zip", _zip_de(**{"a.xml": b"<x/>" * 200, "b.xml": b"<x/>" * 200}))
+    assert [e.nombre for e in lote.entradas] == ["mes.zip/a.xml"] and "del ZIP" in lote.errores[0]["motivo"]
+
+
 def test_ordenar():
     a = xml_ubl.parsear(leer("20131312955-01-F001-124.xml"), VENTAS)   # 20/01
     b = xml_ubl.parsear(leer("20131312955-01-F001-123.xml"), VENTAS)   # 10/01

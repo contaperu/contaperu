@@ -40,6 +40,17 @@ def test_reconoce_la_propuesta_con_y_sin_cabecera():
     assert not sire_txt.es_sire("<?xml version='1.0'?><Invoice/>".encode("utf-8"))
 
 
+def test_la_propuesta_en_un_zip_desmedido_no_se_abre():
+    """La propuesta puede venir dentro de su ZIP, y se lee con los mismos topes que cualquier ZIP (`lectores/_zip.py`):
+    un TXT que se infla miles de veces no se descomprime."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("propuesta.txt", texto(FACTURA) + b"\n" * 2_000_000)
+    with pytest.raises(sire_txt.SireInvalido, match="comprime"):
+        sire_txt.leer_lineas(buf.getvalue())
+    assert not sire_txt.es_sire(buf.getvalue())
+
+
 def test_lee_una_factura_con_su_glosa():
     c = sire_txt.parsear(texto(FACTURA), VENTAS)[0]
     assert (c.tipo_cp, c.serie, c.numero) == ("01", "E001", "1032")

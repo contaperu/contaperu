@@ -9,8 +9,9 @@ Reporta **en privado** —nunca abriendo un issue público— si encuentras:
 
 - Una forma de que el motor produzca un asiento que **cuadra en apariencia pero está mal**, o un TXT
   que SUNAT acepte con importes incorrectos.
-- Un XML malicioso que rompa el parser o llegue al sistema de archivos, a la red o a la memoria más
-  allá de lo razonable (el núcleo usa `defusedxml`, pero el que encuentre el hueco manda).
+- Un XML o un ZIP malicioso que rompa el parser o llegue al sistema de archivos, a la red o a la memoria
+  más allá de lo razonable (el núcleo usa `defusedxml` y abre los ZIP con topes de tamaño y de proporción,
+  pero el que encuentre el hueco manda).
 - Cualquier problema en el **servidor MCP** o en la **puerta HTTP** (`contaperu-http`): se publican **sin
   autenticación a propósito** —no guardan datos, no tienen usuarios y no salen a la red—, así que lo único que pueden
   perder es CPU. Los dos comprueban el `Host` (421) y ponen topes al cuerpo y al archivo. Si encuentras una forma de

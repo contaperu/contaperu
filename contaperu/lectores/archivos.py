@@ -3,6 +3,7 @@
 La subida puede traer el ZIP tal cual lo entrega el facturador (XML + CDR
 `R-….xml` + PDF), ZIP de un mes entero o archivos sueltos. Reglas:
 - tope de archivos por lote (50): lo que pase del tope se reporta, no se procesa;
+- topes al descomprimir (`_zip`): por archivo, por ZIP y de proporción; lo que pase se reporta, no se abre;
 - ZIP anidados no se abren (se reportan);
 - el CDR se detecta por su raíz XML, no por el nombre.
 """
@@ -14,7 +15,7 @@ import zipfile
 from dataclasses import dataclass, field
 from datetime import date
 
-from . import sire_txt, xml_ubl
+from . import _zip, sire_txt, xml_ubl
 from ..modelo import Comprobante, Libro
 
 TOPE_ARCHIVOS = 50
@@ -91,6 +92,7 @@ def expandir(nombre: str, datos: bytes, tope: int = TOPE_ARCHIVOS, lote: Lote | 
     except zipfile.BadZipFile:
         lote.error(nombre, "El ZIP está dañado o no es un ZIP")
         return lote
+    leido = 0
     with z:
         for info in z.infolist():
             base = posixpath.basename(info.filename)
@@ -104,9 +106,15 @@ def expandir(nombre: str, datos: bytes, tope: int = TOPE_ARCHIVOS, lote: Lote | 
                 lote.error(etiqueta, f"Supera el tope de {tope} archivos por lote")
                 continue
             try:
-                lote.entradas.append(Entrada(etiqueta, z.read(info)))
+                contenido = _zip.leer(z, info, leido)
+            except _zip.Desmedido as e:
+                lote.error(etiqueta, str(e))
+                continue
             except Exception as e:  # entrada corrupta o cifrada
                 lote.error(etiqueta, f"No se pudo leer dentro del ZIP: {e}")
+                continue
+            leido += len(contenido)
+            lote.entradas.append(Entrada(etiqueta, contenido))
     return lote
 
 

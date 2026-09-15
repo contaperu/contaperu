@@ -28,6 +28,7 @@ import io
 import zipfile
 from decimal import Decimal
 
+from . import _zip
 from ..errores import ErrorContaperu
 from ..modelo import Comprobante, Libro
 
@@ -77,7 +78,10 @@ def leer_lineas(datos: bytes) -> list[list[str]]:
             nombres = [n for n in z.namelist() if n.lower().endswith(".txt")]
             if not nombres:
                 raise SireInvalido("El ZIP no trae ningún TXT dentro")
-            datos = z.read(nombres[0])
+            try:
+                datos = _zip.leer(z, z.getinfo(nombres[0]))
+            except _zip.Desmedido as e:
+                raise SireInvalido(str(e)) from None
     filas = [l.split("|") for l in _texto(datos).splitlines() if l.strip()]
     if filas and filas[0][0].strip().lower() == "ruc":
         filas = filas[1:]          # la exportación trae cabecera; el reemplazo no
@@ -96,7 +100,7 @@ def es_sire(datos: bytes) -> bool:
                 dentro = [n for n in z.namelist() if n.lower().endswith(".txt")]
                 if not dentro:
                     return False
-                datos = z.read(dentro[0])
+                datos = _zip.leer(z, z.getinfo(dentro[0]))
         texto = _texto(datos[:4096])
     except Exception:  # noqa: BLE001
         return False
