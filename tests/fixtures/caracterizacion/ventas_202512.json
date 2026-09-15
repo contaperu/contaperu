@@ -7270,7 +7270,7 @@
  },
  "generar_asiento/contasis": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
  },
  "exportar/contasis": {
   "_error": "DocumentoInvalido",
@@ -9834,7 +9834,7 @@
  },
  "generar_asiento/sire": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
  },
  "exportar/sire": {
   "_error": "DocumentoInvalido",
@@ -9963,6 +9963,417 @@
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202512||02/12/2025||01|F001|1001||6|20609999999|DISTRIBUIDORA COMERCIAL DEL NORTE SAC|0.00|25000.00|0.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||04/12/2025||01|F001|1002||6|20633333336|INVERSIONES TECNOLOGICAS PERU SRL|0.00|18500.00|0.00|3330.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|21830.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||05/12/2025||01|F001|1003||6|20655555553|CORPORACION INDUSTRIAL ANDINA SAC|0.00|32000.00|0.00|5760.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|37760.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||08/12/2025||01|F001|1004||6|20688888884|GRUPO EMPRESARIAL LIMA SAC|0.00|45000.00|0.00|8100.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|53100.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||10/12/2025||01|F001|1005||6|20644444440|COMERCIALIZADORA INTEGRAL DEL SUR EIRL|0.00|15500.00|0.00|2790.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|18290.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||12/12/2025||01|F001|1006||6|20666666667|SERVICIOS LOGISTICOS NACIONALES SA|0.00|28000.00|0.00|5040.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|33040.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||15/12/2025||01|F001|1007||6|20301234567|IMPORTADORA Y EXPORTADORA CENTRAL SAC|0.00|21000.00|0.00|3780.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|24780.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||03/12/2025||03|B001|5001||6|42589632|CLIENTE CONSUMIDOR FINAL|0.00|850.00|0.00|153.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1003.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||06/12/2025||03|B001|5002||6|45678912|CONSUMIDOR VARIOS|0.00|1200.00|0.00|216.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1416.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||09/12/2025||03|B001|5003||6||CLIENTES VARIOS - CONSOLIDADO DIARIO|0.00|42950.00|0.00|7731.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|50681.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||19/12/2025||01|F001|1234||6|20123456789|MI CLIENTE MANUAL S.A.C.|0.00|5000.00|0.00|900.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|5900.00|PEN|||||||\r\n",
   "archivo_zip": "LE2060123456720251200140400021112.zip"
+ },
+ "diagnosticar/open_accounting": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202512",
+   "tipo": "venta"
+  },
+  "driver": "open_accounting",
+  "exige": [
+   "cuenta_contable"
+  ],
+  "listo_para_exportar": false,
+  "por_que_no": [
+   "5 comprobantes con observaciones que bloquean"
+  ],
+  "que_falta": [
+   {
+    "motivo": "RUC_INVALIDO",
+    "texto": "El RUC del cliente (20609999999) no es válido",
+    "comprobantes": [
+     "F001-1001",
+     "F001-1007",
+     "B001-5001",
+     "B001-5002",
+     "F001-1234"
+    ],
+    "pedir_a": "contador"
+   }
+  ],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 11,
+   "saldrian": 6,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 5,
+   "con_aviso": 1
+  },
+  "bloqueantes": [
+   {
+    "serie_numero": "F001-1001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20609999999) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-1007",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20301234567) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-5001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (42589632) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-5002",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (45678912) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-1234",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20123456789) no es válido"
+     }
+    ]
+   }
+  ],
+  "avisos": [
+   {
+    "serie_numero": "B001-5003",
+    "observaciones": [
+     {
+      "codigo": "BOLETA_SIN_DOC",
+      "nivel": "aviso",
+      "texto": "Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)"
+     }
+    ]
+   }
+  ],
+  "faltantes": {
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": []
+  },
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20609999999": {
+    "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
+    "comprobantes": 1,
+    "total": "21830.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
+   },
+   "20655555553": {
+    "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
+    "comprobantes": 1,
+    "total": "37760.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
+   },
+   "20688888884": {
+    "nombre": "GRUPO EMPRESARIAL LIMA SAC",
+    "comprobantes": 1,
+    "total": "53100.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
+   },
+   "20644444440": {
+    "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
+    "comprobantes": 1,
+    "total": "18290.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
+   },
+   "20666666667": {
+    "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
+    "comprobantes": 1,
+    "total": "33040.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
+   },
+   "20301234567": {
+    "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
+    "comprobantes": 1,
+    "total": "24780.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
+   },
+   "42589632": {
+    "nombre": "CLIENTE CONSUMIDOR FINAL",
+    "comprobantes": 1,
+    "total": "1003.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
+   },
+   "45678912": {
+    "nombre": "CONSUMIDOR VARIOS",
+    "comprobantes": 1,
+    "total": "1416.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
+   },
+   "(sin documento)": {
+    "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
+    "comprobantes": 1,
+    "total": "50681.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
+   },
+   "20123456789": {
+    "nombre": "MI CLIENTE MANUAL S.A.C.",
+    "comprobantes": 1,
+    "total": "5900.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
+   }
+  },
+  "sub_diarios": {},
+  "saldrian": [
+   "F001-1002",
+   "F001-1003",
+   "F001-1004",
+   "F001-1005",
+   "F001-1006",
+   "B001-5003"
+  ]
+ },
+ "generar_asiento/open_accounting": {
+  "_error": "DocumentoInvalido",
+  "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
+ },
+ "exportar/open_accounting": {
+  "_error": "DocumentoInvalido",
+  "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
+ },
+ "exportar_con_observados/open_accounting": {
+  "driver": "open_accounting",
+  "formato": "open_accounting_json",
+  "archivo": "open_accounting_20601234567_202512_venta.json",
+  "comprobantes": 11,
+  "resumen": {
+   "comprobantes": 11,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 1,
+   "con_error": 5,
+   "fuera_del_destino": 0,
+   "total": "277300.00",
+   "igv": "42300.00",
+   "filas": 33,
+   "sub_diarios": {},
+   "debe": "277300.00",
+   "haber": "277300.00",
+   "huella": "bb2c1f5d8715c8fb2506dfe4eca768b7ec83c8159948d77d24b4edc0a8f2b0c8",
+   "lineas": 33
+  },
+  "_exportacion": {
+   "driver": "open_accounting",
+   "archivo": "open_accounting_20601234567_202512_venta.json",
+   "huella": "bb2c1f5d8715c8fb2506dfe4eca768b7ec83c8159948d77d24b4edc0a8f2b0c8",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "293bd7c90ae7d22cc46e1b1ad5b48f5af05a3089a0fea4bd61f00896d23b27b7"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "15219d7ec33266fe7a84a26557af46408480365c214dce8bd158f070293caaad"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "0e897b81368fc4226a126d5f416cacee51d11e14231ff24ed7db7c0291d52981"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "548a7ac647fb0746653dcdffd2a7d41275b07ea35cef387830425cdc26fd7c22"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     },
+     "lineas": [
+      12,
+      15
+     ],
+     "huella": "758bbdcd88a3fba6f7aefc1438d3ce06149bbb623e9d4bc6ec8046ea914c67fe"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     },
+     "lineas": [
+      15,
+      18
+     ],
+     "huella": "c6f7a00988637868e90ddfcccdd6703f8167b19f30d13b9d9337a566112e9892"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     },
+     "lineas": [
+      18,
+      21
+     ],
+     "huella": "4deba7e99e775acc879995311172ad0ec6f4e047ccd9199fedef1023deb23a87"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     },
+     "lineas": [
+      21,
+      24
+     ],
+     "huella": "058c75cb316c7aed5211bfa901d28bbed436ebe152388df55d94d6e609001f31"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     },
+     "lineas": [
+      24,
+      27
+     ],
+     "huella": "51fc49a7f88fdbf829d97e93991c98c7d742456836df3a12b38921afc8418f89"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     },
+     "lineas": [
+      27,
+      30
+     ],
+     "huella": "b392677eb5790563366d4ea2cf9abb0f6575b104ec412d9a4851295992c9d182"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     },
+     "lineas": [
+      30,
+      33
+     ],
+     "huella": "92a1990a943ca824a7102a7c20823972dd383b10828db46064a30fc79ca3c746"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/json"
  },
  "cli_diagnosticar/concar": {
   "codigo": 1,

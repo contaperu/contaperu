@@ -331,6 +331,7 @@
   "de_terceros": "",
   "formato_de": "",
   "obtener": "",
+  "open_accounting": "",
   "recargar": "",
   "sire": ""
  },
@@ -339,6 +340,7 @@
   "CANALES_RESERVADOS": "",
   "CANAL_POR_DEFECTO": "",
   "CENTRO_EN_ANEXO": "",
+  "CLAVES_LEGACY": "",
   "CONFIGURACION_DEL_ASIENTO": "",
   "CONFIGURACION_GENERAL": "",
   "Campo": "",
@@ -351,6 +353,7 @@
   "DriverRegistroArchivo": "",
   "DriverRegistroTexto": "",
   "EXIGE_NUCLEO_ASIENTO": "",
+  "EXIGE_NUCLEO_NEUTRAL": "",
   "EXIGE_NUCLEO_REGISTRO": "",
   "EXIGE_POSIBLES_ASIENTO": "",
   "EXIGE_POSIBLES_REGISTRO": "",
@@ -365,6 +368,8 @@
   "OpcionesArchivo": "",
   "TIPOS_LIBRO": "",
   "TYPE_CHECKING": "",
+  "VOCABULARIOS": "",
+  "VOCABULARIO_POR_DEFECTO": "",
   "acepta_indice": "",
   "arma_asientos": "",
   "canal": "",
@@ -380,7 +385,8 @@
   "incumplimientos": "",
   "lleva_cuentas": "",
   "no_caben": "",
-  "seccion_por_defecto": ""
+  "seccion_por_defecto": "",
+  "vocabulario": ""
  },
  "contaperu.drivers.kit": {
   "Opciones": "",
@@ -463,6 +469,21 @@
   "linea": "",
   "linea_rce": "",
   "linea_rvie": "",
+  "nombre": ""
+ },
+ "contaperu.drivers.open_accounting": {
+  "CANAL": "",
+  "CONFIGURACION": "",
+  "CONTENT_TYPE": "",
+  "EXIGE": "",
+  "FORMATOS": "",
+  "Libro": "",
+  "NOMBRE": "",
+  "OPCIONES": "",
+  "OPEN_ACCOUNTING": "",
+  "OpcionesArchivo": "",
+  "VOCABULARIO": "",
+  "desde_lineas": "",
   "nombre": ""
  }
 }

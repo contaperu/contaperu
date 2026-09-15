@@ -78,8 +78,9 @@ Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega
 - **SIRE:** el TXT de reemplazo del registro de ventas (RVIE) y del de compras (RCE), listo para subir a SUNAT.
 - **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y el registro de
   CONTASIS; SISCONT y STARSOFT esperan un archivo que ese sistema haya aceptado.
-- **ERP:** los sistemas nuevos, en cualquier lenguaje, que reciben el documento en JSON con su diagnóstico, el CSV con
-  las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
+- **ERP:** los sistemas nuevos, en cualquier lenguaje. Reciben el documento `open-accounting` con su asiento **sin
+  vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `open_accounting`), el
+  CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
 
 Cualquier entrada puede terminar en cualquiera de los tres grupos. Las cuentas, los sentidos del debe y el haber y la
 detracción los decide el motor una sola vez, igual para todos los destinos. Y al costado del motor está la comunidad:
@@ -185,8 +186,8 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 
 - **SIRE:** el TXT de reemplazo del RVIE y del RCE.
 - **Legacy:** a CONCAR (Excel de asientos de 41 columnas) y a CONTASIS (su registro de compras y de ventas en Excel).
-- **ERP:** el documento `open-accounting` en JSON y un CSV genérico con las líneas de diario, para cualquier destino que
-  todavía no tenga driver.
+- **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `open_accounting`), y un CSV
+  genérico con las líneas de diario, para cualquier destino que todavía no tenga driver.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta para el sistema de
 destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos, un reparto que no suma la base o que el
@@ -228,7 +229,8 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
 | Drivers de SISCONT y STARSOFT | el contrato ya cubre lo que necesitan; esperan un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
 | **ERP** | |
-| Driver CSV y el documento `open-accounting` en JSON | listo |
+| Driver `open_accounting`: el asiento en el estándar, sin siglas, sub-diarios ni correlativos | listo |
+| Driver CSV | listo |
 | Puerta HTTP con el contrato OpenConta | listo |
 
 Lo que no está listo no tiene fecha: tiene un orden y un dato que lo destraba, en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).

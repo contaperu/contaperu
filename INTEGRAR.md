@@ -163,7 +163,8 @@ Si tu ERP todavía no tiene driver, el contrato está en `contaperu/drivers/cont
 - **Dos niveles.** *De serie*, dentro de este repositorio, con un archivo real que ese ERP haya aceptado. *Comunidad*,
   en un paquete tuyo que se registra por el grupo de entry points `contaperu.drivers`, sin esperar a nadie.
 - **Si tu ERP tiene una API moderna** en vez de un archivo, escribir en ella es un hito reservado (canal `api_erp`, A5
-  de la hoja de ruta). Mientras tanto, tu aplicación pide el asiento a `generar_asiento` y lo envía; el envío y los
+  de la hoja de ruta). Mientras tanto, tu aplicación pide el asiento a `generar_asiento` con `driver="open_accounting"` —las líneas del
+  estándar, sin siglas, sub-diarios ni correlativos de ningún sistema legacy— y lo envía; el envío y los
   reintentos son suyos, con la identidad y la huella de cada comprobante como clave para no repetir.
 
 ## Versiones: fija la tuya y actualiza cuando decidas

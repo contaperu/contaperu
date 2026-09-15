@@ -517,11 +517,11 @@
   "/v1/drivers": {
    "get": {
     "operationId": "drivers_disponibles",
-    "summary": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), lo que exige, si se configura y su descripción.",
-    "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal\n(`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), lo que exige, si se configura y su\ndescripción.",
+    "summary": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo que exige, si se configura y su descripción.",
+    "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal\n(`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), el vocabulario con que recibe sus\nlíneas (`legacy` o `neutral`), lo que exige, si se configura y su descripción.",
     "responses": {
      "200": {
-      "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), lo que exige, si se configura y su descripción.",
+      "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo que exige, si se configura y su descripción.",
       "content": {
        "application/json": {
         "schema": {
@@ -2165,6 +2165,13 @@
         "erp"
        ]
       },
+      "vocabulario": {
+       "description": "Con qué vocabulario recibe sus líneas: el de un sistema legacy (siglas, sub-diarios, correlativos) o el neutral del estándar, para un ERP.",
+       "enum": [
+        "legacy",
+        "neutral"
+       ]
+      },
       "exige": {
        "type": "array",
        "items": {
@@ -2185,6 +2192,7 @@
       "familia",
       "canal",
       "grupo",
+      "vocabulario",
       "exige",
       "configurable",
       "descripcion"

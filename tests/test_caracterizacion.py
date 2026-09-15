@@ -36,7 +36,7 @@ from contaperu.puertas import cli
 from util import GOLDEN
 
 CARACTERIZACION = Path(__file__).parent / "fixtures" / "caracterizacion"
-DRIVERS = ("concar", "contasis", "csv", "sire")
+DRIVERS = ("concar", "contasis", "csv", "sire", "open_accounting")
 SIN_CENTROS = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
 
 # La imputación de cada documento de `casos_202608.json`: la cuenta y el centro de siempre, la de honorarios para los

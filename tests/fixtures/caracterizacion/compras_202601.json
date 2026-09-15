@@ -4731,7 +4731,7 @@
  },
  "generar_asiento/contasis": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
  },
  "exportar/contasis": {
   "driver": "contasis",
@@ -6510,7 +6510,7 @@
  },
  "generar_asiento/sire": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
  },
  "exportar/sire": {
   "driver": "sire",
@@ -6621,6 +6621,443 @@
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202601||10/01/2026|10/02/2026|01|F001||45680||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|40000.00|7200.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|47200.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||18/01/2026|18/02/2026|01|E001||12347||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|25000.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||25/01/2026|25/02/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|1800.00|324.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2124.00|PEN||||||||||||||||\r\n",
   "archivo_zip": "LE2060123456720260100080400021112.zip"
+ },
+ "diagnosticar/open_accounting": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "driver": "open_accounting",
+  "exige": [
+   "cuenta_contable"
+  ],
+  "listo_para_exportar": true,
+  "por_que_no": [],
+  "que_falta": [],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 3,
+   "saldrian": 3,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 0,
+   "con_aviso": 0
+  },
+  "bloqueantes": [],
+  "avisos": [],
+  "faltantes": {
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": []
+  },
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20677777771": {
+    "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "comprobantes": 1,
+    "total": "47200.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "IMPORTADORA ASIA PACIFICO SRL",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20605555552": {
+    "nombre": "ELECTRICIDAD DE PRUEBA SAA",
+    "comprobantes": 1,
+    "total": "2124.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
+   }
+  },
+  "sub_diarios": {},
+  "saldrian": [
+   "F001-45680",
+   "E001-12347",
+   "12345679"
+  ]
+ },
+ "generar_asiento/open_accounting": {
+  "open_accounting": "0.3",
+  "libro": {
+   "ruc": "20601234567",
+   "razon_social": "EMPRESA DE PRUEBA SAC",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "asiento": [
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "40000.00",
+    "rol": "principal",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "7200.00",
+    "rol": "igv",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "IGV - MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "47200.00",
+    "rol": "tercero",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "contraparte_doc": "20677777771",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "25000.00",
+    "rol": "principal",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IMPORTADORA ASIA PACIFICO SRL",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "4500.00",
+    "rol": "igv",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IGV - IMPORTADORA ASIA PACIFICO SRL",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "29500.00",
+    "rol": "tercero",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IMPORTADORA ASIA PACIFICO SRL",
+    "contraparte_doc": "20633333336",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "1800.00",
+    "rol": "principal",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "ELECTRICIDAD DE PRUEBA SAA",
+    "documento": {
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "324.00",
+    "rol": "igv",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "IGV - ELECTRICIDAD DE PRUEBA SAA",
+    "documento": {
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "2124.00",
+    "rol": "tercero",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "ELECTRICIDAD DE PRUEBA SAA",
+    "contraparte_doc": "20605555552",
+    "documento": {
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   }
+  ],
+  "_asiento": {
+   "lineas": 9,
+   "sub_diarios": {},
+   "cuadre": {
+    "cuadra": true,
+    "debe": "78824.00",
+    "haber": "78824.00",
+    "diferencia": "0.00",
+    "lineas": 9,
+    "sin_sentido": 0
+   },
+   "huella": "ccef66c4da1b11e0e073f69407f889b7463d535a4c71a7b8dbe9e9b3f0f4ca87",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "d7be071c58f52c34bb965eb7e0ddab5161577bdc40567e5e511cbb13c0911cdc"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "9cfd81582fc4b75e96769d3d64d40e1e397fea8fc517710553df861e6412cd52"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "5e0e069d93cc79d2f40ed810faa0811f1d0cff0b81df052b5a244a68caa1b5b2"
+    }
+   ],
+   "motor": "(versión del motor)"
+  }
+ },
+ "exportar/open_accounting": {
+  "driver": "open_accounting",
+  "formato": "open_accounting_json",
+  "archivo": "open_accounting_20601234567_202601_compra.json",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00",
+   "filas": 9,
+   "sub_diarios": {},
+   "debe": "78824.00",
+   "haber": "78824.00",
+   "huella": "ccef66c4da1b11e0e073f69407f889b7463d535a4c71a7b8dbe9e9b3f0f4ca87",
+   "lineas": 9
+  },
+  "_exportacion": {
+   "driver": "open_accounting",
+   "archivo": "open_accounting_20601234567_202601_compra.json",
+   "huella": "ccef66c4da1b11e0e073f69407f889b7463d535a4c71a7b8dbe9e9b3f0f4ca87",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "d7be071c58f52c34bb965eb7e0ddab5161577bdc40567e5e511cbb13c0911cdc"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "9cfd81582fc4b75e96769d3d64d40e1e397fea8fc517710553df861e6412cd52"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "5e0e069d93cc79d2f40ed810faa0811f1d0cff0b81df052b5a244a68caa1b5b2"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/json"
+ },
+ "exportar_con_observados/open_accounting": {
+  "driver": "open_accounting",
+  "formato": "open_accounting_json",
+  "archivo": "open_accounting_20601234567_202601_compra.json",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00",
+   "filas": 9,
+   "sub_diarios": {},
+   "debe": "78824.00",
+   "haber": "78824.00",
+   "huella": "ccef66c4da1b11e0e073f69407f889b7463d535a4c71a7b8dbe9e9b3f0f4ca87",
+   "lineas": 9
+  },
+  "_exportacion": {
+   "driver": "open_accounting",
+   "archivo": "open_accounting_20601234567_202601_compra.json",
+   "huella": "ccef66c4da1b11e0e073f69407f889b7463d535a4c71a7b8dbe9e9b3f0f4ca87",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "d7be071c58f52c34bb965eb7e0ddab5161577bdc40567e5e511cbb13c0911cdc"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "9cfd81582fc4b75e96769d3d64d40e1e397fea8fc517710553df861e6412cd52"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "5e0e069d93cc79d2f40ed810faa0811f1d0cff0b81df052b5a244a68caa1b5b2"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/json"
  },
  "cli_diagnosticar/concar": {
   "codigo": 0,

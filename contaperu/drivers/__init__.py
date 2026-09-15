@@ -1,7 +1,7 @@
 """Registro de drivers de salida. Un driver traduce el asiento —o el registro— al formato que
 importa un sistema contable concreto. Lo que tiene que exponer está en `contrato.py`.
 
-Los cuatro que vienen de serie salen de la contabilidad peruana real:
+Los cinco que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, salen de la contabilidad peruana real:
 
 - **`sire`** — el TXT que se sube a SUNAT para reemplazar la propuesta del Registro de Ventas
   (RVIE) o de Compras (RCE). Es lo que la norma exige hoy: el PLE quedó reemplazado por el SIRE
@@ -11,7 +11,9 @@ Los cuatro que vienen de serie salen de la contabilidad peruana real:
 - **`contasis`** — el registro de compras o de ventas en Excel que importa CONTASIS, que arma el
   asiento él mismo: una fila por comprobante. Escrito contra su plantilla oficial y aceptado:
   CONTASIS importó los archivos que genera (13-sep-2026).
-- **`csv`** — las líneas de diario neutrales, para quien todavía no tiene driver.
+- **`csv`** — las líneas de diario en columnas, para quien todavía no tiene driver.
+- **`open_accounting`** — el documento del estándar con su asiento, sin vocabulario legacy (sin siglas, sub-diarios ni
+  correlativos): la salida para un ERP nuevo, que parte del estándar en vez de reimplementar el IGV.
 
 **Drivers de terceros, sin tocar este repositorio.** Un paquete instalado que declare en su
 `pyproject.toml`
@@ -33,16 +35,16 @@ import warnings
 from importlib.metadata import entry_points
 from types import ModuleType
 
-from . import concar, contasis, contrato, csv, sire
+from . import concar, contasis, contrato, csv, open_accounting, sire
 from .kit import Opciones
 
 GRUPO = "contaperu.drivers"
 DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
-                                   contasis.NOMBRE: contasis}
+                                   contasis.NOMBRE: contasis, open_accounting.NOMBRE: open_accounting}
 DRIVER_POR_DEFECTO = "sire"
 
 __all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones", "concar", "contasis",
-           "contrato", "csv", "de_terceros", "formato_de", "obtener", "recargar", "sire"]
+           "contrato", "csv", "de_terceros", "formato_de", "obtener", "open_accounting", "recargar", "sire"]
 
 
 class AvisoDriver(UserWarning):

@@ -87,7 +87,10 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
     if not isinstance(configuracion, dict):
         return _declaracion.validar(configuracion, CONFIGURACION_GENERAL)
     generales = [c.clave for c in CONFIGURACION_GENERAL]
-    sistemas = {nombre: modulo for nombre, modulo in drivers.DRIVERS.items() if drivers.contrato.lleva_cuentas(modulo)}
+    # Una sección es de un sistema que lleva cuentas y declara algo que configurar: un driver neutral como
+    # `open_accounting` lleva cuentas y no tiene nada suyo, solo lo general.
+    sistemas = {nombre: modulo for nombre, modulo in drivers.DRIVERS.items() if drivers.contrato.lleva_cuentas(modulo)
+                and (drivers.contrato.configuracion(modulo) or drivers.contrato.columnas_elegibles(modulo))}
     va_en: dict[str, list[str]] = {}
     for nombre, modulo in sistemas.items():
         for campo in drivers.contrato.configuracion(modulo):
@@ -109,6 +112,8 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
         elif clave == "imputaciones":
             errores.append("`imputaciones` no va en la configuración: la imputación de cada documento llega aparte "
                            "(`imputacion`)")
+        elif clave in drivers.DRIVERS and drivers.contrato.lleva_cuentas(drivers.DRIVERS[clave]):
+            errores.append(f"`{clave}` no tiene sección: ese sistema no tiene nada propio que configurar, solo lo general")
         elif clave in drivers.DRIVERS:
             errores.append(f"`{clave}` no tiene sección: ese sistema no lleva cuentas y no se configura")
         else:

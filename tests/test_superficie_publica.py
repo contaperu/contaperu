@@ -30,7 +30,7 @@ EXTENSION = (
     "contaperu.detracciones", "contaperu.validar", "contaperu.partida_doble", "contaperu.asiento", "contaperu.pcge",
     "contaperu.lectores", "contaperu.lectores.archivos", "contaperu.lectores.sire_txt", "contaperu.lectores.xml_ubl",
     "contaperu.drivers", "contaperu.drivers.contrato", "contaperu.drivers.kit", "contaperu.drivers.concar", "contaperu.drivers.contasis",
-    "contaperu.drivers.csv", "contaperu.drivers.sire",
+    "contaperu.drivers.csv", "contaperu.drivers.sire", "contaperu.drivers.open_accounting",
 )
 TIPOS_DE_CONSTANTE = {"builtins", "decimal", "datetime"}
 

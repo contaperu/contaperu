@@ -277,6 +277,8 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
                 `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como
                 `.xlsx`: una fila por comprobante, sin sub-diario (se elige al importar).
       - ERP:    `csv` — las líneas de diario en columnas, en `texto` y también adjunto.
+                `open_accounting` — el documento del estándar con su asiento, sin siglas, sub-diarios ni
+                correlativos de ningún sistema legacy, adjunto como `.json`.
 
     Antes de escribir nada, en los drivers que arman asiento (`concar`, `csv`) comprueba que cuadre; si
     no cuadra, falla. `contasis` y `sire` no arman asiento: `contasis` se niega antes por lo que exige y

@@ -73,7 +73,8 @@ def desde_lineas_con_indice(modulo, libro: Libro, comprobantes: list[Comprobante
     if fuera:
         raise contrato.NoCabe(fuera)
     lineas, rangos, indice = asi.lineas_e_indice_del_libro(libro, comprobantes, config, correlativos, opciones,
-                                                           contrato.centro_en_anexo(modulo, config))
+                                                           contrato.centro_en_anexo(modulo, config),
+                                                           vocabulario=contrato.vocabulario(modulo))
     cuadre = partida_doble.exigir(lineas)
     if contrato.acepta_indice(modulo):
         contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones, indice=indice)
@@ -125,7 +126,8 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
     corr = asi.correlativos_de_partida(incluidos, config, libro.es_venta, correlativos)
     # Directo a las líneas neutrales: sin pasar por las columnas de ningún ERP.
     neutrales, rangos, indice = asi.lineas_e_indice_del_libro(libro, incluidos, config, corr,
-                                                              centro_en_anexo=contrato.centro_en_anexo(modulo, config))
+                                                              centro_en_anexo=contrato.centro_en_anexo(modulo, config),
+                                                              vocabulario=contrato.vocabulario(modulo))
     lineas = [ln.a_dict() for ln in neutrales]
     cuadre = partida_doble.cuadra(lineas)
     salida = documento(libro, lineas=lineas)

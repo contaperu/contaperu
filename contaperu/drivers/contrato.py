@@ -35,6 +35,11 @@ salida, un solo documento»)—, y hay cuatro formas de driver. Un driver implem
 Cada canal se presenta en uno de los tres grupos de destinos del motor (`GRUPOS`): `tributario` es el **SIRE**, `legacy`
 es **legacy** e `intercambio` es **ERP**. `drivers_disponibles` dice el grupo de cada driver.
 
+**El vocabulario** — con qué palabras recibe sus líneas un driver de asientos (`VOCABULARIO`, 1.1). `legacy`, el de
+siempre: siglas, sub-diarios, correlativos y el documento comodín de la detracción. `neutral`: las líneas del estándar
+sin nada de eso, por `rol` y código SUNAT, para un ERP (el driver `open_accounting`). Un driver neutral es de canal
+`intercambio`, no declara claves legacy en su configuración y el núcleo solo le exige la cuenta.
+
 `api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado (hito A5): el contrato lo rechaza. Un driver
 de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy` durante la 1.x.
 
@@ -99,6 +104,17 @@ CANAL_POR_DEFECTO = "legacy"
 # Cómo se presenta cada canal en la arquitectura del motor (John, 15-sep-2026): lo que sale va al SIRE, a un sistema
 # legacy o a un ERP. El canal es la regla que hace cumplir el contrato; el grupo, cómo se nombra ante quien integra.
 GRUPOS = {"tributario": "sire", "legacy": "legacy", "intercambio": "erp"}
+
+# Con qué vocabulario arma el núcleo las líneas de un driver de asientos (1.1): `legacy` —siglas, sub-diarios,
+# correlativos y el documento comodín de la detracción, lo que importan CONCAR y los de su familia— o `neutral`, las
+# líneas del estándar sin nada de eso, por `rol` y código SUNAT, para los ERP que vienen. La contabilidad es la misma.
+VOCABULARIOS = ("legacy", "neutral")
+VOCABULARIO_POR_DEFECTO = "legacy"
+# Lo que el núcleo exige a un driver neutral: la cuenta de cada línea. La equivalencia del tipo no, porque no hay sigla
+# ni sub-diario que sacar de ella.
+EXIGE_NUCLEO_NEUTRAL = frozenset({"cuenta_contable"})
+# El vocabulario legacy de la configuración del asiento: lo que un driver neutral no declara.
+CLAVES_LEGACY = frozenset({c.clave for c in CONFIGURACION_DEL_ASIENTO} | {MONEDAS_CODIGO})
 
 # En orden de preferencia: si un driver expone dos, el núcleo usa la primera.
 FORMAS = ("desde_lineas", "desde_comprobantes", "construir", "linea")
@@ -188,6 +204,11 @@ def grupo(modulo: Any) -> str:
     return GRUPOS.get(canal(modulo), "")
 
 
+def vocabulario(modulo: Any) -> str:
+    """Con qué vocabulario recibe sus líneas: el `VOCABULARIO` que declara, o `legacy` si no lo declara."""
+    return getattr(modulo, "VOCABULARIO", None) or VOCABULARIO_POR_DEFECTO
+
+
 def acepta_indice(modulo: Any) -> bool:
     """¿Su `desde_lineas` recibe el índice de cada comprobante? Lo decide su firma: un parámetro `indice` o `**kwargs`.
     Así un driver de terceros escrito antes de la 1.0 sigue funcionando sin él."""
@@ -217,7 +238,8 @@ def exige(modulo: Any) -> frozenset[str]:
     `EXIGE`. Un registro tributario (forma `linea`) no exige nada de esto: no lleva cuentas."""
     declarado = frozenset(getattr(modulo, "EXIGE", None) or ())
     if arma_asientos(modulo):
-        return EXIGE_NUCLEO_ASIENTO | declarado
+        nucleo = EXIGE_NUCLEO_NEUTRAL if vocabulario(modulo) == "neutral" else EXIGE_NUCLEO_ASIENTO
+        return nucleo | declarado
     if forma(modulo) == "desde_comprobantes":
         return EXIGE_NUCLEO_REGISTRO | declarado
     return frozenset()
@@ -314,7 +336,29 @@ def incumplimientos(modulo: Any) -> list[str]:
             problemas.append(f"EXIGE solo admite {sorted(posibles)}; sobra {sorted(set(declarado) - posibles)}")
     if hasattr(modulo, "no_caben") and not callable(getattr(modulo, "no_caben")):
         problemas.append("no_caben es una función: no_caben(libro, comprobantes, config)")
-    return problemas + _incumplimientos_del_canal(modulo, f) + _incumplimientos_de_la_configuracion(modulo)
+    return (problemas + _incumplimientos_del_canal(modulo, f) + _incumplimientos_del_vocabulario(modulo, f)
+            + _incumplimientos_de_la_configuracion(modulo))
+
+
+def _incumplimientos_del_vocabulario(modulo: Any, f: str) -> list[str]:
+    declarado = getattr(modulo, "VOCABULARIO", None)
+    if declarado is None:
+        return []
+    if declarado not in VOCABULARIOS:
+        return [f"VOCABULARIO {declarado!r} no existe; los que hay: {', '.join(VOCABULARIOS)}"]
+    if declarado != "neutral":
+        return []
+    problemas = []
+    if f != "desde_lineas":
+        problemas.append("un driver neutral recibe las líneas del estándar: su forma es `desde_lineas`")
+    if canal(modulo) != "intercambio":
+        problemas.append("un driver neutral entrega a un ERP: su canal es `intercambio`")
+    legacy = sorted({c.clave for c in configuracion(modulo) if isinstance(c, Campo)} & CLAVES_LEGACY)
+    if legacy:
+        problemas.append("un driver neutral no declara vocabulario legacy en CONFIGURACION: " + ", ".join(legacy))
+    if "moneda" in (getattr(modulo, "EXIGE", None) or ()):
+        problemas.append("un driver neutral no exige el código de la moneda: la moneda va en ISO")
+    return problemas
 
 
 def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
@@ -364,7 +408,7 @@ def _incumplimientos_de_la_configuracion(modulo: Any) -> list[str]:
             if errores:
                 problemas.append("los valores por defecto de CONFIGURACION no cumplen lo declarado: "
                                  + "; ".join(errores))
-    if arma_asientos(modulo):
+    if arma_asientos(modulo) and vocabulario(modulo) != "neutral":
         propias = {c.clave for c in configuracion(modulo) if isinstance(c, Campo)}
         faltan = [c.clave for c in CONFIGURACION_DEL_ASIENTO if c.clave not in propias]
         if faltan:

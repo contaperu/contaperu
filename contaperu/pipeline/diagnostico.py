@@ -163,7 +163,9 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     mirar = set(exige)
     if contrato.lleva_cuentas(modulo):
         mirar |= {"cuenta_contable", "centro_costo"}
-    if contrato.arma_asientos(modulo):
+    # El tipo con sigla, la moneda con código y los sub-diarios son vocabulario legacy: a un driver neutral no se le miran.
+    legacy = contrato.arma_asientos(modulo) and contrato.vocabulario(modulo) != "neutral"
+    if legacy:
         mirar |= {"tipo_cp", "moneda"}
     codigos = ("sin_sigla", "sin_codigo_de_moneda")      # se dicen por su código, no por comprobante
     faltantes: dict[str, Any] = {clave: cuales if clave in codigos else [_serie_numero(c) for c in cuales]
@@ -172,7 +174,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
         faltantes["no_cabe"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
                                 in contrato.no_caben(modulo, libro, candidatos, config).items()}
     sub_diarios: dict[str, Any] = {}
-    if contrato.arma_asientos(modulo):
+    if legacy:
         con_equivalencia = [c for c in candidatos if c.tipo_cp not in faltantes["sin_sigla"]]
         presentes = asi.sub_diarios_presentes(con_equivalencia, config, es_venta)
         corr = asi.correlativos_de_partida(con_equivalencia, config, es_venta, correlativos)

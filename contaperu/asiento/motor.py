@@ -91,13 +91,15 @@ def _limpio(campos: dict) -> dict:
     return {k: v for k, v in campos.items() if v not in ("", None)}
 
 
-def _detraccion(c: Comprobante, config: dict, total: Decimal) -> dict:
+def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = False) -> dict:
     """El bloque de la línea de detracción: el código SUNAT, el interno del contribuyente (T.G. 28 de
     CONCAR: el de SUNAT + 2 propios, o SUNAT + "01" si no lo configuró), la tasa —la misma con la que
-    se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base."""
+    se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base. Con vocabulario
+    neutral no lleva el código interno: es de un sistema legacy."""
     bloque = c.detraccion or {}
     sunat = str(bloque.get("codigo") or "").strip()
-    interno = str((config.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
+    interno = "" if neutral else str((config.get("detraccion_codigos") or {}).get(sunat)
+                                     or (f"{sunat}01" if sunat else ""))
     tasa = tasa_detraccion(c, config)
     return _limpio({"codigo": sunat, "codigo_interno": interno,
                     "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total)})
@@ -105,10 +107,16 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal) -> dict:
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
                            opciones: Any = None, es_venta: bool = False,
-                           centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO) -> list[LineaDiario]:
+                           centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
+                           vocabulario: str = "legacy") -> list[LineaDiario]:
     """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
     del manual de asientos. `centro_en_anexo` dice qué líneas llevan además el centro en su anexo auxiliar
-    (`principal`, `tercero`)."""
+    (`principal`, `tercero`).
+
+    `vocabulario="neutral"` (1.1) arma las mismas líneas —las mismas cuentas, sentidos, importes y roles— sin el
+    vocabulario de un sistema legacy: sin sub-diario ni correlativo, sin la sigla del documento ni de su referencia, y
+    con la detracción sobre el propio comprobante en vez del documento comodín `DR` y `9999999999`."""
+    neutral = vocabulario == "neutral"
     moneda = (c.moneda or "PEN").upper()
     # A qué cuentas va la base: lo decide la imputación del documento, que llega aparte (una línea por parte si
     # trae reparto), o lo de siempre (`partes_de`). Una parte sin cuenta detiene el asiento igual que una fila sin
@@ -153,15 +161,17 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # La nota de crédito invierte el caso que toque.
     normal = ("H", "D") if es_venta else ("D", "H")
     sentido_base, sentido_tercero = (normal[::-1] if invierte else normal)
-    sub_diario_asiento = sub_diario(c, config, es_venta)
+    sub_diario_asiento = "" if neutral else sub_diario(c, config, es_venta)
 
-    documento = {"tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp, "serie_numero": serie_numero,
+    documento = {"tipo": "" if neutral else sigla_documento(c, config), "tipo_cp": c.tipo_cp,
+                 "serie_numero": serie_numero,
                  "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
     referencia: dict[str, str] = {}
     if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
         numero_ref = _numero(c.ref_numero, opciones)
         equivalencia_ref = equivalencia_tipo(c, config, c.ref_tipo_cp)
-        referencia = {"tipo": str(equivalencia_ref["sigla"]) if equivalencia_ref else "", "tipo_cp": c.ref_tipo_cp,
+        referencia = {"tipo": str(equivalencia_ref["sigla"]) if equivalencia_ref and not neutral else "",
+                      "tipo_cp": c.ref_tipo_cp,
                       "serie_numero": serie_y_numero(c.ref_serie, numero_ref),
                       "fecha": _iso(c.ref_fecha)}
 
@@ -216,17 +226,21 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
             # De QUÉ documento sale esta detracción: en una factura, del propio comprobante (lo que
             # CONCAR aceptó). En una NOTA que ya referencia la factura que corrige se RESPETA esa
             # referencia: ningún archivo validado dice otra cosa. Pendiente de una NC real.
-            referencia_detraccion = referencia if referencia.get("tipo") else {
-                "tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp,
-                "serie_numero": serie_numero, "fecha": _iso(emision)}
             cuenta_detraccion = cuenta_por_pagar_detraccion(config["cuentas"], moneda)
-            documento_detraccion = {"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
-                                    "serie_numero": NUMERO_DETRACCION_PENDIENTE,
-                                    "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
+            if neutral:
+                # Sin documento comodín: la detracción es del propio comprobante, y la constancia llega después.
+                documento_detraccion, referencia_detraccion = documento, referencia
+            else:
+                referencia_detraccion = referencia if referencia.get("tipo") else {
+                    "tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp,
+                    "serie_numero": serie_numero, "fecha": _iso(emision)}
+                documento_detraccion = {"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
+                                        "serie_numero": NUMERO_DETRACCION_PENDIENTE,
+                                        "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
             linea_detraccion = linea("detraccion", detraido, cuenta_detraccion, sentido_tercero,
                                      f"DETRACCION - {glosa}", contraparte_doc=ruc,
                                      documento=_limpio(documento_detraccion), referencia=_limpio(referencia_detraccion),
-                                     detraccion=_detraccion(c, config, total))
+                                     detraccion=_detraccion(c, config, total, neutral))
 
     if es_venta and not invierte:
         # Venta normal: cliente (D) · ingreso (H) · IGV (H) — el orden del manual de asientos.
@@ -239,19 +253,24 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
 
 def lineas_e_indice_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict,
                               correlativos: dict[str, int], opciones: Any = None,
-                              centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
+                              centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO, vocabulario: str = "legacy",
                               ) -> tuple[list[LineaDiario], dict[str, dict], tuple[ComprobanteDelAsiento, ...]]:
     """Todos los comprobantes de un libro → sus líneas numeradas por sub-diario (`MMNNNN`), el rango de correlativos
     que usó cada sub-diario y el índice: qué tramo de líneas es de qué comprobante, con su cabecera
-    (`asiento.indice`). Es la entrada de cualquier driver de asientos."""
+    (`asiento.indice`). Es la entrada de cualquier driver de asientos. Con `vocabulario="neutral"` no numera: no hay
+    sub-diarios, y los rangos salen vacíos."""
     es_venta = libro.es_venta
-    numeros, rangos = numerar_en_orden(comprobantes, config, libro.periodo, correlativos, es_venta)
+    neutral = vocabulario == "neutral"
+    if neutral:
+        numeros, rangos = [""] * len(comprobantes), {}
+    else:
+        numeros, rangos = numerar_en_orden(comprobantes, config, libro.periodo, correlativos, es_venta)
     limites = limites_del_periodo(libro)
     lineas: list[LineaDiario] = []
     indice: list[ComprobanteDelAsiento] = []
     for posicion, (c, numero) in enumerate(zip(comprobantes, numeros)):
-        propias = lineas_del_comprobante(c, config, limites, numero, opciones, es_venta, centro_en_anexo)
-        indice.append(ComprobanteDelAsiento(posicion=posicion, sub_diario=sub_diario(c, config, es_venta),
+        propias = lineas_del_comprobante(c, config, limites, numero, opciones, es_venta, centro_en_anexo, vocabulario)
+        indice.append(ComprobanteDelAsiento(posicion=posicion, sub_diario="" if neutral else sub_diario(c, config, es_venta),
                                             correlativo=numero, desde=len(lineas), hasta=len(lineas) + len(propias),
                                             cabecera=cabecera_de(c)))
         lineas.extend(propias)

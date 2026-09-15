@@ -48,6 +48,13 @@
      "erp"
     ]
    },
+   "vocabulario": {
+    "description": "Con qué vocabulario recibe sus líneas: el de un sistema legacy (siglas, sub-diarios, correlativos) o el neutral del estándar, para un ERP.",
+    "enum": [
+     "legacy",
+     "neutral"
+    ]
+   },
    "exige": {
     "type": "array",
     "items": {
@@ -68,6 +75,7 @@
    "familia",
    "canal",
    "grupo",
+   "vocabulario",
    "exige",
    "configurable",
    "descripcion"

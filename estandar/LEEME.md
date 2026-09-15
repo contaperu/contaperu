@@ -206,6 +206,10 @@ adivinar:
   que admite cada ERP es trabajo del driver.
 - **`tasa_igv`** es la del comprobante como texto (`"18"`, `"10.5"`). Si un ERP solo admite enteros,
   redondea él.
+- **Sin vocabulario legacy, para un ERP.** `sub_diario`, `correlativo` y `documento.tipo` son vocabulario de un
+  sistema legacy como CONCAR, y ya eran opcionales. El motor entrega también un perfil **neutral** (driver
+  `open_accounting`): las mismas líneas, con las mismas cuentas, sentidos e importes, sin esos campos y con la
+  detracción sobre el propio comprobante en vez del documento comodín.
 
 Son campos **opcionales añadidos**, así que no cambian la versión del estándar (ver *Versionado*): un
 consumidor de la 0.3 que no los conozca los ignora.

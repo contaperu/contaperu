@@ -191,10 +191,20 @@ glosa de su columna F y la tasa entera de la AO, que se redondea una sola vez de
 |---|---|---|---|
 | `legacy` | un sistema contable instalado que importa un archivo | lleva cuentas; declara `EXIGE` | concar, contasis; STARSOFT y SISCONT cuando entren |
 | `tributario` | un registro que se presenta a SUNAT | forma `linea`, sin cuentas ni configuración | sire |
-| `intercambio` | un formato neutral para leer o integrar | forma `desde_lineas` | csv |
+| `intercambio` | un formato neutral para leer o integrar | forma `desde_lineas` | csv, open_accounting |
+
+Cada canal se presenta en uno de los tres grupos de destinos del motor (`contrato.GRUPOS`): `tributario` es **SIRE**,
+`legacy` es **Legacy** e `intercambio` es **ERP**.
 
 `api_erp` —escribir el cuerpo de la API de un ERP moderno— queda **reservado** (hito A5): el contrato lo rechaza. Un
 driver de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy` durante la 1.x.
+
+**El vocabulario dice con qué palabras llegan las líneas** (`VOCABULARIO`, 1.1). `legacy`, el de siempre: siglas,
+sub-diarios, correlativos y el documento comodín de la detracción, lo que importan CONCAR y los de su familia.
+`neutral`: las líneas del estándar sin nada de eso, por `rol` y código SUNAT. Es el de `open_accounting`, la salida para
+un ERP nuevo, que parte del estándar en vez de reimplementar el IGV. Un driver neutral es de canal `intercambio`, no
+declara claves legacy en su configuración y el núcleo solo le exige la cuenta. La contabilidad es la misma que la de
+CONCAR: `tests/test_driver_open_accounting.py` compara cuentas, sentidos, importes y roles línea a línea.
 
 Y **declara qué exige** (`EXIGE`): lo que ese ERP no puede importar sin y que el núcleo, si no se lo dicen, deja pasar
 —`centro_costo` en las cuentas que lo llevan, `moneda` con código en el destino; en uno de registro, `centro_costo` y
@@ -217,7 +227,7 @@ Se publica de dos maneras:
   primera vez que se consulta; los de serie ganan ante un nombre repetido y uno que no cumple el contrato se ignora con
   un `AvisoDriver` en vez de tumbar el registro.
 - **Dentro del repositorio**, en `drivers/<sistema>/` y en `DE_SERIE`. Para eso hace falta un archivo real que ese ERP
-  haya aceptado.
+  haya aceptado, salvo en un driver cuyo formato es el propio estándar, como `open_accounting`: lo valida su esquema.
 
 Esté donde esté, `tests/test_contrato_drivers.py` lo examina: cumple el contrato, declara su canal y exporta el golden
 de compras con el asiento cuadrado.

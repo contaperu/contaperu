@@ -16417,7 +16417,7 @@
  },
  "generar_asiento/contasis": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
  },
  "exportar/contasis": {
   "_error": "RepartoNoAdmitido",
@@ -18254,7 +18254,7 @@
  },
  "generar_asiento/sire": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
  },
  "exportar/sire": {
   "driver": "sire",
@@ -18505,6 +18505,1456 @@
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202608||03/08/2026|02/09/2026|01|F001||101||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||05/08/2026|04/09/2026|01|F001||102||6|20602222226|PROVEEDOR DE PRUEBA SAC|500.00|90.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|590.00|USD|3.750|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||12/08/2026||07|FC01||5||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|-100.00|-18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|-118.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||13/08/2026||08|FD01||2||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|50.00|9.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|59.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||10/08/2026|27/08/2026|01|E001||871||6|20602222226|PROVEEDOR DE PRUEBA SAC|4200.00|756.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|4956.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||14/08/2026|13/09/2026|01|F002||45||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|2000.00|360.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2360.00|USD|3.700|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/08/2026||03|B001||88||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|100.00|18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|118.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/06/2026|20/07/2026|01|F001||90||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|300.00|54.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|354.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||25/08/2026|24/09/2026|01|F001||103||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||26/08/2026|10/09/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|200.00|36.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|236.00|PEN||||||||||||||||\r\n",
   "archivo_zip": "LE2060123456720260800080400021112.zip"
+ },
+ "diagnosticar/open_accounting": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202608",
+   "tipo": "compra"
+  },
+  "driver": "open_accounting",
+  "exige": [
+   "cuenta_contable"
+  ],
+  "listo_para_exportar": true,
+  "por_que_no": [],
+  "que_falta": [],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 12,
+   "saldrian": 12,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 0,
+   "con_aviso": 1
+  },
+  "bloqueantes": [],
+  "avisos": [
+   {
+    "serie_numero": "B001-88",
+    "observaciones": [
+     {
+      "codigo": "COMPRA_BOLETA",
+      "nivel": "aviso",
+      "texto": "Boleta de venta recibida: no da crédito fiscal, su IGV es costo. En el lápiz, 'Uso de la compra' → 'Solo para ventas sin IGV'"
+     }
+    ]
+   }
+  ],
+  "faltantes": {
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": []
+  },
+  "detracciones_pendientes": [
+   {
+    "serie_numero": "E001-871",
+    "codigo": "027",
+    "monto": "198"
+   },
+   {
+    "serie_numero": "F002-45",
+    "codigo": "037",
+    "monto": "1048"
+   }
+  ],
+  "resumen_por_contraparte": {
+   "20607777773": {
+    "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
+    "comprobantes": 5,
+    "total": "3821.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "3821.00"
+    }
+   },
+   "20602222226": {
+    "nombre": "PROVEEDOR DE PRUEBA SAC",
+    "comprobantes": 2,
+    "total": "590.00",
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "590.00",
+     "PEN": "4956.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "IMPORTADORA ASIA PACIFICO SRL",
+    "comprobantes": 1,
+    "total": "2360.00",
+    "moneda": "USD",
+    "por_moneda": {
+     "USD": "2360.00"
+    }
+   },
+   "20605555552": {
+    "nombre": "ELECTRICIDAD DE PRUEBA SAA",
+    "comprobantes": 2,
+    "total": "354.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "354.00"
+    }
+   },
+   "20677777771": {
+    "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "comprobantes": 2,
+    "total": "1534.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1534.00"
+    }
+   }
+  },
+  "sub_diarios": {},
+  "saldrian": [
+   "F001-101",
+   "F001-102",
+   "FC01-5",
+   "FD01-2",
+   "E001-871",
+   "F002-45",
+   "E001-15",
+   "E001-16",
+   "B001-88",
+   "F001-90",
+   "F001-103",
+   "12345679"
+  ]
+ },
+ "generar_asiento/open_accounting": {
+  "open_accounting": "0.3",
+  "libro": {
+   "ruc": "20601234567",
+   "razon_social": "EMPRESA DE PRUEBA SAC",
+   "periodo": "202608",
+   "tipo": "compra"
+  },
+  "asiento": [
+   {
+    "cuenta": "631101",
+    "debe_haber": "D",
+    "importe": "1000.00",
+    "rol": "principal",
+    "fecha": "2026-08-03",
+    "moneda": "PEN",
+    "glosa": "GRILLETES Y CONECTORES",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha_emision": "2026-08-03",
+     "fecha_vencimiento": "2026-09-02"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "180.00",
+    "rol": "igv",
+    "fecha": "2026-08-03",
+    "moneda": "PEN",
+    "glosa": "IGV - GRILLETES Y CONECTORES",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha_emision": "2026-08-03",
+     "fecha_vencimiento": "2026-09-02"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "1180.00",
+    "rol": "tercero",
+    "fecha": "2026-08-03",
+    "moneda": "PEN",
+    "glosa": "GRILLETES Y CONECTORES",
+    "contraparte_doc": "20607777773",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha_emision": "2026-08-03",
+     "fecha_vencimiento": "2026-09-02"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "631101",
+    "debe_haber": "D",
+    "importe": "500.00",
+    "rol": "principal",
+    "fecha": "2026-08-05",
+    "moneda": "USD",
+    "tipo_cambio": "3.750",
+    "glosa": "REPUESTOS IMPORTADOS",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-102",
+     "fecha_emision": "2026-08-05",
+     "fecha_vencimiento": "2026-09-04"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "90.00",
+    "rol": "igv",
+    "fecha": "2026-08-05",
+    "moneda": "USD",
+    "tipo_cambio": "3.750",
+    "glosa": "IGV - REPUESTOS IMPORTADOS",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-102",
+     "fecha_emision": "2026-08-05",
+     "fecha_vencimiento": "2026-09-04"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421202",
+    "debe_haber": "H",
+    "importe": "590.00",
+    "rol": "tercero",
+    "fecha": "2026-08-05",
+    "moneda": "USD",
+    "tipo_cambio": "3.750",
+    "glosa": "REPUESTOS IMPORTADOS",
+    "contraparte_doc": "20602222226",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-102",
+     "fecha_emision": "2026-08-05",
+     "fecha_vencimiento": "2026-09-04"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "631101",
+    "debe_haber": "H",
+    "importe": "100.00",
+    "rol": "principal",
+    "fecha": "2026-08-12",
+    "moneda": "PEN",
+    "glosa": "DEVOLUCION DE GRILLETES",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "07",
+     "serie_numero": "FC01-5",
+     "fecha_emision": "2026-08-12",
+     "fecha_vencimiento": "2026-08-12"
+    },
+    "referencia": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha": "2026-08-03"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "H",
+    "importe": "18.00",
+    "rol": "igv",
+    "fecha": "2026-08-12",
+    "moneda": "PEN",
+    "glosa": "IGV - DEVOLUCION DE GRILLETES",
+    "documento": {
+     "tipo_cp": "07",
+     "serie_numero": "FC01-5",
+     "fecha_emision": "2026-08-12",
+     "fecha_vencimiento": "2026-08-12"
+    },
+    "referencia": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha": "2026-08-03"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "D",
+    "importe": "118.00",
+    "rol": "tercero",
+    "fecha": "2026-08-12",
+    "moneda": "PEN",
+    "glosa": "DEVOLUCION DE GRILLETES",
+    "contraparte_doc": "20607777773",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "07",
+     "serie_numero": "FC01-5",
+     "fecha_emision": "2026-08-12",
+     "fecha_vencimiento": "2026-08-12"
+    },
+    "referencia": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha": "2026-08-03"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "631101",
+    "debe_haber": "D",
+    "importe": "50.00",
+    "rol": "principal",
+    "fecha": "2026-08-13",
+    "moneda": "PEN",
+    "glosa": "INTERES POR PAGO TARDIO",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "08",
+     "serie_numero": "FD01-2",
+     "fecha_emision": "2026-08-13",
+     "fecha_vencimiento": "2026-08-13"
+    },
+    "referencia": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha": "2026-08-03"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "9.00",
+    "rol": "igv",
+    "fecha": "2026-08-13",
+    "moneda": "PEN",
+    "glosa": "IGV - INTERES POR PAGO TARDIO",
+    "documento": {
+     "tipo_cp": "08",
+     "serie_numero": "FD01-2",
+     "fecha_emision": "2026-08-13",
+     "fecha_vencimiento": "2026-08-13"
+    },
+    "referencia": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha": "2026-08-03"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "59.00",
+    "rol": "tercero",
+    "fecha": "2026-08-13",
+    "moneda": "PEN",
+    "glosa": "INTERES POR PAGO TARDIO",
+    "contraparte_doc": "20607777773",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "08",
+     "serie_numero": "FD01-2",
+     "fecha_emision": "2026-08-13",
+     "fecha_vencimiento": "2026-08-13"
+    },
+    "referencia": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-101",
+     "fecha": "2026-08-03"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "631101",
+    "debe_haber": "D",
+    "importe": "4200.00",
+    "rol": "principal",
+    "fecha": "2026-08-10",
+    "moneda": "PEN",
+    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "E001-871",
+     "fecha_emision": "2026-08-10",
+     "fecha_vencimiento": "2026-08-27"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "756.00",
+    "rol": "igv",
+    "fecha": "2026-08-10",
+    "moneda": "PEN",
+    "glosa": "IGV - SERVICIO DE TRANSPORTE DE MATERIALES",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "E001-871",
+     "fecha_emision": "2026-08-10",
+     "fecha_vencimiento": "2026-08-27"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "4956.00",
+    "rol": "tercero",
+    "fecha": "2026-08-10",
+    "moneda": "PEN",
+    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
+    "contraparte_doc": "20602222226",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "E001-871",
+     "fecha_emision": "2026-08-10",
+     "fecha_vencimiento": "2026-08-27"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "D",
+    "importe": "198.00",
+    "rol": "detraccion_tercero",
+    "fecha": "2026-08-10",
+    "moneda": "PEN",
+    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
+    "contraparte_doc": "20602222226",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "E001-871",
+     "fecha_emision": "2026-08-10",
+     "fecha_vencimiento": "2026-08-27"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421203",
+    "debe_haber": "H",
+    "importe": "198.00",
+    "rol": "detraccion",
+    "fecha": "2026-08-10",
+    "moneda": "PEN",
+    "glosa": "DETRACCION - SERVICIO DE TRANSPORTE DE MATERIALES",
+    "contraparte_doc": "20602222226",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "E001-871",
+     "fecha_emision": "2026-08-10",
+     "fecha_vencimiento": "2026-08-27"
+    },
+    "detraccion": {
+     "codigo": "027",
+     "tasa": "4",
+     "base": "4956.00"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "631101",
+    "debe_haber": "D",
+    "importe": "2000.00",
+    "rol": "principal",
+    "fecha": "2026-08-14",
+    "moneda": "USD",
+    "tipo_cambio": "3.700",
+    "glosa": "MANTENIMIENTO DE EQUIPOS",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F002-45",
+     "fecha_emision": "2026-08-14",
+     "fecha_vencimiento": "2026-09-13"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "360.00",
+    "rol": "igv",
+    "fecha": "2026-08-14",
+    "moneda": "USD",
+    "tipo_cambio": "3.700",
+    "glosa": "IGV - MANTENIMIENTO DE EQUIPOS",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F002-45",
+     "fecha_emision": "2026-08-14",
+     "fecha_vencimiento": "2026-09-13"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421202",
+    "debe_haber": "H",
+    "importe": "2360.00",
+    "rol": "tercero",
+    "fecha": "2026-08-14",
+    "moneda": "USD",
+    "tipo_cambio": "3.700",
+    "glosa": "MANTENIMIENTO DE EQUIPOS",
+    "contraparte_doc": "20633333336",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F002-45",
+     "fecha_emision": "2026-08-14",
+     "fecha_vencimiento": "2026-09-13"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421202",
+    "debe_haber": "D",
+    "importe": "283.24",
+    "rol": "detraccion_tercero",
+    "fecha": "2026-08-14",
+    "moneda": "USD",
+    "tipo_cambio": "3.700",
+    "glosa": "MANTENIMIENTO DE EQUIPOS",
+    "contraparte_doc": "20633333336",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F002-45",
+     "fecha_emision": "2026-08-14",
+     "fecha_vencimiento": "2026-09-13"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421203",
+    "debe_haber": "H",
+    "importe": "283.24",
+    "rol": "detraccion",
+    "fecha": "2026-08-14",
+    "moneda": "USD",
+    "tipo_cambio": "3.700",
+    "glosa": "DETRACCION - MANTENIMIENTO DE EQUIPOS",
+    "contraparte_doc": "20633333336",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F002-45",
+     "fecha_emision": "2026-08-14",
+     "fecha_vencimiento": "2026-09-13"
+    },
+    "detraccion": {
+     "codigo": "037",
+     "tasa": "12",
+     "base": "2360.00"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "632101",
+    "debe_haber": "D",
+    "importe": "1500.00",
+    "rol": "principal",
+    "fecha": "2026-08-18",
+    "moneda": "PEN",
+    "glosa": "ASESORIA CONTABLE DE AGOSTO",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "02",
+     "serie_numero": "E001-15",
+     "fecha_emision": "2026-08-18",
+     "fecha_vencimiento": "2026-08-18"
+    }
+   },
+   {
+    "cuenta": "401721",
+    "debe_haber": "H",
+    "importe": "120.00",
+    "rol": "retencion_4ta",
+    "fecha": "2026-08-18",
+    "moneda": "PEN",
+    "glosa": "RET 4TA - ASESORIA CONTABLE DE AGOSTO",
+    "documento": {
+     "tipo_cp": "02",
+     "serie_numero": "E001-15",
+     "fecha_emision": "2026-08-18",
+     "fecha_vencimiento": "2026-08-18"
+    }
+   },
+   {
+    "cuenta": "424101",
+    "debe_haber": "H",
+    "importe": "1380.00",
+    "rol": "tercero",
+    "fecha": "2026-08-18",
+    "moneda": "PEN",
+    "glosa": "ASESORIA CONTABLE DE AGOSTO",
+    "contraparte_doc": "20607777773",
+    "documento": {
+     "tipo_cp": "02",
+     "serie_numero": "E001-15",
+     "fecha_emision": "2026-08-18",
+     "fecha_vencimiento": "2026-08-18"
+    }
+   },
+   {
+    "cuenta": "632101",
+    "debe_haber": "D",
+    "importe": "1200.00",
+    "rol": "principal",
+    "fecha": "2026-08-19",
+    "moneda": "PEN",
+    "glosa": "ASESORIA TRIBUTARIA",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "02",
+     "serie_numero": "E001-16",
+     "fecha_emision": "2026-08-19",
+     "fecha_vencimiento": "2026-08-19"
+    }
+   },
+   {
+    "cuenta": "424101",
+    "debe_haber": "H",
+    "importe": "1200.00",
+    "rol": "tercero",
+    "fecha": "2026-08-19",
+    "moneda": "PEN",
+    "glosa": "ASESORIA TRIBUTARIA",
+    "contraparte_doc": "20607777773",
+    "documento": {
+     "tipo_cp": "02",
+     "serie_numero": "E001-16",
+     "fecha_emision": "2026-08-19",
+     "fecha_vencimiento": "2026-08-19"
+    }
+   },
+   {
+    "cuenta": "631101",
+    "debe_haber": "D",
+    "importe": "118.00",
+    "rol": "principal",
+    "fecha": "2026-08-20",
+    "moneda": "PEN",
+    "glosa": "UTILES DE OFICINA",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "03",
+     "serie_numero": "B001-88",
+     "fecha_emision": "2026-08-20",
+     "fecha_vencimiento": "2026-08-20"
+    }
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "118.00",
+    "rol": "tercero",
+    "fecha": "2026-08-20",
+    "moneda": "PEN",
+    "glosa": "UTILES DE OFICINA",
+    "contraparte_doc": "20605555552",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "03",
+     "serie_numero": "B001-88",
+     "fecha_emision": "2026-08-20",
+     "fecha_vencimiento": "2026-08-20"
+    }
+   },
+   {
+    "cuenta": "631101",
+    "debe_haber": "D",
+    "importe": "300.00",
+    "rol": "principal",
+    "fecha": "2026-08-01",
+    "moneda": "PEN",
+    "glosa": "MATERIALES DE JUNIO",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-90",
+     "fecha_emision": "2026-06-20",
+     "fecha_vencimiento": "2026-07-20"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "54.00",
+    "rol": "igv",
+    "fecha": "2026-08-01",
+    "moneda": "PEN",
+    "glosa": "IGV - MATERIALES DE JUNIO",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-90",
+     "fecha_emision": "2026-06-20",
+     "fecha_vencimiento": "2026-07-20"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "354.00",
+    "rol": "tercero",
+    "fecha": "2026-08-01",
+    "moneda": "PEN",
+    "glosa": "MATERIALES DE JUNIO",
+    "contraparte_doc": "20677777771",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-90",
+     "fecha_emision": "2026-06-20",
+     "fecha_vencimiento": "2026-07-20"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "636301",
+    "debe_haber": "D",
+    "importe": "600.00",
+    "rol": "principal",
+    "fecha": "2026-08-25",
+    "moneda": "PEN",
+    "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
+    "centro_costo": "SISTEMAS",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-103",
+     "fecha_emision": "2026-08-25",
+     "fecha_vencimiento": "2026-09-24"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "632201",
+    "debe_haber": "D",
+    "importe": "400.00",
+    "rol": "principal",
+    "fecha": "2026-08-25",
+    "moneda": "PEN",
+    "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
+    "centro_costo": "DESARROLLO",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-103",
+     "fecha_emision": "2026-08-25",
+     "fecha_vencimiento": "2026-09-24"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "180.00",
+    "rol": "igv",
+    "fecha": "2026-08-25",
+    "moneda": "PEN",
+    "glosa": "IGV - LICENCIAS Y EQUIPOS DE OFICINA",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-103",
+     "fecha_emision": "2026-08-25",
+     "fecha_vencimiento": "2026-09-24"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "1180.00",
+    "rol": "tercero",
+    "fecha": "2026-08-25",
+    "moneda": "PEN",
+    "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
+    "contraparte_doc": "20677777771",
+    "documento": {
+     "tipo_cp": "01",
+     "serie_numero": "F001-103",
+     "fecha_emision": "2026-08-25",
+     "fecha_vencimiento": "2026-09-24"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "631101",
+    "debe_haber": "D",
+    "importe": "200.00",
+    "rol": "principal",
+    "fecha": "2026-08-26",
+    "moneda": "PEN",
+    "glosa": "ENERGIA ELECTRICA DE AGOSTO",
+    "centro_costo": "OBRA01",
+    "documento": {
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-08-26",
+     "fecha_vencimiento": "2026-09-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "36.00",
+    "rol": "igv",
+    "fecha": "2026-08-26",
+    "moneda": "PEN",
+    "glosa": "IGV - ENERGIA ELECTRICA DE AGOSTO",
+    "documento": {
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-08-26",
+     "fecha_vencimiento": "2026-09-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "236.00",
+    "rol": "tercero",
+    "fecha": "2026-08-26",
+    "moneda": "PEN",
+    "glosa": "ENERGIA ELECTRICA DE AGOSTO",
+    "contraparte_doc": "20605555552",
+    "anexo_auxiliar": "OBRA01",
+    "documento": {
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-08-26",
+     "fecha_vencimiento": "2026-09-10"
+    },
+    "tasa_igv": "18"
+   }
+  ],
+  "_asiento": {
+   "lineas": 39,
+   "sub_diarios": {},
+   "cuadre": {
+    "cuadra": true,
+    "debe": "14332.24",
+    "haber": "14332.24",
+    "diferencia": "0.00",
+    "lineas": 39,
+    "sin_sentido": 0
+   },
+   "huella": "94b1b1a4121dabd34adbdaebb17005f8d89c2de7a44ec940fe0df99dae57a973",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "dd67582fe33ac9abd1347c3933ffcad23fa173ec4508b774cd8604ddb8c928f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "531e9194f5431f0b27246de9494136f3dc9d60ac5bd66dc62c6a1446321f5778"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "d02c4398a91f9edeb4a455071071d9332836049e7b70f8d75ceb4b3a518809aa"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "f4b827555374dc61553b1b37f970071c91fc81bed48cf98f4724233122aac532"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "c59c7688c3e31d065050be1a6b585bd2157045cf2863785589fe4a8a11a6c953"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "6288d5641ed924d497aef21b5210b4e38954f236ed3c324f10a3f90371ab28ba"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "82ec435bf919586316ead2934e3e2837536114b4e337a8c632e3cf4be1ac1541"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "24f7fa08d722eb0138d1af50c01a50cbb535d913ae688a55833b7f2b905fe15c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "c241cd2673558bf5e347e7eca6a6ccab4b605237ea317d4163872158c868cf7b"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "dcfd191f83f69f75187aaba8caa025ae8728dbcf2c0de737c9ac255d13af5844"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "eeb4612ec4a076ecfab057a54e2e252b7ac6e77e3f6558c5dd46bcd6f698133c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "9a9d744ed56b0e47efbfe77599bc437a3f14e1c586c8f2b3b3169356a49e74ec"
+    }
+   ],
+   "motor": "(versión del motor)"
+  }
+ },
+ "exportar/open_accounting": {
+  "driver": "open_accounting",
+  "formato": "open_accounting_json",
+  "archivo": "open_accounting_20601234567_202608_compra.json",
+  "comprobantes": 12,
+  "resumen": {
+   "comprobantes": 12,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 1,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "13615.00",
+   "igv": "1665.00",
+   "filas": 39,
+   "sub_diarios": {},
+   "debe": "14332.24",
+   "haber": "14332.24",
+   "huella": "94b1b1a4121dabd34adbdaebb17005f8d89c2de7a44ec940fe0df99dae57a973",
+   "lineas": 39
+  },
+  "_exportacion": {
+   "driver": "open_accounting",
+   "archivo": "open_accounting_20601234567_202608_compra.json",
+   "huella": "94b1b1a4121dabd34adbdaebb17005f8d89c2de7a44ec940fe0df99dae57a973",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "dd67582fe33ac9abd1347c3933ffcad23fa173ec4508b774cd8604ddb8c928f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "531e9194f5431f0b27246de9494136f3dc9d60ac5bd66dc62c6a1446321f5778"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "d02c4398a91f9edeb4a455071071d9332836049e7b70f8d75ceb4b3a518809aa"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "f4b827555374dc61553b1b37f970071c91fc81bed48cf98f4724233122aac532"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "c59c7688c3e31d065050be1a6b585bd2157045cf2863785589fe4a8a11a6c953"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "6288d5641ed924d497aef21b5210b4e38954f236ed3c324f10a3f90371ab28ba"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "82ec435bf919586316ead2934e3e2837536114b4e337a8c632e3cf4be1ac1541"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "24f7fa08d722eb0138d1af50c01a50cbb535d913ae688a55833b7f2b905fe15c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "c241cd2673558bf5e347e7eca6a6ccab4b605237ea317d4163872158c868cf7b"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "dcfd191f83f69f75187aaba8caa025ae8728dbcf2c0de737c9ac255d13af5844"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "eeb4612ec4a076ecfab057a54e2e252b7ac6e77e3f6558c5dd46bcd6f698133c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "9a9d744ed56b0e47efbfe77599bc437a3f14e1c586c8f2b3b3169356a49e74ec"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/json"
+ },
+ "exportar_con_observados/open_accounting": {
+  "driver": "open_accounting",
+  "formato": "open_accounting_json",
+  "archivo": "open_accounting_20601234567_202608_compra.json",
+  "comprobantes": 12,
+  "resumen": {
+   "comprobantes": 12,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 1,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "13615.00",
+   "igv": "1665.00",
+   "filas": 39,
+   "sub_diarios": {},
+   "debe": "14332.24",
+   "haber": "14332.24",
+   "huella": "94b1b1a4121dabd34adbdaebb17005f8d89c2de7a44ec940fe0df99dae57a973",
+   "lineas": 39
+  },
+  "_exportacion": {
+   "driver": "open_accounting",
+   "archivo": "open_accounting_20601234567_202608_compra.json",
+   "huella": "94b1b1a4121dabd34adbdaebb17005f8d89c2de7a44ec940fe0df99dae57a973",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "101",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "dd67582fe33ac9abd1347c3933ffcad23fa173ec4508b774cd8604ddb8c928f8"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "102",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "531e9194f5431f0b27246de9494136f3dc9d60ac5bd66dc62c6a1446321f5778"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "5",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "d02c4398a91f9edeb4a455071071d9332836049e7b70f8d75ceb4b3a518809aa"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "08",
+      "serie": "FD01",
+      "numero": "2",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "f4b827555374dc61553b1b37f970071c91fc81bed48cf98f4724233122aac532"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "871",
+      "contraparte_doc": "20602222226"
+     },
+     "lineas": [
+      12,
+      17
+     ],
+     "huella": "c59c7688c3e31d065050be1a6b585bd2157045cf2863785589fe4a8a11a6c953"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F002",
+      "numero": "45",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      17,
+      22
+     ],
+     "huella": "6288d5641ed924d497aef21b5210b4e38954f236ed3c324f10a3f90371ab28ba"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "15",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      22,
+      25
+     ],
+     "huella": "82ec435bf919586316ead2934e3e2837536114b4e337a8c632e3cf4be1ac1541"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "16",
+      "contraparte_doc": "20607777773"
+     },
+     "lineas": [
+      25,
+      27
+     ],
+     "huella": "24f7fa08d722eb0138d1af50c01a50cbb535d913ae688a55833b7f2b905fe15c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "88",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      27,
+      29
+     ],
+     "huella": "c241cd2673558bf5e347e7eca6a6ccab4b605237ea317d4163872158c868cf7b"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "90",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      29,
+      32
+     ],
+     "huella": "dcfd191f83f69f75187aaba8caa025ae8728dbcf2c0de737c9ac255d13af5844"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "103",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      32,
+      36
+     ],
+     "huella": "eeb4612ec4a076ecfab057a54e2e252b7ac6e77e3f6558c5dd46bcd6f698133c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      36,
+      39
+     ],
+     "huella": "9a9d744ed56b0e47efbfe77599bc437a3f14e1c586c8f2b3b3169356a49e74ec"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/json"
  },
  "cli_diagnosticar/concar": {
   "codigo": 0,

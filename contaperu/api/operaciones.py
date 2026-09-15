@@ -153,8 +153,8 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
 
 def drivers_disponibles() -> dict:
     """Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal
-    (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), lo que exige, si se configura y su
-    descripción."""
+    (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), el vocabulario con que recibe sus
+    líneas (`legacy` o `neutral`), lo que exige, si se configura y su descripción."""
     return {
         nombre: {"formatos": modulo.FORMATOS,
                  "tipo": "texto" if contrato.forma(modulo) == "linea" else "archivo",
@@ -162,6 +162,7 @@ def drivers_disponibles() -> dict:
                  "familia": contrato.familia(modulo),
                  "canal": contrato.canal(modulo),
                  "grupo": contrato.grupo(modulo),
+                 "vocabulario": contrato.vocabulario(modulo),
                  "exige": sorted(contrato.exige(modulo)),
                  "configurable": bool(contrato.seccion_por_defecto(modulo)),
                  "descripcion": ((modulo.__doc__ or "").strip().splitlines() or [""])[0]}
