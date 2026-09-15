@@ -10,7 +10,10 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
 authors = [{ name = "Global Procesos AI S.A.C." }]
-keywords = ["contabilidad", "peru", "sunat", "sire", "concar", "pcge", "mcp", "asientos"]
+keywords = ["contabilidad", "contabilidad peruana", "peru", "sunat", "sire", "ple", "concar", "contasis", "siscont",
+            "starsoft", "factura electronica", "comprobantes electronicos", "ubl", "pcge", "igv", "detracciones",
+            "asientos contables", "partida doble", "motor contable", "erp", "mcp", "openapi", "accounting",
+            "peruvian accounting"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Financial and Insurance Industry",

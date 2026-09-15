@@ -104,7 +104,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 
 | Documento | Qué responde |
 |---|---|
-| `README.md` | La portada: el problema, instalar, un ejemplo de diez líneas, el MCP, qué sabe hacer y qué no, estado |
+| `README.md` | La portada, para contadores y para quien integra: qué resuelve en palabras de contador, la arquitectura en dos diagramas (`diagramas/`), un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
 | `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea neutral, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
 | `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 1.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |

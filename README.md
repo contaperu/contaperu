@@ -1,56 +1,230 @@
-# ContaPerú
+# ContaPerú · contabilidad peruana de código abierto
 
 [![tests](https://github.com/contaperu/contaperu/actions/workflows/tests.yml/badge.svg)](https://github.com/contaperu/contaperu/actions/workflows/tests.yml)
-[![PyPI](https://img.shields.io/pypi/v/contaperu.svg)](https://pypi.org/project/contaperu/)
-[![Python](https://img.shields.io/pypi/pyversions/contaperu.svg)](https://pypi.org/project/contaperu/)
 [![licencia MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)
 
-**Núcleo contable abierto del Perú.** Lee los comprobantes que emite SUNAT, arma la partida doble y los
-exporta al formato que pide cada sistema contable. Sin base de datos, sin estado, sin llamadas a la red:
-entra un JSON, sale un JSON o un archivo.
+**Motor abierto para la contabilidad peruana.** Lee los comprobantes electrónicos de SUNAT —factura, boleta, notas de
+crédito y débito, recibo por honorarios—, valida el IGV y las detracciones, arma los **asientos contables en partida
+doble** y los exporta al formato que pide tu sistema contable: el Excel de **CONCAR** o de **CONTASIS** y el TXT del
+**SIRE** (RVIE y RCE). Sin base de datos, sin estado, sin llamadas a la red: entra un JSON, sale un JSON o un archivo.
 
-Sirve a tres usuarios distintos con el mismo código:
-
-- **Un estudio contable o una empresa** que quiere automatizar su registro de compras y ventas sin cambiar
-  el sistema que ya usa.
-- **Un desarrollador** que integra contabilidad peruana y no quiere reimplementar el IGV, las detracciones,
-  las notas de crédito y los sub-diarios por enésima vez.
-- **Un agente de IA** que ya sabe leer un PDF, pero necesita un riel determinista donde depositar lo que
-  extrajo. Para eso está el servidor MCP.
+**Encima de tu sistema contable, no en su lugar.** Nadie tiene que dejar CONCAR ni cambiar su forma de trabajar: el
+motor le quita la digitación.
 
 Licencia MIT. Se dona a la comunidad contable peruana.
 
 ---
 
-## El problema
+## Qué resuelve, en palabras de contador
 
-El software contable peruano nació en los noventa y no se habla entre sí: cada uno importa su propio archivo
-plano, con sus columnas y sus siglas. Cuando además aparece una IA capaz de leer cien facturas en un minuto,
-el cuello de botella deja de ser la lectura — es que **no hay un formato común y validado donde poner el
-resultado**, y una cuenta mal puesta o un asiento descuadrado se descubre meses después.
+El software contable peruano nació en los noventa y no se habla entre sí: cada sistema importa su propio archivo plano,
+con sus columnas y sus siglas. Cuando además aparece una IA capaz de leer cien facturas en un minuto, el cuello de
+botella deja de ser la lectura: **no hay un formato común y validado donde poner el resultado**, y una cuenta mal puesta
+o un asiento descuadrado se descubre meses después.
 
-ContaPerú aporta las dos piezas que faltan:
+ContaPerú se ocupa de lo que hoy se hace a mano:
 
-1. **[`open-accounting`](estandar/LEEME.md)** — un estándar JSON para el documento contable peruano: el libro, los
-   comprobantes y las líneas de diario. Con su [esquema formal](estandar/open-accounting.schema.json).
-2. **Un motor determinista** que valida ese documento, arma el asiento y lo traduce al formato de cada ERP.
+- **El registro de compras y el de ventas**, a partir de los XML que emite SUNAT o de la propuesta del SIRE, sin
+  digitar comprobante por comprobante.
+- **El asiento de cada comprobante**, con los casos que suelen salir mal: IGV, detracción, retención de cuarta
+  categoría, notas de crédito, comprobantes en dólares y extemporáneos.
+- **Revisar antes de exportar.** Dice qué falta para tu sistema —una cuenta, un centro de costo, una sigla, un
+  correlativo— y a quién hay que pedírselo, por serie-número y sin corregir ni inventar nada.
+- **El archivo listo para importar**: el Excel de asientos de CONCAR, el registro de CONTASIS o el TXT de reemplazo de
+  la propuesta del SIRE.
 
-No es un diseño en papel: el motor lleva un año generando el Excel de CONCAR y el TXT del SIRE de empresas
-reales, y el estándar se deriva de su modelo, no al revés.
+No es un diseño en papel: el motor lleva un año generando el Excel de CONCAR y el TXT del SIRE de empresas reales, y
+cada regla lleva al lado la norma o el archivo real que la justifica.
+
+## Para quién es
+
+- **Un estudio contable o el contador de una empresa** que quiere automatizar su registro de compras y ventas sin
+  cambiar el sistema que ya usa.
+- **Quien construye un ERP o un sistema de gestión** y no quiere reimplementar el IGV, las detracciones, las notas de
+  crédito y los sub-diarios por enésima vez, sea en Python o en cualquier otro lenguaje.
+- **Un asistente de IA** que ya sabe leer un PDF, pero necesita un riel determinista donde depositar lo que extrajo.
 
 ---
 
-## Instalación
+## Cómo funciona
+
+![Arquitectura de ContaPerú: SUNAT, tu ERP, los PDF y fotos y, más adelante, el banco, entregan información que se convierte en el documento común open-accounting; el motor la valida, arma el asiento y la traduce a CONCAR, CONTASIS, el SIRE o de vuelta a un ERP](diagramas/arquitectura-general.svg)
+
+1. **De dónde entra la información.** Los XML y la propuesta del SIRE que da SUNAT, los comprobantes que manda un ERP, y
+   lo que una IA lee de un PDF o una foto. El banco está dibujado con línea punteada porque todavía no entra: es de la
+   [hoja de ruta](HOJA-DE-RUTA.md).
+2. **Un documento común.** Todo se convierte en un mismo documento, [`open-accounting`](estandar/LEEME.md): el libro
+   (RUC, periodo, compras o ventas), los comprobantes y el asiento. Tiene su
+   [esquema formal](estandar/open-accounting.schema.json), y cualquier sistema puede leerlo o escribirlo.
+3. **El motor decide la contabilidad.** Valida el comprobante y arma el asiento una sola vez, igual para todos los
+   destinos. Las cuentas, los sentidos del debe y el haber y la detracción los pone el motor, no cada exportación.
+4. **A dónde sale.** Cada sistema contable recibe su propio archivo, o el resultado vuelve en JSON a un ERP o a un
+   asistente de IA.
+
+## El motor por dentro
+
+![El motor por dentro: cuatro formas de usarlo —Python, CLI, MCP y HTTP con el contrato OpenConta— entran por la API pública 1.0; el pipeline se apoya en el núcleo peruano, y los drivers entregan a CONCAR, CONTASIS, el SIRE y el CSV, y a drivers de terceros](diagramas/arquitectura-del-motor.svg)
+
+- **Arriba, lo que ve quien integra:** cuatro formas de usar el mismo motor —desde Python, por la línea de comandos, por
+  MCP para asistentes de IA y por HTTP para un ERP en cualquier lenguaje—, todas por la **API pública 1.0**.
+- **En el medio, lo que decide:** el **pipeline** lee, prepara, arma y diagnostica cada mes, y se apoya en el **núcleo
+  peruano**, que es lo único que sabe contabilidad: validación, IGV, asiento y PCGE.
+- **Abajo, lo que traduce:** los **drivers** convierten el asiento al formato de cada destino sin decidir ninguna cuenta.
+  Un driver de la comunidad se enchufa sin tocar este repositorio.
+
+Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md); cómo integrarlo en un ERP, en
+[INTEGRAR.md](INTEGRAR.md).
+
+## Glosario: palabras de programador en lenguaje contable
+
+| Palabra | Qué es, en términos contables |
+|---|---|
+| **Driver** | El traductor al formato de un sistema contable: sabe en qué columna va cada dato de CONCAR o de CONTASIS, pero nunca decide una cuenta |
+| **`open-accounting`** | El documento común: el libro, sus comprobantes y su asiento, escrito de una forma que cualquier sistema entiende |
+| **Núcleo** | La parte que sabe contabilidad peruana: valida el comprobante, calcula el IGV y arma el asiento |
+| **Pipeline** | El recorrido de cada mes: leer, preparar, armar el asiento y diagnosticar lo que falta |
+| **Puerta** | Cada forma de hablar con el motor: la línea de comandos, el MCP o HTTP |
+| **API** | La lista de operaciones que el motor ofrece (leer, diagnosticar, exportar…) y la promesa de que no cambian sin aviso |
+| **MCP** | El protocolo con el que un asistente de IA usa el motor como herramienta |
+| **OpenConta** | El contrato de la puerta HTTP: describe cada operación para que un ERP en cualquier lenguaje genere su cliente |
+| **Entry point** | El enchufe por el que un driver hecho por otra persona se suma sin tocar este repositorio |
+| **Test** | Una comprobación automática: un caso con el resultado que debe dar, que se repite en cada cambio |
+| **Snapshot** | Un Excel de CONCAR congelado celda por celda: si un cambio mueve una sola celda, el test lo detiene |
+
+---
+
+## Qué sabe hacer
+
+**Lee** el XML UBL 2.1 de la factura electrónica (sueltos o en ZIP, descartando los CDR) y el TXT de la propuesta que
+SUNAT entrega en el SIRE.
+
+**Valida** lo que se puede validar sin salir a ningún sitio: el RUC por su dígito verificador, que el IGV cuadre con la
+base, que el total sea la suma de sus partes, que la fecha no sea posterior al periodo (y, en compras, que no pasen los
+12 meses de anotación de la Ley 29215) y los duplicados, también los de periodos anteriores. Y **la partida doble**, sin
+tolerancia: un céntimo de diferencia detiene la exportación.
+
+**Arma el asiento** de compras y de ventas, incluidos los casos que suelen salir mal:
+
+| Caso | Qué hace |
+|---|---|
+| Factura con IGV | gasto, IGV crédito y proveedor |
+| Boleta de venta (compras) | todo al gasto: no da crédito fiscal |
+| Recibo por honorarios | cuenta propia, y la retención de 4ta **que muestra el comprobante** |
+| Nota de crédito | invierte el asiento, con el documento que modifica en la referencia |
+| **Factura con detracción** | cinco líneas: el total al proveedor y la detracción provisionada aparte |
+| Comprobante en dólares | el tipo de cambio del comprobante, y la detracción convertida a soles |
+| Comprobante extemporáneo | se asienta dentro del periodo, conservando la fecha del documento |
+
+**Exporta** a CONCAR (Excel de asientos de 41 columnas), a CONTASIS (su registro de compras y de ventas en Excel), al
+SIRE (TXT de reemplazo del RVIE y del RCE) y a un CSV genérico con las líneas de diario, para cualquier destino que
+todavía no tenga driver.
+
+**Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta para el sistema de
+destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos, un reparto que no suma la base o que el
+destino no admite, lo que no cabe en su formato), qué detracciones esperan constancia y qué saldría. Una sola
+respuesta, por serie-número, sin corregir ni inventar nada.
+
+## Qué **no** hace
+
+- **No lee PDFs ni fotos.** Eso lo hace bien un modelo de lenguaje; aquí entra el dato ya estructurado.
+- **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red.
+- **No guarda nada.** Ni base de datos, ni archivos, ni sesiones.
+- **No emite comprobantes.** No genera, no firma y no envía facturas electrónicas.
+- **No reemplaza tu sistema contable.** Traduce hacia él.
+
+---
+
+## Estado
+
+| Pieza | Estado |
+|---|---|
+| El estándar `open-accounting` 0.3 y su esquema | listo |
+| Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
+| Validación del comprobante y de la partida doble | listo |
+| Asiento: compras, ventas, honorarios, notas y detracción | listo |
+| Drivers CONCAR, SIRE y CSV | listo |
+| Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
+| API pública estable, `contaperu.api`, con las rutas de la 0.10 funcionando con aviso durante la 1.x | listo |
+| Servidor MCP, CLI y puerta HTTP con el contrato OpenConta | listo |
+| `diagnosticar`: qué falta, para qué destino y a quién pedírselo | listo |
+| Contrato de driver y drivers de terceros por *entry points* | listo |
+| Paquete en PyPI | **próximo**: hoy se instala desde el código |
+| Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
+| Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
+| Drivers de SISCONT y STARSOFT | el contrato ya cubre lo que necesitan; esperan un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
+
+Lo que no está listo no tiene fecha: tiene un orden y un dato que lo destraba, en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).
+
+### Sobre el PCGE 2026
+
+El módulo `contaperu/pcge/` existe con la tabla **vacía**, y mientras lo esté no toca ninguna cuenta: lo dice
+en su informe en vez de adivinar. Las equivalencias del Plan Contable General Empresarial 2026 se publicarán
+**con la cita del artículo de la resolución al lado de cada mapeo** — el cargador rechaza un mapeo sin
+fuente. Un neteo mal puesto en un repositorio público estropea la contabilidad de quien confíe en él, que es
+exactamente lo contrario de lo que este proyecto quiere hacer.
+
+Si tienes el texto oficial y quieres ayudar, es la contribución más útil que hay ahora mismo.
+
+---
+
+## Cómo aportar
+
+La regla que manda en todo el proyecto: **ninguna regla contable entra sin una fuente.** La norma, la resolución o el
+archivo real que la justifica va al lado, en el código. Por eso quien más puede aportar es quien lleva la contabilidad
+todos los días.
+
+### Si eres contador, no necesitas programar
+
+1. **Reporta una regla mal puesta.** Un asiento que no corresponde, una cuenta o un sentido equivocados, una
+   detracción mal calculada: abre un aviso con la plantilla
+   [«Regla mal puesta»](https://github.com/contaperu/contaperu/issues/new?template=regla-mal-puesta.yml) y cita la
+   norma que lo respalda.
+2. **Reporta un comprobante que se leyó o se asentó mal**, o un archivo que tu sistema rechazó, con la plantilla
+   [«Error»](https://github.com/contaperu/contaperu/issues/new?template=error.yml).
+3. **Aporta la norma.** Las equivalencias del PCGE 2026, una resolución de SUNAT, el plazo de un régimen: con la cita
+   exacta, porque sin fuente no entra.
+4. **Comparte el formato de tu sistema.** Si usas **SISCONT, STARSOFT** u otro sistema que todavía no tiene driver, lo
+   que hace falta es su plantilla de importación y un archivo que ese sistema haya aceptado. Con eso se construye el
+   driver.
+5. **Revisa los textos.** Las glosas, los mensajes de lo que falta y este README tienen que decirse como los diría un
+   contador.
+
+**Nunca compartas datos reales.** Antes de subir un archivo, cambia los RUC por los de prueba —`20131312955` y
+`20601234567`—, las razones sociales por nombres inventados y, si quieres, los importes. Los detalles, en
+[CONTRIBUTING.md](CONTRIBUTING.md) («Nunca subas datos reales»).
+
+### Si programas
 
 ```bash
-pip install contaperu              # el núcleo
-pip install "contaperu[excel]"     # + exportar a CONCAR y CONTASIS (.xlsx)
-pip install "contaperu[mcp]"       # + el servidor MCP
-pip install "contaperu[http]"      # + la puerta HTTP para un ERP en cualquier lenguaje
-pip install "contaperu[todo]"      # todo
+git clone https://github.com/contaperu/contaperu.git
+cd contaperu
+pip install -e ".[dev]"
+pytest
 ```
 
-## De un XML de SUNAT a un asiento, en diez líneas
+Más de 800 tests, sin red y sin credenciales. Lo más valioso que puedes aportar es un **driver de salida** para un
+sistema que hoy no está —la receta y el contrato, en [CONTRIBUTING.md](CONTRIBUTING.md)— o un **caso real** que el
+motor resuelva mal.
+
+---
+
+## Para desarrolladores
+
+### Instalación
+
+La 1.0 todavía no está publicada en PyPI: hoy se instala desde el código.
+
+```bash
+git clone https://github.com/contaperu/contaperu.git
+cd contaperu
+pip install -e .                 # el núcleo
+pip install -e ".[excel]"        # + exportar a CONCAR y CONTASIS (.xlsx)
+pip install -e ".[mcp]"          # + el servidor MCP
+pip install -e ".[http]"         # + la puerta HTTP para un ERP en cualquier lenguaje
+pip install -e ".[todo]"         # todo
+```
+
+### De un XML de SUNAT a un asiento, en diez líneas
 
 ```python
 from pathlib import Path
@@ -72,7 +246,20 @@ Path(archivo.archivo).write_bytes(archivo.contenido)            # el Excel que i
 misma firma hasta la 2.0. Cómo integrarlo en un ERP —desde Python, por lotes, por MCP o por HTTP desde cualquier
 lenguaje—, en [INTEGRAR.md](INTEGRAR.md).
 
-## Para un agente de IA: el servidor MCP
+### Para un ERP en cualquier lenguaje: la puerta HTTP
+
+```bash
+pip install -e ".[http,excel]"
+contaperu-http --host 127.0.0.1 --puerto 8080
+curl -s http://localhost:8080/openconta.json -o openconta.json
+```
+
+Cada operación de la api es una ruta (`POST /v1/exportar`, `POST /v1/diagnosticar`, `GET /v1/drivers`…) y el contrato
+que las describe, **OpenConta**, se sirve en `/openconta.json` en formato OpenAPI 3.1: cualquier generador arma el
+cliente de tu lenguaje con él. Sin estado, con la misma defensa del `Host` y los mismos topes que el MCP, y rechazos
+RFC 9457 con una `clave` estable. La guía, en [INTEGRAR.md](INTEGRAR.md).
+
+### Para un agente de IA: el servidor MCP
 
 Once herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
 `configuracion_por_defecto`, `validar_comprobantes`, `validar_partida_doble`, `generar_asiento`,
@@ -84,7 +271,7 @@ de `diagnosticar`.
 El Excel y el ZIP del SIRE vuelven **como archivos** —recursos incrustados con su tipo—, así que el cliente
 los ofrece para guardar en vez de enseñar una tira de letras.
 
-### En tu propia máquina (stdio)
+#### En tu propia máquina (stdio)
 
 ```bash
 docker build -t contaperu-mcp .
@@ -105,7 +292,7 @@ en `claude_desktop_config.json`:
 }
 ```
 
-### Servido en red, para conectarlo como conector remoto
+#### Servido en red, para conectarlo como conector remoto
 
 ```bash
 docker run -d --name contaperu-mcp --restart unless-stopped -p 8000:8000 contaperu-mcp \
@@ -137,7 +324,7 @@ contaperu.tudominio.com {
 Nada de reescribir rutas ni de inyectar cabeceras. Y como no lleva autenticación, el freno sensato es de
 recursos: el tope de cuerpo de arriba, y memoria y CPU acotadas en el contenedor.
 
-### Una imagen, tres puertas
+#### Una imagen, tres puertas
 
 La misma imagen sirve el MCP, la puerta HTTP y la CLI, según lo que le pases:
 
@@ -153,124 +340,29 @@ lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna d
 
 ---
 
-## Para un ERP en cualquier lenguaje: la puerta HTTP
+## Documentos del proyecto
 
-```bash
-pip install "contaperu[http,excel]"
-contaperu-http --host 127.0.0.1 --puerto 8080
-curl -s http://localhost:8080/openconta.json -o openconta.json
-```
-
-Cada operación de la api es una ruta (`POST /v1/exportar`, `POST /v1/diagnosticar`, `GET /v1/drivers`…) y el contrato
-que las describe, **OpenConta**, se sirve en `/openconta.json` en formato OpenAPI 3.1: cualquier generador arma el
-cliente de tu lenguaje con él. Sin estado, con la misma defensa del `Host` y los mismos topes que el MCP, y rechazos
-RFC 9457 con una `clave` estable. La guía, en [INTEGRAR.md](INTEGRAR.md).
-
----
-
-## Qué sabe hacer
-
-**Lee** el XML UBL 2.1 de la factura electrónica (sueltos o en ZIP, descartando los CDR) y el TXT de la
-propuesta que SUNAT entrega en el SIRE.
-
-**Valida** lo que se puede validar sin salir a ningún sitio: el RUC por su dígito verificador, que el IGV
-cuadre con la base, que el total sea la suma de sus partes, que la fecha no sea posterior al periodo (y, en
-compras, que no pasen los 12 meses de anotación de la Ley 29215), los duplicados.
-Y **la partida doble**, sin tolerancia: un céntimo de diferencia detiene la exportación.
-
-**Arma el asiento** de compras y de ventas, incluidos los casos que suelen salir mal:
-
-| Caso | Qué hace |
+| Documento | Qué responde |
 |---|---|
-| Factura con IGV | gasto, IGV crédito y proveedor |
-| Boleta de venta (compras) | todo al gasto: no da crédito fiscal |
-| Recibo por honorarios | cuenta propia, y la retención de 4ta **que muestra el comprobante** |
-| Nota de crédito | invierte el asiento, con el documento que modifica en la referencia |
-| **Factura con detracción** | cinco líneas: el total al proveedor y la detracción provisionada aparte |
-| Comprobante en dólares | el tipo de cambio del comprobante, y la detracción convertida a soles |
-| Comprobante extemporáneo | se asienta dentro del periodo, conservando la fecha del documento |
-
-**Exporta** a CONCAR (Excel de asientos de 41 columnas), a CONTASIS (su registro de compras y de ventas en
-Excel), al SIRE (TXT de reemplazo del RVIE y del RCE) y a un CSV genérico con las líneas de diario, para cualquier
-destino que todavía no tenga driver.
-
-**Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta
-para el sistema de destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos, un reparto que no
-suma la base o que el destino no admite, lo que no cabe en su formato),
-qué detracciones esperan constancia y qué saldría. Una sola respuesta, por serie-número, sin corregir
-ni inventar nada.
-
-## Cómo está construido
-
-Por capas que un test hace cumplir: un **núcleo** que sabe contabilidad peruana y nada más; **drivers** que
-conocen el formato de un sistema concreto y nada de contabilidad, cada uno con su canal (un sistema legacy, un
-registro tributario, un formato de intercambio); un **pipeline** único que prepara y arma cada mes; la **api**
-pública; y tres **puertas** —CLI, MCP y HTTP— que solo hablan con la api.
-El asiento nace en las líneas neutrales del estándar `open-accounting` y cada ERP es una proyección de ellas
-—CONCAR incluido—, así que un driver nuevo solo traduce vocabulario: las cuentas, los sentidos y la
-detracción los pone el núcleo una vez para todos. Un driver de la comunidad se enchufa por *entry
-points* sin tocar este repositorio. Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md).
-Lo que se tomó de QuickBooks, Xero y las APIs unificadas de EE. UU. —y lo que no—, en
-[REFERENCIAS.md](REFERENCIAS.md). Lo que enseñan el ciclo contable de EE. UU. y los proyectos abiertos, y cómo
-entrarían el banco y las facturas de proveedores —que el motor todavía no hace—, en
-[INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
-
-## Qué **no** hace
-
-- **No lee PDFs ni fotos.** Eso lo hace bien un modelo de lenguaje; aquí entra el dato ya estructurado.
-- **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red.
-- **No guarda nada.** Ni base de datos, ni archivos, ni sesiones.
-- **No reemplaza tu sistema contable.** Traduce hacia él.
+| [ARQUITECTURA.md](ARQUITECTURA.md) | Cómo está construido el motor y por qué, y lo que no se negocia |
+| [INTEGRAR.md](INTEGRAR.md) | Cómo integrarlo en un ERP: desde Python, por lotes, por MCP o por HTTP |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | La regla que manda, nunca datos reales, cómo añadir un driver |
+| [estandar/LEEME.md](estandar/LEEME.md) | El estándar `open-accounting`: sus bloques, sus reglas y su versionado |
+| [REFERENCIAS.md](REFERENCIAS.md) | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU. |
+| [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md) | La investigación: el ciclo contable de EE. UU. y del Perú, los proyectos abiertos y cómo entrarían el banco y las facturas de proveedores |
+| [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md) | En qué orden crece el motor y qué dato destraba cada paso |
+| [CHANGELOG.md](CHANGELOG.md) | Cada versión con su porqué |
+| [SECURITY.md](SECURITY.md) | Cómo reportar una vulnerabilidad |
 
 ---
 
-## Estado
+## Palabras clave
 
-| Pieza | Estado |
-|---|---|
-| El estándar `open-accounting` 0.3 y su esquema | listo |
-| Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
-| Validación del comprobante y de la partida doble | listo |
-| Asiento: compras, ventas, honorarios, notas y detracción | listo |
-| Drivers CONCAR, SIRE y CSV | listo |
-| API pública estable, `contaperu.api`, con las rutas de la 0.10 funcionando con aviso durante la 1.x | listo |
-| Servidor MCP, CLI y puerta HTTP con el contrato OpenConta | listo |
-| `diagnosticar`: la capa para agentes — qué falta, para qué destino y a quién pedírselo | listo |
-| Contrato de driver y drivers de terceros por *entry points* | listo |
-| Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
-| Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
-| Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
-| Drivers de SISCONT y STARSOFT | el contrato ya cubre lo que necesitan; esperan un archivo real aceptado — ver [CONTRIBUTING.md](CONTRIBUTING.md) |
-
-Lo que no está listo no tiene fecha: tiene un orden y un dato que lo destraba, en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).
-
-### Sobre el PCGE 2026
-
-El módulo `contaperu/pcge/` existe con la tabla **vacía**, y mientras lo esté no toca ninguna cuenta: lo dice
-en su informe en vez de adivinar. Las equivalencias del Plan Contable General Empresarial 2026 se publicarán
-**con la cita del artículo de la resolución al lado de cada mapeo** — el cargador rechaza un mapeo sin
-fuente. Un neteo mal puesto en un repositorio público estropea la contabilidad de quien confíe en él, que es
-exactamente lo contrario de lo que este proyecto quiere hacer.
-
-Si tienes el texto oficial y quieres ayudar, es la contribución más útil que hay ahora mismo.
-
----
-
-## Contribuir
-
-```bash
-pip install -e ".[dev]"
-pytest
-```
-
-Más de 800 tests, sin red y sin credenciales.
-
-Lo más valioso que puedes aportar es un **driver de salida** para un ERP que hoy no está — ver
-[CONTRIBUTING.md](CONTRIBUTING.md) — o un **caso real** que el motor resuelva mal: un asiento que tu sistema
-rechazó, un comprobante raro que se leyó torcido.
-
-Regla del proyecto: **ninguna regla contable entra sin una fuente.** La norma, la resolución o el archivo
-real que la justifica va al lado, en el código.
+Contabilidad peruana · software contable Perú · motor contable · código abierto · SUNAT · SIRE · RVIE · RCE · PLE ·
+comprobantes de pago electrónicos · factura electrónica · boleta de venta · nota de crédito · recibo por honorarios ·
+XML UBL 2.1 · registro de compras · registro de ventas · asientos contables · partida doble · libro diario ·
+PCGE 2026 · IGV · detracciones · retención de cuarta categoría · CONCAR · CONTASIS · SISCONT · STARSOFT · estudio
+contable · automatización contable · inteligencia artificial · MCP · OpenAPI · ERP
 
 ---
 
@@ -286,6 +378,9 @@ It also defines **`open-accounting`**, an open interchange format for Peruvian a
 files that production accounting systems and SUNAT actually accepted.
 
 A stable Python API (`contaperu.api`), an MCP server for AI agents and a stateless HTTP port described by the
-**OpenConta** contract (an OpenAPI 3.1 document) let any ERP use it, in any language. Install with
-`pip install contaperu`. The docs are in Spanish, because that's the language of the
-domain and of the people who use it — but issues and pull requests in English are welcome.
+**OpenConta** contract (an OpenAPI 3.1 document) let any ERP use it, in any language. For now it installs from
+source (`pip install -e ".[todo]"`); the PyPI package will follow the 1.0 release. The docs are in Spanish, because
+that's the language of the domain and of the people who use it — but issues and pull requests in English are welcome.
+
+*Keywords: Peruvian accounting, Peru tax, SUNAT e-invoicing, electronic invoices, double-entry bookkeeping, accounting
+engine, journal entries, VAT (IGV), open source.*
