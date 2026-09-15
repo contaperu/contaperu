@@ -11,8 +11,9 @@ doble** y los exporta al formato que pide tu sistema contable: el Excel de **CON
 **La contabilidad automatizada no es un problema de cada empresa: es de arquitectura colectiva.** Un estándar abierto y
 un motor abierto, construidos entre todos, para los sistemas que ya existen y para los ERP que vienen.
 
-**Encima de tu sistema contable, no en su lugar.** Nadie tiene que dejar CONCAR ni cambiar su forma de trabajar: el
-motor le quita la digitación.
+**Encima de tu sistema contable, no en su lugar, y la base de los que vienen.** Nadie tiene que dejar CONCAR ni cambiar
+su forma de trabajar: el motor le quita la digitación. Y quien construya un ERP nuevo no tiene que reimplementar el IGV,
+las detracciones ni los sub-diarios: parte del estándar y del motor.
 
 Licencia MIT. Se dona a la comunidad contable peruana.
 

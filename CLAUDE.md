@@ -8,7 +8,13 @@ dice dónde buscarlo.
 
 `contaperu` es **el núcleo contable abierto del Perú**: el estándar de datos `open-accounting`, el motor que lee
 comprobantes (el XML de SUNAT, la propuesta del SIRE), los valida, arma el asiento y lo exporta a CONCAR, a CONTASIS, al
-SIRE y a un CSV genérico, y un servidor MCP para que un agente de IA lo use. Licencia **MIT**; lo mantiene **Global
+SIRE y a un CSV genérico, y un servidor MCP para que un agente de IA lo use.
+
+Parte de una tesis: **la contabilidad automatizada no es un problema organizacional de cada empresa, sino de
+arquitectura colectiva** (open source). Por eso cumple dos papeles a la vez: es **la capa que trabaja encima de los
+sistemas legacy** (CONCAR y CONTASIS hoy; SISCONT y STARSOFT cuando entren) mientras evolucionan, y es **la base
+abierta —estándar y motor— sobre la que se construyen los ERP que vienen**. Sus destinos se agrupan en tres: **SIRE,
+legacy y ERP**. Licencia **MIT**; lo mantiene **Global
 Procesos AI S.A.C.** (Lima). El repositorio (`github.com/contaperu/contaperu`) está **privado por ahora** y se abrirá
 cuando John lo decida: **lo que entra en internet no sale**, tampoco del historial de git, así que se escribe desde hoy
 como si ya fuera público (nada real de nadie, nada de infraestructura ajena a este repo). **Distribuir es publicar**:
@@ -26,6 +32,11 @@ subirlo a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y el OK expl�
   sistema (el producto Contabilidad Inteligente), cuyo MVP es cargar comprobantes → revisar → exportar a un clic el
   Excel de CONCAR o de CONTASIS y/o el TXT del SIRE. Regla vigente del producto: **se afina lo que existe, no se
   añaden módulos**; en el motor eso significa que cada regla entra con su fuente y su caso real, no por si acaso.
+- **Ampliación de John (15-sep-2026):** ContaPerú ya no es solo la capa sobre los sistemas legacy; también monta las
+  bases para los ERP que vienen. «Encima, no en lugar de» sigue valiendo para quien ya tiene su sistema contable, y a
+  la vez un ERP nuevo no tiene que reimplementar el IGV ni las detracciones: parte del estándar y del motor. La
+  contabilidad automatizada se trata como arquitectura colectiva, no organizacional: un estándar y un motor comunes,
+  mejorados entre todos. Es el enfoque que ordena el README, `INTEROPERABILIDAD.md` y `HOJA-DE-RUTA.md`.
 - Es una copia y no una importación, a propósito: este repo se abrirá y no puede depender de un archivo del disco de
   nadie. Si la visión cambia, se actualiza esta sección con la fecha.
 
@@ -116,7 +127,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 
 | Documento | Qué responde |
 |---|---|
-| `README.md` | La portada, para contadores y para quien integra: qué resuelve en palabras de contador, la arquitectura en dos diagramas (`diagramas/`), un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
+| `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres grupos (SIRE, legacy y ERP); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
 | `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea neutral, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
 | `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 1.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
