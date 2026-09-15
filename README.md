@@ -80,6 +80,32 @@ sentidos del debe y el haber y la detracción los decide el motor una sola vez, 
 - **Abajo, los destinos:** el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o el resultado de vuelta al
   ERP, en JSON y con su diagnóstico.
 
+### Las puertas y la API pública
+
+![Las puertas y la API pública: un programa en Python, un contador en la consola, un asistente de IA y un ERP entran por sus puertas —Python, CLI, MCP y HTTP— a la API pública 1.0, con sus operaciones, sus errores con clave, la tabla de operaciones y OpenConta; de ahí, todo pedido entra al mismo pipeline](diagramas/puertas-y-api.svg)
+
+Las **puertas** son las formas de llegar al motor, y ninguna sabe contabilidad: traducen el pedido de su protocolo a la
+API y devuelven la respuesta. Por eso el mismo mes da el mismo resultado por las cuatro, y un test lo comprueba.
+
+| Puerta | Para quién | Cómo se usa |
+|---|---|---|
+| **Python** | Un programa en Python | `from contaperu import api` y `api.exportar(documento, driver="concar", ...)`: llama directo a la API |
+| **CLI** (`contaperu`) | Quien trabaja en la consola o por lotes | Cinco comandos: `generar`, `desde-json`, `diagnosticar`, `configuracion` y `comparar` |
+| **MCP** (`contaperu-mcp`) | Un asistente de IA | 11 herramientas de solo lectura y 6 recursos, por stdio, HTTP o SSE; el archivo vuelve con hasta 4 MB |
+| **HTTP** (`contaperu-http`) | Un ERP en cualquier lenguaje | `POST /v1/exportar`, `POST /v1/diagnosticar`…; responde 421 a un `Host` no declarado, corta la petición en 10 MB y atiende 16 a la vez |
+
+La **API pública** (`contaperu.api`) es la lista de operaciones que comparten las cuatro puertas: leer, revisar,
+diagnosticar, generar el asiento, exportar… Es también una promesa: sus nombres y lo que pide cada una no cambian
+hasta la 2.0. Cada error lleva una clave estable (`sin_cuenta`, `no_cabe`, `sin_sigla`…), que la puerta HTTP entrega
+en formato RFC 9457.
+
+La **tabla de operaciones** (`api/tabla.py`) tiene una fila por operación, con su ruta HTTP y su nombre en el MCP. De
+ella salen solas las rutas, las herramientas y **OpenConta**: el manual de la puerta HTTP, en formato OpenAPI 3.1,
+que se sirve en `/openconta.json` y con el que cualquier herramienta genera el cliente del ERP en su lenguaje.
+OpenConta no es una puerta: describe una.
+
+Pase por la puerta que pase, después de la API todo pedido entra al mismo **pipeline**.
+
 Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md), que también cuenta
 [el recorrido de un mes dentro del motor, paso a paso](ARQUITECTURA.md#un-mes-paso-a-paso); cómo integrarlo en un ERP,
 en [INTEGRAR.md](INTEGRAR.md).
