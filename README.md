@@ -68,19 +68,23 @@ motor una sola vez, igual para todos los destinos.
 
 ## El motor por dentro
 
-![ContaPerú por dentro: el contador y, próximamente, un facturador llegan al ERP externo; el ERP le pasa al motor el documento open-accounting; el motor entra por sus puertas, arma el asiento en el núcleo y sus drivers lo traducen al SIRE, CONCAR, CONTASIS o de vuelta al ERP](diagramas/arquitectura-del-motor.svg)
+![ContaPerú por dentro: el contador y, próximamente, un facturador llegan al ERP externo, que tiene su propia IA para los PDF y las fotos; el ERP le pasa al motor el documento open-accounting, y la imputación aparte; el motor entra por sus puertas a la API pública 1.0, el pipeline se apoya en el núcleo peruano y los drivers lo traducen al SIRE, CONCAR, CONTASIS o de vuelta al ERP](diagramas/arquitectura-del-motor.svg)
 
 - **Arriba, tu sistema:** el **ERP externo** recibe lo que sube el contador y, más adelante, el aviso del facturador.
-  Guarda, revisa, descarga y usa la IA para los PDF y las fotos: todo lo que necesita red, disco o credenciales vive
-  ahí, no en el motor.
+  Guarda, revisa, descarga y tiene su propia IA para los PDF y las fotos: todo lo que necesita red, disco o
+  credenciales vive ahí, no en el motor.
 - **En el medio, el documento común:** lo que el ERP le pasa al motor es un documento
-  [`open-accounting`](estandar/LEEME.md), con el libro (RUC, periodo, compras o ventas), los comprobantes y la
-  imputación. Tiene su [esquema formal](estandar/open-accounting.schema.json).
-- **El motor:**
-  - entra por cuatro **puertas** a la **API pública 1.0**: Python, la línea de comandos, MCP para asistentes de IA y
-    HTTP para un ERP en cualquier lenguaje;
-  - el **núcleo** peruano valida, calcula el IGV y arma el asiento;
-  - los **drivers** lo traducen al formato de cada destino sin decidir ninguna cuenta.
+  [`open-accounting`](estandar/LEEME.md), con el libro (RUC, periodo, compras o ventas) y los comprobantes. Tiene su
+  [esquema formal](estandar/open-accounting.schema.json). La imputación (la cuenta y el centro de costo de cada
+  comprobante) y la configuración contable de la empresa no van dentro: llegan aparte, por el `id_externo` de cada
+  comprobante.
+- **El motor**, de arriba abajo:
+  - cuatro **puertas**: Python, la línea de comandos, MCP para asistentes de IA y HTTP para un ERP en cualquier
+    lenguaje, con el contrato OpenConta;
+  - todas llaman a la **API pública 1.0**, que no cambia de nombres ni de firmas hasta la 2.0;
+  - el **pipeline** lee, prepara, arma y diagnostica cada mes, y se apoya en el **núcleo peruano**, lo único que sabe
+    contabilidad: validación, IGV, asiento y PCGE;
+  - los **drivers** traducen al formato de cada destino sin decidir ninguna cuenta.
 
   Un driver de la comunidad se enchufa sin tocar este repositorio.
 - **Abajo, los destinos:** el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o el resultado de vuelta al

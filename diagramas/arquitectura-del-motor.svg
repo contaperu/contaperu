@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="680" height="600" viewBox="0 0 680 600" role="img" aria-labelledby="titulo descripcion">
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="824" viewBox="0 0 680 824" role="img" aria-labelledby="titulo descripcion">
 <title id="titulo">ContaPerú por dentro: del ERP externo a los destinos</title>
-<desc id="descripcion">El contador sube XML, PDF, fotos o TXT al ERP externo y, próximamente, un sistema facturador le avisa al emitir. El ERP externo guarda, revisa y descarga, y su IA lee los PDF y las fotos. Le pasa al motor el documento común open-accounting: libro, comprobantes e imputación. El motor, sin red, sin disco y sin estado, entra por sus puertas —Python, CLI, MCP y HTTP—, valida y arma el asiento en el núcleo, y sus drivers lo traducen al TXT del SIRE, a los asientos de CONCAR, al registro de CONTASIS o de vuelta al ERP en JSON, con su diagnóstico.</desc>
+<desc id="descripcion">El contador sube XML, PDF, fotos o TXT al ERP externo y, próximamente, un sistema facturador le avisa al emitir. El ERP externo guarda, revisa y descarga, y su IA lee los PDF y las fotos. Le pasa al motor el documento común open-accounting, con el libro y los comprobantes; la imputación de cuentas y centros llega aparte. El motor, sin red, sin disco y sin estado, entra por sus puertas —Python, CLI, MCP y HTTP— a la API pública 1.0. El pipeline lee, prepara, arma y diagnostica apoyándose en el núcleo peruano, que valida, calcula el IGV, arma el asiento y aplica el PCGE, y los drivers lo traducen al destino sin decidir cuentas: el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o de vuelta al ERP en JSON, con su diagnóstico.</desc>
 <style>
 .fondo{fill:#FFFFFF}
 .t,.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
@@ -27,28 +27,32 @@
 <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </marker>
 </defs>
-<rect class="fondo" x="0" y="0" width="680" height="600" rx="12"/>
+<rect class="fondo" x="0" y="0" width="680" height="824" rx="12"/>
 <g class="g"><rect x="90" y="20" width="220" height="56" rx="8" stroke-width="0.5"/><text class="t" x="200" y="38">Contador</text><text class="s" x="200" y="56">Sube XML, PDF, fotos o TXT</text></g>
 <g class="g"><rect x="370" y="20" width="220" height="56" rx="8" stroke-width="0.5" stroke-dasharray="4 3"/><text class="t" x="480" y="38">Facturador</text><text class="s" x="480" y="56">Avisa al emitir</text></g>
 <line class="flecha" x1="200" y1="78" x2="200" y2="118" marker-end="url(#punta)"/>
 <line class="flecha" x1="480" y1="78" x2="480" y2="118" stroke-dasharray="4 3" marker-end="url(#punta)"/>
-<g class="m"><rect x="40" y="120" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="138">ERP externo</text><text class="s" x="340" y="156">Guarda, revisa y descarga · la IA lee PDF y fotos</text></g>
+<g class="m"><rect x="40" y="120" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="138">ERP externo</text><text class="s" x="340" y="156">Guarda, revisa y descarga · su IA lee PDF y fotos</text></g>
 <line class="flecha" x1="340" y1="178" x2="340" y2="210" marker-end="url(#punta)"/>
-<g class="a"><rect x="40" y="212" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="230">open-accounting, el documento común</text><text class="s" x="340" y="248">Libro, comprobantes e imputación</text></g>
+<g class="a"><rect x="40" y="212" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="230">open-accounting, el documento común</text><text class="s" x="340" y="248">Libro y comprobantes · la imputación llega aparte</text></g>
 <line class="flecha" x1="340" y1="270" x2="340" y2="302" marker-end="url(#punta)"/>
-<g class="v"><rect x="20" y="304" width="640" height="148" rx="16" stroke-width="0.5"/><text class="t" x="340" y="326">ContaPerú, el motor</text><text class="s" x="340" y="344">Sin red, sin disco, sin estado</text></g>
-<g class="g"><rect x="40" y="364" width="184" height="64" rx="8" stroke-width="0.5"/><text class="t" x="132" y="386">Puertas</text><text class="s" x="132" y="406">Python, CLI, MCP, HTTP</text></g>
-<g class="g"><rect x="248" y="364" width="184" height="64" rx="8" stroke-width="0.5"/><text class="t" x="340" y="386">Núcleo</text><text class="s" x="340" y="406">Valida, IGV y asiento</text></g>
-<g class="g"><rect x="456" y="364" width="184" height="64" rx="8" stroke-width="0.5"/><text class="t" x="548" y="386">Drivers</text><text class="s" x="548" y="406">Traducen al destino</text></g>
-<line class="flecha" x1="226" y1="396" x2="246" y2="396" marker-end="url(#punta)"/>
-<line class="flecha" x1="434" y1="396" x2="454" y2="396" marker-end="url(#punta)"/>
-<line class="flecha" x1="95" y1="454" x2="95" y2="486" marker-end="url(#punta)"/>
-<line class="flecha" x1="260" y1="454" x2="260" y2="486" marker-end="url(#punta)"/>
-<line class="flecha" x1="425" y1="454" x2="425" y2="486" marker-end="url(#punta)"/>
-<line class="flecha" x1="590" y1="454" x2="590" y2="486" marker-end="url(#punta)"/>
-<g class="g"><rect x="20" y="488" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="95" y="506">SIRE</text><text class="s" x="95" y="524">TXT del registro</text></g>
-<g class="g"><rect x="185" y="488" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="260" y="506">CONCAR</text><text class="s" x="260" y="524">Asientos en Excel</text></g>
-<g class="g"><rect x="350" y="488" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="425" y="506">CONTASIS</text><text class="s" x="425" y="524">Registro en Excel</text></g>
-<g class="g"><rect x="515" y="488" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="590" y="506">Vuelve al ERP</text><text class="s" x="590" y="524">JSON y diagnóstico</text></g>
-<text class="s leyenda" x="340" y="572">Morado: tu sistema · azul: el estándar · verde azulado: el motor · gris: de fuera · punteado: próximo</text>
+<g class="v"><rect x="20" y="304" width="640" height="376" rx="16" stroke-width="0.5"/><text class="t" x="340" y="326">ContaPerú, el motor</text><text class="s" x="340" y="344">Sin red, sin disco, sin estado</text></g>
+<g class="g"><rect x="40" y="364" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="382">Puertas</text><text class="s" x="340" y="400">Python, CLI, MCP y HTTP con OpenConta</text></g>
+<line class="flecha" x1="340" y1="422" x2="340" y2="442" marker-end="url(#punta)"/>
+<g class="g"><rect x="40" y="444" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="462">API pública 1.0</text><text class="s" x="340" y="480">Operaciones, esquemas y errores</text></g>
+<line class="flecha" x1="185" y1="502" x2="185" y2="522" marker-end="url(#punta)"/>
+<g class="g"><rect x="40" y="524" width="290" height="56" rx="8" stroke-width="0.5"/><text class="t" x="185" y="542">Pipeline</text><text class="s" x="185" y="560">Lee, prepara, arma y diagnostica</text></g>
+<line class="flecha" x1="332" y1="552" x2="348" y2="552" marker-end="url(#punta)"/>
+<g class="g"><rect x="350" y="524" width="290" height="56" rx="8" stroke-width="0.5"/><text class="t" x="495" y="542">Núcleo peruano</text><text class="s" x="495" y="560">Valida, IGV, asiento y PCGE</text></g>
+<line class="flecha" x1="185" y1="582" x2="185" y2="602" marker-end="url(#punta)"/>
+<g class="g"><rect x="40" y="604" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="622">Drivers</text><text class="s" x="340" y="640">Traducen al destino sin decidir cuentas</text></g>
+<line class="flecha" x1="95" y1="682" x2="95" y2="714" marker-end="url(#punta)"/>
+<line class="flecha" x1="260" y1="682" x2="260" y2="714" marker-end="url(#punta)"/>
+<line class="flecha" x1="425" y1="682" x2="425" y2="714" marker-end="url(#punta)"/>
+<line class="flecha" x1="590" y1="682" x2="590" y2="714" marker-end="url(#punta)"/>
+<g class="g"><rect x="20" y="716" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="95" y="734">SIRE</text><text class="s" x="95" y="752">TXT del registro</text></g>
+<g class="g"><rect x="185" y="716" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="260" y="734">CONCAR</text><text class="s" x="260" y="752">Asientos en Excel</text></g>
+<g class="g"><rect x="350" y="716" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="425" y="734">CONTASIS</text><text class="s" x="425" y="752">Registro en Excel</text></g>
+<g class="g"><rect x="515" y="716" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="590" y="734">Vuelve al ERP</text><text class="s" x="590" y="752">JSON y diagnóstico</text></g>
+<text class="s leyenda" x="340" y="800">Morado: tu sistema · azul: estándar · verde azulado: motor · gris: piezas y destinos · punteado: próximo</text>
 </svg>
