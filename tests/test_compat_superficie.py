@@ -1,10 +1,10 @@
 """La superficie pública de la 0.10, congelada: ningún nombre desaparece sin aviso durante la 1.x.
 
-`contab-core` y quien use el motor como librería importan hoy nombres de muchos módulos. La 1.0 fija una API nueva
-(`contaperu.api`), pero promete que todo lo de la 0.10 sigue resolviendo hasta la 2.0, aunque avise. Este test guarda
-los nombres de cada módulo del paquete tal como estaban en la 0.10.0 (`fixtures/compat/superficie_0_10.json`) y
-comprueba que cada uno se sigue pudiendo importar y leer. No compara firmas ni comportamiento: eso lo hacen
-`test_compat_contab_core` y `test_caracterizacion`.
+Quien usa el motor como librería importa hoy nombres de muchos módulos. La 1.0 fija una API nueva (`contaperu.api`),
+pero promete que todo lo de la 0.10 sigue resolviendo hasta la 2.0, aunque avise. Este test guarda los nombres de cada
+módulo del paquete tal como estaban en la 0.10.0 (`fixtures/compat/superficie_0_10.json`) y comprueba que cada uno se
+sigue pudiendo importar y leer. No compara firmas ni comportamiento: eso lo hacen `test_compat_firmas` y
+`test_caracterizacion`.
 
 Entran los nombres públicos (sin `_` delante) que son del propio paquete —funciones, clases, constantes, instancias y
 submódulos de `contaperu`— y todo lo que un módulo declara en `__all__`; no entra lo que un módulo importa de la

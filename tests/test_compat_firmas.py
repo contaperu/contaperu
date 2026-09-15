@@ -1,13 +1,13 @@
-"""Lo que usa `contab-core` en producción sigue funcionando igual durante la 1.x.
+"""Las rutas de la 0.10 que usa quien integra el motor siguen funcionando igual durante la 1.x.
 
-`contab-core` (Contabilidad Inteligente, otro repositorio) instala el motor como paquete. La lista exacta de lo que
-importa vive en su `api/CLAUDE.md`, fuera de este repositorio. Aquí se fija lo que este repositorio documenta que usa
-(`ARQUITECTURA.md`, `CLAUDE.md`, `CHANGELOG.md` y los docstrings que nombran al portal): cada símbolo se importa por su
-ruta de la 0.10, sus parámetros siguen en el mismo orden (una llamada por posición sigue valiendo), y exportar a
-CONCAR devuelve el `resumen` que el portal guarda tal cual.
+Una aplicación que integró la 0.10 importa símbolos sueltos por su ruta de entonces (`contaperu.operaciones`,
+`contaperu.generar`, `contaperu.asiento`…). Aquí se fijan los que usa en producción una aplicación que integra el motor:
+cada símbolo se importa por su ruta de la 0.10, sus parámetros siguen en el mismo orden (una llamada por posición sigue
+valiendo), las constantes siguen ahí y exportar a CONCAR devuelve el `resumen` que esa aplicación guarda tal cual.
+`test_compat_superficie` comprueba que ningún nombre de la 0.10 desaparece; este comprueba además firmas y respuestas.
 
-Si la 1.0 mueve algo de aquí, la ruta vieja tiene que seguir resolviendo, aunque avise (rama `motor-v1`, etapa 1,
-14-sep-2026).
+Si la 1.0 mueve algo de aquí, la ruta vieja tiene que seguir resolviendo, aunque avise, hasta la 2.0. Los parámetros
+salen del código de la v0.10.0.
 """
 from __future__ import annotations
 
@@ -36,6 +36,16 @@ USADOS = [
     ("contaperu.operaciones", "con_imputacion", ("config", "imputacion", "comprobantes")),
     ("contaperu.operaciones", "libro_de", ("doc",)),
     ("contaperu.operaciones", "comprobantes_de", ("doc",)),
+    ("contaperu.operaciones", "configuracion_por_defecto", ()),
+    ("contaperu.operaciones", "describir_configuracion", ("driver",)),
+    ("contaperu.generar", "generar",
+     ("libro", "comprobantes", "driver", "opciones", "incluir_errores", "config", "correlativos")),
+    ("contaperu.generar", "etiqueta", ("c",)),
+    ("contaperu.generar", "errores_de", ("comprobantes",)),
+    ("contaperu.generar", "seleccionar", ("comprobantes",)),
+    ("contaperu.generar", "fuera_de", ("comprobantes", "tipos")),
+    ("contaperu.cli", "main", ("argv",)),
+    ("contaperu.lectores.archivos", "expandir", ("nombre", "datos", "tope", "lote")),
     ("contaperu.drivers.concar", "filas_de_comprobante",
      ("c", "config", "limites", "correlativo", "opciones", "es_venta")),
     ("contaperu.igv", "aplicar_igv", ("c", "igv")),
@@ -52,12 +62,18 @@ USADOS = [
     ("contaperu.asiento", "huella", ("lineas",)),
 ]
 
-# Las clases que el portal captura o construye.
+# Las clases que quien integra captura o construye.
 CLASES = [
     ("contaperu.generar", "Exportado"), ("contaperu.generar", "ErroresBloqueantes"),
     ("contaperu.operaciones", "DocumentoInvalido"), ("contaperu.drivers.concar", "CorrelativoDesborda"),
     ("contaperu.asiento", "NoExportable"), ("contaperu.asiento", "SinCentro"), ("contaperu.asiento", "SinCuenta"),
     ("contaperu.igv", "IgvImposible"), ("contaperu.igv", "TotalImposible"),
+]
+
+# Las constantes que se leen por su ruta de la 0.10.
+CONSTANTES = [
+    ("contaperu.operaciones", "PEDIR_A", dict), ("contaperu.drivers", "DRIVERS", dict),
+    ("contaperu.drivers", "DRIVER_POR_DEFECTO", str),
 ]
 
 
@@ -74,18 +90,24 @@ def test_se_importa_por_su_ruta_y_sus_parametros_siguen_en_orden(modulo, nombre,
 
 
 @pytest.mark.parametrize("modulo,nombre", CLASES, ids=[f"{m.split('.', 1)[1]}.{n}" for m, n in CLASES])
-def test_las_clases_que_captura_o_construye_siguen_ahi(modulo, nombre):
+def test_las_clases_que_se_capturan_o_construyen_siguen_ahi(modulo, nombre):
     assert isinstance(_obtener(modulo, nombre), type)
 
 
+@pytest.mark.parametrize("modulo,nombre,tipo", CONSTANTES, ids=[f"{m.split('.', 1)[1]}.{n}" for m, n, _ in CONSTANTES])
+def test_las_constantes_siguen_ahi(modulo, nombre, tipo):
+    valor = _obtener(modulo, nombre)
+    assert isinstance(valor, tipo) and valor
+
+
 def test_exportado_conserva_sus_campos():
-    """El portal guarda `archivo` y `contenido` en Storage, y lee el resto al mostrar la exportación."""
+    """Quien integra guarda `archivo` y `contenido` en su almacenamiento, y lee el resto al mostrar la exportación."""
     campos = [campo.name for campo in dataclasses.fields(_obtener("contaperu.generar", "Exportado"))]
     assert campos[:11] == ["nombre", "nombre_comprimido", "formato", "driver", "texto", "comprimido", "comprobantes",
                            "resumen", "archivo", "contenido", "content_type"]
 
 
-def test_exportar_a_concar_por_posicion_devuelve_el_resumen_que_el_portal_guarda():
+def test_exportar_a_concar_por_posicion_devuelve_el_resumen_que_se_guarda():
     exportar = _obtener("contaperu.operaciones", "exportar")
     documento = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
     respuesta = exportar(documento, "concar", SIN_CENTROS, {"11": 7}, False, "2026-09-14", None)
@@ -99,7 +121,7 @@ def test_exportar_a_concar_por_posicion_devuelve_el_resumen_que_el_portal_guarda
 
 
 def test_numerar_devuelve_los_numeros_por_identidad_del_comprobante():
-    """El portal recuerda los rangos para proponer el siguiente, y lee el número de cada comprobante por `id()`."""
+    """Quien integra recuerda los rangos para proponer el siguiente, y lee el número de cada comprobante por `id()`."""
     comprobantes = _obtener("contaperu.operaciones", "comprobantes_de")(
         json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8")))
     config = _obtener("contaperu.operaciones", "config_aplicada")(SIN_CENTROS, "concar")
