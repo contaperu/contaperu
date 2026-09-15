@@ -66,7 +66,7 @@ packages = ["contaperu"]
 
 [tool.hatch.build.targets.sdist]
 include = ["contaperu", "estandar", "tests", "README.md", "LICENSE", "CHANGELOG.md",
-           "CONTRIBUTING.md", "ARQUITECTURA.md", "REFERENCIAS.md", "INTEROPERABILIDAD.md", "HOJA-DE-RUTA.md",
+           "CONTRIBUTING.md", "ARQUITECTURA.md", "REFERENCIAS.md", "INTEROPERABILIDAD.md", "HOJA-DE-RUTA.md", "INTEGRAR.md",
            "SECURITY.md", "CODE_OF_CONDUCT.md"]
 
 [tool.pytest.ini_options]

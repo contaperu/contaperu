@@ -160,6 +160,41 @@ Si tu ERP todavía no tiene driver, el contrato está en `contaperu/drivers/cont
   de la hoja de ruta). Mientras tanto, tu aplicación pide el asiento a `generar_asiento` y lo envía; el envío y los
   reintentos son suyos, con la identidad y la huella de cada comprobante como clave para no repetir.
 
+## Versiones: fija la tuya y actualiza cuando decidas
+
+ContaPerú publica versiones con número (SemVer): una de parche arregla, una menor añade sin romper y solo una mayor
+rompe. Cada una sale de un tag `vX.Y.Z` como Release de GitHub, con la rueda, el sdist y sus sumas SHA-256, y un commit
+en `main` no le llega a nadie hasta que se publica. Tu aplicación **fija una versión exacta** y la cambia cuando
+decide, después de leer qué trae.
+
+- **Desde Python**, la versión exacta y su huella. Mientras el repositorio sea privado, la rueda de la Release
+  comprobada contra sus sumas, o el commit de su tag:
+
+  ```bash
+  sha256sum -c SHA256SUMS --ignore-missing
+  pip install "contaperu[excel] @ git+https://github.com/contaperu/contaperu.git@<commit del tag vX.Y.Z>"
+  ```
+
+  Cuando esté en PyPI, `contaperu[excel]==X.Y.Z` en tus dependencias, con su hash, y Dependabot o Renovate te abren
+  la actualización.
+- **Por HTTP**, la ruta `/v1/` no cambia durante la 1.x, y `info.version` de `/openconta.json` dice qué versión
+  responde. Si usas la imagen de Docker, por su tag exacto, nunca `latest`.
+- **Por MCP**, el servidor anuncia su versión al conectarse (`serverInfo`).
+
+Para actualizar:
+
+1. Lee la Release de la versión nueva: su parte del CHANGELOG y, si hay algo que adaptar, su «Cómo migrar».
+2. Instálala en una rama tuya y corre tus pruebas, convirtiendo también en error lo que se va a retirar:
+
+   ```bash
+   pytest -W error::contaperu._obsoleto.RutaObsoleta
+   ```
+
+3. Cuando pasen, cambia la versión fijada y despliega.
+
+Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
+seguridad llegan solo a la última versión publicada de la 1.x (`SECURITY.md`).
+
 ## Lo que promete la 1.x
 
 - **`contaperu.api` no cambia de nombre ni de firma** hasta la 2.0 (`tests/test_superficie_publica.py`). Pueden llegar
