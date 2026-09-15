@@ -80,39 +80,9 @@ sentidos del debe y el haber y la detracción los decide el motor una sola vez, 
 - **Abajo, los destinos:** el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o el resultado de vuelta al
   ERP, en JSON y con su diagnóstico.
 
-### Un mes, paso a paso
-
-![El recorrido de un mes dentro del motor: leer el XML o la propuesta del SIRE hasta open-accounting; preparar, revisar, seleccionar y exigir lo del destino; armar un asiento, un registro contable o un registro tributario; y responder con el archivo y cada comprobante](diagramas/recorrido-de-un-mes.svg)
-
-Si llegan archivos de SUNAT, el motor primero los **lee** y los lleva al documento `open-accounting`: el XML de cada
-factura, suelto o en ZIP y sin los CDR, o el TXT de la propuesta del SIRE. Desde ahí, cada mes recorre seis pasos:
-
-1. **Preparar.** Separa el libro de los comprobantes, aplica la configuración general y la sección del destino, y le
-   pone a cada comprobante su imputación por el `id_externo`. Una imputación que no es de ningún comprobante se
-   rechaza.
-2. **Revisar.** El núcleo valida el RUC, el IGV, el total, la fecha y los duplicados, también contra lo ya anotado en
-   otros periodos. Un error detiene la exportación; un aviso deja pasar el comprobante.
-3. **Seleccionar.** Quedan fuera los excluidos, los duplicados y lo que el destino no lleva, como los recibos por
-   honorarios en el SIRE.
-4. **Exigir lo del destino.** Si el destino lleva cuentas, el núcleo comprueba, antes de armar nada, que cada
-   comprobante tenga su cuenta, su centro de costo y su sigla, y que quepa en el formato.
-5. **Armar, según el destino.**
-   - **Asiento** (CONCAR, CSV): el núcleo arma las líneas neutrales, las numera por sub-diario, exige que cuadren al
-     céntimo y les calcula la huella; el driver solo traduce cada línea.
-   - **Registro contable** (CONTASIS): el driver recibe los comprobantes y lee las cuentas de la misma resolución que
-     usa el asiento.
-   - **Registro tributario** (el SIRE): una línea por comprobante, sin cuentas, en un TXT con su ZIP.
-6. **Responder.** El archivo, el resumen y, por cada comprobante, su identidad, su tramo de líneas y su huella, con la
-   versión del motor que lo produjo.
-
-No todas las operaciones hacen el recorrido completo:
-- `revisar` llega hasta el paso 2.
-- `diagnosticar` recorre hasta el 4 sin detenerse y cuenta lo que bloquea, lo que falta y a quién pedírselo.
-- `generar_asiento` se queda en el asiento, sin escribir el archivo.
-- `exportar` lo recorre entero.
-
-Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md); cómo integrarlo en un ERP, en
-[INTEGRAR.md](INTEGRAR.md).
+Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md), que también cuenta
+[el recorrido de un mes dentro del motor, paso a paso](ARQUITECTURA.md#un-mes-paso-a-paso); cómo integrarlo en un ERP,
+en [INTEGRAR.md](INTEGRAR.md).
 
 ## Glosario: palabras de programador en lenguaje contable
 

@@ -61,6 +61,39 @@ recibe los comprobantes con la configuración (`desde_comprobantes`) y lleva cue
 decide: las lee de `asiento.partes_de` y `asiento.cuenta_tercero`, la misma resolución que usa el motor para el
 asiento de CONCAR.
 
+### Un mes, paso a paso
+
+![El recorrido de un mes dentro del motor: leer el XML o la propuesta del SIRE hasta open-accounting; preparar, revisar, seleccionar y exigir lo del destino; armar un asiento, un registro contable o un registro tributario; y responder con el archivo y cada comprobante](diagramas/recorrido-de-un-mes.svg)
+
+Lo mismo, visto desde `pipeline/`. Si llegan archivos de SUNAT, el motor primero los **lee** (`pipeline/lectura`) y
+los lleva al documento `open-accounting`: el XML de cada factura, suelto o en ZIP y sin los CDR, o el TXT de la
+propuesta del SIRE. Desde ahí, cada mes recorre seis pasos:
+
+1. **Preparar** (`preparacion`). Separa el libro de los comprobantes, aplica la configuración general y la sección
+   del destino, y le pone a cada comprobante su imputación por el `id_externo`. Una imputación que no es de ningún
+   comprobante se rechaza.
+2. **Revisar** (`validar.revisar`, en el núcleo). Valida el RUC, el IGV, el total, la fecha y los duplicados, también
+   contra lo ya anotado en otros periodos. Un error detiene la exportación; un aviso deja pasar el comprobante.
+3. **Seleccionar** (`seleccion`). Quedan fuera los excluidos, los duplicados y los tipos que el destino no lleva
+   (`EXCLUYE_TIPOS`), como los recibos por honorarios en el SIRE y en CONTASIS.
+4. **Exigir lo del destino** (`exigir_requisitos` y `contrato.no_caben`). Si el destino lleva cuentas, el núcleo
+   comprueba, antes de armar nada, que cada comprobante tenga su cuenta, su centro de costo y su sigla, y que quepa
+   en el formato.
+5. **Armar, según la forma del driver** (`armado`).
+   - **Asiento** (`desde_lineas`: CONCAR, CSV): el núcleo arma las líneas neutrales, las numera por sub-diario, exige
+     que cuadren al céntimo y les calcula la huella; el driver solo traduce cada línea.
+   - **Registro contable** (`desde_comprobantes`: CONTASIS): el driver recibe los comprobantes y lee las cuentas de
+     la misma resolución que usa el asiento.
+   - **Registro tributario** (`linea`: el SIRE): una línea por comprobante, sin cuentas, en un TXT con su ZIP.
+6. **Responder** (`salida`). El archivo, el resumen y `_exportacion`: por cada comprobante, su identidad, su tramo de
+   líneas y su huella, con la versión del motor que lo produjo.
+
+No todas las operaciones hacen el recorrido completo:
+- `revisar` llega hasta el paso 2.
+- `diagnosticar` recorre hasta el 4 sin detenerse y cuenta lo que bloquea, lo que falta y a quién pedírselo.
+- `generar_asiento` se queda en el asiento, sin escribir el archivo.
+- `exportar` lo recorre entero.
+
 ### La decisión que lo ordena todo: la línea neutral es la fuente
 
 Hasta la 0.6 el asiento nacía en las columnas del Excel de CONCAR (`'A'..'AO'`) y la línea neutral
