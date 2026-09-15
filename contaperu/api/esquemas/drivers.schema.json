@@ -1,0 +1,68 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/drivers.schema.json",
+ "title": "Drivers disponibles",
+ "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia y su canal.",
+ "type": "object",
+ "additionalProperties": {
+  "type": "object",
+  "properties": {
+   "formatos": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "string"
+    }
+   },
+   "tipo": {
+    "enum": [
+     "texto",
+     "archivo"
+    ]
+   },
+   "forma": {
+    "enum": [
+     "desde_lineas",
+     "desde_comprobantes",
+     "construir",
+     "linea"
+    ]
+   },
+   "familia": {
+    "enum": [
+     "registro",
+     "asiento"
+    ]
+   },
+   "canal": {
+    "enum": [
+     "legacy",
+     "tributario",
+     "intercambio"
+    ]
+   },
+   "exige": {
+    "type": "array",
+    "items": {
+     "type": "string"
+    }
+   },
+   "configurable": {
+    "type": "boolean"
+   },
+   "descripcion": {
+    "type": "string"
+   }
+  },
+  "required": [
+   "formatos",
+   "tipo",
+   "forma",
+   "familia",
+   "canal",
+   "exige",
+   "configurable",
+   "descripcion"
+  ],
+  "additionalProperties": false
+ }
+}

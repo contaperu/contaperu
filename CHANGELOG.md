@@ -4,6 +4,223 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+Rumbo a la **1.0.0**, ya en `main`; la candidata es la **1.0.0rc1**. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.
+
+### Añadido
+- **`ErrorContaperu`** (`contaperu.errores`): la base común de todas las excepciones del motor, con una `clave` estable
+  por clase («sin_cuenta», «configuracion_invalida», «xml_invalido»). Las excepciones de siempre conservan sus bases:
+  atraparlas como en la 0.10 sigue funcionando.
+- **`RutaObsoleta`**: el aviso con que las rutas de la 0.10 que cambian de sitio dicen qué usar. Avisa al usar la ruta,
+  no al importar el módulo, y se silencia con `warnings.filterwarnings("ignore", category=contaperu.RutaObsoleta)`.
+- `Libro.a_dict` y `Libro.de_dict`, `LineaDiario.de_dict` (rechaza claves ajenas y un sentido que no es D ni H),
+  `modelo.numero_sin_ceros`, `asiento.numerar_en_orden` (el número de cada comprobante en su posición, sin depender del
+  `id()` de los objetos), `comparar_sire.leer_bytes` y `pcge.adaptar(lineas, datos=...)`.
+- `modelo.identidad_de`: la identidad estable del comprobante del hito 0.0 (RUC y tipo del libro, tipo, serie y número
+  sin ceros; en compras, el proveedor). Todavía no la usa ninguna salida.
+- Una red de seguridad de tests antes de mover nada: la superficie pública de la 0.10 congelada, lo que usa
+  `contab-core`, la respuesta de la fachada por documento y destino, el Excel de CONCAR por el camino de producción
+  caso a caso y la forma de las hojas de Excel.
+- `tests/test_capas.py`: cada módulo pertenece a una capa y solo importa de las de abajo; el núcleo y los drivers no
+  abren archivos (hito 0.5); el acoplamiento con lo peruano queda congelado y visible (hito J0).
+
+- **`contaperu.api`**, la API pública de la 1.0: `leer_xml`, `leer_propuesta_sire`, `leer_archivos`, `documento_de`,
+  `revisar`, `normalizar_detracciones`, `diagnosticar`, `generar_asiento`, `exportar`, `exportar_archivo` (el archivo
+  en bytes, como `Exportado`), `cuadrar`, `buscar_cuenta_pcge`, `adaptar_pcge`, la configuración, los drivers y
+  catálogos disponibles, el esquema del estándar, `comparar_sire` y todos los errores. **El documento va primero y lo
+  demás por su nombre, y `driver` no tiene valor por defecto.** Su superficie queda congelada con su firma
+  (`tests/test_superficie_publica.py`), junto con los nombres del nivel de extensión.
+- `api.OPERACIONES`: cada operación con la ruta HTTP y el nombre del MCP por los que se expone. Es la fuente de las
+  puertas; un test comprueba que el MCP expone exactamente esas herramientas y recursos.
+- `api.problema(error)`: un error como «problem details» del RFC 9457, con su `clave`; lo que no es un error del motor no
+  enseña su texto.
+- `contaperu.pipeline` (interno): la preparación, la lectura, la selección, el armado del asiento, la salida y el
+  diagnóstico, cada uno en su módulo y escritos una sola vez.
+- `contaperu.puertas`: la CLI y el servidor MCP, que hablan solo con la api, y lo que comparten (topes y nombres de host
+  permitidos). `test_capas` lo hace cumplir y la lista de excepciones queda vacía.
+
+- **El canal de cada driver** (`CANAL`): a quién se entrega lo que sale. `legacy`, un sistema contable instalado que
+  importa un archivo (CONCAR, CONTASIS); `tributario`, un registro que se presenta a SUNAT (el SIRE); `intercambio`, un
+  formato neutral (el CSV). El contrato hace cumplir las reglas de cada uno y rechaza `api_erp`, reservado para escribir
+  en la API de un ERP moderno (hito A5). `api.drivers_disponibles` y el recurso `contaperu://drivers` dicen el canal.
+- **El índice del asiento** (`asiento.indice`, hito 0.4 en el motor): `asiento.lineas_e_indice_del_libro` devuelve,
+  con las líneas, qué tramo es de qué comprobante y una `Cabecera` con sus hechos (identidad, contraparte, glosa,
+  importes), fuera de las líneas y de la huella. Un driver `desde_lineas` que acepta `indice` lo recibe.
+- `drivers.kit`: lo que comparten los drivers —`Opciones`, `OpcionesArchivo` para un driver de archivo nuevo, el formato
+  de texto, las celdas y el libro de Excel—.
+- `drivers.contrato.canal`, `declara_canal`, `acepta_indice`, `CANALES` y `CANALES_RESERVADOS`;
+  `asiento.MONEDAS_CODIGO`, la única clave de la sección de un sistema que lee el núcleo, con nombre.
+- Un driver de prueba de asientos por JSON (`tests/drivers_de_prueba/diario_json.py`), de canal `legacy`, con índice y
+  `no_caben`: prueba que el contrato ya cubre lo que pedirá STARSOFT, sin publicar ningún driver.
+
+- **`claves_previas` por las tres puertas** (hito 0.1): `api.revisar`, `diagnosticar`, `generar_asiento`, `exportar` y
+  `exportar_archivo`, las herramientas del MCP y `--claves-previas` en `contaperu desde-json` y `diagnosticar`. Lo ya
+  anotado en otros periodos del mismo RUC viaja como `[tipo_cp, serie, numero, contraparte_doc]`, se normaliza igual
+  que la clave del comprobante («00000123» casa con «123») y lo que coincide sale con `DUPLICADO_PERIODO_ANTERIOR`,
+  que se pide al contador. Tope: `api.MAXIMO_CLAVES_PREVIAS`, 50 000; por encima, `DocumentoInvalido`.
+- **La identidad de un comprobante, escrita** (hito 0.0, `estandar/LEEME.md`): el RUC y el tipo del libro, más el
+  tipo, la serie y el número sin ceros; en compras, el documento del proveedor; en ventas, no el del cliente; nunca el
+  periodo.
+
+- **Cada comprobante en la respuesta** (hito 0.4): `_asiento.comprobantes` y `_exportacion.comprobantes` dicen de
+  cada uno su identidad, el tramo `[desde, hasta)` de las líneas del asiento que le toca y la huella de ese tramo. Los
+  tramos son una partición exacta y cada uno cuadra; la huella de la tanda no cambia. En un registro (el SIRE,
+  CONTASIS), solo la identidad. `Exportado.por_comprobante` lo lleva en Python.
+- **`motor`** (hito B2): la versión de la librería que produjo la respuesta, en `_asiento` y `_exportacion`, fuera de
+  toda huella.
+
+- **Anotaciones MCP** (hito 0.2): las once herramientas se anuncian con `readOnlyHint: true` y `openWorldHint: false`,
+  así un cliente puede llamarlas sin pedir confirmación por un efecto que no tienen.
+
+- **OpenConta** (hito B3): el contrato de la puerta HTTP, en formato OpenAPI 3.1, generado desde `api.OPERACIONES` y
+  versionado en `contaperu/api/openconta.json` (`api.contrato_openconta()`). Cada operación con su cuerpo, su salida y sus
+  rechazos RFC 9457; los esquemas del estándar y de la api, en `components.schemas`; sin `servers`.
+  `herramientas/generar_openconta.py` lo reescribe y, con `--comprobar`, falla si no está al día; un test exige que
+  regenerarlo no cambie ni un byte, que las respuestas reales validen contra su salida y los documentos de ejemplo
+  contra su entrada.
+- **La tabla de operaciones declara su entrada y su salida** (hito B1): cada `Operacion` trae `entrada`, el JSON Schema
+  2020-12 de sus parámetros sacado de su firma, y `esquema_de_salida`, con `$ref` al esquema del estándar. Los esquemas
+  de las salidas viajan en `contaperu/api/esquemas/`.
+- **El esquema de la respuesta de `diagnosticar`** (hito B2), también en la forma de una configuración que no se puede
+  aplicar: `api.esquema_diagnostico()` y el recurso `contaperu://esquemas/diagnostico`. El SDK del MCP no deja
+  declararlo como `outputSchema` de la herramienta sin cambiar lo que responde.
+
+- **La puerta HTTP** (hito B4): `contaperu-http`, con el extra `contaperu[http]` (Starlette y uvicorn). Cada operación
+  de `api.OPERACIONES` es una ruta —`POST /v1/exportar`, `GET /v1/drivers`…—, más `/salud` y `/openconta.json`, que
+  sirve el contrato. Sin estado; comparte con el MCP la defensa del `Host` (421 a un nombre que no se declaró con
+  `--dominio`) y los topes: el cuerpo se lee por trozos y se corta a 10 MiB (413), y el archivo que devuelve
+  `exportar`, a 4 MiB. Los rechazos son RFC 9457: 400 cuerpo mal formado, 422 con la `clave` del error, 500 sin
+  detalle. `puertas.servidor_http.crear_app` la da como aplicación ASGI. Las tres puertas dan el mismo documento y el
+  mismo diagnóstico.
+
+- **`INTEGRAR.md`** (hito B6): cómo integrar el motor en un ERP —qué puerta elegir, la librería, la CLI por lotes, HTTP
+  con OpenConta, el MCP, un driver propio en sus dos niveles y lo que promete la 1.x—. Sus ejemplos se ejecutan en la
+  batería (`tests/test_integrar.py`).
+- CI: la batería también en Windows con Python 3.12; comprobar que OpenConta está al día; un trabajo que construye la
+  rueda, la instala en un entorno limpio y arranca los tres comandos con sus datos empaquetados. Publicar una versión
+  es empujar su tag: `release.yml` corre la batería en ese commit, comprueba que la etiqueta sea `v` más la versión del
+  código y que el CHANGELOG la traiga fechada, pasa `twine check` y crea la Release de GitHub con la rueda, el sdist y
+  `SHA256SUMS`. PyPI va aparte y a mano.
+
+### Cambiado
+- **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
+  `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
+- El registro de drivers busca los de terceros la primera vez que alguien lo mira, no al importar el paquete.
+- **El núcleo no abre archivos** (hito 0.5): el catálogo y la tabla del PCGE se leen como datos empaquetados
+  (`contaperu/_datos.py`, con `importlib.resources`), y la CLI lee el disco antes de comparar con el SIRE.
+- `igv` deja de importar la validación entera por una constante: la tolerancia vive en `catalogos.TOLERANCIA_IGV`
+  (`validar.TOLERANCIA` e `igv.TOLERANCIA` siguen siendo el mismo valor).
+- El asiento deja de depender de las opciones de los drivers: `lineas_del_comprobante` y `lineas_del_libro` leen
+  `sin_ceros` de las opciones que lleguen, y sin opciones quitan los ceros como siempre.
+
+- **La CLI habla solo con la api.** `contaperu desde-json` revisa siempre el documento, la imputación y cada comprobante
+  —`--revisar` ahora solo enseña la tabla—, y un rechazo se imprime con el mensaje de la api. Un documento o una
+  imputación que no se pueden usar responden con el código 2 y el motivo en una sola línea; en `contaperu generar`, un
+  RUC o un periodo mal escritos también, en vez de un traceback.
+- Los comandos `contaperu` y `contaperu-mcp` arrancan desde `contaperu.puertas`. Las herramientas y los recursos del MCP
+  conservan sus nombres, sus argumentos y sus respuestas.
+- `api.revisar` acepta la `imputacion` y comprueba que cada una hable de un documento que está.
+
+- **CONCAR pasa a la forma `desde_lineas`** y la orquestación del asiento queda en un solo sitio, el pipeline. El
+  Excel no cambia ni una celda: la glosa de la columna F y la tasa de la AO salen de la cabecera del comprobante, y la
+  AO se sigue redondeando una sola vez desde su IGV y su base (IGV 175.00 sobre 1000.03 da 17, no 18). El resumen
+  conserva sus claves y sus valores; el desborde de un sub-diario se detecta igual, antes de escribir.
+- **`no_caben` detiene también a un driver `desde_lineas`**, antes de armar el asiento; hasta ahora solo lo hacía con
+  la forma `desde_comprobantes`. Ningún driver de serie de asientos lo declara, así que sus salidas no cambian.
+- Un driver de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy`; uno con la forma
+  `construir` sigue exportando, con un `AvisoDriver`.
+- CONTASIS y CONCAR escriben su Excel con el kit común. `drivers.csv.CANAL`, `drivers.sire.CANAL` y
+  `drivers.sire.txt.columnas_igv_compras`, que vivía en `formato`.
+
+- **En ventas, dos comprobantes con el mismo tipo, serie y número son el mismo aunque el cliente difiera**:
+  `validar.revisar` los marca como duplicados, también contra las claves previas. Es la identidad del hito 0.0; en
+  compras no cambia nada. `validar.marcar_duplicados` recibe `sin_contraparte` para decidirlo y por defecto hace lo de
+  siempre.
+
+- **`generar_asiento` exige lo del destino**: es `exportar` sin escribir el archivo. Deja fuera los excluidos, los
+  duplicados y lo que ese destino no lleva, y se niega por lo que su driver exige —en CONCAR, el centro de costo donde
+  la cuenta lo lleva y una moneda con código— y por lo que no cabe en su formato. Mirar sin exigir es `diagnosticar`, o
+  `generar_asiento` hacia el CSV. El desborde de un sub-diario no se lanza: queda en `_asiento.sub_diarios`.
+
+- **El tipo de cambio y la tasa de la detracción viajan como texto exacto en la línea neutral** (hito 0.6):
+  `"3.550"` y `"4"` en vez de `3.55` y `4.0`, y `float` solo al escribir la celda. El Excel de CONCAR no cambia. Cambian,
+  y es a propósito, la huella de las tandas en dólares o con detracción —una huella guardada con la 0.10 para esas
+  tandas no coincide con la nueva; la de soles, sí— y cómo se escriben esas dos columnas en el CSV. El camino inverso
+  (`drivers.concar.a_lineas`) también devuelve texto.
+
+- **`diagnosticar` cuenta igual lo que saldría** (hito 0.8): `totales.saldrian` es el largo de la lista `saldrian`;
+  hasta ahora contaba también los comprobantes que bloquean.
+- **`diagnosticar` no suma soles con dólares** en `resumen_por_contraparte` (hito 0.8): cada contraparte trae
+  `por_moneda`, con un total por moneda, y `total` y `moneda` son los de la primera moneda en que aparece. El
+  serie-número sigue escribiéndose como en el documento, con sus ceros: igualarlo al de la línea queda por confirmar.
+
+- **Un PDF o una foto enviados a `leer_xml` cuentan como pendientes de leer** (hito 0.7): `_lectura.pendientes_de_leer`
+  sube en uno y no aparece un «XML inválido». El motor reconoce el PDF, el JPEG, el PNG y el WEBP por sus primeros
+  bytes, porque lo que llega por un protocolo no trae nombre de archivo.
+
+- **El CSV lleva tres columnas más al final** (B5): `rol`, `doc_tipo_cp` y `ref_tipo_cp`, lo que un driver necesita
+  para traducir sin adivinar. Las columnas de siempre no se mueven.
+
+- `estandar/LEEME.md`, «La detracción, que ocurre en dos tiempos» (hito 0.3): ya no dice que el asiento «puede
+  regenerarse» con el número de la constancia. En un destino que suma lo importado, regenerarlo duplica; el segundo
+  tiempo es una decisión contable que entrará con su fuente y un archivo real.
+
+- **El TXT del SIRE no usa `assert`.** Una nota de crédito cuyo descuento cambiaría de signo el campo 15 o el 17 del
+  RVIE se niega con `CampoCambiaDeSigno`, un `NoExportable` que trae la nota, en vez de un `AssertionError` que
+  `python -O` se saltaba. Un test impide `assert` en todo el paquete.
+
+- El extra `mcp` pide `mcp>=1.30`, la versión más antigua con la que se probó el servidor (el `>=1.2` de antes no
+  tenía las anotaciones ni la defensa del Host que ya usaba). Un trabajo de CI, `minimos`, instala ese mínimo tal cual.
+
+- La imagen de Docker instala también la puerta HTTP y expone el 8080; su `CMD` sigue siendo `contaperu-mcp`.
+
+- **Versión 1.0.0rc1** y `Development Status :: 5 - Production/Stable`. `README.md`, `ARQUITECTURA.md` (las capas, el
+  pipeline, el contrato v1 con sus canales, «STARSOFT: qué se sabe y qué falta» y lo que queda preparado),
+  `CONTRIBUTING.md`, `CLAUDE.md`, `SECURITY.md` (la política de la 1.x) y la hoja de ruta, con sus hitos cumplidos,
+  describen la 1.0.
+
+### Obsoleto
+- `comparar_sire.leer(ruta)`, `pcge.cargar_equivalencias(ruta)` y `pcge.adaptar(lineas, ruta)`: siguen funcionando y
+  avisan; se pasan los bytes o el diccionario. `asiento.motor.Opciones` y `asiento.motor.formatear_numero` siguen
+  resolviendo desde ahí, con aviso.
+- **`contaperu.operaciones`** (todo el módulo): sigue funcionando con las firmas y los valores por defecto de la 0.10 y
+  avisa con la ruta nueva, `contaperu.api`. `contaperu.generar`: `api.exportar_archivo`, `api.Exportado` y
+  `api.ErroresBloqueantes`. `contaperu.cli` y `contaperu.servidor_mcp`: `contaperu.puertas.cli` y
+  `contaperu.puertas.servidor_mcp`. Son el mismo objeto por las dos rutas (`generar.Exportado is api.Exportado`).
+- **`drivers.concar.construir`** (y `drivers.concar.xlsx.construir`): da las mismas celdas y el mismo resumen y avisa;
+  el Excel de CONCAR se pide a `api.exportar_archivo`. **`contaperu.formato`** entero: `contaperu.drivers.kit`.
+  La forma `construir` de un driver de terceros se retira en la 2.0.
+
+### Cómo migrar desde la 0.10
+
+Nada deja de funcionar: cada ruta de la 0.10 resuelve al mismo objeto, con su firma, y avisa con `RutaObsoleta` qué usar.
+Para silenciar el aviso mientras se migra: `warnings.filterwarnings("ignore", category=contaperu.RutaObsoleta)`.
+
+| En la 0.10 | En la 1.0 |
+|---|---|
+| `from contaperu import operaciones as op` | `from contaperu import api` |
+| `op.exportar(doc, "concar", config, correlativos)` | `api.exportar(doc, driver="concar", configuracion=config, correlativos=correlativos)` |
+| `op.generar_asiento(doc, config, None, False, imputacion, "csv")` | `api.generar_asiento(doc, driver="csv", configuracion=config, imputacion=imputacion)` |
+| `op.diagnosticar(doc, config, driver="concar")` | `api.diagnosticar(doc, driver="concar", configuracion=config)` |
+| `op.revisar(doc, config)` · `op.leer_xml(contenido, libro, True)` | `api.revisar(doc, configuracion=config)` · `api.leer_xml(contenido, libro, es_base64=True)` |
+| `op.documento(libro, comprobantes)` | `api.documento_de(libro, comprobantes)` |
+| `op.config_aplicada`, `op.con_imputacion`, `op.libro_de`, `op.comprobantes_de` | dentro de cada operación; el paso suelto está en `contaperu.pipeline.preparacion`, que es interno |
+| `generar.generar(libro, comprobantes, "concar", config=..., correlativos=...)` | `api.exportar_archivo(documento, driver="concar", configuracion=...)` |
+| `generar.Exportado`, `generar.ErroresBloqueantes`, `op.DocumentoInvalido` | `api.Exportado`, `api.ErroresBloqueantes`, `api.DocumentoInvalido` |
+| `drivers.concar.construir(...)` | `api.exportar_archivo`; un driver nuevo, `desde_lineas` |
+| `from contaperu.formato import Opciones` | `from contaperu.drivers.kit import Opciones` |
+| `contaperu.cli`, `contaperu.servidor_mcp` | `contaperu.puertas.cli`, `contaperu.puertas.servidor_mcp`; los comandos no cambian |
+| `comparar_sire.leer(ruta)` · `pcge.cargar_equivalencias(ruta)` | `comparar_sire.leer_bytes(datos)` · `pcge.cargar_equivalencias(datos)` |
+
+No cambian de sitio ni avisan: `asiento.*`, `drivers.concar.filas_de_comprobante`, `igv.aplicar_igv`,
+`igv.aplicar_total`, `detracciones.normalizar`, `detracciones.monto_detraccion`, `validar.marcar_duplicados`,
+`validar.revisar` y `modelo.clave_de`. El `resumen` de cada exportación conserva sus claves.
+
+Lo que sí cambia de comportamiento está arriba en negrita. Lo que no se aplicó y queda por decidir: descartar al
+exportar las detracciones que la tabla del contribuyente no reconoce (movería de sub-diario una factura y cambiaría el
+Excel de CONCAR validado), e igualar el serie-número de `diagnosticar` al de la línea.
+
 ## [0.10.0] — 2026-09-13
 
 **CONTASIS entra como driver de serie**, con lo que hizo falta para que un segundo sistema contable salga del mismo
@@ -536,5 +753,5 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v0.2.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v0.10.0...HEAD
 [0.2.0]: https://github.com/contaperu/contaperu/releases/tag/v0.2.0

@@ -1,0 +1,2601 @@
+{
+ "openapi": "3.1.0",
+ "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+ "info": {
+  "title": "OpenConta",
+  "version": "1.0.0rc1",
+  "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
+  "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
+  "license": {
+   "name": "MIT",
+   "identifier": "MIT"
+  },
+  "x-open-accounting": "0.3"
+ },
+ "paths": {
+  "/v1/leer_xml": {
+   "post": {
+    "operationId": "leer_xml",
+    "summary": "Lee el XML UBL 2.1 de la factura electrónica de SUNAT —uno suelto, o un ZIP con varios— y devuelve un documento `open-accounting` revisado.",
+    "description": "Lee el XML UBL 2.1 de la factura electrónica de SUNAT —uno suelto, o un ZIP con varios— y devuelve un documento\n`open-accounting` revisado. Descarta lo que no es un comprobante (las constancias de recepción y las hojas de\nestilo) y dice en `_lectura` lo que no pudo leer. `libro` es la cabecera: RUC, periodo y si son ventas o compras.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/leer_xml_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Lee el XML UBL 2.1 de la factura electrónica de SUNAT —uno suelto, o un ZIP con varios— y devuelve un documento `open-accounting` revisado.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/documento_anotado"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/leer_propuesta_sire": {
+   "post": {
+    "operationId": "leer_propuesta_sire",
+    "summary": "Lee el TXT de la propuesta que SUNAT entrega en el SIRE —o el ZIP tal cual lo entrega— y devuelve un documento `open-accounting` revisado.",
+    "description": "Lee el TXT de la propuesta que SUNAT entrega en el SIRE —o el ZIP tal cual lo entrega— y devuelve un documento\n`open-accounting` revisado.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/leer_propuesta_sire_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Lee el TXT de la propuesta que SUNAT entrega en el SIRE —o el ZIP tal cual lo entrega— y devuelve un documento `open-accounting` revisado.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/documento_anotado"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/revisar": {
+   "post": {
+    "operationId": "revisar",
+    "summary": "Revisa los comprobantes y devuelve el mismo documento con `estado` y `observaciones` puestos en cada uno, y en `_revision` lo que hay que mirar.",
+    "description": "Revisa los comprobantes y devuelve el mismo documento con `estado` y `observaciones` puestos en cada uno, y en\n`_revision` lo que hay que mirar. Descarta las detracciones que la tabla del contribuyente no reconoce. Con\n`imputacion`, comprueba también que cada una hable de un documento que está. `claves_previas` es lo ya anotado en\notros periodos del mismo RUC, cada una como `[tipo_cp, serie, numero, contraparte_doc]`: lo que coincide sale con\n`DUPLICADO_PERIODO_ANTERIOR` (hasta `MAXIMO_CLAVES_PREVIAS`).",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/revisar_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Revisa los comprobantes y devuelve el mismo documento con `estado` y `observaciones` puestos en cada uno, y en `_revision` lo que hay que mirar.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/documento_anotado"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/normalizar_detracciones": {
+   "post": {
+    "operationId": "normalizar_detracciones",
+    "summary": "Contrasta la detracción de cada comprobante con la tabla del contribuyente y deja en blanco la que no reconozca; `_detracciones` dice cuántas revisó y cuántas descartó.",
+    "description": "Contrasta la detracción de cada comprobante con la tabla del contribuyente y deja en blanco la que no\nreconozca; `_detracciones` dice cuántas revisó y cuántas descartó. La confusión más común al leer con un modelo de\nlenguaje es tomar la retención del IGV por una detracción.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/normalizar_detracciones_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Contrasta la detracción de cada comprobante con la tabla del contribuyente y deja en blanco la que no reconozca; `_detracciones` dice cuántas revisó y cuántas descartó.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/documento_anotado"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/diagnosticar": {
+   "post": {
+    "operationId": "diagnosticar",
+    "summary": "Todo lo que hay que mirar de un mes antes de exportarlo hacia `driver`, en una sola respuesta: si está listo y por qué no, qué bloquea, qué falta y a quién pedírselo, qué saldría y desde qué correlativo.",
+    "description": "Todo lo que hay que mirar de un mes antes de exportarlo hacia `driver`, en una sola respuesta: si está listo y\npor qué no, qué bloquea, qué falta y a quién pedírselo, qué saldría y desde qué correlativo. No lanza por lo que\nle falte al mes ni por una configuración que no se puede aplicar: lo describe.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/diagnosticar_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Todo lo que hay que mirar de un mes antes de exportarlo hacia `driver`, en una sola respuesta: si está listo y por qué no, qué bloquea, qué falta y a quién pedírselo, qué saldría y desde qué correlativo.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/diagnostico"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/generar_asiento": {
+   "post": {
+    "operationId": "generar_asiento",
+    "summary": "Convierte los comprobantes en líneas de diario del estándar, con la configuración del sistema de asientos `driver` (sus siglas, sus sub-diarios, las columnas del centro de costo) y sin su formato.",
+    "description": "Convierte los comprobantes en líneas de diario del estándar, con la configuración del sistema de asientos\n`driver` (sus siglas, sus sub-diarios, las columnas del centro de costo) y sin su formato. Es `exportar` sin\nescribir el archivo: exige lo que exige ese destino y lo que no cabe en su formato. `_asiento` trae el número de\nlíneas, los rangos por sub-diario, el cuadre y la huella.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/generar_asiento_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Convierte los comprobantes en líneas de diario del estándar, con la configuración del sistema de asientos `driver` (sus siglas, sus sub-diarios, las columnas del centro de costo) y sin su formato.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/asiento"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/exportar": {
+   "post": {
+    "operationId": "exportar",
+    "summary": "Genera el archivo que importa el sistema `driver` y lo devuelve en JSON: `texto` cuando es legible, el archivo en base64 y `_exportacion` con el driver, el archivo, la huella del asiento y la `fecha` que ponga quien llama.",
+    "description": "Genera el archivo que importa el sistema `driver` y lo devuelve en JSON: `texto` cuando es legible, el archivo en\nbase64 y `_exportacion` con el driver, el archivo, la huella del asiento y la `fecha` que ponga quien llama.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/exportar_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Genera el archivo que importa el sistema `driver` y lo devuelve en JSON: `texto` cuando es legible, el archivo en base64 y `_exportacion` con el driver, el archivo, la huella del asiento y la `fecha` que ponga quien llama.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/exportacion"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/cuadrar": {
+   "post": {
+    "operationId": "cuadrar",
+    "summary": "¿La suma del Debe es exactamente igual a la del Haber? Devuelve las dos sumas, la diferencia y cuántas líneas no dicen si son Debe o Haber.",
+    "description": "¿La suma del Debe es exactamente igual a la del Haber? Devuelve las dos sumas, la diferencia y cuántas líneas no\ndicen si son Debe o Haber.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/cuadrar_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "¿La suma del Debe es exactamente igual a la del Haber? Devuelve las dos sumas, la diferencia y cuántas líneas no dicen si son Debe o Haber.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/cuadre"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/buscar_cuenta_pcge": {
+   "post": {
+    "operationId": "buscar_cuenta_pcge",
+    "summary": "Busca una cuenta del Plan Contable General Empresarial 2026 por nombre (`texto`) o por `codigo`.",
+    "description": "Busca una cuenta del Plan Contable General Empresarial 2026 por nombre (`texto`) o por `codigo`. Un código que no\nestá en la norma resuelve a la cuenta madre que lo gobierna: las divisionarias las abre cada empresa.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/buscar_cuenta_pcge_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Busca una cuenta del Plan Contable General Empresarial 2026 por nombre (`texto`) o por `codigo`.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/cuenta_pcge"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/adaptar_pcge": {
+   "post": {
+    "operationId": "adaptar_pcge",
+    "summary": "Aplica las equivalencias del PCGE 2026.",
+    "description": "Aplica las equivalencias del PCGE 2026. Sin la tabla oficial cargada no toca nada\ny lo dice: en este proyecto ninguna regla contable se escribe de memoria.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/adaptar_pcge_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Aplica las equivalencias del PCGE 2026.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/adaptacion_pcge"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/configuracion/por_defecto": {
+   "get": {
+    "operationId": "configuracion_por_defecto",
+    "summary": "La configuración contable de partida, en la forma en que se guarda: lo general en la raíz y una sección por sistema que se configura.",
+    "description": "La configuración contable de partida, en la forma en que se guarda: lo general en la raíz y una sección por\nsistema que se configura. Es un punto de partida, no la verdad de ningún contribuyente.",
+    "responses": {
+     "200": {
+      "description": "La configuración contable de partida, en la forma en que se guarda: lo general en la raíz y una sección por sistema que se configura.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/configuracion"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/configuracion": {
+   "get": {
+    "operationId": "describir_configuracion",
+    "summary": "Qué se configura: lo general y, por cada sistema, sus campos con tipo, valor por defecto, patrón y textos, y en qué columnas de su archivo puede ir cada dato.",
+    "description": "Qué se configura: lo general y, por cada sistema, sus campos con tipo, valor por defecto, patrón y textos, y en\nqué columnas de su archivo puede ir cada dato. Con `driver`, lo general y solo su sección.",
+    "parameters": [
+     {
+      "name": "driver",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "description": "El sistema de destino (`drivers_disponibles`)."
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Qué se configura: lo general y, por cada sistema, sus campos con tipo, valor por defecto, patrón y textos, y en qué columnas de su archivo puede ir cada dato.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/drivers": {
+   "get": {
+    "operationId": "drivers_disponibles",
+    "summary": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), lo que exige, si se configura y su descripción.",
+    "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal\n(`legacy`, `tributario` o `intercambio`), lo que exige, si se configura y su descripción.",
+    "responses": {
+     "200": {
+      "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), lo que exige, si se configura y su descripción.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/drivers"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/catalogos/sunat": {
+   "get": {
+    "operationId": "catalogos_sunat",
+    "summary": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad y monedas.",
+    "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad y monedas.",
+    "responses": {
+     "200": {
+      "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad y monedas.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/catalogos_sunat"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/catalogos/pcge2026": {
+   "get": {
+    "operationId": "catalogo_pcge",
+    "summary": "El catálogo oficial de cuentas del PCGE 2026: cada cuenta con su nombre y la página de la norma que lo dice.",
+    "description": "El catálogo oficial de cuentas del PCGE 2026: cada cuenta con su nombre y la página de la norma que lo dice.",
+    "responses": {
+     "200": {
+      "description": "El catálogo oficial de cuentas del PCGE 2026: cada cuenta con su nombre y la página de la norma que lo dice.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/estandar/open-accounting.schema.json": {
+   "get": {
+    "operationId": "esquema_open_accounting",
+    "summary": "El esquema JSON del documento `open-accounting`, con cada campo documentado.",
+    "description": "El esquema JSON del documento `open-accounting`, con cada campo documentado.",
+    "responses": {
+     "200": {
+      "description": "El esquema JSON del documento `open-accounting`, con cada campo documentado.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/esquemas/diagnostico.schema.json": {
+   "get": {
+    "operationId": "esquema_diagnostico",
+    "summary": "El JSON Schema de la respuesta de `diagnosticar`, también cuando la configuración no se puede aplicar.",
+    "description": "El JSON Schema de la respuesta de `diagnosticar`, también cuando la configuración no se puede aplicar.",
+    "responses": {
+     "200": {
+      "description": "El JSON Schema de la respuesta de `diagnosticar`, también cuando la configuración no se puede aplicar.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/salud": {
+   "get": {
+    "operationId": "salud",
+    "summary": "Si el servidor está vivo, y con qué versión del motor.",
+    "responses": {
+     "200": {
+      "description": "Vivo.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": false,
+         "required": [
+          "estado",
+          "motor",
+          "open_accounting"
+         ],
+         "properties": {
+          "estado": {
+           "const": "ok"
+          },
+          "motor": {
+           "type": "string"
+          },
+          "open_accounting": {
+           "type": "string"
+          }
+         }
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     }
+    }
+   }
+  },
+  "/openconta.json": {
+   "get": {
+    "operationId": "openconta",
+    "summary": "Este contrato.",
+    "responses": {
+     "200": {
+      "description": "El contrato OpenConta.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "OpenAccounting": {
+    "title": "open-accounting",
+    "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
+    "type": "object",
+    "required": [
+     "open_accounting",
+     "libro"
+    ],
+    "additionalProperties": false,
+    "patternProperties": {
+     "^_": {
+      "description": "Cualquier clave que empiece con guion bajo es una anotación del productor. Se transporta y se ignora."
+     }
+    },
+    "properties": {
+     "open_accounting": {
+      "description": "Versión del estándar que habla este documento.",
+      "type": "string",
+      "const": "0.3"
+     },
+     "libro": {
+      "$ref": "#/components/schemas/OpenAccounting_libro"
+     },
+     "comprobantes": {
+      "description": "Los registros del periodo: los hechos de cada documento soporte. Las cuentas no van aquí: son decisiones de cada entorno y llegan aparte, en la imputación, por id_externo.",
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_comprobante"
+      }
+     },
+     "asiento": {
+      "description": "Líneas de diario ya armadas. Opcional: un productor puede entregar solo comprobantes y pedir que se genere el asiento.",
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_linea"
+      }
+     },
+     "emisor": {
+      "description": "Quién generó este documento (software, versión). Informativo.",
+      "type": "object",
+      "additionalProperties": true
+     }
+    }
+   },
+   "OpenAccounting_importe": {
+    "description": "Monto de 2 decimales, siempre positivo. Se acepta texto (exacto, recomendado) o número.",
+    "anyOf": [
+     {
+      "type": "string",
+      "pattern": "^$|^[0-9]+(\\.[0-9]{1,2})?$"
+     },
+     {
+      "type": "number",
+      "minimum": 0
+     }
+    ]
+   },
+   "OpenAccounting_fecha": {
+    "description": "AAAA-MM-DD, o vacío si no aplica.",
+    "type": [
+     "string",
+     "null"
+    ],
+    "pattern": "^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+   },
+   "OpenAccounting_libro": {
+    "description": "Cabecera tributaria: un RUC, un mes, ventas o compras.",
+    "type": "object",
+    "required": [
+     "ruc",
+     "periodo",
+     "tipo"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "ruc": {
+      "type": "string",
+      "pattern": "^[0-9]{11}$",
+      "description": "RUC del contribuyente dueño del libro."
+     },
+     "razon_social": {
+      "type": "string"
+     },
+     "periodo": {
+      "type": "string",
+      "pattern": "^20[0-9]{2}(0[1-9]|1[0-2])$",
+      "description": "AAAAMM."
+     },
+     "tipo": {
+      "enum": [
+       "venta",
+       "compra"
+      ]
+     }
+    }
+   },
+   "OpenAccounting_comprobante": {
+    "type": "object",
+    "required": [
+     "tipo_cp",
+     "fecha_emision",
+     "total"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "tipo_cp": {
+      "type": "string",
+      "pattern": "^[0-9A-Z]{2}$",
+      "description": "Tabla 10 de SUNAT: 01 factura, 02 recibo por honorarios, 03 boleta, 07 nota de crédito, 08 nota de débito, 14 recibo de servicios públicos, 50 DUA."
+     },
+     "serie": {
+      "type": "string",
+      "description": "F001, E001, B001. Vacía en los que no la llevan, como el recibo de servicios públicos."
+     },
+     "numero": {
+      "type": "string"
+     },
+     "numero_final": {
+      "type": "string",
+      "description": "Solo rangos: boletas consolidadas del día."
+     },
+     "fecha_emision": {
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "fecha_vencimiento": {
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "condicion_pago": {
+      "enum": [
+       "",
+       "contado",
+       "credito"
+      ],
+      "description": "Lo que declara el documento sobre su pago (en la factura electrónica, PaymentTerms FormaPago; con cuotas es credito). Vacío = el documento no lo dice."
+     },
+     "contraparte_tipo_doc": {
+      "enum": [
+       "0",
+       "1",
+       "4",
+       "6",
+       "7",
+       "A"
+      ],
+      "description": "Tabla 1: 6 RUC, 1 DNI, 4 carné de extranjería, 7 pasaporte, A cédula diplomática, 0 otros."
+     },
+     "contraparte_doc": {
+      "type": "string"
+     },
+     "contraparte_nombre": {
+      "type": "string"
+     },
+     "moneda": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217: PEN, USD, EUR."
+     },
+     "tipo_cambio": {
+      "description": "El que publica SUNAT para la fecha de emisión. 3 decimales.",
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^$|^[0-9]+(\\.[0-9]{1,3})?$"
+       },
+       {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "base_gravada": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Base imponible NETA de la operación, tras cualquier descuento (desde open-accounting 0.2)."
+     },
+     "igv": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "IGV neto de la operación."
+     },
+     "dscto_base": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Parte de base_gravada que el registro informa como descuento (SIRE ventas, campo 16). No entra en el total."
+     },
+     "dscto_igv": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Parte del igv que el registro informa como descuento (SIRE ventas, campo 18). No entra en el total."
+     },
+     "exonerado": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "inafecto": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "exportacion": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "isc": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "base_ivap": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "ivap": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "icbper": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "otros": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "total": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "retencion": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Retención de renta de 4ta que MUESTRA el recibo por honorarios. No es la retención del IGV, que no entra en ningún asiento."
+     },
+     "destino_igv": {
+      "enum": [
+       "DG",
+       "DGNG",
+       "DNG"
+      ],
+      "description": "Solo compras: gravadas, mixtas, no gravadas."
+     },
+     "valor_no_gravado": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/OpenAccounting_importe"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Si falta, se toma exonerado más inafecto."
+     },
+     "anio_dua": {
+      "type": "string"
+     },
+     "cod_dep_aduanera": {
+      "type": "string"
+     },
+     "clasif_bienes": {
+      "type": "string"
+     },
+     "ref_fecha": {
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "ref_tipo_cp": {
+      "type": "string",
+      "description": "Documento que modifica una nota de crédito o débito."
+     },
+     "ref_serie": {
+      "type": "string"
+     },
+     "ref_numero": {
+      "type": "string"
+     },
+     "detraccion": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/OpenAccounting_detraccion"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "id_contrato": {
+      "type": "string"
+     },
+     "concepto": {
+      "type": "string",
+      "description": "La glosa del asiento."
+     },
+     "origen": {
+      "enum": [
+       "xml",
+       "pdf_texto",
+       "vision",
+       "manual",
+       "sire"
+      ],
+      "description": "De dónde salió el dato. Trazabilidad, no lógica."
+     },
+     "confianza": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+       }
+      ],
+      "description": "De 0 a 1. Menos de 1 solo tiene sentido en lo leído por una IA."
+     },
+     "archivo_nombre": {
+      "type": "string"
+     },
+     "id_externo": {
+      "type": "string",
+      "description": "El id con el que la aplicación que produce el documento conoce este comprobante. Es la llave de su imputación, que llega aparte."
+     },
+     "datos_originales": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Espacio libre del productor. El núcleo lo transporta y no lo interpreta, salvo las cuatro claves que escribe su propio lector de XML y que lee la validación: anticipo, emisor, adquirente y gratuitas."
+     },
+     "estado": {
+      "type": "string",
+      "description": "Lo rellena la validación: ok, observada, duplicada."
+     },
+     "excluida": {
+      "type": "boolean",
+      "description": "Marcada para no exportarse."
+     },
+     "observaciones": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_observacion"
+      }
+     }
+    }
+   },
+   "OpenAccounting_observacion": {
+    "type": "object",
+    "required": [
+     "codigo",
+     "nivel",
+     "texto"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "codigo": {
+      "type": "string"
+     },
+     "nivel": {
+      "enum": [
+       "error",
+       "aviso"
+      ],
+      "description": "error bloquea la exportación; aviso no."
+     },
+     "texto": {
+      "type": "string"
+     }
+    }
+   },
+   "OpenAccounting_detraccion": {
+    "description": "El bloque de dos tiempos. Al registrar la compra la detracción está PROVISIONADA y no se conoce la constancia; cuando se deposita en el Banco de la Nación se inyecta el número y pasa a PAGADO. El asiento provisional usa un número comodín.",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+     "codigo": {
+      "type": "string",
+      "pattern": "^$|^[0-9]{3}$",
+      "description": "Anexo I de la RS 183-2004, 3 dígitos. Vacío si no se reconoce."
+     },
+     "porcentaje": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Tasa en porcentaje: 4, 10, 12."
+     },
+     "monto": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/OpenAccounting_importe"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "En soles: la detracción se deposita siempre en soles."
+     },
+     "cuenta": {
+      "type": "string",
+      "description": "Cuenta de detracciones del proveedor en el Banco de la Nación."
+     },
+     "estado": {
+      "enum": [
+       "PROVISIONADO",
+       "PAGADO"
+      ],
+      "description": "Por defecto PROVISIONADO."
+     },
+     "nro_constancia": {
+      "type": "string",
+      "description": "Constancia de depósito. Vacío mientras no se pague."
+     },
+     "fecha_constancia": {
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     }
+    }
+   },
+   "OpenAccounting_linea": {
+    "description": "Una línea de diario, sin nada de ningún ERP. Es lo que cualquier sistema contable sabe recibir.",
+    "type": "object",
+    "required": [
+     "cuenta",
+     "debe_haber",
+     "importe"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "sub_diario": {
+      "type": "string",
+      "description": "Libro auxiliar donde cae el asiento. Cada empresa usa los suyos."
+     },
+     "correlativo": {
+      "type": "string",
+      "description": "Número del asiento dentro del sub-diario y el mes."
+     },
+     "fecha": {
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "cuenta": {
+      "type": "string",
+      "description": "Cuenta del plan contable del contribuyente."
+     },
+     "debe_haber": {
+      "enum": [
+       "D",
+       "H"
+      ]
+     },
+     "importe": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "rol": {
+      "enum": [
+       "principal",
+       "igv",
+       "retencion_4ta",
+       "tercero",
+       "detraccion_tercero",
+       "detraccion"
+      ],
+      "description": "Qué papel cumple la línea en el asiento: el gasto o ingreso, el IGV, la retención de 4ta, el proveedor o cliente, y las dos líneas de la detracción. Un driver la encuentra por su rol, no por su cuenta."
+     },
+     "moneda": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+     },
+     "tipo_cambio": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "glosa": {
+      "type": "string"
+     },
+     "contraparte_doc": {
+      "type": "string",
+      "description": "El anexo: RUC del proveedor o del cliente."
+     },
+     "centro_costo": {
+      "type": "string"
+     },
+     "anexo_auxiliar": {
+      "type": "string",
+      "description": "Segundo anexo, cuando la empresa lleva el centro de costo también en la línea del tercero."
+     },
+     "documento": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "tipo": {
+        "type": "string",
+        "description": "Tipo de documento en el vocabulario del ERP destino."
+       },
+       "tipo_cp": {
+        "type": "string",
+        "description": "El código SUNAT del documento (Tabla 10). Es el que manda; `tipo` se conserva por compatibilidad. Ausente en la línea de la detracción, cuyo documento no es un comprobante de SUNAT."
+       },
+       "serie_numero": {
+        "type": "string"
+       },
+       "fecha_emision": {
+        "$ref": "#/components/schemas/OpenAccounting_fecha"
+       },
+       "fecha_vencimiento": {
+        "$ref": "#/components/schemas/OpenAccounting_fecha"
+       }
+      }
+     },
+     "referencia": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Documento que modifica una nota de crédito o débito.",
+      "properties": {
+       "tipo": {
+        "type": "string"
+       },
+       "tipo_cp": {
+        "type": "string",
+        "description": "El código SUNAT del documento referido (Tabla 10)."
+       },
+       "serie_numero": {
+        "type": "string"
+       },
+       "fecha": {
+        "$ref": "#/components/schemas/OpenAccounting_fecha"
+       }
+      }
+     },
+     "detraccion": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Presente solo en la línea de detracción.",
+      "properties": {
+       "codigo": {
+        "type": "string",
+        "description": "El código SUNAT del bien o servicio (Catálogo 54)."
+       },
+       "codigo_interno": {
+        "type": "string"
+       },
+       "tasa": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "number"
+         }
+        ]
+       },
+       "base": {
+        "anyOf": [
+         {
+          "$ref": "#/components/schemas/OpenAccounting_importe"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       }
+      }
+     },
+     "tasa_igv": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "number"
+       }
+      ]
+     }
+    }
+   },
+   "configuracion": {
+    "title": "Configuración contable",
+    "description": "Lo general en la raíz y una sección por sistema que se configura. Qué claves admite cada parte lo dice `describir_configuracion`; el motor la valida entera y se niega con la ruta de cada error.",
+    "type": "object"
+   },
+   "imputacion": {
+    "title": "Imputación",
+    "description": "Lo que se decidió para cada documento, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total o un reparto de la base entre cuentas que sume la base. Llega aparte del documento.",
+    "type": "object",
+    "additionalProperties": {
+     "type": "object",
+     "properties": {
+      "cuenta_contable": {
+       "type": "string"
+      },
+      "centro_costo": {
+       "type": "string"
+      },
+      "cuenta_tercero": {
+       "type": "string"
+      },
+      "reparto": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "importe": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "number"
+           }
+          ]
+         },
+         "cuenta_contable": {
+          "type": "string"
+         },
+         "centro_costo": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "importe"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "additionalProperties": false
+    }
+   },
+   "claves_previas": {
+    "title": "Claves previas",
+    "description": "Lo ya anotado en otros periodos del mismo RUC, cada clave como [tipo_cp, serie, numero, contraparte_doc]. Lo que coincide sale con DUPLICADO_PERIODO_ANTERIOR. En ventas el cliente no cuenta.",
+    "type": "array",
+    "maxItems": 50000,
+    "items": {
+     "type": "array",
+     "minItems": 4,
+     "maxItems": 4,
+     "items": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    }
+   },
+   "documento_anotado": {
+    "title": "Documento revisado",
+    "description": "Un documento `open-accounting` con lo que el motor anota al leerlo o revisarlo: `_lectura`, `_revision` o `_detracciones`.",
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/OpenAccounting"
+     },
+     {
+      "type": "object",
+      "properties": {
+       "_lectura": {
+        "type": "object",
+        "properties": {
+         "archivos": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "ignorados": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "pendientes_de_leer": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "errores": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "archivo": {
+             "type": "string"
+            },
+            "motivo": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "archivo",
+            "motivo"
+           ],
+           "additionalProperties": false
+          }
+         }
+        },
+        "required": [
+         "ignorados",
+         "errores",
+         "pendientes_de_leer"
+        ],
+        "additionalProperties": false
+       },
+       "_revision": {
+        "type": "object",
+        "properties": {
+         "comprobantes": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "con_error": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "con_aviso": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "detracciones_descartadas": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "bloqueantes": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "serie_numero": {
+             "type": "string"
+            },
+            "observaciones": {
+             "type": "array",
+             "items": {
+              "$ref": "#/components/schemas/OpenAccounting_observacion"
+             }
+            }
+           },
+           "required": [
+            "serie_numero",
+            "observaciones"
+           ],
+           "additionalProperties": false
+          }
+         }
+        },
+        "required": [
+         "comprobantes",
+         "con_error",
+         "con_aviso",
+         "detracciones_descartadas",
+         "bloqueantes"
+        ],
+        "additionalProperties": false
+       },
+       "_detracciones": {
+        "type": "object",
+        "properties": {
+         "revisadas": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "descartadas": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "codigos_reconocidos": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          }
+         }
+        },
+        "required": [
+         "revisadas",
+         "descartadas",
+         "codigos_reconocidos"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    ]
+   },
+   "comprobante_de_la_respuesta": {
+    "title": "Un comprobante en la respuesta",
+    "description": "Lo que salió de un comprobante: su identidad y, en un asiento, el tramo [desde, hasta) de sus líneas y la huella de ese tramo.",
+    "type": "object",
+    "properties": {
+     "identidad": {
+      "type": "object",
+      "properties": {
+       "ruc": {
+        "type": "string"
+       },
+       "libro": {
+        "enum": [
+         "venta",
+         "compra"
+        ]
+       },
+       "tipo_cp": {
+        "type": "string"
+       },
+       "serie": {
+        "type": "string"
+       },
+       "numero": {
+        "type": "string"
+       },
+       "contraparte_doc": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "ruc",
+       "libro",
+       "tipo_cp",
+       "serie",
+       "numero"
+      ],
+      "additionalProperties": false
+     },
+     "lineas": {
+      "type": "array",
+      "prefixItems": [
+       {
+        "type": "integer",
+        "minimum": 0
+       },
+       {
+        "type": "integer",
+        "minimum": 0
+       }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "huella": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "sha256 del contenido del asiento, sin el correlativo (`estandar/LEEME.md`)."
+     }
+    },
+    "required": [
+     "identidad"
+    ],
+    "additionalProperties": false
+   },
+   "cuadre": {
+    "title": "Cuadre",
+    "description": "Si la suma del Debe es exactamente la del Haber.",
+    "type": "object",
+    "properties": {
+     "cuadra": {
+      "type": "boolean"
+     },
+     "debe": {
+      "type": "string"
+     },
+     "haber": {
+      "type": "string"
+     },
+     "diferencia": {
+      "type": "string"
+     },
+     "lineas": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "sin_sentido": {
+      "type": "integer",
+      "minimum": 0
+     }
+    },
+    "required": [
+     "cuadra",
+     "debe",
+     "haber",
+     "diferencia",
+     "lineas",
+     "sin_sentido"
+    ],
+    "additionalProperties": false
+   },
+   "asiento": {
+    "title": "Asiento generado",
+    "description": "Un documento `open-accounting` con las líneas del asiento y `_asiento`: cuántas líneas, el rango de cada sub-diario, el cuadre, la huella, lo que salió de cada comprobante y la versión del motor.",
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/OpenAccounting"
+     },
+     {
+      "type": "object",
+      "properties": {
+       "_asiento": {
+        "type": "object",
+        "properties": {
+         "lineas": {
+          "type": "integer",
+          "minimum": 0
+         },
+         "sub_diarios": {
+          "type": "object",
+          "additionalProperties": {
+           "type": "object"
+          }
+         },
+         "cuadre": {
+          "$ref": "#/components/schemas/cuadre"
+         },
+         "huella": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "sha256 del contenido del asiento, sin el correlativo (`estandar/LEEME.md`)."
+         },
+         "comprobantes": {
+          "type": "array",
+          "items": {
+           "$ref": "#/components/schemas/comprobante_de_la_respuesta"
+          }
+         },
+         "motor": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "lineas",
+         "sub_diarios",
+         "cuadre",
+         "huella",
+         "comprobantes",
+         "motor"
+        ],
+        "additionalProperties": false
+       }
+      },
+      "required": [
+       "asiento",
+       "_asiento"
+      ],
+      "additionalProperties": true
+     }
+    ]
+   },
+   "exportacion": {
+    "title": "Exportación",
+    "description": "El archivo que importa un sistema contable. `texto` cuando es legible; el TXT del SIRE llega además en `zip_base64`, y cualquier otro archivo en `contenido_base64`. `resumen` es lo que guarda quien exporta y `_exportacion`, la anotación con que reconoce lo que ya exportó.",
+    "type": "object",
+    "properties": {
+     "driver": {
+      "type": "string"
+     },
+     "formato": {
+      "type": "string"
+     },
+     "archivo": {
+      "type": "string"
+     },
+     "comprobantes": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "resumen": {
+      "type": "object"
+     },
+     "_exportacion": {
+      "type": "object",
+      "properties": {
+       "driver": {
+        "type": "string"
+       },
+       "archivo": {
+        "type": "string"
+       },
+       "huella": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$",
+        "description": "sha256 del contenido del asiento, sin el correlativo (`estandar/LEEME.md`)."
+       },
+       "fecha": {
+        "type": "string",
+        "format": "date"
+       },
+       "comprobantes": {
+        "type": "array",
+        "items": {
+         "$ref": "#/components/schemas/comprobante_de_la_respuesta"
+        }
+       },
+       "motor": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "driver",
+       "archivo",
+       "comprobantes",
+       "motor"
+      ],
+      "additionalProperties": false
+     },
+     "texto": {
+      "type": "string"
+     },
+     "zip_base64": {
+      "type": "string"
+     },
+     "archivo_zip": {
+      "type": "string"
+     },
+     "content_type": {
+      "type": "string"
+     },
+     "contenido_base64": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "driver",
+     "formato",
+     "archivo",
+     "comprobantes",
+     "resumen",
+     "_exportacion"
+    ],
+    "additionalProperties": false
+   },
+   "diagnostico": {
+    "title": "Diagnóstico",
+    "description": "Todo lo que hay que mirar de un mes antes de exportarlo hacia un destino. Tiene la misma forma cuando la configuración no se puede aplicar: entonces `errores_de_configuracion` dice por qué y lo demás va vacío.",
+    "type": "object",
+    "properties": {
+     "libro": {
+      "type": "object",
+      "properties": {
+       "ruc": {
+        "type": "string"
+       },
+       "periodo": {
+        "type": "string"
+       },
+       "tipo": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "ruc",
+       "periodo",
+       "tipo"
+      ],
+      "additionalProperties": false
+     },
+     "driver": {
+      "type": "string"
+     },
+     "exige": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "listo_para_exportar": {
+      "type": "boolean"
+     },
+     "por_que_no": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "que_falta": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "motivo": {
+         "type": "string"
+        },
+        "texto": {
+         "type": "string"
+        },
+        "comprobantes": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "pedir_a": {
+         "enum": [
+          "contador",
+          "sistema",
+          "proveedor"
+         ]
+        }
+       },
+       "required": [
+        "motivo",
+        "texto",
+        "comprobantes",
+        "pedir_a"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "errores_de_configuracion": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "totales": {
+      "type": "object",
+      "properties": {
+       "comprobantes": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "saldrian": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "excluidos": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "fuera_del_destino": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "con_error": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "con_aviso": {
+        "type": "integer",
+        "minimum": 0
+       }
+      },
+      "required": [
+       "comprobantes",
+       "saldrian",
+       "excluidos",
+       "fuera_del_destino",
+       "con_error",
+       "con_aviso"
+      ],
+      "additionalProperties": false
+     },
+     "bloqueantes": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "serie_numero": {
+         "type": "string"
+        },
+        "observaciones": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/OpenAccounting_observacion"
+         }
+        }
+       },
+       "required": [
+        "serie_numero",
+        "observaciones"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "avisos": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "serie_numero": {
+         "type": "string"
+        },
+        "observaciones": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/OpenAccounting_observacion"
+         }
+        }
+       },
+       "required": [
+        "serie_numero",
+        "observaciones"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "faltantes": {
+      "type": "object"
+     },
+     "detracciones_pendientes": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "serie_numero": {
+         "type": "string"
+        },
+        "codigo": {
+         "type": "string"
+        },
+        "monto": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "serie_numero",
+        "codigo",
+        "monto"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "resumen_por_contraparte": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "object",
+       "properties": {
+        "nombre": {
+         "type": "string"
+        },
+        "comprobantes": {
+         "type": "integer",
+         "minimum": 0
+        },
+        "total": {
+         "type": "string"
+        },
+        "moneda": {
+         "type": "string"
+        },
+        "por_moneda": {
+         "type": "object",
+         "additionalProperties": {
+          "type": "string"
+         }
+        }
+       },
+       "required": [
+        "nombre",
+        "comprobantes",
+        "total",
+        "moneda",
+        "por_moneda"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "sub_diarios": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "object",
+       "properties": {
+        "etiqueta": {
+         "type": "string"
+        },
+        "comprobantes": {
+         "type": "integer",
+         "minimum": 0
+        },
+        "empieza_en": {
+         "type": "integer",
+         "minimum": 1
+        }
+       },
+       "required": [
+        "etiqueta",
+        "comprobantes",
+        "empieza_en"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "saldrian": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "libro",
+     "driver",
+     "exige",
+     "listo_para_exportar",
+     "por_que_no",
+     "que_falta",
+     "errores_de_configuracion",
+     "totales",
+     "bloqueantes",
+     "avisos",
+     "faltantes",
+     "detracciones_pendientes",
+     "resumen_por_contraparte",
+     "sub_diarios",
+     "saldrian"
+    ],
+    "additionalProperties": false
+   },
+   "cuenta_pcge": {
+    "title": "Cuenta del PCGE 2026",
+    "description": "Lo que se encontró en el catálogo oficial: la cuenta de un código —o la madre que lo gobierna, con `exacta` falso— y las cuentas cuyo nombre contiene el texto.",
+    "type": "object",
+    "properties": {
+     "version": {
+      "type": "string"
+     },
+     "fuente": {
+      "type": "string"
+     },
+     "cuenta": {
+      "anyOf": [
+       {
+        "type": "null"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "codigo": {
+          "type": "string"
+         },
+         "nombre": {
+          "type": "string"
+         },
+         "pagina": {},
+         "exacta": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "codigo",
+         "nombre",
+         "exacta"
+        ],
+        "additionalProperties": false
+       }
+      ]
+     },
+     "encontradas": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "codigo": {
+         "type": "string"
+        },
+        "nombre": {
+         "type": "string"
+        },
+        "pagina": {}
+       },
+       "required": [
+        "codigo",
+        "nombre"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "version",
+     "fuente"
+    ],
+    "additionalProperties": false
+   },
+   "adaptacion_pcge": {
+    "title": "Adaptación al PCGE 2026",
+    "description": "Las líneas con las equivalencias aplicadas y el informe; sin la tabla oficial, intactas y con `sin_tabla`.",
+    "type": "object",
+    "properties": {
+     "asiento": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_linea"
+      }
+     },
+     "informe": {
+      "type": "object",
+      "properties": {
+       "version": {
+        "type": "string"
+       },
+       "fuente": {
+        "type": "string"
+       },
+       "sin_tabla": {
+        "type": "boolean"
+       },
+       "cambios": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "aplicados": {
+        "type": "array"
+       }
+      },
+      "required": [
+       "sin_tabla",
+       "cambios",
+       "aplicados"
+      ],
+      "additionalProperties": true
+     }
+    },
+    "required": [
+     "asiento",
+     "informe"
+    ],
+    "additionalProperties": false
+   },
+   "drivers": {
+    "title": "Drivers disponibles",
+    "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia y su canal.",
+    "type": "object",
+    "additionalProperties": {
+     "type": "object",
+     "properties": {
+      "formatos": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "string"
+       }
+      },
+      "tipo": {
+       "enum": [
+        "texto",
+        "archivo"
+       ]
+      },
+      "forma": {
+       "enum": [
+        "desde_lineas",
+        "desde_comprobantes",
+        "construir",
+        "linea"
+       ]
+      },
+      "familia": {
+       "enum": [
+        "registro",
+        "asiento"
+       ]
+      },
+      "canal": {
+       "enum": [
+        "legacy",
+        "tributario",
+        "intercambio"
+       ]
+      },
+      "exige": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "configurable": {
+       "type": "boolean"
+      },
+      "descripcion": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "formatos",
+      "tipo",
+      "forma",
+      "familia",
+      "canal",
+      "exige",
+      "configurable",
+      "descripcion"
+     ],
+     "additionalProperties": false
+    }
+   },
+   "catalogos_sunat": {
+    "title": "Catálogos de SUNAT",
+    "description": "Los tipos de comprobante, los tipos de documento de identidad y las monedas que entiende el motor.",
+    "type": "object",
+    "properties": {
+     "tipos_comprobante": {
+      "type": "object"
+     },
+     "tipos_documento_identidad": {
+      "type": "object"
+     },
+     "monedas": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "notas": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "fuera_del_registro_sunat": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "tipos_comprobante",
+     "tipos_documento_identidad",
+     "monedas",
+     "notas",
+     "fuera_del_registro_sunat"
+    ],
+    "additionalProperties": false
+   },
+   "problema": {
+    "title": "Problema",
+    "description": "Un rechazo, como «problem details» del RFC 9457 (`application/problem+json`). `clave` lo nombra de forma estable; `errores`, si el error los trae, los lista.",
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string"
+     },
+     "status": {
+      "type": "integer"
+     },
+     "title": {
+      "type": "string"
+     },
+     "detail": {
+      "type": "string"
+     },
+     "clave": {
+      "type": "string"
+     },
+     "errores": {
+      "type": "array"
+     }
+    },
+    "required": [
+     "type",
+     "status",
+     "title",
+     "detail",
+     "clave"
+    ],
+    "additionalProperties": false
+   },
+   "leer_xml_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "contenido",
+     "libro"
+    ],
+    "properties": {
+     "contenido": {
+      "type": "string",
+      "description": "El archivo: texto tal cual o, con `es_base64`, en base64."
+     },
+     "libro": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting_libro",
+      "description": "La cabecera: RUC, periodo y si son ventas o compras."
+     },
+     "es_base64": {
+      "type": "boolean",
+      "default": false,
+      "description": "`contenido` viene en base64 (un ZIP, siempre)."
+     }
+    }
+   },
+   "leer_propuesta_sire_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "contenido",
+     "libro"
+    ],
+    "properties": {
+     "contenido": {
+      "type": "string",
+      "description": "El archivo: texto tal cual o, con `es_base64`, en base64."
+     },
+     "libro": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting_libro",
+      "description": "La cabecera: RUC, periodo y si son ventas o compras."
+     },
+     "es_base64": {
+      "type": "boolean",
+      "default": false,
+      "description": "`contenido` viene en base64 (un ZIP, siempre)."
+     }
+    }
+   },
+   "revisar_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "configuracion": {
+      "type": "object",
+      "$ref": "#/components/schemas/configuracion",
+      "description": "La configuración contable del contribuyente."
+     },
+     "imputacion": {
+      "type": "object",
+      "$ref": "#/components/schemas/imputacion",
+      "description": "Lo decidido para cada documento, por `id_externo`."
+     },
+     "claves_previas": {
+      "type": "array",
+      "$ref": "#/components/schemas/claves_previas",
+      "description": "Lo ya anotado en otros periodos del mismo RUC."
+     }
+    }
+   },
+   "normalizar_detracciones_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "configuracion": {
+      "type": "object",
+      "$ref": "#/components/schemas/configuracion",
+      "description": "La configuración contable del contribuyente."
+     }
+    }
+   },
+   "diagnosticar_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento",
+     "driver"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "driver": {
+      "type": "string",
+      "description": "El sistema de destino (`drivers_disponibles`)."
+     },
+     "configuracion": {
+      "type": "object",
+      "$ref": "#/components/schemas/configuracion",
+      "description": "La configuración contable del contribuyente."
+     },
+     "imputacion": {
+      "type": "object",
+      "$ref": "#/components/schemas/imputacion",
+      "description": "Lo decidido para cada documento, por `id_externo`."
+     },
+     "correlativos": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "description": "Por qué número empieza cada sub-diario; sin él, en 1."
+     },
+     "claves_previas": {
+      "type": "array",
+      "$ref": "#/components/schemas/claves_previas",
+      "description": "Lo ya anotado en otros periodos del mismo RUC."
+     }
+    }
+   },
+   "generar_asiento_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento",
+     "driver"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "driver": {
+      "type": "string",
+      "description": "El sistema de destino (`drivers_disponibles`)."
+     },
+     "configuracion": {
+      "type": "object",
+      "$ref": "#/components/schemas/configuracion",
+      "description": "La configuración contable del contribuyente."
+     },
+     "imputacion": {
+      "type": "object",
+      "$ref": "#/components/schemas/imputacion",
+      "description": "Lo decidido para cada documento, por `id_externo`."
+     },
+     "correlativos": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "description": "Por qué número empieza cada sub-diario; sin él, en 1."
+     },
+     "incluir_observados": {
+      "type": "boolean",
+      "default": false,
+      "description": "Generar aunque haya comprobantes con observaciones que bloquean."
+     },
+     "claves_previas": {
+      "type": "array",
+      "$ref": "#/components/schemas/claves_previas",
+      "description": "Lo ya anotado en otros periodos del mismo RUC."
+     }
+    }
+   },
+   "exportar_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento",
+     "driver"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "driver": {
+      "type": "string",
+      "description": "El sistema de destino (`drivers_disponibles`)."
+     },
+     "configuracion": {
+      "type": "object",
+      "$ref": "#/components/schemas/configuracion",
+      "description": "La configuración contable del contribuyente."
+     },
+     "imputacion": {
+      "type": "object",
+      "$ref": "#/components/schemas/imputacion",
+      "description": "Lo decidido para cada documento, por `id_externo`."
+     },
+     "correlativos": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "description": "Por qué número empieza cada sub-diario; sin él, en 1."
+     },
+     "incluir_observados": {
+      "type": "boolean",
+      "default": false,
+      "description": "Generar aunque haya comprobantes con observaciones que bloquean."
+     },
+     "fecha": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date",
+      "description": "La fecha de la exportación (AAAA-MM-DD)."
+     },
+     "claves_previas": {
+      "type": "array",
+      "$ref": "#/components/schemas/claves_previas",
+      "description": "Lo ya anotado en otros periodos del mismo RUC."
+     }
+    }
+   },
+   "cuadrar_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "lineas"
+    ],
+    "properties": {
+     "lineas": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_linea"
+      },
+      "description": "Las líneas del asiento."
+     }
+    }
+   },
+   "buscar_cuenta_pcge_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [],
+    "properties": {
+     "texto": {
+      "type": "string",
+      "default": "",
+      "description": "Parte del nombre de la cuenta."
+     },
+     "codigo": {
+      "type": "string",
+      "default": "",
+      "description": "El código de la cuenta."
+     }
+    }
+   },
+   "adaptar_pcge_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "lineas"
+    ],
+    "properties": {
+     "lineas": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_linea"
+      },
+      "description": "Las líneas del asiento."
+     }
+    }
+   }
+  },
+  "responses": {
+   "MalFormado": {
+    "description": "El cuerpo no es JSON, o no es un objeto.",
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/problema"
+      }
+     }
+    }
+   },
+   "DemasiadoGrande": {
+    "description": "El cuerpo pasa del tope por petición.",
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/problema"
+      }
+     }
+    }
+   },
+   "HostNoPermitido": {
+    "description": "El `Host` de la petición no es uno de los que el servidor declara: es la defensa contra el DNS rebinding.",
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/problema"
+      }
+     }
+    }
+   },
+   "NoProcesable": {
+    "description": "El motor no puede hacerlo con estos datos: el documento, la configuración o el mes no dan. `clave` dice por qué.",
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/problema"
+      }
+     }
+    }
+   },
+   "ErrorInterno": {
+    "description": "El motor falló. La respuesta no enseña el detalle.",
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/problema"
+      }
+     }
+    }
+   }
+  }
+ }
+}

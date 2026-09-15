@@ -1,0 +1,4722 @@
+{
+ "compras_202601.json": {
+  "FORMATO_COMPRAS": {
+   "columnas": 45,
+   "panel": null,
+   "autofiltro": null,
+   "anchos": {
+    "A": 13.71,
+    "AA": 27.43,
+    "AB": 9.57,
+    "AC": 13.71,
+    "AD": 13.71,
+    "AE": 13.71,
+    "AF": 12.71,
+    "AG": 12.71,
+    "AH": 12.71,
+    "AI": 12.71,
+    "AJ": 12.71,
+    "AK": 13.71,
+    "AL": 15.71,
+    "AM": 15.71,
+    "AN": 10.71,
+    "AO": 15.71,
+    "AP": 11.86,
+    "AQ": 11.71,
+    "AR": 9.29,
+    "AS": 60.71,
+    "AT": 9.71,
+    "AU": 15.71,
+    "AV": 15.71,
+    "AW": 15.71,
+    "AX": 15.71,
+    "B": 13.71,
+    "C": 11.0,
+    "D": 16.29,
+    "E": 16.71,
+    "F": 17.0,
+    "G": 9.57,
+    "H": 13.86,
+    "I": 39.43,
+    "J": 12.29,
+    "K": 12.29,
+    "L": 12.29,
+    "M": 12.29,
+    "N": 12.29,
+    "O": 12.29,
+    "P": 13.71,
+    "Q": 13.71,
+    "R": 13.71,
+    "S": 13.71,
+    "T": 15.71,
+    "U": 11.0,
+    "V": 11.86,
+    "W": 12.29,
+    "X": 11.86,
+    "Y": 11.0,
+    "Z": 11.0
+   },
+   "altos": {},
+   "celdas": [
+    [
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.0000",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ],
+    [
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.0000",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ],
+    [
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.0000",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ]
+   ]
+  }
+ },
+ "ventas_202512.json": {
+  "FORMATO_VENTAS": {
+   "columnas": 40,
+   "panel": null,
+   "autofiltro": null,
+   "anchos": {
+    "A": 13.71,
+    "AA": 13.71,
+    "AB": 13.71,
+    "AC": 13.71,
+    "AD": 13.71,
+    "AE": 13.71,
+    "AF": 15.71,
+    "AG": 15.71,
+    "AH": 10.71,
+    "AI": 15.71,
+    "AJ": 11.86,
+    "AK": 11.71,
+    "AL": 9.29,
+    "AM": 60.71,
+    "AN": 15.29,
+    "AO": 9.71,
+    "AP": 15.71,
+    "AQ": 10.71,
+    "AR": 15.71,
+    "B": 13.71,
+    "C": 11.0,
+    "D": 19.71,
+    "E": 15.71,
+    "F": 9.57,
+    "G": 15.71,
+    "H": 38.57,
+    "I": 15.71,
+    "J": 15.71,
+    "K": 15.71,
+    "L": 15.71,
+    "M": 15.71,
+    "N": 15.71,
+    "O": 15.71,
+    "P": 15.71,
+    "Q": 15.71,
+    "R": 13.71,
+    "S": 13.71,
+    "T": 13.71,
+    "U": 27.43,
+    "V": 9.57,
+    "W": 15.71,
+    "X": 13.71,
+    "Y": 13.71,
+    "Z": 13.71
+   },
+   "altos": {},
+   "celdas": [
+    [
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.0000",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ],
+    [
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.0000",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ],
+    [
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.0000",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "mm-dd-yy",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "General",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "#,##0.00",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     },
+     {
+      "formato": "@",
+      "fuente": [
+       "Calibri",
+       11.0,
+       false,
+       null
+      ],
+      "relleno": [
+       null,
+       "00000000"
+      ],
+      "alineacion": [
+       null,
+       null,
+       false
+      ]
+     }
+    ]
+   ]
+  }
+ }
+}

@@ -42,7 +42,7 @@ def test_las_dos_puertas_se_presentan_con_la_version_de_la_libreria():
 
     Ninguna de las dos puede inventarse el número ni heredar el del SDK que usan por dentro.
     """
-    from contaperu.servidor_mcp import mcp
+    from contaperu.puertas.servidor_mcp import mcp
 
     assert contaperu.__version__ == contaperu._version.__version__
     assert mcp._mcp_server.version == contaperu.__version__
@@ -52,10 +52,10 @@ def test_la_version_de_la_libreria_no_es_la_del_estandar_y_cada_una_vive_una_vez
     """Dos relojes distintos: `open-accounting` es el formato publicado y cambia poquísimo; la librería
     cambia cada vez que se corrige un asiento. `OPEN_ACCOUNTING` también llegó a estar escrito dos veces
     —en `__init__.py` y en `operaciones.py`—, así que se comprueba que ahora sea el mismo objeto."""
-    from contaperu import operaciones
+    from contaperu import api
 
     assert contaperu.OPEN_ACCOUNTING == "0.3" and contaperu.__version__ != contaperu.OPEN_ACCOUNTING
-    assert operaciones.OPEN_ACCOUNTING is contaperu.OPEN_ACCOUNTING
+    assert api.OPEN_ACCOUNTING is contaperu.OPEN_ACCOUNTING
 
 
 def test_el_numero_esta_escrito_una_sola_vez_en_todo_el_repositorio():

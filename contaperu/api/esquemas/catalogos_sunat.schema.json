@@ -1,0 +1,41 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/catalogos_sunat.schema.json",
+ "title": "Catálogos de SUNAT",
+ "description": "Los tipos de comprobante, los tipos de documento de identidad y las monedas que entiende el motor.",
+ "type": "object",
+ "properties": {
+  "tipos_comprobante": {
+   "type": "object"
+  },
+  "tipos_documento_identidad": {
+   "type": "object"
+  },
+  "monedas": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "notas": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "fuera_del_registro_sunat": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  }
+ },
+ "required": [
+  "tipos_comprobante",
+  "tipos_documento_identidad",
+  "monedas",
+  "notas",
+  "fuera_del_registro_sunat"
+ ],
+ "additionalProperties": false
+}

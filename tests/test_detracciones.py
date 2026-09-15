@@ -11,12 +11,13 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
-from contaperu import operaciones as op
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import concar as driver_concar
 from contaperu import detracciones, validar
 from contaperu.modelo import Comprobante, Libro
 
-CONTAB = op.config_aplicada(None, "concar")
+CONTAB = prep.config_aplicada(None, "concar")
 CODIGOS = detracciones.codigos_de(CONTAB)
 # Una tabla explícita para todo lo que depende de las tasas: no se apoya en lo que traigan los defaults.
 TABLA = dict(CONTAB, detraccion_codigos={"027": "02701", "037": "03701"}, detraccion_tasas={"027": 4, "037": 12})

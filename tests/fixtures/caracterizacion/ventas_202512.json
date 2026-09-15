@@ -1,0 +1,9971 @@
+{
+ "revisar": {
+  "open_accounting": "0.3",
+  "libro": {
+   "ruc": "20601234567",
+   "razon_social": "EMPRESA DE PRUEBA SAC",
+   "periodo": "202512",
+   "tipo": "venta"
+  },
+  "comprobantes": [
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00001001",
+    "numero_final": "",
+    "fecha_emision": "2025-12-02",
+    "fecha_vencimiento": "2026-01-02",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20609999999",
+    "contraparte_nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "25000.00",
+    "igv": "4500.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "29500.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "observada",
+    "excluida": false,
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20609999999) no es válido"
+     }
+    ]
+   },
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00001002",
+    "numero_final": "",
+    "fecha_emision": "2025-12-04",
+    "fecha_vencimiento": "2026-01-04",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20633333336",
+    "contraparte_nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "18500.00",
+    "igv": "3330.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "21830.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "ok",
+    "excluida": false,
+    "observaciones": []
+   },
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00001003",
+    "numero_final": "",
+    "fecha_emision": "2025-12-05",
+    "fecha_vencimiento": "2026-01-05",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20655555553",
+    "contraparte_nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "32000.00",
+    "igv": "5760.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "37760.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "ok",
+    "excluida": false,
+    "observaciones": []
+   },
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00001004",
+    "numero_final": "",
+    "fecha_emision": "2025-12-08",
+    "fecha_vencimiento": "2026-01-08",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20688888884",
+    "contraparte_nombre": "GRUPO EMPRESARIAL LIMA SAC",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "45000.00",
+    "igv": "8100.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "53100.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "ok",
+    "excluida": false,
+    "observaciones": []
+   },
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00001005",
+    "numero_final": "",
+    "fecha_emision": "2025-12-10",
+    "fecha_vencimiento": "2026-01-10",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20644444440",
+    "contraparte_nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "15500.00",
+    "igv": "2790.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "18290.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "ok",
+    "excluida": false,
+    "observaciones": []
+   },
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00001006",
+    "numero_final": "",
+    "fecha_emision": "2025-12-12",
+    "fecha_vencimiento": "2026-01-12",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20666666667",
+    "contraparte_nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "28000.00",
+    "igv": "5040.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "33040.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "ok",
+    "excluida": false,
+    "observaciones": []
+   },
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00001007",
+    "numero_final": "",
+    "fecha_emision": "2025-12-15",
+    "fecha_vencimiento": "2026-01-15",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20301234567",
+    "contraparte_nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "21000.00",
+    "igv": "3780.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "24780.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "observada",
+    "excluida": false,
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20301234567) no es válido"
+     }
+    ]
+   },
+   {
+    "tipo_cp": "03",
+    "serie": "B001",
+    "numero": "00005001",
+    "numero_final": "",
+    "fecha_emision": "2025-12-03",
+    "fecha_vencimiento": null,
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "42589632",
+    "contraparte_nombre": "CLIENTE CONSUMIDOR FINAL",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "850.00",
+    "igv": "153.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "1003.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "observada",
+    "excluida": false,
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (42589632) no es válido"
+     }
+    ]
+   },
+   {
+    "tipo_cp": "03",
+    "serie": "B001",
+    "numero": "00005002",
+    "numero_final": "",
+    "fecha_emision": "2025-12-06",
+    "fecha_vencimiento": null,
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "45678912",
+    "contraparte_nombre": "CONSUMIDOR VARIOS",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "1200.00",
+    "igv": "216.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "1416.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "observada",
+    "excluida": false,
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (45678912) no es válido"
+     }
+    ]
+   },
+   {
+    "tipo_cp": "03",
+    "serie": "B001",
+    "numero": "00005003",
+    "numero_final": "",
+    "fecha_emision": "2025-12-09",
+    "fecha_vencimiento": null,
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "",
+    "contraparte_nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "42950.00",
+    "igv": "7731.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "50681.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "observada",
+    "excluida": false,
+    "observaciones": [
+     {
+      "codigo": "BOLETA_SIN_DOC",
+      "nivel": "aviso",
+      "texto": "Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)"
+     }
+    ]
+   },
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00001234",
+    "numero_final": "",
+    "fecha_emision": "2025-12-19",
+    "fecha_vencimiento": "2026-01-19",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20123456789",
+    "contraparte_nombre": "MI CLIENTE MANUAL S.A.C.",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "5000.00",
+    "igv": "900.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "5900.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "observada",
+    "excluida": false,
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20123456789) no es válido"
+     }
+    ]
+   }
+  ],
+  "_revision": {
+   "comprobantes": 11,
+   "con_error": 5,
+   "con_aviso": 1,
+   "detracciones_descartadas": 0,
+   "bloqueantes": [
+    {
+     "serie_numero": "F001-00001001",
+     "observaciones": [
+      {
+       "codigo": "RUC_INVALIDO",
+       "nivel": "error",
+       "texto": "El RUC del cliente (20609999999) no es válido"
+      }
+     ]
+    },
+    {
+     "serie_numero": "F001-00001007",
+     "observaciones": [
+      {
+       "codigo": "RUC_INVALIDO",
+       "nivel": "error",
+       "texto": "El RUC del cliente (20301234567) no es válido"
+      }
+     ]
+    },
+    {
+     "serie_numero": "B001-00005001",
+     "observaciones": [
+      {
+       "codigo": "RUC_INVALIDO",
+       "nivel": "error",
+       "texto": "El RUC del cliente (42589632) no es válido"
+      }
+     ]
+    },
+    {
+     "serie_numero": "B001-00005002",
+     "observaciones": [
+      {
+       "codigo": "RUC_INVALIDO",
+       "nivel": "error",
+       "texto": "El RUC del cliente (45678912) no es válido"
+      }
+     ]
+    },
+    {
+     "serie_numero": "F001-00001234",
+     "observaciones": [
+      {
+       "codigo": "RUC_INVALIDO",
+       "nivel": "error",
+       "texto": "El RUC del cliente (20123456789) no es válido"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "diagnosticar/concar": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202512",
+   "tipo": "venta"
+  },
+  "driver": "concar",
+  "exige": [
+   "centro_costo",
+   "cuenta_contable",
+   "moneda",
+   "tipo_cp"
+  ],
+  "listo_para_exportar": false,
+  "por_que_no": [
+   "5 comprobantes con observaciones que bloquean"
+  ],
+  "que_falta": [
+   {
+    "motivo": "RUC_INVALIDO",
+    "texto": "El RUC del cliente (20609999999) no es válido",
+    "comprobantes": [
+     "F001-00001001",
+     "F001-00001007",
+     "B001-00005001",
+     "B001-00005002",
+     "F001-00001234"
+    ],
+    "pedir_a": "contador"
+   }
+  ],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 11,
+   "saldrian": 6,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 5,
+   "con_aviso": 1
+  },
+  "bloqueantes": [
+   {
+    "serie_numero": "F001-00001001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20609999999) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-00001007",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20301234567) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-00005001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (42589632) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-00005002",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (45678912) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-00001234",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20123456789) no es válido"
+     }
+    ]
+   }
+  ],
+  "avisos": [
+   {
+    "serie_numero": "B001-00005003",
+    "observaciones": [
+     {
+      "codigo": "BOLETA_SIN_DOC",
+      "nivel": "aviso",
+      "texto": "Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)"
+     }
+    ]
+   }
+  ],
+  "faltantes": {
+   "sin_sigla": [],
+   "sin_codigo_de_moneda": [],
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": [],
+   "sin_correlativo": [
+    "05"
+   ]
+  },
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20609999999": {
+    "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
+    "comprobantes": 1,
+    "total": "21830.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
+   },
+   "20655555553": {
+    "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
+    "comprobantes": 1,
+    "total": "37760.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
+   },
+   "20688888884": {
+    "nombre": "GRUPO EMPRESARIAL LIMA SAC",
+    "comprobantes": 1,
+    "total": "53100.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
+   },
+   "20644444440": {
+    "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
+    "comprobantes": 1,
+    "total": "18290.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
+   },
+   "20666666667": {
+    "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
+    "comprobantes": 1,
+    "total": "33040.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
+   },
+   "20301234567": {
+    "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
+    "comprobantes": 1,
+    "total": "24780.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
+   },
+   "42589632": {
+    "nombre": "CLIENTE CONSUMIDOR FINAL",
+    "comprobantes": 1,
+    "total": "1003.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
+   },
+   "45678912": {
+    "nombre": "CONSUMIDOR VARIOS",
+    "comprobantes": 1,
+    "total": "1416.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
+   },
+   "(sin documento)": {
+    "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
+    "comprobantes": 1,
+    "total": "50681.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
+   },
+   "20123456789": {
+    "nombre": "MI CLIENTE MANUAL S.A.C.",
+    "comprobantes": 1,
+    "total": "5900.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
+   }
+  },
+  "sub_diarios": {
+   "05": {
+    "etiqueta": "Ventas",
+    "comprobantes": 11,
+    "empieza_en": 1
+   }
+  },
+  "saldrian": [
+   "F001-00001002",
+   "F001-00001003",
+   "F001-00001004",
+   "F001-00001005",
+   "F001-00001006",
+   "B001-00005003"
+  ]
+ },
+ "generar_asiento/concar": {
+  "_error": "DocumentoInvalido",
+  "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
+ },
+ "exportar/concar": {
+  "_error": "DocumentoInvalido",
+  "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
+ },
+ "exportar_con_observados/concar": {
+  "driver": "concar",
+  "formato": "concar_xlsx",
+  "archivo": "CONCAR_20601234567_202512_VENTAS.xlsx",
+  "comprobantes": 11,
+  "resumen": {
+   "comprobantes": 11,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 1,
+   "con_error": 5,
+   "fuera_del_destino": 0,
+   "total": "277300.00",
+   "igv": "42300.00",
+   "filas": 33,
+   "sub_diarios": {
+    "05": {
+     "etiqueta": "Ventas",
+     "desde": 1,
+     "hasta": 11,
+     "comprobantes": 11,
+     "desde_codigo": "120001",
+     "hasta_codigo": "120011",
+     "desborda": false
+    }
+   },
+   "debe": "277300.00",
+   "haber": "277300.00",
+   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596",
+   "fechas": "por comprobante (extemporáneos al 01/12/2025)"
+  },
+  "_exportacion": {
+   "driver": "concar",
+   "archivo": "CONCAR_20601234567_202512_VENTAS.xlsx",
+   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9f7ab2050f8d605d6922a29cc047ddca92cda29a15ec130faa6dedf90bea2ced"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "095506cc20a55976a44908251cd4ae6d5972733ff8d5157a63caaa8ed83b8752"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "0207debe15acdd4676cfe9af65a2d0038e15e302a164ddb516b989e981bbf5fa"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "19a5b9f1cbc9ac9aa85ff5bf006205daaa6146e26ea3eeb11954340b3b067070"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     },
+     "lineas": [
+      12,
+      15
+     ],
+     "huella": "1f1eb7f0e52b79bd8e5b715ec6a4fe7a52d3bdfbfbd2253f12a5c9ac01694b7f"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     },
+     "lineas": [
+      15,
+      18
+     ],
+     "huella": "6a97a25a7d487a0ce300db82f40c91bf5eaa54969b42aa93684a5141b3d5c9b2"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     },
+     "lineas": [
+      18,
+      21
+     ],
+     "huella": "036ee14bfa32033dde6e2e8866ef2931f5bfd6675f191e235f82f20cf4230df6"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     },
+     "lineas": [
+      21,
+      24
+     ],
+     "huella": "e75b36a0004c6b65d3d0077d2ab8e456709302a335654ab4124b0a0a303a232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     },
+     "lineas": [
+      24,
+      27
+     ],
+     "huella": "b7d3d7bb073f603d9cfd216dee413a1d3e3bb630152c7119ebfc641e816249d2"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     },
+     "lineas": [
+      27,
+      30
+     ],
+     "huella": "366ad002450c0c6e384e23c1f5c1378a1eaf0d42af4ad44315671516e6ff0461"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     },
+     "lineas": [
+      30,
+      33
+     ],
+     "huella": "5fe5d1ca7ef9eb16f5962a60926620c93c9ecdffc326b259797dd2f7a2c9e9f2"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "_hojas": {
+   "CONCAR": [
+    [
+     [
+      "str",
+      "WE"
+     ],
+     [
+      "str",
+      "Sub Diario"
+     ],
+     [
+      "str",
+      "Número de Comprobante"
+     ],
+     [
+      "str",
+      "Fecha de Comprobante"
+     ],
+     [
+      "str",
+      "Código de Moneda"
+     ],
+     [
+      "str",
+      "Glosa Principal"
+     ],
+     [
+      "str",
+      "Tipo de Cambio"
+     ],
+     [
+      "str",
+      "Tipo de Conversión"
+     ],
+     [
+      "str",
+      "Flag de Conversión de Moneda"
+     ],
+     [
+      "str",
+      "Fecha Tipo de Cambio"
+     ],
+     [
+      "str",
+      "Cuenta Contable"
+     ],
+     [
+      "str",
+      "Código de Anexo"
+     ],
+     [
+      "str",
+      "Código de Centro de Costo"
+     ],
+     [
+      "str",
+      "Debe / Haber"
+     ],
+     [
+      "str",
+      "Importe Original"
+     ],
+     [
+      "str",
+      "Importe en Dólares"
+     ],
+     [
+      "str",
+      "Importe en Soles"
+     ],
+     [
+      "str",
+      "Tipo de Documento"
+     ],
+     [
+      "str",
+      "Número de Documento"
+     ],
+     [
+      "str",
+      "Fecha de Documento"
+     ],
+     [
+      "str",
+      "Fecha de Vencimiento"
+     ],
+     [
+      "str",
+      "Código de Area"
+     ],
+     [
+      "str",
+      "Glosa Detalle"
+     ],
+     [
+      "str",
+      "Código de Anexo Auxiliar"
+     ],
+     [
+      "str",
+      "Medio de Pago"
+     ],
+     [
+      "str",
+      "Tipo de Documento de Referencia"
+     ],
+     [
+      "str",
+      "Número de Documento Referencia"
+     ],
+     [
+      "str",
+      "Fecha Documento Referencia"
+     ],
+     [
+      "str",
+      "Nro Máq. Registradora Tipo Doc. Ref."
+     ],
+     [
+      "str",
+      "Base Imponible Documento Referencia"
+     ],
+     [
+      "str",
+      "IGV Documento Provisión"
+     ],
+     [
+      "str",
+      "Tipo Referencia en estado MQ"
+     ],
+     [
+      "str",
+      "Número Serie Caja Registradora"
+     ],
+     [
+      "str",
+      "Fecha de Operación"
+     ],
+     [
+      "str",
+      "Tipo de Tasa"
+     ],
+     [
+      "str",
+      "Tasa Detracción/Percepción"
+     ],
+     [
+      "str",
+      "Importe Base Detracción/Percepción Dólares"
+     ],
+     [
+      "str",
+      "Importe Base Detracción/Percepción Soles"
+     ],
+     [
+      "str",
+      "Tipo Cambio para 'F'"
+     ],
+     [
+      "str",
+      "Importe de IGV sin derecho crédito fiscal"
+     ],
+     [
+      "str",
+      "Tasa IGV"
+     ]
+    ],
+    [
+     [
+      "str",
+      "Contabilidad"
+     ],
+     [
+      "str",
+      "Ver T.G. 02"
+     ],
+     [
+      "str",
+      "Los dos primeros dígitos son el mes y los otros 4 siguientes un correlativo"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Ver T.G. 03"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Llenar  solo si Tipo de Conversión es 'C'. Debe estar entre >=0 y <=9999.999999"
+     ],
+     [
+      "str",
+      "Solo: 'C'= Especial, 'M'=Compra, 'V'=Venta , 'F' De acuerdo a fecha"
+     ],
+     [
+      "str",
+      "Solo: 'S' = Si se convierte, 'N'= No se convierte"
+     ],
+     [
+      "str",
+      "Si  Tipo de Conversión 'F'"
+     ],
+     [
+      "str",
+      "Debe existir en el Plan de Cuentas"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene seleccionado Tipo de Anexo, debe existir en la tabla de Anexos"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado C. Costo, Ver T.G. 05"
+     ],
+     [
+      "str",
+      "'D' ó 'H'"
+     ],
+     [
+      "str",
+      "Importe original de la cuenta contable. Obligatorio, debe estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Importe de la Cuenta Contable en Dólares. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Importe de la Cuenta Contable en Soles. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estra entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia Ver T.G. 06"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia Incluye Serie y Número"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitada la Fecha de Vencimiento"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitada el Area. Ver T.G. 26"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene seleccionado Tipo de Anexo Referencia"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado Tipo Medio Pago. Ver T.G. 'S1'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NA' ó 'ND' Ver T.G. 06"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND', incluye Serie y Número"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'. Solo cuando el Tipo Documento de Referencia 'TK'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable teien Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene Habilitado Documento Referencia 2. Cuando Tipo de Documento es 'TK', consignar la fecha de emision del ticket"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene conf. en Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29. Debe estar entre >=0 y <=999.99"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Especificar solo si Tipo Conversión es 'F'. Se permite 'M' Compra y 'V' Venta."
+     ],
+     [
+      "str",
+      "Especificar solo para comprobantes de compras con IGV sin derecho de crédito Fiscal. Se detalle solo en la cuenta 42xxxx"
+     ],
+     [
+      "str",
+      "Obligatorio para comprobantes de compras, valores validos 0,10,18."
+     ]
+    ],
+    [
+     [
+      "str",
+      "Tamaño/Formato"
+     ],
+     [
+      "str",
+      "4 Caracteres"
+     ],
+     [
+      "str",
+      "6 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "40 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 11, 6"
+     ],
+     [
+      "str",
+      "1 Caracteres"
+     ],
+     [
+      "str",
+      "1 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "12 Caracteres"
+     ],
+     [
+      "str",
+      "18 Caracteres"
+     ],
+     [
+      "str",
+      "6 Caracteres"
+     ],
+     [
+      "str",
+      "1 Carácter"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "3 Caracteres"
+     ],
+     [
+      "str",
+      "30 Caracteres"
+     ],
+     [
+      "str",
+      "18 Caracteres"
+     ],
+     [
+      "str",
+      "8 Caracteres"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "'MQ'"
+     ],
+     [
+      "str",
+      "15 caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "5 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "1 Caracter"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120001"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "DISTRIBUIDORA COMERCIAL DEL NORTE SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "20609999999"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1001"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-02T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "DISTRIBUIDORA COMERCIAL DEL NO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120001"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "DISTRIBUIDORA COMERCIAL DEL NORTE SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1001"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-02T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "DISTRIBUIDORA COMERCIAL DEL NO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120001"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "DISTRIBUIDORA COMERCIAL DEL NORTE SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1001"
+     ],
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-02T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - DISTRIBUIDORA COMERCIAL "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120002"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "INVERSIONES TECNOLOGICAS PERU SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "20633333336"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      21830
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      21830
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1002"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-04T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "INVERSIONES TECNOLOGICAS PERU "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120002"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "INVERSIONES TECNOLOGICAS PERU SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      18500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18500
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1002"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-04T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "INVERSIONES TECNOLOGICAS PERU "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120002"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "INVERSIONES TECNOLOGICAS PERU SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      3330
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      3330
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1002"
+     ],
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-04T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - INVERSIONES TECNOLOGICAS"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120003"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CORPORACION INDUSTRIAL ANDINA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "20655555553"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      37760
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      37760
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1003"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-05T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CORPORACION INDUSTRIAL ANDINA "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120003"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CORPORACION INDUSTRIAL ANDINA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      32000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      32000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1003"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-05T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CORPORACION INDUSTRIAL ANDINA "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120003"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CORPORACION INDUSTRIAL ANDINA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      5760
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      5760
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1003"
+     ],
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-05T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - CORPORACION INDUSTRIAL A"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120004"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "GRUPO EMPRESARIAL LIMA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "20688888884"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      53100
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      53100
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1004"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-08T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "GRUPO EMPRESARIAL LIMA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120004"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "GRUPO EMPRESARIAL LIMA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      45000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      45000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1004"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-08T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "GRUPO EMPRESARIAL LIMA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120004"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "GRUPO EMPRESARIAL LIMA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      8100
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      8100
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1004"
+     ],
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-08T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - GRUPO EMPRESARIAL LIMA S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120005"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "COMERCIALIZADORA INTEGRAL DEL SUR EIRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "20644444440"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      18290
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18290
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1005"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "COMERCIALIZADORA INTEGRAL DEL "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120005"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "COMERCIALIZADORA INTEGRAL DEL SUR EIRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      15500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      15500
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1005"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "COMERCIALIZADORA INTEGRAL DEL "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120005"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "COMERCIALIZADORA INTEGRAL DEL SUR EIRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      2790
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      2790
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1005"
+     ],
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - COMERCIALIZADORA INTEGRA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120006"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "SERVICIOS LOGISTICOS NACIONALES SA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "20666666667"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      33040
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      33040
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1006"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-12T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "SERVICIOS LOGISTICOS NACIONALE"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120006"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "SERVICIOS LOGISTICOS NACIONALES SA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      28000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      28000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1006"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-12T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "SERVICIOS LOGISTICOS NACIONALE"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120006"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "SERVICIOS LOGISTICOS NACIONALES SA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      5040
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      5040
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1006"
+     ],
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-12T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - SERVICIOS LOGISTICOS NAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120007"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA Y EXPORTADORA CENTRAL SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "20301234567"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      24780
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      24780
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1007"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-15T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IMPORTADORA Y EXPORTADORA CENT"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120007"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA Y EXPORTADORA CENTRAL SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      21000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      21000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1007"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-15T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IMPORTADORA Y EXPORTADORA CENT"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120007"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA Y EXPORTADORA CENTRAL SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      3780
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      3780
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1007"
+     ],
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-15T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - IMPORTADORA Y EXPORTADOR"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120008"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CLIENTE CONSUMIDOR FINAL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "42589632"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      1003
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1003
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5001"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CLIENTE CONSUMIDOR FINAL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120008"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CLIENTE CONSUMIDOR FINAL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      850
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      850
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5001"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CLIENTE CONSUMIDOR FINAL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120008"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CLIENTE CONSUMIDOR FINAL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      153
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      153
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5001"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - CLIENTE CONSUMIDOR FINAL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120009"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CONSUMIDOR VARIOS"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "45678912"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      1416
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1416
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5002"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CONSUMIDOR VARIOS"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120009"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CONSUMIDOR VARIOS"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      1200
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1200
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5002"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CONSUMIDOR VARIOS"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120009"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CONSUMIDOR VARIOS"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      216
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      216
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5002"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - CONSUMIDOR VARIOS"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120010"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CLIENTES VARIOS - CONSOLIDADO DIARIO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      50681
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      50681
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5003"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CLIENTES VARIOS - CONSOLIDADO "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120010"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CLIENTES VARIOS - CONSOLIDADO DIARIO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      42950
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      42950
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5003"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CLIENTES VARIOS - CONSOLIDADO "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120010"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "CLIENTES VARIOS - CONSOLIDADO DIARIO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      7731
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      7731
+     ],
+     [
+      "str",
+      "BV"
+     ],
+     [
+      "str",
+      "B001-5003"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - CLIENTES VARIOS - CONSOL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120011"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MI CLIENTE MANUAL S.A.C."
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "str",
+      "121201"
+     ],
+     [
+      "str",
+      "20123456789"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      5900
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      5900
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1234"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-19T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "MI CLIENTE MANUAL S.A.C."
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120011"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MI CLIENTE MANUAL S.A.C."
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "str",
+      "701101"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      5000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      5000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1234"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-19T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "MI CLIENTE MANUAL S.A.C."
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "05"
+     ],
+     [
+      "str",
+      "120011"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MI CLIENTE MANUAL S.A.C."
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      900
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      900
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-1234"
+     ],
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-19T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - MI CLIENTE MANUAL S.A.C."
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ]
+   ]
+  }
+ },
+ "diagnosticar/contasis": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202512",
+   "tipo": "venta"
+  },
+  "driver": "contasis",
+  "exige": [
+   "cuenta_contable",
+   "cuenta_unica"
+  ],
+  "listo_para_exportar": false,
+  "por_que_no": [
+   "5 comprobantes con observaciones que bloquean"
+  ],
+  "que_falta": [
+   {
+    "motivo": "RUC_INVALIDO",
+    "texto": "El RUC del cliente (20609999999) no es válido",
+    "comprobantes": [
+     "F001-00001001",
+     "F001-00001007",
+     "B001-00005001",
+     "B001-00005002",
+     "F001-00001234"
+    ],
+    "pedir_a": "contador"
+   }
+  ],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 11,
+   "saldrian": 6,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 5,
+   "con_aviso": 1
+  },
+  "bloqueantes": [
+   {
+    "serie_numero": "F001-00001001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20609999999) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-00001007",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20301234567) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-00005001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (42589632) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-00005002",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (45678912) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-00001234",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20123456789) no es válido"
+     }
+    ]
+   }
+  ],
+  "avisos": [
+   {
+    "serie_numero": "B001-00005003",
+    "observaciones": [
+     {
+      "codigo": "BOLETA_SIN_DOC",
+      "nivel": "aviso",
+      "texto": "Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)"
+     }
+    ]
+   }
+  ],
+  "faltantes": {
+   "reparto_no_admitido": [],
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": [],
+   "no_cabe": {}
+  },
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20609999999": {
+    "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
+    "comprobantes": 1,
+    "total": "21830.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
+   },
+   "20655555553": {
+    "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
+    "comprobantes": 1,
+    "total": "37760.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
+   },
+   "20688888884": {
+    "nombre": "GRUPO EMPRESARIAL LIMA SAC",
+    "comprobantes": 1,
+    "total": "53100.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
+   },
+   "20644444440": {
+    "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
+    "comprobantes": 1,
+    "total": "18290.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
+   },
+   "20666666667": {
+    "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
+    "comprobantes": 1,
+    "total": "33040.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
+   },
+   "20301234567": {
+    "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
+    "comprobantes": 1,
+    "total": "24780.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
+   },
+   "42589632": {
+    "nombre": "CLIENTE CONSUMIDOR FINAL",
+    "comprobantes": 1,
+    "total": "1003.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
+   },
+   "45678912": {
+    "nombre": "CONSUMIDOR VARIOS",
+    "comprobantes": 1,
+    "total": "1416.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
+   },
+   "(sin documento)": {
+    "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
+    "comprobantes": 1,
+    "total": "50681.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
+   },
+   "20123456789": {
+    "nombre": "MI CLIENTE MANUAL S.A.C.",
+    "comprobantes": 1,
+    "total": "5900.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
+   }
+  },
+  "sub_diarios": {},
+  "saldrian": [
+   "F001-00001002",
+   "F001-00001003",
+   "F001-00001004",
+   "F001-00001005",
+   "F001-00001006",
+   "B001-00005003"
+  ]
+ },
+ "generar_asiento/contasis": {
+  "_error": "ValueError",
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+ },
+ "exportar/contasis": {
+  "_error": "DocumentoInvalido",
+  "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
+ },
+ "exportar_con_observados/contasis": {
+  "driver": "contasis",
+  "formato": "contasis_xlsx",
+  "archivo": "CONTASIS_20601234567_202512_VENTAS.xlsx",
+  "comprobantes": 11,
+  "resumen": {
+   "comprobantes": 11,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 1,
+   "con_error": 5,
+   "fuera_del_destino": 0,
+   "total": "277300.00",
+   "igv": "42300.00",
+   "filas": 11
+  },
+  "_exportacion": {
+   "driver": "contasis",
+   "archivo": "CONTASIS_20601234567_202512_VENTAS.xlsx",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "_hojas": {
+   "FORMATO_VENTAS": [
+    [
+     [
+      "datetime",
+      "2025-12-02T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-02T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "1001         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20609999999"
+     ],
+     [
+      "str",
+      "DISTRIBUIDORA COMERCIAL DEL NORTE SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-01-02T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "DISTRIBUIDORA COMERCIAL DEL NORTE SAC                       "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-04T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-04T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "1002         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20633333336"
+     ],
+     [
+      "str",
+      "INVERSIONES TECNOLOGICAS PERU SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      3330
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      21830
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-01-04T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "INVERSIONES TECNOLOGICAS PERU SRL                           "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-05T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-05T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "1003         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20655555553"
+     ],
+     [
+      "str",
+      "CORPORACION INDUSTRIAL ANDINA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      32000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      5760
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      37760
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-01-05T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "CORPORACION INDUSTRIAL ANDINA SAC                           "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-08T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-08T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "1004         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20688888884"
+     ],
+     [
+      "str",
+      "GRUPO EMPRESARIAL LIMA SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      45000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      8100
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      53100
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-01-08T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "GRUPO EMPRESARIAL LIMA SAC                                  "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "1005         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20644444440"
+     ],
+     [
+      "str",
+      "COMERCIALIZADORA INTEGRAL DEL SUR EIRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      15500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      2790
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18290
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "COMERCIALIZADORA INTEGRAL DEL SUR EIRL                      "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-12T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-12T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "1006         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20666666667"
+     ],
+     [
+      "str",
+      "SERVICIOS LOGISTICOS NACIONALES SA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      28000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      5040
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      33040
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-01-12T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "SERVICIOS LOGISTICOS NACIONALES SA                          "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-15T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-15T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "1007         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20301234567"
+     ],
+     [
+      "str",
+      "IMPORTADORA Y EXPORTADORA CENTRAL SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      21000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      3780
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      24780
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-01-15T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "IMPORTADORA Y EXPORTADORA CENTRAL SAC                       "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-03T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "03"
+     ],
+     [
+      "str",
+      "B001  "
+     ],
+     [
+      "str",
+      "5001         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "42589632   "
+     ],
+     [
+      "str",
+      "CLIENTE CONSUMIDOR FINAL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      850
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      153
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1003
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "CLIENTE CONSUMIDOR FINAL                                    "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-06T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "03"
+     ],
+     [
+      "str",
+      "B001  "
+     ],
+     [
+      "str",
+      "5002         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "45678912   "
+     ],
+     [
+      "str",
+      "CONSUMIDOR VARIOS"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1200
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      216
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1416
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "CONSUMIDOR VARIOS                                           "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-09T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "03"
+     ],
+     [
+      "str",
+      "B001  "
+     ],
+     [
+      "str",
+      "5003         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "           "
+     ],
+     [
+      "str",
+      "CLIENTES VARIOS - CONSOLIDADO DIARIO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      42950
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      7731
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      50681
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "CLIENTES VARIOS - CONSOLIDADO DIARIO                        "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2025-12-19T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-01-19T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "1234         "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20123456789"
+     ],
+     [
+      "str",
+      "MI CLIENTE MANUAL S.A.C."
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      5000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      900
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      5900
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-01-19T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "701101    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "121201    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "MI CLIENTE MANUAL S.A.C.                                    "
+     ],
+     [
+      "str",
+      "001"
+     ]
+    ]
+   ]
+  }
+ },
+ "diagnosticar/csv": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202512",
+   "tipo": "venta"
+  },
+  "driver": "csv",
+  "exige": [
+   "cuenta_contable",
+   "tipo_cp"
+  ],
+  "listo_para_exportar": false,
+  "por_que_no": [
+   "5 comprobantes con observaciones que bloquean"
+  ],
+  "que_falta": [
+   {
+    "motivo": "RUC_INVALIDO",
+    "texto": "El RUC del cliente (20609999999) no es válido",
+    "comprobantes": [
+     "F001-00001001",
+     "F001-00001007",
+     "B001-00005001",
+     "B001-00005002",
+     "F001-00001234"
+    ],
+    "pedir_a": "contador"
+   }
+  ],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 11,
+   "saldrian": 6,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 5,
+   "con_aviso": 1
+  },
+  "bloqueantes": [
+   {
+    "serie_numero": "F001-00001001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20609999999) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-00001007",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20301234567) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-00005001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (42589632) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-00005002",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (45678912) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-00001234",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20123456789) no es válido"
+     }
+    ]
+   }
+  ],
+  "avisos": [
+   {
+    "serie_numero": "B001-00005003",
+    "observaciones": [
+     {
+      "codigo": "BOLETA_SIN_DOC",
+      "nivel": "aviso",
+      "texto": "Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)"
+     }
+    ]
+   }
+  ],
+  "faltantes": {
+   "sin_sigla": [],
+   "sin_codigo_de_moneda": [
+    "PEN"
+   ],
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": [],
+   "sin_correlativo": [
+    "05"
+   ]
+  },
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20609999999": {
+    "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
+    "comprobantes": 1,
+    "total": "21830.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
+   },
+   "20655555553": {
+    "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
+    "comprobantes": 1,
+    "total": "37760.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
+   },
+   "20688888884": {
+    "nombre": "GRUPO EMPRESARIAL LIMA SAC",
+    "comprobantes": 1,
+    "total": "53100.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
+   },
+   "20644444440": {
+    "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
+    "comprobantes": 1,
+    "total": "18290.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
+   },
+   "20666666667": {
+    "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
+    "comprobantes": 1,
+    "total": "33040.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
+   },
+   "20301234567": {
+    "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
+    "comprobantes": 1,
+    "total": "24780.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
+   },
+   "42589632": {
+    "nombre": "CLIENTE CONSUMIDOR FINAL",
+    "comprobantes": 1,
+    "total": "1003.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
+   },
+   "45678912": {
+    "nombre": "CONSUMIDOR VARIOS",
+    "comprobantes": 1,
+    "total": "1416.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
+   },
+   "(sin documento)": {
+    "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
+    "comprobantes": 1,
+    "total": "50681.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
+   },
+   "20123456789": {
+    "nombre": "MI CLIENTE MANUAL S.A.C.",
+    "comprobantes": 1,
+    "total": "5900.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
+   }
+  },
+  "sub_diarios": {
+   "05": {
+    "etiqueta": "Ventas",
+    "comprobantes": 11,
+    "empieza_en": 1
+   }
+  },
+  "saldrian": [
+   "F001-00001002",
+   "F001-00001003",
+   "F001-00001004",
+   "F001-00001005",
+   "F001-00001006",
+   "B001-00005003"
+  ]
+ },
+ "generar_asiento/csv": {
+  "_error": "DocumentoInvalido",
+  "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
+ },
+ "exportar/csv": {
+  "_error": "DocumentoInvalido",
+  "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
+ },
+ "exportar_con_observados/csv": {
+  "driver": "csv",
+  "formato": "csv_asiento",
+  "archivo": "asiento_20601234567_202512_venta.csv",
+  "comprobantes": 11,
+  "resumen": {
+   "comprobantes": 11,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 1,
+   "con_error": 5,
+   "fuera_del_destino": 0,
+   "total": "277300.00",
+   "igv": "42300.00",
+   "filas": 33,
+   "sub_diarios": {
+    "05": {
+     "desde": 1,
+     "hasta": 11,
+     "comprobantes": 11,
+     "desde_codigo": "120001",
+     "hasta_codigo": "120011",
+     "desborda": false
+    }
+   },
+   "debe": "277300.00",
+   "haber": "277300.00",
+   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596"
+  },
+  "_exportacion": {
+   "driver": "csv",
+   "archivo": "asiento_20601234567_202512_venta.csv",
+   "huella": "3d24b80fa1d030703fc02e7bc947c23469f704a17d9a95df8f0af33d85d23596",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9f7ab2050f8d605d6922a29cc047ddca92cda29a15ec130faa6dedf90bea2ced"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "095506cc20a55976a44908251cd4ae6d5972733ff8d5157a63caaa8ed83b8752"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "0207debe15acdd4676cfe9af65a2d0038e15e302a164ddb516b989e981bbf5fa"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     },
+     "lineas": [
+      9,
+      12
+     ],
+     "huella": "19a5b9f1cbc9ac9aa85ff5bf006205daaa6146e26ea3eeb11954340b3b067070"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     },
+     "lineas": [
+      12,
+      15
+     ],
+     "huella": "1f1eb7f0e52b79bd8e5b715ec6a4fe7a52d3bdfbfbd2253f12a5c9ac01694b7f"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     },
+     "lineas": [
+      15,
+      18
+     ],
+     "huella": "6a97a25a7d487a0ce300db82f40c91bf5eaa54969b42aa93684a5141b3d5c9b2"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     },
+     "lineas": [
+      18,
+      21
+     ],
+     "huella": "036ee14bfa32033dde6e2e8866ef2931f5bfd6675f191e235f82f20cf4230df6"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     },
+     "lineas": [
+      21,
+      24
+     ],
+     "huella": "e75b36a0004c6b65d3d0077d2ab8e456709302a335654ab4124b0a0a303a232c"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     },
+     "lineas": [
+      24,
+      27
+     ],
+     "huella": "b7d3d7bb073f603d9cfd216dee413a1d3e3bb630152c7119ebfc641e816249d2"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     },
+     "lineas": [
+      27,
+      30
+     ],
+     "huella": "366ad002450c0c6e384e23c1f5c1378a1eaf0d42af4ad44315671516e6ff0461"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     },
+     "lineas": [
+      30,
+      33
+     ],
+     "huella": "5fe5d1ca7ef9eb16f5962a60926620c93c9ecdffc326b259797dd2f7a2c9e9f2"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "text/csv; charset=utf-8",
+  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp\r\n05;120001;2025-12-02;121201;D;29500.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;20609999999;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18;tercero;01;\r\n05;120001;2025-12-02;701101;H;25000.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18;principal;01;\r\n05;120001;2025-12-02;401111;H;4500.00;PEN;;IGV - DISTRIBUIDORA COMERCIAL DEL NORTE SAC;;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18;igv;01;\r\n05;120002;2025-12-04;121201;D;21830.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;20633333336;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18;tercero;01;\r\n05;120002;2025-12-04;701101;H;18500.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18;principal;01;\r\n05;120002;2025-12-04;401111;H;3330.00;PEN;;IGV - INVERSIONES TECNOLOGICAS PERU SRL;;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18;igv;01;\r\n05;120003;2025-12-05;121201;D;37760.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;20655555553;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18;tercero;01;\r\n05;120003;2025-12-05;701101;H;32000.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18;principal;01;\r\n05;120003;2025-12-05;401111;H;5760.00;PEN;;IGV - CORPORACION INDUSTRIAL ANDINA SAC;;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18;igv;01;\r\n05;120004;2025-12-08;121201;D;53100.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;20688888884;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18;tercero;01;\r\n05;120004;2025-12-08;701101;H;45000.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18;principal;01;\r\n05;120004;2025-12-08;401111;H;8100.00;PEN;;IGV - GRUPO EMPRESARIAL LIMA SAC;;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18;igv;01;\r\n05;120005;2025-12-10;121201;D;18290.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;20644444440;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18;tercero;01;\r\n05;120005;2025-12-10;701101;H;15500.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18;principal;01;\r\n05;120005;2025-12-10;401111;H;2790.00;PEN;;IGV - COMERCIALIZADORA INTEGRAL DEL SUR EIRL;;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18;igv;01;\r\n05;120006;2025-12-12;121201;D;33040.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;20666666667;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18;tercero;01;\r\n05;120006;2025-12-12;701101;H;28000.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18;principal;01;\r\n05;120006;2025-12-12;401111;H;5040.00;PEN;;IGV - SERVICIOS LOGISTICOS NACIONALES SA;;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18;igv;01;\r\n05;120007;2025-12-15;121201;D;24780.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;20301234567;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18;tercero;01;\r\n05;120007;2025-12-15;701101;H;21000.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18;principal;01;\r\n05;120007;2025-12-15;401111;H;3780.00;PEN;;IGV - IMPORTADORA Y EXPORTADORA CENTRAL SAC;;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18;igv;01;\r\n05;120008;2025-12-03;121201;D;1003.00;PEN;;CLIENTE CONSUMIDOR FINAL;42589632;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18;tercero;03;\r\n05;120008;2025-12-03;701101;H;850.00;PEN;;CLIENTE CONSUMIDOR FINAL;;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18;principal;03;\r\n05;120008;2025-12-03;401111;H;153.00;PEN;;IGV - CLIENTE CONSUMIDOR FINAL;;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18;igv;03;\r\n05;120009;2025-12-06;121201;D;1416.00;PEN;;CONSUMIDOR VARIOS;45678912;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18;tercero;03;\r\n05;120009;2025-12-06;701101;H;1200.00;PEN;;CONSUMIDOR VARIOS;;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18;principal;03;\r\n05;120009;2025-12-06;401111;H;216.00;PEN;;IGV - CONSUMIDOR VARIOS;;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18;igv;03;\r\n05;120010;2025-12-09;121201;D;50681.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18;tercero;03;\r\n05;120010;2025-12-09;701101;H;42950.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18;principal;03;\r\n05;120010;2025-12-09;401111;H;7731.00;PEN;;IGV - CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18;igv;03;\r\n05;120011;2025-12-19;121201;D;5900.00;PEN;;MI CLIENTE MANUAL S.A.C.;20123456789;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18;tercero;01;\r\n05;120011;2025-12-19;701101;H;5000.00;PEN;;MI CLIENTE MANUAL S.A.C.;;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18;principal;01;\r\n05;120011;2025-12-19;401111;H;900.00;PEN;;IGV - MI CLIENTE MANUAL S.A.C.;;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18;igv;01;\r\n"
+ },
+ "diagnosticar/sire": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202512",
+   "tipo": "venta"
+  },
+  "driver": "sire",
+  "exige": [],
+  "listo_para_exportar": false,
+  "por_que_no": [
+   "5 comprobantes con observaciones que bloquean"
+  ],
+  "que_falta": [
+   {
+    "motivo": "RUC_INVALIDO",
+    "texto": "El RUC del cliente (20609999999) no es válido",
+    "comprobantes": [
+     "F001-00001001",
+     "F001-00001007",
+     "B001-00005001",
+     "B001-00005002",
+     "F001-00001234"
+    ],
+    "pedir_a": "contador"
+   }
+  ],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 11,
+   "saldrian": 6,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 5,
+   "con_aviso": 1
+  },
+  "bloqueantes": [
+   {
+    "serie_numero": "F001-00001001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20609999999) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-00001007",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20301234567) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-00005001",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (42589632) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "B001-00005002",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (45678912) no es válido"
+     }
+    ]
+   },
+   {
+    "serie_numero": "F001-00001234",
+    "observaciones": [
+     {
+      "codigo": "RUC_INVALIDO",
+      "nivel": "error",
+      "texto": "El RUC del cliente (20123456789) no es válido"
+     }
+    ]
+   }
+  ],
+  "avisos": [
+   {
+    "serie_numero": "B001-00005003",
+    "observaciones": [
+     {
+      "codigo": "BOLETA_SIN_DOC",
+      "nivel": "aviso",
+      "texto": "Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)"
+     }
+    ]
+   }
+  ],
+  "faltantes": {},
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20609999999": {
+    "nombre": "DISTRIBUIDORA COMERCIAL DEL NORTE SAC",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "INVERSIONES TECNOLOGICAS PERU SRL",
+    "comprobantes": 1,
+    "total": "21830.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "21830.00"
+    }
+   },
+   "20655555553": {
+    "nombre": "CORPORACION INDUSTRIAL ANDINA SAC",
+    "comprobantes": 1,
+    "total": "37760.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "37760.00"
+    }
+   },
+   "20688888884": {
+    "nombre": "GRUPO EMPRESARIAL LIMA SAC",
+    "comprobantes": 1,
+    "total": "53100.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "53100.00"
+    }
+   },
+   "20644444440": {
+    "nombre": "COMERCIALIZADORA INTEGRAL DEL SUR EIRL",
+    "comprobantes": 1,
+    "total": "18290.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "18290.00"
+    }
+   },
+   "20666666667": {
+    "nombre": "SERVICIOS LOGISTICOS NACIONALES SA",
+    "comprobantes": 1,
+    "total": "33040.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "33040.00"
+    }
+   },
+   "20301234567": {
+    "nombre": "IMPORTADORA Y EXPORTADORA CENTRAL SAC",
+    "comprobantes": 1,
+    "total": "24780.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "24780.00"
+    }
+   },
+   "42589632": {
+    "nombre": "CLIENTE CONSUMIDOR FINAL",
+    "comprobantes": 1,
+    "total": "1003.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1003.00"
+    }
+   },
+   "45678912": {
+    "nombre": "CONSUMIDOR VARIOS",
+    "comprobantes": 1,
+    "total": "1416.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "1416.00"
+    }
+   },
+   "(sin documento)": {
+    "nombre": "CLIENTES VARIOS - CONSOLIDADO DIARIO",
+    "comprobantes": 1,
+    "total": "50681.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "50681.00"
+    }
+   },
+   "20123456789": {
+    "nombre": "MI CLIENTE MANUAL S.A.C.",
+    "comprobantes": 1,
+    "total": "5900.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "5900.00"
+    }
+   }
+  },
+  "sub_diarios": {},
+  "saldrian": [
+   "F001-00001002",
+   "F001-00001003",
+   "F001-00001004",
+   "F001-00001005",
+   "F001-00001006",
+   "B001-00005003"
+  ]
+ },
+ "generar_asiento/sire": {
+  "_error": "ValueError",
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+ },
+ "exportar/sire": {
+  "_error": "DocumentoInvalido",
+  "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
+ },
+ "exportar_con_observados/sire": {
+  "driver": "sire",
+  "formato": "sire_rvie",
+  "archivo": "LE2060123456720251200140400021112.TXT",
+  "comprobantes": 11,
+  "resumen": {
+   "comprobantes": 11,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 1,
+   "con_error": 5,
+   "fuera_del_destino": 0,
+   "total": "277300.00",
+   "igv": "42300.00"
+  },
+  "_exportacion": {
+   "driver": "sire",
+   "archivo": "LE2060123456720251200140400021112.TXT",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1001"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1002"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1003"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1004"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1005"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1006"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1007"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5001"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5002"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "03",
+      "serie": "B001",
+      "numero": "5003"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "venta",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "1234"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "texto": "20601234567|EMPRESA DE PRUEBA SAC|202512||02/12/2025||01|F001|1001||6|20609999999|DISTRIBUIDORA COMERCIAL DEL NORTE SAC|0.00|25000.00|0.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||04/12/2025||01|F001|1002||6|20633333336|INVERSIONES TECNOLOGICAS PERU SRL|0.00|18500.00|0.00|3330.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|21830.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||05/12/2025||01|F001|1003||6|20655555553|CORPORACION INDUSTRIAL ANDINA SAC|0.00|32000.00|0.00|5760.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|37760.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||08/12/2025||01|F001|1004||6|20688888884|GRUPO EMPRESARIAL LIMA SAC|0.00|45000.00|0.00|8100.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|53100.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||10/12/2025||01|F001|1005||6|20644444440|COMERCIALIZADORA INTEGRAL DEL SUR EIRL|0.00|15500.00|0.00|2790.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|18290.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||12/12/2025||01|F001|1006||6|20666666667|SERVICIOS LOGISTICOS NACIONALES SA|0.00|28000.00|0.00|5040.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|33040.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||15/12/2025||01|F001|1007||6|20301234567|IMPORTADORA Y EXPORTADORA CENTRAL SAC|0.00|21000.00|0.00|3780.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|24780.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||03/12/2025||03|B001|5001||6|42589632|CLIENTE CONSUMIDOR FINAL|0.00|850.00|0.00|153.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1003.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||06/12/2025||03|B001|5002||6|45678912|CONSUMIDOR VARIOS|0.00|1200.00|0.00|216.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1416.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||09/12/2025||03|B001|5003||6||CLIENTES VARIOS - CONSOLIDADO DIARIO|0.00|42950.00|0.00|7731.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|50681.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||19/12/2025||01|F001|1234||6|20123456789|MI CLIENTE MANUAL S.A.C.|0.00|5000.00|0.00|900.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|5900.00|PEN|||||||\r\n",
+  "archivo_zip": "LE2060123456720251200140400021112.zip"
+ },
+ "cli_diagnosticar/concar": {
+  "codigo": 1,
+  "salida": "Libro: VENTA 202512 · RUC 20601234567 · destino concar\nComprobantes: 11 · saldrían 6 · excluidos 0 · fuera del destino 0 · con error 5 · con aviso 1\n\n  !! F001-00001001      [RUC_INVALIDO] El RUC del cliente (20609999999) no es válido\n  !! F001-00001007      [RUC_INVALIDO] El RUC del cliente (20301234567) no es válido\n  !! B001-00005001      [RUC_INVALIDO] El RUC del cliente (42589632) no es válido\n  !! B001-00005002      [RUC_INVALIDO] El RUC del cliente (45678912) no es válido\n  !! F001-00001234      [RUC_INVALIDO] El RUC del cliente (20123456789) no es válido\n   · B001-00005003      [BOLETA_SIN_DOC] Boleta de S/ 700 o más sin identificar al cliente (SUNAT la exige)\nSub-diarios sin correlativo (arrancan en 1): 05\n  -> Pedir al contador: El RUC del cliente (20609999999) no es válido (F001-00001001, F001-00001007, B001-00005001, B001-00005002, F001-00001234)\n  Sub-diario 05 (Ventas): 11 comprobantes desde el 1\n\nNO está listo: 5 comprobantes con observaciones que bloquean.\n"
+ }
+}

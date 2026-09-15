@@ -19,7 +19,9 @@ Los cuatro que vienen de serie salen de la contabilidad peruana real:
     [project.entry-points."contaperu.drivers"]
     siscont = "contaperu_siscont"
 
-aparece aquí solo, con su `NOMBRE`, en la CLI, en la fachada y en el servidor MCP. Es lo que permite
+aparece aquí solo, con su `NOMBRE`, en la CLI, en la api y en el servidor MCP. Declara su `CANAL` —`legacy` si es un
+sistema contable instalado que importa un archivo, `tributario` si es un registro que se presenta a SUNAT,
+`intercambio` si es un formato neutral— y la forma `desde_lineas` o `desde_comprobantes` (`contrato.py`). Es lo que permite
 que la comunidad mantenga el driver de su ERP a su ritmo. Dos reglas: los de serie ganan ante un
 nombre repetido, y un driver que no cumple el contrato —o que revienta al importarse— se ignora con
 un `AvisoDriver` en vez de tumbar el registro entero. Para entrar AL repositorio sigue haciendo falta
@@ -32,7 +34,7 @@ from importlib.metadata import entry_points
 from types import ModuleType
 
 from . import concar, contasis, contrato, csv, sire
-from ..formato import Opciones
+from .kit import Opciones
 
 GRUPO = "contaperu.drivers"
 DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
@@ -65,23 +67,86 @@ def de_terceros() -> dict[str, ModuleType]:
             warnings.warn(f"El driver {entrada.name!r} se llama {modulo.NOMBRE!r}, que ya está registrado; "
                           "se ignora", AvisoDriver, stacklevel=2)
             continue
+        if not contrato.declara_canal(modulo):
+            warnings.warn(f"El driver {entrada.name!r} no declara CANAL ({', '.join(contrato.CANALES)}): se trata como "
+                          f"{contrato.CANAL_POR_DEFECTO!r}; en la 2.0 será obligatorio", AvisoDriver, stacklevel=2)
+        if contrato.forma(modulo) == "construir":
+            warnings.warn(f"El driver {entrada.name!r} usa la forma `construir`, que se retira en la 2.0: `desde_lineas` "
+                          "recibe las líneas ya armadas y el índice de cada comprobante", AvisoDriver, stacklevel=2)
         encontrados[modulo.NOMBRE] = modulo
     return encontrados
 
 
-# Se muta en sitio y no se reasigna: quien hizo `from contaperu.drivers import DRIVERS` ve lo mismo.
-DRIVERS: dict[str, ModuleType] = {}
+class _Registro(dict):
+    """Los drivers registrados: los de serie y los de terceros.
+
+    Los de terceros se buscan la primera vez que alguien mira el registro, no al importar el paquete (1.0): leer los
+    metadatos de lo instalado es trabajo que un `import contaperu.drivers` no tiene por qué pagar. Se muta en sitio y
+    no se reasigna: quien hizo `from contaperu.drivers import DRIVERS` ve lo mismo."""
+
+    _listo = False
+
+    def _asegurar(self) -> None:
+        if not self._listo:
+            recargar()
+
+    def __getitem__(self, clave):
+        self._asegurar()
+        return super().__getitem__(clave)
+
+    def __contains__(self, clave) -> bool:
+        self._asegurar()
+        return super().__contains__(clave)
+
+    def __iter__(self):
+        self._asegurar()
+        return super().__iter__()
+
+    def __len__(self) -> int:
+        self._asegurar()
+        return super().__len__()
+
+    def __repr__(self) -> str:
+        self._asegurar()
+        return super().__repr__()
+
+    def __eq__(self, otro) -> bool:
+        self._asegurar()
+        return super().__eq__(otro)
+
+    __hash__ = None
+
+    def get(self, clave, defecto=None):
+        self._asegurar()
+        return super().get(clave, defecto)
+
+    def keys(self):
+        self._asegurar()
+        return super().keys()
+
+    def values(self):
+        self._asegurar()
+        return super().values()
+
+    def items(self):
+        self._asegurar()
+        return super().items()
+
+    def copy(self) -> dict[str, ModuleType]:
+        self._asegurar()
+        return dict(super().items())
+
+
+DRIVERS: dict[str, ModuleType] = _Registro()
 
 
 def recargar() -> dict[str, ModuleType]:
     """Vuelve a buscar los drivers de terceros (p. ej. tras instalar uno sin reiniciar)."""
-    DRIVERS.clear()
-    DRIVERS.update(DE_SERIE)
-    DRIVERS.update(de_terceros())
+    DRIVERS._listo = True
+    dict.clear(DRIVERS)
+    dict.update(DRIVERS, DE_SERIE)
+    dict.update(DRIVERS, de_terceros())
     return DRIVERS
-
-
-recargar()
 
 
 def obtener(nombre: str) -> ModuleType:

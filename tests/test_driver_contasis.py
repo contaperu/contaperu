@@ -7,7 +7,7 @@ from datetime import datetime
 
 import pytest
 
-from contaperu import operaciones as op
+from contaperu import api
 from contaperu.drivers import contasis, contrato
 
 LIBRO = {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608", "tipo": "compra"}
@@ -30,7 +30,7 @@ def hoja(resultado: dict):
 
 def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     """Sin las filas 1-13 de la plantilla, con su pestaña, y los espacios del relleno siguen ahí al abrirlo."""
-    r = op.exportar(doc(FACTURA, dict(FACTURA, numero="124")), "contasis", CONTAB)
+    r = api.exportar(doc(FACTURA, dict(FACTURA, numero="124")), driver="contasis", configuracion=CONTAB)
     assert r["archivo"] == "CONTASIS_20601234567_202608_COMPRAS.xlsx" and r["formato"] == "contasis_xlsx"
     ws = hoja(r)
     assert ws.title == "FORMATO_COMPRAS" and ws.max_row == 2
@@ -44,14 +44,14 @@ def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     anchos = contasis.datos.ANCHOS["compra"]
     assert all(abs(ws.column_dimensions[letra].width - anchos[letra]) < 0.01 for letra, *_ in contasis.datos.COMPRAS)
     assert anchos["B"] >= 12 and anchos["I"] >= 38 and anchos["K"] >= 12 and anchos["AS"] >= 26
-    ventas = op.exportar(doc(FACTURA, tipo="venta"), "contasis", CONTAB)
+    ventas = api.exportar(doc(FACTURA, tipo="venta"), driver="contasis", configuracion=CONTAB)
     assert hoja(ventas).title == "FORMATO_VENTAS" and ventas["archivo"].endswith("_VENTAS.xlsx")
 
 
 def test_el_recibo_por_honorarios_queda_fuera_del_archivo():
     rh = dict(FACTURA, tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0", inafecto="1000",
               total="1000")
-    r = op.exportar(doc(FACTURA, rh), "contasis", CONTAB)
+    r = api.exportar(doc(FACTURA, rh), driver="contasis", configuracion=CONTAB)
     assert r["comprobantes"] == 1 and r["resumen"]["fuera_del_destino"] == 1 and hoja(r).max_row == 1
 
 
@@ -65,16 +65,15 @@ def test_el_recibo_por_honorarios_queda_fuera_del_archivo():
 def test_lo_que_contasis_no_puede_llevar_se_dice_antes_y_no_sale(motivo, cambios, libro, imputacion):
     d = doc(dict(FACTURA, **cambios), **libro)
     texto = contasis.datos.MOTIVOS[motivo]
-    diag = op.diagnosticar(d, CONTAB, driver="contasis", imputacion=imputacion)
+    diag = api.diagnosticar(d, configuracion=CONTAB, driver="contasis", imputacion=imputacion)
     assert list(diag["faltantes"]["no_cabe"]) == [texto] and diag["listo_para_exportar"] is False
     with pytest.raises(contrato.NoCabe):
-        op.exportar(d, "contasis", CONTAB, incluir_observados=True, imputacion=imputacion)
+        api.exportar(d, driver="contasis", configuracion=CONTAB, incluir_observados=True, imputacion=imputacion)
 
 
 def test_un_centro_mas_largo_que_su_columna_no_se_corta():
     d = doc(dict(FACTURA, id_externo="f1"))
-    diag = op.diagnosticar(d, {"cuentas": {"cxp": {"PEN": "4212"}}}, driver="contasis",
-                           imputacion={"f1": {"cuenta_contable": "631101", "centro_costo": "OBRA-00001"}})
+    diag = api.diagnosticar(d, configuracion={"cuentas": {"cxp": {"PEN": "4212"}}}, driver="contasis", imputacion={"f1": {"cuenta_contable": "631101", "centro_costo": "OBRA-00001"}})
     assert list(diag["faltantes"]["no_cabe"]) == [contasis.datos.MOTIVOS["largo"]]
 
 
@@ -82,8 +81,8 @@ def test_un_nombre_o_una_glosa_largos_se_cortan_y_no_detienen_nada():
     """El nombre y la glosa son texto libre: se cortan a 60. Un código, no (ver el test de arriba)."""
     largo = "SERVICIOS INTEGRALES DE MANTENIMIENTO INDUSTRIAL Y MINERO DEL SUR SOCIEDAD ANONIMA CERRADA"
     d = doc(dict(FACTURA, contraparte_nombre=largo, concepto=largo + " " + largo))
-    assert op.diagnosticar(d, CONTAB, driver="contasis")["listo_para_exportar"] is True
-    ws = hoja(op.exportar(d, "contasis", CONTAB))
+    assert api.diagnosticar(d, configuracion=CONTAB, driver="contasis")["listo_para_exportar"] is True
+    ws = hoja(api.exportar(d, driver="contasis", configuracion=CONTAB))
     assert ws["I1"].value == largo[:60] and len(ws["AS1"].value) == 60
 
 
@@ -91,12 +90,12 @@ def test_una_factura_con_reparto_no_sale_a_contasis():
     d = doc(dict(FACTURA, id_externo="f1"))
     imputacion = {"f1": {"reparto": [{"importe": "60", "cuenta_contable": "636301"},
                                      {"importe": "40", "cuenta_contable": "632201"}]}}
-    diag = op.diagnosticar(d, CONTAB, driver="contasis", imputacion=imputacion)
+    diag = api.diagnosticar(d, configuracion=CONTAB, driver="contasis", imputacion=imputacion)
     assert diag["faltantes"]["reparto_no_admitido"] == ["F001-00000123"] and diag["listo_para_exportar"] is False
 
 
 def test_para_contasis_no_se_piden_sub_diarios_ni_equivalencias():
     """El sub-diario se elige al importar en CONTASIS y el tipo va con su código SUNAT: no hay nada de eso que pedir."""
-    diag = op.diagnosticar(doc(FACTURA), CONTAB, driver="contasis")
+    diag = api.diagnosticar(doc(FACTURA), configuracion=CONTAB, driver="contasis")
     assert diag["exige"] == ["cuenta_contable", "cuenta_unica"] and diag["sub_diarios"] == {}
     assert diag["listo_para_exportar"] is True and diag["faltantes"]["no_cabe"] == {}

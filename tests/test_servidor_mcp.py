@@ -11,7 +11,7 @@ import json
 import pytest
 
 import contaperu
-from contaperu.servidor_mcp import LOCALES, mcp, seguridad
+from contaperu.puertas.servidor_mcp import LOCALES, mcp, seguridad
 
 from util import XML
 
@@ -109,7 +109,8 @@ def test_cada_herramienta_se_explica_sola():
 def test_los_recursos_son_legibles():
     uris = {str(r.uri) for r in asyncio.run(mcp.list_resources())}
     assert uris == {"contaperu://estandar/open-accounting", "contaperu://catalogos/sunat",
-                    "contaperu://drivers", "contaperu://catalogos/pcge2026", "contaperu://configuracion"}
+                    "contaperu://drivers", "contaperu://catalogos/pcge2026", "contaperu://configuracion",
+                    "contaperu://esquemas/diagnostico"}
     esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
     assert esquema["title"] == "open-accounting"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
@@ -273,7 +274,7 @@ def test_la_imputacion_llega_por_el_protocolo():
     herramientas que arman, revisan o exportan el asiento."""
     documento = json.loads(json.dumps(DOCUMENTO))
     documento["comprobantes"][0]["id_externo"] = "fila-871"
-    imputacion = {"fila-871": {"cuenta_contable": "636301", "cuenta_tercero": "469901"}}
+    imputacion = {"fila-871": {"cuenta_contable": "636301", "cuenta_tercero": "469901", "centro_costo": "CC-64"}}
     r = llamar("generar_asiento", documento=documento, imputacion=imputacion)
     # La cuenta del total manda también en la línea que le descuenta la detracción al proveedor.
     assert [ln["cuenta"] for ln in r["asiento"]] == ["636301", "401111", "469901", "469901", "421203"]
@@ -284,3 +285,23 @@ def test_la_imputacion_llega_por_el_protocolo():
 
     resumen, _ = exportar(documento=documento, driver="csv", imputacion=imputacion)
     assert ";636301;D;" in resumen["texto"]
+
+
+def test_un_pdf_por_el_protocolo_queda_pendiente_de_leer():
+    """Hito 0.7: un agente que manda el PDF de la factura en vez del XML recibe «pendiente de leer», no un error."""
+    import base64
+
+    libro = DOCUMENTO["libro"]
+    leido = llamar("leer_xml_ubl", contenido=base64.b64encode(b"%PDF-1.7\n1 0 obj").decode(), libro=libro,
+                   es_base64=True)
+    assert leido["_lectura"]["pendientes_de_leer"] == 1 and leido["_lectura"]["errores"] == []
+
+
+def test_cada_herramienta_se_anuncia_de_solo_lectura_y_sin_salir_a_ningun_sitio():
+    """Hito 0.2: `readOnlyHint` y `openWorldHint` en las once, recorriendo lo que ve el cliente."""
+    herramientas = asyncio.run(mcp.list_tools())
+    assert len(herramientas) == 11
+    for herramienta in herramientas:
+        anotaciones = herramienta.annotations
+        assert anotaciones is not None and anotaciones.readOnlyHint is True, herramienta.name
+        assert anotaciones.openWorldHint is False, herramienta.name

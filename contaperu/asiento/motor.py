@@ -20,19 +20,27 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
+from typing import Any
 
+from .._obsoleto import reexportar
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
 from ..configuracion import CONFIG_POR_DEFECTO
 from ..detracciones import monto_detraccion, tasa_detraccion
-from ..formato import Opciones, formatear_numero
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
-from ..modelo import CENTIMO, Comprobante, Libro, serie_y_numero, texto_tasa
+from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .configuracion import NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinCuenta
+from .indice import Cabecera, ComprobanteDelAsiento
 from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
-                         lleva_centro, numerar, partes_de, reparto_no_cuadra, sigla_documento, sub_diario,
-                         tiene_detraccion)
+                         lleva_centro, numerar, numerar_en_orden, partes_de, reparto_no_cuadra, sigla_documento,
+                         sub_diario, tiene_detraccion)
 from .lineas import LineaDiario
+
+# Hasta la 0.10 este módulo importaba las `Opciones` de los drivers solo para quitar los ceros del número: el núcleo
+# dependía de una pieza de los drivers. Desde la 1.0 lee `opciones.sin_ceros` de lo que llegue, y los dos nombres
+# siguen resolviendo desde aquí, con aviso.
+__getattr__, _ = reexportar(__name__, {"Opciones": "contaperu.drivers.kit:Opciones",
+                                      "formatear_numero": "contaperu.drivers.kit:formatear_numero"})
 
 # El papel de cada línea en el asiento. Es lo que un driver necesita para traducir sin adivinar: un
 # ERP que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su cuenta, que la
@@ -54,6 +62,24 @@ def _iso(fecha: date | None) -> str:
     return fecha.isoformat() if fecha else ""
 
 
+def cabecera_de(c: Comprobante) -> Cabecera:
+    """Los hechos del comprobante que un driver necesita al lado de sus líneas (`asiento.indice`): su identidad, la
+    contraparte, la glosa y los importes de los que se calcula la tasa, en texto exacto."""
+    return Cabecera(tipo_cp=c.tipo_cp or "", serie=c.serie or "", numero=c.numero or "",
+                    fecha_emision=_iso(c.fecha_emision), contraparte_doc=c.contraparte_doc or "",
+                    contraparte_nombre=c.contraparte_nombre or "", condicion_pago=c.condicion_pago or "",
+                    id_externo=c.id_externo or "", moneda=c.moneda or "", glosa=glosa_de(c),
+                    base_gravada=str(c.base_gravada), igv=str(c.igv), total=str(c.total))
+
+
+def _numero(numero: str, opciones: Any) -> str:
+    """El número tal como va a la línea: sin ceros a la izquierda, salvo que las opciones del destino digan lo
+    contrario (`sin_ceros`). Sin opciones, sin ceros: la regla de contabilidad de los tres destinos de serie."""
+    if getattr(opciones, "sin_ceros", True):
+        return numero_sin_ceros(numero)
+    return (numero or "").strip()
+
+
 def _limpio(campos: dict) -> dict:
     """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""
     return {k: v for k, v in campos.items() if v not in ("", None)}
@@ -68,11 +94,11 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal) -> dict:
     interno = str((config.get("detraccion_codigos") or {}).get(sunat) or (f"{sunat}01" if sunat else ""))
     tasa = tasa_detraccion(c, config)
     return _limpio({"codigo": sunat, "codigo_interno": interno,
-                    "tasa": float(tasa) if tasa > 0 else "", "base": str(total)})
+                    "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total)})
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
-                           opciones: Opciones = Opciones(), es_venta: bool = False,
+                           opciones: Any = None, es_venta: bool = False,
                            centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO) -> list[LineaDiario]:
     """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
     del manual de asientos. `centro_en_anexo` dice qué líneas llevan además el centro en su anexo auxiliar
@@ -101,14 +127,14 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # partes comparten uno: con dos centros distintos no hay uno que poner.
     centros = {(centro or "").strip() for _, centro, _ in partes}
     centro_comun = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
-    serie, numero = (c.serie or "").strip(), formatear_numero(c.numero, opciones)
+    serie, numero = (c.serie or "").strip(), _numero(c.numero, opciones)
     serie_numero = serie_y_numero(serie, numero)
     # UNA sola glosa para todas las líneas (confirmado por un contador, 2026); las derivadas anteponen lo
     # que las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—. Cortarla es cosa del driver.
     glosa = glosa_de(c)
     tasa_leida = tasa_calculada(igv, Decimal(c.base_gravada or 0))
     tasa = "" if tasa_leida is None else texto_tasa(tasa_leida)
-    tc = float(c.tipo_cambio) if es_usd and c.tipo_cambio else ""
+    tc = str(c.tipo_cambio) if es_usd and c.tipo_cambio else ""     # texto exacto: `float` solo en una celda
     emision = c.fecha_emision
     vencimiento = c.fecha_vencimiento or emision
     # Cada comprobante se asienta con SU fecha de emisión; el extemporáneo (mes anterior) cae al
@@ -127,7 +153,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                  "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
     referencia: dict[str, str] = {}
     if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
-        numero_ref = formatear_numero(c.ref_numero, opciones)
+        numero_ref = _numero(c.ref_numero, opciones)
         equivalencia_ref = equivalencia_tipo(c, config, c.ref_tipo_cp)
         referencia = {"tipo": str(equivalencia_ref["sigla"]) if equivalencia_ref else "", "tipo_cp": c.ref_tipo_cp,
                       "serie_numero": serie_y_numero(c.ref_serie, numero_ref),
@@ -205,17 +231,33 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     return [ln for ln in orden if ln is not None]
 
 
-def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict, correlativos: dict[str, int],
-                     opciones: Opciones = Opciones(), centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
-                     ) -> tuple[list[LineaDiario], dict[str, dict]]:
-    """Todos los comprobantes de un libro → sus líneas, numeradas por sub-diario (`MMNNNN`).
-
-    Devuelve también el rango de correlativos que usó cada sub-diario, que es lo que se recuerda
-    para proponer el siguiente. Es la entrada de cualquier driver de asientos."""
+def lineas_e_indice_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict,
+                              correlativos: dict[str, int], opciones: Any = None,
+                              centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
+                              ) -> tuple[list[LineaDiario], dict[str, dict], tuple[ComprobanteDelAsiento, ...]]:
+    """Todos los comprobantes de un libro → sus líneas numeradas por sub-diario (`MMNNNN`), el rango de correlativos
+    que usó cada sub-diario y el índice: qué tramo de líneas es de qué comprobante, con su cabecera
+    (`asiento.indice`). Es la entrada de cualquier driver de asientos."""
     es_venta = libro.es_venta
-    numeros, rangos = numerar(comprobantes, config, libro.periodo, correlativos, es_venta)
+    numeros, rangos = numerar_en_orden(comprobantes, config, libro.periodo, correlativos, es_venta)
     limites = limites_del_periodo(libro)
     lineas: list[LineaDiario] = []
-    for c in comprobantes:
-        lineas.extend(lineas_del_comprobante(c, config, limites, numeros[id(c)], opciones, es_venta, centro_en_anexo))
+    indice: list[ComprobanteDelAsiento] = []
+    for posicion, (c, numero) in enumerate(zip(comprobantes, numeros)):
+        propias = lineas_del_comprobante(c, config, limites, numero, opciones, es_venta, centro_en_anexo)
+        indice.append(ComprobanteDelAsiento(posicion=posicion, sub_diario=sub_diario(c, config, es_venta),
+                                            correlativo=numero, desde=len(lineas), hasta=len(lineas) + len(propias),
+                                            cabecera=cabecera_de(c)))
+        lineas.extend(propias)
+    return lineas, rangos, tuple(indice)
+
+
+def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict, correlativos: dict[str, int],
+                     opciones: Any = None, centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
+                     ) -> tuple[list[LineaDiario], dict[str, dict]]:
+    """Todos los comprobantes de un libro → sus líneas, numeradas por sub-diario (`MMNNNN`), y el rango de correlativos
+    que usó cada sub-diario, que es lo que se recuerda para proponer el siguiente. Con el índice de cada comprobante:
+    `lineas_e_indice_del_libro`."""
+    lineas, rangos, _ = lineas_e_indice_del_libro(libro, comprobantes, config, correlativos, opciones,
+                                                  centro_en_anexo)
     return lineas, rangos

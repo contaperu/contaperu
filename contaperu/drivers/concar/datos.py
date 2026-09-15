@@ -8,9 +8,11 @@ from __future__ import annotations
 
 from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from ...configuracion import Campo, Columna
-from ...formato import Opciones
+from ..kit import Opciones
 
 NOMBRE = "concar"
+# Un sistema contable instalado que importa un archivo (`drivers.contrato.CANALES`).
+CANAL = "legacy"
 OPCIONES = Opciones(fecha="DD/MM/AAAA", extension=".xlsx")
 FORMATOS = {"compra": "concar_xlsx", "venta": "concar_xlsx"}
 CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

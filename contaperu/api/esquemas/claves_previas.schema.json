@@ -1,0 +1,26 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/claves_previas.schema.json",
+ "title": "Claves previas",
+ "description": "Lo ya anotado en otros periodos del mismo RUC, cada clave como [tipo_cp, serie, numero, contraparte_doc]. Lo que coincide sale con DUPLICADO_PERIODO_ANTERIOR. En ventas el cliente no cuenta.",
+ "type": "array",
+ "maxItems": 50000,
+ "items": {
+  "type": "array",
+  "minItems": 4,
+  "maxItems": 4,
+  "items": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  }
+ }
+}

@@ -28,12 +28,13 @@ import io
 import zipfile
 from decimal import Decimal
 
+from ..errores import ErrorContaperu
 from ..modelo import Comprobante, Libro
 
 ORIGEN = "sire"
 
 
-class SireInvalido(ValueError):
+class SireInvalido(ErrorContaperu, ValueError):
     """El archivo no es una propuesta del SIRE, o no es la de este proceso."""
 
 

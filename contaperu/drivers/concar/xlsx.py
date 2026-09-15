@@ -1,22 +1,37 @@
-"""El .xlsx de CONCAR (cabecera y formatos de celda de la plantilla oficial) y el
-punto de entrada `construir` que exige el contrato de `generar.py`.
+"""El .xlsx de CONCAR (cabecera y formatos de celda de la plantilla oficial) y el punto de entrada `desde_lineas` del
+contrato: las líneas neutrales del libro, ya numeradas y cuadradas, proyectadas con la cabecera de su comprobante.
 """
 from __future__ import annotations
 
-import io
 from typing import Any
 
-from ...modelo import Comprobante, Libro
-from ... import partida_doble
-from ...formato import Opciones
+from ..._obsoleto import reexportar
 from ...asiento.faltas import NoExportable
-from ...asiento.resolucion import etiquetas_sub_diario, exigir_requisitos, limites_del_periodo, numerar
-from ...asiento.huella import huella
-from ...asiento.motor import lineas_del_comprobante
-from ..contrato import EXIGE_NUCLEO_ASIENTO, centro_en_anexo
-from . import datos, proyeccion
-from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, EXIGE, FORMATOS,
-                    HOJA, OPCIONES, PANEL)
+from ...asiento.indice import ComprobanteDelAsiento
+from ...asiento.lineas import LineaDiario
+from ...asiento.resolucion import etiquetas_sub_diario, limites_del_periodo
+from ...modelo import Libro
+from ..kit import Opciones
+from ..kit import xlsx as kit_xlsx
+from . import datos, proyeccion  # noqa: F401  (`datos` es un nombre que la 0.10 dejaba ver aquí)
+from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, EXIGE,  # noqa: F401
+                    FORMATOS, HOJA, OPCIONES, PANEL)
+
+# Lo que este módulo dejaba ver en la 0.10 y ya no usa: `construir` y lo que importaba para armar el asiento él mismo.
+__getattr__, _ = reexportar(__name__, {
+    "construir": "contaperu._compat.concar:construir",
+    "Comprobante": "contaperu.modelo:Comprobante",
+    "EXIGE_NUCLEO_ASIENTO": "contaperu.drivers.contrato:EXIGE_NUCLEO_ASIENTO",
+    "centro_en_anexo": "contaperu.drivers.contrato:centro_en_anexo",
+    "exigir_requisitos": "contaperu.asiento.resolucion:exigir_requisitos",
+    "huella": "contaperu.asiento.huella:huella",
+    "lineas_del_comprobante": "contaperu.asiento.motor:lineas_del_comprobante",
+    "numerar": "contaperu.asiento.resolucion:numerar",
+    "partida_doble": "contaperu.partida_doble",
+}, nuevas={"construir": "contaperu.api.exportar_archivo"})
+
+# CONCAR numera el asiento con MM + cuatro dígitos (`asiento.numerar_en_orden`).
+MAXIMO_CORRELATIVO = 9999
 
 
 class CorrelativoDesborda(NoExportable):
@@ -36,12 +51,9 @@ def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
 
 
 def escribir_xlsx(filas: list[dict[str, Any]]) -> bytes:
-    import openpyxl
     from openpyxl.styles import Alignment, Font, PatternFill
 
-    libro_excel = openpyxl.Workbook()
-    hoja = libro_excel.active
-    hoja.title = HOJA
+    libro_excel, hoja = kit_xlsx.libro_con_hoja(HOJA)
     # Formato de la plantilla oficial de CONCAR: titulos
     # en azul marino con letra blanca, notas sin relleno con la fila alta, panel
     # congelado en A4 y autofiltro sobre la fila de formatos.
@@ -83,47 +95,57 @@ def escribir_xlsx(filas: list[dict[str, Any]]) -> bytes:
         hoja.column_dimensions[columna].width = ancho
     hoja.freeze_panes = PANEL
     hoja.auto_filter.ref = AUTOFILTRO
-    salida = io.BytesIO()
-    libro_excel.save(salida)
-    return salida.getvalue()
+    return kit_xlsx.a_bytes(libro_excel)
 
 
-def construir(libro: Libro, comprobantes: list[Comprobante], config: dict, correlativos: dict[str, int],
-              opciones: Opciones = OPCIONES) -> tuple[bytes, dict]:
-    """Comprobantes (ya seleccionados y en orden) → bytes del .xlsx + el resumen que guarda quien exporta."""
+def _numero(entrada: ComprobanteDelAsiento) -> int:
+    """El número del asiento dentro de su sub-diario: lo que sigue a los dos dígitos del mes."""
+    return int(entrada.correlativo[2:])
+
+
+def _desbordan(indice: tuple[ComprobanteDelAsiento, ...]) -> dict[str, int]:
+    hasta: dict[str, int] = {}
+    for entrada in indice:
+        hasta[entrada.sub_diario] = max(hasta.get(entrada.sub_diario, 0), _numero(entrada))
+    return {s: n for s, n in hasta.items() if n > MAXIMO_CORRELATIVO}
+
+
+def _sub_diarios(indice: tuple[ComprobanteDelAsiento, ...], config: dict) -> dict[str, dict]:
+    """El rango de cada sub-diario, como lo guarda quien exporta para proponer el siguiente: su etiqueta, desde y hasta
+    qué número llegó, cuántos comprobantes lleva, los dos códigos `MMNNNN` y si desborda."""
+    etiquetas = etiquetas_sub_diario(config)
+    rangos: dict[str, dict] = {}
+    for entrada in indice:
+        n = _numero(entrada)
+        rango = rangos.setdefault(entrada.sub_diario, {"etiqueta": etiquetas.get(entrada.sub_diario, entrada.sub_diario),
+                                                      "desde": n, "hasta": n, "comprobantes": 0, "mes": entrada.correlativo[:2]})
+        rango["hasta"] = n
+        rango["comprobantes"] += 1
+    for rango in rangos.values():
+        mes = rango.pop("mes")
+        rango["desde_codigo"], rango["hasta_codigo"] = f"{mes}{rango['desde']:04d}", f"{mes}{rango['hasta']:04d}"
+        rango["desborda"] = rango["hasta"] > MAXIMO_CORRELATIVO
+    return rangos
+
+
+def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones: Opciones = OPCIONES, *,
+                 indice: tuple[ComprobanteDelAsiento, ...] = ()) -> tuple[bytes, dict]:
+    """Las líneas neutrales del libro, numeradas y cuadradas por el núcleo → el .xlsx y lo que CONCAR suma al resumen.
+
+    Cada fila lleva hechos de la cabecera de su comprobante que la línea no guarda: la glosa de la columna F y la tasa
+    entera del IGV de la AO, que se redondea desde el IGV y la base del comprobante y no desde la tasa ya redondeada de
+    la línea. Los trae el `indice`. Antes de escribir nada se niega si un sub-diario pasa de 9999."""
     if FORMATOS.get(libro.tipo) is None:
         raise ValueError("Tipo de libro no soportado")
-    es_venta = libro.es_venta
-    # Lo que CONCAR no puede importar sin: lo del núcleo (tipo con equivalencia, cuenta) y lo que
-    # este driver declara en EXIGE (centro de costo donde la cuenta lo lleva, moneda con código).
-    exigir_requisitos(comprobantes, config, es_venta, EXIGE_NUCLEO_ASIENTO | EXIGE)
-    # Los limites del mes del proceso: cada asiento se fecha por comprobante
-    # dentro de ellos (regla del 30-ago-2026; el detalle vive en `asiento.lineas_del_comprobante`).
-    limites = limites_del_periodo(libro)
-    numeros, rangos = numerar(comprobantes, config, libro.periodo, correlativos, es_venta)
-    # CONCAR numera con MM + cuatro dígitos: un sub-diario que pase de 9999 no se importa. Hasta el
-    # 11-sep-2026 lo comprobaba el portal antes de llamar aquí; la regla es de este formato.
-    desbordan = {s: r["hasta"] for s, r in rangos.items() if r.get("desborda")}
+    if lineas and not indice:
+        raise ValueError("CONCAR escribe cada fila con la cabecera de su comprobante: necesita el `indice` del asiento")
+    desbordan = _desbordan(indice)
     if desbordan:
         raise CorrelativoDesborda(desbordan)
-    # La contabilidad sale en lineas neutrales; aqui solo se proyectan a las columnas de CONCAR. En cuáles va el
-    # centro de costo lo eligen las columnas de la configuración.
-    anexos = centro_en_anexo(datos, config)
-    lineas, filas = [], []
-    for c in comprobantes:
-        propias = lineas_del_comprobante(c, config, limites, numeros[id(c)], opciones, es_venta, anexos)
-        lineas.extend(propias)
-        filas.extend(proyeccion.filas(c, propias, config))
-    # El asiento tiene que cuadrar ANTES de escribir un solo byte. Por construccion siempre
-    # cuadra, asi que esto es una red de seguridad: si salta, hay un error de verdad.
-    cuadre = partida_doble.exigir(lineas)
-    resumen = {
-        "filas": len(filas),
-        "fechas": "por comprobante (extemporáneos al " + limites[0].strftime("%d/%m/%Y") + ")",
-        "sub_diarios": {s: {"etiqueta": etiquetas_sub_diario(config).get(s, s), **r} for s, r in rangos.items()},
-        "debe": str(cuadre.debe), "haber": str(cuadre.haber),
-        # La huella del contenido (asiento/huella.py): con ella quien guarde este resumen reconoce la
-        # exportación si vuelve a salir. Va aquí porque este resumen es lo que se guarda.
-        "huella": huella(lineas),
-    }
+    filas: list[dict[str, Any]] = []
+    for entrada in indice:
+        filas.extend(proyeccion.filas(entrada.cabecera, entrada.lineas(lineas), config))
+    primero, _ = limites_del_periodo(libro)
+    resumen = {"fechas": "por comprobante (extemporáneos al " + primero.strftime("%d/%m/%Y") + ")",
+               "sub_diarios": _sub_diarios(indice, config)}
     return escribir_xlsx(filas), resumen

@@ -21,10 +21,12 @@ from typing import Any
 
 from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from ...asiento.lineas import LineaDiario
-from ...formato import Opciones
+from ..kit import Opciones
 from ...modelo import Libro
 
 NOMBRE = "csv"
+# Un formato neutral para leer o integrar: proyecta la línea neutral (`drivers.contrato.CANALES`).
+CANAL = "intercambio"
 OPCIONES = Opciones(fecha="AAAA-MM-DD", extension=".csv")
 FORMATOS = {"compra": "csv_asiento", "venta": "csv_asiento"}
 CONTENT_TYPE = "text/csv; charset=utf-8"
@@ -62,6 +64,11 @@ COLUMNAS: list[tuple[str, str]] = [
     ("detraccion.tasa", "detraccion_tasa"),
     ("detraccion.base", "detraccion_base"),
     ("tasa_igv", "tasa_igv"),
+    # Lo que un driver necesita para traducir sin adivinar (B5, 1.0): el papel de la línea y los códigos SUNAT del
+    # documento y de su referencia. Van al final para no mover las columnas de siempre.
+    ("rol", "rol"),
+    ("documento.tipo_cp", "doc_tipo_cp"),
+    ("referencia.tipo_cp", "ref_tipo_cp"),
 ]
 
 

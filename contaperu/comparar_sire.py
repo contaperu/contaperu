@@ -28,6 +28,8 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
+from . import _datos
+from ._obsoleto import avisar
 from .lectores import sire_txt
 
 # Nombres del Anexo 3 (RVIE), para que el informe diga "IGV" y no "campo 17".
@@ -74,10 +76,17 @@ VENTAS = Registro("venta", CAMPOS_RVIE, 9, set(range(14, 27)), 28)
 COMPRAS = Registro("compra", CAMPOS_RCE, 10, set(range(15, 26)), 27, i_contraparte=13)
 
 
-def leer(ruta: str | Path) -> list[list[str]]:
+def leer_bytes(datos: bytes) -> list[list[str]]:
     """Filas (lista de campos) de un TXT o del TXT dentro de un ZIP. El parseo es el
     de `sire_txt.leer_lineas` — era el mismo algoritmo copiado dos veces (30-ago-2026)."""
-    return sire_txt.leer_lineas(Path(ruta).read_bytes())
+    return sire_txt.leer_lineas(datos)
+
+
+def leer(ruta: str | Path) -> list[list[str]]:
+    """Como `leer_bytes`, desde la ruta de un archivo: la forma de la 0.x. Desde la 1.0 el disco lo lee quien llama
+    (la CLI) y aquí entran bytes; sigue funcionando, con aviso, hasta la 2.0."""
+    avisar("contaperu.comparar_sire.leer", "contaperu.comparar_sire.leer_bytes")
+    return leer_bytes(_datos.leer_archivo(ruta) or b"")
 
 
 def registro_de(rutas: list[str | Path], forzado: str = "") -> Registro:

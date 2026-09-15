@@ -1,220 +1,44 @@
-"""Generar el archivo de salida de un libro: el TXT del registro (y el ZIP con el
-que se sube a SUNAT) o el archivo de un driver que lleva cuentas: el Excel de asientos
-de CONCAR, el CSV, el registro de un sistema contable.
+"""`contaperu.generar`: la generación de la 0.x, que sigue funcionando con aviso hasta la 2.0.
 
-- Respeta el orden de entrada: el que ordena es quien llama (la API por fecha
-  y serie-número; los golden, tal cual vienen).
-- Excluye lo que el usuario excluyó y los duplicados; si queda algún comprobante
-  con observaciones de nivel `error`, no genera (`ErroresBloqueantes`) salvo que
-  se pida explícitamente `incluir_errores=True`.
-- El ZIP es reproducible (fecha fija en la entrada) para que dos exportaciones
-  iguales den los mismos bytes.
+Desde la 1.0 el archivo de un documento se pide a `contaperu.api.exportar_archivo`, que devuelve el mismo
+`Exportado`. Cada nombre de aquí resuelve a su copia con las firmas de la 0.10 (`contaperu._compat.generar`) y
+avisa con `RutaObsoleta` al usarse.
 """
 from __future__ import annotations
 
-import io
-import zipfile
-from dataclasses import dataclass
-from decimal import Decimal
+from ._obsoleto import reexportar
 
-from . import configuracion as _declaracion, drivers, partida_doble
-from .asiento.resolucion import exigir_requisitos, fundir_config
-from .asiento.huella import huella
-from .asiento.motor import lineas_del_libro
-from .configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
-from .drivers import contrato
-from .modelo import Comprobante, Libro, serie_y_numero
-from .formato import Opciones
+_DESTINOS = {
+    "CONFIGURACION_GENERAL": "contaperu._compat.generar:CONFIGURACION_GENERAL",
+    "CONFIG_POR_DEFECTO": "contaperu._compat.generar:CONFIG_POR_DEFECTO",
+    "Comprobante": "contaperu._compat.generar:Comprobante",
+    "ConfiguracionInvalida": "contaperu._compat.generar:ConfiguracionInvalida",
+    "ErroresBloqueantes": "contaperu._compat.generar:ErroresBloqueantes",
+    "Exportado": "contaperu._compat.generar:Exportado",
+    "Libro": "contaperu._compat.generar:Libro",
+    "Opciones": "contaperu._compat.generar:Opciones",
+    "contrato": "contaperu._compat.generar:contrato",
+    "drivers": "contaperu._compat.generar:drivers",
+    "errores_de": "contaperu._compat.generar:errores_de",
+    "etiqueta": "contaperu._compat.generar:etiqueta",
+    "exigir_requisitos": "contaperu._compat.generar:exigir_requisitos",
+    "fuera_de": "contaperu._compat.generar:fuera_de",
+    "fundir_config": "contaperu._compat.generar:fundir_config",
+    "generar": "contaperu._compat.generar:generar",
+    "huella": "contaperu._compat.generar:huella",
+    "lineas_de_texto": "contaperu._compat.generar:lineas_de_texto",
+    "lineas_del_libro": "contaperu._compat.generar:lineas_del_libro",
+    "partida_doble": "contaperu._compat.generar:partida_doble",
+    "seleccionar": "contaperu._compat.generar:seleccionar",
+    "serie_y_numero": "contaperu._compat.generar:serie_y_numero",
+}
+_NUEVAS = {
+    "Comprobante": "contaperu.api.Comprobante",
+    "ConfiguracionInvalida": "contaperu.api.ConfiguracionInvalida",
+    "ErroresBloqueantes": "contaperu.api.ErroresBloqueantes",
+    "Exportado": "contaperu.api.Exportado",
+    "Libro": "contaperu.api.Libro",
+    "generar": "contaperu.api.exportar_archivo",
+}
 
-
-class ErroresBloqueantes(Exception):
-    def __init__(self, errores: list[dict]):
-        super().__init__(f"{len(errores)} comprobante(s) con errores que bloquean la exportación")
-        self.errores = errores
-
-
-@dataclass
-class Exportado:
-    nombre: str          # nombre oficial del TXT (o del Excel)
-    nombre_comprimido: str   # '' en los drivers de archivo
-    formato: str         # 'sire_rvie', 'sire_rce', 'concar_xlsx', 'contasis_xlsx', 'csv_asiento' o el de un tercero
-    driver: str
-    texto: bytes             # el TXT; b'' en los drivers de archivo
-    comprimido: bytes        # el ZIP del TXT; b'' en los drivers de archivo
-    comprobantes: int        # cuántos comprobantes salieron
-    resumen: dict
-    # Lo que se guarda en Storage y se descarga: el ZIP del TXT, o el Excel tal cual.
-    archivo: str = ""
-    contenido: bytes = b""
-    content_type: str = "application/zip"
-
-    def __post_init__(self) -> None:
-        if not self.archivo:
-            self.archivo = self.nombre_comprimido or self.nombre
-        if not self.contenido:
-            self.contenido = self.comprimido
-
-
-def etiqueta(c: Comprobante) -> str:
-    return f"{c.tipo_cp} {serie_y_numero(c.serie, c.numero)}".strip()
-
-
-def errores_de(comprobantes: list[Comprobante]) -> list[dict]:
-    return [
-        {
-            "indice": i,
-            "comprobante": etiqueta(c),
-            "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "error"],
-        }
-        for i, c in enumerate(comprobantes)
-        if c.tiene_errores
-    ]
-
-
-def seleccionar(comprobantes: list[Comprobante]) -> list[Comprobante]:
-    return [c for c in comprobantes if not c.excluida and c.estado != "duplicada"]
-
-
-def fuera_de(comprobantes: list[Comprobante], tipos) -> list[Comprobante]:
-    """Los que este driver no puede llevar (hoy: el recibo por honorarios no se
-    anota en el registro que se declara a SUNAT, pero sí en el asiento contable)."""
-    return [c for c in comprobantes if c.tipo_cp in (tipos or frozenset())]
-
-
-def lineas_de_texto(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_POR_DEFECTO,
-                    opciones: Opciones | None = None) -> list[str]:
-    modulo = drivers.obtener(driver)
-    opciones = opciones or modulo.OPCIONES
-    return [modulo.linea(c, libro, i, opciones) for i, c in enumerate(comprobantes, start=1)]
-
-
-def _resumen(comprobantes: list[Comprobante], incluidos: list[Comprobante], errores: list, opciones: Opciones,
-             fuera: list[Comprobante] | None = None) -> dict:
-    def signo(c: Comprobante) -> Decimal:
-        return Decimal(-1) if (opciones.signo_nc and c.es_nota_credito) else Decimal(1)
-
-    return {
-        "comprobantes": len(incluidos),
-        "excluidos": sum(1 for c in comprobantes if c.excluida),
-        "duplicados": sum(1 for c in comprobantes if c.estado == "duplicada" and not c.excluida),
-        "con_aviso": sum(1 for c in incluidos if c.observaciones and not c.tiene_errores),
-        "con_error": len(errores),
-        # Comprobantes que este driver no puede llevar (recibos por honorarios en
-        # el SIRE): se anota para que el histórico no parezca que se perdieron.
-        "fuera_del_destino": len(fuera or []),
-        "total": str(sum((c.total * signo(c) for c in incluidos), Decimal("0.00"))),
-        "igv": str(sum((c.igv * signo(c) for c in incluidos), Decimal("0.00"))),
-    }
-
-
-def _desde_lineas(modulo, libro: Libro, comprobantes: list[Comprobante], opciones: Opciones,
-                  config: dict | None = None, correlativos: dict[str, int] | None = None) -> tuple[bytes, dict]:
-    """Un driver de asientos de la forma `desde_lineas`: el núcleo arma las líneas neutrales, las
-    numera y exige que cuadren; el driver solo las traduce. Así la contabilidad se escribe una vez
-    para todos los ERP, y un driver nuevo no puede equivocarse en una cuenta ni en un sentido."""
-    if config is None or correlativos is None:
-        raise ValueError(f"El driver {modulo.NOMBRE!r} arma asientos: necesita `config` y `correlativos`")
-    # Lo que ese destino exige (`contrato.exige`: lo del núcleo más su EXIGE) se comprueba ANTES de
-    # armar nada: un driver `desde_lineas` nunca ve los comprobantes, así que solo el núcleo puede.
-    exigir_requisitos(comprobantes, config, libro.es_venta, contrato.exige(modulo))
-    lineas, rangos = lineas_del_libro(libro, comprobantes, config, correlativos, opciones,
-                                      contrato.centro_en_anexo(modulo, config))
-    cuadre = partida_doble.exigir(lineas)
-    contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones)
-    return contenido, {"filas": len(lineas), "sub_diarios": dict(rangos),
-                       "debe": str(cuadre.debe), "haber": str(cuadre.haber), "huella": huella(lineas), **extra}
-
-
-def _desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], opciones: Opciones,
-                        config: dict | None = None) -> tuple[bytes, dict]:
-    """Un driver de registro de la forma `desde_comprobantes`: el sistema contable que importa su registro y arma
-    el asiento él mismo. No hay asiento que armar ni que numerar, pero sí cuentas que llevar: el núcleo exige lo
-    que ese destino pide (`contrato.exige`) y lo que su formato no lleva (`no_caben`) ANTES de llamarlo, y el
-    driver lee cada cuenta de `asiento.partes_de`
-    y `asiento.cuenta_tercero`, la misma resolución que usa el asiento. Sin asiento no hay cuadre ni huella."""
-    if config is None:
-        raise ValueError(f"El driver {modulo.NOMBRE!r} lleva cuentas: necesita `config`")
-    exigir_requisitos(comprobantes, config, libro.es_venta, contrato.exige(modulo))
-    fuera = contrato.no_caben(modulo, libro, comprobantes, config)
-    if fuera:
-        raise contrato.NoCabe(fuera)
-    return modulo.desde_comprobantes(libro, comprobantes, config, opciones)
-
-
-def _config_para(modulo, config: dict) -> dict:
-    """La configuración con la que se llama a un driver que lleva cuentas: la ya aplicada para él
-    (`operaciones.config_aplicada(configuracion, driver)`), comprobada contra lo que se configura para él —lo general y
-    su sección— y completada con sus valores por defecto. Quien llama aquí directamente recibe los mismos errores que
-    por la fachada, en vez de exportar con el valor de fábrica una clave que nadie leyó."""
-    secciones = [clave for clave in config if clave in drivers.DRIVERS]
-    if secciones:
-        raise ConfiguracionInvalida([f"`{clave}` es la sección de un sistema: aquí llega la configuración ya aplicada "
-                                     "(`operaciones.config_aplicada(configuracion, driver)`)" for clave in secciones])
-    errores = _declaracion.validar({k: v for k, v in config.items() if k != "imputaciones"},
-                                   (*CONFIGURACION_GENERAL, *contrato.configuracion(modulo)),
-                                   contrato.columnas_elegibles(modulo))
-    if errores:
-        raise ConfiguracionInvalida(errores)
-    return fundir_config({**CONFIG_POR_DEFECTO, **contrato.seccion_por_defecto(modulo)}, config)
-
-
-def generar(libro: Libro, comprobantes: list[Comprobante], driver: str = drivers.DRIVER_POR_DEFECTO,
-            opciones: Opciones | None = None, incluir_errores: bool = False, config: dict | None = None,
-            correlativos: dict[str, int] | None = None) -> Exportado:
-    """`config`, la configuración contable, la pide todo driver que lleva cuentas (`contrato.lleva_cuentas`), y
-    `correlativos`, además, el que arma asientos (`contrato.arma_asientos`)."""
-    modulo = drivers.obtener(driver)
-    opciones = opciones or modulo.OPCIONES
-    formato = drivers.formato_de(driver, libro.tipo)
-    incluidos = seleccionar(comprobantes)
-    # Cada driver se lleva lo que le toca: el TXT del SIRE deja fuera los
-    # recibos por honorarios; el Excel de CONCAR los lleva a su sub-diario.
-    fuera = fuera_de(incluidos, getattr(modulo, "EXCLUYE_TIPOS", None))
-    if fuera:
-        incluidos = [c for c in incluidos if c not in fuera]
-    errores = errores_de(incluidos)
-    if errores and not incluir_errores:
-        raise ErroresBloqueantes(errores)
-
-    forma = contrato.forma(modulo)
-    if forma in ("desde_lineas", "desde_comprobantes", "construir"):
-        if config is not None:
-            config = _config_para(modulo, config)
-        if forma == "desde_lineas":
-            contenido, extra = _desde_lineas(modulo, libro, incluidos, opciones, config, correlativos)
-        elif forma == "desde_comprobantes":
-            contenido, extra = _desde_comprobantes(modulo, libro, incluidos, opciones, config)
-        else:
-            if config is None or correlativos is None:
-                raise ValueError(f"El driver {modulo.NOMBRE!r} arma asientos: necesita `config` y `correlativos`")
-            contenido, extra = modulo.construir(libro, incluidos, config, correlativos, opciones)
-        nombre = modulo.nombre(libro, opciones)
-        return Exportado(
-            nombre=nombre, nombre_comprimido="", formato=formato, driver=driver, texto=b"", comprimido=b"",
-            comprobantes=len(incluidos),
-            resumen={**_resumen(comprobantes, incluidos, errores, opciones, fuera), **extra},
-            archivo=nombre, contenido=contenido,
-            content_type=getattr(modulo, "CONTENT_TYPE", "application/octet-stream"),
-        )
-
-    cuerpo = opciones.nueva_linea.join(lineas_de_texto(libro, incluidos, driver, opciones))
-    if cuerpo:
-        cuerpo += opciones.nueva_linea
-    if opciones.sanear:
-        texto = cuerpo.encode(opciones.codificacion)      # tras sanear() es ASCII: no puede fallar
-    else:
-        texto = cuerpo.encode("cp1252", errors="replace")  # lo que históricamente exigían los libros electrónicos
-
-    nombre = modulo.nombre(libro, opciones)
-    nombre_comprimido = nombre.rsplit(".", 1)[0] + ".zip"
-    memoria = io.BytesIO()
-    with zipfile.ZipFile(memoria, "w", zipfile.ZIP_DEFLATED) as archivo_zip:
-        info = zipfile.ZipInfo(nombre, date_time=(1980, 1, 1, 0, 0, 0))
-        info.compress_type = zipfile.ZIP_DEFLATED
-        archivo_zip.writestr(info, texto)
-
-    return Exportado(
-        nombre=nombre, nombre_comprimido=nombre_comprimido, formato=formato, driver=driver,
-        texto=texto, comprimido=memoria.getvalue(), comprobantes=len(incluidos),
-        resumen=_resumen(comprobantes, incluidos, errores, opciones, fuera),
-    )
+__getattr__, __dir__ = reexportar(__name__, _DESTINOS, nuevas=_NUEVAS)

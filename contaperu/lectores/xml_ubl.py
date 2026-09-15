@@ -19,6 +19,7 @@ from xml.etree.ElementTree import Element
 from defusedxml import ElementTree as DET
 
 from .. import catalogos as cat
+from ..errores import ErrorContaperu
 from ..modelo import Comprobante, Libro, fecha, monto, solo_digitos
 
 NS = {
@@ -31,7 +32,7 @@ RAIZ_CDR = "ApplicationResponse"
 RAICES = {"Invoice": None, "CreditNote": "07", "DebitNote": "08"}
 
 
-class XmlInvalido(ValueError):
+class XmlInvalido(ErrorContaperu, ValueError):
     """El archivo no es un comprobante electrónico que podamos leer."""
 
 

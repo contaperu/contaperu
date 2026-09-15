@@ -1,0 +1,134 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/documento_anotado.schema.json",
+ "title": "Documento revisado",
+ "description": "Un documento `open-accounting` con lo que el motor anota al leerlo o revisarlo: `_lectura`, `_revision` o `_detracciones`.",
+ "allOf": [
+  {
+   "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json"
+  },
+  {
+   "type": "object",
+   "properties": {
+    "_lectura": {
+     "type": "object",
+     "properties": {
+      "archivos": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "ignorados": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "pendientes_de_leer": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "errores": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "archivo": {
+          "type": "string"
+         },
+         "motivo": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "archivo",
+         "motivo"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "ignorados",
+      "errores",
+      "pendientes_de_leer"
+     ],
+     "additionalProperties": false
+    },
+    "_revision": {
+     "type": "object",
+     "properties": {
+      "comprobantes": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "con_error": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "con_aviso": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "detracciones_descartadas": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "bloqueantes": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "serie_numero": {
+          "type": "string"
+         },
+         "observaciones": {
+          "type": "array",
+          "items": {
+           "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json#/$defs/observacion"
+          }
+         }
+        },
+        "required": [
+         "serie_numero",
+         "observaciones"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "comprobantes",
+      "con_error",
+      "con_aviso",
+      "detracciones_descartadas",
+      "bloqueantes"
+     ],
+     "additionalProperties": false
+    },
+    "_detracciones": {
+     "type": "object",
+     "properties": {
+      "revisadas": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "descartadas": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "codigos_reconocidos": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      }
+     },
+     "required": [
+      "revisadas",
+      "descartadas",
+      "codigos_reconocidos"
+     ],
+     "additionalProperties": false
+    }
+   }
+  }
+ ]
+}

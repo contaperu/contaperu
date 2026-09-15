@@ -14,8 +14,9 @@ from jsonschema import Draft202012Validator
 
 from contaperu import asiento as asi
 from contaperu.drivers import concar as driver_concar
-from contaperu import generar as gen
-from contaperu import operaciones as op
+from contaperu.pipeline import salida as gen
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import csv as driver_csv
 from contaperu.modelo import Comprobante, Libro
 from util import comprobante, con_imputaciones, en_secciones
@@ -23,7 +24,7 @@ from util import comprobante, con_imputaciones, en_secciones
 def configuracion(config_contable: dict | None = None) -> dict:
     """La configuración aplicada para CONCAR (la del entorno sobre la de por defecto) con las imputaciones de las
     pruebas. Se escribe plana y se guarda en su sección (`util.en_secciones`)."""
-    return con_imputaciones(op.config_aplicada(en_secciones(config_contable, "concar"), "concar"))
+    return con_imputaciones(prep.config_aplicada(en_secciones(config_contable, "concar"), "concar"))
 
 
 CONTAB = configuracion(None)
@@ -71,7 +72,7 @@ def test_el_codigo_de_moneda_del_erp_vuelve_a_iso():
     """En el Excel la moneda es 'MN' o 'US'; en el estándar, PEN y USD."""
     pen = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(), CONTAB, MES, "080001"), CONTAB)[0]
     usd = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(moneda="USD", tipo_cambio="3.5"), CONTAB, MES, "080002"), CONTAB)[0]
-    assert pen.moneda == "PEN" and usd.moneda == "USD" and usd.tipo_cambio == 3.5
+    assert pen.moneda == "PEN" and usd.moneda == "USD" and usd.tipo_cambio == "3.5"
 
 
 def test_la_linea_de_detraccion_lleva_su_bloque():
@@ -81,7 +82,7 @@ def test_la_linea_de_detraccion_lleva_su_bloque():
     det = lineas[-1]
     assert det.cuenta == "421203" and det.debe_haber == "H" and det.importe == "198.00"
     assert det.documento["tipo"] == "DR" and det.documento["serie_numero"] == "9999999999"
-    assert det.detraccion == {"codigo_interno": "02702", "tasa": 4.0, "base": "4956.00"}
+    assert det.detraccion == {"codigo_interno": "02702", "tasa": "4", "base": "4956.00"}
     assert det.glosa.startswith("DETRACCION - ")
 
 
@@ -173,7 +174,7 @@ def _csv(**opciones_csv) -> bytes:
 
 
 def test_el_csv_escribe_una_fila_por_linea():
-    config = con_imputaciones(op.config_aplicada(None, "csv"))      # la del CSV: sin lo propio de CONCAR
+    config = con_imputaciones(prep.config_aplicada(None, "csv"))      # la del CSV: sin lo propio de CONCAR
     exp = gen.generar(libro_compras(), [factura()], "csv", config=config, correlativos={"11": 1})
     resumen = exp.resumen
     texto = exp.contenido.decode("utf-8-sig")
@@ -200,3 +201,20 @@ def test_el_csv_esta_registrado_como_driver():
     assert drivers.formato_de("csv", "compra") == "csv_asiento"
     with pytest.raises(ValueError):
         drivers.obtener("un-erp-que-no-existe")
+
+
+def test_el_csv_lleva_el_rol_y_los_codigos_sunat():
+    """B5: lo que un driver necesita para no adivinar sale en tres columnas al final, llenas."""
+    import csv
+    import io
+
+    from contaperu import api
+    from util import GOLDEN
+
+    documento = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
+    texto = api.exportar(documento, driver="csv", configuracion={"cuentas": {"gasto": "659999"},
+                                                                  "usa_centros_costo": False})["texto"]
+    filas = list(csv.DictReader(io.StringIO(texto.lstrip("\ufeff")), delimiter=";"))
+    assert list(filas[0])[-3:] == ["rol", "doc_tipo_cp", "ref_tipo_cp"]
+    assert [f["rol"] for f in filas[:3]] == ["principal", "igv", "tercero"]
+    assert all(f["doc_tipo_cp"] for f in filas) and {f["ref_tipo_cp"] for f in filas} == {""}

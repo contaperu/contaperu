@@ -17,7 +17,8 @@ from pathlib import Path
 
 import pytest
 
-from contaperu import operaciones as op
+from contaperu import api
+from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import contasis
 from contaperu.modelo import Comprobante, Libro
 
@@ -115,7 +116,7 @@ def contab_de(extra: dict | None) -> dict:
     """La configuración aplicada para CONTASIS, con la imputación del caso, que llega aparte."""
     extra = dict(extra or {})
     imputaciones = extra.pop("imputaciones", None)
-    config = op.config_aplicada(extra, "contasis")
+    config = prep.config_aplicada(extra, "contasis")
     return {**config, "imputaciones": imputaciones} if imputaciones else config
 
 

@@ -1,0 +1,6629 @@
+{
+ "revisar": {
+  "open_accounting": "0.3",
+  "libro": {
+   "ruc": "20601234567",
+   "razon_social": "EMPRESA DE PRUEBA SAC",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "comprobantes": [
+   {
+    "tipo_cp": "01",
+    "serie": "F001",
+    "numero": "00045680",
+    "numero_final": "",
+    "fecha_emision": "2026-01-10",
+    "fecha_vencimiento": "2026-02-10",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20677777771",
+    "contraparte_nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "40000.00",
+    "igv": "7200.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "47200.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "ok",
+    "excluida": false,
+    "observaciones": []
+   },
+   {
+    "tipo_cp": "01",
+    "serie": "E001",
+    "numero": "00012347",
+    "numero_final": "",
+    "fecha_emision": "2026-01-18",
+    "fecha_vencimiento": "2026-02-18",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20633333336",
+    "contraparte_nombre": "IMPORTADORA ASIA PACIFICO SRL",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "25000.00",
+    "igv": "4500.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "29500.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "ok",
+    "excluida": false,
+    "observaciones": []
+   },
+   {
+    "tipo_cp": "14",
+    "serie": "",
+    "numero": "12345679",
+    "numero_final": "",
+    "fecha_emision": "2026-01-25",
+    "fecha_vencimiento": "2026-02-25",
+    "condicion_pago": "",
+    "contraparte_tipo_doc": "6",
+    "contraparte_doc": "20605555552",
+    "contraparte_nombre": "ELECTRICIDAD DE PRUEBA SAA",
+    "moneda": "PEN",
+    "tipo_cambio": null,
+    "base_gravada": "1800.00",
+    "igv": "324.00",
+    "dscto_base": "0.00",
+    "dscto_igv": "0.00",
+    "exonerado": "0.00",
+    "inafecto": "0.00",
+    "exportacion": "0.00",
+    "isc": "0.00",
+    "base_ivap": "0.00",
+    "ivap": "0.00",
+    "icbper": "0.00",
+    "otros": "0.00",
+    "total": "2124.00",
+    "retencion": "0.00",
+    "destino_igv": "DG",
+    "valor_no_gravado": null,
+    "anio_dua": "",
+    "cod_dep_aduanera": "",
+    "clasif_bienes": "",
+    "ref_fecha": null,
+    "ref_tipo_cp": "",
+    "ref_serie": "",
+    "ref_numero": "",
+    "detraccion": null,
+    "id_contrato": "",
+    "concepto": "",
+    "origen": "xml",
+    "confianza": "1.00",
+    "archivo_nombre": "",
+    "id_externo": "",
+    "datos_originales": {},
+    "estado": "ok",
+    "excluida": false,
+    "observaciones": []
+   }
+  ],
+  "_revision": {
+   "comprobantes": 3,
+   "con_error": 0,
+   "con_aviso": 0,
+   "detracciones_descartadas": 0,
+   "bloqueantes": []
+  }
+ },
+ "diagnosticar/concar": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "driver": "concar",
+  "exige": [
+   "centro_costo",
+   "cuenta_contable",
+   "moneda",
+   "tipo_cp"
+  ],
+  "listo_para_exportar": true,
+  "por_que_no": [],
+  "que_falta": [],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 3,
+   "saldrian": 3,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 0,
+   "con_aviso": 0
+  },
+  "bloqueantes": [],
+  "avisos": [],
+  "faltantes": {
+   "sin_sigla": [],
+   "sin_codigo_de_moneda": [],
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": [],
+   "sin_correlativo": [
+    "11"
+   ]
+  },
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20677777771": {
+    "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "comprobantes": 1,
+    "total": "47200.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "IMPORTADORA ASIA PACIFICO SRL",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20605555552": {
+    "nombre": "ELECTRICIDAD DE PRUEBA SAA",
+    "comprobantes": 1,
+    "total": "2124.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
+   }
+  },
+  "sub_diarios": {
+   "11": {
+    "etiqueta": "Compras",
+    "comprobantes": 3,
+    "empieza_en": 1
+   }
+  },
+  "saldrian": [
+   "F001-00045680",
+   "E001-00012347",
+   "12345679"
+  ]
+ },
+ "generar_asiento/concar": {
+  "open_accounting": "0.3",
+  "libro": {
+   "ruc": "20601234567",
+   "razon_social": "EMPRESA DE PRUEBA SAC",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "asiento": [
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "40000.00",
+    "rol": "principal",
+    "sub_diario": "11",
+    "correlativo": "010001",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "7200.00",
+    "rol": "igv",
+    "sub_diario": "11",
+    "correlativo": "010001",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "IGV - MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "47200.00",
+    "rol": "tercero",
+    "sub_diario": "11",
+    "correlativo": "010001",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "contraparte_doc": "20677777771",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "25000.00",
+    "rol": "principal",
+    "sub_diario": "11",
+    "correlativo": "010002",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IMPORTADORA ASIA PACIFICO SRL",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "4500.00",
+    "rol": "igv",
+    "sub_diario": "11",
+    "correlativo": "010002",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IGV - IMPORTADORA ASIA PACIFICO SRL",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "29500.00",
+    "rol": "tercero",
+    "sub_diario": "11",
+    "correlativo": "010002",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IMPORTADORA ASIA PACIFICO SRL",
+    "contraparte_doc": "20633333336",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "1800.00",
+    "rol": "principal",
+    "sub_diario": "11",
+    "correlativo": "010003",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "ELECTRICIDAD DE PRUEBA SAA",
+    "documento": {
+     "tipo": "RC",
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "324.00",
+    "rol": "igv",
+    "sub_diario": "11",
+    "correlativo": "010003",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "IGV - ELECTRICIDAD DE PRUEBA SAA",
+    "documento": {
+     "tipo": "RC",
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "2124.00",
+    "rol": "tercero",
+    "sub_diario": "11",
+    "correlativo": "010003",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "ELECTRICIDAD DE PRUEBA SAA",
+    "contraparte_doc": "20605555552",
+    "documento": {
+     "tipo": "RC",
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   }
+  ],
+  "_asiento": {
+   "lineas": 9,
+   "sub_diarios": {
+    "11": {
+     "desde": 1,
+     "hasta": 3,
+     "comprobantes": 3,
+     "desde_codigo": "010001",
+     "hasta_codigo": "010003",
+     "desborda": false
+    }
+   },
+   "cuadre": {
+    "cuadra": true,
+    "debe": "78824.00",
+    "haber": "78824.00",
+    "diferencia": "0.00",
+    "lineas": 9,
+    "sin_sentido": 0
+   },
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
+  }
+ },
+ "exportar/concar": {
+  "driver": "concar",
+  "formato": "concar_xlsx",
+  "archivo": "CONCAR_20601234567_202601_COMPRAS.xlsx",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00",
+   "filas": 9,
+   "sub_diarios": {
+    "11": {
+     "etiqueta": "Compras",
+     "desde": 1,
+     "hasta": 3,
+     "comprobantes": 3,
+     "desde_codigo": "010001",
+     "hasta_codigo": "010003",
+     "desborda": false
+    }
+   },
+   "debe": "78824.00",
+   "haber": "78824.00",
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "fechas": "por comprobante (extemporáneos al 01/01/2026)"
+  },
+  "_exportacion": {
+   "driver": "concar",
+   "archivo": "CONCAR_20601234567_202601_COMPRAS.xlsx",
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "_hojas": {
+   "CONCAR": [
+    [
+     [
+      "str",
+      "WE"
+     ],
+     [
+      "str",
+      "Sub Diario"
+     ],
+     [
+      "str",
+      "Número de Comprobante"
+     ],
+     [
+      "str",
+      "Fecha de Comprobante"
+     ],
+     [
+      "str",
+      "Código de Moneda"
+     ],
+     [
+      "str",
+      "Glosa Principal"
+     ],
+     [
+      "str",
+      "Tipo de Cambio"
+     ],
+     [
+      "str",
+      "Tipo de Conversión"
+     ],
+     [
+      "str",
+      "Flag de Conversión de Moneda"
+     ],
+     [
+      "str",
+      "Fecha Tipo de Cambio"
+     ],
+     [
+      "str",
+      "Cuenta Contable"
+     ],
+     [
+      "str",
+      "Código de Anexo"
+     ],
+     [
+      "str",
+      "Código de Centro de Costo"
+     ],
+     [
+      "str",
+      "Debe / Haber"
+     ],
+     [
+      "str",
+      "Importe Original"
+     ],
+     [
+      "str",
+      "Importe en Dólares"
+     ],
+     [
+      "str",
+      "Importe en Soles"
+     ],
+     [
+      "str",
+      "Tipo de Documento"
+     ],
+     [
+      "str",
+      "Número de Documento"
+     ],
+     [
+      "str",
+      "Fecha de Documento"
+     ],
+     [
+      "str",
+      "Fecha de Vencimiento"
+     ],
+     [
+      "str",
+      "Código de Area"
+     ],
+     [
+      "str",
+      "Glosa Detalle"
+     ],
+     [
+      "str",
+      "Código de Anexo Auxiliar"
+     ],
+     [
+      "str",
+      "Medio de Pago"
+     ],
+     [
+      "str",
+      "Tipo de Documento de Referencia"
+     ],
+     [
+      "str",
+      "Número de Documento Referencia"
+     ],
+     [
+      "str",
+      "Fecha Documento Referencia"
+     ],
+     [
+      "str",
+      "Nro Máq. Registradora Tipo Doc. Ref."
+     ],
+     [
+      "str",
+      "Base Imponible Documento Referencia"
+     ],
+     [
+      "str",
+      "IGV Documento Provisión"
+     ],
+     [
+      "str",
+      "Tipo Referencia en estado MQ"
+     ],
+     [
+      "str",
+      "Número Serie Caja Registradora"
+     ],
+     [
+      "str",
+      "Fecha de Operación"
+     ],
+     [
+      "str",
+      "Tipo de Tasa"
+     ],
+     [
+      "str",
+      "Tasa Detracción/Percepción"
+     ],
+     [
+      "str",
+      "Importe Base Detracción/Percepción Dólares"
+     ],
+     [
+      "str",
+      "Importe Base Detracción/Percepción Soles"
+     ],
+     [
+      "str",
+      "Tipo Cambio para 'F'"
+     ],
+     [
+      "str",
+      "Importe de IGV sin derecho crédito fiscal"
+     ],
+     [
+      "str",
+      "Tasa IGV"
+     ]
+    ],
+    [
+     [
+      "str",
+      "Contabilidad"
+     ],
+     [
+      "str",
+      "Ver T.G. 02"
+     ],
+     [
+      "str",
+      "Los dos primeros dígitos son el mes y los otros 4 siguientes un correlativo"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Ver T.G. 03"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Llenar  solo si Tipo de Conversión es 'C'. Debe estar entre >=0 y <=9999.999999"
+     ],
+     [
+      "str",
+      "Solo: 'C'= Especial, 'M'=Compra, 'V'=Venta , 'F' De acuerdo a fecha"
+     ],
+     [
+      "str",
+      "Solo: 'S' = Si se convierte, 'N'= No se convierte"
+     ],
+     [
+      "str",
+      "Si  Tipo de Conversión 'F'"
+     ],
+     [
+      "str",
+      "Debe existir en el Plan de Cuentas"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene seleccionado Tipo de Anexo, debe existir en la tabla de Anexos"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado C. Costo, Ver T.G. 05"
+     ],
+     [
+      "str",
+      "'D' ó 'H'"
+     ],
+     [
+      "str",
+      "Importe original de la cuenta contable. Obligatorio, debe estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Importe de la Cuenta Contable en Dólares. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Importe de la Cuenta Contable en Soles. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estra entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia Ver T.G. 06"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia Incluye Serie y Número"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitada la Fecha de Vencimiento"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitada el Area. Ver T.G. 26"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene seleccionado Tipo de Anexo Referencia"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado Tipo Medio Pago. Ver T.G. 'S1'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NA' ó 'ND' Ver T.G. 06"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND', incluye Serie y Número"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'. Solo cuando el Tipo Documento de Referencia 'TK'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable teien Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene Habilitado Documento Referencia 2. Cuando Tipo de Documento es 'TK', consignar la fecha de emision del ticket"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene conf. en Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29. Debe estar entre >=0 y <=999.99"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Especificar solo si Tipo Conversión es 'F'. Se permite 'M' Compra y 'V' Venta."
+     ],
+     [
+      "str",
+      "Especificar solo para comprobantes de compras con IGV sin derecho de crédito Fiscal. Se detalle solo en la cuenta 42xxxx"
+     ],
+     [
+      "str",
+      "Obligatorio para comprobantes de compras, valores validos 0,10,18."
+     ]
+    ],
+    [
+     [
+      "str",
+      "Tamaño/Formato"
+     ],
+     [
+      "str",
+      "4 Caracteres"
+     ],
+     [
+      "str",
+      "6 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "40 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 11, 6"
+     ],
+     [
+      "str",
+      "1 Caracteres"
+     ],
+     [
+      "str",
+      "1 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "12 Caracteres"
+     ],
+     [
+      "str",
+      "18 Caracteres"
+     ],
+     [
+      "str",
+      "6 Caracteres"
+     ],
+     [
+      "str",
+      "1 Carácter"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "3 Caracteres"
+     ],
+     [
+      "str",
+      "30 Caracteres"
+     ],
+     [
+      "str",
+      "18 Caracteres"
+     ],
+     [
+      "str",
+      "8 Caracteres"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "'MQ'"
+     ],
+     [
+      "str",
+      "15 caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "5 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "1 Caracter"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010001"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "659999"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      40000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      40000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-45680"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010001"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      7200
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      7200
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-45680"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - MAYORISTA NACIONAL DE PR"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010001"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "421201"
+     ],
+     [
+      "str",
+      "20677777771"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      47200
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      47200
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-45680"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010002"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "659999"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "E001-12347"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010002"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "E001-12347"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - IMPORTADORA ASIA PACIFIC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010002"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "421201"
+     ],
+     [
+      "str",
+      "20633333336"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "E001-12347"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010003"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "659999"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      1800
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1800
+     ],
+     [
+      "str",
+      "RC"
+     ],
+     [
+      "str",
+      "12345679"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010003"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      324
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      324
+     ],
+     [
+      "str",
+      "RC"
+     ],
+     [
+      "str",
+      "12345679"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - ELECTRICIDAD DE PRUEBA S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010003"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "421201"
+     ],
+     [
+      "str",
+      "20605555552"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      2124
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      2124
+     ],
+     [
+      "str",
+      "RC"
+     ],
+     [
+      "str",
+      "12345679"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ]
+   ]
+  }
+ },
+ "exportar_con_observados/concar": {
+  "driver": "concar",
+  "formato": "concar_xlsx",
+  "archivo": "CONCAR_20601234567_202601_COMPRAS.xlsx",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00",
+   "filas": 9,
+   "sub_diarios": {
+    "11": {
+     "etiqueta": "Compras",
+     "desde": 1,
+     "hasta": 3,
+     "comprobantes": 3,
+     "desde_codigo": "010001",
+     "hasta_codigo": "010003",
+     "desborda": false
+    }
+   },
+   "debe": "78824.00",
+   "haber": "78824.00",
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "fechas": "por comprobante (extemporáneos al 01/01/2026)"
+  },
+  "_exportacion": {
+   "driver": "concar",
+   "archivo": "CONCAR_20601234567_202601_COMPRAS.xlsx",
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "_hojas": {
+   "CONCAR": [
+    [
+     [
+      "str",
+      "WE"
+     ],
+     [
+      "str",
+      "Sub Diario"
+     ],
+     [
+      "str",
+      "Número de Comprobante"
+     ],
+     [
+      "str",
+      "Fecha de Comprobante"
+     ],
+     [
+      "str",
+      "Código de Moneda"
+     ],
+     [
+      "str",
+      "Glosa Principal"
+     ],
+     [
+      "str",
+      "Tipo de Cambio"
+     ],
+     [
+      "str",
+      "Tipo de Conversión"
+     ],
+     [
+      "str",
+      "Flag de Conversión de Moneda"
+     ],
+     [
+      "str",
+      "Fecha Tipo de Cambio"
+     ],
+     [
+      "str",
+      "Cuenta Contable"
+     ],
+     [
+      "str",
+      "Código de Anexo"
+     ],
+     [
+      "str",
+      "Código de Centro de Costo"
+     ],
+     [
+      "str",
+      "Debe / Haber"
+     ],
+     [
+      "str",
+      "Importe Original"
+     ],
+     [
+      "str",
+      "Importe en Dólares"
+     ],
+     [
+      "str",
+      "Importe en Soles"
+     ],
+     [
+      "str",
+      "Tipo de Documento"
+     ],
+     [
+      "str",
+      "Número de Documento"
+     ],
+     [
+      "str",
+      "Fecha de Documento"
+     ],
+     [
+      "str",
+      "Fecha de Vencimiento"
+     ],
+     [
+      "str",
+      "Código de Area"
+     ],
+     [
+      "str",
+      "Glosa Detalle"
+     ],
+     [
+      "str",
+      "Código de Anexo Auxiliar"
+     ],
+     [
+      "str",
+      "Medio de Pago"
+     ],
+     [
+      "str",
+      "Tipo de Documento de Referencia"
+     ],
+     [
+      "str",
+      "Número de Documento Referencia"
+     ],
+     [
+      "str",
+      "Fecha Documento Referencia"
+     ],
+     [
+      "str",
+      "Nro Máq. Registradora Tipo Doc. Ref."
+     ],
+     [
+      "str",
+      "Base Imponible Documento Referencia"
+     ],
+     [
+      "str",
+      "IGV Documento Provisión"
+     ],
+     [
+      "str",
+      "Tipo Referencia en estado MQ"
+     ],
+     [
+      "str",
+      "Número Serie Caja Registradora"
+     ],
+     [
+      "str",
+      "Fecha de Operación"
+     ],
+     [
+      "str",
+      "Tipo de Tasa"
+     ],
+     [
+      "str",
+      "Tasa Detracción/Percepción"
+     ],
+     [
+      "str",
+      "Importe Base Detracción/Percepción Dólares"
+     ],
+     [
+      "str",
+      "Importe Base Detracción/Percepción Soles"
+     ],
+     [
+      "str",
+      "Tipo Cambio para 'F'"
+     ],
+     [
+      "str",
+      "Importe de IGV sin derecho crédito fiscal"
+     ],
+     [
+      "str",
+      "Tasa IGV"
+     ]
+    ],
+    [
+     [
+      "str",
+      "Contabilidad"
+     ],
+     [
+      "str",
+      "Ver T.G. 02"
+     ],
+     [
+      "str",
+      "Los dos primeros dígitos son el mes y los otros 4 siguientes un correlativo"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Ver T.G. 03"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Llenar  solo si Tipo de Conversión es 'C'. Debe estar entre >=0 y <=9999.999999"
+     ],
+     [
+      "str",
+      "Solo: 'C'= Especial, 'M'=Compra, 'V'=Venta , 'F' De acuerdo a fecha"
+     ],
+     [
+      "str",
+      "Solo: 'S' = Si se convierte, 'N'= No se convierte"
+     ],
+     [
+      "str",
+      "Si  Tipo de Conversión 'F'"
+     ],
+     [
+      "str",
+      "Debe existir en el Plan de Cuentas"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene seleccionado Tipo de Anexo, debe existir en la tabla de Anexos"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado C. Costo, Ver T.G. 05"
+     ],
+     [
+      "str",
+      "'D' ó 'H'"
+     ],
+     [
+      "str",
+      "Importe original de la cuenta contable. Obligatorio, debe estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Importe de la Cuenta Contable en Dólares. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Importe de la Cuenta Contable en Soles. Obligatorio si Flag de Conversión de Moneda esta en 'N', debe estra entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia Ver T.G. 06"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia Incluye Serie y Número"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado el Documento Referencia"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitada la Fecha de Vencimiento"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitada el Area. Ver T.G. 26"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene seleccionado Tipo de Anexo Referencia"
+     ],
+     [
+      "str",
+      "Si Cuenta Contable tiene habilitado Tipo Medio Pago. Ver T.G. 'S1'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NA' ó 'ND' Ver T.G. 06"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND', incluye Serie y Número"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'. Solo cuando el Tipo Documento de Referencia 'TK'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si Tipo de Documento es 'NC', 'NA' ó 'ND'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable teien Habilitado Documento Referencia 2 y  Tipo de Documento es 'TK'"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene Habilitado Documento Referencia 2. Cuando Tipo de Documento es 'TK', consignar la fecha de emision del ticket"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene conf. en Tasa:  Si es '1' ver T.G. 28 y '2' ver T.G. 29. Debe estar entre >=0 y <=999.99"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Si la Cuenta Contable tiene configurada la Tasa. Debe ser el importe total del documento y estar entre >=0 y <=99999999999.99"
+     ],
+     [
+      "str",
+      "Especificar solo si Tipo Conversión es 'F'. Se permite 'M' Compra y 'V' Venta."
+     ],
+     [
+      "str",
+      "Especificar solo para comprobantes de compras con IGV sin derecho de crédito Fiscal. Se detalle solo en la cuenta 42xxxx"
+     ],
+     [
+      "str",
+      "Obligatorio para comprobantes de compras, valores validos 0,10,18."
+     ]
+    ],
+    [
+     [
+      "str",
+      "Tamaño/Formato"
+     ],
+     [
+      "str",
+      "4 Caracteres"
+     ],
+     [
+      "str",
+      "6 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "40 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 11, 6"
+     ],
+     [
+      "str",
+      "1 Caracteres"
+     ],
+     [
+      "str",
+      "1 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "12 Caracteres"
+     ],
+     [
+      "str",
+      "18 Caracteres"
+     ],
+     [
+      "str",
+      "6 Caracteres"
+     ],
+     [
+      "str",
+      "1 Carácter"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "3 Caracteres"
+     ],
+     [
+      "str",
+      "30 Caracteres"
+     ],
+     [
+      "str",
+      "18 Caracteres"
+     ],
+     [
+      "str",
+      "8 Caracteres"
+     ],
+     [
+      "str",
+      "2 Caracteres"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "20 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "'MQ'"
+     ],
+     [
+      "str",
+      "15 caracteres"
+     ],
+     [
+      "str",
+      "dd/mm/aaaa"
+     ],
+     [
+      "str",
+      "5 Caracteres"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "1 Caracter"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ],
+     [
+      "str",
+      "Numérico 14,2"
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010001"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "659999"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      40000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      40000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-45680"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010001"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      7200
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      7200
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-45680"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - MAYORISTA NACIONAL DE PR"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010001"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "str",
+      "421201"
+     ],
+     [
+      "str",
+      "20677777771"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      47200
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      47200
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "F001-45680"
+     ],
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTO"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010002"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "659999"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "E001-12347"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010002"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "E001-12347"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - IMPORTADORA ASIA PACIFIC"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010002"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "str",
+      "421201"
+     ],
+     [
+      "str",
+      "20633333336"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "str",
+      "FT"
+     ],
+     [
+      "str",
+      "E001-12347"
+     ],
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010003"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "659999"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      1800
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1800
+     ],
+     [
+      "str",
+      "RC"
+     ],
+     [
+      "str",
+      "12345679"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010003"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "401111"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "D"
+     ],
+     [
+      "int",
+      324
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      324
+     ],
+     [
+      "str",
+      "RC"
+     ],
+     [
+      "str",
+      "12345679"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "IGV - ELECTRICIDAD DE PRUEBA S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ],
+    [
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "11"
+     ],
+     [
+      "str",
+      "010003"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "MN"
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "V"
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "str",
+      "421201"
+     ],
+     [
+      "str",
+      "20605555552"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "H"
+     ],
+     [
+      "int",
+      2124
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      2124
+     ],
+     [
+      "str",
+      "RC"
+     ],
+     [
+      "str",
+      "12345679"
+     ],
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      18
+     ]
+    ]
+   ]
+  }
+ },
+ "diagnosticar/contasis": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "driver": "contasis",
+  "exige": [
+   "cuenta_contable",
+   "cuenta_unica"
+  ],
+  "listo_para_exportar": true,
+  "por_que_no": [],
+  "que_falta": [],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 3,
+   "saldrian": 3,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 0,
+   "con_aviso": 0
+  },
+  "bloqueantes": [],
+  "avisos": [],
+  "faltantes": {
+   "reparto_no_admitido": [],
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": [],
+   "no_cabe": {}
+  },
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20677777771": {
+    "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "comprobantes": 1,
+    "total": "47200.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "IMPORTADORA ASIA PACIFICO SRL",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20605555552": {
+    "nombre": "ELECTRICIDAD DE PRUEBA SAA",
+    "comprobantes": 1,
+    "total": "2124.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
+   }
+  },
+  "sub_diarios": {},
+  "saldrian": [
+   "F001-00045680",
+   "E001-00012347",
+   "12345679"
+  ]
+ },
+ "generar_asiento/contasis": {
+  "_error": "ValueError",
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+ },
+ "exportar/contasis": {
+  "driver": "contasis",
+  "formato": "contasis_xlsx",
+  "archivo": "CONTASIS_20601234567_202601_COMPRAS.xlsx",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00",
+   "filas": 3
+  },
+  "_exportacion": {
+   "driver": "contasis",
+   "archivo": "CONTASIS_20601234567_202601_COMPRAS.xlsx",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "_hojas": {
+   "FORMATO_COMPRAS": [
+    [
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "    "
+     ],
+     [
+      "str",
+      "45680        "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20677777771"
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC"
+     ],
+     [
+      "int",
+      40000
+     ],
+     [
+      "int",
+      7200
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      47200
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "659999    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "421201    "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC                         "
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "E001  "
+     ],
+     [
+      "str",
+      "    "
+     ],
+     [
+      "str",
+      "12347        "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20633333336"
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "659999    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "421201    "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL                               "
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "str",
+      "14"
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "    "
+     ],
+     [
+      "str",
+      "12345679     "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20605555552"
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "int",
+      1800
+     ],
+     [
+      "int",
+      324
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      2124
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "659999    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "421201    "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA                                  "
+     ]
+    ]
+   ]
+  }
+ },
+ "exportar_con_observados/contasis": {
+  "driver": "contasis",
+  "formato": "contasis_xlsx",
+  "archivo": "CONTASIS_20601234567_202601_COMPRAS.xlsx",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00",
+   "filas": 3
+  },
+  "_exportacion": {
+   "driver": "contasis",
+   "archivo": "CONTASIS_20601234567_202601_COMPRAS.xlsx",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "_hojas": {
+   "FORMATO_COMPRAS": [
+    [
+     [
+      "datetime",
+      "2026-01-10T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "F001  "
+     ],
+     [
+      "str",
+      "    "
+     ],
+     [
+      "str",
+      "45680        "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20677777771"
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC"
+     ],
+     [
+      "int",
+      40000
+     ],
+     [
+      "int",
+      7200
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      47200
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-02-10T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "659999    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "421201    "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "MAYORISTA NACIONAL DE PRODUCTOS SAC                         "
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2026-01-18T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "str",
+      "01"
+     ],
+     [
+      "str",
+      "E001  "
+     ],
+     [
+      "str",
+      "    "
+     ],
+     [
+      "str",
+      "12347        "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20633333336"
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL"
+     ],
+     [
+      "int",
+      25000
+     ],
+     [
+      "int",
+      4500
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      29500
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-02-18T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "659999    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "421201    "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "IMPORTADORA ASIA PACIFICO SRL                               "
+     ]
+    ],
+    [
+     [
+      "datetime",
+      "2026-01-25T00:00:00"
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "str",
+      "14"
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "    "
+     ],
+     [
+      "str",
+      "12345679     "
+     ],
+     [
+      "str",
+      "6"
+     ],
+     [
+      "str",
+      "20605555552"
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA"
+     ],
+     [
+      "int",
+      1800
+     ],
+     [
+      "int",
+      324
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      2124
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "str",
+      "                    "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "int",
+      1
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "  "
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "str",
+      "S"
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "datetime",
+      "2026-02-25T00:00:00"
+     ],
+     [
+      "str",
+      "CON"
+     ],
+     [
+      "str",
+      "659999    "
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "str",
+      "421201    "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "str",
+      "         "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "      "
+     ],
+     [
+      "str",
+      "             "
+     ],
+     [
+      "NoneType",
+      null
+     ],
+     [
+      "str",
+      "          "
+     ],
+     [
+      "int",
+      18
+     ],
+     [
+      "str",
+      "ELECTRICIDAD DE PRUEBA SAA                                  "
+     ]
+    ]
+   ]
+  }
+ },
+ "diagnosticar/csv": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "driver": "csv",
+  "exige": [
+   "cuenta_contable",
+   "tipo_cp"
+  ],
+  "listo_para_exportar": true,
+  "por_que_no": [],
+  "que_falta": [],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 3,
+   "saldrian": 3,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 0,
+   "con_aviso": 0
+  },
+  "bloqueantes": [],
+  "avisos": [],
+  "faltantes": {
+   "sin_sigla": [],
+   "sin_codigo_de_moneda": [
+    "PEN"
+   ],
+   "sin_cuenta": [],
+   "reparto_que_no_cuadra": [],
+   "sin_centro": [],
+   "sin_correlativo": [
+    "11"
+   ]
+  },
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20677777771": {
+    "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "comprobantes": 1,
+    "total": "47200.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "IMPORTADORA ASIA PACIFICO SRL",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20605555552": {
+    "nombre": "ELECTRICIDAD DE PRUEBA SAA",
+    "comprobantes": 1,
+    "total": "2124.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
+   }
+  },
+  "sub_diarios": {
+   "11": {
+    "etiqueta": "Compras",
+    "comprobantes": 3,
+    "empieza_en": 1
+   }
+  },
+  "saldrian": [
+   "F001-00045680",
+   "E001-00012347",
+   "12345679"
+  ]
+ },
+ "generar_asiento/csv": {
+  "open_accounting": "0.3",
+  "libro": {
+   "ruc": "20601234567",
+   "razon_social": "EMPRESA DE PRUEBA SAC",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "asiento": [
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "40000.00",
+    "rol": "principal",
+    "sub_diario": "11",
+    "correlativo": "010001",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "7200.00",
+    "rol": "igv",
+    "sub_diario": "11",
+    "correlativo": "010001",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "IGV - MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "47200.00",
+    "rol": "tercero",
+    "sub_diario": "11",
+    "correlativo": "010001",
+    "fecha": "2026-01-10",
+    "moneda": "PEN",
+    "glosa": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "contraparte_doc": "20677777771",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "F001-45680",
+     "fecha_emision": "2026-01-10",
+     "fecha_vencimiento": "2026-02-10"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "25000.00",
+    "rol": "principal",
+    "sub_diario": "11",
+    "correlativo": "010002",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IMPORTADORA ASIA PACIFICO SRL",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "4500.00",
+    "rol": "igv",
+    "sub_diario": "11",
+    "correlativo": "010002",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IGV - IMPORTADORA ASIA PACIFICO SRL",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "29500.00",
+    "rol": "tercero",
+    "sub_diario": "11",
+    "correlativo": "010002",
+    "fecha": "2026-01-18",
+    "moneda": "PEN",
+    "glosa": "IMPORTADORA ASIA PACIFICO SRL",
+    "contraparte_doc": "20633333336",
+    "documento": {
+     "tipo": "FT",
+     "tipo_cp": "01",
+     "serie_numero": "E001-12347",
+     "fecha_emision": "2026-01-18",
+     "fecha_vencimiento": "2026-02-18"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "659999",
+    "debe_haber": "D",
+    "importe": "1800.00",
+    "rol": "principal",
+    "sub_diario": "11",
+    "correlativo": "010003",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "ELECTRICIDAD DE PRUEBA SAA",
+    "documento": {
+     "tipo": "RC",
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "401111",
+    "debe_haber": "D",
+    "importe": "324.00",
+    "rol": "igv",
+    "sub_diario": "11",
+    "correlativo": "010003",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "IGV - ELECTRICIDAD DE PRUEBA SAA",
+    "documento": {
+     "tipo": "RC",
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   },
+   {
+    "cuenta": "421201",
+    "debe_haber": "H",
+    "importe": "2124.00",
+    "rol": "tercero",
+    "sub_diario": "11",
+    "correlativo": "010003",
+    "fecha": "2026-01-25",
+    "moneda": "PEN",
+    "glosa": "ELECTRICIDAD DE PRUEBA SAA",
+    "contraparte_doc": "20605555552",
+    "documento": {
+     "tipo": "RC",
+     "tipo_cp": "14",
+     "serie_numero": "12345679",
+     "fecha_emision": "2026-01-25",
+     "fecha_vencimiento": "2026-02-25"
+    },
+    "tasa_igv": "18"
+   }
+  ],
+  "_asiento": {
+   "lineas": 9,
+   "sub_diarios": {
+    "11": {
+     "desde": 1,
+     "hasta": 3,
+     "comprobantes": 3,
+     "desde_codigo": "010001",
+     "hasta_codigo": "010003",
+     "desborda": false
+    }
+   },
+   "cuadre": {
+    "cuadra": true,
+    "debe": "78824.00",
+    "haber": "78824.00",
+    "diferencia": "0.00",
+    "lineas": 9,
+    "sin_sentido": 0
+   },
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
+  }
+ },
+ "exportar/csv": {
+  "driver": "csv",
+  "formato": "csv_asiento",
+  "archivo": "asiento_20601234567_202601_compra.csv",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00",
+   "filas": 9,
+   "sub_diarios": {
+    "11": {
+     "desde": 1,
+     "hasta": 3,
+     "comprobantes": 3,
+     "desde_codigo": "010001",
+     "hasta_codigo": "010003",
+     "desborda": false
+    }
+   },
+   "debe": "78824.00",
+   "haber": "78824.00",
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+  },
+  "_exportacion": {
+   "driver": "csv",
+   "archivo": "asiento_20601234567_202601_compra.csv",
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "text/csv; charset=utf-8",
+  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp\r\n11;010001;2026-01-10;659999;D;40000.00;PEN;;MAYORISTA NACIONAL DE PRODUCTOS SAC;;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18;principal;01;\r\n11;010001;2026-01-10;401111;D;7200.00;PEN;;IGV - MAYORISTA NACIONAL DE PRODUCTOS SAC;;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18;igv;01;\r\n11;010001;2026-01-10;421201;H;47200.00;PEN;;MAYORISTA NACIONAL DE PRODUCTOS SAC;20677777771;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18;tercero;01;\r\n11;010002;2026-01-18;659999;D;25000.00;PEN;;IMPORTADORA ASIA PACIFICO SRL;;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18;principal;01;\r\n11;010002;2026-01-18;401111;D;4500.00;PEN;;IGV - IMPORTADORA ASIA PACIFICO SRL;;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18;igv;01;\r\n11;010002;2026-01-18;421201;H;29500.00;PEN;;IMPORTADORA ASIA PACIFICO SRL;20633333336;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18;tercero;01;\r\n11;010003;2026-01-25;659999;D;1800.00;PEN;;ELECTRICIDAD DE PRUEBA SAA;;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18;principal;14;\r\n11;010003;2026-01-25;401111;D;324.00;PEN;;IGV - ELECTRICIDAD DE PRUEBA SAA;;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18;igv;14;\r\n11;010003;2026-01-25;421201;H;2124.00;PEN;;ELECTRICIDAD DE PRUEBA SAA;20605555552;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18;tercero;14;\r\n"
+ },
+ "exportar_con_observados/csv": {
+  "driver": "csv",
+  "formato": "csv_asiento",
+  "archivo": "asiento_20601234567_202601_compra.csv",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00",
+   "filas": 9,
+   "sub_diarios": {
+    "11": {
+     "desde": 1,
+     "hasta": 3,
+     "comprobantes": 3,
+     "desde_codigo": "010001",
+     "hasta_codigo": "010003",
+     "desborda": false
+    }
+   },
+   "debe": "78824.00",
+   "haber": "78824.00",
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2"
+  },
+  "_exportacion": {
+   "driver": "csv",
+   "archivo": "asiento_20601234567_202601_compra.csv",
+   "huella": "77f697a00fe55334ceef9d959ec15ebae30ad2b8b11cfbf77866b719744366d2",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     },
+     "lineas": [
+      0,
+      3
+     ],
+     "huella": "9d7d75d788fb63f9aa3274c399467cfd187c178e5198545878f5b4f141e1263d"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     },
+     "lineas": [
+      3,
+      6
+     ],
+     "huella": "2c0170c94527703df640b7e6b2689517549aaca3fd36765da6ca295cbcd1da76"
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     },
+     "lineas": [
+      6,
+      9
+     ],
+     "huella": "3f8a2de0ebc4e1915829e42fc3523e0163d56043d6bfeeccc14ff469b1902131"
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "content_type": "text/csv; charset=utf-8",
+  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp\r\n11;010001;2026-01-10;659999;D;40000.00;PEN;;MAYORISTA NACIONAL DE PRODUCTOS SAC;;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18;principal;01;\r\n11;010001;2026-01-10;401111;D;7200.00;PEN;;IGV - MAYORISTA NACIONAL DE PRODUCTOS SAC;;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18;igv;01;\r\n11;010001;2026-01-10;421201;H;47200.00;PEN;;MAYORISTA NACIONAL DE PRODUCTOS SAC;20677777771;;;FT;F001-45680;2026-01-10;2026-02-10;;;;;;;18;tercero;01;\r\n11;010002;2026-01-18;659999;D;25000.00;PEN;;IMPORTADORA ASIA PACIFICO SRL;;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18;principal;01;\r\n11;010002;2026-01-18;401111;D;4500.00;PEN;;IGV - IMPORTADORA ASIA PACIFICO SRL;;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18;igv;01;\r\n11;010002;2026-01-18;421201;H;29500.00;PEN;;IMPORTADORA ASIA PACIFICO SRL;20633333336;;;FT;E001-12347;2026-01-18;2026-02-18;;;;;;;18;tercero;01;\r\n11;010003;2026-01-25;659999;D;1800.00;PEN;;ELECTRICIDAD DE PRUEBA SAA;;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18;principal;14;\r\n11;010003;2026-01-25;401111;D;324.00;PEN;;IGV - ELECTRICIDAD DE PRUEBA SAA;;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18;igv;14;\r\n11;010003;2026-01-25;421201;H;2124.00;PEN;;ELECTRICIDAD DE PRUEBA SAA;20605555552;;;RC;12345679;2026-01-25;2026-02-25;;;;;;;18;tercero;14;\r\n"
+ },
+ "diagnosticar/sire": {
+  "libro": {
+   "ruc": "20601234567",
+   "periodo": "202601",
+   "tipo": "compra"
+  },
+  "driver": "sire",
+  "exige": [],
+  "listo_para_exportar": true,
+  "por_que_no": [],
+  "que_falta": [],
+  "errores_de_configuracion": [],
+  "totales": {
+   "comprobantes": 3,
+   "saldrian": 3,
+   "excluidos": 0,
+   "fuera_del_destino": 0,
+   "con_error": 0,
+   "con_aviso": 0
+  },
+  "bloqueantes": [],
+  "avisos": [],
+  "faltantes": {},
+  "detracciones_pendientes": [],
+  "resumen_por_contraparte": {
+   "20677777771": {
+    "nombre": "MAYORISTA NACIONAL DE PRODUCTOS SAC",
+    "comprobantes": 1,
+    "total": "47200.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "47200.00"
+    }
+   },
+   "20633333336": {
+    "nombre": "IMPORTADORA ASIA PACIFICO SRL",
+    "comprobantes": 1,
+    "total": "29500.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "29500.00"
+    }
+   },
+   "20605555552": {
+    "nombre": "ELECTRICIDAD DE PRUEBA SAA",
+    "comprobantes": 1,
+    "total": "2124.00",
+    "moneda": "PEN",
+    "por_moneda": {
+     "PEN": "2124.00"
+    }
+   }
+  },
+  "sub_diarios": {},
+  "saldrian": [
+   "F001-00045680",
+   "E001-00012347",
+   "12345679"
+  ]
+ },
+ "generar_asiento/sire": {
+  "_error": "ValueError",
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv)"
+ },
+ "exportar/sire": {
+  "driver": "sire",
+  "formato": "sire_rce",
+  "archivo": "LE2060123456720260100080400021112.TXT",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00"
+  },
+  "_exportacion": {
+   "driver": "sire",
+   "archivo": "LE2060123456720260100080400021112.TXT",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "texto": "20601234567|EMPRESA DE PRUEBA SAC|202601||10/01/2026|10/02/2026|01|F001||45680||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|40000.00|7200.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|47200.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||18/01/2026|18/02/2026|01|E001||12347||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|25000.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||25/01/2026|25/02/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|1800.00|324.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2124.00|PEN||||||||||||||||\r\n",
+  "archivo_zip": "LE2060123456720260100080400021112.zip"
+ },
+ "exportar_con_observados/sire": {
+  "driver": "sire",
+  "formato": "sire_rce",
+  "archivo": "LE2060123456720260100080400021112.TXT",
+  "comprobantes": 3,
+  "resumen": {
+   "comprobantes": 3,
+   "excluidos": 0,
+   "duplicados": 0,
+   "con_aviso": 0,
+   "con_error": 0,
+   "fuera_del_destino": 0,
+   "total": "78824.00",
+   "igv": "12024.00"
+  },
+  "_exportacion": {
+   "driver": "sire",
+   "archivo": "LE2060123456720260100080400021112.TXT",
+   "comprobantes": [
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "45680",
+      "contraparte_doc": "20677777771"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "12347",
+      "contraparte_doc": "20633333336"
+     }
+    },
+    {
+     "identidad": {
+      "ruc": "20601234567",
+      "libro": "compra",
+      "tipo_cp": "14",
+      "serie": "",
+      "numero": "12345679",
+      "contraparte_doc": "20605555552"
+     }
+    }
+   ],
+   "motor": "(versión del motor)"
+  },
+  "texto": "20601234567|EMPRESA DE PRUEBA SAC|202601||10/01/2026|10/02/2026|01|F001||45680||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|40000.00|7200.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|47200.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||18/01/2026|18/02/2026|01|E001||12347||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|25000.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||25/01/2026|25/02/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|1800.00|324.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2124.00|PEN||||||||||||||||\r\n",
+  "archivo_zip": "LE2060123456720260100080400021112.zip"
+ },
+ "cli_diagnosticar/concar": {
+  "codigo": 0,
+  "salida": "Libro: COMPRA 202601 · RUC 20601234567 · destino concar\nComprobantes: 3 · saldrían 3 · excluidos 0 · fuera del destino 0 · con error 0 · con aviso 0\n\nSub-diarios sin correlativo (arrancan en 1): 11\n  Sub-diario 11 (Compras): 3 comprobantes desde el 1\n\nLISTO para exportar: 3 comprobantes.\n"
+ }
+}

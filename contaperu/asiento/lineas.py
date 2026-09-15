@@ -9,7 +9,8 @@ El camino inverso —de las columnas de CONCAR a la línea— vive con su driver
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+import copy
+from dataclasses import asdict, dataclass, field, fields
 from typing import Any
 
 @dataclass
@@ -18,7 +19,8 @@ class LineaDiario:
 
     `documento` y `referencia` llevan `tipo` (la sigla del ERP, por compatibilidad) y `tipo_cp` (el
     código SUNAT de la Tabla 10, que es el que manda). `glosa` va entera: el corte es del driver.
-    `tasa_igv` es la del comprobante como texto (`"18"`, `"10.5"`), sin redondear a entero.
+    `tasa_igv` es la del comprobante como texto (`"18"`, `"10.5"`), sin redondear a entero. El `tipo_cambio` y la `tasa`
+    de la detracción también van como texto exacto (`"3.550"`, `"4"`, desde la 1.0): `float` solo al escribir una celda.
     """
 
     cuenta: str
@@ -43,3 +45,20 @@ class LineaDiario:
         """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""
         d = asdict(self)
         return {k: v for k, v in d.items() if v not in ("", {}, None)}
+
+    @classmethod
+    def de_dict(cls, d: dict) -> "LineaDiario":
+        """Una línea del bloque `asiento` de un documento → `LineaDiario`. Rechaza (`ValueError`) una clave que no es de
+        la línea, una línea sin cuenta, sin sentido o sin importe, y un sentido que no es D ni H: una línea que llega
+        por JSON no se completa adivinando."""
+        if not isinstance(d, dict):
+            raise ValueError("Una línea del asiento tiene que ser un objeto")
+        desconocidas = sorted(set(d) - {f.name for f in fields(cls)})
+        if desconocidas:
+            raise ValueError(f"Claves que no son de una línea del asiento: {', '.join(desconocidas)}")
+        faltan = [clave for clave in ("cuenta", "debe_haber", "importe") if not str(d.get(clave) or "").strip()]
+        if faltan:
+            raise ValueError(f"A la línea del asiento le falta: {', '.join(faltan)}")
+        if d["debe_haber"] not in ("D", "H"):
+            raise ValueError(f"debe_haber tiene que ser D o H, no {d['debe_haber']!r}")
+        return cls(**copy.deepcopy(d))

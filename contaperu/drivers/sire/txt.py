@@ -21,13 +21,16 @@ Nombre (Tabla 13 / Tabla 6): LE + RUC + AAAAMM + 00 + libro (140400 / 080400)
 from __future__ import annotations
 
 from ... import catalogos as cat
+from ...asiento.faltas import NoExportable
+from ...igv import por_destino
 from ...modelo import Comprobante, Libro
-from ...formato import (
-    Opciones, armar_linea, columnas_igv_compras, formatear_fecha, formatear_monto, formatear_numero, formatear_cambio,
-    negativo, sanear,
+from ..kit import (
+    Opciones, armar_linea, formatear_fecha, formatear_monto, formatear_numero, formatear_cambio, negativo, sanear,
 )
 
 NOMBRE = "sire"
+# Un registro que se presenta a SUNAT (`drivers.contrato.CANALES`).
+CANAL = "tributario"
 # Lo que no se anota en el registro que se declara a SUNAT (hoy: el recibo por
 # honorarios). El Excel de CONCAR no declara esto, así que sí los lleva.
 EXCLUYE_TIPOS = cat.FUERA_DEL_REGISTRO_SUNAT
@@ -40,6 +43,31 @@ FORMATOS = {"venta": "sire_rvie", "compra": "sire_rce"}
 LIBRO_VENTAS = "140400"
 LIBRO_COMPRAS = "080400"
 OPORTUNIDAD_REEMPLAZO = "02"
+
+
+class CampoCambiaDeSigno(NoExportable):
+    """Una nota de crédito cuyo descuento es mayor que su base (`DSCTO_MAYOR_QUE_BASE`): el campo 15 o el 17 del RVIE
+    saldría en positivo, y SUNAT lo leería como una venta. No se escribe; `comprobantes` trae la nota."""
+
+    clave = "campo_cambia_de_signo"
+
+    def __init__(self, c: Comprobante):
+        super().__init__(f"{c.serie}-{c.numero}: DSCTO_MAYOR_QUE_BASE (el campo 15 o el 17 del RVIE cambiaría de signo)",
+                         [c])
+
+
+def _exigir_campos(campos: list[str], esperados: int, registro: str) -> None:
+    """Cada línea lleva exactamente los campos de su anexo. Si no, es un error del driver, no del comprobante."""
+    if len(campos) != esperados:
+        raise RuntimeError(f"La línea del {registro} salió con {len(campos)} campos y lleva {esperados}")
+
+
+def columnas_igv_compras(c: Comprobante, opciones: Opciones) -> list[str]:
+    """Las 6 columnas de base/IGV de compras según el destino de la adquisición:
+    DG (gravadas), DGNG (gravadas y no gravadas), DNG (no gravadas). La división es de `igv.por_destino`;
+    aquí solo se escribe, con el signo de la nota de crédito."""
+    neg = negativo(c, opciones)
+    return [formatear_monto(v, opciones, neg) for pareja in por_destino(c) for v in pareja]
 
 
 def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
@@ -83,7 +111,8 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCI
     s = -1 if neg else 1
     base15, igv17 = s * c.base_gravada + c.dscto_base, s * c.igv + c.dscto_igv
     if neg:
-        assert base15 <= 0 and igv17 <= 0, f"{c.serie}-{c.numero}: DSCTO_MAYOR_QUE_BASE (el campo 15 cambiaría de signo)"
+        if base15 > 0 or igv17 > 0:
+            raise CampoCambiaDeSigno(c)
     campos = _cabecera(c, libro, opciones, vencimiento=c.tipo_cp in cat.EXIGEN_VENCIMIENTO) + [
         formatear_numero(c.numero, opciones),            # 9 número (o inicial del rango)
         formatear_numero(c.numero_final, opciones),      # 10 número final del rango
@@ -111,7 +140,7 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCI
         formatear_numero(c.ref_numero, opciones),        # 32 número del comprobante modificado
         sanear(c.id_contrato, opciones),           # 33 identificador del proyecto / contrato
     ] + [""] * opciones.rvie_vacios                # 34-40 los completa la Administración
-    assert len(campos) == 33 + opciones.rvie_vacios, len(campos)
+    _exigir_campos(campos, 33 + opciones.rvie_vacios, "RVIE")
     return armar_linea(campos, opciones)
 
 
@@ -152,5 +181,5 @@ def linea_rce(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCIO
         "",                                  # 36 IMB (Ley 31053)
         "",                                  # 37 CAR original (solo ajustes posteriores)
     ] + [""] * opciones.rce_vacios                 # 38-41 detracción, tipo de nota, estado, inconsistencias
-    assert len(campos) == 37 + opciones.rce_vacios, len(campos)
+    _exigir_campos(campos, 37 + opciones.rce_vacios, "RCE")
     return armar_linea(campos, opciones)

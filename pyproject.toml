@@ -10,9 +10,12 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
 authors = [{ name = "Global Procesos AI S.A.C." }]
-keywords = ["contabilidad", "peru", "sunat", "sire", "concar", "pcge", "mcp", "asientos"]
+keywords = ["contabilidad", "contabilidad peruana", "peru", "sunat", "sire", "ple", "concar", "contasis", "siscont",
+            "starsoft", "factura electronica", "comprobantes electronicos", "ubl", "pcge", "igv", "detracciones",
+            "asientos contables", "partida doble", "motor contable", "erp", "mcp", "openapi", "accounting",
+            "peruvian accounting"]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Financial and Insurance Industry",
   "License :: OSI Approved :: MIT License",
   "Natural Language :: Spanish",
@@ -28,13 +31,18 @@ dependencies = ["defusedxml>=0.7,<1"]
 [project.optional-dependencies]
 excel = ["openpyxl>=3.1,<4"]              # driver de CONCAR (.xlsx)
 schema = ["jsonschema>=4,<5"]             # validar contra open-accounting.schema.json
-mcp = ["mcp>=1.2,<2", "jsonschema>=4,<5"] # servidor MCP
-todo = ["contaperu[excel,schema,mcp]"]
-dev = ["contaperu[todo]", "pytest>=8,<9"]
+# servidor MCP. 1.30 es la versión más antigua con la que se probó: anotaciones de herramienta, servidor sin sesiones y
+# defensa del Host; el trabajo `minimos` de `.github/workflows/tests.yml` la instala tal cual.
+mcp = ["mcp>=1.30,<2", "jsonschema>=4,<5"]
+# puerta HTTP con el contrato OpenConta. Las versiones con las que se probó: starlette 1.6 y uvicorn 0.52.
+http = ["starlette>=1.6,<2", "uvicorn>=0.52,<1"]
+todo = ["contaperu[excel,schema,mcp,http]"]
+dev = ["contaperu[todo]", "pytest>=8,<9", "httpx>=0.27,<1", "openapi-spec-validator>=0.7,<1"]
 
 [project.scripts]
-contaperu = "contaperu.cli:main"
-contaperu-mcp = "contaperu.servidor_mcp:main"
+contaperu = "contaperu.puertas.cli:main"
+contaperu-mcp = "contaperu.puertas.servidor_mcp:main"
+contaperu-http = "contaperu.puertas.servidor_http:main"
 
 # PyPI solo pone icono a las claves que reconoce, y en ingles.
 [project.urls]
@@ -58,8 +66,11 @@ packages = ["contaperu"]
 
 [tool.hatch.build.targets.sdist]
 include = ["contaperu", "estandar", "tests", "README.md", "LICENSE", "CHANGELOG.md",
-           "CONTRIBUTING.md", "ARQUITECTURA.md", "REFERENCIAS.md", "INTEROPERABILIDAD.md", "HOJA-DE-RUTA.md",
+           "CONTRIBUTING.md", "ARQUITECTURA.md", "REFERENCIAS.md", "INTEROPERABILIDAD.md", "HOJA-DE-RUTA.md", "INTEGRAR.md",
            "SECURITY.md", "CODE_OF_CONDUCT.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Una ruta de la 0.x usada sin decirlo es un error: la batería habla con la 1.0, y lo que prueba la compatibilidad
+# lo dice con `pytest.warns` o `warnings.catch_warnings` (`contaperu/_obsoleto.py`).
+filterwarnings = ["error::contaperu._obsoleto.RutaObsoleta"]

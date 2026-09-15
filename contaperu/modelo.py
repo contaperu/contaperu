@@ -106,6 +106,13 @@ def solo_digitos(v: Any) -> str:
     return re.sub(r"\D", "", str(v or ""))
 
 
+def numero_sin_ceros(numero: str) -> str:
+    """El número de un comprobante sin ceros a la izquierda (`00028806` → `28806`, `0000` → `0`): SUNAT identifica el
+    comprobante por su número y los ceros son cosmética del emisor. Un número con letras queda tal cual."""
+    n = (numero or "").strip()
+    return (n.lstrip("0") or "0") if n.isdigit() else n
+
+
 @dataclass
 class Libro:
     """El registro que se genera: un RUC, un mes, ventas o compras."""
@@ -138,6 +145,16 @@ class Libro:
     @property
     def es_venta(self) -> bool:
         return self.tipo == "venta"
+
+    def a_dict(self) -> dict[str, str]:
+        return {"ruc": self.ruc, "razon_social": self.razon_social, "periodo": self.periodo, "tipo": self.tipo}
+
+    @classmethod
+    def de_dict(cls, d: dict) -> "Libro":
+        """Lo desconocido se ignora; lo que falta llega vacío y lo rechaza la validación del libro (`ValueError`)."""
+        if not isinstance(d, dict):
+            raise ValueError("El libro tiene que ser un objeto con ruc, razon_social, periodo y tipo")
+        return cls(**{f.name: d.get(f.name, "") for f in fields(cls)})
 
 
 @dataclass
@@ -306,6 +323,21 @@ def clave_de(tipo_cp: str, serie: str, numero: str, contraparte_doc: str) -> tup
         str(numero or "").strip().lstrip("0") or "0",
         solo_digitos(contraparte_doc),
     )
+
+
+def identidad_de(libro: Libro, c: Comprobante) -> dict[str, str]:
+    """La identidad estable de un comprobante (hito 0.0 de la hoja de ruta): el RUC y el tipo del libro, más el tipo,
+    la serie y el número sin ceros del comprobante; en compras, también el documento del proveedor.
+
+    No lleva el periodo: un comprobante se anota una sola vez por RUC (el error 452 de SUNAT), así que la misma
+    identidad sirve para reconocerlo entre periodos. En ventas no lleva el documento del cliente (decisión de John,
+    14-sep-2026): la serie-número del emisor ya es única, y un RUC de cliente mal escrito partiría la identidad en dos,
+    que es la misma razón por la que `comparar_sire` lo deja fuera de su clave."""
+    tipo_cp, serie, numero, contraparte = c.clave
+    identidad = {"ruc": libro.ruc, "libro": libro.tipo, "tipo_cp": tipo_cp, "serie": serie, "numero": numero}
+    if not libro.es_venta:
+        identidad["contraparte_doc"] = contraparte
+    return identidad
 
 
 _CAMPOS_MONTO = (

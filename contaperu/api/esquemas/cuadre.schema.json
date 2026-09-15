@@ -1,0 +1,38 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/cuadre.schema.json",
+ "title": "Cuadre",
+ "description": "Si la suma del Debe es exactamente la del Haber.",
+ "type": "object",
+ "properties": {
+  "cuadra": {
+   "type": "boolean"
+  },
+  "debe": {
+   "type": "string"
+  },
+  "haber": {
+   "type": "string"
+  },
+  "diferencia": {
+   "type": "string"
+  },
+  "lineas": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "sin_sentido": {
+   "type": "integer",
+   "minimum": 0
+  }
+ },
+ "required": [
+  "cuadra",
+  "debe",
+  "haber",
+  "diferencia",
+  "lineas",
+  "sin_sentido"
+ ],
+ "additionalProperties": false
+}

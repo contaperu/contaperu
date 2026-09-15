@@ -2,7 +2,7 @@
 import json
 import zipfile
 
-from contaperu import cli
+from contaperu.puertas import cli
 from util import GOLDEN, XML
 
 
@@ -98,7 +98,7 @@ def test_diagnosticar_dice_que_falta_y_luego_que_esta_listo(tmp_path, capsys):
 def test_la_consola_de_windows_no_tumba_el_cli(monkeypatch):
     """La consola de Windows es cp1252 y el CLI imprime flechas y tildes. Que se caiga al
     IMPRIMIR, con los archivos ya escritos, seria absurdo."""
-    from contaperu.cli import _consola_utf8
+    from contaperu.puertas.cli import _consola_utf8
 
     class SinReconfigure:
         encoding = "cp1252"
@@ -139,3 +139,13 @@ def test_la_imputacion_entra_por_la_terminal(tmp_path, capsys):
     imputacion.write_text(json.dumps({"fila-9": {"cuenta_contable": "636301"}}), encoding="utf-8")
     assert cli.main(orden + ["--imputacion", str(imputacion)]) == 2
     assert "fila-9" in capsys.readouterr().err
+
+
+def test_un_pdf_por_la_terminal_queda_pendiente_de_leer(tmp_path, capsys):
+    """Hito 0.7: por la CLI el PDF llega con su nombre, y cuenta igual que por el protocolo."""
+    pdf = tmp_path / "factura.pdf"
+    pdf.write_bytes(b"%PDF-1.7\n1 0 obj")
+    codigo = cli.main(["generar", "--tipo", "venta", "--ruc", "20131312955", "--razon", "EMISOR DE PRUEBA S.A.C.",
+                       "--periodo", "202601", "--salida", str(tmp_path / "s"), str(pdf)])
+    salida = capsys.readouterr().out
+    assert codigo == 1 and "1 PDF/imagen (pendientes de IA) · 0 con error" in salida

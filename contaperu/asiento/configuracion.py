@@ -21,6 +21,12 @@ from ..configuracion import Campo
 TIPO_DOC_DETRACCION = "DR"
 NUMERO_DETRACCION_PENDIENTE = "9999999999"
 
+# La clave donde un sistema de asientos dice el código de cada moneda en su vocabulario ({"PEN": "MN", "USD": "US"}). Es
+# la única clave de la sección de un sistema que lee el núcleo —para saber qué monedas tienen código
+# (`asiento.monedas_sin_codigo`)—, y solo cuenta para un driver que exige `moneda` y la declara (CONCAR); lo comprueba
+# `drivers.contrato.incumplimientos`.
+MONEDAS_CODIGO = "monedas_codigo"
+
 _SUB_DIARIO = r"^([0-9]{1,4})?$"       # de 1 a 4 dígitos, como texto: los ceros de la izquierda cuentan ("05")
 
 CONFIGURACION_DEL_ASIENTO: tuple[Campo, ...] = (

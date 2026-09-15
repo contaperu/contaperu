@@ -14,7 +14,7 @@ from typing import Any
 from ...asiento.resolucion import cuenta_tercero, lleva_centro, partes_de
 from ...asiento.motor import glosa_de
 from ...configuracion import por_defecto
-from ...formato import Opciones, formatear_numero, negativo
+from ..kit import Opciones, celdas, formatear_numero, negativo
 from ...igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
 from ...modelo import CENTIMO, Comprobante, Libro
 from . import datos
@@ -118,7 +118,7 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
 
 
 def _fecha(d: date | None) -> datetime | None:
-    return datetime.combine(d, time.min) if d else None
+    return celdas.fecha_hora(d)
 
 
 def fila(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.OPCIONES) -> dict[str, Any]:

@@ -1,0 +1,85 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/exportacion.schema.json",
+ "title": "Exportación",
+ "description": "El archivo que importa un sistema contable. `texto` cuando es legible; el TXT del SIRE llega además en `zip_base64`, y cualquier otro archivo en `contenido_base64`. `resumen` es lo que guarda quien exporta y `_exportacion`, la anotación con que reconoce lo que ya exportó.",
+ "type": "object",
+ "properties": {
+  "driver": {
+   "type": "string"
+  },
+  "formato": {
+   "type": "string"
+  },
+  "archivo": {
+   "type": "string"
+  },
+  "comprobantes": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "resumen": {
+   "type": "object"
+  },
+  "_exportacion": {
+   "type": "object",
+   "properties": {
+    "driver": {
+     "type": "string"
+    },
+    "archivo": {
+     "type": "string"
+    },
+    "huella": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$",
+     "description": "sha256 del contenido del asiento, sin el correlativo (`estandar/LEEME.md`)."
+    },
+    "fecha": {
+     "type": "string",
+     "format": "date"
+    },
+    "comprobantes": {
+     "type": "array",
+     "items": {
+      "$ref": "comprobante_de_la_respuesta.schema.json"
+     }
+    },
+    "motor": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "driver",
+    "archivo",
+    "comprobantes",
+    "motor"
+   ],
+   "additionalProperties": false
+  },
+  "texto": {
+   "type": "string"
+  },
+  "zip_base64": {
+   "type": "string"
+  },
+  "archivo_zip": {
+   "type": "string"
+  },
+  "content_type": {
+   "type": "string"
+  },
+  "contenido_base64": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "driver",
+  "formato",
+  "archivo",
+  "comprobantes",
+  "resumen",
+  "_exportacion"
+ ],
+ "additionalProperties": false
+}

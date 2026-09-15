@@ -24,16 +24,17 @@ from __future__ import annotations
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from . import catalogos as cat
+from .catalogos import TOLERANCIA_IGV as TOLERANCIA
+from .errores import ErrorContaperu
 from .modelo import CENTIMO, CERO, Comprobante
-from .validar import TOLERANCIA
 
 
 
-class IgvImposible(ValueError):
+class IgvImposible(ErrorContaperu, ValueError):
     """El IGV pedido no se puede aplicar a ese comprobante; el mensaje va tal cual a la persona."""
 
 
-class TotalImposible(ValueError):
+class TotalImposible(ErrorContaperu, ValueError):
     """El total pedido no se puede aplicar a ese comprobante; el mensaje va tal cual a la persona."""
 
 

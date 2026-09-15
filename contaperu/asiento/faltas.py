@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..errores import ErrorContaperu
 from ..modelo import Comprobante
 
 # A quién se le pide. **contador**: se decide mirando el documento o el plan de cuentas. **sistema**: la configuración
@@ -19,7 +20,7 @@ from ..modelo import Comprobante
 CONTADOR, SISTEMA, PROVEEDOR = "contador", "sistema", "proveedor"
 
 
-class NoExportable(Exception):
+class NoExportable(ErrorContaperu):
     """La base de todo lo que impide exportar a un destino. Quien llama atrapa esta y lee `clave` (la de su fila de
     `FALTAS`, o la propia de un driver) y `comprobantes`, vacía cuando lo que falta es un código: un tipo, una moneda,
     un sub-diario."""

@@ -31,27 +31,35 @@ subirlo a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y el OK expl�
 
 ## Cómo está construido
 
-Tres niveles, de abajo arriba: un **núcleo** que sabe contabilidad peruana y nada más (`modelo`, `lectores`,
-`validar`, `asiento`, `igv`, `detracciones`, `partida_doble`, `pcge`); **drivers** que conocen el formato de un
-destino y nada de contabilidad (`drivers/concar`, `drivers/sire`, `drivers/csv`, `drivers/contasis`, y los de terceros por *entry
-points*, con el contrato de `drivers/contrato.py`); y encima la capa para **agentes** (`operaciones`,
-`servidor_mcp`, `cli`; `diagnosticar` es su primera pregunta). El asiento nace en las **líneas de diario neutrales**
-del estándar `open-accounting` y cada ERP es una proyección de ellas: un driver nuevo solo traduce vocabulario. Todo esto,
-con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LEEME.md`.
+Por capas, de abajo arriba, que `tests/test_capas.py` hace cumplir: un **núcleo** que sabe contabilidad peruana y nada
+más (`modelo`, `lectores`, `validar`, `asiento`, `igv`, `detracciones`, `partida_doble`, `pcge`); **drivers** que
+conocen el formato de un destino y nada de contabilidad, cada uno con su canal (`drivers/concar` y `drivers/contasis`
+legacy, `drivers/sire` tributario, `drivers/csv` intercambio, y los de terceros por *entry points*, con el contrato de
+`drivers/contrato.py` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
+(`contaperu.api`, con la tabla de operaciones y el contrato OpenConta); y tres **puertas** que solo hablan con la api
+(`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). Las rutas de la 0.10 viven en `_compat` y avisan. El
+asiento nace en las **líneas de diario neutrales** del estándar `open-accounting` y cada ERP es una proyección de ellas.
+Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LEEME.md`; cómo se integra, en
+`INTEGRAR.md`.
 
 ## Quién lo consume, y el peaje
 
 - **Una aplicación en producción.** Contabilidad Inteligente (`contab-core`, repositorio privado de Global Procesos
-  AI) instala el motor como paquete —un wheel construido en su propio despliegue, porque este repo es privado— y
-  declara la versión mínima que necesita (`MOTOR_MINIMO`, en su batería). **Romper una firma aquí rompe una
-  aplicación en producción.** Un arreglo del motor son dos repositorios: se corrige, se prueba y se etiqueta aquí; se
-  sube la versión mínima y se despliega allá. El circuito completo está en `contab-core/docs/FRONTERA.md`, y qué
-  símbolos usa la app, en `contab-core/api/CLAUDE.md`: cuando el trabajo cruza, se leen primero.
+  AI) usa el motor como lo usaría cualquier ERP: **fija una versión publicada** (en su `api/MOTOR.txt`, el número y
+  el commit del tag) y adopta las nuevas cuando decide, después de leer su Release. Nada de allá lee la carpeta de
+  este repo, así que un commit en `main` no la toca. **Romper una firma aquí la rompe el día que adopte esa versión**:
+  por eso rige SemVer y lo que se retira avisa durante toda la mayor anterior. Un arreglo del motor es un PR aquí y
+  una versión con su tag; allá, cambiar la versión fijada y desplegar. Su lado del circuito está en
+  `contab-core/docs/FRONTERA.md`: cuando el trabajo cruza, se lee primero.
 - **Un MCP abierto en producción.** `contaperu-mcp` corre en `https://contaperu.globalprocesos.com/mcp` (Streamable
   HTTP, sin autenticación por diseño: no guarda nada de nadie, y el freno es de recursos). Actualizarlo es subir el
   repo al servidor y reconstruir su contenedor; el procedimiento y sus trampas (el `--dominio` que el SDK exige para
   no responder 421) están en el hub de infraestructura de Global Procesos AI, no aquí.
 - **Se corrige aquí, nunca en la app.** La app no lleva copia del motor, y su batería lo vigila.
+- **La 1.0 cambia las rutas, no rompe las viejas.** Lo que la app importa de la 0.10 (`operaciones`, `generar`…) sigue
+  resolviendo al mismo objeto, con sus firmas, y avisa con `RutaObsoleta`; migrar es pasar a `contaperu.api` con la
+  tabla del CHANGELOG. Antes de etiquetar una versión mayor se publica una pre-release (`vX.Y.ZrcN`) y quien integra
+  la prueba en su batería, también con `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»).
 
 ## Lo que no se negocia
 
@@ -81,7 +89,11 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 ## Cómo se trabaja
 
 - `git pull` antes de empezar: el repo se trabaja desde dos máquinas.
-- Entorno: `python -m venv .venv` y `pip install -e ".[dev]"` (trae `excel`, `schema`, `mcp` y `pytest`).
+- **Todo va a `main` por un PR corto, con la CI en verde, sin ramas largas.** Cada consumidor fija una versión, así
+  que lo que entra en `main` no le llega a nadie hasta que se etiqueta. La última rama larga fue `motor-v1`, la de la
+  1.0.
+- Entorno: `python -m venv .venv` y `pip install -e ".[dev]"` (trae `excel`, `schema`, `mcp`, `http`, `pytest`,
+  `httpx` y `openapi-spec-validator`).
 - Batería: `pytest` (unos segundos; el snapshot va dentro). Antes de etiquetar, `diagnosticar` y `exportar` sobre un
   caso real en local, solo lectura.
 - **Publicar una versión es empujar su tag, y solo eso le llega a quien integra el motor**: un commit en `main` no le
@@ -92,16 +104,20 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
   se descarga. Una `vX.Y.ZrcN` sale como pre-release, con las notas de «Sin publicar». **Una Release no se
   reemplaza**: un error se arregla sacando otra versión. PyPI va aparte y a mano, con el OK de John.
 - Un driver nuevo pide **un archivo real que ese ERP haya aceptado**: `CONTRIBUTING.md` §«Añadir un driver de
-  salida». El contrato (`NOMBRE`, `FORMATOS`, `OPCIONES`, una de las cuatro formas, `EXIGE`, y lo que se
-  configura: `CONFIGURACION` y `COLUMNAS_ELEGIBLES`) lo comprueba `drivers.contrato.incumplimientos()`.
+  salida». El contrato (`NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, una forma —`desde_lineas` o `desde_comprobantes`
+  para lo nuevo—, `EXIGE`, y lo que se configura: `CONFIGURACION` y `COLUMNAS_ELEGIBLES`) lo comprueba
+  `drivers.contrato.incumplimientos()`.
+- Tras cambiar una operación, un esquema de `contaperu/api/esquemas/` o la versión: `python
+  herramientas/generar_openconta.py`. La batería falla si `contaperu/api/openconta.json` no está al día.
 - Se planifica y se ejecuta por partes, con el OK de John entre cada una.
 
 ## Los documentos
 
 | Documento | Qué responde |
 |---|---|
-| `README.md` | La portada: el problema, instalar, un ejemplo de diez líneas, el MCP, qué sabe hacer y qué no, estado |
-| `ARQUITECTURA.md` | Los tres niveles, el flujo de un comprobante, la línea neutral, cómo se enchufa un driver, lo que no se negocia |
+| `README.md` | La portada, para contadores y para quien integra: qué resuelve en palabras de contador, la arquitectura en dos diagramas (`diagramas/`), un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
+| `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea neutral, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
+| `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 1.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU.; de aquí salió la 0.8.0 |
