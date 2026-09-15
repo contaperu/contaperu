@@ -706,7 +706,7 @@ análogo peruano:
 | Escalón | EE. UU. | Aquí |
 |---|---|---|
 | **1 · Archivo** | QuickBooks Desktop importa **IIF**, texto tabulado con `!TRNS`/`!SPL`/`!ENDTRNS`, con «only limited error checking» ([Intuit](https://quickbooks.intuit.com/learn-support/en-us/help-article/list-management/iif-overview-import-kit-sample-files-headers/L5CZIpJne_US_en_US)) | El Excel de CONCAR y el de CONTASIS |
-| **2 · SDK o API local** | **qbXML** (`JournalEntryAddRq` con líneas de débito y crédito) | La API web de STARSOFT Contabilidad Gold Edition (`POST Api/RegistrarAsientoCompras`, `…Ventas`, `…Standar`…; [ayuda](https://starsoftweb.com/apisintegracion/Help)) |
+| **2 · SDK o API local** | **qbXML** (`JournalEntryAddRq` con líneas de débito y crédito) | La API web de STARSOFT Contabilidad Gold Edition (`POST Api/RegistrarAsientoCompras`, `…Ventas`, `…Standar`…; [ayuda](https://starsoftweb.com/apisintegracion/Help)). Su forma campo a campo, comparada con las API de EE. UU. y con EN 16931, en [API-DE-REGISTRO.md](API-DE-REGISTRO.md) |
 | **3 · Agente en la PC del cliente** | **QuickBooks Web Connector**: un `.QWC` y un servicio SOAP al que «QuickBooks llama» (`authenticate`, `sendRequestXML`, `receiveResponseXML`; [guía](https://static.developer.intuit.com/qbSDK-current/doc/pdf/QBWC_proguide.pdf)). Codat y Rutter lo usan con **escrituras en cola** y restricciones declaradas: la PC encendida, un usuario, horario de sincronización ([Codat](https://docs.codat.io/integrations/accounting/quickbooksdesktop/accounting-quickbooksdesktop/), [Rutter](https://docs.rutter.com/platforms/accounting/qbd)) | Un conector local, **de la aplicación y nunca del motor** |
 
 ### Qué hacen: la puerta abierta para cualquier ERP

@@ -348,7 +348,8 @@ son, con CONCAR y CONTASIS, los sistemas contables que más estudios peruanos ti
 encima de ellos mientras evolucionan.
 
 **Investigación.** Los tres escalones con que EE. UU. integra sistemas de escritorio sin API, y lo que se toma de
-ellos: `INTEROPERABILIDAD.md`, «Exportar al destino».
+ellos: `INTEROPERABILIDAD.md`, «Exportar al destino». Para A4 y A5, la forma de la API de STARSOFT Gold campo a
+campo, comparada con las API de EE. UU. y con los estándares abiertos de factura: `API-DE-REGISTRO.md`.
 
 **Qué hay hoy.** CONCAR (asientos) y CONTASIS (registro) en uso, de canal legacy. Las formas del contrato
 (`contaperu/drivers/contrato.py`) y la receta con la que entró CONTASIS (`CONTRIBUTING.md`, «Añadir un driver de

@@ -10,6 +10,11 @@ Su continuación —el ciclo contable de EE. UU. comparado con el peruano, los p
 PLE, SAF-T, XBRL GL, ISO 20022), la especificación MCP, dos entradas que el motor todavía no tiene, el banco y las
 facturas de proveedores, y la puerta a otra jurisdicción— está en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
 
+Este documento mira el **asiento**: cómo modela cada API un `JournalEntry`. El escalón de antes —el **registro de un
+comprobante**, lo que un sistema manda cuando dice «anota esta compra»— está en
+[API-DE-REGISTRO.md](API-DE-REGISTRO.md), con la API de STARSOFT Gold como punto de partida y el borrador del JSON
+que serviría a cualquier ERP.
+
 ## Por qué mirar a EE. UU.
 
 El problema que ContaPerú resuelve —cada sistema contable importa su propio archivo plano, con sus
