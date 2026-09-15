@@ -83,7 +83,8 @@ nuevo no la usa.
   `contaperu/drivers/__init__.py`.
 
 Esté donde esté, lo que comprueba el contrato es `drivers.contrato.incumplimientos()` (lista vacía = cumple): el
-registro lo llama al cargar un driver de terceros y, si le falta algo, lo ignora con un `AvisoDriver`.
+registro lo llama al cargar un driver de terceros y, si le falta algo, lo ignora con un `AvisoDriver`. Para saberlo
+antes, en la terminal: `contaperu verificar-driver mi_paquete.mi_driver` (0 si cumple, 1 con la lista de lo que falta).
 `tests/test_contrato_drivers.py` se lo pide a cada driver registrado y además le hace exportar el golden de compras
 con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
 
@@ -116,7 +117,8 @@ con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
 10. **Declara tu `CANAL`**: `legacy` si tu sistema contable importa un archivo, `tributario` si es un registro que se
     presenta a SUNAT, `intercambio` si es un formato neutral. El contrato hace cumplir sus reglas (un `legacy` lleva
     cuentas y declara `EXIGE`); `api_erp` está reservado para escribir en la API de un ERP moderno y todavía no se
-    admite.
+    admite. Cada canal se presenta en uno de los grupos del motor: `tributario` es SIRE, `legacy` es Legacy e
+    `intercambio` es ERP.
 
 ## Estilo
 

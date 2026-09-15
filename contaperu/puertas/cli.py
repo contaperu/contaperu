@@ -5,13 +5,14 @@
 
     contaperu desde-json tests/fixtures/golden/ventas_202512.json --driver sire
 
-Cinco subcomandos:
+Seis subcomandos:
 
-  generar        XML o ZIP locales → el archivo del driver; --json vuelca además el documento leído
-  desde-json     un documento open-accounting → el archivo del driver, con --config e --imputacion
-  diagnosticar   qué bloquea, qué falta y qué saldría para un driver, antes de generar nada
-  configuracion  qué se configura (lo general y la sección de cada sistema) o sus valores por defecto
-  comparar       nuestro TXT del SIRE contra la exportación del detalle que da SUNAT
+  generar           XML o ZIP locales → el archivo del driver; --json vuelca además el documento leído
+  desde-json        un documento open-accounting → el archivo del driver, con --config e --imputacion
+  diagnosticar      qué bloquea, qué falta y qué saldría para un driver, antes de generar nada
+  configuracion     qué se configura (lo general y la sección de cada sistema) o sus valores por defecto
+  comparar          nuestro TXT del SIRE contra la exportación del detalle que da SUNAT
+  verificar-driver  un driver propio contra el contrato del motor, antes de registrarlo
 
 El archivo del driver es el TXT y el ZIP del SIRE, el Excel de CONCAR o de CONTASIS, o el CSV. "todas" = los
 drivers de TXT, que hoy es solo el SIRE; los que llevan cuentas se piden por su nombre, y `generar` no recibe
@@ -21,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -234,6 +236,30 @@ def cmd_comparar(args: argparse.Namespace) -> int:
     return 1 if (comparacion["diferencias"] or comparacion["solo_en_sunat"] or comparacion["solo_nuestros"]) else 0
 
 
+def cmd_verificar_driver(args: argparse.Namespace) -> int:
+    """Un driver propio contra el contrato, antes de registrarlo por entry points o de proponerlo al repositorio."""
+    # Quien lo prueba suele estar en la carpeta de su driver, y un comando instalado no la tiene en la ruta de Python.
+    if os.getcwd() not in sys.path:
+        sys.path.insert(0, os.getcwd())
+    try:
+        resultado = api.verificar_driver(args.modulo)
+    except ImportError as error:
+        print(error, file=sys.stderr)
+        return 2
+    grupo = resultado["grupo"] or "(ninguno)"
+    print(f"Driver {resultado['nombre'] or args.modulo} · forma {resultado['forma'] or '(ninguna)'} · "
+          f"canal {resultado['canal']} · grupo {grupo}")
+    for aviso in resultado["avisos"]:
+        print(f"   · {aviso}")
+    if resultado["cumple"]:
+        print("CUMPLE el contrato.")
+        return 0
+    for falta in resultado["incumplimientos"]:
+        print(f"  !! {falta}")
+    print(f"NO cumple el contrato: {len(resultado['incumplimientos'])} cosas que corregir.")
+    return 1
+
+
 def _consola_utf8() -> None:
     """La consola de Windows usa cp1252 por defecto y revienta con una flecha o una tilde.
     Un contador peruano trabaja en Windows: que la herramienta se caiga al IMPRIMIR, con los
@@ -315,6 +341,11 @@ def main(argv: list[str] | None = None) -> int:
     sub_comparar.add_argument("--registro", default="", choices=["", "venta", "compra"],
                               help="normalmente se deduce del nombre (1404 ventas / 0804 compras); fuérzalo si no")
     sub_comparar.set_defaults(fn=cmd_comparar)
+
+    sub_verificar = subcomandos.add_parser("verificar-driver",
+                                           help="un driver propio contra el contrato del motor, antes de registrarlo")
+    sub_verificar.add_argument("modulo", help="el módulo del driver, como se importa en Python (mi_paquete.mi_driver)")
+    sub_verificar.set_defaults(fn=cmd_verificar_driver)
 
     args = analizador.parse_args(argv)
     return args.fn(args)

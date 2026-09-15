@@ -57,7 +57,8 @@
   "normalizar_detracciones": "función(documento: 'dict', *, configuracion: 'dict | None' = None) -> 'dict'",
   "problema": "función(error: 'BaseException') -> 'dict'",
   "revisar": "función(documento: 'dict', *, configuracion: 'dict | None' = None, imputacion: 'dict | None' = None, claves_previas: 'list | None' = None) -> 'dict'",
-  "serie_y_numero": "función(serie: 'str', numero: 'str') -> 'str'"
+  "serie_y_numero": "función(serie: 'str', numero: 'str') -> 'str'",
+  "verificar_driver": "función(modulo: 'str') -> 'dict'"
  },
  "contaperu.errores": {
   "DocumentoInvalido": "",
@@ -355,6 +356,7 @@
   "EXIGE_POSIBLES_REGISTRO": "",
   "FAMILIA": "",
   "FORMAS": "",
+  "GRUPOS": "",
   "Libro": "",
   "MONEDAS_CODIGO": "",
   "NoCabe": "",
@@ -374,6 +376,7 @@
   "exige": "",
   "familia": "",
   "forma": "",
+  "grupo": "",
   "incumplimientos": "",
   "lleva_cuentas": "",
   "no_caben": "",

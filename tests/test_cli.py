@@ -38,6 +38,19 @@ def test_errores_bloquean_salvo_flag(tmp_path, capsys):
     assert (tmp_path / "s" / "LE2013131295520260100140400021112.zip").exists()
 
 
+def test_verificar_un_driver_propio(tmp_path, monkeypatch, capsys):
+    """Un driver de terceros se comprueba contra el contrato antes de registrarlo: 0 si cumple, 1 si le falta algo
+    (y dice qué), 2 si ni siquiera se puede importar."""
+    assert cli.main(["verificar-driver", "drivers_de_prueba.diario_json"]) == 0
+    assert "CUMPLE" in capsys.readouterr().out
+    (tmp_path / "driver_a_medias.py").write_text('NOMBRE = "a_medias"\nCANAL = "legacy"\n', encoding="utf-8")
+    monkeypatch.syspath_prepend(str(tmp_path))
+    assert cli.main(["verificar-driver", "driver_a_medias"]) == 1
+    salida = capsys.readouterr().out
+    assert "NO cumple" in salida and "!!" in salida
+    assert cli.main(["verificar-driver", "no_existe_este_driver"]) == 2
+
+
 def test_la_cli_dice_que_se_configura(capsys):
     """Para escribir un --config sin adivinar: lo que se configura de un sistema, o los valores por defecto."""
     assert cli.main(["configuracion", "--driver", "contasis"]) == 0

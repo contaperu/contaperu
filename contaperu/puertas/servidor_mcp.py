@@ -270,13 +270,13 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
     guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.
     `imputacion` es la misma de `generar_asiento`.
 
-    Drivers disponibles (ver el recurso `contaperu://drivers`):
-      - `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.
-      - `sire`   — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el contenido
-                   va en `texto` y el ZIP que sube a SUNAT, adjunto.
-      - `csv`    — las líneas de diario en columnas, en `texto` y también adjunto.
-      - `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como `.xlsx`:
-                   una fila por comprobante, sin sub-diario (se elige al importar).
+    Drivers disponibles, por grupo (el recurso `contaperu://drivers` dice el grupo de cada uno):
+      - SIRE:   `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el
+                contenido va en `texto` y el ZIP que sube a SUNAT, adjunto.
+      - Legacy: `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.
+                `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como
+                `.xlsx`: una fila por comprobante, sin sub-diario (se elige al importar).
+      - ERP:    `csv` — las líneas de diario en columnas, en `texto` y también adjunto.
 
     Antes de escribir nada, en los drivers que arman asiento (`concar`, `csv`) comprueba que cuadre; si
     no cuadra, falla. `contasis` y `sire` no arman asiento: `contasis` se niega antes por lo que exige y

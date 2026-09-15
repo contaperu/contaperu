@@ -29,7 +29,8 @@ from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesb
 from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, catalogo_pcge, catalogos_sunat, comparar_sire, cuadrar,
                           describir_configuracion, diagnosticar, drivers_disponibles, errores_de_configuracion,
                           esquema_diagnostico, esquema_open_accounting, exportar, exportar_archivo, generar_asiento, leer_archivos,
-                          leer_propuesta_sire, leer_xml, normalizar_detracciones, revisar, configuracion_por_defecto, contrato_openconta)
+                          leer_propuesta_sire, leer_xml, normalizar_detracciones, revisar, configuracion_por_defecto, contrato_openconta,
+                          verificar_driver)
 from .tabla import OPERACIONES, Operacion
 
 __all__ = [
@@ -38,7 +39,7 @@ __all__ = [
     "diagnosticar", "generar_asiento", "exportar", "exportar_archivo", "cuadrar", "buscar_cuenta_pcge", "adaptar_pcge",
     "configuracion_por_defecto", "describir_configuracion", "errores_de_configuracion", "drivers_disponibles",
     "catalogos_sunat", "catalogo_pcge", "esquema_open_accounting", "esquema_diagnostico", "comparar_sire",
-    "contrato_openconta",
+    "contrato_openconta", "verificar_driver",
     # la tabla que exponen las puertas
     "OPERACIONES", "Operacion",
     # lo que devuelve o recibe

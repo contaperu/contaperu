@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/drivers.schema.json",
  "title": "Drivers disponibles",
- "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia y su canal.",
+ "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia, su canal y su grupo.",
  "type": "object",
  "additionalProperties": {
   "type": "object",
@@ -40,6 +40,14 @@
      "intercambio"
     ]
    },
+   "grupo": {
+    "description": "El grupo de destinos al que entrega, según su canal: el SIRE, un sistema legacy o un ERP.",
+    "enum": [
+     "sire",
+     "legacy",
+     "erp"
+    ]
+   },
    "exige": {
     "type": "array",
     "items": {
@@ -59,6 +67,7 @@
    "forma",
    "familia",
    "canal",
+   "grupo",
    "exige",
    "configurable",
    "descripcion"

@@ -62,6 +62,25 @@ def test_el_mcp_expone_exactamente_la_tabla():
     assert recursos == {op.recurso for op in api.OPERACIONES if op.recurso}
 
 
+def test_verificar_un_driver_no_se_expone_por_ninguna_puerta_de_red():
+    """Importa código por su nombre: sirve en Python y en la línea de comandos, nunca por HTTP ni por MCP."""
+    assert "verificar_driver" in api.__all__
+    assert "verificar_driver" not in {op.nombre for op in api.OPERACIONES}
+
+
+def test_cada_driver_dice_su_grupo():
+    """Lo que sale va al SIRE, a un sistema legacy o a un ERP (John, 15-sep-2026): el grupo sale del canal."""
+    assert {nombre: datos["grupo"] for nombre, datos in api.drivers_disponibles().items()} == {
+        "sire": "sire", "concar": "legacy", "contasis": "legacy", "csv": "erp"}
+
+
+def test_verificar_un_driver_dice_lo_que_le_falta():
+    bien = api.verificar_driver("drivers_de_prueba.diario_json")
+    assert bien["cumple"] and bien["incumplimientos"] == [] and (bien["canal"], bien["grupo"]) == ("legacy", "legacy")
+    with pytest.raises(ImportError, match="no_existe_este_driver"):
+        api.verificar_driver("no_existe_este_driver")
+
+
 @pytest.mark.parametrize("vieja,nueva", [
     ("contaperu.operaciones:exportar", None),
     ("contaperu.operaciones:DocumentoInvalido", "contaperu.api:DocumentoInvalido"),

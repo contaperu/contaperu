@@ -32,6 +32,9 @@ salida, un solo documento»)—, y hay cuatro formas de driver. Un driver implem
 - **`tributario`** — un registro que se presenta a SUNAT (el SIRE). Forma `linea`, sin cuentas ni configuración.
 - **`intercambio`** — un formato neutral para leer o integrar (el CSV). Forma `desde_lineas`: proyecta la línea.
 
+Cada canal se presenta en uno de los tres grupos de destinos del motor (`GRUPOS`): `tributario` es el **SIRE**, `legacy`
+es **legacy** e `intercambio` es **ERP**. `drivers_disponibles` dice el grupo de cada driver.
+
 `api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado (hito A5): el contrato lo rechaza. Un driver
 de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy` durante la 1.x.
 
@@ -93,6 +96,9 @@ CANALES_RESERVADOS = {
 }
 # Cómo se trata durante la 1.x un driver de terceros que no declara su canal.
 CANAL_POR_DEFECTO = "legacy"
+# Cómo se presenta cada canal en la arquitectura del motor (John, 15-sep-2026): lo que sale va al SIRE, a un sistema
+# legacy o a un ERP. El canal es la regla que hace cumplir el contrato; el grupo, cómo se nombra ante quien integra.
+GRUPOS = {"tributario": "sire", "legacy": "legacy", "intercambio": "erp"}
 
 # En orden de preferencia: si un driver expone dos, el núcleo usa la primera.
 FORMAS = ("desde_lineas", "desde_comprobantes", "construir", "linea")
@@ -175,6 +181,11 @@ def canal(modulo: Any) -> str:
 
 def declara_canal(modulo: Any) -> bool:
     return bool(getattr(modulo, "CANAL", None))
+
+
+def grupo(modulo: Any) -> str:
+    """El grupo de destinos al que entrega: `sire`, `legacy` o `erp`, según su canal; '' si el canal no existe."""
+    return GRUPOS.get(canal(modulo), "")
 
 
 def acepta_indice(modulo: Any) -> bool:

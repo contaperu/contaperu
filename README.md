@@ -118,7 +118,7 @@ API y devuelven la respuesta. Por eso el mismo mes da el mismo resultado por las
 | Puerta | Para quién | Cómo se usa |
 |---|---|---|
 | **Python** | Un programa en Python | `from contaperu import api` y `api.exportar(documento, driver="concar", ...)`: llama directo a la API |
-| **CLI** (`contaperu`) | Quien trabaja en la consola o por lotes | Cinco comandos: `generar`, `desde-json`, `diagnosticar`, `configuracion` y `comparar` |
+| **CLI** (`contaperu`) | Quien trabaja en la consola o por lotes | Seis comandos: `generar`, `desde-json`, `diagnosticar`, `configuracion`, `comparar` y `verificar-driver`, que comprueba un driver propio contra el contrato |
 | **MCP** (`contaperu-mcp`) | Un asistente de IA | 11 herramientas de solo lectura y 6 recursos, por stdio, HTTP o SSE; el archivo vuelve con hasta 4 MB |
 | **HTTP** (`contaperu-http`) | Un ERP en cualquier lenguaje | `POST /v1/exportar`, `POST /v1/diagnosticar`…; responde 421 a un `Host` no declarado, corta la petición en 10 MB y atiende 16 a la vez |
 

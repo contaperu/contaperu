@@ -7,6 +7,7 @@ llevar bytes; quien los quiera en bytes tiene `exportar_archivo`.
 """
 from __future__ import annotations
 
+import importlib
 from typing import Sequence
 
 from .. import _datos, catalogos, comparar_sire as _comparar, detracciones, drivers, partida_doble, pcge
@@ -152,18 +153,42 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
 
 def drivers_disponibles() -> dict:
     """Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal
-    (`legacy`, `tributario` o `intercambio`), lo que exige, si se configura y su descripción."""
+    (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), lo que exige, si se configura y su
+    descripción."""
     return {
         nombre: {"formatos": modulo.FORMATOS,
                  "tipo": "texto" if contrato.forma(modulo) == "linea" else "archivo",
                  "forma": contrato.forma(modulo),
                  "familia": contrato.familia(modulo),
                  "canal": contrato.canal(modulo),
+                 "grupo": contrato.grupo(modulo),
                  "exige": sorted(contrato.exige(modulo)),
                  "configurable": bool(contrato.seccion_por_defecto(modulo)),
                  "descripcion": ((modulo.__doc__ or "").strip().splitlines() or [""])[0]}
         for nombre, modulo in drivers.DRIVERS.items()
     }
+
+
+def verificar_driver(modulo: str) -> dict:
+    """Comprueba un driver contra el contrato antes de registrarlo: importa el módulo por su nombre (`paquete.driver`) y
+    dice su forma, su canal, su grupo, si cumple y qué le falta (`drivers.contrato.incumplimientos`), más los avisos con
+    que el registro lo aceptaría igual durante la 1.x.
+
+    Solo para Python y la línea de comandos: importar código por su nombre nunca se expone por HTTP ni por MCP, y por
+    eso no está en la tabla de operaciones. Lanza `ImportError` si el módulo no se puede importar."""
+    try:
+        cargado = importlib.import_module(modulo)
+    except Exception as error:  # noqa: BLE001 — cualquier fallo al importar se dice igual: no hay driver que mirar
+        raise ImportError(f"No se puede importar el driver {modulo!r}: {error}") from error
+    faltas = contrato.incumplimientos(cargado)
+    avisos = []
+    if not contrato.declara_canal(cargado):
+        avisos.append("no declara CANAL: durante la 1.x se trata como legacy, y en la 2.0 será obligatorio")
+    if contrato.forma(cargado) == "construir":
+        avisos.append("usa la forma `construir`, que se retira en la 2.0: pasa a `desde_lineas`")
+    return {"modulo": modulo, "nombre": str(getattr(cargado, "NOMBRE", "") or ""), "forma": contrato.forma(cargado),
+            "canal": contrato.canal(cargado), "grupo": contrato.grupo(cargado), "cumple": not faltas,
+            "incumplimientos": faltas, "avisos": avisos}
 
 
 def catalogos_sunat() -> dict:

@@ -517,11 +517,11 @@
   "/v1/drivers": {
    "get": {
     "operationId": "drivers_disponibles",
-    "summary": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), lo que exige, si se configura y su descripción.",
-    "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal\n(`legacy`, `tributario` o `intercambio`), lo que exige, si se configura y su descripción.",
+    "summary": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), lo que exige, si se configura y su descripción.",
+    "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal\n(`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), lo que exige, si se configura y su\ndescripción.",
     "responses": {
      "200": {
-      "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), lo que exige, si se configura y su descripción.",
+      "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), lo que exige, si se configura y su descripción.",
       "content": {
        "application/json": {
         "schema": {
@@ -2119,7 +2119,7 @@
    },
    "drivers": {
     "title": "Drivers disponibles",
-    "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia y su canal.",
+    "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia, su canal y su grupo.",
     "type": "object",
     "additionalProperties": {
      "type": "object",
@@ -2157,6 +2157,14 @@
         "intercambio"
        ]
       },
+      "grupo": {
+       "description": "El grupo de destinos al que entrega, según su canal: el SIRE, un sistema legacy o un ERP.",
+       "enum": [
+        "sire",
+        "legacy",
+        "erp"
+       ]
+      },
       "exige": {
        "type": "array",
        "items": {
@@ -2176,6 +2184,7 @@
       "forma",
       "familia",
       "canal",
+      "grupo",
       "exige",
       "configurable",
       "descripcion"

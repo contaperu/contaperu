@@ -154,7 +154,10 @@ Si tu ERP todavía no tiene driver, el contrato está en `contaperu/drivers/cont
 `CONTRIBUTING.md`. Lo esencial:
 
 - **Declara a quién entrega** (`CANAL`): `legacy` si es un sistema contable instalado que importa un archivo,
-  `tributario` si es un registro que se presenta a SUNAT, `intercambio` si es un formato neutral.
+  `tributario` si es un registro que se presenta a SUNAT, `intercambio` si es un formato neutral. El motor lo presenta
+  en uno de sus tres grupos de destinos —SIRE, Legacy o ERP— y `drivers_disponibles` dice el de cada driver.
+- **Compruébalo antes de registrarlo**: `contaperu verificar-driver mi_paquete.mi_driver` dice si cumple el contrato y
+  qué le falta (desde Python, `api.verificar_driver`).
 - **Un driver de asientos recibe las líneas ya armadas** (`desde_lineas`), numeradas y cuadradas, con el índice de cada
   comprobante y su cabecera. Solo traduce: no puede equivocarse en una cuenta ni en un sentido.
 - **Dos niveles.** *De serie*, dentro de este repositorio, con un archivo real que ese ERP haya aceptado. *Comunidad*,

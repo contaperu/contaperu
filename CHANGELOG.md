@@ -29,6 +29,14 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   `detracciones`, la tabla del motor con su fuente, para que una pantalla nombre cada código aunque el ERP no
   sobreescriba nada (también en `contaperu://catalogos/sunat` y `GET /v1/catalogos/sunat`).
 - `asiento.serie_numero_de(comprobante, opciones)`.
+- **Los tres grupos de destinos del motor en el código**: `drivers.contrato.GRUPOS` y `grupo(modulo)` presentan cada
+  canal como **SIRE** (`tributario`), **Legacy** (`legacy`) o **ERP** (`intercambio`), y `drivers_disponibles` suma
+  `grupo` a cada driver (también en `contaperu://drivers` y `GET /v1/drivers`). Los canales no cambian: siguen siendo la
+  regla del contrato.
+- **`contaperu verificar-driver mi_paquete.mi_driver`** y `api.verificar_driver`: un driver propio contra el contrato
+  antes de registrarlo, con su forma, su canal, su grupo, lo que le falta y los avisos con que el registro lo aceptaría
+  en la 1.x. Sale con 0 si cumple, 1 si le falta algo y 2 si no se puede importar. Importa código por su nombre, así
+  que no está en la tabla de operaciones: nunca se expone por HTTP ni por MCP.
 
 ## [1.0.0] — 2026-09-14
 
