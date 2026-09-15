@@ -28,6 +28,45 @@
    "items": {
     "type": "string"
    }
+  },
+  "detracciones": {
+   "type": "object",
+   "description": "La tabla de detracciones del motor, con su fuente: cada código SUNAT con su nombre y su tasa. El ERP que integra el motor la puede sobreescribir en su configuración (detraccion_tasas, detraccion_nombres).",
+   "properties": {
+    "fuente": {
+     "type": "string"
+    },
+    "nota": {
+     "type": "string"
+    },
+    "codigos": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "properties": {
+       "nombre": {
+        "type": "string"
+       },
+       "tasa": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "nombre",
+       "tasa"
+      ],
+      "additionalProperties": false
+     }
+    }
+   },
+   "required": [
+    "fuente",
+    "codigos"
+   ],
+   "additionalProperties": false
   }
  },
  "required": [
@@ -35,7 +74,8 @@
   "tipos_documento_identidad",
   "monedas",
   "notas",
-  "fuera_del_registro_sunat"
+  "fuera_del_registro_sunat",
+  "detracciones"
  ],
  "additionalProperties": false
 }

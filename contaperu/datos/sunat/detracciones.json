@@ -1,0 +1,20 @@
+{
+ "fuente": "Apéndices vigentes del Sistema de Pago de Obligaciones Tributarias (SPOT), en orientacion.sunat.gob.pe, cruzados por nombre con el Catálogo 54 de SUNAT (Anexo N.° 8). En esa página la columna «código» es el numeral dentro del anexo y no el código del comprobante (ahí «14» es Leche, que en el catálogo es 023, mientras 014 son Carnes): cruzarlo por número sale mal.",
+ "nota": "Tabla parcial: los códigos que el motor reconocía hasta la 1.0. Los demás del Catálogo 54 entran con su fuente. El ERP que integra el motor puede sobreescribir una tasa o un nombre, o sumar un código, en su configuración (detraccion_tasas, detraccion_nombres).",
+ "codigos": {
+  "008": {"nombre": "Madera", "tasa": "4"},
+  "009": {"nombre": "Arena y piedra", "tasa": "10"},
+  "010": {"nombre": "Residuos, subproductos, desechos, recortes y desperdicios", "tasa": "15"},
+  "012": {"nombre": "Intermediación laboral y tercerización", "tasa": "12"},
+  "019": {"nombre": "Arrendamiento de bienes muebles", "tasa": "10"},
+  "020": {"nombre": "Mantenimiento y reparación de bienes muebles", "tasa": "12"},
+  "021": {"nombre": "Movimiento de carga", "tasa": "10"},
+  "022": {"nombre": "Otros servicios empresariales", "tasa": "12"},
+  "024": {"nombre": "Comisión mercantil", "tasa": "10"},
+  "025": {"nombre": "Fabricación de bienes por encargo", "tasa": "10"},
+  "026": {"nombre": "Servicio de transporte de personas", "tasa": "10"},
+  "027": {"nombre": "Servicio de transporte de bienes por vía terrestre", "tasa": "4"},
+  "030": {"nombre": "Contratos de construcción", "tasa": "4"},
+  "037": {"nombre": "Demás servicios gravados con el IGV", "tasa": "12"}
+ }
+}

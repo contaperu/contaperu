@@ -65,7 +65,7 @@ def detraccion_pendiente(c: Comprobante) -> bool:
 
 
 def que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], faltantes: dict,
-              exige: frozenset[str]) -> list[dict]:
+              exige: frozenset[str], serie_numero: Any = _serie_numero) -> list[dict]:
     """Lo que bloquea la exportación a ESE destino, agrupado por motivo y con a quién pedírselo.
 
     Un agente redacta «faltan cuentas contables en E001-871 y E001-872», no dos preguntas: por eso va
@@ -77,7 +77,7 @@ def que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falta
     for c in con_error:
         for o in c.observaciones:
             if o.nivel == "error":
-                por_codigo.setdefault(o.codigo, []).append(_serie_numero(c))
+                por_codigo.setdefault(o.codigo, []).append(serie_numero(c))
                 textos.setdefault(o.codigo, o.texto)
     for codigo in sorted(por_codigo):
         salida.append({"motivo": codigo, "texto": textos[codigo], "comprobantes": por_codigo[codigo],
@@ -87,10 +87,10 @@ def que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falta
         if not falta.requisito or falta.requisito not in exige or not faltantes.get(clave):
             continue
         if clave == "sin_sigla":
-            cuales = [_serie_numero(c) for c in candidatos if c.tipo_cp in faltantes[clave]]
+            cuales = [serie_numero(c) for c in candidatos if c.tipo_cp in faltantes[clave]]
             texto = f"{falta.texto}: {', '.join(faltantes[clave])}"
         elif clave == "sin_codigo_de_moneda":
-            cuales = [_serie_numero(c) for c in candidatos if c.moneda in faltantes[clave]]
+            cuales = [serie_numero(c) for c in candidatos if c.moneda in faltantes[clave]]
             texto = f"{falta.texto}: {', '.join(faltantes[clave])}"
         else:
             cuales, texto = list(faltantes[clave]), falta.texto
@@ -133,6 +133,12 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     todos = comprobantes_de(doc)
     previas = claves_previas_de(claves_previas)
     modulo = drivers.obtener(driver)
+    opciones = getattr(modulo, "OPCIONES", None)
+
+    def _serie_numero(c: Comprobante) -> str:
+        # Como en la línea del asiento de ese destino (hito 0.8): el mismo comprobante se nombra igual en los dos.
+        return asi.serie_numero_de(c, opciones)
+
     # Lo que ESE destino exige (`contrato.exige`): decide qué faltante deja el mes «no listo». El CSV
     # no exige centro ni moneda con código; CONCAR, los dos; el SIRE, nada de esto.
     exige = contrato.exige(modulo)
@@ -210,7 +216,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
         "exige": sorted(exige),
         "listo_para_exportar": not por_que_no,
         "por_que_no": por_que_no,
-        "que_falta": que_falta(con_error, candidatos, faltantes, exige),
+        "que_falta": que_falta(con_error, candidatos, faltantes, exige, _serie_numero),
         "errores_de_configuracion": [],
         "totales": {"comprobantes": len(todos), "saldrian": len(saldrian), "excluidos": len(excluidos),
                     "fuera_del_destino": len(fuera), "con_error": len(con_error), "con_aviso": len(con_aviso)},

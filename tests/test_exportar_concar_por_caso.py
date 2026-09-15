@@ -22,8 +22,9 @@ from datetime import date, datetime
 import pytest
 
 from contaperu import asiento as asi
-from contaperu import api
-from test_snapshot_concar import CASOS, FILAS, armar
+from contaperu import api, detracciones
+from contaperu.drivers import concar as driver_concar
+from test_snapshot_concar import CASOS, FILAS, MES, armar
 
 openpyxl = pytest.importorskip("openpyxl")
 
@@ -40,6 +41,13 @@ RECHAZADOS = {
     "venta_reparto": (asi.SinCentro, "las partes van a 701101 y 704101 sin centro, y la 70 lo lleva"),
 }
 EXPORTABLES = [caso for caso in CASOS if caso[0] not in RECHAZADOS]
+
+# Los casos cuya detracción la tabla no reconoce. La vista previa (`filas_de_comprobante`, y su snapshot) la arma tal como
+# llega; `exportar` la deja en blanco antes, como `revisar` y `diagnosticar` (1.1, decisión de John del 15-sep-2026). Lo
+# que se importa es la vista previa del comprobante ya normalizado.
+NORMALIZADOS = {
+    "detraccion_codigo_sin_tasa": "el 031 no está en la tabla de detracciones: pasa del sub-diario 10 al 11",
+}
 
 
 def exportar_caso(caso) -> dict:
@@ -76,14 +84,30 @@ def filas_congeladas(nombre: str) -> list[dict]:
             for fila in json.loads(FILAS.read_text(encoding="utf-8"))[nombre]]
 
 
+def filas_normalizadas(caso) -> list[dict]:
+    """Las filas de la vista previa del comprobante con su detracción ya contrastada con la tabla."""
+    c, config, es_venta = armar(caso)
+    detracciones.normalizar([c], config)
+    return [{letra: _normal(fila.get(letra)) for letra in LETRAS}
+            for fila in driver_concar.filas_de_comprobante(c, config, MES, "080001", es_venta=es_venta)]
+
+
 def test_los_rechazados_son_casos_del_snapshot():
     assert set(RECHAZADOS) <= {caso[0] for caso in CASOS}
+
+
+@pytest.mark.parametrize("nombre", sorted(NORMALIZADOS))
+def test_los_normalizados_cambian_de_sub_diario_a_proposito(nombre):
+    """Lo anunciado y nada más: la vista previa sigue en el sub-diario de detracciones y lo exportado va al de compras."""
+    caso = next(caso for caso in CASOS if caso[0] == nombre)
+    assert {fila["B"] for fila in filas_congeladas(nombre)} == {"10"}
+    assert {fila["B"] for fila in filas_normalizadas(caso)} == {"11"}
 
 
 @pytest.mark.parametrize("caso", EXPORTABLES, ids=[caso[0] for caso in EXPORTABLES])
 def test_lo_que_se_importa_en_concar_es_el_snapshot(caso):
     obtenidas = filas_del_excel(exportar_caso(caso))
-    esperadas = filas_congeladas(caso[0])
+    esperadas = filas_normalizadas(caso) if caso[0] in NORMALIZADOS else filas_congeladas(caso[0])
     assert len(obtenidas) == len(esperadas), f"{caso[0]}: {len(obtenidas)} filas, se esperaban {len(esperadas)}"
     for i, (fila, esperada) in enumerate(zip(obtenidas, esperadas)):
         distintas = {letra: (fila[letra], esperada[letra]) for letra in LETRAS if fila[letra] != esperada[letra]}

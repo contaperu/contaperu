@@ -80,6 +80,12 @@ def _numero(numero: str, opciones: Any) -> str:
     return (numero or "").strip()
 
 
+def serie_numero_de(c: Comprobante, opciones: Any = None) -> str:
+    """El serie-número del comprobante tal como va a la línea de ese destino: la serie sin espacios y el número según sus
+    opciones. `diagnosticar` lo escribe igual, así un comprobante se nombra lo mismo en el diagnóstico y en el asiento."""
+    return serie_y_numero((c.serie or "").strip(), _numero(c.numero, opciones))
+
+
 def _limpio(campos: dict) -> dict:
     """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""
     return {k: v for k, v in campos.items() if v not in ("", None)}
@@ -128,7 +134,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     centros = {(centro or "").strip() for _, centro, _ in partes}
     centro_comun = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
     serie, numero = (c.serie or "").strip(), _numero(c.numero, opciones)
-    serie_numero = serie_y_numero(serie, numero)
+    serie_numero = serie_numero_de(c, opciones)
     # UNA sola glosa para todas las líneas (confirmado por un contador, 2026); las derivadas anteponen lo
     # que las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—. Cortarla es cosa del driver.
     glosa = glosa_de(c)

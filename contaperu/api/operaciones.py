@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Sequence
 
-from .. import _datos, catalogos, comparar_sire as _comparar, drivers, partida_doble, pcge
+from .. import _datos, catalogos, comparar_sire as _comparar, detracciones, drivers, partida_doble, pcge
 from ..drivers import contrato
 from ..errores import DocumentoInvalido
 from ..pipeline import armado, diagnostico, lectura, preparacion, salida
@@ -167,13 +167,15 @@ def drivers_disponibles() -> dict:
 
 
 def catalogos_sunat() -> dict:
-    """Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad y monedas."""
+    """Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas y la
+    tabla de detracciones, con su fuente, que el ERP puede sobreescribir en su configuración."""
     return {
         "tipos_comprobante": catalogos.TIPOS_CP,
         "tipos_documento_identidad": catalogos.TIPOS_DOC_IDENTIDAD,
         "monedas": sorted(catalogos.MONEDAS),
         "notas": sorted(catalogos.NOTAS),
         "fuera_del_registro_sunat": sorted(catalogos.FUERA_DEL_REGISTRO_SUNAT),
+        "detracciones": detracciones.tabla_del_motor(),
     }
 
 

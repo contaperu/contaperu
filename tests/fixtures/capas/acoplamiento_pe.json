@@ -15,6 +15,7 @@
  "contaperu.api.operaciones": [
   "contaperu.catalogos",
   "contaperu.comparar_sire",
+  "contaperu.detracciones",
   "contaperu.pcge"
  ],
  "contaperu.asiento.motor": [

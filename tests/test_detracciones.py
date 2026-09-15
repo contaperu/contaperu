@@ -64,17 +64,49 @@ def test_sin_detracciones_no_hace_nada():
     assert detracciones.normalizar([comprobante(None)], CONTAB) == []
 
 
-def test_la_tabla_sale_de_la_configuracion_del_contribuyente():
-    """Quien no reconozca un código no lo tiene: la tabla es suya, no del motor. Y es la de sus tasas, que es de la
-    contabilidad general: el código interno de CONCAR (`detraccion_codigos`) no decide qué se reconoce."""
-    propia = {"detraccion_tasas": {"037": 12, "031": None}}
-    assert detracciones.codigos_de(propia) == {"037", "031"}
+def test_la_tabla_vive_en_el_motor_con_su_fuente():
+    """La tabla de detracciones es del motor (John, 15-sep-2026): sin configuración ya se reconocen sus códigos, cada uno
+    con su nombre y su tasa, y la tabla dice de dónde sale. El código interno de CONCAR no decide qué se reconoce."""
+    del_motor = detracciones.tabla_del_motor()
+    assert del_motor["fuente"].strip()
+    assert detracciones.codigos_de({}) == set(del_motor["codigos"]) >= {"027", "030", "037"}
+    assert detracciones.tabla_de_detracciones()["030"] == {"nombre": "Contratos de construcción", "tasa": Decimal("4")}
+    assert detracciones.normalizar_una({"codigo": "27"}, detracciones.codigos_de({})) == {"codigo": "027"}
+    assert detracciones.codigos_de({"detraccion_codigos": {"999": "99901"}}) == detracciones.codigos_de({})
+
+
+def test_el_erp_sobreescribe_la_tabla_del_motor():
+    """Quien integra el motor cambia una tasa o un nombre, o suma un código (`null`: sin tasa, la trae el comprobante)."""
+    propia = {"detraccion_tasas": {"037": 10, "031": None}, "detraccion_nombres": {"030": "Obras", "999": "No suma"}}
+    assert detracciones.tasa_de_tabla("037", propia) == 10              # la del ERP manda
+    assert detracciones.tasa_de_tabla("027", propia) == 4               # la que no toca sigue siendo la del motor
+    assert "031" in detracciones.codigos_de(propia) and detracciones.tasa_de_tabla("031", propia) == 0
     assert detracciones.normalizar_una({"codigo": "31"}, detracciones.codigos_de(propia)) == {"codigo": "031"}
-    assert detracciones.tasa_de_tabla("031", propia) == 0          # reconocido sin tasa: la trae el comprobante
-    solo_de_concar = {"detraccion_codigos": {"027": "02701"}}
-    assert detracciones.normalizar_una({"codigo": "027"}, detracciones.codigos_de(solo_de_concar)) is None
-    vacia = detracciones.codigos_de({})
-    assert detracciones.normalizar_una({"codigo": "027"}, vacia) is None
+    tabla = detracciones.tabla_de_detracciones(propia)
+    assert tabla["030"]["nombre"] == "Obras" and "999" not in tabla     # un nombre no suma un código
+
+
+def test_la_configuracion_de_la_1_0_da_lo_mismo_que_la_tabla_del_motor():
+    """Quien guardó los 14 códigos que traía la configuración hasta la 1.0 sobreescribe con los mismos valores; la de
+    fábrica ya no los trae, porque viven en el motor."""
+    de_la_1_0 = {"detraccion_tasas": {"008": 4, "009": 10, "010": 15, "012": 12, "019": 10, "020": 12, "021": 10,
+                                      "022": 12, "024": 10, "025": 10, "026": 10, "027": 4, "030": 4, "037": 12}}
+    assert detracciones.tabla_de_detracciones(de_la_1_0) == detracciones.tabla_de_detracciones({})
+    assert api.configuracion_por_defecto()["detraccion_tasas"] == {}
+    assert api.configuracion_por_defecto()["detraccion_nombres"] == {}
+
+
+def test_el_asiento_y_el_diagnostico_dejan_en_blanco_la_misma_detraccion():
+    """El mismo documento, la misma respuesta (1.1): la detracción con un código que no está en la tabla no llega a las
+    líneas de `generar_asiento`, y `diagnosticar` tampoco la espera."""
+    mala = dict(comprobante({"codigo": "000", "porcentaje": 3}).a_dict(), id_externo="f1")
+    doc = {"libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608",
+                     "tipo": "compra"}, "comprobantes": [mala]}
+    configuracion = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
+    asiento = api.generar_asiento(doc, driver="csv", configuracion=configuracion, incluir_observados=True)
+    assert all(linea.get("rol") != "detraccion" for linea in asiento["asiento"])
+    assert set(asiento["_asiento"]["sub_diarios"]) == {"11"}
+    assert api.diagnosticar(doc, driver="csv", configuracion=configuracion)["detracciones_pendientes"] == []
 
 
 def test_una_detraccion_limpiada_no_llega_al_asiento():

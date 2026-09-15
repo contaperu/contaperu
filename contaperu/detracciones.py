@@ -8,9 +8,11 @@ inventado, casi siempre «000». Ese código llegaba al asiento como si fuera re
 La regla, de un contador: **si el código no está en la tabla de detracciones del contribuyente,
 la detracción queda en blanco**. Nada se adivina; si toca, la elige una persona.
 
-La tabla efectiva sale de lo general de la configuración: las claves de `detraccion_tasas`, con su tasa o
-con `null` si se reconoce sin tasa (13-sep-2026). Hasta entonces la daba `detraccion_codigos`, que es el código
-interno de CONCAR para cada una: un entorno sin ese sistema —CONTASIS, solo el SIRE— se habría quedado sin tabla.
+**La tabla vive en el motor** (John, 15-sep-2026): el código, el nombre y la tasa de cada detracción, con su fuente, en
+`datos/sunat/detracciones.json`. El ERP que integra el motor puede sobreescribirla en lo general de su configuración:
+`detraccion_tasas` cambia la tasa de un código o suma uno (`null`: se reconoce sin tasa, y la toma del comprobante), y
+`detraccion_nombres` cambia el nombre de uno que ya está. Hasta la 1.0 la tabla entera vivía en la configuración de
+cada empresa, y antes del 13-sep-2026 la daba `detraccion_codigos`, el código interno de CONCAR.
 
 **Y el monto lo calcula el motor, una sola vez** (10-sep-2026). Hasta ese día había dos cifras: la
 del asiento (total × tasa en soles enteros) y la que enseñaba el portal —calculada en el navegador con
@@ -19,15 +21,54 @@ el asiento y `normalizar()`, y lo que ve la persona es lo que va a CONCAR.
 """
 from __future__ import annotations
 
+import copy
 from decimal import ROUND_HALF_UP, Decimal
+from functools import lru_cache
 from typing import Any, Iterable
 
+from . import _datos
 from .modelo import CENTIMO, Comprobante, a_decimal, texto_tasa
+
+# La tabla oficial que trae el motor: código SUNAT → nombre y tasa, con la fuente de donde sale.
+TABLA_DEL_MOTOR = "datos/sunat/detracciones.json"
+
+
+@lru_cache(maxsize=1)
+def _datos_de_la_tabla() -> dict:
+    datos = _datos.leer_json(TABLA_DEL_MOTOR)
+    if not datos or not str(datos.get("fuente") or "").strip():
+        raise FileNotFoundError(f"No encuentro la tabla de detracciones con su fuente ({TABLA_DEL_MOTOR})")
+    return datos
+
+
+def tabla_del_motor() -> dict:
+    """La tabla de detracciones que trae el motor, tal como viaja: `{fuente, nota, codigos: {codigo: {nombre, tasa}}}`.
+    Cada llamada devuelve una copia."""
+    return copy.deepcopy(_datos_de_la_tabla())
+
+
+def tabla_de_detracciones(config: dict | None = None) -> dict[str, dict]:
+    """La tabla con la que se trabaja: la del motor, con lo que sobreescribe el ERP en su configuración encima.
+
+    `{codigo: {"nombre": str, "tasa": Decimal | None}}`, donde `None` es un código que se reconoce sin tasa. Una tasa de
+    `detraccion_tasas` cambia la del motor o suma el código; un nombre de `detraccion_nombres` cambia el de un código que
+    ya está, y no suma ninguno: para sumarlo se le da su tasa."""
+    tabla = {codigo: {"nombre": str(fila.get("nombre") or ""),
+                      "tasa": None if fila.get("tasa") in (None, "") else a_decimal(fila["tasa"])}
+             for codigo, fila in _datos_de_la_tabla()["codigos"].items()}
+    config = config or {}
+    for codigo, tasa in (config.get("detraccion_tasas") or {}).items():
+        fila = tabla.setdefault(str(codigo), {"nombre": "", "tasa": None})
+        fila["tasa"] = None if tasa is None else a_decimal(tasa)
+    for codigo, nombre in (config.get("detraccion_nombres") or {}).items():
+        if str(codigo) in tabla:
+            tabla[str(codigo)]["nombre"] = str(nombre)
+    return tabla
 
 
 def codigos_de(config: dict) -> set[str]:
-    """Los códigos de detracción que el contribuyente reconoce: los de su tabla de tasas, tengan tasa o no."""
-    return {str(k) for k in (config.get("detraccion_tasas") or {})}
+    """Los códigos de detracción que se reconocen: los de la tabla del motor más los que suma el ERP, tengan tasa o no."""
+    return set(tabla_de_detracciones(config))
 
 
 def normalizar_una(det, codigos: set[str]) -> dict | None:
@@ -43,8 +84,10 @@ def normalizar_una(det, codigos: set[str]) -> dict | None:
 
 
 def tasa_de_tabla(codigo: Any, config: dict) -> Decimal:
-    """La tasa que el contribuyente tiene para ese código en su tabla; 0 si no la tiene."""
-    return a_decimal((config.get("detraccion_tasas") or {}).get(str(codigo or "").strip()))
+    """La tasa de ese código en la tabla con la que se trabaja —la del ERP si la sobreescribe, si no la del motor—; 0 si
+    no la tiene."""
+    fila = tabla_de_detracciones(config).get(str(codigo or "").strip()) or {}
+    return fila.get("tasa") or Decimal(0)
 
 
 def tasa_detraccion(c: Comprobante, config: dict) -> Decimal:

@@ -291,28 +291,18 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
     Campo("cuentas_con_centro", "lista", ["63", "65", "70"], titulo="Cuentas que llevan centro de costo",
           grupo="centros", ayuda="Por el inicio de la cuenta: 63 y 65 sí, 60 no.",
           valores=Campo("", "texto", grupo="centros", patron=r"^[0-9]{1,6}$")),
-    # Tasa por código SUNAT, por si el comprobante no la trae. De los apéndices vigentes del SPOT
-    # (orientacion.sunat.gob.pe), cruzados POR NOMBRE con el Catálogo 54: en esa página la columna "código" es el
-    # numeral dentro del anexo, no el código del comprobante (ahí "14" es Leche, que en el catálogo es 023, mientras
-    # 014 son Carnes). Cruzarlo por número sale mal. Sus claves son además la TABLA de códigos que la empresa reconoce
-    # (`detracciones.codigos_de`): un código con `null` se reconoce sin tasa, y la toma del comprobante.
-    Campo("detraccion_tasas", "mapa", {"008": 4, "009": 10, "010": 15, "012": 12, "019": 10, "020": 12, "021": 10,
-                                       "022": 12, "024": 10, "025": 10, "026": 10, "027": 4, "030": 4, "037": 12},
-          titulo="Tasa de cada detracción", grupo="detracciones", claves=r"^[0-9]{3}$",
-          ayuda="Los códigos de detracción que reconoces, con su porcentaje para el comprobante que no lo trae.",
+    # La tabla de detracciones vive en el motor (`detracciones.tabla_del_motor`, John, 15-sep-2026): código, nombre y
+    # tasa, con su fuente. Estas dos claves son lo que el ERP que integra el motor SOBREESCRIBE encima de ella, y por eso
+    # vienen vacías: la tasa de un código que ya está, o un código que suma (`null`: se reconoce sin tasa, y la toma del
+    # comprobante). Una configuración guardada con los 14 códigos de la 1.0 sigue dando lo mismo: son los de la tabla.
+    Campo("detraccion_tasas", "mapa", {}, titulo="Tasa de cada detracción", grupo="detracciones", claves=r"^[0-9]{3}$",
+          ayuda="Sobreescribe la tasa de la tabla del motor para un código, o suma uno que no esté (null: sin tasa).",
           valores=Campo("", "numero", grupo="detracciones", admite_nulo=True)),
-    # Nombre oficial (Catálogo 54 de SUNAT, Anexo N.° 8): la pantalla dice "030 · Contratos de construcción" en vez de
-    # un código a secas. El motor no lo lee.
-    Campo("detraccion_nombres", "mapa", {
-        "008": "Madera", "009": "Arena y piedra", "010": "Residuos, subproductos, desechos, recortes y desperdicios",
-        "012": "Intermediación laboral y tercerización", "019": "Arrendamiento de bienes muebles",
-        "020": "Mantenimiento y reparación de bienes muebles", "021": "Movimiento de carga",
-        "022": "Otros servicios empresariales", "024": "Comisión mercantil",
-        "025": "Fabricación de bienes por encargo", "026": "Servicio de transporte de personas",
-        "027": "Servicio de transporte de bienes por vía terrestre", "030": "Contratos de construcción",
-        "037": "Demás servicios gravados con el IGV"},
-          titulo="Nombre de cada detracción", grupo="detracciones", claves=r"^[0-9]{3}$",
-          ayuda="El nombre del Catálogo 54 de SUNAT, para que un código diga algo.",
+    # El nombre de un código que ya está en la tabla, si el ERP lo quiere decir de otra forma. El de un código que no
+    # está no lo suma: para sumarlo se le da su tasa arriba.
+    Campo("detraccion_nombres", "mapa", {}, titulo="Nombre de cada detracción", grupo="detracciones",
+          claves=r"^[0-9]{3}$",
+          ayuda="Sobreescribe el nombre de la tabla del motor (Catálogo 54 de SUNAT) para un código.",
           valores=Campo("", "texto", grupo="detracciones")),
 )
 

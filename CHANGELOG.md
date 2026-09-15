@@ -6,6 +6,30 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Cambiado
+- **La tabla de detracciones vive en el motor** (`contaperu/datos/sunat/detracciones.json`, decisión de John del
+  15-sep-2026): el código, el nombre y la tasa de cada detracción, con su fuente, iguales para todos. El ERP que integra
+  el motor la sobreescribe en lo general de su configuración: `detraccion_tasas` cambia una tasa o suma un código
+  (`null`: se reconoce sin tasa), y `detraccion_nombres` cambia el nombre de uno que ya está. Por eso las dos claves
+  **vienen vacías** en `configuracion_por_defecto()`, y una configuración guardada con los 14 códigos de la 1.0 da
+  exactamente lo mismo. Lo que ya no se puede es **reconocer menos códigos** que la tabla quitándolos de la
+  configuración: sobreescribir cambia o suma, no quita. `detraccion_codigos`, el código interno de cada sistema, sigue
+  en la sección de ese sistema.
+- **`exportar` y `generar_asiento` dejan en blanco la detracción que la tabla no reconoce**, como ya hacían `revisar` y
+  `diagnosticar`: un mismo documento da la misma respuesta por cualquier operación. Una factura con un código que no
+  está en la tabla va al sub-diario de compras y no al de detracciones: en el Excel de CONCAR, el caso
+  `detraccion_codigo_sin_tasa` (código 031) pasa del 10 al 11 por el camino de exportar. La vista previa de
+  `filas_de_comprobante` y su snapshot no cambian.
+- **`diagnosticar` escribe el serie-número como la línea del asiento de ese destino** (`asiento.serie_numero_de`): el
+  número sin ceros a la izquierda cuando el destino los quita, así un comprobante se nombra igual en el diagnóstico y en
+  el archivo. Cierra el punto «a confirmar» del hito 0.8.
+
+### Añadido
+- `detracciones.tabla_del_motor()` y `detracciones.tabla_de_detracciones(config)`. `api.catalogos_sunat()` lleva
+  `detracciones`, la tabla del motor con su fuente, para que una pantalla nombre cada código aunque el ERP no
+  sobreescriba nada (también en `contaperu://catalogos/sunat` y `GET /v1/catalogos/sunat`).
+- `asiento.serie_numero_de(comprobante, opciones)`.
+
 ## [1.0.0] — 2026-09-14
 
 **La 1.0.0**, probada antes como la candidata **1.0.0rc1**. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.

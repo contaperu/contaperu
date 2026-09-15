@@ -73,7 +73,7 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - 0.5 · 1.0.0
 - 0.6 · 1.0.0
 - 0.7 · 1.0.0
-- 0.8 · 1.0.0 (el serie-número de `diagnosticar` sigue como en el documento; igualarlo al de la línea queda por confirmar)
+- 0.8 · 1.0.0 (el serie-número de `diagnosticar` se igualó al de la línea después, por decisión de John del 15-sep-2026; ver el CHANGELOG)
 - B1 · 1.0.0
 - B2 · 1.0.0 (el esquema de `diagnosticar` viaja como recurso: el SDK no admite `outputSchema` sin cambiar la respuesta)
 - B3 · 1.0.0 (el contrato se llama OpenConta; su archivo sigue el formato OpenAPI 3.1)

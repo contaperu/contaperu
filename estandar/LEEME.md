@@ -181,6 +181,11 @@ El paso de uno a otro es una operación aparte, sin estado: entra el documento p
 constancias, sale el documento actualizado. **El monto se deposita siempre en soles**, incluso si la factura
 está en dólares: por eso `monto` es en soles aunque el resto del comprobante esté en otra moneda.
 
+**La tabla de detracciones vive en el motor.** El código, el nombre y la tasa de cada detracción, con su fuente, los
+trae el motor, y la API los entrega en `catalogos_sunat`. El ERP que lo integra puede sobreescribirla en su
+configuración: cambiar una tasa o un nombre, o sumar un código. Una detracción cuyo código no está en esa tabla queda
+en blanco en todas las operaciones, así un código que no existe, como un «000», nunca provisiona una detracción.
+
 ---
 
 ## Las líneas del asiento, para quien escribe un driver

@@ -91,7 +91,8 @@ def test_una_factura_con_reparto_no_sale_a_contasis():
     imputacion = {"f1": {"reparto": [{"importe": "60", "cuenta_contable": "636301"},
                                      {"importe": "40", "cuenta_contable": "632201"}]}}
     diag = api.diagnosticar(d, configuracion=CONTAB, driver="contasis", imputacion=imputacion)
-    assert diag["faltantes"]["reparto_no_admitido"] == ["F001-00000123"] and diag["listo_para_exportar"] is False
+    # El serie-número como en la línea del asiento (1.1): sin los ceros a la izquierda del número.
+    assert diag["faltantes"]["reparto_no_admitido"] == ["F001-123"] and diag["listo_para_exportar"] is False
 
 
 def test_para_contasis_no_se_piden_sub_diarios_ni_equivalencias():

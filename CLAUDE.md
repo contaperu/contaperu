@@ -146,6 +146,9 @@ espera un archivo o una norma:
 - Drivers de **SISCONT y STARSOFT**: cada uno exige un archivo real que ese sistema haya importado, como pasó con
   **CONTASIS**, aceptado el 13-sep-2026 al importar los archivos que genera su driver.
 - **Conciliación de constancias de detracción**: un archivo real del Banco de la Nación.
+- **El catálogo completo de detracciones** (`contaperu/datos/sunat/detracciones.json`): la tabla del motor trae los 14
+  códigos que ya se reconocían; los demás del Catálogo 54 entran con los apéndices vigentes del SPOT como fuente. El ERP
+  que integra el motor puede sumar o sobreescribir mientras tanto (`detraccion_tasas`, `detraccion_nombres`).
 - **Equivalencias del PCGE 2026**: con la cita del artículo al lado de cada mapeo; el cargador rechaza un mapeo sin
   fuente.
 - **El plazo de anotación en compras** (`validar.PLAZO_ANOTACION_MESES`): hoy 12 meses (Ley 29215, art. 2); el

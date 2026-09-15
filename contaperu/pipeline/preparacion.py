@@ -261,8 +261,8 @@ def revisar(doc: dict, configuracion: dict | None = None, imputacion: dict | Non
 
 
 def normalizar_detracciones(doc: dict, configuracion: dict | None = None) -> dict:
-    """Contrasta la detracción de cada comprobante con la tabla del contribuyente y deja en blanco la que no
-    reconozca."""
+    """Contrasta la detracción de cada comprobante con la tabla de detracciones —la del motor, con lo que sobreescribe el
+    ERP— y deja en blanco la que no reconozca."""
     comprobantes = comprobantes_de(doc)
     config = config_aplicada(configuracion)
     limpiadas = detracciones.normalizar(comprobantes, config)
@@ -280,9 +280,10 @@ def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, im
     """El libro, los comprobantes que no se excluyeron —revisados— y la configuración aplicada hacia `driver` con la
     imputación dentro. Sin `incluir_observados`, un comprobante con observaciones que bloquean detiene todo.
 
-    No descarta las detracciones que la tabla del contribuyente no reconoce, a diferencia de `revisar` y `diagnosticar`:
-    hacerlo al exportar mueve de sub-diario una factura cuyo código no está en la tabla y cambia el Excel de CONCAR
-    validado (caso `detraccion_codigo_sin_tasa` del snapshot). Queda pendiente de decidir."""
+    Como `revisar` y `diagnosticar`, deja en blanco la detracción cuyo código no reconoce la tabla (decisión de John,
+    15-sep-2026): un mismo documento da la misma respuesta por cualquier operación. Una factura con un código que no
+    está pasa al sub-diario de compras en vez del de detracciones, como el caso `detraccion_codigo_sin_tasa` al exportar
+    a CONCAR desde la 1.1."""
     libro = libro_de(doc)
     todos = comprobantes_de(doc)
     previas = claves_previas_de(claves_previas)
@@ -290,6 +291,7 @@ def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, im
     if not comprobantes:
         raise DocumentoInvalido("No hay comprobantes que procesar.")
     config = con_imputacion(config_aplicada(configuracion, driver), imputacion, todos)
+    detracciones.normalizar(todos, config)
     validar.revisar(comprobantes, libro, previas)
     if not incluir_observados:
         con_error = [c for c in comprobantes if c.tiene_errores]
