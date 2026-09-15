@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="906" viewBox="0 0 680 906" role="img" aria-labelledby="titulo descripcion">
+<title id="titulo">El recorrido de un mes dentro del motor</title>
+<desc id="descripcion">El motor lee el XML de las facturas, suelto o en ZIP y sin los CDR, o el TXT de la propuesta del SIRE, y los lleva al documento open-accounting; la configuración y la imputación llegan aparte. Luego recorre seis pasos. Uno, preparar: el libro, la configuración del destino y la imputación por id_externo. Dos, revisar, en el núcleo: RUC, IGV, total, fecha y duplicados; un error detiene y un aviso pasa. Tres, seleccionar: quedan fuera los excluidos, los duplicados y lo que el destino no lleva. Cuatro, exigir lo del destino, en el núcleo, si lleva cuentas: cuenta, centro de costo, sigla y lo que no cabe en su formato. Cinco, armar según el destino: un asiento de líneas neutrales numeradas, que cuadran y llevan su huella, que CONCAR y el CSV traducen línea a línea; un registro contable, que CONTASIS recibe con las mismas cuentas; o un registro tributario, una línea por comprobante sin cuentas, que el SIRE escribe como TXT y ZIP. Seis, responder: el archivo, el resumen y cada comprobante con su identidad y su huella. revisar llega hasta el paso dos, diagnosticar recorre hasta el cuatro sin detenerse, generar_asiento llega al asiento y exportar recorre todo.</desc>
+<style>
+.fondo{fill:#FFFFFF}
+.t,.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
+.t{font-size:14px;font-weight:500}
+.s{font-size:12px;font-weight:400}
+.g rect{fill:#F1EFE8;stroke:#5F5E5A}.g .t{fill:#444441}.g .s{fill:#5F5E5A}
+.v rect{fill:#E1F5EE;stroke:#0F6E56}.v .t{fill:#085041}.v .s{fill:#0F6E56}
+.a rect{fill:#E6F1FB;stroke:#185FA5}.a .t{fill:#0C447C}.a .s{fill:#185FA5}
+.flecha{stroke:#888780;stroke-width:1.5;fill:none}
+.leyenda{fill:#5F5E5A}
+@media (prefers-color-scheme: dark){
+.fondo{fill:#0D1117}
+.g rect{fill:#444441;stroke:#B4B2A9}.g .t{fill:#F1EFE8}.g .s{fill:#D3D1C7}
+.v rect{fill:#085041;stroke:#5DCAA5}.v .t{fill:#E1F5EE}.v .s{fill:#9FE1CB}
+.a rect{fill:#0C447C;stroke:#85B7EB}.a .t{fill:#E6F1FB}.a .s{fill:#B5D4F4}
+.leyenda{fill:#B4B2A9}
+}
+</style>
+<defs>
+<marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+<rect class="fondo" x="0" y="0" width="680" height="906" rx="12"/>
+<g class="g"><rect x="40" y="20" width="290" height="56" rx="8" stroke-width="0.5"/><text class="t" x="185" y="38">Leer el XML</text><text class="s" x="185" y="56">Suelto o en ZIP, sin los CDR</text></g>
+<g class="g"><rect x="350" y="20" width="290" height="56" rx="8" stroke-width="0.5"/><text class="t" x="495" y="38">Leer la propuesta del SIRE</text><text class="s" x="495" y="56">El TXT de SUNAT del periodo</text></g>
+<line class="flecha" x1="185" y1="78" x2="185" y2="114" marker-end="url(#punta)"/>
+<line class="flecha" x1="495" y1="78" x2="495" y2="114" marker-end="url(#punta)"/>
+<g class="a"><rect x="40" y="116" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="134">open-accounting</text><text class="s" x="340" y="152">Libro y comprobantes · la configuración y la imputación llegan aparte</text></g>
+<line class="flecha" x1="340" y1="174" x2="340" y2="198" marker-end="url(#punta)"/>
+<g class="g"><rect x="40" y="200" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="218">1 · Preparar</text><text class="s" x="340" y="236">El libro, la configuración del destino y la imputación por id_externo</text></g>
+<line class="flecha" x1="340" y1="258" x2="340" y2="282" marker-end="url(#punta)"/>
+<g class="v"><rect x="40" y="284" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="302">2 · Revisar</text><text class="s" x="340" y="320">RUC, IGV, total, fecha y duplicados · un error detiene, un aviso pasa</text></g>
+<line class="flecha" x1="340" y1="342" x2="340" y2="366" marker-end="url(#punta)"/>
+<g class="g"><rect x="40" y="368" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="386">3 · Seleccionar</text><text class="s" x="340" y="404">Fuera los excluidos, los duplicados y lo que el destino no lleva</text></g>
+<line class="flecha" x1="340" y1="426" x2="340" y2="450" marker-end="url(#punta)"/>
+<g class="v"><rect x="40" y="452" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="470">4 · Exigir lo del destino</text><text class="s" x="340" y="488">Si lleva cuentas: cuenta, centro de costo, sigla y lo que no cabe</text></g>
+<line class="flecha" x1="340" y1="510" x2="340" y2="546" marker-end="url(#punta)"/>
+<path class="flecha" d="M135 546V528H545V546" marker-start="url(#punta)" marker-end="url(#punta)"/>
+<g class="v"><rect x="40" y="548" width="190" height="72" rx="8" stroke-width="0.5"/><text class="t" x="135" y="568">5 · Asiento</text><text class="s" x="135" y="588">Líneas neutrales numeradas</text><text class="s" x="135" y="604">que cuadran, con su huella</text></g>
+<g class="g"><rect x="245" y="548" width="190" height="72" rx="8" stroke-width="0.5"/><text class="t" x="340" y="568">5 · Registro contable</text><text class="s" x="340" y="588">Los comprobantes con</text><text class="s" x="340" y="604">las mismas cuentas</text></g>
+<g class="g"><rect x="450" y="548" width="190" height="72" rx="8" stroke-width="0.5"/><text class="t" x="545" y="568">5 · Registro tributario</text><text class="s" x="545" y="588">Una línea por comprobante</text><text class="s" x="545" y="604">sin cuentas</text></g>
+<line class="flecha" x1="135" y1="622" x2="135" y2="646" marker-end="url(#punta)"/>
+<line class="flecha" x1="340" y1="622" x2="340" y2="646" marker-end="url(#punta)"/>
+<line class="flecha" x1="545" y1="622" x2="545" y2="646" marker-end="url(#punta)"/>
+<g class="g"><rect x="40" y="648" width="190" height="56" rx="8" stroke-width="0.5"/><text class="t" x="135" y="666">CONCAR y CSV</text><text class="s" x="135" y="684">Traducen cada línea</text></g>
+<g class="g"><rect x="245" y="648" width="190" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="666">CONTASIS</text><text class="s" x="340" y="684">Su registro en Excel</text></g>
+<g class="g"><rect x="450" y="648" width="190" height="56" rx="8" stroke-width="0.5"/><text class="t" x="545" y="666">SIRE</text><text class="s" x="545" y="684">El TXT y su ZIP</text></g>
+<path class="flecha" d="M135 706V728H545V706"/>
+<line class="flecha" x1="340" y1="706" x2="340" y2="750" marker-end="url(#punta)"/>
+<g class="a"><rect x="40" y="752" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="770">6 · Responder</text><text class="s" x="340" y="788">El archivo, el resumen y cada comprobante con su identidad y su huella</text></g>
+<text class="s leyenda" x="340" y="838">Verde: el núcleo peruano, que decide la contabilidad · gris: pipeline y drivers · azul: el documento</text>
+<text class="s leyenda" x="340" y="860">revisar llega hasta 2 · diagnosticar recorre hasta 4 sin detenerse</text>
+<text class="s leyenda" x="340" y="882">generar_asiento llega al asiento · exportar recorre todo</text>
+</svg>
