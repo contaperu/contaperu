@@ -4,42 +4,26 @@ Fuentes: Anexo 1 de la RS 112-2021 (Tabla 1 documentos de identidad, Tabla 2
 monedas, Tabla 3 tipos de comprobante del RVIE) y Anexo 1 de la RS 040-2022
 (Tabla 11 tipos de comprobante del RCE). Los códigos de tributo (1000, 9997…)
 son el Catálogo 05 de la factura electrónica (UBL 2.1).
+
+**Los tres catálogos viven en datos, con su fuente** (1.1, primer paso del hito C1 de la hoja de ruta): los tipos de
+comprobante, los documentos de identidad y las monedas se leen de `datos/sunat/catalogos.json`, y `FUENTES` dice de
+dónde sale cada uno. Los nombres y los tipos de siempre no cambian. Lo demás de este módulo son reglas del motor sobre
+esos códigos, con su porqué al lado.
 """
 from __future__ import annotations
 
 from decimal import Decimal
 
+from . import _datos
+
+_CATALOGOS = _datos.leer_json("datos/sunat/catalogos.json")
+if not _CATALOGOS:
+    raise FileNotFoundError("No encuentro los catálogos de SUNAT (datos/sunat/catalogos.json)")
+# De dónde sale cada catálogo, por su nombre: ninguno entra sin fuente.
+FUENTES: dict[str, str] = {nombre: tabla["fuente"] for nombre, tabla in _CATALOGOS.items()}
+
 # Tipo de comprobante (2 dígitos). Se listan los que un estudio contable ve de verdad.
-TIPOS_CP: dict[str, str] = {
-    "00": "Otros",
-    "01": "Factura",
-    "02": "Recibo por honorarios",
-    "03": "Boleta de venta",
-    "04": "Liquidación de compra",
-    "05": "Boleto de transporte aéreo",
-    "06": "Carta de porte aéreo",
-    "07": "Nota de crédito",
-    "08": "Nota de débito",
-    "09": "Guía de remisión",
-    "10": "Recibo por arrendamiento",
-    "12": "Ticket de máquina registradora",
-    "13": "Documento de bancos y financieras",
-    "14": "Recibo de servicios públicos",
-    "16": "Boleto de transporte público",
-    "18": "Documento de AFP",
-    "21": "Conocimiento de embarque",
-    "22": "Comprobante por operaciones no habituales",
-    "25": "Operadores de contratos de colaboración",
-    "36": "Documento de peaje",
-    "46": "Constancia de pago (SUNAT)",
-    "50": "DUA importación definitiva",
-    "52": "Despacho simplificado de importación",
-    "87": "Nota de crédito especial",
-    "88": "Nota de débito especial",
-    "91": "Comprobante de no domiciliado",
-    "97": "Nota de crédito de no domiciliado",
-    "98": "Nota de débito de no domiciliado",
-}
+TIPOS_CP: dict[str, str] = dict(_CATALOGOS["tipos_comprobante"]["codigos"])
 
 # Comprobantes en los que SUNAT exige fecha de vencimiento o de pago (RCE campo 6).
 EXIGEN_VENCIMIENTO = frozenset({"14", "46", "50", "51", "52", "53", "54"})
@@ -61,17 +45,10 @@ FUERA_DEL_REGISTRO_SUNAT = frozenset({"02"})
 TIPO_HONORARIOS, TIPO_BOLETA, TIPOS_INVIERTEN, TIPOS_NOTA = "02", "03", ("07",), ("07", "08")
 
 # Tabla 1: tipo de documento de identidad.
-TIPOS_DOC_IDENTIDAD: dict[str, str] = {
-    "0": "Otros",
-    "1": "DNI",
-    "4": "Carné de extranjería",
-    "6": "RUC",
-    "7": "Pasaporte",
-    "A": "Cédula diplomática",
-}
+TIPOS_DOC_IDENTIDAD: dict[str, str] = dict(_CATALOGOS["tipos_documento_identidad"]["codigos"])
 
 # Tabla 2 (ISO 4217). Se deja pasar cualquier código de 3 letras; estos son los habituales.
-MONEDAS = frozenset({"PEN", "USD", "EUR", "CNY", "GBP", "JPY", "CLP", "COP", "BRL", "MXN"})
+MONEDAS = frozenset(_CATALOGOS["monedas"]["codigos"])
 
 # Catálogo 05 de la factura electrónica: código de tributo en cac:TaxScheme/cbc:ID.
 TRIBUTO_IGV = "1000"

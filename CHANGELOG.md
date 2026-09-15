@@ -52,6 +52,11 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   CSV de serie pasa a estar escrito así y sale byte a byte igual; su `COLUMNAS` de pares (ruta, cabecera) se conserva
   para quien lo lea. Declarar el largo de una columna y negarse con `no_caben` queda para cuando un formato real lo
   pida: los largos se miden en la línea, y `no_caben` recibe los comprobantes.
+- **Los catálogos de SUNAT viven en datos, con su fuente** (`contaperu/datos/sunat/catalogos.json`, primer paso del
+  hito C1): los tipos de comprobante, los documentos de identidad y las monedas dejan de estar escritos a mano en
+  `catalogos.py`, que los lee con los mismos nombres, tipos y valores (un test congela los de la 1.0). `catalogos.FUENTES`
+  y `api.catalogos_sunat()["fuentes"]` dicen de dónde sale cada uno. Los códigos de retorno y las reglas de validación
+  de SUNAT esperan su hoja oficial, y el código SUNAT en cada observación (C2), las enmiendas del estándar (E1).
 
 ## [1.0.0] — 2026-09-14
 

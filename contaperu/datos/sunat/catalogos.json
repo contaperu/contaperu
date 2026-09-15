@@ -1,0 +1,50 @@
+{
+ "tipos_comprobante": {
+  "fuente": "Anexo 1 de la RS 112-2021 (Tabla 3, tipos de comprobante del RVIE) y Anexo 1 de la RS 040-2022 (Tabla 11, tipos de comprobante del RCE). Se listan los que un estudio contable ve de verdad, no todos.",
+  "codigos": {
+   "00": "Otros",
+   "01": "Factura",
+   "02": "Recibo por honorarios",
+   "03": "Boleta de venta",
+   "04": "Liquidación de compra",
+   "05": "Boleto de transporte aéreo",
+   "06": "Carta de porte aéreo",
+   "07": "Nota de crédito",
+   "08": "Nota de débito",
+   "09": "Guía de remisión",
+   "10": "Recibo por arrendamiento",
+   "12": "Ticket de máquina registradora",
+   "13": "Documento de bancos y financieras",
+   "14": "Recibo de servicios públicos",
+   "16": "Boleto de transporte público",
+   "18": "Documento de AFP",
+   "21": "Conocimiento de embarque",
+   "22": "Comprobante por operaciones no habituales",
+   "25": "Operadores de contratos de colaboración",
+   "36": "Documento de peaje",
+   "46": "Constancia de pago (SUNAT)",
+   "50": "DUA importación definitiva",
+   "52": "Despacho simplificado de importación",
+   "87": "Nota de crédito especial",
+   "88": "Nota de débito especial",
+   "91": "Comprobante de no domiciliado",
+   "97": "Nota de crédito de no domiciliado",
+   "98": "Nota de débito de no domiciliado"
+  }
+ },
+ "tipos_documento_identidad": {
+  "fuente": "Anexo 1 de la RS 112-2021, Tabla 1: tipo de documento de identidad.",
+  "codigos": {
+   "0": "Otros",
+   "1": "DNI",
+   "4": "Carné de extranjería",
+   "6": "RUC",
+   "7": "Pasaporte",
+   "A": "Cédula diplomática"
+  }
+ },
+ "monedas": {
+  "fuente": "Anexo 1 de la RS 112-2021, Tabla 2 (ISO 4217). Se deja pasar cualquier código de 3 letras; estos son los habituales.",
+  "codigos": ["BRL", "CLP", "CNY", "COP", "EUR", "GBP", "JPY", "MXN", "PEN", "USD"]
+ }
+}

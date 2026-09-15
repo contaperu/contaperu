@@ -273,8 +273,11 @@ cubra los casos que faltan, con la misma regla para todos los destinos.
 **Investigación.** Las reglas de SUNAT como datos y los datos públicos que un motor puede recibir:
 `INTEROPERABILIDAD.md`, «Validar antes de asentar»; las analogías de la declaración: «Declarar».
 
-**Qué hay hoy.** Catálogos escritos a mano (`contaperu/catalogos.py`); códigos de observación propios, ninguno igual a
-uno oficial; y un precedente de norma convertida en datos con su cita, `herramientas/extraer_pcge2026.py`.
+**Qué hay hoy.** Desde la 1.1, los catálogos de tipos de comprobante, documentos de identidad y monedas viven en datos
+con su fuente (`contaperu/datos/sunat/catalogos.json`), igual que la tabla de detracciones
+(`contaperu/datos/sunat/detracciones.json`): es el primer paso de C1. Faltan los códigos de retorno y las reglas de
+validación de SUNAT, que esperan su hoja oficial. Los códigos de observación son propios, ninguno igual a uno oficial;
+y hay un precedente de norma convertida en datos con su cita, `herramientas/extraer_pcge2026.py`.
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
@@ -419,6 +422,7 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 | **Estándar y comunidad** | | |
 | E7 | La decisión de abrir el repositorio y la revisión de su historial | John |
 | **Motor** | | |
+| C1 | La hoja oficial de SUNAT con los códigos de retorno y las reglas de validación, con su fecha «actualizado al» (no entra al repositorio) | Descargada de SUNAT a `privado/` |
 | C8 · C11 | La fuente legal del aviso de no habido y del tipo de cambio que rige | Norma citada |
 | C12 | Un comprobante 91 con su pago por el Formulario 1662, y el asiento que CONCAR aceptó | De una empresa que pague servicios a un no domiciliado |
 | J2-J6 | Un cliente real fuera del Perú, su sistema contable de destino y un archivo que ese sistema haya aceptado | Con el cliente |

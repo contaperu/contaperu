@@ -2267,6 +2267,13 @@
        "codigos"
       ],
       "additionalProperties": false
+     },
+     "fuentes": {
+      "type": "object",
+      "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas): la norma y su tabla.",
+      "additionalProperties": {
+       "type": "string"
+      }
      }
     },
     "required": [
@@ -2275,7 +2282,8 @@
      "monedas",
      "notas",
      "fuera_del_registro_sunat",
-     "detracciones"
+     "detracciones",
+     "fuentes"
     ],
     "additionalProperties": false
    },

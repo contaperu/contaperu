@@ -202,6 +202,7 @@ def catalogos_sunat() -> dict:
         "notas": sorted(catalogos.NOTAS),
         "fuera_del_registro_sunat": sorted(catalogos.FUERA_DEL_REGISTRO_SUNAT),
         "detracciones": detracciones.tabla_del_motor(),
+        "fuentes": dict(catalogos.FUENTES),
     }
 
 
