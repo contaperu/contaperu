@@ -48,31 +48,29 @@ cada regla lleva al lado la norma o el archivo real que la justifica.
 
 ## Cómo funciona
 
-![Los tres caminos de ContaPerú dentro de un ERP externo: las facturas en XML, PDF o imagen salen como TXT del SIRE; la propuesta del SIRE sale como asientos o registro de CONCAR o CONTASIS; y, próximamente, el aviso de un facturador se convierte al estándar común para otro ERP](diagramas/arquitectura-general.svg)
+![Dos entradas llegan al documento común open-accounting dentro de un ERP externo: las facturas en XML y la propuesta del SIRE; de ahí salen el TXT del SIRE, los asientos o el registro de CONCAR o CONTASIS y el documento para otro ERP](diagramas/arquitectura-general.svg)
 
 ContaPerú no es una aplicación que se abre: es el motor que va **dentro de un ERP externo**, sea un sistema contable en
 la nube, un portal para estudios o el sistema de gestión de una empresa. En el ERP externo el contador carga, revisa y
-descarga; el motor hace la contabilidad y no guarda nada. Por ahí pasan tres caminos:
+descarga; el motor hace la contabilidad y no guarda nada. Lo del mes entra de dos formas, y las dos llegan al mismo
+documento:
 
-1. **Facturas → SIRE.** Cargas las facturas del mes en XML, PDF o foto. Los XML los lee el motor; los PDF y las fotos,
-   la IA del ERP externo. El motor valida cada comprobante y devuelve el TXT del registro, listo para subir al SIRE.
-2. **Propuesta del SIRE → CONCAR o CONTASIS.** Al revés: cargas el TXT de la propuesta que SUNAT ya tiene, y el motor
-   arma el asiento y entrega el archivo que importa tu sistema, los asientos de CONCAR o el registro de CONTASIS.
-3. **Facturador → cualquier ERP (próximo).** Cuando un sistema facturador emita un comprobante, le avisará al ERP
-   externo, y este lo pasará por el motor al documento común [`open-accounting`](estandar/LEEME.md). Va con línea
-   punteada porque todavía no está: es de la [hoja de ruta](HOJA-DE-RUTA.md).
+1. **Las facturas en XML.** El motor lee el XML UBL 2.1 de cada comprobante, suelto o en ZIP, y lo lleva al documento
+   común [`open-accounting`](estandar/LEEME.md).
+2. **La propuesta del SIRE.** El TXT de SUNAT ya empaqueta todos los comprobantes del contribuyente en el periodo: con
+   ese solo archivo, el mes entero llega a `open-accounting`.
 
-Cualquier carga puede terminar en cualquiera de las tres salidas: de unas facturas salen también los asientos de
-CONCAR, y de la propuesta, el TXT del SIRE. Las cuentas, los sentidos del debe y el haber y la detracción los decide el
-motor una sola vez, igual para todos los destinos.
+Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega lo que pida el destino: el TXT del
+registro, listo para subir al SIRE; los asientos de CONCAR o el registro de CONTASIS; o el documento en JSON, con su
+diagnóstico, para otro ERP. Cualquier entrada puede terminar en cualquiera de las tres salidas. Las cuentas, los
+sentidos del debe y el haber y la detracción los decide el motor una sola vez, igual para todos los destinos.
 
 ## El motor por dentro
 
-![ContaPerú por dentro: el contador y, próximamente, un facturador llegan al ERP externo, que tiene su propia IA para los PDF y las fotos; el ERP le pasa al motor el documento open-accounting, y la imputación aparte; el motor entra por sus puertas a la API pública 1.0, el pipeline se apoya en el núcleo peruano y los drivers lo traducen al SIRE, CONCAR, CONTASIS o de vuelta al ERP](diagramas/arquitectura-del-motor.svg)
+![ContaPerú por dentro: el contador sube al ERP externo los XML o el TXT de la propuesta del SIRE; el ERP le pasa al motor el documento open-accounting, y la imputación aparte; el motor entra por sus puertas a la API pública 1.0, el pipeline se apoya en el núcleo peruano y los drivers lo traducen al SIRE, CONCAR, CONTASIS o de vuelta al ERP](diagramas/arquitectura-del-motor.svg)
 
-- **Arriba, tu sistema:** el **ERP externo** recibe lo que sube el contador y, más adelante, el aviso del facturador.
-  Guarda, revisa, descarga y tiene su propia IA para los PDF y las fotos: todo lo que necesita red, disco o
-  credenciales vive ahí, no en el motor.
+- **Arriba, tu sistema:** el **ERP externo** recibe lo que sube el contador, los XML o el TXT de la propuesta del SIRE.
+  Guarda, revisa y descarga: todo lo que necesita red, disco o credenciales vive ahí, no en el motor.
 - **En el medio, el documento común:** lo que el ERP le pasa al motor es un documento
   [`open-accounting`](estandar/LEEME.md), con el libro (RUC, periodo, compras o ventas) y los comprobantes. Tiene su
   [esquema formal](estandar/open-accounting.schema.json). La imputación (la cuenta y el centro de costo de cada
@@ -144,7 +142,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 
 ## Qué **no** hace
 
-- **No lee PDFs ni fotos.** Eso lo hace bien un modelo de lenguaje; aquí entra el dato ya estructurado.
+- **No lee PDFs ni fotos.** Lee el XML, que es el comprobante electrónico, y la propuesta del SIRE.
 - **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red.
 - **No guarda nada.** Ni base de datos, ni archivos, ni sesiones.
 - **No emite comprobantes.** No genera, no firma y no envía facturas electrónicas.
