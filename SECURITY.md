@@ -14,7 +14,8 @@ Reporta **en privado** —nunca abriendo un issue público— si encuentras:
   pero el que encuentre el hueco manda).
 - Cualquier problema en el **servidor MCP** o en la **puerta HTTP** (`contaperu-http`): se publican **sin
   autenticación a propósito** —no guardan datos, no tienen usuarios y no salen a la red—, así que lo único que pueden
-  perder es CPU. Los dos comprueban el `Host` (421) y ponen topes al cuerpo y al archivo. Si encuentras una forma de
+  perder es CPU. Los dos comprueban el `Host` (421) y ponen topes al cuerpo y al archivo, y la puerta HTTP
+  además limita las peticiones simultáneas. Si encuentras una forma de
   hacerles algo más que eso —saltarse la defensa del `Host`, leer un archivo del servidor, que un error enseñe su
   detalle—, es exactamente lo que quiero saber.
 

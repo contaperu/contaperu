@@ -103,6 +103,20 @@ def test_un_cuerpo_demasiado_grande_es_413():
     assert servidor_http.MAXIMO_PETICION == 10 * 1024 * 1024
 
 
+def test_main_arranca_uvicorn_con_los_topes_de_conexiones(monkeypatch):
+    """Sin tope, un servidor sin autenticación deja que cualquiera acumule trabajo: `main` le pasa a uvicorn cuántas
+    peticiones atiende a la vez y cuánto espera una conexión inactiva (`puertas/comun.py`)."""
+    uvicorn = pytest.importorskip("uvicorn")
+    from contaperu.puertas import comun
+
+    llamada: dict = {}
+    monkeypatch.setattr(uvicorn, "run", lambda app, **opciones: llamada.update(opciones))
+    assert servidor_http.main(["--puerto", "9999"]) == 0
+    assert llamada["limit_concurrency"] == comun.MAXIMO_CONEXIONES > 0
+    assert llamada["timeout_keep_alive"] == comun.ESPERA_INACTIVA > 0
+    assert (llamada["host"], llamada["port"]) == ("127.0.0.1", 9999)
+
+
 def test_un_host_que_no_se_declaro_es_421():
     _es_problema(_cliente("http://ataque.ejemplo.com").get("/salud"), 421, "host_no_permitido")
     publico = _cliente("https://contaperu.ejemplo.com", dominios=["contaperu.ejemplo.com"])

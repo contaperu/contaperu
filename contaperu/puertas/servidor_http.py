@@ -19,8 +19,13 @@ lo que necesita. Lo que sí hace, igual que el servidor MCP (`puertas/comun.py`)
 
 - **Defensa del `Host`**: responde 421 a un nombre que no declaró. Es la defensa contra el DNS rebinding; detrás de un
   proxy hay que declarar el nombre público con `--dominio`.
-- **Topes**: el cuerpo de una petición se lee por trozos y se corta al pasar de 10 MiB (413); el archivo que devuelve
-  `exportar`, a 4 MiB, como por el MCP.
+- **Topes**:
+  - el cuerpo de una petición se lee por trozos y se corta al pasar de 10 MiB (413);
+  - el archivo que devuelve `exportar` tiene un tope de 4 MiB, como por el MCP;
+  - se atienden a lo sumo `MAXIMO_CONEXIONES` peticiones a la vez (503 si llegan más);
+  - una conexión inactiva se cierra a los `ESPERA_INACTIVA` segundos.
+
+  El tiempo para leer una petición lenta lo pone el proxy, porque uvicorn no lo tiene.
 - **Rechazos RFC 9457** (`application/problem+json`): 400 si el cuerpo no es un objeto JSON, 422 si el motor no puede
   hacerlo —con la `clave` estable del error—, 421 y 413 como arriba, y 500 sin enseñar el detalle.
 
@@ -44,7 +49,8 @@ from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
 from .. import api
-from .comun import LOCALES, MAXIMO_ARCHIVO, MAXIMO_PETICION, hosts_permitidos, peso_de_base64
+from .comun import (ESPERA_INACTIVA, LOCALES, MAXIMO_ARCHIVO, MAXIMO_CONEXIONES, MAXIMO_PETICION, hosts_permitidos,
+                    peso_de_base64)
 
 __all__ = ["DefensaDeHost", "PUERTO", "crear_app", "main"]
 
@@ -211,7 +217,7 @@ def main(argv: list[str] | None = None) -> int:
     import uvicorn
 
     uvicorn.run(crear_app(dominios=args.dominio), host=args.host, port=args.puerto, server_header=False,
-                proxy_headers=False)
+                proxy_headers=False, limit_concurrency=MAXIMO_CONEXIONES, timeout_keep_alive=ESPERA_INACTIVA)
     return 0
 
 

@@ -112,6 +112,9 @@ Rumbo a la **1.0.0**, ya en `main`; la candidata es la **1.0.0rc1**. La 1.0 fija
 
   Lo que pasa de uno queda como error del lote, con su motivo, y el resto sigue; en la propuesta del SIRE es
   `SireInvalido`. Antes, un ZIP de unos kilobytes podía expandirse hasta agotar la memoria de quien lo abría.
+- **La puerta HTTP limita sus conexiones.** Atiende a lo sumo 16 peticiones a la vez (503 si llegan más) y cierra a los
+  5 segundos una conexión inactiva (`puertas/comun.py`). El tiempo para leer una petición lenta lo pone el proxy, como
+  explica `INTEGRAR.md`.
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
   `import contaperu.modelo` no arrastra los drivers ni openpyxl. `from contaperu import asiento` funciona igual.
 - El registro de drivers busca los de terceros la primera vez que alguien lo mira, no al importar el paquete.

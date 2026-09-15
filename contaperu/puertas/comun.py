@@ -10,6 +10,13 @@ MAXIMO_ARCHIVO = 4 * 1024 * 1024
 # Tope del cuerpo de una petición. Un mes con miles de comprobantes en JSON cabe holgado.
 MAXIMO_PETICION = 10 * 1024 * 1024
 
+# Peticiones que la puerta HTTP atiende a la vez; las que pasen reciben 503 en vez de hacer cola sin fin. Cada una ocupa
+# CPU del motor, y un servidor sin autenticación no puede dejar que cualquiera acumule trabajo.
+MAXIMO_CONEXIONES = 16
+
+# Segundos que una conexión inactiva se mantiene abierta esperando otra petición.
+ESPERA_INACTIVA = 5
+
 # Nombres por los que un servidor local se deja llamar. Se mantienen también al escuchar en 0.0.0.0, que es lo normal
 # dentro de un contenedor, para que `curl localhost:8000` siga sirviendo para comprobar que está vivo.
 LOCALES = ["127.0.0.1:*", "localhost:*", "[::1]:*"]

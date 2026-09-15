@@ -136,6 +136,9 @@ Lo que conviene saber antes de publicarla:
 - **Los rechazos** son `application/problem+json`: 400 si el cuerpo no es un objeto JSON, 413 si pasa de 10 MiB, 422 si
   el motor no puede hacerlo (con la `clave` del error) o los parámetros no cuadran, y 500 sin detalle. El archivo que
   devuelve `exportar` tiene un tope de 4 MiB: un periodo más grande se divide en lotes.
+- **Las conexiones también tienen tope.** Atiende a lo sumo 16 peticiones a la vez (503 si llegan más) y cierra a los 5
+  segundos una conexión inactiva. El tiempo máximo para leer una petición lenta lo pone el proxy, porque uvicorn no lo
+  tiene: en Caddy, las opciones globales `servers { timeouts { read_header 10s read_body 30s } }`.
 - Con Docker: `docker run --rm -p 8080:8080 contaperu-mcp contaperu-http --host 0.0.0.0 --dominio contaperu.ejemplo.com`.
 
 ## Para un agente de IA, por MCP
