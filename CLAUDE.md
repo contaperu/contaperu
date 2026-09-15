@@ -48,7 +48,7 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   AI) usa el motor como lo usaría cualquier ERP: **fija una versión publicada** (en su `api/MOTOR.txt`, el número y
   el commit del tag) y adopta las nuevas cuando decide, después de leer su Release. Nada de allá lee la carpeta de
   este repo, así que un commit en `main` no la toca. **Romper una firma aquí la rompe el día que adopte esa versión**:
-  por eso rige SemVer y lo que se retira avisa durante toda la mayor anterior. Un arreglo del motor es un PR aquí y
+  por eso rige SemVer y lo que se retira avisa durante toda la mayor anterior. Un arreglo del motor es un commit en `main` y
   una versión con su tag; allá, cambiar la versión fijada y desplegar. Su lado del circuito está en
   `contab-core/docs/FRONTERA.md`: cuando el trabajo cruza, se lee primero.
 - **Un MCP abierto en producción.** `contaperu-mcp` corre en `https://contaperu.globalprocesos.com/mcp` (Streamable
@@ -89,9 +89,10 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 ## Cómo se trabaja
 
 - `git pull` antes de empezar: el repo se trabaja desde dos máquinas.
-- **Todo va a `main` por un PR corto, con la CI en verde, sin ramas largas.** Cada consumidor fija una versión, así
-  que lo que entra en `main` no le llega a nadie hasta que se etiqueta. La última rama larga fue `motor-v1`, la de la
-  1.0.
+- **Se trabaja directo en `main`, sin PR y sin ramas** (decisión de John, 14-sep-2026): commit y push cuando la
+  batería pasa en local, y la CI de cada push a `main` lo confirma. Se puede porque cada consumidor fija una versión,
+  así que lo que entra en `main` no le llega a nadie hasta que se etiqueta. La última rama larga fue `motor-v1`, la de
+  la 1.0. Un contribuidor de fuera sí abre un PR (`CONTRIBUTING.md`).
 - Entorno: `python -m venv .venv` y `pip install -e ".[dev]"` (trae `excel`, `schema`, `mcp`, `http`, `pytest`,
   `httpx` y `openapi-spec-validator`).
 - Batería: `pytest` (unos segundos; el snapshot va dentro). Antes de etiquetar, `diagnosticar` y `exportar` sobre un
