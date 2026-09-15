@@ -48,29 +48,43 @@ cada regla lleva al lado la norma o el archivo real que la justifica.
 
 ## Cómo funciona
 
-![Arquitectura de ContaPerú: SUNAT, tu ERP, los PDF y fotos y, más adelante, el banco, entregan información que se convierte en el documento común open-accounting; el motor la valida, arma el asiento y la traduce a CONCAR, CONTASIS, el SIRE o de vuelta a un ERP](diagramas/arquitectura-general.svg)
+![Los tres caminos de ContaPerú dentro de un ERP externo: las facturas en XML, PDF o imagen salen como TXT del SIRE; la propuesta del SIRE sale como asientos o registro de CONCAR o CONTASIS; y, próximamente, el aviso de un facturador se convierte al estándar común para otro ERP](diagramas/arquitectura-general.svg)
 
-1. **De dónde entra la información.** Los XML y la propuesta del SIRE que da SUNAT, los comprobantes que manda un ERP, y
-   lo que una IA lee de un PDF o una foto. El banco está dibujado con línea punteada porque todavía no entra: es de la
-   [hoja de ruta](HOJA-DE-RUTA.md).
-2. **Un documento común.** Todo se convierte en un mismo documento, [`open-accounting`](estandar/LEEME.md): el libro
-   (RUC, periodo, compras o ventas), los comprobantes y el asiento. Tiene su
-   [esquema formal](estandar/open-accounting.schema.json), y cualquier sistema puede leerlo o escribirlo.
-3. **El motor decide la contabilidad.** Valida el comprobante y arma el asiento una sola vez, igual para todos los
-   destinos. Las cuentas, los sentidos del debe y el haber y la detracción los pone el motor, no cada exportación.
-4. **A dónde sale.** Cada sistema contable recibe su propio archivo, o el resultado vuelve en JSON a un ERP o a un
-   asistente de IA.
+ContaPerú no es una aplicación que se abre: es el motor que va **dentro de un ERP externo**, sea un sistema contable en
+la nube, un portal para estudios o el sistema de gestión de una empresa. En el ERP externo el contador carga, revisa y
+descarga; el motor hace la contabilidad y no guarda nada. Por ahí pasan tres caminos:
+
+1. **Facturas → SIRE.** Cargas las facturas del mes en XML, PDF o foto. Los XML los lee el motor; los PDF y las fotos,
+   la IA del ERP externo. El motor valida cada comprobante y devuelve el TXT del registro, listo para subir al SIRE.
+2. **Propuesta del SIRE → CONCAR o CONTASIS.** Al revés: cargas el TXT de la propuesta que SUNAT ya tiene, y el motor
+   arma el asiento y entrega el archivo que importa tu sistema, los asientos de CONCAR o el registro de CONTASIS.
+3. **Facturador → cualquier ERP (próximo).** Cuando un sistema facturador emita un comprobante, le avisará al ERP
+   externo, y este lo pasará por el motor al documento común [`open-accounting`](estandar/LEEME.md). Va con línea
+   punteada porque todavía no está: es de la [hoja de ruta](HOJA-DE-RUTA.md).
+
+Cualquier carga puede terminar en cualquiera de las tres salidas: de unas facturas salen también los asientos de
+CONCAR, y de la propuesta, el TXT del SIRE. Las cuentas, los sentidos del debe y el haber y la detracción los decide el
+motor una sola vez, igual para todos los destinos.
 
 ## El motor por dentro
 
-![El motor por dentro: cuatro formas de usarlo —Python, CLI, MCP y HTTP con el contrato OpenConta— entran por la API pública 1.0; el pipeline se apoya en el núcleo peruano, y los drivers entregan a CONCAR, CONTASIS, el SIRE y el CSV, y a drivers de terceros](diagramas/arquitectura-del-motor.svg)
+![ContaPerú por dentro: el contador y, próximamente, un facturador llegan al ERP externo; el ERP le pasa al motor el documento open-accounting; el motor entra por sus puertas, arma el asiento en el núcleo y sus drivers lo traducen al SIRE, CONCAR, CONTASIS o de vuelta al ERP](diagramas/arquitectura-del-motor.svg)
 
-- **Arriba, lo que ve quien integra:** cuatro formas de usar el mismo motor —desde Python, por la línea de comandos, por
-  MCP para asistentes de IA y por HTTP para un ERP en cualquier lenguaje—, todas por la **API pública 1.0**.
-- **En el medio, lo que decide:** el **pipeline** lee, prepara, arma y diagnostica cada mes, y se apoya en el **núcleo
-  peruano**, que es lo único que sabe contabilidad: validación, IGV, asiento y PCGE.
-- **Abajo, lo que traduce:** los **drivers** convierten el asiento al formato de cada destino sin decidir ninguna cuenta.
+- **Arriba, tu sistema:** el **ERP externo** recibe lo que sube el contador y, más adelante, el aviso del facturador.
+  Guarda, revisa, descarga y usa la IA para los PDF y las fotos: todo lo que necesita red, disco o credenciales vive
+  ahí, no en el motor.
+- **En el medio, el documento común:** lo que el ERP le pasa al motor es un documento
+  [`open-accounting`](estandar/LEEME.md), con el libro (RUC, periodo, compras o ventas), los comprobantes y la
+  imputación. Tiene su [esquema formal](estandar/open-accounting.schema.json).
+- **El motor:**
+  - entra por cuatro **puertas** a la **API pública 1.0**: Python, la línea de comandos, MCP para asistentes de IA y
+    HTTP para un ERP en cualquier lenguaje;
+  - el **núcleo** peruano valida, calcula el IGV y arma el asiento;
+  - los **drivers** lo traducen al formato de cada destino sin decidir ninguna cuenta.
+
   Un driver de la comunidad se enchufa sin tocar este repositorio.
+- **Abajo, los destinos:** el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o el resultado de vuelta al
+  ERP, en JSON y con su diagnóstico.
 
 Todo esto, con sus porqués, en [ARQUITECTURA.md](ARQUITECTURA.md); cómo integrarlo en un ERP, en
 [INTEGRAR.md](INTEGRAR.md).

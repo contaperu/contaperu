@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="680" height="510" viewBox="0 0 680 510" role="img" aria-labelledby="titulo descripcion">
-<title id="titulo">Arquitectura de ContaPerú: entradas, estándar, motor y destinos</title>
-<desc id="descripcion">SUNAT, el ERP de la empresa, los PDF y fotos, y en el futuro el banco, entregan información que se convierte en el documento común open-accounting. El motor ContaPerú lo recibe por sus puertas, el núcleo valida y arma el asiento, y los drivers lo traducen a CONCAR, CONTASIS, el SIRE o de vuelta a un ERP y a agentes de IA.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="420" viewBox="0 0 680 420" role="img" aria-labelledby="titulo descripcion">
+<title id="titulo">Los tres caminos de ContaPerú dentro de un ERP externo</title>
+<desc id="descripcion">Tres caminos atraviesan un ERP externo que lleva el motor dentro. Las facturas en XML, PDF o imagen se leen y validan —la IA del ERP lee los PDF y las fotos— y salen como TXT del SIRE. La propuesta del SIRE, el TXT de SUNAT, se convierte en asientos o en registro para CONCAR o CONTASIS. Próximamente, el aviso de un sistema facturador al emitir llega al ERP externo, que lo convierte al estándar común para otro ERP. Cualquier carga puede terminar en las tres salidas, y el motor no guarda nada: el ERP externo guarda, revisa y descarga.</desc>
 <style>
 .fondo{fill:#FFFFFF}
 .t,.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
@@ -10,7 +10,6 @@
 .g rect{fill:#F1EFE8;stroke:#5F5E5A}.g .t{fill:#444441}.g .s{fill:#5F5E5A}
 .v rect{fill:#E1F5EE;stroke:#0F6E56}.v .t{fill:#085041}.v .s{fill:#0F6E56}
 .m rect{fill:#EEEDFE;stroke:#534AB7}.m .t{fill:#3C3489}.m .s{fill:#534AB7}
-.caja rect{fill:#FFFFFF;stroke:#B4B2A9}.caja .t{fill:#2C2C2A}.caja .s{fill:#5F5E5A}
 .flecha{stroke:#888780;stroke-width:1.5;fill:none}
 .leyenda{fill:#5F5E5A}
 @media (prefers-color-scheme: dark){
@@ -18,7 +17,6 @@
 .g rect{fill:#444441;stroke:#B4B2A9}.g .t{fill:#F1EFE8}.g .s{fill:#D3D1C7}
 .v rect{fill:#085041;stroke:#5DCAA5}.v .t{fill:#E1F5EE}.v .s{fill:#9FE1CB}
 .m rect{fill:#3C3489;stroke:#AFA9EC}.m .t{fill:#EEEDFE}.m .s{fill:#CECBF6}
-.caja rect{fill:#161B22;stroke:#888780}.caja .t{fill:#F1EFE8}.caja .s{fill:#D3D1C7}
 .leyenda{fill:#B4B2A9}
 }
 </style>
@@ -27,30 +25,23 @@
 <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </marker>
 </defs>
-<rect class="fondo" x="0" y="0" width="680" height="510" rx="12"/>
-<g class="g"><rect x="44" y="40" width="136" height="56" rx="8" stroke-width="0.5"/><text class="t" x="112" y="60">SUNAT</text><text class="s" x="112" y="78">XML y SIRE</text></g>
-<g class="g"><rect x="196" y="40" width="136" height="56" rx="8" stroke-width="0.5"/><text class="t" x="264" y="60">Tu ERP</text><text class="s" x="264" y="78">Manda su JSON</text></g>
-<g class="g"><rect x="348" y="40" width="136" height="56" rx="8" stroke-width="0.5"/><text class="t" x="416" y="60">PDF y fotos</text><text class="s" x="416" y="78">Los lee la IA</text></g>
-<g class="g"><rect x="500" y="40" width="136" height="56" rx="8" stroke-width="0.5" stroke-dasharray="4 3"/><text class="t" x="568" y="60">Banco</text><text class="s" x="568" y="78">Próximo</text></g>
-<line class="flecha" x1="112" y1="98" x2="112" y2="130" marker-end="url(#punta)"/>
-<line class="flecha" x1="264" y1="98" x2="264" y2="130" marker-end="url(#punta)"/>
-<line class="flecha" x1="416" y1="98" x2="416" y2="130" marker-end="url(#punta)"/>
-<line class="flecha" x1="568" y1="98" x2="568" y2="130" stroke-dasharray="4 3" marker-end="url(#punta)"/>
-<g class="v"><rect x="60" y="132" width="560" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="152">open-accounting, el documento común</text><text class="s" x="340" y="170">Libro, comprobantes y asiento</text></g>
-<line class="flecha" x1="340" y1="190" x2="340" y2="222" marker-end="url(#punta)"/>
-<g class="m"><rect x="40" y="224" width="600" height="144" rx="20" stroke-width="0.5"/><text class="t" x="340" y="246">ContaPerú, el motor</text><text class="s" x="340" y="264">Sin red, sin disco, sin estado</text></g>
-<g class="caja"><rect x="60" y="284" width="172" height="64" rx="8" stroke-width="0.5"/><text class="t" x="146" y="306">Puertas</text><text class="s" x="146" y="326">CLI, MCP y HTTP</text></g>
-<g class="caja"><rect x="254" y="284" width="172" height="64" rx="8" stroke-width="0.5"/><text class="t" x="340" y="306">Núcleo</text><text class="s" x="340" y="326">Valida y asienta</text></g>
-<g class="caja"><rect x="448" y="284" width="172" height="64" rx="8" stroke-width="0.5"/><text class="t" x="534" y="306">Drivers</text><text class="s" x="534" y="326">Traducen al destino</text></g>
-<line class="flecha" x1="234" y1="316" x2="252" y2="316" marker-end="url(#punta)"/>
-<line class="flecha" x1="428" y1="316" x2="446" y2="316" marker-end="url(#punta)"/>
-<line class="flecha" x1="112" y1="370" x2="112" y2="402" marker-end="url(#punta)"/>
-<line class="flecha" x1="264" y1="370" x2="264" y2="402" marker-end="url(#punta)"/>
-<line class="flecha" x1="416" y1="370" x2="416" y2="402" marker-end="url(#punta)"/>
-<line class="flecha" x1="568" y1="370" x2="568" y2="402" marker-end="url(#punta)"/>
-<g class="g"><rect x="44" y="404" width="136" height="56" rx="8" stroke-width="0.5"/><text class="t" x="112" y="424">CONCAR</text><text class="s" x="112" y="442">Asientos</text></g>
-<g class="g"><rect x="196" y="404" width="136" height="56" rx="8" stroke-width="0.5"/><text class="t" x="264" y="424">CONTASIS</text><text class="s" x="264" y="442">Registro</text></g>
-<g class="g"><rect x="348" y="404" width="136" height="56" rx="8" stroke-width="0.5"/><text class="t" x="416" y="424">SIRE</text><text class="s" x="416" y="442">TXT</text></g>
-<g class="g"><rect x="500" y="404" width="136" height="56" rx="8" stroke-width="0.5"/><text class="t" x="568" y="424">ERP y agentes</text><text class="s" x="568" y="442">JSON por HTTP</text></g>
-<text class="s leyenda" x="340" y="490">Gris: sistemas de fuera · verde azulado: el estándar · morado: el motor · punteado: próximo</text>
+<rect class="fondo" x="0" y="0" width="680" height="420" rx="12"/>
+<g class="m"><rect x="236" y="20" width="208" height="326" rx="16" stroke-width="0.5"/><text class="t" x="340" y="44">ERP externo</text><text class="s" x="340" y="62">Con el motor dentro</text></g>
+<g class="g"><rect x="16" y="90" width="160" height="56" rx="8" stroke-width="0.5"/><text class="t" x="96" y="108">Facturas</text><text class="s" x="96" y="126">XML, PDF e imágenes</text></g>
+<g class="g"><rect x="16" y="182" width="160" height="56" rx="8" stroke-width="0.5"/><text class="t" x="96" y="200">Propuesta SIRE</text><text class="s" x="96" y="218">TXT de SUNAT</text></g>
+<g class="g"><rect x="16" y="274" width="160" height="56" rx="8" stroke-width="0.5" stroke-dasharray="4 3"/><text class="t" x="96" y="292">Facturador</text><text class="s" x="96" y="310">Avisa al emitir</text></g>
+<g class="v"><rect x="252" y="90" width="176" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="108">Lee y valida</text><text class="s" x="340" y="126">La IA lee PDF y fotos</text></g>
+<g class="v"><rect x="252" y="182" width="176" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="200">Arma el asiento</text><text class="s" x="340" y="218">Desde el TXT del SIRE</text></g>
+<g class="v"><rect x="252" y="274" width="176" height="56" rx="8" stroke-width="0.5" stroke-dasharray="4 3"/><text class="t" x="340" y="292">Recibe y convierte</text><text class="s" x="340" y="310">Al estándar común</text></g>
+<g class="g"><rect x="504" y="90" width="160" height="56" rx="8" stroke-width="0.5"/><text class="t" x="584" y="108">TXT del SIRE</text><text class="s" x="584" y="126">Listo para subir</text></g>
+<g class="g"><rect x="504" y="182" width="160" height="56" rx="8" stroke-width="0.5"/><text class="t" x="584" y="200">CONCAR o CONTASIS</text><text class="s" x="584" y="218">Asientos o registro</text></g>
+<g class="g"><rect x="504" y="274" width="160" height="56" rx="8" stroke-width="0.5" stroke-dasharray="4 3"/><text class="t" x="584" y="292">Otro ERP</text><text class="s" x="584" y="310">Documento estándar</text></g>
+<line class="flecha" x1="178" y1="118" x2="250" y2="118" marker-end="url(#punta)"/>
+<line class="flecha" x1="430" y1="118" x2="502" y2="118" marker-end="url(#punta)"/>
+<line class="flecha" x1="178" y1="210" x2="250" y2="210" marker-end="url(#punta)"/>
+<line class="flecha" x1="430" y1="210" x2="502" y2="210" marker-end="url(#punta)"/>
+<line class="flecha" x1="178" y1="302" x2="250" y2="302" stroke-dasharray="4 3" marker-end="url(#punta)"/>
+<line class="flecha" x1="430" y1="302" x2="502" y2="302" stroke-dasharray="4 3" marker-end="url(#punta)"/>
+<text class="s leyenda" x="340" y="374">Punteado: próximo · cualquier carga puede terminar en las tres salidas</text>
+<text class="s leyenda" x="340" y="396">El motor no guarda nada: el ERP externo guarda, revisa y descarga</text>
 </svg>
