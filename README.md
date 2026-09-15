@@ -431,7 +431,7 @@ lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna d
 | [estandar/LEEME.md](estandar/LEEME.md) | El estándar `open-accounting`: sus bloques, sus reglas y su versionado |
 | [REFERENCIAS.md](REFERENCIAS.md) | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU. |
 | [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md) | La investigación: el ciclo contable de EE. UU. y del Perú, los proyectos abiertos y cómo entrarían el banco y las facturas de proveedores |
-| [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md) | En qué orden crece el motor y qué dato destraba cada paso |
+| [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md) | En qué orden crece el motor y qué dato destraba cada paso, con los frentes en el orden del flujo: entradas, estándar y comunidad, motor, y las salidas SIRE, Legacy y ERP |
 | [CHANGELOG.md](CHANGELOG.md) | Cada versión con su porqué |
 | [SECURITY.md](SECURITY.md) | Cómo reportar una vulnerabilidad |
 

@@ -1066,7 +1066,7 @@ MOTOR: aplicar_constancias*(documento, constancias)  ◄── PRIMER CASO [arch
 DRIVER concar: sub-diario de bancos, columna Y (medio de pago) ──► Excel que el destino SUMA
 ```
 
-**9. Cinco precisiones del diseño**, que salieron al ordenar el frente D de la hoja de ruta:
+**9. Cinco precisiones del diseño**, que salieron al ordenar el frente «Entradas · El banco inicia el proceso contable» de la hoja de ruta:
 
 1. **Hechos y avisos.** Hechos son la línea del extracto y la liquidación de la pasarela. Un webhook o un correo son un
    `Aviso*` (`tipo`: cobro, devolución, contracargo): se empareja, y **nunca produce asiento**.
@@ -1323,7 +1323,7 @@ el §6, cuando exista el primer lector de un extracto bancario.
 
 ## 9 · El estándar y su gobierno
 
-Cómo cambia un estándar sin romper a quien lo usa. Qué hay hoy y los hitos: `HOJA-DE-RUTA.md`, frente E.
+Cómo cambia un estándar sin romper a quien lo usa. Qué hay hoy y los hitos: `HOJA-DE-RUTA.md`, frente «El estándar abierto y la comunidad».
 
 ### Qué hacen
 
@@ -1427,7 +1427,7 @@ No se proponen tareas (todo es síncrono y hay un tope de 5.000 comprobantes, `c
 **Estado: diseño escrito, sin código.** Decisión de John (14-sep-2026): se deja pensado cómo entraría otro país para
 que el núcleo no se cierre la puerta, y nada se mueve hasta que haya **un cliente real fuera del Perú**, con su sistema
 de destino y un archivo que ese sistema haya aceptado. Hasta entonces `ARQUITECTURA.md:25` sigue siendo cierto: el
-núcleo sabe contabilidad peruana y nada más. Los hitos J0-J6 están en la hoja de ruta, frente F.
+núcleo sabe contabilidad peruana y nada más. Los hitos J0-J6 están en la hoja de ruta, frente «El motor · Otra jurisdicción».
 
 ### Qué hace ContaPerú hoy: lo universal y lo peruano
 

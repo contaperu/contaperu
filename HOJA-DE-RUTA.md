@@ -4,13 +4,18 @@
 
 Este documento dice **en qué orden** crece el motor y **qué hace falta** para cada paso. **Toda la investigación que lo
 sostiene** —lo que hacen EE. UU., los proyectos abiertos y SUNAT, el diseño y el pseudocódigo de cada pieza, y sus
-fuentes— vive en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md), ordenada por etapa del ciclo contable; lo que se tomó de
-las plataformas cerradas de EE. UU. está en [REFERENCIAS.md](REFERENCIAS.md). Aquí solo se remite: cada hito cita su
-propuesta por número, en la columna «Propuesta». Lo que ya está hecho se ve en la tabla «Estado» del [README.md](README.md).
+fuentes— vive en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md); lo que se tomó de las plataformas cerradas de EE. UU.
+está en [REFERENCIAS.md](REFERENCIAS.md). Aquí solo se remite: cada hito cita su propuesta por número, en la columna
+«Propuesta». Lo que ya está hecho se ve en la tabla «Estado» del [README.md](README.md).
 
-Cuatro principios la ordenan:
+Cinco principios la ordenan:
 
-- **Encima, no en lugar de.** Nadie cambia de sistema contable: el motor traduce hacia el que ya existe.
+- **Arquitectura colectiva, no organizacional.** La contabilidad automatizada no la resuelve cada empresa por su
+  cuenta: se resuelve una vez, en abierto y entre todos. Por eso el motor cumple dos papeles —trabajar encima de los
+  sistemas legacy mientras evolucionan y ser la base de los ERP que vienen— y la comunidad es parte de la arquitectura,
+  no un extra.
+- **Encima, no en lugar de.** Nadie cambia de sistema contable: el motor traduce hacia el que ya existe, y un ERP nuevo
+  parte del estándar y del motor en vez de reimplementarlos.
 - **Crece con casos reales.** Una regla contable entra con su fuente, un driver o un lector con un archivo real que su
   sistema haya aceptado, y un campo del estándar con el caso que lo pide.
 - **Sin fechas.** Lo que no está publicado es «próximo». Cada hito tiene, en cambio, un **criterio de salida
@@ -18,8 +23,13 @@ Cuatro principios la ordenan:
 - **El núcleo no se mueve de su frontera**: sin red, sin disco, sin estado y sin reloj (`tests/test_frontera.py:75`). Lo
   que conecta, guarda o aprende vive fuera.
 
-Cada frente (A-F) sigue el mismo molde: objetivo, qué hay hoy, la etapa de la investigación que lo sostiene, una
-tabla de hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas:
+**Los frentes siguen el flujo** del diagrama del README: lo que **entra** (los comprobantes y el banco) → **el estándar
+abierto y la comunidad** → **el motor** → las **salidas**, agrupadas en **SIRE**, **Legacy** y **ERP**. Cada hito
+conserva el id con que nació (A1, B4, C9, D3, E1, J0…) aunque hoy viva en otro frente: la letra dice su origen, no su
+sitio, y así ninguna remisión se rompe.
+
+Cada frente sigue el mismo molde: objetivo, qué hay hoy, la etapa de la investigación que lo sostiene, una tabla de
+hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas:
 
 | Columna o marca | Significado |
 |---|---|
@@ -30,7 +40,7 @@ tabla de hitos con su propuesta y lo que no se hace. La tabla usa estas columnas
 | `nombre*` | Nombre provisional: lo decide el mantenedor al pasar a código |
 | *no verificado* · *según terceros* · *según el proveedor* | Calidad de la fuente, a la fecha de consulta (13-sep-2026) |
 
-**Qué sigue** está en el §2, antes que los frentes; lo que hay que conseguir para cada hito, en el §5.
+**Qué sigue** está antes que los frentes; lo que hay que conseguir para cada hito, en «Lo que hay que conseguir».
 
 ---
 
@@ -41,11 +51,14 @@ Librería **1.0.0** y estándar **`open-accounting` 0.3**
 
 | Pieza | Hoy |
 |---|---|
-| Lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. PDF y fotos quedan pendientes para quien use IA |
-| Validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote |
-| Asiento | Línea neutral con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
-| Drivers de serie | CONCAR (asientos) y CONTASIS (registro), de canal legacy; SIRE (TXT), tributario; CSV, intercambio. Más los de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`) |
-| Puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 11 herramientas y 6 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. Las rutas de la 0.10 siguen con aviso |
+| **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
+| **Estándar y comunidad** | `open-accounting` 0.3 con su esquema; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`); plantillas de aviso «Regla mal puesta» y «Error». El repositorio sigue privado |
+| **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote y contra lo ya anotado |
+| **Motor** · asiento | Línea neutral con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
+| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 11 herramientas y 6 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. Las rutas de la 0.10 siguen con aviso |
+| **Salida · SIRE** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
+| **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy |
+| **Salida · ERP** | El documento `open-accounting` en JSON, el CSV de canal intercambio y la puerta HTTP con OpenConta |
 | Pendiente que depende de datos | SISCONT y STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
 
 ### Cumplidos
@@ -74,9 +87,11 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 
 ## 2 · Qué sigue: orden de ejecución y dependencias
 
-El orden de ejecución: **Fase 0 → C (en paralelo con A) → B y D**, con E acompañando desde el principio porque sus
-enmiendas tienen que existir antes del primer bloque nuevo del esquema. El frente F no entra en la secuencia hasta
-que llegue un cliente real fuera del Perú.
+El orden de ejecución: **Fase 0 → el motor (reglas y validación), en paralelo con la salida Legacy → las entradas
+y la salida SIRE a medida que llegan sus datos → el banco**, con **el estándar y la comunidad** acompañando desde el
+principio, porque sus enmiendas tienen que existir antes del primer bloque nuevo del esquema. La salida ERP ya quedó
+abierta en la 1.0 (B1-B6). **Otra jurisdicción** no entra en la secuencia hasta que llegue un cliente real fuera del
+Perú; sus dos primeros hitos, J0 y J1, los cumplió la 1.0 al ordenar el motor en capas.
 
 ```
 FASE 0 (código) ──────────────────────────────────────────────────────────────────────────────────
@@ -100,9 +115,10 @@ FASE 0 (código) ─────────────────────
                └─► E3 política de retiro
 
 Sin dependencias de código: A1-A5 [archivos aceptados] · C6 [04 real] · C7 [RHE real] · C10 [plan + rechazo]
-                            · 0.6 · 0.7 · 0.8 · B5
+                            · 0.6 · 0.7 · 0.8 · B5 · E5 guía de aporte · E6 plantilla de formato
+                            · E7 abrir el repositorio [decisión de John]
 
-FRENTE F [un cliente real fuera del Perú]
+OTRA JURISDICCIÓN [un cliente real fuera del Perú] · J0 y J1 cumplidos en la 1.0
  J0 ─► J1 ─┬─► J2 (tras C1 y C2) ─┬─► J4 ─► J5 (con E1 y E3) ─► J6 [archivo aceptado]
            └─► J3 ────────────────┘
 ```
@@ -113,12 +129,13 @@ FRENTE F [un cliente real fuera del Perú]
 | 2 | E1 | código |
 | 3 | C1 | dato público, ya disponible |
 | 4 | C9 · C2 | código |
-| 5 | E2 · E3 | código |
+| 5 | E2 · E3 · E5 · E6 | código |
 | 6 | B1 · B2 · B5 · B3 · B6 | código |
 | en paralelo | A1-A5 | dato: archivos aceptados |
 | cuando llegue el dato | C3 · C4 · C5 · C6 · C7 · C8 · C10 · C11 · C12 | dato |
 | cuando llegue el dato | D1 · D2 → D3 · D4 → D5 → D6 | dato (D3 es código, tras D1 y D2) |
 | cuando haga falta | B4 · B7 · D7 · E4 | dato o decisión |
+| cuando John lo decida | E7 | decisión |
 | con un cliente real fuera del Perú | J0 → J1 → J2 · J3 → J4 → J5 → J6 | dato: el cliente, su destino y un archivo aceptado |
 
 ---
@@ -143,109 +160,33 @@ posteriores. Las propuestas de origen están en la tabla de `INTEROPERABILIDAD.m
 
 ---
 
-## 4 · Los frentes A a F
+## 4 · Los frentes, de lo que entra a lo que sale
 
-### A · Drivers legacy: SISCONT y STARSOFT
+### Entradas · Leer más, sin emitir
 
-**Objetivo.** Que SISCONT y STARSOFT salgan del mismo documento que CONCAR y CONTASIS, cada uno con su archivo aceptado.
-Es la prioridad por uso: son, con CONCAR y CONTASIS, los sistemas contables que más estudios peruanos tienen instalados.
+**Objetivo.** Que el motor lea más documentos de los que ya recibe una empresa y los lleve al estándar, igual para
+todos los destinos. **Nunca emite**: no genera, no firma, no envía y no consulta la validez de un comprobante; eso es de
+quien tenga red y credenciales.
 
-**Investigación.** Los tres escalones con que EE. UU. integra sistemas de escritorio sin API, y lo que se toma de
-ellos: `INTEROPERABILIDAD.md`, «Exportar al destino».
+**Investigación.** Cómo llega la factura en EE. UU. y en el Perú, y los proyectos que leen el UBL de SUNAT:
+`INTEROPERABILIDAD.md`, «Recibir la factura» y «Validar antes de asentar».
 
-**Qué hay hoy.** Las cuatro formas del contrato (`contaperu/drivers/contrato.py:71`) y la receta con la que entró
-CONTASIS (`CONTRIBUTING.md` §«Añadir un driver de salida», `CHANGELOG.md` 0.10.0):
-
-1. Pedir dos archivos al sistema: su plantilla y un mes que haya importado.
-2. Elegir la forma: `desde_comprobantes` si importa registros, `desde_lineas` si importa asientos.
-3. Llevar al núcleo, antes del driver, lo que no es del driver.
-4. `datos.py` con cada columna y su fuente; `proyeccion.py` que solo traduce; el escritor del archivo.
-5. Pruebas en cuatro capas: snapshot con datos inventados, driver por la fachada, plantilla contra los archivos privados,
-   contrato.
-6. Revisión humana del primer archivo y configuración declarada por sección.
-7. Aceptación real importando un mes; recién entonces documentación y etiqueta.
+**Qué hay hoy.** Tres raíces de XML, y cualquier otra da «Raíz XML no reconocida» (`contaperu/lectores/xml_ubl.py:31`);
+el CDR se ignora; la propuesta del SIRE se lee entera; un PDF o una foto quedan pendientes de leer.
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
-| A1 | SISCONT, registro de compras y ventas → `desde_comprobantes` | D | dato: plantilla + un mes importado | Las cuatro capas de prueba; un mes importado; fila en «Estado»; CHANGELOG y tag | — | — |
-| A2 | ¿Acepta SISCONT el TXT que genera el driver `sire`? (SISCONT importa la propuesta del SIRE, *según el proveedor*; qué formato, *no verificado*) | documentación | dato: una prueba | Nota en la guía; ningún código | — | — |
-| A3 | SISCONT, asientos → `desde_lineas` | D | dato: un caso que A1 no cubra | Igual que A1 | A1 | — |
-| A4 | STARSOFT, asientos → `desde_lineas` | D | dato: plantilla + un mes importado | Igual que A1 | — | — |
-| A5 | El **cuerpo JSON** de la API de STARSOFT Gold, como proyección pura de las líneas | D | dato: una respuesta aceptada guardada en `privado/` | Test contra el cuerpo aceptado; autenticarse y enviar es de la aplicación | A4 | — |
-
-**No se hace.** Un formato común para todos los legacy: el TXT del SIRE no lleva cuentas y pierde la imputación, y no
-consta que ninguno importe el Libro Diario 5.1 del PLE (*no verificado* en negativo). Ningún driver sale a la red.
-
-### B · La puerta abierta para cualquier ERP
-
-**Objetivo.** Que un ERP escrito en cualquier lenguaje mande un documento `open-accounting` y reciba el asiento o el
-archivo de su destino, con un kit que le diga cómo integrarse y cómo comprobar que lo hizo bien.
-
-**La puerta ya existe**: el documento del estándar es la entrada canónica, y un ERP no necesita un lector propio. Lo que
-falta es publicarla para quien no escribe Python.
-
-**Investigación.** Contratos publicados, motor y reglas versionados aparte, reglas escritas para entrar y cómo
-embeberse en un ERP abierto: `INTEROPERABILIDAD.md`, «Exportar al destino»; la puerta MCP, «Arquitectura y
-puertas».
-
-**Qué hay hoy.** La fachada `operaciones` («dict entra, dict sale»; `diagnosticar`, `generar_asiento` y `exportar` en
-`contaperu/operaciones.py`), el grupo de entry points de drivers, la CLI, el MCP y un `Dockerfile`. Dos herramientas del
-MCP tienen su lógica en la puerta y no en la fachada: `buscar_cuenta_pcge` y `normalizar_detracciones`
-(`contaperu/servidor_mcp.py:339` y `:381`). La fachada tipa todo como `dict`, así que un OpenAPI no sale de sus firmas:
-hace falta declararlo.
-
-| id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
-|---|---|---|---|---|---|---|
-| B1 | Las dos operaciones pasan a la fachada, y una tabla `OPERACIONES*` declara cada operación con su entrada y su salida (con `$ref` al esquema del estándar) | F | código | Cada herramienta MCP llama a una operación de la tabla; ninguna puerta importa `pcge` ni `detracciones` | 0.5 | — |
-| B2 | `motor*` (la versión) en `_asiento` y `_exportacion`, y `outputSchema` de `diagnosticar` que cubra también la respuesta con configuración inválida | F | código | Las dos formas validan; `motor` queda fuera de la huella | 0.2, 0.4 | 8, 10 |
-| B3 | **OpenAPI 3.1** generado por una herramienta desde `OPERACIONES*` | F · documentación | código | Regenerarlo no cambia bytes; los documentos de ejemplo validan como cuerpos | B1, B2 | — |
-| B4 | Puerta **HTTP sin estado**, `servidor_http*`, con el extra `contaperu[http]*` | puerta | dato: un integrador no Python que lo necesite | Está en `PUERTAS` de `tests/test_frontera.py`; las tres puertas dan el mismo documento; comparte topes y la defensa de `Host` del MCP; publicar su imagen pide OK | B3 | — |
-| B5 | El CSV lleva `rol` y los `tipo_cp`, lo que un driver necesita para no adivinar | D | código | Columnas nuevas llenas; **se anuncia** porque cambia una salida | — | 7 |
-| B6 | **Guía «integrar ContaPerú en un ERP»**: la librería (Odoo, Frappe), la CLI por lotes, el MCP y, con B4, HTTP; niveles *de serie* (con archivo aceptado) y *comunidad* (paquete propio por entry points); checklist de contribución | documentación | código | Los ejemplos en Python se ejecutan en la batería; `contaperu://drivers` dice si cada driver es de serie | B1 | — |
-| B7 | **Contrato de lector** y entry points `contaperu.lectores*`, el espejo de entrada del contrato de driver (el `Importer` de beangulp: identificar, extraer, deduplicar) | N | dato: el segundo lector bancario | Test de conformidad análogo a `tests/test_contrato_drivers.py` | D2 | 20 |
-
-La **conformidad declarada** —pasar la suite del estándar (E2) y, si es un driver, tener su archivo aceptado— es el
-análogo de la certificación de Xero o Intuit, sin sellos ni tercero que la otorgue.
-
-**No se hace.** SDKs generados (esperan un integrador que los pida), WASM o Pyodide (antes habría que probar que sus
-dependencias cargan), OAuth, estado ni sellos de certificación.
-
-### C · Leer y validar más, sin emitir
-
-Es el **primer frente tras la Fase 0**, en paralelo con A.
-
-**Objetivo.** Que el motor valide con las reglas y los códigos oficiales de SUNAT tomados como datos, y que lea más
-documentos de los que ya recibe una empresa. **Nunca emite**: no genera, no firma, no envía y no consulta la validez de
-un comprobante; eso es de quien tenga red y credenciales.
-
-**Investigación.** Las reglas de SUNAT como datos, los proyectos que leen su UBL y los datos públicos que un motor
-puede recibir: `INTEROPERABILIDAD.md`, «Validar antes de asentar»; la propuesta del RCE como lista de control: «El
-ciclo contable, comparado» y «Recibir la factura»; las analogías de la declaración: «Declarar».
-
-**Qué hay hoy.** Catálogos escritos a mano (`contaperu/catalogos.py`); tres raíces de XML, y cualquier otra da «Raíz XML
-no reconocida» (`contaperu/lectores/xml_ubl.py:31`); el CDR se ignora; códigos de observación propios, ninguno igual a
-uno oficial; y un precedente de norma convertida en datos con su cita, `herramientas/extraer_pcge2026.py`.
-
-| id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
-|---|---|---|---|---|---|---|
-| C1 | `herramientas/extraer_reglas_sunat*.py` → JSON empaquetado con `actualizado_al`, hoja y fila de cada dato: códigos de retorno, catálogos y solo las reglas con efecto contable | N · herramienta | dato público, ya disponible | Reproducible; lo que hoy está a mano en `catalogos.py` está contenido en el JSON o la diferencia queda listada; la hoja de cálculo no entra al repositorio | 0.5 | — |
-| C2 | `codigo_sunat*` en la observación, como campo añadido: los códigos propios no se renombran | N · estándar | código | Cada código citado existe en el JSON; la tabla `PEDIR_A` no cambia | C1, E1 | — |
 | C3 | `leer_cdr*`: aceptado, observado y rechazado; abrir el ZIP en que suele llegar | N · F | dato: CDR reales | Un rechazo produce su observación con el código oficial | C1, E1 | — |
-| C4 | `retencion_igv` (nombre reservado) desde `PaymentTerms` de la factura | N · estándar | dato: un destino que lo pida | `retencion` (renta de 4ta) intacta; snapshot idéntico | E1 | 29 |
 | C5 | Comprobantes de **retención (20)** y **percepción (40)** en un bloque propio | N · estándar | dato: XML reales + la fuente de su tratamiento | No entran al RCE ni al RVIE; ningún driver los escribe sin fuente | C1, E1 | — |
 | C6 | **Liquidación de compra (04)**: la contraparte es el vendedor, no quien emite | N | dato: XML real | Sin falso `XML_PARA_OTRO_RUC` (test de mutación) | — | — |
 | C7 | **Recibo por honorarios electrónico** leído del archivo de SOL | N | dato: archivo real | Tipo 02 con `retencion`; sin falso `RETENCION_TASA` | — | — |
-| C8 | `padron*` como argumento, con forma `{ruc: {activo*, habido*, razon_social*}}`, y aviso de proveedor no habido | N · F | dato: la fuente legal del aviso + tope | Sin padrón no cambia nada; un nombre distinto del padrón no produce observación | 0.1 | 24 |
-| C9 | `cruzar_con_propuesta*`: lo cargado contra la propuesta del RCE, y el primer uso de `pedir_a: proveedor`; es la lista de control que EE. UU. no tiene | N · F | código | Tres cajones; ceros a la izquierda; un RUC mal escrito | 0.0 | 9 |
-| C10 | `plan_de_cuentas*` del destino, falta `cuenta_fuera_del_plan*`, marca de centro de costo y lista de centros | N · F · D | dato: plan exportado de CONCAR + un rechazo real de importación | Sin plan, snapshot idéntico; un plan sin la cuenta bloquea y `exportar` lanza | — | 11, 12, 13 |
-| C11 | `tipos_de_cambio*` como argumento: **contrasta, no rellena** | N · F | dato: la fuente del tipo de cambio que rige | Un tipo de cambio distinto del publicado da un aviso | C8 | — |
-| C12 | **IGV por utilización de servicios de no domiciliados (91, 97, 98)**: el par de líneas autoliquidado con su `rol` y el archivo de no domiciliados del RCE | N · estándar · D | dato: un comprobante 91 real con su pago por el Formulario 1662 y un asiento aceptado por CONCAR | El 91 da cuatro líneas que cuadran; una factura 01 sale idéntica (snapshot); el `rol` entra por su enmienda | C1, E1 | 26 |
+| B7 | **Contrato de lector** y entry points `contaperu.lectores*`, el espejo de entrada del contrato de driver (el `Importer` de beangulp: identificar, extraer, deduplicar) | N | dato: el segundo lector bancario | Test de conformidad análogo a `tests/test_contrato_drivers.py` | D2 | 20 |
 
-**No se hace.** Ejecutar las XSL; leer guías de remisión (09/31), que no tienen efecto contable; portar código PHP (se
-toman las rutas XPath con la cita a SUNAT); usar los XML de prueba de Greenter como fixtures (se hacen con los RUC
-seguros o con archivos reales en `privado/`); sustituir la Tabla 10 del SIRE por el Catálogo 01, que incluye menos tipos.
+**No se hace.** Leer guías de remisión (09/31), que no tienen efecto contable; portar código PHP (se toman las rutas
+XPath con la cita a SUNAT); usar los XML de prueba de Greenter como fixtures (se hacen con los RUC seguros o con
+archivos reales en `privado/`); leer PDF o fotos.
 
-### D · El banco inicia el proceso contable
+### Entradas · El banco inicia el proceso contable
 
 **Objetivo.** Que un hecho bancario —una línea de extracto o la liquidación de una pasarela de pagos— se lea, se
 deduplique, se empareje con lo que salda y, cuando haya fuente, se asiente. Al estilo de EE. UU., y con el núcleo sin
@@ -290,12 +231,14 @@ conector, no con el motor.
 estadístico dentro del motor (lo aprendido llega como dato); confirmar automáticamente; seguir las finanzas abiertas de
 la SBS como hito: se vigilan y se adoptan cuando exista la regulación.
 
-### E · El estándar mejora siempre
+### El estándar abierto y la comunidad
 
-Es **transversal**: acompaña a todos los frentes.
+Es **transversal**: acompaña a todos los frentes. Es también donde la arquitectura se vuelve colectiva: el estándar y el
+motor mejoran porque cualquiera puede aportar por un camino escrito.
 
-**Objetivo.** Que `open-accounting` cambie por un proceso escrito —caso real, fuente, test y compatibilidad declarada— y
-que un tercero pueda comprobar que su implementación cumple.
+**Objetivo.** Que `open-accounting` cambie por un proceso escrito —caso real, fuente, test y compatibilidad declarada—,
+que un tercero pueda comprobar que su implementación cumple, y que un contador, un desarrollador o una empresa sepan
+cómo aportar: la regla con su norma, el driver con su contrato, el formato de su sistema con un archivo aceptado.
 
 **Investigación.** Cómo gobiernan sus cambios MCP, Python, FDX, Peppol y JSON Schema, y la plantilla y los estados de
 una enmienda: `INTEROPERABILIDAD.md`, «El estándar y su gobierno».
@@ -303,7 +246,9 @@ una enmienda: `INTEROPERABILIDAD.md`, «El estándar y su gobierno».
 **Qué hay hoy.** `estandar/LEEME.md` ya tiene una regla de versionado (lo aditivo no sube la versión; lo que cambia de
 significado, sí), siete nombres reservados y un tag del estándar que avanza con cada cambio aditivo;
 `tests/test_estandar.py` valida el esquema. La salida de `cuenta_contable` en la 0.3 fue legado y retiro el mismo día:
-no hubo aviso previo.
+no hubo aviso previo. Para aportar: `CONTRIBUTING.md` con la regla que manda y la receta de un driver, las plantillas de
+aviso «Regla mal puesta» y «Error» (`.github/ISSUE_TEMPLATE/`) y el grupo de entry points para drivers de terceros. El
+repositorio sigue privado.
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
@@ -311,10 +256,41 @@ no hubo aviso previo.
 | E2 | `estandar/conformidad*/`: casos de esquema `{description, data, valid}` y casos de `diagnosticar` con lo esperado (`listo`, motivos, `pedir_a`) | estándar | código | Los corre la batería; hay un caso por regla de `validar` y por fila de `FALTAS`; los de esquema se ejecutan sin el motor | E1 | — |
 | E3 | Política escrita de retiro: legado en una versión, rechazo en la siguiente; cada cambio con su fecha de vigencia | estándar | código | Revisada; `tests/test_estandar.py` sigue verde | E1 | — |
 | E4 | Revisión cuando SUNAT cambia la fecha «actualizado al» de sus reglas | proceso | dato: la nueva versión de SUNAT | JSON de C1 regenerado; las diferencias, en el CHANGELOG | C1 | — |
+| E5 | **Guía de aporte por rol** en `CONTRIBUTING.md`: qué aporta un contador (la regla con su norma), un desarrollador (el driver con su contrato) y una empresa (el formato de su sistema con un archivo aceptado, anonimizado) | documentación | código | La sección existe y el README la enlaza desde «Cómo aportar» | — | — |
+| E6 | Plantilla de aviso **«Formato de mi sistema»** para compartir la plantilla de importación y un archivo aceptado de un sistema sin driver | documentación | código | La plantilla está en `.github/ISSUE_TEMPLATE/`, pide los RUC seguros y el README la enlaza | — | — |
+| E7 | **Abrir el repositorio** | proceso | decisión de John | El repositorio es público, con el historial revisado para que no quede nada real de nadie | — | — |
 
-### F · Otra jurisdicción
+La **conformidad declarada** —pasar la suite del estándar (E2) y, si es un driver, tener su archivo aceptado— es el
+análogo de la certificación de Xero o Intuit, sin sellos ni tercero que la otorgue.
 
-Es **condicional**: ningún hito arranca sin un cliente real fuera del Perú.
+### El motor · Reglas y validación de SUNAT
+
+Es el **primer frente tras la Fase 0**, en paralelo con la salida Legacy.
+
+**Objetivo.** Que el motor valide con las reglas y los códigos oficiales de SUNAT tomados como datos, y que su asiento
+cubra los casos que faltan, con la misma regla para todos los destinos.
+
+**Investigación.** Las reglas de SUNAT como datos y los datos públicos que un motor puede recibir:
+`INTEROPERABILIDAD.md`, «Validar antes de asentar»; las analogías de la declaración: «Declarar».
+
+**Qué hay hoy.** Catálogos escritos a mano (`contaperu/catalogos.py`); códigos de observación propios, ninguno igual a
+uno oficial; y un precedente de norma convertida en datos con su cita, `herramientas/extraer_pcge2026.py`.
+
+| id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
+|---|---|---|---|---|---|---|
+| C1 | `herramientas/extraer_reglas_sunat*.py` → JSON empaquetado con `actualizado_al`, hoja y fila de cada dato: códigos de retorno, catálogos y solo las reglas con efecto contable | N · herramienta | dato público, ya disponible | Reproducible; lo que hoy está a mano en `catalogos.py` está contenido en el JSON o la diferencia queda listada; la hoja de cálculo no entra al repositorio | 0.5 | — |
+| C2 | `codigo_sunat*` en la observación, como campo añadido: los códigos propios no se renombran | N · estándar | código | Cada código citado existe en el JSON; la tabla `PEDIR_A` no cambia | C1, E1 | — |
+| C4 | `retencion_igv` (nombre reservado) desde `PaymentTerms` de la factura | N · estándar | dato: un destino que lo pida | `retencion` (renta de 4ta) intacta; snapshot idéntico | E1 | 29 |
+| C8 | `padron*` como argumento, con forma `{ruc: {activo*, habido*, razon_social*}}`, y aviso de proveedor no habido | N · F | dato: la fuente legal del aviso + tope | Sin padrón no cambia nada; un nombre distinto del padrón no produce observación | 0.1 | 24 |
+| C11 | `tipos_de_cambio*` como argumento: **contrasta, no rellena** | N · F | dato: la fuente del tipo de cambio que rige | Un tipo de cambio distinto del publicado da un aviso | C8 | — |
+| C12 | **IGV por utilización de servicios de no domiciliados (91, 97, 98)**: el par de líneas autoliquidado con su `rol` y el archivo de no domiciliados del RCE | N · estándar · D | dato: un comprobante 91 real con su pago por el Formulario 1662 y un asiento aceptado por CONCAR | El 91 da cuatro líneas que cuadran; una factura 01 sale idéntica (snapshot); el `rol` entra por su enmienda | C1, E1 | 26 |
+
+**No se hace.** Ejecutar las XSL; sustituir la Tabla 10 del SIRE por el Catálogo 01, que incluye menos tipos.
+
+### El motor · Otra jurisdicción
+
+Es **condicional**: salvo J0 y J1, que la 1.0 cumplió al ordenar el motor en capas, ningún hito arranca sin un cliente
+real fuera del Perú.
 
 **Objetivo.** Que otra jurisdicción entre como un perfil que se enchufa, igual que un driver, sin que el Perú cambie una
 celda del Excel de CONCAR ni un carácter de la huella.
@@ -326,8 +302,8 @@ cambio del estándar y EE. UU. como ejemplo: `INTEROPERABILIDAD.md`, «Otra juri
 doble, la línea neutral, la huella, la imputación, las faltas, la maquinaria de configuración y el registro de drivers.
 Son peruanos el `Libro` (`contaperu/modelo.py:113-128`), los impuestos en campos fijos, la validación
 (`contaperu/validar.py:16`), los roles del asiento (`contaperu/asiento/motor.py:40`), las claves del contrato de driver
-(`contaperu/drivers/contrato.py:227-230`, `:280-286`) y el esquema del estándar. `tests/test_frontera.py` no separa lo
-uno de lo otro.
+(`contaperu/drivers/contrato.py:227-230`, `:280-286`) y el esquema del estándar. Desde la 1.0, `tests/test_capas.py`
+congela el acoplamiento con lo peruano (J0).
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
@@ -339,28 +315,116 @@ uno de lo otro.
 | J5 | **`open-accounting` 0.4**: `libro.jurisdiccion*` con perfiles; `pe` conserva los campos de la 0.3 y las demás jurisdicciones usan `impuestos[]*` | estándar | dato: un cliente real fuera del Perú | Todo documento 0.3 valida y significa lo mismo; enmienda en `final`; tag `open-accounting-0.4` | J4, E1, E3 | 30 |
 | J6 | **La segunda jurisdicción**, en paquete propio por entry points o en el repositorio | N · D | dato: su archivo aceptado por su destino y la fuente de cada regla | Conformidad de jurisdicción; archivo aceptado; `pe` sin cambios | J5 | 30 |
 
-**No se hace.** Adelantar J1-J6 sin el cliente; tasas de impuestos sin fuente; traducir al inglés el vocabulario del
+**No se hace.** Adelantar J2-J6 sin el cliente; tasas de impuestos sin fuente; traducir al inglés el vocabulario del
 estándar; poner la jurisdicción en la configuración (es del libro).
+
+### Salida · SIRE
+
+**Objetivo.** Que lo que se presenta a SUNAT salga del mismo documento que los asientos y cuadre con lo que SUNAT ya
+tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de control.
+
+**Investigación.** El SIRE frente a las declaraciones de EE. UU. y la propuesta del RCE como lista de control:
+`INTEROPERABILIDAD.md`, «Declarar», «El ciclo contable, comparado» y «Recibir la factura».
+
+**Qué hay hoy.** El driver `sire` escribe el TXT de reemplazo del RVIE (Anexo 3) y del RCE (Anexo 11), contrastado con
+archivos reales aceptados, y lo comprime en su ZIP; deja fuera los recibos por honorarios. `comparar_sire` compara ese
+TXT con lo que SUNAT exporta del SIRE (`contaperu/comparar_sire.py`).
+
+| id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
+|---|---|---|---|---|---|---|
+| C9 | `cruzar_con_propuesta*`: lo cargado contra la propuesta del RCE, y el primer uso de `pedir_a: proveedor`; es la lista de control que EE. UU. no tiene | N · F | código | Tres cajones; ceros a la izquierda; un RUC mal escrito | 0.0 | 9 |
+
+**No se hace.** Descargar la propuesta ni presentar el registro: eso necesita red y Clave SOL, y es de quien use el
+motor.
+
+### Salida · Legacy: CONCAR, CONTASIS, SISCONT y STARSOFT
+
+**Objetivo.** Que SISCONT y STARSOFT salgan del mismo documento que CONCAR y CONTASIS, cada uno con su archivo aceptado,
+y que el motor conozca lo que el destino exige antes de que el sistema rechace una importación. Es la prioridad por uso:
+son, con CONCAR y CONTASIS, los sistemas contables que más estudios peruanos tienen instalados, y el motor trabaja
+encima de ellos mientras evolucionan.
+
+**Investigación.** Los tres escalones con que EE. UU. integra sistemas de escritorio sin API, y lo que se toma de
+ellos: `INTEROPERABILIDAD.md`, «Exportar al destino».
+
+**Qué hay hoy.** CONCAR (asientos) y CONTASIS (registro) en uso, de canal legacy. Las formas del contrato
+(`contaperu/drivers/contrato.py`) y la receta con la que entró CONTASIS (`CONTRIBUTING.md`, «Añadir un driver de
+salida»; `CHANGELOG.md` 0.10.0):
+
+1. Pedir dos archivos al sistema: su plantilla y un mes que haya importado.
+2. Elegir la forma: `desde_comprobantes` si importa registros, `desde_lineas` si importa asientos.
+3. Llevar al núcleo, antes del driver, lo que no es del driver.
+4. `datos.py` con cada columna y su fuente; `proyeccion.py` que solo traduce; el escritor del archivo.
+5. Pruebas en cuatro capas: snapshot con datos inventados, driver por la fachada, plantilla contra los archivos privados,
+   contrato.
+6. Revisión humana del primer archivo y configuración declarada por sección.
+7. Aceptación real importando un mes; recién entonces documentación y etiqueta.
+
+| id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
+|---|---|---|---|---|---|---|
+| A1 | SISCONT, registro de compras y ventas → `desde_comprobantes` | D | dato: plantilla + un mes importado | Las cuatro capas de prueba; un mes importado; fila en «Estado»; CHANGELOG y tag | — | — |
+| A2 | ¿Acepta SISCONT el TXT que genera el driver `sire`? (SISCONT importa la propuesta del SIRE, *según el proveedor*; qué formato, *no verificado*) | documentación | dato: una prueba | Nota en la guía; ningún código | — | — |
+| A3 | SISCONT, asientos → `desde_lineas` | D | dato: un caso que A1 no cubra | Igual que A1 | A1 | — |
+| A4 | STARSOFT, asientos → `desde_lineas` | D | dato: plantilla + un mes importado | Igual que A1 | — | — |
+| A5 | El **cuerpo JSON** de la API de STARSOFT Gold, como proyección pura de las líneas | D | dato: una respuesta aceptada guardada en `privado/` | Test contra el cuerpo aceptado; autenticarse y enviar es de la aplicación | A4 | — |
+| C10 | `plan_de_cuentas*` del destino, falta `cuenta_fuera_del_plan*`, marca de centro de costo y lista de centros | N · F · D | dato: plan exportado de CONCAR + un rechazo real de importación | Sin plan, snapshot idéntico; un plan sin la cuenta bloquea y `exportar` lanza | — | 11, 12, 13 |
+
+**No se hace.** Un formato común para todos los legacy: el TXT del SIRE no lleva cuentas y pierde la imputación, y no
+consta que ninguno importe el Libro Diario 5.1 del PLE (*no verificado* en negativo). Ningún driver sale a la red.
+
+### Salida · ERP: la puerta abierta para los que vienen
+
+**Objetivo.** Que un ERP escrito en cualquier lenguaje mande un documento `open-accounting` y reciba el asiento o el
+archivo de su destino, con un kit que le diga cómo integrarse y cómo comprobar que lo hizo bien. Es la otra mitad de la
+arquitectura colectiva: un ERP nuevo no reimplementa el IGV, las detracciones ni los sub-diarios, sino que parte del
+estándar y del motor.
+
+**La puerta ya existe**: el documento del estándar es la entrada canónica, y un ERP no necesita un lector propio. La
+1.0 la publicó para quien no escribe Python (B1-B6).
+
+**Investigación.** Contratos publicados, motor y reglas versionados aparte, reglas escritas para entrar y cómo
+embeberse en un ERP abierto: `INTEROPERABILIDAD.md`, «Exportar al destino»; la puerta MCP, «Arquitectura y
+puertas».
+
+**Qué hay hoy.** La API pública `contaperu.api`, la tabla `OPERACIONES` de la que salen las rutas HTTP, las herramientas
+del MCP y el contrato OpenConta (`contaperu/api/openconta.json`), la puerta HTTP sin estado (`contaperu-http`), el CSV
+con `rol` y los `tipo_cp`, y la guía [INTEGRAR.md](INTEGRAR.md), cuyos ejemplos se ejecutan en la batería.
+
+| id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
+|---|---|---|---|---|---|---|
+| B1 | Las dos operaciones pasan a la fachada, y una tabla `OPERACIONES*` declara cada operación con su entrada y su salida (con `$ref` al esquema del estándar) | F | código | Cada herramienta MCP llama a una operación de la tabla; ninguna puerta importa `pcge` ni `detracciones` | 0.5 | — |
+| B2 | `motor*` (la versión) en `_asiento` y `_exportacion`, y `outputSchema` de `diagnosticar` que cubra también la respuesta con configuración inválida | F | código | Las dos formas validan; `motor` queda fuera de la huella | 0.2, 0.4 | 8, 10 |
+| B3 | **OpenAPI 3.1** generado por una herramienta desde `OPERACIONES*` | F · documentación | código | Regenerarlo no cambia bytes; los documentos de ejemplo validan como cuerpos | B1, B2 | — |
+| B4 | Puerta **HTTP sin estado**, `servidor_http*`, con el extra `contaperu[http]*` | puerta | dato: un integrador no Python que lo necesite | Está en `PUERTAS` de `tests/test_frontera.py`; las tres puertas dan el mismo documento; comparte topes y la defensa de `Host` del MCP; publicar su imagen pide OK | B3 | — |
+| B5 | El CSV lleva `rol` y los `tipo_cp`, lo que un driver necesita para no adivinar | D | código | Columnas nuevas llenas; **se anuncia** porque cambia una salida | — | 7 |
+| B6 | **Guía «integrar ContaPerú en un ERP»**: la librería (Odoo, Frappe), la CLI por lotes, el MCP y, con B4, HTTP; niveles *de serie* (con archivo aceptado) y *comunidad* (paquete propio por entry points); checklist de contribución | documentación | código | Los ejemplos en Python se ejecutan en la batería; `contaperu://drivers` dice si cada driver es de serie | B1 | — |
+
+**No se hace.** SDKs generados (esperan un integrador que los pida), WASM o Pyodide (antes habría que probar que sus
+dependencias cargan), OAuth, estado ni sellos de certificación.
 
 ---
 
 ## 5 · Lo que hay que conseguir
 
-Para cada hito que espera un dato: qué hay que conseguir y con quién.
+Para cada hito que espera un dato: qué hay que conseguir y con quién, en el orden del flujo.
 
 | Para | Qué | Cómo |
 |---|---|---|
-| A1-A5 | Plantillas y un mes importado de SISCONT y de STARSOFT; una respuesta aceptada de la API de STARSOFT Gold | Con quien use cada sistema |
+| **Entradas** | | |
 | C3 · C5 · C6 · C7 | CDR (aceptado, observado, rechazado), XML de retención, percepción y liquidación de compra, recibo por honorarios de SOL | De empresas que los emitan o reciban, anonimizados |
-| C8 · C11 | La fuente legal del aviso de no habido y del tipo de cambio que rige | Norma citada |
-| C10 | El plan de cuentas exportado de CONCAR y un rechazo de importación | Con un estudio que use CONCAR |
-| C12 | Un comprobante 91 con su pago por el Formulario 1662, y el asiento que CONCAR aceptó | De una empresa que pague servicios a un no domiciliado |
 | D1 | La consulta de pagos de detracciones de SOL o los movimientos de la cuenta del Banco de la Nación | Descargados por el contribuyente |
 | D2 | Tres meses de extracto de un banco, y la especificación de su MT940 o su archivo host-to-host | Con el ejecutivo del banco |
 | D5 | El reporte de liquidación de una pasarela, y cómo trata el IGV de su comisión (las páginas públicas de Culqi se contradicen) | Con un comercio real |
 | D6 | Las cuentas del PCGE, el ITF con su norma y un archivo aceptado del sub-diario de bancos de CONCAR | Norma citada y un estudio |
-| B4 | Un integrador que no escriba Python | — |
-| J0-J6 | Un cliente real fuera del Perú, su sistema contable de destino y un archivo que ese sistema haya aceptado | Con el cliente |
+| **Estándar y comunidad** | | |
+| E7 | La decisión de abrir el repositorio y la revisión de su historial | John |
+| **Motor** | | |
+| C8 · C11 | La fuente legal del aviso de no habido y del tipo de cambio que rige | Norma citada |
+| C12 | Un comprobante 91 con su pago por el Formulario 1662, y el asiento que CONCAR aceptó | De una empresa que pague servicios a un no domiciliado |
+| J2-J6 | Un cliente real fuera del Perú, su sistema contable de destino y un archivo que ese sistema haya aceptado | Con el cliente |
+| **Legacy** | | |
+| A1-A5 | Plantillas y un mes importado de SISCONT y de STARSOFT; una respuesta aceptada de la API de STARSOFT Gold | Con quien use cada sistema |
+| C10 | El plan de cuentas exportado de CONCAR y un rechazo de importación | Con un estudio que use CONCAR |
 
 ---
 
@@ -383,8 +447,12 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién.
 
 ## 7 · Cómo se mantiene
 
-- **Quién la toca.** El mantenedor decide y fusiona. Un hito nuevo entra solo si nombra su caso real o el dato que lo
-  destraba. Los nombres con `*` se deciden al pasar a código.
+- **Quién la propone y quién la toca.** Cualquiera propone un hito —un contador, un desarrollador, una empresa— abriendo
+  un aviso con su caso real o el dato que lo destraba: es la forma colectiva de la hoja de ruta. El mantenedor decide y
+  fusiona. Un hito nuevo entra solo si nombra su caso real o el dato que lo destraba. Los nombres con `*` se deciden al
+  pasar a código.
+- **Dónde va un hito nuevo.** En el frente del flujo que le toca, con la letra de ese frente y el número siguiente
+  (E8, C13…). Un id no se reutiliza ni se renombra al moverse de frente.
 - **Cuándo un hito está cumplido.**
   - De código: su test en la rama principal, una versión `vX.Y.Z` etiquetada y su entrada en `CHANGELOG.md`.
   - Un driver o un lector: además, el archivo aceptado o leído, con su fecha, como CONTASIS.
@@ -392,10 +460,11 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién.
   - De documentación: el cambio fusionado.
 - **Dónde se marca.** En el mismo cambio que pone la fecha de la versión en el CHANGELOG. La fila del hito pasa a
   «Cumplidos» con solo `id · versión`: el porqué vive en el CHANGELOG y en ningún otro sitio.
-- **Lo que se descarta o cambia de dependencia** pasa al §6 con su motivo. No se borra en silencio.
+- **Lo que se descarta o cambia de dependencia** pasa a «Lo que no está en esta hoja de ruta», con su motivo. No se
+  borra en silencio.
 - **Reparto con los otros documentos.** **La investigación nueva y todo cambio de diseño se escriben en
-  `INTEROPERABILIDAD.md`**, en la sección de su etapa del ciclo y con sus fuentes; aquí solo cambian el orden y los
-  hitos. `ARQUITECTURA.md` y la tabla «Estado» del README cambian cuando algo pasa a estar listo.
+  `INTEROPERABILIDAD.md`**, en la etapa que le toca y con sus fuentes; aquí solo cambian el orden y los hitos.
+  `ARQUITECTURA.md` y la tabla «Estado» del README cambian cuando algo pasa a estar listo.
 - **Remisiones por identificador.** Entre los dos documentos se cita por número de propuesta y por id de hito, nunca
   por número de sección; una etapa de la investigación se nombra por su título. Así cualquiera de los dos se puede
   reordenar sin romper una remisión.
