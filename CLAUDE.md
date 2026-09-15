@@ -92,6 +92,13 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
   `httpx` y `openapi-spec-validator`).
 - Batería: `pytest` (unos segundos; el snapshot va dentro). Antes de etiquetar, `diagnosticar` y `exportar` sobre un
   caso real en local, solo lectura.
+- **Publicar una versión es empujar su tag, y solo eso le llega a quien integra el motor**: un commit en `main` no le
+  cambia nada a nadie, porque cada consumidor fija una versión exacta. Antes del tag, `contaperu/_version.py` con la
+  versión nueva y en `CHANGELOG.md` su sección `## [X.Y.Z] — fecha` (con «Cómo migrar» si hay algo que adaptar).
+  Luego `git tag vX.Y.Z` y `git push origin vX.Y.Z`: `.github/workflows/release.yml` corre la batería en ese commit,
+  comprueba que la etiqueta es la versión y crea la Release de GitHub con la rueda, el sdist y `SHA256SUMS`, de donde
+  se descarga. Una `vX.Y.ZrcN` sale como pre-release, con las notas de «Sin publicar». **Una Release no se
+  reemplaza**: un error se arregla sacando otra versión. PyPI va aparte y a mano, con el OK de John.
 - Un driver nuevo pide **un archivo real que ese ERP haya aceptado**: `CONTRIBUTING.md` §«Añadir un driver de
   salida». El contrato (`NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, una forma —`desde_lineas` o `desde_comprobantes`
   para lo nuevo—, `EXIGE`, y lo que se configura: `CONFIGURACION` y `COLUMNAS_ELEGIBLES`) lo comprueba
