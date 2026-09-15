@@ -6,7 +6,7 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
-Rumbo a la **1.0.0**, en la rama `motor-v1`; la candidata es la **1.0.0rc1**. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.
+Rumbo a la **1.0.0**, ya en `main`; la candidata es la **1.0.0rc1**. La 1.0 fija una API pública estable (`contaperu.api`) y deja las rutas de la 0.10 funcionando con aviso de obsoleto durante toda la 1.x; ordena el motor en capas que un test hace cumplir, con una sola preparación para diagnosticar, generar el asiento y exportar; separa la salida hacia los sistemas legacy (drivers por canal) de la puerta de entrada para ERPs nuevos (servidor HTTP y contrato OpenConta); y cumple la Fase 0 de la hoja de ruta. El Excel de CONCAR validado no cambia. El detalle de cada cambio entra aquí con su commit.
 
 ### Añadido
 - **`ErrorContaperu`** (`contaperu.errores`): la base común de todas las excepciones del motor, con una `clave` estable
@@ -98,9 +98,10 @@ Rumbo a la **1.0.0**, en la rama `motor-v1`; la candidata es la **1.0.0rc1**. La
   con OpenConta, el MCP, un driver propio en sus dos niveles y lo que promete la 1.x—. Sus ejemplos se ejecutan en la
   batería (`tests/test_integrar.py`).
 - CI: la batería también en Windows con Python 3.12; comprobar que OpenConta está al día; un trabajo que construye la
-  rueda, la instala en un entorno limpio y arranca los tres comandos con sus datos empaquetados. Publicar exige antes
-  la batería verde, que la etiqueta sea `v` más la versión del código, el CHANGELOG con esa versión fechada y
-  `twine check`.
+  rueda, la instala en un entorno limpio y arranca los tres comandos con sus datos empaquetados. Publicar una versión
+  es empujar su tag: `release.yml` corre la batería en ese commit, comprueba que la etiqueta sea `v` más la versión del
+  código y que el CHANGELOG la traiga fechada, pasa `twine check` y crea la Release de GitHub con la rueda, el sdist y
+  `SHA256SUMS`. PyPI va aparte y a mano.
 
 ### Cambiado
 - **Importar `contaperu` ya no carga todos sus submódulos**: cada uno se importa la primera vez que se pide, así que
@@ -752,5 +753,5 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v0.2.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v0.10.0...HEAD
 [0.2.0]: https://github.com/contaperu/contaperu/releases/tag/v0.2.0

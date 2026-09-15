@@ -45,11 +45,12 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
 ## Quién lo consume, y el peaje
 
 - **Una aplicación en producción.** Contabilidad Inteligente (`contab-core`, repositorio privado de Global Procesos
-  AI) instala el motor como paquete —un wheel construido en su propio despliegue, porque este repo es privado— y
-  declara la versión mínima que necesita (`MOTOR_MINIMO`, en su batería). **Romper una firma aquí rompe una
-  aplicación en producción.** Un arreglo del motor son dos repositorios: se corrige, se prueba y se etiqueta aquí; se
-  sube la versión mínima y se despliega allá. El circuito completo está en `contab-core/docs/FRONTERA.md`, y qué
-  símbolos usa la app, en `contab-core/api/CLAUDE.md`: cuando el trabajo cruza, se leen primero.
+  AI) usa el motor como lo usaría cualquier ERP: **fija una versión publicada** (en su `api/MOTOR.txt`, el número y
+  el commit del tag) y adopta las nuevas cuando decide, después de leer su Release. Nada de allá lee la carpeta de
+  este repo, así que un commit en `main` no la toca. **Romper una firma aquí la rompe el día que adopte esa versión**:
+  por eso rige SemVer y lo que se retira avisa durante toda la mayor anterior. Un arreglo del motor es un PR aquí y
+  una versión con su tag; allá, cambiar la versión fijada y desplegar. Su lado del circuito está en
+  `contab-core/docs/FRONTERA.md`: cuando el trabajo cruza, se lee primero.
 - **Un MCP abierto en producción.** `contaperu-mcp` corre en `https://contaperu.globalprocesos.com/mcp` (Streamable
   HTTP, sin autenticación por diseño: no guarda nada de nadie, y el freno es de recursos). Actualizarlo es subir el
   repo al servidor y reconstruir su contenedor; el procedimiento y sus trampas (el `--dominio` que el SDK exige para
@@ -57,8 +58,8 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
 - **Se corrige aquí, nunca en la app.** La app no lleva copia del motor, y su batería lo vigila.
 - **La 1.0 cambia las rutas, no rompe las viejas.** Lo que la app importa de la 0.10 (`operaciones`, `generar`…) sigue
   resolviendo al mismo objeto, con sus firmas, y avisa con `RutaObsoleta`; migrar es pasar a `contaperu.api` con la
-  tabla del CHANGELOG. Antes de fusionar la 1.0, la rc1 se prueba en la batería de la app, también con
-  `-W error::DeprecationWarning`.
+  tabla del CHANGELOG. Antes de etiquetar una versión mayor se publica una pre-release (`vX.Y.ZrcN`) y quien integra
+  la prueba en su batería, también con `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»).
 
 ## Lo que no se negocia
 
@@ -88,6 +89,9 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 ## Cómo se trabaja
 
 - `git pull` antes de empezar: el repo se trabaja desde dos máquinas.
+- **Todo va a `main` por un PR corto, con la CI en verde, sin ramas largas.** Cada consumidor fija una versión, así
+  que lo que entra en `main` no le llega a nadie hasta que se etiqueta. La última rama larga fue `motor-v1`, la de la
+  1.0.
 - Entorno: `python -m venv .venv` y `pip install -e ".[dev]"` (trae `excel`, `schema`, `mcp`, `http`, `pytest`,
   `httpx` y `openapi-spec-validator`).
 - Batería: `pytest` (unos segundos; el snapshot va dentro). Antes de etiquetar, `diagnosticar` y `exportar` sobre un
