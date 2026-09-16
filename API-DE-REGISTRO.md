@@ -284,6 +284,26 @@ solo: **el cuerpo de la llamada es el documento `open-accounting`**, con la impu
 porque este mismo archivo, sin cambiar una coma, tiene que dar el TXT del SIRE (`sire`), el Excel de CONTASIS
 (`contasis`) o el documento neutral para otro ERP (`open_accounting`).
 
+### ¿Y el tipo de libro no lo dice la ruta?
+
+Lo decía en el primer borrador, porque un `comprobante` suelto no tenía dónde decirlo. Con el documento como cuerpo
+hay dos sitios para el mismo dato, y **el que sobra es la ruta**:
+
+1. **Cinco operaciones reciben un documento** —`revisar`, `normalizar_detracciones`, `diagnosticar`,
+   `generar_asiento` y `exportar`—, así que el tipo en la ruta las duplica a diez, y a doce cuando entre la
+   siguiente. Decirlo en la ruta solo sale barato si hay una sola ruta, y no la hay.
+2. **Tres de las cuatro puertas no tienen URL.** Python es `api.exportar(documento, driver=…)`; la CLI,
+   `contaperu diagnosticar mi-mes.json`; MCP tampoco. Un dato que vive en la ruta obliga a la CLI a inventarse un
+   `--tipo`, y entonces el mismo archivo significa cosas distintas según por dónde entre.
+3. **El documento es un archivo.** Se guarda, se manda y se abre dentro de un año, cuando ya no hay petición
+   alrededor. Una compra y una venta tienen casi los mismos campos —cambia si la contraparte es el proveedor o el
+   cliente—, de modo que sin `tipo` un archivo suelto no sabe qué libro es.
+4. **`libro` es la cabecera tributaria, y es RUC + mes + tipo.** Ya es obligatoria en la 0.3: sacarle el tipo sería
+   una 0.4 que rompe a todos para ahorrar un campo.
+
+No es una rareza de aquí: Xero lo dice con `Type: ACCPAY | ACCREC` y Merge con
+`type: ACCOUNTS_PAYABLE | ACCOUNTS_RECEIVABLE`, los dos dentro del cuerpo (sección 2).
+
 ### Una venta, y el mes entero
 
 ```json
