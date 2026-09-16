@@ -510,7 +510,117 @@ para todas. Los roles son `principal`, `igv`, `retencion_4ta`, `tercero`, `detra
 
 ---
 
-## 8 · Qué queda fuera, a propósito
+## 8 · La arquitectura de los destinos: al SIRE llegan todos
+
+Los destinos no son tres opciones en fila. **El SIRE está al final de todos los caminos**, porque es el trámite con
+SUNAT y la liquidación del impuesto; un sistema legacy se alimenta a diario con los comprobantes y al cierre saca su
+TXT. Lo que cambia es por dónde se llega:
+
+```
+        Comprobantes (los hechos)
+                 │
+                 ├──────────────► SIRE ──► SUNAT
+                 │                 ▲
+                 ▼                 │
+        Registro contable ─────────┘
+    CONCAR · CONTASIS · STARSOFT · asiento neutral
+```
+
+**Y por eso el driver `sire` no exige nada.** Se llega al SIRE con la contabilidad hecha o sin ella: un contribuyente
+puede presentar su registro a SUNAT aunque el mes no esté contabilizado todavía, que es justo lo que un sistema
+legacy solo no permite, porque antes hay que digitarlo.
+
+**Dónde termina el motor.** Dentro de compras y ventas, el SIRE es el final. Lo que sigue —el libro diario, el mayor
+y los estados financieros— se queda en el sistema contable, y el motor no entra ahí.
+
+### Lo que exige cada destino
+
+| Destino | Grupo | Qué exige |
+|---|---|---|
+| `sire` | sire | **nada** |
+| `open_accounting` | erp | cuenta contable |
+| `contasis` | legacy | cuenta contable, cuenta única |
+| `concar` | legacy | centro de costo, cuenta contable, moneda, tipo |
+
+El camino de los asientos sin software contable es **el más barato de los tres que llevan cuentas**, porque un driver
+neutral no declara claves de un sistema legacy y el núcleo solo le pide la cuenta.
+
+### Lo que el entorno declara
+
+Dos campos, y el segundo no es «¿presenta el SIRE?» —todos lo presentan— sino quién lo produce:
+
+| Campo | Valores |
+|---|---|
+| **¿Dónde lleva su contabilidad?** | CONCAR · CONTASIS · STARSOFT · **«ninguno: generar asientos»** · ninguno |
+| **¿Quién saca el TXT del SIRE?** | Su sistema contable, que ya lo alimenta a diario · **el motor, directo desde los comprobantes** |
+
+Lo que el mes tiene que cumplir es **la suma de lo que exigen los destinos declarados**. Si el entorno eligió generar
+asientos, la cuenta contable pasa a ser obligatoria y el diagnóstico la pide; si solo presenta el SIRE, no se le pide
+ninguna cuenta. La cuenta sale de donde ya sale: manda la imputación del comprobante, lo que no traiga sale de las
+cuentas por defecto del entorno, y si tampoco hay, el diagnóstico se la pide al contador.
+
+**Legacy y neutral son excluyentes** (decisión de John, 15-sep-2026): si hay sistema contable, el asiento sale en su
+estructura y no hace falta el neutral.
+
+### El botón «Generar asientos»
+
+Para quien eligió **sin software contable**, donde otros descargan el Excel que alimenta a su legacy va un botón que
+dice **Generar asientos**. No exporta a nadie: arma el asiento y lo entrega. Es el mismo asiento de CONCAR, más
+limpio. Este es el archivo que produce, generado por el motor para la compra del ejemplo de la sección 6:
+
+```json
+{
+ "open_accounting": "0.3",
+ "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
+            "periodo": "202601", "tipo": "compra" },
+ "asiento": [
+  { "cuenta": "6343001", "debe_haber": "D", "importe": "10000.00", "rol": "principal",
+    "fecha": "2026-01-15", "moneda": "PEN", "centro_costo": "OBRA01", "tasa_igv": "18",
+    "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+    "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
+                   "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
+
+  { "cuenta": "401111", "debe_haber": "D", "importe": "1800.00", "rol": "igv",
+    "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026", "documento": "el mismo" },
+
+  { "cuenta": "421201", "debe_haber": "H", "importe": "11800.00", "rol": "tercero",
+    "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": "el mismo" },
+
+  { "cuenta": "421201", "debe_haber": "D", "importe": "1416.00", "rol": "detraccion_tercero",
+    "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": "el mismo" },
+
+  { "cuenta": "421203", "debe_haber": "H", "importe": "1416.00", "rol": "detraccion",
+    "glosa": "DETRACCION - SERVICIO DE MANTENIMIENTO ENERO 2026",
+    "contraparte_doc": "20131312955",
+    "detraccion": { "codigo": "037", "tasa": "12", "base": "11800.00" },
+    "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
+                   "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } }
+ ]
+}
+```
+
+El archivo se llama `open_accounting_20601234567_202601_compra.json`, y lleva **el libro y el asiento, no los
+comprobantes**: quien pulsa el botón ya los tiene.
+
+### En qué es «más limpio» que CONCAR
+
+Las dos salidas dan **las mismas cinco líneas, los mismos roles, las mismas cuentas y los mismos importes**. La
+diferencia es lo que el perfil de CONCAR añade porque su sistema lo pide:
+
+| | CONCAR | Neutral |
+|---|---|---|
+| `sub_diario` | `"10"` | — |
+| `correlativo` | `"010001"` | — |
+| La sigla del documento | `documento.tipo: "FT"` | — (solo `tipo_cp: "01"`, el código de SUNAT) |
+| La línea de la detracción | Cuelga de un documento comodín: `tipo "DR"`, `serie_numero "9999999999"` | Cuelga **del propio comprobante**: `F001-123` |
+| El código de la detracción | `037` más `codigo_interno: "03701"` | Solo `037`, el de SUNAT |
+
+Tres campos menos y dos invenciones menos —el documento comodín y el código interno—, y con ellos se va todo el
+vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que cualquier contabilidad entiende.
+
+---
+
+## 9 · Qué queda fuera, a propósito
 
 - **Las líneas de detalle por ítem.** Un `Item` o un `InvoiceLine` sería un modelo propio, ya descartado, y el
   registro de compras y ventas de SUNAT no lo pide. Quien reparte el gasto entre cuentas usa `reparto`; quien quiera
@@ -534,7 +644,7 @@ para todas. Los roles son `principal`, `igv`, `retencion_4ta`, `tercero`, `detra
 
 ---
 
-## 9 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
+## 10 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
 
 **El criterio.** Al **estándar** va lo que dos sistemas necesitan para entenderse sin haber hablado nunca entre
 ellos. Al **motor** va lo que se calcula a partir de eso. Un dato que se puede derivar no entra al estándar, y una
@@ -558,6 +668,7 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 | **Una batería de conformidad**: casos de entrada con su documento esperado | Es lo que le permite a un ERP de fuera comprobar que emite bien sin escribirle a nadie. Hoy hay `diagnosticar` y `verificar-driver`; falta el juego de casos |
 | **Decidir el correlativo** | La única pregunta que el formato único no resolvió: el motor no tiene estado, así que o el ERP manda `correlativos` o numera el destino |
 | **No tener bandeja.** El motor recibe, responde y olvida | Depositar y esperar aprobación es del ERP, que es quien tiene usuarios y base de datos. Copiar la bandeja aquí le daría estado al motor, que es lo único que no puede tener |
+| **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos (sección 8) |
 | **No salir a la red.** Ni descargar del SIRE, ni llamar a otro sistema | Misma razón, y ya está escrito en la hoja de ruta |
 
 ### A ninguno de los dos
@@ -585,7 +696,7 @@ valiendo.
 
 ---
 
-## 10 · Lo que falta decidir
+## 11 · Lo que falta decidir
 
 **Resueltas por el formato único** —las cuatro se caían solas en cuanto el cuerpo dejó de ser un envoltorio:
 
@@ -606,10 +717,15 @@ valiendo.
 3. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
 4. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver `open_accounting`: quien
    recibe el documento neutral podría querer saber con qué cuentas se armó el asiento que lleva al lado.
+5. **Si el archivo del botón lleva también los comprobantes.** Hoy sale con `libro` y `asiento`, porque quien lo pide
+   ya tiene los hechos. Un ERP de fuera que reciba ese archivo sí querría los dos, y entonces el archivo pasa a ser
+   un documento completo del estándar en vez de solo el asiento.
+6. **El nombre del driver `open_accounting`**, que se llama igual que el estándar: uno es el formato que entra y el
+   otro una de las salidas. Un nombre por cosa, y este se elige una vez.
 
 ---
 
-## 11 · Fuentes
+## 12 · Fuentes
 
 Consultadas el 15-sep-2026.
 
