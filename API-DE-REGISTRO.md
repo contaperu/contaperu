@@ -32,7 +32,7 @@ las fuentes, al final.
    proceso, sin puerto y sin latencia. La puerta HTTP es para el que está en otro lenguaje o en otro servidor, y la
    levanta él: no hay una URL central del motor, ni la habrá mientras el motor no tenga estado.
 3. **El formato es uno solo, y ya existe.** Es `open-accounting`. Este documento no propone un JSON nuevo al lado del
-   estándar: propone que **el estándar sea también el cuerpo de la llamada**. La sección 6 cuenta por qué el primer
+   estándar: propone que **el estándar sea también el cuerpo de la llamada**. La sección 7 cuenta por qué el primer
    borrador tenía dos formas y qué se ganó al juntarlas.
 
 ---
@@ -199,11 +199,111 @@ Lo que se repite en casi todas las fuentes de arriba:
 11. **Las notas de crédito casi siempre son un recurso aparte**, con la misma forma y un enlace al documento que
     corrigen.
 12. **Ninguna de las fuentes revisadas tiene un campo de retención.** Las retenciones, detracciones y percepciones
-    peruanas no existen en ese mundo: son la parte que el estándar de aquí tiene que aportar.
+    peruanas no existen en ese mundo: son la parte que el estándar de aquí tiene que aportar. Es la tesis de todo
+    esto, y por eso tiene la sección siguiente entera.
 
 ---
 
-## 5 · Qué de todo esto ya tiene `open-accounting` 0.3
+## 5 · Lo que ninguna API del mundo tiene: detracción, retención y percepción
+
+El punto 12 de la sección anterior es el que justifica que este estándar exista, y merece su propia sección. De las
+nueve fuentes revisadas —cinco ERP, tres API unificadas y los estándares abiertos europeos— **ninguna tiene un campo
+para nada de esto**. No es un descuido suyo: es que en su mundo no existe.
+
+Los tres son **movimientos de dinero paralelos a la operación**, no impuestos sobre ella. Por eso no caben en un
+modelo que describe el impuesto como categoría, tasa y base: la plata se mueve entre partes que no son las dos de la
+factura.
+
+### La detracción, o por qué un asiento no se cierra de una vez
+
+El comprador **no le paga todo al proveedor**: retiene un porcentaje del total y lo deposita en una cuenta que el
+proveedor tiene en el Banco de la Nación, reservada para pagar sus impuestos. El proveedor cobra el resto.
+
+Eso, por sí solo, ya rompe el modelo de EN 16931: hay un **tercero** —un banco del Estado— que cobra parte de una
+factura entre dos empresas, y el importe que el proveedor recibe no es el total del documento.
+
+Pero lo que de verdad no cabe en ningún modelo es que **ocurre en dos tiempos**. Cuando se registra la compra el
+depósito todavía no se ha hecho: no hay número de constancia, y llega días después. Un documento de factura europeo
+se considera cerrado al emitirse; aquí falta un dato que nadie tiene todavía.
+
+El estándar lo resuelve con un bloque de estado dentro del comprobante:
+
+```json
+"detraccion": {
+  "codigo": "027",           "porcentaje": 4,
+  "monto": "198.00",         "cuenta": "00-123-456789",
+  "estado": "PROVISIONADO",  "nro_constancia": "", "fecha_constancia": ""
+}
+```
+
+- **`PROVISIONADO`** es el primer tiempo: la compra está registrada y la detracción se debe. El asiento se genera
+  igual, y en el perfil neutral las dos líneas de la detracción cuelgan del propio comprobante.
+- **`PAGADO`** es el segundo: se depositó, y entran `nro_constancia` y `fecha_constancia`. **El asiento ya importado
+  no se regenera**, porque en un destino que suma lo que importa, como CONCAR, volver a importarlo duplicaría.
+- El paso de uno a otro es una operación aparte y sin estado: entra el documento provisional y el archivo de
+  constancias, sale el documento actualizado.
+
+Y dos detalles que solo existen aquí:
+
+- **El monto se deposita siempre en soles**, aunque la factura esté en dólares. Un modelo con una sola moneda por
+  documento no puede decir eso; por eso `monto` es en soles aunque el resto del comprobante no lo sea.
+- **La tabla de códigos vive en el motor** —código, nombre y tasa, con su fuente— y el ERP la sobreescribe desde su
+  configuración. Un código que no está en la tabla queda en blanco en todas las operaciones, así que un `000`
+  inventado nunca provisiona una detracción.
+
+En el asiento son dos líneas con rol propio, `detraccion_tercero` y `detraccion`, que mueven del saldo del proveedor
+a la cuenta de detracciones. Se ven generadas en la sección 9.
+
+### La retención, que son dos cosas distintas con el mismo nombre
+
+Confundirlas es un error contable, y por eso el estándar las separa por nombre:
+
+| | Qué es | ¿Entra al asiento? | En el estándar |
+|---|---|---|---|
+| **Renta de 4ta categoría** | Lo que el contratante retiene de un recibo por honorarios y paga a SUNAT por cuenta del profesional | **Sí**, con rol propio `retencion_4ta` | `retencion`, hoy |
+| **Retención del IGV** | El 3 % que aplica un agente de retención designado por SUNAT, y que el XML trae en `PaymentTerms` | No entra en ningún asiento del registro | `retencion_igv`, nombre reservado |
+
+**Y el motor no la calcula: lee la que el recibo muestra.** `retencion` es un importe, no una tasa —la misma regla
+que con el IGV, cuya tasa se lee del comprobante y nunca de una configuración—, porque quien retuvo ya decidió
+cuánto, y una tasa que cambia por norma no puede vivir en el código de nadie.
+
+### La percepción, el espejo
+
+Aquí el vendedor **cobra de más**: añade un porcentaje al comprador, que es un pago a cuenta del IGV de ese
+comprador. Pasa con los combustibles, con ciertas importaciones y con una lista de bienes.
+
+Es el reverso de la retención —uno cobra de más, el otro paga de menos—, y tiene el mismo problema para un modelo
+extranjero: el total que cambia de manos no es el total de la operación. Hoy es un nombre reservado, `percepcion`, a
+la espera de su caso real.
+
+### Por qué EN 16931 y Peppol no pueden con esto
+
+No es que les falte un campo: es que el modelo no tiene dónde ponerlo.
+
+1. **Describen el impuesto como categoría, tasa y base, agregado por cabecera.** Los tres mecanismos no son un
+   impuesto sobre la operación, sino dinero que se mueve por fuera de ella.
+2. **Suponen dos partes.** La detracción mete a un tercero —el Banco de la Nación— que cobra parte de la factura.
+3. **Suponen un documento cerrado.** La detracción se completa días después, con un dato que al emitir no existe.
+
+Un ERP extranjero que quiera operar en el Perú tiene que resolver los tres con asientos manuales y campos libres, que
+es exactamente lo que hoy hacen. Recibirlos ya modelados es lo que este estándar aporta y ningún otro.
+
+### El estado de los tres, sin adornos
+
+| Mecanismo | Hoy |
+|---|---|
+| Detracción | **Completa**, en dos tiempos, con su tabla de códigos en el motor y dos líneas propias en el asiento |
+| Retención de renta de 4ta | **En el estándar**, con su rol en el asiento |
+| Retención del IGV | Nombre reservado, `retencion_igv`, con su forma ya tomada |
+| Percepción | Nombre reservado, `percepcion` |
+
+Dos de los cuatro esperan un caso real, que es la regla del proyecto: el estándar se mueve con un archivo de verdad
+detrás, no por si acaso. Y mientras tanto quien los tenga los transporta en `datos_originales`, que el motor pasa sin
+interpretar.
+
+---
+
+## 6 · Qué de todo esto ya tiene `open-accounting` 0.3
 
 | Patrón de facto | Qué tiene el estándar hoy |
 |---|---|
@@ -227,7 +327,7 @@ archivo**, y que la llamada no invente una segunda forma de decir lo que el docu
 
 ---
 
-## 6 · El borrador: un solo formato, el del estándar
+## 7 · El borrador: un solo formato, el del estándar
 
 El primer borrador de esta sección proponía `POST /v1/compras` y `POST /v1/ventas` con un cuerpo propio: `ruc`,
 `razon_social` y `periodo` sueltos en la raíz, un `comprobante` en singular y la `imputacion` sin llave. Era la forma
@@ -421,7 +521,7 @@ tiene que servir para destinos distintos.
 
 ---
 
-## 7 · El recorrido, visto desde el ERP que ya tiene el dato
+## 8 · El recorrido, visto desde el ERP que ya tiene el dato
 
 Lo anterior mira el formato. Esta sección mira lo otro que pregunta quien va a integrar: **dónde corre esto, quién
 hace qué y en qué orden.** Hace falta porque el resto del documento está escrito desde el que captura, y un ERP no
@@ -510,7 +610,7 @@ para todas. Los roles son `principal`, `igv`, `retencion_4ta`, `tercero`, `detra
 
 ---
 
-## 8 · La arquitectura de los destinos: al SIRE llegan todos
+## 9 · La arquitectura de los destinos: al SIRE llegan todos
 
 Los destinos no son tres opciones en fila. **El SIRE está al final de todos los caminos**, porque es el trámite con
 SUNAT y la liquidación del impuesto; un sistema legacy se alimenta a diario con los comprobantes y al cierre saca su
@@ -566,7 +666,7 @@ estructura y no hace falta el neutral.
 
 Para quien eligió **sin software contable**, donde otros descargan el Excel que alimenta a su legacy va un botón que
 dice **Generar asientos**. No exporta a nadie: arma el asiento y lo entrega. Es el mismo asiento de CONCAR, más
-limpio. Este es el archivo que produce, generado por el motor para la compra del ejemplo de la sección 6:
+limpio. Este es el archivo que produce, generado por el motor para la compra del ejemplo de la sección 7:
 
 ```json
 {
@@ -620,7 +720,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 
 ---
 
-## 9 · Qué queda fuera, a propósito
+## 10 · Qué queda fuera, a propósito
 
 - **Las líneas de detalle por ítem.** Un `Item` o un `InvoiceLine` sería un modelo propio, ya descartado, y el
   registro de compras y ventas de SUNAT no lo pide. Quien reparte el gasto entre cuentas usa `reparto`; quien quiera
@@ -628,7 +728,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 - **El impuesto por línea de detalle y el indicador de precios con impuesto** (`LineAmountTypes`,
   `pricesIncludeTax`). Sin ítems no tienen dónde ir, y el IGV nunca se delega al destino: va explícito, con su tasa.
 - **Un cuerpo propio de la API.** Fue el primer borrador y duró lo que tardó la primera lectura: un formato que solo
-  existe dentro de una petición no se puede guardar, ni mandar, ni comprobar sin servidor. La sección 6 lo cuenta.
+  existe dentro de una petición no se puede guardar, ni mandar, ni comprobar sin servidor. La sección 7 lo cuenta.
 - **Las rutas por tipo, `/v1/compras` y `/v1/ventas`.** El documento dice `libro.tipo`; una ruta que repite un campo
   del cuerpo solo añade un sitio donde los dos pueden contradecirse.
 - **La cabecera `Idempotency-Key`.** La clave natural aquí es la identidad del comprobante más la huella del
@@ -644,7 +744,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 
 ---
 
-## 10 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
+## 11 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
 
 **El criterio.** Al **estándar** va lo que dos sistemas necesitan para entenderse sin haber hablado nunca entre
 ellos. Al **motor** va lo que se calcula a partir de eso. Un dato que se puede derivar no entra al estándar, y una
@@ -666,10 +766,10 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 |---|---|
 | **Aceptar `imputaciones` dentro del documento**, sin dejar de aceptar el argumento de hoy | Es la pieza que hace real el formato único, y nadie que ya integre tiene que cambiar |
 | **Una batería de conformidad**: casos de entrada con su documento esperado | Es lo que le permite a un ERP de fuera comprobar que emite bien sin escribirle a nadie. Hoy hay `diagnosticar` y `verificar-driver`; falta el juego de casos |
-| **Renombrar el driver a `asiento_neutral`** | Hoy se llama igual que el estándar. Es gratis mientras siga sin publicar, y rompe a quien lo integre si se hace después de la 1.1.0 (sección 11) |
-| **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes (sección 11) |
+| **Renombrar el driver a `asiento_neutral`** | Hoy se llama igual que el estándar. Es gratis mientras siga sin publicar, y rompe a quien lo integre si se hace después de la 1.1.0 (sección 12) |
+| **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes (sección 12) |
 | **No tener bandeja.** El motor recibe, responde y olvida | Depositar y esperar aprobación es del ERP, que es quien tiene usuarios y base de datos. Copiar la bandeja aquí le daría estado al motor, que es lo único que no puede tener |
-| **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos (sección 8) |
+| **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos (sección 9) |
 | **No salir a la red.** Ni descargar del SIRE, ni llamar a otro sistema | Misma razón, y ya está escrito en la hoja de ruta |
 
 ### A ninguno de los dos
@@ -697,7 +797,7 @@ valiendo.
 
 ---
 
-## 11 · Lo que falta decidir
+## 12 · Lo que falta decidir
 
 **Resueltas por el formato único** —las cuatro se caían solas en cuanto el cuerpo dejó de ser un envoltorio:
 
@@ -725,7 +825,7 @@ sub-diario de un sistema legacy** (`MMNNNN`: mes y cuatro dígitos). Tres hechos
 número de voucher pertenece **al libro del mes**, no a la tanda en que alguien subió los archivos — y el documento
 del estándar ya *es* un mes: `libro` es RUC, periodo y tipo.
 
-De ahí los dos modos, que son exactamente los dos flujos de la sección 8:
+De ahí los dos modos, que son exactamente los dos flujos de la sección 9:
 
 | | **Mes completo** (por defecto) | **Por tandas** |
 |---|---|---|
@@ -779,7 +879,7 @@ de las 36 del estándar, que se quedan.
 
 ---
 
-## 12 · Fuentes
+## 13 · Fuentes
 
 Consultadas el 15-sep-2026.
 
