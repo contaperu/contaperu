@@ -71,9 +71,16 @@ Los campos que lleva cada línea de compras: `cuenta`, `annomes`, `subdiario`, `
 `impBolsa`, `nro_File`, `cinterface`, `codemp`, `usuario`. Ventas cambia `cod_Proveedor` por `cod_Cliente` y suma
 `ruc_Cliente`, `razon_Social`, `valor_ISC`, `exportacion`, `exonerado`, `otros_Cargos` y `nro_Doc_Hasta`.
 
+**Lo que hay que tener antes de llamar** (la guía lo pide en su primera página de configuración): una **IP pública**,
+una **licencia activa** del ERP y **las cuentas contables ya configuradas** en su Configurador de cuentas. Es una
+integración para los clientes de STARSOFT —pensada para el que tiene su contabilidad tercerizada en un estudio—, no
+un formato que un tercero cualquiera pueda adoptar. En lo que la guía publica no aparece autenticación: el control
+de acceso que describe es esa IP pública.
+
 **Y el registro no termina en la llamada.** La API deja los datos en una tabla; el contador entra después al módulo
-de contabilidad, a *Otros › Importación de datos externos*, elige el tipo y ejecuta la importación. La API alimenta
-una bandeja, no contabiliza.
+de contabilidad, a *Otros › Importación de datos externos*, elige el tipo y ejecuta la importación. **La API
+alimenta una bandeja, no contabiliza** — y esto, que parece un defecto, es el acierto escondido de su diseño
+(«Qué enseña», punto 4).
 
 ### Qué enseña
 
@@ -85,6 +92,17 @@ una bandeja, no contabiliza.
    lleve el comprobante le obliga a inventarlas.
 3. **La detracción y el centro de costo son de primera clase**, no un añadido. Cualquier estándar peruano tiene que
    llevarlos.
+4. **La bandeja es lo mejor que tiene, y no lo dice.** Ningún sistema serio deja que una llamada de fuera escriba
+   directamente en la contabilidad: la API deposita, y un contador aprueba. Es la razón de fondo de que el motor
+   devuelva diagnóstico y asiento en vez de guardar nada —**quien llama decide**—, y de que la bandeja sea del ERP y
+   no del motor.
+5. **Su ruta de anexos existe porque su modelo usa ids internos.** `RegistrarAnexos` hace falta porque las líneas
+   dicen `cod_Proveedor`, un código de su base: sin dar de alta la ficha antes, la compra no se puede colgar de
+   nadie. Aquí no hace falta ninguna ruta equivalente, porque el RUC viaja en el propio comprobante
+   (`contraparte_doc`), que es el modelo de EN 16931. Es la ventaja de la contraparte embebida, vista de cerca.
+6. **Lo que ellos llaman «asiento de honorarios» aquí ya es una compra.** Su ejemplo es un recibo por honorarios con
+   su cuenta de gasto y su retención; en el estándar es un comprobante de compra con `retencion`. No pide un bloque
+   nuevo: pide que el caso exista.
 
 ### Qué no se toma, y por qué
 
@@ -100,6 +118,11 @@ una bandeja, no contabiliza.
 - **La tasa del ejemplo.** La guía publica `tasa_Igv: 19`, que hoy no rige. Es el recordatorio de por qué el motor
   lee la tasa del comprobante y nunca de una configuración ni de un ejemplo.
 - **El mes en `annomes` dentro de cada línea.** El periodo es del libro, no de la línea.
+- **La IP pública como control de acceso**, y una integración que exige licencia del propio ERP. Un estándar que
+  pide una licencia para ser hablado no es un estándar.
+- **Un ejemplo que hay que copiar a mano con cuarenta campos por línea.** En la guía, el ejemplo de ventas no cierra
+  —reaparecen `ruc` y `listadoAsientos` dentro de un elemento del arreglo—. Puede ser cosa de cómo el PDF suelta el
+  texto, pero un formato así es exactamente donde ese error deja de ser raro.
 
 ---
 
@@ -422,11 +445,43 @@ tiene que servir para destinos distintos.
 
 ---
 
-## 8 · Qué pide esto del estándar
+## 8 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
 
-**Pide una sola cosa, y es aditiva.** El esquema tiene hoy cinco claves en la raíz —`open_accounting`, `libro`,
-`comprobantes`, `asiento` y `emisor`— y rechaza cualquier otra, así que `imputaciones` hay que añadirlo ahí. Un campo
-opcional nuevo **no sube la versión**: avanza el tag `open-accounting-0.3` y quien ya escribe 0.3 sigue valiendo.
+**El criterio.** Al **estándar** va lo que dos sistemas necesitan para entenderse sin haber hablado nunca entre
+ellos. Al **motor** va lo que se calcula a partir de eso. Un dato que se puede derivar no entra al estándar, y una
+regla que cambia según el sistema de destino no entra al núcleo: vive en la configuración de su driver.
+
+### Al estándar, `open-accounting`
+
+| Qué | Por qué | Cuándo |
+|---|---|---|
+| **`imputaciones` en la raíz**, con llave por `id_externo` | Sin ellas el archivo no explica su propio asiento, y el estándar promete que un documento «se entiende solo, en cualquier máquina, sin consultar nada» | Ahora. Aditivo |
+| **La regla de hasta dónde viaja cada bloque** | `libro` y `comprobantes` son hechos y valen en todas partes; `imputaciones` y `asiento` están en el plan de cuentas de quien los escribió y son **informativos fuera de él**. Sin esa regla, un ERP copia cuentas ajenas en silencio. `emisor` ya dice de quién son | Ahora. Es texto, no esquema |
+| `dimensiones`, `medio_pago`, `retencion_igv`, `percepcion`, `no_domiciliado` | Son hechos, y les falta el caso real que manda la regla del proyecto | Con su caso (E1) |
+| Honorarios y cheques | **Honorarios no pide nada**: su «asiento de honorarios» aquí es una compra con `retencion`. Cheques sí es otro hecho —un pago, no un comprobante— y sería otro libro | Cheques, cuando haya caso |
+| Una ficha de proveedor o cliente | **Nunca.** Es un maestro, no un hecho. El RUC viaja embebido en el comprobante, que es justo lo que le ahorra a este estándar la ruta de anexos que STARSOFT necesita | — |
+
+### Al motor, `contaperu`
+
+| Qué | Por qué |
+|---|---|
+| **Aceptar `imputaciones` dentro del documento**, sin dejar de aceptar el argumento de hoy | Es la pieza que hace real el formato único, y nadie que ya integre tiene que cambiar |
+| **Una batería de conformidad**: casos de entrada con su documento esperado | Es lo que le permite a un ERP de fuera comprobar que emite bien sin escribirle a nadie. Hoy hay `diagnosticar` y `verificar-driver`; falta el juego de casos |
+| **Decidir el correlativo** | La única pregunta que el formato único no resolvió: el motor no tiene estado, así que o el ERP manda `correlativos` o numera el destino |
+| **No tener bandeja.** El motor recibe, responde y olvida | Depositar y esperar aprobación es del ERP, que es quien tiene usuarios y base de datos. Copiar la bandeja aquí le daría estado al motor, que es lo único que no puede tener |
+| **No salir a la red.** Ni descargar del SIRE, ni llamar a otro sistema | Misma razón, y ya está escrito en la hoja de ruta |
+
+### A ninguno de los dos
+
+- **El vocabulario legacy** —`subdiario`, la sigla del documento, `destino_Compra`—: vive en la configuración del
+  driver que lo necesita, que es donde ya está. Ni el estándar ni el núcleo lo conocen.
+- **Autenticación, permisos, IP pública, licencias.** Eso es de quien publique una puerta, no del formato.
+- **La ficha del anexo, el detalle por ítem y los ids internos de nadie.**
+
+**Y lo que pide del esquema es una sola cosa, aditiva.** Hoy la raíz admite cinco claves —`open_accounting`,
+`libro`, `comprobantes`, `asiento` y `emisor`— y rechaza cualquier otra, así que `imputaciones` hay que añadirla ahí.
+Un campo opcional nuevo **no sube la versión**: avanza el tag `open-accounting-0.3` y quien ya escribe 0.3 sigue
+valiendo.
 
 | Cambio | Clasificación |
 |---|---|
