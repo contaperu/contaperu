@@ -666,7 +666,7 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 |---|---|
 | **Aceptar `imputaciones` dentro del documento**, sin dejar de aceptar el argumento de hoy | Es la pieza que hace real el formato único, y nadie que ya integre tiene que cambiar |
 | **Una batería de conformidad**: casos de entrada con su documento esperado | Es lo que le permite a un ERP de fuera comprobar que emite bien sin escribirle a nadie. Hoy hay `diagnosticar` y `verificar-driver`; falta el juego de casos |
-| **Decidir el correlativo** | La única pregunta que el formato único no resolvió: el motor no tiene estado, así que o el ERP manda `correlativos` o numera el destino |
+| **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes (sección 11) |
 | **No tener bandeja.** El motor recibe, responde y olvida | Depositar y esperar aprobación es del ERP, que es quien tiene usuarios y base de datos. Copiar la bandeja aquí le daría estado al motor, que es lo único que no puede tener |
 | **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos (sección 8) |
 | **No salir a la red.** Ni descargar del SIRE, ni llamar a otro sistema | Misma razón, y ya está escrito en la hoja de ruta |
@@ -707,20 +707,55 @@ valiendo.
 | Que las dos puertas no se separen | No hay dos puertas: hay un documento y un pipeline |
 | El freno de la ruta por comprobante | El tope de comprobantes del lote ya lo cubre |
 
+### El correlativo: la unidad de numeración es el mes, no el lote
+
+Era la que quedaba, y resulta ser doctrina y no funcionalidad. **El correlativo es el número de voucher dentro del
+sub-diario de un sistema legacy** (`MMNNNN`: mes y cuatro dígitos). Tres hechos lo acotan:
+
+- **Solo existe para destinos legacy.** El asiento neutral no lleva correlativo ni sub-diario, así que para quien no
+  tiene software contable la pregunta ni se plantea.
+- **No es identidad.** Un comprobante es su RUC, libro, tipo, serie, número y contraparte. El correlativo no entra.
+- **Y el motor ya decidió que no cuenta:** la huella de una exportación se calcula **excluyéndolo**, con este
+  comentario en el código —«la misma exportación, repetida tras un *deshacer*, arranca en otro correlativo»—. El
+  correlativo es una etiqueta del destino, no un dato del hecho.
+
+**El choque que se temía no es del motor: es de mandarle un lote donde va un mes.** Si se exportan 20 facturas salen
+0001–0020; si la semana siguiente se exportan solo 5, vuelven a salir 0001–0005 y chocan. Pero en contabilidad el
+número de voucher pertenece **al libro del mes**, no a la tanda en que alguien subió los archivos — y el documento
+del estándar ya *es* un mes: `libro` es RUC, periodo y tipo.
+
+De ahí los dos modos, que son exactamente los dos flujos de la sección 8:
+
+| | **Mes completo** (por defecto) | **Por tandas** |
+|---|---|---|
+| Cuándo | El contador cierra el mes y exporta | El ERP alimenta a su legacy a diario o semanal |
+| Qué manda | **Todos los comprobantes del mes** | Solo los nuevos |
+| Desde qué número | Desde 1 | Desde donde el ERP le diga, en `correlativos` |
+| Quién lleva la cuenta | **Nadie** | El ERP: guarda el rango que el motor devuelve y lo manda en la siguiente |
+
+**En el modo del mes completo nadie guarda estado.** Mandando siempre el mes entero y en un orden fijo —fecha, serie,
+número—, el mismo mes da siempre los mismos números, aunque el usuario haya cargado las facturas en cualquier orden:
+el número no depende de cómo se subieron, sino de qué mes es.
+
+**Y cada comprobante tiene su propio número**, no hay uno por lote; lo único que dependía del lote era desde dónde se
+empezaba a contar.
+
+Nada de esto pide código: el motor ya numera en el orden recibido, ya devuelve los rangos usados, ya los anuncia en
+`diagnosticar` antes de generar nada, ya excluye el correlativo de la huella y ya lo omite en el asiento neutral. Lo
+que faltaba era decir **cuál es la unidad**, y que el ancla para casar lo exportado con la base del ERP es el
+`id_externo` y la huella — nunca el número de voucher.
+
 **Abiertas:**
 
-1. **El correlativo, en el fondo.** Hoy el motor numera por lote y por sub-diario. Quien mande un comprobante por
-   semana va a pedir que la numeración siga la del mes anterior, y el motor no tiene estado: o el ERP manda
-   `correlativos`, como hoy, o se acepta que el destino numere. Es la única decisión que el formato no resolvió.
-2. **El nombre de `imputaciones`.** Es preciso en el vocabulario del motor y ajeno al de un ERP, que diría «cuentas»
+1. **El nombre de `imputaciones`.** Es preciso en el vocabulario del motor y ajeno al de un ERP, que diría «cuentas»
    o «asignación». Entra en el estándar, así que el nombre se elige una vez.
-3. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
-4. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver `open_accounting`: quien
+2. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
+3. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver `open_accounting`: quien
    recibe el documento neutral podría querer saber con qué cuentas se armó el asiento que lleva al lado.
-5. **Si el archivo del botón lleva también los comprobantes.** Hoy sale con `libro` y `asiento`, porque quien lo pide
+4. **Si el archivo del botón lleva también los comprobantes.** Hoy sale con `libro` y `asiento`, porque quien lo pide
    ya tiene los hechos. Un ERP de fuera que reciba ese archivo sí querría los dos, y entonces el archivo pasa a ser
    un documento completo del estándar en vez de solo el asiento.
-6. **El nombre del driver `open_accounting`**, que se llama igual que el estándar: uno es el formato que entra y el
+5. **El nombre del driver `open_accounting`**, que se llama igual que el estándar: uno es el formato que entra y el
    otro una de las salidas. Un nombre por cosa, y este se elige una vez.
 
 ---
