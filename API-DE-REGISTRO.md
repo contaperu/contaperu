@@ -261,11 +261,18 @@ Confundirlas es un error contable, y por eso el estándar las separa por nombre:
 | | Qué es | ¿Entra al asiento? | En el estándar |
 |---|---|---|---|
 | **Renta de 4ta categoría** | Lo que el contratante retiene de un recibo por honorarios y paga a SUNAT por cuenta del profesional | **Sí**, con rol propio `retencion_4ta` | `retencion`, hoy |
-| **Retención del IGV** | El 3 % que aplica un agente de retención designado por SUNAT, y que el XML trae en `PaymentTerms` | No entra en ningún asiento del registro | `retencion_igv`, nombre reservado |
+| **Retención del IGV** | El 3 % que aplica un agente de retención designado por SUNAT, y que el XML trae en `PaymentTerms` | **No, en ninguno** — tampoco en el asiento neutral | `retencion_igv`, nombre reservado |
 
-**Y el motor no la calcula: lee la que el recibo muestra.** `retencion` es un importe, no una tasa —la misma regla
-que con el IGV, cuya tasa se lee del comprobante y nunca de una configuración—, porque quien retuvo ya decidió
-cuánto, y una tasa que cambia por norma no puede vivir en el código de nadie.
+**La del IGV no entra en ningún asiento, tampoco en el neutral**, y no es una omisión: es que **no es un hecho del
+comprobante, sino del pago**. El agente de retención la aplica cuando paga la factura, días después, y lo que la
+registra es el asiento de tesorería — que está fuera de compras y ventas, o sea fuera de lo que hace este motor. Es
+el mismo motivo por el que el segundo tiempo de la detracción no regenera nada: lo que ocurre al pagar es otro hecho.
+Por eso el campo está reservado con su forma tomada, para transportar el dato a quien sí lleve ese asiento, no para
+que el motor lo contabilice.
+
+**Y la de 4ta el motor no la calcula: lee la que el recibo muestra.** `retencion` es un importe, no una tasa —la
+misma regla que con el IGV, cuya tasa se lee del comprobante y nunca de una configuración—, porque quien retuvo ya
+decidió cuánto, y una tasa que cambia por norma no puede vivir en el código de nadie.
 
 ### La percepción, el espejo
 
@@ -294,7 +301,7 @@ es exactamente lo que hoy hacen. Recibirlos ya modelados es lo que este estánda
 |---|---|
 | Detracción | **Completa**, en dos tiempos, con su tabla de códigos en el motor y dos líneas propias en el asiento |
 | Retención de renta de 4ta | **En el estándar**, con su rol en el asiento |
-| Retención del IGV | Nombre reservado, `retencion_igv`, con su forma ya tomada |
+| Retención del IGV | Nombre reservado, `retencion_igv`, con su forma ya tomada. **No entra en ningún asiento**: es un hecho del pago, no del comprobante |
 | Percepción | Nombre reservado, `percepcion` |
 
 Dos de los cuatro esperan un caso real, que es la regla del proyecto: el estándar se mueve con un archivo de verdad
