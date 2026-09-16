@@ -30,7 +30,8 @@ las fuentes, al final.
    dominio —«anota esta compra»—, no porque el motor anote nada en ninguna parte.
 2. **Quien tiene la librería no necesita esta API.** Un ERP en Python llama a `contaperu.api` dentro de su propio
    proceso, sin puerto y sin latencia. La puerta HTTP es para el que está en otro lenguaje o en otro servidor, y la
-   levanta él: no hay una URL central del motor, ni la habrá mientras el motor no tenga estado.
+   levanta él. Existe además un MCP abierto en producción, pero **nadie está obligado a pasar por una URL ajena**:
+   es una puerta que alguien corre, no un servicio del que dependa el cierre de mes de otro.
 3. **El formato es uno solo, y ya existe.** Es `open-accounting`. Este documento no propone un JSON nuevo al lado del
    estándar: propone que **el estándar sea también el cuerpo de la llamada**. La sección 7 cuenta por qué el primer
    borrador tenía dos formas y qué se ganó al juntarlas.
@@ -318,10 +319,11 @@ interpretar.
 | Dos recursos | `libro.tipo: compra \| venta` |
 | Cuenta en la línea | La línea de diario la lleva; en el comprobante viaja aparte, en la imputación por `id_externo` |
 | Impuesto explícito | `base_gravada` e `igv` siempre netos, `tasa_igv` leída del documento, y la línea con `rol: igv` |
-| Moneda y T.C. | `moneda`, `tipo_cambio` |
+| Moneda y T.C. | `moneda`, `tipo_cambio`. **Un comprobante en dólares sin tipo de cambio se observa con `TC_FALTA`, nivel error**: SUNAT lo exige, y el motor no lo inventa ni lo delega al destino |
+| Cada casilla del registro | `base_gravada`, `igv`, `exonerado`, `inafecto`, `exportacion`, `isc`, `base_ivap`, `ivap`, `icbper`, `otros`, cada una con su importe. Son las columnas que SUNAT distingue, y el motor comprueba que sumen el total |
 | Los dos números | `serie` + `numero` del emisor; `id_externo` del sistema que registra |
 | Contraparte | `contraparte_tipo_doc`, `contraparte_doc`, `contraparte_nombre`: el modelo de los estándares abiertos |
-| Estado | `estado` del comprobante (`ok`, `observada`, `duplicada`); el de la línea es nombre reservado |
+| Estado inicial (borrador o contabilizado) | **No lo tiene, y es a propósito.** `estado` del comprobante es `ok`/`observada`/`duplicada` —validación, no ciclo de vida— y el de la línea es nombre reservado. Borrador o contabilizado es del sistema que guarda, y el motor no guarda (sección 10) |
 | Idempotencia | La identidad del comprobante y la huella de `_exportacion` |
 | Dimensiones | `centro_costo` y `anexo_auxiliar`; `dimensiones` es nombre reservado |
 | Nota de crédito | `tipo_cp: 07` con `ref_tipo_cp`, `ref_serie`, `ref_numero`, `ref_fecha` |
@@ -554,6 +556,83 @@ líneas quería: salen de los hechos que trae.
 Y queda la pregunta que este ejemplo levanta —si el libro correcto no debería ser «honorarios» en vez de «compra»—,
 que resulta ser la mejor defensa de esta arquitectura. Está respondida en la sección 9.
 
+### Una factura en dólares y la nota de crédito que la corrige
+
+Los dos casos que más se equivocan, en un documento:
+
+```json
+{
+  "open_accounting": "0.3",
+  "libro": { "ruc": "20601234567", "periodo": "202601", "tipo": "compra" },
+  "comprobantes": [
+    {
+      "tipo_cp": "01",
+      "serie": "E001",
+      "numero": "0000456",
+      "fecha_emision": "2026-01-20",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "USD",
+      "tipo_cambio": "3.752",
+      "base_gravada": "2000.00",
+      "igv": "360.00",
+      "total": "2360.00",
+      "destino_igv": "DG",
+      "concepto": "LICENCIAS DE SOFTWARE",
+      "origen": "xml",
+      "id_externo": "compra-456"
+    },
+    {
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "0000009",
+      "fecha_emision": "2026-01-28",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "1000.00",
+      "igv": "180.00",
+      "total": "1180.00",
+      "destino_igv": "DG",
+      "ref_tipo_cp": "01",
+      "ref_serie": "F001",
+      "ref_numero": "0000123",
+      "ref_fecha": "2026-01-15",
+      "concepto": "DESCUENTO POR SERVICIO NO PRESTADO",
+      "origen": "xml",
+      "id_externo": "nc-9"
+    }
+  ],
+  "imputaciones": {
+    "compra-456": { "cuenta_contable": "6591001", "centro_costo": "SISTEMAS" },
+    "nc-9":       { "cuenta_contable": "6343001", "centro_costo": "OBRA01" }
+  }
+}
+```
+
+**La moneda extranjera.** Los importes van **en dólares, como los dice el comprobante**, y el `tipo_cambio` viaja
+al lado: el motor lo arrastra a cada línea del asiento y deja la conversión a quien la necesite. **Si falta, no se
+inventa ni se delega:** el comprobante se observa con `TC_FALTA`, nivel error, porque SUNAT lo exige. Un mes con una
+factura en dólares sin tipo de cambio no exporta.
+
+**La nota de crédito.** Es el mismo documento con `tipo_cp: "07"` y los cuatro `ref_*` que dicen a qué factura
+corrige — no un recurso aparte, como en QuickBooks o Xero. Y **sus importes van en positivo**: el signo lo pone el
+driver. Se ve en el asiento que sale, con los sentidos invertidos frente a una compra normal:
+
+| `rol` | `cuenta` | | `importe` | |
+|---|---|---|---|---|
+| `principal` | 6591001 | D | 2000.00 | USD, con `tipo_cambio` 3.752 en cada línea |
+| `igv` | 401111 | D | 360.00 | USD |
+| `tercero` | 421202 | H | 2360.00 | USD — y la cuenta del tercero es la de moneda extranjera, no la de soles |
+| `principal` | 6343001 | **H** | 1000.00 | la nota de crédito revierte el gasto |
+| `igv` | 401111 | **H** | 180.00 | y el IGV |
+| `tercero` | 421201 | **D** | 1180.00 | y baja lo que se le debe al proveedor |
+
+Fíjate en la cuenta del tercero: `421202` para la factura en dólares y `421201` para la nota en soles. **El motor
+separa la cuenta por moneda sin que el documento se lo pida** — sale de la configuración del entorno, no del hecho.
+
 ### La respuesta
 
 No hay nada que inventar: es la de `diagnosticar`, con su esquema ya publicado
@@ -594,11 +673,39 @@ tiene que servir para destinos distintos.
 
 | Nombre | Qué decide |
 |---|---|
-| `driver` | El destino: `sire`, `concar`, `contasis`, `open_accounting`… Sin destino, la respuesta es el diagnóstico |
+| `driver` | El destino: `sire`, `concar`, `contasis`, `open_accounting` —que pasará a llamarse `asiento_neutral`, sección 12—… Sin destino, la respuesta es el diagnóstico |
 | `configuracion` | Lo del sistema de destino y lo general del contribuyente |
 | `correlativos` | Desde qué número sigue cada sub-diario |
 | `claves_previas` | Lo anotado en periodos anteriores, para reconocer el duplicado |
 | `incluir_observados`, `fecha` | Qué entra al archivo y con qué fecha se escribe |
+
+### Qué campos se usan y cuáles no: la ausencia es la respuesta
+
+Un comprobante admite **46 campos y solo exige tres**: `tipo_cp`, `fecha_emision` y `total`. Todo lo demás es
+opcional, y la regla es la misma para todos: **un campo está o no está, y si no está, ese hecho no ocurrió.** No hay
+booleanos de presencia, ni ceros de relleno, ni cadenas vacías obligatorias.
+
+Es la diferencia de fondo con la API de la sección 1, donde cada línea manda `detraccion: false` más cinco campos
+vacíos por si acaso. Probado contra el esquema:
+
+| Lo que mandas | Resultado |
+|---|---|
+| Solo los tres obligatorios | **Valida** |
+| Con el bloque `detraccion` | **Valida** |
+| Sin `detraccion`, la clave omitida | **Valida** |
+| `"detraccion": null` | **Valida** |
+| `"detraccion": false` | **Rechazado**: `false` no es un objeto de detracción |
+| `cod_Detraccion: ""`, `tasa_Detraccion: 0` de relleno | **Rechazado**: «Additional properties are not allowed» |
+| `"subdiario": "10"` | **Rechazado**: es vocabulario de un sistema, no un hecho |
+
+Lo sostiene `additionalProperties: false` en la raíz, en el comprobante y en la detracción: **una clave que el
+estándar no conoce se rechaza en vez de ignorarse**, y quien se equivoca de nombre se entera en la primera llamada.
+La válvula para lo que el motor no entiende es `datos_originales`, que se transporta sin interpretar.
+
+Y ausencia no es lo mismo que silencio del validador: **los importes que sí están tienen que cuadrar.** El motor
+comprueba que el total sea la suma de las casillas —por eso un recibo por honorarios con el importe en
+`base_gravada` en vez de en `inafecto` sale observado con `TOTAL_NO_CUADRA`—, y que una factura en dólares traiga su
+tipo de cambio, o la para con `TC_FALTA`.
 
 ### Tres reglas del borrador
 
@@ -1004,6 +1111,10 @@ de las 36 del estándar, que se quedan.
 3. **Si el archivo del botón lleva también los comprobantes.** Hoy sale con `libro` y `asiento`, porque quien lo pide
    ya tiene los hechos. Un ERP de fuera que reciba ese archivo sí querría los dos, y entonces el archivo pasa a ser
    un documento completo del estándar en vez de solo el asiento.
+4. **Los importes en texto son recomendación, no validación.** El estándar dice que van en texto exacto, «porque la
+   contabilidad no perdona el céntimo que se pierde», pero el esquema también admite números sin límite de
+   decimales: probado, deja pasar `118.005`. O el esquema exige texto, o acepta números pero de dos decimales. Hoy
+   la regla que más se repite en este documento es la única que nadie comprueba.
 
 ---
 
