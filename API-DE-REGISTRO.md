@@ -666,6 +666,7 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 |---|---|
 | **Aceptar `imputaciones` dentro del documento**, sin dejar de aceptar el argumento de hoy | Es la pieza que hace real el formato único, y nadie que ya integre tiene que cambiar |
 | **Una batería de conformidad**: casos de entrada con su documento esperado | Es lo que le permite a un ERP de fuera comprobar que emite bien sin escribirle a nadie. Hoy hay `diagnosticar` y `verificar-driver`; falta el juego de casos |
+| **Renombrar el driver a `asiento_neutral`** | Hoy se llama igual que el estándar. Es gratis mientras siga sin publicar, y rompe a quien lo integre si se hace después de la 1.1.0 (sección 11) |
 | **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes (sección 11) |
 | **No tener bandeja.** El motor recibe, responde y olvida | Depositar y esperar aprobación es del ERP, que es quien tiene usuarios y base de datos. Copiar la bandeja aquí le daría estado al motor, que es lo único que no puede tener |
 | **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos (sección 8) |
@@ -745,18 +746,36 @@ Nada de esto pide código: el motor ya numera en el orden recibido, ya devuelve 
 que faltaba era decir **cuál es la unidad**, y que el ancla para casar lo exportado con la base del ERP es el
 `id_externo` y la huella — nunca el número de voucher.
 
+### Los dos nombres, decididos (John, 15-sep-2026)
+
+Se eligieron con cuatro criterios: que no sean vocabulario de ningún sistema —ni CONCAR, ni SAP, ni SUNAT—, que
+estén en español como el resto de claves del estándar, que no choquen con algo que ya se llame así, y que un ERP no
+peruano los entienda sin glosario. Los dos candidatos más obvios se caían por choque: **`cuentas`** a secas, porque
+la configuración ya tiene una sección `cuentas` con las cuentas por defecto del entorno, y **`asiento`** a secas para
+el driver, porque es una clave raíz del estándar.
+
+| | Decisión | Por qué |
+|---|---|---|
+| El bloque de las cuentas por comprobante | **`imputaciones`**, se queda | Es la palabra que el motor ya usa y no es invento local: SAP en español llama «imputación» exactamente a esto. Un contador la entiende sin explicación |
+| El driver, hoy `open_accounting` | **`asiento_neutral`** | Dice qué produce y con qué vocabulario, y no reproduce la confusión de llamarse igual que el estándar. Hay precedente de nombrar un driver por su salida y no por un sistema: `csv` tampoco nombra un destino |
+
+**El renombrado es gratis ahora y caro después.** El driver está en «Sin publicar»: nadie lo usa todavía. Cuando salga
+la 1.1.0, cambiarlo rompe a quien lo haya integrado. Y no toca el estándar: `open-accounting.schema.json` solo usa
+`open_accounting` como clave del documento, que no cambia.
+
+Lo que cambia cuando se aplique: el módulo `contaperu/drivers/open_accounting/` → `.../asiento_neutral/`, el valor
+`driver="asiento_neutral"`, el formato `asiento_neutral_json`, el nombre del archivo que se descarga y la superficie
+pública congelada. Son 89 apariciones del driver en 31 archivos —la mayoría tests y fixtures—, que hay que distinguir
+de las 36 del estándar, que se quedan.
+
 **Abiertas:**
 
-1. **El nombre de `imputaciones`.** Es preciso en el vocabulario del motor y ajeno al de un ERP, que diría «cuentas»
-   o «asignación». Entra en el estándar, así que el nombre se elige una vez.
-2. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
-3. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver `open_accounting`: quien
-   recibe el documento neutral podría querer saber con qué cuentas se armó el asiento que lleva al lado.
-4. **Si el archivo del botón lleva también los comprobantes.** Hoy sale con `libro` y `asiento`, porque quien lo pide
+1. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
+2. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver neutral: quien recibe el
+   documento podría querer saber con qué cuentas se armó el asiento que lleva al lado.
+3. **Si el archivo del botón lleva también los comprobantes.** Hoy sale con `libro` y `asiento`, porque quien lo pide
    ya tiene los hechos. Un ERP de fuera que reciba ese archivo sí querría los dos, y entonces el archivo pasa a ser
    un documento completo del estándar en vez de solo el asiento.
-5. **El nombre del driver `open_accounting`**, que se llama igual que el estándar: uno es el formato que entra y el
-   otro una de las salidas. Un nombre por cosa, y este se elige una vez.
 
 ---
 
