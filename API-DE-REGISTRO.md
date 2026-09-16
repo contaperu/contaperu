@@ -1,9 +1,9 @@
-# API de registro: cómo se manda una compra o una venta, y el JSON que sirve para cualquier ERP
+# API de registro: cómo se manda un comprobante, y el JSON que sirve para cualquier ERP
 
 [REFERENCIAS.md](REFERENCIAS.md) miró el **asiento**: cómo modelan un `JournalEntry` QuickBooks, Xero y las APIs
 unificadas. Este documento mira el escalón de antes, el **registro de un comprobante**: qué manda un sistema cuando
-dice «anota esta compra» o «anota esta venta», y qué forma tiene que tener ese JSON para que le sirva a cualquier
-ERP y no a uno solo. Termina con un borrador concreto para el motor.
+dice «anota esta compra», «anota esta venta» o «anota este recibo por honorarios», y qué forma tiene que tener ese
+JSON para que le sirva a cualquier ERP y no a uno solo. Termina con un borrador concreto para el motor.
 
 **De dónde sale.** De la guía de uso de las API contables de STARSOFT Gold Edition, que registra por tipo de asiento
 —compras, ventas, honorarios, cheques, estándar— y es hoy la forma más cercana a un «registro por API» que tiene un
@@ -15,15 +15,24 @@ detrás, no por si acaso.
 
 **Y esto propone una `0.4`.** Casi todo cabe en la 0.3 sin romper nada, pero **un cambio sube la versión**: el
 tercer valor de `libro.tipo`, `honorario` (sección 9). El resumen de qué entra en cuál está al final, en la
-sección 11; el resto del documento describe la 0.3, que es lo que hay hoy.
+sección 13; el resto del documento describe la 0.3, que es lo que hay hoy.
 
 **Alcance.** Compras, ventas y **honorarios**, que pasa a ser un libro propio (sección 9). Cheques, asientos
 estándar y anexos quedan fuera: cada uno es otro hecho contable y entra cuando tenga su caso.
 
+**Cómo está ordenado.** Cuatro bloques, y cada uno se puede leer solo:
+
+| | Secciones | Qué contesta |
+|---|---|---|
+| **De dónde sale** | 1 a 5 | Cómo lo resuelve el mundo, y qué es lo que el mundo no tiene |
+| **La propuesta** | 6 a 9 | Qué hay hoy, cuál es el formato, cómo se ve en cuatro casos, y el libro que falta |
+| **Cómo funciona** | 10 y 11 | Dónde corre el motor, en qué orden, y a dónde va cada salida |
+| **Los límites y lo que queda** | 12 a 15 | Qué se deja fuera a propósito, qué toca a cada pieza, qué se decidió y qué no |
+
 **Convenciones.** Los RUC de los ejemplos son los seguros del proyecto (`20131312955` y `20601234567`); ninguna
 empresa real aparece aquí. Los importes van en texto y las fechas en `AAAA-MM-DD`, como manda el estándar. Lo que no
-se pudo confirmar en la documentación oficial va marcado *no verificado*. Investigación hecha el **15-sep-2026**;
-las fuentes, al final.
+se pudo confirmar en la documentación oficial va marcado *no verificado*. Investigación hecha el **15 y el 16 de
+septiembre de 2026**; las fuentes, consultadas el 15, al final.
 
 ---
 
@@ -105,9 +114,9 @@ alimenta una bandeja, no contabiliza** — y esto, que parece un defecto, es el 
    dicen `cod_Proveedor`, un código de su base: sin dar de alta la ficha antes, la compra no se puede colgar de
    nadie. Aquí no hace falta ninguna ruta equivalente, porque el RUC viaja en el propio comprobante
    (`contraparte_doc`), que es el modelo de EN 16931. Es la ventaja de la contraparte embebida, vista de cerca.
-6. **Lo que ellos llaman «asiento de honorarios» aquí ya es una compra.** Su ejemplo es un recibo por honorarios con
-   su cuenta de gasto y su retención; en el estándar es un comprobante de compra con `retencion`. No pide un bloque
-   nuevo: pide que el caso exista.
+6. **Su ruta de honorarios apuntaba a algo real.** `RegistrarAsientoHonorarios` existe aparte porque un recibo por
+   honorarios **no es una compra**: no lleva IGV, trae una retención y no entra al registro de compras de SUNAT. Es
+   la única de sus seis rutas que este documento acaba adoptando, y no como ruta sino como libro propio (sección 9).
 
 ### Qué no se toma, y por qué
 
@@ -257,7 +266,7 @@ Y dos detalles que solo existen aquí:
   inventado nunca provisiona una detracción.
 
 En el asiento son dos líneas con rol propio, `detraccion_tercero` y `detraccion`, que mueven del saldo del proveedor
-a la cuenta de detracciones. Se ven generadas en la sección 9.
+a la cuenta de detracciones. Se ven generadas en la sección 11.
 
 ### La retención, que son dos cosas distintas con el mismo nombre
 
@@ -327,7 +336,7 @@ interpretar.
 | Cada casilla del registro | `base_gravada`, `igv`, `exonerado`, `inafecto`, `exportacion`, `isc`, `base_ivap`, `ivap`, `icbper`, `otros`, cada una con su importe. Son las columnas que SUNAT distingue, y el motor comprueba que sumen el total |
 | Los dos números | `serie` + `numero` del emisor; `id_externo` del sistema que registra |
 | Contraparte | `contraparte_tipo_doc`, `contraparte_doc`, `contraparte_nombre`: el modelo de los estándares abiertos |
-| Estado inicial (borrador o contabilizado) | **No lo tiene, y es a propósito.** `estado` del comprobante es `ok`/`observada`/`duplicada` —validación, no ciclo de vida— y el de la línea es nombre reservado. Borrador o contabilizado es del sistema que guarda, y el motor no guarda (sección 10) |
+| Estado inicial (borrador o contabilizado) | **No lo tiene, y es a propósito.** `estado` del comprobante es `ok`/`observada`/`duplicada` —validación, no ciclo de vida— y el de la línea es nombre reservado. Borrador o contabilizado es del sistema que guarda, y el motor no guarda (sección 12) |
 | Idempotencia | La identidad del comprobante y la huella de `_exportacion` |
 | Dimensiones | `centro_costo` y `anexo_auxiliar`; `dimensiones` es nombre reservado |
 | Nota de crédito | `tipo_cp: 07` con `ref_tipo_cp`, `ref_serie`, `ref_numero`, `ref_fecha` |
@@ -339,12 +348,12 @@ son los campos de la Tabla 10 y del SIRE. Lo que falta no son campos: es que **l
 archivo**, y que la llamada no invente una segunda forma de decir lo que el documento ya dice.
 
 **De todo lo que este documento propone, una sola cosa no cabe en la 0.3:** el libro de honorarios, que sube a la
-**0.4** (el porqué en la sección 9, lo que cambia en el esquema en la 11). Lo demás es aditivo y el tag de la 0.3
+**0.4** (el porqué en la sección 9, lo que cambia en el esquema en la 13). Lo demás es aditivo y el tag de la 0.3
 avanza sin romper a nadie.
 
 ---
 
-## 7 · El borrador: un solo formato, el del estándar
+## 7 · El formato: uno solo, el del estándar
 
 El primer borrador de esta sección proponía `POST /v1/compras` y `POST /v1/ventas` con un cuerpo propio: `ruc`,
 `razon_social` y `periodo` sueltos en la raíz, un `comprobante` en singular y la `imputacion` sin llave. Era la forma
@@ -375,6 +384,121 @@ solo: **el cuerpo de la llamada es el documento `open-accounting`**, con la impu
   comprobante suelto es un documento de un comprobante, y pasa por donde pasan todos los demás.
 - **Se mantiene lo que la 0.3 decidió a propósito:** la cuenta **no** vuelve dentro del comprobante. El comprobante
   es el hecho que define SUNAT; la imputación es la decisión de quien lo contabiliza. Mismo sobre, bloques distintos.
+
+### ¿Y el tipo de libro no lo dice la ruta?
+
+Lo decía en el primer borrador, porque un `comprobante` suelto no tenía dónde decirlo. Con el documento como cuerpo
+hay dos sitios para el mismo dato, y **el que sobra es la ruta**:
+
+1. **Cinco operaciones reciben un documento** —`revisar`, `normalizar_detracciones`, `diagnosticar`,
+   `generar_asiento` y `exportar`—, así que el tipo en la ruta las duplica a diez, y a doce cuando entre la
+   siguiente. Decirlo en la ruta solo sale barato si hay una sola ruta, y no la hay.
+2. **Tres de las cuatro puertas no tienen URL.** Python es `api.exportar(documento, driver=…)`; la CLI,
+   `contaperu diagnosticar mi-mes.json`; MCP tampoco. Un dato que vive en la ruta obliga a la CLI a inventarse un
+   `--tipo`, y entonces el mismo archivo significa cosas distintas según por dónde entre.
+3. **El documento es un archivo.** Se guarda, se manda y se abre dentro de un año, cuando ya no hay petición
+   alrededor. Una compra y una venta tienen casi los mismos campos —cambia si la contraparte es el proveedor o el
+   cliente—, de modo que sin `tipo` un archivo suelto no sabe qué libro es.
+4. **`libro` es la cabecera tributaria, y es RUC + mes + tipo.** Ya es obligatoria en la 0.3: sacarle el tipo sería
+   una 0.4 que rompe a todos para ahorrar un campo.
+
+No es una rareza de aquí: Xero lo dice con `Type: ACCPAY | ACCREC` y Merge con
+`type: ACCOUNTS_PAYABLE | ACCOUNTS_RECEIVABLE`, los dos dentro del cuerpo (sección 2).
+
+### Campo por campo
+
+**Dentro del documento** —lo que es contabilidad, y por tanto se guarda, se manda y se archiva:
+
+| Nombre | De dónde sale | Oblig. | Por qué |
+|---|---|---|---|
+| `open_accounting` | 0.3 | sí | La versión del estándar con que se escribió |
+| `libro.ruc` | 0.3 | sí | Sin RUC no hay libro |
+| `libro.razon_social` | 0.3 | no | Informativo; algún driver la escribe |
+| `libro.periodo` | 0.3 | sí | `AAAAMM`. Se exige siempre: derivarlo apagaría tres validaciones de plazo |
+| `libro.tipo` | 0.3 | sí | `compra` o `venta`, y `honorario` en la 0.4. Es el discriminador de Xero y Merge, y evita rutas por tipo |
+| `comprobantes[]` | 0.3 y SUNAT | sí | El modelo ya existe y lo define SUNAT: uno o los del mes |
+| `contraparte_*` | 0.3, Tabla 1 | según el caso | Planos, con el RUC: el modelo de EN 16931, no un `Contact` propio |
+| `detraccion` | 0.3 | no | Entra `PROVISIONADO`; la constancia llega después |
+| `imputaciones{}` | **nuevo**, por `id_externo` | no | `cuenta_contable`, `centro_costo`, `cuenta_tercero` y `reparto[]`, lo que hoy es un argumento de la llamada |
+| `asiento[]` | 0.3 | no | Para el ERP que ya lo armó |
+| `emisor` | 0.3 | no | Qué software produjo el dato |
+
+**Fuera del documento**, en la llamada: no describen la contabilidad sino qué hacer con ella, y el mismo archivo
+tiene que servir para destinos distintos.
+
+| Nombre | Qué decide |
+|---|---|
+| `driver` | El destino: `sire`, `concar`, `contasis`, `open_accounting` —que pasará a llamarse `asiento_neutral`, sección 14—… Sin destino, la respuesta es el diagnóstico |
+| `configuracion` | Lo del sistema de destino y lo general del contribuyente |
+| `correlativos` | Desde qué número sigue cada sub-diario |
+| `claves_previas` | Lo anotado en periodos anteriores, para reconocer el duplicado |
+| `incluir_observados`, `fecha` | Qué entra al archivo y con qué fecha se escribe |
+
+### Qué campos se usan y cuáles no: la ausencia es la respuesta
+
+Un comprobante admite **46 campos y solo exige tres**: `tipo_cp`, `fecha_emision` y `total`. Todo lo demás es
+opcional, y la regla es la misma para todos: **un campo está o no está, y si no está, ese hecho no ocurrió.** No hay
+booleanos de presencia, ni ceros de relleno, ni cadenas vacías obligatorias.
+
+Es la diferencia de fondo con la API de la sección 1, donde cada línea manda `detraccion: false` más cinco campos
+vacíos por si acaso. Probado contra el esquema:
+
+| Lo que mandas | Resultado |
+|---|---|
+| Solo los tres obligatorios | **Valida** |
+| Con el bloque `detraccion` | **Valida** |
+| Sin `detraccion`, la clave omitida | **Valida** |
+| `"detraccion": null` | **Valida** |
+| `"detraccion": false` | **Rechazado**: `false` no es un objeto de detracción |
+| `cod_Detraccion: ""`, `tasa_Detraccion: 0` de relleno | **Rechazado**: «Additional properties are not allowed» |
+| `"subdiario": "10"` | **Rechazado**: es vocabulario de un sistema, no un hecho |
+
+Lo sostiene `additionalProperties: false` en la raíz, en el comprobante y en la detracción: **una clave que el
+estándar no conoce se rechaza en vez de ignorarse**, y quien se equivoca de nombre se entera en la primera llamada.
+La válvula para lo que el motor no entiende es `datos_originales`, que se transporta sin interpretar.
+
+Y ausencia no es lo mismo que silencio del validador: **los importes que sí están tienen que cuadrar.** El motor
+comprueba que el total sea la suma de las casillas —por eso un recibo por honorarios con el importe en
+`base_gravada` en vez de en `inafecto` sale observado con `TOTAL_NO_CUADRA`—, y que una factura en dólares traiga su
+tipo de cambio, o la para con `TC_FALTA`.
+
+### Tres reglas del borrador
+
+1. **Las cuentas viajan en el mismo archivo, al lado del comprobante y nunca dentro de él.** `cuenta_contable` y
+   `centro_costo` salieron del comprobante en la 0.3 a propósito —el comprobante es el hecho de SUNAT, y el hecho no
+   cambia según quién lo contabilice—, y el modelo los rechaza ahí. `imputaciones` respeta esa frontera: hechos y
+   decisiones en el mismo sobre, en bloques distintos, como ya convive `asiento[]`.
+2. **Una clave desconocida se rechaza.** El esquema del estándar no admite campos de más, y en una API pública eso es
+   una virtud: quien se equivoca de nombre se entera en la primera llamada y no al cerrar el mes. El mensaje nombra
+   la clave y sugiere `datos_originales`, que es la válvula para lo que el motor no entiende.
+3. **La nota de crédito va en el mismo documento**, con `tipo_cp: 07` y los campos `ref_*`. No es un recurso aparte:
+   el signo lo pone el driver, y los importes siguen siendo positivos.
+
+---
+
+### La respuesta
+
+No hay nada que inventar: es la de `diagnosticar`, con su esquema ya publicado
+(`GET /v1/esquemas/diagnostico.schema.json`). Con un comprobante, la lista de lo que falta es corta y accionable, y
+cada faltante ya dice **a quién hay que pedírselo**: al contador, al proveedor o al sistema.
+
+```json
+{
+  "identidad": { "ruc": "20601234567", "libro": "compra", "tipo_cp": "01",
+                 "serie": "F001", "numero": "123", "contraparte_doc": "20131312955" },
+  "listo": true,
+  "diagnostico": { "…": "qué falta, con su motivo y a quién pedírselo" },
+  "asiento": [ { "…": "las líneas" } ],
+  "_asiento": { "lineas": 4, "cuadre": "ok", "huella": "…", "motor": "1.1.0" }
+}
+```
+
+---
+
+## 8 · Cuatro ejemplos, uno por caso
+
+Cada uno enseña algo distinto del formato, y los cuatro salen del motor: el JSON se valida contra el esquema
+y el asiento que se muestra es el que devuelve de verdad.
 
 ### Una compra con detracción
 
@@ -423,26 +547,6 @@ solo: **el cuerpo de la llamada es el documento `open-accounting`**, con la impu
 **El destino no está dentro, y es a propósito.** Lo dice la llamada —`POST /v1/exportar` con `driver: "concar"`—
 porque este mismo archivo, sin cambiar una coma, tiene que dar el TXT del SIRE (`sire`), el Excel de CONTASIS
 (`contasis`) o el documento neutral para otro ERP (`open_accounting`).
-
-### ¿Y el tipo de libro no lo dice la ruta?
-
-Lo decía en el primer borrador, porque un `comprobante` suelto no tenía dónde decirlo. Con el documento como cuerpo
-hay dos sitios para el mismo dato, y **el que sobra es la ruta**:
-
-1. **Cinco operaciones reciben un documento** —`revisar`, `normalizar_detracciones`, `diagnosticar`,
-   `generar_asiento` y `exportar`—, así que el tipo en la ruta las duplica a diez, y a doce cuando entre la
-   siguiente. Decirlo en la ruta solo sale barato si hay una sola ruta, y no la hay.
-2. **Tres de las cuatro puertas no tienen URL.** Python es `api.exportar(documento, driver=…)`; la CLI,
-   `contaperu diagnosticar mi-mes.json`; MCP tampoco. Un dato que vive en la ruta obliga a la CLI a inventarse un
-   `--tipo`, y entonces el mismo archivo significa cosas distintas según por dónde entre.
-3. **El documento es un archivo.** Se guarda, se manda y se abre dentro de un año, cuando ya no hay petición
-   alrededor. Una compra y una venta tienen casi los mismos campos —cambia si la contraparte es el proveedor o el
-   cliente—, de modo que sin `tipo` un archivo suelto no sabe qué libro es.
-4. **`libro` es la cabecera tributaria, y es RUC + mes + tipo.** Ya es obligatoria en la 0.3: sacarle el tipo sería
-   una 0.4 que rompe a todos para ahorrar un campo.
-
-No es una rareza de aquí: Xero lo dice con `Type: ACCPAY | ACCREC` y Merge con
-`type: ACCOUNTS_PAYABLE | ACCOUNTS_RECEIVABLE`, los dos dentro del cuerpo (sección 2).
 
 ### Una venta, y el mes entero
 
@@ -644,95 +748,61 @@ driver. Se ve en el asiento que sale, con los sentidos invertidos frente a una c
 Fíjate en la cuenta del tercero: `421202` para la factura en dólares y `421201` para la nota en soles. **El motor
 separa la cuenta por moneda sin que el documento se lo pida** — sale de la configuración del entorno, no del hecho.
 
-### La respuesta
+---
 
-No hay nada que inventar: es la de `diagnosticar`, con su esquema ya publicado
-(`GET /v1/esquemas/diagnostico.schema.json`). Con un comprobante, la lista de lo que falta es corta y accionable, y
-cada faltante ya dice **a quién hay que pedírselo**: al contador, al proveedor o al sistema.
+## 9 · El libro de honorarios, que pide una 0.4
 
-```json
-{
-  "identidad": { "ruc": "20601234567", "libro": "compra", "tipo_cp": "01",
-                 "serie": "F001", "numero": "123", "contraparte_doc": "20131312955" },
-  "listo": true,
-  "diagnostico": { "…": "qué falta, con su motivo y a quién pedírselo" },
-  "asiento": [ { "…": "las líneas" } ],
-  "_asiento": { "lineas": 4, "cuadre": "ok", "huella": "…", "motor": "1.1.0" }
-}
+El tercer ejemplo levanta la pregunta que el resto del documento no podía responder sin salirse del tema: si un
+recibo por honorarios no es una compra, ¿por qué se registra en el libro de compras?
+
+### Por qué debe existir (John, 15-sep-2026)
+
+Un recibo por honorarios se registra hoy en `libro.tipo: compra`, y eso **dice algo que no es cierto**: el registro
+de compras de SUNAT no admite recibos por honorarios. El libro correcto es el de honorarios, que en la contabilidad
+peruana es un registro propio — STARSOFT tiene hasta su ruta aparte, `RegistrarAsientoHonorarios`.
+
+**Y la prueba de que hoy está mal etiquetado es el parche que hace falta para taparlo.** El driver del SIRE lleva una
+lista de excepciones por tipo, `FUERA_DEL_REGISTRO_SUNAT = {"02"}`, cuyo único trabajo es sacar del registro unos
+comprobantes que nunca debieron estar en ese libro. Esa lista es el síntoma, no la solución.
+
+Con `libro.tipo: honorario`, el mecanismo que ya existe hace el trabajo solo. **Cada driver declara los libros que
+lleva**, y los del SIRE son dos:
+
+```
+sire      → {"venta": "sire_rvie", "compra": "sire_rce"}
+concar    → {"venta": "concar_xlsx", "compra": "concar_xlsx"}
+contasis  → {"venta": "contasis_xlsx", "compra": "contasis_xlsx"}
 ```
 
-### Campo por campo
+Un libro que no está en esa tabla **nunca le llega al destino**. Sin listas de exclusión, sin excepciones por tipo y
+sin que nadie tenga que acordarse: el parámetro del SIRE es compras y ventas, y los honorarios no son ninguna de las
+dos. Es la arquitectura limpia, y es la misma regla que ya gobierna todo lo demás.
 
-**Dentro del documento** —lo que es contabilidad, y por tanto se guarda, se manda y se archiva:
+En los legacy pasa lo mismo un escalón más abajo: el sub-diario `15` que CONCAR le da hoy al tipo `02` —y el `13` de
+la boleta— deja de ser una excepción dentro del libro de compras y pasa a ser **el formato de ese libro**, que es lo
+que siempre fue. Cada sistema lo numera a su manera, así que sigue siendo configuración de su driver.
 
-| Nombre | De dónde sale | Oblig. | Por qué |
-|---|---|---|---|
-| `open_accounting` | 0.3 | sí | La versión del estándar con que se escribió |
-| `libro.ruc` | 0.3 | sí | Sin RUC no hay libro |
-| `libro.razon_social` | 0.3 | no | Informativo; algún driver la escribe |
-| `libro.periodo` | 0.3 | sí | `AAAAMM`. Se exige siempre: derivarlo apagaría tres validaciones de plazo |
-| `libro.tipo` | 0.3 | sí | `compra` o `venta`, y `honorario` en la 0.4. Es el discriminador de Xero y Merge, y evita rutas por tipo |
-| `comprobantes[]` | 0.3 y SUNAT | sí | El modelo ya existe y lo define SUNAT: uno o los del mes |
-| `contraparte_*` | 0.3, Tabla 1 | según el caso | Planos, con el RUC: el modelo de EN 16931, no un `Contact` propio |
-| `detraccion` | 0.3 | no | Entra `PROVISIONADO`; la constancia llega después |
-| `imputaciones{}` | **nuevo**, por `id_externo` | no | `cuenta_contable`, `centro_costo`, `cuenta_tercero` y `reparto[]`, lo que hoy es un argumento de la llamada |
-| `asiento[]` | 0.3 | no | Para el ERP que ya lo armó |
-| `emisor` | 0.3 | no | Qué software produjo el dato |
+### Lo que cuesta, dicho entero
 
-**Fuera del documento**, en la llamada: no describen la contabilidad sino qué hacer con ella, y el mismo archivo
-tiene que servir para destinos distintos.
+No es gratis, y conviene tenerlo escrito antes de empezar:
 
-| Nombre | Qué decide |
-|---|---|
-| `driver` | El destino: `sire`, `concar`, `contasis`, `open_accounting` —que pasará a llamarse `asiento_neutral`, sección 12—… Sin destino, la respuesta es el diagnóstico |
-| `configuracion` | Lo del sistema de destino y lo general del contribuyente |
-| `correlativos` | Desde qué número sigue cada sub-diario |
-| `claves_previas` | Lo anotado en periodos anteriores, para reconocer el duplicado |
-| `incluir_observados`, `fecha` | Qué entra al archivo y con qué fecha se escribe |
+- **Es una 0.4, no un campo opcional.** El enum de `libro.tipo` es cerrado (`["venta", "compra"]`), así que
+  `"honorario"` hoy se rechaza; y un consumidor escrito para la 0.3 que reciba un tercer valor no sabría qué hacer
+  con él. Sube la versión del estándar.
+- **Cada driver decide si lo lleva.** El del SIRE no declara nada y queda resuelto. CONCAR y CONTASIS sí: tienen que
+  añadir `"honorario"` a sus formatos, con su sub-diario, o el mes de honorarios no sale por ahí.
+- **El productor clasifica al capturar.** El ERP ya no manda un solo libro de compras: manda el de compras y el de
+  honorarios. Es trabajo suyo y no del destino — pero es **su** dato, y distinguir un recibo por honorarios de una
+  factura no tiene ambigüedad: lo dice el tipo de comprobante.
+- **Y hay que decidir dónde cae una nota de crédito que corrige un honorario**: al libro de honorarios, por el
+  documento que corrige, y no al de compras.
 
-### Qué campos se usan y cuáles no: la ausencia es la respuesta
-
-Un comprobante admite **46 campos y solo exige tres**: `tipo_cp`, `fecha_emision` y `total`. Todo lo demás es
-opcional, y la regla es la misma para todos: **un campo está o no está, y si no está, ese hecho no ocurrió.** No hay
-booleanos de presencia, ni ceros de relleno, ni cadenas vacías obligatorias.
-
-Es la diferencia de fondo con la API de la sección 1, donde cada línea manda `detraccion: false` más cinco campos
-vacíos por si acaso. Probado contra el esquema:
-
-| Lo que mandas | Resultado |
-|---|---|
-| Solo los tres obligatorios | **Valida** |
-| Con el bloque `detraccion` | **Valida** |
-| Sin `detraccion`, la clave omitida | **Valida** |
-| `"detraccion": null` | **Valida** |
-| `"detraccion": false` | **Rechazado**: `false` no es un objeto de detracción |
-| `cod_Detraccion: ""`, `tasa_Detraccion: 0` de relleno | **Rechazado**: «Additional properties are not allowed» |
-| `"subdiario": "10"` | **Rechazado**: es vocabulario de un sistema, no un hecho |
-
-Lo sostiene `additionalProperties: false` en la raíz, en el comprobante y en la detracción: **una clave que el
-estándar no conoce se rechaza en vez de ignorarse**, y quien se equivoca de nombre se entera en la primera llamada.
-La válvula para lo que el motor no entiende es `datos_originales`, que se transporta sin interpretar.
-
-Y ausencia no es lo mismo que silencio del validador: **los importes que sí están tienen que cuadrar.** El motor
-comprueba que el total sea la suma de las casillas —por eso un recibo por honorarios con el importe en
-`base_gravada` en vez de en `inafecto` sale observado con `TOTAL_NO_CUADRA`—, y que una factura en dólares traiga su
-tipo de cambio, o la para con `TC_FALTA`.
-
-### Tres reglas del borrador
-
-1. **Las cuentas viajan en el mismo archivo, al lado del comprobante y nunca dentro de él.** `cuenta_contable` y
-   `centro_costo` salieron del comprobante en la 0.3 a propósito —el comprobante es el hecho de SUNAT, y el hecho no
-   cambia según quién lo contabilice—, y el modelo los rechaza ahí. `imputaciones` respeta esa frontera: hechos y
-   decisiones en el mismo sobre, en bloques distintos, como ya convive `asiento[]`.
-2. **Una clave desconocida se rechaza.** El esquema del estándar no admite campos de más, y en una API pública eso es
-   una virtud: quien se equivoca de nombre se entera en la primera llamada y no al cerrar el mes. El mensaje nombra
-   la clave y sugiere `datos_originales`, que es la válvula para lo que el motor no entiende.
-3. **La nota de crédito va en el mismo documento**, con `tipo_cp: 07` y los campos `ref_*`. No es un recurso aparte:
-   el signo lo pone el driver, y los importes siguen siendo positivos.
+Lo que no cambia: `libro` sigue siendo la cabecera de un registro —un RUC, un mes y qué registro es—, y los
+comprobantes, el asiento y la imputación no se tocan.
 
 ---
 
-## 8 · El recorrido, visto desde el ERP que ya tiene el dato
+## 10 · El recorrido, visto desde el ERP que ya tiene el dato
 
 Lo anterior mira el formato. Esta sección mira lo otro que pregunta quien va a integrar: **dónde corre esto, quién
 hace qué y en qué orden.** Hace falta porque el resto del documento está escrito desde el que captura, y un ERP no
@@ -821,7 +891,7 @@ para todas. Los roles son `principal`, `igv`, `retencion_4ta`, `tercero`, `detra
 
 ---
 
-## 9 · La arquitectura de los destinos: al SIRE llegan todos
+## 11 · Los destinos: al SIRE llegan todos
 
 Los destinos no son tres opciones en fila. **El SIRE está al final de todos los caminos**, porque es el trámite con
 SUNAT y la liquidación del impuesto; un sistema legacy se alimenta a diario con los comprobantes y al cierre saca su
@@ -843,51 +913,6 @@ legacy solo no permite, porque antes hay que digitarlo.
 
 **Dónde termina el motor.** Dentro de compras y ventas, el SIRE es el final. Lo que sigue —el libro diario, el mayor
 y los estados financieros— se queda en el sistema contable, y el motor no entra ahí.
-
-### El libro de honorarios: por qué debe existir (John, 15-sep-2026)
-
-Un recibo por honorarios se registra hoy en `libro.tipo: compra`, y eso **dice algo que no es cierto**: el registro
-de compras de SUNAT no admite recibos por honorarios. El libro correcto es el de honorarios, que en la contabilidad
-peruana es un registro propio — STARSOFT tiene hasta su ruta aparte, `RegistrarAsientoHonorarios`.
-
-**Y la prueba de que hoy está mal etiquetado es el parche que hace falta para taparlo.** El driver del SIRE lleva una
-lista de excepciones por tipo, `FUERA_DEL_REGISTRO_SUNAT = {"02"}`, cuyo único trabajo es sacar del registro unos
-comprobantes que nunca debieron estar en ese libro. Esa lista es el síntoma, no la solución.
-
-Con `libro.tipo: honorario`, el mecanismo que ya existe hace el trabajo solo. **Cada driver declara los libros que
-lleva**, y los del SIRE son dos:
-
-```
-sire      → {"venta": "sire_rvie", "compra": "sire_rce"}
-concar    → {"venta": "concar_xlsx", "compra": "concar_xlsx"}
-contasis  → {"venta": "contasis_xlsx", "compra": "contasis_xlsx"}
-```
-
-Un libro que no está en esa tabla **nunca le llega al destino**. Sin listas de exclusión, sin excepciones por tipo y
-sin que nadie tenga que acordarse: el parámetro del SIRE es compras y ventas, y los honorarios no son ninguna de las
-dos. Es la arquitectura limpia, y es la misma regla que ya gobierna todo lo demás.
-
-En los legacy pasa lo mismo un escalón más abajo: el sub-diario `15` que CONCAR le da hoy al tipo `02` —y el `13` de
-la boleta— deja de ser una excepción dentro del libro de compras y pasa a ser **el formato de ese libro**, que es lo
-que siempre fue. Cada sistema lo numera a su manera, así que sigue siendo configuración de su driver.
-
-### Lo que cuesta, dicho entero
-
-No es gratis, y conviene tenerlo escrito antes de empezar:
-
-- **Es una 0.4, no un campo opcional.** El enum de `libro.tipo` es cerrado (`["venta", "compra"]`), así que
-  `"honorario"` hoy se rechaza; y un consumidor escrito para la 0.3 que reciba un tercer valor no sabría qué hacer
-  con él. Sube la versión del estándar.
-- **Cada driver decide si lo lleva.** El del SIRE no declara nada y queda resuelto. CONCAR y CONTASIS sí: tienen que
-  añadir `"honorario"` a sus formatos, con su sub-diario, o el mes de honorarios no sale por ahí.
-- **El productor clasifica al capturar.** El ERP ya no manda un solo libro de compras: manda el de compras y el de
-  honorarios. Es trabajo suyo y no del destino — pero es **su** dato, y distinguir un recibo por honorarios de una
-  factura no tiene ambigüedad: lo dice el tipo de comprobante.
-- **Y hay que decidir dónde cae una nota de crédito que corrige un honorario**: al libro de honorarios, por el
-  documento que corrige, y no al de compras.
-
-Lo que no cambia: `libro` sigue siendo la cabecera de un registro —un RUC, un mes y qué registro es—, y los
-comprobantes, el asiento y la imputación no se tocan.
 
 ### Lo que exige cada destino
 
@@ -922,7 +947,7 @@ estructura y no hace falta el neutral.
 
 Para quien eligió **sin software contable**, donde otros descargan el Excel que alimenta a su legacy va un botón que
 dice **Generar asientos**. No exporta a nadie: arma el asiento y lo entrega. Es el mismo asiento de CONCAR, más
-limpio. Este es el archivo que produce, generado por el motor para la compra del ejemplo de la sección 7:
+limpio. Este es el archivo que produce, generado por el motor para la compra del ejemplo de la sección 8:
 
 ```json
 {
@@ -976,7 +1001,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 
 ---
 
-## 10 · Qué queda fuera, a propósito
+## 12 · Qué queda fuera, a propósito
 
 - **Las líneas de detalle por ítem.** Un `Item` o un `InvoiceLine` sería un modelo propio, ya descartado, y el
   registro de compras y ventas de SUNAT no lo pide. Quien reparte el gasto entre cuentas usa `reparto`; quien quiera
@@ -994,13 +1019,14 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 - **La contraparte con dirección, correo o id interno del ERP.** Eso es la ficha del proveedor, no el hecho que se
   registra.
 - **Los lotes.** Ya existen: son las operaciones de hoy, con su tope de comprobantes.
-- **Importes numéricos y el signo en vez de `debe_haber`.** Siguen descartados, por las mismas dos razones: el
-  céntimo que pierde un `float` y la nota de crédito restada dos veces.
+- **El signo en vez de `debe_haber`**, y los importes numéricos **como recomendación**: el céntimo que pierde un
+  `float` y la nota de crédito restada dos veces. Con una salvedad que hay que resolver: el esquema todavía **admite**
+  números, así que hoy es consejo y no regla (sección 15).
 - **OAuth, webhooks, sincronización incremental.** El motor no tiene estado ni sale a la red.
 
 ---
 
-## 11 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
+## 13 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
 
 **El criterio.** Al **estándar** va lo que dos sistemas necesitan para entenderse sin haber hablado nunca entre
 ellos. Al **motor** va lo que se calcula a partir de eso. Un dato que se puede derivar no entra al estándar, y una
@@ -1023,10 +1049,10 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 |---|---|
 | **Aceptar `imputaciones` dentro del documento**, sin dejar de aceptar el argumento de hoy | Es la pieza que hace real el formato único, y nadie que ya integre tiene que cambiar |
 | **Una batería de conformidad**: casos de entrada con su documento esperado | Es lo que le permite a un ERP de fuera comprobar que emite bien sin escribirle a nadie. Hoy hay `diagnosticar` y `verificar-driver`; falta el juego de casos |
-| **Renombrar el driver a `asiento_neutral`** | Hoy se llama igual que el estándar. Es gratis mientras siga sin publicar, y rompe a quien lo integre si se hace después de la 1.1.0 (sección 12) |
-| **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes (sección 12) |
+| **Renombrar el driver a `asiento_neutral`** | Hoy se llama igual que el estándar. Es gratis mientras siga sin publicar, y rompe a quien lo integre si se hace después de la 1.1.0 (sección 14) |
+| **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes (sección 14) |
 | **No tener bandeja.** El motor recibe, responde y olvida | Depositar y esperar aprobación es del ERP, que es quien tiene usuarios y base de datos. Copiar la bandeja aquí le daría estado al motor, que es lo único que no puede tener |
-| **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos (sección 9) |
+| **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos (sección 11) |
 | **No salir a la red.** Ni descargar del SIRE, ni llamar a otro sistema | Misma razón, y ya está escrito en la hoja de ruta |
 
 ### A ninguno de los dos
@@ -1072,9 +1098,9 @@ algo que ya existía pase a significar otra cosa.
 
 ---
 
-## 12 · Lo que falta decidir
+## 14 · Lo que ya quedó decidido
 
-**Resueltas por el formato único** —las cuatro se caían solas en cuanto el cuerpo dejó de ser un envoltorio:
+**Cuatro se cayeron solas** en cuanto el cuerpo de la llamada dejó de ser un envoltorio y pasó a ser el documento:
 
 | Antes era una decisión | Cómo queda |
 |---|---|
@@ -1100,7 +1126,7 @@ sub-diario de un sistema legacy** (`MMNNNN`: mes y cuatro dígitos). Tres hechos
 número de voucher pertenece **al libro del mes**, no a la tanda en que alguien subió los archivos — y el documento
 del estándar ya *es* un mes: `libro` es RUC, periodo y tipo.
 
-De ahí los dos modos, que son exactamente los dos flujos de la sección 9:
+De ahí los dos modos, que son exactamente los dos flujos de la sección 11:
 
 | | **Mes completo** (por defecto) | **Por tandas** |
 |---|---|---|
@@ -1144,7 +1170,11 @@ Lo que cambia cuando se aplique: el módulo `contaperu/drivers/open_accounting/`
 pública congelada. Son 89 apariciones del driver en 31 archivos —la mayoría tests y fixtures—, que hay que distinguir
 de las 36 del estándar, que se quedan.
 
-**Abiertas:**
+---
+
+## 15 · Lo que falta decidir
+
+Cuatro, y ninguna es de arquitectura: tres son de alcance y una es un agujero que apareció al probar el esquema.
 
 1. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
 2. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver neutral: quien recibe el
@@ -1159,7 +1189,7 @@ de las 36 del estándar, que se quedan.
 
 ---
 
-## 13 · Fuentes
+## 16 · Fuentes
 
 Consultadas el 15-sep-2026.
 
