@@ -13,7 +13,7 @@ facturas de proveedores, y la puerta a otra jurisdicción— está en [INTEROPER
 Este documento mira el **asiento**: cómo modela cada API un `JournalEntry`. El escalón de antes —el **registro de un
 comprobante**, lo que un sistema manda cuando dice «anota esta compra»— está en
 [API-DE-REGISTRO.md](API-DE-REGISTRO.md), con la API de STARSOFT Gold como punto de partida y el borrador del JSON
-que serviría a cualquier ERP.
+que serviría a cualquier ERP: el propio documento del estándar, con las cuentas dentro.
 
 ## Por qué mirar a EE. UU.
 

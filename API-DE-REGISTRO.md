@@ -23,6 +23,20 @@ las fuentes, al final.
 
 ---
 
+## 0 · Tres cosas antes de empezar, porque el nombre engaña
+
+1. **«Registrar» aquí no es guardar.** El motor no tiene estado, ni disco, ni red: recibe un documento y devuelve el
+   diagnóstico y el asiento. Quien guarda es el sistema que llamó. Esto se llama registro porque es el momento del
+   dominio —«anota esta compra»—, no porque el motor anote nada en ninguna parte.
+2. **Quien tiene la librería no necesita esta API.** Un ERP en Python llama a `contaperu.api` dentro de su propio
+   proceso, sin puerto y sin latencia. La puerta HTTP es para el que está en otro lenguaje o en otro servidor, y la
+   levanta él: no hay una URL central del motor, ni la habrá mientras el motor no tenga estado.
+3. **El formato es uno solo, y ya existe.** Es `open-accounting`. Este documento no propone un JSON nuevo al lado del
+   estándar: propone que **el estándar sea también el cuerpo de la llamada**. La sección 6 cuenta por qué el primer
+   borrador tenía dos formas y qué se ganó al juntarlas.
+
+---
+
 ## 1 · El caso que lo motiva: la API de STARSOFT Gold Edition
 
 STARSOFT publica seis rutas contables, todas `POST`, y una séptima para exportar
@@ -63,10 +77,10 @@ una bandeja, no contabiliza.
 
 ### Qué enseña
 
-1. **La llamada por tipo de registro es la forma natural del dominio.** Compras y ventas son dos hechos distintos,
-   con campos distintos (`destino_Compra` y la detracción de un lado; `exportacion` y el ISC del otro). Dos rutas se
-   explican solas, y es lo mismo que hacen QuickBooks con `Bill` e `Invoice` y Business Central con
-   `purchaseInvoices` y `salesInvoices`.
+1. **Compras y ventas son dos hechos distintos, no dos formas del mismo.** Tienen campos propios —`destino_Compra` y
+   la detracción de un lado; `exportacion` y el ISC del otro—, y por eso QuickBooks tiene `Bill` e `Invoice` y
+   Business Central `purchaseInvoices` y `salesInvoices`. Lo que **no** se sigue de ahí es que hagan falta dos rutas:
+   Xero y Merge lo dicen con un discriminador dentro del cuerpo, y aquí el documento ya lo trae en `libro.tipo`.
 2. **El ERP quiere el asiento, no solo el documento.** Espera cuentas: `42102`, `60101`, `40111`. Un JSON que solo
    lleve el comprobante le obliga a inventarlas.
 3. **La detracción y el centro de costo son de primera clase**, no un añadido. Cualquier estándar peruano tiene que
@@ -185,109 +199,135 @@ Lo que se repite en casi todas las fuentes de arriba:
 
 **Por eso el JSON universal no es un modelo nuevo.** `REFERENCIAS.md` ya descartó inventar `Invoice`, `Bill` o
 `Contact` propios, y el motivo sigue valiendo: en el Perú ese modelo lo define SUNAT, y el comprobante del estándar
-son los campos de la Tabla 10 y del SIRE. Lo que falta no son campos: es **la forma de la llamada**.
+son los campos de la Tabla 10 y del SIRE. Lo que falta no son campos: es que **la imputación quepa en el mismo
+archivo**, y que la llamada no invente una segunda forma de decir lo que el documento ya dice.
 
 ---
 
-## 6 · El borrador: `POST /v1/compras` y `POST /v1/ventas`
+## 6 · El borrador: un solo formato, el del estándar
 
-Un comprobante por llamada. El cuerpo es un **envoltorio de la API**, no un documento `open-accounting`: el motor lo
-convierte en un documento de un solo comprobante y sigue el mismo pipeline de siempre.
+El primer borrador de esta sección proponía `POST /v1/compras` y `POST /v1/ventas` con un cuerpo propio: `ruc`,
+`razon_social` y `periodo` sueltos en la raíz, un `comprobante` en singular y la `imputacion` sin llave. Era la forma
+de STARSOFT traducida al vocabulario de aquí. John lo leyó y preguntó lo que había que preguntar: si el estándar ya
+existe, **¿por qué el cuerpo de la llamada es otra cosa?** No hay respuesta buena, y por eso el borrador es ahora uno
+solo: **el cuerpo de la llamada es el documento `open-accounting`**, con la imputación dentro (decisión de John del
+15-sep-2026).
 
-### La forma del cuerpo
+### Las dos formas, y por qué sobraba una
 
-| Clave | Oblig. | Qué es |
+| El envoltorio que se proponía | El estándar 0.3 | ¿Hacía falta la diferencia? |
 |---|---|---|
-| `ruc` | sí | El contribuyente dueño del libro (`libro.ruc`). No es un `company_id` inventado |
-| `razon_social` | no | `libro.razon_social` |
-| `periodo` | no | `AAAAMM`. Si falta, se deriva de `fecha_emision` y **la respuesta lo dice** |
-| `comprobante` | sí | El objeto del estándar 0.3, **tal cual**, sin un solo campo nuevo |
-| `imputacion` | no | Las cuentas de este comprobante, sin llave: `cuenta_contable`, `centro_costo`, `cuenta_tercero`, `reparto[]` |
-| `asiento` | no | Las líneas de diario, si el ERP ya las armó |
-| `configuracion` | no | La de siempre |
-| `driver` | no | Sin destino, la respuesta es el registro y su diagnóstico; con destino, además el asiento |
-| `con_archivo` | no | `false` por defecto: no devuelve el archivo a quien solo registra |
-| `claves_previas` | no | Lo anotado en periodos anteriores, para detectar el duplicado |
-| `emisor` | no | Qué software produjo el dato |
+| `ruc`, `razon_social`, `periodo` sueltos | dentro de `libro` | **No.** El mismo dato en otro sitio |
+| el tipo de libro, dicho por la ruta | `libro.tipo`: `compra` o `venta` | **No.** El documento ya lo dice; la ruta lo repetía |
+| `comprobante`, uno | `comprobantes[]` | **No.** Una lista de uno |
+| `imputacion` sin llave | hoy, un argumento aparte de la llamada | **No.** Cabe dentro, con llave por `id_externo` |
+| `driver`, `configuracion`, `con_archivo` | no están | **Sí.** Eso no es contabilidad: es qué hacer con ella |
 
-**El tipo de libro lo dice la ruta**, no el cuerpo: `/v1/compras` es `compra`. Son dos hechos distintos, como
-`Bill` e `Invoice`.
+**Lo que se gana al juntarlas:**
+
+- **Una sola forma para uno o para cinco mil comprobantes.** Quien integra escribe un camino, no dos.
+- **Es un archivo, no el cuerpo de una petición.** Se guarda, se versiona, se manda por correo y se comprueba sin
+  API ni servidor: `python -m contaperu.cli diagnosticar mi-mes.json`.
+- **Sobran las rutas por tipo**, y con ellas la última herencia de STARSOFT que quedaba en el borrador.
+- **Sobra derivar el periodo**, que era la primera decisión pendiente: el libro lo trae siempre, así que las tres
+  validaciones de plazo —periodo anterior, fecha posterior y crédito fiscal fuera de plazo— siguen vivas.
+- **Sobra el riesgo de que las dos puertas se separen.** No hay dos caminos que puedan dar asientos distintos: un
+  comprobante suelto es un documento de un comprobante, y pasa por donde pasan todos los demás.
+- **Se mantiene lo que la 0.3 decidió a propósito:** la cuenta **no** vuelve dentro del comprobante. El comprobante
+  es el hecho que define SUNAT; la imputación es la decisión de quien lo contabiliza. Mismo sobre, bloques distintos.
 
 ### Una compra con detracción
 
 ```json
 {
-  "ruc": "20601234567",
-  "razon_social": "EMPRESA DE PRUEBA SAC",
-  "periodo": "202601",
-  "driver": "concar",
-  "comprobante": {
-    "tipo_cp": "01",
-    "serie": "F001",
-    "numero": "0000123",
-    "fecha_emision": "2026-01-15",
-    "fecha_vencimiento": "2026-02-14",
-    "condicion_pago": "credito",
-    "contraparte_tipo_doc": "6",
-    "contraparte_doc": "20131312955",
-    "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
-    "moneda": "PEN",
-    "base_gravada": "10000.00",
-    "igv": "1800.00",
-    "total": "11800.00",
-    "destino_igv": "DG",
-    "detraccion": {
-      "codigo": "037",
-      "porcentaje": "12",
-      "monto": "1416.00",
-      "estado": "PROVISIONADO"
-    },
-    "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
-    "origen": "manual",
-    "id_externo": "compra-123"
+  "open_accounting": "0.3",
+  "libro": {
+    "ruc": "20601234567",
+    "razon_social": "EMPRESA DE PRUEBA SAC",
+    "periodo": "202601",
+    "tipo": "compra"
   },
-  "imputacion": { "cuenta_contable": "6343001", "centro_costo": "OBRA01" }
+  "comprobantes": [
+    {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "fecha_vencimiento": "2026-02-14",
+      "condicion_pago": "credito",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "detraccion": {
+        "codigo": "037",
+        "porcentaje": "12",
+        "monto": "1416.00",
+        "estado": "PROVISIONADO"
+      },
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "origen": "manual",
+      "id_externo": "compra-123"
+    }
+  ],
+  "imputaciones": {
+    "compra-123": { "cuenta_contable": "6343001", "centro_costo": "OBRA01" }
+  }
 }
 ```
 
-### Una venta
+**El destino no está dentro, y es a propósito.** Lo dice la llamada —`POST /v1/exportar` con `driver: "concar"`—
+porque este mismo archivo, sin cambiar una coma, tiene que dar el TXT del SIRE (`sire`), el Excel de CONTASIS
+(`contasis`) o el documento neutral para otro ERP (`open_accounting`).
+
+### Una venta, y el mes entero
 
 ```json
 {
-  "ruc": "20601234567",
-  "driver": "concar",
-  "comprobante": {
-    "tipo_cp": "01",
-    "serie": "F001",
-    "numero": "0000987",
-    "fecha_emision": "2026-01-20",
-    "contraparte_tipo_doc": "6",
-    "contraparte_doc": "20131312955",
-    "contraparte_nombre": "CLIENTE DE PRUEBA SAC",
-    "moneda": "PEN",
-    "base_gravada": "5000.00",
-    "igv": "900.00",
-    "total": "5900.00",
-    "concepto": "VENTA DE SERVICIOS ENERO 2026",
-    "origen": "manual",
-    "id_externo": "venta-987"
-  },
-  "imputacion": { "cuenta_contable": "7041001", "cuenta_tercero": "1212" }
+  "open_accounting": "0.3",
+  "libro": { "ruc": "20601234567", "periodo": "202601", "tipo": "venta" },
+  "comprobantes": [
+    {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000987",
+      "fecha_emision": "2026-01-20",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "CLIENTE DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "5000.00",
+      "igv": "900.00",
+      "total": "5900.00",
+      "concepto": "VENTA DE SERVICIOS ENERO 2026",
+      "origen": "manual",
+      "id_externo": "venta-987"
+    }
+  ],
+  "imputaciones": {
+    "venta-987": { "cuenta_contable": "7041001", "cuenta_tercero": "1212" }
+  }
 }
 ```
 
-Esta venta no manda `periodo`: se deriva `202601` de la fecha de emisión, y la respuesta lo declara.
+**Uno o quinientos, la forma no cambia:** `comprobantes[]` crece y `imputaciones` lleva una entrada por `id_externo`,
+que es lo que ya hace hoy la imputación como argumento. El tope de comprobantes del lote, que ya existe, vale
+también para quien manda uno: no hace falta un freno aparte.
 
 ### La respuesta
 
-Reusa lo que ya existe —`diagnosticar` entero, con su esquema publicado— en vez de inventar otro:
+No hay nada que inventar: es la de `diagnosticar`, con su esquema ya publicado
+(`GET /v1/esquemas/diagnostico.schema.json`). Con un comprobante, la lista de lo que falta es corta y accionable, y
+cada faltante ya dice **a quién hay que pedírselo**: al contador, al proveedor o al sistema.
 
 ```json
 {
   "identidad": { "ruc": "20601234567", "libro": "compra", "tipo_cp": "01",
                  "serie": "F001", "numero": "123", "contraparte_doc": "20131312955" },
-  "libro": { "ruc": "20601234567", "periodo": "202601", "tipo": "compra", "periodo_derivado": false },
-  "comprobante": { "…": "el mismo, con su estado y sus observaciones" },
   "listo": true,
   "diagnostico": { "…": "qué falta, con su motivo y a quién pedírselo" },
   "asiento": [ { "…": "las líneas" } ],
@@ -295,42 +335,46 @@ Reusa lo que ya existe —`diagnosticar` entero, con su esquema publicado— en 
 }
 ```
 
-Con un solo comprobante, la lista de lo que falta es corta y accionable, y cada faltante ya dice **a quién hay que
-pedírselo**: al contador, al proveedor o al sistema.
-
 ### Campo por campo
+
+**Dentro del documento** —lo que es contabilidad, y por tanto se guarda, se manda y se archiva:
 
 | Nombre | De dónde sale | Oblig. | Por qué |
 |---|---|---|---|
-| `ruc` | `libro.ruc` (0.3) | sí | Sin RUC no hay libro; sube al envoltorio para no mandar un `libro` a medias |
-| `razon_social` | `libro.razon_social` | no | Informativo; algún driver la escribe |
-| `periodo` | `libro.periodo` | no | El lote lo exige; un comprobante suelto lo deriva de su fecha |
-| el tipo de libro | `libro.tipo` | — | Lo dice la ruta, como `Bill` e `Invoice` |
-| `comprobante.*` | 0.3 y SUNAT | sí | El modelo ya existe y lo define SUNAT |
-| `contraparte_*` | 0.3, Tabla 1 | según el caso | Planos, con el RUC: es el modelo de EN 16931, no un `Contact` propio |
+| `open_accounting` | 0.3 | sí | La versión del estándar con que se escribió |
+| `libro.ruc` | 0.3 | sí | Sin RUC no hay libro |
+| `libro.razon_social` | 0.3 | no | Informativo; algún driver la escribe |
+| `libro.periodo` | 0.3 | sí | `AAAAMM`. Se exige siempre: derivarlo apagaría tres validaciones de plazo |
+| `libro.tipo` | 0.3 | sí | `compra` o `venta`. Es el discriminador de Xero y Merge, y evita rutas por tipo |
+| `comprobantes[]` | 0.3 y SUNAT | sí | El modelo ya existe y lo define SUNAT: uno o los del mes |
+| `contraparte_*` | 0.3, Tabla 1 | según el caso | Planos, con el RUC: el modelo de EN 16931, no un `Contact` propio |
 | `detraccion` | 0.3 | no | Entra `PROVISIONADO`; la constancia llega después |
-| `imputacion.cuenta_contable` | patrón de EE. UU. (`AccountRef`, `AccountCode`) | no | Va en la misma llamada; si falta, manda la configuración |
-| `imputacion.centro_costo` | patrón de EE. UU. (`Tracking`) | no | Lo mismo; que bloquee o no lo decide lo que el driver exige |
-| `imputacion.cuenta_tercero` | la imputación de hoy | no | La cuenta del total: 42 en compras, 12 en ventas |
-| `imputacion.reparto[]` | la imputación de hoy | no | Es lo más cerca del detalle por ítem que hay hoy |
+| `imputaciones{}` | **nuevo**, por `id_externo` | no | `cuenta_contable`, `centro_costo`, `cuenta_tercero` y `reparto[]`, lo que hoy es un argumento de la llamada |
 | `asiento[]` | 0.3 | no | Para el ERP que ya lo armó |
-| `driver` | la tabla de operaciones | no | Sin destino no hay nada que exigir |
-| `claves_previas` | la fachada | no | Idempotencia sin cabecera |
+| `emisor` | 0.3 | no | Qué software produjo el dato |
 
-### Cuatro reglas del borrador
+**Fuera del documento**, en la llamada: no describen la contabilidad sino qué hacer con ella, y el mismo archivo
+tiene que servir para destinos distintos.
 
-1. **El periodo derivado se declara.** Derivarlo de la propia fecha del comprobante vuelve tautológicas tres
-   validaciones de plazo —el periodo anterior, la fecha posterior y el crédito fiscal fuera de plazo—, que entonces
-   nunca saltan. Por eso la respuesta marca `periodo_derivado` y avisa; quien quiera esa comprobación manda el
-   periodo.
-2. **Las cuentas viajan en la misma llamada, al lado del comprobante y no dentro de él.** `cuenta_contable` y
-   `centro_costo` salieron del comprobante en la 0.3 a propósito, y el modelo los rechaza: devolverlos ahí
-   revertiría esa decisión y rompería a quien ya migró.
-3. **Una clave desconocida se rechaza.** El esquema del estándar no admite campos de más, y en una API pública eso
-   es una virtud: quien se equivoca de nombre se entera en la primera llamada y no al cerrar el mes. El mensaje
-   nombra la clave y sugiere `datos_originales`, que es la válvula para lo que el motor no entiende.
-4. **La nota de crédito va por la misma ruta**, con `tipo_cp: 07` y los campos `ref_*`. No es un recurso aparte: el
-   signo lo pone el driver, y los importes siguen siendo positivos.
+| Nombre | Qué decide |
+|---|---|
+| `driver` | El destino: `sire`, `concar`, `contasis`, `open_accounting`… Sin destino, la respuesta es el diagnóstico |
+| `configuracion` | Lo del sistema de destino y lo general del contribuyente |
+| `correlativos` | Desde qué número sigue cada sub-diario |
+| `claves_previas` | Lo anotado en periodos anteriores, para reconocer el duplicado |
+| `incluir_observados`, `fecha` | Qué entra al archivo y con qué fecha se escribe |
+
+### Tres reglas del borrador
+
+1. **Las cuentas viajan en el mismo archivo, al lado del comprobante y nunca dentro de él.** `cuenta_contable` y
+   `centro_costo` salieron del comprobante en la 0.3 a propósito —el comprobante es el hecho de SUNAT, y el hecho no
+   cambia según quién lo contabilice—, y el modelo los rechaza ahí. `imputaciones` respeta esa frontera: hechos y
+   decisiones en el mismo sobre, en bloques distintos, como ya convive `asiento[]`.
+2. **Una clave desconocida se rechaza.** El esquema del estándar no admite campos de más, y en una API pública eso es
+   una virtud: quien se equivoca de nombre se entera en la primera llamada y no al cerrar el mes. El mensaje nombra
+   la clave y sugiere `datos_originales`, que es la válvula para lo que el motor no entiende.
+3. **La nota de crédito va en el mismo documento**, con `tipo_cp: 07` y los campos `ref_*`. No es un recurso aparte:
+   el signo lo pone el driver, y los importes siguen siendo positivos.
 
 ---
 
@@ -341,6 +385,10 @@ pedírselo**: al contador, al proveedor o al sistema.
   el detalle lo transporta en `datos_originales`.
 - **El impuesto por línea de detalle y el indicador de precios con impuesto** (`LineAmountTypes`,
   `pricesIncludeTax`). Sin ítems no tienen dónde ir, y el IGV nunca se delega al destino: va explícito, con su tasa.
+- **Un cuerpo propio de la API.** Fue el primer borrador y duró lo que tardó la primera lectura: un formato que solo
+  existe dentro de una petición no se puede guardar, ni mandar, ni comprobar sin servidor. La sección 6 lo cuenta.
+- **Las rutas por tipo, `/v1/compras` y `/v1/ventas`.** El documento dice `libro.tipo`; una ruta que repite un campo
+  del cuerpo solo añade un sitio donde los dos pueden contradecirse.
 - **La cabecera `Idempotency-Key`.** La clave natural aquí es la identidad del comprobante más la huella del
   asiento, y las dos ya existen.
 - **El estado de borrador o contabilizado.** `estado` de la línea es un nombre reservado que espera su caso, y
@@ -356,34 +404,44 @@ pedírselo**: al contador, al proveedor o al sistema.
 
 ## 8 · Qué pide esto del estándar
 
-**Cabe entero en `open-accounting` 0.3.** El cuerpo de la llamada es un envoltorio de la API, así que nada de lo
-anterior toca el esquema del estándar ni pide la enmienda del hito E1.
+**Pide una sola cosa, y es aditiva.** El esquema tiene hoy cinco claves en la raíz —`open_accounting`, `libro`,
+`comprobantes`, `asiento` y `emisor`— y rechaza cualquier otra, así que `imputaciones` hay que añadirlo ahí. Un campo
+opcional nuevo **no sube la versión**: avanza el tag `open-accounting-0.3` y quien ya escribe 0.3 sigue valiendo.
 
 | Cambio | Clasificación |
 |---|---|
-| Las rutas `/v1/compras` y `/v1/ventas` | Aditivo, en la API y no en el estándar |
-| `ruc`, `razon_social` y `periodo` sueltos en el cuerpo | Aditivo (envoltorio) |
-| `imputacion` sin llave, la de este comprobante | Aditivo (envoltorio) |
-| Derivar el periodo de la fecha de emisión | Aditivo: es una regla de la puerta, y el núcleo no inventa datos |
-| Rechazar una clave desconocida en la puerta | Aditivo: endurece la API, no el estándar |
-| La respuesta que reusa el esquema del diagnóstico | Aditivo |
-| `dimensiones`, `medio_pago`, `retencion_igv`, `percepcion`, `no_domiciliado`, `estado` de línea | Aditivos al esquema, pero **piden su enmienda (E1) y un caso real**. Fuera de esta tanda |
-| Hacer `libro.periodo` opcional en el esquema | **Rompe**: sería una 0.4. Por eso el periodo se deriva en la puerta |
-| Devolver `cuenta_contable` al comprobante | **Rompe**: revierte la 0.3. Por eso va en `imputacion` |
+| `imputaciones` en la raíz del documento, con llave por `id_externo` | **Aditivo.** Avanza el tag `open-accounting-0.3`, no sube a 0.4 |
+| Aceptar el documento con un solo comprobante | Ya vale: `comprobantes[]` nunca exigió más de uno |
+| La respuesta que reusa el esquema del diagnóstico | Ya vale: está publicado |
+| Rechazar una clave desconocida | Ya vale: el esquema no admite campos de más |
+| `dimensiones`, `medio_pago`, `retencion_igv`, `percepcion`, `no_domiciliado`, `estado` de línea | Aditivos, pero **piden su enmienda (E1) y un caso real**. Fuera de esta tanda |
+| Hacer `libro.periodo` opcional | **Rompe**, y ya no hace falta: el documento lo trae siempre |
+| Devolver `cuenta_contable` al comprobante | **Rompe**: revierte la 0.3. Por eso es un bloque hermano y no un campo del comprobante |
 | Un bloque de ítems en el comprobante | Cambia qué es un comprobante. Fuera |
 
 ---
 
 ## 9 · Lo que falta decidir
 
-1. **El periodo derivado**: ¿se acepta con aviso, o se exige siempre? Derivarlo apaga tres validaciones de plazo.
-2. **El correlativo**: hoy se numera por lote y por sub-diario. Registrando de a uno, ¿quién lleva la cuenta: el ERP
-   en su llamada, o el motor no numera y lo hace el destino?
-3. **Que las dos puertas no se separen**: un comprobante por la ruta nueva tiene que dar exactamente el mismo
-   asiento que dentro de un lote, y eso pide su test.
-4. **El nombre de `imputacion`**: es preciso en el vocabulario del motor y ajeno al de un ERP.
-5. **El freno**: el lote tiene su tope de comprobantes; una ruta por comprobante necesita el suyo.
-6. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
+**Resueltas por el formato único** —las cuatro se caían solas en cuanto el cuerpo dejó de ser un envoltorio:
+
+| Antes era una decisión | Cómo queda |
+|---|---|
+| Si el periodo se deriva de la fecha | No se deriva: el libro lo trae. Las tres validaciones de plazo siguen vivas |
+| Quién numera cuando llega un comprobante suelto | Lo mismo que hoy: un documento de uno se numera como uno de mil |
+| Que las dos puertas no se separen | No hay dos puertas: hay un documento y un pipeline |
+| El freno de la ruta por comprobante | El tope de comprobantes del lote ya lo cubre |
+
+**Abiertas:**
+
+1. **El correlativo, en el fondo.** Hoy el motor numera por lote y por sub-diario. Quien mande un comprobante por
+   semana va a pedir que la numeración siga la del mes anterior, y el motor no tiene estado: o el ERP manda
+   `correlativos`, como hoy, o se acepta que el destino numere. Es la única decisión que el formato no resolvió.
+2. **El nombre de `imputaciones`.** Es preciso en el vocabulario del motor y ajeno al de un ERP, que diría «cuentas»
+   o «asignación». Entra en el estándar, así que el nombre se elige una vez.
+3. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
+4. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver `open_accounting`: quien
+   recibe el documento neutral podría querer saber con qué cuentas se armó el asiento que lleva al lado.
 
 ---
 
