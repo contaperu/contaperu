@@ -551,6 +551,9 @@ El asiento que genera, real:
 Tres líneas en el primero y dos en el segundo, sin que el documento haya tenido que decir en ninguna parte cuántas
 líneas quería: salen de los hechos que trae.
 
+Y queda la pregunta que este ejemplo levanta —si el libro correcto no debería ser «honorarios» en vez de «compra»—,
+que resulta ser la mejor defensa de esta arquitectura. Está respondida en la sección 9.
+
 ### La respuesta
 
 No hay nada que inventar: es la de `diagnosticar`, con su esquema ya publicado
@@ -722,6 +725,41 @@ legacy solo no permite, porque antes hay que digitarlo.
 
 **Dónde termina el motor.** Dentro de compras y ventas, el SIRE es el final. Lo que sigue —el libro diario, el mayor
 y los estados financieros— se queda en el sistema contable, y el motor no entra ahí.
+
+### Por qué no hay un «libro de honorarios», y por qué eso es lo limpio
+
+Un recibo por honorarios se registra hoy en `libro.tipo: compra`, y la objeción es razonable: en la contabilidad
+peruana los honorarios son **su propio registro**, no una compra más. STARSOFT tiene su ruta aparte
+(`RegistrarAsientoHonorarios`) y su sub-diario propio, distinto del de compras.
+
+**Y tiene razón: el libro de honorarios existe. Lo que pasa es que vive en el destino, que es donde esa división
+significa algo.** En la configuración de CONCAR el tipo `02` trae `sub_diario: "15"` y la boleta el `13`; el resto de
+compras va al sub-diario general. Cada sistema legacy los numera a su manera —el de STARSOFT no es el de CONCAR—, y
+por eso es configuración de su driver y no un dato del hecho.
+
+De ahí sale el reparto, que es lo que hace eficiente a esta arquitectura:
+
+| | Quién lo decide | Dónde vive |
+|---|---|---|
+| **Qué ocurrió** | El hecho: se adquirió un servicio y hay un comprobante que lo respalda | El documento: `libro.tipo: compra` |
+| **En qué registro entra** | Cada destino, declarando qué lleva y qué no | El driver: `EXCLUYE_TIPOS`, `sub_diario` por tipo |
+
+**El SIRE no lleva honorarios porque el registro de SUNAT no los admite**, y eso está escrito una vez, en el driver:
+`FUERA_DEL_REGISTRO_SUNAT = {"02"}`. No hace falta que el ERP lo sepa, ni que lo clasifique al capturar, ni que
+acierte: manda el mes de compras entero y **cada destino toma lo suyo**.
+
+**Y por eso `libro.tipo` sigue teniendo dos valores y no tres.** Añadir `honorarios` costaría:
+
+- **Una versión que rompe.** `TIPOS_LIBRO` es `('venta', 'compra')` y cada driver llavea sus formatos por ese valor;
+  un tercero sería una 0.4, no un campo opcional.
+- **Mover la decisión del destino al productor.** Hoy la clasificación la declara un driver en una línea; repartida,
+  la tendrían que acertar todos los ERP que integren, cada uno por su cuenta, y un error ahí parte mal el mes.
+- **Y partir el mes en dos o tres documentos**, con la pregunta inmediata de a cuál pertenece una nota de crédito que
+  corrige un honorario.
+
+El nombre lo dice, además: `libro` es el **libro tributario**, y SUNAT define dos —el registro de compras y el de
+ventas—. El de honorarios es un libro contable, no tributario, y por eso aparece donde aparece la contabilidad: en
+el asiento y en el sub-diario de cada sistema.
 
 ### Lo que exige cada destino
 
