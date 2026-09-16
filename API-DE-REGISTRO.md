@@ -468,6 +468,89 @@ No es una rareza de aquí: Xero lo dice con `Type: ACCPAY | ACCREC` y Merge con
 que es lo que ya hace hoy la imputación como argumento. El tope de comprobantes del lote, que ya existe, vale
 también para quien manda uno: no hace falta un freno aparte.
 
+### Un recibo por honorarios: el que no lleva IGV y no va al SIRE
+
+Vale la pena mirarlo porque rompe tres suposiciones a la vez: **no tiene IGV**, **trae una retención** y **no entra
+al registro del SIRE**. En un solo ejemplo se ve cómo el mismo documento se comporta distinto según el destino. Van
+dos, uno con retención y otro sin ella:
+
+```json
+{
+  "open_accounting": "0.3",
+  "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
+             "periodo": "202601", "tipo": "compra" },
+  "comprobantes": [
+    {
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "0000045",
+      "fecha_emision": "2026-01-22",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "ASESORES DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "0",
+      "igv": "0",
+      "inafecto": "3000.00",
+      "total": "3000.00",
+      "retencion": "240.00",
+      "concepto": "ASESORIA CONTABLE ENERO 2026",
+      "origen": "xml",
+      "id_externo": "rh-45"
+    },
+    {
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "0000046",
+      "fecha_emision": "2026-01-25",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "ASESORES DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "0",
+      "igv": "0",
+      "inafecto": "1200.00",
+      "total": "1200.00",
+      "concepto": "CAPACITACION",
+      "origen": "xml",
+      "id_externo": "rh-46"
+    }
+  ],
+  "imputaciones": {
+    "rh-45": { "cuenta_contable": "6321001", "centro_costo": "ADMIN" },
+    "rh-46": { "cuenta_contable": "6321001", "centro_costo": "ADMIN" }
+  }
+}
+```
+
+**Cuatro cosas que enseña este ejemplo:**
+
+1. **El importe va en `inafecto`, no en `base_gravada`.** Un recibo por honorarios no genera crédito fiscal: la base
+   gravada y el IGV van en cero y el total es inafecto. No es un detalle de estilo — el motor comprueba que el total
+   cuadre con base + IGV + no gravado + otros, y un recibo con el importe en la casilla equivocada sale observado
+   con `TOTAL_NO_CUADRA` antes de llegar a ningún asiento.
+2. **`retencion` aparece solo cuando el recibo la muestra.** En el segundo la clave sencillamente no está: no hay
+   ningún `"retencion": 0` ni un booleano que diga que no hubo. Ausencia es respuesta.
+3. **No va al SIRE, y está escrito en el código**: `FUERA_DEL_REGISTRO_SUNAT = {"02"}`. Pedido con `driver: "sire"`,
+   el diagnóstico devuelve los dos como **fuera del destino** y no exporta ninguno; pedido como asiento, los dos
+   entran. El mismo mes, dos destinos, dos subconjuntos — que es justo lo que significa que cada driver declare qué
+   lleva.
+4. **La cuenta del tercero no es la de proveedores.** Un recibo por honorarios se debe por la cuenta de honorarios
+   por pagar, no por la de facturas, y el motor lo sabe: el tipo `02` tiene tratamiento propio en el asiento.
+
+El asiento que genera, real:
+
+| `rol` | `cuenta` | | `importe` | |
+|---|---|---|---|---|
+| `principal` | 6321001 | D | 3000.00 | el gasto |
+| `retencion_4ta` | 401721 | H | 240.00 | lo retenido, que se le paga a SUNAT |
+| `tercero` | **424101** | H | 2760.00 | lo que se le debe al profesional: el neto |
+| `principal` | 6321001 | D | 1200.00 | el segundo recibo, sin retención |
+| `tercero` | **424101** | H | 1200.00 | aquí se le debe todo |
+
+Tres líneas en el primero y dos en el segundo, sin que el documento haya tenido que decir en ninguna parte cuántas
+líneas quería: salen de los hechos que trae.
+
 ### La respuesta
 
 No hay nada que inventar: es la de `diagnosticar`, con su esquema ya publicado
@@ -688,13 +771,13 @@ limpio. Este es el archivo que produce, generado por el motor para la compra del
                    "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
 
   { "cuenta": "401111", "debe_haber": "D", "importe": "1800.00", "rol": "igv",
-    "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026", "documento": "el mismo" },
+    "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026", "documento": { "…": "el mismo de arriba" } },
 
   { "cuenta": "421201", "debe_haber": "H", "importe": "11800.00", "rol": "tercero",
-    "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": "el mismo" },
+    "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": { "…": "el mismo de arriba" } },
 
   { "cuenta": "421201", "debe_haber": "D", "importe": "1416.00", "rol": "detraccion_tercero",
-    "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": "el mismo" },
+    "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": { "…": "el mismo de arriba" } },
 
   { "cuenta": "421203", "debe_haber": "H", "importe": "1416.00", "rol": "detraccion",
     "glosa": "DETRACCION - SERVICIO DE MANTENIMIENTO ENERO 2026",
