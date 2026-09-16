@@ -13,6 +13,10 @@ ERP peruano instalado. Sirve de punto de partida, no de modelo a copiar.
 `open-accounting` 0.3. El proyecto crece con la misma regla de siempre: el estándar se mueve con casos reales
 detrás, no por si acaso.
 
+**Y esto propone una `0.4`.** Casi todo cabe en la 0.3 sin romper nada, pero **un cambio sube la versión**: el
+tercer valor de `libro.tipo`, `honorario` (sección 9). El resumen de qué entra en cuál está al final, en la
+sección 11; el resto del documento describe la 0.3, que es lo que hay hoy.
+
 **Alcance.** Compras, ventas y **honorarios**, que pasa a ser un libro propio (sección 9). Cheques, asientos
 estándar y anexos quedan fuera: cada uno es otro hecho contable y entra cuando tenga su caso.
 
@@ -333,6 +337,10 @@ interpretar.
 `Contact` propios, y el motivo sigue valiendo: en el Perú ese modelo lo define SUNAT, y el comprobante del estándar
 son los campos de la Tabla 10 y del SIRE. Lo que falta no son campos: es que **la imputación quepa en el mismo
 archivo**, y que la llamada no invente una segunda forma de decir lo que el documento ya dice.
+
+**De todo lo que este documento propone, una sola cosa no cabe en la 0.3:** el libro de honorarios, que sube a la
+**0.4** (el porqué en la sección 9, lo que cambia en el esquema en la 11). Lo demás es aditivo y el tag de la 0.3
+avanza sin romper a nadie.
 
 ---
 
@@ -1028,10 +1036,28 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 - **Autenticación, permisos, IP pública, licencias.** Eso es de quien publique una puerta, no del formato.
 - **La ficha del anexo, el detalle por ítem y los ids internos de nadie.**
 
-**Y lo que pide del esquema es una sola cosa, aditiva.** Hoy la raíz admite cinco claves —`open_accounting`,
-`libro`, `comprobantes`, `asiento` y `emisor`— y rechaza cualquier otra, así que `imputaciones` hay que añadirla ahí.
-Un campo opcional nuevo **no sube la versión**: avanza el tag `open-accounting-0.3` y quien ya escribe 0.3 sigue
-valiendo.
+### Dos cambios al esquema, y solo uno sube la versión
+
+**`imputaciones` es aditivo y se queda en la 0.3.** Hoy la raíz admite cinco claves —`open_accounting`, `libro`,
+`comprobantes`, `asiento` y `emisor`— y rechaza cualquier otra, así que hay que añadirla ahí. Un campo opcional nuevo
+no sube la versión: **avanza el tag `open-accounting-0.3`** y quien ya escribe 0.3 sigue valiendo.
+
+**`honorario` sube a la 0.4, y arrastra tres cosas.** El enum de `libro.tipo` es cerrado, y además la clave de
+versión del documento es una constante: hoy el esquema exige literalmente `"open_accounting": "0.3"`. O sea que un
+documento de honorarios cambia **dos** campos, no uno.
+
+| Qué cambia en el esquema | Hoy | En la 0.4 |
+|---|---|---|
+| `libro.tipo` | `enum: ["venta", "compra"]` | `enum: ["venta", "compra", "honorario"]` |
+| `open_accounting` | `const: "0.3"` | `const: "0.4"` |
+| El `$id` canónico, que cuelga del tag del estándar | `.../open-accounting-0.3/...` | `.../open-accounting-0.4/...`, su propio tag |
+
+Y fuera del esquema, en el motor: `TIPOS_LIBRO` gana un valor, y **cada driver decide si declara ese libro en sus
+formatos** — el del SIRE no lo declara, y con eso se resuelve solo; CONCAR y CONTASIS sí, con su sub-diario.
+
+**Lo que no cambia de significado para nadie:** un documento 0.3 de compras o de ventas dice exactamente lo mismo en
+la 0.4. Sube la versión porque el enum crece y un consumidor viejo no sabría qué hacer con el valor nuevo, no porque
+algo que ya existía pase a significar otra cosa.
 
 | Cambio | Clasificación |
 |---|---|
