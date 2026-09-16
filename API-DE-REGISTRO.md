@@ -421,7 +421,96 @@ tiene que servir para destinos distintos.
 
 ---
 
-## 7 · Qué queda fuera, a propósito
+## 7 · El recorrido, visto desde el ERP que ya tiene el dato
+
+Lo anterior mira el formato. Esta sección mira lo otro que pregunta quien va a integrar: **dónde corre esto, quién
+hace qué y en qué orden.** Hace falta porque el resto del documento está escrito desde el que captura, y un ERP no
+captura: la factura y el proveedor ya están en sus tablas.
+
+### Dónde se procesa: dentro del ERP, siempre
+
+**El motor es una librería que el ERP instala, no un servicio al que le pide permiso.** No hay un servidor de
+ContaPerú en medio de nadie — justo lo contrario del modelo de la sección 1, donde `starsoftweb.com` está en medio y
+por eso hacen falta IP pública y licencia. Los datos del contribuyente **no salen de la infraestructura de quien
+integra**.
+
+| El ERP… | Cómo llama | Dónde corre el motor |
+|---|---|---|
+| Está en Python (Odoo, Frappe, un servicio propio) | `api.exportar(documento, driver="concar")` | Dentro de su propio proceso: sin red y sin puerto |
+| Está en otro lenguaje (.NET, Java, PHP) | `POST http://localhost:8080/v1/exportar` | `contaperu-http`, que levanta él en su servidor o su contenedor |
+| Procesa lotes sin programar | `contaperu desde-json mes.json --driver concar` | Su máquina |
+| Es un agente de IA | El servidor MCP | Su cliente |
+
+Sí hay una ruta HTTP, entonces, pero es **suya**. Las cuatro puertas dan lo mismo, y un test lo comprueba: el mismo
+XML da el mismo documento y el mismo diagnóstico por cualquiera de ellas.
+
+### Quién vuelve estándar cada entrada
+
+| Entra | Quién lo estandariza |
+|---|---|
+| XML de SUNAT, o el TXT de la propuesta del SIRE | **El motor**: `leer_xml`, `leer_propuesta_sire` |
+| PDF, fotos, o las tablas propias del ERP | **El ERP**: su IA o su mapeo entrega los campos. El motor no sale a la red ni lee imágenes |
+
+En los dos casos, **validar lo armado es siempre del motor** (`revisar`, `diagnosticar`).
+
+### Las dos piezas que no son el documento
+
+| Pieza | Qué lleva | Cada cuánto |
+|---|---|---|
+| **Configuración** | Lo que vale para todo el entorno: cuentas por defecto, si usa centros de costo, y una sección por sistema contable —siglas, sub-diarios, en qué columna va cada dato— | Una vez por empresa |
+| **Imputación** | Lo que se decide para **un** comprobante: su cuenta, su centro de costo, la cuenta del total o un reparto entre varias | Solo donde haga falta |
+
+**El usuario no teclea la cuenta en cada factura.** Deja los valores por defecto una vez e imputa lo que se sale de
+la norma; lo que la imputación no traiga sale de la configuración.
+
+### Los cuatro pasos
+
+1. **Armar el documento** desde sus tablas —o dejar que el motor lo arme, si lo que tiene son los XML o el TXT.
+2. **Diagnosticar antes de exportar**, siempre. La respuesta dice si el mes está listo para ese destino y, si no,
+   qué falta y **a quién pedírselo**: `pedir_a` distingue al contador del sistema.
+3. **Mostrar, corregir y volver al paso 2.** Ahí está su bandeja —su pantalla, sus usuarios, su base—, que es suya:
+   el motor no guardó nada entre una llamada y la siguiente.
+4. **Exportar.** Devuelve el archivo del destino y la huella con la que después reconocerá lo que ya exportó.
+
+### Lo que sale, según el destino
+
+- **SIRE:** el TXT del registro. **No lleva cuentas**, así que quien solo quiere el SIRE no configura plan contable.
+- **CONCAR y CONTASIS:** los asientos o el registro, cada uno con el vocabulario de su sistema.
+- **Otro ERP:** el asiento neutral, que es lo que un sistema nuevo viene a buscar aquí.
+
+### El asiento, que ya existe
+
+No está por implementar: **el Excel de CONCAR son asientos**, y `generar_asiento` es una operación pública desde la
+1.0. Lo que añade el driver `open_accounting` es el **perfil neutral** —las mismas cuentas, sentidos e importes, sin
+el vocabulario de un legacy—. Este es el asiento real de la compra del ejemplo de arriba, generado por el motor:
+
+| `rol` | `cuenta` | | `importe` |
+|---|---|---|---|
+| `principal` | 6343001 | D | 10000.00 |
+| `igv` | 401111 | D | 1800.00 |
+| `tercero` | 421201 | H | 11800.00 |
+| `detraccion_tercero` | 421201 | D | 1416.00 |
+| `detraccion` | 421203 | H | 1416.00 |
+
+Y así viene cada línea:
+
+```json
+{
+  "cuenta": "6343001", "debe_haber": "D", "importe": "10000.00", "rol": "principal",
+  "fecha": "2026-01-15", "moneda": "PEN", "centro_costo": "OBRA01",
+  "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026", "tasa_igv": "18",
+  "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
+                 "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" }
+}
+```
+
+**Lo que hace ese asiento portable entre ERPs es `rol`, no la cuenta.** Un sistema que quiera el IGV en una columna
+aparte busca la línea por su rol, porque la cuenta `401111` la elige cada empresa pero «esta línea es el IGV» vale
+para todas. Los roles son `principal`, `igv`, `retencion_4ta`, `tercero`, `detraccion_tercero` y `detraccion`.
+
+---
+
+## 8 · Qué queda fuera, a propósito
 
 - **Las líneas de detalle por ítem.** Un `Item` o un `InvoiceLine` sería un modelo propio, ya descartado, y el
   registro de compras y ventas de SUNAT no lo pide. Quien reparte el gasto entre cuentas usa `reparto`; quien quiera
@@ -445,7 +534,7 @@ tiene que servir para destinos distintos.
 
 ---
 
-## 8 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
+## 9 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
 
 **El criterio.** Al **estándar** va lo que dos sistemas necesitan para entenderse sin haber hablado nunca entre
 ellos. Al **motor** va lo que se calcula a partir de eso. Un dato que se puede derivar no entra al estándar, y una
@@ -496,7 +585,7 @@ valiendo.
 
 ---
 
-## 9 · Lo que falta decidir
+## 10 · Lo que falta decidir
 
 **Resueltas por el formato único** —las cuatro se caían solas en cuanto el cuerpo dejó de ser un envoltorio:
 
@@ -520,7 +609,7 @@ valiendo.
 
 ---
 
-## 10 · Fuentes
+## 11 · Fuentes
 
 Consultadas el 15-sep-2026.
 
