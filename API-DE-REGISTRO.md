@@ -13,24 +13,25 @@ ERP peruano instalado. Sirve de punto de partida, no de modelo a copiar.
 `open-accounting` 0.3. El proyecto crece con la misma regla de siempre: el estándar se mueve con casos reales
 detrás, no por si acaso.
 
-**Y esto propone una `0.4`.** Casi todo cabe en la 0.3 sin romper nada, pero **un cambio sube la versión**: el
-tercer valor de `libro.tipo`, `honorario` (sección 9). El resumen de qué entra en cuál está al final, en la
-sección 13; el resto del documento describe la 0.3, que es lo que hay hoy.
+**Y todo cabe en la `0.3`.** Ninguna de las propuestas sube la versión del estándar: son campos opcionales que un
+consumidor de hoy ignora sin romperse. El resumen está al final, en «Qué va al estándar, qué va al motor».
 
-**Alcance.** Compras, ventas y **honorarios**, que pasa a ser un libro propio (sección 9). Cheques, asientos
-estándar y anexos quedan fuera: cada uno es otro hecho contable y entra cuando tenga su caso.
+**Alcance.** Compras y ventas, **con los recibos por honorarios dentro del libro de compras**, como están hoy
+(decisión de John, 18-sep-2026; el porqué, en «Por qué no hay un libro de honorarios»). Cheques, asientos estándar y
+anexos quedan fuera: cada uno es otro hecho contable y entra cuando tenga su caso.
 
 **Cómo está ordenado.** Cuatro bloques, y cada uno se puede leer solo:
 
 | | Secciones | Qué contesta |
 |---|---|---|
 | **De dónde sale** | 1 a 5 | Cómo lo resuelve el mundo, y qué es lo que el mundo no tiene |
-| **La propuesta** | 6 a 9 | Qué hay hoy, cuál es el formato, cómo se ve en cuatro casos, y el libro que falta |
+| **La propuesta** | 6 a 9 | Qué hay hoy, cuál es el formato, cómo se ve en cuatro casos, y por qué los libros son dos |
 | **Cómo funciona** | 10 y 11 | Dónde corre el motor, en qué orden, y a dónde va cada salida |
 | **Los límites y lo que queda** | 12 a 15 | Qué se deja fuera a propósito, qué toca a cada pieza, qué se decidió y qué no |
 
 **Convenciones.** Los RUC de los ejemplos son los seguros del proyecto (`20131312955` y `20601234567`); ninguna
-empresa real aparece aquí. Los importes van en texto y las fechas en `AAAA-MM-DD`, como manda el estándar. Lo que no
+empresa real aparece aquí. El driver neutral aparece con el nombre que tiene hoy, `open_accounting`, aunque ya esté
+decidido que pase a llamarse `asiento_neutral` («Los dos nombres, decididos»). Los importes van en texto y las fechas en `AAAA-MM-DD`, como manda el estándar. Lo que no
 se pudo confirmar en la documentación oficial va marcado *no verificado*. Investigación hecha el **15 y el 16 de
 septiembre de 2026**; las fuentes, consultadas el 15, al final.
 
@@ -114,9 +115,11 @@ alimenta una bandeja, no contabiliza** — y esto, que parece un defecto, es el 
    dicen `cod_Proveedor`, un código de su base: sin dar de alta la ficha antes, la compra no se puede colgar de
    nadie. Aquí no hace falta ninguna ruta equivalente, porque el RUC viaja en el propio comprobante
    (`contraparte_doc`), que es el modelo de EN 16931. Es la ventaja de la contraparte embebida, vista de cerca.
-6. **Su ruta de honorarios apuntaba a algo real.** `RegistrarAsientoHonorarios` existe aparte porque un recibo por
-   honorarios **no es una compra**: no lleva IGV, trae una retención y no entra al registro de compras de SUNAT. Es
-   la única de sus seis rutas que este documento acaba adoptando, y no como ruta sino como libro propio (sección 9).
+6. **Su ruta de honorarios apunta a algo real.** `RegistrarAsientoHonorarios` existe aparte porque un recibo por
+   honorarios no se parece a una compra: no lleva IGV, trae una retención y no entra al registro de compras de
+   SUNAT. Pero eso no lo convierte en otro libro tributario: es una división **del destino**, y ahí es donde vive
+   —el sub-diario `15` de CONCAR, la ruta propia de STARSOFT—. El porqué, en «Por qué no hay un libro de
+   honorarios».
 
 ### Qué no se toma, y por qué
 
@@ -329,7 +332,7 @@ interpretar.
 | Patrón de facto | Qué tiene el estándar hoy |
 |---|---|
 | Cabecera y líneas en una llamada | El documento lleva `comprobantes[]` y `asiento[]` a la vez |
-| Dos recursos | `libro.tipo: compra \| venta`, y `honorario` propuesto como tercero (sección 9) |
+| Dos recursos | `libro.tipo: compra \| venta`, los dos libros que define SUNAT. Los honorarios van en compras, y qué registro los lleva lo decide cada destino |
 | Cuenta en la línea | La línea de diario la lleva; en el comprobante viaja aparte, en la imputación por `id_externo` |
 | Impuesto explícito | `base_gravada` e `igv` siempre netos, `tasa_igv` leída del documento, y la línea con `rol: igv` |
 | Moneda y T.C. | `moneda`, `tipo_cambio`. **Un comprobante en dólares sin tipo de cambio se observa con `TC_FALTA`, nivel error**: SUNAT lo exige, y el motor no lo inventa ni lo delega al destino |
@@ -347,9 +350,8 @@ interpretar.
 son los campos de la Tabla 10 y del SIRE. Lo que falta no son campos: es que **la imputación quepa en el mismo
 archivo**, y que la llamada no invente una segunda forma de decir lo que el documento ya dice.
 
-**De todo lo que este documento propone, una sola cosa no cabe en la 0.3:** el libro de honorarios, que sube a la
-**0.4** (el porqué en la sección 9, lo que cambia en el esquema en la 13). Lo demás es aditivo y el tag de la 0.3
-avanza sin romper a nadie.
+**Y todo lo que este documento propone cabe en la 0.3:** son campos opcionales, así que el tag de la 0.3 avanza y
+nadie que ya escriba documentos tiene que cambiar nada.
 
 ---
 
@@ -415,7 +417,7 @@ No es una rareza de aquí: Xero lo dice con `Type: ACCPAY | ACCREC` y Merge con
 | `libro.ruc` | 0.3 | sí | Sin RUC no hay libro |
 | `libro.razon_social` | 0.3 | no | Informativo; algún driver la escribe |
 | `libro.periodo` | 0.3 | sí | `AAAAMM`. Se exige siempre: derivarlo apagaría tres validaciones de plazo |
-| `libro.tipo` | 0.3 | sí | `compra` o `venta`, y `honorario` en la 0.4. Es el discriminador de Xero y Merge, y evita rutas por tipo |
+| `libro.tipo` | 0.3 | sí | `compra` o `venta`, los dos libros de SUNAT. Es el discriminador de Xero y Merge, y evita rutas por tipo |
 | `comprobantes[]` | 0.3 y SUNAT | sí | El modelo ya existe y lo define SUNAT: uno o los del mes |
 | `contraparte_*` | 0.3, Tabla 1 | según el caso | Planos, con el RUC: el modelo de EN 16931, no un `Contact` propio |
 | `detraccion` | 0.3 | no | Entra `PROVISIONADO`; la constancia llega después |
@@ -497,8 +499,9 @@ cada faltante ya dice **a quién hay que pedírselo**: al contador, al proveedor
 
 ## 8 · Cuatro ejemplos, uno por caso
 
-Cada uno enseña algo distinto del formato, y los cuatro salen del motor: el JSON se valida contra el esquema
-y el asiento que se muestra es el que devuelve de verdad.
+Cada uno enseña algo distinto del formato, y los cuatro salen del motor: el JSON se valida contra el esquema —salvo
+el bloque `imputaciones`, que es lo que este documento propone añadirle— y el asiento que se muestra es el que
+devuelve de verdad, hoy, con la imputación entregada como la entrega la 1.0.
 
 ### Una compra con detracción
 
@@ -584,18 +587,18 @@ también para quien manda uno: no hace falta un freno aparte.
 
 ### Un recibo por honorarios: el que no lleva IGV y no va al SIRE
 
-Vale la pena mirarlo porque rompe tres suposiciones a la vez: **no tiene IGV**, **trae una retención** y **no es una
-compra**. Van dos, uno con retención y otro sin ella:
+Vale la pena mirarlo porque rompe tres suposiciones a la vez: **no tiene IGV**, **trae una retención** y **no se
+parece a una compra**, aunque viaje en el libro de compras. Van dos, uno con retención y otro sin ella:
 
-> Esta sección es el borrador, y aquí está su parte más nueva: el ejemplo va con **`libro.tipo: "honorario"`**, el
-> tercer libro (decisión de John, 15-sep-2026; el porqué y lo que cuesta, en la sección 9). Pide una **0.4**, porque
-> el enum de la 0.3 es `["venta", "compra"]`. Lo demás del ejemplo funciona hoy tal cual.
+> **El emisor de un recibo por honorarios es una persona natural**, con RUC que empieza en 10. Aquí va uno de los dos
+> RUC seguros del proyecto, que empiezan en 20, porque en el repositorio no entra ningún documento de nadie: lo que
+> el ejemplo enseña es la forma, no el identificador.
 
 ```json
 {
-  "open_accounting": "0.4",
+  "open_accounting": "0.3",
   "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
-             "periodo": "202601", "tipo": "honorario" },
+             "periodo": "202601", "tipo": "compra" },
   "comprobantes": [
     {
       "tipo_cp": "02",
@@ -606,8 +609,6 @@ compra**. Van dos, uno con retención y otro sin ella:
       "contraparte_doc": "20131312955",
       "contraparte_nombre": "ASESORES DE PRUEBA SAC",
       "moneda": "PEN",
-      "base_gravada": "0",
-      "igv": "0",
       "inafecto": "3000.00",
       "total": "3000.00",
       "retencion": "240.00",
@@ -624,8 +625,6 @@ compra**. Van dos, uno con retención y otro sin ella:
       "contraparte_doc": "20131312955",
       "contraparte_nombre": "ASESORES DE PRUEBA SAC",
       "moneda": "PEN",
-      "base_gravada": "0",
-      "igv": "0",
       "inafecto": "1200.00",
       "total": "1200.00",
       "concepto": "CAPACITACION",
@@ -642,16 +641,17 @@ compra**. Van dos, uno con retención y otro sin ella:
 
 **Cuatro cosas que enseña este ejemplo:**
 
-1. **El importe va en `inafecto`, no en `base_gravada`.** Un recibo por honorarios no genera crédito fiscal: la base
-   gravada y el IGV van en cero y el total es inafecto. No es un detalle de estilo — el motor comprueba que el total
-   cuadre con base + IGV + no gravado + otros, y un recibo con el importe en la casilla equivocada sale observado
-   con `TOTAL_NO_CUADRA` antes de llegar a ningún asiento.
+1. **El importe va en `inafecto`, no en `base_gravada`.** Un recibo por honorarios no genera crédito fiscal: no hay
+   base gravada ni IGV —esas claves ni siquiera aparecen, que es la misma regla de la ausencia— y el total es
+   inafecto. No es un detalle de estilo: el motor comprueba que el total cuadre con base + IGV + no gravado + otros,
+   y un recibo con el importe en la casilla equivocada sale observado con `TOTAL_NO_CUADRA` antes de llegar a ningún
+   asiento.
 2. **`retencion` aparece solo cuando el recibo la muestra.** En el segundo la clave sencillamente no está: no hay
    ningún `"retencion": 0` ni un booleano que diga que no hubo. Ausencia es respuesta.
-3. **No va al SIRE, y con el libro propio deja de hacer falta explicarlo.** Cada driver declara los libros que lleva,
-   y el del SIRE declara dos: `{"venta": "sire_rvie", "compra": "sire_rce"}`. Un libro de honorarios sencillamente no
-   está en su tabla, así que nunca le llega. Hoy, metido dentro de compras, hace falta una lista de excepciones por
-   tipo —`FUERA_DEL_REGISTRO_SUNAT = {"02"}`— para sacarlo del registro; con su propio libro, esa lista sobra.
+3. **No va al SIRE, y lo sabe el destino, no el productor.** El registro de compras de SUNAT no admite recibos por
+   honorarios, y eso está escrito una sola vez, en el driver: `FUERA_DEL_REGISTRO_SUNAT = {"02"}`
+   (`contaperu/catalogos.py`). El ERP manda el mes de compras entero y cada destino toma lo suyo: el SIRE los deja
+   fuera y CONCAR los lleva a su sub-diario `15`.
 4. **La cuenta del tercero no es la de proveedores.** Un recibo por honorarios se debe por la cuenta de honorarios
    por pagar, no por la de facturas, y el motor lo sabe: el tipo `02` tiene tratamiento propio en el asiento.
 
@@ -669,11 +669,13 @@ Tres líneas en el primero y dos en el segundo, sin que el documento haya tenido
 líneas quería: salen de los hechos que trae.
 
 Y queda la pregunta que este ejemplo levanta —si el libro correcto no debería ser «honorarios» en vez de «compra»—,
-que resulta ser la mejor defensa de esta arquitectura. Está respondida en la sección 9.
+que resulta ser la mejor defensa de esta arquitectura. Está respondida en «Por qué no hay un libro de honorarios».
 
-### Una factura en dólares y la nota de crédito que la corrige
+### Una factura en dólares, y una nota de crédito en soles
 
-Los dos casos que más se equivocan, en un documento:
+Los dos casos que más se equivocan, en un mismo documento. Son dos comprobantes independientes del mismo mes: la
+factura en dólares, y una nota de crédito en soles que corrige **la compra del primer ejemplo** (`F001-123`), que se
+anotó en ese mismo periodo. Una nota corrige el documento que dicen sus campos `ref_*`, esté o no en el mismo envío:
 
 ```json
 {
@@ -732,9 +734,10 @@ al lado: el motor lo arrastra a cada línea del asiento y deja la conversión a 
 inventa ni se delega:** el comprobante se observa con `TC_FALTA`, nivel error, porque SUNAT lo exige. Un mes con una
 factura en dólares sin tipo de cambio no exporta.
 
-**La nota de crédito.** Es el mismo documento con `tipo_cp: "07"` y los cuatro `ref_*` que dicen a qué factura
-corrige — no un recurso aparte, como en QuickBooks o Xero. Y **sus importes van en positivo**: el signo lo pone el
-driver. Se ve en el asiento que sale, con los sentidos invertidos frente a una compra normal:
+**La nota de crédito.** Es un comprobante más, con `tipo_cp: "07"` y los cuatro `ref_*` que dicen a qué factura
+corrige — no un recurso aparte, como en QuickBooks o Xero. Va en la moneda en que se emitió, que no tiene por qué ser
+la de la factura que corrige. Y **sus importes van en positivo**: el signo lo pone el driver. Se ve en el asiento que
+sale, con los sentidos invertidos frente a una compra normal:
 
 | `rol` | `cuenta` | | `importe` | |
 |---|---|---|---|---|
@@ -750,55 +753,54 @@ separa la cuenta por moneda sin que el documento se lo pida** — sale de la con
 
 ---
 
-## 9 · El libro de honorarios, que pide una 0.4
+## 9 · Por qué no hay un libro de honorarios
 
 El tercer ejemplo levanta la pregunta que el resto del documento no podía responder sin salirse del tema: si un
 recibo por honorarios no es una compra, ¿por qué se registra en el libro de compras?
 
-### Por qué debe existir (John, 15-sep-2026)
+### El libro de honorarios existe, pero vive en el destino
 
-Un recibo por honorarios se registra hoy en `libro.tipo: compra`, y eso **dice algo que no es cierto**: el registro
-de compras de SUNAT no admite recibos por honorarios. El libro correcto es el de honorarios, que en la contabilidad
-peruana es un registro propio — STARSOFT tiene hasta su ruta aparte, `RegistrarAsientoHonorarios`.
+La objeción es razonable: en la contabilidad peruana los honorarios son **su propio registro**, no una compra más.
+STARSOFT tiene su ruta aparte (`RegistrarAsientoHonorarios`) y su sub-diario propio, distinto del de compras.
 
-**Y la prueba de que hoy está mal etiquetado es el parche que hace falta para taparlo.** El driver del SIRE lleva una
-lista de excepciones por tipo, `FUERA_DEL_REGISTRO_SUNAT = {"02"}`, cuyo único trabajo es sacar del registro unos
-comprobantes que nunca debieron estar en ese libro. Esa lista es el síntoma, no la solución.
+**Y es cierto: ese libro existe. Lo que pasa es que vive en el destino, que es donde esa división significa algo.**
+En la configuración de CONCAR el tipo `02` trae `sub_diario: "15"` y la boleta el `13`; el resto de compras va al
+sub-diario general. Cada sistema legacy los numera a su manera —el de STARSOFT no es el de CONCAR—, y por eso es
+configuración de su driver y no un dato del hecho.
 
-Con `libro.tipo: honorario`, el mecanismo que ya existe hace el trabajo solo. **Cada driver declara los libros que
-lleva**, y los del SIRE son dos:
+De ahí sale el reparto, que es lo que hace eficiente a esta arquitectura:
 
-```
-sire      → {"venta": "sire_rvie", "compra": "sire_rce"}
-concar    → {"venta": "concar_xlsx", "compra": "concar_xlsx"}
-contasis  → {"venta": "contasis_xlsx", "compra": "contasis_xlsx"}
-```
+| | Quién lo decide | Dónde vive |
+|---|---|---|
+| **Qué ocurrió** | El hecho: se adquirió un servicio y hay un comprobante que lo respalda | El documento: `libro.tipo: compra` |
+| **En qué registro entra** | Cada destino, declarando qué lleva y qué no | El driver: `FUERA_DEL_REGISTRO_SUNAT`, el `sub_diario` por tipo |
 
-Un libro que no está en esa tabla **nunca le llega al destino**. Sin listas de exclusión, sin excepciones por tipo y
-sin que nadie tenga que acordarse: el parámetro del SIRE es compras y ventas, y los honorarios no son ninguna de las
-dos. Es la arquitectura limpia, y es la misma regla que ya gobierna todo lo demás.
+**El SIRE no lleva honorarios porque el registro de SUNAT no los admite**, y eso está escrito una vez, en el motor:
+`FUERA_DEL_REGISTRO_SUNAT = {"02"}` (`contaperu/catalogos.py`), que el driver del SIRE lee. No hace falta que el ERP
+lo sepa, ni que lo clasifique al capturar, ni que acierte: manda el mes de compras entero y **cada destino toma lo
+suyo**.
 
-En los legacy pasa lo mismo un escalón más abajo: el sub-diario `15` que CONCAR le da hoy al tipo `02` —y el `13` de
-la boleta— deja de ser una excepción dentro del libro de compras y pasa a ser **el formato de ese libro**, que es lo
-que siempre fue. Cada sistema lo numera a su manera, así que sigue siendo configuración de su driver.
+### Lo que costaría el tercer libro (decisión de John, 18-sep-2026)
 
-### Lo que cuesta, dicho entero
+Se evaluó añadir `honorario` como tercer valor de `libro.tipo`, y se descartó. Esto es lo que costaba:
 
-No es gratis, y conviene tenerlo escrito antes de empezar:
+- **Una versión que rompe.** El enum de `libro.tipo` es cerrado y cada driver llavea sus formatos por ese valor: un
+  tercero sería una **0.4** con su enmienda, no un campo opcional. Era el único cambio de todo este documento que
+  subía la versión del estándar; sin él, todo cabe en la 0.3.
+- **Trabajo en cada driver.** CONCAR y CONTASIS tendrían que declarar el libro nuevo con su sub-diario, o el mes de
+  honorarios no saldría por ahí.
+- **Mover la decisión del destino al productor.** Hoy la clasificación la declara un driver en una línea; repartida,
+  la tendrían que acertar todos los ERP que integren, cada uno por su cuenta, y un error ahí parte mal el mes.
+- **Partir el mes en dos documentos**, con la pregunta inmediata de a cuál pertenece una nota de crédito que corrige
+  un honorario.
 
-- **Es una 0.4, no un campo opcional.** El enum de `libro.tipo` es cerrado (`["venta", "compra"]`), así que
-  `"honorario"` hoy se rechaza; y un consumidor escrito para la 0.3 que reciba un tercer valor no sabría qué hacer
-  con él. Sube la versión del estándar.
-- **Cada driver decide si lo lleva.** El del SIRE no declara nada y queda resuelto. CONCAR y CONTASIS sí: tienen que
-  añadir `"honorario"` a sus formatos, con su sub-diario, o el mes de honorarios no sale por ahí.
-- **El productor clasifica al capturar.** El ERP ya no manda un solo libro de compras: manda el de compras y el de
-  honorarios. Es trabajo suyo y no del destino — pero es **su** dato, y distinguir un recibo por honorarios de una
-  factura no tiene ambigüedad: lo dice el tipo de comprobante.
-- **Y hay que decidir dónde cae una nota de crédito que corrige un honorario**: al libro de honorarios, por el
-  documento que corrige, y no al de compras.
+El nombre lo dice, además: `libro` es el **libro tributario**, y SUNAT define dos —el registro de compras y el de
+ventas—. El de honorarios es un libro contable, no tributario, y por eso aparece donde aparece la contabilidad: en
+el asiento y en el sub-diario de cada sistema.
 
-Lo que no cambia: `libro` sigue siendo la cabecera de un registro —un RUC, un mes y qué registro es—, y los
-comprobantes, el asiento y la imputación no se tocan.
+**Lo que queda pendiente, si algún día llega su caso:** un sistema real que exija un envío de honorarios aparte,
+como la ruta propia de STARSOFT. Ese día el tercer libro entra con su archivo aceptado detrás, que es la regla del
+proyecto.
 
 ---
 
@@ -1039,7 +1041,6 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 | **`imputaciones` en la raíz**, con llave por `id_externo` | Sin ellas el archivo no explica su propio asiento, y el estándar promete que un documento «se entiende solo, en cualquier máquina, sin consultar nada» | Ahora. Aditivo |
 | **La regla de hasta dónde viaja cada bloque** | `libro` y `comprobantes` son hechos y valen en todas partes; `imputaciones` y `asiento` están en el plan de cuentas de quien los escribió y son **informativos fuera de él**. Sin esa regla, un ERP copia cuentas ajenas en silencio. `emisor` ya dice de quién son | Ahora. Es texto, no esquema |
 | `dimensiones`, `medio_pago`, `retencion_igv`, `percepcion`, `no_domiciliado` | Son hechos, y les falta el caso real que manda la regla del proyecto | Con su caso (E1) |
-| **`honorario` como tercer valor de `libro.tipo`** | El registro de compras de SUNAT no admite recibos por honorarios: meterlos ahí dice algo falso, y obliga a una lista de excepciones por tipo en el driver del SIRE para taparlo. Con su libro, el mecanismo de siempre lo resuelve solo (sección 9) | **Rompe: es una 0.4.** Decidido el 15-sep-2026 |
 | Cheques | Es otro hecho —un pago, no un comprobante— y sería otro libro más | Cuando haya caso |
 | Una ficha de proveedor o cliente | **Nunca.** Es un maestro, no un hecho. El RUC viaja embebido en el comprobante, que es justo lo que le ahorra a este estándar la ruta de anexos que STARSOFT necesita | — |
 
@@ -1062,28 +1063,16 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 - **Autenticación, permisos, IP pública, licencias.** Eso es de quien publique una puerta, no del formato.
 - **La ficha del anexo, el detalle por ítem y los ids internos de nadie.**
 
-### Dos cambios al esquema, y solo uno sube la versión
+### Un solo cambio al esquema, y no sube la versión
 
 **`imputaciones` es aditivo y se queda en la 0.3.** Hoy la raíz admite cinco claves —`open_accounting`, `libro`,
 `comprobantes`, `asiento` y `emisor`— y rechaza cualquier otra, así que hay que añadirla ahí. Un campo opcional nuevo
 no sube la versión: **avanza el tag `open-accounting-0.3`** y quien ya escribe 0.3 sigue valiendo.
 
-**`honorario` sube a la 0.4, y arrastra tres cosas.** El enum de `libro.tipo` es cerrado, y además la clave de
-versión del documento es una constante: hoy el esquema exige literalmente `"open_accounting": "0.3"`. O sea que un
-documento de honorarios cambia **dos** campos, no uno.
-
-| Qué cambia en el esquema | Hoy | En la 0.4 |
-|---|---|---|
-| `libro.tipo` | `enum: ["venta", "compra"]` | `enum: ["venta", "compra", "honorario"]` |
-| `open_accounting` | `const: "0.3"` | `const: "0.4"` |
-| El `$id` canónico, que cuelga del tag del estándar | `.../open-accounting-0.3/...` | `.../open-accounting-0.4/...`, su propio tag |
-
-Y fuera del esquema, en el motor: `TIPOS_LIBRO` gana un valor, y **cada driver decide si declara ese libro en sus
-formatos** — el del SIRE no lo declara, y con eso se resuelve solo; CONCAR y CONTASIS sí, con su sub-diario.
-
-**Lo que no cambia de significado para nadie:** un documento 0.3 de compras o de ventas dice exactamente lo mismo en
-la 0.4. Sube la versión porque el enum crece y un consumidor viejo no sabría qué hacer con el valor nuevo, no porque
-algo que ya existía pase a significar otra cosa.
+**Y el tercer libro, que sí habría subido a la 0.4, queda descartado** (John, 18-sep-2026): los recibos por
+honorarios se quedan en el libro de compras y qué registro los lleva lo decide cada destino, como hoy. El porqué y
+lo que costaba, en «Por qué no hay un libro de honorarios». Con eso, **nada de este documento toca la versión del
+estándar**.
 
 | Cambio | Clasificación |
 |---|---|
@@ -1108,6 +1097,13 @@ algo que ya existía pase a significar otra cosa.
 | Quién numera cuando llega un comprobante suelto | Lo mismo que hoy: un documento de uno se numera como uno de mil |
 | Que las dos puertas no se separen | No hay dos puertas: hay un documento y un pipeline |
 | El freno de la ruta por comprobante | El tope de comprobantes del lote ya lo cubre |
+
+### El libro de honorarios: no se hace (John, 18-sep-2026)
+
+Los recibos por honorarios se quedan **dentro del libro de compras**, como hoy, y qué registro los lleva lo sigue
+declarando cada destino. Con eso, `libro.tipo` conserva sus dos valores, **ningún cambio de este documento sube la
+versión del estándar** y los drivers se quedan como están. El porqué entero, en «Por qué no hay un libro de
+honorarios».
 
 ### El correlativo: la unidad de numeración es el mes, no el lote
 
@@ -1159,7 +1155,6 @@ el driver, porque es una clave raíz del estándar.
 |---|---|---|
 | El bloque de las cuentas por comprobante | **`imputaciones`**, se queda | Es la palabra que el motor ya usa y no es invento local: SAP en español llama «imputación» exactamente a esto. Un contador la entiende sin explicación |
 | El driver, hoy `open_accounting` | **`asiento_neutral`** | Dice qué produce y con qué vocabulario, y no reproduce la confusión de llamarse igual que el estándar. Hay precedente de nombrar un driver por su salida y no por un sistema: `csv` tampoco nombra un destino |
-| El tercer libro | **`honorario`**, en singular | Como `compra` y `venta`, que también van en singular: `libro.tipo` dice qué es ese libro, no cuántos comprobantes lleva |
 
 **El renombrado es gratis ahora y caro después.** El driver está en «Sin publicar»: nadie lo usa todavía. Cuando salga
 la 1.1.0, cambiarlo rompe a quien lo haya integrado. Y no toca el estándar: `open-accounting.schema.json` solo usa
