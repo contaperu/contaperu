@@ -13,8 +13,10 @@ ERP peruano instalado. Sirve de punto de partida, no de modelo a copiar.
 `open-accounting` 0.3. El proyecto crece con la misma regla de siempre: el estándar se mueve con casos reales
 detrás, no por si acaso.
 
-**Y todo cabe en la `0.3`.** Ninguna de las propuestas sube la versión del estándar: son campos opcionales que un
-consumidor de hoy ignora sin romperse. El resumen está al final, en «Qué va al estándar, qué va al motor».
+**Y esto propone una `0.4`.** La mayor parte son campos opcionales que un consumidor de hoy ignora sin romperse,
+pero dos piezas sí suben la versión, y a propósito: **`clase` en cada línea** y **el `rol` convertido en catálogo
+publicado**, que son las que dejan el asiento listo para cualquier ERP y para los roles que todavía no existen («El
+papel de cada línea»). El resumen de qué entra en cuál está al final, en «Qué va al estándar, qué va al motor».
 
 **Alcance.** Compras y ventas, **con los recibos por honorarios dentro del libro de compras**, como están hoy
 (decisión de John, 18-sep-2026; el porqué, en «Por qué no hay un libro de honorarios»). Cheques, asientos estándar y
@@ -25,9 +27,9 @@ anexos quedan fuera: cada uno es otro hecho contable y entra cuando tenga su cas
 | | Secciones | Qué contesta |
 |---|---|---|
 | **De dónde sale** | 1 a 5 | Cómo lo resuelve el mundo, y qué es lo que el mundo no tiene |
-| **La propuesta** | 6 a 9 | Qué hay hoy, cuál es el formato, cómo se ve en cuatro casos, y por qué los libros son dos |
-| **Cómo funciona** | 10 y 11 | Dónde corre el motor, en qué orden, y a dónde va cada salida |
-| **Los límites y lo que queda** | 12 a 15 | Qué se deja fuera a propósito, qué toca a cada pieza, qué se decidió y qué no |
+| **La propuesta** | 6 a 10 | Qué hay hoy, cuál es el formato, cómo se ve en cuatro casos, por qué los libros son dos, y qué dice cada línea del asiento |
+| **Cómo funciona** | 11 y 12 | Dónde corre el motor, en qué orden, y a dónde va cada salida |
+| **Los límites y lo que queda** | 13 a 16 | Qué se deja fuera a propósito, qué toca a cada pieza, qué se decidió y qué no |
 
 **Convenciones.** Los RUC de los ejemplos son los seguros del proyecto (`20131312955` y `20601234567`); ninguna
 empresa real aparece aquí. El driver neutral aparece con el nombre que tiene hoy, `open_accounting`, aunque ya esté
@@ -350,8 +352,9 @@ interpretar.
 son los campos de la Tabla 10 y del SIRE. Lo que falta no son campos: es que **la imputación quepa en el mismo
 archivo**, y que la llamada no invente una segunda forma de decir lo que el documento ya dice.
 
-**Y todo lo que este documento propone cabe en la 0.3:** son campos opcionales, así que el tag de la 0.3 avanza y
-nadie que ya escriba documentos tiene que cambiar nada.
+**Casi todo lo que este documento propone cabe en la 0.3**, como campo opcional: el tag de la 0.3 avanza y nadie que
+ya escriba documentos cambia nada. Las dos excepciones son `clase` y el `rol` como catálogo, que suben a la 0.4 («El
+papel de cada línea»).
 
 ---
 
@@ -804,7 +807,151 @@ proyecto.
 
 ---
 
-## 10 · El recorrido, visto desde el ERP que ya tiene el dato
+## 10 · El papel de cada línea: `rol` y `clase`
+
+Una compra son tres líneas —el gasto, el IGV y lo que se le debe al proveedor— y una venta otras tres —el ingreso,
+el IGV y lo que el cliente debe—. El `rol` de la línea dice cuál es cuál. El problema es que hoy los roles
+`principal` y `tercero` **solo significan algo si además se mira `libro.tipo`**: en una compra `principal` es el
+gasto y `tercero` un pasivo; en una venta, el ingreso y un activo. Una línea suelta no se explica sola, y la que
+recibe un ERP de fuera es exactamente eso: una línea suelta.
+
+### Cómo lo resuelve el mundo
+
+| Sistema | Dónde vive el papel de la línea | Campo y valores |
+|---|---|---|
+| **QuickBooks Online** | En la cuenta, y en la cabecera | `Classification` (`Asset`, `Liability`, `Equity`, `Revenue`, `Expense`), `AccountType` (16 fijos) y `AccountSubType` (~250, con `SalesTaxPayable`, `WithholdingTaxPurchases`). La cuenta por pagar y la por cobrar van en la **cabecera** (`apAccountRef`, `arAccountRef`), nunca en la línea |
+| **Xero** | En la cuenta | `Type` (18), `Class` (5) y **`SystemAccount`**: `DEBTORS`, `CREDITORS`, `GST`, `ROUNDING`… Un puntero que dice qué cuenta cumple qué función |
+| **NetSuite** | En la cuenta, con enum **inmutable** | «no puedes crear ni modificar tipos de cuenta»; lo demás, con cuentas generadas por el sistema |
+| **Sage Intacct** | Fuera de la cuenta | Solo `ACCOUNTTYPE` (`balancesheet` / `incomestatement`) y `NORMALBALANCE`; el papel lo pone la configuración del módulo |
+| **Merge · Rutter · Apideck** | En la cuenta | `classification` o `category`, con los **mismos cinco valores** en las tres |
+| **XBRL GL** | **En la línea** | El único: `accountPurposeCode` (`{tax}`, `{ifrs}`, `{primary}`…) y `accountType` (`{account}`, `{vendor}`, `{customer}`) |
+| **SAF-T (OCDE)** | En una tabla de mapeo | El plan del contribuyente se mapea a uno estándar (`StandardAccountID`), y el impuesto va en la línea (`TaxInformation`) |
+
+**El patrón es que la cuenta manda y la línea obedece.** Ningún sistema comercial escribe «esta línea es el IGV»: lo
+deduce del tipo de la cuenta que la línea referencia. La única excepción, en todos, es el impuesto, que sí viaja en
+la línea.
+
+### Por qué aquí no se puede copiar tal cual
+
+En QuickBooks o en Xero, la línea y el plan de cuentas **viven en el mismo sistema**: por eso basta con mirar la
+cuenta. El asiento neutral de ContaPerú **viaja a otro sistema, que no tiene ese plan de cuentas**: quien recibe
+`6343001` no sabe que es un gasto, y no lo va a saber mirando el número.
+
+Por eso el `rol` en la línea es la decisión correcta, y es lo que ningún otro estándar tiene. Lo que falta es que la
+línea se explique sola.
+
+### La propuesta: dos ejes
+
+| Eje | Qué dice | Valores | Estabilidad |
+|---|---|---|---|
+| **`clase`** | Qué es contablemente | `activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto` | **Congelado.** Son los cinco valores idénticos en QuickBooks, Xero, Merge y Rutter: cualquier ERP del mundo ya sabe qué hacer con ellos |
+| **`rol`** | Qué papel cumple en la operación peruana | `principal`, `igv`, `retencion_4ta`, `tercero`, `detraccion_tercero`, `detraccion`… | **Catálogo publicado y versionado**, no un enum cerrado dentro del esquema: crece sin cambiar la versión del documento |
+
+Los dos ejes son independientes, y es lo que hace que la misma línea se lea igual en compras y en ventas:
+
+| Caso | `rol` | `clase` | `debe_haber` |
+|---|---|---|---|
+| Compra · el gasto | `principal` | `gasto` | D |
+| Compra · el IGV | `igv` | `activo` (crédito fiscal) | D |
+| Compra · el proveedor | `tercero` | `pasivo` | H |
+| Venta · el ingreso | `principal` | `ingreso` | H |
+| Venta · el IGV | `igv` | `pasivo` (débito fiscal) | H |
+| Venta · el cliente | `tercero` | `activo` | D |
+
+### La regla que lo sostiene
+
+> **Quien recibe tiene que poder contabilizar una línea con `clase`, `debe_haber` e `importe`, aunque no conozca su
+> `rol`.**
+
+Es la regla de degradación, y es la que permite que el catálogo de roles crezca —la percepción, la retención del
+IGV, el anticipo, el redondeo, la diferencia de cambio— **sin romper a ningún ERP ya integrado**: un rol desconocido
+pierde detalle, no rompe el asiento. Es el mismo diseño de ISO 20022, que saca sus códigos a catálogos externos
+«para añadir sin cambiar la versión del mensaje», y el camino que terminó tomando el SAF-T noruego, que sacó la
+clasificación del esquema y la pasó a una tabla de mapeo.
+
+### El asiento completo, con los dos ejes
+
+Esta es la compra con detracción del primer ejemplo. Las cinco líneas, sus cuentas, sus sentidos y sus importes son
+**los que el motor devuelve hoy**; lo que esta sección propone añadir es `clase`, el bloque `impuesto` y el
+diccionario `plan_de_cuentas`:
+
+```json
+{
+ "open_accounting": "0.4",
+ "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
+            "periodo": "202601", "tipo": "compra" },
+ "asiento": [
+  { "cuenta": "6343001", "clase": "gasto", "debe_haber": "D", "importe": "10000.00", "rol": "principal",
+    "fecha": "2026-01-15", "moneda": "PEN", "centro_costo": "OBRA01", "tasa_igv": "18",
+    "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+    "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
+                   "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
+
+  { "cuenta": "401111", "clase": "activo", "debe_haber": "D", "importe": "1800.00", "rol": "igv",
+    "fecha": "2026-01-15", "moneda": "PEN", "tasa_igv": "18",
+    "impuesto": { "codigo": "igv", "tasa": "18", "base": "10000.00" },
+    "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026",
+    "documento": { "…": "el mismo de arriba" } },
+
+  { "cuenta": "421201", "clase": "pasivo", "debe_haber": "H", "importe": "11800.00", "rol": "tercero",
+    "fecha": "2026-01-15", "moneda": "PEN",
+    "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01",
+    "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+    "documento": { "…": "el mismo de arriba" } },
+
+  { "cuenta": "421201", "clase": "pasivo", "debe_haber": "D", "importe": "1416.00", "rol": "detraccion_tercero",
+    "fecha": "2026-01-15", "moneda": "PEN",
+    "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01",
+    "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+    "documento": { "…": "el mismo de arriba" } },
+
+  { "cuenta": "421203", "clase": "pasivo", "debe_haber": "H", "importe": "1416.00", "rol": "detraccion",
+    "fecha": "2026-01-15", "moneda": "PEN", "contraparte_doc": "20131312955",
+    "detraccion": { "codigo": "037", "tasa": "12", "base": "11800.00" },
+    "glosa": "DETRACCION - SERVICIO DE MANTENIMIENTO ENERO 2026",
+    "documento": { "…": "el mismo de arriba" } }
+ ],
+ "plan_de_cuentas": {
+  "6343001": { "clase": "gasto",  "nombre": "Mantenimiento y reparaciones" },
+  "401111":  { "clase": "activo", "nombre": "IGV - crédito fiscal" },
+  "421201":  { "clase": "pasivo", "nombre": "Facturas por pagar" },
+  "421203":  { "clase": "pasivo", "nombre": "Detracciones por pagar" }
+ }
+}
+```
+
+**Léelo desde el ERP que lo recibe.** Sin conocer el PCGE ni el plan del emisor sabe que la primera línea es un
+gasto de 10 000, que la segunda es un impuesto recuperable, que se le deben 11 800 a un proveedor identificado por
+su RUC, y que 1 416 de esa deuda se pagan al Banco de la Nación en vez de al proveedor. Y si mañana llega una línea
+con `rol: "percepcion"`, que hoy no existe, la sigue contabilizando: es un `activo` al debe.
+
+### Las tres piezas nuevas, y qué cuesta cada una
+
+| Pieza | Qué es | Versión |
+|---|---|---|
+| **`clase` en cada línea** | Los cinco valores universales | **0.4**: pasa a ser obligatoria, para que ninguna línea quede sin explicarse |
+| **`rol` como catálogo** | Sale del enum del esquema y pasa a un catálogo publicado, con su versión, junto a los catálogos de SUNAT | **0.4**: el esquema deja de rechazar un rol que todavía no existía |
+| **`impuesto` y `plan_de_cuentas`** | El bloque de impuesto por línea —el único papel que todos los estándares ponen ahí— y el diccionario de cuentas del emisor | Opcionales: entran en la 0.4, o después con su caso |
+
+**Y el motor puede rellenar `clase` solo**, porque la deduce del rol y del libro: un documento 0.3 que llegue sin
+ella se completa al vuelo, así que nadie tiene que reescribir lo que ya tiene guardado. El motor acepta las dos
+versiones durante toda la 1.x.
+
+### Lo que se descartó, y por qué
+
+- **Renombrar los roles a `gasto`, `ingreso`, `por_pagar` y `por_cobrar`.** Se leería solo, pero rompe el enum para
+  decir lo mismo con otro nombre, y cada caso nuevo volvería a romperlo. Xero resolvió los anticipos **añadiendo
+  tipos de documento**, no renombrando tipos de cuenta.
+- **Poner la cuenta por pagar en la cabecera**, como QuickBooks y Xero. Ellos pueden porque la cuenta vive en su
+  mismo sistema; aquí el asiento viaja a otro.
+- **Copiar los ~250 subtipos de QuickBooks.** Cada país fue añadiendo los suyos y el enum dejó de ser un estándar:
+  es el camino del que no se vuelve.
+- **Dejar la semántica solo en el plan de cuentas**, como hacen todos los ERP comerciales. Quien recibe el asiento no
+  tiene ese plan; por eso `plan_de_cuentas` viaja como ayuda opcional y nunca como la única fuente.
+
+---
+
+## 11 · El recorrido, visto desde el ERP que ya tiene el dato
 
 Lo anterior mira el formato. Esta sección mira lo otro que pregunta quien va a integrar: **dónde corre esto, quién
 hace qué y en qué orden.** Hace falta porque el resto del documento está escrito desde el que captura, y un ERP no
@@ -893,7 +1040,7 @@ para todas. Los roles son `principal`, `igv`, `retencion_4ta`, `tercero`, `detra
 
 ---
 
-## 11 · Los destinos: al SIRE llegan todos
+## 12 · Los destinos: al SIRE llegan todos
 
 Los destinos no son tres opciones en fila. **El SIRE está al final de todos los caminos**, porque es el trámite con
 SUNAT y la liquidación del impuesto; un sistema legacy se alimenta a diario con los comprobantes y al cierre saca su
@@ -1003,7 +1150,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 
 ---
 
-## 12 · Qué queda fuera, a propósito
+## 13 · Qué queda fuera, a propósito
 
 - **Las líneas de detalle por ítem.** Un `Item` o un `InvoiceLine` sería un modelo propio, ya descartado, y el
   registro de compras y ventas de SUNAT no lo pide. Quien reparte el gasto entre cuentas usa `reparto`; quien quiera
@@ -1028,7 +1175,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 
 ---
 
-## 13 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
+## 14 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
 
 **El criterio.** Al **estándar** va lo que dos sistemas necesitan para entenderse sin haber hablado nunca entre
 ellos. Al **motor** va lo que se calcula a partir de eso. Un dato que se puede derivar no entra al estándar, y una
@@ -1040,6 +1187,10 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 |---|---|---|
 | **`imputaciones` en la raíz**, con llave por `id_externo` | Sin ellas el archivo no explica su propio asiento, y el estándar promete que un documento «se entiende solo, en cualquier máquina, sin consultar nada» | Ahora. Aditivo |
 | **La regla de hasta dónde viaja cada bloque** | `libro` y `comprobantes` son hechos y valen en todas partes; `imputaciones` y `asiento` están en el plan de cuentas de quien los escribió y son **informativos fuera de él**. Sin esa regla, un ERP copia cuentas ajenas en silencio. `emisor` ya dice de quién son | Ahora. Es texto, no esquema |
+| **`clase` en cada línea**: `activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto` | Es lo único que un ERP de fuera entiende sin conocer el PCGE, y son los cinco valores que QuickBooks, Xero, Merge y Rutter comparten. Sin ella, `principal` y `tercero` solo significan algo mirando `libro.tipo` («El papel de cada línea») | **0.4** |
+| **`rol` como catálogo publicado**, fuera del enum del esquema | Un rol nuevo —percepción, anticipo, redondeo— no puede obligar a una versión del documento. Es el diseño de ISO 20022 y el que terminó adoptando SAF-T | **0.4** |
+| **La regla de degradación**: se puede contabilizar con `clase`, `debe_haber` e `importe` aunque el `rol` sea desconocido | Es lo que permite que el catálogo crezca sin romper a quien ya integró | **0.4**. Es texto, no esquema |
+| `impuesto {codigo, tasa, base}` en la línea, y `plan_de_cuentas` en la raíz | El impuesto es el único papel que todos los estándares sí ponen en la línea; el diccionario de cuentas es el `SystemAccount` de Xero y el `StandardAccountID` de SAF-T, como ayuda opcional | 0.4 u después, con su caso |
 | `dimensiones`, `medio_pago`, `retencion_igv`, `percepcion`, `no_domiciliado` | Son hechos, y les falta el caso real que manda la regla del proyecto | Con su caso (E1) |
 | Cheques | Es otro hecho —un pago, no un comprobante— y sería otro libro más | Cuando haya caso |
 | Una ficha de proveedor o cliente | **Nunca.** Es un maestro, no un hecho. El RUC viaja embebido en el comprobante, que es justo lo que le ahorra a este estándar la ruta de anexos que STARSOFT necesita | — |
@@ -1050,10 +1201,12 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 |---|---|
 | **Aceptar `imputaciones` dentro del documento**, sin dejar de aceptar el argumento de hoy | Es la pieza que hace real el formato único, y nadie que ya integre tiene que cambiar |
 | **Una batería de conformidad**: casos de entrada con su documento esperado | Es lo que le permite a un ERP de fuera comprobar que emite bien sin escribirle a nadie. Hoy hay `diagnosticar` y `verificar-driver`; falta el juego de casos |
-| **Renombrar el driver a `asiento_neutral`** | Hoy se llama igual que el estándar. Es gratis mientras siga sin publicar, y rompe a quien lo integre si se hace después de la 1.1.0 (sección 14) |
-| **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes (sección 14) |
+| **Renombrar el driver a `asiento_neutral`** | Hoy se llama igual que el estándar. Es gratis mientras siga sin publicar, y rompe a quien lo integre si se hace después de la 1.1.0 («Los dos nombres, decididos») |
+| **Rellenar `clase` él mismo**, desde el rol y el libro | Así un documento 0.3 que llega sin ella se completa al vuelo, y nadie tiene que reescribir lo que ya guardó |
+| **Publicar el catálogo de roles**, con su versión, al lado de los catálogos de SUNAT | Un ERP consulta qué roles puede recibir en vez de descubrirlos cuando le llega uno que no conoce |
+| **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes («El correlativo») |
 | **No tener bandeja.** El motor recibe, responde y olvida | Depositar y esperar aprobación es del ERP, que es quien tiene usuarios y base de datos. Copiar la bandeja aquí le daría estado al motor, que es lo único que no puede tener |
-| **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos (sección 11) |
+| **Diagnosticar contra los destinos que el entorno declaró**, no contra el driver de esa llamada | Es lo que hace que «generar asientos» vuelva obligatoria la cuenta contable, y que quien tiene SIRE y CONCAR reciba una sola respuesta en vez de dos («Los destinos») |
 | **No salir a la red.** Ni descargar del SIRE, ni llamar a otro sistema | Misma razón, y ya está escrito en la hoja de ruta |
 
 ### A ninguno de los dos
@@ -1063,20 +1216,35 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 - **Autenticación, permisos, IP pública, licencias.** Eso es de quien publique una puerta, no del formato.
 - **La ficha del anexo, el detalle por ítem y los ids internos de nadie.**
 
-### Un solo cambio al esquema, y no sube la versión
+### Los cambios al esquema: uno aditivo y dos que suben a la 0.4
 
 **`imputaciones` es aditivo y se queda en la 0.3.** Hoy la raíz admite cinco claves —`open_accounting`, `libro`,
 `comprobantes`, `asiento` y `emisor`— y rechaza cualquier otra, así que hay que añadirla ahí. Un campo opcional nuevo
 no sube la versión: **avanza el tag `open-accounting-0.3`** y quien ya escribe 0.3 sigue valiendo.
 
-**Y el tercer libro, que sí habría subido a la 0.4, queda descartado** (John, 18-sep-2026): los recibos por
-honorarios se quedan en el libro de compras y qué registro los lleva lo decide cada destino, como hoy. El porqué y
-lo que costaba, en «Por qué no hay un libro de honorarios». Con eso, **nada de este documento toca la versión del
-estándar**.
+**`clase` y el `rol` como catálogo suben a la 0.4** (John, 18-sep-2026): son las dos piezas que dejan la línea del
+asiento lista para cualquier ERP y para los roles que todavía no existen («El papel de cada línea»). Suben la
+versión porque `clase` pasa a ser obligatoria y porque la clave `open_accounting` es una constante en el esquema.
+
+| Qué cambia en el esquema | Hoy | En la 0.4 |
+|---|---|---|
+| `linea.clase` | no existe | `enum: ["activo", "pasivo", "patrimonio", "ingreso", "gasto"]`, obligatoria |
+| `linea.rol` | `enum` cerrado de seis valores | Texto validado contra el catálogo publicado, que se versiona aparte |
+| `open_accounting` | `const: "0.3"` | `const: "0.4"` |
+| El `$id` canónico, que cuelga del tag del estándar | `.../open-accounting-0.3/...` | `.../open-accounting-0.4/...`, con su propio tag |
+
+**Lo que no cambia de significado para nadie:** un documento 0.3 dice exactamente lo mismo en la 0.4, y **el motor
+rellena `clase` solo**, porque la deduce del rol y del libro. Acepta las dos versiones durante toda la 1.x.
+
+**Y el tercer libro, el de honorarios, sigue descartado** (John, 18-sep-2026): se quedan en el libro de compras y
+qué registro los lleva lo decide cada destino, como hoy. El porqué y lo que costaba, en «Por qué no hay un libro de
+honorarios».
 
 | Cambio | Clasificación |
 |---|---|
 | `imputaciones` en la raíz del documento, con llave por `id_externo` | **Aditivo.** Avanza el tag `open-accounting-0.3`, no sube a 0.4 |
+| `clase` obligatoria en cada línea | **0.4.** Es lo que deja la línea explicándose sola fuera del Perú |
+| `rol` fuera del enum, contra un catálogo publicado | **0.4.** A cambio, los roles que vengan después ya no piden versión |
 | Aceptar el documento con un solo comprobante | Ya vale: `comprobantes[]` nunca exigió más de uno |
 | La respuesta que reusa el esquema del diagnóstico | Ya vale: está publicado |
 | Rechazar una clave desconocida | Ya vale: el esquema no admite campos de más |
@@ -1087,7 +1255,7 @@ estándar**.
 
 ---
 
-## 14 · Lo que ya quedó decidido
+## 15 · Lo que ya quedó decidido
 
 **Cuatro se cayeron solas** en cuanto el cuerpo de la llamada dejó de ser un envoltorio y pasó a ser el documento:
 
@@ -1167,9 +1335,9 @@ de las 36 del estándar, que se quedan.
 
 ---
 
-## 15 · Lo que falta decidir
+## 16 · Lo que falta decidir
 
-Cuatro, y ninguna es de arquitectura: tres son de alcance y una es un agujero que apareció al probar el esquema.
+Seis, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero que apareció al probar el esquema.
 
 1. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
 2. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver neutral: quien recibe el
@@ -1181,10 +1349,15 @@ Cuatro, y ninguna es de arquitectura: tres son de alcance y una es un agujero qu
    contabilidad no perdona el céntimo que se pierde», pero el esquema también admite números sin límite de
    decimales: probado, deja pasar `118.005`. O el esquema exige texto, o acepta números pero de dos decimales. Hoy
    la regla que más se repite en este documento es la única que nadie comprueba.
+5. **Si `impuesto` y `plan_de_cuentas` entran con la 0.4 o esperan su caso.** Los dos son opcionales y ninguno hace
+   falta para que `clase` funcione; entrar juntos ahorra una versión, y esperar respeta la regla de que el estándar
+   crece con un archivo real detrás.
+6. **Cuándo se publica la 0.4.** Con `clase` y el catálogo de roles hay que decidir si sale junto con la 1.1.0 del
+   motor —que ya arrastra el renombrado del driver— o después, con su pre-release y su guía de migración.
 
 ---
 
-## 16 · Fuentes
+## 17 · Fuentes
 
 Consultadas el 15-sep-2026.
 
