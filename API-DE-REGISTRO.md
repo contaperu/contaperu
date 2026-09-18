@@ -1056,6 +1056,60 @@ Por eso el documento del estándar lleva los dos bloques, y **cada uno es opcion
 manda comprobantes sin asiento, y quien solo alimenta a su sistema contable puede recibir el asiento sin los
 comprobantes.
 
+### El asiento es derivado, y por eso la cuenta aparece dos veces
+
+En el documento completo de más abajo, la cuenta `6343001` está en `imputaciones` y otra vez en el `asiento`. No es
+una copia: es **la decisión y su efecto**.
+
+| Bloque | Qué es | Quién lo pone | Cuántas cuentas trae |
+|---|---|---|---|
+| `imputaciones` | La decisión: «esta factura va a la 6343001, obra OBRA01» | El usuario, una vez por comprobante | **Una** |
+| `asiento` | El efecto: las líneas que cuadran | El motor | **Cinco**, en este caso |
+
+Las otras cuatro cuentas —el IGV, el proveedor y las dos de la detracción— **no están en la imputación**: salen de
+la configuración de la empresa. Los dos bloques no son equivalentes y ninguno se deduce del otro. Es lo mismo que
+hace Xero: la línea de la factura lleva su `AccountCode`, y el asiento que genera vuelve a llevarlo, más las cuentas
+de control que la factura nunca menciona.
+
+**De ahí sale la regla que falta escribir: el asiento es derivado.** Se obtiene del comprobante, más la imputación,
+más la configuración, y siempre da lo mismo. Si un documento llega con los tres bloques y el asiento **no
+corresponde** a los otros dos, el motor lo dice en vez de elegir en silencio. Es la misma idea que Xero lleva al
+extremo con un libro diario de solo lectura: lo que se escribe es el hecho y la decisión; el asiento se calcula.
+
+### El centro de costo va en todas las líneas
+
+Hoy el centro de costo se escribe en la línea del gasto y, en la del proveedor, como anexo auxiliar si la empresa lo
+configuró así (`contaperu/asiento/motor.py`). Es lo que la práctica contable peruana espera, porque **los sistemas
+legacy solo aceptan centro de costo donde la cuenta es de resultados**.
+
+Pero eso es una limitación del destino, no del hecho: **el IGV de esa factura sí es de esa obra**, y también lo es
+su detracción. Un ERP que quiera responder «cuánto IGV y cuánta detracción corresponden a OBRA01» hoy no puede, y es
+justo lo que un sistema nuevo viene a buscar aquí.
+
+Y así lo resuelve el resto del mundo: **las dimensiones van por línea, en todas**. Xero admite hasta dos `Tracking`
+por línea, QuickBooks `ClassRef` por línea, NetSuite departamento, clase y ubicación por línea, y las API unificadas
+`tracking_categories` por línea. Ninguna las restringe a las cuentas de resultados.
+
+La propuesta, en tres reglas:
+
+1. **El estándar permite `centro_costo` en cualquier línea**, sea de gasto, de impuesto o de balance.
+2. **El asiento neutral lo propaga a todas las líneas del comprobante**, así que la del IGV queda así:
+
+   ```json
+   { "cuenta": "401111", "clase": "activo", "debe_haber": "D", "importe": "1800.00",
+     "rol": "igv", "centro_costo": "OBRA01", "tasa_igv": "18",
+     "documento": { "id_externo": "compra-123", "serie_numero": "F001-123" } }
+   ```
+
+3. **Cada driver decide dónde escribirlo.** CONCAR y CONTASIS siguen poniéndolo donde su sistema lo acepta, y su
+   archivo no cambia ni una celda. El dato viaja completo y cada destino recorta lo que no sabe usar — el mismo
+   principio que gobierna todo lo demás aquí.
+
+**Lo que falta decidir es el reparto.** Cuando la imputación divide una factura entre dos obras, las líneas
+comunes —el IGV, el proveedor, la detracción— no pertenecen a una sola. O se quedan sin centro, o se reparten en
+proporción a la base y el asiento gana líneas que hoy no tiene. La propuesta es dejarlas sin centro y que el ERP
+reparta si su análisis lo pide.
+
 ### El documento completo, en la 0.4
 
 Una compra con detracción, con los tres bloques y el enlace cerrado. Las cinco líneas del asiento son las que el
@@ -1371,6 +1425,8 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 | **La regla de hasta dónde viaja cada bloque** | `libro` y `comprobantes` son hechos y valen en todas partes; `imputaciones` y `asiento` están en el plan de cuentas de quien los escribió y son **informativos fuera de él**. Sin esa regla, un ERP copia cuentas ajenas en silencio. `emisor` ya dice de quién son | Ahora. Es texto, no esquema |
 | **`clase` en cada línea**: `activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto` | Es lo único que un ERP de fuera entiende sin conocer el PCGE, y son los cinco valores que QuickBooks, Xero, Merge y Rutter comparten. Sin ella, `principal` y `tercero` solo significan algo mirando `libro.tipo` («El papel de cada línea») | **0.4** |
 | **`libro.tipo` como catálogo publicado** | Un registro nuevo no puede costar una versión del documento, y un hecho nuevo —el banco— entra como bloque propio, no como valor forzado aquí. Es lo que hacen QuickBooks con un recurso por hecho y EN 16931 con su lista externa de tipos de documento | **0.4** |
+| **`centro_costo` en cualquier línea**, no solo en las de resultados | El IGV y la detracción de una factura son de la misma obra que el gasto; que el legacy no tenga dónde ponerlos es un límite del destino, no del hecho. Xero, QuickBooks, NetSuite y las unificadas llevan sus dimensiones por línea, sin restringirlas | Ya cabe: es decir la regla |
+| **El asiento es derivado** del comprobante, la imputación y la configuración | Si los tres bloques viajan juntos y el asiento no corresponde, hay dos verdades en un archivo. Xero lo lleva al extremo con un libro diario de solo lectura | Ahora. Es texto, no esquema |
 | **`documento.id_externo` en la línea** | Hoy la línea enlaza con su comprobante por serie y número; Xero enlaza por `SourceID` y SAF-T por `SourceDocumentID`. Con el id, el asiento, la imputación y el comprobante quedan atados sin adivinar | Aditivo |
 | **`rol` como catálogo publicado**, fuera del enum del esquema | Un rol nuevo —percepción, anticipo, redondeo— no puede obligar a una versión del documento. Es el diseño de ISO 20022 y el que terminó adoptando SAF-T | **0.4** |
 | **La regla de degradación**: se puede contabilizar con `clase`, `debe_haber` e `importe` aunque el `rol` sea desconocido | Es lo que permite que el catálogo crezca sin romper a quien ya integró | **0.4**. Es texto, no esquema |
@@ -1386,6 +1442,8 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 | **Aceptar `imputaciones` dentro del documento**, sin dejar de aceptar el argumento de hoy | Es la pieza que hace real el formato único, y nadie que ya integre tiene que cambiar |
 | **Una batería de conformidad**: casos de entrada con su documento esperado | Es lo que le permite a un ERP de fuera comprobar que emite bien sin escribirle a nadie. Hoy hay `diagnosticar` y `verificar-driver`; falta el juego de casos |
 | **Renombrar el driver a `asiento_neutral`** | Hoy se llama igual que el estándar. Es gratis mientras siga sin publicar, y rompe a quien lo integre si se hace después de la 1.1.0 («Los dos nombres, decididos») |
+| **Propagar el centro de costo a todas las líneas** en el vocabulario neutral, y dejar que cada driver legacy escriba donde su sistema acepta | Es lo que permite preguntar cuánto IGV y cuánta detracción son de una obra. El Excel de CONCAR no cambia: su driver sigue con sus reglas |
+| **Avisar cuando el asiento que llega no corresponde** al comprobante y su imputación | Un archivo con dos verdades es peor que uno incompleto |
 | **Rellenar `clase` él mismo**, desde el rol y el libro | Así un documento 0.3 que llega sin ella se completa al vuelo, y nadie tiene que reescribir lo que ya guardó |
 | **Publicar el catálogo de roles**, con su versión, al lado de los catálogos de SUNAT | Un ERP consulta qué roles puede recibir en vez de descubrirlos cuando le llega uno que no conoce |
 | **Nada para el correlativo** | Ya está todo: numera en el orden recibido, devuelve los rangos, los anuncia en `diagnosticar`, lo excluye de la huella y lo omite en el asiento neutral. Lo que faltaba era decir que la unidad es el mes («El correlativo») |
@@ -1522,7 +1580,7 @@ de las 36 del estándar, que se quedan.
 
 ## 17 · Lo que falta decidir
 
-Seis, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero que apareció al probar el esquema.
+Siete, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero que apareció al probar el esquema.
 
 1. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
 2. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver neutral: quien recibe el
@@ -1537,7 +1595,10 @@ Seis, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero 
 5. **Si `impuesto` y `plan_de_cuentas` entran con la 0.4 o esperan su caso.** Los dos son opcionales y ninguno hace
    falta para que `clase` funcione; entrar juntos ahorra una versión, y esperar respeta la regla de que el estándar
    crece con un archivo real detrás.
-6. **Cuándo se publica la 0.4.** Con `clase` y el catálogo de roles hay que decidir si sale junto con la 1.1.0 del
+6. **El centro de costo de las líneas comunes cuando hay reparto.** Si una factura se divide entre dos obras,
+   el IGV, el proveedor y la detracción no son de una sola: o van sin centro, o se reparten en proporción a la
+   base y el asiento gana líneas que hoy no tiene. La propuesta es dejarlas sin centro.
+7. **Cuándo se publica la 0.4.** Con `clase` y el catálogo de roles hay que decidir si sale junto con la 1.1.0 del
    motor —que ya arrastra el renombrado del driver— o después, con su pre-release y su guía de migración.
 
 ---
