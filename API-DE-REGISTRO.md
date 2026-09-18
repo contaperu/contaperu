@@ -30,12 +30,48 @@ anexos quedan fuera: cada uno es otro hecho contable y entra cuando tenga su cas
 | **La propuesta** | 6 a 11 | Qué hay hoy, cuál es el formato, cómo se ve en cuatro casos, por qué los libros son dos, qué dice cada línea del asiento y por qué el comprobante y el asiento son bloques distintos |
 | **Cómo funciona** | 12 y 13 | Dónde corre el motor, en qué orden, y a dónde va cada salida |
 | **Los límites y lo que queda** | 14 a 17 | Qué se deja fuera a propósito, qué toca a cada pieza, qué se decidió y qué no |
+| **Cómo se construye** | 18 | Las partes en orden, sus tests y los documentos que hay que actualizar |
 
 **Convenciones.** Los RUC de los ejemplos son los seguros del proyecto (`20131312955` y `20601234567`); ninguna
 empresa real aparece aquí. El driver neutral aparece con el nombre que tiene hoy, `open_accounting`, aunque ya esté
 decidido que pase a llamarse `asiento_neutral` («Los dos nombres, decididos»). Los importes van en texto y las fechas en `AAAA-MM-DD`, como manda el estándar. Lo que no
 se pudo confirmar en la documentación oficial va marcado *no verificado*. Investigación hecha el **15 y el 16 de
 septiembre de 2026**; las fuentes, consultadas el 15, al final.
+
+---
+
+## En una página
+
+**El problema.** Cada ERP peruano recibe los asientos en su propio formato: STARSOFT pide una lista de líneas con la
+cabecera repetida y vocabulario de CONCAR, el Excel de CONCAR pide sus 41 columnas, CONTASIS las suyas. Quien integra
+tres sistemas escribe tres veces lo mismo.
+
+**La propuesta.** Que el cuerpo de la llamada **sea el documento `open-accounting`**, el mismo archivo que se guarda,
+se manda y se archiva, con cuatro bloques:
+
+| Bloque | Qué lleva | Quién lo decide |
+|---|---|---|
+| `libro` | RUC, mes y qué registro es | El contribuyente |
+| `comprobantes[]` | Los hechos: lo que dice cada factura, con las casillas de SUNAT y **sin cuentas** | SUNAT y el proveedor |
+| `imputaciones{}` | La decisión contable de cada comprobante, por su `id_externo` | El usuario, en su ERP |
+| `asiento[]` | El efecto: las líneas que cuadran, cada una con su `rol` y su `clase` | El motor, que lo **deriva** |
+
+**Los cinco cambios que propone**, y su costo:
+
+| Cambio | Por qué | Versión |
+|---|---|---|
+| `imputaciones` en la raíz | Sin ellas el archivo no explica su propio asiento | Aditivo |
+| `documento.id_externo` en la línea | El enlace exacto entre línea, comprobante e imputación, como `SourceID` en Xero | Aditivo |
+| `clase` en cada línea (`activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto`) | Es lo único que un ERP de fuera entiende sin conocer el PCGE | **0.4** |
+| `rol` y `libro.tipo` como catálogos publicados | Para que un rol o un libro nuevo no cueste una versión | **0.4** |
+| El centro de costo en todas las líneas | El IGV y la detracción son de la misma obra que el gasto | Es decir la regla |
+
+**Lo que no cambia:** el comprobante sigue siendo el de SUNAT y sin cuentas; los importes van en texto; `debe_haber`
+explícito; la detracción en dos tiempos; y los recibos por honorarios se quedan en el libro de compras.
+
+**Y la regla que lo hace escalable:** quien recibe tiene que poder contabilizar una línea con `clase`, `debe_haber` e
+`importe` aunque no conozca su `rol`. Con eso, lo que venga después —la percepción, el anticipo, el banco— entra como
+valor de catálogo o como bloque nuevo, sin volver a subir la versión.
 
 ---
 
@@ -49,7 +85,7 @@ septiembre de 2026**; las fuentes, consultadas el 15, al final.
    levanta él. Existe además un MCP abierto en producción, pero **nadie está obligado a pasar por una URL ajena**:
    es una puerta que alguien corre, no un servicio del que dependa el cierre de mes de otro.
 3. **El formato es uno solo, y ya existe.** Es `open-accounting`. Este documento no propone un JSON nuevo al lado del
-   estándar: propone que **el estándar sea también el cuerpo de la llamada**. La sección 7 cuenta por qué el primer
+   estándar: propone que **el estándar sea también el cuerpo de la llamada**. «El formato: uno solo, el del estándar» cuenta por qué el primer
    borrador tenía dos formas y qué se ganó al juntarlas.
 
 ---
@@ -271,7 +307,7 @@ Y dos detalles que solo existen aquí:
   inventado nunca provisiona una detracción.
 
 En el asiento son dos líneas con rol propio, `detraccion_tercero` y `detraccion`, que mueven del saldo del proveedor
-a la cuenta de detracciones. Se ven generadas en la sección 11.
+a la cuenta de detracciones. Se ven generadas en «El recorrido, visto desde el ERP que ya tiene el dato».
 
 ### La retención, que son dos cosas distintas con el mismo nombre
 
@@ -335,13 +371,13 @@ interpretar.
 |---|---|
 | Cabecera y líneas en una llamada | El documento lleva `comprobantes[]` y `asiento[]` a la vez |
 | Dos recursos | `libro.tipo: compra \| venta`, los dos libros que define SUNAT. Los honorarios van en compras, y qué registro los lleva lo decide cada destino |
-| Cuenta en la línea | La línea de diario la lleva; en el comprobante viaja aparte, en la imputación por `id_externo` |
+| Cuenta en la línea | La línea de diario la lleva; el comprobante nunca, y la decisión viaja en `imputaciones`, por `id_externo` |
 | Impuesto explícito | `base_gravada` e `igv` siempre netos, `tasa_igv` leída del documento, y la línea con `rol: igv` |
 | Moneda y T.C. | `moneda`, `tipo_cambio`. **Un comprobante en dólares sin tipo de cambio se observa con `TC_FALTA`, nivel error**: SUNAT lo exige, y el motor no lo inventa ni lo delega al destino |
 | Cada casilla del registro | `base_gravada`, `igv`, `exonerado`, `inafecto`, `exportacion`, `isc`, `base_ivap`, `ivap`, `icbper`, `otros`, cada una con su importe. Son las columnas que SUNAT distingue, y el motor comprueba que sumen el total |
 | Los dos números | `serie` + `numero` del emisor; `id_externo` del sistema que registra |
 | Contraparte | `contraparte_tipo_doc`, `contraparte_doc`, `contraparte_nombre`: el modelo de los estándares abiertos |
-| Estado inicial (borrador o contabilizado) | **No lo tiene, y es a propósito.** `estado` del comprobante es `ok`/`observada`/`duplicada` —validación, no ciclo de vida— y el de la línea es nombre reservado. Borrador o contabilizado es del sistema que guarda, y el motor no guarda (sección 12) |
+| Estado inicial (borrador o contabilizado) | **No lo tiene, y es a propósito.** `estado` del comprobante es `ok`/`observada`/`duplicada` —validación, no ciclo de vida— y el de la línea es nombre reservado. Borrador o contabilizado es del sistema que guarda, y el motor no guarda («Qué queda fuera, a propósito») |
 | Idempotencia | La identidad del comprobante y la huella de `_exportacion` |
 | Dimensiones | `centro_costo` y `anexo_auxiliar`; `dimensiones` es nombre reservado |
 | Nota de crédito | `tipo_cp: 07` con `ref_tipo_cp`, `ref_serie`, `ref_numero`, `ref_fecha` |
@@ -408,7 +444,7 @@ hay dos sitios para el mismo dato, y **el que sobra es la ruta**:
    una 0.4 que rompe a todos para ahorrar un campo.
 
 No es una rareza de aquí: Xero lo dice con `Type: ACCPAY | ACCREC` y Merge con
-`type: ACCOUNTS_PAYABLE | ACCOUNTS_RECEIVABLE`, los dos dentro del cuerpo (sección 2).
+`type: ACCOUNTS_PAYABLE | ACCOUNTS_RECEIVABLE`, los dos dentro del cuerpo («Cómo registra un comprobante cada API de EE. UU.»).
 
 ### Campo por campo
 
@@ -420,12 +456,12 @@ No es una rareza de aquí: Xero lo dice con `Type: ACCPAY | ACCREC` y Merge con
 | `libro.ruc` | 0.3 | sí | Sin RUC no hay libro |
 | `libro.razon_social` | 0.3 | no | Informativo; algún driver la escribe |
 | `libro.periodo` | 0.3 | sí | `AAAAMM`. Se exige siempre: derivarlo apagaría tres validaciones de plazo |
-| `libro.tipo` | 0.3 | sí | `compra` o `venta`, los dos libros de SUNAT. Es el discriminador de Xero y Merge, y evita rutas por tipo |
+| `libro.tipo` | 0.3 | sí | `compra` o `venta`, los dos libros de SUNAT. Es el discriminador de Xero y Merge, y evita rutas por tipo. En la 0.4 se valida contra su catálogo, para que un registro nuevo no cueste una versión |
 | `comprobantes[]` | 0.3 y SUNAT | sí | El modelo ya existe y lo define SUNAT: uno o los del mes |
 | `contraparte_*` | 0.3, Tabla 1 | según el caso | Planos, con el RUC: el modelo de EN 16931, no un `Contact` propio |
 | `detraccion` | 0.3 | no | Entra `PROVISIONADO`; la constancia llega después |
 | `imputaciones{}` | **nuevo**, por `id_externo` | no | `cuenta_contable`, `centro_costo`, `cuenta_tercero` y `reparto[]`, lo que hoy es un argumento de la llamada |
-| `asiento[]` | 0.3 | no | Para el ERP que ya lo armó |
+| `asiento[]` | 0.3 | no | Para el ERP que ya lo armó. En la 0.4 cada línea lleva `clase` y enlaza con su comprobante por `documento.id_externo` («El papel de cada línea») |
 | `emisor` | 0.3 | no | Qué software produjo el dato |
 
 **Fuera del documento**, en la llamada: no describen la contabilidad sino qué hacer con ella, y el mismo archivo
@@ -433,7 +469,7 @@ tiene que servir para destinos distintos.
 
 | Nombre | Qué decide |
 |---|---|
-| `driver` | El destino: `sire`, `concar`, `contasis`, `open_accounting` —que pasará a llamarse `asiento_neutral`, sección 14—… Sin destino, la respuesta es el diagnóstico |
+| `driver` | El destino: `sire`, `concar`, `contasis`, `open_accounting` —que pasará a llamarse `asiento_neutral`, «Los dos nombres, decididos»—… Sin destino, la respuesta es el diagnóstico |
 | `configuracion` | Lo del sistema de destino y lo general del contribuyente |
 | `correlativos` | Desde qué número sigue cada sub-diario |
 | `claves_previas` | Lo anotado en periodos anteriores, para reconocer el duplicado |
@@ -445,7 +481,7 @@ Un comprobante admite **46 campos y solo exige tres**: `tipo_cp`, `fecha_emision
 opcional, y la regla es la misma para todos: **un campo está o no está, y si no está, ese hecho no ocurrió.** No hay
 booleanos de presencia, ni ceros de relleno, ni cadenas vacías obligatorias.
 
-Es la diferencia de fondo con la API de la sección 1, donde cada línea manda `detraccion: false` más cinco campos
+Es la diferencia de fondo con la API de «El caso que lo motiva», donde cada línea manda `detraccion: false` más cinco campos
 vacíos por si acaso. Probado contra el esquema:
 
 | Lo que mandas | Resultado |
@@ -788,8 +824,8 @@ suyo**.
 Se evaluó añadir `honorario` como tercer valor de `libro.tipo`, y se descartó. Esto es lo que costaba:
 
 - **Una versión que rompe.** El enum de `libro.tipo` es cerrado y cada driver llavea sus formatos por ese valor: un
-  tercero sería una **0.4** con su enmienda, no un campo opcional. Era el único cambio de todo este documento que
-  subía la versión del estándar; sin él, todo cabe en la 0.3.
+  tercero sería una **0.4** con su enmienda, no un campo opcional —y por un valor de enum, no por algo que el
+  formato necesite: la 0.4 que este documento sí propone se la gana `clase`, que le sirve a todos los libros.
 - **Trabajo en cada driver.** CONCAR y CONTASIS tendrían que declarar el libro nuevo con su sub-diario, o el mes de
   honorarios no saldría por ahí.
 - **Mover la decisión del destino al productor.** Hoy la clasificación la declara un driver en una línea; repartida,
@@ -1196,7 +1232,7 @@ captura: la factura y el proveedor ya están en sus tablas.
 ### Dónde se procesa: dentro del ERP, siempre
 
 **El motor es una librería que el ERP instala, no un servicio al que le pide permiso.** No hay un servidor de
-ContaPerú en medio de nadie — justo lo contrario del modelo de la sección 1, donde `starsoftweb.com` está en medio y
+ContaPerú en medio de nadie — justo lo contrario del modelo de «El caso que lo motiva», donde `starsoftweb.com` está en medio y
 por eso hacen falta IP pública y licencia. Los datos del contribuyente **no salen de la infraestructura de quien
 integra**.
 
@@ -1219,12 +1255,12 @@ XML da el mismo documento y el mismo diagnóstico por cualquiera de ellas.
 
 En los dos casos, **validar lo armado es siempre del motor** (`revisar`, `diagnosticar`).
 
-### Las dos piezas que no son el documento
+### La configuración y la imputación
 
-| Pieza | Qué lleva | Cada cuánto |
-|---|---|---|
-| **Configuración** | Lo que vale para todo el entorno: cuentas por defecto, si usa centros de costo, y una sección por sistema contable —siglas, sub-diarios, en qué columna va cada dato— | Una vez por empresa |
-| **Imputación** | Lo que se decide para **un** comprobante: su cuenta, su centro de costo, la cuenta del total o un reparto entre varias | Solo donde haga falta |
+| Pieza | Qué lleva | Cada cuánto | Dónde viaja |
+|---|---|---|---|
+| **Configuración** | Lo que vale para todo el entorno: cuentas por defecto, si usa centros de costo, y una sección por sistema contable —siglas, sub-diarios, en qué columna va cada dato— | Una vez por empresa | **Fuera del documento**: no es contabilidad de un mes, es cómo escribe esta empresa |
+| **Imputación** | Lo que se decide para **un** comprobante: su cuenta, su centro de costo, la cuenta del total o un reparto entre varias | Solo donde haga falta | **Dentro**, en `imputaciones`, con llave por `id_externo` |
 
 **El usuario no teclea la cuenta en cada factura.** Deja los valores por defecto una vez e imputa lo que se sale de
 la norma; lo que la imputación no traiga sale de la configuración.
@@ -1248,7 +1284,8 @@ la norma; lo que la imputación no traiga sale de la configuración.
 
 No está por implementar: **el Excel de CONCAR son asientos**, y `generar_asiento` es una operación pública desde la
 1.0. Lo que añade el driver `open_accounting` es el **perfil neutral** —las mismas cuentas, sentidos e importes, sin
-el vocabulario de un legacy—. Este es el asiento real de la compra del ejemplo de arriba, generado por el motor:
+el vocabulario de un legacy—. Este es el asiento real de la compra del ejemplo de arriba, generado por el motor
+**hoy**: con la 0.4, cada línea suma su `clase` y el centro de costo se propaga a todas («El papel de cada línea»):
 
 | `rol` | `cuenta` | | `importe` |
 |---|---|---|---|
@@ -1258,17 +1295,7 @@ el vocabulario de un legacy—. Este es el asiento real de la compra del ejemplo
 | `detraccion_tercero` | 421201 | D | 1416.00 |
 | `detraccion` | 421203 | H | 1416.00 |
 
-Y así viene cada línea:
-
-```json
-{
-  "cuenta": "6343001", "debe_haber": "D", "importe": "10000.00", "rol": "principal",
-  "fecha": "2026-01-15", "moneda": "PEN", "centro_costo": "OBRA01",
-  "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026", "tasa_igv": "18",
-  "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
-                 "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" }
-}
-```
+Cada línea entera, y el archivo que se descarga, están en «El botón «Generar asientos»».
 
 **Lo que hace ese asiento portable entre ERPs es `rol`, no la cuenta.** Un sistema que quiera el IGV en una columna
 aparte busca la línea por su rol, porque la cuenta `401111` la elige cada empresa pero «esta línea es el IGV» vale
@@ -1332,7 +1359,7 @@ estructura y no hace falta el neutral.
 
 Para quien eligió **sin software contable**, donde otros descargan el Excel que alimenta a su legacy va un botón que
 dice **Generar asientos**. No exporta a nadie: arma el asiento y lo entrega. Es el mismo asiento de CONCAR, más
-limpio. Este es el archivo que produce, generado por el motor para la compra del ejemplo de la sección 8:
+limpio. Este es el archivo que produce, generado por el motor para la compra del primero de los «Cuatro ejemplos»:
 
 ```json
 {
@@ -1394,7 +1421,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 - **El impuesto por línea de detalle y el indicador de precios con impuesto** (`LineAmountTypes`,
   `pricesIncludeTax`). Sin ítems no tienen dónde ir, y el IGV nunca se delega al destino: va explícito, con su tasa.
 - **Un cuerpo propio de la API.** Fue el primer borrador y duró lo que tardó la primera lectura: un formato que solo
-  existe dentro de una petición no se puede guardar, ni mandar, ni comprobar sin servidor. La sección 7 lo cuenta.
+  existe dentro de una petición no se puede guardar, ni mandar, ni comprobar sin servidor. «El formato: uno solo, el del estándar» lo cuenta.
 - **Las rutas por tipo, `/v1/compras` y `/v1/ventas`.** El documento dice `libro.tipo`; una ruta que repite un campo
   del cuerpo solo añade un sitio donde los dos pueden contradecirse.
 - **La cabecera `Idempotency-Key`.** La clave natural aquí es la identidad del comprobante más la huella del
@@ -1406,7 +1433,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 - **Los lotes.** Ya existen: son las operaciones de hoy, con su tope de comprobantes.
 - **El signo en vez de `debe_haber`**, y los importes numéricos **como recomendación**: el céntimo que pierde un
   `float` y la nota de crédito restada dos veces. Con una salvedad que hay que resolver: el esquema todavía **admite**
-  números, así que hoy es consejo y no regla (sección 15).
+  números, así que hoy es consejo y no regla («Lo que falta decidir»).
 - **OAuth, webhooks, sincronización incremental.** El motor no tiene estado ni sale a la red.
 
 ---
@@ -1512,9 +1539,9 @@ honorarios».
 ### El libro de honorarios: no se hace (John, 18-sep-2026)
 
 Los recibos por honorarios se quedan **dentro del libro de compras**, como hoy, y qué registro los lleva lo sigue
-declarando cada destino. Con eso, `libro.tipo` conserva sus dos valores, **ningún cambio de este documento sube la
-versión del estándar** y los drivers se quedan como están. El porqué entero, en «Por qué no hay un libro de
-honorarios».
+declarando cada destino. Con eso los drivers se quedan como están y el estándar se ahorra **esa** versión —la 0.4
+que sí se propone es la de `clase` y los catálogos, por otro motivo—. El porqué entero, en «Por qué no hay un libro
+de honorarios».
 
 ### El correlativo: la unidad de numeración es el mes, no el lote
 
@@ -1533,7 +1560,7 @@ sub-diario de un sistema legacy** (`MMNNNN`: mes y cuatro dígitos). Tres hechos
 número de voucher pertenece **al libro del mes**, no a la tanda en que alguien subió los archivos — y el documento
 del estándar ya *es* un mes: `libro` es RUC, periodo y tipo.
 
-De ahí los dos modos, que son exactamente los dos flujos de la sección 11:
+De ahí los dos modos, que son exactamente los dos flujos de «Los destinos: al SIRE llegan todos»:
 
 | | **Mes completo** (por defecto) | **Por tandas** |
 |---|---|---|
@@ -1603,7 +1630,82 @@ Siete, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero
 
 ---
 
-## 18 · Fuentes
+## 18 · Cómo se implementa
+
+Este documento es investigación y borrador, pero lo que propone se ejecuta por partes, con la batería verde en cada
+una y el OK de John entre ellas. El orden importa: **la parte 2 tiene fecha límite** y la 3 arrastra una versión del
+estándar.
+
+### Parte 1 · `imputaciones` dentro del documento (aditivo, tag `open-accounting-0.3`)
+
+| Qué | Dónde |
+|---|---|
+| La raíz admite `imputaciones`, con llave por `id_externo` | `estandar/open-accounting.schema.json` |
+| El pipeline la lee del documento sin dejar de aceptar el argumento de hoy, y rechaza que lleguen los dos | `contaperu/pipeline/preparacion.py`, `contaperu/api/` |
+| `documento.id_externo` en la línea del asiento | el esquema y `contaperu/asiento/motor.py` |
+
+**Los tests que la fijan:** un documento con `imputaciones` da exactamente el mismo asiento que hoy da con la
+imputación como argumento; una llave que no es de ningún comprobante se rechaza; mandar las dos formas a la vez se
+rechaza; el snapshot de CONCAR y las huellas no se mueven.
+
+### Parte 2 · Renombrar el driver a `asiento_neutral` (antes de la 1.1.0)
+
+Es gratis mientras siga sin publicar y rompe a quien lo integre si se hace después. Son 89 apariciones en 31
+archivos, la mayoría tests y fixtures, y hay que distinguirlas de las 36 del estándar, que se quedan.
+
+**Los tests que la fijan:** la superficie pública regenerada solo con el nombre nuevo; la caracterización, el MCP y
+`openconta.json` al día; el documento que produce, byte a byte igual salvo el nombre del archivo.
+
+### Parte 3 · La 0.4: `clase` y los catálogos
+
+| Qué | Dónde |
+|---|---|
+| `clase` obligatoria en cada línea | el esquema y `contaperu/asiento/motor.py`, que la deduce del rol y del libro |
+| `rol` y `libro.tipo` validados contra un catálogo publicado, no contra un enum | el esquema, `contaperu/modelo.py`, `contaperu/drivers/contrato.py` |
+| Los catálogos `roles`, `clases` y `tipos_de_libro`, con su versión | `contaperu/datos/`, servidos por `api.catalogos_*` |
+| La regla de degradación y la de versionado en tres niveles | `estandar/LEEME.md` |
+| La enmienda que acompaña el salto de versión | `estandar/enmiendas/` (hito E1, que todavía no existe) |
+
+**Los tests que la fijan:** cada rol tiene su clase y un test las recorre todas; un documento 0.3 entra y sale
+completado, con el mismo asiento; un rol que no está en el catálogo no rompe el documento; el snapshot de CONCAR
+idéntico.
+
+**Y antes del tag:** `contaperu/_version.py`, la sección del CHANGELOG, una pre-release `rc` y la guía de migración,
+como manda el proyecto para una versión mayor del estándar.
+
+### Parte 4 · Lo opcional, cuando tenga su caso
+
+El bloque `impuesto` en la línea, el diccionario `plan_de_cuentas`, y propagar el centro de costo a todas las líneas
+del asiento neutral. Esto último **cambia una salida** —la del driver neutral, no la de CONCAR— y por tanto se
+anuncia en el CHANGELOG como cambio de comportamiento.
+
+### Los documentos que hay que actualizar cuando se aplique
+
+Cinco dicen hoy que la imputación llega aparte del documento, y tres describen el asiento sin `clase`:
+
+| Documento | Qué cambia |
+|---|---|
+| `README.md` | «El motor por dentro»: la imputación pasa a ser un bloque del documento |
+| `diagramas/arquitectura-del-motor.svg` | Dibuja «la imputación aparte» |
+| `ARQUITECTURA.md` | La línea neutral, con `clase` y el enlace por `id_externo` |
+| `INTEGRAR.md` | Su ejemplo `curl`, que manda `imputacion` como argumento |
+| `estandar/LEEME.md` | La imputación, las reglas nuevas y el versionado en tres niveles |
+| `CHANGELOG.md` · `HOJA-DE-RUTA.md` | La versión con su porqué, y los hitos de cada parte |
+
+### Lo que bloquea cada parte
+
+| Decisión pendiente | Bloquea |
+|---|---|
+| Si se rechaza la clave desconocida | Parte 1 |
+| Si `imputaciones` vuelve en la respuesta | Parte 1 |
+| Los importes en texto como regla del esquema | Parte 3, que ya toca el esquema |
+| El centro de las líneas comunes cuando hay reparto | Parte 4 |
+| Si `impuesto` y `plan_de_cuentas` entran con la 0.4 | Partes 3 y 4 |
+| Cuándo se publica la 0.4 | Parte 3 |
+
+---
+
+## 19 · Fuentes
 
 Consultadas el 15-sep-2026.
 
