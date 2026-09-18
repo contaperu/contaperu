@@ -27,9 +27,9 @@ anexos quedan fuera: cada uno es otro hecho contable y entra cuando tenga su cas
 | | Secciones | Qué contesta |
 |---|---|---|
 | **De dónde sale** | 1 a 5 | Cómo lo resuelve el mundo, y qué es lo que el mundo no tiene |
-| **La propuesta** | 6 a 10 | Qué hay hoy, cuál es el formato, cómo se ve en cuatro casos, por qué los libros son dos, y qué dice cada línea del asiento |
-| **Cómo funciona** | 11 y 12 | Dónde corre el motor, en qué orden, y a dónde va cada salida |
-| **Los límites y lo que queda** | 13 a 16 | Qué se deja fuera a propósito, qué toca a cada pieza, qué se decidió y qué no |
+| **La propuesta** | 6 a 11 | Qué hay hoy, cuál es el formato, cómo se ve en cuatro casos, por qué los libros son dos, qué dice cada línea del asiento y por qué el comprobante y el asiento son bloques distintos |
+| **Cómo funciona** | 12 y 13 | Dónde corre el motor, en qué orden, y a dónde va cada salida |
+| **Los límites y lo que queda** | 14 a 17 | Qué se deja fuera a propósito, qué toca a cada pieza, qué se decidió y qué no |
 
 **Convenciones.** Los RUC de los ejemplos son los seguros del proyecto (`20131312955` y `20601234567`); ninguna
 empresa real aparece aquí. El driver neutral aparece con el nombre que tiene hoy, `open_accounting`, aunque ya esté
@@ -937,6 +937,37 @@ con `rol: "percepcion"`, que hoy no existe, la sigue contabilizando: es un `acti
 ella se completa al vuelo, así que nadie tiene que reescribir lo que ya tiene guardado. El motor acepta las dos
 versiones durante toda la 1.x.
 
+### Y lo mismo con `libro.tipo`: los tres niveles de cambio
+
+`libro.tipo` tiene hoy el mismo problema que `rol`: es un enum cerrado de dos valores (`TIPOS_LIBRO`,
+`contaperu/modelo.py`), así que **cualquier registro nuevo obligaría a subir la versión** — que es exactamente lo
+que hizo caer el libro de honorarios. Conviene sacarlo al catálogo en la misma 0.4, porque después cada libro nuevo
+sería otra versión.
+
+Y hay que distinguir dos cosas que se confunden:
+
+| Qué llega | Ejemplo | Cómo entra |
+|---|---|---|
+| **Otro registro del mismo hecho** | Un libro de honorarios, un registro simplificado | Un **valor nuevo en el catálogo** de tipos de libro. Cada driver declara en su `FORMATOS` qué libros lleva, y el que no lo declara nunca lo recibe |
+| **Otro hecho** | Los movimientos del banco, los cheques | **Un bloque nuevo en la raíz**, como `movimientos[]`. Un movimiento bancario no tiene tipo de comprobante, ni serie, ni IGV: forzarlo como «tipo de libro» rompería a todo el que espera `comprobantes[]` |
+
+Así lo hacen afuera: QuickBooks tiene un recurso por tipo de hecho —`Bill`, `Invoice`, `JournalEntry`, `Deposit`,
+`Transfer`—, y Xero tiene `BankTransactions` aparte de `Invoices`. Un hecho nuevo es un recurso nuevo, no un valor
+forzado en el enum de otro. Los códigos de tipo de documento de EN 16931 (`BT-3`: 380 factura, 381 nota de crédito)
+viven en una **lista externa**, mantenida aparte de la norma, y los de ISO 20022 también, literalmente «para añadir
+códigos sin impactar la versión de los mensajes».
+
+De ahí sale la regla de versionado que este documento propone escribir en el estándar:
+
+| Cambio | Ejemplo | ¿Sube la versión? |
+|---|---|---|
+| **Un valor nuevo en un catálogo** | Un rol `percepcion`; un libro `honorario` | **No.** Se publica el catálogo con su fecha, y quien no conoce el valor degrada con `clase` |
+| **Un bloque opcional nuevo** | `movimientos[]` del banco; `plan_de_cuentas` | **No.** Quien no lo entiende lo ignora |
+| **Cambiar lo que ya existe** | Volver obligatorio un campo, quitarlo, cambiar su significado | **Sí** |
+
+Con esa regla, la 0.4 es la **última versión que hace falta por un buen tiempo**: después, los libros nuevos, los
+roles nuevos y hasta el banco entran sin tocarla.
+
 ### Lo que se descartó, y por qué
 
 - **Renombrar los roles a `gasto`, `ingreso`, `por_pagar` y `por_cobrar`.** Se leería solo, pero rompe el enum para
@@ -951,7 +982,158 @@ versiones durante toda la 1.x.
 
 ---
 
-## 11 · El recorrido, visto desde el ERP que ya tiene el dato
+## 11 · El comprobante y el asiento: por qué son dos bloques
+
+Al leer un ejemplo parece que `comprobantes` y `asiento` dicen lo mismo dos veces: los dos traen el tipo de
+comprobante, la serie y el número, las fechas y la moneda. No es así, y la diferencia es la que sostiene todo el
+formato.
+
+**El comprobante es el hecho; el asiento es su efecto sobre el plan de cuentas.** El asiento se regenera a partir
+del comprobante, del plan de cuentas y de las reglas; el comprobante **no se puede reconstruir a partir del
+asiento**. Por eso los dos se guardan, y por eso se enlazan.
+
+### Cómo lo resuelve el mundo
+
+| Quién | El documento | El asiento | El enlace |
+|---|---|---|---|
+| **Xero** | `/Invoices`: **se escribe** | `/Journals`: **solo lectura**, lo escribe su motor contable | `SourceID` + `SourceType` en cada asiento, con 24 valores (`ACCPAY`, `ACCREC`, `MANJOURNAL`…) |
+| **QuickBooks Online** | `Bill` e `Invoice`, con vencimiento, términos de pago e ítems | `JournalEntry` guarda solo los asientos manuales y de ajuste; el efecto de una factura en el mayor se consulta por los reportes (`GeneralLedger`) | `LinkedTxn` entre documentos |
+| **SAF-T (OCDE)** | `SourceDocuments`: facturas de venta, de compra y pagos | `GeneralLedgerEntries`: `Journal` → `Transaction` → `Line` | **Cruzado en los dos sentidos**: la línea lleva `SourceDocumentID` y la factura lleva `TransactionID` |
+| **XBRL GL** | Los dos en el mismo árbol | `entryDetail`, con `documentType` y `entryType` | Del hecho al asiento, y del asiento al estado financiero |
+
+Tres consecuencias que se repiten en todos:
+
+1. **El asiento siempre tiene más líneas que el documento**, porque añade lo que la factura no dice: la cuenta de
+   control del proveedor o del cliente, y la del impuesto.
+2. **El documento tiene lo que el asiento nunca tendrá**: los ítems con cantidad y precio, el vencimiento, los
+   términos de pago, el saldo pendiente y el archivo original. La norma de auditoría de EE. UU. lo dice como regla
+   de evidencia: el documento original vale más que cualquier copia o conversión (PCAOB AS 1105).
+3. **SAF-T exige los dos a la vez**, porque con solo el diario no se puede probar el impuesto por línea ni cruzar
+   contra la facturación electrónica. En el Perú pasa igual: SUNAT pide el Libro Diario **y** el Registro de
+   Compras.
+
+### Dónde está la frontera aquí
+
+De los 55 campos de los dos bloques, **solo cuatro están en los dos**:
+
+| | Comprobante | Línea del asiento |
+|---|---|---|
+| **Campos propios** | **42**: las casillas del registro (`base_gravada`, `igv`, `exonerado`, `inafecto`, `exportacion`, `isc`, `icbper`, `total`…), la identificación (`tipo_cp`, `serie`, `numero`, `fecha_emision`), la contraparte con su nombre y su tipo de documento, la referencia de la nota, la DUA y la trazabilidad (`origen`, `confianza`, `id_externo`, `observaciones`) | **13**: `cuenta`, `debe_haber`, `importe`, `rol`, `clase`, `centro_costo`, `anexo_auxiliar`, `sub_diario`, `correlativo`, `glosa`, `tasa_igv`, y los bloques `documento` y `referencia` |
+| **Compartidos** | `contraparte_doc`, `moneda`, `tipo_cambio`, `detraccion` | los mismos cuatro |
+
+Y cada coincidencia tiene su motivo:
+
+- **La moneda y el tipo de cambio se congelan en la línea** para que el asiento se pueda valorar sin volver al
+  documento. Es lo que hace ERPNext, que guarda en cada apunte el tipo de cambio de la transacción.
+- **El bloque `detraccion` no es el mismo en los dos lados.** En el comprobante es el hecho —código, porcentaje,
+  monto, constancia y estado—; en la línea es lo que el destino necesita escribir: `codigo`, `codigo_interno`,
+  `tasa` y `base`.
+- **`contraparte_doc` se repite** porque un sistema que importa asientos necesita el anexo en la línea, sin leer el
+  comprobante.
+
+### Lo que parece copia y es el enlace
+
+El bloque `documento` dentro de cada línea —`tipo_cp`, `serie_numero`, `fecha_emision`, `fecha_vencimiento`— no
+duplica el comprobante: **es el enlace**, el mismo papel que cumplen `SourceID` y `SourceType` en Xero y
+`SourceDocumentID` en SAF-T. Está ahí para que la línea viaje sola a un ERP que recibió el asiento y no los
+comprobantes.
+
+**Y ahí hay una mejora pendiente:** el enlace es por serie y número (`F001-123`), que es la identidad tributaria,
+no la del sistema que registró. Xero enlaza por id y SAF-T por número de documento en los dos sentidos. Añadir
+**`documento.id_externo`** en la línea cierra el círculo: con `imputaciones` llaveadas por `id_externo` y el asiento
+apuntando al mismo id, el archivo se explica entero sin adivinar nada. Ya figura como propuesta en
+`INTEROPERABILIDAD.md`, esperando su caso.
+
+### Qué pasa cuando se fusionan los dos
+
+- **Solo asientos** —el Excel de un legacy— pierde serie y número, el RUC de la contraparte, la fecha de emisión
+  frente a la de registro, el vencimiento y la base por tipo de impuesto. Con eso no se genera el registro de
+  compras ni se cruza contra la facturación electrónica.
+- **Solo documentos** pierde todo lo que no tiene comprobante detrás: provisiones, depreciación, diferencia de
+  cambio, reclasificaciones y ajustes de cierre.
+
+Por eso el documento del estándar lleva los dos bloques, y **cada uno es opcional**: quien solo declara el SIRE
+manda comprobantes sin asiento, y quien solo alimenta a su sistema contable puede recibir el asiento sin los
+comprobantes.
+
+### El documento completo, en la 0.4
+
+Una compra con detracción, con los tres bloques y el enlace cerrado. Las cinco líneas del asiento son las que el
+motor devuelve hoy; lo que la 0.4 añade es `clase`, `documento.id_externo` y el bloque `imputaciones`:
+
+```json
+{
+  "open_accounting": "0.4",
+
+  "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
+             "periodo": "202601", "tipo": "compra" },
+
+  "comprobantes": [
+    {
+      "tipo_cp": "01", "serie": "F001", "numero": "0000123",
+      "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14",
+      "condicion_pago": "credito",
+      "contraparte_tipo_doc": "6", "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00", "igv": "1800.00", "total": "11800.00",
+      "destino_igv": "DG",
+      "detraccion": { "codigo": "037", "porcentaje": "12", "monto": "1416.00",
+                      "estado": "PROVISIONADO" },
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "origen": "xml", "id_externo": "compra-123"
+    }
+  ],
+
+  "imputaciones": {
+    "compra-123": { "cuenta_contable": "6343001", "centro_costo": "OBRA01" }
+  },
+
+  "asiento": [
+    { "cuenta": "6343001", "clase": "gasto", "debe_haber": "D", "importe": "10000.00",
+      "rol": "principal", "fecha": "2026-01-15", "moneda": "PEN",
+      "centro_costo": "OBRA01", "tasa_igv": "18",
+      "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "documento": { "id_externo": "compra-123", "tipo_cp": "01", "serie_numero": "F001-123",
+                     "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
+
+    { "cuenta": "401111", "clase": "activo", "debe_haber": "D", "importe": "1800.00",
+      "rol": "igv", "fecha": "2026-01-15", "moneda": "PEN", "tasa_igv": "18",
+      "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "documento": { "id_externo": "compra-123", "…": "el mismo de arriba" } },
+
+    { "cuenta": "421201", "clase": "pasivo", "debe_haber": "H", "importe": "11800.00",
+      "rol": "tercero", "fecha": "2026-01-15", "moneda": "PEN",
+      "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01",
+      "documento": { "id_externo": "compra-123", "…": "el mismo de arriba" } },
+
+    { "cuenta": "421201", "clase": "pasivo", "debe_haber": "D", "importe": "1416.00",
+      "rol": "detraccion_tercero", "fecha": "2026-01-15", "moneda": "PEN",
+      "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01",
+      "documento": { "id_externo": "compra-123", "…": "el mismo de arriba" } },
+
+    { "cuenta": "421203", "clase": "pasivo", "debe_haber": "H", "importe": "1416.00",
+      "rol": "detraccion", "fecha": "2026-01-15", "moneda": "PEN",
+      "contraparte_doc": "20131312955",
+      "detraccion": { "codigo": "037", "tasa": "12", "base": "11800.00" },
+      "glosa": "DETRACCION - SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "documento": { "id_externo": "compra-123", "…": "el mismo de arriba" } }
+  ]
+}
+```
+
+**Léelo por bloques.** `libro` dice de qué registro y de qué mes es. `comprobantes` trae el hecho, con las casillas
+que SUNAT distingue y sin una sola cuenta. `imputaciones` trae la decisión del contador, llaveada por el mismo
+`id_externo`. Y `asiento` trae el efecto: cinco líneas que cuadran, cada una diciendo qué es (`clase`), qué papel
+cumple (`rol`) y de qué comprobante nace (`documento.id_externo`).
+
+Ese último enlace es el que cierra el círculo: **desde cualquier línea se llega a su comprobante y a la imputación
+con la que se armó**, sin adivinar por serie y número.
+
+
+---
+
+## 12 · El recorrido, visto desde el ERP que ya tiene el dato
 
 Lo anterior mira el formato. Esta sección mira lo otro que pregunta quien va a integrar: **dónde corre esto, quién
 hace qué y en qué orden.** Hace falta porque el resto del documento está escrito desde el que captura, y un ERP no
@@ -1040,7 +1222,7 @@ para todas. Los roles son `principal`, `igv`, `retencion_4ta`, `tercero`, `detra
 
 ---
 
-## 12 · Los destinos: al SIRE llegan todos
+## 13 · Los destinos: al SIRE llegan todos
 
 Los destinos no son tres opciones en fila. **El SIRE está al final de todos los caminos**, porque es el trámite con
 SUNAT y la liquidación del impuesto; un sistema legacy se alimenta a diario con los comprobantes y al cierre saca su
@@ -1150,7 +1332,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 
 ---
 
-## 13 · Qué queda fuera, a propósito
+## 14 · Qué queda fuera, a propósito
 
 - **Las líneas de detalle por ítem.** Un `Item` o un `InvoiceLine` sería un modelo propio, ya descartado, y el
   registro de compras y ventas de SUNAT no lo pide. Quien reparte el gasto entre cuentas usa `reparto`; quien quiera
@@ -1175,7 +1357,7 @@ vocabulario que solo significa algo dentro de un sistema. Lo que queda es lo que
 
 ---
 
-## 14 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
+## 15 · Qué va al estándar, qué va al motor, y qué no va a ninguno de los dos
 
 **El criterio.** Al **estándar** va lo que dos sistemas necesitan para entenderse sin haber hablado nunca entre
 ellos. Al **motor** va lo que se calcula a partir de eso. Un dato que se puede derivar no entra al estándar, y una
@@ -1188,6 +1370,8 @@ regla que cambia según el sistema de destino no entra al núcleo: vive en la co
 | **`imputaciones` en la raíz**, con llave por `id_externo` | Sin ellas el archivo no explica su propio asiento, y el estándar promete que un documento «se entiende solo, en cualquier máquina, sin consultar nada» | Ahora. Aditivo |
 | **La regla de hasta dónde viaja cada bloque** | `libro` y `comprobantes` son hechos y valen en todas partes; `imputaciones` y `asiento` están en el plan de cuentas de quien los escribió y son **informativos fuera de él**. Sin esa regla, un ERP copia cuentas ajenas en silencio. `emisor` ya dice de quién son | Ahora. Es texto, no esquema |
 | **`clase` en cada línea**: `activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto` | Es lo único que un ERP de fuera entiende sin conocer el PCGE, y son los cinco valores que QuickBooks, Xero, Merge y Rutter comparten. Sin ella, `principal` y `tercero` solo significan algo mirando `libro.tipo` («El papel de cada línea») | **0.4** |
+| **`libro.tipo` como catálogo publicado** | Un registro nuevo no puede costar una versión del documento, y un hecho nuevo —el banco— entra como bloque propio, no como valor forzado aquí. Es lo que hacen QuickBooks con un recurso por hecho y EN 16931 con su lista externa de tipos de documento | **0.4** |
+| **`documento.id_externo` en la línea** | Hoy la línea enlaza con su comprobante por serie y número; Xero enlaza por `SourceID` y SAF-T por `SourceDocumentID`. Con el id, el asiento, la imputación y el comprobante quedan atados sin adivinar | Aditivo |
 | **`rol` como catálogo publicado**, fuera del enum del esquema | Un rol nuevo —percepción, anticipo, redondeo— no puede obligar a una versión del documento. Es el diseño de ISO 20022 y el que terminó adoptando SAF-T | **0.4** |
 | **La regla de degradación**: se puede contabilizar con `clase`, `debe_haber` e `importe` aunque el `rol` sea desconocido | Es lo que permite que el catálogo crezca sin romper a quien ya integró | **0.4**. Es texto, no esquema |
 | `impuesto {codigo, tasa, base}` en la línea, y `plan_de_cuentas` en la raíz | El impuesto es el único papel que todos los estándares sí ponen en la línea; el diccionario de cuentas es el `SystemAccount` de Xero y el `StandardAccountID` de SAF-T, como ayuda opcional | 0.4 u después, con su caso |
@@ -1230,6 +1414,7 @@ versión porque `clase` pasa a ser obligatoria y porque la clave `open_accountin
 |---|---|---|
 | `linea.clase` | no existe | `enum: ["activo", "pasivo", "patrimonio", "ingreso", "gasto"]`, obligatoria |
 | `linea.rol` | `enum` cerrado de seis valores | Texto validado contra el catálogo publicado, que se versiona aparte |
+| `libro.tipo` | `enum: ["venta", "compra"]` | Texto validado contra su catálogo, que crece sin subir la versión |
 | `open_accounting` | `const: "0.3"` | `const: "0.4"` |
 | El `$id` canónico, que cuelga del tag del estándar | `.../open-accounting-0.3/...` | `.../open-accounting-0.4/...`, con su propio tag |
 
@@ -1255,7 +1440,7 @@ honorarios».
 
 ---
 
-## 15 · Lo que ya quedó decidido
+## 16 · Lo que ya quedó decidido
 
 **Cuatro se cayeron solas** en cuanto el cuerpo de la llamada dejó de ser un envoltorio y pasó a ser el documento:
 
@@ -1335,7 +1520,7 @@ de las 36 del estándar, que se quedan.
 
 ---
 
-## 16 · Lo que falta decidir
+## 17 · Lo que falta decidir
 
 Seis, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero que apareció al probar el esquema.
 
@@ -1357,7 +1542,7 @@ Seis, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero 
 
 ---
 
-## 17 · Fuentes
+## 18 · Fuentes
 
 Consultadas el 15-sep-2026.
 
@@ -1400,3 +1585,28 @@ Consultadas el 15-sep-2026.
 - Su sintaxis UBL: https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/tree/
 - UBL 2.3 en JSON (OASIS, *committee note*, no normativa):
   https://docs.oasis-open.org/ubl/UBL-2.3-JSON/v1.0/UBL-2.3-JSON-v1.0.html
+
+**El papel de la línea, y la frontera entre documento y asiento** (consultadas el 18-sep-2026)
+
+- Xero, el libro diario de solo lectura con `SourceID` y `SourceType`:
+  https://developer.xero.com/documentation/api/accounting/journals
+- Xero, cuentas con `Type`, `Class` y `SystemAccount`: https://developer.xero.com/documentation/api/accounting/accounts
+  y su especificación: https://github.com/XeroAPI/Xero-OpenAPI/blob/master/xero_accounting.yaml
+- QuickBooks, la cuenta con `Classification`, `AccountType` y `AccountSubType`:
+  https://developer.intuit.com/app/developer/qbo/docs/api/accounting/most-commonly-used/account ; el asiento manual:
+  …/journalentry ; el mayor, por reportes: …/all-entities/generalledger
+- NetSuite, tipos de cuenta que no se pueden crear ni modificar:
+  https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_3947502870.html ; cuentas generadas por el
+  sistema: …/bridgehead_4078513386.html
+- Sage Intacct, la cuenta con `ACCOUNTTYPE` y `NORMALBALANCE`: https://developer.intacct.com/api/general-ledger/accounts/
+- Merge (`classification`): https://docs.merge.dev/accounting/accounts/ ·
+  Rutter (`category`): https://docs.rutter.com/rest/2023-02-07/accounts · Apideck: https://specs.apideck.com/accounting.yml
+- SAF-T de la OCDE, con `SourceDocuments` y `GeneralLedgerEntries` enlazados en los dos sentidos: guía 2.0 y su
+  apéndice B, en el archivo público de la OCDE
+- XBRL GL, `accountPurposeCode` y `accountType`:
+  https://www.xbrl.org/GLWGNotes/XBRL-GL-WGN-Amazing_Account-2007-07-08.htm y
+  http://www.xbrl.org/wgn/templates/wgn-2009-02-17/templates-wgn-wgn-2009-02-17.html
+- ISO 20022, catálogos de códigos externos «para añadir sin cambiar la versión de los mensajes»:
+  https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-sets
+- PCAOB AS 1105, la evidencia del documento original:
+  https://pcaobus.org/oversight/standards/auditing-standards/details/AS1105
