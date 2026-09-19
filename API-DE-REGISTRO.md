@@ -970,7 +970,7 @@ con `rol: "percepcion"`, que hoy no existe, la sigue contabilizando: es un `acti
 | Pieza | Qué es | Versión |
 |---|---|---|
 | **`clase` en cada línea** | Los cinco valores universales | **0.4**: pasa a ser obligatoria, para que ninguna línea quede sin explicarse |
-| **`rol` como catálogo** | Sale del enum del esquema y pasa a un catálogo publicado, con su versión, junto a los catálogos de SUNAT | **0.4**: el esquema deja de rechazar un rol que todavía no existía |
+| **`rol` como catálogo** | Sale del enum del esquema y pasa a un catálogo publicado, con su versión, junto a los catálogos de SUNAT. **Nace con los seis de hoy y ninguno más** | **0.4**: el esquema deja de rechazar un rol que todavía no existía |
 | **`impuesto` y `plan_de_cuentas`** | El bloque de impuesto por línea —el único papel que todos los estándares ponen ahí— y el diccionario de cuentas del emisor | Opcionales: entran en la 0.4, o después con su caso |
 
 ### De dónde sale la `clase` (John, 18-sep-2026)
@@ -1653,6 +1653,22 @@ código, el catálogo lo refleja y ya. Lo que se gobierna es solo lo que este es
 | Quién numera cuando llega un comprobante suelto | Lo mismo que hoy: un documento de uno se numera como uno de mil |
 | Que las dos puertas no se separen | No hay dos puertas: hay un documento y un pipeline |
 | El freno de la ruta por comprobante | El tope de comprobantes del lote ya lo cubre |
+
+### El catálogo de roles se abre, pero no crece (John, 18-sep-2026)
+
+**Los seis roles se quedan como están, y son solo de compras y ventas.** `principal`, `igv`, `tercero`,
+`retencion_4ta`, `detraccion_tercero` y `detraccion` cubren completos los dos libros que el motor genera: una venta
+usa tres, una compra hasta seis, y la nota de crédito no añade ninguno porque reusa los mismos con los sentidos
+invertidos.
+
+**Y aun así el catálogo se abre.** No para añadir valores ahora —no hace falta ninguno— sino porque **abrirlo es
+gratis hoy y caro después**: con el enum cerrado, el día que entre el bloque del banco o el de las letras de cambio
+sus roles costarían otra versión del estándar; con el catálogo, ninguno. Es la misma razón por la que `libro.tipo`
+también sale del enum.
+
+Lo que eso deja claro para quien lea «un catálogo abierto»: **no es una invitación a que los roles proliferen.** Un
+rol nuevo solo aparece cuando aparece el hecho que lo necesita, y un hecho nuevo entra como bloque propio en la
+raíz, nunca como valor forzado en el enum de otro.
 
 ### El libro de honorarios: no se hace (John, 18-sep-2026)
 
