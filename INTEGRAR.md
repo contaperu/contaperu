@@ -19,7 +19,7 @@ el mismo mes, el mismo diagnóstico, por cualquiera de ellas.
 
 ## Lo que entra y lo que sale
 
-Entra un **documento `open-accounting` 0.3** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
+Entra un **documento `open-accounting` 1.0** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
 compras) y los comprobantes tal como los emite SUNAT, con los importes en positivo y como texto exacto. Si tienes los
 XML o la propuesta del SIRE, el motor arma el documento por ti (`leer_xml`, `leer_propuesta_sire`).
 
@@ -163,7 +163,7 @@ Si tu ERP todavía no tiene driver, el contrato está en `contaperu/drivers/cont
 - **Dos niveles.** *De serie*, dentro de este repositorio, con un archivo real que ese ERP haya aceptado. *Comunidad*,
   en un paquete tuyo que se registra por el grupo de entry points `contaperu.drivers`, sin esperar a nadie.
 - **Si tu ERP tiene una API moderna** en vez de un archivo, escribir en ella es un hito reservado (canal `api_erp`, A5
-  de la hoja de ruta). Mientras tanto, tu aplicación pide el asiento a `generar_asiento` con `driver="open_accounting"` —las líneas del
+  de la hoja de ruta). Mientras tanto, tu aplicación pide el asiento a `generar_asiento` con `driver="asiento_neutral"` —las líneas del
   estándar, sin siglas, sub-diarios ni correlativos de ningún sistema legacy— y lo envía; el envío y los
   reintentos son suyos, con la identidad y la huella de cada comprobante como clave para no repetir.
 
@@ -209,4 +209,8 @@ seguridad llegan solo a la última versión publicada de la 1.x (`SECURITY.md`).
 - **OpenConta crece sin romper**: una ruta o un campo que está, sigue.
 - **Las rutas de la 0.10** (`contaperu.operaciones`, `contaperu.generar`, `contaperu.cli`, `contaperu.servidor_mcp`,
   `contaperu.formato`) siguen funcionando con un aviso `RutaObsoleta` que dice qué usar, y se retiran en la 2.0.
-- **El estándar sigue en `open-accounting` 0.3**: todo documento que validaba, valida y significa lo mismo.
+- **El estándar es `open-accounting` 1.0**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
+  significado hasta una 2.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
+  se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **un `rol` que no conozcas se contabiliza con
+  `clase`, `debe_haber` e `importe`**. Si vienes de la 0.3, que el motor ya no acepta:
+  [`estandar/MIGRAR-A-1.0.md`](estandar/MIGRAR-A-1.0.md).

@@ -93,7 +93,9 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 - **La versión vive en `contaperu/_version.py`**: `__version__` del paquete y `OPEN_ACCOUNTING` del estándar son dos
   relojes distintos. `CHANGELOG.md` explica cada versión con su porqué, y **un cambio de comportamiento se anuncia
   como tal** (quien use el motor sin la app lo nota). Dos series de tags: `vX.Y.Z` para el paquete y
-  `open-accounting-0.X` para el estándar, que avanza con cada cambio aditivo del esquema.
+  `open-accounting-X.Y` para el estándar, que avanza con cada cambio aditivo del esquema. **Ninguna de las dos
+  versiones puede ser prefijo de la otra** (`"1.0"` lo es de `"1.0.0"`): por eso el estándar 1.0 salió con la
+  librería en 1.1.0, y un test lo prohíbe.
 - **Un test por regla, y mutaciones cuando la regla es fina**: si al romper una línea ningún test cae, falta el test.
   El snapshot de CONCAR se corre en cada paso; si cambia, cambia a propósito y se dice.
 

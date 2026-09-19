@@ -46,13 +46,13 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **1.0.0** y estándar **`open-accounting` 0.3**
+Librería **1.1.0** y estándar **`open-accounting` 1.0**
 (`contaperu/_version.py`).
 
 | Pieza | Hoy |
 |---|---|
 | **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
-| **Estándar y comunidad** | `open-accounting` 0.3 con su esquema; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`); plantillas de aviso «Regla mal puesta» y «Error». El repositorio sigue privado |
+| **Estándar y comunidad** | `open-accounting` 1.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`); plantillas de aviso «Regla mal puesta» y «Error». El repositorio sigue privado |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea neutral con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 11 herramientas y 6 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. Las rutas de la 0.10 siguen con aviso |
@@ -315,7 +315,7 @@ congela el acoplamiento con lo peruano (J0).
 | J2 | **La validación en dos tablas**: reglas universales y reglas peruanas registradas con código, nivel, `pedir_a` y fuente | N | dato: un cliente real fuera del Perú | Las mismas observaciones en toda la batería; `PEDIR_A` igual clave a clave | J1; después de C1 y C2, para no mover las reglas dos veces | 30 |
 | J3 | **Impuestos que emiten líneas**: el motor arma el principal y el tercero; el IGV, la 4ta y la detracción salen del perfil peruano; los roles son los universales más los de la jurisdicción | N | dato: un cliente real fuera del Perú | Snapshot de CONCAR y huella idénticos | J1 | 30 |
 | J4 | **El perfil peruano como paquete** `contaperu/jurisdicciones/pe*`, con el grupo de entry points `contaperu.jurisdicciones*` y `pe` por defecto | N · D | dato: un cliente real fuera del Perú | Test de conformidad de jurisdicción verde para `pe`; ningún módulo universal importa `pe`; rutas viejas re-exportadas | J2, J3 | 30 |
-| J5 | **`open-accounting` 0.4**: `libro.jurisdiccion*` con perfiles; `pe` conserva los campos de la 0.3 y las demás jurisdicciones usan `impuestos[]*` | estándar | dato: un cliente real fuera del Perú | Todo documento 0.3 valida y significa lo mismo; enmienda en `final`; tag `open-accounting-0.4` | J4, E1, E3 | 30 |
+| J5 | **`open-accounting` 1.1**: `libro.jurisdiccion*` con perfiles; `pe` conserva los campos de la 1.0 y las demás jurisdicciones usan `impuestos[]*` | estándar | dato: un cliente real fuera del Perú | Todo documento 1.0 valida y significa lo mismo —la 1.0 promete no romper hasta una 2.0—; enmienda en `final`; tag `open-accounting-1.1` | J4, E1, E3 | 30 |
 | J6 | **La segunda jurisdicción**, en paquete propio por entry points o en el repositorio | N · D | dato: su archivo aceptado por su destino y la fuente de cada regla | Conformidad de jurisdicción; archivo aceptado; `pe` sin cambios | J5 | 30 |
 
 **No se hace.** Adelantar J2-J6 sin el cliente; tasas de impuestos sin fuente; traducir al inglés el vocabulario del

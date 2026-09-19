@@ -186,7 +186,7 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 
 - **SIRE:** el TXT de reemplazo del RVIE y del RCE.
 - **Legacy:** a CONCAR (Excel de asientos de 41 columnas) y a CONTASIS (su registro de compras y de ventas en Excel).
-- **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `open_accounting`), y un CSV
+- **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `asiento_neutral`), y un CSV
   genérico con las líneas de diario, para cualquier destino que todavía no tenga driver.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta para el sistema de
@@ -212,7 +212,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
 | **Estándar y comunidad** | |
-| El estándar `open-accounting` 0.3 y su esquema | listo |
+| El estándar `open-accounting` 1.0, su esquema, sus catálogos y su batería de conformidad | listo |
 | Contrato de driver y drivers de terceros por *entry points* | listo |
 | Paquete en PyPI | **próximo**: hoy se instala desde el código |
 | **Motor** | |

@@ -253,7 +253,7 @@ de compras con el asiento cuadrado.
 | El banco | paquete reservado `contaperu/banco/` en la capa núcleo; los conectores, fuera del paquete | D1-D7 |
 | Reglas de SUNAT como datos | `_datos.leer_json("datos/sunat/…")`; `catalogos` las cargará sin cambiar sus nombres | C1-C2 |
 | CDR y no domiciliados | `lectores/cdr.py` reservado; los roles pueden crecer sin romper un driver | C3, C12 |
-| Otra jurisdicción | J0 como test, J1 como efecto de las capas, `jurisdicciones/pe` reservado, `open-accounting` 0.4 para J5 | J0-J6 |
+| Otra jurisdicción | J0 como test, J1 como efecto de las capas, `jurisdicciones/pe` reservado, `open-accounting` 1.1 para J5 | J0-J6 |
 | La API de un ERP moderno | canal `api_erp` reservado y rechazado | A5 |
 
 ## La capa para agentes
