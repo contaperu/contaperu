@@ -42,11 +42,17 @@ asiento. Ahora es un bloque de la raíz, llaveado por el `id_externo` de cada co
 es mandar las dos formas a la vez: se rechaza, porque adivinar cuál manda sería elegir en silencio la cuenta de un
 comprobante.
 
-Tres cosas que se exigen **solo cuando la imputación viene en el documento**:
+Dos cosas se exigen **solo cuando la imputación viene en el documento**:
 
 - cada comprobante necesita su `id_externo` (el esquema lo pide con un condicional; sin `imputaciones` no lo pide);
-- ningún `id_externo` puede estar repetido — eso lo comprueba el motor, porque el esquema no puede decirlo;
-- el `id_externo` es **texto único libre**: un uuid es la forma recomendada, pero puedes usar el id de tu propia fila.
+- y con eso, ningún `id_externo` puede estar repetido — eso lo comprueba el motor, porque el esquema no puede decirlo.
+
+Y una vale por las dos vías: **una llave que nombra a dos comprobantes se rechaza**, porque la misma cuenta se
+aplicaría a los dos. Por el argumento se comprueban las llaves que la imputación usa; en el documento, todas. Hasta la
+0.3 esto pasaba en silencio por el argumento, así que **es un cambio de comportamiento**: si mandabas dos filas con el
+mismo id y las imputabas, ahora te lo dice.
+
+El `id_externo` es **texto único libre**: un uuid es la forma recomendada, pero puedes usar el id de tu propia fila.
 
 ## 3 · Cada línea del asiento lleva su `clase`
 

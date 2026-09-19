@@ -102,6 +102,9 @@ comprobante. Por las dos vías es el mismo objeto:
   exige con un condicional —un documento sin imputaciones no lo pide— y el motor añade lo que el esquema no puede
   decir, que ningún `id_externo` esté repetido. **Por el argumento no se exige a todos**, a propósito: ahí se puede
   imputar 3 de 10 comprobantes y que los otros 7 no traigan id. Es la única asimetría entre las dos vías.
+- **Una llave que nombra a dos comprobantes se rechaza por las dos vías**, porque el daño es el mismo: la misma
+  cuenta se aplicaría a los dos y ninguna de sus líneas diría de cuál viene. Lo que cambia es el alcance — en el
+  documento, ningún id puede repetirse; por el argumento, ninguno de los que la imputación nombra.
 - **No va en la configuración guardada**: ahí `imputaciones` es un error. La fachada la lee en la puerta
   (`operaciones.con_imputacion`) y se la entrega al núcleo dentro de la configuración aplicada, bajo `imputaciones`.
 - **Lo que no trae** sale de la configuración del entorno: el comprobante no lleva cuentas.

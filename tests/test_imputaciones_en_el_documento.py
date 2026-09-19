@@ -93,6 +93,31 @@ def test_dos_comprobantes_con_el_mismo_id_externo_se_rechazan():
         api.diagnosticar(doc, driver="concar", configuracion=CONFIG)
 
 
+def test_una_llave_que_nombra_a_dos_comprobantes_se_rechaza_tambien_por_el_argumento():
+    """La llave repetida hace el mismo daño por las dos vías: la misma cuenta se aplica a dos comprobantes, y cada
+    línea sale con un `documento.id_externo` que no distingue de cuál es. Por la vía del documento se rechaza cualquier
+    id repetido; por el argumento, el que la imputación nombra, que es el que decide algo.
+
+    Hasta la 1.0 esto pasaba en silencio por el argumento. Cerrarlo es un cambio de comportamiento, y se hizo ahora
+    porque el `id_externo` pasa a ser el enlace oficial entre la línea, el comprobante y su imputación."""
+    doc = casos()
+    repetido = doc["comprobantes"][0]["id_externo"]
+    doc["comprobantes"][1]["id_externo"] = repetido
+    with pytest.raises(DocumentoInvalido, match="comparten dos comprobantes"):
+        api.diagnosticar(doc, driver="concar", configuracion=CONFIG,
+                         imputacion={repetido: {"cuenta_contable": "6343001"}})
+
+
+def test_un_id_repetido_que_la_imputacion_no_nombra_no_molesta_por_el_argumento():
+    """La otra mitad, para que el rechazo no se pase de listo: por el argumento se imputa a unos y no a otros, así que
+    un id repetido entre comprobantes que nadie imputa no decide nada y no se toca."""
+    doc = casos()
+    con_id = doc["comprobantes"][0]["id_externo"]
+    doc["comprobantes"][2]["id_externo"] = doc["comprobantes"][1]["id_externo"]
+    api.diagnosticar(doc, driver="concar", configuracion=CONFIG,
+                     imputacion={con_id: {"cuenta_contable": "6343001"}})
+
+
 def test_por_el_argumento_no_se_exige_el_id_a_todos():
     """La única asimetría entre las dos vías, y es a propósito: por el argumento se puede imputar 3 de 10 y que los
     otros 7 no traigan id. Exigirlo ahí sería cambiar en silencio lo que ya funciona."""

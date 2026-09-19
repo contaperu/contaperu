@@ -114,13 +114,14 @@ def test_se_rechaza_lo_que_no_es_del_estandar(validador):
         assert list(validador.iter_errors(doc)), doc
 
 
-def test_la_version_del_estandar_no_es_la_de_la_libreria(esquema):
-    """Se versionan por separado a propósito: la librería puede corregir un driver sin
-    que el formato de intercambio cambie."""
-    import contaperu
+def test_el_esquema_declara_la_version_del_estandar_y_no_otra(esquema):
+    """Lo que le toca a este archivo: que el `const` del esquema y la constante del código sean el mismo número.
 
+    Antes esto terminaba con `__version__ != OPEN_ACCOUNTING`, y desde la 1.0 **eso pasaba por casualidad**
+    (`"1.0.0" != "1.0"`) sin comprobar lo que de verdad confunde a los dos relojes, que es la relación de prefijo. La
+    regla vive entera —y con su mensaje— en `test_version.py`, así que aquí no se deja una versión débil de ella que
+    parezca cubrirla."""
     assert esquema["properties"]["open_accounting"]["const"] == OPEN_ACCOUNTING
-    assert contaperu.__version__ != OPEN_ACCOUNTING
 
 
 def test_la_condicion_de_pago_se_normaliza_y_lo_demas_se_rechaza():

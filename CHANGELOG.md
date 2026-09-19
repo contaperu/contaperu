@@ -87,6 +87,12 @@ mueve**.
   también: los catálogos de SUNAT se copian de la norma.
 
 ### Cambiado
+- **Cambio de comportamiento: una llave de imputación que nombra a dos comprobantes se rechaza también cuando la
+  imputación llega por el argumento.** Hasta ahora eso pasaba en silencio y la misma cuenta se aplicaba a los dos, con
+  las dos líneas llevando un `documento.id_externo` que no dice de cuál vienen. Se cierra ahora porque el `id_externo`
+  pasa a ser el enlace oficial entre la línea, el comprobante y su imputación. El alcance no es el mismo por las dos
+  vías, y es a propósito: en el documento no puede repetirse ningún id —lo pide el condicional del esquema—, y por el
+  argumento solo los que la imputación nombra, porque ahí se sigue pudiendo imputar 3 de 10.
 - **`rol` y `libro.tipo` salen del esquema a catálogos publicados** (`estandar/catalogos.json`, junto al esquema y
   citable por la URL del tag del estándar), con `clases` al lado. Vivían como enums cerrados **y repetidos** —`ROLES`
   en `asiento/motor.py` y `TIPOS_LIBRO` en `modelo.py`—, sin ningún test que comparara las copias; ahora hay una sola

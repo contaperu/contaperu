@@ -7,6 +7,7 @@ la configuración contable del contribuyente y la imputación de cada documento 
 from __future__ import annotations
 
 import base64
+from collections import Counter
 from datetime import date
 from typing import Any
 
@@ -41,8 +42,8 @@ def version_del_documento(doc: dict) -> None:
             f"Este documento se declara `open_accounting` {declarada} y el motor habla la {OPEN_ACCOUNTING}. "
             "De la 0.3 a la 1.0 cambian tres cosas: la imputación va dentro del documento, en el bloque "
             "`imputaciones` llaveado por `id_externo`; cada línea del asiento lleva su `clase`; y `rol` y "
-            "`libro.tipo` se validan contra el catálogo publicado del estándar. La guía está en "
-            "`estandar/LEEME.md`.")
+            "`libro.tipo` se validan contra el catálogo publicado del estándar. La guía, paso a paso, está en "
+            "`estandar/MIGRAR-A-1.0.md`.")
 
 
 def libro_de(doc: dict) -> Libro:
@@ -187,7 +188,7 @@ def describir_configuracion(driver: str = "") -> dict:
 
 
 def imputacion_del_documento(doc: dict, imputacion: dict | None,
-                             comprobantes: list[Comprobante] = ()) -> dict | None:
+                             comprobantes: list[Comprobante]) -> dict | None:
     """La imputación que hay que usar: la del bloque `imputaciones` del documento, o la del argumento.
 
     Desde la 1.0 la imputación viaja DENTRO del documento (John, 18-sep-2026), para que un archivo guardado
@@ -212,7 +213,7 @@ def imputacion_del_documento(doc: dict, imputacion: dict | None,
         if sin_id:
             raise DocumentoInvalido("Con `imputaciones` en el documento, cada comprobante necesita su `id_externo`, "
                                     "que es la llave con la que se casan. Sin él: " + ", ".join(sin_id) + ".")
-        repetidos = sorted({i for i in ids if ids.count(i) > 1})
+        repetidos = sorted(i for i, veces in Counter(ids).items() if veces > 1)
         if repetidos:
             raise DocumentoInvalido("Dos comprobantes comparten `id_externo`, que es la llave de la imputación: "
                                     + ", ".join(repetidos) + ".")
@@ -236,10 +237,19 @@ def con_imputacion(config: dict, imputacion: dict | None, comprobantes: list[Com
         leida = {str(k): asi.Imputacion.de(v) for k, v in imputacion.items()}
     except ValueError as e:
         raise DocumentoInvalido(f"Una imputación no se pudo leer: {e}") from None
-    huerfanas = sorted(set(leida) - {(c.id_externo or "").strip() for c in comprobantes})
+    ids = Counter((c.id_externo or "").strip() for c in comprobantes)
+    huerfanas = sorted(set(leida) - set(ids))
     if huerfanas:
         raise DocumentoInvalido("La imputación habla de documentos que no están (id_externo): "
                                 + ", ".join(huerfanas) + ".")
+    # Una llave que nombra a DOS comprobantes aplicaría la misma cuenta a los dos, y cada línea saldría con un
+    # `documento.id_externo` que no distingue de cuál es. Se comprueba por las dos vías —aquí— porque el daño es el
+    # mismo: por la vía del documento se exige además que NINGÚN id se repita, aunque no lo nombre la imputación
+    # (`imputacion_del_documento`), que es lo que el esquema pide con su condicional.
+    repetidas = sorted(llave for llave in leida if ids[llave] > 1)
+    if repetidas:
+        raise DocumentoInvalido("La imputación nombra un `id_externo` que comparten dos comprobantes, así que la misma "
+                                "cuenta se aplicaría a los dos: " + ", ".join(repetidas) + ".")
     return {**config, "imputaciones": leida}
 
 
