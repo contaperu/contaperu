@@ -880,19 +880,23 @@ línea se explique sola.
 
 | Eje | Qué dice | Valores | Estabilidad |
 |---|---|---|---|
-| **`clase`** | Qué es contablemente | `activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto` | **Congelado.** Son los cinco valores idénticos en QuickBooks, Xero, Merge y Rutter: cualquier ERP del mundo ya sabe qué hacer con ellos |
+| **`clase`** | Qué es la cuenta. **Se deriva** del primer dígito, así que se rellena y se valida sola | `activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto` | **Congelado.** Son los cinco valores idénticos en QuickBooks, Xero, Merge y Rutter: cualquier ERP del mundo ya sabe qué hacer con ellos |
 | **`rol`** | Qué papel cumple en la operación peruana | `principal`, `igv`, `retencion_4ta`, `tercero`, `detraccion_tercero`, `detraccion`… | **Catálogo publicado y versionado**, no un enum cerrado dentro del esquema: crece sin cambiar la versión del documento |
 
 Los dos ejes son independientes, y es lo que hace que la misma línea se lea igual en compras y en ventas:
 
-| Caso | `rol` | `clase` | `debe_haber` |
-|---|---|---|---|
-| Compra · el gasto | `principal` | `gasto` | D |
-| Compra · el IGV | `igv` | `activo` (crédito fiscal) | D |
-| Compra · el proveedor | `tercero` | `pasivo` | H |
-| Venta · el ingreso | `principal` | `ingreso` | H |
-| Venta · el IGV | `igv` | `pasivo` (débito fiscal) | H |
-| Venta · el cliente | `tercero` | `activo` | D |
+| Caso | Cuenta | `rol` | `clase` | `debe_haber` | Qué dice la línea |
+|---|---|---|---|---|---|
+| Compra · el gasto | `6343001` | `principal` | `gasto` | D | un gasto |
+| Compra · la mercadería | `201101` | `principal` | **`activo`** | D | existencias: **no es un gasto** |
+| Compra · el IGV | `401111` | `igv` | `pasivo` | D | reduce el tributo por pagar: el crédito fiscal |
+| Compra · el proveedor | `421201` | `tercero` | `pasivo` | H | se le debe |
+| Venta · el ingreso | `701101` | `principal` | `ingreso` | H | un ingreso |
+| Venta · el IGV | `401111` | `igv` | `pasivo` | H | aumenta el tributo por pagar: el débito fiscal |
+| Venta · el cliente | `121201` | `tercero` | `activo` | D | nos deben |
+
+Las dos líneas de IGV usan **la misma cuenta y la misma clase**, y lo que las distingue es el sentido: el crédito
+fiscal reduce el tributo por pagar y el débito lo aumenta. Ninguna necesita llamarse `activo` para entenderse.
 
 ### La regla que lo sostiene
 
@@ -923,7 +927,7 @@ diccionario `plan_de_cuentas`:
     "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
                    "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
 
-  { "cuenta": "401111", "clase": "activo", "debe_haber": "D", "importe": "1800.00", "rol": "igv",
+  { "cuenta": "401111", "clase": "pasivo", "debe_haber": "D", "importe": "1800.00", "rol": "igv",
     "fecha": "2026-01-15", "moneda": "PEN", "tasa_igv": "18",
     "impuesto": { "codigo": "igv", "tasa": "18", "base": "10000.00" },
     "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026",
@@ -949,7 +953,7 @@ diccionario `plan_de_cuentas`:
  ],
  "plan_de_cuentas": {
   "6343001": { "clase": "gasto",  "nombre": "Mantenimiento y reparaciones" },
-  "401111":  { "clase": "activo", "nombre": "IGV - crédito fiscal" },
+  "401111":  { "clase": "pasivo", "nombre": "IGV - Cuenta propia", "elemento": "4" },
   "421201":  { "clase": "pasivo", "nombre": "Facturas por pagar" },
   "421203":  { "clase": "pasivo", "nombre": "Detracciones por pagar" }
  }
@@ -957,7 +961,7 @@ diccionario `plan_de_cuentas`:
 ```
 
 **Léelo desde el ERP que lo recibe.** Sin conocer el PCGE ni el plan del emisor sabe que la primera línea es un
-gasto de 10 000, que la segunda es un impuesto recuperable, que se le deben 11 800 a un proveedor identificado por
+gasto de 10 000, que la segunda reduce un tributo por pagar —un impuesto, lo dice su rol—, que se le deben 11 800 a un proveedor identificado por
 su RUC, y que 1 416 de esa deuda se pagan al Banco de la Nación en vez de al proveedor. Y si mañana llega una línea
 con `rol: "percepcion"`, que hoy no existe, la sigue contabilizando: es un `activo` al debe.
 
@@ -976,22 +980,46 @@ un caso diario: una **compra de mercadería** imputada a `201101` devuelve hoy `
 un gasto, es un activo**. Lo mismo una compra de activo fijo a `333101`. Deducirla del rol daría `gasto` en miles de
 facturas al mes.
 
-**La clase sale de la cuenta, salvo en las líneas de control:**
+**La clase sale del primer dígito de la cuenta, sin excepciones** (John, 18-sep-2026). El PCGE clasifica por
+elementos, y ese es el dato:
 
-| Líneas | De dónde sale su `clase` | Por qué |
-|---|---|---|
-| La **principal** y las del **reparto** | **De la cuenta.** El PCGE la da por su elemento, y el motor ya resuelve cualquier divisionaria a su cuenta madre (`buscar_cuenta_pcge`) | Es la cuenta que eligió el usuario en la imputación, y solo ella sabe si compró un gasto, una mercadería o una máquina |
-| El **IGV**, el **tercero**, la **detracción** y la **retención** | **Del rol y del libro** | Sus cuentas no las elige nadie: las pone la configuración de la empresa, y su papel es el mismo siempre |
+| Elemento del PCGE | `clase` |
+|---|---|
+| **1** disponible y exigible · **2** realizable · **3** inmovilizado | `activo` |
+| **4** pasivo | `pasivo` |
+| **5** patrimonio neto | `patrimonio` |
+| **6** gastos por naturaleza · **9** costos por función | `gasto` |
+| **7** ingresos | `ingreso` |
+| **8** saldos intermediarios · **0** cuentas de orden | **ninguna** |
 
-Eso pide **una pieza que hoy no existe: la clase de cada cuenta en el catálogo del PCGE**, que trae el código, el
-nombre y su cuenta madre, pero no su elemento. Es un dato de la norma, no una opinión, así que entra como los demás
-catálogos de SUNAT: con su fuente y su versión.
+**El 9 mapea a `gasto`** porque muchas empresas imputan por destino y no por naturaleza, y esa línea es un gasto
+igual. **El 8 y el 0 no encajan en ninguna clase, y no se fuerzan:** son de cierre y de control, el motor no las
+emite desde compras ni ventas, y una imputación a ellas es casi seguro un error — así que **se observa con su
+motivo**, como cualquier otra falta, en vez de inventarle una clase. Las cinco clases siguen siendo cinco, que es lo
+que las hace universales.
 
-**Y `clase` no contradice a `plan_de_cuentas`: responden preguntas distintas.** El diccionario dice qué es esa cuenta
-**en el plan del emisor**; la línea dice qué hace **en esta operación**. Para casi todas coinciden, y para el IGV de
-compras no: `40111` es una cuenta del elemento 4 —pasivo— usada al debe como crédito fiscal, y la línea la declara
-`activo` porque eso es lo que el que recibe necesita saber. Cuando difieran, **manda la línea**: el diccionario es
-una ayuda opcional, nunca la fuente.
+**Y esto es todo lo que hace falta: ninguna línea necesita excepción.** Las cuentas que el motor pone por su cuenta
+son de elemento 1, 4 o 7 —`1212` clientes, `4212` proveedores, `421203` detracción, `4241` honorarios, `401721`
+retención, `701101` ventas—, y la única que elige el usuario es la del gasto, que es justo donde la regla vieja
+fallaba.
+
+**El IGV es el caso que lo prueba.** `401111` es elemento 4, así que su clase es `pasivo` — no `activo`, como decía
+el primer borrador. Y es lo correcto: en el PCGE la 40 es una cuenta de pasivo y el crédito fiscal se anota **al
+debe dentro de ella**; no existe una cuenta de activo. `clase: pasivo` con `debe_haber: D` dice exactamente «reduce
+un pasivo», que es lo que pasa; `activo` al debe afirmaría «aumenta un activo», que es otra cosa. Lo que el ERP de
+fuera necesita saber ya viaja igual: `rol: igv` dice que es impuesto y `debe_haber` dice el sentido.
+
+Eso pide **una pieza que hoy no existe: el elemento de cada cuenta en el catálogo del PCGE**, que trae el código, el
+nombre y su cuenta madre, pero no a qué elemento pertenece. Es un dato de la norma, no una opinión, así que entra
+como los demás catálogos: con su fuente y su versión.
+
+**Y aparece un control que antes no se podía hacer.** Al ser derivable, la clase no solo se rellena: **se valida**.
+Un documento que llegue con `clase: gasto` en una cuenta `42` está mal, y el motor lo dice en vez de aceptarlo. Es
+la misma idea que «el asiento es derivado»: lo que se puede recalcular se puede comprobar.
+
+**Y por eso `clase` y `plan_de_cuentas` nunca se contradicen:** los dos leen el mismo plan. El diccionario dice qué
+es cada cuenta y la línea repite la clase de la suya, para que quien reciba el asiento sin el diccionario siga
+entendiéndolo.
 
 **Y con eso el motor puede rellenar `clase` solo**: un documento 0.3 que llegue sin ella se completa al vuelo, así
 que nadie tiene que reescribir lo que ya tiene guardado. El motor acepta las dos versiones durante toda la 1.x.
@@ -1166,7 +1194,7 @@ La propuesta, en tres reglas:
 2. **El asiento neutral lo propaga a todas las líneas del comprobante**, así que la del IGV queda así:
 
    ```json
-   { "cuenta": "401111", "clase": "activo", "debe_haber": "D", "importe": "1800.00",
+   { "cuenta": "401111", "clase": "pasivo", "debe_haber": "D", "importe": "1800.00",
      "rol": "igv", "centro_costo": "OBRA01", "tasa_igv": "18",
      "documento": { "id_externo": "compra-123", "serie_numero": "F001-123" } }
    ```
@@ -1221,7 +1249,7 @@ motor devuelve hoy; lo que la 0.4 añade es `clase`, `documento.id_externo` y el
       "documento": { "id_externo": "compra-123", "tipo_cp": "01", "serie_numero": "F001-123",
                      "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
 
-    { "cuenta": "401111", "clase": "activo", "debe_haber": "D", "importe": "1800.00",
+    { "cuenta": "401111", "clase": "pasivo", "debe_haber": "D", "importe": "1800.00",
       "rol": "igv", "fecha": "2026-01-15", "moneda": "PEN", "tasa_igv": "18",
       "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026",
       "documento": { "id_externo": "compra-123", "…": "el mismo de arriba" } },
@@ -1538,8 +1566,7 @@ versión porque `clase` pasa a ser obligatoria y porque la clave `open_accountin
 | El `$id` canónico, que cuelga del tag del estándar | `.../open-accounting-0.3/...` | `.../open-accounting-0.4/...`, con su propio tag |
 
 **Lo que no cambia de significado para nadie:** un documento 0.3 dice exactamente lo mismo en la 0.4, y **el motor
-rellena `clase` solo** —de la cuenta en la línea principal, del rol y del libro en las de control, según «De dónde
-sale la `clase`»—. Acepta las dos versiones durante toda la 1.x.
+rellena `clase` solo** —del primer dígito de la cuenta, según «De dónde sale la `clase`»—. Acepta las dos versiones durante toda la 1.x.
 
 **Y el tercer libro, el de honorarios, sigue descartado** (John, 18-sep-2026): se quedan en el libro de compras y
 qué registro los lleva lo decide cada destino, como hoy. El porqué y lo que costaba, en «Por qué no hay un libro de
@@ -1760,7 +1787,8 @@ archivos, la mayoría tests y fixtures, y hay que distinguirlas de las 36 del es
 
 | Qué | Dónde |
 |---|---|
-| `clase` obligatoria en cada línea | el esquema y `contaperu/asiento/motor.py`: de la cuenta en la principal y el reparto, del rol y del libro en las de control |
+| `clase` obligatoria en cada línea, derivada del primer dígito de la cuenta | el esquema y `contaperu/asiento/motor.py` |
+| **Validar** la clase que llega, y observar una imputación a una cuenta de elemento 8 o 0 | `contaperu/pipeline/preparacion.py`, `contaperu/asiento/faltas.py` |
 | **La clase de cada cuenta en el catálogo del PCGE**, que hoy solo trae código, nombre y cuenta madre | `contaperu/datos/`, servido por `api.buscar_cuenta_pcge` |
 | `rol` y `libro.tipo` validados contra un catálogo publicado, no contra un enum | el esquema, `contaperu/modelo.py`, `contaperu/drivers/contrato.py` |
 | Los catálogos `roles`, `clases` y `tipos_de_libro`, con su versión | `contaperu/datos/`, servidos por `api.catalogos_*` |
