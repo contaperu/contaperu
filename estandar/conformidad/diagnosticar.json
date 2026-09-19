@@ -1,0 +1,529 @@
+{
+ "_nota": "Casos de conformidad de `diagnosticar`, la operación que dice si un mes está listo para un destino y, si no, qué falta y a quién pedírselo. Cada caso trae el documento, su configuración, el destino y lo que se espera; `tests/test_conformidad.py` los corre contra el motor. Si el motor no pasa su propia conformidad, no la pasa nadie. Casi todos salen de algo que esta investigación descubrió que se equivoca.",
+ "casos": [
+  {
+   "description": "Una compra imputada a una cuenta de gasto: lista para exportar",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": true,
+    "por_que_no": [],
+    "faltantes": {}
+   }
+  },
+  {
+   "description": "Sin imputación y sin cuenta por defecto: se le pide la cuenta al contador",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1"
+     }
+    ]
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": false,
+    "faltantes": {
+     "sin_cuenta": [
+      "F001-123"
+     ]
+    },
+    "pedir_a": {
+     "sin_cuenta": "contador"
+    }
+   }
+  },
+  {
+   "description": "Una cuenta del elemento 8 del PCGE no tiene clase contable: tampoco se puede armar el asiento",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "891101"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": false,
+    "faltantes": {
+     "sin_clase": [
+      "F001-123"
+     ]
+    },
+    "pedir_a": {
+     "sin_clase": "contador"
+    }
+   }
+  },
+  {
+   "description": "Un comprobante en dólares sin tipo de cambio: SUNAT lo exige, así que el mes no exporta",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "USD",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": false,
+    "observaciones": [
+     "TC_FALTA"
+    ]
+   }
+  },
+  {
+   "description": "En dólares con su tipo de cambio: pasa, y el asiento lo arrastra a cada línea",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "USD",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1",
+      "tipo_cambio": "3.752"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": true
+   }
+  },
+  {
+   "description": "Un recibo por honorarios con el importe en `inafecto`, que es donde va: no genera crédito fiscal",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "0000045",
+      "fecha_emision": "2026-01-22",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "ASESORES DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "0",
+      "igv": "0",
+      "inafecto": "3000.00",
+      "total": "3000.00",
+      "retencion": "240.00",
+      "concepto": "ASESORIA CONTABLE",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6321001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": true
+   }
+  },
+  {
+   "description": "El mismo recibo con el importe en `base_gravada`: el motor lo observa, porque una base gravada sin su IGV no cuadra. Es la razón de que el importe vaya en `inafecto`",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "0000045",
+      "fecha_emision": "2026-01-22",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "ASESORES DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "3000.00",
+      "igv": "0",
+      "total": "3000.00",
+      "retencion": "240.00",
+      "concepto": "ASESORIA CONTABLE",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6321001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": false,
+    "observaciones": [
+     "IGV_NO_CUADRA"
+    ]
+   }
+  },
+  {
+   "description": "Un recibo por honorarios queda FUERA del registro del SIRE: el tipo 02 no entra",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "02",
+      "serie": "E001",
+      "numero": "0000045",
+      "fecha_emision": "2026-01-22",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "ASESORES DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "0",
+      "igv": "0",
+      "inafecto": "3000.00",
+      "total": "3000.00",
+      "concepto": "ASESORIA",
+      "id_externo": "c1"
+     }
+    ]
+   },
+   "configuracion": {},
+   "driver": "sire",
+   "espera": {
+    "listo_para_exportar": false,
+    "fuera_del_destino": 1
+   }
+  },
+  {
+   "description": "Una nota de crédito con sus importes en POSITIVO: el signo lo pone el driver",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "07",
+      "serie": "FC01",
+      "numero": "0000009",
+      "fecha_emision": "2026-01-28",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "1000.00",
+      "igv": "180.00",
+      "total": "1180.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1",
+      "ref_tipo_cp": "01",
+      "ref_serie": "F001",
+      "ref_numero": "0000123",
+      "ref_fecha": "2026-01-15"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": true
+   }
+  },
+  {
+   "description": "Una compra con detracción: lista, y el diagnóstico la cuenta como pendiente de constancia",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1",
+      "detraccion": {
+       "codigo": "037",
+       "porcentaje": "12",
+       "monto": "1416.00",
+       "estado": "PROVISIONADO"
+      }
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": true,
+    "detracciones_pendientes": 1
+   }
+  },
+  {
+   "description": "Con `imputaciones` y un comprobante sin `id_externo`: se rechaza en la puerta",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "error": "cada comprobante necesita su `id_externo`"
+   }
+  },
+  {
+   "description": "Un documento que se declara de la 0.3: la 1.0 no lo acepta",
+   "documento": {
+    "open_accounting": "0.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1"
+     }
+    ]
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "error": "se declara `open_accounting` 0.3"
+   }
+  }
+ ]
+}

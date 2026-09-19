@@ -88,7 +88,7 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 
 ## El motor por dentro
 
-![ContaPerú por dentro: el contador sube al ERP externo los XML o el TXT de la propuesta del SIRE; el ERP le pasa al motor el documento open-accounting, y la imputación aparte; el motor entra por sus puertas a la API pública 1.0, el pipeline se apoya en el núcleo peruano y los drivers lo traducen al SIRE, CONCAR, CONTASIS o de vuelta al ERP](diagramas/arquitectura-del-motor.svg)
+![ContaPerú por dentro: el contador sube al ERP externo los XML o el TXT de la propuesta del SIRE; el ERP le pasa al motor el documento open-accounting, con sus comprobantes y su imputación; el motor entra por sus puertas a la API pública 1.0, el pipeline se apoya en el núcleo peruano y los drivers lo traducen al SIRE, CONCAR, CONTASIS o de vuelta al ERP](diagramas/arquitectura-del-motor.svg)
 
 - **Arriba, tu sistema:** el **ERP externo** recibe lo que sube el contador, los XML o el TXT de la propuesta del SIRE.
   Guarda, revisa y descarga: todo lo que necesita red, disco o credenciales vive ahí, no en el motor.

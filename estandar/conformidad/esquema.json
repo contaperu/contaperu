@@ -1,0 +1,601 @@
+{
+ "_nota": "Casos de conformidad del ESQUEMA de open-accounting 1.0. Cada uno es {description, data, valid}: se corren con cualquier validador de JSON Schema draft 2020-12, SIN el motor. La forma es la de la JSON Schema Test Suite, para que se puedan correr con las herramientas que ya existen.",
+ "esquema": "../open-accounting.schema.json",
+ "casos": [
+  {
+   "description": "El mínimo: un libro y nada más",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "Un comprobante con los tres campos que exige y nada más",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "La ausencia es la respuesta: sin detracción no se manda nada",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Una detracción en null vale: es lo mismo que no traerla",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "detraccion": null
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "`detraccion: false` NO vale: no es un objeto de detracción, y el false de relleno es justo lo que este estándar no hace",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "detraccion": false
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Campos de relleno de otro sistema: se rechazan en la primera llamada y no al cerrar el mes",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "cod_Detraccion": "",
+      "tasa_Detraccion": 0
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Vocabulario legacy en el comprobante: `subdiario` es de un sistema, no un hecho de SUNAT",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "subdiario": "10"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "La cuenta contable NO va en el comprobante: es la decisión de quien contabiliza, no el hecho",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "cuenta_contable": "6343001"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Con `imputaciones`, cada comprobante necesita su `id_externo`: es la llave con la que se casan",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "valid": false
+  },
+  {
+   "description": "Con `imputaciones` y con `id_externo`",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001",
+      "centro_costo": "OBRA01"
+     }
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "Sin `imputaciones` no se pide `id_externo`: el requisito es condicional de verdad",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Una clave inventada dentro de una imputación",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta": "6343001"
+     }
+    }
+   },
+   "valid": false
+  },
+  {
+   "description": "Un reparto con su importe",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "reparto": [
+       {
+        "importe": "6000.00",
+        "cuenta_contable": "636301"
+       },
+       {
+        "importe": "4000.00",
+        "cuenta_contable": "632201"
+       }
+      ]
+     }
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "Una línea del asiento sin `clase`: obligatoria desde la 1.0",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "asiento": [
+     {
+      "cuenta": "6343001",
+      "debe_haber": "D",
+      "importe": "10000.00",
+      "rol": "principal"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una línea con su clase",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "asiento": [
+     {
+      "cuenta": "6343001",
+      "debe_haber": "D",
+      "importe": "10000.00",
+      "rol": "principal",
+      "clase": "gasto"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Un rol que el catálogo todavía no tiene NO rompe el documento: quien lo reciba contabiliza con la clase, el sentido y el importe. Es la regla de degradación",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "asiento": [
+     {
+      "cuenta": "421201",
+      "debe_haber": "H",
+      "importe": "100.00",
+      "rol": "percepcion",
+      "clase": "pasivo"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "El enlace de la línea con su comprobante, por el id del sistema que lo produjo",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "asiento": [
+     {
+      "cuenta": "6343001",
+      "debe_haber": "D",
+      "importe": "10000.00",
+      "clase": "gasto",
+      "documento": {
+       "tipo_cp": "01",
+       "serie_numero": "F001-123",
+       "id_externo": "c1"
+      }
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Un importe negativo: los importes van SIEMPRE en positivo y el signo lo pone el driver",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "-118.00",
+      "destino_igv": "DG"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una fecha que no es AAAA-MM-DD",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "15/01/2026",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Un RUC que no tiene once dígitos",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "123",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    }
+   },
+   "valid": false
+  },
+  {
+   "description": "Un periodo que no existe",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202613",
+     "tipo": "compra"
+    }
+   },
+   "valid": false
+  },
+  {
+   "description": "Una anotación del productor: cualquier clave que empiece con guion bajo se transporta y se ignora",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "_mi_sistema": {
+     "lote": 7
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "Una versión que no es la 1.0",
+   "data": {
+    "open_accounting": "0.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    }
+   },
+   "valid": false
+  }
+ ]
+}

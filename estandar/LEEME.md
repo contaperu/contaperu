@@ -390,6 +390,31 @@ aparezca el hecho que lo necesite.
 
 ---
 
+## Cómo compruebas que lo que produces es correcto
+
+Tres piezas, y la tercera es la que faltaba:
+
+| Pieza | Qué comprueba |
+|---|---|
+| `python -m contaperu.cli diagnosticar mi-mes.json` | **Un documento tuyo**: qué bloquea, qué falta y a quién pedírselo |
+| `contaperu verificar-driver mi_paquete.mi_driver` | **Un driver propio** contra el contrato, antes de registrarlo |
+| [`conformidad/`](conformidad/) | **Que lo que tu sistema produce es correcto**, sin escribirle a nadie |
+
+La conformidad son dos juegos de casos, publicados con el tag del estándar:
+
+- [`conformidad/esquema.json`](conformidad/esquema.json) — casos `{description, data, valid}` con la forma de la
+  *JSON Schema Test Suite*, para correrlos con **cualquier validador de draft 2020-12** y sin el motor. Es lo que
+  permite que un ERP en otro lenguaje los use tal cual.
+- [`conformidad/diagnosticar.json`](conformidad/diagnosticar.json) — casos con su documento, su configuración, su
+  destino y lo que se espera: si el mes queda listo, qué falta y a quién pedírselo.
+
+**Los corre la batería de este repositorio**: si el motor no pasa su propia conformidad, no la pasa nadie. Y casi todos
+los casos salen de algo que se equivocó de verdad al escribir la 1.0 — el recibo por honorarios con el importe en la
+casilla equivocada, la factura en dólares sin tipo de cambio, el `detraccion: false` de relleno, la cuenta de un
+elemento sin clase.
+
+---
+
 ## Quién gobierna los catálogos
 
 Mientras `rol` y `libro.tipo` eran enums cerrados dentro del esquema, quien quisiera un valor nuevo tenía que abrir un

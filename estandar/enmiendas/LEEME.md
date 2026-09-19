@@ -51,3 +51,7 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0005](0005-retencion-de-igv.md) | `retencion_igv` — la retención del 3 % del régimen de retenciones | `reservada` |
 | [0006](0006-percepcion.md) | `percepcion` — el régimen de percepciones del IGV | `reservada` |
 | [0007](0007-no-domiciliado.md) | `no_domiciliado` — el comprobante de un sujeto del exterior | `reservada` |
+| [0008](0008-imputaciones-en-el-documento.md) | `imputaciones` en la raíz: el archivo explica su propio asiento | `final` |
+| [0009](0009-id-externo-en-la-linea.md) | `documento.id_externo` en la línea, y el id obligatorio con imputaciones | `final` |
+| [0010](0010-clase-en-la-linea.md) | `clase` obligatoria en cada línea: qué es su cuenta | `final` |
+| [0011](0011-rol-y-tipo-de-libro-en-catalogo.md) | `rol` y `libro.tipo` salen del esquema a catálogos | `final` |

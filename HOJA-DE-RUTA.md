@@ -252,8 +252,8 @@ repositorio sigue privado.
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
-| E1 | `estandar/enmiendas*/NNNN-titulo.md`: plantilla, estados, y los siete nombres reservados migrados como enmiendas en estado `reservada`. El LEEME sigue siendo el texto normativo | estándar · documentación | código | Cada reservado del LEEME tiene su enmienda; cada enmienda `final` cita un test que existe | — | — |
-| E2 | `estandar/conformidad*/`: casos de esquema `{description, data, valid}` y casos de `diagnosticar` con lo esperado (`listo`, motivos, `pedir_a`) | estándar | código | Los corre la batería; hay un caso por regla de `validar` y por fila de `FALTAS`; los de esquema se ejecutan sin el motor | E1 | — |
+| E1 ✅ | `estandar/enmiendas*/NNNN-titulo.md`: plantilla, estados, y los siete nombres reservados migrados como enmiendas en estado `reservada`. El LEEME sigue siendo el texto normativo | estándar · documentación | código | Cada reservado del LEEME tiene su enmienda; cada enmienda `final` cita un test que existe | — | — · **hecho el 18-sep-2026** |
+| E2 ✅ | `estandar/conformidad*/`: casos de esquema `{description, data, valid}` y casos de `diagnosticar` con lo esperado (`listo`, motivos, `pedir_a`) | estándar | código | Los corre la batería; hay un caso por regla de `validar` y por fila de `FALTAS`; los de esquema se ejecutan sin el motor | E1 ✅ | — · **hecho el 18-sep-2026** |
 | E3 | Política escrita de retiro: legado en una versión, rechazo en la siguiente; cada cambio con su fecha de vigencia | estándar | código | Revisada; `tests/test_estandar.py` sigue verde | E1 | — |
 | E4 | Revisión cuando SUNAT cambia la fecha «actualizado al» de sus reglas | proceso | dato: la nueva versión de SUNAT | JSON de C1 regenerado; las diferencias, en el CHANGELOG | C1 | — |
 | E5 | **Guía de aporte por rol** en `CONTRIBUTING.md`: qué aporta un contador (la regla con su norma), un desarrollador (el driver con su contrato) y una empresa (el formato de su sistema con un archivo aceptado, anonimizado) | documentación | código | La sección existe y el README la enlaza desde «Cómo aportar» | — | — |

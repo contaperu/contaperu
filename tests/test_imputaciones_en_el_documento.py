@@ -43,8 +43,15 @@ def llamar(nombre: str, en_el_documento: bool, **kwargs):
 
 @pytest.mark.parametrize("operacion", OPERACIONES)
 def test_las_dos_vias_dan_exactamente_lo_mismo(operacion):
-    """El corazón de esta parte: la imputación en el documento y la imputación en el argumento son la misma cosa."""
-    assert llamar(operacion, en_el_documento=True) == llamar(operacion, en_el_documento=False)
+    """El corazón de esta parte: la imputación en el documento y la imputación en el argumento son la misma cosa.
+
+    Se compara todo menos los bytes del archivo, que en un Excel llevan la hora dentro del zip y por tanto cambian
+    entre dos llamadas seguidas. Lo que dice si el contenido es el mismo es la huella, y va aparte."""
+    por_dentro = llamar(operacion, en_el_documento=True)
+    por_fuera = llamar(operacion, en_el_documento=False)
+    sin_bytes = {"contenido_base64", "texto"}
+    assert {k: v for k, v in por_dentro.items() if k not in sin_bytes} == \
+           {k: v for k, v in por_fuera.items() if k not in sin_bytes}
 
 
 def test_la_huella_no_depende_de_por_donde_llego_la_imputacion():

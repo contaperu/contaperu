@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="680" height="824" viewBox="0 0 680 824" role="img" aria-labelledby="titulo descripcion">
 <title id="titulo">ContaPerú por dentro: del ERP externo a los destinos</title>
-<desc id="descripcion">El contador sube al ERP externo los XML de las facturas o el TXT de la propuesta del SIRE. El ERP externo guarda, revisa y descarga. Le pasa al motor el documento común open-accounting, con el libro y los comprobantes; la imputación de cuentas y centros llega aparte. El motor, sin red, sin disco y sin estado, entra por sus puertas —Python, CLI, MCP y HTTP— a la API pública 1.0. El pipeline lee, prepara, arma y diagnostica apoyándose en el núcleo peruano, que valida, calcula el IGV, arma el asiento y aplica el PCGE, y los drivers lo traducen al destino sin decidir cuentas: el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o de vuelta al ERP en JSON, con su diagnóstico.</desc>
+<desc id="descripcion">El contador sube al ERP externo los XML de las facturas o el TXT de la propuesta del SIRE. El ERP externo guarda, revisa y descarga. Le pasa al motor el documento común open-accounting, con el libro y los comprobantes; con la imputación de cuentas y centros dentro, por el id de cada comprobante. El motor, sin red, sin disco y sin estado, entra por sus puertas —Python, CLI, MCP y HTTP— a la API pública 1.0. El pipeline lee, prepara, arma y diagnostica apoyándose en el núcleo peruano, que valida, calcula el IGV, arma el asiento y aplica el PCGE, y los drivers lo traducen al destino sin decidir cuentas: el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o de vuelta al ERP en JSON, con su diagnóstico.</desc>
 <style>
 .fondo{fill:#FFFFFF}
 .t,.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
@@ -32,7 +32,7 @@
 <line class="flecha" x1="340" y1="78" x2="340" y2="118" marker-end="url(#punta)"/>
 <g class="m"><rect x="40" y="120" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="138">ERP externo</text><text class="s" x="340" y="156">Guarda, revisa y descarga</text></g>
 <line class="flecha" x1="340" y1="178" x2="340" y2="210" marker-end="url(#punta)"/>
-<g class="a"><rect x="40" y="212" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="230">open-accounting, el documento común</text><text class="s" x="340" y="248">Libro y comprobantes · la imputación llega aparte</text></g>
+<g class="a"><rect x="40" y="212" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="230">open-accounting, el documento común</text><text class="s" x="340" y="248">Libro, comprobantes, imputaciones y asiento</text></g>
 <line class="flecha" x1="340" y1="270" x2="340" y2="302" marker-end="url(#punta)"/>
 <g class="v"><rect x="20" y="304" width="640" height="376" rx="16" stroke-width="0.5"/><text class="t" x="340" y="326">ContaPerú, el motor</text><text class="s" x="340" y="344">Sin red, sin disco, sin estado</text></g>
 <g class="g"><rect x="40" y="364" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="382">Puertas</text><text class="s" x="340" y="400">Python, CLI, MCP y HTTP con OpenConta</text></g>

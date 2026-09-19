@@ -7,6 +7,12 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 ## [Sin publicar]
 
 ### Añadido
+- **La batería de conformidad del estándar** (`estandar/conformidad/`, hito E2), para que un tercero compruebe que lo
+  que produce es correcto **sin escribirle a nadie**. Dos juegos: los casos de esquema, con la forma de la *JSON Schema
+  Test Suite* (`{description, data, valid}`), que se corren con cualquier validador de draft 2020-12 y **sin el
+  motor**; y los casos de `diagnosticar`, con su documento, su destino y lo que se espera. **Los corre la batería de
+  aquí**: si el motor no pasa su propia conformidad, no la pasa nadie. Casi todos los casos salen de algo que se
+  equivocó de verdad al escribir esta versión.
 - **`clase` en cada línea del asiento** —`activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto`—, **obligatoria** desde
   `open-accounting` 1.0. Es lo único que un ERP de fuera entiende sin conocer el PCGE: hasta ahora los roles
   `principal` y `tercero` solo significaban algo mirando `libro.tipo` —en una compra `principal` es el gasto y en una
