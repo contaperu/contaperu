@@ -45,10 +45,17 @@ def test_cada_linea_del_snapshot_va_y_vuelve(caso):
 
 
 @pytest.mark.parametrize("linea,motivo", [
-    ({"cuenta": "631101", "debe_haber": "X", "importe": "1.00"}, "D o H"),
-    ({"cuenta": "631101", "debe_haber": "D"}, "importe"),
-    ({"cuenta": "", "debe_haber": "D", "importe": "1.00"}, "cuenta"),
-    ({"cuenta": "631101", "debe_haber": "D", "importe": "1.00", "raro": 1}, "raro"),
+    ({"cuenta": "631101", "debe_haber": "X", "importe": "1.00", "clase": "gasto"}, "D o H"),
+    ({"cuenta": "631101", "debe_haber": "D", "clase": "gasto"}, "importe"),
+    ({"cuenta": "", "debe_haber": "D", "importe": "1.00", "clase": "gasto"}, "cuenta"),
+    ({"cuenta": "631101", "debe_haber": "D", "importe": "1.00", "clase": "gasto", "raro": 1}, "raro"),
+    # La clase, desde la 1.0: obligatoria y coherente con su cuenta. Sin las dos comprobaciones el lector era más
+    # laxo que el esquema que el propio motor publica, y `clase` no podría quedar fuera de la huella.
+    ({"cuenta": "631101", "debe_haber": "D", "importe": "1.00"}, "le falta: clase"),
+    ({"cuenta": "631101", "debe_haber": "D", "importe": "1.00", "clase": ""}, "le falta: clase"),
+    ({"cuenta": "631101", "debe_haber": "D", "importe": "1.00", "clase": "ingreso"}, "es de clase 'gasto'"),
+    ({"cuenta": "201101", "debe_haber": "D", "importe": "1.00", "clase": "gasto"}, "es de clase 'activo'"),
+    ({"cuenta": "891101", "debe_haber": "D", "importe": "1.00", "clase": "gasto"}, "sin clase contable"),
 ])
 def test_una_linea_que_no_es_del_asiento_se_rechaza(linea, motivo):
     with pytest.raises(ValueError, match=motivo):

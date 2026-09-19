@@ -49,12 +49,12 @@ from typing import Any
 from .. import _datos
 from .._obsoleto import avisar
 from ..errores import ErrorContaperu
+from . import clases
 
 # La tabla viaja dentro del paquete y la lee `_datos`: el núcleo no abre archivos (1.0, hito 0.5).
 TABLA = "pcge/pcge2026.json"
 
 MODOS = ("renombrar",)
-from . import clases
 
 
 class TablaInvalida(ErrorContaperu, ValueError):
@@ -125,6 +125,11 @@ def cargar_equivalencias(datos: dict | str | os.PathLike | None = None) -> tuple
                 f"El mapeo {i} ({m['de']} -> {m['a']}) no cita la norma que lo respalda. "
                 "En este proyecto ninguna regla contable entra sin fuente."
             )
+        if not clases.clase_de(str(m["a"])):
+            raise TablaInvalida(
+                f"El mapeo {i} ({m['de']} -> {m['a']}) lleva a una cuenta de un elemento del PCGE sin clase "
+                "contable (el 8 y el 0). La línea adaptada saldría sin `clase`, que es obligatoria desde "
+                "`open-accounting` 1.0: una equivalencia así necesita decidirse con la norma delante.")
         mapeos.append(Mapeo(**{k: m.get(k, "") for k in ("de", "a", "modo", "cita", "nota")}))
     return mapeos, datos
 
@@ -164,10 +169,10 @@ def adaptar(lineas: list[dict[str, Any]], ruta: str | os.PathLike | None = None,
             nueva["cuenta"] = m.a
             # La clase se deriva de la cuenta, así que al reescribirla hay que rederivarla: si el mapeo cruza de
             # elemento —una 6 que pasa a una 9, por ejemplo— la línea saldría diciendo una clase que su cuenta
-            # contradice, y es justo lo que el motor promete rechazar. Si la cuenta adaptada cae en el elemento 8 o
-            # el 0, que no tienen clase, se deja la que traía: aquí no se puede pedir nada a nadie, y es el informe
-            # el que dice qué se tocó.
-            if nueva.get("clase") is not None and clases.clase_de(m.a):
+            # contradice, y eso lo rechaza el lector de líneas (`asiento.LineaDiario.de_dict`). Siempre sale una,
+            # porque `cargar_equivalencias` no admite un mapeo que lleve a una cuenta sin clase. A la línea que no
+            # traía el campo no se le inventa: quien lo escribe es quien arma el asiento.
+            if nueva.get("clase") is not None:
                 nueva["clase"] = clases.clase_de(m.a)
             informe.aplicados.append({
                 "de": cuenta, "a": nueva["cuenta"], "modo": m.modo, "cita": m.cita,

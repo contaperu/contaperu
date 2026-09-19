@@ -30,7 +30,7 @@ from .. import pcge, vocabulario
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .configuracion import NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
-from .faltas import RepartoNoCuadra, SinCuenta
+from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import Cabecera, ComprobanteDelAsiento
 from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
                          lleva_centro, numerar, numerar_en_orden, partes_de, reparto_no_cuadra, sigla_documento,
@@ -183,8 +183,16 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
 
     def linea(rol: str, importe: Decimal, cuenta_linea: str, sentido: str, glosa_linea: str = glosa,
               **extra) -> LineaDiario:
+        # La clase es obligatoria en el estándar y `a_dict()` omite lo vacío, así que una línea sin ella produciría
+        # un documento que el propio esquema 1.0 rechaza, y en silencio. Aquí se corta: es el último guardián, el que
+        # alcanza a las cuentas que no son la de la base —la del tercero, la del IGV, la de la retención, la de la
+        # detracción—, que vienen de la configuración o de la imputación. Lo que lo DICE antes, con su motivo y sin
+        # excepción, es el diagnóstico (`resolucion.comprobantes_sin_clase`).
+        clase_linea = pcge.clase_de(cuenta_linea)
+        if not clase_linea:
+            raise SinClase([c])
         campos = dict(cuenta=cuenta_linea, debe_haber=sentido, importe=str(Decimal(importe).quantize(CENTIMO)),
-                      rol=rol, clase=pcge.clase_de(cuenta_linea), sub_diario=sub_diario_asiento,
+                      rol=rol, clase=clase_linea, sub_diario=sub_diario_asiento,
                       correlativo=correlativo, fecha=_iso(fecha_asiento),
                       moneda=moneda, tipo_cambio=tc, glosa=glosa_linea, documento=_limpio(documento),
                       referencia=_limpio(referencia), tasa_igv=tasa)

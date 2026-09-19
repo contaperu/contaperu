@@ -415,6 +415,28 @@
    "valid": false
   },
   {
+   "description": "Una línea del asiento con la `clase` vacía: `required` sola no la atrapaba, porque el texto vacío es un texto",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "asiento": [
+     {
+      "cuenta": "6343001",
+      "debe_haber": "D",
+      "importe": "10000.00",
+      "rol": "principal",
+      "clase": ""
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
    "description": "Una línea con su clase",
    "data": {
     "open_accounting": "1.0",

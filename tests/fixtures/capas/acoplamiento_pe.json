@@ -18,6 +18,9 @@
   "contaperu.detracciones",
   "contaperu.pcge"
  ],
+ "contaperu.asiento.lineas": [
+  "contaperu.pcge"
+ ],
  "contaperu.asiento.motor": [
   "contaperu.catalogos",
   "contaperu.detracciones",
@@ -26,6 +29,7 @@
  ],
  "contaperu.asiento.resolucion": [
   "contaperu.catalogos",
+  "contaperu.detracciones",
   "contaperu.igv",
   "contaperu.pcge"
  ],

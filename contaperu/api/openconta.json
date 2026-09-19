@@ -1255,8 +1255,9 @@
       "$ref": "#/components/schemas/OpenAccounting_importe"
      },
      "clase": {
-      "description": "Qué es la cuenta de esta línea: los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, así que un ERP de fuera sabe qué hacer con ella sin conocer el PCGE. Se deriva del primer dígito de la cuenta (el elemento del PCGE) y no del rol: en una compra de mercadería el rol es `principal` y la línea es un activo. Los valores están en el catálogo `clases` del estándar.",
-      "type": "string"
+      "description": "Qué es la cuenta de esta línea: los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, así que un ERP de fuera sabe qué hacer con ella sin conocer el PCGE. Se deriva del primer dígito de la cuenta (el elemento del PCGE) y no del rol: en una compra de mercadería el rol es `principal` y la línea es un activo. Los valores están en el catálogo `clases` del estándar, y ahí se congelan: son los únicos que un ERP de fuera entiende sin conocer el PCGE.",
+      "type": "string",
+      "minLength": 1
      },
      "rol": {
       "description": "Qué papel cumple la línea en la operación peruana. Los valores están en el catálogo `roles` de `estandar/catalogos.json`, publicado y versionado aparte del esquema, para que un rol nuevo no cueste una versión del documento. **Quien no conozca un rol tiene que poder contabilizar la línea con `clase`, `debe_haber` e `importe`**: es la regla de degradación que hace que el catálogo pueda crecer sin romper a ningún ERP ya integrado.",

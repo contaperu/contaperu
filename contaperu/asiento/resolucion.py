@@ -14,9 +14,10 @@ from typing import Any
 
 from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..configuracion import CONFIG_POR_DEFECTO, por_defecto
-from ..igv import base_imputable
+from ..detracciones import monto_detraccion
+from ..igv import base_imputable, igv_del_asiento
 from ..pcge import clase_de as _clase_de
-from ..modelo import Comprobante, Libro, a_decimal
+from ..modelo import CENTIMO, Comprobante, Libro, a_decimal
 from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO
 from .faltas import FALTAS, SinCorrelativo, SinSigla
 from .imputacion import Imputacion
@@ -227,12 +228,41 @@ def comprobantes_sin_cuenta(comprobantes: list[Comprobante], config: dict, es_ve
     return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, config, es_venta))]
 
 
+def cuentas_del_asiento(c: Comprobante, config: dict, es_venta: bool = False) -> list[str]:
+    """TODAS las cuentas que tocarán las líneas del asiento de este comprobante: la de la base (una por parte si va
+    repartida), la del IGV, la de la retención de 4ta, la del tercero y la de la detracción.
+
+    Existe porque las faltas se calculan **antes** de armar el asiento, y hasta la 1.0 solo miraban la base: una
+    cuenta sin clase en la del tercero o en la del IGV —que vienen de la imputación y de la configuración— pasaba el
+    diagnóstico y salía en un documento que el propio esquema rechaza. Quién decide qué líneas hay es
+    `motor.lineas_del_comprobante`, que no se puede llamar desde aquí porque él importa esto; lo que ata las dos
+    listas es un test (`tests/test_clases.py`), no la buena voluntad."""
+    cuentas_config = config.get("cuentas") or {}
+    por_defecto = CONFIG_POR_DEFECTO["cuentas"]
+    moneda = (c.moneda or "PEN").upper()
+    es_honorarios = not es_venta and c.tipo_cp == TIPO_HONORARIOS
+    cuentas = [cuenta for cuenta, _, _ in partes_de(c, config, es_venta)]
+    if igv_del_asiento(c, es_venta) > 0:
+        cuentas.append(str(cuentas_config.get("igv") or por_defecto["igv"]))
+    total = a_decimal(c.total).quantize(CENTIMO)
+    retenido = min(a_decimal(c.retencion).quantize(CENTIMO), total) if es_honorarios else Decimal(0)
+    if retenido > 0:
+        cuentas.append(str(cuentas_config.get("retencion_4ta") or por_defecto["retencion_4ta"]))
+    cuentas.append(cuenta_tercero(c, config, es_venta))
+    if not es_venta and not es_honorarios and tiene_detraccion(c):
+        _, detraido = monto_detraccion(c, config)
+        if detraido > 0:
+            cuentas.append(cuenta_por_pagar_detraccion(cuentas_config, moneda))
+    return [cuenta for cuenta in cuentas if cuenta]
+
+
 def comprobantes_sin_clase(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
-    """Las filas imputadas a una cuenta cuyo elemento del PCGE no tiene clase contable: el 8 (saldos intermediarios
-    de gestión) y el 0 (cuentas de orden). Se mira la cuenta de cada parte de la base, como `comprobantes_sin_cuenta`:
-    basta con que una la tenga para que el asiento no se pueda armar."""
+    """Las filas que tocarían una cuenta cuyo elemento del PCGE no tiene clase contable: el 8 (saldos intermediarios
+    de gestión) y el 0 (cuentas de orden). Se miran **todas** las cuentas de su asiento (`cuentas_del_asiento`), no
+    solo la de la base: basta con que una no tenga clase para que el asiento no se pueda armar, porque esa línea
+    saldría sin `clase` y la clase es obligatoria desde la 1.0."""
     return [c for c in comprobantes
-            if any(cuenta and not _clase_de(cuenta) for cuenta, _, _ in partes_de(c, config, es_venta))]
+            if any(not _clase_de(cuenta) for cuenta in cuentas_del_asiento(c, config, es_venta))]
 
 
 def comprobantes_sin_centro(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:

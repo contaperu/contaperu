@@ -141,6 +141,57 @@
    }
   },
   {
+   "description": "La cuenta SIN clase no es la de la base sino la del tercero: se dice igual, porque la línea que saldría sin `clase` es un documento que este esquema rechaza",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "634301",
+      "cuenta_tercero": "011101"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_neutral",
+   "espera": {
+    "listo_para_exportar": false,
+    "faltantes": {
+     "sin_clase": [
+      "F001-123"
+     ]
+    },
+    "pedir_a": {
+     "sin_clase": "contador"
+    }
+   }
+  },
+  {
    "description": "Un comprobante en dólares sin tipo de cambio: SUNAT lo exige, así que el mes no exporta",
    "documento": {
     "open_accounting": "1.0",

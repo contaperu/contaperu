@@ -47,6 +47,17 @@ mueve**.
 - **Los elementos 8 y 0 no tienen clase, y no se fuerzan**: son de cierre y de control. Una imputación a una de esas
   cuentas no genera asiento y se dice con su motivo (`sin_clase` en la tabla de faltas, que se le pide al contador
   porque es quien eligió la cuenta). Las cinco clases siguen siendo cinco, que es lo que las hace universales.
+  **Se miran TODAS las cuentas del asiento**, no solo la de la base: la del tercero, la del IGV, la de la retención y
+  la de la detracción vienen de la imputación y de la configuración, y con solo la base el diagnóstico decía
+  `listo_para_exportar: true` mientras el archivo que salía llevaba una línea **sin `clase`** —un documento que el
+  propio esquema del estándar rechaza, y sin un aviso—. Lo enumera `resolucion.cuentas_del_asiento`, un test lo ata a
+  las líneas que arma el motor de verdad, y la fábrica de líneas se planta si alguna vez se separan.
+- **El lector de una línea exige la `clase` y la comprueba contra su cuenta** (`asiento.LineaDiario.de_dict`). Sin eso
+  el motor era más laxo que el esquema que publica —que la pide en `required`—, y sobre todo: que la clase pueda quedar
+  **fuera de la huella** se sostiene en que no puede contradecir a su cuenta, que sí entra. También en el esquema, la
+  `clase` pide `minLength: 1`: `required` sola no atrapaba la clase vacía, porque el texto vacío es un texto. Y una
+  equivalencia del PCGE no puede llevar a una cuenta sin clase (`pcge.cargar_equivalencias`), que era el único sitio
+  desde donde podía salir una línea con la clase contradiciendo a su cuenta.
 - **El CSV gana dos columnas al final**, `clase` y `doc_id_externo`, sin mover las de siempre. **Cambia los bytes de
   esa salida**; el Excel de CONCAR y el registro de CONTASIS no cambian ni una celda.
 - **La imputación viaja DENTRO del documento** (decisión de John del 18-sep-2026), en el bloque `imputaciones` de la

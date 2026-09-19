@@ -108,6 +108,95 @@ def test_todos_los_roles_tienen_clase_en_un_asiento_completo():
     assert all(vistos.values()), vistos
 
 
+# ── Todas las cuentas del asiento, no solo la de la base ──────────────────────────────────────────────────────
+
+CUENTAS_DE_PRUEBA = {"igv": "401111", "retencion_4ta": "401721", "gasto": "634301", "ventas": "701101"}
+
+
+def aplicada(**general) -> dict:
+    """La configuración aplicada como la recibe el motor, con las imputaciones de prueba dentro."""
+    from contaperu.pipeline import preparacion as prep
+    from util import con_imputaciones, en_secciones
+    return con_imputaciones(prep.config_aplicada(en_secciones({"usa_centros_costo": False, **general}, "concar"),
+                                                 "concar"))
+
+
+@pytest.mark.parametrize("descripcion,campos,es_venta", [
+    ("factura de compra con IGV", {}, False),
+    ("factura con detracción", {"detraccion": {"codigo": "027", "porcentaje": "4"}}, False),
+    ("boleta de compra, que no da crédito fiscal y no lleva línea de IGV",
+     {"tipo_cp": "03", "base_gravada": "0", "igv": "0", "inafecto": "118.00"}, False),
+    ("recibo por honorarios con retención de 4ta",
+     {"tipo_cp": "02", "base_gravada": "0", "igv": "0", "inafecto": "3000.00", "total": "3000.00",
+      "retencion": "240.00"}, False),
+    ("recibo por honorarios sin retención, que es lo normal con suspensión",
+     {"tipo_cp": "02", "base_gravada": "0", "igv": "0", "inafecto": "3000.00", "total": "3000.00"}, False),
+    ("nota de crédito, que invierte los sentidos", {"tipo_cp": "07", "ref_tipo_cp": "01", "ref_serie": "F001",
+                                                    "ref_numero": "500"}, False),
+    ("una venta", {}, True),
+    ("una factura en dólares", {"moneda": "USD", "tipo_cambio": "3.750"}, False),
+])
+def test_las_cuentas_que_el_diagnostico_mira_son_las_que_el_asiento_usa(descripcion, campos, es_venta):
+    """El test que sostiene la duplicación, y la razón por la que existe.
+
+    Las faltas se calculan **antes** de armar el asiento, así que `resolucion.cuentas_del_asiento` repite las
+    condiciones de `motor.lineas_del_comprobante` —hay línea de IGV solo si hay IGV, de retención solo en un recibo
+    con retención, de detracción solo si la hay—. No se puede llamar al motor desde ahí porque él importa esto, de
+    modo que lo que impide que las dos listas se separen es este test. Si se separan, vuelve el defecto de la 1.0:
+    una cuenta sin clase en la del tercero o la del IGV pasaba el diagnóstico y salía en un documento inválido."""
+    from datetime import date
+
+    from contaperu.asiento import lineas_del_comprobante
+    from contaperu.asiento import resolucion
+    from util import comprobante
+
+    base = {"tipo_cp": "01", "serie": "F001", "numero": "500", "fecha_emision": date(2026, 1, 10),
+            "contraparte_tipo_doc": "6", "contraparte_doc": "20131312955",
+            "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC", "moneda": "PEN", "base_gravada": "100.00",
+            "igv": "18.00", "total": "118.00", "destino_igv": "" if es_venta else "DG",
+            "cuenta_contable": "701101" if es_venta else "634301"}
+    c = comprobante(**{**base, **campos})
+    config = aplicada(cuentas=CUENTAS_DE_PRUEBA)
+    del_asiento = {ln.cuenta for ln in lineas_del_comprobante(c, config, (date(2026, 1, 1), date(2026, 1, 31)),
+                                                              "000001", es_venta=es_venta)}
+    assert set(resolucion.cuentas_del_asiento(c, config, es_venta)) == del_asiento, descripcion
+
+
+def test_una_cuenta_sin_clase_que_no_es_la_de_la_base_tambien_se_dice_antes_de_exportar():
+    """El defecto que esto cierra: la cuenta del tercero y la del IGV vienen de la imputación y de la configuración,
+    no de la base, así que el guardián de la 1.0 no las miraba. El diagnóstico decía `listo_para_exportar: true` y el
+    archivo que se entregaba al otro ERP salía con una línea **sin `clase`**: un documento que el propio esquema del
+    estándar rechaza, y sin un solo aviso."""
+    doc = documento("634301")
+    doc["imputaciones"]["c1"]["cuenta_tercero"] = "011101"          # elemento 0: cuentas de orden
+    d = api.diagnosticar(doc, driver="asiento_neutral", configuracion=SIN_CENTROS)
+    assert d["listo_para_exportar"] is False
+    assert d["faltantes"]["sin_clase"] == ["F001-500"]
+
+    con_igv_raro = dict(SIN_CENTROS, cuentas={"igv": "891101"})     # elemento 8: saldos intermediarios
+    d2 = api.diagnosticar(documento("634301"), driver="asiento_neutral", configuracion=con_igv_raro)
+    assert d2["faltantes"]["sin_clase"] == ["F001-500"]
+
+
+def test_ninguna_linea_puede_salir_sin_clase_aunque_el_diagnostico_se_despiste():
+    """El último guardián, dentro de la fábrica de líneas, y se prueba llamándola directamente: por la fachada salta
+    antes la falta, así que un test por ahí no diría nada de esto.
+
+    Hace falta porque `a_dict()` omite lo vacío: una línea sin clase no sale «vacía», sale **sin el campo**, y eso es
+    un documento que el propio esquema del estándar rechaza. Si algún día `cuentas_del_asiento` se queda corta otra
+    vez, el motor se planta con su motivo en vez de emitir un archivo inválido."""
+    from datetime import date
+
+    from contaperu.asiento import lineas_del_comprobante
+    from util import comprobante
+
+    c = comprobante(tipo_cp="01", serie="F001", numero="500", fecha_emision=date(2026, 1, 10),
+                    contraparte_doc="20131312955", moneda="PEN", base_gravada="100.00", igv="18.00",
+                    total="118.00", destino_igv="DG", cuenta_contable="891101")
+    with pytest.raises(faltas.SinClase, match="sin clase contable"):
+        lineas_del_comprobante(c, aplicada(cuentas=CUENTAS_DE_PRUEBA), (date(2026, 1, 1), date(2026, 1, 31)), "000001")
+
+
 # ── La falta ──────────────────────────────────────────────────────────────────────────────────────────────────
 
 def test_una_cuenta_de_elemento_8_no_genera_asiento_y_lo_dice():

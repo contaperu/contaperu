@@ -13,6 +13,8 @@ import copy
 from dataclasses import asdict, dataclass, field, fields
 from typing import Any
 
+from ..pcge import clase_de
+
 @dataclass
 class LineaDiario:
     """Una línea del asiento, en el vocabulario de `open-accounting`.
@@ -53,16 +55,30 @@ class LineaDiario:
     @classmethod
     def de_dict(cls, d: dict) -> "LineaDiario":
         """Una línea del bloque `asiento` de un documento → `LineaDiario`. Rechaza (`ValueError`) una clave que no es de
-        la línea, una línea sin cuenta, sin sentido o sin importe, y un sentido que no es D ni H: una línea que llega
-        por JSON no se completa adivinando."""
+        la línea, una línea sin cuenta, sin sentido, sin importe o **sin clase**, un sentido que no es D ni H, y una
+        `clase` que contradice su cuenta: una línea que llega por JSON no se completa adivinando.
+
+        **La clase se exige desde la 1.0**, que es cuando el estándar la puso en `required`: aceptar una línea sin ella
+        dejaba al lector más laxo que el esquema que publica. Y se comprueba contra la cuenta porque de eso depende
+        que la clase pueda quedar FUERA de la huella (`huella.SIN`): si una línea pudiera decir una clase que su
+        cuenta contradice, dos asientos distintos compartirían huella."""
         if not isinstance(d, dict):
             raise ValueError("Una línea del asiento tiene que ser un objeto")
         desconocidas = sorted(set(d) - {f.name for f in fields(cls)})
         if desconocidas:
             raise ValueError(f"Claves que no son de una línea del asiento: {', '.join(desconocidas)}")
-        faltan = [clave for clave in ("cuenta", "debe_haber", "importe") if not str(d.get(clave) or "").strip()]
+        faltan = [clave for clave in ("cuenta", "debe_haber", "importe", "clase")
+                  if not str(d.get(clave) or "").strip()]
         if faltan:
             raise ValueError(f"A la línea del asiento le falta: {', '.join(faltan)}")
         if d["debe_haber"] not in ("D", "H"):
             raise ValueError(f"debe_haber tiene que ser D o H, no {d['debe_haber']!r}")
+        esperada = clase_de(str(d["cuenta"]))
+        if str(d["clase"]).strip() != esperada:
+            raise ValueError(
+                f"La cuenta {d['cuenta']} es de clase {esperada!r} y la línea dice {str(d['clase']).strip()!r}: "
+                "la clase se deriva del primer dígito de la cuenta, que es el elemento del PCGE"
+                if esperada else
+                f"La cuenta {d['cuenta']} es de un elemento del PCGE sin clase contable (el 8 y el 0), "
+                "así que ninguna clase le corresponde")
         return cls(**copy.deepcopy(d))
