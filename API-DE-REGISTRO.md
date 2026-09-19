@@ -9,14 +9,26 @@ JSON para que le sirva a cualquier ERP y no a uno solo. Termina con un borrador 
 —compras, ventas, honorarios, cheques, estándar— y es hoy la forma más cercana a un «registro por API» que tiene un
 ERP peruano instalado. Sirve de punto de partida, no de modelo a copiar.
 
-**Estado: investigación y borrador.** Nada de lo que aquí se propone está en la librería 1.0.0 ni en
-`open-accounting` 0.3. El proyecto crece con la misma regla de siempre: el estándar se mueve con casos reales
-detrás, no por si acaso.
+**Estado: investigación cerrada y aplicada.** Se escribió entre el 15 y el 18 de septiembre de 2026 contra la
+librería 1.0.0 y `open-accounting` 0.3, cuando nada de esto existía todavía; **salió entero en `open-accounting` 1.0 y
+en la librería 1.1.0, el 18-sep-2026**. Se conserva como está porque su valor es el razonamiento —de dónde sale cada
+decisión y qué alternativas se descartaron—, no la especificación.
 
-**Y esto propone una `0.4`.** La mayor parte son campos opcionales que un consumidor de hoy ignora sin romperse,
-pero dos piezas sí suben la versión, y a propósito: **`clase` en cada línea** y **el `rol` convertido en catálogo
-publicado**, que son las que dejan el asiento listo para cualquier ERP y para los roles que todavía no existen («El
-papel de cada línea»). El resumen de qué entra en cuál está al final, en «Qué va al estándar, qué va al motor».
+**Dos claves para leerlo hoy:**
+
+- **Donde el texto dice «la 0.4», léase la 1.0.** Al implementarlo se decidió que un estándar que promete no romper
+  hasta una 2.0 no puede seguir en el 0.x, así que la versión que este documento propone salió numerada **1.0** (y la
+  librería tuvo que saltar a 1.1.0, porque `"1.0"` es prefijo de `"1.0.0"` y ahí es donde los dos relojes se
+  confunden). **La 0.4 nunca existió.**
+- **El texto normativo no es este archivo**, y no lo era ni cuando era un borrador: es
+  [`estandar/LEEME.md`](estandar/LEEME.md) con su esquema, los catálogos de
+  [`estandar/catalogos.json`](estandar/catalogos.json), las enmiendas de
+  [`estandar/enmiendas/`](estandar/enmiendas/LEEME.md) —0008 a 0011 son las de esta tanda— y la guía
+  [`estandar/MIGRAR-A-1.0.md`](estandar/MIGRAR-A-1.0.md). Si algo de aquí contradice a aquello, manda aquello.
+
+Una sola cosa se decidió al revés de lo que este documento proponía, y está señalada donde toca: **el motor no acepta
+documentos de la 0.3**, en vez de completarlos al vuelo (John, 18-sep-2026: ningún ERP de fuera los escribía todavía,
+así que cargar con dos caminos en el lector no tenía a quién servir).
 
 **Alcance.** Compras y ventas, **con los recibos por honorarios dentro del libro de compras**, como están hoy
 (decisión de John, 18-sep-2026; el porqué, en «Por qué no hay un libro de honorarios»). Cheques, asientos estándar y
@@ -364,7 +376,7 @@ interpretar.
 
 ---
 
-## 6 · Qué de todo esto ya tiene `open-accounting` 0.3
+## 6 · Qué de todo esto ya tenía `open-accounting` 0.3
 
 | Patrón de facto | Qué tiene el estándar hoy |
 |---|---|
@@ -545,7 +557,7 @@ devuelve de verdad, hoy, con la imputación entregada como la entrega la 1.0.
 
 ```json
 {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": {
     "ruc": "20601234567",
     "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -593,7 +605,7 @@ porque este mismo archivo, sin cambiar una coma, tiene que dar el TXT del SIRE (
 
 ```json
 {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": { "ruc": "20601234567", "periodo": "202601", "tipo": "venta" },
   "comprobantes": [
     {
@@ -634,7 +646,7 @@ parece a una compra**, aunque viaje en el libro de compras. Van dos, uno con ret
 
 ```json
 {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
              "periodo": "202601", "tipo": "compra" },
   "comprobantes": [
@@ -717,7 +729,7 @@ anotó en ese mismo periodo. Una nota corrige el documento que dicen sus campos 
 
 ```json
 {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": { "ruc": "20601234567", "periodo": "202601", "tipo": "compra" },
   "comprobantes": [
     {
@@ -912,11 +924,15 @@ clasificación del esquema y la pasó a una tabla de mapeo.
 
 Esta es la compra con detracción del primer ejemplo. Las cinco líneas, sus cuentas, sus sentidos y sus importes son
 **los que el motor devuelve hoy**; lo que esta sección propone añadir es `clase`, el bloque `impuesto` y el
-diccionario `plan_de_cuentas`:
+diccionario `plan_de_cuentas`.
+
+> **De los tres entró solo `clase`.** El bloque `impuesto` por línea y el diccionario `plan_de_cuentas` quedaron
+> fuera de la 1.0 a propósito: son opcionales y esperan su caso real. Así que este ejemplo **no valida** contra el
+> esquema 1.0 —enseña la propuesta, no el formato—; el documento tal como es hoy está en «El documento completo».
 
 ```json
 {
- "open_accounting": "0.4",
+ "open_accounting": "1.0",
  "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
             "periodo": "202601", "tipo": "compra" },
  "asiento": [
@@ -1020,8 +1036,13 @@ la misma idea que «el asiento es derivado»: lo que se puede recalcular se pued
 es cada cuenta y la línea repite la clase de la suya, para que quien reciba el asiento sin el diccionario siga
 entendiéndolo.
 
-**Y con eso el motor puede rellenar `clase` solo**: un documento 0.3 que llegue sin ella se completa al vuelo, así
-que nadie tiene que reescribir lo que ya tiene guardado. El motor acepta las dos versiones durante toda la 1.x.
+**Y con eso el motor podría rellenar `clase` solo**: un documento sin ella se completaría al vuelo, así que nadie
+tendría que reescribir lo que ya tiene guardado.
+
+> **Esto se decidió al revés (John, 18-sep-2026).** El motor **rechaza** un documento que se declare `0.3`, con un
+> mensaje que nombra los tres cambios, en vez de aceptar las dos versiones durante la 1.x: ningún ERP de fuera los
+> escribía todavía, así que dos caminos en el lector no tenían a quién servir. La guía es
+> [`estandar/MIGRAR-A-1.0.md`](estandar/MIGRAR-A-1.0.md).
 
 ### Y lo mismo con `libro.tipo`: los tres niveles de cambio
 
@@ -1207,14 +1228,14 @@ comunes —el IGV, el proveedor, la detracción— no pertenecen a una sola. O s
 proporción a la base y el asiento gana líneas que hoy no tiene. La propuesta es dejarlas sin centro y que el ERP
 reparta si su análisis lo pide.
 
-### El documento completo, en la 0.4
+### El documento completo, en la 1.0 (aquí, «la 0.4»)
 
 Una compra con detracción, con los tres bloques y el enlace cerrado. Las cinco líneas del asiento son las que el
 motor devuelve hoy; lo que la 0.4 añade es `clase`, `documento.id_externo` y el bloque `imputaciones`:
 
 ```json
 {
-  "open_accounting": "0.4",
+  "open_accounting": "1.0",
 
   "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
              "periodo": "202601", "tipo": "compra" },
@@ -1424,30 +1445,30 @@ limpio. Este es el archivo que produce, generado por el motor para la compra del
 
 ```json
 {
- "open_accounting": "0.3",
+ "open_accounting": "1.0",
  "libro": { "ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
             "periodo": "202601", "tipo": "compra" },
  "asiento": [
-  { "cuenta": "6343001", "debe_haber": "D", "importe": "10000.00", "rol": "principal",
+  { "cuenta": "6343001", "debe_haber": "D", "importe": "10000.00", "rol": "principal", "clase": "gasto",
     "fecha": "2026-01-15", "moneda": "PEN", "centro_costo": "OBRA01", "tasa_igv": "18",
     "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026",
-    "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
+    "documento": { "tipo_cp": "01", "serie_numero": "F001-123", "id_externo": "compra-123",
                    "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
 
-  { "cuenta": "401111", "debe_haber": "D", "importe": "1800.00", "rol": "igv",
+  { "cuenta": "401111", "debe_haber": "D", "importe": "1800.00", "rol": "igv", "clase": "pasivo",
     "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026", "documento": { "…": "el mismo de arriba" } },
 
-  { "cuenta": "421201", "debe_haber": "H", "importe": "11800.00", "rol": "tercero",
+  { "cuenta": "421201", "debe_haber": "H", "importe": "11800.00", "rol": "tercero", "clase": "pasivo",
     "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": { "…": "el mismo de arriba" } },
 
-  { "cuenta": "421201", "debe_haber": "D", "importe": "1416.00", "rol": "detraccion_tercero",
+  { "cuenta": "421201", "debe_haber": "D", "importe": "1416.00", "rol": "detraccion_tercero", "clase": "pasivo",
     "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": { "…": "el mismo de arriba" } },
 
-  { "cuenta": "421203", "debe_haber": "H", "importe": "1416.00", "rol": "detraccion",
+  { "cuenta": "421203", "debe_haber": "H", "importe": "1416.00", "rol": "detraccion", "clase": "pasivo",
     "glosa": "DETRACCION - SERVICIO DE MANTENIMIENTO ENERO 2026",
     "contraparte_doc": "20131312955",
     "detraccion": { "codigo": "037", "tasa": "12", "base": "11800.00" },
-    "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
+    "documento": { "tipo_cp": "01", "serie_numero": "F001-123", "id_externo": "compra-123",
                    "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } }
  ]
 }
