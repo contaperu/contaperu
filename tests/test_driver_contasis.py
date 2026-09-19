@@ -20,7 +20,7 @@ CONTAB = {"cuentas": {"gasto": "601101", "ventas": "701101", "cxp": {"PEN": "421
 
 
 def doc(*comprobantes: dict, **libro) -> dict:
-    return {"open_accounting": "0.3", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
+    return {"open_accounting": "1.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
 
 
 def hoja(resultado: dict):

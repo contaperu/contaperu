@@ -27,7 +27,7 @@ exportar = por_la_fachada(api.exportar)
 
 
 def doc(*comprobantes: dict, **libro) -> dict:
-    return {"open_accounting": "0.3", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
+    return {"open_accounting": "1.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
 
 
 def test_un_mes_limpio_esta_listo_y_dice_que_saldria():

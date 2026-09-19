@@ -127,3 +127,24 @@ def test_las_decisiones_contables_no_son_del_documento(esquema):
     with pytest.raises(ValueError, match="imputación"):
         Comprobante.de_dict({"tipo_cp": "01", "cuenta_contable": "659999"})
     assert Comprobante.de_dict({"tipo_cp": "01", "cuenta_contable": "", "centro_costo": None}).tipo_cp == "01"
+
+
+def test_ningun_esquema_cita_un_tag_viejo_del_estandar():
+    """El identificador canónico del estándar cuelga de SU tag, y estaba escrito a mano en cinco archivos: la
+    constante de `api/tabla.py` y los `$ref` de cuatro esquemas de `api/esquemas/`. Por eso la 1.0 estuvo a punto de
+    salir citando el tag de la 0.3. Ahora la constante se construye desde `OPEN_ACCOUNTING` y este test vigila los
+    `$ref`, que siguen siendo texto."""
+    import re
+    from pathlib import Path
+
+    from contaperu.api import tabla
+
+    esperado = f"open-accounting-{OPEN_ACCOUNTING}"
+    assert esperado in tabla.ESTANDAR
+    raiz = Path(__file__).resolve().parent.parent
+    viejos = {}
+    for ruta in sorted([*raiz.glob("contaperu/api/esquemas/*.json"), raiz / "estandar/open-accounting.schema.json"]):
+        citados = set(re.findall(r"open-accounting-[\w.]+", ruta.read_text(encoding="utf-8")))
+        if citados - {esperado}:
+            viejos[ruta.name] = sorted(citados - {esperado})
+    assert viejos == {}, f"esquemas que citan un tag que no es el de esta versión: {viejos}"

@@ -16,7 +16,7 @@ from contaperu.puertas.servidor_mcp import LOCALES, mcp, seguridad
 from util import XML
 
 DOCUMENTO = {
-    "open_accounting": "0.3",
+    "open_accounting": "1.0",
     "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
               "periodo": "202608", "tipo": "compra"},
     "comprobantes": [{
@@ -257,7 +257,7 @@ def test_normalizar_detracciones_descarta_lo_que_no_reconoce():
 
 def test_un_documento_sin_libro_falla_diciendo_por_que():
     with pytest.raises(Exception, match="libro"):
-        llamar("generar_asiento", documento={"open_accounting": "0.3", "comprobantes": []})
+        llamar("generar_asiento", documento={"open_accounting": "1.0", "comprobantes": []})
 
 
 def test_un_comprobante_con_error_bloquea_la_exportacion():

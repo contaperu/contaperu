@@ -55,7 +55,7 @@ def exportar_caso(caso) -> dict:
     _, _, es_venta, extra = caso
     c, config, _ = armar(caso)
     configuracion = {clave: valor for clave, valor in (extra or {}).items() if clave != "imputaciones"}
-    documento = {"open_accounting": "0.3", "libro": dict(LIBRO, tipo="venta" if es_venta else "compra"),
+    documento = {"open_accounting": "1.0", "libro": dict(LIBRO, tipo="venta" if es_venta else "compra"),
                  "comprobantes": [c.a_dict()]}
     return api.exportar(documento, driver="concar", configuracion=configuracion, correlativos=CORRELATIVOS, incluir_observados=True, fecha=None, imputacion=config.get("imputaciones"))
 

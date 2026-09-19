@@ -17,10 +17,15 @@ import inspect
 from dataclasses import dataclass
 from typing import Callable
 
+from .._version import OPEN_ACCOUNTING
 from . import operaciones
 
 # El esquema del estándar, por su `$id` (el de `estandar/open-accounting.schema.json`).
-ESTANDAR = "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json"
+# El identificador canónico del estándar cuelga de SU tag, no del de la librería. Se construye desde la constante
+# y no se escribe a mano: estaba a mano —y repetida en los esquemas de `api/esquemas/`— y por eso la 1.0 estuvo a
+# punto de salir citando el tag de la 0.3. Un test comprueba que ningún `$ref` al estándar cite otro tag.
+ESTANDAR = (f"https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-{OPEN_ACCOUNTING}"
+            "/estandar/open-accounting.schema.json")
 # Y los de la api, por el suyo (`api/esquemas/<nombre>.schema.json`).
 BASE_ESQUEMAS = "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/"
 

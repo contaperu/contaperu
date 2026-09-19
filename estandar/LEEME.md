@@ -1,4 +1,4 @@
-# open-accounting 0.3 — el documento contable universal del Perú
+# open-accounting 1.0 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -11,14 +11,18 @@ integración desde cero. El estándar no reemplaza a ninguno: es el idioma inter
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estandar/open-accounting.schema.json
 ```
 
-Cuelga del tag **del estándar** (`open-accounting-0.3`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`open-accounting-1.0`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
-sirve como estándar. **El tag `open-accounting-0.3` avanza con cada cambio aditivo** —un campo opcional nuevo no
-sube la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la 0.3; un cambio
-de significado sube a 0.4 y estrena su propio tag.
+sirve como estándar. **El tag `open-accounting-1.0` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
+bloque opcional no suben la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la
+1.0; un cambio de significado sube a 2.0 y estrena su propio tag.
+
+**Y la 1.0 es un compromiso:** nada de lo que existe se quita ni cambia de significado hasta una 2.0. Lo que hace
+sostenible esa promesa son los catálogos —`rol`, `clase` y `tipos_de_libro` viven fuera del esquema y crecen sin
+tocarlo— y las [enmiendas](enmiendas/LEEME.md), donde queda escrito cada cambio con su compatibilidad.
 
 Para comprobar un documento con el motor —lo lee con las mismas reglas que el servidor MCP y dice qué bloquea y qué
 falta—:
@@ -243,10 +247,24 @@ consumidor de la 0.3 que no los conozca los ignora.
 
 ## Versionado
 
-`open_accounting` es la versión del estándar, no la de la librería. La regla:
+`open_accounting` es la versión del estándar, no la de la librería. **Y ninguno de los dos números puede ser
+prefijo del otro**, que es lo que de verdad los confunde: `"1.0"` es prefijo de `"1.0.0"`, así que la librería saltó
+a `1.1.0` en la misma tanda en que el estándar llegó a `1.0`, y `tests/test_version.py` pone la batería en rojo si
+alguien lo intenta de otra forma.
 
-- **Añadir un campo opcional** no sube la versión mayor. Un consumidor viejo lo ignora.
-- **Quitar un campo, renombrarlo o cambiar su significado** sube la versión y se documenta aquí.
+La regla del versionado, en **tres niveles** (1.0):
+
+| Cambio | Ejemplo | ¿Sube la versión? |
+|---|---|---|
+| **Un valor nuevo en un catálogo** | Un rol `percepcion`; un libro `honorario` | **No.** Se publica el catálogo con su fecha, y quien no conoce el valor degrada con `clase` |
+| **Un bloque opcional nuevo** | `movimientos[]` del banco; `plan_de_cuentas` | **No.** Quien no lo entiende lo ignora |
+| **Cambiar lo que ya existe** | Volver obligatorio un campo, quitarlo, cambiar su significado | **Sí** |
+
+Con esa regla, un hecho nuevo entra como **bloque propio** y nunca como valor forzado en el enum de otro: un
+movimiento bancario no tiene tipo de comprobante, ni serie, ni IGV, y meterlo como «tipo de libro» rompería a todo el
+que espera `comprobantes[]`. Es lo que hacen QuickBooks con un recurso por hecho y EN 16931 con su lista externa de
+tipos de documento.
+
 - Las claves que empiezan con `_` son anotaciones de quien produce el archivo. Se transportan y se ignoran;
   nunca llevan datos con significado contable.
 
@@ -264,6 +282,14 @@ contada dos veces. Un documento `0.1` sin descuentos significa exactamente lo mi
 —que llega aparte— manda sobre ellos. Nada cambia de significado: un documento sin imputación se exporta
 exactamente igual que antes. Quitarlos del comprobante sí cambiaría la forma del estándar, y por eso salen en la
 `0.3`.
+
+**`1.0` (18-sep-2026) es la primera versión estable, y trae tres cosas.** La **imputación viaja dentro del
+documento** (bloque `imputaciones` de la raíz, llaveado por `id_externo`), para que un archivo guardado explique su
+propio asiento; cada **línea del asiento lleva su `clase`** —`activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto`—,
+derivada del primer dígito de su cuenta, para que una línea suelta se entienda sin mirar `libro.tipo`; y **`rol` y
+`libro.tipo` salen del esquema a catálogos publicados**, para que un valor nuevo no cueste una versión. La línea gana
+además `documento.id_externo`, el enlace con el comprobante que la originó. **El motor no acepta documentos de la
+0.3**: un documento que se declare así se rechaza diciendo qué cambió.
 
 **`0.3` (12-sep-2026) cambia el nombre y la forma.** El estándar se llamaba `pe-ledger` y pasa a llamarse
 `open-accounting`: la clave del documento es `open_accounting`, y el esquema, `open-accounting.schema.json`. Salen del

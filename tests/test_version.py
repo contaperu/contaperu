@@ -51,11 +51,19 @@ def test_las_dos_puertas_se_presentan_con_la_version_de_la_libreria():
 def test_la_version_de_la_libreria_no_es_la_del_estandar_y_cada_una_vive_una_vez():
     """Dos relojes distintos: `open-accounting` es el formato publicado y cambia poquísimo; la librería
     cambia cada vez que se corrige un asiento. `OPEN_ACCOUNTING` también llegó a estar escrito dos veces
-    —en `__init__.py` y en `operaciones.py`—, así que se comprueba que ahora sea el mismo objeto."""
+    —en `__init__.py` y en `operaciones.py`—, así que se comprueba que ahora sea el mismo objeto.
+
+    **Y que ninguno sea prefijo del otro**, que es lo que de verdad los confunde: comparar que son distintos
+    dejó de comprobar algo el día que el estándar llegó a `1.0` con la librería en `1.0.0`. Con esta regla,
+    intentar publicar un estándar cuya versión sea prefijo de la del paquete pone la batería en rojo."""
     from contaperu import api
 
-    assert contaperu.OPEN_ACCOUNTING == "0.3" and contaperu.__version__ != contaperu.OPEN_ACCOUNTING
+    assert contaperu.OPEN_ACCOUNTING == "1.0"
     assert api.OPEN_ACCOUNTING is contaperu.OPEN_ACCOUNTING
+    assert not contaperu.__version__.startswith(contaperu.OPEN_ACCOUNTING), (
+        f"la versión del estándar ({contaperu.OPEN_ACCOUNTING}) es prefijo de la de la librería "
+        f"({contaperu.__version__}): se confunden. Sube la librería.")
+    assert not contaperu.OPEN_ACCOUNTING.startswith(contaperu.__version__)
 
 
 def test_el_numero_esta_escrito_una_sola_vez_en_todo_el_repositorio():

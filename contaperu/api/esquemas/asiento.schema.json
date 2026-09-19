@@ -5,7 +5,7 @@
  "description": "Un documento `open-accounting` con las líneas del asiento y `_asiento`: cuántas líneas, el rango de cada sub-diario, el cuadre, la huella, lo que salió de cada comprobante y la versión del motor.",
  "allOf": [
   {
-   "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json"
+   "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estandar/open-accounting.schema.json"
   },
   {
    "type": "object",

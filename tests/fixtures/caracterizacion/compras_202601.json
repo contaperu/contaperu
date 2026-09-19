@@ -1,6 +1,6 @@
 {
  "revisar": {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -242,7 +242,7 @@
   ]
  },
  "generar_asiento/concar": {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -6024,7 +6024,7 @@
   ]
  },
  "generar_asiento/csv": {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -6689,7 +6689,7 @@
   ]
  },
  "generar_asiento/asiento_neutral": {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",

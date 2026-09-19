@@ -113,7 +113,7 @@ los mismos nombres que los parámetros de la api:
 ```json
 {
   "documento": {
-    "open_accounting": "0.3",
+    "open_accounting": "1.0",
     "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"},
     "comprobantes": [{
       "tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "2026-01-15",

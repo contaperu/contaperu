@@ -1,6 +1,6 @@
 {
   "_nota": "Documento inventado para la caracterización de la 1.0 (rama motor-v1, etapa 1, 14-sep-2026): un mes de compras que pasa por soles y dólares, nota de crédito y de débito, detracción en soles y en dólares, recibos por honorarios con y sin retención, boleta, recibo de servicios públicos, extemporáneo y reparto. RUC seguros y proveedores de prueba; la imputación de cada documento está en tests/test_caracterizacion.py.",
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608", "tipo": "compra"},
   "comprobantes": [
     {"id_externo": "c01", "tipo_cp": "01", "serie": "F001", "numero": "00000101", "fecha_emision": "2026-08-03",

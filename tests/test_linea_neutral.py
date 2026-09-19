@@ -97,7 +97,7 @@ def test_las_lineas_validan_contra_el_estandar():
     """Lo que produce el motor tiene que caber en el bloque `asiento` de open-accounting."""
     validador = Draft202012Validator(json.loads(ESQUEMA.read_text(encoding="utf-8")))
     doc = {
-        "open_accounting": "0.3",
+        "open_accounting": "1.0",
         "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                   "periodo": "202608", "tipo": "compra"},
         "asiento": [ln.a_dict() for ln in driver_concar.a_lineas(
@@ -151,7 +151,7 @@ def test_lo_que_arma_el_motor_valida_contra_el_estandar():
               + asi.lineas_del_comprobante(nc, CONTAB, MES, "080085")
               + asi.lineas_del_comprobante(factura(tipo_cp="02", retencion="336", igv="0", base_gravada="0",
                                             inafecto="4956"), CONTAB, MES, "080086"))
-    doc = {"open_accounting": "0.3",
+    doc = {"open_accounting": "1.0",
            "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                      "periodo": "202608", "tipo": "compra"},
            "asiento": [ln.a_dict() for ln in lineas]}

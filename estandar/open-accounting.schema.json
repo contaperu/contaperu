@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-0.3/estandar/open-accounting.schema.json",
+  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estandar/open-accounting.schema.json",
   "title": "open-accounting",
   "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
   "type": "object",
@@ -15,7 +15,7 @@
     "open_accounting": {
       "description": "Versión del estándar que habla este documento.",
       "type": "string",
-      "const": "0.3"
+      "const": "1.0"
     },
     "libro": { "$ref": "#/$defs/libro" },
     "comprobantes": {
