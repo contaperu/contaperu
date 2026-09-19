@@ -7270,7 +7270,7 @@
  },
  "generar_asiento/contasis": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, asiento_neutral)"
  },
  "exportar/contasis": {
   "_error": "DocumentoInvalido",
@@ -9834,7 +9834,7 @@
  },
  "generar_asiento/sire": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, asiento_neutral)"
  },
  "exportar/sire": {
   "_error": "DocumentoInvalido",
@@ -9964,13 +9964,13 @@
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202512||02/12/2025||01|F001|1001||6|20609999999|DISTRIBUIDORA COMERCIAL DEL NORTE SAC|0.00|25000.00|0.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||04/12/2025||01|F001|1002||6|20633333336|INVERSIONES TECNOLOGICAS PERU SRL|0.00|18500.00|0.00|3330.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|21830.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||05/12/2025||01|F001|1003||6|20655555553|CORPORACION INDUSTRIAL ANDINA SAC|0.00|32000.00|0.00|5760.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|37760.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||08/12/2025||01|F001|1004||6|20688888884|GRUPO EMPRESARIAL LIMA SAC|0.00|45000.00|0.00|8100.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|53100.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||10/12/2025||01|F001|1005||6|20644444440|COMERCIALIZADORA INTEGRAL DEL SUR EIRL|0.00|15500.00|0.00|2790.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|18290.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||12/12/2025||01|F001|1006||6|20666666667|SERVICIOS LOGISTICOS NACIONALES SA|0.00|28000.00|0.00|5040.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|33040.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||15/12/2025||01|F001|1007||6|20301234567|IMPORTADORA Y EXPORTADORA CENTRAL SAC|0.00|21000.00|0.00|3780.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|24780.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||03/12/2025||03|B001|5001||6|42589632|CLIENTE CONSUMIDOR FINAL|0.00|850.00|0.00|153.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1003.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||06/12/2025||03|B001|5002||6|45678912|CONSUMIDOR VARIOS|0.00|1200.00|0.00|216.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1416.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||09/12/2025||03|B001|5003||6||CLIENTES VARIOS - CONSOLIDADO DIARIO|0.00|42950.00|0.00|7731.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|50681.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||19/12/2025||01|F001|1234||6|20123456789|MI CLIENTE MANUAL S.A.C.|0.00|5000.00|0.00|900.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|5900.00|PEN|||||||\r\n",
   "archivo_zip": "LE2060123456720251200140400021112.zip"
  },
- "diagnosticar/open_accounting": {
+ "diagnosticar/asiento_neutral": {
   "libro": {
    "ruc": "20601234567",
    "periodo": "202512",
    "tipo": "venta"
   },
-  "driver": "open_accounting",
+  "driver": "asiento_neutral",
   "exige": [
    "cuenta_contable"
   ],
@@ -10182,18 +10182,18 @@
    "B001-5003"
   ]
  },
- "generar_asiento/open_accounting": {
+ "generar_asiento/asiento_neutral": {
   "_error": "DocumentoInvalido",
   "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
  },
- "exportar/open_accounting": {
+ "exportar/asiento_neutral": {
   "_error": "DocumentoInvalido",
   "_mensaje": "5 comprobantes tienen observaciones que bloquean. Corrígelos, o pide `incluir_observados` si sabes lo que haces."
  },
- "exportar_con_observados/open_accounting": {
-  "driver": "open_accounting",
-  "formato": "open_accounting_json",
-  "archivo": "open_accounting_20601234567_202512_venta.json",
+ "exportar_con_observados/asiento_neutral": {
+  "driver": "asiento_neutral",
+  "formato": "asiento_neutral_json",
+  "archivo": "asiento_neutral_20601234567_202512_venta.json",
   "comprobantes": 11,
   "resumen": {
    "comprobantes": 11,
@@ -10212,8 +10212,8 @@
    "lineas": 33
   },
   "_exportacion": {
-   "driver": "open_accounting",
-   "archivo": "open_accounting_20601234567_202512_venta.json",
+   "driver": "asiento_neutral",
+   "archivo": "asiento_neutral_20601234567_202512_venta.json",
    "huella": "bb2c1f5d8715c8fb2506dfe4eca768b7ec83c8159948d77d24b4edc0a8f2b0c8",
    "comprobantes": [
     {

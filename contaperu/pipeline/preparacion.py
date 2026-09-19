@@ -88,7 +88,7 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
         return _declaracion.validar(configuracion, CONFIGURACION_GENERAL)
     generales = [c.clave for c in CONFIGURACION_GENERAL]
     # Una sección es de un sistema que lleva cuentas y declara algo que configurar: un driver neutral como
-    # `open_accounting` lleva cuentas y no tiene nada suyo, solo lo general.
+    # `asiento_neutral` lleva cuentas y no tiene nada suyo, solo lo general.
     sistemas = {nombre: modulo for nombre, modulo in drivers.DRIVERS.items() if drivers.contrato.lleva_cuentas(modulo)
                 and (drivers.contrato.configuracion(modulo) or drivers.contrato.columnas_elegibles(modulo))}
     va_en: dict[str, list[str]] = {}

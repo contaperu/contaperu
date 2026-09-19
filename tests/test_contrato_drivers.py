@@ -624,7 +624,7 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
 def test_cada_driver_de_serie_declara_su_canal():
     assert {n: contrato.canal(m) for n, m in drivers.DE_SERIE.items()} == {
         "sire": "tributario", "concar": "legacy", "csv": "intercambio", "contasis": "legacy",
-        "open_accounting": "intercambio"}
+        "asiento_neutral": "intercambio"}
     assert all(contrato.declara_canal(m) for m in drivers.DE_SERIE.values())
     assert api.drivers_disponibles()["concar"]["canal"] == "legacy"
 

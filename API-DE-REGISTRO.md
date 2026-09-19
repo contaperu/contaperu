@@ -33,8 +33,7 @@ anexos quedan fuera: cada uno es otro hecho contable y entra cuando tenga su cas
 | **Cómo se construye** | 18 | Las partes en orden, sus tests y los documentos que hay que actualizar |
 
 **Convenciones.** Los RUC de los ejemplos son los seguros del proyecto (`20131312955` y `20601234567`); ninguna
-empresa real aparece aquí. El driver neutral aparece con el nombre que tiene hoy, `open_accounting`, aunque ya esté
-decidido que pase a llamarse `asiento_neutral` («Los dos nombres, decididos»). Los importes van en texto y las fechas en `AAAA-MM-DD`, como manda el estándar. Lo que no
+empresa real aparece aquí. Los importes van en texto y las fechas en `AAAA-MM-DD`, como manda el estándar. Lo que no
 se pudo confirmar en la documentación oficial va marcado *no verificado*. Investigación hecha el **15 y el 16 de
 septiembre de 2026**; las fuentes, consultadas el 15, al final.
 
@@ -165,7 +164,7 @@ alimenta una bandeja, no contabiliza** — y esto, que parece un defecto, es el 
   donde una copia que se desincroniza es un asiento descuadrado. El documento va una vez y las líneas cuelgan de él.
 - **El vocabulario de un sistema.** `subdiario`, `tipo_Anexo`, `tipo_Doc: "FT"`, `destino_Compra`, `conversion_Tc`
   son CONCAR y son STARSOFT, no SUNAT. Quien integre tres ERP tendría que aprender tres vocabularios; por eso el
-  motor tiene desde la 1.1 un vocabulario neutral y el driver `open_accounting` (ver `ARQUITECTURA.md`).
+  motor tiene desde la 1.1 un vocabulario neutral y el driver `asiento_neutral` (ver `ARQUITECTURA.md`).
 - **Los números en coma flotante.** `importe_Doc: 238` y `tc: 3.026` son `float` de JSON. La contabilidad no perdona
   el céntimo que se pierde: el estándar manda importes en texto.
 - **La serie y el número pegados con un espacio** (`"nro_Doc": "100 1"`). El estándar los separa, porque el motor
@@ -469,7 +468,7 @@ tiene que servir para destinos distintos.
 
 | Nombre | Qué decide |
 |---|---|
-| `driver` | El destino: `sire`, `concar`, `contasis`, `open_accounting` —que pasará a llamarse `asiento_neutral`, «Los dos nombres, decididos»—… Sin destino, la respuesta es el diagnóstico |
+| `driver` | El destino: `sire`, `concar`, `contasis`, `asiento_neutral`… Sin destino, la respuesta es el diagnóstico |
 | `configuracion` | Lo del sistema de destino y lo general del contribuyente |
 | `correlativos` | Desde qué número sigue cada sub-diario |
 | `claves_previas` | Lo anotado en periodos anteriores, para reconocer el duplicado |
@@ -588,7 +587,7 @@ devuelve de verdad, hoy, con la imputación entregada como la entrega la 1.0.
 
 **El destino no está dentro, y es a propósito.** Lo dice la llamada —`POST /v1/exportar` con `driver: "concar"`—
 porque este mismo archivo, sin cambiar una coma, tiene que dar el TXT del SIRE (`sire`), el Excel de CONTASIS
-(`contasis`) o el documento neutral para otro ERP (`open_accounting`).
+(`contasis`) o el documento neutral para otro ERP (`asiento_neutral`).
 
 ### Una venta, y el mes entero
 
@@ -1345,7 +1344,7 @@ la norma; lo que la imputación no traiga sale de la configuración.
 ### El asiento, que ya existe
 
 No está por implementar: **el Excel de CONCAR son asientos**, y `generar_asiento` es una operación pública desde la
-1.0. Lo que añade el driver `open_accounting` es el **perfil neutral** —las mismas cuentas, sentidos e importes, sin
+1.0. Lo que añade el driver `asiento_neutral` es el **perfil neutral** —las mismas cuentas, sentidos e importes, sin
 el vocabulario de un legacy—. Este es el asiento real de la compra del ejemplo de arriba, generado por el motor
 **hoy**: con la 0.4, cada línea suma su `clase` y el centro de costo se propaga a todas («El papel de cada línea»):
 
@@ -1393,7 +1392,7 @@ y los estados financieros— se queda en el sistema contable, y el motor no entr
 | Destino | Grupo | Qué exige |
 |---|---|---|
 | `sire` | sire | **nada** |
-| `open_accounting` | erp | cuenta contable |
+| `asiento_neutral` | erp | cuenta contable |
 | `contasis` | legacy | cuenta contable, cuenta única |
 | `concar` | legacy | centro de costo, cuenta contable, moneda, tipo |
 
@@ -1454,7 +1453,7 @@ limpio. Este es el archivo que produce, generado por el motor para la compra del
 }
 ```
 
-El archivo se llama `open_accounting_20601234567_202601_compra.json`, y lleva **el libro y el asiento, no los
+El archivo se llama `asiento_neutral_20601234567_202601_compra.json`, y lleva **el libro y el asiento, no los
 comprobantes**: quien pulsa el botón ya los tiene.
 
 ### En qué es «más limpio» que CONCAR
@@ -1726,16 +1725,14 @@ el driver, porque es una clave raíz del estándar.
 | | Decisión | Por qué |
 |---|---|---|
 | El bloque de las cuentas por comprobante | **`imputaciones`**, se queda | Es la palabra que el motor ya usa y no es invento local: SAP en español llama «imputación» exactamente a esto. Un contador la entiende sin explicación |
-| El driver, hoy `open_accounting` | **`asiento_neutral`** | Dice qué produce y con qué vocabulario, y no reproduce la confusión de llamarse igual que el estándar. Hay precedente de nombrar un driver por su salida y no por un sistema: `csv` tampoco nombra un destino |
+| El driver, que se llamaba `open_accounting` | **`asiento_neutral`** ✅ hecho el 18-sep-2026 | Dice qué produce y con qué vocabulario, y no reproduce la confusión de llamarse igual que el estándar. Hay precedente de nombrar un driver por su salida y no por un sistema: `csv` tampoco nombra un destino |
 
-**El renombrado es gratis ahora y caro después.** El driver está en «Sin publicar»: nadie lo usa todavía. Cuando salga
-la 1.1.0, cambiarlo rompe a quien lo haya integrado. Y no toca el estándar: `open-accounting.schema.json` solo usa
-`open_accounting` como clave del documento, que no cambia.
-
-Lo que cambia cuando se aplique: el módulo `contaperu/drivers/open_accounting/` → `.../asiento_neutral/`, el valor
-`driver="asiento_neutral"`, el formato `asiento_neutral_json`, el nombre del archivo que se descarga y la superficie
-pública congelada. Son 89 apariciones del driver en 31 archivos —la mayoría tests y fixtures—, que hay que distinguir
-de las 36 del estándar, que se quedan.
+**El renombrado se hizo el 18-sep-2026**, y se hizo primero justamente porque era gratis: el driver estaba en «Sin
+publicar», así que nadie lo usaba; después de la 1.1.0 habría roto a quien lo hubiera integrado. Cambiaron el módulo
+`contaperu/drivers/open_accounting/` → `.../asiento_neutral/`, el valor de `driver`, el formato
+`asiento_neutral_json`, el nombre del archivo que se descarga y la superficie pública congelada. **No tocó el
+estándar:** la clave `open_accounting` del documento y el nombre con guion siguen igual, y separarlas de las del
+driver fue el único riesgo real del cambio.
 
 ---
 

@@ -79,7 +79,7 @@ Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega
 - **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y el registro de
   CONTASIS; SISCONT y STARSOFT esperan un archivo que ese sistema haya aceptado.
 - **ERP:** los sistemas nuevos, en cualquier lenguaje. Reciben el documento `open-accounting` con su asiento **sin
-  vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `open_accounting`), el
+  vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `asiento_neutral`), el
   CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
 
 Cualquier entrada puede terminar en cualquiera de los tres grupos. Las cuentas, los sentidos del debe y el haber y la
@@ -229,7 +229,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
 | Drivers de SISCONT y STARSOFT | el contrato ya cubre lo que necesitan; esperan un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
 | **ERP** | |
-| Driver `open_accounting`: el asiento en el estándar, sin siglas, sub-diarios ni correlativos | listo |
+| Driver `asiento_neutral`: el asiento en el estándar, sin siglas, sub-diarios ni correlativos | listo |
 | Driver CSV | listo |
 | Puerta HTTP con el contrato OpenConta | listo |
 

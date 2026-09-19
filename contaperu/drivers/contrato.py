@@ -37,7 +37,7 @@ es **legacy** e `intercambio` es **ERP**. `drivers_disponibles` dice el grupo de
 
 **El vocabulario** — con qué palabras recibe sus líneas un driver de asientos (`VOCABULARIO`, 1.1). `legacy`, el de
 siempre: siglas, sub-diarios, correlativos y el documento comodín de la detracción. `neutral`: las líneas del estándar
-sin nada de eso, por `rol` y código SUNAT, para un ERP (el driver `open_accounting`). Un driver neutral es de canal
+sin nada de eso, por `rol` y código SUNAT, para un ERP (el driver `asiento_neutral`). Un driver neutral es de canal
 `intercambio`, no declara claves legacy en su configuración y el núcleo solo le exige la cuenta.
 
 `api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado (hito A5): el contrato lo rechaza. Un driver

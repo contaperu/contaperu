@@ -332,7 +332,6 @@
   "de_terceros": "",
   "formato_de": "",
   "obtener": "",
-  "open_accounting": "",
   "recargar": "",
   "sire": ""
  },
@@ -476,7 +475,7 @@
   "linea_rvie": "",
   "nombre": ""
  },
- "contaperu.drivers.open_accounting": {
+ "contaperu.drivers.asiento_neutral": {
   "CANAL": "",
   "CONFIGURACION": "",
   "CONTENT_TYPE": "",

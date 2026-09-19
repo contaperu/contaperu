@@ -14,7 +14,7 @@ import pytest
 
 from contaperu import api
 from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
-from contaperu.drivers import contrato, open_accounting
+from contaperu.drivers import contrato, asiento_neutral
 from test_caracterizacion import IMPUTACION_CASOS
 from util import GOLDEN
 
@@ -29,14 +29,14 @@ def contabilidad(lineas: list[dict]) -> list[tuple]:
 
 def test_la_contabilidad_es_la_misma_que_la_de_concar():
     """Soles y dólares, notas, detracción, honorarios, boleta, reparto y extemporáneo: el mismo asiento para los dos."""
-    neutral = api.generar_asiento(casos(), driver="open_accounting", imputacion=IMPUTACION_CASOS)
+    neutral = api.generar_asiento(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
     concar = api.generar_asiento(casos(), driver="concar", imputacion=IMPUTACION_CASOS)
     assert neutral["asiento"] and contabilidad(neutral["asiento"]) == contabilidad(concar["asiento"])
     assert neutral["_asiento"]["cuadre"] == concar["_asiento"]["cuadre"]
 
 
 def test_las_lineas_no_llevan_vocabulario_legacy():
-    lineas = api.generar_asiento(casos(), driver="open_accounting", imputacion=IMPUTACION_CASOS)["asiento"]
+    lineas = api.generar_asiento(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)["asiento"]
     assert all(not {"sub_diario", "correlativo"} & set(linea) for linea in lineas)
     assert all(linea["documento"].get("tipo_cp") and "tipo" not in linea["documento"] for linea in lineas)
     assert all("tipo" not in (linea.get("referencia") or {}) for linea in lineas)
@@ -51,12 +51,12 @@ def test_un_tipo_sin_sigla_no_detiene_a_un_erp():
     sin_sigla = {"csv": {"tipos": {"01": {"sigla": ""}}}}
     with pytest.raises(api.SinSigla):
         api.generar_asiento(casos(), driver="csv", configuracion=sin_sigla, imputacion=IMPUTACION_CASOS)
-    assert api.generar_asiento(casos(), driver="open_accounting", imputacion=IMPUTACION_CASOS)["asiento"]
+    assert api.generar_asiento(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)["asiento"]
 
 
 def test_exporta_el_documento_del_estandar_y_valida_su_esquema():
     jsonschema = pytest.importorskip("jsonschema")
-    respuesta = api.exportar(casos(), driver="open_accounting", imputacion=IMPUTACION_CASOS)
+    respuesta = api.exportar(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
     documento = json.loads(base64.b64decode(respuesta["contenido_base64"]))
     jsonschema.Draft202012Validator(api.esquema_open_accounting()).validate(documento)
     assert documento["asiento"] and respuesta["resumen"]["sub_diarios"] == {}
@@ -64,7 +64,7 @@ def test_exporta_el_documento_del_estandar_y_valida_su_esquema():
 
 
 def test_el_diagnostico_de_un_erp_no_mira_vocabulario_legacy():
-    diagnostico = api.diagnosticar(casos(), driver="open_accounting", imputacion=IMPUTACION_CASOS)
+    diagnostico = api.diagnosticar(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
     assert diagnostico["listo_para_exportar"] is True
     assert diagnostico["exige"] == ["cuenta_contable"] and diagnostico["sub_diarios"] == {}
     assert "sin_sigla" not in diagnostico["faltantes"] and "sin_codigo_de_moneda" not in diagnostico["faltantes"]
@@ -72,21 +72,21 @@ def test_el_diagnostico_de_un_erp_no_mira_vocabulario_legacy():
 
 def test_un_erp_no_tiene_seccion_propia_en_la_configuracion():
     """Lee lo general, que es contabilidad; no tiene siglas ni sub-diarios que configurar."""
-    assert api.errores_de_configuracion({"open_accounting": {}}) == [
-        "`open_accounting` no tiene sección: ese sistema no tiene nada propio que configurar, solo lo general"]
-    assert "open_accounting" not in api.configuracion_por_defecto()
+    assert api.errores_de_configuracion({"asiento_neutral": {}}) == [
+        "`asiento_neutral` no tiene sección: ese sistema no tiene nada propio que configurar, solo lo general"]
+    assert "asiento_neutral" not in api.configuracion_por_defecto()
 
 
 def test_el_contrato_de_un_driver_neutral():
-    assert contrato.incumplimientos(open_accounting) == []
-    assert (contrato.vocabulario(open_accounting), contrato.grupo(open_accounting)) == ("neutral", "erp")
-    assert contrato.exige(open_accounting) == {"cuenta_contable"}
-    assert api.drivers_disponibles()["open_accounting"]["vocabulario"] == "neutral"
+    assert contrato.incumplimientos(asiento_neutral) == []
+    assert (contrato.vocabulario(asiento_neutral), contrato.grupo(asiento_neutral)) == ("neutral", "erp")
+    assert contrato.exige(asiento_neutral) == {"cuenta_contable"}
+    assert api.drivers_disponibles()["asiento_neutral"]["vocabulario"] == "neutral"
     assert api.drivers_disponibles()["concar"]["vocabulario"] == "legacy"
 
     def copia(**cambios) -> types.ModuleType:
         falso = types.ModuleType("falso")
-        falso.__dict__.update({k: v for k, v in vars(open_accounting).items() if not k.startswith("__")})
+        falso.__dict__.update({k: v for k, v in vars(asiento_neutral).items() if not k.startswith("__")})
         falso.__dict__.update(cambios)
         return falso
 

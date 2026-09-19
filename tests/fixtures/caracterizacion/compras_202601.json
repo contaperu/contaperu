@@ -4731,7 +4731,7 @@
  },
  "generar_asiento/contasis": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, asiento_neutral)"
  },
  "exportar/contasis": {
   "driver": "contasis",
@@ -6510,7 +6510,7 @@
  },
  "generar_asiento/sire": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, open_accounting)"
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, asiento_neutral)"
  },
  "exportar/sire": {
   "driver": "sire",
@@ -6622,13 +6622,13 @@
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202601||10/01/2026|10/02/2026|01|F001||45680||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|40000.00|7200.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|47200.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||18/01/2026|18/02/2026|01|E001||12347||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|25000.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||25/01/2026|25/02/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|1800.00|324.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2124.00|PEN||||||||||||||||\r\n",
   "archivo_zip": "LE2060123456720260100080400021112.zip"
  },
- "diagnosticar/open_accounting": {
+ "diagnosticar/asiento_neutral": {
   "libro": {
    "ruc": "20601234567",
    "periodo": "202601",
    "tipo": "compra"
   },
-  "driver": "open_accounting",
+  "driver": "asiento_neutral",
   "exige": [
    "cuenta_contable"
   ],
@@ -6688,7 +6688,7 @@
    "12345679"
   ]
  },
- "generar_asiento/open_accounting": {
+ "generar_asiento/asiento_neutral": {
   "open_accounting": "0.3",
   "libro": {
    "ruc": "20601234567",
@@ -6907,10 +6907,10 @@
    "motor": "(versión del motor)"
   }
  },
- "exportar/open_accounting": {
-  "driver": "open_accounting",
-  "formato": "open_accounting_json",
-  "archivo": "open_accounting_20601234567_202601_compra.json",
+ "exportar/asiento_neutral": {
+  "driver": "asiento_neutral",
+  "formato": "asiento_neutral_json",
+  "archivo": "asiento_neutral_20601234567_202601_compra.json",
   "comprobantes": 3,
   "resumen": {
    "comprobantes": 3,
@@ -6929,8 +6929,8 @@
    "lineas": 9
   },
   "_exportacion": {
-   "driver": "open_accounting",
-   "archivo": "open_accounting_20601234567_202601_compra.json",
+   "driver": "asiento_neutral",
+   "archivo": "asiento_neutral_20601234567_202601_compra.json",
    "huella": "ccef66c4da1b11e0e073f69407f889b7463d535a4c71a7b8dbe9e9b3f0f4ca87",
    "comprobantes": [
     {
@@ -6983,10 +6983,10 @@
   },
   "content_type": "application/json"
  },
- "exportar_con_observados/open_accounting": {
-  "driver": "open_accounting",
-  "formato": "open_accounting_json",
-  "archivo": "open_accounting_20601234567_202601_compra.json",
+ "exportar_con_observados/asiento_neutral": {
+  "driver": "asiento_neutral",
+  "formato": "asiento_neutral_json",
+  "archivo": "asiento_neutral_20601234567_202601_compra.json",
   "comprobantes": 3,
   "resumen": {
    "comprobantes": 3,
@@ -7005,8 +7005,8 @@
    "lineas": 9
   },
   "_exportacion": {
-   "driver": "open_accounting",
-   "archivo": "open_accounting_20601234567_202601_compra.json",
+   "driver": "asiento_neutral",
+   "archivo": "asiento_neutral_20601234567_202601_compra.json",
    "huella": "ccef66c4da1b11e0e073f69407f889b7463d535a4c71a7b8dbe9e9b3f0f4ca87",
    "comprobantes": [
     {

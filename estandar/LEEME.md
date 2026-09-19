@@ -208,7 +208,7 @@ adivinar:
   redondea él.
 - **Sin vocabulario legacy, para un ERP.** `sub_diario`, `correlativo` y `documento.tipo` son vocabulario de un
   sistema legacy como CONCAR, y ya eran opcionales. El motor entrega también un perfil **neutral** (driver
-  `open_accounting`): las mismas líneas, con las mismas cuentas, sentidos e importes, sin esos campos y con la
+  `asiento_neutral`): las mismas líneas, con las mismas cuentas, sentidos e importes, sin esos campos y con la
   detracción sobre el propio comprobante en vez del documento comodín.
 
 Son campos **opcionales añadidos**, así que no cambian la versión del estándar (ver *Versionado*): un

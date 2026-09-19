@@ -37,11 +37,11 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   antes de registrarlo, con su forma, su canal, su grupo, lo que le falta y los avisos con que el registro lo aceptaría
   en la 1.x. Sale con 0 si cumple, 1 si le falta algo y 2 si no se puede importar. Importa código por su nombre, así
   que no está en la tabla de operaciones: nunca se expone por HTTP ni por MCP.
-- **El driver `open_accounting`, la salida para los ERP que vienen**: el documento del estándar con su asiento **sin
+- **El driver `asiento_neutral`, la salida para los ERP que vienen**: el documento del estándar con su asiento **sin
   vocabulario legacy** —sin sub-diario ni correlativo, sin la sigla del documento ni de su referencia, y con la
   detracción sobre el propio comprobante en vez del documento comodín `DR`/`9999999999`—, con el `rol` de cada línea y
   el código SUNAT. La contabilidad es la de CONCAR: las mismas cuentas, sentidos, importes y roles, en el mismo orden
-  (`tests/test_driver_open_accounting.py`). Un tipo sin sigla no lo detiene y `diagnosticar` no le mira vocabulario
+  (`tests/test_driver_asiento_neutral.py`). Un tipo sin sigla no lo detiene y `diagnosticar` no le mira vocabulario
   legacy. Lo hace posible el atributo nuevo del contrato **`VOCABULARIO`** (`legacy` por defecto, o `neutral`), que
   `drivers_disponibles` también dice; un driver neutral es de canal `intercambio`, no declara claves legacy y el
   núcleo solo le exige la cuenta. `asiento.lineas_del_comprobante` y `lineas_e_indice_del_libro` aceptan

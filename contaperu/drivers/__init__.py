@@ -12,7 +12,7 @@ Los cinco que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, sa
   asiento él mismo: una fila por comprobante. Escrito contra su plantilla oficial y aceptado:
   CONTASIS importó los archivos que genera (13-sep-2026).
 - **`csv`** — las líneas de diario en columnas, para quien todavía no tiene driver.
-- **`open_accounting`** — el documento del estándar con su asiento, sin vocabulario legacy (sin siglas, sub-diarios ni
+- **`asiento_neutral`** — el documento del estándar con su asiento, sin vocabulario legacy (sin siglas, sub-diarios ni
   correlativos): la salida para un ERP nuevo, que parte del estándar en vez de reimplementar el IGV.
 
 **Drivers de terceros, sin tocar este repositorio.** Un paquete instalado que declare en su
@@ -35,16 +35,16 @@ import warnings
 from importlib.metadata import entry_points
 from types import ModuleType
 
-from . import concar, contasis, contrato, csv, open_accounting, sire
+from . import asiento_neutral, concar, contasis, contrato, csv, sire
 from .kit import Opciones
 
 GRUPO = "contaperu.drivers"
 DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
-                                   contasis.NOMBRE: contasis, open_accounting.NOMBRE: open_accounting}
+                                   contasis.NOMBRE: contasis, asiento_neutral.NOMBRE: asiento_neutral}
 DRIVER_POR_DEFECTO = "sire"
 
 __all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones", "concar", "contasis",
-           "contrato", "csv", "de_terceros", "formato_de", "obtener", "open_accounting", "recargar", "sire"]
+           "contrato", "csv", "de_terceros", "formato_de", "obtener", "recargar", "sire"]
 
 
 class AvisoDriver(UserWarning):
