@@ -293,11 +293,12 @@ cualquier clave `_`. Dentro de un comprobante o de una línea, no.
 
 Tres campos que `REFERENCIAS.md` propone y que **no** entran hasta que haya un caso real detrás (11-sep-2026).
 El nombre está tomado —el día que entren, entran así— y mientras tanto un productor los lleva en `datos_originales`,
-que el motor transporta sin interpretar:
+que el motor transporta sin interpretar. **Cada uno tiene su enmienda** en
+[`enmiendas/`](enmiendas/LEEME.md), donde está lo que se espera de él y qué caso real le falta:
 
 | Dónde | Nombre | Qué será |
 |---|---|---|
-| línea | `id_externo` | El id con el que el sistema de destino conoce ese asiento (Merge `remote_id`, Rutter `platform_id`). En el comprobante ya entró (12-sep-2026): es la llave de la imputación |
+| línea | `id_en_destino` | El id con el que el sistema de destino conoce ese asiento (Merge `remote_id`, Rutter `platform_id`). Se llamaba `id_externo` hasta el 18-sep-2026, y se renombró antes de existir para que no se confunda con `linea.documento.id_externo`, que es el id del sistema que **produjo** el comprobante ([enmienda 0001](enmiendas/0001-id-en-destino.md)) |
 | comprobante, línea | `dimensiones` | `[{tipo, codigo}]`: área, proyecto, obra… más allá del `centro_costo`, que sigue siendo la primera (Xero `Tracking[]`) |
 | línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: `estado` ya existe en el comprobante (`ok \| observada \| duplicada`) y en la detracción (`PROVISIONADO \| PAGADO`) con otro sentido |
 
@@ -318,6 +319,30 @@ sección `contasis` la elige en `columnas.centro_costo` (13-sep-2026, `drivers/c
 otra columna, no una dimensión. Un segundo centro **distinto** y el código de presupuesto irían en `dimensiones`, el
 nombre ya reservado de la tabla de arriba, y como son decisiones de cada entorno, en la imputación y no en el
 documento. El CONTASIS de John no los usa (12-sep-2026), así que sigue reservado.
+
+---
+
+## Quién gobierna los catálogos
+
+Mientras `rol` y `libro.tipo` eran enums cerrados dentro del esquema, quien quisiera un valor nuevo tenía que abrir un
+PR y discutirlo. Al sacarlos a catálogos publicados esa conversación **desaparece**, así que hay que reponerla a
+propósito: un catálogo abierto sin gobierno es una invitación a que cada ERP invente sus propios valores y el estándar
+deje de serlo.
+
+| | |
+|---|---|
+| **Quién aprueba** | John, mientras el repositorio sea suyo. Dicho, no sobreentendido: quien integra necesita saber a quién le pregunta |
+| **Cómo se propone** | Un aviso con **el caso real detrás** —un archivo de verdad de un sistema de verdad, anonimizado—, y su [enmienda](enmiendas/LEEME.md) |
+| **Qué se responde** | Si entra, entra como valor de catálogo con su fecha; si no, se dice por qué. Un catálogo que crece sin criterio es un enum con más pasos |
+
+**Y la regla que protege a quien ya integró: un valor publicado no se quita ni cambia de significado.** Si resulta
+equivocado, se marca como obsoleto y entra otro al lado. Es lo que hacen las listas de códigos de ISO 20022 y de
+EN 16931, y la razón de que sus mensajes sobrevivan décadas.
+
+**Lo que no se gobierna** son los catálogos de **SUNAT** —tipos de comprobante, documentos de identidad, monedas,
+detracciones, el PCGE—: no se proponen ni se discuten, se copian de la norma con su fuente y su fecha. Cuando SUNAT
+cambia una tasa o añade un código, el catálogo lo refleja y ya. Lo que se gobierna es solo lo que este estándar
+inventa: los **roles**, las **clases** y los **tipos de libro**.
 
 ---
 
