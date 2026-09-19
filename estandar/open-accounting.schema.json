@@ -82,7 +82,11 @@
         "ruc": { "type": "string", "pattern": "^[0-9]{11}$", "description": "RUC del contribuyente dueño del libro." },
         "razon_social": { "type": "string" },
         "periodo": { "type": "string", "pattern": "^20[0-9]{2}(0[1-9]|1[0-2])$", "description": "AAAAMM." },
-        "tipo": { "enum": ["venta", "compra"] }
+        "tipo": {
+        "description": "Qué registro es. Los valores están en el catálogo `tipos_de_libro` de `estandar/catalogos.json`, publicado con el tag del estándar: un registro nuevo entra ahí y no sube la versión del documento. No degrada como el `rol` de una línea —quien recibe un libro que no conoce no puede adivinar qué hacer con él—, así que quien degrada es el destino: el driver que no lo declara en sus `FORMATOS` lo rechaza limpio.",
+        "type": "string",
+        "minLength": 1
+      }
       }
     },
 
@@ -252,8 +256,8 @@
           "type": "string"
         },
         "rol": {
-          "enum": ["principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion"],
-          "description": "Qué papel cumple la línea en el asiento: el gasto o ingreso, el IGV, la retención de 4ta, el proveedor o cliente, y las dos líneas de la detracción. Un driver la encuentra por su rol, no por su cuenta."
+          "description": "Qué papel cumple la línea en la operación peruana. Los valores están en el catálogo `roles` de `estandar/catalogos.json`, publicado y versionado aparte del esquema, para que un rol nuevo no cueste una versión del documento. **Quien no conozca un rol tiene que poder contabilizar la línea con `clase`, `debe_haber` e `importe`**: es la regla de degradación que hace que el catálogo pueda crecer sin romper a ningún ERP ya integrado.",
+          "type": "string"
         },
         "moneda": { "type": "string", "pattern": "^[A-Z]{3}$" },
         "tipo_cambio": { "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "null" }] },

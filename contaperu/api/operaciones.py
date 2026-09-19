@@ -10,7 +10,8 @@ from __future__ import annotations
 import importlib
 from typing import Sequence
 
-from .. import _datos, catalogos, comparar_sire as _comparar, detracciones, drivers, partida_doble, pcge
+from .. import (_datos, catalogos, comparar_sire as _comparar, detracciones, drivers, partida_doble, pcge,
+                vocabulario)
 from ..drivers import contrato
 from ..errores import DocumentoInvalido
 from ..pipeline import armado, diagnostico, lectura, preparacion, salida
@@ -204,6 +205,16 @@ def catalogos_sunat() -> dict:
         "detracciones": detracciones.tabla_del_motor(),
         "fuentes": dict(catalogos.FUENTES),
     }
+
+
+def catalogos_del_estandar() -> dict:
+    """Los catálogos que este estándar inventa —`roles`, `clases` y `tipos_de_libro`—, cada uno con su fuente y su
+    versión. Son lo que un ERP de fuera necesita para leer una línea del asiento sin conocer el PCGE, y viven
+    publicados junto al esquema para poder citarse por la URL del tag del estándar.
+
+    No están en `catalogos_sunat` a propósito: esos se copian de la norma y estos se gobiernan (`estandar/LEEME.md`,
+    «Quién gobierna los catálogos»)."""
+    return vocabulario.catalogos()
 
 
 def catalogo_pcge() -> dict:

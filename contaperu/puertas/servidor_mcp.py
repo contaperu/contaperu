@@ -116,6 +116,13 @@ def catalogos_sunat() -> str:
     return json.dumps(api.catalogos_sunat(), ensure_ascii=False, indent=1)
 
 
+@mcp.resource("contaperu://catalogos/estandar", mime_type="application/json")
+def catalogos_del_estandar() -> str:
+    """Los catálogos que este estándar inventa: los roles de una línea del asiento, las cinco clases contables y
+    los tipos de libro, cada uno con su fuente y su versión."""
+    return json.dumps(api.catalogos_del_estandar(), ensure_ascii=False, indent=1)
+
+
 @mcp.resource("contaperu://catalogos/pcge2026", mime_type="application/json")
 def catalogo_pcge2026() -> str:
     """El catálogo oficial de cuentas del Plan Contable General Empresarial 2026: cada cuenta con

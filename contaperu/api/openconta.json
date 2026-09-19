@@ -564,6 +564,31 @@
     }
    }
   },
+  "/v1/catalogos/estandar": {
+   "get": {
+    "operationId": "catalogos_del_estandar",
+    "summary": "Los catálogos que este estándar inventa —`roles`, `clases` y `tipos_de_libro`—, cada uno con su fuente y su versión.",
+    "description": "Los catálogos que este estándar inventa —`roles`, `clases` y `tipos_de_libro`—, cada uno con su fuente y su\nversión. Son lo que un ERP de fuera necesita para leer una línea del asiento sin conocer el PCGE, y viven\npublicados junto al esquema para poder citarse por la URL del tag del estándar.\n\nNo están en `catalogos_sunat` a propósito: esos se copian de la norma y estos se gobiernan (`estandar/LEEME.md`,\n«Quién gobierna los catálogos»).",
+    "responses": {
+     "200": {
+      "description": "Los catálogos que este estándar inventa —`roles`, `clases` y `tipos_de_libro`—, cada uno con su fuente y su versión.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/catalogos_del_estandar"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
   "/v1/catalogos/pcge2026": {
    "get": {
     "operationId": "catalogo_pcge",
@@ -825,10 +850,9 @@
       "description": "AAAAMM."
      },
      "tipo": {
-      "enum": [
-       "venta",
-       "compra"
-      ]
+      "description": "Qué registro es. Los valores están en el catálogo `tipos_de_libro` de `estandar/catalogos.json`, publicado con el tag del estándar: un registro nuevo entra ahí y no sube la versión del documento. No degrada como el `rol` de una línea —quien recibe un libro que no conoce no puede adivinar qué hacer con él—, así que quien degrada es el destino: el driver que no lo declara en sus `FORMATOS` lo rechaza limpio.",
+      "type": "string",
+      "minLength": 1
      }
     }
    },
@@ -1235,15 +1259,8 @@
       "type": "string"
      },
      "rol": {
-      "enum": [
-       "principal",
-       "igv",
-       "retencion_4ta",
-       "tercero",
-       "detraccion_tercero",
-       "detraccion"
-      ],
-      "description": "Qué papel cumple la línea en el asiento: el gasto o ingreso, el IGV, la retención de 4ta, el proveedor o cliente, y las dos líneas de la detracción. Un driver la encuentra por su rol, no por su cuenta."
+      "description": "Qué papel cumple la línea en la operación peruana. Los valores están en el catálogo `roles` de `estandar/catalogos.json`, publicado y versionado aparte del esquema, para que un rol nuevo no cueste una versión del documento. **Quien no conozca un rol tiene que poder contabilizar la línea con `clase`, `debe_haber` e `importe`**: es la regla de degradación que hace que el catálogo pueda crecer sin romper a ningún ERP ya integrado.",
+      "type": "string"
      },
      "moneda": {
       "type": "string",
@@ -2379,6 +2396,53 @@
      "fuentes"
     ],
     "additionalProperties": false
+   },
+   "catalogos_del_estandar": {
+    "title": "Catálogos del estándar",
+    "description": "Los catálogos que `open-accounting` inventa, frente a los de SUNAT, que se copian de la norma: los roles de una línea del asiento, las cinco clases contables y los tipos de libro. Cada uno con su fuente y su versión, porque se versionan aparte del esquema: un valor nuevo no sube la versión del documento.",
+    "type": "object",
+    "required": [
+     "roles",
+     "clases",
+     "tipos_de_libro"
+    ],
+    "propertyNames": {
+     "enum": [
+      "roles",
+      "clases",
+      "tipos_de_libro"
+     ]
+    },
+    "additionalProperties": {
+     "type": "object",
+     "required": [
+      "fuente",
+      "version",
+      "codigos"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "fuente": {
+       "type": "string",
+       "minLength": 1,
+       "description": "De dónde sale este catálogo. Ninguno entra sin ella."
+      },
+      "version": {
+       "type": "string",
+       "description": "Su versión, que es otro reloj que el del documento: un valor nuevo aquí no sube la del estándar."
+      },
+      "nota": {
+       "type": "string"
+      },
+      "codigos": {
+       "type": "object",
+       "description": "Valor → qué significa.",
+       "additionalProperties": {
+        "type": "string"
+       }
+      }
+     }
+    }
    },
    "problema": {
     "title": "Problema",

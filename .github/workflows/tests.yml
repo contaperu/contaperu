@@ -64,4 +64,4 @@ jobs:
           /tmp/limpio/bin/contaperu --version
           /tmp/limpio/bin/contaperu-mcp --version
           /tmp/limpio/bin/contaperu-http --version
-          /tmp/limpio/bin/python -c "from contaperu import api; import sys; sys.exit(0 if api.catalogo_pcge()['cuentas'] and api.contrato_openconta()['openapi'] == '3.1.0' and api.esquema_open_accounting()['title'] == 'open-accounting' and api.esquema_diagnostico()['title'] and api.catalogos_sunat()['detracciones']['codigos'] else 1)"
+          /tmp/limpio/bin/python -c "from contaperu import api; import sys; sys.exit(0 if api.catalogo_pcge()['cuentas'] and api.contrato_openconta()['openapi'] == '3.1.0' and api.esquema_open_accounting()['title'] == 'open-accounting' and api.esquema_diagnostico()['title'] and api.catalogos_sunat()['detracciones']['codigos'] and api.catalogos_del_estandar()['clases']['codigos']['activo'] else 1)"

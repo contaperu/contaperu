@@ -366,6 +366,30 @@ documento. El CONTASIS de John no los usa (12-sep-2026), así que sigue reservad
 
 ---
 
+## Los catálogos, y cómo degrada cada uno
+
+Tres cosas que este estándar inventa —los **roles** de una línea, las cinco **clases** contables y los **tipos de
+libro**— viven en [`catalogos.json`](catalogos.json), junto a este archivo, con su fuente y su versión. Se citan por
+la URL del tag igual que el esquema, así que un ERP de fuera los lee sin instalar nada:
+
+```
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estandar/catalogos.json
+```
+
+**Por qué están fuera del esquema** (1.0): eran enums cerrados, así que el día que entre un hecho nuevo —los
+movimientos del banco, las letras de cambio— sus roles costarían una versión del estándar. Con el catálogo no cuestan
+ninguna. **Abrirlos no es que crezcan:** los seis roles son los de compras y ventas, y no se añade ninguno hasta que
+aparezca el hecho que lo necesite.
+
+**Y no degradan igual, que es lo que hay que tener claro:**
+
+| | Si llega un valor que no conozco |
+|---|---|
+| **`rol`** | **No rompe nada.** La línea se contabiliza con `clase`, `debe_haber` e `importe`. Es la regla de degradación, y es la que permite que el catálogo crezca sin romper a ningún ERP ya integrado |
+| **`libro.tipo`** | **Sigue siendo un error**: quien recibe un registro que no conoce no puede adivinar qué hacer con él. Quien degrada es el destino — el driver que no lo declara en sus `FORMATOS` lo rechaza limpio, diciendo qué libros lleva |
+
+---
+
 ## Quién gobierna los catálogos
 
 Mientras `rol` y `libro.tipo` eran enums cerrados dentro del esquema, quien quisiera un valor nuevo tenía que abrir un

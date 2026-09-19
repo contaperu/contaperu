@@ -109,12 +109,15 @@ def test_cada_herramienta_se_explica_sola():
 def test_los_recursos_son_legibles():
     uris = {str(r.uri) for r in asyncio.run(mcp.list_resources())}
     assert uris == {"contaperu://estandar/open-accounting", "contaperu://catalogos/sunat",
-                    "contaperu://drivers", "contaperu://catalogos/pcge2026", "contaperu://configuracion",
+                    "contaperu://catalogos/estandar", "contaperu://drivers",
+                    "contaperu://catalogos/pcge2026", "contaperu://configuracion",
                     "contaperu://esquemas/diagnostico"}
     esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
     assert esquema["title"] == "open-accounting"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
     assert catalogos["tipos_comprobante"]["01"] == "Factura"
+    del_estandar = json.loads(leer_recurso("contaperu://catalogos/estandar"))
+    assert del_estandar["clases"]["codigos"]["activo"] and del_estandar["roles"]["version"]
     drivers = json.loads(leer_recurso("contaperu://drivers"))
     assert set(drivers) == {"sire", "concar", "csv", "contasis", "asiento_neutral"}
     assert drivers["concar"]["tipo"] == "archivo" and drivers["sire"]["tipo"] == "texto"

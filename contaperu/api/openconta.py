@@ -25,7 +25,7 @@ from .tabla import BASE_ESQUEMAS, ESTANDAR, OPERACIONES
 # Los esquemas de la api que entran en el contrato, en el orden en que aparecen.
 ESQUEMAS = ("configuracion", "imputacion", "claves_previas", "documento_anotado", "comprobante_de_la_respuesta",
             "cuadre", "asiento", "exportacion", "diagnostico", "cuenta_pcge", "adaptacion_pcge", "drivers",
-            "catalogos_sunat", "problema")
+            "catalogos_sunat", "catalogos_del_estandar", "problema")
 ESTANDAR_EN_COMPONENTES = "OpenAccounting"
 
 _PROBLEMA = {"application/problem+json": {"schema": {"$ref": "#/components/schemas/problema"}}}

@@ -26,7 +26,7 @@ from .._obsoleto import reexportar
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
 from ..configuracion import CONFIG_POR_DEFECTO
 from ..detracciones import monto_detraccion, tasa_detraccion
-from .. import pcge
+from .. import pcge, vocabulario
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .configuracion import NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
@@ -46,7 +46,9 @@ __getattr__, _ = reexportar(__name__, {"Opciones": "contaperu.drivers.kit:Opcion
 # El papel de cada línea en el asiento. Es lo que un driver necesita para traducir sin adivinar: un
 # ERP que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su cuenta, que la
 # elige cada empresa.
-ROLES = ("principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion")
+# Del catálogo del estándar (`vocabulario.ROLES`): una sola fuente, publicada y citable por la URL del tag. Estaba
+# aquí y otra vez como enum del esquema, y ningún test comparaba las dos.
+ROLES = vocabulario.ROLES
 # Las líneas que llevan además el centro de costo en su anexo auxiliar. Lo del estándar es la del tercero —el «doble
 # anexo», también en la línea que le descuenta la detracción—; cada driver lo cambia con las columnas que su sistema
 # elige (`drivers.contrato.centro_en_anexo`). La principal lo lleva ahí solo cuando su cuenta no lo lleva en la suya.

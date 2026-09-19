@@ -36,6 +36,7 @@
   "adaptar_pcge": "función(lineas: 'list[dict]') -> 'dict'",
   "buscar_cuenta_pcge": "función(*, texto: 'str' = '', codigo: 'str' = '') -> 'dict'",
   "catalogo_pcge": "función() -> 'dict'",
+  "catalogos_del_estandar": "función() -> 'dict'",
   "catalogos_sunat": "función() -> 'dict'",
   "comparar_sire": "función(nuestro: 'bytes', sunat: 'bytes', *, registro: 'str' = '', nombres: 'Sequence[str]' = ()) -> 'dict'",
   "configuracion_por_defecto": "función() -> 'dict'",
@@ -85,7 +86,8 @@
   "serie_y_numero": "",
   "solo_digitos": "",
   "texto_tasa": "",
-  "tipo_cambio": ""
+  "tipo_cambio": "",
+  "vocabulario": ""
  },
  "contaperu.catalogos": {
   "ADUANEROS": "",

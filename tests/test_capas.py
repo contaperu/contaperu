@@ -49,6 +49,9 @@ CAPAS = {
     "contaperu._version": "base", "contaperu._obsoleto": "base", "contaperu._datos": "base",
     "contaperu.errores": "base",
     "contaperu.modelo": "nucleo", "contaperu.catalogos": "nucleo", "contaperu.configuracion": "nucleo",
+    # El vocabulario del estándar (roles, clases, tipos de libro), que lee su catálogo publicado por `_datos`.
+    # Núcleo como su hermano `catalogos`, y no «peruano»: los cinco valores de `clase` son universales.
+    "contaperu.vocabulario": "nucleo",
     "contaperu.igv": "nucleo", "contaperu.detracciones": "nucleo", "contaperu.validar": "nucleo",
     "contaperu.partida_doble": "nucleo", "contaperu.asiento": "nucleo", "contaperu.pcge": "nucleo",
     "contaperu.lectores": "nucleo", "contaperu.comparar_sire": "nucleo",

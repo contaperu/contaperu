@@ -12,6 +12,8 @@ solo ordenan y formatean. Reglas:
 """
 from __future__ import annotations
 
+from . import vocabulario
+
 import re
 from dataclasses import dataclass, field, fields
 from datetime import date, datetime
@@ -22,7 +24,9 @@ CERO = Decimal("0.00")
 CENTIMO = Decimal("0.01")     # el cuántum de todo importe: una sola fuente para el motor
 _TRES = Decimal("0.001")
 
-TIPOS_LIBRO = ("venta", "compra")
+# Del catálogo del estándar (`vocabulario.TIPOS_LIBRO`), que es la única fuente desde la 1.0: estaba aquí y otra
+# vez como enum del esquema, sin nada que comparara las dos copias.
+TIPOS_LIBRO = vocabulario.TIPOS_LIBRO
 ORIGENES = ("xml", "pdf_texto", "vision", "manual", "sire")  # sire = importado de la propuesta de SUNAT
 # Lo que declara el documento sobre su pago. En la factura electrónica es obligatorio desde 2021 (UBL
 # `PaymentTerms FormaPago`: «Contado», o «Credito» con sus cuotas). Vacío = el documento no lo dice.

@@ -1,0 +1,33 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/catalogos_del_estandar.schema.json",
+ "title": "Catálogos del estándar",
+ "description": "Los catálogos que `open-accounting` inventa, frente a los de SUNAT, que se copian de la norma: los roles de una línea del asiento, las cinco clases contables y los tipos de libro. Cada uno con su fuente y su versión, porque se versionan aparte del esquema: un valor nuevo no sube la versión del documento.",
+ "type": "object",
+ "required": ["roles", "clases", "tipos_de_libro"],
+ "propertyNames": { "enum": ["roles", "clases", "tipos_de_libro"] },
+ "additionalProperties": {
+  "type": "object",
+  "required": ["fuente", "version", "codigos"],
+  "additionalProperties": false,
+  "properties": {
+   "fuente": {
+    "type": "string",
+    "minLength": 1,
+    "description": "De dónde sale este catálogo. Ninguno entra sin ella."
+   },
+   "version": {
+    "type": "string",
+    "description": "Su versión, que es otro reloj que el del documento: un valor nuevo aquí no sube la del estándar."
+   },
+   "nota": {
+    "type": "string"
+   },
+   "codigos": {
+    "type": "object",
+    "description": "Valor → qué significa.",
+    "additionalProperties": { "type": "string" }
+   }
+  }
+ }
+}

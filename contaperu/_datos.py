@@ -17,7 +17,12 @@ from pathlib import Path
 from typing import Any
 
 PAQUETE = "contaperu"
-ESQUEMA = "estandar/open-accounting.schema.json"
+# Los archivos del estándar viven UNA vez, en `estandar/` de la raíz del repositorio, y viajan dentro del paquete por
+# el `force-include` de `pyproject.toml` (`contaperu/estandar/`). Que estén en dos sitios según de dónde se corra lo
+# sabe solo `del_estandar`, para no repetir esa doble búsqueda en cada archivo nuevo.
+ESTANDAR = "estandar"
+ESQUEMA = f"{ESTANDAR}/open-accounting.schema.json"
+CATALOGOS_DEL_ESTANDAR = f"{ESTANDAR}/catalogos.json"
 
 
 def leer_bytes(ruta: str) -> bytes | None:
@@ -32,16 +37,27 @@ def leer_json(ruta: str) -> Any:
     return None if datos is None else json.loads(datos.decode("utf-8"))
 
 
-def texto_del_esquema() -> str:
-    """El esquema del estándar `open-accounting`, tal cual. Instalado viaja dentro del paquete (`contaperu/estandar/`,
-    por el `force-include` de `pyproject.toml`); en el repositorio vive una sola vez, en `estandar/` de la raíz."""
-    datos = leer_bytes(ESQUEMA)
+def del_estandar(ruta: str) -> bytes:
+    """Los bytes de un archivo del estándar. Instalado viaja dentro del paquete (`contaperu/estandar/`, por el
+    `force-include` de `pyproject.toml`); en el repositorio vive una sola vez, en `estandar/` de la raíz. Un archivo
+    nuevo en `estandar/` necesita su línea de `force-include` y nada más."""
+    datos = leer_bytes(ruta)
     if datos is None:
-        en_la_raiz = Path(__file__).resolve().parent.parent / ESQUEMA
+        en_la_raiz = Path(__file__).resolve().parent.parent / ruta
         if not en_la_raiz.is_file():
-            raise FileNotFoundError("No encuentro open-accounting.schema.json")
+            raise FileNotFoundError(f"No encuentro {ruta}")
         datos = en_la_raiz.read_bytes()
-    return datos.decode("utf-8")
+    return datos
+
+
+def texto_del_esquema() -> str:
+    """El esquema del estándar `open-accounting`, tal cual."""
+    return del_estandar(ESQUEMA).decode("utf-8")
+
+
+def catalogos_del_estandar() -> Any:
+    """Los catálogos que este estándar inventa: `roles`, `clases` y `tipos_de_libro`."""
+    return json.loads(del_estandar(CATALOGOS_DEL_ESTANDAR).decode("utf-8"))
 
 
 def esquema_open_accounting() -> dict:

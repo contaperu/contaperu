@@ -110,6 +110,8 @@ OPERACIONES: tuple[Operacion, ...] = (
     Operacion("describir_configuracion", "GET", "/v1/configuracion", recurso="contaperu://configuracion"),
     Operacion("drivers_disponibles", "GET", "/v1/drivers", "drivers", recurso="contaperu://drivers"),
     Operacion("catalogos_sunat", "GET", "/v1/catalogos/sunat", "catalogos_sunat", recurso="contaperu://catalogos/sunat"),
+    Operacion("catalogos_del_estandar", "GET", "/v1/catalogos/estandar", "catalogos_del_estandar",
+              recurso="contaperu://catalogos/estandar"),
     Operacion("catalogo_pcge", "GET", "/v1/catalogos/pcge2026", recurso="contaperu://catalogos/pcge2026"),
     Operacion("esquema_open_accounting", "GET", "/v1/estandar/open-accounting.schema.json",
               recurso="contaperu://estandar/open-accounting"),

@@ -1,0 +1,37 @@
+{
+ "_nota": "Los catálogos que este estándar inventa, frente a los de SUNAT, que se copian de la norma (contaperu/datos/sunat/). Viven aquí, junto al esquema, para citarse por la URL del tag del estándar igual que él. Un valor nuevo en un catálogo NO sube la versión del documento (estandar/LEEME.md, «Versionado»): se publica con su fecha, y quien no lo conozca degrada con la `clase` de la línea. Quién aprueba un valor y cómo se propone: «Quién gobierna los catálogos».",
+ "roles": {
+  "fuente": "open-accounting: el papel que cumple cada línea en la operación peruana. No está en ninguna norma —es lo que este estándar aporta— y por eso tiene gobierno: estandar/LEEME.md, «Quién gobierna los catálogos».",
+  "version": "1.0",
+  "nota": "Los seis de compras y ventas, que son los libros que el motor genera. Una venta usa tres y una compra hasta seis; la nota de crédito no añade ninguno, porque reusa los mismos con los sentidos invertidos. El catálogo está abierto para que un hecho nuevo —el banco, las letras— traiga sus roles sin subir la versión, no para que estos crezcan.",
+  "codigos": {
+   "principal": "El gasto en compras, el ingreso en ventas. Su cuenta la elige quien imputa",
+   "igv": "El IGV del comprobante. Al debe en compras es el crédito fiscal; al haber en ventas, el débito",
+   "retencion_4ta": "La retención de renta de 4ta categoría que muestra un recibo por honorarios",
+   "tercero": "Lo que se le debe al proveedor o lo que debe el cliente: la cuenta del total",
+   "detraccion_tercero": "La parte del saldo del proveedor que no se le paga a él, porque se deposita",
+   "detraccion": "La contrapartida: lo que se deposita en el Banco de la Nación, pendiente de constancia"
+  }
+ },
+ "clases": {
+  "fuente": "Los cinco valores que QuickBooks (Classification), Xero (Class), Merge y Rutter (classification) comparten. Se congelan: son lo único que un ERP de fuera entiende sin conocer el PCGE.",
+  "version": "1.0",
+  "nota": "La clase de una línea se deriva del primer dígito de su cuenta, que es el elemento del PCGE (contaperu/pcge/clases.py): 1, 2 y 3 activo; 4 pasivo; 5 patrimonio; 6 y 9 gasto; 7 ingreso. Los elementos 8 y 0 no tienen clase, y una imputación a una de esas cuentas no genera asiento.",
+  "codigos": {
+   "activo": "Lo que la empresa tiene o le deben",
+   "pasivo": "Lo que la empresa debe",
+   "patrimonio": "Capital, reservas y resultados acumulados",
+   "ingreso": "Lo que la empresa gana",
+   "gasto": "Lo que la empresa consume"
+  }
+ },
+ "tipos_de_libro": {
+  "fuente": "Los registros que SUNAT define y que este estándar transporta. El valor es el del estándar; su equivalencia con cada archivo de destino la declara el driver en sus FORMATOS.",
+  "version": "1.0",
+  "nota": "Sale del enum del esquema al catálogo para que un registro nuevo no cueste una versión. Pero no degrada como el rol: quien recibe un libro que no conoce no puede adivinar qué hacer con él, así que su degradación es del destino — el driver que no lo declara en sus FORMATOS lo rechaza limpio, diciendo qué libros lleva.",
+  "codigos": {
+   "venta": "El registro de ventas e ingresos: lo que emitió en el periodo",
+   "compra": "El registro de compras: lo que el contribuyente adquirió en el periodo"
+  }
+ }
+}

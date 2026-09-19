@@ -50,6 +50,20 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   también: los catálogos de SUNAT se copian de la norma.
 
 ### Cambiado
+- **`rol` y `libro.tipo` salen del esquema a catálogos publicados** (`estandar/catalogos.json`, junto al esquema y
+  citable por la URL del tag del estándar), con `clases` al lado. Vivían como enums cerrados **y repetidos** —`ROLES`
+  en `asiento/motor.py` y `TIPOS_LIBRO` en `modelo.py`—, sin ningún test que comparara las copias; ahora hay una sola
+  fuente (`contaperu/vocabulario.py`) y un test que la ata al código y al esquema. **Los valores no cambian:** los seis
+  roles son los de compras y ventas, y abrir el catálogo es para que un hecho nuevo traiga los suyos sin subir la
+  versión, no para que estos crezcan. Se sirven en `api.catalogos_del_estandar()`, en `GET /v1/catalogos/estandar` y en
+  el recurso MCP `contaperu://catalogos/estandar`, aparte de los de SUNAT, que se copian de la norma y no se gobiernan.
+- **Un `libro.tipo` fuera del catálogo lo rechaza el modelo, no el esquema.** El rechazo no desaparece: cambia de
+  sitio, porque el esquema ya no enumera. Y es a propósito que `libro.tipo` **no** degrade como el `rol`: quien recibe
+  un registro que no conoce no puede adivinar qué hacer con él, así que quien degrada es el destino — el driver que no
+  lo declara en sus `FORMATOS` lo rechaza limpio.
+- **`_datos.del_estandar(ruta)`**: la doble búsqueda de un archivo del estándar —dentro del paquete instalado o en la
+  raíz del repositorio— estaba escrita solo para el esquema. Ahora está una vez, y un archivo nuevo en `estandar/`
+  necesita su línea de `force-include` y nada más.
 - **`pcge.adaptar` re-deriva la clase al reescribir una cuenta.** Antes solo cambiaba el número, así que un mapeo que
   cruzara de elemento dejaba la línea con una clase que su cuenta contradice — justo lo que el motor promete rechazar,
   y lo que sostiene que la clase quede fuera de la huella.

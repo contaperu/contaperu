@@ -17,6 +17,7 @@ _DESTINOS = {
     "catalogo_pcge2026": "contaperu.puertas.servidor_mcp:catalogo_pcge2026",
     "catalogos": "contaperu.catalogos",
     "catalogos_sunat": "contaperu.puertas.servidor_mcp:catalogos_sunat",
+    "catalogos_del_estandar": "contaperu.puertas.servidor_mcp:catalogos_del_estandar",
     "configuracion_declarada": "contaperu.puertas.servidor_mcp:configuracion_declarada",
     "configuracion_por_defecto": "contaperu.puertas.servidor_mcp:configuracion_por_defecto",
     "detracciones": "contaperu.detracciones",

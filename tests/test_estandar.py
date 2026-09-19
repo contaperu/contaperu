@@ -80,6 +80,23 @@ def test_las_claves_con_guion_bajo_son_anotaciones(validador):
     assert list(validador.iter_errors(documento(_nota="lo que sea"))) == []
 
 
+def test_un_tipo_de_libro_fuera_del_catalogo_lo_rechaza_el_modelo_y_no_el_esquema():
+    """Desde la 1.0 `libro.tipo` no es un enum del esquema sino un valor del catálogo publicado, para que un registro
+    nuevo no cueste una versión. El esquema, entonces, acepta cualquier texto — y quien rechaza lo que no está en el
+    catálogo es el modelo, al construir el libro. El rechazo no desaparece: cambia de sitio, y este test dice cuál."""
+    import jsonschema
+
+    from contaperu.modelo import TIPOS_LIBRO
+
+    doc = documento(libro={"ruc": "20601111111", "periodo": "202601", "tipo": "otro"})
+    from contaperu.api import esquema_open_accounting
+
+    assert list(jsonschema.Draft202012Validator(esquema_open_accounting()).iter_errors(doc)) == []
+    with pytest.raises(ValueError, match="Tipo de libro inválido"):
+        Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA SAC", periodo="202601", tipo="otro")
+    assert set(TIPOS_LIBRO) == {"venta", "compra"}
+
+
 def test_se_rechaza_lo_que_no_es_del_estandar(validador):
     """`additionalProperties: false` es a propósito: un campo mal escrito se detecta al
     validar, no meses después cuando alguien note que nunca llegó."""
@@ -88,7 +105,6 @@ def test_se_rechaza_lo_que_no_es_del_estandar(validador):
                                  "inventado": "x"}]),
         documento(libro={"ruc": "123", "periodo": "202601", "tipo": "compra"}),          # RUC corto
         documento(libro={"ruc": "20601111111", "periodo": "202613", "tipo": "compra"}),  # mes 13
-        documento(libro={"ruc": "20601111111", "periodo": "202601", "tipo": "otro"}),
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "10/01/2026", "total": "1"}]),
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "-5"}]),
         documento(comprobantes=[{"tipo_cp": "01", "fecha_emision": "2026-01-10", "total": "1",
