@@ -390,6 +390,11 @@ aparezca el hecho que lo necesite.
 
 ---
 
+**Si vienes de la 0.3**, la guía de migración está en [`MIGRAR-A-1.0.md`](MIGRAR-A-1.0.md): son tres cambios en el
+documento y uno en la clave de versión.
+
+---
+
 ## Cómo compruebas que lo que produces es correcto
 
 Tres piezas, y la tercera es la que faltaba:

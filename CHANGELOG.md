@@ -6,6 +6,26 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [1.1.0] — 2026-09-18
+
+**El estándar de datos llega a `open-accounting` 1.0**, su primera versión estable, y con ella un compromiso: nada de
+lo que existe se quita ni cambia de significado hasta una 2.0. Lo que hace sostenible esa promesa entra en esta misma
+versión — los catálogos, que crecen sin tocar el esquema, y las enmiendas, donde cada cambio queda con su
+compatibilidad y su test.
+
+Tres cosas cambian en el documento. **La imputación viaja dentro**, así que un archivo guardado explica su propio
+asiento. **Cada línea del asiento lleva su `clase`** —derivada del primer dígito de la cuenta, no del rol—, así que una
+línea suelta se entiende sin mirar de qué libro salió. Y **`rol` y `libro.tipo` salen del esquema a catálogos
+publicados**, así que el día que entre un hecho nuevo sus valores no cuesten otra versión.
+
+La librería sube a **1.1.0** en la misma tanda, y no por conveniencia: `"1.0"` es prefijo de `"1.0.0"`, y ahí es donde
+los dos relojes se confunden. Ahora un test lo prohíbe.
+
+**El motor no acepta documentos de la 0.3**: nadie de fuera los escribía todavía, así que se hizo la limpieza en vez de
+cargar con dos caminos en el lector. El Excel de CONCAR validado no cambia ni una celda, y **ninguna huella emitida se
+mueve**.
+
+
 ### Añadido
 - **La batería de conformidad del estándar** (`estandar/conformidad/`, hito E2), para que un tercero compruebe que lo
   que produce es correcto **sin escribirle a nadie**. Dos juegos: los casos de esquema, con la forma de la *JSON Schema
@@ -897,6 +917,7 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v1.0.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/contaperu/contaperu/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/contaperu/contaperu/compare/v0.10.0...v1.0.0
 [0.2.0]: https://github.com/contaperu/contaperu/releases/tag/v0.2.0
