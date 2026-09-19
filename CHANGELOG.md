@@ -6,7 +6,7 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
-## [1.1.0] — 2026-09-18
+## [1.1.0] — 2026-09-19
 
 **El estándar de datos llega a `open-accounting` 1.0**, su primera versión estable, y con ella un compromiso: nada de
 lo que existe se quita ni cambia de significado hasta una 2.0. Lo que hace sostenible esa promesa entra en esta misma
