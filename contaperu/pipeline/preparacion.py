@@ -110,8 +110,8 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
             errores.append(f"`{clave}` va dentro de la sección de su sistema ({' o '.join(va_en[clave])}), "
                            "no en la raíz")
         elif clave == "imputaciones":
-            errores.append("`imputaciones` no va en la configuración: la imputación de cada documento llega aparte "
-                           "(`imputacion`)")
+            errores.append("`imputaciones` no va en la configuración: la imputación de cada documento llega en el "
+                           "bloque `imputaciones` del documento o en el argumento `imputacion`")
         elif clave in drivers.DRIVERS and drivers.contrato.lleva_cuentas(drivers.DRIVERS[clave]):
             errores.append(f"`{clave}` no tiene sección: ese sistema no tiene nada propio que configurar, solo lo general")
         elif clave in drivers.DRIVERS:
@@ -168,13 +168,47 @@ def describir_configuracion(driver: str = "") -> dict:
                          if drivers.contrato.seccion_por_defecto(modulo)}}
 
 
+def imputacion_del_documento(doc: dict, imputacion: dict | None,
+                             comprobantes: list[Comprobante] = ()) -> dict | None:
+    """La imputación que hay que usar: la del bloque `imputaciones` del documento, o la del argumento.
+
+    Desde la 1.0 la imputación viaja DENTRO del documento (John, 18-sep-2026), para que un archivo guardado
+    explique su propio asiento; el argumento se conserva para quien ya integraba así. **Las dos a la vez se
+    rechazan**: adivinar cuál manda sería elegir en silencio la cuenta de un comprobante.
+
+    Y cuando viene del documento se exige lo que el esquema exige —cada comprobante con su `id_externo`— más lo que
+    el esquema no puede decir: que ningún `id_externo` esté repetido, porque entonces la llave deja de ser una llave.
+    **Las dos comprobaciones valen solo por esta vía**, a propósito: por el argumento se puede imputar 3 de 10
+    comprobantes y que los otros 7 no traigan id, y exigirlo ahí sería cambiar en silencio lo que ya funciona.
+    Es la única asimetría entre las dos vías."""
+    del_documento = (doc or {}).get("imputaciones") if isinstance(doc, dict) else None
+    if del_documento and imputacion:
+        raise DocumentoInvalido("La imputación llega dos veces: en `imputaciones` del documento y en el argumento "
+                                "`imputacion`. Manda una sola.")
+    if del_documento is not None and not isinstance(del_documento, dict):
+        raise DocumentoInvalido("`imputaciones` del documento es un objeto: {id_externo: {cuenta_contable, "
+                                "centro_costo, cuenta_tercero, reparto}}.")
+    if del_documento:
+        ids = [(c.id_externo or "").strip() for c in comprobantes]
+        sin_id = [f"{c.tipo_cp} {c.serie}-{c.numero}" for c in comprobantes if not (c.id_externo or "").strip()]
+        if sin_id:
+            raise DocumentoInvalido("Con `imputaciones` en el documento, cada comprobante necesita su `id_externo`, "
+                                    "que es la llave con la que se casan. Sin él: " + ", ".join(sin_id) + ".")
+        repetidos = sorted({i for i in ids if ids.count(i) > 1})
+        if repetidos:
+            raise DocumentoInvalido("Dos comprobantes comparten `id_externo`, que es la llave de la imputación: "
+                                    + ", ".join(repetidos) + ".")
+    return del_documento or imputacion
+
+
 def con_imputacion(config: dict, imputacion: dict | None, comprobantes: list[Comprobante]) -> dict:
-    """La imputación de cada documento llega APARTE del documento, por `id_externo` (John, 12-sep-2026: las
-    cuentas viven en la aplicación, no en el riel). Se lee aquí, al preparar, para que un error de forma se diga
-    con su motivo, y se le entrega al núcleo dentro de la configuración, que es lo que ya recibe todo el asiento.
+    """La imputación de cada documento se lee aquí, al preparar, para que un error de forma se diga con su motivo, y
+    se le entrega al núcleo dentro de la configuración, que es lo que ya recibe todo el asiento. Llega por el bloque
+    `imputaciones` del documento o por el argumento (`imputacion_del_documento`).
 
     Una imputación cuyo `id_externo` no es de ningún documento se rechaza: una llave mal escrita haría salir ese
-    documento con la cuenta por defecto, sin error y sin aviso."""
+    documento con la cuenta por defecto, sin error y sin aviso. Lo que se exige de más cuando la imputación viene
+    dentro del documento está en `imputacion_del_documento`."""
     if not imputacion:
         return config
     if not isinstance(imputacion, dict):
@@ -245,7 +279,7 @@ def revisar(doc: dict, configuracion: dict | None = None, imputacion: dict | Non
     comprobantes = comprobantes_de(doc)
     previas = claves_previas_de(claves_previas)
     config = config_aplicada(configuracion)
-    con_imputacion(config, imputacion, comprobantes)
+    con_imputacion(config, imputacion_del_documento(doc, imputacion, comprobantes), comprobantes)
     limpiadas = detracciones.normalizar(comprobantes, config)
     validar.revisar(comprobantes, libro, previas)
     errores = [c for c in comprobantes if c.tiene_errores]
@@ -295,7 +329,7 @@ def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, im
     comprobantes = [c for c in todos if not c.excluida]
     if not comprobantes:
         raise DocumentoInvalido("No hay comprobantes que procesar.")
-    config = con_imputacion(config_aplicada(configuracion, driver), imputacion, todos)
+    config = con_imputacion(config_aplicada(configuracion, driver), imputacion_del_documento(doc, imputacion, todos), todos)
     detracciones.normalizar(todos, config)
     validar.revisar(comprobantes, libro, previas)
     if not incluir_observados:

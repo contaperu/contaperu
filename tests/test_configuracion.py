@@ -186,7 +186,8 @@ def test_la_configuracion_se_valida_entera_y_cada_error_dice_adonde_va():
         "`centro_como_referencia` ya no existe: es la columna `anexo_auxiliar` en `concar.columnas.centro_costo`",
         "`tasa_igv`: clave desconocida; en la raíz va lo general (cuentas, usa_centros_costo, centros_costo, "
         "cuentas_con_centro, detraccion_tasas, detraccion_nombres) y una sección por sistema (concar, csv, contasis)",
-        "`imputaciones` no va en la configuración: la imputación de cada documento llega aparte (`imputacion`)",
+        "`imputaciones` no va en la configuración: la imputación de cada documento llega en el bloque "
+        "`imputaciones` del documento o en el argumento `imputacion`",
         "`sire` no tiene sección: ese sistema no lleva cuentas y no se configura",
         '`usa_centros_costo`: se esperaba verdadero o falso y llegó el texto "no"',
         "`concar.medio_pago`: clave desconocida; las que hay: tipos, sub_diario_ventas, sub_diario_compras, "

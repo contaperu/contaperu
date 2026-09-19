@@ -6,7 +6,44 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Añadido
+- **La imputación viaja DENTRO del documento** (decisión de John del 18-sep-2026), en el bloque `imputaciones` de la
+  raíz del estándar, llaveado por el `id_externo` de cada comprobante: un archivo guardado explica su propio asiento,
+  que antes no podía porque las cuentas llegaban solo como argumento de la llamada. **El argumento `imputacion` sigue
+  valiendo** para quien ya integraba así, y **las dos formas a la vez se rechazan**: adivinar cuál manda sería elegir
+  en silencio la cuenta de un comprobante. Un test comprueba que las dos vías dan exactamente lo mismo por `revisar`,
+  `diagnosticar`, `generar_asiento` y `exportar`, porque una vía que ignorara el bloque contabilizaría con la cuenta
+  por defecto sin decir nada.
+- **`id_externo` obligatorio cuando el documento trae `imputaciones`**, con un condicional en el esquema: sin la llave
+  no hay con qué casar la decisión. Un documento sin imputaciones no lo pide, así que nada de lo que ya valía deja de
+  valer. Y el motor añade lo que el esquema no puede expresar: **ningún `id_externo` repetido**. Las dos
+  comprobaciones valen solo por la vía del documento; por el argumento se puede seguir imputando 3 de 10 comprobantes
+  con los otros 7 sin id, y esa es la única asimetría entre las dos vías.
+- **`documento.id_externo` en cada línea del asiento**: el id con el que el sistema que **produjo** el comprobante lo
+  conoce, para que la línea enlace con su comprobante y su imputación sin depender de la serie y el número, que son
+  la identidad tributaria y no la del sistema. Es el papel que cumplen `SourceID` en Xero y `SourceDocumentID` en
+  SAF-T. No confundirlo con `id_en_destino`, reservado para el id que le pone el sistema que **recibe** el asiento
+  ([enmienda 0001](estandar/enmiendas/0001-id-en-destino.md)).
+- **Las enmiendas del estándar** (`estandar/enmiendas/`, hito E1): una por cambio, con su estado, su compatibilidad,
+  su caso real, su fuente y el test que la sostiene. Entran los siete nombres que estaban reservados en el LEEME, y
+  el primero ya renombrado — `linea.id_externo` pasa a **`linea.id_en_destino`** antes de existir, para que no se
+  confunda con el campo nuevo de la línea. `tests/test_enmiendas.py` hace cumplir el criterio de salida del hito:
+  cada reservado tiene su enmienda y una enmienda `final` cita un test que existe.
+- **La gobernanza de los catálogos**, en `estandar/LEEME.md`: quién aprueba un valor nuevo, cómo se propone, qué se
+  responde, y que un valor publicado no se quita ni cambia de significado. Con lo que **no** se gobierna dicho
+  también: los catálogos de SUNAT se copian de la norma.
+
 ### Cambiado
+- **El driver neutral se llama `asiento_neutral`** (antes `open_accounting`, que era el nombre del estándar y hacía
+  tropezar: uno es el formato que entra y el otro una de las salidas). Cambian el valor de `driver`, el formato
+  `asiento_neutral_json` y el nombre del archivo que produce. Nada publicado llevó el nombre viejo. **La clave
+  `open_accounting` del documento no cambia.**
+- **La huella del asiento deja fuera `clase` y `documento.id_externo`**, además del `correlativo` que ya excluía, y
+  `SIN` pasa a admitir rutas con punto para alcanzar un campo de un bloque. **Ninguna huella emitida cambia**: los
+  tres campos quedan fuera precisamente porque no cambian el contenido contable, y `tests/test_huella.py` sigue
+  fijando los mismos valores literales. El `id_externo` es el caso que la huella existe para atajar — al reexportar
+  tras un «deshacer» la aplicación recrea sus filas con ids nuevos, así que con el id dentro el aviso de lote
+  repetido se apagaría justo cuando hace falta.
 - **La tabla de detracciones vive en el motor** (`contaperu/datos/sunat/detracciones.json`, decisión de John del
   15-sep-2026): el código, el nombre y la tasa de cada detracción, con su fuente, iguales para todos. El ERP que integra
   el motor la sobreescribe en lo general de su configuración: `detraccion_tasas` cambia una tasa o suma un código

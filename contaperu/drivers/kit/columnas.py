@@ -20,11 +20,12 @@ from ...asiento.lineas import LineaDiario
 
 # Lo que puede llenar una columna: un campo de la línea neutral o, con punto, un campo de uno de sus bloques.
 BLOQUES: dict[str, tuple[str, ...]] = {
-    "documento": ("tipo", "tipo_cp", "serie_numero", "fecha_emision", "fecha_vencimiento"),
+    "documento": ("tipo", "tipo_cp", "serie_numero", "id_externo", "fecha_emision", "fecha_vencimiento"),
     "referencia": ("tipo", "tipo_cp", "serie_numero", "fecha"),
     "detraccion": ("codigo", "codigo_interno", "tasa", "base"),
 }
 # Qué es el dato de una columna, para quien lo escriba en un formato que distingue (una celda, un ancho fijo).
+# Ojo: no es la `clase` de una línea del asiento (activo, pasivo…), que vive en `contaperu/vocabulario.py`.
 CLASES = ("texto", "importe", "fecha", "numero")
 
 

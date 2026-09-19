@@ -14,7 +14,7 @@ from ..asiento.faltas import CONTADOR, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401 
 from ..drivers import contrato
 from ..modelo import Comprobante, Libro
 from .preparacion import (claves_previas_de, comprobantes_de, con_imputacion, config_aplicada,
-                          errores_de_configuracion, libro_de)
+                          errores_de_configuracion, imputacion_del_documento, libro_de)
 from .preparacion import serie_numero as _serie_numero
 from .seleccion import fuera_de
 
@@ -145,7 +145,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     errores = errores_de_configuracion(configuracion)
     if errores:
         return _sin_configuracion(libro, driver, exige, todos, errores)
-    config = con_imputacion(config_aplicada(configuracion, driver), imputacion, todos)
+    config = con_imputacion(config_aplicada(configuracion, driver), imputacion_del_documento(doc, imputacion, todos), todos)
     detracciones.normalizar(todos, config)
     validar.revisar(todos, libro, previas)
     es_venta = libro.es_venta

@@ -781,6 +781,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -800,6 +801,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -821,6 +823,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -842,6 +845,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -862,6 +866,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -884,6 +889,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -904,6 +910,7 @@
      "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -929,6 +936,7 @@
      "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -956,6 +964,7 @@
      "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -982,6 +991,7 @@
      "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -1007,6 +1017,7 @@
      "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -1034,6 +1045,7 @@
      "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -1060,6 +1072,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -1079,6 +1092,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -1100,6 +1114,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -1121,6 +1136,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -1140,6 +1156,7 @@
     "documento": {
      "tipo": "DR",
      "serie_numero": "9999999999",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -1173,6 +1190,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -1193,6 +1211,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -1215,6 +1234,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -1237,6 +1257,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -1257,6 +1278,7 @@
     "documento": {
      "tipo": "DR",
      "serie_numero": "9999999999",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -1289,6 +1311,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -1307,6 +1330,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -1326,6 +1350,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -1345,6 +1370,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
+     "id_externo": "c08",
      "fecha_emision": "2026-08-19",
      "fecha_vencimiento": "2026-08-19"
     }
@@ -1364,6 +1390,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
+     "id_externo": "c08",
      "fecha_emision": "2026-08-19",
      "fecha_vencimiento": "2026-08-19"
     }
@@ -1383,6 +1410,7 @@
      "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
+     "id_externo": "c09",
      "fecha_emision": "2026-08-20",
      "fecha_vencimiento": "2026-08-20"
     }
@@ -1403,6 +1431,7 @@
      "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
+     "id_externo": "c09",
      "fecha_emision": "2026-08-20",
      "fecha_vencimiento": "2026-08-20"
     }
@@ -1422,6 +1451,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -1441,6 +1471,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -1462,6 +1493,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -1482,6 +1514,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -1502,6 +1535,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -1521,6 +1555,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -1541,6 +1576,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -1561,6 +1597,7 @@
      "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },
@@ -1580,6 +1617,7 @@
      "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },
@@ -1601,6 +1639,7 @@
      "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },
@@ -16600,6 +16639,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -16619,6 +16659,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -16640,6 +16681,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -16661,6 +16703,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -16681,6 +16724,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -16703,6 +16747,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -16723,6 +16768,7 @@
      "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -16748,6 +16794,7 @@
      "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -16775,6 +16822,7 @@
      "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -16801,6 +16849,7 @@
      "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -16826,6 +16875,7 @@
      "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -16853,6 +16903,7 @@
      "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -16879,6 +16930,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -16898,6 +16950,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -16919,6 +16972,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -16940,6 +16994,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -16959,6 +17014,7 @@
     "documento": {
      "tipo": "DR",
      "serie_numero": "9999999999",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -16992,6 +17048,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -17012,6 +17069,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -17034,6 +17092,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -17056,6 +17115,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -17076,6 +17136,7 @@
     "documento": {
      "tipo": "DR",
      "serie_numero": "9999999999",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -17108,6 +17169,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -17126,6 +17188,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -17145,6 +17208,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -17164,6 +17228,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
+     "id_externo": "c08",
      "fecha_emision": "2026-08-19",
      "fecha_vencimiento": "2026-08-19"
     }
@@ -17183,6 +17248,7 @@
      "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
+     "id_externo": "c08",
      "fecha_emision": "2026-08-19",
      "fecha_vencimiento": "2026-08-19"
     }
@@ -17202,6 +17268,7 @@
      "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
+     "id_externo": "c09",
      "fecha_emision": "2026-08-20",
      "fecha_vencimiento": "2026-08-20"
     }
@@ -17222,6 +17289,7 @@
      "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
+     "id_externo": "c09",
      "fecha_emision": "2026-08-20",
      "fecha_vencimiento": "2026-08-20"
     }
@@ -17241,6 +17309,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -17260,6 +17329,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -17281,6 +17351,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -17301,6 +17372,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -17321,6 +17393,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -17340,6 +17413,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -17360,6 +17434,7 @@
      "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -17380,6 +17455,7 @@
      "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },
@@ -17399,6 +17475,7 @@
      "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },
@@ -17420,6 +17497,7 @@
      "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },
@@ -18643,6 +18721,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -18659,6 +18738,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -18677,6 +18757,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-101",
+     "id_externo": "c01",
      "fecha_emision": "2026-08-03",
      "fecha_vencimiento": "2026-09-02"
     },
@@ -18695,6 +18776,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -18712,6 +18794,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -18731,6 +18814,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-102",
+     "id_externo": "c02",
      "fecha_emision": "2026-08-05",
      "fecha_vencimiento": "2026-09-04"
     },
@@ -18748,6 +18832,7 @@
     "documento": {
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -18769,6 +18854,7 @@
     "documento": {
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -18792,6 +18878,7 @@
     "documento": {
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
+     "id_externo": "c03",
      "fecha_emision": "2026-08-12",
      "fecha_vencimiento": "2026-08-12"
     },
@@ -18814,6 +18901,7 @@
     "documento": {
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -18835,6 +18923,7 @@
     "documento": {
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -18858,6 +18947,7 @@
     "documento": {
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
+     "id_externo": "c04",
      "fecha_emision": "2026-08-13",
      "fecha_vencimiento": "2026-08-13"
     },
@@ -18880,6 +18970,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -18896,6 +18987,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -18914,6 +19006,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -18932,6 +19025,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -18949,6 +19043,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "E001-871",
+     "id_externo": "c05",
      "fecha_emision": "2026-08-10",
      "fecha_vencimiento": "2026-08-27"
     },
@@ -18972,6 +19067,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -18989,6 +19085,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -19008,6 +19105,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -19027,6 +19125,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -19045,6 +19144,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F002-45",
+     "id_externo": "c06",
      "fecha_emision": "2026-08-14",
      "fecha_vencimiento": "2026-09-13"
     },
@@ -19067,6 +19167,7 @@
     "documento": {
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -19082,6 +19183,7 @@
     "documento": {
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -19098,6 +19200,7 @@
     "documento": {
      "tipo_cp": "02",
      "serie_numero": "E001-15",
+     "id_externo": "c07",
      "fecha_emision": "2026-08-18",
      "fecha_vencimiento": "2026-08-18"
     }
@@ -19114,6 +19217,7 @@
     "documento": {
      "tipo_cp": "02",
      "serie_numero": "E001-16",
+     "id_externo": "c08",
      "fecha_emision": "2026-08-19",
      "fecha_vencimiento": "2026-08-19"
     }
@@ -19130,6 +19234,7 @@
     "documento": {
      "tipo_cp": "02",
      "serie_numero": "E001-16",
+     "id_externo": "c08",
      "fecha_emision": "2026-08-19",
      "fecha_vencimiento": "2026-08-19"
     }
@@ -19146,6 +19251,7 @@
     "documento": {
      "tipo_cp": "03",
      "serie_numero": "B001-88",
+     "id_externo": "c09",
      "fecha_emision": "2026-08-20",
      "fecha_vencimiento": "2026-08-20"
     }
@@ -19163,6 +19269,7 @@
     "documento": {
      "tipo_cp": "03",
      "serie_numero": "B001-88",
+     "id_externo": "c09",
      "fecha_emision": "2026-08-20",
      "fecha_vencimiento": "2026-08-20"
     }
@@ -19179,6 +19286,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -19195,6 +19303,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -19213,6 +19322,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-90",
+     "id_externo": "c10",
      "fecha_emision": "2026-06-20",
      "fecha_vencimiento": "2026-07-20"
     },
@@ -19230,6 +19340,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -19247,6 +19358,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -19263,6 +19375,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -19280,6 +19393,7 @@
     "documento": {
      "tipo_cp": "01",
      "serie_numero": "F001-103",
+     "id_externo": "c11",
      "fecha_emision": "2026-08-25",
      "fecha_vencimiento": "2026-09-24"
     },
@@ -19297,6 +19411,7 @@
     "documento": {
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },
@@ -19313,6 +19428,7 @@
     "documento": {
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },
@@ -19331,6 +19447,7 @@
     "documento": {
      "tipo_cp": "14",
      "serie_numero": "12345679",
+     "id_externo": "c12",
      "fecha_emision": "2026-08-26",
      "fecha_vencimiento": "2026-09-10"
     },

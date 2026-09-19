@@ -84,13 +84,20 @@ configura, con sus tipos, valores por defecto, patrones y textos, está en el re
 MCP (y en `contaperu configuracion` por la CLI), y el motor valida contra eso lo que recibe antes de generar: una
 clave que no existe se dice, no se ignora.
 
-**La imputación llega aparte, con el `id_externo` del comprobante como llave**: desde la fachada, es el argumento
-`imputacion` de `exportar`, `diagnosticar` y `generar_asiento` (`--imputacion` en la CLI):
+**La imputación va en el documento, con el `id_externo` del comprobante como llave** (1.0): el bloque
+`imputaciones` de la raíz, para que un archivo guardado explique su propio asiento. Sigue valiendo el argumento
+`imputacion` de `exportar`, `diagnosticar` y `generar_asiento` (`--imputacion` en la CLI), para quien ya integraba
+así, y **las dos formas a la vez se rechazan**: adivinar cuál manda sería elegir en silencio la cuenta de un
+comprobante. Por las dos vías es el mismo objeto:
 
     {"fila-123": {"cuenta_contable": "6011020", "centro_costo": "OBRA01", "cuenta_tercero": "4699"},
      "fila-124": {"reparto": [{"importe": "60.00", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
                               {"importe": "40.00", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]}}
 
+- **Con `imputaciones` en el documento, cada comprobante necesita su `id_externo`**, que es la llave: el esquema lo
+  exige con un condicional —un documento sin imputaciones no lo pide— y el motor añade lo que el esquema no puede
+  decir, que ningún `id_externo` esté repetido. **Por el argumento no se exige a todos**, a propósito: ahí se puede
+  imputar 3 de 10 comprobantes y que los otros 7 no traigan id. Es la única asimetría entre las dos vías.
 - **No va en la configuración guardada**: ahí `imputaciones` es un error. La fachada la lee en la puerta
   (`operaciones.con_imputacion`) y se la entrega al núcleo dentro de la configuración aplicada, bajo `imputaciones`.
 - **Lo que no trae** sale de la configuración del entorno: el comprobante no lleva cuentas.
@@ -272,8 +279,11 @@ Las claves que empiezan con `_` son anotaciones: se transportan, se ignoran y nu
 significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la librería):
 
 - **`_exportacion`** — en la respuesta de `exportar`: `{driver, archivo, huella, fecha, comprobantes, motor}`. La **huella** es el
-  sha256 del contenido del asiento que salió: las líneas neutrales, en su orden, **sin el correlativo**,
-  serializadas con `json.dumps(sort_keys=True, ensure_ascii=False, separators=(",", ":"))`. Responde «¿este
+  sha256 del contenido del asiento que salió: las líneas neutrales, en su orden, **sin el `correlativo`, la `clase` ni
+  el `documento.id_externo`**, serializadas con `json.dumps(sort_keys=True, ensure_ascii=False, separators=(",", ":"))`.
+  Los tres quedan fuera porque no cambian el contenido contable: el correlativo arranca en otro número tras un
+  «deshacer», la clase se deriva de la cuenta —que sí entra— y el `id_externo` es el id del sistema que produjo el
+  comprobante, que la aplicación recrea justo al reexportar. Responde «¿este
   contenido ya salió?» —la misma exportación repetida tras un «deshacer» arranca en otro número y lleva la
   misma huella—, que es lo que hace falta para avisar de un lote repetido: el Excel de CONCAR se suma al
   importarlo dos veces. Un registro tributario (el TXT del SIRE) no la lleva: no hay asiento. La `fecha`

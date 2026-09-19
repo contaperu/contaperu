@@ -23,6 +23,10 @@
       "type": "array",
       "items": { "$ref": "#/$defs/comprobante" }
     },
+    "imputaciones": {
+      "description": "Lo que el entorno decidió para cada comprobante, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total o un reparto de la base. No son hechos del comprobante —el hecho no cambia según quién lo contabilice— sino la decisión de quien lo contabiliza, y viajan en el mismo archivo para que el documento explique su propio asiento.",
+      "$ref": "#/$defs/imputaciones"
+    },
     "asiento": {
       "description": "Líneas de diario ya armadas. Opcional: un productor puede entregar solo comprobantes y pedir que se genere el asiento.",
       "type": "array",
@@ -34,6 +38,26 @@
       "additionalProperties": true
     }
   },
+
+  "allOf": [
+    {
+      "description": "Con `imputaciones`, cada comprobante necesita su `id_externo`: es la llave con la que se casan, y sin ella la decisión no se puede aplicar a nada. Va aquí y no en `$defs/comprobante` porque la condición es del documento, y ese `$def` lo reusan otras operaciones. Cuidado al editarlo: como se aplica ADEMÁS del `$ref`, una clave declarada solo aquí sería invisible para el `additionalProperties: false` del comprobante; `id_externo` ya está declarado allí, así que no se añaden `properties` nuevas en este `then`.",
+      "if": {
+        "required": ["imputaciones"],
+        "properties": { "imputaciones": { "minProperties": 1 } }
+      },
+      "then": {
+        "properties": {
+          "comprobantes": {
+            "items": {
+              "required": ["id_externo"],
+              "properties": { "id_externo": { "minLength": 1 } }
+            }
+          }
+        }
+      }
+    }
+  ],
 
   "$defs": {
     "importe": {
@@ -152,6 +176,36 @@
       }
     },
 
+    "imputaciones": {
+      "description": "Por `id_externo` del comprobante, lo que el entorno decidió para él.",
+      "type": "object",
+      "propertyNames": { "minLength": 1 },
+      "additionalProperties": { "$ref": "#/$defs/imputacion" }
+    },
+    "imputacion": {
+      "description": "La decisión contable de un comprobante: su cuenta, su centro de costo, la cuenta del total, o un reparto de la base entre cuentas que sume la base. Lo que no traiga sale de la configuración del entorno.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cuenta_contable": { "type": "string" },
+        "centro_costo": { "type": "string" },
+        "cuenta_tercero": { "type": "string", "description": "La cuenta del total: 42 en compras, 12 en ventas." },
+        "reparto": {
+          "description": "La base repartida entre cuentas. Sus partes suman la base del asiento; el IGV y el total son del documento.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["importe"],
+            "additionalProperties": false,
+            "properties": {
+              "importe": { "$ref": "#/$defs/importe" },
+              "cuenta_contable": { "type": "string" },
+              "centro_costo": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
     "observacion": {
       "type": "object",
       "required": ["codigo", "nivel", "texto"],
@@ -210,6 +264,7 @@
             "tipo": { "type": "string", "description": "Tipo de documento en el vocabulario del ERP destino." },
             "tipo_cp": { "type": "string", "description": "El código SUNAT del documento (Tabla 10). Es el que manda; `tipo` se conserva por compatibilidad. Ausente en la línea de la detracción, cuyo documento no es un comprobante de SUNAT." },
             "serie_numero": { "type": "string" },
+            "id_externo": { "type": "string", "description": "El `id_externo` del comprobante que originó esta línea: el id con el que lo conoce el sistema que lo PRODUJO. Cierra el enlace entre la línea, el comprobante y su imputación sin depender de la serie y el número, que son la identidad tributaria y no la del sistema. No confundir con `id_en_destino`, reservado para el id que le pone el sistema que RECIBE el asiento." },
             "fecha_emision": { "$ref": "#/$defs/fecha" },
             "fecha_vencimiento": { "$ref": "#/$defs/fecha" }
           }

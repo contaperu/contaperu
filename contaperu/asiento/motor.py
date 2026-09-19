@@ -163,8 +163,11 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     sentido_base, sentido_tercero = (normal[::-1] if invierte else normal)
     sub_diario_asiento = "" if neutral else sub_diario(c, config, es_venta)
 
+    # `id_externo`: el id con el que el sistema que PRODUJO el comprobante lo conoce. Cierra el enlace entre la
+    # línea, el comprobante y su imputación sin depender de la serie y el número, que son la identidad tributaria y
+    # no la del sistema (1.0). No es `id_en_destino`, que está reservado para el id del sistema que RECIBE.
     documento = {"tipo": "" if neutral else sigla_documento(c, config), "tipo_cp": c.tipo_cp,
-                 "serie_numero": serie_numero,
+                 "serie_numero": serie_numero, "id_externo": c.id_externo or "",
                  "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
     referencia: dict[str, str] = {}
     if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
@@ -236,6 +239,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                     "serie_numero": serie_numero, "fecha": _iso(emision)}
                 documento_detraccion = {"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
                                         "serie_numero": NUMERO_DETRACCION_PENDIENTE,
+                                        "id_externo": c.id_externo or "",
                                         "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
             linea_detraccion = linea("detraccion", detraido, cuenta_detraccion, sentido_tercero,
                                      f"DETRACCION - {glosa}", contraparte_doc=ruc,
