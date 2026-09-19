@@ -37,7 +37,7 @@ python -m contaperu.cli diagnosticar mi-documento.json
 
 ```json
 {
-  "open_accounting": "0.3",
+  "open_accounting": "1.0",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -231,7 +231,8 @@ adivinar:
   detracción sobre el propio comprobante en vez del documento comodín.
 
 Son campos **opcionales añadidos**, así que no cambian la versión del estándar (ver *Versionado*): un
-consumidor de la 0.3 que no los conozca los ignora.
+consumidor que no los conozca los ignora. La excepción es `clase`, que es obligatoria desde la 1.0 — y es lo que
+permite que el resto pueda degradar.
 
 ---
 
