@@ -54,6 +54,7 @@ from ..errores import ErrorContaperu
 TABLA = "pcge/pcge2026.json"
 
 MODOS = ("renombrar",)
+from . import clases
 
 
 class TablaInvalida(ErrorContaperu, ValueError):
@@ -161,6 +162,13 @@ def adaptar(lineas: list[dict[str, Any]], ruta: str | os.PathLike | None = None,
             if not _aplica(cuenta, m.de):
                 continue
             nueva["cuenta"] = m.a
+            # La clase se deriva de la cuenta, así que al reescribirla hay que rederivarla: si el mapeo cruza de
+            # elemento —una 6 que pasa a una 9, por ejemplo— la línea saldría diciendo una clase que su cuenta
+            # contradice, y es justo lo que el motor promete rechazar. Si la cuenta adaptada cae en el elemento 8 o
+            # el 0, que no tienen clase, se deja la que traía: aquí no se puede pedir nada a nadie, y es el informe
+            # el que dice qué se tocó.
+            if nueva.get("clase") is not None and clases.clase_de(m.a):
+                nueva["clase"] = clases.clase_de(m.a)
             informe.aplicados.append({
                 "de": cuenta, "a": nueva["cuenta"], "modo": m.modo, "cita": m.cita,
                 "glosa": nueva.get("glosa", ""),

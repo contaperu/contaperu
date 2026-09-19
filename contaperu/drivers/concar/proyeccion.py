@@ -21,6 +21,7 @@ from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
 from ...asiento.motor import cabecera_de, glosa_de, lineas_del_comprobante  # noqa: F401  (glosa_de: nombre de la 0.10)
 from ..kit import Opciones, celdas
+from ...pcge import clase_de
 from ...igv import tasa_calculada
 from ...modelo import CENTIMO, Comprobante
 from ..contrato import centro_en_anexo
@@ -190,6 +191,9 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
         cuenta=_texto_de(fila.get("K")),
         debe_haber=_texto_de(fila.get("N")),
         importe=_importe_exacto(fila.get("O")),
+        # CONCAR no lleva una columna de clase: no le hace falta, porque su plan de cuentas vive en su sistema. Al
+        # volver a línea neutral se deriva de la cuenta, igual que al armarla, o el documento no validaría.
+        clase=clase_de(_texto_de(fila.get("K"))),
         sub_diario=_texto_de(fila.get("B")),
         correlativo=_texto_de(fila.get("C")),
         fecha=_texto_de(fila.get("D")),

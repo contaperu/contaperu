@@ -306,7 +306,7 @@ def test_el_registro_exige_la_cuenta_antes_de_escribir_y_diagnosticar_lo_dice(co
 
     d = api.diagnosticar(doc, driver="registro")
     assert d["exige"] == ["cuenta_contable"] and d["listo_para_exportar"] is False
-    assert set(d["faltantes"]) == {"sin_cuenta", "reparto_que_no_cuadra", "sin_centro"}
+    assert set(d["faltantes"]) == {"sin_cuenta", "sin_clase", "reparto_que_no_cuadra", "sin_centro"}
     assert d["por_que_no"] == [f"{len(doc['comprobantes'])} sin cuenta contable"] and d["sub_diarios"] == {}
     con_centros = api.diagnosticar(doc, configuracion=CONTAB_CON_CENTROS, driver="registro")
     assert con_centros["faltantes"]["sin_centro"] and con_centros["listo_para_exportar"] is True

@@ -73,6 +73,9 @@ COLUMNAS_DE_LINEA: tuple[ColumnaDeLinea, ...] = tuple(
         ("rol", "rol", "texto"),
         ("documento.tipo_cp", "doc_tipo_cp", "texto"),
         ("referencia.tipo_cp", "ref_tipo_cp", "texto"),
+        # La clase de la cuenta (1.0): lo único que un ERP de fuera entiende sin conocer el PCGE. También al final.
+        ("clase", "clase", "texto"),
+        ("documento.id_externo", "doc_id_externo", "texto"),
     ))
 # La forma de la 0.10, pares (ruta, cabecera), para quien la lea: se conserva durante la 1.x.
 COLUMNAS: list[tuple[str, str]] = [(columna.ruta, columna.cabecera) for columna in COLUMNAS_DE_LINEA]

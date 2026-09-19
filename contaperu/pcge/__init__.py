@@ -13,9 +13,10 @@ Dos cosas distintas viven aqui:
 `(mapeos, datos)`; `pcge.cargar_catalogo()` lee la norma y devuelve su diccionario. Hasta el 12-sep-2026 las dos se
 llamaban `cargar`, y confundirlas no reventaba: devolvia otra cosa.
 """
-from . import catalogo
+from . import catalogo, clases
 from .adaptar import Informe, Mapeo, TablaInvalida, adaptar, cargar_equivalencias
 from .catalogo import buscar, cargar_catalogo, existe, nombre_de, resolver
+from .clases import ELEMENTOS, clase_de, elemento
 
-__all__ = ["Informe", "Mapeo", "TablaInvalida", "adaptar", "cargar_equivalencias", "catalogo",
-           "buscar", "cargar_catalogo", "existe", "nombre_de", "resolver"]
+__all__ = ["ELEMENTOS", "Informe", "Mapeo", "TablaInvalida", "adaptar", "cargar_equivalencias", "catalogo",
+           "buscar", "cargar_catalogo", "clase_de", "clases", "elemento", "existe", "nombre_de", "resolver"]

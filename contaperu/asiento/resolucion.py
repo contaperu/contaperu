@@ -15,6 +15,7 @@ from typing import Any
 from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..configuracion import CONFIG_POR_DEFECTO, por_defecto
 from ..igv import base_imputable
+from ..pcge import clase_de as _clase_de
 from ..modelo import Comprobante, Libro, a_decimal
 from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO
 from .faltas import FALTAS, SinCorrelativo, SinSigla
@@ -226,6 +227,14 @@ def comprobantes_sin_cuenta(comprobantes: list[Comprobante], config: dict, es_ve
     return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, config, es_venta))]
 
 
+def comprobantes_sin_clase(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
+    """Las filas imputadas a una cuenta cuyo elemento del PCGE no tiene clase contable: el 8 (saldos intermediarios
+    de gestión) y el 0 (cuentas de orden). Se mira la cuenta de cada parte de la base, como `comprobantes_sin_cuenta`:
+    basta con que una la tenga para que el asiento no se pueda armar."""
+    return [c for c in comprobantes
+            if any(cuenta and not _clase_de(cuenta) for cuenta, _, _ in partes_de(c, config, es_venta))]
+
+
 def comprobantes_sin_centro(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
     """Las filas a las que les falta un centro de costo que SÍ hace falta.
 
@@ -284,6 +293,7 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
         salida["reparto_no_admitido"] = con_reparto(comprobantes, config)
     if "cuenta_contable" in exige:
         salida["sin_cuenta"] = comprobantes_sin_cuenta(comprobantes, config, es_venta)
+        salida["sin_clase"] = comprobantes_sin_clase(comprobantes, config, es_venta)
         salida["reparto_que_no_cuadra"] = repartos_que_no_cuadran(comprobantes, config, es_venta)
     if "centro_costo" in exige:
         salida["sin_centro"] = comprobantes_sin_centro(comprobantes, config, es_venta)

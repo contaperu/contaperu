@@ -204,7 +204,8 @@ def test_el_csv_esta_registrado_como_driver():
 
 
 def test_el_csv_lleva_el_rol_y_los_codigos_sunat():
-    """B5: lo que un driver necesita para no adivinar sale en tres columnas al final, llenas."""
+    """B5: lo que un driver necesita para no adivinar sale en columnas al final, llenas. La 1.0 suma dos más, `clase`
+    y el id del comprobante, y siguen yendo al final para no mover las columnas de siempre."""
     import csv
     import io
 
@@ -215,6 +216,10 @@ def test_el_csv_lleva_el_rol_y_los_codigos_sunat():
     texto = api.exportar(documento, driver="csv", configuracion={"cuentas": {"gasto": "659999"},
                                                                   "usa_centros_costo": False})["texto"]
     filas = list(csv.DictReader(io.StringIO(texto.lstrip("\ufeff")), delimiter=";"))
-    assert list(filas[0])[-3:] == ["rol", "doc_tipo_cp", "ref_tipo_cp"]
+    assert list(filas[0])[-5:] == ["rol", "doc_tipo_cp", "ref_tipo_cp", "clase", "doc_id_externo"]
     assert [f["rol"] for f in filas[:3]] == ["principal", "igv", "tercero"]
+    assert [f["clase"] for f in filas[:3]] == ["gasto", "pasivo", "pasivo"]
     assert all(f["doc_tipo_cp"] for f in filas) and {f["ref_tipo_cp"] for f in filas} == {""}
+    # Este golden no trae `id_externo` en sus comprobantes, así que la columna sale vacía: es la prueba de que el
+    # enlace es opcional mientras no haya imputaciones en el documento.
+    assert {f["doc_id_externo"] for f in filas} == {""}

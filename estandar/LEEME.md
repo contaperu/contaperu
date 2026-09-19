@@ -205,6 +205,14 @@ Desde la librería 0.7 el asiento **nace** en estas líneas y cada sistema conta
 ellas (el Excel de CONCAR incluido). Por eso cada línea dice lo que un driver necesita para traducir sin
 adivinar:
 
+- **`clase`** — qué es la cuenta de esta línea: `activo`, `pasivo`, `patrimonio`, `ingreso` o `gasto`.
+  **Obligatoria desde la 1.0**, y derivada del **primer dígito de la cuenta**, que es el elemento del PCGE: 1, 2 y 3
+  activo; 4 pasivo; 5 patrimonio; 6 y 9 gasto; 7 ingreso. No sale del rol — en una compra de mercadería el rol es
+  `principal` y la línea es un activo—, y los elementos 8 y 0 no tienen clase, así que una imputación a una de esas
+  cuentas no genera asiento. Son los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, y por eso son lo
+  único que un ERP de fuera entiende sin conocer el PCGE. **Con `clase`, `debe_haber` e `importe` se puede
+  contabilizar una línea aunque no se conozca su `rol`**: es la regla de degradación que permite que el catálogo de
+  roles crezca sin romper a nadie.
 - **`rol`** — qué papel cumple: `principal` (el gasto en compras, el ingreso en ventas), `igv`,
   `retencion_4ta`, `tercero` (el proveedor o el cliente), `detraccion_tercero` y `detraccion`. Un ERP
   que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su cuenta, que la elige

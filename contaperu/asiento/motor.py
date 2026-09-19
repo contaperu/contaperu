@@ -26,6 +26,7 @@ from .._obsoleto import reexportar
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
 from ..configuracion import CONFIG_POR_DEFECTO
 from ..detracciones import monto_detraccion, tasa_detraccion
+from .. import pcge
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .configuracion import NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
@@ -181,7 +182,8 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     def linea(rol: str, importe: Decimal, cuenta_linea: str, sentido: str, glosa_linea: str = glosa,
               **extra) -> LineaDiario:
         campos = dict(cuenta=cuenta_linea, debe_haber=sentido, importe=str(Decimal(importe).quantize(CENTIMO)),
-                      rol=rol, sub_diario=sub_diario_asiento, correlativo=correlativo, fecha=_iso(fecha_asiento),
+                      rol=rol, clase=pcge.clase_de(cuenta_linea), sub_diario=sub_diario_asiento,
+                      correlativo=correlativo, fecha=_iso(fecha_asiento),
                       moneda=moneda, tipo_cambio=tc, glosa=glosa_linea, documento=_limpio(documento),
                       referencia=_limpio(referencia), tasa_igv=tasa)
         campos.update(extra)

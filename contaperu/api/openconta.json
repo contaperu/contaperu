@@ -1201,7 +1201,8 @@
     "required": [
      "cuenta",
      "debe_haber",
-     "importe"
+     "importe",
+     "clase"
     ],
     "additionalProperties": false,
     "properties": {
@@ -1228,6 +1229,10 @@
      },
      "importe": {
       "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "clase": {
+      "description": "Qué es la cuenta de esta línea: los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, así que un ERP de fuera sabe qué hacer con ella sin conocer el PCGE. Se deriva del primer dígito de la cuenta (el elemento del PCGE) y no del rol: en una compra de mercadería el rol es `principal` y la línea es un activo. Los valores están en el catálogo `clases` del estándar.",
+      "type": "string"
      },
      "rol": {
       "enum": [

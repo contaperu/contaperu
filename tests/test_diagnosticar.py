@@ -227,7 +227,7 @@ def test_una_sola_tabla_de_faltas():
     from contaperu.drivers import concar, contrato
 
     assert [f.clave for f in asi.FALTAS] == ["sin_sigla", "sin_codigo_de_moneda", "reparto_no_admitido",
-                                            "sin_cuenta", "reparto_que_no_cuadra", "sin_centro",
+                                            "sin_cuenta", "sin_clase", "reparto_que_no_cuadra", "sin_centro",
                                             "sin_correlativo", "no_cabe"]
     for falta in asi.FALTAS:
         assert falta.texto and falta.titulo and falta.pedir_a == diag.PEDIR_A[falta.clave]

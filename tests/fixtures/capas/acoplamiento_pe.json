@@ -21,17 +21,20 @@
  "contaperu.asiento.motor": [
   "contaperu.catalogos",
   "contaperu.detracciones",
-  "contaperu.igv"
+  "contaperu.igv",
+  "contaperu.pcge"
  ],
  "contaperu.asiento.resolucion": [
   "contaperu.catalogos",
-  "contaperu.igv"
+  "contaperu.igv",
+  "contaperu.pcge"
  ],
  "contaperu.drivers": [
   "contaperu.drivers.sire"
  ],
  "contaperu.drivers.concar.proyeccion": [
-  "contaperu.igv"
+  "contaperu.igv",
+  "contaperu.pcge"
  ],
  "contaperu.drivers.contasis.proyeccion": [
   "contaperu.igv"

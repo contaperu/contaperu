@@ -247,6 +247,7 @@
   "tipos_sin_sigla": ""
  },
  "contaperu.pcge": {
+  "ELEMENTOS": "",
   "Informe": "",
   "Mapeo": "",
   "TablaInvalida": "",
@@ -255,6 +256,9 @@
   "cargar_catalogo": "",
   "cargar_equivalencias": "",
   "catalogo": "",
+  "clase_de": "",
+  "clases": "",
+  "elemento": "",
   "existe": "",
   "nombre_de": "",
   "resolver": ""

@@ -99,6 +99,18 @@ class SinCentro(NoExportable):
                          comprobantes)
 
 
+class SinClase(NoExportable):
+    """Comprobantes imputados a una cuenta cuyo elemento del PCGE no tiene clase contable: el 8 (saldos
+    intermediarios de gestión) y el 0 (cuentas de orden). Son de cierre y de control, no de compras ni de ventas, así
+    que una imputación a ellas es casi seguro un error: se dice en vez de inventarle una clase a la línea."""
+
+    clave = "sin_clase"
+
+    def __init__(self, comprobantes: list[Comprobante]):
+        super().__init__(f"{len(comprobantes)} comprobante(s) con una cuenta de un elemento sin clase contable "
+                         "(el 8 y el 0 del PCGE no la tienen)", comprobantes)
+
+
 class SinCorrelativo(NoExportable):
     """Sub-diarios presentes sin correlativo de partida: el asiento no se puede numerar."""
 
@@ -128,6 +140,9 @@ FALTAS: tuple[Falta, ...] = (
           "con la base repartida entre varias cuentas, que el sistema de destino no admite", CONTADOR,
           "Reparto que el destino no admite"),
     Falta("sin_cuenta", "cuenta_contable", SinCuenta, "sin cuenta contable", CONTADOR, "Sin cuenta contable"),
+    Falta("sin_clase", "cuenta_contable", SinClase,
+          "con una cuenta de un elemento del PCGE que no tiene clase contable (el 8 y el 0)", CONTADOR,
+          "Cuenta sin clase contable"),
     Falta("reparto_que_no_cuadra", "cuenta_contable", RepartoNoCuadra,
           "con un reparto entre cuentas que no suma la base del asiento", CONTADOR, "Reparto que no suma la base"),
     Falta("sin_centro", "centro_costo", SinCentro,

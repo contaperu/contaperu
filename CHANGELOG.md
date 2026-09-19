@@ -7,6 +7,22 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 ## [Sin publicar]
 
 ### Añadido
+- **`clase` en cada línea del asiento** —`activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto`—, **obligatoria** desde
+  `open-accounting` 1.0. Es lo único que un ERP de fuera entiende sin conocer el PCGE: hasta ahora los roles
+  `principal` y `tercero` solo significaban algo mirando `libro.tipo` —en una compra `principal` es el gasto y en una
+  venta el ingreso—, y la línea que recibe un sistema de fuera es justo eso, una línea suelta. Son los cinco valores
+  idénticos en QuickBooks, Xero, Merge y Rutter.
+- **La clase sale del primer dígito de la cuenta**, que es el elemento del PCGE (`contaperu/pcge/clases.py`): 1, 2 y 3
+  son `activo`; el 4, `pasivo`; el 5, `patrimonio`; el 6 y el **9** —quien imputa por destino y no por naturaleza—,
+  `gasto`; el 7, `ingreso`. **No sale del rol**, y el caso que lo prueba es diario: una compra de mercadería imputada
+  a `201101` tiene `rol: principal` y es un **activo**; deducirla del rol daría `gasto` en miles de facturas al mes.
+  Consecuencia: el IGV (`401111`, elemento 4) es `pasivo`, y con `debe_haber: D` la línea dice exactamente lo que pasa
+  —reduce un tributo por pagar, que es el crédito fiscal—; llamarlo `activo` al debe afirmaría otra cosa.
+- **Los elementos 8 y 0 no tienen clase, y no se fuerzan**: son de cierre y de control. Una imputación a una de esas
+  cuentas no genera asiento y se dice con su motivo (`sin_clase` en la tabla de faltas, que se le pide al contador
+  porque es quien eligió la cuenta). Las cinco clases siguen siendo cinco, que es lo que las hace universales.
+- **El CSV gana dos columnas al final**, `clase` y `doc_id_externo`, sin mover las de siempre. **Cambia los bytes de
+  esa salida**; el Excel de CONCAR y el registro de CONTASIS no cambian ni una celda.
 - **La imputación viaja DENTRO del documento** (decisión de John del 18-sep-2026), en el bloque `imputaciones` de la
   raíz del estándar, llaveado por el `id_externo` de cada comprobante: un archivo guardado explica su propio asiento,
   que antes no podía porque las cuentas llegaban solo como argumento de la llamada. **El argumento `imputacion` sigue
@@ -34,6 +50,12 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   también: los catálogos de SUNAT se copian de la norma.
 
 ### Cambiado
+- **`pcge.adaptar` re-deriva la clase al reescribir una cuenta.** Antes solo cambiaba el número, así que un mapeo que
+  cruzara de elemento dejaba la línea con una clase que su cuenta contradice — justo lo que el motor promete rechazar,
+  y lo que sostiene que la clase quede fuera de la huella.
+- **La vuelta desde el Excel de CONCAR también deriva la clase** (`drivers/concar/desde_fila`): CONCAR no lleva una
+  columna de clase —no le hace falta, su plan de cuentas vive en su sistema—, así que al volver a línea neutral se
+  deriva de la cuenta. Sin eso, un documento reconstruido desde un archivo importado no validaría.
 - **El driver neutral se llama `asiento_neutral`** (antes `open_accounting`, que era el nombre del estándar y hacía
   tropezar: uno es el formato que entra y el otro una de las salidas). Cambian el valor de `driver`, el formato
   `asiento_neutral_json` y el nombre del archivo que produce. Nada publicado llevó el nombre viejo. **La clave

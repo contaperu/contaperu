@@ -238,7 +238,7 @@
     "linea": {
       "description": "Una línea de diario, sin nada de ningún ERP. Es lo que cualquier sistema contable sabe recibir.",
       "type": "object",
-      "required": ["cuenta", "debe_haber", "importe"],
+      "required": ["cuenta", "debe_haber", "importe", "clase"],
       "additionalProperties": false,
       "properties": {
         "sub_diario": { "type": "string", "description": "Libro auxiliar donde cae el asiento. Cada empresa usa los suyos." },
@@ -247,6 +247,10 @@
         "cuenta": { "type": "string", "description": "Cuenta del plan contable del contribuyente." },
         "debe_haber": { "enum": ["D", "H"] },
         "importe": { "$ref": "#/$defs/importe" },
+        "clase": {
+          "description": "Qué es la cuenta de esta línea: los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, así que un ERP de fuera sabe qué hacer con ella sin conocer el PCGE. Se deriva del primer dígito de la cuenta (el elemento del PCGE) y no del rol: en una compra de mercadería el rol es `principal` y la línea es un activo. Los valores están en el catálogo `clases` del estándar.",
+          "type": "string"
+        },
         "rol": {
           "enum": ["principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion"],
           "description": "Qué papel cumple la línea en el asiento: el gasto o ingreso, el IGV, la retención de 4ta, el proveedor o cliente, y las dos líneas de la detracción. Un driver la encuentra por su rol, no por su cuenta."
