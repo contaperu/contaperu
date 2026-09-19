@@ -969,9 +969,32 @@ con `rol: "percepcion"`, que hoy no existe, la sigue contabilizando: es un `acti
 | **`rol` como catálogo** | Sale del enum del esquema y pasa a un catálogo publicado, con su versión, junto a los catálogos de SUNAT | **0.4**: el esquema deja de rechazar un rol que todavía no existía |
 | **`impuesto` y `plan_de_cuentas`** | El bloque de impuesto por línea —el único papel que todos los estándares ponen ahí— y el diccionario de cuentas del emisor | Opcionales: entran en la 0.4, o después con su caso |
 
-**Y el motor puede rellenar `clase` solo**, porque la deduce del rol y del libro: un documento 0.3 que llegue sin
-ella se completa al vuelo, así que nadie tiene que reescribir lo que ya tiene guardado. El motor acepta las dos
-versiones durante toda la 1.x.
+### De dónde sale la `clase` (John, 18-sep-2026)
+
+El primer borrador de esta sección decía que el motor la deduce **del rol y del libro**. No sirve, y se comprueba en
+un caso diario: una **compra de mercadería** imputada a `201101` devuelve hoy `rol: principal`, y esa línea **no es
+un gasto, es un activo**. Lo mismo una compra de activo fijo a `333101`. Deducirla del rol daría `gasto` en miles de
+facturas al mes.
+
+**La clase sale de la cuenta, salvo en las líneas de control:**
+
+| Líneas | De dónde sale su `clase` | Por qué |
+|---|---|---|
+| La **principal** y las del **reparto** | **De la cuenta.** El PCGE la da por su elemento, y el motor ya resuelve cualquier divisionaria a su cuenta madre (`buscar_cuenta_pcge`) | Es la cuenta que eligió el usuario en la imputación, y solo ella sabe si compró un gasto, una mercadería o una máquina |
+| El **IGV**, el **tercero**, la **detracción** y la **retención** | **Del rol y del libro** | Sus cuentas no las elige nadie: las pone la configuración de la empresa, y su papel es el mismo siempre |
+
+Eso pide **una pieza que hoy no existe: la clase de cada cuenta en el catálogo del PCGE**, que trae el código, el
+nombre y su cuenta madre, pero no su elemento. Es un dato de la norma, no una opinión, así que entra como los demás
+catálogos de SUNAT: con su fuente y su versión.
+
+**Y `clase` no contradice a `plan_de_cuentas`: responden preguntas distintas.** El diccionario dice qué es esa cuenta
+**en el plan del emisor**; la línea dice qué hace **en esta operación**. Para casi todas coinciden, y para el IGV de
+compras no: `40111` es una cuenta del elemento 4 —pasivo— usada al debe como crédito fiscal, y la línea la declara
+`activo` porque eso es lo que el que recibe necesita saber. Cuando difieran, **manda la línea**: el diccionario es
+una ayuda opcional, nunca la fuente.
+
+**Y con eso el motor puede rellenar `clase` solo**: un documento 0.3 que llegue sin ella se completa al vuelo, así
+que nadie tiene que reescribir lo que ya tiene guardado. El motor acepta las dos versiones durante toda la 1.x.
 
 ### Y lo mismo con `libro.tipo`: los tres niveles de cambio
 
@@ -1003,6 +1026,13 @@ De ahí sale la regla de versionado que este documento propone escribir en el es
 
 Con esa regla, la 0.4 es la **última versión que hace falta por un buen tiempo**: después, los libros nuevos, los
 roles nuevos y hasta el banco entran sin tocarla.
+
+**Pero los dos catálogos no degradan igual, y conviene decirlo.** Un `rol` desconocido tiene red: la línea se
+contabiliza con `clase`, `debe_haber` e `importe`. Un **`libro.tipo` desconocido no tiene ninguna**: quien recibe un
+registro que no conoce no puede adivinar qué hacer con él. Su degradación es otra, y es la del destino: **el driver
+que no declara ese libro en sus `FORMATOS` lo rechaza limpio**, diciendo qué libros lleva, en vez de intentar
+escribirlo. Un valor de catálogo que nadie declara no es un error del documento: es un destino que no sirve para
+ese libro.
 
 ### Lo que se descartó, y por qué
 
@@ -1109,7 +1139,11 @@ de control que la factura nunca menciona.
 
 **De ahí sale la regla que falta escribir: el asiento es derivado.** Se obtiene del comprobante, más la imputación,
 más la configuración, y siempre da lo mismo. Si un documento llega con los tres bloques y el asiento **no
-corresponde** a los otros dos, el motor lo dice en vez de elegir en silencio. Es la misma idea que Xero lleva al
+corresponde** a los otros dos, el motor lo dice en vez de elegir en silencio.
+
+**Y comprobarlo no pide nada nuevo:** el motor ya calcula una **huella** del asiento, y la calcula a propósito
+*excluyendo el correlativo*, que es lo único que cambia entre dos exportaciones del mismo mes. Rehacer el asiento y
+comparar huellas es exactamente esa regla, con el mecanismo que ya está escrito y probado. Es la misma idea que Xero lleva al
 extremo con un libro diario de solo lectura: lo que se escribe es el hecho y la decisión; el asiento se calcula.
 
 ### El centro de costo va en todas las líneas
@@ -1504,7 +1538,8 @@ versión porque `clase` pasa a ser obligatoria y porque la clave `open_accountin
 | El `$id` canónico, que cuelga del tag del estándar | `.../open-accounting-0.3/...` | `.../open-accounting-0.4/...`, con su propio tag |
 
 **Lo que no cambia de significado para nadie:** un documento 0.3 dice exactamente lo mismo en la 0.4, y **el motor
-rellena `clase` solo**, porque la deduce del rol y del libro. Acepta las dos versiones durante toda la 1.x.
+rellena `clase` solo** —de la cuenta en la línea principal, del rol y del libro en las de control, según «De dónde
+sale la `clase`»—. Acepta las dos versiones durante toda la 1.x.
 
 **Y el tercer libro, el de honorarios, sigue descartado** (John, 18-sep-2026): se quedan en el libro de compras y
 qué registro los lleva lo decide cada destino, como hoy. El porqué y lo que costaba, en «Por qué no hay un libro de
@@ -1525,7 +1560,63 @@ honorarios».
 
 ---
 
-## 16 · Lo que ya quedó decidido
+## 16 · Gobernanza y conformidad: cómo vive el estándar fuera de aquí
+
+Mientras `rol` y `libro.tipo` eran enums cerrados, quien quisiera un valor nuevo tenía que abrir un PR y discutirlo.
+**Al sacarlos a catálogos abiertos, esa conversación desaparece — y hay que reponerla a propósito**, o cada ERP
+inventará sus propios roles y el estándar dejará de serlo en un año. Son las dos preguntas que hace cualquiera antes
+de apostar años de integración, y hoy no tienen respuesta escrita.
+
+### Cómo comprueba un tercero que emite bien
+
+Hoy hay dos piezas y falta la tercera:
+
+| Pieza | Qué comprueba | Estado |
+|---|---|---|
+| `diagnosticar` | Un documento concreto: qué bloquea, qué falta y a quién pedírselo | **Existe** |
+| `contaperu verificar-driver` | Un driver propio contra el contrato, antes de registrarlo | **Existe** |
+| **La batería de conformidad** | Que lo que un sistema **produce** es un documento correcto | **Falta** |
+
+La batería es un juego de casos con su documento esperado: para cada uno, los datos de entrada y el
+`open-accounting` que debe salir. Un ERP la corre contra su propio código y sabe si cumple, **sin escribirle a
+nadie**. Es lo que separa «integrar en una tarde» de «abrir un hilo de correos».
+
+Qué tendría que cubrir, por lo que este documento ya descubrió que se equivoca:
+
+- Los cuatro ejemplos de «Cuatro ejemplos», que ya están y ya se validan.
+- **El recibo por honorarios con el importe en `inafecto`**, que puesto en `base_gravada` sale observado.
+- **La factura en dólares sin tipo de cambio**, que bloquea.
+- **La nota de crédito con sus importes en positivo**, y en su propia moneda.
+- **La ausencia como respuesta**: sin `detraccion: false`, sin ceros de relleno, sin claves de otro sistema.
+- **Cada rol con su clase**, recorriendo el catálogo entero.
+
+Vive en el repositorio, con los documentos y sus salidas esperadas, y se publica con el tag del estándar: **la
+batería de la 0.4 se cita como se cita el esquema**.
+
+### Quién decide qué entra al catálogo
+
+Un catálogo abierto necesita tres cosas escritas, y ninguna es burocracia:
+
+| Qué | Propuesta |
+|---|---|
+| **Quién aprueba** | John, mientras el repositorio sea suyo. Dicho, no sobreentendido: quien integra necesita saber a quién le pregunta |
+| **Cómo se propone** | Un issue con el caso real detrás —un archivo de verdad de un sistema de verdad—, que es la regla que ya gobierna el estándar |
+| **Qué se responde** | Si entra, entra como valor de catálogo con su fecha; si no, se dice por qué. Un catálogo que crece sin criterio es un enum con más pasos |
+
+Y una regla que protege al que ya integró: **un valor publicado no se quita ni cambia de significado**. Si resulta
+equivocado, se marca como obsoleto y entra otro al lado — que es lo que hacen las listas de códigos de ISO 20022 y
+de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
+
+### Lo que no se gobierna
+
+Los catálogos de **SUNAT** —tipos de comprobante, documentos de identidad, monedas, detracciones, el PCGE— no se
+proponen ni se discuten: se copian de la norma, con su fuente y su fecha. Cuando SUNAT cambia una tasa o añade un
+código, el catálogo lo refleja y ya. Lo que se gobierna es solo lo que este estándar inventa: los **roles**, las
+**clases** y los **tipos de libro**.
+
+---
+
+## 17 · Lo que ya quedó decidido
 
 **Cuatro se cayeron solas** en cuanto el cuerpo de la llamada dejó de ser un envoltorio y pasó a ser el documento:
 
@@ -1605,32 +1696,41 @@ de las 36 del estándar, que se quedan.
 
 ---
 
-## 17 · Lo que falta decidir
+## 18 · Lo que falta decidir
 
-Siete, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero que apareció al probar el esquema.
+Nueve, y ninguna es de arquitectura: son de alcance, salvo una que es un agujero que apareció al probar el esquema.
 
-1. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
-2. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver neutral: quien recibe el
+1. **Si `clase` es obligatoria también para quien la manda, o solo para quien la escribe.** Que el motor la rellene
+   es el motor siendo generoso, no el estándar: un tercero que emita `asiento[]` sin `clase` sería rechazado por el
+   esquema. La salida clásica es **estricto al emitir y permisivo al aceptar** —obligatoria en lo que el motor
+   escribe, opcional en lo que lee—, que es lo que hace que un estándar sobreviva a sus propios productores.
+2. **Si `id_externo` pasa a ser obligatorio cuando el documento trae `imputaciones`.** Hoy es opcional, pero con las
+   imputaciones llaveadas por él y `documento.id_externo` en la línea se vuelve estructural: **un comprobante sin
+   `id_externo` no se puede imputar** —el motor ya lo rechaza—, así que el esquema debería exigirlo en ese caso en
+   vez de dejar que falle más tarde.
+
+3. **Rechazar la clave desconocida** endurece la API para quien hoy, desde Python, manda campos de más.
+4. **Si `imputaciones` viaja también de vuelta**, en la respuesta y en la salida del driver neutral: quien recibe el
    documento podría querer saber con qué cuentas se armó el asiento que lleva al lado.
-3. **Si el archivo del botón lleva también los comprobantes.** Hoy sale con `libro` y `asiento`, porque quien lo pide
+5. **Si el archivo del botón lleva también los comprobantes.** Hoy sale con `libro` y `asiento`, porque quien lo pide
    ya tiene los hechos. Un ERP de fuera que reciba ese archivo sí querría los dos, y entonces el archivo pasa a ser
    un documento completo del estándar en vez de solo el asiento.
-4. **Los importes en texto son recomendación, no validación.** El estándar dice que van en texto exacto, «porque la
+6. **Los importes en texto son recomendación, no validación.** El estándar dice que van en texto exacto, «porque la
    contabilidad no perdona el céntimo que se pierde», pero el esquema también admite números sin límite de
    decimales: probado, deja pasar `118.005`. O el esquema exige texto, o acepta números pero de dos decimales. Hoy
    la regla que más se repite en este documento es la única que nadie comprueba.
-5. **Si `impuesto` y `plan_de_cuentas` entran con la 0.4 o esperan su caso.** Los dos son opcionales y ninguno hace
+7. **Si `impuesto` y `plan_de_cuentas` entran con la 0.4 o esperan su caso.** Los dos son opcionales y ninguno hace
    falta para que `clase` funcione; entrar juntos ahorra una versión, y esperar respeta la regla de que el estándar
    crece con un archivo real detrás.
-6. **El centro de costo de las líneas comunes cuando hay reparto.** Si una factura se divide entre dos obras,
+8. **El centro de costo de las líneas comunes cuando hay reparto.** Si una factura se divide entre dos obras,
    el IGV, el proveedor y la detracción no son de una sola: o van sin centro, o se reparten en proporción a la
    base y el asiento gana líneas que hoy no tiene. La propuesta es dejarlas sin centro.
-7. **Cuándo se publica la 0.4.** Con `clase` y el catálogo de roles hay que decidir si sale junto con la 1.1.0 del
+9. **Cuándo se publica la 0.4.** Con `clase` y el catálogo de roles hay que decidir si sale junto con la 1.1.0 del
    motor —que ya arrastra el renombrado del driver— o después, con su pre-release y su guía de migración.
 
 ---
 
-## 18 · Cómo se implementa
+## 19 · Cómo se implementa
 
 Este documento es investigación y borrador, pero lo que propone se ejecuta por partes, con la batería verde en cada
 una y el OK de John entre ellas. El orden importa: **la parte 2 tiene fecha límite** y la 3 arrastra una versión del
@@ -1660,7 +1760,8 @@ archivos, la mayoría tests y fixtures, y hay que distinguirlas de las 36 del es
 
 | Qué | Dónde |
 |---|---|
-| `clase` obligatoria en cada línea | el esquema y `contaperu/asiento/motor.py`, que la deduce del rol y del libro |
+| `clase` obligatoria en cada línea | el esquema y `contaperu/asiento/motor.py`: de la cuenta en la principal y el reparto, del rol y del libro en las de control |
+| **La clase de cada cuenta en el catálogo del PCGE**, que hoy solo trae código, nombre y cuenta madre | `contaperu/datos/`, servido por `api.buscar_cuenta_pcge` |
 | `rol` y `libro.tipo` validados contra un catálogo publicado, no contra un enum | el esquema, `contaperu/modelo.py`, `contaperu/drivers/contrato.py` |
 | Los catálogos `roles`, `clases` y `tipos_de_libro`, con su versión | `contaperu/datos/`, servidos por `api.catalogos_*` |
 | La regla de degradación y la de versionado en tres niveles | `estandar/LEEME.md` |
@@ -1673,7 +1774,17 @@ idéntico.
 **Y antes del tag:** `contaperu/_version.py`, la sección del CHANGELOG, una pre-release `rc` y la guía de migración,
 como manda el proyecto para una versión mayor del estándar.
 
-### Parte 4 · Lo opcional, cuando tenga su caso
+### Parte 4 · La batería de conformidad y la gobernanza
+
+Con `rol` y `libro.tipo` en catálogos abiertos, las dos dejan de ser opcionales: sin batería nadie puede comprobar
+que emite bien, y sin gobernanza cada ERP inventa sus roles. Lo que hay que escribir está en «Gobernanza y
+conformidad»; lo que hay que construir son los casos con su documento esperado, publicados con el tag del estándar,
+y las tres líneas de quién aprueba, cómo se propone y qué se responde.
+
+**Los tests que la fijan:** la batería corre en CI contra el propio motor —si el motor no pasa su propia
+conformidad, no la pasa nadie— y cada caso nuevo del documento entra en ella.
+
+### Parte 5 · Lo opcional, cuando tenga su caso
 
 El bloque `impuesto` en la línea, el diccionario `plan_de_cuentas`, y propagar el centro de costo a todas las líneas
 del asiento neutral. Esto último **cambia una salida** —la del driver neutral, no la de CONCAR— y por tanto se
@@ -1699,13 +1810,15 @@ Cinco dicen hoy que la imputación llega aparte del documento, y tres describen 
 | Si se rechaza la clave desconocida | Parte 1 |
 | Si `imputaciones` vuelve en la respuesta | Parte 1 |
 | Los importes en texto como regla del esquema | Parte 3, que ya toca el esquema |
-| El centro de las líneas comunes cuando hay reparto | Parte 4 |
-| Si `impuesto` y `plan_de_cuentas` entran con la 0.4 | Partes 3 y 4 |
+| El centro de las líneas comunes cuando hay reparto | Parte 5 |
+| Si `impuesto` y `plan_de_cuentas` entran con la 0.4 | Partes 3 y 5 |
 | Cuándo se publica la 0.4 | Parte 3 |
+| Si `clase` es obligatoria al emitir y opcional al aceptar | Parte 3 |
+| Si `id_externo` se exige cuando hay `imputaciones` | Parte 1 |
 
 ---
 
-## 19 · Fuentes
+## 20 · Fuentes
 
 Consultadas el 15-sep-2026.
 
