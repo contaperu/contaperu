@@ -6,6 +6,56 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [1.3.0] — 2026-09-20
+
+**La puerta MCP deja de decidir por el contribuyente.** Cuatro divergencias con las otras dos puertas, una de
+ellas contable. Nada de esto toca la api pública ni el contrato OpenConta: lo que se ha hecho es alinear con
+ellos la única puerta que se había desviado.
+
+### Cambiado
+
+- **`driver` se declara siempre en `diagnosticar`, `generar_asiento` y `exportar`.** Traían `"concar"` de
+  fábrica y eran las únicas de las tres puertas que lo hacían: la api lo exige, el contrato ya lo declaraba
+  obligatorio y la línea de comandos lo enseña en su `--help`. Un agente que olvidara el parámetro le daba un
+  **Excel de CONCAR a un contribuyente de CONTASIS**, y eso no se nota hasta que el archivo ya está importado.
+  **Es un cambio de comportamiento**: una llamada que hoy omita `driver` pasa a negarse. Era justo la llamada
+  que salía mal.
+- **Las doce herramientas contestan un `CallToolResult`**, como ya hacía `exportar`: el resultado en JSON, o el
+  rechazo como «problem details» del RFC 9457 con su `clave` estable y `isError`. Antes el SDK envolvía
+  cualquier excepción en un `ToolError` con el texto pegado, así que un cliente no podía ramificar por nada —y,
+  peor, un error que **no** es del motor salía con su texto entero, que puede llevar una ruta interna. Por HTTP
+  eso se enmascara desde siempre; esta es la puerta publicada sin autenticación.
+- **`claves_previas` acepta el número como número.** La api y el esquema de la puerta HTTP admiten texto,
+  entero o nulo; el MCP solo texto. El peligro no era el rechazo sino lo que hace un agente al encontrárselo:
+  quitar las claves para que pase deja entrar un comprobante ya anotado en otro periodo, y eso SUNAT lo rechaza.
+- **`fecha` es una fecha que puede no venir** (`format: date`), y no una cadena con `""` de fábrica.
+
+### Añadido
+
+- **`drivers_disponibles` también como herramienta**, sin dejar de ser el recurso `contaperu://drivers`. Es la
+  única que sale por las dos vías, y es la pareja del cambio de arriba: en MCP los recursos los gobierna la
+  aplicación cliente, que puede ofrecérselos al modelo o dejarlos como adjuntos que elige la persona, así que
+  preguntar qué destinos hay no podía seguir dependiendo de esa decisión.
+- **`validar_comprobantes` recibe `imputacion`**, que `api.revisar` y `POST /v1/revisar` ya aceptaban: una
+  llave huérfana sale ahora al revisar y no al exportar.
+- **El test que impide que esto vuelva.** `test_la_puerta_mcp_recibe_lo_mismo_que_la_http` compara las doce
+  contra `api.OPERACIONES`, con los dos únicos renombres deliberados declarados a la vista. La causa de la
+  divergencia contable era que el MCP escribía sus parámetros a mano mientras la puerta HTTP los deriva de
+  `api/tabla.py`: dos fuentes para un contrato divergen solas. Con él llegan los primeros tests de `main()`.
+- **El README ya no dice de memoria cuántas herramientas hay.** `test_documentacion.py` cuenta las que publica
+  el servidor y las compara con lo que dicen `README.md` e `INTEGRAR.md`; decían 11 y 6 cuando eran 12 y 7.
+
+### Retirado
+
+- **`--transporte sse`.** Quedaba fuera del bloque que pone `stateless_http` y la defensa del `Host`, así que
+  ignoraba `--dominio` en silencio y acumulaba sesiones. Nunca se documentó ni se probó, y el transporte está
+  obsoleto en la especificación desde 2025-03-26. El que sirve en red es `http`, que es *streamable HTTP*.
+
+### Documentación
+
+- El paquete **está publicado en PyPI** desde el 19-sep-2026 y el repositorio es público. `README.md`,
+  `INTEGRAR.md` y `CLAUDE.md` seguían diciendo lo contrario y recomendando instalar desde un commit de git.
+
 ## [1.2.1] — 2026-09-20
 
 **Las dos puertas dan lo mismo.** Dos defectos que encontró el primer consumidor real al cruzar de

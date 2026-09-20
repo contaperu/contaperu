@@ -98,3 +98,38 @@ def test_la_lista_de_vigentes_no_se_queda_atras():
     sin_decidir = sorted(en_disco - set(VIGENTES) - fechados - {f"estandar/{Path(v).name}" for v in VIGENTES})
     assert not sin_decidir, (f"documentos sin decidir si hablan del presente: {sin_decidir}. "
                              "Van a `VIGENTES` o a `fechados`, con su motivo.")
+
+
+# Los numeros que el README dice de si mismo, escritos como palabra y como cifra.
+PALABRAS = {11: "once", 12: "doce", 13: "trece", 6: "seis", 7: "siete", 8: "ocho"}
+
+
+def test_el_readme_no_dice_cuantas_herramientas_hay_a_ojo():
+    """El mismo despiste que este archivo existe para cazar, en su version aritmetica.
+
+    El README decia «11 herramientas y 6 recursos» cuando ya eran 12 y 7, e `INTEGRAR.md` decia «las once»;
+    `servidor-infra` decia 9. Nadie miente: es que un numero escrito a mano envejece solo, y estos tres se
+    habian quedado en tres momentos distintos. Aqui el numero se cuenta, no se recuerda.
+    """
+    import asyncio
+
+    import pytest as _pytest
+    _pytest.importorskip("mcp")
+    from contaperu.puertas.servidor_mcp import mcp
+
+    herramientas = len(asyncio.run(mcp.list_tools()))
+    recursos = len(asyncio.run(mcp.list_resources()))
+    readme = texto("README.md")
+    integrar = texto("INTEGRAR.md")
+
+    assert f"{herramientas} herramientas" in readme, f"el README no dice las {herramientas} que hay"
+    assert f"{PALABRAS[herramientas].capitalize()} herramientas" in readme
+    assert f"{PALABRAS[herramientas]} herramientas" in integrar
+    assert f"{recursos} recursos" in readme, f"el README no dice los {recursos} que hay"
+    assert f"{PALABRAS[recursos]} recursos" in readme
+
+    # Y ningun recuento viejo sobrevive en otra frase.
+    for numero, palabra in PALABRAS.items():
+        if numero not in (herramientas, recursos):
+            assert f"{numero} herramientas" not in readme, f"queda un recuento viejo: {numero} herramientas"
+            assert f"{numero} recursos" not in readme, f"queda un recuento viejo: {numero} recursos"

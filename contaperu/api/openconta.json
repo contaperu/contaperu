@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {

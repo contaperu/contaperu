@@ -442,3 +442,31 @@ def test_ninguna_herramienta_declara_esquema_de_salida():
     """
     for herramienta in asyncio.run(mcp.list_tools()):
         assert herramienta.outputSchema is None, herramienta.name
+
+
+def test_el_servidor_solo_admite_stdio_y_http(capsys):
+    """`--transporte sse` existio hasta la 1.3.0 y no hacia lo que decia.
+
+    Quedaba fuera del bloque que pone `stateless_http` y la defensa del `Host`, asi que `--dominio` se
+    ignoraba en silencio y las sesiones se acumulaban. No estaba documentado, no estaba probado, y el
+    transporte esta obsoleto en la especificacion desde 2025-03-26. Una opcion publicada que no hace lo
+    que promete es peor que no tenerla.
+    """
+    from contaperu.puertas.servidor_mcp import main
+
+    with pytest.raises(SystemExit):
+        main(["--transporte", "sse"])
+    error = capsys.readouterr().err
+    assert "invalid choice: 'sse'" in error and "'stdio', 'http'" in error
+
+
+def test_servirlo_en_red_es_sin_sesiones_y_con_el_dominio_declarado(monkeypatch):
+    """Lo que `main` prepara antes de arrancar, que hasta ahora no comprobaba nadie."""
+    from contaperu.puertas import servidor_mcp
+
+    arrancado = {}
+    monkeypatch.setattr(servidor_mcp.mcp, "run", lambda transport: arrancado.update(transporte=transport))
+    servidor_mcp.main(["--transporte", "http", "--host", "0.0.0.0", "--dominio", "contaperu.ejemplo.com"])
+    assert arrancado["transporte"] == "streamable-http"
+    assert servidor_mcp.mcp.settings.stateless_http is True, "un anonimo no puede ir acumulando sesiones"
+    assert "contaperu.ejemplo.com" in servidor_mcp.mcp.settings.transport_security.allowed_hosts

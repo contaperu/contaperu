@@ -15,10 +15,11 @@ arquitectura colectiva** (open source). Por eso cumple dos papeles a la vez: es 
 sistemas legacy** (CONCAR y CONTASIS hoy; SISCONT y STARSOFT cuando entren) mientras evolucionan, y es **la base
 abierta —estándar y motor— sobre la que se construyen los ERP que vienen**. Sus destinos se agrupan en tres: **SIRE,
 legacy y ERP**. Licencia **MIT**; lo mantiene **Global
-Procesos AI S.A.C.** (Lima). El repositorio (`github.com/contaperu/contaperu`) está **privado por ahora** y se abrirá
-cuando John lo decida: **lo que entra en internet no sale**, tampoco del historial de git, así que se escribe desde hoy
-como si ya fuera público (nada real de nadie, nada de infraestructura ajena a este repo). **Distribuir es publicar**:
-subirlo a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y el OK explícito de John.
+Procesos AI S.A.C.** (Lima). El repositorio (`github.com/contaperu/contaperu`) es **público**, y el paquete está
+**publicado en PyPI** desde el 19-sep-2026: **lo que entra en internet no sale**, tampoco del historial de git, así
+que se escribe siempre como lo que es (nada real de nadie, nada de infraestructura ajena a este repo). **Distribuir
+sigue siendo publicar**: sacar una versión a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y el OK
+explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino automático por eso.
 
 ## De qué visión sale (copia del `VISION.md` de Global Procesos AI, 13-sep-2026)
 

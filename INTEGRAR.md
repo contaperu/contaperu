@@ -172,7 +172,7 @@ Lo que conviene saber antes de publicarla:
 ## Para un agente de IA, por MCP
 
 Un cliente MCP local lo arranca por entrada y salida estándar; uno remoto, por Streamable HTTP
-(`contaperu-mcp --transporte http --dominio …`). Las once herramientas se anuncian de solo lectura y sin salir a la red,
+(`contaperu-mcp --transporte http --dominio …`). Las doce herramientas se anuncian de solo lectura y sin salir a la red,
 y sus nombres son los de siempre: `diagnosticar`, `exportar`, `generar_asiento`, `validar_comprobantes`… Cómo
 conectarlo a Claude está en el `README.md`.
 
@@ -202,16 +202,15 @@ rompe. Cada una sale de un tag `vX.Y.Z` como Release de GitHub, con la rueda, el
 en `main` no le llega a nadie hasta que se publica. Tu aplicación **fija una versión exacta** y la cambia cuando
 decide, después de leer qué trae.
 
-- **Desde Python**, la versión exacta y su huella. Mientras el repositorio sea privado, la rueda de la Release
-  comprobada contra sus sumas, o el commit de su tag:
+- **Desde Python**, la versión exacta, desde PyPI:
 
   ```bash
-  sha256sum -c SHA256SUMS --ignore-missing
-  pip install "contaperu[excel] @ git+https://github.com/contaperu/contaperu.git@<commit del tag vX.Y.Z>"
+  pip install "contaperu[excel]==X.Y.Z"
   ```
 
-  Cuando esté en PyPI, `contaperu[excel]==X.Y.Z` en tus dependencias, con su hash, y Dependabot o Renovate te abren
-  la actualización.
+  Con `==` basta: una versión publicada en PyPI no se reemplaza jamás, así que el número ya significa «estos bytes
+  exactos». Con su hash en tu archivo de dependencias, Dependabot o Renovate te abren la actualización. Si prefieres
+  no pasar por PyPI, cada Release lleva su rueda y sus `SHA256SUMS` (`sha256sum -c SHA256SUMS --ignore-missing`).
 - **Por HTTP**, la ruta `/v1/` no cambia durante la 1.x, y `info.version` de `/openconta.json` dice qué versión
   responde. Si usas la imagen de Docker, por su tag exacto, nunca `latest`.
 - **Por MCP**, el servidor anuncia su versión al conectarse (`serverInfo`).

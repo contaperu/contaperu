@@ -501,7 +501,10 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         prog="contaperu-mcp",
         description="Servidor MCP del núcleo contable del Perú. Sin estado, sin red, sin base de datos.")
-    ap.add_argument("--transporte", default="stdio", choices=["stdio", "http", "sse"],
+    # `sse` estuvo aqui hasta la 1.3.0 y se retiro: quedaba fuera del bloque de abajo, asi que ignoraba `--dominio`
+    # en silencio y acumulaba sesiones; nunca se documento ni se probo, y el transporte esta obsoleto en la
+    # especificacion desde 2025-03-26. El que sirve en red es `http`, que es streamable-http.
+    ap.add_argument("--transporte", default="stdio", choices=["stdio", "http"],
                     help="stdio (por defecto) para un cliente local; http para servirlo en red")
     ap.add_argument("--host", default="127.0.0.1", help="solo con --transporte http")
     ap.add_argument("--puerto", type=int, default=8000, help="solo con --transporte http")
@@ -511,10 +514,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--version", action="version", version=f"contaperu {api.__version__}")
     args = ap.parse_args(argv)
 
-    if args.transporte in ("http", "sse"):
+    if args.transporte == "http":
         mcp.settings.host = args.host
         mcp.settings.port = args.puerto
-    if args.transporte == "http":
         # Sin sesiones: cada peticion se atiende sola y el servidor no guarda nada entre una y
         # otra, que es lo que este modulo dice de si mismo. Ademas quita de en medio el unico
         # recurso que un desconocido podria ir acumulando en un servidor sin autenticacion:
@@ -525,7 +527,7 @@ def main(argv: list[str] | None = None) -> int:
             print("aviso: sin --dominio solo se atienden peticiones cuyo Host sea localhost; "
                   "desde fuera responde 421. Al publicarlo detras de un proxy hay que declarar "
                   "el nombre publico:  --dominio contaperu.ejemplo.com", file=sys.stderr)
-    transporte: Any = {"http": "streamable-http"}.get(args.transporte, args.transporte)
+    transporte: Any = "streamable-http" if args.transporte == "http" else args.transporte
     mcp.run(transport=transporte)
     return 0
 

@@ -120,7 +120,7 @@ API y devuelven la respuesta. Por eso el mismo mes da el mismo resultado por las
 |---|---|---|
 | **Python** | Un programa en Python | `from contaperu import api` y `api.exportar(documento, driver="concar", ...)`: llama directo a la API |
 | **CLI** (`contaperu`) | Quien trabaja en la consola o por lotes | Seis comandos: `generar`, `desde-json`, `diagnosticar`, `configuracion`, `comparar` y `verificar-driver`, que comprueba un driver propio contra el contrato |
-| **MCP** (`contaperu-mcp`) | Un asistente de IA | 11 herramientas de solo lectura y 6 recursos, por stdio, HTTP o SSE; el archivo vuelve con hasta 4 MB |
+| **MCP** (`contaperu-mcp`) | Un asistente de IA | 12 herramientas de solo lectura y 7 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
 | **HTTP** (`contaperu-http`) | Un ERP en cualquier lenguaje | `POST /v1/exportar`, `POST /v1/diagnosticar`…; responde 421 a un `Host` no declarado, corta la petición en 10 MB y atiende 16 a la vez |
 
 La **API pública** (`contaperu.api`) es la lista de operaciones que comparten las cuatro puertas: leer, revisar,
@@ -214,7 +214,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | **Estándar y comunidad** | |
 | El estándar `open-accounting` 1.0, su esquema, sus catálogos y su batería de conformidad | listo |
 | Contrato de driver y drivers de terceros por *entry points* | listo |
-| Paquete en PyPI | **próximo**: hoy se instala desde el código |
+| Paquete en PyPI | listo: `pip install contaperu` |
 | **Motor** | |
 | Validación del comprobante y de la partida doble | listo |
 | Asiento: compras, ventas, honorarios, notas y detracción | listo |
@@ -295,16 +295,15 @@ motor resuelva mal.
 
 ### Instalación
 
-La 1.0 todavía no está publicada en PyPI: hoy se instala desde el código.
+Desde PyPI, como cualquier dependencia. La versión va fijada con `==`: una versión publicada no se
+reemplaza jamás, así que el número significa «estos bytes exactos».
 
 ```bash
-git clone https://github.com/contaperu/contaperu.git
-cd contaperu
-pip install -e .                 # el núcleo
-pip install -e ".[excel]"        # + exportar a CONCAR y CONTASIS (.xlsx)
-pip install -e ".[mcp]"          # + el servidor MCP
-pip install -e ".[http]"         # + la puerta HTTP para un ERP en cualquier lenguaje
-pip install -e ".[todo]"         # todo
+pip install contaperu                 # el núcleo
+pip install "contaperu[excel]"        # + exportar a CONCAR y CONTASIS (.xlsx)
+pip install "contaperu[mcp]"          # + el servidor MCP
+pip install "contaperu[http]"         # + la puerta HTTP para un ERP en cualquier lenguaje
+pip install "contaperu[todo]"         # todo
 ```
 
 ### De un XML de SUNAT a un asiento, en diez líneas
@@ -344,12 +343,15 @@ RFC 9457 con una `clave` estable. La guía, en [INTEGRAR.md](INTEGRAR.md).
 
 ### Para un agente de IA: el servidor MCP
 
-Once herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
-`configuracion_por_defecto`, `validar_comprobantes`, `validar_partida_doble`, `generar_asiento`,
-`exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`, `buscar_cuenta_pcge` y
-`adaptar_pcge2026`, todas anunciadas de solo lectura. Y seis recursos: el esquema del estándar, los catálogos de
-SUNAT, el catálogo del PCGE 2026, los drivers disponibles, lo que se configura de cada uno y el esquema de la respuesta
-de `diagnosticar`.
+Doce herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
+`configuracion_por_defecto`, `drivers_disponibles`, `validar_comprobantes`, `validar_partida_doble`,
+`generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`,
+`buscar_cuenta_pcge` y `adaptar_pcge2026`, todas anunciadas de solo lectura. Y siete recursos: el esquema del
+estándar, los catálogos de SUNAT, los catálogos del propio estándar, el catálogo del PCGE 2026, los drivers
+disponibles, lo que se configura de cada uno y el esquema de la respuesta de `diagnosticar`.
+
+Las tres que van hacia un sistema contable —`diagnosticar`, `generar_asiento` y `exportar`— **exigen el
+`driver`** y no lo suponen: el sistema de un contribuyente es suyo. `drivers_disponibles` dice cuáles hay.
 
 El Excel y el ZIP del SIRE vuelven **como archivos** —recursos incrustados con su tipo—, así que el cliente
 los ofrece para guardar en vez de enseñar una tira de letras.
@@ -467,7 +469,7 @@ files that production accounting systems and SUNAT actually accepted.
 
 A stable Python API (`contaperu.api`), an MCP server for AI agents and a stateless HTTP port described by the
 **OpenConta** contract (an OpenAPI 3.1 document) let any ERP use it, in any language. For now it installs from
-source (`pip install -e ".[todo]"`); the PyPI package will follow the 1.0 release. The docs are in Spanish, because
+source or from PyPI (`pip install "contaperu[todo]"`). The docs are in Spanish, because
 that's the language of the domain and of the people who use it — but issues and pull requests in English are welcome.
 
 *Keywords: Peruvian accounting, Peru tax, SUNAT e-invoicing, electronic invoices, double-entry bookkeeping, accounting
