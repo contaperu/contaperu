@@ -66,13 +66,25 @@ def _iso(fecha: date | None) -> str:
 
 
 def cabecera_de(c: Comprobante) -> Cabecera:
-    """Los hechos del comprobante que un driver necesita al lado de sus líneas (`asiento.indice`): su identidad, la
-    contraparte, la glosa y los importes de los que se calcula la tasa, en texto exacto."""
+    """Los hechos del comprobante que un driver necesita al lado de sus líneas (`asiento.indice`).
+
+    Todos los del estándar menos los siete del proceso; el porqué y la regla, en el docstring de `Cabecera`.
+    `valor_no_gravado` va YA RESUELTO (`adquisiciones_no_gravadas`): el campo del estándar admite nulo y significa
+    «exonerado más inafecto», y esa cuenta la hace el modelo una vez y no cada driver a su manera.
+    """
     return Cabecera(tipo_cp=c.tipo_cp or "", serie=c.serie or "", numero=c.numero or "",
-                    fecha_emision=_iso(c.fecha_emision), contraparte_doc=c.contraparte_doc or "",
-                    contraparte_nombre=c.contraparte_nombre or "", condicion_pago=c.condicion_pago or "",
-                    id_externo=c.id_externo or "", moneda=c.moneda or "", glosa=glosa_de(c),
-                    base_gravada=str(c.base_gravada), igv=str(c.igv), total=str(c.total))
+                    numero_final=c.numero_final or "", fecha_emision=_iso(c.fecha_emision),
+                    condicion_pago=c.condicion_pago or "", id_externo=c.id_externo or "",
+                    contraparte_tipo_doc=c.contraparte_tipo_doc or "", contraparte_doc=c.contraparte_doc or "",
+                    contraparte_nombre=c.contraparte_nombre or "", glosa=glosa_de(c),
+                    moneda=c.moneda or "", base_gravada=str(c.base_gravada), igv=str(c.igv),
+                    dscto_base=str(c.dscto_base), dscto_igv=str(c.dscto_igv), exonerado=str(c.exonerado),
+                    inafecto=str(c.inafecto), exportacion=str(c.exportacion), isc=str(c.isc),
+                    base_ivap=str(c.base_ivap), ivap=str(c.ivap), icbper=str(c.icbper), otros=str(c.otros),
+                    total=str(c.total), retencion=str(c.retencion),
+                    destino_igv=c.destino_igv or "", valor_no_gravado=str(c.adquisiciones_no_gravadas),
+                    anio_dua=c.anio_dua or "", cod_dep_aduanera=c.cod_dep_aduanera or "",
+                    clasif_bienes=c.clasif_bienes or "", id_contrato=c.id_contrato or "")
 
 
 def _numero(numero: str, opciones: Any) -> str:

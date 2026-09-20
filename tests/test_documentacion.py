@@ -94,7 +94,11 @@ def test_la_lista_de_vigentes_no_se_queda_atras():
     """Si aparece un documento nuevo en la raíz o en `estandar/`, hay que decidir si habla del presente."""
     en_disco = {p.name for p in RAIZ.glob("*.md")} | {f"estandar/{p.name}" for p in (RAIZ / "estandar").glob("*.md")}
     fechados = {"CHANGELOG.md", "REFERENCIAS.md", "INTEROPERABILIDAD.md", "API-DE-REGISTRO.md",
-                "CODE_OF_CONDUCT.md", "SECURITY.md"}
+                "CODE_OF_CONDUCT.md", "SECURITY.md",
+                # Lo levantado del formato de STARSOFT el 20-sep-2026, de dos vídeos y sus capturas. Se declara
+                # a sí mismo documento de trabajo y marca lo que está `[por confirmar]`: pasa a vigente el día
+                # que una plantilla oficial lo respalde.
+                "STARSOFT-INTEGRACION.md"}
     sin_decidir = sorted(en_disco - set(VIGENTES) - fechados - {f"estandar/{Path(v).name}" for v in VIGENTES})
     assert not sin_decidir, (f"documentos sin decidir si hablan del presente: {sin_decidir}. "
                              "Van a `VIGENTES` o a `fechados`, con su motivo.")

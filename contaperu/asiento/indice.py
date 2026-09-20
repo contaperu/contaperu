@@ -24,21 +24,60 @@ from .lineas import LineaDiario
 
 @dataclass(frozen=True)
 class Cabecera:
-    """Los hechos de un comprobante que un driver necesita al escribir sus filas y que no son de ninguna línea."""
+    """Los hechos de un comprobante que un driver necesita al escribir sus filas y que no son de ninguna línea.
 
+    **La regla, desde la 1.4.0: aquí está TODO hecho contable o tributario del comprobante, y ningún dato del
+    proceso que lo produjo.** Lo hace cumplir `tests/test_cabecera.py`, que la compara contra el esquema del
+    estándar: si el estándar gana un campo, o entra aquí o entra en la lista de los que no son hechos.
+
+    Nació con trece campos, los que CONCAR necesitaba, y eso bastó mientras el único driver de asientos escribía
+    contabilidad pura. STARSOFT rompió el supuesto: su plantilla mezcla el asiento con el registro tributario en la
+    misma fila, así que pide el destino del IGV, el valor no gravado y los datos de la DUA. Un driver de REGISTRO
+    (SIRE, CONTASIS) siempre los tuvo, porque recibe el comprobante entero; uno de ASIENTOS no, y se caían aquí.
+
+    Fuera quedan los siete del proceso —`origen`, `confianza`, `archivo_nombre`, `datos_originales`, `estado`,
+    `excluida`, `observaciones`—: dicen de dónde salió el dato y qué opina la validación, no qué pasó. Un driver
+    que mirara `confianza` estaría decidiendo contabilidad con la certeza de un modelo de lenguaje.
+
+    Todo en texto, como en el estándar: un importe es su `Decimal` escrito, sin redondear nada.
+    """
+
+    # Identificación
     tipo_cp: str = ""
     serie: str = ""
     numero: str = ""
+    numero_final: str = ""           # solo rangos: boletas consolidadas del día
     fecha_emision: str = ""
-    contraparte_doc: str = ""
-    contraparte_nombre: str = ""
     condicion_pago: str = ""
     id_externo: str = ""
+    # Contraparte
+    contraparte_tipo_doc: str = ""   # Tabla 1: 6 RUC, 1 DNI, 4 CE, 7 pasaporte
+    contraparte_doc: str = ""
+    contraparte_nombre: str = ""
+    glosa: str = ""                  # la del comprobante, en mayúsculas y sin cortar (`asiento.glosa_de`)
+    # Importes
     moneda: str = ""
-    glosa: str = ""              # la del comprobante, en mayúsculas y sin cortar (`asiento.glosa_de`)
     base_gravada: str = "0"
     igv: str = "0"
+    dscto_base: str = "0"            # qué parte de la base informa el SIRE como descuento; no resta al total
+    dscto_igv: str = "0"
+    exonerado: str = "0"
+    inafecto: str = "0"
+    exportacion: str = "0"
+    isc: str = "0"
+    base_ivap: str = "0"
+    ivap: str = "0"
+    icbper: str = "0"
+    otros: str = "0"
     total: str = "0"
+    retencion: str = "0"             # la de renta de 4ta que MUESTRA el recibo por honorarios
+    # Solo compras
+    destino_igv: str = "DG"          # DG gravadas | DGNG mixtas | DNG no gravadas
+    valor_no_gravado: str = "0"      # YA RESUELTO: si el comprobante no lo trae, exonerado + inafecto
+    anio_dua: str = ""
+    cod_dep_aduanera: str = ""
+    clasif_bienes: str = ""
+    id_contrato: str = ""
 
     def a_dict(self) -> dict[str, str]:
         return asdict(self)
