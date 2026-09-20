@@ -113,7 +113,10 @@ OPERACIONES: tuple[Operacion, ...] = (
     Operacion("configuracion_por_defecto", "GET", "/v1/configuracion/por_defecto", "configuracion",
               herramienta="configuracion_por_defecto"),
     Operacion("describir_configuracion", "GET", "/v1/configuracion", recurso="contaperu://configuracion"),
-    Operacion("drivers_disponibles", "GET", "/v1/drivers", "drivers", recurso="contaperu://drivers"),
+    # La única que sale por las dos: un recurso lo lee quien quiere, y quien decide si el modelo llega a leerlo es
+    # el cliente. Desde que `driver` se declara (1.3), preguntar qué destinos hay no puede depender de esa decisión.
+    Operacion("drivers_disponibles", "GET", "/v1/drivers", "drivers", herramienta="drivers_disponibles",
+              recurso="contaperu://drivers"),
     Operacion("catalogos_sunat", "GET", "/v1/catalogos/sunat", "catalogos_sunat", recurso="contaperu://catalogos/sunat"),
     Operacion("catalogos_del_estandar", "GET", "/v1/catalogos/estandar", "catalogos_del_estandar",
               recurso="contaperu://catalogos/estandar"),

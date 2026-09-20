@@ -52,7 +52,7 @@ def leer_recurso(uri: str) -> str:
     return contenidos[0].content
 
 
-def test_estan_las_once_herramientas():
+def test_estan_las_doce_herramientas():
     """El conjunto EXACTO, no un `in`: una herramienta que se cuela sin querer tambien es un fallo.
 
     Quien conecta esto a su Claude ve esta lista y nada mas; anadir una es una decision, y este
@@ -63,6 +63,7 @@ def test_estan_las_once_herramientas():
         "configuracion_por_defecto", "validar_comprobantes", "validar_partida_doble",
         "generar_asiento", "exportar", "leer_xml_ubl", "leer_propuesta_sire",
         "adaptar_pcge2026", "normalizar_detracciones", "buscar_cuenta_pcge", "diagnosticar",
+        "drivers_disponibles",
     }
 
 
@@ -303,9 +304,9 @@ def test_un_pdf_por_el_protocolo_queda_pendiente_de_leer():
 
 
 def test_cada_herramienta_se_anuncia_de_solo_lectura_y_sin_salir_a_ningun_sitio():
-    """Hito 0.2: `readOnlyHint` y `openWorldHint` en las once, recorriendo lo que ve el cliente."""
+    """Hito 0.2: `readOnlyHint` y `openWorldHint` en las doce, recorriendo lo que ve el cliente."""
     herramientas = asyncio.run(mcp.list_tools())
-    assert len(herramientas) == 11
+    assert len(herramientas) == 12
     for herramienta in herramientas:
         anotaciones = herramienta.annotations
         assert anotaciones is not None and anotaciones.readOnlyHint is True, herramienta.name
@@ -332,3 +333,24 @@ def test_sin_destino_la_llamada_se_niega():
     """Y se niega antes de tocar nada, no generando el archivo del sistema equivocado."""
     with pytest.raises(Exception, match="driver"):
         llamar("diagnosticar", documento=DOCUMENTO, imputacion=IMPUTACION)
+
+
+def test_los_destinos_se_pueden_preguntar_llamando_y_no_solo_leyendo():
+    """`drivers_disponibles` sale por las dos vias, y es la unica que lo hace.
+
+    Un recurso lo lee quien quiere: en MCP los recursos los gobierna la aplicacion, asi que puede
+    ofrecerselos al modelo o dejarlos como adjuntos que elige la persona. Desde que `driver` se
+    declara (1.3.0), saber que destinos hay dejo de poder depender de esa decision del cliente.
+    """
+    por_nombre = {t.name: t for t in asyncio.run(mcp.list_tools())}
+    assert "drivers_disponibles" in por_nombre
+    uris = {str(r.uri) for r in asyncio.run(mcp.list_resources())}
+    assert "contaperu://drivers" in uris, "el recurso sigue ahi: quitarlo romperia a quien ya lo lee"
+
+    llamado = llamar("drivers_disponibles")
+    leido = json.loads(leer_recurso("contaperu://drivers"))
+    assert llamado == leido, "las dos vias tienen que decir lo mismo"
+    assert set(llamado) == {"sire", "concar", "csv", "contasis", "asiento_neutral"}
+    # La diferencia que un agente necesita saber ANTES de elegir: el centro de costo lo pide CONCAR y no el CSV.
+    assert "centro_costo" in llamado["concar"]["exige"]
+    assert "centro_costo" not in llamado["csv"]["exige"]

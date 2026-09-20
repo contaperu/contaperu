@@ -49,7 +49,8 @@ def test_cada_operacion_de_la_tabla_existe_y_tiene_su_ruta():
             assert all(p.default is not inspect.Parameter.empty for p in parametros), f"{op.nombre}: GET no exige nada"
         else:
             assert op.metodo == "POST" and parametros, f"{op.nombre}: POST recibe un cuerpo"
-        assert bool(op.herramienta) != bool(op.recurso), f"{op.nombre}: en el MCP es herramienta o recurso"
+        # Herramienta, recurso o las dos: lo que no vale es que una operación no salga por ninguna parte del MCP.
+        assert op.herramienta or op.recurso, f"{op.nombre}: en el MCP no sale por ninguna parte"
 
 
 def test_el_mcp_expone_exactamente_la_tabla():

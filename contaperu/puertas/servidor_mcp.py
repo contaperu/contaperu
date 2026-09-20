@@ -135,9 +135,13 @@ def catalogo_pcge2026() -> str:
     return json.dumps(api.catalogo_pcge(), ensure_ascii=False, indent=1)
 
 
-@mcp.resource("contaperu://drivers", mime_type="application/json")
-def drivers_disponibles() -> str:
-    """Los formatos de salida disponibles y qué libros genera cada uno."""
+@mcp.resource("contaperu://drivers", name="drivers_disponibles", mime_type="application/json")
+def drivers_como_recurso() -> str:
+    """Los formatos de salida disponibles y qué libros genera cada uno.
+
+    Lo mismo que la herramienta del mismo nombre, y son las dos a propósito: un recurso se lee, y quien decide si
+    el modelo llega a leerlo es el cliente; una herramienta se llama, y el modelo la ve siempre.
+    """
     return json.dumps(api.drivers_disponibles(), ensure_ascii=False, indent=1)
 
 
@@ -171,6 +175,20 @@ def configuracion_por_defecto() -> dict:
     `configuracion` en las demás herramientas: se valida entera, y lo que no existe se dice.
     """
     return api.configuracion_por_defecto()
+
+
+@mcp.tool(annotations=SOLO_LECTURA)
+def drivers_disponibles() -> dict:
+    """Los sistemas contables a los que se puede exportar, y qué pide cada uno.
+
+    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su canal y su
+    grupo (`sire`, `legacy` o `erp`), lo que **exige** para no negarse (CONCAR pide centro de costo y una moneda
+    con código; el CSV no) y si tiene sección propia en la configuración.
+
+    Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el
+    contribuyente: esas tres lo exigen y no lo suponen.
+    """
+    return api.drivers_disponibles()
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
