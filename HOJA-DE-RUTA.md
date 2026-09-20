@@ -59,7 +59,7 @@ Librería **1.1.0** y estándar **`open-accounting` 1.0**
 | **Salida · SIRE** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
 | **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy |
 | **Salida · ERP** | El documento `open-accounting` en JSON, el CSV de canal intercambio y la puerta HTTP con OpenConta |
-| Pendiente que depende de datos | SISCONT y STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
+| Pendiente que depende de datos | SISCONT, la plantilla oficial de STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
 
 ### Cumplidos
 

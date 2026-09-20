@@ -6,6 +6,67 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [1.4.0] — 2026-09-20
+
+**Un driver de asientos ya puede leer los hechos tributarios del comprobante, y hay un driver de STARSOFT.**
+Lo segundo destapó lo primero.
+
+### Añadido
+
+- **El driver `starsoft`**, el cuarto de canal `legacy`. STARSOFT importa asientos desde un Excel con una
+  plantilla que él publica: cada fila es una cuenta con su debe o haber, y las de un comprobante comparten
+  cabecera. Es `desde_lineas`, como CONCAR, y el núcleo sigue poniendo toda la contabilidad.
+
+  Lo que lo separa de CONCAR, con el mismo documento delante: el sub-diario de compras es `4` y el de ventas
+  `03`, no `11` y `05`; el voucher va limpio (`1`) y no con el mes delante (`070001`); el número del documento va
+  pegado y con ceros (`F13600000431`), al revés que en CONCAR y el SIRE; la nota de crédito se llama **`CC`** y
+  no `NC` —`FT` y `BV` sí coinciden, que es lo que hace la trampa peligrosa—; y lleva una columna que CONCAR no
+  tiene, **`DESTINO`**, porque su plantilla mezcla el asiento con el registro tributario en la misma fila.
+
+  **Está EN PRUEBAS, y se dice donde se ve.** El formato se levantó de dos vídeos y sus capturas
+  (`STARSOFT-INTEGRACION.md`), no de una plantilla oficial: cinco de sus columnas están inferidas de una
+  narración y cinco de sus ocho siglas son las de CONCAR como punto de partida, todas marcadas en el código.
+  Por eso escribe **un CSV revisable y no el `.xlsx` definitivo**, y su docstring dice «EN PRUEBAS» donde el de
+  CONTASIS dice «Aceptado (13-sep-2026)». Nadie ha importado todavía en STARSOFT un archivo que genere.
+
+- **La cabecera del índice lleva ahora todos los hechos del comprobante**: 32 campos donde había 13.
+
+  Un driver de REGISTRO —el SIRE, CONTASIS— recibe el comprobante entero. Uno de ASIENTOS solo ve las líneas y
+  la cabecera, y esa cabecera tenía los trece campos que CONCAR necesita. Bastó mientras el único driver de
+  asientos escribiera contabilidad pura: de las 41 columnas de CONCAR **ninguna es el destino del IGV**, así que
+  el dato podía caerse sin que nadie lo notara. Un comprobante con `destino_igv: "DGNG"` producía exactamente el
+  mismo Excel que uno con `DG`.
+
+  Se caían diecinueve campos, y diecisiete son columnas oficiales del registro de compras y ventas de SUNAT.
+  Entran todos: `numero_final`, `contraparte_tipo_doc`, los dos descuentos, `exonerado`, `inafecto`,
+  `exportacion`, `isc`, `base_ivap`, `ivap`, `icbper`, `otros`, `retencion`, `destino_igv`, `valor_no_gravado`
+  —ya resuelto—, `anio_dua`, `cod_dep_aduanera`, `clasif_bienes` e `id_contrato`.
+
+  **Lo que entra de verdad es la regla**, y `tests/test_cabecera.py` la hace cumplir contra el esquema publicado
+  y no contra una lista escrita a mano: la cabecera lleva **todo hecho contable o tributario del comprobante y
+  ningún dato del proceso que lo produjo**. Un campo nuevo del estándar o entra en la cabecera, o se declara como
+  lo que no es un hecho, con su motivo. Fuera quedan siete —`origen`, `confianza`, `archivo_nombre`,
+  `datos_originales`, `estado`, `excluida`, `observaciones`—: un driver que mirara `confianza` estaría decidiendo
+  contabilidad con la certeza de un modelo de lenguaje.
+
+  **Va a la cabecera y no a la huella, por razones medidas.** La huella del motor responde «¿este asiento ya
+  salió?» y va sobre las líneas; si los hechos tributarios entraran, dos exportaciones con el mismo asiento
+  darían huellas distintas y el aviso de lote repetido dejaría de dispararse. Hay un test que lo fija. Y cambiar
+  la fórmula invalidaría todas las guardadas por quien las persista; añadir a la cabecera no invalida ninguna.
+
+### Cambiado
+
+- **`ARQUITECTURA.md` deja de contradecir a `CONTRIBUTING.md`.** Uno invitaba a escribir un driver «sin esperar a
+  nadie» y el otro decía que «hasta entonces no se publica ningún driver ni esqueleto». Un colaborador que
+  quisiera hacer el de SISCONT, o mejorar el de CONCAR, leía el segundo y se iba, que es lo contrario de un
+  núcleo contable abierto. Lo que esa regla protegía —no prometer que un formato funciona cuando nadie lo ha
+  importado— se consigue **declarando el estado, no prohibiendo el código**, que es lo que ya hacía el docstring
+  de CONTASIS con su línea de «Aceptado».
+
+  En su lugar queda escrito el criterio: **las mejoras se evalúan y lo que haga falta se cambia**, con el precio
+  de cada tipo de cambio en una tabla —añadir es barato, tocar el estándar pide una fuente, cambiar la huella
+  invalida las guardadas—. No son prohibiciones: es lo que cuesta, escrito antes de hacerlo.
+
 ## [1.3.0] — 2026-09-20
 
 **La puerta MCP deja de decidir por el contribuyente.** Cuatro divergencias con las otras dos puertas, una de

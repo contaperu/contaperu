@@ -556,7 +556,7 @@ def _meses_que_pasan_por_todo() -> list[tuple[dict, dict]]:
     return meses
 
 
-@pytest.mark.parametrize("nombre", ["concar", "contasis", "csv"])
+@pytest.mark.parametrize("nombre", ["concar", "contasis", "csv", "starsoft"])
 def test_lo_que_se_lee_de_la_configuracion_esta_declarado_y_lo_declarado_se_lee(nombre, monkeypatch):
     """Se exportan un mes de compras y uno de ventas que pasan por todo, y se anota cada clave que se lee de la
     configuración, la lea el driver o el núcleo por él. Lo leído tiene que estar declarado —lo general, su sección, la
@@ -624,7 +624,7 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
 def test_cada_driver_de_serie_declara_su_canal():
     assert {n: contrato.canal(m) for n, m in drivers.DE_SERIE.items()} == {
         "sire": "tributario", "concar": "legacy", "csv": "intercambio", "contasis": "legacy",
-        "asiento_neutral": "intercambio"}
+        "starsoft": "legacy", "asiento_neutral": "intercambio"}
     assert all(contrato.declara_canal(m) for m in drivers.DE_SERIE.values())
     assert api.drivers_disponibles()["concar"]["canal"] == "legacy"
 

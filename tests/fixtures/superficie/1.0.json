@@ -482,6 +482,28 @@
   "linea_rvie": "",
   "nombre": ""
  },
+ "contaperu.drivers.starsoft": {
+  "CANAL": "",
+  "COLUMNAS": "",
+  "COLUMNAS_ELEGIBLES": "",
+  "CONFIGURACION": "",
+  "CONTENT_TYPE": "",
+  "EXIGE": "",
+  "FORMATOS": "",
+  "NOMBRE": "",
+  "OPCIONES": "",
+  "datos": "",
+  "desde_lineas": "",
+  "destino_de": "",
+  "escribir": "",
+  "fila": "",
+  "filas": "",
+  "no_caben": "",
+  "nombre": "",
+  "numero_del_documento": "",
+  "proyeccion": "",
+  "voucher": ""
+ },
  "contaperu.drivers.asiento_neutral": {
   "CANAL": "",
   "CONFIGURACION": "",

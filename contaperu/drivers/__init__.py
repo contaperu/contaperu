@@ -35,12 +35,13 @@ import warnings
 from importlib.metadata import entry_points
 from types import ModuleType
 
-from . import asiento_neutral, concar, contasis, contrato, csv, sire
+from . import asiento_neutral, concar, contasis, contrato, csv, sire, starsoft
 from .kit import Opciones
 
 GRUPO = "contaperu.drivers"
 DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
-                                   contasis.NOMBRE: contasis, asiento_neutral.NOMBRE: asiento_neutral}
+                                   contasis.NOMBRE: contasis, starsoft.NOMBRE: starsoft,
+                                   asiento_neutral.NOMBRE: asiento_neutral}
 DRIVER_POR_DEFECTO = "sire"
 
 __all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones", "concar", "contasis",

@@ -136,12 +136,12 @@ def test_los_recursos_son_legibles():
     del_estandar = json.loads(leer_recurso("contaperu://catalogos/estandar"))
     assert del_estandar["clases"]["codigos"]["activo"] and del_estandar["roles"]["version"]
     drivers = json.loads(leer_recurso("contaperu://drivers"))
-    assert set(drivers) == {"sire", "concar", "csv", "contasis", "asiento_neutral"}
+    assert set(drivers) == {"sire", "concar", "csv", "contasis", "starsoft", "asiento_neutral"}
     assert drivers["concar"]["tipo"] == "archivo" and drivers["sire"]["tipo"] == "texto"
     assert drivers["sire"]["familia"] == "registro" and drivers["csv"]["familia"] == "asiento"
     assert drivers["contasis"]["configurable"] is True and drivers["sire"]["configurable"] is False
     configuracion = json.loads(leer_recurso("contaperu://configuracion"))
-    assert set(configuracion["sistemas"]) == {"concar", "contasis", "csv"}
+    assert set(configuracion["sistemas"]) == {"concar", "contasis", "csv", "starsoft"}
     assert [c["columna"] for c in configuracion["sistemas"]["contasis"]["columnas"]["centro_costo"]] == [
         "centro_costo", "centro_costo_2"]
     pcge = json.loads(leer_recurso("contaperu://catalogos/pcge2026"))
@@ -369,7 +369,7 @@ def test_los_destinos_se_pueden_preguntar_llamando_y_no_solo_leyendo():
     llamado = llamar("drivers_disponibles")
     leido = json.loads(leer_recurso("contaperu://drivers"))
     assert llamado == leido, "las dos vias tienen que decir lo mismo"
-    assert set(llamado) == {"sire", "concar", "csv", "contasis", "asiento_neutral"}
+    assert set(llamado) == {"sire", "concar", "csv", "contasis", "starsoft", "asiento_neutral"}
     # La diferencia que un agente necesita saber ANTES de elegir: el centro de costo lo pide CONCAR y no el CSV.
     assert "centro_costo" in llamado["concar"]["exige"]
     assert "centro_costo" not in llamado["csv"]["exige"]

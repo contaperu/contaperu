@@ -76,8 +76,8 @@ documento:
 Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega lo que pida cada grupo de destinos:
 
 - **SIRE:** el TXT de reemplazo del registro de ventas (RVIE) y del de compras (RCE), listo para subir a SUNAT.
-- **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y el registro de
-  CONTASIS; SISCONT y STARSOFT esperan un archivo que ese sistema haya aceptado.
+- **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y de STARSOFT
+  —este último en pruebas— y el registro de CONTASIS; SISCONT espera un archivo que ese sistema haya aceptado.
 - **ERP:** los sistemas nuevos, en cualquier lenguaje. Reciben el documento `open-accounting` con su asiento **sin
   vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `asiento_neutral`), el
   CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
@@ -227,7 +227,8 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | **Legacy** | |
 | Driver CONCAR (Excel de asientos) | listo |
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
-| Drivers de SISCONT y STARSOFT | el contrato ya cubre lo que necesitan; esperan un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
+| Driver STARSOFT (asientos en Excel) | **en pruebas**: genera los archivos desde el 20-sep-2026; falta que STARSOFT importe uno — ver [Cómo aportar](#cómo-aportar) |
+| Driver SISCONT | el contrato ya cubre lo que necesita; espera un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
 | **ERP** | |
 | Driver `asiento_neutral`: el asiento en el estándar, sin siglas, sub-diarios ni correlativos | listo |
 | Driver CSV | listo |
@@ -266,7 +267,7 @@ todos los días.
    [«Error»](https://github.com/contaperu/contaperu/issues/new?template=error.yml).
 3. **Aporta la norma.** Las equivalencias del PCGE 2026, una resolución de SUNAT, el plazo de un régimen: con la cita
    exacta, porque sin fuente no entra.
-4. **Comparte el formato de tu sistema.** Si usas **SISCONT, STARSOFT** u otro sistema que todavía no tiene driver, lo
+4. **Comparte el formato de tu sistema.** Si usas **SISCONT** u otro sistema que todavía no tiene driver, lo
    que hace falta es su plantilla de importación y un archivo que ese sistema haya aceptado. Con eso se construye el
    driver.
 5. **Revisa los textos.** Las glosas, los mensajes de lo que falta y este README tienen que decirse como los diría un

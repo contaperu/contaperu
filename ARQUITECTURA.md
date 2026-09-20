@@ -234,16 +234,36 @@ de compras con el asiento cuadrado.
 
 ### STARSOFT: qué se sabe y qué falta
 
-- **Qué se sabe.** STARSOFT importa asientos, y su API lista seis endpoints sin esquema publicado. El contrato v1 ya
-  cubre lo que un driver así necesita: canal `legacy`, forma `desde_lineas` con el índice y la cabecera de cada
-  comprobante, un cuerpo que no es un Excel y un `no_caben` propio. Lo prueba un driver de mentira,
-  `tests/drivers_de_prueba/diario_json.py`, enchufado por entry points.
-- **Qué falta.** Un archivo o una respuesta de su API que STARSOFT haya aceptado, y el esquema de su cuerpo; su libro
-  «Standar» pediría enmendar `libro.tipo` en el estándar. Hasta entonces no se publica ningún driver ni esqueleto: uno
-  dentro del paquete quedaría congelado por SemVer sin haber importado nada.
-- **Si se escribe en su API y no en un archivo**, el envío y los reintentos son de la aplicación, no del motor: la
-  identidad y la huella de cada comprobante (`_exportacion.comprobantes`) son la clave de idempotencia. Lo que le falte
-  a la línea va en la cabecera, no en la huella.
+- **Qué se sabe.** STARSOFT importa asientos desde un Excel, con una plantilla que él mismo publica: cada fila es una
+  cuenta con su debe o haber, y las filas de un comprobante comparten cabecera. El driver `starsoft` lo traduce desde
+  el 20-sep-2026. El formato se levantó de dos vídeos y sus capturas (`STARSOFT-INTEGRACION.md`), columna por columna:
+  sus sub-diarios (`4` compras, `03` ventas), sus siglas —`FT` y `BV` coinciden con CONCAR, la nota de crédito es `CC`
+  y no `NC`—, el número del documento pegado y con ceros, y la columna `DESTINO`, el destino del IGV de la adquisición,
+  que CONCAR no tiene. Esa columna es la que hizo crecer la cabecera del índice en la 1.4.0.
+- **Qué falta.** La plantilla oficial vacía y un archivo que STARSOFT haya aceptado. Sin ellos, cinco de sus columnas
+  (`A`-`E`) están inferidas de una narración y no leídas de una celda, y cinco de sus ocho siglas son las de CONCAR
+  puestas como punto de partida. Por eso el driver **escribe un CSV revisable y no el `.xlsx` definitivo**, y su
+  docstring dice «EN PRUEBAS» donde el de CONTASIS dice «Aceptado (13-sep-2026)».
+- **Su API** lista seis endpoints sin esquema publicado, y es otro camino: `API-DE-REGISTRO.md`. Si algún día se
+  escribe por ahí, el envío y los reintentos son de la aplicación y no del motor —la identidad y la huella de cada
+  comprobante (`_exportacion.comprobantes`) son la clave de idempotencia—. Su libro «Standar» pediría enmendar
+  `libro.tipo` en el estándar.
+
+### Las mejoras se evalúan, y lo que haga falta se cambia
+
+Nada aquí está cerrado por principio. Si un driver nuevo necesita un campo en la cabecera, un valor en un catálogo o
+incluso otra forma en el contrato, **se estudia y entra si mejora el motor**: así creció la cabecera del asiento en la
+1.4.0, porque STARSOFT pedía un dato que el estándar ya tenía y que no llegaba a un driver de asientos.
+
+Lo único que se pide es **saber lo que cuesta**, para no romper en silencio a quien ya integra:
+
+| Cambio | Lo que cuesta |
+|---|---|
+| **Añadir** — un campo en la cabecera, un valor por defecto, un driver nuevo | Nada se rompe. Sale en una versión menor |
+| **Cambiar el estándar** | Una fuente —una norma, una resolución, un archivo que un sistema aceptó— y su enmienda, porque otros lo leen |
+| **Cambiar la fórmula de la huella** | Invalida todas las guardadas por quien las persista: va anunciada como cambio de comportamiento en el `CHANGELOG` y con su versión |
+
+No son prohibiciones: es el precio de cada cambio, escrito antes de hacerlo. Quien lo paga, lo cambia.
 
 ### Lo que queda preparado, sin símbolo público
 
