@@ -6,6 +6,27 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [1.2.1] — 2026-09-20
+
+**Las dos puertas dan lo mismo.** Dos defectos que encontró el primer consumidor real al cruzar de
+`contaperu.generar` a `contaperu.api`, y los dos venían de lo mismo: `preparar` se adelantaba al driver, decidiendo
+cosas que son del **destino** y no del documento.
+
+- **El resumen volvía a contar lo que se dejó fuera.** `preparar` descartaba los comprobantes excluidos antes de que
+  `generar` los contara, así que `exportar_archivo` devolvía **`resumen.excluidos` siempre en 0** mientras la ruta de
+  la 0.x lo contaba bien. Ese número se persiste: quien lo guardara vería cero excluidos para siempre, sin un error
+  que lo delatara. Ahora `preparar` devuelve **todos** los comprobantes y quien llama selecciona —que es lo que ya
+  hacían los dos, `salida.generar` y `armado.generar_asiento`—.
+- **Un error en un comprobante que ese destino no lleva ya no impide el archivo.** El recibo por honorarios no va en
+  el TXT del SIRE (`EXCLUYE_TIPOS`), así que su retención mal puesta no puede impedir declarar a SUNAT. La API
+  pública comprobaba los errores **antes** de aplicar la regla del driver y se plantaba; la ruta de la 0.x, que
+  filtra primero, dejaba salir el archivo. Lo que bloquea se mira ahora sobre lo que ese destino lleva de verdad, y
+  un error en lo que **sí** va sigue deteniéndolo todo — hay un test para cada mitad.
+
+Los dos casos entran en la batería como **la misma propiedad**: la ruta de la 0.x y la API pública tienen que
+responder igual sobre el mismo documento. Es el tipo de fallo que solo aparece cuando alguien cruza la frontera de
+verdad, y por eso vale más que el arreglo.
+
 ## [1.2.0] — 2026-09-19
 
 **`api.config_aplicada`: la configuración tal como la preparan las operaciones.** La pide el primer consumidor real

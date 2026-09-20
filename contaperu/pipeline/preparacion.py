@@ -342,10 +342,31 @@ def normalizar_detracciones(doc: dict, configuracion: dict | None = None) -> dic
     return salida
 
 
+def _los_que_van(comprobantes: list[Comprobante], driver: str) -> list[Comprobante]:
+    """De los que no se excluyeron, los que ESE destino lleva de verdad: sin los tipos que descarta por su formato.
+
+    Es la misma regla que aplica el driver al generar (`seleccion.fuera_de`), traída aquí para decidir qué puede
+    bloquear una exportación. Sin `driver` —o con uno que no existe— no se descarta nada: no hay destino que opine."""
+    if not driver or driver not in drivers.DRIVERS:
+        return comprobantes
+    tipos = getattr(drivers.obtener(driver), "EXCLUYE_TIPOS", None)
+    return [c for c in comprobantes if c.tipo_cp not in (tipos or frozenset())]
+
+
 def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, imputacion: dict | None = None,
              driver: str = "", claves_previas: Any = None) -> tuple[Libro, list[Comprobante], dict]:
-    """El libro, los comprobantes que no se excluyeron —revisados— y la configuración aplicada hacia `driver` con la
-    imputación dentro. Sin `incluir_observados`, un comprobante con observaciones que bloquean detiene todo.
+    """El libro, **todos** los comprobantes del documento —revisados— y la configuración aplicada hacia `driver` con
+    la imputación dentro. Sin `incluir_observados`, un comprobante con observaciones que bloquean detiene todo.
+
+    **Devuelve todos, incluidos los excluidos y los duplicados**, y quien llama vuelve a seleccionar: lo hacen los
+    dos (`salida.generar` y `armado.generar_asiento`), porque el resumen de una exportación **cuenta** lo que se dejó
+    fuera. Hasta la 1.2.0 se filtraban aquí, y entonces `exportar_archivo` devolvía `resumen.excluidos` siempre en 0
+    mientras la ruta de la 0.x lo contaba bien: el mismo documento, dos respuestas según la puerta.
+
+    **Y lo que bloquea se mira sobre lo que ESE destino lleva de verdad.** Un error en un comprobante que el driver
+    descarta por su tipo (`EXCLUYE_TIPOS`) no puede impedir el archivo: el recibo por honorarios no va en el TXT del
+    SIRE, así que su retención mal puesta no tiene por qué impedir declarar a SUNAT. Hasta la 1.2.0 se miraba antes
+    de aplicar esa regla, así que por la API pública sí lo impedía — otra vez, distinto según la puerta.
 
     Como `revisar` y `diagnosticar`, deja en blanco la detracción cuyo código no reconoce la tabla (decisión de John,
     15-sep-2026): un mismo documento da la misma respuesta por cualquier operación. Una factura con un código que no
@@ -361,9 +382,9 @@ def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, im
     detracciones.normalizar(todos, config)
     validar.revisar(comprobantes, libro, previas)
     if not incluir_observados:
-        con_error = [c for c in comprobantes if c.tiene_errores]
+        con_error = [c for c in _los_que_van(comprobantes, driver) if c.tiene_errores]
         if con_error:
             raise DocumentoInvalido(
                 f"{len(con_error)} comprobantes tienen observaciones que bloquean. "
                 "Corrígelos, o pide `incluir_observados` si sabes lo que haces.")
-    return libro, comprobantes, config
+    return libro, todos, config
