@@ -68,11 +68,12 @@ def test_estan_las_once_herramientas():
 
 def test_diagnosticar_por_el_protocolo():
     """Un agente pregunta que falta ANTES de exportar, y la respuesta ya viene por serie-numero."""
-    listo = llamar("diagnosticar", documento=DOCUMENTO, imputacion=IMPUTACION)
+    listo = llamar("diagnosticar", documento=DOCUMENTO, driver="concar", imputacion=IMPUTACION)
     assert listo["listo_para_exportar"] is True and listo["saldrian"] == ["E001-871"]
     assert listo["detracciones_pendientes"][0]["serie_numero"] == "E001-871"
     assert listo["sub_diarios"]["10"]["empieza_en"] == 1
-    r = llamar("diagnosticar", documento=DOCUMENTO, imputacion={"fila-871": {"centro_costo": "CC-64"}})
+    r = llamar("diagnosticar", documento=DOCUMENTO, driver="concar",
+               imputacion={"fila-871": {"centro_costo": "CC-64"}})
     assert r["listo_para_exportar"] is False and r["faltantes"]["sin_cuenta"] == ["E001-871"]
     assert r["por_que_no"] == ["1 sin cuenta contable"]
     # Y a quién pedírselo (0.8.0): la cuenta la pone el contador.
@@ -133,7 +134,7 @@ def test_los_recursos_son_legibles():
 
 
 def test_generar_asiento_por_el_protocolo():
-    r = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION)
+    r = llamar("generar_asiento", documento=DOCUMENTO, driver="concar", imputacion=IMPUTACION)
     assert [ln["cuenta"] for ln in r["asiento"]] == ["659999", "401111", "421201", "421201", "421203"]
     assert r["_asiento"]["cuadre"]["cuadra"] is True
 
@@ -148,7 +149,8 @@ def test_generar_asiento_con_la_seccion_de_su_sistema():
     """`generar_asiento` aplica la sección del sistema de asientos que se le diga: las columnas que elige para el
     centro deciden los anexos de las líneas, como en su archivo. Uno que no arma asientos se dice."""
     solo_m = {"concar": {"columnas": {"centro_costo": ["centro_costo"]}}}
-    concar = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, configuracion=solo_m)
+    concar = llamar("generar_asiento", documento=DOCUMENTO, driver="concar", imputacion=IMPUTACION,
+                    configuracion=solo_m)
     assert not any(ln.get("anexo_auxiliar") for ln in concar["asiento"])
     csv = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, configuracion=solo_m, driver="csv")
     assert [ln.get("anexo_auxiliar") for ln in csv["asiento"] if ln["rol"] == "tercero"] == ["CC-64"]
@@ -157,7 +159,7 @@ def test_generar_asiento_con_la_seccion_de_su_sistema():
 
 
 def test_la_partida_doble_se_puede_comprobar_sola():
-    asiento = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION)["asiento"]
+    asiento = llamar("generar_asiento", documento=DOCUMENTO, driver="concar", imputacion=IMPUTACION)["asiento"]
     assert llamar("validar_partida_doble", asiento=asiento)["cuadra"] is True
     asiento[0]["importe"] = "1.00"
     assert llamar("validar_partida_doble", asiento=asiento)["cuadra"] is False
@@ -243,7 +245,7 @@ def test_un_codigo_que_no_existe_ni_por_su_elemento_no_resuelve():
 
 
 def test_el_pcge_avisa_de_que_no_tiene_tabla():
-    asiento = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION)["asiento"]
+    asiento = llamar("generar_asiento", documento=DOCUMENTO, driver="concar", imputacion=IMPUTACION)["asiento"]
     r = llamar("adaptar_pcge2026", asiento=asiento)
     assert r["informe"]["sin_tabla"] is True and r["informe"]["cambios"] == 0
     assert r["asiento"] == asiento
@@ -260,7 +262,7 @@ def test_normalizar_detracciones_descarta_lo_que_no_reconoce():
 
 def test_un_documento_sin_libro_falla_diciendo_por_que():
     with pytest.raises(Exception, match="libro"):
-        llamar("generar_asiento", documento={"open_accounting": "1.0", "comprobantes": []})
+        llamar("generar_asiento", documento={"open_accounting": "1.0", "comprobantes": []}, driver="concar")
 
 
 def test_un_comprobante_con_error_bloquea_la_exportacion():
@@ -278,12 +280,12 @@ def test_la_imputacion_llega_por_el_protocolo():
     documento = json.loads(json.dumps(DOCUMENTO))
     documento["comprobantes"][0]["id_externo"] = "fila-871"
     imputacion = {"fila-871": {"cuenta_contable": "636301", "cuenta_tercero": "469901", "centro_costo": "CC-64"}}
-    r = llamar("generar_asiento", documento=documento, imputacion=imputacion)
+    r = llamar("generar_asiento", documento=documento, driver="concar", imputacion=imputacion)
     # La cuenta del total manda también en la línea que le descuenta la detracción al proveedor.
     assert [ln["cuenta"] for ln in r["asiento"]] == ["636301", "401111", "469901", "469901", "421203"]
 
     corto = {"fila-871": {"reparto": [{"importe": "100", "cuenta_contable": "636301", "centro_costo": "CC-64"}]}}
-    d = llamar("diagnosticar", documento=documento, imputacion=corto)
+    d = llamar("diagnosticar", documento=documento, driver="concar", imputacion=corto)
     assert d["faltantes"]["reparto_que_no_cuadra"] == ["E001-871"] and d["listo_para_exportar"] is False
 
     resumen, _ = exportar(documento=documento, driver="csv", imputacion=imputacion)
@@ -308,3 +310,25 @@ def test_cada_herramienta_se_anuncia_de_solo_lectura_y_sin_salir_a_ningun_sitio(
         anotaciones = herramienta.annotations
         assert anotaciones is not None and anotaciones.readOnlyHint is True, herramienta.name
         assert anotaciones.openWorldHint is False, herramienta.name
+
+
+def test_el_destino_no_se_supone():
+    """El sistema contable de un contribuyente es suyo: la puerta MCP no puede elegirlo por él.
+
+    Hasta la 1.3.0 las tres herramientas que van hacia un destino traian `driver="concar"` de fabrica,
+    y eran las unicas de las tres puertas que lo hacian: la api lo exige (`tests/test_api.py`), el
+    contrato OpenConta lo declara obligatorio y la linea de comandos lo ensena en su `--help`. Un agente
+    que olvidara el parametro le daba un Excel de CONCAR a un contribuyente de CONTASIS, y eso no se nota
+    hasta que el archivo ya esta importado.
+    """
+    por_nombre = {t.name: t for t in asyncio.run(mcp.list_tools())}
+    for nombre in ("generar_asiento", "diagnosticar", "exportar"):
+        entrada = por_nombre[nombre].inputSchema
+        assert "driver" in entrada["required"], f"{nombre}: el driver se supone"
+        assert "default" not in entrada["properties"]["driver"], f"{nombre}: el driver trae un destino de fabrica"
+
+
+def test_sin_destino_la_llamada_se_niega():
+    """Y se niega antes de tocar nada, no generando el archivo del sistema equivocado."""
+    with pytest.raises(Exception, match="driver"):
+        llamar("diagnosticar", documento=DOCUMENTO, imputacion=IMPUTACION)

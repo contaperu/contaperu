@@ -56,7 +56,7 @@ def test_por_el_mcp():
     from contaperu.puertas.servidor_mcp import mcp
 
     documento = _golden("compras_202601.json")
-    argumentos = {"documento": documento, "configuracion": CONFIG,
+    argumentos = {"documento": documento, "driver": "concar", "configuracion": CONFIG,
                   "claves_previas": [_previa(documento["comprobantes"][0])]}
     diagnostico = json.loads(asyncio.run(mcp.call_tool("diagnosticar", argumentos))[0].text)
     assert "DUPLICADO_PERIODO_ANTERIOR" in [f["motivo"] for f in diagnostico["que_falta"]]

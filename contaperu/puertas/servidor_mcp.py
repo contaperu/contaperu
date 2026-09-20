@@ -204,9 +204,9 @@ def validar_partida_doble(asiento: list[dict]) -> dict:
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
-def generar_asiento(documento: dict, configuracion: dict | None = None,
+def generar_asiento(documento: dict, driver: str, configuracion: dict | None = None,
                     correlativos: dict | None = None, incluir_observados: bool = False,
-                    imputacion: dict | None = None, driver: str = "concar",
+                    imputacion: dict | None = None,
                     claves_previas: list[list[str]] | None = None) -> dict:
     """Convierte los comprobantes en líneas de diario, sin el formato de ningún sistema.
 
@@ -223,10 +223,11 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
     entre cuentas ([{importe, cuenta_contable, centro_costo}], que tiene que sumar la base). Lo que no
     traiga sale de la configuración.
 
-    `driver` es el sistema de asientos cuya sección de la configuración se aplica (`concar` o `csv`):
-    sus siglas, sus sub-diarios y las columnas en que pone el centro de costo. Exige lo mismo que
-    `exportar` hacia ese sistema —en CONCAR, el centro de costo y una moneda con código—; para ver qué
-    falta sin que se niegue, `diagnosticar`.
+    `driver` es el sistema de asientos cuya sección de la configuración se aplica: sus siglas, sus
+    sub-diarios y las columnas en que pone el centro de costo. **Se declara siempre** —los que hay están
+    en el recurso `contaperu://drivers`—, porque el sistema de un contribuyente es suyo y suponerlo arma
+    el asiento de otro. Exige lo mismo que `exportar` hacia ese sistema —en CONCAR, el centro de costo y
+    una moneda con código—; para ver qué falta sin que se niegue, `diagnosticar`.
     """
     return api.generar_asiento(documento, driver=driver, configuracion=configuracion, imputacion=imputacion,
                                correlativos=correlativos, incluir_observados=incluir_observados,
@@ -234,8 +235,8 @@ def generar_asiento(documento: dict, configuracion: dict | None = None,
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
-def diagnosticar(documento: dict, configuracion: dict | None = None, correlativos: dict | None = None,
-                 driver: str = "concar", imputacion: dict | None = None,
+def diagnosticar(documento: dict, driver: str, configuracion: dict | None = None,
+                 correlativos: dict | None = None, imputacion: dict | None = None,
                  claves_previas: list[list[str]] | None = None) -> dict:
     """Dice todo lo que hay que mirar de un mes ANTES de exportarlo. **Llámala antes de `exportar`.**
 
@@ -247,6 +248,8 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
     detracciones esperan todavía su constancia; un resumen por proveedor o cliente; desde qué
     correlativo arrancaría cada sub-diario; y la lista de lo que saldría.
 
+    `driver` es el sistema de destino y **se declara siempre** (los que hay, en `contaperu://drivers`):
+    lo que falta depende de él, así que suponerlo devolvería el diagnóstico de otro sistema.
     `exige` dice qué pide ese destino (el CSV no exige centro de costo; CONCAR sí), y `que_falta`
     agrupa por motivo lo que de verdad bloquea, con **`pedir_a`**: `contador` si se resuelve mirando
     el documento o el plan de cuentas, `sistema` si es configuración del destino o un dato público
@@ -265,7 +268,7 @@ def diagnosticar(documento: dict, configuracion: dict | None = None, correlativo
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
-def exportar(documento: dict, driver: str = "concar", configuracion: dict | None = None,
+def exportar(documento: dict, driver: str, configuracion: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False,
              fecha: str = "", imputacion: dict | None = None,
              claves_previas: list[list[str]] | None = None) -> CallToolResult:
@@ -276,6 +279,9 @@ def exportar(documento: dict, driver: str = "concar", configuracion: dict | None
     repite, y el Excel de CONCAR se SUMA al importarlo dos veces) y **el archivo adjunto**, para
     guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.
     `imputacion` es la misma de `generar_asiento`.
+
+    `driver` **se declara siempre**: el sistema contable de un contribuyente es suyo, y un Excel de
+    CONCAR importado en un CONTASIS no se nota hasta que ya está dentro.
 
     Drivers disponibles, por grupo (el recurso `contaperu://drivers` dice el grupo de cada uno):
       - SIRE:   `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el
