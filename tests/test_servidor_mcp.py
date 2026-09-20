@@ -457,7 +457,9 @@ def test_el_servidor_solo_admite_stdio_y_http(capsys):
     with pytest.raises(SystemExit):
         main(["--transporte", "sse"])
     error = capsys.readouterr().err
-    assert "invalid choice: 'sse'" in error and "'stdio', 'http'" in error
+    # Sin atarse a como lo redacta argparse: 3.11 entrecomilla las opciones («choose from 'stdio', 'http'»), 3.12
+    # las deja desnudas y 3.13 vuelve a entrecomillarlas. Lo que importa es que rechaza `sse` y dice cuales valen.
+    assert "sse" in error and "stdio" in error and "http" in error
 
 
 def test_servirlo_en_red_es_sin_sesiones_y_con_el_dominio_declarado(monkeypatch):
