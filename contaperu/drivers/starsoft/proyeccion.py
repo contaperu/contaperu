@@ -114,6 +114,7 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registr
         "NRO DOC REF": ref.get("serie_numero", ""),
     }
     if libro.tipo == "compra":
+        det = ln.detraccion or {}
         propio = {
             "TIPO ANEXO": config.get("tipo_anexo") or "",
             "CODIGO PROVEEDOR": cab.contraparte_doc,
@@ -124,6 +125,25 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registr
             "PORC OPE MIXTA": "",
             "VALOR CIF": "",
             "TIPO DOC REF": ref.get("tipo", ""),
+            # La detracción: el motor la pone en la línea que le toca (`rol` detraccion) y aquí se transcribe.
+            # ⚠️ `[por confirmar]` Y ES LA DUDA MÁS GRANDE DEL DRIVER: en los vídeos la detracción se registra
+            # como DATOS de la fila —el asiento típico de compras tiene tres cuentas, sin línea de detracción—,
+            # mientras el motor genera dos líneas más para ella, que es lo que pide CONCAR. Si STARSOFT las
+            # rearma a partir de estas columnas, el asiento saldría duplicado. Se sabrá con un archivo aceptado
+            # que lleve detracción; hasta entonces salen las dos cosas, que es lo que el motor produce hoy.
+            # El código de SUNAT (`027`), no el interno que CONCAR mapea en su tabla (`02702`): el vídeo dice
+            # «el código de la detracción… para indicar el tipo de operación afecta a la detracción» (10:49), y
+            # eso es el Catálogo 54. Si STARSOFT tuviera códigos propios, saldría de su `detraccion_codigos`.
+            "CODIGO DETRACCION": det.get("codigo", ""),
+            "TASA DETRACCION": det.get("tasa", ""),
+            # Lo DETRAÍDO, que es el importe de esta línea —«cuánto ha sido el importe que se ha detraído»
+            # (10:58)—, no `det["base"]`, que es el total sobre el que se calcula.
+            "IMPORTE DETRACCION": ln.importe if ln.rol == "detraccion" else "",
+            # Sin fuente todavía: la columna existe y va vacía, que dice «este comprobante no lo trae».
+            "ANULADO": "",
+            "IGV POR APLICAR": "",
+            "IMPORTACION": "1" if (cab.anio_dua or cab.cod_dep_aduanera) else "0",
+            "NUMERO FILE": "",
         }
     else:
         propio = {

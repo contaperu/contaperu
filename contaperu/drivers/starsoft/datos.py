@@ -78,7 +78,11 @@ TIPOS = {
     "14": {"sigla": "RC"},     # [por confirmar]
 }
 
-POR_DEFECTO = {"sub_diario_compras": "4", "sub_diario_ventas": "03", "tipos": TIPOS}
+# El sub-diario de la detracción va VACÍO, y no es un olvido: en CONCAR las compras con detracción tienen su
+# propio registro (el 10) y en STARSOFT no consta que exista. Vacío, el motor las manda al de compras
+# (`resolucion.sub_diario`), que es lo que hace cualquier sistema que no los separa. Si STARSOFT tuviera el
+# suyo, se pone aquí y las compras con detracción se van solas a él.
+POR_DEFECTO = {"sub_diario_compras": "4", "sub_diario_ventas": "03", "sub_diario_detraccion": "", "tipos": TIPOS}
 
 CONFIGURACION = (
     *(replace(campo, por_defecto=POR_DEFECTO[campo.clave]) if campo.clave in POR_DEFECTO else campo
@@ -126,8 +130,17 @@ COMPRAS = (
     ("U", "TIPO DOC REF", "texto"),
     ("V", "NRO DOC REF", "texto"),
     ("W", "CENTRO COSTO", "texto"),
-    ("X", "DEBE HABER", "texto"),
-    ("Y", "GLOSA MOVIMIENTO", "texto"),
+    # De aquí en adelante la captura ya no llega: el orden sale de la narración, que las recorre en esta
+    # secuencia (compras 13:40-14:06). `[por confirmar]` como las cinco primeras.
+    ("X", "GLOSA MOVIMIENTO", "texto"),
+    ("Y", "ANULADO", "texto"),
+    ("Z", "IGV POR APLICAR", "texto"),
+    ("AA", "CODIGO DETRACCION", "texto"),
+    ("AB", "IMPORTACION", "texto"),
+    ("AC", "DEBE HABER", "texto"),        # «la posición de las cuentas, la primera línea en el debe» (13:52)
+    ("AD", "TASA DETRACCION", "numero"),
+    ("AE", "IMPORTE DETRACCION", "importe"),
+    ("AF", "NUMERO FILE", "texto"),
 )
 
 # Ventas no comparte juego de columnas con compras: lleva el RUC y la razón social del cliente donde compras lleva

@@ -38,7 +38,11 @@ CONFIGURACION_DEL_ASIENTO: tuple[Campo, ...] = (
                             "03": {"sigla": "BV", "sub_diario": "13"}, "05": {"sigla": "BA"}, "07": {"sigla": "NC"},
                             "08": {"sigla": "ND"}, "12": {"sigla": "TK"}, "14": {"sigla": "RC"}},
           titulo="Tipos de comprobante", grupo="tipos", claves=r"^[0-9]{2}$",
-          ayuda="La sigla con la que tu sistema llama a cada tipo de SUNAT. Un tipo sin sigla detiene la exportación.",
+          ayuda="La sigla con la que TU sistema llama a cada tipo de SUNAT. Vienen rellenas para que no empieces "
+                "de cero, pero son de cada instalación —tu sistema contable deja cambiarlas—: compáralas una vez "
+                "con las tuyas antes de exportar el primer mes. Una sigla equivocada no da error: el archivo "
+                "entra y el comprobante queda registrado como otra cosa. Un tipo sin sigla sí detiene la "
+                "exportación.",
           valores=Campo("", "objeto", grupo="tipos", campos=(
               Campo("sigla", "texto", titulo="Sigla", grupo="tipos"),
               Campo("sub_diario", "texto", titulo="Sub-diario propio", grupo="tipos", patron=_SUB_DIARIO)))),

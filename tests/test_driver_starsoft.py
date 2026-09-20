@@ -190,3 +190,33 @@ def test_el_archivo_se_llama_por_su_ruc_periodo_y_libro():
                      imputacion={"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
     assert r["archivo"] == f"STARSOFT_{RUC}_202507_COMPRAS.csv"
     assert r["resumen"]["debe"] == r["resumen"]["haber"] == "1096.80"
+
+
+def test_una_compra_con_detraccion_lleva_sus_datos_en_las_columnas():
+    """Los tres datos de la detracción, cada uno el que es. Los dos primeros se mapearon mal al escribirlo.
+
+    El CODIGO es el de SUNAT (`027`, Catalogo 54), no el interno que CONCAR mapea en su tabla (`02702`): son
+    tablas de cada sistema y no consta que STARSOFT use una. El IMPORTE es lo DETRAIDO —«cuánto ha sido el
+    importe que se ha detraído» (compras 10:58)— y no la base sobre la que se calcula, que es el total.
+    """
+    doc = _compra(base_gravada="1000.00", igv="180.00", total="1180.00", concepto="TRANSPORTE",
+                  detraccion={"codigo": "027", "porcentaje": 4, "monto": "47.20"})
+    filas = _filas(doc, config={"usa_centros_costo": False},
+                   imputacion={"fila-1": {"cuenta_contable": "63110000"}})
+    con_detraccion = [f for f in filas if f["CODIGO DETRACCION"]]
+    assert len(con_detraccion) == 1
+    assert con_detraccion[0]["CODIGO DETRACCION"] == "027", "el de SUNAT, no el interno de CONCAR"
+    assert con_detraccion[0]["TASA DETRACCION"] == "4"
+    assert con_detraccion[0]["IMPORTE DETRACCION"] == "47.00", "lo detraído, no la base"
+
+
+def test_una_compra_con_detraccion_no_se_va_a_un_sub_diario_que_starsoft_no_tiene():
+    """En CONCAR las compras con detracción tienen su propio registro (el `10`); en STARSOFT no consta que exista.
+
+    Con `sub_diario_detraccion` vacío el motor las manda al de compras, que es lo que hace cualquier sistema que
+    no los separa. Antes de esto salían al `10`, heredado de CONCAR, que es un sub-diario de otro sistema.
+    """
+    doc = _compra(detraccion={"codigo": "027", "porcentaje": 4, "monto": "47.20"})
+    filas = _filas(doc, config={"usa_centros_costo": False},
+                   imputacion={"fila-1": {"cuenta_contable": "63110000"}})
+    assert {f["SUBDIARIO"] for f in filas} == {"4"}
