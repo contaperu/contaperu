@@ -257,3 +257,104 @@ def test_configuracion_invalida_lleva_todos_los_errores():
         raise ConfiguracionInvalida(errores)
     assert e.value.errores == errores and isinstance(e.value, ValueError)
     assert "`otra`: clave desconocida" in str(e.value)
+
+
+# ── `api.config_aplicada`: la configuración tal como la preparan las operaciones (1.2) ───────────────────────
+
+"""Existe porque la API pública entregaba las piezas que CONSUMEN la configuración aplicada y no la que la construye.
+
+`asiento.faltantes_para`, `asiento.sub_diario`, `asiento.cuenta_tercero` y `asiento.lleva_centro` están en la
+superficie congelada, y las cuatro reciben la configuración ya aplicada —plana, con la sección del sistema fundida en
+la raíz—. La forma en que se GUARDA es otra: anidada por sistema. Pasarles la guardada no falla: devuelve vacío, que
+es peor que fallar. Lo pedía el primer consumidor real del estándar, `contab-core`, que hace su propio pre-vuelo:
+decirle al contador qué le falta ANTES de generar el archivo.
+"""
+
+CON_SECCION = {"concar": {"sub_diario_compras": "11", "tipos": {"01": {"sigla": "FT"}}}}
+
+
+def _comprobante_de_prueba():
+    from contaperu.modelo import Comprobante
+    return Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-01-10",
+                       contraparte_tipo_doc="6", contraparte_doc="20131312955", contraparte_nombre="PROVEEDOR SAC",
+                       moneda="PEN", base_gravada="100.00", igv="18.00", total="118.00", destino_igv="DG",
+                       id_externo="c1")
+
+
+def _documento(**extra):
+    from contaperu import api
+    return api.documento_de({"ruc": "20601234567", "periodo": "202601", "tipo": "compra"},
+                            [_comprobante_de_prueba()], **extra)
+
+
+def test_la_configuracion_aplicada_es_plana_y_la_guardada_no_sirve_para_lo_mismo():
+    """El caso que justifica la función: con la guardada, dos funciones públicas del asiento devuelven vacío."""
+    from contaperu import api, asiento
+
+    c = _comprobante_de_prueba()
+    aplicada = api.config_aplicada(CON_SECCION, driver="concar")
+    guardada = {**api.configuracion_por_defecto(), **CON_SECCION}
+
+    assert (asiento.sub_diario(c, aplicada), asiento.sigla_documento(c, aplicada)) == ("11", "FT")
+    assert (asiento.sub_diario(c, guardada), asiento.sigla_documento(c, guardada)) == ("", "")
+
+
+def test_es_exactamente_lo_que_prepara_cada_operacion():
+    """Si se separara de lo que hace `preparar`, quien haga su pre-vuelo con esto vería algo distinto de lo que sale
+    en el archivo — que es justo el error que la función viene a impedir."""
+    from contaperu import api
+    from contaperu.pipeline import preparacion
+
+    for driver in ("", "concar", "contasis", "sire"):
+        assert api.config_aplicada(CON_SECCION, driver=driver) == preparacion.config_aplicada(CON_SECCION, driver)
+
+
+def test_la_imputacion_llega_por_las_dos_vias_y_nunca_por_las_dos_a_la_vez():
+    from contaperu import api
+    from contaperu.errores import DocumentoInvalido
+
+    dentro = api.config_aplicada({}, driver="concar",
+                                 documento=_documento(imputaciones={"c1": {"cuenta_contable": "634301"}}))
+    fuera = api.config_aplicada({}, driver="concar", documento=_documento(),
+                                imputacion={"c1": {"cuenta_contable": "634301"}})
+    assert dentro["imputaciones"]["c1"].cuenta_contable == "634301"
+    assert dentro == fuera
+
+    with pytest.raises(DocumentoInvalido, match="llega dos veces"):
+        api.config_aplicada({}, driver="concar", documento=_documento(imputaciones={"c1": {}}),
+                            imputacion={"c1": {}})
+
+
+def test_una_llave_que_no_es_de_ningun_comprobante_se_rechaza_igual_que_al_exportar():
+    from contaperu import api
+    from contaperu.errores import DocumentoInvalido
+
+    with pytest.raises(DocumentoInvalido, match="documentos que no están"):
+        api.config_aplicada({}, driver="concar",
+                            documento=_documento(imputaciones={"fila-que-no-existe": {"cuenta_contable": "6"}}))
+
+
+def test_una_imputacion_sin_documento_se_rechaza_diciendo_por_que():
+    """Sin comprobantes no hay contra qué casar las llaves, y aceptarla a ciegas devolvería el agujero que las dos
+    comprobaciones de arriba existen para tapar: exportar con la cuenta por defecto sin decir nada."""
+    from contaperu import api
+    from contaperu.errores import DocumentoInvalido
+
+    with pytest.raises(DocumentoInvalido, match="hace falta el `documento`"):
+        api.config_aplicada({}, driver="concar", imputacion={"c1": {"cuenta_contable": "634301"}})
+
+
+def test_una_configuracion_invalida_se_detiene_aqui_y_no_al_exportar():
+    from contaperu import api
+
+    with pytest.raises(ConfiguracionInvalida, match="inventado"):
+        api.config_aplicada({"inventado": 1}, driver="concar")
+
+
+def test_no_sale_por_http_ni_por_mcp_a_proposito():
+    """Solo le sirve a quien puede llamar a las funciones que la consumen, y esas son de la librería. Por HTTP la
+    misma pregunta la responde `diagnosticar`, y mejor. Lo dice el docstring de `api/tabla.py`."""
+    from contaperu import api
+
+    assert "config_aplicada" in api.__all__
+    assert "config_aplicada" not in {o.nombre for o in api.OPERACIONES}

@@ -6,6 +6,34 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [1.2.0] — 2026-09-19
+
+**`api.config_aplicada`: la configuración tal como la preparan las operaciones.** La pide el primer consumidor real
+del estándar, y el hueco que tapa es este: la API pública entregaba las piezas que **consumen** la configuración
+aplicada y no la que la **construye**.
+
+`asiento.faltantes_para`, `asiento.sub_diario`, `asiento.cuenta_tercero` y `asiento.lleva_centro` están en la
+superficie congelada, y las cuatro reciben la configuración **ya aplicada** —plana, con la sección de su sistema
+fundida en la raíz—. La forma en que se guarda es otra, anidada por sistema, y es la única que daba
+`configuracion_por_defecto`. Pasarles la guardada **no falla**: devuelve vacío. Un `sub_diario` en blanco y una sigla
+en blanco, que es peor que un error, porque el pre-vuelo le dice al contador que le falta algo que sí tiene.
+
+**Exportar no la necesita y no cambia**: ahí se sigue entregando la configuración como se guarda y el motor la aplica
+por dentro. Esto es para quien hace su propio pre-vuelo —decir qué falta ANTES de generar el archivo, o pintar una
+pantalla con lo que está configurado—, que es lo que hace cualquier ERP con una pantalla de revisión delante.
+
+La imputación llega como en cualquier operación, en el bloque `imputaciones` del documento o por el argumento, nunca
+las dos, y con las mismas comprobaciones. **Una imputación exige el documento**: sin los comprobantes no hay contra
+qué casar las llaves, y aceptarla a ciegas devolvería el agujero que esas comprobaciones existen para tapar.
+
+**No sale por HTTP ni por MCP, y es una decisión, no un olvido** (`api/tabla.py`): solo le sirve a quien puede llamar
+a las funciones que la consumen, y esas son de la librería. Por esas dos puertas la misma pregunta ya tiene una
+respuesta mejor —`diagnosticar`, que dice qué falta y a quién pedírselo— sin que nadie tenga que interpretar una
+configuración.
+
+Sube a **1.2.0** y no a 1.1.1 porque un nombre público nuevo es una funcionalidad, no un arreglo. Nada más cambia: la
+superficie congelada gana una línea y ninguna firma se toca.
+
 ## [1.1.0] — 2026-09-19
 
 **El estándar de datos llega a `open-accounting` 1.0**, su primera versión estable, y con ella un compromiso: nada de

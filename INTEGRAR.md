@@ -56,6 +56,34 @@ if diagnostico["listo_para_exportar"]:
 Cada función recibe el documento primero y todo lo demás por su nombre; las que van hacia un sistema piden `driver`,
 sin valor por defecto. Los que hay los dice `api.drivers_disponibles()`.
 
+### Si haces tu propio pre-vuelo
+
+`diagnosticar` responde «qué falta» de una vez, y para la mayoría es suficiente. Pero si tu aplicación tiene una
+pantalla de revisión y quiere decidir por su cuenta —marcar la fila a la que le falta el centro de costo, enseñar en
+gris la cuenta que se usará, calcular el correlativo sugerido de cada sub-diario—, vas a llamar a las funciones del
+paquete `asiento`, y **todas reciben la configuración ya aplicada**:
+
+```python
+from contaperu import asiento
+from contaperu.modelo import Comprobante
+
+config = api.config_aplicada(configuracion, driver="concar", documento=documento)   # desde la 1.2
+comprobantes = [Comprobante.de_dict(c) for c in documento["comprobantes"]]
+
+faltan = asiento.faltantes_para(comprobantes, config, es_venta=False, exige=("cuenta_contable",))
+print(sorted(faltan))                                     # ['sin_cuenta'] si nadie eligió la cuenta
+print(asiento.sub_diario(comprobantes[0], config))        # el sub-diario que llevará esa fila
+print(asiento.cuenta_tercero(comprobantes[0], config))    # la cuenta del total que usará el archivo
+```
+
+**Es la misma configuración con la que se genera**, no una aproximación: la arman las dos las operaciones por dentro.
+La diferencia con `configuracion_por_defecto` importa y no se ve a simple vista — esa da la forma en que se
+**guarda**, anidada por sistema, y `config_aplicada` la forma con la que se **genera**, plana y con la sección de tu
+sistema fundida en la raíz. Pasarle la guardada a `asiento.sub_diario` no falla: devuelve vacío.
+
+La imputación va dentro (por el `documento` o por `imputacion=`), con las mismas comprobaciones que al exportar. Y una
+imputación exige el documento: sin los comprobantes no hay contra qué casar sus llaves.
+
 ### Reconocer lo que ya exportaste
 
 El Excel de CONCAR se suma al importarlo: la misma tanda importada dos veces duplica los asientos. Cada exportación

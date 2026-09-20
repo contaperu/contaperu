@@ -145,6 +145,36 @@ def describir_configuracion(driver: str | None = None) -> dict:
     return preparacion.describir_configuracion(driver or "")
 
 
+def config_aplicada(configuracion: dict | None = None, *, driver: str = "",
+                    documento: dict | None = None, imputacion: dict | None = None) -> dict:
+    """La configuración **tal como la preparan las operaciones** antes de tocar nada: lo general con sus valores de
+    fábrica debajo, encima la sección del sistema de `driver`, todo plano, y la imputación de cada comprobante dentro.
+
+    **Exportar no la necesita**: ahí se entrega la configuración como se guarda y el motor la aplica por dentro. Esto
+    es para quien hace su propio **pre-vuelo** —decirle a alguien qué le falta ANTES de generar el archivo, o pintar
+    una pantalla con lo que está configurado—, porque las funciones que responden eso (`asiento.faltantes_para`,
+    `asiento.sub_diario`, `asiento.cuenta_tercero`, `asiento.lleva_centro`…) reciben la configuración **ya aplicada**
+    y buscan sus claves en la raíz. Con la forma en que se guarda no fallan: devuelven vacío, que es peor.
+
+    La imputación llega como en cualquier operación: en el bloque `imputaciones` del `documento` o por `imputacion`,
+    nunca las dos, y con las mismas comprobaciones —ninguna llave huérfana, ninguna repetida—. **Por eso una
+    imputación exige el documento**: sin los comprobantes no hay contra qué casar las llaves, y una mal escrita
+    volvería a hacer lo que esas comprobaciones existen para impedir, que es generar con la cuenta por defecto sin
+    decir nada. Sin imputación, el documento sobra.
+
+    Una configuración inválida se detiene aquí con `ConfiguracionInvalida`, igual que al exportar: una clave que nadie
+    lee generaría el archivo con el valor de fábrica sin avisar.
+    """
+    trae_imputacion = bool(imputacion) or bool((documento or {}).get("imputaciones"))
+    if trae_imputacion and not documento:
+        raise DocumentoInvalido(
+            "Para aplicar una imputación hace falta el `documento`: sus comprobantes son contra lo que se comprueba "
+            "que cada `id_externo` existe y no está repetido. Sin configuración de imputación, el documento sobra.")
+    comprobantes = preparacion.comprobantes_de(documento) if documento else []
+    elegida = preparacion.imputacion_del_documento(documento, imputacion, comprobantes) if documento else None
+    return preparacion.con_imputacion(preparacion.config_aplicada(configuracion, driver), elegida, comprobantes)
+
+
 def errores_de_configuracion(configuracion: dict | None) -> list[str]:
     """Lo que la configuración no cumple, un error por línea con su ruta. Lista vacía: se puede aplicar."""
     return preparacion.errores_de_configuracion(configuracion)

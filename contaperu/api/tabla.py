@@ -10,6 +10,11 @@ expone exactamente estas herramientas y recursos; `tests/test_openconta.py`, que
 Quedan fuera las que solo tienen sentido en Python: `leer_archivos` y `comparar_sire` reciben bytes con nombre de
 archivo, `exportar_archivo` devuelve bytes, `errores_de_configuracion` ya está dentro de cada operación, y
 `contrato_openconta` es el propio contrato, que la puerta HTTP sirve en `/openconta.json`.
+
+Y `config_aplicada` (1.2), por una razón distinta: **solo le sirve a quien puede llamar a las funciones que la
+consumen** —`asiento.faltantes_para`, `asiento.sub_diario`, `asiento.cuenta_tercero`…—, y esas son de la librería.
+Por HTTP y por MCP la misma pregunta ya tiene respuesta, y mejor: `diagnosticar`, que dice qué falta y a quién
+pedírselo sin que nadie tenga que interpretar una configuración.
 """
 from __future__ import annotations
 
