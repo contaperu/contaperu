@@ -58,10 +58,10 @@ def test_por_el_mcp():
     documento = _golden("compras_202601.json")
     argumentos = {"documento": documento, "driver": "concar", "configuracion": CONFIG,
                   "claves_previas": [_previa(documento["comprobantes"][0])]}
-    diagnostico = json.loads(asyncio.run(mcp.call_tool("diagnosticar", argumentos))[0].text)
+    diagnostico = json.loads(asyncio.run(mcp.call_tool("diagnosticar", argumentos)).content[0].text)
     assert "DUPLICADO_PERIODO_ANTERIOR" in [f["motivo"] for f in diagnostico["que_falta"]]
     revisado = json.loads(asyncio.run(mcp.call_tool("validar_comprobantes", {
-        "documento": documento, "claves_previas": argumentos["claves_previas"]}))[0].text)
+        "documento": documento, "claves_previas": argumentos["claves_previas"]})).content[0].text)
     assert "DUPLICADO_PERIODO_ANTERIOR" in _codigos(revisado)
 
 

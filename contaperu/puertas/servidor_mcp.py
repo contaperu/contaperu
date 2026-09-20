@@ -25,18 +25,22 @@ que es un paquete de primer nivel con ese mismo nombre. Cada herramienta y cada 
 from __future__ import annotations
 
 import argparse
+import functools
+import inspect
 import json
 import sys
-from typing import Any
+from typing import Annotated, Any, Callable, get_type_hints
 
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
+from pydantic import Field
+
 from mcp.types import BlobResourceContents, CallToolResult, EmbeddedResource, TextContent, ToolAnnotations
 
 from .. import _datos, api
 from .comun import LOCALES, MAXIMO_ARCHIVO, hosts_permitidos, origenes_permitidos, peso_de_base64
 
-__all__ = ["INSTRUCCIONES", "LOCALES", "MAXIMO_ARCHIVO", "SOLO_LECTURA", "main", "mcp", "seguridad"]
+__all__ = ["INSTRUCCIONES", "LOCALES", "MAXIMO_ARCHIVO", "SOLO_LECTURA", "contesta", "main", "mcp", "seguridad"]
 
 
 def _adjunto(nombre: str, b64: str, mime: str) -> EmbeddedResource:
@@ -56,6 +60,52 @@ def _adjunto(nombre: str, b64: str, mime: str) -> EmbeddedResource:
             blob=b64,
         ),
     )
+
+
+def _dicho(valor: Any) -> CallToolResult:
+    """Lo que devuelve una operación, como el JSON que el agente lee."""
+    return CallToolResult(content=[TextContent(type="text", text=json.dumps(valor, ensure_ascii=False, indent=1))])
+
+
+def _rechazo(error: BaseException) -> CallToolResult:
+    """Un rechazo dicho como lo dice la puerta HTTP: un «problem details» del RFC 9457, con su `clave` estable.
+
+    Es la misma `api.problema` que responde por HTTP, y por dos motivos. El primero es que una `clave` se
+    puede ramificar y una frase no: un cliente que recibe «Error executing tool exportar: 3 comprobantes
+    tienen observaciones que bloquean» no sabe distinguir eso de que el motor haya reventado. El segundo
+    pesa más: un error que NO es del motor puede llevar pegada una ruta o un dato interno, y `api.problema`
+    lo enmascara. Sin esto, lo que la puerta HTTP se cuida de no enseñar salía entero por la puerta MCP,
+    que además es la que está publicada sin autenticación.
+    """
+    return CallToolResult(isError=True, content=[
+        TextContent(type="text", text=json.dumps(api.problema(error), ensure_ascii=False, indent=1))])
+
+
+def contesta(funcion: Callable[..., Any]) -> Callable[..., CallToolResult]:
+    """Hace que una herramienta conteste con esa forma, pase lo que pase.
+
+    La firma se conserva tal cual —es lo que el agente ve como `inputSchema`— y solo se cambia lo que
+    devuelve, porque `CallToolResult` es la anotación con la que el SDK entrega la respuesta sin tocarla.
+    Que la firma siga intacta después de decorar no es confianza: lo comprueba
+    `test_la_puerta_mcp_recibe_lo_mismo_que_la_http`, que compara las doce contra `api.OPERACIONES`.
+    """
+    @functools.wraps(funcion)
+    def herramienta(*posicionales: Any, **argumentos: Any) -> CallToolResult:
+        try:
+            resultado = funcion(*posicionales, **argumentos)
+        except Exception as error:      # cualquiera se dice igual: `api.problema` decide cuánto se enseña
+            return _rechazo(error)
+        return resultado if isinstance(resultado, CallToolResult) else _dicho(resultado)
+
+    # La firma se entrega ya resuelta. Este módulo aplaza las anotaciones (`from __future__ import annotations`),
+    # así que `inspect.signature` las devuelve como texto, y un alias declarado aquí —`FECHA`— deja de resolverse
+    # al mirarlas desde el envoltorio. Con las pistas resueltas, el SDK ve exactamente los mismos tipos que veía
+    # antes de decorar.
+    firma = inspect.signature(funcion)
+    pistas = get_type_hints(funcion, include_extras=True)
+    parametros = [p.replace(annotation=pistas.get(p.name, p.annotation)) for p in firma.parameters.values()]
+    herramienta.__signature__ = firma.replace(parameters=parametros, return_annotation=CallToolResult)
+    return herramienta
 
 
 INSTRUCCIONES = """\
@@ -99,6 +149,10 @@ mcp._mcp_server.version = api.__version__
 # Hito 0.2: cada herramienta se anuncia de solo lectura y sin salir a ningún sitio —no guarda nada, no toca el disco ni
 # la red—, así que un cliente puede llamarla sin pedir confirmación por un efecto que no tiene.
 SOLO_LECTURA = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
+
+# Una fecha del calendario, no una cadena cualquiera: `api/tabla.py` ya lo declara asi para la puerta HTTP y
+# el contrato, y las dos puertas describen lo que reciben con las mismas palabras.
+FECHA = Annotated[str | None, Field(json_schema_extra={"format": "date"})]
 
 
 # --- recursos: lo que conviene leer antes de llamar a nada -------------------------
@@ -164,6 +218,7 @@ def esquema_diagnostico() -> str:
 # --- herramientas ------------------------------------------------------------------
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def configuracion_por_defecto() -> dict:
     """La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas
     de detracción— y una sección por sistema contable con lo suyo (`concar`: siglas y sub-diarios,
@@ -178,6 +233,7 @@ def configuracion_por_defecto() -> dict:
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def drivers_disponibles() -> dict:
     """Los sistemas contables a los que se puede exportar, y qué pide cada uno.
 
@@ -192,8 +248,10 @@ def drivers_disponibles() -> dict:
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def validar_comprobantes(documento: dict, configuracion: dict | None = None,
-                         claves_previas: list[list[str]] | None = None) -> dict:
+                         imputacion: dict | None = None,
+                         claves_previas: list[list[str | int | None]] | None = None) -> dict:
     """Revisa los comprobantes de un documento `open-accounting` y devuelve el mismo documento con
     `estado` y `observaciones` puestos en cada uno.
 
@@ -206,12 +264,15 @@ def validar_comprobantes(documento: dict, configuracion: dict | None = None,
 
     También descarta las detracciones cuyo código no está en la tabla del contribuyente, que es
     de donde salen los códigos inventados cuando una IA confunde la retención del IGV con una
-    detracción.
+    detracción. Con `imputacion` —la misma de `generar_asiento`— comprueba además que cada llave
+    hable de un comprobante que está: una huérfana sale aquí y no al exportar.
     """
-    return api.revisar(documento, configuracion=configuracion, claves_previas=claves_previas)
+    return api.revisar(documento, configuracion=configuracion, imputacion=imputacion,
+                       claves_previas=claves_previas)
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def validar_partida_doble(asiento: list[dict]) -> dict:
     """Comprueba que la suma del Debe sea exactamente igual a la del Haber.
 
@@ -222,10 +283,11 @@ def validar_partida_doble(asiento: list[dict]) -> dict:
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def generar_asiento(documento: dict, driver: str, configuracion: dict | None = None,
                     correlativos: dict | None = None, incluir_observados: bool = False,
                     imputacion: dict | None = None,
-                    claves_previas: list[list[str]] | None = None) -> dict:
+                    claves_previas: list[list[str | int | None]] | None = None) -> dict:
     """Convierte los comprobantes en líneas de diario, sin el formato de ningún sistema.
 
     Devuelve el bloque `asiento` del estándar: cuenta, debe o haber, importe, moneda, glosa,
@@ -253,9 +315,10 @@ def generar_asiento(documento: dict, driver: str, configuracion: dict | None = N
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def diagnosticar(documento: dict, driver: str, configuracion: dict | None = None,
                  correlativos: dict | None = None, imputacion: dict | None = None,
-                 claves_previas: list[list[str]] | None = None) -> dict:
+                 claves_previas: list[list[str | int | None]] | None = None) -> dict:
     """Dice todo lo que hay que mirar de un mes ANTES de exportarlo. **Llámala antes de `exportar`.**
 
     En una sola respuesta: si el mes está listo (`listo_para_exportar`) y, si no, por qué
@@ -286,10 +349,11 @@ def diagnosticar(documento: dict, driver: str, configuracion: dict | None = None
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def exportar(documento: dict, driver: str, configuracion: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False,
-             fecha: str = "", imputacion: dict | None = None,
-             claves_previas: list[list[str]] | None = None) -> CallToolResult:
+             fecha: FECHA = None, imputacion: dict | None = None,
+             claves_previas: list[list[str | int | None]] | None = None) -> CallToolResult:
     """Genera el archivo que espera un sistema contable, ya listo para importar.
 
     Devuelve dos cosas: un resumen en JSON (nombre del archivo, comprobantes, debe y haber, y en
@@ -340,6 +404,7 @@ def exportar(documento: dict, driver: str, configuracion: dict | None = None,
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def leer_xml_ubl(contenido: str, libro: dict, es_base64: bool = False) -> dict:
     """Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `open-accounting`.
 
@@ -352,6 +417,7 @@ def leer_xml_ubl(contenido: str, libro: dict, es_base64: bool = False) -> dict:
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) -> dict:
     """Lee el TXT de la propuesta que SUNAT entrega en el SIRE y devuelve un documento
     `open-accounting`.
@@ -364,6 +430,7 @@ def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) ->
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def buscar_cuenta_pcge(texto: str = "", codigo: str = "") -> dict:
     """Busca una cuenta en el Plan Contable General Empresarial 2026, por nombre o por código.
 
@@ -379,6 +446,7 @@ def buscar_cuenta_pcge(texto: str = "", codigo: str = "") -> dict:
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def adaptar_pcge2026(asiento: list[dict]) -> dict:
     """Adapta las cuentas de un asiento al Plan Contable General Empresarial 2026.
 
@@ -398,6 +466,7 @@ def adaptar_pcge2026(asiento: list[dict]) -> dict:
 
 
 @mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def normalizar_detracciones(documento: dict, configuracion: dict | None = None) -> dict:
     """Contrasta la detracción de cada comprobante con la tabla del contribuyente y deja en
     blanco la que no reconozca.

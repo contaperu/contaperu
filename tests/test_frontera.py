@@ -189,9 +189,9 @@ def test_las_dos_puertas_producen_el_MISMO_documento(tmp_path):
     del_cli = json.loads(destino.read_text(encoding="utf-8"))
 
     # Puerta 2 — el MCP, que lo devuelve por el protocolo.
-    bloques = asyncio.run(mcp.call_tool("leer_xml_ubl", {
+    resultado = asyncio.run(mcp.call_tool("leer_xml_ubl", {
         "contenido": fuente.read_text(encoding="utf-8"), "libro": libro}))
-    del_mcp = json.loads(bloques[0].text)
+    del_mcp = json.loads(resultado.content[0].text)
 
     # Dos campos dependen legítimamente de la puerta y se normalizan antes de comparar:
     #  · `_lectura` — cuántos archivos ignoró: es el parte de la lectura, no del libro.

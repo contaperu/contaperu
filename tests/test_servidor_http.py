@@ -151,7 +151,8 @@ def test_las_tres_puertas_dan_el_mismo_documento_y_el_mismo_diagnostico(tmp_path
     fuente = XML / "20131312955-01-F001-123.xml"
     contenido = fuente.read_text(encoding="utf-8")
     por_http = _cliente().post("/v1/leer_xml", json={"contenido": contenido, "libro": LIBRO}).json()
-    por_mcp = json.loads(asyncio.run(mcp.call_tool("leer_xml_ubl", {"contenido": contenido, "libro": LIBRO}))[0].text)
+    por_mcp = json.loads(asyncio.run(
+        mcp.call_tool("leer_xml_ubl", {"contenido": contenido, "libro": LIBRO})).content[0].text)
     assert por_http == por_mcp == api.leer_xml(contenido, LIBRO)
 
     destino = tmp_path / "cli.json"
@@ -168,5 +169,5 @@ def test_las_tres_puertas_dan_el_mismo_documento_y_el_mismo_diagnostico(tmp_path
     diagnostico_http = _cliente().post("/v1/diagnosticar", json={"documento": documento, "driver": "concar",
                                                                  "configuracion": CONFIG}).json()
     diagnostico_mcp = json.loads(asyncio.run(mcp.call_tool("diagnosticar", {
-        "documento": documento, "configuracion": CONFIG, "driver": "concar"}))[0].text)
+        "documento": documento, "configuracion": CONFIG, "driver": "concar"})).content[0].text)
     assert diagnostico_http == diagnostico_mcp == api.diagnosticar(documento, driver="concar", configuracion=CONFIG)

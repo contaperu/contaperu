@@ -11,6 +11,7 @@ import json
 import pytest
 
 import contaperu
+from contaperu import api
 from contaperu.puertas.servidor_mcp import LOCALES, mcp, seguridad
 
 from util import XML
@@ -33,8 +34,21 @@ IMPUTACION = {"fila-871": {"cuenta_contable": "659999", "centro_costo": "CC-64"}
 
 
 def llamar(herramienta: str, **argumentos):
-    bloques = asyncio.run(mcp.call_tool(herramienta, argumentos))
-    return json.loads(bloques[0].text)
+    """El JSON de una llamada que sale bien.
+
+    Desde la 1.3.0 toda herramienta contesta un `CallToolResult`, como ya hacia `exportar`: el resultado
+    en el primer bloque de texto, y con `isError` el rechazo (ver `rechazo`).
+    """
+    resultado = asyncio.run(mcp.call_tool(herramienta, argumentos))
+    assert not resultado.isError, resultado.content[0].text
+    return json.loads(resultado.content[0].text)
+
+
+def rechazo(herramienta: str, **argumentos) -> dict:
+    """El «problem details» de una llamada que se niega: su `clave` estable, su `detail` y su `status`."""
+    resultado = asyncio.run(mcp.call_tool(herramienta, argumentos))
+    assert resultado.isError, "se esperaba un rechazo y la llamada salio bien"
+    return json.loads(resultado.content[0].text)
 
 
 def exportar(**argumentos):
@@ -43,6 +57,7 @@ def exportar(**argumentos):
     Se separan aquí para que cada test diga cuál de las dos cosas está mirando.
     """
     resultado = asyncio.run(mcp.call_tool("exportar", argumentos))
+    assert not resultado.isError, resultado.content[0].text
     resumen, *adjuntos = resultado.content
     return json.loads(resumen.text), [a.resource for a in adjuntos]
 
@@ -155,8 +170,8 @@ def test_generar_asiento_con_la_seccion_de_su_sistema():
     assert not any(ln.get("anexo_auxiliar") for ln in concar["asiento"])
     csv = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, configuracion=solo_m, driver="csv")
     assert [ln.get("anexo_auxiliar") for ln in csv["asiento"] if ln["rol"] == "tercero"] == ["CC-64"]
-    with pytest.raises(Exception, match="no arma asientos"):
-        llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, driver="contasis")
+    negado = rechazo("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, driver="contasis")
+    assert negado["clave"] == "valor_invalido" and "no arma asientos" in negado["detail"]
 
 
 def test_la_partida_doble_se_puede_comprobar_sola():
@@ -235,8 +250,8 @@ def test_buscar_una_cuenta_del_pcge_por_el_protocolo():
     codigos = {c["codigo"] for c in r["encontradas"]}
     assert {"605", "706"} <= codigos          # el descuento obtenido y el concedido
 
-    with pytest.raises(Exception, match="texto|codigo"):
-        llamar("buscar_cuenta_pcge")
+    negado = rechazo("buscar_cuenta_pcge")
+    assert negado["clave"] == "documento_invalido" and "texto" in negado["detail"]
 
 
 def test_un_codigo_que_no_existe_ni_por_su_elemento_no_resuelve():
@@ -262,15 +277,17 @@ def test_normalizar_detracciones_descarta_lo_que_no_reconoce():
 
 
 def test_un_documento_sin_libro_falla_diciendo_por_que():
-    with pytest.raises(Exception, match="libro"):
-        llamar("generar_asiento", documento={"open_accounting": "1.0", "comprobantes": []}, driver="concar")
+    negado = rechazo("generar_asiento", documento={"open_accounting": "1.0", "comprobantes": []}, driver="concar")
+    assert negado["clave"] == "documento_invalido" and "libro" in negado["detail"]
 
 
 def test_un_comprobante_con_error_bloquea_la_exportacion():
     doc = json.loads(json.dumps(DOCUMENTO))
     doc["comprobantes"][0]["total"] = "9999"          # deja de cuadrar con base + IGV
-    with pytest.raises(Exception, match="bloquean|observaciones"):
-        exportar(documento=doc, driver="concar", imputacion=IMPUTACION)
+    negado = rechazo("exportar", documento=doc, driver="concar", imputacion=IMPUTACION)
+    assert negado["clave"] == "documento_invalido" and "bloquean" in negado["detail"]
+    # Cuales son no lo dice aqui, y a proposito: eso lo contesta `diagnosticar`, que es la que hay que llamar antes.
+    assert "incluir_observados" in negado["detail"]
     forzado, adjuntos = exportar(documento=doc, driver="concar", incluir_observados=True, imputacion=IMPUTACION)
     assert forzado["archivo"].endswith(".xlsx") and len(adjuntos) == 1
 
@@ -331,8 +348,10 @@ def test_el_destino_no_se_supone():
 
 def test_sin_destino_la_llamada_se_niega():
     """Y se niega antes de tocar nada, no generando el archivo del sistema equivocado."""
+    # Este sí sigue siendo una excepción del SDK, y está bien: un argumento que el `inputSchema` prohíbe no llega
+    # al motor, así que no hay rechazo del motor que contar. Lo que el motor niega sale con su clave (ver abajo).
     with pytest.raises(Exception, match="driver"):
-        llamar("diagnosticar", documento=DOCUMENTO, imputacion=IMPUTACION)
+        asyncio.run(mcp.call_tool("diagnosticar", {"documento": DOCUMENTO, "imputacion": IMPUTACION}))
 
 
 def test_los_destinos_se_pueden_preguntar_llamando_y_no_solo_leyendo():
@@ -354,3 +373,72 @@ def test_los_destinos_se_pueden_preguntar_llamando_y_no_solo_leyendo():
     # La diferencia que un agente necesita saber ANTES de elegir: el centro de costo lo pide CONCAR y no el CSV.
     assert "centro_costo" in llamado["concar"]["exige"]
     assert "centro_costo" not in llamado["csv"]["exige"]
+
+
+# Los dos unicos parametros que el MCP llama distinto que la api, y a proposito: para un agente esa lista de
+# diccionarios es «el asiento», no «las lineas». Declarados a la vista, como las toleradas de `test_capas.py`.
+RENOMBRA = {"validar_partida_doble": {"lineas": "asiento"}, "adaptar_pcge2026": {"lineas": "asiento"}}
+
+
+def test_la_puerta_mcp_recibe_lo_mismo_que_la_http():
+    """Las dos puertas salen de la misma tabla, y lo que reciben tiene que salir de ahi tambien.
+
+    La causa de la unica divergencia contable que ha tenido este servidor —tres herramientas suponiendo
+    CONCAR— fue que el MCP escribe sus parametros a mano, en anotaciones de Python, mientras la puerta
+    HTTP los deriva de `api/tabla.py`. Dos fuentes para un mismo contrato divergen solas; este test es la
+    unica razon por la que no volveran a hacerlo sin que nadie lo vea.
+    """
+    por_nombre = {t.name: t for t in asyncio.run(mcp.list_tools())}
+    for op in api.OPERACIONES:
+        if not op.herramienta:
+            continue
+        renombra = RENOMBRA.get(op.herramienta, {})
+        entrada = op.entrada
+        esperadas = {renombra.get(n, n) for n in entrada["properties"]}
+        obligatorias = {renombra.get(n, n) for n in entrada["required"]}
+        real = por_nombre[op.herramienta].inputSchema
+        assert set(real["properties"]) == esperadas, f"{op.herramienta}: recibe otra cosa que POST {op.ruta}"
+        assert set(real.get("required", [])) == obligatorias, f"{op.herramienta}: exige otra cosa que POST {op.ruta}"
+
+
+def test_una_clave_previa_admite_el_numero_como_numero():
+    """Por HTTP el esquema acepta `string`, `integer` o `null`, y el motor tambien; por MCP solo texto.
+
+    El peligro no es el rechazo: es lo que hace un agente cuando se lo encuentra. Quitar las claves previas
+    para que la llamada pase deja pasar un comprobante ya anotado en otro periodo, y eso SUNAT lo rechaza.
+    """
+    previa = ["01", "E001", 871, "20602222226"]          # el numero como numero, no como texto
+    r = llamar("validar_comprobantes", documento=DOCUMENTO, claves_previas=[previa])
+    codigos = [o["codigo"] for o in r["comprobantes"][0]["observaciones"]]
+    assert "DUPLICADO_PERIODO_ANTERIOR" in codigos
+
+
+def test_la_imputacion_se_comprueba_al_revisar():
+    """`api.revisar` la acepta y `POST /v1/revisar` tambien: una llave huerfana sale aqui, no al exportar."""
+    negado = rechazo("validar_comprobantes", documento=DOCUMENTO,
+                     imputacion={"fila-inventada": {"cuenta_contable": "659999"}})
+    assert negado["clave"] == "documento_invalido" and "fila-inventada" in negado["detail"]
+
+
+def test_un_error_que_no_es_del_motor_no_ensena_su_texto(monkeypatch):
+    """El espejo de `test_api.py`, que exigia esto mismo de la puerta HTTP y no de esta.
+
+    Un error imprevisto puede llevar pegada una ruta del servidor o un dato interno. Por HTTP se
+    enmascara desde siempre; por MCP salia entero, y es la puerta que esta publicada sin autenticacion.
+    """
+    monkeypatch.setattr("contaperu.api.diagnosticar",
+                        lambda *a, **k: (_ for _ in ()).throw(RuntimeError("C:/ruta/interna/secreta")))
+    negado = rechazo("diagnosticar", documento=DOCUMENTO, driver="concar", imputacion=IMPUTACION)
+    assert negado["status"] == 500 and negado["clave"] == "error_interno"
+    assert "secreta" not in json.dumps(negado), "una ruta interna no sale por una puerta publica"
+
+
+def test_ninguna_herramienta_declara_esquema_de_salida():
+    """Lo que devuelven se describe en su descripcion y, para `diagnosticar`, en su recurso.
+
+    Es la decision que ya explica el recurso `contaperu://esquemas/diagnostico`: el SDK no deja declarar
+    un `outputSchema` sin cambiar lo que responde. Queda escrita aqui para que un cambio del SDK que
+    empiece a inventarse uno se vea en la bateria y no en produccion.
+    """
+    for herramienta in asyncio.run(mcp.list_tools()):
+        assert herramienta.outputSchema is None, herramienta.name
