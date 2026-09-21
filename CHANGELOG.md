@@ -67,8 +67,7 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   `BV 001 -00036207 /`.
 
 - **STARSOFT: la columna `D` se llama `COMPROBANTE`** (John, 21-sep-2026), en los dos libros, que es como la
-  llama la plantilla real (John, 21-sep-2026), en los dos libros.
-  La función que la calcula sigue llamándose `voucher`, que es superficie pública congelada.
+  llama la plantilla real. La función que la calcula sigue llamándose `voucher`, superficie pública congelada.
 
 - **STARSOFT: el tipo de anexo se parte en dos, y los dos traen valor de fábrica.** El maestro de proveedores
   y el de clientes son distintos en STARSOFT, así que `tipo_anexo` —una sola clave, vacía— pasa a
