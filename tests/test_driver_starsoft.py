@@ -59,8 +59,10 @@ def test_una_compra_sale_con_las_tres_lineas_del_asiento_tipico():
 
 
 def test_el_sub_diario_de_compras_es_el_de_starsoft_y_no_el_de_concar():
-    """`4`, no `11`. «El subdiario por defecto para compras es cuatro según el sistema contable» (compras 6:08)."""
-    assert {f["SUBDIARIO"] for f in _filas(_compra())} == {"4"}
+    """`04`, no `11`. «El subdiario por defecto para compras es cuatro según el sistema contable» (compras 6:08).
+
+    A DOS digitos y con el cero delante (John, 21-sep-2026): es un codigo, no un numero, como el `03` de ventas."""
+    assert {f["SUBDIARIO"] for f in _filas(_compra())} == {"04"}
 
 
 def test_el_sub_diario_de_ventas_tambien():
@@ -213,12 +215,12 @@ def test_el_archivo_se_llama_como_los_demas_sistemas():
 def test_el_resumen_trae_los_rangos_del_sub_diario_y_no_una_lista():
     """Lo que un ERP guarda para proponer el correlativo del mes siguiente.
 
-    Hasta la 2.0 este driver devolvía `["4"]` y PISABA el diccionario de rangos del núcleo
+    Hasta la 2.0 este driver devolvía `["04"]` y PISABA el diccionario de rangos del núcleo
     (`pipeline/armado.py` funde el extra del driver encima): quien lo leyera esperando un dict —como hace
     contab-core al recordar los correlativos— se encontraba una lista."""
     r = api.exportar(_compra(), driver="starsoft", configuracion=CONFIG,
                      imputacion={"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
-    rango = r["resumen"]["sub_diarios"]["4"]
+    rango = r["resumen"]["sub_diarios"]["04"]
     assert {"desde", "hasta", "comprobantes", "desde_codigo", "hasta_codigo", "desborda"} <= set(rango)
     assert (rango["desde"], rango["hasta"], rango["desde_codigo"]) == (1, 1, "070001")
 
@@ -250,4 +252,4 @@ def test_una_compra_con_detraccion_no_se_va_a_un_sub_diario_que_starsoft_no_tien
     doc = _compra(detraccion={"codigo": "027", "porcentaje": 4, "monto": "47.20"})
     filas = _filas(doc, config={"usa_centros_costo": False},
                    imputacion={"fila-1": {"cuenta_contable": "63110000"}})
-    assert {f["SUBDIARIO"] for f in filas} == {"4"}
+    assert {f["SUBDIARIO"] for f in filas} == {"04"}

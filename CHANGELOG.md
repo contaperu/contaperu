@@ -53,6 +53,12 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   sigue en **1.0**. Quien busque sus líneas por `rol` no nota nada; quien buscara la del IGV por el texto
   `"IGV - "` deja de encontrarla.
 
+- **El sub-diario de compras de STARSOFT es `04` y no `4`** (John, 21-sep-2026). El vídeo dice «cuatro» y de
+  ahí salió un `4` a secas; el formato lleva los dos dígitos, como el `03` de ventas —que sí estaba bien desde el
+  principio y venía delatando la inconsistencia—. Es un valor por defecto configurable, así que quien ya lo tenga
+  puesto a mano no se entera; quien use el de fábrica verá `04` en la columna y en las claves de
+  `resumen["sub_diarios"]`.
+
 - **La columna `ANULADO` de STARSOFT sale `0` y no en blanco**, en compras y en ventas. Un comprobante que está
   entrando al registro no está anulado, y afirmarlo es más claro que callarlo (John, 21-sep-2026). Su hoja admite
   las dos formas —«Blanco o `0` por defecto»— y se elige la que afirma, que además es lo que ya hacían

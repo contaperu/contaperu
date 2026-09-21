@@ -44,9 +44,14 @@ EXIGE: frozenset[str] = frozenset()
 
 # --- lo que se configura en la sección `starsoft` ------------------------------------
 
-# Los sub-diarios de STARSOFT, que NO son los de CONCAR: compras es 4 y no 11 («el subdiario por defecto para
-# compras es cuatro según el sistema contable», vídeo de compras 6:08), y ventas es 03 y no 05 (John,
-# 20-sep-2026). El de detracción no consta y se queda en el del núcleo hasta que se sepa.
+# Los sub-diarios de STARSOFT, que NO son los de CONCAR: compras es `04` y no 11 («el subdiario por defecto
+# para compras es cuatro según el sistema contable», vídeo de compras 6:08), y ventas es `03` y no 05
+# (John, 20-sep-2026). El de detracción no consta y se queda en el del núcleo hasta que se sepa.
+#
+# **Van a DOS dígitos, con el cero delante** (John, 21-sep-2026): el vídeo dice «cuatro» y de ahí salió un
+# `4` a secas, pero el formato de STARSOFT es `04`, como su `03` de ventas —que sí se escribió bien desde
+# el principio y venía delatando la inconsistencia—. Por eso el campo es TEXTO y su patrón admite el cero
+# a la izquierda: un sub-diario no es un número, es un código.
 #
 # Se cambia el VALOR POR DEFECTO del campo que ya declara el asiento, no se declara otro campo: la clave es la
 # misma (`sub_diario_compras`) y el núcleo la lee de ahí. Declarar una clave propia sería tener el mismo dato dos
@@ -82,7 +87,7 @@ TIPOS = {
 # propio registro (el 10) y en STARSOFT no consta que exista. Vacío, el motor las manda al de compras
 # (`resolucion.sub_diario`), que es lo que hace cualquier sistema que no los separa. Si STARSOFT tuviera el
 # suyo, se pone aquí y las compras con detracción se van solas a él.
-POR_DEFECTO = {"sub_diario_compras": "4", "sub_diario_ventas": "03", "sub_diario_detraccion": "", "tipos": TIPOS}
+POR_DEFECTO = {"sub_diario_compras": "04", "sub_diario_ventas": "03", "sub_diario_detraccion": "", "tipos": TIPOS}
 
 CONFIGURACION = (
     *(replace(campo, por_defecto=POR_DEFECTO[campo.clave]) if campo.clave in POR_DEFECTO else campo
