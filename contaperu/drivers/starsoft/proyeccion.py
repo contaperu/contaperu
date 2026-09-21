@@ -174,11 +174,9 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha
         # sale ese 60 no consta: el estándar no tiene el porcentaje de la operación mixta.
         "PORC OPE MIXTA": "",
         "VALOR CIF": "",
-        # VACÍA, y es una decisión tomada (John, 21-sep-2026): su hoja dice «`0` o `1`; `1` = el IGV está
-        # pendiente de aplicación», así que el `0` parecía el defecto natural —como en `DOCUMENTO ANULADO`—,
-        # pero no es el mismo caso: esto afirma algo sobre el CRÉDITO FISCAL.
-        # ⚠️ La captura de la hoja real la muestra con `0`. Pendiente de confirmarlo con John.
-        "IGV POR APLICAR": "",
+        # `0` = el IGV NO está pendiente de aplicación. Estuvo vacía mientras la única fuente era la narración
+        # del vídeo; la captura de la hoja real la muestra con `0` en todas las filas y eso la cerró.
+        "IGV POR APLICAR": datos.IGV_NO_PENDIENTE,
         "NRO FILE": "",
         "OTROS TRIBUTOS": "",
         "IMP BOLSA": "",

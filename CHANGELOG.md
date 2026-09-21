@@ -60,8 +60,9 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   los de la hoja (`CTA CONTABLE`, `FECHA DOCUMENTO`, `DOCUMENTO ANULADO`, `DEBE / HABER`, `NRO FILE`…).
 
   La captura **confirma el `04`** del sub-diario de compras, los cuatro dígitos del comprobante, el `03` del
-  tipo de anexo y la serie rellenada a cuatro (`020 00044419`). Y deja **una duda nueva**: `IGV POR APLICAR`
-  sale con `0` en la hoja, y el driver la deja vacía por decisión tomada ese mismo día, antes de verla.
+  tipo de anexo y la serie rellenada a cuatro (`020 00044419`). Y cierra una duda: **`IGV POR APLICAR` pasa a
+  `0`** —el `1` sería que el IGV está pendiente de aplicación—, porque la hoja la muestra con `0` en todas las
+  filas. Estuvo vacía mientras la única fuente fue la narración del vídeo.
 
 - **STARSOFT: la plantilla de VENTAS se calca del archivo real y pasa de 25 columnas a 34.** Cuatro capturas de
   la hoja `PLANTILLA` abierta en Excel con datos dentro (John, 21-sep-2026) corrigieron el mapa entero: faltaban
@@ -98,8 +99,8 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 - **La columna `ANULADO` de STARSOFT sale `0` y no en blanco**, en compras y en ventas. Un comprobante que está
   entrando al registro no está anulado, y afirmarlo es más claro que callarlo (John, 21-sep-2026). Su hoja admite
   las dos formas —«Blanco o `0` por defecto»— y se elige la que afirma, que además es lo que ya hacían
-  `IMPORTACION` y `EXPORTACION` en la misma fila. `IGV POR APLICAR` sigue en blanco a propósito: es una afirmación
-  sobre el crédito fiscal y no consta.
+  `IMPORTACION` y `EXPORTACION` en la misma fila. Con la captura de la hoja real, `IGV POR APLICAR` y
+  `DETRACCION` se sumaron al mismo criterio: en una fila de compras las cuatro banderas dicen `0`.
 
 ## [2.1.0] — 2026-09-21
 

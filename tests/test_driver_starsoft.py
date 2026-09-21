@@ -83,15 +83,16 @@ def test_el_voucher_va_sin_el_mes_pero_con_sus_cuatro_digitos():
 
 
 def test_las_banderas_que_se_saben_van_en_cero_y_no_en_blanco():
-    """`ANULADO` dice `0`: un comprobante que entra al registro no está anulado, y afirmarlo es más claro que
-    callarlo (John, 21-sep-2026). Su hoja admite las dos formas —«Blanco o `0` por defecto»— y se elige la que
-    afirma, igual que ya hacían `IMPORTACION` y `EXPORTACION`.
+    """Las cuatro banderas de la fila dicen `0` y no se callan.
 
-    `IGV POR APLICAR` sigue en blanco a propósito: es una afirmación sobre el crédito fiscal y no consta."""
+    `DOCUMENTO ANULADO`: un comprobante que entra al registro no está anulado, y afirmarlo es más claro que
+    callarlo (John, 21-sep-2026). `IGV POR APLICAR`: `1` seria que el IGV esta PENDIENTE de aplicacion, y la
+    captura de la hoja real la muestra con `0` en todas las filas. `DETRACCION` e `IMPORTACION` ya lo hacian."""
     compra = _filas(_compra())
     assert {f["DOCUMENTO ANULADO"] for f in compra} == {"0"}
     assert {f["IMPORTACION"] for f in compra} == {"0"}
-    assert {f["IGV POR APLICAR"] for f in compra} == {""}, "no consta: vacía dice 'no lo trae'"
+    assert {f["IGV POR APLICAR"] for f in compra} == {"0"}
+    assert {f["DETRACCION"] for f in compra} == {"0"}, "esta compra no lleva detraccion, y se dice"
     # En ventas la columna se llama `DOCUMENTO ANULADO`: son dos plantillas y cada una usa sus nombres.
     ventas = _filas(_venta(), imputacion={"fila-1": {"cuenta_contable": "70111000", "centro_costo": "CC01"}})
     assert {f["DOCUMENTO ANULADO"] for f in ventas} == {"0"}

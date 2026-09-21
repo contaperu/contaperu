@@ -244,6 +244,14 @@ DESTINO_IMPORTACION = "005"
 # valor posible y pasa a ser el valor por defecto de verdad.
 NO_ANULADO = "0"
 
+# La columna `IGV POR APLICAR` de compras (`AD`). Su hoja dice «`0` o `1`, donde `1` es que el IGV está
+# PENDIENTE de aplicación», y la captura de la hoja real la muestra con `0` en todas las filas, así que el
+# defecto es afirmar que no está pendiente (John, 21-sep-2026, tras ver la captura).
+#
+# **El motor no sabe diferir el crédito fiscal**: no hay hoy un comprobante que llegue aquí con el IGV
+# pendiente. El día que el estándar lo traiga, esta constante deja de ser el único valor posible.
+IGV_NO_PENDIENTE = "0"
+
 # Lo que no cabe en el formato. El largo de la glosa está escrito en la cabecera de la propia hoja `PARAMETROS`
 # («GLOSA DEL MOVIMIENTO · Máximo 60 caracteres»), así que es un hecho y no una deducción.
 LARGO_GLOSA = 60

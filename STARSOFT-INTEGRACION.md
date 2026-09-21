@@ -274,12 +274,11 @@ aparecen `OTROS TRIBUTOS` e `IMP BOLSA`. Eran 32 columnas y son 38. Los nombres 
 | `GLOSA` | `FT F136-00000431 /`, `TK 020 -00044419 /` — mismo formato que en ventas |
 | `IGV` y `TASA IGV` | **solo en la fila del total**, la del proveedor |
 | `DESTINO` | `001`, `002`, `004` — con sus tres dígitos |
+| `IGV POR APLICAR` | `0` en todas las filas: el IGV no está pendiente de aplicación |
 | `FECHA DOCUMENTO` (`E`) y `FECHA REGISTRO` (`O`) | son **dos fechas distintas**, en dos columnas |
 
 **Lo que sigue abierto:**
 
-- ⚠️ **`IGV POR APLICAR` sale con `0` en la captura**, y el driver la deja vacía por decisión de John del mismo
-  día, tomada antes de ver esta hoja. **Pendiente de confirmar.**
 - **`PORC OPE MIXTA` sale con `60`** en una compra de destino `002` (uso mixto). De dónde sale ese 60 no consta:
   el estándar no tiene el porcentaje de la operación mixta, así que la columna va declarada y vacía.
 - **`NRO DOC DETRACCION` y `FECHA DETRACCION`** van vacías: la constancia del depósito no se conoce al
