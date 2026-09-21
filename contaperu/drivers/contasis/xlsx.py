@@ -4,13 +4,13 @@ from __future__ import annotations
 from typing import Any
 
 from ...modelo import Comprobante, Libro
-from ..kit import Opciones
+from ..kit import Opciones, nombre_de_archivo
 from ..kit import xlsx as kit_xlsx
 from . import datos, proyeccion
 
 
 def nombre(libro: Libro, opciones: Opciones = datos.OPCIONES) -> str:
-    return f"CONTASIS_{libro.ruc}_{libro.periodo}_{'VENTAS' if libro.es_venta else 'COMPRAS'}{opciones.extension}"
+    return nombre_de_archivo(datos.NOMBRE, libro, opciones)
 
 
 def escribir_xlsx(libro: Libro, filas: list[dict[str, Any]]) -> bytes:

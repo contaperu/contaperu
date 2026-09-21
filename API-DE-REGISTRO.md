@@ -1474,7 +1474,7 @@ limpio. Este es el archivo que produce, generado por el motor para la compra del
 }
 ```
 
-El archivo se llama `asiento_neutral_20601234567_202601_compra.json`, y lleva **el libro y el asiento, no los
+El archivo se llama `ASIENTO_NEUTRAL_COMPRAS_202601_20601234567.json`, y lleva **el libro y el asiento, no los
 comprobantes**: quien pulsa el botón ya los tiene.
 
 ### En qué es «más limpio» que CONCAR

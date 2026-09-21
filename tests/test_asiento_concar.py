@@ -547,12 +547,12 @@ def test_xlsx_con_la_plantilla_de_concar():
 
 def test_generar_con_plantilla_concar():
     exp = gen.generar(COMPRAS, [cp(), cp(numero="2", excluida=True)], "concar", config=CONTAB, correlativos={"11": 1})
-    assert exp.nombre == exp.archivo == "CONCAR_20601111111_202608_COMPRAS.xlsx"
+    assert exp.nombre == exp.archivo == "CONCAR_COMPRAS_202608_20601111111.xlsx"
     assert exp.formato == "concar_xlsx" and exp.content_type.endswith("spreadsheetml.sheet")
     assert exp.contenido[:2] == b"PK" and exp.comprimido == b"" and exp.nombre_comprimido == ""
     assert exp.comprobantes == 1 and exp.resumen["comprobantes"] == 1 and exp.resumen["excluidos"] == 1 and exp.resumen["filas"] == 3
     expv = gen.generar(VENTAS, [cp()], "concar", config=CONTAB, correlativos={"05": 1})
-    assert expv.nombre == "CONCAR_20601111111_202608_VENTAS.xlsx" and expv.resumen["sub_diarios"]["05"]["etiqueta"] == "Ventas"
+    assert expv.nombre == "CONCAR_VENTAS_202608_20601111111.xlsx" and expv.resumen["sub_diarios"]["05"]["etiqueta"] == "Ventas"
     with pytest.raises(concar.SinCuenta):
         gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", config=CONTAB, correlativos={"11": 1})
     with pytest.raises(concar.SinCodigoDeMoneda):

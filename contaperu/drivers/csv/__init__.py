@@ -21,6 +21,7 @@ from __future__ import annotations
 from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from ...asiento.lineas import LineaDiario
 from ..kit import Opciones
+from ..kit import nombre_de_archivo as _nombre_de_archivo
 from ..kit.columnas import ColumnaDeLinea, escribir_csv
 from ...modelo import Libro
 
@@ -82,7 +83,7 @@ COLUMNAS: list[tuple[str, str]] = [(columna.ruta, columna.cabecera) for columna 
 
 
 def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
-    return f"asiento_{libro.ruc}_{libro.periodo}_{libro.tipo}{opciones.extension}"
+    return _nombre_de_archivo(NOMBRE, libro, opciones)
 
 
 def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones: Opciones = OPCIONES,

@@ -10,7 +10,7 @@ from ...asiento.indice import ComprobanteDelAsiento
 from ...asiento.lineas import LineaDiario
 from ...asiento.resolucion import etiquetas_sub_diario, limites_del_periodo
 from ...modelo import Libro
-from ..kit import Opciones
+from ..kit import Opciones, nombre_de_archivo
 from ..kit import xlsx as kit_xlsx
 from . import datos, proyeccion  # noqa: F401  (`datos` es un nombre que la 0.10 dejaba ver aquí)
 from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, EXIGE,  # noqa: F401
@@ -37,7 +37,7 @@ class CorrelativoDesborda(NoExportable):
 
 
 def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
-    return f"CONCAR_{libro.ruc}_{libro.periodo}_{'VENTAS' if libro.es_venta else 'COMPRAS'}{opciones.extension}"
+    return nombre_de_archivo(datos.NOMBRE, libro, opciones)
 
 
 def escribir_xlsx(filas: list[dict[str, Any]]) -> bytes:

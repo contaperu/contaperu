@@ -113,7 +113,10 @@ un contador]**
 |---|---|
 | Año y mes de registro | En el ejemplo, `2025` `7` |
 | **Sub-diario de compras** | **`4`** por defecto, «según el sistema contable» |
-| Correlativo de vouchers | **Siempre empieza en `1`** |
+| Correlativo de vouchers | **Siempre empieza en `1`**. El driver lo escribe a cuatro dígitos (`0001`),
+que es el ancho con el que numera el motor (John, 21-sep-2026). ⚠️ Excel, al abrir el CSV para revisarlo,
+lo mostrará como `1`: el archivo es correcto, engaña el visor. **[por confirmar]** que STARSOFT acepte el
+texto con ceros; si no, se quita el `zfill` de `proyeccion.voucher`. |
 
 **Por comprobante [C 7:19-12:32]:**
 
@@ -374,7 +377,7 @@ cabeceras de `PARAMETROS`** (CTA GTO/ACT, CTA IGV, CTA PASIVO): el driver no tie
 | Columna | El motor da | STARSOFT espera |
 |---|---|---|
 | Sub-diario | `11` compras · `05` ventas (CONCAR) | **`4`** · **`03`** — va a su sección de configuración |
-| Voucher | `070001` (formato CONCAR: mes + correlativo) | **`1`** — número limpio |
+| Voucher | `070001` (formato CONCAR: mes + correlativo) | **`0001`** — sin el mes, con sus cuatro dígitos |
 | `NRO DOCUMENTO` | `F136-431` | **`F13600000431`** — pegado y con ceros |
 | `DESTINO` | `DG` | **`001`** — numérico a 3 dígitos |
 | `CONV` | — | **`VTA`** — constante de configuración |

@@ -31,7 +31,7 @@ def hoja(resultado: dict):
 def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     """Sin las filas 1-13 de la plantilla, con su pestaña, y los espacios del relleno siguen ahí al abrirlo."""
     r = api.exportar(doc(FACTURA, dict(FACTURA, numero="124")), driver="contasis", configuracion=CONTAB)
-    assert r["archivo"] == "CONTASIS_20601234567_202608_COMPRAS.xlsx" and r["formato"] == "contasis_xlsx"
+    assert r["archivo"] == "CONTASIS_COMPRAS_202608_20601234567.xlsx" and r["formato"] == "contasis_xlsx"
     ws = hoja(r)
     assert ws.title == "FORMATO_COMPRAS" and ws.max_row == 2
     assert isinstance(ws["A1"].value, datetime) and ws["A1"].number_format == "mm-dd-yy"
@@ -45,7 +45,7 @@ def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     assert all(abs(ws.column_dimensions[letra].width - anchos[letra]) < 0.01 for letra, *_ in contasis.datos.COMPRAS)
     assert anchos["B"] >= 12 and anchos["I"] >= 38 and anchos["K"] >= 12 and anchos["AS"] >= 26
     ventas = api.exportar(doc(FACTURA, tipo="venta"), driver="contasis", configuracion=CONTAB)
-    assert hoja(ventas).title == "FORMATO_VENTAS" and ventas["archivo"].endswith("_VENTAS.xlsx")
+    assert hoja(ventas).title == "FORMATO_VENTAS" and ventas["archivo"] == "CONTASIS_VENTAS_202608_20601234567.xlsx"
 
 
 def test_el_recibo_por_honorarios_queda_fuera_del_archivo():

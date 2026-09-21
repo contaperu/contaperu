@@ -70,9 +70,11 @@ def test_el_sub_diario_de_ventas_tambien():
     assert {f["SUBDIARIO"] for f in filas} == {"03"}
 
 
-def test_el_voucher_va_limpio_y_no_con_el_mes_delante():
-    """El motor numera `070001`; STARSOFT empieza en 1 y sigue (compras 6:15)."""
-    assert {f["VOUCHER"] for f in _filas(_compra())} == {"1"}
+def test_el_voucher_va_sin_el_mes_pero_con_sus_cuatro_digitos():
+    """El motor numera `070001`; STARSOFT empieza en 1 y sigue (compras 6:15), con el ancho del campo.
+
+    Los ceros son el ancho, no adorno: hasta la 2.0 el recorte del mes pasaba por `int()` y salía `1`."""
+    assert {f["VOUCHER"] for f in _filas(_compra())} == {"0001"}
 
 
 def test_el_numero_del_documento_va_pegado_y_con_ceros():
@@ -185,11 +187,25 @@ def test_una_glosa_larga_no_cabe_y_se_dice_antes_de_exportar():
                      imputacion={"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
 
 
-def test_el_archivo_se_llama_por_su_ruc_periodo_y_libro():
+def test_el_archivo_se_llama_como_los_demas_sistemas():
+    """`SISTEMA_LIBRO_PERIODO_RUC`, la regla de `kit.nombre_de_archivo` (2.1)."""
     r = api.exportar(_compra(), driver="starsoft", configuracion=CONFIG,
                      imputacion={"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
-    assert r["archivo"] == f"STARSOFT_{RUC}_202507_COMPRAS.csv"
+    assert r["archivo"] == f"STARSOFT_COMPRAS_202507_{RUC}.csv"
     assert r["resumen"]["debe"] == r["resumen"]["haber"] == "1096.80"
+
+
+def test_el_resumen_trae_los_rangos_del_sub_diario_y_no_una_lista():
+    """Lo que un ERP guarda para proponer el correlativo del mes siguiente.
+
+    Hasta la 2.0 este driver devolvía `["4"]` y PISABA el diccionario de rangos del núcleo
+    (`pipeline/armado.py` funde el extra del driver encima): quien lo leyera esperando un dict —como hace
+    contab-core al recordar los correlativos— se encontraba una lista."""
+    r = api.exportar(_compra(), driver="starsoft", configuracion=CONFIG,
+                     imputacion={"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
+    rango = r["resumen"]["sub_diarios"]["4"]
+    assert {"desde", "hasta", "comprobantes", "desde_codigo", "hasta_codigo", "desborda"} <= set(rango)
+    assert (rango["desde"], rango["hasta"], rango["desde_codigo"]) == (1, 1, "070001")
 
 
 def test_una_compra_con_detraccion_lleva_sus_datos_en_las_columnas():

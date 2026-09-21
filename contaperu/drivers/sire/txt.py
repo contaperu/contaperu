@@ -71,6 +71,17 @@ def columnas_igv_compras(c: Comprobante, opciones: Opciones) -> list[str]:
 
 
 def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
+    """El nombre oficial del TXT. **Es el ÚNICO driver que no usa `kit.nombre_de_archivo`**, y no es un olvido.
+
+    Dos razones independientes, cualquiera de las dos basta:
+
+    1. **Lo impone SUNAT** (Tablas 6 y 13, arriba). Con otro nombre el SIRE rechaza el archivo, y el error parece
+       de SUNAT y no nuestro.
+    2. **El propio motor lo lee**: `comparar_sire.registro_de()` deduce si un archivo es de ventas o de compras
+       buscando `1404`/`0804` EN EL NOMBRE, «más fiable que contar campos». Renombrarlo lo dejaría ciego.
+
+    Si algún día alguien unifica esto «por coherencia», que lo deshaga después de leer estas dos líneas.
+    """
     codigo = LIBRO_VENTAS if libro.es_venta else LIBRO_COMPRAS
     return f"LE{libro.ruc}{libro.periodo}00{codigo}{OPORTUNIDAD_REEMPLAZO}1112{opciones.extension}"
 

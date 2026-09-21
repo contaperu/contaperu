@@ -76,7 +76,7 @@ def test_es_del_asiento_y_no_del_archivo():
     csv = exportar(d, driver="csv")
     assert concar["_exportacion"]["huella"] == csv["_exportacion"]["huella"] == HUELLA_FACTURA
     assert concar["resumen"]["huella"] == csv["resumen"]["huella"] == HUELLA_FACTURA   # lo que persiste el portal
-    assert _sin_detalle(concar["_exportacion"]) == {"driver": "concar", "archivo": "CONCAR_20601111111_202608_COMPRAS.xlsx",
+    assert _sin_detalle(concar["_exportacion"]) == {"driver": "concar", "archivo": "CONCAR_COMPRAS_202608_20601111111.xlsx",
                                                     "huella": HUELLA_FACTURA}
 
 

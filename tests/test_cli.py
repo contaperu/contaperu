@@ -83,10 +83,10 @@ def test_desde_json_llega_a_los_drivers_de_asientos(tmp_path, capsys):
     config.write_bytes(b"\xef\xbb\xbf" + json.dumps({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}).encode())
     salida = tmp_path / "s"
     assert cli.main(["desde-json", golden, "--driver", "csv", "--salida", str(salida), "--config", str(config)]) == 0
-    csv = (salida / "asiento_20601234567_202601_compra.csv").read_bytes().decode("utf-8-sig")
+    csv = (salida / "CSV_COMPRAS_202601_20601234567.csv").read_bytes().decode("utf-8-sig")
     assert csv.startswith("sub_diario;correlativo;fecha;cuenta") and csv.count("\r\n") == 1 + 9   # 3 facturas × 3 líneas
     assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(salida), "--config", str(config)]) == 0
-    assert (salida / "CONCAR_20601234567_202601_COMPRAS.xlsx").read_bytes()[:2] == b"PK"
+    assert (salida / "CONCAR_COMPRAS_202601_20601234567.xlsx").read_bytes()[:2] == b"PK"
     assert "concar concar_xlsx   3 comprobantes" in capsys.readouterr().out
     # Sin la cuenta de gasto el driver se niega, y la CLI dice a dónde ir a mirar en vez de un traceback.
     assert cli.main(["desde-json", golden, "--driver", "csv", "--salida", str(salida)]) == 1
@@ -142,7 +142,7 @@ def test_la_imputacion_entra_por_la_terminal(tmp_path, capsys):
     salida = tmp_path / "s"
     orden = ["desde-json", str(documento), "--driver", "csv", "--salida", str(salida), "--config", str(config)]
     assert cli.main(orden + ["--imputacion", str(imputacion)]) == 0
-    csv = (salida / "asiento_20601234567_202601_compra.csv").read_bytes().decode("utf-8-sig")
+    csv = (salida / "CSV_COMPRAS_202601_20601234567.csv").read_bytes().decode("utf-8-sig")
     assert csv.count(";636301;D;") == 1 and csv.count(";659999;D;") == 2
 
     # Sin la cuenta de gasto del RUC, al primero le llega la suya y a los otros dos les sigue faltando.

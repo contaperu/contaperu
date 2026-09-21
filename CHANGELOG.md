@@ -6,6 +6,56 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.1.0] — 2026-09-21
+
+**El archivo que produce cada driver cambia de nombre.** Si tienes un script que lo busca por su nombre, es lo
+primero que hay que mirar de esta versión.
+
+La regla nueva es **`SISTEMA_LIBRO_PERIODO_RUC`** y vale para los cinco drivers de sistema:
+
+| Antes | Ahora |
+|---|---|
+| `CONCAR_20601234567_202507_COMPRAS.xlsx` | `CONCAR_COMPRAS_202507_20601234567.xlsx` |
+| `CONTASIS_20601234567_202507_COMPRAS.xlsx` | `CONTASIS_COMPRAS_202507_20601234567.xlsx` |
+| `STARSOFT_20601234567_202507_COMPRAS.csv` | `STARSOFT_COMPRAS_202507_20601234567.csv` |
+| `asiento_20601234567_202507_compra.csv` | `CSV_COMPRAS_202507_20601234567.csv` |
+| `asiento_neutral_20601234567_202507_compra.json` | `ASIENTO_NEUTRAL_COMPRAS_202507_20601234567.json` |
+
+El sistema delante y el RUC al final es cómo se busca un archivo cuando se llevan 30-80 contribuyentes: por
+sistema y por mes. Hasta aquí convivían tres convenciones —la de los tres ERP, la del CSV en minúscula y con el
+libro en singular, y la del SIRE— porque cada driver repetía su propia `f-string`.
+
+**El TXT del SIRE NO cambia** y es la única excepción: su nombre lo impone SUNAT (Tablas 6 y 13), y además
+`comparar_sire.registro_de()` lo lee para saber si un archivo es de ventas o de compras. Queda escrito en
+`drivers/sire/txt.py`, junto a la función, para que nadie lo unifique «por coherencia».
+
+### Añadido
+
+- **`drivers.kit.nombre_de_archivo(sistema, libro, opciones)`** — la regla, escrita una vez. Un driver de
+  terceros la llama y su archivo se llama como los demás sin decidir nada.
+
+### Cambiado
+
+- **El voucher de STARSOFT conserva sus cuatro dígitos: `0001`, no `1`.** El motor numera `070001` (mes +
+  correlativo, que es lo que pide CONCAR) y a STARSOFT se le quita el mes; hasta ahora ese recorte pasaba por
+  `int()` y se llevaba por delante los ceros, que son el ancho del campo. **CONCAR no cambia**: su columna C
+  sigue llevando `070001`, como dice su plantilla. Ojo al revisar el CSV: Excel muestra `0001` como `1` — el
+  archivo es correcto, engaña el visor.
+
+### Arreglado
+
+- **STARSOFT devolvía `sub_diarios` como lista** (`["4"]`) en vez del diccionario de rangos que devuelven los
+  demás, y como el `resumen` del driver se funde ENCIMA del que calcula el núcleo, borraba `desde`, `hasta`,
+  `desde_codigo`, `hasta_codigo` y `desborda`. Eso es justo lo que un ERP guarda para proponer el correlativo del
+  mes siguiente: quien lo leyera esperando un diccionario —como hace la aplicación que integra el motor— se
+  encontraba una lista. Ahora el driver no pone esa clave y manda la del núcleo.
+
+### Nota para quien integra
+
+Ninguna huella se mueve y la API pública no pierde ni cambia un nombre: el correlativo no entra en la huella y el
+voucher se calcula al proyectar, no en la línea neutral. Los archivos ya exportados y guardados conservan el
+nombre que tenían — la regla vale para lo que se exporte de aquí en adelante.
+
 ## [2.0.0] — 2026-09-21
 
 **Se retira la compatibilidad con la 0.x. Quien integró con la 1.x no tiene que cambiar una línea.**
@@ -1137,7 +1187,8 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v2.0.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/contaperu/contaperu/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/contaperu/contaperu/compare/v1.4.0...v2.0.0
 [1.4.0]: https://github.com/contaperu/contaperu/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/contaperu/contaperu/compare/v1.2.1...v1.3.0

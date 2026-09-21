@@ -21,7 +21,7 @@ from typing import Any
 from ...asiento.indice import ComprobanteDelAsiento
 from ...asiento.lineas import LineaDiario
 from ...modelo import Libro
-from ..kit import OpcionesArchivo
+from ..kit import OpcionesArchivo, nombre_de_archivo
 from . import datos, proyeccion
 from .datos import OPCIONES
 
@@ -30,8 +30,7 @@ BOM = "﻿"           # para que Excel reconozca el UTF-8 sin preguntar
 
 
 def nombre(libro: Libro, opciones: OpcionesArchivo = OPCIONES) -> str:
-    return (f"STARSOFT_{libro.ruc}_{libro.periodo}_"
-            f"{'VENTAS' if libro.es_venta else 'COMPRAS'}{opciones.extension}")
+    return nombre_de_archivo(datos.NOMBRE, libro, opciones)
 
 
 def escribir(libro: Libro, filas: list[dict[str, Any]]) -> bytes:
@@ -65,7 +64,11 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict,
     for entrada in indice:
         filas.extend(proyeccion.filas(entrada.cabecera, entrada.lineas(lineas), libro, config,
                                       entrada.cabecera.fecha_emision))
-    resumen = {"filas": len(filas), "sub_diarios": sorted({e.sub_diario for e in indice})}
+    # `sub_diarios` NO se pone aquí: lo calcula el núcleo con sus rangos (`asiento.numerar_en_orden`) y lo
+    # que devuelva el driver lo PISA (`pipeline/armado.py`). Hasta la 2.0 esto devolvía la lista de
+    # sub-diarios presentes y borraba el diccionario de rangos, que es lo que un ERP guarda para proponer
+    # el correlativo del mes siguiente: quien lo consumiera esperando un dict se encontraba una lista.
+    resumen = {"filas": len(filas)}
     return escribir(libro, filas), resumen
 
 

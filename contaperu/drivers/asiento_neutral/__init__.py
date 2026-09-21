@@ -18,6 +18,7 @@ import json
 from ..._version import OPEN_ACCOUNTING
 from ...modelo import Libro
 from ..kit import OpcionesArchivo
+from ..kit import nombre_de_archivo as _nombre_de_archivo
 
 NOMBRE = "asiento_neutral"
 # Un formato neutral para integrar: el grupo ERP (`drivers.contrato.GRUPOS`).
@@ -33,7 +34,7 @@ CONFIGURACION: tuple = ()
 
 
 def nombre(libro: Libro, opciones: OpcionesArchivo = OPCIONES) -> str:
-    return f"asiento_neutral_{libro.ruc}_{libro.periodo}_{libro.tipo}{opciones.extension}"
+    return _nombre_de_archivo(NOMBRE, libro, opciones)
 
 
 def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tuple[bytes, dict]:

@@ -10,7 +10,7 @@ adquisición, el número sin partir—, y una tabla de rutas solo alcanza la lí
 Las seis traducciones que hacen a STARSOFT distinto de CONCAR, con el mismo documento delante:
 
     sub-diario      11  ->  4          el de STARSOFT, que va en la configuración
-    voucher         070001  ->  1      el correlativo limpio, sin el mes delante
+    voucher         070001  ->  0001   el correlativo sin el mes, con sus cuatro dígitos
     nro documento   F136-431  ->  F13600000431    pegado y con ceros
     conversión      V  ->  VTA
     glosa           CELULARES  ->  FT F136-00000431
@@ -25,6 +25,7 @@ from ...asiento.lineas import LineaDiario
 from . import datos
 
 LARGO_NUMERO = 8       # F136 + 00000431: el número a ocho, visto en la captura de la hoja PLANTILLA
+LARGO_VOUCHER = 4      # 0001: los cuatro dígitos con los que numera el motor, sin el mes delante
 
 
 def destino_de(cab: Cabecera) -> str:
@@ -72,15 +73,22 @@ def glosa_del_documento(ln: LineaDiario, cab: Cabecera) -> str:
     return f"{tipo} {cab.serie}-{(cab.numero or '').zfill(LARGO_NUMERO)}".strip()
 
 
-def voucher(correlativo: str) -> Any:
-    """El correlativo tal como lo numera STARSOFT: `1`, no `070001`.
+def voucher(correlativo: str) -> str:
+    """El correlativo tal como lo numera STARSOFT: `0001`, no `070001`.
 
     El motor numera con el mes delante y cuatro dígitos (`asiento.numerar`), que es lo que piden CONCAR y el CSV.
     STARSOFT empieza en 1 y sigue («el correlativo de comprobantes o vouchers debe iniciar siempre en el número
     uno», compras 6:15), así que se le quita el mes. Mismo recorte que hace CONCAR en su propio resumen.
+
+    **Los cuatro dígitos se conservan** (John, 21-sep-2026). Hasta la 2.0 esto pasaba por `int()` y salía `1`: el
+    recorte del mes se llevaba por delante los ceros, que no son adorno sino el ancho del campo.
+
+    ⚠️ En el CSV la celda va `0001` sin comillas, así que **Excel, al abrirlo para revisarlo, mostrará `1`**. El
+    archivo es correcto; lo que engaña es el visor. Si el día de la primera importación real STARSOFT rechazara el
+    texto con ceros, es este `zfill` lo que se quita.
     """
     sin_mes = (correlativo or "")[2:] or "0"
-    return int(sin_mes) if sin_mes.isdigit() else correlativo
+    return sin_mes.zfill(LARGO_VOUCHER) if sin_mes.isdigit() else correlativo
 
 
 def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str) -> dict[str, Any]:
