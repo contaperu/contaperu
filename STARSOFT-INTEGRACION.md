@@ -242,6 +242,51 @@ real, no sobre la narración.
 > **Compras y ventas no comparten juego de columnas.** Ventas lleva `RUC CLIENTE` y `RAZON SOCIAL`;
 > compras, `código de proveedor`. **Son dos plantillas y dos proyecciones.**
 
+### La cabecera REAL de la hoja `PLANTILLA` de compras · **[capturas de John, 21-sep-2026]**
+
+Las 38 columnas, leídas de cuatro capturas de la hoja abierta en Excel con datos dentro.
+
+| | | | | | |
+|---|---|---|---|---|---|
+| **A** `CTA CONTABLE` | **B** `AÑO Y MES PROCESO` | **C** `SUBDIARIO` | **D** `COMPROBANTE` | **E** `FECHA DOCUMENTO` | **F** `TIPO ANEXO` |
+| **G** `CODIGO PROVEEDOR` | **H** `TIPO DOCUMENTO` | **I** `NRO DOCUMENTO` | **J** `FECHA VENCIMIENTO` | **K** `IGV` | **L** `TASA IGV` |
+| **M** `IMPORTE` | **N** `CONV` | **O** `FECHA REGISTRO` | **P** `TIPO CAMBIO` | **Q** `GLOSA` | **R** `DESTINO` |
+| **S** `PORC OPE MIXTA` | **T** `VALOR CIF` | **U** `TIPO DOC REF` | **V** `NRO DOC REF` | **W** `CENTRO DE COSTOS` | **X** `DETRACCION` |
+| **Y** `NRO DOC DETRACCION` | **Z** `FECHA DETRACCION` | **AA** `FECHA DOC REF` | **AB** `GLOSA MOVIMIENTO` | **AC** `DOCUMENTO ANULADO` | **AD** `IGV POR APLICAR` |
+| **AE** `CODIGO DETRACCION` | **AF** `IMPORTACION` | **AG** `DEBE / HABER` | **AH** `TASA DETRACCION` | **AI** `IMPORTE DETRACCION` | **AJ** `NRO FILE` |
+| **AK** `OTROS TRIBUTOS` | **AL** `IMP BOLSA` | | | | |
+
+**Lo que corrigió:** faltaban **`DETRACCION` (`X`)**, **`NRO DOC DETRACCION` (`Y`)**, **`FECHA DETRACCION`
+(`Z`)** y **`FECHA DOC REF` (`AA`)**, así que **desde la `X` todo estaba corrido cuatro posiciones**; y al final
+aparecen `OTROS TRIBUTOS` e `IMP BOLSA`. Eran 32 columnas y son 38. Los nombres pasan a ser los de la hoja:
+`CTA CONTABLE`, `AÑO Y MES PROCESO`, `FECHA DOCUMENTO`, `CENTRO DE COSTOS`, `DOCUMENTO ANULADO`,
+`DEBE / HABER`, `NRO FILE`.
+
+**Lo que confirman los datos:**
+
+| Qué | Lo que se ve |
+|---|---|
+| Sub-diario de compras | **`04`**, con su cero — como dijo John y al revés de lo que se dedujo del vídeo |
+| `COMPROBANTE` | `0001`, `0002`, `0003`… cuatro dígitos |
+| `TIPO ANEXO` | `03` en todas las filas |
+| `DOCUMENTO ANULADO` e `IMPORTACION` | `0` en todas las filas |
+| `NRO DOCUMENTO` | `F13600000431`, pero también `020 00044419` y `050 00010197`: **la serie se rellena a 4** |
+| `GLOSA` | `FT F136-00000431 /`, `TK 020 -00044419 /` — mismo formato que en ventas |
+| `IGV` y `TASA IGV` | **solo en la fila del total**, la del proveedor |
+| `DESTINO` | `001`, `002`, `004` — con sus tres dígitos |
+| `FECHA DOCUMENTO` (`E`) y `FECHA REGISTRO` (`O`) | son **dos fechas distintas**, en dos columnas |
+
+**Lo que sigue abierto:**
+
+- ⚠️ **`IGV POR APLICAR` sale con `0` en la captura**, y el driver la deja vacía por decisión de John del mismo
+  día, tomada antes de ver esta hoja. **Pendiente de confirmar.**
+- **`PORC OPE MIXTA` sale con `60`** en una compra de destino `002` (uso mixto). De dónde sale ese 60 no consta:
+  el estándar no tiene el porcentaje de la operación mixta, así que la columna va declarada y vacía.
+- **`NRO DOC DETRACCION` y `FECHA DETRACCION`** van vacías: la constancia del depósito no se conoce al
+  provisionar, se paga días después.
+- **El `TIPO CAMBIO` viene lleno** (`3.274`) en filas de soles. El driver solo lo escribe cuando el comprobante
+  trae tipo de cambio, que es cuando la moneda no es PEN.
+
 ### La cabecera REAL de la hoja `PLANTILLA` de ventas · **[capturas de John, 21-sep-2026]**
 
 Las 34 columnas, leídas de cuatro capturas de la hoja abierta en Excel **con datos dentro**. Es la fuente más

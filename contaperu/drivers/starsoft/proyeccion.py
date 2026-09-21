@@ -106,27 +106,33 @@ def voucher(correlativo: str) -> str:
     return sin_mes.zfill(LARGO_VOUCHER) if sin_mes.isdigit() else correlativo
 
 
-def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str) -> dict[str, Any]:
+def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str,
+         hay_detraccion: bool = False) -> dict[str, Any]:
     """Una línea neutral → una fila del archivo, con las claves del libro que toca (`datos.COLUMNAS`).
 
     **Compras y ventas no comparten ni las cabeceras**: son dos plantillas y se calca cada una de su fuente, así
     que aquí solo se reparte. La de ventas sale de las capturas de la hoja real; la de compras, del vídeo.
     """
     arma = _fila_venta if libro.tipo == "venta" else _fila_compra
-    todo = arma(ln, cab, libro, config, fecha_registro)
+    todo = arma(ln, cab, libro, config, fecha_registro, hay_detraccion)
     return {cabecera: todo.get(cabecera, "") for _, cabecera, _ in datos.COLUMNAS[libro.tipo]}
 
 
-def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str) -> dict[str, Any]:
-    """`IGV` y `TASA IGV` van **solo en la línea del total** —la del rol `tercero`—, como en la captura."""
+def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str,
+                 hay_detraccion: bool = False) -> dict[str, Any]:
+    """Las 38 columnas de la plantilla de compras, con sus nombres literales.
+
+    `IGV` y `TASA IGV` van **solo en la fila del total** —la del rol `tercero`—, como en la captura: las otras
+    dos filas del asiento las llevan vacías. Es para lo que existe el rol.
+    """
     doc, ref, det = ln.documento or {}, ln.referencia or {}, ln.detraccion or {}
     es_total = ln.rol == "tercero"
     return {
-        "CUENTA": ln.cuenta,
-        "PERIODO": libro.periodo,
+        "CTA CONTABLE": ln.cuenta,
+        "AÑO Y MES PROCESO": libro.periodo,
         "SUBDIARIO": ln.sub_diario,
         "COMPROBANTE": voucher(ln.correlativo),
-        "FECHA": ln.fecha,
+        "FECHA DOCUMENTO": ln.fecha,
         "TIPO ANEXO": config.get("tipo_anexo_proveedor") or "",
         "CODIGO PROVEEDOR": cab.contraparte_doc,
         "TIPO DOCUMENTO": doc.get("tipo", ""),
@@ -140,36 +146,47 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha
         "TIPO CAMBIO": ln.tipo_cambio or "",
         "GLOSA": glosa_del_documento(ln, cab),
         "DESTINO": destino_de(cab),
-        # Las dos que el estándar no tiene. Vacías y declaradas: una columna que existe y va en blanco dice
-        # «este comprobante no lo trae»; una que falta diría «este motor no lo sabe».
-        "PORC OPE MIXTA": "",
-        "VALOR CIF": "",
         "TIPO DOC REF": ref.get("tipo", ""),
         "NRO DOC REF": ref.get("serie_numero", ""),
-        "CENTRO COSTO": ln.centro_costo or ln.anexo_auxiliar or "",
+        "FECHA DOC REF": ref.get("fecha", ""),
+        "CENTRO DE COSTOS": ln.centro_costo or ln.anexo_auxiliar or "",
         "GLOSA MOVIMIENTO": ln.glosa,
-        "ANULADO": datos.NO_ANULADO,
-        # VACÍA, y es una decisión tomada (John, 21-sep-2026), no una casilla por rellenar. Su hoja dice
-        # «`0` o `1`; `1` = el IGV está pendiente de aplicación», así que el `0` parecía el defecto natural
-        # —como en `ANULADO`—, pero no es el mismo caso: esto afirma algo sobre el CRÉDITO FISCAL.
-        "IGV POR APLICAR": "",
-        # La detracción: el motor la pone en la línea que le toca (`rol` detraccion) y aquí se transcribe.
-        # ⚠️ `[por confirmar]` Y ES LA DUDA MÁS GRANDE DEL DRIVER: en los vídeos la detracción se registra
-        # como DATOS de la fila, mientras el motor genera dos líneas más para ella, que es lo que pide CONCAR.
-        # El código de SUNAT (`027`), no el interno que CONCAR mapea en su tabla (`02702`): el vídeo dice
-        # «el código de la detracción… para indicar el tipo de operación afecta» (10:49), y eso es el Catálogo 54.
+        "DOCUMENTO ANULADO": datos.NO_ANULADO,
+        "IMPORTACION": "1" if (cab.anio_dua or cab.cod_dep_aduanera) else "0",
+        "DEBE / HABER": ln.debe_haber,
+        # --- la detracción: cuatro columnas juntas más las tres de después ------------------------------
+        # La bandera del comprobante, no de la línea: «1 sí · blanco o 0 no» dice su hoja, y se elige afirmar,
+        # como en `DOCUMENTO ANULADO` e `IMPORTACION`.
+        "DETRACCION": "1" if hay_detraccion else "0",
+        # La constancia del depósito NO se conoce al provisionar: se paga días después. Por eso el motor pone el
+        # comodín en el documento de la línea, y estas dos van vacías hasta que alguien las traiga.
+        "NRO DOC DETRACCION": "",
+        "FECHA DETRACCION": "",
+        # El código de SUNAT (`027`), no el interno que CONCAR mapea en su tabla (`02702`): el vídeo dice «el
+        # código de la detracción… para indicar el tipo de operación afecta» (10:49), y eso es el Catálogo 54.
         "CODIGO DETRACCION": det.get("codigo", ""),
         "TASA DETRACCION": det.get("tasa", ""),
         # Lo DETRAÍDO, que es el importe de esta línea —«cuánto ha sido el importe que se ha detraído» (10:58)—,
         # no `det["base"]`, que es el total sobre el que se calcula.
         "IMPORTE DETRACCION": ln.importe if ln.rol == "detraccion" else "",
-        "IMPORTACION": "1" if (cab.anio_dua or cab.cod_dep_aduanera) else "0",
-        "NUMERO FILE": "",
-        "DEBE HABER": ln.debe_haber,
+        # --- declaradas y vacías: existen y no consta cómo se llenan ------------------------------------
+        # `PORC OPE MIXTA` sale con 60 en la captura, en una compra de destino 002 (uso mixto), pero de dónde
+        # sale ese 60 no consta: el estándar no tiene el porcentaje de la operación mixta.
+        "PORC OPE MIXTA": "",
+        "VALOR CIF": "",
+        # VACÍA, y es una decisión tomada (John, 21-sep-2026): su hoja dice «`0` o `1`; `1` = el IGV está
+        # pendiente de aplicación», así que el `0` parecía el defecto natural —como en `DOCUMENTO ANULADO`—,
+        # pero no es el mismo caso: esto afirma algo sobre el CRÉDITO FISCAL.
+        # ⚠️ La captura de la hoja real la muestra con `0`. Pendiente de confirmarlo con John.
+        "IGV POR APLICAR": "",
+        "NRO FILE": "",
+        "OTROS TRIBUTOS": "",
+        "IMP BOLSA": "",
     }
 
 
-def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str) -> dict[str, Any]:
+def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str,
+                hay_detraccion: bool = False) -> dict[str, Any]:
     """Las 34 columnas de la plantilla de ventas, con sus nombres literales.
 
     Dos reglas salen de la captura y no del vídeo: **`IGV` y `TASA IGV` van solo en la fila del cliente** —la del
@@ -219,7 +236,12 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_
 
 
 def filas(cab: Cabecera, lineas: list[LineaDiario], libro: Any, config: dict, fecha_registro: str) -> list[dict]:
-    return [fila(ln, cab, libro, config, fecha_registro) for ln in lineas]
+    """Las líneas de UN comprobante → sus filas.
+
+    La bandera `DETRACCION` es del COMPROBANTE y no de la línea —va en las tres o cuatro filas, no solo en la
+    suya—, así que se mira aquí, que es donde se ven todas, y no dentro de `fila()`."""
+    hay_detraccion = any(ln.rol == "detraccion" for ln in lineas)
+    return [fila(ln, cab, libro, config, fecha_registro, hay_detraccion) for ln in lineas]
 
 
 def no_caben(libro: Any, comprobantes: list, config: dict) -> dict[str, list]:

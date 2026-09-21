@@ -121,12 +121,16 @@ CONFIGURACION = (
 # que las nombra primero y en ese orden («las cuentas contables, el periodo tributario, el subdiario, el voucher
 # o comprobante, la fecha», compras 12:51). Encajan justo en el hueco, pero **hasta que una plantilla oficial lo
 # confirme, el orden de esas cinco es una hipótesis**, no un hecho.
+# Las 38 columnas de la hoja `PLANTILLA` de compras, **leídas del archivo**: cuatro capturas de la hoja
+# abierta en Excel con datos dentro (John, 21-sep-2026), como las de ventas. Corrigieron el mapa que se
+# había levantado del vídeo: faltaban las CUATRO columnas de la detracción que van juntas —`DETRACCION`,
+# `NRO DOC DETRACCION`, `FECHA DETRACCION`— y `FECHA DOC REF`, así que desde la `X` todo estaba corrido.
 COMPRAS = (
-    ("A", "CUENTA", "texto"),
-    ("B", "PERIODO", "texto"),
+    ("A", "CTA CONTABLE", "texto"),
+    ("B", "AÑO Y MES PROCESO", "texto"),
     ("C", "SUBDIARIO", "texto"),
     ("D", "COMPROBANTE", "texto"),
-    ("E", "FECHA", "fecha"),
+    ("E", "FECHA DOCUMENTO", "fecha"),
     ("F", "TIPO ANEXO", "texto"),
     ("G", "CODIGO PROVEEDOR", "texto"),
     ("H", "TIPO DOCUMENTO", "texto"),
@@ -144,18 +148,22 @@ COMPRAS = (
     ("T", "VALOR CIF", "importe"),
     ("U", "TIPO DOC REF", "texto"),
     ("V", "NRO DOC REF", "texto"),
-    ("W", "CENTRO COSTO", "texto"),
-    # De aquí en adelante la captura ya no llega: el orden sale de la narración, que las recorre en esta
-    # secuencia (compras 13:40-14:06). `[por confirmar]` como las cinco primeras.
-    ("X", "GLOSA MOVIMIENTO", "texto"),
-    ("Y", "ANULADO", "texto"),
-    ("Z", "IGV POR APLICAR", "texto"),
-    ("AA", "CODIGO DETRACCION", "texto"),
-    ("AB", "IMPORTACION", "texto"),
-    ("AC", "DEBE HABER", "texto"),        # «la posición de las cuentas, la primera línea en el debe» (13:52)
-    ("AD", "TASA DETRACCION", "numero"),
-    ("AE", "IMPORTE DETRACCION", "importe"),
-    ("AF", "NUMERO FILE", "texto"),
+    ("W", "CENTRO DE COSTOS", "texto"),
+    ("X", "DETRACCION", "texto"),
+    ("Y", "NRO DOC DETRACCION", "texto"),
+    ("Z", "FECHA DETRACCION", "fecha"),
+    ("AA", "FECHA DOC REF", "fecha"),
+    ("AB", "GLOSA MOVIMIENTO", "texto"),
+    ("AC", "DOCUMENTO ANULADO", "texto"),
+    ("AD", "IGV POR APLICAR", "texto"),
+    ("AE", "CODIGO DETRACCION", "texto"),
+    ("AF", "IMPORTACION", "texto"),
+    ("AG", "DEBE / HABER", "texto"),
+    ("AH", "TASA DETRACCION", "numero"),
+    ("AI", "IMPORTE DETRACCION", "importe"),
+    ("AJ", "NRO FILE", "texto"),
+    ("AK", "OTROS TRIBUTOS", "importe"),
+    ("AL", "IMP BOLSA", "importe"),
 )
 
 # Ventas no comparte juego de columnas con compras: lleva el RUC y la razón social del cliente donde compras lleva
@@ -210,7 +218,7 @@ COLUMNAS = {"compra": COMPRAS, "venta": VENTAS}
 
 # La columna del centro de costo, para que el contribuyente elija dónde va (`COLUMNAS_ELEGIBLES` del contrato).
 COLUMNAS_ELEGIBLES = {"centro_costo": (
-    Columna("centro_costo", "CENTRO COSTO", {"compra": "W", "venta": "AA"}, fija=True,
+    Columna("centro_costo", "CENTRO DE COSTOS", {"compra": "W", "venta": "AA"}, fija=True,
             ayuda="En la línea del gasto o del ingreso, cuando su cuenta lleva centro de costo.",
             rol="principal", campo="centro_costo"),
 )}

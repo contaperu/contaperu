@@ -57,7 +57,7 @@ def _filas(documento, config=None, imputacion=None) -> list[dict]:
 def test_una_compra_sale_con_las_tres_lineas_del_asiento_tipico():
     """El asiento tipo 1 de STARSOFT: gasto al debe, IGV al debe, pasivo al haber."""
     filas = _filas(_compra())
-    assert [(f["CUENTA"], f["DEBE HABER"], f["IMPORTE"]) for f in filas] == [
+    assert [(f["CTA CONTABLE"], f["DEBE / HABER"], f["IMPORTE"]) for f in filas] == [
         ("60111000", "D", "929.49"), ("401111", "D", "167.31"), ("421201", "H", "1096.80")]
 
 
@@ -89,7 +89,7 @@ def test_las_banderas_que_se_saben_van_en_cero_y_no_en_blanco():
 
     `IGV POR APLICAR` sigue en blanco a propósito: es una afirmación sobre el crédito fiscal y no consta."""
     compra = _filas(_compra())
-    assert {f["ANULADO"] for f in compra} == {"0"}
+    assert {f["DOCUMENTO ANULADO"] for f in compra} == {"0"}
     assert {f["IMPORTACION"] for f in compra} == {"0"}
     assert {f["IGV POR APLICAR"] for f in compra} == {""}, "no consta: vacía dice 'no lo trae'"
     # En ventas la columna se llama `DOCUMENTO ANULADO`: son dos plantillas y cada una usa sus nombres.

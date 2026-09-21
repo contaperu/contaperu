@@ -53,6 +53,16 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   sigue en **1.0**. Quien busque sus líneas por `rol` no nota nada; quien buscara la del IGV por el texto
   `"IGV - "` deja de encontrarla.
 
+- **STARSOFT: la plantilla de COMPRAS se calca del archivo real y pasa de 32 columnas a 38.** Cuatro capturas
+  más de la hoja `PLANTILLA` (John, 21-sep-2026). Faltaban las tres columnas de la detracción que van juntas
+  —`DETRACCION`, `NRO DOC DETRACCION`, `FECHA DETRACCION`— y `FECHA DOC REF`, así que **desde la `X` todo
+  estaba corrido cuatro posiciones**; al final aparecen `OTROS TRIBUTOS` e `IMP BOLSA`. Los nombres pasan a ser
+  los de la hoja (`CTA CONTABLE`, `FECHA DOCUMENTO`, `DOCUMENTO ANULADO`, `DEBE / HABER`, `NRO FILE`…).
+
+  La captura **confirma el `04`** del sub-diario de compras, los cuatro dígitos del comprobante, el `03` del
+  tipo de anexo y la serie rellenada a cuatro (`020 00044419`). Y deja **una duda nueva**: `IGV POR APLICAR`
+  sale con `0` en la hoja, y el driver la deja vacía por decisión tomada ese mismo día, antes de verla.
+
 - **STARSOFT: la plantilla de VENTAS se calca del archivo real y pasa de 25 columnas a 34.** Cuatro capturas de
   la hoja `PLANTILLA` abierta en Excel con datos dentro (John, 21-sep-2026) corrigieron el mapa entero: faltaban
   `TIPO ANEXO` (`F`) y `CODIGO CLIENTE` (`G`), así que **de la `G` en adelante todo estaba corrido una
