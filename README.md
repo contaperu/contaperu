@@ -269,9 +269,17 @@ todos los días.
    exacta, porque sin fuente no entra.
 4. **Comparte el formato de tu sistema.** Si usas **SISCONT** u otro sistema que todavía no tiene driver, lo
    que hace falta es su plantilla de importación y un archivo que ese sistema haya aceptado. Con eso se construye el
-   driver.
-5. **Revisa los textos.** Las glosas, los mensajes de lo que falta y este README tienen que decirse como los diría un
+   driver: la plantilla
+   [«El formato de mi sistema»](https://github.com/contaperu/contaperu/issues/new?template=formato-de-mi-sistema.yml)
+   pide justo eso.
+5. **Propón una enmienda al estándar.** Si a `open-accounting` le falta un dato que tu sistema sí tiene, con la
+   plantilla [«Enmienda»](https://github.com/contaperu/contaperu/issues/new?template=enmienda.yml). Así crecen las
+   reglas, y no hace falta escribir código.
+6. **Revisa los textos.** Las glosas, los mensajes de lo que falta y este README tienen que decirse como los diría un
    contador.
+
+**Y si prefieres elegir tú.** Lo que el proyecto necesita ahora mismo, hito por hito y con quién se consigue cada
+cosa, está en [«Lo que hay que conseguir»](HOJA-DE-RUTA.md#5--lo-que-hay-que-conseguir).
 
 **Nunca compartas datos reales.** Antes de subir un archivo, cambia los RUC por los de prueba —`20131312955` y
 `20601234567`—, las razones sociales por nombres inventados y, si quieres, los importes. Los detalles, en

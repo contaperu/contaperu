@@ -12,7 +12,9 @@ EE. UU. comparado con el peruano, los proyectos de código abierto, los estánda
 asiento, las reglas de SUNAT como datos, las facturas de proveedores y el banco, la especificación MCP y la puerta
 escrita a otra jurisdicción.
 
-**Estado: investigación.** Nada de lo que aquí se propone está en la librería 0.10.0 ni en `open-accounting` 0.3. El
+**Estado: investigación, escrita sobre la librería 0.10.0 y `open-accounting` 0.3**, cuando nada de lo que aquí se
+propone estaba implementado. Parte entró después —las enmiendas `0008` a `0011` del estándar y la cabecera del asiento
+que creció en la 1.4.0, entre otras—, así que lo que sigue abierto se lee contra la librería y el estándar de hoy. El
 proyecto crece con una regla —se afina lo que existe y el estándar crece con casos reales, no por si acaso—, así que
 este documento es una **hoja de ruta condicionada**: cada propuesta dice qué caso real la destraba y qué test la
 fijaría. La tabla del §12 las inventaría con el hito que le toca a cada una, junto con lo que se descartó; la

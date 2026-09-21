@@ -1,0 +1,59 @@
+name: El formato de mi sistema contable
+description: Tu sistema todavía no tiene driver, o el que hay no le entra
+labels: ["formato de sistema", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Un driver no se escribe adivinando: se escribe con **la plantilla del sistema y un archivo
+        que ese sistema haya aceptado de verdad**. Con eso, el resto ya está hecho — el motor pone
+        las cuentas, el cuadre y la numeración, y el driver solo traduce vocabulario.
+
+        Así entró CONTASIS, y así está esperando SISCONT. **Compartir esto es la contribución que
+        más destraba el proyecto**, y no hace falta programar.
+
+        **Nunca subas datos reales.** Antes de adjuntar nada: cambia los RUC por los de prueba
+        —`20131312955` y `20601234567`—, las razones sociales por nombres inventados y, si quieres,
+        los importes. Lo que entra en la historia de un repositorio público no sale nunca más.
+  - type: input
+    id: sistema
+    attributes:
+      label: Qué sistema
+      placeholder: "SISCONT 2024 · STARSOFT de escritorio · CONCAR CB · otro"
+    validations:
+      required: true
+  - type: dropdown
+    id: que_traes
+    attributes:
+      label: Qué puedes aportar
+      multiple: true
+      options:
+        - La plantilla de importación vacía (el Excel o el TXT que el sistema pide)
+        - Un archivo que el sistema aceptó, anonimizado
+        - Un archivo que el sistema rechazó, con el mensaje de rechazo
+        - El manual o la guía de carga
+        - Solo puedo describirlo, no tengo archivos
+    validations:
+      required: true
+  - type: textarea
+    id: formato
+    attributes:
+      label: Cómo es el archivo
+      description: >-
+        Lo que sepas: las columnas y su orden, el separador, si va en Excel o en texto plano, la
+        fila donde empieza el cuerpo, el nombre de la hoja, cómo se llama el sub-diario y las siglas
+        de cada tipo de comprobante. Cualquier trozo vale más que nada.
+      placeholder: "Excel, hoja PLANTILLA, el cuerpo empieza en la fila 2. Factura = FT, boleta = BV, nota de crédito = CC. El sub-diario de compras es el 4."
+    validations:
+      required: true
+  - type: textarea
+    id: rechazo
+    attributes:
+      label: Si ya probaste un driver de aquí, qué te dijo
+      description: El mensaje de error del sistema al importar, tal cual, y con qué driver lo generaste.
+  - type: markdown
+    attributes:
+      value: |
+        Si prefieres no publicar los archivos, dilo en el aviso: hay un correo de contacto en
+        [`SECURITY.md`](https://github.com/contaperu/contaperu/blob/main/SECURITY.md) y sirve
+        igual para esto.

@@ -46,18 +46,18 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **1.1.0** y estándar **`open-accounting` 1.0**
+Librería **1.4.0** y estándar **`open-accounting` 1.0**
 (`contaperu/_version.py`).
 
 | Pieza | Hoy |
 |---|---|
 | **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
-| **Estándar y comunidad** | `open-accounting` 1.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`); plantillas de aviso «Regla mal puesta» y «Error». El repositorio sigue privado |
+| **Estándar y comunidad** | `open-accounting` 1.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea neutral con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
-| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 11 herramientas y 6 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. Las rutas de la 0.10 siguen con aviso |
+| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 12 herramientas y 7 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. Las rutas de la 0.10 siguen con aviso |
 | **Salida · SIRE** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
-| **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy |
+| **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos) en pruebas, a la espera de que alguien importe un archivo |
 | **Salida · ERP** | El documento `open-accounting` en JSON, el CSV de canal intercambio y la puerta HTTP con OpenConta |
 | Pendiente que depende de datos | SISCONT, la plantilla oficial de STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
 
@@ -82,6 +82,8 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - B6 · 1.0.0
 - J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
 - J1 · 1.0.0 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)
+- E6 · 1.4.0 (20-sep-2026: las plantillas «El formato de mi sistema» y «Enmienda»)
+- E7 · 1.4.0 (20-sep-2026: el repositorio es público; el historial quedó sin revisar, ver la fila del hito)
 
 ---
 
@@ -247,8 +249,9 @@ una enmienda: `INTEROPERABILIDAD.md`, «El estándar y su gobierno».
 significado, sí), siete nombres reservados y un tag del estándar que avanza con cada cambio aditivo;
 `tests/test_estandar.py` valida el esquema. La salida de `cuenta_contable` en la 0.3 fue legado y retiro el mismo día:
 no hubo aviso previo. Para aportar: `CONTRIBUTING.md` con la regla que manda y la receta de un driver, las plantillas de
-aviso «Regla mal puesta» y «Error» (`.github/ISSUE_TEMPLATE/`) y el grupo de entry points para drivers de terceros. El
-repositorio sigue privado.
+aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema» (`.github/ISSUE_TEMPLATE/`) y el grupo de
+entry points para drivers de terceros. El repositorio es público, y lo que hace falta conseguir de la comunidad está
+en [§5](#5--lo-que-hay-que-conseguir).
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
@@ -257,8 +260,8 @@ repositorio sigue privado.
 | E3 | Política escrita de retiro: legado en una versión, rechazo en la siguiente; cada cambio con su fecha de vigencia | estándar | código | Revisada; `tests/test_estandar.py` sigue verde | E1 | — |
 | E4 | Revisión cuando SUNAT cambia la fecha «actualizado al» de sus reglas | proceso | dato: la nueva versión de SUNAT | JSON de C1 regenerado; las diferencias, en el CHANGELOG | C1 | — |
 | E5 | **Guía de aporte por rol** en `CONTRIBUTING.md`: qué aporta un contador (la regla con su norma), un desarrollador (el driver con su contrato) y una empresa (el formato de su sistema con un archivo aceptado, anonimizado) | documentación | código | La sección existe y el README la enlaza desde «Cómo aportar» | — | — |
-| E6 | Plantilla de aviso **«Formato de mi sistema»** para compartir la plantilla de importación y un archivo aceptado de un sistema sin driver | documentación | código | La plantilla está en `.github/ISSUE_TEMPLATE/`, pide los RUC seguros y el README la enlaza | — | — |
-| E7 | **Abrir el repositorio** | proceso | decisión de John | El repositorio es público, con el historial revisado para que no quede nada real de nadie | — | — |
+| E6 ✅ | Plantilla de aviso **«Formato de mi sistema»** para compartir la plantilla de importación y un archivo aceptado de un sistema sin driver | documentación | código | La plantilla está en `.github/ISSUE_TEMPLATE/`, pide los RUC seguros y el README la enlaza | — | — · **hecho el 20-sep-2026**, junto con la plantilla «Enmienda» |
+| E7 ✅ | **Abrir el repositorio** | proceso | decisión de John | El repositorio es público, con el historial revisado para que no quede nada real de nadie | — | — · **hecho el 20-sep-2026**. La mitad del criterio queda debiendo: el historial **no** se revisó antes de abrir y conserva correos de trabajo del autor en buena parte de los commits. Reescribirlo ahora rompería los hashes y los tags publicados |
 
 La **conformidad declarada** —pasar la suite del estándar (E2) y, si es un driver, tener su archivo aceptado— es el
 análogo de la certificación de Xero o Intuit, sin sellos ni tercero que la otorgue.

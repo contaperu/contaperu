@@ -1094,7 +1094,11 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v1.1.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/contaperu/contaperu/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/contaperu/contaperu/compare/v1.2.1...v1.3.0
+[1.2.1]: https://github.com/contaperu/contaperu/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/contaperu/contaperu/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/contaperu/contaperu/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/contaperu/contaperu/compare/v0.10.0...v1.0.0
 [0.2.0]: https://github.com/contaperu/contaperu/releases/tag/v0.2.0

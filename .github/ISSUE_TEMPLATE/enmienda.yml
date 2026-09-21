@@ -1,0 +1,66 @@
+name: Proponer una enmienda al estándar
+description: Al estándar `open-accounting` le falta un campo, un valor o una precisión
+labels: ["enmienda"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Así crece `open-accounting`: una enmienda por cambio, con su caso real, su fuente y el test
+        que la sostiene. El proceso entero está en
+        [`estandar/enmiendas/LEEME.md`](https://github.com/contaperu/contaperu/blob/main/estandar/enmiendas/LEEME.md).
+
+        **Si todavía no tienes un caso real, no pasa nada**: se queda en `borrador` hasta que
+        aparezca, o se conversa antes en
+        [Discussions → El estándar](https://github.com/contaperu/contaperu/discussions).
+
+        **Anonimiza todo** — ni RUC de empresas que existen, ni razones sociales reales. Los RUC de
+        prueba son `20131312955` y `20601234567`.
+  - type: textarea
+    id: motivacion
+    attributes:
+      label: Motivación — el caso real
+      description: >-
+        Qué comprobante, qué sistema y qué se pierde hoy por no tener este dato. Es lo que separa
+        un `borrador` de una enmienda `con caso real`: si no lo hay, di qué falta para tenerlo.
+      placeholder: "Mi sistema exige el medio de pago en cada asiento, y hoy viaja en datos_originales, así que se pierde al exportar."
+    validations:
+      required: true
+  - type: textarea
+    id: fuente
+    attributes:
+      label: Fuente
+      description: >-
+        La norma, la resolución, la API ajena o el archivo real que lo respalda.
+        **Ninguna regla entra sin fuente**, y esto es un cambio al estándar, que otros leen.
+      placeholder: "Catálogo 59 de SUNAT (RS 097-2012/SUNAT y sus modificatorias), «Medios de pago»."
+    validations:
+      required: true
+  - type: textarea
+    id: especificacion
+    attributes:
+      label: Especificación
+      description: >-
+        Qué campo, dónde va, de qué tipo, obligatorio u opcional, y **qué pasa con quien no lo
+        conozca**. Si ya sabes qué test lo fijaría, dilo.
+      placeholder: "`medio_pago`, opcional, en la raíz del comprobante. Cadena de 3 dígitos del Catálogo 59. Quien no lo conozca lo ignora: no cambia ningún asiento existente."
+    validations:
+      required: true
+  - type: dropdown
+    id: compatibilidad
+    attributes:
+      label: Compatibilidad
+      description: >-
+        La 1.0 prometió que nada de lo que existe se quita ni cambia de significado hasta una 2.0.
+        Un cambio de significado no es imposible, pero cuesta mucho más y hay que saberlo de entrada.
+      options:
+        - Aditivo — solo añade; quien no lo conozca sigue funcionando igual
+        - Cambio de significado — altera algo que ya está publicado
+        - No estoy seguro
+    validations:
+      required: true
+  - type: input
+    id: sistema
+    attributes:
+      label: Tu sistema, si viene al caso
+      description: El ERP o sistema contable desde el que ves esta falta.
+      placeholder: "CONCAR · CONTASIS · STARSOFT · SISCONT · Odoo · propio"
