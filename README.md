@@ -109,6 +109,29 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 - **Abajo, los destinos:** el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o el resultado de vuelta al
   ERP, en JSON y con su diagnóstico.
 
+### Por dónde pasa un comprobante
+
+![Qué módulo hace qué: un comprobante entra por los lectores, que lo convierten al modelo canónico; validar, igv y detracciones lo revisan; asiento arma la partida doble; y los drivers la traducen al formato de cada sistema. Desde abajo lo sostienen catalogos, partida_doble y contrato, y los catálogos se leen de datos de SUNAT con su fuente citada. Por debajo de todo, el pipeline orquesta, la API pública expone y congela cada firma hasta la 2.0, y las puertas solo hablan con la API](diagramas/recorrido-por-los-modulos.svg)
+
+El mismo motor, un nivel más abajo: qué módulo hace qué.
+
+- **`lectores`** convierten un archivo que ya existe —el XML UBL de SUNAT, el TXT de la propuesta del SIRE— en
+  comprobantes del **`modelo`**, que es el modelo canónico: un comprobante es una fila del registro.
+- **`validar`, `igv` y `detracciones`** aplican las reglas deterministas. El IGV **se lee** de los importes del
+  comprobante, nunca se supone; y la detracción se contrasta con la tabla del contribuyente antes de tocarla.
+- **`asiento`** es donde vive la contabilidad de verdad: qué cuenta, qué sentido, cuántas líneas y con qué correlativo.
+- **`drivers`** traducen esas líneas al formato de cada sistema, sin decidir ni una cuenta.
+
+Tres módulos lo sostienen desde abajo: **`catalogos`** da los códigos de SUNAT a la lectura y la validación,
+**`partida_doble`** comprueba que el Debe iguale al Haber antes de escribir un solo byte, y **`contrato`** dice lo que
+un driver tiene que exponer para que el registro lo acepte. Y los catálogos no están escritos en el código: se leen de
+`datos/sunat/`, **cada uno con la resolución de la que sale**.
+
+Un detalle que se ve al abrir la carpeta: `contaperu/operaciones.py`, `generar.py`, `cli.py`, `formato.py` y
+`servidor_mcp.py` **no contienen nada**. Son las rutas que una aplicación importaba en la 0.x, que siguen resolviendo y
+avisan con `RutaObsoleta` al usarse ([`_obsoleto.py`](contaperu/_obsoleto.py)). El aviso salta al **usar** la ruta, no
+al importar el módulo, para no ensuciar el registro de quien arranca. Se retiran en la 2.0.
+
 ### Las puertas y la API pública
 
 ![Las puertas y la API pública: un programa en Python, un contador en la consola, un asistente de IA y un ERP entran por sus puertas —Python, CLI, MCP y HTTP— a la API pública 1.0, con sus operaciones, sus errores con clave, la tabla de operaciones y OpenConta; de ahí, todo pedido entra al mismo pipeline](diagramas/puertas-y-api.svg)
