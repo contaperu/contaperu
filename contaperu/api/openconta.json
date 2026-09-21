@@ -564,6 +564,31 @@
     }
    }
   },
+  "/v1/catalogos/sire-api": {
+   "get": {
+    "operationId": "catalogos_api_sire",
+    "summary": "El CANAL del SIRE, descrito: a qué rutas se sube un registro, qué parámetros son obligatorios, qué significa cada estado de ticket y qué códigos de retorno devuelve SUNAT.",
+    "description": "El CANAL del SIRE, descrito: a qué rutas se sube un registro, qué parámetros son\nobligatorios, qué significa cada estado de ticket y qué códigos de retorno devuelve SUNAT.\n\nPor qué está en el motor: el conocimiento del FORMATO ya estaba resuelto una vez para todos\n—la estructura del TXT, el nombre que SUNAT exige, los catálogos—, pero el del CANAL no, y cada\ncasa de software lo vuelve a reunir a mano desde dos manuales que se contradicen entre sí. Aquí\nse describe; ejecutarlo es de quien integra. El motor no se conecta a SUNAT.\n\nOjo a lo que esto NO habilita: «Generar el registro» no existe por API (RS 000040-2022 art. 8.3).\nEl techo de cualquier integración es dejar el mes en preliminar.",
+    "responses": {
+     "200": {
+      "description": "El CANAL del SIRE, descrito: a qué rutas se sube un registro, qué parámetros son obligatorios, qué significa cada estado de ticket y qué códigos de retorno devuelve SUNAT.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
   "/v1/catalogos/estandar": {
    "get": {
     "operationId": "catalogos_del_estandar",

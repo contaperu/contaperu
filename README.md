@@ -144,7 +144,7 @@ API y devuelven la respuesta. Por eso el mismo mes da el mismo resultado por las
 |---|---|---|
 | **Python** | Un programa en Python | `from contaperu import api` y `api.exportar(documento, driver="concar", ...)`: llama directo a la API |
 | **CLI** (`contaperu`) | Quien trabaja en la consola o por lotes | Seis comandos: `generar`, `desde-json`, `diagnosticar`, `configuracion`, `comparar` y `verificar-driver`, que comprueba un driver propio contra el contrato |
-| **MCP** (`contaperu-mcp`) | Un asistente de IA | 12 herramientas de solo lectura y 7 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
+| **MCP** (`contaperu-mcp`) | Un asistente de IA | 12 herramientas de solo lectura y 8 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
 | **HTTP** (`contaperu-http`) | Un ERP en cualquier lenguaje | `POST /v1/exportar`, `POST /v1/diagnosticar`…; responde 421 a un `Host` no declarado, corta la petición en 10 MB y atiende 16 a la vez |
 
 La **API pública** (`contaperu.api`) es la lista de operaciones que comparten las cuatro puertas: leer, revisar,
@@ -379,9 +379,9 @@ RFC 9457 con una `clave` estable. La guía, en [INTEGRAR.md](INTEGRAR.md).
 Doce herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
 `configuracion_por_defecto`, `drivers_disponibles`, `validar_comprobantes`, `validar_partida_doble`,
 `generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`,
-`buscar_cuenta_pcge` y `adaptar_pcge2026`, todas anunciadas de solo lectura. Y siete recursos: el esquema del
-estándar, los catálogos de SUNAT, los catálogos del propio estándar, el catálogo del PCGE 2026, los drivers
-disponibles, lo que se configura de cada uno y el esquema de la respuesta de `diagnosticar`.
+`buscar_cuenta_pcge` y `adaptar_pcge2026`, todas anunciadas de solo lectura. Y ocho recursos: el esquema del
+estándar, los catálogos de SUNAT, el canal del SIRE, los catálogos del propio estándar, el catálogo del PCGE
+2026, los drivers disponibles, lo que se configura de cada uno y el esquema de la respuesta de `diagnosticar`.
 
 Las tres que van hacia un sistema contable —`diagnosticar`, `generar_asiento` y `exportar`— **exigen el
 `driver`** y no lo suponen: el sistema de un contribuyente es suyo. `drivers_disponibles` dice cuáles hay.

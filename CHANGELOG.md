@@ -6,6 +6,32 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Añadido
+
+- **El canal del SIRE, descrito como datos**: `catalogos_api_sire()`, `GET /v1/catalogos/sire-api` y el recurso
+  `contaperu://catalogos/sire-api`, leídos de `datos/sunat/sire_api.json`. Trae los dos caminos de OAuth de SUNAT,
+  las rutas **por libro**, los parámetros obligatorios de cada operación, la metadata de TUS, los estados del
+  ticket y los códigos de retorno, cada bloque con su fuente y su `actualizado_al`.
+
+  **Esto NO es un cliente y no lo será.** El motor sigue sin salir a la red: `tests/test_frontera.py` prohíbe
+  importar `httpx` o `socket` y `conftest.py` mata cualquier conexión. Es la descripción de una API ajena, el
+  mismo papel que ya cumplen los formatos de CONCAR, CONTASIS y STARSOFT —describir un sistema ajeno sin hablar
+  con él— y lo que el criterio del hito D7 llama separar la normalización del transporte. El transporte, las
+  credenciales y el estado se quedan fuera.
+
+  Existe porque el conocimiento del FORMATO ya estaba resuelto una vez para todos y el del CANAL no: cada casa de
+  software lo vuelve a reunir a mano desde dos manuales de SUNAT que **se contradicen entre sí** (`codTipoArchivo`
+  es `1=csv` en compras y `1=excel` en ventas, y está así en los dos PDF). Incluye lo que más caro cuesta
+  descubrir a base de rechazos: que RVIE y RCE no comparten rutas y cruzarlas devuelve **500 de nginx** y no 404;
+  que desde la v24 `archivoreporte` exige cuatro parámetros más o responde 500; que el código útil del 422 vive
+  dentro de `errors[]` y no en el `cod` de arriba; que el error **1024** significa «ya entró» y no «falló»; y que
+  **«Generar el registro» no existe por API** (RS 000040-2022 art. 8.3), así que el techo de cualquier
+  integración es dejar el mes en preliminar.
+
+- **`INTEGRAR.md` explica el SIRE de punta a punta**: de dónde salen los bytes y el nombre, que el nombre lo
+  impone SUNAT y renombrarlo hace que lo rechace, que ese nombre ES la política de idempotencia, que el ZIP es
+  reproducible, que el SIRE no lleva huella, y dónde acaba el motor y empieza tu conector.
+
 ### Cambiado
 
 - **La columna `ANULADO` de STARSOFT sale `0` y no en blanco**, en compras y en ventas. Un comprobante que está

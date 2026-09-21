@@ -26,7 +26,7 @@ from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesb
                       ErroresBloqueantes, IgvImposible, NoCabe, NoExportable, RepartoNoAdmitido, RepartoNoCuadra,
                       SinCentro, SinCodigoDeMoneda, SinCorrelativo, SinCuenta, SinSigla, SireInvalido, TablaInvalida,
                       TotalImposible, XmlInvalido, problema)
-from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, catalogo_pcge, catalogos_del_estandar, catalogos_sunat, comparar_sire,
+from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, catalogo_pcge, catalogos_api_sire, catalogos_del_estandar, catalogos_sunat, comparar_sire,
                           config_aplicada, cuadrar,
                           describir_configuracion, diagnosticar, drivers_disponibles, errores_de_configuracion,
                           esquema_diagnostico, esquema_open_accounting, exportar, exportar_archivo, generar_asiento, leer_archivos,
@@ -40,7 +40,8 @@ __all__ = [
     "diagnosticar", "generar_asiento", "exportar", "exportar_archivo", "cuadrar", "buscar_cuenta_pcge", "adaptar_pcge",
     "configuracion_por_defecto", "describir_configuracion", "config_aplicada", "errores_de_configuracion",
     "drivers_disponibles",
-    "catalogos_sunat", "catalogo_pcge", "catalogos_del_estandar", "esquema_open_accounting", "esquema_diagnostico", "comparar_sire",
+    "catalogos_sunat",
+    "catalogos_api_sire", "catalogo_pcge", "catalogos_del_estandar", "esquema_open_accounting", "esquema_diagnostico", "comparar_sire",
     "contrato_openconta", "verificar_driver",
     # la tabla que exponen las puertas
     "OPERACIONES", "Operacion",

@@ -170,6 +170,16 @@ def catalogos_sunat() -> str:
     return json.dumps(api.catalogos_sunat(), ensure_ascii=False, indent=1)
 
 
+@mcp.resource("contaperu://catalogos/sire-api", mime_type="application/json")
+def catalogos_api_sire() -> str:
+    """El CANAL del SIRE, descrito: rutas por libro, parámetros obligatorios, los dos grants de
+    OAuth, la metadata de TUS, los estados del ticket y los códigos de retorno, con su fuente.
+
+    El motor no se conecta a SUNAT: esto describe la API para quien escriba su propio conector.
+    Y avisa de su techo — «Generar el registro» no existe por API."""
+    return json.dumps(api.catalogos_api_sire(), ensure_ascii=False, indent=1)
+
+
 @mcp.resource("contaperu://catalogos/estandar", mime_type="application/json")
 def catalogos_del_estandar() -> str:
     """Los catálogos que este estándar inventa: los roles de una línea del asiento, las cinco clases contables y

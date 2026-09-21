@@ -128,13 +128,26 @@ def test_los_recursos_son_legibles():
     assert uris == {"contaperu://estandar/open-accounting", "contaperu://catalogos/sunat",
                     "contaperu://catalogos/estandar", "contaperu://drivers",
                     "contaperu://catalogos/pcge2026", "contaperu://configuracion",
-                    "contaperu://esquemas/diagnostico"}
+                    "contaperu://esquemas/diagnostico", "contaperu://catalogos/sire-api"}
     esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
     assert esquema["title"] == "open-accounting"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
     assert catalogos["tipos_comprobante"]["01"] == "Factura"
     del_estandar = json.loads(leer_recurso("contaperu://catalogos/estandar"))
     assert del_estandar["clases"]["codigos"]["activo"] and del_estandar["roles"]["version"]
+    # El canal del SIRE: datos sobre una API ajena, no un cliente. Lo que se comprueba es que
+    # siga diciendo lo que más caro cuesta descubrir a mano.
+    canal = json.loads(leer_recurso("contaperu://catalogos/sire-api"))
+    assert canal["libros"]["080000"]["nombre"] == "RCE"
+    # Los dos manuales se contradicen aquí, y el dato es por libro a propósito.
+    assert canal["libros"]["080000"]["cod_tipo_archivo"]["csv"] == 1
+    assert canal["libros"]["140000"]["cod_tipo_archivo"]["excel"] == 1
+    # RVIE y RCE no comparten ruta: cruzarlas da 500 de nginx, no 404.
+    aceptar = canal["operaciones"]["propuesta_aceptar"]["ruta_por_libro"]
+    assert aceptar["080000"] != aceptar["140000"]
+    # Y el techo: no existe por API, y quien integre debe saberlo antes de prometerlo.
+    assert "generar_el_registro" in canal["no_existe_por_api"]
+
     drivers = json.loads(leer_recurso("contaperu://drivers"))
     assert set(drivers) == {"sire", "concar", "csv", "contasis", "starsoft", "asiento_neutral"}
     assert drivers["concar"]["tipo"] == "archivo" and drivers["sire"]["tipo"] == "texto"

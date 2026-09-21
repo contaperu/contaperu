@@ -237,6 +237,20 @@ def catalogos_sunat() -> dict:
     }
 
 
+def catalogos_api_sire() -> dict:
+    """El CANAL del SIRE, descrito: a qué rutas se sube un registro, qué parámetros son
+    obligatorios, qué significa cada estado de ticket y qué códigos de retorno devuelve SUNAT.
+
+    Por qué está en el motor: el conocimiento del FORMATO ya estaba resuelto una vez para todos
+    —la estructura del TXT, el nombre que SUNAT exige, los catálogos—, pero el del CANAL no, y cada
+    casa de software lo vuelve a reunir a mano desde dos manuales que se contradicen entre sí. Aquí
+    se describe; ejecutarlo es de quien integra. El motor no se conecta a SUNAT.
+
+    Ojo a lo que esto NO habilita: «Generar el registro» no existe por API (RS 000040-2022 art. 8.3).
+    El techo de cualquier integración es dejar el mes en preliminar."""
+    return catalogos.api_sire()
+
+
 def catalogos_del_estandar() -> dict:
     """Los catálogos que este estándar inventa —`roles`, `clases` y `tipos_de_libro`—, cada uno con su fuente y su
     versión. Son lo que un ERP de fuera necesita para leer una línea del asiento sin conocer el PCGE, y viven

@@ -118,6 +118,8 @@ OPERACIONES: tuple[Operacion, ...] = (
     Operacion("drivers_disponibles", "GET", "/v1/drivers", "drivers", herramienta="drivers_disponibles",
               recurso="contaperu://drivers"),
     Operacion("catalogos_sunat", "GET", "/v1/catalogos/sunat", "catalogos_sunat", recurso="contaperu://catalogos/sunat"),
+    # El canal del SIRE, como datos. No es un cliente: ver `operaciones.catalogos_api_sire`.
+    Operacion("catalogos_api_sire", "GET", "/v1/catalogos/sire-api", recurso="contaperu://catalogos/sire-api"),
     Operacion("catalogos_del_estandar", "GET", "/v1/catalogos/estandar", "catalogos_del_estandar",
               recurso="contaperu://catalogos/estandar"),
     Operacion("catalogo_pcge", "GET", "/v1/catalogos/pcge2026", recurso="contaperu://catalogos/pcge2026"),

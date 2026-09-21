@@ -195,6 +195,75 @@ Si tu ERP todavía no tiene driver, el contrato está en `contaperu/drivers/cont
   estándar, sin siglas, sub-diarios ni correlativos de ningún sistema legacy— y lo envía; el envío y los
   reintentos son suyos, con la identidad y la huella de cada comprobante como clave para no repetir.
 
+## El SIRE, de punta a punta
+
+El motor **no se conecta a SUNAT** —no hay credenciales, no sale ni un paquete a la red, y sus propios tests
+lo impiden—, pero sí te da todo lo demás. Esto es lo que hace falta saber, y es lo que más caro cuesta
+descubrir a base de rechazos.
+
+**1. El archivo lo generas con `exportar`.** El TXT va dentro de un ZIP, y los dos nombres los pone el motor:
+
+```python
+from contaperu import api
+from contaperu.drivers import sire
+from contaperu.modelo import Libro
+
+exp = api.exportar_archivo(documento, driver="sire")
+exp.contenido        # bytes del ZIP: esto es lo que se sube
+exp.archivo          # «LE20601234567202512000804000211 12.zip»
+exp.texto            # bytes del TXT, por si lo quieres mirar
+exp.nombre           # el .TXT — es el que SUNAT espera en la metadata de la subida
+```
+
+**2. El nombre lo impone SUNAT y no se toca.** Tablas 6 y 13: con otro nombre, el SIRE rechaza el archivo. Y
+es el único driver que no usa el nombre genérico del kit, a propósito — `comparar_sire` deduce del propio
+nombre si un archivo es de ventas o de compras. Si necesitas el nombre **antes** de generar nada (para
+comprobar si ya lo enviaste), `sire.nombre(Libro(ruc=..., razon_social=..., periodo=..., tipo=...))` te lo da.
+
+**3. Ese nombre es tu idempotencia.** SUNAT responde **1024 — «el archivo fue previamente enviado»** cuando
+repites un nombre, y ese es el único mecanismo que ofrece para no duplicar. Trátalo como «ya entró», no como
+un fallo. Ojo: el código viene dentro de `errors[]`, no en el `cod` de arriba, que es un «422» genérico.
+
+**4. El ZIP es reproducible.** Dos exportaciones iguales dan los mismos bytes (la entrada del ZIP lleva fecha
+fija), así que puedes comparar por hash antes de reenviar.
+
+**5. El SIRE no lleva huella.** `_exportacion` no trae `huella` porque un registro tributario no tiene
+asiento. Si esperabas la huella para deduplicar, usa el nombre del archivo o la identidad de los
+comprobantes.
+
+**6. Antes de subir, compara.** `api.comparar_sire(nuestro, de_sunat, registro="compra")` contrasta tu TXT
+contra la exportación del detalle que devuelve SUNAT, campo a campo. Pasa `registro=` explícito si el archivo
+que bajaste por API no conserva el `1404`/`0804` en el nombre.
+
+**7. Y lo que ya devolvió SUNAT, el motor lo lee.** `api.leer_propuesta_sire(contenido, libro,
+es_base64=True)` acepta el TXT o el ZIP tal cual, con cabecera o sin ella, y **mira el contenido y no el
+nombre**: da igual cómo se llame lo que te bajes.
+
+### Dónde acaba el motor y empieza tu conector
+
+Subir el archivo, pedir un token, sondear un ticket y guardar credenciales es **tuyo**: necesita red, estado
+y la Clave SOL de un contribuyente, y nada de eso entra aquí. Lo que sí te damos es el mapa del canal, para
+que no tengas que reunirlo desde dos manuales que se contradicen entre sí:
+
+```python
+api.catalogos_api_sire()     # GET /v1/catalogos/sire-api · contaperu://catalogos/sire-api
+```
+
+Trae los dos caminos de OAuth (el del SIRE pide Clave SOL, el de la consulta de validez no), las rutas **por
+libro** —RVIE y RCE no comparten casi ninguna, y cruzarlas devuelve **500 de nginx** y no 404—, los
+parámetros obligatorios de cada una, la metadata de TUS, los estados del ticket y los códigos de retorno,
+cada bloque con su fuente y su fecha.
+
+Tres avisos que te ahorrarán una tarde:
+
+- **`codTipoArchivo` significa cosas distintas en cada libro.** Compras dice `1=csv`; ventas dice `1=excel`.
+  No es una errata de esta tabla: está así en los dos PDF de SUNAT.
+- **No hay ambiente de pruebas.** El `e-beta` es solo para XML de comprobantes. Toda prueba del SIRE es
+  contra producción con un RUC real, así que empieza por las lecturas, que son idempotentes.
+- **«Generar el registro» no existe por API** (RS 000040-2022 art. 8.3): esa opción solo se alcanza entrando
+  por SOL y la pulsa una persona. El techo de tu integración es dejar el mes en preliminar. Dilo en tu
+  producto desde el primer día, para que nadie espere un botón que no puede existir.
+
 ## Versiones: fija la tuya y actualiza cuando decidas
 
 ContaPerú publica versiones con número (SemVer): una de parche arregla, una menor añade sin romper y solo una mayor

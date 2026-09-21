@@ -22,6 +22,27 @@ if not _CATALOGOS:
 # De dónde sale cada catálogo, por su nombre: ninguno entra sin fuente.
 FUENTES: dict[str, str] = {nombre: tabla["fuente"] for nombre, tabla in _CATALOGOS.items()}
 
+# ── El canal: la API del SIRE, descrita (no ejecutada) ───────────────────────
+# El motor NO sale a la red y no va a salir: `tests/test_frontera.py` prohíbe importar httpx o
+# socket, y `conftest.py` mata cualquier conexión. Esto no es un cliente: es la DESCRIPCIÓN de una
+# API ajena —rutas, parámetros obligatorios, estados de ticket y códigos de retorno— para que quien
+# escriba su propio conector no tenga que reunirla otra vez desde dos PDF que se contradicen.
+#
+# Es el mismo papel que ya cumplen los formatos de CONCAR, CONTASIS y STARSOFT: describir un sistema
+# ajeno columna a columna sin hablar con él. Y responde al criterio del hito D7 de la hoja de ruta:
+# «si la normalización se separa del transporte, la lectura de bytes puede entrar al motor y solo el
+# transporte queda fuera». El transporte, las credenciales y el estado siguen fuera, y para siempre.
+_API_SIRE = _datos.leer_json("datos/sunat/sire_api.json")
+
+
+def api_sire() -> dict:
+    """El canal del SIRE como datos: hosts, los dos grants, rutas por libro, la metadata de
+    TUS, los estados del ticket y los códigos de retorno, cada bloque con su fuente.
+
+    Quien lo use pone el transporte. Aquí no hay ni una petición."""
+    return dict(_API_SIRE)
+
+
 # Tipo de comprobante (2 dígitos). Se listan los que un estudio contable ve de verdad.
 TIPOS_CP: dict[str, str] = dict(_CATALOGOS["tipos_comprobante"]["codigos"])
 

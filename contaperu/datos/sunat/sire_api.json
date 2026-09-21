@@ -1,0 +1,203 @@
+{
+  "_nota": "El CANAL del SIRE, como datos. El motor no sale a la red y no va a salir: esto NO es un cliente, es la descripción de una API ajena — rutas, parámetros obligatorios y códigos de retorno— para que quien escriba su propio conector no tenga que reunirla otra vez a mano desde dos PDF que se contradicen entre sí. Mismo papel que `datos/sunat/catalogos.json` con la norma, o que los formatos de CONCAR y CONTASIS con sistemas ajenos: describir sin ejecutar. Quien lo consuma pone el transporte, las credenciales y el estado; nada de eso vive aquí ni vivirá.",
+  "actualizado_al": "2026-09-21",
+  "fuentes": {
+    "compras": "Manual de servicios Web Api - SIRE_Compras v28 (13-ago-2025), cpe.sunat.gob.pe",
+    "ventas": "Manual de servicios Web Api - SIRE_Ventas v29 (17-feb-2026), cpe.sunat.gob.pe",
+    "norma": "RS 000112-2021 (RVIE, Anexo 6) y RS 000040-2022 (SIRE y RCE)"
+  },
+
+  "hosts": {
+    "seguridad": "https://api-seguridad.sunat.gob.pe/v1",
+    "sire": "https://api-sire.sunat.gob.pe/v1/contribuyente/migeigv/libros"
+  },
+
+  "seguridad": {
+    "_nota": "SUNAT tiene DOS caminos de OAuth y se parecen lo justo para confundirse. El del SIRE exige la Clave SOL en cada pase (`password`); el de la consulta de validez de comprobantes no la pide (`client_credentials`). El scope se parece a un host y NO lo es: es una cadena de identificación, y mandar el de CPE para pedir un pase del SIRE hoy funciona porque el gateway no lo valida — el día que lo valide, deja de autenticar todo de golpe.",
+    "ruta": "{seguridad}/{via}/{client_id}/oauth2/token/",
+    "sire": {
+      "via": "clientessol",
+      "grant_type": "password",
+      "scope": "https://api-sire.sunat.gob.pe",
+      "campos": ["grant_type", "scope", "client_id", "client_secret", "username", "password"],
+      "username": "El RUC y el usuario SOL CONCATENADOS, sin separador: 20131312955MODDATOS",
+      "expires_in": "Se lee de la respuesta. El manual dice «en segundos» y no da la cifra; lo de una hora es observación de campo, no contrato."
+    },
+    "validez_cpe": {
+      "via": "clientesextranet",
+      "grant_type": "client_credentials",
+      "scope": "https://api.sunat.gob.pe/v1/contribuyente/contribuyentes",
+      "campos": ["grant_type", "scope", "client_id", "client_secret"]
+    },
+    "credenciales": "El contribuyente las genera en SOL: EMPRESAS / Credenciales de API SUNAT / Gestión Credenciales de API SUNAT, marcando la URI «MIGE RCE y RVIE – SIRE» (una sola para los dos libros). No hace falta homologación ni registrar la aplicación ante SUNAT: eso es solo para emitir."
+  },
+
+  "libros": {
+    "_nota": "OJO con los dos códigos que se parecen: `cod_libro` (080000/140000) es el parámetro de la API, y el código del NOMBRE DEL ARCHIVO (080400/140400) es otro y vive en el driver. Confundirlos no da 404: da 500 de nginx, que se lee como si SUNAT estuviera caída.",
+    "080000": {
+      "nombre": "RCE",
+      "sigla": "rce",
+      "registro": "compra",
+      "cod_proceso_reemplazo": "61",
+      "cod_tipo_archivo": {"txt": 0, "csv": 1, "excel": 2},
+      "cod_tipo_archivo_fuente": "Compras v28, Anexo III"
+    },
+    "140000": {
+      "nombre": "RVIE",
+      "sigla": "rvie",
+      "registro": "venta",
+      "cod_proceso_reemplazo": "3",
+      "cod_tipo_archivo": {"txt": 0, "excel": 1, "csv": 2},
+      "cod_tipo_archivo_fuente": "Ventas v29, Anexo IV — dice 1=excel y 2=csv, AL REVÉS que compras. No es una errata de esta tabla: está así en los dos PDF, y por eso el dato es por libro."
+    }
+  },
+
+  "cod_origen_envio": {
+    "valor": "2",
+    "significa": "servicio API",
+    "_nota": "Desde la v22 (05-mar-2024). El 1 de los manuales anteriores da 422, y `numRuc` dejó de ser parámetro en todos los servicios: va dentro del token."
+  },
+
+  "operaciones": {
+    "_nota": "Las rutas van colgando de {sire}. Las que tienen `ruta_por_libro` NO son la misma en RVIE y en RCE: cruzarlas devuelve 500 de nginx, no 404.",
+    "periodos": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "json",
+      "ruta": "rvierce/padron/web/omisos/{cod_libro}/periodos",
+      "fuente": "Compras v28 5.33"
+    },
+    "propuesta_pedir": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
+      "ruta_por_libro": {
+        "080000": "rce/propuesta/web/propuesta/{periodo}/exportacioncomprobantepropuesta",
+        "140000": "rvie/propuesta/web/propuesta/{periodo}/exportapropuesta"
+      },
+      "params_obligatorios": ["codTipoArchivo"],
+      "cod_proceso": "10",
+      "fuente": "Compras v28 5.34 · Ventas v29"
+    },
+    "ticket_consultar": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "json",
+      "ruta": "rvierce/gestionprocesosmasivos/web/masivo/consultaestadotickets",
+      "params_obligatorios": ["perIni", "perFin", "page", "perPage", "codLibro", "codOrigenEnvio"],
+      "fuente": "Compras v28 5.31",
+      "_nota": "perIni y perFin son obligatorios AUNQUE se pregunte por un solo ticket: el numTicket no codifica el periodo, así que quien llama tiene que recordar a qué periodo pertenece cada ticket. Si pierde esa asociación, el trabajo es irrecuperable."
+    },
+    "ticket_archivo": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "binario",
+      "ruta": "rvierce/gestionprocesosmasivos/web/masivo/archivoreporte",
+      "params_obligatorios": ["nomArchivoReporte", "codTipoArchivoReporte", "perTributario", "codProceso", "numTicket", "codLibro"],
+      "fuente": "Compras v28 5.32",
+      "_nota": "Los cuatro últimos los exige DESDE LA v24 (10-ene-2025). Sin ellos responde 500, no 400. Además SUNAT escribe la clave del tipo de dos maneras en sus propios manuales (`codTipoAchivoReporte`, sin la «r», y `codTipoArchivoReporte`): conviene aceptar las dos al leer."
+    },
+    "propuesta_reemplazar": {
+      "metodo": "POST", "grada": "escritura", "devuelve": "ticket", "protocolo": "TUS 1.0.0",
+      "ruta": "rvierce/receptorpropuesta/web/propuesta/upload",
+      "fuente": "Compras v28 5.3"
+    },
+    "propuesta_aceptar": {
+      "metodo": "POST", "grada": "declarativa", "devuelve": "ticket",
+      "ruta_por_libro": {
+        "080000": "rce/propuesta/web/registroslibros/{periodo}/aceptarpropuesta",
+        "140000": "rvie/propuesta/web/propuesta/{periodo}/aceptapropuesta"
+      },
+      "cod_proceso": "2",
+      "fuente": "Compras v28 5.2 · Ventas v29",
+      "_nota": "En ventas es `aceptapropuesta`, sin la «r», y bajo otro prefijo. No es una errata."
+    },
+    "preliminar_registrar": {
+      "metodo": "POST", "grada": "declarativa", "devuelve": "ticket",
+      "ruta_por_libro": {
+        "080000": "rce/preliminar/web/registroslibros/{periodo}/registrapreliminares",
+        "140000": "rvierce/gestionlibro/web/registroslibros/{periodo}/registrapreliminar"
+      },
+      "fuente": "Compras v28 5.4 · Ventas v29"
+    },
+    "preliminar_eliminar": {
+      "metodo": "POST", "grada": "escritura", "devuelve": "json",
+      "ruta_por_libro": {
+        "080000": "rce/preliminar/web/registroslibros/{periodo}/{indEliminar}/eliminapreliminar",
+        "140000": "rvierce/gestionlibro/web/registroslibros/{periodo}/eliminapreliminar"
+      },
+      "fuente": "Compras v28 5.17 · Ventas v29"
+    },
+    "excluidos": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
+      "ruta_por_libro": {"080000": "rce/propuesta/web/excluidos/{periodo}/exportaexcluidos"},
+      "params_obligatorios": ["codTipoArchivo", "codOrigenEnvio"],
+      "fuente": "Compras v28 5.37",
+      "_nota": "Solo existe en compras."
+    },
+    "no_incluidos": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
+      "ruta_por_libro": {"140000": "rvie/propuesta/web/noincluidos/{periodo}/exportanoincluidos"},
+      "params_obligatorios": ["codTipoArchivo"],
+      "fuente": "Ventas v29",
+      "_nota": "Solo existe en ventas."
+    },
+    "constancia": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "binario",
+      "ruta": "rvierce/gestionlibro/web/registroslibros/constancia/constanciarecepcion",
+      "params_obligatorios": ["nomConstanciaRecepcion"],
+      "fuente": "Compras v28 5.49"
+    }
+  },
+
+  "no_existe_por_api": {
+    "generar_el_registro": "RS 000040-2022 art. 8.3 y la FAQ oficial n.º 5: la generación del registro solo se hace entrando por SUNAT Operaciones en Línea, y la pulsa una persona. **Es el techo de cualquier integración con el SIRE**: se puede dejar el mes en preliminar y nada más. Quien construya un conector debería decírselo a su usuario en vez de dejarle creer que falta algo por programar."
+  },
+
+  "tickets": {
+    "_nota": "Todo lo pesado del SIRE es asíncrono y NO hay webhooks: la operación devuelve un numTicket y hay que sondear. El anexo documenta del 01 al 06; en producción se han observado 07, 08 y 10 que no figuran en ninguno. Un código desconocido no es ni éxito ni fracaso: conviene registrarlo y seguir sondeando.",
+    "formato": "AAAA99999999 — año, tipo de correlativo (2) y correlativo de envío (8)",
+    "estados": {
+      "01": {"nombre": "cargado", "terminado": false, "errores": false, "descargable": false},
+      "02": {"nombre": "validando archivo", "terminado": false, "errores": false, "descargable": false},
+      "03": {"nombre": "procesado con errores", "terminado": true, "errores": true, "descargable": true},
+      "04": {"nombre": "procesado sin errores", "terminado": true, "errores": false, "descargable": true},
+      "05": {"nombre": "en proceso", "terminado": false, "errores": false, "descargable": false},
+      "06": {"nombre": "terminado", "terminado": true, "errores": false, "descargable": true}
+    },
+    "estados_fuente": "Ventas v29, Anexo III"
+  },
+
+  "tus": {
+    "_nota": "El manual afirma que un cliente TUS «debe ser desarrollado en JAVA» y publica uno entero. No es cierto: TUS 1.0.0 es agnóstico del lenguaje y el propio manual remite a tus.io. Los valores de la metadata van en base64 y las claves en claro; si falta una, la subida se acepta y el ticket termina en error, que es la peor forma de enterarse.",
+    "version": "1.0.0",
+    "metadata": ["filename", "filetype", "numRuc", "perTributario", "codOrigenEnvio", "codProceso", "codTipoCorrelativo", "nomArchivoImportacion", "codLibro"],
+    "cod_tipo_correlativo": "01",
+    "filetype": "application/zip",
+    "filename": "El nombre que exige SUNAT (Tablas 6 y 13), el mismo que produce el driver `sire`. Renombrarlo hace que lo rechace, y además ES la política de idempotencia: reenviar un nombre ya enviado responde 1024."
+  },
+
+  "errores": {
+    "_nota": "El 422 llega como {cod, msg, errors:[{cod, msg}]} y EL CÓDIGO QUE IMPORTA VIVE DENTRO DE `errors`: el `cod` de arriba es casi siempre «422» a secas. Mirar solo el de arriba hace que el 1024 no se reconozca nunca. Un 422 no se reintenta —es validación de negocio— salvo el 1351, que el propio manual manda repetir. Un 500 con cuerpo HTML no es una caída de SUNAT: es una ruta que no existe para ese libro o un parámetro obligatorio que falta.",
+    "idempotentes": {
+      "1024": "El archivo <nombre> fue previamente enviado. ES la única idempotencia que ofrece la API, y va por nombre de archivo: significa «esto ya entró», no «esto falló».",
+      "1008": "El registro electrónico ya se encuentra en el módulo de preliminar.",
+      "1009": "El registro electrónico ya ha sido generado."
+    },
+    "reintentables": {
+      "1351": "Se ha producido un error al realizar el envío del archivo, por favor volver a intentar el envío."
+    },
+    "frecuentes": {
+      "1006": "perTributario con formato distinto de yyyymm",
+      "1007": "El periodo de búsqueda no debe ser mayor a la fecha actual",
+      "1044": "Error en la posición-descripción del nombre del archivo plano",
+      "1059": "codTipoArchivo no permitido",
+      "1067": "perIni vacío o con formato inválido",
+      "1140": "codLibro vacío",
+      "1161": "codLibro no permitido o no válido",
+      "1346": "El tamaño del comprimido .zip debe ser menor o igual a 6 GB",
+      "1348": "La extensión del archivo debe ser .zip",
+      "1518": "No existen documentos para exportar",
+      "2293": "Para registrar el preliminar primero hay que reemplazar la propuesta"
+    }
+  },
+
+  "limites": {
+    "zip_maximo": "6 GB (error 1346)",
+    "cors": "Los servicios del SIRE NO se pueden consumir desde un cliente web: da error de CORS. Solo servidor a servidor — y la Clave SOL no debería estar en un navegador de todas formas.",
+    "cuota": "SUNAT no publica límites de tasa para el SIRE. Se observan 429 intermitentes, así que conviene reintentar con espera creciente y ponerse un tope propio.",
+    "ambiente_de_pruebas": "NO EXISTE para el SIRE. El e-beta de SUNAT es solo para probar estructuras XML de comprobantes (UBL 2.1). Toda prueba del SIRE es contra producción con un RUC real: conviene empezar por las lecturas, que son idempotentes, y no escribir nada sin un acto explícito de la persona."
+  }
+}
