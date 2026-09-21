@@ -148,10 +148,10 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registr
             # (10:58)—, no `det["base"]`, que es el total sobre el que se calcula.
             "IMPORTE DETRACCION": ln.importe if ln.rol == "detraccion" else "",
             "ANULADO": datos.NO_ANULADO,
-            # Sin fuente todavía: la columna existe y va vacía, que dice «este comprobante no lo trae».
-            # ⚠️ Su hoja dice «`0` o `1`; `1` = el IGV está pendiente de aplicación», así que el `0` sería
-            # su defecto natural — pero eso es una afirmación sobre el CRÉDITO FISCAL y no se escribe sin
-            # confirmarla. Vacía dice «este comprobante no lo trae»; un `0` diría «no está pendiente».
+            # VACÍA, y es una decisión tomada (John, 21-sep-2026), no una casilla por rellenar. Su hoja dice
+            # «`0` o `1`; `1` = el IGV está pendiente de aplicación», así que el `0` parecía el defecto
+            # natural —como en `ANULADO`—, pero no es el mismo caso: esto afirma algo sobre el CRÉDITO
+            # FISCAL. Vacía dice «este comprobante no lo trae»; un `0` diría «no está pendiente».
             "IGV POR APLICAR": "",
             "IMPORTACION": "1" if (cab.anio_dua or cab.cod_dep_aduanera) else "0",
             "NUMERO FILE": "",
