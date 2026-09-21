@@ -100,10 +100,21 @@ def test_las_banderas_que_se_saben_van_en_cero_y_no_en_blanco():
 
 
 def test_el_numero_del_documento_va_pegado_y_con_ceros():
-    """`F13600000431`, al revés que en CONCAR y el SIRE, donde va sin ceros. Y la glosa, con guion."""
+    """`F13600000431`: serie a cuatro y número a ocho, al revés que en CONCAR y el SIRE."""
     fila = _filas(_compra())[0]
     assert fila["NRO DOCUMENTO"] == "F13600000431"
-    assert fila["GLOSA"] == "FT F136-00000431 /", "calcada de la plantilla, con su barra final"
+
+
+def test_las_dos_glosas_dicen_lo_mismo_y_es_el_concepto():
+    """`GLOSA` y `GLOSA MOVIMIENTO` llevan las dos el concepto del comprobante (John, 21-sep-2026).
+
+    Hasta la 2.1 la primera llevaba el documento (`FT F136-00000431 /`), pero el tipo y el número ya viajan en
+    sus propias columnas: repetirlos gastaba la glosa en decir dos veces lo mismo."""
+    for fila in _filas(_compra()):
+        assert fila["GLOSA"] == fila["GLOSA MOVIMIENTO"] == "CELULARES"
+    ventas = _filas(_venta(), imputacion={"fila-1": {"cuenta_contable": "70111000", "centro_costo": "CC01"}})
+    for fila in ventas:
+        assert fila["GLOSA"] == fila["GLOSA MOVIMIENTO"] == "CELULARES"
 
 
 def test_la_nota_de_credito_se_llama_CC_y_no_NC():

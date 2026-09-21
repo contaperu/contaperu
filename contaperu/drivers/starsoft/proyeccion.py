@@ -7,14 +7,16 @@ vocabulario. Las líneas llegan cuadradas y numeradas; este módulo no decide ni
 columnas mezclan datos de la línea con datos de la CABECERA del comprobante —el IGV, el destino de la
 adquisición, el número sin partir—, y una tabla de rutas solo alcanza la línea.
 
-Las seis traducciones que hacen a STARSOFT distinto de CONCAR, con el mismo documento delante:
+Las traducciones que hacen a STARSOFT distinto de CONCAR, con el mismo documento delante:
 
-    sub-diario      11  ->  4          el de STARSOFT, que va en la configuración
-    voucher         070001  ->  0001   el correlativo sin el mes, con sus cuatro dígitos
-    nro documento   F136-431  ->  F13600000431    pegado y con ceros
+    sub-diario      11  ->  04         el de STARSOFT, que va en la configuración
+    comprobante     070001  ->  0001   el correlativo sin el mes, con sus cuatro dígitos
+    nro documento   F136-431  ->  F13600000431    serie a cuatro y número a ocho
     conversión      V  ->  VTA
-    glosa           CELULARES  ->  FT F136-00000431
     destino         DGNG  ->  002      la columna que CONCAR no tiene
+
+La glosa NO se traduce: las dos columnas que la llevan —`GLOSA` y `GLOSA MOVIMIENTO`— dicen el concepto del
+comprobante, el mismo que trae la línea.
 """
 from __future__ import annotations
 
@@ -70,18 +72,6 @@ def numero_del_documento(cab: Cabecera) -> str:
     ⚠️ Es lo contrario de la regla de CONCAR y del SIRE, donde el número va SIN ceros a la izquierda.
     """
     return f"{serie_a_cuatro(cab.serie)}{(cab.numero or '').zfill(LARGO_NUMERO)}"
-
-
-def glosa_del_documento(ln: LineaDiario, cab: Cabecera) -> str:
-    """La glosa de la columna del documento: el tipo y el número, no el concepto del comprobante.
-
-    Calcada de la plantilla real de ventas, que muestra `BV 001 -00036207 /` y `FT F001-00000202 /`: el tipo, un
-    espacio, la serie a cuatro, el guion, el número a ocho y ` /` al final. El concepto va a la glosa de
-    movimiento. ⚠️ El ` /` final está en todas las filas de la captura y `[por confirmar]` si lo pide el formato
-    o lo dejó la macro que llenó la hoja.
-    """
-    tipo = (ln.documento or {}).get("tipo", "")
-    return f"{tipo} {serie_a_cuatro(cab.serie)}-{(cab.numero or '').zfill(LARGO_NUMERO)} /".strip()
 
 
 def voucher(correlativo: str) -> str:
@@ -144,7 +134,11 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha
         "CONV": config.get("tipo_conversion") or "",
         "FECHA REGISTRO": fecha_registro,
         "TIPO CAMBIO": ln.tipo_cambio or "",
-        "GLOSA": glosa_del_documento(ln, cab),
+        # LA MISMA que la de movimiento (John, 21-sep-2026): las dos dicen el concepto del
+        # comprobante. Hasta la 2.1 esta llevaba el documento —`FT F001-00000202 /`—, que es lo que
+        # muestra una de las hojas; pero el tipo y el número ya viajan en sus propias columnas, así
+        # que repetirlos aquí gastaba la glosa en decir dos veces lo mismo.
+        "GLOSA": ln.glosa,
         "DESTINO": destino_de(cab),
         "TIPO DOC REF": ref.get("tipo", ""),
         "NRO DOC REF": ref.get("serie_numero", ""),
@@ -212,7 +206,11 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_
         "IMPORTE": ln.importe,
         "CONV": config.get("tipo_conversion") or "",
         "TIPO CAMBIO": ln.tipo_cambio or "",
-        "GLOSA": glosa_del_documento(ln, cab),
+        # LA MISMA que la de movimiento (John, 21-sep-2026): las dos dicen el concepto del
+        # comprobante. Hasta la 2.1 esta llevaba el documento —`FT F001-00000202 /`—, que es lo que
+        # muestra una de las hojas; pero el tipo y el número ya viajan en sus propias columnas, así
+        # que repetirlos aquí gastaba la glosa en decir dos veces lo mismo.
+        "GLOSA": ln.glosa,
         "GLOSA MOVIMIENTO": ln.glosa,
         "DOCUMENTO ANULADO": datos.NO_ANULADO,
         "DEBE / HABER": ln.debe_haber,

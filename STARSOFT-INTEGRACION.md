@@ -325,8 +325,9 @@ fuerte que tiene este documento: no es la narración de un vídeo, es el archivo
 | `EXPORTACION` | `0` en todas las filas |
 | Siglas | `BV` boleta, `FT` factura, **`CC` nota de crédito** |
 | `NRO DOCUMENTO` | 12 caracteres: `F00100000202` y `001 00036207` — **la serie se rellena a 4 con espacio** |
-| `GLOSA` | `BV 001 -00036207 /` — tipo, serie a 4, guion, número a 8, y ` /` al final |
+| `GLOSA` | `BV 001 -00036207 /` en esta hoja. **El driver NO la usa así**: desde la 2.2 las dos columnas de glosa llevan el concepto (John, 21-sep-2026), y el tipo y el número ya viajan en sus propias columnas |
 | `IGV` y `TASA IGV` | **solo en la fila del cliente**, la primera del asiento |
+| El orden de las líneas | **cliente · IGV · ingreso**. Lo dicen esta hoja y un TXT de otro generador, y desde la 2.2 es el del motor |
 | `RUC CLIENTE` y `RAZON SOCIAL` | **solo en la fila del cliente**, no repetidos |
 | `CODIGO CLIENTE` | en TODAS las filas, también el genérico `99999999999` de las boletas |
 | `NRO DOC FINAL` | solo en boletas: el último número del rango |
@@ -334,15 +335,9 @@ fuerte que tiene este documento: no es la narración de un vídeo, es el archivo
 
 **Lo que sigue abierto:**
 
-- El **` /` final de la glosa** está en todas las filas de la captura. `[por confirmar]` si lo pide el formato o
-  lo dejó la macro que llenó la hoja.
 - **`VALOR ISC`, `OTROS TRIB`, `EXONERADO`, `OTROS CARGOS` e `IMP BOLSA`** van declaradas y vacías: existen y no
   consta cómo se llenan. En la captura están en blanco **incluso en la venta EXONERADA**, que es el caso donde
   más se esperaría un número.
-- **El orden de las líneas del asiento.** La hoja va `cliente · IGV · ingreso`; el motor produce
-  `cliente · ingreso · IGV`. Los importes y las cuentas son los mismos y la partida cuadra igual, pero si
-  STARSOFT espera ese orden, hay que cambiarlo **en el núcleo**, que es de donde sale — y eso movería también
-  el Excel de CONCAR.
 - **La plantilla de COMPRAS sigue levantada del vídeo** y espera su propia captura. Por eso sus cabeceras no
   coinciden con estas (`CUENTA` frente a `CTA CONTABLE`): cada una se calca de SU fuente.
 

@@ -53,6 +53,19 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   sigue en **1.0**. Quien busque sus líneas por `rol` no nota nada; quien buscara la del IGV por el texto
   `"IGV - "` deja de encontrarla.
 
+- **El asiento de una VENTA sale `cliente · IGV · ingreso`**, y no `cliente · ingreso · IGV`. Lo piden dos
+  archivos reales de STARSOFT —una hoja de su plantilla y un TXT de otro generador— y era la única asimetría
+  entre los dos libros: en compras el motor ya ponía el IGV justo detrás del principal. Las cuentas, los
+  sentidos y los importes son los mismos, y la partida cuadra igual; **cambian las huellas de los asientos de
+  venta**, porque el orden entra en la huella. Las de compras no se mueven.
+
+  Se comprobó caso por caso al regenerar los snapshots: de los 52 congelados cambian 7, **todos de venta y en
+  todos solo el orden** —misma cuenta, mismo sentido, mismo importe—.
+
+- **STARSOFT: las dos columnas de glosa dicen lo mismo, el concepto del comprobante** (John, 21-sep-2026). La
+  principal llevaba el documento (`FT F001-00000202 /`), que es lo que muestra una de las hojas, pero el tipo y
+  el número ya viajan en sus propias columnas: repetirlos gastaba la glosa en decir dos veces lo mismo.
+
 - **El tipo de cambio viaja en la línea del asiento aunque la moneda sea soles.** Es un hecho del comprobante,
   y hasta ahora el núcleo lo descartaba en PEN — lo que dejaba sin él a un destino que lo pide en todas sus
   filas: STARSOFT (John, 21-sep-2026, confirmado por la hoja real, que lo muestra en comprobantes en soles).

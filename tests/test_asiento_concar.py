@@ -188,9 +188,10 @@ def test_la_cuenta_decide_si_el_centro_va_a_la_M():
         assert (gasto["K"], gasto["M"], gasto["X"]) == (cuenta, "", ""), cuenta
     # Y el doble anexo del proveedor NO depende de esto: sigue llevando el centro.
     assert driver_concar.filas_de_comprobante(cp(cuenta_contable="603201"), CONTAB, MES, "080001")[2]["X"] == "OBRA01"
-    # Ventas sin cambios: 701101 está en la lista, que es exactamente para lo que se metió el 70.
+    # Ventas sin cambios: 701101 está en la lista, que es exactamente para lo que se metió el 70. Es la
+    # TERCERA fila desde la 2.2: el orden de la venta es cliente · IGV · ingreso.
     filas_venta = driver_concar.filas_de_comprobante(cp(cuenta_contable=""), CONTAB, MES, "080001", es_venta=True)
-    assert filas_venta[1]["K"] == "701101" and filas_venta[1]["M"] == "OBRA01"
+    assert filas_venta[2]["K"] == "701101" and filas_venta[2]["M"] == "OBRA01"
     # Casa por prefijo, no por los dos primeros dígitos: "6311" no alcanza a 631201.
     largo = configuracion({"cuentas_con_centro": ["6311"]})
     assert driver_concar.filas_de_comprobante(cp(), largo, MES, "080001")[0]["M"] == "OBRA01"                        # 631101
@@ -411,27 +412,30 @@ def test_asiento_con_detraccion_calca_un_excel_real():
 
 
 def test_asiento_de_ventas_espejo_del_skill():
-    """Ventas: cliente 121201/121202 al Debe por el total, ingreso 701101 al
-    Haber por el valor venta, IGV 401111 al Haber; sub-diario 05; NC invierte; cada venta con
-    su fecha de emisión; la boleta de venta SÍ lleva su IGV; la detracción no se registra."""
+    """Ventas: cliente 121201/121202 al Debe por el total, IGV 401111 al Haber, ingreso 701101 al
+    Haber por el valor venta; sub-diario 05; NC invierte; cada venta con su fecha de emisión; la boleta de
+    venta SÍ lleva su IGV; la detracción no se registra.
+
+    El IGV va ANTES del ingreso desde la 2.2: es el orden de los archivos reales de STARSOFT, y el que el
+    motor ya usaba en compras."""
     fv = driver_concar.filas_de_comprobante(cp(cuenta_contable=""), CONTAB, MES, "080009", es_venta=True)   # sin cuenta en la fila → default 701101
-    cli_, ing, igv = fv
-    assert [f["N"] for f in fv] == ["D", "H", "H"] and [f["K"] for f in fv] == ["121201", "701101", "401111"]
-    assert [f["O"] for f in fv] == [118.0, 100.0, 18.0]
+    cli_, igv, ing = fv
+    assert [f["N"] for f in fv] == ["D", "H", "H"] and [f["K"] for f in fv] == ["121201", "401111", "701101"]
+    assert [f["O"] for f in fv] == [118.0, 18.0, 100.0]
     assert cli_["L"] == "20607777773" and ing["L"] == "" and cli_["X"] == "OBRA01"    # anexo RUC + anexo auxiliar en el cliente
     assert ing["M"] == "OBRA01" and cli_["M"] == ""                                   # centro de costo en el ingreso
     assert all(f["B"] == "05" and f["D"] == EMISION and f["J"] == EMISION for f in fv)  # cada venta en su fecha
     assert fv[0]["AO"] == 18 and fv[0]["R"] == "FT"
     assert debe_haber(fv) == (Decimal("118"), Decimal("118"))
     # La cuenta de ingreso: default real 701101; la fila o el RUC pueden cambiarla
-    assert driver_concar.filas_de_comprobante(cp(cuenta_contable="702101"), CONTAB, MES, "080001", es_venta=True)[1]["K"] == "702101"
+    assert driver_concar.filas_de_comprobante(cp(cuenta_contable="702101"), CONTAB, MES, "080001", es_venta=True)[2]["K"] == "702101"
     config = configuracion({"cuentas": {"ventas": "701201", "clientes": {"USD": "121209"}}})
     v2 = driver_concar.filas_de_comprobante(cp(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), config, MES, "080001", es_venta=True)
-    assert v2[1]["K"] == "701201" and v2[0]["K"] == "121209" and v2[0]["E"] == "US" and v2[0]["G"] == 3.55
+    assert v2[2]["K"] == "701201" and v2[0]["K"] == "121209" and v2[0]["E"] == "US" and v2[0]["G"] == 3.55
     assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], CONTAB, es_venta=True) == []
     # Boleta de venta emitida: SÍ lleva su IGV (la regla "sin crédito" es solo de compras)
     bv = driver_concar.filas_de_comprobante(cp(tipo_cp="03", serie="B001", numero="9", cuenta_contable=""), CONTAB, MES, "080002", es_venta=True)
-    assert len(bv) == 3 and bv[0]["B"] == "05" and bv[0]["R"] == "BV" and bv[2]["K"] == "401111" and bv[0]["AO"] == 18
+    assert len(bv) == 3 and bv[0]["B"] == "05" and bv[0]["R"] == "BV" and bv[1]["K"] == "401111" and bv[0]["AO"] == 18
     # NC de venta: invierte (ingreso D, IGV D, cliente H) con su documento de referencia
     nc = driver_concar.filas_de_comprobante(cp(tipo_cp="07", serie="FC01", numero="3", cuenta_contable="", ref_tipo_cp="01", ref_serie="F001", ref_numero="00000123", ref_fecha="2026-08-01"),
                         CONTAB, MES, "080003", es_venta=True)

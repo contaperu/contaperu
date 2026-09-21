@@ -275,8 +275,12 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                                      detraccion=_detraccion(c, config, total, neutral))
 
     if es_venta and not invierte:
-        # Venta normal: cliente (D) · ingreso (H) · IGV (H) — el orden del manual de asientos.
-        orden = [tercero, *principales, linea_igv]
+        # Venta normal: cliente (D) · IGV (H) · ingreso (H).
+        #
+        # El IGV va ANTES del ingreso desde la 2.2 (John, 21-sep-2026). Lo piden dos archivos reales de STARSOFT
+        # —una hoja de su plantilla y un TXT de otro generador— que ordenan así las tres cuentas, y en compras el
+        # motor ya lo hacía: el IGV sigue al principal, no al revés. Era la única asimetría entre los dos libros.
+        orden = [tercero, linea_igv, *principales]
     else:
         # Compras (y NC de venta, que invierte): principal · IGV · retención · tercero · detracción.
         orden = [*principales, linea_igv, linea_retencion, tercero, linea_detraccion_tercero, linea_detraccion]
