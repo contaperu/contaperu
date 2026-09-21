@@ -22,7 +22,10 @@ from contaperu import api
 
 RUC = "20601234567"
 PROVEEDOR = "20131312955"
-CONFIG = {"usa_centros_costo": True, "starsoft": {"tipo_anexo": "03"}}
+# Los dos tipos de anexo van con su valor de fabrica: 03 proveedores (video de compras), 02 clientes
+# (captura de la hoja PLANTILLA de ventas). Se dejan explicitos para que el test diga cual usa cada libro.
+CONFIG = {"usa_centros_costo": True,
+          "starsoft": {"tipo_anexo_proveedor": "03", "tipo_anexo_cliente": "02"}}
 
 
 def _compra(**cambios) -> dict:
@@ -76,7 +79,7 @@ def test_el_voucher_va_sin_el_mes_pero_con_sus_cuatro_digitos():
     """El motor numera `070001`; STARSOFT empieza en 1 y sigue (compras 6:15), con el ancho del campo.
 
     Los ceros son el ancho, no adorno: hasta la 2.0 el recorte del mes pasaba por `int()` y salía `1`."""
-    assert {f["VOUCHER"] for f in _filas(_compra())} == {"0001"}
+    assert {f["CORRELATIVO"] for f in _filas(_compra())} == {"0001"}
 
 
 def test_las_banderas_que_se_saben_van_en_cero_y_no_en_blanco():

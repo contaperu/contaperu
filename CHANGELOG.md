@@ -53,6 +53,19 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   sigue en **1.0**. Quien busque sus líneas por `rol` no nota nada; quien buscara la del IGV por el texto
   `"IGV - "` deja de encontrarla.
 
+- **STARSOFT: la columna `D` se llama `CORRELATIVO` y no `VOUCHER`** (John, 21-sep-2026), en los dos libros.
+  La función que la calcula sigue llamándose `voucher`, que es superficie pública congelada.
+
+- **STARSOFT: el tipo de anexo se parte en dos, y los dos traen valor de fábrica.** El maestro de proveedores
+  y el de clientes son distintos en STARSOFT, así que `tipo_anexo` —una sola clave, vacía— pasa a
+  `tipo_anexo_proveedor` (`03`, compras) y `tipo_anexo_cliente` (`02`, ventas). Antes había que elegir cuál de
+  los dos maestros salía bien.
+
+- **STARSOFT: la plantilla de VENTAS gana la columna `TIPO ANEXO` en la `F`**, que este repositorio daba por
+  inexistente porque el vídeo no la mostraba. La confirma una captura de la hoja `PLANTILLA` abierta en Excel
+  (John, 21-sep-2026), la fuente más fuerte que tiene el driver: no es una narración, es el archivo. Las veinte
+  columnas siguientes se corren una letra.
+
 - **El sub-diario de compras de STARSOFT es `04` y no `4`** (John, 21-sep-2026). El vídeo dice «cuatro» y de
   ahí salió un `4` a secas; el formato lleva los dos dígitos, como el `03` de ventas —que sí estaba bien desde el
   principio y venía delatando la inconsistencia—. Es un valor por defecto configurable, así que quien ya lo tenga

@@ -92,10 +92,20 @@ POR_DEFECTO = {"sub_diario_compras": "04", "sub_diario_ventas": "03", "sub_diari
 CONFIGURACION = (
     *(replace(campo, por_defecto=POR_DEFECTO[campo.clave]) if campo.clave in POR_DEFECTO else campo
       for campo in CONFIGURACION_DEL_ASIENTO),
-    # El tipo de anexo del maestro de STARSOFT. En el vídeo sale `03`, pero es un código del contribuyente y no
-    # el tipo de documento de SUNAT (que para un RUC es `6`): va configurado y no deducido.
-    Campo("tipo_anexo", "texto", "", titulo="Tipo de anexo", grupo="registro", patron=r"^[0-9]{0,3}$",
-          ayuda="El código de tipo de anexo de tu STARSOFT para proveedores y clientes (en el ejemplo, 03). "
+    # El tipo de anexo del maestro de STARSOFT, la columna F de los dos libros. Es un código del contribuyente y
+    # NO el tipo de documento de SUNAT (que para un RUC es `6`), así que va configurado y no deducido.
+    #
+    # **Son dos y no uno** (John, 21-sep-2026): el maestro de proveedores y el de clientes son distintos en
+    # STARSOFT, así que compras lleva `03` y ventas `02`. Hasta la 2.1 había una sola clave `tipo_anexo`, vacía
+    # por defecto, que se escribía igual en los dos libros: eso obligaba a elegir cuál de los dos maestros salía
+    # bien. El `03` consta en el vídeo de compras; el `02` de ventas lo pone John.
+    Campo("tipo_anexo_proveedor", "texto", "03", titulo="Tipo de anexo del proveedor", grupo="registro",
+          patron=r"^[0-9]{0,3}$",
+          ayuda="El código de tipo de anexo de tu STARSOFT para PROVEEDORES, en compras (en el ejemplo, 03). "
+                "Vacío, la columna se deja en blanco."),
+    Campo("tipo_anexo_cliente", "texto", "02", titulo="Tipo de anexo del cliente", grupo="registro",
+          patron=r"^[0-9]{0,3}$",
+          ayuda="El código de tipo de anexo de tu STARSOFT para CLIENTES, en ventas (en el ejemplo, 02). "
                 "Vacío, la columna se deja en blanco."),
     # La columna CONV. En los dos vídeos vale VTA en todas las filas, también en compras.
     Campo("tipo_conversion", "texto", "VTA", titulo="Tipo de conversión", grupo="monedas", patron=r"^[A-Z]{0,5}$",
@@ -115,7 +125,7 @@ COMPRAS = (
     ("A", "CUENTA", "texto"),
     ("B", "PERIODO", "texto"),
     ("C", "SUBDIARIO", "texto"),
-    ("D", "VOUCHER", "texto"),
+    ("D", "CORRELATIVO", "texto"),
     ("E", "FECHA", "fecha"),
     ("F", "TIPO ANEXO", "texto"),
     ("G", "CODIGO PROVEEDOR", "texto"),
@@ -155,35 +165,36 @@ VENTAS = (
     ("A", "CUENTA", "texto"),
     ("B", "PERIODO", "texto"),
     ("C", "SUBDIARIO", "texto"),
-    ("D", "VOUCHER", "texto"),
+    ("D", "CORRELATIVO", "texto"),
     ("E", "FECHA", "fecha"),
-    ("F", "TIPO DOCUMENTO", "texto"),
-    ("G", "NRO DOCUMENTO", "texto"),
-    ("H", "NRO DOC FINAL", "texto"),
-    ("I", "FECHA EMISION", "fecha"),
-    ("J", "DOC REFERENCIA", "texto"),
-    ("K", "NRO DOC REF", "texto"),
-    ("L", "IGV", "importe"),
-    ("M", "TASA IGV", "numero"),
-    ("N", "IMPORTE", "importe"),
-    ("O", "CONV", "texto"),
-    ("P", "TIPO CAMBIO", "numero"),
-    ("Q", "GLOSA", "texto"),
-    ("R", "GLOSA MOVIMIENTO", "texto"),
-    ("S", "ANULADO", "texto"),
-    ("T", "DEBE HABER", "texto"),
-    ("U", "RUC CLIENTE", "texto"),
-    ("V", "RAZON SOCIAL", "texto"),
-    ("W", "CENTRO COSTO", "texto"),
-    ("X", "FECHA VENCIMIENTO", "fecha"),
-    ("Y", "EXPORTACION", "texto"),
+    ("F", "TIPO ANEXO", "texto"),
+    ("G", "TIPO DOCUMENTO", "texto"),
+    ("H", "NRO DOCUMENTO", "texto"),
+    ("I", "NRO DOC FINAL", "texto"),
+    ("J", "FECHA EMISION", "fecha"),
+    ("K", "DOC REFERENCIA", "texto"),
+    ("L", "NRO DOC REF", "texto"),
+    ("M", "IGV", "importe"),
+    ("N", "TASA IGV", "numero"),
+    ("O", "IMPORTE", "importe"),
+    ("P", "CONV", "texto"),
+    ("Q", "TIPO CAMBIO", "numero"),
+    ("R", "GLOSA", "texto"),
+    ("S", "GLOSA MOVIMIENTO", "texto"),
+    ("T", "ANULADO", "texto"),
+    ("U", "DEBE HABER", "texto"),
+    ("V", "RUC CLIENTE", "texto"),
+    ("W", "RAZON SOCIAL", "texto"),
+    ("X", "CENTRO COSTO", "texto"),
+    ("Y", "FECHA VENCIMIENTO", "fecha"),
+    ("Z", "EXPORTACION", "texto"),
 )
 
 COLUMNAS = {"compra": COMPRAS, "venta": VENTAS}
 
 # La columna del centro de costo, para que el contribuyente elija dónde va (`COLUMNAS_ELEGIBLES` del contrato).
 COLUMNAS_ELEGIBLES = {"centro_costo": (
-    Columna("centro_costo", "CENTRO COSTO", {"compra": "W", "venta": "W"}, fija=True,
+    Columna("centro_costo", "CENTRO COSTO", {"compra": "W", "venta": "X"}, fija=True,
             ayuda="En la línea del gasto o del ingreso, cuando su cuenta lleva centro de costo.",
             rol="principal", campo="centro_costo"),
 )}

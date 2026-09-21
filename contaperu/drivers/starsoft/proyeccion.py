@@ -74,7 +74,11 @@ def glosa_del_documento(ln: LineaDiario, cab: Cabecera) -> str:
 
 
 def voucher(correlativo: str) -> str:
-    """El correlativo tal como lo numera STARSOFT: `0001`, no `070001`.
+    """El correlativo tal como lo numera STARSOFT: `0001`, no `070001`. Alimenta la columna `CORRELATIVO`.
+
+    **La columna se llama `CORRELATIVO` y la función `voucher`**, y no es un descuido: la columna la renombró John
+    el 21-sep-2026 porque «ahí se entiende mejor» —en la captura del vídeo era `VOUCHER`—, y el nombre de la
+    función es superficie pública congelada (`fixtures/superficie/1.0.json`), que solo se quita en una mayor.
 
     El motor numera con el mes delante y cuatro dígitos (`asiento.numerar`), que es lo que piden CONCAR y el CSV.
     STARSOFT empieza en 1 y sigue («el correlativo de comprobantes o vouchers debe iniciar siempre en el número
@@ -105,7 +109,7 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registr
         "CUENTA": ln.cuenta,
         "PERIODO": libro.periodo,
         "SUBDIARIO": ln.sub_diario,
-        "VOUCHER": voucher(ln.correlativo),
+        "CORRELATIVO": voucher(ln.correlativo),
         "FECHA": ln.fecha,
         "TIPO DOCUMENTO": doc.get("tipo", ""),
         "NRO DOCUMENTO": numero_del_documento(cab),
@@ -124,7 +128,7 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registr
     if libro.tipo == "compra":
         det = ln.detraccion or {}
         propio = {
-            "TIPO ANEXO": config.get("tipo_anexo") or "",
+            "TIPO ANEXO": config.get("tipo_anexo_proveedor") or "",
             "CODIGO PROVEEDOR": cab.contraparte_doc,
             "FECHA REGISTRO": fecha_registro,
             "DESTINO": destino_de(cab),
@@ -158,6 +162,8 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registr
         }
     else:
         propio = {
+            # El maestro de CLIENTES, que en STARSOFT no es el de proveedores: su propia clave.
+            "TIPO ANEXO": config.get("tipo_anexo_cliente") or "",
             "FECHA EMISION": doc.get("fecha_emision", ""),
             "NRO DOC FINAL": cab.numero_final,
             "DOC REFERENCIA": ref.get("tipo", ""),

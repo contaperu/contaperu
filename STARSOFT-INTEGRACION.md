@@ -240,7 +240,40 @@ real, no sobre la narración.
 `CENTRO COSTO` · *fecha de vencimiento* · *fecha, serie y número de referencia* · *exportación*
 
 > **Compras y ventas no comparten juego de columnas.** Ventas lleva `RUC CLIENTE` y `RAZON SOCIAL`;
-> compras, `código de proveedor` y `tipo de anexo`. **Son dos plantillas y dos proyecciones.**
+> compras, `código de proveedor`. **Son dos plantillas y dos proyecciones.**
+
+### La cabecera REAL de la hoja `PLANTILLA` de ventas · **[captura de John, 21-sep-2026]**
+
+Leída de una captura de la hoja abierta en Excel, con datos dentro, que es la fuente más fuerte que tiene
+este documento: no es la narración de un vídeo, es el archivo.
+
+| | | | | | | | |
+|---|---|---|---|---|---|---|---|
+| **A** | **B** | **C** | **D** | **E** | **F** | **G** | **H** |
+| `CTA CONTABLE` | `AÑO Y MES PROCESO` | `SUBDIARIO` | `COMPROBANTE` | `FECHA REGISTRO` | `TIPO ANEXO` | `CODIGO CLIENTE` | `TIPO DOCUMENTO` |
+
+| | | | | | | | |
+|---|---|---|---|---|---|---|---|
+| **I** | **J** | **K** | **L** | **M** | **N** | **O** | **P** |
+| `NRO DOCUMENTO` | `NRO DOC FINAL` | `FECHA EMISION` | `DOC REFERENCIA` | `NRO DOC REF` | `IGV` | `VALOR ISC` | `OTROS TRIB` |
+
+**Lo que confirma:**
+
+- **`TIPO ANEXO` SÍ está en ventas, en la `F`**, con valor `02` en todas las filas. El vídeo no la mostraba y
+  este documento la daba por inexistente.
+- **El sub-diario de ventas es `03`**, escrito con su cero.
+- **La columna `D` lleva cuatro dígitos**: `0030`, `0031`, `0032`… Confirma que el correlativo va con ceros.
+- **Las siglas**: `BV` boleta, `FT` factura y **`CC` nota de crédito**, que era lo que más dudas daba.
+
+**Lo que contradice, y sigue abierto:**
+
+- **La `D` se llama `COMPROBANTE`**, no `VOUCHER` (como decía la captura de compras) ni `CORRELATIVO`.
+- **Falta `CODIGO CLIENTE` en la `G`**: el driver lleva el RUC del cliente al final, en `RUC CLIENTE`. Desde
+  la `G` en adelante, el mapa de este documento y el del driver están **corridos una posición**.
+- **`VALOR ISC` y `OTROS TRIB`** existen y el driver no las tiene.
+- **El número del documento ocupa 12 caracteres**: `F00100000202` para una factura, pero `001 00036207` para
+  una boleta. La serie se rellena a **4 caracteres** (`001` + espacio) y el número a 8 con ceros. El driver
+  hoy pega la serie tal cual, así que una boleta saldría con 11 caracteres y no 12.
 
 ## La forma del asiento
 
