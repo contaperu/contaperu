@@ -5,7 +5,7 @@
 | **Estado** | final |
 | **Compatibilidad** | cambio de significado (no toca el esquema) |
 | **Nivel** | estándar |
-| **Versión** | motor: la próxima (hoy sin publicar) · `open-accounting` **1.0**, sin cambio |
+| **Versión** | motor **2.2.0** · `open-accounting` **1.0**, sin cambio |
 | **Test** | `tests/test_linea_neutral.py::test_la_glosa_de_la_linea_va_entera_y_el_corte_es_del_driver` |
 
 ## Motivación

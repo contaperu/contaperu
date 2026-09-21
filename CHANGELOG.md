@@ -6,10 +6,20 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.2.0] — 2026-09-21
+
 > ⚠️ **Todas las huellas de asiento cambian.** Es lo primero que hay que mirar al subir: la fórmula es la
-> misma, pero el contenido que resume no. Quien guarde huellas para reconocer una tanda ya exportada verá
-> las de antes como distintas. Ni un importe, ni una cuenta, ni un sentido se mueven — comprobado celda a
-> celda sobre los snapshots congelados: 57 celdas por snapshot, **todas glosas y ninguna otra**.
+> misma, pero el contenido que resume no. Quien guarde huellas para reconocer una tanda ya exportada verá las
+> de antes como distintas. **Ni un importe, ni una cuenta, ni un sentido se mueven**, y no es una impresión:
+> al regenerar los snapshots congelados se comparó celda a celda contra los anteriores.
+>
+> Cambian por dos motivos, los dos comprobados:
+>
+> - **la glosa pierde sus prefijos** — 57 celdas por snapshot, todas glosas y ninguna otra;
+> - **el asiento de una venta reordena sus líneas** — 7 de los 52 casos, todos de venta, y en los 7 la lista
+>   de *(cuenta, sentido, importe)* es la misma permutada.
+>
+> Las huellas de los asientos de COMPRA solo cambian por lo primero; su orden no se toca.
 
 ### Añadido
 
@@ -1305,7 +1315,8 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v2.1.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/contaperu/contaperu/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/contaperu/contaperu/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/contaperu/contaperu/compare/v1.4.0...v2.0.0
 [1.4.0]: https://github.com/contaperu/contaperu/compare/v1.3.0...v1.4.0
