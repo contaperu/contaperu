@@ -111,9 +111,10 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 
 ### Por dónde pasa un comprobante
 
-![Qué módulo hace qué: un comprobante entra por los lectores, que lo convierten al modelo canónico; validar, igv y detracciones lo revisan; asiento arma la partida doble; y los drivers la traducen al formato de cada sistema. Desde abajo lo sostienen catalogos, partida_doble y contrato, y los catálogos se leen de datos de SUNAT con su fuente citada. Por debajo de todo, el pipeline orquesta, la API pública expone y congela cada firma hasta la 2.0, y las puertas solo hablan con la API](diagramas/recorrido-por-los-modulos.svg)
+![Qué carpeta y qué archivo toca un comprobante: entra por lectores/ (xml_ubl, sire_txt, archivos, _zip), pasa al modelo canónico (modelo, vocabulario, catalogos, que leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (validar, igv, detracciones, configuracion), asiento/ arma la partida doble apoyándose en partida_doble y pcge/, y drivers/ lo traduce a sus seis destinos; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/](diagramas/recorrido-por-los-modulos.svg)
 
-El mismo motor, un nivel más abajo: qué módulo hace qué.
+El mismo motor, un nivel más abajo: **las ocho carpetas del paquete y los archivos que toca un comprobante**, en el
+orden en que lo hacen.
 
 - **`lectores`** convierten un archivo que ya existe —el XML UBL de SUNAT, el TXT de la propuesta del SIRE— en
   comprobantes del **`modelo`**, que es el modelo canónico: un comprobante es una fila del registro.

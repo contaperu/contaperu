@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="680" height="500" viewBox="0 0 680 500" role="img" aria-labelledby="titulo descripcion">
-<title id="titulo">Qué módulo hace qué, en el recorrido de un comprobante</title>
-<desc id="descripcion">Un comprobante entra por los lectores, que lo convierten al modelo canónico; validar, igv y detracciones lo revisan; asiento arma la partida doble; y los drivers la traducen al formato de cada sistema. Tres módulos sostienen ese recorrido desde abajo: catalogos da los códigos de SUNAT a la validación, partida_doble comprueba el cuadre del asiento y contrato dice lo que un driver debe exponer. Los catálogos se leen de datos de SUNAT, cada uno con su fuente citada. Por debajo de todo, el pipeline orquesta el recorrido entero, la API pública lo expone y congela cada firma, y las puertas —línea de comandos, MCP y HTTP— solo hablan con la API.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="778" viewBox="0 0 680 778" role="img" aria-labelledby="titulo descripcion">
+<title id="titulo">Qué carpeta y qué archivo toca un comprobante, de punta a punta</title>
+<desc id="descripcion">El recorrido de un comprobante por el paquete, carpeta a carpeta. Entra por lectores, con xml_ubl, sire_txt, archivos y zip. Pasa al modelo canónico y su vocabulario: modelo, vocabulario y catalogos, que leen los catálogos de datos de SUNAT con su fuente. Lo revisan las reglas deterministas: validar, igv, detracciones y configuracion. La carpeta asiento arma la partida doble con motor, lineas, resolucion, indice, imputacion, huella, faltas y su configuracion, apoyándose en partida_doble, que comprueba que el Debe iguale al Haber, y en pcge. Los drivers lo traducen sin decidir cuentas: contrato y kit, y los seis destinos concar, contasis, sire, csv, starsoft y asiento_neutral; comparar_sire contrasta lo generado con lo que SUNAT ya tiene. Por debajo, pipeline orquesta todo lo anterior con lectura, preparacion, seleccion, armado, diagnostico y salida; api expone la superficie pública congelada con operaciones, tabla, documento, errores, openconta y esquemas; y puertas, que solo hablan con api, ofrece cli, servidor MCP y servidor HTTP. Al final, los módulos de servicio del paquete.</desc>
 <style>
 .fondo{fill:#FFFFFF}
 .t,.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
@@ -25,31 +25,39 @@
 <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </marker>
 </defs>
-<rect class="fondo" x="0" y="0" width="680" height="500" rx="12"/>
+<rect class="fondo" x="0" y="0" width="680" height="778" rx="12"/>
 
-<g class="a"><rect x="40" y="24" width="96" height="56" rx="8" stroke-width="0.5"/><text class="t" x="88" y="52">lectores</text></g>
-<g class="a"><rect x="164" y="24" width="88" height="56" rx="8" stroke-width="0.5"/><text class="t" x="208" y="52">modelo</text></g>
-<g class="a"><rect x="280" y="24" width="136" height="56" rx="8" stroke-width="0.5"/><text class="t" x="348" y="42">validar · igv</text><text class="t" x="348" y="60">detracciones</text></g>
-<g class="a"><rect x="444" y="24" width="90" height="56" rx="8" stroke-width="0.5"/><text class="t" x="489" y="52">asiento</text></g>
-<g class="a"><rect x="562" y="24" width="78" height="56" rx="8" stroke-width="0.5"/><text class="t" x="601" y="52">drivers</text></g>
+<g class="a"><rect x="40" y="24" width="430" height="56" rx="8" stroke-width="0.5"/><text class="t" x="255" y="42">lectores/ — de un archivo a comprobantes</text><text class="s" x="255" y="60">xml_ubl.py · sire_txt.py · archivos.py · _zip.py</text></g>
+<line class="flecha" x1="255" y1="82" x2="255" y2="98" marker-end="url(#punta)"/>
 
-<line class="flecha" x1="140" y1="52" x2="160" y2="52" marker-end="url(#punta)"/>
-<line class="flecha" x1="256" y1="52" x2="276" y2="52" marker-end="url(#punta)"/>
-<line class="flecha" x1="420" y1="52" x2="440" y2="52" marker-end="url(#punta)"/>
-<line class="flecha" x1="538" y1="52" x2="558" y2="52" marker-end="url(#punta)"/>
+<g class="a"><rect x="40" y="100" width="430" height="56" rx="8" stroke-width="0.5"/><text class="t" x="255" y="118">El modelo canónico y su vocabulario</text><text class="s" x="255" y="136">modelo.py · vocabulario.py · catalogos.py</text></g>
+<line class="flecha" x1="255" y1="158" x2="255" y2="174" marker-end="url(#punta)"/>
 
-<g class="v"><rect x="284" y="124" width="128" height="44" rx="8" stroke-width="0.5"/><text class="t" x="348" y="146">catalogos</text></g>
-<g class="v"><rect x="430" y="124" width="118" height="44" rx="8" stroke-width="0.5"/><text class="t" x="489" y="146">partida_doble</text></g>
-<g class="v"><rect x="560" y="124" width="80" height="44" rx="8" stroke-width="0.5"/><text class="t" x="600" y="146">contrato</text></g>
+<g class="a"><rect x="40" y="176" width="430" height="56" rx="8" stroke-width="0.5"/><text class="t" x="255" y="194">Las reglas deterministas</text><text class="s" x="255" y="212">validar.py · igv.py · detracciones.py · configuracion.py</text></g>
+<line class="flecha" x1="255" y1="234" x2="255" y2="250" marker-end="url(#punta)"/>
 
-<line class="flecha" x1="348" y1="122" x2="348" y2="84" marker-end="url(#punta)"/>
-<line class="flecha" x1="489" y1="122" x2="489" y2="84" marker-end="url(#punta)"/>
-<line class="flecha" x1="600" y1="122" x2="600" y2="84" marker-end="url(#punta)"/>
+<g class="a"><rect x="40" y="252" width="430" height="90" rx="8" stroke-width="0.5"/><text class="t" x="255" y="274">asiento/ — aquí vive la contabilidad</text><text class="s" x="255" y="294">motor.py · lineas.py · resolucion.py · indice.py</text><text class="s" x="255" y="312">imputacion.py · huella.py · faltas.py · configuracion.py</text></g>
+<line class="flecha" x1="255" y1="344" x2="255" y2="360" marker-end="url(#punta)"/>
 
-<g class="g"><rect x="284" y="212" width="128" height="56" rx="8" stroke-width="0.5"/><text class="t" x="348" y="230">datos/sunat</text><text class="s" x="348" y="248">Con su fuente</text></g>
-<line class="flecha" x1="348" y1="210" x2="348" y2="172" marker-end="url(#punta)"/>
+<g class="a"><rect x="40" y="362" width="430" height="74" rx="8" stroke-width="0.5"/><text class="t" x="255" y="382">drivers/ — traducen, no deciden</text><text class="s" x="255" y="400">contrato.py · kit/</text><text class="s" x="255" y="418">concar · contasis · sire · csv · starsoft · asiento_neutral</text></g>
 
-<g class="m"><rect x="40" y="304" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="322">pipeline</text><text class="s" x="340" y="340">Orquesta todo lo anterior</text></g>
-<g class="m"><rect x="40" y="364" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="382">API pública</text><text class="s" x="340" y="400">La expone, y congela cada nombre con su firma</text></g>
-<g class="m"><rect x="40" y="424" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="442">Puertas</text><text class="s" x="340" y="460">CLI, MCP y HTTP: solo hablan con la API</text></g>
+<g class="v"><rect x="490" y="100" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="565" y="118">datos/sunat/</text><text class="s" x="565" y="136">Catálogos con su fuente</text></g>
+<line class="flecha" x1="488" y1="128" x2="472" y2="128" marker-end="url(#punta)"/>
+
+<g class="v"><rect x="490" y="252" width="150" height="42" rx="8" stroke-width="0.5"/><text class="t" x="565" y="266">partida_doble.py</text><text class="s" x="565" y="282">Debe = Haber</text></g>
+<line class="flecha" x1="488" y1="273" x2="472" y2="273" marker-end="url(#punta)"/>
+
+<g class="v"><rect x="490" y="300" width="150" height="42" rx="8" stroke-width="0.5"/><text class="t" x="565" y="314">pcge/</text><text class="s" x="565" y="330">PCGE 2026</text></g>
+<line class="flecha" x1="488" y1="321" x2="472" y2="321" marker-end="url(#punta)"/>
+
+<g class="v"><rect x="490" y="376" width="150" height="46" rx="8" stroke-width="0.5"/><text class="t" x="565" y="392">comparar_sire.py</text><text class="s" x="565" y="408">Contrasta con SUNAT</text></g>
+<line class="flecha" x1="488" y1="399" x2="472" y2="399" marker-end="url(#punta)"/>
+
+<g class="m"><rect x="40" y="468" width="600" height="74" rx="8" stroke-width="0.5"/><text class="t" x="340" y="488">pipeline/ — orquesta todo lo de arriba</text><text class="s" x="340" y="508">lectura.py · preparacion.py · seleccion.py</text><text class="s" x="340" y="526">armado.py · diagnostico.py · salida.py</text></g>
+
+<g class="m"><rect x="40" y="552" width="600" height="74" rx="8" stroke-width="0.5"/><text class="t" x="340" y="572">api/ — la superficie pública, congelada</text><text class="s" x="340" y="592">operaciones.py · tabla.py · documento.py</text><text class="s" x="340" y="610">errores.py · openconta.py · esquemas/</text></g>
+
+<g class="m"><rect x="40" y="636" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="654">puertas/ — solo hablan con api/</text><text class="s" x="340" y="672">cli.py · servidor_mcp.py · servidor_http.py · comun.py</text></g>
+
+<g class="g"><rect x="40" y="702" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="720">De servicio, para todo el paquete</text><text class="s" x="340" y="738">__init__.py · errores.py · _datos.py · _version.py · _obsoleto.py</text></g>
 </svg>
