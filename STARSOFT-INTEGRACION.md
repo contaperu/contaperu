@@ -242,38 +242,60 @@ real, no sobre la narración.
 > **Compras y ventas no comparten juego de columnas.** Ventas lleva `RUC CLIENTE` y `RAZON SOCIAL`;
 > compras, `código de proveedor`. **Son dos plantillas y dos proyecciones.**
 
-### La cabecera REAL de la hoja `PLANTILLA` de ventas · **[captura de John, 21-sep-2026]**
+### La cabecera REAL de la hoja `PLANTILLA` de ventas · **[capturas de John, 21-sep-2026]**
 
-Leída de una captura de la hoja abierta en Excel, con datos dentro, que es la fuente más fuerte que tiene
-este documento: no es la narración de un vídeo, es el archivo.
+Las 34 columnas, leídas de cuatro capturas de la hoja abierta en Excel **con datos dentro**. Es la fuente más
+fuerte que tiene este documento: no es la narración de un vídeo, es el archivo. El driver se calcó de aquí.
 
-| | | | | | | | |
-|---|---|---|---|---|---|---|---|
-| **A** | **B** | **C** | **D** | **E** | **F** | **G** | **H** |
-| `CTA CONTABLE` | `AÑO Y MES PROCESO` | `SUBDIARIO` | `COMPROBANTE` | `FECHA REGISTRO` | `TIPO ANEXO` | `CODIGO CLIENTE` | `TIPO DOCUMENTO` |
+| | | | | | | |
+|---|---|---|---|---|---|---|
+| **A** `CTA CONTABLE` | **B** `AÑO Y MES PROCESO` | **C** `SUBDIARIO` | **D** `COMPROBANTE` | **E** `FECHA REGISTRO` | **F** `TIPO ANEXO` | **G** `CODIGO CLIENTE` |
+| **H** `TIPO DOCUMENTO` | **I** `NRO DOCUMENTO` | **J** `NRO DOC FINAL` | **K** `FECHA EMISION` | **L** `DOC REFERENCIA` | **M** `NRO DOC REF` | **N** `IGV` |
+| **O** `VALOR ISC` | **P** `OTROS TRIB` | **Q** `TASA IGV` | **R** `IMPORTE` | **S** `CONV` | **T** `TIPO CAMBIO` | **U** `GLOSA` |
+| **V** `GLOSA MOVIMIENTO` | **W** `DOCUMENTO ANULADO` | **X** `DEBE / HABER` | **Y** `RUC CLIENTE` | **Z** `RAZON SOCIAL` | **AA** `CENTRO DE COSTOS` | **AB** `FECHA VENCIMIENTO` |
+| **AC** `FECHA DOC REFERENCIA` | **AD** `EXPORTACION` | **AE** `NRO FILE` | **AF** `EXONERADO` | **AG** `OTROS CARGOS` | **AH** `IMP BOLSA` | |
 
-| | | | | | | | |
-|---|---|---|---|---|---|---|---|
-| **I** | **J** | **K** | **L** | **M** | **N** | **O** | **P** |
-| `NRO DOCUMENTO` | `NRO DOC FINAL` | `FECHA EMISION` | `DOC REFERENCIA` | `NRO DOC REF` | `IGV` | `VALOR ISC` | `OTROS TRIB` |
+**Lo que corrigió del mapa levantado del vídeo:**
 
-**Lo que confirma:**
+- Faltaban **`TIPO ANEXO` (`F`)** y **`CODIGO CLIENTE` (`G`)**, así que de la `G` en adelante todo estaba
+  corrido una posición. Eran 25 columnas y son 34.
+- La `D` se llama **`COMPROBANTE`**, no `VOUCHER`.
+- `ANULADO` es **`DOCUMENTO ANULADO`**, `CENTRO COSTO` es **`CENTRO DE COSTOS`**, `DEBE HABER` es
+  **`DEBE / HABER`**, `CUENTA` es **`CTA CONTABLE`** y `PERIODO` es **`AÑO Y MES PROCESO`**.
+- Aparecen `VALOR ISC`, `OTROS TRIB`, `FECHA DOC REFERENCIA`, `NRO FILE`, `EXONERADO`, `OTROS CARGOS` e
+  `IMP BOLSA`, que no constaban.
 
-- **`TIPO ANEXO` SÍ está en ventas, en la `F`**, con valor `02` en todas las filas. El vídeo no la mostraba y
-  este documento la daba por inexistente.
-- **El sub-diario de ventas es `03`**, escrito con su cero.
-- **La columna `D` lleva cuatro dígitos**: `0030`, `0031`, `0032`… Confirma que el correlativo va con ceros.
-- **Las siglas**: `BV` boleta, `FT` factura y **`CC` nota de crédito**, que era lo que más dudas daba.
+**Lo que confirman los datos de la hoja:**
 
-**Lo que contradice, y sigue abierto:**
+| Qué | Lo que se ve |
+|---|---|
+| Sub-diario de ventas | `03`, con su cero |
+| `COMPROBANTE` | `0030`, `0031`, `0032`… cuatro dígitos |
+| `TIPO ANEXO` | `02` en todas las filas |
+| `DOCUMENTO ANULADO` | `0` en todas las filas |
+| `EXPORTACION` | `0` en todas las filas |
+| Siglas | `BV` boleta, `FT` factura, **`CC` nota de crédito** |
+| `NRO DOCUMENTO` | 12 caracteres: `F00100000202` y `001 00036207` — **la serie se rellena a 4 con espacio** |
+| `GLOSA` | `BV 001 -00036207 /` — tipo, serie a 4, guion, número a 8, y ` /` al final |
+| `IGV` y `TASA IGV` | **solo en la fila del cliente**, la primera del asiento |
+| `RUC CLIENTE` y `RAZON SOCIAL` | **solo en la fila del cliente**, no repetidos |
+| `CODIGO CLIENTE` | en TODAS las filas, también el genérico `99999999999` de las boletas |
+| `NRO DOC FINAL` | solo en boletas: el último número del rango |
+| `FECHA DOC REFERENCIA` | solo en la nota de crédito |
 
-- **La `D` se llama `COMPROBANTE`**, no `VOUCHER` (como decía la captura de compras) ni `CORRELATIVO`.
-- **Falta `CODIGO CLIENTE` en la `G`**: el driver lleva el RUC del cliente al final, en `RUC CLIENTE`. Desde
-  la `G` en adelante, el mapa de este documento y el del driver están **corridos una posición**.
-- **`VALOR ISC` y `OTROS TRIB`** existen y el driver no las tiene.
-- **El número del documento ocupa 12 caracteres**: `F00100000202` para una factura, pero `001 00036207` para
-  una boleta. La serie se rellena a **4 caracteres** (`001` + espacio) y el número a 8 con ceros. El driver
-  hoy pega la serie tal cual, así que una boleta saldría con 11 caracteres y no 12.
+**Lo que sigue abierto:**
+
+- El **` /` final de la glosa** está en todas las filas de la captura. `[por confirmar]` si lo pide el formato o
+  lo dejó la macro que llenó la hoja.
+- **`VALOR ISC`, `OTROS TRIB`, `EXONERADO`, `OTROS CARGOS` e `IMP BOLSA`** van declaradas y vacías: existen y no
+  consta cómo se llenan. En la captura están en blanco **incluso en la venta EXONERADA**, que es el caso donde
+  más se esperaría un número.
+- **El orden de las líneas del asiento.** La hoja va `cliente · IGV · ingreso`; el motor produce
+  `cliente · ingreso · IGV`. Los importes y las cuentas son los mismos y la partida cuadra igual, pero si
+  STARSOFT espera ese orden, hay que cambiarlo **en el núcleo**, que es de donde sale — y eso movería también
+  el Excel de CONCAR.
+- **La plantilla de COMPRAS sigue levantada del vídeo** y espera su propia captura. Por eso sus cabeceras no
+  coinciden con estas (`CUENTA` frente a `CTA CONTABLE`): cada una se calca de SU fuente.
 
 ## La forma del asiento
 

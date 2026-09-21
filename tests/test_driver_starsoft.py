@@ -79,7 +79,7 @@ def test_el_voucher_va_sin_el_mes_pero_con_sus_cuatro_digitos():
     """El motor numera `070001`; STARSOFT empieza en 1 y sigue (compras 6:15), con el ancho del campo.
 
     Los ceros son el ancho, no adorno: hasta la 2.0 el recorte del mes pasaba por `int()` y salía `1`."""
-    assert {f["CORRELATIVO"] for f in _filas(_compra())} == {"0001"}
+    assert {f["COMPROBANTE"] for f in _filas(_compra())} == {"0001"}
 
 
 def test_las_banderas_que_se_saben_van_en_cero_y_no_en_blanco():
@@ -92,8 +92,9 @@ def test_las_banderas_que_se_saben_van_en_cero_y_no_en_blanco():
     assert {f["ANULADO"] for f in compra} == {"0"}
     assert {f["IMPORTACION"] for f in compra} == {"0"}
     assert {f["IGV POR APLICAR"] for f in compra} == {""}, "no consta: vacía dice 'no lo trae'"
+    # En ventas la columna se llama `DOCUMENTO ANULADO`: son dos plantillas y cada una usa sus nombres.
     ventas = _filas(_venta(), imputacion={"fila-1": {"cuenta_contable": "70111000", "centro_costo": "CC01"}})
-    assert {f["ANULADO"] for f in ventas} == {"0"}
+    assert {f["DOCUMENTO ANULADO"] for f in ventas} == {"0"}
     assert {f["EXPORTACION"] for f in ventas} == {"0"}
 
 
@@ -101,7 +102,7 @@ def test_el_numero_del_documento_va_pegado_y_con_ceros():
     """`F13600000431`, al revés que en CONCAR y el SIRE, donde va sin ceros. Y la glosa, con guion."""
     fila = _filas(_compra())[0]
     assert fila["NRO DOCUMENTO"] == "F13600000431"
-    assert fila["GLOSA"] == "FT F136-00000431"
+    assert fila["GLOSA"] == "FT F136-00000431 /", "calcada de la plantilla, con su barra final"
 
 
 def test_la_nota_de_credito_se_llama_CC_y_no_NC():

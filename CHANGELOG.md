@@ -53,7 +53,21 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   sigue en **1.0**. Quien busque sus líneas por `rol` no nota nada; quien buscara la del IGV por el texto
   `"IGV - "` deja de encontrarla.
 
-- **STARSOFT: la columna `D` se llama `CORRELATIVO` y no `VOUCHER`** (John, 21-sep-2026), en los dos libros.
+- **STARSOFT: la plantilla de VENTAS se calca del archivo real y pasa de 25 columnas a 34.** Cuatro capturas de
+  la hoja `PLANTILLA` abierta en Excel con datos dentro (John, 21-sep-2026) corrigieron el mapa entero: faltaban
+  `TIPO ANEXO` (`F`) y `CODIGO CLIENTE` (`G`), así que **de la `G` en adelante todo estaba corrido una
+  posición**, y aparecen `VALOR ISC`, `OTROS TRIB`, `FECHA DOC REFERENCIA`, `NRO FILE`, `EXONERADO`,
+  `OTROS CARGOS` e `IMP BOLSA`. Los nombres pasan a ser los literales de la hoja (`CTA CONTABLE`,
+  `DOCUMENTO ANULADO`, `DEBE / HABER`, `CENTRO DE COSTOS`…), que **no son los de compras**: son dos plantillas y
+  cada una se calca de su fuente. La de compras sigue levantada del vídeo.
+
+  Con ellas se corrigen tres reglas que el vídeo no dejaba ver: **la serie se rellena a cuatro caracteres** —el
+  número ocupa 12 siempre, `F00100000202` y `001 00036207`, así que una boleta salía con 11—; **`RUC CLIENTE` y
+  `RAZON SOCIAL` van solo en la fila del cliente**, no repetidos en las tres; y la glosa del documento es
+  `BV 001 -00036207 /`.
+
+- **STARSOFT: la columna `D` se llama `COMPROBANTE`** (John, 21-sep-2026), en los dos libros, que es como la
+  llama la plantilla real (John, 21-sep-2026), en los dos libros.
   La función que la calcula sigue llamándose `voucher`, que es superficie pública congelada.
 
 - **STARSOFT: el tipo de anexo se parte en dos, y los dos traen valor de fábrica.** El maestro de proveedores

@@ -125,7 +125,7 @@ COMPRAS = (
     ("A", "CUENTA", "texto"),
     ("B", "PERIODO", "texto"),
     ("C", "SUBDIARIO", "texto"),
-    ("D", "CORRELATIVO", "texto"),
+    ("D", "COMPROBANTE", "texto"),
     ("E", "FECHA", "fecha"),
     ("F", "TIPO ANEXO", "texto"),
     ("G", "CODIGO PROVEEDOR", "texto"),
@@ -161,40 +161,56 @@ COMPRAS = (
 # Ventas no comparte juego de columnas con compras: lleva el RUC y la razón social del cliente donde compras lleva
 # el código del proveedor y el tipo de anexo, y no lleva DESTINO —que es del crédito fiscal de una adquisición—.
 # Leídas de la cabecera en pantalla del vídeo de ventas (11:46) y de la narración que las recorre (12:24-13:07).
+# Las 34 columnas de la hoja `PLANTILLA` de ventas, **leídas del archivo** y no de la narración del vídeo:
+# cuatro capturas de la hoja abierta en Excel con datos dentro (John, 21-sep-2026). Es la fuente más
+# fuerte que tiene este driver, y corrigió el mapa entero: faltaban `TIPO ANEXO` y `CODIGO CLIENTE`, y
+# desde la `G` todo estaba corrido una posición.
+#
+# Los nombres son los de la plantilla, literales, aunque no coincidan con los de compras (`CTA CONTABLE`
+# aquí y `CUENTA` allá): son dos plantillas distintas y cada una se calca de SU fuente. La de compras
+# sigue levantada del vídeo y espera su propia captura.
 VENTAS = (
-    ("A", "CUENTA", "texto"),
-    ("B", "PERIODO", "texto"),
+    ("A", "CTA CONTABLE", "texto"),
+    ("B", "AÑO Y MES PROCESO", "texto"),
     ("C", "SUBDIARIO", "texto"),
-    ("D", "CORRELATIVO", "texto"),
-    ("E", "FECHA", "fecha"),
+    ("D", "COMPROBANTE", "texto"),
+    ("E", "FECHA REGISTRO", "fecha"),
     ("F", "TIPO ANEXO", "texto"),
-    ("G", "TIPO DOCUMENTO", "texto"),
-    ("H", "NRO DOCUMENTO", "texto"),
-    ("I", "NRO DOC FINAL", "texto"),
-    ("J", "FECHA EMISION", "fecha"),
-    ("K", "DOC REFERENCIA", "texto"),
-    ("L", "NRO DOC REF", "texto"),
-    ("M", "IGV", "importe"),
-    ("N", "TASA IGV", "numero"),
-    ("O", "IMPORTE", "importe"),
-    ("P", "CONV", "texto"),
-    ("Q", "TIPO CAMBIO", "numero"),
-    ("R", "GLOSA", "texto"),
-    ("S", "GLOSA MOVIMIENTO", "texto"),
-    ("T", "ANULADO", "texto"),
-    ("U", "DEBE HABER", "texto"),
-    ("V", "RUC CLIENTE", "texto"),
-    ("W", "RAZON SOCIAL", "texto"),
-    ("X", "CENTRO COSTO", "texto"),
-    ("Y", "FECHA VENCIMIENTO", "fecha"),
-    ("Z", "EXPORTACION", "texto"),
+    ("G", "CODIGO CLIENTE", "texto"),
+    ("H", "TIPO DOCUMENTO", "texto"),
+    ("I", "NRO DOCUMENTO", "texto"),
+    ("J", "NRO DOC FINAL", "texto"),
+    ("K", "FECHA EMISION", "fecha"),
+    ("L", "DOC REFERENCIA", "texto"),
+    ("M", "NRO DOC REF", "texto"),
+    ("N", "IGV", "importe"),
+    ("O", "VALOR ISC", "importe"),
+    ("P", "OTROS TRIB", "importe"),
+    ("Q", "TASA IGV", "numero"),
+    ("R", "IMPORTE", "importe"),
+    ("S", "CONV", "texto"),
+    ("T", "TIPO CAMBIO", "numero"),
+    ("U", "GLOSA", "texto"),
+    ("V", "GLOSA MOVIMIENTO", "texto"),
+    ("W", "DOCUMENTO ANULADO", "texto"),
+    ("X", "DEBE / HABER", "texto"),
+    ("Y", "RUC CLIENTE", "texto"),
+    ("Z", "RAZON SOCIAL", "texto"),
+    ("AA", "CENTRO DE COSTOS", "texto"),
+    ("AB", "FECHA VENCIMIENTO", "fecha"),
+    ("AC", "FECHA DOC REFERENCIA", "fecha"),
+    ("AD", "EXPORTACION", "texto"),
+    ("AE", "NRO FILE", "texto"),
+    ("AF", "EXONERADO", "importe"),
+    ("AG", "OTROS CARGOS", "importe"),
+    ("AH", "IMP BOLSA", "importe"),
 )
 
 COLUMNAS = {"compra": COMPRAS, "venta": VENTAS}
 
 # La columna del centro de costo, para que el contribuyente elija dónde va (`COLUMNAS_ELEGIBLES` del contrato).
 COLUMNAS_ELEGIBLES = {"centro_costo": (
-    Columna("centro_costo", "CENTRO COSTO", {"compra": "W", "venta": "X"}, fija=True,
+    Columna("centro_costo", "CENTRO COSTO", {"compra": "W", "venta": "AA"}, fija=True,
             ayuda="En la línea del gasto o del ingreso, cuando su cuenta lleva centro de costo.",
             rol="principal", campo="centro_costo"),
 )}
