@@ -283,8 +283,13 @@ aparecen `OTROS TRIBUTOS` e `IMP BOLSA`. Eran 32 columnas y son 38. Los nombres 
   el estándar no tiene el porcentaje de la operación mixta, así que la columna va declarada y vacía.
 - **`NRO DOC DETRACCION` y `FECHA DETRACCION`** van vacías: la constancia del depósito no se conoce al
   provisionar, se paga días después.
-- **El `TIPO CAMBIO` viene lleno** (`3.274`) en filas de soles. El driver solo lo escribe cuando el comprobante
-  trae tipo de cambio, que es cuando la moneda no es PEN.
+- **El `TIPO CAMBIO` va en TODAS las filas, sea en soles o en dólares** (John, 21-sep-2026), y la hoja lo
+  confirma: `3.274`, `3.281`, `3.261`… en comprobantes en PEN. Desde la 2.2 la línea del asiento transporta el
+  tipo de cambio del comprobante venga en la moneda que venga, y STARSOFT lo escribe siempre.
+
+  **Lo que el motor no hace es inventarlo**: si el comprobante no trae tipo de cambio, la columna sale vacía. El
+  motor no tiene tabla de tipos de cambio ni sale a la red, así que el T.C. del día de una operación en soles
+  tiene que llegar en el comprobante. En la hoja del vídeo lo puso quien la llenó.
 
 ### La cabecera REAL de la hoja `PLANTILLA` de ventas · **[capturas de John, 21-sep-2026]**
 

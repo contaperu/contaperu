@@ -63,8 +63,12 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         # su prefijo. Una sola glosa, dos largos: lo único que cambia es lo que admite CONCAR.
         "F": cabecera.glosa[:40], "W": linea.glosa[:30],
         # Con el T.C. del comprobante la conversión es especial ('C'); sin él, CONCAR lo busca en su tabla.
-        "G": celdas.numero(linea.tipo_cambio) if linea.tipo_cambio else "",
-        "H": "C" if linea.tipo_cambio else TIPO_CONVERSION, "I": MARCA_CONVERSION, "J": _fecha(linea.fecha),
+        # **Solo en moneda extranjera**, que es como está validado el Excel que importa un CONCAR real: un
+        # apunte en soles no se convierte. Desde la 2.2 la línea puede traer T.C. también en PEN —lo pide
+        # STARSOFT en todas sus filas—, así que aquí se mira la moneda y no solo si el campo viene lleno.
+        "G": celdas.numero(linea.tipo_cambio) if (es_usd and linea.tipo_cambio) else "",
+        "H": "C" if (es_usd and linea.tipo_cambio) else TIPO_CONVERSION,
+        "I": MARCA_CONVERSION, "J": _fecha(linea.fecha),
         "K": linea.cuenta, "L": linea.contraparte_doc, "M": linea.centro_costo, "N": linea.debe_haber,
         "O": importe, "P": importe if es_usd else "", "Q": importe if not es_usd else "",
         "R": doc.get("tipo", ""), "S": doc.get("serie_numero", "")[:20],

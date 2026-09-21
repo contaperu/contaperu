@@ -53,6 +53,15 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   sigue en **1.0**. Quien busque sus líneas por `rol` no nota nada; quien buscara la del IGV por el texto
   `"IGV - "` deja de encontrarla.
 
+- **El tipo de cambio viaja en la línea del asiento aunque la moneda sea soles.** Es un hecho del comprobante,
+  y hasta ahora el núcleo lo descartaba en PEN — lo que dejaba sin él a un destino que lo pide en todas sus
+  filas: STARSOFT (John, 21-sep-2026, confirmado por la hoja real, que lo muestra en comprobantes en soles).
+  Cuándo se escribe pasa a ser decisión de formato, que es de cada driver: **el Excel de CONCAR no cambia ni una
+  celda**, porque sigue llenando su columna `G` y su `H` solo en moneda extranjera, que es como está validado.
+
+  El motor **no inventa un tipo de cambio**: si el comprobante no lo trae, la columna sale vacía. No tiene tabla
+  de tipos de cambio ni sale a la red.
+
 - **STARSOFT: la plantilla de COMPRAS se calca del archivo real y pasa de 32 columnas a 38.** Cuatro capturas
   más de la hoja `PLANTILLA` (John, 21-sep-2026). Faltaban las tres columnas de la detracción que van juntas
   —`DETRACCION`, `NRO DOC DETRACCION`, `FECHA DETRACCION`— y `FECHA DOC REF`, así que **desde la `X` todo

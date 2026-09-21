@@ -162,7 +162,12 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     glosa = glosa_de(c)
     tasa_leida = tasa_calculada(igv, Decimal(c.base_gravada or 0))
     tasa = "" if tasa_leida is None else texto_tasa(tasa_leida)
-    tc = str(c.tipo_cambio) if es_usd and c.tipo_cambio else ""     # texto exacto: `float` solo en una celda
+    # El tipo de cambio del comprobante, venga en la moneda que venga: es un HECHO suyo y la línea lo
+    # transporta (texto exacto; `float` solo al escribir una celda). Hasta la 2.1 se descartaba cuando la
+    # moneda era PEN, y eso dejaba sin él a un destino que lo pide en todas las filas —STARSOFT lo hace
+    # (John, 21-sep-2026)—. Qué driver lo escribe y cuándo es decisión de FORMATO, y vive en cada driver:
+    # CONCAR sigue llenando su columna solo en moneda extranjera, que es lo que valida su plantilla.
+    tc = str(c.tipo_cambio) if c.tipo_cambio else ""
     emision = c.fecha_emision
     vencimiento = c.fecha_vencimiento or emision
     # Cada comprobante se asienta con SU fecha de emisión; el extemporáneo (mes anterior) cae al
