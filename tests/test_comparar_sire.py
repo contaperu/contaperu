@@ -123,12 +123,3 @@ def test_el_informe_avisa_cuando_solo_cambia_el_proveedor():
     assert "FALTA en lo nuestro" in inf and "SOBRA" in inf
     assert "01-F001-123 está en los dos con distinto proveedor: revisa el RUC" in inf
 
-
-def test_leer_desde_una_ruta_sigue_valiendo_con_aviso(tmp_path):
-    """`leer(ruta)` es la forma de la 0.x: desde la 1.0 el disco lo lee la CLI y aquí entran bytes."""
-    import pytest
-    from contaperu._obsoleto import RutaObsoleta
-    txt = tmp_path / "export.txt"
-    txt.write_text("|".join(SUYA), encoding="utf-8")
-    with pytest.warns(RutaObsoleta):
-        assert len(cs.leer(txt)) == 1

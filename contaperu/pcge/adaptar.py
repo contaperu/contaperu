@@ -47,7 +47,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .. import _datos
-from .._obsoleto import avisar
 from ..errores import ErrorContaperu
 from . import clases
 
@@ -92,23 +91,22 @@ class Informe:
         }
 
 
-def _tabla(datos: dict | str | os.PathLike | None, vieja: str, nueva: str) -> dict:
-    """La tabla como diccionario: la que llega, la que viaja con el paquete si no llega ninguna, o la de un archivo
-    cuando llega una ruta, que es la forma de la 0.x y avisa."""
+def _tabla(datos: dict | None) -> dict:
+    """La tabla como diccionario: la que llega, o la que viaja con el paquete si no llega ninguna.
+
+    Hasta la 1.x aceptaba también la ruta de un archivo, la forma de la 0.x, y avisaba. La 2.0 la retiró: **el núcleo
+    no lee disco** (hito 0.5), así que el archivo lo abre quien llama y entrega el diccionario."""
     if datos is None:
         return _datos.leer_json(TABLA) or {}
     if isinstance(datos, dict):
         return datos
-    avisar(vieja, nueva, nivel=4)
-    crudo = _datos.leer_archivo(datos)
-    return json.loads(crudo.decode("utf-8")) if crudo is not None else {}
+    raise TypeError("la tabla del PCGE entra como diccionario: el archivo lo lee quien llama, no el motor")
 
 
-def cargar_equivalencias(datos: dict | str | os.PathLike | None = None) -> tuple[list[Mapeo], dict]:
+def cargar_equivalencias(datos: dict | None = None) -> tuple[list[Mapeo], dict]:
     """Los mapeos de la tabla: la que viaja con el paquete, o la que llega como diccionario en `datos`. Lista vacía
-    mientras la norma no esté codificada. Desde la 1.0 el núcleo no lee disco: una ruta de archivo sigue aceptándose,
-    con aviso, hasta la 2.0."""
-    tabla = _tabla(datos, "pcge.cargar_equivalencias(ruta)", "pcge.cargar_equivalencias(datos)")
+    mientras la norma no esté codificada."""
+    tabla = _tabla(datos)
     if not tabla:
         return [], {}
     datos = tabla
@@ -139,8 +137,7 @@ def _aplica(cuenta: str, de: str) -> bool:
     return bool(cuenta) and cuenta.startswith(de)
 
 
-def adaptar(lineas: list[dict[str, Any]], ruta: str | os.PathLike | None = None, *,
-            datos: dict | None = None) -> tuple[list[dict], Informe]:
+def adaptar(lineas: list[dict[str, Any]], *, datos: dict | None = None) -> tuple[list[dict], Informe]:
     """Líneas de diario -> líneas con las cuentas del PCGE 2026 + el informe de lo que cambió.
 
     Mientras la tabla esté vacía devuelve las líneas **tal cual**, sin tocar nada, y el informe
@@ -149,10 +146,7 @@ def adaptar(lineas: list[dict[str, Any]], ruta: str | os.PathLike | None = None,
     Los mapeos se prueban EN ORDEN y gana el primero que case, así que lo específico va antes
     que lo general: `741101` antes que `74`.
     """
-    if ruta is not None:
-        tabla = _tabla(ruta, "pcge.adaptar(lineas, ruta)", "pcge.adaptar(lineas, datos=...)")
-    else:
-        tabla = _tabla(datos, "", "")
+    tabla = _tabla(datos)
     mapeos, datos = cargar_equivalencias(tabla) if tabla else ([], {})
     informe = Informe(version=str(datos.get("version") or ""), fuente=str(datos.get("fuente") or ""),
                       sin_tabla=not mapeos)

@@ -1530,8 +1530,9 @@ tiene sentido cambiar el estándar (J5). La segunda jurisdicción (J6) llega al 
 paso, el snapshot de CONCAR y la huella quedan idénticos.
 
 **7. Riesgos, y cómo se contienen.**
-- **La aplicación en producción** importa `contaperu.asiento` y `contaperu.operaciones` (`CLAUDE.md`, «Quién lo
-  consume»): cada paso re-exporta las rutas viejas, y antes se leen los símbolos que usa.
+- **La aplicación en producción** importa `contaperu.api`, `contaperu.asiento` y el modelo (`CLAUDE.md`, «Quién lo
+  consume»): antes de mover nada se leen los símbolos que usa. Cuando se escribió esto entraba por
+  `contaperu.operaciones`, la ruta de la 0.x que la 2.0 retiró.
 - **El MCP abierto en producción**: ninguna herramienta cambia de firma.
 - **La huella**: su fórmula es contrato (`contaperu/asiento/huella.py`); ningún paso la toca.
 - **Un refactor mueve reglas; no las escribe** (`ARQUITECTURA.md`, «Lo que no se negocia»).

@@ -55,11 +55,10 @@ CAPAS = {
     "contaperu.igv": "nucleo", "contaperu.detracciones": "nucleo", "contaperu.validar": "nucleo",
     "contaperu.partida_doble": "nucleo", "contaperu.asiento": "nucleo", "contaperu.pcge": "nucleo",
     "contaperu.lectores": "nucleo", "contaperu.comparar_sire": "nucleo",
-    "contaperu.drivers": "drivers", "contaperu.formato": "drivers",
-    "contaperu.generar": "pipeline", "contaperu.pipeline": "pipeline",
-    "contaperu.operaciones": "api", "contaperu.api": "api",
-    "contaperu.cli": "puertas", "contaperu.servidor_mcp": "puertas", "contaperu.puertas": "puertas",
-    "contaperu._compat": "compat",
+    "contaperu.drivers": "drivers",
+    "contaperu.pipeline": "pipeline",
+    "contaperu.api": "api",
+    "contaperu.puertas": "puertas",
 }
 _DEBAJO = ["base", "nucleo", "drivers", "pipeline", "api"]
 PUEDE = {
@@ -178,8 +177,7 @@ def test_importar_el_modelo_no_carga_los_drivers_ni_la_fachada():
               "print(json.dumps(sorted(m for m in sys.modules if m.startswith(('contaperu', 'openpyxl')))))")
     salida = subprocess.run([sys.executable, "-c", codigo], capture_output=True, text=True, cwd=RAIZ, check=True)
     cargados = set(json.loads(salida.stdout))
-    assert not cargados & {"contaperu.drivers", "contaperu.operaciones", "contaperu.api", "contaperu.generar",
-                           "openpyxl"}, sorted(cargados)
+    assert not cargados & {"contaperu.drivers", "contaperu.api", "contaperu.pipeline", "openpyxl"}, sorted(cargados)
 
 
 _LECTURAS = {"read_text", "read_bytes", "write_text", "write_bytes"}

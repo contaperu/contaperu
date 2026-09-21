@@ -28,7 +28,7 @@ Para comprobar un documento con el motor —lo lee con las mismas reglas que el 
 falta—:
 
 ```bash
-python -m contaperu.cli diagnosticar mi-documento.json
+python -m contaperu.puertas.cli diagnosticar mi-documento.json
 ```
 
 ---
@@ -405,7 +405,7 @@ Tres piezas, y la tercera es la que faltaba:
 
 | Pieza | Qué comprueba |
 |---|---|
-| `python -m contaperu.cli diagnosticar mi-mes.json` | **Un documento tuyo**: qué bloquea, qué falta y a quién pedírselo |
+| `python -m contaperu.puertas.cli diagnosticar mi-mes.json` | **Un documento tuyo**: qué bloquea, qué falta y a quién pedírselo |
 | `contaperu verificar-driver mi_paquete.mi_driver` | **Un driver propio** contra el contrato, antes de registrarlo |
 | [`conformidad/`](conformidad/) | **Que lo que tu sistema produce es correcto**, sin escribirle a nadie |
 

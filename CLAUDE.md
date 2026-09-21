@@ -49,7 +49,7 @@ conocen el formato de un destino y nada de contabilidad, cada uno con su canal (
 legacy, `drivers/sire` tributario, `drivers/csv` y `drivers/asiento_neutral` intercambio, este con vocabulario neutral para los ERP, y los de terceros por *entry points*, con el contrato de
 `drivers/contrato.py` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
 (`contaperu.api`, con la tabla de operaciones y el contrato OpenConta); y tres **puertas** que solo hablan con la api
-(`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). Las rutas de la 0.10 viven en `_compat` y avisan. El
+(`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x. El
 asiento nace en las **líneas de diario neutrales** del estándar `open-accounting` y cada ERP es una proyección de ellas.
 Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LEEME.md`; cómo se integra, en
 `INTEGRAR.md`.
@@ -68,10 +68,11 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   repo al servidor y reconstruir su contenedor; el procedimiento y sus trampas (el `--dominio` que el SDK exige para
   no responder 421) están en el hub de infraestructura de Global Procesos AI, no aquí.
 - **Se corrige aquí, nunca en la app.** La app no lleva copia del motor, y su batería lo vigila.
-- **La 1.0 cambia las rutas, no rompe las viejas.** Lo que la app importa de la 0.10 (`operaciones`, `generar`…) sigue
-  resolviendo al mismo objeto, con sus firmas, y avisa con `RutaObsoleta`; migrar es pasar a `contaperu.api` con la
-  tabla del CHANGELOG. Antes de etiquetar una versión mayor se publica una pre-release (`vX.Y.ZrcN`) y quien integra
-  la prueba en su batería, también con `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»).
+- **La 2.0 retiró las rutas de la 0.x** (`operaciones`, `generar`, `cli`, `servidor_mcp`, `formato` y
+  `drivers.concar.construir`), que solo redirigían. No rompió a nadie: **ninguna versión 0.x llegó a PyPI** —la
+  primera publicada es la 1.1.0— y la superficie pública de la 1.0 quedó intacta, lo que demuestra su test al pasar
+  sin regenerarse. Antes de etiquetar una versión mayor se publica una pre-release (`vX.Y.ZrcN`) y quien integra la
+  prueba en su batería, también con `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»).
 
 ## Lo que no se negocia
 
@@ -132,7 +133,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 |---|---|
 | `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres grupos (SIRE, legacy y ERP); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
 | `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea neutral, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
-| `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 1.x; sus ejemplos se ejecutan en la batería |
+| `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 2.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU.; de aquí salió la 0.8.0 |

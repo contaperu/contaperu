@@ -22,7 +22,6 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from .._obsoleto import reexportar
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
 from ..configuracion import CONFIG_POR_DEFECTO
 from ..detracciones import monto_detraccion, tasa_detraccion
@@ -38,10 +37,8 @@ from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalenc
 from .lineas import LineaDiario
 
 # Hasta la 0.10 este módulo importaba las `Opciones` de los drivers solo para quitar los ceros del número: el núcleo
-# dependía de una pieza de los drivers. Desde la 1.0 lee `opciones.sin_ceros` de lo que llegue, y los dos nombres
-# siguen resolviendo desde aquí, con aviso.
-__getattr__, _ = reexportar(__name__, {"Opciones": "contaperu.drivers.kit:Opciones",
-                                      "formatear_numero": "contaperu.drivers.kit:formatear_numero"})
+# dependía de una pieza de los drivers. Desde la 1.0 lee `opciones.sin_ceros` de lo que llegue; los dos nombres
+# siguieron resolviendo desde aquí con aviso hasta la 2.0, que los retiró. Viven en `contaperu.drivers.kit`.
 
 # El papel de cada línea en el asiento. Es lo que un driver necesita para traducir sin adivinar: un
 # ERP que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su cuenta, que la

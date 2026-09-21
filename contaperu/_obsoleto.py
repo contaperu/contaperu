@@ -1,14 +1,19 @@
-"""Las rutas de la 0.x que siguen funcionando en la 1.x, y el aviso con que lo dicen.
+"""El mecanismo con que una ruta que cambió de sitio sigue resolviendo, y avisa.
 
-La 1.0 fija una API pública (`contaperu.api`) y promete que lo que una aplicación importaba en la 0.10 sigue resolviendo
-hasta la 2.0 (`tests/test_compat_superficie.py`). Lo que cambió de sitio avisa con `RutaObsoleta`, una subclase de
-`DeprecationWarning` que una aplicación puede silenciar con precisión:
+**Hoy no lo usa nadie**: la 2.0 retiró la última ruta de la 0.x. Se conserva porque `RutaObsoleta` es parte de la API
+pública —una aplicación la filtra con precisión, sin apagar los avisos de nadie más— y porque la próxima vez que algo
+cambie de sitio, el circuito ya está escrito y probado:
 
     warnings.filterwarnings("ignore", category=contaperu.RutaObsoleta)
 
-El aviso sale al USAR la ruta vieja, no al importar el módulo: un `import contaperu.operaciones` en el arranque de una
-aplicación no ensucia su registro. La batería de este repositorio convierte el aviso en error
-(`[tool.pytest.ini_options] filterwarnings`), así que ningún test usa una ruta vieja sin decirlo.
+Las dos decisiones que lo hacen usable, y que conviene no perder:
+
+- **El aviso sale al USAR la ruta vieja, no al importar el módulo.** Por eso `reexportar` devuelve un `__getattr__` de
+  módulo en vez de ejecutar nada en el cuerpo: un `import` en el arranque de una aplicación no ensucia su registro.
+- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 3.0.
+
+La batería de este repositorio convierte el aviso en error (`[tool.pytest.ini_options] filterwarnings`), así que
+ningún test usa una ruta vieja sin decirlo.
 """
 from __future__ import annotations
 
@@ -17,11 +22,11 @@ import importlib
 import warnings
 from typing import Any, Callable
 
-RETIRO = "2.0"
+RETIRO = "3.0"
 
 
 class RutaObsoleta(DeprecationWarning):
-    """Una ruta de la 0.x que sigue funcionando y se retira en la 2.0."""
+    """Una ruta que cambió de sitio, sigue funcionando y se retira en la versión mayor siguiente."""
 
 
 def avisar(vieja: str, nueva: str, *, nivel: int = 3) -> None:
@@ -45,8 +50,8 @@ def reexportar(modulo: str, destinos: dict[str, str], *, avisa: bool = True,
 
     `destinos` es `{"nombre": "paquete.modulo:atributo"}`. Cada nombre se resuelve al pedirlo, y avisa con
     `RutaObsoleta` si `avisa`. El aviso recomienda `nuevas[nombre]` si está —la ruta pública que la reemplaza, cuando
-    el destino es la copia de la 0.x en `_compat`— y el propio destino si no. Un nombre que no está en `destinos` da el
-    `AttributeError` de siempre."""
+    no es el propio destino— y el destino si no. Un nombre que no está en `destinos` da el `AttributeError` de
+    siempre."""
     nuevas = nuevas or {}
 
     def __getattr__(nombre: str) -> Any:

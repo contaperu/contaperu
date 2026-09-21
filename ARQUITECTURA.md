@@ -140,9 +140,8 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 | núcleo | `modelo`, `catalogos`, `configuracion`, `igv`, `detracciones`, `validar`, `partida_doble`, `asiento`, `pcge`, `lectores`, `comparar_sire` | contabilidad peruana, sin disco, sin red y sin reloj |
 | drivers | `drivers/` (`contrato`, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
 | pipeline | `pipeline/` (`preparacion`, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
-| api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa, estable durante la 1.x |
+| api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa; cada nombre con su firma, congelados |
 | puertas | `puertas/` (`cli`, `servidor_mcp`, `servidor_http`, `comun`) | un protocolo; solo hablan con la api |
-| compat | `_compat/` | las rutas de la 0.10; nadie las importa |
 
 - **El pipeline** es el único dueño de la preparación: del documento al libro y los comprobantes, la configuración
   aplicada hacia un destino con la imputación dentro, las claves previas, la selección de lo que sale, lo que exige el
@@ -161,7 +160,8 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
   y `tests/test_frontera.py` impide que el núcleo importe una puerta, el SDK del MCP, la red o el reloj. Las tres dan
   el mismo documento y el mismo diagnóstico.
 - **Las rutas de la 0.10** (`operaciones`, `generar`, `cli`, `servidor_mcp`, `formato`, `drivers.concar.construir`)
-  siguen resolviendo al mismo objeto, con sus firmas, y avisan con `RutaObsoleta` al usarse. Se retiran en la 2.0.
+  las retiró la 2.0, sin tocar la superficie pública de la 1.0: ninguna versión publicada llegó a ofrecerlas, porque
+  la 0.x nunca estuvo en PyPI. El mecanismo con que se deprecia algo sigue en `_obsoleto.py`, para la próxima vez.
 - **El portal** (otro repositorio) usa la api y el nivel de extensión; el `resumen` de cada exportación, que guarda tal
   cual, conserva sus claves.
 - **Lo peruano, a la vista** (hito J0): qué módulos importan uno peruano queda congelado en
@@ -177,7 +177,6 @@ Un driver expone `NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, `nombre()` y **una**
 | `linea(c, libro, idx, opciones) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
 | `desde_comprobantes(libro, comprobantes, config, opciones)` | los comprobantes y la configuración, con la imputación | el registro de un sistema contable que arma el asiento él mismo (CONTASIS) |
 | `desde_lineas(libro, lineas, config, opciones, *, indice=())` | las **líneas neutrales**, numeradas y cuadradas, y el índice de cada comprobante | **todo driver de asientos**, CONCAR incluido desde la 1.0 |
-| `construir(libro, comprobantes, config, correlativos, opciones)` | los comprobantes | la forma de CONCAR hasta la 0.10; un tercero que la use sigue funcionando con aviso hasta la 2.0 |
 
 Con `desde_lineas` el pipeline arma el asiento, lo numera y exige que cuadre **antes** de llamar al driver; el driver
 solo traduce. Si su firma acepta `indice`, recibe además qué tramo de líneas es de qué comprobante y una **cabecera**
@@ -197,7 +196,7 @@ Cada canal se presenta en uno de los tres grupos de destinos del motor (`contrat
 `legacy` es **Legacy** e `intercambio` es **ERP**.
 
 `api_erp` —escribir el cuerpo de la API de un ERP moderno— queda **reservado** (hito A5): el contrato lo rechaza. Un
-driver de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy` durante la 1.x.
+driver de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy`.
 
 **El vocabulario dice con qué palabras llegan las líneas** (`VOCABULARIO`, 1.1). `legacy`, el de siempre: siglas,
 sub-diarios, correlativos y el documento comodín de la detracción, lo que importan CONCAR y los de su familia.

@@ -6,6 +6,49 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.0.0] — 2026-09-21
+
+**Se retira la compatibilidad con la 0.x. Quien integró con la 1.x no tiene que cambiar una línea.**
+
+Esta versión mayor **no cambia la API pública**: `contaperu.api` conserva cada nombre con su firma, y
+`tests/test_superficie_publica.py` lo demuestra al seguir pasando contra el mismo
+`fixtures/superficie/1.0.json`, sin regenerarlo. Lo que desaparece es la capa que traducía las rutas de la 0.x.
+
+**Por qué ahora, y por qué no rompe a nadie.** El repositorio prometía que lo que una aplicación importaba en la
+0.10 seguiría resolviendo hasta la 2.0. Esa promesa **no protegía a un solo usuario**: ninguna versión 0.x llegó a
+publicarse en PyPI. La primera publicada es la **1.1.0** (19-sep-2026); las 0.7 a 0.10 y la propia 1.0.0 existen
+solo como tags de git, y entre `v0.10.0` y `v1.0.0` pasaron 101 minutos. Nadie pudo instalar nunca una 0.x.
+
+### Retirado
+
+- **Cinco módulos que no contenían nada** —`contaperu.operaciones`, `contaperu.generar`, `contaperu.cli`,
+  `contaperu.formato` y `contaperu.servidor_mcp`— y el paquete `_compat/` que los sostenía. Eran tablas de
+  redirección: cero `def`, cero `class`. Lo que hacían lo hace `contaperu.api`, y los comandos instalados
+  (`contaperu`, `contaperu-mcp`, `contaperu-http`) ya apuntaban a `contaperu.puertas.*` y no cambian. En su lugar,
+  `python -m contaperu.puertas.cli`.
+- **`drivers.concar.construir`**, la forma de CONCAR hasta la 0.10. El archivo se pide a `api.exportar_archivo`.
+- **`comparar_sire.leer(ruta)`**: el núcleo no lee disco. Entra `leer_bytes(datos)`.
+- **La tabla del PCGE por ruta de archivo** (`pcge.adaptar(lineas, ruta)`, `pcge.cargar_equivalencias(ruta)`). La
+  tabla entra como diccionario; el archivo lo abre quien llama. `adaptar` pierde su segundo parámetro posicional.
+- **Los nombres que `asiento.motor` y `drivers.concar.xlsx` reexportaban** de la 0.10 (`Opciones`,
+  `formatear_numero`, `numerar`, `huella`…). Viven en `contaperu.drivers.kit` y en su módulo.
+
+### Cambiado
+
+- **`_obsoleto.RETIRO` pasa a `"3.0"`.** El módulo se queda, sin un solo usuario, a propósito: `RutaObsoleta` es
+  parte de la API pública —una aplicación la filtra con precisión— y el circuito ya está escrito y probado para la
+  próxima vez que algo cambie de sitio. Lo cubre `test_api.py`, sobre un módulo de mentira.
+- **La batería baja de 1117 a 1015 tests.** Se van `test_compat_superficie.py` y `test_compat_firmas.py`, que
+  congelaban la superficie de la 0.10 y cuyo propio docstring decía que la promesa duraba «hasta la 2.0».
+  `test_caracterizacion.py` deja de caracterizar por dos rutas y queda con una: lo que congelan sus JSON **no
+  cambió** al retirar la otra.
+
+### Cómo migrar
+
+Desde la 1.x, `pip install -U contaperu` y nada más. Si tu código importa alguno de los nombres retirados —cosa
+que solo podría pasar si copiaste código de un tag de git—, la tabla de la 1.0 en este mismo CHANGELOG dice dónde
+vive cada uno hoy.
+
 ## [1.4.0] — 2026-09-20
 
 **Un driver de asientos ya puede leer los hechos tributarios del comprobante, y hay un driver de STARSOFT.**
@@ -1094,7 +1137,8 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v1.4.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/contaperu/contaperu/compare/v1.4.0...v2.0.0
 [1.4.0]: https://github.com/contaperu/contaperu/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/contaperu/contaperu/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/contaperu/contaperu/compare/v1.2.0...v1.2.1

@@ -18,7 +18,6 @@ from contaperu.pipeline import preparacion as prep
 from contaperu.modelo import Comprobante, Libro
 from contaperu import asiento as concar
 from contaperu.drivers import concar as driver_concar
-from contaperu._obsoleto import RutaObsoleta
 from util import comprobante, con_imputaciones, construir_concar, en_secciones
 
 COMPRAS = Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA SAC", periodo="202608", tipo="compra")
@@ -656,18 +655,6 @@ def test_el_resumen_de_concar_es_el_de_la_numeracion():
     etiquetas = concar.etiquetas_sub_diario(CONTAB)
     assert resumen["sub_diarios"] == {s: {"etiqueta": etiquetas.get(s, s), **r} for s, r in rangos.items()}
     assert resumen["fechas"] == "por comprobante (extemporáneos al 01/08/2026)" and resumen["filas"] == 8
-
-
-def test_construir_sigue_resolviendo_con_aviso_y_da_el_mismo_excel():
-    cs = [cp(), cp(numero="124", moneda="USD", tipo_cambio="3.75"),
-          cp(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="F001", ref_numero="123",
-             ref_fecha="2026-08-11")]
-    with pytest.warns(RutaObsoleta, match="construir"):
-        construir = driver_concar.construir
-    viejo, resumen_viejo = construir(COMPRAS, cs, CONTAB, {"11": 7})
-    nuevo, resumen_nuevo = construir_concar(COMPRAS, cs, CONTAB, {"11": 7})
-    assert resumen_viejo == resumen_nuevo
-    assert _celdas(viejo) == _celdas(nuevo)
 
 
 def test_sin_indice_concar_no_escribe():

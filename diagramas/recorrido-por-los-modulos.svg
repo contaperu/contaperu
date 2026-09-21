@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="680" height="572" viewBox="0 0 680 572" role="img" aria-labelledby="titulo descripcion">
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="500" viewBox="0 0 680 500" role="img" aria-labelledby="titulo descripcion">
 <title id="titulo">Qué módulo hace qué, en el recorrido de un comprobante</title>
-<desc id="descripcion">Un comprobante entra por los lectores, que lo convierten al modelo canónico; validar, igv y detracciones lo revisan; asiento arma la partida doble; y los drivers la traducen al formato de cada sistema. Tres módulos sostienen ese recorrido desde abajo: catalogos da los códigos de SUNAT a la validación, partida_doble comprueba el cuadre del asiento y contrato dice lo que un driver debe exponer. Los catálogos se leen de datos de SUNAT, cada uno con su fuente citada. Por debajo de todo, el pipeline orquesta el recorrido entero, la API pública lo expone y congela cada firma hasta la 2.0, y las puertas —línea de comandos, MCP y HTTP— solo hablan con la API. Aparte, fuera del circuito, quedan las rutas de la 0.x, que se retiran en la 2.0.</desc>
+<desc id="descripcion">Un comprobante entra por los lectores, que lo convierten al modelo canónico; validar, igv y detracciones lo revisan; asiento arma la partida doble; y los drivers la traducen al formato de cada sistema. Tres módulos sostienen ese recorrido desde abajo: catalogos da los códigos de SUNAT a la validación, partida_doble comprueba el cuadre del asiento y contrato dice lo que un driver debe exponer. Los catálogos se leen de datos de SUNAT, cada uno con su fuente citada. Por debajo de todo, el pipeline orquesta el recorrido entero, la API pública lo expone y congela cada firma, y las puertas —línea de comandos, MCP y HTTP— solo hablan con la API.</desc>
 <style>
 .fondo{fill:#FFFFFF}
 .t,.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
@@ -25,7 +25,7 @@
 <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </marker>
 </defs>
-<rect class="fondo" x="0" y="0" width="680" height="572" rx="12"/>
+<rect class="fondo" x="0" y="0" width="680" height="500" rx="12"/>
 
 <g class="a"><rect x="40" y="24" width="96" height="56" rx="8" stroke-width="0.5"/><text class="t" x="88" y="52">lectores</text></g>
 <g class="a"><rect x="164" y="24" width="88" height="56" rx="8" stroke-width="0.5"/><text class="t" x="208" y="52">modelo</text></g>
@@ -50,8 +50,6 @@
 <line class="flecha" x1="348" y1="210" x2="348" y2="172" marker-end="url(#punta)"/>
 
 <g class="m"><rect x="40" y="304" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="322">pipeline</text><text class="s" x="340" y="340">Orquesta todo lo anterior</text></g>
-<g class="m"><rect x="40" y="364" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="382">API pública 1.0</text><text class="s" x="340" y="400">La expone, y congela cada firma hasta la 2.0</text></g>
+<g class="m"><rect x="40" y="364" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="382">API pública</text><text class="s" x="340" y="400">La expone, y congela cada nombre con su firma</text></g>
 <g class="m"><rect x="40" y="424" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="442">Puertas</text><text class="s" x="340" y="460">CLI, MCP y HTTP: solo hablan con la API</text></g>
-
-<g class="g"><rect x="40" y="496" width="600" height="56" rx="8" stroke-width="0.5" stroke-dasharray="4 4"/><text class="t" x="340" y="514">Rutas de la 0.x</text><text class="s" x="340" y="532">Fuera del circuito: se retiran en la 2.0</text></g>
 </svg>

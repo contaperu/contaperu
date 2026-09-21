@@ -1,16 +1,20 @@
-"""La superficie pública de la 1.0, congelada: lo que la 1.x promete no cambiar sin que se vea.
+"""La superficie pública de la 1.0, congelada: lo que se promete no cambiar sin que se vea.
 
 Dos niveles (ver `contaperu/api/__init__.py`):
 
-- **Aplicación, `contaperu.api`**: cada nombre con su firma. Cambiar o quitar una firma es la 2.0.
+- **Aplicación, `contaperu.api`**: cada nombre con su firma. Cambiar o quitar una firma es una versión mayor.
 - **Extensión**: el modelo, el asiento, los impuestos, la validación, los catálogos, la configuración, la partida
   doble, el PCGE, los lectores, el registro y el contrato de drivers, y cada driver de serie. De estos se congelan los
   nombres: su `__all__` si lo declaran, y si no, los nombres públicos que son del paquete.
 
-`pipeline`, `puertas`, `_datos` y `_compat` son internos y no entran.
+`pipeline`, `puertas` y `_datos` son internos y no entran.
+
+**El archivo sigue llamándose `1.0.json` después de la 2.0, y a propósito.** La 2.0 retiró la compatibilidad con la
+0.x —cinco módulos que solo redirigían y su copia en `_compat`— sin tocar ni un nombre de esta superficie: que este
+test pase sin regenerar el fixture es la prueba de que quien integró con la 1.x sube a la 2.0 sin cambiar una línea.
 
 Añadir es una versión menor, pero no pasa en silencio: un nombre nuevo hace fallar el test hasta que se regenera la
-superficie, a propósito. Quitar o cambiar lo que está no se arregla regenerando en la 1.x.
+superficie, a propósito. Quitar o cambiar lo que está no se arregla regenerando.
 
     python -c "import sys; sys.path.insert(0, 'tests'); import test_superficie_publica as t; t.regenerar()"
 """

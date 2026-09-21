@@ -95,8 +95,7 @@ Si tu sistema no importa asientos sino su **registro** de compras y de ventas, y
 configuración, y cada cuenta la lees de `asiento.partes_de` (la de la base, o una por parte si hay reparto) y de
 `asiento.cuenta_tercero` (la del total), que la resuelven igual que para el asiento, con la imputación de cada
 documento dentro. El núcleo exige la cuenta antes de llamarte. Para un TXT por comprobante, como el SIRE, la forma es
-`linea`. `construir`, la forma de CONCAR hasta la 0.10, sigue funcionando con un aviso y se retira en la 2.0: un driver
-nuevo no la usa.
+`linea`. `construir`, la forma de CONCAR hasta la 0.10, la retiró la 2.0: un driver nuevo no la usa.
 
 **Dos maneras de publicarlo:**
 

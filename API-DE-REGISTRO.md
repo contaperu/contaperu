@@ -428,7 +428,7 @@ solo: **el cuerpo de la llamada es el documento `open-accounting`**, con la impu
 
 - **Una sola forma para uno o para cinco mil comprobantes.** Quien integra escribe un camino, no dos.
 - **Es un archivo, no el cuerpo de una petición.** Se guarda, se versiona, se manda por correo y se comprueba sin
-  API ni servidor: `python -m contaperu.cli diagnosticar mi-mes.json`.
+  API ni servidor: `python -m contaperu.puertas.cli diagnosticar mi-mes.json`.
 - **Sobran las rutas por tipo**, y con ellas la última herencia de STARSOFT que quedaba en el borrador.
 - **Sobra derivar el periodo**, que era la primera decisión pendiente: el libro lo trae siempre, así que las tres
   validaciones de plazo —periodo anterior, fecha posterior y crédito fiscal fuera de plazo— siguen vivas.

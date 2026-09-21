@@ -100,7 +100,7 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 - **El motor**, de arriba abajo:
   - cuatro **puertas**: Python, la línea de comandos, MCP para asistentes de IA y HTTP para un ERP en cualquier
     lenguaje, con el contrato OpenConta;
-  - todas llaman a la **API pública 1.0**, que no cambia de nombres ni de firmas hasta la 2.0;
+  - todas llaman a la **API pública**, que no cambia de nombres ni de firmas dentro de una versión mayor;
   - el **pipeline** lee, prepara, arma y diagnostica cada mes, y se apoya en el **núcleo peruano**, lo único que sabe
     contabilidad: validación, IGV, asiento y PCGE;
   - los **drivers** traducen al formato de cada destino sin decidir ninguna cuenta.
@@ -127,10 +127,10 @@ Tres módulos lo sostienen desde abajo: **`catalogos`** da los códigos de SUNAT
 un driver tiene que exponer para que el registro lo acepte. Y los catálogos no están escritos en el código: se leen de
 `datos/sunat/`, **cada uno con la resolución de la que sale**.
 
-Un detalle que se ve al abrir la carpeta: `contaperu/operaciones.py`, `generar.py`, `cli.py`, `formato.py` y
-`servidor_mcp.py` **no contienen nada**. Son las rutas que una aplicación importaba en la 0.x, que siguen resolviendo y
-avisan con `RutaObsoleta` al usarse ([`_obsoleto.py`](contaperu/_obsoleto.py)). El aviso salta al **usar** la ruta, no
-al importar el módulo, para no ensuciar el registro de quien arranca. Se retiran en la 2.0.
+Hasta la 1.x convivían ahí cinco archivos más —`operaciones.py`, `generar.py`, `cli.py`, `formato.py` y
+`servidor_mcp.py`— que **no contenían nada**: eran las rutas que una aplicación importaba en la 0.x, redirigidas con
+un aviso. **La 2.0 las retiró**, y con ellas todo el resto de la compatibilidad con la 0.x. Quien integró con la 1.x
+no cambia una línea: la superficie pública de la 1.0 sigue entera.
 
 ### Las puertas y la API pública
 
@@ -242,7 +242,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Validación del comprobante y de la partida doble | listo |
 | Asiento: compras, ventas, honorarios, notas y detracción | listo |
 | `diagnosticar`: qué falta, para qué destino y a quién pedírselo | listo |
-| API pública estable, `contaperu.api`, con las rutas de la 0.10 funcionando con aviso durante la 1.x | listo |
+| API pública estable, `contaperu.api`: cada nombre con su firma, congelados por un test | listo |
 | Servidor MCP y CLI | listo |
 | Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
 | **SIRE** | |

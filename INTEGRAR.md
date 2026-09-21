@@ -227,15 +227,17 @@ Para actualizar:
 3. Cuando pasen, cambia la versión fijada y despliega.
 
 Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
-seguridad llegan solo a la última versión publicada de la 1.x (`SECURITY.md`).
+seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
-## Lo que promete la 1.x
+## Lo que promete la 2.x
 
-- **`contaperu.api` no cambia de nombre ni de firma** hasta la 2.0 (`tests/test_superficie_publica.py`). Pueden llegar
+- **`contaperu.api` no cambia de nombre ni de firma** hasta la 3.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
 - **OpenConta crece sin romper**: una ruta o un campo que está, sigue.
-- **Las rutas de la 0.10** (`contaperu.operaciones`, `contaperu.generar`, `contaperu.cli`, `contaperu.servidor_mcp`,
-  `contaperu.formato`) siguen funcionando con un aviso `RutaObsoleta` que dice qué usar, y se retiran en la 2.0.
+- **La 2.0 retiró las rutas de la 0.10** (`contaperu.operaciones`, `contaperu.generar`, `contaperu.cli`,
+  `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia
+  una línea**: la superficie pública de la 1.0 sigue entera y su test pasa sin regenerarse. Lo que desapareció es lo
+  que ninguna versión publicada llegó a ofrecer — la 0.x nunca estuvo en PyPI.
 - **El estándar es `open-accounting` 1.0**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
   significado hasta una 2.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
   se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **un `rol` que no conozcas se contabiliza con

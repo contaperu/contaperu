@@ -36,9 +36,12 @@ el arreglo, y tu nombre va en el CHANGELOG salvo que prefieras lo contrario.
 
 | Versión | Recibe arreglos de seguridad |
 |---|---|
-| 1.x, la última publicada | sí, como versión de parche |
-| 0.10 y anteriores | no: se actualiza a la 1.x, que conserva sus rutas con aviso |
+| 2.x, la última publicada | sí, como versión de parche |
+| 1.x y anteriores | no: se actualiza a la 2.x, que no cambió la API pública |
 
-Desde la 1.0 un arreglo de seguridad sale como versión de parche de la última 1.x, sin cambiar la API pública
+Un arreglo de seguridad sale como versión de parche de la última publicada, sin cambiar la API pública
 (`contaperu.api`) ni el contrato OpenConta. Si un arreglo exigiera romper algo, se dice aquí y en el CHANGELOG antes de
 publicarlo.
+
+Subir de la 1.x a la 2.x no pide tocar código: la 2.0 solo retiró las rutas de la 0.x, que ninguna versión publicada
+llegó a ofrecer.

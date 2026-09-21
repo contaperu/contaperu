@@ -98,7 +98,7 @@ con un registro desconocido.
 ## Cómo compruebas que quedó bien
 
 ```bash
-python -m contaperu.cli diagnosticar mi-mes.json
+python -m contaperu.puertas.cli diagnosticar mi-mes.json
 ```
 
 Y si produces documentos con tu propio código, corre la [batería de conformidad](conformidad/): los casos de esquema

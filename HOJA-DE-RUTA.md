@@ -46,7 +46,7 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **1.4.0** y estándar **`open-accounting` 1.0**
+Librería **2.0.0** y estándar **`open-accounting` 1.0**
 (`contaperu/_version.py`).
 
 | Pieza | Hoy |
@@ -55,7 +55,7 @@ Librería **1.4.0** y estándar **`open-accounting` 1.0**
 | **Estándar y comunidad** | `open-accounting` 1.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea neutral con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
-| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 12 herramientas y 7 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. Las rutas de la 0.10 siguen con aviso |
+| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 12 herramientas y 7 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
 | **Salida · SIRE** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
 | **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos) en pruebas, a la espera de que alguien importe un archivo |
 | **Salida · ERP** | El documento `open-accounting` en JSON, el CSV de canal intercambio y la puerta HTTP con OpenConta |

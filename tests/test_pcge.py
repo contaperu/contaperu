@@ -10,7 +10,6 @@ import json
 import pytest
 
 from contaperu import pcge
-from contaperu._obsoleto import RutaObsoleta
 
 LINEAS = [
     {"cuenta": "741101", "debe_haber": "D", "importe": "100.00", "glosa": "DESCUENTO CONCEDIDO"},
@@ -92,15 +91,3 @@ def test_gana_el_primer_mapeo_que_case(tmp_path):
     salida, _ = pcge.adaptar(LINEAS, datos=json.loads(tabla.read_text(encoding="utf-8")))
     assert salida[0]["cuenta"] == "709901"
 
-
-def test_una_tabla_por_ruta_sigue_valiendo_con_aviso(tmp_path):
-    """La forma de la 0.x (la tabla en un archivo) sigue funcionando hasta la 2.0, y avisa: el núcleo ya no lee disco."""
-    tabla = tmp_path / "pcge.json"
-    tabla.write_text(json.dumps({"version": "2026", "mapeos": [
-        {"de": "741", "a": "709901", "modo": "renombrar", "cita": "art. 1"}]}), encoding="utf-8")
-    with pytest.warns(RutaObsoleta):
-        salida, _ = pcge.adaptar(LINEAS, ruta=tabla)
-    assert salida[0]["cuenta"] == "709901"
-    with pytest.warns(RutaObsoleta):
-        mapeos, _ = pcge.cargar_equivalencias(tabla)
-    assert mapeos[0].a == "709901"

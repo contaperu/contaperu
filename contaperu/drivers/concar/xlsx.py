@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..._obsoleto import reexportar
 from ...asiento.faltas import NoExportable
 from ...asiento.indice import ComprobanteDelAsiento
 from ...asiento.lineas import LineaDiario
@@ -17,18 +16,9 @@ from . import datos, proyeccion  # noqa: F401  (`datos` es un nombre que la 0.10
 from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, EXIGE,  # noqa: F401
                     FORMATOS, HOJA, OPCIONES, PANEL)
 
-# Lo que este módulo dejaba ver en la 0.10 y ya no usa: `construir` y lo que importaba para armar el asiento él mismo.
-__getattr__, _ = reexportar(__name__, {
-    "construir": "contaperu._compat.concar:construir",
-    "Comprobante": "contaperu.modelo:Comprobante",
-    "EXIGE_NUCLEO_ASIENTO": "contaperu.drivers.contrato:EXIGE_NUCLEO_ASIENTO",
-    "centro_en_anexo": "contaperu.drivers.contrato:centro_en_anexo",
-    "exigir_requisitos": "contaperu.asiento.resolucion:exigir_requisitos",
-    "huella": "contaperu.asiento.huella:huella",
-    "lineas_del_comprobante": "contaperu.asiento.motor:lineas_del_comprobante",
-    "numerar": "contaperu.asiento.resolucion:numerar",
-    "partida_doble": "contaperu.partida_doble",
-}, nuevas={"construir": "contaperu.api.exportar_archivo"})
+# Hasta la 1.x este módulo reexportaba, con aviso, lo que dejaba ver en la 0.10 para armar el asiento él mismo
+# (`construir`, `numerar`, `huella`…). La 2.0 lo retiró con el resto de la compatibilidad con la 0.x: el asiento lo
+# arma el núcleo y el archivo se pide a `contaperu.api.exportar_archivo`.
 
 # CONCAR numera el asiento con MM + cuatro dígitos (`asiento.numerar_en_orden`).
 MAXIMO_CORRELATIVO = 9999

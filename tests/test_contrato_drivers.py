@@ -612,7 +612,7 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
     dos excepciones leen por el driver que las declara: `columnas`, el contrato (`centro_en_anexo`); y
     `monedas_codigo`, el requisito `moneda`, que solo exige quien la declara (lo comprueba `incumplimientos`)."""
     archivos = [*sorted((PAQUETE / "asiento").rglob("*.py")), PAQUETE / "igv.py", PAQUETE / "detracciones.py",
-                PAQUETE / "generar.py", PAQUETE / "drivers" / "contrato.py"]
+                PAQUETE / "pipeline" / "armado.py", PAQUETE / "drivers" / "contrato.py"]
     permitidas = GENERALES | DEL_ASIENTO | {"imputaciones", "columnas", "monedas_codigo"}
     ajenas = {str(f.relative_to(PAQUETE)).replace("\\", "/"): sorted(_claves_leidas(f) - permitidas) for f in archivos}
     assert {f: claves for f, claves in ajenas.items() if claves} == {}

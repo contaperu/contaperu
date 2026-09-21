@@ -1,10 +1,4 @@
 {
- "contaperu._compat.operaciones": [
-  "contaperu.detracciones",
-  "contaperu.lectores.sire_txt",
-  "contaperu.pcge",
-  "contaperu.validar"
- ],
  "contaperu.api.errores": [
   "contaperu.drivers.sire",
   "contaperu.igv",

@@ -253,13 +253,14 @@ def test_un_pdf_o_una_foto_quedan_pendientes_de_leer(bytes_):
     assert documento["comprobantes"] == []
 
 
-# ── Las dos puertas dan lo mismo (1.2.1) ──────────────────────────────────────────────────────────────────────
+# ── Lo que `preparar` no puede adelantarle al driver (1.2.1) ──────────────────────────────────────────────────
 
-"""La ruta de la 0.x y la API pública tienen que responder IGUAL sobre el mismo documento.
-
-Los dos casos de aquí abajo no son hipótesis: los encontró `contab-core` al pasar de `contaperu.generar` a
-`contaperu.api`, que es el primer consumidor real que cruza esa frontera. Los dos venían de que `preparar` se
+"""Los dos casos de aquí abajo no son hipótesis: los encontró `contab-core` al pasar de la ruta de la 0.x a
+`contaperu.api`, que es el primer consumidor real que cruzó esa frontera. Los dos venían de que `preparar` se
 adelantaba al driver — filtraba y comprobaba cosas que son del destino, no del documento.
+
+Hasta la 2.0 se comprobaban contrastando las dos puertas. Retirada la de la 0.x, queda lo que de verdad importaba:
+que la API pública responda lo que debe.
 """
 
 LIBRO_1_2_1 = {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"}
@@ -275,38 +276,29 @@ def _comprobante_1_2_1(numero, **extra):
     return Comprobante(**campos)
 
 
-def _por_las_dos_puertas(comprobantes, driver="sire"):
-    """(lo que devuelve la ruta de la 0.x, lo que devuelve la API pública) sobre el mismo documento."""
-    import warnings
-
+def _exportado(comprobantes, driver="sire"):
+    """Lo que devuelve la API pública sobre esos comprobantes."""
     from contaperu import api
     from contaperu.modelo import Libro
 
-    libro = Libro(**LIBRO_1_2_1)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        from contaperu.generar import generar
-        vieja = generar(libro, comprobantes, driver, config=None)
-    nueva = api.exportar_archivo(api.documento_de(libro, comprobantes), driver=driver)
-    return vieja, nueva
+    return api.exportar_archivo(api.documento_de(Libro(**LIBRO_1_2_1), comprobantes), driver=driver)
 
 
-def test_el_resumen_cuenta_lo_que_se_dejo_fuera_por_las_dos_puertas():
-    """Un comprobante excluido tiene que contarse como excluido, venga por donde venga.
+def test_el_resumen_cuenta_lo_que_se_dejo_fuera():
+    """Un comprobante excluido tiene que contarse como excluido.
 
     Hasta la 1.2.0 `preparar` lo descartaba ANTES de que `generar` lo contara, así que por la API pública
     `resumen.excluidos` salía siempre 0 — y ese número se guarda: quien lo persista vería cero excluidos para
     siempre, sin un solo error."""
-    vieja, nueva = _por_las_dos_puertas([_comprobante_1_2_1(1), _comprobante_1_2_1(2, excluida=True)])
-    for clave in ("comprobantes", "excluidos", "duplicados", "fuera_del_destino"):
-        assert vieja.resumen.get(clave) == nueva.resumen.get(clave), clave
-    assert nueva.resumen["excluidos"] == 1 and nueva.comprobantes == 1
+    exp = _exportado([_comprobante_1_2_1(1), _comprobante_1_2_1(2, excluida=True)])
+    assert exp.resumen["excluidos"] == 1 and exp.comprobantes == 1
+    assert exp.resumen["duplicados"] == 0 and exp.resumen["fuera_del_destino"] == 0
 
 
 def test_un_error_en_lo_que_el_destino_no_lleva_no_impide_el_archivo():
     """El recibo por honorarios no va en el TXT del SIRE (`EXCLUYE_TIPOS`), así que su retención mal puesta no puede
     impedir declarar a SUNAT. Hasta la 1.2.0 la API pública se plantaba: comprobaba los errores antes de aplicar la
-    regla del driver, y la ruta de la 0.x —que filtra primero— dejaba salir el archivo."""
+    regla del driver, y la ruta de la 0.x —que filtraba primero— dejaba salir el archivo."""
     from contaperu import validar
     from contaperu.modelo import Libro
 
@@ -316,8 +308,7 @@ def test_un_error_en_lo_que_el_destino_no_lleva_no_impide_el_archivo():
     validar.revisar(comprobantes, Libro(**LIBRO_1_2_1))
     assert honorario.tiene_errores, "el caso deja de probar algo si el recibo ya no bloquea"
 
-    vieja, nueva = _por_las_dos_puertas(comprobantes)
-    assert vieja.comprobantes == nueva.comprobantes == 1
+    assert _exportado(comprobantes).comprobantes == 1
 
 
 def test_un_error_en_lo_que_el_destino_SI_lleva_sigue_deteniendo_la_exportacion():
