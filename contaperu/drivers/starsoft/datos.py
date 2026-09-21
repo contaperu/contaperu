@@ -194,6 +194,16 @@ DESTINO = {"DG": "001", "DGNG": "002", "DNG": "003"}
 DESTINO_NO_GRAVADA = "004"
 DESTINO_IMPORTACION = "005"
 
+# La columna del documento anulado (`Y` en compras, `S` en ventas). Sale `0` y no en blanco (John,
+# 21-sep-2026): un comprobante que está entrando al registro no está anulado, y decirlo es más claro que
+# callarlo. La hoja de compras del vídeo admite las dos formas —«Blanco o `0` por defecto»,
+# `STARSOFT-INTEGRACION.md`— y entre las dos se elige la que afirma.
+#
+# **El motor no sabe anular**: no hay un comprobante anulado que llegue hasta aquí, porque un comprobante
+# excluido no entra en el archivo. Si algún día el estándar lo trae, esta constante deja de ser el único
+# valor posible y pasa a ser el valor por defecto de verdad.
+NO_ANULADO = "0"
+
 # Lo que no cabe en el formato. El largo de la glosa está escrito en la cabecera de la propia hoja `PARAMETROS`
 # («GLOSA DEL MOVIMIENTO · Máximo 60 caracteres»), así que es un hecho y no una deducción.
 LARGO_GLOSA = 60

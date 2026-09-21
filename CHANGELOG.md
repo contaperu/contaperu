@@ -6,6 +6,14 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Cambiado
+
+- **La columna `ANULADO` de STARSOFT sale `0` y no en blanco**, en compras y en ventas. Un comprobante que está
+  entrando al registro no está anulado, y afirmarlo es más claro que callarlo (John, 21-sep-2026). Su hoja admite
+  las dos formas —«Blanco o `0` por defecto»— y se elige la que afirma, que además es lo que ya hacían
+  `IMPORTACION` y `EXPORTACION` en la misma fila. `IGV POR APLICAR` sigue en blanco a propósito: es una afirmación
+  sobre el crédito fiscal y no consta.
+
 ## [2.1.0] — 2026-09-21
 
 **El archivo que produce cada driver cambia de nombre.** Si tienes un script que lo busca por su nombre, es lo

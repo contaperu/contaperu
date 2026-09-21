@@ -77,6 +77,21 @@ def test_el_voucher_va_sin_el_mes_pero_con_sus_cuatro_digitos():
     assert {f["VOUCHER"] for f in _filas(_compra())} == {"0001"}
 
 
+def test_las_banderas_que_se_saben_van_en_cero_y_no_en_blanco():
+    """`ANULADO` dice `0`: un comprobante que entra al registro no está anulado, y afirmarlo es más claro que
+    callarlo (John, 21-sep-2026). Su hoja admite las dos formas —«Blanco o `0` por defecto»— y se elige la que
+    afirma, igual que ya hacían `IMPORTACION` y `EXPORTACION`.
+
+    `IGV POR APLICAR` sigue en blanco a propósito: es una afirmación sobre el crédito fiscal y no consta."""
+    compra = _filas(_compra())
+    assert {f["ANULADO"] for f in compra} == {"0"}
+    assert {f["IMPORTACION"] for f in compra} == {"0"}
+    assert {f["IGV POR APLICAR"] for f in compra} == {""}, "no consta: vacía dice 'no lo trae'"
+    ventas = _filas(_venta(), imputacion={"fila-1": {"cuenta_contable": "70111000", "centro_costo": "CC01"}})
+    assert {f["ANULADO"] for f in ventas} == {"0"}
+    assert {f["EXPORTACION"] for f in ventas} == {"0"}
+
+
 def test_el_numero_del_documento_va_pegado_y_con_ceros():
     """`F13600000431`, al revés que en CONCAR y el SIRE, donde va sin ceros. Y la glosa, con guion."""
     fila = _filas(_compra())[0]
