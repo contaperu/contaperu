@@ -224,8 +224,9 @@ adivinar:
   (regla 4). `documento.tipo` sigue llevando la sigla del ERP por compatibilidad. La línea `detraccion`
   no lleva `tipo_cp`: su documento es la constancia pendiente, no un comprobante de SUNAT.
 - **`detraccion.codigo`** — el código SUNAT del bien o servicio (Catálogo 54), al lado del interno.
-- **`glosa`** va entera, con su prefijo (`IGV - `, `RET 4TA - `, `DETRACCION - `). Cortarla al largo
-  que admite cada ERP es trabajo del driver.
+- **`glosa`** es **la misma en todas las líneas del comprobante** y va entera, sin prefijos: qué es cada línea
+  lo dicen su `rol` y su cuenta, no un texto. Cortarla al largo que admite cada ERP es trabajo del driver.
+  (Hasta la 2.1 del motor las líneas derivadas anteponían `IGV - `, `RET 4TA - ` o `DETRACCION - `.)
 - **`tasa_igv`** es la del comprobante como texto (`"18"`, `"10.5"`). Si un ERP solo admite enteros,
   redondea él.
 - **Sin vocabulario legacy, para un ERP.** `sub_diario`, `correlativo` y `documento.tipo` son vocabulario de un

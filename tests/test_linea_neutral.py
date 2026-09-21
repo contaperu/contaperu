@@ -63,7 +63,7 @@ def test_la_linea_neutral_dice_lo_mismo_que_la_columna():
     assert gasto.fecha == "2026-08-10"
     assert gasto.documento == {"tipo": "FT", "serie_numero": "E001-871",
                                "fecha_emision": "2026-08-10", "fecha_vencimiento": "2026-08-27"}
-    assert igv.cuenta == "401111" and igv.glosa.startswith("IGV - ")
+    assert igv.cuenta == "401111" and igv.glosa == gasto.glosa, "la misma glosa en todas las lineas"
     assert proveedor.cuenta == "421201" and proveedor.debe_haber == "H"
     assert proveedor.contraparte_doc == "20602222226" and proveedor.anexo_auxiliar == "CC-64"
 
@@ -83,7 +83,7 @@ def test_la_linea_de_detraccion_lleva_su_bloque():
     assert det.cuenta == "421203" and det.debe_haber == "H" and det.importe == "198.00"
     assert det.documento["tipo"] == "DR" and det.documento["serie_numero"] == "9999999999"
     assert det.detraccion == {"codigo_interno": "02702", "tasa": "4", "base": "4956.00"}
-    assert det.glosa.startswith("DETRACCION - ")
+    assert det.glosa == lineas[0].glosa, "la misma glosa en todas las lineas, sin prefijo (2.2)"
 
 
 def test_a_dict_no_arrastra_claves_vacias():
@@ -121,9 +121,13 @@ def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
 
 
 def test_la_glosa_de_la_linea_va_entera_y_el_corte_es_del_driver():
+    """La MISMA glosa en todas las lineas, entera y sin prefijos (John, 21-sep-2026).
+
+    Que es cada linea lo dicen su `rol` y su cuenta; hasta la 2.1 las derivadas anteponian `IGV - `,
+    `RET 4TA - ` o `DETRACCION - `, que ademas gastaba los 30 caracteres de la columna W de CONCAR."""
     concepto = "SERVICIO DE TRANSPORTE DE MATERIALES DE CONSTRUCCION A LA OBRA"
     lineas = asi.lineas_del_comprobante(factura(concepto=concepto), CONTAB, MES, "080001")
-    assert lineas[0].glosa == concepto and lineas[1].glosa == "IGV - " + concepto
+    assert {ln.glosa for ln in lineas} == {concepto}
     filas = driver_concar.filas_de_comprobante(factura(concepto=concepto), CONTAB, MES, "080001")
     assert filas[0]["W"] == concepto[:30] and filas[0]["F"] == concepto[:40]
 

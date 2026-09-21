@@ -118,7 +118,7 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
 |---|---|
 | `rol` | `principal`, `igv`, `retencion_4ta`, `tercero`, `detraccion_tercero`, `detraccion`. Un ERP que pida el IGV en su columna encuentra la línea por su rol, no por su cuenta (que la elige cada empresa). |
 | `documento.tipo_cp`, `referencia.tipo_cp` | El código SUNAT (Tabla 10). `tipo` conserva la sigla del ERP por compatibilidad. |
-| `glosa` | Entera, con su prefijo. El corte lo decide cada ERP. |
+| `glosa` | La misma en todas las líneas y entera, sin prefijos. El corte lo decide cada ERP. |
 | `tasa_igv` | La del comprobante, como texto exacto (`"10.5"`). Redondear es cosa del que solo admite enteros. |
 | `detraccion.codigo` | El código SUNAT del bien o servicio, al lado del interno del contribuyente. |
 

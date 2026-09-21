@@ -32,7 +32,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -102,7 +102,7 @@
    "fecha": "2026-08-11",
    "moneda": "USD",
    "tipo_cambio": "3.550",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -171,7 +171,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "USD",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -327,7 +327,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "RET 4TA - ASESORIA CONTABLE",
+   "glosa": "ASESORIA CONTABLE",
    "documento": {
     "tipo": "RH",
     "tipo_cp": "02",
@@ -393,7 +393,7 @@
    "fecha": "2026-08-11",
    "moneda": "USD",
    "tipo_cambio": "3.550",
-   "glosa": "RET 4TA - ASESORIA CONTABLE",
+   "glosa": "ASESORIA CONTABLE",
    "documento": {
     "tipo": "RH",
     "tipo_cp": "02",
@@ -458,7 +458,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "RET 4TA - ASESORIA CONTABLE",
+   "glosa": "ASESORIA CONTABLE",
    "documento": {
     "tipo": "RH",
     "tipo_cp": "02",
@@ -529,7 +529,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "NC",
     "tipo_cp": "07",
@@ -609,7 +609,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "ND",
     "tipo_cp": "08",
@@ -677,7 +677,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -790,7 +790,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -858,7 +858,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - ELECTROMECANICA DE PRUEBA S.R.L.",
+   "glosa": "ELECTROMECANICA DE PRUEBA S.R.L.",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -926,7 +926,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-01",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -994,7 +994,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-31",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1060,7 +1060,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-01",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1124,7 +1124,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1191,7 +1191,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "DETRACCION - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
@@ -1250,7 +1250,7 @@
    "fecha": "2026-08-11",
    "moneda": "USD",
    "tipo_cambio": "3.500",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1320,7 +1320,7 @@
    "fecha": "2026-08-11",
    "moneda": "USD",
    "tipo_cambio": "3.500",
-   "glosa": "DETRACCION - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
@@ -1377,7 +1377,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "USD",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1445,7 +1445,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-10",
    "moneda": "PEN",
-   "glosa": "IGV - SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1512,7 +1512,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-10",
    "moneda": "PEN",
-   "glosa": "DETRACCION - SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "contraparte_doc": "20602222226",
    "documento": {
     "tipo": "DR",
@@ -1569,7 +1569,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1637,7 +1637,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1704,7 +1704,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "DETRACCION - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
@@ -1761,7 +1761,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1828,7 +1828,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "DETRACCION - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
@@ -1885,7 +1885,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-10",
    "moneda": "PEN",
-   "glosa": "IGV - SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -1952,7 +1952,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-10",
    "moneda": "PEN",
-   "glosa": "DETRACCION - SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
+   "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "contraparte_doc": "20602222226",
    "documento": {
     "tipo": "DT",
@@ -2009,7 +2009,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2076,7 +2076,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "DETRACCION - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
@@ -2139,7 +2139,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "NC",
     "tipo_cp": "07",
@@ -2224,7 +2224,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "DETRACCION - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
@@ -2325,7 +2325,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "RC",
     "tipo_cp": "14",
@@ -2392,7 +2392,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2460,7 +2460,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2528,7 +2528,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2595,7 +2595,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "DETRACCION - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
@@ -2652,7 +2652,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2719,7 +2719,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2785,7 +2785,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2851,7 +2851,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2919,7 +2919,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "USD",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -2987,7 +2987,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3055,7 +3055,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3122,7 +3122,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "DETRACCION - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
@@ -3202,7 +3202,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3247,7 +3247,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3337,7 +3337,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3490,7 +3490,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3600,7 +3600,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3645,7 +3645,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FA",
     "tipo_cp": "01",
@@ -3736,7 +3736,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3807,7 +3807,7 @@
    "fecha": "2026-08-11",
    "moneda": "USD",
    "tipo_cambio": "3.550",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -3875,7 +3875,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "BV",
     "tipo_cp": "03",
@@ -3926,7 +3926,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "NC",
     "tipo_cp": "07",
@@ -4029,7 +4029,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-11",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",
@@ -4097,7 +4097,7 @@
    "correlativo": "080001",
    "fecha": "2026-08-01",
    "moneda": "PEN",
-   "glosa": "IGV - GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
+   "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
     "tipo": "FT",
     "tipo_cp": "01",

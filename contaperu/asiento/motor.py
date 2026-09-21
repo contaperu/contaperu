@@ -155,8 +155,10 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     centro_comun = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
     serie, numero = (c.serie or "").strip(), _numero(c.numero, opciones)
     serie_numero = serie_numero_de(c, opciones)
-    # UNA sola glosa para todas las líneas (confirmado por un contador, 2026); las derivadas anteponen lo
-    # que las identifica —`IGV - `, `RET 4TA - `, `DETRACCION - `—. Cortarla es cosa del driver.
+    # UNA sola glosa para TODAS las líneas, la misma y sin adornos (John, 21-sep-2026). Hasta la 2.1 las
+    # derivadas anteponían lo que las identificaba —`IGV - `, `RET 4TA - `, `DETRACCION - `—, y era
+    # información repetida: qué es cada línea lo dice su `rol`, y su cuenta. El prefijo solo gastaba los
+    # 30 caracteres que admite CONCAR en su columna de detalle. Cortarla sigue siendo cosa del driver.
     glosa = glosa_de(c)
     tasa_leida = tasa_calculada(igv, Decimal(c.base_gravada or 0))
     tasa = "" if tasa_leida is None else texto_tasa(tasa_leida)
@@ -225,10 +227,10 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
-    linea_igv = (linea("igv", igv, str(config["cuentas"]["igv"]), sentido_base, f"IGV - {glosa}")
+    linea_igv = (linea("igv", igv, str(config["cuentas"]["igv"]), sentido_base, glosa)
                  if igv > 0 else None)
     cuenta_retencion = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"])
-    linea_retencion = (linea("retencion_4ta", retenido, cuenta_retencion, sentido_tercero, f"RET 4TA - {glosa}")
+    linea_retencion = (linea("retencion_4ta", retenido, cuenta_retencion, sentido_tercero, glosa)
                        if retenido > 0 else None)
     cuenta_del_tercero = cuenta_tercero(c, config, es_venta)
     anexo_tercero = centro_comun if ("tercero" in centro_en_anexo and not es_honorarios) else ""
@@ -263,7 +265,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                                         "id_externo": c.id_externo or "",
                                         "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
             linea_detraccion = linea("detraccion", detraido, cuenta_detraccion, sentido_tercero,
-                                     f"DETRACCION - {glosa}", contraparte_doc=ruc,
+                                     glosa, contraparte_doc=ruc,
                                      documento=_limpio(documento_detraccion), referencia=_limpio(referencia_detraccion),
                                      detraccion=_detraccion(c, config, total, neutral))
 

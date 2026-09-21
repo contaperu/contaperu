@@ -21,7 +21,10 @@ exportar = por_la_fachada(api.exportar)
 # La huella de la FACTURA de `test_diagnosticar` con la configuración de fábrica. Si este valor cambia
 # es que cambió la fórmula (o el asiento): las huellas guardadas por quien las persista dejan de
 # coincidir con las nuevas, y eso se anuncia como cambio de comportamiento.
-HUELLA_FACTURA = "04c77b34a131d024e90d33056060d7ccba5ce7cc1e2c1da26bb520a06dbc2f89"
+#
+# **Cambiaron en la 2.2**, y no la fórmula: la glosa entra en la huella y las líneas derivadas dejaron de
+# anteponer `IGV - `, `RET 4TA - ` y `DETRACCION - ` (John, 21-sep-2026). Es la segunda vez que se tocan.
+HUELLA_FACTURA = "5cc54f016ba041f83d95480b84bce96574eb2aa17f9c866d375bae6bea255a85"
 
 
 def lineas(**cambios):
@@ -45,8 +48,8 @@ def test_la_misma_entrada_da_la_misma_huella_y_es_la_de_siempre():
 # exacto dentro de la línea (hito 0.6, anunciado en el CHANGELOG). Con la 0.10 eran
 # 7bea763c65e20607bf0caacfff17b7f41e57e9618634807e900fa51b03928300 y
 # a51a1da1befd246b0deea4fb81f4b1e43d3033c61aa0fea56654fb2b50b8b582.
-HUELLA_USD = "0e447ed2e85b0e7aff589d4fd3d6a77d615a3568a7cad6bdbddc2df93641992b"
-HUELLA_DETRACCION = "7a04e181fe431229ed1b4ee4a3336ae03f8150f9b3e5245dce36c94f63cbc8b7"
+HUELLA_USD = "cb3af1e5e311eadbf33f71aa0087b600e303e2e8f631c8d90ad10f08214689e4"
+HUELLA_DETRACCION = "3c8525988cc772ed9c6589033a84cfc185f0db9e84168f2653c7fced63df64bd"
 
 
 def test_la_huella_en_dolares_y_con_detraccion_es_la_de_siempre():

@@ -56,3 +56,4 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0010](0010-clase-en-la-linea.md) | `clase` obligatoria en cada línea: qué es su cuenta | `final` |
 | [0011](0011-rol-y-tipo-de-libro-en-catalogo.md) | `rol` y `libro.tipo` salen del esquema a catálogos | `final` |
 | [0012](0012-correlativo-sin-el-mes.md) | `correlativo` sin el mes, y el mes en su propio campo | `borrador` |
+| [0013](0013-glosa-sin-prefijos.md) | La glosa, la misma en todas las líneas y sin prefijos | `final` |

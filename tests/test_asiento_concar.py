@@ -65,10 +65,10 @@ def test_factura_pen_con_igv_tres_filas():
         assert (f["B"], f["C"], f["D"], f["E"], f["G"], f["H"], f["I"], f["J"]) == ("11", "080020", EMISION, "MN", "", "V", "S", EMISION)
         assert (f["R"], f["S"], f["T"], f["U"], f["AO"], f["A"], f["AI"]) == ("FT", "F001-123", EMISION, VENCE, 18, "", "")
         assert len(f) == 41 and list(f.keys()) == driver_concar.datos.COLUMNAS
-    # Glosas en MAYÚSCULAS; la principal (F) es la misma en las 3 filas; el "IGV - " va solo en la detalle (W)
+    # Glosas en MAYÚSCULAS. La principal (F) se corta a 40 y la de detalle (W) a 30, y desde la 2.2 la línea del
+    # IGV lleva LA MISMA glosa que las demás: el prefijo `IGV - ` gastaba 6 de esos 30 caracteres.
     assert gasto["F"] == igv["F"] == cxp["F"] == "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2"[:40].upper()
-    assert gasto["W"] == "GRILLETE TIPO LIRA 5/8 PARA TO" and len(gasto["W"]) == 30
-    assert igv["W"] == "IGV - GRILLETE TIPO LIRA 5/8 P" and len(igv["W"]) == 30
+    assert gasto["W"] == igv["W"] == cxp["W"] == "GRILLETE TIPO LIRA 5/8 PARA TO" and len(gasto["W"]) == 30
     assert debe_haber(filas) == (Decimal("118"), Decimal("118"))
 
 
@@ -142,7 +142,7 @@ def test_recibo_por_honorarios_con_retencion_de_4ta():
     assert len(con) == 3 and [f["N"] for f in con] == ["D", "H", "H"]
     assert [f["K"] for f in con] == ["631101", "401721", "424101"]
     assert [f["O"] for f in con] == [2000.0, 160.0, 1840.0]        # gasto total · retención · NETO
-    assert con[1]["W"] == "RET 4TA - ASESORIA CONTABLE"[:30] and con[1]["L"] == "" and con[1]["M"] == ""
+    assert con[1]["W"] == "ASESORIA CONTABLE" and con[1]["L"] == "" and con[1]["M"] == ""
     assert con[2]["L"] == "20607777773"                             # el RUC va en la línea del profesional
     assert all(f["B"] == "15" and f["R"] == "RH" and f["AO"] == "" for f in con)
     assert debe_haber(con) == (Decimal("2000"), Decimal("2000"))
@@ -259,7 +259,10 @@ def test_el_centro_solo_es_obligatorio_donde_se_escribe():
 def test_factura_con_detraccion_va_al_sub_diario_10():
     """La factura con detracción, calcada dun Excel real de produccion (06-sep-2026): el total COMPLETO al
     proveedor (421201) y dos líneas más por el monto detraído — el proveedor al Debe y 421203 al Haber
-    con tipo DT, comodín 9999999999, glosa «DETRACCION - …» y AI–AL. El monto va en soles enteros."""
+    con tipo DT, comodín 9999999999 y AI–AL. El monto va en soles enteros.
+
+    La glosa es la misma que la de las otras cuatro filas desde la 2.2: la línea se reconoce por su cuenta y su
+    tipo de documento, no por un texto."""
     det = {"codigo": "037", "porcentaje": "12", "monto": "14.16", "cuenta": "00-000-123456"}
     c = cp(detraccion=det)
     assert concar.tiene_detraccion(c) and concar.sub_diario(c, CONTAB) == "10" and concar.sigla_documento(c, CONTAB) == "FT"
@@ -271,7 +274,7 @@ def test_factura_con_detraccion_va_al_sub_diario_10():
         ("421201", "20607777773", "D", 14.0, "FT", "F001-123", "OBRA01")
     assert (det_["K"], det_["L"], det_["N"], det_["O"], det_["Q"]) == ("421203", "20607777773", "H", 14.0, 14.0)   # 118 × 12 % = 14.16 → 14
     assert (det_["R"], det_["S"], det_["M"], det_["X"]) == ("DR", "9999999999", "", "")
-    assert det_["W"] == ("DETRACCION - " + gasto["F"])[:30]
+    assert det_["W"] == gasto["W"], "la misma glosa en las cinco filas"
     assert (det_["AI"], det_["AJ"], det_["AK"], det_["AL"], det_["AO"]) == ("03701", 12.0, "", 118.0, 18)
     assert (gasto["AI"], igv["AI"], cxp["AI"]) == ("", "", "") and debe_haber(filas) == (Decimal("132"), Decimal("132"))
     # Dólares: la detracción se deposita en SOLES → 118 × 3.5 = 413 × 12 % = 49.56 → 50 soles → 14.29 US en la línea
@@ -395,8 +398,7 @@ def test_asiento_con_detraccion_calca_un_excel_real():
     assert col("O") == [4200.0, 756.0, 4956.0, 198.0, 198.0] and col("Q") == col("O") and col("P") == [""] * 5
     assert col("R") == ["FT", "FT", "FT", "FT", "DR"] and col("S") == ["E001-871"] * 4 + ["9999999999"]
     assert col("D") == [date(2026, 8, 10)] * 5 and col("T") == [date(2026, 8, 10)] * 5 and col("U") == [date(2026, 8, 27)] * 5
-    assert col("W") == ["SERVICIO DE TRANSPORTE DE MATE", "IGV - SERVICIO DE TRANSPORTE D", "SERVICIO DE TRANSPORTE DE MATE",
-                        "SERVICIO DE TRANSPORTE DE MATE", "DETRACCION - SERVICIO DE TRANS"]
+    assert col("W") == ["SERVICIO DE TRANSPORTE DE MATE"] * 5, "la misma glosa en las cinco filas (2.2)"
     assert col("AI") == ["", "", "", "", "02702"] and col("AJ") == ["", "", "", "", 4.0]
     assert col("AL") == ["", "", "", "", 4956.0] and col("AK") == [""] * 5
     assert col("AO") == [18] * 5 and debe_haber(filas) == (Decimal("5154"), Decimal("5154"))

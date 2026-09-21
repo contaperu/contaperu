@@ -6,6 +6,11 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+> ⚠️ **Todas las huellas de asiento cambian.** Es lo primero que hay que mirar al subir: la fórmula es la
+> misma, pero el contenido que resume no. Quien guarde huellas para reconocer una tanda ya exportada verá
+> las de antes como distintas. Ni un importe, ni una cuenta, ni un sentido se mueven — comprobado celda a
+> celda sobre los snapshots congelados: 57 celdas por snapshot, **todas glosas y ninguna otra**.
+
 ### Añadido
 
 - **El canal del SIRE, descrito como datos**: `catalogos_api_sire()`, `GET /v1/catalogos/sire-api` y el recurso
@@ -33,6 +38,20 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   reproducible, que el SIRE no lleva huella, y dónde acaba el motor y empieza tu conector.
 
 ### Cambiado
+
+- **La glosa es la misma en todas las líneas del comprobante, sin prefijos.** Las líneas derivadas
+  anteponían lo que las identificaba —`IGV - `, `RET 4TA - `, `DETRACCION - `— y era información repetida:
+  qué es cada línea lo dicen su `rol` y su cuenta, que es como la buscan los seis drivers. Ninguno leía la
+  glosa para decidir nada.
+
+  El prefijo además se comía el dato. CONCAR admite 30 caracteres en su columna de detalle: con un concepto
+  real, la línea de la detracción llegaba como `DETRACCION - SERVICIO DE TRANS` —sobrevivía la etiqueta y se
+  perdía el concepto—. Ahora llega `SERVICIO DE TRANSPORTE DE MATE`.
+
+  Vale para **todos los drivers y para el asiento neutral**, porque se quita en el motor y no en la salida.
+  Enmienda [0013](estandar/enmiendas/0013-glosa-sin-prefijos.md); el esquema no se toca y `open-accounting`
+  sigue en **1.0**. Quien busque sus líneas por `rol` no nota nada; quien buscara la del IGV por el texto
+  `"IGV - "` deja de encontrarla.
 
 - **La columna `ANULADO` de STARSOFT sale `0` y no en blanco**, en compras y en ventas. Un comprobante que está
   entrando al registro no está anulado, y afirmarlo es más claro que callarlo (John, 21-sep-2026). Su hoja admite
