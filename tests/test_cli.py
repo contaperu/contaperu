@@ -94,11 +94,19 @@ def test_desde_json_llega_a_los_drivers_de_asientos(tmp_path, capsys):
 
 
 def test_diagnosticar_dice_que_falta_y_luego_que_esta_listo(tmp_path, capsys):
-    """Antes de generar nada: el golden no trae cuenta de gasto, y con la del RUC queda listo."""
+    """Antes de generar nada: el golden no trae cuenta de gasto, y con la del RUC queda listo.
+
+    Sin `--config` vale la cuenta de gasto que trae CONCAR (2.5), así que lo que falta ya no es la cuenta sino el
+    CENTRO: esa cuenta es de la clase 63, y las 63 llevan centro de costo. Para ver la falta de cuenta hay que
+    decir que no hay ninguna, que es lo que hace quien prefiere que le avisen."""
     golden = str(GOLDEN / "compras_202601.json")
-    assert cli.main(["diagnosticar", golden]) == 1
+    sin_gasto = tmp_path / "sin_gasto.json"
+    sin_gasto.write_text(json.dumps({"cuentas": {"gasto": ""}, "usa_centros_costo": False}), encoding="utf-8")
+    assert cli.main(["diagnosticar", golden, "--config", str(sin_gasto)]) == 1
     out = capsys.readouterr().out
     assert "NO está listo: 3 sin cuenta contable" in out and "Sin cuenta contable:" in out
+    assert cli.main(["diagnosticar", golden]) == 1
+    assert "NO está listo: 3 sin centro de costo" in capsys.readouterr().out
     config = tmp_path / "config.json"
     config.write_text(json.dumps({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}), encoding="utf-8")
     assert cli.main(["diagnosticar", golden, "--config", str(config)]) == 0
@@ -145,8 +153,12 @@ def test_la_imputacion_entra_por_la_terminal(tmp_path, capsys):
     csv = (salida / "CSV_COMPRAS_202601_20601234567.csv").read_bytes().decode("utf-8-sig")
     assert csv.count(";636301;D;") == 1 and csv.count(";659999;D;") == 2
 
-    # Sin la cuenta de gasto del RUC, al primero le llega la suya y a los otros dos les sigue faltando.
-    assert cli.main(["diagnosticar", str(documento), "--imputacion", str(imputacion)]) == 1
+    # Sin la cuenta de gasto del RUC, al primero le llega la suya y a los otros dos les sigue faltando. Hay que
+    # pedirlo con la cuenta de gasto en blanco: si no, la de CONCAR (2.5) se la da a los dos.
+    sin_gasto = tmp_path / "sin_gasto.json"
+    sin_gasto.write_text(json.dumps({"cuentas": {"gasto": ""}, "usa_centros_costo": False}), encoding="utf-8")
+    assert cli.main(["diagnosticar", str(documento), "--imputacion", str(imputacion),
+                     "--config", str(sin_gasto)]) == 1
     assert "NO está listo: 2 sin cuenta contable" in capsys.readouterr().out
 
     imputacion.write_text(json.dumps({"fila-9": {"cuenta_contable": "636301"}}), encoding="utf-8")

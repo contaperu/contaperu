@@ -245,10 +245,17 @@ def _cuenta_por_moneda(clave: str, titulo: str, soles: str, dolares: str, ayuda:
         Campo("USD", "texto", dolares, titulo="Dólares", grupo="cuentas", patron=_CUENTA)))
 
 
+# Lo general de la contabilidad. **Las cuentas de aquí son el PCGE a seis dígitos, que es como numeran CONCAR y
+# CONTASIS**: salieron de ahí y hasta la 2.5 no estaba dicho en ninguna parte, lo que las hacía parecer universales.
+# No lo son — STARSOFT numera a ocho—, y por eso un driver puede declarar las suyas y apartarse de estas
+# (`drivers.contrato.cuentas_por_defecto`). Lo que un driver no declare lo sigue heredando de aquí.
 CONFIGURACION_GENERAL: tuple[Campo, ...] = (
     Campo("cuentas", "objeto", titulo="Cuentas", grupo="cuentas", campos=(
-        # VACÍA a propósito: en la práctica es el comodín «63/65», que no es una cuenta. La pone la imputación de cada
-        # documento o la configuración de la empresa.
+        # VACÍA aquí a propósito: en la práctica es el comodín «63/65», que no es una cuenta. La pone la imputación
+        # de cada documento, la configuración de la empresa o el driver del sistema al que se exporta
+        # (`drivers.contrato.CUENTAS_POR_DEFECTO`, 2.5; CONCAR declara la suya). **Con una puesta, el motor deja de
+        # contar como `sin_cuenta` los comprobantes a los que nadie les puso una**: salen a ella y el mes queda
+        # listo. Quien prefiera que le avisen la deja en blanco, y lo guardado manda sobre lo que traiga el driver.
         Campo("gasto", "texto", "", titulo="Cuenta de gasto por defecto", grupo="cuentas", patron=_CUENTA,
               ayuda="La que se usa cuando el comprobante no trae ninguna. Vacía, se elige en cada comprobante."),
         _cuenta_por_moneda("cxp", "Facturas, boletas y tickets por pagar", "421201", "421202",

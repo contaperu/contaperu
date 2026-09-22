@@ -22,6 +22,20 @@ CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.shee
 # propio driver; hasta entonces solo lo avisaba `diagnosticar` y lo negaba el portal por su cuenta.
 EXIGE = frozenset({"centro_costo", "moneda"})
 
+# Con qué cuentas nace una empresa que lleva CONCAR. **Solo la del gasto**, y eso dice algo que hasta hoy no estaba
+# escrito en ninguna parte: las demás cuentas de lo general (`configuracion.CONFIGURACION_GENERAL`) —421201, 401111,
+# 121201, 701101, 424101, 401721, 421203— YA SON LAS DE CONCAR, el PCGE a seis dígitos. Repetirlas aquí sería el
+# mismo dato en dos sitios sin nadie que los compare, y el día que lo general mejorara, CONCAR se quedaría atrás.
+# Se declara lo que se aparta, que es la regla del contrato (`drivers/contrato.py`).
+#
+# `631101` la eligió John (22-sep-2026) como la cuenta con la que arranca una empresa suya. **Ponerla tiene una
+# consecuencia que conviene tener presente**: con una cuenta de gasto por defecto, el motor deja de contar como
+# `sin_cuenta` los comprobantes a los que nadie les puso una, así que un mes con compras sin cuenta sale «listo
+# para exportar» y esas filas se imputan aquí. Es lo que venía haciendo por su cuenta la aplicación que ya sembraba
+# un comodín, y quien integre el motor y prefiera que le avisen lo consigue poniendo `cuentas.gasto` en blanco en
+# su configuración: lo que la empresa guarda manda sobre esto.
+CUENTAS_POR_DEFECTO: dict = {"gasto": "631101"}
+
 # Lo que se configura en la sección `concar`: lo que el núcleo lee al armar el asiento, y lo propio de este formato.
 CONFIGURACION = (
     *CONFIGURACION_DEL_ASIENTO,

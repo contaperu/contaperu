@@ -7,10 +7,12 @@ el contrato (`xlsx.py`). Hasta la 0.10 la forma era `construir`, retirada en la 
 `contaperu.api.exportar_archivo`.
 """
 from . import datos, proyeccion
-from .datos import CANAL, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, EXIGE, FORMATOS, NOMBRE, OPCIONES
+from .datos import (CANAL, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, CUENTAS_POR_DEFECTO, EXIGE,
+                    FORMATOS, NOMBRE, OPCIONES)
 from .proyeccion import a_lineas, desde_fila, filas_de_comprobante, tasa_igv_entera
 from .xlsx import CorrelativoDesborda, desde_lineas, escribir_xlsx, nombre
 
-__all__ = ["CANAL", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES",
+__all__ = ["CANAL", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "CUENTAS_POR_DEFECTO", "EXIGE",
+           "FORMATOS", "NOMBRE", "OPCIONES",
            "CorrelativoDesborda", "a_lineas", "datos", "desde_fila", "desde_lineas", "escribir_xlsx",
            "filas_de_comprobante", "nombre", "proyeccion", "tasa_igv_entera"]

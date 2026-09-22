@@ -75,12 +75,16 @@ def test_los_avisos_no_bloquean_pero_se_ven():
     ({"centro_costo": ""}, "sin_centro", "sin centro de costo en una cuenta que lo lleva"),
 ])
 def test_cada_faltante_se_describe_sin_lanzar(cambio, clave, motivo):
-    d = diagnosticar(doc(dict(FACTURA, **cambio)), driver="concar")
+    # CONCAR trae cuenta de gasto desde la 2.5, así que una fila sin cuenta ya no falta: sale a la suya. Para
+    # probar que la falta se sigue viendo hay que decir que no hay cuenta de gasto, que es lo que hace quien
+    # prefiere que le avisen.
+    config = {"cuentas": {"gasto": ""}} if clave == "sin_cuenta" else None
+    d = diagnosticar(doc(dict(FACTURA, **cambio)), driver="concar", configuracion=config)
     assert d["listo_para_exportar"] is False and d["por_que_no"] == [f"1 {motivo}"]
     assert len(d["faltantes"][clave]) == 1
     # Y la exportación de verdad se niega por lo mismo: el diagnóstico no dice nada que ella no haga.
     with pytest.raises(Exception):
-        exportar(doc(dict(FACTURA, **cambio)), driver="concar")
+        exportar(doc(dict(FACTURA, **cambio)), driver="concar", configuracion=config)
 
 
 def test_el_centro_de_costo_lo_para_el_driver_desde_la_0_8():
@@ -158,10 +162,14 @@ def test_un_mes_vacio_no_esta_listo():
 
 def test_el_golden_de_compras_se_diagnostica_con_la_cuenta_del_ruc():
     datos = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
-    sin = diagnosticar(datos, driver="concar")
+    sin = diagnosticar(datos, driver="concar", configuracion={"cuentas": {"gasto": ""}, "usa_centros_costo": False})
     assert sin["listo_para_exportar"] is False and len(sin["faltantes"]["sin_cuenta"]) == 3
     con = diagnosticar(datos, driver="concar", configuracion={"cuentas": {"gasto": "659999"}, "usa_centros_costo": False})
     assert con["listo_para_exportar"] is True and len(con["saldrian"]) == 3
+    # Y sin decir nada de cuentas vale la que trae CONCAR (`datos.CUENTAS_POR_DEFECTO`): las tres salen igual, a
+    # la suya. Es el cambio de la 2.5, y es lo que hace que un mes sin cuentas escritas pase a «listo».
+    de_concar = diagnosticar(datos, driver="concar", configuracion={"usa_centros_costo": False})
+    assert de_concar["listo_para_exportar"] is True and len(de_concar["saldrian"]) == 3
 
 
 def test_solo_un_documento_que_no_es_documento_lanza():
@@ -188,7 +196,8 @@ def test_lo_que_falta_dice_a_quien_pedirselo():
     d = diagnosticar(doc(dict(FACTURA, igv="99", total="4299"),                    # el IGV no es el 18 %
                             dict(FACTURA, numero="872", cuenta_contable=""),
                             dict(FACTURA, numero="873", cuenta_contable=""),
-                            dict(FACTURA, tipo_cp="13", serie="", numero="77")), driver="concar")    # sin sigla
+                            dict(FACTURA, tipo_cp="13", serie="", numero="77")), driver="concar",    # sin sigla
+                        configuracion={"cuentas": {"gasto": ""}})    # sin cuenta de gasto, para que la falta se vea
     assert [(q["motivo"], q["comprobantes"], q["pedir_a"]) for q in d["que_falta"]] == [
         ("IGV_NO_CUADRA", ["E001-871"], "contador"),
         ("sin_sigla", ["77"], "sistema"),

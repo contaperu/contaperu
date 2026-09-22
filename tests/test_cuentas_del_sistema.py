@@ -53,10 +53,25 @@ def _documento() -> dict:
 
 
 def test_un_sistema_que_no_las_declara_sigue_con_las_del_pcge():
-    """Lo de siempre, y es la mitad que importa: esto no mueve a quien ya estaba."""
-    assert contrato.cuentas_por_defecto(drivers.obtener("concar")) == {}
+    """Lo de siempre, y es la mitad que importa: esto no mueve a quien ya estaba.
+
+    CONTASIS no declara ninguna, y por eso hereda lo general: el PCGE a seis dígitos, que es como numera."""
+    assert contrato.cuentas_por_defecto(drivers.obtener("contasis")) == {}
+    cuentas = api.config_aplicada(driver="contasis")["cuentas"]
+    assert (cuentas["cxp"]["PEN"], cuentas["igv"], cuentas["gasto"]) == ("421201", "401111", "")
+
+
+def test_concar_solo_se_aparta_de_lo_general_en_la_cuenta_de_gasto():
+    """Porque lo general YA es lo de CONCAR: el PCGE a seis dígitos salió de ahí y nunca se había dicho.
+
+    Repetir esas cuentas en su driver sería el mismo dato en dos sitios sin nadie que los compare, y el día que lo
+    general mejorara, CONCAR se quedaría atrás. Se declara lo que se aparta, y es una sola cosa."""
+    assert contrato.cuentas_por_defecto(drivers.obtener("concar")) == {"gasto": "631101"}
     cuentas = api.config_aplicada(driver="concar")["cuentas"]
-    assert (cuentas["cxp"]["PEN"], cuentas["igv"]) == ("421201", "401111")
+    assert (cuentas["cxp"]["PEN"], cuentas["igv"], cuentas["clientes"]["PEN"]) == ("421201", "401111", "121201")
+    assert cuentas["gasto"] == "631101"
+    # Y lo que el contador guarde manda: quien quiera que le sigan avisando de las compras sin cuenta, la deja vacía.
+    assert api.config_aplicada({"cuentas": {"gasto": ""}}, driver="concar")["cuentas"]["gasto"] == ''
 
 
 def test_las_del_sistema_llegan_cuando_la_empresa_no_configuro_nada(con_cuentas_propias):

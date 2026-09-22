@@ -31,6 +31,9 @@ def configuracion(config_contable: dict | None = None) -> dict:
 
 
 CONTAB = configuracion(None)
+# CONCAR trae su cuenta de gasto (`datos.CUENTAS_POR_DEFECTO`, 2.5), así que para probar que un comprobante SIN
+# cuenta se planta hay que decir que no hay ninguna — que es lo que hace quien prefiere que le avisen.
+SIN_GASTO = configuracion({"cuentas": {"gasto": ""}})
 # El centro también en la X de la línea del gasto, como referencia, además del doble anexo del tercero.
 REFERENCIA_EN_X = {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar", "anexo_auxiliar_del_tercero"]}}
 
@@ -250,11 +253,12 @@ def test_el_centro_solo_es_obligatorio_donde_se_escribe():
     # que se puede dejar en blanco no puede impedir exportar.
     ref = configuracion(REFERENCIA_EN_X)
     assert concar.comprobantes_sin_centro([cp(cuenta_contable="603201", centro_costo="")], ref) == []
-    # Ventas: sin el flag la cuenta se resolveria como gasto. Con `cuentas.gasto` vacío en los
-    # CONFIG_POR_DEFECTO eso da cuenta vacía → no bloquea; con el flag cae en 701101 → sí bloquea.
+    # Ventas: sin el flag la cuenta se resolveria como gasto. Con `cuentas.gasto` vacío eso da cuenta vacía → no
+    # bloquea; con el flag cae en 701101 → sí bloquea. Va con SIN_GASTO porque con la de CONCAR (631101) la cuenta
+    # ya no sale vacía y el caso que se quiere probar no existiría.
     vacio = cp(cuenta_contable="", centro_costo="")
-    assert concar.comprobantes_sin_centro([vacio], CONTAB) == []
-    assert [c.numero for c in concar.comprobantes_sin_centro([vacio], CONTAB, es_venta=True)] == ["00000123"]
+    assert concar.comprobantes_sin_centro([vacio], SIN_GASTO) == []
+    assert [c.numero for c in concar.comprobantes_sin_centro([vacio], SIN_GASTO, es_venta=True)] == ["00000123"]
 
 
 def test_factura_con_detraccion_va_al_sub_diario_10():
@@ -483,15 +487,23 @@ def test_la_configuracion_del_entorno_se_funde_con_los_valores_por_defecto():
 
 
 def test_cuenta_obligatoria_y_default_del_ruc():
+    # Sin ninguna cuenta de gasto no hay de dónde sacarla, y se planta: es el caso de quien la deja en blanco a
+    # propósito para que le avisen.
     with pytest.raises(concar.SinCuenta):
-        driver_concar.filas_de_comprobante(cp(cuenta_contable=""), CONTAB, MES, "080001")
+        driver_concar.filas_de_comprobante(cp(cuenta_contable=""), SIN_GASTO, MES, "080001")
+    # Con la que trae CONCAR, esa misma fila sale a su cuenta de gasto en vez de detener la exportación.
+    sale = driver_concar.filas_de_comprobante(cp(cuenta_contable=""), CONTAB, MES, "080001")
+    assert sale[0]["K"] == "631101"
     config = configuracion({"cuentas": {"gasto": "659901", "cxp": {"USD": "421203"}}})
     filas = driver_concar.filas_de_comprobante(cp(cuenta_contable="", moneda="USD"), config, MES, "080001")
     assert filas[0]["K"] == "659901" and filas[2]["K"] == "421203"
     assert config["cuentas"]["cxp"]["PEN"] == "421201" and config["cuentas"]["igv"] == "401111"   # lo no tocado se conserva
     assert config["cuentas"]["honorarios"] == {"PEN": "424101", "USD": "424102"}
-    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable=""), cp()], CONTAB)[0].numero == "00000123"
+    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable=""), cp()], SIN_GASTO)[0].numero == "00000123"
     assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], config) == []
+    # Y con la de CONCAR tampoco falta ninguna: es la consecuencia de que el sistema traiga cuenta de gasto —el
+    # mes sale «listo» y esas filas se imputan ahí—, y quien prefiera que le avisen deja la cuenta en blanco.
+    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], CONTAB) == []
     # El centro de costo, igual (06-sep-2026): obligatorio con los centros encendidos; nada si están apagados
     assert [c.numero for c in concar.comprobantes_sin_centro([cp(centro_costo=""), cp(centro_costo="  "), cp()], CONTAB)] == ["00000123", "00000123"]
     assert concar.comprobantes_sin_centro([cp(centro_costo="")], configuracion({"usa_centros_costo": False})) == []
@@ -560,7 +572,7 @@ def test_generar_con_plantilla_concar():
     expv = gen.generar(VENTAS, [cp()], "concar", config=CONTAB, correlativos={"05": 1})
     assert expv.nombre == "CONCAR_VENTAS_202608_20601111111.xlsx" and expv.resumen["sub_diarios"]["05"]["etiqueta"] == "Ventas"
     with pytest.raises(concar.SinCuenta):
-        gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", config=CONTAB, correlativos={"11": 1})
+        gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", config=SIN_GASTO, correlativos={"11": 1})
     with pytest.raises(concar.SinCodigoDeMoneda):
         gen.generar(COMPRAS, [cp(moneda="EUR")], "concar", config=CONTAB, correlativos={"11": 1})
 
