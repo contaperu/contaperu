@@ -72,11 +72,12 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict,
     if lineas and not indice:
         raise ValueError("STARSOFT escribe cada fila con la cabecera de su comprobante: necesita el `indice` "
                          "del asiento")
-    # STARSOFT no mira el reloj y el motor tampoco: la fecha de registro es la de cada comprobante, no la de hoy.
+    # Las DOS fechas salen de la linea, no del reloj ni de un parametro aparte: la del documento es la
+    # emision y la de registro es la del asiento, que el nucleo ya pone dentro del periodo. Hasta la 2.3
+    # se pasaba `cabecera.fecha_emision` como "fecha de registro" y las dos acababan cruzadas.
     filas: list[dict[str, Any]] = []
     for entrada in indice:
-        filas.extend(proyeccion.filas(entrada.cabecera, entrada.lineas(lineas), libro, config,
-                                      entrada.cabecera.fecha_emision))
+        filas.extend(proyeccion.filas(entrada.cabecera, entrada.lineas(lineas), libro, config))
     # `sub_diarios` NO se pone aquí: lo calcula el núcleo con sus rangos (`asiento.numerar_en_orden`) y lo
     # que devuelva el driver lo PISA (`pipeline/armado.py`). Hasta la 2.0 esto devolvía la lista de
     # sub-diarios presentes y borraba el diccionario de rangos, que es lo que un ERP guarda para proponer

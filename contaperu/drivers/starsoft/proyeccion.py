@@ -96,7 +96,7 @@ def voucher(correlativo: str) -> str:
     return sin_mes.zfill(LARGO_VOUCHER) if sin_mes.isdigit() else correlativo
 
 
-def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str,
+def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
          hay_detraccion: bool = False) -> dict[str, Any]:
     """Una línea neutral → una fila del archivo, con las claves del libro que toca (`datos.COLUMNAS`).
 
@@ -104,11 +104,11 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registr
     que aquí solo se reparte. La de ventas sale de las capturas de la hoja real; la de compras, del vídeo.
     """
     arma = _fila_venta if libro.tipo == "venta" else _fila_compra
-    todo = arma(ln, cab, libro, config, fecha_registro, hay_detraccion)
+    todo = arma(ln, cab, libro, config, hay_detraccion)
     return {cabecera: todo.get(cabecera, "") for _, cabecera, _ in datos.COLUMNAS[libro.tipo]}
 
 
-def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str,
+def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
                  hay_detraccion: bool = False) -> dict[str, Any]:
     """Las 38 columnas de la plantilla de compras, con sus nombres literales.
 
@@ -122,7 +122,7 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha
         "AÑO Y MES PROCESO": libro.periodo,
         "SUBDIARIO": ln.sub_diario,
         "COMPROBANTE": voucher(ln.correlativo),
-        "FECHA DOCUMENTO": ln.fecha,
+        "FECHA DOCUMENTO": doc.get("fecha_emision", "") or ln.fecha,
         "TIPO ANEXO": config.get("tipo_anexo_proveedor") or "",
         "CODIGO PROVEEDOR": cab.contraparte_doc,
         "TIPO DOCUMENTO": doc.get("tipo", ""),
@@ -132,7 +132,7 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha
         "TASA IGV": ln.tasa_igv if es_total else "",
         "IMPORTE": ln.importe,
         "CONV": config.get("tipo_conversion") or "",
-        "FECHA REGISTRO": fecha_registro,
+        "FECHA REGISTRO": ln.fecha,
         "TIPO CAMBIO": ln.tipo_cambio or "",
         # LA MISMA que la de movimiento (John, 21-sep-2026): las dos dicen el concepto del
         # comprobante. Hasta la 2.1 esta llevaba el documento —`FT F001-00000202 /`—, que es lo que
@@ -171,13 +171,10 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha
         # `0` = el IGV NO está pendiente de aplicación. Estuvo vacía mientras la única fuente era la narración
         # del vídeo; la captura de la hoja real la muestra con `0` en todas las filas y eso la cerró.
         "IGV POR APLICAR": datos.IGV_NO_PENDIENTE,
-        "NRO FILE": "",
-        "OTROS TRIBUTOS": "",
-        "IMP BOLSA": "",
     }
 
 
-def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_registro: str,
+def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
                 hay_detraccion: bool = False) -> dict[str, Any]:
     """Las 34 columnas de la plantilla de ventas, con sus nombres literales.
 
@@ -192,12 +189,11 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_
         "AÑO Y MES PROCESO": libro.periodo,
         "SUBDIARIO": ln.sub_diario,
         "COMPROBANTE": voucher(ln.correlativo),
-        "FECHA REGISTRO": fecha_registro,
+        "FECHA REGISTRO": ln.fecha,
         "TIPO ANEXO": config.get("tipo_anexo_cliente") or "",
         "CODIGO CLIENTE": cab.contraparte_doc,
         "TIPO DOCUMENTO": doc.get("tipo", ""),
         "NRO DOCUMENTO": numero_del_documento(cab),
-        "NRO DOC FINAL": cab.numero_final,
         "FECHA EMISION": doc.get("fecha_emision", ""),
         "DOC REFERENCIA": ref.get("tipo", ""),
         "NRO DOC REF": ref.get("serie_numero", ""),
@@ -222,22 +218,16 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict, fecha_
         "EXPORTACION": "1" if not _es_cero(cab.exportacion) else "0",
         # Declaradas y vacías: existen en la plantilla y no consta cómo se llenan. En la captura de John van en
         # blanco incluso en la venta EXONERADA, que es el caso donde más se esperaría un número.
-        "VALOR ISC": "",
-        "OTROS TRIB": "",
-        "NRO FILE": "",
-        "EXONERADO": "",
-        "OTROS CARGOS": "",
-        "IMP BOLSA": "",
     }
 
 
-def filas(cab: Cabecera, lineas: list[LineaDiario], libro: Any, config: dict, fecha_registro: str) -> list[dict]:
+def filas(cab: Cabecera, lineas: list[LineaDiario], libro: Any, config: dict) -> list[dict]:
     """Las líneas de UN comprobante → sus filas.
 
     La bandera `DETRACCION` es del COMPROBANTE y no de la línea —va en las tres o cuatro filas, no solo en la
     suya—, así que se mira aquí, que es donde se ven todas, y no dentro de `fila()`."""
     hay_detraccion = any(ln.rol == "detraccion" for ln in lineas)
-    return [fila(ln, cab, libro, config, fecha_registro, hay_detraccion) for ln in lineas]
+    return [fila(ln, cab, libro, config, hay_detraccion) for ln in lineas]
 
 
 def no_caben(libro: Any, comprobantes: list, config: dict) -> dict[str, list]:

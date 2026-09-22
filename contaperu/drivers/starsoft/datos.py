@@ -115,17 +115,27 @@ CONFIGURACION = (
 
 # --- la plantilla -------------------------------------------------------------------
 
-# Las columnas, leídas de la captura de la hoja `PLANTILLA` de compras. Las letras cuadran desde la M, que en la
-# captura está seleccionada con el IGV de la segunda línea (`M3 = 167.3`).
+# ── Las columnas ────────────────────────────────────────────────────────────────────────────────────
 #
-# ⚠️ **De la A a la E están INFERIDAS**, no leídas: quedan fuera de cuadro en la captura y salen de la narración,
-# que las nombra primero y en ese orden («las cuentas contables, el periodo tributario, el subdiario, el voucher
-# o comprobante, la fecha», compras 12:51). Encajan justo en el hueco, pero **hasta que una plantilla oficial lo
-# confirme, el orden de esas cinco es una hipótesis**, no un hecho.
-# Las 38 columnas de la hoja `PLANTILLA` de compras, **leídas del archivo**: cuatro capturas de la hoja
-# abierta en Excel con datos dentro (John, 21-sep-2026), como las de ventas. Corrigieron el mapa que se
-# había levantado del vídeo: faltaban las CUATRO columnas de la detracción que van juntas —`DETRACCION`,
-# `NRO DOC DETRACCION`, `FECHA DETRACCION`— y `FECHA DOC REF`, así que desde la `X` todo estaba corrido.
+# **LA FUENTE CAMBIÓ EL 22-sep-2026.** Hasta entonces estas dos tablas se calcaron de capturas de la hoja
+# `PLANTILLA` de Excel y de la narración de dos vídeos. Ahora existe la documentación de STARSOFT
+# —`CONT_COMPRAS` y `CONT_VENTAS`, «Sistema de Contabilidad · Documentación»—, con la tabla de campos
+# (longitud, obligatoriedad, formato y condiciones) y **ejemplos de TXT sacados del propio sistema**.
+# Los PDF no están en el repositorio —son de otra empresa y esto es público—: lo que dicen está volcado
+# en `STARSOFT-INTEGRACION.md`.
+#
+# **Y trajeron la regla que la plantilla de Excel escondía: el número del ítem en el manual NO es su
+# posición en la línea.** Varias columnas dependen de un «concepto general» de cada instalación, y el
+# manual dice literal: «Para las columnas que se habilitan con un concepto general: si el concepto está
+# en falso, no incluir la columna». O sea que no ocupan sitio. La hoja de Excel las tiene todas —por eso
+# las capturas las mostraban— pero el TXT no.
+#
+# Escribiéndolas salían **38 campos en compras y 34 en ventas**; los ejemplos oficiales traen **35 y 27**,
+# que es lo que hay aquí. Las condicionales quedan listadas abajo, con el concepto del que depende cada
+# una: no se inventan, se sabe que existen y por qué no se escriben.
+#
+# Para un TXT la LETRA es la posición en la línea (A = campo 1), no la columna de una hoja de cálculo.
+
 COMPRAS = (
     ("A", "CTA CONTABLE", "texto"),
     ("B", "AÑO Y MES PROCESO", "texto"),
@@ -162,22 +172,19 @@ COMPRAS = (
     ("AG", "DEBE / HABER", "texto"),
     ("AH", "TASA DETRACCION", "numero"),
     ("AI", "IMPORTE DETRACCION", "importe"),
-    ("AJ", "NRO FILE", "texto"),
-    ("AK", "OTROS TRIBUTOS", "importe"),
-    ("AL", "IMP BOLSA", "importe"),
 )
 
-# Ventas no comparte juego de columnas con compras: lleva el RUC y la razón social del cliente donde compras lleva
-# el código del proveedor y el tipo de anexo, y no lleva DESTINO —que es del crédito fiscal de una adquisición—.
-# Leídas de la cabecera en pantalla del vídeo de ventas (11:46) y de la narración que las recorre (12:24-13:07).
-# Las 34 columnas de la hoja `PLANTILLA` de ventas, **leídas del archivo** y no de la narración del vídeo:
-# cuatro capturas de la hoja abierta en Excel con datos dentro (John, 21-sep-2026). Es la fuente más
-# fuerte que tiene este driver, y corrigió el mapa entero: faltaban `TIPO ANEXO` y `CODIGO CLIENTE`, y
-# desde la `G` todo estaba corrido una posición.
+# Las que el manual llama condicionales y NO se escriben (ver `CONDICIONALES` abajo): en compras son los
+# items 36 `NRO. DE FILE`, 37 `OTROS TRIBUTOS`, 38 `IMP. A LA BOLSA DE PLASTICO` y 39 `TIPO OPERACION DE
+# DETRACCION`. Hasta la 2.3 las tres primeras se escribian siempre, y por eso la linea salia con 38 campos
+# donde el sistema espera 35.
+
+# Ventas no comparte juego de columnas con compras: lleva el RUC y la razón social del cliente donde compras
+# lleva el código del proveedor, y no lleva DESTINO —que es del crédito fiscal de una adquisición—. Y coloca
+# las dos fechas AL REVÉS: aquí el campo 5 es la de registro y el 11 la de emisión; en compras, al contrario.
 #
-# Los nombres son los de la plantilla, literales, aunque no coincidan con los de compras (`CTA CONTABLE`
-# aquí y `CUENTA` allá): son dos plantillas distintas y cada una se calca de SU fuente. La de compras
-# sigue levantada del vídeo y espera su propia captura.
+# 27 campos, los de los ejemplos del manual. Fuera quedan siete condicionales (ver `CONDICIONALES`).
+
 VENTAS = (
     ("A", "CTA CONTABLE", "texto"),
     ("B", "AÑO Y MES PROCESO", "texto"),
@@ -188,38 +195,55 @@ VENTAS = (
     ("G", "CODIGO CLIENTE", "texto"),
     ("H", "TIPO DOCUMENTO", "texto"),
     ("I", "NRO DOCUMENTO", "texto"),
-    ("J", "NRO DOC FINAL", "texto"),
-    ("K", "FECHA EMISION", "fecha"),
-    ("L", "DOC REFERENCIA", "texto"),
-    ("M", "NRO DOC REF", "texto"),
-    ("N", "IGV", "importe"),
-    ("O", "VALOR ISC", "importe"),
-    ("P", "OTROS TRIB", "importe"),
-    ("Q", "TASA IGV", "numero"),
-    ("R", "IMPORTE", "importe"),
-    ("S", "CONV", "texto"),
-    ("T", "TIPO CAMBIO", "numero"),
-    ("U", "GLOSA", "texto"),
-    ("V", "GLOSA MOVIMIENTO", "texto"),
-    ("W", "DOCUMENTO ANULADO", "texto"),
-    ("X", "DEBE / HABER", "texto"),
-    ("Y", "RUC CLIENTE", "texto"),
-    ("Z", "RAZON SOCIAL", "texto"),
-    ("AA", "CENTRO DE COSTOS", "texto"),
-    ("AB", "FECHA VENCIMIENTO", "fecha"),
-    ("AC", "FECHA DOC REFERENCIA", "fecha"),
-    ("AD", "EXPORTACION", "texto"),
-    ("AE", "NRO FILE", "texto"),
-    ("AF", "EXONERADO", "importe"),
-    ("AG", "OTROS CARGOS", "importe"),
-    ("AH", "IMP BOLSA", "importe"),
+    ("J", "FECHA EMISION", "fecha"),
+    ("K", "DOC REFERENCIA", "texto"),
+    ("L", "NRO DOC REF", "texto"),
+    ("M", "IGV", "importe"),
+    ("N", "TASA IGV", "numero"),
+    ("O", "IMPORTE", "importe"),
+    ("P", "CONV", "texto"),
+    ("Q", "TIPO CAMBIO", "numero"),
+    ("R", "GLOSA", "texto"),
+    ("S", "GLOSA MOVIMIENTO", "texto"),
+    ("T", "DOCUMENTO ANULADO", "texto"),
+    ("U", "DEBE / HABER", "texto"),
+    ("V", "RUC CLIENTE", "texto"),
+    ("W", "RAZON SOCIAL", "texto"),
+    ("X", "CENTRO DE COSTOS", "texto"),
+    ("Y", "FECHA VENCIMIENTO", "fecha"),
+    ("Z", "FECHA DOC REFERENCIA", "fecha"),
+    ("AA", "EXPORTACION", "texto"),
 )
+
+# Las columnas que el manual declara pero que NO se escriben, con el concepto general del que depende cada
+# una. Se listan para que consten: si una instalación las tiene en verdadero, su archivo lleva esas columnas
+# de más y este driver no las pone. El día que haga falta, se sabe cuáles son y en qué posición van.
+#
+# «Para las columnas que se habilitan con un concepto general: si el concepto está en falso, no incluir la
+# columna» (CONT_COMPRAS y CONT_VENTAS, «Datos generales»).
+CONDICIONALES = {
+    "compra": (
+        (36, "NRO. DE FILE", "PERS_SETOURS"),
+        (37, "OTROS TRIBUTOS", "DATOS_ADIC_COM_TXT"),
+        (38, "IMP. A LA BOLSA DE PLASTICO", "el check de impuesto a la bolsa"),
+        (39, "TIPO OPERACION DE DETRACCION", "IMPDX_TIPOPE_DETRAC"),
+    ),
+    "venta": (
+        (10, "NUM. DE DOC. FINAL", "DATOS_ADIC_VTAS_TXT"),
+        (15, "VALOR ISC", "MIGRA_ISC_TXT"),
+        (16, "OTROS TRIBUTOS", "DATOS_ADIC_VTAS_TXT"),
+        (31, "NRO. DE FILE", "PERS_SETOURS"),
+        (32, "EXONERADO", "EXONERADO_TXT"),
+        (33, "OTROS CARGOS", "OTROS_CARGOS_VTA"),
+        (34, "IMP. A LA BOLSA DE PLASTICO", "el check de impuesto a la bolsa"),
+    ),
+}
 
 COLUMNAS = {"compra": COMPRAS, "venta": VENTAS}
 
 # La columna del centro de costo, para que el contribuyente elija dónde va (`COLUMNAS_ELEGIBLES` del contrato).
 COLUMNAS_ELEGIBLES = {"centro_costo": (
-    Columna("centro_costo", "CENTRO DE COSTOS", {"compra": "W", "venta": "AA"}, fija=True,
+    Columna("centro_costo", "CENTRO DE COSTOS", {"compra": "W", "venta": "X"}, fija=True,
             ayuda="En la línea del gasto o del ingreso, cuando su cuenta lleva centro de costo.",
             rol="principal", campo="centro_costo"),
 )}

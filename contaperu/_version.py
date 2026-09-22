@@ -15,7 +15,7 @@ como apareció el `0.1.0` de arriba.
 """
 from __future__ import annotations
 
-__version__ = "2.3.0"
+__version__ = "2.4.0"
 
 # La versión del ESTÁNDAR de datos, que es otro reloj: `open-accounting` es el formato que se publica para
 # que otros lo usen y cambia poquísimo, mientras la librería cambia cada vez que se corrige un

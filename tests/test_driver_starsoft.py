@@ -346,3 +346,56 @@ def test_una_compra_con_detraccion_no_se_va_a_un_sub_diario_que_starsoft_no_tien
     filas = _filas(doc, config={"usa_centros_costo": False},
                    imputacion={"fila-1": {"cuenta_contable": "63110000"}})
     assert {f["SUBDIARIO"] for f in filas} == {"04"}
+
+
+# ── Contra el manual oficial (22-sep-2026) ───────────────────────────────────────────────
+#
+# Hasta hoy este driver se calcó de CAPTURAS de la hoja PLANTILLA de Excel. John consiguió la
+# documentación de STARSOFT —`CONT_COMPRAS` y `CONT_VENTAS`, con la tabla de campos y ejemplos de TXT
+# sacados del propio sistema— y esos ejemplos desmintieron tres cosas. Lo que sigue las fija.
+#
+# La regla que lo explica todo, y que la plantilla de Excel escondía: **el número del ítem en el manual
+# NO es su posición en la línea**. Las columnas que dependen de un «concepto general» de cada
+# instalación no se escriben, y por tanto no ocupan sitio. Escribiéndolas, la línea salía con tres
+# campos de más en compras y siete de más en ventas.
+
+def test_la_linea_tiene_los_campos_del_ejemplo_oficial():
+    """35 en compras y 27 en ventas, contados en los ejemplos del manual.
+
+    Antes salían 38 y 34: se escribían las condicionales (compras `NRO FILE`, `OTROS TRIBUTOS` e
+    `IMP BOLSA`; ventas esas y además `NUM DOC FINAL`, `VALOR ISC`, `OTROS TRIB` y `EXONERADO`), y el
+    manual dice literal: «si el concepto está en falso, no incluir la columna».
+    """
+    assert len(_texto(_exportar(_compra())).split("\r\n")[0].split("|")) == 35
+    assert len(_texto(_exportar(_venta())).split("\r\n")[0].split("|")) == 27
+
+
+def test_la_fecha_del_documento_es_la_emision_y_la_de_registro_la_del_periodo():
+    """Las dos reglas del manual, que solo se ven cuando el comprobante es EXTEMPORÁNEO.
+
+    Campo 5 de compras (`FECHA DEL DOCUMENTO`): «menor o igual al campo 15 (fecha de Registro) y debe
+    corresponder al periodo». Campo 15 (`FECHA DE REGISTRO`): «debe corresponder al periodo informado».
+    Hasta la 2.3 se escribían al revés —la del asiento en la del documento y la emisión en la de
+    registro—, así que una factura de julio anotada en agosto rompía las dos a la vez: el 5 salía
+    mayor que el 15 y el 15 no era del periodo. Con el comprobante dentro de su mes no se notaba.
+    """
+    doc = _compra(fecha_emision="2025-06-20", fecha_vencimiento="2025-07-20")   # junio, anotado en julio
+    fila = _filas(doc)[0]
+    assert fila["FECHA DOCUMENTO"] == "20/06/2025", "la del documento es la EMISIÓN"
+    assert fila["FECHA REGISTRO"] == "01/07/2025", "la de registro cae dentro del periodo 202507"
+
+    # En ventas el manual las coloca al revés: el campo 5 es la de registro y la emisión es el 11.
+    venta = _filas(_venta(fecha_emision="2025-06-20", fecha_vencimiento="2025-07-20"))[0]
+    assert venta["FECHA REGISTRO"] == "01/07/2025" and venta["FECHA EMISION"] == "20/06/2025"
+
+
+def test_el_tipo_de_conversion_va_en_TODAS_las_lineas():
+    """Y no solo en la del tercero, aunque lo parezca.
+
+    Es la observación que John retiró: los ejemplos oficiales traen `VTA` en las tres líneas —la del
+    gasto, la del IGV y la del proveedor— y el manual de compras lo da por obligatorio sin distinguir
+    por cuenta. En ventas añade «en las demás cuentas puede estar en blanco», o sea que rellenarlo
+    también vale. Sin este test, la duda volvería.
+    """
+    for filas in (_filas(_compra()), _filas(_venta())):
+        assert [f["CONV"] for f in filas] == ["VTA"] * len(filas)

@@ -23,12 +23,22 @@ no `desde_comprobantes`, como CONTASIS. El asiento lo arma el núcleo; aquí sol
 Esa última columna es la que hizo falta ampliar la cabecera del índice en la 1.4.0: el dato existía en el
 estándar (`destino_igv`) y no llegaba a un driver de asientos.
 
-**Estado: EN PRUEBAS.** El formato se levantó el 20-sep-2026 de dos vídeos y sus capturas
-(`STARSOFT-INTEGRACION.md`), no de una plantilla oficial. Lo que no consta está marcado `[por confirmar]` en el
-código, y la mitad de la tabla de siglas está vacía a propósito: un tipo sin equivalente detiene la exportación
-en vez de inventarse uno. **Nadie ha importado todavía en STARSOFT un archivo generado por este driver.** El día que un
-contribuyente lo importe de verdad, este docstring gana su línea de «Aceptado (fecha)», como la tiene
-CONTASIS.
+**Estado: EN PRUEBAS, con la documentación oficial en la mano desde el 22-sep-2026.** El formato se
+levantó el 20-sep-2026 de dos vídeos y sus capturas, y se recalcó el 22 contra la documentación de STARSOFT
+—`CONT_COMPRAS` y `CONT_VENTAS`, con la tabla de campos y ejemplos de TXT del propio sistema—, que corrigió
+tres cosas de golpe: **la línea lleva 35 campos en compras y 27 en ventas** (se escribían las columnas que
+dependen de un «concepto general» de cada instalación, que el manual manda no incluir), y **las dos fechas
+estaban cruzadas** — la del documento es la emisión y la de registro cae dentro del periodo, que solo se
+nota cuando el comprobante es extemporáneo. Todo en `STARSOFT-INTEGRACION.md`; los PDF no están en el
+repositorio porque son de otra empresa y esto es público.
+
+Lo que sigue sin constar está marcado `[por confirmar]`, y la tabla de siglas depende de cada instalación
+—el manual dice «el tipo de comprobante que tiene registrado en su sistema externo»—: un tipo sin
+equivalente detiene la exportación en vez de inventarse uno.
+
+**Un archivo de este driver ya entró en STARSOFT** (John, 22-sep-2026), y eso es lo que destapó las tres
+correcciones de arriba. Lo que falta para la línea de «Aceptado (fecha)» que tiene CONTASIS es que entre
+uno **ya corregido**: el que importó llevaba los 38 campos y las fechas al revés.
 
 **Lo que escribe es el TXT de palotes envuelto en un ZIP** (2.3), que es una de las dos vías de carga de
 STARSOFT; la otra es su plantilla de Excel. Hasta la 2.2 escribía un CSV, provisional, para poder

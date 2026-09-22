@@ -6,6 +6,49 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.4.0] — 2026-09-22
+
+**Las huellas NO cambian.** Esto toca la proyección de STARSOFT a columnas, no el asiento: ni un fixture de
+snapshot ni el de líneas neutrales se movió.
+
+**STARSOFT se recalca de su documentación oficial.** Hasta hoy el driver se levantó de dos vídeos y de cuatro
+capturas de la hoja `PLANTILLA` de Excel. John consiguió la documentación de STARSOFT —«Sistema de Contabilidad ·
+Documentación», compras y ventas, con la tabla de campos y **ejemplos de TXT sacados del propio sistema**— y la
+importó de verdad: el archivo entró, y al compararlo con los ejemplos aparecieron dos errores que la hoja de
+Excel escondía. Lo que dice el manual está volcado en `STARSOFT-INTEGRACION.md`, campo a campo; los PDF no
+entran al repositorio, que es público y son de otra empresa.
+
+### Corregido
+
+- ⚠️ **La línea llevaba campos de más: 38 en compras y 34 en ventas, cuando son 35 y 27.** La regla que la
+  plantilla de Excel escondía es que **el número del ítem en el manual no es su posición en la línea**: varias
+  columnas dependen de un «concepto general» de cada instalación y, dice literal, «si el concepto está en falso,
+  **no incluir la columna**» — así que no ocupan sitio. La hoja las tiene todas; el archivo, no. Quedan
+  declaradas en `datos.CONDICIONALES`, con el concepto del que depende cada una, para que conste que existen y
+  por qué no se escriben. En compras salían de más `NRO FILE`, `OTROS TRIBUTOS` e `IMP BOLSA`; en ventas esas
+  tres y además `NUM DOC FINAL`, `VALOR ISC`, `OTROS TRIB` y `EXONERADO`.
+- ⚠️ **Las dos fechas estaban cruzadas, y solo se notaba con un comprobante extemporáneo.** El manual pide que
+  la del DOCUMENTO sea la emisión y que la de REGISTRO caiga dentro del periodo; el driver escribía la del
+  asiento en la primera y la emisión en la segunda. Con una factura de julio anotada en agosto rompía las dos
+  reglas a la vez: la del documento salía **mayor** que la de registro, y la de registro **no era del periodo**.
+  Dentro de su propio mes las dos coinciden, y por eso ningún ejemplo lo delataba. En ventas van en posiciones
+  cambiadas respecto a compras (5 registro, 11 emisión) y también se corrige.
+- El centro de costo de ventas se mueve de la columna `AA` a la `X`, que es su posición real ahora.
+
+### Añadido
+
+- Tres pruebas contra el manual: el número de campos de cada libro, las dos fechas con un comprobante
+  extemporáneo, y que **el tipo de conversión (`VTA`) va en TODAS las líneas** y no solo en la del tercero —
+  los ejemplos oficiales lo traen en las tres y el manual de compras lo da por obligatorio sin distinguir por
+  cuenta. Era una duda razonable; sin prueba, volvería.
+
+### Cómo migrar
+
+Nada que tocar en quien integre el motor: la API pública no cambia. Lo que cambia es **el archivo**, y en la
+dirección correcta — si alguien guardaba archivos de STARSOFT generados antes, los nuevos tienen menos campos y
+las fechas en su sitio. Los tres fixtures de caracterización se regeneraron: su diff es exactamente `|D|||||` →
+`|D||` en compras y el recorte equivalente en ventas.
+
 ## [2.3.0] — 2026-09-22
 
 **Las huellas NO cambian.** Esto toca cómo se escriben los bytes, no el asiento, y la batería lo confirma sin

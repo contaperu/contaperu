@@ -11,10 +11,145 @@
 > - **[C] Compras** — «Importar asientos contables de compras al Star Soft», 22:25 · `youtube.com/watch?v=1HMTMsuQJAA`
 > - **[V] Ventas** — «Importar asientos de ventas al Star Soft», 20:16 · `youtube.com/watch?v=iOq8Zh6avj8`
 >
-> **Nada de aquí entra en el motor todavía**: falta la plantilla real y un archivo que STARSOFT haya
-> aceptado, que es la regla del repositorio para cualquier driver (`CONTRIBUTING.md`).
+> **Desde el 22-sep-2026 la fuente es otra**, y está en la sección de abajo: la documentación de
+> STARSOFT, con la tabla de campos y ejemplos de TXT del propio sistema. Lo de los vídeos y las capturas
+> se conserva porque explica de dónde salió cada decisión, pero **donde se contradigan, manda el
+> manual**. Y ya hay un archivo de este driver importado en STARSOFT (John, 22-sep-2026) — el que
+> destapó las tres correcciones.
 >
 > Lo observado va con su minuto. Lo que sigue sin confirmar, **[por confirmar]**.
+
+## La documentación oficial (22-sep-2026) — **la fuente**
+
+Hasta hoy este documento recogía lo observado en dos vídeos y en capturas de la hoja `PLANTILLA` de
+Excel. **Ahora hay documentación de STARSOFT**: «Sistema de Contabilidad · Documentación», en dos
+archivos —`CONT_COMPRAS` y `CONT_VENTAS`— con la tabla de campos y, sobre todo, **ejemplos de TXT
+sacados del propio sistema** (18 líneas en compras, 12 en ventas).
+
+**Los PDF no están en el repositorio** —son de otra empresa y esto es público y MIT—: están en el
+`.gitignore`, y lo que entra es lo que dicen, que es esta sección.
+
+### La regla que la hoja de Excel escondía
+
+**El número del ítem en el manual NO es su posición en la línea del TXT.** Varias columnas dependen de
+un «concepto general» de cada instalación, y el manual dice, literal:
+
+> Para las columnas que se habilitan con un concepto general: si el concepto esta en falso, **no
+> incluir la columna**.
+
+O sea que no ocupan sitio. La hoja de Excel las tiene todas —por eso las capturas las mostraban— pero
+el archivo no. De ahí que el driver escribiera **38 campos en compras y 34 en ventas** cuando los
+ejemplos oficiales traen **35 y 27**. Van marcadas abajo.
+
+Lo demás que dicen los «Datos generales»: separador `|`, **un enter al final de la última fila**,
+codificación ANSI, **sin ningún TAB**, todo alineado a la izquierda, solo punto decimal, y el nombre
+del archivo empieza por `C` en compras.
+
+### Compras — 39 ítems, 35 escritos
+
+| # | Campo | Long. | Oblig. | Qué dice el manual |
+|---|---|---|---|---|
+| 1 | **CUENTA CONTABLE** | Hasta 18 | Si | A ultimo nivel. Ejemplos del manual: 42120001, 40111000, 62010001 |
+| 2 | **ANO Y MES DE PROCESO** | 6 | Si | AAAAMM. Todos los registros, del mismo periodo |
+| 3 | **SUBDIARIO** | Hasta 2 | Si | Del mantenimiento de Subdiarios de Contabilidad |
+| 4 | **COMPROBANTE** | 4 | Si | Correlativo de 4 digitos, **rellenando con ceros a la izquierda** |
+| 5 | **FECHA DEL DOCUMENTO** | Hasta 10 | Si | **Menor o igual al campo 15 y debe corresponder al periodo** |
+| 6 | **TIPO DE ANEXO** | Hasta 2 | No | Obligatorio si la cuenta tiene Tipo de Anexo. Proveedores: 03 |
+| 7 | **CODIGO DEL PROVEEDOR** | Hasta 11 | No | Obligatorio si la cuenta tiene Tipo de Anexo y el anexo existe |
+| 8 | **TIPO DE DOCUMENTO** | Hasta 2 | Si | **El que tiene registrado TU sistema** (FT, BV, NC...) |
+| 9 | **SERIE Y NUMERO DEL DOCUMENTO** | Hasta 21 | Si | Los 4 primeros son la serie; si es de 3, un espacio en blanco y el numero desde la quinta |
+| 10 | **FECHA DE VENCIMIENTO** | Hasta 10 | No | Si viene, mayor o igual al campo 5 |
+| 11 | **IGV** | Hasta 18,2 | Si | **Solo si el campo 1 es una cuenta de Proveedores** |
+| 12 | **TASA IGV** | Hasta 10,2 | Si | Valor fijo del IGV vigente (18) |
+| 13 | **IMPORTE TOTAL DEL DOCUMENTO** | Hasta 18,2 | Si | En la cuenta de Proveedores, el total; en las demas, el importe de la cuenta |
+| 14 | **TIPO DE CONVERSION DEL TIPO DE CAMBIO** | 3 | Si | **Puede ser VTA o ESP.** Sin distinguir por cuenta |
+| 15 | **FECHA DE REGISTRO** | Hasta 10 | Si | **Debe corresponder al periodo informado** |
+| 16 | **TIPO DE CAMBIO** | Hasta 10,3 | Si | Obligatorio si el campo 14 es ESP |
+| 17 | **GLOSA** | Hasta 60 | No | **Hasta 60 caracteres** |
+| 18 | **TIPO DE DESTINO DE LA COMPRA** | 3 | Si | 001 gravada . 002 mixta . 003 no gravada . 004 no gravadas . 005 importacion |
+| 19 | **PORCENTAJE PARA OPERACIONES MIXTAS** | Hasta 18,2 | No | Solo con destino 002 |
+| 20 | **VALOR CIF** | Hasta 18,2 | No | Solo con destino 005 |
+| 21 | **TIPO DE DOCUMENTO DE REFERENCIA** | Hasta 2 | No | Obligatorio si el campo 8 es nota de credito o debito |
+| 22 | **SERIE Y NUMERO DEL DOC. DE REFERENCIA** | Hasta 21 | No | Misma regla de serie que el campo 9 |
+| 23 | **CENTRO DE COSTO** | Hasta 10 | No | Obligatorio si la cuenta lo tiene configurado |
+| 24 | **AFECTO A DETRACCION** | 1 | No | 1 si lo es; si no, 0 o en blanco |
+| 25 | **NUMERO DE DETRACCION** | Hasta 17 | No | Solo si esta afecto a detraccion |
+| 26 | **FECHA DE DETRACCION** | Hasta 10 | No | Solo si esta afecto a detraccion |
+| 27 | **FECHA DEL DOC. DE REFERENCIA** | Hasta 10 | No | Obligatorio si el campo 8 es nota de credito o debito |
+| 28 | **GLOSA DEL MOVIMIENTO** | Hasta 60 | No |  |
+| 29 | **DOC. ANULADO** | 1 | Si | Poner 0 o dejarlo en blanco |
+| 30 | **IGV POR APLICAR** | 1 | No | 0 o 1 |
+| 31 | **CODIGO DE LA DETRACCION** | 5 | No | Solo si esta afecto a detraccion |
+| 32 | **IMPORTACION** | 1 | No | 0 o 1 |
+| 33 | **DEBE O HABER** | 1 | Si | D o H |
+| 34 | **TASA DE DETRACCION** | Hasta 18,2 | No | Solo si esta afecto a detraccion |
+| 35 | **IMPORTE DE DETRACCION** | Hasta 18,2 | No | Solo si esta afecto a detraccion |
+| 36 | **NRO. DE FILE** · **no se escribe** | Hasta 12 | No | solo si el concepto general `PERS_SETOURS` es verdadero |
+| 37 | **OTROS TRIBUTOS** · **no se escribe** | Hasta 18,2 | No | solo si `DATOS_ADIC_COM_TXT` es verdadero |
+| 38 | **IMP. A LA BOLSA DE PLASTICO** · **no se escribe** | Hasta 18,2 | No | solo con el check de impuesto a la bolsa. Y solo en la fila de la cuenta de proveedores (42) |
+| 39 | **TIPO OPERACION DE DETRACCION** · **no se escribe** | 2 | No | solo si `IMPDX_TIPOPE_DETRAC` es verdadero |
+
+### Ventas — 34 ítems, 27 escritos
+
+| # | Campo | Long. | Oblig. | Qué dice el manual |
+|---|---|---|---|---|
+| 1 | **CUENTA CONTABLE** | Hasta 18 | Si | A ultimo nivel. Ejemplos del manual: 12120001, 40111000, 70410001 |
+| 2 | **ANO Y MES PROCESO** | 6 | Si | AAAAMM |
+| 3 | **SUBDIARIO** | Hasta 2 | Si |  |
+| 4 | **COMPROBANTE** | 4 | Si | Correlativo de 4 digitos con ceros a la izquierda |
+| 5 | **FECHA DE REGISTRO** | Hasta 10 | Si | **Debe corresponder al periodo informado** |
+| 6 | **TIPO ANEXO** | Hasta 2 | No | Clientes: 02 |
+| 7 | **CODIGO CLIENTE** | Hasta 11 | No |  |
+| 8 | **TIPO DE DOCUMENTO** | Hasta 2 | Si | El que tiene registrado TU sistema |
+| 9 | **NUMERO DE DOCUMENTO** | Hasta 21 | Si | 4 primeros la serie; si tiene 3, un espacio; **sin serie, cuatro espacios** |
+| 10 | **NUM. DE DOC. FINAL** · **no se escribe** | Hasta 21 | No | solo si `DATOS_ADIC_VTAS_TXT` es verdadero. Para BV (03), TK (12) y codigo SUNAT 99 |
+| 11 | **FECHA DE EMISION DEL DOCUMENTO** | Hasta 10 | Si | **Menor o igual al campo 5 y debe corresponder al periodo** |
+| 12 | **DOCUMENTO DE REFERENCIA** | Hasta 2 | No | Obligatorio en nota de credito o debito |
+| 13 | **NUMERO DE DOC. DE REFERENCIA** | Hasta 21 | No |  |
+| 14 | **IGV** | Hasta 18,2 | Si | **Solo si el campo 1 es una cuenta de Clientes (12)**; en las demas, en blanco |
+| 15 | **VALOR ISC** · **no se escribe** | Hasta 18,2 | No | solo si `MIGRA_ISC_TXT` es verdadero |
+| 16 | **OTROS TRIBUTOS** · **no se escribe** | Hasta 18,2 | No | solo si `DATOS_ADIC_VTAS_TXT` es verdadero |
+| 17 | **TASA DEL IGV** | Hasta 10,2 | Si | Solo en la cuenta de Clientes; valor fijo (18) |
+| 18 | **IMPORTE** | Hasta 18,2 | Si | En Clientes, el total del documento; en las demas, el de la cuenta |
+| 19 | **CONVERSION DE TIPO DE CAMBIO** | 3 | Si | VTA o ESP. En las demas cuentas **puede** estar en blanco |
+| 20 | **TIPO DE CAMBIO** | Hasta 10,3 | Si | Obligatorio si el campo 19 es ESP |
+| 21 | **GLOSA** | Hasta 60 | No | Hasta 60 caracteres |
+| 22 | **GLOSA DE MOVIMIENTO** | Hasta 60 | No |  |
+| 23 | **DOCUMENTO ANULADO** | 1 | Si | 0 no anulado . 1 anulado |
+| 24 | **DEBE / HABER** | 1 | Si | D o H |
+| 25 | **RUC DEL CLIENTE** | 11 | No | Solo si el campo 1 es una cuenta de Clientes |
+| 26 | **RAZON SOCIAL DEL CLIENTE** | Hasta 50 | No | Idem |
+| 27 | **CENTRO DE COSTO** | Hasta 10 | No | Si la cuenta lo tiene configurado |
+| 28 | **FECHA DE VENCIMIENTO** | Hasta 10 | No | Si viene, mayor o igual al campo 11 |
+| 29 | **FECHA DEL DOC. REFERENCIA** | Hasta 10 | No |  |
+| 30 | **EXPORTACION** | 1 | Si | 0 local . 1 exportacion |
+| 31 | **NRO. DE FILE** · **no se escribe** | Hasta 12 | No | solo si `PERS_SETOURS` es verdadero |
+| 32 | **EXONERADO** · **no se escribe** | Hasta 18,2 | No | solo si `EXONERADO_TXT` es verdadero. Y solo en la fila de Clientes |
+| 33 | **OTROS CARGOS** · **no se escribe** | Hasta 18,2 | No | solo si `OTROS_CARGOS_VTA` es verdadero. Y solo en la fila de Clientes |
+| 34 | **IMP. A LA BOLSA DE PLASTICO** · **no se escribe** | Hasta 18,2 | No | solo con el check de impuesto a la bolsa. Y solo en la fila de Clientes |
+
+### Las dos fechas, que estaban cruzadas
+
+Es lo otro que el manual corrigió, y **solo se nota con un comprobante extemporáneo**. En compras el
+campo 5 es la del DOCUMENTO —la emisión— y el 15 la de REGISTRO, que «debe corresponder al periodo»;
+en ventas están al revés (5 registro, 11 emisión). Hasta la 2.3 el driver escribía la del asiento en la
+del documento y la emisión en la de registro: con una factura de julio anotada en agosto, el campo 5
+salía **mayor** que el 15 y el 15 **no era del periodo**, rompiendo las dos reglas a la vez. Dentro de
+su propio mes las dos fechas coinciden y no se veía.
+
+### Un asiento oficial, entero
+
+El primero de los ejemplos del manual de compras — tres líneas, 35 campos:
+
+```
+40111000|202101|04|0001|06/01/21|03|PROV001|FT|001 000005||||85.42|VTA|06/01/21|2.807|FT  001-000005  /|001|0.00|0.00||||0||||EXAMENES MEDICOS|0|0||0|D|0.00|0.00
+42120001|202101|04|0001|06/01/21|03|PROV001|FT|001 000005||85.42|18.00|560.00|VTA|06/01/21|2.807|FT  001-000005  /|001|0.00|0.00||||0||||EXAMENES MEDICOS|0|0||0|H|0.00|0.00
+63920101|202101|04|0001|06/01/21|03|PROV001|FT|001 000005||||474.58|VTA|06/01/21|2.807|FT  001-000005  /|001|0.00|0.00|||070103|0||||EXAMENES MEDICOS|0|0||0|D|0.00|0.00
+```
+
+Tres cosas se leen ahí y zanjan otras tantas dudas: **`VTA` va en las tres líneas** y no solo en la del
+proveedor; **el IGV y su tasa van solo en la del proveedor** (42120001); y la línea acaba en
+`|D|0.00|0.00`, o sea **35 campos**.
 
 ## Lo esencial
 

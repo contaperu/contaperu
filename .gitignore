@@ -17,3 +17,12 @@ salida/
 # Datos reales de contribuyentes: NUNCA. Este repo es publico.
 privado/
 *.privado.*
+
+# Documentacion de terceros: NUNCA al repo, que es publico y MIT. Los manuales de
+# importacion de los ERP (STARSOFT, CONTASIS, CONCAR) son de sus fabricantes: se leen
+# para calcar el driver y lo que entra aqui son LOS DATOS, en su documento de integracion
+# y en el codigo, citando de donde sale cada regla.
+CONT_COMPRAS.pdf
+CONT_VENTAS.pdf
+Gu*a de Uso APIS de Integraci*n.pdf
+*.manual.pdf
