@@ -32,7 +32,7 @@ entran al repositorio, que es público y son de otra empresa.
   asiento en la primera y la emisión en la segunda. Con una factura de julio anotada en agosto rompía las dos
   reglas a la vez: la del documento salía **mayor** que la de registro, y la de registro **no era del periodo**.
   Dentro de su propio mes las dos coinciden, y por eso ningún ejemplo lo delataba. En ventas van en posiciones
-  cambiadas respecto a compras (5 registro, 11 emisión) y también se corrige.
+  cambiadas respecto a compras (5 registro, 10 emisión) y también se corrige.
 - El centro de costo de ventas se mueve de la columna `AA` a la `X`, que es su posición real ahora.
 
 ### Añadido
