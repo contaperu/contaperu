@@ -174,6 +174,27 @@ def test_sin_detraccion_la_bandera_va_en_cero_y_sus_importes_tambien():
         assert f["PORC OPE MIXTA"] == f["VALOR CIF"] == "0.00"
 
 
+def test_el_orden_de_las_filas_es_el_de_los_ejemplos_oficiales():
+    """Una COMPRA va IGV, proveedor, gasto; una VENTA va cliente, IGV, ingreso. No es el del asiento del motor.
+
+    Y el caso que lo destapo es la NOTA DE CREDITO de ventas: al invertirse los sentidos, el nucleo la sacaba
+    ingreso, IGV, cliente, mientras que el manual la escribe como cualquier otra venta —su ejemplo es
+    `12120001 H · 40111000 D · 70111100 D`—. Las demas ventas ya salian bien, que es por lo que no se veia."""
+    compra = _filas(_compra())
+    assert [f["CTA CONTABLE"] for f in compra] == ["40111000", "42120001", "60111000"]
+
+    venta = _filas(_venta(), imputacion={"fila-1": {"cuenta_contable": "70410001"}})
+    assert [(f["CTA CONTABLE"], f["DEBE / HABER"]) for f in venta] == [
+        ("12120001", "D"), ("40111000", "H"), ("70410001", "H")]
+
+    nota = _venta(tipo_cp="07", ref_tipo_cp="01", ref_serie="F001", ref_numero="120",
+                  ref_fecha="2025-07-01")
+    filas = _filas(nota, imputacion={"fila-1": {"cuenta_contable": "70911111"}})
+    assert [(f["CTA CONTABLE"], f["DEBE / HABER"]) for f in filas] == [
+        ("12120001", "H"), ("40111000", "D"), ("70911111", "D")]
+    assert filas[0]["TIPO DOCUMENTO"] == "CC"
+
+
 def test_el_sub_diario_de_compras_es_el_de_starsoft_y_no_el_de_concar():
     """`04`, no `11`. «El subdiario por defecto para compras es cuatro según el sistema contable» (compras 6:08).
 

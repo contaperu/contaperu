@@ -26,7 +26,7 @@ from typing import Any
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
 from . import datos
-from .datos import ORDEN_DE_LA_COMPRA, ROLES_DE_LA_DETRACCION
+from .datos import ORDEN_DE_LAS_FILAS, ROLES_DE_LA_DETRACCION
 
 LARGO_SERIE = 4       # F001 · 001 + espacio: la serie ocupa cuatro en la plantilla
 LARGO_NUMERO = 8       # F136 + 00000431: el número a ocho, visto en la captura de la hoja PLANTILLA
@@ -274,13 +274,14 @@ def filas(cab: Cabecera, lineas: list[LineaDiario], libro: Any, config: dict) ->
       Una compra con detracción sale con las mismas tres filas que una sin ella;
     - **la bandera `DETRACCION` es del COMPROBANTE**, no de la línea: va en las tres, no solo en la del
       proveedor;
-    - **y en COMPRAS el orden es el de sus ejemplos** —IGV, proveedor, gasto—, no el del asiento del motor, que
-      saca el gasto primero (`datos.ORDEN_DE_LA_COMPRA`)."""
+    - **y el orden es el de sus ejemplos** —IGV, proveedor, gasto en una compra; cliente, IGV, ingreso en una
+      venta—, no el del asiento del motor (`datos.ORDEN_DE_LAS_FILAS`). En ventas coincidían salvo en la NOTA DE
+      CRÉDITO, donde al invertirse los sentidos el núcleo la sacaba al revés y el manual la escribe como
+      cualquier otra venta."""
     de_la_detraccion = next((ln for ln in lineas if ln.rol == "detraccion"), None)
     del_asiento = [ln for ln in lineas if ln.rol not in ROLES_DE_LA_DETRACCION]
-    if libro.tipo == "compra":
-        del_asiento.sort(key=lambda ln: (ORDEN_DE_LA_COMPRA.index(ln.rol)
-                                         if ln.rol in ORDEN_DE_LA_COMPRA else len(ORDEN_DE_LA_COMPRA)))
+    orden = ORDEN_DE_LAS_FILAS.get(libro.tipo, ())
+    del_asiento.sort(key=lambda ln: orden.index(ln.rol) if ln.rol in orden else len(orden))
     return [fila(ln, cab, libro, config, de_la_detraccion) for ln in del_asiento]
 
 

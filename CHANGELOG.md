@@ -6,6 +6,61 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.5.0] — 2026-09-22
+
+**Las cuentas dejan de ser unas para todos, y el archivo de STARSOFT se recalca de sus ejemplos oficiales.** Dos
+trabajos que empezaron por sitios distintos y acabaron en el mismo: lo que el motor daba por universal era, en
+realidad, lo que hace CONCAR.
+
+### Añadido
+
+- **Un driver puede declarar con qué cuentas nace una empresa que lleva su sistema** (`CUENTAS_POR_DEFECTO`). Las
+  cuentas se apilan en tres capas: las de fábrica, encima las del sistema al que se exporta y encima las que la
+  empresa guardó. Se declaran **solo las que cambian**, así que lo que un driver no diga lo sigue heredando de lo
+  general, hoy y el día que lo general mejore. El contrato las valida contra el bloque `cuentas` de lo general.
+- `configuracion_por_defecto` acepta un `driver` y devuelve entonces lo general con las cuentas de ese sistema y
+  solo su sección, igual que `describir_configuracion`. Es con lo que una aplicación siembra una empresa que ya
+  dijo con qué sistema trabaja: sembrar la de todos le daba a un contribuyente de STARSOFT las cuentas de CONCAR.
+  El parámetro es opcional y quien llamaba sin él sigue llamando igual.
+- **STARSOFT declara las suyas, de ocho dígitos.** Cuatro constan en el manual —facturas por pagar `42120001`,
+  IGV `40111000`, clientes `12120001`, ingresos `70410001`— y siete valores se deducen de su patrón (la subcuenta
+  del PCGE de cuatro dígitos más un correlativo de cuatro; las de raíz de cinco completan con tres), marcados uno
+  a uno como defecto configurable. `gasto` NO se declara: en lo general va vacía a propósito y la del manual
+  (`62010001`) es una cuenta de gasto real, que de respaldo imputaría en silencio toda compra sin cuenta.
+- **CONCAR declara su cuenta de gasto** (`631101`). Es la única en la que se aparta, porque las demás cuentas de
+  lo general ya son las suyas — el PCGE a seis dígitos salió de ahí y hasta hoy no estaba dicho en ninguna parte.
+
+### Corregido
+
+- ⚠️ **Las cuentas 62 llevan centro de costo** (`cuentas_con_centro` pasa de `["63", "65", "70"]` a
+  `["62", "63", "65", "70"]`), **para cualquier sistema**. La regla se escribió de una frase que no decía nada del
+  62 y nadie lo echó de menos. **Tiene dos caras:** una 62 pasa a escribir su centro y pasa a exigirlo, así que un
+  mes con cuentas 62 y sin centro deja de estar «listo para exportar». Quien tenga la lista guardada no lo recibe.
+- ⚠️ **En STARSOFT la detracción no es un asiento: son campos de la fila del proveedor.** Su tabla le dedica seis
+  —24 afecto, 25 número, 26 fecha, 31 código, 34 tasa, 35 importe— y sus ejemplos llevan tres filas por
+  comprobante. Hasta ahora se escribían cinco, porque el driver proyectaba tal cual lo que el núcleo le daba: en
+  CONCAR el traslado a la cuenta de detracciones son dos líneas más. **Una compra con detracción sale ahora con
+  las mismas tres filas que una sin ella**, y el archivo cuadra igual. El asiento del motor no cambia.
+- ⚠️ **La nota de débito de STARSOFT es `CD` y no `ND`**, heredada de CONCAR y marcada «por confirmar». Es el
+  mismo error que `NC` en vez de `CC`: el archivo entra igual y el sistema clasifica el comprobante como otra
+  cosa. Los mismos ejemplos confirman `TK` y `RC`; de las cinco siglas sin constar quedan dos.
+- **El orden de las filas de STARSOFT es el de sus ejemplos**: una compra va IGV, proveedor, gasto; una venta,
+  cliente, IGV, ingreso. Se ordena en el driver y no en el núcleo, porque el orden entra en la huella del asiento.
+  El caso que lo destapó es la nota de crédito de ventas, que al invertirse los sentidos salía al revés.
+- **La columna `GLOSA` de STARSOFT vuelve a llevar el documento** (`FT E001-00000871 /`), con el concepto en
+  `GLOSA MOVIMIENTO`: es lo que hacen sus treinta ejemplos, y revierte la decisión del 21-sep-2026.
+- **La tasa del IGV sale `18.00`** y no `18`, y los importes que no aplican van `0.00` y no vacíos en compras
+  (porcentaje de operaciones mixtas, valor CIF, tasa e importe de detracción). En ventas no: los suyos van en
+  blanco.
+
+### Cómo migrar
+
+Quien integre el motor no tiene nada que tocar: la API pública no cambia y el parámetro nuevo es opcional. Lo que
+cambia es **el archivo de STARSOFT**, en la dirección correcta, y **qué cuentas exigen centro de costo**, que
+afecta a todos los destinos. Si una empresa ya tenía `cuentas_con_centro` guardada, no se mueve. Si prefieres que
+el motor siga avisando de las compras sin cuenta hacia CONCAR, deja `cuentas.gasto` en blanco en su configuración:
+lo guardado manda sobre lo que traiga el driver.
+
 ## [2.4.0] — 2026-09-22
 
 **Las huellas NO cambian.** Esto toca la proyección de STARSOFT a columnas, no el asiento: ni un fixture de
