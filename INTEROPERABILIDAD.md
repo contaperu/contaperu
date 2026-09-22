@@ -474,7 +474,7 @@ un sustituto de un dato que existe en el destino.**
   describe sin lanzar y `exigir_requisitos` lanza antes de llamar al driver (`contaperu/asiento/resolucion.py:271`,
   `:293`).
 - `centro_costo` falta solo si la cuenta lo lleva, y eso se decide por prefijo (`cuentas_con_centro`, de fábrica
-  `["63", "65", "70"]`, `contaperu/configuracion.py:289`). La lista `centros_costo` se declara
+  `["62", "63", "65", "70"]`, `contaperu/configuracion.py:289`). La lista `centros_costo` se declara
   (`contaperu/configuracion.py:280`) pero el motor no comprueba contra ella.
 - **La cadena de resolución de una cuenta es corta:** la imputación del documento, si no la cuenta general
   (`cuentas.gasto` o `cuentas.ventas`), y si no la falta `sin_cuenta` (`contaperu/asiento/resolucion.py:92`). No hay

@@ -182,11 +182,14 @@ def test_la_cuenta_decide_si_el_centro_va_a_la_M():
     OJO al leer este test: el fixture usa 631101, que SÍ está en la lista de fábrica. Por eso
     ningún test anterior se enteró del cambio, y por eso hace falta este.
     """
-    # Las de la lista de fábrica: 63, 65 y —para que ventas no cambie— 70.
+    # Las de la lista de fábrica: 62, 63, 65 y —para que ventas no cambie— 70.
     assert driver_concar.filas_de_comprobante(cp(), CONTAB, MES, "080001")[0]["M"] == "OBRA01"                      # 631101
     assert driver_concar.filas_de_comprobante(cp(cuenta_contable="659999"), CONTAB, MES, "080001")[0]["M"] == "OBRA01"
-    # Las que NO: ni M ni X. Son las clases reales de un constructor: 603 compras, 627 seguros.
-    for cuenta in ("601101", "603201", "627401", "681401"):
+    # El 62 entró el 22-sep-2026 (John), para cualquier sistema: una 62 es gasto y lleva su centro como las otras
+    # tres. Hasta ese día esta misma cuenta estaba abajo, entre las que NO lo llevan.
+    assert driver_concar.filas_de_comprobante(cp(cuenta_contable="627401"), CONTAB, MES, "080001")[0]["M"] == "OBRA01"
+    # Las que NO: ni M ni X. Son las clases reales de un constructor: 603 compras, 681 depreciación.
+    for cuenta in ("601101", "603201", "681401"):
         gasto = driver_concar.filas_de_comprobante(cp(cuenta_contable=cuenta), CONTAB, MES, "080001")[0]
         assert (gasto["K"], gasto["M"], gasto["X"]) == (cuenta, "", ""), cuenta
     # Y el doble anexo del proveedor NO depende de esto: sigue llevando el centro.
@@ -247,8 +250,11 @@ def test_las_columnas_elegidas_deciden_en_que_anexo_va_el_centro():
 def test_el_centro_solo_es_obligatorio_donde_se_escribe():
     """Una cuenta que no lleva centro no puede bloquear la exportación de un mes."""
     assert concar.comprobantes_sin_centro([cp(cuenta_contable="603201", centro_costo="")], CONTAB) == []
-    assert concar.comprobantes_sin_centro([cp(cuenta_contable="627401", centro_costo="")], CONTAB) == []
     assert [c.numero for c in concar.comprobantes_sin_centro([cp(centro_costo="")], CONTAB)] == ["00000123"]
+    # Y una 62 sí lo exige desde el 22-sep-2026, porque desde entonces lo escribe: las dos caras de la misma
+    # lista. Un mes con cuentas 62 y sin centro deja de estar listo, y eso es lo que se quiere.
+    assert [c.numero for c in concar.comprobantes_sin_centro(
+        [cp(cuenta_contable="627401", centro_costo="")], CONTAB)] == ["00000123"]
     # Ni siquiera con la referencia en X encendida: esa X es una referencia, y una referencia
     # que se puede dejar en blanco no puede impedir exportar.
     ref = configuracion(REFERENCIA_EN_X)

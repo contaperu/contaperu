@@ -295,8 +295,12 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
     # esa marca vive en cada cuenta del plan; aquí se declara por prefijo, que es lo que un estudio sabe decir. El `70`
     # va para que las ventas lleven su centro. Casa por `startswith`, así que "6311" también vale. Lista VACÍA es una
     # respuesta legítima (ninguna cuenta lo lleva) y no es lo mismo que ausente (los de fábrica): ver `lleva_centro`.
-    Campo("cuentas_con_centro", "lista", ["63", "65", "70"], titulo="Cuentas que llevan centro de costo",
-          grupo="centros", ayuda="Por el inicio de la cuenta: 63 y 65 sí, 60 no.",
+    #
+    # El `62` entró el 22-sep-2026 (John), **para cualquier sistema y no solo para el que lo destapó**: los ejemplos
+    # oficiales de STARSOFT llevan su centro en cuentas 63 y 65, y su cuenta de gasto de ejemplo es una 62 —que se
+    # quedaba sin centro sin que nadie lo notara—. Son las cuatro clases de gasto que por defecto lo llevan.
+    Campo("cuentas_con_centro", "lista", ["62", "63", "65", "70"], titulo="Cuentas que llevan centro de costo",
+          grupo="centros", ayuda="Por el inicio de la cuenta: 62, 63 y 65 sí, 60 no.",
           valores=Campo("", "texto", grupo="centros", patron=r"^[0-9]{1,6}$")),
     # La tabla de detracciones vive en el motor (`detracciones.tabla_del_motor`, John, 15-sep-2026): código, nombre y
     # tasa, con su fuente. Estas dos claves son lo que el ERP que integra el motor SOBREESCRIBE encima de ella, y por eso
