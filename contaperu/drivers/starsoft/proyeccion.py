@@ -24,12 +24,12 @@ from decimal import Decimal
 from typing import Any
 
 from ...asiento.indice import Cabecera
+from ...modelo import numero_sin_ceros
 from ...asiento.lineas import LineaDiario
 from . import datos
 from .datos import ORDEN_DE_LAS_FILAS, ROLES_DE_LA_DETRACCION
 
 LARGO_SERIE = 4       # F001 · 001 + espacio: la serie ocupa cuatro en la plantilla
-LARGO_NUMERO = 8       # F136 + 00000431: el número a ocho, visto en la captura de la hoja PLANTILLA
 LARGO_VOUCHER = 4      # 0001: los cuatro dígitos con los que numera el motor, sin el mes delante
 
 
@@ -61,19 +61,25 @@ def _es_cero(texto: str) -> bool:
 def serie_a_cuatro(serie: str) -> str:
     """La serie a CUATRO caracteres, rellenando con espacios por la derecha: `F001` se queda, `001` pasa a `001 `.
 
-    Sale de la plantilla real de ventas (capturas de John, 21-sep-2026), donde el número ocupa 12 caracteres
-    siempre: `F00100000202` en una factura y `001 00036207` en una boleta. Sin el relleno, la boleta saldría con
-    11 y la columna dejaría de cuadrar.
+    **Esto SÍ se rellena**, y no es lo mismo que el número: el manual dice que «los 4 primeros son la serie; si es
+    de 3, un espacio en blanco y el numero desde la quinta», así que el hueco es dónde empieza el número, no
+    cosmética. Sus ejemplos lo confirman: `001 000005` y `0001000004`.
     """
     return f"{(serie or '').strip():<{LARGO_SERIE}}"[:LARGO_SERIE]
 
 
 def numero_del_documento(cab: Cabecera) -> str:
-    """Serie y número pegados, 12 caracteres: `F136` + `00000431`, `001 ` + `00036207`.
+    """Serie y número pegados: `F136` + `431`, `001 ` + `36207`.
 
-    ⚠️ Es lo contrario de la regla de CONCAR y del SIRE, donde el número va SIN ceros a la izquierda.
+    **El número va SIN ceros a la izquierda** (John, 22-sep-2026, viéndolo dentro de su STARSOFT): en la columna
+    Documento del asiento salía `E00100000105` y él lo quiere `E001105`. Con esto STARSOFT deja de ser la
+    excepción — el SIRE, CONCAR y CONTASIS ya escriben el número así, y era la regla de la casa desde antes.
+
+    Hasta la 2.5 se rellenaba a ocho, tomado de una captura de la hoja PLANTILLA donde los números se veían con
+    ceros; pero eso es cómo los guarda **esa** instalación, no lo que el formato exige. La serie sí se rellena,
+    que ahí el hueco marca dónde empieza el número (`serie_a_cuatro`).
     """
-    return f"{serie_a_cuatro(cab.serie)}{(cab.numero or '').zfill(LARGO_NUMERO)}"
+    return f"{serie_a_cuatro(cab.serie)}{numero_sin_ceros(cab.numero)}"
 
 
 def con_dos_decimales(valor: Any) -> str:
@@ -98,14 +104,13 @@ def glosa_del_documento(ln: LineaDiario, cab: Cabecera) -> str:
     que repetía el tipo y el número, que ya viajan en sus propias columnas; **el manual la devuelve**, y entre
     parecerlo y lo que hace su sistema gana lo segundo (John, 22-sep-2026).
 
-    La serie va a cuatro y el número a ocho, igual que en `numero_del_documento`, para que las dos columnas
-    hablen del mismo documento. Los ejemplos no rellenan, pero tampoco rellenan su columna 9, y lo que no se
-    puede es que una diga `E001-871` y la otra `E00100000871`.
+    La serie va a cuatro y el número **sin ceros**, igual que en `numero_del_documento`: lo que no se puede es
+    que una columna diga `E001-105` y la otra `E00100000105` hablando del mismo documento.
 
     ⚠️ El ` /` final está en todos los ejemplos y **no consta** si lo pide el formato o lo dejó quien llenó la
     hoja; se conserva porque es lo que se ve."""
     tipo = (ln.documento or {}).get("tipo", "")
-    return f"{tipo} {serie_a_cuatro(cab.serie)}-{(cab.numero or '').zfill(LARGO_NUMERO)} /".strip()
+    return f"{tipo} {serie_a_cuatro(cab.serie)}-{numero_sin_ceros(cab.numero)} /".strip()
 
 
 def voucher(correlativo: str) -> str:

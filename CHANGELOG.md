@@ -6,6 +6,25 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.5.1] — 2026-09-22
+
+### Corregido
+
+- **El número del documento de STARSOFT va SIN ceros a la izquierda** (John, 22-sep-2026, viéndolo dentro de su
+  sistema): en la columna Documento de su asiento salía `E00100000105` y lo quiere `E001105`. Afecta a las dos
+  columnas que dicen el documento —`NRO DOCUMENTO` y la `GLOSA`—, porque no puede escribirse de dos formas en la
+  misma fila. **La serie se sigue rellenando a cuatro**, y no es lo mismo: ahí el hueco marca dónde empieza el
+  número, como pide el manual («si es de 3, un espacio en blanco y el numero desde la quinta»).
+
+  Hasta ahora se rellenaba a ocho, leído de una captura de la hoja `PLANTILLA`; eso era cómo guarda los números
+  **esa** instalación, no lo que el formato exige. Con esto STARSOFT deja de ser la excepción: el SIRE, CONCAR y
+  CONTASIS ya escribían el número así, y era la regla de la casa desde antes. Se reutiliza
+  `modelo.numero_sin_ceros`, que ya existía.
+
+### Cómo migrar
+
+Nada que tocar. Cambia **el archivo de STARSOFT** en dos columnas, en la dirección que pidió quien lo importa.
+
 ## [2.5.0] — 2026-09-22
 
 **Las cuentas dejan de ser unas para todos, y el archivo de STARSOFT se recalca de sus ejemplos oficiales.** Dos

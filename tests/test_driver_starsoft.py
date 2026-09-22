@@ -233,10 +233,15 @@ def test_las_banderas_que_se_saben_van_en_cero_y_no_en_blanco():
     assert {f["EXPORTACION"] for f in ventas} == {"0"}
 
 
-def test_el_numero_del_documento_va_pegado_y_con_ceros():
-    """`F13600000431`: serie a cuatro y número a ocho, al revés que en CONCAR y el SIRE."""
-    fila = _filas(_compra())[0]
-    assert fila["NRO DOCUMENTO"] == "F13600000431"
+def test_el_numero_del_documento_va_pegado_y_SIN_ceros():
+    """`F136431`: la serie a cuatro, el número tal cual (John, 22-sep-2026, viéndolo dentro de su STARSOFT).
+
+    Hasta la 2.5 se rellenaba a ocho y en la columna Documento de su asiento salía `E00100000105`. Con esto
+    STARSOFT deja de ser la excepción: el SIRE, CONCAR y CONTASIS ya escriben el número sin ceros."""
+    assert _filas(_compra())[0]["NRO DOCUMENTO"] == "F136431"
+    # La serie SÍ se rellena, y no es lo mismo: el manual dice que el número empieza en la quinta posición.
+    de_tres = _filas(_compra(serie="001"))[0]["NRO DOCUMENTO"]
+    assert de_tres == "001 431", repr(de_tres)
 
 
 def test_la_glosa_lleva_el_documento_y_la_de_movimiento_el_concepto():
@@ -246,11 +251,11 @@ def test_la_glosa_lleva_el_documento_y_la_de_movimiento_el_concepto():
     propias columnas— parecia gastar la glosa en decir dos veces lo mismo. El manual dice otra cosa y manda el
     manual: entre lo que parece y lo que hace su sistema, gana lo segundo."""
     for fila in _filas(_compra()):
-        assert fila["GLOSA"] == "FT F136-00000431 /"
+        assert fila["GLOSA"] == "FT F136-431 /"     # el mismo documento que la columna 9, sin ceros
         assert fila["GLOSA MOVIMIENTO"] == "CELULARES"
     ventas = _filas(_venta(), imputacion={"fila-1": {"cuenta_contable": "70111000", "centro_costo": "CC01"}})
     for fila in ventas:
-        assert fila["GLOSA"] == "FT F001-00000123 /"
+        assert fila["GLOSA"] == "FT F001-123 /"
         assert fila["GLOSA MOVIMIENTO"] == "CELULARES"
 
 

@@ -454,10 +454,13 @@ real, no sobre la narración.
 
 **Tres detalles de formato que solo se ven en la captura y que el driver tiene que respetar:**
 
-1. **`NRO DOCUMENTO` va concatenado y con ceros** (`F13600000431`), mientras la **glosa lleva el guion**
-   (`FT F136-00000431`). Son dos formas del mismo dato en la misma fila. Ojo: choca con la regla de
-   John para CONCAR y el SIRE —«al archivo va el número SIN ceros a la izquierda»—, así que **esta es
-   propia de STARSOFT**. **[por confirmar con la plantilla]**
+1. **`NRO DOCUMENTO` va concatenado** (`F136431`) y la **glosa lleva el guion** (`FT F136-431`): dos
+   formas del mismo dato en la misma fila. **El número va SIN ceros a la izquierda**, como en CONCAR y
+   en el SIRE — ✅ **zanjado por John el 22-sep-2026**, viéndolo dentro de su STARSOFT: en la columna
+   Documento del asiento salía `E00100000105` y lo quiere `E001105`. Hasta la 2.5 se rellenaba a ocho,
+   leído de una captura de la hoja PLANTILLA; pero eso era cómo guarda los números **esa** instalación,
+   no lo que el formato exige. **La serie sí se rellena a cuatro**, y no es lo mismo: ahí el hueco marca
+   dónde empieza el número («si es de 3, un espacio en blanco y el numero desde la quinta»).
 2. **`IGV` y `TASA IGV` solo van en la línea del importe total**, no repetidos en las tres.
 3. **`DESTINO` va con ceros a tres dígitos** (`001`, no `1`).
 
@@ -712,7 +715,7 @@ cabeceras de `PARAMETROS`** (CTA GTO/ACT, CTA IGV, CTA PASIVO): el driver no tie
 |---|---|---|
 | Sub-diario | `11` compras · `05` ventas (CONCAR) | **`4`** · **`03`** — va a su sección de configuración |
 | Voucher | `070001` (formato CONCAR: mes + correlativo) | **`0001`** — sin el mes, con sus cuatro dígitos |
-| `NRO DOCUMENTO` | `F136-431` | **`F13600000431`** — pegado y con ceros |
+| `NRO DOCUMENTO` | `F136-431` | **`F136431`** — pegado y sin ceros (la serie sí se rellena a 4) |
 | `DESTINO` | `DG` | **`001`** — numérico a 3 dígitos |
 | `CONV` | — | **`VTA`** — constante de configuración |
 | `GLOSA` | `CELULARES` (el concepto) | `FT F136-00000431` (tipo + documento) |
