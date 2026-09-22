@@ -48,6 +48,19 @@ def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     assert hoja(ventas).title == "FORMATO_VENTAS" and ventas["archivo"] == "CONTASIS_VENTAS_202608_20601234567.xlsx"
 
 
+def test_en_soles_el_tipo_de_cambio_no_cambia_el_archivo():
+    """En PEN, CONTASIS escribe siempre `1` en su columna de cambio: el T.C. del comprobante no se mira.
+
+    Importa desde el 22-sep-2026, cuando las aplicaciones empezaron a anotarlo también en soles para STARSOFT.
+    Aquí el archivo tiene que salir byte a byte igual."""
+    sin_tc = api.exportar(doc(FACTURA), driver="contasis", configuracion=CONTAB)
+    con_tc = api.exportar(doc(dict(FACTURA, tipo_cambio="3.383")), driver="contasis", configuracion=CONTAB)
+    a, b = hoja(sin_tc), hoja(con_tc)
+    filas_a = [[c.value for c in f] for f in a.iter_rows()]
+    filas_b = [[c.value for c in f] for f in b.iter_rows()]
+    assert filas_a == filas_b, "el T.C. en soles no puede mover el registro de CONTASIS"
+
+
 def test_el_recibo_por_honorarios_queda_fuera_del_archivo():
     rh = dict(FACTURA, tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0", inafecto="1000",
               total="1000")

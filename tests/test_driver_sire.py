@@ -93,6 +93,27 @@ def test_usd_con_tipo_cambio_y_pen_sin_tc():
     assert f[26] == "PEN" and f[27] == ""           # en el SIRE: obligatorio solo si ≠ PEN
 
 
+def test_en_soles_el_tipo_de_cambio_NO_sale_aunque_el_comprobante_lo_traiga():
+    """El TXT que se presenta a SUNAT no puede moverse porque una aplicación anote el T.C. del día.
+
+    Desde el 22-sep-2026 hay integradores que lo rellenan también en soles —STARSOFT lo escribe en todas sus
+    filas—, así que el comprobante en PEN puede llegar con T.C. Aquí no sale: lo corta `kit.texto.formatear_cambio`
+    por moneda, antes de mirar el valor, y el driver fija `tc_pen=""`. Hasta hoy solo se probaba el PEN SIN T.C.,
+    que es el caso que ya no representa lo que llega.
+    """
+    libro, _ = cargar_golden("ventas_202512.json")
+    base = dict(tipo_cp="01", serie="F001", fecha_emision="2025-12-21", contraparte_doc="20131312955",
+                contraparte_nombre="X", moneda="PEN", base_gravada="100", igv="18", total="118")
+    sin_tc = Comprobante(numero="11", **base)
+    con_tc = Comprobante(numero="12", tipo_cambio="3.751", **base)
+
+    linea_sin = campos(g.lineas_de_texto(libro, [sin_tc], "sire")[0], palote_final=False)
+    linea_con = campos(g.lineas_de_texto(libro, [con_tc], "sire")[0], palote_final=False)
+    assert linea_con[27] == "" == linea_sin[27], "el T.C. en soles no puede llegar al TXT del SIRE"
+    # Y la línea entera es la misma salvo el número (campo 9): nada más se mueve por llevar el T.C.
+    assert linea_con[:8] + linea_con[9:] == linea_sin[:8] + linea_sin[9:]
+
+
 def test_saneado_ascii():
     libro, _ = cargar_golden("ventas_202512.json")
     c = Comprobante(tipo_cp="01", serie="F001", numero="10", fecha_emision="2025-12-21",

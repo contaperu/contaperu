@@ -75,6 +75,21 @@ def test_factura_pen_con_igv_tres_filas():
     assert debe_haber(filas) == (Decimal("118"), Decimal("118"))
 
 
+def test_en_soles_el_tipo_de_cambio_no_entra_aunque_el_comprobante_lo_traiga():
+    """CONCAR no convierte nada en soles, así que su columna G se queda vacía y la conversión, en la de siempre.
+
+    Importa desde el 22-sep-2026: hay aplicaciones que anotan el T.C. del día también en PEN —STARSOFT lo escribe
+    en todas sus filas—, y desde la 2.2 la LÍNEA puede traerlo en soles. Si aquí se mirara solo «viene lleno» en
+    vez de la moneda, el Excel de un mes entero cambiaría de columna G y de tipo de conversión sin que nadie lo
+    hubiera pedido."""
+    con_tc = driver_concar.filas_de_comprobante(cp(tipo_cambio="3.383"), CONTAB, MES, "080001")
+    sin_tc = driver_concar.filas_de_comprobante(cp(), CONTAB, MES, "080001")
+    assert con_tc[0]["G"] == "" and con_tc[0]["H"] == sin_tc[0]["H"]
+    assert [f["G"] for f in con_tc] == [f["G"] for f in sin_tc] == ["", "", ""]
+    # Y la fila entera es la misma: el T.C. en soles no mueve ni una celda.
+    assert con_tc == sin_tc
+
+
 def test_dolares_con_tipo_de_cambio_del_comprobante():
     usd = driver_concar.filas_de_comprobante(cp(moneda="USD", tipo_cambio="3.550"), CONTAB, MES, "080001")
     assert usd[0]["E"] == "US" and usd[0]["P"] == 100.0 and usd[0]["Q"] == "" and usd[2]["K"] == "421202"
