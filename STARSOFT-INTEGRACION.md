@@ -151,6 +151,43 @@ Tres cosas se leen ahí y zanjan otras tantas dudas: **`VTA` va en las tres lín
 proveedor; **el IGV y su tasa van solo en la del proveedor** (42120001); y la línea acaba en
 `|D|0.00|0.00`, o sea **35 campos**.
 
+### Con qué cuentas nace una empresa que lleva STARSOFT
+
+STARSOFT numera a **ocho dígitos**, y las de fábrica del motor son las del PCGE a seis (`configuracion.py`),
+que es como numeran CONCAR y CONTASIS. Hasta la 2.5 eso no se podía decir por sistema: un contribuyente de
+STARSOFT que no hubiera abierto la pantalla de configuración exportaba su asiento con el `421201` de CONCAR,
+sin error en ninguna parte y con el archivo rechazado en la suya. Desde la 2.5 el driver las declara
+(`datos.CUENTAS_POR_DEFECTO`), y se apilan en tres capas: fábrica, sistema, empresa.
+
+**Cuatro constan en el manual** y las demás se **deducen** de su patrón: la subcuenta del PCGE de cuatro
+dígitos más un correlativo de cuatro (`4212` → `42120001`); las de raíz de cinco —el IGV y la renta de 4ta,
+que en el PCGE son `40111` y `40172`— completan con tres.
+
+| Cuenta | PCGE (lo general) | STARSOFT | De dónde |
+|---|---|---|---|
+| Facturas por pagar PEN | 421201 | `42120001` | **manual** (compras, campo 1) |
+| Facturas por pagar USD | 421202 | `42120002` | deducida |
+| Detracciones por pagar | 421203 | `42120003` | deducida |
+| Honorarios por pagar PEN | 424101 | `42410001` | deducida |
+| Honorarios por pagar USD | 424102 | `42410002` | deducida |
+| Renta de 4ta retenida | 401721 | `40172100` | deducida |
+| IGV | 401111 | `40111000` | **manual** (los dos libros) |
+| Clientes PEN | 121201 | `12120001` | **manual** (ventas, campo 1) |
+| Clientes USD | 121202 | `12120002` | deducida |
+| Ingreso por defecto | 701101 | `70410001` | **manual** (ventas, campo 1) |
+
+**`gasto` no se declara, a propósito.** En lo general va vacía —es el comodín «63/65», que no es una
+cuenta— y lo que trae el manual (`62010001`) es una cuenta de gasto real. Los propios ejemplos oficiales lo
+demuestran: el asiento de arriba imputa a `63920101` y la tabla de campos pone `62010001`. Una cuenta de
+gasto depende del comprobante, así que de respaldo imputaría en silencio toda compra a la que nadie le puso
+cuenta. El comodín que evita que la exportación se bloquee es de la **aplicación**, que lo siembra y el
+contador lo ve en su pantalla; un respaldo del motor actúa sin que nadie lo haya escrito.
+
+⚠️ **Una discrepancia anotada, para que no reaparezca.** La cuenta de ingreso del manual es `70410001`, y
+las capturas del aplicativo (los asientos típicos de ventas, más abajo) usan `70410100`. Manda el manual,
+que es la fuente. Además la de ingreso varía con el tipo de venta —`70610100` exonerada, `70510100`
+mixta—, así que es un punto de partida como el `701101` de lo general, no una regla.
+
 ## Lo esencial
 
 1. STARSOFT ofrece **dos vías de carga, TXT y Excel**. **Se usa la del TXT** (John, 22-sep-2026), que el

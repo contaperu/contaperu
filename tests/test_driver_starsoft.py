@@ -77,10 +77,41 @@ def _filas(documento, config=None, imputacion=None) -> list[dict]:
 
 
 def test_una_compra_sale_con_las_tres_lineas_del_asiento_tipico():
-    """El asiento tipo 1 de STARSOFT: gasto al debe, IGV al debe, pasivo al haber."""
+    """El asiento tipo 1 de STARSOFT: gasto al debe, IGV al debe, pasivo al haber.
+
+    Y las tres cuentas son de OCHO digitos, que es como numera STARSOFT. La del gasto llega en la imputacion; las
+    otras dos las pone el driver (`datos.CUENTAS_POR_DEFECTO`, 2.5) sin que esta configuracion diga nada de
+    cuentas. Hasta entonces este mismo test fijaba `401111` y `421201` —las de CONCAR— dentro de un archivo de
+    STARSOFT: el fallo estaba congelado en su propia prueba."""
     filas = _filas(_compra())
     assert [(f["CTA CONTABLE"], f["DEBE / HABER"], f["IMPORTE"]) for f in filas] == [
-        ("60111000", "D", "929.49"), ("401111", "D", "167.31"), ("421201", "H", "1096.80")]
+        ("60111000", "D", "929.49"), ("40111000", "D", "167.31"), ("42120001", "H", "1096.80")]
+
+
+def test_las_cuentas_con_las_que_nace_una_empresa_de_starsoft():
+    """STARSOFT numera a OCHO digitos y las de fabrica del motor son las del PCGE a seis.
+
+    Se fija la tabla entera —no solo las dos que se ven en el asiento tipico— porque la mitad son DEDUCIDAS del
+    patron que ensenan las del manual y no constan en ningun sitio: si alguien las cambia, que sea a proposito.
+    Las cuatro del manual van aparte, que es lo unico que se puede afirmar.
+    """
+    del_manual = {"cxp": "42120001", "igv": "40111000", "clientes": "12120001", "ventas": "70410001"}
+    cuentas = starsoft.CUENTAS_POR_DEFECTO
+    assert cuentas["cxp"]["PEN"] == del_manual["cxp"]
+    assert cuentas["igv"] == del_manual["igv"]
+    assert cuentas["clientes"]["PEN"] == del_manual["clientes"]
+    assert cuentas["ventas"] == del_manual["ventas"]
+    # Las deducidas: la misma cuenta de lo general con el patron de STARSOFT (subcuenta de 4 + correlativo de 4;
+    # las de raiz de 5, como el IGV y la renta de 4ta, completan con 3).
+    assert cuentas["cxp"]["USD"] == "42120002"
+    assert cuentas["cxp_detraccion"] == {"PEN": "42120003", "USD": "42120003"}
+    assert cuentas["honorarios"] == {"PEN": "42410001", "USD": "42410002"}
+    assert cuentas["retencion_4ta"] == "40172100"
+    assert cuentas["clientes"]["USD"] == "12120002"
+    # `gasto` NO: en lo general va vacia a proposito (es el comodin 63/65) y el `62010001` del manual es una cuenta
+    # de gasto real. De respaldo imputaria a mercaderias, en silencio, toda compra sin cuenta.
+    assert "gasto" not in cuentas
+    assert api.config_aplicada(driver="starsoft")["cuentas"]["gasto"] == ""
 
 
 def test_el_sub_diario_de_compras_es_el_de_starsoft_y_no_el_de_concar():

@@ -1,9 +1,11 @@
 """Los DATOS del driver STARSOFT: su identidad en el contrato, sus columnas y lo que se configura.
 
-**De dónde sale cada cosa.** Lo levantado el 20-sep-2026 de dos vídeos del canal *ArchivoExcel* —«Importar
-asientos contables de compras al Star Soft» y su gemelo de ventas— leyendo sus capturas y su transcripción, más
-las capturas de la hoja `PARAMETROS` de los dos aplicativos. Está todo en `STARSOFT-INTEGRACION.md`, columna por
-columna y con su minuto.
+**De dónde sale cada cosa.** La fuente es **la documentación oficial de STARSOFT** desde el 22-sep-2026 —la tabla
+de campos de compras y de ventas, con ejemplos de TXT sacados del propio sistema—, y de ahí salen las columnas, las
+dos fechas y las cuentas que constan. Lo anterior a ella se levantó de dos vídeos del canal *ArchivoExcel*
+—«Importar asientos contables de compras al Star Soft» y su gemelo de ventas— y de las capturas de la hoja
+`PARAMETROS`; sigue vigente donde el manual no dice nada, y **el manual gana donde los dos hablan**. Está todo en
+`STARSOFT-INTEGRACION.md`, columna por columna, cada cosa con su fuente.
 
 **Lo que NO consta se queda vacío**, y eso incluye la mitad de la tabla de siglas. Un tipo de comprobante sin
 equivalente detiene la exportación con `SinSigla`, que es la regla que no se negocia: es preferible que el
@@ -42,6 +44,43 @@ CONTENT_TYPE = "application/zip"
 #
 # Las dos se amplían sin romper nada el día que la plantilla lo diga.
 EXIGE: frozenset[str] = frozenset()
+
+# --- con qué cuentas nace una empresa que lleva STARSOFT ------------------------------
+
+# STARSOFT numera a OCHO dígitos, y las de fábrica del motor son las del PCGE a seis (`configuracion.py`), que es
+# como numeran CONCAR y CONTASIS. Sin esto, un contribuyente de STARSOFT que no hubiera abierto la pantalla de
+# configuración exportaba su asiento con el `421201` de CONCAR: no fallaba en ninguna parte, y el archivo lo
+# rechazaba su sistema. Se declaran SOLO las que se apartan de lo general (`drivers/contrato.py`).
+#
+# **Cuatro salen del manual**, de los asientos de ejemplo de compras y de ventas —cuentas que STARSOFT escribe en
+# su propia documentación—: facturas por pagar en soles, IGV, clientes en soles e ingresos. **Las otras siete se
+# DEDUCEN de su patrón**, y van marcadas una a una: son un punto de partida configurable, igual que las cinco
+# siglas heredadas de CONCAR, no un hecho comprobado.
+#
+# El patrón es el que enseñan las cuatro del manual: **la subcuenta del PCGE de cuatro dígitos más un correlativo
+# de cuatro** (4212 → 42120001); las de raíz de cinco —el IGV y la renta de 4ta, que en el PCGE son 40111 y
+# 40172— completan con tres (40111 → 40111000). Cada deducida es la misma cuenta de lo general reescrita con ese
+# patrón, así que si el contador ve otra en su sistema la cambia desde su pantalla, sin tocar código.
+#
+# **`gasto` NO se declara, y es una decisión.** En lo general va vacía a propósito —es el comodín «63/65», que no
+# es una cuenta— y lo que trae el manual (`62010001`) es una cuenta de gasto REAL, mercaderías. De respaldo
+# imputaría a mercaderías, en silencio, toda compra a la que nadie le puso cuenta. El comodín que evita que la
+# exportación se bloquee es de la aplicación, que lo SIEMBRA y el contador lo ve en su pantalla; un respaldo del
+# motor actúa sin que nadie lo haya escrito. Es la misma regla que la sigla que no se inventa.
+CUENTAS_POR_DEFECTO: dict = {
+    "cxp": {"PEN": "42120001",                              # del manual
+            "USD": "42120002"},                             # deducida
+    "cxp_detraccion": {"PEN": "42120003",                   # deducida
+                       "USD": "42120003"},                  # deducida (la misma en las dos, como en lo general)
+    "honorarios": {"PEN": "42410001",                       # deducida
+                   "USD": "42410002"},                      # deducida
+    "retencion_4ta": "40172100",                            # deducida
+    "igv": "40111000",                                      # del manual
+    "clientes": {"PEN": "12120001",                         # del manual
+                 "USD": "12120002"},                        # deducida
+    "ventas": "70410001",                                   # del manual
+}
+
 
 # --- lo que se configura en la sección `starsoft` ------------------------------------
 

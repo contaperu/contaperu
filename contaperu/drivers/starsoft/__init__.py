@@ -47,11 +47,11 @@ revisarlo columna por columna mientras no se conocía la plantilla.
 from __future__ import annotations
 
 from . import datos, proyeccion
-from .datos import (CANAL, COLUMNAS, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, EXIGE, FORMATOS, NOMBRE,
-                    OPCIONES)
+from .datos import (CANAL, COLUMNAS, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, CUENTAS_POR_DEFECTO, EXIGE,
+                    FORMATOS, NOMBRE, OPCIONES)
 from .proyeccion import destino_de, fila, filas, no_caben, numero_del_documento, voucher
 from .salida import desde_lineas, escribir, nombre
 
-__all__ = ["CANAL", "COLUMNAS", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "EXIGE", "FORMATOS",
-           "NOMBRE", "OPCIONES", "datos", "desde_lineas", "destino_de", "escribir", "fila", "filas", "no_caben",
-           "nombre", "numero_del_documento", "proyeccion", "voucher"]
+__all__ = ["CANAL", "COLUMNAS", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "CUENTAS_POR_DEFECTO",
+           "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "datos", "desde_lineas", "destino_de", "escribir", "fila",
+           "filas", "no_caben", "nombre", "numero_del_documento", "proyeccion", "voucher"]
