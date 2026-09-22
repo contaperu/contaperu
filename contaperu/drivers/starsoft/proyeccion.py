@@ -25,6 +25,7 @@ from typing import Any
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
 from . import datos
+from .datos import ROLES_DE_LA_DETRACCION
 
 LARGO_SERIE = 4       # F001 · 001 + espacio: la serie ocupa cuatro en la plantilla
 LARGO_NUMERO = 8       # F136 + 00000431: el número a ocho, visto en la captura de la hoja PLANTILLA
@@ -97,25 +98,26 @@ def voucher(correlativo: str) -> str:
 
 
 def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
-         hay_detraccion: bool = False) -> dict[str, Any]:
+         detraccion: LineaDiario | None = None) -> dict[str, Any]:
     """Una línea neutral → una fila del archivo, con las claves del libro que toca (`datos.COLUMNAS`).
 
     **Compras y ventas no comparten ni las cabeceras**: son dos plantillas y se calca cada una de su fuente, así
     que aquí solo se reparte. La de ventas sale de las capturas de la hoja real; la de compras, del vídeo.
     """
     arma = _fila_venta if libro.tipo == "venta" else _fila_compra
-    todo = arma(ln, cab, libro, config, hay_detraccion)
+    todo = arma(ln, cab, libro, config, detraccion)
     return {cabecera: todo.get(cabecera, "") for _, cabecera, _ in datos.COLUMNAS[libro.tipo]}
 
 
 def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
-                 hay_detraccion: bool = False) -> dict[str, Any]:
+                 detraccion: LineaDiario | None = None) -> dict[str, Any]:
     """Las 38 columnas de la plantilla de compras, con sus nombres literales.
 
     `IGV` y `TASA IGV` van **solo en la fila del total** —la del rol `tercero`—, como en la captura: las otras
     dos filas del asiento las llevan vacías. Es para lo que existe el rol.
     """
-    doc, ref, det = ln.documento or {}, ln.referencia or {}, ln.detraccion or {}
+    doc, ref = ln.documento or {}, ln.referencia or {}
+    det = (detraccion.detraccion if detraccion is not None else None) or {}
     es_total = ln.rol == "tercero"
     return {
         "CTA CONTABLE": ln.cuenta,
@@ -148,21 +150,26 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         "DOCUMENTO ANULADO": datos.NO_ANULADO,
         "IMPORTACION": "1" if (cab.anio_dua or cab.cod_dep_aduanera) else "0",
         "DEBE / HABER": ln.debe_haber,
-        # --- la detracción: cuatro columnas juntas más las tres de después ------------------------------
-        # La bandera del comprobante, no de la línea: «1 sí · blanco o 0 no» dice su hoja, y se elige afirmar,
-        # como en `DOCUMENTO ANULADO` e `IMPORTACION`.
-        "DETRACCION": "1" if hay_detraccion else "0",
-        # La constancia del depósito NO se conoce al provisionar: se paga días después. Por eso el motor pone el
-        # comodín en el documento de la línea, y estas dos van vacías hasta que alguien las traiga.
+        # --- la detracción: en la fila del PROVEEDOR, y sin fila propia (2.5) ---------------------------
+        # STARSOFT **no asienta la detracción**: la lleva como datos del documento, en los campos 24, 25, 26, 31,
+        # 34 y 35 de su tabla. Por eso una compra con detracción sale con las mismas TRES filas que una sin ella
+        # (John, 22-sep-2026, contra el manual), y el traslado a la cuenta de detracciones —que en CONCAR son dos
+        # líneas más— no se escribe: lo hace su propio sistema al registrar el depósito. Las líneas siguen
+        # existiendo en el asiento del motor, que es el mismo para todos; lo que cambia es lo que este driver
+        # proyecta. La bandera va en las TRES filas, no solo en la del proveedor (John, 22-sep-2026).
+        "DETRACCION": "1" if detraccion is not None else "0",
+        # La constancia del depósito NO se conoce al exportar: se paga después, «casi pasando el otro mes» (John,
+        # 22-sep-2026). Van en blanco y las completa STARSOFT cuando el depósito existe.
         "NRO DOC DETRACCION": "",
         "FECHA DETRACCION": "",
         # El código de SUNAT (`027`), no el interno que CONCAR mapea en su tabla (`02702`): el vídeo dice «el
         # código de la detracción… para indicar el tipo de operación afecta» (10:49), y eso es el Catálogo 54.
-        "CODIGO DETRACCION": det.get("codigo", ""),
-        "TASA DETRACCION": det.get("tasa", ""),
-        # Lo DETRAÍDO, que es el importe de esta línea —«cuánto ha sido el importe que se ha detraído» (10:58)—,
-        # no `det["base"]`, que es el total sobre el que se calcula.
-        "IMPORTE DETRACCION": ln.importe if ln.rol == "detraccion" else "",
+        # Los tres van SOLO en la fila del proveedor, como el IGV y su tasa: es para lo que existe el rol.
+        "CODIGO DETRACCION": det.get("codigo", "") if es_total else "",
+        "TASA DETRACCION": det.get("tasa", "") if es_total else "",
+        # Lo DETRAÍDO —«cuánto ha sido el importe que se ha detraído» (10:58)—, que es el importe de la línea que
+        # ya no se escribe, no `det["base"]`, que es el total sobre el que se calcula.
+        "IMPORTE DETRACCION": (detraccion.importe if detraccion is not None else "") if es_total else "",
         # --- declaradas y vacías: existen y no consta cómo se llenan ------------------------------------
         # `PORC OPE MIXTA` sale con 60 en la captura, en una compra de destino 002 (uso mixto), pero de dónde
         # sale ese 60 no consta: el estándar no tiene el porcentaje de la operación mixta.
@@ -175,7 +182,7 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
 
 
 def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
-                hay_detraccion: bool = False) -> dict[str, Any]:
+                detraccion: LineaDiario | None = None) -> dict[str, Any]:
     """Las 34 columnas de la plantilla de ventas, con sus nombres literales.
 
     Dos reglas salen de la captura y no del vídeo: **`IGV` y `TASA IGV` van solo en la fila del cliente** —la del
@@ -224,10 +231,16 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
 def filas(cab: Cabecera, lineas: list[LineaDiario], libro: Any, config: dict) -> list[dict]:
     """Las líneas de UN comprobante → sus filas.
 
-    La bandera `DETRACCION` es del COMPROBANTE y no de la línea —va en las tres o cuatro filas, no solo en la
-    suya—, así que se mira aquí, que es donde se ven todas, y no dentro de `fila()`."""
-    hay_detraccion = any(ln.rol == "detraccion" for ln in lineas)
-    return [fila(ln, cab, libro, config, hay_detraccion) for ln in lineas]
+    Aquí se ven todas las del comprobante, y por eso aquí se decide lo que ninguna línea sabe por su cuenta:
+
+    - **la detracción no se escribe como filas** (2.5). STARSOFT la lleva en campos de la fila del proveedor, así
+      que sus dos líneas del asiento —el traslado a la cuenta de detracciones— se apartan y viajan como datos.
+      Una compra con detracción sale con las mismas tres filas que una sin ella;
+    - **la bandera `DETRACCION` es del COMPROBANTE**, no de la línea: va en las tres, no solo en la del
+      proveedor."""
+    de_la_detraccion = next((ln for ln in lineas if ln.rol == "detraccion"), None)
+    del_asiento = [ln for ln in lineas if ln.rol not in ROLES_DE_LA_DETRACCION]
+    return [fila(ln, cab, libro, config, de_la_detraccion) for ln in del_asiento]
 
 
 def no_caben(libro: Any, comprobantes: list, config: dict) -> dict[str, list]:

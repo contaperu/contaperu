@@ -114,6 +114,58 @@ def test_las_cuentas_con_las_que_nace_una_empresa_de_starsoft():
     assert api.config_aplicada(driver="starsoft")["cuentas"]["gasto"] == ""
 
 
+def _con_detraccion(**cambios) -> dict:
+    """La misma compra, afecta a detraccion: codigo 027 al 4 % sobre 1096.80 → 43.87."""
+    return _compra(detraccion={"codigo": "027", "porcentaje": "4"}, **cambios)
+
+
+def test_una_compra_con_detraccion_sale_con_las_mismas_tres_filas_que_una_sin_ella():
+    """STARSOFT NO asienta la detraccion: la lleva en campos del documento (John, 22-sep-2026, contra el manual).
+
+    En CONCAR el traslado a la cuenta de detracciones son dos lineas mas —el proveedor al debe y 421203 al
+    haber—, y hasta la 2.4 este driver las escribia porque proyectaba tal cual lo que el nucleo le daba. El
+    manual no las tiene: sus seis ejemplos llevan tres filas por comprobante. El asiento del motor sigue siendo
+    el mismo para todos los destinos; lo que cambia es lo que este driver escribe.
+    """
+    sin, con = _filas(_compra()), _filas(_con_detraccion())
+    assert len(sin) == len(con) == 3
+    assert [f["CTA CONTABLE"] for f in con] == [f["CTA CONTABLE"] for f in sin] == [
+        "60111000", "40111000", "42120001"]
+    # Y el archivo cuadra solo con esas tres: lo detraido no mueve cuentas aqui.
+    debe = sum(float(f["IMPORTE"]) for f in con if f["DEBE / HABER"] == "D")
+    haber = sum(float(f["IMPORTE"]) for f in con if f["DEBE / HABER"] == "H")
+    assert debe == haber == 1096.80
+    # La cuenta de detracciones NO aparece: es la que se dejo de escribir.
+    assert all(f["CTA CONTABLE"] != "42120003" for f in con)
+
+
+def test_los_campos_de_la_detraccion_van_en_la_fila_del_proveedor():
+    """Los del manual: 24 afecto, 25 numero, 26 fecha, 31 codigo, 34 tasa, 35 importe.
+
+    La bandera del 24 va en las TRES filas —es del comprobante, no de la linea—; los otros cinco, solo en la del
+    proveedor, como el IGV y su tasa. Y la CONSTANCIA va en blanco a proposito: se deposita despues de exportar,
+    «casi pasando el otro mes» (John, 22-sep-2026), asi que quien la conoce es STARSOFT y no nosotros."""
+    filas = _filas(_con_detraccion())
+    assert [f["DETRACCION"] for f in filas] == ["1", "1", "1"]
+    proveedor = filas[2]
+    assert proveedor["CTA CONTABLE"] == "42120001"
+    assert proveedor["CODIGO DETRACCION"] == "027"      # el de SUNAT, no el interno de CONCAR (02702)
+    assert proveedor["TASA DETRACCION"] == "4"
+    # Lo DETRAIDO, que no es el 4 % exacto de 1096.80 (43.872): la detraccion se redondea al sol, y eso lo
+    # decide el nucleo, igual para todos los destinos.
+    assert proveedor["IMPORTE DETRACCION"] == "44.00"
+    assert proveedor["NRO DOC DETRACCION"] == "" and proveedor["FECHA DETRACCION"] == ""
+    # Y en las otras dos, los cinco van vacios.
+    for otra in filas[:2]:
+        assert otra["CODIGO DETRACCION"] == otra["TASA DETRACCION"] == otra["IMPORTE DETRACCION"] == ""
+
+
+def test_sin_detraccion_la_bandera_va_en_cero_y_sus_campos_vacios():
+    for f in _filas(_compra()):
+        assert f["DETRACCION"] == "0"
+        assert f["CODIGO DETRACCION"] == f["TASA DETRACCION"] == f["IMPORTE DETRACCION"] == ""
+
+
 def test_el_sub_diario_de_compras_es_el_de_starsoft_y_no_el_de_concar():
     """`04`, no `11`. «El subdiario por defecto para compras es cuatro según el sistema contable» (compras 6:08).
 

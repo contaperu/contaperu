@@ -151,6 +151,39 @@ Tres cosas se leen ahí y zanjan otras tantas dudas: **`VTA` va en las tres lín
 proveedor; **el IGV y su tasa van solo en la del proveedor** (42120001); y la línea acaba en
 `|D|0.00|0.00`, o sea **35 campos**.
 
+### La detracción NO es un asiento: son campos de la fila del proveedor
+
+**Una compra con detracción sale con las mismas TRES filas que una sin ella** (John, 22-sep-2026, contra
+el manual). Los seis ejemplos oficiales llevan tres filas por comprobante y **ninguno tiene detracción**,
+así que no hay uno que calcar; lo que lo zanja es la tabla de campos, donde la detracción ocupa seis:
+
+| # | Campo | Qué lleva |
+|---|---|---|
+| 24 | AFECTO A DETRACCION | `1`. **Va en las tres filas**: es del comprobante, no de la línea |
+| 25 | NUMERO DE DETRACCION | **en blanco**: la constancia se deposita *después* de exportar |
+| 26 | FECHA DE DETRACCION | **en blanco**, por lo mismo |
+| 31 | CODIGO DE LA DETRACCION | el del Catálogo 54 de SUNAT (`027`), no el interno de CONCAR (`02702`) |
+| 34 | TASA DE DETRACCION | el porcentaje |
+| 35 | IMPORTE DE DETRACCION | lo detraído, ya redondeado al sol por el núcleo |
+
+Los cinco últimos van **solo en la fila del proveedor**, como el IGV y su tasa.
+
+En CONCAR el traslado a la cuenta de detracciones son **dos líneas más** —el proveedor al debe y `421203`
+al haber—, y hasta la 2.4 este driver las escribía porque proyectaba tal cual lo que el núcleo le daba.
+STARSOFT no las quiere: registra el depósito por su cuenta. **Las líneas siguen existiendo en el asiento
+del motor**, que es el mismo para todos los destinos; lo que cambia es lo que este driver proyecta
+(`datos.ROLES_DE_LA_DETRACCION`).
+
+`01 E001-871` · total 4956.00 · base 4200.00 · IGV 756.00 · detracción `027` al 4 % = 198.00:
+
+```
+62010001|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|||4200.00|VTA|10/08/2026||SERVICIO DE TRANSPORTE|001||||||1||||SERVICIO DE TRANSPORTE|0|0||0|D||
+40111000|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|||756.00|VTA|10/08/2026||SERVICIO DE TRANSPORTE|001||||||1||||SERVICIO DE TRANSPORTE|0|0||0|D||
+42120001|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|756.00|18|4956.00|VTA|10/08/2026||SERVICIO DE TRANSPORTE|001||||||1||||SERVICIO DE TRANSPORTE|0|0|027|0|H|4|198.00
+```
+
+El asiento cuadra con esas tres: 756 + 4200 al debe contra 4956 al haber. Lo detraído no mueve cuentas.
+
 ### Con qué cuentas nace una empresa que lleva STARSOFT
 
 STARSOFT numera a **ocho dígitos**, y las de fábrica del motor son las del PCGE a seis (`configuracion.py`),

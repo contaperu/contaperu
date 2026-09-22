@@ -45,6 +45,16 @@ CONTENT_TYPE = "application/zip"
 # Las dos se amplían sin romper nada el día que la plantilla lo diga.
 EXIGE: frozenset[str] = frozenset()
 
+# Los roles del asiento que STARSOFT **no escribe como fila** (2.5). Su formato no asienta la detracción: la lleva
+# en campos de la fila del proveedor (24 afecto, 25 número, 26 fecha, 31 código, 34 tasa, 35 importe), así que el
+# traslado a la cuenta de detracciones —que en CONCAR son dos líneas más— no va al archivo, y una compra con
+# detracción sale con las mismas TRES filas que una sin ella. Lo confirmó John contra el manual (22-sep-2026): los
+# seis ejemplos oficiales llevan tres filas por comprobante y ninguno de ellos tiene detracción.
+#
+# Las líneas siguen existiendo en el asiento del motor, que es el mismo para todos los destinos; lo que cambia es
+# lo que este driver proyecta. Por eso se declaran aquí y no se tocan en el núcleo.
+ROLES_DE_LA_DETRACCION = ("detraccion", "detraccion_tercero")
+
 # --- con qué cuentas nace una empresa que lleva STARSOFT ------------------------------
 
 # STARSOFT numera a OCHO dígitos, y las de fábrica del motor son las del PCGE a seis (`configuracion.py`), que es
@@ -70,6 +80,9 @@ EXIGE: frozenset[str] = frozenset()
 CUENTAS_POR_DEFECTO: dict = {
     "cxp": {"PEN": "42120001",                              # del manual
             "USD": "42120002"},                             # deducida
+    # Esta NO se escribe en el archivo —STARSOFT no asienta la detracción, ver `ROLES_DE_LA_DETRACCION`—, pero el
+    # asiento del motor sí la usa, y es el mismo para todos los destinos. Sin ella ese asiento mostraría la cuenta
+    # de seis dígitos de CONCAR en un libro de STARSOFT, que es justo lo que este bloque viene a evitar.
     "cxp_detraccion": {"PEN": "42120003",                   # deducida
                        "USD": "42120003"},                  # deducida (la misma en las dos, como en lo general)
     "honorarios": {"PEN": "42410001",                       # deducida
