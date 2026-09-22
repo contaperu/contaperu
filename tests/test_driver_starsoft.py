@@ -82,10 +82,13 @@ def test_una_compra_sale_con_las_tres_lineas_del_asiento_tipico():
     Y las tres cuentas son de OCHO digitos, que es como numera STARSOFT. La del gasto llega en la imputacion; las
     otras dos las pone el driver (`datos.CUENTAS_POR_DEFECTO`, 2.5) sin que esta configuracion diga nada de
     cuentas. Hasta entonces este mismo test fijaba `401111` y `421201` —las de CONCAR— dentro de un archivo de
-    STARSOFT: el fallo estaba congelado en su propia prueba."""
+    STARSOFT: el fallo estaba congelado en su propia prueba.
+
+    El ORDEN es el de los ejemplos oficiales —IGV, proveedor, gasto—, que no es el del asiento del motor
+    (`datos.ORDEN_DE_LA_COMPRA`, 2.5)."""
     filas = _filas(_compra())
     assert [(f["CTA CONTABLE"], f["DEBE / HABER"], f["IMPORTE"]) for f in filas] == [
-        ("60111000", "D", "929.49"), ("40111000", "D", "167.31"), ("42120001", "H", "1096.80")]
+        ("40111000", "D", "167.31"), ("42120001", "H", "1096.80"), ("60111000", "D", "929.49")]
 
 
 def test_las_cuentas_con_las_que_nace_una_empresa_de_starsoft():
@@ -130,7 +133,7 @@ def test_una_compra_con_detraccion_sale_con_las_mismas_tres_filas_que_una_sin_el
     sin, con = _filas(_compra()), _filas(_con_detraccion())
     assert len(sin) == len(con) == 3
     assert [f["CTA CONTABLE"] for f in con] == [f["CTA CONTABLE"] for f in sin] == [
-        "60111000", "40111000", "42120001"]
+        "40111000", "42120001", "60111000"]
     # Y el archivo cuadra solo con esas tres: lo detraido no mueve cuentas aqui.
     debe = sum(float(f["IMPORTE"]) for f in con if f["DEBE / HABER"] == "D")
     haber = sum(float(f["IMPORTE"]) for f in con if f["DEBE / HABER"] == "H")
@@ -147,23 +150,28 @@ def test_los_campos_de_la_detraccion_van_en_la_fila_del_proveedor():
     «casi pasando el otro mes» (John, 22-sep-2026), asi que quien la conoce es STARSOFT y no nosotros."""
     filas = _filas(_con_detraccion())
     assert [f["DETRACCION"] for f in filas] == ["1", "1", "1"]
-    proveedor = filas[2]
+    proveedor = filas[1]          # IGV, proveedor, gasto
     assert proveedor["CTA CONTABLE"] == "42120001"
     assert proveedor["CODIGO DETRACCION"] == "027"      # el de SUNAT, no el interno de CONCAR (02702)
-    assert proveedor["TASA DETRACCION"] == "4"
+    assert proveedor["TASA DETRACCION"] == "4.00"
     # Lo DETRAIDO, que no es el 4 % exacto de 1096.80 (43.872): la detraccion se redondea al sol, y eso lo
     # decide el nucleo, igual para todos los destinos.
     assert proveedor["IMPORTE DETRACCION"] == "44.00"
     assert proveedor["NRO DOC DETRACCION"] == "" and proveedor["FECHA DETRACCION"] == ""
-    # Y en las otras dos, los cinco van vacios.
-    for otra in filas[:2]:
-        assert otra["CODIGO DETRACCION"] == otra["TASA DETRACCION"] == otra["IMPORTE DETRACCION"] == ""
+    # Y en las otras dos no van: el codigo vacio, y los dos importes a `0.00`, que es como los ejemplos
+    # oficiales dicen «no aplica» en esas columnas.
+    for otra in (filas[0], filas[2]):
+        assert otra["CODIGO DETRACCION"] == ""
+        assert otra["TASA DETRACCION"] == otra["IMPORTE DETRACCION"] == "0.00"
 
 
-def test_sin_detraccion_la_bandera_va_en_cero_y_sus_campos_vacios():
+def test_sin_detraccion_la_bandera_va_en_cero_y_sus_importes_tambien():
+    """`0.00` y no vacio en las dos columnas de importe, como en los ejemplos oficiales (John, 22-sep-2026)."""
     for f in _filas(_compra()):
         assert f["DETRACCION"] == "0"
-        assert f["CODIGO DETRACCION"] == f["TASA DETRACCION"] == f["IMPORTE DETRACCION"] == ""
+        assert f["CODIGO DETRACCION"] == ""
+        assert f["TASA DETRACCION"] == f["IMPORTE DETRACCION"] == "0.00"
+        assert f["PORC OPE MIXTA"] == f["VALOR CIF"] == "0.00"
 
 
 def test_el_sub_diario_de_compras_es_el_de_starsoft_y_no_el_de_concar():
@@ -210,16 +218,19 @@ def test_el_numero_del_documento_va_pegado_y_con_ceros():
     assert fila["NRO DOCUMENTO"] == "F13600000431"
 
 
-def test_las_dos_glosas_dicen_lo_mismo_y_es_el_concepto():
-    """`GLOSA` y `GLOSA MOVIMIENTO` llevan las dos el concepto del comprobante (John, 21-sep-2026).
+def test_la_glosa_lleva_el_documento_y_la_de_movimiento_el_concepto():
+    """Los treinta ejemplos oficiales lo traen asi: `FT 002-000085 /` arriba y el concepto al lado.
 
-    Hasta la 2.1 la primera llevaba el documento (`FT F136-00000431 /`), pero el tipo y el número ya viajan en
-    sus propias columnas: repetirlos gastaba la glosa en decir dos veces lo mismo."""
+    Del 21 al 22-sep-2026 las dos dijeron el concepto, porque repetir el tipo y el numero —que ya viajan en sus
+    propias columnas— parecia gastar la glosa en decir dos veces lo mismo. El manual dice otra cosa y manda el
+    manual: entre lo que parece y lo que hace su sistema, gana lo segundo."""
     for fila in _filas(_compra()):
-        assert fila["GLOSA"] == fila["GLOSA MOVIMIENTO"] == "CELULARES"
+        assert fila["GLOSA"] == "FT F136-00000431 /"
+        assert fila["GLOSA MOVIMIENTO"] == "CELULARES"
     ventas = _filas(_venta(), imputacion={"fila-1": {"cuenta_contable": "70111000", "centro_costo": "CC01"}})
     for fila in ventas:
-        assert fila["GLOSA"] == fila["GLOSA MOVIMIENTO"] == "CELULARES"
+        assert fila["GLOSA"] == "FT F001-00000123 /"
+        assert fila["GLOSA MOVIMIENTO"] == "CELULARES"
 
 
 def test_la_nota_de_credito_se_llama_CC_y_no_NC():
@@ -271,10 +282,13 @@ def test_las_cinco_siglas_que_no_constan_se_heredan_marcadas():
 
 
 def test_el_igv_va_solo_en_la_linea_del_total():
-    """Como en la captura: las otras dos filas del asiento lo llevan vacío."""
+    """Como en la captura: las otras dos filas del asiento lo llevan vacío.
+
+    En compras la del total es la SEGUNDA desde la 2.5 —el orden del manual es IGV, proveedor, gasto—, y la tasa
+    va con dos decimales, como la escriben sus ejemplos."""
     filas = _filas(_compra())
-    assert [f["IGV"] for f in filas] == ["", "", "167.31"]
-    assert [f["TASA IGV"] for f in filas] == ["", "", "18"]
+    assert [f["IGV"] for f in filas] == ["", "167.31", ""]
+    assert [f["TASA IGV"] for f in filas] == ["", "18.00", ""]
 
 
 @pytest.mark.parametrize("cambios,esperado", [
@@ -351,7 +365,7 @@ def test_el_mismo_contenido_da_el_mismo_zip_byte_a_byte():
 def test_el_txt_no_lleva_cabecera_y_su_primera_linea_ya_es_un_asiento():
     """Ningún TXT de STARSOFT de los vistos la lleva, y una cabecera se importaría como un asiento más."""
     primera = _texto(_exportar(_compra())).split("\r\n")[0]
-    assert primera.startswith("60111000|202507|04|0001|")
+    assert primera.startswith("40111000|202507|04|0001|")   # el IGV abre el asiento (2.5)
     assert "CTA CONTABLE" not in _texto(_exportar(_compra()))
 
 
@@ -415,7 +429,7 @@ def test_una_compra_con_detraccion_lleva_sus_datos_en_las_columnas():
     con_detraccion = [f for f in filas if f["CODIGO DETRACCION"]]
     assert len(con_detraccion) == 1
     assert con_detraccion[0]["CODIGO DETRACCION"] == "027", "el de SUNAT, no el interno de CONCAR"
-    assert con_detraccion[0]["TASA DETRACCION"] == "4"
+    assert con_detraccion[0]["TASA DETRACCION"] == "4.00"
     assert con_detraccion[0]["IMPORTE DETRACCION"] == "47.00", "lo detraído, no la base"
 
 

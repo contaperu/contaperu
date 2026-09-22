@@ -20,12 +20,13 @@ comprobante, el mismo que trae la línea.
 """
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
 from . import datos
-from .datos import ROLES_DE_LA_DETRACCION
+from .datos import ORDEN_DE_LA_COMPRA, ROLES_DE_LA_DETRACCION
 
 LARGO_SERIE = 4       # F001 · 001 + espacio: la serie ocupa cuatro en la plantilla
 LARGO_NUMERO = 8       # F136 + 00000431: el número a ocho, visto en la captura de la hoja PLANTILLA
@@ -73,6 +74,38 @@ def numero_del_documento(cab: Cabecera) -> str:
     ⚠️ Es lo contrario de la regla de CONCAR y del SIRE, donde el número va SIN ceros a la izquierda.
     """
     return f"{serie_a_cuatro(cab.serie)}{(cab.numero or '').zfill(LARGO_NUMERO)}"
+
+
+def con_dos_decimales(valor: Any) -> str:
+    """Un importe o un porcentaje como los escribe STARSOFT: `18.00`, `0.00`, `4.00`.
+
+    Sus ejemplos oficiales los llevan SIEMPRE con dos decimales —incluso los que no aplican, que salen `0.00` y
+    no vacíos— y el nuestro escribía `18` y dejaba en blanco los que no aplicaban (John, 22-sep-2026). Vacío o
+    None da `0.00`: en las columnas donde esto se usa, «no aplica» se dice con un cero."""
+    if valor in (None, ""):
+        return "0.00"
+    try:
+        return f"{Decimal(str(valor)):.2f}"
+    except (ArithmeticError, ValueError):
+        return str(valor)
+
+
+def glosa_del_documento(ln: LineaDiario, cab: Cabecera) -> str:
+    """La columna `GLOSA`: el tipo y el número, no el concepto —que va en `GLOSA MOVIMIENTO`—.
+
+    Así lo traen los doce ejemplos oficiales de ventas y los dieciocho de compras: `FT 002-000085 /`, con el
+    concepto en la columna de al lado. Esta función existió hasta la 2.1 y se quitó el 21-sep-2026 por parecer
+    que repetía el tipo y el número, que ya viajan en sus propias columnas; **el manual la devuelve**, y entre
+    parecerlo y lo que hace su sistema gana lo segundo (John, 22-sep-2026).
+
+    La serie va a cuatro y el número a ocho, igual que en `numero_del_documento`, para que las dos columnas
+    hablen del mismo documento. Los ejemplos no rellenan, pero tampoco rellenan su columna 9, y lo que no se
+    puede es que una diga `E001-871` y la otra `E00100000871`.
+
+    ⚠️ El ` /` final está en todos los ejemplos y **no consta** si lo pide el formato o lo dejó quien llenó la
+    hoja; se conserva porque es lo que se ve."""
+    tipo = (ln.documento or {}).get("tipo", "")
+    return f"{tipo} {serie_a_cuatro(cab.serie)}-{(cab.numero or '').zfill(LARGO_NUMERO)} /".strip()
 
 
 def voucher(correlativo: str) -> str:
@@ -131,16 +164,15 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         "NRO DOCUMENTO": numero_del_documento(cab),
         "FECHA VENCIMIENTO": doc.get("fecha_vencimiento", ""),
         "IGV": cab.igv if es_total else "",
-        "TASA IGV": ln.tasa_igv if es_total else "",
+        "TASA IGV": con_dos_decimales(ln.tasa_igv) if es_total else "",
         "IMPORTE": ln.importe,
         "CONV": config.get("tipo_conversion") or "",
         "FECHA REGISTRO": ln.fecha,
         "TIPO CAMBIO": ln.tipo_cambio or "",
-        # LA MISMA que la de movimiento (John, 21-sep-2026): las dos dicen el concepto del
-        # comprobante. Hasta la 2.1 esta llevaba el documento —`FT F001-00000202 /`—, que es lo que
-        # muestra una de las hojas; pero el tipo y el número ya viajan en sus propias columnas, así
-        # que repetirlos aquí gastaba la glosa en decir dos veces lo mismo.
-        "GLOSA": ln.glosa,
+        # El DOCUMENTO, y el concepto en `GLOSA MOVIMIENTO`: así lo traen los ejemplos oficiales
+        # (John, 22-sep-2026). Del 21 al 22-sep las dos dijeron el concepto, por parecer que repetir
+        # el tipo y el número gastaba la glosa; el manual dice otra cosa, y manda el manual.
+        "GLOSA": glosa_del_documento(ln, cab),
         "DESTINO": destino_de(cab),
         "TIPO DOC REF": ref.get("tipo", ""),
         "NRO DOC REF": ref.get("serie_numero", ""),
@@ -166,15 +198,20 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         # código de la detracción… para indicar el tipo de operación afecta» (10:49), y eso es el Catálogo 54.
         # Los tres van SOLO en la fila del proveedor, como el IGV y su tasa: es para lo que existe el rol.
         "CODIGO DETRACCION": det.get("codigo", "") if es_total else "",
-        "TASA DETRACCION": det.get("tasa", "") if es_total else "",
+        # Las dos de detracción van con dos decimales y `0.00` donde no aplican —en las otras dos filas y en
+        # toda compra sin detracción—, como los ejemplos oficiales.
+        "TASA DETRACCION": con_dos_decimales(det.get("tasa")) if es_total else "0.00",
         # Lo DETRAÍDO —«cuánto ha sido el importe que se ha detraído» (10:58)—, que es el importe de la línea que
         # ya no se escribe, no `det["base"]`, que es el total sobre el que se calcula.
-        "IMPORTE DETRACCION": (detraccion.importe if detraccion is not None else "") if es_total else "",
+        "IMPORTE DETRACCION": con_dos_decimales(
+            detraccion.importe if (detraccion is not None and es_total) else None),
         # --- declaradas y vacías: existen y no consta cómo se llenan ------------------------------------
         # `PORC OPE MIXTA` sale con 60 en la captura, en una compra de destino 002 (uso mixto), pero de dónde
-        # sale ese 60 no consta: el estándar no tiene el porcentaje de la operación mixta.
-        "PORC OPE MIXTA": "",
-        "VALOR CIF": "",
+        # sale ese 60 no consta: el estándar no tiene el porcentaje de la operación mixta. Van a `0.00` y no
+        # vacías porque es lo que escriben los ejemplos oficiales cuando no aplican (John, 22-sep-2026); en
+        # VENTAS no, que ahí los suyos van en blanco.
+        "PORC OPE MIXTA": "0.00",
+        "VALOR CIF": "0.00",
         # `0` = el IGV NO está pendiente de aplicación. Estuvo vacía mientras la única fuente era la narración
         # del vídeo; la captura de la hoja real la muestra con `0` en todas las filas y eso la cerró.
         "IGV POR APLICAR": datos.IGV_NO_PENDIENTE,
@@ -205,15 +242,14 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         "DOC REFERENCIA": ref.get("tipo", ""),
         "NRO DOC REF": ref.get("serie_numero", ""),
         "IGV": cab.igv if es_total else "",
-        "TASA IGV": ln.tasa_igv if es_total else "",
+        "TASA IGV": con_dos_decimales(ln.tasa_igv) if es_total else "",
         "IMPORTE": ln.importe,
         "CONV": config.get("tipo_conversion") or "",
         "TIPO CAMBIO": ln.tipo_cambio or "",
-        # LA MISMA que la de movimiento (John, 21-sep-2026): las dos dicen el concepto del
-        # comprobante. Hasta la 2.1 esta llevaba el documento —`FT F001-00000202 /`—, que es lo que
-        # muestra una de las hojas; pero el tipo y el número ya viajan en sus propias columnas, así
-        # que repetirlos aquí gastaba la glosa en decir dos veces lo mismo.
-        "GLOSA": ln.glosa,
+        # El DOCUMENTO, y el concepto en `GLOSA MOVIMIENTO`: así lo traen los ejemplos oficiales
+        # (John, 22-sep-2026). Del 21 al 22-sep las dos dijeron el concepto, por parecer que repetir
+        # el tipo y el número gastaba la glosa; el manual dice otra cosa, y manda el manual.
+        "GLOSA": glosa_del_documento(ln, cab),
         "GLOSA MOVIMIENTO": ln.glosa,
         "DOCUMENTO ANULADO": datos.NO_ANULADO,
         "DEBE / HABER": ln.debe_haber,
@@ -237,9 +273,14 @@ def filas(cab: Cabecera, lineas: list[LineaDiario], libro: Any, config: dict) ->
       que sus dos líneas del asiento —el traslado a la cuenta de detracciones— se apartan y viajan como datos.
       Una compra con detracción sale con las mismas tres filas que una sin ella;
     - **la bandera `DETRACCION` es del COMPROBANTE**, no de la línea: va en las tres, no solo en la del
-      proveedor."""
+      proveedor;
+    - **y en COMPRAS el orden es el de sus ejemplos** —IGV, proveedor, gasto—, no el del asiento del motor, que
+      saca el gasto primero (`datos.ORDEN_DE_LA_COMPRA`)."""
     de_la_detraccion = next((ln for ln in lineas if ln.rol == "detraccion"), None)
     del_asiento = [ln for ln in lineas if ln.rol not in ROLES_DE_LA_DETRACCION]
+    if libro.tipo == "compra":
+        del_asiento.sort(key=lambda ln: (ORDEN_DE_LA_COMPRA.index(ln.rol)
+                                         if ln.rol in ORDEN_DE_LA_COMPRA else len(ORDEN_DE_LA_COMPRA)))
     return [fila(ln, cab, libro, config, de_la_detraccion) for ln in del_asiento]
 
 

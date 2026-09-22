@@ -55,6 +55,16 @@ EXIGE: frozenset[str] = frozenset()
 # lo que este driver proyecta. Por eso se declaran aquí y no se tocan en el núcleo.
 ROLES_DE_LA_DETRACCION = ("detraccion", "detraccion_tercero")
 
+# En qué ORDEN salen las filas de una COMPRA: primero el IGV, luego el proveedor y al final el gasto (John,
+# 22-sep-2026). Es el de los dieciocho ejemplos oficiales, y el contrario al del asiento del motor, que saca el
+# gasto primero. Se ordena aquí y no en el núcleo a propósito: **el orden entra en la huella del asiento**, así
+# que moverlo allá cambiaría la de todos los destinos por un detalle de este formato. En VENTAS no hace falta —
+# sus ejemplos van cliente, IGV, ingreso, que ya es el orden del núcleo desde la 2.2—.
+#
+# Lo que no case con un rol de estos va al final y conserva su orden relativo, que es lo que hace el segundo
+# ejemplo del manual: una compra con dos cuentas de gasto las escribe seguidas, detrás del proveedor.
+ORDEN_DE_LA_COMPRA = ("igv", "tercero")
+
 # --- con qué cuentas nace una empresa que lleva STARSOFT ------------------------------
 
 # STARSOFT numera a OCHO dígitos, y las de fábrica del motor son las del PCGE a seis (`configuracion.py`), que es

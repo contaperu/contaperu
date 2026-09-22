@@ -174,15 +174,32 @@ STARSOFT no las quiere: registra el depósito por su cuenta. **Las líneas sigue
 del motor**, que es el mismo para todos los destinos; lo que cambia es lo que este driver proyecta
 (`datos.ROLES_DE_LA_DETRACCION`).
 
-`01 E001-871` · total 4956.00 · base 4200.00 · IGV 756.00 · detracción `027` al 4 % = 198.00:
+`01 E001-871` · total 4956.00 · base 4200.00 · IGV 756.00 · detracción `027` al 4 % = 198.00, tal como lo
+genera el motor:
 
 ```
-62010001|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|||4200.00|VTA|10/08/2026||SERVICIO DE TRANSPORTE|001||||||1||||SERVICIO DE TRANSPORTE|0|0||0|D||
-40111000|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|||756.00|VTA|10/08/2026||SERVICIO DE TRANSPORTE|001||||||1||||SERVICIO DE TRANSPORTE|0|0||0|D||
-42120001|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|756.00|18|4956.00|VTA|10/08/2026||SERVICIO DE TRANSPORTE|001||||||1||||SERVICIO DE TRANSPORTE|0|0|027|0|H|4|198.00
+40111000|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|||756.00|VTA|10/08/2026||FT E001-00000871 /|001|0.00|0.00||||1||||SERVICIO DE TRANSPORTE DE MATERIALES|0|0||0|D|0.00|0.00
+42120001|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|756.00|18.00|4956.00|VTA|10/08/2026||FT E001-00000871 /|001|0.00|0.00||||1||||SERVICIO DE TRANSPORTE DE MATERIALES|0|0|027|0|H|4.00|198.00
+62010001|202608|04|0001|10/08/2026|03|20602222226|FT|E00100000871|27/08/2026|||4200.00|VTA|10/08/2026||FT E001-00000871 /|001|0.00|0.00||||1||||SERVICIO DE TRANSPORTE DE MATERIALES|0|0||0|D|0.00|0.00
 ```
 
 El asiento cuadra con esas tres: 756 + 4200 al debe contra 4956 al haber. Lo detraído no mueve cuentas.
+
+### Cuatro detalles de forma que los ejemplos oficiales zanjaron (2.5)
+
+Salieron de comparar nuestra línea con la del manual campo a campo, y los cuatro los decidió John el
+22-sep-2026:
+
+| Qué | Antes | Ahora |
+|---|---|---|
+| **El orden de las filas de una COMPRA** | gasto, IGV, proveedor (el del asiento del motor) | **IGV, proveedor, gasto**, el de sus dieciocho ejemplos. En VENTAS no cambia: sus doce van cliente, IGV, ingreso, que ya era el nuestro |
+| **La columna `GLOSA`** (17 en compras) | el concepto, igual que `GLOSA MOVIMIENTO` | el **documento** (`FT E001-00000871 /`), con el concepto al lado. Es lo que hacen los treinta ejemplos; la decisión contraria del 21-sep-2026 queda revertida |
+| **La tasa del IGV** | `18` | `18.00`, con dos decimales, en los dos libros |
+| **Los importes que no aplican** en compras: `% mixtas`, `valor CIF`, `tasa` e `importe de detracción` | vacíos | `0.00`. **Solo en compras**: los ejemplos de ventas dejan los suyos en blanco |
+
+Con eso, una fila nuestra es estructuralmente idéntica a una suya. La única diferencia que queda es el
+campo 16, **tipo de cambio**: sus ejemplos lo traen siempre y nosotros solo cuando lo hay, porque el manual
+lo exige únicamente si el campo 14 es `ESP`.
 
 ### Con qué cuentas nace una empresa que lleva STARSOFT
 
