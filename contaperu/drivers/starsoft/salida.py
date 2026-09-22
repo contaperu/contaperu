@@ -1,48 +1,61 @@
-"""La escritura del archivo y el punto de entrada que exige el contrato (`desde_lineas`).
+"""Cómo se escribe el archivo de STARSOFT Desktop: un TXT de palotes, envuelto en un ZIP.
 
-**Escribe un CSV, y es deliberado mientras no haya plantilla oficial.** STARSOFT importa un Excel —«carga de
-archivo Excel», vídeo de ventas 19:08—, pero de su plantilla no consta lo que hace falta para escribirla sin
-adivinar: el nombre de la hoja, en qué fila empieza el cuerpo, si hay cabeceras que respetar, el formato real de
-las fechas y las longitudes de cada columna. Cinco de sus columnas (`A`-`E`) ni siquiera se leyeron: se dedujeron
-de la narración.
+**El formato sale del archivo de verdad** (capturas de John, 21 y 22-sep-2026): los campos separados por `|`,
+**sin fila de cabecera** —ningún TXT de los vistos la lleva, y STARSOFT podría tomarla por un asiento—, sin
+palote al final de la línea, y las fechas en `DD/MM/AAAA`.
 
-Un `.xlsx` escrito con esas cinco incógnitas produce un archivo que STARSOFT rechaza entero o, peor, acepta mal.
-Un CSV con las mismas filas se abre, se revisa columna por columna con un contador y dice exactamente lo que el
-driver sabe hoy. El día que llegue la plantilla, cambia este módulo y la proyección no se toca.
+Hasta la 2.2 esto escribía un CSV de puntos y coma, y era provisional: se hizo así para poder abrirlo y
+revisarlo columna por columna con un contador mientras no se conocía la plantilla. Ahora se conoce.
 
-Este archivo se llamará `xlsx.py`, como en CONCAR y CONTASIS, cuando escriba lo que su nombre diría.
+**El orden de los campos es el de `datos.COLUMNAS`**, que es el de la hoja real y lo validó John campo a
+campo. Este módulo no decide ninguno: solo los escribe.
 """
 from __future__ import annotations
 
-import csv
-import io
 from typing import Any
 
 from ...asiento.indice import ComprobanteDelAsiento
 from ...asiento.lineas import LineaDiario
 from ...modelo import Libro
-from ..kit import OpcionesArchivo, nombre_de_archivo
+from ..kit import Opciones, OpcionesArchivo, celdas, nombre_de_archivo
+from ..kit.texto import formatear_fecha, sanear
 from . import datos, proyeccion
 from .datos import OPCIONES
 
-SEPARADOR = ";"          # el de un Excel en español, que es donde se va a abrir
-BOM = "﻿"           # para que Excel reconozca el UTF-8 sin preguntar
+SEPARADOR = "|"          # el del TXT real; por eso ningún campo puede llevarlo (ver `_campo`)
+NUEVA_LINEA = "\r\n"     # CRLF, como el archivo que abrió el Bloc de notas
+# Para sanear un campo hace falta una `Opciones`, y `OpcionesArchivo` no lo es. Con `sanear=False` la función
+# hace justo lo que este formato necesita: quitar el separador y los saltos de línea, y **conservar las
+# tildes y la Ñ** —la hoja real lleva «RECONSTRUCCIÓN NACIONAL SAC»—, al revés que el TXT del SIRE.
+_COMO_VIENE = Opciones(sanear=False)
 
 
 def nombre(libro: Libro, opciones: OpcionesArchivo = OPCIONES) -> str:
     return nombre_de_archivo(datos.NOMBRE, libro, opciones)
 
 
-def escribir(libro: Libro, filas: list[dict[str, Any]]) -> bytes:
-    """Las filas proyectadas, en el orden de las columnas de su libro."""
-    cabeceras = [cabecera for _, cabecera, _ in datos.COLUMNAS[libro.tipo]]
-    buffer = io.StringIO()
-    escritor = csv.DictWriter(buffer, fieldnames=cabeceras, delimiter=SEPARADOR,
-                              lineterminator="\r\n", extrasaction="ignore")
-    escritor.writeheader()
-    for fila in filas:
-        escritor.writerow({c: ("" if fila.get(c) is None else fila.get(c, "")) for c in cabeceras})
-    return (BOM + buffer.getvalue()).encode("utf-8")
+def _campo(valor: Any, clase: str, opciones: OpcionesArchivo) -> str:
+    """Un valor de la proyección → su texto en el archivo.
+
+    Las fechas se traducen **por la clase declarada de su columna**, no por su nombre: así la columna de fecha
+    que se añada mañana sale bien sin que nadie se acuerde. Llegan en ISO, porque así viajan en el estándar.
+    """
+    if valor in (None, ""):
+        return ""
+    if clase == "fecha" and opciones.fecha:
+        return formatear_fecha(celdas.fecha(str(valor), None), opciones)
+    # Un `|` dentro de una razón social partiría la línea y correría todos los campos siguientes.
+    return sanear(str(valor), _COMO_VIENE)
+
+
+def escribir(libro: Libro, filas: list[dict[str, Any]], opciones: OpcionesArchivo = OPCIONES) -> bytes:
+    """Las filas proyectadas, en el orden de las columnas de su libro. Sin cabecera: la primera línea ya es un
+    asiento."""
+    columnas = datos.COLUMNAS[libro.tipo]
+    lineas = [SEPARADOR.join(_campo(fila.get(cabecera), clase, opciones) for _, cabecera, clase in columnas)
+              for fila in filas]
+    cuerpo = NUEVA_LINEA.join(lineas) + (NUEVA_LINEA if lineas else "")
+    return cuerpo.encode("utf-8")
 
 
 def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict,
@@ -69,7 +82,7 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict,
     # sub-diarios presentes y borraba el diccionario de rangos, que es lo que un ERP guarda para proponer
     # el correlativo del mes siguiente: quien lo consumiera esperando un dict se encontraba una lista.
     resumen = {"filas": len(filas)}
-    return escribir(libro, filas), resumen
+    return escribir(libro, filas, opciones), resumen
 
 
 # Se reexporta para que `desde_lineas` compruebe el libro sin importar el módulo entero.

@@ -24,12 +24,13 @@ NOMBRE = "starsoft"
 # Un sistema contable instalado que importa un archivo (`drivers.contrato.CANALES`).
 CANAL = "legacy"
 
-# Mientras no haya plantilla oficial, la salida es un CSV de las filas proyectadas: se puede abrir y revisar
-# columna por columna con un contador, que es justo lo que hace falta antes de tener el .xlsx. El día que llegue
-# la plantilla cambia esto y el módulo `salida.py`; la proyección no se toca.
-OPCIONES = OpcionesArchivo(extension=".csv")
-FORMATOS = {"compra": "starsoft_csv", "venta": "starsoft_csv"}
-CONTENT_TYPE = "text/csv; charset=utf-8"
+# La salida es el TXT de palotes que importa STARSOFT, envuelto en un ZIP (John, 22-sep-2026). Las fechas van
+# como las escribe su hoja, `DD/MM/AAAA`, y no en el ISO del estándar: hasta la 2.2 salían en ISO porque
+# `OpcionesArchivo` no tenía dónde decirlo. Hasta entonces la salida fue un CSV, provisional, para poder
+# revisarlo columna por columna mientras no se conocía la plantilla.
+OPCIONES = OpcionesArchivo(extension=".txt", fecha="DD/MM/AAAA", comprimir=True)
+FORMATOS = {"compra": "starsoft_txt", "venta": "starsoft_txt"}
+CONTENT_TYPE = "application/zip"
 
 # Lo que STARSOFT necesita para no rechazar el archivo, además de lo que el núcleo exige a todo driver de asientos
 # (`cuenta_contable` y `tipo_cp`). **Vacío a propósito**, y las dos ausencias son decisiones:

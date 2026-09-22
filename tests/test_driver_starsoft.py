@@ -13,12 +13,14 @@ importe, y entonces este archivo gana su prueba de aceptación como la tiene CON
 from __future__ import annotations
 
 import base64
-import csv
 import io
+import re
+import zipfile
 
 import pytest
 
 from contaperu import api
+from contaperu.drivers import starsoft
 
 RUC = "20601234567"
 PROVEEDOR = "20131312955"
@@ -46,12 +48,32 @@ def _venta(**cambios) -> dict:
     return doc
 
 
+def _exportar(documento, config=None, imputacion=None) -> dict:
+    return api.exportar(documento, driver="starsoft", configuracion=config or CONFIG,
+                        imputacion=imputacion or {"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
+
+
+def _texto(r: dict) -> str:
+    """El TXT, sacado del ZIP y no de `r["texto"]`: así lo que se prueba es lo que de verdad se descarga."""
+    with zipfile.ZipFile(io.BytesIO(base64.b64decode(r["zip_base64"]))) as z:
+        return z.read(r["archivo"]).decode("utf-8")
+
+
 def _filas(documento, config=None, imputacion=None) -> list[dict]:
-    """Las filas del archivo, ya parseadas, como las vería quien abre el CSV."""
-    r = api.exportar(documento, driver="starsoft", configuracion=config or CONFIG,
-                     imputacion=imputacion or {"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
-    texto = base64.b64decode(r["contenido_base64"]).decode("utf-8-sig")
-    return list(csv.DictReader(io.StringIO(texto), delimiter=";"))
+    """Las filas del archivo, partidas por `|` y con el nombre de su columna.
+
+    El TXT **no lleva cabecera**, así que los nombres salen de `datos.COLUMNAS` — y eso es justo lo que hay que
+    comprobar: que cada campo cae en la posición que su columna dice, porque es un formato por POSICIÓN."""
+    r = _exportar(documento, config, imputacion)
+    columnas = [cabecera for _, cabecera, _ in starsoft.COLUMNAS[documento["libro"]["tipo"]]]
+    filas = []
+    for linea in _texto(r).split("\r\n"):
+        if not linea:
+            continue
+        campos = linea.split("|")
+        assert len(campos) == len(columnas), f"{len(campos)} campos para {len(columnas)} columnas: {linea}"
+        filas.append(dict(zip(columnas, campos)))
+    return filas
 
 
 def test_una_compra_sale_con_las_tres_lineas_del_asiento_tipico():
@@ -221,11 +243,66 @@ def test_una_glosa_larga_no_cabe_y_se_dice_antes_de_exportar():
 
 
 def test_el_archivo_se_llama_como_los_demas_sistemas():
-    """`SISTEMA_LIBRO_PERIODO_RUC`, la regla de `kit.nombre_de_archivo` (2.1)."""
-    r = api.exportar(_compra(), driver="starsoft", configuracion=CONFIG,
-                     imputacion={"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
-    assert r["archivo"] == f"STARSOFT_COMPRAS_202507_{RUC}.csv"
+    """`SISTEMA_LIBRO_PERIODO_RUC`, la regla de `kit.nombre_de_archivo` (2.1). El ZIP comparte su nombre base."""
+    r = _exportar(_compra())
+    assert r["archivo"] == f"STARSOFT_COMPRAS_202507_{RUC}.txt"
+    assert r["archivo_zip"] == f"STARSOFT_COMPRAS_202507_{RUC}.zip"
     assert r["resumen"]["debe"] == r["resumen"]["haber"] == "1096.80"
+
+
+def test_el_txt_viaja_dentro_de_un_zip_de_un_solo_miembro():
+    """Lo que se descarga es el ZIP, y dentro va el TXT con su nombre. Como el del SIRE."""
+    r = _exportar(_compra())
+    with zipfile.ZipFile(io.BytesIO(base64.b64decode(r["zip_base64"]))) as z:
+        assert z.namelist() == [r["archivo"]]
+
+
+def test_el_mismo_contenido_da_el_mismo_zip_byte_a_byte():
+    """La fecha de la entrada es fija, así que el ZIP es reproducible y quien guarde su huella lo reconoce.
+
+    Estaba afirmado en el docstring del pipeline desde que existe el SIRE, y no lo probaba nadie."""
+    uno, otro = _exportar(_compra()), _exportar(_compra())
+    assert uno["zip_base64"] == otro["zip_base64"]
+
+
+def test_el_txt_no_lleva_cabecera_y_su_primera_linea_ya_es_un_asiento():
+    """Ningún TXT de STARSOFT de los vistos la lleva, y una cabecera se importaría como un asiento más."""
+    primera = _texto(_exportar(_compra())).split("\r\n")[0]
+    assert primera.startswith("60111000|202507|04|0001|")
+    assert "CTA CONTABLE" not in _texto(_exportar(_compra()))
+
+
+def test_ninguna_fecha_sale_en_iso():
+    """STARSOFT las quiere `DD/MM/AAAA` y el estándar las trae en ISO; hasta la 2.2 salían sin traducir.
+
+    Se comprueba sobre TODAS las columnas declaradas `fecha` de los dos libros, y no sobre una lista escrita a
+    mano: así el día que se añada una columna de fecha, este test ya la cubre."""
+    for documento, imputacion in ((_compra(), None),
+                                  (_venta(), {"fila-1": {"cuenta_contable": "70111000", "centro_costo": "CC01"}})):
+        tipo = documento["libro"]["tipo"]
+        fechas = [cab for _, cab, clase in starsoft.COLUMNAS[tipo] if clase == "fecha"]
+        assert fechas, tipo
+        for fila in _filas(documento, imputacion=imputacion):
+            for columna in fechas:
+                valor = fila[columna]
+                assert not valor or re.fullmatch(r"\d{2}/\d{2}/\d{4}", valor), f"{tipo} · {columna} = {valor!r}"
+
+
+def test_un_palote_en_la_razon_social_no_parte_la_linea():
+    """El separador dentro de un campo correría todos los siguientes, y en un formato por posición eso es
+    contabilidad en la columna de al lado."""
+    documento = _venta()
+    documento["comprobantes"][0]["contraparte_nombre"] = "ACME | SAC"
+    filas = _filas(documento, imputacion={"fila-1": {"cuenta_contable": "70111000"}})
+    assert filas[0]["RAZON SOCIAL"] == "ACME SAC"
+
+
+def test_el_tipo_de_cambio_sale_tambien_en_soles_cuando_el_comprobante_lo_trae():
+    """Su hoja lo lleva en todas las filas, también en operaciones en PEN (John, 21-sep-2026).
+
+    El motor no lo inventa: lo transporta si llega. Quien lo pondrá es la aplicación que integra."""
+    assert {f["TIPO CAMBIO"] for f in _filas(_compra(tipo_cambio="3.274"))} == {"3.274"}
+    assert {f["TIPO CAMBIO"] for f in _filas(_compra())} == {""}
 
 
 def test_el_resumen_trae_los_rangos_del_sub_diario_y_no_una_lista():

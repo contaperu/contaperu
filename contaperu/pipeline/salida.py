@@ -52,6 +52,21 @@ class Exportado:
             self.contenido = self.comprimido
 
 
+def _en_zip(nombre: str, datos: bytes) -> tuple[str, bytes]:
+    """El archivo dentro de un ZIP de un solo miembro, con su mismo nombre base.
+
+    **Reproducible**: la fecha de la entrada es fija, así que el mismo contenido da el mismo ZIP byte a byte, y
+    quien guarde su huella la reconoce. El nombre se corta por el último punto, que es la razón por la que
+    `kit.nombre_de_archivo` no omite nunca la extensión.
+    """
+    memoria = io.BytesIO()
+    with zipfile.ZipFile(memoria, "w", zipfile.ZIP_DEFLATED) as archivo_zip:
+        info = zipfile.ZipInfo(nombre, date_time=(1980, 1, 1, 0, 0, 0))
+        info.compress_type = zipfile.ZIP_DEFLATED
+        archivo_zip.writestr(info, datos)
+    return nombre.rsplit(".", 1)[0] + ".zip", memoria.getvalue()
+
+
 def lineas_de_texto(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones: Any = None) -> list[str]:
     modulo = drivers.obtener(driver)
     opciones = opciones or modulo.OPCIONES
@@ -111,12 +126,23 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
                 raise ValueError(f"El driver {modulo.NOMBRE!r} arma asientos: necesita `config` y `correlativos`")
             contenido, extra = modulo.construir(libro, incluidos, config, correlativos, opciones)
         nombre = modulo.nombre(libro, opciones)
+        resumen = {**_resumen(comprobantes, incluidos, errores, opciones, fuera), **extra}
+        tipo = getattr(modulo, "CONTENT_TYPE", "application/octet-stream")
+        # Comprimir es del FORMATO, no de la forma del driver: lo pide un sistema que importa un archivo
+        # envuelto (STARSOFT), y hasta la 2.3 solo sabía hacerlo la rama de texto, que es la del SIRE. Se
+        # pobla `texto` además del ZIP porque es por donde bifurcan `respuesta()`, la CLI y el MCP: así el
+        # driver sale como el SIRE —el TXT legible y su ZIP— sin que nada de fuera cambie.
+        if getattr(opciones, "comprimir", False):
+            nombre_comprimido, comprimido = _en_zip(nombre, contenido)
+            return Exportado(
+                nombre=nombre, nombre_comprimido=nombre_comprimido, formato=formato, driver=driver,
+                texto=contenido, comprimido=comprimido, comprobantes=len(incluidos), resumen=resumen,
+                archivo=nombre_comprimido, contenido=comprimido, content_type=tipo, por_comprobante=detalle,
+            )
         return Exportado(
             nombre=nombre, nombre_comprimido="", formato=formato, driver=driver, texto=b"", comprimido=b"",
-            comprobantes=len(incluidos),
-            resumen={**_resumen(comprobantes, incluidos, errores, opciones, fuera), **extra},
-            archivo=nombre, contenido=contenido,
-            content_type=getattr(modulo, "CONTENT_TYPE", "application/octet-stream"), por_comprobante=detalle,
+            comprobantes=len(incluidos), resumen=resumen,
+            archivo=nombre, contenido=contenido, content_type=tipo, por_comprobante=detalle,
         )
 
     cuerpo = opciones.nueva_linea.join(lineas_de_texto(libro, incluidos, driver, opciones))
@@ -128,16 +154,11 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
         texto = cuerpo.encode("cp1252", errors="replace")  # lo que históricamente exigían los libros electrónicos
 
     nombre = modulo.nombre(libro, opciones)
-    nombre_comprimido = nombre.rsplit(".", 1)[0] + ".zip"
-    memoria = io.BytesIO()
-    with zipfile.ZipFile(memoria, "w", zipfile.ZIP_DEFLATED) as archivo_zip:
-        info = zipfile.ZipInfo(nombre, date_time=(1980, 1, 1, 0, 0, 0))
-        info.compress_type = zipfile.ZIP_DEFLATED
-        archivo_zip.writestr(info, texto)
+    nombre_comprimido, comprimido = _en_zip(nombre, texto)
 
     return Exportado(
         nombre=nombre, nombre_comprimido=nombre_comprimido, formato=formato, driver=driver,
-        texto=texto, comprimido=memoria.getvalue(), comprobantes=len(incluidos),
+        texto=texto, comprimido=comprimido, comprobantes=len(incluidos),
         resumen=_resumen(comprobantes, incluidos, errores, opciones, fuera),
         por_comprobante=armado.identidades(libro, incluidos),
     )

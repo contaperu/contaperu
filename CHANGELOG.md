@@ -6,6 +6,42 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Cambiado
+
+- **STARSOFT escribe un TXT de palotes envuelto en un ZIP, y ya no un CSV** (John, 22-sep-2026). Es una de las
+  dos vías de carga del sistema —la otra es su plantilla de Excel— y el formato sale de un TXT de STARSOFT de
+  verdad: campos separados por `|`, **sin fila de cabecera** y sin palote al final. El CSV era provisional,
+  para poder revisarlo columna por columna mientras no se conocía la plantilla; ahora se conoce.
+
+  El archivo pasa a `STARSOFT_COMPRAS_202507_20601234567.txt` dentro de su `.zip`, y el formato, de
+  `starsoft_csv` a `starsoft_txt`.
+
+- **Las fechas de STARSOFT salen en `DD/MM/AAAA` y no en ISO.** Es un defecto que llevaba ahí desde el primer
+  día y que el CSV también tenía: el driver escribía `2025-07-01` donde su hoja y su TXT dicen `01/07/2025`.
+  Son **cinco columnas en compras y cuatro en ventas**, y se traducen **por la clase declarada de la columna**,
+  así que la columna de fecha que se añada mañana sale bien sin acordarse de nada.
+
+### Añadido
+
+- **Un driver de archivo puede pedir que su salida viaje comprimida**, con `comprimir=True` en sus
+  `OpcionesArchivo`. Hasta ahora el ZIP estaba atado a la FORMA del driver: solo lo hacía la rama de texto, que
+  es la del SIRE, y un driver de asientos como STARSOFT no podía usarla sin dejar de recibir el asiento y de
+  declarar su configuración. Comprimir es del formato, no de la forma.
+
+  Quien comprime sale además como el SIRE en toda la superficie —`texto` legible, `zip_base64` y `archivo_zip`
+  en la respuesta, el TXT y el ZIP en disco desde la CLI, los dos adjuntos en el MCP— **sin que nada de eso
+  cambiara**, y conservando lo que la rama de texto no da: el resumen con el cuadre y la huella.
+
+- **`OpcionesArchivo` gana `fecha`**, con los mismos valores que `Opciones`. Vacío —el defecto— deja las fechas
+  como vienen, en ISO, que es lo que quiere un formato de intercambio como el CSV o el asiento neutral.
+
+### Documentación
+
+- **Este driver es el de STARSOFT *Desktop*, y ahora lo dice.** Existe además **STARSOFT Web (Gold Edition)**,
+  con API pública, que será `starsoft_web` — el hito A5 de la hoja de ruta, **abierto a quien quiera
+  escribirlo**. Lo que este driver resolvió le sirve casi entero: las siglas, los sub-diarios, el destino del
+  IGV, las cuentas y la proyección son los mismos; lo distinto es a dónde van los datos.
+
 ## [2.2.0] — 2026-09-21
 
 > ⚠️ **Todas las huellas de asiento cambian.** Es lo primero que hay que mirar al subir: la fórmula es la

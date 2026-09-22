@@ -1,4 +1,11 @@
-"""Driver STARSOFT: la plantilla de importación de asientos. Canal `legacy`.
+"""Driver STARSOFT **Desktop**: la plantilla de importación de asientos. Canal `legacy`.
+
+**STARSOFT son dos productos, y este driver es el de escritorio** (John, 22-sep-2026): el que importa un
+archivo. El otro es **STARSOFT Web — Gold Edition**, que tiene **API pública**, y su driver se llamará
+`starsoft_web` el día que alguien lo escriba: es el hito A5 de la hoja de ruta, y la puerta está abierta
+para quien quiera. Lo que aquí está resuelto le sirve casi entero —las cuentas, las siglas, los
+sub-diarios, el destino del IGV y la proyección son los mismos—; lo único distinto es a dónde van los
+datos: un archivo aquí, un cuerpo JSON allá.
 
 STARSOFT importa asientos, no un registro: en su plantilla cada fila es una cuenta, con su debe o haber y su
 importe, y las filas de un comprobante comparten cabecera. Por eso este driver es `desde_lineas`, como CONCAR, y
@@ -19,9 +26,13 @@ estándar (`destino_igv`) y no llegaba a un driver de asientos.
 **Estado: EN PRUEBAS.** El formato se levantó el 20-sep-2026 de dos vídeos y sus capturas
 (`STARSOFT-INTEGRACION.md`), no de una plantilla oficial. Lo que no consta está marcado `[por confirmar]` en el
 código, y la mitad de la tabla de siglas está vacía a propósito: un tipo sin equivalente detiene la exportación
-en vez de inventarse uno. **Nadie ha importado todavía en STARSOFT un archivo generado por este driver**, así
-que mientras escribe un CSV revisable y no el Excel definitivo. El día que un contribuyente lo importe de
-verdad, este docstring gana su línea de «Aceptado (fecha)», como la tiene CONTASIS.
+en vez de inventarse uno. **Nadie ha importado todavía en STARSOFT un archivo generado por este driver.** El día que un
+contribuyente lo importe de verdad, este docstring gana su línea de «Aceptado (fecha)», como la tiene
+CONTASIS.
+
+**Lo que escribe es el TXT de palotes envuelto en un ZIP** (2.3), que es una de las dos vías de carga de
+STARSOFT; la otra es su plantilla de Excel. Hasta la 2.2 escribía un CSV, provisional, para poder
+revisarlo columna por columna mientras no se conocía la plantilla.
 """
 from __future__ import annotations
 

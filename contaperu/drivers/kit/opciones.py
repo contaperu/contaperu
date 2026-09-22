@@ -41,6 +41,15 @@ class OpcionesArchivo:
     extension: str = ""
     sin_ceros: bool = True
     signo_nc: bool = True
+    # Cómo escribe las fechas el sistema de destino. **Vacío = como vienen**, en ISO, que es como viajan en el
+    # estándar: es lo que quiere un formato de intercambio (el CSV, el asiento neutral) y por eso es el defecto.
+    # Un sistema contable pide las suyas —STARSOFT, `DD/MM/AAAA`—, y hasta la 2.3 no tenía dónde decirlo: sus
+    # fechas salían en ISO. Los valores son los de `Opciones.fecha` y los traduce `kit.texto.formatear_fecha`.
+    fecha: str = ""
+    # El archivo viaja dentro de un ZIP con su mismo nombre base (`pipeline/salida.py`). Comprimir es del
+    # FORMATO y no de la forma del driver: lo pide STARSOFT, que es `desde_lineas`, igual que el TXT del SIRE,
+    # que es `linea`.
+    comprimir: bool = False
 
     def con(self, **cambios) -> "OpcionesArchivo":
         return replace(self, **cambios)

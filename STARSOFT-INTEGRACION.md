@@ -1,4 +1,9 @@
-# STARSOFT — notas para el driver
+# STARSOFT Desktop — notas para el driver
+
+> **De qué STARSOFT habla este documento.** Del **de escritorio**, el que importa un archivo. Existe
+> además **STARSOFT Web (Gold Edition)**, con **API pública**, y es otro driver: `starsoft_web`, el hito
+> A5 de la hoja de ruta, que nadie ha escrito todavía. Casi todo lo que hay aquí le sirve —las siglas,
+> los sub-diarios, el destino del IGV, las cuentas—; lo que cambia es a dónde van los datos.
 
 > **Documento de trabajo, no especificación.** Recoge lo observado el 20-sep-2026 en dos vídeos del
 > canal *ArchivoExcel*, leyendo sus capturas y su transcripción automática:
@@ -13,7 +18,9 @@
 
 ## Lo esencial
 
-1. STARSOFT ofrece **dos vías de carga, TXT y Excel**. **Se usa la de Excel** (John, 20-sep-2026).
+1. STARSOFT ofrece **dos vías de carga, TXT y Excel**. **Se usa la del TXT** (John, 22-sep-2026), que el
+   motor envuelve en un ZIP. Hasta ese día se había elegido la de Excel, y el driver escribía un CSV
+   provisional mientras no se conocía la plantilla.
 2. La plantilla la publica **el propio STARSOFT**; el aplicativo de los vídeos solo la rellena.
 3. El asiento va **una fila por cuenta**, con el debe/haber en su propia columna.
 4. **Máximo 4 cuentas contables por asiento** **[C 5:25]**.
@@ -283,6 +290,10 @@ aparecen `OTROS TRIBUTOS` e `IMP BOLSA`. Eran 32 columnas y son 38. Los nombres 
   el estándar no tiene el porcentaje de la operación mixta, así que la columna va declarada y vacía.
 - **`NRO DOC DETRACCION` y `FECHA DETRACCION`** van vacías: la constancia del depósito no se conoce al
   provisionar, se paga días después.
+- **Las fechas van en `DD/MM/AAAA`**, no en el ISO del estándar. Lo dicen las dos fuentes —la hoja y el TXT— y
+  el driver las traduce desde la 2.3; hasta entonces salían `2025-07-01` y nadie lo había mirado. Se aplica por
+  la CLASE declarada de cada columna, así que una columna de fecha nueva sale bien sola.
+
 - **El `TIPO CAMBIO` va en TODAS las filas, sea en soles o en dólares** (John, 21-sep-2026), y la hoja lo
   confirma: `3.274`, `3.281`, `3.261`… en comprobantes en PEN. Desde la 2.2 la línea del asiento transporta el
   tipo de cambio del comprobante venga en la moneda que venga, y STARSOFT lo escribe siempre.

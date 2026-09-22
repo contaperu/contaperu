@@ -345,7 +345,7 @@ motor.
 
 ### Salida · Legacy: CONCAR, CONTASIS, SISCONT y STARSOFT
 
-**Objetivo.** Que SISCONT y STARSOFT salgan del mismo documento que CONCAR y CONTASIS, cada uno con su archivo aceptado,
+**Objetivo.** Que SISCONT y STARSOFT Desktop salgan del mismo documento que CONCAR y CONTASIS, cada uno con su archivo aceptado,
 y que el motor conozca lo que el destino exige antes de que el sistema rechace una importación. Es la prioridad por uso:
 son, con CONCAR y CONTASIS, los sistemas contables que más estudios peruanos tienen instalados, y el motor trabaja
 encima de ellos mientras evolucionan.
@@ -372,8 +372,8 @@ salida»; `CHANGELOG.md` 0.10.0):
 | A1 | SISCONT, registro de compras y ventas → `desde_comprobantes` | D | dato: plantilla + un mes importado | Las cuatro capas de prueba; un mes importado; fila en «Estado»; CHANGELOG y tag | — | — |
 | A2 | ¿Acepta SISCONT el TXT que genera el driver `sire`? (SISCONT importa la propuesta del SIRE, *según el proveedor*; qué formato, *no verificado*) | documentación | dato: una prueba | Nota en la guía; ningún código | — | — |
 | A3 | SISCONT, asientos → `desde_lineas` | D | dato: un caso que A1 no cubra | Igual que A1 | A1 | — |
-| A4 | STARSOFT, asientos → `desde_lineas` | D | dato: plantilla + un mes importado | Igual que A1 | — | — |
-| A5 | El **cuerpo JSON** de la API de STARSOFT Gold, como proyección pura de las líneas | D | dato: una respuesta aceptada guardada en `privado/` | Test contra el cuerpo aceptado; autenticarse y enviar es de la aplicación | A4 | — |
+| A4 | **STARSOFT Desktop**, asientos → `desde_lineas`. **Hecho** (2.0-2.3): las dos plantillas calcadas del archivo real, TXT de palotes en ZIP. Falta lo único que no depende de nosotros: que alguien importe un mes | D | dato: plantilla + un mes importado | Igual que A1 | — | — |
+| A5 | **`starsoft_web`**: el cuerpo JSON de la API de STARSOFT Web (Gold Edition), como proyección pura de las líneas. **Abierto a la comunidad**: lo que resolvió A4 le sirve casi entero —siglas, sub-diarios, destino del IGV, cuentas y la proyección—; lo distinto es a dónde van los datos | D | dato: una respuesta aceptada guardada en `privado/` | Test contra el cuerpo aceptado; autenticarse y enviar es de la aplicación | A4 | — |
 | C10 | `plan_de_cuentas*` del destino, falta `cuenta_fuera_del_plan*`, marca de centro de costo y lista de centros | N · F · D | dato: plan exportado de CONCAR + un rechazo real de importación | Sin plan, snapshot idéntico; un plan sin la cuenta bloquea y `exportar` lanza | — | 11, 12, 13 |
 
 **No se hace.** Un formato común para todos los legacy: el TXT del SIRE no lleva cuentas y pierde la imputación, y no
