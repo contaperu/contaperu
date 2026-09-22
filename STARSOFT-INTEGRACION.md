@@ -599,9 +599,11 @@ fuerte que tiene este documento: no es la narración de un vídeo, es el archivo
 | Factura | `FT` | **`FT`** ✅ **[C 7:34]** |
 | Boleta | `BV` | **`BV`** (John, 20-sep-2026) |
 | **Nota de crédito** | **`NC`** | **`CC`** ⚠️ **[V 14:05]** |
-| Nota de débito | `ND` | **[por confirmar]** |
+| **Nota de débito** | **`ND`** | **`CD`** ⚠️ **[manual de compras, 2 ejemplos: «penalidad por daños» con referencia a una `FT`]** |
 | Recibo por honorarios | `RH` | **[por confirmar]** |
-| Ticket | `TK` | **[por confirmar]** |
+| Ticket | `TK` | **`TK`** ✅ **[manual de compras, 3 ejemplos: un ticket de combustible]** |
+| Recibo de servicios públicos | `RC` | **`RC`** ✅ **[manual de compras, 3 ejemplos: un recibo de Claro]** |
+| Boleta de anticipo | `BA` | **[por confirmar]** |
 | **Sub-diario de compras** | **`11`** | **`4`** ⚠️ **[C 6:08]** |
 | **Sub-diario de ventas** | **`05`** | **`03`** ⚠️ (John, 20-sep-2026) |
 | Sub-diario de detracción | `10` | **[por confirmar]** |

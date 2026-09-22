@@ -138,12 +138,20 @@ CUENTAS_POR_DEFECTO: dict = {
 TIPOS = {
     "01": {"sigla": "FT"},     # CONSTA: «tipo de documento FT que son las iniciales de factura» (compras 7:34)
     "03": {"sigla": "BV"},     # CONSTA (John, 20-sep-2026)
-    "07": {"sigla": "CC"},     # CONSTA: «la sigla para la nota de crédito en este sistema contable es CC» (14:05)
+    "07": {"sigla": "CC"},     # CONSTA: «la sigla para la nota de crédito en este sistema contable es CC» (14:05),
+                               # y los tres ejemplos de nota de crédito del manual de VENTAS la traen
+    # CONSTA desde el manual (22-sep-2026): sus dos ejemplos de nota de DÉBITO —una penalidad por daños, con el
+    # proveedor al haber y referencia a una FT— la escriben `CD`. Hasta hoy iba `ND`, heredada de CONCAR y marcada
+    # «[por confirmar] — y es el que más sospecha da, por ser el hermano del 07». La sospecha era buena: es el
+    # mismo error que `NC` en vez de `CC`, del que no avisa nadie porque el archivo entra igual.
+    "08": {"sigla": "CD"},
+    "12": {"sigla": "TK"},     # CONSTA: tres ejemplos de compras (un ticket de combustible)
+    "14": {"sigla": "RC"},     # CONSTA: tres ejemplos de compras (un recibo de Claro)
+    # Las dos que siguen SIN constar. No aparecen en ningún ejemplo ni en la tabla de campos, y el manual dice que
+    # el tipo es «el que tiene registrado TU sistema», o sea de cada instalación: se cotejan con el maestro de
+    # cada contribuyente, no se fijan aquí.
     "02": {"sigla": "RH"},     # [por confirmar] — de CONCAR, sin su sub-diario propio, que tampoco consta
     "05": {"sigla": "BA"},     # [por confirmar]
-    "08": {"sigla": "ND"},     # [por confirmar] — y es el que más sospecha da, por ser el hermano del 07
-    "12": {"sigla": "TK"},     # [por confirmar]
-    "14": {"sigla": "RC"},     # [por confirmar]
 }
 
 # El sub-diario de la detracción va VACÍO, y no es un olvido: en CONCAR las compras con detracción tienen su

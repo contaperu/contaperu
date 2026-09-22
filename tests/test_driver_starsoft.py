@@ -262,23 +262,27 @@ def test_un_tipo_de_comprobante_sin_sigla_detiene_la_exportacion():
     assert _filas(doc, config=con_sigla)[0]["TIPO DOCUMENTO"] == "GRT"
 
 
-def test_las_cinco_siglas_que_no_constan_se_heredan_marcadas():
+def test_solo_dos_siglas_siguen_sin_constar_y_se_heredan_marcadas():
     """Documenta la única decisión de este driver que no se puede afirmar, para que se vea y se pueda revocar.
 
-    `01`, `03` y `07` salen de los vídeos. Las otras cinco son las de CONCAR, puestas como defecto configurable
-    porque sin ellas el golden de compras —que lleva un recibo de servicios públicos— no se exportaría, y un
-    driver que se planta ante el comprobante más común no sirve para probar nada.
-    """
+    Eran cinco hasta que llegó el manual (22-sep-2026). Sus ejemplos zanjaron tres —`TK` y `RC` tal como estaban,
+    y la nota de débito, que iba `ND` heredada de CONCAR y **es `CD`**—, así que solo quedan el recibo por
+    honorarios y la boleta de anticipo. Siguen puestas como defecto configurable y no vacías porque sin ellas el
+    golden de compras no se exportaría entero, y un driver que se planta ante un comprobante común no sirve para
+    probar nada."""
     from contaperu.drivers.starsoft import datos
 
-    constan = {"01": "FT", "03": "BV", "07": "CC"}
-    heredadas = {"02": "RH", "05": "BA", "08": "ND", "12": "TK", "14": "RC"}
+    constan = {"01": "FT", "03": "BV", "07": "CC", "08": "CD", "12": "TK", "14": "RC"}
+    heredadas = {"02": "RH", "05": "BA"}
     assert {k: v["sigla"] for k, v in datos.TIPOS.items()} == {**constan, **heredadas}
 
     de_concar = api.configuracion_por_defecto()["concar"]["tipos"]
     for codigo, sigla in heredadas.items():
         assert de_concar[codigo]["sigla"] == sigla, f"{codigo} ya no es la de CONCAR: revisar de dónde sale"
-    assert de_concar["07"]["sigla"] != constan["07"], "la nota de crédito es la divergencia que sí consta"
+    # Las dos divergencias con CONCAR que sí constan, y que son la razón de que este driver tenga tabla propia:
+    # heredarla sin tocar sacaría un archivo que STARSOFT importa clasificando mal esos dos comprobantes.
+    assert de_concar["07"]["sigla"] == "NC" != constan["07"]
+    assert de_concar["08"]["sigla"] == "ND" != constan["08"]
 
 
 def test_el_igv_va_solo_en_la_linea_del_total():
