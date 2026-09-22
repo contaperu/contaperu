@@ -297,7 +297,9 @@
             "codigo": { "type": "string", "description": "El código SUNAT del bien o servicio (Catálogo 54)." },
             "codigo_interno": { "type": "string" },
             "tasa": { "anyOf": [{ "type": "string" }, { "type": "number" }] },
-            "base": { "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }] }
+            "base": { "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }] },
+            "nro_constancia": { "type": "string", "description": "La constancia del depósito, o el comodín mientras no se haya pagado." },
+            "fecha_constancia": { "$ref": "#/$defs/fecha" }
           }
         },
         "tasa_igv": { "anyOf": [{ "type": "string" }, { "type": "number" }] }

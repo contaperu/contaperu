@@ -81,7 +81,7 @@ def test_la_linea_de_detraccion_lleva_su_bloque():
     assert len(lineas) == 5
     det = lineas[-1]
     assert det.cuenta == "421203" and det.debe_haber == "H" and det.importe == "198.00"
-    assert det.documento["tipo"] == "DR" and det.documento["serie_numero"] == "9999999999"
+    assert det.documento["tipo"] == "DR" and det.documento["serie_numero"] == "999999999"
     assert det.detraccion == {"codigo_interno": "02702", "tasa": "4", "base": "4956.00"}
     assert det.glosa == lineas[0].glosa, "la misma glosa en todas las lineas, sin prefijo (2.2)"
 

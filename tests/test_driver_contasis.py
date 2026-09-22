@@ -61,6 +61,30 @@ def test_en_soles_el_tipo_de_cambio_no_cambia_el_archivo():
     assert filas_a == filas_b, "el T.C. en soles no puede mover el registro de CONTASIS"
 
 
+def test_la_constancia_de_la_detraccion_llena_sus_dos_columnas():
+    """Las columnas U y V existían declaradas y se escribían vacías desde el 12-sep-2026 («no pongas nada»).
+
+    El 22-sep-2026 John pidió lo contrario: que la constancia salga en cualquier destino que tenga el campo. Sin
+    depositar sale el comodín; con el vóucher pegado, su número y su fecha. Y una compra SIN detracción las deja
+    en blanco: son columnas de las que la llevan, no de todas."""
+    fila = lambda d: [c.value for c in hoja(api.exportar(doc(dict(FACTURA, **d)), driver="contasis",
+                                                         configuracion=CONTAB)).iter_rows().__next__()]
+    columna = lambda f, letra: f[ord(letra) - ord("A")]
+
+    # La U es un texto de ancho fijo (20), así que el escritor la rellena con espacios: se compara sin ellos.
+    sin = fila({})
+    assert columna(sin, "U").strip() == "" and columna(sin, "V") is None
+
+    pendiente = fila({"detraccion": {"codigo": "027", "porcentaje": "4"}})
+    assert columna(pendiente, "U").strip() == "999999999", "el comodín mientras no se deposita"
+    assert columna(pendiente, "V") is None, "sin fecha no se inventa una"
+
+    pagada = fila({"detraccion": {"codigo": "027", "porcentaje": "4",
+                                  "nro_constancia": "00123456789", "fecha_constancia": "2026-08-05"}})
+    assert columna(pagada, "U").strip() == "00123456789"
+    assert columna(pagada, "V") is not None and columna(pagada, "V").strftime("%d/%m/%Y") == "05/08/2026"
+
+
 def test_el_recibo_por_honorarios_queda_fuera_del_archivo():
     rh = dict(FACTURA, tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0", inafecto="1000",
               total="1000")

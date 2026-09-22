@@ -1195,7 +1195,7 @@
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
@@ -1210,7 +1210,8 @@
     "codigo": "037",
     "codigo_interno": "03701",
     "tasa": "12",
-    "base": "118.00"
+    "base": "118.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -1324,7 +1325,7 @@
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
@@ -1339,7 +1340,8 @@
     "codigo": "037",
     "codigo_interno": "03701",
     "tasa": "12",
-    "base": "118.00"
+    "base": "118.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -1516,7 +1518,7 @@
    "contraparte_doc": "20602222226",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-10",
     "fecha_vencimiento": "2026-08-27"
@@ -1531,7 +1533,8 @@
     "codigo": "027",
     "codigo_interno": "02702",
     "tasa": "4",
-    "base": "4956.00"
+    "base": "4956.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -1708,7 +1711,7 @@
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
@@ -1723,7 +1726,8 @@
     "codigo": "019",
     "codigo_interno": "01903",
     "tasa": "10",
-    "base": "118.00"
+    "base": "118.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -1832,7 +1836,7 @@
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
@@ -1847,7 +1851,8 @@
     "codigo": "037",
     "codigo_interno": "03799",
     "tasa": "12",
-    "base": "118.00"
+    "base": "118.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -1956,7 +1961,7 @@
    "contraparte_doc": "20602222226",
    "documento": {
     "tipo": "DT",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-10",
     "fecha_vencimiento": "2026-08-27"
@@ -1971,7 +1976,8 @@
     "codigo": "027",
     "codigo_interno": "02702",
     "tasa": "4",
-    "base": "4956.00"
+    "base": "4956.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -2080,7 +2086,7 @@
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
@@ -2095,7 +2101,8 @@
     "codigo": "037",
     "codigo_interno": "03701",
     "tasa": "12",
-    "base": "118.00"
+    "base": "118.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -2228,7 +2235,7 @@
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
@@ -2243,7 +2250,8 @@
     "codigo": "027",
     "codigo_interno": "02702",
     "tasa": "4",
-    "base": "118.00"
+    "base": "118.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -2599,7 +2607,7 @@
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
@@ -2614,7 +2622,8 @@
     "codigo": "027",
     "codigo_interno": "02702",
     "tasa": "4",
-    "base": "118.00"
+    "base": "118.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }
@@ -3126,7 +3135,7 @@
    "contraparte_doc": "20607777773",
    "documento": {
     "tipo": "DR",
-    "serie_numero": "9999999999",
+    "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
@@ -3141,7 +3150,8 @@
     "codigo": "037",
     "codigo_interno": "03701",
     "tasa": "12",
-    "base": "118.00"
+    "base": "118.00",
+    "nro_constancia": "999999999"
    },
    "tasa_igv": "18"
   }

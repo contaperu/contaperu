@@ -285,7 +285,7 @@ def test_el_centro_solo_es_obligatorio_donde_se_escribe():
 def test_factura_con_detraccion_va_al_sub_diario_10():
     """La factura con detracción, calcada dun Excel real de produccion (06-sep-2026): el total COMPLETO al
     proveedor (421201) y dos líneas más por el monto detraído — el proveedor al Debe y 421203 al Haber
-    con tipo DT, comodín 9999999999 y AI–AL. El monto va en soles enteros.
+    con tipo DT, comodín 999999999 y AI–AL. El monto va en soles enteros.
 
     La glosa es la misma que la de las otras cuatro filas desde la 2.2: la línea se reconoce por su cuenta y su
     tipo de documento, no por un texto."""
@@ -299,7 +299,7 @@ def test_factura_con_detraccion_va_al_sub_diario_10():
     assert (det_prov["K"], det_prov["L"], det_prov["N"], det_prov["O"], det_prov["R"], det_prov["S"], det_prov["X"]) == \
         ("421201", "20607777773", "D", 14.0, "FT", "F001-123", "OBRA01")
     assert (det_["K"], det_["L"], det_["N"], det_["O"], det_["Q"]) == ("421203", "20607777773", "H", 14.0, 14.0)   # 118 × 12 % = 14.16 → 14
-    assert (det_["R"], det_["S"], det_["M"], det_["X"]) == ("DR", "9999999999", "", "")
+    assert (det_["R"], det_["S"], det_["M"], det_["X"]) == ("DR", "999999999", "", "")
     assert det_["W"] == gasto["W"], "la misma glosa en las cinco filas"
     assert (det_["AI"], det_["AJ"], det_["AK"], det_["AL"], det_["AO"]) == ("03701", 12.0, "", 118.0, 18)
     assert (gasto["AI"], igv["AI"], cxp["AI"]) == ("", "", "") and debe_haber(filas) == (Decimal("132"), Decimal("132"))
@@ -422,7 +422,7 @@ def test_asiento_con_detraccion_calca_un_excel_real():
     assert col("M") == ["CC-64", "", "", "", ""] and col("X") == ["", "", "CC-64", "CC-64", ""]
     assert col("N") == ["D", "D", "H", "D", "H"]
     assert col("O") == [4200.0, 756.0, 4956.0, 198.0, 198.0] and col("Q") == col("O") and col("P") == [""] * 5
-    assert col("R") == ["FT", "FT", "FT", "FT", "DR"] and col("S") == ["E001-871"] * 4 + ["9999999999"]
+    assert col("R") == ["FT", "FT", "FT", "FT", "DR"] and col("S") == ["E001-871"] * 4 + ["999999999"]
     assert col("D") == [date(2026, 8, 10)] * 5 and col("T") == [date(2026, 8, 10)] * 5 and col("U") == [date(2026, 8, 27)] * 5
     assert col("W") == ["SERVICIO DE TRANSPORTE DE MATE"] * 5, "la misma glosa en las cinco filas (2.2)"
     assert col("AI") == ["", "", "", "", "02702"] and col("AJ") == ["", "", "", "", 4.0]

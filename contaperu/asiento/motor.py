@@ -107,14 +107,23 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = Fa
     """El bloque de la línea de detracción: el código SUNAT, el interno del contribuyente (T.G. 28 de
     CONCAR: el de SUNAT + 2 propios, o SUNAT + "01" si no lo configuró), la tasa —la misma con la que
     se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base. Con vocabulario
-    neutral no lleva el código interno: es de un sistema legacy."""
+    neutral no lleva el código interno: es de un sistema legacy.
+
+    **Y la constancia del depósito** (2.6): el número y la fecha que alguien haya pegado, porque la detracción tiene
+    dos tiempos —se provisiona al registrar y se paga días después— y hasta ahora el segundo no volvía al archivo.
+    El número cae al COMODÍN cuando no hay constancia, que es el caso normal al exportar el mes; la fecha no, que
+    una fecha inventada es peor que ninguna. Se resuelve aquí, y no en cada driver, porque es la contabilidad la
+    que dice «esto está pendiente»: el driver solo elige en qué columna lo escribe, si es que tiene una."""
     bloque = c.detraccion or {}
     sunat = str(bloque.get("codigo") or "").strip()
     interno = "" if neutral else str((config.get("detraccion_codigos") or {}).get(sunat)
                                      or (f"{sunat}01" if sunat else ""))
     tasa = tasa_detraccion(c, config)
+    constancia = str(bloque.get("nro_constancia") or "").strip() or NUMERO_DETRACCION_PENDIENTE
     return _limpio({"codigo": sunat, "codigo_interno": interno,
-                    "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total)})
+                    "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total),
+                    "nro_constancia": constancia if sunat else "",
+                    "fecha_constancia": str(bloque.get("fecha_constancia") or "").strip() if sunat else ""})
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,

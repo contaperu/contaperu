@@ -160,8 +160,8 @@ así que no hay uno que calcar; lo que lo zanja es la tabla de campos, donde la 
 | # | Campo | Qué lleva |
 |---|---|---|
 | 24 | AFECTO A DETRACCION | `1`. **Va en las tres filas**: es del comprobante, no de la línea |
-| 25 | NUMERO DE DETRACCION | **en blanco**: la constancia se deposita *después* de exportar |
-| 26 | FECHA DE DETRACCION | **en blanco**, por lo mismo |
+| 25 | NUMERO DE DETRACCION | el del vóucher, o el **comodín `999999999`** mientras no se haya depositado |
+| 26 | FECHA DE DETRACCION | la del depósito; **en blanco** si no consta — una fecha inventada es peor que ninguna |
 | 31 | CODIGO DE LA DETRACCION | el del Catálogo 54 de SUNAT (`027`), no el interno de CONCAR (`02702`) |
 | 34 | TASA DE DETRACCION | el porcentaje |
 | 35 | IMPORTE DE DETRACCION | lo detraído, ya redondeado al sol por el núcleo |

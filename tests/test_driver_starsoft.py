@@ -146,8 +146,7 @@ def test_los_campos_de_la_detraccion_van_en_la_fila_del_proveedor():
     """Los del manual: 24 afecto, 25 numero, 26 fecha, 31 codigo, 34 tasa, 35 importe.
 
     La bandera del 24 va en las TRES filas —es del comprobante, no de la linea—; los otros cinco, solo en la del
-    proveedor, como el IGV y su tasa. Y la CONSTANCIA va en blanco a proposito: se deposita despues de exportar,
-    «casi pasando el otro mes» (John, 22-sep-2026), asi que quien la conoce es STARSOFT y no nosotros."""
+    proveedor, como el IGV y su tasa."""
     filas = _filas(_con_detraccion())
     assert [f["DETRACCION"] for f in filas] == ["1", "1", "1"]
     proveedor = filas[1]          # IGV, proveedor, gasto
@@ -157,12 +156,28 @@ def test_los_campos_de_la_detraccion_van_en_la_fila_del_proveedor():
     # Lo DETRAIDO, que no es el 4 % exacto de 1096.80 (43.872): la detraccion se redondea al sol, y eso lo
     # decide el nucleo, igual para todos los destinos.
     assert proveedor["IMPORTE DETRACCION"] == "44.00"
-    assert proveedor["NRO DOC DETRACCION"] == "" and proveedor["FECHA DETRACCION"] == ""
+    # La CONSTANCIA sin depositar sale con el COMODIN (2.6): el deposito se hace despues de exportar, «casi
+    # pasando el otro mes» (John, 22-sep-2026), asi que este es el caso normal al cerrar el mes. La FECHA no
+    # tiene comodin: una fecha inventada es peor que ninguna.
+    assert proveedor["NRO DOC DETRACCION"] == "999999999" and proveedor["FECHA DETRACCION"] == ""
     # Y en las otras dos no van: el codigo vacio, y los dos importes a `0.00`, que es como los ejemplos
     # oficiales dicen «no aplica» en esas columnas.
     for otra in (filas[0], filas[2]):
         assert otra["CODIGO DETRACCION"] == ""
         assert otra["TASA DETRACCION"] == otra["IMPORTE DETRACCION"] == "0.00"
+        assert otra["NRO DOC DETRACCION"] == "" and otra["FECHA DETRACCION"] == ""
+
+
+def test_la_constancia_depositada_sale_en_lugar_del_comodin():
+    """El segundo tiempo de la detraccion: alguien pega el numero del voucher y la fecha, y salen al archivo.
+
+    Es lo que pidio John el 22-sep-2026. El comodin solo tapa el hueco mientras el deposito no existe."""
+    doc = _compra(detraccion={"codigo": "027", "porcentaje": "4",
+                              "nro_constancia": "00123456789", "fecha_constancia": "2026-08-05"})
+    proveedor = _filas(doc)[1]
+    assert proveedor["NRO DOC DETRACCION"] == "00123456789"
+    assert proveedor["FECHA DETRACCION"] == "05/08/2026", "la fecha sale en el formato de STARSOFT"
+    assert proveedor["CODIGO DETRACCION"] == "027" and proveedor["TASA DETRACCION"] == "4.00"
 
 
 def test_sin_detraccion_la_bandera_va_en_cero_y_sus_importes_tambien():

@@ -49,7 +49,10 @@ def test_la_misma_entrada_da_la_misma_huella_y_es_la_de_siempre():
 # 7bea763c65e20607bf0caacfff17b7f41e57e9618634807e900fa51b03928300 y
 # a51a1da1befd246b0deea4fb81f4b1e43d3033c61aa0fea56654fb2b50b8b582.
 HUELLA_USD = "cb3af1e5e311eadbf33f71aa0087b600e303e2e8f631c8d90ad10f08214689e4"
-HUELLA_DETRACCION = "3c8525988cc772ed9c6589033a84cfc185f0db9e84168f2653c7fced63df64bd"
+# La de detracción cambió OTRA VEZ en la 2.6, y las otras dos no: su línea pasó a llevar la constancia del depósito
+# —el comodín mientras no se ha pagado— y el comodín pasó de diez nueves a nueve. Era
+# 3c8525988cc772ed9c6589033a84cfc185f0db9e84168f2653c7fced63df64bd.
+HUELLA_DETRACCION = "13024902a19eda1674fefe0d03b03eeb6fa55df276d9a549680b26d180ef66c6"
 
 
 def test_la_huella_en_dolares_y_con_detraccion_es_la_de_siempre():

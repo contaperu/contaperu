@@ -11,6 +11,7 @@ from datetime import date, datetime, time
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
+from ...asiento.configuracion import NUMERO_DETRACCION_PENDIENTE
 from ...asiento.resolucion import cuenta_tercero, lleva_centro, partes_de
 from ...asiento.motor import glosa_de
 from ...configuracion import por_defecto
@@ -51,6 +52,20 @@ def _en_soles(importes: dict[str, Decimal], tipo: str, tc: Decimal) -> dict[str,
         if diferencia and candidatas:
             soles[max(candidatas, key=lambda k: abs(soles[k]))] += diferencia
     return soles
+
+
+def _constancia(c: Comprobante) -> dict[str, Any]:
+    """Las columnas U y V: la constancia del depósito de la detracción (2.6).
+
+    CONTASIS es un driver de REGISTRO —no arma el asiento, así que no ve la línea de detracción donde el núcleo ya
+    resuelve el comodín—, y por eso lo resuelve aquí sobre el comprobante. Sin detracción las dos van en blanco: la
+    columna existe para las compras que la llevan, no para todas.
+    """
+    det = c.detraccion or {}
+    if not str(det.get("codigo") or "").strip():
+        return {"U": "", "V": None}
+    return {"U": str(det.get("nro_constancia") or "").strip() or NUMERO_DETRACCION_PENDIENTE,
+            "V": _fecha(celdas.fecha(str(det.get("fecha_constancia") or ""), None))}
 
 
 def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.OPCIONES) -> dict[str, Any]:
@@ -104,8 +119,11 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
         "A": c.fecha_emision, "B": c.fecha_vencimiento, "C": c.tipo_cp, "D": c.serie or c.cod_dep_aduanera,
         "E": c.anio_dua, "F": formatear_numero(c.numero, opciones), "G": c.contraparte_tipo_doc, "H": c.contraparte_doc,
         "I": c.contraparte_nombre, **importes,
-        # El no domiciliado y la constancia de la detracción van vacíos (John, 12-sep-2026: «no pongas nada»).
-        "T": "", "U": "", "V": None, "W": comunes["cambio"],
+        # El no domiciliado va vacío (John, 12-sep-2026: «no pongas nada»). La CONSTANCIA de la detracción sí se
+        # escribe desde la 2.6, y revierte esa decisión a petición suya del 22-sep: si el comprobante tiene
+        # detracción, su número —o el comodín mientras no se haya depositado— y la fecha del depósito, que va
+        # vacía si no consta. Sin detracción, las dos en blanco: son columnas suyas, no de todas las compras.
+        "T": "", **_constancia(c), "W": comunes["cambio"],
         "X": comunes["ref_fecha"], "Y": comunes["ref_tipo"], "Z": comunes["ref_serie"], "AA": comunes["ref_numero"],
         "AB": comunes["moneda"], "AC": comunes["dolares"], "AD": c.fecha_vencimiento, "AE": comunes["condicion"],
         "AF": cuenta, "AG": (cuentas.get("otros_tributos") or "") if importes["R"] else "", "AH": comunes["tercero"],

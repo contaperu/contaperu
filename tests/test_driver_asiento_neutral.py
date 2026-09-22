@@ -42,7 +42,7 @@ def test_las_lineas_no_llevan_vocabulario_legacy():
     assert all("tipo" not in (linea.get("referencia") or {}) for linea in lineas)
     detraccion = [linea for linea in lineas if linea["rol"] == "detraccion"]
     assert detraccion, "el golden trae una factura con detracción"
-    assert all(linea["documento"]["serie_numero"] != "9999999999" for linea in detraccion)
+    assert all(linea["documento"]["serie_numero"] != "999999999" for linea in detraccion)
     assert all(linea["detraccion"]["codigo"] and "codigo_interno" not in linea["detraccion"] for linea in detraccion)
 
 

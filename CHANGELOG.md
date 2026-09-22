@@ -6,6 +6,41 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.6.0] — 2026-09-22
+
+**La detracción tiene dos tiempos y ahora el segundo llega al archivo.** Se provisiona al registrar el comprobante y
+se deposita días después —«casi pasando el otro mes»—; hasta hoy esa constancia no volvía a ninguna parte.
+
+### Añadido
+
+- **La línea de detracción transporta `nro_constancia` y `fecha_constancia`** (`asiento.motor._detraccion`), que ya
+  estaban declarados en el estándar (`detraccion` del comprobante) y no los usaba nadie. El número cae al
+  **comodín** cuando no hay constancia, que es el caso normal al cerrar el mes; la fecha no tiene comodín, porque
+  una fecha inventada es peor que ninguna. Se resuelve en el núcleo y no en cada driver: es la contabilidad la que
+  dice «esto está pendiente», el driver solo elige en qué columna lo escribe.
+- **STARSOFT escribe sus campos 25 y 26**, que estaban declarados y se rellenaban con `""` literal. Van solo en la
+  fila del proveedor, como el código y la tasa.
+- **CONTASIS escribe sus columnas U y V** —«Constancia de depósito de detracción: número» y «: fecha»—, que
+  estaban declaradas con su largo y se escribían vacías. **Revierte la decisión del 12-sep-2026** («no pongas
+  nada»), a petición de John del 22: la constancia sale en cualquier destino que tenga el campo.
+- El esquema del estándar declara las dos claves nuevas en el bloque `detraccion` de la **línea**, que era
+  `additionalProperties: false`.
+
+### Cambiado
+
+- ⚠️ **El comodín pasa de `9999999999` a `999999999`** — de diez nueves a **nueve**, contados por John. **Esto
+  mueve el asiento de CONCAR**, no solo el de STARSOFT: es el número del documento comodín de la línea `DR`, y así
+  se ha importado ya en un CONCAR real. Los asientos con detracción que se exporten a partir de ahora llevan un
+  dígito menos que los que ya están importados.
+- La **huella del asiento** de un comprobante con detracción cambia, por lo anterior y porque su línea lleva ahora
+  la constancia. Las de soles sin detracción y las de dólares no se mueven.
+
+### Cómo migrar
+
+La API pública no cambia. Lo que cambia es **el archivo** de tres destinos, y el comodín en todos ellos. Quien
+guarde `nro_constancia` en el bloque `detraccion` de un comprobante lo verá salir; quien no, verá el comodín donde
+antes había un hueco.
+
 ## [2.5.1] — 2026-09-22
 
 ### Corregido

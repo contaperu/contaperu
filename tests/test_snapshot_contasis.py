@@ -78,7 +78,12 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
                              concepto="Importación de repuestos"), False, None),
     ("glosa_larga", dict(concepto=LARGA), False, None),
     ("sin_concepto", dict(concepto=""), False, None),
-    ("detraccion_no_se_escribe", dict(detraccion={"codigo": "037", "porcentaje": "12"}), False, None),
+    # Desde la 2.6 la detracción SÍ escribe sus dos columnas (U y V): el número del depósito o el comodín mientras
+    # no exista, y la fecha si consta. Hasta entonces iban vacías y el caso se llamaba «detraccion_no_se_escribe».
+    ("detraccion_pendiente", dict(detraccion={"codigo": "037", "porcentaje": "12"}), False, None),
+    ("detraccion_con_constancia", dict(detraccion={"codigo": "037", "porcentaje": "12",
+                                                   "nro_constancia": "00123456789",
+                                                   "fecha_constancia": "2026-08-05"}), False, None),
     ("credito", dict(condicion_pago="credito", fecha_vencimiento="2026-09-10"), False, None),
     ("sin_vencimiento", dict(fecha_vencimiento=None), False, None),
     ("imputacion_cuenta_del_total", dict(id_externo="f1"), False,

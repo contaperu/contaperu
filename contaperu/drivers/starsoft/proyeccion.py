@@ -195,10 +195,12 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         # existiendo en el asiento del motor, que es el mismo para todos; lo que cambia es lo que este driver
         # proyecta. La bandera va en las TRES filas, no solo en la del proveedor (John, 22-sep-2026).
         "DETRACCION": "1" if detraccion is not None else "0",
-        # La constancia del depósito NO se conoce al exportar: se paga después, «casi pasando el otro mes» (John,
-        # 22-sep-2026). Van en blanco y las completa STARSOFT cuando el depósito existe.
-        "NRO DOC DETRACCION": "",
-        "FECHA DETRACCION": "",
+        # La constancia del depósito (2.6). Se paga después del registro —«casi pasando el otro mes» (John,
+        # 22-sep-2026)—, así que lo normal al exportar el mes es que no exista todavía: en ese caso el NÚMERO sale
+        # con el comodín, que lo decide el núcleo y no este driver (`asiento.NUMERO_DETRACCION_PENDIENTE`). La
+        # FECHA no tiene comodín: una fecha inventada es peor que ninguna. Hasta la 2.5 las dos iban en blanco.
+        "NRO DOC DETRACCION": det.get("nro_constancia", "") if es_total else "",
+        "FECHA DETRACCION": det.get("fecha_constancia", "") if es_total else "",
         # El código de SUNAT (`027`), no el interno que CONCAR mapea en su tabla (`02702`): el vídeo dice «el
         # código de la detracción… para indicar el tipo de operación afecta» (10:49), y eso es el Catálogo 54.
         # Los tres van SOLO en la fila del proveedor, como el IGV y su tasa: es para lo que existe el rol.

@@ -19,7 +19,13 @@ from ..configuracion import Campo
 # importarse en un CONCAR de verdad; el archivo validado dice DR. Es la sigla de la Tabla General 06,
 # que cada contribuyente numera a su gusto: por eso `detraccion_tipo_doc` puede cambiarla.
 TIPO_DOC_DETRACCION = "DR"
-NUMERO_DETRACCION_PENDIENTE = "9999999999"
+# NUEVE nueves, contados por John (22-sep-2026). Hasta la 2.5 eran diez, y cambiarlo mueve el asiento de CONCAR,
+# no solo el de STARSOFT: es el número del documento comodín de la línea `DR`, y también lo que sale como número de
+# constancia en los destinos que tienen esa columna mientras nadie haya pegado la de verdad.
+#
+# ⚠️ DEUDA: el TIPO del documento se configura (`detraccion_tipo_doc`, abajo) y el NÚMERO no. La asimetría es de
+# cuando el comodín era un detalle de CONCAR; hoy lo ven tres destinos y tarde o temprano alguno querrá el suyo.
+NUMERO_DETRACCION_PENDIENTE = "999999999"
 
 # La clave donde un sistema de asientos dice el código de cada moneda en su vocabulario ({"PEN": "MN", "USD": "US"}). Es
 # la única clave de la sección de un sistema que lee el núcleo —para saber qué monedas tienen código

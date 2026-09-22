@@ -2401,7 +2401,7 @@
    "ELECTROMECANICA DE PRUEBA S.R.L.                            "
   ]
  },
- "detraccion_no_se_escribe": {
+ "detraccion_pendiente": {
   "A": [
    "datetime",
    "2026-08-11T00:00:00"
@@ -2456,7 +2456,137 @@
   ],
   "U": [
    "str",
+   "999999999           "
+  ],
+  "W": [
+   "float",
+   1.0
+  ],
+  "Y": [
+   "str",
+   "  "
+  ],
+  "Z": [
+   "str",
+   "      "
+  ],
+  "AA": [
+   "str",
+   "             "
+  ],
+  "AB": [
+   "str",
+   "S"
+  ],
+  "AD": [
+   "datetime",
+   "2026-08-18T00:00:00"
+  ],
+  "AE": [
+   "str",
+   "CON"
+  ],
+  "AF": [
+   "str",
+   "631101    "
+  ],
+  "AG": [
+   "str",
+   "          "
+  ],
+  "AH": [
+   "str",
+   "421201    "
+  ],
+  "AI": [
+   "str",
+   "OBRA01   "
+  ],
+  "AJ": [
+   "str",
+   "         "
+  ],
+  "AN": [
+   "str",
+   "      "
+  ],
+  "AO": [
+   "str",
+   "             "
+  ],
+  "AQ": [
+   "str",
+   "          "
+  ],
+  "AR": [
+   "float",
+   18.0
+  ],
+  "AS": [
+   "str",
+   "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSIÓN           "
+  ]
+ },
+ "detraccion_con_constancia": {
+  "A": [
+   "datetime",
+   "2026-08-11T00:00:00"
+  ],
+  "B": [
+   "datetime",
+   "2026-08-18T00:00:00"
+  ],
+  "C": [
+   "str",
+   "01"
+  ],
+  "D": [
+   "str",
+   "F001  "
+  ],
+  "E": [
+   "str",
+   "    "
+  ],
+  "F": [
+   "str",
+   "123          "
+  ],
+  "G": [
+   "str",
+   "6"
+  ],
+  "H": [
+   "str",
+   "20607777773"
+  ],
+  "I": [
+   "str",
+   "ELECTROMECANICA DE PRUEBA S.R.L."
+  ],
+  "J": [
+   "float",
+   100.0
+  ],
+  "K": [
+   "float",
+   18.0
+  ],
+  "S": [
+   "float",
+   118.0
+  ],
+  "T": [
+   "str",
    "                    "
+  ],
+  "U": [
+   "str",
+   "00123456789         "
+  ],
+  "V": [
+   "datetime",
+   "2026-08-05T00:00:00"
   ],
   "W": [
    "float",
