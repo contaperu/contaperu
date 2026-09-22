@@ -16,6 +16,11 @@ test pase sin regenerar el fixture es la prueba de que quien integró con la 1.x
 Añadir es una versión menor, pero no pasa en silencio: un nombre nuevo hace fallar el test hasta que se regenera la
 superficie, a propósito. Quitar o cambiar lo que está no se arregla regenerando.
 
+**Un parámetro nuevo y opcional al final de una firma es añadir, no cambiar** (2.5, `configuracion_por_defecto`):
+quien llamaba sin él sigue llamando igual. Se ve como una firma distinta y hace fallar el test, que es lo que se
+quiere —el diff del fixture es de una línea y dice exactamente qué se añadió—, pero se regenera. Lo que no se
+regenera es quitar un parámetro, renombrarlo, hacerlo obligatorio o cambiar su valor por defecto.
+
     python -c "import sys; sys.path.insert(0, 'tests'); import test_superficie_publica as t; t.regenerar()"
 """
 from __future__ import annotations

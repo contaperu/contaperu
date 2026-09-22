@@ -229,17 +229,21 @@ def esquema_diagnostico() -> str:
 
 @mcp.tool(annotations=SOLO_LECTURA)
 @contesta
-def configuracion_por_defecto() -> dict:
+def configuracion_por_defecto(driver: str | None = None) -> dict:
     """La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas
     de detracción— y una sección por sistema contable con lo suyo (`concar`: siglas y sub-diarios,
     códigos, columnas del centro de costo; `csv`: siglas, sub-diarios y códigos de la detracción;
     `contasis`: medio de pago y columnas del centro de costo).
 
+    **Con `driver`, la de quien lleva ese sistema**: lo general con las cuentas de ese sistema y solo
+    su sección. Pásalo siempre que sepas a qué sistema contable exporta el contribuyente, porque las
+    cuentas de fábrica son las del PCGE a seis dígitos y hay sistemas que numeran de otra forma.
+
     Es un punto de partida razonable, no la verdad de ningún contribuyente: el plan de cuentas
     y los sub-diarios los decide cada empresa. Cópiala, cámbiale lo que toque y pásala como
     `configuracion` en las demás herramientas: se valida entera, y lo que no existe se dice.
     """
-    return api.configuracion_por_defecto()
+    return api.configuracion_por_defecto(driver)
 
 
 @mcp.tool(annotations=SOLO_LECTURA)

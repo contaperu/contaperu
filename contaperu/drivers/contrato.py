@@ -71,12 +71,21 @@ defecto de su sección, su validación y la descripción con la que una aplicaci
 (`seccion_por_defecto`, `describir`): cada aplicación construida con el motor configura cada sistema según lo que
 necesita cada empresa, sin copiar nada.
 
+Y opcional en un driver que lleva cuentas, `CUENTAS_POR_DEFECTO` (2.5): **con qué cuentas nace una empresa que lleva
+SU sistema**, cuando no son las de `CONFIGURACION_GENERAL`. Las de fábrica son las del PCGE a seis dígitos —`421201`,
+`401111`, `121201`—, que es como numeran CONCAR y CONTASIS; un sistema que numera de otra forma las declara aquí, y
+`config_aplicada` las pone debajo de lo que la empresa haya guardado. Se declaran **solo las que cambian**: lo que un
+driver no diga sigue siendo lo general, así que esto no es un segundo plan de cuentas sino la diferencia con el
+primero. **No son las cuentas de nadie**: son de dónde parte quien abre ese sistema por primera vez, y en cuanto el
+contador escriba la suya, manda la suya.
+
 Los `Protocol` de abajo son la documentación tipada; lo que el registro comprueba de verdad al cargar
 un driver de terceros es `incumplimientos()`, y `tests/test_contrato_drivers.py` es el examen que pasa
 cualquier driver registrado.
 """
 from __future__ import annotations
 
+import copy
 import inspect
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -146,6 +155,9 @@ DATOS_CON_COLUMNAS = frozenset({"centro_costo"})
 _LINEAS_CON_ANEXO = frozenset({"principal", "tercero"})
 # Lo que ninguna sección puede declarar: lo general y lo que el núcleo reserva.
 _CLAVES_QUE_NO_SON_DE_UNA_SECCION = frozenset({c.clave for c in CONFIGURACION_GENERAL} | {"columnas", "imputaciones"})
+# Las cuentas de lo general, contra las que se valida lo que un driver declare en `CUENTAS_POR_DEFECTO`: sus claves
+# son estas y ninguna más, y cada una cumple lo que ya cumplía (el patrón de una cuenta, o el objeto PEN/USD).
+_CUENTAS_GENERALES: tuple[Campo, ...] = next((c.campos for c in CONFIGURACION_GENERAL if c.clave == "cuentas"), ())
 
 
 class Driver(Protocol):
@@ -163,6 +175,7 @@ class DriverRegistroTexto(Driver, Protocol):
 class DriverRegistroArchivo(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_REGISTRO
+    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, solo las que se apartan de lo general
 
     def desde_comprobantes(self, libro: Libro, comprobantes: list[Comprobante], config: dict,
                            opciones: Opciones = ...) -> tuple[bytes, dict]: ...
@@ -171,6 +184,7 @@ class DriverRegistroArchivo(Driver, Protocol):
 class DriverAsientoComprobantes(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
+    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, solo las que se apartan de lo general
 
     def construir(self, libro: Libro, comprobantes: list[Comprobante], config: dict,
                   correlativos: dict[str, int], opciones: Opciones = ...) -> tuple[bytes, dict]: ...
@@ -179,6 +193,7 @@ class DriverAsientoComprobantes(Driver, Protocol):
 class DriverAsientoLineas(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
+    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, solo las que se apartan de lo general
 
     def desde_lineas(self, libro: Libro, lineas: list[LineaDiario], config: dict, opciones: Opciones = ..., *,
                      indice: tuple[ComprobanteDelAsiento, ...] = ...) -> tuple[bytes, dict]: ...
@@ -253,6 +268,15 @@ def exige(modulo: Any) -> frozenset[str]:
 def configuracion(modulo: Any) -> tuple[Campo, ...]:
     """Lo que se configura en la sección del driver (su `CONFIGURACION`); vacío si no declara nada."""
     return tuple(getattr(modulo, "CONFIGURACION", None) or ())
+
+
+def cuentas_por_defecto(modulo: Any) -> dict:
+    """Con qué cuentas nace una empresa que lleva ESTE sistema (su `CUENTAS_POR_DEFECTO`): solo las que se apartan de
+    lo general, para que lo que no declare siga siendo lo general y lo siga siendo el día que lo general mejore.
+    Vacío si no declara ninguna, que es el caso de quien numera como el PCGE.
+
+    Devuelve una copia: el dict del driver es de fábrica y nadie de fuera lo muta."""
+    return copy.deepcopy(getattr(modulo, "CUENTAS_POR_DEFECTO", None) or {})
 
 
 def columnas_elegibles(modulo: Any) -> dict[str, tuple[Columna, ...]]:
@@ -398,10 +422,13 @@ def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
 def _incumplimientos_de_la_configuracion(modulo: Any) -> list[str]:
     declarada = getattr(modulo, "CONFIGURACION", None)
     columnas = getattr(modulo, "COLUMNAS_ELEGIBLES", None)
-    if (declarada is not None or columnas is not None) and not lleva_cuentas(modulo):
-        return ["CONFIGURACION y COLUMNAS_ELEGIBLES son de un driver que lleva cuentas: un registro tributario no se "
-                "configura"]
+    cuentas = getattr(modulo, "CUENTAS_POR_DEFECTO", None)
+    if (declarada is not None or columnas is not None or cuentas is not None) and not lleva_cuentas(modulo):
+        return ["CONFIGURACION, COLUMNAS_ELEGIBLES y CUENTAS_POR_DEFECTO son de un driver que lleva cuentas: un "
+                "registro tributario no se configura"]
     problemas: list[str] = []
+    if cuentas is not None:
+        problemas += _incumplimientos_de_las_cuentas(cuentas)
     if declarada is not None:
         if isinstance(declarada, (str, bytes, dict)) or not all(isinstance(c, Campo) for c in declarada):
             problemas.append("CONFIGURACION es una tupla de configuracion.Campo")
@@ -433,6 +460,17 @@ def _incumplimientos_de_la_configuracion(modulo: Any) -> list[str]:
     if columnas is not None:
         problemas += _incumplimientos_de_las_columnas(modulo, columnas)
     return problemas
+
+
+def _incumplimientos_de_las_cuentas(cuentas: Any) -> list[str]:
+    """Lo que `CUENTAS_POR_DEFECTO` no cumple. Se valida contra el bloque `cuentas` de lo general —las mismas claves y
+    el mismo formato—, porque va a fundirse encima de él: una clave que no existe ahí no la leería nadie, y una cuenta
+    con un formato que la declaración rechaza entraría por la puerta de atrás en la configuración de cada empresa."""
+    if not isinstance(cuentas, dict):
+        return ["CUENTAS_POR_DEFECTO es un objeto con las claves de `cuentas`, como se guardan"]
+    if not cuentas:
+        return ["CUENTAS_POR_DEFECTO vacío es no declararlo: un sistema que numera como el PCGE no lo pone"]
+    return _declaracion.validar(cuentas, _CUENTAS_GENERALES, donde="CUENTAS_POR_DEFECTO")
 
 
 def _incumplimientos_de_las_columnas(modulo: Any, columnas: Any) -> list[str]:

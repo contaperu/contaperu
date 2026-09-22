@@ -444,6 +444,40 @@ def test_las_columnas_elegibles_llevan_el_titulo_y_la_letra_de_su_excel():
             assert {l: nombre for l, nombre, _, _ in COLUMNAS[libro]}[letra] == c.titulo, (c.columna, libro)
 
 
+def test_el_contrato_revisa_las_cuentas_que_declara_un_driver():
+    """`CUENTAS_POR_DEFECTO` se valida contra el bloque `cuentas` de lo general, porque va a fundirse encima de él.
+
+    Una clave que no existe ahí no la leería nadie, y una cuenta con un formato que la declaración rechaza entraría
+    por la puerta de atrás en la configuración de cada empresa que abra ese sistema: son los dos fallos que no darían
+    error en ninguna parte, solo un archivo mal.
+    """
+    valido = driver_de_registro()
+    valido.CUENTAS_POR_DEFECTO = {"cxp": {"PEN": "42120001"}, "igv": "40111000"}
+    assert contrato.incumplimientos(valido) == []
+    assert contrato.cuentas_por_defecto(valido) == {"cxp": {"PEN": "42120001"}, "igv": "40111000"}
+    # Y lo que devuelve es una copia: el dict del driver es de fábrica y nadie de fuera lo muta.
+    contrato.cuentas_por_defecto(valido)["igv"] = "otra"
+    assert valido.CUENTAS_POR_DEFECTO["igv"] == "40111000"
+
+    desconocida = driver_de_registro()
+    desconocida.CUENTAS_POR_DEFECTO = {"cxp_en_dolares": "42120002"}
+    assert contrato.incumplimientos(desconocida) == [
+        "`CUENTAS_POR_DEFECTO.cxp_en_dolares`: clave desconocida; las que hay: gasto, cxp, cxp_detraccion, "
+        "honorarios, retencion_4ta, igv, clientes, ventas, otros_tributos, icbper"]
+    mal_formato = driver_de_registro()
+    mal_formato.CUENTAS_POR_DEFECTO = {"igv": "40-111-000"}
+    assert contrato.incumplimientos(mal_formato) == [
+        '`CUENTAS_POR_DEFECTO.igv`: el texto "40-111-000" no cumple el patrón ^([0-9]{2,12})?$']
+    vacio = driver_de_registro()
+    vacio.CUENTAS_POR_DEFECTO = {}
+    assert contrato.incumplimientos(vacio) == [
+        "CUENTAS_POR_DEFECTO vacío es no declararlo: un sistema que numera como el PCGE no lo pone"]
+    no_es_objeto = driver_de_registro()
+    no_es_objeto.CUENTAS_POR_DEFECTO = ["42120001"]
+    assert contrato.incumplimientos(no_es_objeto) == [
+        "CUENTAS_POR_DEFECTO es un objeto con las claves de `cuentas`, como se guardan"]
+
+
 def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
     """Un driver de terceros declara su sección como los de serie, y el registro lo examina al cargarlo."""
     sin_asiento = driver_de_prueba()
@@ -490,7 +524,8 @@ def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
     tributario.linea = lambda c, libro, idx, op=None: ""
     tributario.CONFIGURACION = ()
     assert contrato.incumplimientos(tributario) == [
-        "CONFIGURACION y COLUMNAS_ELEGIBLES son de un driver que lleva cuentas: un registro tributario no se configura"]
+        "CONFIGURACION, COLUMNAS_ELEGIBLES y CUENTAS_POR_DEFECTO son de un driver que lleva cuentas: un registro "
+        "tributario no se configura"]
 
     con_moneda = driver_de_prueba()
     con_moneda.EXIGE = frozenset({"moneda"})

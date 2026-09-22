@@ -133,10 +133,14 @@ def adaptar_pcge(lineas: list[dict]) -> dict:
 
 # --- configuración ------------------------------------------------------------------
 
-def configuracion_por_defecto() -> dict:
+def configuracion_por_defecto(driver: str | None = None) -> dict:
     """La configuración contable de partida, en la forma en que se guarda: lo general en la raíz y una sección por
-    sistema que se configura. Es un punto de partida, no la verdad de ningún contribuyente."""
-    return preparacion.configuracion_por_defecto()
+    sistema que se configura. Es un punto de partida, no la verdad de ningún contribuyente.
+
+    **Con `driver`, la de quien lleva ese sistema**: lo general con las cuentas de ese sistema —las suyas si las
+    declara, las del PCGE si no— y solo su sección. Es lo que una aplicación siembra cuando alguien da de alta una
+    empresa y ya dijo con qué sistema trabaja, en vez de sembrar la de todos."""
+    return preparacion.configuracion_por_defecto(driver or "")
 
 
 def describir_configuracion(driver: str | None = None) -> dict:

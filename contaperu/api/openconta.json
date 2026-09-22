@@ -457,7 +457,18 @@
    "get": {
     "operationId": "configuracion_por_defecto",
     "summary": "La configuración contable de partida, en la forma en que se guarda: lo general en la raíz y una sección por sistema que se configura.",
-    "description": "La configuración contable de partida, en la forma en que se guarda: lo general en la raíz y una sección por\nsistema que se configura. Es un punto de partida, no la verdad de ningún contribuyente.",
+    "description": "La configuración contable de partida, en la forma en que se guarda: lo general en la raíz y una sección por\nsistema que se configura. Es un punto de partida, no la verdad de ningún contribuyente.\n\n**Con `driver`, la de quien lleva ese sistema**: lo general con las cuentas de ese sistema —las suyas si las\ndeclara, las del PCGE si no— y solo su sección. Es lo que una aplicación siembra cuando alguien da de alta una\nempresa y ya dijo con qué sistema trabaja, en vez de sembrar la de todos.",
+    "parameters": [
+     {
+      "name": "driver",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "description": "El sistema de destino (`drivers_disponibles`)."
+      }
+     }
+    ],
     "responses": {
      "200": {
       "description": "La configuración contable de partida, en la forma en que se guarda: lo general en la raíz y una sección por sistema que se configura.",

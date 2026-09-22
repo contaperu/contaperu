@@ -146,6 +146,12 @@ def config_aplicada(configuracion: dict | None = None, driver: str = "") -> dict
     sección de ese sistema con los suyos, todo plano, como lo lee el núcleo. Sin `driver` —o con uno que no lleva
     cuentas, como el SIRE—, solo lo general.
 
+    **Las cuentas se apilan en tres capas**, y el orden es lo que hace que esto funcione: las de fábrica del PCGE,
+    encima las que declare el sistema al que se exporta (`contrato.cuentas_por_defecto`, 2.5) y encima del todo las
+    que la empresa guardó. Así un sistema que numera a ocho dígitos no escribe una cuenta de seis en su archivo
+    **aunque la empresa nunca haya abierto la pantalla de configuración**, que es justo cuando pasaba: lo que falta se
+    rellena solo, y hasta la 2.5 se rellenaba con la de CONCAR. Y la empresa sigue mandando sobre las dos.
+
     Se guarda con lo general en la raíz y una sección por sistema (John, 13-sep-2026): `{"cuentas": {...},
     "concar": {"tipos": {...}, "columnas": {...}}, "contasis": {"medio_pago": "003"}}`, fundida en profundidad sobre
     los valores por defecto (una empresa puede cambiar solo `cuentas.cxp.USD` y hereda el resto). Se valida entera
@@ -156,16 +162,30 @@ def config_aplicada(configuracion: dict | None = None, driver: str = "") -> dict
     if errores:
         raise ConfiguracionInvalida(errores)
     guardada = configuracion or {}
-    aplicada = asi.fundir_config(CONFIG_POR_DEFECTO, {k: v for k, v in guardada.items() if k not in drivers.DRIVERS})
+    general = {k: v for k, v in guardada.items() if k not in drivers.DRIVERS}
     if not driver:
-        return aplicada
+        return asi.fundir_config(CONFIG_POR_DEFECTO, general)
     modulo = drivers.obtener(driver)
+    de_fabrica = asi.fundir_config(CONFIG_POR_DEFECTO,
+                                   {"cuentas": drivers.contrato.cuentas_por_defecto(modulo)})
+    aplicada = asi.fundir_config(de_fabrica, general)
     return {**aplicada, **asi.fundir_config(drivers.contrato.seccion_por_defecto(modulo), guardada.get(driver) or {})}
 
 
-def configuracion_por_defecto() -> dict:
+def configuracion_por_defecto(driver: str = "") -> dict:
     """La configuración de partida en la forma en que se guarda: lo general y la sección de cada sistema que se
-    configura, con sus valores por defecto. Se puede cambiar y volver a pasar tal cual."""
+    configura, con sus valores por defecto. Se puede cambiar y volver a pasar tal cual.
+
+    **Con `driver`, la de quien lleva ESE sistema**: lo general con las cuentas de ese sistema y solo su sección, igual
+    que `describir_configuracion`. Es con lo que una aplicación siembra una empresa nueva, y por eso el parámetro
+    existe: sembrar la de todos daba a un contribuyente de STARSOFT las cuentas de CONCAR."""
+    if driver:
+        modulo = drivers.obtener(driver)
+        salida = asi.fundir_config(CONFIG_POR_DEFECTO, {"cuentas": drivers.contrato.cuentas_por_defecto(modulo)})
+        seccion = drivers.contrato.seccion_por_defecto(modulo)
+        if seccion:
+            salida[driver] = seccion
+        return salida
     salida = asi.fundir_config(CONFIG_POR_DEFECTO, {})
     for nombre, modulo in drivers.DRIVERS.items():
         seccion = drivers.contrato.seccion_por_defecto(modulo)

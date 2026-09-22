@@ -26,7 +26,10 @@ XML o la propuesta del SIRE, el motor arma el documento por ti (`leer_xml`, `lee
 Aparte del documento llegan dos cosas que son de tu aplicación y no del comprobante:
 
 - **La configuración contable** de cada empresa: lo general en la raíz y una sección por sistema. `describir_configuracion`
-  dice qué se configura, para pintar la pantalla, y `configuracion_por_defecto` da un punto de partida.
+  dice qué se configura, para pintar la pantalla, y `configuracion_por_defecto` da un punto de partida. **Pásale el
+  `driver` cuando ya sepas a qué sistema exporta esa empresa**: las cuentas de fábrica son las del PCGE a seis
+  dígitos, y un sistema que numera de otra forma declara las suyas (`contrato.cuentas_por_defecto`). Sembrar la de
+  todos le da a un contribuyente de STARSOFT las cuentas de CONCAR.
 - **La imputación** de cada documento, por su `id_externo`: la cuenta, el centro de costo, la cuenta del total o un
   reparto de la base. Lo que no traiga sale de la configuración.
 
