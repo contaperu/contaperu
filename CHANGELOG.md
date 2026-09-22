@@ -6,6 +6,11 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.3.0] — 2026-09-22
+
+**Las huellas NO cambian.** Esto toca cómo se escriben los bytes, no el asiento, y la batería lo confirma sin
+regenerar un solo fixture del SIRE ni de los snapshots.
+
 ### Cambiado
 
 - **STARSOFT escribe un TXT de palotes envuelto en un ZIP, y ya no un CSV** (John, 22-sep-2026). Es una de las
@@ -1351,7 +1356,8 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v2.2.0...HEAD
+[Sin publicar]: https://github.com/contaperu/contaperu/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/contaperu/contaperu/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/contaperu/contaperu/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/contaperu/contaperu/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/contaperu/contaperu/compare/v1.4.0...v2.0.0
