@@ -17,7 +17,7 @@ from typing import Any
 from ...asiento.indice import ComprobanteDelAsiento
 from ...asiento.lineas import LineaDiario
 from ...modelo import Libro
-from ..kit import Opciones, OpcionesArchivo, celdas, nombre_de_archivo
+from ..kit import Opciones, OpcionesArchivo, nombre_de_archivo
 from ..kit.texto import formatear_fecha, sanear
 from . import datos, proyeccion
 from .datos import OPCIONES
@@ -43,7 +43,7 @@ def _campo(valor: Any, clase: str, opciones: OpcionesArchivo) -> str:
     if valor in (None, ""):
         return ""
     if clase == "fecha" and opciones.fecha:
-        return formatear_fecha(celdas.fecha(str(valor), None), opciones)
+        return formatear_fecha(str(valor), opciones)
     # Un `|` dentro de una razón social partiría la línea y correría todos los campos siguientes.
     return sanear(str(valor), _COMO_VIENE)
 

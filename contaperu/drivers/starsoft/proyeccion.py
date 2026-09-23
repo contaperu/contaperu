@@ -20,11 +20,11 @@ comprobante, el mismo que trae la línea.
 """
 from __future__ import annotations
 
-from decimal import Decimal
 from typing import Any
 
 from ...asiento.indice import Cabecera
-from ...modelo import numero_sin_ceros
+from ...modelo import a_decimal, numero_sin_ceros
+from ..kit.texto import formatear_monto
 from ...asiento.lineas import LineaDiario
 from . import datos
 from .datos import ORDEN_DE_LAS_FILAS, ROLES_DE_LA_DETRACCION
@@ -46,6 +46,11 @@ def destino_de(cab: Cabecera) -> str:
     ⚠️ `[por confirmar]` contra un archivo que STARSOFT haya aceptado: la precedencia entre importación y destino
     —hoy gana la importación— y el umbral del 004. Es de los errores que no dan error: el archivo se importa y
     clasifica mal el crédito fiscal.
+
+    **No es `igv.por_destino`, y se comprobó** (2.7): las dos leen `destino_igv`, pero aquella REPARTE la base y el
+    IGV en tres parejas de importes, para las columnas del SIRE y de CONTASIS, y esta devuelve UN código de la
+    tabla de STARSOFT con dos valores que en el estándar no existen. Juntarlas sería meter la clasificación de un
+    proveedor dentro de una regla del núcleo.
     """
     if cab.anio_dua or cab.cod_dep_aduanera:
         return datos.DESTINO_IMPORTACION
@@ -55,7 +60,9 @@ def destino_de(cab: Cabecera) -> str:
 
 
 def _es_cero(texto: str) -> bool:
-    return not (texto or "").strip("0.-")
+    """¿Esa columna vale cero? Lo decide el modelo, que es quien sabe leer un número del estándar: hasta la 2.7
+    era un `strip("0.-")` sobre el texto, que daba lo mismo pero por su cuenta."""
+    return a_decimal(texto) == 0
 
 
 def serie_a_cuatro(serie: str) -> str:
@@ -86,14 +93,12 @@ def con_dos_decimales(valor: Any) -> str:
     """Un importe o un porcentaje como los escribe STARSOFT: `18.00`, `0.00`, `4.00`.
 
     Sus ejemplos oficiales los llevan SIEMPRE con dos decimales —incluso los que no aplican, que salen `0.00` y
-    no vacíos— y el nuestro escribía `18` y dejaba en blanco los que no aplicaban (John, 22-sep-2026). Vacío o
-    None da `0.00`: en las columnas donde esto se usa, «no aplica» se dice con un cero."""
-    if valor in (None, ""):
-        return "0.00"
-    try:
-        return f"{Decimal(str(valor)):.2f}"
-    except (ArithmeticError, ValueError):
-        return str(valor)
+    no vacíos— y el nuestro escribía `18` y dejaba en blanco los que no aplicaban (John, 22-sep-2026).
+
+    Desde la 2.7 esto es `kit.formatear_monto` con las opciones de STARSOFT, que declaran `cero="0.00"`: la regla
+    de los dos decimales y la de cómo se escribe un cero son del kit, y lo que STARSOFT elige es el valor. Se
+    queda el nombre porque es el que se lee en la proyección, y dice en el sitio lo que hace."""
+    return formatear_monto(valor, datos.OPCIONES)
 
 
 def glosa_del_documento(ln: LineaDiario, cab: Cabecera) -> str:

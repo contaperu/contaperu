@@ -10,7 +10,7 @@ from ...asiento.indice import ComprobanteDelAsiento
 from ...asiento.lineas import LineaDiario
 from ...asiento.resolucion import etiquetas_sub_diario, limites_del_periodo
 from ...modelo import Libro
-from ..kit import Opciones, nombre_de_archivo
+from ..kit import Opciones, formatear_fecha, nombre_de_archivo
 from ..kit import xlsx as kit_xlsx
 from . import datos, proyeccion
 from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
@@ -136,6 +136,6 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones
     for entrada in indice:
         filas.extend(proyeccion.filas(entrada.cabecera, entrada.lineas(lineas), config))
     primero, _ = limites_del_periodo(libro)
-    resumen = {"fechas": "por comprobante (extemporáneos al " + primero.strftime("%d/%m/%Y") + ")",
+    resumen = {"fechas": "por comprobante (extemporáneos al " + formatear_fecha(primero, opciones) + ")",
                "sub_diarios": _sub_diarios(indice, config)}
     return escribir_xlsx(filas), resumen

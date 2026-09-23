@@ -160,7 +160,7 @@ def fila(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.
         elif clase == datos.FECHA:
             salida[letra] = _fecha(valor)
         else:
-            salida[letra] = None if valor is None or Decimal(valor) == 0 else float(valor)
+            salida[letra] = celdas.importe_o_vacia(valor)
     return salida
 
 

@@ -37,6 +37,21 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ### Cambiado
 
+- **Un formateador por cosa, y ningún archivo cambia.** `kit.formatear_monto` acepta ahora lo que trae una línea
+  —texto, `Decimal` o nada— y decide el cero por `opciones.cero`, así que el `con_dos_decimales` de STARSOFT pasa
+  a ser una llamada a él con las opciones de STARSOFT. `kit.formatear_fecha` acepta el texto ISO además del
+  `date`, y con eso desaparece el `formatear_fecha(celdas.fecha(...))` de STARSOFT: dos pasos para decir una
+  cosa. `OpcionesArchivo` declara su `cero`, como `Opciones`.
+- **Dos conversores de celda salen del driver al kit**: `celdas.importe_exacto` (vivía escondido en CONCAR con
+  guion bajo) y `celdas.importe_o_vacia`, que es la regla «un cero deja la celda vacía» que CONTASIS llevaba
+  escrita dentro de una expresión. Se documenta que `importe_exacto` **no** es `texto_exacto`: en dinero los
+  decimales son parte del dato y `4` no es `4.00`; en un tipo de cambio los ceros de más son ruido.
+- **`starsoft.destino_de` NO se unifica con `igv.por_destino`**, y queda escrito por qué: las dos leen
+  `destino_igv`, pero aquella reparte base e IGV en tres parejas de importes y esta devuelve un código de la
+  tabla de STARSOFT con dos valores que en el estándar no existen.
+- `TOLERADAS` del examen de drivers queda **vacía**: nació con dos excepciones y las dos se fueron el mismo día.
+
+
 - **CONCAR declara `no_caben`, y deja de cortar la serie-número en silencio.** Cortaba a 20 caracteres desde el
   refactor de la 0.7, que es justo lo que la doctrina escrita en CONTASIS prohíbe: un código cortado es otro
   código, y el asiento entraría con un documento que no existe. Los largos que consta que aplica van declarados

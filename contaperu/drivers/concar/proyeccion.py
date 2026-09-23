@@ -23,7 +23,7 @@ from ...asiento.motor import cabecera_de, lineas_del_comprobante, serie_numero_d
 from ..kit import Opciones, celdas
 from ...pcge import clase_de
 from ...igv import tasa_calculada
-from ...modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero
+from ...modelo import Comprobante, Libro, numero_sin_ceros, serie_y_numero
 from ..contrato import centro_en_anexo
 from . import datos
 from .datos import COLUMNAS, MARCA_CONVERSION, OPCIONES, TIPO_CONVERSION
@@ -158,14 +158,6 @@ def _texto_de(v: Any) -> str:
     return "" if v is None else str(v).strip()
 
 
-def _importe_exacto(v: Any) -> str:
-    """A texto con 2 decimales. Los importes salen del asiento como float para openpyxl;
-    aquí vuelven a ser exactos, que es como viajan en el estándar."""
-    if v is None or v == "":
-        return ""
-    return str(Decimal(str(v)).quantize(CENTIMO))
-
-
 _numero_o_vacio = celdas.numero_o_vacio
 
 
@@ -191,12 +183,12 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
     detraccion = {
         "codigo_interno": _texto_de(fila.get("AI")),
         "tasa": celdas.texto_exacto(fila.get("AJ")),
-        "base": _importe_exacto(fila.get("AK") or fila.get("AL")),
+        "base": celdas.importe_exacto(fila.get("AK") or fila.get("AL")),
     }
     return LineaDiario(
         cuenta=_texto_de(fila.get("K")),
         debe_haber=_texto_de(fila.get("N")),
-        importe=_importe_exacto(fila.get("O")),
+        importe=celdas.importe_exacto(fila.get("O")),
         # CONCAR no lleva una columna de clase: no le hace falta, porque su plan de cuentas vive en su sistema. Al
         # volver a línea neutral se deriva de la cuenta, igual que al armarla, o el documento no validaría.
         clase=clase_de(_texto_de(fila.get("K"))),

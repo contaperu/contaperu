@@ -690,12 +690,11 @@ def test_los_de_serie_estan_todos_en_la_lista_publica_del_registro():
 # otra vez. Lo que hoy no las cumple va en `TOLERADAS`, con su motivo a la vista y no en silencio, igual que en
 # `test_capas.py` — y la lista está para vaciarse.
 
-TOLERADAS: dict[tuple[str, str], str] = {
-    ("starsoft/proyeccion.py", "importe a mano"):
-        "`con_dos_decimales` es `kit.formatear_monto` reescrito con otra política del cero. Se unifica en la 2.7.",
-    ("concar/xlsx.py", "fecha a mano"):
-        "El `strftime` arma la frase del resumen, no una celda. Se pasa por `formatear_fecha` en la 2.7.",
-}
+# **Vacía desde la 2.7**, y se quedó vacía el mismo día que nació: las dos que traía —el `con_dos_decimales` de
+# STARSOFT y el `strftime` del resumen de CONCAR— se quitaron en cuanto el formateo se unificó. Una excepción
+# nueva entra aquí con su motivo, a la vista, y `test_las_toleradas_siguen_haciendo_falta` obliga a sacarla
+# cuando deja de hacer falta.
+TOLERADAS: dict[tuple[str, str], str] = {}
 
 # Un importe escrito a mano: la política del cero y los decimales son del kit, no de cada driver.
 _IMPORTE_A_MANO = re.compile(r":\.\d+f")
