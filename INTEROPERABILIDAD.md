@@ -476,10 +476,12 @@ un sustituto de un dato que existe en el destino.**
 - `centro_costo` falta solo si la cuenta lo lleva, y eso se decide por prefijo (`cuentas_con_centro`, de fábrica
   `["62", "63", "65", "70"]`, `contaperu/configuracion.py:289`). La lista `centros_costo` se declara
   (`contaperu/configuracion.py:280`) pero el motor no comprueba contra ella.
-- **La cadena de resolución de una cuenta es corta:** la imputación del documento, si no la cuenta general
-  (`cuentas.gasto` o `cuentas.ventas`), y si no la falta `sin_cuenta` (`contaperu/asiento/resolucion.py:92`). No hay
-  valor por defecto por prefijo ni por proveedor. Lo que una aplicación sepa de un proveedor lo mete ella en la
-  imputación.
+- **La cadena de resolución de una cuenta es de un solo eslabón** (3.0): la imputación del documento, y si no la
+  falta `sin_cuenta`. No hay cuenta general que la supla —`cuentas.gasto` y `cuentas.ventas` existieron hasta la
+  2.7 y se retiraron: con una puesta, el motor dejaba de contar como `sin_cuenta` lo que nadie había imputado y el
+  mes salía «listo» a un comodín—. Tampoco hay valor por defecto por prefijo ni por proveedor. Lo que una aplicación
+  sepa de un proveedor lo mete ella en la imputación; con qué cuentas empieza una empresa lo declara su driver
+  (`CUENTAS_POR_DEFECTO.compras` y `.ventas`), y eso siembra su plan, no imputa.
 - El PCGE 2026 se consulta, pero no valida (`contaperu/pcge/catalogo.py`), y **nada comprueba que una cuenta exista en
   el plan del destino**. Hoy ese error aparece recién al importar el Excel en CONCAR.
 - `generar_asiento` no llama a `exigir_requisitos` (`contaperu/operaciones.py:323-345`): sus líneas pueden salir sin

@@ -31,9 +31,8 @@ def configuracion(config_contable: dict | None = None) -> dict:
 
 
 CONTAB = configuracion(None)
-# CONCAR trae su cuenta de gasto (`datos.CUENTAS_POR_DEFECTO`, 2.5), así que para probar que un comprobante SIN
-# cuenta se planta hay que decir que no hay ninguna — que es lo que hace quien prefiere que le avisen.
-SIN_GASTO = configuracion({"cuentas": {"gasto": ""}})
+# `SIN_GASTO` murió en la 3.0 (23-sep-2026): era la configuración con `cuentas.gasto` en blanco, que hacía falta para
+# probar que un comprobante sin cuenta se planta. Ya no hay ninguna cuenta de respaldo, así que `CONTAB` sirve.
 # El centro también en la X de la línea del gasto, como referencia, además del doble anexo del tercero.
 REFERENCIA_EN_X = {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar", "anexo_auxiliar_del_tercero"]}}
 
@@ -146,7 +145,7 @@ def test_fecha_por_comprobante():
     assert post[0]["T"] == date(2026, 9, 2) and post[0]["U"] == date(2026, 9, 10)
     sin_fecha = driver_concar.filas_de_comprobante(cp(fecha_emision=None, fecha_vencimiento=None), CONTAB, MES, "080004")
     assert all(f["D"] == date(2026, 8, 1) for f in sin_fecha)     # FECHA_FALTA: al primer día
-    venta_jul = driver_concar.filas_de_comprobante(cp(fecha_emision="2026-07-20", cuenta_contable=""), CONTAB, MES, "080005", es_venta=True)
+    venta_jul = driver_concar.filas_de_comprobante(cp(fecha_emision="2026-07-20", cuenta_contable="701101"), CONTAB, MES, "080005", es_venta=True)
     assert all(f["D"] == date(2026, 8, 1) and f["J"] == date(2026, 8, 1) for f in venta_jul)
 
 
@@ -211,7 +210,7 @@ def test_la_cuenta_decide_si_el_centro_va_a_la_M():
     assert driver_concar.filas_de_comprobante(cp(cuenta_contable="603201"), CONTAB, MES, "080001")[2]["X"] == "OBRA01"
     # Ventas sin cambios: 701101 está en la lista, que es exactamente para lo que se metió el 70. Es la
     # TERCERA fila desde la 2.2: el orden de la venta es cliente · IGV · ingreso.
-    filas_venta = driver_concar.filas_de_comprobante(cp(cuenta_contable=""), CONTAB, MES, "080001", es_venta=True)
+    filas_venta = driver_concar.filas_de_comprobante(cp(cuenta_contable="701101"), CONTAB, MES, "080001", es_venta=True)
     assert filas_venta[2]["K"] == "701101" and filas_venta[2]["M"] == "OBRA01"
     # Casa por prefijo, no por los dos primeros dígitos: "6311" no alcanza a 631201.
     largo = configuracion({"cuentas_con_centro": ["6311"]})
@@ -274,12 +273,10 @@ def test_el_centro_solo_es_obligatorio_donde_se_escribe():
     # que se puede dejar en blanco no puede impedir exportar.
     ref = configuracion(REFERENCIA_EN_X)
     assert concar.comprobantes_sin_centro([cp(cuenta_contable="603201", centro_costo="")], ref) == []
-    # Ventas: sin el flag la cuenta se resolveria como gasto. Con `cuentas.gasto` vacío eso da cuenta vacía → no
-    # bloquea; con el flag cae en 701101 → sí bloquea. Va con SIN_GASTO porque con la de CONCAR (631101) la cuenta
-    # ya no sale vacía y el caso que se quiere probar no existiría.
-    vacio = cp(cuenta_contable="", centro_costo="")
-    assert concar.comprobantes_sin_centro([vacio], SIN_GASTO) == []
-    assert [c.numero for c in concar.comprobantes_sin_centro([vacio], SIN_GASTO, es_venta=True)] == ["00000123"]
+    # Sin cuenta no se puede saber si lleva centro —`lleva_centro` la mira—, así que no bloquea por el centro: lo
+    # que falta es la cuenta, y eso lo dice `comprobantes_sin_cuenta`. Pedir las dos sería pedir algo que a lo
+    # mejor no va.
+    assert concar.comprobantes_sin_centro([cp(cuenta_contable="", centro_costo="")], CONTAB) == []
 
 
 def test_factura_con_detraccion_va_al_sub_diario_10():
@@ -443,7 +440,7 @@ def test_asiento_de_ventas_espejo_del_skill():
 
     El IGV va ANTES del ingreso desde la 2.2: es el orden de los archivos reales de STARSOFT, y el que el
     motor ya usaba en compras."""
-    fv = driver_concar.filas_de_comprobante(cp(cuenta_contable=""), CONTAB, MES, "080009", es_venta=True)   # sin cuenta en la fila → default 701101
+    fv = driver_concar.filas_de_comprobante(cp(cuenta_contable="701101"), CONTAB, MES, "080009", es_venta=True)
     cli_, igv, ing = fv
     assert [f["N"] for f in fv] == ["D", "H", "H"] and [f["K"] for f in fv] == ["121201", "401111", "701101"]
     assert [f["O"] for f in fv] == [118.0, 18.0, 100.0]
@@ -452,17 +449,18 @@ def test_asiento_de_ventas_espejo_del_skill():
     assert all(f["B"] == "05" and f["D"] == EMISION and f["J"] == EMISION for f in fv)  # cada venta en su fecha
     assert fv[0]["AO"] == 18 and fv[0]["R"] == "FT"
     assert debe_haber(fv) == (Decimal("118"), Decimal("118"))
-    # La cuenta de ingreso: default real 701101; la fila o el RUC pueden cambiarla
+    # La cuenta de ingreso la pone la fila, como en compras (3.0): ya no hay una de fábrica que la supla.
     assert driver_concar.filas_de_comprobante(cp(cuenta_contable="702101"), CONTAB, MES, "080001", es_venta=True)[2]["K"] == "702101"
-    config = configuracion({"cuentas": {"ventas": "701201", "clientes": {"USD": "121209"}}})
-    v2 = driver_concar.filas_de_comprobante(cp(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), config, MES, "080001", es_venta=True)
+    config = configuracion({"cuentas": {"clientes": {"USD": "121209"}}})
+    v2 = driver_concar.filas_de_comprobante(cp(cuenta_contable="701201", moneda="USD", tipo_cambio="3.55"), config, MES, "080001", es_venta=True)
     assert v2[2]["K"] == "701201" and v2[0]["K"] == "121209" and v2[0]["E"] == "US" and v2[0]["G"] == 3.55
-    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], CONTAB, es_venta=True) == []
+    # Y una venta sin cuenta falta, igual que una compra: hasta la 3.0 la tapaba el 701101 de fábrica.
+    assert [c.numero for c in concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], CONTAB, es_venta=True)] == ["00000123"]
     # Boleta de venta emitida: SÍ lleva su IGV (la regla "sin crédito" es solo de compras)
-    bv = driver_concar.filas_de_comprobante(cp(tipo_cp="03", serie="B001", numero="9", cuenta_contable=""), CONTAB, MES, "080002", es_venta=True)
+    bv = driver_concar.filas_de_comprobante(cp(tipo_cp="03", serie="B001", numero="9", cuenta_contable="701101"), CONTAB, MES, "080002", es_venta=True)
     assert len(bv) == 3 and bv[0]["B"] == "05" and bv[0]["R"] == "BV" and bv[1]["K"] == "401111" and bv[0]["AO"] == 18
     # NC de venta: invierte (ingreso D, IGV D, cliente H) con su documento de referencia
-    nc = driver_concar.filas_de_comprobante(cp(tipo_cp="07", serie="FC01", numero="3", cuenta_contable="", ref_tipo_cp="01", ref_serie="F001", ref_numero="00000123", ref_fecha="2026-08-01"),
+    nc = driver_concar.filas_de_comprobante(cp(tipo_cp="07", serie="FC01", numero="3", cuenta_contable="701101", ref_tipo_cp="01", ref_serie="F001", ref_numero="00000123", ref_fecha="2026-08-01"),
                         CONTAB, MES, "080003", es_venta=True)
     assert [f["N"] for f in nc] == ["D", "D", "H"] and [f["K"] for f in nc] == ["701101", "401111", "121201"]
     assert nc[0]["Z"] == "FT" and nc[0]["AA"] == "F001-123" and debe_haber(nc) == (Decimal("118"), Decimal("118"))
@@ -497,34 +495,31 @@ def test_el_codigo_sunat_manda_y_lo_de_concar_se_deriva():
 def test_la_configuracion_del_entorno_se_funde_con_los_valores_por_defecto():
     """Lo general en la raíz y lo de CONCAR en su sección (John, 13-sep-2026): lo que el entorno cambia manda, y lo que
     no toca conserva su valor por defecto, también dentro de un mismo grupo (`fundir_config` funde en profundidad)."""
-    entorno = {"cuentas": {"gasto": "659301", "cxp": {"USD": "421203"}},
+    entorno = {"cuentas": {"igv": "401112", "cxp": {"USD": "421203"}},
                "concar": {"tipos": {"20": {"sigla": "CO", "sub_diario": "11"}}}}
     c = con_imputaciones(prep.config_aplicada(entorno, "concar"))
-    assert c["cuentas"]["gasto"] == "659301"                              # el entorno manda
+    assert c["cuentas"]["igv"] == "401112"                                # el entorno manda
     assert c["cuentas"]["cxp"] == {"PEN": "421201", "USD": "421203"}      # se funde dentro del grupo
-    assert c["cuentas"]["igv"] == "401111" and c["tipos"]["01"]["sigla"] == "FT"
+    assert c["cuentas"]["retencion_4ta"] == "401721" and c["tipos"]["01"]["sigla"] == "FT"
     assert c["tipos"]["20"]["sigla"] == "CO"                              # un tipo añadido por el entorno
     assert configuracion(None) == configuracion({}) == CONTAB
 
 
-def test_cuenta_obligatoria_y_default_del_ruc():
-    # Sin ninguna cuenta de gasto no hay de dónde sacarla, y se planta: es el caso de quien la deja en blanco a
-    # propósito para que le avisen.
+def test_la_cuenta_es_del_comprobante_y_sin_ella_no_hay_asiento():
+    """La cuenta con la que se registra una compra es de CADA comprobante y llega en su imputación. **Ninguna
+    configuración la suple** (3.0, John 23-sep-2026): hasta entonces una `cuentas.gasto` por defecto —CONCAR traía
+    `631101`— hacía que la fila sin cuenta saliera imputada ahí y que el mes se diera por listo para exportar."""
     with pytest.raises(concar.SinCuenta):
-        driver_concar.filas_de_comprobante(cp(cuenta_contable=""), SIN_GASTO, MES, "080001")
-    # Con la que trae CONCAR, esa misma fila sale a su cuenta de gasto en vez de detener la exportación.
-    sale = driver_concar.filas_de_comprobante(cp(cuenta_contable=""), CONTAB, MES, "080001")
-    assert sale[0]["K"] == "631101"
-    config = configuracion({"cuentas": {"gasto": "659901", "cxp": {"USD": "421203"}}})
-    filas = driver_concar.filas_de_comprobante(cp(cuenta_contable="", moneda="USD"), config, MES, "080001")
+        driver_concar.filas_de_comprobante(cp(cuenta_contable=""), CONTAB, MES, "080001")
+    # Con la suya, sale la suya. Y lo demás de la configuración sigue mandando: la cuenta por pagar en dólares.
+    config = configuracion({"cuentas": {"cxp": {"USD": "421203"}}})
+    filas = driver_concar.filas_de_comprobante(cp(cuenta_contable="659901", moneda="USD"), config, MES, "080001")
     assert filas[0]["K"] == "659901" and filas[2]["K"] == "421203"
     assert config["cuentas"]["cxp"]["PEN"] == "421201" and config["cuentas"]["igv"] == "401111"   # lo no tocado se conserva
     assert config["cuentas"]["honorarios"] == {"PEN": "424101", "USD": "424102"}
-    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable=""), cp()], SIN_GASTO)[0].numero == "00000123"
-    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], config) == []
-    # Y con la de CONCAR tampoco falta ninguna: es la consecuencia de que el sistema traiga cuenta de gasto —el
-    # mes sale «listo» y esas filas se imputan ahí—, y quien prefiera que le avisen deja la cuenta en blanco.
-    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="")], CONTAB) == []
+    # Y se cuenta como falta, que es lo que lee el portal antes de dejar exportar.
+    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable=""), cp()], CONTAB)[0].numero == "00000123"
+    assert concar.comprobantes_sin_cuenta([cp(cuenta_contable="659901")], config) == []
     # El centro de costo, igual (06-sep-2026): obligatorio con los centros encendidos; nada si están apagados
     assert [c.numero for c in concar.comprobantes_sin_centro([cp(centro_costo=""), cp(centro_costo="  "), cp()], CONTAB)] == ["00000123", "00000123"]
     assert concar.comprobantes_sin_centro([cp(centro_costo="")], configuracion({"usa_centros_costo": False})) == []
@@ -593,7 +588,7 @@ def test_generar_con_plantilla_concar():
     expv = gen.generar(VENTAS, [cp()], "concar", config=CONTAB, correlativos={"05": 1})
     assert expv.nombre == "CONCAR_VENTAS_202608_20601111111.xlsx" and expv.resumen["sub_diarios"]["05"]["etiqueta"] == "Ventas"
     with pytest.raises(concar.SinCuenta):
-        gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", config=SIN_GASTO, correlativos={"11": 1})
+        gen.generar(COMPRAS, [cp(cuenta_contable="")], "concar", config=CONTAB, correlativos={"11": 1})
     with pytest.raises(concar.SinCodigoDeMoneda):
         gen.generar(COMPRAS, [cp(moneda="EUR")], "concar", config=CONTAB, correlativos={"11": 1})
 

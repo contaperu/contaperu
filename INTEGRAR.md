@@ -45,14 +45,18 @@ from pathlib import Path
 from contaperu import api
 
 documento = json.loads(Path("tests/fixtures/golden/compras_202601.json").read_text(encoding="utf-8"))
-configuracion = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
+configuracion = {"usa_centros_costo": False}
+# La cuenta de cada comprobante es SUYA y llega por su `id_externo`: la configuración no la suple (3.0).
+imputacion = {c.setdefault("id_externo", f"fila-{n}"): {"cuenta_contable": "659999"}
+              for n, c in enumerate(documento["comprobantes"], 1)}
 
-diagnostico = api.diagnosticar(documento, driver="concar", configuracion=configuracion)
+diagnostico = api.diagnosticar(documento, driver="concar", configuracion=configuracion, imputacion=imputacion)
 for falta in diagnostico["que_falta"]:
     print(falta["pedir_a"], "·", falta["texto"], falta["comprobantes"])
 
 if diagnostico["listo_para_exportar"]:
-    archivo = api.exportar_archivo(documento, driver="concar", configuracion=configuracion)
+    archivo = api.exportar_archivo(documento, driver="concar", configuracion=configuracion,
+                                   imputacion=imputacion)
     print(archivo.archivo, len(archivo.contenido), "bytes")      # el .xlsx, listo para escribir o servir
 ```
 
@@ -94,7 +98,8 @@ trae con qué reconocerla, y la identidad de cada comprobante —el RUC y el tip
 sin ceros, y en compras el proveedor— es la clave con que tu aplicación evita repetir un envío.
 
 ```python
-resultado = api.exportar(documento, driver="concar", configuracion=configuracion, fecha="2026-09-14")
+resultado = api.exportar(documento, driver="concar", configuracion=configuracion, imputacion=imputacion,
+                         fecha="2026-09-14")
 exportacion = resultado["_exportacion"]
 print("tanda", exportacion["huella"], "motor", exportacion["motor"])
 for comprobante in exportacion["comprobantes"]:
@@ -113,7 +118,7 @@ Todo rechazo es un `api.ErrorContaperu` con una `clave` estable, que es lo que c
 
 ```python
 try:
-    api.exportar(documento, driver="concar", configuracion={"cuentas": {"gasto": "659999"}})
+    api.exportar(documento, driver="concar", configuracion={}, imputacion=imputacion)
 except api.ErrorContaperu as error:
     print(error.clave, "·", api.problema(error)["detail"])          # sin_centro · 3 comprobante(s) sin centro…
 ```
@@ -153,7 +158,7 @@ los mismos nombres que los parámetros de la api:
     }]
   },
   "driver": "csv",
-  "configuracion": {"cuentas": {"gasto": "659999"}, "usa_centros_costo": false},
+  "configuracion": {"usa_centros_costo": false},
   "imputacion": {"fila-1": {"cuenta_contable": "636301"}}
 }
 ```

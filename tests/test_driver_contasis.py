@@ -9,18 +9,29 @@ import pytest
 
 from contaperu import api
 from contaperu.drivers import contasis, contrato
+from util import imputando
 
 LIBRO = {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608", "tipo": "compra"}
 FACTURA = {"tipo_cp": "01", "serie": "F001", "numero": "00000123", "fecha_emision": "2026-08-11",
            "fecha_vencimiento": "2026-08-18", "contraparte_tipo_doc": "6", "contraparte_doc": "20607777773",
            "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC", "base_gravada": "100", "igv": "18", "total": "118",
            "concepto": "Compra de materiales"}
-CONTAB = {"cuentas": {"gasto": "601101", "ventas": "701101", "cxp": {"PEN": "4212", "USD": "4212"}},
-          "usa_centros_costo": False}
+CONTAB = {"cuentas": {"cxp": {"PEN": "4212", "USD": "4212"}}, "usa_centros_costo": False}
+# La cuenta de cada comprobante ya no es configuración (3.0): la trae su imputación. Estas eran `cuentas.gasto` y
+# `cuentas.ventas` de CONTAB, y hoy se las pone `imputado()`.
+CUENTA_DE_COMPRAS, CUENTA_DE_VENTAS = "601101", "701101"
 
 
 def doc(*comprobantes: dict, **libro) -> dict:
+    """El documento, SIN imputar: para los casos que traen su propia imputación por el argumento."""
     return {"open_accounting": "1.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
+
+
+def imputado(*comprobantes: dict, **libro) -> dict:
+    """El documento con todos sus comprobantes imputados a la cuenta del libro: compras a la 601101, ventas a la
+    701101, que son las que ponía la configuración hasta la 3.0."""
+    documento = doc(*comprobantes, **libro)
+    return imputando(documento, CUENTA_DE_VENTAS if documento["libro"]["tipo"] == "venta" else CUENTA_DE_COMPRAS)
 
 
 def hoja(resultado: dict):
@@ -30,7 +41,7 @@ def hoja(resultado: dict):
 
 def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     """Sin las filas 1-13 de la plantilla, con su pestaña, y los espacios del relleno siguen ahí al abrirlo."""
-    r = api.exportar(doc(FACTURA, dict(FACTURA, numero="124")), driver="contasis", configuracion=CONTAB)
+    r = api.exportar(imputado(FACTURA, dict(FACTURA, numero="124")), driver="contasis", configuracion=CONTAB)
     assert r["archivo"] == "CONTASIS_COMPRAS_202608_20601234567.xlsx" and r["formato"] == "contasis_xlsx"
     ws = hoja(r)
     assert ws.title == "FORMATO_COMPRAS" and ws.max_row == 2
@@ -44,7 +55,7 @@ def test_el_archivo_empieza_en_la_fila_1_con_la_pestana_oficial():
     anchos = contasis.datos.ANCHOS["compra"]
     assert all(abs(ws.column_dimensions[letra].width - anchos[letra]) < 0.01 for letra, *_ in contasis.datos.COMPRAS)
     assert anchos["B"] >= 12 and anchos["I"] >= 38 and anchos["K"] >= 12 and anchos["AS"] >= 26
-    ventas = api.exportar(doc(FACTURA, tipo="venta"), driver="contasis", configuracion=CONTAB)
+    ventas = api.exportar(imputado(FACTURA, tipo="venta"), driver="contasis", configuracion=CONTAB)
     assert hoja(ventas).title == "FORMATO_VENTAS" and ventas["archivo"] == "CONTASIS_VENTAS_202608_20601234567.xlsx"
 
 
@@ -53,8 +64,8 @@ def test_en_soles_el_tipo_de_cambio_no_cambia_el_archivo():
 
     Importa desde el 22-sep-2026, cuando las aplicaciones empezaron a anotarlo también en soles para STARSOFT.
     Aquí el archivo tiene que salir byte a byte igual."""
-    sin_tc = api.exportar(doc(FACTURA), driver="contasis", configuracion=CONTAB)
-    con_tc = api.exportar(doc(dict(FACTURA, tipo_cambio="3.383")), driver="contasis", configuracion=CONTAB)
+    sin_tc = api.exportar(imputado(FACTURA), driver="contasis", configuracion=CONTAB)
+    con_tc = api.exportar(imputado(dict(FACTURA, tipo_cambio="3.383")), driver="contasis", configuracion=CONTAB)
     a, b = hoja(sin_tc), hoja(con_tc)
     filas_a = [[c.value for c in f] for f in a.iter_rows()]
     filas_b = [[c.value for c in f] for f in b.iter_rows()]
@@ -67,7 +78,7 @@ def test_la_constancia_de_la_detraccion_llena_sus_dos_columnas():
     El 22-sep-2026 John pidió lo contrario: que la constancia salga en cualquier destino que tenga el campo. Sin
     depositar sale el comodín; con el vóucher pegado, su número y su fecha. Y una compra SIN detracción las deja
     en blanco: son columnas de las que la llevan, no de todas."""
-    fila = lambda d: [c.value for c in hoja(api.exportar(doc(dict(FACTURA, **d)), driver="contasis",
+    fila = lambda d: [c.value for c in hoja(api.exportar(imputado(dict(FACTURA, **d)), driver="contasis",
                                                          configuracion=CONTAB)).iter_rows().__next__()]
     columna = lambda f, letra: f[ord(letra) - ord("A")]
 
@@ -88,7 +99,7 @@ def test_la_constancia_de_la_detraccion_llena_sus_dos_columnas():
 def test_el_recibo_por_honorarios_queda_fuera_del_archivo():
     rh = dict(FACTURA, tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0", inafecto="1000",
               total="1000")
-    r = api.exportar(doc(FACTURA, rh), driver="contasis", configuracion=CONTAB)
+    r = api.exportar(imputado(FACTURA, rh), driver="contasis", configuracion=CONTAB)
     assert r["comprobantes"] == 1 and r["resumen"]["fuera_del_destino"] == 1 and hoja(r).max_row == 1
 
 
@@ -100,7 +111,9 @@ def test_el_recibo_por_honorarios_queda_fuera_del_archivo():
     ("largo", dict(id_externo="f1"), {}, {"f1": {"cuenta_contable": "60110100001"}}),
 ], ids=["moneda", "cambio", "rango", "ivap", "largo"])
 def test_lo_que_contasis_no_puede_llevar_se_dice_antes_y_no_sale(motivo, cambios, libro, imputacion):
-    d = doc(dict(FACTURA, **cambios), **libro)
+    # Los casos que no traen su propia imputación necesitan cuenta igual: sin ella lo que se plantaría es la cuenta
+    # y no lo que este test mira, que es lo que CONTASIS no puede llevar.
+    d = doc(dict(FACTURA, **cambios), **libro) if imputacion else imputado(dict(FACTURA, **cambios), **libro)
     texto = contasis.datos.MOTIVOS[motivo]
     diag = api.diagnosticar(d, configuracion=CONTAB, driver="contasis", imputacion=imputacion)
     assert list(diag["faltantes"]["no_cabe"]) == [texto] and diag["listo_para_exportar"] is False
@@ -117,7 +130,7 @@ def test_un_centro_mas_largo_que_su_columna_no_se_corta():
 def test_un_nombre_o_una_glosa_largos_se_cortan_y_no_detienen_nada():
     """El nombre y la glosa son texto libre: se cortan a 60. Un código, no (ver el test de arriba)."""
     largo = "SERVICIOS INTEGRALES DE MANTENIMIENTO INDUSTRIAL Y MINERO DEL SUR SOCIEDAD ANONIMA CERRADA"
-    d = doc(dict(FACTURA, contraparte_nombre=largo, concepto=largo + " " + largo))
+    d = imputado(dict(FACTURA, contraparte_nombre=largo, concepto=largo + " " + largo))
     assert api.diagnosticar(d, configuracion=CONTAB, driver="contasis")["listo_para_exportar"] is True
     ws = hoja(api.exportar(d, driver="contasis", configuracion=CONTAB))
     assert ws["I1"].value == largo[:60] and len(ws["AS1"].value) == 60
@@ -134,7 +147,7 @@ def test_una_factura_con_reparto_no_sale_a_contasis():
 
 def test_para_contasis_no_se_piden_sub_diarios_ni_equivalencias():
     """El sub-diario se elige al importar en CONTASIS y el tipo va con su código SUNAT: no hay nada de eso que pedir."""
-    diag = api.diagnosticar(doc(FACTURA), configuracion=CONTAB, driver="contasis")
+    diag = api.diagnosticar(imputado(FACTURA), configuracion=CONTAB, driver="contasis")
     assert diag["exige"] == ["cuenta_contable", "cuenta_unica"] and diag["sub_diarios"] == {}
     assert diag["listo_para_exportar"] is True and diag["faltantes"]["no_cabe"] == {}
 
@@ -163,7 +176,7 @@ def test_sus_cuentas_son_las_que_el_nucleo_decidiria(tipo, base, total, centro):
     `test_driver_asiento_neutral` le lleva la contraria. Y la comparación en sí ya existía en
     `test_contrato_drivers` para un driver de registro DE MENTIRA, mientras el de verdad no la tenía.
     """
-    documento = doc(FACTURA, dict(FACTURA, serie="F002", numero="00000456", contraparte_doc="20512333797"),
+    documento = imputado(FACTURA, dict(FACTURA, serie="F002", numero="00000456", contraparte_doc="20512333797"),
                     tipo=tipo)
     celdas = hoja(api.exportar(documento, driver="contasis", configuracion=CONTAB))
     filas = range(1, len(documento["comprobantes"]) + 1)

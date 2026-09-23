@@ -13,10 +13,11 @@ from jsonschema.exceptions import ValidationError
 
 from contaperu import api
 from contaperu.api import openconta, tabla
-from util import GOLDEN, XML
+from util import GOLDEN, XML, imputando
 
 VERSIONADO = Path(__file__).resolve().parents[1] / "contaperu" / "api" / "openconta.json"
-CONFIG = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
+# La cuenta de cada comprobante llega en su imputación desde la 3.0; hasta entonces la ponía `cuentas.gasto`.
+CONFIG = {"usa_centros_costo": False}
 
 
 def _contrato() -> dict:
@@ -24,7 +25,7 @@ def _contrato() -> dict:
 
 
 def _golden(nombre: str = "compras_202601.json") -> dict:
-    return json.loads((GOLDEN / nombre).read_text(encoding="utf-8"))
+    return imputando(json.loads((GOLDEN / nombre).read_text(encoding="utf-8")), "659999")
 
 
 def _validar(componente: str, instancia) -> None:

@@ -215,14 +215,16 @@ def test_el_csv_lleva_el_rol_y_los_codigos_sunat():
 
     from util import GOLDEN
 
-    documento = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
-    texto = api.exportar(documento, driver="csv", configuracion={"cuentas": {"gasto": "659999"},
-                                                                  "usa_centros_costo": False})["texto"]
+    from util import imputando
+
+    documento = imputando(json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8")), "659999")
+    texto = api.exportar(documento, driver="csv", configuracion={"usa_centros_costo": False})["texto"]
     filas = list(csv.DictReader(io.StringIO(texto.lstrip("\ufeff")), delimiter=";"))
     assert list(filas[0])[-5:] == ["rol", "doc_tipo_cp", "ref_tipo_cp", "clase", "doc_id_externo"]
     assert [f["rol"] for f in filas[:3]] == ["principal", "igv", "tercero"]
     assert [f["clase"] for f in filas[:3]] == ["gasto", "pasivo", "pasivo"]
     assert all(f["doc_tipo_cp"] for f in filas) and {f["ref_tipo_cp"] for f in filas} == {""}
-    # Este golden no trae `id_externo` en sus comprobantes, así que la columna sale vacía: es la prueba de que el
-    # enlace es opcional mientras no haya imputaciones en el documento.
-    assert {f["doc_id_externo"] for f in filas} == {""}
+    # El enlace con la imputación: cada línea dice de qué comprobante salió. Desde la 3.0 el documento imputa
+    # —la cuenta es suya, no de la configuración—, así que la columna va llena; con un documento sin imputaciones
+    # sale vacía, que es lo que la hace opcional.
+    assert {f["doc_id_externo"] for f in filas} == {"fila-1", "fila-2", "fila-3"}

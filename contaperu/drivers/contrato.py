@@ -72,20 +72,24 @@ defecto de su sección, su validación y la descripción con la que una aplicaci
 necesita cada empresa, sin copiar nada.
 
 Y opcional en un driver que lleva cuentas, `CUENTAS_POR_DEFECTO` (2.5): **con qué cuentas nace una empresa que lleva
-SU sistema**, cuando no son las de `CONFIGURACION_GENERAL`. Las de fábrica son las del PCGE a seis dígitos —`421201`,
-`401111`, `121201`—, que es como numeran CONCAR y CONTASIS; un sistema que numera de otra forma las declara aquí, y
-`config_aplicada` las pone debajo de lo que la empresa haya guardado. Lo que un driver no diga sigue siendo lo
-general, así que esto no es un segundo plan de cuentas. **No son las cuentas de nadie**: son de dónde parte quien
-abre ese sistema por primera vez, y en cuanto el contador escriba la suya, manda la suya.
+SU sistema**. Es un solo sitio (John, 23-sep-2026) con **dos oficios**, y el reparto lo decide la clave:
 
-Cuánto declarar es una decisión de cada driver, y las dos respuestas están en el repositorio:
+- **Las de la contrapartida** —`cxp`, `cxp_detraccion`, `honorarios`, `retencion_4ta`, `igv`, `clientes`— son
+  CONFIGURACIÓN: `config_aplicada` las pone debajo de lo que la empresa haya guardado, y de ahí salen las líneas del
+  asiento que no son la del comprobante. Las de fábrica son las del PCGE a seis dígitos —`421201`, `401111`,
+  `121201`—, que es como numeran CONCAR y CONTASIS; un sistema que numera de otra forma declara las suyas.
+- **`compras` y `ventas`** (`CLAVES_DEL_PLAN`, 3.0) NO son configuración: son la cuenta con la que ese sistema
+  registra habitualmente una compra y una venta, y **siembran el plan de cuentas** de la empresa que lo abre, para
+  que las elija (`plan_base`). **No imputan solas**: la cuenta de un comprobante viene siempre en su imputación, y
+  hasta la 3.0 una cuenta por defecto la suplía y el mes salía «listo» imputado a un comodín que nadie eligió.
 
-- **Solo lo que se aparta** (CONCAR, que declara una sola cuenta). Es lo más corto y no puede quedarse atrás: el día
-  que lo general mejore, el driver mejora con él.
-- **El bloque entero** (STARSOFT, porque numera a ocho dígitos y se aparta en todo; CONTASIS, porque sus cuentas
-  coinciden hoy con las de fábrica pero nadie ha traído las de una instalación real, y se quiere tener dónde
-  escribirlas cuenta por cuenta). Repetir un dato en dos sitios **exige un test que los compare**, o el driver se
-  queda atrás en silencio: el de CONTASIS está en `tests/test_cuentas_del_sistema.py`.
+**No son las cuentas de nadie**: son de dónde parte quien abre ese sistema por primera vez, y en cuanto el contador
+escriba la suya, manda la suya.
+
+**Se declara el bloque ENTERO y visible** (John, 23-sep-2026), aunque repita lo de fábrica: un driver se lee de un
+vistazo y no obliga a ir a buscar qué hereda. Hasta la 3.0 aquí convivían dos respuestas —CONCAR declaraba una sola
+cuenta «porque las demás ya son las suyas»— y esa se retiró. Repetir un dato en dos sitios **exige un test que los
+compare**, o el driver se queda atrás en silencio: están en `tests/test_cuentas_del_sistema.py`.
 
 Los `Protocol` de abajo son la documentación tipada; lo que el registro comprueba de verdad al cargar
 un driver de terceros es `incumplimientos()`, y `tests/test_contrato_drivers.py` es el examen que pasa
@@ -101,7 +105,7 @@ from .. import configuracion as _declaracion
 from ..asiento.configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO
 from ..asiento.faltas import NoExportable
 from ..asiento.motor import CENTRO_EN_ANEXO
-from ..configuracion import CONFIGURACION_GENERAL, Campo, Columna
+from ..configuracion import CONFIGURACION_GENERAL, PATRON_CUENTA, Campo, Columna
 from ..modelo import TIPOS_LIBRO, Comprobante, Libro
 from .kit import Opciones, OpcionesArchivo
 from .kit import columnas as _columnas_de_linea
@@ -166,6 +170,14 @@ _CLAVES_QUE_NO_SON_DE_UNA_SECCION = frozenset({c.clave for c in CONFIGURACION_GE
 # Las cuentas de lo general, contra las que se valida lo que un driver declare en `CUENTAS_POR_DEFECTO`: sus claves
 # son estas y ninguna más, y cada una cumple lo que ya cumplía (el patrón de una cuenta, o el objeto PEN/USD).
 _CUENTAS_GENERALES: tuple[Campo, ...] = next((c.campos for c in CONFIGURACION_GENERAL if c.clave == "cuentas"), ())
+# Las dos claves que NO son configuración y por eso no están en lo general: la cuenta con la que ese sistema registra
+# una compra y la de una venta. Siembran el plan de cuentas de la empresa (`plan_base`) y no imputan nada. El `tipo`
+# de la fila sale de la clave, y son los dos únicos que admite un plan: gasto e ingreso.
+TIPO_DEL_PLAN: dict[str, str] = {"compras": "gasto", "ventas": "ingreso"}
+CLAVES_DEL_PLAN: tuple[str, ...] = tuple(TIPO_DEL_PLAN)
+_CUENTAS_DEL_PLAN: tuple[Campo, ...] = tuple(
+    Campo(clave, "texto", "", titulo=titulo, grupo="cuentas", patron=PATRON_CUENTA)
+    for clave, titulo in (("compras", "Cuenta de compras del sistema"), ("ventas", "Cuenta de ventas del sistema")))
 
 
 class Driver(Protocol):
@@ -183,7 +195,7 @@ class DriverRegistroTexto(Driver, Protocol):
 class DriverRegistroArchivo(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_REGISTRO
-    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, solo las que se apartan de lo general
+    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, enteras: contrapartida + plan (compras/ventas)
 
     def desde_comprobantes(self, libro: Libro, comprobantes: list[Comprobante], config: dict,
                            opciones: Opciones = ...) -> tuple[bytes, dict]: ...
@@ -192,7 +204,7 @@ class DriverRegistroArchivo(Driver, Protocol):
 class DriverAsientoComprobantes(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
-    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, solo las que se apartan de lo general
+    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, enteras: contrapartida + plan (compras/ventas)
 
     def construir(self, libro: Libro, comprobantes: list[Comprobante], config: dict,
                   correlativos: dict[str, int], opciones: Opciones = ...) -> tuple[bytes, dict]: ...
@@ -201,7 +213,7 @@ class DriverAsientoComprobantes(Driver, Protocol):
 class DriverAsientoLineas(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
-    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, solo las que se apartan de lo general
+    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, enteras: contrapartida + plan (compras/ventas)
 
     def desde_lineas(self, libro: Libro, lineas: list[LineaDiario], config: dict, opciones: Opciones = ..., *,
                      indice: tuple[ComprobanteDelAsiento, ...] = ...) -> tuple[bytes, dict]: ...
@@ -288,12 +300,25 @@ def configuracion(modulo: Any) -> tuple[Campo, ...]:
 
 
 def cuentas_por_defecto(modulo: Any) -> dict:
-    """Con qué cuentas nace una empresa que lleva ESTE sistema (su `CUENTAS_POR_DEFECTO`): solo las que se apartan de
-    lo general, para que lo que no declare siga siendo lo general y lo siga siendo el día que lo general mejore.
-    Vacío si no declara ninguna, que es el caso de quien numera como el PCGE.
+    """Las cuentas de la CONTRAPARTIDA con las que nace una empresa que lleva este sistema: lo que declara en
+    `CUENTAS_POR_DEFECTO` **sin las dos claves del plan**, que no son configuración (`plan_base`). Es lo que
+    `config_aplicada` funde debajo de lo que la empresa haya guardado. Vacío si no declara ninguna.
 
     Devuelve una copia: el dict del driver es de fábrica y nadie de fuera lo muta."""
-    return copy.deepcopy(getattr(modulo, "CUENTAS_POR_DEFECTO", None) or {})
+    declaradas = copy.deepcopy(getattr(modulo, "CUENTAS_POR_DEFECTO", None) or {})
+    return {clave: valor for clave, valor in declaradas.items() if clave not in TIPO_DEL_PLAN}
+
+
+def plan_base(modulo: Any) -> tuple[dict[str, str], ...]:
+    """Con qué PLAN DE CUENTAS nace una empresa que lleva este sistema: `({"codigo", "tipo"}, …)`, una fila por cada
+    clave del plan que el driver declare (3.0).
+
+    Es la lista que esa empresa elige al imputar cada comprobante —una cuenta de compras y una de ventas, que es de
+    donde se parte—, no un valor que se aplique solo: **la cuenta de un comprobante viene siempre en su imputación**.
+    Vacío si el driver no declara ninguna, que es el caso de quien no es el sistema de nadie."""
+    declaradas = getattr(modulo, "CUENTAS_POR_DEFECTO", None) or {}
+    return tuple({"codigo": str(declaradas[clave]).strip(), "tipo": tipo}
+                 for clave, tipo in TIPO_DEL_PLAN.items() if str(declaradas.get(clave) or "").strip())
 
 
 def columnas_elegibles(modulo: Any) -> dict[str, tuple[Columna, ...]]:
@@ -487,7 +512,7 @@ def _incumplimientos_de_las_cuentas(cuentas: Any) -> list[str]:
         return ["CUENTAS_POR_DEFECTO es un objeto con las claves de `cuentas`, como se guardan"]
     if not cuentas:
         return ["CUENTAS_POR_DEFECTO vacío es no declararlo: un sistema que numera como el PCGE no lo pone"]
-    return _declaracion.validar(cuentas, _CUENTAS_GENERALES, donde="CUENTAS_POR_DEFECTO")
+    return _declaracion.validar(cuentas, _CUENTAS_GENERALES + _CUENTAS_DEL_PLAN, donde="CUENTAS_POR_DEFECTO")
 
 
 def _incumplimientos_de_las_columnas(modulo: Any, columnas: Any) -> list[str]:

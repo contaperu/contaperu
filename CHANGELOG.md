@@ -6,6 +6,35 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Cambiado — **incompatible: es una 3.0**
+
+- **La cuenta de un comprobante es de su imputación, y nada la suple.** `CONFIGURACION_GENERAL` pierde las dos
+  cuentas que la suplían —`cuentas.gasto` (vacía de fábrica) y `cuentas.ventas` (`701101`)— y `asiento.partes_de` se
+  queda sin respaldo: lo que nadie imputó se cuenta como `sin_cuenta` y `exigir_requisitos` detiene la exportación.
+
+  Hasta aquí una cuenta por defecto hacía que el motor **dejara de contar** como `sin_cuenta` los comprobantes a los
+  que nadie les había puesto una: salían imputados a ella y el mes se daba por listo para exportar. En ventas pasaba
+  siempre, porque la de fábrica era real. Es la decisión de John (23-sep-2026) tras verlo en producción: cada
+  comprobante tiene su cuenta y un comodín la esconde.
+
+  **Qué hacer al subir:** lo que estaba en `cuentas.gasto` o `cuentas.ventas` pasa a la imputación de cada
+  comprobante, por `id_externo` —el argumento `imputacion` o el bloque `imputaciones` del documento—. Una
+  configuración que todavía las traiga se rechaza con `ConfiguracionInvalida`, que es lo contrario de perderlas en
+  silencio.
+
+- **`CUENTAS_POR_DEFECTO` de un driver tiene dos oficios, y lo dice la clave.** Las de la contrapartida —`cxp`,
+  `cxp_detraccion`, `honorarios`, `retencion_4ta`, `igv`, `clientes`— siguen siendo configuración. Las dos nuevas,
+  **`compras` y `ventas`** (`contrato.CLAVES_DEL_PLAN`), no: son la cuenta con la que ese sistema registra
+  habitualmente una compra y una venta, y **siembran el plan de cuentas** de la empresa que lo abre, para que las
+  elija comprobante a comprobante. No imputan solas. Se leen con `contrato.plan_base(driver)`, y
+  `contrato.cuentas_por_defecto(driver)` ya no las devuelve.
+
+- **Los tres drivers legacy declaran su bloque entero.** CONCAR era la última excepción —declaraba una sola cuenta
+  «porque lo general ya era lo suyo»— y se retiró: un driver se lee de un vistazo y no obliga a ir a buscar qué
+  hereda. Sus planes: CONCAR y CONTASIS `631101`/`701101` (PCGE a seis dígitos; la de compras de CONTASIS va marcada
+  `# prevista`, porque no consta en ningún manual), STARSOFT `60110100`/`70410001`, las dos de su manual y de una
+  instalación real.
+
 ### Corregido
 
 - **Un caso de conformidad comprobaba `pedir_a` contra la constante del propio motor**, no contra la respuesta

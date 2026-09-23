@@ -13,9 +13,10 @@ import pytest
 from contaperu import api, drivers
 from contaperu.drivers import contrato
 from drivers_de_prueba import diario_json
-from util import GOLDEN
+from util import GOLDEN, imputando
 
-CONFIG = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
+# Desde la 3.0 la cuenta es del comprobante: los documentos de estas pruebas la traen con `imputando`.
+CONFIG = {"usa_centros_costo": False}
 
 
 class _Entrada:
@@ -35,7 +36,7 @@ def registrado(monkeypatch):
 
 
 def _documento() -> dict:
-    return json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
+    return imputando(json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8")), "659999")
 
 
 def test_cumple_el_contrato_v1_como_legacy():

@@ -348,12 +348,14 @@ from contaperu import api
 
 libro = {"ruc": "20601234567", "razon_social": "MI EMPRESA SAC", "periodo": "202608", "tipo": "compra"}
 documento = api.leer_xml(Path("F001-123.xml").read_text(encoding="utf-8"), libro)
-# La cuenta de gasto por defecto viene vacía: va aquí o en la imputación de cada comprobante, por su `id_externo`.
-configuracion = {"cuentas": {"gasto": "603201"}}
+# La cuenta de cada comprobante va en su imputación, por `id_externo`: no hay ninguna de la empresa que la supla.
+configuracion = {}
+imputacion = {c.setdefault("id_externo", f"fila-{n}"): {"cuenta_contable": "603201"}
+              for n, c in enumerate(documento["comprobantes"], 1)}
 
-diagnostico = api.diagnosticar(documento, driver="concar", configuracion=configuracion)
+diagnostico = api.diagnosticar(documento, driver="concar", configuracion=configuracion, imputacion=imputacion)
 print(diagnostico["listo_para_exportar"], diagnostico["por_que_no"])
-archivo = api.exportar_archivo(documento, driver="concar", configuracion=configuracion)
+archivo = api.exportar_archivo(documento, driver="concar", configuracion=configuracion, imputacion=imputacion)
 Path(archivo.archivo).write_bytes(archivo.contenido)            # el Excel que importa CONCAR
 ```
 

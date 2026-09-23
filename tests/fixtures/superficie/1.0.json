@@ -129,6 +129,7 @@
   "Columna": "",
   "ConfiguracionInvalida": "",
   "ErrorContaperu": "",
+  "PATRON_CUENTA": "",
   "describir": "",
   "por_defecto": "",
   "validar": ""
@@ -352,6 +353,7 @@
   "CANALES_RESERVADOS": "",
   "CANAL_POR_DEFECTO": "",
   "CENTRO_EN_ANEXO": "",
+  "CLAVES_DEL_PLAN": "",
   "CLAVES_LEGACY": "",
   "CONFIGURACION_DEL_ASIENTO": "",
   "CONFIGURACION_GENERAL": "",
@@ -378,7 +380,9 @@
   "NoExportable": "",
   "Opciones": "",
   "OpcionesArchivo": "",
+  "PATRON_CUENTA": "",
   "TIPOS_LIBRO": "",
+  "TIPO_DEL_PLAN": "",
   "TYPE_CHECKING": "",
   "VOCABULARIOS": "",
   "VOCABULARIO_POR_DEFECTO": "",
@@ -399,6 +403,7 @@
   "incumplimientos": "",
   "lleva_cuentas": "",
   "no_caben": "",
+  "plan_base": "",
   "seccion_por_defecto": "",
   "vocabulario": ""
  },

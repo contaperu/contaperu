@@ -79,6 +79,25 @@ def separar_imputacion(documento: dict) -> tuple[dict, dict]:
     return documento, imputacion
 
 
+def imputando(documento: dict, cuenta: str, centro: str = "") -> dict:
+    """El documento con su bloque `imputaciones`: la MISMA cuenta para todos sus comprobantes, por `id_externo` (se
+    le pone uno a quien no lo tenga).
+
+    Hasta la 3.0 esto se conseguía con `cuentas.gasto` en la configuración —la cuenta que el motor le ponía a quien
+    no traía ninguna—, y por eso los documentos de prueba que vienen de SUNAT no imputan nada. Desde la 3.0 **la
+    cuenta es del comprobante**, así que los documentos que solo quieren exportar la traen por aquí; los que prueban
+    qué pasa SIN cuenta, a propósito, no llaman a esto.
+    """
+    documento = copy.deepcopy(documento)
+    imputaciones = dict(documento.get("imputaciones") or {})
+    propia = {"cuenta_contable": cuenta, **({"centro_costo": centro} if centro else {})}
+    for n, c in enumerate(documento.get("comprobantes") or [], 1):
+        c.setdefault("id_externo", f"fila-{n}")
+        imputaciones.setdefault(c["id_externo"], propia)
+    documento["imputaciones"] = imputaciones
+    return documento
+
+
 def por_la_fachada(operacion):
     """Una operación de la fachada (`diagnosticar`, `exportar`…) para documentos de prueba que escriben la cuenta y el
     centro en cada comprobante: se apartan como su imputación antes de llamar."""

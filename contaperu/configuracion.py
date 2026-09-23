@@ -236,13 +236,13 @@ def describir(campos: tuple[Campo, ...], columnas: dict[str, tuple[Columna, ...]
 
 # ── Lo general de la contabilidad: sirve a cualquier sistema contable ────────────────────────────────────────────────
 
-_CUENTA = r"^([0-9]{2,12})?$"      # de 2 a 12 dígitos, como la valida la pantalla; vacía = sin cuenta
+PATRON_CUENTA = r"^([0-9]{2,12})?$"      # de 2 a 12 dígitos, como la valida la pantalla; vacía = sin cuenta
 
 
 def _cuenta_por_moneda(clave: str, titulo: str, soles: str, dolares: str, ayuda: str) -> Campo:
     return Campo(clave, "objeto", titulo=titulo, ayuda=ayuda, grupo="cuentas", campos=(
-        Campo("PEN", "texto", soles, titulo="Soles", grupo="cuentas", patron=_CUENTA),
-        Campo("USD", "texto", dolares, titulo="Dólares", grupo="cuentas", patron=_CUENTA)))
+        Campo("PEN", "texto", soles, titulo="Soles", grupo="cuentas", patron=PATRON_CUENTA),
+        Campo("USD", "texto", dolares, titulo="Dólares", grupo="cuentas", patron=PATRON_CUENTA)))
 
 
 # Lo general de la contabilidad. **Las cuentas de aquí son el PCGE a seis dígitos, que es como numeran CONCAR y
@@ -251,13 +251,15 @@ def _cuenta_por_moneda(clave: str, titulo: str, soles: str, dolares: str, ayuda:
 # (`drivers.contrato.cuentas_por_defecto`). Lo que un driver no declare lo sigue heredando de aquí.
 CONFIGURACION_GENERAL: tuple[Campo, ...] = (
     Campo("cuentas", "objeto", titulo="Cuentas", grupo="cuentas", campos=(
-        # VACÍA aquí a propósito: en la práctica es el comodín «63/65», que no es una cuenta. La pone la imputación
-        # de cada documento, la configuración de la empresa o el driver del sistema al que se exporta
-        # (`drivers.contrato.CUENTAS_POR_DEFECTO`, 2.5; CONCAR declara la suya). **Con una puesta, el motor deja de
-        # contar como `sin_cuenta` los comprobantes a los que nadie les puso una**: salen a ella y el mes queda
-        # listo. Quien prefiera que le avisen la deja en blanco, y lo guardado manda sobre lo que traiga el driver.
-        Campo("gasto", "texto", "", titulo="Cuenta de gasto por defecto", grupo="cuentas", patron=_CUENTA,
-              ayuda="La que se usa cuando el comprobante no trae ninguna. Vacía, se elige en cada comprobante."),
+        # **Aquí NO hay cuenta de gasto ni de ingreso, y es la decisión de la 3.0** (John, 23-sep-2026). La cuenta
+        # con la que se registra una compra o una venta es de CADA comprobante y llega en su imputación, por
+        # `id_externo`; no es un dato de la empresa. Mientras fueron configuración, una cuenta por defecto hacía que
+        # el motor dejara de contar como `sin_cuenta` los comprobantes a los que nadie les puso una: salían a ella y
+        # el mes quedaba listo para exportar, imputado en silencio a un comodín que nadie eligió.
+        #
+        # Lo que cada sistema legacy usa habitualmente sigue declarado, pero con otro oficio: en su driver, como
+        # `compras` y `ventas` de `CUENTAS_POR_DEFECTO`, y de ahí **nace el plan de cuentas** de la empresa que abre
+        # ese sistema, para elegirlas (`drivers.contrato.plan_base`).
         _cuenta_por_moneda("cxp", "Facturas, boletas y tickets por pagar", "421201", "421202",
                            "Las compras normales a un proveedor con RUC."),
         # La factura afecta a detracción (SUNAT) lleva su propia cuenta por pagar, la MISMA en las dos monedas.
@@ -266,18 +268,16 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
         _cuenta_por_moneda("honorarios", "Recibos por honorarios por pagar", "424101", "424102",
                            "Lo que le debes al profesional independiente."),
         Campo("retencion_4ta", "texto", "401721", titulo="Renta de 4ta que le retienes", grupo="cuentas",
-              patron=_CUENTA, ayuda="Solo cuando el recibo por honorarios muestra la retención."),
-        Campo("igv", "texto", "401111", titulo="IGV", grupo="cuentas", patron=_CUENTA,
+              patron=PATRON_CUENTA, ayuda="Solo cuando el recibo por honorarios muestra la retención."),
+        Campo("igv", "texto", "401111", titulo="IGV", grupo="cuentas", patron=PATRON_CUENTA,
               ayuda="Crédito fiscal en las compras, débito fiscal en las ventas."),
         _cuenta_por_moneda("clientes", "Facturas y boletas emitidas por cobrar", "121201", "121202",
                            "La cuenta por cobrar del cliente."),
-        Campo("ventas", "texto", "701101", titulo="Cuenta de ingreso por defecto", grupo="cuentas", patron=_CUENTA,
-              ayuda="La que se usa cuando la venta no trae ninguna."),
         # Vacías a propósito: son cuentas de cada empresa, y sin ellas su columna sale en blanco (el registro de
         # CONTASIS las lleva cuando su columna trae importe).
-        Campo("otros_tributos", "texto", "", titulo="Otros tributos y cargos", grupo="cuentas", patron=_CUENTA,
+        Campo("otros_tributos", "texto", "", titulo="Otros tributos y cargos", grupo="cuentas", patron=PATRON_CUENTA,
               ayuda="La cuenta de los otros tributos y cargos del documento. Vacía, esa columna sale en blanco."),
-        Campo("icbper", "texto", "", titulo="ICBPER", grupo="cuentas", patron=_CUENTA,
+        Campo("icbper", "texto", "", titulo="ICBPER", grupo="cuentas", patron=PATRON_CUENTA,
               ayuda="La cuenta del impuesto a las bolsas de plástico. Vacía, esa columna sale en blanco."),
     )),
     # ¿Esta empresa lleva centros de costo (obras, proyectos, áreas)? Apagado, el centro no sale en ninguna columna

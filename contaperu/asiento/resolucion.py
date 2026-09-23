@@ -94,13 +94,17 @@ def imputacion_de(c: Comprobante, config: dict) -> Imputacion | None:
 def partes_de(c: Comprobante, config: dict, es_venta: bool = False) -> list[tuple[str, str, Decimal | None]]:
     """A qué cuentas va la base del documento: `[(cuenta, centro, importe)]`, con importe None = la base entera.
 
-    Con reparto en su imputación, una parte por cada una. Si no, una sola: la cuenta y el centro de la imputación, y
-    la cuenta que no traiga, la de la configuración. Es la única resolución: el asiento, los drivers de registro y
-    las faltas de cuenta y de centro leen esto."""
+    Con reparto en su imputación, una parte por cada una. Si no, una sola: la cuenta y el centro que traiga su
+    imputación. Es la única resolución: el asiento, los drivers de registro y las faltas de cuenta y de centro leen
+    esto.
+
+    **Sin imputación no hay cuenta** (3.0): la configuración de la empresa ya no suple la del comprobante, así que
+    `comprobantes_sin_cuenta` lo cuenta y `exigir_requisitos` detiene la exportación. Es a propósito — una compra
+    imputada a un comodín que nadie eligió es un asiento mal hecho que nadie mira—."""
     imputacion = imputacion_de(c, config)
     if imputacion is not None and imputacion.reparto:
         return [(p.cuenta_contable, p.centro_costo, p.importe) for p in imputacion.reparto]
-    cuenta = (imputacion.cuenta_contable if imputacion is not None else "") or _cuenta_de_respaldo(config, es_venta)
+    cuenta = imputacion.cuenta_contable if imputacion is not None else ""
     centro = imputacion.centro_costo if imputacion is not None else ""
     return [(cuenta, centro, None)]
 
@@ -179,14 +183,10 @@ def monedas_sin_codigo(comprobantes: list[Comprobante], config: dict) -> list[st
     return vistas
 
 
-def _cuenta_de_respaldo(config: dict, es_venta: bool = False) -> str:
-    """La cuenta de la base cuando la imputación del documento no trae una: la de ingreso en ventas, que SÍ tiene un
-    valor de fábrica real (el habitual), y la de gasto en compras, que va vacía a propósito (`configuracion.py`).
-    Solo lee la configuración; la resolución entera, con la imputación delante, es `partes_de`."""
-    cuentas = config.get("cuentas") or {}
-    if es_venta:
-        return str(cuentas.get("ventas") or CONFIG_POR_DEFECTO["cuentas"]["ventas"]).strip()
-    return str(cuentas.get("gasto") or "").strip()
+# `_cuenta_de_respaldo` murió en la 3.0 (John, 23-sep-2026): daba la cuenta de la configuración cuando la imputación
+# no traía ninguna —la de ingreso tenía hasta un valor de fábrica, `701101`— y con eso una venta sin cuenta salía
+# imputada sola y el mes se daba por listo. **La cuenta del comprobante es de su imputación o no hay**, que es lo que
+# el estándar dice desde que la imputación viaja aparte. Si reaparece en un grep, es código revivido.
 
 
 def lleva_centro(cuenta: str, config: dict) -> bool:

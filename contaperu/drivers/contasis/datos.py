@@ -29,18 +29,21 @@ EXIGE = frozenset({"cuenta_unica"})
 # con la misma forma que las de STARSOFT, aunque hoy coincidan una a una con las de lo general
 # (`configuracion.CONFIGURACION_GENERAL`): CONTASIS usa el PCGE a seis dígitos, igual que CONCAR.
 #
-# CONCAR hace lo contrario —declara solo la suya, la del gasto— y su comentario da la razón: repetir un dato en dos
-# sitios sin nadie que los compare hace que, el día que lo general mejore, el driver se quede atrás. Aquí se acepta
-# esa repetición por una razón concreta —que el día que alguien traiga el plan real de una instalación de CONTASIS
-# tenga dónde escribirlo, cuenta por cuenta, en vez de descubrir que hereda las de otro sistema— y **se le pone el
-# vigilante que le faltaba a la idea**: `tests/test_cuentas_del_sistema.py` compara este bloque con lo general y se
-# pone rojo si se separan sin que nadie lo haya decidido. Cuando lleguen las cuentas de verdad, se cambia la línea
-# y se cambia el test, que es exactamente el momento en el que hay que pensarlo.
+# La razón de escribirlas aquí aunque coincidan: el día que alguien traiga el plan real de una instalación de
+# CONTASIS tiene dónde escribirlo, cuenta por cuenta, en vez de descubrir que hereda las de otro sistema.
 #
-# **`gasto` no se declara**, como en STARSOFT y por su mismo motivo: en lo general va vacía porque es el comodín
-# «63/65», que no es una cuenta, y poner una REAL aquí imputaría en silencio toda compra a la que nadie le puso
-# ninguna. Cuál es la de CONTASIS no consta; hoy la siembra la aplicación, donde el contador la ve. El día que se
-# sepa, es una línea más.
+# **El bloque va ENTERO y visible** (John, 23-sep-2026), aunque repita lo de fábrica: un driver se lee de un vistazo
+# y no obliga a ir a buscar qué hereda. Lo vigila `tests/test_cuentas_del_sistema.py`, que compara con lo general lo
+# que tiene que coincidir y se pone rojo si se separan sin que nadie lo haya decidido.
+#
+# **`compras` y `ventas` no son configuración**: son la cuenta con la que este sistema registra habitualmente una
+# compra y una venta, y de ellas **nace el plan de cuentas** de la empresa, para elegirlas comprobante a comprobante
+# (`drivers.contrato.plan_base`). **No imputan solas**: hasta la 3.0 una cuenta de gasto o de ingreso por defecto
+# suplía a la que nadie puso, y entonces el mes salía «listo para exportar» imputado a un comodín que nadie eligió.
+#
+# **`compras` va marcada `# prevista`** (John, 23-sep-2026): cuál es la de CONTASIS no consta en ningún manual, así
+# que se pone la del PCGE —la misma que CONCAR— para que ninguna empresa nazca sin una cuenta de dónde partir, y se
+# marca para que se vea de un vistazo que no está comprobada. El día que llegue la de verdad, es cambiar la línea.
 CUENTAS_POR_DEFECTO: dict = {
     "cxp": {"PEN": "421201", "USD": "421202"},
     "cxp_detraccion": {"PEN": "421203", "USD": "421203"},
@@ -48,6 +51,7 @@ CUENTAS_POR_DEFECTO: dict = {
     "retencion_4ta": "401721",
     "igv": "401111",
     "clientes": {"PEN": "121201", "USD": "121202"},
+    "compras": "631101",                                    # prevista
     "ventas": "701101",
 }
 

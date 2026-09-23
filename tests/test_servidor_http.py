@@ -18,9 +18,10 @@ from starlette.testclient import TestClient  # noqa: E402
 
 from contaperu import api  # noqa: E402
 from contaperu.puertas import servidor_http  # noqa: E402
-from util import GOLDEN, XML  # noqa: E402
+from util import GOLDEN, XML, imputando  # noqa: E402
 
-CONFIG = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
+# Desde la 3.0 la cuenta es del comprobante: los documentos de estas pruebas la traen con `imputando`.
+CONFIG = {"usa_centros_costo": False}
 LIBRO = {"ruc": "20131312955", "razon_social": "EMISOR DE PRUEBA S.A.C.", "periodo": "202601", "tipo": "venta"}
 
 
@@ -29,7 +30,7 @@ def _cliente(base: str = "http://localhost:8080", **opciones) -> TestClient:
 
 
 def _golden(nombre: str = "compras_202601.json") -> dict:
-    return json.loads((GOLDEN / nombre).read_text(encoding="utf-8"))
+    return imputando(json.loads((GOLDEN / nombre).read_text(encoding="utf-8")), "659999")
 
 
 def _es_problema(respuesta, estado: int, clave: str) -> None:
@@ -72,8 +73,9 @@ def test_exportar_da_lo_mismo_que_la_api(driver):
 
 def test_un_rechazo_del_motor_es_un_422_con_su_clave():
     documento = _golden()
+    # El documento trae su cuenta y no su centro, y CONCAR exige el centro donde la cuenta lo lleva.
     respuesta = _cliente().post("/v1/exportar", json={"documento": documento, "driver": "concar",
-                                                     "configuracion": {"cuentas": {"gasto": "659999"}}})
+                                                     "configuracion": {}})
     _es_problema(respuesta, 422, "sin_centro")
     sin_libro = _cliente().post("/v1/revisar", json={"documento": {"comprobantes": []}})
     _es_problema(sin_libro, 422, "documento_invalido")

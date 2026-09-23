@@ -103,7 +103,9 @@ def test_las_cuentas_con_las_que_nace_una_empresa_de_starsoft():
     assert cuentas["cxp"]["PEN"] == del_manual["cxp"]
     assert cuentas["igv"] == del_manual["igv"]
     assert cuentas["clientes"]["PEN"] == del_manual["clientes"]
+    # `ventas` y `compras` no son configuración desde la 3.0: son las dos con las que nace el plan de la empresa.
     assert cuentas["ventas"] == del_manual["ventas"]
+    assert cuentas["compras"] == "60110100"      # John, 23-sep-2026, de una instalación real
     # Las deducidas: la misma cuenta de lo general con el patron de STARSOFT (subcuenta de 4 + correlativo de 4;
     # las de raiz de 5, como el IGV y la renta de 4ta, completan con 3).
     assert cuentas["cxp"]["USD"] == "42120002"
@@ -111,10 +113,8 @@ def test_las_cuentas_con_las_que_nace_una_empresa_de_starsoft():
     assert cuentas["honorarios"] == {"PEN": "42410001", "USD": "42410002"}
     assert cuentas["retencion_4ta"] == "40172100"
     assert cuentas["clientes"]["USD"] == "12120002"
-    # `gasto` NO: en lo general va vacia a proposito (es el comodin 63/65) y el `62010001` del manual es una cuenta
-    # de gasto real. De respaldo imputaria a mercaderias, en silencio, toda compra sin cuenta.
-    assert "gasto" not in cuentas
-    assert api.config_aplicada(driver="starsoft")["cuentas"]["gasto"] == ""
+    # Y ninguna de las dos del plan se funde en la configuracion: no imputan, siembran el plan de la empresa (3.0).
+    assert not {"compras", "ventas"} & set(api.config_aplicada(driver="starsoft")["cuentas"])
 
 
 def _con_detraccion(**cambios) -> dict:

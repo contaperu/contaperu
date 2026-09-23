@@ -83,11 +83,18 @@ ORDEN_DE_LAS_FILAS = {"compra": ("igv", "tercero"), "venta": ("tercero", "igv")}
 # 40172— completan con tres (40111 → 40111000). Cada deducida es la misma cuenta de lo general reescrita con ese
 # patrón, así que si el contador ve otra en su sistema la cambia desde su pantalla, sin tocar código.
 #
-# **`gasto` NO se declara, y es una decisión.** En lo general va vacía a propósito —es el comodín «63/65», que no
-# es una cuenta— y lo que trae el manual (`62010001`) es una cuenta de gasto REAL, mercaderías. De respaldo
-# imputaría a mercaderías, en silencio, toda compra a la que nadie le puso cuenta. El comodín que evita que la
-# exportación se bloquee es de la aplicación, que lo SIEMBRA y el contador lo ve en su pantalla; un respaldo del
-# motor actúa sin que nadie lo haya escrito. Es la misma regla que la sigla que no se inventa.
+# **El bloque va ENTERO y visible** (John, 23-sep-2026), aunque repita lo de fábrica: un driver se lee de un vistazo
+# y no obliga a ir a buscar qué hereda. Lo vigila `tests/test_cuentas_del_sistema.py`, que compara con lo general lo
+# que tiene que coincidir y se pone rojo si se separan sin que nadie lo haya decidido.
+#
+# **`compras` y `ventas` no son configuración**: son la cuenta con la que este sistema registra habitualmente una
+# compra y una venta, y de ellas **nace el plan de cuentas** de la empresa, para elegirlas comprobante a comprobante
+# (`drivers.contrato.plan_base`). **No imputan solas**: hasta la 3.0 una cuenta de gasto o de ingreso por defecto
+# suplía a la que nadie puso, y entonces el mes salía «listo para exportar» imputado a un comodín que nadie eligió.
+#
+# **`compras` es `60110100`** (John, 23-sep-2026, de una instalación real): mercaderías, PCGE 6011. Antes aquí no
+# había ninguna y la sembraba la aplicación como comodín — el `62010001` del manual—, que es justo lo que se retiró:
+# de respaldo imputaba a mercaderías, en silencio, toda compra a la que nadie le puso cuenta.
 CUENTAS_POR_DEFECTO: dict = {
     "cxp": {"PEN": "42120001",                              # del manual
             "USD": "42120002"},                             # deducida
@@ -102,6 +109,7 @@ CUENTAS_POR_DEFECTO: dict = {
     "igv": "40111000",                                      # del manual
     "clientes": {"PEN": "12120001",                         # del manual
                  "USD": "12120002"},                        # deducida
+    "compras": "60110100",                                  # John, 23-sep-2026
     "ventas": "70410001",                                   # del manual
 }
 

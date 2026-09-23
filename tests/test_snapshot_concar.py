@@ -124,8 +124,10 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
      {"concar": {"columnas": {"centro_costo": ["centro_costo", "anexo_auxiliar"]}}}),
     ("sin_centros_de_costo", {}, False, {"usa_centros_costo": False}),
     ("ninguna_cuenta_lleva_centro", {}, False, {"cuentas_con_centro": []}),
-    ("gasto_y_cxp_del_ruc", dict(cuenta_contable="", moneda="USD"), False,
-     {"cuentas": {"gasto": "659901", "cxp": {"USD": "421203"}}}),
+    # Era «gasto_y_cxp_del_ruc»: el gasto salía de `cuentas.gasto`, que murió en la 3.0 —la cuenta del comprobante
+    # es de su imputación—. Lo que sigue siendo del RUC es la cuenta por pagar en dólares, y eso es lo que fija.
+    ("gasto_y_cxp_del_ruc", dict(cuenta_contable="659901", moneda="USD"), False,
+     {"cuentas": {"cxp": {"USD": "421203"}}}),
     # La imputación de un documento llega aparte, en la configuración y por `id_externo` (John, 12-sep-2026: las
     # cuentas viven en la aplicación). La cuenta del total que decide manda sobre la del RUC, también en la línea
     # que le descuenta la detracción al proveedor; la de la detracción sigue siendo la suya.
@@ -133,37 +135,38 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
      {"imputaciones": {"f1": {"cuenta_tercero": "469901"}}}),
     ("cuenta_tercero_con_detraccion", dict(id_externo="f1", detraccion=DET), False,
      {"imputaciones": {"f1": {"cuenta_tercero": "469901"}}}),
-    ("venta_cuenta_tercero_de_la_imputacion", dict(cuenta_contable="", id_externo="f1"), True,
+    ("venta_cuenta_tercero_de_la_imputacion", dict(cuenta_contable="701101", id_externo="f1"), True,
      {"imputaciones": {"f1": {"cuenta_tercero": "121209"}}}),
     # Campo a campo: la cuenta de la imputación manda sobre la de legado, y el centro que no trae sale del legado.
     ("la_imputacion_manda_campo_a_campo", dict(id_externo="f1"), False,
      {"imputaciones": {"f1": {"cuenta_contable": "659999"}}}),
     # El reparto de la base entre cuentas y centros: una línea de gasto o ingreso por parte, con su centro donde la
     # cuenta lo lleva; el doble anexo del tercero, solo si todas las partes comparten centro.
-    ("reparto_dos_cuentas", dict(cuenta_contable="", centro_costo="", id_externo="f1"), False,
+    ("reparto_dos_cuentas", dict(cuenta_contable="701101", centro_costo="", id_externo="f1"), False,
      {"imputaciones": {"f1": {"reparto": [
          {"importe": "60", "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
          {"importe": "40", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]}}}),
-    ("reparto_boleta_con_igv_al_gasto", dict(tipo_cp="03", serie="B001", numero="55", cuenta_contable="",
+    ("reparto_boleta_con_igv_al_gasto", dict(tipo_cp="03", serie="B001", numero="55", cuenta_contable="701101",
                                              centro_costo="", id_externo="f1"), False,
      {"imputaciones": {"f1": {"reparto": [
          {"importe": "100", "cuenta_contable": "631101", "centro_costo": "OBRA01"},
          {"importe": "18", "cuenta_contable": "659999"}]}}}),
-    ("reparto_mismo_centro_doble_anexo", dict(cuenta_contable="", centro_costo="", id_externo="f1"), False,
+    ("reparto_mismo_centro_doble_anexo", dict(cuenta_contable="701101", centro_costo="", id_externo="f1"), False,
      {"imputaciones": {"f1": {"reparto": [
          {"importe": "60", "cuenta_contable": "631101", "centro_costo": "OBRA01"},
          {"importe": "40", "cuenta_contable": "632201", "centro_costo": "OBRA01"}]}}}),
-    ("venta_reparto", dict(cuenta_contable="", centro_costo="", id_externo="f1"), True,
+    ("venta_reparto", dict(cuenta_contable="701101", centro_costo="", id_externo="f1"), True,
      {"imputaciones": {"f1": {"reparto": [
          {"importe": "70", "cuenta_contable": "701101"}, {"importe": "30", "cuenta_contable": "704101"}]}}}),
     ("tipo_renombrado_por_el_ruc", {}, False, {"concar": {"tipos": {"01": {"sigla": "FA", "sub_diario": "12"}}}}),
-    ("venta_factura", dict(cuenta_contable=""), True, None),
-    ("venta_usd_cuentas_del_ruc", dict(cuenta_contable="", moneda="USD", tipo_cambio="3.55"), True,
-     {"cuentas": {"ventas": "701201", "clientes": {"USD": "121209"}}}),
-    ("venta_boleta", dict(tipo_cp="03", serie="B001", numero="9", cuenta_contable=""), True, None),
-    ("venta_nota_de_credito", dict(NC, serie="FC01", numero="3", cuenta_contable=""), True, None),
+    ("venta_factura", dict(cuenta_contable="701101"), True, None),
+    # Ídem: la cuenta de ingreso era `cuentas.ventas`; hoy es la de su imputación. La del cliente sigue siendo del RUC.
+    ("venta_usd_cuentas_del_ruc", dict(cuenta_contable="701201", moneda="USD", tipo_cambio="3.55"), True,
+     {"cuentas": {"clientes": {"USD": "121209"}}}),
+    ("venta_boleta", dict(tipo_cp="03", serie="B001", numero="9", cuenta_contable="701101"), True, None),
+    ("venta_nota_de_credito", dict(NC, serie="FC01", numero="3", cuenta_contable="701101"), True, None),
     ("venta_con_detraccion", dict(detraccion=DET), True, None),
-    ("venta_extemporanea", dict(fecha_emision="2026-07-20", cuenta_contable=""), True, None),
+    ("venta_extemporanea", dict(fecha_emision="2026-07-20", cuenta_contable="701101"), True, None),
 ]
 
 

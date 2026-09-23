@@ -23,17 +23,32 @@ from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from contaperu.configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from contaperu.drivers import contrato
 from contaperu.drivers.kit import Opciones
-from util import GOLDEN
+from util import GOLDEN, imputando
 
-# El golden no trae cuenta de gasto (sale del RUC en la vida real): se la pone la configuración. Tampoco
-# trae centros de costo —viene de SUNAT, que no los conoce—, y desde la 0.8 CONCAR exige el centro donde
-# la cuenta lo lleva: este RUC declara que no los usa. Con centros (CONTAB_CON_CENTROS) se niega.
-CONTAB = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
-CONTAB_CON_CENTROS = {"cuentas": {"gasto": "659999"}}
+# El golden viene de SUNAT: no trae cuenta —desde la 3.0 la pone su imputación, no la configuración— ni centros de
+# costo, que SUNAT no conoce. Desde la 0.8 CONCAR exige el centro donde la cuenta lo lleva, así que este RUC declara
+# que no los usa; con centros (CONTAB_CON_CENTROS) se niega, que es lo que prueban dos tests de aquí abajo.
+CONTAB = {"usa_centros_costo": False}
+CONTAB_CON_CENTROS: dict = {}
 
 
 def documento_de_compras() -> dict:
+    """El golden, con todos sus comprobantes imputados a la 659999 — la cuenta que hasta la 3.0 les ponía
+    `cuentas.gasto`—. Quien pruebe qué pasa sin cuenta usa `sin_imputar()`."""
+    return imputando(sin_imputar(), "659999")
+
+
+def sin_imputar() -> dict:
     return json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
+
+
+def imputacion_de(doc: dict, cuenta: str = "659999", **propias) -> dict:
+    """La imputación de TODOS los comprobantes del documento, para pasarla por el argumento: la misma cuenta a cada
+    uno y, encima, la que el caso quiera para un `id_externo` suyo. Desde la 3.0 el que se quede sin cuenta detiene
+    la exportación, así que un caso que solo quiere probar UNA imputación tiene que darle algo a los demás."""
+    for n, c in enumerate(doc.get("comprobantes") or [], 1):
+        c.setdefault("id_externo", f"fila-{n}")
+    return {**{c["id_externo"]: {"cuenta_contable": cuenta} for c in doc["comprobantes"]}, **propias}
 
 
 @pytest.mark.parametrize("nombre", sorted(drivers.DRIVERS))
@@ -272,23 +287,26 @@ def test_al_registro_le_llega_la_imputacion_y_no_le_pide_la_equivalencia_del_tip
     from contaperu.modelo import Comprobante
 
     con_terceros(_Entrada("registro", driver_de_registro()))
-    doc = documento_de_compras()
+    doc = sin_imputar()      # la imputación de este caso llega por el argumento, con su reparto
     primero = doc["comprobantes"][0]
     primero["id_externo"] = "fila-1"
     base = base_imputable(Comprobante.de_dict(primero), False)
     mitad = (base / 2).quantize(base)
     reparto = [{"importe": str(mitad), "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
                {"importe": str(base - mitad), "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]
-    r = api.exportar(doc, driver="registro", configuracion=CONTAB, imputacion={"fila-1": {"reparto": reparto}})
+    r = api.exportar(doc, driver="registro", configuracion=CONTAB,
+                     imputacion=imputacion_de(doc, **{"fila-1": {"reparto": reparto}}))
     filas = [f.split("|") for f in r["texto"].splitlines()]
     assert len(filas) == len(doc["comprobantes"]) + 1
     assert [f[1:4] for f in filas[:2]] == [["636301", "SISTEMAS", f"{mitad:.2f}"],
                                            ["632201", "DESARROLLO", f"{base - mitad:.2f}"]]
 
     sin_equivalencia = dict(CONTAB, csv={"tipos": {c["tipo_cp"]: {"sigla": ""} for c in doc["comprobantes"]}})
+    imputado = imputacion_de(doc)
     with pytest.raises(asi.SinSigla):
-        api.exportar(doc, driver="csv", configuracion=sin_equivalencia)
-    assert api.exportar(doc, driver="registro", configuracion=sin_equivalencia)["resumen"]["filas"] == len(doc["comprobantes"])
+        api.exportar(doc, driver="csv", configuracion=sin_equivalencia, imputacion=imputado)
+    assert api.exportar(doc, driver="registro", configuracion=sin_equivalencia,
+                        imputacion=imputado)["resumen"]["filas"] == len(doc["comprobantes"])
 
 
 def test_el_registro_exige_la_cuenta_antes_de_escribir_y_diagnosticar_lo_dice(con_terceros):
@@ -299,31 +317,35 @@ def test_el_registro_exige_la_cuenta_antes_de_escribir_y_diagnosticar_lo_dice(co
     exigente = driver_de_registro("exigente")
     exigente.EXIGE = frozenset({"centro_costo"})
     con_terceros(_Entrada("registro", driver_de_registro()), _Entrada("exigente", exigente))
-    doc = documento_de_compras()
+    doc = sin_imputar()      # a propósito: lo que se prueba aquí es qué pasa sin cuenta
     with pytest.raises(asi.SinCuenta):
         api.exportar(doc, driver="registro")
     with pytest.raises(asi.SinCentro):
-        api.exportar(doc, driver="exigente", configuracion=CONTAB_CON_CENTROS)
+        api.exportar(imputando(doc, "659999"), driver="exigente", configuracion=CONTAB_CON_CENTROS)
 
     d = api.diagnosticar(doc, driver="registro")
     assert d["exige"] == ["cuenta_contable"] and d["listo_para_exportar"] is False
     assert set(d["faltantes"]) == {"sin_cuenta", "sin_clase", "reparto_que_no_cuadra", "sin_centro"}
     assert d["por_que_no"] == [f"{len(doc['comprobantes'])} sin cuenta contable"] and d["sub_diarios"] == {}
-    con_centros = api.diagnosticar(doc, configuracion=CONTAB_CON_CENTROS, driver="registro")
+    con_centros = api.diagnosticar(imputando(doc, "659999"), configuracion=CONTAB_CON_CENTROS, driver="registro")
     assert con_centros["faltantes"]["sin_centro"] and con_centros["listo_para_exportar"] is True
-    assert api.diagnosticar(doc, configuracion=CONTAB_CON_CENTROS, driver="exigente")["listo_para_exportar"] is False
+    assert api.diagnosticar(imputando(doc, "659999"), configuracion=CONTAB_CON_CENTROS,
+                            driver="exigente")["listo_para_exportar"] is False
+    # Y con la cuenta puesta en su imputación, el mismo documento ya está listo para el registro.
+    assert api.diagnosticar(imputando(doc, "659999"), driver="registro")["listo_para_exportar"] is True
 
 
 def test_la_terminal_alcanza_al_registro_con_su_configuracion_y_su_imputacion(con_terceros, tmp_path):
     from contaperu.puertas import cli
 
     con_terceros(_Entrada("registro", driver_de_registro()))
-    doc = documento_de_compras()
-    doc["comprobantes"][0]["id_externo"] = "fila-1"
+    doc = sin_imputar()      # la imputación llega por su archivo, que es lo que prueba este test
     documento, config, imputacion = tmp_path / "mes.json", tmp_path / "config.json", tmp_path / "imputacion.json"
+    # El `id_externo` se lo pone `imputacion_de` al documento, así que primero la imputación y después el archivo.
+    suya = imputacion_de(doc, **{"fila-1": {"cuenta_contable": "636301"}})
     documento.write_text(json.dumps(doc), encoding="utf-8")
     config.write_text(json.dumps(CONTAB), encoding="utf-8")
-    imputacion.write_text(json.dumps({"fila-1": {"cuenta_contable": "636301"}}), encoding="utf-8")
+    imputacion.write_text(json.dumps(suya), encoding="utf-8")
     salida = tmp_path / "s"
     assert cli.main(["desde-json", str(documento), "--driver", "registro", "--salida", str(salida),
                      "--config", str(config), "--imputacion", str(imputacion)]) == 0
@@ -342,12 +364,12 @@ def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros)
     unica = driver_de_registro("unica")
     unica.EXIGE = frozenset({"cuenta_unica"})
     con_terceros(_Entrada("unica", unica), _Entrada("registro", driver_de_registro()))
-    doc = documento_de_compras()
+    doc = sin_imputar()
     primero = doc["comprobantes"][0]
     primero["id_externo"] = "fila-1"
     base = base_imputable(Comprobante.de_dict(primero), False)
-    imputacion = {"fila-1": {"reparto": [{"importe": str(base - 1), "cuenta_contable": "636301"},
-                                         {"importe": "1", "cuenta_contable": "632201"}]}}
+    imputacion = imputacion_de(doc, **{"fila-1": {"reparto": [{"importe": str(base - 1), "cuenta_contable": "636301"},
+                                                              {"importe": "1", "cuenta_contable": "632201"}]}})
 
     d = api.diagnosticar(doc, configuracion=CONTAB, driver="unica", imputacion=imputacion)
     etiqueta = d["saldrian"][0]
@@ -460,11 +482,20 @@ def test_el_contrato_revisa_las_cuentas_que_declara_un_driver():
     contrato.cuentas_por_defecto(valido)["igv"] = "otra"
     assert valido.CUENTAS_POR_DEFECTO["igv"] == "40111000"
 
+    # Las dos claves del PLAN se admiten aunque no estén en lo general: no son configuración (3.0).
+    con_plan = driver_de_registro()
+    con_plan.CUENTAS_POR_DEFECTO = {"igv": "40111000", "compras": "60110100", "ventas": "70410001"}
+    assert contrato.incumplimientos(con_plan) == []
+    assert contrato.cuentas_por_defecto(con_plan) == {"igv": "40111000"}, "el plan no se funde en la configuración"
+    assert contrato.plan_base(con_plan) == ({"codigo": "60110100", "tipo": "gasto"},
+                                            {"codigo": "70410001", "tipo": "ingreso"})
+    assert contrato.plan_base(valido) == (), "un driver sin cuentas de compras ni de ventas no siembra plan"
+
     desconocida = driver_de_registro()
     desconocida.CUENTAS_POR_DEFECTO = {"cxp_en_dolares": "42120002"}
     assert contrato.incumplimientos(desconocida) == [
-        "`CUENTAS_POR_DEFECTO.cxp_en_dolares`: clave desconocida; las que hay: gasto, cxp, cxp_detraccion, "
-        "honorarios, retencion_4ta, igv, clientes, ventas, otros_tributos, icbper"]
+        "`CUENTAS_POR_DEFECTO.cxp_en_dolares`: clave desconocida; las que hay: cxp, cxp_detraccion, "
+        "honorarios, retencion_4ta, igv, clientes, otros_tributos, icbper, compras, ventas"]
     mal_formato = driver_de_registro()
     mal_formato.CUENTAS_POR_DEFECTO = {"igv": "40-111-000"}
     assert contrato.incumplimientos(mal_formato) == [
@@ -571,7 +602,7 @@ def _propias(modulo) -> set[str]:
 def _meses_que_pasan_por_todo() -> list[tuple[dict, dict]]:
     """Un mes de compras y uno de ventas que recorren todo lo que se puede leer de la configuración: una factura con
     detracción, otra en dólares, una nota de crédito, un recibo por honorarios y una boleta, con su imputación."""
-    compras = documento_de_compras()
+    compras = sin_imputar()      # la imputación de estos meses se arma aquí abajo, con su centro
     base = compras["comprobantes"][0]
     compras["comprobantes"] += [
         dict(base, numero="9001", detraccion={"codigo": "027", "porcentaje": 4}),

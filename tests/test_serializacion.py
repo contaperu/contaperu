@@ -71,7 +71,7 @@ def test_el_numero_sin_ceros(numero, esperado):
 def test_numerar_en_orden_da_lo_mismo_que_numerar_sin_depender_de_la_identidad():
     documento = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
     comprobantes = prep.comprobantes_de(documento)
-    config = prep.config_aplicada({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}, "concar")
+    config = prep.config_aplicada({"usa_centros_costo": False}, "concar")
     en_orden, rangos = asi.numerar_en_orden(comprobantes, config, "202601", {"11": 5})
     por_id, rangos_viejos = asi.numerar(comprobantes, config, "202601", {"11": 5})
     assert en_orden == ["010005", "010006", "010007"] == [por_id[id(c)] for c in comprobantes]

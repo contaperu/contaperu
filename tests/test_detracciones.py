@@ -19,7 +19,11 @@ from contaperu.asiento.configuracion import NUMERO_DETRACCION_PENDIENTE
 from contaperu.drivers import contasis as driver_contasis
 from contaperu.modelo import Comprobante, Libro
 
-CONTAB = prep.config_aplicada(None, "concar")
+# `con_imputaciones` mete las imputaciones de prueba en la configuración: desde la 3.0 la cuenta de un comprobante
+# es suya y llega por ahí, así que sin esto el asiento se plantaría con «sin cuenta contable».
+from util import comprobante as _comprobante_de_prueba, con_imputaciones     # noqa: E402
+
+CONTAB = con_imputaciones(prep.config_aplicada(None, "concar"))
 CODIGOS = detracciones.codigos_de(CONTAB)
 # Una tabla explícita para todo lo que depende de las tasas: no se apoya en lo que traigan los defaults.
 TABLA = dict(CONTAB, detraccion_codigos={"027": "02701", "037": "03701"}, detraccion_tasas={"027": 4, "037": 12})
@@ -27,9 +31,10 @@ TABLA = dict(CONTAB, detraccion_codigos={"027": "02701", "037": "03701"}, detrac
 
 def comprobante(det, **k) -> Comprobante:
     base = dict(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-08-11",
-                contraparte_doc="20601111111", base_gravada="100", igv="18", total="118", detraccion=det)
+                contraparte_doc="20601111111", base_gravada="100", igv="18", total="118", detraccion=det,
+                cuenta_contable="659999")
     base.update(k)
-    return Comprobante(**base)
+    return _comprobante_de_prueba(**base)
 
 
 def test_el_codigo_de_la_tabla_se_conserva():
@@ -104,19 +109,21 @@ def test_el_asiento_y_el_diagnostico_dejan_en_blanco_la_misma_detraccion():
     mala = dict(comprobante({"codigo": "000", "porcentaje": 3}).a_dict(), id_externo="f1")
     doc = {"libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608",
                      "tipo": "compra"}, "comprobantes": [mala]}
-    configuracion = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
-    asiento = api.generar_asiento(doc, driver="csv", configuracion=configuracion, incluir_observados=True)
+    configuracion = {"usa_centros_costo": False}
+    imputacion = {"f1": {"cuenta_contable": "659999"}}      # la cuenta es del comprobante desde la 3.0
+    asiento = api.generar_asiento(doc, driver="csv", configuracion=configuracion, imputacion=imputacion,
+                                  incluir_observados=True)
     assert all(linea.get("rol") != "detraccion" for linea in asiento["asiento"])
     assert set(asiento["_asiento"]["sub_diarios"]) == {"11"}
-    assert api.diagnosticar(doc, driver="csv", configuracion=configuracion)["detracciones_pendientes"] == []
+    assert api.diagnosticar(doc, driver="csv", configuracion=configuracion,
+                            imputacion=imputacion)["detracciones_pendientes"] == []
 
 
 def test_una_detraccion_limpiada_no_llega_al_asiento():
     """La consecuencia real de la regla: sin código válido no hay líneas de detracción."""
     c = comprobante({"codigo": "000", "porcentaje": 3})
     detracciones.normalizar([c], CONTAB)
-    filas = driver_concar.filas_de_comprobante(c, dict(CONTAB, cuentas=dict(CONTAB["cuentas"], gasto="659999")),
-                        (date(2026, 8, 1), date(2026, 8, 31)), "080001")
+    filas = driver_concar.filas_de_comprobante(c, CONTAB, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
     assert len(filas) == 3 and all(f["R"] != "DR" for f in filas)
 
 
@@ -145,8 +152,7 @@ def test_sin_tasa_en_el_comprobante_usa_la_de_la_tabla():
 def test_el_asiento_usa_el_mismo_monto():
     """Una sola implementación: lo que ve la persona es lo que sale en las líneas de la detracción."""
     c = comprobante({"codigo": "037", "porcentaje": 12}, total="330.40", base_gravada="280", igv="50.40")
-    config = dict(TABLA, cuentas=dict(TABLA["cuentas"], gasto="659999"))
-    filas = driver_concar.filas_de_comprobante(c, config, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
+    filas = driver_concar.filas_de_comprobante(c, TABLA, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
     detraccion = [f for f in filas if f["R"] == "DR"]
     assert detraccion and all(f["O"] == 40 for f in detraccion)
 
@@ -177,10 +183,10 @@ def test_no_avisa_si_coincide_o_si_la_tasa_sale_de_la_tabla():
 
 def _compra_con_detraccion(**extra) -> Comprobante:
     """Una factura afecta a detracción, con lo mínimo para que el asiento salga."""
-    return Comprobante(tipo_cp="01", serie="F001", numero="123", fecha_emision=date(2026, 1, 15),
-                       contraparte_doc="20512333797", contraparte_nombre="PROVEEDOR SAC", moneda="PEN",
-                       base_gravada=Decimal("1000.00"), igv=Decimal("180.00"), total=Decimal("1180.00"),
-                       detraccion={"codigo": "027", **extra})
+    return _comprobante_de_prueba(tipo_cp="01", serie="F001", numero="123", fecha_emision=date(2026, 1, 15),
+                                  contraparte_doc="20512333797", contraparte_nombre="PROVEEDOR SAC", moneda="PEN",
+                                  base_gravada=Decimal("1000.00"), igv=Decimal("180.00"), total=Decimal("1180.00"),
+                                  cuenta_contable="659999", detraccion={"codigo": "027", **extra})
 
 
 def test_sin_constancia_pegada_el_numero_sale_con_el_comodin():

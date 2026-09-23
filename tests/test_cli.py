@@ -63,6 +63,28 @@ def test_la_cli_dice_que_se_configura(capsys):
     assert "concar" not in partida and partida["cuentas"]["igv"] == "401111"
 
 
+def _golden_con_ids(tmp_path):
+    """El golden con un `id_externo` por comprobante, escrito en tmp: por ahí lo alcanza la imputación."""
+    doc = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
+    for n, c in enumerate(doc["comprobantes"], 1):
+        c["id_externo"] = f"fila-{n}"
+    archivo = tmp_path / "mes_con_ids.json"
+    archivo.write_text(json.dumps(doc), encoding="utf-8")
+    return archivo
+
+
+def imputacion_del_golden(tmp_path, cuenta: str = "659999") -> list[str]:
+    """`--imputacion <archivo>` con los tres comprobantes del golden imputados a la misma cuenta.
+
+    Hasta la 3.0 esto se conseguía con `cuentas.gasto` en el --config: una cuenta de la EMPRESA que el motor le
+    ponía a quien no traía ninguna. Desde la 3.0 la cuenta es del comprobante y llega por aquí."""
+    doc = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
+    archivo = tmp_path / "imputacion.json"
+    archivo.write_text(json.dumps({f"fila-{n}": {"cuenta_contable": cuenta}
+                                   for n in range(1, len(doc["comprobantes"]) + 1)}), encoding="utf-8")
+    return ["--imputacion", str(archivo)]
+
+
 def test_desde_json(tmp_path):
     assert cli.main(["desde-json", str(GOLDEN / "compras_202601.json"), "--driver", "sire", "--salida", str(tmp_path)]) == 0
     assert (tmp_path / "LE2060123456720260100080400021112.TXT").read_bytes().count(b"\r\n") == 3
@@ -76,16 +98,19 @@ def test_desde_json_llega_a_los_drivers_de_asientos(tmp_path, capsys):
     los correlativos arrancan en 1, igual que en `operaciones.exportar`. Es lo que hace que un driver
     de la comunidad enchufado por entry point se pueda probar desde la terminal.
     """
-    golden = str(GOLDEN / "compras_202601.json")
+    golden = str(_golden_con_ids(tmp_path))
     config = tmp_path / "config.json"
     # CON BOM a propósito: es lo que escriben el Bloc de notas y `Out-File` de PowerShell en Windows,
     # que es donde trabaja un contador peruano. Un JSON con BOM tiene que leerse igual que sin él.
-    config.write_bytes(b"\xef\xbb\xbf" + json.dumps({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}).encode())
+    config.write_bytes(b"\xef\xbb\xbf" + json.dumps({"usa_centros_costo": False}).encode())
     salida = tmp_path / "s"
-    assert cli.main(["desde-json", golden, "--driver", "csv", "--salida", str(salida), "--config", str(config)]) == 0
+    imputado = imputacion_del_golden(tmp_path)
+    assert cli.main(["desde-json", golden, "--driver", "csv", "--salida", str(salida), "--config", str(config)]
+                    + imputado) == 0
     csv = (salida / "CSV_COMPRAS_202601_20601234567.csv").read_bytes().decode("utf-8-sig")
     assert csv.startswith("sub_diario;correlativo;fecha;cuenta") and csv.count("\r\n") == 1 + 9   # 3 facturas × 3 líneas
-    assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(salida), "--config", str(config)]) == 0
+    assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(salida), "--config", str(config)]
+                    + imputado) == 0
     assert (salida / "CONCAR_COMPRAS_202601_20601234567.xlsx").read_bytes()[:2] == b"PK"
     assert "concar concar_xlsx   3 comprobantes" in capsys.readouterr().out
     # Sin la cuenta de gasto el driver se niega, y la CLI dice a dónde ir a mirar en vez de un traceback.
@@ -99,17 +124,17 @@ def test_diagnosticar_dice_que_falta_y_luego_que_esta_listo(tmp_path, capsys):
     Sin `--config` vale la cuenta de gasto que trae CONCAR (2.5), así que lo que falta ya no es la cuenta sino el
     CENTRO: esa cuenta es de la clase 63, y las 63 llevan centro de costo. Para ver la falta de cuenta hay que
     decir que no hay ninguna, que es lo que hace quien prefiere que le avisen."""
-    golden = str(GOLDEN / "compras_202601.json")
-    sin_gasto = tmp_path / "sin_gasto.json"
-    sin_gasto.write_text(json.dumps({"cuentas": {"gasto": ""}, "usa_centros_costo": False}), encoding="utf-8")
-    assert cli.main(["diagnosticar", golden, "--config", str(sin_gasto)]) == 1
+    golden = str(_golden_con_ids(tmp_path))
+    sin_centros = tmp_path / "sin_centros.json"
+    sin_centros.write_text(json.dumps({"usa_centros_costo": False}), encoding="utf-8")
+    # Sin imputar, faltan las tres cuentas: desde la 3.0 no hay ninguna de la empresa que las supla.
+    assert cli.main(["diagnosticar", golden, "--config", str(sin_centros)]) == 1
     out = capsys.readouterr().out
     assert "NO está listo: 3 sin cuenta contable" in out and "Sin cuenta contable:" in out
-    assert cli.main(["diagnosticar", golden]) == 1
+    imputado = imputacion_del_golden(tmp_path)
+    assert cli.main(["diagnosticar", golden] + imputado) == 1
     assert "NO está listo: 3 sin centro de costo" in capsys.readouterr().out
-    config = tmp_path / "config.json"
-    config.write_text(json.dumps({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}), encoding="utf-8")
-    assert cli.main(["diagnosticar", golden, "--config", str(config)]) == 0
+    assert cli.main(["diagnosticar", golden, "--config", str(sin_centros)] + imputado) == 0
     out = capsys.readouterr().out
     assert "LISTO para exportar: 3 comprobantes." in out and "Sub-diario 11 (Compras): 3 comprobantes desde el 1" in out
     # Para el SIRE no hay cuentas que pedir: el mismo golden está listo tal cual.
@@ -130,10 +155,11 @@ def test_la_consola_de_windows_no_tumba_el_cli(monkeypatch):
 
 def test_sin_centro_la_cli_remite_a_diagnosticar(tmp_path, capsys):
     """Desde la 0.8 CONCAR se niega sin centro de costo donde la cuenta lo lleva; la CLI lo dice sin traceback."""
-    golden = str(GOLDEN / "compras_202601.json")
+    golden = str(_golden_con_ids(tmp_path))
     config = tmp_path / "config.json"
-    config.write_text(json.dumps({"cuentas": {"gasto": "659999"}}), encoding="utf-8")     # centros encendidos
-    assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(tmp_path / "s"), "--config", str(config)]) == 1
+    config.write_text(json.dumps({}), encoding="utf-8")     # centros encendidos
+    assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(tmp_path / "s"),
+                     "--config", str(config)] + imputacion_del_golden(tmp_path)) == 1
     err = capsys.readouterr().err
     assert "sin centro de costo" in err and "contaperu diagnosticar" in err and "Traceback" not in err
 
@@ -141,24 +167,24 @@ def test_sin_centro_la_cli_remite_a_diagnosticar(tmp_path, capsys):
 def test_la_imputacion_entra_por_la_terminal(tmp_path, capsys):
     """La imputación de cada documento llega aparte, por `id_externo`, igual que por la fachada: --imputacion en
     `desde-json` y en `diagnosticar`. Una llave que no es de ningún documento se rechaza antes de escribir nada."""
-    doc = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
-    doc["comprobantes"][0]["id_externo"] = "fila-1"
-    documento, config, imputacion = tmp_path / "mes.json", tmp_path / "config.json", tmp_path / "imputacion.json"
-    documento.write_text(json.dumps(doc), encoding="utf-8")
-    config.write_text(json.dumps({"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}), encoding="utf-8")
-    imputacion.write_text(json.dumps({"fila-1": {"cuenta_contable": "636301"}}), encoding="utf-8")
+    documento = _golden_con_ids(tmp_path)
+    config, imputacion = tmp_path / "config.json", tmp_path / "propia.json"
+    config.write_text(json.dumps({"usa_centros_costo": False}), encoding="utf-8")
+    imputacion.write_text(json.dumps({"fila-1": {"cuenta_contable": "636301"},
+                                      "fila-2": {"cuenta_contable": "659999"},
+                                      "fila-3": {"cuenta_contable": "659999"}}), encoding="utf-8")
     salida = tmp_path / "s"
     orden = ["desde-json", str(documento), "--driver", "csv", "--salida", str(salida), "--config", str(config)]
     assert cli.main(orden + ["--imputacion", str(imputacion)]) == 0
     csv = (salida / "CSV_COMPRAS_202601_20601234567.csv").read_bytes().decode("utf-8-sig")
     assert csv.count(";636301;D;") == 1 and csv.count(";659999;D;") == 2
 
-    # Sin la cuenta de gasto del RUC, al primero le llega la suya y a los otros dos les sigue faltando. Hay que
-    # pedirlo con la cuenta de gasto en blanco: si no, la de CONCAR (2.5) se la da a los dos.
-    sin_gasto = tmp_path / "sin_gasto.json"
-    sin_gasto.write_text(json.dumps({"cuentas": {"gasto": ""}, "usa_centros_costo": False}), encoding="utf-8")
-    assert cli.main(["diagnosticar", str(documento), "--imputacion", str(imputacion),
-                     "--config", str(sin_gasto)]) == 1
+    # Con una imputación que solo alcanza al primero, a los otros dos les falta la cuenta: desde la 3.0 no hay
+    # ninguna de la empresa que se la dé.
+    solo_uno = tmp_path / "solo_uno.json"
+    solo_uno.write_text(json.dumps({"fila-1": {"cuenta_contable": "636301"}}), encoding="utf-8")
+    assert cli.main(["diagnosticar", str(documento), "--imputacion", str(solo_uno),
+                     "--config", str(config)]) == 1
     assert "NO está listo: 2 sin cuenta contable" in capsys.readouterr().out
 
     imputacion.write_text(json.dumps({"fila-9": {"cuenta_contable": "636301"}}), encoding="utf-8")

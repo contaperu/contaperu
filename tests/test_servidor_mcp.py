@@ -88,8 +88,8 @@ def test_diagnosticar_por_el_protocolo():
     assert listo["listo_para_exportar"] is True and listo["saldrian"] == ["E001-871"]
     assert listo["detracciones_pendientes"][0]["serie_numero"] == "E001-871"
     assert listo["sub_diarios"]["10"]["empieza_en"] == 1
-    # Con la cuenta de gasto en blanco: si no, la que trae CONCAR (2.5) se la daría y no faltaría ninguna.
-    r = llamar("diagnosticar", documento=DOCUMENTO, driver="concar", configuracion={"cuentas": {"gasto": ""}},
+    # Sin cuenta en la imputación falta, y desde la 3.0 no hay ninguna de la empresa que la supla.
+    r = llamar("diagnosticar", documento=DOCUMENTO, driver="concar",
                imputacion={"fila-871": {"centro_costo": "CC-64"}})
     assert r["listo_para_exportar"] is False and r["faltantes"]["sin_cuenta"] == ["E001-871"]
     assert r["por_que_no"] == ["1 sin cuenta contable"]

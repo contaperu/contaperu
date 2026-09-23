@@ -10,6 +10,8 @@ import pytest
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
 
+from util import imputando  # noqa: E402
+
 LIBRO = {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
          "periodo": "202601", "tipo": "compra"}
 
@@ -50,7 +52,7 @@ def test_los_excluidos_no_entran_en_la_exportacion():
         dict(base, numero="1"),
         dict(base, numero="2", excluida=True),
     ]}
-    r = api.generar_asiento(doc, driver="concar", configuracion={"cuentas": {"gasto": "659999"}, "usa_centros_costo": False})
+    r = api.generar_asiento(imputando(doc, "659999"), driver="concar", configuracion={"usa_centros_costo": False})
     assert len({ln["documento"]["serie_numero"] for ln in r["asiento"]}) == 1
 
 
@@ -103,14 +105,14 @@ def test_la_configuracion_que_sale_se_puede_volver_a_meter():
     Si esto no funcionara, los cambios se ignorarian EN SILENCIO y el asiento saldria con
     las cuentas de serie sin que nadie se enterara."""
     mia = api.configuracion_por_defecto()
-    mia["cuentas"]["gasto"] = "631201"
+    mia["cuentas"]["igv"] = "401112"
     mia["concar"]["sub_diario_compras"] = "07"
 
     efectiva = prep.config_aplicada(mia, "concar")
 
-    assert efectiva["cuentas"]["gasto"] == "631201"
+    assert efectiva["cuentas"]["igv"] == "401112"
     assert efectiva["sub_diario_compras"] == "07"
-    assert efectiva["cuentas"]["igv"] == "401111"          # lo demas intacto
+    assert efectiva["cuentas"]["cxp"]["PEN"] == "421201"   # lo demas intacto
 
 
 def test_la_configuracion_va_por_secciones():
@@ -173,15 +175,21 @@ def test_la_cuenta_llega_solo_en_la_imputacion():
     `id_externo`, y lo que no traiga sale de la configuración. Un documento que todavía los trae se rechaza en la
     puerta: perder su cuenta en silencio sería peor."""
     doc = {"libro": LIBRO, "comprobantes": [BASE]}
-    config = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
-    assert _del_rol(api.generar_asiento(doc, driver="concar", configuracion=config), "principal", "tercero") == [("659999", "100.00"), ("421201", "118.00")]
+    config = {"usa_centros_costo": False}
+    # Sin imputación no hay cuenta, y desde la 3.0 eso detiene la exportación en vez de salir a una del RUC.
+    with pytest.raises(api.SinCuenta):
+        api.generar_asiento(doc, driver="concar", configuracion=config)
+    assert _del_rol(api.generar_asiento(doc, driver="concar", configuracion=config,
+                                        imputacion={"fila-8": {"cuenta_contable": "659999"}}),
+                    "principal", "tercero") == [("659999", "100.00"), ("421201", "118.00")]
 
     imputacion = {"fila-8": {"cuenta_contable": "637301", "cuenta_tercero": "469901"}}
     assert _del_rol(api.generar_asiento(doc, driver="concar", configuracion=config, imputacion=imputacion), "principal", "tercero") == [
         ("637301", "100.00"), ("469901", "118.00")]
-    # Solo la cuenta del total: la de la base sale de la configuración.
+    # Solo la cuenta del total: la de la base sigue faltando, porque ya no hay ninguna que la supla (3.0).
     solo_total = {"fila-8": {"cuenta_tercero": "469901"}}
-    assert _del_rol(api.generar_asiento(doc, driver="concar", configuracion=config, imputacion=solo_total), "principal") == [("659999", "100.00")]
+    with pytest.raises(api.SinCuenta):
+        api.generar_asiento(doc, driver="concar", configuracion=config, imputacion=solo_total)
 
     assert "469901" in api.exportar(doc, driver="csv", configuracion=config, imputacion=imputacion)["texto"]
     assert "cuenta_contable" not in api.revisar(doc)["comprobantes"][0]
@@ -230,14 +238,14 @@ def test_una_imputacion_ambigua_o_de_otro_documento_se_rechaza_en_la_puerta():
 def test_generar_asiento_exige_lo_mismo_que_exportar():
     """Es `exportar` sin escribir el archivo (1.0): se niega por lo que el destino exige y deja fuera lo que no saldría.
     Mirar sin exigir es `diagnosticar`, o el CSV, que no exige centro."""
-    doc = {"libro": LIBRO, "comprobantes": [BASE]}
-    con_centros = {"cuentas": {"gasto": "659999"}}          # la 659999 lleva centro y el documento no trae
+    doc = imputando({"libro": LIBRO, "comprobantes": [BASE]}, "659999")
+    con_centros: dict = {}          # la 659999 lleva centro y el documento no trae
     with pytest.raises(api.SinCentro):
         api.generar_asiento(doc, driver="concar", configuracion=con_centros)
     with pytest.raises(api.SinCentro):
         api.exportar(doc, driver="concar", configuracion=con_centros)
     assert api.generar_asiento(doc, driver="csv", configuracion=con_centros)["asiento"]
-    repetido = {"libro": LIBRO, "comprobantes": [BASE, dict(BASE, id_externo="fila-9")]}
+    repetido = imputando({"libro": LIBRO, "comprobantes": [BASE, dict(BASE, id_externo="fila-9")]}, "659999")
     r = api.generar_asiento(repetido, driver="csv", configuracion=con_centros, incluir_observados=True)
     assert len({ln["correlativo"] for ln in r["asiento"]}) == 1      # el duplicado no sale, como en el archivo
 
@@ -325,5 +333,5 @@ def test_un_error_en_lo_que_el_destino_SI_lleva_sigue_deteniendo_la_exportacion(
 
     documento = api.documento_de(Libro(**LIBRO_1_2_1), comprobantes)
     with pytest.raises(DocumentoInvalido, match="observaciones que bloquean"):
-        api.exportar_archivo(documento, driver="concar", configuracion={"cuentas": {"gasto": "634301"}},
+        api.exportar_archivo(imputando(documento, "634301"), driver="concar", configuracion={},
                              correlativos={"11": 1, "13": 1})

@@ -24,19 +24,31 @@ CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.shee
 # propio driver; hasta entonces solo lo avisaba `diagnosticar` y lo negaba el portal por su cuenta.
 EXIGE = frozenset({"centro_costo", "moneda"})
 
-# Con qué cuentas nace una empresa que lleva CONCAR. **Solo la del gasto**, y eso dice algo que hasta hoy no estaba
-# escrito en ninguna parte: las demás cuentas de lo general (`configuracion.CONFIGURACION_GENERAL`) —421201, 401111,
-# 121201, 701101, 424101, 401721, 421203— YA SON LAS DE CONCAR, el PCGE a seis dígitos. Repetirlas aquí sería el
-# mismo dato en dos sitios sin nadie que los compare, y el día que lo general mejorara, CONCAR se quedaría atrás.
-# Se declara lo que se aparta, que es la regla del contrato (`drivers/contrato.py`).
+# Con qué cuentas nace una empresa que lleva CONCAR: **el PCGE a seis dígitos**, que es como numera este sistema.
+# Hasta la 3.0 aquí solo estaba la del gasto, porque las demás ya eran las de lo general; ahora se escriben todas.
 #
-# `631101` la eligió John (22-sep-2026) como la cuenta con la que arranca una empresa suya. **Ponerla tiene una
-# consecuencia que conviene tener presente**: con una cuenta de gasto por defecto, el motor deja de contar como
-# `sin_cuenta` los comprobantes a los que nadie les puso una, así que un mes con compras sin cuenta sale «listo
-# para exportar» y esas filas se imputan aquí. Es lo que venía haciendo por su cuenta la aplicación que ya sembraba
-# un comodín, y quien integre el motor y prefiera que le avisen lo consigue poniendo `cuentas.gasto` en blanco en
-# su configuración: lo que la empresa guarda manda sobre esto.
-CUENTAS_POR_DEFECTO: dict = {"gasto": "631101"}
+# **El bloque va ENTERO y visible** (John, 23-sep-2026), aunque repita lo de fábrica: un driver se lee de un vistazo
+# y no obliga a ir a buscar qué hereda. Lo vigila `tests/test_cuentas_del_sistema.py`, que compara con lo general lo
+# que tiene que coincidir y se pone rojo si se separan sin que nadie lo haya decidido.
+#
+# **`compras` y `ventas` no son configuración**: son la cuenta con la que este sistema registra habitualmente una
+# compra y una venta, y de ellas **nace el plan de cuentas** de la empresa, para elegirlas comprobante a comprobante
+# (`drivers.contrato.plan_base`). **No imputan solas**: hasta la 3.0 una cuenta de gasto o de ingreso por defecto
+# suplía a la que nadie puso, y entonces el mes salía «listo para exportar» imputado a un comodín que nadie eligió.
+#
+# `631101` la eligió John (22-sep-2026) como la cuenta con la que arranca una empresa suya: TRANSPORTE DE CARGA
+# (PCGE 6311). Y `701101`, la de ventas de lo general. Las dos dejaron de imputar el 23-sep-2026 y hoy son las dos
+# filas con las que nace su plan.
+CUENTAS_POR_DEFECTO: dict = {
+    "cxp": {"PEN": "421201", "USD": "421202"},
+    "cxp_detraccion": {"PEN": "421203", "USD": "421203"},
+    "honorarios": {"PEN": "424101", "USD": "424102"},
+    "retencion_4ta": "401721",
+    "igv": "401111",
+    "clientes": {"PEN": "121201", "USD": "121202"},
+    "compras": "631101",                                    # John, 22-sep-2026
+    "ventas": "701101",
+}
 
 # Lo que se configura en la sección `concar`: lo que el núcleo lee al armar el asiento, y lo propio de este formato.
 CONFIGURACION = (

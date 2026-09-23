@@ -32,11 +32,12 @@ import pytest
 
 from contaperu import api
 from contaperu.puertas import cli
-from util import GOLDEN
+from util import GOLDEN, imputando
 
 CARACTERIZACION = Path(__file__).parent / "fixtures" / "caracterizacion"
 DRIVERS = ("concar", "contasis", "csv", "sire", "starsoft", "asiento_neutral")
-SIN_CENTROS = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
+# Desde la 3.0 la cuenta es del comprobante: los documentos de estas pruebas la traen con `imputando`.
+SIN_CENTROS = {"usa_centros_costo": False}
 
 # La imputación de cada documento de `casos_202608.json`: la cuenta y el centro de siempre, la de honorarios para los
 # recibos y un reparto de la base entre dos cuentas y dos centros.
@@ -48,6 +49,11 @@ IMPUTACION_CASOS: dict[str, dict] = {
                         {"importe": "400.00", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]},
 }
 
+# Los dos golden vienen de SUNAT y no imputan nada: hasta la 3.0 la cuenta se la ponía `cuentas.gasto` (659999) y,
+# en ventas, `cuentas.ventas` (701101). Hoy se la pone su imputación, con las MISMAS cuentas, para que lo congelado
+# siga siendo comparable: lo que cambió es por dónde llega la cuenta, no cuál es.
+CUENTA_DEL_GOLDEN = {"compras_202601.json": "659999", "ventas_202512.json": "701101"}
+
 # nombre → (archivo del golden, configuración, imputación)
 DOCUMENTOS: dict[str, tuple[str, dict, dict | None]] = {
     "compras_202601": ("compras_202601.json", SIN_CENTROS, None),
@@ -57,7 +63,9 @@ DOCUMENTOS: dict[str, tuple[str, dict, dict | None]] = {
 
 
 def cargar_documento(archivo: str) -> dict:
-    return json.loads((GOLDEN / archivo).read_text(encoding="utf-8"))
+    documento = json.loads((GOLDEN / archivo).read_text(encoding="utf-8"))
+    cuenta = CUENTA_DEL_GOLDEN.get(archivo)
+    return imputando(documento, cuenta) if cuenta else documento
 
 
 def _celda(valor):

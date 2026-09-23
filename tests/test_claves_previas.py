@@ -11,13 +11,14 @@ import pytest
 from contaperu import api
 from contaperu.pipeline import preparacion
 from contaperu.puertas import cli
-from util import GOLDEN
+from util import GOLDEN, imputando
 
-CONFIG = {"cuentas": {"gasto": "659999"}, "usa_centros_costo": False}
+# Desde la 3.0 la cuenta es del comprobante: los documentos de estas pruebas la traen con `imputando`.
+CONFIG = {"usa_centros_costo": False}
 
 
 def _golden(nombre: str) -> dict:
-    return json.loads((GOLDEN / nombre).read_text(encoding="utf-8"))
+    return imputando(json.loads((GOLDEN / nombre).read_text(encoding="utf-8")), "659999")
 
 
 def _previa(c: dict, **cambios) -> list[str]:

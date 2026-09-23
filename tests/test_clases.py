@@ -110,7 +110,9 @@ def test_todos_los_roles_tienen_clase_en_un_asiento_completo():
 
 # ── Todas las cuentas del asiento, no solo la de la base ──────────────────────────────────────────────────────
 
-CUENTAS_DE_PRUEBA = {"igv": "401111", "retencion_4ta": "401721", "gasto": "634301", "ventas": "701101"}
+# Las del asiento que SÍ son configuración: la de la base la trae cada comprobante en su imputación (3.0),
+# y por eso estos casos la escriben en `base["cuenta_contable"]`.
+CUENTAS_DE_PRUEBA = {"igv": "401111", "retencion_4ta": "401721"}
 
 
 def aplicada(**general) -> dict:
