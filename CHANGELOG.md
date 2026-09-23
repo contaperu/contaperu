@@ -6,6 +6,8 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.7.0] — 2026-09-22
+
 ### Añadido
 
 - **Linter (`ruff check .`), en el CI y antes de un PR.** Acotado a propósito a **código muerto y errores**
