@@ -14,6 +14,7 @@ from typing import Any
 from ...asiento.resolucion import cuenta_tercero, lleva_centro, partes_de
 from ...asiento.motor import constancia_de, glosa_de
 from ...configuracion import por_defecto
+from ..contrato import columnas_elegidas
 from ..kit import Opciones, celdas, formatear_numero, negativo
 from ...igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
 from ...modelo import CENTIMO, Comprobante, Libro
@@ -53,14 +54,14 @@ def _en_soles(importes: dict[str, Decimal], tipo: str, tc: Decimal) -> dict[str,
     return soles
 
 
-def _constancia(c: Comprobante) -> dict[str, Any]:
+def _constancia(c: Comprobante, config: dict) -> dict[str, Any]:
     """Las columnas U y V: la constancia del depósito de la detracción (2.6).
 
     CONTASIS es un driver de REGISTRO —no arma el asiento, así que no ve la línea de detracción donde el núcleo la
     deja resuelta—, y hasta la 2.7 reescribía aquí la regla entera, comodín incluido. Ahora la pregunta la
     responde `asiento.constancia_de`, una sola vez para los dos caminos; lo que sigue siendo de CONTASIS es en qué
     columnas la escribe y que la fecha vaya como `datetime` de celda."""
-    constancia = constancia_de(c)
+    constancia = constancia_de(c, config)
     return {"U": constancia["nro_constancia"],
             "V": _fecha(celdas.fecha(constancia["fecha_constancia"], None))}
 
@@ -73,10 +74,9 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
     # El centro, donde la cuenta lo lleva: la misma regla que pone el centro en la columna M de CONCAR.
     centro = centro if config.get("usa_centros_costo", True) and lleva_centro(cuenta, config) else ""
     # Y el mismo centro en la segunda columna de centro de costos, si la configuración la elige (John, 13-sep-2026).
-    elegidas = (config.get("columnas") or {}).get("centro_costo")
-    if elegidas is None:
-        elegidas = _POR_DEFECTO["columnas"]["centro_costo"]
-    centro_2 = centro if "centro_costo_2" in elegidas else ""
+    # Qué columnas se eligieron lo dice el contrato, que es quien resuelve esa regla también para el núcleo: hasta
+    # la 3.1 se resolvía aquí contra el `por_defecto` del propio driver, el mismo cálculo escrito dos veces.
+    centro_2 = centro if "centro_costo_2" in columnas_elegidas(datos, config) else ""
     es_usd = c.moneda == "USD"
     importes = _importes(c, es_venta)
     if es_usd and c.tipo_cambio:
@@ -120,7 +120,7 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
         # escribe desde la 2.6, y revierte esa decisión a petición suya del 22-sep: si el comprobante tiene
         # detracción, su número —o el comodín mientras no se haya depositado— y la fecha del depósito, que va
         # vacía si no consta. Sin detracción, las dos en blanco: son columnas suyas, no de todas las compras.
-        "T": "", **_constancia(c), "W": comunes["cambio"],
+        "T": "", **_constancia(c, config), "W": comunes["cambio"],
         "X": comunes["ref_fecha"], "Y": comunes["ref_tipo"], "Z": comunes["ref_serie"], "AA": comunes["ref_numero"],
         "AB": comunes["moneda"], "AC": comunes["dolares"], "AD": c.fecha_vencimiento, "AE": comunes["condicion"],
         "AF": cuenta, "AG": (cuentas.get("otros_tributos") or "") if importes["R"] else "", "AH": comunes["tercero"],

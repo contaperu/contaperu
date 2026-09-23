@@ -11,7 +11,7 @@ Aquí no hay lógica: si cambia un valor por defecto, se toca este archivo y nad
 """
 from __future__ import annotations
 
-from ..configuracion import Campo
+from ..configuracion import NUMERO_DETRACCION_PENDIENTE as _NUMERO_DETRACCION_PENDIENTE, Campo
 
 # La línea de la detracción, calcada del Excel real que CONCAR ACEPTÓ (set-2026): tipo de documento
 # **DR** y el comodín del número —la constancia del depósito no se conoce al provisionar, se paga
@@ -19,13 +19,10 @@ from ..configuracion import Campo
 # importarse en un CONCAR de verdad; el archivo validado dice DR. Es la sigla de la Tabla General 06,
 # que cada contribuyente numera a su gusto: por eso `detraccion_tipo_doc` puede cambiarla.
 TIPO_DOC_DETRACCION = "DR"
-# NUEVE nueves, contados por John (22-sep-2026). Hasta la 2.5 eran diez, y cambiarlo mueve el asiento de CONCAR,
-# no solo el de STARSOFT: es el número del documento comodín de la línea `DR`, y también lo que sale como número de
-# constancia en los destinos que tienen esa columna mientras nadie haya pegado la de verdad.
-#
-# ⚠️ DEUDA: el TIPO del documento se configura (`detraccion_tipo_doc`, abajo) y el NÚMERO no. La asimetría es de
-# cuando el comodín era un detalle de CONCAR; hoy lo ven tres destinos y tarde o temprano alguno querrá el suyo.
-NUMERO_DETRACCION_PENDIENTE = "999999999"
+# El comodín del número vive con su campo, en `contaperu/configuracion.py`: desde la 3.1 se configura
+# (`detraccion_numero_pendiente`) y su campo es GENERAL, no del asiento, porque ese número sale también
+# en las columnas de constancia de un registro. Se reexporta aquí, que es donde se lee desde siempre.
+NUMERO_DETRACCION_PENDIENTE = _NUMERO_DETRACCION_PENDIENTE
 
 # La clave donde un sistema de asientos dice el código de cada moneda en su vocabulario ({"PEN": "MN", "USD": "US"}). Es
 # la única clave de la sección de un sistema que lee el núcleo —para saber qué monedas tienen código

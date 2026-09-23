@@ -215,6 +215,30 @@ def test_el_driver_de_asiento_y_el_de_registro_dicen_lo_MISMO():
     c = _compra_con_detraccion(nro_constancia="98765432109876543", fecha_constancia="2026-02-10")
     lineas = asiento.lineas_del_comprobante(c, CONTAB, (date(2026, 1, 1), date(2026, 1, 31)), "0001")
     de_la_linea = next(ln.detraccion for ln in lineas if ln.rol == "detraccion" and ln.detraccion)
-    del_registro = driver_contasis.proyeccion._constancia(c)
+    del_registro = driver_contasis.proyeccion._constancia(c, CONTAB)
     assert de_la_linea["nro_constancia"] == del_registro["U"] == "98765432109876543"
     assert de_la_linea["fecha_constancia"] == "2026-02-10" and del_registro["V"].date() == date(2026, 2, 10)
+
+
+def test_el_comodin_del_numero_se_configura_y_llega_a_los_dos_caminos():
+    """Cierra una deuda que el código llevaba anotada: el TIPO del documento de la detracción se configuraba
+    (`detraccion_tipo_doc`) y el NÚMERO no, «una asimetría de cuando el comodín era un detalle de CONCAR».
+
+    Va en lo GENERAL y no en la configuración del asiento, aunque su hermano el tipo sí sea del asiento, y el
+    motivo se ve aquí: el tipo solo existe en la línea comodín `DR`, y el número sale ADEMÁS en las columnas de
+    constancia de un registro, que no arma ningún asiento. Declararlo en la sección del asiento habría dejado a
+    CONTASIS sin poder leerlo — lo cazó el espía del contrato al intentarlo."""
+    propio = {**CONTAB, "detraccion_numero_pendiente": "123456789"}
+    c = _compra_con_detraccion()
+
+    # El camino del ASIENTO: el documento comodín de la línea `DR` y la constancia de su bloque.
+    lineas = asiento.lineas_del_comprobante(c, propio, (date(2026, 1, 1), date(2026, 1, 31)), "0001")
+    de_la_linea = next(ln for ln in lineas if ln.rol == "detraccion")
+    assert de_la_linea.documento["serie_numero"] == "123456789"
+    assert de_la_linea.detraccion["nro_constancia"] == "123456789"
+
+    # El camino del REGISTRO, que nunca ve esa línea.
+    assert driver_contasis.proyeccion._constancia(c, propio)["U"] == "123456789"
+
+    # Y sin configurar nada, el de partida.
+    assert asiento.constancia_de(c)["nro_constancia"] == NUMERO_DETRACCION_PENDIENTE

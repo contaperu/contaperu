@@ -336,6 +336,22 @@ def describir(modulo: Any) -> dict:
     return {"sistema": modulo.NOMBRE, **_declaracion.describir(configuracion(modulo), columnas_elegibles(modulo))}
 
 
+def columnas_elegidas(modulo: Any, config: dict, dato: str = "centro_costo") -> tuple[str, ...]:
+    """En qué columnas de ESTE driver sale ese dato: las que la configuración eligió (`columnas.<dato>`) o, si no
+    eligió ninguna, las que el driver trae marcadas de fábrica.
+
+    Es una sola regla y la usan dos: el núcleo, para saber qué líneas llevan el centro en su anexo
+    (`centro_en_anexo`), y el driver que escribe una segunda columna de centro. Hasta la 3.1 CONTASIS la
+    reimplementaba contra su propio `por_defecto`, que es el mismo cálculo escrito dos veces."""
+    declaradas = columnas_elegibles(modulo).get(dato)
+    if not declaradas:
+        return ()
+    elegidas = ((config or {}).get("columnas") or {}).get(dato)
+    if elegidas is None:
+        elegidas = [c.columna for c in declaradas if c.fija or c.marcada]
+    return tuple(elegidas)
+
+
 def centro_en_anexo(modulo: Any, config: dict) -> frozenset[str]:
     """Qué líneas neutrales llevan el centro en su anexo auxiliar para ESTE driver: las de las columnas que la
     configuración eligió para el centro (`columnas.centro_costo`) o, si no eligió, las marcadas de fábrica. Un driver
@@ -343,9 +359,7 @@ def centro_en_anexo(modulo: Any, config: dict) -> frozenset[str]:
     declaradas = columnas_elegibles(modulo).get("centro_costo")
     if not declaradas:
         return CENTRO_EN_ANEXO
-    elegidas = ((config or {}).get("columnas") or {}).get("centro_costo")
-    if elegidas is None:
-        elegidas = [c.columna for c in declaradas if c.fija or c.marcada]
+    elegidas = columnas_elegidas(modulo, config)
     return frozenset(c.rol for c in declaradas if c.campo == "anexo_auxiliar" and c.columna in elegidas)
 
 

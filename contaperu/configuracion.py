@@ -27,6 +27,11 @@ from typing import Any
 
 from .errores import ErrorContaperu
 
+# El comodín del número de la detracción pendiente: NUEVE nueves, contados por John (22-sep-2026). Hasta la 2.5
+# eran diez, y cambiarlo mueve el asiento de CONCAR, no solo el de STARSOFT. Es el valor de partida; desde la 3.1
+# cada contribuyente puede poner el suyo en `detraccion_numero_pendiente`.
+NUMERO_DETRACCION_PENDIENTE = "999999999"
+
 _ESPERADO = {"texto": "un texto", "booleano": "verdadero o falso", "numero": "un número", "lista": "una lista",
              "mapa": "un objeto", "objeto": "un objeto"}
 
@@ -306,6 +311,14 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
     # tasa, con su fuente. Estas dos claves son lo que el ERP que integra el motor SOBREESCRIBE encima de ella, y por eso
     # vienen vacías: la tasa de un código que ya está, o un código que suma (`null`: se reconoce sin tasa, y la toma del
     # comprobante). Una configuración guardada con los 14 códigos de la 1.0 sigue dando lo mismo: son los de la tabla.
+    # El número con el que sale una detracción cuyo depósito todavía no tiene constancia: la del banco se conoce
+    # días después, «casi pasando el otro mes». Va en lo GENERAL y no en la configuración del asiento, aunque su
+    # hermano el TIPO (`detraccion_tipo_doc`) sí sea del asiento: el tipo solo existe en la línea comodín `DR`, y
+    # este número sale además en las columnas de constancia de un registro —las U y V de CONTASIS, los campos
+    # 25 y 26 de STARSOFT—, que no arma ningún asiento. Su largo es el que admita la columna del destino.
+    Campo("detraccion_numero_pendiente", "texto", NUMERO_DETRACCION_PENDIENTE,
+          titulo="Número de la detracción pendiente", grupo="detracciones", patron=r"^[0-9]{1,20}$",
+          ayuda="El número con el que sale una detracción cuyo depósito todavía no tiene constancia."),
     Campo("detraccion_tasas", "mapa", {}, titulo="Tasa de cada detracción", grupo="detracciones", claves=r"^[0-9]{3}$",
           ayuda="Sobreescribe la tasa de la tabla del motor para un código, o suma uno que no esté (null: sin tasa).",
           valores=Campo("", "numero", grupo="detracciones", admite_nulo=True)),

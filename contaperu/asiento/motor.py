@@ -103,7 +103,16 @@ def _limpio(campos: dict) -> dict:
     return {k: v for k, v in campos.items() if v not in ("", None)}
 
 
-def constancia_de(c: Comprobante) -> dict[str, str]:
+def _numero_pendiente(config: dict | None = None) -> str:
+    """El número con el que sale una detracción cuyo depósito todavía no tiene constancia.
+
+    El del contribuyente si lo configuró (`detraccion_numero_pendiente`, 3.1) y el de partida si no. Se pregunta
+    aquí y no se lee la constante suelta: hasta la 3.1 el TIPO de ese documento se configuraba y el NÚMERO no, una
+    asimetría de cuando el comodín era un detalle de CONCAR."""
+    return str((config or {}).get("detraccion_numero_pendiente") or NUMERO_DETRACCION_PENDIENTE)
+
+
+def constancia_de(c: Comprobante, config: dict | None = None) -> dict[str, str]:
     """La constancia del depósito de la detracción de ese comprobante: su número y su fecha, como van al archivo.
 
     Una sola regla para los dos caminos que la necesitan, y son distintos a propósito: un driver de ASIENTO la
@@ -117,7 +126,7 @@ def constancia_de(c: Comprobante) -> dict[str, str]:
     bloque = c.detraccion or {}
     if not str(bloque.get("codigo") or "").strip():
         return {"nro_constancia": "", "fecha_constancia": ""}
-    return {"nro_constancia": str(bloque.get("nro_constancia") or "").strip() or NUMERO_DETRACCION_PENDIENTE,
+    return {"nro_constancia": str(bloque.get("nro_constancia") or "").strip() or _numero_pendiente(config),
             "fecha_constancia": str(bloque.get("fecha_constancia") or "").strip()}
 
 
@@ -139,7 +148,7 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = Fa
     tasa = tasa_detraccion(c, config)
     return _limpio({"codigo": sunat, "codigo_interno": interno,
                     "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total),
-                    **constancia_de(c)})
+                    **constancia_de(c, config)})
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
@@ -289,7 +298,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                     "tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp,
                     "serie_numero": serie_numero, "fecha": _iso(emision)}
                 documento_detraccion = {"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
-                                        "serie_numero": NUMERO_DETRACCION_PENDIENTE,
+                                        "serie_numero": _numero_pendiente(config),
                                         "id_externo": c.id_externo or "",
                                         "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
             linea_detraccion = linea("detraccion", detraido, cuenta_detraccion, sentido_tercero,

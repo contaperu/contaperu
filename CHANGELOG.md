@@ -19,6 +19,25 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ### Cambiado
 
+- **El comodín del número de la detracción pendiente se configura** (`detraccion_numero_pendiente`), que era una
+  deuda anotada en el código: el TIPO de ese documento se configuraba y el NÚMERO no, «una asimetría de cuando el
+  comodín era un detalle de CONCAR». Va en la configuración **general** y no en la del asiento, aunque su hermano
+  el tipo sí sea del asiento: el tipo solo existe en la línea comodín `DR`, y este número sale además en las
+  columnas de constancia de un registro —las U y V de CONTASIS—, que no arma ningún asiento. Declararlo en la
+  sección del asiento habría dejado a CONTASIS sin poder leerlo, y lo cazó el espía del contrato al intentarlo.
+- **`contrato.columnas_elegidas(modulo, config, dato)`**: en qué columnas sale un dato, resuelto una sola vez.
+  CONTASIS lo reimplementaba contra su propio `por_defecto` y `centro_en_anexo` lo tenía escrito aparte.
+
+### Añadido
+
+- **Un test que corre juntas las cuatro respuestas a «cuál es la tasa del IGV»** sobre el mismo comprobante. Son
+  cuatro y las cuatro están bien —el núcleo escribe el cociente, CONCAR lo redondea a entero, CONTASIS declara la
+  tasa legal que cuadra y STARSOFT reformatea la de la línea—, pero no había sitio donde se vieran juntas, y el
+  snapshot de CONTASIS usa casos donde coinciden: no distinguiría si alguien cambiara una función por otra.
+- **Un test de que `CUENTAS_POR_DEFECTO` se lee por su accesor y no en crudo.** Desde la 3.0 guarda dos cosas
+  —las contrapartidas, que imputan, y `compras`/`ventas`, que siembran el plan—, y en crudo salen mezcladas.
+
+
 - **El LEEME del estándar dice de cada juego de conformidad quién puede correrlo.** Los de `esquema.json` los corre
   cualquiera, con un validador y sin el motor. Los de `diagnosticar.json` **no son portables** —nombran drivers del
   motor y esperan la forma de `api.diagnosticar`, que es superficie del paquete y no del estándar— y comprueban que

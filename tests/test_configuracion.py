@@ -152,7 +152,8 @@ def test_una_aplicacion_pinta_su_pantalla_con_lo_que_describe_el_motor():
     todo = api.describir_configuracion()
     json.dumps(todo)
     assert [c["clave"] for c in todo["general"]["campos"]] == [
-        "cuentas", "usa_centros_costo", "centros_costo", "cuentas_con_centro", "detraccion_tasas", "detraccion_nombres"]
+        "cuentas", "usa_centros_costo", "centros_costo", "cuentas_con_centro", "detraccion_numero_pendiente",
+        "detraccion_tasas", "detraccion_nombres"]
     assert set(todo["sistemas"]) == {"concar", "csv", "contasis", "starsoft"}
     concar = api.describir_configuracion("concar")
     assert concar["sistema"] == "concar" and concar["general"] == todo["general"]
@@ -183,7 +184,7 @@ def test_la_configuracion_se_valida_entera_y_cada_error_dice_adonde_va():
         "`medio_pago` va dentro de la sección de su sistema (contasis), no en la raíz",
         "`centro_como_referencia` ya no existe: es la columna `anexo_auxiliar` en `concar.columnas.centro_costo`",
         "`tasa_igv`: clave desconocida; en la raíz va lo general (cuentas, usa_centros_costo, centros_costo, "
-        "cuentas_con_centro, detraccion_tasas, detraccion_nombres) y una sección por sistema (concar, csv, contasis, starsoft)",
+        "cuentas_con_centro, detraccion_numero_pendiente, detraccion_tasas, detraccion_nombres) y una sección por sistema (concar, csv, contasis, starsoft)",
         "`imputaciones` no va en la configuración: la imputación de cada documento llega en el bloque "
         "`imputaciones` del documento o en el argumento `imputacion`",
         "`sire` no tiene sección: ese sistema no lleva cuentas y no se configura",

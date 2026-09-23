@@ -695,6 +695,26 @@ def test_lo_que_cada_destino_no_lleva_se_pregunta_al_contrato():
                      "concar": [], "csv": [], "starsoft": [], "asiento_neutral": []}
 
 
+def test_las_cuentas_de_un_driver_se_leen_por_su_accesor_y_no_en_crudo():
+    """`CUENTAS_POR_DEFECTO` guarda DOS cosas desde la 3.0, y lo que decide cuál es la clave: las contrapartidas
+    —`cxp`, `igv`, `clientes`…— son configuración y las usa el asiento; `compras` y `ventas` **no imputan nada**,
+    siembran el plan de cuentas de quien abre ese sistema.
+
+    Leerlo en crudo te da las dos mezcladas, y quien lo haga tratará `compras` como si fuera una contrapartida.
+    Por eso hay dos accesores y este test dice para qué sirve cada uno. Es la misma lección que `EXCLUYE_TIPOS`
+    en la 2.7: quien integra el motor le pregunta al contrato, no al módulo."""
+    for nombre in ("concar", "contasis", "starsoft"):
+        modulo = drivers.obtener(nombre)
+        crudo = set(getattr(modulo, "CUENTAS_POR_DEFECTO", {}))
+        configuracion = set(contrato.cuentas_por_defecto(modulo))
+        del_plan = {c["codigo"] for c in contrato.plan_base(modulo)}
+
+        assert {"compras", "ventas"} <= crudo, f"{nombre}: el crudo lleva las dos que siembran el plan"
+        assert not ({"compras", "ventas"} & configuracion), (
+            f"{nombre}: `compras` y `ventas` no son contrapartidas; no pueden salir por `cuentas_por_defecto`")
+        assert len(del_plan) == 2 and all(cod for cod in del_plan), f"{nombre}: siembra dos cuentas con código"
+
+
 def test_los_tres_legacy_declaran_lo_que_no_cabe_en_su_formato():
     """CONCAR no lo declaraba y cortaba la serie-número a 20 en silencio (2.7), que es justo lo que la doctrina
     escrita en CONTASIS prohíbe. Ahora los tres responden a la misma pregunta, aunque dos de ellos respondan que
