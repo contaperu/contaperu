@@ -274,7 +274,8 @@ Definidas por John (20-sep-2026):
 > que esta hoja le da a la macro, que no sabe contabilidad.
 >
 > Se documenta por dos motivos: **las cuentas** que usa sí son configuración del contribuyente, y
-> **la glosa de 60 caracteres** es un límite real del formato.
+> **la glosa de 60 caracteres** es un límite real del formato — que desde la 2.6 se resuelve **cortando**
+> al escribir, no deteniendo la exportación (John, 22-sep-2026).
 
 **Estructura real, leída de la captura de `PARAMETROS` de ventas** (`P Ventas SS V0124.xlsm`):
 
@@ -755,8 +756,9 @@ Los seis campos de la última tabla son la única deuda real, y solo dos importa
 
 ## Lo que ya está hecho y no hay que rehacer
 
-- `contaperu/drivers/contrato.py` — `exige`, `no_caben` y la declaración de configuración. **El límite
-  de 4 cuentas y los 60 caracteres de glosa entran por ahí**, que es justo para lo que existe.
+- `contaperu/drivers/contrato.py` — `exige`, `no_caben` y la declaración de configuración. Ojo: **los 60
+  caracteres de glosa NO entran por `no_caben`** desde la 2.6 — se CORTAN al escribir, como en CONCAR y
+  CONTASIS. `no_caben` es para lo que el sistema RECHAZA, no para lo que recorta.
 - `contaperu/drivers/kit/` — escribir `.xlsx` sin decidir contabilidad.
 - `contaperu/drivers/concar/datos.py` — el modelo de cómo se declaran siglas, sub-diarios y columnas.
 - `contaperu/drivers/contasis/` — la forma: `.xlsx` legacy, plantilla fuera de Git, tests que se saltan

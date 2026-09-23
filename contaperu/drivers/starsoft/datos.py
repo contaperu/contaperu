@@ -348,9 +348,11 @@ NO_ANULADO = "0"
 # pendiente. El día que el estándar lo traiga, esta constante deja de ser el único valor posible.
 IGV_NO_PENDIENTE = "0"
 
-# Lo que no cabe en el formato. El largo de la glosa está escrito en la cabecera de la propia hoja `PARAMETROS`
-# («GLOSA DEL MOVIMIENTO · Máximo 60 caracteres»), así que es un hecho y no una deducción.
+# A cuánto se CORTA la glosa al escribirla. Está en la cabecera de la propia hoja `PARAMETROS` («GLOSA DEL
+# MOVIMIENTO · Máximo 60 caracteres»), así que es un hecho y no una deducción.
+#
+# Hasta la 2.6 esto no cortaba: medía, y un comprobante que se pasara **detenía la exportación del mes entero**
+# con un `no_caben`. Lo quitó John el 22-sep-2026 al encontrarse cuatro facturas parándole el archivo, y tenía
+# razón: la glosa es texto libre, cortada sigue diciendo lo que decía, y los otros dos drivers la cortaban desde
+# siempre. Lo que no se corta es un CÓDIGO —una cuenta o una serie cortadas serían otra cuenta y otra serie—.
 LARGO_GLOSA = 60
-MOTIVOS = {
-    "glosa": f"con una glosa de más de {LARGO_GLOSA} caracteres, que es lo que admite la plantilla de STARSOFT",
-}

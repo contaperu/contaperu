@@ -177,13 +177,13 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         # El DOCUMENTO, y el concepto en `GLOSA MOVIMIENTO`: así lo traen los ejemplos oficiales
         # (John, 22-sep-2026). Del 21 al 22-sep las dos dijeron el concepto, por parecer que repetir
         # el tipo y el número gastaba la glosa; el manual dice otra cosa, y manda el manual.
-        "GLOSA": glosa_del_documento(ln, cab),
+        "GLOSA": glosa_del_documento(ln, cab)[:datos.LARGO_GLOSA],
         "DESTINO": destino_de(cab),
         "TIPO DOC REF": ref.get("tipo", ""),
         "NRO DOC REF": ref.get("serie_numero", ""),
         "FECHA DOC REF": ref.get("fecha", ""),
         "CENTRO DE COSTOS": ln.centro_costo or ln.anexo_auxiliar or "",
-        "GLOSA MOVIMIENTO": ln.glosa,
+        "GLOSA MOVIMIENTO": (ln.glosa or "")[:datos.LARGO_GLOSA],
         "DOCUMENTO ANULADO": datos.NO_ANULADO,
         "IMPORTACION": "1" if (cab.anio_dua or cab.cod_dep_aduanera) else "0",
         "DEBE / HABER": ln.debe_haber,
@@ -256,8 +256,8 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         # El DOCUMENTO, y el concepto en `GLOSA MOVIMIENTO`: así lo traen los ejemplos oficiales
         # (John, 22-sep-2026). Del 21 al 22-sep las dos dijeron el concepto, por parecer que repetir
         # el tipo y el número gastaba la glosa; el manual dice otra cosa, y manda el manual.
-        "GLOSA": glosa_del_documento(ln, cab),
-        "GLOSA MOVIMIENTO": ln.glosa,
+        "GLOSA": glosa_del_documento(ln, cab)[:datos.LARGO_GLOSA],
+        "GLOSA MOVIMIENTO": (ln.glosa or "")[:datos.LARGO_GLOSA],
         "DOCUMENTO ANULADO": datos.NO_ANULADO,
         "DEBE / HABER": ln.debe_haber,
         "RUC CLIENTE": cab.contraparte_doc if es_total else "",
@@ -293,15 +293,20 @@ def filas(cab: Cabecera, lineas: list[LineaDiario], libro: Any, config: dict) ->
 
 
 def no_caben(libro: Any, comprobantes: list, config: dict) -> dict[str, list]:
-    """Lo que la plantilla de STARSOFT no puede llevar, por motivo (`datos.MOTIVOS`).
+    """**Hoy no hay nada que la plantilla de STARSOFT no pueda llevar**, y que esté vacía es la respuesta.
 
-    Hoy solo la glosa, y es el único límite que consta de verdad: está escrito en la cabecera de la propia hoja
-    `PARAMETROS` de los dos aplicativos. Se mira aquí y no se corta, porque una glosa cortada sigue siendo
-    legible pero una que se pasa hace que STARSOFT rechace la fila.
+    Hasta la 2.6 su único motivo era la glosa de más de 60, y **detenía la exportación del mes entero**. Lo quitó
+    John el 22-sep-2026 al encontrarse cuatro facturas parándole el archivo, y tenía razón: la glosa es texto
+    libre y ahora se CORTA al escribirla (`datos.LARGO_GLOSA`), como hacen CONCAR (40 y 30) y CONTASIS desde
+    siempre. El criterio ya estaba escrito en CONTASIS y este driver era el único que no lo seguía: «un CÓDIGO no
+    se corta —una cuenta o una serie cortadas serían otra cuenta y otra serie—, y por eso el largo se mira en toda
+    columna de texto salvo las que sí se cortan, el nombre y la glosa».
 
-    **No entra el límite de «4 cuentas por asiento»** que sugiere `PARAMETROS` con sus cuatro pares de columnas:
-    esa hoja es de la macro de Excel y no viaja al archivo, así que no consta que sea un límite del formato. Una
-    compra con detracción produce cinco líneas pero solo cuatro cuentas distintas, así que hoy ni lo rozaría.
+    Se queda declarada, y no se retira, por dos razones: es un nombre público de este módulo, y es el sitio donde
+    entra el día que aparezca un límite de verdad —uno que haga que STARSOFT RECHACE la fila, no que la recorte—.
+
+    **No lo es el de «4 cuentas por asiento»** que sugiere `PARAMETROS` con sus cuatro pares de columnas: esa hoja
+    es de la macro de Excel y no viaja al archivo, así que no consta que sea un límite del formato. Una compra con
+    detracción produce cinco líneas pero solo cuatro cuentas distintas, así que hoy ni lo rozaría.
     """
-    largas = [c for c in comprobantes if len((c.concepto or "").strip()) > datos.LARGO_GLOSA]
-    return {datos.MOTIVOS["glosa"]: largas} if largas else {}
+    return {}

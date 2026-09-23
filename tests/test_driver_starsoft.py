@@ -368,20 +368,27 @@ def test_una_venta_lleva_el_cliente_donde_una_compra_lleva_el_proveedor():
     assert "DESTINO" not in filas[0], "el destino del crédito fiscal es de una compra, no de una venta"
 
 
-def test_una_glosa_larga_no_cabe_y_se_dice_antes_de_exportar():
-    """El único límite que consta: está escrito en la cabecera de la hoja `PARAMETROS` («Máximo 60 caracteres»).
+def test_una_glosa_larga_se_CORTA_y_no_detiene_la_exportacion():
+    """60 es lo que admite la hoja `PARAMETROS` («Máximo 60 caracteres»), y se corta al escribir.
 
-    Lo que vale no es que falle al exportar, sino que `diagnosticar` lo diga ANTES.
+    Hasta la 2.6 se medía y se detenía el mes entero. Lo quitó John el 22-sep-2026 al encontrarse cuatro facturas
+    parándole el archivo: la glosa es texto libre y cortada sigue diciendo lo que decía, que es lo que CONCAR y
+    CONTASIS hacían desde siempre. Lo que no se corta es un CÓDIGO.
     """
-    doc = _compra(concepto="C" * 61)
-    diagnostico = api.diagnosticar(doc, driver="starsoft", configuracion=CONFIG,
-                                   imputacion={"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
-    assert diagnostico["listo_para_exportar"] is False
-    assert any("60 caracteres" in motivo for motivo in diagnostico["faltantes"]["no_cabe"])
+    imputacion = {"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}}
+    doc = _compra(concepto="C" * 200)
 
-    with pytest.raises(api.NoCabe):
-        api.exportar(doc, driver="starsoft", configuracion=CONFIG,
-                     imputacion={"fila-1": {"cuenta_contable": "60111000", "centro_costo": "CC01"}})
+    diagnostico = api.diagnosticar(doc, driver="starsoft", configuracion=CONFIG, imputacion=imputacion)
+    assert diagnostico["listo_para_exportar"] is True, "una glosa larga ya no para el mes"
+    assert diagnostico["faltantes"]["no_cabe"] == {}
+
+    for f in _filas(doc, imputacion=imputacion):
+        assert f["GLOSA MOVIMIENTO"] == "C" * 60, "cortada al largo de la plantilla, no rechazada"
+        assert len(f["GLOSA"]) <= 60
+
+    # Y una que cabe no se toca.
+    corta = _filas(_compra(concepto="CELULARES"), imputacion=imputacion)[0]
+    assert corta["GLOSA MOVIMIENTO"] == "CELULARES"
 
 
 def test_el_archivo_se_llama_como_los_demas_sistemas():

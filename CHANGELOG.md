@@ -6,6 +6,24 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [2.6.1] — 2026-09-22
+
+### Corregido
+
+- **La glosa larga de STARSOFT se CORTA en vez de detener la exportación.** Era su único `no_caben`, y con
+  cuatro comprobantes de más de 60 caracteres el mes entero se quedaba sin archivo. La glosa es **texto libre**:
+  cortada sigue diciendo lo que decía. Lo que no se corta es un **código** —una cuenta o una serie cortadas
+  serían otra cuenta y otra serie—, y ese criterio ya estaba escrito en CONTASIS; STARSOFT era el único driver
+  que no lo seguía, mientras CONCAR cortaba a 40 y 30 y CONTASIS a los largos de sus columnas.
+
+  `no_caben` **se queda declarada y devuelve vacío**: es el sitio donde entrará el día que aparezca un límite de
+  verdad, de los que hacen que el sistema rechace la fila.
+
+### Cómo migrar
+
+Nada que tocar. Un mes con glosas largas que antes no se podía exportar, ahora sale, con esas glosas recortadas
+al largo de la plantilla.
+
 ## [2.6.0] — 2026-09-22
 
 **La detracción tiene dos tiempos y ahora el segundo llega al archivo.** Se provisiona al registrar el comprobante y
