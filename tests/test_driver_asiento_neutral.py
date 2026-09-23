@@ -63,6 +63,40 @@ def test_exporta_el_documento_del_estandar_y_valida_su_esquema():
     assert respuesta["_exportacion"]["huella"] and respuesta["_exportacion"]["comprobantes"][0]["lineas"]
 
 
+def test_el_archivo_se_basta_solo_para_no_repetir_un_comprobante():
+    """El archivo lleva `_exportacion` en su raíz (3.1), y esto es lo que hace que sirva a quien NO llama al motor.
+
+    Hasta la 3.1 el documento tenía tres claves y la huella vivía solo en la respuesta del API, así que quien
+    recibiera el JSON —por correo, en una carpeta— se quedaba sin la clave con la que reconocer lo que ya había
+    importado. `INTEGRAR.md` le pide a un ERP justamente eso, «la identidad y la huella de cada comprobante como
+    clave para no repetir», y por la vía del archivo era imposible de seguir.
+
+    Y lo que va dentro es LO MISMO que dice el API, no una versión reducida: las dos salen de
+    `asiento.exportacion_de`."""
+    respuesta = api.exportar(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
+    documento = json.loads(base64.b64decode(respuesta["contenido_base64"]))
+
+    dentro = documento["_exportacion"]
+    assert dentro["huella"] == respuesta["_exportacion"]["huella"]
+    assert dentro["comprobantes"] == respuesta["_exportacion"]["comprobantes"]
+    assert dentro["driver"] == "asiento_neutral" and dentro["motor"]
+
+    # Cada comprobante: su identidad, su tramo y la huella de ese tramo. Los tramos parten las líneas enteras.
+    tramos = [c["lineas"] for c in dentro["comprobantes"]]
+    assert tramos[0][0] == 0 and tramos[-1][1] == len(documento["asiento"])
+    assert all(a[1] == b[0] for a, b in zip(tramos, tramos[1:])), "los tramos dejan hueco o se solapan"
+    assert all(c["identidad"]["ruc"] and c["huella"] for c in dentro["comprobantes"])
+
+
+def test_lo_que_el_archivo_no_puede_saber_no_se_inventa():
+    """`fecha` la pone quien llama a `exportar` y `archivo` es el nombre del propio archivo: ninguna de las dos es
+    un hecho del asiento, así que el documento no las lleva. Decirlo con un test evita que alguien las añada
+    «por simetría» con la respuesta del API."""
+    documento = json.loads(base64.b64decode(
+        api.exportar(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)["contenido_base64"]))
+    assert set(documento["_exportacion"]) == {"driver", "motor", "huella", "comprobantes"}
+
+
 def test_el_diagnostico_de_un_erp_no_mira_vocabulario_legacy():
     diagnostico = api.diagnosticar(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
     assert diagnostico["listo_para_exportar"] is True

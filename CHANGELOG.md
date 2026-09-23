@@ -6,6 +6,20 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Añadido
+
+- **El archivo del driver `asiento_neutral` lleva `_exportacion` en su raíz**: la huella del asiento y, por
+  comprobante, su identidad y el tramo de líneas que le toca. Hasta ahora eso solo existía en la respuesta del
+  API, así que **quien recibiera el JSON a secas se quedaba sin la clave con la que no repetir un comprobante** —
+  que es justo lo que `INTEGRAR.md` le pide a un ERP—. El driver tenía el índice en la mano y lo descartaba.
+
+  **No hace falta enmendar el estándar**: su raíz ya admite cualquier clave `_` y `estandar/LEEME.md` dice que un
+  productor puede llevar ahí `_exportacion`. Los 24 casos de conformidad siguen pasando sin tocarlos.
+- **`asiento.exportacion_de(libro, lineas, indice)`**, que es quien lo arma, y `Cabecera.clave`, para que
+  `modelo.identidad_de` sirva igual con un comprobante y con la cabecera de su tramo. `pipeline/armado` pasa a
+  delegar en ella: una sola implementación para la respuesta del API y para el archivo, y por eso lo que va
+  dentro del documento es idéntico a lo que dice el API, no una versión reducida.
+
 ## [3.0.0] — 2026-09-23
 
 ### Cambiado — **incompatible: es una 3.0**

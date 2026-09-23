@@ -118,7 +118,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
         if forma == "desde_lineas":
             contenido, extra, lineas, indice = armado.desde_lineas_con_indice(modulo, libro, incluidos, opciones,
                                                                               config, correlativos)
-            detalle = armado.por_comprobante(libro, incluidos, lineas, indice)
+            detalle = armado.por_comprobante(libro, lineas, indice)
         elif forma == "desde_comprobantes":
             contenido, extra = armado.desde_comprobantes(modulo, libro, incluidos, opciones, config)
         else:

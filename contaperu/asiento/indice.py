@@ -19,6 +19,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Sequence
 
+from ..modelo import Libro, clave_de, identidad_de
+from .huella import huella
 from .lineas import LineaDiario
 
 
@@ -83,6 +85,16 @@ class Cabecera:
         return asdict(self)
 
 
+    @property
+    def clave(self) -> tuple[str, str, str, str]:
+        """La misma identidad de duplicados que `Comprobante.clave`, calculada con la misma función.
+
+        La tiene para que `modelo.identidad_de` —que solo lee `.clave`— sirva igual para un comprobante y para la
+        cabecera de su tramo. Sin esto, quien tiene el índice y no los comprobantes —un driver— tendría que
+        rehacer la normalización del número y del documento, que es de donde salen los duplicados."""
+        return clave_de(self.tipo_cp, self.serie, self.numero, self.contraparte_doc)
+
+
 @dataclass(frozen=True)
 class ComprobanteDelAsiento:
     """Un comprobante dentro del asiento del libro: su posición entre los que salieron, su sub-diario y su correlativo,
@@ -102,3 +114,19 @@ class ComprobanteDelAsiento:
     def a_dict(self) -> dict:
         return {"posicion": self.posicion, "sub_diario": self.sub_diario, "correlativo": self.correlativo,
                 "lineas": [self.desde, self.hasta], "cabecera": self.cabecera.a_dict()}
+
+
+def exportacion_de(libro: Libro, lineas: Sequence[LineaDiario], indice: Sequence[ComprobanteDelAsiento]) -> dict:
+    """Lo que hay que saber de un asiento para reconocerlo después: su huella y, por comprobante, su identidad, el
+    tramo de líneas que le toca (`[desde, hasta)`) y la huella de ese tramo. Los tramos parten las líneas sin dejar
+    hueco ni solaparse.
+
+    Se arma aquí, y no en la capa de respuesta, porque **quien lo necesita lo tiene en la mano en dos sitios**: la
+    respuesta del API lo pone en `_exportacion`, y un driver que escriba el documento del estándar puede llevarlo
+    dentro del archivo, que es lo que el estándar admite en su raíz (`estandar/LEEME.md`, las claves `_`). Hasta la
+    3.1 vivía solo en `pipeline/salida.py` y el archivo salía sin ello: quien recibiera el JSON a secas se quedaba
+    sin la clave con la que no repetir un comprobante."""
+    return {"huella": huella(lineas),
+            "comprobantes": [{"identidad": identidad_de(libro, entrada.cabecera),
+                              "lineas": [entrada.desde, entrada.hasta],
+                              "huella": huella(entrada.lineas(lineas))} for entrada in indice]}

@@ -43,11 +43,14 @@ def identidades(libro: Libro, comprobantes: list[Comprobante]) -> list[dict]:
     return [{"identidad": identidad_de(libro, c)} for c in comprobantes]
 
 
-def por_comprobante(libro: Libro, comprobantes: list[Comprobante], lineas: list, indice: tuple) -> list[dict]:
+def por_comprobante(libro: Libro, lineas: list, indice: tuple) -> list[dict]:
     """Lo que la respuesta dice de cada comprobante de un asiento (hito 0.4): su identidad, el tramo de líneas que le
-    toca (`[desde, hasta)`) y la huella de ese tramo. Los tramos son una partición exacta de las líneas."""
-    return [{"identidad": identidad_de(libro, comprobantes[entrada.posicion]), "lineas": [entrada.desde, entrada.hasta],
-             "huella": huella(entrada.lineas(lineas))} for entrada in indice]
+    toca (`[desde, hasta)`) y la huella de ese tramo. Los tramos son una partición exacta de las líneas.
+
+    Lo arma `asiento.exportacion_de`, que es quien lo sabe hacer, porque desde la 3.1 lo necesitan dos: esta
+    respuesta y el driver que escribe el documento del estándar, que puede llevarlo dentro del archivo. Ya no
+    hace falta pasarle los comprobantes: la identidad sale de la cabecera del índice, que sabe decir su clave."""
+    return asi.exportacion_de(libro, lineas, indice)["comprobantes"]
 
 
 def desde_lineas(modulo, libro: Libro, comprobantes: list[Comprobante], opciones: Any,
@@ -133,6 +136,6 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
     salida = documento(libro, lineas=lineas)
     salida["_asiento"] = {"lineas": len(lineas), "sub_diarios": dict(rangos), "cuadre": cuadre.a_dict(),
                           "huella": huella(neutrales),
-                          "comprobantes": por_comprobante(libro, incluidos, neutrales, indice),
+                          "comprobantes": por_comprobante(libro, neutrales, indice),
                           "motor": __version__}
     return salida
