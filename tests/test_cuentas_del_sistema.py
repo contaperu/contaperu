@@ -85,6 +85,9 @@ def test_contasis_declara_las_suyas_enteras_y_hoy_son_las_de_lo_general():
     ese es justo el momento en el que hay que pensarlo."""
     declaradas = contrato.cuentas_por_defecto(drivers.obtener("contasis"))
     de_fabrica = api.config_aplicada()["cuentas"]
+    # Las claves, pinchadas: si desaparece una, el bloque deja de ser «entero» y hay que decidirlo, no perderlo.
+    assert sorted(declaradas) == ["clientes", "cxp", "cxp_detraccion", "honorarios", "igv", "retencion_4ta",
+                                  "ventas"]
     assert declaradas == {clave: de_fabrica[clave] for clave in declaradas}, (
         "Las cuentas de CONTASIS se separaron de las de fábrica. Si es a propósito, cámbialas aquí también.")
     # La del gasto NO se declara, como en STARSOFT: poner una real imputaría en silencio lo que nadie imputó.

@@ -146,6 +146,10 @@ COLUMNAS = list(CABECERAS["titulos"].keys())      # A … AO, 41 columnas en ord
 # dispararse —serie de 4 más número de hasta 8—, y por eso esto no cambia ningún archivo: es la red para el día
 # que llegue un documento raro, en vez de recortarlo sin avisar.
 LARGOS_DE_CODIGO = {"S": 20, "AA": 20}
+# Lo que SÍ se corta, porque es texto libre: la glosa de la cabecera y la de la línea. Cortadas siguen
+# diciendo lo que decían. Estaban escritas a pelo en la proyección; aquí están donde se miran los largos,
+# que es como lo llevan CONTASIS (en su tabla de columnas) y STARSOFT (`LARGO_GLOSA`).
+LARGOS_DE_GLOSA = {"F": 40, "W": 30}
 MOTIVOS = {
     "largo": "con una serie-número más larga que su columna de CONCAR, que no se puede cortar sin cambiarla",
 }

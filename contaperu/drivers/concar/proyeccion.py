@@ -61,7 +61,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         "E": codigo_moneda(linea.moneda, config),
         # F: la glosa de la cabecera, igual en todas las filas del comprobante; W: la de la línea, con
         # su prefijo. Una sola glosa, dos largos: lo único que cambia es lo que admite CONCAR.
-        "F": cabecera.glosa[:40], "W": linea.glosa[:30],
+        "F": cabecera.glosa[:datos.LARGOS_DE_GLOSA["F"]], "W": linea.glosa[:datos.LARGOS_DE_GLOSA["W"]],
         # Con el T.C. del comprobante la conversión es especial ('C'); sin él, CONCAR lo busca en su tabla.
         # **Solo en moneda extranjera**, que es como está validado el Excel que importa un CONCAR real: un
         # apunte en soles no se convierte. Desde la 2.2 la línea puede traer T.C. también en PEN —lo pide
@@ -87,7 +87,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         # No se corta a los 3 caracteres de la plantilla: cortar un código lo manda a OTRA área en silencio.
         f["V"] = str(config.get("detraccion_area") or "")
     if ref:
-        f.update({"Z": ref.get("tipo", ""), "AA": ref.get("serie_numero", "")[:20],
+        f.update({"Z": ref.get("tipo", ""), "AA": ref.get("serie_numero", ""),
                   "AB": _fecha(ref.get("fecha"))})
     if det:
         base = _importe(det.get("base"))

@@ -25,6 +25,13 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   vez de descubrir que hereda las de otro sistema. Repetir un dato exige un vigilante: `test_cuentas_del_sistema`
   compara el bloque con lo general y se pone rojo si se separan sin que nadie lo decida. **`gasto` no se declara**,
   como en STARSOFT: poner una cuenta real imputaría en silencio toda compra a la que nadie le puso ninguna.
+- **Seis reglas nuevas en el examen de los drivers** (`test_contrato_drivers.py`), contra la clase de fallo que
+  costó siete versiones al entrar STARSOFT: nadie escribe un importe ni una fecha a mano teniendo el kit, ningún
+  corte de texto lleva el número escrito en la proyección —el largo vive junto a su columna—, el nombre del
+  archivo sale del kit, y todo driver `legacy` declara con qué cuentas nace. Lo que hoy no las cumple está en
+  `TOLERADAS`, con su motivo escrito y un test que avisa cuando una excepción deja de hacer falta.
+- **`concar.datos.LARGOS_DE_GLOSA`**: los dos cortes de CONCAR (40 y 30) estaban escritos dentro de la
+  proyección, donde no se ven al mirar el formato. Ahora están donde ya los llevan CONTASIS y STARSOFT.
 - **`contrato.excluye_tipos(modulo)`**, el accesor que le faltaba a `EXCLUYE_TIPOS`. Era lo único del contrato que
   se leía con un `getattr` crudo desde fuera, mientras `exige`, `no_caben` y `canal` ya tenían el suyo.
 

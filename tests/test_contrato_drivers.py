@@ -11,6 +11,7 @@ import ast
 import base64
 import json
 import pathlib
+import re
 import types
 
 import pytest
@@ -676,6 +677,101 @@ def test_los_de_serie_estan_todos_en_la_lista_publica_del_registro():
     exportaban y funcionaban, pero no salían en la lista pública del paquete ni en la superficie congelada. No lo
     cazó nada porque importarlos por su nombre sigue funcionando igual. Esto lo caza."""
     assert sorted(set(drivers.DE_SERIE) - set(drivers.__all__)) == []
+
+
+# --- que el próximo legacy no repita las convergencias de STARSOFT (2.7) -----------------------------------------
+#
+# STARSOFT entró en la 2.0 y hasta la 2.6.1 hicieron falta siete versiones. Casi todas dicen lo mismo con otras
+# palabras: STARSOFT convergiendo a algo que CONCAR o CONTASIS YA hacían —cortar la glosa, escribir el número sin
+# ceros, el nombre del archivo, las fechas, la detracción—. Ninguna la cazó un test: las cazó John mirando un
+# archivo, semanas después de publicarlo.
+#
+# Estas reglas son ese test. No buscan elegancia: buscan que la misma clase de divergencia no llegue a producción
+# otra vez. Lo que hoy no las cumple va en `TOLERADAS`, con su motivo a la vista y no en silencio, igual que en
+# `test_capas.py` — y la lista está para vaciarse.
+
+TOLERADAS: dict[tuple[str, str], str] = {
+    ("starsoft/proyeccion.py", "importe a mano"):
+        "`con_dos_decimales` es `kit.formatear_monto` reescrito con otra política del cero. Se unifica en la 2.7.",
+    ("concar/xlsx.py", "fecha a mano"):
+        "El `strftime` arma la frase del resumen, no una celda. Se pasa por `formatear_fecha` en la 2.7.",
+}
+
+# Un importe escrito a mano: la política del cero y los decimales son del kit, no de cada driver.
+_IMPORTE_A_MANO = re.compile(r":\.\d+f")
+# Una fecha escrita a mano: los formatos que admite el estándar están en `kit.formatear_fecha`.
+_FECHA_A_MANO = re.compile(r"\.strftime\(")
+# Un corte de texto con el número escrito en la expresión, en vez de declarado junto a su columna.
+_CORTE_A_PELO = re.compile(r"(glosa|serie_numero|serie|numero|nombre|razon_social)\S{0,20}\[:\d+\]")
+
+
+def _fuentes_de_los_drivers() -> dict[str, str]:
+    """El código de cada driver de serie, por `sistema/archivo.py`. El kit no entra: es donde vive lo compartido."""
+    salida = {}
+    for nombre, modulo in drivers.DE_SERIE.items():
+        for f in sorted(pathlib.Path(modulo.__file__).parent.rglob("*.py")):
+            salida[f"{nombre}/{f.name}"] = f.read_text(encoding="utf-8")
+    return salida
+
+
+def _infracciones(patron: re.Pattern, etiqueta: str) -> list[str]:
+    fuera = []
+    for ruta, fuente in _fuentes_de_los_drivers().items():
+        if not patron.search(fuente):
+            continue
+        if (ruta, etiqueta) in TOLERADAS:
+            continue
+        fuera.append(f"{ruta} ({etiqueta})")
+    return sorted(fuera)
+
+
+def test_ningun_driver_escribe_un_importe_a_mano():
+    """Hoy hay tres políticas del cero para el mismo importe: el `formatear_monto` del kit, el
+    `con_dos_decimales` de STARSOFT y el `float()` de CONTASIS. Tres formas de escribir «nada» en una columna de
+    dinero es exactamente el tipo de diferencia que nadie ve hasta que un sistema rechaza el archivo."""
+    assert _infracciones(_IMPORTE_A_MANO, "importe a mano") == []
+
+
+def test_ningun_driver_formatea_una_fecha_a_mano():
+    """Los formatos que existen están en `kit.formatear_fecha`, y son tres. Un `strftime` suelto es un cuarto
+    que nadie declaró y que no aparece en ninguna `Opciones`."""
+    assert _infracciones(_FECHA_A_MANO, "fecha a mano") == []
+
+
+def test_ningun_corte_de_texto_lleva_el_numero_escrito_en_la_expresion():
+    """Un largo es del FORMATO, así que vive junto a la columna que lo tiene: `datos.LARGOS_DE_GLOSA` en CONCAR,
+    la tabla de columnas en CONTASIS, `LARGO_GLOSA` en STARSOFT. Escrito dentro de la proyección no se ve al
+    mirar el formato, y es como STARSOFT acabó siendo el único driver que no cortaba su glosa."""
+    assert _infracciones(_CORTE_A_PELO, "corte a pelo") == []
+
+
+def test_todo_driver_nombra_su_archivo_con_el_kit():
+    """Hasta la 2.0 cada driver repetía su propia `f-string` y convivían tres convenciones. El SIRE es la única
+    excepción, y lleva las dos razones escritas en su propio código: el nombre se lo impone SUNAT."""
+    sin_kit = [nombre for nombre, modulo in drivers.DE_SERIE.items()
+               if callable(getattr(modulo, "nombre", None)) and nombre != "sire"
+               and "nombre_de_archivo" not in "".join(
+                   f.read_text(encoding="utf-8") for f in pathlib.Path(modulo.__file__).parent.rglob("*.py"))]
+    assert sin_kit == []
+
+
+def test_todo_legacy_declara_con_que_cuentas_nace():
+    """Un sistema contable instalado tiene un plan de cuentas, y quien abre ese sistema por primera vez parte de
+    alguna parte. Los tres de serie lo declaran desde la 2.7; un legacy nuevo que no lo diga heredaría las de
+    CONCAR sin que nadie lo haya decidido, que es lo que le pasó a STARSOFT hasta la 2.5."""
+    sin_cuentas = sorted(nombre for nombre, modulo in drivers.DE_SERIE.items()
+                         if contrato.canal(modulo) == "legacy" and not contrato.cuentas_por_defecto(modulo))
+    assert sin_cuentas == []
+
+
+def test_las_toleradas_siguen_haciendo_falta():
+    """Una excepción que ya no hace falta es documentación que miente. El día que se unifique el formateo, estas
+    se quitan y este test avisa si alguien se olvida de quitarlas."""
+    patrones = {"importe a mano": _IMPORTE_A_MANO, "fecha a mano": _FECHA_A_MANO, "corte a pelo": _CORTE_A_PELO}
+    vivas = {(ruta, etiqueta)
+             for ruta, fuente in _fuentes_de_los_drivers().items()
+             for etiqueta, patron in patrones.items() if patron.search(fuente)}
+    assert set(TOLERADAS) == vivas, "sobra o falta una tolerada: mira TOLERADAS"
 
 
 # --- el canal: a quién se entrega lo que sale (1.0) --------------------------------------------------------------
