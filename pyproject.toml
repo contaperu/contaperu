@@ -73,9 +73,15 @@ packages = ["contaperu"]
 
 # El esquema del estandar vive UNA sola vez, en la raiz, pero viaja dentro del paquete:
 # el servidor MCP lo publica como recurso y tiene que encontrarlo tambien instalado.
+#
+# Y con el, desde la 3.1, los casos de CONFORMIDAD. El LEEME del estandar los ofrece para comprobar
+# que lo que tu sistema produce es correcto, y hasta hoy no estaban en la rueda: quien hiciera
+# `pip install contaperu` no los tenia, y la unica forma de correrlos era clonar el repositorio.
 [tool.hatch.build.targets.wheel.force-include]
 "estandar/open-accounting.schema.json" = "contaperu/estandar/open-accounting.schema.json"
 "estandar/catalogos.json" = "contaperu/estandar/catalogos.json"
+"estandar/conformidad/esquema.json" = "contaperu/estandar/conformidad/esquema.json"
+"estandar/conformidad/diagnosticar.json" = "contaperu/estandar/conformidad/diagnosticar.json"
 
 [tool.hatch.build.targets.sdist]
 include = ["contaperu", "estandar", "tests", "README.md", "LICENSE", "CHANGELOG.md",

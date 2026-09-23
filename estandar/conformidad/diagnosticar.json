@@ -1,5 +1,5 @@
 {
- "_nota": "Casos de conformidad de `diagnosticar`, la operación que dice si un mes está listo para un destino y, si no, qué falta y a quién pedírselo. Cada caso trae el documento, su configuración, el destino y lo que se espera; `tests/test_conformidad.py` los corre contra el motor. Si el motor no pasa su propia conformidad, no la pasa nadie. Casi todos salen de algo que esta investigación descubrió que se equivoca.",
+ "_nota": "Casos de conformidad de `diagnosticar`, la operación que dice si un mes está listo para un destino y, si no, qué falta y a quién pedírselo. Cada caso trae el documento, su configuración, el destino y lo que se espera; `tests/test_conformidad.py` los corre contra el motor. Si el motor no pasa su propia conformidad, no la pasa nadie. Casi todos salen de algo que esta investigación descubrió que se equivoca. **Estos NO son portables, al revés que los de `esquema.json`**: nombran drivers del motor y su `espera` está escrita contra la forma de la respuesta de `api.diagnosticar`, que es superficie del paquete y no del estándar. Sirven para comprobar ESTE motor, no para que otro compruebe el suyo.",
  "casos": [
   {
    "description": "Una compra imputada a una cuenta de gasto: lista para exportar",

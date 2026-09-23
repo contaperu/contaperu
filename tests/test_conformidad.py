@@ -12,17 +12,21 @@ from __future__ import annotations
 
 import json
 import re
+import pathlib
 from pathlib import Path
 
 import jsonschema
 import pytest
 
-from contaperu import api
+from contaperu import _datos, api
 from contaperu.errores import ErrorContaperu
 
 CONFORMIDAD = Path(__file__).resolve().parent.parent / "estandar" / "conformidad"
-ESQUEMA = json.loads((CONFORMIDAD / "esquema.json").read_text(encoding="utf-8"))
-DIAGNOSTICAR = json.loads((CONFORMIDAD / "diagnosticar.json").read_text(encoding="utf-8"))
+# Por `_datos.del_estandar`, que los busca donde estén: en `estandar/` si se corre desde el repositorio y dentro
+# del paquete si se corre instalado. Desde la 3.1 viajan en la rueda, así que esta batería también corre contra
+# una instalación — que es lo que hace un tercero.
+ESQUEMA = json.loads(_datos.del_estandar(_datos.CONFORMIDAD_ESQUEMA).decode("utf-8"))
+DIAGNOSTICAR = json.loads(_datos.del_estandar(_datos.CONFORMIDAD_DIAGNOSTICAR).decode("utf-8"))
 
 
 def ids(casos):
@@ -96,6 +100,46 @@ def test_hay_un_caso_por_falta_que_el_motor_puede_declarar():
     sin_caso = {f.clave for f in asi.FALTAS} - con_caso
     assert sin_caso == {"sin_sigla", "sin_codigo_de_moneda", "reparto_no_admitido", "reparto_que_no_cuadra",
                         "sin_centro", "sin_correlativo", "no_cabe"}, sin_caso
+
+
+def test_la_ruta_del_esquema_que_declara_el_archivo_es_la_de_verdad():
+    """`esquema.json` declara contra qué validar: `"esquema": "../open-accounting.schema.json"`.
+
+    Hasta la 3.1 **el runner la ignoraba** y usaba la copia que trae el paquete. Las dos son el mismo archivo, pero
+    nada lo comprobaba: un tercero que respetara la ruta declarada y este repositorio podían acabar validando
+    contra esquemas distintos sin que saltara nada. Es la clase de divergencia que solo se ve cuando ya duele."""
+    declarada = (CONFORMIDAD / ESQUEMA["esquema"]).resolve()
+    assert declarada.is_file(), f"la ruta que declara esquema.json no existe: {ESQUEMA['esquema']}"
+    assert json.loads(declarada.read_text(encoding="utf-8")) == api.esquema_open_accounting()
+
+
+def test_cada_archivo_de_conformidad_dice_quien_puede_correrlo():
+    """La distinción que el LEEME no hacía: **los casos de esquema los corre cualquiera** —un validador de JSON
+    Schema y nada más, en el lenguaje que sea— y **los de `diagnosticar` solo los corre un motor**, porque nombran
+    drivers y esperan la forma de la respuesta de `api.diagnosticar`, que es superficie del paquete y no del
+    estándar. Ofrecer las dos como «comprueba lo que tu sistema produce» prometía de más."""
+    assert "SIN el motor" in ESQUEMA["_nota"], "esquema.json tiene que decir que se corre sin el motor"
+    assert "contra el motor" in DIAGNOSTICAR["_nota"], "diagnosticar.json tiene que decir que necesita un motor"
+    assert "no son portables" in DIAGNOSTICAR["_nota"].lower() or "solo" in DIAGNOSTICAR["_nota"].lower()
+
+
+def test_todo_archivo_del_estandar_viaja_dentro_del_paquete():
+    """`_datos.del_estandar` lo dice como regla: «un archivo nuevo en `estandar/` necesita su línea de
+    `force-include` y nada más». No la vigilaba nadie, y así es como los casos de conformidad llevaban desde que
+    existen sin viajar en la rueda: estaban en el repositorio y en el sdist, y quien instalaba `contaperu` no los
+    tenía, aunque el LEEME se los ofreciera para comprobar lo que produce.
+
+    Se mira el `pyproject.toml` y no la rueda construida, para que el test corra en un segundo y falle en el
+    momento de añadir el archivo, que es cuando se arregla barato."""
+    import tomllib
+
+    raiz = pathlib.Path(__file__).resolve().parent.parent
+    declarados = tomllib.loads((raiz / "pyproject.toml").read_text(encoding="utf-8"))
+    incluidos = set(declarados["tool"]["hatch"]["build"]["targets"]["wheel"]["force-include"])
+    en_el_estandar = {f"estandar/{f.relative_to(raiz / 'estandar').as_posix()}"
+                      for f in (raiz / "estandar").rglob("*.json")}
+    assert en_el_estandar - incluidos == set(), (
+        "hay JSON en `estandar/` que no viajan en la rueda: añádelos al `force-include` de pyproject.toml")
 
 
 def test_la_conformidad_viaja_con_el_estandar():

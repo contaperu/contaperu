@@ -8,6 +8,22 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ### Añadido
 
+- **Los casos de conformidad viajan en la rueda** (`contaperu/estandar/conformidad/`). El LEEME del estándar los
+  ofrecía para «comprobar que lo que tu sistema produce es correcto, sin escribirle a nadie» y **solo estaban en el
+  repositorio**: quien instalaba `contaperu` no los tenía y la única forma de correrlos era clonar. Y un guardián
+  nuevo comprueba que **todo** JSON de `estandar/` viaje, que era una regla escrita en `_datos.del_estandar` sin
+  nadie detrás — así es como estos llevaban desde que existen sin viajar.
+- **Un test de la ruta que `esquema.json` declara** (`"esquema": "../open-accounting.schema.json"`), que el runner
+  ignoraba: usaba la copia empaquetada. Son el mismo archivo, pero nada lo comprobaba, y un tercero que respetara
+  la ruta declarada podía acabar validando contra otro esquema sin que saltara nada.
+
+### Cambiado
+
+- **El LEEME del estándar dice de cada juego de conformidad quién puede correrlo.** Los de `esquema.json` los corre
+  cualquiera, con un validador y sin el motor. Los de `diagnosticar.json` **no son portables** —nombran drivers del
+  motor y esperan la forma de `api.diagnosticar`, que es superficie del paquete y no del estándar— y comprueban que
+  ESTE motor decide bien, no el tuyo. Ofrecer los dos como lo mismo prometía de más.
+
 - **El archivo del driver `asiento_neutral` lleva `_exportacion` en su raíz**: la huella del asiento y, por
   comprobante, su identidad y el tramo de líneas que le toca. Hasta ahora eso solo existía en la respuesta del
   API, así que **quien recibiera el JSON a secas se quedaba sin la clave con la que no repetir un comprobante** —

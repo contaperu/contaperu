@@ -408,7 +408,8 @@ Tres piezas, y la tercera es la que faltaba:
 |---|---|
 | `python -m contaperu.puertas.cli diagnosticar mi-mes.json` | **Un documento tuyo**: qué bloquea, qué falta y a quién pedírselo |
 | `contaperu verificar-driver mi_paquete.mi_driver` | **Un driver propio** contra el contrato, antes de registrarlo |
-| [`conformidad/`](conformidad/) | **Que lo que tu sistema produce es correcto**, sin escribirle a nadie |
+| [`conformidad/esquema.json`](conformidad/esquema.json) | **Que tus documentos son conformes**, con un validador y nada más: sin el motor y en cualquier lenguaje |
+| [`conformidad/diagnosticar.json`](conformidad/diagnosticar.json) | **Que ESTE motor decide bien**. No es para comprobar el tuyo: mira abajo |
 
 La conformidad son dos juegos de casos, publicados con el tag del estándar:
 
@@ -416,12 +417,19 @@ La conformidad son dos juegos de casos, publicados con el tag del estándar:
   *JSON Schema Test Suite*, para correrlos con **cualquier validador de draft 2020-12** y sin el motor. Es lo que
   permite que un ERP en otro lenguaje los use tal cual.
 - [`conformidad/diagnosticar.json`](conformidad/diagnosticar.json) — casos con su documento, su configuración, su
-  destino y lo que se espera: si el mes queda listo, qué falta y a quién pedírselo.
+  destino y lo que se espera: si el mes queda listo, qué falta y a quién pedírselo. **Estos no son portables, y
+  conviene saberlo antes de intentarlo**: nombran drivers del motor y lo que esperan está escrito contra la forma de
+  la respuesta de `api.diagnosticar`, que es superficie del paquete y no del estándar. Comprueban que ESTE motor
+  decide bien; para comprobar el tuyo están los de esquema, y lo demás lo decide tu contabilidad, no la nuestra.
 
 **Los corre la batería de este repositorio**: si el motor no pasa su propia conformidad, no la pasa nadie. Y casi todos
 los casos salen de algo que se equivocó de verdad al escribir la 1.0 — el recibo por honorarios con el importe en la
 casilla equivocada, la factura en dólares sin tipo de cambio, el `detraccion: false` de relleno, la cuenta de un
 elemento sin clase.
+
+**Y desde la 3.1 viajan dentro del paquete**, en `contaperu/estandar/conformidad/`: hasta entonces solo estaban en el
+repositorio y en el sdist, así que quien instalaba `contaperu` no los tenía y la única forma de correrlos era clonar.
+Ofrecerlos para comprobar lo que produces y no ponerlos donde se instala era la mitad de la promesa.
 
 ---
 

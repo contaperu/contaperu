@@ -23,6 +23,9 @@ PAQUETE = "contaperu"
 ESTANDAR = "estandar"
 ESQUEMA = f"{ESTANDAR}/open-accounting.schema.json"
 CATALOGOS_DEL_ESTANDAR = f"{ESTANDAR}/catalogos.json"
+# Los casos de conformidad: con los que un tercero comprueba lo que produce. Viajan desde la 3.1.
+CONFORMIDAD_ESQUEMA = f"{ESTANDAR}/conformidad/esquema.json"
+CONFORMIDAD_DIAGNOSTICAR = f"{ESTANDAR}/conformidad/diagnosticar.json"
 
 
 def leer_bytes(ruta: str) -> bytes | None:

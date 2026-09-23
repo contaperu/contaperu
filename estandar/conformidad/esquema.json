@@ -1,5 +1,5 @@
 {
- "_nota": "Casos de conformidad del ESQUEMA de open-accounting 1.0. Cada uno es {description, data, valid}: se corren con cualquier validador de JSON Schema draft 2020-12, SIN el motor. La forma es la de la JSON Schema Test Suite, para que se puedan correr con las herramientas que ya existen.",
+ "_nota": "Casos de conformidad del ESQUEMA de open-accounting 1.0. Cada uno es {description, data, valid}: se corren con cualquier validador de JSON Schema draft 2020-12, SIN el motor. La forma es la de la JSON Schema Test Suite, para que se puedan correr con las herramientas que ya existen. Viajan dentro del paquete desde la 3.1 (`contaperu/estandar/conformidad/`), así que no hace falta clonar el repositorio para correrlos.",
  "esquema": "../open-accounting.schema.json",
  "casos": [
   {
