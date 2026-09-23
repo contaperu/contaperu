@@ -19,11 +19,11 @@ from ...asiento.configuracion import MONEDAS_CODIGO
 from ...asiento.faltas import SinCodigoDeMoneda
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
-from ...asiento.motor import cabecera_de, lineas_del_comprobante
+from ...asiento.motor import cabecera_de, lineas_del_comprobante, serie_numero_de
 from ..kit import Opciones, celdas
 from ...pcge import clase_de
 from ...igv import tasa_calculada
-from ...modelo import CENTIMO, Comprobante
+from ...modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero
 from ..contrato import centro_en_anexo
 from . import datos
 from .datos import COLUMNAS, MARCA_CONVERSION, OPCIONES, TIPO_CONVERSION
@@ -71,7 +71,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         "I": MARCA_CONVERSION, "J": _fecha(linea.fecha),
         "K": linea.cuenta, "L": linea.contraparte_doc, "M": linea.centro_costo, "N": linea.debe_haber,
         "O": importe, "P": importe if es_usd else "", "Q": importe if not es_usd else "",
-        "R": doc.get("tipo", ""), "S": doc.get("serie_numero", "")[:20],
+        "R": doc.get("tipo", ""), "S": doc.get("serie_numero", ""),
         # Sin fecha, T y U quedan en None y no en "": así salían antes de separar el asiento de su
         # formato, y el snapshot lo fija. En el .xlsx las dos son la misma celda vacía.
         "T": _fecha(doc.get("fecha_emision"), None), "U": _fecha(doc.get("fecha_vencimiento"), None),
@@ -127,6 +127,23 @@ def tasa_igv_entera(igv: Decimal, base_gravada: Decimal) -> Any:
     """
     t = tasa_calculada(igv, base_gravada)
     return "" if t is None else int(t.to_integral_value(rounding=ROUND_HALF_UP))
+
+
+
+def no_caben(libro: Libro, comprobantes: list[Comprobante], config: dict) -> dict[str, list[Comprobante]]:
+    """Lo que el Excel de CONCAR no puede llevar, por motivo (`datos.MOTIVOS`).
+
+    Un código no se corta: una serie cortada sería otra serie, y el asiento entraría con un documento que no
+    existe. Hasta la 2.7 esto se cortaba en silencio; ahora el comprobante no sale y la aplicación lo enseña, que
+    es lo que ya hacían CONTASIS y el resto del contrato. Las dos glosas SÍ se siguen cortando, porque son texto
+    libre: cortadas dicen lo mismo."""
+    largo_s, largo_aa = datos.LARGOS_DE_CODIGO["S"], datos.LARGOS_DE_CODIGO["AA"]
+    fuera = []
+    for c in comprobantes:
+        referencia = serie_y_numero(c.ref_serie, numero_sin_ceros(c.ref_numero)) if c.ref_serie or c.ref_numero else ""
+        if len(serie_numero_de(c, OPCIONES)) > largo_s or len(referencia) > largo_aa:
+            fuera.append(c)
+    return {datos.MOTIVOS["largo"]: fuera}
 
 
 # ── El camino inverso: de las columnas de CONCAR a la línea neutral ──────────────────────────────────────────────

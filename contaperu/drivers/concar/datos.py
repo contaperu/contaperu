@@ -136,6 +136,20 @@ CABECERAS: dict[str, dict[str, str]] = {
     },
 }
 COLUMNAS = list(CABECERAS["titulos"].keys())      # A … AO, 41 columnas en orden
+# El largo de las columnas de CÓDIGO, y el motivo por el que se declara. Hasta la 2.7 la proyección cortaba la
+# serie-número a 20 caracteres **en silencio** —desde el refactor de la 0.7—, y eso es justo lo que la doctrina
+# escrita en CONTASIS prohíbe: un código cortado es otro código, y el archivo entraría con una serie que no existe.
+# Lo que sí se corta sigue cortándose, porque es texto libre: las dos glosas (F a 40, W a 30).
+#
+# **Solo se declara lo que consta.** La plantilla oficial no documenta límites de caracteres en ninguna de sus
+# notas, así que aquí va el único largo que el código venía aplicando. Con datos peruanos válidos no puede
+# dispararse —serie de 4 más número de hasta 8—, y por eso esto no cambia ningún archivo: es la red para el día
+# que llegue un documento raro, en vez de recortarlo sin avisar.
+LARGOS_DE_CODIGO = {"S": 20, "AA": 20}
+MOTIVOS = {
+    "largo": "con una serie-número más larga que su columna de CONCAR, que no se puede cortar sin cambiarla",
+}
+
 # Formato de la plantilla oficial de CONCAR: solo estas
 # 27 columnas llevan ancho propio; las demas quedan al ancho default de Excel.
 ANCHOS = {

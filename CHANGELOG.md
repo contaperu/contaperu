@@ -19,6 +19,27 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 - Un guardián de que **todo driver de serie esté en `__all__`**: `starsoft` y `asiento_neutral` llevaban
   tiempo fuera de la lista pública del registro, y no lo cazaba nada porque importarlos seguía funcionando.
 
+- **CONTASIS declara sus `CUENTAS_POR_DEFECTO`** (John, 22-sep-2026), con la misma forma que las de STARSOFT.
+  Hoy coinciden una a una con las de fábrica —usa el PCGE a seis dígitos, como CONCAR—, y se declaran igualmente
+  para que el día que alguien traiga el plan real de una instalación tenga dónde escribirlo cuenta por cuenta, en
+  vez de descubrir que hereda las de otro sistema. Repetir un dato exige un vigilante: `test_cuentas_del_sistema`
+  compara el bloque con lo general y se pone rojo si se separan sin que nadie lo decida. **`gasto` no se declara**,
+  como en STARSOFT: poner una cuenta real imputaría en silencio toda compra a la que nadie le puso ninguna.
+- **`contrato.excluye_tipos(modulo)`**, el accesor que le faltaba a `EXCLUYE_TIPOS`. Era lo único del contrato que
+  se leía con un `getattr` crudo desde fuera, mientras `exige`, `no_caben` y `canal` ya tenían el suyo.
+
+### Cambiado
+
+- **CONCAR declara `no_caben`, y deja de cortar la serie-número en silencio.** Cortaba a 20 caracteres desde el
+  refactor de la 0.7, que es justo lo que la doctrina escrita en CONTASIS prohíbe: un código cortado es otro
+  código, y el asiento entraría con un documento que no existe. Los largos que consta que aplica van declarados
+  en `datos.LARGOS_DE_CODIGO`; las dos glosas se siguen cortando, porque son texto libre.
+
+  **Con datos peruanos válidos esto no puede dispararse** —serie de 4 más número de hasta 8—, así que no cambia
+  ningún archivo. Lo único que se mueve es la respuesta de `diagnosticar/concar`, que **gana la clave `no_cabe`
+  vacía**: aparece cuando el driver declara la función, así que ahora los tres legacy responden a la misma
+  pregunta. Tres líneas en los fixtures de caracterización, una por documento.
+
 ### Corregido
 
 - **Tres variables muertas en `asiento/motor.py`** —`es_usd`, `serie` y `numero`—, del refactor de la 0.7.

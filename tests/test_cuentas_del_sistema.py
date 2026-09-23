@@ -55,9 +55,10 @@ def _documento() -> dict:
 def test_un_sistema_que_no_las_declara_sigue_con_las_del_pcge():
     """Lo de siempre, y es la mitad que importa: esto no mueve a quien ya estaba.
 
-    CONTASIS no declara ninguna, y por eso hereda lo general: el PCGE a seis dígitos, que es como numera."""
-    assert contrato.cuentas_por_defecto(drivers.obtener("contasis")) == {}
-    cuentas = api.config_aplicada(driver="contasis")["cuentas"]
+    El ejemplo era CONTASIS hasta que declaró las suyas (2.7). Lo sigue siendo el CSV, que no declara ninguna
+    porque no es de ningún sistema: hereda lo general, el PCGE a seis dígitos."""
+    assert contrato.cuentas_por_defecto(drivers.obtener("csv")) == {}
+    cuentas = api.config_aplicada(driver="csv")["cuentas"]
     assert (cuentas["cxp"]["PEN"], cuentas["igv"], cuentas["gasto"]) == ("421201", "401111", "")
 
 
@@ -72,6 +73,31 @@ def test_concar_solo_se_aparta_de_lo_general_en_la_cuenta_de_gasto():
     assert cuentas["gasto"] == "631101"
     # Y lo que el contador guarde manda: quien quiera que le sigan avisando de las compras sin cuenta, la deja vacía.
     assert api.config_aplicada({"cuentas": {"gasto": ""}}, driver="concar")["cuentas"]["gasto"] == ''
+
+
+def test_contasis_declara_las_suyas_enteras_y_hoy_son_las_de_lo_general():
+    """CONTASIS las declara todas (John, 22-sep-2026), al revés que CONCAR, para tener dónde escribir el plan real
+    de una instalación el día que alguien lo traiga. Hoy coinciden con lo general —usa el PCGE a seis dígitos—, y
+    repetir un dato en dos sitios es exactamente lo que hace que uno se quede atrás cuando el otro mejora.
+
+    Este test es el que lo impide: si alguien cambia una cuenta de `CONFIGURACION_GENERAL` y no la cambia aquí, se
+    pone rojo. Cuando lleguen las de CONTASIS de verdad, se separan a propósito y se cambia este test con ellas —y
+    ese es justo el momento en el que hay que pensarlo."""
+    declaradas = contrato.cuentas_por_defecto(drivers.obtener("contasis"))
+    de_fabrica = api.config_aplicada()["cuentas"]
+    assert declaradas == {clave: de_fabrica[clave] for clave in declaradas}, (
+        "Las cuentas de CONTASIS se separaron de las de fábrica. Si es a propósito, cámbialas aquí también.")
+    # La del gasto NO se declara, como en STARSOFT: poner una real imputaría en silencio lo que nadie imputó.
+    assert "gasto" not in declaradas
+    assert api.config_aplicada(driver="contasis")["cuentas"]["gasto"] == ""
+
+
+def test_los_tres_legacy_declaran_cuentas_con_la_misma_forma():
+    """Lo que se buscaba al declararlas: que leer los tres drivers no obligue a aprenderse tres convenciones.
+    CONCAR es la excepción declarada —solo la que se aparta— y lleva su motivo escrito en su `datos.py`."""
+    formas = {n: sorted(contrato.cuentas_por_defecto(drivers.obtener(n))) for n in ("contasis", "starsoft")}
+    assert formas["contasis"] == formas["starsoft"]
+    assert sorted(contrato.cuentas_por_defecto(drivers.obtener("concar"))) == ["gasto"]
 
 
 def test_las_del_sistema_llegan_cuando_la_empresa_no_configuro_nada(con_cuentas_propias):

@@ -25,6 +25,32 @@ EXCLUYE_TIPOS = frozenset({"02"})
 # CONTASIS arma un asiento por fila con UNA cuenta de la base (John, 12-sep-2026): un reparto entre cuentas no sale.
 EXIGE = frozenset({"cuenta_unica"})
 
+# Con qué cuentas nace una empresa que lleva CONTASIS. **Declaradas enteras y a propósito** (John, 22-sep-2026),
+# con la misma forma que las de STARSOFT, aunque hoy coincidan una a una con las de lo general
+# (`configuracion.CONFIGURACION_GENERAL`): CONTASIS usa el PCGE a seis dígitos, igual que CONCAR.
+#
+# CONCAR hace lo contrario —declara solo la suya, la del gasto— y su comentario da la razón: repetir un dato en dos
+# sitios sin nadie que los compare hace que, el día que lo general mejore, el driver se quede atrás. Aquí se acepta
+# esa repetición por una razón concreta —que el día que alguien traiga el plan real de una instalación de CONTASIS
+# tenga dónde escribirlo, cuenta por cuenta, en vez de descubrir que hereda las de otro sistema— y **se le pone el
+# vigilante que le faltaba a la idea**: `tests/test_cuentas_del_sistema.py` compara este bloque con lo general y se
+# pone rojo si se separan sin que nadie lo haya decidido. Cuando lleguen las cuentas de verdad, se cambia la línea
+# y se cambia el test, que es exactamente el momento en el que hay que pensarlo.
+#
+# **`gasto` no se declara**, como en STARSOFT y por su mismo motivo: en lo general va vacía porque es el comodín
+# «63/65», que no es una cuenta, y poner una REAL aquí imputaría en silencio toda compra a la que nadie le puso
+# ninguna. Cuál es la de CONTASIS no consta; hoy la siembra la aplicación, donde el contador la ve. El día que se
+# sepa, es una línea más.
+CUENTAS_POR_DEFECTO: dict = {
+    "cxp": {"PEN": "421201", "USD": "421202"},
+    "cxp_detraccion": {"PEN": "421203", "USD": "421203"},
+    "honorarios": {"PEN": "424101", "USD": "424102"},
+    "retencion_4ta": "401721",
+    "igv": "401111",
+    "clientes": {"PEN": "121201", "USD": "121202"},
+    "ventas": "701101",
+}
+
 # Lo que se configura en la sección `contasis`. El medio de pago de las VENTAS (la tabla del comentario de su
 # plantilla): 001 «depósito en cuenta», el de todas las filas del registro que CONTASIS importó. Es de la empresa, no
 # de cada documento.

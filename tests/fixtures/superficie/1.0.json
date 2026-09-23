@@ -390,6 +390,7 @@
   "cuentas_por_defecto": "",
   "declara_canal": "",
   "describir": "",
+  "excluye_tipos": "",
   "exige": "",
   "familia": "",
   "forma": "",
@@ -433,6 +434,7 @@
   "desde_lineas": "",
   "escribir_xlsx": "",
   "filas_de_comprobante": "",
+  "no_caben": "",
   "nombre": "",
   "proyeccion": "",
   "tasa_igv_entera": ""
@@ -442,6 +444,7 @@
   "COLUMNAS_ELEGIBLES": "",
   "CONFIGURACION": "",
   "CONTENT_TYPE": "",
+  "CUENTAS_POR_DEFECTO": "",
   "EXCLUYE_TIPOS": "",
   "EXIGE": "",
   "FORMATOS": "",

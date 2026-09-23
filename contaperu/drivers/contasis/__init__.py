@@ -31,9 +31,11 @@ Cómo se escribe el archivo (las fuentes de cada regla, en `datos.py`):
 driver, escrito contra la plantilla oficial y un registro que CONTASIS ya había importado.
 """
 from . import datos
-from .datos import CANAL, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, EXCLUYE_TIPOS, EXIGE, FORMATOS, NOMBRE, OPCIONES
+from .datos import (CANAL, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, CUENTAS_POR_DEFECTO, EXCLUYE_TIPOS,
+                    EXIGE, FORMATOS, NOMBRE, OPCIONES)
 from .proyeccion import fila, no_caben, valores
 from .xlsx import escribir_xlsx, desde_comprobantes, nombre
 
-__all__ = ["CANAL", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "EXCLUYE_TIPOS", "EXIGE", "FORMATOS", "NOMBRE",
-           "OPCIONES", "escribir_xlsx", "datos", "desde_comprobantes", "fila", "no_caben", "nombre", "valores"]
+__all__ = ["CANAL", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "CUENTAS_POR_DEFECTO", "EXCLUYE_TIPOS",
+           "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "escribir_xlsx", "datos", "desde_comprobantes", "fila",
+           "no_caben", "nombre", "valores"]

@@ -654,6 +654,23 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
     assert "monedas_codigo" in _propias(drivers.concar) and "moneda" in drivers.concar.EXIGE
 
 
+def test_lo_que_cada_destino_no_lleva_se_pregunta_al_contrato():
+    """`EXCLUYE_TIPOS` era lo único del contrato que quien integra el motor leía con un `getattr` crudo, mientras
+    `exige`, `no_caben` y `canal` tenían su accesor. Ahora lo tiene: el SIRE y CONTASIS dejan fuera el recibo por
+    honorarios, y quien no declara nada devuelve el conjunto vacío en vez de `None`."""
+    fuera = {n: sorted(contrato.excluye_tipos(m)) for n, m in drivers.DE_SERIE.items()}
+    assert fuera == {"sire": ["02"], "contasis": ["02"],
+                     "concar": [], "csv": [], "starsoft": [], "asiento_neutral": []}
+
+
+def test_los_tres_legacy_declaran_lo_que_no_cabe_en_su_formato():
+    """CONCAR no lo declaraba y cortaba la serie-número a 20 en silencio (2.7), que es justo lo que la doctrina
+    escrita en CONTASIS prohíbe. Ahora los tres responden a la misma pregunta, aunque dos de ellos respondan que
+    no hay nada que no quepa."""
+    for nombre in ("concar", "contasis", "starsoft"):
+        assert callable(getattr(drivers.obtener(nombre), "no_caben", None)), f"{nombre} no declara no_caben"
+
+
 def test_los_de_serie_estan_todos_en_la_lista_publica_del_registro():
     """`starsoft` y `asiento_neutral` entraron en `DE_SERIE` y nadie los añadió a `__all__`: se registraban, se
     exportaban y funcionaban, pero no salían en la lista pública del paquete ni en la superficie congelada. No lo

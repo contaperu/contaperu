@@ -74,10 +74,18 @@ necesita cada empresa, sin copiar nada.
 Y opcional en un driver que lleva cuentas, `CUENTAS_POR_DEFECTO` (2.5): **con qué cuentas nace una empresa que lleva
 SU sistema**, cuando no son las de `CONFIGURACION_GENERAL`. Las de fábrica son las del PCGE a seis dígitos —`421201`,
 `401111`, `121201`—, que es como numeran CONCAR y CONTASIS; un sistema que numera de otra forma las declara aquí, y
-`config_aplicada` las pone debajo de lo que la empresa haya guardado. Se declaran **solo las que cambian**: lo que un
-driver no diga sigue siendo lo general, así que esto no es un segundo plan de cuentas sino la diferencia con el
-primero. **No son las cuentas de nadie**: son de dónde parte quien abre ese sistema por primera vez, y en cuanto el
-contador escriba la suya, manda la suya.
+`config_aplicada` las pone debajo de lo que la empresa haya guardado. Lo que un driver no diga sigue siendo lo
+general, así que esto no es un segundo plan de cuentas. **No son las cuentas de nadie**: son de dónde parte quien
+abre ese sistema por primera vez, y en cuanto el contador escriba la suya, manda la suya.
+
+Cuánto declarar es una decisión de cada driver, y las dos respuestas están en el repositorio:
+
+- **Solo lo que se aparta** (CONCAR, que declara una sola cuenta). Es lo más corto y no puede quedarse atrás: el día
+  que lo general mejore, el driver mejora con él.
+- **El bloque entero** (STARSOFT, porque numera a ocho dígitos y se aparta en todo; CONTASIS, porque sus cuentas
+  coinciden hoy con las de fábrica pero nadie ha traído las de una instalación real, y se quiere tener dónde
+  escribirlas cuenta por cuenta). Repetir un dato en dos sitios **exige un test que los compare**, o el driver se
+  queda atrás en silencio: el de CONTASIS está en `tests/test_cuentas_del_sistema.py`.
 
 Los `Protocol` de abajo son la documentación tipada; lo que el registro comprueba de verdad al cargar
 un driver de terceros es `incumplimientos()`, y `tests/test_contrato_drivers.py` es el examen que pasa
@@ -251,6 +259,15 @@ def lleva_cuentas(modulo: Any) -> bool:
 def arma_asientos(modulo: Any) -> bool:
     """¿Arma asientos, y necesita por eso además los correlativos? Las dos formas de la familia asiento."""
     return familia(modulo) == "asiento"
+
+
+def excluye_tipos(modulo: Any) -> frozenset[str]:
+    """Los tipos de comprobante que ese destino NO lleva (su `EXCLUYE_TIPOS`, opcional).
+
+    El SIRE y CONTASIS dejan fuera el recibo por honorarios (`02`). Es un accesor y no un `getattr` suelto por la
+    misma razón que `exige` y `no_caben`: quien integra el motor pregunta al contrato y no al módulo, así que el
+    día que esto se declare de otra forma no hay que buscar los `getattr` repartidos por ahí fuera."""
+    return frozenset(getattr(modulo, "EXCLUYE_TIPOS", None) or ())
 
 
 def exige(modulo: Any) -> frozenset[str]:
