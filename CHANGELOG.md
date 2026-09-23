@@ -6,6 +6,8 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [3.0.0] — 2026-09-23
+
 ### Cambiado — **incompatible: es una 3.0**
 
 - **La cuenta de un comprobante es de su imputación, y nada la suple.** `CONFIGURACION_GENERAL` pierde las dos
