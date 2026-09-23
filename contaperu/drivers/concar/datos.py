@@ -13,6 +13,8 @@ from ..kit import Opciones
 NOMBRE = "concar"
 # Un sistema contable instalado que importa un archivo (`drivers.contrato.CANALES`).
 CANAL = "legacy"
+# El `fecha` no lo lee nadie al escribir: una celda de Excel lleva una fecha de verdad y el formato lo pone
+# `number_format` (`xlsx.py`). Queda declarado porque es cómo se ve la columna en CONCAR.
 OPCIONES = Opciones(fecha="DD/MM/AAAA", extension=".xlsx")
 FORMATOS = {"compra": "concar_xlsx", "venta": "concar_xlsx"}
 CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

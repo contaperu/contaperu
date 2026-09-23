@@ -148,7 +148,6 @@ def test_una_aplicacion_pinta_su_pantalla_con_lo_que_describe_el_motor():
     """Cada aplicación construida con el motor configura cada sistema según lo que necesita cada empresa: lo que se
     configura se lo pide al motor, con sus títulos, sus valores por defecto y sus columnas, y no lo copia."""
     from contaperu import api
-    from contaperu.pipeline import preparacion as prep
 
     todo = api.describir_configuracion()
     json.dumps(todo)
@@ -167,7 +166,6 @@ def test_la_configuracion_se_valida_entera_y_cada_error_dice_adonde_va():
     """Una clave que nadie lee exportaría con el valor de fábrica sin avisar: la forma plana de antes, una clave
     retirada, una inventada o una mal escrita, cada una con su motivo y su ruta."""
     from contaperu import api
-    from contaperu.pipeline import preparacion as prep
 
     errores = api.errores_de_configuracion({
         "tipos": {"01": {"sigla": "FA"}},
@@ -222,7 +220,6 @@ def test_una_configuracion_que_no_cumple_no_se_aplica_ni_genera():
 
 def test_diagnosticar_dice_la_configuracion_que_no_se_puede_aplicar():
     from contaperu import api
-    from contaperu.pipeline import preparacion as prep
     from util import GOLDEN
 
     doc = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))

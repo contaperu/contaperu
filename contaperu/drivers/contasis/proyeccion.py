@@ -7,7 +7,7 @@ de CONTASIS; las reglas del formato, con su fuente, están en `datos.py`.
 """
 from __future__ import annotations
 
-from datetime import date, datetime, time
+from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 

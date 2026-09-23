@@ -37,7 +37,8 @@ mcp = ["mcp>=1.30,<2", "jsonschema>=4,<5"]
 # puerta HTTP con el contrato OpenConta. Las versiones con las que se probó: starlette 1.6 y uvicorn 0.52.
 http = ["starlette>=1.6,<2", "uvicorn>=0.52,<1"]
 todo = ["contaperu[excel,schema,mcp,http]"]
-dev = ["contaperu[todo]", "pytest>=8,<9", "httpx>=0.27,<1", "openapi-spec-validator>=0.7,<1"]
+dev = ["contaperu[todo]", "pytest>=8,<9", "httpx>=0.27,<1", "openapi-spec-validator>=0.7,<1",
+       "ruff>=0.16,<1"]
 
 [project.scripts]
 contaperu = "contaperu.puertas.cli:main"
@@ -53,6 +54,17 @@ Changelog = "https://github.com/contaperu/contaperu/blob/main/CHANGELOG.md"
 
 # La versión se escribe UNA vez, en el código, y el empaquetado la lee de ahí. Al revés no
 # funciona: `importlib.metadata` en una instalación editable devuelve la del día que se instaló.
+# Linter. Entró el 22-sep-2026, tras un barrido que encontró tres variables muertas EN EL MOTOR —`es_usd`,
+# `serie` y `numero`, del refactor 0.7— y veintidós imports que no usaba nadie. Había cuatro `# noqa` en el
+# repositorio silenciando a un guardián que no existía.
+#
+# **Se seleccionan solo las reglas que cazan código muerto y errores, nunca estilo.** El largo de línea no es
+# una regla aquí: 442 líneas pasan de 120 caracteres y la mayor tiene 312, porque los comentarios se escriben
+# en prosa y a propósito. Un linter que discuta eso se desactiva al tercer día y deja de avisar de lo que sí
+# importa.
+[tool.ruff.lint]
+select = ["F", "E9"]   # pyflakes (imports y variables muertos, redefiniciones, nombres sin definir) y errores
+
 [tool.hatch.version]
 path = "contaperu/_version.py"
 

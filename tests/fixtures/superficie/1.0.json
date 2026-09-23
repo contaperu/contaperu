@@ -334,6 +334,7 @@
   "DRIVER_POR_DEFECTO": "",
   "GRUPO": "",
   "Opciones": "",
+  "asiento_neutral": "",
   "concar": "",
   "contasis": "",
   "contrato": "",
@@ -342,7 +343,8 @@
   "formato_de": "",
   "obtener": "",
   "recargar": "",
-  "sire": ""
+  "sire": "",
+  "starsoft": ""
  },
  "contaperu.drivers.contrato": {
   "CANALES": "",

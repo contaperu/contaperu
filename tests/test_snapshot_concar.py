@@ -23,7 +23,6 @@ from pathlib import Path
 import pytest
 
 from contaperu import asiento as asi
-from contaperu import api
 from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import concar as driver_concar, contrato
 from contaperu.modelo import Comprobante

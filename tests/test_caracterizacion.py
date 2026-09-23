@@ -24,7 +24,6 @@ import copy
 import io
 import json
 import tempfile
-import warnings
 from contextlib import redirect_stdout
 from datetime import date, datetime
 from pathlib import Path

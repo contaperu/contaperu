@@ -12,8 +12,8 @@ from ...asiento.resolucion import etiquetas_sub_diario, limites_del_periodo
 from ...modelo import Libro
 from ..kit import Opciones, nombre_de_archivo
 from ..kit import xlsx as kit_xlsx
-from . import datos, proyeccion  # noqa: F401  (`datos` es un nombre que la 0.10 dejaba ver aquí)
-from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO, EXIGE,  # noqa: F401
+from . import datos, proyeccion
+from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
                     FORMATOS, HOJA, OPCIONES, PANEL)
 
 # Hasta la 1.x este módulo reexportaba, con aviso, lo que dejaba ver en la 0.10 para armar el asiento él mismo

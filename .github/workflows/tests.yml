@@ -30,6 +30,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: pip install -e ".[dev]"
+      # Codigo muerto: imports y variables que no usa nadie. Solo eso, nunca estilo (ver [tool.ruff.lint]).
+      - run: ruff check .
       # Sin red y sin credenciales: si un test necesita cualquiera de las dos, esta mal planteado.
       - run: pytest -q
       # El contrato OpenConta versionado tiene que ser el que genera el codigo.

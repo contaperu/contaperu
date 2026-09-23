@@ -35,7 +35,6 @@ falta, es del proxy que lo publica.
 from __future__ import annotations
 
 import argparse
-import inspect
 import json
 import sys
 from typing import Any, Iterable
@@ -49,7 +48,7 @@ from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
 from .. import api
-from .comun import (ESPERA_INACTIVA, LOCALES, MAXIMO_ARCHIVO, MAXIMO_CONEXIONES, MAXIMO_PETICION, hosts_permitidos,
+from .comun import (ESPERA_INACTIVA, MAXIMO_ARCHIVO, MAXIMO_CONEXIONES, MAXIMO_PETICION, hosts_permitidos,
                     peso_de_base64)
 
 __all__ = ["DefensaDeHost", "PUERTO", "crear_app", "main"]

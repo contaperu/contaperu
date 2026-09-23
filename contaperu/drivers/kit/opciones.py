@@ -6,7 +6,7 @@ from dataclasses import dataclass, replace
 
 @dataclass(frozen=True)
 class Opciones:
-    fecha: str = "AAAAMMDD"       # 'AAAAMMDD' | 'DD/MM/AAAA'
+    fecha: str = "AAAAMMDD"       # 'AAAAMMDD' | 'DD/MM/AAAA' | 'AAAA-MM-DD' (ISO, el del estándar)
     nueva_linea: str = "\n"       # LF (archivos de referencia) | CRLF
     palote_final: bool = True     # cada línea termina en '|' (el SIRE: ver `drivers/sire/txt.py`)
     tc_pen: str = "1.000"         # tipo de cambio cuando la moneda es PEN ('' = vacío)

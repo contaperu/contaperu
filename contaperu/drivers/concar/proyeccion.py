@@ -19,7 +19,7 @@ from ...asiento.configuracion import MONEDAS_CODIGO
 from ...asiento.faltas import SinCodigoDeMoneda
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
-from ...asiento.motor import cabecera_de, glosa_de, lineas_del_comprobante  # noqa: F401  (glosa_de: nombre de la 0.10)
+from ...asiento.motor import cabecera_de, lineas_del_comprobante
 from ..kit import Opciones, celdas
 from ...pcge import clase_de
 from ...igv import tasa_calculada
@@ -131,23 +131,8 @@ def tasa_igv_entera(igv: Decimal, base_gravada: Decimal) -> Any:
 
 # ── El camino inverso: de las columnas de CONCAR a la línea neutral ──────────────────────────────────────────────
 # Era como se obtenía la línea cuando el asiento nacía en columnas (hasta la 0.7), y se conserva con su driver. No
-# rellena los campos que llegaron después (`rol`, `tipo_cp`, el código SUNAT de la detracción). La tabla es, de paso,
-# la documentación de qué significa cada columna del formato de CONCAR, que en su manual solo tiene una letra por nombre.
-COLUMNA_A_CAMPO = {
-    "B": "sub_diario",          "C": "correlativo",        "D": "fecha del asiento",
-    "E": "moneda (código del ERP)", "F": "glosa de la cabecera", "G": "tipo de cambio",
-    "H": "tipo de conversión",  "I": "flag de conversión", "J": "fecha de la operación",
-    "K": "cuenta",              "L": "anexo (documento de la contraparte)",
-    "M": "centro de costo",     "N": "debe o haber",       "O": "importe original",
-    "P": "importe en dólares",  "Q": "importe en soles",   "R": "tipo de documento",
-    "S": "serie y número",      "T": "fecha del documento", "U": "fecha de vencimiento",
-    "W": "glosa del detalle",   "X": "anexo auxiliar",
-    "Z": "tipo del documento de referencia", "AA": "serie y número de la referencia",
-    "AB": "fecha de la referencia",
-    "AI": "código interno de detracción", "AJ": "tasa de detracción",
-    "AK": "base de la detracción en dólares", "AL": "base de la detracción en soles",
-    "AO": "tasa del IGV",
-}
+# rellena los campos que llegaron después (`rol`, `tipo_cp`, el código SUNAT de la detracción). Qué significa cada
+# columna está en `datos.CABECERAS`, con los títulos literales de la plantilla oficial y sus notas.
 
 
 def _texto_de(v: Any) -> str:

@@ -156,7 +156,12 @@ con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
 
 ```bash
 pip install -e ".[dev]"
+ruff check .
 pytest
 ```
 
 Los tests corren sin red y sin credenciales. Si el tuyo necesita algo de eso, está mal planteado.
+
+`ruff` solo mira **código muerto y errores** —imports y variables que no usa nadie, redefiniciones, nombres sin
+definir—, nunca estilo: aquí los comentarios se escriben en prosa y el largo de línea no es una regla. Si te
+molesta una regla suya, es que hemos seleccionado mal; se discute en el issue, no se tapa con un `# noqa`.

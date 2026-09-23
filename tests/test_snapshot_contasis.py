@@ -17,7 +17,6 @@ from pathlib import Path
 
 import pytest
 
-from contaperu import api
 from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import contasis
 from contaperu.modelo import Comprobante, Libro

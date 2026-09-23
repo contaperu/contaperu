@@ -1,7 +1,7 @@
 """Registro de drivers de salida. Un driver traduce el asiento —o el registro— al formato que
 importa un sistema contable concreto. Lo que tiene que exponer está en `contrato.py`.
 
-Los cinco que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, salen de la contabilidad peruana real:
+Los seis que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, salen de la contabilidad peruana real:
 
 - **`sire`** — el TXT que se sube a SUNAT para reemplazar la propuesta del Registro de Ventas
   (RVIE) o de Compras (RCE). Es lo que la norma exige hoy: el PLE quedó reemplazado por el SIRE
@@ -11,9 +11,16 @@ Los cinco que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, sa
 - **`contasis`** — el registro de compras o de ventas en Excel que importa CONTASIS, que arma el
   asiento él mismo: una fila por comprobante. Escrito contra su plantilla oficial y aceptado:
   CONTASIS importó los archivos que genera (13-sep-2026).
+- **`starsoft`** — el TXT de palotes, dentro de un ZIP, que importa STARSOFT Desktop. Escrito contra su
+  documentación oficial; **en pruebas** hasta que alguien importe un mes de verdad.
 - **`csv`** — las líneas de diario en columnas, para quien todavía no tiene driver.
 - **`asiento_neutral`** — el documento del estándar con su asiento, sin vocabulario legacy (sin siglas, sub-diarios ni
   correlativos): la salida para un ERP nuevo, que parte del estándar en vez de reimplementar el IGV.
+
+**`asiento_neutral` no es la carpeta `contaperu/asiento/`.** Esa arma el asiento —decide cuentas, sentidos,
+importes y orden, y es contabilidad peruana—; este lo **escribe** tal como salió, sin traducirlo. La forma del
+asiento estándar vive en `estandar/open-accounting.schema.json`; `ARQUITECTURA.md` §«Dónde vive el asiento
+estándar» lo cuenta con las tres capas y su acoplamiento medido.
 
 **Drivers de terceros, sin tocar este repositorio.** Un paquete instalado que declare en su
 `pyproject.toml`
@@ -44,8 +51,9 @@ DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv
                                    asiento_neutral.NOMBRE: asiento_neutral}
 DRIVER_POR_DEFECTO = "sire"
 
-__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones", "concar", "contasis",
-           "contrato", "csv", "de_terceros", "formato_de", "obtener", "recargar", "sire"]
+__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones",
+           "asiento_neutral", "concar", "contasis", "contrato", "csv", "de_terceros", "formato_de",
+           "obtener", "recargar", "sire", "starsoft"]
 
 
 class AvisoDriver(UserWarning):

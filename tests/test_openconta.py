@@ -89,7 +89,7 @@ def test_la_tabla_apunta_al_estandar_por_su_id():
         assert _datos.leer_esquema(nombre)["$id"] == f"{tabla.BASE_ESQUEMAS}{nombre}.schema.json"
 
 
-@pytest.mark.parametrize("driver", ["concar", "contasis", "csv", "sire", "asiento_neutral"])
+@pytest.mark.parametrize("driver", ["concar", "contasis", "csv", "sire", "starsoft", "asiento_neutral"])
 def test_el_diagnostico_y_la_exportacion_reales_validan(driver):
     documento = _golden()
     _validar("diagnostico", api.diagnosticar(documento, driver=driver, configuracion=CONFIG))

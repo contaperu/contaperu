@@ -213,7 +213,6 @@ def test_el_csv_lleva_el_rol_y_los_codigos_sunat():
     import csv
     import io
 
-    from contaperu import api
     from util import GOLDEN
 
     documento = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))

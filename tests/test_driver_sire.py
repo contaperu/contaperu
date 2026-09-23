@@ -157,9 +157,7 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
     declara a SUNAT; sí en el asiento contable. El TXT lo deja fuera y lo dice en el
     resumen, para que no parezca que se perdió. (Vivía en el archivo del PLE y se
     portó aquí al morir aquel, 30-ago-2026.)"""
-    from datetime import date
 
-    from contaperu import asiento as concar
 
     libro = cargar_golden("compras_202601.json")[0]
 
@@ -184,7 +182,6 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
 
 def test_una_nota_que_cambiaria_de_signo_no_se_escribe_y_dice_cual():
     """Hasta la 0.10 esto era un `assert`: con `python -O` el TXT habría salido con el campo 15 en positivo."""
-    from contaperu import api
     from contaperu.drivers import sire
     from contaperu.modelo import Comprobante, Libro
 

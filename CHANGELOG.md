@@ -6,6 +6,36 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Añadido
+
+- **Linter (`ruff check .`), en el CI y antes de un PR.** Acotado a propósito a **código muerto y errores**
+  —imports y variables que no usa nadie, redefiniciones, nombres sin definir—, **nunca a estilo**: aquí los
+  comentarios se escriben en prosa y 442 líneas pasan de 120 caracteres. Había cuatro `# noqa` en el
+  repositorio silenciando a un guardián que no estaba instalado.
+- `formatear_fecha` reconoce el **ISO** (`AAAA-MM-DD`), que es lo que el CSV declaraba en sus `Opciones` y lo
+  que la línea neutral lleva. Antes ese valor levantaba `ValueError`: no se notaba porque el CSV no pasa por
+  ahí, pero su docstring lo ofrece como plantilla para un driver de terceros, que sí lo habría hecho.
+- `tests/test_kit_texto.py`: el formateo compartido del kit, probado por sí mismo. No tenía ni un test directo.
+- Un guardián de que **todo driver de serie esté en `__all__`**: `starsoft` y `asiento_neutral` llevaban
+  tiempo fuera de la lista pública del registro, y no lo cazaba nada porque importarlos seguía funcionando.
+
+### Corregido
+
+- **Tres variables muertas en `asiento/motor.py`** —`es_usd`, `serie` y `numero`—, del refactor de la 0.7.
+  Se calculaban en cada comprobante y se tiraban. No cambian ninguna salida: eran cálculos puros.
+- **`COLUMNA_A_CAMPO` de CONCAR**, una tabla de quince líneas que no leía nadie. Lo que documentaba está
+  mejor dicho en `datos.CABECERAS`, con los títulos literales de la plantilla oficial y sus notas.
+- Veintidós imports muertos, entre ellos el `glosa_de` que CONCAR arrastraba «por compatibilidad con la
+  0.10» — compatibilidad que la 2.0 retiró.
+- **El bloque `detraccion` de `kit/columnas.py` no declaraba `nro_constancia` ni `fecha_constancia`**, que la
+  2.6.0 sí escribe en la línea: un driver de terceros que declarara esa columna lo rechazaba el contrato.
+- `starsoft` entra en el guardián de OpenConta (`test_openconta.py`), del que se había quedado fuera: era el
+  único driver de serie que no validaba sus respuestas reales contra el contrato HTTP.
+- `ARQUITECTURA.md`: la sección de STARSOFT decía que escribía un **Excel** levantado de **dos vídeos**, con el
+  número **con ceros** y cinco siglas sin constar. Desde la 2.3-2.5.1 es un TXT en ZIP recalcado de su
+  documentación oficial, el número va sin ceros y las siglas sin constar son dos. Y se escribe de una vez
+  **dónde vive el asiento estándar**, que se confundía con el driver `asiento_neutral`.
+
 ## [2.6.1] — 2026-09-22
 
 ### Corregido

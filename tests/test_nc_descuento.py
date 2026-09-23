@@ -16,11 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from contaperu import asiento as concar
 from contaperu.drivers import concar as driver_concar
 from contaperu import comparar_sire, validar
 from contaperu.pipeline import salida as g
-from contaperu import api
 from contaperu.pipeline import preparacion as prep
 from contaperu.lectores import sire_txt, xml_ubl
 from contaperu.modelo import Comprobante, Libro

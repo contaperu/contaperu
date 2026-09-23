@@ -32,7 +32,7 @@ from .configuracion import NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import Cabecera, ComprobanteDelAsiento
 from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
-                         lleva_centro, numerar, numerar_en_orden, partes_de, reparto_no_cuadra, sigla_documento,
+                         lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra, sigla_documento,
                          sub_diario, tiene_detraccion)
 from .lineas import LineaDiario
 
@@ -147,7 +147,6 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
         raise SinCuenta([c])
     if reparto_no_cuadra(c, config, es_venta):
         raise RepartoNoCuadra([c])
-    es_usd = moneda == "USD"
     es_honorarios = not es_venta and c.tipo_cp == TIPO_HONORARIOS
     invierte = c.tipo_cp in TIPOS_INVIERTEN
     total = Decimal(c.total or 0).quantize(CENTIMO)
@@ -162,7 +161,6 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # partes comparten uno: con dos centros distintos no hay uno que poner.
     centros = {(centro or "").strip() for _, centro, _ in partes}
     centro_comun = (next(iter(centros)) if len(centros) == 1 else "") if usa_centros else ""
-    serie, numero = (c.serie or "").strip(), _numero(c.numero, opciones)
     serie_numero = serie_numero_de(c, opciones)
     # UNA sola glosa para TODAS las líneas, la misma y sin adornos (John, 21-sep-2026). Hasta la 2.1 las
     # derivadas anteponían lo que las identificaba —`IGV - `, `RET 4TA - `, `DETRACCION - `—, y era

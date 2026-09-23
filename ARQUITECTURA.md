@@ -121,6 +121,26 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
 | `glosa` | La misma en todas las líneas y entera, sin prefijos. El corte lo decide cada ERP. |
 | `tasa_igv` | La del comprobante, como texto exacto (`"10.5"`). Redondear es cosa del que solo admite enteros. |
 | `detraccion.codigo` | El código SUNAT del bien o servicio, al lado del interno del contribuyente. |
+| `detraccion.nro_constancia`, `.fecha_constancia` | El vóucher del depósito, que llega días después (2.6.0). Sin él, el número sale con el comodín `999999999` y la fecha, vacía. |
+
+### Dónde vive el asiento estándar
+
+Tres cosas distintas llevan la palabra «asiento», y conviene no confundirlas al leer el árbol:
+
+| Capa | Dónde | Qué es |
+|---|---|---|
+| **La forma** | `estandar/open-accounting.schema.json`, `$defs.linea` (con `enmiendas/` y `conformidad/`) | **La fuente.** El contrato que lee un ERP de terceros, en cualquier lenguaje |
+| **La pieza en Python** | `asiento/lineas.py` (`LineaDiario`), `asiento/indice.py` (`Cabecera`) | Su materialización. No es una copia: `tests/test_estandar.py` exige que digan lo mismo, ni un campo de más ni uno de menos |
+| **La entrega** | `drivers/asiento_neutral/` | Un destino más, de 45 líneas, que lo escribe sin traducirlo a vocabulario legacy |
+
+Lo que **no** es el asiento estándar, aunque comparta carpeta, es `asiento/motor.py` y `asiento/resolucion.py`: son
+**la contabilidad peruana** —IGV, detracciones, sub-diarios, catálogos SUNAT—. El reparto no es una opinión, está
+medido: `tests/fixtures/capas/acoplamiento_pe.json` registra que `asiento.lineas` toca un solo módulo peruano
+(`pcge`, del que sale la `clase`), que `asiento.motor` y `asiento.resolucion` tocan cuatro cada uno, y que
+`drivers.asiento_neutral` **no aparece**, es decir, acoplamiento cero.
+
+Un ERP de otro país usaría las dos primeras capas y tiraría `motor.py` a la basura. Por eso están separadas, y por
+eso el driver se llama `asiento_neutral` y no `asiento`: el neutral es el que no sabe de Perú.
 
 ## Capas, api y puertas
 
@@ -233,16 +253,18 @@ de compras con el asiento cuadrado.
 
 ### STARSOFT: qué se sabe y qué falta
 
-- **Qué se sabe.** STARSOFT importa asientos desde un Excel, con una plantilla que él mismo publica: cada fila es una
-  cuenta con su debe o haber, y las filas de un comprobante comparten cabecera. El driver `starsoft` lo traduce desde
-  el 20-sep-2026. El formato se levantó de dos vídeos y sus capturas (`STARSOFT-INTEGRACION.md`), columna por columna:
-  sus sub-diarios (`4` compras, `03` ventas), sus siglas —`FT` y `BV` coinciden con CONCAR, la nota de crédito es `CC`
-  y no `NC`—, el número del documento pegado y con ceros, y la columna `DESTINO`, el destino del IGV de la adquisición,
-  que CONCAR no tiene. Esa columna es la que hizo crecer la cabecera del índice en la 1.4.0.
-- **Qué falta.** La plantilla oficial vacía y un archivo que STARSOFT haya aceptado. Sin ellos, cinco de sus columnas
-  (`A`-`E`) están inferidas de una narración y no leídas de una celda, y cinco de sus ocho siglas son las de CONCAR
-  puestas como punto de partida. Por eso el driver **escribe un CSV revisable y no el `.xlsx` definitivo**, y su
-  docstring dice «EN PRUEBAS» donde el de CONTASIS dice «Aceptado (13-sep-2026)».
+- **Qué se sabe.** STARSOFT Desktop importa un **TXT de palotes dentro de un ZIP** —35 campos en compras, 27 en
+  ventas—, no un Excel. Cada fila es una cuenta con su debe o haber y las filas de un comprobante comparten
+  cabecera. Desde el 22-sep-2026 el formato está recalcado de **su documentación oficial** (`STARSOFT-INTEGRACION.md`),
+  que sustituyó a los dos vídeos con los que nació: sus sub-diarios (`04` compras, `03` ventas), sus siglas, la
+  columna `DESTINO` —el destino del IGV de la adquisición, que CONCAR no tiene y que hizo crecer la cabecera del
+  índice en la 1.4.0—, sus cuentas de ocho dígitos y la detracción, que en STARSOFT son **campos de la fila del
+  proveedor y no dos líneas de asiento**.
+- **Qué falta: que alguien importe un mes.** Es lo único, y no depende de código. Por eso su docstring dice «EN
+  PRUEBAS» donde el de CONTASIS dice «Aceptado (13-sep-2026)». De sus ocho siglas, **seis constan** en el manual
+  (`FT`, `BV`, `CC`, `CD`, `TK`, `RC`) y **dos siguen marcadas `[por confirmar]`** —`02` (RH) y `05` (BA)—, que no
+  aparecen en ningún ejemplo; el manual dice además que el tipo es «el que tiene registrado TU sistema», así que se
+  cotejan contra el maestro de cada contribuyente y no se fijan aquí.
 - **Su API** lista seis endpoints sin esquema publicado, y es otro camino: `API-DE-REGISTRO.md`. Si algún día se
   escribe por ahí, el envío y los reintentos son de la aplicación y no del motor —la identidad y la huella de cada
   comprobante (`_exportacion.comprobantes`) son la clave de idempotencia—. Su libro «Standar» pediría enmendar

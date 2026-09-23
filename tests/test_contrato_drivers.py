@@ -654,6 +654,13 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
     assert "monedas_codigo" in _propias(drivers.concar) and "moneda" in drivers.concar.EXIGE
 
 
+def test_los_de_serie_estan_todos_en_la_lista_publica_del_registro():
+    """`starsoft` y `asiento_neutral` entraron en `DE_SERIE` y nadie los añadió a `__all__`: se registraban, se
+    exportaban y funcionaban, pero no salían en la lista pública del paquete ni en la superficie congelada. No lo
+    cazó nada porque importarlos por su nombre sigue funcionando igual. Esto lo caza."""
+    assert sorted(set(drivers.DE_SERIE) - set(drivers.__all__)) == []
+
+
 # --- el canal: a quién se entrega lo que sale (1.0) --------------------------------------------------------------
 
 def test_cada_driver_de_serie_declara_su_canal():

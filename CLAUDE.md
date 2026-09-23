@@ -109,9 +109,12 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
   así que lo que entra en `main` no le llega a nadie hasta que se etiqueta. La última rama larga fue `motor-v1`, la de
   la 1.0. Un contribuidor de fuera sí abre un PR (`CONTRIBUTING.md`).
 - Entorno: `python -m venv .venv` y `pip install -e ".[dev]"` (trae `excel`, `schema`, `mcp`, `http`, `pytest`,
-  `httpx` y `openapi-spec-validator`).
+  `httpx`, `openapi-spec-validator` y `ruff`).
 - Batería: `pytest` (unos segundos; el snapshot va dentro). Antes de etiquetar, `diagnosticar` y `exportar` sobre un
   caso real en local, solo lectura.
+- Código muerto: `ruff check .`, también en el CI. **Solo caza imports y variables que no usa nadie, redefiniciones
+  y nombres sin definir; nunca estilo** (`[tool.ruff.lint]` en `pyproject.toml`, con el porqué). Entró el
+  22-sep-2026 y lo primero que encontró fueron tres variables muertas en `asiento/motor.py` del refactor 0.7.
 - **Publicar una versión es empujar su tag, y solo eso le llega a quien integra el motor**: un commit en `main` no le
   cambia nada a nadie, porque cada consumidor fija una versión exacta. Antes del tag, `contaperu/_version.py` con la
   versión nueva y en `CHANGELOG.md` su sección `## [X.Y.Z] — fecha` (con «Cómo migrar» si hay algo que adaptar).

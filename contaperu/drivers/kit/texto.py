@@ -32,6 +32,8 @@ def formatear_fecha(d: date | None, opciones: Opciones) -> str:
         return d.strftime("%Y%m%d")
     if opciones.fecha == "DD/MM/AAAA":
         return d.strftime("%d/%m/%Y")
+    if opciones.fecha == "AAAA-MM-DD":
+        return d.isoformat()
     raise ValueError(f"Formato de fecha desconocido: {opciones.fecha!r}")
 
 

@@ -15,7 +15,7 @@ import pytest
 from contaperu.pipeline import salida as gen
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
-from contaperu.modelo import Comprobante, Libro
+from contaperu.modelo import Libro
 from contaperu import asiento as concar
 from contaperu.drivers import concar as driver_concar
 from util import comprobante, con_imputaciones, construir_concar, en_secciones

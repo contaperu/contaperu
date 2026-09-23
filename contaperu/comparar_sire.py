@@ -28,7 +28,6 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
-from . import _datos
 from .lectores import sire_txt
 
 # Nombres del Anexo 3 (RVIE), para que el informe diga "IGV" y no "campo 17".
