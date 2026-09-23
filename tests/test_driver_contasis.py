@@ -137,3 +137,39 @@ def test_para_contasis_no_se_piden_sub_diarios_ni_equivalencias():
     diag = api.diagnosticar(doc(FACTURA), configuracion=CONTAB, driver="contasis")
     assert diag["exige"] == ["cuenta_contable", "cuenta_unica"] and diag["sub_diarios"] == {}
     assert diag["listo_para_exportar"] is True and diag["faltantes"]["no_cabe"] == {}
+
+
+# ── Que sus cuentas sean las que el núcleo decidiría ────────────────────────────────────────────────────────────
+
+def _cuentas_del_asiento(documento: dict, rol: str) -> list[str]:
+    """Las cuentas que el asiento del núcleo pone en ese rol, para los mismos comprobantes."""
+    asiento = api.generar_asiento(documento, driver="concar", configuracion=CONTAB)["asiento"]
+    return [ln["cuenta"] for ln in asiento if ln.get("rol") == rol]
+
+
+@pytest.mark.parametrize("tipo, base, total, centro", [("compra", "AF", "AH", "AI"), ("venta", "AB", "AD", "Z")])
+def test_sus_cuentas_son_las_que_el_nucleo_decidiria(tipo, base, total, centro):
+    """`docs/contasis/LEEME.md` promete que «el driver no decide ninguna cuenta»: la de la base sale de
+    `asiento.partes_de` y la del total de `asiento.cuenta_tercero`, la misma resolución que usa el asiento de
+    CONCAR. Hasta la 2.8 esa promesa estaba escrita y no la afirmaba ningún test.
+
+    **No sustituye al snapshot, que hace otra cosa.** El snapshot caza que una celda CAMBIE, y lo hace bien: al
+    mutar la resolución de la cuenta caen 44 de sus casos. Lo que no puede decir es si el valor que congeló era
+    el correcto el primer día, porque se generó desde el código de CONTASIS. Esto compara contra una fuente
+    independiente —el asiento que el núcleo arma para los mismos comprobantes—, así que caza una divergencia que
+    hubiera estado ahí desde siempre, y convierte la frase de la documentación en una aserción.
+
+    Es la misma pareja que ya tiene CONCAR: `test_snapshot_concar` congela sus celdas y
+    `test_driver_asiento_neutral` le lleva la contraria. Y la comparación en sí ya existía en
+    `test_contrato_drivers` para un driver de registro DE MENTIRA, mientras el de verdad no la tenía.
+    """
+    documento = doc(FACTURA, dict(FACTURA, serie="F002", numero="00000456", contraparte_doc="20512333797"),
+                    tipo=tipo)
+    celdas = hoja(api.exportar(documento, driver="contasis", configuracion=CONTAB))
+    filas = range(1, len(documento["comprobantes"]) + 1)
+    assert [str(celdas[f"{base}{n}"].value or "").strip() for n in filas] == _cuentas_del_asiento(documento,
+                                                                                                 "principal")
+    assert [str(celdas[f"{total}{n}"].value or "").strip() for n in filas] == _cuentas_del_asiento(documento,
+                                                                                                  "tercero")
+    # Y el centro, que sale de `lleva_centro`: apagado en esta configuración, va vacío en los dos lados.
+    assert all(not str(celdas[f"{centro}{n}"].value or "").strip() for n in filas)

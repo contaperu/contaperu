@@ -5,6 +5,8 @@ quedan escritos aquí, tal como estaban en `catalogos.py`.
 """
 from __future__ import annotations
 
+from decimal import Decimal
+
 from contaperu import _datos, api, catalogos
 
 TIPOS_CP_DE_LA_1_0 = {
@@ -38,3 +40,39 @@ def test_cada_catalogo_viene_de_datos_con_su_fuente():
     assert catalogos.TIPOS_CP == datos["tipos_comprobante"]["codigos"]
     assert catalogos.FUENTES == {nombre: tabla["fuente"] for nombre, tabla in datos.items()}
     assert api.catalogos_sunat()["fuentes"] == catalogos.FUENTES
+
+
+# ── Las tres cifras del IGV ────────────────────────────────────────────────────────────────────────────────────
+#
+# No las fijaba nadie: un grep de `TASA_IGV`, `TASAS_IGV_REDUCIDAS` y `TOLERANCIA_IGV` sobre `tests/` daba cero
+# hasta la 2.8. Son las tres de las que depende que el IGV cuadre —`validar` decide con ellas `IGV_NO_CUADRA` y
+# `IGV_TASA_REDUCIDA`, e `igv.tasa_legal` reconoce con ellas la tasa que un registro declara—, así que cambiar
+# cualquiera movería silenciosamente lo que el motor acepta y lo que escribe CONTASIS en su columna del IGV.
+
+TASA_IGV_DE_LA_1_0 = "0.18"
+TASAS_REDUCIDAS_DE_LA_1_0 = ("0.10", "0.105", "0.08")   # restaurantes y hoteles; se aceptan con aviso, no con error
+TOLERANCIA_DE_LA_1_0 = Decimal("0.05")                  # cinco céntimos, en unidades de IMPORTE y no de tasa
+
+
+def test_las_tasas_de_igv_son_las_de_la_1_0():
+    """Son fracciones escritas como texto (`"0.18"`, no `18`): quien las use las multiplica por 100 para el
+    porcentaje. Cambiar el tipo rompería tanto a `validar` como a `igv.tasa_legal`."""
+    assert catalogos.TASA_IGV == TASA_IGV_DE_LA_1_0
+    assert catalogos.TASAS_IGV_REDUCIDAS == TASAS_REDUCIDAS_DE_LA_1_0
+    assert all(isinstance(t, str) for t in (catalogos.TASA_IGV, *catalogos.TASAS_IGV_REDUCIDAS))
+
+
+def test_la_tolerancia_del_igv_es_la_de_la_1_0():
+    """Vivía en `validar.py` y la leía también `igv.py`, que por eso dependía de la validación entera. Es la MISMA
+    para las dos, y que lo sea es lo que hace que `igv.tasa_legal` reconozca exactamente las tasas que `validar`
+    acepta: si se separaran, un comprobante podría declarar 18 % en el registro y ser `IGV_NO_CUADRA` a la vez."""
+    assert catalogos.TOLERANCIA_IGV == TOLERANCIA_DE_LA_1_0
+    assert isinstance(catalogos.TOLERANCIA_IGV, Decimal)
+    from contaperu import igv, validar
+    assert igv.TOLERANCIA is validar.TOLERANCIA is catalogos.TOLERANCIA_IGV
+
+
+def test_la_tasa_general_y_las_reducidas_no_se_pisan():
+    """Un duplicado haría que `igv.tasa_legal` devolviera la primera que cuadre y nadie lo notaría."""
+    todas = (catalogos.TASA_IGV, *catalogos.TASAS_IGV_REDUCIDAS)
+    assert len(set(todas)) == len(todas)

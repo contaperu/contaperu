@@ -6,6 +6,26 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Corregido
+
+- **Un caso de conformidad comprobaba `pedir_a` contra la constante del propio motor**, no contra la respuesta
+  del diagnóstico que dice estar verificando (`tests/test_conformidad.py`). Si `diagnosticar` dejara de poner
+  `pedir_a`, o lo pusiera mal, los tres casos que lo usan seguirían en verde. Ahora se lee de `que_falta`, y al
+  mutar la respuesta caen los tres.
+
+### Añadido
+
+- **Test de las tres cifras del IGV** (`TASA_IGV`, `TASAS_IGV_REDUCIDAS`, `TOLERANCIA_IGV`): no las fijaba
+  ninguno. Son de las que depende que el IGV cuadre —`validar` decide con ellas `IGV_NO_CUADRA` e `igv.tasa_legal`
+  reconoce con ellas la tasa que un registro declara—, así que cambiarlas movía en silencio lo que el motor acepta.
+  Se fija además que la tolerancia sea **la misma** en `validar` y en `igv`: si se separaran, un comprobante
+  podría declarar 18 % en el registro y ser `IGV_NO_CUADRA` a la vez.
+- **Las cuentas de CONTASIS, comparadas con las que el núcleo decidiría.** `docs/contasis/LEEME.md` promete que
+  «el driver no decide ninguna cuenta» y esa frase no la afirmaba ningún test. No sustituye al snapshot, que caza
+  que una celda cambie: lo que añade es una fuente independiente —el asiento del núcleo para los mismos
+  comprobantes—, que cazaría una divergencia que hubiera estado ahí desde el primer día. Es la pareja que CONCAR
+  ya tiene con `test_driver_asiento_neutral`.
+
 ## [2.7.0] — 2026-09-22
 
 ### Añadido

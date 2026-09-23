@@ -70,9 +70,14 @@ def test_los_casos_de_diagnosticar(caso):
         assert d["faltantes"].get(clave) == esperado, d["faltantes"]
     if espera.get("faltantes") == {}:
         assert all(v == [] for v in d["faltantes"].values()), d["faltantes"]
+    # A QUIÉN se le pide cada falta, leído de la RESPUESTA y no de la tabla del motor. Hasta la 2.8 esto
+    # comparaba `diagnostico.PEDIR_A[clave] == quien`, o sea la constante contra sí misma: si `diagnosticar`
+    # dejara de poner `pedir_a`, o lo pusiera mal, estos casos seguirían en verde. Un caso de conformidad
+    # describe lo que el motor RESPONDE; comprobarlo contra su propia constante no comprueba nada.
     for clave, quien in (espera.get("pedir_a") or {}).items():
-        from contaperu.pipeline import diagnostico as diag
-        assert diag.PEDIR_A[clave] == quien
+        entradas = [f for f in d["que_falta"] if f["motivo"] == clave]
+        assert entradas, f"el diagnóstico no trae la falta {clave!r}: {[f['motivo'] for f in d['que_falta']]}"
+        assert [f["pedir_a"] for f in entradas] == [quien] * len(entradas)
     for codigo in espera.get("observaciones") or []:
         # El diagnóstico lleva las observaciones de cada comprobante; basta con que el código aparezca.
         assert codigo in json.dumps(d, ensure_ascii=False), f"no se observó {codigo}"
