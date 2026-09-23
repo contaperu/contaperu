@@ -6,6 +6,8 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+## [3.1.0] — 2026-09-23
+
 ### Añadido
 
 - **`contaperu verificar-documento mi-documento.json`** (y `api.verificar_documento`): un documento contra el

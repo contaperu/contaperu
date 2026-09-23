@@ -73,8 +73,13 @@ def test_el_numero_esta_escrito_una_sola_vez_en_todo_el_repositorio():
     la versión se escribe a mano y así debe ser — es la bitácora, no la fuente.
     """
     literal = f'"{contaperu.__version__}"'
+    # `"openapi": "3.1.0"` es la versión de la ESPECIFICACIÓN OpenAPI, no la nuestra, y el día que la librería
+    # llegó a la 3.1.0 este test se puso rojo por una coincidencia de números. Se descarta esa línea y solo esa:
+    # el guardián sigue siendo el mismo para cualquier otro sitio donde alguien teclee la versión.
+    otra_cosa = f'"openapi": {literal}'
     donde = []
     for f in list((RAIZ / "contaperu").rglob("*.py")) + [RAIZ / "pyproject.toml"]:
-        if literal in f.read_text(encoding="utf-8"):
+        texto = f.read_text(encoding="utf-8").replace(otra_cosa, "")
+        if literal in texto:
             donde.append(str(f.relative_to(RAIZ)).replace("\\", "/"))
     assert donde == ["contaperu/_version.py"], f"la versión aparece escrita en: {donde}"
