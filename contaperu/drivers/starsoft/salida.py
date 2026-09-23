@@ -17,7 +17,7 @@ from typing import Any
 from ...asiento.indice import ComprobanteDelAsiento
 from ...asiento.lineas import LineaDiario
 from ...modelo import Libro
-from ..kit import Opciones, OpcionesArchivo, nombre_de_archivo
+from ..kit import Opciones, OpcionesArchivo, forma, nombre_de_archivo
 from ..kit.texto import formatear_fecha, sanear
 from . import datos, proyeccion
 from .datos import OPCIONES
@@ -67,17 +67,11 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict,
     Necesita el `indice`: cada fila lleva datos de la CABECERA de su comprobante —el IGV del total, el número sin
     partir y el destino de la adquisición— que ninguna línea guarda.
     """
-    if FORMATOS.get(libro.tipo) is None:
-        raise ValueError("Tipo de libro no soportado")
-    if lineas and not indice:
-        raise ValueError("STARSOFT escribe cada fila con la cabecera de su comprobante: necesita el `indice` "
-                         "del asiento")
+    forma.exigir_indice("STARSOFT", libro, lineas, indice, FORMATOS)
     # Las DOS fechas salen de la linea, no del reloj ni de un parametro aparte: la del documento es la
     # emision y la de registro es la del asiento, que el nucleo ya pone dentro del periodo. Hasta la 2.3
     # se pasaba `cabecera.fecha_emision` como "fecha de registro" y las dos acababan cruzadas.
-    filas: list[dict[str, Any]] = []
-    for entrada in indice:
-        filas.extend(proyeccion.filas(entrada.cabecera, entrada.lineas(lineas), libro, config))
+    filas = forma.filas_del_indice(indice, lineas, lambda cab, suyas: proyeccion.filas(cab, suyas, libro, config))
     # `sub_diarios` NO se pone aquí: lo calcula el núcleo con sus rangos (`asiento.numerar_en_orden`) y lo
     # que devuelva el driver lo PISA (`pipeline/armado.py`). Hasta la 2.0 esto devolvía la lista de
     # sub-diarios presentes y borraba el diccionario de rangos, que es lo que un ERP guarda para proponer

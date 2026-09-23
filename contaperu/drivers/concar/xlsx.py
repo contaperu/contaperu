@@ -10,7 +10,7 @@ from ...asiento.indice import ComprobanteDelAsiento
 from ...asiento.lineas import LineaDiario
 from ...asiento.resolucion import etiquetas_sub_diario, limites_del_periodo
 from ...modelo import Libro
-from ..kit import Opciones, formatear_fecha, nombre_de_archivo
+from ..kit import Opciones, forma, formatear_fecha, nombre_de_archivo
 from ..kit import xlsx as kit_xlsx
 from . import datos, proyeccion
 from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
@@ -102,7 +102,14 @@ def _desbordan(indice: tuple[ComprobanteDelAsiento, ...]) -> dict[str, int]:
 
 def _sub_diarios(indice: tuple[ComprobanteDelAsiento, ...], config: dict) -> dict[str, dict]:
     """El rango de cada sub-diario, como lo guarda quien exporta para proponer el siguiente: su etiqueta, desde y hasta
-    qué número llegó, cuántos comprobantes lleva, los dos códigos `MMNNNN` y si desborda."""
+    qué número llegó, cuántos comprobantes lleva, los dos códigos `MMNNNN` y si desborda.
+
+    **Sí, el núcleo también calcula rangos** (`asiento.numerar_en_orden`), y en la 2.7 se miró si esto sobraba: no
+    sobra. Los del núcleo llevan `desde`, `hasta` y `comprobantes`, y esto añade lo que un ERP necesita para
+    proponer el correlativo del mes siguiente —la etiqueta, los dos códigos `MMNNNN` y el desborde—, que es lo que
+    el portal lee. Y el que manda es este: `pipeline/armado.py` funde el resumen del driver AL FINAL, así que lo
+    que el driver devuelva pisa lo del núcleo. Lo que se repite son tres cifras que el driver no recibe y tiene
+    que sacar del índice; cambiarlo pediría pasarle los rangos a `desde_lineas`, y eso es tocar el contrato."""
     etiquetas = etiquetas_sub_diario(config)
     rangos: dict[str, dict] = {}
     for entrada in indice:
@@ -125,16 +132,11 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones
     Cada fila lleva hechos de la cabecera de su comprobante que la línea no guarda: la glosa de la columna F y la tasa
     entera del IGV de la AO, que se redondea desde el IGV y la base del comprobante y no desde la tasa ya redondeada de
     la línea. Los trae el `indice`. Antes de escribir nada se niega si un sub-diario pasa de 9999."""
-    if FORMATOS.get(libro.tipo) is None:
-        raise ValueError("Tipo de libro no soportado")
-    if lineas and not indice:
-        raise ValueError("CONCAR escribe cada fila con la cabecera de su comprobante: necesita el `indice` del asiento")
+    forma.exigir_indice("CONCAR", libro, lineas, indice, FORMATOS)
     desbordan = _desbordan(indice)
     if desbordan:
         raise CorrelativoDesborda(desbordan)
-    filas: list[dict[str, Any]] = []
-    for entrada in indice:
-        filas.extend(proyeccion.filas(entrada.cabecera, entrada.lineas(lineas), config))
+    filas = forma.filas_del_indice(indice, lineas, lambda cab, suyas: proyeccion.filas(cab, suyas, config))
     primero, _ = limites_del_periodo(libro)
     resumen = {"fechas": "por comprobante (extemporáneos al " + formatear_fecha(primero, opciones) + ")",
                "sub_diarios": _sub_diarios(indice, config)}

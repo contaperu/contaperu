@@ -14,7 +14,9 @@ from decimal import Decimal
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import concar as driver_concar
-from contaperu import detracciones, validar
+from contaperu import asiento, detracciones, validar
+from contaperu.asiento.configuracion import NUMERO_DETRACCION_PENDIENTE
+from contaperu.drivers import contasis as driver_contasis
 from contaperu.modelo import Comprobante, Libro
 
 CONTAB = prep.config_aplicada(None, "concar")
@@ -169,3 +171,44 @@ def test_no_avisa_si_coincide_o_si_la_tasa_sale_de_la_tabla():
     detracciones.normalizar([igual, de_tabla], TABLA)
     assert "DETRACCION_TASA_DISTINTA" not in _codigos(igual)
     assert "DETRACCION_TASA_DISTINTA" not in _codigos(de_tabla)
+
+
+# --- la constancia del depósito: una sola regla para los dos caminos (2.7) ---------------------------------------
+
+def _compra_con_detraccion(**extra) -> Comprobante:
+    """Una factura afecta a detracción, con lo mínimo para que el asiento salga."""
+    return Comprobante(tipo_cp="01", serie="F001", numero="123", fecha_emision=date(2026, 1, 15),
+                       contraparte_doc="20512333797", contraparte_nombre="PROVEEDOR SAC", moneda="PEN",
+                       base_gravada=Decimal("1000.00"), igv=Decimal("180.00"), total=Decimal("1180.00"),
+                       detraccion={"codigo": "027", **extra})
+
+
+def test_sin_constancia_pegada_el_numero_sale_con_el_comodin():
+    """Es el caso normal al exportar el mes: el depósito se hace días después, «casi pasando el otro mes»."""
+    constancia = asiento.constancia_de(_compra_con_detraccion())
+    assert constancia == {"nro_constancia": NUMERO_DETRACCION_PENDIENTE, "fecha_constancia": ""}
+
+
+def test_con_constancia_pegada_sale_la_suya():
+    constancia = asiento.constancia_de(
+        _compra_con_detraccion(nro_constancia="12345678901234567", fecha_constancia="2026-02-10"))
+    assert constancia == {"nro_constancia": "12345678901234567", "fecha_constancia": "2026-02-10"}
+
+
+def test_sin_detraccion_no_hay_constancia_ni_comodin():
+    """El comodín dice «está pendiente», y una compra sin detracción no tiene nada pendiente."""
+    c = _compra_con_detraccion()
+    c.detraccion = None
+    assert asiento.constancia_de(c) == {"nro_constancia": "", "fecha_constancia": ""}
+
+
+def test_el_driver_de_asiento_y_el_de_registro_dicen_lo_MISMO():
+    """Es para lo que se extrajo la regla (2.7). CONCAR la recibe dentro de la línea de detracción que arma el
+    núcleo; CONTASIS nunca ve esa línea —su sistema arma el asiento— y hasta la 2.7 la reescribía por su cuenta,
+    comodín incluido. Dos copias de una regla acaban diciendo cosas distintas; esto lo comprueba."""
+    c = _compra_con_detraccion(nro_constancia="98765432109876543", fecha_constancia="2026-02-10")
+    lineas = asiento.lineas_del_comprobante(c, CONTAB, (date(2026, 1, 1), date(2026, 1, 31)), "0001")
+    de_la_linea = next(ln.detraccion for ln in lineas if ln.rol == "detraccion" and ln.detraccion)
+    del_registro = driver_contasis.proyeccion._constancia(c)
+    assert de_la_linea["nro_constancia"] == del_registro["U"] == "98765432109876543"
+    assert de_la_linea["fecha_constancia"] == "2026-02-10" and del_registro["V"].date() == date(2026, 2, 10)

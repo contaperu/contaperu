@@ -11,9 +11,8 @@ from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.configuracion import NUMERO_DETRACCION_PENDIENTE
 from ...asiento.resolucion import cuenta_tercero, lleva_centro, partes_de
-from ...asiento.motor import glosa_de
+from ...asiento.motor import constancia_de, glosa_de
 from ...configuracion import por_defecto
 from ..kit import Opciones, celdas, formatear_numero, negativo
 from ...igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
@@ -57,15 +56,13 @@ def _en_soles(importes: dict[str, Decimal], tipo: str, tc: Decimal) -> dict[str,
 def _constancia(c: Comprobante) -> dict[str, Any]:
     """Las columnas U y V: la constancia del depósito de la detracción (2.6).
 
-    CONTASIS es un driver de REGISTRO —no arma el asiento, así que no ve la línea de detracción donde el núcleo ya
-    resuelve el comodín—, y por eso lo resuelve aquí sobre el comprobante. Sin detracción las dos van en blanco: la
-    columna existe para las compras que la llevan, no para todas.
-    """
-    det = c.detraccion or {}
-    if not str(det.get("codigo") or "").strip():
-        return {"U": "", "V": None}
-    return {"U": str(det.get("nro_constancia") or "").strip() or NUMERO_DETRACCION_PENDIENTE,
-            "V": _fecha(celdas.fecha(str(det.get("fecha_constancia") or ""), None))}
+    CONTASIS es un driver de REGISTRO —no arma el asiento, así que no ve la línea de detracción donde el núcleo la
+    deja resuelta—, y hasta la 2.7 reescribía aquí la regla entera, comodín incluido. Ahora la pregunta la
+    responde `asiento.constancia_de`, una sola vez para los dos caminos; lo que sigue siendo de CONTASIS es en qué
+    columnas la escribe y que la fecha vaya como `datetime` de celda."""
+    constancia = constancia_de(c)
+    return {"U": constancia["nro_constancia"],
+            "V": _fecha(celdas.fecha(constancia["fecha_constancia"], None))}
 
 
 def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.OPCIONES) -> dict[str, Any]:

@@ -37,6 +37,18 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ### Cambiado
 
+- **`asiento.constancia_de(comprobante)`: la constancia de la detracción, una sola regla.** Estaba escrita dos
+  veces, comodín incluido, y el propio docstring de CONTASIS lo admitía: es un driver de REGISTRO, no ve la línea
+  de detracción donde el núcleo la deja resuelta, así que la reescribía. Ahora los dos caminos preguntan lo mismo,
+  y hay un test que comprueba que responden lo mismo — que es para lo que se extrajo.
+- **`kit.forma`**: lo que todo driver `desde_lineas` comprueba y recorre antes de escribir. Las dos guardas
+  estaban en CONCAR y en STARSOFT carácter a carácter salvo el nombre del sistema.
+- **Los rangos de sub-diario de CONCAR se quedan donde están, y se escribe por qué.** Se miró si sobraban: no
+  sobran. Los del núcleo llevan tres cifras y CONCAR añade la etiqueta, los dos códigos `MMNNNN` y el desborde,
+  que es lo que un ERP guarda para proponer el correlativo del mes siguiente. Y manda el del driver, porque
+  `pipeline/armado.py` funde su resumen al final.
+
+
 - **Un formateador por cosa, y ningún archivo cambia.** `kit.formatear_monto` acepta ahora lo que trae una línea
   —texto, `Decimal` o nada— y decide el cero por `opciones.cero`, así que el `con_dos_decimales` de STARSOFT pasa
   a ser una llamada a él con las opciones de STARSOFT. `kit.formatear_fecha` acepta el texto ISO además del

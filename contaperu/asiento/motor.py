@@ -103,6 +103,24 @@ def _limpio(campos: dict) -> dict:
     return {k: v for k, v in campos.items() if v not in ("", None)}
 
 
+def constancia_de(c: Comprobante) -> dict[str, str]:
+    """La constancia del depósito de la detracción de ese comprobante: su número y su fecha, como van al archivo.
+
+    Una sola regla para los dos caminos que la necesitan, y son distintos a propósito: un driver de ASIENTO la
+    recibe ya resuelta dentro de la línea de detracción, pero uno de REGISTRO —CONTASIS— nunca ve esa línea,
+    porque el asiento lo arma su propio sistema. Hasta la 2.7 la reescribía, con el comodín incluido, y su
+    docstring lo admitía.
+
+    Lo que dice la regla: **sin detracción no hay constancia**, las dos en blanco; con detracción, el número cae
+    al comodín cuando nadie ha pegado el vóucher —que es el caso normal al exportar el mes, porque el depósito se
+    hace días después— y **la fecha no tiene comodín**, que una fecha inventada es peor que ninguna."""
+    bloque = c.detraccion or {}
+    if not str(bloque.get("codigo") or "").strip():
+        return {"nro_constancia": "", "fecha_constancia": ""}
+    return {"nro_constancia": str(bloque.get("nro_constancia") or "").strip() or NUMERO_DETRACCION_PENDIENTE,
+            "fecha_constancia": str(bloque.get("fecha_constancia") or "").strip()}
+
+
 def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = False) -> dict:
     """El bloque de la línea de detracción: el código SUNAT, el interno del contribuyente (T.G. 28 de
     CONCAR: el de SUNAT + 2 propios, o SUNAT + "01" si no lo configuró), la tasa —la misma con la que
@@ -119,11 +137,9 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = Fa
     interno = "" if neutral else str((config.get("detraccion_codigos") or {}).get(sunat)
                                      or (f"{sunat}01" if sunat else ""))
     tasa = tasa_detraccion(c, config)
-    constancia = str(bloque.get("nro_constancia") or "").strip() or NUMERO_DETRACCION_PENDIENTE
     return _limpio({"codigo": sunat, "codigo_interno": interno,
                     "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total),
-                    "nro_constancia": constancia if sunat else "",
-                    "fecha_constancia": str(bloque.get("fecha_constancia") or "").strip() if sunat else ""})
+                    **constancia_de(c)})
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
