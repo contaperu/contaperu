@@ -184,10 +184,29 @@ Un cliente MCP local lo arranca por entrada y salida estándar; uno remoto, por 
 y sus nombres son los de siempre: `diagnosticar`, `exportar`, `generar_asiento`, `validar_comprobantes`… Cómo
 conectarlo a Claude está en el `README.md`.
 
+## ¿Te hace falta un driver? Casi seguro que no
+
+Antes de escribir nada, mira cuál de estos tres eres. Solo el tercero pide código.
+
+| | Qué necesitas | ¿Driver? |
+|---|---|---|
+| **1** | Leer asientos que otro armó | **No.** Te basta el esquema; ni siquiera instalas el paquete |
+| **2** | Que el motor te dé el asiento, en el estándar | **No.** `exportar(documento, driver="asiento_neutral")` y ya |
+| **3** | Que el motor escriba **tu formato propio** | **Sí**, y va en tu paquete, sin pasar por aquí |
+
+**Un driver existe para traducir a un formato que no podemos cambiar** — el Excel que importa un CONCAR instalado, el
+TXT que pide SUNAT. Un sistema que puede adoptar el estándar no tiene nada que traducir: el estándar ya es su
+formato, y para eso está el driver `asiento_neutral`. Si escribes un driver que no te hacía falta, has creado un
+traductor más que mantener.
+
+Y el canal lo dice del formato, no de la edad del software: si tu importador pide siglas y correlativos es `legacy`
+aunque el sistema sea de este año, y si acepta las líneas del estándar es `intercambio`, que el motor presenta en su
+grupo `erp`.
+
 ## Un driver para tu sistema contable
 
-Si tu ERP todavía no tiene driver, el contrato está en `contaperu/drivers/contrato.py` y la guía paso a paso, en
-`CONTRIBUTING.md`. Lo esencial:
+Esto es el nivel 3: tu sistema importa un archivo con una forma suya. El contrato está en
+`contaperu/drivers/contrato.py` y la guía paso a paso, en `CONTRIBUTING.md`. Lo esencial:
 
 - **Declara a quién entrega** (`CANAL`): `legacy` si es un sistema contable instalado que importa un archivo,
   `tributario` si es un registro que se presenta a SUNAT, `intercambio` si es un formato neutral. El motor lo presenta

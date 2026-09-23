@@ -6,6 +6,15 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Cambiado
+
+- **`INTEGRAR.md` dice primero que casi nadie necesita un driver.** La guía dedicaba una sección entera a
+  escribir uno y una sola línea a pedir el asiento con `asiento_neutral`, así que un sistema moderno que la leyera
+  daba por hecho que le tocaba escribir código aquí. Ahora abre con los tres niveles —leer el documento, pedirle
+  el asiento al motor, o escribir tu formato— y solo el tercero pide driver. **Un estándar escala cuando la
+  mayoría de los que lo adoptan no escriben código en él**, y un driver que no hacía falta es un traductor más
+  que mantener. Se dice también que el canal describe el FORMATO y no la edad del software.
+
 ## [3.1.0] — 2026-09-23
 
 ### Añadido
