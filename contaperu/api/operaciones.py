@@ -205,6 +205,47 @@ def drivers_disponibles() -> dict:
     }
 
 
+def verificar_documento(documento: dict) -> dict:
+    """Comprueba un documento contra el ESTÁNDAR, sin armar ni exportar nada: su esquema y sus catálogos.
+
+    Es el espejo de `verificar_driver`. Aquel comprueba lo que alguien ESCRIBE contra el contrato del motor; este
+    comprueba lo que alguien PRODUCE contra el contrato del estándar, y existe porque hasta la 3.1 no había
+    ninguno: quien construía sobre `open-accounting` tenía el esquema publicado y ninguna forma de correrlo que no
+    fuera clonar el repositorio y lanzar pytest.
+
+    Devuelve `{conforme, errores, avisos, open_accounting}`. La diferencia entre las dos listas es la del propio
+    estándar: un **error** es que el documento no cumple el esquema, y ahí no hay nada que interpretar. Un
+    **aviso** es lo que el esquema no puede decir porque está en los catálogos y no en él —un `rol` que no
+    conocemos se degrada y no rompe la línea, pero un `tipo` de libro que no conocemos sí—, y quien lee decide.
+
+    Solo para Python y la línea de comandos, por lo mismo que `verificar_driver` y por una razón más: valida con
+    `jsonschema`, que es el extra `schema` y no una dependencia del núcleo. Lanza `ImportError` si no está."""
+    try:
+        import jsonschema
+    except ImportError as error:
+        raise ImportError("Validar contra el esquema necesita `jsonschema`: pip install 'contaperu[schema]'") from error
+
+    validador = jsonschema.Draft202012Validator(esquema_open_accounting())
+    errores = [f"{'/'.join(str(p) for p in e.absolute_path) or '(raíz)'}: {e.message}"
+               for e in sorted(validador.iter_errors(documento), key=lambda e: list(e.absolute_path))]
+
+    catalogos = catalogos_del_estandar()
+    roles = set(catalogos["roles"]["codigos"])
+    tipos = set(catalogos["tipos_de_libro"]["codigos"])
+    avisos = []
+    tipo = ((documento or {}).get("libro") or {}).get("tipo")
+    if tipo is not None and tipo not in tipos:
+        avisos.append(f"`libro.tipo` {tipo!r} no está en el catálogo ({', '.join(sorted(tipos))}): esto SÍ rompe, "
+                      "porque de él dependen las columnas de cada registro")
+    desconocidos = sorted({str(ln.get("rol")) for ln in (documento or {}).get("asiento") or []
+                           if ln.get("rol") and ln.get("rol") not in roles})
+    if desconocidos:
+        avisos.append(f"roles fuera del catálogo ({', '.join(desconocidos)}): una línea con un rol que no conoces "
+                      "se lee igual, el rol solo dice qué es. No rompe.")
+    return {"conforme": not errores, "errores": errores, "avisos": avisos,
+            "open_accounting": (documento or {}).get("open_accounting", "")}
+
+
 def verificar_driver(modulo: str) -> dict:
     """Comprueba un driver contra el contrato antes de registrarlo: importa el módulo por su nombre (`paquete.driver`) y
     dice su forma, su canal, su grupo, si cumple y qué le falta (`drivers.contrato.incumplimientos`), más los avisos con

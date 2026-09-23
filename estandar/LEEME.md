@@ -402,10 +402,12 @@ documento y uno en la clave de versión.
 
 ## Cómo compruebas que lo que produces es correcto
 
-Tres piezas, y la tercera es la que faltaba:
+Cuatro piezas. La de arriba entró en la 3.1 y es la que faltaba para quien **no usa el motor**: hasta
+entonces el esquema estaba publicado y la única forma de correrlo era clonar el repositorio.
 
 | Pieza | Qué comprueba |
 |---|---|
+| `contaperu verificar-documento mi-documento.json` | **Un documento tuyo contra ESTE estándar**: su esquema y sus catálogos, sin armar ni exportar nada |
 | `python -m contaperu.puertas.cli diagnosticar mi-mes.json` | **Un documento tuyo**: qué bloquea, qué falta y a quién pedírselo |
 | `contaperu verificar-driver mi_paquete.mi_driver` | **Un driver propio** contra el contrato, antes de registrarlo |
 | [`conformidad/esquema.json`](conformidad/esquema.json) | **Que tus documentos son conformes**, con un validador y nada más: sin el motor y en cualquier lenguaje |

@@ -61,7 +61,7 @@ def test_cada_comando_que_nombra_existe():
     from contaperu.puertas import cli
 
     scripts = tomllib.loads((RAIZ / "pyproject.toml").read_text(encoding="utf-8"))["project"]["scripts"]
-    subcomandos = {"generar", "desde-json", "diagnosticar", "configuracion", "comparar"}
+    subcomandos = {"generar", "desde-json", "diagnosticar", "configuracion", "comparar", "verificar-documento"}
     for bloque in _bloques("bash"):
         for linea in bloque.splitlines():
             partes = shlex.split(linea) if linea.strip() else []

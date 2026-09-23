@@ -31,7 +31,7 @@ from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, catalogo_pcge, catal
                           describir_configuracion, diagnosticar, drivers_disponibles, errores_de_configuracion,
                           esquema_diagnostico, esquema_open_accounting, exportar, exportar_archivo, generar_asiento, leer_archivos,
                           leer_propuesta_sire, leer_xml, normalizar_detracciones, revisar, configuracion_por_defecto, contrato_openconta,
-                          verificar_driver)
+                          verificar_documento, verificar_driver)
 from .tabla import OPERACIONES, Operacion
 
 __all__ = [
@@ -42,7 +42,7 @@ __all__ = [
     "drivers_disponibles",
     "catalogos_sunat",
     "catalogos_api_sire", "catalogo_pcge", "catalogos_del_estandar", "esquema_open_accounting", "esquema_diagnostico", "comparar_sire",
-    "contrato_openconta", "verificar_driver",
+    "contrato_openconta", "verificar_documento", "verificar_driver",
     # la tabla que exponen las puertas
     "OPERACIONES", "Operacion",
     # lo que devuelve o recibe

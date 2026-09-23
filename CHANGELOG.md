@@ -8,6 +8,21 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ### Añadido
 
+- **`contaperu verificar-documento mi-documento.json`** (y `api.verificar_documento`): un documento contra el
+  ESTÁNDAR, su esquema y sus catálogos, sin armar ni exportar nada. Es el espejo de `verificar-driver` —aquel
+  comprueba lo que alguien escribe contra el contrato del motor; este, lo que alguien produce contra el contrato
+  del estándar— y **hasta ahora no existía ninguno**: quien construía sobre `open-accounting` tenía el esquema
+  publicado y ninguna forma de correrlo que no fuera clonar el repositorio y lanzar pytest.
+
+  Separa **errores** de **avisos**, y la distinción es la del propio estándar: un error es no cumplir el esquema,
+  y ahí no hay nada que interpretar; un aviso es lo que el esquema no puede decir porque vive en los catálogos —un
+  `rol` desconocido se degrada y no rompe la línea, un `tipo` de libro desconocido sí rompe—.
+- **`INTEGRAR.md` gana la sección «Si NO usas el motor: construir sobre el estándar».** La guía entera suponía que
+  llamas a `contaperu` por una de sus cuatro puertas; esta es para quien no lo hace. Dice qué lleva el documento,
+  qué garantiza —las cuentas decididas, el asiento cuadrado, el orden estable—, cómo se enlaza con el origen por
+  `id_externo` y por la huella de `_exportacion.comprobantes`, y qué no lleva y por qué.
+
+
 - **Los casos de conformidad viajan en la rueda** (`contaperu/estandar/conformidad/`). El LEEME del estándar los
   ofrecía para «comprobar que lo que tu sistema produce es correcto, sin escribirle a nadie» y **solo estaban en el
   repositorio**: quien instalaba `contaperu` no los tenía y la única forma de correrlos era clonar. Y un guardián

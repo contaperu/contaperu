@@ -203,6 +203,55 @@ Si tu ERP todavía no tiene driver, el contrato está en `contaperu/drivers/cont
   estándar, sin siglas, sub-diarios ni correlativos de ningún sistema legacy— y lo envía; el envío y los
   reintentos son suyos, con la identidad y la huella de cada comprobante como clave para no repetir.
 
+## Si NO usas el motor: construir sobre el estándar
+
+Todo lo de arriba supone que llamas a `contaperu`. No hace falta: `open-accounting` es un estándar publicado y
+puedes construir sobre él, en el lenguaje que sea. Esta sección es para eso, y es el espejo de la anterior —allí se
+escribe un driver contra el contrato del motor; aquí se lee el documento contra el contrato del estándar—.
+
+**Qué recibes.** El documento que produce el driver `asiento_neutral` tiene cuatro claves:
+
+```json
+{
+  "open_accounting": "1.0",
+  "libro": {"ruc": "…", "razon_social": "…", "periodo": "202601", "tipo": "compra"},
+  "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "1000.00", "clase": "gasto", "rol": "principal"}],
+  "_exportacion": {"driver": "asiento_neutral", "motor": "3.1.0", "huella": "…", "comprobantes": [{"…"}]}
+}
+```
+
+**Qué te garantiza, y es lo que ahorra el trabajo:** las cuentas ya están decididas, el asiento **cuadra** —el motor
+se niega a producirlo si no— y el orden de las líneas es estable. Cada línea dice qué es por su `rol` y trae el
+código SUNAT de su documento, no la sigla de ningún sistema.
+
+**Cómo lo enlazas con lo tuyo.** Por dos vías, y conviene usar las dos:
+
+- `linea.documento.id_externo` — el identificador que pusiste tú en el comprobante, en cada línea suya.
+- `_exportacion.comprobantes` — por comprobante, su identidad, el tramo `[desde, hasta)` de líneas que le toca y la
+  huella de ese tramo. **Esa huella es la clave para no repetir**: si la de un comprobante no cambió, es el mismo
+  asiento que ya importaste. Los tramos parten las líneas sin dejar hueco ni solaparse.
+
+**Qué NO lleva, y por qué.** Ni `fecha` de exportación ni nombre de archivo: no son hechos del asiento, y quien
+llama al API los recibe en su respuesta. Tampoco sub-diarios ni correlativos: son vocabulario de un sistema legacy y
+el documento neutral no los tiene (`sub_diarios` sale vacío a propósito). Y una línea **no lleva las claves que
+están vacías**: cuenta con que el juego de campos varíe de una a otra.
+
+**Cómo compruebas lo que produces**, sin escribirle a nadie:
+
+```bash
+contaperu verificar-documento mi-documento.json
+```
+
+Dice si es conforme con el esquema y, aparte, los **avisos** de lo que el esquema no puede decir porque vive en los
+catálogos: un `rol` que no conoces se lee igual —el rol solo dice qué es esa línea—, pero un `tipo` de libro que no
+conoces sí rompe, porque de él dependen las columnas de cada registro. Desde Python es `api.verificar_documento`.
+
+Y si tu implementación es de otro lenguaje, los casos están publicados: `estandar/conformidad/esquema.json` son 24
+casos con la forma de la *JSON Schema Test Suite*, que corres con cualquier validador de draft 2020-12 y sin el
+motor. Viajan dentro del paquete, así que `pip install contaperu` te los deja en
+`contaperu/estandar/conformidad/`. Los de `diagnosticar.json` **no son portables**: comprueban este motor, no el
+tuyo.
+
 ## El SIRE, de punta a punta
 
 El motor **no se conecta a SUNAT** —no hay credenciales, no sale ni un paquete a la red, y sus propios tests

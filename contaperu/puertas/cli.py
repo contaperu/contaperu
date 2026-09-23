@@ -236,6 +236,30 @@ def cmd_comparar(args: argparse.Namespace) -> int:
     return 1 if (comparacion["diferencias"] or comparacion["solo_en_sunat"] or comparacion["solo_nuestros"]) else 0
 
 
+def cmd_verificar_documento(args: argparse.Namespace) -> int:
+    """Un documento contra el estándar: su esquema y sus catálogos, sin armar ni exportar nada.
+
+    Es el espejo de `verificar-driver`, y existe para quien construye SOBRE `open-accounting` sin usar el motor:
+    hasta la 3.1 el esquema estaba publicado y la única forma de correrlo era clonar el repositorio."""
+    try:
+        resultado = api.verificar_documento(_leer_json(args.json))
+    except ImportError as error:
+        print(error, file=sys.stderr)
+        return 2
+    version = resultado["open_accounting"] or "(no lo dice)"
+    print(f"Documento open-accounting {version}")
+    for aviso in resultado["avisos"]:
+        print(f"   · {aviso}")
+    if resultado["conforme"]:
+        print("CONFORME con el esquema del estándar.")
+        return 0
+    for falta in resultado["errores"]:
+        print(f"  !! {falta}")
+    n = len(resultado["errores"])
+    print(f"NO conforme: {n} cosa{'s' if n != 1 else ''} que corregir.")
+    return 1
+
+
 def cmd_verificar_driver(args: argparse.Namespace) -> int:
     """Un driver propio contra el contrato, antes de registrarlo por entry points o de proponerlo al repositorio."""
     # Quien lo prueba suele estar en la carpeta de su driver, y un comando instalado no la tiene en la ruta de Python.
@@ -256,7 +280,8 @@ def cmd_verificar_driver(args: argparse.Namespace) -> int:
         return 0
     for falta in resultado["incumplimientos"]:
         print(f"  !! {falta}")
-    print(f"NO cumple el contrato: {len(resultado['incumplimientos'])} cosas que corregir.")
+    n = len(resultado["incumplimientos"])
+    print(f"NO cumple el contrato: {n} cosa{'s' if n != 1 else ''} que corregir.")
     return 1
 
 
@@ -341,6 +366,11 @@ def main(argv: list[str] | None = None) -> int:
     sub_comparar.add_argument("--registro", default="", choices=["", "venta", "compra"],
                               help="normalmente se deduce del nombre (1404 ventas / 0804 compras); fuérzalo si no")
     sub_comparar.set_defaults(fn=cmd_comparar)
+
+    sub_documento = subcomandos.add_parser(
+        "verificar-documento", help="un documento contra el estándar open-accounting: su esquema y sus catálogos")
+    sub_documento.add_argument("json", help="documento open-accounting")
+    sub_documento.set_defaults(fn=cmd_verificar_documento)
 
     sub_verificar = subcomandos.add_parser("verificar-driver",
                                            help="un driver propio contra el contrato del motor, antes de registrarlo")

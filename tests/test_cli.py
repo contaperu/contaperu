@@ -200,3 +200,45 @@ def test_un_pdf_por_la_terminal_queda_pendiente_de_leer(tmp_path, capsys):
                        "--periodo", "202601", "--salida", str(tmp_path / "s"), str(pdf)])
     salida = capsys.readouterr().out
     assert codigo == 1 and "1 PDF/imagen (pendientes de IA) · 0 con error" in salida
+
+
+# ── `verificar-documento`: el espejo de `verificar-driver`, para quien NO usa el motor ──────────────────────────
+
+def _escribir(tmp_path, documento: dict):
+    ruta = tmp_path / "documento.json"
+    ruta.write_text(json.dumps(documento, ensure_ascii=False), encoding="utf-8")
+    return str(ruta)
+
+
+LIBRO_OK = {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"}
+
+
+def test_un_documento_conforme_sale_con_cero(tmp_path, capsys):
+    """Lo que un tercero necesita para comprobar lo que produce sin escribirle a nadie, que es lo que el LEEME del
+    estándar ofrece. Hasta la 3.1 el esquema estaba publicado y la única forma de correrlo era clonar el
+    repositorio y lanzar pytest."""
+    codigo = cli.main(["verificar-documento", _escribir(tmp_path, {"open_accounting": "1.0", "libro": LIBRO_OK})])
+    assert codigo == 0 and "CONFORME" in capsys.readouterr().out
+
+
+def test_lo_que_el_esquema_rechaza_es_un_ERROR(tmp_path, capsys):
+    documento = {"open_accounting": "1.0", "libro": LIBRO_OK,
+                 "asiento": [{"cuenta": "631101", "debe_haber": "X", "importe": "100.00", "clase": "gasto"}]}
+    codigo = cli.main(["verificar-documento", _escribir(tmp_path, documento)])
+    salida = capsys.readouterr().out
+    assert codigo == 1 and "NO conforme: 1 cosa que corregir" in salida
+    assert "debe_haber" in salida and "'D', 'H'" in salida
+
+
+def test_lo_que_solo_saben_los_catalogos_es_un_AVISO(tmp_path, capsys):
+    """La distinción es la del propio estándar y por eso se enseña en dos listas: un **error** es no cumplir el
+    esquema, y ahí no hay nada que interpretar. Un **aviso** es lo que el esquema no puede decir porque vive en
+    los catálogos — un `rol` desconocido se degrada y no rompe la línea; un `tipo` de libro desconocido sí rompe,
+    porque de él dependen las columnas de cada registro."""
+    documento = {"open_accounting": "1.0", "libro": {**LIBRO_OK, "tipo": "diario"},
+                 "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "100.00", "clase": "gasto",
+                              "rol": "inventado"}]}
+    codigo = cli.main(["verificar-documento", _escribir(tmp_path, documento)])
+    salida = capsys.readouterr().out
+    assert codigo == 0, "los catálogos avisan, no rechazan: el esquema es quien dice conforme o no"
+    assert "SÍ rompe" in salida and "inventado" in salida and "No rompe" in salida
