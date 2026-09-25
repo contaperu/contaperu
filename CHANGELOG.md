@@ -8,6 +8,19 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ### Añadido
 
+- **Los nueve importes que forman el total, descritos en el esquema del estándar.** `exonerado` e `inafecto`
+  estaban uno al lado del otro sin una línea que los separara, y la diferencia tiene consecuencia tributaria: lo
+  **exonerado** está dentro del campo de aplicación del IGV y una norma lo libera (Apéndices I y II); lo
+  **inafecto** queda fuera de ese campo (art. 2 de la Ley), así que nunca hubo impuesto que cobrar — y es lo que
+  suele llevar la parte no gravada de un recibo de servicios públicos. Un ERP que integre el estándar tenía que
+  adivinarlo. Con ellos van `exportacion`, `isc`, `base_ivap`, `ivap`, `icbper`, `otros` y `total`, que estaban
+  igual: describir la mitad de un bloque es peor que no describir ninguno.
+
+  Solo son anotaciones, así que **no cambia ninguna validación** ni la versión del estándar. Quedan 15 campos del
+  comprobante sin describir, la mayoría evidentes por su nombre.
+
+### Añadido
+
 - **`INTEGRAR.md`: «Tu propio MCP con el del motor debajo».** Faltaba decir dónde va la capa de agente de un ERP
   —configurar, reportes, análisis, cargar una factura— y la respuesta cabe en una pregunta: **¿necesita TUS datos?**
   Lo que no los necesita ya es del motor; lo que sí, es del ERP, y juntarlas obligaría al motor a tener estado.

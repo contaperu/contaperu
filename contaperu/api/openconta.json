@@ -986,31 +986,40 @@
       "description": "Parte del igv que el registro informa como descuento (SIRE ventas, campo 18). No entra en el total."
      },
      "exonerado": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Importe de la operación EXONERADA del IGV: está dentro del campo de aplicación del impuesto y una norma la libera (Apéndices I —bienes— y II —servicios— de la Ley del IGV). No es lo mismo que `inafecto`: lo exonerado tributaría si esa norma no existiera."
      },
      "inafecto": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Importe de la operación INAFECTA: queda FUERA del campo de aplicación del IGV (art. 2 de la Ley), así que nunca hubo impuesto que cobrar. Es lo que suele llevar la parte no gravada de un recibo de servicios públicos —intereses, recargos, cobros por cuenta de terceros—, y no `exonerado`."
      },
      "exportacion": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Valor de la operación de exportación, que no está gravada con IGV. Va aparte de `inafecto` porque el registro de ventas la declara en su propia columna."
      },
      "isc": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Impuesto Selectivo al Consumo que trae el comprobante. Forma parte del total y no es base gravada."
      },
      "base_ivap": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Base imponible del Impuesto a la Venta de Arroz Pilado, que sustituye al IGV en ese producto."
      },
      "ivap": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Impuesto a la Venta de Arroz Pilado. Sustituye al IGV, así que no va en `igv` ni da crédito fiscal."
      },
      "icbper": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Impuesto al Consumo de las Bolsas de Plástico. Forma parte del total y tiene su propia cuenta contable: es un tributo, no un gasto de la compra."
      },
      "otros": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Otros tributos y cargos que forman el total y no son ninguno de los anteriores. Su cuenta se configura aparte (`cuentas.otros_tributos`)."
      },
      "total": {
-      "$ref": "#/components/schemas/OpenAccounting_importe"
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Importe total del comprobante, tal como lo dice el documento. El motor comprueba que cuadre con la suma de sus partes dentro de la tolerancia, y lo observa si no (`TOTAL_NO_CUADRA`)."
      },
      "retencion": {
       "$ref": "#/components/schemas/OpenAccounting_importe",
