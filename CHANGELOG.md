@@ -4,6 +4,25 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+### Añadido
+
+- **La Tabla 1 de SUNAT, «Tipo de medio de pago», entra como catálogo** (`catalogos.MEDIOS_PAGO`, y en
+  `catalogos_sunat` por la API, la puerta HTTP y el recurso `contaperu://catalogos/sunat`). Son los **22 códigos**
+  del Anexo 3 de la RS 169-2015/SUNAT —la que aprueba la versión 5.0.0 del PLE—, que son los medios de pago del
+  artículo 5 de la Ley 28194, la de bancarización.
+
+  Hasta hoy el motor **escribía un medio de pago que nadie sabía leer**: `contasis.medio_pago` vale `001` de fábrica
+  y sale en la columna AN de su registro de ventas, sin que existiera en ninguna parte un mapa que dijera qué es
+  `001`. Y el catálogo se gana su sitio con un caso concreto: la primera lista que llegó traía tres filas y decía
+  que `005` era «tarjeta de crédito» —en el anexo `005` es **tarjeta de débito** y la de crédito emitida en el país
+  es `006`—. Un valor publicado no se cambia de significado después, así que los 22 quedan congelados en
+  `tests/test_catalogos.py`, con un test que solo comprueba esas dos tarjetas.
+
+  Ojo con el nombre: **no es la «Tabla 1» de los documentos de identidad**, que es la del Anexo 1 de la RS 112-2021.
+  Cada anexo numera las suyas desde 1.
+
 ## [3.2.0] — 2026-09-25
 
 **La detracción tiene dos tiempos y ahora se sabe en cuál está cada una.** La 2.6 hizo que la constancia del depósito

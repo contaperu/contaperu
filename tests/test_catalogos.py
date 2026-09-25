@@ -35,11 +35,66 @@ def test_los_catalogos_son_los_de_la_1_0():
 
 def test_cada_catalogo_viene_de_datos_con_su_fuente():
     datos = _datos.leer_json("datos/sunat/catalogos.json")
-    assert set(datos) == {"tipos_comprobante", "tipos_documento_identidad", "monedas"}
+    assert set(datos) == {"tipos_comprobante", "tipos_documento_identidad", "monedas", "medios_pago"}
     assert all(tabla["fuente"].strip() for tabla in datos.values())
     assert catalogos.TIPOS_CP == datos["tipos_comprobante"]["codigos"]
     assert catalogos.FUENTES == {nombre: tabla["fuente"] for nombre, tabla in datos.items()}
     assert api.catalogos_sunat()["fuentes"] == catalogos.FUENTES
+
+
+# ── Los medios de pago (Tabla 1 del Anexo 3 de la RS 169-2015) ─────────────────────────────────────────────────
+
+# Los 22 códigos, escritos a mano y enteros. Existe por un error concreto: la primera lista que llegó tenía tres
+# filas y decía que `005` era «tarjeta de crédito». En el anexo `005` es **tarjeta de débito** y la de crédito
+# emitida en el país es `006`. Un código publicado no se puede cambiar de significado después
+# (`estandar/enmiendas/LEEME.md`), así que el que los vigila es este test y no la buena memoria de nadie.
+MEDIOS_DE_PAGO_DE_LA_TABLA_1 = {
+    "001": "Depósito en cuenta",
+    "002": "Giro",
+    "003": "Transferencia de fondos",
+    "004": "Orden de pago",
+    "005": "Tarjeta de débito",
+    "006": "Tarjeta de crédito emitida en el país por una empresa del sistema financiero",
+    "007": "Cheques con la cláusula de «no negociable», «intransferibles», «no a la orden» u otra equivalente, "
+           "a que se refiere el inciso g) del artículo 5° de la Ley",
+    "008": "Efectivo, por operaciones en las que no existe obligación de utilizar medio de pago",
+    "009": "Efectivo, en los demás casos",
+    "010": "Medios de pago usados en comercio exterior",
+    "011": "Documentos emitidos por las EDPYMES y las cooperativas de ahorro y crédito no autorizadas a captar "
+           "depósitos del público",
+    "012": "Tarjeta de crédito emitida en el país o en el exterior por una empresa no perteneciente al sistema "
+           "financiero, cuyo objeto principal sea la emisión y administración de tarjetas de crédito",
+    "013": "Tarjetas de crédito emitidas en el exterior por empresas bancarias o financieras no domiciliadas",
+    "101": "Transferencias - Comercio exterior",
+    "102": "Cheques bancarios - Comercio exterior",
+    "103": "Orden de pago simple - Comercio exterior",
+    "104": "Orden de pago documentario - Comercio exterior",
+    "105": "Remesa simple - Comercio exterior",
+    "106": "Remesa documentaria - Comercio exterior",
+    "107": "Carta de crédito simple - Comercio exterior",
+    "108": "Carta de crédito documentario - Comercio exterior",
+    "999": "Otros medios de pago",
+}
+
+
+def test_los_medios_de_pago_son_los_de_la_tabla_1():
+    """Los 22 códigos, con su texto y en el orden del anexo."""
+    assert list(catalogos.MEDIOS_PAGO.items()) == list(MEDIOS_DE_PAGO_DE_LA_TABLA_1.items())
+
+
+def test_la_tarjeta_de_debito_es_la_005_y_la_de_credito_la_006():
+    """El error que motivó el catálogo, con nombre propio: son dos códigos distintos y dos tarjetas distintas."""
+    assert catalogos.MEDIOS_PAGO["005"] == "Tarjeta de débito"
+    assert catalogos.MEDIOS_PAGO["006"].startswith("Tarjeta de crédito emitida en el país")
+    assert "crédito" not in catalogos.MEDIOS_PAGO["005"]
+
+
+def test_los_medios_de_pago_salen_por_la_fachada_con_su_fuente():
+    """Un ERP los lee por la API o por el recurso del MCP, no copiándolos."""
+    catalogos_sunat = api.catalogos_sunat()
+    assert catalogos_sunat["medios_pago"] == catalogos.MEDIOS_PAGO
+    fuente = catalogos_sunat["fuentes"]["medios_pago"]
+    assert "RS 169-2015" in fuente and "Tabla 1" in fuente
 
 
 # ── Las tres cifras del IGV ────────────────────────────────────────────────────────────────────────────────────

@@ -553,11 +553,11 @@
   "/v1/catalogos/sunat": {
    "get": {
     "operationId": "catalogos_sunat",
-    "summary": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas y la tabla de detracciones, con su fuente, que el ERP puede sobreescribir en su configuración.",
-    "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas y la\ntabla de detracciones, con su fuente, que el ERP puede sobreescribir en su configuración.",
+    "summary": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas, medios de pago y la tabla de detracciones, con su fuente.",
+    "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas,\nmedios de pago y la tabla de detracciones, con su fuente. La de detracciones es la única que el ERP puede\nsobreescribir en su configuración; las demás se copian de la norma y no se gobiernan.",
     "responses": {
      "200": {
-      "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas y la tabla de detracciones, con su fuente, que el ERP puede sobreescribir en su configuración.",
+      "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas, medios de pago y la tabla de detracciones, con su fuente.",
       "content": {
        "application/json": {
         "schema": {
@@ -2406,11 +2406,18 @@
    },
    "catalogos_sunat": {
     "title": "Catálogos de SUNAT",
-    "description": "Los tipos de comprobante, los tipos de documento de identidad y las monedas que entiende el motor.",
+    "description": "Los tipos de comprobante, los tipos de documento de identidad, las monedas y los medios de pago que entiende el motor.",
     "type": "object",
     "properties": {
      "tipos_comprobante": {
       "type": "object"
+     },
+     "medios_pago": {
+      "type": "object",
+      "description": "Tabla 1 del Anexo 3 de la RS 169-2015: el código de medio de pago y su descripción.",
+      "additionalProperties": {
+       "type": "string"
+      }
      },
      "tipos_documento_identidad": {
       "type": "object"
@@ -2474,7 +2481,7 @@
      },
      "fuentes": {
       "type": "object",
-      "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas): la norma y su tabla.",
+      "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas, medios_pago): la norma y su tabla.",
       "additionalProperties": {
        "type": "string"
       }
@@ -2484,6 +2491,7 @@
      "tipos_comprobante",
      "tipos_documento_identidad",
      "monedas",
+     "medios_pago",
      "notas",
      "fuera_del_registro_sunat",
      "detracciones",

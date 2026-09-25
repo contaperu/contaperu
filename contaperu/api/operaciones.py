@@ -269,12 +269,14 @@ def verificar_driver(modulo: str) -> dict:
 
 
 def catalogos_sunat() -> dict:
-    """Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas y la
-    tabla de detracciones, con su fuente, que el ERP puede sobreescribir en su configuración."""
+    """Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas,
+    medios de pago y la tabla de detracciones, con su fuente. La de detracciones es la única que el ERP puede
+    sobreescribir en su configuración; las demás se copian de la norma y no se gobiernan."""
     return {
         "tipos_comprobante": catalogos.TIPOS_CP,
         "tipos_documento_identidad": catalogos.TIPOS_DOC_IDENTIDAD,
         "monedas": sorted(catalogos.MONEDAS),
+        "medios_pago": catalogos.MEDIOS_PAGO,
         "notas": sorted(catalogos.NOTAS),
         "fuera_del_registro_sunat": sorted(catalogos.FUERA_DEL_REGISTRO_SUNAT),
         "detracciones": detracciones.tabla_del_motor(),

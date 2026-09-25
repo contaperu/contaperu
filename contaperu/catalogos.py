@@ -71,6 +71,15 @@ TIPOS_DOC_IDENTIDAD: dict[str, str] = dict(_CATALOGOS["tipos_documento_identidad
 # Tabla 2 (ISO 4217). Se deja pasar cualquier código de 3 letras; estos son los habituales.
 MONEDAS = frozenset(_CATALOGOS["monedas"]["codigos"])
 
+# Tabla 1 del Anexo 3 de la RS 169-2015: TIPO DE MEDIO DE PAGO, los 22 códigos con los que se paga una operación
+# (`001` depósito en cuenta … `999` otros). **No es la «Tabla 1» de tres líneas más arriba**, que es la de documentos
+# de identidad del Anexo 1 de la RS 112-2021: cada anexo numera las suyas desde 1, y son dos tablas distintas.
+#
+# El motor no decide con ella: es vocabulario. Da significado al código que un sistema contable exige —CONTASIS lo
+# pide en su registro de ventas— y permite avisar de uno que no existe. Un código que no esté aquí **no bloquea**
+# (`validar.MEDIO_PAGO_DESCONOCIDO` es aviso): el día que SUNAT añada uno, nadie se queda sin exportar su mes.
+MEDIOS_PAGO: dict[str, str] = dict(_CATALOGOS["medios_pago"]["codigos"])
+
 # Catálogo 05 de la factura electrónica: código de tributo en cac:TaxScheme/cbc:ID.
 TRIBUTO_IGV = "1000"
 TRIBUTO_IVAP = "1016"

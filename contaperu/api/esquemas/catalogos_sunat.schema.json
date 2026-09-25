@@ -2,11 +2,18 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/catalogos_sunat.schema.json",
  "title": "Catálogos de SUNAT",
- "description": "Los tipos de comprobante, los tipos de documento de identidad y las monedas que entiende el motor.",
+ "description": "Los tipos de comprobante, los tipos de documento de identidad, las monedas y los medios de pago que entiende el motor.",
  "type": "object",
  "properties": {
   "tipos_comprobante": {
    "type": "object"
+  },
+  "medios_pago": {
+   "type": "object",
+   "description": "Tabla 1 del Anexo 3 de la RS 169-2015: el código de medio de pago y su descripción.",
+   "additionalProperties": {
+    "type": "string"
+   }
   },
   "tipos_documento_identidad": {
    "type": "object"
@@ -70,7 +77,7 @@
   },
   "fuentes": {
    "type": "object",
-   "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas): la norma y su tabla.",
+   "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas, medios_pago): la norma y su tabla.",
    "additionalProperties": {
     "type": "string"
    }
@@ -80,6 +87,7 @@
   "tipos_comprobante",
   "tipos_documento_identidad",
   "monedas",
+  "medios_pago",
   "notas",
   "fuera_del_registro_sunat",
   "detracciones",
