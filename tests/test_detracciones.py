@@ -8,8 +8,10 @@ leída del PDF— y a CONCAR iba otra. Ahora las dos salen de `detracciones.mont
 """
 from __future__ import annotations
 
+import json
 from datetime import date
 from decimal import Decimal
+from pathlib import Path
 
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
@@ -242,3 +244,79 @@ def test_el_comodin_del_numero_se_configura_y_llega_a_los_dos_caminos():
 
     # Y sin configurar nada, el de partida.
     assert asiento.constancia_de(c)["nro_constancia"] == NUMERO_DETRACCION_PENDIENTE
+
+
+# --- cuándo una detracción cuenta como PAGADA (3.2) ---------------------------------------------------------------
+
+ESQUEMA_DEL_ESTANDAR = Path(__file__).resolve().parents[1] / "estandar" / "open-accounting.schema.json"
+
+
+def test_los_dos_estados_son_exactamente_los_del_estandar():
+    """Los nombres se declaran en el motor para que nadie escriba la cadena a mano, y el esquema los declara para
+    quien no usa el motor. Dos listas que dicen lo mismo en dos sitios acaban diciendo cosas distintas."""
+    esquema = json.loads(ESQUEMA_DEL_ESTANDAR.read_text(encoding="utf-8"))
+    del_estandar = esquema["$defs"]["detraccion"]["properties"]["estado"]["enum"]
+    assert del_estandar == [detracciones.PROVISIONADO, detracciones.PAGADO]
+
+
+def test_pagada_exige_el_numero_Y_la_fecha():
+    """El criterio de John (25-sep-2026). Con el número solo —lo que pasa cuando alguien pega el vóucher y se deja
+    la fecha— la detracción SIGUE pendiente, y por eso el mes la sigue listando: es lo que hace que vuelva."""
+    sin_nada = _compra_con_detraccion()
+    solo_numero = _compra_con_detraccion(nro_constancia="00123456789")
+    solo_fecha = _compra_con_detraccion(fecha_constancia="2026-02-10")
+    completa = _compra_con_detraccion(nro_constancia="00123456789", fecha_constancia="2026-02-10")
+    assert detracciones.estado_de(sin_nada) == detracciones.PROVISIONADO
+    assert detracciones.estado_de(solo_numero) == detracciones.PROVISIONADO
+    assert detracciones.estado_de(solo_fecha) == detracciones.PROVISIONADO
+    assert detracciones.estado_de(completa) == detracciones.PAGADO
+    assert detracciones.esta_pendiente(solo_numero) is True
+    assert detracciones.esta_pendiente(completa) is False
+
+
+def test_el_comodin_no_es_un_deposito_aunque_venga_con_fecha():
+    """Se descartan los DOS: el comodín en vigor y el de partida. Un contribuyente que configuró el suyo puede
+    tener guardado el de fábrica de una exportación anterior, y ese número tampoco es un vóucher."""
+    con_el_de_fabrica = _compra_con_detraccion(nro_constancia=NUMERO_DETRACCION_PENDIENTE,
+                                               fecha_constancia="2026-02-10")
+    assert detracciones.estado_de(con_el_de_fabrica) == detracciones.PROVISIONADO
+    propio = {**CONTAB, "detraccion_numero_pendiente": "123456789"}
+    con_el_suyo = _compra_con_detraccion(nro_constancia="123456789", fecha_constancia="2026-02-10")
+    assert detracciones.estado_de(con_el_suyo, propio) == detracciones.PROVISIONADO
+    assert detracciones.estado_de(con_el_de_fabrica, propio) == detracciones.PROVISIONADO
+    assert detracciones.numero_pendiente(propio) == "123456789"
+    assert detracciones.numero_pendiente() == NUMERO_DETRACCION_PENDIENTE
+
+
+def test_el_estado_que_trae_el_documento_no_se_lee():
+    """Es informativo (John, 25-sep-2026): lo escribe quien quiera para que se vea. Un `estado` PAGADO sin
+    constancia no convierte en pagada una detracción que no lo está, y uno PROVISIONADO con el depósito
+    documentado no la deja pendiente."""
+    miente_pagada = _compra_con_detraccion(estado="PAGADO")
+    miente_provisional = _compra_con_detraccion(estado="PROVISIONADO", nro_constancia="00123456789",
+                                                fecha_constancia="2026-02-10")
+    assert detracciones.estado_de(miente_pagada) == detracciones.PROVISIONADO
+    assert detracciones.estado_de(miente_provisional) == detracciones.PAGADO
+
+
+def test_sin_detraccion_no_hay_estado():
+    c = _compra_con_detraccion()
+    c.detraccion = None
+    assert detracciones.estado_de(c) == ""
+    assert detracciones.esta_pendiente(c) is False
+
+
+def test_el_voucher_llega_al_documento_DR_de_CONCAR():
+    """Lo que faltaba (3.2): el número real llegaba a STARSOFT y a CONTASIS y **no a CONCAR**, que es el destino en
+    producción y donde el número del documento `DR` ES la constancia. El comodín solo ocupa su sitio."""
+    def documento_dr(c, config=CONTAB) -> tuple[str, str]:
+        lineas = asiento.lineas_del_comprobante(c, config, (date(2026, 1, 1), date(2026, 1, 31)), "0001")
+        dr = next(ln for ln in lineas if ln.rol == "detraccion")
+        return driver_concar.proyeccion.fila(dr, c, config)["S"], dr.documento["serie_numero"]
+
+    # Sin vóucher, el comodín, como siempre: es el caso normal al cerrar el mes.
+    assert documento_dr(_compra_con_detraccion()) == (NUMERO_DETRACCION_PENDIENTE, NUMERO_DETRACCION_PENDIENTE)
+    pagada = _compra_con_detraccion(nro_constancia="00123456789", fecha_constancia="2026-02-10")
+    assert documento_dr(pagada) == ("00123456789", "00123456789")
+    # Con número y sin fecha el archivo TAMBIÉN lleva el número: el vóucher existe, lo que falta es anotar el día.
+    assert documento_dr(_compra_con_detraccion(nro_constancia="00123456789"))[0] == "00123456789"

@@ -181,12 +181,51 @@
      },
      "monto": {
       "type": "string"
+     },
+     "nro_constancia": {
+      "type": "string"
+     },
+     "fecha_constancia": {
+      "type": "string"
      }
     },
     "required": [
      "serie_numero",
      "codigo",
-     "monto"
+     "monto",
+     "nro_constancia",
+     "fecha_constancia"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "detracciones_pagadas": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "serie_numero": {
+      "type": "string"
+     },
+     "codigo": {
+      "type": "string"
+     },
+     "monto": {
+      "type": "string"
+     },
+     "nro_constancia": {
+      "type": "string"
+     },
+     "fecha_constancia": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "serie_numero",
+     "codigo",
+     "monto",
+     "nro_constancia",
+     "fecha_constancia"
     ],
     "additionalProperties": false
    }
@@ -271,6 +310,7 @@
   "avisos",
   "faltantes",
   "detracciones_pendientes",
+  "detracciones_pagadas",
   "resumen_por_contraparte",
   "sub_diarios",
   "saldrian"

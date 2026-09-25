@@ -27,6 +27,7 @@ from functools import lru_cache
 from typing import Any, Iterable
 
 from . import _datos
+from .configuracion import NUMERO_DETRACCION_PENDIENTE
 from .modelo import CENTIMO, Comprobante, a_decimal, texto_tasa
 
 # La tabla oficial que trae el motor: código SUNAT → nombre y tasa, con la fuente de donde sale.
@@ -149,7 +150,55 @@ def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Compro
     return cambiados
 
 
-# Conciliar las constancias del Banco de la Nación —el segundo tiempo, que pasa la detracción
-# de PROVISIONADO a PAGADO— todavía no está implementado: hace falta un archivo de constancias
-# real para saber su formato exacto, y en este proyecto ninguna regla se escribe de memoria.
-# El estándar ya tiene el hueco (`detraccion.estado`, `nro_constancia`, `fecha_constancia`).
+# --- los dos tiempos: provisionado y pagado ---------------------------------------------------------------------
+
+# Los dos estados que declara el estándar (`detraccion.estado`). Se nombran aquí para que nadie escriba la cadena a
+# mano, y `tests/test_detracciones.py` los ancla al `enum` del esquema: dos listas que dicen lo mismo en dos sitios
+# acaban diciendo cosas distintas.
+PROVISIONADO = "PROVISIONADO"
+PAGADO = "PAGADO"
+
+
+def numero_pendiente(config: dict | None = None) -> str:
+    """El COMODÍN del número de constancia: el del contribuyente si lo configuró
+    (`detraccion_numero_pendiente`, 3.1) y el de partida si no.
+
+    Vive aquí, y no en el asiento, que es donde se leía hasta la 3.1: lo necesitan los dos lados —la línea comodín
+    del asiento y el estado de la detracción, que no arma ningún asiento— y una sola fuente es lo que evita que un
+    contribuyente configure el suyo y el motor siga comparando contra otro."""
+    return str((config or {}).get("detraccion_numero_pendiente") or NUMERO_DETRACCION_PENDIENTE)
+
+
+def estado_de(c: Comprobante, config: dict | None = None) -> str:
+    """En qué tiempo está la detracción de ese comprobante: `PAGADO`, `PROVISIONADO`, o vacío si no tiene ninguna.
+
+    **PAGADO exige las dos cosas** (John, 25-sep-2026): un número de constancia que no sea el comodín **y** la
+    fecha del depósito. Con el número solo —lo normal cuando alguien lo pega y se deja la fecha— sigue
+    PROVISIONADO: el archivo ya sale con el número de verdad, y el mes lo sigue listando como pendiente, que es
+    justo lo que hace que alguien vuelva a poner la fecha.
+
+    **El `estado` que traiga el documento no se lee.** Es un campo informativo (John, 25-sep-2026): lo escribe
+    quien quiera para que se vea, y el motor lo deduce de los dos datos que no se pueden inventar. Un productor que
+    lo declare PAGADO sin constancia no consigue que el motor se lo crea.
+
+    Se descartan los DOS comodines, el que está en vigor y el de partida: un contribuyente que configuró el suyo
+    puede tener guardado el de fábrica de una exportación anterior, y ese número tampoco es un depósito.
+    """
+    bloque = c.detraccion if isinstance(c.detraccion, dict) else {}
+    if not str(bloque.get("codigo") or "").strip():
+        return ""
+    numero = str(bloque.get("nro_constancia") or "").strip()
+    fecha = str(bloque.get("fecha_constancia") or "").strip()
+    comodines = {numero_pendiente(config), NUMERO_DETRACCION_PENDIENTE}
+    return PAGADO if (numero and numero not in comodines and fecha) else PROVISIONADO
+
+
+def esta_pendiente(c: Comprobante, config: dict | None = None) -> bool:
+    """¿Esta detracción espera todavía su depósito documentado? Un comprobante sin detracción no espera nada."""
+    return estado_de(c, config) == PROVISIONADO
+
+
+# Lo que sigue pendiente es CONCILIAR con el banco: leer el archivo de constancias del Banco de la Nación y casar
+# cada depósito con su comprobante, sin que nadie teclee. Hace falta un archivo real para saber su formato exacto, y
+# en este proyecto ninguna regla se escribe de memoria. Lo que ya no falta es el estado: se deduce de lo que haya
+# pegado una persona (`estado_de`), y el estándar tiene desde siempre el hueco donde se guarda.

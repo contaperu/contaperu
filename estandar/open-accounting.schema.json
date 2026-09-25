@@ -233,9 +233,9 @@
         },
         "monto": { "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }], "description": "En soles: la detracción se deposita siempre en soles." },
         "cuenta": { "type": "string", "description": "Cuenta de detracciones del proveedor en el Banco de la Nación." },
-        "estado": { "enum": ["PROVISIONADO", "PAGADO"], "description": "Por defecto PROVISIONADO." },
-        "nro_constancia": { "type": "string", "description": "Constancia de depósito. Vacío mientras no se pague." },
-        "fecha_constancia": { "$ref": "#/$defs/fecha" }
+        "estado": { "enum": ["PROVISIONADO", "PAGADO"], "description": "INFORMATIVO, y por defecto PROVISIONADO: está para que se vea en pantalla o en un informe. Quien lee este documento NO se fía de él, porque nadie puede comprobarlo: el estado se DEDUCE de los dos datos que sí se pueden comprobar —PAGADO cuando `nro_constancia` no está vacío ni es el número comodín Y `fecha_constancia` tiene fecha; PROVISIONADO en cualquier otro caso—. Un `estado` que diga PAGADO sin constancia no convierte en pagada una detracción que no lo está." },
+        "nro_constancia": { "type": "string", "description": "Número de la constancia del depósito en el Banco de la Nación (el vóucher). Vacío mientras no se pague, y hay un valor más que significa lo mismo que vacío: el NÚMERO COMODÍN con el que un productor rellena la columna de los sistemas contables que la exigen (`999999999` en este motor, configurable). Con número pero sin `fecha_constancia`, el depósito está a medias: el archivo del sistema contable ya lleva el número de verdad y la detracción sigue contando como pendiente." },
+        "fecha_constancia": { "$ref": "#/$defs/fecha", "description": "Fecha del depósito en el Banco de la Nación, que es un día distinto del de la factura —se paga días después, a veces el mes siguiente—. Vacía mientras no se pague: **no tiene comodín**, porque una fecha inventada es peor que ninguna." }
       }
     },
 

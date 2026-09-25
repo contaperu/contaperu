@@ -126,15 +126,33 @@ def test_los_correlativos_se_ensenan_antes_de_exportar():
 
 
 def test_la_detraccion_espera_su_constancia_hasta_que_se_pague():
+    """Las dos caras, desde la 3.2: pagada es la que tiene número de constancia Y fecha del depósito.
+
+    La tercera factura es el caso que trajo el cambio: alguien pega el vóucher y se deja la fecha. Antes salía de
+    la lista y nadie volvía a mirarla; ahora sigue pendiente, y su entrada dice que el número ya está."""
     provisional = dict(FACTURA, detraccion={"codigo": "027", "porcentaje": 4})
     pagada = dict(FACTURA, numero="872", detraccion={"codigo": "027", "porcentaje": 4, "estado": "PAGADO",
                                                      "nro_constancia": "123456789", "fecha_constancia": "2026-08-20"})
-    d = diagnosticar(doc(provisional, pagada), driver="concar")
-    assert [p["serie_numero"] for p in d["detracciones_pendientes"]] == ["E001-871"]
-    assert d["detracciones_pendientes"][0] == {"serie_numero": "E001-871", "codigo": "027", "monto": "198"}
-    # Un código que el contribuyente no reconoce se descarta antes (normalizar), así que no está pendiente.
+    a_medias = dict(FACTURA, numero="873", detraccion={"codigo": "027", "porcentaje": 4,
+                                                       "nro_constancia": "123456789"})
+    d = diagnosticar(doc(provisional, pagada, a_medias), driver="concar")
+    assert [p["serie_numero"] for p in d["detracciones_pendientes"]] == ["E001-871", "E001-873"]
+    assert d["detracciones_pendientes"][0] == {"serie_numero": "E001-871", "codigo": "027", "monto": "198",
+                                               "nro_constancia": "", "fecha_constancia": ""}
+    assert d["detracciones_pendientes"][1]["nro_constancia"] == "123456789"
+    assert d["detracciones_pendientes"][1]["fecha_constancia"] == ""
+    assert d["detracciones_pagadas"] == [{"serie_numero": "E001-872", "codigo": "027", "monto": "198",
+                                          "nro_constancia": "123456789", "fecha_constancia": "2026-08-20"}]
+    # Las dos listas tienen la MISMA forma: quien pinta las dos no aprende dos formas.
+    assert set(d["detracciones_pendientes"][0]) == set(d["detracciones_pagadas"][0])
+    # Un código que el contribuyente no reconoce se descarta antes (normalizar): ni pendiente ni pagada.
     d2 = diagnosticar(doc(dict(FACTURA, detraccion={"codigo": "000", "porcentaje": 3})), driver="concar")
-    assert d2["detracciones_pendientes"] == []
+    assert d2["detracciones_pendientes"] == [] and d2["detracciones_pagadas"] == []
+    # Y el `estado` que declare el documento es informativo: PAGADO sin constancia sigue saliendo pendiente.
+    solo_lo_dice = dict(FACTURA, detraccion={"codigo": "027", "porcentaje": 4, "estado": "PAGADO"})
+    d3 = diagnosticar(doc(solo_lo_dice), driver="concar")
+    assert [p["serie_numero"] for p in d3["detracciones_pendientes"]] == ["E001-871"]
+    assert d3["detracciones_pagadas"] == []
 
 
 def test_los_excluidos_y_lo_que_el_destino_no_lleva_se_cuentan_aparte():

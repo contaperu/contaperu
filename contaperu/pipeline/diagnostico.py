@@ -50,18 +50,24 @@ PEDIR_A: dict[str, str] = {
 }
 
 
-def detraccion_pendiente(c: Comprobante) -> bool:
+def detraccion_pendiente(c: Comprobante, config: dict | None = None) -> bool:
     """¿La detracción de este comprobante espera todavía su constancia del Banco de la Nación?
 
-    El estándar define `detraccion.estado` (PROVISIONADO | PAGADO) y `nro_constancia`, pero hoy
-    ningún lector los escribe —la conciliación de constancias está pendiente de un archivo real—,
-    así que «pendiente» se lee de la forma más honesta: no está PAGADO y no hay constancia. Un
-    productor que sí los rellene obtiene la respuesta correcta sin cambiar nada aquí.
+    La regla vive en `detracciones.estado_de` desde la 3.2 y aquí solo se pregunta: un comprobante está pendiente
+    mientras no tenga un número de constancia distinto del comodín **y** la fecha del depósito. Hasta la 3.1 la
+    pregunta se respondía aquí y bastaba el número —y el `estado` que trajera el documento contaba—, que es lo que
+    dejaba pasar un mes con vóuchers pegados sin fecha.
     """
-    d = c.detraccion if isinstance(c.detraccion, dict) else None
-    if not d or not asi.tiene_detraccion(c):
-        return False
-    return str(d.get("estado") or "").upper() != "PAGADO" and not str(d.get("nro_constancia") or "").strip()
+    return detracciones.esta_pendiente(c, config)
+
+
+def _de_la_detraccion(c: Comprobante, serie_numero: Any) -> dict:
+    """Una detracción como se cuenta en el diagnóstico. **La misma forma esté pagada o pendiente**: quien pinta las
+    dos listas no aprende dos formas, y en una pendiente que ya trae número se ve que lo que falta es la fecha."""
+    d = c.detraccion or {}
+    return {"serie_numero": serie_numero(c), "codigo": str(d.get("codigo") or ""),
+            "monto": str(d.get("monto") or ""), "nro_constancia": str(d.get("nro_constancia") or ""),
+            "fecha_constancia": str(d.get("fecha_constancia") or "")}
 
 
 def que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], faltantes: dict,
@@ -116,7 +122,7 @@ def _sin_configuracion(libro: Libro, driver: str, exige: frozenset[str], todos: 
         "errores_de_configuracion": errores,
         "totales": {"comprobantes": len(todos), "saldrian": 0, "excluidos": sum(1 for c in todos if c.excluida),
                     "fuera_del_destino": 0, "con_error": 0, "con_aviso": 0},
-        "bloqueantes": [], "avisos": [], "faltantes": {}, "detracciones_pendientes": [],
+        "bloqueantes": [], "avisos": [], "faltantes": {}, "detracciones_pendientes": [], "detracciones_pagadas": [],
         "resumen_por_contraparte": {}, "sub_diarios": {}, "saldrian": [],
     }
 
@@ -212,6 +218,13 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     # Lo que saldría: la misma lista que se cuenta en `totales`.
     saldrian = [_serie_numero(c) for c in candidatos if not c.tiene_errores]
 
+    por_estado: dict[str, list[dict]] = {"detracciones_pendientes": [], "detracciones_pagadas": []}
+    donde = {detracciones.PROVISIONADO: "detracciones_pendientes", detracciones.PAGADO: "detracciones_pagadas"}
+    for c in candidatos:
+        clave = donde.get(detracciones.estado_de(c, config))
+        if clave:
+            por_estado[clave].append(_de_la_detraccion(c, _serie_numero))
+
     return {
         "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
         "driver": driver,
@@ -229,10 +242,10 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
                     "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "aviso"]}
                    for c in con_aviso],
         "faltantes": faltantes,
-        "detracciones_pendientes": [
-            {"serie_numero": _serie_numero(c), "codigo": str((c.detraccion or {}).get("codigo") or ""),
-             "monto": str((c.detraccion or {}).get("monto") or "")}
-            for c in candidatos if detraccion_pendiente(c)],
+        # Las dos caras de la detracción (3.2). Hasta la 3.1 solo salían las pendientes, y una aplicación que
+        # quisiera enseñar «7 pendientes · 12 pagadas» tenía que deducir las pagadas por su cuenta, con la regla
+        # copiada. `estado_de` se pregunta UNA vez por comprobante y reparte.
+        **por_estado,
         "resumen_por_contraparte": por_contraparte,
         "sub_diarios": sub_diarios,
         "saldrian": saldrian,

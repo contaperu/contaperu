@@ -4,10 +4,27 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [3.2.0] — 2026-09-25
+
+**La detracción tiene dos tiempos y ahora se sabe en cuál está cada una.** La 2.6 hizo que la constancia del depósito
+llegara al archivo; lo que faltaba era poder separar lo pagado de lo pendiente sin copiar la regla en cada aplicación
+—y que el vóucher llegara **también a CONCAR**, el único de los cuatro destinos que se quedaba con el comodín aunque
+alguien lo hubiera pegado—.
 
 ### Añadido
 
+- **`detracciones.estado_de(comprobante, config)`: en qué tiempo está esa detracción**, con `esta_pendiente` al lado
+  y los dos estados nombrados (`PROVISIONADO`, `PAGADO`) para que nadie escriba la cadena a mano. Un test los ancla
+  al `enum` del esquema del estándar: dos listas que dicen lo mismo en dos sitios acaban diciendo cosas distintas.
+- **`diagnosticar` dice las DOS caras: `detracciones_pendientes` y `detracciones_pagadas`**, y las dos con la
+  **misma forma** —`serie_numero`, `codigo`, `monto`, `nro_constancia`, `fecha_constancia`—, así que quien pinta las
+  dos listas no aprende dos formas. Hasta ahora solo salían las pendientes: una aplicación que quisiera enseñar
+  «7 pendientes · 12 depositadas» tenía que deducir las pagadas por su cuenta, con la regla copiada. Y en una
+  pendiente que ya trae número se ve de un golpe que lo que falta es la fecha.
+- **`detracciones.numero_pendiente(config)`: el comodín, en un solo sitio.** Se preguntaba en el asiento
+  (`_numero_pendiente`) y hacía falta también fuera de él, porque el estado no arma ningún asiento.
+- **`contaperu diagnosticar` lista además las depositadas**, con su número y su fecha, y marca la pendiente que ya
+  tiene número con «falta la fecha del depósito».
 - **Los nueve importes que forman el total, descritos en el esquema del estándar.** `exonerado` e `inafecto`
   estaban uno al lado del otro sin una línea que los separara, y la diferencia tiene consecuencia tributaria: lo
   **exonerado** está dentro del campo de aplicación del IGV y una norma lo libera (Apéndices I y II); lo
@@ -18,23 +35,49 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
   Solo son anotaciones, así que **no cambia ninguna validación** ni la versión del estándar. Quedan 15 campos del
   comprobante sin describir, la mayoría evidentes por su nombre.
-
-### Añadido
-
 - **`INTEGRAR.md`: «Tu propio MCP con el del motor debajo».** Faltaba decir dónde va la capa de agente de un ERP
   —configurar, reportes, análisis, cargar una factura— y la respuesta cabe en una pregunta: **¿necesita TUS datos?**
   Lo que no los necesita ya es del motor; lo que sí, es del ERP, y juntarlas obligaría al motor a tener estado.
   Con las dos formas de combinarlas, un ejemplo que la batería ejecuta, y el aviso de traerse `INSTRUCCIONES`
   aunque no se traiga nada más: es lo que evita que un modelo se invente detracciones.
 
+### Corregido
+
+- **El vóucher del depósito no llegaba a CONCAR**, que es el destino en producción. El número de la constancia
+  viajaba dentro de la línea de detracción y la proyección de CONCAR no lo mira: la columna donde va es la **S**, el
+  número del documento `DR` —ese documento **es** la constancia, y el comodín solo ocupa su sitio mientras no la
+  haya—, y ahí se escribía el comodín siempre. STARSOFT (campo 25) y CONTASIS (columna U) sí lo escribían desde la
+  2.6, y `docs/concar/LEEME.md` de la aplicación ya prometía lo que el motor no hacía: «comodín **mientras nadie
+  haya pegado la constancia** del depósito». La **fecha** del documento `DR` sigue siendo la de la factura: ningún
+  Excel validado dice que sea la del depósito, y eso no se decide de memoria.
+
 ### Cambiado
 
+- ⚠️ **Cuándo una detracción cuenta como PAGADA** (criterio de John, 25-sep-2026): hacen falta **las dos cosas**, un
+  `nro_constancia` que no sea el comodín **y** una `fecha_constancia`. Antes bastaba el número —y contaba el `estado`
+  que trajera el documento—, así que un mes con vóuchers pegados sin fecha salía de la lista de pendientes y nadie
+  volvía a mirarlo. Ahora sigue pendiente, y por eso vuelve. Se descartan los **dos** comodines, el configurado y el
+  de fábrica: un contribuyente que puso el suyo puede tener guardado el otro de una exportación anterior.
+- ⚠️ **El `estado` del documento no se lee: se deduce.** Es un campo informativo —está para que se vea en una
+  pantalla o en un informe— y quien lo recibe no puede comprobarlo, así que un `estado` que diga `PAGADO` sin
+  constancia no convierte en pagada una detracción que no lo está. Queda escrito en el esquema del estándar, en su
+  LEEME y en la hoja de ruta, donde el hito D1 pasa a ser lo que de verdad falta: **casar el archivo del Banco de la
+  Nación** con cada comprobante, no escribir un estado.
 - **`INTEGRAR.md` dice primero que casi nadie necesita un driver.** La guía dedicaba una sección entera a
   escribir uno y una sola línea a pedir el asiento con `asiento_neutral`, así que un sistema moderno que la leyera
   daba por hecho que le tocaba escribir código aquí. Ahora abre con los tres niveles —leer el documento, pedirle
   el asiento al motor, o escribir tu formato— y solo el tercero pide driver. **Un estándar escala cuando la
   mayoría de los que lo adoptan no escriben código en él**, y un driver que no hacía falta es un traductor más
   que mantener. Se dice también que el canal describe el FORMATO y no la edad del software.
+
+### Cómo migrar
+
+La API pública no cambia y **ningún archivo se mueve** mientras nadie haya pegado una constancia: los 52 casos de
+CONCAR, los 44 de CONTASIS y la caracterización de los seis destinos salen idénticos, porque un comprobante sin
+vóucher sigue llevando el comodín. Lo que cambia es de quien SÍ lo pegó: su Excel de CONCAR lleva ahora el número
+de verdad en la columna S, y si le falta la fecha del depósito su mes vuelve a contarlo como pendiente. Quien lea
+`detracciones_pendientes` recibe dos claves más por entrada (`nro_constancia`, `fecha_constancia`) y una lista nueva
+al lado; el esquema del diagnóstico las declara.
 
 ## [3.1.0] — 2026-09-23
 

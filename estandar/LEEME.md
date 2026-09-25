@@ -192,7 +192,14 @@ El estándar lo resuelve con un bloque de estado dentro del comprobante:
   su fuente y un archivo real aceptado (hitos D1 y D6 de la hoja de ruta), no una regeneración.
 
 El paso de uno a otro es una operación aparte, sin estado: entra el documento provisional y el archivo de
-constancias, sale el documento actualizado. **El monto se deposita siempre en soles**, incluso si la factura
+constancias, sale el documento actualizado.
+
+**Y el `estado` no se lee: se deduce** (3.2). Es un campo informativo, para que se vea en una pantalla o en un
+informe, y quien lee el documento no puede comprobarlo. Lo que se comprueba son los dos datos que no se pueden
+inventar: una detracción cuenta como **pagada cuando tiene un `nro_constancia` que no es el número comodín Y una
+`fecha_constancia`**. Con el número y sin la fecha el depósito está a medias —el archivo del sistema contable ya
+lleva el número de verdad y la detracción sigue contando como pendiente, que es lo que hace que alguien vuelva a
+poner el día—, y un `estado` que diga `PAGADO` sin constancia no convierte en pagada una detracción que no lo está. **El monto se deposita siempre en soles**, incluso si la factura
 está en dólares: por eso `monto` es en soles aunque el resto del comprobante esté en otra moneda.
 
 **La tabla de detracciones vive en el motor.** El código, el nombre y la tasa de cada detracción, con su fuente, los

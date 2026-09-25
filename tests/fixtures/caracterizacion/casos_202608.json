@@ -666,14 +666,19 @@
    {
     "serie_numero": "E001-871",
     "codigo": "027",
-    "monto": "198"
+    "monto": "198",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    },
    {
     "serie_numero": "F002-45",
     "codigo": "037",
-    "monto": "1048"
+    "monto": "1048",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    }
   ],
+  "detracciones_pagadas": [],
   "resumen_por_contraparte": {
    "20607777773": {
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
@@ -16428,14 +16433,19 @@
    {
     "serie_numero": "E001-871",
     "codigo": "027",
-    "monto": "198"
+    "monto": "198",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    },
    {
     "serie_numero": "F002-45",
     "codigo": "037",
-    "monto": "1048"
+    "monto": "1048",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    }
   ],
+  "detracciones_pagadas": [],
   "resumen_por_contraparte": {
    "20607777773": {
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
@@ -16567,14 +16577,19 @@
    {
     "serie_numero": "E001-871",
     "codigo": "027",
-    "monto": "198"
+    "monto": "198",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    },
    {
     "serie_numero": "F002-45",
     "codigo": "037",
-    "monto": "1048"
+    "monto": "1048",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    }
   ],
+  "detracciones_pagadas": [],
   "resumen_por_contraparte": {
    "20607777773": {
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
@@ -18346,14 +18361,19 @@
    {
     "serie_numero": "E001-871",
     "codigo": "027",
-    "monto": "198"
+    "monto": "198",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    },
    {
     "serie_numero": "F002-45",
     "codigo": "037",
-    "monto": "1048"
+    "monto": "1048",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    }
   ],
+  "detracciones_pagadas": [],
   "resumen_por_contraparte": {
    "20607777773": {
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
@@ -18725,14 +18745,19 @@
    {
     "serie_numero": "E001-871",
     "codigo": "027",
-    "monto": "198"
+    "monto": "198",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    },
    {
     "serie_numero": "F002-45",
     "codigo": "037",
-    "monto": "1048"
+    "monto": "1048",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    }
   ],
+  "detracciones_pagadas": [],
   "resumen_por_contraparte": {
    "20607777773": {
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",
@@ -20413,14 +20438,19 @@
    {
     "serie_numero": "E001-871",
     "codigo": "027",
-    "monto": "198"
+    "monto": "198",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    },
    {
     "serie_numero": "F002-45",
     "codigo": "037",
-    "monto": "1048"
+    "monto": "1048",
+    "nro_constancia": "",
+    "fecha_constancia": ""
    }
   ],
+  "detracciones_pagadas": [],
   "resumen_por_contraparte": {
    "20607777773": {
     "nombre": "ELECTROMECANICA DE PRUEBA S.R.L.",

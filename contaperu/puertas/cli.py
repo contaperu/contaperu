@@ -191,8 +191,14 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         elif diagnostico["faltantes"].get(falta.clave):
             _lista(falta.titulo, diagnostico["faltantes"][falta.clave])
     if diagnostico["detracciones_pendientes"]:
+        # Una pendiente que YA trae número es la que se queda a medias: alguien pegó el vóucher y se dejó la fecha.
         _lista("Detracciones pendientes de constancia",
-               [pendiente["serie_numero"] for pendiente in diagnostico["detracciones_pendientes"]])
+               [pendiente["serie_numero"] + (" (falta la fecha del depósito)" if pendiente["nro_constancia"] else "")
+                for pendiente in diagnostico["detracciones_pendientes"]])
+    if diagnostico.get("detracciones_pagadas"):
+        _lista("Detracciones ya depositadas",
+               [f"{pagada['serie_numero']} · {pagada['nro_constancia']} del {pagada['fecha_constancia']}"
+                for pagada in diagnostico["detracciones_pagadas"]])
     if diagnostico.get("que_falta"):
         quien = {"contador": "Pedir al contador", "sistema": "Ajustar en el sistema", "proveedor": "Pedir al proveedor"}
         for falta in diagnostico["que_falta"]:

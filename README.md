@@ -215,7 +215,8 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta para el sistema de
 destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos, un reparto que no suma la base o que el
-destino no admite, lo que no cabe en su formato), qué detracciones esperan constancia y qué saldría. Una sola
+destino no admite, lo que no cabe en su formato), qué detracciones esperan constancia y cuáles ya se
+depositaron —con número y fecha, que son las dos cosas que hacen falta— y qué saldría. Una sola
 respuesta, por serie-número, sin corregir ni inventar nada.
 
 ## Qué **no** hace

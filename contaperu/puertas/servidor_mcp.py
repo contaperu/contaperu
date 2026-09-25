@@ -340,7 +340,10 @@ def diagnosticar(documento: dict, driver: str, configuracion: dict | None = None
     serie-número; qué falta para el sistema de destino —cuenta contable, centro de costo, tipos de
     comprobante sin sigla, monedas que no admite, un reparto entre cuentas que no admite
     (`reparto_no_admitido`), lo que no cabe en su formato (`no_cabe`), sub-diarios sin correlativo—; qué
-    detracciones esperan todavía su constancia; un resumen por proveedor o cliente; desde qué
+    detracciones esperan todavía su constancia (`detracciones_pendientes`) y cuáles ya están
+    depositadas (`detracciones_pagadas`) — una detracción cuenta como pagada cuando tiene un número
+    de constancia que no es el comodín **y** la fecha del depósito, así que una que trae número y no
+    fecha sigue saliendo como pendiente y lo que hay que pedir es la fecha; un resumen por proveedor o cliente; desde qué
     correlativo arrancaría cada sub-diario; y la lista de lo que saldría.
 
     `driver` es el sistema de destino y **se declara siempre** (los que hay, en `contaperu://drivers`):

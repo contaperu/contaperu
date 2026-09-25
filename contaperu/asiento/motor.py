@@ -24,11 +24,11 @@ from typing import Any
 
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
 from ..configuracion import CONFIG_POR_DEFECTO
-from ..detracciones import monto_detraccion, tasa_detraccion
+from ..detracciones import monto_detraccion, numero_pendiente, tasa_detraccion
 from .. import pcge, vocabulario
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
-from .configuracion import NUMERO_DETRACCION_PENDIENTE, TIPO_DOC_DETRACCION
+from .configuracion import TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import Cabecera, ComprobanteDelAsiento
 from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
@@ -103,15 +103,6 @@ def _limpio(campos: dict) -> dict:
     return {k: v for k, v in campos.items() if v not in ("", None)}
 
 
-def _numero_pendiente(config: dict | None = None) -> str:
-    """El número con el que sale una detracción cuyo depósito todavía no tiene constancia.
-
-    El del contribuyente si lo configuró (`detraccion_numero_pendiente`, 3.1) y el de partida si no. Se pregunta
-    aquí y no se lee la constante suelta: hasta la 3.1 el TIPO de ese documento se configuraba y el NÚMERO no, una
-    asimetría de cuando el comodín era un detalle de CONCAR."""
-    return str((config or {}).get("detraccion_numero_pendiente") or NUMERO_DETRACCION_PENDIENTE)
-
-
 def constancia_de(c: Comprobante, config: dict | None = None) -> dict[str, str]:
     """La constancia del depósito de la detracción de ese comprobante: su número y su fecha, como van al archivo.
 
@@ -126,7 +117,7 @@ def constancia_de(c: Comprobante, config: dict | None = None) -> dict[str, str]:
     bloque = c.detraccion or {}
     if not str(bloque.get("codigo") or "").strip():
         return {"nro_constancia": "", "fecha_constancia": ""}
-    return {"nro_constancia": str(bloque.get("nro_constancia") or "").strip() or _numero_pendiente(config),
+    return {"nro_constancia": str(bloque.get("nro_constancia") or "").strip() or numero_pendiente(config),
             "fecha_constancia": str(bloque.get("fecha_constancia") or "").strip()}
 
 
@@ -297,8 +288,13 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                 referencia_detraccion = referencia if referencia.get("tipo") else {
                     "tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp,
                     "serie_numero": serie_numero, "fecha": _iso(emision)}
+                # El número del documento `DR` **es** la constancia del depósito: el comodín solo ocupa su sitio
+                # mientras nadie la haya pegado (3.2). Hasta entonces aquí se escribía el comodín y nada más, así
+                # que el vóucher llegaba a STARSOFT y a CONTASIS y no a CONCAR, que es donde vive esa columna —y
+                # el LEEME de CONCAR ya prometía lo contrario. La FECHA del documento sigue siendo la de la
+                # factura: ningún Excel validado dice que sea la del depósito, y eso no se decide de memoria.
                 documento_detraccion = {"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
-                                        "serie_numero": _numero_pendiente(config),
+                                        "serie_numero": constancia_de(c, config)["nro_constancia"],
                                         "id_externo": c.id_externo or "",
                                         "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
             linea_detraccion = linea("detraccion", detraido, cuenta_detraccion, sentido_tercero,
