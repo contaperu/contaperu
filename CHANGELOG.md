@@ -6,6 +6,14 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Añadido
+
+- **`INTEGRAR.md`: «Tu propio MCP con el del motor debajo».** Faltaba decir dónde va la capa de agente de un ERP
+  —configurar, reportes, análisis, cargar una factura— y la respuesta cabe en una pregunta: **¿necesita TUS datos?**
+  Lo que no los necesita ya es del motor; lo que sí, es del ERP, y juntarlas obligaría al motor a tener estado.
+  Con las dos formas de combinarlas, un ejemplo que la batería ejecuta, y el aviso de traerse `INSTRUCCIONES`
+  aunque no se traiga nada más: es lo que evita que un modelo se invente detracciones.
+
 ### Cambiado
 
 - **`INTEGRAR.md` dice primero que casi nadie necesita un driver.** La guía dedicaba una sección entera a

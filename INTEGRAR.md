@@ -184,6 +184,60 @@ Un cliente MCP local lo arranca por entrada y salida estándar; uno remoto, por 
 y sus nombres son los de siempre: `diagnosticar`, `exportar`, `generar_asiento`, `validar_comprobantes`… Cómo
 conectarlo a Claude está en el `README.md`.
 
+### Tu propio MCP con el del motor debajo
+
+Si tu ERP quiere su capa de agente —que configure, saque reportes, analice tus datos o cargue una factura—, **eso no
+va aquí**. Lo que decide dónde va cada herramienta es una sola pregunta: **¿necesita TUS datos?**
+
+| Herramienta | ¿Tus datos? | De quién es |
+|---|---|---|
+| Qué se configura y con qué valores se parte | No | **del motor** — `configuracion_por_defecto`, y el recurso `contaperu://configuracion` |
+| Guardar la configuración de un RUC | Sí | **tuya** |
+| Reportes y análisis | Sí | **tuya.** El motor no tiene ni una fila |
+| Leer un XML de SUNAT | No | **del motor** — `leer_xml_ubl` |
+| Leer un PDF o una foto con un modelo | Sí (red y una clave) | **tuya.** El motor no sale a la red, y eso lo vigila un test |
+| Guardar la factura | Sí | **tuya** |
+
+Las del motor son puras: reciben todo lo que necesitan y devuelven todo lo que producen. Las tuyas necesitan tu base
+de datos y tu sesión. **Son dos capas, no una**, y juntarlas obligaría al motor a tener estado.
+
+Dos formas de combinarlas, y la primera no cuesta nada:
+
+1. **Dos servidores.** Un cliente MCP se conecta a varios: el tuyo y `contaperu-mcp` al lado. Cero trabajo.
+2. **Uno solo**, delegando en la api las que son del motor:
+
+```python
+from mcp.server.fastmcp import FastMCP
+
+from contaperu import api
+from contaperu.puertas.servidor_mcp import INSTRUCCIONES
+
+mio = FastMCP("mi-erp", instructions=INSTRUCCIONES)
+
+
+@mio.tool()
+def mis_meses(ruc: str) -> dict:
+    """Los meses de ese RUC. Esta es TUYA: necesita tu base de datos."""
+    return {"ruc": ruc, "meses": ["202601"]}
+
+
+@mio.tool()
+def diagnosticar(documento: dict, driver: str) -> dict:
+    """Y esta delega en el motor, que es quien sabe si el mes está listo."""
+    return api.diagnosticar(documento, driver=driver)
+
+
+print(f"servidor con las tuyas y las del motor: {mio.name}")
+```
+
+**Trae `INSTRUCCIONES`, aunque no traigas nada más.** Es lo que el servidor del motor le dice al agente antes de que
+toque nada —que los importes van siempre en positivo, que `tipo_cp` es el código de la Tabla 10 y no la sigla del
+sistema, que la retención del IGV del 3 % **no** es una detracción—, y está en el `__all__` a propósito. Sin eso, un
+modelo se inventa detracciones con mucha seguridad.
+
+Y si prefieres una sola instancia sin reescribir nada, `contaperu.puertas.servidor_mcp.mcp` es importable y le puedes
+añadir tus herramientas con `@mcp.tool()`. Funciona, pero estás mutando la instancia del motor: queda a tu cargo.
+
 ## ¿Te hace falta un driver? Casi seguro que no
 
 Antes de escribir nada, mira cuál de estos tres eres. Solo el tercero pide código.
