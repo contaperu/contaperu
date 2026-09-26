@@ -117,6 +117,10 @@ OPERACIONES: tuple[Operacion, ...] = (
     # asiento, no de un destino — lo que iría a un destino concreto ya lo dice `diagnosticar`.
     Operacion("resumen", "POST", "/v1/resumen", "resumen", herramienta="resumen"),
     Operacion("por_cuenta", "POST", "/v1/por_cuenta", "pre_mayor", herramienta="por_cuenta"),
+    # Quién escribe cada campo. Recurso y no herramienta: es un GET sin argumentos que se lee una vez,
+    # como `describir_configuracion`, y así el conjunto de herramientas no crece por una tabla.
+    Operacion("campos_del_comprobante", "GET", "/v1/campos/comprobante", "campos_del_comprobante",
+              recurso="contaperu://campos/comprobante"),
     Operacion("buscar_cuenta_pcge", "POST", "/v1/buscar_cuenta_pcge", "cuenta_pcge", herramienta="buscar_cuenta_pcge"),
     Operacion("adaptar_pcge", "POST", "/v1/adaptar_pcge", "adaptacion_pcge", herramienta="adaptar_pcge2026"),
     Operacion("configuracion_por_defecto", "GET", "/v1/configuracion/por_defecto", "configuracion",

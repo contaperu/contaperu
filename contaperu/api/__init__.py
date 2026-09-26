@@ -22,12 +22,13 @@ from ..modelo import Comprobante, Libro, Observacion, serie_y_numero
 from ..pipeline.preparacion import MAXIMO_CLAVES_PREVIAS, MAXIMO_COMPROBANTES
 from ..pipeline.salida import Exportado
 from .documento import documento_de
+from .instrucciones import CAMINO, INSTRUCCIONES, PRESENTACION, REGLAS
 from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesborda, Descuadre, DocumentoInvalido, ErrorContaperu,
                       ErroresBloqueantes, IgvImposible, NoCabe, NoExportable, RepartoNoAdmitido, RepartoNoCuadra,
                       SinCentro, SinCodigoDeMoneda, SinCorrelativo, SinCuenta, SinSigla, SireInvalido, TablaInvalida,
                       TotalImposible, XmlInvalido, problema)
 from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, catalogo_pcge, catalogos_api_sire, catalogos_del_estandar, catalogos_sunat, comparar_sire,
-                          config_aplicada, cuadrar, por_cuenta, resumen,
+                          campos_del_comprobante, config_aplicada, cuadrar, por_cuenta, resumen,
                           describir_configuracion, diagnosticar, drivers_disponibles, errores_de_configuracion,
                           esquema_diagnostico, esquema_open_accounting, exportar, exportar_archivo, generar_asiento, leer_archivos,
                           leer_propuesta_sire, leer_xml, normalizar_detracciones, revisar, configuracion_por_defecto, contrato_openconta,
@@ -38,7 +39,7 @@ __all__ = [
     # operaciones
     "leer_xml", "leer_propuesta_sire", "leer_archivos", "documento_de", "revisar", "normalizar_detracciones",
     "diagnosticar", "generar_asiento", "exportar", "exportar_archivo", "cuadrar", "buscar_cuenta_pcge", "adaptar_pcge",
-    "resumen", "por_cuenta",
+    "resumen", "por_cuenta", "campos_del_comprobante",
     "configuracion_por_defecto", "describir_configuracion", "config_aplicada", "errores_de_configuracion",
     "drivers_disponibles",
     "catalogos_sunat",
@@ -46,6 +47,9 @@ __all__ = [
     "contrato_openconta", "verificar_documento", "verificar_driver",
     # la tabla que exponen las puertas
     "OPERACIONES", "Operacion",
+    # lo que se le dice a un agente: las REGLAS del dominio, que no nombran ninguna herramienta, y el
+    # texto entero de este servidor. Quien monta su propia capa de agente se trae `REGLAS`.
+    "REGLAS", "CAMINO", "PRESENTACION", "INSTRUCCIONES",
     # lo que devuelve o recibe
     "Exportado", "Comprobante", "Libro", "Observacion", "FALTAS", "serie_y_numero", "MAXIMO_COMPROBANTES",
     "MAXIMO_CLAVES_PREVIAS",

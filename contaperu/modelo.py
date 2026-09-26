@@ -42,6 +42,33 @@ NOTAS_CREDITO = ("07", "87")             # 07 domiciliado · 87 no domiciliado
 NOTAS_DEBITO = ("08", "88")              # las hermanas que suman
 NOTAS = NOTAS_CREDITO + NOTAS_DEBITO
 
+# ── Quién escribe cada campo (3.4.0) ────────────────────────────────────────────────────────────
+#
+# El esquema del estándar ya lo dice en prosa, campo por campo; lo que faltaba era poder **preguntarlo**.
+# Sirve para una cosa concreta y frecuente: cualquier ERP que abra una puerta de entrada —una API, un
+# formulario, un agente al que se le dicta una factura— tiene que decidir qué acepta de quien escribe, y
+# hasta la 3.4 lo escribía a mano. La primera aplicación que lo hizo se dejó cinco campos que su propia
+# base ya guardaba (los descuentos, el ICBPER, el valor no gravado y el destino del IGV): se perdían sin
+# error y sin aviso, porque una lista escrita a mano no se queja de lo que le falta.
+#
+# Tres tramos que no se solapan y cubren el comprobante entero. Lo comprueba `tests/test_campos.py`, y eso
+# es el valor: un campo nuevo en el modelo que nadie reparta deja el test rojo.
+CAMPOS_DEL_DOCUMENTO = (
+    "tipo_cp", "serie", "numero", "numero_final", "fecha_emision", "fecha_vencimiento",
+    "condicion_pago", "medio_pago", "contraparte_tipo_doc", "contraparte_doc", "contraparte_nombre",
+    "moneda", "tipo_cambio", "base_gravada", "igv", "dscto_base", "dscto_igv", "exonerado", "inafecto",
+    "exportacion", "isc", "base_ivap", "ivap", "icbper", "otros", "total", "retencion", "destino_igv",
+    "valor_no_gravado", "anio_dua", "cod_dep_aduanera", "clasif_bienes",
+    "ref_fecha", "ref_tipo_cp", "ref_serie", "ref_numero", "detraccion", "id_contrato", "concepto",
+)
+# Lo que pone el sistema que lo produce: de dónde salió el dato y cómo se le llama desde fuera. Nada de
+# esto lo dice el papel, así que una puerta de entrada no lo acepta de quien dicta.
+CAMPOS_DEL_SISTEMA = ("origen", "confianza", "archivo_nombre", "id_externo", "datos_originales")
+# Y lo que decide quien revisa: el veredicto de la validación y la marca de apartarlo. Se separa del
+# sistema porque son de dos momentos distintos —uno al leer, otro al revisar— y porque un ERP que deposite
+# comprobantes para que un contador los apruebe necesita saber cuál es cuál.
+CAMPOS_DE_LA_REVISION = ("estado", "excluida", "observaciones")
+
 
 def a_decimal(v: Any) -> Decimal:
     """Un número cualquiera (una tasa, un porcentaje) a `Decimal`, sin redondear y sin quitarle el signo; vacío o

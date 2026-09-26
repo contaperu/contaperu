@@ -1,0 +1,31 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/campos_del_comprobante.schema.json",
+ "title": "Quién escribe cada campo de un comprobante",
+ "description": "Qué campos los pone el documento, cuáles el sistema que lo produce y cuáles la revisión. Los tres tramos no se solapan y cubren el comprobante entero. Es lo que una puerta de entrada necesita para saber qué acepta de quien escribe.",
+ "type": "object",
+ "properties": {
+  "documento": {
+   "type": "array",
+   "items": {"type": "string"},
+   "description": "Los hechos que dice el papel: lo que se puede dictar, leer de un XML o teclear."
+  },
+  "sistema": {
+   "type": "array",
+   "items": {"type": "string"},
+   "description": "De dónde salió el dato y cómo se le llama desde fuera. Nada de esto lo dice el papel."
+  },
+  "revision": {
+   "type": "array",
+   "items": {"type": "string"},
+   "description": "Lo que decide quien revisa: el veredicto de la validación y la marca de apartarlo."
+  },
+  "obligatorios": {
+   "type": "array",
+   "items": {"type": "string"},
+   "description": "Sin esto no es un comprobante, y es el `required` del estándar: el tipo, la fecha de emisión y el importe."
+  }
+ },
+ "required": ["documento", "sistema", "revision", "obligatorios"],
+ "additionalProperties": false
+}

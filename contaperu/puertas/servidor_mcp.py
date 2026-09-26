@@ -40,7 +40,8 @@ from mcp.types import BlobResourceContents, CallToolResult, EmbeddedResource, Te
 from .. import _datos, api
 from .comun import LOCALES, MAXIMO_ARCHIVO, hosts_permitidos, origenes_permitidos, peso_de_base64
 
-__all__ = ["INSTRUCCIONES", "LOCALES", "MAXIMO_ARCHIVO", "SOLO_LECTURA", "contesta", "main", "mcp", "seguridad"]
+__all__ = ["INSTRUCCIONES", "LOCALES", "MAXIMO_ARCHIVO", "REGLAS", "SOLO_LECTURA", "contesta", "main", "mcp",
+           "seguridad"]
 
 
 def _adjunto(nombre: str, b64: str, mime: str) -> EmbeddedResource:
@@ -108,38 +109,13 @@ def contesta(funcion: Callable[..., Any]) -> Callable[..., CallToolResult]:
     return herramienta
 
 
-INSTRUCCIONES = """\
-Núcleo contable del Perú. Convierte comprobantes de SUNAT en asientos y en los archivos que
-importan los sistemas contables peruanos. Todo es determinista y sin estado.
-
-El camino normal:
-  1. `leer_xml_ubl` o `leer_propuesta_sire` si tienes archivos de SUNAT; si ya tienes los datos
-     estructurados, arma tú el documento `open-accounting` (mira el recurso del esquema).
-  2. `validar_comprobantes` para ver qué observaciones hay antes de nada.
-  3. `generar_asiento` para las líneas de diario, o `exportar` directamente al formato del ERP.
-
-Reglas que conviene tener claras antes de armar un documento:
-  - Los importes van SIEMPRE en positivo. Una nota de crédito se marca con `tipo_cp: "07"`,
-    nunca con importes negativos.
-  - `tipo_cp` es el código de la Tabla 10 de SUNAT, no la sigla del sistema contable.
-  - La `retencion` de un comprobante es la de renta de 4ta de un recibo por honorarios. La
-    retención del IGV del 3 % NO es una detracción y no entra en el asiento.
-  - Cada contribuyente tiene su plan de cuentas y sus sub-diarios: van en `configuracion`, con lo
-    general en la raíz y lo de cada sistema contable en su sección (`concar`, `csv`, `contasis`).
-    `configuracion_por_defecto` devuelve un punto de partida razonable, no la verdad de nadie.
-  - La cuenta, el centro de costo, la cuenta del total y el reparto de CADA comprobante los decide
-    quien revisa, y no van en el documento: llegan aparte, en `imputacion`, por el `id_externo` del
-    comprobante — {"fila-8": {"cuenta_contable": "636301", "centro_costo": "OBRA01"}}. Lo que no
-    traiga sale de la `configuracion`.
-  - Lo ya anotado en otros periodos del mismo RUC llega en `claves_previas`, cada uno como
-    [tipo_cp, serie, numero, contraparte_doc]: un comprobante que coincide sale con
-    DUPLICADO_PERIODO_ANTERIOR, porque SUNAT lo rechazaría. En ventas el cliente no cuenta.
-  - Antes de inventar una cuenta contable, `buscar_cuenta_pcge`. Que una cuenta no esté en el PCGE
-    no la invalida —las divisionarias las abre cada empresa—, pero conviene saberlo.
-
-Si algo no se puede hacer bien, la herramienta falla y dice por qué. No se inventa una cuenta,
-ni un tipo de documento, ni una equivalencia del PCGE.
-"""
+# Lo que este servidor le dice al agente: la presentación, el camino de SUS herramientas y las reglas del
+# dominio. **Vive en `api.instrucciones` desde la 3.4.0**, y `REGLAS` está aparte porque quien monta su
+# propia capa de agente encima del motor se trae las reglas y NO el camino: sus herramientas son otras, y
+# prometerle a un modelo un `leer_xml_ubl` que no existe es peor que no decirle nada. Se reexporta aquí
+# —está en el `__all__`— para que el import que `INTEGRAR.md` enseña siga valiendo.
+INSTRUCCIONES = api.INSTRUCCIONES
+REGLAS = api.REGLAS
 
 mcp = FastMCP("contaperu", instructions=INSTRUCCIONES)
 # FastMCP no deja poner la version en su constructor y, sin esto, el servidor se presenta en el
@@ -216,6 +192,17 @@ def configuracion_declarada() -> str:
     ejemplo). Es lo que una aplicación lee para pintar su pantalla de configuración, y contra lo que se valida la
     `configuracion` de las herramientas."""
     return json.dumps(api.describir_configuracion(), ensure_ascii=False, indent=1)
+
+
+@mcp.resource("contaperu://campos/comprobante", mime_type="application/json")
+def campos_del_comprobante() -> str:
+    """Qué campos de un comprobante los pone el DOCUMENTO, cuáles el SISTEMA que lo produce y cuáles la
+    REVISIÓN, más los tres que son obligatorios.
+
+    Léelo antes de armar un documento con datos que alguien te dicte: lo que está en `sistema` o en
+    `revision` no lo dice el papel —el estado, el origen, la confianza, si está apartado— y ponerlo tú es
+    decidir por el sistema que va a recibirlo. Los tres tramos cubren el comprobante entero."""
+    return json.dumps(api.campos_del_comprobante(), ensure_ascii=False, indent=1)
 
 
 @mcp.resource("contaperu://esquemas/diagnostico", mime_type="application/schema+json")

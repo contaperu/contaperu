@@ -10,7 +10,7 @@ from __future__ import annotations
 import importlib
 from typing import Sequence
 
-from .. import (_datos, catalogos, comparar_sire as _comparar, detracciones, drivers, partida_doble, pcge,
+from .. import (_datos, catalogos, comparar_sire as _comparar, detracciones, drivers, modelo, partida_doble, pcge,
                 resumen as _resumen,
                 vocabulario)
 from ..drivers import contrato
@@ -130,6 +130,25 @@ def resumen(documento: dict, *, agrupar_por: str = "") -> dict:
     # además lo que hace que nadie pueda coser doce de estos y presentarlos como un resumen anual sin que
     # se vea, que es un descarte declarado del estándar (`INTEROPERABILIDAD.md` §7).
     return {"libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo}, **salida_}
+
+
+def campos_del_comprobante() -> dict:
+    """Qué campos de un comprobante los pone el DOCUMENTO, cuáles el SISTEMA que lo produce y cuáles la
+    REVISIÓN.
+
+    Es lo que necesita cualquier puerta de entrada para saber qué acepta de quien escribe: una API de
+    registro, un formulario, o un agente al que alguien le dicta una factura. Los tres tramos no se
+    solapan y cubren el comprobante entero, y `obligatorios` son los del `required` del estándar.
+
+    Existe por un caso concreto: quien lo escribía a mano se dejaba campos —los descuentos, el ICBPER, el
+    valor no gravado— que su propia base ya guardaba, y se perdían sin error y sin aviso.
+    """
+    return {
+        "documento": list(modelo.CAMPOS_DEL_DOCUMENTO),
+        "sistema": list(modelo.CAMPOS_DEL_SISTEMA),
+        "revision": list(modelo.CAMPOS_DE_LA_REVISION),
+        "obligatorios": list(esquema_open_accounting()["$defs"]["comprobante"]["required"]),
+    }
 
 
 def por_cuenta(lineas: list[dict]) -> dict:

@@ -4,6 +4,70 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [3.4.0] — 2026-09-26
+
+**Sumar un libro deja de ser trabajo de cada aplicación.** El motor sabía armar el asiento de un mes y decir qué le
+faltaba, y no sabía decir cuánto era: lo único que sumaba dinero era el `resumen` de una exportación —privado, y dentro
+de la respuesta de `exportar`—, así que para saber cuánto compró un RUC en agosto había que generarle un archivo, y
+`base_gravada` no se agregaba en ningún punto. Quien integraba el motor lo escribía por su cuenta, y ahí se vio por qué
+no era suyo: la primera aplicación que lo hizo se quedó con el `07` donde el motor dice `("07", "87")`, así que una nota
+de crédito de no domiciliado **le sumaba en vez de restarle** y el total cuadraba con su propia tabla.
+
+### Añadido
+
+- **`resumen(documento, agrupar_por="")`** (`POST /v1/resumen`, herramienta `resumen`): base gravada, IGV y total de un
+  libro, **cada moneda por su lado**, y con `agrupar_por="contraparte"` también por proveedor o cliente, de más a menos
+  y agrupados por su documento. **No recibe driver ni configuración**, y esa es la diferencia con el
+  `resumen_por_contraparte` de `diagnosticar`: aquello es lo que iría a ESE destino —filtra lo que no lleva y cuenta las
+  duplicadas—, esto es el libro.
+
+  `recuento` trae cuatro números que **no se solapan y suman `recibidos`**: lo excluido no es del libro y lo duplicado no
+  va a ningún archivo, así que ninguno suma, pero son dos cosas distintas. Nace así porque la misma palabra significaba
+  dos cifras según quién la leyera: en el resumen de una exportación «comprobantes» son los que salieron, y en la
+  pantalla de un SaaS, los que no están excluidos.
+
+- **`por_cuenta(lineas)`** (`POST /v1/por_cuenta`, herramienta `por_cuenta`): el pre-mayor, hermana de `cuadrar` —misma
+  entrada— y con el **cuadre por moneda**, que dice algo que el global no puede: dos monedas cuyos descuadres se
+  compensan salen cuadradas en el total y descuadradas cada una. Lo suma `partida_doble.cuadra` sobre cada montón, así
+  que el pre-mayor y el cuadre no pueden discrepar por construcción.
+
+  `roles` va **en plural**: con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento —`tercero` y
+  `detraccion_tercero`—, y quedarse con el primero esconde el segundo. El importe está; lo que faltaba era saber de qué
+  era cada mitad.
+
+- **`campos_del_comprobante()`** (`GET /v1/campos/comprobante`, recurso `contaperu://campos/comprobante`) y las tres
+  tuplas de `modelo` que lo sostienen: qué campos los pone el **documento**, cuáles el **sistema** que lo produce y
+  cuáles la **revisión**. Es lo que una puerta de entrada necesita para saber qué acepta de quien escribe, y su caso es
+  concreto: quien la escribió a mano se dejó cinco campos que su propia base ya guardaba —los dos descuentos, el ICBPER,
+  el valor no gravado y el destino del IGV—, que se perdían sin error y sin aviso. Los tres tramos cubren el comprobante
+  entero y no se solapan, y un campo nuevo que nadie reparta deja el test rojo.
+
+- **`REGLAS`**, en `contaperu.api`: las reglas del dominio **sin nombrar ninguna herramienta**, para que quien monte su
+  propia capa de agente encima del motor se las lleve sin decirle a su modelo que llame a un `leer_xml_ubl` que no
+  tiene. `INSTRUCCIONES` las sigue incluyendo y **no cambia lo que dice**; ahora vive en `api.instrucciones`, así que un
+  integrador ya no tiene que importar una puerta entera para leer un texto —y `from contaperu.puertas.servidor_mcp import
+  INSTRUCCIONES` sigue valiendo—.
+
+- **`modelo.NOTAS_CREDITO`, `NOTAS_DEBITO` y `NOTAS`**: la regla que `es_nota_credito` tenía dentro, con nombre. **Son el
+  07 y el 87**, y tener un nombre que citar es lo que permite que la próxima aplicación lo pregunte en vez de deducirlo.
+
+### Cambiado
+
+- `diagnosticar` dice en su docstring y en el esquema de su respuesta **qué es y qué no es**
+  `resumen_por_contraparte` —lo que iría a ese destino, no el resumen del libro— y a quién preguntarle el otro. **Su
+  cifra no cambia.**
+- `INTEGRAR.md` parte en dos la fila «Reportes y análisis» de la tabla que decide de quién es cada herramienta:
+  **elegir las filas es tuyo; la aritmética de un libro, no.** La pregunta sigue siendo «¿necesita TUS datos?», y para
+  un resumen la respuesta es no: necesita los datos que le pasas, como `cuadrar`.
+- `INTEROPERABILIDAD.md` aclara su descarte: lo descartado es **convertir** monedas dentro de un resumen, no informar
+  cada moneda por su lado.
+
+### Cómo migrar
+
+**Nada que adaptar.** La api pública solo crece, ninguna respuesta existente cambia de forma y ningún archivo se mueve:
+los snapshots de los seis destinos salen idénticos. Dos avisos para quien lea la respuesta del MCP: hay **catorce**
+herramientas y **nueve** recursos.
+
 ## [3.3.0] — 2026-09-25
 
 **Con qué se pagó una operación deja de ser un misterio.** Entra el catálogo de medios de pago de SUNAT y, con él,

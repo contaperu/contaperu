@@ -126,12 +126,32 @@ def test_cada_herramienta_se_explica_sola():
         assert t.inputSchema["type"] == "object"
 
 
+def test_las_reglas_del_dominio_no_nombran_ninguna_herramienta():
+    """`REGLAS` existe para que otro servidor MCP se las lleve, y eso solo funciona si no habla de ESTE.
+
+    `INTEGRAR.md` le pide a todo integrador que se traiga lo que este servidor le dice al agente; hasta la
+    3.4 era un solo texto que empezaba por «llama a `leer_xml_ubl`», que en su servidor no existe —y
+    prometerle a un modelo una herramienta que no puede llamar es peor que no decirle nada—. Sin este
+    test, la próxima regla útil vuelve a nacer con un nombre de herramienta pegado y nadie lo nota hasta
+    que alguien la copia.
+    """
+    nombres = {t.name for t in asyncio.run(mcp.list_tools())}
+    citadas = sorted(n for n in nombres if n in api.REGLAS)
+    assert not citadas, (f"las REGLAS nombran herramientas de este servidor: {citadas}. "
+                         f"El puntero va en `CAMINO`; la regla, sin nombre propio.")
+    # Y siguen siendo la mitad de lo que el servidor anuncia: partirlo no cambió lo que dice.
+    assert api.REGLAS in mcp.instructions and api.CAMINO in mcp.instructions
+    for uri in (str(r.uri) for r in asyncio.run(mcp.list_resources())):
+        assert uri not in api.REGLAS, f"las REGLAS citan el recurso {uri} de este servidor"
+
+
 def test_los_recursos_son_legibles():
     uris = {str(r.uri) for r in asyncio.run(mcp.list_resources())}
     assert uris == {"contaperu://estandar/open-accounting", "contaperu://catalogos/sunat",
                     "contaperu://catalogos/estandar", "contaperu://drivers",
                     "contaperu://catalogos/pcge2026", "contaperu://configuracion",
-                    "contaperu://esquemas/diagnostico", "contaperu://catalogos/sire-api"}
+                    "contaperu://esquemas/diagnostico", "contaperu://catalogos/sire-api",
+                    "contaperu://campos/comprobante"}
     esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
     assert esquema["title"] == "open-accounting"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
@@ -140,6 +160,10 @@ def test_los_recursos_son_legibles():
     assert del_estandar["clases"]["codigos"]["activo"] and del_estandar["roles"]["version"]
     # El canal del SIRE: datos sobre una API ajena, no un cliente. Lo que se comprueba es que
     # siga diciendo lo que más caro cuesta descubrir a mano.
+    # Quién escribe cada campo: lo que una puerta de entrada lee para saber qué acepta de quien dicta.
+    campos = json.loads(leer_recurso("contaperu://campos/comprobante"))
+    assert "total" in campos["documento"] and "estado" in campos["revision"]
+    assert "origen" in campos["sistema"] and campos["obligatorios"] == ["tipo_cp", "fecha_emision", "total"]
     canal = json.loads(leer_recurso("contaperu://catalogos/sire-api"))
     assert canal["libros"]["080000"]["nombre"] == "RCE"
     # Los dos manuales se contradicen aquí, y el dato es por libro a propósito.

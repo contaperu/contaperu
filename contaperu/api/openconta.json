@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -443,6 +443,31 @@
      },
      "422": {
       "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/campos/comprobante": {
+   "get": {
+    "operationId": "campos_del_comprobante",
+    "summary": "Qué campos de un comprobante los pone el DOCUMENTO, cuáles el SISTEMA que lo produce y cuáles la REVISIÓN.",
+    "description": "Qué campos de un comprobante los pone el DOCUMENTO, cuáles el SISTEMA que lo produce y cuáles la\nREVISIÓN.\n\nEs lo que necesita cualquier puerta de entrada para saber qué acepta de quien escribe: una API de\nregistro, un formulario, o un agente al que alguien le dicta una factura. Los tres tramos no se\nsolapan y cubren el comprobante entero, y `obligatorios` son los del `required` del estándar.\n\nExiste por un caso concreto: quien lo escribía a mano se dejaba campos —los descuentos, el ICBPER, el\nvalor no gravado— que su propia base ya guardaba, y se perdían sin error y sin aviso.",
+    "responses": {
+     "200": {
+      "description": "Qué campos de un comprobante los pone el DOCUMENTO, cuáles el SISTEMA que lo produce y cuáles la REVISIÓN.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/campos_del_comprobante"
+        }
+       }
+      }
      },
      "421": {
       "$ref": "#/components/responses/HostNoPermitido"
@@ -2530,6 +2555,48 @@
      "cuentas",
      "por_moneda",
      "cuadre"
+    ],
+    "additionalProperties": false
+   },
+   "campos_del_comprobante": {
+    "title": "Quién escribe cada campo de un comprobante",
+    "description": "Qué campos los pone el documento, cuáles el sistema que lo produce y cuáles la revisión. Los tres tramos no se solapan y cubren el comprobante entero. Es lo que una puerta de entrada necesita para saber qué acepta de quien escribe.",
+    "type": "object",
+    "properties": {
+     "documento": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Los hechos que dice el papel: lo que se puede dictar, leer de un XML o teclear."
+     },
+     "sistema": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "De dónde salió el dato y cómo se le llama desde fuera. Nada de esto lo dice el papel."
+     },
+     "revision": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Lo que decide quien revisa: el veredicto de la validación y la marca de apartarlo."
+     },
+     "obligatorios": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Sin esto no es un comprobante, y es el `required` del estándar: el tipo, la fecha de emisión y el importe."
+     }
+    },
+    "required": [
+     "documento",
+     "sistema",
+     "revision",
+     "obligatorios"
     ],
     "additionalProperties": false
    },

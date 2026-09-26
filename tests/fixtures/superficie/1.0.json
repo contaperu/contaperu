@@ -1,5 +1,6 @@
 {
  "contaperu.api": {
+  "CAMINO": "valor",
   "CampoCambiaDeSigno": "clase",
   "Comprobante": "clase",
   "ConfiguracionInvalida": "clase",
@@ -10,6 +11,7 @@
   "ErroresBloqueantes": "clase",
   "Exportado": "clase",
   "FALTAS": "valor",
+  "INSTRUCCIONES": "valor",
   "IgvImposible": "clase",
   "Libro": "clase",
   "MAXIMO_CLAVES_PREVIAS": "valor",
@@ -20,6 +22,8 @@
   "OPERACIONES": "valor",
   "Observacion": "clase",
   "Operacion": "clase",
+  "PRESENTACION": "valor",
+  "REGLAS": "valor",
   "RepartoNoAdmitido": "clase",
   "RepartoNoCuadra": "clase",
   "RutaObsoleta": "clase",
@@ -35,6 +39,7 @@
   "__version__": "valor",
   "adaptar_pcge": "función(lineas: 'list[dict]') -> 'dict'",
   "buscar_cuenta_pcge": "función(*, texto: 'str' = '', codigo: 'str' = '') -> 'dict'",
+  "campos_del_comprobante": "función() -> 'dict'",
   "catalogo_pcge": "función() -> 'dict'",
   "catalogos_api_sire": "función() -> 'dict'",
   "catalogos_del_estandar": "función() -> 'dict'",
@@ -72,6 +77,9 @@
   "ErroresBloqueantes": ""
  },
  "contaperu.modelo": {
+  "CAMPOS_DEL_DOCUMENTO": "",
+  "CAMPOS_DEL_SISTEMA": "",
+  "CAMPOS_DE_LA_REVISION": "",
   "CENTIMO": "",
   "CERO": "",
   "CONDICIONES_PAGO": "",
