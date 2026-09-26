@@ -71,7 +71,8 @@ def cabecera_de(c: Comprobante) -> Cabecera:
     """
     return Cabecera(tipo_cp=c.tipo_cp or "", serie=c.serie or "", numero=c.numero or "",
                     numero_final=c.numero_final or "", fecha_emision=_iso(c.fecha_emision),
-                    condicion_pago=c.condicion_pago or "", id_externo=c.id_externo or "",
+                    condicion_pago=c.condicion_pago or "", medio_pago=c.medio_pago or "",
+                    id_externo=c.id_externo or "",
                     contraparte_tipo_doc=c.contraparte_tipo_doc or "", contraparte_doc=c.contraparte_doc or "",
                     contraparte_nombre=c.contraparte_nombre or "", glosa=glosa_de(c),
                     moneda=c.moneda or "", base_gravada=str(c.base_gravada), igv=str(c.igv),

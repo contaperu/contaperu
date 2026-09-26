@@ -618,6 +618,69 @@
     }
    },
    "valid": false
+  },
+  {
+   "description": "Con qué se pagó: un código del catálogo de medios de pago de SUNAT",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "medio_pago": "003"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Un medio de pago de tres dígitos que el catálogo todavía no tiene: vale, porque SUNAT puede añadirlo y el significado no lo cuida el esquema",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "medio_pago": "014"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Un medio de pago sin forma de código: son tres dígitos, no uno",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "medio_pago": "3"
+     }
+    ]
+   },
+   "valid": false
   }
  ]
 }

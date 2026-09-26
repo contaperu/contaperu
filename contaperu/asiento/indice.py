@@ -50,7 +50,8 @@ class Cabecera:
     numero: str = ""
     numero_final: str = ""           # solo rangos: boletas consolidadas del día
     fecha_emision: str = ""
-    condicion_pago: str = ""
+    condicion_pago: str = ""         # CUÁNDO se paga: contado | credito
+    medio_pago: str = ""             # CON QUÉ se paga: el código de SUNAT (`catalogos.MEDIOS_PAGO`)
     id_externo: str = ""
     # Contraparte
     contraparte_tipo_doc: str = ""   # tipo de documento de identidad: 6 RUC, 1 DNI, 4 CE, 7 pasaporte

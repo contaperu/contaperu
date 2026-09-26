@@ -110,6 +110,10 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
      True, None),
     ("venta_exonerada", dict(cuenta_contable="701101", base_gravada="0", igv="0", exonerado="118"), True, None),
     ("venta_medio_de_pago_del_entorno", dict(cuenta_contable="701101"), True, {"contasis": {"medio_pago": "003"}}),
+    # Y desde la 3.3 el del DOCUMENTO manda sobre el del entorno: el comprobante dice que se pagó con tarjeta de
+    # débito (005) aunque el contribuyente tenga configurada la transferencia (003).
+    ("venta_medio_de_pago_del_documento", dict(cuenta_contable="701101", medio_pago="005"), True,
+     {"contasis": {"medio_pago": "003"}}),
     ("venta_icbper_con_su_cuenta", dict(cuenta_contable="701101", icbper="0.50", total="118.50"), True,
      {"cuentas": {"icbper": "401891"}}),
     ("venta_credito", dict(cuenta_contable="701101", condicion_pago="credito", fecha_vencimiento="2026-09-10"), True, None),

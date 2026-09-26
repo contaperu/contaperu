@@ -5219,6 +5219,124 @@
    "003"
   ]
  },
+ "venta_medio_de_pago_del_documento": {
+  "A": [
+   "datetime",
+   "2026-08-11T00:00:00"
+  ],
+  "B": [
+   "datetime",
+   "2026-08-18T00:00:00"
+  ],
+  "C": [
+   "str",
+   "01"
+  ],
+  "D": [
+   "str",
+   "F001  "
+  ],
+  "E": [
+   "str",
+   "123          "
+  ],
+  "F": [
+   "str",
+   "6"
+  ],
+  "G": [
+   "str",
+   "20607777773"
+  ],
+  "H": [
+   "str",
+   "ELECTROMECANICA DE PRUEBA S.R.L."
+  ],
+  "J": [
+   "float",
+   100.0
+  ],
+  "N": [
+   "float",
+   18.0
+  ],
+  "P": [
+   "float",
+   118.0
+  ],
+  "Q": [
+   "float",
+   1.0
+  ],
+  "S": [
+   "str",
+   "  "
+  ],
+  "T": [
+   "str",
+   "      "
+  ],
+  "U": [
+   "str",
+   "             "
+  ],
+  "V": [
+   "str",
+   "S"
+  ],
+  "X": [
+   "datetime",
+   "2026-08-18T00:00:00"
+  ],
+  "Y": [
+   "str",
+   "CON"
+  ],
+  "Z": [
+   "str",
+   "OBRA01   "
+  ],
+  "AA": [
+   "str",
+   "         "
+  ],
+  "AB": [
+   "str",
+   "701101    "
+  ],
+  "AC": [
+   "str",
+   "          "
+  ],
+  "AD": [
+   "str",
+   "121201    "
+  ],
+  "AH": [
+   "str",
+   "      "
+  ],
+  "AI": [
+   "str",
+   "             "
+  ],
+  "AK": [
+   "str",
+   "          "
+  ],
+  "AL": [
+   "float",
+   18.0
+  ],
+  "AM": [
+   "str",
+   "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSIÓN           "
+  ],
+  "AN": [
+   "str",
+   "005"
+  ]
+ },
  "venta_icbper_con_su_cuenta": {
   "A": [
    "datetime",

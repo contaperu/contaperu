@@ -105,9 +105,10 @@
         "numero_final": { "type": "string", "description": "Solo rangos: boletas consolidadas del día." },
         "fecha_emision": { "$ref": "#/$defs/fecha" },
         "fecha_vencimiento": { "$ref": "#/$defs/fecha" },
-        "condicion_pago": { "enum": ["", "contado", "credito"], "description": "Lo que declara el documento sobre su pago (en la factura electrónica, PaymentTerms FormaPago; con cuotas es credito). Vacío = el documento no lo dice." },
+        "condicion_pago": { "enum": ["", "contado", "credito"], "description": "CUÁNDO se paga, según lo declara el documento (en la factura electrónica, PaymentTerms FormaPago; con cuotas es credito). Vacío = el documento no lo dice. Con qué se paga es `medio_pago`." },
+        "medio_pago": { "type": "string", "pattern": "^$|^[0-9]{3}$", "description": "Con qué se PAGÓ la operación: el código de tres dígitos del catálogo de medios de pago de SUNAT (`001` depósito en cuenta, `003` transferencia de fondos, `005` tarjeta de débito… `999` otros; Anexo 3 de la RS 169-2015, que recoge los medios del artículo 5 de la Ley 28194, la de bancarización). No es `condicion_pago`, que dice CUÁNDO se paga. Vacío = el documento no lo dice, y entonces quien exporta pone el que tenga configurado el contribuyente. Es opcional y quien no lo conozca lo ignora; un código que no esté en el catálogo **no invalida el documento** —se avisa y se respeta— porque SUNAT puede añadir uno y nadie debería quedarse sin exportar su mes por un dato informativo." },
 
-        "contraparte_tipo_doc": { "enum": ["0", "1", "4", "6", "7", "A"], "description": "Tabla 1: 6 RUC, 1 DNI, 4 carné de extranjería, 7 pasaporte, A cédula diplomática, 0 otros." },
+        "contraparte_tipo_doc": { "enum": ["0", "1", "4", "6", "7", "A"], "description": "Tipo de documento de identidad de SUNAT: 6 RUC, 1 DNI, 4 carné de extranjería, 7 pasaporte, A cédula diplomática, 0 otros." },
         "contraparte_doc": { "type": "string" },
         "contraparte_nombre": { "type": "string" },
 

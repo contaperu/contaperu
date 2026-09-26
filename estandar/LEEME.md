@@ -256,6 +256,7 @@ permite que el resto pueda degradar.
 | `retencion` | Es la **retención de renta de 4ta** que muestra un recibo por honorarios. **No** es la retención del IGV del 3 %, que no entra en ningún asiento y que las IAs confunden constantemente con una detracción. |
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
 | `condicion_pago` | `contado` o `credito`: lo que **declara** el documento. En la factura electrónica viene en `PaymentTerms FormaPago`, y una factura con cuotas es a crédito. Vacío no significa contado: significa que el documento no lo dice. |
+| `medio_pago` | **Con qué** se pagó, que es otra pregunta que `condicion_pago`: un código de tres dígitos del catálogo de medios de pago de SUNAT (`001` depósito en cuenta, `003` transferencia, `005` tarjeta de débito… `999` otros). Vacío = el documento no lo dice, y entonces quien exporta usa el que tenga configurado el contribuyente. Un código que el catálogo no tenga **no invalida el documento**: se avisa y se respeta, porque SUNAT puede añadir uno. |
 | `id_externo` | El id con el que la aplicación que produce el documento conoce ese comprobante (su fila). Es la llave de su imputación: sin él, al documento no le llega ninguna. |
 | `tipo_cambio` | El que **publica SUNAT para la fecha de emisión**, con 3 decimales. No el del día del pago. |
 | `serie` | Vacía en los comprobantes que no la llevan (recibo de servicios públicos, tipo `14`). Que esté vacía no es un error. |
@@ -361,11 +362,10 @@ que el motor transporta sin interpretar. **Cada uno tiene su enmienda** en
 Lo que sí entró de esa propuesta: `_exportacion` (arriba), `EXIGE` en el contrato de driver y `pedir_a` en
 `diagnosticar` (`ARQUITECTURA.md`).
 
-Y cuatro que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso real o una decisión:
+Y tres que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso real o una decisión —el cuarto, `medio_pago`, **entró el 25-sep-2026** ([enmienda 0004](enmiendas/0004-medio-de-pago.md)): la decisión que le faltaba era si es dato del documento o valor del contribuyente, y la respuesta fue las dos cosas—:
 
 | Dónde | Nombre | Qué será |
 |---|---|---|
-| comprobante | `medio_pago` | El código de medio de pago de SUNAT (`001` depósito en cuenta…), si resulta ser dato de cada documento y no un valor del contribuyente |
 | comprobante | `retencion_igv` | `{porcentaje, monto}`: la retención del IGV del 3 %, que el XML trae en `PaymentTerms Retencion`. **No es `retencion`**, que es la renta de 4ta |
 | comprobante | `percepcion` | El régimen de percepciones del IGV |
 | comprobante | `no_domiciliado` | El número del comprobante que emite un sujeto no domiciliado |

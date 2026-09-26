@@ -60,8 +60,9 @@ CUENTAS_POR_DEFECTO: dict = {
 # de cada documento.
 CONFIGURACION = (
     Campo("medio_pago", "texto", "001", titulo="Medio de pago de las ventas", grupo="registro", patron=r"^[0-9]{3}$",
-          ayuda="El código de la tabla de medios de pago de CONTASIS que llevan tus ventas: 001 es depósito en "
-                "cuenta."),
+          ayuda="El código del catálogo de medios de pago de SUNAT que llevan tus ventas cuando el documento no "
+                "dice el suyo: 001 es depósito en cuenta, 003 transferencia de fondos. Los 22, en "
+                "`catalogos_sunat.medios_pago`."),
 )
 
 # La pestaña conserva su nombre, y el archivo va sin las filas 1-13 de la plantilla: su nota 3 dice «Eliminar la Fila

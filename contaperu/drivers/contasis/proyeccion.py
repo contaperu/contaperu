@@ -109,7 +109,9 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
             # El régimen especial (detracción, percepción, retención) va vacío (John, 12-sep-2026).
             "AE": None, "AF": None, "AG": None, "AH": "", "AI": "", "AJ": None, "AK": "",
             "AL": tasa_legal(c.igv, c.base_gravada), "AM": comunes["glosa"],
-            "AN": str(config.get("medio_pago") or _POR_DEFECTO["medio_pago"]), "AO": "", "AP": None,
+            # El medio de pago del DOCUMENTO si lo trae, y el del contribuyente si no (3.3). Hasta la 3.2 solo
+            # existía el segundo, porque el estándar no tenía dónde poner el primero.
+            "AN": c.medio_pago or str(config.get("medio_pago") or _POR_DEFECTO["medio_pago"]), "AO": "", "AP": None,
             "AR": (cuentas.get("icbper") or "") if importes["AQ"] else "",
         }
     return {

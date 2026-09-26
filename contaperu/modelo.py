@@ -181,6 +181,12 @@ class Comprobante:
     fecha_emision: date | None = None
     fecha_vencimiento: date | None = None
     condicion_pago: str = ""        # contado | credito (CONDICIONES_PAGO); vacío = el documento no lo dice
+    # CON QUÉ se paga, que es otra pregunta que `condicion_pago`: el código de tres dígitos del catálogo de medios
+    # de pago de SUNAT (`catalogos.MEDIOS_PAGO`). Vacío = el documento no lo dice, y quien exporta usa el que tenga
+    # configurado el contribuyente. **No se valida contra el catálogo al construir**, a diferencia de
+    # `condicion_pago`: un código desconocido es un aviso (`MEDIO_PAGO_DESCONOCIDO`) y no impide registrar nada,
+    # porque no cambia ningún asiento y SUNAT puede añadir códigos.
+    medio_pago: str = ""
     # Contraparte: el cliente en ventas, el proveedor en compras
     contraparte_tipo_doc: str = "6"  # tipo de documento de identidad: 6 RUC, 1 DNI, 4 CE, 7 pasaporte, 0 otros
     contraparte_doc: str = ""
@@ -356,5 +362,5 @@ _CAMPOS_TEXTO = (
     "tipo_cp", "serie", "numero", "numero_final", "contraparte_tipo_doc", "contraparte_doc",
     "contraparte_nombre", "moneda", "destino_igv", "anio_dua", "cod_dep_aduanera",
     "clasif_bienes", "ref_tipo_cp", "ref_serie", "ref_numero", "id_contrato",
-    "concepto", "archivo_nombre", "condicion_pago", "id_externo",
+    "concepto", "archivo_nombre", "condicion_pago", "medio_pago", "id_externo",
 )

@@ -47,7 +47,7 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0001](0001-id-en-destino.md) | `linea.id_en_destino` — el id del asiento en el sistema de destino | `reservada` |
 | [0002](0002-dimensiones.md) | `dimensiones` — los ejes analíticos más allá del centro de costo | `reservada` |
 | [0003](0003-estado-de-la-linea.md) | `linea.estado` — en qué punto del circuito está esa línea | `reservada` |
-| [0004](0004-medio-de-pago.md) | `medio_pago` — el código de medio de pago de SUNAT | `reservada` |
+| [0004](0004-medio-de-pago.md) | `medio_pago` — el código de medio de pago de SUNAT | `final` |
 | [0005](0005-retencion-de-igv.md) | `retencion_igv` — la retención del 3 % del régimen de retenciones | `reservada` |
 | [0006](0006-percepcion.md) | `percepcion` — el régimen de percepciones del IGV | `reservada` |
 | [0007](0007-no-domiciliado.md) | `no_domiciliado` — el comprobante de un sujeto del exterior | `reservada` |

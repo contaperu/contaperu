@@ -168,6 +168,15 @@ def validar(c: Comprobante, libro: Libro) -> None:
                   f"La detracción {detraccion.get('codigo')} va al {format(leida.normalize(), 'f')} % y tu tabla dice "
                   f"{format(de_tabla.normalize(), 'f')} %: si es la de la tabla, vuelve a elegir el código")
 
+    # --- Medio de pago ---------------------------------------------------------------------------
+    # El código contra el catálogo de SUNAT (`catalogos.MEDIOS_PAGO`). **Aviso y no error, y el valor se respeta**
+    # (John, 25-sep-2026): el medio de pago no cambia ningún asiento ni ningún importe, así que un código que este
+    # motor todavía no conoce —SUNAT puede añadir uno— no puede impedirle a nadie cerrar su mes. La forma la cuida
+    # el esquema del estándar (tres dígitos); esto cuida el significado.
+    if c.medio_pago and c.medio_pago not in cat.MEDIOS_PAGO:
+        aviso("MEDIO_PAGO_DESCONOCIDO",
+              f"El medio de pago {c.medio_pago} no está en la tabla de SUNAT: sale igual, compruébalo")
+
     # --- Notas de crédito / débito -------------------------------------------------------
     if c.es_nota:
         if not (c.ref_tipo_cp and c.ref_numero):

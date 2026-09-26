@@ -4,7 +4,65 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [3.3.0] — 2026-09-25
+
+**Con qué se pagó una operación deja de ser un misterio.** Entra el catálogo de medios de pago de SUNAT y, con él,
+el campo que llevaba desde el 12-sep-2026 reservado en el estándar esperando una decisión.
+
+### Añadido
+
+- **El catálogo de medios de pago de SUNAT** (`catalogos.MEDIOS_PAGO`, y en `catalogos_sunat` por la API, la puerta
+  HTTP y el recurso `contaperu://catalogos/sunat`). Son los **22 códigos** del Anexo 3 de la RS 169-2015/SUNAT —la
+  que aprueba la versión 5.0.0 del PLE—, que son los medios de pago del artículo 5 de la Ley 28194, la de
+  bancarización.
+
+  Hasta hoy el motor **escribía un medio de pago que nadie sabía leer**: `contasis.medio_pago` vale `001` de fábrica
+  y sale en la columna AN de su registro de ventas, sin que existiera en ninguna parte un mapa que dijera qué es
+  `001`. Y el catálogo se gana su sitio con un caso concreto: la primera lista que llegó traía tres filas y decía
+  que `005` era «tarjeta de crédito» —en el anexo `005` es **tarjeta de débito** y la de crédito emitida en el país
+  es `006`—. Un valor publicado no se cambia de significado después, así que los 22 quedan congelados en
+  `tests/test_catalogos.py`, con un test que solo comprueba esas dos tarjetas.
+- **`medio_pago` en el comprobante** ([enmienda 0004](estandar/enmiendas/0004-medio-de-pago.md), que pasa de
+  `reservada` a `final`). Es un campo **opcional** de tres dígitos, y lo que le faltaba no era un caso sino una
+  decisión: si es dato de cada documento o un valor del contribuyente. **Las dos cosas** (John, 25-sep-2026): manda
+  el del documento, y el de la configuración del sistema contable es el respaldo para cuando el documento no lo
+  dice, que es lo normal hoy. Así queda abierto a cualquier ERP sin romperle nada al que ya exportaba.
+
+  No es `condicion_pago`, que dice **cuándo** se paga; este dice **con qué**. No entra en ninguna línea, ni en
+  ninguna cuenta, ni en la huella del asiento, y **sí llega a la cabecera** (`asiento.Cabecera.medio_pago`), que es
+  la regla que impide que el próximo driver descubra que el dato se cayó por el camino.
+- **Un aviso, `MEDIO_PAGO_DESCONOCIDO`**, para el código que no está en el catálogo. **Aviso y no error, y el valor
+  se respeta**: el medio de pago no cambia ningún asiento ni ningún importe, así que un código que este motor
+  todavía no conoce —SUNAT puede añadir uno— no puede impedirle a nadie cerrar su mes. La **forma** la cuida el
+  esquema (tres dígitos); el **significado**, el catálogo.
+- **Tres casos de conformidad** del esquema (27 en total), para que un ERP compruebe el campo sin escribirle a
+  nadie: uno válido, uno con un código que el catálogo todavía no tiene —válido a propósito— y uno sin forma de
+  código.
+
+### Cambiado
+
+- **El registro de ventas de CONTASIS escribe el medio de pago del DOCUMENTO** cuando lo trae (columna AN), y el
+  del contribuyente cuando no. Hasta la 3.2 solo existía el segundo, porque el estándar no tenía dónde poner el
+  primero.
+- **Un catálogo se nombra por lo que ES, nunca por su número de tabla** (John, 25-sep-2026). Cada anexo de SUNAT
+  numera las suyas empezando por 1, así que al entrar los medios de pago pasó a haber **dos «Tabla 1»** en el mismo
+  archivo, a seis líneas de distancia: la de documentos de identidad (Anexo 1 de la RS 112-2021) y la de medios de
+  pago (Anexo 3 de la RS 169-2015). El número suelto no identifica nada —y además puede cambiar con la siguiente
+  resolución, mientras que lo que el catálogo es, no—.
+
+  Así que los comentarios y las descripciones dicen «tipo de documento de identidad» y «tipo de medio de pago», y el
+  número se queda **solo dentro de la `fuente`**, que es la cita de la norma y donde hace falta para encontrarla, con
+  su asunto siempre al lado. Toca `catalogos.py`, `modelo.py`, `asiento/indice.py`, el esquema del estándar y el de
+  la respuesta.
+
+### Cómo migrar
+
+La API pública no cambia y **ningún archivo se mueve** por sí solo: un documento que no traiga `medio_pago` produce
+exactamente el mismo Excel, el mismo TXT y la misma huella que en la 3.2. Lo que cambia es de quien empiece a
+mandarlo: su registro de CONTASIS llevará el del documento en lugar del configurado.
+
+Dos avisos para quien lea la respuesta del motor: el documento anotado trae ahora `medio_pago` en cada comprobante
+—vacío cuando no se sabe, como `condicion_pago`—, y `catalogos_sunat` trae una clave más, `medios_pago`.
 
 ### Añadido
 
