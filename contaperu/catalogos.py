@@ -1,14 +1,19 @@
 """Catálogos de SUNAT que usa el motor (los que hacen falta, no todos).
 
-Fuentes: Anexo 1 de la RS 112-2021 (Tabla 1 documentos de identidad, Tabla 2
-monedas, Tabla 3 tipos de comprobante del RVIE) y Anexo 1 de la RS 040-2022
-(Tabla 11 tipos de comprobante del RCE). Los códigos de tributo (1000, 9997…)
-son el Catálogo 05 de la factura electrónica (UBL 2.1).
+Fuentes: Anexo 1 de la RS 112-2021 (documentos de identidad, monedas y tipos de
+comprobante del RVIE), Anexo 1 de la RS 040-2022 (tipos de comprobante del RCE) y
+Anexo 3 de la RS 169-2015 (tipos de medio de pago). Los códigos de tributo (1000,
+9997…) son el Catálogo 05 de la factura electrónica (UBL 2.1).
 
-**Los tres catálogos viven en datos, con su fuente** (1.1, primer paso del hito C1 de la hoja de ruta): los tipos de
-comprobante, los documentos de identidad y las monedas se leen de `datos/sunat/catalogos.json`, y `FUENTES` dice de
-dónde sale cada uno. Los nombres y los tipos de siempre no cambian. Lo demás de este módulo son reglas del motor sobre
-esos códigos, con su porqué al lado.
+**Un catálogo se nombra por lo que ES, nunca por su número de tabla.** Cada anexo de SUNAT numera las suyas
+empezando por 1, así que hay una «Tabla 1» de documentos de identidad (Anexo 1 de la RS 112-2021) y otra de medios de
+pago (Anexo 3 de la RS 169-2015), y el número suelto no identifica nada: solo vale dentro de su cita, que es donde
+vive, en `fuente`. Y el número puede cambiar con la siguiente resolución; lo que el catálogo es, no.
+
+**Los catálogos viven en datos, con su fuente** (1.1, primer paso del hito C1 de la hoja de ruta): los tipos de
+comprobante, los documentos de identidad, las monedas y los medios de pago se leen de `datos/sunat/catalogos.json`, y
+`FUENTES` dice de dónde sale cada uno. Los nombres y los tipos de siempre no cambian. Lo demás de este módulo son
+reglas del motor sobre esos códigos, con su porqué al lado.
 """
 from __future__ import annotations
 
@@ -65,15 +70,15 @@ FUERA_DEL_REGISTRO_SUNAT = frozenset({"02"})
 # (su registro), la nota de crédito (invierte el asiento) y las notas (llevan el documento que modifican).
 TIPO_HONORARIOS, TIPO_BOLETA, TIPOS_INVIERTEN, TIPOS_NOTA = "02", "03", ("07",), ("07", "08")
 
-# Tabla 1: tipo de documento de identidad.
+# Tipo de documento de identidad (Anexo 1 de la RS 112-2021).
 TIPOS_DOC_IDENTIDAD: dict[str, str] = dict(_CATALOGOS["tipos_documento_identidad"]["codigos"])
 
-# Tabla 2 (ISO 4217). Se deja pasar cualquier código de 3 letras; estos son los habituales.
+# Monedas, ISO 4217 (Anexo 1 de la RS 112-2021). Se deja pasar cualquier código de 3 letras; estos son los
+# habituales.
 MONEDAS = frozenset(_CATALOGOS["monedas"]["codigos"])
 
-# Tabla 1 del Anexo 3 de la RS 169-2015: TIPO DE MEDIO DE PAGO, los 22 códigos con los que se paga una operación
-# (`001` depósito en cuenta … `999` otros). **No es la «Tabla 1» de tres líneas más arriba**, que es la de documentos
-# de identidad del Anexo 1 de la RS 112-2021: cada anexo numera las suyas desde 1, y son dos tablas distintas.
+# Tipo de medio de pago (Anexo 3 de la RS 169-2015): los 22 códigos con los que se paga una operación, `001`
+# depósito en cuenta … `999` otros. Son los medios del artículo 5 de la Ley 28194, la de bancarización.
 #
 # El motor no decide con ella: es vocabulario. Da significado al código que un sistema contable exige —CONTASIS lo
 # pide en su registro de ventas— y permite avisar de uno que no existe. Un código que no esté aquí **no bloquea**
@@ -99,7 +104,7 @@ TASAS_IGV_REDUCIDAS = ("0.10", "0.105", "0.08")
 # también `igv.py`, que por eso dependía de la validación entera (1.0: las dependencias ocultas se cortan).
 TOLERANCIA_IGV = Decimal("0.05")
 
-# schemeID del Catálogo 06 → Tabla 1 (coinciden salvo matices).
+# schemeID del Catálogo 06 → tipo de documento de identidad (coinciden salvo matices).
 SCHEME_A_TIPO_DOC = {"0": "0", "1": "1", "4": "4", "6": "6", "7": "7", "A": "A", "-": "0"}
 
 

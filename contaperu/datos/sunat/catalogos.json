@@ -44,7 +44,7 @@
   }
  },
  "monedas": {
-  "fuente": "Anexo 1 de la RS 112-2021, Tabla 2 (ISO 4217). Se deja pasar cualquier código de 3 letras; estos son los habituales.",
+  "fuente": "Anexo 1 de la RS 112-2021, Tabla 2: monedas (ISO 4217). Se deja pasar cualquier código de 3 letras; estos son los habituales.",
   "codigos": ["BRL", "CLP", "CNY", "COP", "EUR", "GBP", "JPY", "MXN", "PEN", "USD"]
  },
  "medios_pago": {

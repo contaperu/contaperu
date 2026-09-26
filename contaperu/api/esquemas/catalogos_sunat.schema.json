@@ -10,7 +10,7 @@
   },
   "medios_pago": {
    "type": "object",
-   "description": "Tabla 1 del Anexo 3 de la RS 169-2015: el código de medio de pago y su descripción.",
+   "description": "El código de medio de pago y su descripción (Anexo 3 de la RS 169-2015).",
    "additionalProperties": {
     "type": "string"
    }

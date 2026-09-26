@@ -42,13 +42,13 @@ def test_cada_catalogo_viene_de_datos_con_su_fuente():
     assert api.catalogos_sunat()["fuentes"] == catalogos.FUENTES
 
 
-# ── Los medios de pago (Tabla 1 del Anexo 3 de la RS 169-2015) ─────────────────────────────────────────────────
+# ── Los medios de pago (Anexo 3 de la RS 169-2015) ─────────────────────────────────────────────────────────────
 
 # Los 22 códigos, escritos a mano y enteros. Existe por un error concreto: la primera lista que llegó tenía tres
 # filas y decía que `005` era «tarjeta de crédito». En el anexo `005` es **tarjeta de débito** y la de crédito
 # emitida en el país es `006`. Un código publicado no se puede cambiar de significado después
 # (`estandar/enmiendas/LEEME.md`), así que el que los vigila es este test y no la buena memoria de nadie.
-MEDIOS_DE_PAGO_DE_LA_TABLA_1 = {
+MEDIOS_DE_PAGO_DE_SUNAT = {
     "001": "Depósito en cuenta",
     "002": "Giro",
     "003": "Transferencia de fondos",
@@ -77,9 +77,9 @@ MEDIOS_DE_PAGO_DE_LA_TABLA_1 = {
 }
 
 
-def test_los_medios_de_pago_son_los_de_la_tabla_1():
+def test_los_medios_de_pago_son_los_del_anexo():
     """Los 22 códigos, con su texto y en el orden del anexo."""
-    assert list(catalogos.MEDIOS_PAGO.items()) == list(MEDIOS_DE_PAGO_DE_LA_TABLA_1.items())
+    assert list(catalogos.MEDIOS_PAGO.items()) == list(MEDIOS_DE_PAGO_DE_SUNAT.items())
 
 
 def test_la_tarjeta_de_debito_es_la_005_y_la_de_credito_la_006():
@@ -94,7 +94,8 @@ def test_los_medios_de_pago_salen_por_la_fachada_con_su_fuente():
     catalogos_sunat = api.catalogos_sunat()
     assert catalogos_sunat["medios_pago"] == catalogos.MEDIOS_PAGO
     fuente = catalogos_sunat["fuentes"]["medios_pago"]
-    assert "RS 169-2015" in fuente and "Tabla 1" in fuente
+    # La fuente dice la norma Y el asunto: un número de tabla suelto no identifica nada y puede cambiar.
+    assert "RS 169-2015" in fuente and "medio de pago" in fuente.lower()
 
 
 # ── Las tres cifras del IGV ────────────────────────────────────────────────────────────────────────────────────

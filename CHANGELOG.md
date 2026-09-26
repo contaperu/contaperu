@@ -20,8 +20,17 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   es `006`—. Un valor publicado no se cambia de significado después, así que los 22 quedan congelados en
   `tests/test_catalogos.py`, con un test que solo comprueba esas dos tarjetas.
 
-  Ojo con el nombre: **no es la «Tabla 1» de los documentos de identidad**, que es la del Anexo 1 de la RS 112-2021.
-  Cada anexo numera las suyas desde 1.
+### Cambiado
+
+- **Un catálogo se nombra por lo que ES, nunca por su número de tabla** (John, 25-sep-2026). Cada anexo de SUNAT
+  numera las suyas empezando por 1, así que al entrar los medios de pago pasó a haber **dos «Tabla 1»** en el mismo
+  archivo, a seis líneas de distancia: la de documentos de identidad (Anexo 1 de la RS 112-2021) y la de medios de
+  pago (Anexo 3 de la RS 169-2015). El número suelto no identifica nada —y además puede cambiar con la siguiente
+  resolución, mientras que lo que el catálogo es, no—.
+
+  Así que los comentarios y las descripciones dicen «tipo de documento de identidad» y «tipo de medio de pago», y el
+  número se queda **solo dentro de la `fuente`**, que es la cita de la norma y donde hace falta para encontrarla, con
+  su asunto siempre al lado. Toca `catalogos.py`, `modelo.py`, `asiento/indice.py` y el esquema de la respuesta.
 
 ## [3.2.0] — 2026-09-25
 

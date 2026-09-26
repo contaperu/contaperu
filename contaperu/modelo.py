@@ -182,7 +182,7 @@ class Comprobante:
     fecha_vencimiento: date | None = None
     condicion_pago: str = ""        # contado | credito (CONDICIONES_PAGO); vacío = el documento no lo dice
     # Contraparte: el cliente en ventas, el proveedor en compras
-    contraparte_tipo_doc: str = "6"  # Tabla 1: 6 RUC, 1 DNI, 4 CE, 7 pasaporte, 0 otros
+    contraparte_tipo_doc: str = "6"  # tipo de documento de identidad: 6 RUC, 1 DNI, 4 CE, 7 pasaporte, 0 otros
     contraparte_doc: str = ""
     contraparte_nombre: str = ""
     # Importes (positivos)

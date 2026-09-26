@@ -53,7 +53,7 @@ class Cabecera:
     condicion_pago: str = ""
     id_externo: str = ""
     # Contraparte
-    contraparte_tipo_doc: str = ""   # Tabla 1: 6 RUC, 1 DNI, 4 CE, 7 pasaporte
+    contraparte_tipo_doc: str = ""   # tipo de documento de identidad: 6 RUC, 1 DNI, 4 CE, 7 pasaporte
     contraparte_doc: str = ""
     contraparte_nombre: str = ""
     glosa: str = ""                  # la del comprobante, en mayúsculas y sin cortar (`asiento.glosa_de`)
