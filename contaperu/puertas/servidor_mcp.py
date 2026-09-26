@@ -298,6 +298,40 @@ def validar_partida_doble(asiento: list[dict]) -> dict:
 
 @mcp.tool(annotations=SOLO_LECTURA)
 @contesta
+def resumen(documento: dict, agrupar_por: str = "") -> dict:
+    """Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.
+
+    Lo que un contador pregunta antes de dar un mes por bueno. **No pide destino**: es del libro, no de un
+    archivo — si lo que quieres es qué saldría hacia un sistema contable concreto, eso es `diagnosticar`.
+
+    Dos avisos para decírselos a quien pregunte: **las notas de crédito restan** (los tipos 07 y 87), así
+    que el total no cuadra sumando a mano lo que se ve; y **soles y dólares no se suman entre sí**, porque
+    sumar importes nominales de dos monedas no da ningún total. Lo excluido y lo marcado duplicado se
+    cuentan en `recuento` y no suman.
+
+    Con `agrupar_por="contraparte"`, los mismos totales por proveedor o cliente, de más a menos.
+    """
+    return api.resumen(documento, agrupar_por=agrupar_por)
+
+
+@mcp.tool(annotations=SOLO_LECTURA)
+@contesta
+def por_cuenta(asiento: list[dict]) -> dict:
+    """El pre-mayor: en qué cuentas cayó un asiento, con su debe y su haber por moneda, y el cuadre.
+
+    Recibe las líneas que devuelve `generar_asiento`. Delata una imputación mal puesta sin generar ningún
+    archivo: una cuenta con un importe que no le toca salta a la vista en una lista de diez cuentas y no en
+    una tabla de seiscientas filas.
+
+    Trae el cuadre global y también **por moneda**, que dice algo que el global no puede: dos monedas cuyos
+    descuadres se compensan salen cuadradas en el total y descuadradas cada una. Y `roles` va en plural:
+    con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.
+    """
+    return api.por_cuenta(asiento)
+
+
+@mcp.tool(annotations=SOLO_LECTURA)
+@contesta
 def generar_asiento(documento: dict, driver: str, configuracion: dict | None = None,
                     correlativos: dict | None = None, incluir_observados: bool = False,
                     imputacion: dict | None = None,

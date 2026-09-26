@@ -105,7 +105,8 @@ def test_la_lista_de_vigentes_no_se_queda_atras():
 
 
 # Los numeros que el README dice de si mismo, escritos como palabra y como cifra.
-PALABRAS = {11: "once", 12: "doce", 13: "trece", 6: "seis", 7: "siete", 8: "ocho"}
+PALABRAS = {11: "once", 12: "doce", 13: "trece", 14: "catorce", 6: "seis", 7: "siete", 8: "ocho",
+            9: "nueve"}
 
 
 def test_el_readme_no_dice_cuantas_herramientas_hay_a_ojo():

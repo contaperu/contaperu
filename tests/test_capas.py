@@ -54,6 +54,10 @@ CAPAS = {
     "contaperu.vocabulario": "nucleo",
     "contaperu.igv": "nucleo", "contaperu.detracciones": "nucleo", "contaperu.validar": "nucleo",
     "contaperu.partida_doble": "nucleo", "contaperu.asiento": "nucleo", "contaperu.pcge": "nucleo",
+    # Cuanto es un libro y en que cuentas cayo (3.4.0). **Nucleo y no pipeline**, y es la decision que
+    # sostiene todo lo demas: esta capa NO PUEDE importar un driver, asi que la garantia de que un
+    # resumen no mire el destino es la capa y no una promesa escrita en un docstring.
+    "contaperu.resumen": "nucleo",
     "contaperu.lectores": "nucleo", "contaperu.comparar_sire": "nucleo",
     "contaperu.drivers": "drivers",
     "contaperu.pipeline": "pipeline",

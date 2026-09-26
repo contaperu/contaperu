@@ -180,7 +180,7 @@ Lo que conviene saber antes de publicarla:
 ## Para un agente de IA, por MCP
 
 Un cliente MCP local lo arranca por entrada y salida estándar; uno remoto, por Streamable HTTP
-(`contaperu-mcp --transporte http --dominio …`). Las doce herramientas se anuncian de solo lectura y sin salir a la red,
+(`contaperu-mcp --transporte http --dominio …`). Las catorce herramientas se anuncian de solo lectura y sin salir a la red,
 y sus nombres son los de siempre: `diagnosticar`, `exportar`, `generar_asiento`, `validar_comprobantes`… Cómo
 conectarlo a Claude está en el `README.md`.
 
@@ -193,13 +193,21 @@ va aquí**. Lo que decide dónde va cada herramienta es una sola pregunta: **¿n
 |---|---|---|
 | Qué se configura y con qué valores se parte | No | **del motor** — `configuracion_por_defecto`, y el recurso `contaperu://configuracion` |
 | Guardar la configuración de un RUC | Sí | **tuya** |
-| Reportes y análisis | Sí | **tuya.** El motor no tiene ni una fila |
+| **Reportes sobre TUS filas**: qué meses hay, qué entró en la subida de las 11:19, un histórico | Sí | **tuya.** El motor no tiene ni una fila: no las busca, no las guarda y no sabe cuáles hay |
+| **Sumar, agrupar o cuadrar un documento que LE DAS** | No | **del motor** — `resumen`, `por_cuenta`, `cuadrar`. El dato entra en la llamada y sale en la llamada |
 | Leer un XML de SUNAT | No | **del motor** — `leer_xml_ubl` |
 | Leer un PDF o una foto con un modelo | Sí (red y una clave) | **tuya.** El motor no sale a la red, y eso lo vigila un test |
 | Guardar la factura | Sí | **tuya** |
 
 Las del motor son puras: reciben todo lo que necesitan y devuelven todo lo que producen. Las tuyas necesitan tu base
 de datos y tu sesión. **Son dos capas, no una**, y juntarlas obligaría al motor a tener estado.
+
+**Elegir las filas es tuyo; la aritmética de un libro, no** (3.4.0). La fila de los reportes decía «tuya» a secas, y
+metía en el mismo saco dos cosas distintas: qué mes, qué registro y qué filtro solo lo sabes tú, pero que una nota de
+crédito reste, que dos monedas no se sumen, que una excluida no cuente y que las líneas se agrupen por cuenta es
+contabilidad. Hasta la 3.3 el motor no la tenía, así que la escribía cada aplicación — y a la primera que lo hizo le
+salió con el `07` donde el motor dice `("07", "87")`: una nota de crédito de no domiciliado le **sumaba** en vez de
+restarle, y el total cuadraba con su propia tabla.
 
 Dos formas de combinarlas, y la primera no cuesta nada:
 

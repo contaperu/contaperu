@@ -32,6 +32,16 @@ ORIGENES = ("xml", "pdf_texto", "vision", "manual", "sire")  # sire = importado 
 # `PaymentTerms FormaPago`: «Contado», o «Credito» con sus cuotas). Vacío = el documento no lo dice.
 CONDICIONES_PAGO = ("contado", "credito")
 
+# Qué tipos de la Tabla 10 son una nota, y cuáles de ellas restan. **Con nombre desde la 3.4.0**, que no
+# es cosmética: estaba dentro de las dos propiedades de abajo, así que quien resumía un libro fuera del
+# motor no tenía nada que citar y lo escribía a mano. La primera aplicación que lo hizo se quedó con el
+# `07` y se dejó el `87` —la nota de crédito de no domiciliado—, así que esa **sumaba en vez de restar**:
+# el importe entraba con el signo contrario y el total cuadraba consigo mismo. Un nombre público es lo
+# que permite que la próxima lo pregunte en vez de deducirlo.
+NOTAS_CREDITO = ("07", "87")             # 07 domiciliado · 87 no domiciliado
+NOTAS_DEBITO = ("08", "88")              # las hermanas que suman
+NOTAS = NOTAS_CREDITO + NOTAS_DEBITO
+
 
 def a_decimal(v: Any) -> Decimal:
     """Un número cualquiera (una tasa, un porcentaje) a `Decimal`, sin redondear y sin quitarle el signo; vacío o
@@ -272,11 +282,11 @@ class Comprobante:
     # --- Derivados -------------------------------------------------------
     @property
     def es_nota_credito(self) -> bool:
-        return self.tipo_cp in ("07", "87")
+        return self.tipo_cp in NOTAS_CREDITO
 
     @property
     def es_nota(self) -> bool:
-        return self.tipo_cp in ("07", "08", "87", "88")
+        return self.tipo_cp in NOTAS
 
     @property
     def adquisiciones_no_gravadas(self) -> Decimal:

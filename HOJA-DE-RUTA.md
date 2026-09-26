@@ -405,6 +405,14 @@ con `rol` y los `tipo_cp`, y la guía [INTEGRAR.md](INTEGRAR.md), cuyos ejemplos
 | B4 | Puerta **HTTP sin estado**, `servidor_http*`, con el extra `contaperu[http]*` | puerta | dato: un integrador no Python que lo necesite | Está en `PUERTAS` de `tests/test_frontera.py`; las tres puertas dan el mismo documento; comparte topes y la defensa de `Host` del MCP; publicar su imagen pide OK | B3 | — |
 | B5 | El CSV lleva `rol` y los `tipo_cp`, lo que un driver necesita para no adivinar | D | código | Columnas nuevas llenas; **se anuncia** porque cambia una salida | — | 7 |
 | B6 | **Guía «integrar ContaPerú en un ERP»**: la librería (Odoo, Frappe), la CLI por lotes, el MCP y, con B4, HTTP; niveles *de serie* (con archivo aceptado) y *comunidad* (paquete propio por entry points); checklist de contribución | documentación | código | Los ejemplos en Python se ejecutan en la batería; `contaperu://drivers` dice si cada driver es de serie | B1 | — |
+| **B8** | **`resumen*` y `por_cuenta*`**: cuánto es un libro —base gravada, IGV y total, cada moneda por su lado, con agrupación por contraparte— y el pre-mayor con su cuadre por moneda. **Sin driver y sin configuración**: es del libro y del asiento, no de un destino | N · F | código | Una nota de crédito de no domiciliado (87) resta; ninguna clave suma dos monedas; el cuadre es el mismo dict que `cuadrar`; una cuenta con dos papeles los dice los dos; el `resumen_por_contraparte` de `diagnosticar` no cambia de cifra | B1 | — |
+
+**El caso real de B8**, que es lo que esta hoja de ruta exige para admitir un hito: el conector MCP de una aplicación
+que integra el motor (25-sep-2026) tuvo que escribir por su cuenta «suma este libro» y «agrupa este asiento por
+cuenta» para poder contestar «¿cuánto compré en agosto?» sin generar un archivo — porque el motor solo sumaba dinero
+dentro del `resumen` de una exportación, y `base_gravada` no se agregaba en ningún sitio. Y le salió con el `07` donde
+el motor dice `("07", "87")`, así que una nota de crédito de no domiciliado le sumaba en vez de restarle: el dato de
+que la regla estaba en el sitio equivocado.
 
 **No se hace.** SDKs generados (esperan un integrador que los pida), WASM o Pyodide (antes habría que probar que sus
 dependencias cargan), OAuth, estado ni sellos de certificación.

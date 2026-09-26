@@ -67,7 +67,7 @@ def leer_recurso(uri: str) -> str:
     return contenidos[0].content
 
 
-def test_estan_las_doce_herramientas():
+def test_estan_las_catorce_herramientas():
     """El conjunto EXACTO, no un `in`: una herramienta que se cuela sin querer tambien es un fallo.
 
     Quien conecta esto a su Claude ve esta lista y nada mas; anadir una es una decision, y este
@@ -79,6 +79,8 @@ def test_estan_las_doce_herramientas():
         "generar_asiento", "exportar", "leer_xml_ubl", "leer_propuesta_sire",
         "adaptar_pcge2026", "normalizar_detracciones", "buscar_cuenta_pcge", "diagnosticar",
         "drivers_disponibles",
+        # 3.4.0: cuanto es un libro y en que cuentas cayo. Ninguna pide destino.
+        "resumen", "por_cuenta",
     }
 
 
@@ -337,7 +339,7 @@ def test_un_pdf_por_el_protocolo_queda_pendiente_de_leer():
 def test_cada_herramienta_se_anuncia_de_solo_lectura_y_sin_salir_a_ningun_sitio():
     """Hito 0.2: `readOnlyHint` y `openWorldHint` en las doce, recorriendo lo que ve el cliente."""
     herramientas = asyncio.run(mcp.list_tools())
-    assert len(herramientas) == 12
+    assert len(herramientas) == 14
     for herramienta in herramientas:
         anotaciones = herramienta.annotations
         assert anotaciones is not None and anotaciones.readOnlyHint is True, herramienta.name
@@ -391,7 +393,10 @@ def test_los_destinos_se_pueden_preguntar_llamando_y_no_solo_leyendo():
 
 # Los dos unicos parametros que el MCP llama distinto que la api, y a proposito: para un agente esa lista de
 # diccionarios es «el asiento», no «las lineas». Declarados a la vista, como las toleradas de `test_capas.py`.
-RENOMBRA = {"validar_partida_doble": {"lineas": "asiento"}, "adaptar_pcge2026": {"lineas": "asiento"}}
+RENOMBRA = {"validar_partida_doble": {"lineas": "asiento"}, "adaptar_pcge2026": {"lineas": "asiento"},
+            # `por_cuenta` recibe las líneas de un asiento y las llama como sus dos hermanas del MCP: por
+            # HTTP el parámetro se llama `lineas`, que es el nombre de la api.
+            "por_cuenta": {"lineas": "asiento"}}
 
 
 def test_la_puerta_mcp_recibe_lo_mismo_que_la_http():

@@ -365,6 +365,94 @@
     }
    }
   },
+  "/v1/resumen": {
+   "post": {
+    "operationId": "resumen",
+    "summary": "Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.",
+    "description": "Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.\n\nLo que un contador pregunta antes de dar un mes por bueno, y lo que hasta la 3.4 había que sacar\ngenerando un archivo. **No recibe `driver` ni configuración**: es del libro, no de un destino — y esa\nes la diferencia con el `resumen_por_contraparte` de `diagnosticar`, que es lo que iría a ESE archivo\n(filtra lo que el destino no lleva y cuenta las duplicadas).\n\n`recuento` trae cuatro números que no se solapan y suman `recibidos`: lo excluido no es del mes y lo\nduplicado no va a ningún archivo, así que ninguno suma, pero son dos cosas distintas y se dicen\naparte. **La nota de crédito resta** —la 07 y la 87—, y no hay ninguna clave que sume dos monedas.\n\nCon `agrupar_por=\"contraparte\"`, además por proveedor o cliente, de más a menos y por su documento.\nQuien quiera que las duplicadas del lote se marquen solas, llama antes a `revisar`: esto no valida.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/resumen_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/resumen"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/por_cuenta": {
+   "post": {
+    "operationId": "por_cuenta",
+    "summary": "El pre-mayor: en qué cuentas cayó el asiento, con su debe y su haber por moneda, y el cuadre.",
+    "description": "El pre-mayor: en qué cuentas cayó el asiento, con su debe y su haber por moneda, y el cuadre.\n\nLa misma entrada que `cuadrar`, y hermana suya: aquí no se contabiliza nada, se agrupa lo que el motor\nya contabilizó. Delata una imputación mal puesta sin abrir ningún archivo —una cuenta con un importe\nque no le toca salta a la vista en diez cuentas y no en seiscientas filas—.\n\nTrae el cuadre global y **también por moneda**, que dice algo que el global no puede: dos monedas cuyos\ndescuadres se compensan salen cuadradas en el total y descuadradas cada una. Los suma la misma función\nque `cuadrar`, así que el pre-mayor y el cuadre no pueden discrepar.\n\n`roles` va en plural: con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/por_cuenta_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "El pre-mayor: en qué cuentas cayó el asiento, con su debe y su haber por moneda, y el cuadre.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/pre_mayor"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
   "/v1/buscar_cuenta_pcge": {
    "post": {
     "operationId": "buscar_cuenta_pcge",
@@ -2215,6 +2303,236 @@
     ],
     "additionalProperties": false
    },
+   "recuento": {
+    "title": "Recuento de un libro",
+    "type": "object",
+    "description": "Cuatro números que NO se solapan y suman `recibidos`: lo excluido no es del libro y lo duplicado no va a ningún archivo, así que ninguno suma, pero son dos cosas distintas.",
+    "properties": {
+     "recibidos": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Todos los que trae el documento."
+     },
+     "excluidos": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Apartados a mano: no son del libro."
+     },
+     "duplicados": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Son del libro y no van a ningún archivo."
+     },
+     "sumados": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Los que están en `totales`."
+     }
+    },
+    "required": [
+     "recibidos",
+     "excluidos",
+     "duplicados",
+     "sumados"
+    ],
+    "additionalProperties": false
+   },
+   "totales_por_moneda": {
+    "title": "Totales por moneda",
+    "type": "object",
+    "description": "Por moneda, y NUNCA una clave que sume dos: convertir dentro de un resumen sería una cifra nueva sin caso.",
+    "propertyNames": {
+     "pattern": "^[A-Z]{3}$"
+    },
+    "additionalProperties": {
+     "type": "object",
+     "properties": {
+      "base_gravada": {
+       "type": "string",
+       "description": "La base gravada. Lo inafecto y lo exonerado no entran, así que base + IGV puede no dar el total."
+      },
+      "igv": {
+       "type": "string"
+      },
+      "total": {
+       "type": "string",
+       "description": "Con las notas de crédito restando (los tipos 07 y 87)."
+      },
+      "sumados": {
+       "type": "integer",
+       "minimum": 0
+      }
+     },
+     "required": [
+      "base_gravada",
+      "igv",
+      "total",
+      "sumados"
+     ],
+     "additionalProperties": false
+    }
+   },
+   "resumen": {
+    "title": "Resumen de un libro",
+    "description": "Cuánto es un libro: base gravada, IGV y total, cada moneda por su lado. No depende de ningún destino.",
+    "type": "object",
+    "properties": {
+     "libro": {
+      "type": "object",
+      "description": "De qué RUC, qué periodo y qué libro es este resumen. Un total sin decirlo no dice nada.",
+      "properties": {
+       "ruc": {
+        "type": "string"
+       },
+       "periodo": {
+        "type": "string"
+       },
+       "tipo": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "ruc",
+       "periodo",
+       "tipo"
+      ],
+      "additionalProperties": false
+     },
+     "recuento": {
+      "$ref": "#/components/schemas/recuento"
+     },
+     "totales": {
+      "$ref": "#/components/schemas/totales_por_moneda"
+     },
+     "agrupado_por": {
+      "type": "string",
+      "description": "Cómo se agrupó: vacío, o «contraparte»."
+     },
+     "grupos": {
+      "type": "array",
+      "description": "Los mismos totales por grupo, de más a menos. Vacío cuando no se agrupó.",
+      "items": {
+       "type": "object",
+       "properties": {
+        "clave": {
+         "type": "string",
+         "description": "El documento de la contraparte; vacío si no lo trae."
+        },
+        "etiqueta": {
+         "type": "string",
+         "description": "Su nombre, el más reciente que trajo alguna de sus filas."
+        },
+        "recuento": {
+         "$ref": "#/components/schemas/recuento"
+        },
+        "totales": {
+         "$ref": "#/components/schemas/totales_por_moneda"
+        }
+       },
+       "required": [
+        "clave",
+        "etiqueta",
+        "recuento",
+        "totales"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "libro",
+     "recuento",
+     "totales",
+     "agrupado_por",
+     "grupos"
+    ],
+    "additionalProperties": false
+   },
+   "pre_mayor": {
+    "title": "Pre-mayor",
+    "description": "En qué cuentas cayó un asiento, con su debe y su haber por moneda, y el cuadre. Agrupa lo ya contabilizado: no contabiliza nada.",
+    "type": "object",
+    "properties": {
+     "cuentas": {
+      "type": "array",
+      "description": "Por código de cuenta, que es como se lee un mayor.",
+      "items": {
+       "type": "object",
+       "properties": {
+        "cuenta": {
+         "type": "string"
+        },
+        "clase": {
+         "type": "string",
+         "description": "gasto, ingreso, activo o pasivo. En singular: se deriva del primer dígito de la cuenta y no puede variar entre dos líneas de la misma."
+        },
+        "roles": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         },
+         "description": "Qué papeles hace en el asiento. En PLURAL: con una detracción, la cuenta por pagar sale como «tercero» y como «detraccion_tercero» en el mismo asiento."
+        },
+        "lineas": {
+         "type": "integer",
+         "minimum": 0
+        },
+        "por_moneda": {
+         "type": "object",
+         "description": "Su debe y su haber en cada moneda. De una cuenta no se dice si cuadra: una cuenta no tiene por qué cuadrar.",
+         "propertyNames": {
+          "pattern": "^[A-Z]{3}$"
+         },
+         "additionalProperties": {
+          "type": "object",
+          "properties": {
+           "debe": {
+            "type": "string"
+           },
+           "haber": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "debe",
+           "haber"
+          ],
+          "additionalProperties": false
+         }
+        }
+       },
+       "required": [
+        "cuenta",
+        "clase",
+        "roles",
+        "lineas",
+        "por_moneda"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "por_moneda": {
+      "type": "object",
+      "description": "El cuadre de cada moneda, que dice algo que el global no puede: dos monedas cuyos descuadres se compensan salen cuadradas en el total y descuadradas cada una.",
+      "propertyNames": {
+       "pattern": "^[A-Z]{3}$"
+      },
+      "additionalProperties": {
+       "$ref": "#/components/schemas/cuadre"
+      }
+     },
+     "cuadre": {
+      "description": "El de todas las líneas juntas, lo mismo que devuelve `cuadrar`.",
+      "$ref": "#/components/schemas/cuadre"
+     }
+    },
+    "required": [
+     "cuentas",
+     "por_moneda",
+     "cuadre"
+    ],
+    "additionalProperties": false
+   },
    "cuenta_pcge": {
     "title": "Cuenta del PCGE 2026",
     "description": "Lo que se encontró en el catálogo oficial: la cuenta de un código —o la madre que lo gobierna, con `exacta` falso— y las cuentas cuyo nombre contiene el texto.",
@@ -2825,6 +3143,45 @@
     }
    },
    "cuadrar_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "lineas"
+    ],
+    "properties": {
+     "lineas": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_linea"
+      },
+      "description": "Las líneas del asiento."
+     }
+    }
+   },
+   "resumen_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "agrupar_por": {
+      "type": "string",
+      "enum": [
+       "",
+       "contraparte"
+      ],
+      "default": "",
+      "description": "Vacío, solo los totales del libro; `contraparte`, además por proveedor o cliente."
+     }
+    }
+   },
+   "por_cuenta_entrada": {
     "type": "object",
     "additionalProperties": false,
     "required": [

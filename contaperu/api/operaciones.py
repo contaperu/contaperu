@@ -11,6 +11,7 @@ import importlib
 from typing import Sequence
 
 from .. import (_datos, catalogos, comparar_sire as _comparar, detracciones, drivers, partida_doble, pcge,
+                resumen as _resumen,
                 vocabulario)
 from ..drivers import contrato
 from ..errores import DocumentoInvalido
@@ -106,6 +107,45 @@ def cuadrar(lineas: list[dict]) -> dict:
     """¿La suma del Debe es exactamente igual a la del Haber? Devuelve las dos sumas, la diferencia y cuántas líneas no
     dicen si son Debe o Haber."""
     return partida_doble.cuadra(lineas).a_dict()
+
+
+def resumen(documento: dict, *, agrupar_por: str = "") -> dict:
+    """Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.
+
+    Lo que un contador pregunta antes de dar un mes por bueno, y lo que hasta la 3.4 había que sacar
+    generando un archivo. **No recibe `driver` ni configuración**: es del libro, no de un destino — y esa
+    es la diferencia con el `resumen_por_contraparte` de `diagnosticar`, que es lo que iría a ESE archivo
+    (filtra lo que el destino no lleva y cuenta las duplicadas).
+
+    `recuento` trae cuatro números que no se solapan y suman `recibidos`: lo excluido no es del mes y lo
+    duplicado no va a ningún archivo, así que ninguno suma, pero son dos cosas distintas y se dicen
+    aparte. **La nota de crédito resta** —la 07 y la 87—, y no hay ninguna clave que sume dos monedas.
+
+    Con `agrupar_por="contraparte"`, además por proveedor o cliente, de más a menos y por su documento.
+    Quien quiera que las duplicadas del lote se marquen solas, llama antes a `revisar`: esto no valida.
+    """
+    libro = preparacion.libro_de(documento)
+    salida_ = _resumen.del_libro(preparacion.comprobantes_de(documento), agrupar_por=agrupar_por)
+    # El libro va en la respuesta porque un total sin decir de qué RUC y de qué mes es una trampa —y es
+    # además lo que hace que nadie pueda coser doce de estos y presentarlos como un resumen anual sin que
+    # se vea, que es un descarte declarado del estándar (`INTEROPERABILIDAD.md` §7).
+    return {"libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo}, **salida_}
+
+
+def por_cuenta(lineas: list[dict]) -> dict:
+    """El pre-mayor: en qué cuentas cayó el asiento, con su debe y su haber por moneda, y el cuadre.
+
+    La misma entrada que `cuadrar`, y hermana suya: aquí no se contabiliza nada, se agrupa lo que el motor
+    ya contabilizó. Delata una imputación mal puesta sin abrir ningún archivo —una cuenta con un importe
+    que no le toca salta a la vista en diez cuentas y no en seiscientas filas—.
+
+    Trae el cuadre global y **también por moneda**, que dice algo que el global no puede: dos monedas cuyos
+    descuadres se compensan salen cuadradas en el total y descuadradas cada una. Los suma la misma función
+    que `cuadrar`, así que el pre-mayor y el cuadre no pueden discrepar.
+
+    `roles` va en plural: con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.
+    """
+    return _resumen.por_cuenta(lineas)
 
 
 # --- plan de cuentas ----------------------------------------------------------------

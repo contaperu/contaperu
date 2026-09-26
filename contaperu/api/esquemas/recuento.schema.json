@@ -1,0 +1,36 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/recuento.schema.json",
+ "title": "Recuento de un libro",
+ "type": "object",
+ "description": "Cuatro números que NO se solapan y suman `recibidos`: lo excluido no es del libro y lo duplicado no va a ningún archivo, así que ninguno suma, pero son dos cosas distintas.",
+ "properties": {
+  "recibidos": {
+   "type": "integer",
+   "minimum": 0,
+   "description": "Todos los que trae el documento."
+  },
+  "excluidos": {
+   "type": "integer",
+   "minimum": 0,
+   "description": "Apartados a mano: no son del libro."
+  },
+  "duplicados": {
+   "type": "integer",
+   "minimum": 0,
+   "description": "Son del libro y no van a ningún archivo."
+  },
+  "sumados": {
+   "type": "integer",
+   "minimum": 0,
+   "description": "Los que están en `totales`."
+  }
+ },
+ "required": [
+  "recibidos",
+  "excluidos",
+  "duplicados",
+  "sumados"
+ ],
+ "additionalProperties": false
+}

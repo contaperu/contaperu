@@ -1,0 +1,54 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/pre_mayor.schema.json",
+ "title": "Pre-mayor",
+ "description": "En qué cuentas cayó un asiento, con su debe y su haber por moneda, y el cuadre. Agrupa lo ya contabilizado: no contabiliza nada.",
+ "type": "object",
+ "properties": {
+  "cuentas": {
+   "type": "array",
+   "description": "Por código de cuenta, que es como se lee un mayor.",
+   "items": {
+    "type": "object",
+    "properties": {
+     "cuenta": {"type": "string"},
+     "clase": {"type": "string", "description": "gasto, ingreso, activo o pasivo. En singular: se deriva del primer dígito de la cuenta y no puede variar entre dos líneas de la misma."},
+     "roles": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Qué papeles hace en el asiento. En PLURAL: con una detracción, la cuenta por pagar sale como «tercero» y como «detraccion_tercero» en el mismo asiento."
+     },
+     "lineas": {"type": "integer", "minimum": 0},
+     "por_moneda": {
+      "type": "object",
+      "description": "Su debe y su haber en cada moneda. De una cuenta no se dice si cuadra: una cuenta no tiene por qué cuadrar.",
+      "propertyNames": {"pattern": "^[A-Z]{3}$"},
+      "additionalProperties": {
+       "type": "object",
+       "properties": {
+        "debe": {"type": "string"},
+        "haber": {"type": "string"}
+       },
+       "required": ["debe", "haber"],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": ["cuenta", "clase", "roles", "lineas", "por_moneda"],
+    "additionalProperties": false
+   }
+  },
+  "por_moneda": {
+   "type": "object",
+   "description": "El cuadre de cada moneda, que dice algo que el global no puede: dos monedas cuyos descuadres se compensan salen cuadradas en el total y descuadradas cada una.",
+   "propertyNames": {"pattern": "^[A-Z]{3}$"},
+   "additionalProperties": {"$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/cuadre.schema.json"}
+  },
+  "cuadre": {
+   "description": "El de todas las líneas juntas, lo mismo que devuelve `cuadrar`.",
+   "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/cuadre.schema.json"
+  }
+ },
+ "required": ["cuentas", "por_moneda", "cuadre"],
+ "additionalProperties": false
+}

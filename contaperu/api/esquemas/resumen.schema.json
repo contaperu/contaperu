@@ -1,0 +1,78 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/resumen.schema.json",
+ "title": "Resumen de un libro",
+ "description": "Cuánto es un libro: base gravada, IGV y total, cada moneda por su lado. No depende de ningún destino.",
+ "type": "object",
+ "properties": {
+  "libro": {
+   "type": "object",
+   "description": "De qué RUC, qué periodo y qué libro es este resumen. Un total sin decirlo no dice nada.",
+   "properties": {
+    "ruc": {
+     "type": "string"
+    },
+    "periodo": {
+     "type": "string"
+    },
+    "tipo": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ruc",
+    "periodo",
+    "tipo"
+   ],
+   "additionalProperties": false
+  },
+  "recuento": {
+   "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/recuento.schema.json"
+  },
+  "totales": {
+   "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/totales_por_moneda.schema.json"
+  },
+  "agrupado_por": {
+   "type": "string",
+   "description": "Cómo se agrupó: vacío, o «contraparte»."
+  },
+  "grupos": {
+   "type": "array",
+   "description": "Los mismos totales por grupo, de más a menos. Vacío cuando no se agrupó.",
+   "items": {
+    "type": "object",
+    "properties": {
+     "clave": {
+      "type": "string",
+      "description": "El documento de la contraparte; vacío si no lo trae."
+     },
+     "etiqueta": {
+      "type": "string",
+      "description": "Su nombre, el más reciente que trajo alguna de sus filas."
+     },
+     "recuento": {
+      "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/recuento.schema.json"
+     },
+     "totales": {
+      "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/totales_por_moneda.schema.json"
+     }
+    },
+    "required": [
+     "clave",
+     "etiqueta",
+     "recuento",
+     "totales"
+    ],
+    "additionalProperties": false
+   }
+  }
+ },
+ "required": [
+  "libro",
+  "recuento",
+  "totales",
+  "agrupado_por",
+  "grupos"
+ ],
+ "additionalProperties": false
+}

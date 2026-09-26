@@ -144,7 +144,7 @@ API y devuelven la respuesta. Por eso el mismo mes da el mismo resultado por las
 |---|---|---|
 | **Python** | Un programa en Python | `from contaperu import api` y `api.exportar(documento, driver="concar", ...)`: llama directo a la API |
 | **CLI** (`contaperu`) | Quien trabaja en la consola o por lotes | Seis comandos: `generar`, `desde-json`, `diagnosticar`, `configuracion`, `comparar` y `verificar-driver`, que comprueba un driver propio contra el contrato |
-| **MCP** (`contaperu-mcp`) | Un asistente de IA | 12 herramientas de solo lectura y 8 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
+| **MCP** (`contaperu-mcp`) | Un asistente de IA | 14 herramientas de solo lectura y 8 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
 | **HTTP** (`contaperu-http`) | Un ERP en cualquier lenguaje | `POST /v1/exportar`, `POST /v1/diagnosticar`…; responde 421 a un `Host` no declarado, corta la petición en 10 MB y atiende 16 a la vez |
 
 La **API pública** (`contaperu.api`) es la lista de operaciones que comparten las cuatro puertas: leer, revisar,
@@ -379,7 +379,8 @@ RFC 9457 con una `clave` estable. La guía, en [INTEGRAR.md](INTEGRAR.md).
 
 ### Para un agente de IA: el servidor MCP
 
-Doce herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
+Catorce herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
+`resumen` (cuánto es el libro, cada moneda por su lado) y `por_cuenta` (en qué cuentas cayó el asiento),
 `configuracion_por_defecto`, `drivers_disponibles`, `validar_comprobantes`, `validar_partida_doble`,
 `generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`,
 `buscar_cuenta_pcge` y `adaptar_pcge2026`, todas anunciadas de solo lectura. Y ocho recursos: el esquema del

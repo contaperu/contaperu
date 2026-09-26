@@ -1256,7 +1256,9 @@ de C4. El motor nunca calcula una retención que no muestre el comprobante.
 - Calendarios de vencimientos, pagos a cuenta y plazos de conservación: el núcleo no tiene reloj
   (`tests/test_frontera.py:94`) ni disco.
 - Asentar el 91 como costo, a imitación del *use tax*: en el Perú es crédito con requisitos.
-- Convertir monedas dentro de un resumen: sería una cifra nueva sin caso.
+- Convertir monedas dentro de un resumen: sería una cifra nueva sin caso. Lo descartado es **convertir**, no
+  informar cada moneda por su lado, que es lo que hace `resumen` desde la 3.4.0: sus totales son un mapa por
+  moneda y no hay ninguna clave que sume dos.
 
 ---
 

@@ -22,6 +22,7 @@ import inspect
 from dataclasses import dataclass
 from typing import Callable
 
+from .. import resumen
 from .._version import OPEN_ACCOUNTING
 from . import operaciones
 
@@ -56,6 +57,10 @@ PARAMETROS: dict[str, dict] = {
                            "description": "Generar aunque haya comprobantes con observaciones que bloquean."},
     "fecha": {"type": ["string", "null"], "format": "date", "description": "La fecha de la exportación (AAAA-MM-DD)."},
     "lineas": {"type": "array", "items": {"$ref": f"{ESTANDAR}#/$defs/linea"}, "description": "Las líneas del asiento."},
+    # El `enum` sale de la constante del núcleo y no escrito aquí: el día que entre otra forma de agrupar,
+    # la puerta la publica sola en vez de quedarse una versión por detrás.
+    "agrupar_por": {"type": "string", "enum": list(resumen.AGRUPACIONES), "default": "",
+                    "description": "Vacío, solo los totales del libro; `contraparte`, además por proveedor o cliente."},
     "texto": {"type": "string", "default": "", "description": "Parte del nombre de la cuenta."},
     "codigo": {"type": "string", "default": "", "description": "El código de la cuenta."},
 }
@@ -108,6 +113,10 @@ OPERACIONES: tuple[Operacion, ...] = (
     Operacion("generar_asiento", "POST", "/v1/generar_asiento", "asiento", herramienta="generar_asiento"),
     Operacion("exportar", "POST", "/v1/exportar", "exportacion", herramienta="exportar"),
     Operacion("cuadrar", "POST", "/v1/cuadrar", "cuadre", herramienta="validar_partida_doble"),
+    # Cuánto es un libro y en qué cuentas cayó (3.4.0). Ninguna recibe `driver`: son del libro y del
+    # asiento, no de un destino — lo que iría a un destino concreto ya lo dice `diagnosticar`.
+    Operacion("resumen", "POST", "/v1/resumen", "resumen", herramienta="resumen"),
+    Operacion("por_cuenta", "POST", "/v1/por_cuenta", "pre_mayor", herramienta="por_cuenta"),
     Operacion("buscar_cuenta_pcge", "POST", "/v1/buscar_cuenta_pcge", "cuenta_pcge", herramienta="buscar_cuenta_pcge"),
     Operacion("adaptar_pcge", "POST", "/v1/adaptar_pcge", "adaptacion_pcge", herramienta="adaptar_pcge2026"),
     Operacion("configuracion_por_defecto", "GET", "/v1/configuracion/por_defecto", "configuracion",
