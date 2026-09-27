@@ -197,6 +197,32 @@ def test_una_nota_en_cero_ya_no_se_calla():
     assert [o.codigo for o in de_una_foto.observaciones if o.codigo.startswith("TOTAL_CERO")] == ["TOTAL_CERO"]
 
 
+def test_un_mes_con_lo_que_sunat_declara_sale_por_los_cuatro_destinos():
+    """La prueba de que las dos mitades funcionan juntas, con las tres formas en las que SUNAT complica un mes: un
+    comprobante dado de baja (en cero), una nota de crédito declarada en las columnas de descuento, y una nota con la
+    base sin declarar, que es la que bloqueaba el mes entero por los cuatro destinos a la vez.
+
+    Antes de la 3.5.0 esto devolvía `listo_para_exportar: False` con «1 comprobantes con observaciones que bloquean», y
+    `pipeline/salida.generar` miraba los errores ANTES de saber el destino: caían el TXT del SIRE, CONCAR, CONTASIS y
+    STARSOFT por igual."""
+    nota_descuento = fila(tipo_cp="07", serie="FC01", numero="37", base_gravada="7464.75", igv="1343.65",
+                          dscto_base="7464.75", dscto_igv="1343.65", total="8808.40", estado_sunat="1",
+                          tipo_nota="09", ref_tipo_cp="01", ref_serie="F001", ref_numero="83",
+                          ref_fecha="2025-12-30")
+    nota_sin_base = fila(tipo_cp="07", serie="E001", numero="222", base_gravada="0", igv="4546.31",
+                         total="29803.61", estado_sunat="1", tipo_nota="01", ref_tipo_cp="01", ref_serie="E001",
+                         ref_numero="1003", ref_fecha="2026-02-04")
+    doc = {"open_accounting": "1.0", "libro": LIBRO,
+           "comprobantes": [fila(), fila(**LA_VENTA), nota_descuento, nota_sin_base]}
+    d = diagnosticar(doc, driver="sire")
+    assert d["listo_para_exportar"] is True and d["por_que_no"] == []
+    assert d["totales"]["con_error"] == 0 and d["totales"]["sin_efecto_contable"] == 1
+    # Y sale por los cuatro destinos sin forzar nada: el registro los lleva y el asiento se salta el que no mueve dinero.
+    for driver in ("sire", "concar", "contasis", "starsoft"):
+        r = exportar(doc, driver=driver)
+        assert r["comprobantes"] >= 3, driver
+
+
 def test_el_comparador_reconoce_el_tipo_de_cambio_de_un_comprobante_dado_de_baja():
     """SUNAT escribe `1.000` en el TC de un comprobante normal en soles y **`0.000`** en uno que da de baja; el archivo
     de reemplazo lo manda vacío. Los tres dicen lo mismo, y hasta la 3.5.0 el comparador solo conocía dos: un mes con

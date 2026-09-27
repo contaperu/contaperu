@@ -89,8 +89,15 @@ def escribir_xlsx(filas: list[dict[str, Any]]) -> bytes:
 
 
 def _numero(entrada: ComprobanteDelAsiento) -> int:
-    """El número del asiento dentro de su sub-diario: lo que sigue a los dos dígitos del mes."""
-    return int(entrada.correlativo[2:])
+    """El número del asiento dentro de su sub-diario: lo que sigue a los dos dígitos del mes.
+
+    Cero cuando el comprobante no tiene correlativo, que desde la 3.5.0 es un caso legítimo y no un error: uno que no
+    mueve dinero no gasta número —SUNAT declara en cero los que se dan de baja— y aparece en el índice con su identidad
+    y un tramo vacío, para que el archivo siga diciendo qué pasó con cada comprobante. Sin número no hay desborde que
+    calcular, y antes esto reventaba con un `ValueError` a medio Excel.
+    """
+    resto = entrada.correlativo[2:]
+    return int(resto) if resto.isdigit() else 0
 
 
 def _desbordan(indice: tuple[ComprobanteDelAsiento, ...]) -> dict[str, int]:

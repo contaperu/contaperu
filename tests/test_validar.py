@@ -89,6 +89,41 @@ def test_contraparte():
     assert codigos(cp(contraparte_nombre="")) == ["NOMBRE_FALTA"]
 
 
+def test_un_descuadre_de_la_propia_propuesta_avisa_en_vez_de_bloquear():
+    """El caso real que lo trajo: SUNAT tiene una nota de crédito con la base sin declarar —base 0, IGV 4 546.31 y
+    total 29 803.61— y con eso el mes entero no salía por ningún destino.
+
+    El motor no es el auditor de lo que la Administración ya aceptó: corregir la copia no cambia el registro, y el
+    arreglo de verdad es que el emisor emita otra nota. Así que avisa, bien visible, y deja cerrar el mes."""
+    de_sunat = cp(tipo_cp="07", serie="E001", numero="222", origen="sire", base_gravada="0", igv="4546.31",
+                  total="29803.61", ref_tipo_cp="01", ref_serie="E001", ref_numero="1003", ref_fecha="2026-01-04")
+    assert codigos(de_sunat) == ["SIRE_SIN_DETALLE", "IGV_NO_CUADRA", "TOTAL_NO_CUADRA"]
+    assert [o.nivel for o in de_sunat.observaciones] == ["aviso", "aviso", "aviso"]
+    assert not de_sunat.tiene_errores                    # y por tanto el mes sale
+    # El texto dice POR QUÉ no bloquea: un aviso sin explicación se lee como un error tolerado.
+    assert all("SUNAT" in o.texto for o in de_sunat.observaciones if o.codigo.endswith("NO_CUADRA"))
+
+
+def test_el_mismo_descuadre_en_un_xml_sigue_bloqueando():
+    """La otra mitad, y la que impide que esto sea una barra libre: el alcance es `origen == "sire"` y nada más. En un
+    XML, en un PDF o en un dictado el descuadre se corrige ANTES de declarar, así que ahí tiene que detener."""
+    for origen in ("xml", "pdf_texto", "vision", "manual"):
+        c = cp(tipo_cp="07", serie="E001", numero="222", origen=origen, base_gravada="0", igv="4546.31",
+               total="29803.61", ref_tipo_cp="01", ref_serie="E001", ref_numero="1003", ref_fecha="2026-01-04")
+        assert codigos(c) == ["IGV_NO_CUADRA", "TOTAL_NO_CUADRA"], origen
+        assert c.tiene_errores, origen
+        assert [o.nivel for o in c.observaciones] == ["error", "error"], origen
+
+
+def test_los_dos_codigos_del_descuadre_siguen_en_la_tabla_de_a_quien_pedirlo():
+    """El nivel se volvió variable, y eso es una trampa: el test que comprueba que `PEDIR_A` cubre todos los códigos
+    es un `ast.walk` que solo reconoce `error(...)`, `aviso(...)` y `.observar(...)` con el código como primera
+    constante literal. Si alguien esconde el nivel en un helper propio, los dos códigos se caen de esa comprobación
+    **en verde**, así que aquí se nombran a mano."""
+    from contaperu.pipeline.diagnostico import PEDIR_A
+    assert PEDIR_A["IGV_NO_CUADRA"] == "contador" and PEDIR_A["TOTAL_NO_CUADRA"] == "contador"
+
+
 def test_moneda_y_tc():
     assert codigos(cp(moneda="USD")) == ["TC_FALTA"]
     assert codigos(cp(moneda="USD", tipo_cambio="3.75")) == []

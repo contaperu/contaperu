@@ -123,6 +123,23 @@ def validar(c: Comprobante, libro: Libro) -> None:
         error("TC_FALTA", f"Comprobante en {c.moneda}: falta el tipo de cambio (SUNAT lo exige)")
 
     # --- Importes --------------------------------------------------------------------
+    # Un descuadre bloquea, **salvo que el descuadre lo haya escrito SUNAT**. El motor no es el auditor de lo que la
+    # Administración ya aceptó: si su propuesta trae una nota de crédito con la base sin declarar —caso real: base 0,
+    # IGV 4 546.31 y total 29 803.61—, corregir la copia no cambia el registro, y el arreglo de verdad es que el emisor
+    # emita otra nota. Bloquear el mes le pediría al contador algo que no puede hacer, y de paso impediría generar un
+    # TXT que sería idéntico al que SUNAT ya tiene. Es el mismo criterio con el que `MEDIO_PAGO_DESCONOCIDO` y
+    # `CREDITO_FISCAL_FUERA_DE_PLAZO` son avisos: nadie se queda sin cerrar su mes por algo que no está en su mano.
+    #
+    # En cualquier otro origen sigue siendo error, y eso es el alcance entero: en un XML, en un PDF o en un dictado el
+    # descuadre se corrige ANTES de declarar, así que ahí sí tiene que detener la exportación.
+    #
+    # OJO al tocar esto: el nivel va en una variable pero **el código queda literal** en la llamada a `c.observar`. El
+    # test que comprueba que `PEDIR_A` cubre todos los códigos (`test_diagnosticar.py`) es un `ast.walk` que solo
+    # reconoce `error(...)`, `aviso(...)` y `.observar(...)` con el código como primera constante; si el nivel variable
+    # se esconde en un helper propio, estos dos códigos se caen de esa comprobación **en verde**.
+    de_la_propuesta = c.origen == "sire"
+    nivel_descuadre = "aviso" if de_la_propuesta else "error"
+    ya_declarado = " — así lo tiene SUNAT en su propuesta, así que no detiene la exportación" if de_la_propuesta else ""
     if c.base_gravada > 0 or c.igv > 0:
         esperado = c.base_gravada * Decimal(cat.TASA_IGV)
         if not _cuadra(c.igv, esperado):
@@ -131,8 +148,9 @@ def validar(c: Comprobante, libro: Libro) -> None:
             if reducida:
                 aviso("IGV_TASA_REDUCIDA", f"IGV al {Decimal(reducida) * 100:.1f} % (tasa reducida); verifica que corresponda")
             else:
-                error("IGV_NO_CUADRA",
-                      f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} (esperado {esperado:.2f})")
+                c.observar("IGV_NO_CUADRA", nivel_descuadre,
+                           f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} "
+                           f"(esperado {esperado:.2f}){ya_declarado}")
     # Sin los descuentos: la base y el IGV ya son netos (estandar/LEEME.md, open-accounting 0.2).
     esperado_total = (
         c.base_gravada + c.igv + c.exonerado + c.inafecto + c.exportacion + c.isc
@@ -143,7 +161,9 @@ def validar(c: Comprobante, libro: Libro) -> None:
         if anticipo > 0 and _cuadra(c.total, esperado_total - anticipo):
             aviso("ANTICIPO", f"El total descuenta un anticipo de {anticipo}; revisa la base a anotar")
         else:
-            error("TOTAL_NO_CUADRA", f"Total {c.total} no cuadra con base + IGV + no gravado + otros ({esperado_total:.2f})")
+            c.observar("TOTAL_NO_CUADRA", nivel_descuadre,
+                       f"Total {c.total} no cuadra con base + IGV + no gravado + otros "
+                       f"({esperado_total:.2f}){ya_declarado}")
     # En una NC los descuentos van con el mismo signo que la base (SIRE, campos 15 y 16): son la parte de la
     # base y del IGV que se informa aparte, así que no pueden pasarlos, o el campo 15 cambiaría de signo.
     if c.es_nota_credito and (c.dscto_base > c.base_gravada or c.dscto_igv > c.igv):
