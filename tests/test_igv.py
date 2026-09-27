@@ -238,3 +238,80 @@ def test_editar_una_compra_no_gravada_no_pierde_el_importe_ni_lo_duplica():
     # `validar` lo dice: `aplicar_total` NO toca el IGV a propósito, porque se escribe del papel en su propia
     # celda. Lo promete su docstring desde el 11-sep-2026 y aquí queda anclado.
     assert cuadra(cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168"), r) == ["IGV_NO_CUADRA"]
+
+
+def clase(c, es_venta=False):
+    return igv.clase_de_igv(c, es_venta)
+
+
+def test_la_clase_del_igv_sale_de_los_importes_y_no_del_destino():
+    """Qué le cobraron de IGV al comprobante, deducido de sus importes.
+
+    **No es `destino_igv`**, y ese es el fallo que esto viene a cerrar: el modelo pone `DG` por defecto a TODO
+    comprobante, también a una compra que no tiene IGV que destinar, así que leer el destino para responder a esta
+    pregunta contesta «gravada» a media contabilidad. Lo sabía `drivers/starsoft/proyeccion.destino_de` desde la 2.x,
+    dentro de un driver; aquí sube al núcleo, que es donde puede mirarlo también la pantalla.
+    """
+    # Una compra sin IGV con el destino por defecto: la clase NO se deja engañar.
+    no_gravada = cp(valor_no_gravado="150", total="150", destino_igv="DG")
+    assert no_gravada.destino_igv == "DG" and clase(no_gravada) == "no_gravada"
+
+    assert clase(cp(base_gravada="100", igv="18", total="118")) == "gravada"
+    assert clase(cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168")) == "mixto"
+    # La importación se reconoce por la DUA, no por un importe, y solo existe en compras.
+    assert clase(cp(base_gravada="100", igv="18", total="118", anio_dua="2026")) == "importacion"
+    assert clase(cp(base_gravada="100", igv="18", total="118", cod_dep_aduanera="235")) == "importacion"
+
+
+def test_los_dos_libros_no_dan_las_mismas_clases():
+    """El RVIE separa exonerado (19) de inafecto (20); el RCE tiene UNA columna que no dice cuál de los dos es.
+
+    Por eso en compras se dice «no gravada» y no se inventa el desglose, y por eso las dos tablas del catálogo están
+    separadas. Con el mismo importe en `inafecto`, una venta dice «inafecto» y una compra, «no gravada».
+    """
+    from contaperu import catalogos as cat
+    assert clase(cp(inafecto="150", total="150"), es_venta=True) == "inafecto"
+    assert clase(cp(inafecto="150", total="150")) == "no_gravada"
+    assert clase(cp(exonerado="50", total="50"), es_venta=True) == "exonerado"
+    # «Importación» solo existe en compras: una venta con DUA es una exportación, y esa tiene su propia columna.
+    assert clase(cp(exportacion="100", total="100", anio_dua="2026"), es_venta=True) == "exportacion"
+    # Y cada clase que se devuelve tiene su nombre en castellano, sin que la pantalla lo escriba a mano.
+    for c, es_venta, tabla in ((cp(base_gravada="100", igv="18", total="118"), False, cat.CLASES_IGV_COMPRA),
+                               (cp(inafecto="150", total="150"), True, cat.CLASES_IGV_VENTA)):
+        assert clase(c, es_venta) in tabla
+
+
+def test_un_comprobante_sin_importes_no_tiene_clase():
+    """Así declara SUNAT lo que se da de baja: todo en cero. No es gravado ni no gravado, y decir cualquiera de las
+    dos cosas sería inventar — la pantalla caía en «inafecto» por descarte y lo enseñaba con `0.00` al lado."""
+    assert clase(cp(total="0")) == "" and clase(cp(total="0"), es_venta=True) == ""
+
+
+def test_poner_el_importe_no_gravado_recalcula_la_base_sin_tocar_el_total():
+    """El (+) del portal: la persona escribe UN importe y el motor recoloca el resto.
+
+    Existe porque una compra mixta no se podía corregir: el formulario ofrecía `exonerado` e `inafecto`, que en el
+    RCE no existen, y escondía `valor_no_gravado`, que es el único que sí.
+    """
+    from contaperu import validar
+    from contaperu.modelo import Libro
+    compras = Libro(ruc="20131312955", razon_social="X", periodo="202608", tipo="compra")   # `cp()` emite en agosto
+
+    r = igv.aplicar_no_gravado(cp(base_gravada="150", igv="18", total="168"), "50")
+    assert r == {"valor_no_gravado": D("50"), "base_gravada": D("100")}
+    # Y el comprobante resultante cuadra y pasa a ser mixto.
+    c = cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168")
+    validar.revisar([c], compras)
+    assert [o.codigo for o in c.observaciones] == [] and clase(c) == "mixto"
+
+    # Cero SUELTA el campo declarado (None, no cero): un cero declarado ganaría sobre el desglose.
+    assert igv.aplicar_no_gravado(cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168"),
+                                  "0")["valor_no_gravado"] is None
+    # En ventas se elige la columna, porque el RVIE sí las separa.
+    assert igv.aplicar_no_gravado(cp(base_gravada="150", igv="18", total="168"), "50", "exonerado") == {
+        "exonerado": D("50"), "base_gravada": D("100")}
+    # Lo que no cabe, no entra.
+    with pytest.raises(igv.NoGravadoImposible):
+        igv.aplicar_no_gravado(cp(base_gravada="100", igv="18", total="118"), "500")
+    with pytest.raises(igv.NoGravadoImposible):
+        igv.aplicar_no_gravado(cp(total="118"), "50", "base_gravada")

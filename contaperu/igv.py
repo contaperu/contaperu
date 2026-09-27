@@ -179,6 +179,102 @@ def aplicar_igv(c: Comprobante, igv) -> dict[str, Decimal]:
             for k, v in fila.items()}
 
 
+def clase_de_igv(c: Comprobante, es_venta: bool) -> str:
+    """Qué le cobraron de IGV a este comprobante, deducido de sus importes.
+
+    **No se elige: sale de los importes** (John, 10-sep-2026), y por eso vive aquí y no en una columna: quien quiera
+    cambiarla escribe el IGV o el importe no gravado que trae el papel y el motor recoloca el resto.
+
+    **No es `destino_igv`**, y la confusión cuesta cara. Aquella dice PARA QUÉ se usa una compra —`DG`, `DGNG`,
+    `DNG`— y solo tiene sentido si te cobraron IGV; ésta dice SI te lo cobraron. El modelo pone `DG` por defecto a
+    todo comprobante, también a una compra que no tiene IGV que destinar, así que leer el destino para responder a
+    esta pregunta contesta «gravada» a media contabilidad. El mismo aviso está escrito desde la 2.x en
+    `drivers/starsoft/proyeccion.destino_de`, que tuvo que resolverlo por su cuenta dentro de un driver; esto lo sube
+    al núcleo, que es donde podía mirarlo también la pantalla.
+
+    **Los dos libros no dan las mismas clases, porque no informan lo mismo.** El RVIE separa lo exonerado (campo 19)
+    de lo inafecto (campo 20); el RCE tiene una sola columna de adquisiciones no gravadas (campo 21) que no dice cuál
+    de los dos es, así que en compras se dice «no gravada» y no se inventa el desglose. Y la importación solo existe
+    en compras, donde se reconoce por la DUA y no por un importe.
+
+    Devuelve **cadena vacía cuando no hay ningún importe**: un comprobante que SUNAT declara en cero porque se dio de
+    baja no es gravado ni no gravado, y decir cualquiera de las dos cosas sería inventar. Antes de la 3.7 la pantalla
+    caía en «inafecto» por descarte y lo enseñaba con un importe de `0.00` al lado, que es exactamente la confusión
+    que esto viene a quitar.
+    """
+    if not es_venta and (c.anio_dua or c.cod_dep_aduanera):
+        return "importacion"
+    no_gravado = c.adquisiciones_no_gravadas
+    gravada = c.igv > 0 or c.base_gravada > 0
+    if es_venta:
+        partes = [gravada, c.exonerado > 0, c.inafecto > 0, c.exportacion > 0]
+        if sum(partes) > 1:
+            return "mixto"
+        if gravada:
+            return "afecto"
+        if c.exonerado > 0:
+            return "exonerado"
+        if c.exportacion > 0:
+            return "exportacion"
+        return "inafecto" if c.inafecto > 0 else ""
+    # Compras. `exportacion` no se mira: el RCE no tiene esa columna.
+    if gravada and no_gravado > 0:
+        return "mixto"
+    if gravada:
+        return "gravada"
+    return "no_gravada" if no_gravado > 0 else ""
+
+
+class NoGravadoImposible(ErrorContaperu, ValueError):
+    """El importe no gravado que se quiere poner no cabe en el comprobante."""
+
+    clave = "no_gravado_imposible"
+
+
+#: Dónde puede vivir lo no gravado, y no es lo mismo en los dos libros: el RVIE separa exonerado (campo 19) de
+#: inafecto (campo 20) y el RCE tiene UNA sola columna, «Valor de las adquisiciones no gravadas» (campo 21), que no
+#: dice cuál de los dos es. Quien llama elige el campo con el libro delante; el motor no lo adivina.
+CAMPOS_NO_GRAVADO = ("valor_no_gravado", "exonerado", "inafecto")
+
+
+def aplicar_no_gravado(c: Comprobante, importe, campo: str = "valor_no_gravado") -> dict[str, Decimal | None]:
+    """Los importes del comprobante con el no gravado que dice el papel, **sin tocar el total ni el IGV**.
+
+    Es la hermana de `aplicar_igv` y `aplicar_total`, y sigue su misma regla: la persona escribe UN importe y el
+    motor recalcula el resto, en vez de que la pantalla haga cuentas. Aquí el que absorbe es la base gravada, que se
+    recalcula entera —no se le suma la diferencia— para que un error anterior no se arrastre.
+
+    Existe porque hasta la 3.7 **una compra mixta no se podía corregir**: el formulario ofrecía `exonerado` e
+    `inafecto`, que en el registro de compras no existen, y escondía `valor_no_gravado`, que es el único que sí. Con
+    una factura de 100 + 18 de IGV y 50 sin gravar no había dónde escribir los 50.
+
+    Poner cero en el campo declarado lo SUELTA (`None`, no cero): cero sería declarar que no hay nada no gravado, y
+    eso gana sobre el desglose. Lo mismo que hace `aplicar_igv` al volver afecto un comprobante.
+    """
+    if campo not in CAMPOS_NO_GRAVADO:
+        raise NoGravadoImposible(f"«{campo}» no es un campo de lo no gravado ({', '.join(CAMPOS_NO_GRAVADO)})")
+    try:
+        nuevo = Decimal(str(importe).replace(",", ".").strip() or "0").quantize(CENTIMO, rounding=ROUND_HALF_UP)
+    except InvalidOperation:
+        raise NoGravadoImposible("El importe no gravado debe ser un número") from None
+    if nuevo < 0:
+        raise NoGravadoImposible("El importe no gravado no puede ser negativo")
+
+    # Lo que NO es este campo se queda como está, y la base absorbe el resto. En compras el campo declarado manda
+    # sobre el desglose, así que escribir en `valor_no_gravado` deja `exonerado` e `inafecto` donde estén: no los
+    # borra, simplemente dejan de contar mientras el campo esté declarado (`adquisiciones_no_gravadas`).
+    otros_no_gravados = CERO if campo == "valor_no_gravado" else sum(
+        getattr(c, k) for k in ("exonerado", "inafecto") if k != campo)
+    base = c.total - c.igv - nuevo - otros_no_gravados - c.exportacion - _cargos(c)
+    if base < 0:
+        raise NoGravadoImposible("Ese importe no gravado, con el IGV y los demás, supera el total del comprobante")
+
+    fila: dict[str, Decimal | None] = {campo: nuevo, "base_gravada": base}
+    if campo == "valor_no_gravado" and nuevo == 0:
+        fila[campo] = None
+    return {k: v if v is None else Decimal(v).quantize(CENTIMO, rounding=ROUND_HALF_UP) for k, v in fila.items()}
+
+
 # El orden en que `aplicar_total` busca quién absorbe el total. `valor_no_gravado` va el segundo, detrás de
 # la base y delante del desglose, porque es el campo con el que el RCE informa lo no gravado de una compra
 # (su campo 21) y ahí no existen `exonerado` ni `inafecto`: sin él, corregir el total de una compra no

@@ -4,6 +4,49 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [3.7.0] — 2026-09-27
+
+**Qué le cobraron de IGV a un comprobante deja de deducirse por descarte.** La pantalla del portal miraba cuatro
+importes y, si ninguno tenía valor, contestaba «Inafecto» — con un `0.00` al lado. Así es como 460 compras de un mes
+real, que informan su importe en la columna de adquisiciones no gravadas del RCE, salían etiquetadas con la palabra
+equivocada y un importe que no era el suyo.
+
+### Añadido
+
+- **`igv.clase_de_igv(c, es_venta)`**: qué le cobraron, deducido de los importes. **No se elige, sale de los
+  importes**, que es la regla de esta casa desde el 10-sep-2026.
+
+  **No es `destino_igv`, y la confusión cuesta cara**: aquella dice PARA QUÉ se usa una compra —`DG`, `DGNG`, `DNG`—
+  y solo tiene sentido si te cobraron IGV. El modelo pone `DG` por defecto a **todo** comprobante, también a una
+  compra que no tiene IGV que destinar, así que leer el destino para responder a esta pregunta contesta «gravada» a
+  media contabilidad. El aviso llevaba escrito desde la 2.x dentro de un driver
+  (`drivers/starsoft/proyeccion.destino_de`, que tuvo que resolverlo por su cuenta); ahora vive en el núcleo, que es
+  donde puede mirarlo también quien pinta la pantalla.
+
+  **Los dos libros no dan las mismas clases, porque no informan lo mismo.** En compras: `gravada`, `no_gravada`,
+  `importacion` —que se reconoce por la DUA, no por un importe— y `mixto`. En ventas siguen siendo `afecto`,
+  `exonerado`, `inafecto`, `exportacion` y `mixto`, porque el RVIE sí separa exonerado de inafecto en dos columnas.
+  Llamar «Inafecto» a una compra afirmaría algo que su archivo no distingue.
+
+  Y **devuelve cadena vacía cuando no hay ningún importe**: así declara SUNAT lo que se da de baja, y un comprobante
+  en cero no es gravado ni no gravado. Decir cualquiera de las dos cosas sería inventar.
+
+- **`catalogos.CLASES_IGV_COMPRA` y `CLASES_IGV_VENTA`**, con el nombre en castellano de cada clase, y las dos salen
+  por `catalogos_sunat()`: el vocabulario de la pantalla no se escribe dos veces. La cadena vacía no está en ninguna
+  de las dos, a propósito.
+
+- **`igv.aplicar_no_gravado(c, importe, campo)`**, hermana de `aplicar_igv` y `aplicar_total`: la persona escribe UN
+  importe y el motor recoloca la base, sin tocar el total ni el IGV. Existe porque **una compra mixta no se podía
+  corregir**: el formulario ofrecía `exonerado` e `inafecto`, que en el RCE no existen, y escondía
+  `valor_no_gravado`, que es el único que sí. Poner cero **suelta** el campo declarado (`None`), por lo mismo que lo
+  hace `aplicar_igv`: un cero declarado ganaría sobre el desglose.
+
+### Ojo al integrar
+
+«Mixto» significa dos cosas a dos centímetros y conviene no cruzarlas: en la clase de IGV es «lleva importes con y
+sin IGV», y en `destino_igv` el `DGNG` es «la compra se usa para ventas con y sin IGV». Qué te cobraron, y para qué
+lo usas.
+
 ## [3.6.0] — 2026-09-27
 
 **Un descuento dentro de «otros conceptos» deja de sumarse como si fuera un cargo.** En el mismo registro de compras

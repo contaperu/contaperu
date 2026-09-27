@@ -1,113 +1,129 @@
 {
- "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/catalogos_sunat.schema.json",
- "title": "Catálogos de SUNAT",
- "description": "Los tipos de comprobante, los tipos de documento de identidad, las monedas, los medios de pago y los motivos de una nota de crédito o de débito que entiende el motor.",
- "type": "object",
- "properties": {
-  "tipos_comprobante": {
-   "type": "object"
-  },
-  "medios_pago": {
-   "type": "object",
-   "description": "El código de medio de pago y su descripción (Anexo 3 de la RS 169-2015).",
-   "additionalProperties": {
-    "type": "string"
-   }
-  },
-  "motivos_nota_credito": {
-   "type": "object",
-   "description": "Por qué se emitió una nota de crédito: el código y su descripción (Catálogo No. 09 del Anexo N.° 8).",
-   "additionalProperties": {
-    "type": "string"
-   }
-  },
-  "motivos_nota_debito": {
-   "type": "object",
-   "description": "Por qué se emitió una nota de débito: el código y su descripción (Catálogo No. 10 del Anexo N.° 8). OJO: sus códigos NO significan lo mismo que los del 09 — el «01» es «intereses por mora» aquí y «anulación de la operación» allí.",
-   "additionalProperties": {
-    "type": "string"
-   }
-  },
-  "tipos_documento_identidad": {
-   "type": "object"
-  },
-  "monedas": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "notas": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "fuera_del_registro_sunat": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "detracciones": {
-   "type": "object",
-   "description": "La tabla de detracciones del motor, con su fuente: cada código SUNAT con su nombre y su tasa. El ERP que integra el motor la puede sobreescribir en su configuración (detraccion_tasas, detraccion_nombres).",
-   "properties": {
-    "fuente": {
-     "type": "string"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/catalogos_sunat.schema.json",
+  "title": "Catálogos de SUNAT",
+  "description": "Los tipos de comprobante, los tipos de documento de identidad, las monedas, los medios de pago y los motivos de una nota de crédito o de débito que entiende el motor.",
+  "type": "object",
+  "properties": {
+    "tipos_comprobante": {
+      "type": "object"
     },
-    "nota": {
-     "type": "string"
-    },
-    "codigos": {
-     "type": "object",
-     "additionalProperties": {
+    "medios_pago": {
       "type": "object",
-      "properties": {
-       "nombre": {
+      "description": "El código de medio de pago y su descripción (Anexo 3 de la RS 169-2015).",
+      "additionalProperties": {
         "type": "string"
-       },
-       "tasa": {
-        "type": [
-         "string",
-         "null"
-        ]
-       }
+      }
+    },
+    "motivos_nota_credito": {
+      "type": "object",
+      "description": "Por qué se emitió una nota de crédito: el código y su descripción (Catálogo No. 09 del Anexo N.° 8).",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "motivos_nota_debito": {
+      "type": "object",
+      "description": "Por qué se emitió una nota de débito: el código y su descripción (Catálogo No. 10 del Anexo N.° 8). OJO: sus códigos NO significan lo mismo que los del 09 — el «01» es «intereses por mora» aquí y «anulación de la operación» allí.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tipos_documento_identidad": {
+      "type": "object"
+    },
+    "monedas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "fuera_del_registro_sunat": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "detracciones": {
+      "type": "object",
+      "description": "La tabla de detracciones del motor, con su fuente: cada código SUNAT con su nombre y su tasa. El ERP que integra el motor la puede sobreescribir en su configuración (detraccion_tasas, detraccion_nombres).",
+      "properties": {
+        "fuente": {
+          "type": "string"
+        },
+        "nota": {
+          "type": "string"
+        },
+        "codigos": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "nombre": {
+                "type": "string"
+              },
+              "tasa": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "nombre",
+              "tasa"
+            ],
+            "additionalProperties": false
+          }
+        }
       },
       "required": [
-       "nombre",
-       "tasa"
+        "fuente",
+        "codigos"
       ],
       "additionalProperties": false
-     }
+    },
+    "fuentes": {
+      "type": "object",
+      "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas, medios_pago, motivos_nota_credito, motivos_nota_debito): la norma y su tabla.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "clases_igv_compra": {
+      "type": "object",
+      "description": "Cómo se llama en castellano cada clase de IGV de una compra (`igv.clase_de_igv`). Son dos tablas porque los dos libros no informan lo mismo: el RVIE separa exonerado de inafecto y el RCE tiene una sola columna de adquisiciones no gravadas. La cadena vacía no está: es lo que devuelve un comprobante sin ningún importe, y entonces no hay clase que enseñar.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "clases_igv_venta": {
+      "type": "object",
+      "description": "Cómo se llama en castellano cada clase de IGV de una venta (`igv.clase_de_igv`). Son dos tablas porque los dos libros no informan lo mismo: el RVIE separa exonerado de inafecto y el RCE tiene una sola columna de adquisiciones no gravadas. La cadena vacía no está: es lo que devuelve un comprobante sin ningún importe, y entonces no hay clase que enseñar.",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
-   },
-   "required": [
-    "fuente",
-    "codigos"
-   ],
-   "additionalProperties": false
   },
-  "fuentes": {
-   "type": "object",
-   "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas, medios_pago, motivos_nota_credito, motivos_nota_debito): la norma y su tabla.",
-   "additionalProperties": {
-    "type": "string"
-   }
-  }
- },
- "required": [
-  "tipos_comprobante",
-  "tipos_documento_identidad",
-  "monedas",
-  "medios_pago",
-  "motivos_nota_credito",
-  "motivos_nota_debito",
-  "notas",
-  "fuera_del_registro_sunat",
-  "detracciones",
-  "fuentes"
- ],
- "additionalProperties": false
+  "required": [
+    "tipos_comprobante",
+    "tipos_documento_identidad",
+    "monedas",
+    "medios_pago",
+    "motivos_nota_credito",
+    "motivos_nota_debito",
+    "notas",
+    "fuera_del_registro_sunat",
+    "detracciones",
+    "fuentes",
+    "clases_igv_compra",
+    "clases_igv_venta"
+  ],
+  "additionalProperties": false
 }

@@ -136,6 +136,31 @@ TRIBUTO_EXONERADO = "9997"
 TRIBUTO_INAFECTO = "9998"
 TRIBUTO_OTROS = "9999"
 
+# Cómo se llama en castellano cada clase de `igv.clase_de_igv`, para que la pantalla no las escriba a mano y no haya
+# dos vocabularios. **Son dos tablas y no una**, porque los dos libros no informan lo mismo: el RVIE separa lo
+# exonerado (campo 19) de lo inafecto (campo 20) y el RCE tiene una sola columna de adquisiciones no gravadas (campo
+# 21) que no dice cuál de los dos es. Llamar «Inafecto» a una compra afirmaría algo que el archivo no distingue.
+#
+# La cadena vacía no está en ninguna de las dos **a propósito**: es lo que devuelve `clase_de_igv` cuando el
+# comprobante no tiene ningún importe —así declara SUNAT lo que se da de baja— y entonces no hay clase que enseñar.
+# Un comprobante en cero no es gravado ni no gravado.
+#
+# Ojo con «Mixto», que se parece a otra cosa a dos centímetros: aquí significa «lleva importes con y sin IGV», y en
+# `destino_igv` el `DGNG` es «la compra se usa para ventas con y sin IGV». Qué te cobraron y para qué lo usas.
+CLASES_IGV_COMPRA = {
+    "gravada": "Gravada",
+    "no_gravada": "No gravada",
+    "importacion": "Importación",
+    "mixto": "Mixto",
+}
+CLASES_IGV_VENTA = {
+    "afecto": "Afecto",
+    "exonerado": "Exonerado",
+    "inafecto": "Inafecto",
+    "exportacion": "Exportación",
+    "mixto": "Mixto",
+}
+
 # Tasas de IGV que la validación reconoce. La general es 18 %; las reducidas
 # (restaurantes y hoteles) se aceptan con aviso, no como error.
 TASA_IGV = "0.18"
