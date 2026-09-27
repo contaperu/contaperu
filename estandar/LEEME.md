@@ -252,6 +252,7 @@ permite que el resto pueda degradar.
 | Campo | Cuidado |
 |---|---|
 | `base_gravada`, `igv` | El importe **neto** de la operación, tras cualquier descuento. Así lo dan el `TaxableAmount` y el `TaxAmount` del XML, y así cuadra el total: base + IGV + no gravados + cargos. |
+| `dscto_otros` | **El único «dscto_» que SÍ mueve el total**, y por eso está aquí. Es la parte de `otros` que el registro informa en negativo: un descuento global que no forma base (SIRE, campo 24 del RCE y 25 del RVIE, que llevan **el neto con signo** en una sola columna). Va en positivo como todo importe y **resta**. Al leer, un negativo ahí es esto **solo si su signo es contrario al del total**: en una nota de crédito todos los campos vienen negativos y ese signo lo pone el driver. |
 | `dscto_base`, `dscto_igv` | **No suman ni restan.** Dicen qué parte de la base y del IGV informa el registro en sus columnas de descuento (SIRE ventas, campos 16 y 18). Una nota de crédito de descuento global va **entera** ahí —así la registra SUNAT— y entonces valen lo mismo que `base_gravada` e `igv`. |
 | `retencion` | Es la **retención de renta de 4ta** que muestra un recibo por honorarios. **No** es la retención del IGV del 3 %, que no entra en ningún asiento y que las IAs confunden constantemente con una detracción. |
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |

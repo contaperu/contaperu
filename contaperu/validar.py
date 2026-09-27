@@ -167,9 +167,11 @@ def validar(c: Comprobante, libro: Libro) -> None:
     # en el RCE son la misma cosa informada una vez, y sumarlos contaria el importe dos veces en cuanto
     # alguien rellene el desglose a mano. Era ademas el ULTIMO sitio del motor con la cuenta escrita aparte:
     # el driver del SIRE, CONTASIS y la cabecera del asiento ya usaban la propiedad.
+    # `dscto_otros` RESTA: es la parte de «otros conceptos» que el registro informa en negativo, o sea un
+    # descuento global. Al revés que `dscto_base` y `dscto_igv`, que no tocan el total.
     esperado_total = (
         c.base_gravada + c.igv + c.adquisiciones_no_gravadas + c.exportacion + c.isc
-        + c.base_ivap + c.ivap + c.icbper + c.otros
+        + c.base_ivap + c.ivap + c.icbper + c.otros - c.dscto_otros
     )
     if not _cuadra(c.total, esperado_total):
         anticipo = Decimal(str(c.datos_originales.get("anticipo") or "0"))

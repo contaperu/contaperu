@@ -107,6 +107,22 @@ def _firmado(v, opciones: Opciones) -> str:
     return formatear_monto(abs(v), opciones, v < 0)
 
 
+def _otros(c: Comprobante, opciones: Opciones, neg: bool) -> str:
+    """El campo «Otros conceptos, tributos y cargos» (RCE 24, RVIE 25): un NETO con signo.
+
+    Sale `otros - dscto_otros`, porque el registro lleva una sola columna para los dos y así vuelve idéntica
+    a como la manda SUNAT. Si la operación entera es negativa —una nota de crédito— manda su signo, igual que
+    en los demás importes: el descuento dentro de una nota no se puede distinguir en una columna que ya viene
+    negativa, y el lector tampoco lo separa por eso mismo.
+    """
+    neto = c.otros_neto
+    if neg:
+        # Operación negativa: manda su signo, como en los demás importes. `dscto_otros` es siempre 0 aquí
+        # —el lector no lo separa en una nota— así que esto escribe exactamente lo que escribía antes.
+        return formatear_monto(abs(neto), opciones, True)
+    return _firmado(neto, opciones)
+
+
 def linea_rvie(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCIONES) -> str:
     """Anexo 3 — 33 campos informados; del 34 al 40 se encarga la Administración.
 
@@ -141,7 +157,7 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCI
         m(c.base_ivap),                      # 22 base del IVAP
         m(c.ivap),                           # 23 IVAP
         m(c.icbper),                         # 24 ICBPER
-        m(c.otros),                          # 25 otros tributos y cargos
+        _otros(c, opciones, neg),            # 25 otros tributos y cargos (neto: otros - descuento)
         m(c.total),                          # 26 importe total
         c.moneda,                            # 27 moneda
         formatear_cambio(c, opciones),                       # 28 tipo de cambio
@@ -177,7 +193,7 @@ def linea_rce(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCIO
         m(c.adquisiciones_no_gravadas),      # 21 valor de adquisiciones no gravadas
         m(c.isc),                            # 22 ISC
         m(c.icbper),                         # 23 ICBPER
-        m(c.otros),                          # 24 otros tributos y cargos
+        _otros(c, opciones, False),          # 24 otros tributos y cargos (neto: otros - descuento)
         m(c.total),                          # 25 importe total
         c.moneda,                            # 26 moneda
         formatear_cambio(c, opciones),                       # 27 tipo de cambio

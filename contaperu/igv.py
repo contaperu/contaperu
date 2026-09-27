@@ -107,7 +107,7 @@ def _cargos(c: Comprobante) -> Decimal:
     """Lo que forma el total y no es base gravada, IGV ni importe sin IGV: ISC, IVAP, ICBPER y otros
     cargos. Los descuentos no: la base y el IGV ya son netos. Es la fórmula del total de `validar.py` sin
     sus sumandos de IGV."""
-    return c.isc + c.base_ivap + c.ivap + c.icbper + c.otros
+    return c.isc + c.base_ivap + c.ivap + c.icbper + c.otros_neto
 
 
 def _entera(c: Comprobante) -> bool:

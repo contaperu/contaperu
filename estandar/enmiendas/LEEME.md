@@ -59,3 +59,4 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0013](0013-glosa-sin-prefijos.md) | La glosa, la misma en todas las líneas y sin prefijos | `final` |
 | [0014](0014-tipo-de-nota.md) | `tipo_nota`: por qué se emitió una nota de crédito o de débito | `final` |
 | [0015](0015-estado-del-comprobante-en-sunat.md) | `estado_sunat`: lo que SUNAT dice del comprobante en su registro | `final` |
+| [0016](0016-descuento-en-otros-conceptos.md) | `dscto_otros`: el descuento que el registro informa dentro de «otros conceptos» | `final` |

@@ -78,7 +78,7 @@ def cabecera_de(c: Comprobante) -> Cabecera:
                     moneda=c.moneda or "", base_gravada=str(c.base_gravada), igv=str(c.igv),
                     dscto_base=str(c.dscto_base), dscto_igv=str(c.dscto_igv), exonerado=str(c.exonerado),
                     inafecto=str(c.inafecto), exportacion=str(c.exportacion), isc=str(c.isc),
-                    base_ivap=str(c.base_ivap), ivap=str(c.ivap), icbper=str(c.icbper), otros=str(c.otros),
+                    base_ivap=str(c.base_ivap), ivap=str(c.ivap), icbper=str(c.icbper), otros=str(c.otros), dscto_otros=str(c.dscto_otros),
                     total=str(c.total), retencion=str(c.retencion),
                     destino_igv=c.destino_igv or "", valor_no_gravado=str(c.adquisiciones_no_gravadas),
                     anio_dua=c.anio_dua or "", cod_dep_aduanera=c.cod_dep_aduanera or "",

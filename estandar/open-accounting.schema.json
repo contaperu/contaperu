@@ -126,6 +126,10 @@
         "igv": { "$ref": "#/$defs/importe", "description": "IGV neto de la operación." },
         "dscto_base": { "$ref": "#/$defs/importe", "description": "Parte de base_gravada que el registro informa como descuento (SIRE ventas, campo 16). No entra en el total." },
         "dscto_igv": { "$ref": "#/$defs/importe", "description": "Parte del igv que el registro informa como descuento (SIRE ventas, campo 18). No entra en el total." },
+    "dscto_otros": {
+      "$ref": "#/$defs/importe",
+      "description": "Parte de `otros` que el registro informa en NEGATIVO: un descuento global que no forma base (SIRE, campo 24 del RCE y 25 del RVIE, que llevan el neto con signo). Va en positivo como todo importe y RESTA del total — ahí se separa de dscto_base y dscto_igv, que no lo mueven."
+    },
         "exonerado": { "$ref": "#/$defs/importe", "description": "Importe de la operación EXONERADA del IGV: está dentro del campo de aplicación del impuesto y una norma la libera (Apéndices I —bienes— y II —servicios— de la Ley del IGV). No es lo mismo que `inafecto`: lo exonerado tributaría si esa norma no existiera." },
         "inafecto": { "$ref": "#/$defs/importe", "description": "Importe de la operación INAFECTA: queda FUERA del campo de aplicación del IGV (art. 2 de la Ley), así que nunca hubo impuesto que cobrar. Es lo que suele llevar la parte no gravada de un recibo de servicios públicos —intereses, recargos, cobros por cuenta de terceros—, y no `exonerado`." },
         "exportacion": { "$ref": "#/$defs/importe", "description": "Valor de la operación de exportación, que no está gravada con IGV. Va aparte de `inafecto` porque el registro de ventas la declara en su propia columna." },

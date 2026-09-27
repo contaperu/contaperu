@@ -28,12 +28,12 @@ def _importes(c: Comprobante, es_venta: bool) -> dict[str, Decimal]:
     """Los importes de la fila, columna por columna, en la moneda del documento y en positivo."""
     if es_venta:
         return {"I": c.exportacion, "J": c.base_gravada, "K": c.exonerado, "L": c.inafecto, "M": c.isc,
-                "N": c.igv, "O": c.otros, "AQ": c.icbper, "P": c.total}
-    cargos = {"Q": c.isc, "R": c.otros, "AW": c.icbper, "S": c.total}
+                "N": c.igv, "O": c.otros_neto, "AQ": c.icbper, "P": c.total}
+    cargos = {"Q": c.isc, "R": c.otros_neto, "AW": c.icbper, "S": c.total}
     if c.tipo_cp in SIN_CREDITO_FISCAL:
         # Sin crédito fiscal (la boleta; el recibo por honorarios no llega a este archivo): el importe va entero a no
         # gravadas y sin IGV propio. Así llevan sus boletas el registro validado y el asiento (`igv.igv_del_asiento`).
-        return {"P": c.total - c.isc - c.otros - c.icbper, **cargos}
+        return {"P": c.total - c.isc - c.otros_neto - c.icbper, **cargos}
     (base_dg, igv_dg), (base_dgng, igv_dgng), (base_dng, igv_dng) = por_destino(c)
     return {"J": base_dg, "K": igv_dg, "L": base_dgng, "M": igv_dgng, "N": base_dng, "O": igv_dng,
             "P": c.adquisiciones_no_gravadas, **cargos}

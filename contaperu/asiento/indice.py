@@ -72,6 +72,7 @@ class Cabecera:
     ivap: str = "0"
     icbper: str = "0"
     otros: str = "0"
+    dscto_otros: str = "0"           # la parte de `otros` que el registro informa en negativo (resta del total)
     total: str = "0"
     retencion: str = "0"             # la de renta de 4ta que MUESTRA el recibo por honorarios
     # Solo compras

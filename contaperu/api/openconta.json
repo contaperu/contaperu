@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "3.5.1",
+  "version": "3.6.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -1102,6 +1102,10 @@
      "dscto_igv": {
       "$ref": "#/components/schemas/OpenAccounting_importe",
       "description": "Parte del igv que el registro informa como descuento (SIRE ventas, campo 18). No entra en el total."
+     },
+     "dscto_otros": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Parte de `otros` que el registro informa en NEGATIVO: un descuento global que no forma base (SIRE, campo 24 del RCE y 25 del RVIE, que llevan el neto con signo). Va en positivo como todo importe y RESTA del total — ahí se separa de dscto_base y dscto_igv, que no lo mueven."
      },
      "exonerado": {
       "$ref": "#/components/schemas/OpenAccounting_importe",

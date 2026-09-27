@@ -79,7 +79,7 @@ POS_COMPRA = {
 IGV_COMPRAS = {"DG": (14, 15), "DGNG": (16, 17), "DNG": (18, 19)}
 VALOR_NO_GRAVADO = 20
 MONTOS = {"exportacion", "base_gravada", "dscto_base", "igv", "dscto_igv", "exonerado", "inafecto",
-          "isc", "base_ivap", "ivap", "icbper", "otros", "total"}
+          "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total"}
 FECHAS = {"fecha_emision", "fecha_vencimiento", "ref_fecha"}
 MINIMO_CAMPOS = 30
 
@@ -144,6 +144,18 @@ def _con_signo(v: str) -> Decimal:
 def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
     pos = POS_VENTA if libro.es_venta else POS_COMPRA
     datos = {k: _valor(campos, i) for k, i in pos.items()}
+    # «Otros conceptos, tributos y cargos» (RCE campo 24, RVIE campo 25) es un NETO CON SIGNO, y un negativo
+    # ahí es un descuento global: caso real, una factura de grifo con 96.00 no gravado y −13.40, total 82.60.
+    # `monto()` devuelve el valor absoluto —el signo no es parte del dato— así que sin esto el total salía
+    # 109.40 y el comprobante avisaba «no cuadra» por algo que estaba bien.
+    #
+    # Se mira el signo CONTRARIO AL DEL TOTAL, no el signo a secas: en una nota de crédito TODOS los campos
+    # vienen negativos porque lo es la operación entera, y ese signo ya lo pone el driver al escribir
+    # (`negativo(c)`). Tomarlo por descuento invertiría la nota. Comprobado en un RCE real de 1116 filas: las
+    # dos notas de crédito traen este campo en 0.00 y las seis facturas con descuento lo traen contrario.
+    bruto_otros = _con_signo(datos.get("otros") or "0")
+    if bruto_otros < 0 and _con_signo(datos.get("total") or "0") >= 0:
+        datos["otros"], datos["dscto_otros"] = "0", str(-bruto_otros)
     for k in MONTOS:
         if k in datos:
             datos[k] = datos[k] or "0"

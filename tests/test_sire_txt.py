@@ -198,6 +198,41 @@ def test_el_campo_21_en_cero_no_declara_nada():
     assert c.adquisiciones_no_gravadas == Decimal("0")
 
 
+def test_otros_conceptos_en_negativo_es_un_descuento():
+    """El campo 24 del RCE («otros conceptos, tributos y cargos») es un NETO CON SIGNO.
+
+    Caso real, una factura de grifo: 96.00 no gravado y −13.40 aquí, total 82.60. `monto()` devuelve el valor
+    absoluto —el signo no es parte del dato— así que el motor sumaba 109.40 y avisaba «no cuadra» por un
+    comprobante correcto; y el TXT que generaba escribía +13.40 donde SUNAT tiene −13.40.
+    """
+    compras = Libro(ruc="20601111111", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
+    fila = ("20601111111|MI EMPRESA SAC|202608||05/08/2026||01|FA04||440774||6|20608888889|GRIFO SAC|"
+            "0|0|0|0|0|0|96.00|0|0|-13.40|82.60|PEN||||||||||")
+    c = sire_txt.parsear(texto(fila, con_cabecera=False), compras)[0]
+    assert c.otros == 0 and c.dscto_otros == Decimal("13.40")
+    assert c.valor_no_gravado == Decimal("96.00") and c.total == Decimal("82.60")
+
+    # Y vuelve al archivo tal como vino: el registro solo tiene una columna, así que sale el neto con signo.
+    from contaperu.drivers.sire import txt as driver
+    assert driver.linea(c, compras, driver.OPCIONES).split("|")[23] == "-13.40"
+
+
+def test_en_una_nota_de_credito_el_negativo_NO_es_un_descuento():
+    """En una nota TODOS los campos vienen negativos porque lo es la operación entera, y ese signo lo pone el
+    driver al escribir. Tomarlo por descuento invertiría la nota.
+
+    Por eso la condición es **signo contrario al del total**, y no «negativo» a secas. Comprobado en un RCE
+    real de 1116 filas: sus dos notas de crédito traen esta columna en 0.00 y las seis facturas con descuento
+    la traen contraria al total.
+    """
+    compras = Libro(ruc="20601111111", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
+    fila = ("20601111111|MI EMPRESA SAC|202608||05/08/2026||07|FC01||97||6|20608888889|PROVEEDOR SAC|"
+            "-100.00|-18.00|0|0|0|0|0|0|0|-5.00|-123.00|PEN|||01|F001||77||||")
+    c = sire_txt.parsear(texto(fila, con_cabecera=False), compras)[0]
+    assert c.otros == Decimal("5.00") and c.dscto_otros == 0    # el signo es de la operación, no un descuento
+    assert c.total == Decimal("123.00") and c.base_gravada == Decimal("100.00")
+
+
 def test_el_txt_del_sire_deja_de_ser_un_archivo_auxiliar():
     """Antes caía con los .xsl y .css: el proceso decía 'no había ningún comprobante'."""
     lote = archivos.expandir("propuesta.txt", texto(FACTURA))

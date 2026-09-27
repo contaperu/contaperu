@@ -4,6 +4,36 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [3.6.0] — 2026-09-27
+
+**Un descuento dentro de «otros conceptos» deja de sumarse como si fuera un cargo.** En el mismo registro de compras
+real de la 3.5.1, seis facturas de grifo y de peaje seguían sin cuadrar: traían el campo «Otros conceptos, tributos y
+cargos» **en negativo**, que es como SUNAT informa un descuento global que no forma base. El motor guardaba el valor
+absoluto —el signo no es parte del dato— así que sumaba donde había que restar. Y no era solo un aviso feo: el TXT que
+este motor genera escribía **+13.40 donde SUNAT tiene −13.40**, una diferencia real en un archivo que se declara.
+
+### Añadido
+
+- **`dscto_otros`** en el comprobante (enmienda 0016): la parte de `otros` que el registro informa en negativo. Va en
+  **positivo, como todo importe** —no se rompe la regla de la primera línea del esquema, que es lo que permite que el
+  signo de una nota de crédito lo ponga el driver de salida— y **resta del total**. Ahí se separa de `dscto_base` y
+  `dscto_igv`, que con el mismo prefijo no mueven el total.
+
+- **`Comprobante.otros_neto`**, que es `otros − dscto_otros`: la columna tal como la lleva el registro, que solo tiene
+  una. La usan el TXT del SIRE, el registro de CONTASIS y el cálculo de la base a partir del total; sin ella, cada
+  sitio habría rehecho la resta a su manera, que es exactamente lo que causó el fallo de la 3.5.1.
+
+### Cómo se decide que un negativo es un descuento
+
+Por **signo contrario al del total**, no por ser negativo a secas: en una nota de crédito *todos* los campos vienen
+negativos porque lo es la operación entera, y ese signo ya lo pone el driver al escribir. Tomarlo por descuento
+invertiría la nota. La regla se comprobó sobre las 1116 filas del registro real: sus dos notas de crédito traen esa
+columna en `0.00` y las seis facturas con descuento la traen contraria al total.
+
+**Resultado medido sobre ese mes:** `TOTAL_NO_CUADRA` pasa de **460 a 0**, y el TXT regenerado contra el archivo de
+SUNAT da **1116 comprobantes en los dos, ninguno de más ni de menos, y ni una diferencia en el campo 24** — ni en
+ningún otro campo de importe.
+
 ## [3.5.1] — 2026-09-27
 
 **Una compra cuyo importe va en la columna de adquisiciones no gravadas deja de avisar «no cuadra».** En el registro

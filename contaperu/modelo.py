@@ -57,7 +57,7 @@ CAMPOS_DEL_DOCUMENTO = (
     "tipo_cp", "serie", "numero", "numero_final", "fecha_emision", "fecha_vencimiento",
     "condicion_pago", "medio_pago", "contraparte_tipo_doc", "contraparte_doc", "contraparte_nombre",
     "moneda", "tipo_cambio", "base_gravada", "igv", "dscto_base", "dscto_igv", "exonerado", "inafecto",
-    "exportacion", "isc", "base_ivap", "ivap", "icbper", "otros", "total", "retencion", "destino_igv",
+    "exportacion", "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "retencion", "destino_igv",
     "valor_no_gravado", "anio_dua", "cod_dep_aduanera", "clasif_bienes",
     "tipo_nota", "ref_fecha", "ref_tipo_cp", "ref_serie", "ref_numero", "detraccion", "id_contrato", "concepto",
 )
@@ -248,6 +248,12 @@ class Comprobante:
     ivap: Decimal = CERO
     icbper: Decimal = CERO
     otros: Decimal = CERO
+    # La parte de «otros conceptos» que el registro informa en NEGATIVO: un descuento global que no forma
+    # base. Va en positivo, como todo importe, y **resta del total** — ahí se separa de `dscto_base` y
+    # `dscto_igv`, que solo dicen qué parte de la base viaja en la columna de descuento y no mueven el total.
+    # El RCE lo trae en su campo 24 y el RVIE en el 25, los dos como un NETO con signo: si viene negativo es
+    # esto. Caso real: una factura de grifo con 96.00 no gravado y −13.40 aquí, total 82.60.
+    dscto_otros: Decimal = CERO
     total: Decimal = CERO
     # Retención de renta de 4ta que MUESTRA el recibo por honorarios (tipo 02).
     # 0 = sin retención; nunca se calcula el 8 % solo (con suspensión no la hay y
@@ -343,6 +349,17 @@ class Comprobante:
         return self.tipo_cp in NOTAS
 
     @property
+    def otros_neto(self) -> Decimal:
+        """«Otros conceptos, tributos y cargos» como lo lleva el registro: UNA columna con signo.
+
+        Los importes del estándar van siempre en positivo, así que un descuento global vive aparte en
+        `dscto_otros` y aquí se vuelven a juntar. Quien escriba ese campo —el TXT del SIRE, el registro de
+        CONTASIS— usa esto, y quien calcule una base a partir del total también: si no, el descuento se
+        contaría como un cargo y la base saldría de más.
+        """
+        return self.otros - self.dscto_otros
+
+    @property
     def adquisiciones_no_gravadas(self) -> Decimal:
         if self.valor_no_gravado is not None:
             return self.valor_no_gravado
@@ -416,7 +433,7 @@ def identidad_de(libro: Libro, c: Comprobante) -> dict[str, str]:
 
 _CAMPOS_MONTO = (
     "base_gravada", "igv", "dscto_base", "dscto_igv", "exonerado", "inafecto", "exportacion",
-    "isc", "base_ivap", "ivap", "icbper", "otros", "total", "retencion",
+    "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "retencion",
 )
 _CAMPOS_FECHA = ("fecha_emision", "fecha_vencimiento", "ref_fecha")
 # Los campos que salieron del comprobante en open-accounting 0.3: llegan en la imputación.
