@@ -35,7 +35,7 @@ def test_un_mes_limpio_esta_listo_y_dice_que_saldria():
     assert d["listo_para_exportar"] is True and d["por_que_no"] == []
     assert d["saldrian"] == ["E001-871", "E001-872"]
     assert d["totales"] == {"comprobantes": 2, "saldrian": 2, "excluidos": 0, "fuera_del_destino": 0,
-                            "con_error": 0, "con_aviso": 0}
+                            "sin_efecto_contable": 0, "con_error": 0, "con_aviso": 0}
     assert d["sub_diarios"] == {"11": {"etiqueta": "Compras", "comprobantes": 2, "empieza_en": 1}}
     assert d["resumen_por_contraparte"]["20602222226"] == {
         "nombre": "PROVEEDOR DE PRUEBA SAC", "comprobantes": 2, "total": "5074.00", "moneda": "PEN",

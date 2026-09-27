@@ -31,9 +31,9 @@ from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_nume
 from .configuracion import TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import Cabecera, ComprobanteDelAsiento
-from .resolucion import (cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo, limites_del_periodo,
-                         lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra, sigla_documento,
-                         sub_diario, tiene_detraccion)
+from .resolucion import (asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
+                         limites_del_periodo, lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra,
+                         sigla_documento, sin_efecto_contable, sub_diario, tiene_detraccion)
 from .lineas import LineaDiario
 
 # Hasta la 0.10 este módulo importaba las `Opciones` de los drivers solo para quitar los ceros del número: el núcleo
@@ -155,6 +155,12 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     `vocabulario="neutral"` (1.1) arma las mismas líneas —las mismas cuentas, sentidos, importes y roles— sin el
     vocabulario de un sistema legacy: sin sub-diario ni correlativo, sin la sigla del documento ni de su referencia, y
     con la detracción sobre el propio comprobante en vez del documento comodín `DR` y `9999999999`."""
+    # Lo que no mueve dinero no tiene asiento que armar, y se decide ANTES de pedir cuentas: un comprobante dado de
+    # baja por SUNAT llega con todos sus importes en cero, y hasta la 3.5.0 pedía cuenta contable para acabar
+    # produciendo dos líneas a `0.00` que cuadraban entre sí. Se puede volver al comportamiento anterior con
+    # `asentar_sin_efecto_contable`. El comprobante sigue en el registro que se declara a SUNAT: eso no lo decide aquí.
+    if sin_efecto_contable(c) and not asienta_sin_efecto(config):
+        return []
     neutral = vocabulario == "neutral"
     moneda = (c.moneda or "PEN").upper()
     # A qué cuentas va la base: lo decide la imputación del documento, que llega aparte (una línea por parte si

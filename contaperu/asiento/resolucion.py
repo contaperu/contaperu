@@ -148,6 +148,39 @@ def tiene_detraccion(c: Comprobante) -> bool:
     return bool(str(d.get("codigo") or "").strip()) or a_decimal(d.get("porcentaje")) > 0
 
 
+def sin_efecto_contable(c: Comprobante) -> bool:
+    """¿Este comprobante no mueve dinero? Total, IGV y retención en cero, y sin detracción.
+
+    Es lo que decide que no pida cuenta contable ni centro, que no gaste un número de vóucher y que no produzca líneas
+    de asiento —salvo que la configuración diga lo contrario (`asentar_sin_efecto_contable`, apagado de fábrica)—.
+
+    **Decide por el importe y no por lo que SUNAT diga del comprobante**, y eso es el punto: el «Est. Comp» del SIRE
+    viene sin tabla de valores publicada, así que apoyarse en él sería inventarle un significado, mientras «no mueve
+    dinero» se comprueba mirando el documento. De paso atrapa más de lo que lo trajo: un comprobante en cero que
+    llegue de un XML, de una foto o dictado por un ERP tampoco tiene asiento que armar, y no trae estado ninguno.
+
+    Queda FUERA a propósito el caso raro de total cero con IGV distinto de cero —existe: una nota de crédito real que
+    SUNAT tiene con la base sin declarar—. Ese conserva su asiento y su aviso de descuadre, porque ahí sí hay algo
+    que mirar.
+
+    Lo que esto NO cambia: el comprobante **sigue en el registro** que se declara a SUNAT. El asiento es una cosa y el
+    registro es otra, y el correlativo de SUNAT necesita su fila —por eso los da de baja en cero en vez de quitarlos—.
+    """
+    return c.total == 0 and c.igv == 0 and c.retencion == 0 and not tiene_detraccion(c)
+
+
+def asienta_sin_efecto(config: dict | None = None) -> bool:
+    """¿La configuración pide asentar igual lo que no mueve dinero? De fábrica, no."""
+    return bool((config or {}).get("asentar_sin_efecto_contable", False))
+
+
+def con_efecto_contable(comprobantes: list[Comprobante], config: dict | None = None) -> list[Comprobante]:
+    """Los que llevan asiento: todos, si la configuración lo pide; si no, los que mueven dinero."""
+    if asienta_sin_efecto(config):
+        return list(comprobantes)
+    return [c for c in comprobantes if not sin_efecto_contable(c)]
+
+
 def sub_diario(c: Comprobante, config: dict, es_venta: bool = False) -> str:
     """Por USO: ventas → sub_diario_ventas; compras con detracción → sub_diario_detraccion;
     un tipo con registro propio (boletas 13, honorarios 15) → el suyo; el resto → sub_diario_compras.
@@ -313,20 +346,26 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
 
     No lanza: describe. Es la misma comprobación que `exigir_requisitos` hace cumplir, y la que
     `diagnosticar` cuenta por serie-número; una sola lista de reglas para las tres.
+
+    **Lo que no mueve dinero no se le pide a nadie** (`sin_efecto_contable`): un comprobante dado de baja por SUNAT
+    llega con todos sus importes en cero y no hay cuenta, centro ni reparto que ponerle. Se filtra aquí, en el único
+    sitio donde se decide qué le falta a una imputación, y no en cada regla por separado. La sigla y el código de
+    moneda **sí se le siguen pidiendo**: los escribe también un driver de registro, que no arma ningún asiento.
     """
+    de_la_imputacion = con_efecto_contable(comprobantes, config)
     salida: dict[str, list] = {}
     if "tipo_cp" in exige:
         salida["sin_sigla"] = tipos_sin_sigla(comprobantes, config)
     if "moneda" in exige:
         salida["sin_codigo_de_moneda"] = monedas_sin_codigo(comprobantes, config)
     if "cuenta_unica" in exige:
-        salida["reparto_no_admitido"] = con_reparto(comprobantes, config)
+        salida["reparto_no_admitido"] = con_reparto(de_la_imputacion, config)
     if "cuenta_contable" in exige:
-        salida["sin_cuenta"] = comprobantes_sin_cuenta(comprobantes, config, es_venta)
-        salida["sin_clase"] = comprobantes_sin_clase(comprobantes, config, es_venta)
-        salida["reparto_que_no_cuadra"] = repartos_que_no_cuadran(comprobantes, config, es_venta)
+        salida["sin_cuenta"] = comprobantes_sin_cuenta(de_la_imputacion, config, es_venta)
+        salida["sin_clase"] = comprobantes_sin_clase(de_la_imputacion, config, es_venta)
+        salida["reparto_que_no_cuadra"] = repartos_que_no_cuadran(de_la_imputacion, config, es_venta)
     if "centro_costo" in exige:
-        salida["sin_centro"] = comprobantes_sin_centro(comprobantes, config, es_venta)
+        salida["sin_centro"] = comprobantes_sin_centro(de_la_imputacion, config, es_venta)
     return salida
 
 
@@ -357,21 +396,30 @@ def numerar(comprobantes: list[Comprobante], config: dict, periodo: str,
 def numerar_en_orden(comprobantes: list[Comprobante], config: dict, periodo: str,
                      correlativos: dict[str, int], es_venta: bool = False) -> tuple[list[str], dict[str, dict]]:
     """El número `MMNNNN` de cada comprobante, en el orden recibido y en la misma posición, y el rango usado por
-    sub-diario. No depende de la identidad de los objetos: dos llamadas con los mismos datos dan lo mismo."""
+    sub-diario. No depende de la identidad de los objetos: dos llamadas con los mismos datos dan lo mismo.
+
+    **Un comprobante que no mueve dinero no gasta número** (`sin_efecto_contable`): sale con el suyo en blanco y el
+    siguiente se lleva el que le tocaba. Si consumiera uno, el asiento tendría un vóucher sin líneas y el rango que se
+    recuerda para el mes siguiente contaría comprobantes que nunca se escribieron."""
     mes_mm = str(periodo)[4:6]
     sin_equivalencia = tipos_sin_sigla(comprobantes, config)
     if sin_equivalencia:
         raise SinSigla(sin_equivalencia)
-    presentes = sub_diarios_presentes(comprobantes, config, es_venta)
+    con_asiento = con_efecto_contable(comprobantes, config)
+    presentes = sub_diarios_presentes(con_asiento, config, es_venta)
     faltan = [s for s in presentes if s not in correlativos]
     if faltan:
         raise SinCorrelativo(faltan)
     contadores = {s: int(correlativos[s]) for s in presentes}
     if any(n < 1 for n in contadores.values()):
         raise ValueError("Los correlativos empiezan en 1")
+    sin_numero = {id(c) for c in comprobantes} - {id(c) for c in con_asiento}
     numeros: list[str] = []
     rangos: dict[str, dict] = {s: {"desde": n, "hasta": n - 1, "comprobantes": 0} for s, n in contadores.items()}
     for c in comprobantes:
+        if id(c) in sin_numero:
+            numeros.append("")
+            continue
         s = sub_diario(c, config, es_venta)
         n = contadores[s]
         numeros.append(f"{mes_mm}{n:04d}")

@@ -48,14 +48,15 @@ from .configuracion import (CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO, NUMERO_DE
 from .faltas import (CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA, Falta, SinCodigoDeMoneda, NoExportable,
                      RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCuenta, SinCorrelativo,
                      SinSigla)
-from .resolucion import (comprobantes_sin_centro, comprobantes_sin_cuenta, con_reparto,
+from .resolucion import (asienta_sin_efecto, comprobantes_sin_centro, comprobantes_sin_cuenta,
+                         con_efecto_contable, con_reparto,
                          correlativos_de_partida, cuenta_honorarios,
                          cuenta_por_pagar, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
                          etiquetas_sub_diario, exigir_requisitos, faltantes_para, fundir_config, imputacion_de,
                          limites_del_periodo, lleva_centro, monedas_sin_codigo, numerar, numerar_en_orden, partes_de,
                          reparto_no_cuadra,
-                         repartos_que_no_cuadran, sigla_documento, sub_diario, sub_diarios_presentes,
-                         tiene_detraccion, tipos_sin_sigla)
+                         repartos_que_no_cuadran, sigla_documento, sin_efecto_contable, sub_diario,
+                         sub_diarios_presentes, tiene_detraccion, tipos_sin_sigla)
 from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
@@ -66,13 +67,14 @@ from .motor import (CENTRO_EN_ANEXO, ROLES, cabecera_de, constancia_de, glosa_de
 __all__ = [
     "CONFIGURACION_DEL_ASIENTO", "NUMERO_DETRACCION_PENDIENTE", "TIPO_DOC_DETRACCION", "CONTADOR", "FALTA", "FALTAS",
     "PROVEEDOR", "SISTEMA", "Falta", "SinCodigoDeMoneda", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
-    "SinCentro", "SinCuenta", "SinCorrelativo", "SinSigla", "comprobantes_sin_centro",
-    "comprobantes_sin_cuenta", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",
+    "SinCentro", "SinCuenta", "SinCorrelativo", "SinSigla", "asienta_sin_efecto", "comprobantes_sin_centro",
+    "comprobantes_sin_cuenta", "con_efecto_contable", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",
     "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo",
     "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para", "fundir_config", "imputacion_de",
     "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar", "numerar_en_orden", "partes_de",
     "reparto_no_cuadra",
-    "repartos_que_no_cuadran", "sigla_documento", "sub_diario", "sub_diarios_presentes", "tiene_detraccion",
+    "repartos_que_no_cuadran", "sigla_documento", "sin_efecto_contable", "sub_diario", "sub_diarios_presentes",
+    "tiene_detraccion",
     "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro", "lineas_e_indice_del_libro", "cabecera_de", "Cabecera",
     "ComprobanteDelAsiento", "MONEDAS_CODIGO", "constancia_de", "exportacion_de", "serie_numero_de",

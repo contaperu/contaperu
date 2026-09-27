@@ -702,6 +702,7 @@
    "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
+   "sin_efecto_contable": 0,
    "con_error": 5,
    "con_aviso": 1
   },
@@ -7118,6 +7119,7 @@
    "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
+   "sin_efecto_contable": 0,
    "con_error": 5,
    "con_aviso": 1
   },
@@ -9259,6 +9261,7 @@
    "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
+   "sin_efecto_contable": 0,
    "con_error": 5,
    "con_aviso": 1
   },
@@ -9692,6 +9695,7 @@
    "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
+   "sin_efecto_contable": 0,
    "con_error": 5,
    "con_aviso": 1
   },
@@ -10040,6 +10044,7 @@
    "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
+   "sin_efecto_contable": 0,
    "con_error": 5,
    "con_aviso": 1
   },
@@ -10476,6 +10481,7 @@
    "saldrian": 6,
    "excluidos": 0,
    "fuera_del_destino": 0,
+   "sin_efecto_contable": 0,
    "con_error": 5,
    "con_aviso": 1
   },

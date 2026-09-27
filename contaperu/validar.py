@@ -149,8 +149,25 @@ def validar(c: Comprobante, libro: Libro) -> None:
     if c.es_nota_credito and (c.dscto_base > c.base_gravada or c.dscto_igv > c.igv):
         error("DSCTO_MAYOR_QUE_BASE", f"La parte que va como descuento ({c.dscto_base}; IGV {c.dscto_igv}) no puede "
                                       f"ser mayor que la base ({c.base_gravada}) y el IGV ({c.igv}) de la nota")
-    if c.total == 0 and not c.es_nota:
-        aviso("TOTAL_CERO", "Importe total en cero")
+    # Un comprobante en cero. Dos avisos y no uno, porque no significan lo mismo:
+    #
+    # - Si viene de la PROPUESTA DEL SIRE, el cero no puede ser un despiste: **lo escribió SUNAT**. Es como declara los
+    #   comprobantes que el contribuyente da de baja —todos los importes en cero, hasta el tipo de cambio— para que el
+    #   correlativo no quede con huecos, así que hay que anotarlo igual. El texto lo dice y no traduce nada: se cita el
+    #   «Est. Comp» tal como viene, **sin decir qué significa**, porque la norma no publica su tabla de valores.
+    # - En cualquier otro origen sigue siendo `TOTAL_CERO`, que es lo que era: un total que quizá falta por rellenar.
+    #
+    # Y **se le quitó la mordaza `and not c.es_nota`** (3.5.0): una nota en cero no decía nada, así que en un mes real
+    # dos notas dadas de baja salían `estado="ok"` sin una palabra. Esa condición venía del commit inicial del núcleo,
+    # sin test que la defendiera ni motivo escrito, y una nota en cero merece la misma mirada que una factura en cero.
+    if c.total == 0:
+        if c.origen == "sire":
+            estado = f", con estado «{c.estado_sunat}»" if c.estado_sunat else ""
+            aviso("TOTAL_CERO_EN_LA_PROPUESTA",
+                  f"SUNAT lo informa con todos los importes en cero{estado}: así declara lo que se da de baja, y el "
+                  f"registro lo lleva igual. No pide cuenta ni entra al asiento; si ya no tiene efecto, exclúyelo")
+        else:
+            aviso("TOTAL_CERO", "Importe total en cero")
 
     # --- Detracción ------------------------------------------------------------------------------
     # La tasa con la que va a salir, contra la de la tabla del contribuyente para ese código (la anota

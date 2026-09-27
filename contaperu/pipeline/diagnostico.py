@@ -49,6 +49,7 @@ PEDIR_A: dict[str, str] = {
     "PERIODO_ANTERIOR": CONTADOR, "RETENCION_NO_APLICA": CONTADOR, "RETENCION_TASA": CONTADOR,
     "SIRE_SIN_DETALLE": CONTADOR, "TIPO_CP_DESCONOCIDO": CONTADOR,
     "TIPO_NOTA_DESCONOCIDO": CONTADOR, "TIPO_NOTA_NO_APLICA": CONTADOR, "TOTAL_CERO": CONTADOR,
+    "TOTAL_CERO_EN_LA_PROPUESTA": CONTADOR,
 }
 
 
@@ -122,8 +123,10 @@ def _sin_configuracion(libro: Libro, driver: str, exige: frozenset[str], todos: 
                        "texto": "la configuración no cumple lo que declaran el motor y su sistema",
                        "pedir_a": PEDIR_A["configuracion_invalida"]}],
         "errores_de_configuracion": errores,
+        # Con la configuración rota no se ha mirado ningún comprobante, así que los contadores que dependen de mirarlos
+        # van en cero — incluido `sin_efecto_contable`, que se decide con la configuración aplicada.
         "totales": {"comprobantes": len(todos), "saldrian": 0, "excluidos": sum(1 for c in todos if c.excluida),
-                    "fuera_del_destino": 0, "con_error": 0, "con_aviso": 0},
+                    "fuera_del_destino": 0, "sin_efecto_contable": 0, "con_error": 0, "con_aviso": 0},
         "bloqueantes": [], "avisos": [], "faltantes": {}, "detracciones_pendientes": [], "detracciones_pagadas": [],
         "resumen_por_contraparte": {}, "sub_diarios": {}, "saldrian": [],
     }
@@ -163,6 +166,9 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     candidatos = [c for c in todos if not c.excluida and c not in fuera]
     con_error = [c for c in candidatos if c.tiene_errores]
     con_aviso = [c for c in candidatos if c.observaciones and not c.tiene_errores]
+    # Los que no llevan asiento porque no mueven dinero (`asiento.sin_efecto_contable`): siguen en el registro, pero no
+    # se les pide cuenta ni centro. Se cuentan para que una pantalla pueda decir «3 dados de baja» en vez de callarlos.
+    sin_asiento = [c for c in candidatos if c not in asi.con_efecto_contable(candidatos, config)]
 
     # Lo que se mira: lo que ese destino exige y, además, lo que solo informa —la cuenta y el centro a todo el que lleva
     # cuentas, el tipo y la moneda al que arma asientos—, con la misma regla que hace cumplir el núcleo
@@ -235,8 +241,13 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
         "por_que_no": por_que_no,
         "que_falta": que_falta(con_error, candidatos, faltantes, exige, _serie_numero),
         "errores_de_configuracion": [],
+        # `sin_efecto_contable` (3.5.0) es su propia casilla y no se suma a `fuera_del_destino`, que significa otra
+        # cosa: «este destino no lleva ese tipo de comprobante». Estos sí salen en el registro —el correlativo de SUNAT
+        # los necesita—; lo que no tienen es asiento, así que no piden cuenta ni gastan vóucher. Con
+        # `asentar_sin_efecto_contable` encendido la casilla se queda en 0, porque entonces sí se asientan.
         "totales": {"comprobantes": len(todos), "saldrian": len(saldrian), "excluidos": len(excluidos),
-                    "fuera_del_destino": len(fuera), "con_error": len(con_error), "con_aviso": len(con_aviso)},
+                    "fuera_del_destino": len(fuera), "sin_efecto_contable": len(sin_asiento),
+                    "con_error": len(con_error), "con_aviso": len(con_aviso)},
         "bloqueantes": [{"serie_numero": _serie_numero(c),
                          "observaciones": [o.a_dict() for o in c.observaciones if o.nivel == "error"]}
                         for c in con_error],

@@ -102,6 +102,11 @@
      "type": "integer",
      "minimum": 0
     },
+    "sin_efecto_contable": {
+     "type": "integer",
+     "minimum": 0,
+     "description": "Cuántos no llevan asiento porque no mueven dinero (total, IGV y retención en cero, y sin detracción): no piden cuenta ni centro ni gastan número de vóucher, pero SÍ salen en el registro que se declara a SUNAT. Es donde caen los comprobantes que SUNAT da de baja, que declara con todos los importes en cero para no dejar huecos en el correlativo. Cero si la configuración pide asentarlos igual (asentar_sin_efecto_contable)."
+    },
     "con_error": {
      "type": "integer",
      "minimum": 0
@@ -116,6 +121,7 @@
     "saldrian",
     "excluidos",
     "fuera_del_destino",
+    "sin_efecto_contable",
     "con_error",
     "con_aviso"
    ],

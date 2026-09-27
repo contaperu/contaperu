@@ -328,6 +328,24 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
           claves=r"^[0-9]{3}$",
           ayuda="Sobreescribe el nombre de la tabla del motor (Catálogo 54 de SUNAT) para un código.",
           valores=Campo("", "texto", grupo="detracciones")),
+    # ¿Se le arma asiento a un comprobante que no mueve dinero? Apagado de fábrica (John, 26-sep-2026), y eso es lo
+    # que hace que un comprobante dado de baja deje de pedir cuenta contable y de gastar un número de vóucher.
+    #
+    # El caso que lo trajo: SUNAT declara los comprobantes que el contribuyente da de baja **con todos sus importes en
+    # cero** —hasta el tipo de cambio— para que el correlativo no quede con huecos, así que la propuesta del SIRE los
+    # trae y hay que anotarlos. Pero a un comprobante anulado no se le pone cuenta, y con cuenta puesta salía al Excel
+    # como dos líneas de asiento a `0.00` con su número de vóucher gastado. Las dos salidas eran malas.
+    #
+    # Va en lo GENERAL y no en la configuración del asiento porque es contabilidad y no formato: vale igual para
+    # CONCAR, para el CSV, para STARSOFT y para el asiento neutral —que no declara sección propia y lee justo esto—.
+    # Y se puede encender: quien integre un ERP que quiera esas líneas en cero las tiene con una clave.
+    #
+    # Lo que NO cambia al apagarlo: el comprobante **sigue en el registro** que se declara a SUNAT. El asiento es una
+    # cosa y el registro es otra, y el correlativo de SUNAT necesita la fila.
+    Campo("asentar_sin_efecto_contable", "booleano", False, titulo="Asentar comprobantes sin efecto contable",
+          grupo="asiento",
+          ayuda="Un comprobante con el total, el IGV y la retención en cero y sin detracción no mueve dinero. "
+                "Apagado, no pide cuenta ni centro y no produce asiento; sigue saliendo en el registro de SUNAT."),
 )
 
 # Los valores por defecto de lo general, como se guardan en la raíz. Cada sistema suma los de su sección

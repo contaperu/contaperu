@@ -111,7 +111,12 @@ def clave(fila: list[str], reg: Registro = VENTAS) -> tuple:
 def _norm(posicion: int, valor: str, reg: Registro = VENTAS) -> str:
     valor = (valor or "").strip()
     if posicion in reg.importes or posicion == reg.i_tc:   # importes y tipo de cambio
-        if valor in ("", "0", "0.00", "1.000"):  # el TC en soles va vacío en el reemplazo
+        # El TC en soles va vacío en el archivo de reemplazo, y SUNAT lo muestra de dos formas: `1.000` en un
+        # comprobante normal y **`0.000` en uno que da de baja** —ahí pone en cero todo lo numérico, hasta el tipo de
+        # cambio—. Los tres dicen lo mismo: operación en soles, sin tipo de cambio que aplicar. Sin el `0.000`, un mes
+        # con comprobantes dados de baja cantaba una diferencia por cada uno, y en un campo que rellena la propia
+        # Administración: se comprobó contra un registro real de 52 filas, donde eran las únicas cinco diferencias.
+        if valor in ("", "0", "0.00", "0.000", "1.000"):
             return ""
         try:
             return str(Decimal(valor).normalize())
