@@ -329,13 +329,19 @@ def verificar_driver(modulo: str) -> dict:
 
 def catalogos_sunat() -> dict:
     """Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas,
-    medios de pago y la tabla de detracciones, con su fuente. La de detracciones es la única que el ERP puede
-    sobreescribir en su configuración; las demás se copian de la norma y no se gobiernan."""
+    medios de pago, los motivos de una nota de crédito y de una de débito, y la tabla de detracciones, con su fuente.
+    La de detracciones es la única que el ERP puede sobreescribir en su configuración; las demás se copian de la norma
+    y no se gobiernan.
+
+    Ojo con dos claves que se parecen y no son lo mismo: `notas` son los TIPOS DE COMPROBANTE que son notas (07, 08,
+    87 y 88), y los dos `motivos_nota_*` dicen POR QUÉ se emitió una (los Catálogos 09 y 10 del Anexo N.° 8)."""
     return {
         "tipos_comprobante": catalogos.TIPOS_CP,
         "tipos_documento_identidad": catalogos.TIPOS_DOC_IDENTIDAD,
         "monedas": sorted(catalogos.MONEDAS),
         "medios_pago": catalogos.MEDIOS_PAGO,
+        "motivos_nota_credito": catalogos.MOTIVOS_NOTA_CREDITO,
+        "motivos_nota_debito": catalogos.MOTIVOS_NOTA_DEBITO,
         "notas": sorted(catalogos.NOTAS),
         "fuera_del_registro_sunat": sorted(catalogos.FUERA_DEL_REGISTRO_SUNAT),
         "detracciones": detracciones.tabla_del_motor(),

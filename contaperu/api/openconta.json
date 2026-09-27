@@ -666,11 +666,11 @@
   "/v1/catalogos/sunat": {
    "get": {
     "operationId": "catalogos_sunat",
-    "summary": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas, medios de pago y la tabla de detracciones, con su fuente.",
-    "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas,\nmedios de pago y la tabla de detracciones, con su fuente. La de detracciones es la única que el ERP puede\nsobreescribir en su configuración; las demás se copian de la norma y no se gobiernan.",
+    "summary": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas, medios de pago, los motivos de una nota de crédito y de una de débito, y la tabla de detracciones, con su fuente.",
+    "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas,\nmedios de pago, los motivos de una nota de crédito y de una de débito, y la tabla de detracciones, con su fuente.\nLa de detracciones es la única que el ERP puede sobreescribir en su configuración; las demás se copian de la norma\ny no se gobiernan.\n\nOjo con dos claves que se parecen y no son lo mismo: `notas` son los TIPOS DE COMPROBANTE que son notas (07, 08,\n87 y 88), y los dos `motivos_nota_*` dicen POR QUÉ se emitió una (los Catálogos 09 y 10 del Anexo N.° 8).",
     "responses": {
      "200": {
-      "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas, medios de pago y la tabla de detracciones, con su fuente.",
+      "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas, medios de pago, los motivos de una nota de crédito y de una de débito, y la tabla de detracciones, con su fuente.",
       "content": {
        "application/json": {
         "schema": {
@@ -2796,7 +2796,7 @@
    },
    "catalogos_sunat": {
     "title": "Catálogos de SUNAT",
-    "description": "Los tipos de comprobante, los tipos de documento de identidad, las monedas y los medios de pago que entiende el motor.",
+    "description": "Los tipos de comprobante, los tipos de documento de identidad, las monedas, los medios de pago y los motivos de una nota de crédito o de débito que entiende el motor.",
     "type": "object",
     "properties": {
      "tipos_comprobante": {
@@ -2805,6 +2805,20 @@
      "medios_pago": {
       "type": "object",
       "description": "El código de medio de pago y su descripción (Anexo 3 de la RS 169-2015).",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "motivos_nota_credito": {
+      "type": "object",
+      "description": "Por qué se emitió una nota de crédito: el código y su descripción (Catálogo No. 09 del Anexo N.° 8).",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "motivos_nota_debito": {
+      "type": "object",
+      "description": "Por qué se emitió una nota de débito: el código y su descripción (Catálogo No. 10 del Anexo N.° 8). OJO: sus códigos NO significan lo mismo que los del 09 — el «01» es «intereses por mora» aquí y «anulación de la operación» allí.",
       "additionalProperties": {
        "type": "string"
       }
@@ -2871,7 +2885,7 @@
      },
      "fuentes": {
       "type": "object",
-      "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas, medios_pago): la norma y su tabla.",
+      "description": "De dónde sale cada catálogo (tipos_comprobante, tipos_documento_identidad, monedas, medios_pago, motivos_nota_credito, motivos_nota_debito): la norma y su tabla.",
       "additionalProperties": {
        "type": "string"
       }
@@ -2882,6 +2896,8 @@
      "tipos_documento_identidad",
      "monedas",
      "medios_pago",
+     "motivos_nota_credito",
+     "motivos_nota_debito",
      "notas",
      "fuera_del_registro_sunat",
      "detracciones",

@@ -112,7 +112,11 @@
   "FUERA_DEL_REGISTRO_SUNAT": "",
   "MEDIOS_PAGO": "",
   "MONEDAS": "",
+  "MOTIVOS_NOTA_CREDITO": "",
+  "MOTIVOS_NOTA_DEBITO": "",
   "NOTAS": "",
+  "NOTAS_CREDITO": "",
+  "NOTAS_DEBITO": "",
   "SCHEME_A_TIPO_DOC": "",
   "SIN_CONTRAPARTE_OK": "",
   "TASAS_IGV_REDUCIDAS": "",
@@ -134,6 +138,7 @@
   "TRIBUTO_IVAP": "",
   "TRIBUTO_OTROS": "",
   "api_sire": "",
+  "motivos_de_nota": "",
   "ruc_valido": ""
  },
  "contaperu.configuracion": {

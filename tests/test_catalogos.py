@@ -35,7 +35,8 @@ def test_los_catalogos_son_los_de_la_1_0():
 
 def test_cada_catalogo_viene_de_datos_con_su_fuente():
     datos = _datos.leer_json("datos/sunat/catalogos.json")
-    assert set(datos) == {"tipos_comprobante", "tipos_documento_identidad", "monedas", "medios_pago"}
+    assert set(datos) == {"tipos_comprobante", "tipos_documento_identidad", "monedas", "medios_pago",
+                          "motivos_nota_credito", "motivos_nota_debito"}
     assert all(tabla["fuente"].strip() for tabla in datos.values())
     assert catalogos.TIPOS_CP == datos["tipos_comprobante"]["codigos"]
     assert catalogos.FUENTES == {nombre: tabla["fuente"] for nombre, tabla in datos.items()}
@@ -96,6 +97,89 @@ def test_los_medios_de_pago_salen_por_la_fachada_con_su_fuente():
     fuente = catalogos_sunat["fuentes"]["medios_pago"]
     # La fuente dice la norma Y el asunto: un número de tabla suelto no identifica nada y puede cambiar.
     assert "RS 169-2015" in fuente and "medio de pago" in fuente.lower()
+
+
+# ── Por qué se emitió una nota: los Catálogos 09 y 10 del Anexo N.° 8 ──────────────────────────────────────────
+
+# Escritos a mano y enteros, por el mismo motivo que los medios de pago: son texto de una norma y nadie los
+# recuerda bien. El 09 vigente es el del Anexo III de la RS 193-2020, que lo llevó de 9 códigos a 13; el 10 es el
+# del Anexo V de la RS 318-2017, que lo republicó sin cambios.
+MOTIVOS_DE_NOTA_DE_CREDITO = {
+    "01": "Anulación de la operación",
+    "02": "Anulación por error en el RUC",
+    "03": "Corrección por error en la descripción",
+    "04": "Descuento global",
+    "05": "Descuento por ítem",
+    "06": "Devolución total",
+    "07": "Devolución por ítem",
+    "08": "Bonificación",
+    "09": "Disminución en el valor",
+    "10": "Otros conceptos",
+    "11": "Ajustes de operaciones de exportación",
+    "12": "Ajustes afectos al IVAP",
+    "13": "Corrección del monto neto pendiente de pago y/o la(s) fechas(s) de vencimiento del pago único o de las "
+          "cuotas y/o los montos correspondientes a cada cuota, de ser el caso",
+}
+MOTIVOS_DE_NOTA_DE_DEBITO = {
+    "01": "Intereses por mora",
+    "02": "Aumento en el valor",
+    "03": "Penalidades/otros conceptos",
+}
+
+
+def test_los_trece_motivos_de_nota_de_credito_son_los_del_catalogo_09():
+    """Los 13 códigos, con su texto y en el orden del anexo."""
+    assert list(catalogos.MOTIVOS_NOTA_CREDITO.items()) == list(MOTIVOS_DE_NOTA_DE_CREDITO.items())
+
+
+def test_los_tres_motivos_de_nota_de_debito_son_los_del_catalogo_10():
+    """Tres y no más: al 10 no le añadieron los ajustes de exportación e IVAP que sí ganó el 09 en 2020."""
+    assert list(catalogos.MOTIVOS_NOTA_DEBITO.items()) == list(MOTIVOS_DE_NOTA_DE_DEBITO.items())
+
+
+def test_el_01_significa_cosas_distintas_en_los_dos_catalogos():
+    """La razón de que sean DOS tablas y no una. Juntarlas obligaría a inventar un prefijo, y un catálogo con
+    códigos inventados deja de ser el de SUNAT."""
+    assert catalogos.MOTIVOS_NOTA_CREDITO["01"] == "Anulación de la operación"
+    assert catalogos.MOTIVOS_NOTA_DEBITO["01"] == "Intereses por mora"
+    assert catalogos.MOTIVOS_NOTA_CREDITO["01"] != catalogos.MOTIVOS_NOTA_DEBITO["01"]
+
+
+def test_el_catalogo_de_una_nota_lo_elige_su_tipo_de_comprobante():
+    """**El test que cierra el 87 para este campo.** Mirar solo `("07", "08")` —que es lo que dice
+    `catalogos.TIPOS_NOTA`, y significa otra cosa— dejaría a la nota de crédito de no domiciliado y a la de débito
+    especial sin catálogo EN SILENCIO: su código se avisaría como desconocido siempre."""
+    assert catalogos.motivos_de_nota("07") is catalogos.MOTIVOS_NOTA_CREDITO
+    assert catalogos.motivos_de_nota("87") is catalogos.MOTIVOS_NOTA_CREDITO
+    assert catalogos.motivos_de_nota("08") is catalogos.MOTIVOS_NOTA_DEBITO
+    assert catalogos.motivos_de_nota("88") is catalogos.MOTIVOS_NOTA_DEBITO
+    # Lo que no es una nota no tiene motivo, y eso incluye el vacío y la basura.
+    assert catalogos.motivos_de_nota("01") == {}
+    assert catalogos.motivos_de_nota("") == {}
+    assert catalogos.motivos_de_nota(None) == {}
+
+
+def test_las_dos_listas_de_notas_dicen_lo_mismo():
+    """`catalogos` y `modelo` son dos módulos hoja que no se importan entre sí, así que cada uno tiene su copia de
+    los cuatro códigos de nota. Lo que impide que se separen es este test. Y `catalogos.NOTAS` se DERIVA de los dos
+    conjuntos, así que dentro de `catalogos` no puede haber desacuerdo."""
+    from contaperu import modelo
+    assert set(catalogos.NOTAS_CREDITO) == set(modelo.NOTAS_CREDITO)
+    assert set(catalogos.NOTAS_DEBITO) == set(modelo.NOTAS_DEBITO)
+    assert catalogos.NOTAS == catalogos.NOTAS_CREDITO | catalogos.NOTAS_DEBITO == set(modelo.NOTAS)
+    # Y todo código con catálogo es una nota, y toda nota tiene catálogo: sin huérfanos por ningún lado.
+    assert {t for t in catalogos.TIPOS_CP if catalogos.motivos_de_nota(t)} == set(catalogos.NOTAS)
+
+
+def test_los_motivos_de_nota_salen_por_la_fachada_con_su_fuente():
+    """Un ERP los lee por la API o por el recurso del MCP, no copiándolos."""
+    catalogos_sunat = api.catalogos_sunat()
+    assert catalogos_sunat["motivos_nota_credito"] == catalogos.MOTIVOS_NOTA_CREDITO
+    assert catalogos_sunat["motivos_nota_debito"] == catalogos.MOTIVOS_NOTA_DEBITO
+    # La fuente dice la norma Y el asunto; el número de catálogo vive dentro de la cita, no en el nombre.
+    for nombre, norma in (("motivos_nota_credito", "193-2020"), ("motivos_nota_debito", "318-2017")):
+        fuente = catalogos_sunat["fuentes"][nombre]
+        assert norma in fuente and "nota de" in fuente.lower()
 
 
 # ── Las tres cifras del IGV ────────────────────────────────────────────────────────────────────────────────────

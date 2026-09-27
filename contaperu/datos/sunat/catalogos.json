@@ -73,5 +73,31 @@
    "108": "Carta de crédito documentario - Comercio exterior",
    "999": "Otros medios de pago"
   }
+ },
+ "motivos_nota_credito": {
+  "fuente": "Anexo N.° 8 de la RS 097-2012/SUNAT, «Catálogo No. 09: Códigos de tipo de nota de crédito electrónica», con el texto vigente del Anexo III de la RS 193-2020/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2020/anexo3-193-2020.pdf), que lo llevó de 9 códigos a 13. Es un catálogo de la factura electrónica —el campo cbc:ResponseCode del XML—, y el SIRE lo CITA en vez de tener uno propio: el campo 34 del Anexo N.° 2 de la RS 112-2021 (ventas) y el 39 del Anexo 8 de la RS 040-2022 (compras) remiten «al catálogo No. 09 y 10 del Anexo 8». Transcrito entero: se conserva el texto, con la capitalización de los demás catálogos, y se omite el punto final que el original pone en los códigos 03 y 13. El «la(s) fechas(s)» del 13 es del original y se deja tal cual.",
+  "codigos": {
+   "01": "Anulación de la operación",
+   "02": "Anulación por error en el RUC",
+   "03": "Corrección por error en la descripción",
+   "04": "Descuento global",
+   "05": "Descuento por ítem",
+   "06": "Devolución total",
+   "07": "Devolución por ítem",
+   "08": "Bonificación",
+   "09": "Disminución en el valor",
+   "10": "Otros conceptos",
+   "11": "Ajustes de operaciones de exportación",
+   "12": "Ajustes afectos al IVAP",
+   "13": "Corrección del monto neto pendiente de pago y/o la(s) fechas(s) de vencimiento del pago único o de las cuotas y/o los montos correspondientes a cada cuota, de ser el caso"
+  }
+ },
+ "motivos_nota_debito": {
+  "fuente": "Anexo N.° 8 de la RS 097-2012/SUNAT, «Catálogo No. 10: Códigos de Tipo de nota de débito electrónica», republicado SIN CAMBIOS por el Anexo V de la RS 318-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexosV-318-2017.pdf), que es la versión más reciente encontrada: los tres códigos siguen siendo los mismos, a diferencia del Catálogo 09, al que la RS 193-2020 le añadió cuatro. Mismo campo del XML (cbc:ResponseCode) y misma cita desde el SIRE. Del 03 se quita el espacio que el original deja tras la barra.",
+  "codigos": {
+   "01": "Intereses por mora",
+   "02": "Aumento en el valor",
+   "03": "Penalidades/otros conceptos"
+  }
  }
 }

@@ -54,8 +54,14 @@ TIPOS_CP: dict[str, str] = dict(_CATALOGOS["tipos_comprobante"]["codigos"])
 # Comprobantes en los que SUNAT exige fecha de vencimiento o de pago (RCE campo 6).
 EXIGEN_VENCIMIENTO = frozenset({"14", "46", "50", "51", "52", "53", "54"})
 # Comprobantes en los que el ICBPER va con 0.00 aunque no aplique (nunca vacío).
-# Notas: llevan documento modificado obligatorio.
-NOTAS = frozenset({"07", "08", "87", "88"})
+# Notas: llevan documento modificado obligatorio. Se separan en crédito y débito porque su catálogo de motivos es
+# distinto —el 09 y el 10— y porque el «01» significa cosas opuestas en cada uno; `NOTAS` se DERIVA de los dos, así
+# que aquí no se pueden desacordar. Los mismos cuatro códigos viven en `modelo.NOTAS_CREDITO`/`NOTAS_DEBITO`: los dos
+# módulos son hojas y no se importan entre sí, así que lo que impide que se separen es un test
+# (`test_catalogos.py::test_las_dos_listas_de_notas_dicen_lo_mismo`), no la buena voluntad.
+NOTAS_CREDITO = frozenset({"07", "87"})     # 07 domiciliado · 87 no domiciliado
+NOTAS_DEBITO = frozenset({"08", "88"})      # las hermanas que suman
+NOTAS = NOTAS_CREDITO | NOTAS_DEBITO
 # Comprobantes aduaneros: llevan año de la DUA y código de dependencia.
 ADUANEROS = frozenset({"50", "51", "52", "53", "54"})
 # Comprobantes que pueden ir sin documento de la contraparte (consumidor final).
@@ -84,6 +90,40 @@ MONEDAS = frozenset(_CATALOGOS["monedas"]["codigos"])
 # pide en su registro de ventas— y permite avisar de uno que no existe. Un código que no esté aquí **no bloquea**
 # (`validar.MEDIO_PAGO_DESCONOCIDO` es aviso): el día que SUNAT añada uno, nadie se queda sin exportar su mes.
 MEDIOS_PAGO: dict[str, str] = dict(_CATALOGOS["medios_pago"]["codigos"])
+
+# Por qué se emitió una nota: el Catálogo 09 para las de crédito (13 motivos, «01 anulación de la operación» …
+# «09 disminución en el valor») y el 10 para las de débito (3: mora, aumento de valor, penalidades).
+#
+# **Son dos tablas y no una porque los códigos colisionan**: el `01` es «anulación de la operación» en el de crédito
+# e «intereses por mora» en el de débito. Juntarlas obligaría a inventar un prefijo, y un catálogo con códigos
+# inventados deja de ser el de SUNAT.
+#
+# No son del SIRE: son de la factura electrónica (el `cbc:ResponseCode` del XML), y el SIRE los CITA —campo 34 del
+# Anexo N.° 2 de la RS 112-2021 en ventas, campo 39 del Anexo 8 de la RS 040-2022 en compras—. Como los medios de
+# pago, esto es vocabulario y el motor no decide con él: un código que no esté aquí **no bloquea**
+# (`validar.TIPO_NOTA_DESCONOCIDO` es aviso), porque SUNAT ya le añadió cuatro códigos al 09 en 2020.
+#
+# Y OJO con lo que NO dice el `01` del Catálogo 09: dice que la nota **anula el comprobante que referencia**, no que
+# la nota esté anulada. En el mes real con el que se hizo esto, las cinco notas con motivo `01` estaban vivas y con
+# importes, y las dos que SUNAT daba de baja llevaban motivo `09`. Ninguna regla del motor lee el motivo para hablar
+# de anulación.
+MOTIVOS_NOTA_CREDITO: dict[str, str] = dict(_CATALOGOS["motivos_nota_credito"]["codigos"])
+MOTIVOS_NOTA_DEBITO: dict[str, str] = dict(_CATALOGOS["motivos_nota_debito"]["codigos"])
+
+
+def motivos_de_nota(tipo_cp: str) -> dict[str, str]:
+    """El catálogo de motivos que le toca a ese comprobante, y `{}` si no es una nota.
+
+    Aquí vive, **una sola vez**, el reparto entre los dos catálogos, y se apoya en los conjuntos completos: mirar
+    solo `("07", "08")` dejaría al 87 y al 88 sin catálogo **en silencio**, que es exactamente la forma del fallo que
+    `resumen.py` cuenta en su cabecera (una nota de crédito de no domiciliado tratada como si no lo fuera)."""
+    codigo = str(tipo_cp or "").strip()
+    if codigo in NOTAS_CREDITO:
+        return MOTIVOS_NOTA_CREDITO
+    if codigo in NOTAS_DEBITO:
+        return MOTIVOS_NOTA_DEBITO
+    return {}
+
 
 # Catálogo 05 de la factura electrónica: código de tributo en cac:TaxScheme/cbc:ID.
 TRIBUTO_IGV = "1000"
