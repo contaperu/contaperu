@@ -127,8 +127,9 @@ def _seguir_descuento(c: Comprobante, fila: dict, error: type[ValueError]) -> No
 def aplicar_igv(c: Comprobante, igv) -> dict[str, Decimal]:
     """Los importes del comprobante con el IGV que dice el papel, sin tocar el total.
 
-    Devuelve los que pueden moverse —base, IGV, exonerado, inafecto, exportación y los dos descuentos—; el
-    resto del comprobante no se toca. Lanza `IgvImposible` si el IGV no es un número, es negativo o no cabe.
+    Devuelve los que pueden moverse —base, IGV, exonerado, inafecto, exportación y los dos descuentos, y en un
+    comprobante que lo declare también `valor_no_gravado`—; el resto del comprobante no se toca. Lanza
+    `IgvImposible` si el IGV no es un número, es negativo o no cabe.
     """
     try:
         nuevo = Decimal(str(igv).replace(",", ".").strip() or "0").quantize(CENTIMO, rounding=ROUND_HALF_UP)
@@ -139,27 +140,51 @@ def aplicar_igv(c: Comprobante, igv) -> dict[str, Decimal]:
     fila = {"base_gravada": c.base_gravada, "igv": c.igv, "exonerado": c.exonerado,
             "inafecto": c.inafecto, "exportacion": c.exportacion,
             "dscto_base": c.dscto_base, "dscto_igv": c.dscto_igv}
+    # Un comprobante de COMPRA traído del RCE informa lo no gravado en `valor_no_gravado` (su campo 21) y
+    # **no** en `exonerado`/`inafecto`, que en ese archivo no existen. Mover importes sin mirarlo dejaba dos
+    # verdades —el campo declarado por un lado y el desglose por otro— y el total volvía a no cuadrar, ahora
+    # de verdad. `declarado` es el interruptor: cuando lo está, lo no gravado se sigue llevando en ESE campo;
+    # cuando no, todo sigue exactamente como antes de la 3.5.1.
+    declarado = c.valor_no_gravado is not None
     if nuevo == 0:
-        # Sin IGV cae en inafecto: la base y el IGV que tuviera pasan ahí, y el total queda igual. Sin base
-        # no hay nada que informar como descuento.
-        fila.update(inafecto=c.inafecto + c.base_gravada + c.igv, base_gravada=CERO, igv=CERO,
-                    dscto_base=CERO, dscto_igv=CERO)
+        # Sin IGV, la base y el IGV que tuviera pasan a lo no gravado, y el total queda igual. Sin base no
+        # hay nada que informar como descuento. En una compra del RCE ese destino es el campo declarado, no
+        # `inafecto`: si se llevara ahí, la propiedad seguiría devolviendo el valor viejo y el comprobante
+        # pasaría a descuadrar por un importe que nadie perdió.
+        fila.update(base_gravada=CERO, igv=CERO, dscto_base=CERO, dscto_igv=CERO)
+        if declarado:
+            fila["valor_no_gravado"] = c.valor_no_gravado + c.base_gravada + c.igv
+        else:
+            fila["inafecto"] = c.inafecto + c.base_gravada + c.igv
     elif c.igv <= 0:
-        # No tenía IGV: todo el importe sin IGV pasa a la base. Poner un IGV es decir «esto es afecto».
+        # No tenía IGV: todo el importe sin IGV pasa a la base. Poner un IGV es decir «esto es afecto», así
+        # que se suelta también el campo declarado (None, no cero: cero sería declarar que no hay nada no
+        # gravado, y eso ganaría sobre el desglose que alguien escriba después).
         fila.update(igv=nuevo, exonerado=CERO, inafecto=CERO, exportacion=CERO,
                     base_gravada=c.total - nuevo - _cargos(c))
+        if declarado:
+            fila["valor_no_gravado"] = None
     else:
-        # Ya era afecto (o mixto): la base absorbe el cambio; lo que no lleva IGV se queda donde está.
+        # Ya era afecto (o mixto): la base absorbe el cambio; lo que no lleva IGV se queda donde está —y
+        # `adquisiciones_no_gravadas` dice dónde está, que es el campo declarado o la suma de los otros dos.
         fila.update(igv=nuevo,
-                    base_gravada=c.total - nuevo - c.exonerado - c.inafecto - c.exportacion - _cargos(c))
+                    base_gravada=c.total - nuevo - c.adquisiciones_no_gravadas - c.exportacion - _cargos(c))
     if fila["base_gravada"] < 0:
         raise IgvImposible("Ese IGV supera el total del comprobante")
     if nuevo != 0:
         _seguir_descuento(c, fila, IgvImposible)
-    return {k: Decimal(v).quantize(CENTIMO, rounding=ROUND_HALF_UP) for k, v in fila.items()}
+    # `valor_no_gravado` admite None —significa «no lo declaro, mira el desglose»— y por eso se queda fuera
+    # del redondeo: `Decimal(None)` reventaría.
+    return {k: v if v is None else Decimal(v).quantize(CENTIMO, rounding=ROUND_HALF_UP)
+            for k, v in fila.items()}
 
 
-PRINCIPALES = ("base_gravada", "inafecto", "exonerado", "exportacion")
+# El orden en que `aplicar_total` busca quién absorbe el total. `valor_no_gravado` va el segundo, detrás de
+# la base y delante del desglose, porque es el campo con el que el RCE informa lo no gravado de una compra
+# (su campo 21) y ahí no existen `exonerado` ni `inafecto`: sin él, corregir el total de una compra no
+# gravada la convertía en gravada sin IGV —el importe caía en `base_gravada`— y encima dejaba el campo viejo
+# sin tocar, o sea el total contado dos veces. Admite None, de ahí el `or CERO` de abajo.
+PRINCIPALES = ("base_gravada", "valor_no_gravado", "inafecto", "exonerado", "exportacion")
 
 
 def aplicar_total(c: Comprobante, total) -> dict[str, Decimal]:
@@ -179,9 +204,13 @@ def aplicar_total(c: Comprobante, total) -> dict[str, Decimal]:
         raise TotalImposible("El total debe ser un número") from None
     if nuevo < 0:
         raise TotalImposible("El total no puede ser negativo")
-    principal = next((k for k in PRINCIPALES if getattr(c, k) > 0), "base_gravada")
-    resto = (c.base_gravada + c.igv + c.inafecto + c.exonerado + c.exportacion + _cargos(c)
-             - getattr(c, principal))
+    principal = next((k for k in PRINCIPALES if (getattr(c, k) or CERO) > 0), "base_gravada")
+    # `adquisiciones_no_gravadas` y no `inafecto + exonerado`: dice dónde vive lo no gravado de ESTE
+    # comprobante —el campo declarado en una compra del RCE, la suma de los dos en todo lo demás— y es la
+    # misma propiedad con la que `validar` comprueba el total. Dos cuentas distintas para lo mismo es lo que
+    # tenía a 460 compras de un enero real avisando «no cuadra».
+    resto = (c.base_gravada + c.igv + c.adquisiciones_no_gravadas + c.exportacion + _cargos(c)
+             - (getattr(c, principal) or CERO))
     valor = nuevo - resto
     if valor < 0:
         raise TotalImposible("Ese total es menor que el IGV más los otros importes del comprobante")

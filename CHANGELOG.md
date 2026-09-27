@@ -4,6 +4,44 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [3.5.1] — 2026-09-27
+
+**Una compra cuyo importe va en la columna de adquisiciones no gravadas deja de avisar «no cuadra».** En el registro
+de compras real de un contribuyente, **460 de 1116 filas de un solo mes** —el 41 %— salían observadas con
+`TOTAL_NO_CUADRA` y un esperado de `0.00` teniendo total. El aviso se delataba solo: enumeraba «no gravado» entre los
+sumandos y era justo el que no sumaba.
+
+### Corregido
+
+- **El total se comprueba contra `adquisiciones_no_gravadas`, no contra `exonerado + inafecto`.** Los dos registros de
+  SUNAT no informan lo mismo: el **RVIE** separa lo exonerado (campo 19) de lo inafecto (campo 20) y el **RCE** tiene
+  **una sola columna**, «Valor de las adquisiciones no gravadas» (campo 21), que no dice cuál de los dos es — por eso
+  el lector la deja en `valor_no_gravado` en vez de inventar el desglose. `validar` era **el último sitio del motor con
+  esa cuenta escrita aparte**: el driver del SIRE, el registro de CONTASIS y la cabecera del asiento ya usaban la
+  propiedad del modelo. Para cualquier otro origen —ventas, XML, PDF, IA o dictado— es **equivalente exacto** y ningún
+  comprobante cambia de veredicto.
+
+  **Lo que salía por la puerta siempre estuvo bien**, y esto es solo el cartel: la línea de gasto del asiento usa
+  `total − IGV`, no `base_gravada`, y el TXT del SIRE ya escribía el campo 21 con la propiedad correcta. Comprobado
+  contra el archivo de SUNAT de ese mes: 50 comprobantes en los dos, **ninguna diferencia en importes**, y el TXT sale
+  byte a byte idéntico antes y después.
+
+- **El campo 21 en cero ya no se declara.** Llega como `"0"` en toda compra gravada, y la cadena `"0"` es verdadera:
+  el comprobante quedaba con `valor_no_gravado = 0.00` en vez de `None`. Declararlo en cero significa «lo no gravado
+  aquí es cero» y **gana** sobre el desglose, así que se habría llevado por delante lo que alguien escribiera luego.
+
+- **Corregir el IGV o el total de una compra no gravada ya no la descuadra.** `aplicar_igv` mandaba los importes a
+  `inafecto` sin mirar el campo declarado —dos verdades a la vez— y `aplicar_total` los hacía caer en `base_gravada`,
+  que convertía una compra no gravada en **gravada sin IGV** y contaba el importe dos veces. Ahora los dos llevan lo no
+  gravado al campo que usa el libro, y `valor_no_gravado` entra en `PRINCIPALES` para poder absorber el total.
+
+### Documentación
+
+- `estandar/LEEME.md` estrena la fila de `valor_no_gravado` en «Campos que conviene mirar dos veces», con lo que de
+  verdad importa: **nulo no es cero**, y el total se comprueba contra la decisión, no contra la suma de los tres.
+- `API-DE-REGISTRO.md` decía que el importe no gravado «va en `inafecto`». Es cierto **al dictar**, y era la mitad de
+  la historia: ahora explica los dos libros y cuándo aparece `valor_no_gravado`.
+
 ## [3.5.0] — 2026-09-26
 
 **Un comprobante que SUNAT da de baja deja de parecer uno al que le falta el importe.** El motor leía la propuesta del

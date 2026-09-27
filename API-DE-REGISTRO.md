@@ -696,6 +696,15 @@ parece a una compra**, aunque viaje en el libro de compras. Van dos, uno con ret
    inafecto. No es un detalle de estilo: el motor comprueba que el total cuadre con base + IGV + no gravado + otros,
    y un recibo con el importe en la casilla equivocada sale observado con `TOTAL_NO_CUADRA` antes de llegar a ningún
    asiento.
+
+   **Ojo con «no gravado», que son dos casillas y no una**, porque los dos registros de SUNAT no informan lo mismo:
+   el **RVIE** (ventas) separa lo exonerado (campo 19) de lo inafecto (campo 20), y el **RCE** (compras) tiene **una
+   sola columna**, «Valor de las adquisiciones no gravadas» (campo 21), que no dice cuál de los dos es. Por eso el
+   estándar lleva `valor_no_gravado`, opcional: **al dictar se deja fuera** —como en este ejemplo— y el motor usa
+   `exonerado + inafecto`; una compra importada del RCE lo trae y entonces manda él, porque inventar el desglose
+   sería escribir un dato que el archivo no tiene. La cuenta la hace el modelo una vez
+   (`Comprobante.adquisiciones_no_gravadas`) y la usan igual la validación, el TXT del SIRE, el registro de CONTASIS
+   y la cabecera del asiento.
 2. **`retencion` aparece solo cuando el recibo la muestra.** En el segundo la clave sencillamente no está: no hay
    ningún `"retencion": 0` ni un booleano que diga que no hubo. Ausencia es respuesta.
 3. **No va al SIRE, y lo sabe el destino, no el productor.** El registro de compras de SUNAT no admite recibos por

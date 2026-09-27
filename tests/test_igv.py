@@ -192,3 +192,49 @@ def test_sin_igv_ninguna_se_inventa_una_tasa():
     assert igv.tasa_calculada("0", D("100")) is None
     assert igv.tasa_legal("0", "100") is None
     assert _las_cuatro("0", "100")["concar"] == ""
+
+
+def test_editar_una_compra_no_gravada_no_pierde_el_importe_ni_lo_duplica():
+    """Corregir el IGV o el total de una compra del RCE tiene que dejar el comprobante cuadrado.
+
+    Lo no gravado de una compra vive en `valor_no_gravado` (campo 21 del RCE), no en `exonerado`/`inafecto`,
+    que en ese archivo no existen. Mover importes sin mirarlo dejaba dos verdades: el campo declarado por un
+    lado y el desglose por otro. Con la suma de `validar` arreglada (3.5.1) eso ya no pasa desapercibido, así
+    que los dos recálculos tienen que llevar el importe al campo que el libro usa.
+    """
+    from contaperu import validar
+    from contaperu.modelo import Libro
+    compras = Libro(ruc="20131312955", razon_social="X", periodo="202608", tipo="compra")
+
+    def cuadra(c, cambios):
+        for k, v in cambios.items():
+            setattr(c, k, v)
+        c.__post_init__()
+        validar.revisar([c], compras)
+        return [o.codigo for o in c.observaciones]
+
+    # Quitarle el IGV a una compra mixta: los 168 enteros pasan a lo NO GRAVADO, no a `inafecto`.
+    mixta = cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168")
+    r = igv.aplicar_igv(mixta, "0")
+    assert r["valor_no_gravado"] == D("168") and r["inafecto"] == 0
+    assert cuadra(cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168"), r) == []
+
+    # Ponerle IGV a una no gravada la vuelve afecta y SUELTA el campo (None, no cero: un cero declarado
+    # ganaría sobre el desglose que alguien escriba luego).
+    r = igv.aplicar_igv(cp(valor_no_gravado="150", total="150"), "22.88")
+    assert r["base_gravada"] == D("127.12") and r["valor_no_gravado"] is None
+    assert cuadra(cp(valor_no_gravado="150", total="150"), r) == []
+
+    # Corregir el TOTAL de una no gravada lo absorbe el campo 21, no la base: si cayera en `base_gravada`
+    # la compra pasaría a ser gravada sin IGV y el importe se contaría dos veces.
+    r = igv.aplicar_total(cp(valor_no_gravado="150", total="150"), "160")
+    assert r["valor_no_gravado"] == D("160") and "base_gravada" not in r
+    assert cuadra(cp(valor_no_gravado="150", total="150"), r) == []
+
+    # Y en una mixta el total lo absorbe la base, descontando lo no gravado: 178 - 18 - 50 = 110.
+    r = igv.aplicar_total(cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168"), "178")
+    assert r["base_gravada"] == D("110")
+    # El total cuadra, que es lo de esta tanda. El IGV queda fuera de tasa (18 no es el 18 % de 110) y
+    # `validar` lo dice: `aplicar_total` NO toca el IGV a propósito, porque se escribe del papel en su propia
+    # celda. Lo promete su docstring desde el 11-sep-2026 y aquí queda anclado.
+    assert cuadra(cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168"), r) == ["IGV_NO_CUADRA"]

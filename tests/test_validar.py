@@ -50,6 +50,36 @@ def test_total_no_cuadra_y_anticipo():
     assert codigos(cp(exonerado="50", total="168")) == []
 
 
+def test_la_compra_no_gravada_del_rce_cuadra():
+    """El campo 21 del RCE («Valor de las adquisiciones no gravadas») cuenta para el total.
+
+    Los dos libros no informan lo mismo: el RVIE separa exonerado (19) e inafecto (20) y el RCE tiene UNA
+    sola columna, así que el lector la deja en `valor_no_gravado`. Hasta la 3.5.1 `validar` sumaba solo
+    `exonerado + inafecto`, y una compra así daba esperado 0.00 teniendo total — en un enero real, 460 de
+    1116 filas avisando «no cuadra» por un dato correcto.
+    """
+    assert codigos(cp(base_gravada="0", igv="0", valor_no_gravado="150", total="150"), COMPRAS) == []
+    # El MISMO importe por el camino de ventas sigue como estaba: el arreglo no toca nada que no sea esto.
+    assert codigos(cp(base_gravada="0", igv="0", inafecto="150", total="150")) == []
+    # Y una compra mixta —parte gravada y parte no— también cuadra, que es el caso que el portal deja
+    # corregir a mano: 100 + 18 + 50 = 168.
+    assert codigos(cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168"), COMPRAS) == []
+    # Sin el campo declarado, el que manda sigue siendo el desglose: si falta el importe, sigue avisando.
+    assert codigos(cp(base_gravada="0", igv="0", total="150"), COMPRAS) == ["TOTAL_NO_CUADRA"]
+
+
+def test_el_campo_declarado_manda_sobre_el_desglose():
+    """`valor_no_gravado` gana a `exonerado + inafecto` cuando el comprobante lo declara.
+
+    Lo dice `modelo.adquisiciones_no_gravadas` y lo ancla aquí porque es la regla que hace que los dos
+    libros convivan. Si alguien la invirtiera, una compra con las dos cosas empezaría a contar el importe
+    dos veces.
+    """
+    c = cp(base_gravada="0", igv="0", valor_no_gravado="150", inafecto="99", total="150")
+    assert codigos(c, COMPRAS) == []
+    assert c.adquisiciones_no_gravadas == Decimal("150")
+
+
 def test_fechas():
     assert codigos(cp(fecha_emision="2026-02-01")) == ["FECHA_POSTERIOR"]
     # (el estado de anotación 8/9 era del PLE; murió con él el 30-ago-2026)

@@ -165,8 +165,15 @@ def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
                 break
         else:
             datos.update(destino_igv="DG", base_gravada="0", igv="0")
+        # El campo 21 solo se DECLARA cuando trae importe, y el `strip("0.-")` no es adorno: la columna
+        # llega como "0" o "0.00" en las compras gravadas, y la cadena "0" es verdadera. Declararlo en cero
+        # significa «lo no gravado de este comprobante es cero», y eso **gana** sobre `exonerado + inafecto`
+        # en `adquisiciones_no_gravadas`. Mientras el lector fuera el unico que escribia el campo daba igual
+        # —en el RCE esos dos siempre son 0—, pero desde que `validar` usa la propiedad (3.5.1) un cero
+        # declarado se llevaria por delante el desglose que alguien escriba luego en la pantalla. Es el mismo
+        # idioma con el que arriba se decide si una pareja base/IGV trae algo.
         no_gravado = _valor(campos, VALOR_NO_GRAVADO)
-        if no_gravado:
+        if no_gravado and no_gravado.strip("0.-"):
             datos["valor_no_gravado"] = no_gravado
     if libro.es_venta:
         # Base e IGV netos, descuentos aparte (estandar/LEEME.md). SUNAT escribe cada campo con su signo y el

@@ -165,6 +165,39 @@ def test_compras_reparte_las_seis_columnas_segun_el_destino():
     assert c.numero == "123" and c.total == Decimal("119.18")
 
 
+def test_compras_lee_el_valor_de_las_adquisiciones_no_gravadas():
+    """El campo 21 del RCE, que es el ÚNICO sitio donde una compra informa lo no gravado.
+
+    En el RVIE hay dos columnas (exonerado e inafecto); en el RCE hay una sola y el archivo no dice cuál de
+    los dos es, así que va a `valor_no_gravado` y nadie inventa el desglose. En el enero real de un
+    contribuyente esta columna la usaban **460 de 1116 compras**, el 41 % del mes.
+    """
+    compras = Libro(ruc="20601111111", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
+    # Las seis parejas base/IGV en cero y el importe solo en la 21 (índice 20).
+    fila = ("20601111111|MI EMPRESA SAC|202608||05/08/2026||01|E001||151||6|20608888889|PROVEEDOR SAC|"
+            "0|0|0|0|0|0|150.00|0|0|0|150.00|PEN||||||||||")
+    c = sire_txt.parsear(texto(fila, con_cabecera=False), compras)[0]
+    assert c.valor_no_gravado == Decimal("150.00")
+    assert c.adquisiciones_no_gravadas == Decimal("150.00")
+    # Y el desglose se queda vacío a propósito: el archivo no dice si es exonerado o inafecto.
+    assert c.exonerado == 0 and c.inafecto == 0 and c.base_gravada == 0 and c.igv == 0
+
+
+def test_el_campo_21_en_cero_no_declara_nada():
+    """Una compra gravada trae la columna 21 como «0», y eso NO es declarar que lo no gravado es cero.
+
+    La diferencia importa desde la 3.5.1: un cero declarado gana sobre `exonerado + inafecto` en
+    `adquisiciones_no_gravadas`, así que se llevaría por delante el desglose que alguien escriba luego en la
+    pantalla. `None` significa «no lo declaro, mira el desglose».
+    """
+    compras = Libro(ruc="20601111111", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
+    fila = ("20601111111|MI EMPRESA SAC|202608||05/08/2026||01|F001||123||6|20608888889|PROVEEDOR SAC|"
+            "100.00|18.00|0|0|0|0|0.00|0|0|0|118.00|PEN||||||||||")
+    c = sire_txt.parsear(texto(fila, con_cabecera=False), compras)[0]
+    assert c.valor_no_gravado is None
+    assert c.adquisiciones_no_gravadas == Decimal("0")
+
+
 def test_el_txt_del_sire_deja_de_ser_un_archivo_auxiliar():
     """Antes caía con los .xsl y .css: el proceso decía 'no había ningún comprobante'."""
     lote = archivos.expandir("propuesta.txt", texto(FACTURA))

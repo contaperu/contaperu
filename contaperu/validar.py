@@ -152,8 +152,23 @@ def validar(c: Comprobante, libro: Libro) -> None:
                            f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} "
                            f"(esperado {esperado:.2f}){ya_declarado}")
     # Sin los descuentos: la base y el IGV ya son netos (estandar/LEEME.md, open-accounting 0.2).
+    #
+    # Lo no gravado entra por `adquisiciones_no_gravadas` y NO como `exonerado + inafecto`, que es lo que
+    # ponia aqui hasta la 3.5.1. Los dos libros no informan lo mismo: el RVIE separa exonerado (campo 19) e
+    # inafecto (campo 20), pero el RCE tiene UNA sola columna, «Valor de las adquisiciones no gravadas»
+    # (campo 21), y el lector la deja en `valor_no_gravado` porque el archivo no dice cual de los dos es.
+    # Sumando solo los otros dos, una compra no gravada daba esperado 0.00 teniendo total: en el enero real
+    # de un contribuyente eran **460 de 1116 filas**, el 41 % del mes, todas avisando «no cuadra» por un
+    # dato correcto — y el propio texto del aviso ya enumeraba «no gravado» entre los sumandos.
+    #
+    # La propiedad del modelo decide cual de los dos toca (`valor_no_gravado` si el comprobante lo declara,
+    # `exonerado + inafecto` si no), asi que en ventas y en cualquier otro origen esto es **equivalente
+    # exacto** y ningun comprobante cambia de veredicto. Y los tres campos NO se suman a la vez a proposito:
+    # en el RCE son la misma cosa informada una vez, y sumarlos contaria el importe dos veces en cuanto
+    # alguien rellene el desglose a mano. Era ademas el ULTIMO sitio del motor con la cuenta escrita aparte:
+    # el driver del SIRE, CONTASIS y la cabecera del asiento ya usaban la propiedad.
     esperado_total = (
-        c.base_gravada + c.igv + c.exonerado + c.inafecto + c.exportacion + c.isc
+        c.base_gravada + c.igv + c.adquisiciones_no_gravadas + c.exportacion + c.isc
         + c.base_ivap + c.ivap + c.icbper + c.otros
     )
     if not _cuadra(c.total, esperado_total):
