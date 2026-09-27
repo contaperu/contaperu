@@ -257,6 +257,8 @@ permite que el resto pueda degradar.
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
 | `condicion_pago` | `contado` o `credito`: lo que **declara** el documento. En la factura electrónica viene en `PaymentTerms FormaPago`, y una factura con cuotas es a crédito. Vacío no significa contado: significa que el documento no lo dice. |
 | `medio_pago` | **Con qué** se pagó, que es otra pregunta que `condicion_pago`: un código de tres dígitos del catálogo de medios de pago de SUNAT (`001` depósito en cuenta, `003` transferencia, `005` tarjeta de débito… `999` otros). Vacío = el documento no lo dice, y entonces quien exporta usa el que tenga configurado el contribuyente. Un código que el catálogo no tenga **no invalida el documento**: se avisa y se respeta, porque SUNAT puede añadir uno. |
+| `tipo_nota` | **Por qué** se emitió una nota: dos dígitos del Catálogo 09 de SUNAT si es de crédito (`07`, `87`) y del 10 si es de débito (`08`, `88`). **Son dos tablas y el mismo código significa cosas opuestas**: el `01` es «anulación de la operación» en una de crédito e «intereses por mora» en una de débito. Y el `01` del 09 dice que la nota anula **el comprobante que referencia**, no que la nota esté anulada. Vacío = el documento no lo dice, y eso no es un defecto: el TXT del SIRE no lleva esta columna. |
+| `estado_sunat` | Lo que dice **SUNAT** del comprobante en su registro («Est. Comp» del SIRE), y por tanto lo único del comprobante que no lo dice el papel. **Se transporta tal cual y no condiciona ninguna regla**: la norma lo llama referencial y **no publica su tabla de valores**, así que quien lo reciba lo enseña y no lo traduce. No es el `estado` de la revisión ni el de la detracción — hay tres. Lo que decide que un comprobante no lleve asiento es su importe en cero, que sí se puede comprobar. |
 | `id_externo` | El id con el que la aplicación que produce el documento conoce ese comprobante (su fila). Es la llave de su imputación: sin él, al documento no le llega ninguna. |
 | `tipo_cambio` | El que **publica SUNAT para la fecha de emisión**, con 3 decimales. No el del día del pago. |
 | `serie` | Vacía en los comprobantes que no la llevan (recibo de servicios públicos, tipo `14`). Que esté vacía no es un error. |
@@ -292,6 +294,12 @@ tipos de documento.
 `0.1` es la primera versión publicada y se deriva de un modelo que lleva un año generando el Excel de CONCAR
 y el TXT del SIRE de empresas reales — no de un diseño en papel. Lo que falte, faltará porque nadie lo ha
 necesitado todavía; se añade con un caso real detrás, no por si acaso.
+
+**`1.0` gana dos campos opcionales el 26-sep-2026 y no sube** (enmiendas 0014 y 0015): `tipo_nota`, por qué se
+emitió una nota, y `estado_sunat`, lo que SUNAT dice del comprobante en su propio registro. Los dos vienen de
+columnas que la propuesta del SIRE ya traía y que se descartaban al leer. Nada cambia de significado y un
+documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-1.0` avanza y la versión se
+queda en `1.0`**.
 
 **`0.2` (11-sep-2026) cambia el significado de dos campos**, y por eso sube: `base_gravada` e `igv` pasan a ser
 siempre netos y `dscto_base`/`dscto_igv` dejan de restarse del total. En `0.1` el descuento se restaba de una
@@ -357,7 +365,7 @@ que el motor transporta sin interpretar. **Cada uno tiene su enmienda** en
 |---|---|---|
 | línea | `id_en_destino` | El id con el que el sistema de destino conoce ese asiento (Merge `remote_id`, Rutter `platform_id`). Se llamaba `id_externo` hasta el 18-sep-2026, y se renombró antes de existir para que no se confunda con `linea.documento.id_externo`, que es el id del sistema que **produjo** el comprobante ([enmienda 0001](enmiendas/0001-id-en-destino.md)) |
 | comprobante, línea | `dimensiones` | `[{tipo, codigo}]`: área, proyecto, obra… más allá del `centro_costo`, que sigue siendo la primera (Xero `Tracking[]`) |
-| línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: `estado` ya existe en el comprobante (`ok \| observada \| duplicada`) y en la detracción (`PROVISIONADO \| PAGADO`) con otro sentido |
+| línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: hay **tres** `estado` más y ninguno significa esto — en el comprobante (`ok \| observada \| duplicada`, el veredicto de la validación), en la detracción (`PROVISIONADO \| PAGADO`) y, desde el 26-sep-2026, `estado_sunat` en el comprobante, que es lo que dice SUNAT en su propio registro y **se transporta sin traducir**. El día que SUNAT publique la tabla de valores de ese campo, la traducción viviría aquí o en un catálogo propio, **nunca dentro de `estado_sunat`** ([enmienda 0015](enmiendas/0015-estado-del-comprobante-en-sunat.md)) |
 
 Lo que sí entró de esa propuesta: `_exportacion` (arriba), `EXIGE` en el contrato de driver y `pedir_a` en
 `diagnosticar` (`ARQUITECTURA.md`).

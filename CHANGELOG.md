@@ -4,6 +4,91 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [3.5.0] — 2026-09-26
+
+**Un comprobante que SUNAT da de baja deja de parecer uno al que le falta el importe.** El motor leía la propuesta del
+SIRE y descartaba dos de sus columnas —por qué se emitió una nota y qué dice SUNAT del comprobante—, así que no había
+forma de distinguir un comprobante dado de baja de uno incompleto. Con un registro de ventas real de 52 filas ya
+declarado: cinco venían con **todos** los importes en cero, tres facturas y dos notas de crédito, y eran exactamente
+los cinco marcados con «Est. Comp» = `2`, con el tipo de cambio también en cero y sus correlativos en medio de la
+serie. El motor les pedía cuenta contable —que a un comprobante dado de baja no se le pone— y, con cuenta puesta, los
+escribía al Excel como dos líneas de asiento a `0.00` con su número de vóucher gastado.
+
+### Añadido
+
+- **`tipo_nota`** en el comprobante (enmienda 0014): por qué se emitió una nota de crédito o de débito. **El dato ya
+  entraba y se tiraba**: el lector de XML lo leía de `cac:DiscrepancyResponse/cbc:ResponseCode` y lo dejaba en
+  `datos_originales`, y la columna del SIRE se descartaba —estaba hasta en el fixture de pruebas del repositorio—.
+  Ahora entra como hecho del documento, se puede dictar y llega a la cabecera del asiento.
+
+- **`estado_sunat`** en el comprobante (enmienda 0015): lo que SUNAT dice del comprobante en su propio registro. Es
+  campo del **sistema** y no del documento, porque no lo dice el papel —ninguna factura impresa lleva un «Est. Comp»—,
+  y el efecto es el que se quiere de una API de registro: **nadie puede dictarle al motor que SUNAT dice algo de un
+  comprobante**. **Se transporta verbatim y no condiciona ninguna regla**: la norma lo llama referencial y **no publica
+  su tabla de valores**, así que traducirlo sería inventarle el significado. Hay un test cuyo único trabajo es ponerse
+  rojo si alguien lo intenta.
+
+- **`motivos_nota_credito` y `motivos_nota_debito`**, los Catálogos 09 y 10 del Anexo N.° 8, con su fuente, en
+  `catalogos_sunat` (API y recurso MCP). **Son dos tablas porque los códigos colisionan**: el `01` es «anulación de la
+  operación» en el de crédito e «intereses por mora» en el de débito. `motivos_de_nota(tipo_cp)` es el único sitio
+  donde se decide cuál le toca a un comprobante, y se apoya en las listas completas: mirar solo `("07", "08")` dejaría
+  al 87 y al 88 sin catálogo **en silencio**, que es la forma exacta del fallo que cuenta la cabecera de `resumen.py`.
+
+- **`asentar_sin_efecto_contable`** en la configuración general, apagado de fábrica: lo que no mueve dinero —total, IGV
+  y retención en cero, y sin detracción— no pide cuenta ni centro, no gasta número de vóucher y no produce líneas de
+  asiento. **Y sigue saliendo en el registro que se declara a SUNAT**, porque el asiento es una cosa y el registro es
+  otra: el correlativo necesita su fila, que es justo por lo que SUNAT los declara en cero en vez de quitarlos. Quien
+  integre un ERP y quiera esas líneas las recupera con esa clave.
+
+  **Decide por el importe y no por el estado**, y eso es mejor y no solo más prudente: funciona igual si SUNAT cambia
+  el código, y atrapa además el comprobante en cero que llegue de un XML, de una foto o dictado por un ERP, que no
+  trae estado ninguno.
+
+- **`totales.sin_efecto_contable`** en `diagnosticar`: su propia casilla, no dentro de `fuera_del_destino`, que
+  significa otra cosa —«este destino no lleva ese tipo de comprobante»—.
+
+- Tres avisos: **`TIPO_NOTA_DESCONOCIDO`** (el código no está en el catálogo que le toca), **`TIPO_NOTA_NO_APLICA`**
+  (un comprobante que no es nota trae motivo) y **`TOTAL_CERO_EN_LA_PROPUESTA`**. Los dos primeros con el criterio de
+  `MEDIO_PAGO_DESCONOCIDO`: avisan y **el valor se respeta**. Lo que **no** existe es un `TIPO_NOTA_FALTA`: una nota
+  sin motivo no es un defecto, porque el campo no viaja en el archivo y el propio TXT que este motor genera lo manda
+  vacío.
+
+### Cambiado
+
+- **`IGV_NO_CUADRA` y `TOTAL_NO_CUADRA` dejan de bloquear cuando el comprobante viene de la propuesta del SIRE.** Es
+  lo primero que tiene que leer quien integre. El caso: la propuesta traía una nota de crédito con la base sin declarar
+  —base 0, IGV 4 546.31, total 29 803.61— y con ese único comprobante el mes entero no salía por **ningún** destino,
+  porque `salida.generar` mira los errores antes de saber a dónde vas. Y el TXT que se negaba a escribir era idéntico
+  al que SUNAT ya tenía declarado. El motor no es el auditor de lo que la Administración aceptó: corregir la copia no
+  cambia el registro, y el arreglo de verdad es que el emisor emita otra nota. **En un XML, un PDF o un dictado sigue
+  siendo error**, porque ahí sí se corrige antes de declarar. Los códigos no cambian de nombre; cambia el nivel, y el
+  texto dice por qué no bloquea.
+
+- **`TOTAL_CERO` deja de callarse en las notas.** Llevaba un `and not c.es_nota` desde el commit inicial del núcleo,
+  sin test que lo defendiera ni motivo escrito, y por él dos de los cinco comprobantes en cero del mes real salían
+  `estado="ok"` sin una sola palabra.
+
+- **El comparador reconoce el tipo de cambio `0.000`.** SUNAT escribe el TC de un comprobante en soles como `1.000` si
+  es normal y `0.000` si lo da de baja; el archivo de reemplazo lo manda vacío. Los tres dicen lo mismo y `_norm` solo
+  conocía dos, así que un mes con comprobantes dados de baja cantaba una diferencia por cada uno **en un campo que
+  rellena la propia Administración**. Con esto, el TXT que el motor genera del mes real sale **sin una sola
+  diferencia** contra lo declarado, en las 52 filas: antes había cinco y todas eran esta.
+
+- `catalogos.NOTAS` pasa a **derivarse** de `NOTAS_CREDITO` y `NOTAS_DEBITO`, que son nuevos: dentro de `catalogos` ya
+  no se pueden desacordar, y que no se separen de las de `modelo` lo vigila un test, porque los dos módulos son hojas
+  y no se importan entre sí.
+
+### Corregido
+
+- El Excel de CONCAR reventaba con un `ValueError` a medio archivo cuando un comprobante no traía correlativo:
+  `_numero` hacía `int(correlativo[2:])`. Sin número no hay desborde que calcular, y desde esta versión un comprobante
+  sin correlativo es un caso legítimo y no un error.
+
+### El estándar
+
+Sigue en **`open-accounting 1.0`** —dos campos opcionales nuevos no suben la versión— y **el tag
+`open-accounting-1.0` avanza**. Seis casos de conformidad nuevos; ninguno de los 27 anteriores cambia de veredicto.
+
 ## [3.4.0] — 2026-09-26
 
 **Sumar un libro deja de ser trabajo de cada aplicación.** El motor sabía armar el asiento de un mes y decir qué le

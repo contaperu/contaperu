@@ -681,6 +681,132 @@
     ]
    },
    "valid": false
+  },
+  {
+   "description": "Por qué se emitió la nota: un código del Catálogo 09 de SUNAT",
+   "valid": true,
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "07",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "tipo_nota": "09"
+     }
+    ]
+   }
+  },
+  {
+   "description": "El motivo de la nota es de dos caracteres: tres no caben",
+   "valid": false,
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "07",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "tipo_nota": "123"
+     }
+    ]
+   }
+  },
+  {
+   "description": "Un motivo que el catálogo todavía no tiene: vale, porque SUNAT amplía estas tablas y el receptor avisa en vez de rechazar",
+   "valid": true,
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "07",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "tipo_nota": "99"
+     }
+    ]
+   }
+  },
+  {
+   "description": "Lo que SUNAT dice del comprobante en su registro, tal como viene",
+   "valid": true,
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "07",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "estado_sunat": "2"
+     }
+    ]
+   }
+  },
+  {
+   "description": "El estado de SUNAT admite letras: el anexo del RVIE lo declara alfanumérico, así que el estándar no le impone forma de número",
+   "valid": true,
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "07",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "estado_sunat": "A1"
+     }
+    ]
+   }
+  },
+  {
+   "description": "El estado de SUNAT es de dos caracteres como máximo",
+   "valid": false,
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "07",
+      "fecha_emision": "2026-01-15",
+      "total": "118.00",
+      "estado_sunat": "123"
+     }
+    ]
+   }
   }
  ]
 }

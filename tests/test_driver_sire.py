@@ -137,6 +137,23 @@ def test_importes_siempre_positivos_en_el_modelo():
     assert c.base_gravada == Decimal("100.00") and c.total == Decimal("118.00")
 
 
+@pytest.mark.parametrize("json_golden", ["ventas_202512.json", "compras_202601.json"])
+def test_el_motivo_de_la_nota_y_el_estado_de_sunat_no_entran_en_el_txt(json_golden):
+    """**Convierte un comentario en una promesa ejecutable.** Los dos campos son de los que «completa la
+    Administración», y la norma dice lo mismo de ellos en los dos registros: en ventas, que el campo «no es considerado
+    para la construcción del archivo de texto»; en compras, que los campos 38 al 41 «deberán mostrarse vacíos». Vacíos
+    quiere decir vacíos.
+
+    Sin este test, dentro de un año alguien «completa» las columnas que faltaban y se lleva el error 453 de estructura
+    en producción, que es exactamente lo que ya pasó en ventas cuando se mandaban los campos 34-40."""
+    libro, comprobantes = cargar_golden(json_golden)
+    sin_ellos = g.generar(libro, comprobantes, "sire").texto
+    for c in comprobantes:
+        c.tipo_nota, c.estado_sunat = "09", "2"
+    con_ellos = g.generar(libro, comprobantes, "sire").texto
+    assert con_ellos == sin_ellos           # byte a byte: el archivo no se enteró
+
+
 def test_los_vacios_del_final_de_COMPRAS_son_una_opcion_no_codigo():
     """Si el RCE devuelve el 453 —como pasó en ventas—, se apaga con una opción.
 
