@@ -67,6 +67,13 @@ def test_nota_de_credito():
     assert (c.tipo_cp, c.serie, c.numero) == ("07", "FC01", "7")
     assert (c.ref_tipo_cp, c.ref_serie, c.ref_numero, c.ref_fecha) == ("01", "F001", "123", None)
     assert c.datos_originales["motivo_nota"]["codigo"] == "01"
+    # Desde la 3.5.0 ese código tiene campo propio: el `cbc:ResponseCode` del XML es el MISMO catálogo que cita el
+    # SIRE en su columna «Tipo de Nota», así que el motivo entra porque lo dice el documento y no porque lo diga el
+    # registro. La bolsa cruda lo conserva entero —con su referencia y su descripción, que no tienen campo—.
+    assert c.tipo_nota == "01"
+    assert set(c.datos_originales["motivo_nota"]) == {"referencia", "codigo", "descripcion"}
+    # Y el «01» del Catálogo 09 dice que esta nota anula la factura F001-123, NO que la nota esté anulada.
+    assert c.estado_sunat == ""
     assert (c.base_gravada, c.igv, c.total) == (Decimal("200.00"), Decimal("36.00"), Decimal("236.00"))
     validar.revisar([c], VENTAS)
     assert [o.codigo for o in c.observaciones] == ["NOTA_SIN_FECHA_REF"]   # el XML no trae la fecha del doc modificado

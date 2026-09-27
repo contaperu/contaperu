@@ -285,6 +285,11 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         # de las facturas y NO entra en ningún asiento (se ignora). La retención de 4ta
         # solo existe en el recibo por honorarios, y ahí sí parte el asiento.
         retencion=monto(retencion.get("monto")) if (retencion and tipo_cp == "02") else monto(0),
+        # Por qué se emitió la nota. Lo lee este mismo lector desde la 1.x en `cac:DiscrepancyResponse/cbc:ResponseCode`
+        # —es el mismo catálogo que cita el SIRE, el 09 o el 10 según el tipo— y hasta la 3.5.0 se quedaba solo en
+        # `datos_originales["motivo_nota"]`, donde nadie lo miraba. Ahí sigue con su `referencia` y su `descripcion`,
+        # que no tienen campo propio: quitarlo perdería datos sin avisar.
+        tipo_nota=(motivo or {}).get("codigo", ""),
         ref_tipo_cp=ref_tipo,
         ref_serie=ref_serie,
         ref_numero=ref_numero,

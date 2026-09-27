@@ -77,6 +77,63 @@ def test_la_nota_de_credito_conserva_los_campos_de_descuento():
     assert str(c.ref_fecha) == "2026-07-31"
 
 
+def test_el_motivo_de_la_nota_y_el_estado_entran_desde_la_exportacion():
+    """Las dos columnas que completa la Administración y que el lector ignoraba hasta la 3.5.0. Estaban en este
+    mismo fixture desde que se escribió —el `09` y el `1` del final de `NOTA`— y se descartaban."""
+    nota = sire_txt.parsear(texto(NOTA), VENTAS)[0]
+    assert nota.tipo_nota == "09"        # Catálogo 09: disminución en el valor
+    assert nota.estado_sunat == "1"
+    factura = sire_txt.parsear(texto(FACTURA), VENTAS)[0]
+    assert factura.tipo_nota == ""       # no es una nota: no tiene motivo
+    assert factura.estado_sunat == "1"
+
+
+def test_el_estado_de_sunat_se_transporta_tal_cual():
+    """**El motor no traduce ese campo, y este test es lo que lo impide.** La norma no publica su tabla de valores y
+    lo declara «alfanumérico» en ventas, así que cualquier normalización —un `upper()`, un `zfill`, un mapa a la
+    palabra «anulado»— sería decidir algo sin fuente. Si alguien la añade, esto se pone rojo."""
+    campos = NOTA.split("|")
+    for valor in ("2", "a1", "A1", "9"):
+        fila = "|".join(campos[:34] + [valor] + campos[35:])
+        assert sire_txt.parsear(texto(fila), VENTAS)[0].estado_sunat == valor
+
+
+def test_el_motivo_de_la_nota_de_un_digito_se_completa_a_dos():
+    """Los dos catálogos son de dos dígitos, así que quien escriba «9» quiere decir «09». Lo hace el modelo, y solo
+    si es dígito: la columna del RCE se declara alfanumérica y no se le impone un formato que la norma no pide."""
+    campos = NOTA.split("|")
+    assert sire_txt.parsear(texto("|".join(campos[:33] + ["9"] + campos[34:])), VENTAS)[0].tipo_nota == "09"
+
+
+def test_el_formato_de_reemplazo_no_trae_las_dos_ultimas_y_entra_igual():
+    """El archivo que genera este mismo motor son 33 campos y palote, sin las columnas de la Administración. Que
+    entre sin ellas es lo que hace segura la ida y vuelta: sale, se sube a SUNAT y puede volver."""
+    fila = "|".join(NOTA.split("|")[:33]) + "|"
+    c = sire_txt.parsear(texto(fila, con_cabecera=False), VENTAS)[0]
+    assert (c.tipo_nota, c.estado_sunat) == ("", "")
+    assert c.total == Decimal("11782.72")     # y el resto del comprobante entra completo
+
+
+def test_compras_trae_el_motivo_y_el_estado_en_sus_propias_columnas():
+    """**Sus números NO son los de ventas**, y por eso cada registro tiene su mapa: el Anexo 8 de la RS 040-2022
+    (§8.4) pone el motivo en el campo 39 y el estado en el 40, con la marca de detracción en el 38 —que no se lee— y
+    las inconsistencias en el 41. En ventas son el 34 y el 35."""
+    compras = Libro(ruc="20601111111", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
+    campos = [""] * 41
+    campos[0:4] = ["20601111111", "MI EMPRESA SAC", "202608", ""]
+    campos[4], campos[6], campos[7], campos[9] = "05/08/2026", "07", "FC01", "9"
+    campos[11], campos[12], campos[13] = "6", "20608888889", "PROVEEDOR SAC"
+    campos[14], campos[15], campos[24] = "100.00", "18.00", "118.00"   # DG: base, IGV y total
+    campos[25] = "PEN"
+    campos[27], campos[28], campos[29], campos[31] = "31/07/2026", "01", "F001", "77"
+    campos[38], campos[39], campos[40] = "04", "2", "algo"            # motivo, estado, inconsistencias
+    c = sire_txt.parsear(texto("|".join(campos), con_cabecera=False), compras)[0]
+    assert c.tipo_nota == "04"            # Catálogo 09: descuento global
+    assert c.estado_sunat == "2"
+    # Y no se ha leído la columna de al lado: la marca de detracción (38) y las inconsistencias (41) se ignoran.
+    assert c.total == Decimal("118.00") and c.ref_numero == "77"
+
+
 def test_el_tipo_de_cambio_solo_se_guarda_si_no_es_soles():
     dolares = FACTURA.replace("|PEN|1.000|", "|USD|3.755|", 1)
     assert sire_txt.parsear(texto(dolares), VENTAS)[0].tipo_cambio == Decimal("3.755")

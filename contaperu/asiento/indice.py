@@ -81,6 +81,9 @@ class Cabecera:
     cod_dep_aduanera: str = ""
     clasif_bienes: str = ""
     id_contrato: str = ""
+    # Solo notas: por qué se emitió (el Catálogo 09 si es de crédito y el 10 si es de débito). Está aquí y no en el
+    # bloque `referencia` de la línea porque no describe el comprobante MODIFICADO, sino la nota misma.
+    tipo_nota: str = ""
 
     def a_dict(self) -> dict[str, str]:
         return asdict(self)

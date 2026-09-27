@@ -51,15 +51,20 @@ def test_lo_obligatorio_lo_dice_siempre_el_documento():
 
 
 def test_lo_que_decide_el_sistema_no_se_acepta_de_quien_dicta():
-    """Los cinco del sistema y los tres de la revisión, uno por uno y por su nombre. Escritos aquí a
+    """Los seis del sistema y los tres de la revisión, uno por uno y por su nombre. Escritos aquí a
     propósito: son la lista que una puerta de entrada tiene que rechazar, y verla completa es el sentido
-    de que este test exista."""
-    assert set(modelo.CAMPOS_DEL_SISTEMA) == {"origen", "confianza", "archivo_nombre", "id_externo",
+    de que este test exista.
+
+    `estado_sunat` está entre ellos y no entre los del documento porque **no lo dice el papel**: una factura impresa
+    no lleva «Est. Comp»; solo lo lleva el registro de la Administración. Que no se pueda dictar es el punto: nadie
+    debería poder declararle al motor que SUNAT dice algo de un comprobante."""
+    assert set(modelo.CAMPOS_DEL_SISTEMA) == {"origen", "confianza", "archivo_nombre", "estado_sunat", "id_externo",
                                               "datos_originales"}
     assert set(modelo.CAMPOS_DE_LA_REVISION) == {"estado", "excluida", "observaciones"}
     # Y los que SÍ se dictan y más se olvidan, porque son los que costaron el caso: los descuentos, el
-    # impuesto a la bolsa, el valor no gravado y el destino del IGV.
-    for campo in ("dscto_base", "dscto_igv", "icbper", "valor_no_gravado", "destino_igv", "medio_pago"):
+    # impuesto a la bolsa, el valor no gravado, el destino del IGV y el motivo de la nota, que el XML dice en su
+    # `cbc:ResponseCode` y que por tanto se puede dictar igual que el resto del documento.
+    for campo in ("dscto_base", "dscto_igv", "icbper", "valor_no_gravado", "destino_igv", "medio_pago", "tipo_nota"):
         assert campo in modelo.CAMPOS_DEL_DOCUMENTO, campo
 
 

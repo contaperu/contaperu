@@ -82,7 +82,8 @@ def cabecera_de(c: Comprobante) -> Cabecera:
                     total=str(c.total), retencion=str(c.retencion),
                     destino_igv=c.destino_igv or "", valor_no_gravado=str(c.adquisiciones_no_gravadas),
                     anio_dua=c.anio_dua or "", cod_dep_aduanera=c.cod_dep_aduanera or "",
-                    clasif_bienes=c.clasif_bienes or "", id_contrato=c.id_contrato or "")
+                    clasif_bienes=c.clasif_bienes or "", id_contrato=c.id_contrato or "",
+                    tipo_nota=c.tipo_nota or "")
 
 
 def _numero(numero: str, opciones: Any) -> str:

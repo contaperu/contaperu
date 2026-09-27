@@ -8,7 +8,10 @@ entero, sin un solo XML, hasta el Excel para el sistema contable.
 Entran los dos formatos, porque comparten el orden de los campos informados:
 
 - **La exportación**: fila de cabecera, 40 columnas en ventas, el CAR lleno y las
-  que completa la Administración al final (tipo de nota, estado, FOB, gratuitas…).
+  que completa la Administración al final. De esas se leen dos, el motivo de la nota
+  y el estado del comprobante, y se ignoran las demás (FOB, gratuitas, tipo de
+  operación, DAM, CLU): son referenciales y nunca vuelven a SUNAT, así que del estado
+  y del motivo lo que se hace es transportarlos, no decidir con ellos.
 - **El de "reemplazar propuesta"**: 33 campos en ventas (37 en compras) y palote
   final, sin cabecera. Es el que genera este mismo portal, así que un archivo puede
   salir y volver a entrar.
@@ -42,6 +45,17 @@ class SireInvalido(ErrorContaperu, ValueError):
 # Orden de los campos informados. El mismo en la exportación y en el reemplazo: se
 # comprobó columna a columna contra la exportación real de agosto (26-ago-2026).
 # Ventas = Anexo 3 (RS 112-2021); compras = Anexo 11 (RS 040-2022).
+#
+# Los índices son 0-based, o sea el número de campo del anexo menos uno. **Los dos últimos de cada mapa son los que
+# completa la Administración**, y se leen desde la 3.5.0: el motivo de la nota y lo que SUNAT dice del comprobante.
+# Sus números NO son los mismos en los dos registros, y de ahí que cada mapa los tenga por separado — ventas los pone
+# en los campos 34 y 35 (Anexo N.° 2 de la RS 112-2021) y compras en el 39 y el 40 (Anexo 8 de la RS 040-2022, §8.4,
+# donde el 38 es la marca de detracción y el 41 las inconsistencias). Los anexos ni siquiera les dan el mismo formato:
+# el estado es «longitud 2, alfanumérico» en ventas y «longitud 1, numérico» en compras, así que ninguno de los dos
+# campos se normaliza al leerlo.
+#
+# El formato de «reemplazar propuesta» no las trae —33 campos y palote en ventas, 37 en compras—: ahí quedan vacías
+# y el comprobante entra igual, que es lo que hace segura la ida y vuelta.
 POS_VENTA = {
     "fecha_emision": 4, "fecha_vencimiento": 5, "tipo_cp": 6, "serie": 7, "numero": 8, "numero_final": 9,
     "contraparte_tipo_doc": 10, "contraparte_doc": 11, "contraparte_nombre": 12,
@@ -49,6 +63,7 @@ POS_VENTA = {
     "exonerado": 18, "inafecto": 19, "isc": 20, "base_ivap": 21, "ivap": 22, "icbper": 23,
     "otros": 24, "total": 25, "moneda": 26, "tipo_cambio": 27,
     "ref_fecha": 28, "ref_tipo_cp": 29, "ref_serie": 30, "ref_numero": 31, "id_contrato": 32,
+    "tipo_nota": 33, "estado_sunat": 34,
 }
 POS_COMPRA = {
     "fecha_emision": 4, "fecha_vencimiento": 5, "tipo_cp": 6, "serie": 7, "anio_dua": 8,
@@ -58,6 +73,8 @@ POS_COMPRA = {
     "isc": 21, "icbper": 22, "otros": 23, "total": 24, "moneda": 25, "tipo_cambio": 26,
     "ref_fecha": 27, "ref_tipo_cp": 28, "ref_serie": 29, "cod_dep_aduanera": 30, "ref_numero": 31,
     "clasif_bienes": 32, "id_contrato": 33,
+    # 34-37: % de participación, IMB y el CAR del CP a modificar; 38: la marca de detracción, que no se lee.
+    "tipo_nota": 38, "estado_sunat": 39,
 }
 IGV_COMPRAS = {"DG": (14, 15), "DGNG": (16, 17), "DNG": (18, 19)}
 VALOR_NO_GRAVADO = 20

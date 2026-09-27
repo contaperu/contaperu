@@ -59,11 +59,13 @@ CAMPOS_DEL_DOCUMENTO = (
     "moneda", "tipo_cambio", "base_gravada", "igv", "dscto_base", "dscto_igv", "exonerado", "inafecto",
     "exportacion", "isc", "base_ivap", "ivap", "icbper", "otros", "total", "retencion", "destino_igv",
     "valor_no_gravado", "anio_dua", "cod_dep_aduanera", "clasif_bienes",
-    "ref_fecha", "ref_tipo_cp", "ref_serie", "ref_numero", "detraccion", "id_contrato", "concepto",
+    "tipo_nota", "ref_fecha", "ref_tipo_cp", "ref_serie", "ref_numero", "detraccion", "id_contrato", "concepto",
 )
 # Lo que pone el sistema que lo produce: de dónde salió el dato y cómo se le llama desde fuera. Nada de
-# esto lo dice el papel, así que una puerta de entrada no lo acepta de quien dicta.
-CAMPOS_DEL_SISTEMA = ("origen", "confianza", "archivo_nombre", "id_externo", "datos_originales")
+# esto lo dice el papel, así que una puerta de entrada no lo acepta de quien dicta. Y lo que diga del comprobante la
+# fuente de la que salió, cuando esa fuente es la Administración: `estado_sunat` no está en ninguna factura impresa,
+# solo en el registro de SUNAT, y que no se pueda dictar es justo lo que se quiere de una API de registro.
+CAMPOS_DEL_SISTEMA = ("origen", "confianza", "archivo_nombre", "estado_sunat", "id_externo", "datos_originales")
 # Y lo que decide quien revisa: el veredicto de la validación y la marca de apartarlo. Se separa del
 # sistema porque son de dos momentos distintos —uno al leer, otro al revisar— y porque un ERP que deposite
 # comprobantes para que un contador los apruebe necesita saber cuál es cuál.
@@ -259,6 +261,13 @@ class Comprobante:
     cod_dep_aduanera: str = ""
     clasif_bienes: str = ""
     # Documento modificado (NC/ND)
+    # Por qué se emitió la nota: el Catálogo 09 si es de crédito y el 10 si es de débito
+    # (`catalogos.motivos_de_nota`). Lo dice el documento —el `cbc:ResponseCode` del XML— y el SIRE lo trae en su
+    # campo 34 de ventas y 39 de compras. Un código desconocido se avisa y se respeta, y vacío = el documento no lo
+    # dice, que es lo normal: el propio TXT que este motor genera manda esa columna vacía porque la norma dice que no
+    # se considera. OJO: el «01» del Catálogo 09 significa que la nota ANULA EL COMPROBANTE QUE REFERENCIA, no que la
+    # nota esté anulada.
+    tipo_nota: str = ""
     ref_fecha: date | None = None
     ref_tipo_cp: str = ""
     ref_serie: str = ""
@@ -273,6 +282,20 @@ class Comprobante:
     origen: str = "xml"
     confianza: Decimal = Decimal("1.00")
     archivo_nombre: str = ""
+    # Lo que SUNAT dice del comprobante en su propio registro: el campo 35 del Anexo N.° 2 (ventas) y el 40 del
+    # Anexo 8 de la RS 040-2022 (compras), «Est. Comp». Está aquí y no entre los hechos del documento porque **no lo
+    # dice el papel**: una factura impresa no lleva «Est. Comp»; solo lo lleva el registro de la Administración. Y por
+    # eso una puerta de entrada no lo acepta de quien dicta un comprobante.
+    #
+    # **Se transporta tal cual y NO condiciona ninguna regla**, y eso es a propósito: la norma dice de él solo dos
+    # cosas —«en la propuesta se muestra datos a título referencial» y «este campo no es considerado para la
+    # construcción del archivo de texto»— y **no publica su tabla de valores**. Así que el motor lo enseña y no lo
+    # traduce: sin `zfill` y sin `upper()`, porque poner en mayúsculas un código cuyo alfabeto no conocemos ya sería
+    # decidir algo sin fuente. Lo que aparta un comprobante del asiento es su importe en cero, que sí se puede
+    # comprobar, no este campo.
+    #
+    # Y no es el `estado` de más abajo, que es el veredicto de la validación de aquí (ok / observada / duplicada).
+    estado_sunat: str = ""
     # El id con el que la aplicación que produce el documento conoce este comprobante (su fila). Es la llave con
     # la que le llega aparte su imputación: la cuenta, el centro y el reparto de ESTE documento.
     id_externo: str = ""
@@ -292,6 +315,10 @@ class Comprobante:
         for f in _CAMPOS_TEXTO:
             setattr(self, f, " ".join(str(getattr(self, f) or "").split()))
         self.tipo_cp = self.tipo_cp.zfill(2) if self.tipo_cp.isdigit() else self.tipo_cp.upper()
+        # Los dos catálogos de motivo son de dos dígitos, así que quien manda "9" quiere decir "09". Solo si es
+        # dígito: la columna del RCE lo declara «alfanumérico» y no se le puede imponer un formato que la norma no
+        # pide. `estado_sunat` NO pasa por aquí a propósito: se transporta verbatim.
+        self.tipo_nota = self.tipo_nota.zfill(2) if self.tipo_nota.isdigit() else self.tipo_nota
         self.serie = self.serie.upper()
         self.moneda = (self.moneda or "PEN").upper()
         self.contraparte_tipo_doc = self.contraparte_tipo_doc or "6"
@@ -398,6 +425,6 @@ RETIRADOS_EN_0_3 = ("cuenta_contable", "centro_costo")
 _CAMPOS_TEXTO = (
     "tipo_cp", "serie", "numero", "numero_final", "contraparte_tipo_doc", "contraparte_doc",
     "contraparte_nombre", "moneda", "destino_igv", "anio_dua", "cod_dep_aduanera",
-    "clasif_bienes", "ref_tipo_cp", "ref_serie", "ref_numero", "id_contrato",
-    "concepto", "archivo_nombre", "condicion_pago", "medio_pago", "id_externo",
+    "clasif_bienes", "tipo_nota", "ref_tipo_cp", "ref_serie", "ref_numero", "id_contrato",
+    "concepto", "archivo_nombre", "condicion_pago", "medio_pago", "id_externo", "estado_sunat",
 )

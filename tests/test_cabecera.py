@@ -30,8 +30,13 @@ from contaperu.asiento.indice import Cabecera
 # validación, no qué pasó. Un driver que mirara `confianza` estaría decidiendo contabilidad con la certeza de
 # un modelo de lenguaje, y `estado` u `observaciones` son el resultado de mirar el comprobante, no el
 # comprobante. La aplicación los tiene; el driver no los necesita.
+#
+# `estado_sunat` está aquí por la misma razón y una más: es lo que SUNAT dice del comprobante en SU registro
+# («Est. Comp»), no lo que pasó. No mueve ningún importe, ninguna cuenta ni ningún sentido; la propia norma lo llama
+# referencial y no publica su tabla de valores. Un driver de asiento no tiene nada que hacer con él, y los dos de
+# registro reciben el comprobante entero, así que lo tienen si algún día lo necesitan.
 DEL_PROCESO = frozenset({"origen", "confianza", "archivo_nombre", "datos_originales",
-                         "estado", "excluida", "observaciones"})
+                         "estado", "excluida", "observaciones", "estado_sunat"})
 
 # Lo que la cabecera no lleva porque ya viaja DENTRO de la línea, en su bloque `documento`, `referencia` o
 # `detraccion` (`LineaDiario`): repetirlo sería tener el mismo hecho en dos sitios.

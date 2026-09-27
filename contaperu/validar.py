@@ -184,6 +184,21 @@ def validar(c: Comprobante, libro: Libro) -> None:
         if c.ref_fecha is None:
             error("NOTA_SIN_FECHA_REF", "Falta la fecha del comprobante modificado (el XML no la trae; complétala)")
 
+    # El motivo de la nota, contra el catálogo que le toca (`catalogos.motivos_de_nota`: el 09 si es de crédito, el 10
+    # si es de débito). **Aviso y no error, y el valor se respeta**, por lo mismo que el medio de pago: no cambia
+    # ningún asiento ni ningún importe, y SUNAT amplía estas tablas —al 09 le añadió cuatro códigos en 2020—, así que
+    # un código que este motor no conoce no puede impedirle a nadie cerrar su mes.
+    #
+    # **No existe un `TIPO_NOTA_FALTA`, y es a propósito**: una nota sin motivo no es un defecto. La norma dice que ese
+    # campo «no es considerado para la construcción del archivo de texto», y el propio TXT que este motor genera lo
+    # manda vacío, así que avisar de su ausencia observaría el mes entero por un dato que el archivo no pide.
+    motivos = cat.motivos_de_nota(c.tipo_cp)
+    if c.tipo_nota and motivos and c.tipo_nota not in motivos:
+        aviso("TIPO_NOTA_DESCONOCIDO",
+              f"El motivo {c.tipo_nota} no está en la tabla de SUNAT para este tipo de nota: sale igual, compruébalo")
+    elif c.tipo_nota and not motivos:
+        aviso("TIPO_NOTA_NO_APLICA", "Solo una nota de crédito o de débito lleva motivo: en este comprobante se ignora")
+
     # --- Procedencia -------------------------------------------------------------------------
     if c.origen == "xml":
         emisor = solo_digitos((c.datos_originales.get("emisor") or {}).get("doc", ""))

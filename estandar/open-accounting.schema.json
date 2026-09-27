@@ -149,6 +149,7 @@
         "cod_dep_aduanera": { "type": "string" },
         "clasif_bienes": { "type": "string" },
 
+        "tipo_nota": { "type": "string", "maxLength": 2, "description": "Por qué se emitió la nota: el Catálogo 09 de SUNAT si es de crédito (07, 87) y el 10 si es de débito (08, 88) — dos tablas distintas, y el «01» significa cosas opuestas en cada una. Vacío = el documento no lo dice, que es lo habitual; un código que no esté en el catálogo se avisa y se respeta. SIN patrón numérico a propósito: el anexo del RVIE lo declara numérico y el del RCE alfanumérico, así que el estándar admite los dos. NO viaja en el TXT del SIRE: la norma dice que ese campo no se considera para construirlo. Y OJO: el «01» del Catálogo 09 dice que la nota anula el comprobante que referencia, no que la nota esté anulada." },
         "ref_fecha": { "$ref": "#/$defs/fecha" },
         "ref_tipo_cp": { "type": "string", "description": "Documento que modifica una nota de crédito o débito." },
         "ref_serie": { "type": "string" },
@@ -165,6 +166,7 @@
           "description": "De 0 a 1. Menos de 1 solo tiene sentido en lo leído por una IA."
         },
         "archivo_nombre": { "type": "string" },
+        "estado_sunat": { "type": "string", "maxLength": 2, "description": "Lo que SUNAT dice de este comprobante en su propio registro: el campo 35 del Anexo N.° 2 de la RS 112-2021 (ventas) y el 40 del Anexo 8 de la RS 040-2022 (compras), «Est. Comp». SE TRANSPORTA TAL CUAL Y NO CONDICIONA NINGUNA REGLA: la norma dice de él solo que «en la propuesta se muestra datos a título referencial» y que «no es considerado para la construcción del archivo de texto», y NO publica su tabla de valores, así que quien lo reciba lo enseña y no lo traduce. No se dicta —no está en ninguna factura impresa, solo en el registro de la Administración— y no viaja de vuelta en el TXT. No es el `estado` de la revisión (ok, observada, duplicada), que es otra cosa." },
         "id_externo": { "type": "string", "description": "El id con el que la aplicación que produce el documento conoce este comprobante. Es la llave de su imputación, que llega aparte." },
         "datos_originales": {
           "type": "object",

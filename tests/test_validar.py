@@ -100,6 +100,55 @@ def test_notas():
     assert codigos(cp(tipo_cp="07", serie="FC01", ref_tipo_cp="01", ref_serie="F001", ref_numero="9", ref_fecha="2026-01-02")) == []
 
 
+def nota(**kw) -> Comprobante:
+    """Una nota con su referencia completa, para que lo único que quede por mirar sea el motivo."""
+    base = dict(tipo_cp="07", serie="FC01", ref_tipo_cp="01", ref_serie="F001", ref_numero="9",
+                ref_fecha="2026-01-02")
+    return cp(**{**base, **kw})
+
+
+def test_el_motivo_de_una_nota_se_mide_contra_el_catalogo_que_le_toca():
+    """Son dos catálogos distintos, así que el mismo código puede valer en uno y no en el otro: el `09` es
+    «disminución en el valor» en una nota de crédito y NO EXISTE entre los de débito, que solo tiene tres —mora,
+    aumento de valor y penalidades—."""
+    assert codigos(nota(tipo_nota="09")) == []
+    assert codigos(nota(tipo_cp="08", tipo_nota="03")) == []            # penalidades, del Catálogo 10
+    assert codigos(nota(tipo_cp="08", tipo_nota="09")) == ["TIPO_NOTA_DESCONOCIDO"]
+
+
+def test_un_motivo_que_sunat_no_tiene_avisa_y_no_bloquea():
+    """Aviso, y el valor se respeta, igual que el medio de pago: no cambia ningún asiento ni ningún importe, y SUNAT
+    amplía estas tablas —al Catálogo 09 le añadió cuatro códigos en 2020—, así que un código que este motor todavía
+    no conoce no puede impedirle a nadie cerrar su mes."""
+    c = nota(tipo_nota="99")
+    assert codigos(c) == ["TIPO_NOTA_DESCONOCIDO"]
+    assert [o.nivel for o in c.observaciones] == ["aviso"]
+    assert c.tipo_nota == "99" and not c.tiene_errores                  # el valor se respeta y no bloquea
+
+
+def test_una_nota_sin_motivo_no_es_un_defecto():
+    """**No existe `TIPO_NOTA_FALTA`, y es a propósito.** La norma dice que ese campo «no es considerado para la
+    construcción del archivo de texto», y el propio TXT que este motor genera lo manda vacío: avisar de su ausencia
+    observaría el mes entero por un dato que el archivo no pide."""
+    assert codigos(nota(tipo_nota="")) == []
+    # Y no existe como código: `PEDIR_A` es la lista cerrada de todo lo que el motor puede observar, y un `ast.walk`
+    # sobre `validar.py` comprueba que no falte ninguno (`test_diagnosticar.py`). Si alguien añadiera el aviso,
+    # tendría que aparecer ahí, y esto se pondría rojo.
+    from contaperu.pipeline.diagnostico import PEDIR_A
+    assert "TIPO_NOTA_FALTA" not in PEDIR_A
+
+
+def test_solo_una_nota_lleva_motivo():
+    """Una factura con motivo de nota es un dato mal puesto: se avisa, no se borra."""
+    c = cp(tipo_cp="01", tipo_nota="09")
+    assert codigos(c) == ["TIPO_NOTA_NO_APLICA"]
+    assert c.tipo_nota == "09"
+    # Y el 87 y el 88 SÍ llevan motivo, que es el agujero que cierra `catalogos.motivos_de_nota`: con `TIPOS_NOTA`
+    # —que es `("07", "08")`— se habrían quedado fuera en silencio y su código se avisaría como desconocido siempre.
+    assert codigos(nota(tipo_cp="87", tipo_nota="09")) == []
+    assert codigos(nota(tipo_cp="88", tipo_nota="01")) == []
+
+
 def test_reglas_de_compras():
     recibo = cp(tipo_cp="14", serie="", numero="123", contraparte_doc="20603333331", fecha_vencimiento=None)
     assert codigos(recibo, COMPRAS) == ["VENCIMIENTO_FALTA"]
