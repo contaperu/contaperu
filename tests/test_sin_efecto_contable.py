@@ -16,9 +16,6 @@ una foto o dictado por un ERP, que no trae estado ninguno.
 from __future__ import annotations
 
 from datetime import date
-from decimal import Decimal
-
-import pytest
 
 from contaperu import api, asiento as asi, comparar_sire, validar
 from contaperu.asiento import motor
