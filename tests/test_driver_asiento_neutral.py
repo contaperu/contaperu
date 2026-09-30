@@ -46,6 +46,38 @@ def test_las_lineas_no_llevan_vocabulario_legacy():
     assert all(linea["detraccion"]["codigo"] and "codigo_interno" not in linea["detraccion"] for linea in detraccion)
 
 
+def test_la_constancia_pendiente_no_viaja_como_comodin():
+    """El `999999999` es un apaño peruano para llenar una columna obligatoria, y no un número de depósito.
+
+    Se colaba en el perfil del estándar: el flag solo suprimía el código interno, y la constancia se resolvía igual
+    para los dos vocabularios. Un ERP de fuera recibía un vóucher que no existe y no tenía forma de saberlo — y el
+    test de al lado no lo veía, porque solo mira el documento comodín y no el bloque de la detracción.
+
+    Con constancia de verdad pegada, el número sale tal cual: lo que se quita es el comodín, no el dato."""
+    lineas = api.generar_asiento(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)["asiento"]
+    detraccion = [linea for linea in lineas if linea["rol"] == "detraccion"]
+    assert detraccion, "el golden trae una factura con detracción"
+    assert all("nro_constancia" not in linea["detraccion"] for linea in detraccion),         "sin depósito documentado la clave no viaja: un comodín es una afirmación falsa"
+
+    # Y al legacy no se le quita: su columna es obligatoria y el comodín es lo que CONCAR espera.
+    legacy = api.generar_asiento(casos(), driver="concar", imputacion=IMPUTACION_CASOS)["asiento"]
+    comodines = [linea for linea in legacy if linea["rol"] == "detraccion"]
+    assert all(linea["detraccion"]["nro_constancia"] == "999999999" for linea in comodines)
+
+
+def test_una_constancia_de_verdad_si_viaja():
+    """Lo que se descarta es el comodín; un depósito documentado sale con su número y su fecha."""
+    documento = casos()
+    for c in documento["comprobantes"]:
+        if (c.get("detraccion") or {}).get("codigo"):
+            c["detraccion"] = {**c["detraccion"], "nro_constancia": "00123456789", "fecha_constancia": "2026-08-20"}
+    lineas = api.generar_asiento(documento, driver="asiento_neutral", imputacion=IMPUTACION_CASOS)["asiento"]
+    detraccion = [linea for linea in lineas if linea["rol"] == "detraccion"]
+    assert detraccion
+    assert all(linea["detraccion"]["nro_constancia"] == "00123456789" for linea in detraccion)
+    assert all(linea["detraccion"]["fecha_constancia"] == "2026-08-20" for linea in detraccion)
+
+
 def test_un_tipo_sin_sigla_no_detiene_a_un_erp():
     """Un ERP no necesita la sigla de CONCAR: le basta el código SUNAT. Al CSV, que habla legacy, sí lo detiene."""
     sin_sigla = {"csv": {"tipos": {"01": {"sigla": ""}}}}

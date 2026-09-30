@@ -24,7 +24,7 @@ from typing import Any
 
 from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
 from ..configuracion import CONFIG_POR_DEFECTO
-from ..detracciones import monto_detraccion, numero_pendiente, tasa_detraccion
+from ..detracciones import es_comodin, monto_detraccion, numero_pendiente, tasa_detraccion
 from .. import pcge, vocabulario
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
@@ -105,7 +105,7 @@ def _limpio(campos: dict) -> dict:
     return {k: v for k, v in campos.items() if v not in ("", None)}
 
 
-def constancia_de(c: Comprobante, config: dict | None = None) -> dict[str, str]:
+def constancia_de(c: Comprobante, config: dict | None = None, *, comodin: bool = True) -> dict[str, str]:
     """La constancia del depósito de la detracción de ese comprobante: su número y su fecha, como van al archivo.
 
     Una sola regla para los dos caminos que la necesitan, y son distintos a propósito: un driver de ASIENTO la
@@ -115,11 +115,21 @@ def constancia_de(c: Comprobante, config: dict | None = None) -> dict[str, str]:
 
     Lo que dice la regla: **sin detracción no hay constancia**, las dos en blanco; con detracción, el número cae
     al comodín cuando nadie ha pegado el vóucher —que es el caso normal al exportar el mes, porque el depósito se
-    hace días después— y **la fecha no tiene comodín**, que una fecha inventada es peor que ninguna."""
+    hace días después— y **la fecha no tiene comodín**, que una fecha inventada es peor que ninguna.
+
+    **Con `comodin=False` no hay comodín ninguno** (3.9): ni se inventa el pendiente ni se repite el que venga en el
+    documento, porque un comodín guardado de una exportación anterior tampoco es un depósito. Es lo que pide el
+    vocabulario del estándar: el `999999999` es un apaño de los sistemas peruanos para llenar una columna obligatoria,
+    y un ERP de fuera que lo reciba se apunta un vóucher que no existe. Sin constancia, la clave no viaja."""
     bloque = c.detraccion or {}
     if not str(bloque.get("codigo") or "").strip():
         return {"nro_constancia": "", "fecha_constancia": ""}
-    return {"nro_constancia": str(bloque.get("nro_constancia") or "").strip() or numero_pendiente(config),
+    numero = str(bloque.get("nro_constancia") or "").strip()
+    if comodin:
+        numero = numero or numero_pendiente(config)
+    elif es_comodin(numero, config):
+        numero = ""
+    return {"nro_constancia": numero,
             "fecha_constancia": str(bloque.get("fecha_constancia") or "").strip()}
 
 
@@ -127,7 +137,7 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = Fa
     """El bloque de la línea de detracción: el código SUNAT, el interno del contribuyente (T.G. 28 de
     CONCAR: el de SUNAT + 2 propios, o SUNAT + "01" si no lo configuró), la tasa —la misma con la que
     se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base. Con vocabulario
-    neutral no lleva el código interno: es de un sistema legacy.
+    neutral no lleva el código interno ni el comodín de la constancia: los dos son de un sistema legacy.
 
     **Y la constancia del depósito** (2.6): el número y la fecha que alguien haya pegado, porque la detracción tiene
     dos tiempos —se provisiona al registrar y se paga días después— y hasta ahora el segundo no volvía al archivo.
@@ -141,7 +151,7 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = Fa
     tasa = tasa_detraccion(c, config)
     return _limpio({"codigo": sunat, "codigo_interno": interno,
                     "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total),
-                    **constancia_de(c, config)})
+                    **constancia_de(c, config, comodin=not neutral)})
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,

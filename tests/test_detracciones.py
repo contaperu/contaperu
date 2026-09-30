@@ -203,6 +203,21 @@ def test_con_constancia_pegada_sale_la_suya():
     assert constancia == {"nro_constancia": "12345678901234567", "fecha_constancia": "2026-02-10"}
 
 
+def test_sin_comodin_el_pendiente_no_se_inventa_ni_se_repite():
+    """`comodin=False` es lo que pide el vocabulario del estándar (3.9): el `999999999` llena una columna obligatoria
+    de un sistema peruano, y para un ERP de fuera es un vóucher que no existe.
+
+    Se descartan los dos casos: el que el motor inventaría y el que ya viene en el documento —un comodín guardado de
+    una exportación anterior tampoco es un depósito—. La constancia de verdad no se toca."""
+    assert asiento.constancia_de(_compra_con_detraccion(), comodin=False) == {
+        "nro_constancia": "", "fecha_constancia": ""}
+    guardado = _compra_con_detraccion(nro_constancia=NUMERO_DETRACCION_PENDIENTE)
+    assert asiento.constancia_de(guardado, comodin=False)["nro_constancia"] == ""
+    real = _compra_con_detraccion(nro_constancia="12345678901234567", fecha_constancia="2026-02-10")
+    assert asiento.constancia_de(real, comodin=False) == {
+        "nro_constancia": "12345678901234567", "fecha_constancia": "2026-02-10"}
+
+
 def test_sin_detraccion_no_hay_constancia_ni_comodin():
     """El comodín dice «está pendiente», y una compra sin detracción no tiene nada pendiente."""
     c = _compra_con_detraccion()

@@ -20936,8 +20936,7 @@
     "detraccion": {
      "codigo": "027",
      "tasa": "4",
-     "base": "4956.00",
-     "nro_constancia": "999999999"
+     "base": "4956.00"
     },
     "tasa_igv": "18"
    },
@@ -21043,8 +21042,7 @@
     "detraccion": {
      "codigo": "037",
      "tasa": "12",
-     "base": "2360.00",
-     "nro_constancia": "999999999"
+     "base": "2360.00"
     },
     "tasa_igv": "18"
    },
@@ -21375,7 +21373,7 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "7f5ab70000580795ca9f988890da7f2facabc325177d5055bf9b32edcbf1f26c",
+   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
    "comprobantes": [
     {
      "identidad": {
@@ -21450,7 +21448,7 @@
       12,
       17
      ],
-     "huella": "a1ab420c0a320e1185da28d23d7a4c1a52edfe98172757a927a2067ac4585248"
+     "huella": "1880b5bdbe4dd55f33a2ebf08a704954825801616cdd34081624dcced94c4cb4"
     },
     {
      "identidad": {
@@ -21465,7 +21463,7 @@
       17,
       22
      ],
-     "huella": "34988a9833f049f4a783e9225a2234d36d20d24191f1ff307a3be58f88ffe3f3"
+     "huella": "93748a27175f9ea9a26517f2d814f7cc3087baaec330bb163d88ed8a6de2e735"
     },
     {
      "identidad": {
@@ -21579,13 +21577,13 @@
    "sub_diarios": {},
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "7f5ab70000580795ca9f988890da7f2facabc325177d5055bf9b32edcbf1f26c",
+   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
    "lineas": 39
   },
   "_exportacion": {
    "driver": "asiento_neutral",
    "archivo": "ASIENTO_NEUTRAL_COMPRAS_202608_20601234567.json",
-   "huella": "7f5ab70000580795ca9f988890da7f2facabc325177d5055bf9b32edcbf1f26c",
+   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
    "comprobantes": [
     {
      "identidad": {
@@ -21660,7 +21658,7 @@
       12,
       17
      ],
-     "huella": "a1ab420c0a320e1185da28d23d7a4c1a52edfe98172757a927a2067ac4585248"
+     "huella": "1880b5bdbe4dd55f33a2ebf08a704954825801616cdd34081624dcced94c4cb4"
     },
     {
      "identidad": {
@@ -21675,7 +21673,7 @@
       17,
       22
      ],
-     "huella": "34988a9833f049f4a783e9225a2234d36d20d24191f1ff307a3be58f88ffe3f3"
+     "huella": "93748a27175f9ea9a26517f2d814f7cc3087baaec330bb163d88ed8a6de2e735"
     },
     {
      "identidad": {
@@ -21790,13 +21788,13 @@
    "sub_diarios": {},
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "7f5ab70000580795ca9f988890da7f2facabc325177d5055bf9b32edcbf1f26c",
+   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
    "lineas": 39
   },
   "_exportacion": {
    "driver": "asiento_neutral",
    "archivo": "ASIENTO_NEUTRAL_COMPRAS_202608_20601234567.json",
-   "huella": "7f5ab70000580795ca9f988890da7f2facabc325177d5055bf9b32edcbf1f26c",
+   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
    "comprobantes": [
     {
      "identidad": {
@@ -21871,7 +21869,7 @@
       12,
       17
      ],
-     "huella": "a1ab420c0a320e1185da28d23d7a4c1a52edfe98172757a927a2067ac4585248"
+     "huella": "1880b5bdbe4dd55f33a2ebf08a704954825801616cdd34081624dcced94c4cb4"
     },
     {
      "identidad": {
@@ -21886,7 +21884,7 @@
       17,
       22
      ],
-     "huella": "34988a9833f049f4a783e9225a2234d36d20d24191f1ff307a3be58f88ffe3f3"
+     "huella": "93748a27175f9ea9a26517f2d814f7cc3087baaec330bb163d88ed8a6de2e735"
     },
     {
      "identidad": {

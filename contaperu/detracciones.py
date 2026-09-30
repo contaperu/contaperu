@@ -169,6 +169,19 @@ def numero_pendiente(config: dict | None = None) -> str:
     return str((config or {}).get("detraccion_numero_pendiente") or NUMERO_DETRACCION_PENDIENTE)
 
 
+def es_comodin(numero: str, config: dict | None = None) -> bool:
+    """¿Este número de constancia es un COMODÍN y no un depósito de verdad?
+
+    Se descartan los dos, el que está en vigor y el de partida: un contribuyente que configuró el suyo puede tener
+    guardado el de fábrica de una exportación anterior, y ese número tampoco es un depósito. Un número vacío no es un
+    comodín: es que nadie ha pegado nada.
+
+    Lo preguntan los dos lados —el estado de la detracción y la constancia que va al archivo— y por eso la lista de
+    comodines vive aquí y no escrita en cada sitio."""
+    limpio = str(numero or "").strip()
+    return bool(limpio) and limpio in {numero_pendiente(config), NUMERO_DETRACCION_PENDIENTE}
+
+
 def estado_de(c: Comprobante, config: dict | None = None) -> str:
     """En qué tiempo está la detracción de ese comprobante: `PAGADO`, `PROVISIONADO`, o vacío si no tiene ninguna.
 
@@ -189,8 +202,7 @@ def estado_de(c: Comprobante, config: dict | None = None) -> str:
         return ""
     numero = str(bloque.get("nro_constancia") or "").strip()
     fecha = str(bloque.get("fecha_constancia") or "").strip()
-    comodines = {numero_pendiente(config), NUMERO_DETRACCION_PENDIENTE}
-    return PAGADO if (numero and numero not in comodines and fecha) else PROVISIONADO
+    return PAGADO if (numero and not es_comodin(numero, config) and fecha) else PROVISIONADO
 
 
 def esta_pendiente(c: Comprobante, config: dict | None = None) -> bool:
