@@ -36,6 +36,47 @@ Aparte del documento llegan dos cosas que son de tu aplicación y no del comprob
 El camino normal es siempre el mismo: **`diagnosticar` antes de `exportar`**. El diagnóstico dice si el mes está listo
 para ese destino y, si no, qué falta y a quién pedírselo (`pedir_a`: el contador o el sistema).
 
+## Quién aporta cada variable, y cómo añades las tuyas
+
+Todo dato tiene un dueño, y saber cuál es responde la pregunta que llega siempre: «¿dónde meto lo mío?». Son cuatro
+sitios, y **solo dos aceptan variables que el motor no conoce**:
+
+| Lo que añades | Dónde va | ¿Caben las tuyas? |
+|---|---|---|
+| Un hecho del comprobante | el documento | **No.** Una clave que el estándar no conoce se rechaza en vez de ignorarse: un dato que se cuela sin error es un dato que se pierde sin aviso |
+| La decisión contable de un documento | `imputaciones`, o el argumento `imputacion` | **No.** Cuatro campos exactos: `cuenta_contable`, `centro_costo`, `cuenta_tercero` y `reparto`. Un quinto no se ignora, se rechaza |
+| El vocabulario de tu sistema contable | tu sección de la configuración | **Sí, libres.** Tu driver declara sus campos con tipo, patrón y ayuda; el motor los valida y `describir_configuracion` los pinta |
+| Lo que el motor no entiende | `datos_originales` del comprobante, y las claves `_` de la raíz | **Sí, pero solo viajan.** Se transportan sin interpretar, y ningún driver las lee |
+
+**La imputación está cerrada a propósito.** Sus cuatro campos son las cuatro decisiones que un contador toma sobre un
+comprobante, y son pocas porque el motor **resuelve la cuenta una sola vez para todos los drivers**
+(`asiento.partes_de`, `asiento.cuenta_tercero`): la que decide tu Revisión sale igual en el Excel de CONCAR y en la
+columna de un sistema que importa registros. Si el objeto fuera libre, dos aplicaciones llamarían distinto a lo mismo y
+esa resolución única dejaría de existir.
+
+**Lo que es de tu sistema va en tu sección**, y se configura **por contribuyente, no por comprobante**: así viven el
+medio de pago de CONTASIS, el código de área de la detracción de CONCAR y sus códigos de moneda. La prueba para saber
+si un dato es configuración es esa: si cambia de un comprobante a otro, no lo es.
+
+**Si te falta de verdad un dato por comprobante**, hay dos caminos y ninguno es un campo libre:
+
+- **Es un hecho del comprobante** —algo que SUNAT informa o que el documento dice—: entra en el estándar, con su
+  fuente y su enmienda. No es un trámite raro: en septiembre de 2026 entraron así `tipo_nota` y `estado_sunat`
+  (columnas que la propuesta del SIRE ya traía y se descartaban al leer), `dscto_otros` y `medio_pago`. Lo que se
+  pide es el archivo real que lo trae.
+- **Es una dimensión analítica tuya** —obra, proyecto, área, presupuesto— más allá del centro de costo: **el nombre
+  ya está reservado**. Es `dimensiones`, `[{tipo, codigo}]`, con el centro de costo como la primera, y va **en la
+  imputación y no en el documento**, porque es una decisión de cada entorno y no un hecho del comprobante. Está
+  esperando un caso real; cuando lo tengas, es lo que hay que traer.
+
+Mientras uno de los dos llegue, `datos_originales` transporta el dato sin perderlo.
+
+**Y las variables del SIRE no son el modelo.** El motor lee las 40 columnas del RVIE y las 41 del RCE, tipa como
+campos del documento las que son hechos y guarda la fila entera en `datos_originales`; de ahí en adelante nadie
+vuelve a mirar el TXT. Tu driver no lee columnas del SIRE: lee el documento, o las líneas de diario que el núcleo
+armó con él. Por eso, el día que SUNAT cambie una columna, cambian el lector y el driver `sire`, y ningún driver de
+asientos se entera.
+
 ## Desde Python
 
 ```python

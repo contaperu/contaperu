@@ -240,6 +240,10 @@ núcleo solo lo general, lo del asiento y `MONEDAS_CODIGO`: lo vigila `tests/tes
 drivers comparten para escribir —las opciones, el formato de texto, las celdas y el libro de Excel— está en
 `drivers/kit/`.
 
+Eso es también el reparto que ve quien integra: el documento trae los hechos, la imputación la decisión
+contable, la sección del driver el vocabulario de su sistema y `datos_originales` lo que nadie interpreta.
+Cuál de los cuatro acepta variables nuevas está en `INTEGRAR.md`, §«Quién aporta cada variable».
+
 Se publica de dos maneras:
 
 - **Como paquete propio**, por entry points (`[project.entry-points."contaperu.drivers"]`). El registro lo busca la

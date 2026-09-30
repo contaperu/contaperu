@@ -136,7 +136,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 |---|---|
 | `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres grupos (SIRE, legacy y ERP); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
 | `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea neutral, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
-| `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 2.x; sus ejemplos se ejecutan en la batería |
+| `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, quién aporta cada variable y cuáles de las cuatro piezas aceptan las tuyas, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 2.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU.; de aquí salió la 0.8.0 |

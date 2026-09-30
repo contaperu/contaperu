@@ -74,6 +74,9 @@ recibe tres piezas, y cada dato tiene un solo dueño:
 Lo que se calcula con esas tres —el signo de la nota de crédito, los soles de una factura en dólares, el % de
 IGV, el correlativo— **no lo guarda nadie**: lo deriva el driver.
 
+Qué puede añadir de su cosecha un ERP en cada una de las tres —y qué no, y por dónde entra un dato que
+todavía no existe— está en `INTEGRAR.md`, §«Quién aporta cada variable, y cómo añades las tuyas».
+
 **La configuración la declara el motor y la guarda la aplicación** (John, 13-sep-2026). Su forma es lo general en la
 raíz y una sección por sistema contable:
 
