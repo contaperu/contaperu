@@ -67,6 +67,11 @@ CONFIGURACION = (
                                             "ejemplo 061). Vacío, no se escribe."),
 )
 
+# El sufijo con el que se arma un código de la T.G. 28 que la empresa no mapeó: el de SUNAT más estos dos dígitos, que
+# es el patrón más común de esa tabla. Vive aquí, y no en el núcleo, porque es de CONCAR: hasta la 3.10 el asiento lo
+# inventaba para todos y se lo escribía también al CSV y a STARSOFT, que llevan el código de SUNAT.
+SUFIJO_T28 = "01"
+
 TIPO_CONVERSION = "V"       # CONCAR busca el T.C. en su tabla; con T.C. en G pasa a 'C' (especial)
 MARCA_CONVERSION = "S"      # la columna I, «Flag de Conversión de Moneda»
 COLUMNAS_IMPORTE = ("O", "P", "Q", "AD", "AE", "AK", "AL")

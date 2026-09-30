@@ -374,6 +374,18 @@ def test_el_tipo_de_documento_de_la_detraccion_es_configurable():
     assert driver_concar.filas_de_comprobante(c, otro, MES, "080001")[-1]["R"] == "DT"
 
 
+def test_un_codigo_de_detraccion_sin_mapear_sale_con_el_patron_de_la_tabla_28():
+    """La T.G. 28 la numera cada contribuyente, y el mapa de fábrica trae 14 códigos de muestra. Un código que el
+    ERP suma a la tabla del motor (`detraccion_tasas`) y no mapea sale como el de SUNAT más `01`, el patrón más
+    común de esa tabla: no vacío, que dejaría la columna sin el dato que CONCAR pide al lado de la tasa.
+
+    Ningún caso del snapshot lo ejercita, porque un código que no está en la tabla del motor lo deja en blanco
+    `detracciones.normalizar_una` antes de llegar aquí: hace falta sumarlo para alcanzar este camino."""
+    c = cp(detraccion={"codigo": "031", "porcentaje": "10"})
+    config = configuracion({"detraccion_tasas": {"031": 10}})
+    assert driver_concar.filas_de_comprobante(c, config, MES, "080001")[-1]["AI"] == "03101"
+
+
 def test_la_detraccion_referencia_al_documento_del_que_sale():
     """Z/AA/AB en la línea de la detracción: de qué documento sale este depósito.
 

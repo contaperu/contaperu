@@ -15,7 +15,7 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.configuracion import MONEDAS_CODIGO
+from ...asiento.configuracion import MONEDAS_CODIGO, TIPO_DOC_DETRACCION
 from ...asiento.faltas import SinCodigoDeMoneda
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
@@ -37,6 +37,23 @@ def codigo_moneda(moneda: str, config: dict) -> str:
     if not codigo:
         raise SinCodigoDeMoneda([moneda])
     return codigo
+
+
+def tipo_doc_detraccion(config: dict) -> str:
+    """Columna R de la línea de la detracción: la sigla de su **T.G. 06**. `DR` es la del Excel real que CONCAR
+    aceptó (set-2026) —el `DT` que hubo antes salía de un borrador y nunca se importó en un CONCAR de verdad—, y cada
+    contribuyente numera esa tabla a su gusto: por eso se configura."""
+    return str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION)
+
+
+def codigo_interno_detraccion(codigo_sunat: Any, config: dict) -> str:
+    """Columna AI: el código de la **T.G. 28** de este CONCAR (5 dígitos: el de SUNAT más 2 propios) para el código
+    SUNAT del bien o servicio (Catálogo 54, 3 dígitos). Lo que la empresa no mapeó sale como el de SUNAT más
+    `SUFIJO_T28`, el patrón más común de esa tabla; sin código de SUNAT no hay detracción y la celda va vacía."""
+    sunat = str(codigo_sunat or "").strip()
+    if not sunat:
+        return ""
+    return str((config.get("detraccion_codigos") or {}).get(sunat) or f"{sunat}{datos.SUFIJO_T28}")
 
 
 # Los importes viajan como texto exacto; openpyxl los quiere `float` para darles formato numérico (`drivers.kit.celdas`).
@@ -83,6 +100,9 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
                if linea.tasa_igv not in ("", None) else ""),
     })
     if linea.rol == "detraccion":
+        # La sigla de la T.G. 06. Hasta la 3.10 la traía el documento comodín que armaba el núcleo, que se la
+        # escribía igual al CSV y a STARSOFT; es vocabulario de CONCAR y se pone aquí.
+        f["R"] = tipo_doc_detraccion(config)
         # El área (T.G. 26) es un número propio de cada empresa y solo va en esta fila (Excel validado).
         # No se corta a los 3 caracteres de la plantilla: cortar un código lo manda a OTRA área en silencio.
         f["V"] = str(config.get("detraccion_area") or "")
@@ -91,7 +111,8 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
                   "AB": _fecha(ref.get("fecha"))})
     if det:
         base = _importe(det.get("base"))
-        f.update({"AI": det.get("codigo_interno", ""), "AJ": celdas.numero(det.get("tasa", "")),
+        f.update({"AI": codigo_interno_detraccion(det.get("codigo"), config),
+                  "AJ": celdas.numero(det.get("tasa", "")),
                   "AK": base if es_usd else "", "AL": base if not es_usd else ""})
     return f
 
