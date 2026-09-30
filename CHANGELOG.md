@@ -4,6 +4,73 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [3.9.0] — 2026-09-29
+
+**El documento del estándar se basta, y por eso puede volver a entrar al motor.** El driver `asiento_neutral` escribía
+el libro y el asiento, y eso deja preguntas que un asiento no puede contestar. Una compra de 100 gravado más 50
+exonerado produce **una sola línea de gasto de 150** —la contabilidad es correcta— y quien recibía el archivo no tenía
+forma de separar el desglose ni de comprobar que el IGV de 18 iba sobre 100 y no sobre 150. El nombre del proveedor
+viajaba **por accidente**, dentro de la glosa y solo mientras el concepto viniera vacío: con un concepto propio
+desaparecía del archivo y el ERP se quedaba con el RUC a secas. Y una nota de crédito revertía bien los importes sin
+decir por qué se emitió.
+
+Ahora escribe **los tres bloques que el estándar ya definía** —`libro`, `comprobantes` y `asiento`—, y el bloque nuevo
+no inventa nada: sale de la cabecera del índice, que el driver tenía en la mano y descartaba. Cero enmiendas al
+estándar y ninguna versión nueva de él, porque un bloque opcional es aditivo. Lo que esto consigue es lo de fondo: el
+documento **vuelve a entrar al motor y da el mismo asiento, con la misma huella** —comprobado sobre el mes de los
+casos: 39 líneas idénticas, mismos tramos, misma huella—, así que un ERP no necesita haber guardado nada más.
+
+Va siempre y no bajo una opción: un documento que solo a veces se basta obliga a quien lo lee a manejar dos formas y
+deja condicional la única garantía que hace útil el formato. **No** lleva `imputaciones`, y también a propósito: el
+esquema exige entonces `id_externo` en todos los comprobantes, así que un mes cuyo productor no los puso daría un
+documento que falla su propio esquema — quien quiera el asiento idéntico al volver a entrar pasa la misma imputación.
+Y no lleva `emisor`: el estándar dice «quién generó este documento», y quien lo genera es la aplicación que llama.
+
+**Para que fuera posible, la cabecera del comprobante tuvo que llevar ya todos sus hechos.** Le faltaban ocho —el
+concepto, el vencimiento, el tipo de cambio, los cuatro del comprobante que modifica una nota y la detracción—, con el
+argumento de que repetirlos sería tener el mismo hecho en dos sitios porque ya viajaban dentro de la línea. El
+argumento se cae en cuanto hay que escribir un comprobante: desde la línea esos ocho **no se pueden recomponer**
+—`referencia.serie_numero` va unido por un guion y no hay vuelta fiable, y la cuenta del Banco de la Nación de la
+detracción no está en ninguna línea— y sin ellos la validación se detenía en `VENCIMIENTO_FALTA`, `TC_FALTA` y
+`NOTA_SIN_REFERENCIA`. La línea responde «qué se asienta» y la cabecera «qué decía el comprobante»: son dos preguntas.
+
+Con ellos dentro, **`Cabecera.como_comprobante()`** produce un `comprobante` que valida contra el esquema publicado.
+Dos cosas lo impedían: la `glosa`, que pasa a ser una **propiedad derivada** del concepto —no es un hecho, el estándar
+no la declara, y siendo derivada ya no puede discrepar de su fuente—, y la detracción, que ahora se **filtra a las
+siete claves del estándar** porque el motor anota además `tasa_tabla` y `$defs/detraccion` la rechaza por su
+`additionalProperties: false`. `a_dict()` no cambia para nadie: sigue llevando lo vacío y la glosa.
+
+**Y el comodín de la detracción deja de salir del Perú.** El `999999999` es un apaño de los sistemas peruanos para
+llenar una columna obligatoria cuando el depósito todavía no se ha hecho, y se colaba en el vocabulario del estándar:
+el flag solo suprimía el código interno y la constancia se resolvía igual para los dos. Un ERP de fuera recibía en
+`detraccion.nro_constancia` un vóucher que no existe, sin nada que se lo advirtiera y contra lo que prometía el propio
+docstring del driver — y el test que vigilaba ese perfil no lo veía, porque solo mira el documento comodín. Ahora
+`asiento.constancia_de` acepta `comodin=False` y entonces no inventa el pendiente ni repite el que venga en el
+documento (un comodín guardado de una exportación anterior tampoco es un depósito): **sin depósito, la clave no
+viaja**. La constancia de verdad sale igual que antes. Al legacy no se le quita nada: su columna es obligatoria.
+De paso, la lista de los dos comodines deja de estar escrita dentro de `estado_de` y pasa a `detracciones.es_comodin`.
+
+**Y la salida que va a ser la principal tiene por fin su snapshot.** CONCAR tiene sus 52 casos vigilados celda a celda
+desde la 0.6; esta no tenía ninguno, y lo que parecía serlo engañaba: `lineas_neutrales.json` se genera sin
+`vocabulario="neutral"`, así que su contenido es **legacy** —sub-diario, correlativo y la sigla `FT`— y nunca fueron
+las líneas del estándar. Pasa a llamarse `lineas_legacy.json`, sin tocar un byte. El nuevo,
+`documento_del_estandar.json`, congela el documento entero en ocho casos, cada uno elegido por algo que el asiento por
+sí solo no puede contar.
+
+### Cómo migrar
+
+- **La huella del vocabulario del estándar cambia** en los comprobantes con detracción sin constancia, porque la línea
+  ya no lleva el comodín. Un ERP que las persista para saber qué importó **deja de reconocer esos comprobantes** y los
+  verá como nuevos. La de CONCAR y los demás destinos legacy no se mueve: su snapshot de 52 casos está intacto.
+- **El archivo pesa un 48 % más** y eso acerca el tope de 4 MB de las puertas MCP y HTTP: medido con facturas simples,
+  de **~2.042 a ~1.381 comprobantes** por llamada. Un mes entre esas dos cifras que hoy pasa, pasará a pedir lotes.
+- **Dos claves se llaman `comprobantes`** en el mismo archivo y no son lo mismo: la de la raíz son los hechos de cada
+  comprobante —el bloque del estándar— y la de `_exportacion` es su identidad, su tramo de líneas y su huella. La
+  segunda se llama así desde la 3.1 y no se renombra.
+- **`Cabecera(glosa=…)` deja de aceptarse**, porque `glosa` ya no es un campo. El único constructor del motor es
+  `asiento.cabecera_de`; solo afecta a quien construya una cabecera a mano.
+- Nada más cambia: los cinco destinos legacy, el TXT del SIRE y la api producen lo mismo, bit a bit.
+
 ## [3.8.0] — 2026-09-29
 
 **El formato del SIRE deja de estar repartido en tres sitios que nada obligaba a concordar.** El conocimiento de qué
