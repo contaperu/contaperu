@@ -30,7 +30,7 @@ from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .configuracion import TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
-from .indice import Cabecera, ComprobanteDelAsiento
+from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
 from .resolucion import (asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
                          limites_del_periodo, lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra,
                          sigla_documento, sin_efecto_contable, sub_diario, tiene_detraccion)
@@ -62,10 +62,22 @@ def _iso(fecha: date | None) -> str:
     return fecha.isoformat() if fecha else ""
 
 
+def _detraccion_del_estandar(c: Comprobante) -> dict:
+    """La detracción del comprobante con solo las claves que el estándar declara.
+
+    El motor anota `tasa_tabla` al normalizar (`detracciones.py`) y `$defs/detraccion` la rechaza, así que copiar el
+    bloque tal cual haría que el documento de un driver fallara su propio esquema. Se filtra aquí, una vez, y no en
+    cada driver."""
+    bloque = c.detraccion if isinstance(c.detraccion, dict) else {}
+    return {k: v for k in DETRACCION_DEL_ESTANDAR if (v := bloque.get(k)) not in ("", None)}
+
+
 def cabecera_de(c: Comprobante) -> Cabecera:
     """Los hechos del comprobante que un driver necesita al lado de sus líneas (`asiento.indice`).
 
-    Todos los del estándar menos los siete del proceso; el porqué y la regla, en el docstring de `Cabecera`.
+    **Todos los del estándar menos los del proceso** (3.9: antes también faltaban los ocho que ya viajaban dentro de
+    la línea, y por eso el documento que escribía un driver no podía volver a entrar al motor); el porqué y la regla,
+    en el docstring de `Cabecera`.
     `valor_no_gravado` va YA RESUELTO (`adquisiciones_no_gravadas`): el campo del estándar admite nulo y significa
     «exonerado más inafecto», y esa cuenta la hace el modelo una vez y no cada driver a su manera.
     """
@@ -74,7 +86,11 @@ def cabecera_de(c: Comprobante) -> Cabecera:
                     condicion_pago=c.condicion_pago or "", medio_pago=c.medio_pago or "",
                     id_externo=c.id_externo or "",
                     contraparte_tipo_doc=c.contraparte_tipo_doc or "", contraparte_doc=c.contraparte_doc or "",
-                    contraparte_nombre=c.contraparte_nombre or "", glosa=glosa_de(c),
+                    contraparte_nombre=c.contraparte_nombre or "", concepto=c.concepto or "",
+                    fecha_vencimiento=_iso(c.fecha_vencimiento), tipo_cambio=str(c.tipo_cambio or ""),
+                    ref_tipo_cp=c.ref_tipo_cp or "", ref_serie=c.ref_serie or "",
+                    ref_numero=c.ref_numero or "", ref_fecha=_iso(c.ref_fecha),
+                    detraccion=_detraccion_del_estandar(c),
                     moneda=c.moneda or "", base_gravada=str(c.base_gravada), igv=str(c.igv),
                     dscto_base=str(c.dscto_base), dscto_igv=str(c.dscto_igv), exonerado=str(c.exonerado),
                     inafecto=str(c.inafecto), exportacion=str(c.exportacion), isc=str(c.isc),

@@ -16,12 +16,19 @@ su `Decimal` escrito, sin redondear nada.
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Sequence
 
 from ..modelo import Libro, clave_de, identidad_de
 from .huella import huella
 from .lineas import LineaDiario
+
+
+# Las siete claves de la detracción que declara el estándar (`$defs/detraccion`, `additionalProperties: false`).
+# El motor anota además `tasa_tabla` —la tasa del Catálogo 54 con la que se calculó el monto, `detracciones.py`—, que el
+# estándar no conoce y rechaza. Por eso la cabecera FILTRA en vez de copiar el bloque: si no, el documento que produce
+# un driver con esta cabecera fallaría su propio esquema.
+DETRACCION_DEL_ESTANDAR = ("codigo", "porcentaje", "monto", "cuenta", "estado", "nro_constancia", "fecha_constancia")
 
 
 @dataclass(frozen=True)
@@ -50,6 +57,7 @@ class Cabecera:
     numero: str = ""
     numero_final: str = ""           # solo rangos: boletas consolidadas del día
     fecha_emision: str = ""
+    fecha_vencimiento: str = ""
     condicion_pago: str = ""         # CUÁNDO se paga: contado | credito
     medio_pago: str = ""             # CON QUÉ se paga: el código de SUNAT (`catalogos.MEDIOS_PAGO`)
     id_externo: str = ""
@@ -57,9 +65,10 @@ class Cabecera:
     contraparte_tipo_doc: str = ""   # tipo de documento de identidad: 6 RUC, 1 DNI, 4 CE, 7 pasaporte
     contraparte_doc: str = ""
     contraparte_nombre: str = ""
-    glosa: str = ""                  # la del comprobante, en mayúsculas y sin cortar (`asiento.glosa_de`)
+    concepto: str = ""               # lo que dice el comprobante que se compró o se vendió, tal cual
     # Importes
     moneda: str = ""
+    tipo_cambio: str = ""
     base_gravada: str = "0"
     igv: str = "0"
     dscto_base: str = "0"            # qué parte de la base informa el SIRE como descuento; no resta al total
@@ -85,9 +94,48 @@ class Cabecera:
     # Solo notas: por qué se emitió (el Catálogo 09 si es de crédito y el 10 si es de débito). Está aquí y no en el
     # bloque `referencia` de la línea porque no describe el comprobante MODIFICADO, sino la nota misma.
     tipo_nota: str = ""
+    # Y CUÁL modifica: el comprobante al que apunta la nota. Viaja también en el bloque `referencia` de cada línea;
+    # aquí está porque es un hecho del comprobante y la cabecera lleva todos, y porque quien escribe el documento del
+    # estándar lo necesita sin tener que recomponerlo de una línea (`referencia.serie_numero` va unido por el guion).
+    ref_tipo_cp: str = ""
+    ref_serie: str = ""
+    ref_numero: str = ""
+    ref_fecha: str = ""
+    # La detracción del comprobante, filtrada a las claves del estándar (`DETRACCION_DEL_ESTANDAR`). Incluye la
+    # `cuenta` del Banco de la Nación, que ninguna línea lleva.
+    detraccion: dict = field(default_factory=dict)
 
-    def a_dict(self) -> dict[str, str]:
-        return asdict(self)
+    @property
+    def glosa(self) -> str:
+        """Lo que se escribe en la columna de descripción: el concepto del comprobante y, si viene vacío, el nombre
+        de la contraparte, en mayúsculas y sin cortar (el corte es de cada driver).
+
+        Es una PROPIEDAD y no un campo desde la 3.9, por dos razones. No es un hecho del comprobante —es un derivado
+        del `concepto`, que sí lo es— y el estándar no la declara, así que mientras fue campo era lo único que
+        impedía que `a_dict()` fuese un comprobante del estándar. Y siendo derivada no puede discrepar de su fuente,
+        que es lo que pasaba al construir una cabecera a mano con una glosa cualquiera.
+
+        La misma regla que `asiento.glosa_de`, sobre los datos que la cabecera ya tiene."""
+        return ((self.concepto or "").strip() or (self.contraparte_nombre or "").strip()).upper()
+
+    def a_dict(self) -> dict:
+        """Todos los campos, más la `glosa` derivada, que es la que un driver escribe en su columna.
+
+        Lleva lo vacío a propósito: `tests/test_driver_diario_json.py` fija que un driver reciba la lista completa de
+        hechos aunque este comprobante no traiga alguno. Para escribir un comprobante del estándar, `como_comprobante`.
+        """
+        return {**asdict(self), "glosa": self.glosa}
+
+    def como_comprobante(self) -> dict:
+        """Esta cabecera como un `comprobante` del estándar, listo para el bloque `comprobantes` de un documento.
+
+        Dos diferencias con `a_dict()`, y las dos son lo que hace que el resultado valide: **fuera la `glosa`**, que
+        el estándar no declara porque es un derivado del concepto, y **fuera lo vacío**, porque una cadena vacía no
+        pasa el `pattern` de `moneda` ni el `enum` de `contraparte_tipo_doc` — el estándar distingue «no lo sé» de
+        «es esto», y lo primero se dice omitiendo la clave.
+
+        `tests/test_cabecera.py` lo comprueba contra el esquema publicado, campo a campo."""
+        return {k: v for k, v in asdict(self).items() if v not in ("", None, {})}
 
 
     @property

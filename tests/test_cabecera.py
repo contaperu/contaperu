@@ -18,6 +18,7 @@ con su motivo; no hay tercera opción que no sea este test en rojo.
 from __future__ import annotations
 
 import dataclasses
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -38,10 +39,17 @@ from contaperu.asiento.indice import Cabecera
 DEL_PROCESO = frozenset({"origen", "confianza", "archivo_nombre", "datos_originales",
                          "estado", "excluida", "observaciones", "estado_sunat"})
 
-# Lo que la cabecera no lleva porque ya viaja DENTRO de la línea, en su bloque `documento`, `referencia` o
-# `detraccion` (`LineaDiario`): repetirlo sería tener el mismo hecho en dos sitios.
-EN_LA_LINEA = frozenset({"fecha_vencimiento", "tipo_cambio", "concepto", "detraccion",
-                         "ref_fecha", "ref_tipo_cp", "ref_serie", "ref_numero"})
+# Antes vivían aquí los ocho hechos que también viajan DENTRO de la línea —el concepto, el vencimiento, el tipo de
+# cambio, los cuatro de la nota que modifica y la detracción—, con el argumento de que repetirlos sería tener el mismo
+# hecho en dos sitios. **Se vació en la 3.9**, cuando el driver del estándar tuvo que escribir el bloque
+# `comprobantes`: desde la línea no se pueden recomponer —`referencia.serie_numero` va unido por un guion y no hay
+# vuelta fiable, y la `cuenta` del Banco de la Nación de la detracción no está en ninguna línea—, así que el documento
+# que producía no podía volver a entrar al motor. La cabecera lleva ahora TODOS los hechos, sin excepción, y la línea
+# sigue llevando los suyos: no es duplicar por comodidad, es que cada uno responde a una pregunta distinta.
+#
+# Se queda como frozenset vacío y no se borra: es la mitad de la regla que este archivo hace cumplir, y el día que
+# haya un motivo de verdad para excluir un campo, aquí es donde se declara con su porqué.
+EN_LA_LINEA: frozenset[str] = frozenset()
 
 
 def _campos_del_estandar() -> set[str]:
@@ -98,6 +106,60 @@ def test_el_valor_no_gravado_llega_ya_resuelto():
     declarado = modelo.Comprobante(exonerado=Decimal("50.00"), inafecto=Decimal("10.00"),
                                    valor_no_gravado=Decimal("45.00"))
     assert motor.cabecera_de(declarado).valor_no_gravado == "45.00"
+
+
+def test_la_cabecera_es_un_comprobante_del_estandar():
+    """`como_comprobante()` produce un `comprobante` que valida contra el esquema publicado, campo a campo.
+
+    Es lo que hace posible que un driver escriba el bloque `comprobantes` sin inventarse nada, y por tanto que su
+    documento pueda volver a entrar al motor. Dos cosas lo romperían y las dos están cubiertas aquí: que la cabecera
+    gane un campo que el estándar no declare, y que la detracción arrastre una anotación del motor como `tasa_tabla`,
+    que `$defs/detraccion` rechaza por su `additionalProperties: false`.
+    """
+    from jsonschema import Draft202012Validator
+
+    esquema = api.esquema_open_accounting()
+    c = modelo.Comprobante(tipo_cp="01", serie="F136", numero="431", fecha_emision=date(2026, 1, 10),
+                           fecha_vencimiento=date(2026, 2, 10), contraparte_tipo_doc="6",
+                           contraparte_doc="20131312955", contraparte_nombre="PROVEEDOR DE PRUEBA SAC",
+                           concepto="SERVICIO DE TRANSPORTE", moneda="PEN",
+                           base_gravada=Decimal("1000.00"), igv=Decimal("180.00"), total=Decimal("1180.00"),
+                           exonerado=Decimal("50.00"), destino_igv="DGNG",
+                           detraccion={"codigo": "027", "monto": Decimal("47.00"), "tasa_tabla": "4",
+                                       "cuenta": "00-123-456789"})
+    comprobante = motor.cabecera_de(c).como_comprobante()
+
+    validador = Draft202012Validator({"$ref": "#/$defs/comprobante", "$defs": esquema["$defs"]})
+    errores = [f"{list(e.path)}: {e.message}" for e in validador.iter_errors(comprobante)]
+    assert errores == [], f"la cabecera no es un comprobante del estándar: {errores}"
+
+    assert "glosa" not in comprobante, "la glosa es un derivado del concepto y el estándar no la declara"
+    assert comprobante["concepto"] == "SERVICIO DE TRANSPORTE"
+    assert "tasa_tabla" not in comprobante["detraccion"], "es una anotación del motor, no del estándar"
+    assert comprobante["detraccion"]["cuenta"] == "00-123-456789", "la cuenta del banco no está en ninguna línea"
+
+
+def test_lo_vacio_no_viaja_como_un_dato():
+    """Una cadena vacía no es «no lo sé»: no pasa el `pattern` de `moneda` ni el `enum` de `contraparte_tipo_doc`.
+
+    `a_dict()` sí lleva lo vacío, y a propósito: un driver recibe la lista completa de hechos para saber que existen
+    (`tests/test_driver_diario_json.py`). Quien escribe un documento usa `como_comprobante()`."""
+    cab = motor.cabecera_de(modelo.Comprobante(tipo_cp="01", serie="F1", numero="1"))
+    vacios = ("numero_final", "anio_dua", "condicion_pago", "id_contrato", "cod_dep_aduanera")
+    assert all(cab.a_dict()[campo] == "" for campo in vacios), "a_dict los declara todos, aunque estén vacíos"
+    assert not set(vacios) & set(cab.como_comprobante()), "una cadena vacía no es un dato: la clave se omite"
+    # Lo que sí tiene valor viaja por las dos vías: `moneda` es PEN de fábrica en el modelo.
+    assert cab.a_dict()["moneda"] == "PEN" == cab.como_comprobante()["moneda"]
+
+
+def test_la_glosa_es_derivada_y_no_puede_discrepar():
+    """Deja de ser un campo: sale del concepto y, si viene vacío, del nombre de la contraparte."""
+    con_concepto = motor.cabecera_de(modelo.Comprobante(concepto="alquiler de andamios",
+                                                        contraparte_nombre="Proveedor SAC"))
+    assert con_concepto.glosa == "ALQUILER DE ANDAMIOS"
+    sin_concepto = motor.cabecera_de(modelo.Comprobante(contraparte_nombre="Proveedor SAC"))
+    assert sin_concepto.glosa == "PROVEEDOR SAC"
+    assert "glosa" not in {f.name for f in dataclasses.fields(Cabecera)}
 
 
 def test_la_cabecera_no_entra_en_la_huella():
