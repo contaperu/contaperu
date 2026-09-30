@@ -40,10 +40,25 @@ def nombre(libro: Libro, opciones: OpcionesArchivo = OPCIONES) -> str:
 
 
 def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tuple[bytes, dict]:
-    """Las líneas neutrales, ya armadas, numeradas y cuadradas por el núcleo → el documento `open-accounting` con su
-    bloque `asiento`, en JSON, **y `_exportacion` en la raíz**.
+    """Las líneas del comprobante, ya armadas y cuadradas por el núcleo → el documento `open-accounting` **completo**,
+    en JSON: sus tres bloques —`libro`, `comprobantes` y `asiento`— y `_exportacion` en la raíz.
 
-    Ahí van la huella del asiento y, por comprobante, su identidad y el tramo de líneas que le toca. Hasta la 3.1
+    **El bloque `comprobantes` entra en la 3.9**, y con él se acaba la carencia que tenía este archivo: un asiento
+    solo, sin los comprobantes, no dice qué parte de una compra mixta era exonerada —100 gravado más 50 exonerado
+    salen como una sola línea de gasto de 150, y el IGV de 18 parece calculado sobre 150—, no lleva el nombre de la
+    contraparte —viajaba por accidente dentro de la glosa, solo cuando el concepto venía vacío— y no dice por qué se
+    emitió una nota de crédito. Con los dos bloques el documento **se basta**, y por eso puede volver a entrar al
+    motor y dar el mismo asiento, con la misma huella.
+
+    Va SIEMPRE y no bajo una opción: un documento que solo a veces se basta obliga a quien lo lee a manejar dos
+    formas, y deja condicional la única garantía que hace útil el formato.
+
+    No escribe `imputaciones`, a propósito: el esquema exige `id_externo` en TODOS los comprobantes cuando ese bloque
+    no está vacío, así que un mes cuyo productor no puso ids daría un documento que falla su propio esquema. Quien
+    quiera el asiento idéntico al volver a entrar, pasa la misma imputación que la primera vez.
+
+    **En `_exportacion`** van la huella del asiento y, por comprobante, su identidad y el tramo de líneas que le
+    toca. Hasta la 3.1
     esto solo existía en la respuesta del API (`pipeline/salida.py`), así que **quien recibiera el archivo a secas
     se quedaba sin la clave con la que no repetir un comprobante** — que es justo lo que `INTEGRAR.md` le pide a
     un ERP que use. El driver tenía el índice en la mano y lo descartaba.
@@ -52,6 +67,7 @@ def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tupl
     productor puede llevar ahí `_exportacion`. Lo que la respuesta del API añade y el archivo no puede saber es
     `fecha` —la pone quien llama— y `archivo`, que aquí sería su propio nombre."""
     documento = {"open_accounting": OPEN_ACCOUNTING, "libro": libro.a_dict(),
+                 "comprobantes": [entrada.cabecera.como_comprobante() for entrada in indice],
                  "asiento": [linea.a_dict() for linea in lineas],
                  "_exportacion": {"driver": NOMBRE, "motor": __version__,
                                   **_exportacion_de(libro, lineas, indice)}}

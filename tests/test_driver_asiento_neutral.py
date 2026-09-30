@@ -46,6 +46,70 @@ def test_las_lineas_no_llevan_vocabulario_legacy():
     assert all(linea["detraccion"]["codigo"] and "codigo_interno" not in linea["detraccion"] for linea in detraccion)
 
 
+def test_el_desglose_tributario_y_la_contraparte_viajan():
+    """Lo que el asiento por sí solo no puede decir, y que hasta la 3.9 se perdía sin aviso.
+
+    Una compra de 100 gravado más 50 exonerado produce **una sola línea de gasto de 150**: la contabilidad es
+    correcta, pero quien recibe el archivo no puede separar el desglose ni comprobar que el IGV de 18 corresponde a
+    100 y no a 150. Y el nombre de la contraparte viajaba por accidente —dentro de la glosa, y solo cuando el
+    concepto venía vacío—: con un concepto propio desaparecía del archivo y el ERP se quedaba con el RUC a secas.
+    """
+    documento = casos()
+    c = documento["comprobantes"][0]
+    c.update(base_gravada="100.00", igv="18.00", exonerado="50.00", total="168.00",
+             concepto="ALQUILER DE ANDAMIOS ENERO", contraparte_nombre="MAYORISTA NACIONAL SAC")
+    r = api.exportar(documento, driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
+    d = json.loads(base64.b64decode(r["contenido_base64"]))
+
+    assert list(d) == ["open_accounting", "libro", "comprobantes", "asiento", "_exportacion"]
+    comprobante = d["comprobantes"][0]
+    assert comprobante["exonerado"] == "50.00", "el asiento no puede decir qué parte no estaba gravada"
+    assert comprobante["base_gravada"] == "100.00" and comprobante["igv"] == "18.00"
+    assert comprobante["contraparte_nombre"] == "MAYORISTA NACIONAL SAC"
+    assert comprobante["concepto"] == "ALQUILER DE ANDAMIOS ENERO"
+    # Y el asiento sigue siendo el mismo: la línea del gasto es una sola, por los 150.
+    principal = [linea for linea in d["asiento"] if linea["rol"] == "principal"][0]
+    assert principal["importe"] == "150.00"
+
+
+def test_la_nota_dice_por_que_se_emitio():
+    """El motivo del Catálogo 09 decide el tratamiento, y una nota asentada no lo lleva escrito en ninguna línea."""
+    documento = casos()
+    notas = [c for c in documento["comprobantes"] if c["tipo_cp"] in ("07", "87")]
+    assert notas, "el golden trae una nota de crédito"
+    notas[0]["tipo_nota"] = "06"
+    r = api.exportar(documento, driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
+    d = json.loads(base64.b64decode(r["contenido_base64"]))
+    de_la_nota = [c for c in d["comprobantes"] if c["tipo_cp"] in ("07", "87")][0]
+    assert de_la_nota["tipo_nota"] == "06"
+    assert de_la_nota["ref_serie"] and de_la_nota["ref_numero"], "y a qué comprobante apunta"
+
+
+def test_el_documento_vuelve_a_entrar_y_da_el_mismo_asiento():
+    """La prueba de que el documento se basta: sale del motor y vuelve a entrar dando lo mismo, bit a bit.
+
+    Es lo que un ERP necesita para no depender de haber guardado nada más, y lo que era imposible antes de que la
+    cabecera llevara los ocho hechos que faltaban: sin el vencimiento la validación se detenía en
+    `VENCIMIENTO_FALTA`, sin el tipo de cambio en `TC_FALTA` y sin los `ref_*` en `NOTA_SIN_REFERENCIA`.
+
+    **El límite, y es a propósito**: la imputación no viaja en el documento —el esquema exigiría `id_externo` en
+    todos los comprobantes— así que quien quiera el mismo asiento pasa la misma imputación que la primera vez. Sin
+    ella, el mes se detiene pidiendo la cuenta, que es lo correcto: la cuenta es una decisión, no un hecho.
+    """
+    ida = api.generar_asiento(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
+    archivo = json.loads(api.exportar_archivo(casos(), driver="asiento_neutral",
+                                              imputacion=IMPUTACION_CASOS).contenido)
+
+    vuelta = api.generar_asiento(archivo, driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
+    assert vuelta["asiento"] == ida["asiento"]
+    assert vuelta["_asiento"]["huella"] == ida["_asiento"]["huella"]
+    assert vuelta["_asiento"]["comprobantes"] == ida["_asiento"]["comprobantes"]
+
+    assert "imputaciones" not in archivo
+    with pytest.raises(api.SinCuenta):
+        api.generar_asiento(archivo, driver="asiento_neutral")
+
+
 def test_la_constancia_pendiente_no_viaja_como_comodin():
     """El `999999999` es un apaño peruano para llenar una columna obligatoria, y no un número de depósito.
 

@@ -331,20 +331,34 @@ Todo lo de arriba supone que llamas a `contaperu`. No hace falta: `open-accounti
 puedes construir sobre él, en el lenguaje que sea. Esta sección es para eso, y es el espejo de la anterior —allí se
 escribe un driver contra el contrato del motor; aquí se lee el documento contra el contrato del estándar—.
 
-**Qué recibes.** El documento que produce el driver `asiento_neutral` tiene cuatro claves:
+**Qué recibes.** El documento que produce el driver `asiento_neutral` tiene cinco claves, y desde la 3.9 lleva los
+**tres bloques** del estándar: el libro, los comprobantes tal como los informa SUNAT y su asiento.
 
 ```json
 {
   "open_accounting": "1.0",
   "libro": {"ruc": "…", "razon_social": "…", "periodo": "202601", "tipo": "compra"},
-  "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "1000.00", "clase": "gasto", "rol": "principal"}],
-  "_exportacion": {"driver": "asiento_neutral", "motor": "3.1.0", "huella": "…", "comprobantes": [{"…"}]}
+  "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "45680", "fecha_emision": "2026-01-10",
+                    "contraparte_doc": "20677777771", "contraparte_nombre": "MAYORISTA NACIONAL SAC",
+                    "concepto": "…", "base_gravada": "1000.00", "igv": "180.00", "exonerado": "50.00",
+                    "total": "1230.00", "destino_igv": "DGNG", "id_externo": "f1"}],
+  "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "1050.00", "clase": "gasto", "rol": "principal"}],
+  "_exportacion": {"driver": "asiento_neutral", "motor": "3.9.0", "huella": "…", "comprobantes": [{"…"}]}
 }
 ```
 
 **Qué te garantiza, y es lo que ahorra el trabajo:** las cuentas ya están decididas, el asiento **cuadra** —el motor
 se niega a producirlo si no— y el orden de las líneas es estable. Cada línea dice qué es por su `rol` y trae el
 código SUNAT de su documento, no la sigla de ningún sistema.
+
+**Y se basta**, que es lo que el bloque `comprobantes` añadió: el asiento por sí solo no puede decirte qué parte de
+una compra mixta estaba exonerada —100 gravado más 50 exonerado son una sola línea de gasto de 150—, ni cómo se llama
+tu proveedor, ni por qué se emitió una nota de crédito. Por eso **el documento puede volver a entrar al motor y dar
+el mismo asiento, con la misma huella**, pasándole la misma imputación que la primera vez.
+
+**Ojo con las dos claves que se llaman `comprobantes`** y no son lo mismo: la de la raíz son los hechos de cada
+comprobante —el bloque del estándar— y la de `_exportacion` es su identidad, el tramo de líneas que le toca y su
+huella. La segunda se llama así desde la 3.1 y no se renombra; la primera es la del estándar desde su 0.1.
 
 **Cómo lo enlazas con lo tuyo.** Por dos vías, y conviene usar las dos:
 
@@ -355,8 +369,12 @@ código SUNAT de su documento, no la sigla de ningún sistema.
 
 **Qué NO lleva, y por qué.** Ni `fecha` de exportación ni nombre de archivo: no son hechos del asiento, y quien
 llama al API los recibe en su respuesta. Tampoco sub-diarios ni correlativos: son vocabulario de un sistema legacy y
-el documento neutral no los tiene (`sub_diarios` sale vacío a propósito). Y una línea **no lleva las claves que
-están vacías**: cuenta con que el juego de campos varíe de una a otra.
+el documento del estándar no los tiene (`sub_diarios` sale vacío a propósito), ni el comodín `999999999` de una
+constancia de detracción que nadie ha depositado todavía: **sin depósito, la clave no viaja**. Tampoco el bloque
+`imputaciones`, y es a propósito: el esquema exige entonces `id_externo` en todos los comprobantes, y un mes cuyo
+productor no los puso daría un documento que falla su propio esquema. Y ni una línea ni un comprobante **llevan las
+claves que están vacías**: cuenta con que el juego de campos varíe de uno a otro, porque el estándar distingue «no lo
+sé» de «es esto» omitiendo la clave.
 
 **Cómo compruebas lo que produces**, sin escribirle a nadie:
 
