@@ -26,7 +26,7 @@ from ..kit.columnas import ColumnaDeLinea, escribir_csv
 from ...modelo import Libro
 
 NOMBRE = "csv"
-# Un formato neutral para leer o integrar: proyecta la línea neutral (`drivers.contrato.CANALES`).
+# Un formato neutral para leer o integrar: proyecta la línea del comprobante (`drivers.contrato.CANALES`).
 CANAL = "intercambio"
 OPCIONES = Opciones(fecha="AAAA-MM-DD", extension=".csv")
 FORMATOS = {"compra": "csv_asiento", "venta": "csv_asiento"}
@@ -39,8 +39,8 @@ CONFIGURACION = CONFIGURACION_DEL_ASIENTO
 
 SEPARADOR = ";"
 
-# La fuente de cada columna es el propio estándar: el CSV escribe la línea neutral, un campo por columna.
-_FUENTE = "estandar/LEEME.md, «Las líneas del asiento»: la línea neutral de open-accounting, un campo por columna"
+# La fuente de cada columna es el propio estándar: el CSV escribe la línea del comprobante, un campo por columna.
+_FUENTE = "estandar/LEEME.md, «Las líneas del asiento»: la línea del comprobante de open-accounting, un campo por columna"
 
 # Una columna por campo de la línea de diario. Los bloques anidados (documento, referencia,
 # detracción) se aplanan con prefijo, porque un CSV no sabe anidar.
@@ -88,7 +88,7 @@ def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
 
 def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones: Opciones = OPCIONES,
                  separador: str = SEPARADOR, bom: bool = True) -> tuple[bytes, dict]:
-    """Líneas neutrales (ya numeradas y cuadradas por el núcleo) → CSV.
+    """Líneas del comprobante (ya numeradas y cuadradas por el núcleo) → CSV.
 
     Es el driver de asientos más sencillo que puede escribirse con la forma `desde_lineas` del
     contrato, y por eso sirve de plantilla: traduce vocabulario y nada más."""

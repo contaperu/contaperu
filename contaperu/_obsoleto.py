@@ -1,8 +1,8 @@
-"""El mecanismo con que una ruta que cambió de sitio sigue resolviendo, y avisa.
+"""El mecanismo con que un nombre que cambió sigue resolviendo, y avisa.
 
-**Hoy no lo usa nadie**: la 2.0 retiró la última ruta de la 0.x. Se conserva porque `RutaObsoleta` es parte de la API
-pública —una aplicación la filtra con precisión, sin apagar los avisos de nadie más— y porque la próxima vez que algo
-cambie de sitio, el circuito ya está escrito y probado:
+Estuvo sin usarse desde que la 2.0 retiró la última ruta de la 0.x hasta que la 3.10 renombró el driver
+`asiento_neutral` a `asiento_contable`: ahí volvió a hacer falta, y por eso se había conservado. `RutaObsoleta` es
+parte de la API pública —una aplicación la filtra con precisión, sin apagar los avisos de nadie más—:
 
     warnings.filterwarnings("ignore", category=contaperu.RutaObsoleta)
 
@@ -10,7 +10,12 @@ Las dos decisiones que lo hacen usable, y que conviene no perder:
 
 - **El aviso sale al USAR la ruta vieja, no al importar el módulo.** Por eso `reexportar` devuelve un `__getattr__` de
   módulo en vez de ejecutar nada en el cuerpo: un `import` en el arranque de una aplicación no ensucia su registro.
-- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 3.0.
+- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 4.0, que
+  es lo que promete `CLAUDE.md`: lo que se retira avisa durante toda la mayor anterior. Decía «3.0» con el paquete ya
+  en la 3.8, así que el aviso citaba una versión pasada — una promesa de retiro no puede sostener nada si el número que
+  da ya quedó atrás.
+- **El texto del aviso no supone de qué clase es lo que cambió.** Nació para las rutas de la 0.x y lo decía en la
+  cadena; ahora `que` lo dice quien llama, porque un nombre de driver no es una ruta de módulo.
 
 La batería de este repositorio convierte el aviso en error (`[tool.pytest.ini_options] filterwarnings`), así que
 ningún test usa una ruta vieja sin decirlo.
@@ -22,16 +27,22 @@ import importlib
 import warnings
 from typing import Any, Callable
 
-RETIRO = "3.0"
+RETIRO = "4.0"
 
 
 class RutaObsoleta(DeprecationWarning):
-    """Una ruta que cambió de sitio, sigue funcionando y se retira en la versión mayor siguiente."""
+    """Algo que cambió de nombre o de sitio, sigue funcionando y se retira en la versión mayor siguiente.
+
+    Lo usan las rutas de módulo (`reexportar`) y, desde la 3.10, el nombre viejo de un driver (`drivers.ALIAS`)."""
 
 
-def avisar(vieja: str, nueva: str, *, nivel: int = 3) -> None:
-    """Avisa de que `vieja` se retira, y dice qué usar en su lugar. `nivel` apunta a quien llamó a la ruta vieja."""
-    warnings.warn(f"`{vieja}` es una ruta de la 0.x y se retira en la {RETIRO}: usa `{nueva}`.", RutaObsoleta,
+def avisar(vieja: str, nueva: str, *, que: str = "una ruta de la 0.x", nivel: int = 3) -> None:
+    """Avisa de que `vieja` se retira, y dice qué usar en su lugar.
+
+    `que` dice QUÉ es lo que cambió —una ruta de módulo, el nombre viejo de un driver— porque el mensaje lo lee una
+    persona y «es una ruta de la 0.x» sería falso para cualquier cosa que no lo sea. `nivel` apunta a quien usó lo
+    viejo, no a este archivo."""
+    warnings.warn(f"`{vieja}` es {que} y se retira en la {RETIRO}: usa `{nueva}`.", RutaObsoleta,
                   stacklevel=nivel)
 
 

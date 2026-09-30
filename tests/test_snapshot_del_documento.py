@@ -99,7 +99,7 @@ def serializar(caso) -> dict:
 
     `_exportacion.motor` se quita porque cambia en cada versión: dejarlo dentro haría que este snapshot se moviera sin
     que nada de contabilidad hubiera cambiado, y un snapshot que se mueve solo deja de vigilar."""
-    exportado = api.exportar_archivo(documento_de(caso), driver="asiento_neutral",
+    exportado = api.exportar_archivo(documento_de(caso), driver="asiento_contable",
                                      configuracion=CONFIG, imputacion=IMPUTACION)
     documento = json.loads(exportado.contenido)
     documento["_exportacion"].pop("motor", None)
@@ -129,7 +129,7 @@ def test_el_snapshot_cubre_todos_los_casos():
 
 def test_la_version_del_motor_viaja_pero_no_se_congela():
     """Se saca del snapshot a propósito, así que se comprueba aparte: el archivo sí la lleva."""
-    exportado = api.exportar_archivo(documento_de(CASOS[0]), driver="asiento_neutral",
+    exportado = api.exportar_archivo(documento_de(CASOS[0]), driver="asiento_contable",
                                      configuracion=CONFIG, imputacion=IMPUTACION)
     assert json.loads(exportado.contenido)["_exportacion"]["motor"] == api.__version__
 

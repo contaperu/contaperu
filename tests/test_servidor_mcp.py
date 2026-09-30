@@ -177,7 +177,7 @@ def test_los_recursos_son_legibles():
     assert "generar_el_registro" in canal["no_existe_por_api"]
 
     drivers = json.loads(leer_recurso("contaperu://drivers"))
-    assert set(drivers) == {"sire", "concar", "csv", "contasis", "starsoft", "asiento_neutral"}
+    assert set(drivers) == {"sire", "concar", "csv", "contasis", "starsoft", "asiento_contable"}
     assert drivers["concar"]["tipo"] == "archivo" and drivers["sire"]["tipo"] == "texto"
     assert drivers["sire"]["familia"] == "registro" and drivers["csv"]["familia"] == "asiento"
     assert drivers["contasis"]["configurable"] is True and drivers["sire"]["configurable"] is False
@@ -410,7 +410,7 @@ def test_los_destinos_se_pueden_preguntar_llamando_y_no_solo_leyendo():
     llamado = llamar("drivers_disponibles")
     leido = json.loads(leer_recurso("contaperu://drivers"))
     assert llamado == leido, "las dos vias tienen que decir lo mismo"
-    assert set(llamado) == {"sire", "concar", "csv", "contasis", "starsoft", "asiento_neutral"}
+    assert set(llamado) == {"sire", "concar", "csv", "contasis", "starsoft", "asiento_contable"}
     # La diferencia que un agente necesita saber ANTES de elegir: el centro de costo lo pide CONCAR y no el CSV.
     assert "centro_costo" in llamado["concar"]["exige"]
     assert "centro_costo" not in llamado["csv"]["exige"]

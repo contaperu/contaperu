@@ -32,7 +32,7 @@ def documento(cuenta: str, **comprobante) -> dict:
 
 
 def asiento(cuenta: str, **comprobante) -> list[dict]:
-    return api.generar_asiento(documento(cuenta, **comprobante), driver="asiento_neutral",
+    return api.generar_asiento(documento(cuenta, **comprobante), driver="asiento_contable",
                                configuracion=SIN_CENTROS)["asiento"]
 
 
@@ -85,7 +85,7 @@ def test_el_igv_de_ventas_es_la_misma_cuenta_y_la_misma_clase_al_haber():
     lo aumenta."""
     doc = documento("701101")
     doc["libro"]["tipo"] = "venta"
-    lineas = api.generar_asiento(doc, driver="asiento_neutral", configuracion=SIN_CENTROS)["asiento"]
+    lineas = api.generar_asiento(doc, driver="asiento_contable", configuracion=SIN_CENTROS)["asiento"]
     igv = next(ln for ln in lineas if ln["rol"] == "igv")
     assert (igv["cuenta"], igv["clase"], igv["debe_haber"]) == ("401111", "pasivo", "H")
 
@@ -171,12 +171,12 @@ def test_una_cuenta_sin_clase_que_no_es_la_de_la_base_tambien_se_dice_antes_de_e
     estándar rechaza, y sin un solo aviso."""
     doc = documento("634301")
     doc["imputaciones"]["c1"]["cuenta_tercero"] = "011101"          # elemento 0: cuentas de orden
-    d = api.diagnosticar(doc, driver="asiento_neutral", configuracion=SIN_CENTROS)
+    d = api.diagnosticar(doc, driver="asiento_contable", configuracion=SIN_CENTROS)
     assert d["listo_para_exportar"] is False
     assert d["faltantes"]["sin_clase"] == ["F001-500"]
 
     con_igv_raro = dict(SIN_CENTROS, cuentas={"igv": "891101"})     # elemento 8: saldos intermediarios
-    d2 = api.diagnosticar(documento("634301"), driver="asiento_neutral", configuracion=con_igv_raro)
+    d2 = api.diagnosticar(documento("634301"), driver="asiento_contable", configuracion=con_igv_raro)
     assert d2["faltantes"]["sin_clase"] == ["F001-500"]
 
 
@@ -210,7 +210,7 @@ def test_el_diagnostico_cuenta_la_cuenta_sin_clase_y_se_la_pide_al_contador():
     """Como cualquier otra falta: con su motivo, su cuenta y a quién pedírsela — la eligió el contador."""
     from contaperu.pipeline import diagnostico as diag
 
-    d = api.diagnosticar(documento("891101"), driver="asiento_neutral", configuracion=SIN_CENTROS)
+    d = api.diagnosticar(documento("891101"), driver="asiento_contable", configuracion=SIN_CENTROS)
     assert d["listo_para_exportar"] is False
     assert d["faltantes"]["sin_clase"] == ["F001-500"]
     assert any("clase" in motivo for motivo in d["por_que_no"]), d["por_que_no"]

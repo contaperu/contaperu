@@ -14,10 +14,12 @@ Los seis que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, sal
 - **`starsoft`** — el TXT de palotes, dentro de un ZIP, que importa STARSOFT Desktop. Escrito contra su
   documentación oficial; **en pruebas** hasta que alguien importe un mes de verdad.
 - **`csv`** — las líneas de diario en columnas, para quien todavía no tiene driver.
-- **`asiento_neutral`** — el documento del estándar con su asiento, sin vocabulario legacy (sin siglas, sub-diarios ni
-  correlativos): la salida para un ERP nuevo, que parte del estándar en vez de reimplementar el IGV.
+- **`asiento_contable`** — el documento del estándar completo: el libro, sus comprobantes y su asiento, sin vocabulario
+  legacy (sin siglas, sub-diarios ni correlativos). Es la salida para un ERP nuevo, que parte del estándar en vez de
+  reimplementar el IGV, y desde la 3.10 se llama así: antes era `asiento_neutral`, que decía de qué se libraba en
+  lugar de qué es. El nombre viejo sigue resolviendo toda la 3.x (`ALIAS`).
 
-**`asiento_neutral` no es la carpeta `contaperu/asiento/`.** Esa arma el asiento —decide cuentas, sentidos,
+**`asiento_contable` no es la carpeta `contaperu/asiento/`.** Esa arma el asiento —decide cuentas, sentidos,
 importes y orden, y es contabilidad peruana—; este lo **escribe** tal como salió, sin traducirlo. La forma del
 asiento estándar vive en `estandar/open-accounting.schema.json`; `ARQUITECTURA.md` §«Dónde vive el asiento
 estándar» lo cuenta con las tres capas y su acoplamiento medido.
@@ -42,18 +44,26 @@ import warnings
 from importlib.metadata import entry_points
 from types import ModuleType
 
-from . import asiento_neutral, concar, contasis, contrato, csv, sire, starsoft
+from .. import _obsoleto
+from . import asiento_contable, concar, contasis, contrato, csv, sire, starsoft
 from .kit import Opciones
 
 GRUPO = "contaperu.drivers"
 DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
                                    contasis.NOMBRE: contasis, starsoft.NOMBRE: starsoft,
-                                   asiento_neutral.NOMBRE: asiento_neutral}
+                                   asiento_contable.NOMBRE: asiento_contable}
 DRIVER_POR_DEFECTO = "sire"
+# Los nombres viejos que siguen resolviendo, con el aviso de cuál usar. **No viven en `DE_SERIE` ni en `DRIVERS`**: ahí
+# aparecerían como un driver más en `api.drivers_disponibles()`, en el recurso `contaperu://drivers` y en la docena de
+# tests que comprueban la lista de destinos contra un conjunto escrito a mano. Un alias no es un destino: es la misma
+# salida por su nombre anterior. Se retiran en la 4.0 (`_obsoleto.RETIRO`).
+ALIAS = {"asiento_neutral": asiento_contable.NOMBRE}
 
-__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones",
-           "asiento_neutral", "concar", "contasis", "contrato", "csv", "de_terceros", "formato_de",
-           "obtener", "recargar", "sire", "starsoft"]
+# `asiento_neutral` se queda en la lista: es el talón que sostiene el nombre viejo, y quitarlo de aquí sería quitar un
+# nombre público, o sea una versión mayor.
+__all__ = ["ALIAS", "DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones",
+           "asiento_contable", "asiento_neutral", "concar", "contasis", "contrato", "csv", "de_terceros",
+           "formato_de", "obtener", "recargar", "sire", "starsoft"]
 
 
 class AvisoDriver(UserWarning):
@@ -161,9 +171,19 @@ def recargar() -> dict[str, ModuleType]:
 
 
 def obtener(nombre: str) -> ModuleType:
+    """El módulo de un driver por su nombre, o el `ValueError` que dice cuáles hay.
+
+    Un nombre de `ALIAS` resuelve al driver que lo reemplazó y avisa con `RutaObsoleta`. Aquí y no en el registro
+    porque **es el único sitio por donde pasan las cuatro puertas** —la librería, la CLI, HTTP y el MCP llegan todas a
+    `pipeline`, y `pipeline` llega aquí—, así que un alias puesto en este punto los cubre a los cuatro y no ensucia la
+    lista de destinos que ese mismo registro publica."""
     try:
         return DRIVERS[nombre]
     except KeyError:
+        if nombre in ALIAS:
+            nuevo = ALIAS[nombre]
+            _obsoleto.avisar(f'driver="{nombre}"', f'driver="{nuevo}"', que="el nombre viejo de un driver")
+            return DRIVERS[nuevo]
         raise ValueError(f"Driver desconocido: {nombre!r}. Disponibles: {', '.join(DRIVERS)}") from None
 
 

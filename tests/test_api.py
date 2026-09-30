@@ -73,7 +73,7 @@ def test_cada_driver_dice_su_grupo():
     """Lo que sale va al SIRE, a un sistema legacy o a un ERP (John, 15-sep-2026): el grupo sale del canal."""
     assert {nombre: datos["grupo"] for nombre, datos in api.drivers_disponibles().items()} == {
         "sire": "sire", "concar": "legacy", "contasis": "legacy", "starsoft": "legacy", "csv": "erp",
-        "asiento_neutral": "erp"}
+        "asiento_contable": "erp"}
 
 
 def test_verificar_un_driver_dice_lo_que_le_falta():

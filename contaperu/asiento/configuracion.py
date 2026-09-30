@@ -1,7 +1,7 @@
 """Lo que el núcleo lee al armar un asiento: la sigla y el sub-diario de cada tipo de comprobante, los sub-diarios por
 uso y la línea de la detracción (`CONFIGURACION_DEL_ASIENTO`).
 
-No es de un sistema en particular: llena campos de la línea neutral, así que cada driver de asientos lo incluye en su
+No es de un sistema en particular: llena campos de la línea del comprobante, así que cada driver de asientos lo incluye en su
 sección —CONCAR y el CSV— y cada uno lo guarda en la suya. Lo general de la contabilidad (cuentas, centros de costo,
 tasas de detracción) se declara en `contaperu/configuracion.py`, y lo propio de cada sistema, en su driver.
 

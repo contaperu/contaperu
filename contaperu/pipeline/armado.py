@@ -1,6 +1,6 @@
 """Armar: el asiento de un mes y la forma en que cada driver lo recibe.
 
-La contabilidad se escribe una vez para todos los sistemas: el núcleo arma las líneas neutrales, las numera y exige que
+La contabilidad se escribe una vez para todos los sistemas: el núcleo arma las líneas del asiento, las numera y exige que
 cuadren; un driver de asientos solo las traduce, y uno de registro recibe los comprobantes después de que el núcleo
 exigió lo que ese destino pide.
 """
@@ -55,7 +55,7 @@ def por_comprobante(libro: Libro, lineas: list, indice: tuple) -> list[dict]:
 
 def desde_lineas(modulo, libro: Libro, comprobantes: list[Comprobante], opciones: Any,
                  config: dict | None = None, correlativos: dict[str, int] | None = None) -> tuple[bytes, dict]:
-    """Un driver de asientos de la forma `desde_lineas`: el núcleo arma las líneas neutrales, las
+    """Un driver de asientos de la forma `desde_lineas`: el núcleo arma las líneas del asiento, las
     numera y exige que cuadren; el driver solo las traduce. Así la contabilidad se escribe una vez
     para todos los ERP, y un driver nuevo no puede equivocarse en una cuenta ni en un sentido."""
     contenido, resumen, _, _ = desde_lineas_con_indice(modulo, libro, comprobantes, opciones, config, correlativos)
@@ -127,7 +127,7 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
     if no_caben:
         raise contrato.NoCabe(no_caben)
     corr = asi.correlativos_de_partida(incluidos, config, libro.es_venta, correlativos)
-    # Directo a las líneas neutrales: sin pasar por las columnas de ningún ERP.
+    # Directo a las líneas del asiento: sin pasar por las columnas de ningún ERP.
     neutrales, rangos, indice = asi.lineas_e_indice_del_libro(libro, incluidos, config, corr,
                                                               centro_en_anexo=contrato.centro_en_anexo(modulo, config),
                                                               vocabulario=contrato.vocabulario(modulo))

@@ -46,7 +46,7 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
 Por capas, de abajo arriba, que `tests/test_capas.py` hace cumplir: un **núcleo** que sabe contabilidad peruana y nada
 más (`modelo`, `lectores`, `validar`, `asiento`, `igv`, `detracciones`, `partida_doble`, `pcge`); **drivers** que
 conocen el formato de un destino y nada de contabilidad, cada uno con su canal (`drivers/concar` y `drivers/contasis`
-legacy, `drivers/sire` tributario, `drivers/csv` y `drivers/asiento_neutral` intercambio, este con vocabulario neutral para los ERP, y los de terceros por *entry points*, con el contrato de
+legacy, `drivers/sire` tributario, `drivers/csv` y `drivers/asiento_contable` intercambio, este con vocabulario neutral para los ERP, y los de terceros por *entry points*, con el contrato de
 `drivers/contrato.py` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
 (`contaperu.api`, con la tabla de operaciones y el contrato OpenConta); y tres **puertas** que solo hablan con la api
 (`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x. El
@@ -135,7 +135,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 | Documento | Qué responde |
 |---|---|
 | `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres grupos (SIRE, legacy y ERP); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
-| `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea neutral, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
+| `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea del comprobante, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
 | `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, quién aporta cada variable y cuáles de las cuatro piezas aceptan las tuyas, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 2.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |

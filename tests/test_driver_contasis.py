@@ -173,7 +173,7 @@ def test_sus_cuentas_son_las_que_el_nucleo_decidiria(tipo, base, total, centro):
     hubiera estado ahí desde siempre, y convierte la frase de la documentación en una aserción.
 
     Es la misma pareja que ya tiene CONCAR: `test_snapshot_concar` congela sus celdas y
-    `test_driver_asiento_neutral` le lleva la contraria. Y la comparación en sí ya existía en
+    `test_driver_asiento_contable` le lleva la contraria. Y la comparación en sí ya existía en
     `test_contrato_drivers` para un driver de registro DE MENTIRA, mientras el de verdad no la tenía.
     """
     documento = imputado(FACTURA, dict(FACTURA, serie="F002", numero="00000456", contraparte_doc="20512333797"),

@@ -98,11 +98,11 @@ def test_un_tipo_de_libro_desconocido_si_rompe_y_es_a_proposito():
 
 def test_el_destino_que_no_declara_un_libro_lo_rechaza_limpio():
     """La otra mitad de esa degradación: no la hace el documento, la hace el driver, diciendo qué libros lleva."""
-    from contaperu.drivers import asiento_neutral, formato_de, sire
+    from contaperu.drivers import asiento_contable, formato_de, sire
 
     assert set(sire.FORMATOS) == set(TIPOS_DE_LIBRO_DE_LA_1_0)
-    assert formato_de("asiento_neutral", "compra") == "asiento_neutral_json"
-    assert asiento_neutral.FORMATOS.get("banco") is None
+    assert formato_de("asiento_contable", "compra") == "asiento_contable_json"
+    assert asiento_contable.FORMATOS.get("banco") is None
 
 
 def test_el_catalogo_viaja_donde_el_esquema():

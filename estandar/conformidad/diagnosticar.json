@@ -38,7 +38,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": true,
     "por_que_no": [],
@@ -77,7 +77,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": false,
     "faltantes": {
@@ -127,7 +127,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": false,
     "faltantes": {
@@ -178,7 +178,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": false,
     "faltantes": {
@@ -228,7 +228,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": false,
     "observaciones": [
@@ -274,7 +274,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": true
    }
@@ -317,7 +317,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": true
    }
@@ -359,7 +359,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": false,
     "observaciones": [
@@ -444,7 +444,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": true
    }
@@ -492,7 +492,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "listo_para_exportar": true,
     "detracciones_pendientes": 1
@@ -534,7 +534,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "error": "cada comprobante necesita su `id_externo`"
    }
@@ -571,7 +571,7 @@
    "configuracion": {
     "usa_centros_costo": false
    },
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "espera": {
     "error": "se declara `open_accounting` 0.3"
    }

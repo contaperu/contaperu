@@ -1,4 +1,4 @@
-"""De una línea neutral a una fila de STARSOFT.
+"""De una línea del comprobante a una fila de STARSOFT.
 
 El motor pone la contabilidad —qué cuentas, qué sentido, qué importes, la numeración— y aquí solo se traduce
 vocabulario. Las líneas llegan cuadradas y numeradas; este módulo no decide ni una cuenta.
@@ -142,7 +142,7 @@ def voucher(correlativo: str) -> str:
 
 def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
          detraccion: LineaDiario | None = None) -> dict[str, Any]:
-    """Una línea neutral → una fila del archivo, con las claves del libro que toca (`datos.COLUMNAS`).
+    """Una línea del comprobante → una fila del archivo, con las claves del libro que toca (`datos.COLUMNAS`).
 
     **Compras y ventas no comparten ni las cabeceras**: son dos plantillas y se calca cada una de su fuente, así
     que aquí solo se reparte. La de ventas sale de las capturas de la hoja real; la de compras, del vídeo.

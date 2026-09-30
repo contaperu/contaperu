@@ -1,4 +1,4 @@
-"""La línea neutral, proyectada a las 41 columnas del Excel de CONCAR.
+"""La línea del comprobante, proyectada a las 41 columnas del Excel de CONCAR.
 
 Lo que aquí se decide es FORMATO de CONCAR, no contabilidad: el código de moneda de su T.G. 03
 (MN/US), los flags de conversión, los cortes de la glosa a 40 y 30 caracteres, el importe partido en
@@ -49,7 +49,7 @@ def _cabecera(c: Comprobante | Cabecera) -> Cabecera:
 
 
 def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[str, Any]:
-    """Una línea neutral → una fila del Excel (claves 'A'..'AO', en el orden de la plantilla). `c` es la cabecera del
+    """Una línea del comprobante → una fila del Excel (claves 'A'..'AO', en el orden de la plantilla). `c` es la cabecera del
     comprobante (`asiento.indice`) o el propio comprobante: de ahí salen la glosa de la F y la tasa de la AO."""
     cabecera = _cabecera(c)
     es_usd = linea.moneda == "USD"
@@ -146,7 +146,7 @@ def no_caben(libro: Libro, comprobantes: list[Comprobante], config: dict) -> dic
     return {datos.MOTIVOS["largo"]: fuera}
 
 
-# ── El camino inverso: de las columnas de CONCAR a la línea neutral ──────────────────────────────────────────────
+# ── El camino inverso: de las columnas de CONCAR a la línea del comprobante ──────────────────────────────────────────────
 # Era como se obtenía la línea cuando el asiento nacía en columnas (hasta la 0.7), y se conserva con su driver. No
 # rellena los campos que llegaron después (`rol`, `tipo_cp`, el código SUNAT de la detracción). Qué significa cada
 # columna está en `datos.CABECERAS`, con los títulos literales de la plantilla oficial y sus notas.
@@ -190,7 +190,7 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
         debe_haber=_texto_de(fila.get("N")),
         importe=celdas.importe_exacto(fila.get("O")),
         # CONCAR no lleva una columna de clase: no le hace falta, porque su plan de cuentas vive en su sistema. Al
-        # volver a línea neutral se deriva de la cuenta, igual que al armarla, o el documento no validaría.
+        # volver a línea del comprobante se deriva de la cuenta, igual que al armarla, o el documento no validaría.
         clase=clase_de(_texto_de(fila.get("K"))),
         sub_diario=_texto_de(fila.get("B")),
         correlativo=_texto_de(fila.get("C")),
@@ -209,7 +209,7 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
 
 
 def a_lineas(filas: list[dict], config: dict | None = None) -> list[LineaDiario]:
-    """Todas las filas de un asiento -> líneas neutrales. `config` solo se usa para
+    """Todas las filas de un asiento -> líneas del asiento. `config` solo se usa para
     devolverle a la moneda su código ISO."""
     codigos = (config or {}).get(MONEDAS_CODIGO) or {}
     monedas = {v: k for k, v in codigos.items()}

@@ -79,7 +79,7 @@ Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega
 - **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y de STARSOFT
   —este último en pruebas— y el registro de CONTASIS; SISCONT espera un archivo que ese sistema haya aceptado.
 - **ERP:** los sistemas nuevos, en cualquier lenguaje. Reciben el documento `open-accounting` con su asiento **sin
-  vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `asiento_neutral`), el
+  vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `asiento_contable`), el
   CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
 
 Cualquier entrada puede terminar en cualquiera de los tres grupos. Las cuentas, los sentidos del debe y el haber y la
@@ -168,6 +168,10 @@ en [INTEGRAR.md](INTEGRAR.md).
 | Palabra | Qué es, en términos contables |
 |---|---|
 | **Arquitectura colectiva** | Resolver la contabilidad automatizada una vez, en abierto y entre todos, en vez de que cada empresa construya su propia integración |
+| **Asiento** | El apunte de partida doble de un comprobante: sus líneas, con la misma suma al Debe y al Haber |
+| **Línea del comprobante** | Una línea de ese asiento: una cuenta, un sentido (Debe o Haber) y un importe. Es lo que cualquier sistema contable sabe recibir, y en el documento se llama `linea` |
+| **Registro** | El libro que se presenta a SUNAT —el de compras o el de ventas—, con una fila por comprobante y **sin cuentas**. Es la otra familia de salida frente al asiento, y un driver declara en cuál está; no es lo mismo que «registrar» un comprobante en una aplicación |
+| **Vocabulario legacy** | Las palabras que pide un sistema contable instalado y que no son contabilidad: la sigla del documento, el sub-diario, el correlativo. Un ERP nuevo no las necesita |
 | **SIRE** | El Sistema Integrado de Registros Electrónicos de SUNAT, donde se presentan el registro de ventas (RVIE) y el de compras (RCE) |
 | **Legacy** | Un sistema contable instalado que importa un archivo plano: CONCAR, CONTASIS, SISCONT, STARSOFT |
 | **Driver** | El traductor al formato de un sistema contable: sabe en qué columna va cada dato de CONCAR o de CONTASIS, pero nunca decide una cuenta |
@@ -210,7 +214,7 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 
 - **SIRE:** el TXT de reemplazo del RVIE y del RCE.
 - **Legacy:** a CONCAR (Excel de asientos de 41 columnas) y a CONTASIS (su registro de compras y de ventas en Excel).
-- **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `asiento_neutral`), y un CSV
+- **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `asiento_contable`), y un CSV
   genérico con las líneas de diario, para cualquier destino que todavía no tenga driver.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta para el sistema de
@@ -255,7 +259,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Driver STARSOFT (asientos en Excel) | **en pruebas**: genera los archivos desde el 20-sep-2026; falta que STARSOFT importe uno — ver [Cómo aportar](#cómo-aportar) |
 | Driver SISCONT | el contrato ya cubre lo que necesita; espera un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
 | **ERP** | |
-| Driver `asiento_neutral`: el asiento en el estándar, sin siglas, sub-diarios ni correlativos | listo |
+| Driver `asiento_contable`: el documento del estándar con sus comprobantes y su asiento | listo |
 | Driver CSV | listo |
 | Puerta HTTP con el contrato OpenConta | listo |
 

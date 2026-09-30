@@ -1,4 +1,4 @@
-"""La línea de diario neutral y el driver CSV que la escribe.
+"""La línea del comprobante y el driver CSV que la escribe.
 
 Es la pieza que convierte a este proyecto en un traductor y no en un exportador de CONCAR:
 el asiento sale del vocabulario de un ERP concreto y entra en el del estándar.
@@ -107,7 +107,7 @@ def test_las_lineas_validan_contra_el_estandar():
     assert list(validador.iter_errors(doc)) == []
 
 
-# --- el motor: la línea neutral como fuente (0.7) -------------------------------------
+# --- el motor: la línea del comprobante como fuente (0.7) -------------------------------------
 
 def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
     lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")

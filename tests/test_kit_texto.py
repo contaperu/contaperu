@@ -4,7 +4,7 @@ Estas funciones las usan varios drivers y no tenían ni un test directo: se cubr
 salía. Una regla que solo se prueba por su resultado final no dice dónde se rompió.
 
 El caso que las trajo aquí: el CSV declaraba `Opciones(fecha="AAAA-MM-DD")` —lo que de verdad escribe, porque la
-línea neutral lleva la fecha en ISO— y `formatear_fecha` no conocía ese valor. Nadie se estrellaba porque el CSV no
+línea del comprobante lleva la fecha en ISO— y `formatear_fecha` no conocía ese valor. Nadie se estrellaba porque el CSV no
 pasa por aquí, pero su propio docstring lo ofrece como plantilla para un driver de terceros, que sí lo haría.
 """
 from __future__ import annotations

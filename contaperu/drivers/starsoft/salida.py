@@ -61,7 +61,7 @@ def escribir(libro: Libro, filas: list[dict[str, Any]], opciones: OpcionesArchiv
 def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict,
                  opciones: OpcionesArchivo = OPCIONES, *,
                  indice: tuple[ComprobanteDelAsiento, ...] = ()) -> tuple[bytes, dict]:
-    """Las líneas neutrales del libro, ya numeradas y cuadradas por el núcleo → el archivo y lo que STARSOFT suma
+    """Las líneas del libro, ya numeradas y cuadradas por el núcleo → el archivo y lo que STARSOFT suma
     al resumen.
 
     Necesita el `indice`: cada fila lleva datos de la CABECERA de su comprobante —el IGV del total, el número sin

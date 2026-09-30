@@ -1,6 +1,6 @@
 """El índice del asiento: qué líneas son de qué comprobante, con la cabecera de hechos de cada uno (1.0).
 
-Las líneas neutrales llevan la contabilidad y nada más, y así la huella solo cambia si cambia un asiento. Pero un sistema
+Las líneas del comprobante llevan la contabilidad y nada más, y así la huella solo cambia si cambia un asiento. Pero un sistema
 contable escribe cada fila con hechos del COMPROBANTE que ninguna línea guarda: la glosa de la cabecera, la tasa del IGV
 calculada desde su base y su IGV —y no desde la tasa de la línea, que ya viene redondeada—, el documento de la
 contraparte, el `id_externo` con el que la aplicación lo reconoce. El índice los lleva al lado de las líneas, fuera de

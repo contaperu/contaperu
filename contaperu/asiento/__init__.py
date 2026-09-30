@@ -35,9 +35,9 @@ exportación se detiene y dice cuál falta.
 
 ---
 
-Nota de arquitectura: el asiento nace en líneas neutrales de `open-accounting` (`motor.py`) y cada ERP
+Nota de arquitectura: el asiento nace en líneas del asiento de `open-accounting` (`motor.py`) y cada ERP
 es una proyección de ellas. CONCAR fue el primero y el código nació generando su Excel, así que
-durante un año las filas nacieron en sus columnas ('A'..'AO') y la línea neutral se sacaba después;
+durante un año las filas nacieron en sus columnas ('A'..'AO') y la línea del comprobante se sacaba después;
 desde el 11-sep-2026 (0.7) la dirección está invertida — la línea es la fuente y el Excel de CONCAR,
 una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una celda al invertirse
 (`tests/test_snapshot_concar.py`). Desde la 0.10 las columnas de

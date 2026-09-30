@@ -244,7 +244,7 @@ adivinar:
   redondea él.
 - **Sin vocabulario legacy, para un ERP.** `sub_diario`, `correlativo` y `documento.tipo` son vocabulario de un
   sistema legacy como CONCAR, y ya eran opcionales. El motor entrega también un perfil **neutral** (driver
-  `asiento_neutral`): las mismas líneas, con las mismas cuentas, sentidos e importes, sin esos campos y con la
+  `asiento_contable`): las mismas líneas, con las mismas cuentas, sentidos e importes, sin esos campos y con la
   detracción sobre el propio comprobante en vez del documento comodín.
 
 Son campos **opcionales añadidos**, así que no cambian la versión del estándar (ver *Versionado*): un
@@ -342,7 +342,7 @@ Las claves que empiezan con `_` son anotaciones: se transportan, se ignoran y nu
 significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la librería):
 
 - **`_exportacion`** — en la respuesta de `exportar`: `{driver, archivo, huella, fecha, comprobantes, motor}`. La **huella** es el
-  sha256 del contenido del asiento que salió: las líneas neutrales, en su orden, **sin el `correlativo`, la `clase` ni
+  sha256 del contenido del asiento que salió: las líneas del asiento, en su orden, **sin el `correlativo`, la `clase` ni
   el `documento.id_externo`**, serializadas con `json.dumps(sort_keys=True, ensure_ascii=False, separators=(",", ":"))`.
   Los tres quedan fuera porque no cambian el contenido contable: el correlativo arranca en otro número tras un
   «deshacer», la clase se deriva de la cuenta —que sí entra— y el `id_externo` es el id del sistema que produjo el

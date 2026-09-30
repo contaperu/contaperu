@@ -97,7 +97,7 @@
    }
   ],
   "_exportacion": {
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "huella": "336c0e250ab96294f2da34a721ee06c253e1a6868d356a626fd323fc1fc25c9c",
    "comprobantes": [
     {
@@ -220,7 +220,7 @@
    }
   ],
   "_exportacion": {
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "huella": "1daf7aec7209eed92a93e75f10a596b0b5b897a1cb16e7ed2da080e71d23fd3e",
    "comprobantes": [
     {
@@ -359,7 +359,7 @@
    }
   ],
   "_exportacion": {
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "huella": "cb9e23b737b2a6f7ca06e5ab4b526a1d5d4d3338ffa22e060989b3c5b904e6e5",
    "comprobantes": [
     {
@@ -526,7 +526,7 @@
    }
   ],
   "_exportacion": {
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "huella": "aed0c608fa63bca0c2566e6ad9e8e5675acb8a3aa50f613e2c15442a2c740d5d",
    "comprobantes": [
     {
@@ -697,7 +697,7 @@
    }
   ],
   "_exportacion": {
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "huella": "efd4b2d4ba4b71b04f21a476088904406103862820e9243b560f0aeab82f856d",
    "comprobantes": [
     {
@@ -813,7 +813,7 @@
    }
   ],
   "_exportacion": {
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "huella": "709f4082905552d22e6873cea3ee2c3539cd3c5dd9372f166f2ff913e8994ee5",
    "comprobantes": [
     {
@@ -932,7 +932,7 @@
    }
   ],
   "_exportacion": {
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "huella": "fe6c8e9ca37b42d7dd54de593c70a1dfb23ad91fd4ea80abcb919911f95da770",
    "comprobantes": [
     {
@@ -1050,7 +1050,7 @@
    }
   ],
   "_exportacion": {
-   "driver": "asiento_neutral",
+   "driver": "asiento_contable",
    "huella": "3c523d051d4b1c2799b2e9c90a59d43ded2350359e9f015992aa59ea2ff473e5",
    "comprobantes": [
     {

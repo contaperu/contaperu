@@ -201,7 +201,7 @@ def test_el_pre_mayor_acepta_lo_que_devuelve_generar_asiento():
     """La entrada es la salida de `generar_asiento`, sin tocar nada por el camino."""
     # La cuenta llega en la imputación y por `id_externo`, que es donde vive desde la 3.0: en el
     # comprobante el motor ya no la admite.
-    armado = api.generar_asiento(doc(dict(FACTURA, id_externo="fila-8")), driver="asiento_neutral",
+    armado = api.generar_asiento(doc(dict(FACTURA, id_externo="fila-8")), driver="asiento_contable",
                                  imputacion={"fila-8": {"cuenta_contable": "631101"}})
     r = resumen.por_cuenta(armado["asiento"])
     assert r["cuadre"] == api.cuadrar(armado["asiento"])

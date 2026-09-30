@@ -539,7 +539,7 @@ def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
     assert contrato.incumplimientos(columnas) == [
         "COLUMNAS_ELEGIBLES['centro_costo'] lleva una sola columna fija: la principal",
         "COLUMNAS_ELEGIBLES['centro_costo']: la letra de 'b' va por cada libro de FORMATOS (compra, venta)",
-        "COLUMNAS_ELEGIBLES['centro_costo']: 'b' no lleva rol ni campo, que son de las líneas neutrales de un driver "
+        "COLUMNAS_ELEGIBLES['centro_costo']: 'b' no lleva rol ni campo, que son de las líneas del asiento de un driver "
         "de asientos",
         "COLUMNAS_ELEGIBLES: 'cuenta_contable' no se elige por columnas; los que sí: centro_costo"]
     asientos = driver_de_prueba()
@@ -547,7 +547,7 @@ def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
         Columna("m", "M", {"compra": "M"}, fija=True, rol="principal", campo="centro_costo"),
         Columna("x", "X", {"compra": "X"}, rol="igv", campo="anexo_auxiliar"))}
     assert contrato.incumplimientos(asientos) == [
-        "COLUMNAS_ELEGIBLES['centro_costo']: en un driver de asientos, 'x' dice qué línea neutral la llena: la fija, "
+        "COLUMNAS_ELEGIBLES['centro_costo']: en un driver de asientos, 'x' dice qué línea del comprobante la llena: la fija, "
         "con el centro_costo de la principal; las demás, con el anexo_auxiliar de la principal o del tercero"]
 
     tributario = types.ModuleType("tributario")
@@ -692,7 +692,7 @@ def test_lo_que_cada_destino_no_lleva_se_pregunta_al_contrato():
     honorarios, y quien no declara nada devuelve el conjunto vacío en vez de `None`."""
     fuera = {n: sorted(contrato.excluye_tipos(m)) for n, m in drivers.DE_SERIE.items()}
     assert fuera == {"sire": ["02"], "contasis": ["02"],
-                     "concar": [], "csv": [], "starsoft": [], "asiento_neutral": []}
+                     "concar": [], "csv": [], "starsoft": [], "asiento_contable": []}
 
 
 def test_las_cuentas_de_un_driver_se_leen_por_su_accesor_y_no_en_crudo():
@@ -724,7 +724,7 @@ def test_los_tres_legacy_declaran_lo_que_no_cabe_en_su_formato():
 
 
 def test_los_de_serie_estan_todos_en_la_lista_publica_del_registro():
-    """`starsoft` y `asiento_neutral` entraron en `DE_SERIE` y nadie los añadió a `__all__`: se registraban, se
+    """`starsoft` y `asiento_contable` entraron en `DE_SERIE` y nadie los añadió a `__all__`: se registraban, se
     exportaban y funcionaban, pero no salían en la lista pública del paquete ni en la superficie congelada. No lo
     cazó nada porque importarlos por su nombre sigue funcionando igual. Esto lo caza."""
     assert sorted(set(drivers.DE_SERIE) - set(drivers.__all__)) == []
@@ -829,7 +829,7 @@ def test_las_toleradas_siguen_haciendo_falta():
 def test_cada_driver_de_serie_declara_su_canal():
     assert {n: contrato.canal(m) for n, m in drivers.DE_SERIE.items()} == {
         "sire": "tributario", "concar": "legacy", "csv": "intercambio", "contasis": "legacy",
-        "starsoft": "legacy", "asiento_neutral": "intercambio"}
+        "starsoft": "legacy", "asiento_contable": "intercambio"}
     assert all(contrato.declara_canal(m) for m in drivers.DE_SERIE.values())
     assert api.drivers_disponibles()["concar"]["canal"] == "legacy"
 
@@ -842,7 +842,7 @@ def test_las_reglas_de_cada_canal():
     intercambio_de_registro = driver_de_registro("i")
     intercambio_de_registro.CANAL = "intercambio"
     assert contrato.incumplimientos(intercambio_de_registro) == [
-        "un driver de intercambio proyecta la línea neutral: su forma es `desde_lineas`"]
+        "un driver de intercambio proyecta la línea del comprobante: su forma es `desde_lineas`"]
     legacy_sin_exige = driver_de_prueba("l")
     del legacy_sin_exige.EXIGE
     assert contrato.incumplimientos(legacy_sin_exige) == [

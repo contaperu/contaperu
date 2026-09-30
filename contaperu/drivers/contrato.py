@@ -37,7 +37,7 @@ es **legacy** e `intercambio` es **ERP**. `drivers_disponibles` dice el grupo de
 
 **El vocabulario** — con qué palabras recibe sus líneas un driver de asientos (`VOCABULARIO`, 1.1). `legacy`, el de
 siempre: siglas, sub-diarios, correlativos y el documento comodín de la detracción. `neutral`: las líneas del estándar
-sin nada de eso, por `rol` y código SUNAT, para un ERP (el driver `asiento_neutral`). Un driver neutral es de canal
+sin nada de eso, por `rol` y código SUNAT, para un ERP (el driver `asiento_contable`). Un driver neutral es de canal
 `intercambio`, no declara claves legacy en su configuración y el núcleo solo le exige la cuenta.
 
 `api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado (hito A5): el contrato lo rechaza. Un driver
@@ -163,7 +163,7 @@ EXIGE_NUCLEO_REGISTRO = frozenset({"cuenta_contable"})
 # Los datos que un sistema contable elige en qué columnas de su archivo escribir (`COLUMNAS_ELEGIBLES`). Hoy, el centro
 # de costo (John, 13-sep-2026): se guarda una vez y la sección de cada sistema elige dónde sale.
 DATOS_CON_COLUMNAS = frozenset({"centro_costo"})
-# Las líneas neutrales que pueden llevar el centro en su anexo auxiliar (`asiento.lineas_del_comprobante`).
+# Las líneas del comprobante que pueden llevar el centro en su anexo auxiliar (`asiento.lineas_del_comprobante`).
 _LINEAS_CON_ANEXO = frozenset({"principal", "tercero"})
 # Lo que ninguna sección puede declarar: lo general y lo que el núcleo reserva.
 _CLAVES_QUE_NO_SON_DE_UNA_SECCION = frozenset({c.clave for c in CONFIGURACION_GENERAL} | {"columnas", "imputaciones"})
@@ -353,7 +353,7 @@ def columnas_elegidas(modulo: Any, config: dict, dato: str = "centro_costo") -> 
 
 
 def centro_en_anexo(modulo: Any, config: dict) -> frozenset[str]:
-    """Qué líneas neutrales llevan el centro en su anexo auxiliar para ESTE driver: las de las columnas que la
+    """Qué líneas del asiento llevan el centro en su anexo auxiliar para ESTE driver: las de las columnas que la
     configuración eligió para el centro (`columnas.centro_costo`) o, si no eligió, las marcadas de fábrica. Un driver
     que no declara columnas lleva lo del estándar (`asiento.CENTRO_EN_ANEXO`)."""
     declaradas = columnas_elegibles(modulo).get("centro_costo")
@@ -424,7 +424,7 @@ def incumplimientos(modulo: Any) -> list[str]:
     declaradas = getattr(modulo, "COLUMNAS_DE_LINEA", None)
     if declaradas is not None:
         if f != "desde_lineas":
-            problemas.append("COLUMNAS_DE_LINEA es de un driver `desde_lineas`: sus columnas leen la línea neutral")
+            problemas.append("COLUMNAS_DE_LINEA es de un driver `desde_lineas`: sus columnas leen la línea del comprobante")
         problemas += _columnas_de_linea.problemas(declaradas)
     return (problemas + _incumplimientos_del_canal(modulo, f) + _incumplimientos_del_vocabulario(modulo, f)
             + _incumplimientos_de_la_configuracion(modulo))
@@ -471,7 +471,7 @@ def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
     if declarado == "tributario" and f != "linea":
         return ["un driver tributario escribe un registro de texto para SUNAT: su forma es `linea`"]
     if declarado == "intercambio" and f != "desde_lineas":
-        return ["un driver de intercambio proyecta la línea neutral: su forma es `desde_lineas`"]
+        return ["un driver de intercambio proyecta la línea del comprobante: su forma es `desde_lineas`"]
     return []
 
 
@@ -558,9 +558,9 @@ def _incumplimientos_de_las_columnas(modulo: Any, columnas: Any) -> list[str]:
                          or (c.campo == "anexo_auxiliar" and c.rol in _LINEAS_CON_ANEXO and not c.fija))
                 if not llena:
                     problemas.append(f"COLUMNAS_ELEGIBLES[{dato!r}]: en un driver de asientos, {c.columna!r} dice qué "
-                                     "línea neutral la llena: la fija, con el centro_costo de la principal; las demás, "
+                                     "línea del comprobante la llena: la fija, con el centro_costo de la principal; las demás, "
                                      "con el anexo_auxiliar de la principal o del tercero")
             elif c.rol or c.campo:
                 problemas.append(f"COLUMNAS_ELEGIBLES[{dato!r}]: {c.columna!r} no lleva rol ni campo, que son de las "
-                                 "líneas neutrales de un driver de asientos")
+                                 "líneas del asiento de un driver de asientos")
     return problemas

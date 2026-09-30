@@ -2,7 +2,7 @@
 
 ContaPerú convierte comprobantes de SUNAT en asientos y en los archivos que importan los sistemas contables peruanos,
 sin estado: todo entra por parámetro y sale por retorno. Esta guía es para quien construye un ERP, un portal contable o
-un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 1.x. Los ejemplos se
+un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 3.x. Los ejemplos se
 ejecutan en la batería del repositorio (`tests/test_integrar.py`): si uno deja de funcionar, la batería falla.
 
 ## Qué puerta elegir
@@ -294,12 +294,12 @@ Antes de escribir nada, mira cuál de estos tres eres. Solo el tercero pide cód
 | | Qué necesitas | ¿Driver? |
 |---|---|---|
 | **1** | Leer asientos que otro armó | **No.** Te basta el esquema; ni siquiera instalas el paquete |
-| **2** | Que el motor te dé el asiento, en el estándar | **No.** `exportar(documento, driver="asiento_neutral")` y ya |
+| **2** | Que el motor te dé el asiento, en el estándar | **No.** `exportar(documento, driver="asiento_contable")` y ya |
 | **3** | Que el motor escriba **tu formato propio** | **Sí**, y va en tu paquete, sin pasar por aquí |
 
 **Un driver existe para traducir a un formato que no podemos cambiar** — el Excel que importa un CONCAR instalado, el
 TXT que pide SUNAT. Un sistema que puede adoptar el estándar no tiene nada que traducir: el estándar ya es su
-formato, y para eso está el driver `asiento_neutral`. Si escribes un driver que no te hacía falta, has creado un
+formato, y para eso está el driver `asiento_contable`. Si escribes un driver que no te hacía falta, has creado un
 traductor más que mantener.
 
 Y el canal lo dice del formato, no de la edad del software: si tu importador pide siglas y correlativos es `legacy`
@@ -321,7 +321,7 @@ Esto es el nivel 3: tu sistema importa un archivo con una forma suya. El contrat
 - **Dos niveles.** *De serie*, dentro de este repositorio, con un archivo real que ese ERP haya aceptado. *Comunidad*,
   en un paquete tuyo que se registra por el grupo de entry points `contaperu.drivers`, sin esperar a nadie.
 - **Si tu ERP tiene una API moderna** en vez de un archivo, escribir en ella es un hito reservado (canal `api_erp`, A5
-  de la hoja de ruta). Mientras tanto, tu aplicación pide el asiento a `generar_asiento` con `driver="asiento_neutral"` —las líneas del
+  de la hoja de ruta). Mientras tanto, tu aplicación pide el asiento a `generar_asiento` con `driver="asiento_contable"` —las líneas del
   estándar, sin siglas, sub-diarios ni correlativos de ningún sistema legacy— y lo envía; el envío y los
   reintentos son suyos, con la identidad y la huella de cada comprobante como clave para no repetir.
 
@@ -331,7 +331,7 @@ Todo lo de arriba supone que llamas a `contaperu`. No hace falta: `open-accounti
 puedes construir sobre él, en el lenguaje que sea. Esta sección es para eso, y es el espejo de la anterior —allí se
 escribe un driver contra el contrato del motor; aquí se lee el documento contra el contrato del estándar—.
 
-**Qué recibes.** El documento que produce el driver `asiento_neutral` tiene cinco claves, y desde la 3.9 lleva los
+**Qué recibes.** El documento que produce el driver `asiento_contable` tiene cinco claves, y desde la 3.9 lleva los
 **tres bloques** del estándar: el libro, los comprobantes tal como los informa SUNAT y su asiento.
 
 ```json
@@ -343,7 +343,7 @@ escribe un driver contra el contrato del motor; aquí se lee el documento contra
                     "concepto": "…", "base_gravada": "1000.00", "igv": "180.00", "exonerado": "50.00",
                     "total": "1230.00", "destino_igv": "DGNG", "id_externo": "f1"}],
   "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "1050.00", "clase": "gasto", "rol": "principal"}],
-  "_exportacion": {"driver": "asiento_neutral", "motor": "3.9.0", "huella": "…", "comprobantes": [{"…"}]}
+  "_exportacion": {"driver": "asiento_contable", "motor": "3.10.0", "huella": "…", "comprobantes": [{"…"}]}
 }
 ```
 
@@ -503,10 +503,14 @@ Para actualizar:
 Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
 seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
-## Lo que promete la 2.x
+## Lo que promete la 3.x
 
-- **`contaperu.api` no cambia de nombre ni de firma** hasta la 3.0 (`tests/test_superficie_publica.py`). Pueden llegar
+- **`contaperu.api` no cambia de nombre ni de firma** hasta la 4.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
+- **Un nombre que cambia sigue resolviendo durante toda la 3.x**, y avisa con `contaperu.RutaObsoleta` diciendo cuál
+  usar. Es el caso del driver `asiento_neutral`, que desde la 3.10 se llama `asiento_contable`: el nombre viejo
+  funciona igual y se retira en la 4.0. Corre tu batería con `-W error::contaperu._obsoleto.RutaObsoleta` y te sale
+  cada sitio donde usas uno.
 - **OpenConta crece sin romper**: una ruta o un campo que está, sigue.
 - **La 2.0 retiró las rutas de la 0.10** (`contaperu.operaciones`, `contaperu.generar`, `contaperu.cli`,
   `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia

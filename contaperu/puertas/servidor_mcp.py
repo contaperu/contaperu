@@ -421,7 +421,7 @@ def exportar(documento: dict, driver: str, configuracion: dict | None = None,
                 `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como
                 `.xlsx`: una fila por comprobante, sin sub-diario (se elige al importar).
       - ERP:    `csv` — las líneas de diario en columnas, en `texto` y también adjunto.
-                `asiento_neutral` — el documento del estándar con su asiento, sin siglas, sub-diarios ni
+                `asiento_contable` — el documento del estándar con sus comprobantes y su asiento, sin siglas ni
                 correlativos de ningún sistema legacy, adjunto como `.json`.
 
     Antes de escribir nada, en los drivers que arman asiento (`concar`, `csv`) comprueba que cuadre; si

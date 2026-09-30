@@ -1,5 +1,5 @@
 """El .xlsx de CONCAR (cabecera y formatos de celda de la plantilla oficial) y el punto de entrada `desde_lineas` del
-contrato: las líneas neutrales del libro, ya numeradas y cuadradas, proyectadas con la cabecera de su comprobante.
+contrato: las líneas del libro, ya numeradas y cuadradas, proyectadas con la cabecera de su comprobante.
 """
 from __future__ import annotations
 
@@ -134,7 +134,7 @@ def _sub_diarios(indice: tuple[ComprobanteDelAsiento, ...], config: dict) -> dic
 
 def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones: Opciones = OPCIONES, *,
                  indice: tuple[ComprobanteDelAsiento, ...] = ()) -> tuple[bytes, dict]:
-    """Las líneas neutrales del libro, numeradas y cuadradas por el núcleo → el .xlsx y lo que CONCAR suma al resumen.
+    """Las líneas del libro, numeradas y cuadradas por el núcleo → el .xlsx y lo que CONCAR suma al resumen.
 
     Cada fila lleva hechos de la cabecera de su comprobante que la línea no guarda: la glosa de la columna F y la tasa
     entera del IGV de la AO, que se redondea desde el IGV y la base del comprobante y no desde la tasa ya redondeada de

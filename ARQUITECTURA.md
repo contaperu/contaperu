@@ -80,7 +80,7 @@ propuesta del SIRE. Desde ahí, cada mes recorre seis pasos:
    comprueba, antes de armar nada, que cada comprobante tenga su cuenta, su centro de costo y su sigla, y que quepa
    en el formato.
 5. **Armar, según la forma del driver** (`armado`).
-   - **Asiento** (`desde_lineas`: CONCAR, CSV): el núcleo arma las líneas neutrales, las numera por sub-diario, exige
+   - **Asiento** (`desde_lineas`: CONCAR, CSV): el núcleo arma las líneas del asiento, las numera por sub-diario, exige
      que cuadren al céntimo y les calcula la huella; el driver solo traduce cada línea.
    - **Registro contable** (`desde_comprobantes`: CONTASIS): el driver recibe los comprobantes y lee las cuentas de
      la misma resolución que usa el asiento.
@@ -94,13 +94,19 @@ No todas las operaciones hacen el recorrido completo:
 - `generar_asiento` se queda en el asiento, sin escribir el archivo.
 - `exportar` lo recorre entero.
 
-### La decisión que lo ordena todo: la línea neutral es la fuente
+### La decisión que lo ordena todo: la línea del comprobante es la fuente
 
-Hasta la 0.6 el asiento nacía en las columnas del Excel de CONCAR (`'A'..'AO'`) y la línea neutral
-se sacaba después releyéndolas. Funcionaba, pero la línea «neutral» heredaba el vocabulario de un
+Hasta la 0.6 el asiento nacía en las columnas del Excel de CONCAR (`'A'..'AO'`) y la línea del comprobante
+se sacaba después releyéndolas. Funcionaba, pero esa línea heredaba el vocabulario de un
 ERP —la sigla `FT` en vez del código SUNAT `01`, la glosa cortada a 30 caracteres, la tasa del IGV
 redondeada a entero— y un segundo driver de asientos habría tenido que reinterpretar columnas de
 CONCAR para escribir las suyas.
+
+**De aquí salió la palabra «neutral»**, que esta línea llevó hasta la 3.10: era la que no arrastraba las columnas de
+CONCAR. Se cambió por «línea del comprobante» (John, 29-sep-2026) porque el nombre decía de qué se libró en vez de qué
+es, y porque la premisa se invirtió en esta misma versión: ya no es la versión limpia de algo, es la fuente. El
+adjetivo sigue vivo donde sí describe —`VOCABULARIO = "neutral"` en el contrato de driver, las palabras del estándar
+frente a las de un sistema legacy—.
 
 Desde la 0.7 la dirección está invertida. `asiento/motor.py` arma las líneas en el vocabulario de
 `open-accounting` y CONCAR es una proyección más. Lo que hace posible el cambio sin riesgo es
@@ -131,16 +137,23 @@ Tres cosas distintas llevan la palabra «asiento», y conviene no confundirlas a
 |---|---|---|
 | **La forma** | `estandar/open-accounting.schema.json`, `$defs.linea` (con `enmiendas/` y `conformidad/`) | **La fuente.** El contrato que lee un ERP de terceros, en cualquier lenguaje |
 | **La pieza en Python** | `asiento/lineas.py` (`LineaDiario`), `asiento/indice.py` (`Cabecera`) | Su materialización. No es una copia: `tests/test_estandar.py` exige que digan lo mismo, ni un campo de más ni uno de menos |
-| **La entrega** | `drivers/asiento_neutral/` | Un destino más, de 45 líneas, que lo escribe sin traducirlo a vocabulario legacy |
+| **La entrega** | `drivers/asiento_contable/` | Un destino más, y de los cortos, que lo escribe sin traducirlo a vocabulario legacy |
 
 Lo que **no** es el asiento estándar, aunque comparta carpeta, es `asiento/motor.py` y `asiento/resolucion.py`: son
 **la contabilidad peruana** —IGV, detracciones, sub-diarios, catálogos SUNAT—. El reparto no es una opinión, está
 medido: `tests/fixtures/capas/acoplamiento_pe.json` registra que `asiento.lineas` toca un solo módulo peruano
 (`pcge`, del que sale la `clase`), que `asiento.motor` y `asiento.resolucion` tocan cuatro cada uno, y que
-`drivers.asiento_neutral` **no aparece**, es decir, acoplamiento cero.
+`drivers.asiento_contable` **no aparece**, es decir, acoplamiento cero.
 
-Un ERP de otro país usaría las dos primeras capas y tiraría `motor.py` a la basura. Por eso están separadas, y por
-eso el driver se llama `asiento_neutral` y no `asiento`: el neutral es el que no sabe de Perú.
+Un ERP de otro país usaría las dos primeras capas y tiraría `motor.py` a la basura. Por eso están separadas, y por eso
+el driver no se llama `asiento` a secas: `asiento` es la clave raíz del documento del estándar, y un driver no puede
+llamarse igual que el bloque que escribe.
+
+Se llamó **`asiento_neutral`** de la 1.1 a la 3.10, y el argumento de entonces era ese acoplamiento cero: «neutral» era
+el que no sabe de Perú. El nombre describía una ausencia, y un ERP que elige un destino no busca un asiento neutral:
+busca el asiento contable. Desde la 3.10 se llama **`asiento_contable`**, el nombre viejo sigue resolviendo toda la 3.x
+con aviso (`drivers.ALIAS`) y lo que no cambia es el eje que el contrato mide, que sigue llamándose `VOCABULARIO =
+"neutral"` porque eso sí es lo que describe: las palabras del estándar frente a las de un sistema legacy.
 
 ## Capas, api y puertas
 
@@ -196,7 +209,7 @@ Un driver expone `NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, `nombre()` y **una**
 |---|---|---|
 | `linea(c, libro, idx, opciones) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
 | `desde_comprobantes(libro, comprobantes, config, opciones)` | los comprobantes y la configuración, con la imputación | el registro de un sistema contable que arma el asiento él mismo (CONTASIS) |
-| `desde_lineas(libro, lineas, config, opciones, *, indice=())` | las **líneas neutrales**, numeradas y cuadradas, y el índice de cada comprobante | **todo driver de asientos**, CONCAR incluido desde la 1.0 |
+| `desde_lineas(libro, lineas, config, opciones, *, indice=())` | las **líneas del asiento**, numeradas y cuadradas, y el índice de cada comprobante | **todo driver de asientos**, CONCAR incluido desde la 1.0 |
 
 Con `desde_lineas` el pipeline arma el asiento, lo numera y exige que cuadre **antes** de llamar al driver; el driver
 solo traduce. Si su firma acepta `indice`, recibe además qué tramo de líneas es de qué comprobante y una **cabecera**
@@ -210,7 +223,7 @@ glosa de su columna F y la tasa entera de la AO, que se redondea una sola vez de
 |---|---|---|---|
 | `legacy` | un sistema contable instalado que importa un archivo | lleva cuentas; declara `EXIGE` | concar, contasis; STARSOFT y SISCONT cuando entren |
 | `tributario` | un registro que se presenta a SUNAT | forma `linea`, sin cuentas ni configuración | sire |
-| `intercambio` | un formato neutral para leer o integrar | forma `desde_lineas` | csv, asiento_neutral |
+| `intercambio` | un formato neutral para leer o integrar | forma `desde_lineas` | csv, asiento_contable |
 
 Cada canal se presenta en uno de los tres grupos de destinos del motor (`contrato.GRUPOS`): `tributario` es **SIRE**,
 `legacy` es **Legacy** e `intercambio` es **ERP**.
@@ -220,10 +233,10 @@ driver de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como 
 
 **El vocabulario dice con qué palabras llegan las líneas** (`VOCABULARIO`, 1.1). `legacy`, el de siempre: siglas,
 sub-diarios, correlativos y el documento comodín de la detracción, lo que importan CONCAR y los de su familia.
-`neutral`: las líneas del estándar sin nada de eso, por `rol` y código SUNAT. Es el de `asiento_neutral`, la salida para
+`neutral`: las líneas del estándar sin nada de eso, por `rol` y código SUNAT. Es el de `asiento_contable`, la salida para
 un ERP nuevo, que parte del estándar en vez de reimplementar el IGV. Un driver neutral es de canal `intercambio`, no
 declara claves legacy en su configuración y el núcleo solo le exige la cuenta. La contabilidad es la misma que la de
-CONCAR: `tests/test_driver_asiento_neutral.py` compara cuentas, sentidos, importes y roles línea a línea.
+CONCAR: `tests/test_driver_asiento_contable.py` compara cuentas, sentidos, importes y roles línea a línea.
 
 Y **declara qué exige** (`EXIGE`): lo que ese ERP no puede importar sin y que el núcleo, si no se lo dicen, deja pasar
 —`centro_costo` en las cuentas que lo llevan, `moneda` con código en el destino; en uno de registro, `centro_costo` y
@@ -250,7 +263,7 @@ Se publica de dos maneras:
   primera vez que se consulta; los de serie ganan ante un nombre repetido y uno que no cumple el contrato se ignora con
   un `AvisoDriver` en vez de tumbar el registro.
 - **Dentro del repositorio**, en `drivers/<sistema>/` y en `DE_SERIE`. Para eso hace falta un archivo real que ese ERP
-  haya aceptado, salvo en un driver cuyo formato es el propio estándar, como `asiento_neutral`: lo valida su esquema.
+  haya aceptado, salvo en un driver cuyo formato es el propio estándar, como `asiento_contable`: lo valida su esquema.
 
 Esté donde esté, `tests/test_contrato_drivers.py` lo examina: cumple el contrato, declara su canal y exporta el golden
 de compras con el asiento cuadrado.

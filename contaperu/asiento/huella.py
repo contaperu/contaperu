@@ -8,7 +8,7 @@ determinista de lo que salió, para que quien la guarde reconozca la exportació
 
 Es la huella del **contenido del asiento**, no del archivo:
 
-- va sobre las líneas neutrales (`LineaDiario.a_dict()`), **en el orden en que salen** —el orden es
+- va sobre las líneas del asiento (`LineaDiario.a_dict()`), **en el orden en que salen** —el orden es
   parte del asiento: principal, IGV, retención, tercero, detracción— y no se reordenan;
 - con **todo** lo que dice el asiento: sub-diario, fecha, cuentas, sentidos, importes (texto exacto),
   glosas, documento, referencia y detracción. Un céntimo la cambia; una configuración que mueva el

@@ -1,4 +1,4 @@
-"""Un formato de archivo declarado como tabla: cada columna, el campo de la línea neutral que la llena y su fuente (1.1).
+"""Un formato de archivo declarado como tabla: cada columna, el campo de la línea del comprobante que la llena y su fuente (1.1).
 
 Para un sistema que importa sus asientos en columnas simples —un CSV, un TXT de campos separados— el driver no necesita
 código de proyección: declara `COLUMNAS_DE_LINEA`, una tupla de `ColumnaDeLinea`, y su `desde_lineas` escribe con
@@ -18,7 +18,7 @@ from typing import Any, Iterable
 
 from ...asiento.lineas import LineaDiario
 
-# Lo que puede llenar una columna: un campo de la línea neutral o, con punto, un campo de uno de sus bloques.
+# Lo que puede llenar una columna: un campo de la línea del comprobante o, con punto, un campo de uno de sus bloques.
 BLOQUES: dict[str, tuple[str, ...]] = {
     "documento": ("tipo", "tipo_cp", "serie_numero", "id_externo", "fecha_emision", "fecha_vencimiento"),
     "referencia": ("tipo", "tipo_cp", "serie_numero", "fecha"),
@@ -42,7 +42,7 @@ class ColumnaDeLinea:
 
 
 def rutas() -> frozenset[str]:
-    """Todas las rutas que una columna puede leer de la línea neutral."""
+    """Todas las rutas que una columna puede leer de la línea del comprobante."""
     simples = {campo.name for campo in fields(LineaDiario)} - set(BLOQUES)
     return frozenset(simples | {f"{bloque}.{campo}" for bloque, campos in BLOQUES.items() for campo in campos})
 
@@ -70,7 +70,7 @@ def problemas(columnas: Any) -> list[str]:
         if not str(columna.cabecera).strip():
             salida.append(f"la columna que lee {columna.ruta!r} no tiene cabecera")
         if columna.ruta not in validas:
-            salida.append(f"la columna {columna.cabecera!r} lee {columna.ruta!r}, que no es un campo de la línea neutral")
+            salida.append(f"la columna {columna.cabecera!r} lee {columna.ruta!r}, que no es un campo de la línea del comprobante")
         if not str(columna.fuente).strip():
             salida.append(f"la columna {columna.cabecera!r} no dice su fuente: ninguna columna entra sin ella")
         if columna.clase not in CLASES:

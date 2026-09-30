@@ -1,74 +1,35 @@
-"""Driver asiento_neutral: el asiento en el propio estándar, para los ERP que vienen.
+"""El nombre viejo del driver `asiento_contable`, que sigue resolviendo y avisa (3.10).
 
-Es la salida del grupo ERP (John, 15-sep-2026). Un ERP nuevo, escrito en cualquier lenguaje, no importa el Excel de un
-sistema legacy: recibe el documento `open-accounting` con su bloque `asiento`, las líneas de la partida doble **sin
-vocabulario legacy** —sin siglas, sin sub-diarios, sin correlativos, sin el documento comodín de la detracción—, con el
-`rol` de cada línea y el código SUNAT de su documento (`VOCABULARIO = "neutral"`, `drivers/contrato.py`). La
-contabilidad es la de CONCAR: las mismas cuentas, los mismos sentidos y los mismos importes, decididos una sola vez por
-el núcleo (`tests/test_driver_asiento_neutral.py`). Lo que un ERP necesita además de las líneas —qué tramo es de qué
-comprobante y su huella— va **dentro del archivo**, en `_exportacion`, desde la 3.1: hasta entonces esta frase decía
-lo mismo pero solo era cierta llamando al API, y quien recibiera el JSON a secas se quedaba sin ello.
+Este módulo no tiene código propio: cada nombre se resuelve en `contaperu.drivers.asiento_contable` al pedirlo, con un
+`RutaObsoleta` que dice cuál usar. Se retira en la 4.0 (`_obsoleto.RETIRO`), que es lo que promete `CLAUDE.md`: lo que
+se retira avisa durante toda la mayor anterior.
 
-Entra de serie sin un archivo aceptado por ningún sistema, a diferencia de un driver legacy: su formato es el estándar
-mismo, y lo que lo valida es su esquema (`estandar/open-accounting.schema.json`).
+**Por qué es un archivo en disco y no un `__getattr__` en `drivers/__init__.py`.** Un `__getattr__` de paquete (PEP
+562) resuelve `from contaperu.drivers import asiento_neutral` y el acceso por atributo, pero **no**
+`import contaperu.drivers.asiento_neutral` ni `from contaperu.drivers.asiento_neutral import NOMBRE`: para eso el
+módulo tiene que existir. Quien integró con la 1.x pudo escribir cualquiera de las cuatro formas, así que las cuatro
+siguen funcionando.
+
+**Y por qué declara `__all__`.** `tests/test_superficie_publica.py` congeló trece nombres públicos de este módulo, y
+lee `__all__` si está. Sin él tomaría los nombres del talón —que no tiene ninguno— y los trece contarían como
+**quitados**, que es una versión mayor. Con él, la superficie sigue entera sin regenerarse y el test no dispara el
+aviso, porque mira la lista y no hace `getattr`.
+
+`Libro`, `OpcionesArchivo` y `OPEN_ACCOUNTING` están en la lista porque se colaron en la superficie como importaciones
+del módulo original; se conservan por eso, no porque sean suyos.
 """
 from __future__ import annotations
 
-import json
+from .. import _obsoleto as _o
 
-from ..._version import OPEN_ACCOUNTING, __version__
-from ...asiento import exportacion_de as _exportacion_de
-from ...modelo import Libro
-from ..kit import OpcionesArchivo
-from ..kit import nombre_de_archivo as _nombre_de_archivo
+_NUEVO = "contaperu.drivers.asiento_contable"
 
-NOMBRE = "asiento_neutral"
-# Un formato neutral para integrar: el grupo ERP (`drivers.contrato.GRUPOS`).
-CANAL = "intercambio"
-VOCABULARIO = "neutral"
-FORMATOS = {"compra": "asiento_neutral_json", "venta": "asiento_neutral_json"}
-OPCIONES = OpcionesArchivo(extension=".json")
-CONTENT_TYPE = "application/json"
-# No exige nada más que el núcleo: la cuenta de cada línea. El tipo va en su código SUNAT y la moneda en ISO.
-EXIGE = frozenset()
-# Nada que configurar en su sección: lee lo general, que es contabilidad, y ningún vocabulario de un sistema.
-CONFIGURACION: tuple = ()
+# Los trece que congeló la superficie de la 1.0, cada uno a su sitio en el módulo nuevo.
+__all__ = ["CANAL", "CONFIGURACION", "CONTENT_TYPE", "EXIGE", "FORMATOS", "Libro", "NOMBRE", "OPCIONES",
+           "OPEN_ACCOUNTING", "OpcionesArchivo", "VOCABULARIO", "desde_lineas", "nombre"]
 
-
-def nombre(libro: Libro, opciones: OpcionesArchivo = OPCIONES) -> str:
-    return _nombre_de_archivo(NOMBRE, libro, opciones)
-
-
-def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tuple[bytes, dict]:
-    """Las líneas del comprobante, ya armadas y cuadradas por el núcleo → el documento `open-accounting` **completo**,
-    en JSON: sus tres bloques —`libro`, `comprobantes` y `asiento`— y `_exportacion` en la raíz.
-
-    **El bloque `comprobantes` entra en la 3.9**, y con él se acaba la carencia que tenía este archivo: un asiento
-    solo, sin los comprobantes, no dice qué parte de una compra mixta era exonerada —100 gravado más 50 exonerado
-    salen como una sola línea de gasto de 150, y el IGV de 18 parece calculado sobre 150—, no lleva el nombre de la
-    contraparte —viajaba por accidente dentro de la glosa, solo cuando el concepto venía vacío— y no dice por qué se
-    emitió una nota de crédito. Con los dos bloques el documento **se basta**, y por eso puede volver a entrar al
-    motor y dar el mismo asiento, con la misma huella.
-
-    Va SIEMPRE y no bajo una opción: un documento que solo a veces se basta obliga a quien lo lee a manejar dos
-    formas, y deja condicional la única garantía que hace útil el formato.
-
-    No escribe `imputaciones`, a propósito: el esquema exige `id_externo` en TODOS los comprobantes cuando ese bloque
-    no está vacío, así que un mes cuyo productor no puso ids daría un documento que falla su propio esquema. Quien
-    quiera el asiento idéntico al volver a entrar, pasa la misma imputación que la primera vez.
-
-    **En `_exportacion`** van la huella del asiento y, por comprobante, su identidad y el tramo de líneas que le
-    toca. Hasta la 3.1
-    esto solo existía en la respuesta del API (`pipeline/salida.py`), así que **quien recibiera el archivo a secas
-    se quedaba sin la clave con la que no repetir un comprobante** — que es justo lo que `INTEGRAR.md` le pide a
-    un ERP que use. El driver tenía el índice en la mano y lo descartaba.
-
-    No hace falta enmendar el estándar: su raíz admite cualquier clave `_` y `estandar/LEEME.md` dice que un
-    productor puede llevar ahí `_exportacion`. Lo que la respuesta del API añade y el archivo no puede saber es
-    `fecha` —la pone quien llama— y `archivo`, que aquí sería su propio nombre."""
-    documento = {"open_accounting": OPEN_ACCOUNTING, "libro": libro.a_dict(),
-                 "comprobantes": [entrada.cabecera.como_comprobante() for entrada in indice],
-                 "asiento": [linea.a_dict() for linea in lineas],
-                 "_exportacion": {"driver": NOMBRE, "motor": __version__,
-                                  **_exportacion_de(libro, lineas, indice)}}
-    return json.dumps(documento, ensure_ascii=False, indent=1).encode("utf-8"), {"lineas": len(lineas)}
+__getattr__, __dir__ = _o.reexportar(
+    __name__,
+    {nombre: f"{_NUEVO}:{nombre}" for nombre in __all__},
+    nuevas={nombre: f"{_NUEVO}.{nombre}" for nombre in __all__},
+)

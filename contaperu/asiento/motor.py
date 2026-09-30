@@ -1,13 +1,13 @@
-"""El asiento en líneas neutrales: la contabilidad, sin el vocabulario de ningún ERP.
+"""El asiento en líneas del asiento: la contabilidad, sin el vocabulario de ningún ERP.
 
 Aquí vive la LÓGICA del asiento —qué cuentas, qué sentido, cuántas líneas, en qué fecha— y sale ya
 en el bloque `asiento` del estándar `open-accounting`. Las reglas, con su fuente al lado, están en el
 docstring del paquete (`__init__.py`); este módulo las aplica.
 
 Hasta el 11-sep-2026 esta lógica escribía directamente las columnas del Excel de CONCAR ('A'..'AO')
-y la línea neutral se sacaba después, releyendo esas columnas. Era al revés de lo que el proyecto
+y la línea del comprobante se sacaba después, releyendo esas columnas. Era al revés de lo que el proyecto
 quiere ser: la línea «neutral» heredaba los cortes de glosa y las siglas de un ERP concreto, y un
-segundo driver de asientos habría tenido que reinterpretar columnas de CONCAR. Ahora la línea neutral
+segundo driver de asientos habría tenido que reinterpretar columnas de CONCAR. Ahora la línea del comprobante
 es la fuente y CONCAR es una proyección más (`drivers/concar/proyeccion.py`), con prohibido cambiar
 una sola celda del Excel validado: lo vigila `tests/test_snapshot_concar.py`.
 

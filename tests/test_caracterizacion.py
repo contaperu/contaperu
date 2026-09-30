@@ -35,7 +35,7 @@ from contaperu.puertas import cli
 from util import GOLDEN, imputando
 
 CARACTERIZACION = Path(__file__).parent / "fixtures" / "caracterizacion"
-DRIVERS = ("concar", "contasis", "csv", "sire", "starsoft", "asiento_neutral")
+DRIVERS = ("concar", "contasis", "csv", "sire", "starsoft", "asiento_contable")
 # Desde la 3.0 la cuenta es del comprobante: los documentos de estas pruebas la traen con `imputando`.
 SIN_CENTROS = {"usa_centros_costo": False}
 

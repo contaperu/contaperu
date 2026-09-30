@@ -176,7 +176,7 @@ ANCHOS = {
 }
 
 # En qué columnas puede ir el centro de costo (John, 13-sep-2026: el dato se guarda una vez y la sección de cada sistema
-# elige dónde sale). Cada una dice qué campo de qué línea neutral la llena: la M, el centro de la línea del gasto o del
+# elige dónde sale). Cada una dice qué campo de qué línea del comprobante la llena: la M, el centro de la línea del gasto o del
 # ingreso; la X, su anexo auxiliar.
 COLUMNAS_ELEGIBLES = {"centro_costo": (
     # La principal, siempre: la M de la línea cuya cuenta lleva centro (`cuentas_con_centro`).

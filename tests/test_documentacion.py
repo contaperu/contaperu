@@ -63,7 +63,9 @@ def texto(doc: str) -> str:
 def test_ningun_documento_nombra_un_driver_que_no_existe(doc):
     """El caso que lo trae: `driver="open_accounting"` sobrevivió al renombrado en los dos documentos que más se leen."""
     nombrados = {next(g for g in m.groups() if g) for m in NOMBRA_DRIVER.finditer(texto(doc))}
-    fantasmas = sorted(nombrados - set(drivers.DRIVERS))
+    # Los nombres viejos cuentan como existentes: siguen resolviendo y un documento puede explicar el renombrado
+    # usando la forma natural (`driver="asiento_neutral"`). Lo que se caza es un nombre que no resuelve de ninguna manera.
+    fantasmas = sorted(nombrados - set(drivers.DRIVERS) - set(drivers.ALIAS))
     assert not fantasmas, (f"{doc} nombra un driver que no existe: {fantasmas}. "
                            f"Los de serie son {sorted(drivers.DRIVERS)}")
 

@@ -30,7 +30,7 @@ historia de un repositorio público no sale nunca más.
 
 Un driver traduce el asiento al formato que importa un sistema contable. El contrato completo está en
 [`contaperu/drivers/contrato.py`](contaperu/drivers/contrato.py); para un driver de **asientos** nuevo
-(SISCONT, STARSOFT…) la forma es `desde_lineas`: el núcleo arma las líneas neutrales de
+(SISCONT, STARSOFT…) la forma es `desde_lineas`: el núcleo arma las líneas del asiento de
 `open-accounting`, las numera y exige que cuadren, y tu driver solo las traduce. No tienes que reimplementar
 ni una cuenta, ni un sentido, ni la detracción.
 
@@ -67,7 +67,7 @@ El driver CSV ([`contaperu/drivers/csv`](contaperu/drivers/csv/__init__.py)) es 
 esta forma.
 
 **Si tu formato es una tabla simple** —un CSV o un TXT de columnas—, no escribas la proyección: **declárala**. Cada
-columna dice qué campo de la línea neutral la llena y de dónde sale que vaya ahí, y `kit.columnas` escribe el archivo:
+columna dice qué campo de la línea del comprobante la llena y de dónde sale que vaya ahí, y `kit.columnas` escribe el archivo:
 
 ```python
 from contaperu.drivers.kit.columnas import ColumnaDeLinea, escribir_csv

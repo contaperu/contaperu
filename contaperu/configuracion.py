@@ -63,7 +63,7 @@ class Columna:
 
     `columna` la nombra en la configuración (`columnas`), con el título de su Excel (`titulo`); `letra` dice dónde
     está en cada libro (`{"compra": "AI", "venta": "Z"}`). La `fija` va siempre y la `marcada` viene elegida de
-    fábrica. En un driver de asientos, `rol` y `campo` dicen qué campo de qué línea neutral la llena."""
+    fábrica. En un driver de asientos, `rol` y `campo` dicen qué campo de qué línea del comprobante la llena."""
     columna: str
     titulo: str
     letra: dict[str, str]
@@ -360,4 +360,8 @@ CLAVES_RETIRADAS: dict[str, str] = {
     "centro_en_anexo_del_tercero": _COLUMNA_DE_CONCAR.format("anexo_auxiliar_del_tercero"),
     "cc_en_anexo_auxiliar": _COLUMNA_DE_CONCAR.format("anexo_auxiliar_del_tercero"),
     "contabilidad": "lo general en la raíz y lo de cada sistema en su sección, sin clave intermedia",
+    # No es una clave que se retirara, sino el nombre viejo de un driver (3.10): una configuración guardada puede
+    # llevar su sección, y así el mensaje dice qué hacer en vez de «clave desconocida». El driver sigue resolviendo
+    # con aviso (`drivers.ALIAS`); esto es solo para su sección de la configuración.
+    "asiento_neutral": "la sección `asiento_contable`, que es como se llama el driver desde la 3.10",
 }

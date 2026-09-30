@@ -4768,7 +4768,7 @@
  },
  "generar_asiento/contasis": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, starsoft, asiento_neutral)"
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, starsoft, asiento_contable)"
  },
  "exportar/contasis": {
   "driver": "contasis",
@@ -6570,7 +6570,7 @@
  },
  "generar_asiento/sire": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, starsoft, asiento_neutral)"
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, starsoft, asiento_contable)"
  },
  "exportar/sire": {
   "driver": "sire",
@@ -7209,13 +7209,13 @@
   "texto": "40111000|202601|04|0001|10/01/2026|03|20677777771|FT|F00145680|10/02/2026|||7200.00|VTA|10/01/2026||FT F001-45680 /|001|0.00|0.00||||0||||MAYORISTA NACIONAL DE PRODUCTOS SAC|0|0||0|D|0.00|0.00\r\n42120001|202601|04|0001|10/01/2026|03|20677777771|FT|F00145680|10/02/2026|7200.00|18.00|47200.00|VTA|10/01/2026||FT F001-45680 /|001|0.00|0.00||||0||||MAYORISTA NACIONAL DE PRODUCTOS SAC|0|0||0|H|0.00|0.00\r\n659999|202601|04|0001|10/01/2026|03|20677777771|FT|F00145680|10/02/2026|||40000.00|VTA|10/01/2026||FT F001-45680 /|001|0.00|0.00||||0||||MAYORISTA NACIONAL DE PRODUCTOS SAC|0|0||0|D|0.00|0.00\r\n40111000|202601|04|0002|18/01/2026|03|20633333336|FT|E00112347|18/02/2026|||4500.00|VTA|18/01/2026||FT E001-12347 /|001|0.00|0.00||||0||||IMPORTADORA ASIA PACIFICO SRL|0|0||0|D|0.00|0.00\r\n42120001|202601|04|0002|18/01/2026|03|20633333336|FT|E00112347|18/02/2026|4500.00|18.00|29500.00|VTA|18/01/2026||FT E001-12347 /|001|0.00|0.00||||0||||IMPORTADORA ASIA PACIFICO SRL|0|0||0|H|0.00|0.00\r\n659999|202601|04|0002|18/01/2026|03|20633333336|FT|E00112347|18/02/2026|||25000.00|VTA|18/01/2026||FT E001-12347 /|001|0.00|0.00||||0||||IMPORTADORA ASIA PACIFICO SRL|0|0||0|D|0.00|0.00\r\n40111000|202601|04|0003|25/01/2026|03|20605555552|RC|12345679|25/02/2026|||324.00|VTA|25/01/2026||RC -12345679 /|001|0.00|0.00||||0||||ELECTRICIDAD DE PRUEBA SAA|0|0||0|D|0.00|0.00\r\n42120001|202601|04|0003|25/01/2026|03|20605555552|RC|12345679|25/02/2026|324.00|18.00|2124.00|VTA|25/01/2026||RC -12345679 /|001|0.00|0.00||||0||||ELECTRICIDAD DE PRUEBA SAA|0|0||0|H|0.00|0.00\r\n659999|202601|04|0003|25/01/2026|03|20605555552|RC|12345679|25/02/2026|||1800.00|VTA|25/01/2026||RC -12345679 /|001|0.00|0.00||||0||||ELECTRICIDAD DE PRUEBA SAA|0|0||0|D|0.00|0.00\r\n",
   "archivo_zip": "STARSOFT_COMPRAS_202601_20601234567.zip"
  },
- "diagnosticar/asiento_neutral": {
+ "diagnosticar/asiento_contable": {
   "libro": {
    "ruc": "20601234567",
    "periodo": "202601",
    "tipo": "compra"
   },
-  "driver": "asiento_neutral",
+  "driver": "asiento_contable",
   "exige": [
    "cuenta_contable"
   ],
@@ -7278,7 +7278,7 @@
    "12345679"
   ]
  },
- "generar_asiento/asiento_neutral": {
+ "generar_asiento/asiento_contable": {
   "open_accounting": "1.0",
   "libro": {
    "ruc": "20601234567",
@@ -7515,10 +7515,10 @@
    "motor": "(versión del motor)"
   }
  },
- "exportar/asiento_neutral": {
-  "driver": "asiento_neutral",
-  "formato": "asiento_neutral_json",
-  "archivo": "ASIENTO_NEUTRAL_COMPRAS_202601_20601234567.json",
+ "exportar/asiento_contable": {
+  "driver": "asiento_contable",
+  "formato": "asiento_contable_json",
+  "archivo": "ASIENTO_CONTABLE_COMPRAS_202601_20601234567.json",
   "comprobantes": 3,
   "resumen": {
    "comprobantes": 3,
@@ -7537,8 +7537,8 @@
    "lineas": 9
   },
   "_exportacion": {
-   "driver": "asiento_neutral",
-   "archivo": "ASIENTO_NEUTRAL_COMPRAS_202601_20601234567.json",
+   "driver": "asiento_contable",
+   "archivo": "ASIENTO_CONTABLE_COMPRAS_202601_20601234567.json",
    "huella": "c9fd3fb195f9bb76861d5a3c98647ab784da16b1f5761a0c65e706fed3a327a8",
    "comprobantes": [
     {
@@ -7591,10 +7591,10 @@
   },
   "content_type": "application/json"
  },
- "exportar_con_observados/asiento_neutral": {
-  "driver": "asiento_neutral",
-  "formato": "asiento_neutral_json",
-  "archivo": "ASIENTO_NEUTRAL_COMPRAS_202601_20601234567.json",
+ "exportar_con_observados/asiento_contable": {
+  "driver": "asiento_contable",
+  "formato": "asiento_contable_json",
+  "archivo": "ASIENTO_CONTABLE_COMPRAS_202601_20601234567.json",
   "comprobantes": 3,
   "resumen": {
    "comprobantes": 3,
@@ -7613,8 +7613,8 @@
    "lineas": 9
   },
   "_exportacion": {
-   "driver": "asiento_neutral",
-   "archivo": "ASIENTO_NEUTRAL_COMPRAS_202601_20601234567.json",
+   "driver": "asiento_contable",
+   "archivo": "ASIENTO_CONTABLE_COMPRAS_202601_20601234567.json",
    "huella": "c9fd3fb195f9bb76861d5a3c98647ab784da16b1f5761a0c65e706fed3a327a8",
    "comprobantes": [
     {

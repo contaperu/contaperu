@@ -4,6 +4,61 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [3.10.0] — 2026-09-29
+
+**El driver del asiento se llama `asiento_contable`, y las palabras dicen por fin lo que son.** Se llamaba
+`asiento_neutral`, y ese nombre describía de qué se libraba en lugar de qué es. «Neutral» se eligió en la 0.7 con un
+motivo bueno —distinguir estas líneas de las columnas del Excel de CONCAR, de donde entonces se releían— y con la
+misma versión ese motivo caducó: desde que la línea es la fuente y CONCAR una proyección, el adjetivo nombra una
+ausencia. Un ERP que elige un destino no busca un asiento neutral: busca **el asiento contable**. Es la salida que
+pasa a ser la principal para quien no tiene un sistema contable legacy, así que tenía que decirse sola.
+
+**Nadie se rompe, y eso costó más que el renombrado.** A diferencia de la 1.1.0, cuando este mismo driver pasó de
+`open_accounting` a `asiento_neutral` y fue gratis porque nada publicado llevaba el nombre viejo, hoy el paquete está
+en PyPI y una aplicación en producción fija su versión. Así que **el nombre viejo sigue resolviendo toda la 3.x y
+avisa**:
+
+- `driver="asiento_neutral"` funciona y avisa con `RutaObsoleta` diciendo cuál usar. El alias vive en
+  `drivers.ALIAS`, y **a propósito fuera de `DE_SERIE`**: dentro aparecería como un destino más en
+  `drivers_disponibles()`, en el recurso `contaperu://drivers` y en la docena de sitios que comprueban la lista de
+  destinos. Un alias no es un destino: es la misma salida por su nombre anterior.
+- **Las cuatro formas de importar el módulo viejo siguen valiendo**, porque `contaperu/drivers/asiento_neutral/` sigue
+  existiendo como talón que reexporta. Un `__getattr__` de paquete habría cubierto solo dos: `import
+  contaperu.drivers.asiento_neutral` y `from …asiento_neutral import NOMBRE` necesitan que el módulo exista.
+- **La superficie pública no pierde nada**: el talón declara los trece nombres que congeló la 1.0, así que el test de
+  superficie pasa sumando el módulo nuevo y sin quitar el viejo. Por eso esto es una menor y no una 4.0.
+- Una configuración guardada con la sección `asiento_neutral` recibe el mensaje que dice a qué se movió, en vez de
+  «clave desconocida».
+
+Todo se retira en la **4.0** (`_obsoleto.RETIRO`), que es lo que promete `CLAUDE.md`: lo que se retira avisa durante
+toda la mayor anterior. De paso, ese `RETIRO` decía «3.0» con el paquete en la 3.9 —un aviso que citaba una versión ya
+pasada— y el texto de `avisar` estaba cableado a «es una ruta de la 0.x», que es falso para el nombre de un driver.
+`INTEGRAR.md` prometía «la 1.x» en su primera línea y «la 2.x» en su última sección: las dos promesas iban dos mayores
+por detrás.
+
+**Y «línea neutral» pasa a ser «línea del comprobante»** (decisión de John, 29-sep-2026), en 56 sitios de prosa. El
+sustantivo no cambia porque ya era el correcto —es `linea` en el estándar y `JournalLine` en QuickBooks, Xero y
+Merge—; lo que sobraba era el adjetivo. Donde se habla del conjunto de un libro son «las líneas del asiento», que es
+lo que son. **No se renombra** `LineaDiario`, ni el valor `VOCABULARIO = "neutral"`: ese sí describe lo que es —las
+palabras del estándar frente a las de un sistema legacy—, es un enum publicado, y cambiarlo rompería en silencio a
+cualquier driver de terceros que lo declare. El párrafo de `ARQUITECTURA.md` que cuenta de dónde salió la palabra se
+conserva, porque es la única fuente escrita de por qué se dijo así.
+
+El glosario del README gana las cuatro palabras sobre las que gira el estándar y que no definía: **asiento**, **línea
+del comprobante**, **registro** —con su desambiguación, porque en el contrato es la otra familia de salida: una fila
+por comprobante y sin cuentas, no una línea del asiento— y **vocabulario legacy**.
+
+### Cómo migrar
+
+- **Cambia `driver="asiento_neutral"` por `driver="asiento_contable"`** cuando puedas. Mientras no lo hagas funciona
+  igual; corre tu batería con `-W error::contaperu._obsoleto.RutaObsoleta` y te sale cada sitio.
+- **El formato pasa a `asiento_contable_json`** y el archivo a `ASIENTO_CONTABLE_<libro>_<periodo>_<ruc>.json`. Si
+  tienes un script que lo busca por su nombre, es lo primero que mirar. Los archivos ya exportados conservan el
+  suyo y su `_exportacion.driver: "asiento_neutral"`: **el alias cubre la entrada, no los datos que ya están en
+  disco**, así que un consumidor que ramifique sobre ese valor tiene que aceptar los dos nombres.
+- **Ninguna huella se mueve**: va solo sobre las líneas, y ni el nombre del driver ni el del archivo entran en ella.
+  Lo que ya importaste sigue reconociéndose.
+
 ## [3.9.0] — 2026-09-29
 
 **El documento del estándar se basta, y por eso puede volver a entrar al motor.** El driver `asiento_neutral` escribía

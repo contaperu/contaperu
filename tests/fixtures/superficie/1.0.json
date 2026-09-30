@@ -373,12 +373,14 @@
   "solo_digitos": ""
  },
  "contaperu.drivers": {
+  "ALIAS": "",
   "AvisoDriver": "",
   "DE_SERIE": "",
   "DRIVERS": "",
   "DRIVER_POR_DEFECTO": "",
   "GRUPO": "",
   "Opciones": "",
+  "asiento_contable": "",
   "asiento_neutral": "",
   "concar": "",
   "contasis": "",
@@ -566,6 +568,21 @@
   "numero_del_documento": "",
   "proyeccion": "",
   "voucher": ""
+ },
+ "contaperu.drivers.asiento_contable": {
+  "CANAL": "",
+  "CONFIGURACION": "",
+  "CONTENT_TYPE": "",
+  "EXIGE": "",
+  "FORMATOS": "",
+  "Libro": "",
+  "NOMBRE": "",
+  "OPCIONES": "",
+  "OPEN_ACCOUNTING": "",
+  "OpcionesArchivo": "",
+  "VOCABULARIO": "",
+  "desde_lineas": "",
+  "nombre": ""
  },
  "contaperu.drivers.asiento_neutral": {
   "CANAL": "",

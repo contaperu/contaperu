@@ -165,7 +165,7 @@ def test_la_glosa_es_derivada_y_no_puede_discrepar():
 def test_la_cabecera_no_entra_en_la_huella():
     """La razón por la que los campos van aquí y no a la huella, fijada como test.
 
-    La huella del motor responde «¿este asiento ya salió?» y va sobre las líneas neutrales. Si los hechos
+    La huella del motor responde «¿este asiento ya salió?» y va sobre las líneas del asiento. Si los hechos
     tributarios entraran, dos exportaciones con el mismo asiento —el Excel de CONCAR sale idéntico con `DG` y
     con `DGNG`— darían huellas distintas, y el aviso de lote repetido dejaría de dispararse. Quien necesita
     saber si un comprobante cambió tiene su propia huella, en la aplicación.
