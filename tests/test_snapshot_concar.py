@@ -29,7 +29,10 @@ from contaperu.modelo import Comprobante
 
 SNAPSHOT = Path(__file__).parent / "fixtures" / "snapshot"
 FILAS = SNAPSHOT / "concar_filas.json"
-LINEAS = SNAPSHOT / "lineas_neutrales.json"
+# Las líneas en vocabulario LEGACY, que es lo que come CONCAR: con su sigla, su sub-diario y su
+# correlativo. Se llamó `lineas_neutrales.json` hasta la 3.9 y el nombre engañaba —se generan sin
+# `vocabulario="neutral"`, así que nunca fueron las del estándar—; el contenido no cambió al renombrarlo.
+LINEAS = SNAPSHOT / "lineas_legacy.json"
 MES = (date(2026, 8, 1), date(2026, 8, 31))
 
 
@@ -195,7 +198,7 @@ def serializar_filas(caso) -> list[dict]:
 
 
 def serializar_lineas(caso) -> list[dict]:
-    """Las líneas neutrales que arma el motor. Se congelaron primero desde las columnas de CONCAR
+    """Las líneas que arma el motor **en vocabulario legacy**, que es de donde salen las filas de CONCAR. Se congelaron primero desde las columnas de CONCAR
     (v0.6) y se regeneraron UNA vez al invertir el asiento (0.7), con un diff revisado que solo
     añadía `rol`, `tipo_cp` y el código SUNAT de la detracción, dejaba la glosa sin cortar y la tasa
     del IGV como texto exacto. Ningún importe, cuenta ni sentido cambió."""
@@ -240,5 +243,5 @@ def test_las_filas_de_concar_no_cambian_ni_una_celda(caso):
 
 
 @pytest.mark.parametrize("caso", CASOS, ids=[c[0] for c in CASOS])
-def test_las_lineas_neutrales_son_las_congeladas(caso):
+def test_las_lineas_legacy_son_las_congeladas(caso):
     assert serializar_lineas(caso) == _cargar(LINEAS)[caso[0]]

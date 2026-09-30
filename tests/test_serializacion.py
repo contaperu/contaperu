@@ -22,7 +22,7 @@ from contaperu.lectores.xml_ubl import XmlInvalido
 from contaperu.modelo import Comprobante, Libro, identidad_de, numero_sin_ceros
 from util import GOLDEN
 
-LINEAS = json.loads((Path(__file__).parent / "fixtures" / "snapshot" / "lineas_neutrales.json").read_text(encoding="utf-8"))
+LINEAS = json.loads((Path(__file__).parent / "fixtures" / "snapshot" / "lineas_legacy.json").read_text(encoding="utf-8"))
 COMPRAS = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202608", tipo="compra")
 
 
