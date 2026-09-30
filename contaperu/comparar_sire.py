@@ -28,31 +28,17 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
+from . import catalogos
 from .lectores import sire_txt
 
-# Nombres del Anexo 3 (RVIE), para que el informe diga "IGV" y no "campo 17".
-CAMPOS_RVIE = [
-    "RUC", "ID / razón social", "periodo", "CAR SUNAT", "fecha de emisión", "vencimiento",
-    "tipo de CP", "serie", "número", "número final", "tipo de documento", "nro de documento",
-    "nombre del cliente", "exportación", "base gravada", "descuento de la base", "IGV",
-    "descuento del IGV", "exonerado", "inafecto", "ISC", "base del IVAP", "IVAP", "ICBPER",
-    "otros tributos", "total", "moneda", "tipo de cambio", "fecha del doc. modificado",
-    "tipo del doc. modificado", "serie del doc. modificado", "número del doc. modificado",
-    "ID de proyecto",
-]
-# Nombres del Anexo 11 (RCE). Ojo con los desplazamientos frente a ventas: el 9 es el
-# año de la DUA, así que el número del comprobante es el 10; y las tres parejas de
-# base/IGV (15-20) dicen el destino de la adquisición.
-CAMPOS_RCE = [
-    "RUC", "ID / razón social", "periodo", "CAR SUNAT", "fecha de emisión", "vencimiento",
-    "tipo de CP", "serie", "año de la DUA", "número", "número final", "tipo de documento",
-    "nro de documento", "nombre del proveedor", "base gravada DG", "IGV DG", "base gravada DGNG",
-    "IGV DGNG", "base gravada DNG", "IGV DNG", "adquisiciones no gravadas", "ISC", "ICBPER",
-    "otros tributos", "total", "moneda", "tipo de cambio", "fecha del doc. modificado",
-    "tipo del doc. modificado", "serie del doc. modificado", "dependencia aduanera",
-    "número del doc. modificado", "clasificación de bienes", "ID de proyecto",
-    "% de participación", "IMB", "CAR original",
-]
+# Los nombres de SUNAT, para que el informe diga «IGV» y no «campo 17». Salen del mapa de
+# campos (`datos/sunat/sire_campos.json`) y no escritos aquí: vivían en esta lista y a la vez
+# en el lector y en el escritor del driver, tres sitios que nada obligaba a concordar. Ojo con
+# los desplazamientos de compras frente a ventas: el 9 es el año de la DUA, así que el número
+# del comprobante es el 10, y las tres parejas de base/IGV (15-20) dicen el destino de la
+# adquisición.
+CAMPOS_RVIE = catalogos.nombres_del_sire(True)
+CAMPOS_RCE = catalogos.nombres_del_sire(False)
 IGNORAR = {4}          # CAR SUNAT: lleno en la exportación, vacío en el reemplazo
 
 

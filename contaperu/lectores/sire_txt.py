@@ -73,7 +73,9 @@ POS_COMPRA = {
     "isc": 21, "icbper": 22, "otros": 23, "total": 24, "moneda": 25, "tipo_cambio": 26,
     "ref_fecha": 27, "ref_tipo_cp": 28, "ref_serie": 29, "cod_dep_aduanera": 30, "ref_numero": 31,
     "clasif_bienes": 32, "id_contrato": 33,
-    # 34-37: % de participación, IMB y el CAR del CP a modificar; 38: la marca de detracción, que no se lee.
+    # 34-36: % de participación, IMB y el CAR del CP a modificar; 37: la marca de detracción, que no se lee.
+    # Estos índices y los de arriba, con el nombre de SUNAT de cada columna y el motivo de cada hueco, están
+    # publicados en `datos/sunat/sire_campos.json`, y `tests/test_sire_campos.py` no los deja separarse.
     "tipo_nota": 38, "estado_sunat": 39,
 }
 IGV_COMPRAS = {"DG": (14, 15), "DGNG": (16, 17), "DNG": (18, 19)}

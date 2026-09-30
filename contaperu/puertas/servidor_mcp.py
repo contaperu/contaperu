@@ -156,6 +156,17 @@ def catalogos_api_sire() -> str:
     return json.dumps(api.catalogos_api_sire(), ensure_ascii=False, indent=1)
 
 
+@mcp.resource("contaperu://catalogos/sire-campos", mime_type="application/json")
+def campos_del_sire() -> str:
+    """El FORMATO del SIRE columna a columna: de cada campo del anexo del RVIE y del RCE, su número, el
+    nombre de SUNAT, el campo del documento donde cae —o el motivo por el que no cae— y si el TXT de
+    reemplazo lo devuelve.
+
+    Sirve para contestar «¿dónde acabó esta columna?» y «¿qué del registro no se usa?». Una columna que el
+    motor no lee no se pierde: la fila entera viaja en `datos_originales["sire"]`."""
+    return json.dumps(api.campos_del_sire(), ensure_ascii=False, indent=1)
+
+
 @mcp.resource("contaperu://catalogos/estandar", mime_type="application/json")
 def catalogos_del_estandar() -> str:
     """Los catálogos que este estándar inventa: los roles de una línea del asiento, las cinco clases contables y

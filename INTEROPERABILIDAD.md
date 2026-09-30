@@ -287,6 +287,13 @@ mensajería— y **la propuesta del RCE es la lista de control** de lo que deber
   (`clave_orden`, `contaperu/lectores/archivos.py:147`).
 - **La propuesta ya se lee como comprobantes** (`sire_txt.parsear`, `contaperu/lectores/sire_txt.py:171`), con la fila
   cruda en `datos_originales`.
+- **Y el formato está publicado columna a columna** (`datos/sunat/sire_campos.json`, `api.campos_del_sire()`, 3.8.0):
+  de cada campo del anexo, dónde cae en el documento o el motivo por el que no cae, y si el TXT de reemplazo lo
+  devuelve. De las 81 columnas de los dos registros, 63 son campos del documento y las 18 restantes se transportan en
+  `datos_originales`. Dos van marcadas como candidatas a entrar con su caso real: la **marca de detracción** del RCE
+  (campo 38), porque el motor ya avisa `SIRE_SIN_DETALLE` y una marca de sujeción al SPOT sería un hecho tributario, y
+  el **valor de operaciones gratuitas** del RVIE (campo 37). Lo que hizo falta publicarlo: el mismo conocimiento vivía
+  en tres listas paralelas, y tres de las cuatro versiones anteriores fueron columnas del SIRE mal leídas o ignoradas.
 - **`comparar_sire` compara TXT contra TXT, campo a campo**: el reemplazo generado contra la exportación del detalle de
   SUNAT (`contaperu/comparar_sire.py`). Nació de un contraste real.
 - **Los duplicados entre periodos no llegan a la fachada.** `validar.revisar(…, claves_previas)` existe y produce

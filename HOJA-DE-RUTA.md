@@ -334,7 +334,10 @@ tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de cont
 
 **Qué hay hoy.** El driver `sire` escribe el TXT de reemplazo del RVIE (Anexo 3) y del RCE (Anexo 11), contrastado con
 archivos reales aceptados, y lo comprime en su ZIP; deja fuera los recibos por honorarios. `comparar_sire` compara ese
-TXT con lo que SUNAT exporta del SIRE (`contaperu/comparar_sire.py`).
+TXT con lo que SUNAT exporta del SIRE (`contaperu/comparar_sire.py`). Y el FORMATO está publicado columna a columna
+(`datos/sunat/sire_campos.json`, `api.campos_del_sire()`, 3.8.0): de cada campo del anexo, dónde cae o por qué no cae,
+con un test que lo confronta con el lector y con el escritor. Cubre del hito B9 la mitad que mira al registro; la que
+mira al documento es `campos_del_comprobante*`.
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|

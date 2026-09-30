@@ -169,6 +169,9 @@ suyo. El núcleo lo lleva de un extremo al otro y no lo interpreta, salvo las cu
 lector de XML (`lectores/xml_ubl.py`) y que lee la validación (`validar.py`): `anticipo`, `emisor`, `adquirente` y
 `gratuitas`. Un productor que las escriba les da ese mismo sentido.
 
+De un registro del SIRE, **qué acaba en un campo y qué solo se transporta** está publicado columna a columna en
+`datos/sunat/sire_campos.json` (`api.campos_del_sire()`), con el motivo de cada hueco al lado.
+
 ---
 
 ## La detracción, que ocurre en dos tiempos

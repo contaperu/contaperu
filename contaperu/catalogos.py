@@ -48,6 +48,43 @@ def api_sire() -> dict:
     return dict(_API_SIRE)
 
 
+# ── El formato: las columnas del SIRE, y dónde cae cada una ──────────────────
+# El mapa columna a columna del RVIE y del RCE: de cada campo del anexo, a qué campo del documento
+# va o por qué no va, y si el TXT de reemplazo lo devuelve. Existe porque el mismo conocimiento
+# estaba repartido en tres sitios que nada obligaba a concordar —`POS_VENTA`/`POS_COMPRA` del
+# lector, estos nombres y el escritor del driver `sire`—, y porque tres de las cuatro versiones
+# anteriores fueron columnas del SIRE mal leídas o ignoradas: el 26-sep-2026 `tipo_nota` y
+# `estado_sunat` estaban en la lista de «referenciales que se ignoran» y resultó que importaban.
+# `tests/test_sire_campos.py` lo confronta con el lector y con el escritor, así que ahora no se
+# pueden separar sin que la batería lo diga.
+_CAMPOS_SIRE = _datos.leer_json("datos/sunat/sire_campos.json")
+if not _CAMPOS_SIRE:
+    raise FileNotFoundError("No encuentro el mapa de campos del SIRE (datos/sunat/sire_campos.json)")
+# El nombre del libro de SUNAT según el registro que se trabaja: el mismo par de siglas que usa el canal.
+REGISTRO_SIRE = {True: "rvie", False: "rce"}
+
+
+def campos_del_sire() -> dict:
+    """El formato del SIRE columna a columna, con su fuente: por cada campo del anexo, su número, su
+    nombre, el campo del documento donde cae —o el motivo por el que no cae— y si el TXT de reemplazo
+    lo devuelve.
+
+    Una columna que el motor no lee NO se pierde: la fila entera viaja en `datos_originales["sire"]`."""
+    return dict(_CAMPOS_SIRE)
+
+
+def columnas_del_sire(es_venta: bool) -> list[dict]:
+    """Las columnas de un registro, en el orden del anexo."""
+    return list(_CAMPOS_SIRE["libros"][REGISTRO_SIRE[es_venta]]["campos"])
+
+
+def nombres_del_sire(es_venta: bool) -> list[str]:
+    """Los nombres de SUNAT de los campos INFORMADOS de un registro, para que un informe diga «IGV» y
+    no «campo 17». Viven aquí una sola vez: el mapa es la fuente."""
+    libro = _CAMPOS_SIRE["libros"][REGISTRO_SIRE[es_venta]]
+    return [c["nombre"] for c in libro["campos"] if c["n"] <= libro["campos_informados"]]
+
+
 # Tipo de comprobante (2 dígitos). Se listan los que un estudio contable ve de verdad.
 TIPOS_CP: dict[str, str] = dict(_CATALOGOS["tipos_comprobante"]["codigos"])
 

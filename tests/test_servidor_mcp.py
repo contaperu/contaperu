@@ -151,6 +151,7 @@ def test_los_recursos_son_legibles():
                     "contaperu://catalogos/estandar", "contaperu://drivers",
                     "contaperu://catalogos/pcge2026", "contaperu://configuracion",
                     "contaperu://esquemas/diagnostico", "contaperu://catalogos/sire-api",
+                    "contaperu://catalogos/sire-campos",
                     "contaperu://campos/comprobante"}
     esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
     assert esquema["title"] == "open-accounting"

@@ -418,6 +418,14 @@ que bajaste por API no conserva el `1404`/`0804` en el nombre.
 es_base64=True)` acepta el TXT o el ZIP tal cual, con cabecera o sin ella, y **mira el contenido y no el
 nombre**: da igual cómo se llame lo que te bajes.
 
+**8. Y qué se lee de cada columna, lo dice el motor.** `api.campos_del_sire()` devuelve el formato columna a
+columna: de cada campo del anexo —40 en el RVIE, 41 en el RCE— su número, el nombre que le da SUNAT, el campo
+del documento donde cae o **el motivo por el que no cae**, y si el TXT de reemplazo lo devuelve con dato,
+presente y vacío, o no lo manda. De las 81 columnas, 63 son campos del documento; **ninguna de las otras 18 se
+pierde**, porque la fila entera del TXT viaja en `datos_originales["sire"]` del comprobante. Úsalo para
+contestar «¿de dónde salió este dato?» en tu pantalla de revisión, y para saber qué te llega antes de escribir
+una línea de código contra el registro.
+
 ### Dónde acaba el motor y empieza tu conector
 
 Subir el archivo, pedir un token, sondear un ticket y guardar credenciales es **tuyo**: necesita red, estado

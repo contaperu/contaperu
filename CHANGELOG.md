@@ -4,6 +4,47 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [3.8.0] — 2026-09-29
+
+**El formato del SIRE deja de estar repartido en tres sitios que nada obligaba a concordar.** El conocimiento de qué
+columna del RVIE y del RCE es cada cosa vivía a la vez en el lector (`POS_VENTA`, `POS_COMPRA`), en los nombres que
+`comparar_sire` usa para su informe y en el escritor del driver `sire`. Tres listas paralelas, copiadas a mano del
+anexo, que podían separarse sin que nada se rompiera — y el aviso ya había llegado: **tres de las cuatro versiones
+anteriores fueron columnas del SIRE mal leídas o ignoradas**. La 3.5.0 es el caso que lo explica solo: `tipo_nota` y
+`estado_sunat` estaban en la lista de «referenciales que se ignoran» y resultó que importaban, con cinco filas reales
+que SUNAT había dado de baja y que el motor leía como si les faltara el importe.
+
+Ahora hay **una sola fuente, publicada**: `datos/sunat/sire_campos.json` describe las 40 columnas del RVIE y las 41
+del RCE, y de cada una dice su número de campo del anexo, el nombre que le da SUNAT, el campo del documento donde cae
+—o **el motivo por el que no cae**— y si el TXT de reemplazo la devuelve con dato, presente y vacía, o no la manda.
+Se consulta con `api.campos_del_sire()` (recurso `contaperu://catalogos/sire-campos`, `GET
+/v1/catalogos/sire-campos`), y es el hermano de `catalogos_api_sire`: aquel describe el CANAL —a qué ruta se sube un
+registro— y este el FORMATO. Los dos describen sin ejecutar.
+
+Lo que esto responde, y antes había que leer el código para saberlo: **de las 81 columnas, 63 son campos del
+documento y 18 no**, y ninguna de las 18 se pierde —la fila entera del TXT viaja en `datos_originales["sire"]`—. De
+esas, ocho son la cabecera del libro o el CAR de SUNAT, y las diez restantes llevan su motivo escrito. Dos van
+señaladas como **candidatas a entrar el día que haya un caso real** detrás, que es la única forma en que una regla
+entra aquí: la **marca de detracción del RCE** (campo 38), porque el motor ya avisa `SIRE_SIN_DETALLE` y una marca de
+sujeción al SPOT sí sería un hecho tributario, y el **valor de operaciones gratuitas del RVIE** (campo 37), porque
+una entrega gratuita tiene tratamiento contable propio.
+
+El mapa no puede separarse del código: `tests/test_sire_campos.py` lo confronta con las dos puntas —lo que el lector
+lee y lo que el driver escribe, columna por columna— y se comprobó con cinco mutaciones que las cinco lo ponen en
+rojo. `comparar_sire` **deriva** de él los nombres de su informe en vez de llevar su propia copia, así que ya no
+pueden decir cosas distintas. De paso se corrige un comentario del lector que nombraba tres cosas para cuatro huecos
+(los índices 34-36 son el % de participación, el IMB y el CAR original; el 37 es la marca de detracción).
+
+**Y quien integra tiene por fin en un solo sitio quién aporta cada variable.** `INTEGRAR.md` gana la sección que
+responde la pregunta que llega siempre —«¿dónde meto lo mío?»— con los cuatro sitios y, lo que faltaba, cuáles
+aceptan variables que el motor no conoce: el documento no, porque una clave desconocida se rechaza en vez de perderse
+sin aviso; la imputación tampoco, y con su porqué, que es que el motor resuelve la cuenta una sola vez para todos los
+drivers; la sección del driver sí, libre y por contribuyente; y `datos_originales` sí, pero solo transporta. Con los
+dos caminos para un dato que todavía no existe: al estándar si es un hecho del comprobante, y a `dimensiones` —el
+nombre ya reservado, en la imputación y no en el documento— si es una dimensión analítica del entorno.
+
+Nada cambia de comportamiento: el Excel de CONCAR, el TXT del SIRE y los asientos salen idénticos.
+
 ## [3.7.0] — 2026-09-27
 
 **Qué le cobraron de IGV a un comprobante deja de deducirse por descarte.** La pantalla del portal miraba cuatro

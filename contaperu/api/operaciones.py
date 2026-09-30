@@ -366,6 +366,24 @@ def catalogos_api_sire() -> dict:
     return catalogos.api_sire()
 
 
+def campos_del_sire() -> dict:
+    """El FORMATO del SIRE columna a columna: de cada campo del anexo del RVIE y del RCE, su número, el nombre que le
+    da SUNAT, el campo del documento donde cae —o el motivo por el que no cae— y si el TXT de reemplazo lo devuelve.
+
+    Para qué sirve: responde «¿dónde acabó esta columna?» y «¿qué del registro no se está usando?» sin leer el código
+    del lector. Quien monta una pantalla de revisión puede decir de dónde salió cada dato, y quien escribe su propio
+    conector sabe qué le llega y qué no.
+
+    **Una columna que el motor no lee no se pierde**: la fila entera del TXT viaja en `datos_originales["sire"]` del
+    comprobante. Lo que no está tipado es lo que ninguna regla usa todavía, y cada hueco lleva escrito su motivo —dos
+    de ellos, la marca de detracción del RCE y las operaciones gratuitas del RVIE, dicen además que son candidatos a
+    entrar el día que haya un caso real detrás.
+
+    Es el hermano de `catalogos_api_sire`: aquel describe el CANAL —a qué ruta se sube un registro— y este el FORMATO.
+    Los dos describen sin ejecutar."""
+    return catalogos.campos_del_sire()
+
+
 def catalogos_del_estandar() -> dict:
     """Los catálogos que este estándar inventa —`roles`, `clases` y `tipos_de_libro`—, cada uno con su fuente y su
     versión. Son lo que un ERP de fuera necesita para leer una línea del asiento sin conocer el PCGE, y viven

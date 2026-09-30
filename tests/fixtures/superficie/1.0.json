@@ -40,6 +40,7 @@
   "adaptar_pcge": "función(lineas: 'list[dict]') -> 'dict'",
   "buscar_cuenta_pcge": "función(*, texto: 'str' = '', codigo: 'str' = '') -> 'dict'",
   "campos_del_comprobante": "función() -> 'dict'",
+  "campos_del_sire": "función() -> 'dict'",
   "catalogo_pcge": "función() -> 'dict'",
   "catalogos_api_sire": "función() -> 'dict'",
   "catalogos_del_estandar": "función() -> 'dict'",
@@ -119,6 +120,7 @@
   "NOTAS": "",
   "NOTAS_CREDITO": "",
   "NOTAS_DEBITO": "",
+  "REGISTRO_SIRE": "",
   "SCHEME_A_TIPO_DOC": "",
   "SIN_CONTRAPARTE_OK": "",
   "TASAS_IGV_REDUCIDAS": "",
@@ -140,7 +142,10 @@
   "TRIBUTO_IVAP": "",
   "TRIBUTO_OTROS": "",
   "api_sire": "",
+  "campos_del_sire": "",
+  "columnas_del_sire": "",
   "motivos_de_nota": "",
+  "nombres_del_sire": "",
   "ruc_valido": ""
  },
  "contaperu.configuracion": {

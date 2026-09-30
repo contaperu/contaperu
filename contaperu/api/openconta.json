@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -696,6 +696,31 @@
     "responses": {
      "200": {
       "description": "El CANAL del SIRE, descrito: a qué rutas se sube un registro, qué parámetros son obligatorios, qué significa cada estado de ticket y qué códigos de retorno devuelve SUNAT.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/catalogos/sire-campos": {
+   "get": {
+    "operationId": "campos_del_sire",
+    "summary": "El FORMATO del SIRE columna a columna: de cada campo del anexo del RVIE y del RCE, su número, el nombre que le da SUNAT, el campo del documento donde cae —o el motivo por el que no cae— y si el TXT de reemplazo lo devuelve.",
+    "description": "El FORMATO del SIRE columna a columna: de cada campo del anexo del RVIE y del RCE, su número, el nombre que le\nda SUNAT, el campo del documento donde cae —o el motivo por el que no cae— y si el TXT de reemplazo lo devuelve.\n\nPara qué sirve: responde «¿dónde acabó esta columna?» y «¿qué del registro no se está usando?» sin leer el código\ndel lector. Quien monta una pantalla de revisión puede decir de dónde salió cada dato, y quien escribe su propio\nconector sabe qué le llega y qué no.\n\n**Una columna que el motor no lee no se pierde**: la fila entera del TXT viaja en `datos_originales[\"sire\"]` del\ncomprobante. Lo que no está tipado es lo que ninguna regla usa todavía, y cada hueco lleva escrito su motivo —dos\nde ellos, la marca de detracción del RCE y las operaciones gratuitas del RVIE, dicen además que son candidatos a\nentrar el día que haya un caso real detrás.\n\nEs el hermano de `catalogos_api_sire`: aquel describe el CANAL —a qué ruta se sube un registro— y este el FORMATO.\nLos dos describen sin ejecutar.",
+    "responses": {
+     "200": {
+      "description": "El FORMATO del SIRE columna a columna: de cada campo del anexo del RVIE y del RCE, su número, el nombre que le da SUNAT, el campo del documento donde cae —o el motivo por el que no cae— y si el TXT de reemplazo lo devuelve.",
       "content": {
        "application/json": {
         "schema": {
