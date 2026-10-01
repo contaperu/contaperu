@@ -35,8 +35,11 @@ def test_los_catalogos_son_los_de_la_1_0():
 
 def test_cada_catalogo_viene_de_datos_con_su_fuente():
     datos = _datos.leer_json("datos/sunat/catalogos.json")
+    # Siete desde la 5.0, cuando `tributos` entró. Es una igualdad de conjuntos y no un conteo a propósito: una tabla
+    # nueva pone esto rojo y hay que decidirla, que es el único punto del repositorio donde «entró un catálogo de
+    # SUNAT» se declara.
     assert set(datos) == {"tipos_comprobante", "tipos_documento_identidad", "monedas", "medios_pago",
-                          "motivos_nota_credito", "motivos_nota_debito"}
+                          "motivos_nota_credito", "motivos_nota_debito", "tributos"}
     assert all(tabla["fuente"].strip() for tabla in datos.values())
     assert catalogos.TIPOS_CP == datos["tipos_comprobante"]["codigos"]
     assert catalogos.FUENTES == {nombre: tabla["fuente"] for nombre, tabla in datos.items()}
@@ -180,6 +183,64 @@ def test_los_motivos_de_nota_salen_por_la_fachada_con_su_fuente():
     for nombre, norma in (("motivos_nota_credito", "193-2020"), ("motivos_nota_debito", "318-2017")):
         fuente = catalogos_sunat["fuentes"][nombre]
         assert norma in fuente and "nota de" in fuente.lower()
+
+
+# ── El Catálogo 05: los códigos de tributo ─────────────────────────────────────────────────────────────────────
+#
+# Hasta la 5.0 eran nueve constantes del módulo **sin fuente y sin un solo test**: la superficie pública congela sus
+# NOMBRES pero no sus VALORES, así que cambiar `TRIBUTO_IGV` de `"1000"` a cualquier otra cosa pasaba verde y el
+# lector de XML repartía los importes del comprobante en los campos equivocados sin que nada se quejara. Es el mismo
+# agujero que las tres cifras del IGV tuvieron hasta la 2.8.
+#
+# Los diez salen del Anexo II de la RS 244-2019, leído: el `3000` y el `7152` no estaban en la deducción original.
+
+TRIBUTOS_DEL_ANEXO = {
+    "1000": "IGV Impuesto General a las Ventas",
+    "1016": "Impuesto a la Venta Arroz Pilado",
+    "2000": "ISC Impuesto Selectivo al Consumo",
+    "3000": "Impuesto a la Renta",
+    "7152": "Impuesto al Consumo de las bolsas de plástico",
+    "9995": "Exportación",
+    "9996": "Gratuito",
+    "9997": "Exonerado",
+    "9998": "Inafecto",
+    "9999": "Otros tributos",
+}
+
+
+def test_los_codigos_de_tributo_son_los_del_anexo():
+    """Con su orden, que es el del anexo: el código ordena la tabla y el `3000` va entre el ISC y el ICBPER."""
+    assert list(catalogos.TRIBUTOS.items()) == list(TRIBUTOS_DEL_ANEXO.items())
+    assert api.catalogos_sunat()["tributos"] == TRIBUTOS_DEL_ANEXO
+
+
+def test_cada_constante_de_tributo_apunta_a_su_fila():
+    """Los nueve nombres de siempre, más el `3000` que entró con la tabla. Son los que `lectores/xml_ubl.py` usa para
+    repartir los importes del XML, así que un valor cambiado manda el IGV a la columna del ISC."""
+    esperado = {"TRIBUTO_IGV": "1000", "TRIBUTO_IVAP": "1016", "TRIBUTO_ISC": "2000", "TRIBUTO_RENTA": "3000",
+                "TRIBUTO_ICBPER": "7152", "TRIBUTO_EXPORTACION": "9995", "TRIBUTO_GRATUITO": "9996",
+                "TRIBUTO_EXONERADO": "9997", "TRIBUTO_INAFECTO": "9998", "TRIBUTO_OTROS": "9999"}
+    for nombre, codigo in esperado.items():
+        assert getattr(catalogos, nombre) == codigo, nombre
+        assert codigo in catalogos.TRIBUTOS, f"{nombre} apunta a una fila que la tabla no tiene"
+
+
+def test_los_tributos_salen_por_la_fachada_con_su_fuente():
+    """Y la fuente dice la norma Y el asunto, como las de los medios de pago y los motivos de nota. Era el único
+    catálogo de SUNAT del motor que no citaba ninguna: ni resolución, ni anexo, ni URL."""
+    fuente = api.catalogos_sunat()["fuentes"]["tributos"]
+    assert "RS 097-2012" in fuente and "RS 244-2019" in fuente
+    assert "tributos" in fuente.lower() and "sunat.gob.pe" in fuente
+
+
+def test_el_catalogo_05_no_son_solo_tributos():
+    """Su nombre lo dice —«tipos de tributos Y OTROS CONCEPTOS»— y el motor lo trata así: del `9996` gratuito solo
+    toma la base y la manda a `datos_originales`, nunca a un campo del comprobante. Confundir las dos mitades es
+    contar como impuesto lo que es la condición de la operación."""
+    assert all(c in catalogos.TRIBUTOS for c in
+               (catalogos.TRIBUTO_EXPORTACION, catalogos.TRIBUTO_GRATUITO, catalogos.TRIBUTO_EXONERADO,
+                catalogos.TRIBUTO_INAFECTO))
+    assert catalogos.TRIBUTOS[catalogos.TRIBUTO_RENTA] == "Impuesto a la Renta"
 
 
 # ── Las tres cifras del IGV ────────────────────────────────────────────────────────────────────────────────────

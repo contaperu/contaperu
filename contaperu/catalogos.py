@@ -2,8 +2,9 @@
 
 Fuentes: Anexo 1 de la RS 112-2021 (documentos de identidad, monedas y tipos de
 comprobante del RVIE), Anexo 1 de la RS 040-2022 (tipos de comprobante del RCE) y
-Anexo 3 de la RS 169-2015 (tipos de medio de pago). Los códigos de tributo (1000,
-9997…) son el Catálogo 05 de la factura electrónica (UBL 2.1).
+Anexo 3 de la RS 169-2015 (tipos de medio de pago) y Anexo N.° 8 de la RS 097-2012,
+con el texto de la RS 244-2019 (códigos de tributo, el Catálogo 05 de la factura
+electrónica).
 
 **Un catálogo se nombra por lo que ES, nunca por su número de tabla.** Cada anexo de SUNAT numera las suyas
 empezando por 1, así que hay una «Tabla 1» de documentos de identidad (Anexo 1 de la RS 112-2021) y otra de medios de
@@ -11,7 +12,8 @@ pago (Anexo 3 de la RS 169-2015), y el número suelto no identifica nada: solo v
 vive, en `fuente`. Y el número puede cambiar con la siguiente resolución; lo que el catálogo es, no.
 
 **Los catálogos viven en datos, con su fuente** (1.1, primer paso del hito C1 de la hoja de ruta): los tipos de
-comprobante, los documentos de identidad, las monedas y los medios de pago se leen de `datos/sunat/catalogos.json`, y
+comprobante, los documentos de identidad, las monedas, los medios de pago, los motivos de nota y los códigos de
+tributo se leen de `datos/sunat/catalogos.json`, y
 `FUENTES` dice de dónde sale cada uno. Los nombres y los tipos de siempre no cambian. Lo demás de este módulo son
 reglas del motor sobre esos códigos, con su porqué al lado.
 """
@@ -195,16 +197,29 @@ def motivos_de_nota(tipo_cp: str) -> dict[str, str]:
     return {}
 
 
-# Catálogo 05 de la factura electrónica: código de tributo en cac:TaxScheme/cbc:ID.
+# Código de tributo del XML de la factura electrónica, en `cac:TaxCategory/cac:TaxScheme/cbc:ID`: el Catálogo 05 del
+# Anexo N.° 8, que **entra en datos con su fuente en la 5.0** y hasta entonces era lo único de este módulo que
+# afirmaba códigos de SUNAT sin citar la norma de la que salen —ni en `FUENTES`, ni en la fachada, ni con un test que
+# fijara un solo valor—. Su `fuente` dice de qué anexo se transcribió y qué columna se dejó fuera.
+#
+# Los nueve nombres de siempre se quedan **leyendo de la tabla**: están en la superficie pública congelada y nunca
+# avisaron de que fueran a irse, así que retirarlos rompería la promesa de que lo que se retira avisa durante toda la
+# mayor anterior. `TRIBUTO_RENTA` es nuevo: el `3000` estaba en el anexo y no en el motor, y es el tributo que la
+# línea de rol `retencion` cita en su bloque.
+TRIBUTOS: dict[str, str] = dict(_CATALOGOS["tributos"]["codigos"])
 TRIBUTO_IGV = "1000"
 TRIBUTO_IVAP = "1016"
 TRIBUTO_ISC = "2000"
+TRIBUTO_RENTA = "3000"      # la retención de 4ta es de este tributo, no del IGV
 TRIBUTO_ICBPER = "7152"
 TRIBUTO_EXPORTACION = "9995"
 TRIBUTO_GRATUITO = "9996"   # operaciones gratuitas: NO entran en el cuadre ni en el registro
 TRIBUTO_EXONERADO = "9997"
 TRIBUTO_INAFECTO = "9998"
 TRIBUTO_OTROS = "9999"
+# Que los diez nombres digan lo que la tabla dice, y no una copia que se pueda separar de ella en silencio, lo guarda
+# un test (`test_cada_constante_de_tributo_apunta_a_su_fila`) y no un `assert` aquí: un `assert` desaparece con
+# `python -O`. Es el mismo reparto que entre este módulo y `modelo` con las dos listas de notas.
 
 # Cómo se llama en castellano cada clase de `igv.clase_de_igv`, para que la pantalla no las escriba a mano y no haya
 # dos vocabularios. **Son dos tablas y no una**, porque los dos libros no informan lo mismo: el RVIE separa lo

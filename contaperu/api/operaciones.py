@@ -327,8 +327,8 @@ def verificar_driver(modulo: str) -> dict:
 
 def catalogos_sunat() -> dict:
     """Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas,
-    medios de pago, los motivos de una nota de crédito y de una de débito, las clases de IGV y la tabla de
-    detracciones, con su fuente.
+    medios de pago, los motivos de una nota de crédito y de una de débito, los códigos de tributo, las clases de IGV
+    y la tabla de detracciones, con su fuente.
     La de detracciones es la única que el ERP puede sobreescribir en su configuración; las demás se copian de la norma
     y no se gobiernan.
 
@@ -341,6 +341,7 @@ def catalogos_sunat() -> dict:
         "medios_pago": catalogos.MEDIOS_PAGO,
         "motivos_nota_credito": catalogos.MOTIVOS_NOTA_CREDITO,
         "motivos_nota_debito": catalogos.MOTIVOS_NOTA_DEBITO,
+        "tributos": catalogos.TRIBUTOS,
         "notas": sorted(catalogos.NOTAS),
         "clases_igv_compra": catalogos.CLASES_IGV_COMPRA,
         "clases_igv_venta": catalogos.CLASES_IGV_VENTA,

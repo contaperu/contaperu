@@ -99,5 +99,20 @@
    "02": "Aumento en el valor",
    "03": "Penalidades/otros conceptos"
   }
+ },
+ "tributos": {
+  "fuente": "Anexo N.° 8 de la RS 097-2012/SUNAT, «No. 05 · Catálogo Código de tipos de tributos y otros conceptos», con el texto del Anexo II de la RS 244-2019/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2019/anexo-244-2019.pdf), que es la republicación más reciente encontrada y la primera que ya trae el 7152 del ICBPER (Ley 30884). Es el código de tributo del XML de la factura electrónica, en cac:TaxCategory/cac:TaxScheme/cbc:ID. Transcrito entero del anexo, con la capitalización de los demás catálogos y la sigla donde el original la pone dentro de la descripción («IGV Impuesto General a las Ventas»). NO se transcribe su cuarta columna, «Código internacional / Nombre» (VAT IGV, EXC ISC, OTH ICBPER): es la clasificación de UBL y no la lee nada del motor; entrará con su caso el día que un destino la pida.",
+  "codigos": {
+   "1000": "IGV Impuesto General a las Ventas",
+   "1016": "Impuesto a la Venta Arroz Pilado",
+   "2000": "ISC Impuesto Selectivo al Consumo",
+   "3000": "Impuesto a la Renta",
+   "7152": "Impuesto al Consumo de las bolsas de plástico",
+   "9995": "Exportación",
+   "9996": "Gratuito",
+   "9997": "Exonerado",
+   "9998": "Inafecto",
+   "9999": "Otros tributos"
+  }
  }
 }
