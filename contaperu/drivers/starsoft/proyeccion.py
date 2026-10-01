@@ -120,12 +120,12 @@ def glosa_del_documento(ln: LineaDiario, cab: Cabecera, config: dict | None = No
     return f"{tipo} {serie_a_cuatro(cab.serie)}-{numero_sin_ceros(cab.numero)} /".strip()
 
 
-def voucher(correlativo: str) -> str:
+def correlativo_de_starsoft(correlativo: str) -> str:
     """El correlativo tal como lo numera STARSOFT: `0001`, no `070001`. Alimenta la columna `CORRELATIVO`.
 
-    **La columna se llama `CORRELATIVO` y la función `voucher`**, y no es un descuido: la columna la renombró John
-    el 21-sep-2026 porque «ahí se entiende mejor» —en la captura del vídeo era `VOUCHER`—, y el nombre de la
-    función es superficie pública congelada (`fixtures/superficie/1.0.json`), que solo se quita en una mayor.
+    **Se llamaba `voucher` hasta la 4.0**, y no era un descuido: la columna la renombró John el 21-sep-2026 porque
+    «ahí se entiende mejor» —en la captura del vídeo era `VOUCHER`—, y el nombre de la función era superficie pública
+    congelada, que solo se quita en una mayor. Esta es esa mayor, y las dos vuelven a decir lo mismo.
 
     El motor numera con el mes delante y cuatro dígitos (`asiento.numerar`), que es lo que piden CONCAR y el CSV.
     STARSOFT empieza en 1 y sigue («el correlativo de comprobantes o vouchers debe iniciar siempre en el número
@@ -168,7 +168,7 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         "CTA CONTABLE": ln.cuenta,
         "AÑO Y MES PROCESO": libro.periodo,
         "SUBDIARIO": ln.sub_diario,
-        "COMPROBANTE": voucher(ln.correlativo),
+        "COMPROBANTE": correlativo_de_starsoft(ln.correlativo),
         "FECHA DOCUMENTO": doc.get("fecha_emision", "") or ln.fecha,
         "TIPO ANEXO": config.get("tipo_anexo_proveedor") or "",
         "CODIGO PROVEEDOR": cab.contraparte_doc,
@@ -246,7 +246,7 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         "CTA CONTABLE": ln.cuenta,
         "AÑO Y MES PROCESO": libro.periodo,
         "SUBDIARIO": ln.sub_diario,
-        "COMPROBANTE": voucher(ln.correlativo),
+        "COMPROBANTE": correlativo_de_starsoft(ln.correlativo),
         "FECHA REGISTRO": ln.fecha,
         "TIPO ANEXO": config.get("tipo_anexo_cliente") or "",
         "CODIGO CLIENTE": cab.contraparte_doc,

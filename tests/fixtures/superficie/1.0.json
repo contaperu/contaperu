@@ -555,6 +555,7 @@
   "FORMATOS": "",
   "NOMBRE": "",
   "OPCIONES": "",
+  "correlativo_de_starsoft": "",
   "datos": "",
   "desde_lineas": "",
   "destino_de": "",
@@ -564,8 +565,7 @@
   "no_caben": "",
   "nombre": "",
   "numero_del_documento": "",
-  "proyeccion": "",
-  "voucher": ""
+  "proyeccion": ""
  },
  "contaperu.drivers.asiento_contable": {
   "CANAL": "",

@@ -14,7 +14,7 @@ no `desde_comprobantes`, como CONTASIS. El asiento lo arma el núcleo; aquí sol
 **Lo que lo hace distinto de CONCAR**, con el mismo documento delante:
 
 - el sub-diario de compras es `4` y el de ventas `03`, no `11` y `05`;
-- el voucher va sin el mes que CONCAR lleva delante: `0001` y no `070001`;
+- el correlativo va sin el mes que CONCAR lleva delante: `0001` y no `070001`;
 - el número del documento va pegado y con ceros (`F13600000431`), al revés que en CONCAR y el SIRE;
 - la nota de crédito se llama **`CC`** y no `NC` —`FT` y `BV` sí coinciden—;
 - y lleva una columna que CONCAR no tiene: **`DESTINO`**, el destino del IGV de la adquisición, porque su
@@ -49,9 +49,10 @@ from __future__ import annotations
 from . import datos, proyeccion
 from .datos import (CANAL, COLUMNAS, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, CUENTAS_POR_DEFECTO, EXIGE,
                     FORMATOS, NOMBRE, OPCIONES)
-from .proyeccion import destino_de, fila, filas, no_caben, numero_del_documento, voucher
+from .proyeccion import correlativo_de_starsoft, destino_de, fila, filas, no_caben, numero_del_documento
 from .salida import desde_lineas, escribir, nombre
 
 __all__ = ["CANAL", "COLUMNAS", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "CUENTAS_POR_DEFECTO",
-           "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "datos", "desde_lineas", "destino_de", "escribir", "fila",
-           "filas", "no_caben", "nombre", "numero_del_documento", "proyeccion", "voucher"]
+           "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "correlativo_de_starsoft", "datos", "desde_lineas",
+           "destino_de", "escribir", "fila",
+           "filas", "no_caben", "nombre", "numero_del_documento", "proyeccion"]
