@@ -196,7 +196,7 @@ def test_lo_que_el_archivo_no_puede_saber_no_se_inventa():
 def test_el_diagnostico_de_un_erp_no_mira_vocabulario_legacy():
     diagnostico = api.diagnosticar(casos(), driver="asiento_contable", imputacion=IMPUTACION_CASOS)
     assert diagnostico["listo_para_exportar"] is True
-    assert diagnostico["exige"] == ["cuenta_contable"] and diagnostico["sub_diarios"] == {}
+    assert diagnostico["exige"] == ["cuenta_contable", "detraccion"] and diagnostico["sub_diarios"] == {}
     assert "sin_sigla" not in diagnostico["faltantes"] and "sin_codigo_de_moneda" not in diagnostico["faltantes"]
 
 
@@ -210,7 +210,7 @@ def test_un_erp_no_tiene_seccion_propia_en_la_configuracion():
 def test_el_contrato_de_un_driver_neutral():
     assert contrato.incumplimientos(asiento_contable) == []
     assert (contrato.vocabulario(asiento_contable), contrato.grupo(asiento_contable)) == ("neutral", "erp")
-    assert contrato.exige(asiento_contable) == {"cuenta_contable"}
+    assert contrato.exige(asiento_contable) == {"cuenta_contable", "detraccion"}
     assert api.drivers_disponibles()["asiento_contable"]["vocabulario"] == "neutral"
     assert api.drivers_disponibles()["concar"]["vocabulario"] == "legacy"
 

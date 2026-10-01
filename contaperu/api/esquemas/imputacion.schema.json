@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/imputacion.schema.json",
  "title": "Imputación",
- "description": "Lo que se decidió para cada documento, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total o un reparto de la base entre cuentas que sume la base. Llega aparte del documento.",
+ "description": "Lo que se decidió para cada documento, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total, el código de su detracción o un reparto de la base entre cuentas que sume la base. Llega aparte del documento.",
  "type": "object",
  "additionalProperties": {
   "type": "object",
@@ -15,6 +15,11 @@
    },
    "cuenta_tercero": {
     "type": "string"
+   },
+   "detraccion_codigo": {
+    "type": "string",
+    "pattern": "^$|^[0-9]{3}$",
+    "description": "El código del Catálogo 54 de la detracción, cuando el comprobante no lo trae (1.1)."
    },
    "reparto": {
     "type": "array",

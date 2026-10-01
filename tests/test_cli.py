@@ -242,3 +242,36 @@ def test_lo_que_solo_saben_los_catalogos_es_un_AVISO(tmp_path, capsys):
     salida = capsys.readouterr().out
     assert codigo == 0, "los catálogos avisan, no rechazan: el esquema es quien dice conforme o no"
     assert "SÍ rompe" in salida and "inventado" in salida and "No rompe" in salida
+
+
+def test_un_mes_de_verdad_no_sale_por_pantalla_entero(tmp_path, capsys):
+    """La ventana del motor sin portal tiene tope (4.1). Un mes real de compras trae miles de comprobantes: hasta la
+    4.0 esto imprimía una línea por observación y por comprobante, y unía la lista entera en UNA línea —un RCE real de
+    3018 filas sacaba 3018 líneas del mismo aviso y 36 KB de salida—. Lo que hace falta para decidir es ver unos
+    cuantos y saber **cuántos hay y de qué son**; la lista completa viaja en la respuesta de `diagnosticar`, que es de
+    donde la lee un portal para filtrar su tabla.
+
+    El tope no toca un mes pequeño: por eso los casos congelados de `test_caracterizacion` no cambiaron al entrar."""
+    libro = {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"}
+    # Treinta comprobantes sin cuenta: muy por encima del tope, y todos con el mismo aviso.
+    comprobantes = [{"tipo_cp": "01", "serie": "F001", "numero": str(1000 + i), "fecha_emision": "2026-01-15",
+                     "contraparte_tipo_doc": "6", "contraparte_doc": "20131312955",
+                     "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC", "moneda": "PEN", "base_gravada": "100.00",
+                     "igv": "18.00", "total": "118.00", "destino_igv": "DG", "concepto": "SERVICIO",
+                     "id_externo": f"c{i}"} for i in range(30)]
+    doc = tmp_path / "mes.json"
+    doc.write_text(json.dumps({"libro": libro, "comprobantes": comprobantes}), encoding="utf-8")
+    sin_centros = tmp_path / "sin_centros.json"
+    sin_centros.write_text(json.dumps({"usa_centros_costo": False}), encoding="utf-8")
+
+    assert cli.main(["diagnosticar", str(doc), "--config", str(sin_centros)]) == 1
+    out = capsys.readouterr().out
+    assert len(out.splitlines()) < 30, f"la salida son {len(out.splitlines())} líneas: el tope no entró"
+    # Se ven los primeros y se dice cuántos quedan: el número y de qué son, que es lo que se necesita.
+    assert "F001-1000" in out and "F001-1029" not in out
+    # Las dos superficies que unían la lista entera, cada una con su tope y su cola de «cuántos más».
+    titulo = next(linea for linea in out.splitlines() if linea.startswith("Sin cuenta contable:"))
+    assert titulo.count(",") == cli.TOPE - 1 and titulo.endswith("… y 18 más")
+    pedido = next(linea for linea in out.splitlines() if "Pedir al contador" in linea)
+    assert pedido.count(",") == cli.TOPE - 1 and pedido.endswith("… y 18 más)")
+    assert "NO está listo: 30 sin cuenta contable" in out

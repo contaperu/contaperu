@@ -85,6 +85,35 @@ def normalizar_una(det, codigos: set[str]) -> dict | None:
     return dict(det, codigo=cod)
 
 
+def _codigo_de_la_imputacion(c: Comprobante, config: dict) -> str:
+    """El código del Catálogo 54 que el contador puso en la imputación de ESTE documento, o `""`.
+
+    Se busca con un acceso a `config["imputaciones"][id_externo]` y no con `asiento.imputacion_de`, que es quien sabe
+    de imputaciones: `asiento` importa este módulo, así que importarlo de vuelta sería un ciclo. Acepta el dict tal
+    como llega por JSON y la `Imputacion` ya armada, porque por la fachada pueden llegar las dos."""
+    id_externo = (c.id_externo or "").strip()
+    if not id_externo:
+        return ""
+    imp = (config.get("imputaciones") or {}).get(id_externo)
+    if imp is None:
+        return ""
+    valor = imp.get("detraccion_codigo") if isinstance(imp, dict) else getattr(imp, "detraccion_codigo", "")
+    return str(valor or "").strip()
+
+
+def con_el_codigo_del_contador(c: Comprobante, config: dict) -> dict | None:
+    """El bloque de detracción de este comprobante **con el código que puso el contador** si el comprobante no trae uno
+    suyo. Lo que diga el archivo manda sobre lo que decida una persona, así que solo rellena lo que falta.
+
+    Vive aquí, y lo usan `normalizar` y `asiento.comprobantes_sin_codigo_detraccion`, porque es una sola regla: con una
+    copia en cada sitio, el filtro acabaría pidiendo un código que el asiento ya tenía, o al revés."""
+    det = c.detraccion
+    if not isinstance(det, dict) or str(det.get("codigo") or "").strip():
+        return det if isinstance(det, dict) else None
+    del_contador = _codigo_de_la_imputacion(c, config)
+    return dict(det, codigo=del_contador) if del_contador else det
+
+
 def tasa_de_tabla(codigo: Any, config: dict) -> Decimal:
     """La tasa de ese código en la tabla con la que se trabaja —la del ERP si la sobreescribe, si no la del motor—; 0 si
     no la tiene."""
@@ -122,6 +151,12 @@ def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Compro
     anota lo que dice el motor: su `monto` (soles enteros, lo que va a CONCAR) y la tasa de la tabla
     para ese código (`_tasa_tabla`), que `validar` compara con la del comprobante.
 
+    **Al blanquear se guardan las anotaciones `_`** (4.1). Hasta la 4.0 el bloque entero se iba a `None`, y eso
+    borraba la marca de detracción que el lector del SIRE escribe cuando SUNAT la afirma en su registro
+    (`_marca_sire`): el comprobante perdía la única prueba de que le falta algo, y el mes se exportaba sin su línea
+    de detracción y en silencio. La anotación se conserva, el código sigue sin inventarse, y es `validar` quien
+    detiene la exportación hasta que el contador lo ponga.
+
     **La tasa del comprobante no se toca**: es la que leyó la IA o la que eligió la persona, y la
     huella con que se sabe si un comprobante cambió después de exportarse depende de ella.
 
@@ -135,7 +170,10 @@ def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Compro
     cambiados = []
     for c in con:
         antes = c.detraccion
-        nuevo = normalizar_una(c.detraccion, codigos)
+        # Con el código del contador ya dentro —el caso de un mes importado de la propuesta del SIRE, que afirma que hay
+        # detracción y no dice cuál— todo lo de abajo funciona igual que con un XML: la tasa sale de la tabla y el monto
+        # de `total × tasa`.
+        nuevo = normalizar_una(con_el_codigo_del_contador(c, config), codigos)
         if nuevo is not None:
             c.detraccion = nuevo
             soles, _ = monto_detraccion(c, config)
@@ -150,10 +188,25 @@ def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Compro
                 nuevo["_tasa_tabla"] = texto_tasa(de_tabla)
             else:
                 nuevo.pop("_tasa_tabla", None)
+        else:
+            # Sin código reconocible el bloque se blanquea, pero las ANOTACIONES se quedan: no son hechos del
+            # comprobante que haya que limpiar, son lo que el motor sabe de él. `_tasa_tabla` no sobrevive aquí
+            # porque sin código no hay tabla que consultar; `_marca_sire` sí, y es la que sostiene la falta.
+            anotaciones = {k: v for k, v in antes.items()
+                           if k.startswith("_") and k != "_tasa_tabla"} if isinstance(antes, dict) else {}
+            nuevo = anotaciones or None
         c.detraccion = nuevo
         if nuevo != antes:
             cambiados.append(c)
     return cambiados
+
+
+# La anotación con la que viaja «SUNAT afirma que esta compra está sujeta al SPOT» (4.1). Se nombra aquí, con el resto
+# del vocabulario de la detracción, para que nadie escriba la cadena a mano: la pone el lector del SIRE
+# (`lectores.sire_txt`), la conserva `normalizar`, la lee `validar` para negarse a exportar, y la lee quien integre el
+# motor. Guion bajo porque es una ANOTACIÓN —el estándar reserva ese prefijo para lo que se transporta y se ignora
+# (enmienda 0019)—: el hecho del comprobante es el código del Catálogo 54, y ese la propuesta no lo da.
+MARCA_SIRE = "_marca_sire"
 
 
 # --- los dos tiempos: provisionado y pagado ---------------------------------------------------------------------

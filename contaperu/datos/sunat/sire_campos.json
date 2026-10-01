@@ -1,640 +1,641 @@
 {
-  "_nota": "El FORMATO del SIRE, columna a columna: de cada campo del anexo, dónde cae en el documento `open-accounting` o por qué no cae, y si el TXT de reemplazo lo devuelve. Es la lista de control de que nada del registro se pierde en silencio —tres de las cuatro versiones anteriores a este archivo fueron columnas del SIRE mal leídas o ignoradas—, y describe sin ejecutar, como `sire_api.json` con el canal y como los formatos de CONCAR y de CONTASIS con sistemas ajenos. **Una columna ignorada no se pierde**: la fila entera viaja en `datos_originales['sire']`. Los números son los del anexo (1-based), no los índices del lector.",
-  "actualizado_al": "2026-09-29",
-  "fuentes": {
-    "rvie": "Anexo 3 de la RS 112-2021 (los campos informados) y su Anexo N.° 2 (los dos que completa la Administración y sí se leen)",
-    "rce": "Anexo 11 de la RS 040-2022 (los campos informados) y su Anexo 8, §8.4 (los cuatro finales)",
-    "contraste": "Columna a columna contra la exportación real del SIRE (26-ago-2026) y contra un RCE presentado (27-ago-2026)"
-  },
-  "lecturas": {
-    "directa": "La columna es un campo del documento y se lee tal cual.",
-    "del_libro": "No es del comprobante: es la cabecera del libro, y el lector la usa para comprobar que el archivo es de este proceso.",
-    "pareja_igv": "Una de las tres parejas de base e IGV del RCE, de las que sale `destino_igv`.",
-    "no_gravadas": "La columna de adquisiciones no gravadas del RCE, que tiene lectura propia.",
-    "neto": "Una columna que el lector parte en dos campos y el driver vuelve a juntar.",
-    "ignorada": "El motor no la lee. No se pierde: la fila entera viaja en `datos_originales['sire']`."
-  },
-  "vuelve": {
-    "dato": "El driver `sire` la escribe con su valor en el TXT de reemplazo.",
-    "vacio": "El driver la manda presente y vacía, porque el anexo lo pide así.",
-    "no": "No se manda: el reemplazo del RVIE acaba en el campo 33."
-  },
-  "libros": {
-    "rvie": {
-      "registro": "venta",
-      "columnas": 40,
-      "campos_informados": 33,
-      "campos": [
-        {
-          "n": 1,
-          "nombre": "RUC",
-          "campo": null,
-          "lectura": "del_libro",
-          "motivo": "Es del libro, no del comprobante: el lector comprueba con él que el archivo es de este proceso, y el driver lo escribe desde `libro.ruc`.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 2,
-          "nombre": "ID / razón social",
-          "campo": null,
-          "lectura": "del_libro",
-          "motivo": "Un identificador libre del titular. Es del libro (`libro.razon_social`); el comprobante no lo repite.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 3,
-          "nombre": "periodo",
-          "campo": null,
-          "lectura": "del_libro",
-          "motivo": "Es del libro: el lector rechaza un archivo de otro periodo antes de leer una sola fila.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 4,
-          "nombre": "CAR SUNAT",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "El código con el que SUNAT identifica la anotación en SU registro, y no un hecho del comprobante. En el reemplazo va vacío a propósito, y `comparar_sire` lo salta por eso mismo.",
-          "vuelve": "vacio"
-        },
-        {
-          "n": 5,
-          "nombre": "fecha de emisión",
-          "campo": "fecha_emision",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 6,
-          "nombre": "vencimiento",
-          "campo": "fecha_vencimiento",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 7,
-          "nombre": "tipo de CP",
-          "campo": "tipo_cp",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 8,
-          "nombre": "serie",
-          "campo": "serie",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 9,
-          "nombre": "número",
-          "campo": "numero",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 10,
-          "nombre": "número final",
-          "campo": "numero_final",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 11,
-          "nombre": "tipo de documento",
-          "campo": "contraparte_tipo_doc",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 12,
-          "nombre": "nro de documento",
-          "campo": "contraparte_doc",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 13,
-          "nombre": "nombre del cliente",
-          "campo": "contraparte_nombre",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 14,
-          "nombre": "exportación",
-          "campo": "exportacion",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 15,
-          "nombre": "base gravada",
-          "campo": "base_gravada",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 16,
-          "nombre": "descuento de la base",
-          "campo": "dscto_base",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 17,
-          "nombre": "IGV",
-          "campo": "igv",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 18,
-          "nombre": "descuento del IGV",
-          "campo": "dscto_igv",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 19,
-          "nombre": "exonerado",
-          "campo": "exonerado",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 20,
-          "nombre": "inafecto",
-          "campo": "inafecto",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 21,
-          "nombre": "ISC",
-          "campo": "isc",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 22,
-          "nombre": "base del IVAP",
-          "campo": "base_ivap",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 23,
-          "nombre": "IVAP",
-          "campo": "ivap",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 24,
-          "nombre": "ICBPER",
-          "campo": "icbper",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 25,
-          "nombre": "otros tributos",
-          "campo": "otros",
-          "tambien": "dscto_otros",
-          "lectura": "neto",
-          "nota": "Una sola columna para dos campos: el lector la parte en `otros` y `dscto_otros`, y el driver la devuelve como un neto con signo.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 26,
-          "nombre": "total",
-          "campo": "total",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 27,
-          "nombre": "moneda",
-          "campo": "moneda",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 28,
-          "nombre": "tipo de cambio",
-          "campo": "tipo_cambio",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 29,
-          "nombre": "fecha del doc. modificado",
-          "campo": "ref_fecha",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 30,
-          "nombre": "tipo del doc. modificado",
-          "campo": "ref_tipo_cp",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 31,
-          "nombre": "serie del doc. modificado",
-          "campo": "ref_serie",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 32,
-          "nombre": "número del doc. modificado",
-          "campo": "ref_numero",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 33,
-          "nombre": "ID de proyecto",
-          "campo": "id_contrato",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 34,
-          "nombre": "tipo de nota",
-          "campo": "tipo_nota",
-          "lectura": "directa",
-          "vuelve": "no"
-        },
-        {
-          "n": 35,
-          "nombre": "estado del comprobante",
-          "campo": "estado_sunat",
-          "lectura": "directa",
-          "vuelve": "no"
-        },
-        {
-          "n": 36,
-          "nombre": "valor FOB embarcado",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Referencial de la Administración para exportaciones: no vuelve en el reemplazo y ninguna regla del motor lo usa.",
-          "vuelve": "no"
-        },
-        {
-          "n": 37,
-          "nombre": "valor de operaciones gratuitas",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Referencial de la Administración. Candidato a entrar el día que haya un caso real: una entrega gratuita tiene tratamiento contable propio.",
-          "vuelve": "no"
-        },
-        {
-          "n": 38,
-          "nombre": "tipo de operación",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Referencial de la Administración; no vuelve en el reemplazo.",
-          "vuelve": "no"
-        },
-        {
-          "n": 39,
-          "nombre": "DAM / CP",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Referencial de la Administración; no vuelve en el reemplazo.",
-          "vuelve": "no"
-        },
-        {
-          "n": 40,
-          "nombre": "CLU",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Referencial de la Administración; no vuelve en el reemplazo.",
-          "vuelve": "no"
-        }
-      ]
+ "_nota": "El FORMATO del SIRE, columna a columna: de cada campo del anexo, dónde cae en el documento `open-accounting` o por qué no cae, y si el TXT de reemplazo lo devuelve. Es la lista de control de que nada del registro se pierde en silencio —tres de las cuatro versiones anteriores a este archivo fueron columnas del SIRE mal leídas o ignoradas—, y describe sin ejecutar, como `sire_api.json` con el canal y como los formatos de CONCAR y de CONTASIS con sistemas ajenos. **Una columna ignorada no se pierde**: la fila entera viaja en `datos_originales['sire']`. Los números son los del anexo (1-based), no los índices del lector.",
+ "actualizado_al": "2026-09-30",
+ "fuentes": {
+  "rvie": "Anexo 3 de la RS 112-2021 (los campos informados) y su Anexo N.° 2 (los dos que completa la Administración y sí se leen)",
+  "rce": "Anexo 11 de la RS 040-2022 (los campos informados) y su Anexo 8, §8.4 (los cuatro finales)",
+  "contraste": "Columna a columna contra la exportación real del SIRE (26-ago-2026) y contra un RCE presentado (27-ago-2026)"
+ },
+ "lecturas": {
+  "directa": "La columna es un campo del documento y se lee tal cual.",
+  "del_libro": "No es del comprobante: es la cabecera del libro, y el lector la usa para comprobar que el archivo es de este proceso.",
+  "pareja_igv": "Una de las tres parejas de base e IGV del RCE, de las que sale `destino_igv`.",
+  "no_gravadas": "La columna de adquisiciones no gravadas del RCE, que tiene lectura propia.",
+  "neto": "Una columna que el lector parte en dos campos y el driver vuelve a juntar.",
+  "ignorada": "El motor no la lee. No se pierde: la fila entera viaja en `datos_originales['sire']`.",
+  "anotacion": "No es un campo del documento: es un hecho que SUNAT afirma del registro y que el motor guarda como ANOTACIÓN (prefijo `_`), para transportarlo sin convertirlo en un dato del comprobante que el archivo no da."
+ },
+ "vuelve": {
+  "dato": "El driver `sire` la escribe con su valor en el TXT de reemplazo.",
+  "vacio": "El driver la manda presente y vacía, porque el anexo lo pide así.",
+  "no": "No se manda: el reemplazo del RVIE acaba en el campo 33."
+ },
+ "libros": {
+  "rvie": {
+   "registro": "venta",
+   "columnas": 40,
+   "campos_informados": 33,
+   "campos": [
+    {
+     "n": 1,
+     "nombre": "RUC",
+     "campo": null,
+     "lectura": "del_libro",
+     "motivo": "Es del libro, no del comprobante: el lector comprueba con él que el archivo es de este proceso, y el driver lo escribe desde `libro.ruc`.",
+     "vuelve": "dato"
     },
-    "rce": {
-      "registro": "compra",
-      "columnas": 41,
-      "campos_informados": 37,
-      "campos": [
-        {
-          "n": 1,
-          "nombre": "RUC",
-          "campo": null,
-          "lectura": "del_libro",
-          "motivo": "Es del libro, no del comprobante: el lector comprueba con él que el archivo es de este proceso, y el driver lo escribe desde `libro.ruc`.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 2,
-          "nombre": "ID / razón social",
-          "campo": null,
-          "lectura": "del_libro",
-          "motivo": "Un identificador libre del titular. Es del libro (`libro.razon_social`); el comprobante no lo repite.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 3,
-          "nombre": "periodo",
-          "campo": null,
-          "lectura": "del_libro",
-          "motivo": "Es del libro: el lector rechaza un archivo de otro periodo antes de leer una sola fila.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 4,
-          "nombre": "CAR SUNAT",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "El código con el que SUNAT identifica la anotación en SU registro, y no un hecho del comprobante. En el reemplazo va vacío a propósito, y `comparar_sire` lo salta por eso mismo.",
-          "vuelve": "vacio"
-        },
-        {
-          "n": 5,
-          "nombre": "fecha de emisión",
-          "campo": "fecha_emision",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 6,
-          "nombre": "vencimiento",
-          "campo": "fecha_vencimiento",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 7,
-          "nombre": "tipo de CP",
-          "campo": "tipo_cp",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 8,
-          "nombre": "serie",
-          "campo": "serie",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 9,
-          "nombre": "año de la DUA",
-          "campo": "anio_dua",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 10,
-          "nombre": "número",
-          "campo": "numero",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 11,
-          "nombre": "número final",
-          "campo": "numero_final",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 12,
-          "nombre": "tipo de documento",
-          "campo": "contraparte_tipo_doc",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 13,
-          "nombre": "nro de documento",
-          "campo": "contraparte_doc",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 14,
-          "nombre": "nombre del proveedor",
-          "campo": "contraparte_nombre",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 15,
-          "nombre": "base gravada DG",
-          "campo": "base_gravada",
-          "destino": "DG",
-          "lectura": "pareja_igv",
-          "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 16,
-          "nombre": "IGV DG",
-          "campo": "igv",
-          "destino": "DG",
-          "lectura": "pareja_igv",
-          "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 17,
-          "nombre": "base gravada DGNG",
-          "campo": "base_gravada",
-          "destino": "DGNG",
-          "lectura": "pareja_igv",
-          "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 18,
-          "nombre": "IGV DGNG",
-          "campo": "igv",
-          "destino": "DGNG",
-          "lectura": "pareja_igv",
-          "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 19,
-          "nombre": "base gravada DNG",
-          "campo": "base_gravada",
-          "destino": "DNG",
-          "lectura": "pareja_igv",
-          "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 20,
-          "nombre": "IGV DNG",
-          "campo": "igv",
-          "destino": "DNG",
-          "lectura": "pareja_igv",
-          "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 21,
-          "nombre": "adquisiciones no gravadas",
-          "campo": "valor_no_gravado",
-          "lectura": "no_gravadas",
-          "nota": "El RCE trae una sola columna donde el RVIE separa exonerado e inafecto; en `0` o `0.00` no se declara, para no afirmar un dato que el archivo no da.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 22,
-          "nombre": "ISC",
-          "campo": "isc",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 23,
-          "nombre": "ICBPER",
-          "campo": "icbper",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 24,
-          "nombre": "otros tributos",
-          "campo": "otros",
-          "tambien": "dscto_otros",
-          "lectura": "neto",
-          "nota": "Una sola columna para dos campos: el lector la parte en `otros` y `dscto_otros`, y el driver la devuelve como un neto con signo.",
-          "vuelve": "dato"
-        },
-        {
-          "n": 25,
-          "nombre": "total",
-          "campo": "total",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 26,
-          "nombre": "moneda",
-          "campo": "moneda",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 27,
-          "nombre": "tipo de cambio",
-          "campo": "tipo_cambio",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 28,
-          "nombre": "fecha del doc. modificado",
-          "campo": "ref_fecha",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 29,
-          "nombre": "tipo del doc. modificado",
-          "campo": "ref_tipo_cp",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 30,
-          "nombre": "serie del doc. modificado",
-          "campo": "ref_serie",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 31,
-          "nombre": "dependencia aduanera",
-          "campo": "cod_dep_aduanera",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 32,
-          "nombre": "número del doc. modificado",
-          "campo": "ref_numero",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 33,
-          "nombre": "clasificación de bienes",
-          "campo": "clasif_bienes",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 34,
-          "nombre": "ID de proyecto",
-          "campo": "id_contrato",
-          "lectura": "directa",
-          "vuelve": "dato"
-        },
-        {
-          "n": 35,
-          "nombre": "% de participación",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Solo en operaciones con participación; el reemplazo la manda presente y vacía.",
-          "vuelve": "vacio"
-        },
-        {
-          "n": 36,
-          "nombre": "IMB",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Solo cuando aplica la Ley 31053; el reemplazo la manda presente y vacía.",
-          "vuelve": "vacio"
-        },
-        {
-          "n": 37,
-          "nombre": "CAR original",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Solo en ajustes posteriores; el reemplazo la manda presente y vacía.",
-          "vuelve": "vacio"
-        },
-        {
-          "n": 38,
-          "nombre": "marca de detracción",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Candidato a entrar: el motor avisa `SIRE_SIN_DETALLE` porque la propuesta no trae el detalle de la detracción, y una marca de sujeción al SPOT sí sería un hecho tributario. Espera su caso real.",
-          "vuelve": "vacio"
-        },
-        {
-          "n": 39,
-          "nombre": "tipo de nota",
-          "campo": "tipo_nota",
-          "lectura": "directa",
-          "vuelve": "vacio"
-        },
-        {
-          "n": 40,
-          "nombre": "estado del comprobante",
-          "campo": "estado_sunat",
-          "lectura": "directa",
-          "vuelve": "vacio"
-        },
-        {
-          "n": 41,
-          "nombre": "inconsistencias",
-          "campo": null,
-          "lectura": "ignorada",
-          "motivo": "Lo que SUNAT observa de la fila: opinión de la Administración, no un hecho del comprobante.",
-          "vuelve": "vacio"
-        }
-      ]
+    {
+     "n": 2,
+     "nombre": "ID / razón social",
+     "campo": null,
+     "lectura": "del_libro",
+     "motivo": "Un identificador libre del titular. Es del libro (`libro.razon_social`); el comprobante no lo repite.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 3,
+     "nombre": "periodo",
+     "campo": null,
+     "lectura": "del_libro",
+     "motivo": "Es del libro: el lector rechaza un archivo de otro periodo antes de leer una sola fila.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 4,
+     "nombre": "CAR SUNAT",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "El código con el que SUNAT identifica la anotación en SU registro, y no un hecho del comprobante. En el reemplazo va vacío a propósito, y `comparar_sire` lo salta por eso mismo.",
+     "vuelve": "vacio"
+    },
+    {
+     "n": 5,
+     "nombre": "fecha de emisión",
+     "campo": "fecha_emision",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 6,
+     "nombre": "vencimiento",
+     "campo": "fecha_vencimiento",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 7,
+     "nombre": "tipo de CP",
+     "campo": "tipo_cp",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 8,
+     "nombre": "serie",
+     "campo": "serie",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 9,
+     "nombre": "número",
+     "campo": "numero",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 10,
+     "nombre": "número final",
+     "campo": "numero_final",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 11,
+     "nombre": "tipo de documento",
+     "campo": "contraparte_tipo_doc",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 12,
+     "nombre": "nro de documento",
+     "campo": "contraparte_doc",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 13,
+     "nombre": "nombre del cliente",
+     "campo": "contraparte_nombre",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 14,
+     "nombre": "exportación",
+     "campo": "exportacion",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 15,
+     "nombre": "base gravada",
+     "campo": "base_gravada",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 16,
+     "nombre": "descuento de la base",
+     "campo": "dscto_base",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 17,
+     "nombre": "IGV",
+     "campo": "igv",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 18,
+     "nombre": "descuento del IGV",
+     "campo": "dscto_igv",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 19,
+     "nombre": "exonerado",
+     "campo": "exonerado",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 20,
+     "nombre": "inafecto",
+     "campo": "inafecto",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 21,
+     "nombre": "ISC",
+     "campo": "isc",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 22,
+     "nombre": "base del IVAP",
+     "campo": "base_ivap",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 23,
+     "nombre": "IVAP",
+     "campo": "ivap",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 24,
+     "nombre": "ICBPER",
+     "campo": "icbper",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 25,
+     "nombre": "otros tributos",
+     "campo": "otros",
+     "tambien": "dscto_otros",
+     "lectura": "neto",
+     "nota": "Una sola columna para dos campos: el lector la parte en `otros` y `dscto_otros`, y el driver la devuelve como un neto con signo.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 26,
+     "nombre": "total",
+     "campo": "total",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 27,
+     "nombre": "moneda",
+     "campo": "moneda",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 28,
+     "nombre": "tipo de cambio",
+     "campo": "tipo_cambio",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 29,
+     "nombre": "fecha del doc. modificado",
+     "campo": "ref_fecha",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 30,
+     "nombre": "tipo del doc. modificado",
+     "campo": "ref_tipo_cp",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 31,
+     "nombre": "serie del doc. modificado",
+     "campo": "ref_serie",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 32,
+     "nombre": "número del doc. modificado",
+     "campo": "ref_numero",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 33,
+     "nombre": "ID de proyecto",
+     "campo": "id_contrato",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 34,
+     "nombre": "tipo de nota",
+     "campo": "tipo_nota",
+     "lectura": "directa",
+     "vuelve": "no"
+    },
+    {
+     "n": 35,
+     "nombre": "estado del comprobante",
+     "campo": "estado_sunat",
+     "lectura": "directa",
+     "vuelve": "no"
+    },
+    {
+     "n": 36,
+     "nombre": "valor FOB embarcado",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Referencial de la Administración para exportaciones: no vuelve en el reemplazo y ninguna regla del motor lo usa.",
+     "vuelve": "no"
+    },
+    {
+     "n": 37,
+     "nombre": "valor de operaciones gratuitas",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Referencial de la Administración. Candidato a entrar el día que haya un caso real: una entrega gratuita tiene tratamiento contable propio.",
+     "vuelve": "no"
+    },
+    {
+     "n": 38,
+     "nombre": "tipo de operación",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Referencial de la Administración; no vuelve en el reemplazo.",
+     "vuelve": "no"
+    },
+    {
+     "n": 39,
+     "nombre": "DAM / CP",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Referencial de la Administración; no vuelve en el reemplazo.",
+     "vuelve": "no"
+    },
+    {
+     "n": 40,
+     "nombre": "CLU",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Referencial de la Administración; no vuelve en el reemplazo.",
+     "vuelve": "no"
     }
+   ]
+  },
+  "rce": {
+   "registro": "compra",
+   "columnas": 41,
+   "campos_informados": 37,
+   "campos": [
+    {
+     "n": 1,
+     "nombre": "RUC",
+     "campo": null,
+     "lectura": "del_libro",
+     "motivo": "Es del libro, no del comprobante: el lector comprueba con él que el archivo es de este proceso, y el driver lo escribe desde `libro.ruc`.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 2,
+     "nombre": "ID / razón social",
+     "campo": null,
+     "lectura": "del_libro",
+     "motivo": "Un identificador libre del titular. Es del libro (`libro.razon_social`); el comprobante no lo repite.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 3,
+     "nombre": "periodo",
+     "campo": null,
+     "lectura": "del_libro",
+     "motivo": "Es del libro: el lector rechaza un archivo de otro periodo antes de leer una sola fila.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 4,
+     "nombre": "CAR SUNAT",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "El código con el que SUNAT identifica la anotación en SU registro, y no un hecho del comprobante. En el reemplazo va vacío a propósito, y `comparar_sire` lo salta por eso mismo.",
+     "vuelve": "vacio"
+    },
+    {
+     "n": 5,
+     "nombre": "fecha de emisión",
+     "campo": "fecha_emision",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 6,
+     "nombre": "vencimiento",
+     "campo": "fecha_vencimiento",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 7,
+     "nombre": "tipo de CP",
+     "campo": "tipo_cp",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 8,
+     "nombre": "serie",
+     "campo": "serie",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 9,
+     "nombre": "año de la DUA",
+     "campo": "anio_dua",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 10,
+     "nombre": "número",
+     "campo": "numero",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 11,
+     "nombre": "número final",
+     "campo": "numero_final",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 12,
+     "nombre": "tipo de documento",
+     "campo": "contraparte_tipo_doc",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 13,
+     "nombre": "nro de documento",
+     "campo": "contraparte_doc",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 14,
+     "nombre": "nombre del proveedor",
+     "campo": "contraparte_nombre",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 15,
+     "nombre": "base gravada DG",
+     "campo": "base_gravada",
+     "destino": "DG",
+     "lectura": "pareja_igv",
+     "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 16,
+     "nombre": "IGV DG",
+     "campo": "igv",
+     "destino": "DG",
+     "lectura": "pareja_igv",
+     "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 17,
+     "nombre": "base gravada DGNG",
+     "campo": "base_gravada",
+     "destino": "DGNG",
+     "lectura": "pareja_igv",
+     "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 18,
+     "nombre": "IGV DGNG",
+     "campo": "igv",
+     "destino": "DGNG",
+     "lectura": "pareja_igv",
+     "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 19,
+     "nombre": "base gravada DNG",
+     "campo": "base_gravada",
+     "destino": "DNG",
+     "lectura": "pareja_igv",
+     "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 20,
+     "nombre": "IGV DNG",
+     "campo": "igv",
+     "destino": "DNG",
+     "lectura": "pareja_igv",
+     "nota": "Tres parejas de base e IGV según el destino de la adquisición: el lector toma la primera con importe y de ahí deduce `destino_igv`.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 21,
+     "nombre": "adquisiciones no gravadas",
+     "campo": "valor_no_gravado",
+     "lectura": "no_gravadas",
+     "nota": "El RCE trae una sola columna donde el RVIE separa exonerado e inafecto; en `0` o `0.00` no se declara, para no afirmar un dato que el archivo no da.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 22,
+     "nombre": "ISC",
+     "campo": "isc",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 23,
+     "nombre": "ICBPER",
+     "campo": "icbper",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 24,
+     "nombre": "otros tributos",
+     "campo": "otros",
+     "tambien": "dscto_otros",
+     "lectura": "neto",
+     "nota": "Una sola columna para dos campos: el lector la parte en `otros` y `dscto_otros`, y el driver la devuelve como un neto con signo.",
+     "vuelve": "dato"
+    },
+    {
+     "n": 25,
+     "nombre": "total",
+     "campo": "total",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 26,
+     "nombre": "moneda",
+     "campo": "moneda",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 27,
+     "nombre": "tipo de cambio",
+     "campo": "tipo_cambio",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 28,
+     "nombre": "fecha del doc. modificado",
+     "campo": "ref_fecha",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 29,
+     "nombre": "tipo del doc. modificado",
+     "campo": "ref_tipo_cp",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 30,
+     "nombre": "serie del doc. modificado",
+     "campo": "ref_serie",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 31,
+     "nombre": "dependencia aduanera",
+     "campo": "cod_dep_aduanera",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 32,
+     "nombre": "número del doc. modificado",
+     "campo": "ref_numero",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 33,
+     "nombre": "clasificación de bienes",
+     "campo": "clasif_bienes",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 34,
+     "nombre": "ID de proyecto",
+     "campo": "id_contrato",
+     "lectura": "directa",
+     "vuelve": "dato"
+    },
+    {
+     "n": 35,
+     "nombre": "% de participación",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Solo en operaciones con participación; el reemplazo la manda presente y vacía.",
+     "vuelve": "vacio"
+    },
+    {
+     "n": 36,
+     "nombre": "IMB",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Solo cuando aplica la Ley 31053; el reemplazo la manda presente y vacía.",
+     "vuelve": "vacio"
+    },
+    {
+     "n": 37,
+     "nombre": "CAR original",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Solo en ajustes posteriores; el reemplazo la manda presente y vacía.",
+     "vuelve": "vacio"
+    },
+    {
+     "n": 38,
+     "nombre": "marca de detracción",
+     "campo": "detraccion",
+     "lectura": "anotacion",
+     "motivo": "Se lee desde la 4.1, y era el candidato que esperaba su caso real: un RCE real de un mes lo traía en 221 de 3018 filas. SUNAT afirma QUE la compra está sujeta al SPOT y no dice CUÁL —el código del Catálogo 54, la tasa y el monto son del comprobante—, así que la marca entra como anotación y el motor se NIEGA a exportar esos comprobantes hasta que el contador ponga el código (`sin_codigo_detraccion`), en vez de omitir la línea de la detracción en silencio.",
+     "vuelve": "vacio"
+    },
+    {
+     "n": 39,
+     "nombre": "tipo de nota",
+     "campo": "tipo_nota",
+     "lectura": "directa",
+     "vuelve": "vacio"
+    },
+    {
+     "n": 40,
+     "nombre": "estado del comprobante",
+     "campo": "estado_sunat",
+     "lectura": "directa",
+     "vuelve": "vacio"
+    },
+    {
+     "n": 41,
+     "nombre": "inconsistencias",
+     "campo": null,
+     "lectura": "ignorada",
+     "motivo": "Lo que SUNAT observa de la fila: opinión de la Administración, no un hecho del comprobante.",
+     "vuelve": "vacio"
+    }
+   ]
   }
+ }
 }

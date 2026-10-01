@@ -444,20 +444,40 @@ pierde**, porque la fila entera del TXT viaja en `datos_originales["sire"]` del 
 contestar «¿de dónde salió este dato?» en tu pantalla de revisión, y para saber qué te llega antes de escribir
 una línea de código contra el registro.
 
-**9. Y ojo con la detracción: del SIRE no llega.** Si tu mes entra por la propuesta y no por los XML, **ningún
-comprobante traerá detracción**, y el motor te lo avisa con `SIRE_SIN_DETALLE`. La distinción importa, porque no
-es que SUNAT se calle del todo:
+**9. La detracción del SIRE: SUNAT dice QUE, tú dices CUÁL.** Si tu mes entra por la propuesta y no por los XML, la
+detracción llega a medias, y conviene saber qué mitad:
 
 - **SUNAT sí dice SI hay detracción.** El RCE trae una columna propia, el campo 38 del Anexo 8 de la RS
   040-2022, con una `D` en las filas sujetas al SPOT. En un RCE real de un mes (3018 filas) venía marcada en 221.
 - **SUNAT no dice CUÁL.** No hay código del Catálogo 54, ni tasa, ni monto, ni cuenta del Banco de la Nación, ni
   constancia. Eso es del comprobante, no del registro.
-- **Y el motor hoy no lee ni la marca**: el campo 38 está declarado como `ignorada` en `api.campos_del_sire()`,
-  con su motivo. Llega entera en `datos_originales["sire"]`, así que si la necesitas ya, la tienes ahí.
+- **Desde la 4.1 el motor lee la marca** y la guarda en `detraccion._marca_sire`, sin código. Y **se niega a exportar**
+  esos comprobantes hasta que llegue el código, con la falta `sin_codigo_detraccion`: antes salían sin su línea de
+  detracción y en silencio, con la cuenta por pagar al proveedor inflada.
 
-Lo que esto significa para tu conector: **la detracción la aporta tu lado**, leyendo el XML del comprobante o
-pidiéndosela al contador. No la deduzcas de la propuesta, y no asumas que un mes importado del SIRE y exportado a
-CONCAR lleva sus líneas de detracción: no las lleva, porque el dato no estaba.
+Así que tu conector tiene dos cosas que hacer, y las dos por canales que ya usas:
+
+```python
+d = api.diagnosticar(documento, driver="concar", configuracion=config, imputacion=imputacion)
+# La clave está cuando el destino exige la detracción: los cinco que escriben un asiento, el `sire` no.
+faltan_codigo = d["faltantes"].get("sin_codigo_detraccion", [])
+print(len(faltan_codigo), "marcados por SUNAT sin código de detracción")
+```
+
+Esa lista es la que **filtra la tabla donde el contador los completa**: no la imprimas entera, que un mes real trae
+miles de filas. Y cuando la complete, el código viaja en la imputación de cada documento, al lado de su cuenta:
+
+```python
+con_detraccion = {"f1": {"cuenta_contable": "659999", "detraccion_codigo": "037"}}
+print(con_detraccion["f1"]["detraccion_codigo"])
+```
+
+Con eso el motor saca la tasa de su tabla y el monto de `total × tasa`, y la detracción sale completa —sus dos líneas y
+su código interno en cada destino— **igual que si el comprobante hubiera entrado por su XML**. Lo que traiga el
+comprobante manda sobre la imputación, así que mandarlo siempre no rompe nada.
+
+Un detalle de alcance: esto es **solo compras**. El RVIE no tiene columna de detracción en ninguno de sus 40 campos. Y
+el driver `sire` no se detiene nunca por esto: el registro que se declara a SUNAT no lleva detracción.
 
 ### Dónde acaba el motor y empieza tu conector
 

@@ -79,16 +79,16 @@ def test_la_forma_de_cada_driver_de_serie():
 
 def test_lo_que_exige_cada_driver_de_serie():
     """`exige` = lo del núcleo (cuenta y tipo con equivalencia) más lo que el driver declara."""
-    assert contrato.exige(drivers.concar) == {"cuenta_contable", "tipo_cp", "centro_costo", "moneda"}
-    assert contrato.exige(drivers.csv) == {"cuenta_contable", "tipo_cp"}
-    assert contrato.exige(drivers.contasis) == {"cuenta_contable", "cuenta_unica"}
+    assert contrato.exige(drivers.concar) == {"cuenta_contable", "tipo_cp", "centro_costo", "moneda", "detraccion"}
+    assert contrato.exige(drivers.csv) == {"cuenta_contable", "tipo_cp", "detraccion"}
+    assert contrato.exige(drivers.contasis) == {"cuenta_contable", "cuenta_unica", "detraccion"}
     assert contrato.exige(drivers.sire) == frozenset() and not hasattr(drivers.sire, "EXIGE")
 
 
 def test_un_requisito_fuera_del_catalogo_no_pasa_el_contrato():
     raro = driver_de_prueba()
     raro.EXIGE = {"anexo"}
-    assert contrato.incumplimientos(raro) == ["EXIGE solo admite ['centro_costo', 'moneda']; sobra ['anexo']"]
+    assert contrato.incumplimientos(raro) == ["EXIGE solo admite ['centro_costo', 'detraccion', 'moneda']; sobra ['anexo']"]
     texto = driver_de_prueba()
     texto.EXIGE = "centro_costo"                 # un str también es iterable: no vale
     assert contrato.incumplimientos(texto) == ["EXIGE es un conjunto de textos"]
@@ -261,7 +261,7 @@ def test_las_dos_familias_y_lo_que_pide_cada_forma():
     assert contrato.incumplimientos(registro) == []
     assert contrato.exige(registro) == {"cuenta_contable", "centro_costo"}
     registro.EXIGE = frozenset({"moneda"})
-    assert contrato.incumplimientos(registro) == ["EXIGE solo admite ['centro_costo', 'cuenta_unica']; sobra ['moneda']"]
+    assert contrato.incumplimientos(registro) == ["EXIGE solo admite ['centro_costo', 'cuenta_unica', 'detraccion']; sobra ['moneda']"]
 
 
 def test_un_registro_sale_sin_asiento_y_con_las_cuentas_del_asiento(con_terceros):
@@ -387,7 +387,7 @@ def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros)
     assert api.exportar(doc, driver="csv", configuracion=CONTAB, imputacion=imputacion)["archivo"].endswith(".csv")
     asientos = driver_de_prueba("asientos")
     asientos.EXIGE = frozenset({"cuenta_unica"})
-    assert contrato.incumplimientos(asientos) == ["EXIGE solo admite ['centro_costo', 'moneda']; sobra ['cuenta_unica']"]
+    assert contrato.incumplimientos(asientos) == ["EXIGE solo admite ['centro_costo', 'detraccion', 'moneda']; sobra ['cuenta_unica']"]
 
 
 def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_terceros, tmp_path, capsys):

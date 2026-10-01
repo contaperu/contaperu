@@ -153,9 +153,12 @@ FORMAS = ("desde_lineas", "desde_comprobantes", "linea")
 FAMILIA = {"linea": "registro", "desde_comprobantes": "registro", "desde_lineas": "asiento"}
 
 # Lo que un driver de asientos PUEDE exigir (el núcleo sabe generar sin ello): el centro de costo en
-# las cuentas que lo llevan, y que la moneda tenga código en el destino. Lo que exige el núcleo a todos:
-# la cuenta contable de cada línea y la equivalencia del tipo SUNAT (de ella sale el sub-diario).
-EXIGE_POSIBLES_ASIENTO = frozenset({"centro_costo", "moneda"})
+# las cuentas que lo llevan, que la moneda tenga código en el destino, y `detraccion` (4.1): el código del Catálogo 54
+# de las compras que SUNAT marcó con detracción en su propuesta del SIRE. Lo declara el destino que escribe la línea de
+# la detracción —sin el código no la escribiría, y en silencio—; un destino que no la lleva no tiene por qué pararse.
+# Lo que exige el núcleo a todos: la cuenta contable de cada línea y la equivalencia del tipo SUNAT (de ella sale el
+# sub-diario).
+EXIGE_POSIBLES_ASIENTO = frozenset({"centro_costo", "moneda", "detraccion"})
 EXIGE_NUCLEO_ASIENTO = frozenset({"cuenta_contable", "tipo_cp"})
 # Y a uno de registro que lleva cuentas (`desde_comprobantes`), el núcleo le exige la cuenta —la columna con la
 # que el destino arma su asiento— y nada del sub-diario ni de su equivalencia, que son del asiento. Puede exigir
@@ -163,7 +166,7 @@ EXIGE_NUCLEO_ASIENTO = frozenset({"cuenta_contable", "tipo_cp"})
 # lleva una por fila y arma un asiento por fila (CONTASIS, John 12-sep-2026). La moneda no: su código
 # (`monedas_codigo`) es el de la configuración del asiento; lo que un registro no puede escribir en su propio
 # vocabulario lo dice su `no_caben`.
-EXIGE_POSIBLES_REGISTRO = frozenset({"centro_costo", "cuenta_unica"})
+EXIGE_POSIBLES_REGISTRO = frozenset({"centro_costo", "cuenta_unica", "detraccion"})
 EXIGE_NUCLEO_REGISTRO = frozenset({"cuenta_contable"})
 
 # Los datos que un sistema contable elige en qué columnas de su archivo escribir (`COLUMNAS_ELEGIBLES`). Hoy, el centro

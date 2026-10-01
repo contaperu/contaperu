@@ -63,3 +63,4 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0017](0017-el-codigo-interno-lo-pone-cada-erp.md) | `detraccion.codigo_interno`: el código interno lo pone cada ERP, no el estándar | `final` |
 | [0018](0018-la-sigla-del-tipo-la-pone-cada-erp.md) | `documento.tipo` y `referencia.tipo`: la sigla la pone cada ERP, no el estándar | `final` |
 | [0019](0019-anotaciones-dentro-de-la-detraccion.md) | El bloque `detraccion` admite anotaciones `_`, como la raíz | `final` |
+| [0020](0020-la-marca-de-detraccion-del-sire.md) | La marca de detracción del SIRE, y el `detraccion_codigo` que pone quien integra | `final` |

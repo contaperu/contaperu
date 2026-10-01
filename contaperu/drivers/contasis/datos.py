@@ -23,7 +23,8 @@ OPCIONES = Opciones(extension=".xlsx")
 # su retención de 4ta.
 EXCLUYE_TIPOS = frozenset({"02"})
 # CONTASIS arma un asiento por fila con UNA cuenta de la base (John, 12-sep-2026): un reparto entre cuentas no sale.
-EXIGE = frozenset({"cuenta_unica"})
+# Y `detraccion` (4.1): su fila lleva la detracción, así que sin el código del Catálogo 54 la omitiría en silencio.
+EXIGE = frozenset({"cuenta_unica", "detraccion"})
 
 # Con qué cuentas nace una empresa que lleva CONTASIS. **Declaradas enteras y a propósito** (John, 22-sep-2026),
 # con la misma forma que las de STARSOFT, aunque hoy coincidan una a una con las de lo general

@@ -4,6 +4,59 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [4.1.0] — 2026-10-01
+
+**La propuesta del SIRE dice QUE hay detracción; quien integra dice CUÁL.** Un mes importado de la propuesta —el caso
+normal de un estudio contable, porque los XML los tiene el cliente— se exportaba **sin ninguna detracción y en
+silencio**. El asiento salía mal: sin la línea de la detracción, la cuenta por pagar al proveedor queda inflada, y
+nada decía cuáles eran. El aviso `SIRE_SIN_DETALLE` salía en **todos** los comprobantes por igual, así que no
+distinguía al que le falta la detracción del que nunca la tuvo.
+
+Y era peor de lo necesario, porque SUNAT sí lo dice: el **campo 38 del Anexo 8 de la RS 040-2022** trae una `D` en las
+filas sujetas al SPOT. El motor lo ignoraba, y `datos/sunat/sire_campos.json` lo tenía anotado como «candidato a
+entrar: **espera su caso real**». El caso real llegó: un RCE de verdad, 3018 filas, **221 marcadas**.
+
+Lo que falta para armar la detracción es **una sola cosa, el código del Catálogo 54**: de él salen la tasa (la tabla
+del motor) y el monto (`total × tasa`, soles enteros). Y no se inventa —inventarlo escribiría una tasa falsa en el
+asiento y un código interno falso en CONCAR—, así que lo pone quien integra, por el canal con el que ya pone la cuenta
+contable.
+
+### Añadido
+
+- **El lector del RCE lee la marca** y la guarda como anotación: `detraccion: {"_marca_sire": "D"}`, **sin código**. Es
+  la primera que usa la puerta que abrió la 4.0 (las anotaciones `^_` dentro de `detraccion`, enmienda 0019). Solo
+  compras: el RVIE no tiene esa columna en ninguno de sus 40 campos.
+- **`imputacion` acepta `detraccion_codigo`** (enmienda 0020), junto a `cuenta_contable`, `centro_costo`,
+  `cuenta_tercero` y `reparto`. Puesto el código, la detracción nace completa en los seis destinos, con su código
+  interno y su sigla, igual que si el comprobante hubiera entrado por su XML. Aditivo: la versión del estándar no se
+  mueve, avanza su tag.
+- **La falta `sin_codigo_detraccion`**, con su lista de comprobantes y `pedir_a: "contador"`. Es la lista con la que un
+  portal filtra la tabla donde el contador los completa.
+- **El requisito `detraccion` del contrato de drivers**, que declaran los cinco destinos que escriben un asiento. El
+  driver `sire` **no**: el registro tributario no lleva detracción, así que un mes marcado se sigue declarando.
+
+### Cambiado
+
+- **`detracciones.normalizar` conserva las anotaciones `_` al blanquear** una detracción sin código reconocible. Hasta
+  la 4.0 se llevaba el bloque entero, y con él la marca: la única prueba de que a ese comprobante le faltaba algo.
+  `_tasa_tabla` no sobrevive, y con motivo: es la tasa de un código, y sin código no hay nada que anotar.
+- **La CLI tiene tope.** `diagnosticar` imprimía una línea por observación y por comprobante, y unía cada lista en UNA
+  línea: sobre el RCE real de 3018 filas eran **3018 líneas del mismo aviso y 36 KB de salida**. Ahora enseña las
+  primeras doce y dice cuántas quedan y de qué códigos son. La lista completa sigue entera en la respuesta de
+  `diagnosticar`, que es de donde la lee un portal.
+
+### Cómo migrar
+
+1. **Un mes importado de la propuesta del SIRE con detracciones marcadas deja de exportar** hasta que se ponga el
+   código de cada una. Es el cambio de comportamiento de esta versión, y es a propósito: antes esos meses salían con el
+   asiento incompleto y sin avisar. Lo que hay que hacer son dos cosas: leer
+   `diagnosticar(...)["faltantes"]["sin_codigo_detraccion"]` para saber cuáles son, y mandar `detraccion_codigo` en la
+   imputación de cada uno. **No afecta a un mes que entró por XML**: ahí el código viene en el archivo.
+2. **El TXT del SIRE no se ve afectado**: ese driver no exige la detracción, así que un mes marcado se declara igual.
+3. **Si leías `faltantes` esperando un juego fijo de claves**, ahora trae una más. Y `exige` de los cinco drivers de
+   asiento trae `detraccion`.
+4. **Si imprimías la salida de `contaperu diagnosticar`** y contabas con una línea por comprobante, ahora hay tope.
+
 ## [4.0.0] — 2026-10-01
 
 **La base que leen todos es la detracción de SUNAT, y de ahí pasa por cada driver** (decisión de John, 30-sep-2026).

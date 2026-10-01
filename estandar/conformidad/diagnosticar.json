@@ -499,6 +499,62 @@
    }
   },
   {
+   "description": "La propuesta del SIRE marca una compra con detracción y no dice cuál: se le pide el código del Catálogo 54 al contador",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "ALQUILER DE MAQUINARIA ENERO 2026",
+      "id_externo": "c1",
+      "detraccion": {
+       "_marca_sire": "D"
+      }
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "asiento_contable",
+   "espera": {
+    "listo_para_exportar": false,
+    "por_que_no": [
+     "1 con detracción marcada por SUNAT y sin su código del Catálogo 54"
+    ],
+    "faltantes": {
+     "sin_codigo_detraccion": [
+      "F001-123"
+     ]
+    },
+    "pedir_a": {
+     "sin_codigo_detraccion": "contador"
+    }
+   }
+  },
+  {
    "description": "Con `imputaciones` y un comprobante sin `id_externo`: se rechaza en la puerta",
    "documento": {
     "open_accounting": "1.0",

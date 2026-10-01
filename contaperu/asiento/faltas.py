@@ -72,6 +72,27 @@ class SinCuenta(NoExportable):
         super().__init__(f"{len(comprobantes)} comprobante(s) sin cuenta contable", comprobantes)
 
 
+class SinCodigoDetraccion(NoExportable):
+    """Compras que **SUNAT marcó** como sujetas al SPOT en su propuesta del SIRE (campo 38 del Anexo 8 de la RS
+    040-2022) y que no traen el código del Catálogo 54 con el que se arma la detracción.
+
+    Detiene la exportación, y no es una cortesía: **el hecho lo afirma SUNAT en su propio registro**, no lo infiere el
+    motor. Un contador que acepta esa propuesta está aceptando que esos comprobantes tienen detracción, así que
+    exportarlos sin ella contradice el archivo que acaba de aceptar — y lo haría en silencio, porque sin código no hay
+    tasa, sin tasa el monto es 0 y la línea no nace (`motor.lineas_del_comprobante`). El asiento saldría con la cuenta
+    por pagar al proveedor inflada y nadie se enteraría.
+
+    El código no se inventa (la misma regla que `SinSigla`): de él salen la tasa de la tabla y el monto, así que
+    inventarlo escribiría una tasa falsa en el asiento y un código interno falso en CONCAR. Lo pone el contador, por
+    la imputación (`detraccion_codigo`), igual que pone la cuenta contable."""
+
+    clave = "sin_codigo_detraccion"
+
+    def __init__(self, comprobantes: list[Comprobante]):
+        super().__init__(f"{len(comprobantes)} comprobante(s) que SUNAT marcó con detracción y no traen su código "
+                         "del Catálogo 54", comprobantes)
+
+
 class RepartoNoCuadra(NoExportable):
     """Comprobantes cuyo reparto (el de su imputación) no suma la base del asiento. Hasta el 12-sep-2026 heredaba de
     `SinCuenta` para que quien atrapaba la falta de cuenta la atrapara sin cambiar nada; ahora eso lo da `NoExportable`,
@@ -147,6 +168,9 @@ FALTAS: tuple[Falta, ...] = (
           "con un reparto entre cuentas que no suma la base del asiento", CONTADOR, "Reparto que no suma la base"),
     Falta("sin_centro", "centro_costo", SinCentro,
           "sin centro de costo en una cuenta que lo lleva", CONTADOR, "Sin centro de costo"),
+    Falta("sin_codigo_detraccion", "detraccion", SinCodigoDetraccion,
+          "con detracción marcada por SUNAT y sin su código del Catálogo 54", CONTADOR,
+          "Sin código de detracción"),
     # Estas dos no bloquean por un requisito: el correlativo que falta arranca en 1, y lo que no cabe en el formato lo
     # declara el driver, con su motivo y su excepción (`contrato.NoCabe`).
     Falta("sin_correlativo", "", SinCorrelativo, "sub-diarios sin correlativo", SISTEMA,

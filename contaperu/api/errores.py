@@ -6,7 +6,7 @@ puerta HTTP, y sirve igual a cualquier aplicación que quiera guardar o enseñar
 from __future__ import annotations
 
 from ..asiento.faltas import (NoExportable, RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCodigoDeMoneda,
-                              SinCorrelativo, SinCuenta, SinSigla)
+                              SinCodigoDetraccion, SinCorrelativo, SinCuenta, SinSigla)
 from ..configuracion import ConfiguracionInvalida
 from ..drivers.concar import CorrelativoDesborda
 from ..drivers.contrato import NoCabe
@@ -20,7 +20,8 @@ from ..pcge.adaptar import TablaInvalida
 
 __all__ = ["CampoCambiaDeSigno", "ConfiguracionInvalida", "CorrelativoDesborda", "Descuadre", "DocumentoInvalido", "ErrorContaperu",
            "ErroresBloqueantes", "IgvImposible", "NoCabe", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
-           "SinCentro", "SinCodigoDeMoneda", "SinCorrelativo", "SinCuenta", "SinSigla", "SireInvalido",
+           "SinCentro", "SinCodigoDeMoneda", "SinCodigoDetraccion", "SinCorrelativo", "SinCuenta", "SinSigla",
+           "SireInvalido",
            "TablaInvalida", "TotalImposible", "XmlInvalido", "problema"]
 
 # Lo que se pidió no se puede hacer con estos datos: el documento, la configuración o el mes no dan.

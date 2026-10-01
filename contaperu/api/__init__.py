@@ -25,7 +25,8 @@ from .documento import documento_de
 from .instrucciones import CAMINO, INSTRUCCIONES, PRESENTACION, REGLAS
 from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesborda, Descuadre, DocumentoInvalido, ErrorContaperu,
                       ErroresBloqueantes, IgvImposible, NoCabe, NoExportable, RepartoNoAdmitido, RepartoNoCuadra,
-                      SinCentro, SinCodigoDeMoneda, SinCorrelativo, SinCuenta, SinSigla, SireInvalido, TablaInvalida,
+                      SinCentro, SinCodigoDeMoneda, SinCodigoDetraccion, SinCorrelativo, SinCuenta, SinSigla,
+                      SireInvalido, TablaInvalida,
                       TotalImposible, XmlInvalido, problema)
 from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, campos_del_sire, catalogo_pcge, catalogos_api_sire, catalogos_del_estandar, catalogos_sunat, comparar_sire,
                           campos_del_comprobante, config_aplicada, cuadrar, por_cuenta, resumen,
@@ -55,7 +56,8 @@ __all__ = [
     "MAXIMO_CLAVES_PREVIAS",
     # errores
     "ErrorContaperu", "DocumentoInvalido", "ConfiguracionInvalida", "ErroresBloqueantes", "NoExportable", "NoCabe",
-    "SinCuenta", "SinCentro", "SinSigla", "SinCodigoDeMoneda", "SinCorrelativo", "RepartoNoCuadra",
+    "SinCuenta", "SinCentro", "SinCodigoDetraccion", "SinSigla", "SinCodigoDeMoneda", "SinCorrelativo",
+    "RepartoNoCuadra",
     "RepartoNoAdmitido", "CorrelativoDesborda", "CampoCambiaDeSigno", "Descuadre", "XmlInvalido", "SireInvalido", "IgvImposible",
     "TotalImposible", "TablaInvalida", "problema",
     # versiones y avisos

@@ -59,12 +59,18 @@ class Imputacion:
     cuenta_contable: str = ""
     centro_costo: str = ""
     cuenta_tercero: str = ""
+    # El código del Catálogo 54 de la detracción (1.1). Está aquí, y no en el comprobante, por la misma razón que la
+    # cuenta: **llega aparte**. Lo pone el contador cuando el comprobante entró por la propuesta del SIRE, que marca
+    # que hay detracción (campo 38 del Anexo 8) y no dice cuál. De él salen la tasa de la tabla y el monto, así que
+    # sin él el motor se niega a exportar (`SinCodigoDetraccion`) en vez de omitir la línea en silencio.
+    detraccion_codigo: str = ""
     reparto: list[Parte] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self.cuenta_contable = _texto(self.cuenta_contable)
         self.centro_costo = _texto(self.centro_costo)
         self.cuenta_tercero = _texto(self.cuenta_tercero)
+        self.detraccion_codigo = _texto(self.detraccion_codigo)
         self.reparto = [p if isinstance(p, Parte) else Parte(**p) for p in (self.reparto or [])]
         if self.reparto and (self.cuenta_contable or self.centro_costo):
             raise ValueError("una imputación con reparto no lleva además cuenta_contable ni centro_costo "
@@ -76,7 +82,8 @@ class Imputacion:
         if isinstance(valor, cls):
             return valor
         if not isinstance(valor, dict):
-            raise ValueError("una imputación es un objeto {cuenta_contable, centro_costo, cuenta_tercero, reparto}")
+            raise ValueError("una imputación es un objeto {cuenta_contable, centro_costo, cuenta_tercero, "
+                             "detraccion_codigo, reparto}")
         try:
             return cls(**valor)
         except TypeError as e:
@@ -84,4 +91,5 @@ class Imputacion:
 
     def a_dict(self) -> dict:
         return {"cuenta_contable": self.cuenta_contable, "centro_costo": self.centro_costo,
-                "cuenta_tercero": self.cuenta_tercero, "reparto": [p.a_dict() for p in self.reparto]}
+                "cuenta_tercero": self.cuenta_tercero, "detraccion_codigo": self.detraccion_codigo,
+                "reparto": [p.a_dict() for p in self.reparto]}

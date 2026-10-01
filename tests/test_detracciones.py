@@ -13,6 +13,8 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
+import pytest
+
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import concar as driver_concar
@@ -20,6 +22,7 @@ from contaperu.drivers import contrato
 from contaperu import asiento, detracciones, validar
 from contaperu.asiento.configuracion import NUMERO_DETRACCION_PENDIENTE
 from contaperu.drivers import contasis as driver_contasis
+from contaperu.drivers import sire as driver_sire
 from contaperu.modelo import Comprobante, Libro
 
 # `con_imputaciones` mete las imputaciones de prueba en la configuración: desde la 3.0 la cuenta de un comprobante
@@ -356,3 +359,108 @@ def test_el_voucher_llega_al_documento_DR_de_CONCAR():
     assert documento_dr(pagada) == ("00123456789", "00123456789")
     # Con número y sin fecha el archivo TAMBIÉN lleva el número: el vóucher existe, lo que falta es anotar el día.
     assert documento_dr(_compra_con_detraccion(nro_constancia="00123456789"))[0] == "00123456789"
+
+
+# ── La marca que SUNAT afirma en su propuesta, y el código que pone el contador (4.1) ─────────────────────────────
+
+MARCADA = {detracciones.MARCA_SIRE: "D"}
+
+
+def test_la_marca_del_sire_sobrevive_al_blanqueo():
+    """Lo que la 4.1 arregla. `normalizar` blanquea la detracción sin código reconocible, y hasta la 4.0 se llevaba el
+    bloque entero: la marca que el lector del SIRE escribe —la única prueba de que a ese comprobante le FALTA algo— se
+    perdía, y el mes se exportaba sin su línea de detracción y en silencio.
+
+    Si alguien quita la conservación de anotaciones en `normalizar`, este test cae."""
+    marcada = comprobante(dict(MARCADA))
+    assert detracciones.normalizar([marcada], TABLA) == []      # no hay nada que cambiarle: ya está así
+    assert marcada.detraccion == MARCADA                        # y la marca sigue ahí
+
+    # Y una detracción con código ilegible que ADEMÁS venía marcada conserva la marca y pierde el resto.
+    mixta = comprobante({"codigo": "000", "porcentaje": 3, **MARCADA})
+    assert detracciones.normalizar([mixta], TABLA) == [mixta]
+    assert mixta.detraccion == MARCADA
+
+
+def test_la_anotacion_de_la_tabla_no_sobrevive_al_blanqueo():
+    """`_tasa_tabla` es la tasa de un código, así que sin código no hay nada que anotar: se va con él. Conservarla
+    dejaría en el bloque una tasa que no corresponde a ninguna detracción."""
+    c = comprobante({"codigo": "027", "porcentaje": 4})
+    detracciones.normalizar([c], TABLA)
+    assert c.detraccion["_tasa_tabla"] == "4"
+    c.detraccion = {"codigo": "000", "_tasa_tabla": "4", **MARCADA}
+    detracciones.normalizar([c], TABLA)
+    assert c.detraccion == MARCADA
+
+
+def test_el_codigo_que_pone_el_contador_completa_la_marca():
+    """El circuito entero: SUNAT dice QUE hay detracción, el contador dice CUÁL por su imputación, y el motor saca la
+    tasa de su tabla y el monto de `total × tasa`. Desde ahí es indistinguible de un comprobante leído de un XML."""
+    c = comprobante(dict(MARCADA), id_externo="c-detra")
+    config = dict(TABLA, imputaciones={"c-detra": {"detraccion_codigo": "037"}})
+    assert detracciones.normalizar([c], config) == [c]
+    # 118 × 12 % = 14.16 → 14 soles enteros, y la tasa de la tabla anotada al lado.
+    assert c.detraccion == {"codigo": "037", "monto": "14", "_tasa_tabla": "12", **MARCADA}
+
+
+def test_lo_que_trae_el_comprobante_manda_sobre_lo_que_dice_el_contador():
+    """El archivo gana a la persona: si el XML trajo el código, la imputación no lo pisa. Solo rellena lo que falta."""
+    c = comprobante({"codigo": "027", "porcentaje": 4}, id_externo="c-detra")
+    config = dict(TABLA, imputaciones={"c-detra": {"detraccion_codigo": "037"}})
+    detracciones.normalizar([c], config)
+    assert c.detraccion["codigo"] == "027"
+
+
+def test_un_codigo_del_contador_que_no_esta_en_la_tabla_no_cuela():
+    """La imputación no es una puerta trasera a la tabla: un código que el contribuyente no reconoce se blanquea igual,
+    y el comprobante sigue marcado y sigue faltándole el código."""
+    c = comprobante(dict(MARCADA), id_externo="c-detra")
+    config = dict(TABLA, imputaciones={"c-detra": {"detraccion_codigo": "999"}})
+    detracciones.normalizar([c], config)
+    assert c.detraccion == MARCADA
+
+
+def _doc_marcado(imputacion_extra: dict | None = None) -> tuple[dict, dict, dict]:
+    """Un mes de una compra que SUNAT marcó con detracción, como lo deja el lector del SIRE."""
+    marcado = dict(comprobante(dict(MARCADA)).a_dict(), id_externo="f1", origen="sire")
+    doc = {"libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608",
+                     "tipo": "compra"}, "comprobantes": [marcado]}
+    imputacion = {"f1": {"cuenta_contable": "659999", **(imputacion_extra or {})}}
+    return doc, {"usa_centros_costo": False}, imputacion
+
+
+def test_sin_el_codigo_la_exportacion_se_niega_y_dice_a_quien_pedirlo():
+    """Lo que la 4.1 cambia de verdad. Hasta la 4.0 este mes se exportaba **sin la línea de detracción y en silencio**:
+    sin código no hay tasa, sin tasa el monto es 0 y la línea no nace, así que el Excel salía con la cuenta por pagar
+    al proveedor inflada y nadie se enteraba. Ahora se para, con su lista para que el portal la filtre."""
+    doc, configuracion, imputacion = _doc_marcado()
+    d = api.diagnosticar(doc, driver="concar", configuracion=configuracion, imputacion=imputacion)
+    assert d["listo_para_exportar"] is False
+    assert d["faltantes"]["sin_codigo_detraccion"] == ["F001-1"]
+    assert {"motivo": "sin_codigo_detraccion", "pedir_a": "contador"}.items() <= \
+        next(f for f in d["que_falta"] if f["motivo"] == "sin_codigo_detraccion").items()
+    with pytest.raises(asiento.SinCodigoDetraccion, match="marcó con detracción"):
+        api.exportar(doc, driver="concar", configuracion=configuracion, imputacion=imputacion)
+
+
+def test_el_driver_del_sire_sigue_exportando_un_mes_marcado():
+    """El registro tributario no lleva detracción, así que no tiene por qué pararse: lo que se declara a SUNAT no
+    cambia porque falte un dato del asiento. Si esto se rompiera, un mes del SIRE no se podría ni declarar."""
+    doc, configuracion, imputacion = _doc_marcado()
+    assert "detraccion" not in contrato.exige(driver_sire)
+    assert api.exportar(doc, driver="sire", configuracion=configuracion,
+                        imputacion=imputacion)["archivo"].endswith(".TXT")
+
+
+def test_con_el_codigo_del_contador_la_detraccion_llega_al_asiento():
+    """Y el otro lado: puesto el código, el mes exporta y la detracción nace completa —sus dos líneas y su monto—,
+    exactamente como si el comprobante hubiera entrado por su XML."""
+    doc, configuracion, imputacion = _doc_marcado({"detraccion_codigo": "037"})
+    assert api.diagnosticar(doc, driver="concar", configuracion=configuracion,
+                            imputacion=imputacion)["faltantes"]["sin_codigo_detraccion"] == []
+    asi = api.generar_asiento(doc, driver="csv", configuracion=configuracion, imputacion=imputacion)
+    roles = [linea.get("rol") for linea in asi["asiento"]]
+    assert roles.count("detraccion") == 1 and roles.count("detraccion_tercero") == 1
+    # 118 × 12 % = 14.16 → 14 soles enteros, y la línea lleva el código de SUNAT, no el interno de ningún ERP.
+    detra = next(linea for linea in asi["asiento"] if linea.get("rol") == "detraccion")
+    assert detra["importe"] == "14.00" and detra["detraccion"]["codigo"] == "037"

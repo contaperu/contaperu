@@ -11,6 +11,7 @@ from decimal import Decimal
 
 import pytest
 
+from contaperu import catalogos
 from contaperu.lectores import archivos, sire_txt
 from contaperu.modelo import Libro
 
@@ -116,8 +117,8 @@ def test_el_formato_de_reemplazo_no_trae_las_dos_ultimas_y_entra_igual():
 
 def test_compras_trae_el_motivo_y_el_estado_en_sus_propias_columnas():
     """**Sus números NO son los de ventas**, y por eso cada registro tiene su mapa: el Anexo 8 de la RS 040-2022
-    (§8.4) pone el motivo en el campo 39 y el estado en el 40, con la marca de detracción en el 38 —que no se lee— y
-    las inconsistencias en el 41. En ventas son el 34 y el 35."""
+    (§8.4) pone el motivo en el campo 39 y el estado en el 40, con la marca de detracción en el 38 —que se lee desde
+    la 4.1, ver más abajo— y las inconsistencias en el 41. En ventas son el 34 y el 35."""
     compras = Libro(ruc="20601111111", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
     campos = [""] * 41
     campos[0:4] = ["20601111111", "MI EMPRESA SAC", "202608", ""]
@@ -130,8 +131,47 @@ def test_compras_trae_el_motivo_y_el_estado_en_sus_propias_columnas():
     c = sire_txt.parsear(texto("|".join(campos), con_cabecera=False), compras)[0]
     assert c.tipo_nota == "04"            # Catálogo 09: descuento global
     assert c.estado_sunat == "2"
-    # Y no se ha leído la columna de al lado: la marca de detracción (38) y las inconsistencias (41) se ignoran.
+    # Y la columna de al lado sigue sin leerse: las inconsistencias (41) son la opinión de la Administración.
     assert c.total == Decimal("118.00") and c.ref_numero == "77"
+
+
+def _compra(**campos_extra) -> list[str]:
+    """Una fila mínima del RCE, para no repetir el andamio en cada caso."""
+    campos = [""] * 41
+    campos[0:3] = ["20601111111", "MI EMPRESA SAC", "202608"]
+    campos[4], campos[6], campos[7], campos[9] = "10/08/2026", "01", "F001", "501"
+    campos[11], campos[12], campos[13] = "6", "20608888889", "PROVEEDOR SAC"
+    campos[14], campos[15], campos[24] = "4200.00", "756.00", "4956.00"
+    campos[25] = "PEN"
+    for i, v in campos_extra.items():
+        campos[int(i[1:])] = v
+    return campos
+
+
+COMPRAS = Libro(ruc="20601111111", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
+
+
+def test_compras_lee_la_marca_de_detraccion_que_sunat_afirma():
+    """El campo 38 del Anexo 8: SUNAT escribe una `D` en las filas sujetas al SPOT. Es lo ÚNICO que la propuesta dice
+    del SPOT —afirma QUE hay detracción y no dice CUÁL—, así que entra como anotación y el bloque sale **sin código**:
+    inventarlo escribiría una tasa falsa en el asiento. En un RCE real de un mes venía en 221 de 3018 filas."""
+    c = sire_txt.parsear(texto("|".join(_compra(c37="D")), con_cabecera=False), COMPRAS)[0]
+    assert c.detraccion == {"_marca_sire": "D"}
+    assert not c.detraccion.get("codigo") and not c.detraccion.get("monto")
+
+
+def test_sin_la_marca_el_comprobante_no_trae_detraccion():
+    """La columna vacía es el caso de las 2797 filas restantes: no se inventa un bloque que no está."""
+    assert not sire_txt.parsear(texto("|".join(_compra()), con_cabecera=False), COMPRAS)[0].detraccion
+    # Y una letra que el anexo no declara tampoco marca nada: se compara con la que SUNAT escribe, no «no vacío».
+    assert not sire_txt.parsear(texto("|".join(_compra(c37="X")), con_cabecera=False), COMPRAS)[0].detraccion
+
+
+def test_en_ventas_no_hay_marca_de_detraccion_porque_el_rvie_no_la_tiene():
+    """Ninguna de las 40 columnas del RVIE es la detracción, así que una venta nunca sale marcada. Si algún día el
+    anexo de ventas la trajera, este test es el que avisa de que hay que decidirlo."""
+    assert all(campo["nombre"] != "marca de detracción" for campo in catalogos.columnas_del_sire(True))
+    assert not sire_txt.parsear(texto(FACTURA), VENTAS)[0].detraccion
 
 
 def test_el_tipo_de_cambio_solo_se_guarda_si_no_es_soles():

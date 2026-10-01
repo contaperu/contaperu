@@ -31,9 +31,10 @@ CANAL = "intercambio"
 OPCIONES = Opciones(fecha="AAAA-MM-DD", extension=".csv")
 FORMATOS = {"compra": "csv_asiento", "venta": "csv_asiento"}
 CONTENT_TYPE = "text/csv; charset=utf-8"
-# No exige nada más que el núcleo: escribe la moneda en ISO y el centro de costo que haya. Un mes sin
-# centros sale igual, con la columna vacía.
-EXIGE = frozenset()
+# Escribe la moneda en ISO y el centro de costo que haya: un mes sin centros sale igual, con la columna vacía. Sí
+# exige `detraccion` (4.1): sus filas llevan la línea de la detracción con su código del Catálogo 54, y sin el código
+# no la escribiría — un canal de intercambio que calla una detracción que SUNAT afirma miente igual que un legacy.
+EXIGE = frozenset({"detraccion"})
 # Se configura lo que el núcleo lee al armar el asiento, y nada propio: escribe las líneas tal cual.
 CONFIGURACION = CONFIGURACION_DEL_ASIENTO
 

@@ -148,7 +148,7 @@ def test_una_factura_con_reparto_no_sale_a_contasis():
 def test_para_contasis_no_se_piden_sub_diarios_ni_equivalencias():
     """El sub-diario se elige al importar en CONTASIS y el tipo va con su código SUNAT: no hay nada de eso que pedir."""
     diag = api.diagnosticar(imputado(FACTURA), configuracion=CONTAB, driver="contasis")
-    assert diag["exige"] == ["cuenta_contable", "cuenta_unica"] and diag["sub_diarios"] == {}
+    assert diag["exige"] == ["cuenta_contable", "cuenta_unica", "detraccion"] and diag["sub_diarios"] == {}
     assert diag["listo_para_exportar"] is True and diag["faltantes"]["no_cabe"] == {}
 
 

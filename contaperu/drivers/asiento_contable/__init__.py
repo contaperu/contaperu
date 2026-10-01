@@ -35,8 +35,10 @@ VOCABULARIO = "neutral"
 FORMATOS = {"compra": "asiento_contable_json", "venta": "asiento_contable_json"}
 OPCIONES = OpcionesArchivo(extension=".json")
 CONTENT_TYPE = "application/json"
-# No exige nada más que el núcleo: la cuenta de cada línea. El tipo va en su código SUNAT y la moneda en ISO.
-EXIGE = frozenset()
+# Del núcleo le basta la cuenta de cada línea: el tipo va en su código SUNAT y la moneda en ISO. Exige `detraccion`
+# (4.1) porque sus líneas la llevan, y un ERP que reciba este documento sin la detracción que SUNAT afirma recibiría
+# un asiento incompleto sin saberlo.
+EXIGE = frozenset({"detraccion"})
 # Nada que configurar en su sección: lee lo general, que es contabilidad, y ningún vocabulario de un sistema.
 CONFIGURACION: tuple = ()
 

@@ -22,10 +22,11 @@ datos del comprobante, no del registro; `validar.py` lo avisa con `SIRE_SIN_DETA
 
 De la detracción conviene precisar qué calla SUNAT y qué no, porque no es lo mismo: el RCE **sí marca si una
 fila está sujeta al SPOT** —el campo 38 del Anexo 8, con una `D`; en un RCE real de un mes, 221 filas de 3018—,
-pero **no dice cuál**: ni código del Catálogo 54, ni tasa, ni monto, ni cuenta, ni constancia. Esa marca hoy no
-se lee (`sire_campos.json` la declara `ignorada`, con su motivo y como candidata), y quien la necesite la tiene
-entera en `datos_originales["sire"]`. Para quien integra, la consecuencia está en `INTEGRAR.md` §«El SIRE, de
-punta a punta», punto 9: **la detracción la aporta su lado**, del XML o del contador.
+pero **no dice cuál**: ni código del Catálogo 54, ni tasa, ni monto, ni cuenta, ni constancia. Desde la 4.1 esa
+marca **se lee** y entra como anotación (`detraccion._marca_sire`), sin código, y el motor se niega a exportar
+esos comprobantes hasta que quien integra mande el `detraccion_codigo` en su imputación (enmienda 0020). Antes
+salían sin su línea de detracción y en silencio. Para quien integra, el circuito está en `INTEGRAR.md` §«El SIRE,
+de punta a punta», punto 9.
 El **concepto se queda VACÍO a propósito** (regla de contabilidad): copiarle el nombre de
 la contraparte repetía en la columna un dato que ya está en la suya, y no ganaba nada
 —`asiento.glosa_de` ya cae al nombre de la contraparte cuando el concepto está vacío, así
@@ -39,6 +40,7 @@ import zipfile
 from decimal import Decimal
 
 from . import _zip
+from .. import detracciones as _detracciones
 from ..errores import ErrorContaperu
 from ..modelo import Comprobante, Libro
 
@@ -87,6 +89,14 @@ POS_COMPRA = {
 }
 IGV_COMPRAS = {"DG": (14, 15), "DGNG": (16, 17), "DNG": (18, 19)}
 VALOR_NO_GRAVADO = 20
+# La columna «Detracción» del RCE: campo 38 del Anexo 8 de la RS 040-2022 (§8.4). SUNAT escribe una `D` en las filas
+# sujetas al SPOT y la deja vacía en las demás — en un RCE real de un mes, 221 de 3018 (set-2026). **Es lo único que
+# la propuesta dice del SPOT**: afirma QUE hay detracción y no dice CUÁL, porque el código del Catálogo 54, la tasa y
+# el monto son del comprobante y no del registro. El RVIE no tiene esta columna: solo compras.
+MARCA_DETRACCION = 37
+# Lo que SUNAT escribe en esa columna cuando la operación está sujeta. Se guarda el valor literal, no un booleano: es
+# el dato del archivo, y si algún día el anexo admite otra letra, aquí se verá en vez de perderse en un `True`.
+MARCA_DETRACCION_SI = "D"
 MONTOS = {"exportacion", "base_gravada", "dscto_base", "igv", "dscto_igv", "exonerado", "inafecto",
           "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total"}
 FECHAS = {"fecha_emision", "fecha_vencimiento", "ref_fecha"}
@@ -196,6 +206,13 @@ def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
         no_gravado = _valor(campos, VALOR_NO_GRAVADO)
         if no_gravado and no_gravado.strip("0.-"):
             datos["valor_no_gravado"] = no_gravado
+        # La marca de detracción, lo único que la propuesta dice del SPOT. Entra como ANOTACIÓN en un bloque de
+        # detracción que, a propósito, **no lleva código**: la propuesta no lo trae y no se inventa (si se inventara,
+        # CONCAR recibiría un código interno falso y el asiento una tasa falsa). Lo que hace esta marca es que el
+        # motor sepa a QUIÉN le falta: `validar` se niega a exportar esos comprobantes hasta que el contador ponga el
+        # código, en vez de exportarlos sin su línea de detracción y en silencio, que es lo que pasaba hasta la 4.0.
+        if _valor(campos, MARCA_DETRACCION).strip().upper() == MARCA_DETRACCION_SI:
+            datos["detraccion"] = {_detracciones.MARCA_SIRE: MARCA_DETRACCION_SI}
     if libro.es_venta:
         # Base e IGV netos, descuentos aparte (estandar/LEEME.md). SUNAT escribe cada campo con su signo y el
         # total es la suma de todos: en las diez filas de la exportación real de agosto, el campo 26 es

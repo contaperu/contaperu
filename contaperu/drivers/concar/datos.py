@@ -22,7 +22,9 @@ CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.shee
 # que lo llevan en la columna M —el contador, 06-sep-2026: obligatorio donde de verdad se escribe— y
 # una moneda con código en su Tabla General 03 (solo MN y US). Desde el 11-sep-2026 lo hace cumplir el
 # propio driver; hasta entonces solo lo avisaba `diagnosticar` y lo negaba el portal por su cuenta.
-EXIGE = frozenset({"centro_costo", "moneda"})
+# Y `detraccion` (4.1): este driver escribe la línea de la detracción con su código interno y su sigla `DR`, así que
+# sin el código del Catálogo 54 la omitiría en silencio y el Excel saldría con la cuenta por pagar inflada.
+EXIGE = frozenset({"centro_costo", "moneda", "detraccion"})
 
 # Con qué cuentas nace una empresa que lleva CONCAR: **el PCGE a seis dígitos**, que es como numera este sistema.
 # Hasta la 3.0 aquí solo estaba la del gasto, porque las demás ya eran las de lo general; ahora se escriben todas.

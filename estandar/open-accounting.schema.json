@@ -1,321 +1,711 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estandar/open-accounting.schema.json",
-  "title": "open-accounting",
-  "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
-  "type": "object",
-  "required": ["open_accounting", "libro"],
-  "additionalProperties": false,
-  "patternProperties": {
-    "^_": {
-      "description": "Cualquier clave que empiece con guion bajo es una anotación del productor. Se transporta y se ignora."
-    }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estandar/open-accounting.schema.json",
+ "title": "open-accounting",
+ "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
+ "type": "object",
+ "required": [
+  "open_accounting",
+  "libro"
+ ],
+ "additionalProperties": false,
+ "patternProperties": {
+  "^_": {
+   "description": "Cualquier clave que empiece con guion bajo es una anotación del productor. Se transporta y se ignora."
+  }
+ },
+ "properties": {
+  "open_accounting": {
+   "description": "Versión del estándar que habla este documento.",
+   "type": "string",
+   "const": "1.0"
   },
-  "properties": {
-    "open_accounting": {
-      "description": "Versión del estándar que habla este documento.",
-      "type": "string",
-      "const": "1.0"
-    },
-    "libro": { "$ref": "#/$defs/libro" },
-    "comprobantes": {
-      "description": "Los registros del periodo: los hechos de cada documento soporte. Las cuentas no van aquí: son decisiones de cada entorno y llegan aparte, en la imputación, por id_externo.",
-      "type": "array",
-      "items": { "$ref": "#/$defs/comprobante" }
-    },
-    "imputaciones": {
-      "description": "Lo que el entorno decidió para cada comprobante, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total o un reparto de la base. No son hechos del comprobante —el hecho no cambia según quién lo contabilice— sino la decisión de quien lo contabiliza, y viajan en el mismo archivo para que el documento explique su propio asiento.",
-      "$ref": "#/$defs/imputaciones"
-    },
-    "asiento": {
-      "description": "Líneas de diario ya armadas. Opcional: un productor puede entregar solo comprobantes y pedir que se genere el asiento.",
-      "type": "array",
-      "items": { "$ref": "#/$defs/linea" }
-    },
-    "emisor": {
-      "description": "Quién generó este documento (software, versión). Informativo.",
-      "type": "object",
-      "additionalProperties": true
-    }
+  "libro": {
+   "$ref": "#/$defs/libro"
   },
-
-  "allOf": [
-    {
-      "description": "Con `imputaciones`, cada comprobante necesita su `id_externo`: es la llave con la que se casan, y sin ella la decisión no se puede aplicar a nada. Va aquí y no en `$defs/comprobante` porque la condición es del documento, y ese `$def` lo reusan otras operaciones. Cuidado al editarlo: como se aplica ADEMÁS del `$ref`, una clave declarada solo aquí sería invisible para el `additionalProperties: false` del comprobante; `id_externo` ya está declarado allí, así que no se añaden `properties` nuevas en este `then`.",
-      "if": {
-        "required": ["imputaciones"],
-        "properties": { "imputaciones": { "minProperties": 1 } }
-      },
-      "then": {
-        "properties": {
-          "comprobantes": {
-            "items": {
-              "required": ["id_externo"],
-              "properties": { "id_externo": { "minLength": 1 } }
-            }
-          }
+  "comprobantes": {
+   "description": "Los registros del periodo: los hechos de cada documento soporte. Las cuentas no van aquí: son decisiones de cada entorno y llegan aparte, en la imputación, por id_externo.",
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/comprobante"
+   }
+  },
+  "imputaciones": {
+   "description": "Lo que el entorno decidió para cada comprobante, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total o un reparto de la base. No son hechos del comprobante —el hecho no cambia según quién lo contabilice— sino la decisión de quien lo contabiliza, y viajan en el mismo archivo para que el documento explique su propio asiento.",
+   "$ref": "#/$defs/imputaciones"
+  },
+  "asiento": {
+   "description": "Líneas de diario ya armadas. Opcional: un productor puede entregar solo comprobantes y pedir que se genere el asiento.",
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/linea"
+   }
+  },
+  "emisor": {
+   "description": "Quién generó este documento (software, versión). Informativo.",
+   "type": "object",
+   "additionalProperties": true
+  }
+ },
+ "allOf": [
+  {
+   "description": "Con `imputaciones`, cada comprobante necesita su `id_externo`: es la llave con la que se casan, y sin ella la decisión no se puede aplicar a nada. Va aquí y no en `$defs/comprobante` porque la condición es del documento, y ese `$def` lo reusan otras operaciones. Cuidado al editarlo: como se aplica ADEMÁS del `$ref`, una clave declarada solo aquí sería invisible para el `additionalProperties: false` del comprobante; `id_externo` ya está declarado allí, así que no se añaden `properties` nuevas en este `then`.",
+   "if": {
+    "required": [
+     "imputaciones"
+    ],
+    "properties": {
+     "imputaciones": {
+      "minProperties": 1
+     }
+    }
+   },
+   "then": {
+    "properties": {
+     "comprobantes": {
+      "items": {
+       "required": [
+        "id_externo"
+       ],
+       "properties": {
+        "id_externo": {
+         "minLength": 1
         }
+       }
       }
+     }
     }
-  ],
-
-  "$defs": {
-    "importe": {
-      "description": "Monto de 2 decimales, siempre positivo. Se acepta texto (exacto, recomendado) o número.",
-      "anyOf": [
-        { "type": "string", "pattern": "^$|^[0-9]+(\\.[0-9]{1,2})?$" },
-        { "type": "number", "minimum": 0 }
-      ]
+   }
+  }
+ ],
+ "$defs": {
+  "importe": {
+   "description": "Monto de 2 decimales, siempre positivo. Se acepta texto (exacto, recomendado) o número.",
+   "anyOf": [
+    {
+     "type": "string",
+     "pattern": "^$|^[0-9]+(\\.[0-9]{1,2})?$"
+    },
+    {
+     "type": "number",
+     "minimum": 0
+    }
+   ]
+  },
+  "fecha": {
+   "description": "AAAA-MM-DD, o vacío si no aplica.",
+   "type": [
+    "string",
+    "null"
+   ],
+   "pattern": "^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+  },
+  "libro": {
+   "description": "Cabecera tributaria: un RUC, un mes, ventas o compras.",
+   "type": "object",
+   "required": [
+    "ruc",
+    "periodo",
+    "tipo"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "ruc": {
+     "type": "string",
+     "pattern": "^[0-9]{11}$",
+     "description": "RUC del contribuyente dueño del libro."
+    },
+    "razon_social": {
+     "type": "string"
+    },
+    "periodo": {
+     "type": "string",
+     "pattern": "^20[0-9]{2}(0[1-9]|1[0-2])$",
+     "description": "AAAAMM."
+    },
+    "tipo": {
+     "description": "Qué registro es. Los valores están en el catálogo `tipos_de_libro` de `estandar/catalogos.json`, publicado con el tag del estándar: un registro nuevo entra ahí y no sube la versión del documento. No degrada como el `rol` de una línea —quien recibe un libro que no conoce no puede adivinar qué hacer con él—, así que quien degrada es el destino: el driver que no lo declara en sus `FORMATOS` lo rechaza limpio.",
+     "type": "string",
+     "minLength": 1
+    }
+   }
+  },
+  "comprobante": {
+   "type": "object",
+   "required": [
+    "tipo_cp",
+    "fecha_emision",
+    "total"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "tipo_cp": {
+     "type": "string",
+     "pattern": "^[0-9A-Z]{2}$",
+     "description": "Tabla 10 de SUNAT: 01 factura, 02 recibo por honorarios, 03 boleta, 07 nota de crédito, 08 nota de débito, 14 recibo de servicios públicos, 50 DUA."
+    },
+    "serie": {
+     "type": "string",
+     "description": "F001, E001, B001. Vacía en los que no la llevan, como el recibo de servicios públicos."
+    },
+    "numero": {
+     "type": "string"
+    },
+    "numero_final": {
+     "type": "string",
+     "description": "Solo rangos: boletas consolidadas del día."
+    },
+    "fecha_emision": {
+     "$ref": "#/$defs/fecha"
+    },
+    "fecha_vencimiento": {
+     "$ref": "#/$defs/fecha"
+    },
+    "condicion_pago": {
+     "enum": [
+      "",
+      "contado",
+      "credito"
+     ],
+     "description": "CUÁNDO se paga, según lo declara el documento (en la factura electrónica, PaymentTerms FormaPago; con cuotas es credito). Vacío = el documento no lo dice. Con qué se paga es `medio_pago`."
+    },
+    "medio_pago": {
+     "type": "string",
+     "pattern": "^$|^[0-9]{3}$",
+     "description": "Con qué se PAGÓ la operación: el código de tres dígitos del catálogo de medios de pago de SUNAT (`001` depósito en cuenta, `003` transferencia de fondos, `005` tarjeta de débito… `999` otros; Anexo 3 de la RS 169-2015, que recoge los medios del artículo 5 de la Ley 28194, la de bancarización). No es `condicion_pago`, que dice CUÁNDO se paga. Vacío = el documento no lo dice, y entonces quien exporta pone el que tenga configurado el contribuyente. Es opcional y quien no lo conozca lo ignora; un código que no esté en el catálogo **no invalida el documento** —se avisa y se respeta— porque SUNAT puede añadir uno y nadie debería quedarse sin exportar su mes por un dato informativo."
+    },
+    "contraparte_tipo_doc": {
+     "enum": [
+      "0",
+      "1",
+      "4",
+      "6",
+      "7",
+      "A"
+     ],
+     "description": "Tipo de documento de identidad de SUNAT: 6 RUC, 1 DNI, 4 carné de extranjería, 7 pasaporte, A cédula diplomática, 0 otros."
+    },
+    "contraparte_doc": {
+     "type": "string"
+    },
+    "contraparte_nombre": {
+     "type": "string"
+    },
+    "moneda": {
+     "type": "string",
+     "pattern": "^[A-Z]{3}$",
+     "description": "ISO 4217: PEN, USD, EUR."
+    },
+    "tipo_cambio": {
+     "description": "El que publica SUNAT para la fecha de emisión. 3 decimales.",
+     "anyOf": [
+      {
+       "type": "string",
+       "pattern": "^$|^[0-9]+(\\.[0-9]{1,3})?$"
+      },
+      {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "base_gravada": {
+     "$ref": "#/$defs/importe",
+     "description": "Base imponible NETA de la operación, tras cualquier descuento (desde open-accounting 0.2)."
+    },
+    "igv": {
+     "$ref": "#/$defs/importe",
+     "description": "IGV neto de la operación."
+    },
+    "dscto_base": {
+     "$ref": "#/$defs/importe",
+     "description": "Parte de base_gravada que el registro informa como descuento (SIRE ventas, campo 16). No entra en el total."
+    },
+    "dscto_igv": {
+     "$ref": "#/$defs/importe",
+     "description": "Parte del igv que el registro informa como descuento (SIRE ventas, campo 18). No entra en el total."
+    },
+    "dscto_otros": {
+     "$ref": "#/$defs/importe",
+     "description": "Parte de `otros` que el registro informa en NEGATIVO: un descuento global que no forma base (SIRE, campo 24 del RCE y 25 del RVIE, que llevan el neto con signo). Va en positivo como todo importe y RESTA del total — ahí se separa de dscto_base y dscto_igv, que no lo mueven."
+    },
+    "exonerado": {
+     "$ref": "#/$defs/importe",
+     "description": "Importe de la operación EXONERADA del IGV: está dentro del campo de aplicación del impuesto y una norma la libera (Apéndices I —bienes— y II —servicios— de la Ley del IGV). No es lo mismo que `inafecto`: lo exonerado tributaría si esa norma no existiera."
+    },
+    "inafecto": {
+     "$ref": "#/$defs/importe",
+     "description": "Importe de la operación INAFECTA: queda FUERA del campo de aplicación del IGV (art. 2 de la Ley), así que nunca hubo impuesto que cobrar. Es lo que suele llevar la parte no gravada de un recibo de servicios públicos —intereses, recargos, cobros por cuenta de terceros—, y no `exonerado`."
+    },
+    "exportacion": {
+     "$ref": "#/$defs/importe",
+     "description": "Valor de la operación de exportación, que no está gravada con IGV. Va aparte de `inafecto` porque el registro de ventas la declara en su propia columna."
+    },
+    "isc": {
+     "$ref": "#/$defs/importe",
+     "description": "Impuesto Selectivo al Consumo que trae el comprobante. Forma parte del total y no es base gravada."
+    },
+    "base_ivap": {
+     "$ref": "#/$defs/importe",
+     "description": "Base imponible del Impuesto a la Venta de Arroz Pilado, que sustituye al IGV en ese producto."
+    },
+    "ivap": {
+     "$ref": "#/$defs/importe",
+     "description": "Impuesto a la Venta de Arroz Pilado. Sustituye al IGV, así que no va en `igv` ni da crédito fiscal."
+    },
+    "icbper": {
+     "$ref": "#/$defs/importe",
+     "description": "Impuesto al Consumo de las Bolsas de Plástico. Forma parte del total y tiene su propia cuenta contable: es un tributo, no un gasto de la compra."
+    },
+    "otros": {
+     "$ref": "#/$defs/importe",
+     "description": "Otros tributos y cargos que forman el total y no son ninguno de los anteriores. Su cuenta se configura aparte (`cuentas.otros_tributos`)."
+    },
+    "total": {
+     "$ref": "#/$defs/importe",
+     "description": "Importe total del comprobante, tal como lo dice el documento. El motor comprueba que cuadre con la suma de sus partes dentro de la tolerancia, y lo observa si no (`TOTAL_NO_CUADRA`)."
+    },
+    "retencion": {
+     "$ref": "#/$defs/importe",
+     "description": "Retención de renta de 4ta que MUESTRA el recibo por honorarios. No es la retención del IGV, que no entra en ningún asiento."
+    },
+    "destino_igv": {
+     "enum": [
+      "DG",
+      "DGNG",
+      "DNG"
+     ],
+     "description": "Solo compras: gravadas, mixtas, no gravadas."
+    },
+    "valor_no_gravado": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/importe"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Si falta, se toma exonerado más inafecto."
+    },
+    "anio_dua": {
+     "type": "string"
+    },
+    "cod_dep_aduanera": {
+     "type": "string"
+    },
+    "clasif_bienes": {
+     "type": "string"
+    },
+    "tipo_nota": {
+     "type": "string",
+     "maxLength": 2,
+     "description": "Por qué se emitió la nota: el Catálogo 09 de SUNAT si es de crédito (07, 87) y el 10 si es de débito (08, 88) — dos tablas distintas, y el «01» significa cosas opuestas en cada una. Vacío = el documento no lo dice, que es lo habitual; un código que no esté en el catálogo se avisa y se respeta. SIN patrón numérico a propósito: el anexo del RVIE lo declara numérico y el del RCE alfanumérico, así que el estándar admite los dos. NO viaja en el TXT del SIRE: la norma dice que ese campo no se considera para construirlo. Y OJO: el «01» del Catálogo 09 dice que la nota anula el comprobante que referencia, no que la nota esté anulada."
+    },
+    "ref_fecha": {
+     "$ref": "#/$defs/fecha"
+    },
+    "ref_tipo_cp": {
+     "type": "string",
+     "description": "Documento que modifica una nota de crédito o débito."
+    },
+    "ref_serie": {
+     "type": "string"
+    },
+    "ref_numero": {
+     "type": "string"
+    },
+    "detraccion": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/detraccion"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "id_contrato": {
+     "type": "string"
+    },
+    "concepto": {
+     "type": "string",
+     "description": "La glosa del asiento."
+    },
+    "origen": {
+     "enum": [
+      "xml",
+      "pdf_texto",
+      "vision",
+      "manual",
+      "sire"
+     ],
+     "description": "De dónde salió el dato. Trazabilidad, no lógica."
+    },
+    "confianza": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      }
+     ],
+     "description": "De 0 a 1. Menos de 1 solo tiene sentido en lo leído por una IA."
+    },
+    "archivo_nombre": {
+     "type": "string"
+    },
+    "estado_sunat": {
+     "type": "string",
+     "maxLength": 2,
+     "description": "Lo que SUNAT dice de este comprobante en su propio registro: el campo 35 del Anexo N.° 2 de la RS 112-2021 (ventas) y el 40 del Anexo 8 de la RS 040-2022 (compras), «Est. Comp». SE TRANSPORTA TAL CUAL Y NO CONDICIONA NINGUNA REGLA: la norma dice de él solo que «en la propuesta se muestra datos a título referencial» y que «no es considerado para la construcción del archivo de texto», y NO publica su tabla de valores, así que quien lo reciba lo enseña y no lo traduce. No se dicta —no está en ninguna factura impresa, solo en el registro de la Administración— y no viaja de vuelta en el TXT. No es el `estado` de la revisión (ok, observada, duplicada), que es otra cosa."
+    },
+    "id_externo": {
+     "type": "string",
+     "description": "El id con el que la aplicación que produce el documento conoce este comprobante. Es la llave de su imputación, que llega aparte."
+    },
+    "datos_originales": {
+     "type": "object",
+     "additionalProperties": true,
+     "description": "Espacio libre del productor. El núcleo lo transporta y no lo interpreta, salvo las cuatro claves que escribe su propio lector de XML y que lee la validación: anticipo, emisor, adquirente y gratuitas."
+    },
+    "estado": {
+     "type": "string",
+     "description": "Lo rellena la validación: ok, observada, duplicada."
+    },
+    "excluida": {
+     "type": "boolean",
+     "description": "Marcada para no exportarse."
+    },
+    "observaciones": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/observacion"
+     }
+    }
+   }
+  },
+  "imputaciones": {
+   "description": "Por `id_externo` del comprobante, lo que el entorno decidió para él.",
+   "type": "object",
+   "propertyNames": {
+    "minLength": 1
+   },
+   "additionalProperties": {
+    "$ref": "#/$defs/imputacion"
+   }
+  },
+  "imputacion": {
+   "description": "La decisión contable de un comprobante: su cuenta, su centro de costo, la cuenta del total, el código de su detracción, o un reparto de la base entre cuentas que sume la base. Lo que no traiga sale de la configuración del entorno.",
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "cuenta_contable": {
+     "type": "string"
+    },
+    "centro_costo": {
+     "type": "string"
+    },
+    "cuenta_tercero": {
+     "type": "string",
+     "description": "La cuenta del total: 42 en compras, 12 en ventas."
+    },
+    "detraccion_codigo": {
+     "type": "string",
+     "pattern": "^$|^[0-9]{3}$",
+     "description": "El código del Catálogo 54 de la detracción, cuando el comprobante no lo trae: la propuesta del SIRE marca que hay detracción (campo 38 del Anexo 8 de la RS 040-2022) y no dice cuál, y de ese código salen la tasa y el monto. Lo que traiga el comprobante manda sobre esto."
+    },
+    "reparto": {
+     "description": "La base repartida entre cuentas. Sus partes suman la base del asiento; el IGV y el total son del documento.",
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "importe"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "importe": {
+        "$ref": "#/$defs/importe"
+       },
+       "cuenta_contable": {
+        "type": "string"
+       },
+       "centro_costo": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
+  },
+  "observacion": {
+   "type": "object",
+   "required": [
+    "codigo",
+    "nivel",
+    "texto"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "codigo": {
+     "type": "string"
+    },
+    "nivel": {
+     "enum": [
+      "error",
+      "aviso"
+     ],
+     "description": "error bloquea la exportación; aviso no."
+    },
+    "texto": {
+     "type": "string"
+    }
+   }
+  },
+  "detraccion": {
+   "description": "El bloque de dos tiempos. Al registrar la compra la detracción está PROVISIONADA y no se conoce la constancia; cuando se deposita en el Banco de la Nación se inyecta el número y pasa a PAGADO. El asiento provisional usa un número comodín.",
+   "type": "object",
+   "additionalProperties": false,
+   "patternProperties": {
+    "^_": {
+     "description": "Cualquier clave que empiece con guion bajo es una anotación, igual que en la raíz: se transporta y se ignora. Así viaja `_tasa_tabla`, la del Catálogo 54 con la que el motor calculó el monto, sin que el bloque deje de ser cerrado."
+    }
+   },
+   "properties": {
+    "codigo": {
+     "type": "string",
+     "pattern": "^$|^[0-9]{3}$",
+     "description": "Anexo I de la RS 183-2004, 3 dígitos. Vacío si no se reconoce."
+    },
+    "porcentaje": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 100
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Tasa en porcentaje: 4, 10, 12."
+    },
+    "monto": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/importe"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "En soles: la detracción se deposita siempre en soles."
+    },
+    "cuenta": {
+     "type": "string",
+     "description": "Cuenta de detracciones del proveedor en el Banco de la Nación."
+    },
+    "estado": {
+     "enum": [
+      "PROVISIONADO",
+      "PAGADO"
+     ],
+     "description": "INFORMATIVO, y por defecto PROVISIONADO: está para que se vea en pantalla o en un informe. Quien lee este documento NO se fía de él, porque nadie puede comprobarlo: el estado se DEDUCE de los dos datos que sí se pueden comprobar —PAGADO cuando `nro_constancia` no está vacío ni es el número comodín Y `fecha_constancia` tiene fecha; PROVISIONADO en cualquier otro caso—. Un `estado` que diga PAGADO sin constancia no convierte en pagada una detracción que no lo está."
+    },
+    "nro_constancia": {
+     "type": "string",
+     "description": "Número de la constancia del depósito en el Banco de la Nación (el vóucher). Vacío mientras no se pague, y hay un valor más que significa lo mismo que vacío: el NÚMERO COMODÍN con el que un productor rellena la columna de los sistemas contables que la exigen (`999999999` en este motor, configurable). Con número pero sin `fecha_constancia`, el depósito está a medias: el archivo del sistema contable ya lleva el número de verdad y la detracción sigue contando como pendiente."
+    },
+    "fecha_constancia": {
+     "$ref": "#/$defs/fecha",
+     "description": "Fecha del depósito en el Banco de la Nación, que es un día distinto del de la factura —se paga días después, a veces el mes siguiente—. Vacía mientras no se pague: **no tiene comodín**, porque una fecha inventada es peor que ninguna."
+    }
+   }
+  },
+  "linea": {
+   "description": "Una línea de diario, sin nada de ningún ERP. Es lo que cualquier sistema contable sabe recibir.",
+   "type": "object",
+   "required": [
+    "cuenta",
+    "debe_haber",
+    "importe",
+    "clase"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "sub_diario": {
+     "type": "string",
+     "description": "Libro auxiliar donde cae el asiento. Cada empresa usa los suyos."
+    },
+    "correlativo": {
+     "type": "string",
+     "description": "Número del asiento dentro del sub-diario y el mes."
     },
     "fecha": {
-      "description": "AAAA-MM-DD, o vacío si no aplica.",
-      "type": ["string", "null"],
-      "pattern": "^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+     "$ref": "#/$defs/fecha"
     },
-
-    "libro": {
-      "description": "Cabecera tributaria: un RUC, un mes, ventas o compras.",
-      "type": "object",
-      "required": ["ruc", "periodo", "tipo"],
-      "additionalProperties": false,
-      "properties": {
-        "ruc": { "type": "string", "pattern": "^[0-9]{11}$", "description": "RUC del contribuyente dueño del libro." },
-        "razon_social": { "type": "string" },
-        "periodo": { "type": "string", "pattern": "^20[0-9]{2}(0[1-9]|1[0-2])$", "description": "AAAAMM." },
-        "tipo": {
-        "description": "Qué registro es. Los valores están en el catálogo `tipos_de_libro` de `estandar/catalogos.json`, publicado con el tag del estándar: un registro nuevo entra ahí y no sube la versión del documento. No degrada como el `rol` de una línea —quien recibe un libro que no conoce no puede adivinar qué hacer con él—, así que quien degrada es el destino: el driver que no lo declara en sus `FORMATOS` lo rechaza limpio.",
-        "type": "string",
-        "minLength": 1
-      }
-      }
+    "cuenta": {
+     "type": "string",
+     "description": "Cuenta del plan contable del contribuyente."
     },
-
-    "comprobante": {
-      "type": "object",
-      "required": ["tipo_cp", "fecha_emision", "total"],
-      "additionalProperties": false,
-      "properties": {
-        "tipo_cp": {
-          "type": "string",
-          "pattern": "^[0-9A-Z]{2}$",
-          "description": "Tabla 10 de SUNAT: 01 factura, 02 recibo por honorarios, 03 boleta, 07 nota de crédito, 08 nota de débito, 14 recibo de servicios públicos, 50 DUA."
-        },
-        "serie": { "type": "string", "description": "F001, E001, B001. Vacía en los que no la llevan, como el recibo de servicios públicos." },
-        "numero": { "type": "string" },
-        "numero_final": { "type": "string", "description": "Solo rangos: boletas consolidadas del día." },
-        "fecha_emision": { "$ref": "#/$defs/fecha" },
-        "fecha_vencimiento": { "$ref": "#/$defs/fecha" },
-        "condicion_pago": { "enum": ["", "contado", "credito"], "description": "CUÁNDO se paga, según lo declara el documento (en la factura electrónica, PaymentTerms FormaPago; con cuotas es credito). Vacío = el documento no lo dice. Con qué se paga es `medio_pago`." },
-        "medio_pago": { "type": "string", "pattern": "^$|^[0-9]{3}$", "description": "Con qué se PAGÓ la operación: el código de tres dígitos del catálogo de medios de pago de SUNAT (`001` depósito en cuenta, `003` transferencia de fondos, `005` tarjeta de débito… `999` otros; Anexo 3 de la RS 169-2015, que recoge los medios del artículo 5 de la Ley 28194, la de bancarización). No es `condicion_pago`, que dice CUÁNDO se paga. Vacío = el documento no lo dice, y entonces quien exporta pone el que tenga configurado el contribuyente. Es opcional y quien no lo conozca lo ignora; un código que no esté en el catálogo **no invalida el documento** —se avisa y se respeta— porque SUNAT puede añadir uno y nadie debería quedarse sin exportar su mes por un dato informativo." },
-
-        "contraparte_tipo_doc": { "enum": ["0", "1", "4", "6", "7", "A"], "description": "Tipo de documento de identidad de SUNAT: 6 RUC, 1 DNI, 4 carné de extranjería, 7 pasaporte, A cédula diplomática, 0 otros." },
-        "contraparte_doc": { "type": "string" },
-        "contraparte_nombre": { "type": "string" },
-
-        "moneda": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217: PEN, USD, EUR." },
-        "tipo_cambio": {
-          "description": "El que publica SUNAT para la fecha de emisión. 3 decimales.",
-          "anyOf": [
-            { "type": "string", "pattern": "^$|^[0-9]+(\\.[0-9]{1,3})?$" },
-            { "type": "number", "exclusiveMinimum": 0 },
-            { "type": "null" }
-          ]
-        },
-
-        "base_gravada": { "$ref": "#/$defs/importe", "description": "Base imponible NETA de la operación, tras cualquier descuento (desde open-accounting 0.2)." },
-        "igv": { "$ref": "#/$defs/importe", "description": "IGV neto de la operación." },
-        "dscto_base": { "$ref": "#/$defs/importe", "description": "Parte de base_gravada que el registro informa como descuento (SIRE ventas, campo 16). No entra en el total." },
-        "dscto_igv": { "$ref": "#/$defs/importe", "description": "Parte del igv que el registro informa como descuento (SIRE ventas, campo 18). No entra en el total." },
-    "dscto_otros": {
-      "$ref": "#/$defs/importe",
-      "description": "Parte de `otros` que el registro informa en NEGATIVO: un descuento global que no forma base (SIRE, campo 24 del RCE y 25 del RVIE, que llevan el neto con signo). Va en positivo como todo importe y RESTA del total — ahí se separa de dscto_base y dscto_igv, que no lo mueven."
+    "debe_haber": {
+     "enum": [
+      "D",
+      "H"
+     ]
     },
-        "exonerado": { "$ref": "#/$defs/importe", "description": "Importe de la operación EXONERADA del IGV: está dentro del campo de aplicación del impuesto y una norma la libera (Apéndices I —bienes— y II —servicios— de la Ley del IGV). No es lo mismo que `inafecto`: lo exonerado tributaría si esa norma no existiera." },
-        "inafecto": { "$ref": "#/$defs/importe", "description": "Importe de la operación INAFECTA: queda FUERA del campo de aplicación del IGV (art. 2 de la Ley), así que nunca hubo impuesto que cobrar. Es lo que suele llevar la parte no gravada de un recibo de servicios públicos —intereses, recargos, cobros por cuenta de terceros—, y no `exonerado`." },
-        "exportacion": { "$ref": "#/$defs/importe", "description": "Valor de la operación de exportación, que no está gravada con IGV. Va aparte de `inafecto` porque el registro de ventas la declara en su propia columna." },
-        "isc": { "$ref": "#/$defs/importe", "description": "Impuesto Selectivo al Consumo que trae el comprobante. Forma parte del total y no es base gravada." },
-        "base_ivap": { "$ref": "#/$defs/importe", "description": "Base imponible del Impuesto a la Venta de Arroz Pilado, que sustituye al IGV en ese producto." },
-        "ivap": { "$ref": "#/$defs/importe", "description": "Impuesto a la Venta de Arroz Pilado. Sustituye al IGV, así que no va en `igv` ni da crédito fiscal." },
-        "icbper": { "$ref": "#/$defs/importe", "description": "Impuesto al Consumo de las Bolsas de Plástico. Forma parte del total y tiene su propia cuenta contable: es un tributo, no un gasto de la compra." },
-        "otros": { "$ref": "#/$defs/importe", "description": "Otros tributos y cargos que forman el total y no son ninguno de los anteriores. Su cuenta se configura aparte (`cuentas.otros_tributos`)." },
-        "total": { "$ref": "#/$defs/importe", "description": "Importe total del comprobante, tal como lo dice el documento. El motor comprueba que cuadre con la suma de sus partes dentro de la tolerancia, y lo observa si no (`TOTAL_NO_CUADRA`)." },
-        "retencion": {
-          "$ref": "#/$defs/importe",
-          "description": "Retención de renta de 4ta que MUESTRA el recibo por honorarios. No es la retención del IGV, que no entra en ningún asiento."
-        },
-
-        "destino_igv": { "enum": ["DG", "DGNG", "DNG"], "description": "Solo compras: gravadas, mixtas, no gravadas." },
-        "valor_no_gravado": {
-          "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }],
-          "description": "Si falta, se toma exonerado más inafecto."
-        },
-        "anio_dua": { "type": "string" },
-        "cod_dep_aduanera": { "type": "string" },
-        "clasif_bienes": { "type": "string" },
-
-        "tipo_nota": { "type": "string", "maxLength": 2, "description": "Por qué se emitió la nota: el Catálogo 09 de SUNAT si es de crédito (07, 87) y el 10 si es de débito (08, 88) — dos tablas distintas, y el «01» significa cosas opuestas en cada una. Vacío = el documento no lo dice, que es lo habitual; un código que no esté en el catálogo se avisa y se respeta. SIN patrón numérico a propósito: el anexo del RVIE lo declara numérico y el del RCE alfanumérico, así que el estándar admite los dos. NO viaja en el TXT del SIRE: la norma dice que ese campo no se considera para construirlo. Y OJO: el «01» del Catálogo 09 dice que la nota anula el comprobante que referencia, no que la nota esté anulada." },
-        "ref_fecha": { "$ref": "#/$defs/fecha" },
-        "ref_tipo_cp": { "type": "string", "description": "Documento que modifica una nota de crédito o débito." },
-        "ref_serie": { "type": "string" },
-        "ref_numero": { "type": "string" },
-
-        "detraccion": { "anyOf": [{ "$ref": "#/$defs/detraccion" }, { "type": "null" }] },
-        "id_contrato": { "type": "string" },
-
-        "concepto": { "type": "string", "description": "La glosa del asiento." },
-
-        "origen": { "enum": ["xml", "pdf_texto", "vision", "manual", "sire"], "description": "De dónde salió el dato. Trazabilidad, no lógica." },
-        "confianza": {
-          "anyOf": [{ "type": "string" }, { "type": "number", "minimum": 0, "maximum": 1 }],
-          "description": "De 0 a 1. Menos de 1 solo tiene sentido en lo leído por una IA."
-        },
-        "archivo_nombre": { "type": "string" },
-        "estado_sunat": { "type": "string", "maxLength": 2, "description": "Lo que SUNAT dice de este comprobante en su propio registro: el campo 35 del Anexo N.° 2 de la RS 112-2021 (ventas) y el 40 del Anexo 8 de la RS 040-2022 (compras), «Est. Comp». SE TRANSPORTA TAL CUAL Y NO CONDICIONA NINGUNA REGLA: la norma dice de él solo que «en la propuesta se muestra datos a título referencial» y que «no es considerado para la construcción del archivo de texto», y NO publica su tabla de valores, así que quien lo reciba lo enseña y no lo traduce. No se dicta —no está en ninguna factura impresa, solo en el registro de la Administración— y no viaja de vuelta en el TXT. No es el `estado` de la revisión (ok, observada, duplicada), que es otra cosa." },
-        "id_externo": { "type": "string", "description": "El id con el que la aplicación que produce el documento conoce este comprobante. Es la llave de su imputación, que llega aparte." },
-        "datos_originales": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "Espacio libre del productor. El núcleo lo transporta y no lo interpreta, salvo las cuatro claves que escribe su propio lector de XML y que lee la validación: anticipo, emisor, adquirente y gratuitas."
-        },
-
-        "estado": { "type": "string", "description": "Lo rellena la validación: ok, observada, duplicada." },
-        "excluida": { "type": "boolean", "description": "Marcada para no exportarse." },
-        "observaciones": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/observacion" }
-        }
-      }
+    "importe": {
+     "$ref": "#/$defs/importe"
     },
-
-    "imputaciones": {
-      "description": "Por `id_externo` del comprobante, lo que el entorno decidió para él.",
-      "type": "object",
-      "propertyNames": { "minLength": 1 },
-      "additionalProperties": { "$ref": "#/$defs/imputacion" }
+    "clase": {
+     "description": "Qué es la cuenta de esta línea: los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, así que un ERP de fuera sabe qué hacer con ella sin conocer el PCGE. Se deriva del primer dígito de la cuenta (el elemento del PCGE) y no del rol: en una compra de mercadería el rol es `principal` y la línea es un activo. Los valores están en el catálogo `clases` del estándar, y ahí se congelan: son los únicos que un ERP de fuera entiende sin conocer el PCGE.",
+     "type": "string",
+     "minLength": 1
     },
-    "imputacion": {
-      "description": "La decisión contable de un comprobante: su cuenta, su centro de costo, la cuenta del total, o un reparto de la base entre cuentas que sume la base. Lo que no traiga sale de la configuración del entorno.",
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "cuenta_contable": { "type": "string" },
-        "centro_costo": { "type": "string" },
-        "cuenta_tercero": { "type": "string", "description": "La cuenta del total: 42 en compras, 12 en ventas." },
-        "reparto": {
-          "description": "La base repartida entre cuentas. Sus partes suman la base del asiento; el IGV y el total son del documento.",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["importe"],
-            "additionalProperties": false,
-            "properties": {
-              "importe": { "$ref": "#/$defs/importe" },
-              "cuenta_contable": { "type": "string" },
-              "centro_costo": { "type": "string" }
-            }
-          }
-        }
-      }
+    "rol": {
+     "description": "Qué papel cumple la línea en la operación peruana. Los valores están en el catálogo `roles` de `estandar/catalogos.json`, publicado y versionado aparte del esquema, para que un rol nuevo no cueste una versión del documento. **Quien no conozca un rol tiene que poder contabilizar la línea con `clase`, `debe_haber` e `importe`**: es la regla de degradación que hace que el catálogo pueda crecer sin romper a ningún ERP ya integrado.",
+     "type": "string"
     },
-    "observacion": {
-      "type": "object",
-      "required": ["codigo", "nivel", "texto"],
-      "additionalProperties": false,
-      "properties": {
-        "codigo": { "type": "string" },
-        "nivel": { "enum": ["error", "aviso"], "description": "error bloquea la exportación; aviso no." },
-        "texto": { "type": "string" }
-      }
+    "moneda": {
+     "type": "string",
+     "pattern": "^[A-Z]{3}$"
     },
-
-    "detraccion": {
-      "description": "El bloque de dos tiempos. Al registrar la compra la detracción está PROVISIONADA y no se conoce la constancia; cuando se deposita en el Banco de la Nación se inyecta el número y pasa a PAGADO. El asiento provisional usa un número comodín.",
-      "type": "object",
-      "additionalProperties": false,
-      "patternProperties": {
-        "^_": {
-          "description": "Cualquier clave que empiece con guion bajo es una anotación, igual que en la raíz: se transporta y se ignora. Así viaja `_tasa_tabla`, la del Catálogo 54 con la que el motor calculó el monto, sin que el bloque deje de ser cerrado."
-        }
+    "tipo_cambio": {
+     "anyOf": [
+      {
+       "type": "string"
       },
-      "properties": {
-        "codigo": { "type": "string", "pattern": "^$|^[0-9]{3}$", "description": "Anexo I de la RS 183-2004, 3 dígitos. Vacío si no se reconoce." },
-        "porcentaje": {
-          "anyOf": [{ "type": "string" }, { "type": "number", "minimum": 0, "maximum": 100 }, { "type": "null" }],
-          "description": "Tasa en porcentaje: 4, 10, 12."
-        },
-        "monto": { "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }], "description": "En soles: la detracción se deposita siempre en soles." },
-        "cuenta": { "type": "string", "description": "Cuenta de detracciones del proveedor en el Banco de la Nación." },
-        "estado": { "enum": ["PROVISIONADO", "PAGADO"], "description": "INFORMATIVO, y por defecto PROVISIONADO: está para que se vea en pantalla o en un informe. Quien lee este documento NO se fía de él, porque nadie puede comprobarlo: el estado se DEDUCE de los dos datos que sí se pueden comprobar —PAGADO cuando `nro_constancia` no está vacío ni es el número comodín Y `fecha_constancia` tiene fecha; PROVISIONADO en cualquier otro caso—. Un `estado` que diga PAGADO sin constancia no convierte en pagada una detracción que no lo está." },
-        "nro_constancia": { "type": "string", "description": "Número de la constancia del depósito en el Banco de la Nación (el vóucher). Vacío mientras no se pague, y hay un valor más que significa lo mismo que vacío: el NÚMERO COMODÍN con el que un productor rellena la columna de los sistemas contables que la exigen (`999999999` en este motor, configurable). Con número pero sin `fecha_constancia`, el depósito está a medias: el archivo del sistema contable ya lleva el número de verdad y la detracción sigue contando como pendiente." },
-        "fecha_constancia": { "$ref": "#/$defs/fecha", "description": "Fecha del depósito en el Banco de la Nación, que es un día distinto del de la factura —se paga días después, a veces el mes siguiente—. Vacía mientras no se pague: **no tiene comodín**, porque una fecha inventada es peor que ninguna." }
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
       }
+     ]
     },
-
-    "linea": {
-      "description": "Una línea de diario, sin nada de ningún ERP. Es lo que cualquier sistema contable sabe recibir.",
-      "type": "object",
-      "required": ["cuenta", "debe_haber", "importe", "clase"],
-      "additionalProperties": false,
-      "properties": {
-        "sub_diario": { "type": "string", "description": "Libro auxiliar donde cae el asiento. Cada empresa usa los suyos." },
-        "correlativo": { "type": "string", "description": "Número del asiento dentro del sub-diario y el mes." },
-        "fecha": { "$ref": "#/$defs/fecha" },
-        "cuenta": { "type": "string", "description": "Cuenta del plan contable del contribuyente." },
-        "debe_haber": { "enum": ["D", "H"] },
-        "importe": { "$ref": "#/$defs/importe" },
-        "clase": {
-          "description": "Qué es la cuenta de esta línea: los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, así que un ERP de fuera sabe qué hacer con ella sin conocer el PCGE. Se deriva del primer dígito de la cuenta (el elemento del PCGE) y no del rol: en una compra de mercadería el rol es `principal` y la línea es un activo. Los valores están en el catálogo `clases` del estándar, y ahí se congelan: son los únicos que un ERP de fuera entiende sin conocer el PCGE.",
-          "type": "string",
-          "minLength": 1
-        },
-        "rol": {
-          "description": "Qué papel cumple la línea en la operación peruana. Los valores están en el catálogo `roles` de `estandar/catalogos.json`, publicado y versionado aparte del esquema, para que un rol nuevo no cueste una versión del documento. **Quien no conozca un rol tiene que poder contabilizar la línea con `clase`, `debe_haber` e `importe`**: es la regla de degradación que hace que el catálogo pueda crecer sin romper a ningún ERP ya integrado.",
-          "type": "string"
-        },
-        "moneda": { "type": "string", "pattern": "^[A-Z]{3}$" },
-        "tipo_cambio": { "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "null" }] },
-        "glosa": { "type": "string" },
-        "contraparte_doc": { "type": "string", "description": "El anexo: RUC del proveedor o del cliente." },
-        "centro_costo": { "type": "string" },
-        "anexo_auxiliar": { "type": "string", "description": "Segundo anexo, cuando la empresa lleva el centro de costo también en la línea del tercero." },
-        "documento": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "tipo": { "type": "string", "description": "Tipo de documento en el vocabulario del ERP destino." },
-            "tipo_cp": { "type": "string", "description": "El código SUNAT del documento (Tabla 10). Es el que manda; `tipo` se conserva por compatibilidad. Ausente en la línea de la detracción, cuyo documento no es un comprobante de SUNAT." },
-            "serie_numero": { "type": "string" },
-            "id_externo": { "type": "string", "description": "El `id_externo` del comprobante que originó esta línea: el id con el que lo conoce el sistema que lo PRODUJO. Cierra el enlace entre la línea, el comprobante y su imputación sin depender de la serie y el número, que son la identidad tributaria y no la del sistema. No confundir con `id_en_destino`, reservado para el id que le pone el sistema que RECIBE el asiento." },
-            "fecha_emision": { "$ref": "#/$defs/fecha" },
-            "fecha_vencimiento": { "$ref": "#/$defs/fecha" }
-          }
-        },
-        "referencia": {
-          "type": "object",
-          "additionalProperties": false,
-          "description": "Documento que modifica una nota de crédito o débito.",
-          "properties": {
-            "tipo": { "type": "string" },
-            "tipo_cp": { "type": "string", "description": "El código SUNAT del documento referido (Tabla 10)." },
-            "serie_numero": { "type": "string" },
-            "fecha": { "$ref": "#/$defs/fecha" }
-          }
-        },
-        "detraccion": {
-          "type": "object",
-          "additionalProperties": false,
-          "description": "Presente solo en la línea de detracción.",
-          "properties": {
-            "codigo": { "type": "string", "description": "El código SUNAT del bien o servicio (Catálogo 54)." },
-            "codigo_interno": { "type": "string" },
-            "tasa": { "anyOf": [{ "type": "string" }, { "type": "number" }] },
-            "base": { "anyOf": [{ "$ref": "#/$defs/importe" }, { "type": "null" }] },
-            "nro_constancia": { "type": "string", "description": "La constancia del depósito, o el comodín mientras no se haya pagado." },
-            "fecha_constancia": { "$ref": "#/$defs/fecha" }
-          }
-        },
-        "tasa_igv": { "anyOf": [{ "type": "string" }, { "type": "number" }] }
+    "glosa": {
+     "type": "string"
+    },
+    "contraparte_doc": {
+     "type": "string",
+     "description": "El anexo: RUC del proveedor o del cliente."
+    },
+    "centro_costo": {
+     "type": "string"
+    },
+    "anexo_auxiliar": {
+     "type": "string",
+     "description": "Segundo anexo, cuando la empresa lleva el centro de costo también en la línea del tercero."
+    },
+    "documento": {
+     "type": "object",
+     "additionalProperties": false,
+     "properties": {
+      "tipo": {
+       "type": "string",
+       "description": "Tipo de documento en el vocabulario del ERP destino."
+      },
+      "tipo_cp": {
+       "type": "string",
+       "description": "El código SUNAT del documento (Tabla 10). Es el que manda; `tipo` se conserva por compatibilidad. Ausente en la línea de la detracción, cuyo documento no es un comprobante de SUNAT."
+      },
+      "serie_numero": {
+       "type": "string"
+      },
+      "id_externo": {
+       "type": "string",
+       "description": "El `id_externo` del comprobante que originó esta línea: el id con el que lo conoce el sistema que lo PRODUJO. Cierra el enlace entre la línea, el comprobante y su imputación sin depender de la serie y el número, que son la identidad tributaria y no la del sistema. No confundir con `id_en_destino`, reservado para el id que le pone el sistema que RECIBE el asiento."
+      },
+      "fecha_emision": {
+       "$ref": "#/$defs/fecha"
+      },
+      "fecha_vencimiento": {
+       "$ref": "#/$defs/fecha"
       }
+     }
+    },
+    "referencia": {
+     "type": "object",
+     "additionalProperties": false,
+     "description": "Documento que modifica una nota de crédito o débito.",
+     "properties": {
+      "tipo": {
+       "type": "string"
+      },
+      "tipo_cp": {
+       "type": "string",
+       "description": "El código SUNAT del documento referido (Tabla 10)."
+      },
+      "serie_numero": {
+       "type": "string"
+      },
+      "fecha": {
+       "$ref": "#/$defs/fecha"
+      }
+     }
+    },
+    "detraccion": {
+     "type": "object",
+     "additionalProperties": false,
+     "description": "Presente solo en la línea de detracción.",
+     "properties": {
+      "codigo": {
+       "type": "string",
+       "description": "El código SUNAT del bien o servicio (Catálogo 54)."
+      },
+      "codigo_interno": {
+       "type": "string"
+      },
+      "tasa": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "number"
+        }
+       ]
+      },
+      "base": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/importe"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "nro_constancia": {
+       "type": "string",
+       "description": "La constancia del depósito, o el comodín mientras no se haya pagado."
+      },
+      "fecha_constancia": {
+       "$ref": "#/$defs/fecha"
+      }
+     }
+    },
+    "tasa_igv": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "number"
+      }
+     ]
     }
+   }
   }
+ }
 }

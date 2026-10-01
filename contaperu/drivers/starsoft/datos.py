@@ -43,7 +43,8 @@ CONTENT_TYPE = "application/zip"
 #   STARSOFT a los soles y a los dólares. CONCAR usa MN y US; suponer que STARSOFT hace lo mismo sería inventar.
 #
 # Las dos se amplían sin romper nada el día que la plantilla lo diga.
-EXIGE: frozenset[str] = frozenset()
+# `detraccion` (4.1): escribe la línea de la detracción, así que sin el código del Catálogo 54 la omitiría en silencio.
+EXIGE: frozenset[str] = frozenset({"detraccion"})
 
 # Los roles del asiento que STARSOFT **no escribe como fila** (2.5). Su formato no asienta la detracción: la lleva
 # en campos de la fila del proveedor (24 afecto, 25 número, 26 fecha, 31 código, 34 tasa, 35 importe), así que el

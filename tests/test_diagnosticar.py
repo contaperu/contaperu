@@ -200,7 +200,7 @@ def test_el_csv_no_bloquea_por_centro_ni_por_moneda():
     """Lo que deja un mes «no listo» depende del destino: el CSV escribe la moneda en ISO y el centro que
     haya, así que ni EUR ni una M vacía lo paran. `faltantes` lo sigue diciendo, informando."""
     d = diagnosticar(doc(dict(FACTURA, centro_costo="", moneda="EUR", tipo_cambio="4.1")), driver="csv")
-    assert d["exige"] == ["cuenta_contable", "tipo_cp"]
+    assert d["exige"] == ["cuenta_contable", "detraccion", "tipo_cp"]
     assert d["listo_para_exportar"] is True and d["por_que_no"] == [] and d["que_falta"] == []
     assert d["faltantes"]["sin_codigo_de_moneda"] == ["EUR"] and d["faltantes"]["sin_centro"] == ["E001-871"]
     # Y la exportación de verdad sale: el diagnóstico no dice nada que ella no haga.
@@ -253,7 +253,7 @@ def test_una_sola_tabla_de_faltas():
 
     assert [f.clave for f in asi.FALTAS] == ["sin_sigla", "sin_codigo_de_moneda", "reparto_no_admitido",
                                             "sin_cuenta", "sin_clase", "reparto_que_no_cuadra", "sin_centro",
-                                            "sin_correlativo", "no_cabe"]
+                                            "sin_codigo_detraccion", "sin_correlativo", "no_cabe"]
     for falta in asi.FALTAS:
         assert falta.texto and falta.titulo and falta.pedir_a == diag.PEDIR_A[falta.clave]
         if falta.excepcion is not None:

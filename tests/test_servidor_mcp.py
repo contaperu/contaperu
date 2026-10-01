@@ -98,7 +98,7 @@ def test_diagnosticar_por_el_protocolo():
     # Y a quién pedírselo (0.8.0): la cuenta la pone el contador.
     assert r["que_falta"] == [{"motivo": "sin_cuenta", "texto": "sin cuenta contable",
                                "comprobantes": ["E001-871"], "pedir_a": "contador"}]
-    assert r["exige"] == ["centro_costo", "cuenta_contable", "moneda", "tipo_cp"]
+    assert r["exige"] == ["centro_costo", "cuenta_contable", "detraccion", "moneda", "tipo_cp"]
 
 
 def test_el_servidor_se_presenta_con_SU_version():

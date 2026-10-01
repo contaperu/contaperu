@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -1302,7 +1302,7 @@
     }
    },
    "OpenAccounting_imputacion": {
-    "description": "La decisión contable de un comprobante: su cuenta, su centro de costo, la cuenta del total, o un reparto de la base entre cuentas que sume la base. Lo que no traiga sale de la configuración del entorno.",
+    "description": "La decisión contable de un comprobante: su cuenta, su centro de costo, la cuenta del total, el código de su detracción, o un reparto de la base entre cuentas que sume la base. Lo que no traiga sale de la configuración del entorno.",
     "type": "object",
     "additionalProperties": false,
     "properties": {
@@ -1315,6 +1315,11 @@
      "cuenta_tercero": {
       "type": "string",
       "description": "La cuenta del total: 42 en compras, 12 en ventas."
+     },
+     "detraccion_codigo": {
+      "type": "string",
+      "pattern": "^$|^[0-9]{3}$",
+      "description": "El código del Catálogo 54 de la detracción, cuando el comprobante no lo trae: la propuesta del SIRE marca que hay detracción (campo 38 del Anexo 8 de la RS 040-2022) y no dice cuál, y de ese código salen la tasa y el monto. Lo que traiga el comprobante manda sobre esto."
      },
      "reparto": {
       "description": "La base repartida entre cuentas. Sus partes suman la base del asiento; el IGV y el total son del documento.",
@@ -1609,7 +1614,7 @@
    },
    "imputacion": {
     "title": "Imputación",
-    "description": "Lo que se decidió para cada documento, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total o un reparto de la base entre cuentas que sume la base. Llega aparte del documento.",
+    "description": "Lo que se decidió para cada documento, por su `id_externo`: su cuenta, su centro de costo, la cuenta del total, el código de su detracción o un reparto de la base entre cuentas que sume la base. Llega aparte del documento.",
     "type": "object",
     "additionalProperties": {
      "type": "object",
@@ -1622,6 +1627,11 @@
       },
       "cuenta_tercero": {
        "type": "string"
+      },
+      "detraccion_codigo": {
+       "type": "string",
+       "pattern": "^$|^[0-9]{3}$",
+       "description": "El código del Catálogo 54 de la detracción, cuando el comprobante no lo trae (1.1)."
       },
       "reparto": {
        "type": "array",

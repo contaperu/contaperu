@@ -183,6 +183,7 @@
   "exige": [
    "centro_costo",
    "cuenta_contable",
+   "detraccion",
    "moneda",
    "tipo_cp"
   ],
@@ -208,6 +209,7 @@
    "sin_clase": [],
    "reparto_que_no_cuadra": [],
    "sin_centro": [],
+   "sin_codigo_detraccion": [],
    "no_cabe": {},
    "sin_correlativo": [
     "11"
@@ -4694,7 +4696,8 @@
   "driver": "contasis",
   "exige": [
    "cuenta_contable",
-   "cuenta_unica"
+   "cuenta_unica",
+   "detraccion"
   ],
   "listo_para_exportar": true,
   "por_que_no": [],
@@ -4717,6 +4720,7 @@
    "sin_clase": [],
    "reparto_que_no_cuadra": [],
    "sin_centro": [],
+   "sin_codigo_detraccion": [],
    "no_cabe": {}
   },
   "detracciones_pendientes": [],
@@ -5980,6 +5984,7 @@
   "driver": "csv",
   "exige": [
    "cuenta_contable",
+   "detraccion",
    "tipo_cp"
   ],
   "listo_para_exportar": true,
@@ -6006,6 +6011,7 @@
    "sin_clase": [],
    "reparto_que_no_cuadra": [],
    "sin_centro": [],
+   "sin_codigo_detraccion": [],
    "sin_correlativo": [
     "11"
    ]
@@ -6673,6 +6679,7 @@
   "driver": "starsoft",
   "exige": [
    "cuenta_contable",
+   "detraccion",
    "tipo_cp"
   ],
   "listo_para_exportar": true,
@@ -6699,6 +6706,7 @@
    "sin_clase": [],
    "reparto_que_no_cuadra": [],
    "sin_centro": [],
+   "sin_codigo_detraccion": [],
    "no_cabe": {},
    "sin_correlativo": [
     "04"
@@ -7190,7 +7198,8 @@
   },
   "driver": "asiento_contable",
   "exige": [
-   "cuenta_contable"
+   "cuenta_contable",
+   "detraccion"
   ],
   "listo_para_exportar": true,
   "por_que_no": [],
@@ -7211,7 +7220,8 @@
    "sin_cuenta": [],
    "sin_clase": [],
    "reparto_que_no_cuadra": [],
-   "sin_centro": []
+   "sin_centro": [],
+   "sin_codigo_detraccion": []
   },
   "detracciones_pendientes": [],
   "detracciones_pagadas": [],

@@ -45,9 +45,10 @@ CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()
 """
 from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO, NUMERO_DETRACCION_PENDIENTE
 from .faltas import (CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA, Falta, SinCodigoDeMoneda, NoExportable,
-                     RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCuenta, SinCorrelativo,
-                     SinSigla)
-from .resolucion import (asienta_sin_efecto, comprobantes_sin_centro, comprobantes_sin_cuenta,
+                     RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCodigoDetraccion, SinCuenta,
+                     SinCorrelativo, SinSigla)
+from .resolucion import (asienta_sin_efecto, comprobantes_sin_centro, comprobantes_sin_codigo_detraccion,
+                         comprobantes_sin_cuenta,
                          con_efecto_contable, con_reparto,
                          correlativos_de_partida, cuenta_honorarios,
                          cuenta_por_pagar, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
@@ -66,8 +67,8 @@ from .motor import (CENTRO_EN_ANEXO, ROLES, cabecera_de, constancia_de, glosa_de
 __all__ = [
     "CONFIGURACION_DEL_ASIENTO", "NUMERO_DETRACCION_PENDIENTE", "CONTADOR", "FALTA", "FALTAS",
     "PROVEEDOR", "SISTEMA", "Falta", "SinCodigoDeMoneda", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
-    "SinCentro", "SinCuenta", "SinCorrelativo", "SinSigla", "asienta_sin_efecto", "comprobantes_sin_centro",
-    "comprobantes_sin_cuenta", "con_efecto_contable", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",
+    "SinCentro", "SinCodigoDetraccion", "SinCuenta", "SinCorrelativo", "SinSigla", "asienta_sin_efecto",
+    "comprobantes_sin_centro", "comprobantes_sin_codigo_detraccion", "comprobantes_sin_cuenta", "con_efecto_contable", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",
     "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo",
     "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para", "fundir_config", "imputacion_de",
     "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar", "numerar_en_orden", "partes_de",

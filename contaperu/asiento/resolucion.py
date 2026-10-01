@@ -14,7 +14,8 @@ from typing import Any
 
 from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..configuracion import CONFIG_POR_DEFECTO, por_defecto
-from ..detracciones import monto_detraccion
+from ..detracciones import (MARCA_SIRE, codigos_de, con_el_codigo_del_contador, monto_detraccion,
+                            normalizar_una)
 from ..igv import base_imputable, igv_del_asiento
 from ..pcge import clase_de as _clase_de
 from ..modelo import CENTIMO, Comprobante, Libro, a_decimal
@@ -273,6 +274,21 @@ def comprobantes_sin_cuenta(comprobantes: list[Comprobante], config: dict, es_ve
     return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, config, es_venta))]
 
 
+def comprobantes_sin_codigo_detraccion(comprobantes: list[Comprobante], config: dict) -> list[Comprobante]:
+    """Las compras que SUNAT marcó con detracción y a las que todavía les falta el código del Catálogo 54.
+
+    Mira la anotación `_marca_sire`, que es la afirmación de SUNAT, y no la detracción a secas: una detracción con un
+    código que el contribuyente no reconoce ya se blanquea desde antes (`detracciones.normalizar`) y es otra regla,
+    con otro caso real. Y usa `normalizar_una` para decidir si el código sirve, en vez de repetir aquí la prueba: una
+    segunda copia de esa regla acabaría diciendo algo distinto.
+
+    Las ventas nunca entran: el RVIE no tiene columna de detracción, así que el lector solo marca compras."""
+    codigos = codigos_de(config)
+    return [c for c in comprobantes
+            if isinstance(c.detraccion, dict) and c.detraccion.get(MARCA_SIRE)
+            and normalizar_una(con_el_codigo_del_contador(c, config), codigos) is None]
+
+
 def cuentas_del_asiento(c: Comprobante, config: dict, es_venta: bool = False) -> list[str]:
     """TODAS las cuentas que tocarán las líneas del asiento de este comprobante: la de la base (una por parte si va
     repartida), la del IGV, la de la retención de 4ta, la del tercero y la de la detracción.
@@ -378,6 +394,8 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
         salida["reparto_que_no_cuadra"] = repartos_que_no_cuadran(de_la_imputacion, config, es_venta)
     if "centro_costo" in exige:
         salida["sin_centro"] = comprobantes_sin_centro(de_la_imputacion, config, es_venta)
+    if "detraccion" in exige:
+        salida["sin_codigo_detraccion"] = comprobantes_sin_codigo_detraccion(de_la_imputacion, config)
     return salida
 
 

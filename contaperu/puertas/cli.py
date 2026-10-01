@@ -154,8 +154,26 @@ def cmd_desde_json(args: argparse.Namespace) -> int:
     return _generar_todas(datos, args.driver, Path(args.salida), args.incluir_errores, config, imputacion, previas)
 
 
+# Cuántos elementos se enseñan antes de resumir el resto. Un mes real de compras trae miles de comprobantes: hasta la
+# 4.1 esta ventana imprimía una línea por observación y por comprobante, y `_lista` unía la lista entera en UNA línea,
+# así que un RCE de 3018 filas sacaba 3018 líneas de `SIRE_SIN_DETALLE` y una línea con 3018 series-número. Lo que hace
+# falta para decidir es ver unos cuantos y saber cuántos hay; la lista completa está en la respuesta de `diagnosticar`
+# (`faltantes` y `que_falta`), que es de donde la lee un portal para filtrar su tabla.
+TOPE = 12
+
+
+def _cortado(elementos: list, tope: int = TOPE) -> tuple[list, int]:
+    """Los primeros `tope` y cuántos quedan fuera."""
+    return elementos[:tope], max(0, len(elementos) - tope)
+
+
 def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
-    print(f"{titulo}: {', '.join(str(elemento) for elemento in elementos) if elementos else vacio}")
+    if not elementos:
+        print(f"{titulo}: {vacio}")
+        return
+    primeros, resto = _cortado(elementos)
+    cola = f" … y {resto} más" if resto else ""
+    print(f"{titulo}: {', '.join(str(elemento) for elemento in primeros)}{cola}")
 
 
 def cmd_diagnosticar(args: argparse.Namespace) -> int:
@@ -180,9 +198,17 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
     for error in diagnostico.get("errores_de_configuracion") or []:
         print(f"  !! Configuración: {error}")
     for bloque, marca in (("bloqueantes", "!!"), ("avisos", " ·")):
-        for entrada in diagnostico[bloque]:
-            for observacion in entrada["observaciones"]:
-                print(f"  {marca} {entrada['serie_numero']:<18} [{observacion['codigo']}] {observacion['texto']}")
+        lineas = [f"  {marca} {entrada['serie_numero']:<18} [{observacion['codigo']}] {observacion['texto']}"
+                  for entrada in diagnostico[bloque] for observacion in entrada["observaciones"]]
+        primeras, resto = _cortado(lineas)
+        for linea in primeras:
+            print(linea)
+        if resto:
+            # Qué son las que no se enseñan, que es lo que de verdad hace falta saber: con un mes entero importado del
+            # SIRE, las 3000 de más son todas el mismo aviso.
+            codigos = sorted({observacion["codigo"] for entrada in diagnostico[bloque]
+                              for observacion in entrada["observaciones"]})
+            print(f"  {marca} … y {resto} más ({', '.join(codigos)})")
     for falta in api.FALTAS:
         if falta.clave == "no_cabe":
             # Lo que no cabe llega por motivo, cada uno con su lista.
@@ -203,7 +229,11 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         quien = {"contador": "Pedir al contador", "sistema": "Ajustar en el sistema", "proveedor": "Pedir al proveedor"}
         for falta in diagnostico["que_falta"]:
             destinatario = quien.get(falta["pedir_a"], falta["pedir_a"])
-            cuales = f" ({', '.join(falta['comprobantes'])})" if falta["comprobantes"] else ""
+            # El recuento va dentro del paréntesis y no delante del texto: aquí conviven los textos de `FALTAS`, que
+            # están escritos para seguir a un número («sin cuenta contable»), con los de una observación, que son
+            # frases enteras («El RUC del cliente no es válido»). Un número delante solo encaja en la mitad.
+            primeros, resto = _cortado(falta["comprobantes"])
+            cuales = f" ({', '.join(primeros)}{f' … y {resto} más' if resto else ''})" if primeros else ""
             print(f"  -> {destinatario}: {falta['texto']}{cuales}")
     for sub_diario, rango in diagnostico["sub_diarios"].items():
         print(f"  Sub-diario {sub_diario} ({rango['etiqueta']}): {rango['comprobantes']} comprobantes "
