@@ -460,7 +460,7 @@ def test_con_el_codigo_del_contador_la_detraccion_llega_al_asiento():
                             imputacion=imputacion)["faltantes"]["sin_codigo_detraccion"] == []
     asi = api.generar_asiento(doc, driver="csv", configuracion=configuracion, imputacion=imputacion)
     roles = [linea.get("rol") for linea in asi["asiento"]]
-    assert roles.count("detraccion") == 1 and roles.count("detraccion_tercero") == 1
+    assert roles.count("detraccion") == 1 and roles.count("recorte") == 1
     # 118 × 12 % = 14.16 → 14 soles enteros, y la línea lleva el código de SUNAT, no el interno de ningún ERP.
     detra = next(linea for linea in asi["asiento"] if linea.get("rol") == "detraccion")
     assert detra["importe"] == "14.00" and detra["detraccion"]["codigo"] == "037"

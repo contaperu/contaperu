@@ -144,7 +144,7 @@ def por_cuenta(lineas: Iterable[Any]) -> dict:
     salen cuadradas en el total y descuadradas cada una.
 
     `roles` va en plural porque la misma cuenta puede hacer dos papeles en un asiento: con una detracción,
-    la cuenta por pagar aparece como `tercero` y como `detraccion_tercero`. `clase` es singular: se deriva
+    la cuenta por pagar aparece como `tercero` y como `recorte`. `clase` es singular: se deriva
     del primer dígito de la cuenta y no puede variar entre dos líneas de la misma.
     """
     todas = list(lineas)

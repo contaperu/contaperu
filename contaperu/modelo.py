@@ -401,7 +401,7 @@ class Comprobante:
         **Lo desconocido NO se ignora** (4.0). Hasta la 3.10 se filtraba en silencio, y eso es lo que `INTEGRAR.md`
         promete que no pasa: «un dato que se cuela sin error es un dato que se pierde sin aviso». Pasaba de verdad —un
         `retencion_4ta` donde el campo es `retencion` exportaba el mes entero sin la línea de retención, y solo se veía
-        leyendo las celdas—. Además dejaba al lector **más laxo que el esquema publicado**, que ya rechaza por su
+        leyendo las celdas—. Desde la 5.0 el rol se llama `retencion`, igual que el campo, lo que **no** vuelve a abrir el agujero: son objetos distintos —uno es un importe del comprobante y el otro el papel de una línea— y lo que protege ya no es la diferencia de nombre sino que el comprobante rechace lo que no es suyo. Además dejaba al lector **más laxo que el esquema publicado**, que ya rechaza por su
         `additionalProperties: false`; es el mismo error que `LineaDiario.de_dict` corrigió en su día, y de ahí sale la
         forma de este rechazo: nombrar TODAS las sobrantes, no reventar en la primera.
 

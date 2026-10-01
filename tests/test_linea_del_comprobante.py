@@ -148,7 +148,7 @@ def test_las_lineas_validan_contra_el_estandar():
 
 def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
     lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
-    assert [ln.rol for ln in lineas] == ["principal", "igv", "tercero", "detraccion_tercero", "detraccion"]
+    assert [ln.rol for ln in lineas] == ["principal", "impuesto", "tercero", "recorte", "detraccion"]
     assert all(ln.rol in asi.ROLES for ln in lineas)
     # La línea lleva el código de SUNAT y NO la sigla: `FT` es la T.G. 06 de CONCAR y la escribe su driver (4.0).
     assert lineas[0].documento["tipo_cp"] == "01" and "tipo" not in lineas[0].documento
@@ -271,7 +271,7 @@ def test_el_csv_lleva_el_rol_y_los_codigos_sunat():
     texto = api.exportar(documento, driver="csv", configuracion={"usa_centros_costo": False})["texto"]
     filas = list(csv.DictReader(io.StringIO(texto.lstrip("\ufeff")), delimiter=";"))
     assert list(filas[0])[-5:] == ["rol", "doc_tipo_cp", "ref_tipo_cp", "clase", "doc_id_externo"]
-    assert [f["rol"] for f in filas[:3]] == ["principal", "igv", "tercero"]
+    assert [f["rol"] for f in filas[:3]] == ["principal", "impuesto", "tercero"]
     assert [f["clase"] for f in filas[:3]] == ["gasto", "pasivo", "pasivo"]
     assert all(f["doc_tipo_cp"] for f in filas) and {f["ref_tipo_cp"] for f in filas} == {""}
     # El enlace con la imputación: cada línea dice de qué comprobante salió. Desde la 3.0 el documento imputa

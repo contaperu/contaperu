@@ -210,6 +210,29 @@ def test_el_orden_de_las_filas_es_el_de_los_ejemplos_oficiales():
     assert filas[0]["TIPO DOCUMENTO"] == "CC"
 
 
+def test_sus_dos_tablas_de_roles_son_del_catalogo_vigente():
+    """Las dos tablas de este driver guardan NOMBRES DE ROL y hacen con ellos algo que no se ve en su contenido:
+    `ROLES_DE_LA_DETRACCION` **excluye filas** —su formato no asienta la detraccion— y `ORDEN_DE_LAS_FILAS`
+    **ordena**, mandando al final lo que no casa. Un renombrado del catalogo que las dejara atras haria las dos cosas
+    mal: medido con la 5.0, una compra con detraccion sale con CUATRO filas donde su manual dice tres.
+
+    Sus tests de aceptacion ya lo cazan —dos fallan con la primera tabla atras y siete con la segunda—, asi que esto
+    no es una red que faltara. Lo que anade es **el mensaje**: alli el sintoma es un recuento de filas o una cuenta en
+    otra posicion, y hay que deducir la causa; aqui el fallo dice que `detraccion_tercero` se quedo atras. Para el
+    proximo renombrado, eso es la diferencia entre media hora y un minuto."""
+    del_catalogo = set(api.catalogos_del_estandar()["roles"]["codigos"])
+    obsoletos = set(api.catalogos_del_estandar()["roles"]["obsoletos"])
+    for rol in starsoft.datos.ROLES_DE_LA_DETRACCION:
+        assert rol in del_catalogo and rol not in obsoletos, f"ROLES_DE_LA_DETRACCION: `{rol}` se quedo atras"
+    for libro, orden in starsoft.datos.ORDEN_DE_LAS_FILAS.items():
+        for rol in orden:
+            assert rol in del_catalogo and rol not in obsoletos, f"ORDEN_DE_LAS_FILAS[{libro}]: `{rol}` se quedo atras"
+    # Y que sean los que el MOTOR emite: ordenar u omitir por un rol que nunca llega no hace nada.
+    from contaperu.asiento import motor
+    assert set(starsoft.datos.ROLES_DE_LA_DETRACCION) <= set(motor.ROLES_DEL_MOTOR)
+    assert all(set(o) <= set(motor.ROLES_DEL_MOTOR) for o in starsoft.datos.ORDEN_DE_LAS_FILAS.values())
+
+
 def test_el_sub_diario_de_compras_es_el_de_starsoft_y_no_el_de_concar():
     """`04`, no `11`. «El subdiario por defecto para compras es cuatro según el sistema contable» (compras 6:08).
 

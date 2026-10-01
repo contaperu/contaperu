@@ -16,7 +16,7 @@
      "roles": {
       "type": "array",
       "items": {"type": "string"},
-      "description": "Qué papeles hace en el asiento. En PLURAL: con una detracción, la cuenta por pagar sale como «tercero» y como «detraccion_tercero» en el mismo asiento."
+      "description": "Qué papeles hace en el asiento. En PLURAL: con una detracción, la cuenta por pagar sale como «tercero» y como «recorte» en el mismo asiento. Los valores son los del catálogo `roles` del estándar, que se publica aparte: aquí no se enumeran para que un rol nuevo no cueste una versión."
      },
      "lineas": {"type": "integer", "minimum": 0},
      "por_moneda": {

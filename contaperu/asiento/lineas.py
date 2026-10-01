@@ -29,7 +29,7 @@ class LineaDiario:
     cuenta: str
     debe_haber: str            # 'D' | 'H'
     importe: str
-    rol: str = ""              # ver `motor.ROLES`: principal, igv, retencion_4ta, tercero…
+    rol: str = ""              # ver `motor.ROLES`: principal, impuesto, retencion, tercero…
     # Qué es la cuenta de esta línea: activo, pasivo, patrimonio, ingreso o gasto. Obligatoria desde la 1.0, y
     # derivada del primer dígito de la cuenta (`pcge.clase_de`), no del rol: en una compra de mercadería el rol es
     # `principal` y la línea es un ACTIVO. Es lo único que un ERP de fuera entiende sin conocer el PCGE.

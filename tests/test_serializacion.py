@@ -69,7 +69,13 @@ def test_un_comprobante_con_una_clave_que_no_es_suya_se_rechaza():
 
     Pasaba de verdad, y así se encontró: un `retencion_4ta` donde el campo se llama `retencion` exportaba el mes
     entero **sin la línea de retención de 4ta**, y solo se veía leyendo las celdas del Excel. Además dejaba al lector
-    más laxo que el esquema publicado, que ya rechaza por su `additionalProperties: false`."""
+    más laxo que el esquema publicado, que ya rechaza por su `additionalProperties: false`.
+
+    **Y desde la 5.0 el ejemplo vale por otro motivo, que conviene dejar escrito.** El rol se renombró a `retencion`,
+    así que `retencion_4ta` ya no es ni un campo ni un rol: es un nombre muerto, y el de alguien que escriba desde una
+    integración vieja. Que siga fallando en voz alta es justo lo que hace falta. Lo que ya no protege es la diferencia
+    de nombre —el rol y el campo se llaman igual ahora, como `detraccion`, que es campo, bloque y rol a la vez—, sino
+    que el comprobante rechace cualquier clave que no sea suya, que es lo que este test fija."""
     base = {"tipo_cp": "01", "serie": "F001", "numero": "1", "total": "118"}
 
     with pytest.raises(ValueError, match="retencion_4ta"):

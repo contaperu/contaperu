@@ -28,7 +28,12 @@ TIPOS_DE_LIBRO_DE_LA_1_0 = ("venta", "compra")
 # `contrapartida` y `tesoreria` entraron el 1-oct-2026 con su caso real —un Libro Diario presentado y aceptado por
 # SUNAT— porque nombran dos hechos que el catálogo no sabía nombrar: la otra cara de una depreciación o de un asiento
 # de destino, y el dinero moviéndose.
-ROLES_DE_HOY = ROLES_DE_LA_1_0 + ("contrapartida", "tesoreria")
+#
+# `impuesto`, `retencion` y `recorte` entraron con la 5.0, y **no son valores nuevos sino los mismos tres papeles bien
+# nombrados**: los viejos metían el tributo en el nombre del rol. Van AL FINAL porque el orden es el de inserción y los
+# seis de la 1.0 tienen que seguir ocupando las seis primeras posiciones; los tres viejos siguen en `codigos` y además
+# en `obsoletos`, con su reemplazo.
+ROLES_DE_HOY = ROLES_DE_LA_1_0 + ("contrapartida", "tesoreria", "impuesto", "retencion", "recorte")
 
 
 def test_los_valores_de_la_1_0_no_cambian():
@@ -52,8 +57,15 @@ def test_el_motor_no_escribe_todos_los_roles_del_catalogo():
     Los dos nuevos son vocabulario para quien produce un asiento que el motor no origina. Si algún día el motor
     empieza a emitirlos, este test cae y hay que mover el valor a `ROLES_DEL_MOTOR` a propósito."""
     assert set(motor.ROLES_DEL_MOTOR) < set(vocabulario.ROLES)
-    assert motor.ROLES_DEL_MOTOR == ROLES_DE_LA_1_0
-    assert set(vocabulario.ROLES) - set(motor.ROLES_DEL_MOTOR) == {"contrapartida", "tesoreria"}
+    # **Desde la 5.0 ya no es la tupla de la 1.0**, y divergen para siempre: tres de los seis se renombraron. Lo que
+    # el motor emite son seis papeles, los mismos de siempre, con tres nombres nuevos.
+    assert motor.ROLES_DEL_MOTOR == ("principal", "impuesto", "retencion", "tercero", "recorte", "detraccion")
+    assert len(motor.ROLES_DEL_MOTOR) == len(ROLES_DE_LA_1_0) == 6
+    # Lo que el motor NO emite: los dos de vocabulario, y los tres viejos, que están publicados y ya no se escriben.
+    obsoletos = set(api.catalogos_del_estandar()["roles"]["obsoletos"])
+    assert set(vocabulario.ROLES) - set(motor.ROLES_DEL_MOTOR) == {"contrapartida", "tesoreria"} | obsoletos
+    assert obsoletos == {"igv", "retencion_4ta", "detraccion_tercero"}
+    assert not (obsoletos & set(motor.ROLES_DEL_MOTOR)), "el motor no escribe un rol marcado como obsoleto"
 
 
 def test_el_codigo_y_el_catalogo_son_lo_mismo():

@@ -209,7 +209,7 @@ def test_el_reparto_da_una_linea_por_parte_y_tiene_que_cuadrar():
                {"importe": "40", "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]
     asiento = api.generar_asiento(doc, driver="concar", imputacion={"fila-8": {"reparto": reparto}})
     assert _del_rol(asiento, "principal") == [("636301", "60.00"), ("632201", "40.00")]
-    assert [importe for _, importe in _del_rol(asiento, "igv", "tercero")] == ["18.00", "118.00"]
+    assert [importe for _, importe in _del_rol(asiento, "impuesto", "tercero")] == ["18.00", "118.00"]
     lineas = asiento["asiento"]
     assert (sum(Decimal(ln["importe"]) for ln in lineas if ln["debe_haber"] == "D")
             == sum(Decimal(ln["importe"]) for ln in lineas if ln["debe_haber"] == "H"))

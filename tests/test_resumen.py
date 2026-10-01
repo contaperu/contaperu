@@ -152,11 +152,11 @@ def test_una_agrupacion_que_no_existe_se_niega_y_dice_las_que_hay():
 LINEAS = [
     {"cuenta": "631101", "rol": "principal", "clase": "gasto", "debe_haber": "D", "importe": "1000.00",
      "moneda": "PEN"},
-    {"cuenta": "401111", "rol": "igv", "clase": "pasivo", "debe_haber": "D", "importe": "180.00",
+    {"cuenta": "401111", "rol": "impuesto", "clase": "pasivo", "debe_haber": "D", "importe": "180.00",
      "moneda": "PEN"},
     {"cuenta": "421201", "rol": "tercero", "clase": "pasivo", "debe_haber": "H", "importe": "1080.00",
      "moneda": "PEN"},
-    {"cuenta": "421201", "rol": "detraccion_tercero", "clase": "pasivo", "debe_haber": "H",
+    {"cuenta": "421201", "rol": "recorte", "clase": "pasivo", "debe_haber": "H",
      "importe": "100.00", "moneda": "PEN"},
 ]
 
@@ -167,7 +167,7 @@ def test_una_cuenta_con_dos_papeles_los_dice_los_dos():
     el papel no— y en una lista de diez cuentas eso no se nota."""
     r = resumen.por_cuenta(LINEAS)
     por_cuenta = {c["cuenta"]: c for c in r["cuentas"]}
-    assert por_cuenta["421201"]["roles"] == ["detraccion_tercero", "tercero"]
+    assert por_cuenta["421201"]["roles"] == ["recorte", "tercero"]
     assert por_cuenta["421201"]["lineas"] == 2
     assert por_cuenta["421201"]["por_moneda"]["PEN"] == {"debe": "0.00", "haber": "1180.00"}
     assert [c["cuenta"] for c in r["cuentas"]] == ["401111", "421201", "631101"], "por código de cuenta"

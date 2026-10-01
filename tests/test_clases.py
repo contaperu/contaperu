@@ -76,7 +76,7 @@ def test_el_igv_de_compras_es_pasivo_al_debe():
     """`401111` es elemento 4, así que su clase es `pasivo`. Con `debe_haber: D` la línea dice exactamente lo que
     pasa —reduce un tributo por pagar, que es el crédito fiscal—; llamarla `activo` al debe afirmaría otra cosa. Lo
     que el ERP de fuera necesita saber ya viaja igual: el rol dice que es impuesto."""
-    igv = next(ln for ln in asiento("634301") if ln["rol"] == "igv")
+    igv = next(ln for ln in asiento("634301") if ln["rol"] == "impuesto")
     assert (igv["cuenta"], igv["clase"], igv["debe_haber"]) == ("401111", "pasivo", "D")
 
 
@@ -86,7 +86,7 @@ def test_el_igv_de_ventas_es_la_misma_cuenta_y_la_misma_clase_al_haber():
     doc = documento("701101")
     doc["libro"]["tipo"] = "venta"
     lineas = api.generar_asiento(doc, driver="asiento_contable", configuracion=SIN_CENTROS)["asiento"]
-    igv = next(ln for ln in lineas if ln["rol"] == "igv")
+    igv = next(ln for ln in lineas if ln["rol"] == "impuesto")
     assert (igv["cuenta"], igv["clase"], igv["debe_haber"]) == ("401111", "pasivo", "H")
 
 

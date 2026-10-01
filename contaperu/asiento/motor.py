@@ -45,7 +45,9 @@ from .lineas import LineaDiario
 # Del catálogo del estándar (`vocabulario.ROLES`): una sola fuente, publicada y citable por la URL del tag. Estaba
 # aquí y otra vez como enum del esquema, y ningún test comparaba las dos.
 ROLES = vocabulario.ROLES
-# Y los que el motor **escribe**, que desde la 1.1 del catálogo ya no son todos. `contrapartida` y `tesoreria`
+# Y los que el motor **escribe**, que desde la 1.1 del catálogo ya no son todos, y que desde la 5.0 **tampoco son
+# los seis de la 1.0**: tres de ellos se renombraron para sacarles el tributo del nombre, y los viejos siguen en el
+# catálogo marcados en `obsoletos`. Así que esta tupla y la de la 1.0 divergen para siempre, a propósito. `contrapartida` y `tesoreria`
 # entraron como vocabulario para quien produce un asiento que el motor no origina —una depreciación, un pago, una
 # planilla—, y el motor no los emite: genera compras y ventas.
 #
@@ -53,7 +55,7 @@ ROLES = vocabulario.ROLES
 # porque puede recibir un documento que los traiga, así que lee `ROLES`. Un **test** que compruebe «todos los roles
 # salen con su clase» solo puede exigir estos seis, porque los otros dos no hay forma de producirlos desde un
 # comprobante. Confundirlos daba un rojo que invitaba a emitir un rol solo para que el test pasara.
-ROLES_DEL_MOTOR = ("principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion")
+ROLES_DEL_MOTOR = ("principal", "impuesto", "retencion", "tercero", "recorte", "detraccion")
 # Las líneas que llevan además el centro de costo en su anexo auxiliar. Lo del estándar es la del tercero —el «doble
 # anexo», también en la línea que le descuenta la detracción—; cada driver lo cambia con las columnas que su sistema
 # elige (`drivers.contrato.centro_en_anexo`). La principal lo lleva ahí solo cuando su cuenta no lo lleva en la suya.
@@ -306,10 +308,10 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
-    linea_igv = (linea("igv", igv, str(config["cuentas"]["igv"]), sentido_base, glosa)
+    linea_impuesto = (linea("impuesto", igv, str(config["cuentas"]["igv"]), sentido_base, glosa)
                  if igv > 0 else None)
     cuenta_retencion = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"])
-    linea_retencion = (linea("retencion_4ta", retenido, cuenta_retencion, sentido_tercero, glosa)
+    linea_de_retencion = (linea("retencion", retenido, cuenta_retencion, sentido_tercero, glosa)
                        if retenido > 0 else None)
     cuenta_del_tercero = cuenta_tercero(c, config, es_venta)
     anexo_tercero = centro_comun if ("tercero" in centro_en_anexo and not es_honorarios) else ""
@@ -322,11 +324,11 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # y la cuenta de detracciones al Haber, con su propio tipo de documento y el comodín 9999999999
     # (la constancia no existe todavía al provisionar). Lo dispara que la factura TENGA detracción, no
     # el sub-diario. Solo compras; el recibo por honorarios nunca.
-    linea_detraccion_tercero = linea_detraccion = None
+    linea_recorte = linea_detraccion = None
     if not es_venta and not es_honorarios and tiene_detraccion(c):
         _, detraido = monto_detraccion(c, config)
         if detraido > 0:
-            linea_detraccion_tercero = linea("detraccion_tercero", detraido, cuenta_del_tercero, sentido_base,
+            linea_recorte = linea("recorte", detraido, cuenta_del_tercero, sentido_base,
                                              contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
             # De QUÉ documento sale esta detracción: en una factura, del propio comprobante (lo que
             # CONCAR aceptó). En una NOTA que ya referencia la factura que corrige se RESPETA esa
@@ -360,10 +362,10 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
         # El IGV va ANTES del ingreso desde la 2.2 (John, 21-sep-2026). Lo piden dos archivos reales de STARSOFT
         # —una hoja de su plantilla y un TXT de otro generador— que ordenan así las tres cuentas, y en compras el
         # motor ya lo hacía: el IGV sigue al principal, no al revés. Era la única asimetría entre los dos libros.
-        orden = [tercero, linea_igv, *principales]
+        orden = [tercero, linea_impuesto, *principales]
     else:
         # Compras (y NC de venta, que invierte): principal · IGV · retención · tercero · detracción.
-        orden = [*principales, linea_igv, linea_retencion, tercero, linea_detraccion_tercero, linea_detraccion]
+        orden = [*principales, linea_impuesto, linea_de_retencion, tercero, linea_recorte, linea_detraccion]
     return [ln for ln in orden if ln is not None]
 
 

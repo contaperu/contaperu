@@ -54,7 +54,7 @@ EXIGE: frozenset[str] = frozenset({"detraccion"})
 #
 # Las líneas siguen existiendo en el asiento del motor, que es el mismo para todos los destinos; lo que cambia es
 # lo que este driver proyecta. Por eso se declaran aquí y no se tocan en el núcleo.
-ROLES_DE_LA_DETRACCION = ("detraccion", "detraccion_tercero")
+ROLES_DE_LA_DETRACCION = ("detraccion", "recorte")
 
 # En qué ORDEN salen las filas de cada libro, según sus treinta ejemplos oficiales (John, 22-sep-2026): una COMPRA
 # va IGV, proveedor, gasto; una VENTA va cliente, IGV, ingreso. No es el del asiento del motor, que en compras saca
@@ -65,7 +65,7 @@ ROLES_DE_LA_DETRACCION = ("detraccion", "detraccion_tercero")
 #
 # Lo que no case con un rol de estos va al final y conserva su orden relativo, que es lo que hace el segundo
 # ejemplo del manual: una compra con dos cuentas de gasto las escribe seguidas, detrás del proveedor.
-ORDEN_DE_LAS_FILAS = {"compra": ("igv", "tercero"), "venta": ("tercero", "igv")}
+ORDEN_DE_LAS_FILAS = {"compra": ("impuesto", "tercero"), "venta": ("tercero", "impuesto")}
 
 # --- con qué cuentas nace una empresa que lleva STARSOFT ------------------------------
 

@@ -145,7 +145,7 @@ def test_el_asiento_lleva_la_cuenta_del_sistema_sin_configurar_nada(con_cuentas_
     asiento = api.generar_asiento(imputando(_documento(), "62010001"), driver="diario_json",
                                   configuracion=CONFIG)["asiento"]
     terceros = {linea["cuenta"] for linea in asiento if linea["rol"] == "tercero"}
-    igv = {linea["cuenta"] for linea in asiento if linea["rol"] == "igv"}
+    igv = {linea["cuenta"] for linea in asiento if linea["rol"] == "impuesto"}
     assert terceros == {"42120001"} and igv == {"40111000"}
 
 
