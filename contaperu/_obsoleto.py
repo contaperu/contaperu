@@ -10,10 +10,11 @@ Las dos decisiones que lo hacen usable, y que conviene no perder:
 
 - **El aviso sale al USAR la ruta vieja, no al importar el módulo.** Por eso `reexportar` devuelve un `__getattr__` de
   módulo en vez de ejecutar nada en el cuerpo: un `import` en el arranque de una aplicación no ensucia su registro.
-- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 4.0, que
-  es lo que promete `CLAUDE.md`: lo que se retira avisa durante toda la mayor anterior. Decía «3.0» con el paquete ya
-  en la 3.8, así que el aviso citaba una versión pasada — una promesa de retiro no puede sostener nada si el número que
-  da ya quedó atrás.
+- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 5.0, que
+  es lo que promete `CLAUDE.md`: lo que se retira avisa durante toda la mayor anterior. **Se mueve con cada mayor que
+  cumple lo prometido**, y la 4.0 cumplió: retiró el alias `asiento_neutral`, que era lo único que quedaba avisando.
+  Decía «3.0» con el paquete ya en la 3.8, así que el aviso citaba una versión pasada — una promesa de retiro no puede
+  sostener nada si el número que da ya quedó atrás, y de ahí sale esta regla.
 - **El texto del aviso no supone de qué clase es lo que cambió.** Nació para las rutas de la 0.x y lo decía en la
   cadena; ahora `que` lo dice quien llama, porque un nombre de driver no es una ruta de módulo.
 
@@ -27,7 +28,7 @@ import importlib
 import warnings
 from typing import Any, Callable
 
-RETIRO = "4.0"
+RETIRO = "5.0"
 
 
 class RutaObsoleta(DeprecationWarning):

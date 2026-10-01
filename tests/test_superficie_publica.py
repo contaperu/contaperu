@@ -40,9 +40,9 @@ EXTENSION = (
     "contaperu.lectores", "contaperu.lectores.archivos", "contaperu.lectores.sire_txt", "contaperu.lectores.xml_ubl",
     "contaperu.drivers", "contaperu.drivers.contrato", "contaperu.drivers.kit", "contaperu.drivers.concar", "contaperu.drivers.contasis",
     "contaperu.drivers.csv", "contaperu.drivers.sire", "contaperu.drivers.starsoft",
-    # Los dos: el driver y el talón que sostiene su nombre viejo, cuyos trece nombres congeló la 1.0 y que por eso
-    # no se puede quitar hasta la 4.0.
-    "contaperu.drivers.asiento_contable", "contaperu.drivers.asiento_neutral",
+    # El talón que sostenía su nombre viejo (`asiento_neutral`, hasta la 3.10) se retiró en la 4.0, con sus trece
+    # nombres: es lo que una mayor permite y lo que su aviso prometía.
+    "contaperu.drivers.asiento_contable",
 )
 TIPOS_DE_CONSTANTE = {"builtins", "decimal", "datetime"}
 

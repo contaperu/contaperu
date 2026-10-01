@@ -2,7 +2,7 @@
 
 ContaPerú convierte comprobantes de SUNAT en asientos y en los archivos que importan los sistemas contables peruanos,
 sin estado: todo entra por parámetro y sale por retorno. Esta guía es para quien construye un ERP, un portal contable o
-un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 3.x. Los ejemplos se
+un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 4.x. Los ejemplos se
 ejecutan en la batería del repositorio (`tests/test_integrar.py`): si uno deja de funcionar, la batería falla.
 
 ## Qué puerta elegir
@@ -485,7 +485,7 @@ decide, después de leer qué trae.
   Con `==` basta: una versión publicada en PyPI no se reemplaza jamás, así que el número ya significa «estos bytes
   exactos». Con su hash en tu archivo de dependencias, Dependabot o Renovate te abren la actualización. Si prefieres
   no pasar por PyPI, cada Release lleva su rueda y sus `SHA256SUMS` (`sha256sum -c SHA256SUMS --ignore-missing`).
-- **Por HTTP**, la ruta `/v1/` no cambia durante la 1.x, y `info.version` de `/openconta.json` dice qué versión
+- **Por HTTP**, la ruta `/v1/` no cambia mientras la mayor sea la misma, y `info.version` de `/openconta.json` dice qué versión
   responde. Si usas la imagen de Docker, por su tag exacto, nunca `latest`.
 - **Por MCP**, el servidor anuncia su versión al conectarse (`serverInfo`).
 
@@ -503,14 +503,14 @@ Para actualizar:
 Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
 seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
-## Lo que promete la 3.x
+## Lo que promete la 4.x
 
-- **`contaperu.api` no cambia de nombre ni de firma** hasta la 4.0 (`tests/test_superficie_publica.py`). Pueden llegar
+- **`contaperu.api` no cambia de nombre ni de firma** hasta la 5.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
-- **Un nombre que cambia sigue resolviendo durante toda la 3.x**, y avisa con `contaperu.RutaObsoleta` diciendo cuál
-  usar. Es el caso del driver `asiento_neutral`, que desde la 3.10 se llama `asiento_contable`: el nombre viejo
-  funciona igual y se retira en la 4.0. Corre tu batería con `-W error::contaperu._obsoleto.RutaObsoleta` y te sale
-  cada sitio donde usas uno.
+- **Un nombre que cambia sigue resolviendo durante toda la 4.x**, y avisa con `contaperu.RutaObsoleta` diciendo cuál
+  usar, hasta la 5.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno: la 4.0 cumplió el único que avisaba —el driver
+  que se llamó `asiento_neutral` hasta la 3.10 y hoy es `asiento_contable`—. Corre tu batería con
+  `-W error::contaperu._obsoleto.RutaObsoleta` y te sale cada sitio donde uses uno.
 - **OpenConta crece sin romper**: una ruta o un campo que está, sigue.
 - **La 2.0 retiró las rutas de la 0.10** (`contaperu.operaciones`, `contaperu.generar`, `contaperu.cli`,
   `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia

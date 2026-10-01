@@ -381,7 +381,6 @@
   "GRUPO": "",
   "Opciones": "",
   "asiento_contable": "",
-  "asiento_neutral": "",
   "concar": "",
   "contasis": "",
   "contrato": "",
@@ -569,21 +568,6 @@
   "voucher": ""
  },
  "contaperu.drivers.asiento_contable": {
-  "CANAL": "",
-  "CONFIGURACION": "",
-  "CONTENT_TYPE": "",
-  "EXIGE": "",
-  "FORMATOS": "",
-  "Libro": "",
-  "NOMBRE": "",
-  "OPCIONES": "",
-  "OPEN_ACCOUNTING": "",
-  "OpcionesArchivo": "",
-  "VOCABULARIO": "",
-  "desde_lineas": "",
-  "nombre": ""
- },
- "contaperu.drivers.asiento_neutral": {
   "CANAL": "",
   "CONFIGURACION": "",
   "CONTENT_TYPE": "",

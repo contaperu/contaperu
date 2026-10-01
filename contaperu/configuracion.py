@@ -361,7 +361,8 @@ CLAVES_RETIRADAS: dict[str, str] = {
     "cc_en_anexo_auxiliar": _COLUMNA_DE_CONCAR.format("anexo_auxiliar_del_tercero"),
     "contabilidad": "lo general en la raíz y lo de cada sistema en su sección, sin clave intermedia",
     # No es una clave que se retirara, sino el nombre viejo de un driver (3.10): una configuración guardada puede
-    # llevar su sección, y así el mensaje dice qué hacer en vez de «clave desconocida». El driver sigue resolviendo
-    # con aviso (`drivers.ALIAS`); esto es solo para su sección de la configuración.
+    # llevar su sección, y así el mensaje dice qué hacer en vez de «clave desconocida». **Se queda en la 4.0, que
+    # retiró el alias del driver**: ahora es la única guía que recibe quien tenga esa sección guardada, así que vale
+    # más que antes, cuando el nombre todavía resolvía.
     "asiento_neutral": "la sección `asiento_contable`, que es como se llama el driver desde la 3.10",
 }

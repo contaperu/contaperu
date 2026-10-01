@@ -226,59 +226,40 @@ def test_el_contrato_de_un_driver_neutral():
     assert any("no declara vocabulario legacy" in p for p in legacy)
     assert any("código de la moneda" in p for p in contrato.incumplimientos(copia(EXIGE=frozenset({"moneda"}))))
 
+def test_el_nombre_viejo_del_driver_ya_no_existe():
+    """La 4.0 retiró `asiento_neutral`, el nombre que este driver tuvo hasta la 3.10.
 
-def test_el_nombre_viejo_del_driver_sigue_funcionando_y_avisa():
-    """`driver="asiento_neutral"` no se rompe: resuelve al driver nuevo y avisa de cuál usar (3.10).
+    Avisó durante toda la 3.x con `RutaObsoleta`, y era necesario: el paquete está en PyPI y una aplicación en
+    producción fija su versión, así que sin el alias se habría roto con un `ValueError` el día que adoptara la 3.10, y
+    ninguna guarda de este repositorio lo habría visto, porque el valor de `driver` no está en ningún enum. Cumplido el
+    aviso, se va: ni el nombre resuelve ni existe el módulo talón que sostenía las cuatro formas de importarlo.
 
-    Es lo que separa este renombrado del de la 1.1.0, cuando el driver pasó de `open_accounting` a `asiento_neutral`:
-    entonces fue gratis porque nada publicado llevaba el nombre viejo, y hoy sí lo lleva —el paquete está en PyPI y una
-    aplicación en producción fija su versión—. Sin el alias, esa aplicación se rompería con un `ValueError` el día que
-    adoptara la versión, y ninguna guarda de este repositorio lo habría visto, porque el valor de `driver` no está en
-    ningún enum.
+    Lo que NO se va con él es el mecanismo: `drivers.ALIAS` se queda vacío para el próximo renombrado."""
+    import importlib
 
-    El aviso es `RutaObsoleta`, la misma clase que quien integra ya filtra, y el retiro es la 4.0.
-    """
+    from contaperu import drivers
+
+    with pytest.raises(ValueError, match="Driver desconocido"):
+        drivers.obtener("asiento_neutral")
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("contaperu.drivers.asiento_neutral")
+    assert "asiento_neutral" not in drivers.ALIAS and not hasattr(drivers, "asiento_neutral")
+    # Los archivos ya exportados llevan ese nombre DENTRO, en `_exportacion.driver`, y eso no lo arregla ninguna
+    # versión: el alias cubría la entrada, no los datos que ya están en disco.
+
+
+def test_el_alias_de_un_driver_sigue_en_pie(monkeypatch):
+    """No queda ningún nombre viejo, pero el circuito que resuelve uno tiene que seguir funcionando: es lo que se usará
+    la próxima vez que un destino se renombre. Se prueba con un nombre de mentira, para no tener que deprecar nada de
+    verdad solo por cubrirlo — el mismo trato que `_obsoleto` recibe en `test_api.py`.
+
+    Lo que se comprueba es lo que costó acertar: que resuelva al driver nuevo, que avise con `RutaObsoleta` y que
+    **no** aparezca como un destino más en la lista que publica el registro."""
     from contaperu import RutaObsoleta
     from contaperu import drivers
 
+    monkeypatch.setitem(drivers.ALIAS, "nombre_de_antes", "asiento_contable")
     with pytest.warns(RutaObsoleta, match="asiento_contable"):
-        assert drivers.obtener("asiento_neutral") is drivers.obtener("asiento_contable")
-
-    # Y por la fachada, que es por donde llega de verdad.
-    with pytest.warns(RutaObsoleta):
-        viejo = api.generar_asiento(casos(), driver="asiento_neutral", imputacion=IMPUTACION_CASOS)
-    nuevo = api.generar_asiento(casos(), driver="asiento_contable", imputacion=IMPUTACION_CASOS)
-    assert viejo["asiento"] == nuevo["asiento"]
-
-    # El alias NO es un destino: no aparece en la lista de drivers ni la ensucia.
-    assert "asiento_neutral" not in drivers.DRIVERS
-    assert "asiento_neutral" not in api.drivers_disponibles()
-
-
-def test_las_cuatro_formas_de_importar_el_nombre_viejo_resuelven():
-    """Quien integró con la 1.x pudo escribir cualquiera de las cuatro, así que las cuatro siguen valiendo.
-
-    Un `__getattr__` de paquete habría cubierto solo dos: las otras dos necesitan que el módulo exista en disco, y por
-    eso el talón es un archivo. El aviso sale al USAR un nombre, no al importar el módulo — así un `import` en el
-    arranque de una aplicación no ensucia su registro de avisos.
-    """
-    import importlib
-
-    from contaperu import RutaObsoleta
-
-    modulo = importlib.import_module("contaperu.drivers.asiento_neutral")      # 1) import del módulo: no avisa
-    with pytest.warns(RutaObsoleta, match="asiento_contable"):
-        assert modulo.NOMBRE == "asiento_contable"                             # 2) atributo: avisa
-
-    from contaperu.drivers import asiento_neutral                              # 3) from el paquete
-    with pytest.warns(RutaObsoleta):
-        assert asiento_neutral.FORMATOS["compra"] == "asiento_contable_json"
-
-    with pytest.warns(RutaObsoleta):                                           # 4) from el módulo viejo
-        from contaperu.drivers.asiento_neutral import CANAL
-    assert CANAL == "intercambio"
-
-    # Los trece nombres que congeló la 1.0 siguen todos ahí: quitar uno sería una versión mayor.
-    assert len(asiento_neutral.__all__) == 13
-    with pytest.warns(RutaObsoleta):
-        assert all(hasattr(asiento_neutral, nombre) for nombre in asiento_neutral.__all__)
+        assert drivers.obtener("nombre_de_antes") is drivers.obtener("asiento_contable")
+    assert "nombre_de_antes" not in drivers.DRIVERS
+    assert "nombre_de_antes" not in api.drivers_disponibles()
