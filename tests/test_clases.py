@@ -14,7 +14,7 @@ import pytest
 
 from contaperu import api, pcge
 from contaperu.asiento import faltas
-from contaperu.asiento.motor import ROLES
+from contaperu.asiento.motor import ROLES_DEL_MOTOR
 
 LIBRO = {"ruc": "20601234567", "periodo": "202601", "tipo": "compra"}
 COMPRA = {"tipo_cp": "01", "serie": "F001", "numero": "500", "fecha_emision": "2026-01-10",
@@ -97,14 +97,20 @@ def test_ninguna_linea_sale_sin_clase():
 
 
 def test_todos_los_roles_tienen_clase_en_un_asiento_completo():
-    """El asiento de un recibo por honorarios con retención y el de una compra con detracción cubren los seis roles."""
+    """El asiento de un recibo por honorarios con retención y el de una compra con detracción cubren los seis roles
+    **que el motor escribe**.
+
+    No los del catálogo, que desde el 1-oct-2026 son ocho: `contrapartida` y `tesoreria` son vocabulario para quien
+    produce un asiento que el motor no origina —una depreciación, un pago—, y no hay forma de sacarlos de un
+    comprobante. Exigirlos aquí invitaría a emitir un rol solo para que este test pasara."""
     vistos = {}
     for cuenta, extra in [("634301", {"detraccion": {"codigo": "037", "porcentaje": "12"}}),
                           ("632101", {"tipo_cp": "02", "base_gravada": "0", "igv": "0",
                                       "inafecto": "3000.00", "total": "3000.00", "retencion": "240.00"})]:
         for ln in asiento(cuenta, **extra):
             vistos[ln["rol"]] = ln["clase"]
-    assert set(vistos) == set(ROLES), f"faltan roles por cubrir: {set(ROLES) - set(vistos)}"
+    assert set(vistos) == set(ROLES_DEL_MOTOR), (
+        f"faltan roles por cubrir: {set(ROLES_DEL_MOTOR) - set(vistos)}")
     assert all(vistos.values()), vistos
 
 

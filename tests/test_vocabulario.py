@@ -11,21 +11,49 @@ import json
 import pytest
 
 from contaperu import api, vocabulario
+from contaperu.asiento import motor
 from contaperu.asiento.motor import ROLES
 from contaperu.modelo import TIPOS_LIBRO
 
-# Los valores de la 1.0, escritos a mano. Si alguien añade uno, este test se pone rojo y hay que decidirlo a
-# propósito: abrir el catálogo no era para que crezcan (John, 18-sep-2026), sino para que un hecho nuevo pueda
-# traer los suyos sin subir la versión del estándar.
+# Los valores de la 1.0, escritos a mano, y **congelados para siempre**: lo que se publicó no se quita ni cambia de
+# significado ni se mueve de sitio, porque quien ya integró lo lee por su nombre y a veces por su orden.
 ROLES_DE_LA_1_0 = ("principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion")
 CLASES_DE_LA_1_0 = ("activo", "pasivo", "patrimonio", "ingreso", "gasto")
 TIPOS_DE_LIBRO_DE_LA_1_0 = ("venta", "compra")
 
+# Y el catálogo de HOY, que es el de la 1.0 más lo que entró después, en el orden en que entró. Si alguien añade un
+# valor, este test se pone rojo y hay que decidirlo a propósito: abrir el catálogo no era para que crezcan
+# (John, 18-sep-2026), sino para que un hecho nuevo pueda traer los suyos sin subir la versión del estándar.
+#
+# `contrapartida` y `tesoreria` entraron el 1-oct-2026 con su caso real —un Libro Diario presentado y aceptado por
+# SUNAT— porque nombran dos hechos que el catálogo no sabía nombrar: la otra cara de una depreciación o de un asiento
+# de destino, y el dinero moviéndose.
+ROLES_DE_HOY = ROLES_DE_LA_1_0 + ("contrapartida", "tesoreria")
+
 
 def test_los_valores_de_la_1_0_no_cambian():
-    assert vocabulario.ROLES == ROLES_DE_LA_1_0
+    """La promesa de la 1.0: lo publicado sigue ahí, con su mismo nombre y en su mismo sitio. Que el catálogo crezca
+    por detrás no la rompe; que algo de esto se moviera, sí."""
+    assert vocabulario.ROLES[:len(ROLES_DE_LA_1_0)] == ROLES_DE_LA_1_0
     assert vocabulario.CLASES == CLASES_DE_LA_1_0
     assert vocabulario.TIPOS_LIBRO == TIPOS_DE_LIBRO_DE_LA_1_0
+
+
+def test_el_catalogo_crece_solo_a_proposito():
+    """El otro lado de la promesa: añadir un valor pone esto rojo. Un catálogo que crece sin que nadie lo decida es
+    un enum con más pasos (`estandar/LEEME.md`, «Quién gobierna los catálogos»)."""
+    assert vocabulario.ROLES == ROLES_DE_HOY
+
+
+def test_el_motor_no_escribe_todos_los_roles_del_catalogo():
+    """La distinción que entra con `contrapartida` y `tesoreria`, y que conviene que un test diga en voz alta: el
+    catálogo es lo que un driver tiene que **entender**, y `ROLES_DEL_MOTOR` lo que el motor **emite**.
+
+    Los dos nuevos son vocabulario para quien produce un asiento que el motor no origina. Si algún día el motor
+    empieza a emitirlos, este test cae y hay que mover el valor a `ROLES_DEL_MOTOR` a propósito."""
+    assert set(motor.ROLES_DEL_MOTOR) < set(vocabulario.ROLES)
+    assert motor.ROLES_DEL_MOTOR == ROLES_DE_LA_1_0
+    assert set(vocabulario.ROLES) - set(motor.ROLES_DEL_MOTOR) == {"contrapartida", "tesoreria"}
 
 
 def test_el_codigo_y_el_catalogo_son_lo_mismo():
@@ -60,7 +88,7 @@ def test_el_esquema_ya_no_los_enumera():
 def test_la_api_los_sirve_con_su_fuente():
     servidos = api.catalogos_del_estandar()
     assert set(servidos) == {"roles", "clases", "tipos_de_libro"}
-    assert list(servidos["roles"]["codigos"]) == list(ROLES_DE_LA_1_0)
+    assert list(servidos["roles"]["codigos"]) == list(ROLES_DE_HOY)
     assert servidos["clases"]["fuente"] == vocabulario.FUENTES["clases"]
 
 

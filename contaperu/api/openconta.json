@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -1629,6 +1629,11 @@
         "type": "number"
        }
       ]
+     },
+     "medio_pago": {
+      "description": "Con qué se movió el dinero en esta línea: un código de tres dígitos del catálogo de medios de pago de SUNAT (Tabla 1 del Anexo 3 de la RS 169-2015), el mismo que el comprobante usa desde la enmienda 0004. Es de la línea con rol `tesoreria`, la que mueve caja o banco: el comprobante dice con qué se paga la operación y esta dice con qué se movió el dinero. Vacío significa que no se dice, no que fuera en efectivo. **No entra en la huella del asiento**: no cambia ningún asiento ni ningún importe.",
+      "type": "string",
+      "pattern": "^$|^[0-9]{3}$"
      }
     }
    },

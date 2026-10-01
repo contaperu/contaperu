@@ -13,7 +13,7 @@ Es la huella del **contenido del asiento**, no del archivo:
 - con **todo** lo que dice el asiento: sub-diario, fecha, cuentas, sentidos, importes (texto exacto),
   glosas, documento, referencia y detracción. Un céntimo la cambia; una configuración que mueva el
   sub-diario también, porque es otro asiento;
-- **menos tres campos**, cada uno por su motivo, y los tres están en `SIN`.
+- **menos cuatro campos**, cada uno por su motivo, y los cuatro están en `SIN`.
 
 Lo que queda fuera, y por qué (todos con la misma prueba: si entrara, la huella diría que dos contenidos
 iguales son distintos):
@@ -28,6 +28,10 @@ iguales son distintos):
   caso que la huella existe para atajar: al reexportar tras un «deshacer», la aplicación recrea sus filas con
   ids nuevos, así que con el id dentro la misma tanda daría otra huella y el aviso de lote repetido se
   apagaría justo cuando hace falta.
+- **`medio_pago`** — dice CON QUÉ se movió el dinero, y **no cambia ningún asiento ni ningún importe**: la misma
+  compra pagada por transferencia o en efectivo es el mismo asiento. Lo escribió así la enmienda 0004 al entrar, y
+  entonces se cumplía solo porque el campo vivía en la `Cabecera`, que no se hashea. Desde que baja a la línea (rol
+  `tesoreria`) hay que decirlo a propósito, o la promesa se rompería sin que nadie lo notara.
 
 `SIN` admite **rutas con punto** para alcanzar un campo de un bloque —la misma convención que `kit/columnas`—,
 porque un campo anidado en `SIN` sin eso no haría nada y la huella cambiaría en silencio.
@@ -43,7 +47,7 @@ import hashlib
 import json
 from typing import Iterable
 
-SIN = ("correlativo", "clase", "documento.id_externo")
+SIN = ("correlativo", "clase", "documento.id_externo", "medio_pago")
 
 
 def _sin_lo_excluido(d: dict) -> dict:

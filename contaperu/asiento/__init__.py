@@ -61,7 +61,7 @@ from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
 from .indice import Cabecera, ComprobanteDelAsiento, exportacion_de
-from .motor import (CENTRO_EN_ANEXO, ROLES, cabecera_de, constancia_de, glosa_de, lineas_del_comprobante,
+from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, cabecera_de, constancia_de, glosa_de, lineas_del_comprobante,
                     lineas_del_libro, lineas_e_indice_del_libro, serie_numero_de)
 
 __all__ = [
@@ -76,7 +76,7 @@ __all__ = [
     "repartos_que_no_cuadran", "sigla_de_tipo", "sigla_documento", "sin_efecto_contable", "sub_diario",
     "sub_diarios_presentes",
     "tiene_detraccion",
-    "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "glosa_de",
+    "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "ROLES_DEL_MOTOR", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro", "lineas_e_indice_del_libro", "cabecera_de", "Cabecera",
     "ComprobanteDelAsiento", "MONEDAS_CODIGO", "constancia_de", "exportacion_de", "serie_numero_de",
 ]

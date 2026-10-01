@@ -704,6 +704,11 @@
        "type": "number"
       }
      ]
+    },
+    "medio_pago": {
+     "description": "Con qué se movió el dinero en esta línea: un código de tres dígitos del catálogo de medios de pago de SUNAT (Tabla 1 del Anexo 3 de la RS 169-2015), el mismo que el comprobante usa desde la enmienda 0004. Es de la línea con rol `tesoreria`, la que mueve caja o banco: el comprobante dice con qué se paga la operación y esta dice con qué se movió el dinero. Vacío significa que no se dice, no que fuera en efectivo. **No entra en la huella del asiento**: no cambia ningún asiento ni ningún importe.",
+     "type": "string",
+     "pattern": "^$|^[0-9]{3}$"
     }
    }
   }

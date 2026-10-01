@@ -210,7 +210,7 @@ def test_lo_que_arma_el_motor_valida_contra_el_estandar():
                      "periodo": "202608", "tipo": "compra"},
            "asiento": [ln.a_dict() for ln in lineas]}
     assert list(validador.iter_errors(doc)) == []
-    assert {ln.rol for ln in lineas} == set(asi.ROLES)
+    assert {ln.rol for ln in lineas} == set(asi.ROLES_DEL_MOTOR)
 
 
 # --- el driver CSV -----------------------------------------------------------------

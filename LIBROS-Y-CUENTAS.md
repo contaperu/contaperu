@@ -18,7 +18,7 @@ cada una. ¿Para qué declarar encima un papel?
 
 Y de tres casos que el motor hoy no cubre, y que la pregunta destapa: **una planilla** (renta de 5ta, ONP,
 remuneración), **una depreciación** (que se relaciona con el elemento 3) y **un asiento de cuentas de destino** no
-tienen ningún rol asignado, porque el catálogo de roles solo tiene los seis de compras y ventas.
+tenían ningún rol asignado, porque el catálogo de roles solo tenía los seis de compras y ventas. **Dos de esos huecos se cerraron el 1-oct-2026** con la [enmienda 0021](estandar/enmiendas/0021-contrapartida-y-tesoreria.md), que es consecuencia directa de esta investigación; ver el estado de las candidatas en §6.
 
 La investigación salió a ver cómo lo resuelve el software de EE. UU. —abierto y cerrado— y volvió con algo que no
 esperaba: **la respuesta estaba en el Perú, en el PLE**, y el modelo de roles no era el problema.
@@ -387,6 +387,17 @@ corrido, y meter cinco filas que aún van a cambiar lo ensuciaría. Entran ahí,
 y cada una tenga su caso real. El molde de cada una es el del inventario: nivel, caso real que la destraba, test que la
 fijaría, prioridad y hito.
 
+> **Estado al 1-oct-2026, después de que John trajera un Libro Diario presentado y aceptado.** El archivo real movió
+> cuatro de las cinco, así que lo de abajo se lee con esto delante:
+>
+> | | Qué pasó |
+> |---|---|
+> | **A** · `libro.tipo` con el catálogo del PLE | **No hace falta para producir.** El driver toma un mes de compras o de ventas y lo escribe en formato Libro Diario, como el `sire` lo escribe como RVIE o RCE. Haría falta para **recibir** un diario de un ERP, que es otra dirección |
+> | **B** · la cuenta normativa y su denominación | **Pierde la mitad.** La denominación va vacía en las 12 094 líneas del archivo: el artículo 6 la hace opcional a quien usa más de cuatro dígitos de subcuenta. Queda solo la divisionaria, y sigue esperando |
+> | **C** · `tipo_de_cuenta` con los `account_type` de Odoo | Sin cambios. Sigue esperando un ERP que pida más que las cinco clases |
+> | **D** · la tabla de determinación con dimensiones | Sin cambios, y sigue siendo la que cubre el hueco de investigación real |
+> | **E** · `retencion` genérico | **Reemplazada por algo mejor y más ancho.** La revisión del modelo de roles encontró que el hueco no eran las retenciones sino **dos papeles que el catálogo no sabía nombrar**, y ésos entraron ya por la [enmienda 0021](estandar/enmiendas/0021-contrapartida-y-tesoreria.md). `retencion` sigue fuera, y ahora con un motivo escrito: **un rol genérico no entra antes que el catálogo de tributos que lo hace genérico** |
+
 ### A · `libro.tipo` crece con el catálogo del PLE
 
 **La central, y la que destraba las otras.** Con ella, planilla, depreciación y asiento de destino tienen sitio sin
@@ -577,7 +588,7 @@ que aportan a este documento)
 
 **Dentro de este repositorio** (no son fuentes externas; son dónde vive cada cosa que el documento cita)
 
-- Los seis roles y su gobierno: `estandar/catalogos.json`, `contaperu/vocabulario.py`, `estandar/LEEME.md`
+- Los roles y su gobierno: `estandar/catalogos.json`, `contaperu/vocabulario.py`, `estandar/LEEME.md`
   («Quién gobierna los catálogos»)
 - Los dos ejes `rol` y `clase`: `API-DE-REGISTRO.md` («El papel de cada línea»), con «Cómo lo resuelve el mundo» y
   «Lo que se descartó, y por qué»

@@ -47,6 +47,15 @@ class LineaDiario:
     referencia: dict = field(default_factory=dict)
     detraccion: dict = field(default_factory=dict)
     tasa_igv: Any = ""
+    # CON QUÉ se movió el dinero en ESTA línea: un código de `catalogos.MEDIOS_PAGO` (Tabla 1 del Anexo 3 de la
+    # RS 169-2015). Completa el bloque que abrió la enmienda 0004, que lo dejó en el comprobante y en la `Cabecera`:
+    # el catálogo decía con qué se paga, pero la línea que mueve el dinero no lo llevaba. Es de la línea de rol
+    # `tesoreria`, y el motor **no la emite todavía** — este campo es para quien produce ese asiento.
+    #
+    # **Fuera de la huella** (`huella.SIN`), y por el mismo motivo que la 0004 escribió al entrar: el medio de pago no
+    # cambia ningún asiento ni ningún importe. Hasta hoy eso era cierto solo porque vivía en la `Cabecera`, que no se
+    # hashea; en la línea hay que decirlo a propósito.
+    medio_pago: str = ""
 
     def a_dict(self) -> dict:
         """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""

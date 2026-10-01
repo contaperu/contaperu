@@ -45,6 +45,15 @@ from .lineas import LineaDiario
 # Del catálogo del estándar (`vocabulario.ROLES`): una sola fuente, publicada y citable por la URL del tag. Estaba
 # aquí y otra vez como enum del esquema, y ningún test comparaba las dos.
 ROLES = vocabulario.ROLES
+# Y los que el motor **escribe**, que desde la 1.1 del catálogo ya no son todos. `contrapartida` y `tesoreria`
+# entraron como vocabulario para quien produce un asiento que el motor no origina —una depreciación, un pago, una
+# planilla—, y el motor no los emite: genera compras y ventas.
+#
+# La diferencia importa en dos sitios opuestos, y por eso hay dos nombres. Un **driver** tiene que entender los ocho,
+# porque puede recibir un documento que los traiga, así que lee `ROLES`. Un **test** que compruebe «todos los roles
+# salen con su clase» solo puede exigir estos seis, porque los otros dos no hay forma de producirlos desde un
+# comprobante. Confundirlos daba un rojo que invitaba a emitir un rol solo para que el test pasara.
+ROLES_DEL_MOTOR = ("principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion")
 # Las líneas que llevan además el centro de costo en su anexo auxiliar. Lo del estándar es la del tercero —el «doble
 # anexo», también en la línea que le descuenta la detracción—; cada driver lo cambia con las columnas que su sistema
 # elige (`drivers.contrato.centro_en_anexo`). La principal lo lleva ahí solo cuando su cuenta no lo lleva en la suya.

@@ -85,8 +85,10 @@ de la serie y el número. Es opcional.
 
 ## 4 · `rol` y `libro.tipo` ya no son enums del esquema
 
-Los valores no cambian —los seis roles de compras y ventas, y `venta` y `compra`—, así que **no tienes que tocar
-nada**. Lo que cambia es dónde se validan: en [`catalogos.json`](catalogos.json), publicado con el tag.
+Los valores que había no cambian —los seis roles de compras y ventas, y `venta` y `compra`—, así que **no tienes que
+tocar nada**. Lo que cambia es dónde se validan: en [`catalogos.json`](catalogos.json), publicado con el tag. Desde
+entonces el catálogo de roles ha ganado dos valores que el motor no emite (`contrapartida` y `tesoreria`), y por eso
+mismo no te afectan al migrar: lo que recibes sigue siendo lo de siempre.
 
 Si tu código validaba contra el enum del esquema, ahora lee el catálogo. Y hay una regla nueva que te conviene
 aprovechar: **si recibes un `rol` que no conoces, contabiliza la línea con `clase`, `debe_haber` e `importe`**. Así el

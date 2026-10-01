@@ -413,8 +413,17 @@ https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estand
 
 **Por qué están fuera del esquema** (1.0): eran enums cerrados, así que el día que entre un hecho nuevo —los
 movimientos del banco, las letras de cambio— sus roles costarían una versión del estándar. Con el catálogo no cuestan
-ninguna. **Abrirlos no es que crezcan:** los seis roles son los de compras y ventas, y no se añade ninguno hasta que
-aparezca el hecho que lo necesite.
+ninguna. **Abrirlos no es que crezcan:** no se añade ninguno hasta que aparezca el hecho que lo necesite.
+
+Y el día llegó, que es la prueba de que el mecanismo funciona: el **1-oct-2026** entraron `contrapartida` y
+`tesoreria` ([enmienda 0021](enmiendas/0021-contrapartida-y-tesoreria.md)), con un Libro Diario presentado y aceptado
+por SUNAT como caso real, porque nombran dos hechos que el catálogo no sabía nombrar —la otra cara de una
+depreciación o de un asiento de destino, y el dinero moviéndose—. **No costaron una versión del estándar**: el
+catálogo de roles pasó a su `1.1` y el documento se quedó en la 1.0.
+
+De ahí sale una distinción que conviene tener presente al escribir un driver: el catálogo son los roles que hay que
+**entender**, y no todos los emite el motor. Seis salen de un comprobante de compra o de venta; los otros dos son
+vocabulario para quien produce un asiento que el motor no origina.
 
 **Y no degradan igual, que es lo que hay que tener claro:**
 

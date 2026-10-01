@@ -4,6 +4,60 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [4.2.0] — 2026-10-01
+
+**Un Libro Diario presentado a SUNAT entró como caso real, y de él salen las dos cosas de esta versión:** el formato
+del 5.1 publicado columna a columna, y los dos papeles que al catálogo de roles le faltaban.
+
+El archivo: un Libro Diario del formato 5.1 de un mes, **presentado y aceptado por SUNAT con sus constancias de
+recepción**. 12 094 líneas, 1 441 asientos y ninguno descuadrado. Vive solo en `privado/`, que `.gitignore` bloquea;
+de él salen conteos agregados y nada más.
+
+**No se movió ni una huella**, el Excel de CONCAR no cambió una celda y el motor emite exactamente las mismas líneas
+que antes. Todo lo de esta versión es aditivo.
+
+### Añadido
+
+- **El formato del Libro Diario 5.1, columna a columna** (`datos/sunat/ple_campos.json`), como ya estaba el del SIRE:
+  de cada uno de sus 21 campos, de dónde lo saca un driver al escribirlo —o por qué va vacío— y qué hizo con esa
+  columna el libro contrastado. Con **los códigos de libro verificados**: `050100` el Diario, `050300` el Simplificado,
+  `080100` Compras y `140100` Ventas. Ojo, **no son los del SIRE**, que usa `140400` y `080400`. Se sirve por
+  `api.campos_del_ple()`, por `GET /v1/catalogos/ple-campos` y por el recurso MCP `contaperu://catalogos/ple-campos`.
+- **Dos roles nuevos, `contrapartida` y `tesoreria`** ([enmienda 0021](estandar/enmiendas/0021-contrapartida-y-tesoreria.md)),
+  que nombran dos hechos que el catálogo no sabía nombrar: la otra cara de un hecho que no se le debe a nadie —la
+  depreciación acumulada frente a su gasto, la cuenta de destino frente a la `79`— y el dinero moviéndose. De los 1 441
+  asientos del archivo, **595 no referencian ningún registro** y ninguno de los dos papeles tenía rol. El catálogo de
+  roles pasa a su `1.1`; **la versión del estándar no se mueve**, avanza su tag.
+- **`medio_pago` en la línea**, opcional, con el mismo catálogo de SUNAT que ya usaba en el comprobante. Completa el
+  bloque que abrió la enmienda 0004, que dejó publicada la tabla y la línea sin ella: el comprobante dice con qué se
+  paga la operación y la línea de rol `tesoreria` dice con qué se movió el dinero.
+- **`asiento.ROLES_DEL_MOTOR`**, los seis que el motor escribe, al lado de `asiento.ROLES`, que son los ocho del
+  catálogo. Es la distinción que entra con esta versión: un driver tiene que **entender** los ocho porque puede
+  recibirlos; el motor **emite** seis, porque genera compras y ventas.
+
+### Cambiado
+
+- **`medio_pago` queda fuera de la huella** (`asiento.huella.SIN`, que pasa de tres exclusiones a cuatro). Es la
+  promesa que la enmienda 0004 escribió al entrar —«el medio de pago no cambia ningún asiento ni ningún importe»— y
+  que hasta ahora se cumplía sola porque el campo vivía en la `Cabecera`, que no se hashea. Al bajar a la línea hay
+  que declararlo, o se habría roto sin que nadie lo notara.
+- **Dos correcciones de lo que el repositorio creía del formato**, las dos del archivo real: el Libro Diario de
+  Formato Simplificado es el **5.3** y no el 5.2, y **la denominación de la cuenta no se llena** —el formato en papel
+  la pide, pero el artículo 6 de la RS 234-2006 la hace opcional a quien usa más de cuatro dígitos de subcuenta, y en
+  las 12 094 líneas va vacía—.
+
+### Cómo migrar
+
+**No hay que hacer nada.** Ningún valor se quitó, ninguno cambió de significado, ningún campo pasó a ser obligatorio y
+las huellas guardadas siguen valiendo. Dos avisos para quien lea el catálogo de roles:
+
+1. **Trae ocho valores y no seis.** Si tu código los recorría esperando seis, ahora hay dos más — y la regla de
+   degradación sigue siendo la de siempre: un rol que no conoces se contabiliza con `clase`, `debe_haber` e `importe`.
+2. **`igv` y `retencion_4ta` NO están marcados como reemplazados**, aunque el catálogo diga hacia dónde va. Son lo que
+   el motor escribe en cada asiento, y lo seguirán siendo hasta una versión mayor. El `hacia_donde_va` del catálogo lo
+   explica: el modelo al que va son siete papeles con el tributo en su bloque, y los renombrados entrarán todos juntos
+   porque cada uno invalidaría las huellas guardadas.
+
 ## [4.1.0] — 2026-10-01
 
 **La propuesta del SIRE dice QUE hay detracción; quien integra dice CUÁL.** Un mes importado de la propuesta —el caso

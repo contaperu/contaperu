@@ -1692,6 +1692,12 @@ código, el catálogo lo refleja y ya. Lo que se gobierna es solo lo que este es
 
 ### El catálogo de roles se abre, pero no crece (John, 18-sep-2026)
 
+> **Lo que pasó después (1-oct-2026).** Esta decisión se cumplió, y la prueba es cómo creció: el catálogo estuvo dos
+> semanas sin añadir un valor, y cuando añadió dos fue con un caso real delante —un Libro Diario presentado y aceptado
+> por SUNAT, con 595 asientos que ningún rol sabía nombrar— y sin costar una versión del estándar
+> ([enmienda 0021](estandar/enmiendas/0021-contrapartida-y-tesoreria.md)). Lo que sigue abajo es el porqué de abrirlo,
+> y vale igual; donde dice «los seis» hoy son ocho, y dos de ellos el motor **no los emite**.
+
 **Los seis roles se quedan como están, y son solo de compras y ventas.** `principal`, `igv`, `tercero`,
 `retencion_4ta`, `detraccion_tercero` y `detraccion` cubren completos los dos libros que el motor genera: una venta
 usa tres, una compra hasta seis, y la nota de crédito no añade ninguno porque reusa los mismos con los sentidos
