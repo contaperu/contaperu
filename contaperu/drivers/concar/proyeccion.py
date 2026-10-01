@@ -92,7 +92,13 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         # R y Z: la sigla de la T.G. 06, que escribe este driver desde la 4.0. La línea lleva el código de SUNAT
         # (`tipo_cp`) y el mapa de siglas es configuración del asiento (`tipos`): la traducción la hace quien conoce
         # su tabla. Un tipo sin sigla no llega hasta aquí —detiene la exportación antes (`tipos_sin_sigla`)—.
-        "R": sigla_de_tipo(doc.get("tipo_cp"), config), "S": doc.get("serie_numero", ""),
+        #
+        # El respaldo a `tipo` es para la VUELTA: una línea leída de un Excel de CONCAR (`desde_fila`) trae la sigla
+        # literal del archivo, y hay siglas que no salen de la Tabla 10 —la `DR` de la detracción es de esta misma
+        # T.G. 06— ni conservan el `rol` del que saldrían. Para una línea que arma el motor nunca entra, porque el
+        # asiento no escribe siglas: así la ida y vuelta devuelve el mismo Excel sin reabrir esa puerta.
+        "R": sigla_de_tipo(doc.get("tipo_cp"), config) or doc.get("tipo", ""),
+        "S": doc.get("serie_numero", ""),
         # Sin fecha, T y U quedan en None y no en "": así salían antes de separar el asiento de su
         # formato, y el snapshot lo fija. En el .xlsx las dos son la misma celda vacía.
         "T": _fecha(doc.get("fecha_emision"), None), "U": _fecha(doc.get("fecha_vencimiento"), None),
@@ -111,7 +117,8 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         # No se corta a los 3 caracteres de la plantilla: cortar un código lo manda a OTRA área en silencio.
         f["V"] = str(config.get("detraccion_area") or "")
     if ref:
-        f.update({"Z": sigla_de_tipo(ref.get("tipo_cp"), config), "AA": ref.get("serie_numero", ""),
+        f.update({"Z": sigla_de_tipo(ref.get("tipo_cp"), config) or ref.get("tipo", ""),
+                  "AA": ref.get("serie_numero", ""),
                   "AB": _fecha(ref.get("fecha"))})
     if det:
         base = _importe(det.get("base"))
@@ -197,23 +204,31 @@ def _codigo_sunat_de(interno: str, detracciones: dict[str, str]) -> str:
 
 
 def desde_fila(fila: dict, monedas: dict[str, str] | None = None,
-               detracciones: dict[str, str] | None = None) -> LineaDiario:
+               detracciones: dict[str, str] | None = None, siglas: dict[str, str] | None = None) -> LineaDiario:
     """Una fila en columnas de CONCAR -> una línea del comprobante.
 
-    `monedas` traduce el código del ERP al ISO 4217 ('MN' -> 'PEN'); si no se pasa, el código
-    se transporta tal cual. `detracciones` traduce el código de la T.G. 28 al de SUNAT ('02702' -> '027'): es el
-    mapa `detraccion_codigos` invertido, que arma `a_lineas`.
+    Los tres mapas van invertidos y los arma `a_lineas`: `monedas` devuelve el ISO 4217 ('MN' -> 'PEN'),
+    `detracciones` el código de SUNAT de la T.G. 28 ('02702' -> '027') y `siglas` el de la Tabla 10 desde la T.G. 06
+    ('FT' -> '01'). Sin ellos, cada código se transporta tal cual.
+
+    **El `tipo_cp` hace falta para que la vuelta sea vuelta** (4.0): la sigla la escribe ahora este driver desde el
+    código de SUNAT, así que una línea leída sin `tipo_cp` volvía al Excel con las columnas R y Z vacías. La sigla
+    literal se conserva además en `tipo`, porque al leer un archivo es un dato de ese archivo y no una traducción.
     """
     monedas = monedas or {}
+    siglas = siglas or {}
     codigo = _texto_de(fila.get("E"))
+    sigla_doc, sigla_ref = _texto_de(fila.get("R")), _texto_de(fila.get("Z"))
     documento = {
-        "tipo": _texto_de(fila.get("R")),
+        "tipo": sigla_doc,
+        "tipo_cp": siglas.get(sigla_doc, ""),
         "serie_numero": _texto_de(fila.get("S")),
         "fecha_emision": _texto_de(fila.get("T")),
         "fecha_vencimiento": _texto_de(fila.get("U")),
     }
     referencia = {
-        "tipo": _texto_de(fila.get("Z")),
+        "tipo": sigla_ref,
+        "tipo_cp": siglas.get(sigla_ref, ""),
         "serie_numero": _texto_de(fila.get("AA")),
         "fecha": _texto_de(fila.get("AB")),
     }
@@ -254,4 +269,8 @@ def a_lineas(filas: list[dict], config: dict | None = None) -> list[LineaDiario]
     # gana el primero por orden de código, y no el que el diccionario traiga de último.
     internos = (config or {}).get("detraccion_codigos") or {}
     detracciones = {interno: sunat for sunat, interno in sorted(internos.items(), reverse=True)}
-    return [desde_fila(f, monedas, detracciones) for f in filas]
+    # Y la sigla de la T.G. 06 de vuelta a su tipo de la Tabla 10, por el mismo motivo y con el mismo desempate.
+    tipos = (config or {}).get("tipos") or {}
+    siglas = {str(fila["sigla"]): tipo for tipo, fila in sorted(tipos.items(), reverse=True)
+              if isinstance(fila, dict) and fila.get("sigla")}
+    return [desde_fila(f, monedas, detracciones, siglas) for f in filas]

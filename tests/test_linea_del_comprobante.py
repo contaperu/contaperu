@@ -62,7 +62,9 @@ def test_la_linea_neutral_dice_lo_mismo_que_la_columna():
     assert gasto.centro_costo == "CC-64" and gasto.moneda == "PEN"
     assert gasto.sub_diario == "11" and gasto.correlativo == "080084"
     assert gasto.fecha == "2026-08-10"
-    assert gasto.documento == {"tipo": "FT", "serie_numero": "E001-871",
+    # Al leer vuelven los DOS: el `tipo_cp` de SUNAT, que es lo que la línea lleva y de lo que el driver saca su
+    # columna R —sin él la vuelta no sería vuelta—, y la sigla literal del archivo, que es un dato de ese archivo.
+    assert gasto.documento == {"tipo": "FT", "tipo_cp": "01", "serie_numero": "E001-871",
                                "fecha_emision": "2026-08-10", "fecha_vencimiento": "2026-08-27"}
     assert igv.cuenta == "401111" and igv.glosa == gasto.glosa, "la misma glosa en todas las lineas"
     assert proveedor.cuenta == "421201" and proveedor.debe_haber == "H"
@@ -87,6 +89,24 @@ def test_la_linea_de_detraccion_lleva_su_bloque():
     assert det.documento["tipo"] == "DR" and det.documento["serie_numero"] == "999999999"
     assert det.detraccion == {"codigo": "027", "tasa": "4", "base": "4956.00"}
     assert det.glosa == lineas[0].glosa, "la misma glosa en todas las lineas, sin prefijo (2.2)"
+
+
+def test_el_excel_de_concar_vuelve_a_su_excel_sin_perder_columnas():
+    """Ida y vuelta COMPLETA: escribir, leer y volver a escribir da las mismas filas.
+
+    Es lo que se rompió al mover la sigla al driver (4.0) y lo que ningún test veía: `fila()` pasó a sacar la columna
+    R del `tipo_cp` de la línea, y el lector seguía devolviendo solo la sigla, así que una línea leída volvía al Excel
+    con la R y la Z VACÍAS. El snapshot no lo veía porque solo mira la ida, y los tests de la vuelta miraban la línea
+    y no el Excel que sale de ella."""
+    for c in (factura(), factura(detraccion={"codigo": "027", "porcentaje": "4"}),
+              factura(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="E001", ref_numero="871",
+                      ref_fecha="2026-08-01")):
+        ida = driver_concar.filas_de_comprobante(c, CONTAB, MES, "080084")
+        cab = proyeccion.cabecera_de(c)
+        vuelta = [proyeccion.fila(ln, cab, CONTAB) for ln in driver_concar.a_lineas(ida, CONTAB)]
+        for antes, despues in zip(ida, vuelta):
+            for columna in ("R", "Z", "AI"):
+                assert antes.get(columna, "") == despues.get(columna, ""), f"{columna} se pierde en la vuelta"
 
 
 def test_la_columna_ai_vuelve_al_codigo_de_sunat():

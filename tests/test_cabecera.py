@@ -144,6 +144,27 @@ def test_la_cabecera_es_un_comprobante_del_estandar():
     assert comprobante["detraccion"]["cuenta"] == "00-123-456789", "la cuenta del banco no está en ninguna línea"
 
 
+def test_la_detraccion_del_comprobante_no_cuela_nada_que_el_esquema_rechace():
+    """La frontera filtra: del bloque de la detracción salen sus claves declaradas y las anotaciones `_`, y nada más.
+
+    Hace falta porque `$defs/detraccion` es cerrado y un `Comprobante` NO vigila las claves de ese dict: quien usa la
+    librería arma sus comprobantes en memoria. Sin el filtro, una clave de más —el `codigo_interno` de un sistema, o
+    la anotación `tasa_tabla` con el nombre que tuvo hasta la 3.10— hace que el documento de un driver falle su propio
+    esquema, y el error aparece lejos de donde se metió la clave."""
+    from jsonschema import Draft202012Validator
+
+    validador = Draft202012Validator({"$ref": "#/$defs/comprobante", "$defs": api.esquema_open_accounting()["$defs"]})
+    base = dict(tipo_cp="01", serie="F1", numero="1", fecha_emision=date(2026, 8, 1), contraparte_doc="20131312955",
+                contraparte_nombre="PROVEEDOR DE PRUEBA SAC", moneda="PEN", base_gravada=Decimal("100.00"),
+                igv=Decimal("18.00"), total=Decimal("118.00"))
+    for sobra in ({"codigo_interno": "02702"}, {"tasa_tabla": "4"}, {"lo_que_sea": "x"}):
+        detraccion = {"codigo": "027", "monto": Decimal("5"), "_tasa_tabla": "4", **sobra}
+        comprobante = motor.cabecera_de(modelo.Comprobante(**base, detraccion=detraccion)).como_comprobante()
+        assert list(validador.iter_errors(comprobante)) == [], f"se coló {sobra}"
+        assert not set(sobra) & set(comprobante["detraccion"]), f"{sobra} no es del estándar"
+        assert comprobante["detraccion"]["_tasa_tabla"] == "4", "la anotación sí pasa"
+
+
 def test_los_dos_metodos_de_la_cabecera_no_pueden_separarse():
     """`como_comprobante()` es exactamente `a_dict()` **sin la glosa y sin lo vacío**, y nada más.
 

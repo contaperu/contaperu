@@ -25,9 +25,11 @@ from .lineas import LineaDiario
 
 
 # Las siete claves de la detracción que declara el estándar (`$defs/detraccion`, `additionalProperties: false`).
-# El motor anota además `tasa_tabla` —la tasa del Catálogo 54 con la que se calculó el monto, `detracciones.py`—, que el
-# estándar no conoce y rechaza. Por eso la cabecera FILTRA en vez de copiar el bloque: si no, el documento que produce
-# un driver con esta cabecera fallaría su propio esquema.
+# Por eso la cabecera FILTRA en vez de copiar el bloque (`motor._detraccion_del_estandar`): si no, el documento que
+# produce un driver fallaría su propio esquema en cuanto el bloque llevara algo de más, y puede llevarlo porque un
+# `Comprobante` no vigila las claves de ese dict. Lo que SÍ pasa el filtro, además de estas siete, son las anotaciones
+# del motor con guion bajo —`_tasa_tabla`, la tasa del Catálogo 54 con la que se calculó el monto—: el bloque las
+# admite desde la 4.0 (enmienda 0019), y hasta la 3.10 se llamaba `tasa_tabla` y se quedaba en esta frontera.
 DETRACCION_DEL_ESTANDAR = ("codigo", "porcentaje", "monto", "cuenta", "estado", "nro_constancia", "fecha_constancia")
 
 
@@ -101,8 +103,8 @@ class Cabecera:
     ref_serie: str = ""
     ref_numero: str = ""
     ref_fecha: str = ""
-    # La detracción del comprobante, filtrada a las claves del estándar (`DETRACCION_DEL_ESTANDAR`). Incluye la
-    # `cuenta` del Banco de la Nación, que ninguna línea lleva.
+    # La detracción del comprobante: las claves del estándar (`DETRACCION_DEL_ESTANDAR`) y las anotaciones `_` del
+    # motor, que el bloque admite desde la 4.0. Incluye la `cuenta` del Banco de la Nación, que ninguna línea lleva.
     detraccion: dict = field(default_factory=dict)
 
     @property

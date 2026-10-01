@@ -228,7 +228,8 @@ def familia(modulo: Any) -> str:
 
 
 def canal(modulo: Any) -> str:
-    """A quién se entrega lo que sale: el `CANAL` que declara el driver, o `legacy` si no lo declara (1.x)."""
+    """A quién se entrega lo que sale: el `CANAL` que declara el driver. Vacío si no lo declara, que desde la 4.0 es
+    un incumplimiento y no un defecto: hasta la 3.10 se trataba como `legacy` y el grupo del destino se adivinaba."""
     return str(getattr(modulo, "CANAL", None) or "")
 
 

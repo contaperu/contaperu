@@ -29,7 +29,7 @@ from .. import pcge, vocabulario
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
-from .indice import Cabecera, ComprobanteDelAsiento
+from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
 from .resolucion import (asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero, limites_del_periodo,
                          lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra, sin_efecto_contable,
                          sub_diario, tiene_detraccion)
@@ -62,15 +62,19 @@ def _iso(fecha: date | None) -> str:
 
 
 def _detraccion_del_estandar(c: Comprobante) -> dict:
-    """La detracción del comprobante, sin las claves vacías —el estándar distingue «no lo sé» de «es esto», y lo
-    primero se dice omitiendo la clave—.
+    """La detracción del comprobante con lo que el estándar admite: sus siete claves declaradas y las anotaciones
+    `_`. Sin las vacías, porque el estándar distingue «no lo sé» de «es esto» y lo primero se dice omitiendo la clave.
 
-    Hasta la 3.10 esto FILTRABA a las siete claves declaradas, porque el motor anota la tasa de la tabla y
-    `$defs/detraccion` la rechazaba: copiar el bloque tal cual hacía que el documento de un driver fallara su propio
-    esquema. Desde la 4.0 esa anotación se llama `_tasa_tabla` y el bloque admite el prefijo que el estándar ya
-    reservaba para las anotaciones, así que viaja con el documento en vez de perderse en esta frontera."""
+    **Es una frontera y filtra a propósito.** `$defs/detraccion` es un bloque cerrado, así que copiarlo tal cual hace
+    que el documento de un driver falle su propio esquema en cuanto el bloque lleve algo de más — y puede llevarlo:
+    quien usa la librería construye sus comprobantes en memoria, y un `Comprobante` no vigila las claves de este dict.
+    Hasta la 3.10 el caso que lo justificaba era `tasa_tabla`, la anotación del motor, que el esquema rechazaba; desde
+    la 4.0 esa anotación se llama `_tasa_tabla` y **sí pasa**, porque el bloque admite el prefijo que el estándar ya
+    reservaba (enmienda 0019). Lo que no cambia es que aquí no se cuela nada que el esquema no admita."""
     bloque = c.detraccion if isinstance(c.detraccion, dict) else {}
-    return {k: v for k, v in bloque.items() if v not in ("", None)}
+    admitidas = set(DETRACCION_DEL_ESTANDAR)
+    return {k: v for k, v in bloque.items()
+            if v not in ("", None) and (k in admitidas or k.startswith("_"))}
 
 
 def cabecera_de(c: Comprobante) -> Cabecera:

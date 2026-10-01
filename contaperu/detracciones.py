@@ -145,6 +145,7 @@ def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Compro
             # esquema la rechazaba, así que la cabecera tenía que filtrar el bloque para que su propio documento
             # validara; ahora viaja legalmente y no hay nada que filtrar.
             de_tabla = tasa_de_tabla(nuevo["codigo"], config)
+            nuevo.pop("tasa_tabla", None)       # el nombre que tuvo hasta la 3.10, por si llega uno normalizado antes
             if de_tabla > 0:
                 nuevo["_tasa_tabla"] = texto_tasa(de_tabla)
             else:
