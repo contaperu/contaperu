@@ -81,7 +81,6 @@ def test_el_periodo_lleva_dia_a_diferencia_del_5_1():
     """`AAAAMMDD` aquí y `AAAAMM00` en el 5.1. Es el despiste fácil, porque los dos salen del mismo mes."""
     _, filas = exportar()
     assert {campos_de(f)[0] for f in filas} == {"20260101"}
-    _, del_diario = api.exportar(documento(), driver="ple", fecha="2026-10-01"), None
     diario = base64.b64decode(api.exportar(documento(), driver="ple", fecha="2026-10-01")
                               ["contenido_base64"]).decode("ascii").splitlines()
     assert diario[0].split("|")[0] == "20260100"
