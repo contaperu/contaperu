@@ -27,6 +27,20 @@
     "type": "object",
     "description": "Valor → qué significa.",
     "additionalProperties": { "type": "string" }
+   },
+   "obsoletos": {
+    "type": "object",
+    "description": "Los valores que siguen publicados y ya no se deben escribir: `{viejo: {usar, desde, por_que}}`. Es por donde un ERP migra sin escribir el mapeo a mano, y la razón de que exista es la regla del estándar: un valor publicado no se quita ni cambia de significado, así que cuando resulta equivocado se marca y entra otro al lado. **No hay versión de retiro: un valor de catálogo obsoleto no desaparece nunca**, porque los documentos ya guardados lo llevan dentro. Un valor que esté aquí sigue estando en `codigos` y sigue siendo válido al leerlo.",
+    "additionalProperties": {
+     "type": "object",
+     "required": ["usar", "desde", "por_que"],
+     "additionalProperties": false,
+     "properties": {
+      "usar": { "type": "string", "minLength": 1, "description": "El valor que lo reemplaza, que está en `codigos`." },
+      "desde": { "type": "string", "description": "La fecha en que se marcó (AAAA-MM-DD)." },
+      "por_que": { "type": "string", "minLength": 1, "description": "Qué estaba mal en el viejo." }
+     }
+    }
    }
   }
  }

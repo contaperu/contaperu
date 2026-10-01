@@ -495,6 +495,26 @@ deje de serlo.
 equivocado, se marca como obsoleto y entra otro al lado. Es lo que hacen las listas de códigos de ISO 20022 y de
 EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 
+**Desde la 5.0 eso es un dato y no solo una frase.** Cualquier tabla de `catalogos.json` puede llevar `obsoletos`,
+hermana de `codigos`:
+
+```json
+"obsoletos": {"igv": {"usar": "impuesto", "desde": "2026-10-01", "por_que": "metía el tributo en el nombre del rol"}}
+```
+
+Viaja por `catalogos_del_estandar` —la api, el HTTP y el MCP—, así que **un ERP migra leyéndolo en vez de escribir el
+mapeo a mano**. Es hermana de `codigos` y no un campo dentro de cada valor a propósito: el valor de `codigos` es un
+texto, y convertirlo en objeto rompería a todo el que ya lo lee así.
+
+Dos cosas que conviene no confundir con el mecanismo de los nombres de Python (`contaperu/_obsoleto.py`), que se
+parece y no es igual:
+
+- **Un valor marcado sigue siendo válido al LEER.** Solo dice «no lo escribas más». Un documento que lo traiga se
+  acepta igual y significa lo mismo; lo que cambia es lo que el motor escribe.
+- **No hay versión de retiro.** Un nombre de Python obsoleto desaparece en la mayor siguiente; **un valor de catálogo
+  obsoleto no desaparece nunca**, porque los documentos ya guardados lo llevan dentro y seguirán llegando. Quien
+  limpie algún día esta tabla pensando que es deuda técnica rompería todos esos archivos.
+
 **Lo que no se gobierna** son los catálogos de **SUNAT** —tipos de comprobante, documentos de identidad, monedas,
 detracciones, el PCGE—: no se proponen ni se discuten, se copian de la norma con su fuente y su fecha. Cuando SUNAT
 cambia una tasa o añade un código, el catálogo lo refleja y ya. Lo que se gobierna es solo lo que este estándar

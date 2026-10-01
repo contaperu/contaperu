@@ -70,6 +70,43 @@ def test_cada_catalogo_trae_su_fuente_y_su_version():
         assert vocabulario.VERSIONES[nombre].strip()
 
 
+def test_cada_tabla_puede_marcar_un_valor_como_obsoleto():
+    """El mecanismo con que un catálogo abierto corrige un valor equivocado sin quitarlo (5.0).
+
+    La regla existía escrita desde la 1.0 —«un valor publicado no se quita ni cambia de significado; si resulta
+    equivocado, se marca como obsoleto y entra otro al lado»— y no existía como dato, así que quien integraba no tenía
+    forma de enterarse. Y hay un precedente de eso mismo saliendo mal: el `hacia_donde_va` del catálogo de roles
+    anunciaba tres renombrados desde la 1.1 y **nunca llegó a la api**, porque `catalogos()` no lo propagaba y el
+    esquema de salida lo habría rechazado."""
+    servidos = api.catalogos_del_estandar()
+    for nombre, tabla in servidos.items():
+        assert "obsoletos" in tabla, f"{nombre}: la clave viaja siempre, vacía si no hay ninguno"
+        for viejo, marca in tabla["obsoletos"].items():
+            assert set(marca) == {"usar", "desde", "por_que"}
+            # Lo que lo hace útil: el reemplazo existe, y el viejo NO se ha quitado.
+            assert marca["usar"] in tabla["codigos"], f"{nombre}/{viejo}: `usar` apunta a un valor que no existe"
+            assert viejo in tabla["codigos"], f"{nombre}/{viejo}: un valor publicado no se quita, se marca"
+            assert marca["usar"] != viejo and marca["por_que"].strip()
+
+
+def test_un_valor_obsoleto_sigue_siendo_valido_al_leerlo():
+    """Marcarlo dice «no lo escribas más», no «esto ya no vale». Si invalidara, cada corrección del catálogo rompería
+    los documentos guardados, que es justo lo que la regla viene a evitar."""
+    import jsonschema
+
+    from contaperu.asiento.lineas import LineaDiario
+
+    roles = api.catalogos_del_estandar()["roles"]
+    for viejo in roles["obsoletos"]:
+        linea = LineaDiario.de_dict({"cuenta": "401111", "debe_haber": "D", "importe": "18.00",
+                                     "clase": "pasivo", "rol": viejo})
+        assert linea.rol == viejo
+        doc = {"open_accounting": api.OPEN_ACCOUNTING,
+               "libro": {"ruc": "20601234567", "periodo": "202601", "tipo": "compra"},
+               "asiento": [linea.a_dict()]}
+        assert list(jsonschema.Draft202012Validator(api.esquema_open_accounting()).iter_errors(doc)) == []
+
+
 def test_cada_valor_esta_descrito():
     """Un catálogo publicado sin decir qué significa cada valor obliga a preguntar, que es lo que viene a evitar."""
     for tabla in vocabulario.catalogos().values():
