@@ -395,14 +395,33 @@ class Comprobante:
 
     @classmethod
     def de_dict(cls, d: dict) -> "Comprobante":
-        """Lo desconocido se ignora; lo que salió del comprobante en open-accounting 0.3, no: un documento que todavía
-        trae la cuenta o el centro se rechaza, porque ignorarlos lo dejaría sin cuenta y sin aviso."""
-        retirados = [k for k in RETIRADOS_EN_0_3 if str(d.get(k) or "").strip()]
+        """Rechaza (`ValueError`) una clave que no es un campo del comprobante, y con su propio mensaje las dos que
+        salieron de aquí en open-accounting 0.3.
+
+        **Lo desconocido NO se ignora** (4.0). Hasta la 3.10 se filtraba en silencio, y eso es lo que `INTEGRAR.md`
+        promete que no pasa: «un dato que se cuela sin error es un dato que se pierde sin aviso». Pasaba de verdad —un
+        `retencion_4ta` donde el campo es `retencion` exportaba el mes entero sin la línea de retención, y solo se veía
+        leyendo las celdas—. Además dejaba al lector **más laxo que el esquema publicado**, que ya rechaza por su
+        `additionalProperties: false`; es el mismo error que `LineaDiario.de_dict` corrigió en su día, y de ahí sale la
+        forma de este rechazo: nombrar TODAS las sobrantes, no reventar en la primera.
+
+        Las claves `_` tampoco pasan aquí, y no es un olvido: el estándar las admite en la raíz del documento y dentro
+        de la detracción, **no en un comprobante** (`estandar/LEEME.md`, «Anotaciones que produce el motor»).
+
+        El orden es el que importa: primero las retiradas en 0.3, que tienen un mensaje que dice adónde se movieron, y
+        después las desconocidas. Al revés, un documento viejo recibiría «clave desconocida» en vez de su migración.
+        """
+        if not isinstance(d, dict):
+            raise ValueError("Un comprobante tiene que ser un objeto")
+        retirados = [k for k in RETIRADOS_EN_0_3 if k in d]
         if retirados:
             raise ValueError(f"{', '.join(retirados)} ya no va en el comprobante (open-accounting 0.3): la cuenta y "
                              "el centro de cada documento llegan en la imputación, por id_externo")
-        conocidos = {f.name for f in fields(cls)}
-        return cls(**{k: v for k, v in d.items() if k in conocidos})
+        desconocidas = sorted(set(d) - {f.name for f in fields(cls)})
+        if desconocidas:
+            raise ValueError(f"Claves que no son de un comprobante: {', '.join(desconocidas)}. Un hecho que el "
+                             "estándar no declara va en `datos_originales`, que se transporta sin interpretar")
+        return cls(**d)
 
 
 def clave_de(tipo_cp: str, serie: str, numero: str, contraparte_doc: str) -> tuple[str, str, str, str]:

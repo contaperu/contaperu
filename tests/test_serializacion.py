@@ -8,6 +8,7 @@ y la clave estable de cada error.
 from __future__ import annotations
 
 import json
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -60,6 +61,30 @@ def test_cada_linea_del_snapshot_va_y_vuelve(caso):
 def test_una_linea_que_no_es_del_asiento_se_rechaza(linea, motivo):
     with pytest.raises(ValueError, match=motivo):
         LineaDiario.de_dict(linea)
+
+
+def test_un_comprobante_con_una_clave_que_no_es_suya_se_rechaza():
+    """Una clave que el estándar no declara se rechaza en vez de ignorarse (4.0), que es lo que `INTEGRAR.md` promete:
+    «un dato que se cuela sin error es un dato que se pierde sin aviso».
+
+    Pasaba de verdad, y así se encontró: un `retencion_4ta` donde el campo se llama `retencion` exportaba el mes
+    entero **sin la línea de retención de 4ta**, y solo se veía leyendo las celdas del Excel. Además dejaba al lector
+    más laxo que el esquema publicado, que ya rechaza por su `additionalProperties: false`."""
+    base = {"tipo_cp": "01", "serie": "F001", "numero": "1", "total": "118"}
+
+    with pytest.raises(ValueError, match="retencion_4ta"):
+        Comprobante.de_dict({**base, "retencion_4ta": "240"})
+    # Las nombra TODAS y ordenadas, no revienta en la primera, y dice adónde va lo que el motor no entiende.
+    with pytest.raises(ValueError, match="aaa, zzz.*datos_originales"):
+        Comprobante.de_dict({**base, "zzz": 1, "aaa": 2})
+    # Una anotación `_` tampoco pasa AQUÍ: el estándar las admite en la raíz y dentro de la detracción, no en un
+    # comprobante. Dejarla pasar volvería a poner el lector por delante del esquema.
+    with pytest.raises(ValueError, match="_lo_mio"):
+        Comprobante.de_dict({**base, "_lo_mio": "x"})
+
+    # Y lo que sí tiene sitio declarado sigue entrando, con lo que sea dentro: es la salida que el mensaje enseña.
+    c = Comprobante.de_dict({**base, "datos_originales": {"erp": {"folio": 9}}})
+    assert c.datos_originales == {"erp": {"folio": 9}} and c.total == Decimal("118")
 
 
 @pytest.mark.parametrize("numero,esperado", [("00028806", "28806"), ("0000", "0"), (" 12 ", "12"), ("F-001", "F-001"),

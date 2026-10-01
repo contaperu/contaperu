@@ -346,7 +346,8 @@ un contador]**
 | Correlativo de vouchers | **Siempre empieza en `1`**. El driver lo escribe a cuatro dígitos (`0001`),
 que es el ancho con el que numera el motor (John, 21-sep-2026). ⚠️ Excel, al abrir el CSV para revisarlo,
 lo mostrará como `1`: el archivo es correcto, engaña el visor. **[por confirmar]** que STARSOFT acepte el
-texto con ceros; si no, se quita el `zfill` de `proyeccion.voucher`. |
+texto con ceros; si no, se quita el `zfill` de `proyeccion.correlativo_de_starsoft` (se llamó `voucher` hasta la 4.0,
+cuando la función pasó a llamarse como su columna). |
 
 **Por comprobante [C 7:19-12:32]:**
 
@@ -685,7 +686,7 @@ cabeceras de `PARAMETROS`** (CTA GTO/ACT, CTA IGV, CTA PASIVO): el driver no tie
 | Cuenta contable | `linea.cuenta` |
 | Periodo tributario | `libro.periodo` (`202507`) |
 | Fecha | `linea.fecha` |
-| `TIPO DOCUMENTO` | `linea.documento.tipo` → ya da **`FT`** |
+| `TIPO DOCUMENTO` | `linea.documento.tipo_cp` (el código SUNAT, `01`) traducido a la sigla por `asiento.sigla_de_tipo` → **`FT`**. Hasta la 3.10 la sigla venía ya hecha en `linea.documento.tipo`; desde la 4.0 la línea lleva solo el código y la traduce cada driver, porque `FT` es el nombre que le da **un** sistema |
 | `FECHA VENCIMIENTO` | `linea.documento.fecha_vencimiento` |
 | `IGV` · `TASA IGV` | `comprobante.igv` · `linea.tasa_igv` (`18`) |
 | `IMPORTE` | `linea.importe` |

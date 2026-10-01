@@ -20,6 +20,13 @@ decisión y qué alternativas se descartaron—, no la especificación.
   hasta una 2.0 no puede seguir en el 0.x, así que la versión que este documento propone salió numerada **1.0** (y la
   librería tuvo que saltar a 1.1.0, porque `"1.0"` es prefijo de `"1.0.0"` y ahí es donde los dos relojes se
   confunden). **La 0.4 nunca existió.**
+- **Lo que la 4.0 cambió por debajo (01-oct-2026).** Sus ejemplos se escribieron contra la 1.x y siguen valiendo como
+  razonamiento, pero tres cosas de las que enseñan ya no son así: la línea del asiento **no lleva** la sigla del
+  sistema (`documento.tipo`) ni el código interno de la detracción (`detraccion.codigo_interno`) —la línea habla en
+  códigos de SUNAT y cada driver traduce, enmiendas 0017 y 0018—; el driver `asiento_neutral` **se llama**
+  `asiento_contable` desde la 3.10 y su nombre viejo se retiró en la 4.0, así que el archivo
+  `ASIENTO_NEUTRAL_…json` hoy es `ASIENTO_CONTABLE_…json`; y un comprobante con **una clave que el estándar no
+  declara se rechaza**, cosa que este documento daba por hecha y la librería no cumplía hasta la 4.0.
 - **El texto normativo no es este archivo**, y no lo era ni cuando era un borrador: es
   [`estandar/LEEME.md`](estandar/LEEME.md) con su esquema, los catálogos de
   [`estandar/catalogos.json`](estandar/catalogos.json), las enmiendas de

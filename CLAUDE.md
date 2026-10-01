@@ -89,7 +89,11 @@ Las siete reglas completas están en `ARQUITECTURA.md` §«Lo que no se negocia�
 4. **Sin red, sin disco, sin estado, sin reloj en el núcleo** (`tests/test_frontera.py`): la fecha la pone quien llama.
 5. **`Decimal` de punta a punta**, `float` solo en el borde de escritura del archivo.
 6. **Nunca datos reales en el repositorio.** RUC seguros: `20131312955` y `20601234567`. Un archivo real se usa solo
-   en local, de lectura, y vive en `privado/` (que `.gitignore` bloquea).
+   en local, de lectura, y vive en `privado/` (que `.gitignore` bloquea). **Ojo con el segundo**: `20601234567` tiene
+   el dígito verificador mal a propósito —debería acabar en 5—, y eso es lo que lo hace seguro, porque no puede ser de
+   ninguna empresa. Sirve como RUC del **contribuyente** (el del libro, que el motor no valida) y es el que usan los
+   fixtures y los ejemplos; **no sirve como contraparte**, que sí se valida y da `RUC_INVALIDO`. Para un proveedor o un
+   cliente de ejemplo, los de la batería: `20602222226` y `20607777773`.
 7. **Código, comentarios, commits y documentación en español**: es el idioma del dominio.
 
 Y las de trabajo, que no están en `ARQUITECTURA.md`:

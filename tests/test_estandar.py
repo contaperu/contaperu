@@ -143,7 +143,11 @@ def test_las_decisiones_contables_no_son_del_documento(esquema):
                 "reparto"} & set(propiedades)
     with pytest.raises(ValueError, match="imputación"):
         Comprobante.de_dict({"tipo_cp": "01", "cuenta_contable": "659999"})
-    assert Comprobante.de_dict({"tipo_cp": "01", "cuenta_contable": "", "centro_costo": None}).tipo_cp == "01"
+    # **También vacías** (4.0). Hasta la 3.10 una `cuenta_contable: ""` se colaba en silencio, y eso dejaba al lector
+    # más laxo que el esquema, que las rechaza por su `additionalProperties: false` vengan llenas o vacías. Y el
+    # mensaje que recibe es el de la migración, el que dice adónde se movieron, no un «clave desconocida» cualquiera.
+    with pytest.raises(ValueError, match="imputación"):
+        Comprobante.de_dict({"tipo_cp": "01", "cuenta_contable": "", "centro_costo": None})
 
 
 def test_ningun_esquema_cita_un_tag_viejo_del_estandar():

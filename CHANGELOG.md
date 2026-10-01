@@ -48,6 +48,15 @@ sitios más:
   función no podía seguirla hasta una mayor.
 - **`_obsoleto.RETIRO` pasa a la 5.0**, que es la regla que la 3.10 escribió: se mueve con cada mayor que cumple.
 
+**Y el comprobante deja de tragarse lo que no entiende.** `INTEGRAR.md` promete desde hace versiones que «una clave
+que el estándar no conoce se rechaza en vez de ignorarse: un dato que se cuela sin error es un dato que se pierde sin
+aviso», y la librería hacía lo contrario: la filtraba en silencio. Se encontró probando esta misma versión de punta a
+punta, escribiendo `retencion_4ta` donde el campo se llama `retencion`: **el mes se exportó entero sin la línea de
+retención de 4ta**, y solo se vio leyendo las celdas del Excel. Además dejaba al motor más laxo que su propio esquema
+publicado, que ya rechaza por su `additionalProperties: false`. Ahora el rechazo nombra todas las claves sobrantes y
+dice adónde va lo que el motor no entiende: `datos_originales`. La forma estaba ya en el repositorio —`LineaDiario`
+rechaza así desde la 1.0— y la promesa hermana, la de la imputación, también se cumplía: faltaba solo el comprobante.
+
 **El estándar gana una pieza, y es aditiva** (enmienda 0019): `$defs/detraccion` admite claves `^_` como ya hacía la
 raíz, así que la anotación de la tasa de la tabla pasa a `_tasa_tabla` y **viaja dentro del documento** en vez de
 filtrarse al salir. Con el filtro, un documento que volvía a entrar al motor había perdido la tasa con la que se
@@ -76,7 +85,11 @@ calculó el monto, y su validación ya no podía avisar de la discrepancia que e
    ahí es donde se declaran.
 8. **Un driver de terceros** con la forma `construir` o sin `CANAL` deja de cargar, con el error diciendo qué hacer.
 9. **`starsoft.proyeccion.voucher` pasa a `correlativo_de_starsoft`.**
-10. Lo que **no** cambia: el Excel de CONCAR, el de CONTASIS, el TXT del SIRE y el TXT de STARSOFT salen idénticos, y
+10. **Una clave que el estándar no declara, en un comprobante, ya no se ignora: se rechaza.** Si mandabas una de más
+    —el nombre equivocado de un campo, o un dato tuyo—, el documento entero se rechaza con `DocumentoInvalido`
+    nombrándola. Lo tuyo va en `datos_originales`, que se transporta sin interpretar. Las anotaciones `_` siguen
+    valiendo en la raíz del documento, no dentro de un comprobante.
+11. Lo que **no** cambia: el Excel de CONCAR, el de CONTASIS, el TXT del SIRE y el TXT de STARSOFT salen idénticos, y
     `open-accounting` sigue en 1.0.
 
 ## [3.10.0] — 2026-09-29
