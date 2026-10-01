@@ -21,9 +21,10 @@ salida, un solo documento»)—, y hay cuatro formas de driver. Un driver implem
   contabilidad —cuentas, sentidos, detracción, numeración— la pone el núcleo una sola vez para todos. El núcleo exige
   el cuadre ANTES de llamarlo. Si la firma acepta `indice`, recibe además qué tramo de líneas es de qué comprobante,
   con la cabecera de sus hechos (`asiento.indice`): lo que un formato escribe en cada fila y la línea no guarda.
-- **`construir(libro, comprobantes, config, correlativos, opciones) -> (bytes, resumen)`** — un archivo entero armado
-  a partir de los comprobantes. Era la forma del Excel de CONCAR hasta la 0.10; un driver de terceros que la use
-  sigue funcionando con un `AvisoDriver`, y se retira en la 2.0.
+La forma **`construir`** —un archivo entero armado a partir de los comprobantes, con sus correlativos— se RETIRÓ en
+la 4.0. Era la del Excel de CONCAR hasta la 0.10, avisaba desde la 1.0 y contradecía lo de arriba: recibiendo los
+comprobantes, el driver tenía que hacer la contabilidad él mismo. Un driver que la exponga ya no carga, y el error
+dice que pase a `desde_lineas`.
 
 **El canal** — a QUIÉN se entrega lo que sale (la familia dice QUÉ se entrega). Cada driver declara su `CANAL`:
 
@@ -125,8 +126,10 @@ CANALES_RESERVADOS = {
     "api_erp": "escribir el cuerpo de la API de un ERP moderno es el hito A5 de la hoja de ruta, fuera de la 1.0: el "
                "envío y los reintentos son de la aplicación",
 }
-# Cómo se trata durante la 1.x un driver de terceros que no declara su canal.
-CANAL_POR_DEFECTO = "legacy"
+# Declarar el canal es OBLIGATORIO desde la 4.0. Hasta entonces un driver que no lo declaraba se trataba como
+# `legacy` con un aviso que prometía la 2.0 —y el paquete llegó a la 3.10 con la promesa sin cumplir—. Sin canal, el
+# grupo del destino (SIRE, legacy o ERP) se adivinaba, y de él dependen las reglas que el contrato hace cumplir.
+CANAL_OBLIGATORIO_DESDE = "4.0"
 # Cómo se presenta cada canal en la arquitectura del motor (John, 15-sep-2026): lo que sale va al SIRE, a un sistema
 # legacy o a un ERP. El canal es la regla que hace cumplir el contrato; el grupo, cómo se nombra ante quien integra.
 GRUPOS = {"tributario": "sire", "legacy": "legacy", "intercambio": "erp"}
@@ -146,8 +149,8 @@ CLAVES_LEGACY = frozenset({c.clave for c in CONFIGURACION_DEL_ASIENTO}
                           | {MONEDAS_CODIGO, "detraccion_tipo_doc", "detraccion_codigos"})
 
 # En orden de preferencia: si un driver expone dos, el núcleo usa la primera.
-FORMAS = ("desde_lineas", "desde_comprobantes", "construir", "linea")
-FAMILIA = {"linea": "registro", "desde_comprobantes": "registro", "construir": "asiento", "desde_lineas": "asiento"}
+FORMAS = ("desde_lineas", "desde_comprobantes", "linea")
+FAMILIA = {"linea": "registro", "desde_comprobantes": "registro", "desde_lineas": "asiento"}
 
 # Lo que un driver de asientos PUEDE exigir (el núcleo sabe generar sin ello): el centro de costo en
 # las cuentas que lo llevan, y que la moneda tenga código en el destino. Lo que exige el núcleo a todos:
@@ -204,15 +207,6 @@ class DriverRegistroArchivo(Driver, Protocol):
                            opciones: Opciones = ...) -> tuple[bytes, dict]: ...
 
 
-class DriverAsientoComprobantes(Driver, Protocol):
-    CONTENT_TYPE: str
-    EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
-    CUENTAS_POR_DEFECTO: dict     # opcional; las cuentas de su sistema, enteras: contrapartida + plan (compras/ventas)
-
-    def construir(self, libro: Libro, comprobantes: list[Comprobante], config: dict,
-                  correlativos: dict[str, int], opciones: Opciones = ...) -> tuple[bytes, dict]: ...
-
-
 class DriverAsientoLineas(Driver, Protocol):
     CONTENT_TYPE: str
     EXIGE: frozenset[str]     # opcional; subconjunto de EXIGE_POSIBLES_ASIENTO
@@ -228,17 +222,19 @@ def forma(modulo: Any) -> str:
 
 
 def familia(modulo: Any) -> str:
-    """'registro' (una fila por comprobante: `linea`, `desde_comprobantes`) o 'asiento' (`construir`,
+    """'registro' (una fila por comprobante: `linea`, `desde_comprobantes`) o 'asiento' (
     `desde_lineas`); '' si no implementa ninguna forma."""
     return FAMILIA.get(forma(modulo), "")
 
 
 def canal(modulo: Any) -> str:
     """A quién se entrega lo que sale: el `CANAL` que declara el driver, o `legacy` si no lo declara (1.x)."""
-    return getattr(modulo, "CANAL", None) or CANAL_POR_DEFECTO
+    return str(getattr(modulo, "CANAL", None) or "")
 
 
 def declara_canal(modulo: Any) -> bool:
+    """Si declara su `CANAL`, que es **obligatorio** desde la 4.0 (antes se trataba como `legacy`). Lo comprueba
+    `incumplimientos`, así que un driver sin canal no carga; esto queda para que quien escriba uno lo pregunte."""
     return bool(getattr(modulo, "CANAL", None))
 
 
@@ -268,7 +264,7 @@ def acepta_indice(modulo: Any) -> bool:
 def lleva_cuentas(modulo: Any) -> bool:
     """¿Necesita la configuración contable del contribuyente? Todo driver que lleva cuentas: los de asientos y el
     registro de un sistema contable (`desde_comprobantes`). El registro tributario (`linea`), no."""
-    return forma(modulo) in ("desde_lineas", "construir", "desde_comprobantes")
+    return forma(modulo) in ("desde_lineas", "desde_comprobantes")
 
 
 def arma_asientos(modulo: Any) -> bool:
@@ -457,7 +453,8 @@ def _incumplimientos_del_vocabulario(modulo: Any, f: str) -> list[str]:
 def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
     declarado = getattr(modulo, "CANAL", None)
     if declarado is None:
-        return []
+        return [f"un driver declara CANAL ({', '.join(CANALES)}): es obligatorio desde la "
+                f"{CANAL_OBLIGATORIO_DESDE} y de él sale el grupo del destino"]
     if declarado in CANALES_RESERVADOS:
         return [f"CANAL {declarado!r} está reservado y no se admite en la 1.0: {CANALES_RESERVADOS[declarado]}"]
     if declarado not in CANALES:

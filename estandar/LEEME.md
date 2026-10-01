@@ -130,7 +130,7 @@ comprobante. Por las dos vías es el mismo objeto:
 
 Un sistema nuevo solo elige familia: el documento del que sale es el mismo. En el contrato de drivers
 (`contaperu/drivers/contrato.py`), la familia registro son las formas `linea` y `desde_comprobantes`, y la
-familia asiento, `construir` y `desde_lineas`.
+familia asiento, `desde_lineas`.
 
 ---
 

@@ -97,6 +97,7 @@ def test_un_requisito_fuera_del_catalogo_no_pasa_el_contrato():
 def test_un_driver_de_texto_no_declara_exige():
     tributario = types.ModuleType("tributario")
     tributario.NOMBRE, tributario.FORMATOS, tributario.OPCIONES = "trib", {"venta": "trib"}, Opciones()
+    tributario.CANAL = "tributario"          # obligatorio desde la 4.0, como para un driver de verdad
     tributario.nombre = lambda libro, op=None: "x.txt"
     tributario.linea = lambda c, libro, idx, op=None: ""
     assert contrato.incumplimientos(tributario) == []
@@ -552,6 +553,7 @@ def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
 
     tributario = types.ModuleType("tributario")
     tributario.NOMBRE, tributario.FORMATOS, tributario.OPCIONES = "trib", {"venta": "trib"}, Opciones()
+    tributario.CANAL = "tributario"          # obligatorio desde la 4.0, como para un driver de verdad
     tributario.nombre = lambda libro, op=None: "x.txt"
     tributario.linea = lambda c, libro, idx, op=None: ""
     tributario.CONFIGURACION = ()
@@ -864,15 +866,25 @@ def test_un_canal_reservado_o_desconocido_no_pasa(valor, motivo):
     assert motivo in problema and (valor != "api_erp" or "A5" in problema)
 
 
-def test_un_tercero_sin_canal_avisa_y_se_trata_como_legacy(con_terceros):
+def test_un_tercero_sin_canal_no_carga(con_terceros):
+    """Declarar `CANAL` es obligatorio desde la 4.0. Hasta la 3.10 un driver sin canal se trataba como `legacy` con un
+    aviso que prometía «la 2.0» —con el paquete ya en la 3.10—, así que el grupo del destino (SIRE, legacy o ERP) se
+    adivinaba, y de él salen las reglas que el contrato hace cumplir."""
     sin_canal = driver_de_prueba("sincanal")
     del sin_canal.CANAL
-    with pytest.warns(drivers.AvisoDriver, match="no declara CANAL"):
+    assert contrato.incumplimientos(sin_canal) == [
+        "un driver declara CANAL (legacy, tributario, intercambio): es obligatorio desde la 4.0 y de él sale el "
+        "grupo del destino"]
+    with pytest.warns(drivers.AvisoDriver, match="no cumple el contrato"):
         registrados = con_terceros(_Entrada("sincanal", sin_canal))
-    assert "sincanal" in registrados and contrato.canal(sin_canal) == "legacy"
+    assert "sincanal" not in registrados
 
 
-def test_la_forma_construir_de_un_tercero_avisa_y_sigue_exportando(con_terceros):
+def test_la_forma_construir_se_retiro(con_terceros):
+    """`construir` recibía los comprobantes y los correlativos, y el driver se armaba el archivo entero: era la forma
+    del Excel de CONCAR hasta la 0.10 y contradice la arquitectura, porque el driver tendría que hacer la contabilidad.
+    Avisaba desde la 1.0 prometiendo «la 2.0», y la 4.0 la cobró: ya no es una forma, así que el driver no carga."""
+    assert "construir" not in contrato.FORMAS and "construir" not in contrato.FAMILIA
     viejo = driver_de_prueba("viejo")
     del viejo.desde_lineas
 
@@ -880,10 +892,10 @@ def test_la_forma_construir_de_un_tercero_avisa_y_sigue_exportando(con_terceros)
         return b"hecho a mano", {"filas": len(comprobantes)}
 
     viejo.construir = construir
-    with pytest.warns(drivers.AvisoDriver, match="construir"):
-        con_terceros(_Entrada("viejo", viejo))
-    r = api.exportar(documento_de_compras(), driver="viejo", configuracion=CONTAB)
-    assert base64.b64decode(r["contenido_base64"]) == b"hecho a mano" and r["resumen"]["filas"] == 3
+    assert contrato.forma(viejo) == "", "`construir` ya no es una forma que el núcleo reconozca"
+    with pytest.warns(drivers.AvisoDriver, match="no cumple el contrato"):
+        registrados = con_terceros(_Entrada("viejo", viejo))
+    assert "viejo" not in registrados
 
 
 def test_el_indice_llega_a_quien_lo_acepta(con_terceros):

@@ -396,7 +396,7 @@
  "contaperu.drivers.contrato": {
   "CANALES": "",
   "CANALES_RESERVADOS": "",
-  "CANAL_POR_DEFECTO": "",
+  "CANAL_OBLIGATORIO_DESDE": "",
   "CENTRO_EN_ANEXO": "",
   "CLAVES_DEL_PLAN": "",
   "CLAVES_LEGACY": "",
@@ -407,7 +407,6 @@
   "Comprobante": "",
   "DATOS_CON_COLUMNAS": "",
   "Driver": "",
-  "DriverAsientoComprobantes": "",
   "DriverAsientoLineas": "",
   "DriverRegistroArchivo": "",
   "DriverRegistroTexto": "",

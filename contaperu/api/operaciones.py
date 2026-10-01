@@ -317,11 +317,9 @@ def verificar_driver(modulo: str) -> dict:
     except Exception as error:  # noqa: BLE001 — cualquier fallo al importar se dice igual: no hay driver que mirar
         raise ImportError(f"No se puede importar el driver {modulo!r}: {error}") from error
     faltas = contrato.incumplimientos(cargado)
-    avisos = []
-    if not contrato.declara_canal(cargado):
-        avisos.append("no declara CANAL: durante la 1.x se trata como legacy, y en la 2.0 será obligatorio")
-    if contrato.forma(cargado) == "construir":
-        avisos.append("usa la forma `construir`, que se retira en la 2.0: pasa a `desde_lineas`")
+    # Los dos avisos que hubo aquí hasta la 3.10 —no declarar CANAL y usar la forma `construir`— prometían la 2.0
+    # con el paquete en la 3.10. La 4.0 los cobró: las dos cosas son ya incumplimientos, no avisos.
+    avisos: list[str] = []
     return {"modulo": modulo, "nombre": str(getattr(cargado, "NOMBRE", "") or ""), "forma": contrato.forma(cargado),
             "canal": contrato.canal(cargado), "grupo": contrato.grupo(cargado), "cumple": not faltas,
             "incumplimientos": faltas, "avisos": avisos}

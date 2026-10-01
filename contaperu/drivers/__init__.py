@@ -88,12 +88,9 @@ def de_terceros() -> dict[str, ModuleType]:
             warnings.warn(f"El driver {entrada.name!r} se llama {modulo.NOMBRE!r}, que ya está registrado; "
                           "se ignora", AvisoDriver, stacklevel=2)
             continue
-        if not contrato.declara_canal(modulo):
-            warnings.warn(f"El driver {entrada.name!r} no declara CANAL ({', '.join(contrato.CANALES)}): se trata como "
-                          f"{contrato.CANAL_POR_DEFECTO!r}; en la 2.0 será obligatorio", AvisoDriver, stacklevel=2)
-        if contrato.forma(modulo) == "construir":
-            warnings.warn(f"El driver {entrada.name!r} usa la forma `construir`, que se retira en la 2.0: `desde_lineas` "
-                          "recibe las líneas ya armadas y el índice de cada comprobante", AvisoDriver, stacklevel=2)
+        # Hasta la 3.10 aquí avisaban dos promesas que decían «la 2.0» con el paquete en la 3.10: un driver sin
+        # CANAL y uno con la forma `construir`. La 4.0 las cobró, y las dos las comprueba ya `contrato`:
+        # sin canal es un incumplimiento, y `construir` no es una forma, así que el driver no carga.
         encontrados[modulo.NOMBRE] = modulo
     return encontrados
 

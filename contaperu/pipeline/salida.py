@@ -111,7 +111,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
         raise ErroresBloqueantes(errores)
 
     forma = contrato.forma(modulo)
-    if forma in ("desde_lineas", "desde_comprobantes", "construir"):
+    if forma in ("desde_lineas", "desde_comprobantes"):
         if config is not None:
             config = armado.config_para(modulo, config)
         detalle = armado.identidades(libro, incluidos)
@@ -119,12 +119,8 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
             contenido, extra, lineas, indice = armado.desde_lineas_con_indice(modulo, libro, incluidos, opciones,
                                                                               config, correlativos)
             detalle = armado.por_comprobante(libro, lineas, indice)
-        elif forma == "desde_comprobantes":
-            contenido, extra = armado.desde_comprobantes(modulo, libro, incluidos, opciones, config)
         else:
-            if config is None or correlativos is None:
-                raise ValueError(f"El driver {modulo.NOMBRE!r} arma asientos: necesita `config` y `correlativos`")
-            contenido, extra = modulo.construir(libro, incluidos, config, correlativos, opciones)
+            contenido, extra = armado.desde_comprobantes(modulo, libro, incluidos, opciones, config)
         nombre = modulo.nombre(libro, opciones)
         resumen = {**_resumen(comprobantes, incluidos, errores, opciones, fuera), **extra}
         tipo = getattr(modulo, "CONTENT_TYPE", "application/octet-stream")
