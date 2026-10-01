@@ -18,6 +18,7 @@ con su motivo; no hay tercera opción que no sea este test en rojo.
 from __future__ import annotations
 
 import dataclasses
+from dataclasses import replace
 from datetime import date
 from decimal import Decimal
 
@@ -113,8 +114,12 @@ def test_la_cabecera_es_un_comprobante_del_estandar():
 
     Es lo que hace posible que un driver escriba el bloque `comprobantes` sin inventarse nada, y por tanto que su
     documento pueda volver a entrar al motor. Dos cosas lo romperían y las dos están cubiertas aquí: que la cabecera
-    gane un campo que el estándar no declare, y que la detracción arrastre una anotación del motor como `tasa_tabla`,
-    que `$defs/detraccion` rechaza por su `additionalProperties: false`.
+    gane un campo que el estándar no declare, y que la detracción arrastre algo que su bloque cerrado rechace.
+
+    La anotación del motor **sí viaja**, y por eso valida: desde la 4.0 se llama `_tasa_tabla` y `$defs/detraccion`
+    admite el prefijo que el estándar ya reservaba para las anotaciones —se transportan y se ignoran—. Hasta la 3.10
+    se llamaba `tasa_tabla`, el bloque la rechazaba, y había que filtrarla al salir: entonces un documento que volvía a
+    entrar perdía la tasa con la que se calculó el monto.
     """
     from jsonschema import Draft202012Validator
 
@@ -125,7 +130,7 @@ def test_la_cabecera_es_un_comprobante_del_estandar():
                            concepto="SERVICIO DE TRANSPORTE", moneda="PEN",
                            base_gravada=Decimal("1000.00"), igv=Decimal("180.00"), total=Decimal("1180.00"),
                            exonerado=Decimal("50.00"), destino_igv="DGNG",
-                           detraccion={"codigo": "027", "monto": Decimal("47.00"), "tasa_tabla": "4",
+                           detraccion={"codigo": "027", "monto": Decimal("47.00"), "_tasa_tabla": "4",
                                        "cuenta": "00-123-456789"})
     comprobante = motor.cabecera_de(c).como_comprobante()
 
@@ -135,8 +140,36 @@ def test_la_cabecera_es_un_comprobante_del_estandar():
 
     assert "glosa" not in comprobante, "la glosa es un derivado del concepto y el estándar no la declara"
     assert comprobante["concepto"] == "SERVICIO DE TRANSPORTE"
-    assert "tasa_tabla" not in comprobante["detraccion"], "es una anotación del motor, no del estándar"
+    assert comprobante["detraccion"]["_tasa_tabla"] == "4", "la anotación del motor viaja, y el esquema la admite"
     assert comprobante["detraccion"]["cuenta"] == "00-123-456789", "la cuenta del banco no está en ninguna línea"
+
+
+def test_los_dos_metodos_de_la_cabecera_no_pueden_separarse():
+    """`como_comprobante()` es exactamente `a_dict()` **sin la glosa y sin lo vacío**, y nada más.
+
+    Los dos existen porque hacen dos trabajos: `a_dict()` da a un driver el juego completo y estable de hechos
+    —incluidos los que este comprobante no trae, para que sepa que existen—, y `como_comprobante()` escribe un
+    comprobante del estándar, que distingue «no lo sé» de «es esto». La 3.9.0 los dejó así con un «`a_dict()` no cambia
+    para nadie», y lo que faltaba era esta prueba: sin ella, el día que uno gane un campo el otro puede no enterarse y
+    nadie lo ve, porque cada uno tiene sus propios tests y ninguno los compara.
+
+    Ojo: la relación se comprueba sobre una cabecera LLENA. Con una vacía, las dos coincidirían por casualidad."""
+    c = modelo.Comprobante(tipo_cp="07", serie="FC01", numero="9", fecha_emision=date(2026, 8, 12),
+                           fecha_vencimiento=date(2026, 9, 11), contraparte_doc="20601234567",
+                           contraparte_nombre="PROVEEDOR DE PRUEBA SAC", concepto="SERVICIO DE TRANSPORTE",
+                           moneda="USD", tipo_cambio=Decimal("3.550"), base_gravada=Decimal("1000.00"),
+                           igv=Decimal("180.00"), total=Decimal("1180.00"), ref_tipo_cp="01", ref_serie="F001",
+                           ref_numero="101", ref_fecha=date(2026, 8, 3),
+                           detraccion={"codigo": "027", "monto": Decimal("47.00"), "_tasa_tabla": "4"})
+    for detraccion in ({"codigo": "027", "monto": Decimal("47.00"), "_tasa_tabla": "4"}, {}):
+        # Las dos clases de vacío: la cadena y el None de siempre, y el DICCIONARIO vacío, que solo aparece aquí
+        # —`detraccion` es el único campo de la cabecera que es un dict— y que por eso se prueba a propósito.
+        cab = motor.cabecera_de(replace(c, detraccion=detraccion))
+        completo = cab.a_dict()
+        esperado = {k: v for k, v in completo.items() if k != "glosa" and v not in ("", None, {})}
+        assert cab.como_comprobante() == esperado, detraccion
+        # Y que la prueba no sea trivial: la cabecera llena tiene de las dos clases de campo.
+        assert completo["glosa"] and any(v in ("", None, {}) for v in completo.values())
 
 
 def test_lo_vacio_no_viaja_como_un_dato():

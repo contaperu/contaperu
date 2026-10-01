@@ -420,8 +420,9 @@
     "valor_no_gravado": "0.00",
     "detraccion": {
      "codigo": "027",
+     "cuenta": "00-123-456789",
      "monto": "47",
-     "cuenta": "00-123-456789"
+     "_tasa_tabla": "4"
     }
    }
   ],
@@ -587,10 +588,11 @@
     "valor_no_gravado": "0.00",
     "detraccion": {
      "codigo": "027",
-     "monto": "47",
      "cuenta": "00-123-456789",
      "nro_constancia": "00123456789",
-     "fecha_constancia": "2026-08-20"
+     "fecha_constancia": "2026-08-20",
+     "monto": "47",
+     "_tasa_tabla": "4"
     }
    }
   ],

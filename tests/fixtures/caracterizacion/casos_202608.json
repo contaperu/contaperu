@@ -259,7 +259,7 @@
      "codigo": "027",
      "porcentaje": "4",
      "monto": "198",
-     "tasa_tabla": "4"
+     "_tasa_tabla": "4"
     },
     "id_contrato": "",
     "concepto": "Servicio de transporte de materiales",
@@ -316,7 +316,7 @@
      "codigo": "037",
      "porcentaje": "12",
      "monto": "1048",
-     "tasa_tabla": "12"
+     "_tasa_tabla": "12"
     },
     "id_contrato": "",
     "concepto": "Mantenimiento de equipos",

@@ -353,6 +353,11 @@ significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la libr
   importarlo dos veces. Un registro tributario (el TXT del SIRE) no la lleva: no hay asiento. La `fecha`
   (`AAAA-MM-DD`) la pone quien llama; el motor no mira el reloj. La fórmula es contrato: cambiarla se anuncia.
 - **`_asiento.huella`** — en la respuesta de `generar_asiento`, la misma huella de esas líneas.
+- **`detraccion._tasa_tabla`** — la tasa del Catálogo 54 con la que el motor calculó el monto de la detracción, como
+  texto exacto. La escribe al normalizar y la lee `validar` para avisar de la confusión que más caro sale al leer una
+  factura con IA: una tasa que no es la del código. Va **dentro del bloque de la detracción**, que admite el prefijo
+  desde la enmienda 0019 (hasta la 3.10 se llamaba `tasa_tabla`, el bloque la rechazaba y se filtraba al escribir, así
+  que un documento que volvía a entrar había perdido la tasa). Es una anotación: ningún importe depende de ella.
 - **`comprobantes`** — en `_exportacion` y en `_asiento` (desde la 1.0), lo que salió de cada comprobante: su
   `identidad` («La identidad de un comprobante»), el tramo `lineas` `[desde, hasta)` de las líneas del asiento que le
   tocan y la `huella` de ese tramo. Los tramos son una partición exacta y cada uno cuadra. Un registro que no arma
@@ -361,7 +366,8 @@ significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la libr
   No entra en ninguna huella: la misma tanda exportada con otra versión sigue siendo la misma tanda.
 
 Un productor que guarde un documento puede copiar `_exportacion` en su raíz tal cual: el esquema admite ahí
-cualquier clave `_`. Dentro de un comprobante o de una línea, no.
+cualquier clave `_`. Dentro de un comprobante o de una línea, no; el único bloque de dentro que las admite es
+`detraccion` (enmienda 0019), y el día que otro lo necesite entra igual, con la suya.
 
 ## Nombres reservados
 

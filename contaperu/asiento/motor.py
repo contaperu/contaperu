@@ -29,7 +29,7 @@ from .. import pcge, vocabulario
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
-from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
+from .indice import Cabecera, ComprobanteDelAsiento
 from .resolucion import (asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero, limites_del_periodo,
                          lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra, sin_efecto_contable,
                          sub_diario, tiene_detraccion)
@@ -62,13 +62,15 @@ def _iso(fecha: date | None) -> str:
 
 
 def _detraccion_del_estandar(c: Comprobante) -> dict:
-    """La detracción del comprobante con solo las claves que el estándar declara.
+    """La detracción del comprobante, sin las claves vacías —el estándar distingue «no lo sé» de «es esto», y lo
+    primero se dice omitiendo la clave—.
 
-    El motor anota `tasa_tabla` al normalizar (`detracciones.py`) y `$defs/detraccion` la rechaza, así que copiar el
-    bloque tal cual haría que el documento de un driver fallara su propio esquema. Se filtra aquí, una vez, y no en
-    cada driver."""
+    Hasta la 3.10 esto FILTRABA a las siete claves declaradas, porque el motor anota la tasa de la tabla y
+    `$defs/detraccion` la rechazaba: copiar el bloque tal cual hacía que el documento de un driver fallara su propio
+    esquema. Desde la 4.0 esa anotación se llama `_tasa_tabla` y el bloque admite el prefijo que el estándar ya
+    reservaba para las anotaciones, así que viaja con el documento en vez de perderse en esta frontera."""
     bloque = c.detraccion if isinstance(c.detraccion, dict) else {}
-    return {k: v for k in DETRACCION_DEL_ESTANDAR if (v := bloque.get(k)) not in ("", None)}
+    return {k: v for k, v in bloque.items() if v not in ("", None)}
 
 
 def cabecera_de(c: Comprobante) -> Cabecera:

@@ -212,9 +212,9 @@ def validar(c: Comprobante, libro: Libro) -> None:
     # 10-sep-2026: «la IA lee un 10 % y el código es del 12 %»—. Aviso y no error: la del comprobante
     # puede ser legítima. Desaparece en cuanto se vuelve a elegir el código, que aplica la de la tabla.
     detraccion = c.detraccion if isinstance(c.detraccion, dict) else None
-    if detraccion and detraccion.get("porcentaje") not in (None, "") and detraccion.get("tasa_tabla") not in (None, ""):
+    if detraccion and detraccion.get("porcentaje") not in (None, "") and detraccion.get("_tasa_tabla") not in (None, ""):
         try:
-            leida, de_tabla = Decimal(str(detraccion["porcentaje"])), Decimal(str(detraccion["tasa_tabla"]))
+            leida, de_tabla = Decimal(str(detraccion["porcentaje"])), Decimal(str(detraccion["_tasa_tabla"]))
         except Exception:  # noqa: BLE001 — una tasa ilegible no es motivo para romper la validación
             leida = de_tabla = None
         if leida is not None and leida != de_tabla:

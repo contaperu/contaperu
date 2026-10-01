@@ -120,7 +120,7 @@ def monto_detraccion(c: Comprobante, config: dict) -> tuple[Decimal, Decimal]:
 def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Comprobante]:
     """Deja en blanco la detracción cuyo código no reconoce el contribuyente, y a la que queda le
     anota lo que dice el motor: su `monto` (soles enteros, lo que va a CONCAR) y la tasa de la tabla
-    para ese código (`tasa_tabla`), que `validar` compara con la del comprobante.
+    para ese código (`_tasa_tabla`), que `validar` compara con la del comprobante.
 
     **La tasa del comprobante no se toca**: es la que leyó la IA o la que eligió la persona, y la
     huella con que se sabe si un comprobante cambió después de exportarse depende de ella.
@@ -140,11 +140,15 @@ def normalizar(comprobantes: Iterable[Comprobante], config: dict) -> list[Compro
             c.detraccion = nuevo
             soles, _ = monto_detraccion(c, config)
             nuevo = dict(nuevo, monto=str(soles) if soles > 0 else "")
+            # `_tasa_tabla` con guion bajo: es una ANOTACIÓN del motor, no un hecho del comprobante, y el estándar
+            # reserva ese prefijo para eso —se transporta y se ignora—. Hasta la 3.10 se llamaba `tasa_tabla` y el
+            # esquema la rechazaba, así que la cabecera tenía que filtrar el bloque para que su propio documento
+            # validara; ahora viaja legalmente y no hay nada que filtrar.
             de_tabla = tasa_de_tabla(nuevo["codigo"], config)
             if de_tabla > 0:
-                nuevo["tasa_tabla"] = texto_tasa(de_tabla)
+                nuevo["_tasa_tabla"] = texto_tasa(de_tabla)
             else:
-                nuevo.pop("tasa_tabla", None)
+                nuevo.pop("_tasa_tabla", None)
         c.detraccion = nuevo
         if nuevo != antes:
             cambiados.append(c)

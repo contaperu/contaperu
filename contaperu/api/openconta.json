@@ -1368,6 +1368,11 @@
     "description": "El bloque de dos tiempos. Al registrar la compra la detracción está PROVISIONADA y no se conoce la constancia; cuando se deposita en el Banco de la Nación se inyecta el número y pasa a PAGADO. El asiento provisional usa un número comodín.",
     "type": "object",
     "additionalProperties": false,
+    "patternProperties": {
+     "^_": {
+      "description": "Cualquier clave que empiece con guion bajo es una anotación, igual que en la raíz: se transporta y se ignora. Así viaja `_tasa_tabla`, la del Catálogo 54 con la que el motor calculó el monto, sin que el bloque deje de ser cerrado."
+     }
+    },
     "properties": {
      "codigo": {
       "type": "string",

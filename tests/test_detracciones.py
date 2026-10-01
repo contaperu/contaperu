@@ -64,7 +64,7 @@ def test_normalizar_devuelve_solo_lo_que_cambio():
     assert detracciones.normalizar([buena, mala, sin], TABLA) == [buena, mala]
     assert mala.detraccion is None            # se limpió
     # 118 × 4 % = 4.72 → 5 soles enteros; y la tasa de la tabla, anotada para compararla.
-    assert buena.detraccion == {"codigo": "027", "porcentaje": 4, "monto": "5", "tasa_tabla": "4"}
+    assert buena.detraccion == {"codigo": "027", "porcentaje": 4, "monto": "5", "_tasa_tabla": "4"}
     assert sin.detraccion is None
     # Idempotente: repetirla no cambia nada, así la revalidación no reescribe filas de más.
     assert detracciones.normalizar([buena, mala, sin], TABLA) == []
