@@ -1740,7 +1740,7 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737",
    "comprobantes": [
     {
      "identidad": {
@@ -1755,7 +1755,7 @@
       0,
       3
      ],
-     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
+     "huella": "1f190a7ff0d8912b3dc4c55da1014afb10e14efd63c68e1b5f94205549e322ff"
     },
     {
      "identidad": {
@@ -1770,7 +1770,7 @@
       3,
       6
      ],
-     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
+     "huella": "c77f94d2e5cd756df8bb269b0b0bc324a2cb7b28661d6166e31824c6c051a74a"
     },
     {
      "identidad": {
@@ -1785,7 +1785,7 @@
       6,
       9
      ],
-     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
+     "huella": "d84621bedc31c9cd472b1076fadb8cf765c561766828fb18fb704d7df70d532c"
     },
     {
      "identidad": {
@@ -1800,7 +1800,7 @@
       9,
       12
      ],
-     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
+     "huella": "c02baa64d5efe924e01556a5c41f7965f927e1bad1e7473c8e6ec7a187d8ffe6"
     },
     {
      "identidad": {
@@ -1815,7 +1815,7 @@
       12,
       17
      ],
-     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
+     "huella": "2cd8959d13a6b43ae82d0def47c0eb9e41de2093782ede70660db2138933b190"
     },
     {
      "identidad": {
@@ -1830,7 +1830,7 @@
       17,
       22
      ],
-     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
+     "huella": "7eff94a101dbbbb57725a1e626cfd99f2bd3217da1d1d1f20f2cad30852ba778"
     },
     {
      "identidad": {
@@ -1845,7 +1845,7 @@
       22,
       25
      ],
-     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
+     "huella": "94e1706895688199c7bcf269af3b767605b3191f817da8983ffc0cc337123728"
     },
     {
      "identidad": {
@@ -1860,7 +1860,7 @@
       25,
       27
      ],
-     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
+     "huella": "b3487d8f3f0c3d5025a80893f5b04b4ec8ee049c7bf4e6b4dd9d62e6dac3302e"
     },
     {
      "identidad": {
@@ -1875,7 +1875,7 @@
       27,
       29
      ],
-     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
+     "huella": "cc326749008e4c8c0a06b85826c4a4bc9eb025224c07d854f365152f3aaabf14"
     },
     {
      "identidad": {
@@ -1890,7 +1890,7 @@
       29,
       32
      ],
-     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
+     "huella": "07f9a533154f20b8c9d83303e2b61c258b9298f6a8c8e915e85d485b08f98768"
     },
     {
      "identidad": {
@@ -1905,7 +1905,7 @@
       32,
       36
      ],
-     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
+     "huella": "e5af1d33a74f41ca8bb0bac484d210975d374b10bd05d338a43b12f0dd0611a1"
     },
     {
      "identidad": {
@@ -1920,7 +1920,7 @@
       36,
       39
      ],
-     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
+     "huella": "8e6df9d247f8fc65a10dd462130a19cad8a756814034d9f336c5564004d73823"
     }
    ],
    "motor": "(versión del motor)"
@@ -1981,13 +1981,13 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737",
    "fechas": "por comprobante (extemporáneos al 01/08/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_COMPRAS_202608_20601234567.xlsx",
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737",
    "comprobantes": [
     {
      "identidad": {
@@ -2002,7 +2002,7 @@
       0,
       3
      ],
-     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
+     "huella": "1f190a7ff0d8912b3dc4c55da1014afb10e14efd63c68e1b5f94205549e322ff"
     },
     {
      "identidad": {
@@ -2017,7 +2017,7 @@
       3,
       6
      ],
-     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
+     "huella": "c77f94d2e5cd756df8bb269b0b0bc324a2cb7b28661d6166e31824c6c051a74a"
     },
     {
      "identidad": {
@@ -2032,7 +2032,7 @@
       6,
       9
      ],
-     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
+     "huella": "d84621bedc31c9cd472b1076fadb8cf765c561766828fb18fb704d7df70d532c"
     },
     {
      "identidad": {
@@ -2047,7 +2047,7 @@
       9,
       12
      ],
-     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
+     "huella": "c02baa64d5efe924e01556a5c41f7965f927e1bad1e7473c8e6ec7a187d8ffe6"
     },
     {
      "identidad": {
@@ -2062,7 +2062,7 @@
       12,
       17
      ],
-     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
+     "huella": "2cd8959d13a6b43ae82d0def47c0eb9e41de2093782ede70660db2138933b190"
     },
     {
      "identidad": {
@@ -2077,7 +2077,7 @@
       17,
       22
      ],
-     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
+     "huella": "7eff94a101dbbbb57725a1e626cfd99f2bd3217da1d1d1f20f2cad30852ba778"
     },
     {
      "identidad": {
@@ -2092,7 +2092,7 @@
       22,
       25
      ],
-     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
+     "huella": "94e1706895688199c7bcf269af3b767605b3191f817da8983ffc0cc337123728"
     },
     {
      "identidad": {
@@ -2107,7 +2107,7 @@
       25,
       27
      ],
-     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
+     "huella": "b3487d8f3f0c3d5025a80893f5b04b4ec8ee049c7bf4e6b4dd9d62e6dac3302e"
     },
     {
      "identidad": {
@@ -2122,7 +2122,7 @@
       27,
       29
      ],
-     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
+     "huella": "cc326749008e4c8c0a06b85826c4a4bc9eb025224c07d854f365152f3aaabf14"
     },
     {
      "identidad": {
@@ -2137,7 +2137,7 @@
       29,
       32
      ],
-     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
+     "huella": "07f9a533154f20b8c9d83303e2b61c258b9298f6a8c8e915e85d485b08f98768"
     },
     {
      "identidad": {
@@ -2152,7 +2152,7 @@
       32,
       36
      ],
-     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
+     "huella": "e5af1d33a74f41ca8bb0bac484d210975d374b10bd05d338a43b12f0dd0611a1"
     },
     {
      "identidad": {
@@ -2167,7 +2167,7 @@
       36,
       39
      ],
-     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
+     "huella": "8e6df9d247f8fc65a10dd462130a19cad8a756814034d9f336c5564004d73823"
     }
    ],
    "motor": "(versión del motor)"
@@ -9205,13 +9205,13 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737",
    "fechas": "por comprobante (extemporáneos al 01/08/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_COMPRAS_202608_20601234567.xlsx",
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737",
    "comprobantes": [
     {
      "identidad": {
@@ -9226,7 +9226,7 @@
       0,
       3
      ],
-     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
+     "huella": "1f190a7ff0d8912b3dc4c55da1014afb10e14efd63c68e1b5f94205549e322ff"
     },
     {
      "identidad": {
@@ -9241,7 +9241,7 @@
       3,
       6
      ],
-     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
+     "huella": "c77f94d2e5cd756df8bb269b0b0bc324a2cb7b28661d6166e31824c6c051a74a"
     },
     {
      "identidad": {
@@ -9256,7 +9256,7 @@
       6,
       9
      ],
-     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
+     "huella": "d84621bedc31c9cd472b1076fadb8cf765c561766828fb18fb704d7df70d532c"
     },
     {
      "identidad": {
@@ -9271,7 +9271,7 @@
       9,
       12
      ],
-     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
+     "huella": "c02baa64d5efe924e01556a5c41f7965f927e1bad1e7473c8e6ec7a187d8ffe6"
     },
     {
      "identidad": {
@@ -9286,7 +9286,7 @@
       12,
       17
      ],
-     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
+     "huella": "2cd8959d13a6b43ae82d0def47c0eb9e41de2093782ede70660db2138933b190"
     },
     {
      "identidad": {
@@ -9301,7 +9301,7 @@
       17,
       22
      ],
-     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
+     "huella": "7eff94a101dbbbb57725a1e626cfd99f2bd3217da1d1d1f20f2cad30852ba778"
     },
     {
      "identidad": {
@@ -9316,7 +9316,7 @@
       22,
       25
      ],
-     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
+     "huella": "94e1706895688199c7bcf269af3b767605b3191f817da8983ffc0cc337123728"
     },
     {
      "identidad": {
@@ -9331,7 +9331,7 @@
       25,
       27
      ],
-     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
+     "huella": "b3487d8f3f0c3d5025a80893f5b04b4ec8ee049c7bf4e6b4dd9d62e6dac3302e"
     },
     {
      "identidad": {
@@ -9346,7 +9346,7 @@
       27,
       29
      ],
-     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
+     "huella": "cc326749008e4c8c0a06b85826c4a4bc9eb025224c07d854f365152f3aaabf14"
     },
     {
      "identidad": {
@@ -9361,7 +9361,7 @@
       29,
       32
      ],
-     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
+     "huella": "07f9a533154f20b8c9d83303e2b61c258b9298f6a8c8e915e85d485b08f98768"
     },
     {
      "identidad": {
@@ -9376,7 +9376,7 @@
       32,
       36
      ],
-     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
+     "huella": "e5af1d33a74f41ca8bb0bac484d210975d374b10bd05d338a43b12f0dd0611a1"
     },
     {
      "identidad": {
@@ -9391,7 +9391,7 @@
       36,
       39
      ],
-     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
+     "huella": "8e6df9d247f8fc65a10dd462130a19cad8a756814034d9f336c5564004d73823"
     }
    ],
    "motor": "(versión del motor)"
@@ -17608,7 +17608,7 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737",
    "comprobantes": [
     {
      "identidad": {
@@ -17623,7 +17623,7 @@
       0,
       3
      ],
-     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
+     "huella": "1f190a7ff0d8912b3dc4c55da1014afb10e14efd63c68e1b5f94205549e322ff"
     },
     {
      "identidad": {
@@ -17638,7 +17638,7 @@
       3,
       6
      ],
-     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
+     "huella": "c77f94d2e5cd756df8bb269b0b0bc324a2cb7b28661d6166e31824c6c051a74a"
     },
     {
      "identidad": {
@@ -17653,7 +17653,7 @@
       6,
       9
      ],
-     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
+     "huella": "d84621bedc31c9cd472b1076fadb8cf765c561766828fb18fb704d7df70d532c"
     },
     {
      "identidad": {
@@ -17668,7 +17668,7 @@
       9,
       12
      ],
-     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
+     "huella": "c02baa64d5efe924e01556a5c41f7965f927e1bad1e7473c8e6ec7a187d8ffe6"
     },
     {
      "identidad": {
@@ -17683,7 +17683,7 @@
       12,
       17
      ],
-     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
+     "huella": "2cd8959d13a6b43ae82d0def47c0eb9e41de2093782ede70660db2138933b190"
     },
     {
      "identidad": {
@@ -17698,7 +17698,7 @@
       17,
       22
      ],
-     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
+     "huella": "7eff94a101dbbbb57725a1e626cfd99f2bd3217da1d1d1f20f2cad30852ba778"
     },
     {
      "identidad": {
@@ -17713,7 +17713,7 @@
       22,
       25
      ],
-     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
+     "huella": "94e1706895688199c7bcf269af3b767605b3191f817da8983ffc0cc337123728"
     },
     {
      "identidad": {
@@ -17728,7 +17728,7 @@
       25,
       27
      ],
-     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
+     "huella": "b3487d8f3f0c3d5025a80893f5b04b4ec8ee049c7bf4e6b4dd9d62e6dac3302e"
     },
     {
      "identidad": {
@@ -17743,7 +17743,7 @@
       27,
       29
      ],
-     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
+     "huella": "cc326749008e4c8c0a06b85826c4a4bc9eb025224c07d854f365152f3aaabf14"
     },
     {
      "identidad": {
@@ -17758,7 +17758,7 @@
       29,
       32
      ],
-     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
+     "huella": "07f9a533154f20b8c9d83303e2b61c258b9298f6a8c8e915e85d485b08f98768"
     },
     {
      "identidad": {
@@ -17773,7 +17773,7 @@
       32,
       36
      ],
-     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
+     "huella": "e5af1d33a74f41ca8bb0bac484d210975d374b10bd05d338a43b12f0dd0611a1"
     },
     {
      "identidad": {
@@ -17788,7 +17788,7 @@
       36,
       39
      ],
-     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
+     "huella": "8e6df9d247f8fc65a10dd462130a19cad8a756814034d9f336c5564004d73823"
     }
    ],
    "motor": "(versión del motor)"
@@ -17845,12 +17845,12 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c"
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737"
   },
   "_exportacion": {
    "driver": "csv",
    "archivo": "CSV_COMPRAS_202608_20601234567.csv",
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737",
    "comprobantes": [
     {
      "identidad": {
@@ -17865,7 +17865,7 @@
       0,
       3
      ],
-     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
+     "huella": "1f190a7ff0d8912b3dc4c55da1014afb10e14efd63c68e1b5f94205549e322ff"
     },
     {
      "identidad": {
@@ -17880,7 +17880,7 @@
       3,
       6
      ],
-     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
+     "huella": "c77f94d2e5cd756df8bb269b0b0bc324a2cb7b28661d6166e31824c6c051a74a"
     },
     {
      "identidad": {
@@ -17895,7 +17895,7 @@
       6,
       9
      ],
-     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
+     "huella": "d84621bedc31c9cd472b1076fadb8cf765c561766828fb18fb704d7df70d532c"
     },
     {
      "identidad": {
@@ -17910,7 +17910,7 @@
       9,
       12
      ],
-     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
+     "huella": "c02baa64d5efe924e01556a5c41f7965f927e1bad1e7473c8e6ec7a187d8ffe6"
     },
     {
      "identidad": {
@@ -17925,7 +17925,7 @@
       12,
       17
      ],
-     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
+     "huella": "2cd8959d13a6b43ae82d0def47c0eb9e41de2093782ede70660db2138933b190"
     },
     {
      "identidad": {
@@ -17940,7 +17940,7 @@
       17,
       22
      ],
-     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
+     "huella": "7eff94a101dbbbb57725a1e626cfd99f2bd3217da1d1d1f20f2cad30852ba778"
     },
     {
      "identidad": {
@@ -17955,7 +17955,7 @@
       22,
       25
      ],
-     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
+     "huella": "94e1706895688199c7bcf269af3b767605b3191f817da8983ffc0cc337123728"
     },
     {
      "identidad": {
@@ -17970,7 +17970,7 @@
       25,
       27
      ],
-     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
+     "huella": "b3487d8f3f0c3d5025a80893f5b04b4ec8ee049c7bf4e6b4dd9d62e6dac3302e"
     },
     {
      "identidad": {
@@ -17985,7 +17985,7 @@
       27,
       29
      ],
-     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
+     "huella": "cc326749008e4c8c0a06b85826c4a4bc9eb025224c07d854f365152f3aaabf14"
     },
     {
      "identidad": {
@@ -18000,7 +18000,7 @@
       29,
       32
      ],
-     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
+     "huella": "07f9a533154f20b8c9d83303e2b61c258b9298f6a8c8e915e85d485b08f98768"
     },
     {
      "identidad": {
@@ -18015,7 +18015,7 @@
       32,
       36
      ],
-     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
+     "huella": "e5af1d33a74f41ca8bb0bac484d210975d374b10bd05d338a43b12f0dd0611a1"
     },
     {
      "identidad": {
@@ -18030,7 +18030,7 @@
       36,
       39
      ],
-     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
+     "huella": "8e6df9d247f8fc65a10dd462130a19cad8a756814034d9f336c5564004d73823"
     }
    ],
    "motor": "(versión del motor)"
@@ -18089,12 +18089,12 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c"
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737"
   },
   "_exportacion": {
    "driver": "csv",
    "archivo": "CSV_COMPRAS_202608_20601234567.csv",
-   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
+   "huella": "12916bc675b9c2d65f8569bd35433b577f70c70cb494ddb5ef1b222b0e696737",
    "comprobantes": [
     {
      "identidad": {
@@ -18109,7 +18109,7 @@
       0,
       3
      ],
-     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
+     "huella": "1f190a7ff0d8912b3dc4c55da1014afb10e14efd63c68e1b5f94205549e322ff"
     },
     {
      "identidad": {
@@ -18124,7 +18124,7 @@
       3,
       6
      ],
-     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
+     "huella": "c77f94d2e5cd756df8bb269b0b0bc324a2cb7b28661d6166e31824c6c051a74a"
     },
     {
      "identidad": {
@@ -18139,7 +18139,7 @@
       6,
       9
      ],
-     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
+     "huella": "d84621bedc31c9cd472b1076fadb8cf765c561766828fb18fb704d7df70d532c"
     },
     {
      "identidad": {
@@ -18154,7 +18154,7 @@
       9,
       12
      ],
-     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
+     "huella": "c02baa64d5efe924e01556a5c41f7965f927e1bad1e7473c8e6ec7a187d8ffe6"
     },
     {
      "identidad": {
@@ -18169,7 +18169,7 @@
       12,
       17
      ],
-     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
+     "huella": "2cd8959d13a6b43ae82d0def47c0eb9e41de2093782ede70660db2138933b190"
     },
     {
      "identidad": {
@@ -18184,7 +18184,7 @@
       17,
       22
      ],
-     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
+     "huella": "7eff94a101dbbbb57725a1e626cfd99f2bd3217da1d1d1f20f2cad30852ba778"
     },
     {
      "identidad": {
@@ -18199,7 +18199,7 @@
       22,
       25
      ],
-     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
+     "huella": "94e1706895688199c7bcf269af3b767605b3191f817da8983ffc0cc337123728"
     },
     {
      "identidad": {
@@ -18214,7 +18214,7 @@
       25,
       27
      ],
-     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
+     "huella": "b3487d8f3f0c3d5025a80893f5b04b4ec8ee049c7bf4e6b4dd9d62e6dac3302e"
     },
     {
      "identidad": {
@@ -18229,7 +18229,7 @@
       27,
       29
      ],
-     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
+     "huella": "cc326749008e4c8c0a06b85826c4a4bc9eb025224c07d854f365152f3aaabf14"
     },
     {
      "identidad": {
@@ -18244,7 +18244,7 @@
       29,
       32
      ],
-     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
+     "huella": "07f9a533154f20b8c9d83303e2b61c258b9298f6a8c8e915e85d485b08f98768"
     },
     {
      "identidad": {
@@ -18259,7 +18259,7 @@
       32,
       36
      ],
-     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
+     "huella": "e5af1d33a74f41ca8bb0bac484d210975d374b10bd05d338a43b12f0dd0611a1"
     },
     {
      "identidad": {
@@ -18274,7 +18274,7 @@
       36,
       39
      ],
-     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
+     "huella": "8e6df9d247f8fc65a10dd462130a19cad8a756814034d9f336c5564004d73823"
     }
    ],
    "motor": "(versión del motor)"
@@ -19681,7 +19681,7 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5",
+   "huella": "369d504b9c60eb69c62df96d1dedb81a9b533dcc389e27bf762a665d7df70167",
    "comprobantes": [
     {
      "identidad": {
@@ -19696,7 +19696,7 @@
       0,
       3
      ],
-     "huella": "b6a1e309d28ca88aa46ba255858861f4f0b5ae4aa6829108df84a6945f8b69b9"
+     "huella": "ccc8769b3525c4e2fb8177a920f36442d76ae3b62bcacff12327a7c0146f011b"
     },
     {
      "identidad": {
@@ -19711,7 +19711,7 @@
       3,
       6
      ],
-     "huella": "04f243773c7031a9f3a73917d27ffa029f38c42d801a8588ae49284c113efb48"
+     "huella": "d5dece3e729ad4d2e4884c53236f91d7e57167b14ba9d88dbc39152b6fd92417"
     },
     {
      "identidad": {
@@ -19726,7 +19726,7 @@
       6,
       9
      ],
-     "huella": "eff0b17d033185ae8132db421d3a6b374d1c658612a2d848ec77a099a52bda3c"
+     "huella": "530511672d111d77c58f4173becc6d9ee19e0d6c82e303682d9647b9687f22a3"
     },
     {
      "identidad": {
@@ -19741,7 +19741,7 @@
       9,
       12
      ],
-     "huella": "20eb60c18241d7051824e8e34a2e483a26a4684429512e0d1a87ed5288e822b3"
+     "huella": "5f7eb4bc08cffb0b0e2e8d8f40cfc026c228645e63e7ddee35ade208528cf6d7"
     },
     {
      "identidad": {
@@ -19756,7 +19756,7 @@
       12,
       17
      ],
-     "huella": "296d0bbdaae63f98f658439fe8efff15ad50b15c5925d1d48bd8853cad58284f"
+     "huella": "3e7a96aff97aabd73b9c1f8b24f033f695d698a0947b17612de03ca22b3d15b7"
     },
     {
      "identidad": {
@@ -19771,7 +19771,7 @@
       17,
       22
      ],
-     "huella": "b367edc4fdd3fed2005d723aa89a8206766f3bfa488ab30ce93f29de993f5ef7"
+     "huella": "bc460eee943a6bf042897399e87e32b264fcb4abd7b3cde7098403cd45f202a7"
     },
     {
      "identidad": {
@@ -19786,7 +19786,7 @@
       22,
       25
      ],
-     "huella": "5af682bc5ca43d277a5cbfc664c1e513878fe705fbec41835d981959ede983f5"
+     "huella": "98b58fd2449fa8ffd3e144395b1a1d65192c4fe530f8e73c77c122ea547c3bf4"
     },
     {
      "identidad": {
@@ -19801,7 +19801,7 @@
       25,
       27
      ],
-     "huella": "03fd2593a5a9bcad98d8de3d683aa69ef369d0d03ab416e031c1af95328b9013"
+     "huella": "347e6d004ff174ba34cb529f878c60663e2f59d6e807b5f02999c2da8f2e142d"
     },
     {
      "identidad": {
@@ -19816,7 +19816,7 @@
       27,
       29
      ],
-     "huella": "f8452e6a42fb3fbed64c97ed86cb9fed91909b0edc54b81f39292f20f6a5d452"
+     "huella": "e311db58bf302a2178a4c496d237abc627bca58b8a0188b2dcd308a2d54e5faa"
     },
     {
      "identidad": {
@@ -19831,7 +19831,7 @@
       29,
       32
      ],
-     "huella": "9ba510db8cab33093f97841b0e64a5dbd10f4163232fa78630464c73cbfadb3a"
+     "huella": "d20df68074130abcfed4b41e64b3de3b12afee56b086d253ebf5c6264536e2c2"
     },
     {
      "identidad": {
@@ -19846,7 +19846,7 @@
       32,
       36
      ],
-     "huella": "0fedf3904c43eb2788c8c21a684cc5ed9a2d9586e7d6225931b17a251fa5ce5a"
+     "huella": "ce96c5543deea5a5fbcf5c7a7fff8de53c0de412c139c6c73544444bef6d3b19"
     },
     {
      "identidad": {
@@ -19861,7 +19861,7 @@
       36,
       39
      ],
-     "huella": "88d3c72e2f496eee3f78d3bd4c06514f05ff99ad600a069efe4eb1d54903fe1e"
+     "huella": "a6d05329eac20d35069858e6fa094fa08d71c3ecd6e2d9563fd4c1c8db27cc98"
     }
    ],
    "motor": "(versión del motor)"
@@ -19894,12 +19894,12 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5"
+   "huella": "369d504b9c60eb69c62df96d1dedb81a9b533dcc389e27bf762a665d7df70167"
   },
   "_exportacion": {
    "driver": "starsoft",
    "archivo": "STARSOFT_COMPRAS_202608_20601234567.txt",
-   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5",
+   "huella": "369d504b9c60eb69c62df96d1dedb81a9b533dcc389e27bf762a665d7df70167",
    "comprobantes": [
     {
      "identidad": {
@@ -19914,7 +19914,7 @@
       0,
       3
      ],
-     "huella": "b6a1e309d28ca88aa46ba255858861f4f0b5ae4aa6829108df84a6945f8b69b9"
+     "huella": "ccc8769b3525c4e2fb8177a920f36442d76ae3b62bcacff12327a7c0146f011b"
     },
     {
      "identidad": {
@@ -19929,7 +19929,7 @@
       3,
       6
      ],
-     "huella": "04f243773c7031a9f3a73917d27ffa029f38c42d801a8588ae49284c113efb48"
+     "huella": "d5dece3e729ad4d2e4884c53236f91d7e57167b14ba9d88dbc39152b6fd92417"
     },
     {
      "identidad": {
@@ -19944,7 +19944,7 @@
       6,
       9
      ],
-     "huella": "eff0b17d033185ae8132db421d3a6b374d1c658612a2d848ec77a099a52bda3c"
+     "huella": "530511672d111d77c58f4173becc6d9ee19e0d6c82e303682d9647b9687f22a3"
     },
     {
      "identidad": {
@@ -19959,7 +19959,7 @@
       9,
       12
      ],
-     "huella": "20eb60c18241d7051824e8e34a2e483a26a4684429512e0d1a87ed5288e822b3"
+     "huella": "5f7eb4bc08cffb0b0e2e8d8f40cfc026c228645e63e7ddee35ade208528cf6d7"
     },
     {
      "identidad": {
@@ -19974,7 +19974,7 @@
       12,
       17
      ],
-     "huella": "296d0bbdaae63f98f658439fe8efff15ad50b15c5925d1d48bd8853cad58284f"
+     "huella": "3e7a96aff97aabd73b9c1f8b24f033f695d698a0947b17612de03ca22b3d15b7"
     },
     {
      "identidad": {
@@ -19989,7 +19989,7 @@
       17,
       22
      ],
-     "huella": "b367edc4fdd3fed2005d723aa89a8206766f3bfa488ab30ce93f29de993f5ef7"
+     "huella": "bc460eee943a6bf042897399e87e32b264fcb4abd7b3cde7098403cd45f202a7"
     },
     {
      "identidad": {
@@ -20004,7 +20004,7 @@
       22,
       25
      ],
-     "huella": "5af682bc5ca43d277a5cbfc664c1e513878fe705fbec41835d981959ede983f5"
+     "huella": "98b58fd2449fa8ffd3e144395b1a1d65192c4fe530f8e73c77c122ea547c3bf4"
     },
     {
      "identidad": {
@@ -20019,7 +20019,7 @@
       25,
       27
      ],
-     "huella": "03fd2593a5a9bcad98d8de3d683aa69ef369d0d03ab416e031c1af95328b9013"
+     "huella": "347e6d004ff174ba34cb529f878c60663e2f59d6e807b5f02999c2da8f2e142d"
     },
     {
      "identidad": {
@@ -20034,7 +20034,7 @@
       27,
       29
      ],
-     "huella": "f8452e6a42fb3fbed64c97ed86cb9fed91909b0edc54b81f39292f20f6a5d452"
+     "huella": "e311db58bf302a2178a4c496d237abc627bca58b8a0188b2dcd308a2d54e5faa"
     },
     {
      "identidad": {
@@ -20049,7 +20049,7 @@
       29,
       32
      ],
-     "huella": "9ba510db8cab33093f97841b0e64a5dbd10f4163232fa78630464c73cbfadb3a"
+     "huella": "d20df68074130abcfed4b41e64b3de3b12afee56b086d253ebf5c6264536e2c2"
     },
     {
      "identidad": {
@@ -20064,7 +20064,7 @@
       32,
       36
      ],
-     "huella": "0fedf3904c43eb2788c8c21a684cc5ed9a2d9586e7d6225931b17a251fa5ce5a"
+     "huella": "ce96c5543deea5a5fbcf5c7a7fff8de53c0de412c139c6c73544444bef6d3b19"
     },
     {
      "identidad": {
@@ -20079,7 +20079,7 @@
       36,
       39
      ],
-     "huella": "88d3c72e2f496eee3f78d3bd4c06514f05ff99ad600a069efe4eb1d54903fe1e"
+     "huella": "a6d05329eac20d35069858e6fa094fa08d71c3ecd6e2d9563fd4c1c8db27cc98"
     }
    ],
    "motor": "(versión del motor)"
@@ -20114,12 +20114,12 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5"
+   "huella": "369d504b9c60eb69c62df96d1dedb81a9b533dcc389e27bf762a665d7df70167"
   },
   "_exportacion": {
    "driver": "starsoft",
    "archivo": "STARSOFT_COMPRAS_202608_20601234567.txt",
-   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5",
+   "huella": "369d504b9c60eb69c62df96d1dedb81a9b533dcc389e27bf762a665d7df70167",
    "comprobantes": [
     {
      "identidad": {
@@ -20134,7 +20134,7 @@
       0,
       3
      ],
-     "huella": "b6a1e309d28ca88aa46ba255858861f4f0b5ae4aa6829108df84a6945f8b69b9"
+     "huella": "ccc8769b3525c4e2fb8177a920f36442d76ae3b62bcacff12327a7c0146f011b"
     },
     {
      "identidad": {
@@ -20149,7 +20149,7 @@
       3,
       6
      ],
-     "huella": "04f243773c7031a9f3a73917d27ffa029f38c42d801a8588ae49284c113efb48"
+     "huella": "d5dece3e729ad4d2e4884c53236f91d7e57167b14ba9d88dbc39152b6fd92417"
     },
     {
      "identidad": {
@@ -20164,7 +20164,7 @@
       6,
       9
      ],
-     "huella": "eff0b17d033185ae8132db421d3a6b374d1c658612a2d848ec77a099a52bda3c"
+     "huella": "530511672d111d77c58f4173becc6d9ee19e0d6c82e303682d9647b9687f22a3"
     },
     {
      "identidad": {
@@ -20179,7 +20179,7 @@
       9,
       12
      ],
-     "huella": "20eb60c18241d7051824e8e34a2e483a26a4684429512e0d1a87ed5288e822b3"
+     "huella": "5f7eb4bc08cffb0b0e2e8d8f40cfc026c228645e63e7ddee35ade208528cf6d7"
     },
     {
      "identidad": {
@@ -20194,7 +20194,7 @@
       12,
       17
      ],
-     "huella": "296d0bbdaae63f98f658439fe8efff15ad50b15c5925d1d48bd8853cad58284f"
+     "huella": "3e7a96aff97aabd73b9c1f8b24f033f695d698a0947b17612de03ca22b3d15b7"
     },
     {
      "identidad": {
@@ -20209,7 +20209,7 @@
       17,
       22
      ],
-     "huella": "b367edc4fdd3fed2005d723aa89a8206766f3bfa488ab30ce93f29de993f5ef7"
+     "huella": "bc460eee943a6bf042897399e87e32b264fcb4abd7b3cde7098403cd45f202a7"
     },
     {
      "identidad": {
@@ -20224,7 +20224,7 @@
       22,
       25
      ],
-     "huella": "5af682bc5ca43d277a5cbfc664c1e513878fe705fbec41835d981959ede983f5"
+     "huella": "98b58fd2449fa8ffd3e144395b1a1d65192c4fe530f8e73c77c122ea547c3bf4"
     },
     {
      "identidad": {
@@ -20239,7 +20239,7 @@
       25,
       27
      ],
-     "huella": "03fd2593a5a9bcad98d8de3d683aa69ef369d0d03ab416e031c1af95328b9013"
+     "huella": "347e6d004ff174ba34cb529f878c60663e2f59d6e807b5f02999c2da8f2e142d"
     },
     {
      "identidad": {
@@ -20254,7 +20254,7 @@
       27,
       29
      ],
-     "huella": "f8452e6a42fb3fbed64c97ed86cb9fed91909b0edc54b81f39292f20f6a5d452"
+     "huella": "e311db58bf302a2178a4c496d237abc627bca58b8a0188b2dcd308a2d54e5faa"
     },
     {
      "identidad": {
@@ -20269,7 +20269,7 @@
       29,
       32
      ],
-     "huella": "9ba510db8cab33093f97841b0e64a5dbd10f4163232fa78630464c73cbfadb3a"
+     "huella": "d20df68074130abcfed4b41e64b3de3b12afee56b086d253ebf5c6264536e2c2"
     },
     {
      "identidad": {
@@ -20284,7 +20284,7 @@
       32,
       36
      ],
-     "huella": "0fedf3904c43eb2788c8c21a684cc5ed9a2d9586e7d6225931b17a251fa5ce5a"
+     "huella": "ce96c5543deea5a5fbcf5c7a7fff8de53c0de412c139c6c73544444bef6d3b19"
     },
     {
      "identidad": {
@@ -20299,7 +20299,7 @@
       36,
       39
      ],
-     "huella": "88d3c72e2f496eee3f78d3bd4c06514f05ff99ad600a069efe4eb1d54903fe1e"
+     "huella": "a6d05329eac20d35069858e6fa094fa08d71c3ecd6e2d9563fd4c1c8db27cc98"
     }
    ],
    "motor": "(versión del motor)"
@@ -21236,7 +21236,7 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
+   "huella": "235fb004a4452afa0fdfb6b1106e287feb780f434abf187a40c4e1828964168d",
    "comprobantes": [
     {
      "identidad": {
@@ -21251,7 +21251,7 @@
       0,
       3
      ],
-     "huella": "0abd6d1db58fa98c0b938b6bc45b5e22b2c1ec6464bb6ceb03a720cb62670075"
+     "huella": "5b84c0025259b8ce41a009050f26b6af99afefe87eda98f47f9186e702e7ebf9"
     },
     {
      "identidad": {
@@ -21266,7 +21266,7 @@
       3,
       6
      ],
-     "huella": "300547e8f1580619bf2992e4eb181d2574538778600f2ffbe833b43451f6ce2a"
+     "huella": "c1e1927064c2249dbf24b4d285e778701f302b03de9265e579b8982e66b3498b"
     },
     {
      "identidad": {
@@ -21281,7 +21281,7 @@
       6,
       9
      ],
-     "huella": "78bc10ce1d58f41bbfb3ff82d7491e4b61819cf31e644659d3da65e0eb4f7eab"
+     "huella": "551cc94f4f14941c7e2b67c1a8c988e3be5cf8a3093a0508acfa61516f60d7ba"
     },
     {
      "identidad": {
@@ -21296,7 +21296,7 @@
       9,
       12
      ],
-     "huella": "4999845bc4571934f87f50d3ffabced848613aaf41b65135324ac9a88f672620"
+     "huella": "d99d52c5ad62949d83e4226f9e0abe2b43fa491c59e23d3de2e4f800ca172791"
     },
     {
      "identidad": {
@@ -21311,7 +21311,7 @@
       12,
       17
      ],
-     "huella": "1880b5bdbe4dd55f33a2ebf08a704954825801616cdd34081624dcced94c4cb4"
+     "huella": "caa6f9ab5f8ef4c06f6d567d580383f26f476eef643cba803ad0f3d49c058143"
     },
     {
      "identidad": {
@@ -21326,7 +21326,7 @@
       17,
       22
      ],
-     "huella": "93748a27175f9ea9a26517f2d814f7cc3087baaec330bb163d88ed8a6de2e735"
+     "huella": "219323abbf0f1471d6971b289cf7bcd89f77aeb766be7de70ce52b9434a7f2f6"
     },
     {
      "identidad": {
@@ -21341,7 +21341,7 @@
       22,
       25
      ],
-     "huella": "2b759a3964a7f19961ce31bdeefff50dd4cde70ad790c3f65c089d3b74f65790"
+     "huella": "0ee2b67e2f2c66e9e2e91c7f023960100b0f6544236ea5ee5f89906a42bb84cd"
     },
     {
      "identidad": {
@@ -21356,7 +21356,7 @@
       25,
       27
      ],
-     "huella": "24f7fa08d722eb0138d1af50c01a50cbb535d913ae688a55833b7f2b905fe15c"
+     "huella": "904de2aee15f1c30b681421fee746d177bd4358f07636c7c284472ae79664277"
     },
     {
      "identidad": {
@@ -21371,7 +21371,7 @@
       27,
       29
      ],
-     "huella": "c241cd2673558bf5e347e7eca6a6ccab4b605237ea317d4163872158c868cf7b"
+     "huella": "02edee780bbf7d362a98e115154df727336059aba3f6b9b118054f9aad56234b"
     },
     {
      "identidad": {
@@ -21386,7 +21386,7 @@
       29,
       32
      ],
-     "huella": "15a27308806461bae078228280897b3c56cb75a5fa1699d9629cb2aa57dac358"
+     "huella": "4eb202527c6129a7f0c31b2a05977ca7f929036d3c4c16b5f54cd73332a0d483"
     },
     {
      "identidad": {
@@ -21401,7 +21401,7 @@
       32,
       36
      ],
-     "huella": "e83ecc524dd519edfd1542691bee0158f86e6f6a35c174cb4412abf8a86e6aa0"
+     "huella": "dc7f702776690867cf8a8163b6f5ae9b4c8fadcedf6ba378c37a1ac1180a1cd5"
     },
     {
      "identidad": {
@@ -21416,7 +21416,7 @@
       36,
       39
      ],
-     "huella": "0ab853d8c625d20aea83a1999f71c7b59458fcdbbfdb941e0e6972965dc259ba"
+     "huella": "abdd412b6f171b4a04d93a491732402c4504366320f4c0a20903ac37e78852f5"
     }
    ],
    "motor": "(versión del motor)"
@@ -21440,13 +21440,13 @@
    "sub_diarios": {},
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
+   "huella": "235fb004a4452afa0fdfb6b1106e287feb780f434abf187a40c4e1828964168d",
    "lineas": 39
   },
   "_exportacion": {
    "driver": "asiento_contable",
    "archivo": "ASIENTO_CONTABLE_COMPRAS_202608_20601234567.json",
-   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
+   "huella": "235fb004a4452afa0fdfb6b1106e287feb780f434abf187a40c4e1828964168d",
    "comprobantes": [
     {
      "identidad": {
@@ -21461,7 +21461,7 @@
       0,
       3
      ],
-     "huella": "0abd6d1db58fa98c0b938b6bc45b5e22b2c1ec6464bb6ceb03a720cb62670075"
+     "huella": "5b84c0025259b8ce41a009050f26b6af99afefe87eda98f47f9186e702e7ebf9"
     },
     {
      "identidad": {
@@ -21476,7 +21476,7 @@
       3,
       6
      ],
-     "huella": "300547e8f1580619bf2992e4eb181d2574538778600f2ffbe833b43451f6ce2a"
+     "huella": "c1e1927064c2249dbf24b4d285e778701f302b03de9265e579b8982e66b3498b"
     },
     {
      "identidad": {
@@ -21491,7 +21491,7 @@
       6,
       9
      ],
-     "huella": "78bc10ce1d58f41bbfb3ff82d7491e4b61819cf31e644659d3da65e0eb4f7eab"
+     "huella": "551cc94f4f14941c7e2b67c1a8c988e3be5cf8a3093a0508acfa61516f60d7ba"
     },
     {
      "identidad": {
@@ -21506,7 +21506,7 @@
       9,
       12
      ],
-     "huella": "4999845bc4571934f87f50d3ffabced848613aaf41b65135324ac9a88f672620"
+     "huella": "d99d52c5ad62949d83e4226f9e0abe2b43fa491c59e23d3de2e4f800ca172791"
     },
     {
      "identidad": {
@@ -21521,7 +21521,7 @@
       12,
       17
      ],
-     "huella": "1880b5bdbe4dd55f33a2ebf08a704954825801616cdd34081624dcced94c4cb4"
+     "huella": "caa6f9ab5f8ef4c06f6d567d580383f26f476eef643cba803ad0f3d49c058143"
     },
     {
      "identidad": {
@@ -21536,7 +21536,7 @@
       17,
       22
      ],
-     "huella": "93748a27175f9ea9a26517f2d814f7cc3087baaec330bb163d88ed8a6de2e735"
+     "huella": "219323abbf0f1471d6971b289cf7bcd89f77aeb766be7de70ce52b9434a7f2f6"
     },
     {
      "identidad": {
@@ -21551,7 +21551,7 @@
       22,
       25
      ],
-     "huella": "2b759a3964a7f19961ce31bdeefff50dd4cde70ad790c3f65c089d3b74f65790"
+     "huella": "0ee2b67e2f2c66e9e2e91c7f023960100b0f6544236ea5ee5f89906a42bb84cd"
     },
     {
      "identidad": {
@@ -21566,7 +21566,7 @@
       25,
       27
      ],
-     "huella": "24f7fa08d722eb0138d1af50c01a50cbb535d913ae688a55833b7f2b905fe15c"
+     "huella": "904de2aee15f1c30b681421fee746d177bd4358f07636c7c284472ae79664277"
     },
     {
      "identidad": {
@@ -21581,7 +21581,7 @@
       27,
       29
      ],
-     "huella": "c241cd2673558bf5e347e7eca6a6ccab4b605237ea317d4163872158c868cf7b"
+     "huella": "02edee780bbf7d362a98e115154df727336059aba3f6b9b118054f9aad56234b"
     },
     {
      "identidad": {
@@ -21596,7 +21596,7 @@
       29,
       32
      ],
-     "huella": "15a27308806461bae078228280897b3c56cb75a5fa1699d9629cb2aa57dac358"
+     "huella": "4eb202527c6129a7f0c31b2a05977ca7f929036d3c4c16b5f54cd73332a0d483"
     },
     {
      "identidad": {
@@ -21611,7 +21611,7 @@
       32,
       36
      ],
-     "huella": "e83ecc524dd519edfd1542691bee0158f86e6f6a35c174cb4412abf8a86e6aa0"
+     "huella": "dc7f702776690867cf8a8163b6f5ae9b4c8fadcedf6ba378c37a1ac1180a1cd5"
     },
     {
      "identidad": {
@@ -21626,7 +21626,7 @@
       36,
       39
      ],
-     "huella": "0ab853d8c625d20aea83a1999f71c7b59458fcdbbfdb941e0e6972965dc259ba"
+     "huella": "abdd412b6f171b4a04d93a491732402c4504366320f4c0a20903ac37e78852f5"
     }
    ],
    "motor": "(versión del motor)"
@@ -21651,13 +21651,13 @@
    "sub_diarios": {},
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
+   "huella": "235fb004a4452afa0fdfb6b1106e287feb780f434abf187a40c4e1828964168d",
    "lineas": 39
   },
   "_exportacion": {
    "driver": "asiento_contable",
    "archivo": "ASIENTO_CONTABLE_COMPRAS_202608_20601234567.json",
-   "huella": "67662def95515e76e0275d322bae33196ce31882f90c8c7da7f6334ff5c33c37",
+   "huella": "235fb004a4452afa0fdfb6b1106e287feb780f434abf187a40c4e1828964168d",
    "comprobantes": [
     {
      "identidad": {
@@ -21672,7 +21672,7 @@
       0,
       3
      ],
-     "huella": "0abd6d1db58fa98c0b938b6bc45b5e22b2c1ec6464bb6ceb03a720cb62670075"
+     "huella": "5b84c0025259b8ce41a009050f26b6af99afefe87eda98f47f9186e702e7ebf9"
     },
     {
      "identidad": {
@@ -21687,7 +21687,7 @@
       3,
       6
      ],
-     "huella": "300547e8f1580619bf2992e4eb181d2574538778600f2ffbe833b43451f6ce2a"
+     "huella": "c1e1927064c2249dbf24b4d285e778701f302b03de9265e579b8982e66b3498b"
     },
     {
      "identidad": {
@@ -21702,7 +21702,7 @@
       6,
       9
      ],
-     "huella": "78bc10ce1d58f41bbfb3ff82d7491e4b61819cf31e644659d3da65e0eb4f7eab"
+     "huella": "551cc94f4f14941c7e2b67c1a8c988e3be5cf8a3093a0508acfa61516f60d7ba"
     },
     {
      "identidad": {
@@ -21717,7 +21717,7 @@
       9,
       12
      ],
-     "huella": "4999845bc4571934f87f50d3ffabced848613aaf41b65135324ac9a88f672620"
+     "huella": "d99d52c5ad62949d83e4226f9e0abe2b43fa491c59e23d3de2e4f800ca172791"
     },
     {
      "identidad": {
@@ -21732,7 +21732,7 @@
       12,
       17
      ],
-     "huella": "1880b5bdbe4dd55f33a2ebf08a704954825801616cdd34081624dcced94c4cb4"
+     "huella": "caa6f9ab5f8ef4c06f6d567d580383f26f476eef643cba803ad0f3d49c058143"
     },
     {
      "identidad": {
@@ -21747,7 +21747,7 @@
       17,
       22
      ],
-     "huella": "93748a27175f9ea9a26517f2d814f7cc3087baaec330bb163d88ed8a6de2e735"
+     "huella": "219323abbf0f1471d6971b289cf7bcd89f77aeb766be7de70ce52b9434a7f2f6"
     },
     {
      "identidad": {
@@ -21762,7 +21762,7 @@
       22,
       25
      ],
-     "huella": "2b759a3964a7f19961ce31bdeefff50dd4cde70ad790c3f65c089d3b74f65790"
+     "huella": "0ee2b67e2f2c66e9e2e91c7f023960100b0f6544236ea5ee5f89906a42bb84cd"
     },
     {
      "identidad": {
@@ -21777,7 +21777,7 @@
       25,
       27
      ],
-     "huella": "24f7fa08d722eb0138d1af50c01a50cbb535d913ae688a55833b7f2b905fe15c"
+     "huella": "904de2aee15f1c30b681421fee746d177bd4358f07636c7c284472ae79664277"
     },
     {
      "identidad": {
@@ -21792,7 +21792,7 @@
       27,
       29
      ],
-     "huella": "c241cd2673558bf5e347e7eca6a6ccab4b605237ea317d4163872158c868cf7b"
+     "huella": "02edee780bbf7d362a98e115154df727336059aba3f6b9b118054f9aad56234b"
     },
     {
      "identidad": {
@@ -21807,7 +21807,7 @@
       29,
       32
      ],
-     "huella": "15a27308806461bae078228280897b3c56cb75a5fa1699d9629cb2aa57dac358"
+     "huella": "4eb202527c6129a7f0c31b2a05977ca7f929036d3c4c16b5f54cd73332a0d483"
     },
     {
      "identidad": {
@@ -21822,7 +21822,7 @@
       32,
       36
      ],
-     "huella": "e83ecc524dd519edfd1542691bee0158f86e6f6a35c174cb4412abf8a86e6aa0"
+     "huella": "dc7f702776690867cf8a8163b6f5ae9b4c8fadcedf6ba378c37a1ac1180a1cd5"
     },
     {
      "identidad": {
@@ -21837,7 +21837,7 @@
       36,
       39
      ],
-     "huella": "0ab853d8c625d20aea83a1999f71c7b59458fcdbbfdb941e0e6972965dc259ba"
+     "huella": "abdd412b6f171b4a04d93a491732402c4504366320f4c0a20903ac37e78852f5"
     }
    ],
    "motor": "(versión del motor)"

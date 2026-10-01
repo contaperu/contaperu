@@ -343,11 +343,15 @@ Las claves que empiezan con `_` son anotaciones: se transportan, se ignoran y nu
 significado contable. Dos las escribe el propio motor (desde la 0.8.0 de la librería):
 
 - **`_exportacion`** — en la respuesta de `exportar`: `{driver, archivo, huella, fecha, comprobantes, motor}`. La **huella** es el
-  sha256 del contenido del asiento que salió: las líneas del asiento, en su orden, **sin el `correlativo`, la `clase` ni
-  el `documento.id_externo`**, serializadas con `json.dumps(sort_keys=True, ensure_ascii=False, separators=(",", ":"))`.
-  Los tres quedan fuera porque no cambian el contenido contable: el correlativo arranca en otro número tras un
-  «deshacer», la clase se deriva de la cuenta —que sí entra— y el `id_externo` es el id del sistema que produjo el
-  comprobante, que la aplicación recrea justo al reexportar. Responde «¿este
+  sha256 del contenido del asiento que salió: las líneas del asiento, en su orden, **sin el `correlativo`, la `clase`,
+  el `rol`, el `documento.id_externo` ni el `medio_pago`**, serializadas con `json.dumps(sort_keys=True,
+  ensure_ascii=False, separators=(",", ":"))`. Los cinco quedan fuera porque no cambian el contenido contable: el
+  correlativo arranca en otro número tras un «deshacer», la clase se deriva de la cuenta —que sí entra—, el `rol` es
+  una etiqueta sobre la línea y el mismo asiento con otra etiqueta es el mismo asiento, el `id_externo` es el id del
+  sistema que produjo el comprobante, que la aplicación recrea justo al reexportar, y el medio de pago no cambia
+  ningún importe. La lista está en `asiento/huella.py` (`SIN`), con el motivo de cada uno escrito: eran tres en la 4.0,
+  cuatro con la [enmienda 0004](enmiendas/0004-medio-de-pago.md) al bajar `medio_pago` a la línea, y cinco desde la 5.0
+  al salir el `rol`. Responde «¿este
   contenido ya salió?» —la misma exportación repetida tras un «deshacer» arranca en otro número y lleva la
   misma huella—, que es lo que hace falta para avisar de un lote repetido: el Excel de CONCAR se suma al
   importarlo dos veces. Un registro tributario (el TXT del SIRE) no la lleva: no hay asiento. La `fecha`

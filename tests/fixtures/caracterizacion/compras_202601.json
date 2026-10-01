@@ -472,7 +472,7 @@
     "lineas": 9,
     "sin_sentido": 0
    },
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9",
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae",
    "comprobantes": [
     {
      "identidad": {
@@ -487,7 +487,7 @@
       0,
       3
      ],
-     "huella": "48400935bf792edabf40f4922ec22cabec489e2b78fabee7d93443fbd2802e51"
+     "huella": "fb6c297b95ef17176622ca67de1eae8101da23fb86da5c489c522bde2003e007"
     },
     {
      "identidad": {
@@ -502,7 +502,7 @@
       3,
       6
      ],
-     "huella": "bebc3b30977c509c6f44a42b306d27b52249ce11181b8bbdeefebccab8dcc152"
+     "huella": "83ed1c9672c91df7b1d4a8ac00a4c88f57e0567d2af85ab34931d274237c803a"
     },
     {
      "identidad": {
@@ -517,7 +517,7 @@
       6,
       9
      ],
-     "huella": "3196a9cca1942c73afd6b44528def2a5f98033c8899627b2cd6a4b0cbc79424a"
+     "huella": "400d453d451677edc20856eb489d0bf212ca3854b44304c7d995a2cf7949eee5"
     }
    ],
    "motor": "(versión del motor)"
@@ -551,13 +551,13 @@
    },
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9",
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae",
    "fechas": "por comprobante (extemporáneos al 01/01/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_COMPRAS_202601_20601234567.xlsx",
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9",
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae",
    "comprobantes": [
     {
      "identidad": {
@@ -572,7 +572,7 @@
       0,
       3
      ],
-     "huella": "48400935bf792edabf40f4922ec22cabec489e2b78fabee7d93443fbd2802e51"
+     "huella": "fb6c297b95ef17176622ca67de1eae8101da23fb86da5c489c522bde2003e007"
     },
     {
      "identidad": {
@@ -587,7 +587,7 @@
       3,
       6
      ],
-     "huella": "bebc3b30977c509c6f44a42b306d27b52249ce11181b8bbdeefebccab8dcc152"
+     "huella": "83ed1c9672c91df7b1d4a8ac00a4c88f57e0567d2af85ab34931d274237c803a"
     },
     {
      "identidad": {
@@ -602,7 +602,7 @@
       6,
       9
      ],
-     "huella": "3196a9cca1942c73afd6b44528def2a5f98033c8899627b2cd6a4b0cbc79424a"
+     "huella": "400d453d451677edc20856eb489d0bf212ca3854b44304c7d995a2cf7949eee5"
     }
    ],
    "motor": "(versión del motor)"
@@ -2633,13 +2633,13 @@
    },
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9",
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae",
    "fechas": "por comprobante (extemporáneos al 01/01/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_COMPRAS_202601_20601234567.xlsx",
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9",
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae",
    "comprobantes": [
     {
      "identidad": {
@@ -2654,7 +2654,7 @@
       0,
       3
      ],
-     "huella": "48400935bf792edabf40f4922ec22cabec489e2b78fabee7d93443fbd2802e51"
+     "huella": "fb6c297b95ef17176622ca67de1eae8101da23fb86da5c489c522bde2003e007"
     },
     {
      "identidad": {
@@ -2669,7 +2669,7 @@
       3,
       6
      ],
-     "huella": "bebc3b30977c509c6f44a42b306d27b52249ce11181b8bbdeefebccab8dcc152"
+     "huella": "83ed1c9672c91df7b1d4a8ac00a4c88f57e0567d2af85ab34931d274237c803a"
     },
     {
      "identidad": {
@@ -2684,7 +2684,7 @@
       6,
       9
      ],
-     "huella": "3196a9cca1942c73afd6b44528def2a5f98033c8899627b2cd6a4b0cbc79424a"
+     "huella": "400d453d451677edc20856eb489d0bf212ca3854b44304c7d995a2cf7949eee5"
     }
    ],
    "motor": "(versión del motor)"
@@ -6273,7 +6273,7 @@
     "lineas": 9,
     "sin_sentido": 0
    },
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9",
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae",
    "comprobantes": [
     {
      "identidad": {
@@ -6288,7 +6288,7 @@
       0,
       3
      ],
-     "huella": "48400935bf792edabf40f4922ec22cabec489e2b78fabee7d93443fbd2802e51"
+     "huella": "fb6c297b95ef17176622ca67de1eae8101da23fb86da5c489c522bde2003e007"
     },
     {
      "identidad": {
@@ -6303,7 +6303,7 @@
       3,
       6
      ],
-     "huella": "bebc3b30977c509c6f44a42b306d27b52249ce11181b8bbdeefebccab8dcc152"
+     "huella": "83ed1c9672c91df7b1d4a8ac00a4c88f57e0567d2af85ab34931d274237c803a"
     },
     {
      "identidad": {
@@ -6318,7 +6318,7 @@
       6,
       9
      ],
-     "huella": "3196a9cca1942c73afd6b44528def2a5f98033c8899627b2cd6a4b0cbc79424a"
+     "huella": "400d453d451677edc20856eb489d0bf212ca3854b44304c7d995a2cf7949eee5"
     }
    ],
    "motor": "(versión del motor)"
@@ -6351,12 +6351,12 @@
    },
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9"
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae"
   },
   "_exportacion": {
    "driver": "csv",
    "archivo": "CSV_COMPRAS_202601_20601234567.csv",
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9",
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae",
    "comprobantes": [
     {
      "identidad": {
@@ -6371,7 +6371,7 @@
       0,
       3
      ],
-     "huella": "48400935bf792edabf40f4922ec22cabec489e2b78fabee7d93443fbd2802e51"
+     "huella": "fb6c297b95ef17176622ca67de1eae8101da23fb86da5c489c522bde2003e007"
     },
     {
      "identidad": {
@@ -6386,7 +6386,7 @@
       3,
       6
      ],
-     "huella": "bebc3b30977c509c6f44a42b306d27b52249ce11181b8bbdeefebccab8dcc152"
+     "huella": "83ed1c9672c91df7b1d4a8ac00a4c88f57e0567d2af85ab34931d274237c803a"
     },
     {
      "identidad": {
@@ -6401,7 +6401,7 @@
       6,
       9
      ],
-     "huella": "3196a9cca1942c73afd6b44528def2a5f98033c8899627b2cd6a4b0cbc79424a"
+     "huella": "400d453d451677edc20856eb489d0bf212ca3854b44304c7d995a2cf7949eee5"
     }
    ],
    "motor": "(versión del motor)"
@@ -6436,12 +6436,12 @@
    },
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9"
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae"
   },
   "_exportacion": {
    "driver": "csv",
    "archivo": "CSV_COMPRAS_202601_20601234567.csv",
-   "huella": "fe7cfa5096510312a7187dcef789ea146790c90d8f55899cfc12ecaa4325cbd9",
+   "huella": "4188fa5e015bb780ac415d6199379c26905e90e61a16162560b154d0ec8558ae",
    "comprobantes": [
     {
      "identidad": {
@@ -6456,7 +6456,7 @@
       0,
       3
      ],
-     "huella": "48400935bf792edabf40f4922ec22cabec489e2b78fabee7d93443fbd2802e51"
+     "huella": "fb6c297b95ef17176622ca67de1eae8101da23fb86da5c489c522bde2003e007"
     },
     {
      "identidad": {
@@ -6471,7 +6471,7 @@
       3,
       6
      ],
-     "huella": "bebc3b30977c509c6f44a42b306d27b52249ce11181b8bbdeefebccab8dcc152"
+     "huella": "83ed1c9672c91df7b1d4a8ac00a4c88f57e0567d2af85ab34931d274237c803a"
     },
     {
      "identidad": {
@@ -6486,7 +6486,7 @@
       6,
       9
      ],
-     "huella": "3196a9cca1942c73afd6b44528def2a5f98033c8899627b2cd6a4b0cbc79424a"
+     "huella": "400d453d451677edc20856eb489d0bf212ca3854b44304c7d995a2cf7949eee5"
     }
    ],
    "motor": "(versión del motor)"
@@ -6969,7 +6969,7 @@
     "lineas": 9,
     "sin_sentido": 0
    },
-   "huella": "3a83bb0291ed906d27e5dcba79d07f8284551188cd834dee61c4d0a0fe6e82c5",
+   "huella": "fa39ad8376b6cf636e79b3920bae51a59ee3101f5e39f370dfb3432b32475737",
    "comprobantes": [
     {
      "identidad": {
@@ -6984,7 +6984,7 @@
       0,
       3
      ],
-     "huella": "eaaa192be20e81f233549636c6a66d545249d0faed232fe4402274fb42e722e1"
+     "huella": "6b41bb46fe39b18d0610ce68ee632dd94352a16770902dbae7c737cf6a10a939"
     },
     {
      "identidad": {
@@ -6999,7 +6999,7 @@
       3,
       6
      ],
-     "huella": "8a1c5f542b656b353225303c69250e6d169f70b0cf4d3f9698793c32382af33d"
+     "huella": "5c7c47e6bfdf8f39f144ead5ec50972c6454c3f310e7b5d8f7409b52635d5f8f"
     },
     {
      "identidad": {
@@ -7014,7 +7014,7 @@
       6,
       9
      ],
-     "huella": "e8022bb3d12f9c7913e6d7bce32c2e118dd1903a791708d2a1b8ef50e337d0e8"
+     "huella": "edaa41ce8a1e4bfd111fb4acf1afcc59a1fe6ae33ad1ee80c859d96249ecd2af"
     }
    ],
    "motor": "(versión del motor)"
@@ -7047,12 +7047,12 @@
    },
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "3a83bb0291ed906d27e5dcba79d07f8284551188cd834dee61c4d0a0fe6e82c5"
+   "huella": "fa39ad8376b6cf636e79b3920bae51a59ee3101f5e39f370dfb3432b32475737"
   },
   "_exportacion": {
    "driver": "starsoft",
    "archivo": "STARSOFT_COMPRAS_202601_20601234567.txt",
-   "huella": "3a83bb0291ed906d27e5dcba79d07f8284551188cd834dee61c4d0a0fe6e82c5",
+   "huella": "fa39ad8376b6cf636e79b3920bae51a59ee3101f5e39f370dfb3432b32475737",
    "comprobantes": [
     {
      "identidad": {
@@ -7067,7 +7067,7 @@
       0,
       3
      ],
-     "huella": "eaaa192be20e81f233549636c6a66d545249d0faed232fe4402274fb42e722e1"
+     "huella": "6b41bb46fe39b18d0610ce68ee632dd94352a16770902dbae7c737cf6a10a939"
     },
     {
      "identidad": {
@@ -7082,7 +7082,7 @@
       3,
       6
      ],
-     "huella": "8a1c5f542b656b353225303c69250e6d169f70b0cf4d3f9698793c32382af33d"
+     "huella": "5c7c47e6bfdf8f39f144ead5ec50972c6454c3f310e7b5d8f7409b52635d5f8f"
     },
     {
      "identidad": {
@@ -7097,7 +7097,7 @@
       6,
       9
      ],
-     "huella": "e8022bb3d12f9c7913e6d7bce32c2e118dd1903a791708d2a1b8ef50e337d0e8"
+     "huella": "edaa41ce8a1e4bfd111fb4acf1afcc59a1fe6ae33ad1ee80c859d96249ecd2af"
     }
    ],
    "motor": "(versión del motor)"
@@ -7132,12 +7132,12 @@
    },
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "3a83bb0291ed906d27e5dcba79d07f8284551188cd834dee61c4d0a0fe6e82c5"
+   "huella": "fa39ad8376b6cf636e79b3920bae51a59ee3101f5e39f370dfb3432b32475737"
   },
   "_exportacion": {
    "driver": "starsoft",
    "archivo": "STARSOFT_COMPRAS_202601_20601234567.txt",
-   "huella": "3a83bb0291ed906d27e5dcba79d07f8284551188cd834dee61c4d0a0fe6e82c5",
+   "huella": "fa39ad8376b6cf636e79b3920bae51a59ee3101f5e39f370dfb3432b32475737",
    "comprobantes": [
     {
      "identidad": {
@@ -7152,7 +7152,7 @@
       0,
       3
      ],
-     "huella": "eaaa192be20e81f233549636c6a66d545249d0faed232fe4402274fb42e722e1"
+     "huella": "6b41bb46fe39b18d0610ce68ee632dd94352a16770902dbae7c737cf6a10a939"
     },
     {
      "identidad": {
@@ -7167,7 +7167,7 @@
       3,
       6
      ],
-     "huella": "8a1c5f542b656b353225303c69250e6d169f70b0cf4d3f9698793c32382af33d"
+     "huella": "5c7c47e6bfdf8f39f144ead5ec50972c6454c3f310e7b5d8f7409b52635d5f8f"
     },
     {
      "identidad": {
@@ -7182,7 +7182,7 @@
       6,
       9
      ],
-     "huella": "e8022bb3d12f9c7913e6d7bce32c2e118dd1903a791708d2a1b8ef50e337d0e8"
+     "huella": "edaa41ce8a1e4bfd111fb4acf1afcc59a1fe6ae33ad1ee80c859d96249ecd2af"
     }
    ],
    "motor": "(versión del motor)"
@@ -7447,7 +7447,7 @@
     "lineas": 9,
     "sin_sentido": 0
    },
-   "huella": "c9fd3fb195f9bb76861d5a3c98647ab784da16b1f5761a0c65e706fed3a327a8",
+   "huella": "9e30ba17d2f9901ab7c8490a5e5c4f6b4abb206dac3f9f737261c6eecad0ad5a",
    "comprobantes": [
     {
      "identidad": {
@@ -7462,7 +7462,7 @@
       0,
       3
      ],
-     "huella": "a4e5b95ada15602d9b997d0c3ca2c1b248dfe912a326226bb7805ca935d58175"
+     "huella": "ad7c584e926db3edf847a6ed5e79e97bd5f5dec476e58ac0fdba32f225b76725"
     },
     {
      "identidad": {
@@ -7477,7 +7477,7 @@
       3,
       6
      ],
-     "huella": "54e5a512634872828847c10fb9e6b421b18b03b4cc2e98ee817407ecad532cc5"
+     "huella": "0b7e0801d22dfbd8527733933c8b282c3afe4b243663471750b57b5a0f81e59a"
     },
     {
      "identidad": {
@@ -7492,7 +7492,7 @@
       6,
       9
      ],
-     "huella": "e4553bd216ce357ac51a2b8fb77d219a9857795bfc4d8e02a7ba9bdd48416bf0"
+     "huella": "0d5b13966ac8672f0174fc9f393d7eb45cb641e4db9523e65650a13df1fc4ae5"
     }
    ],
    "motor": "(versión del motor)"
@@ -7516,13 +7516,13 @@
    "sub_diarios": {},
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "c9fd3fb195f9bb76861d5a3c98647ab784da16b1f5761a0c65e706fed3a327a8",
+   "huella": "9e30ba17d2f9901ab7c8490a5e5c4f6b4abb206dac3f9f737261c6eecad0ad5a",
    "lineas": 9
   },
   "_exportacion": {
    "driver": "asiento_contable",
    "archivo": "ASIENTO_CONTABLE_COMPRAS_202601_20601234567.json",
-   "huella": "c9fd3fb195f9bb76861d5a3c98647ab784da16b1f5761a0c65e706fed3a327a8",
+   "huella": "9e30ba17d2f9901ab7c8490a5e5c4f6b4abb206dac3f9f737261c6eecad0ad5a",
    "comprobantes": [
     {
      "identidad": {
@@ -7537,7 +7537,7 @@
       0,
       3
      ],
-     "huella": "a4e5b95ada15602d9b997d0c3ca2c1b248dfe912a326226bb7805ca935d58175"
+     "huella": "ad7c584e926db3edf847a6ed5e79e97bd5f5dec476e58ac0fdba32f225b76725"
     },
     {
      "identidad": {
@@ -7552,7 +7552,7 @@
       3,
       6
      ],
-     "huella": "54e5a512634872828847c10fb9e6b421b18b03b4cc2e98ee817407ecad532cc5"
+     "huella": "0b7e0801d22dfbd8527733933c8b282c3afe4b243663471750b57b5a0f81e59a"
     },
     {
      "identidad": {
@@ -7567,7 +7567,7 @@
       6,
       9
      ],
-     "huella": "e4553bd216ce357ac51a2b8fb77d219a9857795bfc4d8e02a7ba9bdd48416bf0"
+     "huella": "0d5b13966ac8672f0174fc9f393d7eb45cb641e4db9523e65650a13df1fc4ae5"
     }
    ],
    "motor": "(versión del motor)"
@@ -7592,13 +7592,13 @@
    "sub_diarios": {},
    "debe": "78824.00",
    "haber": "78824.00",
-   "huella": "c9fd3fb195f9bb76861d5a3c98647ab784da16b1f5761a0c65e706fed3a327a8",
+   "huella": "9e30ba17d2f9901ab7c8490a5e5c4f6b4abb206dac3f9f737261c6eecad0ad5a",
    "lineas": 9
   },
   "_exportacion": {
    "driver": "asiento_contable",
    "archivo": "ASIENTO_CONTABLE_COMPRAS_202601_20601234567.json",
-   "huella": "c9fd3fb195f9bb76861d5a3c98647ab784da16b1f5761a0c65e706fed3a327a8",
+   "huella": "9e30ba17d2f9901ab7c8490a5e5c4f6b4abb206dac3f9f737261c6eecad0ad5a",
    "comprobantes": [
     {
      "identidad": {
@@ -7613,7 +7613,7 @@
       0,
       3
      ],
-     "huella": "a4e5b95ada15602d9b997d0c3ca2c1b248dfe912a326226bb7805ca935d58175"
+     "huella": "ad7c584e926db3edf847a6ed5e79e97bd5f5dec476e58ac0fdba32f225b76725"
     },
     {
      "identidad": {
@@ -7628,7 +7628,7 @@
       3,
       6
      ],
-     "huella": "54e5a512634872828847c10fb9e6b421b18b03b4cc2e98ee817407ecad532cc5"
+     "huella": "0b7e0801d22dfbd8527733933c8b282c3afe4b243663471750b57b5a0f81e59a"
     },
     {
      "identidad": {
@@ -7643,7 +7643,7 @@
       6,
       9
      ],
-     "huella": "e4553bd216ce357ac51a2b8fb77d219a9857795bfc4d8e02a7ba9bdd48416bf0"
+     "huella": "0d5b13966ac8672f0174fc9f393d7eb45cb641e4db9523e65650a13df1fc4ae5"
     }
    ],
    "motor": "(versión del motor)"

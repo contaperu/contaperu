@@ -98,7 +98,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "336c0e250ab96294f2da34a721ee06c253e1a6868d356a626fd323fc1fc25c9c",
+   "huella": "15a9be32838614ed05df7e0f060c1935b738cc503acbfa705a198db96caf0b7f",
    "comprobantes": [
     {
      "identidad": {
@@ -113,7 +113,7 @@
       0,
       3
      ],
-     "huella": "336c0e250ab96294f2da34a721ee06c253e1a6868d356a626fd323fc1fc25c9c"
+     "huella": "15a9be32838614ed05df7e0f060c1935b738cc503acbfa705a198db96caf0b7f"
     }
    ]
   }
@@ -221,7 +221,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "1daf7aec7209eed92a93e75f10a596b0b5b897a1cb16e7ed2da080e71d23fd3e",
+   "huella": "95276ec9feab1616235ed45099ed2dee38589fddff5041be5610931e8581cb59",
    "comprobantes": [
     {
      "identidad": {
@@ -236,7 +236,7 @@
       0,
       3
      ],
-     "huella": "1daf7aec7209eed92a93e75f10a596b0b5b897a1cb16e7ed2da080e71d23fd3e"
+     "huella": "95276ec9feab1616235ed45099ed2dee38589fddff5041be5610931e8581cb59"
     }
    ]
   }
@@ -360,7 +360,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "cb9e23b737b2a6f7ca06e5ab4b526a1d5d4d3338ffa22e060989b3c5b904e6e5",
+   "huella": "9b39cbb8eee65e55d9f019a21e3c20e79ea0c95f350451182cfbd400b714923c",
    "comprobantes": [
     {
      "identidad": {
@@ -375,7 +375,7 @@
       0,
       3
      ],
-     "huella": "cb9e23b737b2a6f7ca06e5ab4b526a1d5d4d3338ffa22e060989b3c5b904e6e5"
+     "huella": "9b39cbb8eee65e55d9f019a21e3c20e79ea0c95f350451182cfbd400b714923c"
     }
    ]
   }
@@ -528,7 +528,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "aed0c608fa63bca0c2566e6ad9e8e5675acb8a3aa50f613e2c15442a2c740d5d",
+   "huella": "67e66c910edc83050c374915b8476a99334ac0540a4fe741988b5a0522106427",
    "comprobantes": [
     {
      "identidad": {
@@ -543,7 +543,7 @@
       0,
       5
      ],
-     "huella": "aed0c608fa63bca0c2566e6ad9e8e5675acb8a3aa50f613e2c15442a2c740d5d"
+     "huella": "67e66c910edc83050c374915b8476a99334ac0540a4fe741988b5a0522106427"
     }
    ]
   }
@@ -700,7 +700,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "efd4b2d4ba4b71b04f21a476088904406103862820e9243b560f0aeab82f856d",
+   "huella": "e69ee386d480288ca2f0284aa6a3434bdb86b3dc4ab45e6242c1f0202853b056",
    "comprobantes": [
     {
      "identidad": {
@@ -715,7 +715,7 @@
       0,
       5
      ],
-     "huella": "efd4b2d4ba4b71b04f21a476088904406103862820e9243b560f0aeab82f856d"
+     "huella": "e69ee386d480288ca2f0284aa6a3434bdb86b3dc4ab45e6242c1f0202853b056"
     }
    ]
   }
@@ -816,7 +816,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "709f4082905552d22e6873cea3ee2c3539cd3c5dd9372f166f2ff913e8994ee5",
+   "huella": "19c7d0bfba2088a2e59077a12d5a0c43fb3006feb6fddfa7fd643d9193adf58a",
    "comprobantes": [
     {
      "identidad": {
@@ -831,7 +831,7 @@
       0,
       3
      ],
-     "huella": "709f4082905552d22e6873cea3ee2c3539cd3c5dd9372f166f2ff913e8994ee5"
+     "huella": "19c7d0bfba2088a2e59077a12d5a0c43fb3006feb6fddfa7fd643d9193adf58a"
     }
    ]
   }
@@ -935,7 +935,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "fe6c8e9ca37b42d7dd54de593c70a1dfb23ad91fd4ea80abcb919911f95da770",
+   "huella": "3278c86c481ad167f4a6e1fe844108ea3a79c3d2d70b616c29cae7f5d3eab7cc",
    "comprobantes": [
     {
      "identidad": {
@@ -949,7 +949,7 @@
       0,
       3
      ],
-     "huella": "fe6c8e9ca37b42d7dd54de593c70a1dfb23ad91fd4ea80abcb919911f95da770"
+     "huella": "3278c86c481ad167f4a6e1fe844108ea3a79c3d2d70b616c29cae7f5d3eab7cc"
     }
    ]
   }
@@ -1053,7 +1053,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "3c523d051d4b1c2799b2e9c90a59d43ded2350359e9f015992aa59ea2ff473e5",
+   "huella": "568bb6046f284cfcad3fcbc854285f5dd70464f02bbde39fcc986d2fc7f38af8",
    "comprobantes": [
     {
      "identidad": {
@@ -1068,7 +1068,7 @@
       0,
       3
      ],
-     "huella": "3c523d051d4b1c2799b2e9c90a59d43ded2350359e9f015992aa59ea2ff473e5"
+     "huella": "568bb6046f284cfcad3fcbc854285f5dd70464f02bbde39fcc986d2fc7f38af8"
     }
    ]
   }

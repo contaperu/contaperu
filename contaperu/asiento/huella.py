@@ -13,7 +13,7 @@ Es la huella del **contenido del asiento**, no del archivo:
 - con **todo** lo que dice el asiento: sub-diario, fecha, cuentas, sentidos, importes (texto exacto),
   glosas, documento, referencia y detracción. Un céntimo la cambia; una configuración que mueva el
   sub-diario también, porque es otro asiento;
-- **menos cuatro campos**, cada uno por su motivo, y los cuatro están en `SIN`.
+- **menos cinco campos**, cada uno por su motivo, y los cinco están en `SIN`.
 
 Lo que queda fuera, y por qué (todos con la misma prueba: si entrara, la huella diría que dos contenidos
 iguales son distintos):
@@ -28,6 +28,17 @@ iguales son distintos):
   caso que la huella existe para atajar: al reexportar tras un «deshacer», la aplicación recrea sus filas con
   ids nuevos, así que con el id dentro la misma tanda daría otra huella y el aviso de lote repetido se
   apagaría justo cuando hace falta.
+- **`rol`** — dice QUÉ PAPEL hace la línea, y eso es una etiqueta sobre el asiento, no el asiento. **El mismo
+  asiento con otra etiqueta es el mismo asiento**: renombrar un valor del catálogo no cambia ni una celda del Excel
+  de CONCAR, ni un byte del SIRE ni de los dos formatos del PLE, porque ninguno de los cuatro lo lleva —solo el CSV y
+  `asiento_contable`, que son los dos destinos donde el rol es una columna, y para eso están los bytes del archivo—.
+  Es el motivo del `correlativo`, no el de la `clase`: no sale por ser redundante sino por no ser contenido. Y
+  excluirlo no puede hacer que dos asientos distintos compartan huella, porque dos líneas que solo difieran en el rol
+  —misma cuenta, mismo sentido, mismo importe, misma glosa, mismo documento— son la misma línea mal etiquetada.
+  Sale en la 5.0, y sale **antes** de los tres renombrados que esa versión trae: así las huellas se mueven UNA vez,
+  por esto, y desde entonces el catálogo de roles puede crecer o corregirse sin apagarle a nadie el aviso de «este
+  lote ya salió». Con el rol dentro, cada renombrado lo apagaba en silencio, que es el único fallo de esta cifra que
+  no se ve: no falla, deja de proteger.
 - **`medio_pago`** — dice CON QUÉ se movió el dinero, y **no cambia ningún asiento ni ningún importe**: la misma
   compra pagada por transferencia o en efectivo es el mismo asiento. Lo escribió así la enmienda 0004 al entrar, y
   entonces se cumplía solo porque el campo vivía en la `Cabecera`, que no se hashea. Desde que baja a la línea (rol
@@ -47,7 +58,7 @@ import hashlib
 import json
 from typing import Iterable
 
-SIN = ("correlativo", "clase", "documento.id_externo", "medio_pago")
+SIN = ("correlativo", "clase", "rol", "documento.id_externo", "medio_pago")
 
 
 def _sin_lo_excluido(d: dict) -> dict:

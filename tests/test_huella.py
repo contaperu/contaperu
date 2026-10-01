@@ -31,7 +31,16 @@ exportar = por_la_fachada(api.exportar)
 # ahora la escribe cada driver en su columna. Como `huella.SIN` solo excluye el correlativo, la clase y el
 # `id_externo`, esa sigla entraba en la huella: por eso se mueven TODAS y no solo las de la detracción. Era
 # 5cc54f016ba041f83d95480b84bce96574eb2aa17f9c866d375bae6bea255a85.
-HUELLA_FACTURA = "04300749a2f4301e1a0c695420b7ee977ace8c56ad75b01128f64342c722f385"
+#
+# **Y cambiaron las TRES otra vez en la 5.0**, tampoco por la fórmula: el `rol` SALE de `huella.SIN`. Es una etiqueta
+# sobre la línea y no el contenido de la línea —no lo lleva ni una celda del Excel de CONCAR, ni el SIRE, ni los dos
+# formatos del PLE—, y mientras estuviera dentro, cada renombrado del catálogo de roles invalidaba todas las huellas
+# guardadas EN SILENCIO: no falla, deja de proteger. Sale antes que los tres renombrados de esa misma versión, para
+# que se muevan una vez y no dos, y para que desde aquí cualquier movimiento de huella durante un renombrado sea un
+# bug y no ruido esperado. Esa frase de arriba, «SIN solo excluye el correlativo, la clase y el id_externo», describía
+# la 4.0: con la enmienda 0021 fueron cuatro y ahora son cinco. Era
+# 04300749a2f4301e1a0c695420b7ee977ace8c56ad75b01128f64342c722f385.
+HUELLA_FACTURA = "facf9d2e4598472dbb43839bd73227254c4459c237c13e9b0506d1aa7c3a33a2"
 
 
 def lineas(**cambios):
@@ -57,14 +66,19 @@ def test_la_misma_entrada_da_la_misma_huella_y_es_la_de_siempre():
 # a51a1da1befd246b0deea4fb81f4b1e43d3033c61aa0fea56654fb2b50b8b582.
 # La de dólares también se mueve en la 4.0 por la sigla, como la de arriba. Era
 # cb3af1e5e311eadbf33f71aa0087b600e303e2e8f631c8d90ad10f08214689e4.
-HUELLA_USD = "82c9fb49fdec64a3f115f11259a27cfce0927c4a7ec549da6c08220a349e5d1d"
+# Y en la 5.0 con las otras dos, al salir el `rol`. Era
+# 82c9fb49fdec64a3f115f11259a27cfce0927c4a7ec549da6c08220a349e5d1d.
+HUELLA_USD = "8457af1036953eadbc9cc772a92704a9f54504d74e0c91a55752e18d6ee0da0e"
 # La de detracción cambió OTRA VEZ en la 2.6, y las otras dos no: su línea pasó a llevar la constancia del depósito
 # —el comodín mientras no se ha pagado— y el comodín pasó de diez nueves a nueve. Era
 # 3c8525988cc772ed9c6589033a84cfc185f0db9e84168f2653c7fced63df64bd.
 # Y cambió una TERCERA vez en la 4.0, esta vez con las otras dos: su línea dejó además de llevar el `codigo_interno`
 # de la Tabla General 28 y la sigla `DR` de la Tabla General 06, que ahora escribe el driver en sus columnas AI y R.
 # Era 13024902a19eda1674fefe0d03b03eeb6fa55df276d9a549680b26d180ef66c6.
-HUELLA_DETRACCION = "defbee57ca03d1dda91b6fffd30d58839cb25e1e2faf1b748d176a1b70b648a8"
+# Y una CUARTA en la 5.0, con las otras dos, al salir el `rol`: es la que más roles distintos lleva —`detraccion` y
+# `detraccion_tercero` además del `igv`— y aun así se mueve por lo mismo que ellas. Era
+# defbee57ca03d1dda91b6fffd30d58839cb25e1e2faf1b748d176a1b70b648a8.
+HUELLA_DETRACCION = "421469d7828b5ae28af73cebc50e279e2f66d3c85cb5c1ddbe6b71523138c3e0"
 
 
 def test_la_huella_en_dolares_y_con_detraccion_es_la_de_siempre():
