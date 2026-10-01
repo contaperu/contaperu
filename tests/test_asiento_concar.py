@@ -367,11 +367,16 @@ def test_el_codigo_de_area_no_se_recorta():
 
 
 def test_el_tipo_de_documento_de_la_detraccion_es_configurable():
-    """`DR` es lo que aceptó un CONCAR real, pero la Tabla General 06 la numera cada contribuyente."""
+    """`DR` es lo que aceptó un CONCAR real, pero la Tabla General 06 la numera cada contribuyente.
+
+    La sigla de ejemplo es `99` y **no `DT`** a propósito (John, 01-oct-2026): `DT` fue el valor equivocado —salía de
+    un borrador de plantilla y nunca llegó a importarse en un CONCAR de verdad—, así que usarlo aquí hace pensar que
+    sigue vivo en algún sitio. No lo está: el único valor del motor es `DR`. Lo que esta prueba dice es que vale
+    cualquiera que configure la empresa, y un número lo deja claro mejor que una sigla con historia."""
     c = cp(detraccion={"codigo": "027", "porcentaje": "4"})
     assert driver_concar.filas_de_comprobante(c, CONTAB, MES, "080001")[-1]["R"] == "DR"
-    otro = configuracion({"detraccion_tipo_doc": "DT"})
-    assert driver_concar.filas_de_comprobante(c, otro, MES, "080001")[-1]["R"] == "DT"
+    otro = configuracion({"detraccion_tipo_doc": "99"})
+    assert driver_concar.filas_de_comprobante(c, otro, MES, "080001")[-1]["R"] == "99"
 
 
 def test_un_codigo_de_detraccion_sin_mapear_sale_con_el_patron_de_la_tabla_28():

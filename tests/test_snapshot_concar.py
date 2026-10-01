@@ -111,7 +111,9 @@ CASOS: list[tuple[str, dict, bool, dict | None]] = [
      {"concar": {"sub_diario_detraccion": "", "detraccion_codigos": {"037": "03799"}}}),
     # El área era "9001" hasta el 13-sep-2026, cuando la configuración de CONCAR pasó a rechazar un área de más de sus
     # 3 caracteres: que no se recorte lo prueba `test_asiento_concar.test_el_codigo_de_area_no_se_recorta`.
-    ("detraccion_area_y_tipo_doc", REAL, False, {"concar": {"detraccion_area": "900", "detraccion_tipo_doc": "DT"}}),
+    # La sigla de ejemplo es `99` y no `DT`, que fue el valor equivocado y sigue confundiendo (ver el test de
+    # `test_asiento_concar.py`). El único valor del motor es `DR`.
+    ("detraccion_area_y_tipo_doc", REAL, False, {"concar": {"detraccion_area": "900", "detraccion_tipo_doc": "99"}}),
     ("detraccion_cuenta_propia", dict(detraccion=DET), False, {"cuentas": {"cxp_detraccion": {"PEN": "421209"}}}),
     ("nota_con_detraccion", dict(NC, detraccion={"codigo": "027", "porcentaje": "4"}), False, None),
     ("honorarios_con_detraccion", dict(RH, detraccion=DET), False, None),
