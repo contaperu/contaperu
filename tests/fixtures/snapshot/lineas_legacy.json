@@ -13,7 +13,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -34,7 +33,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -57,7 +55,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -82,7 +79,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -104,7 +100,6 @@
    "tipo_cambio": "3.550",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -128,7 +123,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -152,7 +146,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -173,7 +166,6 @@
    "moneda": "USD",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -196,7 +188,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -220,7 +211,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "BV",
     "tipo_cp": "03",
     "serie_numero": "B001-55",
     "id_externo": "f1",
@@ -242,7 +232,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "BV",
     "tipo_cp": "03",
     "serie_numero": "B001-55",
     "id_externo": "f1",
@@ -265,7 +254,6 @@
    "glosa": "ASESORIA CONTABLE",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -286,7 +274,6 @@
    "glosa": "ASESORIA CONTABLE",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -309,7 +296,6 @@
    "glosa": "ASESORIA CONTABLE",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -329,7 +315,6 @@
    "moneda": "PEN",
    "glosa": "ASESORIA CONTABLE",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -350,7 +335,6 @@
    "glosa": "ASESORIA CONTABLE",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -374,7 +358,6 @@
    "glosa": "ASESORIA CONTABLE",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -395,7 +378,6 @@
    "tipo_cambio": "3.550",
    "glosa": "ASESORIA CONTABLE",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -417,7 +399,6 @@
    "glosa": "ASESORIA CONTABLE",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -440,7 +421,6 @@
    "glosa": "ASESORIA CONTABLE",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -460,7 +440,6 @@
    "moneda": "PEN",
    "glosa": "ASESORIA CONTABLE",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -481,7 +460,6 @@
    "glosa": "ASESORIA CONTABLE",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -504,7 +482,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-9",
     "id_externo": "f1",
@@ -512,7 +489,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -531,7 +507,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-9",
     "id_externo": "f1",
@@ -539,7 +514,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -560,7 +534,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-9",
     "id_externo": "f1",
@@ -568,7 +541,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -590,7 +562,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "ND",
     "tipo_cp": "08",
     "serie_numero": "FD01-3",
     "id_externo": "f1",
@@ -611,7 +582,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "ND",
     "tipo_cp": "08",
     "serie_numero": "FD01-3",
     "id_externo": "f1",
@@ -634,7 +604,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "ND",
     "tipo_cp": "08",
     "serie_numero": "FD01-3",
     "id_externo": "f1",
@@ -658,7 +627,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -679,7 +647,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -702,7 +669,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -726,7 +692,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -748,7 +713,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -771,7 +735,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -792,7 +755,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -815,7 +777,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -839,7 +800,6 @@
    "glosa": "ELECTROMECANICA DE PRUEBA S.R.L.",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -860,7 +820,6 @@
    "moneda": "PEN",
    "glosa": "ELECTROMECANICA DE PRUEBA S.R.L.",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -883,7 +842,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -907,7 +865,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -928,7 +885,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -951,7 +907,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -975,7 +930,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -996,7 +950,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1019,7 +972,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1043,7 +995,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1"
@@ -1062,7 +1013,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1"
@@ -1083,7 +1033,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1"
@@ -1105,7 +1054,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1126,7 +1074,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1149,7 +1096,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1172,7 +1118,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1200,7 +1145,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-11"
@@ -1229,7 +1173,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1251,7 +1194,6 @@
    "tipo_cambio": "3.500",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1275,7 +1217,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1299,7 +1240,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1328,7 +1268,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-11"
@@ -1356,7 +1295,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1377,7 +1315,6 @@
    "moneda": "USD",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1400,7 +1337,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1424,7 +1360,6 @@
    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "centro_costo": "CC-64",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "id_externo": "f1",
@@ -1445,7 +1380,6 @@
    "moneda": "PEN",
    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "id_externo": "f1",
@@ -1468,7 +1402,6 @@
    "contraparte_doc": "20602222226",
    "anexo_auxiliar": "CC-64",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "id_externo": "f1",
@@ -1491,7 +1424,6 @@
    "contraparte_doc": "20602222226",
    "anexo_auxiliar": "CC-64",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "id_externo": "f1",
@@ -1519,7 +1451,6 @@
     "fecha_vencimiento": "2026-08-27"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "fecha": "2026-08-10"
@@ -1547,7 +1478,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1568,7 +1498,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1591,7 +1520,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1615,7 +1543,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1636,7 +1563,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1659,7 +1585,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1682,7 +1607,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1710,7 +1634,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-11"
@@ -1738,7 +1661,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1759,7 +1681,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1782,7 +1703,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1805,7 +1725,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -1833,7 +1752,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-11"
@@ -1861,7 +1779,6 @@
    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "centro_costo": "CC-64",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "id_externo": "f1",
@@ -1882,7 +1799,6 @@
    "moneda": "PEN",
    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "id_externo": "f1",
@@ -1905,7 +1821,6 @@
    "contraparte_doc": "20602222226",
    "anexo_auxiliar": "CC-64",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "id_externo": "f1",
@@ -1928,7 +1843,6 @@
    "contraparte_doc": "20602222226",
    "anexo_auxiliar": "CC-64",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "id_externo": "f1",
@@ -1956,7 +1870,6 @@
     "fecha_vencimiento": "2026-08-27"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "E001-871",
     "fecha": "2026-08-10"
@@ -1984,7 +1897,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2005,7 +1917,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2028,7 +1939,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2051,7 +1961,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2079,7 +1988,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-11"
@@ -2107,7 +2015,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-9",
     "id_externo": "f1",
@@ -2115,7 +2022,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -2134,7 +2040,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-9",
     "id_externo": "f1",
@@ -2142,7 +2047,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -2163,7 +2067,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-9",
     "id_externo": "f1",
@@ -2171,7 +2074,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -2192,7 +2094,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-9",
     "id_externo": "f1",
@@ -2200,7 +2101,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -2226,7 +2126,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -2254,7 +2153,6 @@
    "glosa": "ASESORIA CONTABLE",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -2275,7 +2173,6 @@
    "glosa": "ASESORIA CONTABLE",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "RH",
     "tipo_cp": "02",
     "serie_numero": "E001-7",
     "id_externo": "f1",
@@ -2298,7 +2195,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "RC",
     "tipo_cp": "14",
     "serie_numero": "12345",
     "id_externo": "f1",
@@ -2319,7 +2215,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "RC",
     "tipo_cp": "14",
     "serie_numero": "12345",
     "id_externo": "f1",
@@ -2342,7 +2237,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "RC",
     "tipo_cp": "14",
     "serie_numero": "12345",
     "id_externo": "f1",
@@ -2365,7 +2259,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2386,7 +2279,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2409,7 +2301,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2433,7 +2324,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2454,7 +2344,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2477,7 +2366,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2501,7 +2389,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2522,7 +2409,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2545,7 +2431,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2568,7 +2453,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2596,7 +2480,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-11"
@@ -2624,7 +2507,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2645,7 +2527,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2667,7 +2548,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2691,7 +2571,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2712,7 +2591,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2734,7 +2612,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2757,7 +2634,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2778,7 +2654,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2800,7 +2675,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2823,7 +2697,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2844,7 +2717,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2867,7 +2739,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2891,7 +2762,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2912,7 +2782,6 @@
    "moneda": "USD",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2935,7 +2804,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2959,7 +2827,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -2980,7 +2847,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3003,7 +2869,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3027,7 +2892,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3048,7 +2912,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3071,7 +2934,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3094,7 +2956,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3122,7 +2983,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-11"
@@ -3151,7 +3011,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3172,7 +3031,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3194,7 +3052,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3218,7 +3075,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3239,7 +3095,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3262,7 +3117,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3286,7 +3140,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "SISTEMAS",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3308,7 +3161,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "DESARROLLO",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3329,7 +3181,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3351,7 +3202,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3375,7 +3225,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "BV",
     "tipo_cp": "03",
     "serie_numero": "B001-55",
     "id_externo": "f1",
@@ -3395,7 +3244,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "BV",
     "tipo_cp": "03",
     "serie_numero": "B001-55",
     "id_externo": "f1",
@@ -3416,7 +3264,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "BV",
     "tipo_cp": "03",
     "serie_numero": "B001-55",
     "id_externo": "f1",
@@ -3439,7 +3286,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3461,7 +3307,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3482,7 +3327,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3505,7 +3349,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3529,7 +3372,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3550,7 +3392,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3571,7 +3412,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3592,7 +3432,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3616,7 +3455,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FA",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3637,7 +3475,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FA",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3660,7 +3497,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FA",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3685,7 +3521,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3706,7 +3541,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3728,7 +3562,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3754,7 +3587,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3776,7 +3608,6 @@
    "tipo_cambio": "3.550",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3799,7 +3630,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3824,7 +3654,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "BV",
     "tipo_cp": "03",
     "serie_numero": "B001-9",
     "id_externo": "f1",
@@ -3845,7 +3674,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "BV",
     "tipo_cp": "03",
     "serie_numero": "B001-9",
     "id_externo": "f1",
@@ -3867,7 +3695,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "BV",
     "tipo_cp": "03",
     "serie_numero": "B001-9",
     "id_externo": "f1",
@@ -3891,7 +3718,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-3",
     "id_externo": "f1",
@@ -3899,7 +3725,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -3918,7 +3743,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-3",
     "id_externo": "f1",
@@ -3926,7 +3750,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -3947,7 +3770,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "NC",
     "tipo_cp": "07",
     "serie_numero": "FC01-3",
     "id_externo": "f1",
@@ -3955,7 +3777,6 @@
     "fecha_vencimiento": "2026-08-18"
    },
    "referencia": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
@@ -3978,7 +3799,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -3999,7 +3819,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -4021,7 +3840,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -4046,7 +3864,6 @@
    "contraparte_doc": "20607777773",
    "anexo_auxiliar": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -4067,7 +3884,6 @@
    "moneda": "PEN",
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",
@@ -4089,7 +3905,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "centro_costo": "OBRA01",
    "documento": {
-    "tipo": "FT",
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1",

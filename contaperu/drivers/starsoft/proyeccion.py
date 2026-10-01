@@ -26,6 +26,7 @@ from ...asiento.indice import Cabecera
 from ...modelo import a_decimal, numero_sin_ceros
 from ..kit.texto import formatear_monto
 from ...asiento.lineas import LineaDiario
+from ...asiento.resolucion import sigla_de_tipo
 from . import datos
 from .datos import ORDEN_DE_LAS_FILAS, ROLES_DE_LA_DETRACCION
 
@@ -101,7 +102,7 @@ def con_dos_decimales(valor: Any) -> str:
     return formatear_monto(valor, datos.OPCIONES)
 
 
-def glosa_del_documento(ln: LineaDiario, cab: Cabecera) -> str:
+def glosa_del_documento(ln: LineaDiario, cab: Cabecera, config: dict | None = None) -> str:
     """La columna `GLOSA`: el tipo y el número, no el concepto —que va en `GLOSA MOVIMIENTO`—.
 
     Así lo traen los doce ejemplos oficiales de ventas y los dieciocho de compras: `FT 002-000085 /`, con el
@@ -114,7 +115,8 @@ def glosa_del_documento(ln: LineaDiario, cab: Cabecera) -> str:
 
     ⚠️ El ` /` final está en todos los ejemplos y **no consta** si lo pide el formato o lo dejó quien llenó la
     hoja; se conserva porque es lo que se ve."""
-    tipo = (ln.documento or {}).get("tipo", "")
+    # La sigla la traduce este driver desde la 4.0: la línea lleva el código de SUNAT y el mapa es del asiento.
+    tipo = sigla_de_tipo((ln.documento or {}).get("tipo_cp"), config)
     return f"{tipo} {serie_a_cuatro(cab.serie)}-{numero_sin_ceros(cab.numero)} /".strip()
 
 
@@ -170,7 +172,7 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         "FECHA DOCUMENTO": doc.get("fecha_emision", "") or ln.fecha,
         "TIPO ANEXO": config.get("tipo_anexo_proveedor") or "",
         "CODIGO PROVEEDOR": cab.contraparte_doc,
-        "TIPO DOCUMENTO": doc.get("tipo", ""),
+        "TIPO DOCUMENTO": sigla_de_tipo(doc.get("tipo_cp"), config),
         "NRO DOCUMENTO": numero_del_documento(cab),
         "FECHA VENCIMIENTO": doc.get("fecha_vencimiento", ""),
         "IGV": cab.igv if es_total else "",
@@ -182,9 +184,9 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         # El DOCUMENTO, y el concepto en `GLOSA MOVIMIENTO`: así lo traen los ejemplos oficiales
         # (John, 22-sep-2026). Del 21 al 22-sep las dos dijeron el concepto, por parecer que repetir
         # el tipo y el número gastaba la glosa; el manual dice otra cosa, y manda el manual.
-        "GLOSA": glosa_del_documento(ln, cab)[:datos.LARGO_GLOSA],
+        "GLOSA": glosa_del_documento(ln, cab, config)[:datos.LARGO_GLOSA],
         "DESTINO": destino_de(cab),
-        "TIPO DOC REF": ref.get("tipo", ""),
+        "TIPO DOC REF": sigla_de_tipo(ref.get("tipo_cp"), config),
         "NRO DOC REF": ref.get("serie_numero", ""),
         "FECHA DOC REF": ref.get("fecha", ""),
         "CENTRO DE COSTOS": ln.centro_costo or ln.anexo_auxiliar or "",
@@ -248,10 +250,10 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         "FECHA REGISTRO": ln.fecha,
         "TIPO ANEXO": config.get("tipo_anexo_cliente") or "",
         "CODIGO CLIENTE": cab.contraparte_doc,
-        "TIPO DOCUMENTO": doc.get("tipo", ""),
+        "TIPO DOCUMENTO": sigla_de_tipo(doc.get("tipo_cp"), config),
         "NRO DOCUMENTO": numero_del_documento(cab),
         "FECHA EMISION": doc.get("fecha_emision", ""),
-        "DOC REFERENCIA": ref.get("tipo", ""),
+        "DOC REFERENCIA": sigla_de_tipo(ref.get("tipo_cp"), config),
         "NRO DOC REF": ref.get("serie_numero", ""),
         "IGV": cab.igv if es_total else "",
         "TASA IGV": con_dos_decimales(ln.tasa_igv) if es_total else "",
@@ -261,7 +263,7 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
         # El DOCUMENTO, y el concepto en `GLOSA MOVIMIENTO`: así lo traen los ejemplos oficiales
         # (John, 22-sep-2026). Del 21 al 22-sep las dos dijeron el concepto, por parecer que repetir
         # el tipo y el número gastaba la glosa; el manual dice otra cosa, y manda el manual.
-        "GLOSA": glosa_del_documento(ln, cab)[:datos.LARGO_GLOSA],
+        "GLOSA": glosa_del_documento(ln, cab, config)[:datos.LARGO_GLOSA],
         "GLOSA MOVIMIENTO": (ln.glosa or "")[:datos.LARGO_GLOSA],
         "DOCUMENTO ANULADO": datos.NO_ANULADO,
         "DEBE / HABER": ln.debe_haber,

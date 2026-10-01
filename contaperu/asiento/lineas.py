@@ -19,8 +19,9 @@ from ..pcge import clase_de
 class LineaDiario:
     """Una línea del asiento, en el vocabulario de `open-accounting`.
 
-    `documento` y `referencia` llevan `tipo` (la sigla del ERP, por compatibilidad) y `tipo_cp` (el
-    código SUNAT de la Tabla 10, que es el que manda). `glosa` va entera: el corte es del driver.
+    `documento` y `referencia` llevan `tipo_cp`, el código SUNAT de la Tabla 10 — **y solo eso** desde la 4.0: la
+    sigla con la que cada sistema legacy llama a ese tipo la escribe su driver (`asiento.sigla_de_tipo`), que es quien
+    conoce su tabla. `glosa` va entera: el corte es del driver.
     `tasa_igv` es la del comprobante como texto (`"18"`, `"10.5"`), sin redondear a entero. El `tipo_cambio` y la `tasa`
     de la detracción también van como texto exacto (`"3.550"`, `"4"`, desde la 1.0): `float` solo al escribir una celda.
     """

@@ -24,7 +24,14 @@ exportar = por_la_fachada(api.exportar)
 #
 # **Cambiaron en la 2.2**, y no la fórmula: la glosa entra en la huella y las líneas derivadas dejaron de
 # anteponer `IGV - `, `RET 4TA - ` y `DETRACCION - ` (John, 21-sep-2026). Es la segunda vez que se tocan.
-HUELLA_FACTURA = "5cc54f016ba041f83d95480b84bce96574eb2aa17f9c866d375bae6bea255a85"
+#
+# **Y cambiaron las TRES en la 4.0**, tampoco por la fórmula: la línea dejó de llevar `documento.tipo` y
+# `referencia.tipo`, la sigla con la que un sistema legacy llama al tipo del comprobante. Se conservaba «por
+# compatibilidad» desde los consumidores de la 0.6, con el código de SUNAT (`tipo_cp`) al lado, que es el que manda;
+# ahora la escribe cada driver en su columna. Como `huella.SIN` solo excluye el correlativo, la clase y el
+# `id_externo`, esa sigla entraba en la huella: por eso se mueven TODAS y no solo las de la detracción. Era
+# 5cc54f016ba041f83d95480b84bce96574eb2aa17f9c866d375bae6bea255a85.
+HUELLA_FACTURA = "04300749a2f4301e1a0c695420b7ee977ace8c56ad75b01128f64342c722f385"
 
 
 def lineas(**cambios):
@@ -48,14 +55,16 @@ def test_la_misma_entrada_da_la_misma_huella_y_es_la_de_siempre():
 # exacto dentro de la línea (hito 0.6, anunciado en el CHANGELOG). Con la 0.10 eran
 # 7bea763c65e20607bf0caacfff17b7f41e57e9618634807e900fa51b03928300 y
 # a51a1da1befd246b0deea4fb81f4b1e43d3033c61aa0fea56654fb2b50b8b582.
-HUELLA_USD = "cb3af1e5e311eadbf33f71aa0087b600e303e2e8f631c8d90ad10f08214689e4"
+# La de dólares también se mueve en la 4.0 por la sigla, como la de arriba. Era
+# cb3af1e5e311eadbf33f71aa0087b600e303e2e8f631c8d90ad10f08214689e4.
+HUELLA_USD = "82c9fb49fdec64a3f115f11259a27cfce0927c4a7ec549da6c08220a349e5d1d"
 # La de detracción cambió OTRA VEZ en la 2.6, y las otras dos no: su línea pasó a llevar la constancia del depósito
 # —el comodín mientras no se ha pagado— y el comodín pasó de diez nueves a nueve. Era
 # 3c8525988cc772ed9c6589033a84cfc185f0db9e84168f2653c7fced63df64bd.
-# Y cambió una TERCERA vez en la 4.0, otra vez sola: su línea dejó de llevar dos campos que eran de CONCAR y no del
-# asiento —el `codigo_interno` de la Tabla General 28 y la sigla `DR` de la Tabla General 06, que ahora escribe el
-# driver en sus columnas AI y R—. Era 13024902a19eda1674fefe0d03b03eeb6fa55df276d9a549680b26d180ef66c6.
-HUELLA_DETRACCION = "b6de4bb1e5af66fdea96f9b33f6b35a161b47c689d8fba490733b3a5f2152912"
+# Y cambió una TERCERA vez en la 4.0, esta vez con las otras dos: su línea dejó además de llevar el `codigo_interno`
+# de la Tabla General 28 y la sigla `DR` de la Tabla General 06, que ahora escribe el driver en sus columnas AI y R.
+# Era 13024902a19eda1674fefe0d03b03eeb6fa55df276d9a549680b26d180ef66c6.
+HUELLA_DETRACCION = "defbee57ca03d1dda91b6fffd30d58839cb25e1e2faf1b748d176a1b70b648a8"
 
 
 def test_la_huella_en_dolares_y_con_detraccion_es_la_de_siempre():

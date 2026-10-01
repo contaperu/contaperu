@@ -20,6 +20,7 @@ from ...asiento.faltas import SinCodigoDeMoneda
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
 from ...asiento.motor import cabecera_de, lineas_del_comprobante, serie_numero_de
+from ...asiento.resolucion import sigla_de_tipo
 from ..kit import Opciones, celdas
 from ...pcge import clase_de
 from ...igv import tasa_calculada
@@ -88,7 +89,10 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         "I": MARCA_CONVERSION, "J": _fecha(linea.fecha),
         "K": linea.cuenta, "L": linea.contraparte_doc, "M": linea.centro_costo, "N": linea.debe_haber,
         "O": importe, "P": importe if es_usd else "", "Q": importe if not es_usd else "",
-        "R": doc.get("tipo", ""), "S": doc.get("serie_numero", ""),
+        # R y Z: la sigla de la T.G. 06, que escribe este driver desde la 4.0. La línea lleva el código de SUNAT
+        # (`tipo_cp`) y el mapa de siglas es configuración del asiento (`tipos`): la traducción la hace quien conoce
+        # su tabla. Un tipo sin sigla no llega hasta aquí —detiene la exportación antes (`tipos_sin_sigla`)—.
+        "R": sigla_de_tipo(doc.get("tipo_cp"), config), "S": doc.get("serie_numero", ""),
         # Sin fecha, T y U quedan en None y no en "": así salían antes de separar el asiento de su
         # formato, y el snapshot lo fija. En el .xlsx las dos son la misma celda vacía.
         "T": _fecha(doc.get("fecha_emision"), None), "U": _fecha(doc.get("fecha_vencimiento"), None),
@@ -107,7 +111,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         # No se corta a los 3 caracteres de la plantilla: cortar un código lo manda a OTRA área en silencio.
         f["V"] = str(config.get("detraccion_area") or "")
     if ref:
-        f.update({"Z": ref.get("tipo", ""), "AA": ref.get("serie_numero", ""),
+        f.update({"Z": sigla_de_tipo(ref.get("tipo_cp"), config), "AA": ref.get("serie_numero", ""),
                   "AB": _fecha(ref.get("fecha"))})
     if det:
         base = _importe(det.get("base"))

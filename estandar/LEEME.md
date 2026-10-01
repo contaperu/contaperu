@@ -234,7 +234,7 @@ adivinar:
   que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su cuenta, que la elige
   cada empresa.
 - **`documento.tipo_cp`** y **`referencia.tipo_cp`** — el código SUNAT (Tabla 10). Es el que manda
-  (regla 4). `documento.tipo` sigue llevando la sigla del ERP por compatibilidad. La línea `detraccion`
+  (regla 4), y desde la 4.0 el único que viaja: la sigla del ERP la pone su driver (enmienda 0018). La línea `detraccion`
   no lleva `tipo_cp`: su documento es la constancia pendiente, no un comprobante de SUNAT.
 - **`detraccion.codigo`** — el código SUNAT del bien o servicio (Catálogo 54). El código interno con el que lo
   llame un ERP no es del estándar: lo traduce su driver, y el motor dejó de emitirlo en la 4.0 (enmienda 0017).
@@ -243,7 +243,7 @@ adivinar:
   (Hasta la 2.1 del motor las líneas derivadas anteponían `IGV - `, `RET 4TA - ` o `DETRACCION - `.)
 - **`tasa_igv`** es la del comprobante como texto (`"18"`, `"10.5"`). Si un ERP solo admite enteros,
   redondea él.
-- **Sin vocabulario legacy, para un ERP.** `sub_diario`, `correlativo` y `documento.tipo` son vocabulario de un
+- **Sin vocabulario legacy, para un ERP.** `sub_diario` y `correlativo` son vocabulario de un
   sistema legacy como CONCAR, y ya eran opcionales. El motor entrega también un perfil **neutral** (driver
   `asiento_contable`): las mismas líneas, con las mismas cuentas, sentidos e importes, sin esos campos y con la
   detracción sobre el propio comprobante en vez del documento comodín.

@@ -123,7 +123,7 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
 | Campo | Para qué |
 |---|---|
 | `rol` | `principal`, `igv`, `retencion_4ta`, `tercero`, `detraccion_tercero`, `detraccion`. Un ERP que pida el IGV en su columna encuentra la línea por su rol, no por su cuenta (que la elige cada empresa). |
-| `documento.tipo_cp`, `referencia.tipo_cp` | El código SUNAT (Tabla 10). `tipo` conserva la sigla del ERP por compatibilidad. |
+| `documento.tipo_cp`, `referencia.tipo_cp` | El código SUNAT (Tabla 10), **y solo ese**: la sigla con la que un sistema legacy llama al tipo la escribe su driver, con `asiento.sigla_de_tipo`. |
 | `glosa` | La misma en todas las líneas y entera, sin prefijos. El corte lo decide cada ERP. |
 | `tasa_igv` | La del comprobante, como texto exacto (`"10.5"`). Redondear es cosa del que solo admite enteros. |
 | `detraccion.codigo` | El código SUNAT del bien o servicio (Catálogo 54), **y solo ese**: el código interno de la tabla de cada sistema lo pone su driver (CONCAR, el de su T.G. 28), no el asiento. |

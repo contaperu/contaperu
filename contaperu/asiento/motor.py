@@ -13,8 +13,8 @@ una sola celda del Excel validado: lo vigila `tests/test_snapshot_concar.py`.
 
 Lo que la línea sigue llevando de «sistema contable» es contabilidad peruana, no formato de un ERP:
 el sub-diario y su correlativo, la cuenta, el centro de costo y en qué línea va. La sigla del
-documento (`documento.tipo`) se conserva por compatibilidad —la leían los consumidores de la 0.6—,
-pero al lado viaja `tipo_cp`, el código SUNAT, que es el que manda.
+documento se conservaba por compatibilidad —la leían los consumidores de la 0.6— al lado de `tipo_cp`, el
+código SUNAT; desde la 4.0 solo viaja el código, y la sigla la escribe cada driver con `resolucion.sigla_de_tipo`.
 """
 from __future__ import annotations
 
@@ -30,9 +30,9 @@ from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
-from .resolucion import (asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
-                         limites_del_periodo, lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra,
-                         sigla_documento, sin_efecto_contable, sub_diario, tiene_detraccion)
+from .resolucion import (asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero, limites_del_periodo,
+                         lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra, sin_efecto_contable,
+                         sub_diario, tiene_detraccion)
 from .lineas import LineaDiario
 
 # Hasta la 0.10 este módulo importaba las `Opciones` de los drivers solo para quitar los ceros del número: el núcleo
@@ -243,15 +243,16 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # `id_externo`: el id con el que el sistema que PRODUJO el comprobante lo conoce. Cierra el enlace entre la
     # línea, el comprobante y su imputación sin depender de la serie y el número, que son la identidad tributaria y
     # no la del sistema (1.0). No es `id_en_destino`, que está reservado para el id del sistema que RECIBE.
-    documento = {"tipo": "" if neutral else sigla_documento(c, config), "tipo_cp": c.tipo_cp,
+    # Sin `tipo`: la sigla con la que un sistema legacy llama al tipo (en CONCAR, su T.G. 06) la escribe su driver
+    # desde la 4.0, con `resolucion.sigla_de_tipo`. Aquí viaja el código de SUNAT, que es el que manda; la sigla se
+    # conservaba «por compatibilidad» desde los consumidores de la 0.6.
+    documento = {"tipo_cp": c.tipo_cp,
                  "serie_numero": serie_numero, "id_externo": c.id_externo or "",
                  "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
     referencia: dict[str, str] = {}
     if c.tipo_cp in TIPOS_NOTA and (c.ref_serie or c.ref_numero):
         numero_ref = _numero(c.ref_numero, opciones)
-        equivalencia_ref = equivalencia_tipo(c, config, c.ref_tipo_cp)
-        referencia = {"tipo": str(equivalencia_ref["sigla"]) if equivalencia_ref and not neutral else "",
-                      "tipo_cp": c.ref_tipo_cp,
+        referencia = {"tipo_cp": c.ref_tipo_cp,
                       "serie_numero": serie_y_numero(c.ref_serie, numero_ref),
                       "fecha": _iso(c.ref_fecha)}
 
@@ -320,9 +321,8 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                 # Sin documento comodín: la detracción es del propio comprobante, y la constancia llega después.
                 documento_detraccion, referencia_detraccion = documento, referencia
             else:
-                referencia_detraccion = referencia if referencia.get("tipo") else {
-                    "tipo": sigla_documento(c, config), "tipo_cp": c.tipo_cp,
-                    "serie_numero": serie_numero, "fecha": _iso(emision)}
+                referencia_detraccion = referencia if referencia.get("tipo_cp") else {
+                    "tipo_cp": c.tipo_cp, "serie_numero": serie_numero, "fecha": _iso(emision)}
                 # El número del documento `DR` **es** la constancia del depósito: el comodín solo ocupa su sitio
                 # mientras nadie la haya pegado (3.2). Hasta entonces aquí se escribía el comodín y nada más, así
                 # que el vóucher llegaba a STARSOFT y a CONTASIS y no a CONCAR, que es donde vive esa columna —y

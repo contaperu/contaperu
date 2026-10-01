@@ -130,7 +130,8 @@ def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
     lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
     assert [ln.rol for ln in lineas] == ["principal", "igv", "tercero", "detraccion_tercero", "detraccion"]
     assert all(ln.rol in asi.ROLES for ln in lineas)
-    assert lineas[0].documento["tipo_cp"] == "01" and lineas[0].documento["tipo"] == "FT"
+    # La línea lleva el código de SUNAT y NO la sigla: `FT` es la T.G. 06 de CONCAR y la escribe su driver (4.0).
+    assert lineas[0].documento["tipo_cp"] == "01" and "tipo" not in lineas[0].documento
     # La detracción no es un comprobante de SUNAT: su documento es el DR, sin código de la Tabla 10;
     # y su referencia es la propia factura, que sí lo tiene.
     assert "tipo_cp" not in lineas[-1].documento and lineas[-1].referencia["tipo_cp"] == "01"
@@ -173,8 +174,7 @@ def test_una_nota_de_credito_lleva_los_dos_codigos_de_su_referencia():
                  ref_numero="871", ref_fecha="2026-08-01")
     principal = asi.lineas_del_comprobante(nc, CONTAB, MES, "080001")[0]
     assert principal.documento["tipo_cp"] == "07" and principal.debe_haber == "H"
-    assert principal.referencia == {"tipo": "FT", "tipo_cp": "01", "serie_numero": "E001-871",
-                                    "fecha": "2026-08-01"}
+    assert principal.referencia == {"tipo_cp": "01", "serie_numero": "E001-871", "fecha": "2026-08-01"}
 
 
 def test_lo_que_arma_el_motor_valida_contra_el_estandar():

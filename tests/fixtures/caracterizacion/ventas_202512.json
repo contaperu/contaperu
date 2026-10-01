@@ -948,13 +948,13 @@
    },
    "debe": "277300.00",
    "haber": "277300.00",
-   "huella": "a8026f1d48b907bd7ab97ba0dd11ca307c79614b076170b5476f2051f6fbedbd",
+   "huella": "e6644a60b88a38f6a4c373c20452252fde0868b2982319c00af7160237e59855",
    "fechas": "por comprobante (extemporáneos al 01/12/2025)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_VENTAS_202512_20601234567.xlsx",
-   "huella": "a8026f1d48b907bd7ab97ba0dd11ca307c79614b076170b5476f2051f6fbedbd",
+   "huella": "e6644a60b88a38f6a4c373c20452252fde0868b2982319c00af7160237e59855",
    "comprobantes": [
     {
      "identidad": {
@@ -968,7 +968,7 @@
       0,
       3
      ],
-     "huella": "f6ed729f1dcdc2c0230c911cf3893a9ff9d00dd6102f636e1e9b72ce13cea1d4"
+     "huella": "c6fa898d15ebb2db59fedf073beac606bc1edd71360d1551e66cb087a53ae75c"
     },
     {
      "identidad": {
@@ -982,7 +982,7 @@
       3,
       6
      ],
-     "huella": "ac23bf35c140ce698ea204e6fe57ab0eb7f7eb5ef308470acb4615609751c8b8"
+     "huella": "71160825d9c47f45b79252c4388869b7c426014e6c8f96d2c76ca3f31264fa84"
     },
     {
      "identidad": {
@@ -996,7 +996,7 @@
       6,
       9
      ],
-     "huella": "a2a50db928b01fd436b1faf921f2d1abfd4c3626627b86535b022d391a8db9b8"
+     "huella": "9a74c5c6f6fe03af306afce22bb1d9757bdc6e940a0e6b8fbd101485fb6e2477"
     },
     {
      "identidad": {
@@ -1010,7 +1010,7 @@
       9,
       12
      ],
-     "huella": "fbd7cf86a92e75e684540c27819314aab3da0388f10981fa6c31ae7a594e6d2a"
+     "huella": "ee775ae62cdf28fdd74cf0402ba4481da2ba0aef67cd5480ec8f1e03b0d513c2"
     },
     {
      "identidad": {
@@ -1024,7 +1024,7 @@
       12,
       15
      ],
-     "huella": "96b209c13b519187d20d978a824a1eb01d916b9bf7dd21cb2651755380cfb7f7"
+     "huella": "84887afa0f17694f6246dcbeda63d197b388f1a86026d74f93177f2c3ecb57e3"
     },
     {
      "identidad": {
@@ -1038,7 +1038,7 @@
       15,
       18
      ],
-     "huella": "fa132245b1e28e986ee1a515d72b83782bfd37f193d2378cbab62b53a9682159"
+     "huella": "bc5942ad65a3fd589b314ede547c4af4c56e0c2a959f9d91f9e9459837c50a48"
     },
     {
      "identidad": {
@@ -1052,7 +1052,7 @@
       18,
       21
      ],
-     "huella": "046af470631f483474fdca53eabc2b67d5037bc08abccdff2c869613dea5c61e"
+     "huella": "a20b1f2de16da97639c5ab1d67dd03390d8bc55993262e18e375103081e0cea4"
     },
     {
      "identidad": {
@@ -1066,7 +1066,7 @@
       21,
       24
      ],
-     "huella": "8e8a0da4b59b7a66af4fa308eb70f4d14c98879c225f7e41937cd3bd27c9070f"
+     "huella": "83da5b5333851567a35df417c198c1d86df81797156bff6fbcb1020c60eeef62"
     },
     {
      "identidad": {
@@ -1080,7 +1080,7 @@
       24,
       27
      ],
-     "huella": "7b55194b46c92862605b7492fd4ce039a4da669a22628c19f271efe5048d85a3"
+     "huella": "e5afaf51d819b6ad676b2697970c30dfb2dcf9d7dcf1155dd110c5ef8c88bb79"
     },
     {
      "identidad": {
@@ -1094,7 +1094,7 @@
       27,
       30
      ],
-     "huella": "161aa4a85cc354a9eb3197b39853ca4f6358dcf366392f4e48df43f9823cb8b3"
+     "huella": "9b84be636d8d24f69f990b5244622a487bb22e76a6a28ab4cffc0dedad22854b"
     },
     {
      "identidad": {
@@ -1108,7 +1108,7 @@
       30,
       33
      ],
-     "huella": "5208973cfeccfa1e2a14f621a2511217170251adb520f7563603a8a2a84c70df"
+     "huella": "6062adb13a518bb27f6664582acf8a4ad519d9a3a762533de4b73908fa76fb69"
     }
    ],
    "motor": "(versión del motor)"
@@ -9507,12 +9507,12 @@
    },
    "debe": "277300.00",
    "haber": "277300.00",
-   "huella": "a8026f1d48b907bd7ab97ba0dd11ca307c79614b076170b5476f2051f6fbedbd"
+   "huella": "e6644a60b88a38f6a4c373c20452252fde0868b2982319c00af7160237e59855"
   },
   "_exportacion": {
    "driver": "csv",
    "archivo": "CSV_VENTAS_202512_20601234567.csv",
-   "huella": "a8026f1d48b907bd7ab97ba0dd11ca307c79614b076170b5476f2051f6fbedbd",
+   "huella": "e6644a60b88a38f6a4c373c20452252fde0868b2982319c00af7160237e59855",
    "comprobantes": [
     {
      "identidad": {
@@ -9526,7 +9526,7 @@
       0,
       3
      ],
-     "huella": "f6ed729f1dcdc2c0230c911cf3893a9ff9d00dd6102f636e1e9b72ce13cea1d4"
+     "huella": "c6fa898d15ebb2db59fedf073beac606bc1edd71360d1551e66cb087a53ae75c"
     },
     {
      "identidad": {
@@ -9540,7 +9540,7 @@
       3,
       6
      ],
-     "huella": "ac23bf35c140ce698ea204e6fe57ab0eb7f7eb5ef308470acb4615609751c8b8"
+     "huella": "71160825d9c47f45b79252c4388869b7c426014e6c8f96d2c76ca3f31264fa84"
     },
     {
      "identidad": {
@@ -9554,7 +9554,7 @@
       6,
       9
      ],
-     "huella": "a2a50db928b01fd436b1faf921f2d1abfd4c3626627b86535b022d391a8db9b8"
+     "huella": "9a74c5c6f6fe03af306afce22bb1d9757bdc6e940a0e6b8fbd101485fb6e2477"
     },
     {
      "identidad": {
@@ -9568,7 +9568,7 @@
       9,
       12
      ],
-     "huella": "fbd7cf86a92e75e684540c27819314aab3da0388f10981fa6c31ae7a594e6d2a"
+     "huella": "ee775ae62cdf28fdd74cf0402ba4481da2ba0aef67cd5480ec8f1e03b0d513c2"
     },
     {
      "identidad": {
@@ -9582,7 +9582,7 @@
       12,
       15
      ],
-     "huella": "96b209c13b519187d20d978a824a1eb01d916b9bf7dd21cb2651755380cfb7f7"
+     "huella": "84887afa0f17694f6246dcbeda63d197b388f1a86026d74f93177f2c3ecb57e3"
     },
     {
      "identidad": {
@@ -9596,7 +9596,7 @@
       15,
       18
      ],
-     "huella": "fa132245b1e28e986ee1a515d72b83782bfd37f193d2378cbab62b53a9682159"
+     "huella": "bc5942ad65a3fd589b314ede547c4af4c56e0c2a959f9d91f9e9459837c50a48"
     },
     {
      "identidad": {
@@ -9610,7 +9610,7 @@
       18,
       21
      ],
-     "huella": "046af470631f483474fdca53eabc2b67d5037bc08abccdff2c869613dea5c61e"
+     "huella": "a20b1f2de16da97639c5ab1d67dd03390d8bc55993262e18e375103081e0cea4"
     },
     {
      "identidad": {
@@ -9624,7 +9624,7 @@
       21,
       24
      ],
-     "huella": "8e8a0da4b59b7a66af4fa308eb70f4d14c98879c225f7e41937cd3bd27c9070f"
+     "huella": "83da5b5333851567a35df417c198c1d86df81797156bff6fbcb1020c60eeef62"
     },
     {
      "identidad": {
@@ -9638,7 +9638,7 @@
       24,
       27
      ],
-     "huella": "7b55194b46c92862605b7492fd4ce039a4da669a22628c19f271efe5048d85a3"
+     "huella": "e5afaf51d819b6ad676b2697970c30dfb2dcf9d7dcf1155dd110c5ef8c88bb79"
     },
     {
      "identidad": {
@@ -9652,7 +9652,7 @@
       27,
       30
      ],
-     "huella": "161aa4a85cc354a9eb3197b39853ca4f6358dcf366392f4e48df43f9823cb8b3"
+     "huella": "9b84be636d8d24f69f990b5244622a487bb22e76a6a28ab4cffc0dedad22854b"
     },
     {
      "identidad": {
@@ -9666,13 +9666,13 @@
       30,
       33
      ],
-     "huella": "5208973cfeccfa1e2a14f621a2511217170251adb520f7563603a8a2a84c70df"
+     "huella": "6062adb13a518bb27f6664582acf8a4ad519d9a3a762533de4b73908fa76fb69"
     }
    ],
    "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
-  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp;clase;doc_id_externo\r\n05;120001;2025-12-02;121201;D;29500.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;20609999999;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18;tercero;01;;activo;fila-1\r\n05;120001;2025-12-02;401111;H;4500.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18;igv;01;;pasivo;fila-1\r\n05;120001;2025-12-02;701101;H;25000.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;;;;FT;F001-1001;2025-12-02;2026-01-02;;;;;;;18;principal;01;;ingreso;fila-1\r\n05;120002;2025-12-04;121201;D;21830.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;20633333336;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18;tercero;01;;activo;fila-2\r\n05;120002;2025-12-04;401111;H;3330.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18;igv;01;;pasivo;fila-2\r\n05;120002;2025-12-04;701101;H;18500.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;;;;FT;F001-1002;2025-12-04;2026-01-04;;;;;;;18;principal;01;;ingreso;fila-2\r\n05;120003;2025-12-05;121201;D;37760.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;20655555553;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18;tercero;01;;activo;fila-3\r\n05;120003;2025-12-05;401111;H;5760.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18;igv;01;;pasivo;fila-3\r\n05;120003;2025-12-05;701101;H;32000.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;;;;FT;F001-1003;2025-12-05;2026-01-05;;;;;;;18;principal;01;;ingreso;fila-3\r\n05;120004;2025-12-08;121201;D;53100.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;20688888884;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18;tercero;01;;activo;fila-4\r\n05;120004;2025-12-08;401111;H;8100.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18;igv;01;;pasivo;fila-4\r\n05;120004;2025-12-08;701101;H;45000.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;;;;FT;F001-1004;2025-12-08;2026-01-08;;;;;;;18;principal;01;;ingreso;fila-4\r\n05;120005;2025-12-10;121201;D;18290.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;20644444440;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18;tercero;01;;activo;fila-5\r\n05;120005;2025-12-10;401111;H;2790.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18;igv;01;;pasivo;fila-5\r\n05;120005;2025-12-10;701101;H;15500.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;;;;FT;F001-1005;2025-12-10;2026-01-10;;;;;;;18;principal;01;;ingreso;fila-5\r\n05;120006;2025-12-12;121201;D;33040.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;20666666667;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18;tercero;01;;activo;fila-6\r\n05;120006;2025-12-12;401111;H;5040.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18;igv;01;;pasivo;fila-6\r\n05;120006;2025-12-12;701101;H;28000.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;;;;FT;F001-1006;2025-12-12;2026-01-12;;;;;;;18;principal;01;;ingreso;fila-6\r\n05;120007;2025-12-15;121201;D;24780.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;20301234567;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18;tercero;01;;activo;fila-7\r\n05;120007;2025-12-15;401111;H;3780.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18;igv;01;;pasivo;fila-7\r\n05;120007;2025-12-15;701101;H;21000.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;;;;FT;F001-1007;2025-12-15;2026-01-15;;;;;;;18;principal;01;;ingreso;fila-7\r\n05;120008;2025-12-03;121201;D;1003.00;PEN;;CLIENTE CONSUMIDOR FINAL;42589632;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18;tercero;03;;activo;fila-8\r\n05;120008;2025-12-03;401111;H;153.00;PEN;;CLIENTE CONSUMIDOR FINAL;;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18;igv;03;;pasivo;fila-8\r\n05;120008;2025-12-03;701101;H;850.00;PEN;;CLIENTE CONSUMIDOR FINAL;;;;BV;B001-5001;2025-12-03;2025-12-03;;;;;;;18;principal;03;;ingreso;fila-8\r\n05;120009;2025-12-06;121201;D;1416.00;PEN;;CONSUMIDOR VARIOS;45678912;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18;tercero;03;;activo;fila-9\r\n05;120009;2025-12-06;401111;H;216.00;PEN;;CONSUMIDOR VARIOS;;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18;igv;03;;pasivo;fila-9\r\n05;120009;2025-12-06;701101;H;1200.00;PEN;;CONSUMIDOR VARIOS;;;;BV;B001-5002;2025-12-06;2025-12-06;;;;;;;18;principal;03;;ingreso;fila-9\r\n05;120010;2025-12-09;121201;D;50681.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18;tercero;03;;activo;fila-10\r\n05;120010;2025-12-09;401111;H;7731.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18;igv;03;;pasivo;fila-10\r\n05;120010;2025-12-09;701101;H;42950.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;BV;B001-5003;2025-12-09;2025-12-09;;;;;;;18;principal;03;;ingreso;fila-10\r\n05;120011;2025-12-19;121201;D;5900.00;PEN;;MI CLIENTE MANUAL S.A.C.;20123456789;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18;tercero;01;;activo;fila-11\r\n05;120011;2025-12-19;401111;H;900.00;PEN;;MI CLIENTE MANUAL S.A.C.;;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18;igv;01;;pasivo;fila-11\r\n05;120011;2025-12-19;701101;H;5000.00;PEN;;MI CLIENTE MANUAL S.A.C.;;;;FT;F001-1234;2025-12-19;2026-01-19;;;;;;;18;principal;01;;ingreso;fila-11\r\n"
+  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp;clase;doc_id_externo\r\n05;120001;2025-12-02;121201;D;29500.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;20609999999;;;;F001-1001;2025-12-02;2026-01-02;;;;;;;18;tercero;01;;activo;fila-1\r\n05;120001;2025-12-02;401111;H;4500.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;;;;;F001-1001;2025-12-02;2026-01-02;;;;;;;18;igv;01;;pasivo;fila-1\r\n05;120001;2025-12-02;701101;H;25000.00;PEN;;DISTRIBUIDORA COMERCIAL DEL NORTE SAC;;;;;F001-1001;2025-12-02;2026-01-02;;;;;;;18;principal;01;;ingreso;fila-1\r\n05;120002;2025-12-04;121201;D;21830.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;20633333336;;;;F001-1002;2025-12-04;2026-01-04;;;;;;;18;tercero;01;;activo;fila-2\r\n05;120002;2025-12-04;401111;H;3330.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;;;;;F001-1002;2025-12-04;2026-01-04;;;;;;;18;igv;01;;pasivo;fila-2\r\n05;120002;2025-12-04;701101;H;18500.00;PEN;;INVERSIONES TECNOLOGICAS PERU SRL;;;;;F001-1002;2025-12-04;2026-01-04;;;;;;;18;principal;01;;ingreso;fila-2\r\n05;120003;2025-12-05;121201;D;37760.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;20655555553;;;;F001-1003;2025-12-05;2026-01-05;;;;;;;18;tercero;01;;activo;fila-3\r\n05;120003;2025-12-05;401111;H;5760.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;;;;;F001-1003;2025-12-05;2026-01-05;;;;;;;18;igv;01;;pasivo;fila-3\r\n05;120003;2025-12-05;701101;H;32000.00;PEN;;CORPORACION INDUSTRIAL ANDINA SAC;;;;;F001-1003;2025-12-05;2026-01-05;;;;;;;18;principal;01;;ingreso;fila-3\r\n05;120004;2025-12-08;121201;D;53100.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;20688888884;;;;F001-1004;2025-12-08;2026-01-08;;;;;;;18;tercero;01;;activo;fila-4\r\n05;120004;2025-12-08;401111;H;8100.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;;;;;F001-1004;2025-12-08;2026-01-08;;;;;;;18;igv;01;;pasivo;fila-4\r\n05;120004;2025-12-08;701101;H;45000.00;PEN;;GRUPO EMPRESARIAL LIMA SAC;;;;;F001-1004;2025-12-08;2026-01-08;;;;;;;18;principal;01;;ingreso;fila-4\r\n05;120005;2025-12-10;121201;D;18290.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;20644444440;;;;F001-1005;2025-12-10;2026-01-10;;;;;;;18;tercero;01;;activo;fila-5\r\n05;120005;2025-12-10;401111;H;2790.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;;;;;F001-1005;2025-12-10;2026-01-10;;;;;;;18;igv;01;;pasivo;fila-5\r\n05;120005;2025-12-10;701101;H;15500.00;PEN;;COMERCIALIZADORA INTEGRAL DEL SUR EIRL;;;;;F001-1005;2025-12-10;2026-01-10;;;;;;;18;principal;01;;ingreso;fila-5\r\n05;120006;2025-12-12;121201;D;33040.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;20666666667;;;;F001-1006;2025-12-12;2026-01-12;;;;;;;18;tercero;01;;activo;fila-6\r\n05;120006;2025-12-12;401111;H;5040.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;;;;;F001-1006;2025-12-12;2026-01-12;;;;;;;18;igv;01;;pasivo;fila-6\r\n05;120006;2025-12-12;701101;H;28000.00;PEN;;SERVICIOS LOGISTICOS NACIONALES SA;;;;;F001-1006;2025-12-12;2026-01-12;;;;;;;18;principal;01;;ingreso;fila-6\r\n05;120007;2025-12-15;121201;D;24780.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;20301234567;;;;F001-1007;2025-12-15;2026-01-15;;;;;;;18;tercero;01;;activo;fila-7\r\n05;120007;2025-12-15;401111;H;3780.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;;;;;F001-1007;2025-12-15;2026-01-15;;;;;;;18;igv;01;;pasivo;fila-7\r\n05;120007;2025-12-15;701101;H;21000.00;PEN;;IMPORTADORA Y EXPORTADORA CENTRAL SAC;;;;;F001-1007;2025-12-15;2026-01-15;;;;;;;18;principal;01;;ingreso;fila-7\r\n05;120008;2025-12-03;121201;D;1003.00;PEN;;CLIENTE CONSUMIDOR FINAL;42589632;;;;B001-5001;2025-12-03;2025-12-03;;;;;;;18;tercero;03;;activo;fila-8\r\n05;120008;2025-12-03;401111;H;153.00;PEN;;CLIENTE CONSUMIDOR FINAL;;;;;B001-5001;2025-12-03;2025-12-03;;;;;;;18;igv;03;;pasivo;fila-8\r\n05;120008;2025-12-03;701101;H;850.00;PEN;;CLIENTE CONSUMIDOR FINAL;;;;;B001-5001;2025-12-03;2025-12-03;;;;;;;18;principal;03;;ingreso;fila-8\r\n05;120009;2025-12-06;121201;D;1416.00;PEN;;CONSUMIDOR VARIOS;45678912;;;;B001-5002;2025-12-06;2025-12-06;;;;;;;18;tercero;03;;activo;fila-9\r\n05;120009;2025-12-06;401111;H;216.00;PEN;;CONSUMIDOR VARIOS;;;;;B001-5002;2025-12-06;2025-12-06;;;;;;;18;igv;03;;pasivo;fila-9\r\n05;120009;2025-12-06;701101;H;1200.00;PEN;;CONSUMIDOR VARIOS;;;;;B001-5002;2025-12-06;2025-12-06;;;;;;;18;principal;03;;ingreso;fila-9\r\n05;120010;2025-12-09;121201;D;50681.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;;B001-5003;2025-12-09;2025-12-09;;;;;;;18;tercero;03;;activo;fila-10\r\n05;120010;2025-12-09;401111;H;7731.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;;B001-5003;2025-12-09;2025-12-09;;;;;;;18;igv;03;;pasivo;fila-10\r\n05;120010;2025-12-09;701101;H;42950.00;PEN;;CLIENTES VARIOS - CONSOLIDADO DIARIO;;;;;B001-5003;2025-12-09;2025-12-09;;;;;;;18;principal;03;;ingreso;fila-10\r\n05;120011;2025-12-19;121201;D;5900.00;PEN;;MI CLIENTE MANUAL S.A.C.;20123456789;;;;F001-1234;2025-12-19;2026-01-19;;;;;;;18;tercero;01;;activo;fila-11\r\n05;120011;2025-12-19;401111;H;900.00;PEN;;MI CLIENTE MANUAL S.A.C.;;;;;F001-1234;2025-12-19;2026-01-19;;;;;;;18;igv;01;;pasivo;fila-11\r\n05;120011;2025-12-19;701101;H;5000.00;PEN;;MI CLIENTE MANUAL S.A.C.;;;;;F001-1234;2025-12-19;2026-01-19;;;;;;;18;principal;01;;ingreso;fila-11\r\n"
  },
  "diagnosticar/sire": {
   "libro": {
@@ -10291,12 +10291,12 @@
    },
    "debe": "277300.00",
    "haber": "277300.00",
-   "huella": "317bfb4ab9de15efcc14ecb8d7fa014c54d5b3936b156cbe2136b70712e47307"
+   "huella": "4f8cca31ea9154099c91814ed38d1e8d31f88cd4951d8e2f3675e9b3899dd2e8"
   },
   "_exportacion": {
    "driver": "starsoft",
    "archivo": "STARSOFT_VENTAS_202512_20601234567.txt",
-   "huella": "317bfb4ab9de15efcc14ecb8d7fa014c54d5b3936b156cbe2136b70712e47307",
+   "huella": "4f8cca31ea9154099c91814ed38d1e8d31f88cd4951d8e2f3675e9b3899dd2e8",
    "comprobantes": [
     {
      "identidad": {
@@ -10310,7 +10310,7 @@
       0,
       3
      ],
-     "huella": "de98d86c30d1d53e2dfa003dccaa8d11b14210111205faae3b58d87ce491960d"
+     "huella": "1d30750ac61daa047e1bb076d0595f37b986e6d8959b92d5520fdf3df0ba13d8"
     },
     {
      "identidad": {
@@ -10324,7 +10324,7 @@
       3,
       6
      ],
-     "huella": "78f777d48abd77714641c33f5e5499db93c975914cbe7b4cefe732a99eb5bfbb"
+     "huella": "30768b4b0fe291aaf05fdd13e20a7474bf3bd4b17730291ded85c00d64087c0e"
     },
     {
      "identidad": {
@@ -10338,7 +10338,7 @@
       6,
       9
      ],
-     "huella": "2703d5f381b9f4a09406e11d0695a6dac17591ee455ac8b583ea15530dc138ce"
+     "huella": "3056c7a4a9432093442ecae8adcbefd75919d3f836698207b605cb1ad77dd52f"
     },
     {
      "identidad": {
@@ -10352,7 +10352,7 @@
       9,
       12
      ],
-     "huella": "ff7462ad4b6d06af18cbb7d143f23890caaa0914b0b36e9c885647dae513c7e4"
+     "huella": "3a0c493716bebc7ea3a5b249e608a066f5e8c2194543a921129d7fcadeae6d2e"
     },
     {
      "identidad": {
@@ -10366,7 +10366,7 @@
       12,
       15
      ],
-     "huella": "92a3ba20adbf95c3d35d3740e4c46b334952d0e683f5cbc3c29d17709a817d9f"
+     "huella": "4c8ffb9970095e7613a5f8aa78d9d33050c68d06cb5a9bb9de2d379f29298f36"
     },
     {
      "identidad": {
@@ -10380,7 +10380,7 @@
       15,
       18
      ],
-     "huella": "501cbb86d3710324a88850918dc65553a9589558c391d7e4e142f1c6971f1f7c"
+     "huella": "34ffdecd502f8c347bd1aacdffd8cd4678fcc6dd32031f2749739ad1015b8b10"
     },
     {
      "identidad": {
@@ -10394,7 +10394,7 @@
       18,
       21
      ],
-     "huella": "24b068f7e37df66c9ea9002a128be858b0f8ef7b59d0c13a57547ec9bb5a14b6"
+     "huella": "a1722f4051139513f79d152d70c72533e7b65d87d4d8d4ecdbe64de132ed6ae5"
     },
     {
      "identidad": {
@@ -10408,7 +10408,7 @@
       21,
       24
      ],
-     "huella": "7c871d70c19c1240955da1176fd6da35bf7e04be154fe7a650e66084756a3476"
+     "huella": "1cc0a8e9cebce5d07fea2acbc92cd56361dd2af9bec31bd5f68c53e9159f42f2"
     },
     {
      "identidad": {
@@ -10422,7 +10422,7 @@
       24,
       27
      ],
-     "huella": "73818011b93c2fe0ae583ef602c66458a3ae0f06f9ab8426097dc79dfeabf255"
+     "huella": "881c330855cdbc838657f6e590024164ffeba8d90342a147963a82df82d86ebf"
     },
     {
      "identidad": {
@@ -10436,7 +10436,7 @@
       27,
       30
      ],
-     "huella": "d3d8f8b504db9493c1c89d8a0d252326bbbc17b75641a47daa418954f8a1c8c6"
+     "huella": "e5874720ce972a8ae2cad3242d534e3d775d245a24d87709edb3190c6ba95ab4"
     },
     {
      "identidad": {
@@ -10450,7 +10450,7 @@
       30,
       33
      ],
-     "huella": "97b1c816d733c56e0ab8da55a039b9d7cf07fe15a1c8e71b3d5a0ac8e4529ea1"
+     "huella": "e899cc62d88d3f2d4be959b7a7748503d147a39bbbaf6b9d552f496a28b0aba3"
     }
    ],
    "motor": "(versión del motor)"

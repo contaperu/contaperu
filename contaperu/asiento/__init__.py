@@ -54,7 +54,7 @@ from .resolucion import (asienta_sin_efecto, comprobantes_sin_centro, comprobant
                          etiquetas_sub_diario, exigir_requisitos, faltantes_para, fundir_config, imputacion_de,
                          limites_del_periodo, lleva_centro, monedas_sin_codigo, numerar, numerar_en_orden, partes_de,
                          reparto_no_cuadra,
-                         repartos_que_no_cuadran, sigla_documento, sin_efecto_contable, sub_diario,
+                         repartos_que_no_cuadran, sigla_de_tipo, sigla_documento, sin_efecto_contable, sub_diario,
                          sub_diarios_presentes, tiene_detraccion, tipos_sin_sigla)
 from .huella import huella
 from .imputacion import Imputacion, Parte
@@ -72,7 +72,8 @@ __all__ = [
     "etiquetas_sub_diario", "exigir_requisitos", "faltantes_para", "fundir_config", "imputacion_de",
     "limites_del_periodo", "lleva_centro", "monedas_sin_codigo", "numerar", "numerar_en_orden", "partes_de",
     "reparto_no_cuadra",
-    "repartos_que_no_cuadran", "sigla_documento", "sin_efecto_contable", "sub_diario", "sub_diarios_presentes",
+    "repartos_que_no_cuadran", "sigla_de_tipo", "sigla_documento", "sin_efecto_contable", "sub_diario",
+    "sub_diarios_presentes",
     "tiene_detraccion",
     "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro", "lineas_e_indice_del_libro", "cabecera_de", "Cabecera",

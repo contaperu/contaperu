@@ -835,7 +835,6 @@
     "glosa": "GRILLETES Y CONECTORES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -856,7 +855,6 @@
     "moneda": "PEN",
     "glosa": "GRILLETES Y CONECTORES",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -879,7 +877,6 @@
     "contraparte_doc": "20607777773",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -902,7 +899,6 @@
     "glosa": "REPUESTOS IMPORTADOS",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -924,7 +920,6 @@
     "tipo_cambio": "3.750",
     "glosa": "REPUESTOS IMPORTADOS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -948,7 +943,6 @@
     "contraparte_doc": "20602222226",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -970,7 +964,6 @@
     "glosa": "DEVOLUCION DE GRILLETES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -978,7 +971,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -997,7 +989,6 @@
     "moneda": "PEN",
     "glosa": "DEVOLUCION DE GRILLETES",
     "documento": {
-     "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -1005,7 +996,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -1026,7 +1016,6 @@
     "contraparte_doc": "20607777773",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -1034,7 +1023,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -1054,7 +1042,6 @@
     "glosa": "INTERES POR PAGO TARDIO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -1062,7 +1049,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -1081,7 +1067,6 @@
     "moneda": "PEN",
     "glosa": "INTERES POR PAGO TARDIO",
     "documento": {
-     "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -1089,7 +1074,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -1110,7 +1094,6 @@
     "contraparte_doc": "20607777773",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -1118,7 +1101,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -1138,7 +1120,6 @@
     "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -1159,7 +1140,6 @@
     "moneda": "PEN",
     "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -1182,7 +1162,6 @@
     "contraparte_doc": "20602222226",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -1205,7 +1184,6 @@
     "contraparte_doc": "20602222226",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -1233,7 +1211,6 @@
      "fecha_vencimiento": "2026-08-27"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "fecha": "2026-08-10"
@@ -1260,7 +1237,6 @@
     "glosa": "MANTENIMIENTO DE EQUIPOS",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -1282,7 +1258,6 @@
     "tipo_cambio": "3.700",
     "glosa": "MANTENIMIENTO DE EQUIPOS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -1306,7 +1281,6 @@
     "contraparte_doc": "20633333336",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -1330,7 +1304,6 @@
     "contraparte_doc": "20633333336",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -1359,7 +1332,6 @@
      "fecha_vencimiento": "2026-09-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "fecha": "2026-08-14"
@@ -1385,7 +1357,6 @@
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -1405,7 +1376,6 @@
     "moneda": "PEN",
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -1426,7 +1396,6 @@
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -1447,7 +1416,6 @@
     "glosa": "ASESORIA TRIBUTARIA",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
      "id_externo": "c08",
@@ -1468,7 +1436,6 @@
     "glosa": "ASESORIA TRIBUTARIA",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
      "id_externo": "c08",
@@ -1489,7 +1456,6 @@
     "glosa": "UTILES DE OFICINA",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
      "id_externo": "c09",
@@ -1511,7 +1477,6 @@
     "contraparte_doc": "20605555552",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
      "id_externo": "c09",
@@ -1532,7 +1497,6 @@
     "glosa": "MATERIALES DE JUNIO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -1553,7 +1517,6 @@
     "moneda": "PEN",
     "glosa": "MATERIALES DE JUNIO",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -1576,7 +1539,6 @@
     "contraparte_doc": "20677777771",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -1598,7 +1560,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "centro_costo": "SISTEMAS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -1620,7 +1581,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "centro_costo": "DESARROLLO",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -1641,7 +1601,6 @@
     "moneda": "PEN",
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -1663,7 +1622,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "contraparte_doc": "20677777771",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -1685,7 +1643,6 @@
     "glosa": "ENERGIA ELECTRICA DE AGOSTO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -1706,7 +1663,6 @@
     "moneda": "PEN",
     "glosa": "ENERGIA ELECTRICA DE AGOSTO",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -1729,7 +1685,6 @@
     "contraparte_doc": "20605555552",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -1783,7 +1738,7 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45",
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
    "comprobantes": [
     {
      "identidad": {
@@ -1798,7 +1753,7 @@
       0,
       3
      ],
-     "huella": "37039b5ed03ab8bdb7ceb9b55e7bf01217cfda005011e73481186eb39866d7f2"
+     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
     },
     {
      "identidad": {
@@ -1813,7 +1768,7 @@
       3,
       6
      ],
-     "huella": "738a966075db337dedad031f13a935570dfc2a5523f2caa1c3973a16cb5ccc65"
+     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
     },
     {
      "identidad": {
@@ -1828,7 +1783,7 @@
       6,
       9
      ],
-     "huella": "100325a0d0c959f774cdcd8dd81a2509ec77656df5eb2e06b222d0bba12d7cc6"
+     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
     },
     {
      "identidad": {
@@ -1843,7 +1798,7 @@
       9,
       12
      ],
-     "huella": "2bf233985b8c6525cf5e5b2ac8cf425fa07d36d5407167bffbb306dd660601d8"
+     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
     },
     {
      "identidad": {
@@ -1858,7 +1813,7 @@
       12,
       17
      ],
-     "huella": "dc9341fd3eb9379c8ffffed998f6f63de5a7c6e37a062886dabb312a64c07002"
+     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
     },
     {
      "identidad": {
@@ -1873,7 +1828,7 @@
       17,
       22
      ],
-     "huella": "8b67a124fe9ee6ae6a9d21e585654f4d106de4792eef9fe4450d17c18d7d3698"
+     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
     },
     {
      "identidad": {
@@ -1888,7 +1843,7 @@
       22,
       25
      ],
-     "huella": "c1bdf42613f31b3ead9a3c7f8add905e8854b2d4a25963b3278e01e72438be2c"
+     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
     },
     {
      "identidad": {
@@ -1903,7 +1858,7 @@
       25,
       27
      ],
-     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
     },
     {
      "identidad": {
@@ -1918,7 +1873,7 @@
       27,
       29
      ],
-     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
     },
     {
      "identidad": {
@@ -1933,7 +1888,7 @@
       29,
       32
      ],
-     "huella": "fc3240dcc5fed15e06b291a598864dcc6af6751003146a32810905cefe1fd28a"
+     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
     },
     {
      "identidad": {
@@ -1948,7 +1903,7 @@
       32,
       36
      ],
-     "huella": "df45c08c4dcd23243e09134f0203048ffcc11ab134718abab20ceb13904b2bd5"
+     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
     },
     {
      "identidad": {
@@ -1963,7 +1918,7 @@
       36,
       39
      ],
-     "huella": "4605c36f1641d3780aa4d60274a44beeb1827656a092939781c32b136df01b69"
+     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
     }
    ],
    "motor": "(versión del motor)"
@@ -2024,13 +1979,13 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45",
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
    "fechas": "por comprobante (extemporáneos al 01/08/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_COMPRAS_202608_20601234567.xlsx",
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45",
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
    "comprobantes": [
     {
      "identidad": {
@@ -2045,7 +2000,7 @@
       0,
       3
      ],
-     "huella": "37039b5ed03ab8bdb7ceb9b55e7bf01217cfda005011e73481186eb39866d7f2"
+     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
     },
     {
      "identidad": {
@@ -2060,7 +2015,7 @@
       3,
       6
      ],
-     "huella": "738a966075db337dedad031f13a935570dfc2a5523f2caa1c3973a16cb5ccc65"
+     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
     },
     {
      "identidad": {
@@ -2075,7 +2030,7 @@
       6,
       9
      ],
-     "huella": "100325a0d0c959f774cdcd8dd81a2509ec77656df5eb2e06b222d0bba12d7cc6"
+     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
     },
     {
      "identidad": {
@@ -2090,7 +2045,7 @@
       9,
       12
      ],
-     "huella": "2bf233985b8c6525cf5e5b2ac8cf425fa07d36d5407167bffbb306dd660601d8"
+     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
     },
     {
      "identidad": {
@@ -2105,7 +2060,7 @@
       12,
       17
      ],
-     "huella": "dc9341fd3eb9379c8ffffed998f6f63de5a7c6e37a062886dabb312a64c07002"
+     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
     },
     {
      "identidad": {
@@ -2120,7 +2075,7 @@
       17,
       22
      ],
-     "huella": "8b67a124fe9ee6ae6a9d21e585654f4d106de4792eef9fe4450d17c18d7d3698"
+     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
     },
     {
      "identidad": {
@@ -2135,7 +2090,7 @@
       22,
       25
      ],
-     "huella": "c1bdf42613f31b3ead9a3c7f8add905e8854b2d4a25963b3278e01e72438be2c"
+     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
     },
     {
      "identidad": {
@@ -2150,7 +2105,7 @@
       25,
       27
      ],
-     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
     },
     {
      "identidad": {
@@ -2165,7 +2120,7 @@
       27,
       29
      ],
-     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
     },
     {
      "identidad": {
@@ -2180,7 +2135,7 @@
       29,
       32
      ],
-     "huella": "fc3240dcc5fed15e06b291a598864dcc6af6751003146a32810905cefe1fd28a"
+     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
     },
     {
      "identidad": {
@@ -2195,7 +2150,7 @@
       32,
       36
      ],
-     "huella": "df45c08c4dcd23243e09134f0203048ffcc11ab134718abab20ceb13904b2bd5"
+     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
     },
     {
      "identidad": {
@@ -2210,7 +2165,7 @@
       36,
       39
      ],
-     "huella": "4605c36f1641d3780aa4d60274a44beeb1827656a092939781c32b136df01b69"
+     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
     }
    ],
    "motor": "(versión del motor)"
@@ -9248,13 +9203,13 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45",
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
    "fechas": "por comprobante (extemporáneos al 01/08/2026)"
   },
   "_exportacion": {
    "driver": "concar",
    "archivo": "CONCAR_COMPRAS_202608_20601234567.xlsx",
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45",
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
    "comprobantes": [
     {
      "identidad": {
@@ -9269,7 +9224,7 @@
       0,
       3
      ],
-     "huella": "37039b5ed03ab8bdb7ceb9b55e7bf01217cfda005011e73481186eb39866d7f2"
+     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
     },
     {
      "identidad": {
@@ -9284,7 +9239,7 @@
       3,
       6
      ],
-     "huella": "738a966075db337dedad031f13a935570dfc2a5523f2caa1c3973a16cb5ccc65"
+     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
     },
     {
      "identidad": {
@@ -9299,7 +9254,7 @@
       6,
       9
      ],
-     "huella": "100325a0d0c959f774cdcd8dd81a2509ec77656df5eb2e06b222d0bba12d7cc6"
+     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
     },
     {
      "identidad": {
@@ -9314,7 +9269,7 @@
       9,
       12
      ],
-     "huella": "2bf233985b8c6525cf5e5b2ac8cf425fa07d36d5407167bffbb306dd660601d8"
+     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
     },
     {
      "identidad": {
@@ -9329,7 +9284,7 @@
       12,
       17
      ],
-     "huella": "dc9341fd3eb9379c8ffffed998f6f63de5a7c6e37a062886dabb312a64c07002"
+     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
     },
     {
      "identidad": {
@@ -9344,7 +9299,7 @@
       17,
       22
      ],
-     "huella": "8b67a124fe9ee6ae6a9d21e585654f4d106de4792eef9fe4450d17c18d7d3698"
+     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
     },
     {
      "identidad": {
@@ -9359,7 +9314,7 @@
       22,
       25
      ],
-     "huella": "c1bdf42613f31b3ead9a3c7f8add905e8854b2d4a25963b3278e01e72438be2c"
+     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
     },
     {
      "identidad": {
@@ -9374,7 +9329,7 @@
       25,
       27
      ],
-     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
     },
     {
      "identidad": {
@@ -9389,7 +9344,7 @@
       27,
       29
      ],
-     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
     },
     {
      "identidad": {
@@ -9404,7 +9359,7 @@
       29,
       32
      ],
-     "huella": "fc3240dcc5fed15e06b291a598864dcc6af6751003146a32810905cefe1fd28a"
+     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
     },
     {
      "identidad": {
@@ -9419,7 +9374,7 @@
       32,
       36
      ],
-     "huella": "df45c08c4dcd23243e09134f0203048ffcc11ab134718abab20ceb13904b2bd5"
+     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
     },
     {
      "identidad": {
@@ -9434,7 +9389,7 @@
       36,
       39
      ],
-     "huella": "4605c36f1641d3780aa4d60274a44beeb1827656a092939781c32b136df01b69"
+     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
     }
    ],
    "motor": "(versión del motor)"
@@ -16744,7 +16699,6 @@
     "glosa": "GRILLETES Y CONECTORES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -16765,7 +16719,6 @@
     "moneda": "PEN",
     "glosa": "GRILLETES Y CONECTORES",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -16788,7 +16741,6 @@
     "contraparte_doc": "20607777773",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -16811,7 +16763,6 @@
     "glosa": "REPUESTOS IMPORTADOS",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -16833,7 +16784,6 @@
     "tipo_cambio": "3.750",
     "glosa": "REPUESTOS IMPORTADOS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -16857,7 +16807,6 @@
     "contraparte_doc": "20602222226",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -16879,7 +16828,6 @@
     "glosa": "DEVOLUCION DE GRILLETES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -16887,7 +16835,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -16906,7 +16853,6 @@
     "moneda": "PEN",
     "glosa": "DEVOLUCION DE GRILLETES",
     "documento": {
-     "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -16914,7 +16860,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -16935,7 +16880,6 @@
     "contraparte_doc": "20607777773",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "NC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -16943,7 +16887,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -16963,7 +16906,6 @@
     "glosa": "INTERES POR PAGO TARDIO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -16971,7 +16913,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -16990,7 +16931,6 @@
     "moneda": "PEN",
     "glosa": "INTERES POR PAGO TARDIO",
     "documento": {
-     "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -16998,7 +16938,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -17019,7 +16958,6 @@
     "contraparte_doc": "20607777773",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "ND",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -17027,7 +16965,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -17047,7 +16984,6 @@
     "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -17068,7 +17004,6 @@
     "moneda": "PEN",
     "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -17091,7 +17026,6 @@
     "contraparte_doc": "20602222226",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -17114,7 +17048,6 @@
     "contraparte_doc": "20602222226",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -17142,7 +17075,6 @@
      "fecha_vencimiento": "2026-08-27"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "fecha": "2026-08-10"
@@ -17169,7 +17101,6 @@
     "glosa": "MANTENIMIENTO DE EQUIPOS",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -17191,7 +17122,6 @@
     "tipo_cambio": "3.700",
     "glosa": "MANTENIMIENTO DE EQUIPOS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -17215,7 +17145,6 @@
     "contraparte_doc": "20633333336",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -17239,7 +17168,6 @@
     "contraparte_doc": "20633333336",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -17268,7 +17196,6 @@
      "fecha_vencimiento": "2026-09-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "fecha": "2026-08-14"
@@ -17294,7 +17221,6 @@
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -17314,7 +17240,6 @@
     "moneda": "PEN",
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -17335,7 +17260,6 @@
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -17356,7 +17280,6 @@
     "glosa": "ASESORIA TRIBUTARIA",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
      "id_externo": "c08",
@@ -17377,7 +17300,6 @@
     "glosa": "ASESORIA TRIBUTARIA",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
      "id_externo": "c08",
@@ -17398,7 +17320,6 @@
     "glosa": "UTILES DE OFICINA",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
      "id_externo": "c09",
@@ -17420,7 +17341,6 @@
     "contraparte_doc": "20605555552",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
      "id_externo": "c09",
@@ -17441,7 +17361,6 @@
     "glosa": "MATERIALES DE JUNIO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -17462,7 +17381,6 @@
     "moneda": "PEN",
     "glosa": "MATERIALES DE JUNIO",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -17485,7 +17403,6 @@
     "contraparte_doc": "20677777771",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -17507,7 +17424,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "centro_costo": "SISTEMAS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -17529,7 +17445,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "centro_costo": "DESARROLLO",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -17550,7 +17465,6 @@
     "moneda": "PEN",
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -17572,7 +17486,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "contraparte_doc": "20677777771",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -17594,7 +17507,6 @@
     "glosa": "ENERGIA ELECTRICA DE AGOSTO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -17615,7 +17527,6 @@
     "moneda": "PEN",
     "glosa": "ENERGIA ELECTRICA DE AGOSTO",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -17638,7 +17549,6 @@
     "contraparte_doc": "20605555552",
     "anexo_auxiliar": "OBRA01",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -17692,7 +17602,7 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45",
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
    "comprobantes": [
     {
      "identidad": {
@@ -17707,7 +17617,7 @@
       0,
       3
      ],
-     "huella": "37039b5ed03ab8bdb7ceb9b55e7bf01217cfda005011e73481186eb39866d7f2"
+     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
     },
     {
      "identidad": {
@@ -17722,7 +17632,7 @@
       3,
       6
      ],
-     "huella": "738a966075db337dedad031f13a935570dfc2a5523f2caa1c3973a16cb5ccc65"
+     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
     },
     {
      "identidad": {
@@ -17737,7 +17647,7 @@
       6,
       9
      ],
-     "huella": "100325a0d0c959f774cdcd8dd81a2509ec77656df5eb2e06b222d0bba12d7cc6"
+     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
     },
     {
      "identidad": {
@@ -17752,7 +17662,7 @@
       9,
       12
      ],
-     "huella": "2bf233985b8c6525cf5e5b2ac8cf425fa07d36d5407167bffbb306dd660601d8"
+     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
     },
     {
      "identidad": {
@@ -17767,7 +17677,7 @@
       12,
       17
      ],
-     "huella": "dc9341fd3eb9379c8ffffed998f6f63de5a7c6e37a062886dabb312a64c07002"
+     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
     },
     {
      "identidad": {
@@ -17782,7 +17692,7 @@
       17,
       22
      ],
-     "huella": "8b67a124fe9ee6ae6a9d21e585654f4d106de4792eef9fe4450d17c18d7d3698"
+     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
     },
     {
      "identidad": {
@@ -17797,7 +17707,7 @@
       22,
       25
      ],
-     "huella": "c1bdf42613f31b3ead9a3c7f8add905e8854b2d4a25963b3278e01e72438be2c"
+     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
     },
     {
      "identidad": {
@@ -17812,7 +17722,7 @@
       25,
       27
      ],
-     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
     },
     {
      "identidad": {
@@ -17827,7 +17737,7 @@
       27,
       29
      ],
-     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
     },
     {
      "identidad": {
@@ -17842,7 +17752,7 @@
       29,
       32
      ],
-     "huella": "fc3240dcc5fed15e06b291a598864dcc6af6751003146a32810905cefe1fd28a"
+     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
     },
     {
      "identidad": {
@@ -17857,7 +17767,7 @@
       32,
       36
      ],
-     "huella": "df45c08c4dcd23243e09134f0203048ffcc11ab134718abab20ceb13904b2bd5"
+     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
     },
     {
      "identidad": {
@@ -17872,7 +17782,7 @@
       36,
       39
      ],
-     "huella": "4605c36f1641d3780aa4d60274a44beeb1827656a092939781c32b136df01b69"
+     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
     }
    ],
    "motor": "(versión del motor)"
@@ -17929,12 +17839,12 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45"
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c"
   },
   "_exportacion": {
    "driver": "csv",
    "archivo": "CSV_COMPRAS_202608_20601234567.csv",
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45",
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
    "comprobantes": [
     {
      "identidad": {
@@ -17949,7 +17859,7 @@
       0,
       3
      ],
-     "huella": "37039b5ed03ab8bdb7ceb9b55e7bf01217cfda005011e73481186eb39866d7f2"
+     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
     },
     {
      "identidad": {
@@ -17964,7 +17874,7 @@
       3,
       6
      ],
-     "huella": "738a966075db337dedad031f13a935570dfc2a5523f2caa1c3973a16cb5ccc65"
+     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
     },
     {
      "identidad": {
@@ -17979,7 +17889,7 @@
       6,
       9
      ],
-     "huella": "100325a0d0c959f774cdcd8dd81a2509ec77656df5eb2e06b222d0bba12d7cc6"
+     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
     },
     {
      "identidad": {
@@ -17994,7 +17904,7 @@
       9,
       12
      ],
-     "huella": "2bf233985b8c6525cf5e5b2ac8cf425fa07d36d5407167bffbb306dd660601d8"
+     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
     },
     {
      "identidad": {
@@ -18009,7 +17919,7 @@
       12,
       17
      ],
-     "huella": "dc9341fd3eb9379c8ffffed998f6f63de5a7c6e37a062886dabb312a64c07002"
+     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
     },
     {
      "identidad": {
@@ -18024,7 +17934,7 @@
       17,
       22
      ],
-     "huella": "8b67a124fe9ee6ae6a9d21e585654f4d106de4792eef9fe4450d17c18d7d3698"
+     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
     },
     {
      "identidad": {
@@ -18039,7 +17949,7 @@
       22,
       25
      ],
-     "huella": "c1bdf42613f31b3ead9a3c7f8add905e8854b2d4a25963b3278e01e72438be2c"
+     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
     },
     {
      "identidad": {
@@ -18054,7 +17964,7 @@
       25,
       27
      ],
-     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
     },
     {
      "identidad": {
@@ -18069,7 +17979,7 @@
       27,
       29
      ],
-     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
     },
     {
      "identidad": {
@@ -18084,7 +17994,7 @@
       29,
       32
      ],
-     "huella": "fc3240dcc5fed15e06b291a598864dcc6af6751003146a32810905cefe1fd28a"
+     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
     },
     {
      "identidad": {
@@ -18099,7 +18009,7 @@
       32,
       36
      ],
-     "huella": "df45c08c4dcd23243e09134f0203048ffcc11ab134718abab20ceb13904b2bd5"
+     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
     },
     {
      "identidad": {
@@ -18114,13 +18024,13 @@
       36,
       39
      ],
-     "huella": "4605c36f1641d3780aa4d60274a44beeb1827656a092939781c32b136df01b69"
+     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
     }
    ],
    "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
-  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp;clase;doc_id_externo\r\n11;080001;2026-08-03;631101;D;1000.00;PEN;;GRILLETES Y CONECTORES;;OBRA01;;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18;principal;01;;gasto;c01\r\n11;080001;2026-08-03;401111;D;180.00;PEN;;GRILLETES Y CONECTORES;;;;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18;igv;01;;pasivo;c01\r\n11;080001;2026-08-03;421201;H;1180.00;PEN;;GRILLETES Y CONECTORES;20607777773;;OBRA01;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18;tercero;01;;pasivo;c01\r\n11;080002;2026-08-05;631101;D;500.00;USD;3.750;REPUESTOS IMPORTADOS;;OBRA01;;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18;principal;01;;gasto;c02\r\n11;080002;2026-08-05;401111;D;90.00;USD;3.750;REPUESTOS IMPORTADOS;;;;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18;igv;01;;pasivo;c02\r\n11;080002;2026-08-05;421202;H;590.00;USD;3.750;REPUESTOS IMPORTADOS;20602222226;;OBRA01;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18;tercero;01;;pasivo;c02\r\n11;080003;2026-08-12;631101;H;100.00;PEN;;DEVOLUCION DE GRILLETES;;OBRA01;;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18;principal;07;01;gasto;c03\r\n11;080003;2026-08-12;401111;H;18.00;PEN;;DEVOLUCION DE GRILLETES;;;;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18;igv;07;01;pasivo;c03\r\n11;080003;2026-08-12;421201;D;118.00;PEN;;DEVOLUCION DE GRILLETES;20607777773;;OBRA01;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18;tercero;07;01;pasivo;c03\r\n11;080004;2026-08-13;631101;D;50.00;PEN;;INTERES POR PAGO TARDIO;;OBRA01;;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18;principal;08;01;gasto;c04\r\n11;080004;2026-08-13;401111;D;9.00;PEN;;INTERES POR PAGO TARDIO;;;;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18;igv;08;01;pasivo;c04\r\n11;080004;2026-08-13;421201;H;59.00;PEN;;INTERES POR PAGO TARDIO;20607777773;;OBRA01;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18;tercero;08;01;pasivo;c04\r\n10;080001;2026-08-10;631101;D;4200.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;OBRA01;;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18;principal;01;;gasto;c05\r\n10;080001;2026-08-10;401111;D;756.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;;;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18;igv;01;;pasivo;c05\r\n10;080001;2026-08-10;421201;H;4956.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18;tercero;01;;pasivo;c05\r\n10;080001;2026-08-10;421201;D;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18;detraccion_tercero;01;;pasivo;c05\r\n10;080001;2026-08-10;421203;H;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;;;999999999;2026-08-10;2026-08-27;FT;E001-871;2026-08-10;027;4;4956.00;18;detraccion;;01;pasivo;c05\r\n10;080002;2026-08-14;631101;D;2000.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;;OBRA01;;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18;principal;01;;gasto;c06\r\n10;080002;2026-08-14;401111;D;360.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;;;;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18;igv;01;;pasivo;c06\r\n10;080002;2026-08-14;421202;H;2360.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18;tercero;01;;pasivo;c06\r\n10;080002;2026-08-14;421202;D;283.24;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18;detraccion_tercero;01;;pasivo;c06\r\n10;080002;2026-08-14;421203;H;283.24;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;;;999999999;2026-08-14;2026-09-13;FT;F002-45;2026-08-14;037;12;2360.00;18;detraccion;;01;pasivo;c06\r\n15;080001;2026-08-18;632101;D;1500.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;OBRA01;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;;principal;02;;gasto;c07\r\n15;080001;2026-08-18;401721;H;120.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;;retencion_4ta;02;;pasivo;c07\r\n15;080001;2026-08-18;424101;H;1380.00;PEN;;ASESORIA CONTABLE DE AGOSTO;20607777773;;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;;tercero;02;;pasivo;c07\r\n15;080002;2026-08-19;632101;D;1200.00;PEN;;ASESORIA TRIBUTARIA;;OBRA01;;RH;E001-16;2026-08-19;2026-08-19;;;;;;;;principal;02;;gasto;c08\r\n15;080002;2026-08-19;424101;H;1200.00;PEN;;ASESORIA TRIBUTARIA;20607777773;;;RH;E001-16;2026-08-19;2026-08-19;;;;;;;;tercero;02;;pasivo;c08\r\n13;080001;2026-08-20;631101;D;118.00;PEN;;UTILES DE OFICINA;;OBRA01;;BV;B001-88;2026-08-20;2026-08-20;;;;;;;;principal;03;;gasto;c09\r\n13;080001;2026-08-20;421201;H;118.00;PEN;;UTILES DE OFICINA;20605555552;;OBRA01;BV;B001-88;2026-08-20;2026-08-20;;;;;;;;tercero;03;;pasivo;c09\r\n11;080005;2026-08-01;631101;D;300.00;PEN;;MATERIALES DE JUNIO;;OBRA01;;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18;principal;01;;gasto;c10\r\n11;080005;2026-08-01;401111;D;54.00;PEN;;MATERIALES DE JUNIO;;;;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18;igv;01;;pasivo;c10\r\n11;080005;2026-08-01;421201;H;354.00;PEN;;MATERIALES DE JUNIO;20677777771;;OBRA01;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18;tercero;01;;pasivo;c10\r\n11;080006;2026-08-25;636301;D;600.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;SISTEMAS;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18;principal;01;;gasto;c11\r\n11;080006;2026-08-25;632201;D;400.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;DESARROLLO;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18;principal;01;;gasto;c11\r\n11;080006;2026-08-25;401111;D;180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18;igv;01;;pasivo;c11\r\n11;080006;2026-08-25;421201;H;1180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;20677777771;;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18;tercero;01;;pasivo;c11\r\n11;080007;2026-08-26;631101;D;200.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;OBRA01;;RC;12345679;2026-08-26;2026-09-10;;;;;;;18;principal;14;;gasto;c12\r\n11;080007;2026-08-26;401111;D;36.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;;;RC;12345679;2026-08-26;2026-09-10;;;;;;;18;igv;14;;pasivo;c12\r\n11;080007;2026-08-26;421201;H;236.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;20605555552;;OBRA01;RC;12345679;2026-08-26;2026-09-10;;;;;;;18;tercero;14;;pasivo;c12\r\n"
+  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp;clase;doc_id_externo\r\n11;080001;2026-08-03;631101;D;1000.00;PEN;;GRILLETES Y CONECTORES;;OBRA01;;;F001-101;2026-08-03;2026-09-02;;;;;;;18;principal;01;;gasto;c01\r\n11;080001;2026-08-03;401111;D;180.00;PEN;;GRILLETES Y CONECTORES;;;;;F001-101;2026-08-03;2026-09-02;;;;;;;18;igv;01;;pasivo;c01\r\n11;080001;2026-08-03;421201;H;1180.00;PEN;;GRILLETES Y CONECTORES;20607777773;;OBRA01;;F001-101;2026-08-03;2026-09-02;;;;;;;18;tercero;01;;pasivo;c01\r\n11;080002;2026-08-05;631101;D;500.00;USD;3.750;REPUESTOS IMPORTADOS;;OBRA01;;;F001-102;2026-08-05;2026-09-04;;;;;;;18;principal;01;;gasto;c02\r\n11;080002;2026-08-05;401111;D;90.00;USD;3.750;REPUESTOS IMPORTADOS;;;;;F001-102;2026-08-05;2026-09-04;;;;;;;18;igv;01;;pasivo;c02\r\n11;080002;2026-08-05;421202;H;590.00;USD;3.750;REPUESTOS IMPORTADOS;20602222226;;OBRA01;;F001-102;2026-08-05;2026-09-04;;;;;;;18;tercero;01;;pasivo;c02\r\n11;080003;2026-08-12;631101;H;100.00;PEN;;DEVOLUCION DE GRILLETES;;OBRA01;;;FC01-5;2026-08-12;2026-08-12;;F001-101;2026-08-03;;;;18;principal;07;01;gasto;c03\r\n11;080003;2026-08-12;401111;H;18.00;PEN;;DEVOLUCION DE GRILLETES;;;;;FC01-5;2026-08-12;2026-08-12;;F001-101;2026-08-03;;;;18;igv;07;01;pasivo;c03\r\n11;080003;2026-08-12;421201;D;118.00;PEN;;DEVOLUCION DE GRILLETES;20607777773;;OBRA01;;FC01-5;2026-08-12;2026-08-12;;F001-101;2026-08-03;;;;18;tercero;07;01;pasivo;c03\r\n11;080004;2026-08-13;631101;D;50.00;PEN;;INTERES POR PAGO TARDIO;;OBRA01;;;FD01-2;2026-08-13;2026-08-13;;F001-101;2026-08-03;;;;18;principal;08;01;gasto;c04\r\n11;080004;2026-08-13;401111;D;9.00;PEN;;INTERES POR PAGO TARDIO;;;;;FD01-2;2026-08-13;2026-08-13;;F001-101;2026-08-03;;;;18;igv;08;01;pasivo;c04\r\n11;080004;2026-08-13;421201;H;59.00;PEN;;INTERES POR PAGO TARDIO;20607777773;;OBRA01;;FD01-2;2026-08-13;2026-08-13;;F001-101;2026-08-03;;;;18;tercero;08;01;pasivo;c04\r\n10;080001;2026-08-10;631101;D;4200.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;OBRA01;;;E001-871;2026-08-10;2026-08-27;;;;;;;18;principal;01;;gasto;c05\r\n10;080001;2026-08-10;401111;D;756.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;;;;E001-871;2026-08-10;2026-08-27;;;;;;;18;igv;01;;pasivo;c05\r\n10;080001;2026-08-10;421201;H;4956.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;;E001-871;2026-08-10;2026-08-27;;;;;;;18;tercero;01;;pasivo;c05\r\n10;080001;2026-08-10;421201;D;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;;E001-871;2026-08-10;2026-08-27;;;;;;;18;detraccion_tercero;01;;pasivo;c05\r\n10;080001;2026-08-10;421203;H;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;;;999999999;2026-08-10;2026-08-27;;E001-871;2026-08-10;027;4;4956.00;18;detraccion;;01;pasivo;c05\r\n10;080002;2026-08-14;631101;D;2000.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;;OBRA01;;;F002-45;2026-08-14;2026-09-13;;;;;;;18;principal;01;;gasto;c06\r\n10;080002;2026-08-14;401111;D;360.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;;;;;F002-45;2026-08-14;2026-09-13;;;;;;;18;igv;01;;pasivo;c06\r\n10;080002;2026-08-14;421202;H;2360.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;;F002-45;2026-08-14;2026-09-13;;;;;;;18;tercero;01;;pasivo;c06\r\n10;080002;2026-08-14;421202;D;283.24;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;;F002-45;2026-08-14;2026-09-13;;;;;;;18;detraccion_tercero;01;;pasivo;c06\r\n10;080002;2026-08-14;421203;H;283.24;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;;;999999999;2026-08-14;2026-09-13;;F002-45;2026-08-14;037;12;2360.00;18;detraccion;;01;pasivo;c06\r\n15;080001;2026-08-18;632101;D;1500.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;OBRA01;;;E001-15;2026-08-18;2026-08-18;;;;;;;;principal;02;;gasto;c07\r\n15;080001;2026-08-18;401721;H;120.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;;;;E001-15;2026-08-18;2026-08-18;;;;;;;;retencion_4ta;02;;pasivo;c07\r\n15;080001;2026-08-18;424101;H;1380.00;PEN;;ASESORIA CONTABLE DE AGOSTO;20607777773;;;;E001-15;2026-08-18;2026-08-18;;;;;;;;tercero;02;;pasivo;c07\r\n15;080002;2026-08-19;632101;D;1200.00;PEN;;ASESORIA TRIBUTARIA;;OBRA01;;;E001-16;2026-08-19;2026-08-19;;;;;;;;principal;02;;gasto;c08\r\n15;080002;2026-08-19;424101;H;1200.00;PEN;;ASESORIA TRIBUTARIA;20607777773;;;;E001-16;2026-08-19;2026-08-19;;;;;;;;tercero;02;;pasivo;c08\r\n13;080001;2026-08-20;631101;D;118.00;PEN;;UTILES DE OFICINA;;OBRA01;;;B001-88;2026-08-20;2026-08-20;;;;;;;;principal;03;;gasto;c09\r\n13;080001;2026-08-20;421201;H;118.00;PEN;;UTILES DE OFICINA;20605555552;;OBRA01;;B001-88;2026-08-20;2026-08-20;;;;;;;;tercero;03;;pasivo;c09\r\n11;080005;2026-08-01;631101;D;300.00;PEN;;MATERIALES DE JUNIO;;OBRA01;;;F001-90;2026-06-20;2026-07-20;;;;;;;18;principal;01;;gasto;c10\r\n11;080005;2026-08-01;401111;D;54.00;PEN;;MATERIALES DE JUNIO;;;;;F001-90;2026-06-20;2026-07-20;;;;;;;18;igv;01;;pasivo;c10\r\n11;080005;2026-08-01;421201;H;354.00;PEN;;MATERIALES DE JUNIO;20677777771;;OBRA01;;F001-90;2026-06-20;2026-07-20;;;;;;;18;tercero;01;;pasivo;c10\r\n11;080006;2026-08-25;636301;D;600.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;SISTEMAS;;;F001-103;2026-08-25;2026-09-24;;;;;;;18;principal;01;;gasto;c11\r\n11;080006;2026-08-25;632201;D;400.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;DESARROLLO;;;F001-103;2026-08-25;2026-09-24;;;;;;;18;principal;01;;gasto;c11\r\n11;080006;2026-08-25;401111;D;180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;;;;F001-103;2026-08-25;2026-09-24;;;;;;;18;igv;01;;pasivo;c11\r\n11;080006;2026-08-25;421201;H;1180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;20677777771;;;;F001-103;2026-08-25;2026-09-24;;;;;;;18;tercero;01;;pasivo;c11\r\n11;080007;2026-08-26;631101;D;200.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;OBRA01;;;12345679;2026-08-26;2026-09-10;;;;;;;18;principal;14;;gasto;c12\r\n11;080007;2026-08-26;401111;D;36.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;;;;12345679;2026-08-26;2026-09-10;;;;;;;18;igv;14;;pasivo;c12\r\n11;080007;2026-08-26;421201;H;236.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;20605555552;;OBRA01;;12345679;2026-08-26;2026-09-10;;;;;;;18;tercero;14;;pasivo;c12\r\n"
  },
  "exportar_con_observados/csv": {
   "driver": "csv",
@@ -18173,12 +18083,12 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45"
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c"
   },
   "_exportacion": {
    "driver": "csv",
    "archivo": "CSV_COMPRAS_202608_20601234567.csv",
-   "huella": "5182c3ab375342b6338883779c97e29a562677b4b3b94134462acef31ae71c45",
+   "huella": "75c179ffa73de9d427ac2b6a3d1f2e55873416bf3b7b833bd8957745f8bfc96c",
    "comprobantes": [
     {
      "identidad": {
@@ -18193,7 +18103,7 @@
       0,
       3
      ],
-     "huella": "37039b5ed03ab8bdb7ceb9b55e7bf01217cfda005011e73481186eb39866d7f2"
+     "huella": "9d1cb0c60acbe4815f7ad1254a76291fc94def8c8998d0a501a6f68061bcc1b7"
     },
     {
      "identidad": {
@@ -18208,7 +18118,7 @@
       3,
       6
      ],
-     "huella": "738a966075db337dedad031f13a935570dfc2a5523f2caa1c3973a16cb5ccc65"
+     "huella": "bf322a98ae18884cdd7fb75fb3553c6a808b07a3e7aab5bc65a63d581ca2fffb"
     },
     {
      "identidad": {
@@ -18223,7 +18133,7 @@
       6,
       9
      ],
-     "huella": "100325a0d0c959f774cdcd8dd81a2509ec77656df5eb2e06b222d0bba12d7cc6"
+     "huella": "f7fd295b05e91ed098680a5b1ed7daa3c0cb2933537d098688098a00d3343b6e"
     },
     {
      "identidad": {
@@ -18238,7 +18148,7 @@
       9,
       12
      ],
-     "huella": "2bf233985b8c6525cf5e5b2ac8cf425fa07d36d5407167bffbb306dd660601d8"
+     "huella": "af7b85b58352d78c594bda2f143854449b16610ca095fd087a43b0c99832c7e7"
     },
     {
      "identidad": {
@@ -18253,7 +18163,7 @@
       12,
       17
      ],
-     "huella": "dc9341fd3eb9379c8ffffed998f6f63de5a7c6e37a062886dabb312a64c07002"
+     "huella": "335104626554bc92226a9fb5542c3ddfd81b8fcda12d2b25821780407948d16a"
     },
     {
      "identidad": {
@@ -18268,7 +18178,7 @@
       17,
       22
      ],
-     "huella": "8b67a124fe9ee6ae6a9d21e585654f4d106de4792eef9fe4450d17c18d7d3698"
+     "huella": "165541e183cf72afd7281fef8226995949df4ac2cf6f641c05be9faeb912640a"
     },
     {
      "identidad": {
@@ -18283,7 +18193,7 @@
       22,
       25
      ],
-     "huella": "c1bdf42613f31b3ead9a3c7f8add905e8854b2d4a25963b3278e01e72438be2c"
+     "huella": "7a279f11393829b78a5983fd96e2c2647ff588024896957898b363aeb55788ef"
     },
     {
      "identidad": {
@@ -18298,7 +18208,7 @@
       25,
       27
      ],
-     "huella": "6f2bbc83f019c728cac198ab3109aa5cc6ff55e147d28db942f90a75b13c7b1e"
+     "huella": "a903472fd613faef96ec74917e5a84b8d6811ef3635153ad04e33f982da9d79f"
     },
     {
      "identidad": {
@@ -18313,7 +18223,7 @@
       27,
       29
      ],
-     "huella": "f35d9c93156dc81974116518d60b7f1fa73460776238c4ea5f0bb17a9cb375d8"
+     "huella": "5586039458dea80979b2c33ba1e7e66312964741990be4959763df24ea0af4f6"
     },
     {
      "identidad": {
@@ -18328,7 +18238,7 @@
       29,
       32
      ],
-     "huella": "fc3240dcc5fed15e06b291a598864dcc6af6751003146a32810905cefe1fd28a"
+     "huella": "22f70e6c9a16fed289b1707212a916bb46df6a792419dc45e2f866cb6ed263cf"
     },
     {
      "identidad": {
@@ -18343,7 +18253,7 @@
       32,
       36
      ],
-     "huella": "df45c08c4dcd23243e09134f0203048ffcc11ab134718abab20ceb13904b2bd5"
+     "huella": "6a913746bf794b1fd9ee9edd10b99b2c8a60d74d7cd68c3f272bfef0d40580d6"
     },
     {
      "identidad": {
@@ -18358,13 +18268,13 @@
       36,
       39
      ],
-     "huella": "4605c36f1641d3780aa4d60274a44beeb1827656a092939781c32b136df01b69"
+     "huella": "eac8a27eeed2ce55807a9fc643f412cae806827096486cdeca9f7047a8638ccb"
     }
    ],
    "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
-  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp;clase;doc_id_externo\r\n11;080001;2026-08-03;631101;D;1000.00;PEN;;GRILLETES Y CONECTORES;;OBRA01;;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18;principal;01;;gasto;c01\r\n11;080001;2026-08-03;401111;D;180.00;PEN;;GRILLETES Y CONECTORES;;;;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18;igv;01;;pasivo;c01\r\n11;080001;2026-08-03;421201;H;1180.00;PEN;;GRILLETES Y CONECTORES;20607777773;;OBRA01;FT;F001-101;2026-08-03;2026-09-02;;;;;;;18;tercero;01;;pasivo;c01\r\n11;080002;2026-08-05;631101;D;500.00;USD;3.750;REPUESTOS IMPORTADOS;;OBRA01;;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18;principal;01;;gasto;c02\r\n11;080002;2026-08-05;401111;D;90.00;USD;3.750;REPUESTOS IMPORTADOS;;;;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18;igv;01;;pasivo;c02\r\n11;080002;2026-08-05;421202;H;590.00;USD;3.750;REPUESTOS IMPORTADOS;20602222226;;OBRA01;FT;F001-102;2026-08-05;2026-09-04;;;;;;;18;tercero;01;;pasivo;c02\r\n11;080003;2026-08-12;631101;H;100.00;PEN;;DEVOLUCION DE GRILLETES;;OBRA01;;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18;principal;07;01;gasto;c03\r\n11;080003;2026-08-12;401111;H;18.00;PEN;;DEVOLUCION DE GRILLETES;;;;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18;igv;07;01;pasivo;c03\r\n11;080003;2026-08-12;421201;D;118.00;PEN;;DEVOLUCION DE GRILLETES;20607777773;;OBRA01;NC;FC01-5;2026-08-12;2026-08-12;FT;F001-101;2026-08-03;;;;18;tercero;07;01;pasivo;c03\r\n11;080004;2026-08-13;631101;D;50.00;PEN;;INTERES POR PAGO TARDIO;;OBRA01;;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18;principal;08;01;gasto;c04\r\n11;080004;2026-08-13;401111;D;9.00;PEN;;INTERES POR PAGO TARDIO;;;;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18;igv;08;01;pasivo;c04\r\n11;080004;2026-08-13;421201;H;59.00;PEN;;INTERES POR PAGO TARDIO;20607777773;;OBRA01;ND;FD01-2;2026-08-13;2026-08-13;FT;F001-101;2026-08-03;;;;18;tercero;08;01;pasivo;c04\r\n10;080001;2026-08-10;631101;D;4200.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;OBRA01;;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18;principal;01;;gasto;c05\r\n10;080001;2026-08-10;401111;D;756.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;;;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18;igv;01;;pasivo;c05\r\n10;080001;2026-08-10;421201;H;4956.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18;tercero;01;;pasivo;c05\r\n10;080001;2026-08-10;421201;D;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;FT;E001-871;2026-08-10;2026-08-27;;;;;;;18;detraccion_tercero;01;;pasivo;c05\r\n10;080001;2026-08-10;421203;H;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;;;999999999;2026-08-10;2026-08-27;FT;E001-871;2026-08-10;027;4;4956.00;18;detraccion;;01;pasivo;c05\r\n10;080002;2026-08-14;631101;D;2000.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;;OBRA01;;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18;principal;01;;gasto;c06\r\n10;080002;2026-08-14;401111;D;360.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;;;;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18;igv;01;;pasivo;c06\r\n10;080002;2026-08-14;421202;H;2360.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18;tercero;01;;pasivo;c06\r\n10;080002;2026-08-14;421202;D;283.24;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;FT;F002-45;2026-08-14;2026-09-13;;;;;;;18;detraccion_tercero;01;;pasivo;c06\r\n10;080002;2026-08-14;421203;H;283.24;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;;;999999999;2026-08-14;2026-09-13;FT;F002-45;2026-08-14;037;12;2360.00;18;detraccion;;01;pasivo;c06\r\n15;080001;2026-08-18;632101;D;1500.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;OBRA01;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;;principal;02;;gasto;c07\r\n15;080001;2026-08-18;401721;H;120.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;;retencion_4ta;02;;pasivo;c07\r\n15;080001;2026-08-18;424101;H;1380.00;PEN;;ASESORIA CONTABLE DE AGOSTO;20607777773;;;RH;E001-15;2026-08-18;2026-08-18;;;;;;;;tercero;02;;pasivo;c07\r\n15;080002;2026-08-19;632101;D;1200.00;PEN;;ASESORIA TRIBUTARIA;;OBRA01;;RH;E001-16;2026-08-19;2026-08-19;;;;;;;;principal;02;;gasto;c08\r\n15;080002;2026-08-19;424101;H;1200.00;PEN;;ASESORIA TRIBUTARIA;20607777773;;;RH;E001-16;2026-08-19;2026-08-19;;;;;;;;tercero;02;;pasivo;c08\r\n13;080001;2026-08-20;631101;D;118.00;PEN;;UTILES DE OFICINA;;OBRA01;;BV;B001-88;2026-08-20;2026-08-20;;;;;;;;principal;03;;gasto;c09\r\n13;080001;2026-08-20;421201;H;118.00;PEN;;UTILES DE OFICINA;20605555552;;OBRA01;BV;B001-88;2026-08-20;2026-08-20;;;;;;;;tercero;03;;pasivo;c09\r\n11;080005;2026-08-01;631101;D;300.00;PEN;;MATERIALES DE JUNIO;;OBRA01;;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18;principal;01;;gasto;c10\r\n11;080005;2026-08-01;401111;D;54.00;PEN;;MATERIALES DE JUNIO;;;;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18;igv;01;;pasivo;c10\r\n11;080005;2026-08-01;421201;H;354.00;PEN;;MATERIALES DE JUNIO;20677777771;;OBRA01;FT;F001-90;2026-06-20;2026-07-20;;;;;;;18;tercero;01;;pasivo;c10\r\n11;080006;2026-08-25;636301;D;600.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;SISTEMAS;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18;principal;01;;gasto;c11\r\n11;080006;2026-08-25;632201;D;400.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;DESARROLLO;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18;principal;01;;gasto;c11\r\n11;080006;2026-08-25;401111;D;180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18;igv;01;;pasivo;c11\r\n11;080006;2026-08-25;421201;H;1180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;20677777771;;;FT;F001-103;2026-08-25;2026-09-24;;;;;;;18;tercero;01;;pasivo;c11\r\n11;080007;2026-08-26;631101;D;200.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;OBRA01;;RC;12345679;2026-08-26;2026-09-10;;;;;;;18;principal;14;;gasto;c12\r\n11;080007;2026-08-26;401111;D;36.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;;;RC;12345679;2026-08-26;2026-09-10;;;;;;;18;igv;14;;pasivo;c12\r\n11;080007;2026-08-26;421201;H;236.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;20605555552;;OBRA01;RC;12345679;2026-08-26;2026-09-10;;;;;;;18;tercero;14;;pasivo;c12\r\n"
+  "texto": "sub_diario;correlativo;fecha;cuenta;debe_haber;importe;moneda;tipo_cambio;glosa;contraparte_doc;centro_costo;anexo_auxiliar;doc_tipo;doc_serie_numero;doc_fecha_emision;doc_fecha_vencimiento;ref_tipo;ref_serie_numero;ref_fecha;detraccion_codigo;detraccion_tasa;detraccion_base;tasa_igv;rol;doc_tipo_cp;ref_tipo_cp;clase;doc_id_externo\r\n11;080001;2026-08-03;631101;D;1000.00;PEN;;GRILLETES Y CONECTORES;;OBRA01;;;F001-101;2026-08-03;2026-09-02;;;;;;;18;principal;01;;gasto;c01\r\n11;080001;2026-08-03;401111;D;180.00;PEN;;GRILLETES Y CONECTORES;;;;;F001-101;2026-08-03;2026-09-02;;;;;;;18;igv;01;;pasivo;c01\r\n11;080001;2026-08-03;421201;H;1180.00;PEN;;GRILLETES Y CONECTORES;20607777773;;OBRA01;;F001-101;2026-08-03;2026-09-02;;;;;;;18;tercero;01;;pasivo;c01\r\n11;080002;2026-08-05;631101;D;500.00;USD;3.750;REPUESTOS IMPORTADOS;;OBRA01;;;F001-102;2026-08-05;2026-09-04;;;;;;;18;principal;01;;gasto;c02\r\n11;080002;2026-08-05;401111;D;90.00;USD;3.750;REPUESTOS IMPORTADOS;;;;;F001-102;2026-08-05;2026-09-04;;;;;;;18;igv;01;;pasivo;c02\r\n11;080002;2026-08-05;421202;H;590.00;USD;3.750;REPUESTOS IMPORTADOS;20602222226;;OBRA01;;F001-102;2026-08-05;2026-09-04;;;;;;;18;tercero;01;;pasivo;c02\r\n11;080003;2026-08-12;631101;H;100.00;PEN;;DEVOLUCION DE GRILLETES;;OBRA01;;;FC01-5;2026-08-12;2026-08-12;;F001-101;2026-08-03;;;;18;principal;07;01;gasto;c03\r\n11;080003;2026-08-12;401111;H;18.00;PEN;;DEVOLUCION DE GRILLETES;;;;;FC01-5;2026-08-12;2026-08-12;;F001-101;2026-08-03;;;;18;igv;07;01;pasivo;c03\r\n11;080003;2026-08-12;421201;D;118.00;PEN;;DEVOLUCION DE GRILLETES;20607777773;;OBRA01;;FC01-5;2026-08-12;2026-08-12;;F001-101;2026-08-03;;;;18;tercero;07;01;pasivo;c03\r\n11;080004;2026-08-13;631101;D;50.00;PEN;;INTERES POR PAGO TARDIO;;OBRA01;;;FD01-2;2026-08-13;2026-08-13;;F001-101;2026-08-03;;;;18;principal;08;01;gasto;c04\r\n11;080004;2026-08-13;401111;D;9.00;PEN;;INTERES POR PAGO TARDIO;;;;;FD01-2;2026-08-13;2026-08-13;;F001-101;2026-08-03;;;;18;igv;08;01;pasivo;c04\r\n11;080004;2026-08-13;421201;H;59.00;PEN;;INTERES POR PAGO TARDIO;20607777773;;OBRA01;;FD01-2;2026-08-13;2026-08-13;;F001-101;2026-08-03;;;;18;tercero;08;01;pasivo;c04\r\n10;080001;2026-08-10;631101;D;4200.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;OBRA01;;;E001-871;2026-08-10;2026-08-27;;;;;;;18;principal;01;;gasto;c05\r\n10;080001;2026-08-10;401111;D;756.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;;;;;E001-871;2026-08-10;2026-08-27;;;;;;;18;igv;01;;pasivo;c05\r\n10;080001;2026-08-10;421201;H;4956.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;;E001-871;2026-08-10;2026-08-27;;;;;;;18;tercero;01;;pasivo;c05\r\n10;080001;2026-08-10;421201;D;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;OBRA01;;E001-871;2026-08-10;2026-08-27;;;;;;;18;detraccion_tercero;01;;pasivo;c05\r\n10;080001;2026-08-10;421203;H;198.00;PEN;;SERVICIO DE TRANSPORTE DE MATERIALES;20602222226;;;;999999999;2026-08-10;2026-08-27;;E001-871;2026-08-10;027;4;4956.00;18;detraccion;;01;pasivo;c05\r\n10;080002;2026-08-14;631101;D;2000.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;;OBRA01;;;F002-45;2026-08-14;2026-09-13;;;;;;;18;principal;01;;gasto;c06\r\n10;080002;2026-08-14;401111;D;360.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;;;;;F002-45;2026-08-14;2026-09-13;;;;;;;18;igv;01;;pasivo;c06\r\n10;080002;2026-08-14;421202;H;2360.00;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;;F002-45;2026-08-14;2026-09-13;;;;;;;18;tercero;01;;pasivo;c06\r\n10;080002;2026-08-14;421202;D;283.24;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;OBRA01;;F002-45;2026-08-14;2026-09-13;;;;;;;18;detraccion_tercero;01;;pasivo;c06\r\n10;080002;2026-08-14;421203;H;283.24;USD;3.700;MANTENIMIENTO DE EQUIPOS;20633333336;;;;999999999;2026-08-14;2026-09-13;;F002-45;2026-08-14;037;12;2360.00;18;detraccion;;01;pasivo;c06\r\n15;080001;2026-08-18;632101;D;1500.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;OBRA01;;;E001-15;2026-08-18;2026-08-18;;;;;;;;principal;02;;gasto;c07\r\n15;080001;2026-08-18;401721;H;120.00;PEN;;ASESORIA CONTABLE DE AGOSTO;;;;;E001-15;2026-08-18;2026-08-18;;;;;;;;retencion_4ta;02;;pasivo;c07\r\n15;080001;2026-08-18;424101;H;1380.00;PEN;;ASESORIA CONTABLE DE AGOSTO;20607777773;;;;E001-15;2026-08-18;2026-08-18;;;;;;;;tercero;02;;pasivo;c07\r\n15;080002;2026-08-19;632101;D;1200.00;PEN;;ASESORIA TRIBUTARIA;;OBRA01;;;E001-16;2026-08-19;2026-08-19;;;;;;;;principal;02;;gasto;c08\r\n15;080002;2026-08-19;424101;H;1200.00;PEN;;ASESORIA TRIBUTARIA;20607777773;;;;E001-16;2026-08-19;2026-08-19;;;;;;;;tercero;02;;pasivo;c08\r\n13;080001;2026-08-20;631101;D;118.00;PEN;;UTILES DE OFICINA;;OBRA01;;;B001-88;2026-08-20;2026-08-20;;;;;;;;principal;03;;gasto;c09\r\n13;080001;2026-08-20;421201;H;118.00;PEN;;UTILES DE OFICINA;20605555552;;OBRA01;;B001-88;2026-08-20;2026-08-20;;;;;;;;tercero;03;;pasivo;c09\r\n11;080005;2026-08-01;631101;D;300.00;PEN;;MATERIALES DE JUNIO;;OBRA01;;;F001-90;2026-06-20;2026-07-20;;;;;;;18;principal;01;;gasto;c10\r\n11;080005;2026-08-01;401111;D;54.00;PEN;;MATERIALES DE JUNIO;;;;;F001-90;2026-06-20;2026-07-20;;;;;;;18;igv;01;;pasivo;c10\r\n11;080005;2026-08-01;421201;H;354.00;PEN;;MATERIALES DE JUNIO;20677777771;;OBRA01;;F001-90;2026-06-20;2026-07-20;;;;;;;18;tercero;01;;pasivo;c10\r\n11;080006;2026-08-25;636301;D;600.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;SISTEMAS;;;F001-103;2026-08-25;2026-09-24;;;;;;;18;principal;01;;gasto;c11\r\n11;080006;2026-08-25;632201;D;400.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;DESARROLLO;;;F001-103;2026-08-25;2026-09-24;;;;;;;18;principal;01;;gasto;c11\r\n11;080006;2026-08-25;401111;D;180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;;;;;F001-103;2026-08-25;2026-09-24;;;;;;;18;igv;01;;pasivo;c11\r\n11;080006;2026-08-25;421201;H;1180.00;PEN;;LICENCIAS Y EQUIPOS DE OFICINA;20677777771;;;;F001-103;2026-08-25;2026-09-24;;;;;;;18;tercero;01;;pasivo;c11\r\n11;080007;2026-08-26;631101;D;200.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;OBRA01;;;12345679;2026-08-26;2026-09-10;;;;;;;18;principal;14;;gasto;c12\r\n11;080007;2026-08-26;401111;D;36.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;;;;;12345679;2026-08-26;2026-09-10;;;;;;;18;igv;14;;pasivo;c12\r\n11;080007;2026-08-26;421201;H;236.00;PEN;;ENERGIA ELECTRICA DE AGOSTO;20605555552;;OBRA01;;12345679;2026-08-26;2026-09-10;;;;;;;18;tercero;14;;pasivo;c12\r\n"
  },
  "diagnosticar/sire": {
   "libro": {
@@ -18895,7 +18805,6 @@
     "glosa": "GRILLETES Y CONECTORES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -18916,7 +18825,6 @@
     "moneda": "PEN",
     "glosa": "GRILLETES Y CONECTORES",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -18938,7 +18846,6 @@
     "glosa": "GRILLETES Y CONECTORES",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "id_externo": "c01",
@@ -18961,7 +18868,6 @@
     "glosa": "REPUESTOS IMPORTADOS",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -18983,7 +18889,6 @@
     "tipo_cambio": "3.750",
     "glosa": "REPUESTOS IMPORTADOS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -19006,7 +18911,6 @@
     "glosa": "REPUESTOS IMPORTADOS",
     "contraparte_doc": "20602222226",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-102",
      "id_externo": "c02",
@@ -19028,7 +18932,6 @@
     "glosa": "DEVOLUCION DE GRILLETES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "CC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -19036,7 +18939,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -19055,7 +18957,6 @@
     "moneda": "PEN",
     "glosa": "DEVOLUCION DE GRILLETES",
     "documento": {
-     "tipo": "CC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -19063,7 +18964,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -19083,7 +18983,6 @@
     "glosa": "DEVOLUCION DE GRILLETES",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "CC",
      "tipo_cp": "07",
      "serie_numero": "FC01-5",
      "id_externo": "c03",
@@ -19091,7 +18990,6 @@
      "fecha_vencimiento": "2026-08-12"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -19111,7 +19009,6 @@
     "glosa": "INTERES POR PAGO TARDIO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "CD",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -19119,7 +19016,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -19138,7 +19034,6 @@
     "moneda": "PEN",
     "glosa": "INTERES POR PAGO TARDIO",
     "documento": {
-     "tipo": "CD",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -19146,7 +19041,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -19166,7 +19060,6 @@
     "glosa": "INTERES POR PAGO TARDIO",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "CD",
      "tipo_cp": "08",
      "serie_numero": "FD01-2",
      "id_externo": "c04",
@@ -19174,7 +19067,6 @@
      "fecha_vencimiento": "2026-08-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-101",
      "fecha": "2026-08-03"
@@ -19194,7 +19086,6 @@
     "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -19215,7 +19106,6 @@
     "moneda": "PEN",
     "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -19237,7 +19127,6 @@
     "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
     "contraparte_doc": "20602222226",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -19259,7 +19148,6 @@
     "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES",
     "contraparte_doc": "20602222226",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "id_externo": "c05",
@@ -19287,7 +19175,6 @@
      "fecha_vencimiento": "2026-08-27"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "E001-871",
      "fecha": "2026-08-10"
@@ -19314,7 +19201,6 @@
     "glosa": "MANTENIMIENTO DE EQUIPOS",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -19336,7 +19222,6 @@
     "tipo_cambio": "3.700",
     "glosa": "MANTENIMIENTO DE EQUIPOS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -19359,7 +19244,6 @@
     "glosa": "MANTENIMIENTO DE EQUIPOS",
     "contraparte_doc": "20633333336",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -19382,7 +19266,6 @@
     "glosa": "MANTENIMIENTO DE EQUIPOS",
     "contraparte_doc": "20633333336",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "id_externo": "c06",
@@ -19411,7 +19294,6 @@
      "fecha_vencimiento": "2026-09-13"
     },
     "referencia": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F002-45",
      "fecha": "2026-08-14"
@@ -19437,7 +19319,6 @@
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -19457,7 +19338,6 @@
     "moneda": "PEN",
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -19478,7 +19358,6 @@
     "glosa": "ASESORIA CONTABLE DE AGOSTO",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-15",
      "id_externo": "c07",
@@ -19499,7 +19378,6 @@
     "glosa": "ASESORIA TRIBUTARIA",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
      "id_externo": "c08",
@@ -19520,7 +19398,6 @@
     "glosa": "ASESORIA TRIBUTARIA",
     "contraparte_doc": "20607777773",
     "documento": {
-     "tipo": "RH",
      "tipo_cp": "02",
      "serie_numero": "E001-16",
      "id_externo": "c08",
@@ -19541,7 +19418,6 @@
     "glosa": "UTILES DE OFICINA",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
      "id_externo": "c09",
@@ -19562,7 +19438,6 @@
     "glosa": "UTILES DE OFICINA",
     "contraparte_doc": "20605555552",
     "documento": {
-     "tipo": "BV",
      "tipo_cp": "03",
      "serie_numero": "B001-88",
      "id_externo": "c09",
@@ -19583,7 +19458,6 @@
     "glosa": "MATERIALES DE JUNIO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -19604,7 +19478,6 @@
     "moneda": "PEN",
     "glosa": "MATERIALES DE JUNIO",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -19626,7 +19499,6 @@
     "glosa": "MATERIALES DE JUNIO",
     "contraparte_doc": "20677777771",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-90",
      "id_externo": "c10",
@@ -19648,7 +19520,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "centro_costo": "SISTEMAS",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -19670,7 +19541,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "centro_costo": "DESARROLLO",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -19691,7 +19561,6 @@
     "moneda": "PEN",
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -19713,7 +19582,6 @@
     "glosa": "LICENCIAS Y EQUIPOS DE OFICINA",
     "contraparte_doc": "20677777771",
     "documento": {
-     "tipo": "FT",
      "tipo_cp": "01",
      "serie_numero": "F001-103",
      "id_externo": "c11",
@@ -19735,7 +19603,6 @@
     "glosa": "ENERGIA ELECTRICA DE AGOSTO",
     "centro_costo": "OBRA01",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -19756,7 +19623,6 @@
     "moneda": "PEN",
     "glosa": "ENERGIA ELECTRICA DE AGOSTO",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -19778,7 +19644,6 @@
     "glosa": "ENERGIA ELECTRICA DE AGOSTO",
     "contraparte_doc": "20605555552",
     "documento": {
-     "tipo": "RC",
      "tipo_cp": "14",
      "serie_numero": "12345679",
      "id_externo": "c12",
@@ -19808,7 +19673,7 @@
     "lineas": 39,
     "sin_sentido": 0
    },
-   "huella": "8941c3cc3e5cca5f85ce29fdf2298aa5df0b71ffd0ca297e551b77219ca5f99f",
+   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5",
    "comprobantes": [
     {
      "identidad": {
@@ -19823,7 +19688,7 @@
       0,
       3
      ],
-     "huella": "b61d7d3b39d6190adc7e0012c851109778b4c36d04401f097e792235c14f2aeb"
+     "huella": "b6a1e309d28ca88aa46ba255858861f4f0b5ae4aa6829108df84a6945f8b69b9"
     },
     {
      "identidad": {
@@ -19838,7 +19703,7 @@
       3,
       6
      ],
-     "huella": "45f4d6b73c86d234346aeee8c5ef33e4551ce370b15b17b2221c19fe72a74831"
+     "huella": "04f243773c7031a9f3a73917d27ffa029f38c42d801a8588ae49284c113efb48"
     },
     {
      "identidad": {
@@ -19853,7 +19718,7 @@
       6,
       9
      ],
-     "huella": "b6d0fcbdbf1c74a44c0b02182e75ba448b357a255ac27696b7011eda0e2f2d6e"
+     "huella": "eff0b17d033185ae8132db421d3a6b374d1c658612a2d848ec77a099a52bda3c"
     },
     {
      "identidad": {
@@ -19868,7 +19733,7 @@
       9,
       12
      ],
-     "huella": "75aedbd8a855df593822080a977c3b5ebf13defb35e50d69f7a33534b815b22b"
+     "huella": "20eb60c18241d7051824e8e34a2e483a26a4684429512e0d1a87ed5288e822b3"
     },
     {
      "identidad": {
@@ -19883,7 +19748,7 @@
       12,
       17
      ],
-     "huella": "f74f77cfe54e17c77993dd583af32aab4a0ca226b563e8239bcd86243095c95f"
+     "huella": "296d0bbdaae63f98f658439fe8efff15ad50b15c5925d1d48bd8853cad58284f"
     },
     {
      "identidad": {
@@ -19898,7 +19763,7 @@
       17,
       22
      ],
-     "huella": "5d92be4f4bb89775e3ac733fa7bfaf3b06d63c301fb3b55a175986607339d42f"
+     "huella": "b367edc4fdd3fed2005d723aa89a8206766f3bfa488ab30ce93f29de993f5ef7"
     },
     {
      "identidad": {
@@ -19913,7 +19778,7 @@
       22,
       25
      ],
-     "huella": "605b082546bcf36fdb50efd10963676efec17b8143d7f20942689942ef5bbc91"
+     "huella": "5af682bc5ca43d277a5cbfc664c1e513878fe705fbec41835d981959ede983f5"
     },
     {
      "identidad": {
@@ -19928,7 +19793,7 @@
       25,
       27
      ],
-     "huella": "44a2e0ce9a0c2384d525598e001f332add720a2b01faf05eb0b657a68e17d989"
+     "huella": "03fd2593a5a9bcad98d8de3d683aa69ef369d0d03ab416e031c1af95328b9013"
     },
     {
      "identidad": {
@@ -19943,7 +19808,7 @@
       27,
       29
      ],
-     "huella": "0c67f11e7196981f63df955a24e21ebdc9da907a881d0e06c7d63f14a82b7b18"
+     "huella": "f8452e6a42fb3fbed64c97ed86cb9fed91909b0edc54b81f39292f20f6a5d452"
     },
     {
      "identidad": {
@@ -19958,7 +19823,7 @@
       29,
       32
      ],
-     "huella": "13fb1eebaf21ef47f55bc2996857656c0663f56bb1d51912b58bce98519fe64d"
+     "huella": "9ba510db8cab33093f97841b0e64a5dbd10f4163232fa78630464c73cbfadb3a"
     },
     {
      "identidad": {
@@ -19973,7 +19838,7 @@
       32,
       36
      ],
-     "huella": "2b8b56e5ca816f2e272acbf97d8515371fc113b27c44aef6c0c8707657215af7"
+     "huella": "0fedf3904c43eb2788c8c21a684cc5ed9a2d9586e7d6225931b17a251fa5ce5a"
     },
     {
      "identidad": {
@@ -19988,7 +19853,7 @@
       36,
       39
      ],
-     "huella": "27275892638c5fdeb1d9817f8414a4b9deb685bfcac8fa6b3e32bb8dc0c97a40"
+     "huella": "88d3c72e2f496eee3f78d3bd4c06514f05ff99ad600a069efe4eb1d54903fe1e"
     }
    ],
    "motor": "(versión del motor)"
@@ -20021,12 +19886,12 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "8941c3cc3e5cca5f85ce29fdf2298aa5df0b71ffd0ca297e551b77219ca5f99f"
+   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5"
   },
   "_exportacion": {
    "driver": "starsoft",
    "archivo": "STARSOFT_COMPRAS_202608_20601234567.txt",
-   "huella": "8941c3cc3e5cca5f85ce29fdf2298aa5df0b71ffd0ca297e551b77219ca5f99f",
+   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5",
    "comprobantes": [
     {
      "identidad": {
@@ -20041,7 +19906,7 @@
       0,
       3
      ],
-     "huella": "b61d7d3b39d6190adc7e0012c851109778b4c36d04401f097e792235c14f2aeb"
+     "huella": "b6a1e309d28ca88aa46ba255858861f4f0b5ae4aa6829108df84a6945f8b69b9"
     },
     {
      "identidad": {
@@ -20056,7 +19921,7 @@
       3,
       6
      ],
-     "huella": "45f4d6b73c86d234346aeee8c5ef33e4551ce370b15b17b2221c19fe72a74831"
+     "huella": "04f243773c7031a9f3a73917d27ffa029f38c42d801a8588ae49284c113efb48"
     },
     {
      "identidad": {
@@ -20071,7 +19936,7 @@
       6,
       9
      ],
-     "huella": "b6d0fcbdbf1c74a44c0b02182e75ba448b357a255ac27696b7011eda0e2f2d6e"
+     "huella": "eff0b17d033185ae8132db421d3a6b374d1c658612a2d848ec77a099a52bda3c"
     },
     {
      "identidad": {
@@ -20086,7 +19951,7 @@
       9,
       12
      ],
-     "huella": "75aedbd8a855df593822080a977c3b5ebf13defb35e50d69f7a33534b815b22b"
+     "huella": "20eb60c18241d7051824e8e34a2e483a26a4684429512e0d1a87ed5288e822b3"
     },
     {
      "identidad": {
@@ -20101,7 +19966,7 @@
       12,
       17
      ],
-     "huella": "f74f77cfe54e17c77993dd583af32aab4a0ca226b563e8239bcd86243095c95f"
+     "huella": "296d0bbdaae63f98f658439fe8efff15ad50b15c5925d1d48bd8853cad58284f"
     },
     {
      "identidad": {
@@ -20116,7 +19981,7 @@
       17,
       22
      ],
-     "huella": "5d92be4f4bb89775e3ac733fa7bfaf3b06d63c301fb3b55a175986607339d42f"
+     "huella": "b367edc4fdd3fed2005d723aa89a8206766f3bfa488ab30ce93f29de993f5ef7"
     },
     {
      "identidad": {
@@ -20131,7 +19996,7 @@
       22,
       25
      ],
-     "huella": "605b082546bcf36fdb50efd10963676efec17b8143d7f20942689942ef5bbc91"
+     "huella": "5af682bc5ca43d277a5cbfc664c1e513878fe705fbec41835d981959ede983f5"
     },
     {
      "identidad": {
@@ -20146,7 +20011,7 @@
       25,
       27
      ],
-     "huella": "44a2e0ce9a0c2384d525598e001f332add720a2b01faf05eb0b657a68e17d989"
+     "huella": "03fd2593a5a9bcad98d8de3d683aa69ef369d0d03ab416e031c1af95328b9013"
     },
     {
      "identidad": {
@@ -20161,7 +20026,7 @@
       27,
       29
      ],
-     "huella": "0c67f11e7196981f63df955a24e21ebdc9da907a881d0e06c7d63f14a82b7b18"
+     "huella": "f8452e6a42fb3fbed64c97ed86cb9fed91909b0edc54b81f39292f20f6a5d452"
     },
     {
      "identidad": {
@@ -20176,7 +20041,7 @@
       29,
       32
      ],
-     "huella": "13fb1eebaf21ef47f55bc2996857656c0663f56bb1d51912b58bce98519fe64d"
+     "huella": "9ba510db8cab33093f97841b0e64a5dbd10f4163232fa78630464c73cbfadb3a"
     },
     {
      "identidad": {
@@ -20191,7 +20056,7 @@
       32,
       36
      ],
-     "huella": "2b8b56e5ca816f2e272acbf97d8515371fc113b27c44aef6c0c8707657215af7"
+     "huella": "0fedf3904c43eb2788c8c21a684cc5ed9a2d9586e7d6225931b17a251fa5ce5a"
     },
     {
      "identidad": {
@@ -20206,7 +20071,7 @@
       36,
       39
      ],
-     "huella": "27275892638c5fdeb1d9817f8414a4b9deb685bfcac8fa6b3e32bb8dc0c97a40"
+     "huella": "88d3c72e2f496eee3f78d3bd4c06514f05ff99ad600a069efe4eb1d54903fe1e"
     }
    ],
    "motor": "(versión del motor)"
@@ -20241,12 +20106,12 @@
    },
    "debe": "14332.24",
    "haber": "14332.24",
-   "huella": "8941c3cc3e5cca5f85ce29fdf2298aa5df0b71ffd0ca297e551b77219ca5f99f"
+   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5"
   },
   "_exportacion": {
    "driver": "starsoft",
    "archivo": "STARSOFT_COMPRAS_202608_20601234567.txt",
-   "huella": "8941c3cc3e5cca5f85ce29fdf2298aa5df0b71ffd0ca297e551b77219ca5f99f",
+   "huella": "406d60b4286b14cd218b769637f63f4765ecc5c6fddf44b3eec52f4ad35b4dc5",
    "comprobantes": [
     {
      "identidad": {
@@ -20261,7 +20126,7 @@
       0,
       3
      ],
-     "huella": "b61d7d3b39d6190adc7e0012c851109778b4c36d04401f097e792235c14f2aeb"
+     "huella": "b6a1e309d28ca88aa46ba255858861f4f0b5ae4aa6829108df84a6945f8b69b9"
     },
     {
      "identidad": {
@@ -20276,7 +20141,7 @@
       3,
       6
      ],
-     "huella": "45f4d6b73c86d234346aeee8c5ef33e4551ce370b15b17b2221c19fe72a74831"
+     "huella": "04f243773c7031a9f3a73917d27ffa029f38c42d801a8588ae49284c113efb48"
     },
     {
      "identidad": {
@@ -20291,7 +20156,7 @@
       6,
       9
      ],
-     "huella": "b6d0fcbdbf1c74a44c0b02182e75ba448b357a255ac27696b7011eda0e2f2d6e"
+     "huella": "eff0b17d033185ae8132db421d3a6b374d1c658612a2d848ec77a099a52bda3c"
     },
     {
      "identidad": {
@@ -20306,7 +20171,7 @@
       9,
       12
      ],
-     "huella": "75aedbd8a855df593822080a977c3b5ebf13defb35e50d69f7a33534b815b22b"
+     "huella": "20eb60c18241d7051824e8e34a2e483a26a4684429512e0d1a87ed5288e822b3"
     },
     {
      "identidad": {
@@ -20321,7 +20186,7 @@
       12,
       17
      ],
-     "huella": "f74f77cfe54e17c77993dd583af32aab4a0ca226b563e8239bcd86243095c95f"
+     "huella": "296d0bbdaae63f98f658439fe8efff15ad50b15c5925d1d48bd8853cad58284f"
     },
     {
      "identidad": {
@@ -20336,7 +20201,7 @@
       17,
       22
      ],
-     "huella": "5d92be4f4bb89775e3ac733fa7bfaf3b06d63c301fb3b55a175986607339d42f"
+     "huella": "b367edc4fdd3fed2005d723aa89a8206766f3bfa488ab30ce93f29de993f5ef7"
     },
     {
      "identidad": {
@@ -20351,7 +20216,7 @@
       22,
       25
      ],
-     "huella": "605b082546bcf36fdb50efd10963676efec17b8143d7f20942689942ef5bbc91"
+     "huella": "5af682bc5ca43d277a5cbfc664c1e513878fe705fbec41835d981959ede983f5"
     },
     {
      "identidad": {
@@ -20366,7 +20231,7 @@
       25,
       27
      ],
-     "huella": "44a2e0ce9a0c2384d525598e001f332add720a2b01faf05eb0b657a68e17d989"
+     "huella": "03fd2593a5a9bcad98d8de3d683aa69ef369d0d03ab416e031c1af95328b9013"
     },
     {
      "identidad": {
@@ -20381,7 +20246,7 @@
       27,
       29
      ],
-     "huella": "0c67f11e7196981f63df955a24e21ebdc9da907a881d0e06c7d63f14a82b7b18"
+     "huella": "f8452e6a42fb3fbed64c97ed86cb9fed91909b0edc54b81f39292f20f6a5d452"
     },
     {
      "identidad": {
@@ -20396,7 +20261,7 @@
       29,
       32
      ],
-     "huella": "13fb1eebaf21ef47f55bc2996857656c0663f56bb1d51912b58bce98519fe64d"
+     "huella": "9ba510db8cab33093f97841b0e64a5dbd10f4163232fa78630464c73cbfadb3a"
     },
     {
      "identidad": {
@@ -20411,7 +20276,7 @@
       32,
       36
      ],
-     "huella": "2b8b56e5ca816f2e272acbf97d8515371fc113b27c44aef6c0c8707657215af7"
+     "huella": "0fedf3904c43eb2788c8c21a684cc5ed9a2d9586e7d6225931b17a251fa5ce5a"
     },
     {
      "identidad": {
@@ -20426,7 +20291,7 @@
       36,
       39
      ],
-     "huella": "27275892638c5fdeb1d9817f8414a4b9deb685bfcac8fa6b3e32bb8dc0c97a40"
+     "huella": "88d3c72e2f496eee3f78d3bd4c06514f05ff99ad600a069efe4eb1d54903fe1e"
     }
    ],
    "motor": "(versión del motor)"

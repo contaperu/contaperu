@@ -137,10 +137,22 @@ def equivalencia_tipo(c: Comprobante, config: dict, tipo: str | None = None) -> 
     return equivalencia if isinstance(equivalencia, dict) and equivalencia.get("sigla") else None
 
 
+def sigla_de_tipo(tipo_cp: str | None, config: dict | None = None) -> str:
+    """La sigla con la que un sistema legacy llama a un tipo de la Tabla 10 (en CONCAR, su Tabla General 06), o vacío
+    si no la configuró.
+
+    La LLAMA el driver, desde la 4.0: la línea del comprobante lleva el código de SUNAT (`documento.tipo_cp`) y la
+    sigla la escribe quien conoce su tabla, en la columna que le toque. Vive aquí, y no en cada driver, porque el mapa
+    (`tipos`) es configuración del asiento y la regla es una: un tipo sin sigla no se inventa —detiene la exportación
+    antes de llegar al formato (`tipos_sin_sigla`)—."""
+    equivalencia = (config or _DEL_ASIENTO).get("tipos") or {}
+    fila = equivalencia.get(tipo_cp)
+    return str(fila["sigla"]) if isinstance(fila, dict) and fila.get("sigla") else ""
+
+
 def sigla_documento(c: Comprobante, config: dict | None = None) -> str:
     """La sigla con la que el sistema de destino llama al tipo del comprobante (en CONCAR, su Tabla General 06)."""
-    equivalencia = equivalencia_tipo(c, config or _DEL_ASIENTO)
-    return str(equivalencia["sigla"]) if equivalencia else ""
+    return sigla_de_tipo(c.tipo_cp, config or _DEL_ASIENTO)
 
 
 def tiene_detraccion(c: Comprobante) -> bool:
