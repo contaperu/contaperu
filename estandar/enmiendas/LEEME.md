@@ -65,3 +65,4 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0019](0019-anotaciones-dentro-de-la-detraccion.md) | El bloque `detraccion` admite anotaciones `_`, como la raíz | `final` |
 | [0020](0020-la-marca-de-detraccion-del-sire.md) | La marca de detracción del SIRE, y el `detraccion_codigo` que pone quien integra | `final` |
 | [0021](0021-contrapartida-y-tesoreria.md) | `contrapartida` y `tesoreria`: los dos papeles que el catálogo no sabía nombrar, y `medio_pago` en la línea | `final` |
+| [0022](0022-el-tributo-en-su-bloque.md) | El tributo sale del nombre del rol: `impuesto`, `retencion` y `recorte`, con sus bloques, y los obsoletos del catálogo | `final` |

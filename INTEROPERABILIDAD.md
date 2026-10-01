@@ -1321,7 +1321,7 @@ Tres patrones se generalizan:
 | Número de negocio | `documento.serie_numero` en cada línea; `Comprobante.clave` = (tipo, serie, número sin ceros, documento de la contraparte) | `contaperu/asiento/motor.py:126-127`, `contaperu/modelo.py:300` |
 | Id técnico en el destino | (mes, sub-diario, correlativo): lo numera el motor desde el punto de partida que da quien llama, y **cambia al re-exportar** | `contaperu/asiento/resolucion.py:306`, `contaperu/asiento/huella.py:13-15` |
 | Puntero al origen | No existe: la línea no dice de qué comprobante salió más allá de su serie-número | `contaperu/asiento/lineas.py` |
-| Motivo | `rol`: `principal`, `igv`, `retencion_4ta`, `tercero`, `detraccion_tercero`, `detraccion` | `contaperu/asiento/motor.py` |
+| Motivo | `rol`: `principal`, `impuesto`, `retencion`, `tercero`, `recorte`, `detraccion` | `contaperu/asiento/motor.py` |
 
 ### Qué tomar
 
@@ -1501,7 +1501,7 @@ LIBROS = ("venta", "compra")
 PERIODO = {"patron": "AAAAMM", "limites": limites_del_periodo, "prefijo_correlativo": mes}
 TIPOS_DOCUMENTO = {"01": {"nombre": "Factura", "invierte": False, "da_credito": True}, ...}
 REGLAS = (Regla(codigo, nivel, pedir_a, funcion, fuente), ...)       # sin fuente no se registra
-ROLES = ("igv", "retencion_4ta", "detraccion_tercero", "detraccion")  # se suman a principal y tercero
+ROLES = ("impuesto", "retencion", "recorte", "detraccion")           # se suman a principal y tercero
 def impuestos(comprobante, config, sentido) -> list[LineaDiario]: ... # emite las líneas con su rol
 CONFIGURACION_GENERAL, CONFIGURACION_DEL_ASIENTO, MONEDA_FUNCIONAL = ..., ..., "PEN"
 LECTORES, DRIVERS_POR_DEFECTO, GOLDEN = ..., ("sire", "concar", "contasis"), "compras_202601.json"
@@ -1530,7 +1530,7 @@ Sube a **0.4**, aunque un documento peruano sin `jurisdiccion` siga significando
 | Identificador | RUC, con dígito verificador | EIN o SSN de 9 dígitos, **sin** dígito verificador: solo formato; la comprobación real es TIN Matching, en red, de la aplicación (§3) |
 | Periodo | Mensual, el mismo para el libro y la declaración | Contable mensual; declaración de sales tax mensual, trimestral o anual según el estado y el volumen (§7) |
 | Impuestos | IGV nacional, crédito en compras | Sales tax por jurisdicción, costo en compras; *use tax* autoliquidado (§7) |
-| Roles | `igv`, `retencion_4ta`, detracción | `impuesto_venta*`, `impuesto_uso*`, `impuesto_uso_por_pagar*` |
+| Roles | `impuesto`, `retencion`, detracción | `impuesto_venta*`, `impuesto_uso*`, `impuesto_uso_por_pagar*` |
 | Declaración por tercero | — (el SIRE es por comprobante) | 1099-NEC hacia IRIS: el umbral de US$2,000 es regla de la jurisdicción; el CSV de la Pub 5717 es formato de un driver |
 | Destinos | CONCAR, CONTASIS, SIRE | QuickBooks, Xero, NetSuite ([REFERENCIAS.md](REFERENCIAS.md)) |
 

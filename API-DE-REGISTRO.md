@@ -324,7 +324,7 @@ Y dos detalles que solo existen aquí:
   configuración. Un código que no está en la tabla queda en blanco en todas las operaciones, así que un `000`
   inventado nunca provisiona una detracción.
 
-En el asiento son dos líneas con rol propio, `detraccion_tercero` y `detraccion`, que mueven del saldo del proveedor
+En el asiento son dos líneas con rol propio, `recorte` y `detraccion`, que mueven del saldo del proveedor
 a la cuenta de detracciones. Se ven generadas en «El recorrido, visto desde el ERP que ya tiene el dato».
 
 ### La retención, que son dos cosas distintas con el mismo nombre
@@ -333,7 +333,7 @@ Confundirlas es un error contable, y por eso el estándar las separa por nombre:
 
 | | Qué es | ¿Entra al asiento? | En el estándar |
 |---|---|---|---|
-| **Renta de 4ta categoría** | Lo que el contratante retiene de un recibo por honorarios y paga a SUNAT por cuenta del profesional | **Sí**, con rol propio `retencion_4ta` | `retencion`, hoy |
+| **Renta de 4ta categoría** | Lo que el contratante retiene de un recibo por honorarios y paga a SUNAT por cuenta del profesional | **Sí**, con rol propio `retencion` y su bloque `{codigo: "3000", categoria: "4"}` | `retencion`, hoy |
 | **Retención del IGV** | El 3 % que aplica un agente de retención designado por SUNAT, y que el XML trae en `PaymentTerms` | **No, en ninguno** — tampoco en el asiento neutral | `retencion_igv`, nombre reservado |
 
 **La del IGV no entra en ningún asiento, tampoco en el neutral**, y no es una omisión: es que **no es un hecho del
@@ -726,7 +726,7 @@ El asiento que genera, real:
 | `rol` | `cuenta` | | `importe` | |
 |---|---|---|---|---|
 | `principal` | 6321001 | D | 3000.00 | el gasto |
-| `retencion_4ta` | 401721 | H | 240.00 | lo retenido, que se le paga a SUNAT |
+| `retencion` | 401721 | H | 240.00 | lo retenido, que se le paga a SUNAT |
 | `tercero` | **424101** | H | 2760.00 | lo que se le debe al profesional: el neto |
 | `principal` | 6321001 | D | 1200.00 | el segundo recibo, sin retención |
 | `tercero` | **424101** | H | 1200.00 | aquí se le debe todo |
@@ -908,7 +908,7 @@ línea se explique sola.
 | Eje | Qué dice | Valores | Estabilidad |
 |---|---|---|---|
 | **`clase`** | Qué es la cuenta. **Se deriva** del primer dígito, así que se rellena y se valida sola | `activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto` | **Congelado.** Son los cinco valores idénticos en QuickBooks, Xero, Merge y Rutter: cualquier ERP del mundo ya sabe qué hacer con ellos |
-| **`rol`** | Qué papel cumple en la operación peruana | `principal`, `igv`, `retencion_4ta`, `tercero`, `detraccion_tercero`, `detraccion`… | **Catálogo publicado y versionado**, no un enum cerrado dentro del esquema: crece sin cambiar la versión del documento |
+| **`rol`** | Qué papel cumple en la operación peruana | `principal`, `impuesto`, `retencion`, `tercero`, `recorte`, `detraccion`… | **Catálogo publicado y versionado**, no un enum cerrado dentro del esquema: crece sin cambiar la versión del documento |
 
 Los dos ejes son independientes, y es lo que hace que la misma línea se lea igual en compras y en ventas:
 
@@ -970,7 +970,7 @@ diccionario `plan_de_cuentas`.
     "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026",
     "documento": { "…": "el mismo de arriba" } },
 
-  { "cuenta": "421201", "clase": "pasivo", "debe_haber": "D", "importe": "1416.00", "rol": "detraccion_tercero",
+  { "cuenta": "421201", "clase": "pasivo", "debe_haber": "D", "importe": "1416.00", "rol": "recorte",
     "fecha": "2026-01-15", "moneda": "PEN",
     "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01",
     "glosa": "SERVICIO DE MANTENIMIENTO ENERO 2026",
@@ -1231,7 +1231,7 @@ La propuesta, en tres reglas:
 
    ```json
    { "cuenta": "401111", "clase": "pasivo", "debe_haber": "D", "importe": "1800.00",
-     "rol": "igv", "centro_costo": "OBRA01", "tasa_igv": "18",
+     "rol": "impuesto", "centro_costo": "OBRA01", "tasa_igv": "18",
      "documento": { "id_externo": "compra-123", "serie_numero": "F001-123" } }
    ```
 
@@ -1286,7 +1286,7 @@ motor devuelve hoy; lo que la 0.4 añade es `clase`, `documento.id_externo` y el
                      "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
 
     { "cuenta": "401111", "clase": "pasivo", "debe_haber": "D", "importe": "1800.00",
-      "rol": "igv", "fecha": "2026-01-15", "moneda": "PEN", "tasa_igv": "18",
+      "rol": "impuesto", "fecha": "2026-01-15", "moneda": "PEN", "tasa_igv": "18",
       "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026",
       "documento": { "id_externo": "compra-123", "…": "el mismo de arriba" } },
 
@@ -1296,7 +1296,7 @@ motor devuelve hoy; lo que la 0.4 añade es `clase`, `documento.id_externo` y el
       "documento": { "id_externo": "compra-123", "…": "el mismo de arriba" } },
 
     { "cuenta": "421201", "clase": "pasivo", "debe_haber": "D", "importe": "1416.00",
-      "rol": "detraccion_tercero", "fecha": "2026-01-15", "moneda": "PEN",
+      "rol": "recorte", "fecha": "2026-01-15", "moneda": "PEN",
       "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01",
       "documento": { "id_externo": "compra-123", "…": "el mismo de arriba" } },
 
@@ -1390,14 +1390,14 @@ el vocabulario de un legacy—. Este es el asiento real de la compra del ejemplo
 | `principal` | 6343001 | D | 10000.00 |
 | `igv` | 401111 | D | 1800.00 |
 | `tercero` | 421201 | H | 11800.00 |
-| `detraccion_tercero` | 421201 | D | 1416.00 |
+| `recorte` | 421201 | D | 1416.00 |
 | `detraccion` | 421203 | H | 1416.00 |
 
 Cada línea entera, y el archivo que se descarga, están en «El botón «Generar asientos»».
 
 **Lo que hace ese asiento portable entre ERPs es `rol`, no la cuenta.** Un sistema que quiera el IGV en una columna
 aparte busca la línea por su rol, porque la cuenta `401111` la elige cada empresa pero «esta línea es el IGV» vale
-para todas. Los roles son `principal`, `igv`, `retencion_4ta`, `tercero`, `detraccion_tercero` y `detraccion`.
+para todas. Los roles son `principal`, `impuesto`, `retencion`, `tercero`, `recorte` y `detraccion`.
 
 ---
 
@@ -1471,13 +1471,13 @@ limpio. Este es el archivo que produce, generado por el motor para la compra del
     "documento": { "tipo_cp": "01", "serie_numero": "F001-123", "id_externo": "compra-123",
                    "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
 
-  { "cuenta": "401111", "debe_haber": "D", "importe": "1800.00", "rol": "igv", "clase": "pasivo",
+  { "cuenta": "401111", "debe_haber": "D", "importe": "1800.00", "rol": "impuesto", "clase": "pasivo",
     "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026", "documento": { "…": "el mismo de arriba" } },
 
   { "cuenta": "421201", "debe_haber": "H", "importe": "11800.00", "rol": "tercero", "clase": "pasivo",
     "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": { "…": "el mismo de arriba" } },
 
-  { "cuenta": "421201", "debe_haber": "D", "importe": "1416.00", "rol": "detraccion_tercero", "clase": "pasivo",
+  { "cuenta": "421201", "debe_haber": "D", "importe": "1416.00", "rol": "recorte", "clase": "pasivo",
     "contraparte_doc": "20131312955", "anexo_auxiliar": "OBRA01", "documento": { "…": "el mismo de arriba" } },
 
   { "cuenta": "421203", "debe_haber": "H", "importe": "1416.00", "rol": "detraccion", "clase": "pasivo",
@@ -1699,7 +1699,7 @@ código, el catálogo lo refleja y ya. Lo que se gobierna es solo lo que este es
 > y vale igual; donde dice «los seis» hoy son ocho, y dos de ellos el motor **no los emite**.
 
 **Los seis roles se quedan como están, y son solo de compras y ventas.** `principal`, `igv`, `tercero`,
-`retencion_4ta`, `detraccion_tercero` y `detraccion` cubren completos los dos libros que el motor genera: una venta
+`retencion`, `recorte` y `detraccion` cubren completos los dos libros que el motor genera: una venta
 usa tres, una compra hasta seis, y la nota de crédito no añade ninguno porque reusa los mismos con los sentidos
 invertidos.
 

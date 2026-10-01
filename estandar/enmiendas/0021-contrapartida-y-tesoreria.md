@@ -81,6 +81,10 @@ exactamente las mismas líneas que antes. Un documento de ayer vale hoy y signif
 
 ## Hacia dónde va el catálogo, dicho a propósito
 
+> **Esto ya pasó.** Lo de abajo se escribió el 1-oct-2026 anunciando tres renombrados, y los tres entraron ese mismo
+> día con la 5.0: [enmienda 0022](0022-el-tributo-en-su-bloque.md). Se deja tal cual, porque es el registro de lo que
+> se sabía al escribir esta enmienda.
+
 Para que quien integre no se lo encuentre de golpe. El principio al que va este catálogo es **un rol dice qué hace la
 línea; el tributo, cuando lo hay, va en su bloque** — que es lo que `detraccion` ya hace con su código y su tasa, y lo
 que `igv` y `retencion_4ta` no hacen porque meten el tributo en el nombre. El modelo completo son siete papeles:
@@ -90,7 +94,8 @@ Faltan tres, y no han entrado por dos motivos que conviene dejar escritos:
 
 - **Un rol genérico no entra antes que el catálogo que lo hace genérico.** `retencion` sin el código de su tributo no
   puede decir «de 4ta»: sería *peor* que `retencion_4ta`, y un valor publicado no se retira nunca. Y para `impuesto`
-  hace falta que el **Catálogo 05** entre antes como catálogo con su fuente — hoy son tres constantes sueltas del
-  lector de XML.
+  hace falta que el **Catálogo 05** entre antes como catálogo con su fuente — hoy son nueve constantes sueltas de
+  `catalogos.py`, que solo consume el lector de XML. *(Esta enmienda decía «tres constantes sueltas del lector de XML»:
+  eran nueve y no viven en el lector. Corregido al contarlas de verdad en la 5.0.)*
 - **Los tres son renombrados, e invalidan todas las huellas guardadas.** Así que entran los tres a la vez, con el motor
   adoptándolos, en una versión mayor. Moverlas dos veces sería el doble de daño por el mismo beneficio.

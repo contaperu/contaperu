@@ -229,10 +229,13 @@ adivinar:
   único que un ERP de fuera entiende sin conocer el PCGE. **Con `clase`, `debe_haber` e `importe` se puede
   contabilizar una línea aunque no se conozca su `rol`**: es la regla de degradación que permite que el catálogo de
   roles crezca sin romper a nadie.
-- **`rol`** — qué papel cumple: `principal` (el gasto en compras, el ingreso en ventas), `igv`,
-  `retencion_4ta`, `tercero` (el proveedor o el cliente), `detraccion_tercero` y `detraccion`. Un ERP
-  que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su cuenta, que la elige
-  cada empresa.
+- **`rol`** — qué papel cumple: `principal` (el gasto en compras, el ingreso en ventas), `impuesto`,
+  `retencion`, `tercero` (el proveedor o el cliente), `recorte` (lo que no se le paga al tercero) y
+  `detraccion`. Un ERP que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su
+  cuenta, que la elige cada empresa. **El rol dice qué HACE la línea, no de qué tributo es**: eso lo dice
+  su bloque, `impuesto` o `retencion`, con el código del Catálogo 05. Hasta la 5.0 dos roles metían el
+  tributo en su nombre —`igv` y `retencion_4ta`—, y siguen publicados y marcados en `obsoletos`
+  ([enmienda 0022](enmiendas/0022-el-tributo-en-su-bloque.md)).
 - **`documento.tipo_cp`** y **`referencia.tipo_cp`** — el código SUNAT (Tabla 10). Es el que manda
   (regla 4), y desde la 4.0 el único que viaja: la sigla del ERP la pone su driver (enmienda 0018). La línea `detraccion`
   no lleva `tipo_cp`: su documento es la constancia pendiente, no un comprobante de SUNAT.

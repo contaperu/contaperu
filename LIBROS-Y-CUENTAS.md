@@ -1,12 +1,19 @@
 # Libros y cuentas: el PLE como suelo del estándar, y el modelo de cuentas de los ERP abiertos
 
-**Estado: documento de trabajo, escrito el 1-oct-2026 sobre la librería 4.1.0 y `open-accounting` 1.0.** Nada de lo
-que aquí se propone está implementado, y este documento **no es normativo**: lo normativo es
+**Estado: documento de trabajo, escrito el 1-oct-2026 sobre la librería 4.1.0 y `open-accounting` 1.0.** Este
+documento **no es normativo**: lo normativo es
 [`estandar/LEEME.md`](estandar/LEEME.md) y lo que valide su esquema. Lo que está comprobado contra fuente primaria se
 cita con su norma o su URL; lo que falta por comprobar va marcado **`[por confirmar]`** y no se usa para sostener
 ninguna conclusión. Pasa a documento vigente, o se reparte entre
 [`INTEROPERABILIDAD.md`](INTEROPERABILIDAD.md) y [`API-DE-REGISTRO.md`](API-DE-REGISTRO.md), el día que se cierre el
 refinado y cada candidata tenga su caso real.
+
+> **Lo que ya dejó de ser propuesta (5.0.0, 1-oct-2026).** La candidata **E** entró, y entró más grande de lo que aquí
+> se planteaba: no solo `retencion` genérico sino los tres renombrados —`igv`→`impuesto`, `retencion_4ta`→`retencion`,
+> `detraccion_tercero`→`recorte`—, con sus bloques y con el mecanismo de obsoletos que el estándar necesitaba para
+> poder corregir un valor sin quitarlo. Está en la
+> [enmienda 0022](estandar/enmiendas/0022-el-tributo-en-su-bloque.md). Las candidatas **A** (planilla y depreciación
+> por su libro del PLE), **B**, **C** y **D** siguen abiertas y esperando su caso real.
 
 ---
 
@@ -57,7 +64,7 @@ No es el IGV ni el gasto. Es éste, en una compra con detracción:
 
 ```
 tercero             421201  H  11800.00
-detraccion_tercero  421201  D   1180.00
+recorte             421201  D   1180.00
 ```
 
 **Misma cuenta, los dos signos, el mismo comprobante.** Cuenta + signo + importe dice que en la `421201` hubo dos
@@ -337,7 +344,7 @@ valor en ese vocabulario.
    mayores. Aquí cada valor queda **derivado de la divisionaria del PCGE**, con el artículo del PCGE 2026 al lado: no
    se negocia, no se mantiene a mano y no se puede desincronizar sin que un test se ponga rojo.
 2. **Conservar el `rol`, que Odoo no tiene para el Perú.** Su `display_type` (`product`, `tax`, `payment_term`…)
-   describe su formulario de factura: **no tiene `detraccion` ni `retencion_4ta`**, y no los va a tener.
+   describe su formulario de factura: **no tiene `detraccion` ni `retencion`**, y no los va a tener.
 3. **Añadir el nivel normativo y la denominación** del artículo 6 y del Formato 5.1, que Odoo no necesita porque no
    declara a SUNAT, y aquí son obligatorios.
 
@@ -498,29 +505,38 @@ no por completitud.
 
 ### E · `retencion` genérico, con el tributo en un campo
 
-`retencion_4ta` metió el tributo en el nombre del rol. No escala: renta de 5ta, ONP y AFP cumplen **el mismo papel**
+`retencion_4ta` metía el tributo en el nombre del rol. No escala: renta de 5ta, ONP y AFP cumplen **el mismo papel**
 —una retención que recorta lo que el tercero cobra— con tributos distintos. El bloque `detraccion` ya lo hace bien: rol
 genérico, código y tasa dentro.
 
-**Las tres cosas que la frenan, y van escritas:**
+**IMPLEMENTADA EN LA 5.0.0** (1-oct-2026), y más grande de lo que aquí se planteaba: los tres renombrados a la vez.
+[Enmienda 0022](estandar/enmiendas/0022-el-tributo-en-su-bloque.md).
 
-- **John decidió lo contrario** el 18-sep-2026: «el catálogo de roles se abre, pero no crece; los seis se quedan como
-  están, y son solo de compras y ventas».
-- **Renombrar es carísimo.** `rol` entra en la huella, así que cambiar `retencion_4ta` invalidaría todas las huellas
-  guardadas de los asientos que lo lleven, y la fórmula es contrato: obliga a anunciarlo como cambio de
-  comportamiento. Solo cabe **aditivo**, con `retencion` al lado y `retencion_4ta` marcado `reemplazada`, que es la
-  regla de gobierno: un valor publicado no se quita ni cambia de significado.
-- **Y con la candidata A puede que no haga falta.** Si la planilla entra como libro del PLE, su asiento es una línea
-  del 5.1, y el **aporte del empleador** —que no es retención, porque al trabajador no se le descuenta nada— tiene
-  sitio sin tocar el catálogo de roles. **Es la pregunta abierta de este documento.**
+Se dejan escritas las tres cosas que parecían frenarla, porque **dos resultaron falsas al medirlas** y eso vale más que
+la propuesta:
+
+- **«John decidió lo contrario» el 18-sep-2026**: «el catálogo se abre, pero no crece». Seguía valiendo, y por eso esto
+  no fue crecer: los tres valores nuevos son **los mismos papeles que el motor ya emitía**, bien nombrados. John lo
+  decidió al revés el 1-oct-2026, con el argumento de que es una mejora y no un cambio lateral.
+- **«Renombrar es carísimo» porque el rol entra en la huella.** Cierto, y la salida fue **sacar el rol de la huella**,
+  que era lo que había que hacer de todas formas: mientras estuviera dentro, cada corrección futura del catálogo
+  invalidaría las huellas guardadas **en silencio**. Se movieron una vez por eso y otra por los bloques; desde ahí,
+  ningún renombrado vuelve a tocarlas. Lo medido: el renombrado en sí **no movió ninguna**.
+- **«Con la candidata A puede que no haga falta».** Era la pregunta abierta de este documento, y la respuesta es que
+  son independientes: el rol mal nombrado lo estaba **hoy, en compras y ventas**, antes de que ninguna planilla entre.
+  La A sigue abierta.
+
+Y una cosa que este documento no previó: el renombrado era **imposible sin meter antes el Catálogo 05 como catálogo con
+su fuente**, porque un `impuesto` sin su código sabe menos que un `igv`. Al leer el anexo apareció el **`3000`,
+Impuesto a la Renta**, que el motor no tenía y que es justo el tributo que `retencion` necesitaba para no perder el
+«de 4ta».
 
 | | |
 |---|---|
 | Nivel | `estándar` |
-| Caso real que la destraba | Una planilla real: su tareo, sus boletas y el asiento que su sistema aceptó |
-| Test que la fijaría | Un recibo por honorarios sigue dando `retencion_4ta` byte a byte; una planilla da `retencion` con su tributo |
-| Prio | D |
-| Hito | J3 |
+| Estado | **cerrada** — 5.0.0, enmienda 0022 |
+| Test que la fija | `test_la_linea_del_impuesto_dice_de_que_tributo_es` · `test_la_linea_de_la_retencion_dice_de_que_tributo_y_de_que_categoria` · `test_cada_tabla_puede_marcar_un_valor_como_obsoleto` |
+| Hito | J3 (la planilla sigue pendiente, y es la candidata A) |
 
 ---
 

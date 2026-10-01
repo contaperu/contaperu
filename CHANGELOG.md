@@ -4,6 +4,94 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [5.0.0] — 2026-10-01
+
+**El tributo sale del nombre del rol y pasa a su bloque.** Un rol dice QUÉ HACE la línea; cuál es el tributo, cuando
+lo hay, lo dice un bloque al lado. Es lo que `detraccion` hacía bien desde la 1.0 y lo que tres valores del catálogo
+no hacían: `igv` y `retencion_4ta` metían el tributo —y la categoría— en el nombre, y `detraccion_tercero` nombraba
+por su causa lo que es un papel.
+
+| Rol de la 1.0 | Rol de la 5.0 |
+|---|---|
+| `igv` | **`impuesto`**, con `linea.impuesto = {codigo}` del Catálogo 05 |
+| `retencion_4ta` | **`retencion`**, con `linea.retencion = {codigo, categoria}` |
+| `detraccion_tercero` | **`recorte`** |
+
+Los otros tres —`principal`, `tercero`, `detraccion`— no se tocan. Con esto el modelo de siete papeles queda
+completo: `principal`, `tercero`, `recorte`, `contrapartida`, `tesoreria`, `impuesto` y `retencion`. **No hay ningún
+renombrado más previsto.**
+
+**Dos relojes, y solo uno se mueve.** El **paquete** sube a 5.0.0 porque cambia lo que el motor escribe. **El
+estándar se queda en `1.0`**: añadir valores a un catálogo y bloques opcionales a la línea es aditivo por su propia
+regla de versionado, ningún valor se quita ni cambia de significado, y el esquema gana 35 líneas sin borrar una. Su
+tag avanza.
+
+### Cambios de comportamiento
+
+- **Las huellas guardadas dejan de coincidir**, y esto es lo único de esta versión que pide una decisión a quien las
+  persista. Se mueven **dos veces, por dos motivos opuestos**, y las dos van en el mismo anuncio:
+  1. **El `rol` SALE de la huella**, y esto es lo que de verdad importa. Mientras estuviera dentro, cada corrección
+     futura del catálogo de roles invalidaría todas las huellas **en silencio**: no falla, deja de proteger, y
+     justo cuando hace falta —el Excel de CONCAR se SUMA al importarlo dos veces—. Sale por el motivo del
+     `correlativo` y no por el de la `clase`: no es redundante, es que no es contenido. El mismo asiento con otra
+     etiqueta es el mismo asiento. **Desde aquí, ningún renombrado ni valor nuevo del catálogo vuelve a tocarlas.**
+  2. **Los dos bloques nuevos SÍ entran.** Una línea de IGV y una de ISC con la misma cuenta y el mismo importe son
+     hechos distintos, así que dejarlos fuera podría darles la misma huella.
+- **El valor del campo `rol`** cambia en los dos únicos destinos que lo llevan como columna: el **CSV** y el JSON de
+  **`asiento_contable`**. Comprobado que la cabecera del CSV no gana ni pierde ninguna columna: normalizando el valor
+  del rol, el archivo es idéntico.
+- **Código que compare `rol == "igv"`** deja de coincidir. La equivalencia no hay que escribirla a mano: viaja en
+  `catalogos_del_estandar()["roles"]["obsoletos"]`.
+- **`_obsoleto.RETIRO` pasa de `"5.0"` a `"6.0"`**, sin retirar nada: esta mayor llegó sin ninguna ruta ni alias
+  avisando. Es la regla que la 3.10 escribió —una promesa de retiro no sostiene nada si el número que da ya quedó
+  atrás— y que se cumple con cada mayor.
+
+### Añadido
+
+- **El Catálogo 05 entra como catálogo de datos, con su fuente.** Era lo único de `catalogos.py` que afirmaba códigos
+  de SUNAT sin citar la norma: nueve constantes sueltas, fuera de `FUENTES`, fuera de la fachada y **sin un solo
+  test**. Y el agujero no era teórico — la superficie pública congela los NOMBRES y no los VALORES, así que cambiar
+  `TRIBUTO_IGV` pasaba verde mientras el lector de XML repartía los importes del comprobante en los campos
+  equivocados. La fuente se cerró **leyendo el anexo**: Anexo N.° 8 de la RS 097-2012, con el texto del Anexo II de la
+  RS 244-2019. Leerlo trajo dos filas que la deducción no tenía, y una de ellas hacía falta: el **`3000`, Impuesto a
+  la Renta**, que es el tributo de una retención de 4ta. Sale por `catalogos_sunat()` con su fuente, y suma
+  `TRIBUTO_RENTA` y `CATEGORIA_RENTA_4TA` a la superficie pública.
+- **`obsoletos`, el mecanismo con que un catálogo del estándar corrige un valor sin quitarlo.** La regla estaba
+  escrita desde la 1.0 y no existía como dato, así que quien integraba no tenía forma de enterarse — y hay
+  precedente: el `hacia_donde_va` de los roles anunciaba estos tres renombrados desde la 1.1 y **nunca llegó a la
+  api**, porque `catalogos()` no lo propagaba. Ahora cualquier tabla puede llevar `{viejo: {usar, desde, por_que}}`, y
+  viaja por la api, por HTTP y por el MCP. Dos diferencias con `_obsoleto.py`, las dos con test: un valor marcado
+  **sigue siendo válido al leerlo**, y **no tiene versión de retiro** — no desaparece nunca, porque los documentos ya
+  guardados lo llevan dentro.
+- **Los dos bloques de la línea.** `impuesto = {codigo}` y `retencion = {codigo, categoria}`, opcionales, con
+  `additionalProperties: false`. **Ninguno lleva `tasa`, y es una decisión**: en el repositorio conviven dos
+  convenciones sin documentar —`detraccion.porcentaje` es porcentaje y `TASA_IGV` es fracción—, el ICBPER no tiene
+  tasa porque es un importe por bolsa, y en la retención el motor no la conoce. Si hace falta, entra con su caso real.
+- **Dos tests que STARSOFT no tenía**, que comprueban que sus dos tablas de roles —la que excluye filas y la que las
+  ordena— siguen siendo del catálogo vigente.
+
+### Arreglado
+
+- **`estandar/LEEME.md` y `test_huella.py` decían que la huella excluye tres campos**, y eran cuatro desde que la
+  enmienda 0021 bajó `medio_pago` a la línea. Ahora son cinco, y LEEME remite a `SIN` en vez de repetir la lista.
+- **La enmienda 0021 decía «tres constantes sueltas del lector de XML»** hablando del Catálogo 05. Eran **nueve**, y
+  vivían en `catalogos.py`; el lector solo las consume.
+- **El borrador de `API-DE-REGISTRO.md` dibujaba el bloque con `"codigo": "igv"`** —el nombre del rol— donde va el
+  código del catálogo. Era la confusión que esta versión cierra, escrita en el documento que la propone.
+
+### Cómo migrar
+
+1. **Si fijas una versión** (lo recomendado), no te llega nada hasta que decides subir. Prueba primero la
+   pre-release `v5.0.0rc1`, también con `-W error::contaperu._obsoleto.RutaObsoleta`.
+2. **Si guardas huellas**, las de antes no van a coincidir. No hay forma de recalcularlas sin el asiento original: lo
+   que sí hay es que **esta es la última vez que se mueven por un cambio de rol**.
+3. **Si comparas el rol con una cadena**, lee la equivalencia de `catalogos_del_estandar()["roles"]["obsoletos"]` en
+   vez de escribirla a mano. Y si lees documentos de terceros, acepta los seis valores: los tres viejos siguen
+   publicados y siguen siendo válidos.
+4. **Si no tocas el rol** —CONCAR, CONTASIS, SIRE, PLE 5.1, PLE 5.3— no tienes nada que hacer. Comprobado generando
+   los archivos con el motor de la 4.3.0 y con el de la 5.0.0: el SIRE, los dos del PLE y STARSOFT salen **idénticos
+   byte a byte**, y los Excel de CONCAR y de CONTASIS **idénticos celda a celda**.
+
 ## [4.3.0] — 2026-10-01
 
 **El motor escribe el otro libro del par: el detalle del plan contable utilizado.** El grupo 05 del PLE son dos
