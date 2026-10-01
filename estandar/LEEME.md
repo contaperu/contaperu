@@ -236,7 +236,8 @@ adivinar:
 - **`documento.tipo_cp`** y **`referencia.tipo_cp`** — el código SUNAT (Tabla 10). Es el que manda
   (regla 4). `documento.tipo` sigue llevando la sigla del ERP por compatibilidad. La línea `detraccion`
   no lleva `tipo_cp`: su documento es la constancia pendiente, no un comprobante de SUNAT.
-- **`detraccion.codigo`** — el código SUNAT del bien o servicio (Catálogo 54), al lado del interno.
+- **`detraccion.codigo`** — el código SUNAT del bien o servicio (Catálogo 54). El código interno con el que lo
+  llame un ERP no es del estándar: lo traduce su driver, y el motor dejó de emitirlo en la 4.0 (enmienda 0017).
 - **`glosa`** es **la misma en todas las líneas del comprobante** y va entera, sin prefijos: qué es cada línea
   lo dicen su `rol` y su cuenta, no un texto. Cortarla al largo que admite cada ERP es trabajo del driver.
   (Hasta la 2.1 del motor las líneas derivadas anteponían `IGV - `, `RET 4TA - ` o `DETRACCION - `.)

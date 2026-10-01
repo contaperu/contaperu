@@ -126,7 +126,7 @@ importe lleva lo que un driver necesita para traducir **sin adivinar**:
 | `documento.tipo_cp`, `referencia.tipo_cp` | El código SUNAT (Tabla 10). `tipo` conserva la sigla del ERP por compatibilidad. |
 | `glosa` | La misma en todas las líneas y entera, sin prefijos. El corte lo decide cada ERP. |
 | `tasa_igv` | La del comprobante, como texto exacto (`"10.5"`). Redondear es cosa del que solo admite enteros. |
-| `detraccion.codigo` | El código SUNAT del bien o servicio, al lado del interno del contribuyente. |
+| `detraccion.codigo` | El código SUNAT del bien o servicio (Catálogo 54), **y solo ese**: el código interno de la tabla de cada sistema lo pone su driver (CONCAR, el de su T.G. 28), no el asiento. |
 | `detraccion.nro_constancia`, `.fecha_constancia` | El vóucher del depósito, que llega días después (2.6.0). Sin él, el número sale con el comodín `999999999` y la fecha, vacía. |
 
 ### Dónde vive el asiento estándar

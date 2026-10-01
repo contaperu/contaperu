@@ -12,7 +12,8 @@ la detracción queda en blanco**. Nada se adivina; si toca, la elige una persona
 `datos/sunat/detracciones.json`. El ERP que integra el motor puede sobreescribirla en lo general de su configuración:
 `detraccion_tasas` cambia la tasa de un código o suma uno (`null`: se reconoce sin tasa, y la toma del comprobante), y
 `detraccion_nombres` cambia el nombre de uno que ya está. Hasta la 1.0 la tabla entera vivía en la configuración de
-cada empresa, y antes del 13-sep-2026 la daba `detraccion_codigos`, el código interno de CONCAR.
+cada empresa, y antes del 13-sep-2026 la daba `detraccion_codigos`, el código interno de CONCAR, que desde la 4.0 vive en la
+sección de ese driver y no lo lee el núcleo.
 
 **Y el monto lo calcula el motor, una sola vez** (10-sep-2026). Hasta ese día había dos cifras: la
 del asiento (total × tasa en soles enteros) y la que enseñaba el portal —calculada en el navegador con

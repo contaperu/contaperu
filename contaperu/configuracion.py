@@ -312,10 +312,10 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
     # vienen vacías: la tasa de un código que ya está, o un código que suma (`null`: se reconoce sin tasa, y la toma del
     # comprobante). Una configuración guardada con los 14 códigos de la 1.0 sigue dando lo mismo: son los de la tabla.
     # El número con el que sale una detracción cuyo depósito todavía no tiene constancia: la del banco se conoce
-    # días después, «casi pasando el otro mes». Va en lo GENERAL y no en la configuración del asiento, aunque su
-    # hermano el TIPO (`detraccion_tipo_doc`) sí sea del asiento: el tipo solo existe en la línea comodín `DR`, y
-    # este número sale además en las columnas de constancia de un registro —las U y V de CONTASIS, los campos
-    # 25 y 26 de STARSOFT—, que no arma ningún asiento. Su largo es el que admita la columna del destino.
+    # días después, «casi pasando el otro mes». Va en lo GENERAL, y su hermano el TIPO (`detraccion_tipo_doc`) es de
+    # CONCAR —la sigla de su T.G. 06, en su driver desde la 4.0—, porque este número sale además en las columnas de
+    # constancia de un registro —las U y V de CONTASIS, los campos 25 y 26 de STARSOFT—, que no arma ningún asiento:
+    # es contabilidad y no el vocabulario de un sistema. Su largo es el que admita la columna del destino.
     Campo("detraccion_numero_pendiente", "texto", NUMERO_DETRACCION_PENDIENTE,
           titulo="Número de la detracción pendiente", grupo="detracciones", patron=r"^[0-9]{1,20}$",
           ayuda="El número con el que sale una detracción cuyo depósito todavía no tiene constancia."),

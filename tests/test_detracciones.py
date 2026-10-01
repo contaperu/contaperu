@@ -16,6 +16,7 @@ from pathlib import Path
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import concar as driver_concar
+from contaperu.drivers import contrato
 from contaperu import asiento, detracciones, validar
 from contaperu.asiento.configuracion import NUMERO_DETRACCION_PENDIENTE
 from contaperu.drivers import contasis as driver_contasis
@@ -82,6 +83,26 @@ def test_la_tabla_vive_en_el_motor_con_su_fuente():
     assert detracciones.tabla_de_detracciones()["030"] == {"nombre": "Contratos de construcción", "tasa": Decimal("4")}
     assert detracciones.normalizar_una({"codigo": "27"}, detracciones.codigos_de({})) == {"codigo": "027"}
     assert detracciones.codigos_de({"detraccion_codigos": {"999": "99901"}}) == detracciones.codigos_de({})
+
+
+def test_los_codigos_de_detraccion_de_concar_son_de_la_tabla_del_motor():
+    """El mapa de la Tabla General 28 de CONCAR traduce códigos de SUNAT, así que sus claves tienen que ser códigos
+    que el motor reconozca: uno que no esté en la tabla no llegaría nunca a la columna AI, porque `normalizar_una`
+    deja en blanco la detracción cuyo código no reconoce, y el mapeo mentiría.
+
+    **Al revés no**: la tabla tiene, y tendrá, códigos que este mapa de muestra no trae; el que aparezca se añade con
+    el código interno que use el contribuyente. Y cada interno empieza por su código de SUNAT, que es cómo se numera
+    esa tabla (el de SUNAT más 2 propios): de eso depende el respaldo del lector (`proyeccion._codigo_sunat_de`).
+
+    Si las dos listas se separan a propósito, se cambian las dos. El precedente es `test_cuentas_del_sistema.py`,
+    que compara las cuentas de CONCAR con las de fábrica por el mismo motivo."""
+    mapa = contrato.seccion_por_defecto(driver_concar)["detraccion_codigos"]
+    del_motor = detracciones.codigos_de({})
+    sobran = sorted(set(mapa) - del_motor)
+    assert not sobran, f"CONCAR mapea códigos que el motor no reconoce: {sobran}. Añádelos a la tabla del motor con " \
+                       "su fuente (datos/sunat/detracciones.json), o quítalos del mapa."
+    mal = sorted(f"{sunat}->{interno}" for sunat, interno in mapa.items() if not interno.startswith(sunat))
+    assert not mal, f"un código de la T.G. 28 no empieza por el de SUNAT: {mal}"
 
 
 def test_el_erp_sobreescribe_la_tabla_del_motor():

@@ -438,8 +438,8 @@ def test_cada_driver_de_serie_declara_lo_que_se_configura_en_su_seccion():
     """Lo del asiento lo declaran los dos drivers de asientos; CONCAR suma lo de su formato, y CONTASIS solo lo suyo.
     El SIRE no se configura: no lleva cuentas."""
     del_asiento = [c.clave for c in CONFIGURACION_DEL_ASIENTO]
-    assert [c.clave for c in contrato.configuracion(drivers.concar)] == [*del_asiento, "monedas_codigo",
-                                                                          "detraccion_area"]
+    assert [c.clave for c in contrato.configuracion(drivers.concar)] == [
+        *del_asiento, "monedas_codigo", "detraccion_tipo_doc", "detraccion_codigos", "detraccion_area"]
     assert [c.clave for c in contrato.configuracion(drivers.csv)] == del_asiento
     assert [c.clave for c in contrato.configuracion(drivers.contasis)] == ["medio_pago"]
     assert contrato.configuracion(drivers.sire) == () and contrato.columnas_elegibles(drivers.sire) == {}
@@ -517,7 +517,7 @@ def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
     assert contrato.incumplimientos(sin_asiento) == [
         "un driver de asientos incluye en CONFIGURACION las claves del asiento (asiento.CONFIGURACION_DEL_ASIENTO), "
         "que el núcleo lee al armar sus líneas; faltan: tipos, sub_diario_ventas, sub_diario_compras, "
-        "sub_diario_detraccion, detraccion_tipo_doc, detraccion_codigos"]
+        "sub_diario_detraccion"]
 
     repetida = driver_de_registro()
     repetida.CONFIGURACION = (Campo("x", "texto"), Campo("x", "texto"), Campo("cuentas", "texto"))

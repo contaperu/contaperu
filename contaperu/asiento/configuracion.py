@@ -1,5 +1,5 @@
-"""Lo que el núcleo lee al armar un asiento: la sigla y el sub-diario de cada tipo de comprobante, los sub-diarios por
-uso y la línea de la detracción (`CONFIGURACION_DEL_ASIENTO`).
+"""Lo que el núcleo lee al armar un asiento: la sigla y el sub-diario de cada tipo de comprobante y los sub-diarios por
+uso (`CONFIGURACION_DEL_ASIENTO`).
 
 No es de un sistema en particular: llena campos de la línea del comprobante, así que cada driver de asientos lo incluye en su
 sección —CONCAR y el CSV— y cada uno lo guarda en la suya. Lo general de la contabilidad (cuentas, centros de costo,
@@ -8,17 +8,17 @@ tasas de detracción) se declara en `contaperu/configuracion.py`, y lo propio de
 Aquí no hay lógica: si cambia un valor por defecto, se toca este archivo y nada más. Hasta el 13-sep-2026 aquí vivía
 `CONFIG_POR_DEFECTO`, una sola configuración plana con todo junto; hasta el 12-sep-2026 el módulo era
 `asiento/datos.py` y llevaba también los datos del Excel de CONCAR.
+
+**Y hasta la 3.10 vivían aquí también la sigla `DR` y el mapa de códigos internos de la detracción**, que el núcleo
+leía y escribía en la línea para todos los destinos. No eran del asiento: son dos Tablas Generales de CONCAR —la 06 y
+la 28—, y se las llevaban igual el CSV y STARSOFT, que trabajan con el código de SUNAT. Desde la 4.0 se declaran en
+`drivers/concar/datos.py`, junto a la tercera (el área de la T.G. 26), y el núcleo ya no las lee: la línea lleva el
+código del Catálogo 54 y cada driver traduce al vocabulario de su sistema.
 """
 from __future__ import annotations
 
 from ..configuracion import NUMERO_DETRACCION_PENDIENTE as _NUMERO_DETRACCION_PENDIENTE, Campo
 
-# La línea de la detracción, calcada del Excel real que CONCAR ACEPTÓ (set-2026): tipo de documento
-# **DR** y el comodín del número —la constancia del depósito no se conoce al provisionar, se paga
-# días después—. El `DT` que hubo hasta entonces salía del borrador de la plantilla y nunca llegó a
-# importarse en un CONCAR de verdad; el archivo validado dice DR. Es la sigla de la Tabla General 06,
-# que cada contribuyente numera a su gusto: por eso `detraccion_tipo_doc` puede cambiarla.
-TIPO_DOC_DETRACCION = "DR"
 # El comodín del número vive con su campo, en `contaperu/configuracion.py`: desde la 3.1 se configura
 # (`detraccion_numero_pendiente`) y su campo es GENERAL, no del asiento, porque ese número sale también
 # en las columnas de constancia de un registro. Se reexporta aquí, que es donde se lee desde siempre.
@@ -58,20 +58,4 @@ CONFIGURACION_DEL_ASIENTO: tuple[Campo, ...] = (
     Campo("sub_diario_detraccion", "texto", "10", titulo="Compras con detracción", grupo="subdiarios",
           patron=_SUB_DIARIO, ayuda="La factura afecta a detracción sale aparte. ¿Tu sistema no las separa? Pon el "
                                     "mismo número que en compras."),
-    Campo("detraccion_tipo_doc", "texto", TIPO_DOC_DETRACCION, titulo="Tipo de documento de la detracción",
-          grupo="detracciones", patron=r"^[A-Z0-9]{1,2}$",
-          ayuda="La sigla con la que tu sistema reconoce la línea de la detracción, como DR."),
-    # Código SUNAT del bien o servicio (3 dígitos, viene en el XML) → código interno de la T.G. 28 de CONCAR (5 dígitos:
-    # el de SUNAT + 2 propios). Un código que no esté aquí sale como SUNAT + "01" (el patrón más común).
-    # QUÉ ENTRA (los más usados, no todos): todo el Anexo 3 —los servicios, que son lo que un estudio ve a diario— más
-    # el transporte de bienes por vía terrestre (027) y las tres de bienes que aparecen en obra y comercio (madera,
-    # arena y piedra, residuos). Fuera quedan las sectoriales (pesca, oro, minerales…): la que aparezca se añade. Los
-    # siete que ya usaba un contribuyente real conservan su código interno EXACTO.
-    Campo("detraccion_codigos", "mapa", {"008": "00801", "009": "00901", "010": "01001", "012": "01201",
-                                         "019": "01903", "020": "02001", "021": "02101", "022": "02201",
-                                         "024": "02401", "025": "02501", "026": "02601", "027": "02702",
-                                         "030": "03001", "037": "03701"},
-          titulo="Código de cada detracción en tu sistema", grupo="detracciones", claves=r"^[0-9]{3}$",
-          ayuda="El código interno de tu sistema para cada código SUNAT.",
-          valores=Campo("", "texto", grupo="detracciones", patron=r"^[0-9]{2,12}$")),
 )

@@ -137,8 +137,10 @@ def test_la_configuracion_de_partida_es_lo_general_y_una_seccion_por_sistema():
     assert {clave: partida[clave] for clave in CONFIG_POR_DEFECTO} == CONFIG_POR_DEFECTO
     assert api.errores_de_configuracion(partida) == []
     del_asiento = {c.clave for c in CONFIGURACION_DEL_ASIENTO}
-    assert set(prep.config_aplicada(partida, "concar")) == \
-        set(CONFIG_POR_DEFECTO) | del_asiento | {"monedas_codigo", "detraccion_area", "columnas"}
+    # Las tres Tablas Generales de la detracción son de CONCAR y se nombran aparte: desde la 4.0 no salen de
+    # `CONFIGURACION_DEL_ASIENTO`, y la línea del `csv` —que no las lleva— es la que lo demuestra.
+    assert set(prep.config_aplicada(partida, "concar")) == set(CONFIG_POR_DEFECTO) | del_asiento | {
+        "monedas_codigo", "detraccion_tipo_doc", "detraccion_codigos", "detraccion_area", "columnas"}
     assert set(prep.config_aplicada(partida, "csv")) == set(CONFIG_POR_DEFECTO) | del_asiento
     assert set(prep.config_aplicada(partida, "contasis")) == set(CONFIG_POR_DEFECTO) | {"medio_pago", "columnas"}
     assert prep.config_aplicada(partida, "sire") == prep.config_aplicada(partida) == prep.config_aplicada()
@@ -190,7 +192,7 @@ def test_la_configuracion_se_valida_entera_y_cada_error_dice_adonde_va():
         "`sire` no tiene sección: ese sistema no lleva cuentas y no se configura",
         '`usa_centros_costo`: se esperaba verdadero o falso y llegó el texto "no"',
         "`concar.medio_pago`: clave desconocida; las que hay: tipos, sub_diario_ventas, sub_diario_compras, "
-        "sub_diario_detraccion, detraccion_tipo_doc, detraccion_codigos, monedas_codigo, detraccion_area",
+        "sub_diario_detraccion, monedas_codigo, detraccion_tipo_doc, detraccion_codigos, detraccion_area",
         '`concar.columnas.centro_costo`: "centro_costo_2" no es una de sus columnas; las que hay: centro_costo, '
         'anexo_auxiliar, anexo_auxiliar_del_tercero',
         '`contasis.medio_pago`: el texto "3" no cumple el patrón ^[0-9]{3}$',

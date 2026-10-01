@@ -28,7 +28,6 @@ from ..detracciones import es_comodin, monto_detraccion, numero_pendiente, tasa_
 from .. import pcge, vocabulario
 from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
-from .configuracion import TIPO_DOC_DETRACCION
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
 from .resolucion import (asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero, equivalencia_tipo,
@@ -150,10 +149,14 @@ def constancia_de(c: Comprobante, config: dict | None = None, *, comodin: bool =
 
 
 def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = False) -> dict:
-    """El bloque de la línea de detracción: el código SUNAT, el interno del contribuyente (T.G. 28 de
-    CONCAR: el de SUNAT + 2 propios, o SUNAT + "01" si no lo configuró), la tasa —la misma con la que
-    se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base. Con vocabulario
-    neutral no lleva el código interno ni el comodín de la constancia: los dos son de un sistema legacy.
+    """El bloque de la línea de detracción: el código SUNAT del bien o servicio (Catálogo 54), la tasa —la misma con
+    la que se calcula el monto, que decide `detracciones.tasa_detraccion`— y el total del documento como base. Con
+    vocabulario neutral no lleva el comodín de la constancia, que es de un sistema legacy.
+
+    **Y SOLO el código de SUNAT** (4.0). Hasta la 3.10 el núcleo anotaba al lado `codigo_interno`, el de la T.G. 28
+    del contribuyente, inventando el de SUNAT más «01» para lo que nadie hubiera mapeado. Era la única traducción al
+    vocabulario de un ERP que hacía el asiento, y se la llevaban igual el CSV y STARSOFT, que escriben el de SUNAT a
+    propósito. La hace ahora quien conoce esa tabla: `drivers.concar.proyeccion.codigo_interno_detraccion`.
 
     **Y la constancia del depósito** (2.6): el número y la fecha que alguien haya pegado, porque la detracción tiene
     dos tiempos —se provisiona al registrar y se paga días después— y hasta ahora el segundo no volvía al archivo.
@@ -162,10 +165,8 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = Fa
     que dice «esto está pendiente»: el driver solo elige en qué columna lo escribe, si es que tiene una."""
     bloque = c.detraccion or {}
     sunat = str(bloque.get("codigo") or "").strip()
-    interno = "" if neutral else str((config.get("detraccion_codigos") or {}).get(sunat)
-                                     or (f"{sunat}01" if sunat else ""))
     tasa = tasa_detraccion(c, config)
-    return _limpio({"codigo": sunat, "codigo_interno": interno,
+    return _limpio({"codigo": sunat,
                     "tasa": format(Decimal(tasa).normalize(), "f") if tasa > 0 else "", "base": str(total),
                     **constancia_de(c, config, comodin=not neutral)})
 
@@ -327,8 +328,10 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                 # que el vóucher llegaba a STARSOFT y a CONTASIS y no a CONCAR, que es donde vive esa columna —y
                 # el LEEME de CONCAR ya prometía lo contrario. La FECHA del documento sigue siendo la de la
                 # factura: ningún Excel validado dice que sea la del depósito, y eso no se decide de memoria.
-                documento_detraccion = {"tipo": str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION),
-                                        "serie_numero": constancia_de(c, config)["nro_constancia"],
+                # Sin `tipo`: la sigla de la T.G. 06 (`DR`) es de CONCAR y la escribe su driver en la columna R
+                # (`drivers.concar.proyeccion.tipo_doc_detraccion`). Lo demás del comodín se queda, porque es
+                # contabilidad y no formato: dice que este depósito está pendiente.
+                documento_detraccion = {"serie_numero": constancia_de(c, config)["nro_constancia"],
                                         "id_externo": c.id_externo or "",
                                         "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
             linea_detraccion = linea("detraccion", detraido, cuenta_detraccion, sentido_tercero,

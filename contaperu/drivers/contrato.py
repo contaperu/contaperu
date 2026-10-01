@@ -139,8 +139,11 @@ VOCABULARIO_POR_DEFECTO = "legacy"
 # Lo que el núcleo exige a un driver neutral: la cuenta de cada línea. La equivalencia del tipo no, porque no hay sigla
 # ni sub-diario que sacar de ella.
 EXIGE_NUCLEO_NEUTRAL = frozenset({"cuenta_contable"})
-# El vocabulario legacy de la configuración del asiento: lo que un driver neutral no declara.
-CLAVES_LEGACY = frozenset({c.clave for c in CONFIGURACION_DEL_ASIENTO} | {MONEDAS_CODIGO})
+# El vocabulario legacy de la configuración del asiento: lo que un driver neutral no declara. Las dos de la detracción
+# —la sigla de la T.G. 06 y el mapa de la T.G. 28— salieron de `CONFIGURACION_DEL_ASIENTO` a la sección de CONCAR en la
+# 4.0, y siguen siendo vocabulario legacy: se nombran a mano para que un driver neutral tampoco pueda declararlas.
+CLAVES_LEGACY = frozenset({c.clave for c in CONFIGURACION_DEL_ASIENTO}
+                          | {MONEDAS_CODIGO, "detraccion_tipo_doc", "detraccion_codigos"})
 
 # En orden de preferencia: si un driver expone dos, el núcleo usa la primera.
 FORMAS = ("desde_lineas", "desde_comprobantes", "construir", "linea")

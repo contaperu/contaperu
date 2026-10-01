@@ -43,8 +43,7 @@ una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una cel
 (`tests/test_snapshot_concar.py`). Desde la 0.10 las columnas de
 CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()` y `lineas_del_libro()`.
 """
-from .configuracion import (CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO, NUMERO_DETRACCION_PENDIENTE,
-                            TIPO_DOC_DETRACCION)
+from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO, NUMERO_DETRACCION_PENDIENTE
 from .faltas import (CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA, Falta, SinCodigoDeMoneda, NoExportable,
                      RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCuenta, SinCorrelativo,
                      SinSigla)
@@ -65,7 +64,7 @@ from .motor import (CENTRO_EN_ANEXO, ROLES, cabecera_de, constancia_de, glosa_de
                     lineas_del_libro, lineas_e_indice_del_libro, serie_numero_de)
 
 __all__ = [
-    "CONFIGURACION_DEL_ASIENTO", "NUMERO_DETRACCION_PENDIENTE", "TIPO_DOC_DETRACCION", "CONTADOR", "FALTA", "FALTAS",
+    "CONFIGURACION_DEL_ASIENTO", "NUMERO_DETRACCION_PENDIENTE", "CONTADOR", "FALTA", "FALTAS",
     "PROVEEDOR", "SISTEMA", "Falta", "SinCodigoDeMoneda", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
     "SinCentro", "SinCuenta", "SinCorrelativo", "SinSigla", "asienta_sin_efecto", "comprobantes_sin_centro",
     "comprobantes_sin_cuenta", "con_efecto_contable", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",

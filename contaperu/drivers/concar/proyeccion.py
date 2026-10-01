@@ -15,7 +15,7 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
-from ...asiento.configuracion import MONEDAS_CODIGO, TIPO_DOC_DETRACCION
+from ...asiento.configuracion import MONEDAS_CODIGO
 from ...asiento.faltas import SinCodigoDeMoneda
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
@@ -43,7 +43,7 @@ def tipo_doc_detraccion(config: dict) -> str:
     """Columna R de la línea de la detracción: la sigla de su **T.G. 06**. `DR` es la del Excel real que CONCAR
     aceptó (set-2026) —el `DT` que hubo antes salía de un borrador y nunca se importó en un CONCAR de verdad—, y cada
     contribuyente numera esa tabla a su gusto: por eso se configura."""
-    return str(config.get("detraccion_tipo_doc") or TIPO_DOC_DETRACCION)
+    return str(config.get("detraccion_tipo_doc") or datos.TIPO_DOC_DETRACCION)
 
 
 def codigo_interno_detraccion(codigo_sunat: Any, config: dict) -> str:
@@ -182,11 +182,23 @@ def _texto_de(v: Any) -> str:
 _numero_o_vacio = celdas.numero_o_vacio
 
 
-def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario:
-    """Una fila en columnas de CONCAR -> una línea de diario neutral.
+def _codigo_sunat_de(interno: str, detracciones: dict[str, str]) -> str:
+    """La columna AI lleva el interno de la T.G. 28; de vuelta se devuelve el código de SUNAT, que es lo que dice el
+    estándar: por el mapa del contribuyente y, si no está, por sus TRES primeros dígitos, que es como se numera esa
+    tabla (el de SUNAT más 2 propios). Un interno más corto que eso no dice de qué código viene: celda vacía."""
+    interno = (interno or "").strip()
+    if not interno:
+        return ""
+    return detracciones.get(interno) or (interno[:3] if len(interno) >= 3 else "")
+
+
+def desde_fila(fila: dict, monedas: dict[str, str] | None = None,
+               detracciones: dict[str, str] | None = None) -> LineaDiario:
+    """Una fila en columnas de CONCAR -> una línea del comprobante.
 
     `monedas` traduce el código del ERP al ISO 4217 ('MN' -> 'PEN'); si no se pasa, el código
-    se transporta tal cual.
+    se transporta tal cual. `detracciones` traduce el código de la T.G. 28 al de SUNAT ('02702' -> '027'): es el
+    mapa `detraccion_codigos` invertido, que arma `a_lineas`.
     """
     monedas = monedas or {}
     codigo = _texto_de(fila.get("E"))
@@ -202,7 +214,7 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
         "fecha": _texto_de(fila.get("AB")),
     }
     detraccion = {
-        "codigo_interno": _texto_de(fila.get("AI")),
+        "codigo": _codigo_sunat_de(_texto_de(fila.get("AI")), detracciones or {}),
         "tasa": celdas.texto_exacto(fila.get("AJ")),
         "base": celdas.importe_exacto(fila.get("AK") or fila.get("AL")),
     }
@@ -230,8 +242,12 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None) -> LineaDiario
 
 
 def a_lineas(filas: list[dict], config: dict | None = None) -> list[LineaDiario]:
-    """Todas las filas de un asiento -> líneas del asiento. `config` solo se usa para
-    devolverle a la moneda su código ISO."""
+    """Todas las filas de un asiento -> líneas del asiento. `config` se usa para devolverle a la moneda su código ISO
+    y a la detracción el suyo de SUNAT."""
     codigos = (config or {}).get(MONEDAS_CODIGO) or {}
     monedas = {v: k for k, v in codigos.items()}
-    return [desde_fila(f, monedas) for f in filas]
+    # Invertido y determinista: si dos códigos de SUNAT compartieran interno —que la T.G. 28 no debería permitir—
+    # gana el primero por orden de código, y no el que el diccionario traiga de último.
+    internos = (config or {}).get("detraccion_codigos") or {}
+    detracciones = {interno: sunat for sunat, interno in sorted(internos.items(), reverse=True)}
+    return [desde_fila(f, monedas, detracciones) for f in filas]

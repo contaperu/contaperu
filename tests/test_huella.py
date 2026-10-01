@@ -52,7 +52,10 @@ HUELLA_USD = "cb3af1e5e311eadbf33f71aa0087b600e303e2e8f631c8d90ad10f08214689e4"
 # La de detracción cambió OTRA VEZ en la 2.6, y las otras dos no: su línea pasó a llevar la constancia del depósito
 # —el comodín mientras no se ha pagado— y el comodín pasó de diez nueves a nueve. Era
 # 3c8525988cc772ed9c6589033a84cfc185f0db9e84168f2653c7fced63df64bd.
-HUELLA_DETRACCION = "13024902a19eda1674fefe0d03b03eeb6fa55df276d9a549680b26d180ef66c6"
+# Y cambió una TERCERA vez en la 4.0, otra vez sola: su línea dejó de llevar dos campos que eran de CONCAR y no del
+# asiento —el `codigo_interno` de la Tabla General 28 y la sigla `DR` de la Tabla General 06, que ahora escribe el
+# driver en sus columnas AI y R—. Era 13024902a19eda1674fefe0d03b03eeb6fa55df276d9a549680b26d180ef66c6.
+HUELLA_DETRACCION = "b6de4bb1e5af66fdea96f9b33f6b35a161b47c689d8fba490733b3a5f2152912"
 
 
 def test_la_huella_en_dolares_y_con_detraccion_es_la_de_siempre():

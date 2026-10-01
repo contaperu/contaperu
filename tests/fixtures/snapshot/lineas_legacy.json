@@ -1194,7 +1194,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
@@ -1208,7 +1207,6 @@
    },
    "detraccion": {
     "codigo": "037",
-    "codigo_interno": "03701",
     "tasa": "12",
     "base": "118.00",
     "nro_constancia": "999999999"
@@ -1324,7 +1322,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
@@ -1338,7 +1335,6 @@
    },
    "detraccion": {
     "codigo": "037",
-    "codigo_interno": "03701",
     "tasa": "12",
     "base": "118.00",
     "nro_constancia": "999999999"
@@ -1517,7 +1513,6 @@
    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "contraparte_doc": "20602222226",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-10",
@@ -1531,7 +1526,6 @@
    },
    "detraccion": {
     "codigo": "027",
-    "codigo_interno": "02702",
     "tasa": "4",
     "base": "4956.00",
     "nro_constancia": "999999999"
@@ -1710,7 +1704,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
@@ -1724,7 +1717,6 @@
    },
    "detraccion": {
     "codigo": "019",
-    "codigo_interno": "01903",
     "tasa": "10",
     "base": "118.00",
     "nro_constancia": "999999999"
@@ -1835,7 +1827,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
@@ -1849,7 +1840,6 @@
    },
    "detraccion": {
     "codigo": "037",
-    "codigo_interno": "03799",
     "tasa": "12",
     "base": "118.00",
     "nro_constancia": "999999999"
@@ -1960,7 +1950,6 @@
    "glosa": "SERVICIO DE TRANSPORTE DE MATERIALES BENCE",
    "contraparte_doc": "20602222226",
    "documento": {
-    "tipo": "DT",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-10",
@@ -1974,7 +1963,6 @@
    },
    "detraccion": {
     "codigo": "027",
-    "codigo_interno": "02702",
     "tasa": "4",
     "base": "4956.00",
     "nro_constancia": "999999999"
@@ -2085,7 +2073,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
@@ -2099,7 +2086,6 @@
    },
    "detraccion": {
     "codigo": "037",
-    "codigo_interno": "03701",
     "tasa": "12",
     "base": "118.00",
     "nro_constancia": "999999999"
@@ -2234,7 +2220,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
@@ -2248,7 +2233,6 @@
    },
    "detraccion": {
     "codigo": "027",
-    "codigo_interno": "02702",
     "tasa": "4",
     "base": "118.00",
     "nro_constancia": "999999999"
@@ -2606,7 +2590,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
@@ -2620,7 +2603,6 @@
    },
    "detraccion": {
     "codigo": "027",
-    "codigo_interno": "02702",
     "tasa": "4",
     "base": "118.00",
     "nro_constancia": "999999999"
@@ -3134,7 +3116,6 @@
    "glosa": "GRILLETE TIPO LIRA 5/8 PARA TORRE DE ALTA TENSION LINEA 2",
    "contraparte_doc": "20607777773",
    "documento": {
-    "tipo": "DR",
     "serie_numero": "999999999",
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
@@ -3148,7 +3129,6 @@
    },
    "detraccion": {
     "codigo": "037",
-    "codigo_interno": "03701",
     "tasa": "12",
     "base": "118.00",
     "nro_constancia": "999999999"

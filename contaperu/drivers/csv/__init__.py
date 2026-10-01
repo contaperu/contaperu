@@ -65,7 +65,11 @@ COLUMNAS_DE_LINEA: tuple[ColumnaDeLinea, ...] = tuple(
         ("referencia.tipo", "ref_tipo", "texto"),
         ("referencia.serie_numero", "ref_serie_numero", "texto"),
         ("referencia.fecha", "ref_fecha", "fecha"),
-        ("detraccion.codigo_interno", "detraccion_codigo", "texto"),
+        # El código de SUNAT del bien o servicio (Catálogo 54), que es lo que dice el estándar. Hasta la 3.10 aquí
+        # salía `detraccion.codigo_interno`, o sea la Tabla General 28 de CONCAR en un canal de intercambio: quien
+        # leyera este CSV desde otro sistema recibía `02702` y tenía que conocer CONCAR para entenderlo. La cabecera
+        # no cambia, así que es un cambio silencioso para quien la busque por nombre: va primero en «Cómo migrar».
+        ("detraccion.codigo", "detraccion_codigo", "texto"),
         ("detraccion.tasa", "detraccion_tasa", "numero"),
         ("detraccion.base", "detraccion_base", "importe"),
         ("tasa_igv", "tasa_igv", "numero"),

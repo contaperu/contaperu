@@ -22,7 +22,10 @@ from ...asiento.lineas import LineaDiario
 BLOQUES: dict[str, tuple[str, ...]] = {
     "documento": ("tipo", "tipo_cp", "serie_numero", "id_externo", "fecha_emision", "fecha_vencimiento"),
     "referencia": ("tipo", "tipo_cp", "serie_numero", "fecha"),
-    "detraccion": ("codigo", "codigo_interno", "tasa", "base", "nro_constancia", "fecha_constancia"),
+    # `codigo_interno` salió en la 4.0: ninguna línea lo lleva ya —el código interno es de la tabla de cada ERP y lo
+    # pone su driver—, así que una columna que lo declarara saldría vacía en silencio, que es justo lo que esta tabla
+    # existe para impedir.
+    "detraccion": ("codigo", "tasa", "base", "nro_constancia", "fecha_constancia"),
 }
 # Qué es el dato de una columna, para quien lo escriba en un formato que distingue (una celda, un ancho fijo).
 # Ojo: no es la `clase` de una línea del asiento (activo, pasivo…), que vive en `contaperu/vocabulario.py`.

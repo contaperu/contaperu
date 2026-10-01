@@ -14,6 +14,7 @@ from jsonschema import Draft202012Validator
 
 from contaperu import asiento as asi
 from contaperu.drivers import concar as driver_concar
+from contaperu.drivers.concar import proyeccion
 from contaperu.pipeline import salida as gen
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
@@ -81,9 +82,25 @@ def test_la_linea_de_detraccion_lleva_su_bloque():
     assert len(lineas) == 5
     det = lineas[-1]
     assert det.cuenta == "421203" and det.debe_haber == "H" and det.importe == "198.00"
+    # La sigla sale de la columna R, que es de CONCAR: al volver a línea se recupera del archivo, aunque el asiento
+    # ya no la escriba. El código, en cambio, vuelve al de SUNAT: la AI lleva el interno de la T.G. 28.
     assert det.documento["tipo"] == "DR" and det.documento["serie_numero"] == "999999999"
-    assert det.detraccion == {"codigo_interno": "02702", "tasa": "4", "base": "4956.00"}
+    assert det.detraccion == {"codigo": "027", "tasa": "4", "base": "4956.00"}
     assert det.glosa == lineas[0].glosa, "la misma glosa en todas las lineas, sin prefijo (2.2)"
+
+
+def test_la_columna_ai_vuelve_al_codigo_de_sunat():
+    """Ida y vuelta por la T.G. 28. El interno mapeado vuelve por el mapa del contribuyente (`03799` -> `037`), y uno
+    que la empresa no mapeó, por sus tres primeros dígitos, que es como se numera esa tabla. El lector devuelve lo que
+    dice el estándar —el Catálogo 54—, no el código de un ERP."""
+    config = dict(CONTAB, detraccion_codigos={**CONTAB.get("detraccion_codigos", {}), "037": "03799"})
+    filas = driver_concar.filas_de_comprobante(factura(detraccion={"codigo": "037", "porcentaje": "10"}),
+                                               config, MES, "080084")
+    assert filas[-1]["AI"] == "03799"
+    assert driver_concar.a_lineas(filas, config)[-1].detraccion["codigo"] == "037", "por el mapa"
+    # Un interno que no está en el mapa: por los tres primeros dígitos.
+    assert proyeccion._codigo_sunat_de("03101", {}) == "031"
+    assert proyeccion._codigo_sunat_de("", {}) == "" and proyeccion._codigo_sunat_de("03", {}) == ""
 
 
 def test_a_dict_no_arrastra_claves_vacias():
@@ -117,7 +134,20 @@ def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
     # La detracción no es un comprobante de SUNAT: su documento es el DR, sin código de la Tabla 10;
     # y su referencia es la propia factura, que sí lo tiene.
     assert "tipo_cp" not in lineas[-1].documento and lineas[-1].referencia["tipo_cp"] == "01"
-    assert lineas[-1].detraccion["codigo"] == "027" and lineas[-1].detraccion["codigo_interno"] == "02702"
+    assert lineas[-1].detraccion["codigo"] == "027"
+
+
+def test_la_linea_lleva_el_codigo_de_sunat_y_el_interno_lo_pone_cada_erp():
+    """El `02702` es la Tabla General 28 de CONCAR: es de un ERP, no del asiento. Hasta la 3.10 el núcleo lo anotaba
+    al lado del código de SUNAT —inventando el de SUNAT más «01» para lo que nadie hubiera mapeado— y se lo escribía
+    igual al CSV y a STARSOFT, que trabajan con el Catálogo 54. Desde la 4.0 la línea lleva solo el de SUNAT, en los
+    DOS vocabularios, y la traducción la hace `drivers.concar.proyeccion.codigo_interno_detraccion`."""
+    for vocabulario in ("legacy", "neutral"):
+        lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES,
+                                            "080084", vocabulario=vocabulario)
+        det = lineas[-1].detraccion
+        assert det["codigo"] == "027", vocabulario
+        assert "codigo_interno" not in det, f"el interno de la T.G. 28 no es del asiento ({vocabulario})"
 
 
 def test_la_glosa_de_la_linea_va_entera_y_el_corte_es_del_driver():

@@ -50,6 +50,14 @@ CUENTAS_POR_DEFECTO: dict = {
     "ventas": "701101",
 }
 
+# El sufijo con el que se arma un código de la T.G. 28 que la empresa no mapeó: el de SUNAT más estos dos dígitos, que
+# es el patrón más común de esa tabla. Vive aquí, y no en el núcleo, porque es de CONCAR: hasta la 3.10 el asiento lo
+# inventaba para todos y se lo escribía también al CSV y a STARSOFT, que llevan el código de SUNAT.
+SUFIJO_T28 = "01"
+# La sigla de la T.G. 06 con la que nace una empresa: la del Excel real que CONCAR aceptó. Hasta la 3.10 se llamaba
+# `asiento.TIPO_DOC_DETRACCION` y era un nombre público del núcleo, que es donde no debía estar.
+TIPO_DOC_DETRACCION = "DR"
+
 # Lo que se configura en la sección `concar`: lo que el núcleo lee al armar el asiento, y lo propio de este formato.
 CONFIGURACION = (
     *CONFIGURACION_DEL_ASIENTO,
@@ -59,18 +67,39 @@ CONFIGURACION = (
               ayuda="Cómo escribe tu sistema la moneda nacional."),
         Campo("USD", "texto", "US", titulo="Los dólares se llaman", grupo="monedas",
               ayuda="Ojo: CONCAR usa US, no ME."))),
-    # Columna V de la línea de la detracción: el área de la T.G. 26. VACÍA a propósito: es un número propio de cada
+    # ── Las tres Tablas Generales de la detracción ──────────────────────────────────────────────────────────────
+    # Las tres viven aquí desde la 4.0. Las dos primeras estaban en `asiento/configuracion.py`, que las leía el
+    # núcleo y las escribía en la línea para TODOS los destinos: también para el CSV y para STARSOFT, que trabajan
+    # con el código de SUNAT y nacían con catorce mapeos de CONCAR que nunca leyeron. La línea lleva el código del
+    # Catálogo 54 y este driver traduce; lo escribe su proyección (`tipo_doc_detraccion`, `codigo_interno_detraccion`).
+    #
+    # Columna R: la sigla de la T.G. 06, calcada del Excel real que CONCAR ACEPTÓ (set-2026). El `DT` que hubo hasta
+    # entonces salía del borrador de la plantilla y nunca llegó a importarse en un CONCAR de verdad. Cada
+    # contribuyente numera esa tabla a su gusto, y por eso se configura.
+    Campo("detraccion_tipo_doc", "texto", TIPO_DOC_DETRACCION, titulo="Tipo de documento de la detracción",
+          grupo="detracciones", patron=r"^[A-Z0-9]{1,2}$",
+          ayuda="La sigla de tu Tabla General 06 para la línea de la detracción (en el Excel validado, DR)."),
+    # Columna AI: código SUNAT del bien o servicio (3 dígitos, viene en el XML) → código interno de la T.G. 28 de
+    # CONCAR (5 dígitos: el de SUNAT + 2 propios). Un código que no esté aquí sale como SUNAT + `SUFIJO_T28`.
+    # QUÉ ENTRA (los más usados, no todos): todo el Anexo 3 —los servicios, que son lo que un estudio ve a diario— más
+    # el transporte de bienes por vía terrestre (027) y las tres de bienes que aparecen en obra y comercio (madera,
+    # arena y piedra, residuos). Fuera quedan las sectoriales (pesca, oro, minerales…): la que aparezca se añade. Los
+    # siete que ya usaba un contribuyente real conservan su código interno EXACTO. Sus claves son códigos que el motor
+    # reconoce, y lo vigila `tests/test_detracciones.py`: uno que no esté en la tabla del motor no llegaría nunca.
+    Campo("detraccion_codigos", "mapa", {"008": "00801", "009": "00901", "010": "01001", "012": "01201",
+                                         "019": "01903", "020": "02001", "021": "02101", "022": "02201",
+                                         "024": "02401", "025": "02501", "026": "02601", "027": "02702",
+                                         "030": "03001", "037": "03701"},
+          titulo="Código de cada detracción en tu sistema", grupo="detracciones", claves=r"^[0-9]{3}$",
+          ayuda="El código de tu Tabla General 28 para cada código SUNAT.",
+          valores=Campo("", "texto", grupo="detracciones", patron=r"^[0-9]{2,12}$")),
+    # Columna V: el área de la T.G. 26. VACÍA a propósito: es un número propio de cada
     # empresa, y uno de fábrica metería los apuntes de todo el mundo en un área que nadie eligió. No se corta a los 3
     # caracteres de la plantilla: un código cortado es OTRA área.
     Campo("detraccion_area", "texto", "", titulo="Área de la detracción", grupo="detracciones",
           patron=r"^[A-Z0-9]{0,3}$", ayuda="El código de área de tu CONCAR para la línea de la detracción (por "
                                             "ejemplo 061). Vacío, no se escribe."),
 )
-
-# El sufijo con el que se arma un código de la T.G. 28 que la empresa no mapeó: el de SUNAT más estos dos dígitos, que
-# es el patrón más común de esa tabla. Vive aquí, y no en el núcleo, porque es de CONCAR: hasta la 3.10 el asiento lo
-# inventaba para todos y se lo escribía también al CSV y a STARSOFT, que llevan el código de SUNAT.
-SUFIJO_T28 = "01"
 
 TIPO_CONVERSION = "V"       # CONCAR busca el T.C. en su tabla; con T.C. en G pasa a 'C' (especial)
 MARCA_CONVERSION = "S"      # la columna I, «Flag de Conversión de Moneda»
