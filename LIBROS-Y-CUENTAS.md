@@ -221,12 +221,21 @@ Comparado campo a campo:
 **La línea de este estándar ya es, casi exactamente, una línea del Libro Diario de SUNAT.** Lo que le falta es **una**
 cosa, el nivel normativo de la cuenta — y no dos, como decía este documento antes de ver un archivo real.
 
-> **Corregido el 1-oct-2026, con un Libro Diario presentado y aceptado delante.** La tabla de arriba se escribió
-> contra el formato en papel de la RS 234-2006. El TXT que se presenta de verdad tiene **21 campos**, y su columna de
-> denominación **va vacía en las 12 094 líneas** del archivo contrastado: el artículo 6 la hace opcional a quien usa
-> más de cuatro dígitos de subcuenta, y ese contribuyente usa seis. Así que la denominación **no tiene caso real**
-> —nadie la llena— y la candidata B de abajo pierde esa mitad. El mapa completo de los 21 campos, con de dónde sale
-> cada uno, vive ahora en `contaperu/datos/sunat/ple_campos.json` y lo vigila `tests/test_ple_campos.py`.
+> **Corregido dos veces el 1-oct-2026, y la segunda deshace la primera.** La tabla de arriba se escribió contra el
+> formato en papel de la RS 234-2006. Con un Libro Diario presentado y aceptado delante se vio que el TXT real tiene
+> **21 campos** y que su quinta columna va vacía en las 12 094 líneas, y de ahí se concluyó —mal— que era la
+> denominación y que «no tenía caso real porque nadie la llena».
+>
+> **El libro oficial de estructuras del PLE lo zanjó**: el campo 5 del 5.1 no es la denominación, es el **código de
+> la Unidad de Operación**, y la denominación **no está en el 5.1 en absoluto**. Vive en el **formato 5.3, «Libro
+> Diario - detalle del plan contable utilizado»**, donde se declara **una vez por cuenta** —725 filas en el archivo
+> contrastado— en vez de repetirse en cada una de las 12 094 líneas. Así que la candidata B **no pierde esa mitad**:
+> la denominación tiene caso real, obligatorio, y su sitio es otro libro.
+>
+> La lección, que es la del repositorio: una columna vacía no dice por qué está vacía. Deducirlo de un archivo en vez
+> de leerlo de la norma es exactamente lo que la regla «ninguna regla sin fuente» existe para evitar. El mapa de los
+> dos formatos, con de dónde sale cada campo, vive en `contaperu/datos/sunat/ple_campos.json` y lo vigila
+> `tests/test_ple_campos.py`.
 
 Eso cambia de sitio la idea del §2.4: **no es un préstamo de SAF-T, es lo que SUNAT exige.** Y es mejor sitio, porque
 la regla del repositorio es que ninguna regla contable entra sin fuente, y la fuente peruana existe.
@@ -245,7 +254,7 @@ El catálogo de libros y registros de la RS 234-2006, por su número de formato:
 | 2 | Libro de Ingresos y Gastos | 2.1, 2.2 |
 | 3 | Libro de Inventarios y Balances | 3.1 – 3.20 |
 | 4 | Libro de Retenciones (incisos e y f del art. 34 de la LIR) | 4.1 |
-| 5 | **Libro Diario** y Libro Diario de Formato Simplificado | **5.1**, 5.3 |
+| 5 | **Libro Diario** · su **detalle del plan contable** · y los dos del formato simplificado | **5.1**, **5.3**, 5.2, 5.4 |
 | 6 | Libro Mayor | 6.1 |
 | 7 | **Registro de Activos Fijos** | 7.1 – 7.4 |
 | 8 | Registro de Compras | 8.1 |
@@ -393,7 +402,7 @@ fijaría, prioridad y hito.
 > | | Qué pasó |
 > |---|---|
 > | **A** · `libro.tipo` con el catálogo del PLE | **No hace falta para producir.** El driver toma un mes de compras o de ventas y lo escribe en formato Libro Diario, como el `sire` lo escribe como RVIE o RCE. Haría falta para **recibir** un diario de un ERP, que es otra dirección |
-> | **B** · la cuenta normativa y su denominación | **Pierde la mitad.** La denominación va vacía en las 12 094 líneas del archivo: el artículo 6 la hace opcional a quien usa más de cuatro dígitos de subcuenta. Queda solo la divisionaria, y sigue esperando |
+> | **B** · la cuenta normativa y su denominación | **Se parte en dos, y las dos tienen sitio.** La denominación no iba vacía por opcional: es que **no es del 5.1** — vive en el formato **5.3**, una vez por cuenta. Ahí es obligatoria, así que tiene caso real y entra como dato del contribuyente. La divisionaria normativa sigue esperando su caso en la línea |
 > | **C** · `tipo_de_cuenta` con los `account_type` de Odoo | Sin cambios. Sigue esperando un ERP que pida más que las cinco clases |
 > | **D** · la tabla de determinación con dimensiones | Sin cambios, y sigue siendo la que cubre el hueco de investigación real |
 > | **E** · `retencion` genérico | **Reemplazada por algo mejor y más ancho.** La revisión del modelo de roles encontró que el hueco no eran las retenciones sino **dos papeles que el catálogo no sabía nombrar**, y ésos entraron ya por la [enmienda 0021](estandar/enmiendas/0021-contrapartida-y-tesoreria.md). `retencion` sigue fuera, y ahora con un motivo escrito: **un rol genérico no entra antes que el catálogo de tributos que lo hace genérico** |
@@ -416,10 +425,16 @@ choca con algo que `INTEROPERABILIDAD.md` ya tenía anotado: «`FORMATOS` solo a
 | Prio | C |
 | Hito | `—` |
 
-### B · La cuenta normativa y su denominación en la línea
+### B · La cuenta normativa en la línea, y la denominación en su libro
 
-La línea lleva la cuenta de la empresa y además **su divisionaria del PCGE** (al mínimo del artículo 6) y **su
-denominación**, que el Formato 5.1 exige salvo que la empresa use más de cuatro dígitos de subcuenta.
+**Se parte en dos al leer la estructura oficial del PLE (1-oct-2026), y cada mitad va a un sitio distinto.**
+
+La **denominación** no es de la línea: el Formato 5.1 no la lleva —su campo 5 es el código de la Unidad de
+Operación— y donde SUNAT la pide es en el **formato 5.3, el detalle del plan contable utilizado**, una vez por cuenta
+y obligatoria. Ahí tiene caso real y entra como dato del contribuyente, porque el motor conoce el nombre de la
+divisionaria del PCGE («Caja») y no el de la cuenta de la empresa («CAJA CHICA M.N.»), y no se inventa.
+
+Lo que sigue siendo de la línea, y sigue esperando su caso, es **la divisionaria del PCGE** al mínimo del artículo 6.
 
 **Qué arregla.** Cuando el destino es STARSOFT, el driver reescribe la cuenta a ocho dígitos (`421201` → `42120001`) y
 el asiento deja de ser reconocible para quien no conozca ese plan. Con la divisionaria al lado, un asiento de CONCAR y
@@ -528,8 +543,8 @@ Ninguno de estos puntos sostiene una conclusión de este documento; todos son pr
 
 | | Qué falta | Dónde está |
 |---|---|---|
-| ~~1~~ | ~~Los **códigos de libro** del PLE y la nomenclatura del TXT~~ | **Resuelto el 1-oct-2026** contra un archivo que SUNAT aceptó: el código es de **seis** dígitos y los ocho del nombre del fichero son el código más la oportunidad. `050100` Diario · `050300` Diario Simplificado · `080100` Registro de Compras · `140100` Registro de Ventas. **No son los del SIRE**, que usa `140400` y `080400`. En `datos/sunat/ple_campos.json` |
-| ~~2~~ | ~~La **estructura electrónica del 5.1**, campo a campo~~ | **Resuelto en lo que importa**: los **21 campos** están mapeados en `datos/sunat/ple_campos.json`, con de dónde sale cada uno. Sigue `[por confirmar]` contra el Anexo 2 lo accesorio: los **nombres oficiales de las columnas 5 y 6** y la obligatoriedad campo a campo, que están deducidos del archivo y no copiados de la norma |
+| ~~1~~ | ~~Los **códigos de libro** del PLE y la nomenclatura del TXT~~ | **Resuelto.** El código es de **seis** dígitos y los ocho del nombre del fichero son el código más la oportunidad. El grupo 05 son **dos pares**: `050100` Diario con `050300` su plan contable, y `050200` Simplificado con `050400` el suyo. Más `080100` y `080200` Compras y `140100` Ventas. **No son los del SIRE**, que usa `140400` y `080400`. En `datos/sunat/ple_campos.json` |
+| ~~2~~ | ~~La **estructura electrónica**, campo a campo~~ | **Resuelto del todo**, y no por deducción: el **libro oficial de estructuras del PLE** que publica SUNAT, leído campo a campo el 1-oct-2026 — nombre, longitud, obligatoriedad, llave única, descripción, formato y observaciones. De ahí salió que el campo 5 del 5.1 estaba mal rotulado y que la denominación vive en el 5.3. Ya no queda nada `[por confirmar]` en el mapa, y un test lo vigila |
 | 3 | El **Formato 5.1 oficial** publicado por SUNAT | `contenido.app.sunat.gob.pe` rechazó la conexión el 1-oct-2026. Ya no bloquea nada: el archivo real cubrió su papel |
 | 4 | La **licencia exacta de `l10n_pe`** y qué `account_type` asigna a cada elemento del PCGE, en especial al 9 | su `__manifest__.py` y su CSV |
 | 5 | El **`ReportCode` de Xero**: el único campo de clasificación que no está investigado en ningún documento del repositorio | la API de Xero |

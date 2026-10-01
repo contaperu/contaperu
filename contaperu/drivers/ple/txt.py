@@ -20,6 +20,8 @@ quien integre tiene que saberlo antes de presentar nada.
 """
 from __future__ import annotations
 
+from typing import Any
+
 from ...asiento import CONFIGURACION_DEL_ASIENTO, ComprobanteDelAsiento, LineaDiario
 from ...modelo import Libro
 from ..kit import Opciones, armar_archivo, armar_linea, forma, formatear_fecha, formatear_monto, sanear

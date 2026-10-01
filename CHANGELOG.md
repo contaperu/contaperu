@@ -4,6 +4,36 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [4.2.2] — 2026-10-01
+
+**El mapa del PLE deja de ser una deducción y pasa a salir de la norma.** John aportó el **libro oficial de
+estructuras del PLE** que publica SUNAT, y leerlo campo a campo corrigió dos cosas que la 4.2.0 había deducido de un
+archivo presentado — que es justo lo que la regla «ninguna regla contable sin fuente» existe para evitar.
+
+Nada de esto cambia un byte de lo que el motor escribe: el driver del 5.1 produce el mismo archivo que en la 4.2.1.
+
+### Corregido
+
+- **El campo 5 del 5.1 no es la denominación de la cuenta.** Es el **código de la Unidad de Operación**. Iba vacío en
+  las 12 094 líneas del archivo contrastado y de ahí se dedujo —mal— que era la denominación y que el artículo 6 la
+  hacía opcional. La denominación **no está en el 5.1 en absoluto**.
+- **El formato 5.3 no es el Libro Diario Simplificado.** Es **«Libro Diario - detalle del plan contable utilizado»**,
+  y es donde vive la denominación: una fila por cuenta, 725 en el archivo contrastado, en vez de repetirla en cada una
+  de las 12 094 líneas. El simplificado es el **5.2**, con su propio detalle de plan en el **5.4**. El grupo 05 son
+  **dos pares**, no cuatro formatos sueltos. La 4.2.0 decía lo contrario en su CHANGELOG y en `LIBROS-Y-CUENTAS.md`.
+- **`contaperu/drivers/ple/txt.py` usaba `Any` sin importarlo.** No rompía nada en ejecución —`from __future__ import
+  annotations` deja la anotación sin evaluar— pero `typing.get_type_hints` sobre ese módulo lanzaba `NameError`.
+
+### Añadido
+
+- **El mapa del formato 5.3** en `datos/sunat/ple_campos.json`, al lado del 5.1, con sus 8 campos y la periodicidad
+  que manda SUNAT: «obligatorio en el periodo de enero cada año o cuando se genera el libro electrónico por primera
+  vez; en los demás meses se puede optar por generar un libro vacío salvo que el Plan Contable sufra modificaciones».
+- **La obligatoriedad de cada campo**, que antes no estaba, y los **códigos de libro completos** del grupo 05
+  (`050100`, `050200`, `050300`, `050400`) más el `080200` del registro de compras de no domiciliados.
+- **Ya no queda nada `[por confirmar]`** en el mapa, y un test lo vigila: lo que no salga de la estructura oficial no
+  se escribe.
+
 ## [4.2.1] — 2026-10-01
 
 **El Libro Diario no se inventa un vencimiento.** Primer arreglo del driver `ple`, encontrado al contrastar su salida

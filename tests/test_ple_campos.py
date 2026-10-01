@@ -81,10 +81,11 @@ def test_las_escrituras_y_los_vistos_estan_descritos(mapa, campos):
 
 
 def test_cada_fuente_dice_de_donde_sale(mapa):
-    """Ninguna regla sin fuente, y aquí son cinco: el formato, el nivel de la cuenta, la estructura electrónica,
-    los códigos de libro y el archivo con el que se contrastó."""
+    """Ninguna regla sin fuente, y aquí son seis: la estructura oficial, el formato, el nivel de la cuenta, la
+    estructura electrónica, los códigos de libro y el archivo con el que se contrastó."""
     fuentes = mapa["fuentes"]
-    assert set(fuentes) == {"formato", "nivel_de_la_cuenta", "estructura_electronica", "codigos_de_libro", "contraste"}
+    assert set(fuentes) == {"estructura", "formato", "nivel_de_la_cuenta", "estructura_electronica",
+                            "codigos_de_libro", "contraste"}
     for nombre, texto in fuentes.items():
         assert len(texto.strip()) > 40, f"la fuente {nombre} no dice nada"
     # El nivel de la cuenta es el que manda el artículo 6, y la fuente lo cita con sus dos umbrales.
@@ -92,11 +93,44 @@ def test_cada_fuente_dice_de_donde_sale(mapa):
     assert "100 UIT" in fuentes["nivel_de_la_cuenta"]
 
 
-def test_lo_que_falta_por_confirmar_esta_marcado(mapa):
-    """Lo que no se pudo leer de la norma va dicho, no supuesto. Son los nombres oficiales de dos columnas y los
-    códigos de libro, que están verificados contra un archivo aceptado y no contra el anexo."""
-    assert "[por confirmar]" in mapa["fuentes"]["estructura_electronica"]
-    assert "[por confirmar]" in mapa["fuentes"]["codigos_de_libro"]
+def test_el_mapa_sale_de_la_estructura_oficial_y_no_de_deducciones(mapa):
+    """Hasta el 1-oct-2026 este mapa se dedujo de un archivo presentado, y tenía dos columnas mal rotuladas y unos
+    códigos `[por confirmar]`. Ahora sale del libro de estructuras que publica SUNAT, leído campo a campo, así que
+    **no puede quedar nada por confirmar**: lo que no se sepa, no se escribe.
+
+    El caso que lo trae: el campo 5 del 5.1 se rotuló «denominación de la cuenta» porque iba vacío y la norma la
+    hace opcional. No era eso — es el **código de la Unidad de Operación**, y la denominación no está en el 5.1 en
+    absoluto: vive en el 5.3."""
+    for nombre, texto in mapa["fuentes"].items():
+        assert "[por confirmar]" not in texto, f"la fuente {nombre} todavía deduce algo"
+    assert "estructura" in mapa["fuentes"] and "SUNAT" in mapa["fuentes"]["estructura"]
+    # El rótulo que estaba mal, y el que lo corrige.
+    campo5 = next(c for c in catalogos.columnas_del_ple() if c["n"] == 5)
+    assert "Unidad de Operación" in campo5["nombre"]
+
+
+def test_el_mapa_trae_los_dos_libros_del_par(mapa):
+    """El grupo 05 son dos pares: cada diario con su detalle del plan contable al lado. El motor escribe el par del
+    diario completo —5.1 y 5.3— que es del que hay archivo aceptado.
+
+    El 5.3 es donde vive la **denominación de la cuenta**, y por eso el 5.1 no la lleva en cada línea: se declara
+    una vez por cuenta y no 12 094 veces."""
+    assert set(mapa["libros"]) == {"diario", "plan_contable"}
+    plan = mapa["libros"]["plan_contable"]
+    assert plan["formato"] == "5.3" and plan["codigo"] == "050300" and plan["columnas"] == 8
+    assert len(catalogos.columnas_del_ple("plan_contable")) == 8
+    # El periodo del 5.3 lleva día; el del 5.1, no. Confundirlos nombra mal el fichero por dentro.
+    assert plan["periodo"] == "AAAAMMDD" and mapa["libros"]["diario"]["periodo"] == "AAAAMM00"
+    # La denominación es obligatoria y el motor no la tiene: la declara el contribuyente.
+    denominacion = next(c for c in plan["campos"] if c["n"] == 3)
+    assert denominacion["obligatorio"] and denominacion["escritura"] == "del_contribuyente"
+
+
+def test_la_periodicidad_del_plan_contable_esta_dicha(mapa):
+    """SUNAT no lo pide todos los meses, y eso no se puede deducir del archivo: «obligatorio en el periodo de enero
+    cada año o cuando se genera el libro electrónico por primera vez»."""
+    nota = mapa["libros"]["plan_contable"]["nota"]
+    assert "enero" in nota and "primera vez" in nota
 
 
 def test_los_codigos_de_libro_no_se_confunden_con_los_del_sire(mapa):
