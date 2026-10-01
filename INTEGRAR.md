@@ -444,6 +444,21 @@ pierde**, porque la fila entera del TXT viaja en `datos_originales["sire"]` del 
 contestar «¿de dónde salió este dato?» en tu pantalla de revisión, y para saber qué te llega antes de escribir
 una línea de código contra el registro.
 
+**9. Y ojo con la detracción: del SIRE no llega.** Si tu mes entra por la propuesta y no por los XML, **ningún
+comprobante traerá detracción**, y el motor te lo avisa con `SIRE_SIN_DETALLE`. La distinción importa, porque no
+es que SUNAT se calle del todo:
+
+- **SUNAT sí dice SI hay detracción.** El RCE trae una columna propia, el campo 38 del Anexo 8 de la RS
+  040-2022, con una `D` en las filas sujetas al SPOT. En un RCE real de un mes (3018 filas) venía marcada en 221.
+- **SUNAT no dice CUÁL.** No hay código del Catálogo 54, ni tasa, ni monto, ni cuenta del Banco de la Nación, ni
+  constancia. Eso es del comprobante, no del registro.
+- **Y el motor hoy no lee ni la marca**: el campo 38 está declarado como `ignorada` en `api.campos_del_sire()`,
+  con su motivo. Llega entera en `datos_originales["sire"]`, así que si la necesitas ya, la tienes ahí.
+
+Lo que esto significa para tu conector: **la detracción la aporta tu lado**, leyendo el XML del comprobante o
+pidiéndosela al contador. No la deduzcas de la propuesta, y no asumas que un mes importado del SIRE y exportado a
+CONCAR lleva sus líneas de detracción: no las lleva, porque el dato no estaba.
+
 ### Dónde acaba el motor y empieza tu conector
 
 Subir el archivo, pedir un token, sondear un ticket y guardar credenciales es **tuyo**: necesita red, estado

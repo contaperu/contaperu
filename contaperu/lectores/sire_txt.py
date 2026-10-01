@@ -19,6 +19,13 @@ Entran los dos formatos, porque comparten el orden de los campos informados:
 Lo que la propuesta NO trae, y por eso no se inventa aquí: el concepto del
 comprobante, la cuenta contable, el centro de costo y el detalle de la detracción. Son
 datos del comprobante, no del registro; `validar.py` lo avisa con `SIRE_SIN_DETALLE`.
+
+De la detracción conviene precisar qué calla SUNAT y qué no, porque no es lo mismo: el RCE **sí marca si una
+fila está sujeta al SPOT** —el campo 38 del Anexo 8, con una `D`; en un RCE real de un mes, 221 filas de 3018—,
+pero **no dice cuál**: ni código del Catálogo 54, ni tasa, ni monto, ni cuenta, ni constancia. Esa marca hoy no
+se lee (`sire_campos.json` la declara `ignorada`, con su motivo y como candidata), y quien la necesite la tiene
+entera en `datos_originales["sire"]`. Para quien integra, la consecuencia está en `INTEGRAR.md` §«El SIRE, de
+punta a punta», punto 9: **la detracción la aporta su lado**, del XML o del contador.
 El **concepto se queda VACÍO a propósito** (regla de contabilidad): copiarle el nombre de
 la contraparte repetía en la columna un dato que ya está en la suya, y no ganaba nada
 —`asiento.glosa_de` ya cae al nombre de la contraparte cuando el concepto está vacío, así
