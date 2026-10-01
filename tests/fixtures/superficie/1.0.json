@@ -466,6 +466,7 @@
  "contaperu.drivers.kit": {
   "Opciones": "",
   "OpcionesArchivo": "",
+  "armar_archivo": "",
   "armar_linea": "",
   "celdas": "",
   "columnas": "",

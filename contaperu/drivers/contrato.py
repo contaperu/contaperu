@@ -30,7 +30,10 @@ dice que pase a `desde_lineas`.
 
 - **`legacy`** — un sistema contable instalado que importa un archivo (CONCAR, CONTASIS; STARSOFT y SISCONT cuando
   entren). Lleva cuentas y declara `EXIGE`, lo que su sistema no puede importar sin (vacío si nada).
-- **`tributario`** — un registro que se presenta a SUNAT (el SIRE). Forma `linea`, sin cuentas ni configuración.
+- **`tributario`** — un registro que se presenta a SUNAT. Dos formas, según de qué sea su FILA: `linea` cuando es un
+  comprobante (el SIRE, sin cuentas ni configuración) y `desde_lineas` cuando es una línea del asiento (el Libro
+  Diario del PLE, que sí lleva cuentas y numera su CUO con el sub-diario y el correlativo). Lo que el canal fija es
+  que escribe **texto para SUNAT**, no un Excel ni un JSON.
 - **`intercambio`** — un formato neutral para leer o integrar (el CSV). Forma `desde_lineas`: proyecta la línea.
 
 Cada canal se presenta en uno de los tres grupos de destinos del motor (`GRUPOS`): `tributario` es el **SIRE**, `legacy`
@@ -272,8 +275,16 @@ def lleva_cuentas(modulo: Any) -> bool:
 
 
 def arma_asientos(modulo: Any) -> bool:
-    """¿Arma asientos, y necesita por eso además los correlativos? Las dos formas de la familia asiento."""
-    return familia(modulo) == "asiento"
+    """¿Arma asientos, y necesita por eso además los correlativos? Las dos formas de la familia asiento, y desde la
+    4.2 también un **registro tributario que recibe las líneas** (`desde_lineas`).
+
+    Lo pidió el Libro Diario del PLE: su campo 2 es el CUO, que se compone del sub-diario y del correlativo del
+    asiento, así que sin correlativos no hay archivo. Su familia es `registro` —viene del canal, y es correcta: lo que
+    produce es un registro que se presenta a SUNAT— pero numera igual que CONCAR.
+
+    **Para los drivers de antes de la 4.2 la condición no cambia**: todos los `desde_lineas` que había eran ya de
+    familia asiento, así que esto no mueve ni un correlativo de los que ya se escribían."""
+    return familia(modulo) == "asiento" or forma(modulo) == "desde_lineas"
 
 
 def excluye_tipos(modulo: Any) -> frozenset[str]:
@@ -472,8 +483,14 @@ def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
         if not hasattr(modulo, "EXIGE"):
             problemas.append("un driver legacy declara EXIGE: lo que su sistema no puede importar sin (vacío si nada)")
         return problemas
-    if declarado == "tributario" and f != "linea":
-        return ["un driver tributario escribe un registro de texto para SUNAT: su forma es `linea`"]
+    # Un tributario escribe un registro de texto para SUNAT, y hasta la 4.2 eso quería decir una fila por
+    # comprobante, que es la forma `linea` y la del SIRE. El Libro Diario del PLE rompió el supuesto sin romper la
+    # regla: también es un registro de texto para SUNAT, pero **su fila es una línea del asiento**, no un
+    # comprobante —una compra con detracción son cinco filas—, así que su forma es `desde_lineas`. Lo que la regla
+    # protege sigue en pie: un tributario no escribe un Excel ni un JSON.
+    if declarado == "tributario" and f not in ("linea", "desde_lineas"):
+        return ["un driver tributario escribe un registro de texto para SUNAT: su forma es `linea` "
+                "(una fila por comprobante) o `desde_lineas` (una fila por línea del asiento)"]
     if declarado == "intercambio" and f != "desde_lineas":
         return ["un driver de intercambio proyecta la línea del comprobante: su forma es `desde_lineas`"]
     return []

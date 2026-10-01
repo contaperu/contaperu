@@ -1,6 +1,8 @@
 """El formato de un registro de texto: saneado, fechas, importes y números como van al archivo."""
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 import re
 import unicodedata
 from datetime import date
@@ -87,3 +89,25 @@ def negativo(c: Comprobante, opciones) -> bool:
 def armar_linea(campos: list[str], opciones: Opciones) -> str:
     linea = "|".join(campos)
     return linea + "|" if opciones.palote_final else linea
+
+
+def armar_archivo(lineas: Iterable[str], opciones: Opciones) -> bytes:
+    """Las líneas ya armadas → los bytes del archivo: las une con su salto, cierra con uno más y codifica.
+
+    Vivía dentro de `pipeline/salida.py`, en la rama de la forma `linea`, que era la del SIRE y de nadie más. Sale
+    aquí al aparecer el segundo registro de texto para SUNAT —el Libro Diario del PLE, que por la forma de su fila es
+    un driver `desde_lineas` y no pasa por esa rama—, para que **la política de codificación viva en un solo sitio**:
+    es la misma convergencia que la 2.3 hizo con el ZIP, que hasta entonces solo sabía hacer la rama de texto.
+
+    La codificación no es un detalle: `sanear()` deja el texto en ASCII y entonces `encode` no puede fallar; sin
+    sanear se cae a cp1252 con reemplazo, que es **lo que históricamente exigían los libros electrónicos** y lo que
+    evita que un carácter raro de una glosa tumbe una exportación entera.
+
+    Un archivo sin ninguna línea son cero bytes, no un salto suelto: un TXT vacío que SUNAT recibiera con una línea en
+    blanco sería una fila vacía, no un archivo vacío."""
+    cuerpo = opciones.nueva_linea.join(lineas)
+    if cuerpo:
+        cuerpo += opciones.nueva_linea
+    if opciones.sanear:
+        return cuerpo.encode(opciones.codificacion)      # tras sanear() es ASCII: no puede fallar
+    return cuerpo.encode("cp1252", errors="replace")     # lo que históricamente exigían los libros electrónicos

@@ -20,6 +20,7 @@ from .. import asiento as asi
 from .. import drivers
 from .._version import __version__
 from ..drivers import contrato
+from ..drivers.kit import texto as kit_texto
 from ..errores import ErroresBloqueantes
 from ..modelo import Comprobante, Libro
 from . import armado
@@ -141,13 +142,9 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
             archivo=nombre, contenido=contenido, content_type=tipo, por_comprobante=detalle,
         )
 
-    cuerpo = opciones.nueva_linea.join(lineas_de_texto(libro, incluidos, driver, opciones))
-    if cuerpo:
-        cuerpo += opciones.nueva_linea
-    if opciones.sanear:
-        texto = cuerpo.encode(opciones.codificacion)      # tras sanear() es ASCII: no puede fallar
-    else:
-        texto = cuerpo.encode("cp1252", errors="replace")  # lo que históricamente exigían los libros electrónicos
+    # Unir y codificar vive en el kit desde la 4.2: lo comparte con el driver del Libro Diario del PLE, que por la
+    # forma de su fila es `desde_lineas` y no pasa por aquí. La política de codificación es una sola.
+    texto = kit_texto.armar_archivo(lineas_de_texto(libro, incluidos, driver, opciones), opciones)
 
     nombre = modulo.nombre(libro, opciones)
     nombre_comprimido, comprimido = _en_zip(nombre, texto)

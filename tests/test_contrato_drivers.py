@@ -837,10 +837,17 @@ def test_cada_driver_de_serie_declara_su_canal():
 
 
 def test_las_reglas_de_cada_canal():
-    tributario_de_asientos = driver_de_prueba("t")
-    tributario_de_asientos.CANAL = "tributario"
-    assert contrato.incumplimientos(tributario_de_asientos) == [
-        "un driver tributario escribe un registro de texto para SUNAT: su forma es `linea`"]
+    # Un tributario puede recibir las líneas desde la 4.2: lo pidió el Libro Diario del PLE, cuya fila ES una línea
+    # del asiento y no un comprobante. Lo que la regla protege sigue en pie —no escribe un Excel ni un JSON—, así que
+    # el que incumple ahora es el que usa la tercera forma.
+    tributario_de_lineas = driver_de_prueba("t")
+    tributario_de_lineas.CANAL = "tributario"
+    assert contrato.incumplimientos(tributario_de_lineas) == []
+    tributario_de_registro = driver_de_registro("tr")
+    tributario_de_registro.CANAL = "tributario"
+    assert contrato.incumplimientos(tributario_de_registro) == [
+        "un driver tributario escribe un registro de texto para SUNAT: su forma es `linea` "
+        "(una fila por comprobante) o `desde_lineas` (una fila por línea del asiento)"]
     intercambio_de_registro = driver_de_registro("i")
     intercambio_de_registro.CANAL = "intercambio"
     assert contrato.incumplimientos(intercambio_de_registro) == [

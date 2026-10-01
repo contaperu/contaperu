@@ -15,8 +15,8 @@ así se itera con el reporte de SUNAT o del sistema en la mano sin tocar los dri
 from . import celdas, columnas, forma, nombres, xlsx
 from .nombres import nombre_de_archivo
 from .opciones import Opciones, OpcionesArchivo
-from .texto import armar_linea, formatear_cambio, formatear_fecha, formatear_monto, formatear_numero, negativo, sanear
+from .texto import armar_archivo, armar_linea, formatear_cambio, formatear_fecha, formatear_monto, formatear_numero, negativo, sanear
 
-__all__ = ["Opciones", "OpcionesArchivo", "armar_linea", "celdas", "columnas", "forma",
+__all__ = ["Opciones", "OpcionesArchivo", "armar_archivo", "armar_linea", "celdas", "columnas", "forma",
            "formatear_cambio", "formatear_fecha", "formatear_monto", "formatear_numero",
            "negativo", "nombre_de_archivo", "nombres", "sanear", "xlsx"]
