@@ -40,7 +40,13 @@ exportar = por_la_fachada(api.exportar)
 # bug y no ruido esperado. Esa frase de arriba, «SIN solo excluye el correlativo, la clase y el id_externo», describía
 # la 4.0: con la enmienda 0021 fueron cuatro y ahora son cinco. Era
 # 04300749a2f4301e1a0c695420b7ee977ace8c56ad75b01128f64342c722f385.
-HUELLA_FACTURA = "facf9d2e4598472dbb43839bd73227254c4459c237c13e9b0506d1aa7c3a33a2"
+#
+# **Y una SEGUNDA vez en la misma 5.0**, por el motivo opuesto al de arriba: la línea del impuesto gana su bloque
+# `impuesto` con el código del Catálogo 05, y ese SÍ es contenido —una línea de IGV y una de ISC con la misma cuenta y
+# el mismo importe son hechos distintos, así que dejarlo fuera podría darles la misma huella—. Son dos movimientos en
+# una versión y un solo anuncio; lo que no vuelve a repetirse es el primero. Era
+# facf9d2e4598472dbb43839bd73227254c4459c237c13e9b0506d1aa7c3a33a2.
+HUELLA_FACTURA = "02666fbfd5fadf2875c6dfc5004b60708ba02fedb4be1b77565b9dc53d902795"
 
 
 def lineas(**cambios):
@@ -68,7 +74,9 @@ def test_la_misma_entrada_da_la_misma_huella_y_es_la_de_siempre():
 # cb3af1e5e311eadbf33f71aa0087b600e303e2e8f631c8d90ad10f08214689e4.
 # Y en la 5.0 con las otras dos, al salir el `rol`. Era
 # 82c9fb49fdec64a3f115f11259a27cfce0927c4a7ec549da6c08220a349e5d1d.
-HUELLA_USD = "8457af1036953eadbc9cc772a92704a9f54504d74e0c91a55752e18d6ee0da0e"
+# Y otra vez con el bloque `impuesto`, como las otras dos. Era
+# 8457af1036953eadbc9cc772a92704a9f54504d74e0c91a55752e18d6ee0da0e.
+HUELLA_USD = "1408690d7adf2da387d811b5192eddfd21dbb3cd5ce58c806598669ee5da3080"
 # La de detracción cambió OTRA VEZ en la 2.6, y las otras dos no: su línea pasó a llevar la constancia del depósito
 # —el comodín mientras no se ha pagado— y el comodín pasó de diez nueves a nueve. Era
 # 3c8525988cc772ed9c6589033a84cfc185f0db9e84168f2653c7fced63df64bd.
@@ -78,7 +86,9 @@ HUELLA_USD = "8457af1036953eadbc9cc772a92704a9f54504d74e0c91a55752e18d6ee0da0e"
 # Y una CUARTA en la 5.0, con las otras dos, al salir el `rol`: es la que más roles distintos lleva —`detraccion` y
 # `detraccion_tercero` además del `igv`— y aun así se mueve por lo mismo que ellas. Era
 # defbee57ca03d1dda91b6fffd30d58839cb25e1e2faf1b748d176a1b70b648a8.
-HUELLA_DETRACCION = "421469d7828b5ae28af73cebc50e279e2f66d3c85cb5c1ddbe6b71523138c3e0"
+# Y una QUINTA con el bloque `impuesto`. Era
+# 421469d7828b5ae28af73cebc50e279e2f66d3c85cb5c1ddbe6b71523138c3e0.
+HUELLA_DETRACCION = "ba6a57e57839497f7fbaad71af2681ac0a2a2f9e8124412969f870fc3cf6de2b"
 
 
 def test_la_huella_en_dolares_y_con_detraccion_es_la_de_siempre():

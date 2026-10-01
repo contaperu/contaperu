@@ -217,6 +217,13 @@ TRIBUTO_GRATUITO = "9996"   # operaciones gratuitas: NO entran en el cuadre ni e
 TRIBUTO_EXONERADO = "9997"
 TRIBUTO_INAFECTO = "9998"
 TRIBUTO_OTROS = "9999"
+# La categoría de renta de la retención que el motor escribe. **No es un catálogo de SUNAT sino de la LEY**: las cinco
+# categorías de renta son los artículos 22 y siguientes del TUO de la Ley del Impuesto a la Renta (D.S. 179-2004-EF), y
+# la cuarta es la del trabajo independiente —su artículo 33—, que es la que muestra un recibo por honorarios y la
+# única que el motor produce. Va aquí, al lado del tributo, porque juntas son lo que el bloque `retencion` de la línea
+# dice: de qué tributo y de qué categoría. Las otras cuatro entran el día que un libro las necesite.
+CATEGORIA_RENTA_4TA = "4"
+
 # Que los diez nombres digan lo que la tabla dice, y no una copia que se pueda separar de ella en silencio, lo guarda
 # un test (`test_cada_constante_de_tributo_apunta_a_su_fila`) y no un `assert` aquí: un `assert` desaparece con
 # `python -O`. Es el mismo reparto que entre este módulo y `modelo` con las dos listas de notas.

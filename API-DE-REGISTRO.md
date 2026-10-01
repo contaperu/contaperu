@@ -958,9 +958,9 @@ diccionario `plan_de_cuentas`.
     "documento": { "tipo_cp": "01", "serie_numero": "F001-123",
                    "fecha_emision": "2026-01-15", "fecha_vencimiento": "2026-02-14" } },
 
-  { "cuenta": "401111", "clase": "pasivo", "debe_haber": "D", "importe": "1800.00", "rol": "igv",
+  { "cuenta": "401111", "clase": "pasivo", "debe_haber": "D", "importe": "1800.00", "rol": "impuesto",
     "fecha": "2026-01-15", "moneda": "PEN", "tasa_igv": "18",
-    "impuesto": { "codigo": "igv", "tasa": "18", "base": "10000.00" },
+    "impuesto": { "codigo": "1000" },
     "glosa": "IGV - SERVICIO DE MANTENIMIENTO ENERO 2026",
     "documento": { "…": "el mismo de arriba" } },
 

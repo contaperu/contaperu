@@ -74,6 +74,9 @@
      "fecha_emision": "2026-08-11",
      "fecha_vencimiento": "2026-08-18"
     },
+    "impuesto": {
+     "codigo": "1000"
+    },
     "tasa_igv": "18"
    },
    {
@@ -98,7 +101,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "15a9be32838614ed05df7e0f060c1935b738cc503acbfa705a198db96caf0b7f",
+   "huella": "b7ba87b077643acc174143d6fd2e5dcefaf8a307591534520fa324f457dce0c4",
    "comprobantes": [
     {
      "identidad": {
@@ -113,7 +116,7 @@
       0,
       3
      ],
-     "huella": "15a9be32838614ed05df7e0f060c1935b738cc503acbfa705a198db96caf0b7f"
+     "huella": "b7ba87b077643acc174143d6fd2e5dcefaf8a307591534520fa324f457dce0c4"
     }
    ]
   }
@@ -196,6 +199,9 @@
      "fecha_emision": "2026-08-11",
      "fecha_vencimiento": "2026-08-18"
     },
+    "impuesto": {
+     "codigo": "1000"
+    },
     "tasa_igv": "18"
    },
    {
@@ -221,7 +227,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "95276ec9feab1616235ed45099ed2dee38589fddff5041be5610931e8581cb59",
+   "huella": "5c308b6fa65bbc250a324cbeb2c01228a8c725e5ab0cd75b916b0d0008d6a532",
    "comprobantes": [
     {
      "identidad": {
@@ -236,7 +242,7 @@
       0,
       3
      ],
-     "huella": "95276ec9feab1616235ed45099ed2dee38589fddff5041be5610931e8581cb59"
+     "huella": "5c308b6fa65bbc250a324cbeb2c01228a8c725e5ab0cd75b916b0d0008d6a532"
     }
    ]
   }
@@ -331,6 +337,9 @@
      "serie_numero": "F001-123",
      "fecha": "2026-08-11"
     },
+    "impuesto": {
+     "codigo": "1000"
+    },
     "tasa_igv": "18"
    },
    {
@@ -360,7 +369,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "9b39cbb8eee65e55d9f019a21e3c20e79ea0c95f350451182cfbd400b714923c",
+   "huella": "665c09245da96ba69cc19ad836bf19b6a0b5652dad1c71a8fd689e7369a8b82a",
    "comprobantes": [
     {
      "identidad": {
@@ -375,7 +384,7 @@
       0,
       3
      ],
-     "huella": "9b39cbb8eee65e55d9f019a21e3c20e79ea0c95f350451182cfbd400b714923c"
+     "huella": "665c09245da96ba69cc19ad836bf19b6a0b5652dad1c71a8fd689e7369a8b82a"
     }
    ]
   }
@@ -461,6 +470,9 @@
      "fecha_emision": "2026-08-11",
      "fecha_vencimiento": "2026-08-18"
     },
+    "impuesto": {
+     "codigo": "1000"
+    },
     "tasa_igv": "18"
    },
    {
@@ -528,7 +540,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "67e66c910edc83050c374915b8476a99334ac0540a4fe741988b5a0522106427",
+   "huella": "097c20320d324da53fb25411fb1ac5fa3ff5cba1eba5acb2e8e8162a3af1f32f",
    "comprobantes": [
     {
      "identidad": {
@@ -543,7 +555,7 @@
       0,
       5
      ],
-     "huella": "67e66c910edc83050c374915b8476a99334ac0540a4fe741988b5a0522106427"
+     "huella": "097c20320d324da53fb25411fb1ac5fa3ff5cba1eba5acb2e8e8162a3af1f32f"
     }
    ]
   }
@@ -631,6 +643,9 @@
      "fecha_emision": "2026-08-11",
      "fecha_vencimiento": "2026-08-18"
     },
+    "impuesto": {
+     "codigo": "1000"
+    },
     "tasa_igv": "18"
    },
    {
@@ -700,7 +715,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "e69ee386d480288ca2f0284aa6a3434bdb86b3dc4ab45e6242c1f0202853b056",
+   "huella": "fa424db5ec8500f6952a4ea79b5b0d9992b2516c2e079e339a108a388e7e8878",
    "comprobantes": [
     {
      "identidad": {
@@ -715,7 +730,7 @@
       0,
       5
      ],
-     "huella": "e69ee386d480288ca2f0284aa6a3434bdb86b3dc4ab45e6242c1f0202853b056"
+     "huella": "fa424db5ec8500f6952a4ea79b5b0d9992b2516c2e079e339a108a388e7e8878"
     }
    ]
   }
@@ -793,6 +808,10 @@
      "id_externo": "f1",
      "fecha_emision": "2026-08-11",
      "fecha_vencimiento": "2026-08-18"
+    },
+    "retencion": {
+     "codigo": "3000",
+     "categoria": "4"
     }
    },
    {
@@ -816,7 +835,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "19c7d0bfba2088a2e59077a12d5a0c43fb3006feb6fddfa7fd643d9193adf58a",
+   "huella": "e800c45e1a494a164127ac68824c85a277b3e6aadb45bbd614b9903578741022",
    "comprobantes": [
     {
      "identidad": {
@@ -831,7 +850,7 @@
       0,
       3
      ],
-     "huella": "19c7d0bfba2088a2e59077a12d5a0c43fb3006feb6fddfa7fd643d9193adf58a"
+     "huella": "e800c45e1a494a164127ac68824c85a277b3e6aadb45bbd614b9903578741022"
     }
    ]
   }
@@ -912,6 +931,9 @@
      "fecha_emision": "2026-08-11",
      "fecha_vencimiento": "2026-08-18"
     },
+    "impuesto": {
+     "codigo": "1000"
+    },
     "tasa_igv": "18"
    },
    {
@@ -935,7 +957,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "3278c86c481ad167f4a6e1fe844108ea3a79c3d2d70b616c29cae7f5d3eab7cc",
+   "huella": "30ec7ee32c25a68e8c17caf6ea5aafa5a6f99209f3c673c1fa8126464a6342d9",
    "comprobantes": [
     {
      "identidad": {
@@ -949,7 +971,7 @@
       0,
       3
      ],
-     "huella": "3278c86c481ad167f4a6e1fe844108ea3a79c3d2d70b616c29cae7f5d3eab7cc"
+     "huella": "30ec7ee32c25a68e8c17caf6ea5aafa5a6f99209f3c673c1fa8126464a6342d9"
     }
    ]
   }
@@ -1029,6 +1051,9 @@
      "fecha_emision": "2026-08-11",
      "fecha_vencimiento": "2026-09-05"
     },
+    "impuesto": {
+     "codigo": "1000"
+    },
     "tasa_igv": "18"
    },
    {
@@ -1053,7 +1078,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "568bb6046f284cfcad3fcbc854285f5dd70464f02bbde39fcc986d2fc7f38af8",
+   "huella": "8bca51ebbf7e90dd11b3cf9ef547cfdc342c63bacb6921c8548b2b91d53330f9",
    "comprobantes": [
     {
      "identidad": {
@@ -1068,7 +1093,7 @@
       0,
       3
      ],
-     "huella": "568bb6046f284cfcad3fcbc854285f5dd70464f02bbde39fcc986d2fc7f38af8"
+     "huella": "8bca51ebbf7e90dd11b3cf9ef547cfdc342c63bacb6921c8548b2b91d53330f9"
     }
    ]
   }

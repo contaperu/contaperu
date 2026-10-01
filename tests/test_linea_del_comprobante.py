@@ -146,6 +146,46 @@ def test_las_lineas_validan_contra_el_estandar():
 
 # --- el motor: la línea del comprobante como fuente (0.7) -------------------------------------
 
+def test_la_linea_del_impuesto_dice_de_que_tributo_es():
+    """Lo que hace que el rol `impuesto` no sea una pérdida respecto del `igv` al que reemplaza (5.0).
+
+    El rol dice QUÉ HACE la línea y el bloque dice CUÁL es el tributo. Con el nombre dentro del rol no había forma de
+    decir que una línea era del ISC o del ICBPER; con el bloque, el valor del rol es genérico y el catálogo de SUNAT
+    pone la precisión. Mismo patrón que `detraccion`, que lo hace desde la 1.0 con su código y su tasa."""
+    from contaperu import catalogos
+
+    lineas = asi.lineas_del_comprobante(factura(), CONTAB, MES, "080084")
+    del_impuesto = next(ln for ln in lineas if ln.rol == "impuesto")
+    assert del_impuesto.impuesto == {"codigo": "1000"} == {"codigo": catalogos.TRIBUTO_IGV}
+    assert del_impuesto.impuesto["codigo"] in catalogos.TRIBUTOS
+    # El bloque es SOLO de su línea: ninguna otra lo lleva, como ninguna otra lleva la detracción.
+    assert [ln.rol for ln in lineas if ln.impuesto] == ["impuesto"]
+    # Y NO lleva tasa, a propósito: la del IGV ya viaja en `tasa_igv` y con otra convención —fracción frente a
+    # porcentaje—, y el ICBPER no tiene ninguna porque es un importe por bolsa.
+    assert "tasa" not in del_impuesto.impuesto and del_impuesto.tasa_igv
+
+
+def test_la_linea_de_la_retencion_dice_de_que_tributo_y_de_que_categoria():
+    """Sin la categoría, `retencion` sería PEOR que el `retencion_4ta` al que reemplaza: perdería el «de 4ta». Y el
+    tributo no es el del IGV sino el 3000, Impuesto a la Renta, que estaba en el Catálogo 05 y no en el motor.
+
+    La categoría es `4` con certeza y no por deducción: el motor solo emite esta línea desde un recibo por honorarios,
+    que es trabajo independiente —el artículo 33 del TUO de la Ley del Impuesto a la Renta—."""
+    from contaperu import catalogos
+
+    rh = factura(tipo_cp="02", retencion="160.00", igv="0.00", base_gravada="0.00",
+                 exonerado="2000.00", total="2000.00")
+    lineas = asi.lineas_del_comprobante(rh, CONTAB, MES, "150001")
+    de_la_retencion = next(ln for ln in lineas if ln.rol == "retencion")
+    assert de_la_retencion.retencion == {"codigo": "3000", "categoria": "4"}
+    assert de_la_retencion.retencion["codigo"] == catalogos.TRIBUTO_RENTA
+    assert de_la_retencion.retencion["categoria"] == catalogos.CATEGORIA_RENTA_4TA
+    # El IMPORTE retenido no está aquí: está donde está el de cualquier línea, en `importe`. Este bloque dice de qué
+    # es, y `comprobante.retencion` dice cuánto. Confundirlos es el error que costó un mes sin su línea de retención.
+    assert de_la_retencion.importe == "160.00" and "monto" not in de_la_retencion.retencion
+    assert [ln.rol for ln in lineas if ln.retencion] == ["retencion"]
+
+
 def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
     lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
     assert [ln.rol for ln in lineas] == ["principal", "impuesto", "tercero", "recorte", "detraccion"]

@@ -22,7 +22,8 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from ..catalogos import TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA
+from ..catalogos import (CATEGORIA_RENTA_4TA, TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA, TRIBUTO_IGV,
+                         TRIBUTO_RENTA)
 from ..configuracion import CONFIG_POR_DEFECTO
 from ..detracciones import es_comodin, monto_detraccion, numero_pendiente, tasa_detraccion
 from .. import pcge, vocabulario
@@ -308,11 +309,17 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
-    linea_impuesto = (linea("impuesto", igv, str(config["cuentas"]["igv"]), sentido_base, glosa)
-                 if igv > 0 else None)
+    # El bloque dice QUÉ TRIBUTO es, que es lo que el nombre del rol dejó de decir: `impuesto` a secas no sabría
+    # distinguir el IGV del ISC o del ICBPER. El motor escribe el 1000, el único que lleva a una línea de asiento.
+    linea_impuesto = (linea("impuesto", igv, str(config["cuentas"]["igv"]), sentido_base, glosa,
+                            impuesto={"codigo": TRIBUTO_IGV})
+                      if igv > 0 else None)
     cuenta_retencion = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"])
-    linea_de_retencion = (linea("retencion", retenido, cuenta_retencion, sentido_tercero, glosa)
-                       if retenido > 0 else None)
+    # La categoría es `4` con certeza y no por deducción: esta línea solo nace de un recibo por honorarios
+    # (`retenido > 0` exige `es_honorarios`). El tributo es el 3000, Impuesto a la Renta, y no el del IGV.
+    linea_de_retencion = (linea("retencion", retenido, cuenta_retencion, sentido_tercero, glosa,
+                                retencion={"codigo": TRIBUTO_RENTA, "categoria": CATEGORIA_RENTA_4TA})
+                          if retenido > 0 else None)
     cuenta_del_tercero = cuenta_tercero(c, config, es_venta)
     anexo_tercero = centro_comun if ("tercero" in centro_en_anexo and not es_honorarios) else ""
     # El tercero: el proveedor en compras, el cliente en ventas.

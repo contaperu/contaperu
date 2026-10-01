@@ -695,6 +695,41 @@
       }
      }
     },
+    "impuesto": {
+     "description": "De qué tributo es esta línea, cuando su rol es `impuesto`. El rol dice QUÉ HACE la línea y este bloque dice CUÁL es el tributo: es lo que permitió que el rol dejara de llamarse `igv`, que metía el tributo en su propio nombre y no sabía decir que una línea fuera del ISC o del ICBPER. Mismo patrón que `detraccion`, que lo hace desde la 1.0. **No lleva tasa**, a propósito: el ICBPER no tiene ninguna —es un importe por bolsa— y la del IGV ya viaja en `tasa_igv`, con otra convención (fracción frente a porcentaje). Entra en la huella del asiento: una línea de IGV y una de ISC con la misma cuenta y el mismo importe son hechos distintos.",
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "codigo"
+     ],
+     "properties": {
+      "codigo": {
+       "type": "string",
+       "pattern": "^[0-9]{4}$",
+       "description": "El código del tributo, cuatro dígitos del Catálogo 05 de SUNAT (Anexo N.° 8): `1000` IGV, `1016` IVAP, `2000` ISC, `7152` ICBPER. El motor escribe el `1000`. Los códigos `9995` a `9999` de ese catálogo NO son tributos sino la condición de la operación, y no van aquí."
+      }
+     }
+    },
+    "retencion": {
+     "description": "Qué se le retiene a un tercero, cuando el rol de la línea es `retencion`. Sin este bloque el rol habría perdido información respecto del `retencion_4ta` al que reemplaza: la categoría estaba en el nombre, y la de 4ta no es la única que existe. **No se confunde con `comprobante.retencion`**, que es el IMPORTE retenido que muestra el comprobante; esto dice de qué es. Y tampoco con el régimen de retenciones del IGV, que es otro tributo y tendrá su propio campo. Entra en la huella.",
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "codigo"
+     ],
+     "properties": {
+      "codigo": {
+       "type": "string",
+       "pattern": "^[0-9]{4}$",
+       "description": "El tributo retenido, del Catálogo 05: `3000`, Impuesto a la Renta, que es el que el motor escribe."
+      },
+      "categoria": {
+       "type": "string",
+       "pattern": "^$|^[1-5]$",
+       "description": "La categoría de renta, del TUO de la Ley del Impuesto a la Renta (D.S. 179-2004-EF, artículos 22 y siguientes): `4` es el trabajo independiente del artículo 33, la del recibo por honorarios, y la única que el motor escribe. No es un catálogo de SUNAT sino de la ley."
+      }
+     }
+    },
     "tasa_igv": {
      "anyOf": [
       {

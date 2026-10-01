@@ -39,6 +39,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -106,6 +109,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -171,6 +177,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -320,6 +329,10 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "retencion": {
+    "codigo": "3000",
+    "categoria": "4"
    }
   },
   {
@@ -383,6 +396,10 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "retencion": {
+    "codigo": "3000",
+    "categoria": "4"
    }
   },
   {
@@ -445,6 +462,10 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "retencion": {
+    "codigo": "3000",
+    "categoria": "4"
    }
   },
   {
@@ -518,6 +539,9 @@
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -588,6 +612,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -652,6 +679,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "10.5"
   },
@@ -761,6 +791,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-11"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -825,6 +858,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -891,6 +927,9 @@
     "fecha_emision": "2026-06-15",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -956,6 +995,9 @@
     "fecha_emision": "2026-09-02",
     "fecha_vencimiento": "2026-09-10"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -1016,6 +1058,9 @@
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "id_externo": "f1"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -1079,6 +1124,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -1199,6 +1247,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -1321,6 +1372,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -1385,6 +1439,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-10",
     "fecha_vencimiento": "2026-08-27"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -1504,6 +1561,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -1568,6 +1628,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -1687,6 +1750,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -1805,6 +1871,9 @@
     "fecha_emision": "2026-08-10",
     "fecha_vencimiento": "2026-08-27"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -1922,6 +1991,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -2050,6 +2122,9 @@
     "tipo_cp": "01",
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -2221,6 +2296,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -2284,6 +2362,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -2350,6 +2431,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -2414,6 +2498,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -2533,6 +2620,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -2597,6 +2687,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -2660,6 +2753,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -2722,6 +2818,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -2788,6 +2887,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -2853,6 +2955,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -2917,6 +3022,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -3037,6 +3145,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -3100,6 +3211,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -3186,6 +3300,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -3333,6 +3450,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -3397,6 +3517,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -3481,6 +3604,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -3546,6 +3672,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -3614,6 +3743,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -3679,6 +3811,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },
@@ -3754,6 +3889,9 @@
     "serie_numero": "F001-123",
     "fecha": "2026-08-01"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -3825,6 +3963,9 @@
     "fecha_emision": "2026-08-11",
     "fecha_vencimiento": "2026-08-18"
    },
+   "impuesto": {
+    "codigo": "1000"
+   },
    "tasa_igv": "18"
   },
   {
@@ -3889,6 +4030,9 @@
     "id_externo": "f1",
     "fecha_emision": "2026-07-20",
     "fecha_vencimiento": "2026-08-18"
+   },
+   "impuesto": {
+    "codigo": "1000"
    },
    "tasa_igv": "18"
   },

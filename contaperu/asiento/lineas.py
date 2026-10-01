@@ -46,6 +46,26 @@ class LineaDiario:
     documento: dict = field(default_factory=dict)
     referencia: dict = field(default_factory=dict)
     detraccion: dict = field(default_factory=dict)
+    # QUÉ TRIBUTO es la línea de rol `impuesto`, y qué se le retiene a un tercero en la de rol `retencion`. Son los
+    # dos bloques que la 5.0 trae con los renombrados, y sin ellos los nombres nuevos habrían perdido información: con
+    # `igv` el tributo iba en el nombre del rol, y un rol `impuesto` a secas no sabría decir que una línea es del ISC o
+    # del ICBPER.
+    #
+    # - `impuesto`: `{"codigo"}`, del Catálogo 05 (`catalogos.TRIBUTOS`). El motor escribe el `1000`, el IGV.
+    # - `retencion`: `{"codigo", "categoria"}` — el tributo, que es el `3000`, Impuesto a la Renta, y la categoría de
+    #   la Ley del Impuesto a la Renta. El motor escribe la `4`, y la sabe con certeza porque solo emite esa línea en un
+    #   recibo por honorarios.
+    #
+    # **Ninguno lleva `tasa`, y es una decisión.** En el repositorio conviven dos convenciones —`detraccion.porcentaje`
+    # es porcentaje («4, 10, 12») y `catalogos.TASA_IGV` es fracción («0.18»)—, así que un `tasa` aquí contradiría a una
+    # de las dos en la misma línea que ya lleva `tasa_igv`. Y para el ICBPER no existe tasa: es un importe por bolsa.
+    # En la retención el motor tampoco la conoce: el importe le llega dado en `comprobante.retencion`, y derivarla
+    # sería adivinar. Si hace falta, entra con su caso real y su convención decidida.
+    #
+    # **Los dos SÍ entran en la huella**, al contrario que `medio_pago`: una línea de IGV y una de ISC con la misma
+    # cuenta y el mismo importe son hechos distintos, así que dejarlos fuera podría darles la misma huella.
+    impuesto: dict = field(default_factory=dict)
+    retencion: dict = field(default_factory=dict)
     tasa_igv: Any = ""
     # CON QUÉ se movió el dinero en ESTA línea: un código de `catalogos.MEDIOS_PAGO` (Tabla 1 del Anexo 3 de la
     # RS 169-2015). Completa el bloque que abrió la enmienda 0004, que lo dejó en el comprobante y en la `Cabecera`:
