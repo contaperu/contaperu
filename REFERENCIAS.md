@@ -10,6 +10,11 @@ Su continuación —el ciclo contable de EE. UU. comparado con el peruano, los p
 PLE, SAF-T, XBRL GL, ISO 20022), la especificación MCP, dos entradas que el motor todavía no tiene, el banco y las
 facturas de proveedores, y la puerta a otra jurisdicción— está en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
 
+De aquí salieron las cinco `clases` de la línea, tomadas del único vocabulario que QuickBooks, Xero, Merge y Rutter
+comparten. **El nivel que les falta debajo** —cómo clasifican la cuenta los ERP abiertos, qué cuenta usa cada papel y
+por qué el suelo de todo eso es el PLE y no una idea importada— se investigó el 1-oct-2026 en
+[LIBROS-Y-CUENTAS.md](LIBROS-Y-CUENTAS.md), que es documento de trabajo.
+
 Este documento mira el **asiento**: cómo modela cada API un `JournalEntry`. El escalón de antes —el **registro de un
 comprobante**, lo que un sistema manda cuando dice «anota esta compra»— está en
 [API-DE-REGISTRO.md](API-DE-REGISTRO.md), con la API de STARSOFT Gold como punto de partida y el borrador del JSON

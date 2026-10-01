@@ -12,6 +12,14 @@ EE. UU. comparado con el peruano, los proyectos de código abierto, los estánda
 asiento, las reglas de SUNAT como datos, las facturas de proveedores y el banco, la especificación MCP y la puerta
 escrita a otra jurisdicción.
 
+**Una tanda nueva se está trabajando aparte, y todavía no está aquí:**
+[LIBROS-Y-CUENTAS.md](LIBROS-Y-CUENTAS.md) (1-oct-2026) investiga el modelo de cuentas —cómo clasifican la cuenta los
+ERP abiertos que este documento no había mirado (OFBiz, iDempiere, GnuCash, Tryton, ledger-cli), cómo determinan qué
+cuenta usa cada papel, y por qué **el suelo de todo eso es el PLE**: el artículo 6 de la RS 234-2006 ya fija el nivel
+de la cuenta contable y el Formato 5.1 ya tiene la forma de la línea del estándar—. Es **documento de trabajo**: sus
+cinco candidatas entran en la tabla del §12 cuando cierre su refinado, y entonces se reparte entre este documento y
+[API-DE-REGISTRO.md](API-DE-REGISTRO.md) o pasa a vigente.
+
 **Estado: investigación, escrita sobre la librería 0.10.0 y `open-accounting` 0.3**, cuando nada de lo que aquí se
 propone estaba implementado. Parte entró después —las enmiendas `0008` a `0011` del estándar y la cabecera del asiento
 que creció en la 1.4.0, entre otras—, así que lo que sigue abierto se lee contra la librería y el estándar de hoy. El

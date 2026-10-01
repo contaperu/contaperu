@@ -100,7 +100,13 @@ def test_la_lista_de_vigentes_no_se_queda_atras():
                 # Lo levantado del formato de STARSOFT el 20-sep-2026, de dos vídeos y sus capturas. Se declara
                 # a sí mismo documento de trabajo y marca lo que está `[por confirmar]`: pasa a vigente el día
                 # que una plantilla oficial lo respalde.
-                "STARSOFT-INTEGRACION.md"}
+                "STARSOFT-INTEGRACION.md",
+                # La investigación del 1-oct-2026 sobre el PLE como suelo del estándar y el modelo de cuentas de
+                # los ERP abiertos. Mismo caso que el de STARSOFT: se declara documento de trabajo y marca lo que
+                # está `[por confirmar]` —los códigos de libro del Anexo 3 de la RS 286-2009, entre otros—. Sus
+                # candidatas a propuesta entran en la tabla de `INTEROPERABILIDAD.md` cuando cierre el refinado,
+                # y entonces este documento pasa a vigente o se reparte entre los dos de investigación.
+                "LIBROS-Y-CUENTAS.md"}
     sin_decidir = sorted(en_disco - set(VIGENTES) - fechados - {f"estandar/{Path(v).name}" for v in VIGENTES})
     assert not sin_decidir, (f"documentos sin decidir si hablan del presente: {sin_decidir}. "
                              "Van a `VIGENTES` o a `fechados`, con su motivo.")
