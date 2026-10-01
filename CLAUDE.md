@@ -49,7 +49,8 @@ conocen el formato de un destino y nada de contabilidad, cada uno con su canal (
 legacy, `drivers/sire` tributario, `drivers/csv` y `drivers/asiento_contable` intercambio, este con vocabulario neutral para los ERP, y los de terceros por *entry points*, con el contrato de
 `drivers/contrato.py` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
 (`contaperu.api`, con la tabla de operaciones y el contrato OpenConta); y tres **puertas** que solo hablan con la api
-(`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x. El
+(`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x y la 4.0, el
+vocabulario de un ERP que llevaba la línea. El
 asiento nace en las **líneas de diario neutrales** del estándar `open-accounting` y cada ERP es una proyección de ellas.
 Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LEEME.md`; cómo se integra, en
 `INTEGRAR.md`.
@@ -71,8 +72,11 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
 - **La 2.0 retiró las rutas de la 0.x** (`operaciones`, `generar`, `cli`, `servidor_mcp`, `formato` y
   `drivers.concar.construir`), que solo redirigían. No rompió a nadie: **ninguna versión 0.x llegó a PyPI** —la
   primera publicada es la 1.1.0— y la superficie pública de la 1.0 quedó intacta, lo que demuestra su test al pasar
-  sin regenerarse. Antes de etiquetar una versión mayor se publica una pre-release (`vX.Y.ZrcN`) y quien integra la
-  prueba en su batería, también con `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»).
+  sin regenerarse. **La 4.0 sí rompe, y a propósito**: la línea del comprobante dejó de llevar el vocabulario de un
+  ERP —la sigla del tipo y el código interno de la detracción—, así que la huella cambia para todos y la columna de
+  detracción del CSV cambia de significado sin cambiar de nombre. Antes de etiquetar una versión mayor se publica una
+  pre-release (`vX.Y.ZrcN`) y quien integra la prueba en su batería, también con
+  `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»).
 
 ## Lo que no se negocia
 

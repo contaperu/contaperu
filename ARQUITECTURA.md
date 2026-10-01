@@ -151,9 +151,10 @@ llamarse igual que el bloque que escribe.
 
 Se llamó **`asiento_neutral`** de la 1.1 a la 3.10, y el argumento de entonces era ese acoplamiento cero: «neutral» era
 el que no sabe de Perú. El nombre describía una ausencia, y un ERP que elige un destino no busca un asiento neutral:
-busca el asiento contable. Desde la 3.10 se llama **`asiento_contable`**, el nombre viejo sigue resolviendo toda la 3.x
-con aviso (`drivers.ALIAS`) y lo que no cambia es el eje que el contrato mide, que sigue llamándose `VOCABULARIO =
-"neutral"` porque eso sí es lo que describe: las palabras del estándar frente a las de un sistema legacy.
+busca el asiento contable. Desde la 3.10 se llama **`asiento_contable`**, el nombre viejo resolvió toda la 3.x
+con aviso (`drivers.ALIAS`) y **la 4.0 lo retiró**, que es lo que el aviso prometía. Lo que no cambia es el eje que el
+contrato mide, que sigue llamándose `VOCABULARIO = "neutral"` porque eso sí es lo que describe: las palabras del
+estándar frente a las de un sistema legacy.
 
 ## Capas, api y puertas
 
@@ -194,7 +195,9 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
   el mismo documento y el mismo diagnóstico.
 - **Las rutas de la 0.10** (`operaciones`, `generar`, `cli`, `servidor_mcp`, `formato`, `drivers.concar.construir`)
   las retiró la 2.0, sin tocar la superficie pública de la 1.0: ninguna versión publicada llegó a ofrecerlas, porque
-  la 0.x nunca estuvo en PyPI. El mecanismo con que se deprecia algo sigue en `_obsoleto.py`, para la próxima vez.
+  la 0.x nunca estuvo en PyPI. La **4.0** retiró lo que avisaba desde la 3.10 —el nombre `asiento_neutral` del driver—
+  y dos promesas que llevaban dos mayores sin cumplirse: la forma `construir` de un driver y el `CANAL` opcional. El
+  mecanismo con que se deprecia algo sigue en `_obsoleto.py`, sin usuarios y a propósito, para la próxima vez.
 - **El portal** (otro repositorio) usa la api y el nivel de extensión; el `resumen` de cada exportación, que guarda tal
   cual, conserva sus claves.
 - **Lo peruano, a la vista** (hito J0): qué módulos importan uno peruano queda congelado en

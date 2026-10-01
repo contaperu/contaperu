@@ -4,6 +4,81 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [4.0.0] — 2026-10-01
+
+**La base que leen todos es la detracción de SUNAT, y de ahí pasa por cada driver** (decisión de John, 30-sep-2026).
+La línea del comprobante llevaba vocabulario de un sistema contable concreto, y el núcleo lo escribía para todos los
+destinos: la sigla `DR` —la Tabla General 06 de CONCAR—, el código interno de cinco dígitos —su Tabla General 28— y la
+sigla de cada tipo de comprobante. Nada de eso es contabilidad peruana: es cómo numera **un** sistema sus tablas.
+
+Lo que costaba, y no era teórico:
+
+- **STARSOFT nacía con catorce mapeos de CONCAR que nunca leyó.** Escribe el código de SUNAT a propósito —su propio
+  comentario lo dice: «el código de SUNAT (`027`), no el interno que CONCAR mapea en su tabla (`02702`)»— y los dos
+  campos salían igual en su pantalla de configuración sin hacer nada.
+- **El CSV de intercambio escribía códigos de CONCAR.** `02702` en su columna de detracción y `DR` en la del tipo de
+  documento: quien lo leyera desde otro sistema tenía que conocer CONCAR para entenderlo.
+- **El núcleo inventaba.** Un código de detracción que la empresa no hubiera mapeado salía como el de SUNAT más `01`,
+  «el patrón más común» de una tabla ajena. Una conjetura, hecha en el núcleo, contra la regla de que nada se adivina.
+- **La línea solo podía llevar la sigla de un destino.** Con dos sistemas sobre el mismo mes, la que escribía era la
+  del que se estuviera exportando.
+
+Ahora la línea lleva **códigos de SUNAT** —el Catálogo 54 en la detracción, la Tabla 10 en el documento— y cada driver
+traduce al vocabulario de su sistema, en la columna que le toque. Las tres Tablas Generales de la detracción quedan
+juntas en `drivers/concar/`: la 06 (la sigla, columna R), la 28 (el interno, columna AI) y la 26 (el área, columna V,
+que ya vivía ahí). La traducción de la sigla de un tipo la hace `asiento.sigla_de_tipo`, un nombre nuevo de la
+superficie pública, porque un driver legacy de terceros lo necesita.
+
+**El Excel de CONCAR no cambia ni una celda.** Sus 52 casos de snapshot pasan sin regenerarse, con el driver
+calculando lo que antes recibía. Es la comprobación que manda en todo el cambio, y por eso el primer commit movió solo
+la escritura y dejó el resto en quitar.
+
+**Y la 4.0 cobra la deuda que tres versiones dejaron anotada para ella.** Dos promesas del contrato de drivers decían
+«se retira en la 2.0» con el paquete en la 3.10 —el mismo vicio que la 3.10 corrigió en `_obsoleto.RETIRO`: «una
+promesa de retiro no puede sostener nada si el número que da ya quedó atrás»—, y había quedado sin barrer en tres
+sitios más:
+
+- **La forma `construir` se retira.** Recibía los comprobantes y el driver se armaba el archivo entero, o sea hacía la
+  contabilidad: era la del Excel de CONCAR hasta la 0.10 y contradice lo que el contrato promete dos párrafos antes.
+- **`CANAL` pasa a obligatorio.** Sin él se adivinaba `legacy`, y de ese canal salen las reglas que el contrato hace
+  cumplir. Ningún driver de serie se entera: los siete lo declaran.
+- **Se retira el nombre `asiento_neutral`**, con su módulo talón y sus trece nombres congelados. Avisó durante toda la
+  3.x, que es lo que `CLAUDE.md` promete. El mecanismo se queda vacío para el próximo renombrado, con su test.
+- **`starsoft.proyeccion.voucher` pasa a `correlativo_de_starsoft`**: su columna se renombró el 21-sep-2026 y la
+  función no podía seguirla hasta una mayor.
+- **`_obsoleto.RETIRO` pasa a la 5.0**, que es la regla que la 3.10 escribió: se mueve con cada mayor que cumple.
+
+**El estándar gana una pieza, y es aditiva** (enmienda 0019): `$defs/detraccion` admite claves `^_` como ya hacía la
+raíz, así que la anotación de la tasa de la tabla pasa a `_tasa_tabla` y **viaja dentro del documento** en vez de
+filtrarse al salir. Con el filtro, un documento que volvía a entrar al motor había perdido la tasa con la que se
+calculó el monto, y su validación ya no podía avisar de la discrepancia que el motor sí vio la primera vez.
+`open-accounting` sigue en **1.0**: lo aditivo avanza el tag, no la versión.
+
+### Cómo migrar
+
+1. **La columna `detraccion_codigo` del CSV lleva ahora `027` y no `02702`, con la misma cabecera.** Es el cambio más
+   silencioso de esta versión: no falla, cambia de significado. Si lo lees por nombre de columna, míralo primero.
+2. **`detraccion.codigo_interno` desaparece de la línea.** El código de SUNAT está en `detraccion.codigo`; el interno
+   de tu tabla lo escribe tu driver (enmienda 0017).
+3. **`documento.tipo` y `referencia.tipo` desaparecen de la línea.** El código de SUNAT está en `tipo_cp`, que siempre
+   estuvo al lado; la sigla la pone cada driver con `asiento.sigla_de_tipo` (enmienda 0018). La columna `doc_tipo` del
+   CSV va vacía.
+4. **La huella cambia en TODOS los comprobantes**, porque la sigla entraba en ella —de la línea solo quedan fuera el
+   correlativo, la clase y el `id_externo`—. Quien la persista para saber qué ya exportó **deja de reconocer, una vez,
+   todo lo anterior**. La de los comprobantes con detracción cambia además por el código interno.
+5. **`contaperu.asiento.TIPO_DOC_DETRACCION` ya no existe**: la sigla `DR` es de CONCAR y vive en
+   `contaperu.drivers.concar`.
+6. **`driver="asiento_neutral"` deja de resolver**, y su sección de configuración también —el error dice adónde se
+   movió—. Ojo: **los archivos ya exportados llevan ese nombre dentro**, en `_exportacion.driver`, y eso no lo arregla
+   ninguna versión: el alias cubría la entrada, no los datos en disco. Un consumidor que ramifique sobre ese valor
+   acepta los dos nombres para siempre.
+7. **Si guardaste `detraccion_tipo_doc` o `detraccion_codigos` en la sección `csv` o `starsoft`**, muévelos a `concar`:
+   ahí es donde se declaran.
+8. **Un driver de terceros** con la forma `construir` o sin `CANAL` deja de cargar, con el error diciendo qué hacer.
+9. **`starsoft.proyeccion.voucher` pasa a `correlativo_de_starsoft`.**
+10. Lo que **no** cambia: el Excel de CONCAR, el de CONTASIS, el TXT del SIRE y el TXT de STARSOFT salen idénticos, y
+    `open-accounting` sigue en 1.0.
+
 ## [3.10.0] — 2026-09-29
 
 **El driver del asiento se llama `asiento_contable`, y las palabras dicen por fin lo que son.** Se llamaba
