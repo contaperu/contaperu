@@ -116,9 +116,19 @@ def fila(ln: LineaDiario, cabecera: ComprobanteDelAsiento, n: int, libro: Libro,
         ln.contraparte_doc or SIN_TERCERO,                               # 9 número de doc del tercero
         doc.get("tipo_cp") or SIN_COMPROBANTE,                           # 10 tipo de comprobante
         sanear(cabecera.serie, opciones),                                # 11 serie
-        sanear(cabecera.numero, opciones),                               # 12 número
+        # 12 número: **tal como lo trae el comprobante, sin quitarle los ceros de la izquierda**. El kit sabe
+        # quitarlos (`formatear_numero`, la opción `sin_ceros`) y aquí no se usa a propósito: eso lo pide un
+        # sistema contable, y no hay fuente que diga qué quiere SUNAT. El archivo contrastado trae las DOS formas
+        # —`1010` sin rellenar y `0000226` rellenado— y las dos fueron aceptadas, así que transformar sería elegir
+        # por el contribuyente. Se escribe lo que dice su comprobante.
+        sanear(cabecera.numero, opciones),
         _fecha(ln.fecha, opciones),                                      # 13 fecha de la operación
-        _fecha(doc.get("fecha_vencimiento"), opciones),                  # 14 fecha de vencimiento
+        # 14 vencimiento: **de la CABECERA y no de la línea, a propósito**. Cuando el comprobante no trae
+        # vencimiento el núcleo lo rellena con la fecha de emisión —a CONCAR le vale, su columna no puede ir
+        # vacía—, pero aquí eso sería escribir en un libro que se presenta a SUNAT un vencimiento que el
+        # documento nunca tuvo. La cabecera conserva la verdad: cadena vacía si no lo hay. El archivo
+        # contrastado escribe la fecha nula en 4088 de sus 6446 filas con comprobante.
+        _fecha(cabecera.fecha_vencimiento, opciones),
         _fecha(doc.get("fecha_emision"), opciones),                      # 15 fecha de emisión
         sanear(ln.glosa, opciones),                                      # 16 glosa
         GLOSA_REFERENCIAL,                                               # 17 glosa referencial

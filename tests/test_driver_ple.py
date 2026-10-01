@@ -126,6 +126,34 @@ def test_sin_fecha_va_la_fecha_nula_del_formato():
             assert campos_de(fila)[i].count("/") == 2, "las tres fechas van siempre escritas"
 
 
+def test_un_comprobante_sin_vencimiento_no_se_inventa_uno():
+    """El campo 14 sale de la CABECERA y no de la línea, y esto es lo que lo hace falta.
+
+    Cuando el comprobante no trae vencimiento, **el núcleo lo rellena con la fecha de emisión**: a CONCAR le vale
+    porque su columna no puede ir vacía. Pero esto es un libro que se presenta a SUNAT, y escribir ahí un vencimiento
+    que el documento nunca tuvo es inventarse un dato tributario. La cabecera conserva la verdad, así que el 5.1
+    escribe su fecha nula — como hace el archivo contrastado en 4088 de sus 6446 filas con comprobante."""
+    from contaperu.drivers import ple
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
+                     "periodo": "202601", "tipo": "compra"},
+           "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "00000123",
+                             "fecha_emision": "2026-01-10", "id_externo": "f1",
+                             "contraparte_tipo_doc": "6", "contraparte_doc": "20131312955",
+                             "concepto": "Servicios", "moneda": "PEN",
+                             "base_gravada": "1000.00", "igv": "180.00", "total": "1180.00"}],
+           "imputaciones": {"f1": {"cuenta_contable": "631101", "centro_costo": "001"}}}
+    # El núcleo sí lo rellena: por eso no vale leerlo de la línea.
+    linea = api.generar_asiento(doc, driver="ple")["asiento"][0]
+    assert linea["documento"]["fecha_vencimiento"] == "2026-01-10"
+
+    r = api.exportar(doc, driver="ple", fecha="2026-10-01")
+    for fila in base64.b64decode(r["contenido_base64"]).decode("ascii").splitlines():
+        c = campos_de(fila)
+        assert c[14] == "10/01/2026", "la emisión sí es la del comprobante"
+        assert c[13] == ple.SIN_FECHA, f"sin vencimiento va la fecha nula, no la emisión: {c[13]}"
+
+
 def test_el_campo_20_va_vacio_y_se_sabe_por_que():
     """La referencia al registro de origen pide el CUO de ESE registro, que el motor no numera todavía.
 

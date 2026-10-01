@@ -4,6 +4,23 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [4.2.1] — 2026-10-01
+
+**El Libro Diario no se inventa un vencimiento.** Primer arreglo del driver `ple`, encontrado al contrastar su salida
+contra el archivo real justo después de publicar la 4.2.0.
+
+### Arreglado
+
+- **El campo 14 del 5.1 sale de la cabecera del comprobante y no de la línea.** Cuando un comprobante **no trae fecha
+  de vencimiento**, el núcleo la rellena con la de emisión —a CONCAR le vale, porque su columna no puede ir vacía— y
+  el driver la escribía tal cual. En un libro que se presenta a SUNAT eso es **escribir un dato tributario que el
+  documento nunca tuvo**. Ahora se lee de `Cabecera.fecha_vencimiento`, que conserva la verdad, y donde no hay
+  vencimiento va la fecha nula del formato (`01/01/0001`) — como hace el archivo contrastado en 4088 de sus 6446
+  filas con comprobante. El núcleo **no cambia**: sigue rellenando, porque el Excel de CONCAR depende de ello, y
+  ninguna huella se mueve.
+
+Nada más cambia. Quien no use el driver `ple` no nota esta versión.
+
 ## [4.2.0] — 2026-10-01
 
 **Un Libro Diario presentado a SUNAT entró como caso real, y de él salen las dos cosas de esta versión:** el formato
