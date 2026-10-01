@@ -631,6 +631,58 @@
    "espera": {
     "error": "se declara `open_accounting` 0.3"
    }
+  },
+  {
+   "description": "El detalle del plan contable pide cómo llama la empresa a cada cuenta, y el motor solo conoce el nombre del PCGE: se le piden al contador, por cuenta y no por comprobante",
+   "documento": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202601",
+     "tipo": "compra"
+    },
+    "comprobantes": [
+     {
+      "tipo_cp": "01",
+      "serie": "F001",
+      "numero": "0000123",
+      "fecha_emision": "2026-01-15",
+      "contraparte_tipo_doc": "6",
+      "contraparte_doc": "20131312955",
+      "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC",
+      "moneda": "PEN",
+      "base_gravada": "10000.00",
+      "igv": "1800.00",
+      "total": "11800.00",
+      "destino_igv": "DG",
+      "concepto": "SERVICIO DE MANTENIMIENTO ENERO 2026",
+      "id_externo": "c1"
+     }
+    ],
+    "imputaciones": {
+     "c1": {
+      "cuenta_contable": "6343001"
+     }
+    }
+   },
+   "configuracion": {
+    "usa_centros_costo": false
+   },
+   "driver": "ple_plan",
+   "espera": {
+    "listo_para_exportar": false,
+    "por_que_no": [
+     "3 cuentas sin denominación en el plan de la empresa"
+    ],
+    "faltantes": {
+     "sin_denominacion": [
+      "401111",
+      "421201",
+      "6343001"
+     ]
+    }
+   }
   }
  ]
 }

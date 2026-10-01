@@ -7325,7 +7325,7 @@
  },
  "generar_asiento/contasis": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, starsoft, asiento_contable, ple)"
+  "_mensaje": "El driver 'contasis' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, starsoft, asiento_contable, ple, ple_plan)"
  },
  "exportar/contasis": {
   "_error": "DocumentoInvalido",
@@ -9896,7 +9896,7 @@
  },
  "generar_asiento/sire": {
   "_error": "ValueError",
-  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, starsoft, asiento_contable, ple)"
+  "_mensaje": "El driver 'sire' no arma asientos: las líneas salen con la configuración de uno que sí (concar, csv, starsoft, asiento_contable, ple, ple_plan)"
  },
  "exportar/sire": {
   "_error": "DocumentoInvalido",

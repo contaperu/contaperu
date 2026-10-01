@@ -56,7 +56,7 @@ def test_la_cli_dice_que_se_configura(capsys):
     assert cli.main(["configuracion", "--driver", "contasis"]) == 0
     descripcion = json.loads(capsys.readouterr().out)
     assert descripcion["sistema"] == "contasis" and descripcion["campos"][0]["clave"] == "medio_pago"
-    assert [c["clave"] for c in descripcion["general"]["campos"]][:2] == ["cuentas", "usa_centros_costo"]
+    assert [c["clave"] for c in descripcion["general"]["campos"]][:2] == ["cuentas", "denominacion_cuentas"]
     assert cli.main(["configuracion", "--por-defecto", "--driver", "contasis"]) == 0
     partida = json.loads(capsys.readouterr().out)
     assert partida["contasis"] == {"medio_pago": "001", "columnas": {"centro_costo": ["centro_costo"]}}

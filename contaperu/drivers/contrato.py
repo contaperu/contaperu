@@ -161,7 +161,7 @@ FAMILIA = {"linea": "registro", "desde_comprobantes": "registro", "desde_lineas"
 # la detracción —sin el código no la escribiría, y en silencio—; un destino que no la lleva no tiene por qué pararse.
 # Lo que exige el núcleo a todos: la cuenta contable de cada línea y la equivalencia del tipo SUNAT (de ella sale el
 # sub-diario).
-EXIGE_POSIBLES_ASIENTO = frozenset({"centro_costo", "moneda", "detraccion"})
+EXIGE_POSIBLES_ASIENTO = frozenset({"centro_costo", "moneda", "detraccion", "denominacion"})
 EXIGE_NUCLEO_ASIENTO = frozenset({"cuenta_contable", "tipo_cp"})
 # Y a uno de registro que lleva cuentas (`desde_comprobantes`), el núcleo le exige la cuenta —la columna con la
 # que el destino arma su asiento— y nada del sub-diario ni de su equivalencia, que son del asiento. Puede exigir

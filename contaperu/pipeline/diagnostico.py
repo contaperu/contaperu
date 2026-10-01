@@ -181,7 +181,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     legacy = contrato.arma_asientos(modulo) and contrato.vocabulario(modulo) != "neutral"
     if legacy:
         mirar |= {"tipo_cp", "moneda"}
-    codigos = ("sin_sigla", "sin_codigo_de_moneda")      # se dicen por su código, no por comprobante
+    codigos = ("sin_sigla", "sin_codigo_de_moneda", "sin_denominacion")   # se dicen por su código, no por comprobante
     faltantes: dict[str, Any] = {clave: cuales if clave in codigos else [_serie_numero(c) for c in cuales]
                                  for clave, cuales in asi.faltantes_para(candidatos, config, es_venta, mirar).items()}
     if contrato.lleva_cuentas(modulo) and callable(getattr(modulo, "no_caben", None)):

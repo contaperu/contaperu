@@ -4,6 +4,53 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [4.3.0] — 2026-10-01
+
+**El motor escribe el otro libro del par: el detalle del plan contable utilizado.** El grupo 05 del PLE son dos
+pares, y hasta ahora el motor solo sabía escribir medio: el Libro Diario 5.1 con sus asientos. Entra el **5.3**, que
+son las cuentas que esos asientos usaron, con su denominación.
+
+Y con él entra el dato que el motor no tenía y que **no se puede deducir de nada**: cómo llama la empresa a cada una
+de sus cuentas.
+
+### Añadido
+
+- **El driver `ple_plan`**, que escribe el TXT del formato 5.3: 8 campos con palote final, CRLF, una fila por cuenta
+  distinta y ordenadas, el periodo en `AAAAMMDD` —con día, a diferencia del `AAAAMM00` del 5.1— y el plan `01` de la
+  tabla 17 de SUNAT. Contrastado punto por punto contra el 5.3 que SUNAT aceptó junto al 5.1 del mismo mes.
+- **`denominacion_cuentas` en la configuración general**: un mapa `cuenta → nombre`, vacío de fábrica. Es de la
+  empresa y no de su formato, así que la misma cuenta se llama igual exporte a donde exporte.
+- **La falta `sin_denominacion`**, que se dice **por cuenta y no por comprobante** —como la sigla o el código de
+  moneda—, con su lista y su `pedir_a: contador`: es la lista con la que un portal filtra la tabla donde se
+  completan. Y el requisito `denominacion` en el contrato de drivers, que solo declara quien lo necesita.
+- **`asiento.cuentas_sin_denominacion`** y el caso de conformidad del estándar que la fija.
+
+### Por qué no se inventa el nombre
+
+El motor conoce el nombre de la divisionaria del PCGE —`101` es «Caja»— y **no sirve**: el catálogo llega hasta cinco
+dígitos y la empresa desagrega hasta donde quiera, así que de `101101` solo sabría decir «Caja» donde la empresa
+escribe «CAJA CHICA M.N.». Escribirlo sería declararle a SUNAT una denominación que el contribuyente no usa, que es la
+misma clase de invento que una sigla puesta a dedo. Así que **una cuenta sin nombre para la exportación**, con su
+lista, en vez de salir con un nombre que nadie eligió.
+
+### Cambiado
+
+- **Lo que SUNAT impone igual a los dos libros del PLE vive en un sitio** (`drivers/ple/comun.py`): las opciones de
+  texto, la oportunidad, las banderas del nombre y el estado. Es la misma convergencia que ya se hizo con la
+  nomenclatura `LE…` cuando el SIRE dejó de ser el único libro electrónico.
+- **El test que exporta el golden con todos los drivers le da a cada uno lo que exige** en vez de saltárselo, así que
+  el driver nuevo se ejerce de verdad.
+
+### Cómo migrar
+
+**No hay que hacer nada.** El driver del 5.1 escribe el mismo archivo, ninguna huella se mueve y el Excel de CONCAR no
+cambia una celda. Dos avisos para quien lea la respuesta del motor:
+
+1. **`faltantes` trae una clave más**, `sin_denominacion`, y su lista es de **cuentas**, no de serie-números. Solo
+   aparece para un destino que la exija, que hoy es únicamente el del plan contable.
+2. **La configuración general trae una clave más**, `denominacion_cuentas`, vacía. Si pintas la pantalla de
+   configuración con `describir_configuracion`, aparece sola.
+
 ## [4.2.2] — 2026-10-01
 
 **El mapa del PLE deja de ser una deducción y pasa a salir de la norma.** John aportó el **libro oficial de

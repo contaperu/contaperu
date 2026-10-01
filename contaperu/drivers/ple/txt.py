@@ -26,6 +26,8 @@ from ...asiento import CONFIGURACION_DEL_ASIENTO, ComprobanteDelAsiento, LineaDi
 from ...modelo import Libro
 from ..kit import Opciones, armar_archivo, armar_linea, forma, formatear_fecha, formatear_monto, sanear
 from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
+# Lo que SUNAT impone igual a los dos libros del PLE vive en un sitio (`comun.py`), no en cada driver.
+from .comun import BANDERAS, ESTADO_DEL_PERIODO, OPCIONES, OPORTUNIDAD
 
 NOMBRE = "ple"
 # Un registro que se presenta a SUNAT (`drivers.contrato.CANALES`), como el SIRE.
@@ -36,17 +38,10 @@ CANAL = "tributario"
 # RCE.
 FORMATOS = {"compra": "ple_5_1", "venta": "ple_5_1"}
 CONTENT_TYPE = "text/plain; charset=us-ascii"
-# `cero="0.00"` porque el 5.1 lleva DOS columnas, Debe y Haber, y la que no toca va con el cero escrito: así sale en
-# el archivo contrastado. El `sire` no lo necesita porque sus importes van en una sola columna con signo.
-OPCIONES = Opciones(fecha="DD/MM/AAAA", nueva_linea="\r\n", tc_pen="", cero="0.00", extension=".TXT")
 
 # El código del libro (seis dígitos) y lo que lo acompaña en el nombre del fichero. **No son los del SIRE**, que usa
 # `140400` y `080400`: confundirlos nombraría el archivo de forma que SUNAT lo rechaza.
 LIBRO_DIARIO = "050100"
-# Oportunidad y banderas tal como vienen en el archivo contrastado. El `sire` usa `02` porque reemplaza una
-# propuesta; un libro diario no reemplaza nada.
-OPORTUNIDAD = "00"
-BANDERAS = "1111"
 # La fecha que el archivo contrastado escribe donde no hay fecha, y que SUNAT aceptó. No es la cadena vacía.
 SIN_FECHA = "01/01/0001"
 # Lo que el formato escribe donde no hay tercero ni comprobante.
@@ -54,9 +49,6 @@ SIN_TERCERO = "0"
 SIN_COMPROBANTE = "00"
 # La glosa referencial es opcional y el motor no tiene una segunda glosa; el archivo contrastado pone un guion.
 GLOSA_REFERENCIAL = "-"
-# Estado 1: una operación del periodo. El 8 (de un periodo anterior no anotado) y el 9 (corrige una ya anotada, con
-# su CUO original) los decide quien lleva el libro, no el motor.
-ESTADO_DEL_PERIODO = "1"
 # Prefijo del secuencial dentro del asiento: M de movimiento. La apertura (A) y el cierre (C) no los emite el motor.
 PREFIJO_MOVIMIENTO = "M"
 

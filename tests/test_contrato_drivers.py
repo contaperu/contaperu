@@ -56,13 +56,27 @@ def test_cumple_el_contrato(nombre):
     assert contrato.incumplimientos(drivers.obtener(nombre)) == []
 
 
+def _cuentas_del_golden(doc: dict, config: dict) -> list[str]:
+    """Las cuentas que el asiento de ese golden va a tocar, para poder darle a un driver lo que exija de ellas."""
+    from contaperu.asiento import resolucion
+    libro, comprobantes, cfg = prep.preparar(doc, config, False, None, "asiento_contable", None)
+    return sorted({cuenta for c in comprobantes
+                   for cuenta in resolucion.cuentas_del_asiento(c, cfg, libro.es_venta)})
+
+
 @pytest.mark.parametrize("nombre", sorted(drivers.DRIVERS))
 def test_exporta_el_golden_de_compras(nombre):
     mod = drivers.obtener(nombre)
     if "compra" not in mod.FORMATOS:
         pytest.skip(f"{nombre} no genera libros de compras")
     doc = documento_de_compras()
-    r = api.exportar(doc, driver=nombre, configuracion=CONTAB)
+    # Un driver puede exigir un dato que este golden no trae y que no se puede deducir. El del plan contable del PLE
+    # es el caso: pide cómo llama la empresa a cada cuenta, y sin eso **tiene que parar** —eso lo prueba su propio
+    # test—. Aquí lo que se prueba es que exporte, así que se le da lo que exige en vez de saltárselo.
+    config = dict(CONTAB)
+    if "denominacion" in contrato.exige(mod):
+        config["denominacion_cuentas"] = {c: f"CUENTA {c}" for c in _cuentas_del_golden(doc, config)}
+    r = api.exportar(doc, driver=nombre, configuracion=config)
     crudo = base64.b64decode(r.get("contenido_base64") or r.get("zip_base64") or "")
     assert crudo, f"{nombre} no produjo bytes"
     assert r["archivo"] == mod.nombre(prep.libro_de(doc), mod.OPCIONES)
@@ -88,7 +102,7 @@ def test_lo_que_exige_cada_driver_de_serie():
 def test_un_requisito_fuera_del_catalogo_no_pasa_el_contrato():
     raro = driver_de_prueba()
     raro.EXIGE = {"anexo"}
-    assert contrato.incumplimientos(raro) == ["EXIGE solo admite ['centro_costo', 'detraccion', 'moneda']; sobra ['anexo']"]
+    assert contrato.incumplimientos(raro) == ["EXIGE solo admite ['centro_costo', 'denominacion', 'detraccion', 'moneda']; sobra ['anexo']"]
     texto = driver_de_prueba()
     texto.EXIGE = "centro_costo"                 # un str también es iterable: no vale
     assert contrato.incumplimientos(texto) == ["EXIGE es un conjunto de textos"]
@@ -387,7 +401,7 @@ def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros)
     assert api.exportar(doc, driver="csv", configuracion=CONTAB, imputacion=imputacion)["archivo"].endswith(".csv")
     asientos = driver_de_prueba("asientos")
     asientos.EXIGE = frozenset({"cuenta_unica"})
-    assert contrato.incumplimientos(asientos) == ["EXIGE solo admite ['centro_costo', 'detraccion', 'moneda']; sobra ['cuenta_unica']"]
+    assert contrato.incumplimientos(asientos) == ["EXIGE solo admite ['centro_costo', 'denominacion', 'detraccion', 'moneda']; sobra ['cuenta_unica']"]
 
 
 def test_lo_que_no_cabe_en_el_formato_se_dice_antes_y_detiene_el_archivo(con_terceros, tmp_path, capsys):
@@ -694,7 +708,7 @@ def test_lo_que_cada_destino_no_lleva_se_pregunta_al_contrato():
     honorarios, y quien no declara nada devuelve el conjunto vacío en vez de `None`."""
     fuera = {n: sorted(contrato.excluye_tipos(m)) for n, m in drivers.DE_SERIE.items()}
     assert fuera == {"sire": ["02"], "contasis": ["02"],
-                     "concar": [], "csv": [], "starsoft": [], "asiento_contable": [], "ple": []}
+                     "concar": [], "csv": [], "starsoft": [], "asiento_contable": [], "ple": [], "ple_plan": []}
 
 
 def test_las_cuentas_de_un_driver_se_leen_por_su_accesor_y_no_en_crudo():
@@ -837,7 +851,7 @@ def test_las_toleradas_siguen_haciendo_falta():
 def test_cada_driver_de_serie_declara_su_canal():
     assert {n: contrato.canal(m) for n, m in drivers.DE_SERIE.items()} == {
         "sire": "tributario", "concar": "legacy", "csv": "intercambio", "contasis": "legacy",
-        "starsoft": "legacy", "ple": "tributario", "asiento_contable": "intercambio"}
+        "starsoft": "legacy", "ple": "tributario", "ple_plan": "tributario", "asiento_contable": "intercambio"}
     assert all(contrato.declara_canal(m) for m in drivers.DE_SERIE.values())
     assert api.drivers_disponibles()["concar"]["canal"] == "legacy"
 

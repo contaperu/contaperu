@@ -285,6 +285,23 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
         Campo("icbper", "texto", "", titulo="ICBPER", grupo="cuentas", patron=PATRON_CUENTA,
               ayuda="La cuenta del impuesto a las bolsas de plástico. Vacía, esa columna sale en blanco."),
     )),
+    # Cómo llama la EMPRESA a cada una de sus cuentas: `{"101101": "CAJA CHICA M.N."}`.
+    #
+    # No es el nombre del PCGE. El motor ya conoce ése —`101` es «Caja»— y no sirve: el PCGE llega hasta cinco dígitos
+    # y la empresa desagrega hasta donde quiera, así que de `101101` el catálogo solo sabe decir `101`. Escribir «Caja»
+    # donde la empresa pone «CAJA CHICA M.N.» sería declararle a SUNAT una denominación que no usa, que es la misma
+    # clase de invento que una sigla puesta a dedo.
+    #
+    # Lo pide el **formato 5.3 del PLE**, «Libro Diario - detalle del plan contable utilizado», donde su campo 3 es
+    # obligatorio: una fila por cuenta con su descripción. Por eso la denominación no está en cada línea del 5.1 —se
+    # declara una vez por cuenta y no doce mil veces— y por eso el motor no podía deducirla de ningún sitio.
+    #
+    # Va en lo GENERAL y no en la sección de un sistema porque es de la empresa, no de su formato: la misma cuenta se
+    # llama igual exporte a donde exporte. Vacío de fábrica, y solo lo exige quien lo necesita (`EXIGE`).
+    Campo("denominacion_cuentas", "mapa", {}, titulo="Nombre de cada cuenta", grupo="cuentas",
+          claves=PATRON_CUENTA,
+          ayuda="Cómo llama tu empresa a cada cuenta de su plan. Lo pide el detalle del plan contable del PLE.",
+          valores=Campo("", "texto", grupo="cuentas")),
     # ¿Esta empresa lleva centros de costo (obras, proyectos, áreas)? Apagado, el centro no sale en ninguna columna
     # aunque el documento traiga uno, y la aplicación deja de pedirlo: hay empresas que no los usan.
     Campo("usa_centros_costo", "booleano", True, titulo="Usa centros de costo", grupo="centros",

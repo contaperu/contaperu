@@ -52,6 +52,20 @@ class SinCodigoDeMoneda(NoExportable):
         self.monedas = monedas
 
 
+class SinDenominacion(NoExportable):
+    """Cuentas del asiento que la empresa no ha dicho cómo se llaman (`denominacion_cuentas`): no se inventa un
+    nombre, igual que no se inventa una sigla.
+
+    El nombre del PCGE no sirve de reemplazo: su catálogo llega hasta cinco dígitos, así que de `101101` solo sabe
+    decir «Caja» donde la empresa escribe «CAJA CHICA M.N.». Lo exige el detalle del plan contable del PLE."""
+
+    clave = "sin_denominacion"
+
+    def __init__(self, cuentas: list[str]):
+        super().__init__("Cuentas sin denominación en el plan de la empresa: " + ", ".join(cuentas))
+        self.cuentas = cuentas
+
+
 class RepartoNoAdmitido(NoExportable):
     """Comprobantes con la base repartida entre varias cuentas (un `reparto` en su imputación) para un destino que
     lleva UNA cuenta por documento: CONTASIS arma un asiento por fila (John, 12-sep-2026)."""
@@ -168,6 +182,8 @@ FALTAS: tuple[Falta, ...] = (
           "con un reparto entre cuentas que no suma la base del asiento", CONTADOR, "Reparto que no suma la base"),
     Falta("sin_centro", "centro_costo", SinCentro,
           "sin centro de costo en una cuenta que lo lleva", CONTADOR, "Sin centro de costo"),
+    Falta("sin_denominacion", "denominacion", SinDenominacion,
+          "cuentas sin denominación en el plan de la empresa", CONTADOR, "Cuentas sin denominación"),
     Falta("sin_codigo_detraccion", "detraccion", SinCodigoDetraccion,
           "con detracción marcada por SUNAT y sin su código del Catálogo 54", CONTADOR,
           "Sin código de detracción"),

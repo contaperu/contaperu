@@ -317,6 +317,23 @@ def cuentas_del_asiento(c: Comprobante, config: dict, es_venta: bool = False) ->
     return [cuenta for cuenta in cuentas if cuenta]
 
 
+def cuentas_sin_denominacion(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[str]:
+    """Las cuentas que el asiento va a tocar y que la empresa **no ha dicho cómo se llaman**
+    (`configuracion.denominacion_cuentas`), ordenadas y sin repetir.
+
+    Se dice por CUENTA y no por comprobante, como la sigla o el código de moneda: lo que falta no es de un documento
+    sino del plan de la empresa, y la lista con la que se arregla es la de cuentas a completar.
+
+    Lo pide el detalle del plan contable del PLE (formato 5.3), cuyo campo 3 es obligatorio. El motor conoce el nombre
+    de la divisionaria del PCGE —`101` es «Caja»— y **no sirve**: el catálogo llega hasta cinco dígitos y la empresa
+    desagrega hasta donde quiera, así que de `101101` solo sabría decir «Caja» donde la empresa escribe «CAJA CHICA
+    M.N.». Inventarlo sería declararle a SUNAT una denominación que el contribuyente no usa."""
+    denominaciones = config.get("denominacion_cuentas") or {}
+    faltan = {cuenta for c in comprobantes for cuenta in cuentas_del_asiento(c, config, es_venta)
+              if not str(denominaciones.get(cuenta) or "").strip()}
+    return sorted(faltan)
+
+
 def comprobantes_sin_clase(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
     """Las filas que tocarían una cuenta cuyo elemento del PCGE no tiene clase contable: el 8 (saldos intermediarios
     de gestión) y el 0 (cuentas de orden). Se miran **todas** las cuentas de su asiento (`cuentas_del_asiento`), no
@@ -394,6 +411,8 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
         salida["reparto_que_no_cuadra"] = repartos_que_no_cuadran(de_la_imputacion, config, es_venta)
     if "centro_costo" in exige:
         salida["sin_centro"] = comprobantes_sin_centro(de_la_imputacion, config, es_venta)
+    if "denominacion" in exige:
+        salida["sin_denominacion"] = cuentas_sin_denominacion(de_la_imputacion, config, es_venta)
     if "detraccion" in exige:
         salida["sin_codigo_detraccion"] = comprobantes_sin_codigo_detraccion(de_la_imputacion, config)
     return salida
