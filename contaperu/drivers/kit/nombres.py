@@ -8,7 +8,9 @@ Hasta la 2.0 cada driver repetía su propia `f-string` y convivían tres convenc
 `asiento_<RUC>_<PERIODO>_compra` en minúscula y singular, y la del SIRE—. El día que entra un driver nuevo, su nombre
 sale de aquí y no hay nada que decidir.
 
-**El SIRE es la única excepción y no pasa por aquí** (`drivers/sire/txt.py`): su nombre lo impone SUNAT.
+**Los libros electrónicos no pasan por esa regla, porque su nombre lo impone SUNAT** y además el motor lo lee. Pero
+tampoco lo escribe cada uno por su cuenta: desde la 4.2 lo arma `nombre_de_libro_electronico`, que es de donde salen
+el del SIRE y el del Libro Diario del PLE.
 """
 from __future__ import annotations
 
@@ -25,3 +27,24 @@ def nombre_de_archivo(sistema: str, libro: Libro, opciones: Opciones | OpcionesA
     """
     return (f"{sistema.upper()}_{'VENTAS' if libro.es_venta else 'COMPRAS'}"
             f"_{libro.periodo}_{libro.ruc}{opciones.extension}")
+
+
+def nombre_de_libro_electronico(libro: Libro, codigo: str, oportunidad: str, banderas: str,
+                                opciones: Opciones | OpcionesArchivo, dia: str = "00") -> str:
+    """El nombre que SUNAT impone a un libro electrónico: `LE` + RUC + periodo + día + código del libro +
+    oportunidad + cuatro banderas + extensión.
+
+    `LE20601234567202601000801000211 12.TXT` sin el espacio: RUC de once, periodo `AAAAMM`, día `00` cuando el libro
+    es del periodo entero, **código de SEIS dígitos**, dos de oportunidad y cuatro banderas —operativa, contenido,
+    moneda y origen—.
+
+    Vive aquí desde la 4.2, cuando apareció el segundo libro electrónico. Antes era una `f-string` dentro del driver
+    del SIRE, con una nota que decía que era «el ÚNICO driver que no usa el kit»; dejó de ser único y la regla no
+    puede estar escrita dos veces, porque **un nombre mal formado lo rechaza SUNAT y el error parece suyo y no
+    nuestro**. Y porque el propio motor lee ese nombre: `comparar_sire.registro_de()` deduce si un archivo es de
+    ventas o de compras buscando su código EN EL NOMBRE, «más fiable que contar campos».
+
+    **Ojo con los códigos: los del SIRE no son los del PLE.** El SIRE usa `140400` y `080400`; los registros del PLE
+    son `140100` y `080100`, y su Libro Diario, `050100`. Cada driver trae los suyos.
+    """
+    return f"LE{libro.ruc}{libro.periodo}{dia}{codigo}{oportunidad}{banderas}{opciones.extension}"

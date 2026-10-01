@@ -45,13 +45,13 @@ from importlib.metadata import entry_points
 from types import ModuleType
 
 from .. import _obsoleto
-from . import asiento_contable, concar, contasis, contrato, csv, sire, starsoft
+from . import asiento_contable, concar, contasis, contrato, csv, ple, sire, starsoft
 from .kit import Opciones
 
 GRUPO = "contaperu.drivers"
 DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
                                    contasis.NOMBRE: contasis, starsoft.NOMBRE: starsoft,
-                                   asiento_contable.NOMBRE: asiento_contable}
+                                   asiento_contable.NOMBRE: asiento_contable, ple.NOMBRE: ple}
 DRIVER_POR_DEFECTO = "sire"
 # Los nombres viejos que siguen resolviendo, con el aviso de cuál usar. **No viven en `DE_SERIE` ni en `DRIVERS`**: ahí
 # aparecerían como un driver más en `api.drivers_disponibles()`, en el recurso `contaperu://drivers` y en la docena de
@@ -65,7 +65,7 @@ ALIAS: dict[str, str] = {}
 
 __all__ = ["ALIAS", "DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones",
            "asiento_contable", "concar", "contasis", "contrato", "csv", "de_terceros",
-           "formato_de", "obtener", "recargar", "sire", "starsoft"]
+           "formato_de", "obtener", "ple", "recargar", "sire", "starsoft"]
 
 
 class AvisoDriver(UserWarning):

@@ -13,10 +13,10 @@ Hasta la 0.10 esto vivía en `contaperu/formato.py`, retirado en la 2.0. Las mic
 así se itera con el reporte de SUNAT o del sistema en la mano sin tocar los drivers.
 """
 from . import celdas, columnas, forma, nombres, xlsx
-from .nombres import nombre_de_archivo
+from .nombres import nombre_de_archivo, nombre_de_libro_electronico
 from .opciones import Opciones, OpcionesArchivo
 from .texto import armar_archivo, armar_linea, formatear_cambio, formatear_fecha, formatear_monto, formatear_numero, negativo, sanear
 
 __all__ = ["Opciones", "OpcionesArchivo", "armar_archivo", "armar_linea", "celdas", "columnas", "forma",
            "formatear_cambio", "formatear_fecha", "formatear_monto", "formatear_numero",
-           "negativo", "nombre_de_archivo", "nombres", "sanear", "xlsx"]
+           "negativo", "nombre_de_archivo", "nombre_de_libro_electronico", "nombres", "sanear", "xlsx"]

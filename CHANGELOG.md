@@ -34,6 +34,23 @@ que antes. Todo lo de esta versión es aditivo.
 - **`asiento.ROLES_DEL_MOTOR`**, los seis que el motor escribe, al lado de `asiento.ROLES`, que son los ocho del
   catálogo. Es la distinción que entra con esta versión: un driver tiene que **entender** los ocho porque puede
   recibirlos; el motor **emite** seis, porque genera compras y ventas.
+- **El driver `ple`**, que escribe el TXT del Libro Diario 5.1: 21 campos por fila con palote final, CRLF, el CUO
+  compuesto del sub-diario y el correlativo que el motor ya numera, y el secuencial `M000N` dentro de cada asiento.
+  Canal `tributario`, como el `sire`. **Lo que emite es el Libro Diario de los comprobantes del mes, no el libro
+  completo**: en el archivo contrastado, 595 de 1441 asientos no vienen de ningún registro —el asiento de destino,
+  los pagos, la planilla, la depreciación— y el motor no los origina. Es el mismo límite que tiene el `sire`.
+
+### Cambiado · el contrato de drivers
+
+- **Un driver tributario puede recibir las líneas** (`desde_lineas`), y no solo escribir una fila por comprobante
+  (`linea`). Lo pidió el 5.1, cuya fila **es una línea del asiento**: una compra con detracción son cinco filas. Lo
+  que la regla protege sigue en pie — un tributario escribe texto para SUNAT, no un Excel ni un JSON.
+- **Y recibe correlativos**, que antes decidía la familia: la del `ple` es `registro`, pero su CUO se compone del
+  sub-diario y del correlativo. Para los drivers de antes **la condición es la misma**, porque todos los
+  `desde_lineas` que había eran ya de familia asiento: no se movió ni un correlativo de los que ya se escribían.
+- **Unir las líneas y codificarlas sale al kit** (`kit.armar_archivo`), y la nomenclatura `LE…` de un libro
+  electrónico también (`kit.nombre_de_libro_electronico`). Las dos vivían dentro del driver del SIRE, que hasta ahora
+  era el único libro electrónico. Una regla que SUNAT impone no puede estar escrita en dos drivers.
 
 ### Cambiado
 

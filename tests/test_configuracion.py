@@ -133,7 +133,7 @@ def test_la_configuracion_de_partida_es_lo_general_y_una_seccion_por_sistema():
     from contaperu.configuracion import CONFIG_POR_DEFECTO
 
     partida = api.configuracion_por_defecto()
-    assert set(partida) - set(CONFIG_POR_DEFECTO) == {"concar", "contasis", "csv", "starsoft"}
+    assert set(partida) - set(CONFIG_POR_DEFECTO) == {"concar", "contasis", "csv", "starsoft", "ple"}
     assert {clave: partida[clave] for clave in CONFIG_POR_DEFECTO} == CONFIG_POR_DEFECTO
     assert api.errores_de_configuracion(partida) == []
     del_asiento = {c.clave for c in CONFIGURACION_DEL_ASIENTO}
@@ -156,7 +156,7 @@ def test_una_aplicacion_pinta_su_pantalla_con_lo_que_describe_el_motor():
     assert [c["clave"] for c in todo["general"]["campos"]] == [
         "cuentas", "usa_centros_costo", "centros_costo", "cuentas_con_centro", "detraccion_numero_pendiente",
         "detraccion_tasas", "detraccion_nombres", "asentar_sin_efecto_contable"]
-    assert set(todo["sistemas"]) == {"concar", "csv", "contasis", "starsoft"}
+    assert set(todo["sistemas"]) == {"concar", "csv", "contasis", "starsoft", "ple"}
     concar = api.describir_configuracion("concar")
     assert concar["sistema"] == "concar" and concar["general"] == todo["general"]
     columnas = concar["columnas"]["centro_costo"]
@@ -182,11 +182,11 @@ def test_la_configuracion_se_valida_entera_y_cada_error_dice_adonde_va():
         "contasis": {"medio_pago": "3"},
     })
     assert errores == [
-        "`tipos` va dentro de la sección de su sistema (concar o csv o starsoft), no en la raíz",
+        "`tipos` va dentro de la sección de su sistema (concar o csv o starsoft o ple), no en la raíz",
         "`medio_pago` va dentro de la sección de su sistema (contasis), no en la raíz",
         "`centro_como_referencia` ya no existe: es la columna `anexo_auxiliar` en `concar.columnas.centro_costo`",
         "`tasa_igv`: clave desconocida; en la raíz va lo general (cuentas, usa_centros_costo, centros_costo, "
-        "cuentas_con_centro, detraccion_numero_pendiente, detraccion_tasas, detraccion_nombres, asentar_sin_efecto_contable) y una sección por sistema (concar, csv, contasis, starsoft)",
+        "cuentas_con_centro, detraccion_numero_pendiente, detraccion_tasas, detraccion_nombres, asentar_sin_efecto_contable) y una sección por sistema (concar, csv, contasis, starsoft, ple)",
         "`imputaciones` no va en la configuración: la imputación de cada documento llega en el bloque "
         "`imputaciones` del documento o en el argumento `imputacion`",
         "`sire` no tiene sección: ese sistema no lleva cuentas y no se configura",
@@ -209,7 +209,7 @@ def test_una_configuracion_que_no_cumple_no_se_aplica_ni_genera():
 
     with pytest.raises(ConfiguracionInvalida) as e:
         prep.config_aplicada({"sub_diario_compras": "11"}, "concar")
-    assert e.value.errores == ["`sub_diario_compras` va dentro de la sección de su sistema (concar o csv o starsoft), no en la "
+    assert e.value.errores == ["`sub_diario_compras` va dentro de la sección de su sistema (concar o csv o starsoft o ple), no en la "
                                "raíz"]
     libro, comprobantes = cargar_golden("compras_202601.json")
     with pytest.raises(ConfiguracionInvalida) as e:
@@ -246,7 +246,7 @@ def test_la_cli_dice_la_configuracion_que_no_se_puede_usar(tmp_path, capsys):
     assert cli.main(["desde-json", golden, "--driver", "concar", "--salida", str(tmp_path / "s"),
                      "--config", str(config)]) == 2
     err = capsys.readouterr().err
-    assert "`tipos` va dentro de la sección de su sistema (concar o csv o starsoft)" in err and "Traceback" not in err
+    assert "`tipos` va dentro de la sección de su sistema (concar o csv o starsoft o ple)" in err and "Traceback" not in err
     assert cli.main(["diagnosticar", golden, "--config", str(config)]) == 1
     assert "!! Configuración: `tipos` va dentro de la sección" in capsys.readouterr().out
 

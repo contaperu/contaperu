@@ -694,7 +694,7 @@ def test_lo_que_cada_destino_no_lleva_se_pregunta_al_contrato():
     honorarios, y quien no declara nada devuelve el conjunto vacío en vez de `None`."""
     fuera = {n: sorted(contrato.excluye_tipos(m)) for n, m in drivers.DE_SERIE.items()}
     assert fuera == {"sire": ["02"], "contasis": ["02"],
-                     "concar": [], "csv": [], "starsoft": [], "asiento_contable": []}
+                     "concar": [], "csv": [], "starsoft": [], "asiento_contable": [], "ple": []}
 
 
 def test_las_cuentas_de_un_driver_se_leen_por_su_accesor_y_no_en_crudo():
@@ -798,12 +798,18 @@ def test_ningun_corte_de_texto_lleva_el_numero_escrito_en_la_expresion():
 
 
 def test_todo_driver_nombra_su_archivo_con_el_kit():
-    """Hasta la 2.0 cada driver repetía su propia `f-string` y convivían tres convenciones. El SIRE es la única
-    excepción, y lleva las dos razones escritas en su propio código: el nombre se lo impone SUNAT."""
+    """Hasta la 2.0 cada driver repetía su propia `f-string` y convivían tres convenciones.
+
+    Son **dos** reglas, no una, y las dos viven en el kit: `nombre_de_archivo` para un archivo que importa un sistema
+    contable, y `nombre_de_libro_electronico` para uno que se presenta a SUNAT, que impone el nombre. Hasta la 4.2 la
+    segunda estaba dentro del driver del SIRE y este test lo exentaba por su nombre; con el Libro Diario del PLE dejó
+    de ser el único, y una regla que SUNAT impone no puede estar escrita en dos drivers."""
+    del_kit = ("nombre_de_archivo", "nombre_de_libro_electronico")
     sin_kit = [nombre for nombre, modulo in drivers.DE_SERIE.items()
-               if callable(getattr(modulo, "nombre", None)) and nombre != "sire"
-               and "nombre_de_archivo" not in "".join(
-                   f.read_text(encoding="utf-8") for f in pathlib.Path(modulo.__file__).parent.rglob("*.py"))]
+               if callable(getattr(modulo, "nombre", None))
+               and not any(cual in "".join(f.read_text(encoding="utf-8")
+                                           for f in pathlib.Path(modulo.__file__).parent.rglob("*.py"))
+                           for cual in del_kit)]
     assert sin_kit == []
 
 
@@ -831,7 +837,7 @@ def test_las_toleradas_siguen_haciendo_falta():
 def test_cada_driver_de_serie_declara_su_canal():
     assert {n: contrato.canal(m) for n, m in drivers.DE_SERIE.items()} == {
         "sire": "tributario", "concar": "legacy", "csv": "intercambio", "contasis": "legacy",
-        "starsoft": "legacy", "asiento_contable": "intercambio"}
+        "starsoft": "legacy", "ple": "tributario", "asiento_contable": "intercambio"}
     assert all(contrato.declara_canal(m) for m in drivers.DE_SERIE.values())
     assert api.drivers_disponibles()["concar"]["canal"] == "legacy"
 

@@ -27,6 +27,7 @@ from ...modelo import Comprobante, Libro
 from ..kit import (
     Opciones, armar_linea, formatear_fecha, formatear_monto, formatear_numero, formatear_cambio, negativo, sanear,
 )
+from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
 
 NOMBRE = "sire"
 # Un registro que se presenta a SUNAT (`drivers.contrato.CANALES`).
@@ -43,6 +44,8 @@ FORMATOS = {"venta": "sire_rvie", "compra": "sire_rce"}
 LIBRO_VENTAS = "140400"
 LIBRO_COMPRAS = "080400"
 OPORTUNIDAD_REEMPLAZO = "02"
+# Las cuatro banderas del nombre, en orden: 1 operativa, 1 con información, 1 soles, 2 generado por el SIRE.
+BANDERAS = "1112"
 
 
 class CampoCambiaDeSigno(NoExportable):
@@ -71,7 +74,7 @@ def columnas_igv_compras(c: Comprobante, opciones: Opciones) -> list[str]:
 
 
 def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
-    """El nombre oficial del TXT. **Es el ÚNICO driver que no usa `kit.nombre_de_archivo`**, y no es un olvido.
+    """El nombre oficial del TXT. **No usa `kit.nombre_de_archivo`**, y no es un olvido.
 
     Dos razones independientes, cualquiera de las dos basta:
 
@@ -80,10 +83,13 @@ def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
     2. **El propio motor lo lee**: `comparar_sire.registro_de()` deduce si un archivo es de ventas o de compras
        buscando `1404`/`0804` EN EL NOMBRE, «más fiable que contar campos». Renombrarlo lo dejaría ciego.
 
-    Si algún día alguien unifica esto «por coherencia», que lo deshaga después de leer estas dos líneas.
+    Lo que sí usa, desde la 4.2, es `kit.nombre_de_libro_electronico`: hasta entonces este era el único libro
+    electrónico y la regla vivía aquí dentro. Con el Libro Diario del PLE dejó de ser único, y una regla que SUNAT
+    impone no puede estar escrita en dos drivers. Lo propio de este —sus códigos, su oportunidad y sus banderas—
+    sigue aquí.
     """
     codigo = LIBRO_VENTAS if libro.es_venta else LIBRO_COMPRAS
-    return f"LE{libro.ruc}{libro.periodo}00{codigo}{OPORTUNIDAD_REEMPLAZO}1112{opciones.extension}"
+    return _nombre_de_libro_electronico(libro, codigo, OPORTUNIDAD_REEMPLAZO, BANDERAS, opciones)
 
 
 def linea(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCIONES) -> str:
