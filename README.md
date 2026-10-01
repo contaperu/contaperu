@@ -144,7 +144,7 @@ API y devuelven la respuesta. Por eso el mismo mes da el mismo resultado por las
 |---|---|---|
 | **Python** | Un programa en Python | `from contaperu import api` y `api.exportar(documento, driver="concar", ...)`: llama directo a la API |
 | **CLI** (`contaperu`) | Quien trabaja en la consola o por lotes | Seis comandos: `generar`, `desde-json`, `diagnosticar`, `configuracion`, `comparar` y `verificar-driver`, que comprueba un driver propio contra el contrato |
-| **MCP** (`contaperu-mcp`) | Un asistente de IA | 14 herramientas de solo lectura y 10 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
+| **MCP** (`contaperu-mcp`) | Un asistente de IA | 14 herramientas de solo lectura y 11 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
 | **HTTP** (`contaperu-http`) | Un ERP en cualquier lenguaje | `POST /v1/exportar`, `POST /v1/diagnosticar`…; responde 421 a un `Host` no declarado, corta la petición en 10 MB y atiende 16 a la vez |
 
 La **API pública** (`contaperu.api`) es la lista de operaciones que comparten las cuatro puertas: leer, revisar,
@@ -387,9 +387,10 @@ Catorce herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, 
 `resumen` (cuánto es el libro, cada moneda por su lado) y `por_cuenta` (en qué cuentas cayó el asiento),
 `configuracion_por_defecto`, `drivers_disponibles`, `validar_comprobantes`, `validar_partida_doble`,
 `generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`,
-`buscar_cuenta_pcge` y `adaptar_pcge2026`, todas anunciadas de solo lectura. Y diez recursos: el esquema del
+`buscar_cuenta_pcge` y `adaptar_pcge2026`, todas anunciadas de solo lectura. Y once recursos: el esquema del
 estándar, los catálogos de SUNAT, el canal del SIRE, **el formato del SIRE columna a columna** —dónde cae cada
-campo del anexo, o por qué no cae—, los catálogos del propio estándar, el catálogo del PCGE 2026, los drivers
+campo del anexo, o por qué no cae—, **el del Libro Diario 5.1 del PLE** —de dónde sale cada uno de sus 21 campos,
+con los códigos de libro de SUNAT—, los catálogos del propio estándar, el catálogo del PCGE 2026, los drivers
 disponibles, lo que se configura de cada uno, el esquema de la respuesta de `diagnosticar` y **quién escribe
 cada campo de un comprobante** (el documento, el sistema o la revisión).
 

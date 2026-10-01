@@ -135,6 +135,8 @@ OPERACIONES: tuple[Operacion, ...] = (
     Operacion("catalogos_api_sire", "GET", "/v1/catalogos/sire-api", recurso="contaperu://catalogos/sire-api"),
     # Y el FORMATO, columna a columna: dónde cae cada campo del anexo, o por qué no cae.
     Operacion("campos_del_sire", "GET", "/v1/catalogos/sire-campos", recurso="contaperu://catalogos/sire-campos"),
+    # El otro formato de SUNAT que el motor escribe: el Libro Diario 5.1 del PLE, con sus códigos de libro.
+    Operacion("campos_del_ple", "GET", "/v1/catalogos/ple-campos", recurso="contaperu://catalogos/ple-campos"),
     Operacion("catalogos_del_estandar", "GET", "/v1/catalogos/estandar", "catalogos_del_estandar",
               recurso="contaperu://catalogos/estandar"),
     Operacion("catalogo_pcge", "GET", "/v1/catalogos/pcge2026", recurso="contaperu://catalogos/pcge2026"),

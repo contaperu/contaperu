@@ -382,6 +382,23 @@ def campos_del_sire() -> dict:
     return catalogos.campos_del_sire()
 
 
+def campos_del_ple() -> dict:
+    """El FORMATO del **Libro Diario 5.1 del PLE** columna a columna: de cada uno de sus 21 campos, su número, el
+    nombre que le da SUNAT, de dónde lo saca el driver al escribirlo —o el motivo por el que va vacío— y qué hizo con
+    esa columna un libro real que SUNAT aceptó.
+
+    Trae además los **códigos de libro** del PLE (`050100` el Diario, `080100` el Registro de Compras, `140100` el de
+    Ventas) y la nomenclatura del fichero `LE…`. Ojo con no confundirlos con los del SIRE, que son otros: `140400` y
+    `080400`.
+
+    **El motor no LEE un 5.1**, así que a diferencia del mapa del SIRE este no habla de lectura: describe cómo se
+    escribe. Lo que el motor no sabe poner lo dice su `motivo` — el campo 20, la referencia al registro de origen,
+    espera que el motor numere el CUO de ese registro.
+
+    Es el hermano de `campos_del_sire`: el mismo papel para el otro formato de SUNAT que el motor escribe."""
+    return catalogos.campos_del_ple()
+
+
 def catalogos_del_estandar() -> dict:
     """Los catálogos que este estándar inventa —`roles`, `clases` y `tipos_de_libro`—, cada uno con su fuente y su
     versión. Son lo que un ERP de fuera necesita para leer una línea del asiento sin conocer el PCGE, y viven

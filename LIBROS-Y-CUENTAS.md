@@ -214,12 +214,19 @@ Comparado campo a campo:
 | **Glosa** o descripción de la operación *(opcional)* | `glosa` |
 | **Referencia de la operación**: código del libro, número correlativo, documento sustentatorio | `documento{}` y `referencia{}` |
 | **Código de la cuenta contable**, con el mínimo del artículo 6 | `cuenta` — **sin nivel normativo declarado** |
-| **Denominación de la cuenta** *(opcional si usa más de 4 dígitos de subcuenta)* | **no existe** |
+| **Denominación de la cuenta** *(opcional si usa más de 4 dígitos de subcuenta)* | **no existe** — y resulta que **no hace falta**: ver abajo |
 | **Movimiento: Debe / Haber** | `debe_haber` + `importe` |
 | Totales | `cuadrar()` / `_asiento.cuadre` |
 
-**La línea de este estándar ya es, casi exactamente, una línea del Libro Diario de SUNAT.** Le faltan dos cosas, y las
-dos son la misma propuesta: el nivel normativo de la cuenta y su denominación.
+**La línea de este estándar ya es, casi exactamente, una línea del Libro Diario de SUNAT.** Lo que le falta es **una**
+cosa, el nivel normativo de la cuenta — y no dos, como decía este documento antes de ver un archivo real.
+
+> **Corregido el 1-oct-2026, con un Libro Diario presentado y aceptado delante.** La tabla de arriba se escribió
+> contra el formato en papel de la RS 234-2006. El TXT que se presenta de verdad tiene **21 campos**, y su columna de
+> denominación **va vacía en las 12 094 líneas** del archivo contrastado: el artículo 6 la hace opcional a quien usa
+> más de cuatro dígitos de subcuenta, y ese contribuyente usa seis. Así que la denominación **no tiene caso real**
+> —nadie la llena— y la candidata B de abajo pierde esa mitad. El mapa completo de los 21 campos, con de dónde sale
+> cada uno, vive ahora en `contaperu/datos/sunat/ple_campos.json` y lo vigila `tests/test_ple_campos.py`.
 
 Eso cambia de sitio la idea del §2.4: **no es un préstamo de SAF-T, es lo que SUNAT exige.** Y es mejor sitio, porque
 la regla del repositorio es que ninguna regla contable entra sin fuente, y la fuente peruana existe.
@@ -238,7 +245,7 @@ El catálogo de libros y registros de la RS 234-2006, por su número de formato:
 | 2 | Libro de Ingresos y Gastos | 2.1, 2.2 |
 | 3 | Libro de Inventarios y Balances | 3.1 – 3.20 |
 | 4 | Libro de Retenciones (incisos e y f del art. 34 de la LIR) | 4.1 |
-| 5 | **Libro Diario** y Libro Diario de Formato Simplificado | **5.1**, 5.2 |
+| 5 | **Libro Diario** y Libro Diario de Formato Simplificado | **5.1**, 5.3 |
 | 6 | Libro Mayor | 6.1 |
 | 7 | **Registro de Activos Fijos** | 7.1 – 7.4 |
 | 8 | Registro de Compras | 8.1 |
@@ -500,7 +507,7 @@ genérico, código y tasa dentro.
 | **Una tabla de cuenta → rol para el PCGE** | descartado | §5: el rol no es atributo de la cuenta; la relación es de muchos a muchos y una cuenta nueva no obligaría a tocar nada |
 | **Un rol nuevo por cada hecho nuevo** (planilla, depreciación, destino) | descartado | §3.3: el hecho entra por su **libro** del PLE, que es fuente normativa |
 | **Copiar los ~250 `AccountSubType` de QuickBooks** | descartado antes de este documento | «es el camino del que no se vuelve» (`API-DE-REGISTRO.md`) |
-| **Escribir un driver del PLE 5.1** | fuera de alcance | Aquí el PLE es **fuente**, no destino. Un driver pide un archivo real que ese sistema haya aceptado, y ya está anotado en negativo que «no consta que ningún legacy importe el Libro Diario 5.1 del PLE» |
+| ~~**Escribir un driver del PLE 5.1**~~ | **ya no**, decidido por John el 1-oct-2026 | Esta fila decía «fuera de alcance: aquí el PLE es fuente, no destino», y el motivo era que faltaba el archivo real. **Llegó**: un Libro Diario 5.1 de un mes presentado a SUNAT con sus constancias de recepción, 12 094 líneas y 1 441 asientos, ninguno descuadrado. Con el archivo delante, John decidió que **el motor construya el PLE «así como el sire lo hace»**. El negativo que seguía en pie —que no consta que ningún sistema legacy *importe* un 5.1— no se contradice: el driver escribe para SUNAT, no para un legacy |
 
 ---
 
@@ -510,9 +517,9 @@ Ninguno de estos puntos sostiene una conclusión de este documento; todos son pr
 
 | | Qué falta | Dónde está |
 |---|---|---|
-| 1 | Los **códigos de 8 dígitos** de cada libro del PLE y la nomenclatura del TXT | Anexo 3 de la RS 286-2009 y modificatorias. Las fuentes secundarias se contradicen (`050000` frente a `050100`) |
-| 2 | La **estructura electrónica del 5.1**, campo a campo, para confirmar el de la cuenta contable y el de la denominación | Anexo 2 de la RS 286-2009 / RS 169-2015. El PDF de MINJUS no se deja extraer con las herramientas de esta sesión |
-| 3 | El **Formato 5.1 oficial** publicado por SUNAT | `contenido.app.sunat.gob.pe` rechazó la conexión el 1-oct-2026 |
+| ~~1~~ | ~~Los **códigos de libro** del PLE y la nomenclatura del TXT~~ | **Resuelto el 1-oct-2026** contra un archivo que SUNAT aceptó: el código es de **seis** dígitos y los ocho del nombre del fichero son el código más la oportunidad. `050100` Diario · `050300` Diario Simplificado · `080100` Registro de Compras · `140100` Registro de Ventas. **No son los del SIRE**, que usa `140400` y `080400`. En `datos/sunat/ple_campos.json` |
+| ~~2~~ | ~~La **estructura electrónica del 5.1**, campo a campo~~ | **Resuelto en lo que importa**: los **21 campos** están mapeados en `datos/sunat/ple_campos.json`, con de dónde sale cada uno. Sigue `[por confirmar]` contra el Anexo 2 lo accesorio: los **nombres oficiales de las columnas 5 y 6** y la obligatoriedad campo a campo, que están deducidos del archivo y no copiados de la norma |
+| 3 | El **Formato 5.1 oficial** publicado por SUNAT | `contenido.app.sunat.gob.pe` rechazó la conexión el 1-oct-2026. Ya no bloquea nada: el archivo real cubrió su papel |
 | 4 | La **licencia exacta de `l10n_pe`** y qué `account_type` asigna a cada elemento del PCGE, en especial al 9 | su `__manifest__.py` y su CSV |
 | 5 | El **`ReportCode` de Xero**: el único campo de clasificación que no está investigado en ningún documento del repositorio | la API de Xero |
 | 6 | Las **equivalencias PCGE Revisado → PCGE 2026** para el artículo 6, con la cita del artículo al lado | pendiente ya anotado en `CLAUDE.md` |

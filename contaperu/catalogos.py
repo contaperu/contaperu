@@ -57,11 +57,29 @@ def api_sire() -> dict:
 # `estado_sunat` estaban en la lista de «referenciales que se ignoran» y resultó que importaban.
 # `tests/test_sire_campos.py` lo confronta con el lector y con el escritor, así que ahora no se
 # pueden separar sin que la batería lo diga.
-_CAMPOS_SIRE = _datos.leer_json("datos/sunat/sire_campos.json")
-if not _CAMPOS_SIRE:
-    raise FileNotFoundError("No encuentro el mapa de campos del SIRE (datos/sunat/sire_campos.json)")
+#
+# Desde el 1-oct-2026 hay DOS mapas de este tipo —el del SIRE y el del Libro Diario 5.1 del PLE— así que la carga
+# se hace una vez y no dos: lo que cambia entre ellos es el fichero, no el procedimiento.
+def _mapa_de_formato(ruta: str, de_quien: str) -> dict:
+    """El mapa de un formato de SUNAT, columna a columna. Ninguno entra sin su fichero: si falta, el motor no
+    arranca, porque un driver que escribiera columnas sin su mapa es justo lo que estos ficheros vinieron a evitar."""
+    mapa = _datos.leer_json(ruta)
+    if not mapa:
+        raise FileNotFoundError(f"No encuentro el mapa de campos del {de_quien} ({ruta})")
+    return mapa
+
+
+_CAMPOS_SIRE = _mapa_de_formato("datos/sunat/sire_campos.json", "SIRE")
 # El nombre del libro de SUNAT según el registro que se trabaja: el mismo par de siglas que usa el canal.
 REGISTRO_SIRE = {True: "rvie", False: "rce"}
+
+# El del PLE va aparte y no comparte estructura con el del SIRE más que por fuera, porque uno se LEE y el otro se
+# ESCRIBE: donde el del SIRE dice `lectura` y `vuelve`, el del PLE dice `escritura` y `visto`. El `_nota` de cada
+# fichero lo explica.
+_CAMPOS_PLE = _mapa_de_formato("datos/sunat/ple_campos.json", "PLE")
+# El único formato del PLE que el motor escribe hoy. No es `libro.tipo`: el driver toma un mes de compras o de
+# ventas y lo escribe como Libro Diario, igual que el `sire` lo escribe como RVIE o RCE.
+FORMATO_PLE = "diario"
 
 
 def campos_del_sire() -> dict:
@@ -83,6 +101,21 @@ def nombres_del_sire(es_venta: bool) -> list[str]:
     no «campo 17». Viven aquí una sola vez: el mapa es la fuente."""
     libro = _CAMPOS_SIRE["libros"][REGISTRO_SIRE[es_venta]]
     return [c["nombre"] for c in libro["campos"] if c["n"] <= libro["campos_informados"]]
+
+
+def campos_del_ple() -> dict:
+    """El formato del Libro Diario 5.1 del PLE columna a columna, con sus fuentes: por cada uno de los 21 campos, su
+    número, su nombre, de dónde lo saca el driver al escribirlo —o por qué va vacío— y qué hizo con esa columna un
+    libro real que SUNAT aceptó.
+
+    Trae además los códigos de libro del PLE y la nomenclatura del fichero. **El motor no LEE un 5.1**: no hay
+    lector, así que este mapa describe la escritura y nada más."""
+    return dict(_CAMPOS_PLE)
+
+
+def columnas_del_ple(formato: str = FORMATO_PLE) -> list[dict]:
+    """Las 21 columnas del formato, en el orden que manda SUNAT."""
+    return list(_CAMPOS_PLE["libros"][formato]["campos"])
 
 
 # Tipo de comprobante (2 dígitos). Se listan los que un estudio contable ve de verdad.

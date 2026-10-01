@@ -1,0 +1,72 @@
+{
+ "_nota": "El FORMATO del Libro Diario 5.1 del PLE, columna a columna: de cada campo, de dónde lo saca el driver al escribirlo, o por qué va vacío. Es el espejo de `sire_campos.json`, con dos diferencias que vienen de que este formato se ESCRIBE y no se lee: donde el del SIRE dice `lectura` (cómo lo lee el lector) este dice `escritura` (de dónde lo saca el driver), y donde aquél dice `vuelve` (si el TXT de reemplazo devuelve el dato) este dice `visto` (qué hizo con esa columna un libro real que SUNAT aceptó). El motor NO lee un 5.1: no hay lector, y por eso no hay columna `lectura`.",
+ "actualizado_al": "2026-10-01",
+ "fuentes": {
+  "formato": "RS 234-2006/SUNAT, Formato 5.1 «LIBRO DIARIO» (información mínima) — https://www.sunat.gob.pe/legislacion/superin/2006/234.htm · el formato publicado por SUNAT en http://contenido.app.sunat.gob.pe/insc/Libros+y+Registros/Informacion+m%C3%ADnimo+formatos/FORMATO_5_1.pdf",
+  "nivel_de_la_cuenta": "RS 234-2006/SUNAT, artículo 6, literal b), inciso (iii): la cuenta contable va desagregada a TRES dígitos como mínimo para quien obtuvo hasta 100 UIT de ingresos brutos en el ejercicio anterior, y a CUATRO como mínimo por encima de 100 UIT. Es la norma que hace que el nivel de la cuenta no sea opinable, y la que hace opcional la denominación (campo 5) a quien usa más de cuatro dígitos de subcuenta.",
+  "estructura_electronica": "Anexo 2 de la RS 286-2009/SUNAT y sus modificatorias, entre ellas el Anexo 2 de la RS 169-2015 — https://spij.minjus.gob.pe/Graficos/Peru/2015/Junio/30/RS-169-2015-SUNAT-ANX-2.pdf . [por confirmar]: el PDF no se deja extraer con las herramientas de esta sesión, así que los nombres oficiales de los campos 5 y 6 y la obligatoriedad campo a campo están DEDUCIDOS del archivo real, no copiados de la norma.",
+  "codigos_de_libro": "Anexo 3 de la RS 286-2009/SUNAT y sus modificatorias. [por confirmar] en la norma; los cuatro que trae `codigos_de_libro` están verificados contra un archivo que SUNAT aceptó (el nombre del fichero y su campo 20), no contra el anexo.",
+  "contraste": "Un Libro Diario 5.1 real de un mes, presentado y aceptado por SUNAT con su constancia de recepción (visto el 1-oct-2026): 21 campos por línea separados por `|` con palote final, 12 094 líneas, 1 441 asientos y NINGUNO descuadrado (el libro completo cuadra a 0.00). De él salen los conteos de la columna `visto` y la nomenclatura del fichero. El archivo vive solo en `privado/`, de lectura, y no entra al repositorio (`CLAUDE.md`: nunca datos reales)."
+ },
+ "nomenclatura": {
+  "patron": "LE + RUC(11) + AAAA + MM + DD + codigo_libro(6) + oportunidad(2) + operativa(1) + contenido(1) + moneda(1) + origen(1) + extension",
+  "ejemplo": "LE2060123456720260600050100001111.TXT",
+  "nota": "Es la misma descomposición que ya usa el driver `sire` (`drivers/sire/txt.py`), con los códigos del PLE en vez de los del SIRE. El día va en `00` cuando el libro es del periodo entero. Las cuatro banderas finales del archivo contrastado son `1111`. Los dos dígitos de oportunidad valen `00` en el libro contrastado, frente al `02` que el SIRE usa para reemplazar la propuesta."
+ },
+ "codigos_de_libro": {
+  "fuente": "Verificados contra un archivo aceptado por SUNAT, no contra el Anexo 3: ver `fuentes.codigos_de_libro`.",
+  "nota": "El código es de SEIS dígitos; los ocho del nombre del fichero son el código más los dos de oportunidad. OJO: los códigos del SIRE NO son los del PLE — el SIRE usa `140400` y `080400`, y los registros del PLE son `140100` y `080100`.",
+  "codigos": {
+   "050100": "Libro Diario (formato 5.1)",
+   "050300": "Libro Diario de Formato Simplificado (formato 5.3)",
+   "080100": "Registro de Compras (formato 8.1)",
+   "140100": "Registro de Ventas e Ingresos (formato 14.1)"
+  }
+ },
+ "escrituras": {
+  "del_libro": "Sale del `Libro`: el RUC, el periodo. No es de ninguna línea.",
+  "de_la_linea": "Sale de un campo de la `LineaDiario`, directo. `campo` dice cuál.",
+  "de_la_cabecera": "Sale de la `Cabecera` del comprobante, que viaja con las líneas de un driver `desde_lineas`. Es lo que la línea no lleva: el tipo de documento de identidad del tercero, y la serie y el número por separado (la línea los trae unidos en `documento.serie_numero`).",
+  "del_orden": "Se deriva de la posición de la línea dentro de su asiento, no de ningún dato.",
+  "del_driver": "El driver lo compone a partir de varios campos. El CUO es el caso: sub-diario, mes y correlativo en una sola cadena.",
+  "constante": "Un valor fijo que el formato pide y que no depende del contenido.",
+  "vacia": "La columna existe y va vacía, con su motivo. No es un olvido.",
+  "pendiente": "La columna pide un dato que el motor todavía no tiene. Va vacía y su `motivo` dice qué falta para llenarla."
+ },
+ "visto": {
+  "siempre": "El libro real la trae llena en todas sus líneas.",
+  "a_veces": "El libro real la trae llena en algunas líneas y vacía en otras.",
+  "nunca": "El libro real la trae vacía en todas sus líneas."
+ },
+ "libros": {
+  "diario": {
+   "formato": "5.1",
+   "codigo": "050100",
+   "columnas": 21,
+   "campos_informados": 21,
+   "campos": [
+    {"n": 1, "nombre": "Periodo", "campo": null, "escritura": "del_libro", "motivo": "Es del libro (`libro.periodo`), no de la línea. Va como `AAAAMM` más `00` cuando el libro es del periodo entero.", "visto": "siempre"},
+    {"n": 2, "nombre": "Número correlativo del asiento o código único de la operación (CUO)", "campo": null, "escritura": "del_driver", "motivo": "El driver lo compone: sub-diario, mes del periodo y correlativo del asiento. En el libro contrastado tiene la forma `SD-MMNNNN` (por ejemplo, sub-diario `03`, mes `06`, correlativo `0001`). El motor ya numera las dos piezas: `linea.sub_diario` y `linea.correlativo`.", "nota": "El CUO lo pone el software contable que genera el PLE, y es la llave que identifica el asiento. No es la identidad del comprobante del motor.", "visto": "siempre"},
+    {"n": 3, "nombre": "Número correlativo del movimiento dentro del asiento", "campo": null, "escritura": "del_orden", "motivo": "Es la posición de la línea dentro de su asiento, con el prefijo que dice de qué asiento se trata: `M` movimiento, `A` apertura, `C` cierre. En el libro contrastado las 12 094 líneas llevan prefijo `M`.", "visto": "siempre"},
+    {"n": 4, "nombre": "Código de la cuenta contable desagregado", "campo": "cuenta", "escritura": "de_la_linea", "nota": "Al mínimo del artículo 6 (tres o cuatro dígitos según los ingresos del ejercicio anterior), o más. El libro contrastado usa seis.", "visto": "siempre"},
+    {"n": 5, "nombre": "Denominación de la cuenta contable", "campo": null, "escritura": "vacia", "motivo": "El artículo 6 la hace OPCIONAL para quien usa más de cuatro dígitos de subcuenta, y el libro contrastado la deja vacía en sus 12 094 líneas. El motor no guarda la denominación de la cuenta del contribuyente: su catálogo del PCGE tiene el nombre de la divisionaria normativa, que no es lo mismo. [por confirmar] el nombre oficial de esta columna.", "visto": "nunca"},
+    {"n": 6, "nombre": "Código del centro de costos", "campo": "centro_costo", "escritura": "de_la_linea", "motivo": "[por confirmar] el nombre oficial de esta columna: está deducido del archivo real, donde trae 26 valores distintos con la forma de un centro de costo.", "visto": "a_veces"},
+    {"n": 7, "nombre": "Moneda", "campo": "moneda", "escritura": "de_la_linea", "nota": "En ISO 4217, como en el estándar. El libro contrastado trae PEN y USD.", "visto": "siempre"},
+    {"n": 8, "nombre": "Tipo de documento de identidad del tercero", "campo": null, "escritura": "de_la_cabecera", "motivo": "La línea lleva el número del tercero (`contraparte_doc`) pero NO su tipo. Sale de `Cabecera.contraparte_tipo_doc`, que viaja con las líneas. Es la Tabla 2 de SUNAT: `6` RUC, `1` DNI, `4` carné de extranjería, `0` cuando no aplica.", "visto": "siempre"},
+    {"n": 9, "nombre": "Número de documento de identidad del tercero", "campo": "contraparte_doc", "escritura": "de_la_linea", "nota": "El libro contrastado escribe `0` en las líneas que no tienen tercero.", "visto": "siempre"},
+    {"n": 10, "nombre": "Tipo de comprobante de pago", "campo": "documento.tipo_cp", "escritura": "de_la_linea", "nota": "El código de SUNAT (Tabla 10). El libro contrastado usa doce distintos, y `00` cuando no aplica — que es lo que el estándar ya hace en la línea de la detracción.", "visto": "siempre"},
+    {"n": 11, "nombre": "Serie del comprobante", "campo": null, "escritura": "de_la_cabecera", "motivo": "La línea trae la serie y el número UNIDOS en `documento.serie_numero`; el formato los pide separados. Salen de `Cabecera.serie`.", "visto": "siempre"},
+    {"n": 12, "nombre": "Número del comprobante", "campo": null, "escritura": "de_la_cabecera", "motivo": "Lo mismo que el 11: de `Cabecera.numero`.", "visto": "siempre"},
+    {"n": 13, "nombre": "Fecha de la operación", "campo": "fecha", "escritura": "de_la_linea", "nota": "La fecha contable del asiento, dentro del periodo.", "visto": "siempre"},
+    {"n": 14, "nombre": "Fecha de vencimiento del comprobante", "campo": "documento.fecha_vencimiento", "escritura": "de_la_linea", "nota": "El libro contrastado escribe la fecha nula `01/01/0001` cuando no hay vencimiento, en 9 285 de sus 12 094 líneas. Que el 14 es vencimiento y el 15 emisión se comprobó sobre los 2 809 pares con las dos fechas reales: el 99 % tiene vencimiento igual o posterior a la emisión.", "visto": "a_veces"},
+    {"n": 15, "nombre": "Fecha de emisión del comprobante", "campo": "documento.fecha_emision", "escritura": "de_la_linea", "visto": "siempre"},
+    {"n": 16, "nombre": "Glosa o descripción de la operación", "campo": "glosa", "escritura": "de_la_linea", "visto": "siempre"},
+    {"n": 17, "nombre": "Glosa referencial", "campo": null, "escritura": "constante", "motivo": "El formato la admite y el motor no tiene una segunda glosa: el nombre de la contraparte vive en la `Cabecera` y no es una glosa. Va con el guion que el libro contrastado usa cuando no hay nada que poner.", "visto": "a_veces"},
+    {"n": 18, "nombre": "Movimiento - Debe", "campo": "importe", "escritura": "de_la_linea", "motivo": "El importe cuando `debe_haber` es `D`; el cero del formato cuando es `H`. El estándar lleva un importe y su sentido; el formato lleva dos columnas.", "visto": "siempre"},
+    {"n": 19, "nombre": "Movimiento - Haber", "campo": "importe", "escritura": "de_la_linea", "motivo": "El espejo del 18: el importe cuando `debe_haber` es `H`.", "visto": "siempre"},
+    {"n": 20, "nombre": "Dato estructurado: referencia al libro de origen", "campo": null, "escritura": "pendiente", "motivo": "Es la referencia cruzada al registro que originó el asiento, con la forma `codigo_libro&periodo&CUO&correlativo` (por ejemplo `080100&20260600&05-060001&M0001`). Es la costura entre el Libro Diario y los registros de compras y de ventas. Falta que el motor numere el CUO del registro de origen, que hoy no numera: hasta entonces va vacía. En el libro contrastado la traen 4 187 de 12 094 líneas, y referencian `080100` (4 136 veces) y `140100` (51).", "visto": "a_veces"},
+    {"n": 21, "nombre": "Estado de la operación", "campo": null, "escritura": "constante", "motivo": "`1` para una operación del periodo. El `8` es de un periodo anterior no anotado y el `9` corrige una ya anotada, con su CUO original; los dos los decide quien lleva el libro, no el motor. El libro contrastado trae `1` en sus 12 094 líneas. `linea.estado` es un nombre RESERVADO del estándar (`estandar/LEEME.md`, «Nombres reservados»), y esta columna es su caso real.", "visto": "siempre"}
+   ]
+  }
+ }
+}

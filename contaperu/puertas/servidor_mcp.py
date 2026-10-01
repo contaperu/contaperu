@@ -167,6 +167,17 @@ def campos_del_sire() -> str:
     return json.dumps(api.campos_del_sire(), ensure_ascii=False, indent=1)
 
 
+@mcp.resource("contaperu://catalogos/ple-campos", mime_type="application/json")
+def campos_del_ple() -> str:
+    """El FORMATO del Libro Diario 5.1 del PLE columna a columna: de cada uno de sus 21 campos, su número,
+    el nombre de SUNAT, de dónde lo saca el driver al escribirlo —o por qué va vacío— y qué hizo con esa
+    columna un libro real que SUNAT aceptó.
+
+    Trae también los códigos de libro del PLE y la nomenclatura del fichero `LE…`. No confundirlos con los
+    del SIRE, que son otros."""
+    return json.dumps(api.campos_del_ple(), ensure_ascii=False, indent=1)
+
+
 @mcp.resource("contaperu://catalogos/estandar", mime_type="application/json")
 def catalogos_del_estandar() -> str:
     """Los catálogos que este estándar inventa: los roles de una línea del asiento, las cinco clases contables y
