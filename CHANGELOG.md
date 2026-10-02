@@ -4,6 +4,47 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+Dos cosas que salieron al importar notas de crédito en un CONCAR real (John, 2-oct-2026), con un **SIRE RCE de
+setiembre de 2026** delante.
+
+### Cambios de comportamiento
+
+- **CONCAR escribe `NA` en la nota de crédito**, no `NC`: es la sigla con la que nace su Tabla General 06, vista en
+  la instalación de John. Queda escrito que **`NC` también existe en esa tabla** —la cabecera de la plantilla oficial
+  nombra las dos, «'NC', 'NA' ó 'ND'» en las columnas AA a AE y «'NA' ó 'ND'» en la Z—, así que son dos siglas
+  distintas y cuál le toca al tipo 07 es de cada instalación. **La tabla general no se toca**: CONCAR estrena la suya,
+  como STARSOFT con su `CC`, así que el `csv` y los dos del PLE siguen con `NC`. A quien ya tenga su sigla configurada
+  no le llega; al LEER se aceptan las dos, para que un Excel de ayer no pierda su `tipo_cp`.
+
+### Añadido
+
+- **`imputacion.anulada_por_nota`: la factura anulada por una nota de crédito no provisiona su detracción.** Una
+  factura de compra con detracción da cinco líneas y su nota da tres, así que el par no cuadraba y quedaban colgados
+  el recorte y la provisión del depósito —137 soles, con los importes del caso real— diciendo que se le debe ese
+  dinero al Banco de la Nación por una factura anulada. Marcada, la factura da tres líneas y el par cuadra a cero.
+  - **La señal va en la imputación y no en el comprobante**, porque el comprobante es lo que dice el papel y una
+    factura impresa no dice que más tarde se anulara. Mismo sitio y mismo motivo que `detraccion_codigo`.
+  - **Y SUNAT no lo da, medido**: de las 41 columnas del RCE, **ninguna** distingue las cuatro facturas que tienen
+    nota de las otras diecinueve. El enlace existe solo en la fila de la nota, apuntando hacia atrás.
+  - **El registro no cambia**: el comprobante sigue entero en el que se declara a SUNAT.
+  - **La contradicción se para**: marcada como anulada con su detracción ya depositada, el motor falla diciendo cuál
+    es el comprobante, porque suprimir esas líneas esconderría un pago real. Es la primera falta que bloquea sin
+    colgar de un requisito del destino, y trae su caso de conformidad.
+  - [Enmienda 0023](estandar/enmiendas/0023-la-factura-anulada-no-provisiona-su-detraccion.md).
+- **El motor avisa de la factura que tiene nota de crédito**, y es **el primer cruce de dos comprobantes** que hace:
+  hasta ahora miraba cada uno solo. Solo cuando la nota anula el total exacto —una parcial es un descuento— y solo
+  dentro del lote. Avisa y no decide: la marca manda. Cuatro avisos sobre el RCE real de setiembre.
+
+### Arreglado
+
+- **Un test de la 5.2 era intermitente.** Comparaba los bytes de la exportación, y para CONCAR y CONTASIS eso es un
+  `.xlsx`: un ZIP con la fecha dentro. Pasaba si la ida y la vuelta caían en el mismo segundo. Ahora a un Excel se le
+  comparan las celdas.
+- **Tres imports habían entrado en la superficie pública de `validar`** sin ser nombres que el módulo ofrezca. Esa
+  superficie se congela, así que pasan a privados.
+
 ## [5.2.0] — 2026-10-02
 
 **Contrastado contra un Libro Diario 5.1 y su 5.3 de mayo de 2026, presentados y aceptados por SUNAT** con sus
