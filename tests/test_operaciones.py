@@ -188,8 +188,20 @@ def _doc_con_imputacion() -> dict:
                              for n in range(1, len(crudos) + 1)}}
 
 
-def _bytes_de(r: dict) -> bytes:
-    return base64.b64decode(r["contenido_base64"]) if r.get("contenido_base64") else r["texto"].encode("utf-8")
+def _contenido_de(r: dict):
+    """Lo que hay que comparar de una exportación, y para un `.xlsx` **no son los bytes**.
+
+    Un `.xlsx` es un ZIP y sus entradas llevan la FECHA dentro, así que dos exportaciones idénticas hechas en
+    segundos distintos dan bytes distintos. Comparar bytes hacía este test intermitente —pasaba si las dos caían en
+    el mismo segundo— y es el mismo despiste que ya hubo que corregir al contrastar los archivos a mano: a un Excel
+    se le comparan las CELDAS."""
+    crudo = base64.b64decode(r["contenido_base64"]) if r.get("contenido_base64") else r["texto"].encode("utf-8")
+    if not r["archivo"].endswith(".xlsx"):
+        return crudo
+    from openpyxl import load_workbook
+
+    libro = load_workbook(io.BytesIO(crudo), data_only=True)
+    return [[[celda.value for celda in fila] for fila in hoja.iter_rows()] for hoja in libro.worksheets]
 
 
 @pytest.mark.parametrize("driver", DRIVERS_DE_ASIENTOS)
@@ -205,7 +217,7 @@ def test_el_asiento_que_el_motor_produce_vuelve_a_entrar_y_da_el_mismo_archivo(d
     armado = api.generar_asiento(doc, driver=driver, configuracion=cfg, incluir_observados=True)
     vuelta = api.exportar(dict(doc, asiento=armado["asiento"]), driver=driver, configuracion=cfg,
                           fecha="2026-10-01", incluir_observados=True)
-    assert _bytes_de(vuelta) == _bytes_de(directo)
+    assert _contenido_de(vuelta) == _contenido_de(directo)
     assert vuelta["archivo"] == directo["archivo"]
     assert vuelta["_exportacion"]["huella"] == directo["_exportacion"]["huella"]
     assert vuelta["resumen"] == directo["resumen"], "el resumen tiene que decir lo mismo por las dos puertas"
