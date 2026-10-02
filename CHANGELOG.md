@@ -4,6 +4,28 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+Dos deudas que la 5.0.0 dejó anotadas, las dos pequeñas y las dos de algo que ya había mordido.
+
+### Arreglado
+
+- **`asiento.lineas_del_comprobante` dejaba escapar un `KeyError` pelado.** Dos de las cuentas que necesita vienen de
+  la configuración y no de la imputación —la del IGV y la de la retención de 4ta—, y se leían de dos formas distintas
+  en líneas consecutivas: la segunda caía a su valor de fábrica y la primera se indexaba sin red. Con una `cuentas`
+  incompleta eso daba `KeyError: 'igv'`, que **no es un `ErrorContaperu`**, así que quien atrapa los errores del motor
+  no lo cazaba. Por la fachada no era alcanzable —el pipeline funde `CONFIG_POR_DEFECTO` antes de llamar—, pero la
+  función está en la superficie pública y no promete esa fusión. Lo delató su espejo en el diagnóstico,
+  `resolucion.cuentas_del_asiento`, que ya era simétrico.
+- **El release falla si el tag del estándar no sirve el estándar de esa versión.** Los ficheros del estándar se
+  publican por la URL de su tag, `open-accounting-X.Y`, que se mueve a mano y que nada vigilaba. La 5.0.0 se etiquetó
+  con ese tag en el commit de la 4.3.0, y como cuatro de los `api/esquemas/*.json` referencian el estándar por esa URL
+  —entre ellos `asiento.schema.json`, que declara la salida de `generar_asiento`—, la Release apuntaba por contrato a
+  un esquema que **rechazaba lo que el motor devuelve**. La batería no puede verlo: esos `$ref` son URLs y el núcleo no
+  sale a la red, así que la comprobación vive en el workflow, que es donde hay tags. Compara los **ficheros** y no los
+  commits, que es lo que la hace útil, y cubre los cuatro que viajan en la rueda, incluidos los casos de conformidad.
+  `CLAUDE.md` dice ahora el orden: el tag del estándar se mueve **antes** que el de la versión.
+
 ## [5.0.0] — 2026-10-01
 
 **El tributo sale del nombre del rol y pasa a su bloque.** Un rol dice QUÉ HACE la línea; cuál es el tributo, cuando
