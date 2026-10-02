@@ -13,6 +13,7 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from contaperu import asiento as asi
+from contaperu.configuracion import CONFIG_POR_DEFECTO
 from contaperu.drivers import concar as driver_concar
 from contaperu.drivers.concar import proyeccion
 from contaperu.pipeline import salida as gen
@@ -145,6 +146,33 @@ def test_las_lineas_validan_contra_el_estandar():
 
 
 # --- el motor: la línea del comprobante como fuente (0.7) -------------------------------------
+
+def test_las_dos_cuentas_del_sistema_se_leen_igual_y_con_su_respaldo():
+    """`lineas_del_comprobante` es PÚBLICA, así que un ERP la llama con la configuración que quiera. Dos de las cuentas
+    que necesita no vienen de la imputación sino de la configuración —la del IGV y la de la retención de 4ta— y hasta la
+    5.1 se leían de dos formas distintas en líneas consecutivas: la segunda caía a su valor de fábrica y la primera se
+    indexaba sin red.
+
+    Con una `cuentas` incompleta, eso daba un `KeyError: 'igv'` **pelado**: no es un `ErrorContaperu`, así que quien
+    atrapa los errores del motor no lo caza y le sale un error de Python en la cara. El espejo de esto en el
+    diagnóstico (`resolucion.cuentas_del_asiento`) ya era simétrico, que es lo que delató la diferencia."""
+    sin_las_dos = dict(CONTAB, cuentas={k: v for k, v in CONTAB["cuentas"].items()
+                                       if k not in ("igv", "retencion_4ta")})
+    lineas = asi.lineas_del_comprobante(factura(), sin_las_dos, MES, "080084")
+    del_impuesto = next(ln for ln in lineas if ln.rol == "impuesto")
+    assert del_impuesto.cuenta == CONFIG_POR_DEFECTO["cuentas"]["igv"] == "401111"
+
+    # Y la de la retención, que ya lo hacía, para que las dos queden fijadas por el mismo test y no se separen otra vez.
+    rh = factura(tipo_cp="02", retencion="160.00", igv="0.00", base_gravada="0.00",
+                 exonerado="2000.00", total="2000.00")
+    de_la_retencion = next(ln for ln in asi.lineas_del_comprobante(rh, sin_las_dos, MES, "150001")
+                           if ln.rol == "retencion")
+    assert de_la_retencion.cuenta == CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"] == "401721"
+
+    # La clave de configuración NO se renombró con el rol en la 5.0: sigue siendo `retencion_4ta`, porque es la cuenta
+    # que el contribuyente configura y renombrarla rompería la configuración de todos los integradores.
+    assert "retencion_4ta" in CONFIG_POR_DEFECTO["cuentas"] and "retencion" not in CONFIG_POR_DEFECTO["cuentas"]
+
 
 def test_la_linea_del_impuesto_dice_de_que_tributo_es():
     """Lo que hace que el rol `impuesto` no sea una pérdida respecto del `igv` al que reemplaza (5.0).

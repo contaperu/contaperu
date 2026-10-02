@@ -311,7 +311,13 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                    for cuenta, centro, importe in partes]
     # El bloque dice QUÉ TRIBUTO es, que es lo que el nombre del rol dejó de decir: `impuesto` a secas no sabría
     # distinguir el IGV del ISC o del ICBPER. El motor escribe el 1000, el único que lleva a una línea de asiento.
-    linea_impuesto = (linea("impuesto", igv, str(config["cuentas"]["igv"]), sentido_base, glosa,
+    # Las dos cuentas se leen igual —con su respaldo de fábrica—, y no es cosmética: `lineas_del_comprobante` es
+    # pública, así que un ERP puede llamarla con la configuración que quiera. La del IGV se indexaba sin red mientras
+    # la de la retención, en la línea siguiente, caía al defecto; con una `cuentas` sin la clave, la primera daba un
+    # `KeyError: 'igv'` pelado, que no es un `ErrorContaperu` y por tanto no lo caza quien atrapa los errores del
+    # motor. El espejo de esto en el diagnóstico (`resolucion.cuentas_del_asiento`) ya era simétrico.
+    cuenta_impuesto = str((config.get("cuentas") or {}).get("igv") or CONFIG_POR_DEFECTO["cuentas"]["igv"])
+    linea_impuesto = (linea("impuesto", igv, cuenta_impuesto, sentido_base, glosa,
                             impuesto={"codigo": TRIBUTO_IGV})
                       if igv > 0 else None)
     cuenta_retencion = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"])
