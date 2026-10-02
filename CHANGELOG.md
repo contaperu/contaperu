@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [5.2.0] — 2026-10-02
 
 **Contrastado contra un Libro Diario 5.1 y su 5.3 de mayo de 2026, presentados y aceptados por SUNAT** con sus
 constancias. Lo que coincide es casi todo: los **dos nombres de archivo son idénticos byte a byte** y los 21 campos
@@ -2788,6 +2788,7 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
      publicaron dentro de la siguiente. Un `compare/vA...vB` con un tag que no existe da 404, así que no se inventan:
      hasta hoy el de la 0.2.0 era justo eso. Si alguna vez se etiquetan, su enlace entra aquí y se recalcula el de
      la versión siguiente. -->
+[5.2.0]: https://github.com/contaperu/contaperu/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/contaperu/contaperu/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/contaperu/contaperu/compare/v4.3.0...v5.0.0
 [4.3.0]: https://github.com/contaperu/contaperu/compare/v4.2.2...v4.3.0
