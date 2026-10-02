@@ -1346,6 +1346,10 @@
       "pattern": "^$|^[0-9]{3}$",
       "description": "El código del Catálogo 54 de la detracción, cuando el comprobante no lo trae: la propuesta del SIRE marca que hay detracción (campo 38 del Anexo 8 de la RS 040-2022) y no dice cuál, y de ese código salen la tasa y el monto. Lo que traiga el comprobante manda sobre esto."
      },
+     "anulada_por_nota": {
+      "type": "boolean",
+      "description": "Que esta factura de compra quedó ANULADA por una nota de crédito. Lo decide quien lleva la contabilidad, y por eso está en la imputación y no en el comprobante: **el comprobante es lo que dice el papel**, y una factura impresa no dice que más tarde se anulara. Mismo sitio y mismo motivo que `detraccion_codigo`, un paso más allá. SUNAT no lo da: en la propuesta del SIRE ninguna columna marca la FACTURA —el enlace existe solo en la fila de la nota, apuntando hacia atrás—, así que la factura no se puede marcar sola. **Lo único que cambia: la factura no provisiona su detracción.** Sus otras líneas salen igual, porque su nota de crédito las revierte; sin esto el par no cuadra y quedan colgados el recorte y la provisión del depósito, diciendo que se le debe al Banco de la Nación un dinero que nunca se depositó. **No cambia el registro**: el comprobante sigue entero en el que se declara a SUNAT, que necesita su fila. Si la detracción ya tiene constancia de depósito, los dos hechos se contradicen y el motor se para en vez de elegir: anular una factura cuya detracción se depositó es contabilidad distinta, no una línea de menos."
+     },
      "reparto": {
       "description": "La base repartida entre cuentas. Sus partes suman la base del asiento; el IGV y el total son del documento.",
       "type": "array",

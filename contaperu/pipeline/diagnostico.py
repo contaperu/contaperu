@@ -10,7 +10,7 @@ from typing import Any
 
 from .. import asiento as asi
 from .. import detracciones, drivers, validar
-from ..asiento.faltas import CONTADOR, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
+from ..asiento.faltas import CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
 from ..drivers import contrato
 from ..modelo import Comprobante, Libro
 from .preparacion import (claves_previas_de, comprobantes_de, con_imputacion, config_aplicada,
@@ -73,6 +73,10 @@ def _de_la_detraccion(c: Comprobante, serie_numero: Any) -> dict:
             "fecha_constancia": str(d.get("fecha_constancia") or "")}
 
 
+# La única falta que bloquea sin colgar de un requisito del destino: ver el comentario dentro de `que_falta`.
+SIN_REQUISITO_QUE_BLOQUEA = "anulada_con_deposito"
+
+
 def que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], faltantes: dict,
               exige: frozenset[str], serie_numero: Any = _serie_numero) -> list[dict]:
     """Lo que bloquea la exportación a ESE destino, agrupado por motivo y con a quién pedírselo.
@@ -93,7 +97,12 @@ def que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falta
                        "pedir_a": PEDIR_A.get(codigo, CONTADOR)})
     for falta in FALTAS:
         clave = falta.clave
-        if not falta.requisito or falta.requisito not in exige or not faltantes.get(clave):
+        # `anulada_con_deposito` no cuelga de ningún requisito y aun así bloquea: no es que al destino le falte un
+        # dato, es que dos hechos del documento se contradicen. Las demás sin requisito (`sin_correlativo`, `no_cabe`)
+        # siguen fuera de este bucle, la segunda con su propia vuelta justo abajo.
+        if clave != SIN_REQUISITO_QUE_BLOQUEA and (not falta.requisito or falta.requisito not in exige):
+            continue
+        if not faltantes.get(clave):
             continue
         if clave == "sin_sigla":
             cuales = [serie_numero(c) for c in candidatos if c.tipo_cp in faltantes[clave]]
@@ -209,6 +218,12 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     # Lo que no cabe en el formato del destino lo declara el propio driver: siempre bloquea.
     for motivo, cuales in (faltantes.get("no_cabe") or {}).items():
         por_que_no.append(f"{len(cuales)} {motivo}")
+    # Y la contradicción entre «anulada» y «su detracción ya se depositó» bloquea SIEMPRE, sea lo que sea que el
+    # destino exija: no es un requisito de un formato, son dos hechos del documento que no pueden ser los dos
+    # verdaderos. Una factura marcada como anulada deja de provisionar su detracción en el núcleo, para cualquier
+    # driver, así que la contradicción tiene que pararse para cualquier driver.
+    if faltantes.get(SIN_REQUISITO_QUE_BLOQUEA):
+        por_que_no.append(f"{len(faltantes[SIN_REQUISITO_QUE_BLOQUEA])} {FALTA[SIN_REQUISITO_QUE_BLOQUEA].texto}")
 
     # Por contraparte y por moneda: soles y dólares no se suman. `total` y `moneda` son los de la primera moneda en que
     # aparece la contraparte, y `por_moneda` los trae todos.

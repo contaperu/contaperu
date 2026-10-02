@@ -14,8 +14,8 @@ from typing import Any
 
 from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..configuracion import CONFIG_POR_DEFECTO, por_defecto
-from ..detracciones import (MARCA_SIRE, codigos_de, con_el_codigo_del_contador, monto_detraccion,
-                            normalizar_una)
+from ..detracciones import (MARCA_SIRE, codigos_de, con_el_codigo_del_contador, esta_pendiente,
+                            monto_detraccion, normalizar_una)
 from ..igv import base_imputable, igv_del_asiento
 from ..pcge import clase_de as _clase_de
 from ..modelo import CENTIMO, Comprobante, Libro, a_decimal
@@ -274,6 +274,24 @@ def comprobantes_sin_cuenta(comprobantes: list[Comprobante], config: dict, es_ve
     return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, config, es_venta))]
 
 
+def anulada_por_nota(c: Comprobante, config: dict) -> bool:
+    """¿El contador marcó esta factura como anulada por una nota de crédito? (1.2)
+
+    Lo lee de su imputación, que es donde vive lo que decide el contador y no lo que dice el papel. SUNAT no lo da:
+    ninguna columna del RCE marca la factura, solo la nota apunta hacia atrás."""
+    imputacion = imputacion_de(c, config)
+    return bool(imputacion and imputacion.anulada_por_nota)
+
+
+def comprobantes_anulados_con_deposito(comprobantes: list[Comprobante], config: dict) -> list[Comprobante]:
+    """Las marcadas como anuladas cuya detracción YA tiene constancia de depósito: los dos hechos se contradicen.
+
+    El estado se deduce de la constancia y de su fecha, nunca de lo que el bloque declare (`detracciones.estado_de`),
+    así que un productor no puede conseguir que el motor se crea un depósito que no documentó."""
+    return [c for c in comprobantes
+            if anulada_por_nota(c, config) and tiene_detraccion(c) and not esta_pendiente(c, config)]
+
+
 def comprobantes_sin_codigo_detraccion(comprobantes: list[Comprobante], config: dict) -> list[Comprobante]:
     """Las compras que SUNAT marcó con detracción y a las que todavía les falta el código del Catálogo 54.
 
@@ -415,6 +433,14 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
         salida["sin_denominacion"] = cuentas_sin_denominacion(de_la_imputacion, config, es_venta)
     if "detraccion" in exige:
         salida["sin_codigo_detraccion"] = comprobantes_sin_codigo_detraccion(de_la_imputacion, config)
+    # Esta NO depende de lo que el destino exija: no es un requisito de un formato, es que dos hechos del documento se
+    # contradicen. Una factura marcada como anulada deja de provisionar su detracción en el núcleo, para cualquier
+    # driver, así que la contradicción tiene que pararse para cualquier driver.
+    # Solo si hay alguna: las demás claves aparecen vacías cuando su requisito se exige, y así significan «esto se
+    # comprobó». Esta no cuelga de ningún requisito, así que aparecería siempre y no diría nada.
+    anuladas = comprobantes_anulados_con_deposito(de_la_imputacion, config)
+    if anuladas:
+        salida["anulada_con_deposito"] = anuladas
     return salida
 
 

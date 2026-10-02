@@ -31,9 +31,9 @@ from ..igv import base_imputable, igv_del_asiento, tasa_calculada
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
-from .resolucion import (asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero, limites_del_periodo,
-                         lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra, sin_efecto_contable,
-                         sub_diario, tiene_detraccion)
+from .resolucion import (anulada_por_nota, asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero,
+                         limites_del_periodo, lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra,
+                         sin_efecto_contable, sub_diario, tiene_detraccion)
 from .lineas import LineaDiario
 
 # Hasta la 0.10 este módulo importaba las `Opciones` de los drivers solo para quitar los ceros del número: el núcleo
@@ -337,8 +337,18 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # y la cuenta de detracciones al Haber, con su propio tipo de documento y el comodín 9999999999
     # (la constancia no existe todavía al provisionar). Lo dispara que la factura TENGA detracción, no
     # el sub-diario. Solo compras; el recibo por honorarios nunca.
+    # Y una factura que el contador marcó como ANULADA por una nota de crédito **no la provisiona** (5.3): su nota
+    # revierte tres líneas, así que si la factura pusiera cinco el par no cuadraría y quedarían colgados el recorte y
+    # la provisión del depósito — diciendo que se le debe al Banco de la Nación un dinero que nunca se depositó.
+    #
+    # Sus otras tres líneas salen igual, y el comprobante sigue entero en el registro que se declara a SUNAT: el
+    # asiento es una cosa y el registro es otra, como ya dice `sin_efecto_contable`.
+    #
+    # La señal la pone el contador en la imputación porque **SUNAT no la da**: ninguna columna del RCE marca la
+    # factura, solo la nota apunta hacia atrás. Y si la detracción ya tiene constancia de depósito, los dos hechos se
+    # contradicen y esto no se decide aquí: se para antes (`comprobantes_anulados_con_deposito`).
     linea_recorte = linea_detraccion = None
-    if not es_venta and not es_honorarios and tiene_detraccion(c):
+    if not es_venta and not es_honorarios and tiene_detraccion(c) and not anulada_por_nota(c, config):
         _, detraido = monto_detraccion(c, config)
         if detraido > 0:
             linea_recorte = linea("recorte", detraido, cuenta_del_tercero, sentido_base,

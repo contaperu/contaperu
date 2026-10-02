@@ -166,6 +166,25 @@ class Falta:
     titulo: str                             # el de la CLI
 
 
+class AnuladaConDeposito(NoExportable):
+    """Facturas marcadas como anuladas por una nota de crédito cuya detracción **ya tiene constancia de depósito**.
+
+    Los dos hechos se contradicen y el motor no elige. Marcar la factura como anulada hace que no provisione su
+    detracción, y eso es correcto cuando el depósito nunca se hizo —que es el caso normal: se anula antes de pagar—.
+    Pero con una constancia de verdad el dinero SÍ salió al Banco de la Nación: suprimir esas dos líneas esconderría
+    un pago real, y el asiento diría que nunca hubo obligación.
+
+    Anular una factura cuya detracción ya se depositó es contabilidad distinta —hay que recuperar el depósito— y no
+    una línea de menos. Así que se para y se dice cuál es el comprobante, en vez de elegir por el contador. El estado
+    se deduce de la constancia y de su fecha, no de lo que el bloque declare (`detracciones.estado_de`)."""
+
+    clave = "anulada_con_deposito"
+
+    def __init__(self, comprobantes: list):
+        super().__init__(f"{len(comprobantes)} factura(s) marcadas como anuladas con su detracción ya depositada")
+        self.comprobantes = list(comprobantes)
+
+
 FALTAS: tuple[Falta, ...] = (
     Falta("sin_sigla", "tipo_cp", SinSigla,
           "de un tipo sin sigla en el sistema de destino", SISTEMA, "Tipos sin sigla"),
@@ -187,6 +206,10 @@ FALTAS: tuple[Falta, ...] = (
     Falta("sin_codigo_detraccion", "detraccion", SinCodigoDetraccion,
           "con detracción marcada por SUNAT y sin su código del Catálogo 54", CONTADOR,
           "Sin código de detracción"),
+    # Esta no bloquea por un requisito que falte, sino porque dos hechos del documento se contradicen.
+    Falta("anulada_con_deposito", "", AnuladaConDeposito,
+          "marcadas como anuladas por una nota de crédito con su detracción ya depositada", CONTADOR,
+          "Anuladas con su detracción depositada"),
     # Estas dos no bloquean por un requisito: el correlativo que falta arranca en 1, y lo que no cabe en el formato lo
     # declara el driver, con su motivo y su excepción (`contrato.NoCabe`).
     Falta("sin_correlativo", "", SinCorrelativo, "sub-diarios sin correlativo", SISTEMA,

@@ -452,6 +452,119 @@ def test_el_driver_del_sire_sigue_exportando_un_mes_marcado():
                         imputacion=imputacion)["archivo"].endswith(".TXT")
 
 
+# ── La factura anulada por una nota de crédito (5.3) ──────────────────────────────────────────────────────────
+#
+# El descubrimiento de John (2-oct-2026), importando notas de crédito en un CONCAR real: una factura de compra con
+# detracción da CINCO líneas y su nota de crédito da TRES, así que el par no cuadra y quedan colgados el recorte y la
+# provisión del depósito. Lo que queda colgado dice algo falso: que se le deben al Banco de la Nación unos soles por
+# una factura anulada, un depósito que nunca se hizo.
+
+FACTURA_CON_DETRACCION = {"tipo_cp": "01", "serie": "E001", "numero": "209", "fecha_emision": "2026-09-11",
+                          "contraparte_doc": "20602222226", "contraparte_nombre": "TRANSPORTES DE PRUEBA SAC",
+                          "moneda": "PEN", "concepto": "SERVICIO DE TRANSPORTE", "base_gravada": "2900.00",
+                          "igv": "522.00", "total": "3422.00",
+                          "detraccion": {"codigo": "027", "porcentaje": "4"}}
+SU_NOTA_DE_CREDITO = {"tipo_cp": "07", "serie": "E001", "numero": "13", "fecha_emision": "2026-09-30",
+                      "contraparte_doc": "20602222226", "contraparte_nombre": "TRANSPORTES DE PRUEBA SAC",
+                      "moneda": "PEN", "concepto": "ANULACION DE LA OPERACION", "base_gravada": "2900.00",
+                      "igv": "522.00", "total": "3422.00", "tipo_nota": "01",
+                      "ref_tipo_cp": "01", "ref_serie": "E001", "ref_numero": "209", "ref_fecha": "2026-09-11"}
+
+
+def _par(anulada: bool, detraccion: dict | None = None) -> list[dict]:
+    """El par factura + su nota de crédito, con la factura marcada o no."""
+    factura = dict(FACTURA_CON_DETRACCION, id_externo="f1")
+    if detraccion is not None:
+        factura["detraccion"] = detraccion
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+           "comprobantes": [factura, dict(SU_NOTA_DE_CREDITO, id_externo="f2")],
+           "imputaciones": {"f1": {"cuenta_contable": "631101", "centro_costo": "001",
+                                   "anulada_por_nota": anulada},
+                            "f2": {"cuenta_contable": "631101", "centro_costo": "001"}}}
+    return api.generar_asiento(doc, driver="concar", incluir_observados=True)["asiento"]
+
+
+def _neto(asiento: list[dict]) -> dict[str, str]:
+    """Lo que queda en cada cuenta: vacío si el par cuadra."""
+    from collections import defaultdict
+    neto: defaultdict = defaultdict(Decimal)
+    for l in asiento:
+        neto[l["cuenta"]] += Decimal(l["importe"]) * (1 if l["debe_haber"] == "D" else -1)
+    return {cuenta: str(v) for cuenta, v in neto.items() if v}
+
+
+def test_sin_marcar_la_factura_el_par_deja_colgada_la_detraccion():
+    """El problema, con los importes de John: cinco líneas contra tres, y 137 soles colgados en el par 421201/421203.
+
+    Se fija el comportamiento de HOY a propósito: no se arregla solo, hace falta que el contador lo diga. Si algún día
+    el motor lo decidiera por su cuenta, este test cae y hay que decidirlo."""
+    a = _par(anulada=False)
+    assert [l["rol"] for l in a if l["documento"].get("serie_numero") == "E001-209"] == [
+        "principal", "impuesto", "tercero", "recorte"]
+    assert _neto(a) == {"421201": "137.00", "421203": "-137.00"}
+
+
+def test_marcada_como_anulada_la_factura_no_provisiona_y_el_par_cuadra():
+    """**La prueba del cambio.** La factura marcada da tres líneas, su nota revierte esas tres, y no queda nada
+    colgado. El 137 que decía que se le debía al Banco de la Nación desaparece, porque ese depósito no se hizo."""
+    a = _par(anulada=True)
+    assert [l["rol"] for l in a if l["documento"].get("serie_numero") == "E001-209"] == [
+        "principal", "impuesto", "tercero"]
+    assert _neto(a) == {}, "el par tiene que cuadrar a cero"
+    # Y la nota de crédito no se toca: sigue dando sus tres.
+    assert len([l for l in a if l["documento"].get("serie_numero") == "E001-13"]) == 3
+
+
+def test_el_comprobante_anulado_sigue_entero_en_el_registro():
+    """La frontera que `sin_efecto_contable` ya tiene escrita: el asiento es una cosa y el registro es otra. La
+    factura anulada **sigue saliendo en el que se declara a SUNAT**, con su detracción y todo, porque el correlativo
+    de SUNAT necesita su fila y la marca es del asiento, no del registro."""
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+           "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1")],
+           "imputaciones": {"f1": {"cuenta_contable": "631101", "anulada_por_nota": True}}}
+    r = api.exportar(doc, driver="sire", fecha="2026-10-01", incluir_observados=True)
+    assert "E001" in r["texto"] and r["resumen"]["comprobantes"] == 1
+
+
+def test_anulada_con_su_deposito_ya_hecho_se_para_y_dice_cual():
+    """La contradicción. Con una constancia de verdad el dinero SÍ salió al Banco de la Nación: suprimir esas dos
+    líneas esconderría un pago real, y el asiento diría que nunca hubo obligación.
+
+    Anular una factura cuya detracción ya se depositó es contabilidad distinta —hay que recuperar el depósito— y no
+    una línea de menos. El motor no elige: se para y dice cuál es el comprobante."""
+    from contaperu.asiento.faltas import AnuladaConDeposito
+
+    depositada = {"codigo": "027", "porcentaje": "4", "nro_constancia": "00123456",
+                  "fecha_constancia": "2026-09-20"}
+    with pytest.raises(AnuladaConDeposito) as e:
+        _par(anulada=True, detraccion=depositada)
+    assert e.value.clave == "anulada_con_deposito" and len(e.value.comprobantes) == 1
+
+    # Y el estado se DEDUCE de la constancia, no de lo que el bloque declare: un productor no consigue que el motor
+    # se crea un depósito que no documentó.
+    solo_dicho = {"codigo": "027", "porcentaje": "4", "estado": "PAGADO"}
+    assert _neto(_par(anulada=True, detraccion=solo_dicho)) == {}
+
+
+def test_el_diagnostico_lo_dice_y_a_quien_pedirselo():
+    """Y bloquea para CUALQUIER driver, no solo para los que exigen la detracción: no es que al destino le falte un
+    dato, es que dos hechos del documento se contradicen."""
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+           "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1",
+                                 detraccion={"codigo": "027", "porcentaje": "4",
+                                             "nro_constancia": "00123456", "fecha_constancia": "2026-09-20"})],
+           "imputaciones": {"f1": {"cuenta_contable": "631101", "anulada_por_nota": True}}}
+    for driver in ("concar", "asiento_contable", "csv"):
+        r = api.diagnosticar(doc, driver=driver, configuracion={"usa_centros_costo": False})
+        assert r["listo_para_exportar"] is False, driver
+        assert r["faltantes"]["anulada_con_deposito"] == ["E001-209"], driver
+        motivos = {m["motivo"]: m for m in r["que_falta"]}
+        assert motivos["anulada_con_deposito"]["pedir_a"] == "contador", driver
+
+
 def test_con_el_codigo_del_contador_la_detraccion_llega_al_asiento():
     """Y el otro lado: puesto el código, el mes exporta y la detracción nace completa —sus dos líneas y su monto—,
     exactamente como si el comprobante hubiera entrado por su XML."""

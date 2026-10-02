@@ -64,6 +64,23 @@ class Imputacion:
     # que hay detracción (campo 38 del Anexo 8) y no dice cuál. De él salen la tasa de la tabla y el monto, así que
     # sin él el motor se niega a exportar (`SinCodigoDetraccion`) en vez de omitir la línea en silencio.
     detraccion_codigo: str = ""
+    # Que esta factura de compra quedó ANULADA por una nota de crédito (1.2). Está aquí por el mismo motivo que el
+    # código de la detracción, un paso más allá: **el comprobante es lo que dice el papel**, y una factura impresa no
+    # dice que más tarde se anulara. Lo decide el contador, como la cuenta.
+    #
+    # Y SUNAT no lo da: medido sobre un RCE real de setiembre de 2026, **ninguna de sus 41 columnas distingue** las
+    # cuatro facturas que tienen nota de crédito de las otras diecinueve —ni el CAR SUNAT, ni el CAR original, ni el
+    # estado del comprobante, los tres vacíos en las veintitrés—. El enlace existe solo en la fila de la NOTA,
+    # apuntando hacia atrás, así que la factura no se puede marcar sola.
+    #
+    # **Lo único que hace: la factura no provisiona su detracción.** Sus otras tres líneas salen igual, porque la nota
+    # de crédito las revierte. Sin esto el par no cuadra —la nota revierte tres líneas y la factura puso cinco— y
+    # quedan colgados el recorte y la provisión del depósito, diciendo que se le debe al Banco de la Nación un dinero
+    # por una factura anulada que nunca se depositó.
+    #
+    # Y **no cambia el registro**: el comprobante sigue entero en el que se declara a SUNAT, que necesita su fila. Es
+    # la misma frontera que `sin_efecto_contable` ya tiene escrita — el asiento es una cosa y el registro es otra.
+    anulada_por_nota: bool = False
     reparto: list[Parte] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -71,6 +88,7 @@ class Imputacion:
         self.centro_costo = _texto(self.centro_costo)
         self.cuenta_tercero = _texto(self.cuenta_tercero)
         self.detraccion_codigo = _texto(self.detraccion_codigo)
+        self.anulada_por_nota = bool(self.anulada_por_nota)
         self.reparto = [p if isinstance(p, Parte) else Parte(**p) for p in (self.reparto or [])]
         if self.reparto and (self.cuenta_contable or self.centro_costo):
             raise ValueError("una imputación con reparto no lleva además cuenta_contable ni centro_costo "
@@ -83,7 +101,7 @@ class Imputacion:
             return valor
         if not isinstance(valor, dict):
             raise ValueError("una imputación es un objeto {cuenta_contable, centro_costo, cuenta_tercero, "
-                             "detraccion_codigo, reparto}")
+                             "detraccion_codigo, anulada_por_nota, reparto}")
         try:
             return cls(**valor)
         except TypeError as e:
@@ -92,4 +110,5 @@ class Imputacion:
     def a_dict(self) -> dict:
         return {"cuenta_contable": self.cuenta_contable, "centro_costo": self.centro_costo,
                 "cuenta_tercero": self.cuenta_tercero, "detraccion_codigo": self.detraccion_codigo,
+                "anulada_por_nota": self.anulada_por_nota,
                 "reparto": [p.a_dict() for p in self.reparto]}
