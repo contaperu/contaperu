@@ -126,10 +126,16 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 - **Publicar una versión es empujar su tag, y solo eso le llega a quien integra el motor**: un commit en `main` no le
   cambia nada a nadie, porque cada consumidor fija una versión exacta. Antes del tag, `contaperu/_version.py` con la
   versión nueva y en `CHANGELOG.md` su sección `## [X.Y.Z] — fecha` (con «Cómo migrar» si hay algo que adaptar).
+  **Y si el esquema o los catálogos del estándar cambiaron, se mueve su tag ANTES del de la versión** (`git tag -f
+  open-accounting-X.Y <commit>` y `git push -f origin open-accounting-X.Y`): los ficheros del estándar se publican por
+  la URL de ese tag, y varios `api/esquemas/*.json` los referencian así, de modo que un tag atrasado deja el contrato
+  apuntando a un esquema que no es el de esa versión. Le pasó a la 5.0.0, y desde la 5.1 **el release falla** si no
+  coinciden, porque la batería no puede verlo: esos `$ref` son URLs y el núcleo no sale a la red.
   Luego `git tag vX.Y.Z` y `git push origin vX.Y.Z`: `.github/workflows/release.yml` corre la batería en ese commit,
-  comprueba que la etiqueta es la versión y crea la Release de GitHub con la rueda, el sdist y `SHA256SUMS`, de donde
-  se descarga. Una `vX.Y.ZrcN` sale como pre-release, con las notas de «Sin publicar». **Una Release no se
-  reemplaza**: un error se arregla sacando otra versión. PyPI va aparte y a mano, con el OK de John.
+  comprueba que la etiqueta es la versión, que el CHANGELOG la trae y que el tag del estándar sirve los mismos cuatro
+  ficheros, y crea la Release de GitHub con la rueda, el sdist y `SHA256SUMS`, de donde se descarga. Una `vX.Y.ZrcN`
+  sale como pre-release, con las notas de «Sin publicar». **Una Release no se reemplaza**: un error se arregla sacando
+  otra versión. PyPI va aparte y a mano, con el OK de John.
 - Un driver nuevo pide **un archivo real que ese ERP haya aceptado**: `CONTRIBUTING.md` §«Añadir un driver de
   salida». El contrato (`NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, una forma —`desde_lineas` o `desde_comprobantes`
   para lo nuevo—, `EXIGE`, `VOCABULARIO` —legacy o neutral—, y lo que se configura: `CONFIGURACION` y `COLUMNAS_ELEGIBLES`) lo comprueba

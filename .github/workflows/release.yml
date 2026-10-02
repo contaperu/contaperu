@@ -55,6 +55,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: refs/tags/${{ env.ETIQUETA }}
+          # Con los TAGS y con historia: el paso del final compara los ficheros del estándar contra su propio tag, y
+          # un clon superficial no lo tiene. Es el único trabajo que los necesita.
+          fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
@@ -77,6 +80,32 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: El tag del estándar sirve el estándar de esta versión
+        # Los dos relojes van por su cuenta, pero los ficheros del estándar se publican por la URL de SU tag
+        # (`open-accounting-X.Y`), que se mueve A MANO. Si se queda atrás, la versión sale con un estándar que no es el
+        # suyo — y no es teórico: le pasó a la 5.0.0, cuyos `api/esquemas/*.json` referencian el estándar por esa URL,
+        # así que el contrato apuntaba a un esquema que RECHAZABA la salida del propio motor.
+        #
+        # La batería no puede cazarlo: esos `$ref` son URLs y el núcleo no sale a la red (`tests/test_frontera.py`), así
+        # que los tests pasaban en verde con el agujero dentro. Por eso vive aquí, que es donde hay tags.
+        #
+        # Se comparan los FICHEROS y no los commits: lo que importa no es dónde apunta el tag sino que lo que sirve sea
+        # idéntico a lo que esta versión escribe. Son los cuatro que viajan en la rueda (`force-include`).
+        run: |
+          ESTANDAR=$(python -c "from contaperu import OPEN_ACCOUNTING; print(OPEN_ACCOUNTING)")
+          TAG="open-accounting-$ESTANDAR"
+          FICHEROS="estandar/open-accounting.schema.json estandar/catalogos.json"
+          FICHEROS="$FICHEROS estandar/conformidad/esquema.json estandar/conformidad/diagnosticar.json"
+          git rev-parse -q --verify "refs/tags/$TAG" > /dev/null || {
+            echo "No existe el tag \`$TAG\`. El estándar subió a $ESTANDAR y su tag no se ha creado:"
+            echo "  git tag $TAG <commit> && git push origin $TAG"; exit 1; }
+          git diff --quiet "$TAG" HEAD -- $FICHEROS || {
+            echo "El tag \`$TAG\` sirve un estándar DISTINTO del de esta versión:"
+            git diff --stat "$TAG" HEAD -- $FICHEROS
+            echo
+            echo "Muévelo al commit de esta versión ANTES de etiquetarla, y vuelve a empujar la etiqueta:"
+            echo "  git tag -f $TAG $(git rev-parse HEAD) && git push -f origin $TAG"; exit 1; }
+          echo "\`$TAG\` sirve los mismos cuatro ficheros que esta versión. Correcto."
 
   construir:
     needs: verificar
