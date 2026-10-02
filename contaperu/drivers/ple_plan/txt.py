@@ -32,7 +32,9 @@ CANAL = "tributario"
 # El mismo formato para los dos libros que el motor genera: el plan de cuentas que se usó en el mes es el mismo
 # fichero venga de compras o de ventas.
 FORMATOS = {"compra": "ple_5_3", "venta": "ple_5_3"}
-CONTENT_TYPE = "text/plain; charset=us-ascii"
+# El `charset` dice la verdad de los bytes, y viaja hasta la api, el HTTP y el MCP: va con la `codificacion`
+# de `comun.OPCIONES`, que es cp1252 desde la 5.2.
+CONTENT_TYPE = "text/plain; charset=windows-1252"
 # Lo único que el núcleo tiene que darle, y no se puede deducir de ninguna parte: ver el docstring.
 EXIGE = frozenset({"denominacion"})
 # Lo mismo que el 5.1: los sub-diarios y la tabla de tipos que el núcleo lee al armar las líneas. Este driver no los

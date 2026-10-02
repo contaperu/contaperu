@@ -37,7 +37,9 @@ CANAL = "tributario"
 # toma el mes que el motor conoce y se escribe en formato Libro Diario, igual que el `sire` lo escribe como RVIE o
 # RCE.
 FORMATOS = {"compra": "ple_5_1", "venta": "ple_5_1"}
-CONTENT_TYPE = "text/plain; charset=us-ascii"
+# El `charset` dice la verdad de los bytes, y viaja hasta la api, el HTTP y el MCP: va con la `codificacion`
+# de `comun.OPCIONES`, que es cp1252 desde la 5.2.
+CONTENT_TYPE = "text/plain; charset=windows-1252"
 
 # El código del libro (seis dígitos) y lo que lo acompaña en el nombre del fichero. **No son los del SIRE**, que usa
 # `140400` y `080400`: confundirlos nombraría el archivo de forma que SUNAT lo rechaza.

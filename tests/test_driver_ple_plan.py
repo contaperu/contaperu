@@ -18,6 +18,8 @@ from contaperu.drivers import ple_plan
 from util import cargar_golden
 
 CAMPOS = 8
+# La del PLE desde la 5.2: su 5.3 aceptado trae la Ñ en el byte 0xD1, que es cp1252 y no ASCII.
+CODIFICACION = "cp1252"
 # Cómo llama esta empresa de prueba a las cuentas que el golden de compras acaba tocando.
 DENOMINACIONES = {"631101": "TRANSPORTE DE CARGA", "401111": "IGV CUENTA PROPIA",
                   "421201": "FACTURAS POR PAGAR M.N.", "421203": "DETRACCIONES POR PAGAR",
@@ -40,7 +42,7 @@ def exportar(nombre_golden: str = "compras_202601.json", **kw) -> tuple[dict, li
     r = api.exportar(documento(nombre_golden, **kw), driver="ple_plan",
                      configuracion={"denominacion_cuentas": DENOMINACIONES},
                      fecha="2026-10-01", incluir_observados=True)
-    return r, base64.b64decode(r["contenido_base64"]).decode("ascii").splitlines()
+    return r, base64.b64decode(r["contenido_base64"]).decode(CODIFICACION).splitlines()
 
 
 def campos_de(linea: str) -> list[str]:
@@ -57,7 +59,7 @@ def test_estructura(golden, cuenta):
     assert filas
     for fila in filas:
         assert len(campos_de(fila)) == CAMPOS
-    bruto = base64.b64decode(r["contenido_base64"]).decode("ascii")
+    bruto = base64.b64decode(r["contenido_base64"]).decode(CODIFICACION)
     assert "\r\n" in bruto and "\n" not in bruto.replace("\r\n", "")
 
 
@@ -82,7 +84,7 @@ def test_el_periodo_lleva_dia_a_diferencia_del_5_1():
     _, filas = exportar()
     assert {campos_de(f)[0] for f in filas} == {"20260101"}
     diario = base64.b64decode(api.exportar(documento(), driver="ple", fecha="2026-10-01")
-                              ["contenido_base64"]).decode("ascii").splitlines()
+                              ["contenido_base64"]).decode(CODIFICACION).splitlines()
     assert diario[0].split("|")[0] == "20260100"
 
 
@@ -136,6 +138,39 @@ def test_el_5_1_no_pide_denominacion():
     from contaperu.drivers import contrato, ple
     assert "denominacion" not in contrato.exige(ple)
     assert api.exportar(documento(), driver="ple", fecha="2026-10-01")["archivo"]
+
+
+def test_la_denominacion_conserva_la_enie_como_el_archivo_aceptado():
+    """**El test que justifica el cambio de codificación de la 5.2.** El 5.3 que SUNAT aceptó escribe «ALQUILER DE
+    BAÑOS QUIMICOS» con el byte `0xD1` —una Ñ de cp1252, no los dos bytes de UTF-8— y el motor escribía «BANOS».
+
+    Cuatro de las 725 cuentas de ese mes llevaban Ñ: «AÑOS ANTERIORES», «CUMPLEAÑOS», «NAVIDEÑAS» y ésta. Cambiarle a
+    SUNAT el nombre que el contribuyente le da a su cuenta es elegir por él, que es lo mismo que este driver se niega
+    a hacer cuando EXIGE la denominación en vez de usar la del PCGE.
+
+    Se asierta sobre los BYTES y no sobre la cadena: lo que importa es qué sale al archivo."""
+    nombre = "ALQUILER DE BAÑOS QUIMICOS"
+    r = api.exportar(documento(), driver="ple_plan",
+                     configuracion={"denominacion_cuentas": dict(DENOMINACIONES, **{"631101": nombre})},
+                     fecha="2026-10-01", incluir_observados=True)
+    brutos = base64.b64decode(r["contenido_base64"])
+    assert nombre.encode(CODIFICACION) in brutos, "la Ñ tiene que salir como el byte 0xD1"
+    assert bytes([0xD1]) in brutos
+    # Y el `charset` que viaja a la api, al HTTP y al MCP no puede mentir sobre esos bytes.
+    assert r["content_type"] == "text/plain; charset=windows-1252"
+
+
+def test_lo_que_la_codificacion_no_sabe_escribir_se_cae_y_no_tumba_el_mes():
+    """El otro lado del plegado: conservar la Ñ no puede significar que un carácter pegado desde un ERP reviente un
+    mes entero. Lo que el destino no sabe escribir pierde su tilde si la tiene, y si no, desaparece."""
+    grivna = chr(8372)
+    r = api.exportar(documento(), driver="ple_plan",
+                     configuracion={"denominacion_cuentas": dict(DENOMINACIONES,
+                                                                 **{"631101": f"COSTE EN {grivna} Y TILDE Ó"})},
+                     fecha="2026-10-01", incluir_observados=True)
+    brutos = base64.b64decode(r["contenido_base64"])
+    # La Ó sobrevive entera (cp1252 la tiene); el signo de la grivna, que no está, se cae.
+    assert "COSTE EN Y TILDE Ó".encode(CODIFICACION) in brutos
 
 
 def test_el_mapa_declara_las_mismas_columnas_que_el_driver_escribe():

@@ -26,6 +26,12 @@ class Opciones:
     # la Administración" y aun así hubiera que quitarlos es el motivo de que siga siendo una
     # opción y no un número escrito en el driver: si SUNAT cambia de idea, `rce_vacios=0`.
     rce_vacios: int = 4
+    # Con qué se escriben los bytes del archivo, y a qué se pliega `sanear()` cada campo. **Gobierna las dos ramas de
+    # `armar_archivo` desde la 5.2**; antes solo la saneada, y la otra llevaba `cp1252` a mano.
+    #
+    # El defecto sigue siendo `ascii` y no se mueve: el TXT del SIRE lo tiene con un test y un caso real detrás
+    # (`test_driver_sire.py::test_saneado_ascii`, con «PEÑA & CÍA S.A.C. | Lima/Perú» → «PENA & CIA S.A.C. Lima-Peru»).
+    # El PLE lo heredaba sin decidirlo y pasa a `cp1252`, que es lo que trae el libro que SUNAT aceptó.
     codificacion: str = "ascii"
 
     def con(self, **cambios) -> "Opciones":

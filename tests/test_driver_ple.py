@@ -19,6 +19,8 @@ from contaperu.drivers import ple
 from util import cargar_golden
 
 CAMPOS = 21
+# La del PLE desde la 5.2: su 5.3 aceptado trae la Ñ en el byte 0xD1, que es cp1252 y no ASCII.
+CODIFICACION = "cp1252"
 
 
 def documento(nombre_golden: str, cuenta: str = "631101", centro: str = "001") -> dict:
@@ -38,7 +40,7 @@ def exportar(nombre_golden: str = "compras_202601.json", **kw) -> tuple[dict, li
     """`incluir_observados` porque lo que se prueba aquí es el LAYOUT, no la validación: el golden de ventas trae
     RUCs inválidos a propósito, para ejercitarla en los tests que son de eso."""
     r = api.exportar(documento(nombre_golden, **kw), driver="ple", fecha="2026-10-01", incluir_observados=True)
-    texto = base64.b64decode(r["contenido_base64"]).decode("ascii")
+    texto = base64.b64decode(r["contenido_base64"]).decode(CODIFICACION)
     return r, texto.splitlines()
 
 
@@ -58,7 +60,7 @@ def test_estructura(golden):
     for fila in filas:
         assert len(campos_de(fila)) == CAMPOS
     # CRLF puro: el TXT se abre en Windows y una exportación con \n suelto es una fila partida.
-    bruto = base64.b64decode(r["contenido_base64"]).decode("ascii")
+    bruto = base64.b64decode(r["contenido_base64"]).decode(CODIFICACION)
     assert "\r\n" in bruto and "\n" not in bruto.replace("\r\n", "")
 
 
@@ -148,10 +150,37 @@ def test_un_comprobante_sin_vencimiento_no_se_inventa_uno():
     assert linea["documento"]["fecha_vencimiento"] == "2026-01-10"
 
     r = api.exportar(doc, driver="ple", fecha="2026-10-01")
-    for fila in base64.b64decode(r["contenido_base64"]).decode("ascii").splitlines():
+    for fila in base64.b64decode(r["contenido_base64"]).decode(CODIFICACION).splitlines():
         c = campos_de(fila)
         assert c[14] == "10/01/2026", "la emisión sí es la del comprobante"
         assert c[13] == ple.SIN_FECHA, f"sin vencimiento va la fecha nula, no la emisión: {c[13]}"
+
+
+def test_la_glosa_conserva_las_tildes_y_la_enie():
+    """El 5.1 comparte las `OPCIONES` con el 5.3, así que el cambio de la 5.2 le llega igual: su campo 16 es la glosa,
+    y una glosa real lleva «PEÑA» o «CÍA» más veces que no.
+
+    El golden de este archivo está escrito sin tildes a propósito, así que **sin este test el cambio no se prueba**:
+    ASCII y cp1252 dan bytes idénticos sobre datos ASCII, y la batería daría luz verde a algo que no ha ejercitado."""
+    doc = documento("compras_202601.json")
+    doc["comprobantes"][0]["concepto"] = "COMPAÑÍA DE SEÑALIZACIÓN"
+    r = api.exportar(doc, driver="ple", fecha="2026-10-01", incluir_observados=True)
+    assert "COMPAÑÍA DE SEÑALIZACIÓN".encode(CODIFICACION) in base64.b64decode(r["contenido_base64"])
+    assert r["content_type"] == "text/plain; charset=windows-1252"
+
+
+def test_el_separador_y_los_saltos_se_quitan_aunque_se_conserven_las_tildes():
+    """Lo que el plegado NO relajó, y conviene que un test lo diga en voz alta: el palote es el separador y un salto
+    de línea parte una fila, así que esos salen siempre, con cualquier codificación. Y la barra sigue pasando a guion.
+
+    Si alguna vez se tocan, que sea a propósito y no de rebote de un cambio de codificación."""
+    doc = documento("compras_202601.json")
+    doc["comprobantes"][0]["concepto"] = "PEÑA | CÍA" + chr(13) + chr(10) + "S.A.C. 50/50"
+    r = api.exportar(doc, driver="ple", fecha="2026-10-01", incluir_observados=True)
+    filas = base64.b64decode(r["contenido_base64"]).decode(CODIFICACION).splitlines()
+    assert campos_de(filas[0])[15] == "PEÑA CÍA S.A.C. 50-50", campos_de(filas[0])[15]
+    for fila in filas:
+        assert len(campos_de(fila)) == CAMPOS, "ningún campo pudo partir la fila"
 
 
 def test_el_campo_20_va_vacio_y_se_sabe_por_que():

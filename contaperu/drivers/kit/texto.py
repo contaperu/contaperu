@@ -15,15 +15,45 @@ from .opciones import Opciones
 _CONTROLES = re.compile(r"[\x00-\x1f\x7f]")
 
 
+def _plegar(texto: str, codificacion: str) -> str:
+    """`texto` con cada carácter que `codificacion` no sabe escribir plegado a lo que sí sepa.
+
+    Carácter a carácter a propósito: plegar la cadena entera con un `NFKD` descompone la «Ñ» en «N» más una tilde
+    suelta, y cp1252 tiene la «Ñ» pero no esa tilde, así que la perdería. Lo que el destino sabe escribir no se toca;
+    lo que no, se descompone y se queda su letra base. Lo que ni así tiene equivalente desaparece, como siempre."""
+    salida = []
+    for ch in texto:
+        try:
+            ch.encode(codificacion)
+        except UnicodeEncodeError:
+            ch = unicodedata.normalize("NFKD", ch).encode(codificacion, "ignore").decode(codificacion)
+        salida.append(ch)
+    return "".join(salida)
+
+
 def sanear(texto: str, opciones: Opciones) -> str:
     """Texto apto para un campo del TXT: nunca lleva '|' (es el separador) ni
-    saltos de línea. Con `opciones.sanear`, además se convierte a ASCII (tildes fuera,
+    saltos de línea, y los espacios van colapsados. Con `opciones.sanear`, además se pliega a lo que
+    **`opciones.codificacion` puede escribir** (tildes fuera si el destino no las tiene,
     Ñ → N) y '/' y '\\' → '-' (la Tabla 12 los prohíbe). El '&' se conserva: las
-    razones sociales lo llevan."""
+    razones sociales lo llevan.
+
+    **Se pliega al DESTINO y no a ASCII a palo seco, y eso es el arreglo de la 5.2.** Hasta entonces convertía siempre
+    a ASCII, así que el PLE escribía «BANOS» donde el libro que SUNAT aceptó escribe «BAÑOS» —con el byte `0xD1`, que
+    es cp1252—. Transformar el nombre que el contribuyente le da a su cuenta es elegir por él: lo mismo que este
+    repositorio se niega a hacer con el número del comprobante y con la sigla de un tipo. Con `codificacion="cp1252"`
+    la Ñ y las tildes sobreviven; con `"ascii"`, el comportamiento de siempre.
+
+    Lo que **no** depende de la bandera, y por eso apagarla nunca fue la salida: quitar los controles, quitar el
+    separador y colapsar los espacios. Eso pasa siempre.
+
+    El plegado va **carácter a carácter y no de golpe**, y eso no es un detalle: descomponer la cadena entera primero
+    rompe la «Ñ» en «N» más una tilde suelta, y cp1252 —que sí tiene la «Ñ»— no tiene esa tilde suelta, así que la
+    descartaría y volveríamos a escribir «BANOS». Se mira cada carácter: el que el destino sabe escribir se queda tal
+    cual, y solo el que no se descompone para salvar la letra («Ó» → «O» en ASCII, en vez de desaparecer)."""
     s = _CONTROLES.sub(" ", str(texto or "")).replace("|", " ")
     if opciones.sanear:
-        s = unicodedata.normalize("NFKD", s)
-        s = s.encode("ascii", "ignore").decode("ascii")
+        s = _plegar(s, opciones.codificacion)
         s = s.replace("/", "-").replace("\\", "-")
     return " ".join(s.split())
 
@@ -99,9 +129,12 @@ def armar_archivo(lineas: Iterable[str], opciones: Opciones) -> bytes:
     un driver `desde_lineas` y no pasa por esa rama—, para que **la política de codificación viva en un solo sitio**:
     es la misma convergencia que la 2.3 hizo con el ZIP, que hasta entonces solo sabía hacer la rama de texto.
 
-    La codificación no es un detalle: `sanear()` deja el texto en ASCII y entonces `encode` no puede fallar; sin
-    sanear se cae a cp1252 con reemplazo, que es **lo que históricamente exigían los libros electrónicos** y lo que
-    evita que un carácter raro de una glosa tumbe una exportación entera.
+    La codificación no es un detalle, y desde la 5.2 **la gobierna `opciones.codificacion` en las dos ramas**. Antes
+    solo la leía la rama saneada, y la otra llevaba `cp1252` escrito a mano: el campo quedaba muerto justo donde hacía
+    falta, porque poner `codificacion="cp1252"` no tenía ningún efecto si el driver no saneaba.
+
+    Tras `sanear()` el texto ya está plegado a esa codificación y `encode` no puede fallar. Sin sanear se escribe con
+    `errors="replace"`, que es lo que evita que un carácter raro de una glosa tumbe una exportación entera.
 
     Un archivo sin ninguna línea son cero bytes, no un salto suelto: un TXT vacío que SUNAT recibiera con una línea en
     blanco sería una fila vacía, no un archivo vacío."""
@@ -109,5 +142,5 @@ def armar_archivo(lineas: Iterable[str], opciones: Opciones) -> bytes:
     if cuerpo:
         cuerpo += opciones.nueva_linea
     if opciones.sanear:
-        return cuerpo.encode(opciones.codificacion)      # tras sanear() es ASCII: no puede fallar
-    return cuerpo.encode("cp1252", errors="replace")     # lo que históricamente exigían los libros electrónicos
+        return cuerpo.encode(opciones.codificacion)      # tras sanear() ya está plegado: no puede fallar
+    return cuerpo.encode(opciones.codificacion, errors="replace")

@@ -15,7 +15,15 @@ from ..kit import Opciones
 
 # `cero="0.00"` lo pide el 5.1, que lleva el Debe y el Haber en DOS columnas y escribe el cero en la que no toca. El
 # 5.3 no lleva importes y no lo usa; está aquí porque las opciones son del envase, no de los campos.
-OPCIONES = Opciones(fecha="DD/MM/AAAA", nueva_linea="\r\n", tc_pen="", cero="0.00", extension=".TXT")
+#
+# Y `codificacion="cp1252"` sale del archivo contrastado, no de una preferencia: su 5.3 escribe «ALQUILER DE
+# BAÑOS QUIMICOS» con el byte `0xD1` —una Ñ de cp1252, no los dos bytes de UTF-8— y SUNAT lo aceptó, con su
+# constancia. Hasta la 5.2 estos dos drivers heredaban el `ascii` que `Opciones` trae de fábrica, sin que nadie
+# lo hubiera decidido, y escribían «BANOS»: cuatro de las 725 cuentas de ese mes salían con el nombre cambiado.
+# El 5.3 exige la denominación del contribuyente justamente para no declararle a SUNAT un nombre que no usa,
+# así que cambiársela es el mismo pecado, más pequeño.
+OPCIONES = Opciones(fecha="DD/MM/AAAA", nueva_linea="\r\n", tc_pen="", cero="0.00", extension=".TXT",
+                    codificacion="cp1252")
 
 # Oportunidad y banderas del nombre del fichero, tal como vienen en el archivo contrastado. El `sire` usa `02` porque
 # reemplaza una propuesta; un libro del PLE no reemplaza nada.
