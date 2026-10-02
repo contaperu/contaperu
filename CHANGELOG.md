@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [5.0.0] — 2026-10-01
 
 **El tributo sale del nombre del rol y pasa a su bloque.** Un rol dice QUÉ HACE la línea; cuál es el tributo, cuando
 lo hay, lo dice un bloque al lado. Es lo que `detraccion` hacía bien desde la 1.0 y lo que tres valores del catálogo
@@ -2706,7 +2706,7 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
-[Sin publicar]: https://github.com/contaperu/contaperu/compare/v4.3.0...HEAD
+[5.0.0]: https://github.com/contaperu/contaperu/compare/v4.3.0...v5.0.0
 [2.3.0]: https://github.com/contaperu/contaperu/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/contaperu/contaperu/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/contaperu/contaperu/compare/v2.0.0...v2.1.0
