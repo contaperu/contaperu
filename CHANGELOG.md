@@ -4,6 +4,60 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+**Contrastado contra un Libro Diario 5.1 y su 5.3 de mayo de 2026, presentados y aceptados por SUNAT** con sus
+constancias. Lo que coincide es casi todo: los **dos nombres de archivo son idénticos byte a byte** y los 21 campos
+del 5.1 coinciden en forma uno por uno. Dos filas confirman decisiones recientes con el archivo delante: el **campo 5
+va vacío en las 10 579 filas** —la corrección de la 4.2.2 era la buena y la deducción era mala— y el **campo 14
+escribe `01/01/0001` en 8 436 de ellas**, que es exactamente el arreglo de la 4.2.1.
+
+Y tres inconsistencias, que es lo que trae esta versión.
+
+### Cambios de comportamiento
+
+- **El PLE conserva la Ñ y las tildes.** El 5.3 aceptado escribe «ALQUILER DE BAÑOS QUIMICOS» con el byte `0xD1`
+  —cp1252— y el motor escribía «BANOS»; cuatro de las 725 cuentas de ese mes llevaban Ñ. Cambiarle a SUNAT el nombre
+  que el contribuyente le da a su cuenta es elegir por él, que es lo que este repositorio se niega a hacer con el
+  número de un comprobante y con la sigla de un tipo, y lo que el 5.3 evita al **exigir** la denominación en vez de
+  usar la del PCGE. Un mes con tildes produce desde ahora bytes distintos de los que producía, y el `CONTENT_TYPE`
+  pasa a decir `charset=windows-1252`. **Sobre datos ASCII es un no-op exacto**: los golden del 5.1 y del 5.3 dan el
+  mismo sha256 que antes.
+
+### Añadido
+
+- **`exportar` usa el bloque `asiento` que el documento traiga, en vez de rederivarlo.** El esquema del estándar lo
+  admite de entrada desde la 1.0 y el motor solo sabía escribirlo, así que **no podía releer su propio documento**: lo
+  que devuelve `generar_asiento` no entraba por `exportar`. El enlace no se inventa —es `linea.documento.id_externo`,
+  que el estándar puso en la línea para esto (enmienda 0009)— y **no se renumera**: el sub-diario y el correlativo
+  salen de las propias líneas, así que un ERP con su numeración la conserva.
+  - **No es «un asiento desnudo vale»**: los `comprobantes` siguen haciendo falta, porque el 5.1 saca cuatro de sus
+    veintiún campos de la cabecera y el del vencimiento no es recuperable de las líneas. Son los dos bloques, que es
+    lo que el driver `asiento_contable` ya escribe.
+  - Entrar por aquí **no relaja ninguna regla**: el destino exige lo que exige, lo que su formato no lleva sigue
+    parando, y el asiento tiene que cuadrar. Dos guardas nuevas fallan en voz alta: una línea sin `id_externo` o con
+    uno huérfano, y las líneas de un mismo comprobante no contiguas.
+  - Lo medido, sobre los **seis** drivers de asientos y no solo el PLE: mismo archivo byte a byte, misma huella y
+    mismo resumen por las dos puertas, incluidos el Excel de CONCAR y el ZIP de STARSOFT.
+- **`asiento.indice_de_lineas_dadas`, `asiento.rangos_de_lineas_dadas` y `asiento.LineaSinComprobante`** en la
+  superficie pública: la vuelta de `lineas_e_indice_del_libro`, que reconoce las líneas en vez de generarlas.
+- **`opciones.codificacion` gobierna las dos ramas de `armar_archivo`**, y `sanear` pliega a ella en vez de a ASCII a
+  palo seco. Era el único campo de `Opciones` sin comentario y estaba **muerto justo donde hacía falta**: en la rama
+  sin sanear el `cp1252` iba escrito a mano. El plegado va carácter a carácter, porque descomponer la cadena entera
+  rompe la Ñ en N más una tilde suelta y cp1252 no tiene esa tilde. El defecto sigue en `ascii` y **el SIRE no se
+  toca**: su ASCII tiene un test y un caso real detrás, mientras el del PLE era el defecto del dataclass heredado sin
+  que nadie lo decidiera.
+
+### Arreglado
+
+- **El `motivo` del campo 20 del 5.1 decía que faltaba que el motor numerara el CUO del registro**, lo que da a
+  entender que es trabajo pendiente del motor. No lo es: dos de sus cuatro partes son el campo 2 y el campo 3 de un
+  registro que el motor no produce, y deducirlas del CUO del diario sería afirmar algo que no ha visto. Ahora dice de
+  dónde puede venir el dato, y que es **opcional** con su número: en el libro contrastado lo traen 4 187 de 12 094
+  líneas y el resto van vacías.
+- **La anotación de `ple.fila()`** declaraba un `ComprobanteDelAsiento` y recibe un `Cabecera`; y su docstring decía
+  «dos campos salen de la cabecera» cuando son cuatro, con el vencimiento.
+
 ## [5.1.0] — 2026-10-02
 
 Dos deudas que la 5.0.0 dejó anotadas, las dos pequeñas y las dos de algo que ya había mordido.
