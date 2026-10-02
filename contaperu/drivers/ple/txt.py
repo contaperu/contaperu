@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ...asiento import CONFIGURACION_DEL_ASIENTO, ComprobanteDelAsiento, LineaDiario
+from ...asiento import CONFIGURACION_DEL_ASIENTO, Cabecera, ComprobanteDelAsiento, LineaDiario
 from ...modelo import Libro
 from ..kit import Opciones, armar_archivo, armar_linea, forma, formatear_fecha, formatear_monto, sanear
 from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
@@ -88,14 +88,20 @@ def _fecha(valor: Any, opciones: Opciones) -> str:
     return formatear_fecha(valor, opciones) or SIN_FECHA
 
 
-def fila(ln: LineaDiario, cabecera: ComprobanteDelAsiento, n: int, libro: Libro, opciones: Opciones) -> str:
+def fila(ln: LineaDiario, cabecera: Cabecera, n: int, libro: Libro, opciones: Opciones) -> str:
     """Una línea del asiento → su fila del 5.1, con los 21 campos en el orden del formato.
 
     `n` es la posición de la línea DENTRO de su asiento, de 1 en adelante: el campo 3 del formato.
 
-    Dos campos salen de la cabecera y no de la línea, y por eso este driver necesita el índice: el **tipo** de
-    documento del tercero (la línea lleva el número, no el tipo) y la **serie y el número por separado** (la línea los
-    trae unidos en `documento.serie_numero`).
+    **Cuatro** campos salen de la cabecera y no de la línea, y por eso este driver necesita el índice:
+
+    - el **tipo** de documento del tercero (campo 8): la línea lleva el número, no el tipo;
+    - la **serie** y el **número por separado** (campos 11 y 12): la línea los trae unidos en `documento.serie_numero`;
+    - y el **vencimiento** (campo 14), que es el delicado — ver su comentario abajo.
+
+    El docstring decía «dos» desde que se escribió, contando solo los del documento del tercero. Son cuatro, y el
+    número importa: es exactamente lo que un documento tiene que traer en su bloque `comprobantes` para poder
+    exportarse con el asiento ya armado (`pipeline.armado.desde_lineas_dadas`).
     """
     doc = ln.documento or {}
     tiene_tercero = bool(ln.contraparte_doc)
