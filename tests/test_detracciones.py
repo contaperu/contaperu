@@ -565,6 +565,56 @@ def test_el_diagnostico_lo_dice_y_a_quien_pedirselo():
         assert motivos["anulada_con_deposito"]["pedir_a"] == "contador", driver
 
 
+def test_el_motor_avisa_de_la_factura_que_tiene_nota_de_credito():
+    """**El primer cruce de dos comprobantes del motor.** Hacía falta porque el enlace es de una sola dirección: la
+    nota dice a qué factura apunta y la factura no dice nada — medido sobre un RCE real, ninguna de sus 41 columnas
+    distingue las que tienen nota de las que no.
+
+    Avisa y no decide: que una factura tenga nota de crédito no significa que esté anulada —puede ser un descuento o
+    una corrección—, pero sí que conviene mirarla. El aviso nombra la nota, para no tener que buscarla."""
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+           "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1"),
+                            dict(SU_NOTA_DE_CREDITO, id_externo="f2")]}
+    r = api.revisar(doc)
+    de_la_factura = next(c for c in r["comprobantes"] if c["numero"] == "209")
+    aviso = next(o for o in de_la_factura["observaciones"] if o["codigo"] == "FACTURA_CON_NOTA_DE_CREDITO")
+    assert aviso["nivel"] == "aviso" and "E001-13" in aviso["texto"] and "anulada_por_nota" in aviso["texto"]
+    # Y NO bloquea, que es lo que importa: queda `observada` —cualquier aviso lo hace— pero el mes se exporta igual,
+    # sin pedir `incluir_observados`, y con sus cinco líneas mientras nadie la marque.
+    assert de_la_factura["estado"] == "observada"
+    exportado = api.exportar(dict(doc, imputaciones={"f1": {"cuenta_contable": "631101", "centro_costo": "001"},
+                                                     "f2": {"cuenta_contable": "631101", "centro_costo": "001"}}),
+                             driver="concar", fecha="2026-10-01")
+    assert exportado["resumen"]["filas"] == 8, "cinco de la factura y tres de la nota"
+    # La nota NO se avisa a sí misma: el aviso es de la factura, que es la que decide si da cinco líneas o tres.
+    de_la_nota = next(c for c in r["comprobantes"] if c["numero"] == "13")
+    assert not [o for o in de_la_nota["observaciones"] if o["codigo"] == "FACTURA_CON_NOTA_DE_CREDITO"]
+
+
+def test_una_nota_de_credito_parcial_no_dispara_el_aviso():
+    """Una nota que no anula el total es un DESCUENTO o una devolución parcial, no una anulación: la factura conserva
+    sus cinco líneas y nadie tiene que mirar nada. Avisar aquí sería ruido en un mes de tres mil filas."""
+    parcial = dict(SU_NOTA_DE_CREDITO, base_gravada="1000.00", igv="180.00", total="1180.00")
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+           "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1"), dict(parcial, id_externo="f2")]}
+    r = api.revisar(doc)
+    for c in r["comprobantes"]:
+        assert not [o for o in c["observaciones"] if o["codigo"] == "FACTURA_CON_NOTA_DE_CREDITO"]
+
+
+def test_una_nota_cuya_factura_no_esta_en_el_lote_no_avisa_de_nada():
+    """El caso que ningún dato puede resolver: la nota llega el mes siguiente y su factura no está aquí. No hay de
+    dónde deducirlo, y por eso el campo de la imputación existe — para que el contador lo marque a mano."""
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202610", "tipo": "compra"},
+           "comprobantes": [dict(SU_NOTA_DE_CREDITO, id_externo="f2", fecha_emision="2026-10-05")]}
+    r = api.revisar(doc)
+    assert not [o for c in r["comprobantes"] for o in c["observaciones"]
+                if o["codigo"] == "FACTURA_CON_NOTA_DE_CREDITO"]
+
+
 def test_con_el_codigo_del_contador_la_detraccion_llega_al_asiento():
     """Y el otro lado: puesto el código, el mes exporta y la detracción nace completa —sus dos líneas y su monto—,
     exactamente como si el comprobante hubiera entrado por su XML."""

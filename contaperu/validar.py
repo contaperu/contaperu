@@ -15,6 +15,11 @@ from typing import Iterable
 
 from . import catalogos as cat
 from .modelo import Comprobante, Libro, solo_digitos
+# Privados a propósito: la superficie pública de este módulo se congela, y un import no es un nombre que este
+# módulo ofrezca. Mismo patrón que `asiento/motor.py` con `clase_de`.
+from .modelo import a_decimal as _a_decimal
+from .modelo import clave_de as _clave_de
+from .modelo import serie_y_numero as _serie_y_numero
 
 TOLERANCIA = cat.TOLERANCIA_IGV
 
@@ -325,6 +330,41 @@ def fijar_estado(c: Comprobante) -> None:
     c.estado = "observada" if c.observaciones else "ok"
 
 
+def avisar_de_facturas_con_nota(comprobantes: list[Comprobante]) -> int:
+    """Avisa en cada factura a la que una NOTA DE CRÉDITO del mismo lote anula su total (5.3). Devuelve cuántas.
+
+    **Es el primer cruce de dos comprobantes del motor**, y hacía falta porque el enlace es de una sola dirección: la
+    nota dice a qué factura apunta y la factura no dice nada. Medido sobre un RCE real de setiembre de 2026, **ninguna
+    de sus 41 columnas** distingue las cuatro facturas que tienen nota de las otras diecinueve.
+
+    **Avisa y no decide**, que es la diferencia que importa. Que una factura tenga nota de crédito no significa que
+    esté anulada: puede ser un descuento, una devolución parcial o una corrección de datos. Lo que sí significa es que
+    **conviene mirarla**, porque si está anulada su detracción no debería provisionarse
+    (`imputacion.anulada_por_nota`) y, si no se marca, el par deja colgado el recorte y la provisión del depósito.
+
+    Solo cuando el importe de la nota **anula el total exacto**: una nota parcial es otra cosa y la factura conserva
+    sus cinco líneas. Los importes del estándar van siempre en positivo, así que se comparan tal cual.
+
+    Y solo mira el lote: una nota del mes siguiente no está aquí, y entonces no hay dato del que deducirlo — el
+    contador lo marca a mano, que es para lo que el campo existe."""
+    por_identidad = {_clave_de(c.tipo_cp, c.serie, c.numero, c.contraparte_doc): c
+                     for c in comprobantes if not c.excluida and not c.es_nota}
+    n = 0
+    for nota in comprobantes:
+        if nota.excluida or not nota.es_nota_credito or not (nota.ref_serie or nota.ref_numero):
+            continue
+        factura = por_identidad.get(_clave_de(nota.ref_tipo_cp, nota.ref_serie, nota.ref_numero, nota.contraparte_doc))
+        if factura is None or _a_decimal(nota.total) != _a_decimal(factura.total):
+            continue
+        factura.observar(
+            "FACTURA_CON_NOTA_DE_CREDITO", "aviso",
+            f"La nota de crédito {_serie_y_numero(nota.serie, nota.numero)} de este lote anula su total. Si la "
+            "factura quedó anulada, márcala en su imputación (`anulada_por_nota`) para que no provisione su "
+            "detracción; si la nota es un descuento o una corrección, déjala como está")
+        n += 1
+    return n
+
+
 def revisar(comprobantes: list[Comprobante], libro: Libro, claves_previas: Iterable[tuple] = (),
             claves_proceso: Iterable[tuple] = ()) -> list[Comprobante]:
     """Revisión completa de un lote (idempotente: se puede repetir antes de exportar)."""
@@ -333,6 +373,9 @@ def revisar(comprobantes: list[Comprobante], libro: Libro, claves_previas: Itera
         c.estado = "ok"
         validar(c, libro)
     marcar_duplicados(comprobantes, claves_previas, claves_proceso, sin_contraparte=libro.es_venta)
+    # Después de marcar duplicados, para no avisar sobre una factura que ya se descartó por repetida.
+    if not libro.es_venta:
+        avisar_de_facturas_con_nota(comprobantes)
     for c in comprobantes:
         fijar_estado(c)
     return comprobantes
