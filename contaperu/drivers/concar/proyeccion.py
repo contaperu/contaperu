@@ -273,4 +273,13 @@ def a_lineas(filas: list[dict], config: dict | None = None) -> list[LineaDiario]
     tipos = (config or {}).get("tipos") or {}
     siglas = {str(fila["sigla"]): tipo for tipo, fila in sorted(tipos.items(), reverse=True)
               if isinstance(fila, dict) and fila.get("sigla")}
+    # Al LEER se aceptan las DOS siglas de la nota de crédito, aunque al escribir salga solo la configurada.
+    #
+    # El motivo es un archivo de ayer: el defecto pasó de `NC` a `NA` en la 5.3, y un Excel escrito antes de ese
+    # cambio —o por un contribuyente con la otra— se releería con el mapa de hoy y su `tipo_cp` saldría VACÍO, sin
+    # que nada lo dijera. Importa más desde la 5.2, que abrió la puerta de releer un asiento ya armado.
+    #
+    # Solo se rellena lo que el mapa no tenga: si el contribuyente configuró una de las dos, la suya manda.
+    for sigla, tipo in (("NA", "07"), ("NC", "07")):
+        siglas.setdefault(sigla, tipo)
     return [desde_fila(f, monedas, detracciones, siglas) for f in filas]

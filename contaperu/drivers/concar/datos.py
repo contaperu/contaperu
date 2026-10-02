@@ -6,6 +6,8 @@ Aquí no hay lógica: si CONCAR cambia una columna, se toca este archivo y nada 
 """
 from __future__ import annotations
 
+from dataclasses import replace
+
 from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from ...configuracion import Campo, Columna
 from ..kit import Opciones
@@ -60,9 +62,35 @@ SUFIJO_T28 = "01"
 # `asiento.TIPO_DOC_DETRACCION` y era un nombre público del núcleo, que es donde no debía estar.
 TIPO_DOC_DETRACCION = "DR"
 
+# La sigla de la nota de crédito, que es de CONCAR y no de la tabla general del asiento.
+#
+# **CONCAR nace con `NA` para el tipo 07** (John, 2-oct-2026, contra su instalación). Es el mismo tipo de hecho que
+# trajo el `DR` de arriba y las siglas de STARSOFT: lo que un sistema real tiene registrado, visto en él.
+#
+# Y conviene saber por qué está escrito aquí y no en la tabla general. **`NC` también existe en la T.G. 06**: la
+# cabecera de la plantilla oficial, recalcada celda a celda en `CABECERA` más abajo, nombra las dos a la vez —«Si Tipo
+# de Documento es 'NC', 'NA' ó 'ND'» en las columnas AA a AE, y «Si Tipo de Documento es 'NA' ó 'ND'» en la Z—. O sea
+# que son dos siglas distintas de la misma tabla, no dos nombres de lo mismo. Cuál de las dos le toca al tipo 07 es de
+# cada instalación, y la de la plantilla de John es `NA`.
+#
+# El riesgo queda dicho porque no lo avisa nada: **una sigla equivocada no da error**, el archivo entra y el
+# comprobante queda registrado como otra cosa. Quien tenga `NC` la pone en su configuración y gana al defecto.
+TIPOS = {"01": {"sigla": "FT"}, "02": {"sigla": "RH", "sub_diario": "15"},
+         "03": {"sigla": "BV", "sub_diario": "13"}, "05": {"sigla": "BA"},
+         "07": {"sigla": "NA"},      # CONSTA: la T.G. 06 de la instalación de John (2-oct-2026)
+         "08": {"sigla": "ND"}, "12": {"sigla": "TK"}, "14": {"sigla": "RC"}}
+# Escrita entera y no derivada de la general, como la de STARSOFT: así se lee de un tirón qué tiene esta instalación.
+# Que las otras SIETE sigan siendo las de la tabla general lo guarda un test
+# (`test_asiento_concar.py::test_concar_solo_difiere_de_la_tabla_general_en_la_nota_de_credito`), para que no se
+# separen en silencio el día que una de ellas cambie.
+
 # Lo que se configura en la sección `concar`: lo que el núcleo lee al armar el asiento, y lo propio de este formato.
 CONFIGURACION = (
-    *CONFIGURACION_DEL_ASIENTO,
+    # Se cambia el valor por defecto del campo que el asiento ya declara, y no se declara otro: la clave sigue siendo
+    # `tipos` y el núcleo la lee de ahí. Es el patrón de `drivers/starsoft/datos.py`, cuyo comentario lo explica —
+    # declarar una clave propia sería tener el mismo dato dos veces.
+    *(replace(campo, por_defecto=TIPOS) if campo.clave == "tipos" else campo
+      for campo in CONFIGURACION_DEL_ASIENTO),
     # Columna E, el código de la T.G. 03. CONCAR solo admite MN y US (rechaza ME): otra moneda detiene la exportación.
     Campo("monedas_codigo", "objeto", titulo="Monedas", grupo="monedas", campos=(
         Campo("PEN", "texto", "MN", titulo="Los soles se llaman", grupo="monedas",

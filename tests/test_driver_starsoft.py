@@ -306,8 +306,10 @@ def test_la_nota_de_credito_se_llama_CC_y_no_NC():
     doc = _compra(tipo_cp="07", ref_tipo_cp="01", ref_serie="F136", ref_numero="431", ref_fecha="2025-07-01")
     assert _filas(doc)[0]["TIPO DOCUMENTO"] == "CC"
 
-    de_concar = api.configuracion_por_defecto()["concar"]["tipos"]["07"]["sigla"]
-    assert de_concar == "NC", "si CONCAR cambiara, este test deja de comparar lo que cree"
+    de_concar = api.configuracion_por_defecto("concar")["concar"]["tipos"]["07"]["sigla"]
+    # CONCAR pasó de `NC` a `NA` en la 5.3, y la divergencia sigue intacta: lo que importa no es cuál sea la de
+    # CONCAR, sino que NO sea la de STARSOFT. Si algún día coincidieran, este test deja de comparar lo que cree.
+    assert de_concar == "NA" != "CC"
 
 
 def test_un_tipo_de_comprobante_sin_sigla_detiene_la_exportacion():
@@ -345,7 +347,7 @@ def test_solo_dos_siglas_siguen_sin_constar_y_se_heredan_marcadas():
         assert de_concar[codigo]["sigla"] == sigla, f"{codigo} ya no es la de CONCAR: revisar de dónde sale"
     # Las dos divergencias con CONCAR que sí constan, y que son la razón de que este driver tenga tabla propia:
     # heredarla sin tocar sacaría un archivo que STARSOFT importa clasificando mal esos dos comprobantes.
-    assert de_concar["07"]["sigla"] == "NC" != constan["07"]
+    assert de_concar["07"]["sigla"] == "NA" != constan["07"]
     assert de_concar["08"]["sigla"] == "ND" != constan["08"]
 
 

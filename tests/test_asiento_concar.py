@@ -100,6 +100,41 @@ def test_dolares_con_tipo_de_cambio_del_comprobante():
     assert e.value.monedas == ["EUR"] and concar.monedas_sin_codigo([cp(moneda="EUR"), cp()], CONTAB) == ["EUR"]
 
 
+def test_concar_solo_difiere_de_la_tabla_general_en_la_nota_de_credito():
+    """CONCAR estrena tabla de siglas propia en la 5.3, escrita entera como la de STARSOFT. Este test es lo que
+    impide que las otras SIETE se separen de la general en silencio el día que una de ellas cambie.
+
+    Y la que difiere difiere a propósito: **CONCAR nace con `NA` para el tipo 07** (John, 2-oct-2026, contra su
+    instalación). `NC` también existe en la T.G. 06 —la cabecera de la plantilla oficial nombra las dos— así que son
+    dos siglas distintas y cuál le toca al 07 es de cada instalación."""
+    from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
+
+    general = next(c for c in CONFIGURACION_DEL_ASIENTO if c.clave == "tipos").por_defecto
+    de_concar = api.configuracion_por_defecto("concar")["concar"]["tipos"]
+
+    assert de_concar["07"] == {"sigla": "NA"} and general["07"] == {"sigla": "NC"}
+    assert {k: v for k, v in de_concar.items() if k != "07"} == {k: v for k, v in general.items() if k != "07"}
+    # Y la tabla general no se movió: la heredan tal cual el CSV y los dos del PLE, que no escriben siglas.
+    for driver in ("csv", "ple", "ple_plan"):
+        assert api.configuracion_por_defecto(driver)[driver]["tipos"]["07"]["sigla"] == "NC"
+
+
+def test_un_excel_escrito_con_la_otra_sigla_se_relee_sin_perder_el_tipo():
+    """La ida y vuelta de un archivo de AYER. El defecto pasó de `NC` a `NA`, y un Excel escrito antes del cambio
+    —o por un contribuyente con la otra— se releería con el mapa de hoy dejando su `tipo_cp` vacío, sin que nada lo
+    dijera. Importa más desde la 5.2, que abrió la puerta de releer un asiento ya armado.
+
+    Al leer se aceptan las dos; al escribir sale solo la configurada."""
+    from contaperu.drivers.concar import proyeccion as proyeccion_concar
+
+    for sigla in ("NA", "NC"):
+        fila = {"R": sigla, "S": "FC01-9", "A": "2026-08-12", "B": "11", "E": "MN", "N": "H",
+                "F": "631101", "O": "100.00", "H": "GLOSA"}
+        leidas = proyeccion_concar.a_lineas([fila], CONTAB)
+        assert leidas[0].documento["tipo_cp"] == "07", f"{sigla} no resolvió a su tipo de la Tabla 10"
+        assert leidas[0].documento["tipo"] == sigla, "la sigla del archivo se conserva tal cual"
+
+
 def test_boleta_honorarios_nota_de_credito_y_tasa():
     # Boleta: no da crédito fiscal → todo al gasto, sin línea de IGV ni tasa, aunque traiga IGV
     bv = driver_concar.filas_de_comprobante(cp(tipo_cp="03", serie="B001", numero="55"), CONTAB, MES, "080001")
@@ -113,7 +148,7 @@ def test_boleta_honorarios_nota_de_credito_y_tasa():
     # Nota de crédito: invierte (proveedor al Debe, gasto e IGV al Haber) y lleva el documento que modifica
     nc = driver_concar.filas_de_comprobante(cp(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="F001", ref_numero="00000123", ref_fecha="2026-08-01"),
                         CONTAB, MES, "080002")
-    assert [f["N"] for f in nc] == ["H", "H", "D"] and nc[0]["R"] == "NC" and nc[0]["B"] == "11"
+    assert [f["N"] for f in nc] == ["H", "H", "D"] and nc[0]["R"] == "NA" and nc[0]["B"] == "11"
     assert (nc[0]["Z"], nc[0]["AA"], nc[0]["AB"]) == ("FT", "F001-123", date(2026, 8, 1))
     assert debe_haber(nc) == (Decimal("118"), Decimal("118"))
     nd = driver_concar.filas_de_comprobante(cp(tipo_cp="08", serie="FD01", numero="3"), CONTAB, MES, "080003")
