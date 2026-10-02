@@ -17,6 +17,7 @@ from .. import detracciones, drivers, validar
 from .._version import OPEN_ACCOUNTING
 from ..configuracion import CLAVES_RETIRADAS, CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
 from ..errores import DocumentoInvalido
+from ..asiento.lineas import LineaDiario
 from ..modelo import Comprobante, Libro, clave_de, serie_y_numero
 
 # Tope de seguridad. Un mes de una PYME son decenas o cientos de comprobantes; muchos miles en
@@ -70,6 +71,33 @@ def comprobantes_de(doc: dict) -> list[Comprobante]:
         return [Comprobante.de_dict(c) for c in crudos]
     except (ValueError, TypeError) as e:
         raise DocumentoInvalido(f"Un comprobante no se pudo leer: {e}") from None
+
+
+def lineas_de(doc: dict) -> list[LineaDiario] | None:
+    """Las líneas del bloque `asiento` del documento, o `None` si no lo trae (5.2).
+
+    Hermano de `comprobantes_de`, y hacía falta: había lectores para el libro, los comprobantes y las imputaciones,
+    y el bloque `asiento` **solo se escribía**. El esquema del estándar lo admite de entrada desde la 1.0 —su
+    descripción dice «líneas de diario ya armadas»— y el motor no sabía leerlo, así que **no podía releer su propio
+    documento**: lo que devolvía `generar_asiento` no entraba por `exportar`.
+
+    Quien lo trae manda sobre el motor: con este bloque el asiento **no se rearma**, se usa. Los `comprobantes`
+    siguen haciendo falta —de su cabecera salen hechos que ninguna línea guarda, como el vencimiento— y es
+    exactamente lo que el driver `asiento_contable` ya escribe en su archivo: los dos bloques, para que el documento
+    se baste.
+
+    `LineaDiario.de_dict` hace la validación: sin cuenta, sin sentido, sin importe o **sin clase** no pasa, un
+    sentido que no es D ni H no pasa, y una clase que contradice su cuenta tampoco. Una clave que la línea no
+    declara se rechaza en vez de perderse."""
+    crudas = doc.get("asiento")
+    if crudas is None:
+        return None
+    if not isinstance(crudas, list):
+        raise DocumentoInvalido("`asiento` tiene que ser una lista de líneas de diario.")
+    try:
+        return [LineaDiario.de_dict(l) for l in crudas]
+    except (ValueError, TypeError) as e:
+        raise DocumentoInvalido(f"Una línea del asiento no se pudo leer: {e}") from None
 
 
 def documento(libro: Libro, comprobantes: list[Comprobante] | None = None,

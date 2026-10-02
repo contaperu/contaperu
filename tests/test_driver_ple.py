@@ -156,6 +156,83 @@ def test_un_comprobante_sin_vencimiento_no_se_inventa_uno():
         assert c[13] == ple.SIN_FECHA, f"sin vencimiento va la fecha nula, no la emisión: {c[13]}"
 
 
+def test_el_motor_puede_releer_su_propio_asiento_y_sale_el_mismo_archivo():
+    """**La prueba de la puerta de la 5.2.** Hasta entonces el motor no podía releer lo que él mismo producía: el
+    bloque `asiento` que devuelve `generar_asiento` no era entrada de `exportar`, aunque el esquema del estándar lo
+    admita desde la 1.0.
+
+    Lo que se exige es lo máximo: **el mismo archivo byte a byte**, la misma huella y el mismo resumen. Si difieren,
+    es que la vuelta está rearmando el asiento en vez de usarlo, y entonces le estaría cambiando el correlativo a un
+    asiento que puede haber salido ya."""
+    doc = documento("compras_202601.json")
+    directo = api.exportar(doc, driver="ple", fecha="2026-10-01", incluir_observados=True)
+    armado = api.generar_asiento(doc, driver="ple", incluir_observados=True)
+    vuelta = api.exportar(dict(doc, asiento=armado["asiento"]), driver="ple", fecha="2026-10-01",
+                          incluir_observados=True)
+    assert vuelta["contenido_base64"] == directo["contenido_base64"]
+    assert vuelta["archivo"] == directo["archivo"]
+    assert vuelta["_exportacion"]["huella"] == directo["_exportacion"]["huella"]
+    # Y el resumen igual por las dos puertas, que es una lección que este repositorio ya aprendió una vez: hasta la
+    # 1.2.0 el mismo documento daba respuestas distintas según por dónde entrara.
+    assert vuelta["resumen"] == directo["resumen"]
+
+
+def test_un_asiento_que_llega_de_fuera_no_se_renumera():
+    """El CUO que escribe el campo 2 es el de quien produjo el asiento, no uno nuevo. Es lo que permite que un ERP
+    lleve su propia numeración y el PLE la respete: renumerar aquí sería cambiarle el número a un asiento ajeno."""
+    doc = documento("compras_202601.json")
+    armado = api.generar_asiento(doc, driver="ple", incluir_observados=True)
+    # Un asiento numerado por OTRO sistema, con su sub-diario y su correlativo.
+    suyo = [dict(l, sub_diario="99", correlativo="019999") for l in armado["asiento"]]
+    r = api.exportar(dict(doc, asiento=suyo), driver="ple", fecha="2026-10-01", incluir_observados=True)
+    filas = base64.b64decode(r["contenido_base64"]).decode(CODIFICACION).splitlines()
+    assert {campos_de(f)[1] for f in filas} == {"99-019999"}
+    assert r["resumen"]["sub_diarios"]["99"]["desde_codigo"] == "019999"
+
+
+def test_una_linea_que_no_dice_de_que_comprobante_es_se_rechaza():
+    """Las dos guardas de la puerta, y las dos fallan en voz alta porque el silencio aquí sale caro: un archivo
+    incompleto que parece correcto se presenta a SUNAT y nadie lo nota.
+
+    El enlace es `documento.id_externo`, que el estándar puso en la línea justamente para esto. Sin él no hay forma
+    de saber de qué comprobante saca el driver los cuatro campos que la línea no guarda —el tipo de documento del
+    tercero, la serie, el número y el vencimiento—."""
+    doc = documento("compras_202601.json")
+    armado = api.generar_asiento(doc, driver="ple", incluir_observados=True)
+
+    sin_enlace = [{k: v for k, v in l.items() if k != "documento"} for l in armado["asiento"]]
+    with pytest.raises(Exception, match="id_externo"):
+        api.exportar(dict(doc, asiento=sin_enlace), driver="ple", fecha="2026-10-01", incluir_observados=True)
+
+    huerfana = [dict(l, documento=dict(l["documento"], id_externo="no-existe")) for l in armado["asiento"]]
+    with pytest.raises(Exception, match="no está en el documento"):
+        api.exportar(dict(doc, asiento=huerfana), driver="ple", fecha="2026-10-01", incluir_observados=True)
+
+
+def test_las_lineas_de_un_comprobante_tienen_que_ir_seguidas():
+    """La otra guarda: el índice de un asiento es un tramo `desde`/`hasta`, así que un comprobante partido en dos
+    trozos no se puede representar. Mejor decirlo que escribir un archivo con los tramos mal."""
+    doc = documento("compras_202601.json")
+    armado = api.generar_asiento(doc, driver="ple", incluir_observados=True)
+    lineas = armado["asiento"]
+    # Se parte el primer comprobante metiendo una línea de otro por medio.
+    de_otro = next(l for l in lineas if l["documento"]["id_externo"] != lineas[0]["documento"]["id_externo"])
+    partido = [lineas[0], de_otro] + lineas[1:]
+    with pytest.raises(Exception, match="no van seguidas"):
+        api.exportar(dict(doc, asiento=partido), driver="ple", fecha="2026-10-01", incluir_observados=True)
+
+
+def test_un_asiento_que_llega_descuadrado_no_pasa():
+    """Entrar por esta puerta no relaja ninguna regla. El asiento tiene que cuadrar igual, y lo que el destino exige
+    se exige igual: solo se evita rederivar lo que ya está hecho."""
+    doc = documento("compras_202601.json")
+    armado = api.generar_asiento(doc, driver="ple", incluir_observados=True)
+    descuadrado = [dict(l) for l in armado["asiento"]]
+    descuadrado[0]["importe"] = "1.00"
+    with pytest.raises(api.Descuadre):
+        api.exportar(dict(doc, asiento=descuadrado), driver="ple", fecha="2026-10-01", incluir_observados=True)
+
+
 def test_la_glosa_conserva_las_tildes_y_la_enie():
     """El 5.1 comparte las `OPCIONES` con el 5.3, así que el cambio de la 5.2 le llega igual: su campo 16 es la glosa,
     y una glosa real lleva «PEÑA» o «CÍA» más veces que no.

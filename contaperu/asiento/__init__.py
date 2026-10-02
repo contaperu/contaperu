@@ -61,8 +61,9 @@ from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
 from .indice import Cabecera, ComprobanteDelAsiento, exportacion_de
-from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, cabecera_de, constancia_de, glosa_de, lineas_del_comprobante,
-                    lineas_del_libro, lineas_e_indice_del_libro, serie_numero_de)
+from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, LineaSinComprobante, cabecera_de, constancia_de,
+                    glosa_de, indice_de_lineas_dadas, lineas_del_comprobante, lineas_del_libro,
+                    lineas_e_indice_del_libro, rangos_de_lineas_dadas, serie_numero_de)
 
 __all__ = [
     "CONFIGURACION_DEL_ASIENTO", "NUMERO_DETRACCION_PENDIENTE", "CONTADOR", "FALTA", "FALTAS",
@@ -78,5 +79,6 @@ __all__ = [
     "tiene_detraccion",
     "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "ROLES_DEL_MOTOR", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro", "lineas_e_indice_del_libro", "cabecera_de", "Cabecera",
+    "indice_de_lineas_dadas", "rangos_de_lineas_dadas", "LineaSinComprobante",
     "ComprobanteDelAsiento", "MONEDAS_CODIGO", "constancia_de", "exportacion_de", "serie_numero_de",
 ]

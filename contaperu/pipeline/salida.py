@@ -24,7 +24,7 @@ from ..drivers.kit import texto as kit_texto
 from ..errores import ErroresBloqueantes
 from ..modelo import Comprobante, Libro
 from . import armado
-from .preparacion import fecha_de, preparar
+from .preparacion import fecha_de, lineas_de, preparar
 from .seleccion import errores_de, fuera_de, seleccionar
 
 
@@ -95,9 +95,12 @@ def _resumen(comprobantes: list[Comprobante], incluidos: list[Comprobante], erro
 
 def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones: Any = None,
             incluir_errores: bool = False, config: dict | None = None,
-            correlativos: dict[str, int] | None = None) -> Exportado:
+            correlativos: dict[str, int] | None = None, lineas: list | None = None) -> Exportado:
     """`config`, la configuración contable, la pide todo driver que lleva cuentas (`contrato.lleva_cuentas`), y
-    `correlativos`, además, el que arma asientos (`contrato.arma_asientos`)."""
+    `correlativos`, además, el que arma asientos (`contrato.arma_asientos`).
+
+    `lineas` son las del bloque `asiento` del documento, cuando lo trae: entonces el asiento **no se rearma**, se
+    usa, y los correlativos no hacen falta porque cada línea trae el suyo (5.2)."""
     modulo = drivers.obtener(driver)
     opciones = opciones or modulo.OPCIONES
     formato = drivers.formato_de(driver, libro.tipo)
@@ -117,8 +120,12 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
             config = armado.config_para(modulo, config)
         detalle = armado.identidades(libro, incluidos)
         if forma == "desde_lineas":
-            contenido, extra, lineas, indice = armado.desde_lineas_con_indice(modulo, libro, incluidos, opciones,
-                                                                              config, correlativos)
+            if lineas is None:
+                contenido, extra, lineas, indice = armado.desde_lineas_con_indice(modulo, libro, incluidos, opciones,
+                                                                                  config, correlativos)
+            else:
+                contenido, extra, lineas, indice = armado.desde_lineas_dadas(modulo, libro, incluidos, lineas,
+                                                                             opciones, config)
             detalle = armado.por_comprobante(libro, lineas, indice)
         else:
             contenido, extra = armado.desde_comprobantes(modulo, libro, incluidos, opciones, config)
@@ -164,13 +171,16 @@ def exportar_archivo(doc: dict, *, driver: str, configuracion: dict | None = Non
     generar."""
     libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     modulo = drivers.obtener(driver)
+    # El asiento que el documento TRAIGA manda sobre el que el motor derivaría (5.2): quien lo produjo ya numeró, y
+    # rearmarlo le cambiaría el correlativo a un asiento que puede haber salido ya.
+    dadas = lineas_de(doc) if contrato.forma(modulo) == "desde_lineas" else None
     # Lo que pide la forma del driver: la configuración, todo el que lleva cuentas (también el registro de un
-    # sistema contable); los correlativos, además, el que arma asientos.
+    # sistema contable); los correlativos, además, el que arma asientos — y solo si hay que numerar.
     corr = None
-    if contrato.arma_asientos(modulo):
+    if contrato.arma_asientos(modulo) and dadas is None:
         corr = asi.correlativos_de_partida(comprobantes, config, libro.es_venta, correlativos)
     return generar(libro, comprobantes, driver, incluir_errores=incluir_observados,
-                   config=config if contrato.lleva_cuentas(modulo) else None, correlativos=corr)
+                   config=config if contrato.lleva_cuentas(modulo) else None, correlativos=corr, lineas=dadas)
 
 
 def respuesta(exp: Exportado, cuando: str | None = None) -> dict:

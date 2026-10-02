@@ -88,6 +88,37 @@ def desde_lineas_con_indice(modulo, libro: Libro, comprobantes: list[Comprobante
     return contenido, resumen, lineas, indice
 
 
+def desde_lineas_dadas(modulo, libro: Libro, comprobantes: list[Comprobante], lineas: list,
+                       opciones: Any, config: dict | None = None) -> tuple[bytes, dict, list, tuple]:
+    """Como `desde_lineas_con_indice`, pero con las líneas que YA trae el documento: **no las rearma** (5.2).
+
+    Hasta aquí el motor solo sabía exportar lo que él mismo derivaba de los comprobantes, así que no podía releer su
+    propio documento: `generar_asiento` devuelve un bloque `asiento` que `exportar` no sabía leer. Esta rama cierra
+    ese círculo, y abre la puerta a que un ERP entregue el asiento que lleva él.
+
+    Lo que **sigue igual**, y es la mitad del valor de esta función: el destino exige lo que exige antes de escribir
+    nada (`contrato.exige`, de donde sale que el 5.3 pida la denominación), lo que su formato no lleva lo para
+    (`no_caben`), y el asiento **tiene que cuadrar** (`partida_doble.exigir`). Entrar por esta puerta no relaja
+    ninguna regla: solo evita rederivar lo que ya está hecho.
+
+    Lo que cambia es de dónde sale el índice: de reconocer las líneas en vez de generarlas
+    (`asiento.indice_de_lineas_dadas`), por su `documento.id_externo`. Y los correlativos no se piden, porque cada
+    línea trae el suyo."""
+    exigir_requisitos(comprobantes, config, libro.es_venta, contrato.exige(modulo))
+    fuera = contrato.no_caben(modulo, libro, comprobantes, config)
+    if fuera:
+        raise contrato.NoCabe(fuera)
+    indice = asi.indice_de_lineas_dadas(comprobantes, lineas)
+    cuadre = partida_doble.exigir(lineas)
+    if contrato.acepta_indice(modulo):
+        contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones, indice=indice)
+    else:
+        contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones)
+    resumen = {"filas": len(lineas), "sub_diarios": asi.rangos_de_lineas_dadas(indice),
+               "debe": str(cuadre.debe), "haber": str(cuadre.haber), "huella": huella(lineas), **extra}
+    return contenido, resumen, lineas, indice
+
+
 def desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], opciones: Any,
                        config: dict | None = None) -> tuple[bytes, dict]:
     """Un driver de registro de la forma `desde_comprobantes`: el sistema contable que importa su registro y arma

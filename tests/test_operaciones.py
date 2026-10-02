@@ -166,6 +166,63 @@ BASE = {"tipo_cp": "01", "serie": "F001", "numero": "8", "fecha_emision": "2026-
         "base_gravada": "100", "igv": "18", "total": "118", "id_externo": "fila-8"}
 
 
+# ── La puerta del asiento: el motor relee lo que él mismo produce (5.2) ────────────────────────────────────────
+#
+# Hasta la 5.2 el bloque `asiento` de un documento **solo se escribía**: el esquema del estándar lo admite de entrada
+# desde la 1.0 y `exportar` no sabía leerlo, así que lo que devolvía `generar_asiento` no podía volver a entrar. Esto
+# lo cierra para los SEIS drivers de asientos a la vez, que es donde está el valor: el día que uno no tolere unas
+# líneas dadas, se ve aquí y no en el archivo de un contribuyente.
+
+DRIVERS_DE_ASIENTOS = ("asiento_contable", "concar", "csv", "ple", "ple_plan", "starsoft")
+DENOMINACIONES_DE_PRUEBA = {"631101": "TRANSPORTE DE CARGA", "401111": "IGV CUENTA PROPIA",
+                            "421201": "FACTURAS POR PAGAR M.N.", "421203": "DETRACCIONES POR PAGAR"}
+
+
+def _doc_con_imputacion() -> dict:
+    from util import cargar_golden
+
+    libro, comps = cargar_golden("compras_202601.json")
+    crudos = [dict(c.a_dict(), id_externo=f"f{n}") for n, c in enumerate(comps, 1)]
+    return {"open_accounting": "1.0", "libro": libro.a_dict(), "comprobantes": crudos,
+            "imputaciones": {f"f{n}": {"cuenta_contable": "631101", "centro_costo": "001"}
+                             for n in range(1, len(crudos) + 1)}}
+
+
+def _bytes_de(r: dict) -> bytes:
+    return base64.b64decode(r["contenido_base64"]) if r.get("contenido_base64") else r["texto"].encode("utf-8")
+
+
+@pytest.mark.parametrize("driver", DRIVERS_DE_ASIENTOS)
+def test_el_asiento_que_el_motor_produce_vuelve_a_entrar_y_da_el_mismo_archivo(driver):
+    """El mismo archivo byte a byte por las dos puertas. Si difieren, la vuelta está rearmando el asiento en vez de
+    usarlo —y entonces le cambia el correlativo a un asiento que puede haber salido ya—.
+
+    Incluye el Excel de CONCAR y el ZIP de STARSOFT, no solo los TXT: la rama es del pipeline, así que vale para
+    cualquier driver de la forma `desde_lineas`."""
+    doc = _doc_con_imputacion()
+    cfg = {"denominacion_cuentas": DENOMINACIONES_DE_PRUEBA}
+    directo = api.exportar(doc, driver=driver, configuracion=cfg, fecha="2026-10-01", incluir_observados=True)
+    armado = api.generar_asiento(doc, driver=driver, configuracion=cfg, incluir_observados=True)
+    vuelta = api.exportar(dict(doc, asiento=armado["asiento"]), driver=driver, configuracion=cfg,
+                          fecha="2026-10-01", incluir_observados=True)
+    assert _bytes_de(vuelta) == _bytes_de(directo)
+    assert vuelta["archivo"] == directo["archivo"]
+    assert vuelta["_exportacion"]["huella"] == directo["_exportacion"]["huella"]
+    assert vuelta["resumen"] == directo["resumen"], "el resumen tiene que decir lo mismo por las dos puertas"
+
+
+def test_un_documento_sin_comprobantes_sigue_sin_exportar_aunque_traiga_asiento():
+    """La puerta NO es «un asiento desnudo vale». El 5.1 saca cuatro de sus veintiún campos de la cabecera del
+    comprobante —el tipo de documento del tercero, la serie, el número y el vencimiento—, y el del vencimiento no es
+    recuperable de las líneas: el núcleo rellena el que falta con la fecha de emisión y la línea ya perdió la
+    distinción. Así que los dos bloques, como el documento que escribe `asiento_contable`."""
+    doc = _doc_con_imputacion()
+    armado = api.generar_asiento(doc, driver="ple", incluir_observados=True)
+    solo_asiento = {k: v for k, v in dict(doc, asiento=armado["asiento"]).items() if k != "comprobantes"}
+    with pytest.raises(api.DocumentoInvalido, match="No hay comprobantes"):
+        api.exportar(solo_asiento, driver="ple", fecha="2026-10-01", incluir_observados=True)
+
+
 def _del_rol(asiento: dict, *roles: str) -> list[tuple[str, str]]:
     return [(ln["cuenta"], ln["importe"]) for ln in asiento["asiento"] if ln["rol"] in roles]
 

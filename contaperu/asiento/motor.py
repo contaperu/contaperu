@@ -408,6 +408,88 @@ def lineas_e_indice_del_libro(libro: Libro, comprobantes: list[Comprobante], con
     return lineas, rangos, tuple(indice)
 
 
+class LineaSinComprobante(ValueError):
+    """Una línea del asiento que llega de fuera y no se puede atribuir a ningún comprobante del documento."""
+
+
+def indice_de_lineas_dadas(comprobantes: list[Comprobante], lineas: list[LineaDiario],
+                           ) -> tuple[ComprobanteDelAsiento, ...]:
+    """Unas líneas que YA vienen armadas → el índice de qué tramo es de qué comprobante (5.2).
+
+    Es la vuelta de `lineas_e_indice_del_libro`: ahí el índice nace de generar las líneas, y aquí de reconocerlas.
+    Hace falta porque un driver de asientos escribe cada fila **con hechos del comprobante que ninguna línea
+    guarda** —el Libro Diario del PLE saca cuatro de sus veintiún campos de la cabecera: el tipo de documento del
+    tercero, la serie, el número y el vencimiento—, y sin índice saldrían incompletas en silencio
+    (`drivers/kit/forma.exigir_indice`).
+
+    **El enlace es `linea.documento.id_externo`**, que el estándar puso en la línea justamente para esto
+    ([enmienda 0009](../../estandar/enmiendas/0009-id-externo-en-la-linea.md)). No se adivina por cuenta ni por
+    importe.
+
+    Y **no se renumera nada**: el `sub_diario` y el `correlativo` salen de las propias líneas, así que el CUO que
+    escriba el destino es el que puso quien las produjo. Renumerar aquí cambiaría el número de un asiento que ya
+    salió.
+
+    Dos cosas se rechazan en voz alta, porque pasarlas por alto daría un archivo incompleto que parece correcto:
+    una línea sin `id_externo` o con uno que ningún comprobante tiene, y las líneas de un mismo comprobante **no
+    contiguas** —el índice es un tramo `desde`/`hasta`, así que un asiento partido en dos trozos no se puede
+    representar—."""
+    de_su_id: dict[str, tuple[int, Comprobante]] = {}
+    for posicion, c in enumerate(comprobantes):
+        if c.id_externo:
+            de_su_id[str(c.id_externo)] = (posicion, c)
+
+    indice: list[ComprobanteDelAsiento] = []
+    vistos: set[str] = set()
+    i = 0
+    while i < len(lineas):
+        id_externo = str((lineas[i].documento or {}).get("id_externo") or "")
+        if not id_externo:
+            raise LineaSinComprobante(
+                f"la línea {i + 1} del asiento no dice de qué comprobante es: le falta `documento.id_externo`, "
+                "que es el enlace con el bloque `comprobantes`")
+        if id_externo not in de_su_id:
+            raise LineaSinComprobante(
+                f"la línea {i + 1} del asiento dice ser del comprobante {id_externo!r}, que no está en el documento")
+        if id_externo in vistos:
+            raise LineaSinComprobante(
+                f"las líneas del comprobante {id_externo!r} no van seguidas: el índice de un asiento es un tramo, "
+                "así que un comprobante partido en dos trozos no se puede representar")
+        vistos.add(id_externo)
+        desde = i
+        while i < len(lineas) and str((lineas[i].documento or {}).get("id_externo") or "") == id_externo:
+            i += 1
+        posicion, c = de_su_id[id_externo]
+        indice.append(ComprobanteDelAsiento(posicion=posicion, sub_diario=lineas[desde].sub_diario,
+                                            correlativo=lineas[desde].correlativo, desde=desde, hasta=i,
+                                            cabecera=cabecera_de(c)))
+    return tuple(indice)
+
+
+def rangos_de_lineas_dadas(indice: tuple[ComprobanteDelAsiento, ...]) -> dict[str, dict]:
+    """El rango de correlativos que usó cada sub-diario, leído de unas líneas dadas en vez de al numerarlas.
+
+    Mantiene la forma que `numerar_en_orden` devuelve, para que el resumen de una exportación diga lo mismo por las
+    dos puertas: hasta la 1.2.0 la respuesta cambiaba según por dónde entrara el mismo documento, y eso se arregló
+    una vez."""
+    rangos: dict[str, dict] = {}
+    for entrada in indice:
+        if not entrada.sub_diario or not entrada.correlativo:
+            continue
+        codigo = str(entrada.correlativo)
+        n = int(codigo[-4:] or 0)
+        r = rangos.setdefault(entrada.sub_diario, {"desde": n, "hasta": n, "comprobantes": 0, "mes": codigo[:-4]})
+        r["desde"], r["hasta"] = min(r["desde"], n), max(r["hasta"], n)
+        r["comprobantes"] += 1
+    # Las mismas cuatro claves derivadas que pone `numerar_en_orden`, y en el mismo orden: el resumen de una
+    # exportación tiene que decir lo mismo por las dos puertas.
+    for r in rangos.values():
+        mes = r.pop("mes")
+        r["desde_codigo"], r["hasta_codigo"] = f"{mes}{r['desde']:04d}", f"{mes}{r['hasta']:04d}"
+        r["desborda"] = r["hasta"] > 9999
+    return rangos
+
+
 def lineas_del_libro(libro: Libro, comprobantes: list[Comprobante], config: dict, correlativos: dict[str, int],
                      opciones: Any = None, centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
                      ) -> tuple[list[LineaDiario], dict[str, dict]]:
