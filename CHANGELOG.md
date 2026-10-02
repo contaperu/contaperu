@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [5.1.0] — 2026-10-02
 
 Dos deudas que la 5.0.0 dejó anotadas, las dos pequeñas y las dos de algo que ya había mordido.
 
@@ -2728,6 +2728,7 @@ exporta al formato que pide un sistema contable. Sin estado, sin base de datos y
   como texto, y admite publicarse tras un proxy declarando el dominio.
 - 148 tests, sin red y sin credenciales, sobre Python 3.11, 3.12 y 3.13.
 
+[5.1.0]: https://github.com/contaperu/contaperu/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/contaperu/contaperu/compare/v4.3.0...v5.0.0
 [2.3.0]: https://github.com/contaperu/contaperu/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/contaperu/contaperu/compare/v2.1.0...v2.2.0
