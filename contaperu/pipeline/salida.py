@@ -75,7 +75,7 @@ def lineas_de_texto(libro: Libro, comprobantes: list[Comprobante], driver: str, 
 
 
 def _resumen(comprobantes: list[Comprobante], incluidos: list[Comprobante], errores: list, opciones: Any,
-             fuera: list[Comprobante] | None = None) -> dict:
+             fuera: list[Comprobante] | None = None, config: dict | None = None) -> dict:
     def signo(c: Comprobante) -> Decimal:
         return Decimal(-1) if (opciones.signo_nc and c.es_nota_credito) else Decimal(1)
 
@@ -88,6 +88,18 @@ def _resumen(comprobantes: list[Comprobante], incluidos: list[Comprobante], erro
         # Comprobantes que este driver no puede llevar (recibos por honorarios en
         # el SIRE): se anota para que el histórico no parezca que se perdieron.
         "fuera_del_destino": len(fuera or []),
+        # Las facturas que el contador marcó como anuladas por una nota de crédito (5.3.1). Se cuentan
+        # por el mismo motivo que la línea de arriba: la marca hace desaparecer dos líneas del asiento
+        # —el recorte y la provisión del depósito— y hasta ahora no quedaba rastro de ello en ninguna
+        # parte. **`anuladas_por_nota` y no `anuladas`**: «anulado» ya significa otra cosa en este
+        # dominio, la comunicación de baja de SUNAT, y son dos hechos distintos.
+        #
+        # **Sale 0 en un registro tributario**, y no por descuido: a un driver que no lleva cuentas se le
+        # entrega `config=None` a propósito (`exportar_archivo`), así que aquí no hay imputación que
+        # mirar. Encaja con lo que la marca significa — «el asiento es una cosa y el registro es otra»:
+        # en el TXT del SIRE el comprobante va entero y la marca no cambia ni un byte, así que no hay
+        # nada que contar.
+        "anuladas_por_nota": sum(1 for c in incluidos if asi.anulada_por_nota(c, config or {})),
         "total": str(sum((c.total * signo(c) for c in incluidos), Decimal("0.00"))),
         "igv": str(sum((c.igv * signo(c) for c in incluidos), Decimal("0.00"))),
     }
@@ -130,7 +142,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
         else:
             contenido, extra = armado.desde_comprobantes(modulo, libro, incluidos, opciones, config)
         nombre = modulo.nombre(libro, opciones)
-        resumen = {**_resumen(comprobantes, incluidos, errores, opciones, fuera), **extra}
+        resumen = {**_resumen(comprobantes, incluidos, errores, opciones, fuera, config), **extra}
         tipo = getattr(modulo, "CONTENT_TYPE", "application/octet-stream")
         # Comprimir es del FORMATO, no de la forma del driver: lo pide un sistema que importa un archivo
         # envuelto (STARSOFT), y hasta la 2.3 solo sabía hacerlo la rama de texto, que es la del SIRE. Se
@@ -159,7 +171,7 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
     return Exportado(
         nombre=nombre, nombre_comprimido=nombre_comprimido, formato=formato, driver=driver,
         texto=texto, comprimido=comprimido, comprobantes=len(incluidos),
-        resumen=_resumen(comprobantes, incluidos, errores, opciones, fuera),
+        resumen=_resumen(comprobantes, incluidos, errores, opciones, fuera, config),
         por_comprobante=armado.identidades(libro, incluidos),
     )
 

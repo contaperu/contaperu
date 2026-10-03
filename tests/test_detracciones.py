@@ -565,6 +565,40 @@ def test_el_diagnostico_lo_dice_y_a_quien_pedirselo():
         assert motivos["anulada_con_deposito"]["pedir_a"] == "contador", driver
 
 
+def test_marcada_como_anulada_no_se_le_pide_el_codigo_que_no_va_a_usar():
+    """El hueco de la 5.3, cerrado en la 5.3.1 (John, 2-oct-2026): «es ilógico que pida la detracción cuando el
+    usuario colocó que está anulada la factura de compra».
+
+    El campo nuevo se cableó donde nacen las líneas y no bajó hasta la lista de faltas, así que una compra del SIRE
+    ya marcada seguía sin exportar hasta que le inventaran un código del Catálogo 54 **que el asiento no iba a
+    usar**: `motor.lineas_del_comprobante` ya había decidido no provisionarla.
+    """
+    doc, configuracion, imputacion = _doc_marcado({"anulada_por_nota": True})
+    d = api.diagnosticar(doc, driver="concar", configuracion=configuracion, imputacion=imputacion)
+    assert d["faltantes"]["sin_codigo_detraccion"] == []
+    assert d["listo_para_exportar"] is True
+    assert api.exportar(doc, driver="concar", configuracion=configuracion, imputacion=imputacion)["archivo"]
+
+
+def test_sin_marcarla_la_misma_compra_del_sire_sigue_pidiendo_su_codigo():
+    """La otra mitad, y es la que impide que lo de arriba afloje la regla de la 0020: la exención es de la MARCA, no
+    de venir del SIRE. En el mes real de setiembre son 221 de 3018 las que siguen bloqueadas."""
+    doc, configuracion, imputacion = _doc_marcado()
+    d = api.diagnosticar(doc, driver="concar", configuracion=configuracion, imputacion=imputacion)
+    assert d["faltantes"]["sin_codigo_detraccion"] == ["F001-1"]
+
+
+def test_la_exencion_no_alcanza_a_la_cuenta_ni_al_centro():
+    """Una factura anulada **sigue dando tres líneas**, así que sigue necesitando su cuenta. Por eso la exclusión
+    vive dentro de `comprobantes_sin_codigo_detraccion` y no en `faltantes_para`, donde eximiría de todo."""
+    doc, _configuracion, _imputacion = _doc_marcado()
+    imputacion = {"f1": {"anulada_por_nota": True}}            # marcada y SIN cuenta contable
+    d = api.diagnosticar(doc, driver="concar", configuracion={"usa_centros_costo": False}, imputacion=imputacion)
+    assert d["faltantes"]["sin_codigo_detraccion"] == []
+    assert d["faltantes"]["sin_cuenta"] == ["F001-1"]
+    assert d["listo_para_exportar"] is False
+
+
 def test_el_motor_avisa_de_la_factura_que_tiene_nota_de_credito():
     """**El primer cruce de dos comprobantes del motor.** Hacía falta porque el enlace es de una sola dirección: la
     nota dice a qué factura apunta y la factura no dice nada — medido sobre un RCE real, ninguna de sus 41 columnas
@@ -590,6 +624,78 @@ def test_el_motor_avisa_de_la_factura_que_tiene_nota_de_credito():
     # La nota NO se avisa a sí misma: el aviso es de la factura, que es la que decide si da cinco líneas o tres.
     de_la_nota = next(c for c in r["comprobantes"] if c["numero"] == "13")
     assert not [o for o in de_la_nota["observaciones"] if o["codigo"] == "FACTURA_CON_NOTA_DE_CREDITO"]
+
+
+def test_la_factura_ya_marcada_no_recibe_el_aviso_que_le_pide_marcarla():
+    """El mismo código, otro texto (5.3.1). Decirle «márcala en su imputación» a una factura que YA está marcada es
+    pedir algo hecho, y el contador aprende a no leer un aviso que no sabe si le habla a él."""
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+           "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1"),
+                            dict(SU_NOTA_DE_CREDITO, id_externo="f2")],
+           "imputaciones": {"f1": {"cuenta_contable": "631101", "anulada_por_nota": True},
+                            "f2": {"cuenta_contable": "631101"}}}
+    r = api.revisar(doc)
+    factura = next(c for c in r["comprobantes"] if c["numero"] == "209")
+    avisos = [o for o in factura["observaciones"] if o["codigo"].startswith("FACTURA_")]
+    assert len(avisos) == 1, "un aviso por factura, nunca dos"
+    assert avisos[0]["codigo"] == "FACTURA_CON_NOTA_DE_CREDITO" and avisos[0]["nivel"] == "aviso"
+    assert "E001-13" in avisos[0]["texto"] and "no se provisiona" in avisos[0]["texto"]
+    assert "márcala" not in avisos[0]["texto"]
+
+
+def test_la_marcada_sin_su_nota_en_el_lote_tambien_deja_rastro():
+    """El tercer aviso, y el que John pidió: «correcto avisar pero no detener» (2-oct-2026).
+
+    Es el caso NORMAL —una factura de setiembre que se anula con una nota de octubre—, y por eso el texto no es un
+    reproche: dice lo que pasa. Sin él, la marca hacía desaparecer dos líneas del asiento y nada lo contaba."""
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+           "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1")],
+           "imputaciones": {"f1": {"cuenta_contable": "631101", "anulada_por_nota": True}}}
+    r = api.revisar(doc)
+    factura = r["comprobantes"][0]
+    avisos = [o for o in factura["observaciones"] if o["codigo"].startswith("FACTURA_")]
+    assert [o["codigo"] for o in avisos] == ["FACTURA_ANULADA_SIN_NOTA"]
+    assert avisos[0]["nivel"] == "aviso"
+    # Y NO detiene: el mes exporta igual, que es la condición que puso John.
+    exportado = api.exportar(doc, driver="concar", configuracion={"usa_centros_costo": False}, fecha="2026-10-01")
+    assert exportado["resumen"]["filas"] == 3, "la factura anulada da tres líneas, y se exporta"
+
+
+def test_sin_marcar_y_sin_nota_no_se_avisa_de_nada():
+    """La otra mitad del aviso nuevo: no sale por tener detracción, sale por estar MARCADA. Si saliera siempre sería
+    ruido en un mes de tres mil filas, que es lo que este repositorio ya se niega a hacer con las notas parciales."""
+    doc = {"open_accounting": "1.0",
+           "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+           "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1")],
+           "imputaciones": {"f1": {"cuenta_contable": "631101"}}}
+    r = api.revisar(doc)
+    assert not [o for o in r["comprobantes"][0]["observaciones"] if o["codigo"].startswith("FACTURA_")]
+
+
+def test_el_resumen_cuenta_las_anuladas_para_que_no_desaparezcan_en_silencio():
+    """Lo que la marca hace es quitar dos líneas, y hasta la 5.3.1 eso no se contaba en ninguna parte.
+
+    `anuladas_por_nota` y no `anuladas`: «anulado» ya significa otra cosa en este dominio —la comunicación de baja de
+    SUNAT— y son dos hechos distintos. Un nombre por cosa."""
+    def doc(anulada):
+        return {"open_accounting": "1.0",
+                "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
+                "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1"),
+                                 dict(SU_NOTA_DE_CREDITO, id_externo="f2")],
+                "imputaciones": {"f1": {"cuenta_contable": "631101", "anulada_por_nota": anulada},
+                                 "f2": {"cuenta_contable": "631101"}}}
+    cfg = {"usa_centros_costo": False}
+    sin = api.exportar(doc(False), driver="concar", configuracion=cfg, fecha="2026-10-01")["resumen"]
+    con = api.exportar(doc(True), driver="concar", configuracion=cfg, fecha="2026-10-01")["resumen"]
+    assert (sin["anuladas_por_nota"], sin["filas"]) == (0, 8)
+    assert (con["anuladas_por_nota"], con["filas"]) == (1, 6), "dos líneas menos, y el resumen lo dice"
+    # Y en un registro tributario sale 0, que es lo correcto: a un driver que no lleva cuentas se le entrega
+    # `config=None` a propósito, y la marca es del ASIENTO. En el TXT del SIRE el comprobante va entero y no
+    # cambia ni un byte, así que no hay nada que contar — la misma frontera que ya traza `sin_efecto_contable`.
+    del_sire = api.exportar(doc(True), driver="sire", configuracion=cfg, fecha="2026-10-01")["resumen"]
+    assert del_sire["anuladas_por_nota"] == 0 and del_sire["comprobantes"] == 2
 
 
 def test_una_nota_de_credito_parcial_no_dispara_el_aviso():

@@ -45,6 +45,7 @@ PEDIR_A: dict[str, str] = {
     "ADQUIRENTE_NO_COINCIDE": CONTADOR, "ANTICIPO": CONTADOR, "BOLETA_SIN_DOC": CONTADOR,
     "COMPRA_BOLETA": CONTADOR, "CREDITO_FISCAL_FUERA_DE_PLAZO": CONTADOR, "DETRACCION_TASA_DISTINTA": CONTADOR,
     "EMISOR_NO_COINCIDE": CONTADOR, "FACTURA_CON_NOTA_DE_CREDITO": CONTADOR,
+    "FACTURA_ANULADA_SIN_NOTA": CONTADOR,
     "GRATUITAS": CONTADOR, "IGV_TASA_REDUCIDA": CONTADOR,
     "MEDIO_PAGO_DESCONOCIDO": CONTADOR, "NOMBRE_FALTA": CONTADOR,
     "PERIODO_ANTERIOR": CONTADOR, "RETENCION_NO_APLICA": CONTADOR, "RETENCION_TASA": CONTADOR,
@@ -168,7 +169,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
         return _sin_configuracion(libro, driver, exige, todos, errores)
     config = con_imputacion(config_aplicada(configuracion, driver), imputacion_del_documento(doc, imputacion, todos), todos)
     detracciones.normalizar(todos, config)
-    validar.revisar(todos, libro, previas)
+    validar.revisar(todos, libro, previas, config=config)
     es_venta = libro.es_venta
 
     excluidos = [c for c in todos if c.excluida]

@@ -4,6 +4,57 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [5.3.1] — 2026-10-02
+
+Lo que el campo nuevo de la 5.3 no alcanzó. `imputacion.anulada_por_nota` se cableó donde nacen las líneas
+(`motor.lineas_del_comprobante`) y no se propagó a las tres cosas que miran lo mismo, así que el motor exigía un dato
+y acto seguido lo ignoraba.
+
+### Arreglado
+
+- **A una factura marcada como anulada ya no se le pide el código del Catálogo 54.** Era el caso de John
+  (2-oct-2026): importas la propuesta de compras del SIRE, SUNAT marca unas cuantas con detracción, declaras una
+  anulada **y la exportación se seguía negando** hasta inventarle un código. Y el código no servía para nada —puesto,
+  el asiento sale idéntico: tres líneas, porque `motor.lineas_del_comprobante` ya había decidido no provisionarla—.
+  - **No afloja la regla de la [enmienda 0020](estandar/enmiendas/0020-la-marca-de-detraccion-del-sire.md)**, que
+    existe porque «si el contador acepta el txt está consintiendo que tiene detracción». La marca es una declaración
+    igual de explícita del mismo contador, y más fuerte: no dice «esta no tiene detracción», dice «esta factura ya no
+    existe». La compra marcada por SUNAT que nadie declaró anulada **sigue bloqueada** — 221 de 3018 en el mes real.
+  - La exención vive dentro de `comprobantes_sin_codigo_detraccion` y no en `faltantes_para`, donde está el otro
+    filtro de este estilo: `sin_efecto_contable` exime de **todas** las faltas, y esto solo de la detracción. A una
+    factura anulada se le siguen pidiendo su cuenta, su centro y su sigla, porque da tres líneas y entra entera en el
+    registro.
+- **`cuentas_del_asiento` vuelve a decir lo mismo que el motor.** Repetía su condición menos la marca, así que una
+  factura anulada seguía declarando la cuenta por pagar de la detracción y el PLE pedía su denominación para una
+  cuenta que ninguna línea toca. Su docstring dice que «lo que ata las dos listas es un test»: ese test no lo cazó
+  porque ninguno de sus casos llevaba la marca, y ahora sí.
+- **La configuración con las imputaciones se asigna al revisar.** `con_imputacion` devuelve un dict nuevo y en esa
+  ruta el valor de retorno se tiraba, así que `revisar` y `diagnosticar` veían documentos distintos. No se notaba
+  porque nada de lo que corría después la miraba.
+
+### Añadido
+
+- **Tres avisos para la factura anulada, y ninguno detiene** (John: «correcto avisar pero no detener»). La marca la
+  pone el contador a mano y hasta ahora no dejaba ningún rastro: dos líneas del asiento desaparecían y nada lo decía.
+  **Un aviso por factura, nunca dos**: la que tiene su nota en el lote y no está marcada sigue recibiendo el de la
+  5.3, que la invita a marcarla; la que ya está marcada recibe ese mismo código con otro texto, porque pedirle que
+  haga lo que ya hizo enseña a no leer los avisos; y la marcada **sin** nota en el lote estrena
+  `FACTURA_ANULADA_SIN_NOTA`, que es el caso normal —una factura de setiembre anulada por una nota de octubre— y por
+  eso no es un reproche: dice lo que pasa.
+- **`resumen.anuladas_por_nota`**, al lado de `con_aviso` y `fuera_del_destino`. Se llama así y no `anuladas` porque
+  «anulado» ya significa otra cosa en este dominio —la comunicación de baja de SUNAT— y son dos hechos distintos.
+  Sale **0 en un registro tributario**, y es correcto: la marca es del asiento, y en el TXT del SIRE el comprobante va
+  entero sin cambiar un byte.
+- **`AnuladaConDeposito`, `anulada_por_nota` y `comprobantes_anulados_con_deposito` en la superficie pública.** Sus
+  nueve hermanas se exportaban y estas tres no, así que quien integra no podía escribir
+  `except asiento.AnuladaConDeposito` — justo la guarda que más conviene distinguir, porque no dice «te falta un
+  dato» sino «dos hechos se contradicen».
+
+### Cómo migrar
+
+Nada que hacer. Lo único que cambia de comportamiento es que **deja de bloquear** un caso que bloqueaba sin motivo, y
+aparecen dos claves nuevas: una en el resumen y un código de observación más, los dos aditivos.
+
 ## [5.3.0] — 2026-10-02
 
 Dos cosas que salieron al importar notas de crédito en un CONCAR real (John, 2-oct-2026), con un **SIRE RCE de

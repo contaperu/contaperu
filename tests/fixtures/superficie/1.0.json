@@ -242,6 +242,7 @@
   "exigir": ""
  },
  "contaperu.asiento": {
+  "AnuladaConDeposito": "",
   "CENTRO_EN_ANEXO": "",
   "CONFIGURACION_DEL_ASIENTO": "",
   "CONTADOR": "",
@@ -269,8 +270,10 @@
   "SinCorrelativo": "",
   "SinCuenta": "",
   "SinSigla": "",
+  "anulada_por_nota": "",
   "asienta_sin_efecto": "",
   "cabecera_de": "",
+  "comprobantes_anulados_con_deposito": "",
   "comprobantes_sin_centro": "",
   "comprobantes_sin_codigo_detraccion": "",
   "comprobantes_sin_cuenta": "",

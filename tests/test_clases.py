@@ -132,6 +132,11 @@ def aplicada(**general) -> dict:
 @pytest.mark.parametrize("descripcion,campos,es_venta", [
     ("factura de compra con IGV", {}, False),
     ("factura con detracción", {"detraccion": {"codigo": "027", "porcentaje": "4"}}, False),
+    # El caso que faltaba, y que dejó las dos listas separadas entre la 5.3 y la 5.3.1: `anulada_por_nota` entró
+    # en la condición del motor y no en la de `cuentas_del_asiento`, así que esta factura seguía declarando la
+    # cuenta por pagar de la detracción y el PLE pedía su denominación para una cuenta que ninguna línea toca.
+    ("factura con detracción ANULADA por una nota, que no la provisiona",
+     {"detraccion": {"codigo": "027", "porcentaje": "4"}, "anulada_por_nota": True}, False),
     ("boleta de compra, que no da crédito fiscal y no lleva línea de IGV",
      {"tipo_cp": "03", "base_gravada": "0", "igv": "0", "inafecto": "118.00"}, False),
     ("recibo por honorarios con retención de 4ta",
@@ -156,14 +161,19 @@ def test_las_cuentas_que_el_diagnostico_mira_son_las_que_el_asiento_usa(descripc
 
     from contaperu.asiento import lineas_del_comprobante
     from contaperu.asiento import resolucion
-    from util import comprobante
+    from util import IMPUTACIONES, comprobante
 
+    # La marca vive en la IMPUTACIÓN, no en el comprobante, así que no puede viajar en `campos`.
+    campos = dict(campos)
+    anulada = campos.pop("anulada_por_nota", False)
     base = {"tipo_cp": "01", "serie": "F001", "numero": "500", "fecha_emision": date(2026, 1, 10),
             "contraparte_tipo_doc": "6", "contraparte_doc": "20131312955",
             "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC", "moneda": "PEN", "base_gravada": "100.00",
             "igv": "18.00", "total": "118.00", "destino_igv": "" if es_venta else "DG",
             "cuenta_contable": "701101" if es_venta else "634301"}
     c = comprobante(**{**base, **campos})
+    if anulada:
+        IMPUTACIONES[c.id_externo]["anulada_por_nota"] = True
     config = aplicada(cuentas=CUENTAS_DE_PRUEBA)
     del_asiento = {ln.cuenta for ln in lineas_del_comprobante(c, config, (date(2026, 1, 1), date(2026, 1, 31)),
                                                               "000001", es_venta=es_venta)}

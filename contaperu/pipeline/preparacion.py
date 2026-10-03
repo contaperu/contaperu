@@ -355,9 +355,13 @@ def revisar(doc: dict, configuracion: dict | None = None, imputacion: dict | Non
     comprobantes = comprobantes_de(doc)
     previas = claves_previas_de(claves_previas)
     config = config_aplicada(configuracion)
-    con_imputacion(config, imputacion_del_documento(doc, imputacion, comprobantes), comprobantes)
+    # **Se ASIGNA**, y hasta la 5.3.1 no se hacía: el valor de retorno se tiraba, así que por esta ruta la
+    # configuración se quedaba sin `imputaciones` mientras que la de `diagnosticar` sí las lleva. Las dos veían
+    # documentos distintos. No se notaba porque nada de lo que corre después la miraba; el aviso de la factura
+    # anulada sí, y la marca vive justo ahí.
+    config = con_imputacion(config, imputacion_del_documento(doc, imputacion, comprobantes), comprobantes)
     limpiadas = detracciones.normalizar(comprobantes, config)
-    validar.revisar(comprobantes, libro, previas)
+    validar.revisar(comprobantes, libro, previas, config=config)
     errores = [c for c in comprobantes if c.tiene_errores]
     avisos = [c for c in comprobantes if c.observaciones and not c.tiene_errores]
     salida = documento(libro, comprobantes)
@@ -428,7 +432,7 @@ def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, im
         raise DocumentoInvalido("No hay comprobantes que procesar.")
     config = con_imputacion(config_aplicada(configuracion, driver), imputacion_del_documento(doc, imputacion, todos), todos)
     detracciones.normalizar(todos, config)
-    validar.revisar(comprobantes, libro, previas)
+    validar.revisar(comprobantes, libro, previas, config=config)
     if not incluir_observados:
         con_error = [c for c in _los_que_van(comprobantes, driver) if c.tiene_errores]
         if con_error:

@@ -300,10 +300,27 @@ def comprobantes_sin_codigo_detraccion(comprobantes: list[Comprobante], config: 
     con otro caso real. Y usa `normalizar_una` para decidir si el código sirve, en vez de repetir aquí la prueba: una
     segunda copia de esa regla acabaría diciendo algo distinto.
 
-    Las ventas nunca entran: el RVIE no tiene columna de detracción, así que el lector solo marca compras."""
+    Las ventas nunca entran: el RVIE no tiene columna de detracción, así que el lector solo marca compras.
+
+    **Y las que el contador declaró anuladas tampoco** (5.3.1). El campo `anulada_por_nota` entró en la 5.3
+    cableado solo donde nacen las líneas (`motor.lineas_del_comprobante`) y no bajó hasta aquí, así que una compra
+    del SIRE ya marcada seguía sin poder exportar hasta que le inventaran un código **que el asiento no iba a usar**:
+    puesto el código, las líneas salen exactamente igual. Pedir un dato y acto seguido ignorarlo no es una guarda,
+    es una friccion.
+
+    No afloja la regla de la 0020, que existe porque «si el contador acepta el txt está consintiendo que tiene
+    detracción» (John). `anulada_por_nota` es una declaración igual de explícita del mismo contador, y más fuerte:
+    no dice «esta no tiene detracción», dice «esta factura ya no existe». La compra marcada por SUNAT que nadie
+    declaró anulada sigue bloqueada, que son 221 de 3018 en el mes real de setiembre. Y la contradicción de verdad
+    —anulada con su depósito ya hecho— la sigue parando `comprobantes_anulados_con_deposito`, que va aparte.
+
+    La exclusión va AQUÍ y no en `faltantes_para`, donde vive el otro filtro de este estilo: `sin_efecto_contable`
+    exime de **todas** las faltas, y esto solo de la detracción. A una factura anulada se le siguen pidiendo su
+    cuenta, su centro y su sigla, porque sigue dando tres líneas y entra entera en el registro."""
     codigos = codigos_de(config)
     return [c for c in comprobantes
             if isinstance(c.detraccion, dict) and c.detraccion.get(MARCA_SIRE)
+            and not anulada_por_nota(c, config)
             and normalizar_una(con_el_codigo_del_contador(c, config), codigos) is None]
 
 
@@ -315,7 +332,12 @@ def cuentas_del_asiento(c: Comprobante, config: dict, es_venta: bool = False) ->
     cuenta sin clase en la del tercero o en la del IGV —que vienen de la imputación y de la configuración— pasaba el
     diagnóstico y salía en un documento que el propio esquema rechaza. Quién decide qué líneas hay es
     `motor.lineas_del_comprobante`, que no se puede llamar desde aquí porque él importa esto; lo que ata las dos
-    listas es un test (`tests/test_clases.py`), no la buena voluntad."""
+    listas es un test (`tests/test_clases.py`), no la buena voluntad.
+
+    Ese lazo estuvo roto entre la 5.3 y la 5.3.1: `anulada_por_nota` entró en la condición de allí y no en la de
+    aquí, así que una factura anulada seguía declarando la cuenta por pagar de la detracción y el PLE pedía su
+    denominación (`cuentas_sin_denominacion`) para una cuenta que ninguna línea toca. El test no lo cazó porque
+    ninguno de sus casos llevaba la marca; ahora sí."""
     cuentas_config = config.get("cuentas") or {}
     por_defecto = CONFIG_POR_DEFECTO["cuentas"]
     moneda = (c.moneda or "PEN").upper()
@@ -328,7 +350,7 @@ def cuentas_del_asiento(c: Comprobante, config: dict, es_venta: bool = False) ->
     if retenido > 0:
         cuentas.append(str(cuentas_config.get("retencion_4ta") or por_defecto["retencion_4ta"]))
     cuentas.append(cuenta_tercero(c, config, es_venta))
-    if not es_venta and not es_honorarios and tiene_detraccion(c):
+    if not es_venta and not es_honorarios and tiene_detraccion(c) and not anulada_por_nota(c, config):
         _, detraido = monto_detraccion(c, config)
         if detraido > 0:
             cuentas.append(cuenta_por_pagar_detraccion(cuentas_config, moneda))
