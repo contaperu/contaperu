@@ -79,8 +79,15 @@ lee formatos, propone con motivo y arma asientos, siempre como funciones puras.
 **Lo que sigue sin verificar**, y se revisa al abrir el hito que lo usa:
 - Qué hace CONCAR al importar una cuenta, un anexo o un centro de costo que no existen (C10).
 - La composición exacta del CAR del SIRE (0.0).
-- La descarga del XML de los comprobantes recibidos desde SOL o el SIRE (C9): el manual de la API del SIRE de compras no
-  la menciona.
+- ~~La descarga del XML de los comprobantes recibidos desde SOL o el SIRE (C9)~~ — **resuelto el
+  04-oct-2026, y la respuesta es que no hay API pública.** Existe el servicio `consultacpe` en
+  `api-cpe.sunat.gob.pe`, que entrega el PDF, el XML firmado y el CDR de un comprobante **también como
+  receptor**, y es el que usa la pantalla «Consulta de Comprobante de Pago» de SOL. Pero **SUNAT no lo ofrece
+  como recurso habilitable** para la aplicación de un contribuyente: contesta `401` a un token propio con
+  cualquier scope, mientras que una ruta mal formada contesta `404`. El `Bearer` que sí funciona lo emite SOL
+  para la sesión de una persona, no el registro de credenciales de API — por eso los servicios que venden esa
+  descarga piden la Clave SOL y no un `client_id`. **Conclusión para el estándar: el canal del adquiriente
+  sigue siendo el emisor**, que por norma debe poner el comprobante a su disposición, no SUNAT.
 - Un formato de máquina para la constancia de detracción, y el TXT de detracciones campo por campo (D1).
 - Que algún banco peruano entregue MT940 o camt (D2).
 - La primera versión del SDK de MCP que acepta anotaciones (0.2).
