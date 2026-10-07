@@ -1,4 +1,4 @@
-"""Cómo se escribe el archivo de STARSOFT Desktop: un TXT de palotes, envuelto en un ZIP.
+"""Cómo se escribe el archivo de STARSOFT Desktop: un TXT de palotes, suelto.
 
 **El formato sale del archivo de verdad** (capturas de John, 21 y 22-sep-2026): los campos separados por `|`,
 **sin fila de cabecera** —ningún TXT de los vistos la lleva, y STARSOFT podría tomarla por un asiento—, sin
@@ -31,7 +31,19 @@ _COMO_VIENE = Opciones(sanear=False)
 
 
 def nombre(libro: Libro, opciones: OpcionesArchivo = OPCIONES) -> str:
-    return nombre_de_archivo(datos.NOMBRE, libro, opciones)
+    """`C-COMPRAS_202609_<RUC>.txt`. **El nombre empieza por `C`, y no es decoración**: lo dicen los «Datos
+    generales» del manual —«el nombre del archivo de texto o Excel debe comenzar con la letra C»— y lo demostró
+    un mes real (John, 7-oct-2026).
+
+    El archivo que el motor nombraba `STARSOFT_COMPRAS_202609_<RUC>.txt` fue rechazado al importarlo, con un
+    «error de conversión de datos de carga masiva (truncado) en la fila 1, columna 2 (PERIODO)» que no habla del
+    nombre y despista; el MISMO archivo, renombrado a `C-COMPRAS_…`, entró. Los otros dos que importó ese día
+    llevaban la `C` desde el principio.
+
+    Ventas lleva la `C` igual que compras: el manual solo lo dice de compras, y queda `[por confirmar]` con un
+    archivo de ventas que entre.
+    """
+    return nombre_de_archivo("C", libro, opciones, union="-")
 
 
 def _campo(valor: Any, clase: str, opciones: OpcionesArchivo) -> str:

@@ -45,6 +45,41 @@ Lo demás que dicen los «Datos generales»: separador `|`, **un enter al final 
 codificación ANSI, **sin ningún TAB**, todo alineado a la izquierda, solo punto decimal, y el nombre
 del archivo empieza por `C` en compras.
 
+### Lo que enseñó el primer mes importado (7-oct-2026) — **la prueba de aceptación**
+
+De esa lista, la del nombre parecía la menos importante y resultó ser la que detiene la carga. John
+intentó subir un mes real de compras y STARSOFT respondió:
+
+> Error No. : -2147217900 · Descripción: Error de conversión de datos de carga masiva (truncado) en la
+> fila 1, columna 2 (PERIODO).
+
+El mensaje no habla del archivo ni del nombre, y despista: `PERIODO` son los seis caracteres de
+`202609` y la columna admite seis. Contra los **dos archivos que ese mismo día sí entraron**, los tres
+resultaron gemelos en forma —35 campos, `|`, CRLF, enter final, sin BOM ni TAB, ninguna longitud fuera
+de rango, ningún espacio sobrante—. La única diferencia: **los que entraron iban renombrados a mano**,
+«se añadió `C-` y se borró `STARSOFT`». De ahí salen las dos reglas de la 6.0:
+
+1. **El nombre empieza por `C`.** El motor lo nombraba `STARSOFT_COMPRAS_<periodo>_<RUC>.txt`, que es
+   su patrón común; ahora escribe `C-COMPRAS_…` y `C-VENTAS_…` (`drivers/starsoft/salida.nombre`).
+   Lo de ventas es decisión de John y **[por confirmar]**: el manual solo lo dice de compras.
+2. **El TXT va suelto, no en un ZIP.** «Lo que STARSOFT acepta es el TXT» (John): su pantalla de
+   importación pide el archivo de texto. De la 2.3 a la 5.3 el motor lo envolvía —se eligió por
+   parecido con el SIRE, sin un caso que lo pidiera— y nadie lo había subido para descubrirlo.
+
+⚠️ **Y una que NO hay que «arreglar»: la codificación.** Los «Datos generales» piden ANSI y el driver
+escribe **UTF-8**. Uno de los archivos que entró lleva `PAGARÉ ELECTRÓNICO` y `FACTURAS NEGOCIABLES
+FÍSICAS`, o sea los bytes `C3 89`, `C3 8D` y `C3 93` — y el `8D` ni siquiera existe en cp1252, así que
+ese archivo **no es ANSI de ninguna manera** y STARSOFT lo importó igual. Pasarlo a cp1252 sería
+cambiar lo único que está probado a cambio de cumplir una línea del manual que la máquina no aplica.
+Si algún día un archivo se rechaza **y ya empieza por `C`**, esta es la siguiente sospechosa; hasta
+entonces, no se toca.
+
+Lo mismo con la **columna 12, `TASA IGV`**: el archivo que entró la trae en `0.00` en sus 40 filas de
+proveedor (todas de destino `004`, no gravadas), de modo que el `0.00` está probado. Lo que sigue sin
+probarse es el `18.01` que escribe el motor cuando el IGV del comprobante no da la tasa exacta
+(`7.69 / 42.71`), donde el manual pide el valor fijo: queda anotado, y lo destraba el día que entre —o
+se rechace— un mes que lo lleve.
+
 ### Compras — 39 ítems, 35 escritos
 
 | # | Campo | Long. | Oblig. | Qué dice el manual |
@@ -240,9 +275,10 @@ mixta—, así que es un punto de partida como el `701101` de lo general, no una
 
 ## Lo esencial
 
-1. STARSOFT ofrece **dos vías de carga, TXT y Excel**. **Se usa la del TXT** (John, 22-sep-2026), que el
-   motor envuelve en un ZIP. Hasta ese día se había elegido la de Excel, y el driver escribía un CSV
-   provisional mientras no se conocía la plantilla.
+1. STARSOFT ofrece **dos vías de carga, TXT y Excel**. **Se usa la del TXT** (John, 22-sep-2026), y va
+   **suelto**: hasta la 5.3 el motor lo envolvía en un ZIP y su pantalla de importación no lo abre
+   (7-oct-2026). Hasta el 22-sep se había elegido la de Excel, y el driver escribía un CSV provisional
+   mientras no se conocía la plantilla.
 2. La plantilla la publica **el propio STARSOFT**; el aplicativo de los vídeos solo la rellena.
 3. El asiento va **una fila por cuenta**, con el debe/haber en su propia columna.
 4. **Máximo 4 cuentas contables por asiento** **[C 5:25]**.
@@ -748,7 +784,8 @@ Los seis campos de la última tabla son la única deuda real, y solo dos importa
 ## Lo que falta
 
 1. **Las plantillas oficiales** (compras y ventas, `.xlsx` vacías con su cabecera).
-2. **Un archivo aceptado por STARSOFT** de cada libro.
+2. ~~**Un archivo aceptado por STARSOFT**~~ de **compras**: hecho el 7-oct-2026, y de ahí salieron el
+   nombre con `C` y el TXT sin ZIP. Falta el de **ventas**, que es el que confirma la `C` en ese libro.
 3. **Completar la tabla de siglas y sub-diarios** — la columna derecha de la comparación.
 4. **Qué hace STARSOFT con el tipo de asiento al importar**: ¿arma o solo clasifica?
 5. **Formato de los datos**: fecha (`dd/mm/aaaa` en el vídeo), separador decimal, longitudes, y si el

@@ -10,7 +10,9 @@ from . import datos, proyeccion
 
 
 def nombre(libro: Libro, opciones: Opciones = datos.OPCIONES) -> str:
-    return nombre_de_archivo(datos.NOMBRE, libro, opciones)
+    """`COMPRAS_202609_<RUC>.xlsx`: **sin el sistema delante** (John, 7-oct-2026), igual que CONCAR — y por eso
+    el nombre de los dos coincide, que es una consecuencia asumida y no un descuido."""
+    return nombre_de_archivo("", libro, opciones)
 
 
 def escribir_xlsx(libro: Libro, filas: list[dict[str, Any]]) -> bytes:

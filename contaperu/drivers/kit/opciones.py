@@ -56,8 +56,10 @@ class OpcionesArchivo:
     # fechas salían en ISO. Los valores son los de `Opciones.fecha` y los traduce `kit.texto.formatear_fecha`.
     fecha: str = ""
     # El archivo viaja dentro de un ZIP con su mismo nombre base (`pipeline/salida.py`). Comprimir es del
-    # FORMATO y no de la forma del driver: lo pide STARSOFT, que es `desde_lineas`, igual que el TXT del SIRE,
-    # que es `linea`.
+    # FORMATO y no de la forma del driver: puede pedirlo un `desde_lineas` igual que el TXT del SIRE, que es
+    # `linea`. **Hoy no la usa ningún driver de serie**: la puso STARSOFT en la 2.3 y la soltó en la 6.0, cuando
+    # se supo que su pantalla de importación quiere el TXT y no el ZIP. Se queda porque es del contrato y un
+    # driver de tercero puede necesitarla; quitarla lo rompería a cambio de nada.
     comprimir: bool = False
 
     def con(self, **cambios) -> "OpcionesArchivo":

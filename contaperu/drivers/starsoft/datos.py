@@ -26,13 +26,19 @@ NOMBRE = "starsoft"
 # Un sistema contable instalado que importa un archivo (`drivers.contrato.CANALES`).
 CANAL = "legacy"
 
-# La salida es el TXT de palotes que importa STARSOFT, envuelto en un ZIP (John, 22-sep-2026). Las fechas van
-# como las escribe su hoja, `DD/MM/AAAA`, y no en el ISO del estándar: hasta la 2.2 salían en ISO porque
-# `OpcionesArchivo` no tenía dónde decirlo. Hasta entonces la salida fue un CSV, provisional, para poder
-# revisarlo columna por columna mientras no se conocía la plantilla.
-OPCIONES = OpcionesArchivo(extension=".txt", fecha="DD/MM/AAAA", comprimir=True)
+# La salida es el TXT de palotes que importa STARSOFT. Las fechas van como las escribe su hoja, `DD/MM/AAAA`, y
+# no en el ISO del estándar: hasta la 2.2 salían en ISO porque `OpcionesArchivo` no tenía dónde decirlo. Hasta
+# entonces la salida fue un CSV, provisional, para poder revisarlo columna por columna mientras no se conocía la
+# plantilla.
+#
+# **El TXT va suelto, no dentro de un ZIP** (John, 7-oct-2026): «lo que STARSOFT acepta es el TXT». De la 2.3 a
+# la 5.3 se envolvió en un ZIP —se eligió por parecido con el SIRE, sin un caso que lo pidiera— y su pantalla de
+# importación no lo abre: pide el archivo de texto. Es la otra mitad de lo que destapó el mes real del
+# 7-oct-2026, con el nombre (`salida.nombre`). Por eso `CONTENT_TYPE` es de texto: así `pipeline.respuesta` lo
+# devuelve legible además de en base64, como el CSV y los dos Excel.
+OPCIONES = OpcionesArchivo(extension=".txt", fecha="DD/MM/AAAA")
 FORMATOS = {"compra": "starsoft_txt", "venta": "starsoft_txt"}
-CONTENT_TYPE = "application/zip"
+CONTENT_TYPE = "text/plain"
 
 # Lo que STARSOFT necesita para no rechazar el archivo, además de lo que el núcleo exige a todo driver de asientos
 # (`cuenta_contable` y `tipo_cp`). **Vacío a propósito**, y las dos ausencias son decisiones:

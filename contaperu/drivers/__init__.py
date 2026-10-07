@@ -11,8 +11,9 @@ Los seis que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, sal
 - **`contasis`** — el registro de compras o de ventas en Excel que importa CONTASIS, que arma el
   asiento él mismo: una fila por comprobante. Escrito contra su plantilla oficial y aceptado:
   CONTASIS importó los archivos que genera (13-sep-2026).
-- **`starsoft`** — el TXT de palotes, dentro de un ZIP, que importa STARSOFT Desktop. Escrito contra su
-  documentación oficial; **en pruebas** hasta que alguien importe un mes de verdad.
+- **`starsoft`** — el TXT de palotes que importa STARSOFT Desktop. Escrito contra su documentación oficial y
+  **aceptado**: STARSOFT importó los archivos que genera (7-oct-2026), y de ese mes salieron el nombre que
+  empieza por `C` y el TXT sin el ZIP que lo envolvía.
 - **`csv`** — las líneas de diario en columnas, para quien todavía no tiene driver.
 - **`asiento_contable`** — el documento del estándar completo: el libro, sus comprobantes y su asiento, sin vocabulario
   legacy (sin siglas, sub-diarios ni correlativos). Es la salida para un ERP nuevo, que parte del estándar en vez de

@@ -12,7 +12,7 @@ from ...asiento.resolucion import etiquetas_sub_diario, limites_del_periodo
 from ...modelo import Libro
 from ..kit import Opciones, forma, formatear_fecha, nombre_de_archivo
 from ..kit import xlsx as kit_xlsx
-from . import datos, proyeccion
+from . import proyeccion
 from .datos import (ANCHOS, AUTOFILTRO, CABECERAS, COLUMNAS_FECHA, COLUMNAS_IMPORTE, COLUMNAS_TEXTO,
                     FORMATOS, HOJA, OPCIONES, PANEL)
 
@@ -37,7 +37,9 @@ class CorrelativoDesborda(NoExportable):
 
 
 def nombre(libro: Libro, opciones: Opciones = OPCIONES) -> str:
-    return nombre_de_archivo(datos.NOMBRE, libro, opciones)
+    """`COMPRAS_202609_<RUC>.xlsx`: **sin el sistema delante** (John, 7-oct-2026), igual que CONTASIS. El de los
+    dos coincide, y está asumido: quien exporte a los dos el mismo mes se pisa un archivo con el otro."""
+    return nombre_de_archivo("", libro, opciones)
 
 
 def escribir_xlsx(filas: list[dict[str, Any]]) -> bytes:

@@ -4,6 +4,74 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [6.0.0] — 2026-10-07
+
+Lo que STARSOFT destapó al importar su primer mes de verdad. El driver estaba escrito contra la documentación
+oficial y nunca lo había subido nadie: el día que se subió, **las dos cosas que fallaron no estaban en ninguna
+columna**, sino en cómo se llama el archivo y en si va envuelto.
+
+John intentó cargar un mes de compras y STARSOFT respondió «Error de conversión de datos de carga masiva
+(truncado) en la fila 1, columna 2 (PERIODO)», que no habla del archivo y despista: `202609` son seis
+caracteres y la columna admite seis. Contra los dos archivos que ese día **sí** entraron, los tres resultaron
+gemelos en forma —35 campos, `|`, CRLF, enter final, sin BOM ni TAB, ninguna longitud fuera de rango—. La
+única diferencia es que los que entraron iban **renombrados a mano**.
+
+### Cambios de comportamiento
+
+- **El archivo de STARSOFT se llama `C-COMPRAS_<periodo>_<RUC>.txt`** (y `C-VENTAS_…`). La regla es de su
+  manual —«Datos generales»: *el nombre del archivo debe comenzar con la letra C*—, estaba escrita en
+  `STARSOFT-INTEGRACION.md` desde el 22-sep-2026 y no la aplicaba nadie: el motor usaba su patrón común,
+  `STARSOFT_COMPRAS_…`, y por eso el archivo no entraba. Lo de ventas es decisión de John y queda `[por
+  confirmar]`, porque el manual solo lo dice de compras.
+- **El TXT de STARSOFT ya no viaja dentro de un ZIP.** «Lo que STARSOFT acepta es el TXT»: su pantalla de
+  importación pide el archivo de texto. De la 2.3 a la 5.3 se envolvió por parecido con el SIRE, sin un caso
+  que lo pidiera. **La respuesta de `exportar` cambia de forma** y es la razón de que esta versión sea mayor:
+  donde traía `zip_base64` y `archivo_zip` ahora trae `contenido_base64` y `content_type` (`text/plain`), como
+  el CSV y los dos Excel. `texto` sigue estando, porque el tipo es de texto.
+- **CONCAR y CONTASIS escriben `COMPRAS_<periodo>_<RUC>.xlsx`**, sin el nombre del sistema delante (John,
+  7-oct-2026). **Los dos coinciden**: quien exporte a CONCAR y a CONTASIS el mismo mes y RUC se pisa un
+  archivo con el otro, y está asumido — el sistema lo sabe quien llama, que es quien elige el driver.
+
+El **contenido** de los archivos no cambia ni un byte en ningún driver: lo comprueban los casos congelados de
+`test_caracterizacion`, cuyo diff es solo de nombres y de la forma de la respuesta, y el snapshot de CONCAR,
+que no se movió.
+
+### Añadido
+
+- **Tres tests que fijan lo que costó descubrir**: que el nombre de STARSOFT empieza por `C`, que el de ventas
+  también, y que lo que se descarga es el TXT y no un ZIP. Cada uno cuenta en su docstring el error que dio el
+  archivo rechazado, para que un refactor que devuelva el driver al patrón común sepa qué está rompiendo.
+- `kit.nombre_de_archivo` admite ahora **prefijo vacío** y un separador propio (`union`), que es lo que hace
+  falta cuando el sistema de destino impone el nombre. Los demás drivers lo llaman igual que antes.
+
+### Arreglado
+
+- **La reproducibilidad del ZIP volvió a tener quien la pruebe.** La probaba el test de STARSOFT, que lo
+  estrenó en la 2.3; al dejar de comprimir se habría quedado sin test, así que se mudó a `test_driver_sire`,
+  que es el driver que comprime.
+
+### Lo que NO se tocó, y por qué
+
+Las dos cosas que parecían culpables y no lo eran. Quedan escritas para que nadie las «arregle»:
+
+- **La codificación.** El manual pide ANSI y el motor escribe UTF-8 — y uno de los archivos que STARSOFT
+  importó lleva `PAGARÉ ELECTRÓNICO` y `FACTURAS NEGOCIABLES FÍSICAS`, con los bytes `C3 89`, `C3 8D` y
+  `C3 93`. El `8D` ni existe en cp1252: ese archivo no es ANSI de ninguna manera y entró igual.
+- **La columna 12, `TASA IGV`.** Ese mismo archivo la trae en `0.00` en sus 40 filas de proveedor y entró, así
+  que el `0.00` está probado. Sigue sin probarse el `18.01` que sale cuando el IGV del comprobante no da la
+  tasa exacta (`7.69 / 42.71`), donde el manual pide el valor fijo; queda anotado en
+  `STARSOFT-INTEGRACION.md` y lo destraba un mes que lo lleve.
+
+### Cómo migrar
+
+- **Si descargas el archivo de STARSOFT**: lee `contenido_base64` en vez de `zip_base64`, y `archivo` en vez de
+  `archivo_zip`. El nombre ya trae `.txt`, y `content_type` dice `text/plain`. Si solo mostrabas `texto`, no
+  tienes que hacer nada.
+- **Si guardas o buscas los archivos por su nombre**: los tres drivers contables cambian de nombre. Si
+  distinguías CONCAR de CONTASIS por él, ahora hay que llevar el driver aparte: va en la respuesta y en
+  `_exportacion`.
+- La huella del asiento **no cambia**, así que lo exportado antes se sigue reconociendo.
+
 ## [5.3.1] — 2026-10-02
 
 Lo que el campo nuevo de la 5.3 no alcanzó. `imputacion.anulada_por_nota` se cableó donde nacen las líneas

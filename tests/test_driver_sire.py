@@ -21,6 +21,18 @@ from util import campos, cargar_golden
 from util import con_imputaciones, imputar
 
 
+def test_el_mismo_contenido_da_el_mismo_zip_byte_a_byte():
+    """La fecha de la entrada es fija, así que el ZIP es reproducible y quien guarde su huella lo reconoce.
+
+    Lo afirma el docstring del pipeline desde que existe el SIRE. Vivía en el test de STARSOFT, que es quien lo
+    estrenó en la 2.3; cuando en la 6.0 su archivo dejó de ir comprimido, la regla se quedó sin quien la probara
+    y se mudó aquí, que es el driver que comprime.
+    """
+    libro, comprobantes = cargar_golden("compras_202601.json")
+    uno, otro = g.generar(libro, comprobantes, "sire"), g.generar(libro, comprobantes, "sire")
+    assert uno.comprimido == otro.comprimido
+
+
 @pytest.mark.parametrize("json_golden,n_campos,nombre", [
     ("ventas_202512.json", 33, "LE2060123456720251200140400021112.TXT"),
     ("compras_202601.json", 41, "LE2060123456720260100080400021112.TXT"),

@@ -7,15 +7,17 @@ Los números son los del vídeo de compras —base 929.49, IGV 167.31, total 109
 01-07-2025— con el RUC cambiado por los de prueba. Si una regla del driver deja de cumplirse, aquí se ve en la
 celda concreta y no en un total.
 
-Lo que NO se prueba, porque no consta: que STARSOFT acepte el archivo. Eso lo dirá el día que alguien lo
-importe, y entonces este archivo gana su prueba de aceptación como la tiene CONTASIS (`test_plantilla_contasis`).
+**STARSOFT ya importó lo que genera este driver** (John, 7-oct-2026), y de ese mes salieron dos reglas que
+ningún vídeo ni el manual habían dejado claras: el nombre empieza por `C` y el TXT va suelto, sin el ZIP que lo
+envolvía desde la 2.3. Las dos tienen su test abajo, con el error que dio el archivo rechazado.
+
+Lo que sigue sin probarse aquí es el contenido contra una importación celda a celda, como hace CONTASIS en
+`test_plantilla_contasis`: lo que entró fueron archivos de un mes real, que no pueden vivir en el repositorio.
 """
 from __future__ import annotations
 
 import base64
-import io
 import re
-import zipfile
 
 import pytest
 
@@ -54,9 +56,9 @@ def _exportar(documento, config=None, imputacion=None) -> dict:
 
 
 def _texto(r: dict) -> str:
-    """El TXT, sacado del ZIP y no de `r["texto"]`: así lo que se prueba es lo que de verdad se descarga."""
-    with zipfile.ZipFile(io.BytesIO(base64.b64decode(r["zip_base64"]))) as z:
-        return z.read(r["archivo"]).decode("utf-8")
+    """El TXT, sacado de `contenido_base64` y no de `r["texto"]`: así lo que se prueba es lo que de verdad se
+    descarga. Hasta la 5.3 lo que se descargaba era un ZIP y esto lo abría."""
+    return base64.b64decode(r["contenido_base64"]).decode("utf-8")
 
 
 def _filas(documento, config=None, imputacion=None) -> list[dict]:
@@ -416,27 +418,40 @@ def test_una_glosa_larga_se_CORTA_y_no_detiene_la_exportacion():
     assert corta["GLOSA MOVIMIENTO"] == "CELULARES"
 
 
-def test_el_archivo_se_llama_como_los_demas_sistemas():
-    """`SISTEMA_LIBRO_PERIODO_RUC`, la regla de `kit.nombre_de_archivo` (2.1). El ZIP comparte su nombre base."""
+def test_el_nombre_del_archivo_empieza_por_C():
+    """**La regla es del manual**, «Datos generales»: el nombre del archivo debe comenzar con la letra `C`.
+
+    No es cosmética y por eso tiene test propio: el 7-oct-2026 un mes real salió como
+    `STARSOFT_COMPRAS_202609_<RUC>.txt` y STARSOFT lo rechazó con un «error de conversión de datos de carga
+    masiva (truncado) en la fila 1, columna 2 (PERIODO)» que no nombra el archivo; el mismo contenido,
+    renombrado a `C-COMPRAS_…`, entró. Un refactor que devuelva este driver al patrón común de
+    `kit.nombre_de_archivo` tumba este test, que es justo lo que tiene que pasar.
+    """
     r = _exportar(_compra())
-    assert r["archivo"] == f"STARSOFT_COMPRAS_202507_{RUC}.txt"
-    assert r["archivo_zip"] == f"STARSOFT_COMPRAS_202507_{RUC}.zip"
+    assert r["archivo"].startswith("C-")
+    assert r["archivo"] == f"C-COMPRAS_202507_{RUC}.txt"
     assert r["resumen"]["debe"] == r["resumen"]["haber"] == "1096.80"
 
 
-def test_el_txt_viaja_dentro_de_un_zip_de_un_solo_miembro():
-    """Lo que se descarga es el ZIP, y dentro va el TXT con su nombre. Como el del SIRE."""
+def test_el_archivo_de_ventas_tambien_empieza_por_C():
+    """El manual lo dice de compras y aquí vale para los dos, por decisión de John (7-oct-2026): queda
+    `[por confirmar]` con un archivo de ventas que STARSOFT importe."""
+    r = _exportar(_venta())
+    assert r["archivo"] == f"C-VENTAS_202507_{RUC}.txt"
+
+
+def test_lo_que_se_descarga_es_el_TXT_y_no_un_ZIP():
+    """Lo que STARSOFT acepta es el texto: su pantalla de importación pide el `.txt` (John, 7-oct-2026).
+
+    De la 2.3 a la 5.3 el TXT viajó envuelto en un ZIP —se eligió por parecido con el SIRE, sin un caso que lo
+    pidiera— y la respuesta traía `zip_base64` y `archivo_zip`. Ahora sale como el CSV y los dos Excel: el
+    archivo en `contenido_base64`, su `content_type`, y el TXT legible en `texto` porque el tipo es de texto.
+    """
     r = _exportar(_compra())
-    with zipfile.ZipFile(io.BytesIO(base64.b64decode(r["zip_base64"]))) as z:
-        assert z.namelist() == [r["archivo"]]
-
-
-def test_el_mismo_contenido_da_el_mismo_zip_byte_a_byte():
-    """La fecha de la entrada es fija, así que el ZIP es reproducible y quien guarde su huella lo reconoce.
-
-    Estaba afirmado en el docstring del pipeline desde que existe el SIRE, y no lo probaba nadie."""
-    uno, otro = _exportar(_compra()), _exportar(_compra())
-    assert uno["zip_base64"] == otro["zip_base64"]
+    assert "zip_base64" not in r and "archivo_zip" not in r
+    assert r["content_type"] == "text/plain"
+    assert base64.b64decode(r["contenido_base64"]) == r["texto"].encode("utf-8")
+    assert r["archivo"].endswith(".txt")
 
 
 def test_el_txt_no_lleva_cabecera_y_su_primera_linea_ya_es_un_asiento():

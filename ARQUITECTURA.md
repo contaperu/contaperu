@@ -224,7 +224,7 @@ glosa de su columna F y la tasa entera de la AO, que se redondea una sola vez de
 
 | Canal | Qué es | Reglas | Drivers |
 |---|---|---|---|
-| `legacy` | un sistema contable instalado que importa un archivo | lleva cuentas; declara `EXIGE` | concar, contasis; STARSOFT y SISCONT cuando entren |
+| `legacy` | un sistema contable instalado que importa un archivo | lleva cuentas; declara `EXIGE` | concar, contasis, starsoft; SISCONT cuando entre |
 | `tributario` | un registro que se presenta a SUNAT | forma `linea`, sin cuentas ni configuración | sire |
 | `intercambio` | un formato neutral para leer o integrar | forma `desde_lineas` | csv, asiento_contable |
 
@@ -273,7 +273,7 @@ de compras con el asiento cuadrado.
 
 ### STARSOFT: qué se sabe y qué falta
 
-- **Qué se sabe.** STARSOFT Desktop importa un **TXT de palotes dentro de un ZIP** —35 campos en compras, 27 en
+- **Qué se sabe.** STARSOFT Desktop importa un **TXT de palotes, suelto** —35 campos en compras, 27 en
   ventas—, no un Excel. Cada fila es una cuenta con su debe o haber y las filas de un comprobante comparten
   cabecera. Desde el 22-sep-2026 el formato está recalcado de **su documentación oficial** (`STARSOFT-INTEGRACION.md`),
   que sustituyó a los dos vídeos con los que nació: sus sub-diarios (`04` compras, `03` ventas), sus siglas, la

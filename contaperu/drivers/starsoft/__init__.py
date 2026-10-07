@@ -40,9 +40,11 @@ equivalente detiene la exportación en vez de inventarse uno.
 correcciones de arriba. Lo que falta para la línea de «Aceptado (fecha)» que tiene CONTASIS es que entre
 uno **ya corregido**: el que importó llevaba los 38 campos y las fechas al revés.
 
-**Lo que escribe es el TXT de palotes envuelto en un ZIP** (2.3), que es una de las dos vías de carga de
-STARSOFT; la otra es su plantilla de Excel. Hasta la 2.2 escribía un CSV, provisional, para poder
-revisarlo columna por columna mientras no se conocía la plantilla.
+**Lo que escribe es el TXT de palotes, suelto**, que es una de las dos vías de carga de STARSOFT; la otra
+es su plantilla de Excel. Hasta la 2.2 escribía un CSV, provisional, para poder revisarlo columna por
+columna mientras no se conocía la plantilla; de la 2.3 a la 5.3 lo envolvió en un ZIP, hasta que un mes
+real enseñó que su pantalla de importación pide el texto (John, 7-oct-2026). El nombre empieza por `C`
+por la misma razón y el mismo día: `salida.nombre`.
 """
 from __future__ import annotations
 

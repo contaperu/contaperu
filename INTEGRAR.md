@@ -98,7 +98,9 @@ for falta in diagnostico["que_falta"]:
 if diagnostico["listo_para_exportar"]:
     archivo = api.exportar_archivo(documento, driver="concar", configuracion=configuracion,
                                    imputacion=imputacion)
-    print(archivo.archivo, len(archivo.contenido), "bytes")      # el .xlsx, listo para escribir o servir
+    # El nombre NO dice a qué sistema va: desde la 6.0, CONCAR y CONTASIS escriben los dos
+    # `COMPRAS_<periodo>_<RUC>.xlsx`. Si guardas los dos, el driver lo pone quien llama, no el nombre.
+    print(archivo.driver, archivo.archivo, len(archivo.contenido), "bytes")   # listo para escribir o servir
 ```
 
 Cada función recibe el documento primero y todo lo demás por su nombre; las que van hacia un sistema piden `driver`,

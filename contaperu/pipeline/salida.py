@@ -145,9 +145,10 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
         resumen = {**_resumen(comprobantes, incluidos, errores, opciones, fuera, config), **extra}
         tipo = getattr(modulo, "CONTENT_TYPE", "application/octet-stream")
         # Comprimir es del FORMATO, no de la forma del driver: lo pide un sistema que importa un archivo
-        # envuelto (STARSOFT), y hasta la 2.3 solo sabía hacerlo la rama de texto, que es la del SIRE. Se
-        # pobla `texto` además del ZIP porque es por donde bifurcan `respuesta()`, la CLI y el MCP: así el
-        # driver sale como el SIRE —el TXT legible y su ZIP— sin que nada de fuera cambie.
+        # envuelto, y hasta la 2.3 solo sabía hacerlo la rama de texto, que es la del SIRE. Se pobla `texto`
+        # además del ZIP porque es por donde bifurcan `respuesta()`, la CLI y el MCP. **Ningún driver de serie
+        # entra hoy por aquí**: lo hacía STARSOFT y en la 6.0 dejó de hacerlo, porque su pantalla de importación
+        # quiere el TXT suelto. Queda para un driver de tercero cuyo destino sí pida el envoltorio.
         if getattr(opciones, "comprimir", False):
             nombre_comprimido, comprimido = _en_zip(nombre, contenido)
             return Exportado(
