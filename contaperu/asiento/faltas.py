@@ -6,7 +6,8 @@ Hasta el 12-sep-2026 esto vivía en cinco sitios —`REQUISITO_DE`, `TEXTO_FALTA
 la tupla de `por_que_no` y los títulos de la CLI—, cada uno con su orden. Ahora hay uno, el de la comprobación: primero
 lo que impide clasificar (el tipo, la moneda) y después lo de cada documento.
 
-Las reglas no están aquí: las comprueba `resolucion.faltantes_para`. Esto dice cómo se llaman y a quién se le piden.
+Las reglas no están aquí: las comprueba `resolucion.requisitos`, que es su fichero hermano. Esto dice cómo se
+llaman y a quién se le piden.
 """
 from __future__ import annotations
 

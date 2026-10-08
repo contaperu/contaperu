@@ -22,11 +22,20 @@
   "contaperu.tributos.detracciones",
   "contaperu.tributos.igv"
  ],
- "contaperu.asiento.resolucion": [
+ "contaperu.asiento.resolucion.clasificacion": [
   "contaperu.catalogos",
-  "contaperu.pcge",
   "contaperu.tributos.detracciones",
   "contaperu.tributos.igv"
+ ],
+ "contaperu.asiento.resolucion.configurado": [
+  "contaperu.catalogos"
+ ],
+ "contaperu.asiento.resolucion.imputado": [
+  "contaperu.catalogos"
+ ],
+ "contaperu.asiento.resolucion.requisitos": [
+  "contaperu.pcge",
+  "contaperu.tributos.detracciones"
  ],
  "contaperu.drivers": [
   "contaperu.drivers.sire"
