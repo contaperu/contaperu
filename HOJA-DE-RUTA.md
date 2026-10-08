@@ -53,7 +53,7 @@ Librería **6.1.0** y estándar **`open-accounting` 1.0**
 |---|---|
 | **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
 | **Estándar y comunidad** | `open-accounting` 1.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato/`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
-| **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote y contra lo ya anotado |
+| **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/tributos/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 14 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
 | **Salida · SIRE** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
@@ -151,7 +151,7 @@ posteriores. Las propuestas de origen están en la tabla del §8, y cada hito ci
 | id | Hito | Nivel | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|
 | **0.0** | **Decidir la identidad del comprobante**: `libro.ruc` + `libro.tipo` + `Comprobante.clave` (`contaperu/modelo/comprobante.py`), sin periodo, y si en ventas lleva la contraparte (`comparar_sire` la deja fuera por la misma razón) | estándar · F | Escrita en `estandar/LEEME.md` | — | — |
-| **0.1** | **`claves_previas` en la fachada**: `revisar`, `diagnosticar`, `generar_asiento`, `exportar`, CLI y MCP. `validar.revisar` ya lo acepta (`contaperu/validar.py:244`). En JSON viaja como `[tipo_cp, serie, numero, contraparte_doc]`, normalizado con `clave_de`, y con un tope como `MAXIMO_COMPROBANTES` (`contaperu/pipeline/preparacion/documento.py:21`) | F | Por las tres puertas sale `DUPLICADO_PERIODO_ANTERIOR` con `pedir_a: contador`; «00000123» casa con «123»; por encima del tope, `DocumentoInvalido`; sin claves, el snapshot de CONCAR sale idéntico | 0.0 | 1 |
+| **0.1** | **`claves_previas` en la fachada**: `revisar`, `diagnosticar`, `generar_asiento`, `exportar`, CLI y MCP. `validar.revisar` ya lo acepta (`contaperu/tributos/validar.py`). En JSON viaja como `[tipo_cp, serie, numero, contraparte_doc]`, normalizado con `clave_de`, y con un tope como `MAXIMO_COMPROBANTES` (`contaperu/pipeline/preparacion/documento.py:21`) | F | Por las tres puertas sale `DUPLICADO_PERIODO_ANTERIOR` con `pedir_a: contador`; «00000123» casa con «123»; por encima del tope, `DocumentoInvalido`; sin claves, el snapshot de CONCAR sale idéntico | 0.0 | 1 |
 | **0.2** | **Anotaciones MCP**: `readOnlyHint: true` y `openWorldHint: false` en las 11 herramientas, y subir el mínimo del pin `mcp` al primero que las acepte (*no verificado* cuál) | F | `tests/test_servidor_mcp.py` recorre `list_tools()`; un trabajo de CI instala el mínimo declarado y pasa | — | 2 |
 | **0.3** | **La frase de la detracción regenerada**: `estandar/LEEME.md`, «La detracción, que ocurre en dos tiempos», dice que el asiento «puede regenerarse». En un destino que suma, regenerar lo ya importado duplica | estándar | El texto dice que el segundo tiempo es una decisión contable que entra con fuente y archivo real | — | 3 |
 | **0.4** | **Índice por comprobante** `_asiento.comprobantes*` y `_exportacion.comprobantes*`: identidad, rango de líneas y huella por comprobante. En la familia registro, sin huella | F | Los rangos son una partición exacta; cada rango cuadra; `HUELLA_FACTURA` (`tests/test_huella.py:24`) no cambia | 0.0 | 4 |
@@ -198,8 +198,8 @@ abiertos, los rieles de pago y el fraude.
 
 **Qué hay hoy.** Nada de banco. La conciliación de constancias de detracción está pendiente de un archivo real, pero la
 mitad existe: `diagnosticar` ya lista las detracciones que esperan constancia (`_detraccion_pendiente`,
-`contaperu/detracciones.py:151`) y el monto en soles enteros tiene su regla con fuente
-(`contaperu/detracciones.py:57`). Hay dos trampas para un lector de extractos: un `.xlsx` empieza como un ZIP y se
+`contaperu/tributos/detracciones.py`) y el monto en soles enteros tiene su regla con fuente
+(`contaperu/tributos/detracciones.py`). Hay dos trampas para un lector de extractos: un `.xlsx` empieza como un ZIP y se
 desarma (`contaperu/lectores/archivos.py:56-58`), y un `.txt` se ignora como archivo auxiliar (`archivos.py:26`).
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
@@ -306,7 +306,7 @@ cambio del estándar.
 **Qué hay hoy.** El núcleo sabe contabilidad peruana y nada más (`ARQUITECTURA.md:25`). Ya son universales la partida
 doble, la línea del comprobante, la huella, la imputación, las faltas, la maquinaria de configuración y el registro de drivers.
 Son peruanos el `Libro` (`contaperu/modelo/libro.py`), los impuestos en campos fijos, la validación
-(`contaperu/validar.py:16`), los roles del asiento (`contaperu/asiento/motor.py:40`), las claves del contrato de driver
+(`contaperu/tributos/validar.py`), los roles del asiento (`contaperu/asiento/motor.py:40`), las claves del contrato de driver
 (`contaperu/drivers/contrato/:227-230`, `:280-286`) y el esquema del estándar. Desde la 1.0, `tests/test_capas.py`
 congela el acoplamiento con lo peruano (J0).
 
@@ -332,7 +332,7 @@ tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de cont
 
 **Qué hay hoy.** El driver `sire` escribe el TXT de reemplazo del RVIE (Anexo 3) y del RCE (Anexo 11), contrastado con
 archivos reales aceptados, y lo comprime en su ZIP; deja fuera los recibos por honorarios. `comparar_sire` compara ese
-TXT con lo que SUNAT exporta del SIRE (`contaperu/comparar_sire.py`). Y el FORMATO está publicado columna a columna
+TXT con lo que SUNAT exporta del SIRE (`contaperu/tributos/comparar_sire.py`). Y el FORMATO está publicado columna a columna
 (`datos/sunat/sire_campos.json`, `api.campos_del_sire()`, 3.8.0): de cada campo del anexo, dónde cae o por qué no cae,
 con un test que lo confronta con el lector y con el escritor. Cubre del hito B9 la mitad que mira al registro; la que
 mira al documento es `campos_del_comprobante*`.

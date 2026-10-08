@@ -91,8 +91,42 @@ def test_no_queda_ninguna_ruta_de_la_0_x():
             importlib.import_module(modulo)
 
 
+def test_no_queda_ninguno_de_los_puentes_de_la_6_4():
+    """La 6.4.0 mudó el núcleo a `tributos/` y `contable/` y dejó seis puentes en la raíz, que avisaban con
+    `RutaObsoleta` durante toda la 6.x. La 7.0 los retira, que es lo que `_obsoleto.RETIRO` prometía.
+
+    Se comprueba que el módulo **no resuelve**, no que el fichero no esté: borrar el `.py` y dejarse el `.pyc`
+    deja a Python importando el directorio como paquete de espacio de nombres, y entonces un test que mirara el
+    disco pasaría en verde con el módulo todavía vivo. Es la trampa que la 4.0 documentó."""
+    for modulo, nueva in (("contaperu.igv", "contaperu.tributos.igv"),
+                          ("contaperu.detracciones", "contaperu.tributos.detracciones"),
+                          ("contaperu.validar", "contaperu.tributos.validar"),
+                          ("contaperu.comparar_sire", "contaperu.tributos.comparar_sire"),
+                          ("contaperu.partida_doble", "contaperu.contable.partida_doble"),
+                          ("contaperu.resumen", "contaperu.contable.resumen")):
+        with pytest.raises(ModuleNotFoundError):
+            importlib.import_module(modulo)
+        assert importlib.import_module(nueva), f"{modulo} se retiró pero {nueva} tiene que estar"
+
+
+def test_el_paquete_raiz_no_ofrece_lo_retirado():
+    """El puente se importaba también por atributo del paquete (`from contaperu import igv`), que lo resuelve
+    `_SUBMODULOS`. Un nombre que se queda ahí después de borrar el fichero da `ModuleNotFoundError` desde dentro
+    de `__getattr__`, que es un sitio peor para enterarse."""
+    import contaperu
+    for nombre in ("igv", "detracciones", "validar", "comparar_sire", "partida_doble", "resumen"):
+        assert nombre not in contaperu._SUBMODULOS
+        assert nombre not in contaperu.__all__
+        with pytest.raises(AttributeError):
+            getattr(contaperu, nombre)
+    # Y los paquetes que los sustituyen sí salen por los dos sitios.
+    for nombre in ("tributos", "contable"):
+        assert nombre in contaperu._SUBMODULOS and nombre in contaperu.__all__
+        assert getattr(contaperu, nombre)
+
+
 def test_el_mecanismo_de_deprecacion_sigue_en_pie():
-    """No queda ningún nombre deprecado, pero el circuito con que se deprecia uno tiene que seguir funcionando: es
+    """No queda ningún nombre deprecado —la 7.0 cobró los seis puentes de la 6.4.0—, pero el circuito con que se deprecia uno tiene que seguir funcionando: es
     lo que se usará la próxima vez que algo cambie de sitio. Se prueba sobre un módulo de mentira, para no tener
     que deprecar nada de verdad solo por cubrirlo.
 
