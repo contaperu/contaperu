@@ -34,6 +34,15 @@ RAIZ = Path(__file__).resolve().parents[1]
 VIGENTES = ("README.md", "INTEGRAR.md", "ARQUITECTURA.md", "CLAUDE.md", "HOJA-DE-RUTA.md", "CONTRIBUTING.md",
             "estandar/LEEME.md", "estandar/MIGRAR-A-1.0.md", "estandar/enmiendas/LEEME.md")
 
+# Los que citan el código por su ruta y hablan del presente: los vigentes y los de investigación. **El CHANGELOG
+# queda fuera, y es la exclusión importante**: es la bitácora, cita el código que había el día de cada versión y por
+# eso no se reescribe. Exigirle las rutas de hoy lo pondría rojo en cada reestructuración y nos empujaría a mentir
+# sobre el pasado. `CODE_OF_CONDUCT.md` y `SECURITY.md` no citan código.
+CITAN_CODIGO = VIGENTES + ("REFERENCIAS.md", "API-DE-REGISTRO.md", "LIBROS-Y-CUENTAS.md", "STARSOFT-INTEGRACION.md")
+
+# Una ruta de fichero del paquete citada en un documento, con su línea opcional: `contaperu/validar.py:244`.
+RUTA_CITADA = re.compile(r"`?(contaperu/[A-Za-z0-9_/]+\.(?:py|json))(?::\d+(?:-\d+)?)?`?")
+
 # Un documento nombra un driver así: `driver="x"`, `driver: "x"`, `--driver x` o «el driver `x`».
 NOMBRA_DRIVER = re.compile(r"""driver[s]?[=:]\s*["'`]([a-z_][a-z_0-9]*)["'`]"""
                            r"""|--driver[= ]+`?([a-z_][a-z_0-9]*)`?"""
@@ -157,3 +166,22 @@ def test_el_readme_no_dice_cuantas_herramientas_hay_a_ojo():
         if numero not in (herramientas, recursos):
             assert f"{numero} herramientas" not in readme, f"queda un recuento viejo: {numero} herramientas"
             assert f"{numero} recursos" not in readme, f"queda un recuento viejo: {numero} recursos"
+
+
+@pytest.mark.parametrize("doc", CITAN_CODIGO)
+def test_ninguna_ruta_citada_en_un_documento_ha_dejado_de_existir(doc):
+    """El hermano del de los drivers, y el que hace segura una reestructuración.
+
+    Los documentos de aquí citan el código por su ruta —`contaperu/validar.py:244`— porque es lo que convierte
+    una afirmación en algo que se puede ir a mirar. Pero una ruta envejece sin avisar: cuando esto entró,
+    `HOJA-DE-RUTA.md` citaba **`contaperu/operaciones.py`, `contaperu/formato.py` y `contaperu/generar.py` en
+    cinco sitios**, y esos tres módulos los había retirado la 2.0 **cuatro mayores antes**. Nadie lo había
+    visto porque este fichero solo vigilaba los nombres de driver y la versión del estándar.
+
+    Se comprueba que el fichero exista y **no** el número de línea: una línea que se corre no engaña a nadie
+    —el código está al lado—, y exigirla pondría la batería roja en cada commit que añada una función.
+    """
+    citadas = {m.group(1) for m in RUTA_CITADA.finditer(texto(doc))}
+    fantasmas = sorted(r for r in citadas if not (RAIZ / r).exists())
+    assert not fantasmas, (f"{doc} cita rutas que ya no existen: {fantasmas}. Si el código cambió de sitio, la "
+                           "cita va a la ruta nueva; si desapareció, la frase sobra.")

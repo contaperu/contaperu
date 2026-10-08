@@ -9,7 +9,6 @@ cada módulo del paquete pertenece a una capa, y una capa solo importa de las qu
     pipeline la preparación y la orquestación de un mes
     api      la fachada estable
     puertas  CLI, MCP y HTTP: solo hablan con la api
-    compat   las rutas de la 0.x, que pueden importar cualquier cosa y nadie las importa
 
 Además, aquí se hacen visibles dos cosas que la hoja de ruta pedía antes de mover código:
 
@@ -64,7 +63,6 @@ CAPAS = {
     "contaperu.api": "api",
     "contaperu.puertas": "puertas",
 }
-_DEBAJO = ["base", "nucleo", "drivers", "pipeline", "api"]
 PUEDE = {
     "base": {"base"},
     "nucleo": {"base", "nucleo"},
@@ -139,7 +137,7 @@ def test_cada_modulo_importa_solo_su_capa_o_las_de_abajo():
     culpables = {}
     for modulo in MODULOS:
         propia = capa(modulo)
-        if propia in ("paquete", "compat"):
+        if propia == "paquete":
             continue
         malas = sorted(d for d in importaciones(modulo)
                        if capa(d) not in PUEDE[propia] and (modulo, d) not in TOLERADAS)
@@ -165,13 +163,6 @@ def test_las_puertas_hablan_solo_con_la_api():
 def test_los_drivers_no_saben_por_que_puerta_llego_el_documento():
     culpables = {m: sorted(d for d in importaciones(m) if capa(d) in ("pipeline", "api", "puertas"))
                  for m in MODULOS if capa(m) == "drivers"}
-    assert {m: d for m, d in culpables.items() if d} == {}
-
-
-def test_nadie_importa_las_rutas_viejas():
-    """`_compat` es de las rutas de la 0.x: el motor no depende de ellas, solo las publica."""
-    culpables = {m: sorted(d for d in importaciones(m) if capa(d) == "compat")
-                 for m in MODULOS if capa(m) not in ("compat", "paquete")}
     assert {m: d for m, d in culpables.items() if d} == {}
 
 

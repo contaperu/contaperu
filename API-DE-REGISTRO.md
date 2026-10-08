@@ -716,7 +716,7 @@ parece a una compra**, aunque viaje en el libro de compras. Van dos, uno con ret
    ningún `"retencion": 0` ni un booleano que diga que no hubo. Ausencia es respuesta.
 3. **No va al SIRE, y lo sabe el destino, no el productor.** El registro de compras de SUNAT no admite recibos por
    honorarios, y eso está escrito una sola vez, en el driver: `FUERA_DEL_REGISTRO_SUNAT = {"02"}`
-   (`contaperu/catalogos.py`). El ERP manda el mes de compras entero y cada destino toma lo suyo: el SIRE los deja
+   (`contaperu/catalogos/comprobantes.py`). El ERP manda el mes de compras entero y cada destino toma lo suyo: el SIRE los deja
    fuera y CONCAR los lleva a su sub-diario `15`.
 4. **La cuenta del tercero no es la de proveedores.** Un recibo por honorarios se debe por la cuenta de honorarios
    por pagar, no por la de facturas, y el motor lo sabe: el tipo `02` tiene tratamiento propio en el asiento.
@@ -842,7 +842,7 @@ De ahí sale el reparto, que es lo que hace eficiente a esta arquitectura:
 | **En qué registro entra** | Cada destino, declarando qué lleva y qué no | El driver: `FUERA_DEL_REGISTRO_SUNAT`, el `sub_diario` por tipo |
 
 **El SIRE no lleva honorarios porque el registro de SUNAT no los admite**, y eso está escrito una vez, en el motor:
-`FUERA_DEL_REGISTRO_SUNAT = {"02"}` (`contaperu/catalogos.py`), que el driver del SIRE lee. No hace falta que el ERP
+`FUERA_DEL_REGISTRO_SUNAT = {"02"}` (`contaperu/catalogos/comprobantes.py`), que el driver del SIRE lee. No hace falta que el ERP
 lo sepa, ni que lo clasifique al capturar, ni que acierte: manda el mes de compras entero y **cada destino toma lo
 suyo**.
 

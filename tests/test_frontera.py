@@ -25,16 +25,19 @@ PUERTAS = {"cli", "servidor_mcp", "servidor_http", "puertas"}
 # Por donde pasan las puertas para llegar al motor.
 FACHADA = "api"
 
-# Lo que no es núcleo: las puertas, la api, las rutas de la 0.x y los módulos de la 0.x que las publican.
-CARPETAS_FUERA = {"puertas", "api", "_compat"}
-MODULOS_FUERA = {"cli.py", "servidor_mcp.py", "operaciones.py"}
+# Lo que no es núcleo: las puertas y la api.
+#
+# Hasta la 6.2.0 estos dos conjuntos nombraban además `_compat`, `cli.py` y `operaciones.py`, que eran las rutas
+# de la 0.x y sus módulos: **la 2.0 los retiró y nadie quitó el filtro**, así que durante cuatro mayores tres de
+# sus seis entradas no filtraban nada. Un filtro que nombra algo inexistente no es inocuo: parece decir que ese
+# algo existe y hay que tratarlo aparte.
+CARPETAS_FUERA = {"puertas", "api"}
 
 
 def modulos_del_nucleo() -> list[pathlib.Path]:
-    """Todo `contaperu/**.py` menos las puertas, la api y las rutas de la 0.x."""
+    """Todo `contaperu/**.py` menos las puertas y la api."""
     return [f for f in sorted(PAQUETE.rglob("*.py"))
-            if not set(f.relative_to(PAQUETE).parts[:-1]) & CARPETAS_FUERA
-            and not (f.parent == PAQUETE and f.name in MODULOS_FUERA)]
+            if not set(f.relative_to(PAQUETE).parts[:-1]) & CARPETAS_FUERA]
 
 
 def importa(archivo: pathlib.Path) -> set[str]:
