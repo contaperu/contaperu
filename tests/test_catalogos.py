@@ -269,7 +269,7 @@ def test_la_tolerancia_del_igv_es_la_de_la_1_0():
     acepta: si se separaran, un comprobante podría declarar 18 % en el registro y ser `IGV_NO_CUADRA` a la vez."""
     assert catalogos.TOLERANCIA_IGV == TOLERANCIA_DE_LA_1_0
     assert isinstance(catalogos.TOLERANCIA_IGV, Decimal)
-    from contaperu import igv, validar
+    from contaperu.tributos import igv, validar
     assert igv.TOLERANCIA is validar.TOLERANCIA is catalogos.TOLERANCIA_IGV
 
 

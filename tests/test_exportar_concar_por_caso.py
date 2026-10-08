@@ -22,7 +22,8 @@ from datetime import date, datetime
 import pytest
 
 from contaperu import asiento as asi
-from contaperu import api, detracciones
+from contaperu import api
+from contaperu.tributos import detracciones
 from contaperu.drivers import concar as driver_concar
 from test_snapshot_concar import CASOS, FILAS, MES, armar
 

@@ -14,9 +14,9 @@ from typing import Any
 
 from ..catalogos import TIPO_BOLETA, TIPO_HONORARIOS
 from ..configuracion import CONFIG_POR_DEFECTO, por_defecto
-from ..detracciones import (MARCA_SIRE, codigos_de, con_el_codigo_del_contador, esta_pendiente,
+from ..tributos.detracciones import (MARCA_SIRE, codigos_de, con_el_codigo_del_contador, esta_pendiente,
                             monto_detraccion, normalizar_una)
-from ..igv import base_imputable, igv_del_asiento
+from ..tributos.igv import base_imputable, igv_del_asiento
 from ..pcge import clase_de as _clase_de
 from ..modelo import CENTIMO, Comprobante, Libro, a_decimal
 from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO

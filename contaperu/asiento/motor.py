@@ -25,9 +25,9 @@ from typing import Any
 from ..catalogos import (CATEGORIA_RENTA_4TA, TIPO_HONORARIOS, TIPOS_INVIERTEN, TIPOS_NOTA, TRIBUTO_IGV,
                          TRIBUTO_RENTA)
 from ..configuracion import CONFIG_POR_DEFECTO
-from ..detracciones import es_comodin, monto_detraccion, numero_pendiente, tasa_detraccion
+from ..tributos.detracciones import es_comodin, monto_detraccion, numero_pendiente, tasa_detraccion
 from .. import pcge, vocabulario
-from ..igv import base_imputable, igv_del_asiento, tasa_legal
+from ..tributos.igv import base_imputable, igv_del_asiento, tasa_legal
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento

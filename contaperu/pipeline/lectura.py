@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
-from .. import validar
+from ..tributos import validar
 from ..lectores import archivos as lectura_archivos
 from ..lectores import sire_txt
 from .preparacion import bytes_de, documento, libro_de

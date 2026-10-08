@@ -9,7 +9,8 @@ from decimal import Decimal
 from typing import Any
 
 from .. import asiento as asi
-from .. import detracciones, drivers, validar
+from .. import drivers
+from ..tributos import detracciones, validar
 from ..asiento.faltas import CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
 from ..drivers import contrato
 from ..modelo import Comprobante, Libro

@@ -40,7 +40,7 @@ import zipfile
 from decimal import Decimal
 
 from . import _zip
-from .. import detracciones as _detracciones
+from ..tributos import detracciones as _detracciones
 from ..errores import ErrorContaperu
 from ..modelo import Comprobante, Libro
 

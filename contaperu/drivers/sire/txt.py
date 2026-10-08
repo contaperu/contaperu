@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from ... import catalogos as cat
 from ...asiento.faltas import NoExportable
-from ...igv import por_destino
+from ...tributos.igv import por_destino
 from ...modelo import Comprobante, Libro
 from ..kit import (
     Opciones, armar_linea, formatear_fecha, formatear_monto, formatear_numero, formatear_cambio, negativo, sanear,

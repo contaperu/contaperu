@@ -6,7 +6,7 @@ from decimal import Decimal
 
 import pytest
 
-from contaperu import validar
+from contaperu.tributos import validar
 from contaperu.lectores import archivos, xml_ubl
 from contaperu.modelo import Libro
 from util import XML

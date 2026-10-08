@@ -19,7 +19,8 @@ from contaperu import api
 from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import concar as driver_concar
 from contaperu.drivers import contrato
-from contaperu import asiento, detracciones, validar
+from contaperu import asiento
+from contaperu.tributos import detracciones, validar
 from contaperu.asiento.configuracion import NUMERO_DETRACCION_PENDIENTE
 from contaperu.drivers import contasis as driver_contasis
 from contaperu.drivers import sire as driver_sire

@@ -298,7 +298,7 @@ def test_al_registro_le_llega_la_imputacion_y_no_le_pide_la_equivalencia_del_tip
     por parte. Y la equivalencia del tipo es del asiento (de ella sale el sub-diario): sin ella el CSV se niega y
     el registro sale."""
     from contaperu import asiento as asi
-    from contaperu.igv import base_imputable
+    from contaperu.tributos.igv import base_imputable
     from contaperu.modelo import Comprobante
 
     con_terceros(_Entrada("registro", driver_de_registro()))
@@ -373,7 +373,7 @@ def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros)
     12-sep-2026). El reparto se dice antes, con a quién pedírselo, y el núcleo se niega; a un destino que no lo
     declara —un registro cualquiera, el CSV de asientos— no le cambia nada. Un driver de asientos no lo declara."""
     from contaperu import asiento as asi
-    from contaperu.igv import base_imputable
+    from contaperu.tributos.igv import base_imputable
     from contaperu.modelo import Comprobante
 
     unica = driver_de_registro("unica")

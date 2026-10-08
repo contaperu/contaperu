@@ -17,7 +17,8 @@ from __future__ import annotations
 
 from datetime import date
 
-from contaperu import api, asiento as asi, validar
+from contaperu import api, asiento as asi
+from contaperu.tributos import validar
 from contaperu.tributos import comparar_sire
 from contaperu.asiento import motor
 from contaperu.drivers import concar as driver_concar

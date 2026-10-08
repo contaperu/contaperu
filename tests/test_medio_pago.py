@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import pytest
 
-from contaperu import api, asiento, catalogos, validar
+from contaperu import api, asiento, catalogos
+from contaperu.tributos import validar
 from contaperu.drivers import contasis
 from contaperu.modelo import Comprobante, Libro
 from contaperu.pipeline import preparacion as prep

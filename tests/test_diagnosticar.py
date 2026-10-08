@@ -228,7 +228,7 @@ def test_la_tabla_pedir_a_cubre_todos_los_codigos_de_validar():
     import ast
     import pathlib
 
-    import contaperu.validar as validar
+    import contaperu.tributos.validar as validar
     codigos = set()
     for n in ast.walk(ast.parse(pathlib.Path(validar.__file__).read_text(encoding="utf-8"))):
         if isinstance(n, ast.Call) and n.args and isinstance(n.args[0], ast.Constant) and isinstance(n.args[0].value, str):

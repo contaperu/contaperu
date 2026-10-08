@@ -23,7 +23,7 @@ from ...asiento.motor import cabecera_de, lineas_del_comprobante, serie_numero_d
 from ...asiento.resolucion import sigla_de_tipo
 from ..kit import Opciones, celdas
 from ...pcge import clase_de
-from ...igv import tasa_calculada
+from ...tributos.igv import tasa_calculada
 from ...modelo import Comprobante, Libro, numero_sin_ceros, serie_y_numero
 from ..contrato import centro_en_anexo
 from . import datos

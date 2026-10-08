@@ -13,7 +13,8 @@ from typing import Any
 
 from .. import asiento as asi
 from .. import configuracion as _declaracion
-from .. import detracciones, drivers, validar
+from .. import drivers
+from ..tributos import detracciones, validar
 from .._version import OPEN_ACCOUNTING
 from ..configuracion import CLAVES_RETIRADAS, CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
 from ..errores import DocumentoInvalido

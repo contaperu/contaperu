@@ -1,42 +1,42 @@
 {
  "contaperu.api.errores": [
   "contaperu.drivers.sire",
-  "contaperu.igv",
   "contaperu.lectores.sire_txt",
   "contaperu.lectores.xml_ubl",
-  "contaperu.pcge.adaptar"
+  "contaperu.pcge.adaptar",
+  "contaperu.tributos.igv"
  ],
  "contaperu.api.operaciones": [
   "contaperu.catalogos",
-  "contaperu.detracciones",
   "contaperu.pcge",
   "contaperu.tributos",
-  "contaperu.tributos.comparar_sire"
+  "contaperu.tributos.comparar_sire",
+  "contaperu.tributos.detracciones"
  ],
  "contaperu.asiento.lineas": [
   "contaperu.pcge"
  ],
  "contaperu.asiento.motor": [
   "contaperu.catalogos",
-  "contaperu.detracciones",
-  "contaperu.igv",
-  "contaperu.pcge"
+  "contaperu.pcge",
+  "contaperu.tributos.detracciones",
+  "contaperu.tributos.igv"
  ],
  "contaperu.asiento.resolucion": [
   "contaperu.catalogos",
-  "contaperu.detracciones",
-  "contaperu.igv",
-  "contaperu.pcge"
+  "contaperu.pcge",
+  "contaperu.tributos.detracciones",
+  "contaperu.tributos.igv"
  ],
  "contaperu.drivers": [
   "contaperu.drivers.sire"
  ],
  "contaperu.drivers.concar.proyeccion": [
-  "contaperu.igv",
-  "contaperu.pcge"
+  "contaperu.pcge",
+  "contaperu.tributos.igv"
  ],
  "contaperu.drivers.contasis.proyeccion": [
-  "contaperu.igv"
+  "contaperu.tributos.igv"
  ],
  "contaperu.lectores": [
   "contaperu.lectores.sire_txt",
@@ -47,15 +47,18 @@
   "contaperu.lectores.xml_ubl"
  ],
  "contaperu.pipeline.diagnostico": [
-  "contaperu.detracciones",
-  "contaperu.validar"
+  "contaperu.tributos",
+  "contaperu.tributos.detracciones",
+  "contaperu.tributos.validar"
  ],
  "contaperu.pipeline.lectura": [
   "contaperu.lectores.sire_txt",
-  "contaperu.validar"
+  "contaperu.tributos",
+  "contaperu.tributos.validar"
  ],
  "contaperu.pipeline.preparacion": [
-  "contaperu.detracciones",
-  "contaperu.validar"
+  "contaperu.tributos",
+  "contaperu.tributos.detracciones",
+  "contaperu.tributos.validar"
  ]
 }

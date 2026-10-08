@@ -8,7 +8,7 @@ from decimal import Decimal as D
 import pytest
 
 from contaperu import catalogos as cat
-from contaperu import igv
+from contaperu.tributos import igv
 from contaperu.drivers.concar import tasa_igv_entera as tasa_igv
 from contaperu.modelo import Comprobante
 
@@ -262,7 +262,7 @@ def test_editar_una_compra_no_gravada_no_pierde_el_importe_ni_lo_duplica():
     lado y el desglose por otro. Con la suma de `validar` arreglada (3.5.1) eso ya no pasa desapercibido, así
     que los dos recálculos tienen que llevar el importe al campo que el libro usa.
     """
-    from contaperu import validar
+    from contaperu.tributos import validar
     from contaperu.modelo import Libro
     compras = Libro(ruc="20131312955", razon_social="X", periodo="202608", tipo="compra")
 
@@ -353,7 +353,7 @@ def test_poner_el_importe_no_gravado_recalcula_la_base_sin_tocar_el_total():
     Existe porque una compra mixta no se podía corregir: el formulario ofrecía `exonerado` e `inafecto`, que en el
     RCE no existen, y escondía `valor_no_gravado`, que es el único que sí.
     """
-    from contaperu import validar
+    from contaperu.tributos import validar
     from contaperu.modelo import Libro
     compras = Libro(ruc="20131312955", razon_social="X", periodo="202608", tipo="compra")   # `cp()` emite en agosto
 

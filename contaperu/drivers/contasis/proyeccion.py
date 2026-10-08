@@ -16,7 +16,7 @@ from ...asiento.motor import constancia_de, glosa_de
 from ...configuracion import por_defecto
 from ..contrato import columnas_elegidas
 from ..kit import Opciones, celdas, formatear_numero, negativo
-from ...igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
+from ...tributos.igv import SIN_CREDITO_FISCAL, por_destino, tasa_legal
 from ...modelo import CENTIMO, Comprobante, Libro
 from . import datos
 

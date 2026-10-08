@@ -3,7 +3,8 @@ from decimal import Decimal
 
 import pytest
 
-from contaperu import catalogos as cat, validar
+from contaperu import catalogos as cat
+from contaperu.tributos import validar
 from contaperu.modelo import Comprobante, Libro
 
 VENTAS = Libro(ruc="20131312955", razon_social="X", periodo="202601", tipo="venta")

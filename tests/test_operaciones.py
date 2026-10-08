@@ -376,7 +376,7 @@ def test_un_error_en_lo_que_el_destino_no_lleva_no_impide_el_archivo():
     """El recibo por honorarios no va en el TXT del SIRE (`EXCLUYE_TIPOS`), así que su retención mal puesta no puede
     impedir declarar a SUNAT. Hasta la 1.2.0 la API pública se plantaba: comprobaba los errores antes de aplicar la
     regla del driver, y la ruta de la 0.x —que filtraba primero— dejaba salir el archivo."""
-    from contaperu import validar
+    from contaperu.tributos import validar
     from contaperu.modelo import Libro
 
     honorario = _comprobante_1_2_1(9, tipo_cp="02", serie="E001", base_gravada="0", igv="0",
@@ -391,7 +391,8 @@ def test_un_error_en_lo_que_el_destino_no_lleva_no_impide_el_archivo():
 def test_un_error_en_lo_que_el_destino_SI_lleva_sigue_deteniendo_la_exportacion():
     """La otra mitad, para que el arreglo no se pase de listo: en CONCAR el recibo por honorarios SÍ va al asiento,
     así que ahí el mismo error tiene que seguir parando la exportación."""
-    from contaperu import api, validar
+    from contaperu import api
+    from contaperu.tributos import validar
     from contaperu.errores import DocumentoInvalido
     from contaperu.modelo import Libro
 

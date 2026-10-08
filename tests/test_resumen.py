@@ -10,7 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from contaperu import api, resumen, validar
+from contaperu import api, resumen
+from contaperu.tributos import validar
 from contaperu.modelo import Comprobante, Libro
 
 LIBRO = {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608", "tipo": "compra"}
