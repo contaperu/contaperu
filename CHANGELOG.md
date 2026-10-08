@@ -4,6 +4,34 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+### Retirado
+
+- **`INTEROPERABILIDAD.md`**, la investigación del ciclo contable de setiembre de 2026 (John, 8-oct-2026). Era de una
+  primera fase y ya había dado lo que tenía que dar; lo que quedaba vivo **se mudó en vez de perderse**:
+  - **las 31 propuestas** van al **§8 de `HOJA-DE-RUTA.md`**, que era su único consumidor real — sus frentes ya
+    citaban cada una por número en la columna «Propuesta», así que la tabla deja de ser una remisión a otro documento
+    y pasa a vivir donde se usa;
+  - **los descartes** van a `ARQUITECTURA.md`, «Lo que no se hace, y por qué», y **con su motivo escrito**: la
+    columna remitía a la sección de cada etapa, y eso no sobrevive a retirar el documento. Ahora cada línea se explica
+    sola, que es lo que hace falta para que un descarte no se vuelva a proponer cada año.
+  Lo que se fue: el ciclo de EE. UU. comparado con el peruano, los modelos de referencia y las etapas. Queda en el
+  historial de git, que es donde vive lo que ya no se consulta.
+- Y las **veinte remisiones** a sus secciones que quedaban repartidas por `HOJA-DE-RUTA.md`,
+  `LIBROS-Y-CUENTAS.md`, `REFERENCIAS.md`, `API-DE-REGISTRO.md`, `README.md` y `CLAUDE.md`. Las dos del **código**
+  —`resumen.py` y `api/operaciones.py`, que justifican por qué el motor no convierte monedas— ahora citan
+  `ARQUITECTURA.md`. El documento sale también del `sdist` y de los `fechados` de `tests/test_documentacion.py`, que
+  lo abría para comprobar que declaraba su fecha: sin esto, la batería **no fallaba, reventaba**.
+
+### Arreglado
+
+- **Dos citas que el guardián de la documentación destapó al mudar la tabla.** `test_documentacion.py` solo vigila
+  los documentos vigentes, así que mientras la tabla vivía en investigación nadie la miraba: al llegar a la hoja de
+  ruta saltó que la propuesta 22 llamaba «driver `desde_lineas`» a lo que es una **forma** del contrato, y que la 23
+  citaba `contaperu/operaciones.py`, un módulo que **la 2.0 retiró**. Es un argumento a favor de que la tabla esté
+  donde se lee.
+
 ## [6.1.0] — 2026-10-07
 
 El contribuyente entra en el motor, como datos. Para decirle a una empresa del Régimen Especial cuánto paga hacía

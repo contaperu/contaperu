@@ -348,6 +348,51 @@ tienen fuente**, nunca con una regla nueva escrita para el agente.
 6. **Nunca datos reales en el repositorio.** Dos RUC seguros: `20131312955` y `20601234567`.
 7. **Código y comentarios en español**, porque es el idioma del dominio.
 
+## Lo que no se hace, y por qué
+
+La otra mitad de lo de arriba: lo que se estudió y se dejó fuera. Cada línea lleva su motivo, porque
+un descarte sin motivo se vuelve a proponer cada año — y porque el código los cita: `resumen.py` y
+`api/operaciones.py` remiten aquí para explicar por qué el motor no convierte monedas.
+
+Sale de la investigación del ciclo contable de setiembre de 2026, que vivió en
+`INTEROPERABILIDAD.md` hasta el 8-oct-2026; al retirarlo, los motivos se escribieron aquí en vez de
+seguir remitiendo a sus secciones.
+
+| Qué | Por qué no |
+|---|---|
+| Emparejar órdenes de compra y recepciones (las tres vías de EE. UU.) | Necesita estado y las guías de remisión, que están fuera por decisión. De ahí solo se toma la tolerancia en dos medidas |
+| Un buzón, estados de borrador o la aprobación de facturas | Son de la aplicación; el motor ya dice lo que falta |
+| Redes EDI, portales, DBNAlliance o Peppol dentro del motor | El Perú valida antes de emitir, y un canal de entrega es transporte |
+| Leer `cbc:AccountingCost` (BT-19/BT-133) | **Espera un XML real que lo traiga**: no hay evidencia de que los peruanos lo lleven |
+| Imputar por ítem de la factura | **Hueco declarado.** Hoy lo cubre el reparto de la imputación |
+| La factura negociable como canal del motor | **En vigilancia**: la conformidad la registra SUNAT y la anotación en cuenta es de CAVALI |
+| Un lenguaje de requisitos declarativos | ERPNext y Odoo lo necesitan porque ellos **son** el destino; este motor escribe hacia un destino que ya guarda esa exigencia en su plan. Tomar el dato es más corto y no inventa reglas |
+| Los estados de intercambio de OCA y el `blocking_level` de Odoo | Son estado de la aplicación, y la gradación error/aviso ya existe (`Observacion.nivel` y `FALTAS`) |
+| TIN Matching o el padrón en línea, y retenciones calculadas por el motor | Lo primero es red; lo segundo, una regla sin un comprobante que la muestre |
+| Llamar CUO a la identidad del comprobante, o hacerla un hash opaco | El CUO es del software que genera el PLE, y una clave legible se puede leer en un error |
+| Una huella de la configuración aplicada | Metería las imputaciones en la huella y no tiene caso |
+| Log con hash encadenado, secuencia sin huecos, fechas de bloqueo | Son estado: de la aplicación o del ERP de destino, nunca del motor |
+| Guardar aparte el tipo de cambio usado, o tres fechas nuevas | Ya van en la línea y en `_exportacion` |
+| `Idempotency-Key`, webhooks y sincronización incremental | El motor no habla con otra API con estado |
+| Redis como recomendación contable | No hay una fuente contable que la respalde; es nota de ingeniería para la aplicación |
+| La cuenta transitoria inmediata (Odoo) | El destino suma; primero se empareja |
+| *Embeddings* y aprendizaje estadístico dentro del motor | No son deterministas: son de la aplicación, y el motor recibe lo aprendido como datos |
+| Doble aprobación o un registro de cuentas bancarias de proveedores | Son estado |
+| Un resumen anual por tercero, o la DAOT | El libro es mensual, y la exclusión de lo anotado en registros electrónicos la vacía |
+| Sales tax, nexo o certificados de exención | No hay caso peruano |
+| Saber si un mes está en plazo, y los plazos de conservación | **Necesita el hoy**, y el núcleo no tiene reloj (`tests/test_frontera.py`). Si queda tiempo o hay mora lo calcula quien tiene la fecha |
+| El calendario de vencimientos como tal | **Acotado el 7-oct-2026**: un calendario no es un reloj —dado un periodo y un dígito de RUC devuelve siempre la misma fecha—, así que entró en la 6.1.0 como datos, con los dos anexos de la RS 000281-2022. Lo descartado sigue siendo la pregunta de arriba |
+| Asentar el tipo 91 como costo, a imitación del *use tax* | En el Perú es crédito con requisitos |
+| **Convertir** monedas dentro de un resumen | Sería una cifra nueva sin caso. Lo descartado es convertir, **no** informar cada moneda por su lado, que es lo que `resumen` hace desde la 3.4.0: sus totales son un mapa por moneda y ninguna clave suma dos |
+| Numscript o cualquier lenguaje de reglas contables (Formance) | Las reglas viven en código, con su fuente al lado (`CONTRIBUTING.md`) |
+| Importes en enteros de la unidad mínima (TigerBeetle) | El texto exacto con `Decimal` ya lo resuelve y no pierde la moneda de vista |
+| Modelos definidos por el usuario y *field mappings* por conexión | El modelo lo define SUNAT, y dónde va cada dato ya lo resuelven `COLUMNAS_ELEGIBLES` y la configuración por sistema |
+| Del MCP: tareas, *sampling*, *roots*, prompts y los interruptores de escritura | Unas herramientas puras de solo lectura no los necesitan |
+| La jurisdicción en la configuración | Es del libro |
+| Un motor de impuestos genérico, con tasas como datos sin fuente | Ninguna regla contable sin fuente: es la primera regla de la casa |
+| Adelantar la puerta a otra jurisdicción (J1-J6) | **Espera un cliente real fuera del Perú** |
+| Traducir al inglés el vocabulario del estándar | El español es el idioma del dominio |
+
 ## Hoja de ruta
 
 El orden en que crece el motor, y el dato o el código que destraba cada paso, viven en
@@ -356,7 +401,8 @@ STARSOFT, la puerta para que cualquier ERP integre el motor, leer y validar más
 banco como punto de partida del proceso contable, un estándar que mejora siempre y la puerta a otra jurisdicción,
 condicionada a un cliente real fuera del Perú—, cada uno con sus hitos y su criterio de salida. Aquí no se repiten. La
 investigación y el diseño de cada pieza, ordenados por el ciclo contable y con el de EE. UU. como referencia, están en
-[INTEROPERABILIDAD.md](INTEROPERABILIDAD.md), y lo tomado de las APIs de EE. UU., en [REFERENCIAS.md](REFERENCIAS.md).
+el §8 de [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md), y lo tomado de las APIs de EE. UU., en
+[REFERENCIAS.md](REFERENCIAS.md).
 
 La idea que la ordena sigue siendo la de esta arquitectura: primero la compatibilidad con los sistemas que ya existen,
 después un lenguaje común (`open-accounting`, que crece con casos reales detrás) y, encima, más preguntas de agentes

@@ -4,7 +4,7 @@
 
 Este documento dice **en qué orden** crece el motor y **qué hace falta** para cada paso. **Toda la investigación que lo
 sostiene** —lo que hacen EE. UU., los proyectos abiertos y SUNAT, el diseño y el pseudocódigo de cada pieza, y sus
-fuentes— vive en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md); lo que se tomó de las plataformas cerradas de EE. UU.
+fuentes— está en el §8 de esta hoja; lo que se tomó de las plataformas cerradas de EE. UU.
 está en [REFERENCIAS.md](REFERENCIAS.md). Aquí solo se remite: cada hito cita su propuesta por número, en la columna
 «Propuesta». Lo que ya está hecho se ve en la tabla «Estado» del [README.md](README.md).
 
@@ -36,7 +36,7 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 | **Nivel** | `N` núcleo · `D` driver · `F` fachada o puerta (CLI, MCP) · `App` aplicación que consume el motor · `estándar` · `documentación` |
 | **Arranca con** | `código` si se puede empezar ya; `dato: …` si espera un archivo real, una especificación o una norma |
 | **Criterio de salida** | Lo que tiene que ser cierto para darlo por cumplido |
-| **Propuesta** | El número de la propuesta en la tabla de `INTEROPERABILIDAD.md`; «—» si el hito no nació de una |
+| **Propuesta** | El número de la propuesta en la tabla del §8; «—» si el hito no nació de una |
 | `nombre*` | Nombre provisional: lo decide el mantenedor al pasar a código |
 | *no verificado* · *según terceros* · *según el proveedor* | Calidad de la fuente, a la fecha de consulta (13-sep-2026) |
 
@@ -145,7 +145,7 @@ OTRA JURISDICCIÓN [un cliente real fuera del Perú] · J0 y J1 cumplidos en la 
 ## 3 · Fase 0 · Afinar lo que existe
 
 Antes de abrir frentes se afina lo que ya está en uso. Todo arranca con **código**; varias piezas desbloquean frentes
-posteriores. Las propuestas de origen están en la tabla de `INTEROPERABILIDAD.md`, y cada hito cita la suya en la columna
+posteriores. Las propuestas de origen están en la tabla del §8, y cada hito cita la suya en la columna
 «Propuesta».
 
 | id | Hito | Nivel | Criterio de salida | Depende de | Propuesta |
@@ -171,7 +171,6 @@ todos los destinos. **Nunca emite**: no genera, no firma, no envía y no consult
 quien tenga red y credenciales.
 
 **Investigación.** Cómo llega la factura en EE. UU. y en el Perú, y los proyectos que leen el UBL de SUNAT:
-`INTEROPERABILIDAD.md`, «Recibir la factura» y «Validar antes de asentar».
 
 **Qué hay hoy.** Tres raíces de XML, y cualquier otra da «Raíz XML no reconocida» (`contaperu/lectores/xml_ubl.py:31`);
 el CDR se ignora; la propuesta del SIRE se lee entera; un PDF o una foto quedan pendientes de leer.
@@ -195,7 +194,7 @@ deduplique, se empareje con lo que salda y, cuando haya fuente, se asiente. Al e
 red.
 
 **Investigación.** Lo que hace EE. UU. de verdad, los canales peruanos a la fecha de consulta, los proyectos
-abiertos, los rieles de pago y el fraude, y el diseño completo con sus precisiones: `INTEROPERABILIDAD.md`, «Pagar y conciliar».
+abiertos, los rieles de pago y el fraude.
 
 **Qué hay hoy.** Nada de banco. La conciliación de constancias de detracción está pendiente de un archivo real, pero la
 mitad existe: `diagnosticar` ya lista las detracciones que esperan constancia (`_detraccion_pendiente`,
@@ -243,7 +242,7 @@ que un tercero pueda comprobar que su implementación cumple, y que un contador,
 cómo aportar: la regla con su norma, el driver con su contrato, el formato de su sistema con un archivo aceptado.
 
 **Investigación.** Cómo gobiernan sus cambios MCP, Python, FDX, Peppol y JSON Schema, y la plantilla y los estados de
-una enmienda: `INTEROPERABILIDAD.md`, «El estándar y su gobierno».
+una enmienda: `estandar/LEEME.md`, «El estándar y su gobierno».
 
 **Qué hay hoy.** `estandar/LEEME.md` ya tiene una regla de versionado (lo aditivo no sube la versión; lo que cambia de
 significado, sí), siete nombres reservados y un tag del estándar que avanza con cada cambio aditivo;
@@ -274,7 +273,6 @@ Es el **primer frente tras la Fase 0**, en paralelo con la salida Legacy.
 cubra los casos que faltan, con la misma regla para todos los destinos.
 
 **Investigación.** Las reglas de SUNAT como datos y los datos públicos que un motor puede recibir:
-`INTEROPERABILIDAD.md`, «Validar antes de asentar»; las analogías de la declaración: «Declarar».
 
 **Qué hay hoy.** Desde la 1.1, los catálogos de tipos de comprobante, documentos de identidad y monedas viven en datos
 con su fuente (`contaperu/datos/sunat/catalogos.json`), igual que la tabla de detracciones
@@ -303,7 +301,7 @@ real fuera del Perú.
 celda del Excel de CONCAR ni un carácter de la huella.
 
 **Investigación.** El mapa de lo universal y lo peruano, la partición en perfiles, el contrato de una jurisdicción, el
-cambio del estándar y EE. UU. como ejemplo: `INTEROPERABILIDAD.md`, «Otra jurisdicción».
+cambio del estándar.
 
 **Qué hay hoy.** El núcleo sabe contabilidad peruana y nada más (`ARQUITECTURA.md:25`). Ya son universales la partida
 doble, la línea del comprobante, la huella, la imputación, las faltas, la maquinaria de configuración y el registro de drivers.
@@ -331,7 +329,6 @@ estándar; poner la jurisdicción en la configuración (es del libro).
 tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de control.
 
 **Investigación.** El SIRE frente a las declaraciones de EE. UU. y la propuesta del RCE como lista de control:
-`INTEROPERABILIDAD.md`, «Declarar», «El ciclo contable, comparado» y «Recibir la factura».
 
 **Qué hay hoy.** El driver `sire` escribe el TXT de reemplazo del RVIE (Anexo 3) y del RCE (Anexo 11), contrastado con
 archivos reales aceptados, y lo comprime en su ZIP; deja fuera los recibos por honorarios. `comparar_sire` compara ese
@@ -355,7 +352,7 @@ son, con CONCAR y CONTASIS, los sistemas contables que más estudios peruanos ti
 encima de ellos mientras evolucionan.
 
 **Investigación.** Los tres escalones con que EE. UU. integra sistemas de escritorio sin API, y lo que se toma de
-ellos: `INTEROPERABILIDAD.md`, «Exportar al destino». Para A4 y A5, la forma de la API de STARSOFT Gold campo a
+ellos. Para A4 y A5, la forma de la API de STARSOFT Gold campo a
 campo, comparada con las API de EE. UU. y con los estándares abiertos de factura: `API-DE-REGISTRO.md`.
 
 **Qué hay hoy.** CONCAR (asientos) y CONTASIS (registro) en uso, de canal legacy. Las formas del contrato
@@ -394,7 +391,7 @@ estándar y del motor.
 1.0 la publicó para quien no escribe Python (B1-B6).
 
 **Investigación.** Contratos publicados, motor y reglas versionados aparte, reglas escritas para entrar y cómo
-embeberse en un ERP abierto: `INTEROPERABILIDAD.md`, «Exportar al destino»; la puerta MCP, «Arquitectura y
+embeberse en un ERP abierto; la puerta MCP, «Arquitectura y
 puertas».
 
 **Qué hay hoy.** La API pública `contaperu.api`, la tabla `OPERACIONES` de la que salen las rutas HTTP, las herramientas
@@ -464,8 +461,8 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
   (espera un archivo importado y C7); `cuentas_conocidas*`, la cuenta del proveedor distinta de la conocida (espera D2
   y un caso); emparejar órdenes de compra y recepciones (espera un cliente cuyo ERP las lleve).
 - **En vigilancia:** las finanzas abiertas de la SBS y un perfil FAPI peruano, cuando exista la regulación; la factura negociable y su
-  Plataforma de Confirmación, si un cliente la usa como canal de conformidad (`INTEROPERABILIDAD.md`, «Recibir la factura»).
-- **Descartado en el diseño** (la tabla de descartes de `INTEROPERABILIDAD.md`): la cuenta transitoria inmediata, *embeddings* en el motor, un
+  Plataforma de Confirmación, si un cliente la usa como canal de conformidad.
+- **Descartado en el diseño** (`ARQUITECTURA.md`, «Lo que no se hace, y por qué»): la cuenta transitoria inmediata, *embeddings* en el motor, un
   lenguaje de requisitos declarativos, log con hash encadenado y fechas de bloqueo.
 - **Resuelta en la 1.0:** `generar_asiento` exige lo que exige el destino, igual que `exportar` (CHANGELOG, «Cambiado»).
 
@@ -489,10 +486,63 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 - **Lo que se descarta o cambia de dependencia** pasa a «Lo que no está en esta hoja de ruta», con su motivo. No se
   borra en silencio.
 - **Reparto con los otros documentos.** **La investigación nueva y todo cambio de diseño se escriben en
-  `INTEROPERABILIDAD.md`**, en la etapa que le toca y con sus fuentes; aquí solo cambian el orden y los hitos.
+  el §8**, con el caso real que destraba cada una; aquí solo cambian el orden y los hitos.
   `ARQUITECTURA.md` y la tabla «Estado» del README cambian cuando algo pasa a estar listo.
 - **Remisiones por identificador.** Entre los dos documentos se cita por número de propuesta y por id de hito, nunca
   por número de sección; una etapa de la investigación se nombra por su título. Así cualquiera de los dos se puede
   reordenar sin romper una remisión.
 - **Cuándo se revisa.** Al etiquetar una versión y cuando SUNAT publica una nueva versión de sus reglas (E4). Nunca por
   calendario de entregas.
+
+---
+
+## 8 · De dónde salió cada hito: el inventario de propuestas
+
+Las 31 propuestas que levantó la investigación del ciclo contable (13-14 de setiembre de 2026),
+cada una con el caso real que la destraba y el hito que le toca; «—» si todavía no tiene uno. Es a
+esta tabla a la que remite la columna **Propuesta** de los frentes.
+
+Vivió en `INTEROPERABILIDAD.md` hasta el 8-oct-2026, y se mudó aquí al retirarlo: la tabla la usa
+esta hoja y nadie más, así que dejar de ser una remisión a otro documento es lo que la mantiene
+viva. Lo que se fue con aquel documento es la investigación comparada que la originó —el ciclo de
+EE. UU. frente al peruano, los modelos de referencia, las etapas—, que ya había dado todo lo que
+tenía que dar y queda en el historial de git.
+
+Prioridad **A**: afina lo que existe, tiene un caso visto y no necesita datos de fuera. **B**: tiene
+caso, pero cambia una salida (y se anuncia) o es una función nueva que decide el mantenedor. **C**:
+espera un archivo real. **D**: espera un segundo caso o una versión del SDK.
+
+| # | Propuesta | Nivel | Caso real que la destraba | Test que la fijaría | Nombre | Prio | Hito |
+|---|---|---|---|---|---|---|---|
+| 1 | `claves_previas` en `revisar`, `diagnosticar`, `exportar` y el MCP | F | `DUPLICADO_PERIODO_ANTERIOR` nunca se dispara desde la fachada (error 452) | Con una clave previa, el comprobante sale en `bloqueantes` con `pedir_a: contador`; sin ella, todo igual | ya existe en `validar` | A | 0.1 |
+| 2 | Anotaciones en las 11 herramientas | F | Sin anotación, un cliente asume `destructiveHint` y `openWorldHint` verdaderos | `test_servidor_mcp` recorre las 11 | — | A | 0.2 |
+| 3 | Corregir la frase del LEEME sobre la detracción regenerada | estándar | Regenerar lo ya importado duplica en un destino que suma | — | — | A | 0.3 |
+| 4 | Índice por comprobante: identidad, rango de líneas y huella | F | Tandas que se solapan; comprobante que cambió tras exportarse | Partición exacta; cuadre por rango; literal de `test_huella` intacto | `_asiento.comprobantes*` | A | 0.4 |
+| 5 | Llevar la lectura de disco de `comparar_sire` a la CLI | puerta | La regla «sin disco en el núcleo» | Un vigilante de disco en `test_frontera`, salvo datos empaquetados | — | A | 0.5 |
+| 6 | Tipo de cambio y tasa de detracción como texto en la línea | N · D | La regla de `Decimal` | Línea con texto; celda de CONCAR igual (snapshot intacto); huella en USD con literal nuevo y anuncio | — | B | 0.6 |
+| 7 | CSV con `rol` y los `tipo_cp` | D | El CSV se ofrece como plantilla de driver y pierde lo que un driver necesita | Columnas nuevas presentes y llenas | — | B | B5 |
+| 8 | Versión del motor en `_asiento` y `_exportacion` | F | Saber con qué versión salió una tanda tras un cambio anunciado | Igual a `__version__`; fuera de la huella | `motor*` | B | B2 |
+| 9 | `cruzar_con_propuesta` y el primer `pedir_a: proveedor` | N · F | La propuesta del RCE como lista de control, la que EE. UU. no tiene | Tres cajones; ceros; RUC mal escrito | `cruzar_con_propuesta*` | B | C9 |
+| 10 | `outputSchema` de `diagnosticar` | F | Un agente que valida la forma de la respuesta | Las dos formas de retorno validan contra el esquema | — | B | B2 |
+| 11 | Plan de cuentas del destino y falta `cuenta_fuera_del_plan` | N · F · D | Nota K de la plantilla de CONCAR | Plan sin la cuenta bloquea y `exportar` lanza; sin plan, snapshot idéntico | `plan_de_cuentas*`, `cuenta_fuera_del_plan*` | C | C10 |
+| 12 | `lleva_centro` por la marca del plan | N | Nota M; el propio docstring de `lleva_centro` | La marca manda sobre el prefijo (mutación) | — | C | C10 |
+| 13 | Centro de costo contra la lista `centros_costo` | N | Nota M, «Ver T.G. 05» | Un centro inexistente bloquea solo si llega la lista | — | C | C10 |
+| 14 | `aplicar_constancias` | N | Hoja de ruta; `_detraccion_pendiente` ya responde | De `PROVISIONADO` a `PAGADO` con el archivo real; sin pareja, igual | `aplicar_constancias*` | C | D1 |
+| 15 | Lector de extracto del banco X y el movimiento | N | El Excel o TXT del portal bancario, el formato confirmado en el Perú | Archivo real anonimizado; un libro Excel no se desarma como ZIP; deduplica | `Movimiento*`, `leer_extracto*` | C | D2 |
+| 16 | `conciliar` | N | Constancias primero; después cobros y pagos | Motivos legibles; cardinalidades; lo pendiente no se propone; tolerancia | `conciliar*` | C | D3 |
+| 17 | Asiento de tesorería | N · D | Cobros y pagos hacia el destino | Archivo aceptado del sub-diario de bancos; ITF con su norma | — | C | D6 |
+| 18 | `sugerir_imputacion` | N · F | La imputación repetida por proveedor | Determinista; mínimo; nunca escribe la imputación | `sugerir_imputacion*` | C | — |
+| 19 | Pedir lo que falta desde el MCP (MRTR) | F | Pedir una cuenta sin guardar estado | — | — | D | — |
+| 20 | Contrato de lector y *entry points* de lectores | N | El segundo banco | Un test de conformidad análogo al de drivers | `contaperu.lectores*` | D | B7 |
+| 21 | `trazas` de un driver que consolide | D | El primer driver que agrupe líneas | Partición exacta; los importes suman | `trazas*` | D | — |
+| 22 | `documento.id_externo` en la línea | estándar | Un driver de forma `desde_lineas` que escriba el id del origen | Transporte puro; fuera de la huella | — | D | — |
+| 23 | El resumen por contraparte de `diagnosticar` agrupa por moneda | F | Un proveedor que factura en PEN y en USD el mismo mes | Dos monedas del mismo RUC no dan un único total; con una sola moneda, la salida no cambia | — | A | 0.8 |
+| 24 | El padrón admite `razon_social*`, sin aviso por diferencia de nombre | N · F | El de C8, con TIN Matching como referencia | Sin padrón no cambia nada; un nombre distinto no produce observación (mutación) | `razon_social*` | C | C8 |
+| 25 | Tolerancia de importe en porcentaje y en diferencia absoluta | N | Las tres vías de NetSuite | Dentro del porcentaje y fuera del absoluto no da certeza alta | — | D | D3 |
+| 26 | IGV por utilización de servicios de no domiciliados: par de líneas y archivo del RCE | N · estándar · D | Un 91 real con su pago por el Formulario 1662 y un asiento aceptado por CONCAR | Cuatro líneas que cuadran; una 01 idéntica (snapshot); el rol entra por su enmienda | `igv_no_domiciliado*` | C | C12 |
+| 27 | Archivo de 4ta del PLAME, análogo del 1099-NEC | D | Un archivo que PLAME haya importado, y el de C7 | Las cuatro capas de prueba de un driver | `plame_4ta*` | C | — |
+| 28 | Cuenta del proveedor distinta de la conocida, en `conciliar` | N · F | D2 y un caso real de cambio de cuenta | Sin el dato no cambia nada; con una cuenta nueva no hay certeza alta | `cuentas_conocidas*` | D | — |
+| 29 | Los padrones que deciden una retención llegan como dato | N | El de C4 | — | — | D | C4 |
+| 30 | La puerta a otra jurisdicción | N · D · estándar | Un cliente real fuera del Perú | Los criterios de J0-J6 en la hoja de ruta | `jurisdiccion*`, `impuestos[]*` | D | J0-J6 |
+| 31 | El régimen tributario del contribuyente como datos, y el cálculo de su pago a cuenta | N · F | La tabla entró en la 6.1.0 con los arts. 118, 120 y 124 de la LIR; **calcular** la cuota espera un formulario mensual presentado | La tasa, los topes y los libros contra su artículo; la cuota contra las casillas 301 y 312 de un formulario real | `regimenes_tributarios`, `pago_a_cuenta*` | C | C13 |
+| — | ¿Debe `generar_asiento` exigir lo que exige el destino? | F | — | — | — | pregunta | — |

@@ -128,7 +128,7 @@ def resumen(documento: dict, *, agrupar_por: str = "") -> dict:
     salida_ = _resumen.del_libro(preparacion.comprobantes_de(documento), agrupar_por=agrupar_por)
     # El libro va en la respuesta porque un total sin decir de qué RUC y de qué mes es una trampa —y es
     # además lo que hace que nadie pueda coser doce de estos y presentarlos como un resumen anual sin que
-    # se vea, que es un descarte declarado del estándar (`INTEROPERABILIDAD.md` §7).
+    # se vea, que es un descarte declarado (`ARQUITECTURA.md`, «Lo que no se hace, y por qué»).
     return {"libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo}, **salida_}
 
 

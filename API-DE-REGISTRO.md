@@ -1172,7 +1172,7 @@ comprobantes.
 no la del sistema que registró. Xero enlaza por id y SAF-T por número de documento en los dos sentidos. Añadir
 **`documento.id_externo`** en la línea cierra el círculo: con `imputaciones` llaveadas por `id_externo` y el asiento
 apuntando al mismo id, el archivo se explica entero sin adivinar nada. Ya figura como propuesta en
-`INTEROPERABILIDAD.md`, esperando su caso.
+el §8 de `HOJA-DE-RUTA.md`, esperando su caso.
 
 ### Qué pasa cuando se fusionan los dos
 

@@ -12,7 +12,7 @@ documentación es justo donde vive el nombre que la gente copia.
 Se comprueban los documentos que describen **lo que hay hoy**. Quedan fuera, a propósito:
 
 - `CHANGELOG.md`, que es la bitácora: habla de versiones viejas porque para eso existe;
-- `REFERENCIAS.md`, `INTEROPERABILIDAD.md` y `API-DE-REGISTRO.md`, que son investigación fechada y dicen en su
+- `REFERENCIAS.md` y `API-DE-REGISTRO.md`, que son investigación fechada y dicen en su
   cabecera de cuándo son y contra qué versión se escribieron;
 - `estandar/LEEME.md` en su historia de versiones, que narra la 0.1, la 0.2 y la 0.3 sin la palabra
   `open-accounting` delante, así que el patrón no la toca.
@@ -86,7 +86,7 @@ def test_los_documentos_de_investigacion_dicen_de_cuando_son():
 
     Es lo que separa un documento de investigación de uno desactualizado, y la diferencia la tiene que ver el lector
     en el primer párrafo, no deducirla del `git log`."""
-    for doc in ("REFERENCIAS.md", "INTEROPERABILIDAD.md", "API-DE-REGISTRO.md"):
+    for doc in ("REFERENCIAS.md", "API-DE-REGISTRO.md"):
         cabecera = "\n".join(texto(doc).splitlines()[:40])
         assert "**Estado:" in cabecera or "Investigación hecha el" in cabecera, (
             f"{doc} no dice en su cabecera de cuándo es ni contra qué versión se escribió")
@@ -95,7 +95,7 @@ def test_los_documentos_de_investigacion_dicen_de_cuando_son():
 def test_la_lista_de_vigentes_no_se_queda_atras():
     """Si aparece un documento nuevo en la raíz o en `estandar/`, hay que decidir si habla del presente."""
     en_disco = {p.name for p in RAIZ.glob("*.md")} | {f"estandar/{p.name}" for p in (RAIZ / "estandar").glob("*.md")}
-    fechados = {"CHANGELOG.md", "REFERENCIAS.md", "INTEROPERABILIDAD.md", "API-DE-REGISTRO.md",
+    fechados = {"CHANGELOG.md", "REFERENCIAS.md", "API-DE-REGISTRO.md",
                 "CODE_OF_CONDUCT.md", "SECURITY.md",
                 # Lo levantado del formato de STARSOFT el 20-sep-2026, de dos vídeos y sus capturas. Se declara
                 # a sí mismo documento de trabajo y marca lo que está `[por confirmar]`: pasa a vigente el día
@@ -104,7 +104,7 @@ def test_la_lista_de_vigentes_no_se_queda_atras():
                 # La investigación del 1-oct-2026 sobre el PLE como suelo del estándar y el modelo de cuentas de
                 # los ERP abiertos. Mismo caso que el de STARSOFT: se declara documento de trabajo y marca lo que
                 # está `[por confirmar]` —los códigos de libro del Anexo 3 de la RS 286-2009, entre otros—. Sus
-                # candidatas a propuesta entran en la tabla de `INTEROPERABILIDAD.md` cuando cierre el refinado,
+                # candidatas a propuesta entran en la tabla del §8 de `HOJA-DE-RUTA.md` cuando cierre el refinado,
                 # y entonces este documento pasa a vigente o se reparte entre los dos de investigación.
                 "LIBROS-Y-CUENTAS.md"}
     sin_decidir = sorted(en_disco - set(VIGENTES) - fechados - {f"estandar/{Path(v).name}" for v in VIGENTES})

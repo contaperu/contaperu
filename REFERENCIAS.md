@@ -8,7 +8,8 @@ fuentes están al final.
 
 Su continuación —el ciclo contable de EE. UU. comparado con el peruano, los proyectos abiertos, los estándares (el
 PLE, SAF-T, XBRL GL, ISO 20022), la especificación MCP, dos entradas que el motor todavía no tiene, el banco y las
-facturas de proveedores, y la puerta a otra jurisdicción— está en [INTEROPERABILIDAD.md](INTEROPERABILIDAD.md).
+facturas de proveedores, y la puerta a otra jurisdicción— está en el §8 de
+[HOJA-DE-RUTA.md](HOJA-DE-RUTA.md), con sus descartes en [ARQUITECTURA.md](ARQUITECTURA.md).
 
 De aquí salieron las cinco `clases` de la línea, tomadas del único vocabulario que QuickBooks, Xero, Merge y Rutter
 comparten. **El nivel que les falta debajo** —cómo clasifican la cuenta los ERP abiertos, qué cuenta usa cada papel y

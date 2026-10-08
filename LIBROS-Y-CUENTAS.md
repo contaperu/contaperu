@@ -5,7 +5,7 @@ documento **no es normativo**: lo normativo es
 [`estandar/LEEME.md`](estandar/LEEME.md) y lo que valide su esquema. Lo que está comprobado contra fuente primaria se
 cita con su norma o su URL; lo que falta por comprobar va marcado **`[por confirmar]`** y no se usa para sostener
 ninguna conclusión. Pasa a documento vigente, o se reparte entre
-[`INTEROPERABILIDAD.md`](INTEROPERABILIDAD.md) y [`API-DE-REGISTRO.md`](API-DE-REGISTRO.md), el día que se cierre el
+[`HOJA-DE-RUTA.md`](HOJA-DE-RUTA.md) y [`API-DE-REGISTRO.md`](API-DE-REGISTRO.md), el día que se cierre el
 refinado y cada candidata tenga su caso real.
 
 > **Lo que ya dejó de ser propuesta (5.0.0, 1-oct-2026).** La candidata **E** entró, y entró más grande de lo que aquí
@@ -248,7 +248,7 @@ Eso cambia de sitio la idea del §2.4: **no es un préstamo de SAF-T, es lo que 
 la regla del repositorio es que ninguna regla contable entra sin fuente, y la fuente peruana existe.
 
 *(La estructura **electrónica** del 5.1 —el TXT campo a campo del Anexo 2 de la RS 286-2009 y sus modificatorias,
-entre ellas la RS 169-2015— confirma esta tabla o la matiza: **`[por confirmar]`**. `INTEROPERABILIDAD.md`, «Modelos
+entre ellas la RS 169-2015— confirma esta tabla o la matiza: **`[por confirmar]`**. «Modelos
 de referencia», ya tiene de ese anexo el CUO, los campos 10-12, el 20 y el 21, pero no el de la cuenta contable.)*
 
 ### 3.3 · Los tres casos que no estaban cubiertos ya tienen su libro
@@ -357,7 +357,7 @@ Cinco motivos, y el primero es dirimente:
    referencia, pero **empaquetar el CSV de `l10n_pe`** aquí es otra cosa y no se hace. El mapeo se deriva del catálogo
    propio y, si acaso, se *compara* con `l10n_pe` como contraste externo. *(Licencia exacta del módulo:
    **`[por confirmar]`**.)*
-2. **Odoo *es* el destino, no el estándar.** El mismo argumento que `INTEROPERABILIDAD.md` ya usó para otra cosa:
+2. **Odoo *es* el destino, no el estándar.** El mismo argumento que ya se usó para otra cosa:
    «ERPNext y Odoo lo necesitan porque ellos *son* el destino; ContaPerú escribe hacia un destino que ya guarda esa
    exigencia».
 3. **Ningún destino del motor lee Odoo.** CONCAR, CONTASIS, SISCONT y STARSOFT, no. La tesis es «encima, no en lugar
@@ -398,7 +398,7 @@ Dos propiedades de este reparto, y son las que lo hacen escalable:
 
 ## 6 · Candidatas a propuesta
 
-Van aquí y **no** en la tabla de `INTEROPERABILIDAD.md` todavía, a propósito: ese inventario es uno y se numera de
+Van aquí y **no** en la tabla del §8 de `HOJA-DE-RUTA.md` todavía, a propósito: ese inventario es uno y se numera de
 corrido, y meter cinco filas que aún van a cambiar lo ensuciaría. Entran ahí, con su número, cuando el refinado cierre
 y cada una tenga su caso real. El molde de cada una es el del inventario: nivel, caso real que la destraba, test que la
 fijaría, prioridad y hito.
@@ -422,7 +422,7 @@ tocar el catálogo de roles.
 **Lo que hay que respetar.** `tipos_de_libro` **no degrada como `rol`**: quien recibe un libro que no conoce no puede
 adivinar qué hacer con él, así que el driver que no lo declare en sus `FORMATOS` lo rechaza limpio diciendo qué libros
 lleva. Añadir valores es aditivo y no sube la versión del estándar, pero **cada driver decide qué libros declara** —y
-choca con algo que `INTEROPERABILIDAD.md` ya tenía anotado: «`FORMATOS` solo acepta `venta` y `compra`».
+choca con algo que ya estaba anotado: «`FORMATOS` solo acepta `venta` y `compra`».
 
 | | |
 |---|---|
@@ -489,7 +489,7 @@ con ocho ranuras: `cxp`, `cxp_detraccion`, `honorarios`, `retencion_4ta`, `igv`,
 **contraparte** es el «quién», y el **código del Catálogo 54** es literalmente un *product posting group* —clasifica
 qué se compra y de ahí sale una tasa—, y ya entra por `imputacion.detraccion_codigo`. Precedente interno:
 `cuentas_con_centro = ["62","63","65","70"]` ya es una regla por **prefijo de cuenta**, como las dimensiones por
-prefijo de Odoo y por tipo de cuenta de ERPNext que `INTEROPERABILIDAD.md` ya tiene investigadas.
+prefijo de Odoo y por tipo de cuenta de ERPNext, ya investigadas.
 
 **Lo que no se toma.** El lenguaje declarativo de requisitos, ya descartado con su motivo. Y las ~45 ranuras de
 iDempiere: nombran hechos que el motor no registra —almacén, proyecto, variaciones de costo—. La tabla crece por hecho,
@@ -581,7 +581,7 @@ Ninguno de estos puntos sostiene una conclusión de este documento; todos son pr
   *(no accesible el 1-oct-2026)*
 - RS 286-2009/SUNAT, sistema de llevado de libros electrónicos: estructuras en el Anexo 2, tablas y códigos en el
   Anexo 3. **`[por confirmar]`**
-- RS 169-2015/SUNAT, Anexo 2 (ya citado en `INTEROPERABILIDAD.md`) —
+- RS 169-2015/SUNAT, Anexo 2 —
   https://spij.minjus.gob.pe/Graficos/Peru/2015/Junio/30/RS-169-2015-SUNAT-ANX-2.pdf
 
 **La clasificación y la determinación de cuentas en los ERP abiertos** (consultadas el 1-oct-2026)
@@ -607,7 +607,7 @@ Ninguno de estos puntos sostiene una conclusión de este documento; todos son pr
   https://learn.microsoft.com/en-us/dynamics365/business-central/finance-work-with-vat ·
   https://github.com/MicrosoftDocs/dynamics365smb-docs/blob/main/business-central/finance-setup-vat.md
 
-**Los estándares de intercambio** (ya citados en `API-DE-REGISTRO.md` e `INTEROPERABILIDAD.md`; se repiten aquí por lo
+**Los estándares de intercambio** (ya citados en `API-DE-REGISTRO.md`; se repiten aquí por lo
 que aportan a este documento)
 
 - XBRL Global Ledger, `accountPurposeCode` y `entryDetail` —
@@ -628,5 +628,3 @@ que aportan a este documento)
 - Las ocho ranuras de cuenta y sus tres capas: `contaperu/configuracion.py`, `contaperu/drivers/contrato.py`,
   `contaperu/drivers/*/datos.py`
 - La huella y lo que excluye: `contaperu/asiento/huella.py`
-- Los proyectos abiertos ya investigados: `INTEROPERABILIDAD.md` («Modelos de referencia: ERPs abiertos, ledgers y
-  estándares»)

@@ -37,7 +37,7 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
   bases para los ERP que vienen. «Encima, no en lugar de» sigue valiendo para quien ya tiene su sistema contable, y a
   la vez un ERP nuevo no tiene que reimplementar el IGV ni las detracciones: parte del estándar y del motor. La
   contabilidad automatizada se trata como arquitectura colectiva, no organizacional: un estándar y un motor comunes,
-  mejorados entre todos. Es el enfoque que ordena el README, `INTEROPERABILIDAD.md` y `HOJA-DE-RUTA.md`.
+  mejorados entre todos. Es el enfoque que ordena el README y `HOJA-DE-RUTA.md`.
 - Es una copia y no una importación, a propósito: este repo se abrirá y no puede depender de un archivo del disco de
   nadie. Si la visión cambia, se actualiza esta sección con la fecha.
 
@@ -155,9 +155,8 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU.; de aquí salió la 0.8.0 |
 | `API-DE-REGISTRO.md` | El escalón de antes del asiento: cómo se manda una compra o una venta por API. La de STARSOFT Gold como punto de partida, cómo lo resuelven QuickBooks, Xero, Business Central, NetSuite, Intacct y las unificadas, qué enseñan EN 16931 y Peppol, y el borrador del JSON universal: el cuerpo de la llamada **es** el documento del estándar, con `imputaciones` dentro |
-| `INTEROPERABILIDAD.md` | Su continuación, y toda la investigación en un solo lugar, en cuatro partes: el marco (el ciclo de EE. UU. comparado con el peruano); las etapas del ciclo (recibir la factura, validar, asentar, exportar al destino, pagar y conciliar, declarar); lo transversal (modelos de referencia, el estándar, la arquitectura con MCP, otra jurisdicción); y el inventario de propuestas y descartes, con sus fuentes. Cada propuesta cita su hito y espera su caso real |
 | `LIBROS-Y-CUENTAS.md` | **Documento de trabajo** (1-oct-2026), no normativo: por qué una línea lleva `rol` si la cuenta ya dice qué es, y las tres capas con que el mundo lo resuelve (clasificar la cuenta, determinar qué cuenta usa cada papel, el propósito de la línea). Su tesis: **el suelo es el PLE** —el artículo 6 de la RS 234-2006 ya fija el nivel de la cuenta, y el Formato 5.1 ya tiene la forma de nuestra línea—, así que planilla, depreciación y asiento de destino entran por su **libro**, no por un rol nuevo; y el vocabulario para integrar se toma de los ERP abiertos (los `account_type` de Odoo, la tabla de determinación de OFBiz e iDempiere). Cinco candidatas a propuesta, sus descartes y lo que queda `[por confirmar]` |
-| `HOJA-DE-RUTA.md` | En qué orden crece el motor: qué sigue, la Fase 0 y los seis frentes (drivers legacy, puerta para cualquier ERP, leer y validar más, el banco, el estándar y otra jurisdicción), hitos con criterio de salida y el dato que destraba cada uno. Solo orden: cada hito cita su propuesta de `INTEROPERABILIDAD.md` por número |
+| `HOJA-DE-RUTA.md` | En qué orden crece el motor: qué sigue, la Fase 0 y los seis frentes (drivers legacy, puerta para cualquier ERP, leer y validar más, el banco, el estándar y otra jurisdicción), hitos con criterio de salida y el dato que destraba cada uno. Solo orden: cada hito cita su propuesta por número, y el §8 es el inventario de las 31 con el caso real que destraba cada una |
 | `CHANGELOG.md` | Cada versión con su porqué; la bitácora del motor vive aquí y en ningún otro sitio |
 | `SECURITY.md` · `CODE_OF_CONDUCT.md` | Cómo reportar una vulnerabilidad; cómo se convive en el proyecto |
 

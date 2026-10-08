@@ -10,7 +10,8 @@ Lo que aquí se decide es lo que decide cualquiera que sume un libro peruano, y 
 
 - **La nota de crédito resta** (`Comprobante.es_nota_credito`, o sea `modelo.NOTAS_CREDITO`).
 - **Cada moneda va por su lado.** No hay ninguna clave que sume soles con dólares, y no la habrá:
-  convertir dentro de un resumen sería una cifra nueva sin caso (`INTEROPERABILIDAD.md` §7).
+  convertir dentro de un resumen sería una cifra nueva sin caso (`ARQUITECTURA.md`, «Lo que no
+  se hace, y por qué»).
 - **Lo excluido no es del mes y lo duplicado no va a ningún archivo**, así que ninguno suma — pero los
   dos se cuentan, porque son dos cosas distintas y quien mira necesita saber cuál le pasó.
 
