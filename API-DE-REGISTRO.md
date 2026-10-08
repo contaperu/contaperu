@@ -1824,7 +1824,7 @@ estándar.
 | Qué | Dónde |
 |---|---|
 | La raíz admite `imputaciones`, con llave por `id_externo` | `estandar/open-accounting.schema.json` |
-| El pipeline la lee del documento sin dejar de aceptar el argumento de hoy, y rechaza que lleguen los dos | `contaperu/pipeline/preparacion.py`, `contaperu/api/` |
+| El pipeline la lee del documento sin dejar de aceptar el argumento de hoy, y rechaza que lleguen los dos | `contaperu/pipeline/preparacion/`, `contaperu/api/` |
 | `documento.id_externo` en la línea del asiento | el esquema y `contaperu/asiento/motor.py` |
 
 **Los tests que la fijan:** un documento con `imputaciones` da exactamente el mismo asiento que hoy da con la
@@ -1844,7 +1844,7 @@ archivos, la mayoría tests y fixtures, y hay que distinguirlas de las 36 del es
 | Qué | Dónde |
 |---|---|
 | `clase` obligatoria en cada línea, derivada del primer dígito de la cuenta | el esquema y `contaperu/asiento/motor.py` |
-| **Validar** la clase que llega, y observar una imputación a una cuenta de elemento 8 o 0 | `contaperu/pipeline/preparacion.py`, `contaperu/asiento/faltas.py` |
+| **Validar** la clase que llega, y observar una imputación a una cuenta de elemento 8 o 0 | `contaperu/pipeline/preparacion/`, `contaperu/asiento/faltas.py` |
 | **La clase de cada cuenta en el catálogo del PCGE**, que hoy solo trae código, nombre y cuenta madre | `contaperu/datos/`, servido por `api.buscar_cuenta_pcge` |
 | `rol` y `libro.tipo` validados contra un catálogo publicado, no contra un enum | el esquema, `contaperu/modelo/libro.py`, `contaperu/drivers/contrato/` |
 | Los catálogos `roles`, `clases` y `tipos_de_libro`, con su versión | `contaperu/datos/`, servidos por `api.catalogos_*` |

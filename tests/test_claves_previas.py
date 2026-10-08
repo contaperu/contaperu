@@ -83,7 +83,9 @@ def test_por_la_terminal(tmp_path, capsys):
 def test_por_encima_del_tope_o_mal_escritas_se_rechazan(monkeypatch):
     documento = _golden("compras_202601.json")
     assert api.MAXIMO_CLAVES_PREVIAS == 50000
-    monkeypatch.setattr(preparacion, "MAXIMO_CLAVES_PREVIAS", 1)
+    # El tope vive en `preparacion.entradas`, al lado de la comprobación que lo usa: morder la fachada
+    # cambiaría su reexportación y no el valor que lee `claves_previas_de`.
+    monkeypatch.setattr(preparacion.entradas, "MAXIMO_CLAVES_PREVIAS", 1)
     with pytest.raises(api.DocumentoInvalido, match="el tope es 1"):
         api.revisar(documento, claves_previas=[["01", "F001", "1", ""], ["01", "F001", "2", ""]])
     for malas in ("01-F001-1", [["01", "F001"]], [{"tipo_cp": "01"}]):

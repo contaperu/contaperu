@@ -56,7 +56,7 @@
   "contaperu.tributos",
   "contaperu.tributos.validar"
  ],
- "contaperu.pipeline.preparacion": [
+ "contaperu.pipeline.preparacion.pasos": [
   "contaperu.tributos",
   "contaperu.tributos.detracciones",
   "contaperu.tributos.validar"
