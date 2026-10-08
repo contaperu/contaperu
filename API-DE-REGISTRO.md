@@ -1063,7 +1063,7 @@ tendría que reescribir lo que ya tiene guardado.
 ### Y lo mismo con `libro.tipo`: los tres niveles de cambio
 
 `libro.tipo` tiene hoy el mismo problema que `rol`: es un enum cerrado de dos valores (`TIPOS_LIBRO`,
-`contaperu/modelo.py`), así que **cualquier registro nuevo obligaría a subir la versión** — que es exactamente lo
+`contaperu/modelo/libro.py`), así que **cualquier registro nuevo obligaría a subir la versión** — que es exactamente lo
 que hizo caer el libro de honorarios. Conviene sacarlo al catálogo en la misma 0.4, porque después cada libro nuevo
 sería otra versión.
 
@@ -1846,7 +1846,7 @@ archivos, la mayoría tests y fixtures, y hay que distinguirlas de las 36 del es
 | `clase` obligatoria en cada línea, derivada del primer dígito de la cuenta | el esquema y `contaperu/asiento/motor.py` |
 | **Validar** la clase que llega, y observar una imputación a una cuenta de elemento 8 o 0 | `contaperu/pipeline/preparacion.py`, `contaperu/asiento/faltas.py` |
 | **La clase de cada cuenta en el catálogo del PCGE**, que hoy solo trae código, nombre y cuenta madre | `contaperu/datos/`, servido por `api.buscar_cuenta_pcge` |
-| `rol` y `libro.tipo` validados contra un catálogo publicado, no contra un enum | el esquema, `contaperu/modelo.py`, `contaperu/drivers/contrato.py` |
+| `rol` y `libro.tipo` validados contra un catálogo publicado, no contra un enum | el esquema, `contaperu/modelo/libro.py`, `contaperu/drivers/contrato.py` |
 | Los catálogos `roles`, `clases` y `tipos_de_libro`, con su versión | `contaperu/datos/`, servidos por `api.catalogos_*` |
 | La regla de degradación y la de versionado en tres niveles | `estandar/LEEME.md` |
 | La enmienda que acompaña el salto de versión | `estandar/enmiendas/` (hito E1, que todavía no existe) |

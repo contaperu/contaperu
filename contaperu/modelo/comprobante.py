@@ -1,32 +1,21 @@
-"""Modelo canónico del motor: un `Comprobante` = una fila del registro de compras o ventas.
+"""El comprobante: una fila del registro de compras o de ventas, con lo que dice el papel y nada más.
 
-Aquí está TODO lo que necesitan las salidas —el SIRE (Anexos 3 y 11) y los sistemas contables—; los drivers
-solo ordenan y formatean. Reglas:
+Va junto con su **identidad** —`clave_de` e `identidad_de`— porque son lo mismo visto de otra forma: qué
+cuatro datos distinguen un comprobante de otro, que es la pregunta que decide un duplicado.
 
-- Importes en `Decimal` con 2 decimales y SIEMPRE positivos: el signo de las
-  notas de crédito lo pone el driver, no el dato (así la celda editable del
-  portal no obliga a escribir negativos).
-- Fechas como `date`; los drivers las escriben en el formato que toque.
-- Los campos de revisión (`estado`, `observaciones`, `excluida`) los rellenan
-  `validar.py` y el usuario; el motor nunca los inventa.
+`Comprobante` se queda entero, con sus cuarenta campos y su lector estricto: partir una dataclass por tamaño
+dejaría la mitad de los campos lejos de la regla que los valida.
 """
 from __future__ import annotations
 
-from . import vocabulario
-
-import re
 from dataclasses import dataclass, field, fields
-from datetime import date, datetime
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from datetime import date
+from decimal import Decimal
 from typing import Any
 
-CERO = Decimal("0.00")
-CENTIMO = Decimal("0.01")     # el cuántum de todo importe: una sola fuente para el motor
-_TRES = Decimal("0.001")
+from .coerciones import CENTIMO, CERO, fecha, monto, solo_digitos, tipo_cambio
+from .libro import Libro
 
-# Del catálogo del estándar (`vocabulario.TIPOS_LIBRO`), que es la única fuente desde la 1.0: estaba aquí y otra
-# vez como enum del esquema, sin nada que comparara las dos copias.
-TIPOS_LIBRO = vocabulario.TIPOS_LIBRO
 ORIGENES = ("xml", "pdf_texto", "vision", "manual", "sire")  # sire = importado de la propuesta de SUNAT
 # Lo que declara el documento sobre su pago. En la factura electrónica es obligatorio desde 2021 (UBL
 # `PaymentTerms FormaPago`: «Contado», o «Credito» con sus cuotas). Vacío = el documento no lo dice.
@@ -70,134 +59,6 @@ CAMPOS_DEL_SISTEMA = ("origen", "confianza", "archivo_nombre", "estado_sunat", "
 # sistema porque son de dos momentos distintos —uno al leer, otro al revisar— y porque un ERP que deposite
 # comprobantes para que un contador los apruebe necesita saber cuál es cuál.
 CAMPOS_DE_LA_REVISION = ("estado", "excluida", "observaciones")
-
-
-def a_decimal(v: Any) -> Decimal:
-    """Un número cualquiera (una tasa, un porcentaje) a `Decimal`, sin redondear y sin quitarle el signo; vacío o
-    ilegible, 0. Para importes está `monto`, que además los deja en 2 decimales y en positivo."""
-    try:
-        return Decimal(str(v if v not in (None, "") else 0))
-    except Exception:
-        return Decimal(0)
-
-
-def texto_tasa(tasa: Decimal) -> str:
-    """Una tasa como se escribe: a 2 decimales y sin ceros de más (18 → «18», 10.5 → «10.5», 4.50 → «4.5»)."""
-    return format(tasa.quantize(CENTIMO, rounding=ROUND_HALF_UP).normalize(), "f")
-
-
-def serie_y_numero(serie: str, numero: str) -> str:
-    """«F001-123», o solo la parte que haya: un documento sin serie (un DUA, un recibo de servicios) se nombra por su
-    número, y sin número por su serie."""
-    return f"{serie}-{numero}" if serie and numero else (serie or numero)
-
-
-def monto(v: Any) -> Decimal:
-    """Normaliza a Decimal de 2 decimales. Acepta str ('1,234.50'), int, float,
-    Decimal o vacío/None (→ 0.00). Devuelve el valor absoluto: el signo no es
-    parte del dato (ver docstring del módulo)."""
-    if v is None or v == "":
-        return CERO
-    if isinstance(v, Decimal):
-        d = v
-    else:
-        s = str(v).strip().replace(",", "")
-        if s == "":
-            return CERO
-        try:
-            d = Decimal(s)
-        except InvalidOperation as e:
-            raise ValueError(f"Importe inválido: {v!r}") from e
-    return abs(d).quantize(CENTIMO, rounding=ROUND_HALF_UP)
-
-
-def tipo_cambio(v: Any) -> Decimal | None:
-    """Tipo de cambio con 3 decimales (formato `#.###` de SUNAT); vacío → None."""
-    if v is None or v == "":
-        return None
-    try:
-        d = Decimal(str(v).strip().replace(",", ""))
-    except InvalidOperation as e:
-        raise ValueError(f"Tipo de cambio inválido: {v!r}") from e
-    if d <= 0:
-        return None
-    return d.quantize(_TRES, rounding=ROUND_HALF_UP)
-
-
-_FORMATOS_FECHA = ("%Y-%m-%d", "%Y%m%d", "%d/%m/%Y", "%d-%m-%Y")
-
-
-def fecha(v: Any) -> date | None:
-    """Acepta date/datetime, 'AAAA-MM-DD', 'AAAAMMDD', 'DD/MM/AAAA', 'DD-MM-AAAA';
-    vacío → None. Cualquier otra cosa es un error (mejor fallar que inventar)."""
-    if v is None or v == "":
-        return None
-    if isinstance(v, datetime):
-        return v.date()
-    if isinstance(v, date):
-        return v
-    s = str(v).strip()[:10]
-    for f in _FORMATOS_FECHA:
-        try:
-            return datetime.strptime(s, f).date()
-        except ValueError:
-            continue
-    raise ValueError(f"Fecha inválida: {v!r}")
-
-
-def solo_digitos(v: Any) -> str:
-    return re.sub(r"\D", "", str(v or ""))
-
-
-def numero_sin_ceros(numero: str) -> str:
-    """El número de un comprobante sin ceros a la izquierda (`00028806` → `28806`, `0000` → `0`): SUNAT identifica el
-    comprobante por su número y los ceros son cosmética del emisor. Un número con letras queda tal cual."""
-    n = (numero or "").strip()
-    return (n.lstrip("0") or "0") if n.isdigit() else n
-
-
-@dataclass
-class Libro:
-    """El registro que se genera: un RUC, un mes, ventas o compras."""
-
-    ruc: str
-    razon_social: str
-    periodo: str  # 'AAAAMM'
-    tipo: str     # 'venta' | 'compra'
-
-    def __post_init__(self) -> None:
-        self.ruc = solo_digitos(self.ruc)
-        self.periodo = solo_digitos(self.periodo)[:6]
-        self.razon_social = " ".join(str(self.razon_social or "").split())
-        self.tipo = str(self.tipo or "").strip().lower()
-        if len(self.ruc) != 11:
-            raise ValueError(f"RUC inválido: {self.ruc!r} (11 dígitos)")
-        if not re.fullmatch(r"20[0-9]{2}(0[1-9]|1[0-2])", self.periodo):
-            raise ValueError(f"Periodo inválido: {self.periodo!r} (AAAAMM)")
-        if self.tipo not in TIPOS_LIBRO:
-            raise ValueError(f"Tipo de libro inválido: {self.tipo!r} (venta|compra)")
-
-    @property
-    def anio(self) -> int:
-        return int(self.periodo[:4])
-
-    @property
-    def mes(self) -> int:
-        return int(self.periodo[4:6])
-
-    @property
-    def es_venta(self) -> bool:
-        return self.tipo == "venta"
-
-    def a_dict(self) -> dict[str, str]:
-        return {"ruc": self.ruc, "razon_social": self.razon_social, "periodo": self.periodo, "tipo": self.tipo}
-
-    @classmethod
-    def de_dict(cls, d: dict) -> "Libro":
-        """Lo desconocido se ignora; lo que falta llega vacío y lo rechaza la validación del libro (`ValueError`)."""
-        if not isinstance(d, dict):
-            raise ValueError("El libro tiene que ser un objeto con ruc, razon_social, periodo y tipo")
-        return cls(**{f.name: d.get(f.name, "") for f in fields(cls)})
 
 
 @dataclass

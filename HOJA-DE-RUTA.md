@@ -150,7 +150,7 @@ posteriores. Las propuestas de origen están en la tabla del §8, y cada hito ci
 
 | id | Hito | Nivel | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|
-| **0.0** | **Decidir la identidad del comprobante**: `libro.ruc` + `libro.tipo` + `Comprobante.clave` (`contaperu/modelo.py:300`), sin periodo, y si en ventas lleva la contraparte (`comparar_sire` la deja fuera por la misma razón) | estándar · F | Escrita en `estandar/LEEME.md` | — | — |
+| **0.0** | **Decidir la identidad del comprobante**: `libro.ruc` + `libro.tipo` + `Comprobante.clave` (`contaperu/modelo/comprobante.py`), sin periodo, y si en ventas lleva la contraparte (`comparar_sire` la deja fuera por la misma razón) | estándar · F | Escrita en `estandar/LEEME.md` | — | — |
 | **0.1** | **`claves_previas` en la fachada**: `revisar`, `diagnosticar`, `generar_asiento`, `exportar`, CLI y MCP. `validar.revisar` ya lo acepta (`contaperu/validar.py:244`). En JSON viaja como `[tipo_cp, serie, numero, contraparte_doc]`, normalizado con `clave_de`, y con un tope como `MAXIMO_COMPROBANTES` (`contaperu/pipeline/preparacion.py:26`) | F | Por las tres puertas sale `DUPLICADO_PERIODO_ANTERIOR` con `pedir_a: contador`; «00000123» casa con «123»; por encima del tope, `DocumentoInvalido`; sin claves, el snapshot de CONCAR sale idéntico | 0.0 | 1 |
 | **0.2** | **Anotaciones MCP**: `readOnlyHint: true` y `openWorldHint: false` en las 11 herramientas, y subir el mínimo del pin `mcp` al primero que las acepte (*no verificado* cuál) | F | `tests/test_servidor_mcp.py` recorre `list_tools()`; un trabajo de CI instala el mínimo declarado y pasa | — | 2 |
 | **0.3** | **La frase de la detracción regenerada**: `estandar/LEEME.md`, «La detracción, que ocurre en dos tiempos», dice que el asiento «puede regenerarse». En un destino que suma, regenerar lo ya importado duplica | estándar | El texto dice que el segundo tiempo es una decisión contable que entra con fuente y archivo real | — | 3 |
@@ -305,7 +305,7 @@ cambio del estándar.
 
 **Qué hay hoy.** El núcleo sabe contabilidad peruana y nada más (`ARQUITECTURA.md:25`). Ya son universales la partida
 doble, la línea del comprobante, la huella, la imputación, las faltas, la maquinaria de configuración y el registro de drivers.
-Son peruanos el `Libro` (`contaperu/modelo.py:113-128`), los impuestos en campos fijos, la validación
+Son peruanos el `Libro` (`contaperu/modelo/libro.py`), los impuestos en campos fijos, la validación
 (`contaperu/validar.py:16`), los roles del asiento (`contaperu/asiento/motor.py:40`), las claves del contrato de driver
 (`contaperu/drivers/contrato.py:227-230`, `:280-286`) y el esquema del estándar. Desde la 1.0, `tests/test_capas.py`
 congela el acoplamiento con lo peruano (J0).
