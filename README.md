@@ -111,7 +111,7 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 
 ### Por dónde pasa un comprobante
 
-![Qué carpeta y qué archivo toca un comprobante: entra por lectores/ (xml_ubl, sire_txt, archivos, _zip), pasa al modelo canónico (modelo, vocabulario, catalogos, que leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (validar, igv, detracciones, configuracion), asiento/ arma la partida doble apoyándose en partida_doble y pcge/, y drivers/ lo traduce a sus seis destinos; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/](diagramas/recorrido-por-los-modulos.svg)
+![Qué carpeta y qué archivo toca un comprobante: entra por lectores/ (xml_ubl, sire_txt, archivos, _zip), pasa al modelo canónico (modelo, vocabulario, catalogos, que leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (tributos/ con validar, igv y detracciones, más configuracion), asiento/ arma la partida doble apoyándose en contable/ y pcge/, y drivers/ lo traduce a sus seis destinos; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/](diagramas/recorrido-por-los-modulos.svg)
 
 El mismo motor, un nivel más abajo: **las ocho carpetas del paquete y los archivos que toca un comprobante**, en el
 orden en que lo hacen.
@@ -132,6 +132,10 @@ Hasta la 1.x convivían ahí cinco archivos más —`operaciones.py`, `generar.p
 `servidor_mcp.py`— que **no contenían nada**: eran las rutas que una aplicación importaba en la 0.x, redirigidas con
 un aviso. **La 2.0 las retiró**, y con ellas todo el resto de la compatibilidad con la 0.x. Quien integró con la 1.x
 no cambia una línea: la superficie pública de la 1.0 sigue entera.
+
+Y volvió a pasar lo mismo, a propósito: la 6.4.0 agrupó el núcleo en `tributos/` y `contable/` y dejó seis archivos
+de redirección en la raíz para no obligar a nadie a cambiar un import de un día para otro; **la 7.0 los retiró**,
+como su aviso prometía. Si usas `contaperu.api`, tampoco esta vez cambias nada.
 
 ### Las puertas y la API pública
 
