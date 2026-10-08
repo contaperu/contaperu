@@ -1,0 +1,744 @@
+{
+ "herramientas": {
+  "adaptar_pcge2026": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Adapta las cuentas de un asiento al Plan Contable General Empresarial 2026.\n\n    **La tabla de equivalencias está vacía, y hoy eso es lo correcto**: este proyecto nace en 2026\n    y trabaja con el PCGE 2026 desde el primer asiento, así que no hay plan anterior del que\n    traducir. La herramienta existe como riel para el día que una modificatoria sustituya cuentas;\n    mientras tanto devuelve el asiento intacto y lo dice en su informe (`sin_tabla`).\n\n    Cuando llegue esa modificatoria, cada equivalencia entrará **con la cita del artículo que la\n    respalda** —el cargador se niega a leer un mapeo sin ella—, porque una equivalencia inventada\n    produce estados financieros incorrectos en la contabilidad de quien confíe en esto.\n\n    Para saber si una cuenta existe o cómo se llama, la herramienta es `buscar_cuenta_pcge`; esta\n    no es esa.\n    ",
+   "entrada": {
+    "properties": {
+     "asiento": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "title": "Asiento",
+      "type": "array"
+     }
+    },
+    "required": [
+     "asiento"
+    ],
+    "title": "adaptar_pcge2026Arguments",
+    "type": "object"
+   }
+  },
+  "buscar_cuenta_pcge": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Busca una cuenta en el Plan Contable General Empresarial 2026, por nombre o por código.\n\n    Con `texto` devuelve las cuentas cuyo nombre lo contiene (sin distinguir tildes ni mayúsculas).\n    Con `codigo` devuelve esa cuenta y, si no está en la norma, **la cuenta madre que la gobierna**:\n    de `603201` sale `6032 Suministros`, porque el PCGE llega a cinco dígitos y las divisionarias\n    las abre cada empresa. Un código que no resuelve ni por su elemento está mal escrito.\n\n    Úsala antes de decidir la `cuenta_contable` de un comprobante: es la diferencia entre elegir\n    una cuenta que existe y proponer uno que suena bien.\n    ",
+   "entrada": {
+    "properties": {
+     "codigo": {
+      "default": "",
+      "title": "Codigo",
+      "type": "string"
+     },
+     "texto": {
+      "default": "",
+      "title": "Texto",
+      "type": "string"
+     }
+    },
+    "title": "buscar_cuenta_pcgeArguments",
+    "type": "object"
+   }
+  },
+  "configuracion_por_defecto": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas\n    de detracción— y una sección por sistema contable con lo suyo (`concar`: siglas y sub-diarios,\n    códigos, columnas del centro de costo; `csv`: siglas, sub-diarios y códigos de la detracción;\n    `contasis`: medio de pago y columnas del centro de costo).\n\n    **Con `driver`, la de quien lleva ese sistema**: lo general con las cuentas de ese sistema y solo\n    su sección. Pásalo siempre que sepas a qué sistema contable exporta el contribuyente, porque las\n    cuentas de fábrica son las del PCGE a seis dígitos y hay sistemas que numeran de otra forma.\n\n    Es un punto de partida razonable, no la verdad de ningún contribuyente: el plan de cuentas\n    y los sub-diarios los decide cada empresa. Cópiala, cámbiale lo que toque y pásala como\n    `configuracion` en las demás herramientas: se valida entera, y lo que no existe se dice.\n    ",
+   "entrada": {
+    "properties": {
+     "driver": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Driver"
+     }
+    },
+    "title": "configuracion_por_defectoArguments",
+    "type": "object"
+   }
+  },
+  "diagnosticar": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Dice todo lo que hay que mirar de un mes ANTES de exportarlo. **Llámala antes de `exportar`.**\n\n    En una sola respuesta: si el mes está listo (`listo_para_exportar`) y, si no, por qué\n    (`por_que_no`); qué comprobantes tienen observaciones que bloquean y cuáles solo avisos, por su\n    serie-número; qué falta para el sistema de destino —cuenta contable, centro de costo, tipos de\n    comprobante sin sigla, monedas que no admite, un reparto entre cuentas que no admite\n    (`reparto_no_admitido`), lo que no cabe en su formato (`no_cabe`), sub-diarios sin correlativo—; qué\n    detracciones esperan todavía su constancia (`detracciones_pendientes`) y cuáles ya están\n    depositadas (`detracciones_pagadas`) — una detracción cuenta como pagada cuando tiene un número\n    de constancia que no es el comodín **y** la fecha del depósito, así que una que trae número y no\n    fecha sigue saliendo como pendiente y lo que hay que pedir es la fecha; un resumen por proveedor o cliente; desde qué\n    correlativo arrancaría cada sub-diario; y la lista de lo que saldría.\n\n    `driver` es el sistema de destino y **se declara siempre** (los que hay, en `contaperu://drivers`):\n    lo que falta depende de él, así que suponerlo devolvería el diagnóstico de otro sistema.\n    `exige` dice qué pide ese destino (el CSV no exige centro de costo; CONCAR sí), y `que_falta`\n    agrupa por motivo lo que de verdad bloquea, con **`pedir_a`**: `contador` si se resuelve mirando\n    el documento o el plan de cuentas, `sistema` si es configuración del destino o un dato público\n    que no está en el papel. Úsalo para redactar la pregunta a quien toca, en vez de adivinar.\n\n    No corrige nada ni inventa nada: un comprobante sin cuenta se arregla donde se revisa, y aquí\n    solo se dice cuál es. Es la herramienta para enseñarle a la persona qué va a salir antes de\n    generar un archivo que luego se importa en su sistema contable. `imputacion` es la misma de\n    `generar_asiento`: un reparto que no suma la base sale en `faltantes.reparto_que_no_cuadra`.\n    Si la `configuracion` no cumple lo que se declara en `contaperu://configuracion`, lo dice en\n    `errores_de_configuracion`, cada error con su ruta. La forma de la respuesta está en el recurso\n    `contaperu://esquemas/diagnostico`.\n    ",
+   "entrada": {
+    "properties": {
+     "claves_previas": {
+      "anyOf": [
+       {
+        "items": {
+         "items": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "integer"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "type": "array"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Claves Previas"
+     },
+     "configuracion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Configuracion"
+     },
+     "correlativos": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Correlativos"
+     },
+     "documento": {
+      "additionalProperties": true,
+      "title": "Documento",
+      "type": "object"
+     },
+     "driver": {
+      "title": "Driver",
+      "type": "string"
+     },
+     "imputacion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Imputacion"
+     }
+    },
+    "required": [
+     "documento",
+     "driver"
+    ],
+    "title": "diagnosticarArguments",
+    "type": "object"
+   }
+  },
+  "drivers_disponibles": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Los sistemas contables a los que se puede exportar, y qué pide cada uno.\n\n    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su canal y su\n    grupo (`sire`, `legacy` o `erp`), lo que **exige** para no negarse (CONCAR pide centro de costo y una moneda\n    con código; el CSV no) y si tiene sección propia en la configuración.\n\n    Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el\n    contribuyente: esas tres lo exigen y no lo suponen.\n    ",
+   "entrada": {
+    "properties": {},
+    "title": "drivers_disponiblesArguments",
+    "type": "object"
+   }
+  },
+  "exportar": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Genera el archivo que espera un sistema contable, ya listo para importar.\n\n    Devuelve dos cosas: un resumen en JSON (nombre del archivo, comprobantes, debe y haber, y en\n    `_exportacion` la **huella** del asiento que salió: si vuelves a exportar lo mismo, la huella se\n    repite, y el Excel de CONCAR se SUMA al importarlo dos veces) y **el archivo adjunto**, para\n    guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.\n    `imputacion` es la misma de `generar_asiento`.\n\n    `driver` **se declara siempre**: el sistema contable de un contribuyente es suyo, y un Excel de\n    CONCAR importado en un CONTASIS no se nota hasta que ya está dentro.\n\n    Drivers disponibles, por grupo (el recurso `contaperu://drivers` dice el grupo de cada uno):\n      - SIRE:   `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el\n                contenido va en `texto` y el ZIP que sube a SUNAT, adjunto.\n      - Legacy: `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.\n                `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como\n                `.xlsx`: una fila por comprobante, sin sub-diario (se elige al importar).\n      - ERP:    `csv` — las líneas de diario en columnas, en `texto` y también adjunto.\n                `asiento_contable` — el documento del estándar con sus comprobantes y su asiento, sin siglas ni\n                correlativos de ningún sistema legacy, adjunto como `.json`.\n\n    Antes de escribir nada, en los drivers que arman asiento (`concar`, `csv`) comprueba que cuadre; si\n    no cuadra, falla. `contasis` y `sire` no arman asiento: `contasis` se niega antes por lo que exige y\n    por lo que no cabe en su formato (`no_cabe`).\n    ",
+   "entrada": {
+    "properties": {
+     "claves_previas": {
+      "anyOf": [
+       {
+        "items": {
+         "items": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "integer"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "type": "array"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Claves Previas"
+     },
+     "configuracion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Configuracion"
+     },
+     "correlativos": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Correlativos"
+     },
+     "documento": {
+      "additionalProperties": true,
+      "title": "Documento",
+      "type": "object"
+     },
+     "driver": {
+      "title": "Driver",
+      "type": "string"
+     },
+     "fecha": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "format": "date",
+      "title": "Fecha"
+     },
+     "imputacion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Imputacion"
+     },
+     "incluir_observados": {
+      "default": false,
+      "title": "Incluir Observados",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "documento",
+     "driver"
+    ],
+    "title": "exportarArguments",
+    "type": "object"
+   }
+  },
+  "generar_asiento": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Convierte los comprobantes en líneas de diario, sin el formato de ningún sistema.\n\n    Devuelve el bloque `asiento` del estándar: cuenta, debe o haber, importe, moneda, glosa,\n    centro de costo y el documento que lo respalda. Es lo que sirve para revisar el asiento, o\n    para cargarlo en un sistema que no tenga driver todavía.\n\n    `correlativos` dice por qué número empieza cada sub-diario ({\"11\": 1}); si no se pasa,\n    empieza en 1. Con `incluir_observados` se genera aunque haya comprobantes con errores —\n    útil para ver qué saldría, arriesgado para presentar.\n\n    `imputacion` trae lo que se decidió para cada comprobante, por su `id_externo`: su\n    `cuenta_contable`, su `centro_costo`, la `cuenta_tercero` (la del total) o un `reparto` de la base\n    entre cuentas ([{importe, cuenta_contable, centro_costo}], que tiene que sumar la base). Lo que no\n    traiga sale de la configuración.\n\n    `driver` es el sistema de asientos cuya sección de la configuración se aplica: sus siglas, sus\n    sub-diarios y las columnas en que pone el centro de costo. **Se declara siempre** —los que hay están\n    en el recurso `contaperu://drivers`—, porque el sistema de un contribuyente es suyo y suponerlo arma\n    el asiento de otro. Exige lo mismo que `exportar` hacia ese sistema —en CONCAR, el centro de costo y\n    una moneda con código—; para ver qué falta sin que se niegue, `diagnosticar`.\n    ",
+   "entrada": {
+    "properties": {
+     "claves_previas": {
+      "anyOf": [
+       {
+        "items": {
+         "items": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "integer"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "type": "array"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Claves Previas"
+     },
+     "configuracion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Configuracion"
+     },
+     "correlativos": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Correlativos"
+     },
+     "documento": {
+      "additionalProperties": true,
+      "title": "Documento",
+      "type": "object"
+     },
+     "driver": {
+      "title": "Driver",
+      "type": "string"
+     },
+     "imputacion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Imputacion"
+     },
+     "incluir_observados": {
+      "default": false,
+      "title": "Incluir Observados",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "documento",
+     "driver"
+    ],
+    "title": "generar_asientoArguments",
+    "type": "object"
+   }
+  },
+  "leer_propuesta_sire": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Lee el TXT de la propuesta que SUNAT entrega en el SIRE y devuelve un documento\n    `open-accounting`.\n\n    Es lo que el contribuyente descarga de su SIRE con lo que SUNAT cree que compró o vendió;\n    a partir de ahí se compara con la realidad y se corrige. Acepta el TXT como texto o el ZIP\n    tal cual lo entrega SUNAT (`es_base64: true`).\n    ",
+   "entrada": {
+    "properties": {
+     "contenido": {
+      "title": "Contenido",
+      "type": "string"
+     },
+     "es_base64": {
+      "default": false,
+      "title": "Es Base64",
+      "type": "boolean"
+     },
+     "libro": {
+      "additionalProperties": true,
+      "title": "Libro",
+      "type": "object"
+     }
+    },
+    "required": [
+     "contenido",
+     "libro"
+    ],
+    "title": "leer_propuesta_sireArguments",
+    "type": "object"
+   }
+  },
+  "leer_xml_ubl": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `open-accounting`.\n\n    Acepta un XML suelto como texto, o un ZIP en base64 con varios dentro (`es_base64: true`).\n    Descarta lo que no es un comprobante — las constancias de recepción (CDR) y las hojas de\n    estilo— y avisa de lo que no pudo leer. `libro` es la cabecera: RUC, periodo y si son\n    ventas o compras.\n    ",
+   "entrada": {
+    "properties": {
+     "contenido": {
+      "title": "Contenido",
+      "type": "string"
+     },
+     "es_base64": {
+      "default": false,
+      "title": "Es Base64",
+      "type": "boolean"
+     },
+     "libro": {
+      "additionalProperties": true,
+      "title": "Libro",
+      "type": "object"
+     }
+    },
+    "required": [
+     "contenido",
+     "libro"
+    ],
+    "title": "leer_xml_ublArguments",
+    "type": "object"
+   }
+  },
+  "normalizar_detracciones": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Contrasta la detracción de cada comprobante con la tabla del contribuyente y deja en\n    blanco la que no reconozca.\n\n    Sirve sobre todo después de leer comprobantes con un modelo de lenguaje: la confusión más\n    común es tomar la **retención del IGV** (el 3 % que retiene un agente de retención cuando la\n    factura pasa de S/ 700, y que no toca el registro de compras) por una detracción.\n    ",
+   "entrada": {
+    "properties": {
+     "configuracion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Configuracion"
+     },
+     "documento": {
+      "additionalProperties": true,
+      "title": "Documento",
+      "type": "object"
+     }
+    },
+    "required": [
+     "documento"
+    ],
+    "title": "normalizar_detraccionesArguments",
+    "type": "object"
+   }
+  },
+  "por_cuenta": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "El pre-mayor: en qué cuentas cayó un asiento, con su debe y su haber por moneda, y el cuadre.\n\n    Recibe las líneas que devuelve `generar_asiento`. Delata una imputación mal puesta sin generar ningún\n    archivo: una cuenta con un importe que no le toca salta a la vista en una lista de diez cuentas y no en\n    una tabla de seiscientas filas.\n\n    Trae el cuadre global y también **por moneda**, que dice algo que el global no puede: dos monedas cuyos\n    descuadres se compensan salen cuadradas en el total y descuadradas cada una. Y `roles` va en plural:\n    con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.\n    ",
+   "entrada": {
+    "properties": {
+     "asiento": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "title": "Asiento",
+      "type": "array"
+     }
+    },
+    "required": [
+     "asiento"
+    ],
+    "title": "por_cuentaArguments",
+    "type": "object"
+   }
+  },
+  "resumen": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.\n\n    Lo que un contador pregunta antes de dar un mes por bueno. **No pide destino**: es del libro, no de un\n    archivo — si lo que quieres es qué saldría hacia un sistema contable concreto, eso es `diagnosticar`.\n\n    Dos avisos para decírselos a quien pregunte: **las notas de crédito restan** (los tipos 07 y 87), así\n    que el total no cuadra sumando a mano lo que se ve; y **soles y dólares no se suman entre sí**, porque\n    sumar importes nominales de dos monedas no da ningún total. Lo excluido y lo marcado duplicado se\n    cuentan en `recuento` y no suman.\n\n    Con `agrupar_por=\"contraparte\"`, los mismos totales por proveedor o cliente, de más a menos.\n    ",
+   "entrada": {
+    "properties": {
+     "agrupar_por": {
+      "default": "",
+      "title": "Agrupar Por",
+      "type": "string"
+     },
+     "documento": {
+      "additionalProperties": true,
+      "title": "Documento",
+      "type": "object"
+     }
+    },
+    "required": [
+     "documento"
+    ],
+    "title": "resumenArguments",
+    "type": "object"
+   }
+  },
+  "validar_comprobantes": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Revisa los comprobantes de un documento `open-accounting` y devuelve el mismo documento con\n    `estado` y `observaciones` puestos en cada uno.\n\n    Comprueba lo que se puede comprobar sin salir a ningún sitio: que el RUC sea un RUC, que el\n    IGV cuadre con la base, que el total sea la suma de sus partes, que la fecha no sea posterior\n    al periodo (error; una venta de un mes anterior solo avisa, y una compra anterior, solo pasados\n    los 12 meses del plazo de anotación), que no haya duplicados —en el lote y, con `claves_previas`, contra lo ya\n    anotado en otros periodos—. Las observaciones de nivel `error`\n    bloquean la exportación; las de nivel `aviso` no.\n\n    También descarta las detracciones cuyo código no está en la tabla del contribuyente, que es\n    de donde salen los códigos inventados cuando una IA confunde la retención del IGV con una\n    detracción. Con `imputacion` —la misma de `generar_asiento`— comprueba además que cada llave\n    hable de un comprobante que está: una huérfana sale aquí y no al exportar.\n    ",
+   "entrada": {
+    "properties": {
+     "claves_previas": {
+      "anyOf": [
+       {
+        "items": {
+         "items": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "integer"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "type": "array"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Claves Previas"
+     },
+     "configuracion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Configuracion"
+     },
+     "documento": {
+      "additionalProperties": true,
+      "title": "Documento",
+      "type": "object"
+     },
+     "imputacion": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Imputacion"
+     }
+    },
+    "required": [
+     "documento"
+    ],
+    "title": "validar_comprobantesArguments",
+    "type": "object"
+   }
+  },
+  "validar_partida_doble": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Comprueba que la suma del Debe sea exactamente igual a la del Haber.\n\n    Sin tolerancia: un céntimo de diferencia es un asiento mal armado. Devuelve las dos sumas,\n    la diferencia y cuántas líneas no dicen si son Debe o Haber.\n    ",
+   "entrada": {
+    "properties": {
+     "asiento": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "title": "Asiento",
+      "type": "array"
+     }
+    },
+    "required": [
+     "asiento"
+    ],
+    "title": "validar_partida_dobleArguments",
+    "type": "object"
+   }
+  }
+ },
+ "recursos": {
+  "contaperu://campos/comprobante": {
+   "descripcion": "Qué campos de un comprobante los pone el DOCUMENTO, cuáles el SISTEMA que lo produce y cuáles la\n    REVISIÓN, más los tres que son obligatorios.\n\n    Léelo antes de armar un documento con datos que alguien te dicte: lo que está en `sistema` o en\n    `revision` no lo dice el papel —el estado, el origen, la confianza, si está apartado— y ponerlo tú es\n    decidir por el sistema que va a recibirlo. Los tres tramos cubren el comprobante entero.",
+   "mime": "application/json",
+   "nombre": "campos_del_comprobante"
+  },
+  "contaperu://catalogos/estandar": {
+   "descripcion": "Los catálogos que este estándar inventa: los roles de una línea del asiento, las cinco clases contables y\n    los tipos de libro, cada uno con su fuente y su versión.",
+   "mime": "application/json",
+   "nombre": "catalogos_del_estandar"
+  },
+  "contaperu://catalogos/pcge2026": {
+   "descripcion": "El catálogo oficial de cuentas del Plan Contable General Empresarial 2026: cada cuenta con\n    su nombre y la página de la norma que lo dice.\n\n    Sirve para dos cosas: poner el nombre de una cuenta, y comprobar que la cuenta que se va a\n    escribir existe. **Que una cuenta no esté aquí no la invalida**: el PCGE llega a cinco dígitos\n    y cada empresa abre sus divisionarias debajo — `603201` es válida y no aparece en la norma.\n    ",
+   "mime": "application/json",
+   "nombre": "catalogo_pcge2026"
+  },
+  "contaperu://catalogos/ple-campos": {
+   "descripcion": "El FORMATO del Libro Diario 5.1 del PLE columna a columna: de cada uno de sus 21 campos, su número,\n    el nombre de SUNAT, de dónde lo saca el driver al escribirlo —o por qué va vacío— y qué hizo con esa\n    columna un libro real que SUNAT aceptó.\n\n    Trae también los códigos de libro del PLE y la nomenclatura del fichero `LE…`. No confundirlos con los\n    del SIRE, que son otros.",
+   "mime": "application/json",
+   "nombre": "campos_del_ple"
+  },
+  "contaperu://catalogos/regimenes": {
+   "descripcion": "Los regímenes tributarios del Perú y lo que cada uno obliga, con la cita de su artículo: la\n    tasa y la base de su pago a cuenta, los libros que obliga a llevar —por su código del PLE— y los\n    topes que sacan de él.\n\n    Hoy solo el Régimen Especial tiene su norma leída; los otros tres dicen qué hay que leer para\n    que entren, en vez de traer una tasa de memoria. El motor no calcula la cuota: publica la tasa.",
+   "mime": "application/json",
+   "nombre": "regimenes_tributarios"
+  },
+  "contaperu://catalogos/sire-api": {
+   "descripcion": "El CANAL del SIRE, descrito: rutas por libro, parámetros obligatorios, los dos grants de\n    OAuth, la metadata de TUS, los estados del ticket y los códigos de retorno, con su fuente.\n\n    El motor no se conecta a SUNAT: esto describe la API para quien escriba su propio conector.\n    Y avisa de su techo — «Generar el registro» no existe por API.",
+   "mime": "application/json",
+   "nombre": "catalogos_api_sire"
+  },
+  "contaperu://catalogos/sire-campos": {
+   "descripcion": "El FORMATO del SIRE columna a columna: de cada campo del anexo del RVIE y del RCE, su número, el\n    nombre de SUNAT, el campo del documento donde cae —o el motivo por el que no cae— y si el TXT de\n    reemplazo lo devuelve.\n\n    Sirve para contestar «¿dónde acabó esta columna?» y «¿qué del registro no se usa?». Una columna que el\n    motor no lee no se pierde: la fila entera viaja en `datos_originales[\"sire\"]`.",
+   "mime": "application/json",
+   "nombre": "campos_del_sire"
+  },
+  "contaperu://catalogos/sunat": {
+   "descripcion": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento\n    de identidad y monedas.",
+   "mime": "application/json",
+   "nombre": "catalogos_sunat"
+  },
+  "contaperu://catalogos/vencimientos": {
+   "descripcion": "Cuándo vence un mes: la fecha de la declaración y el pago, y la fecha máxima de atraso del\n    registro electrónico de ventas y de compras, por periodo y por último dígito de RUC, con la\n    columna de los buenos contribuyentes. Los dos salen de la RS 000281-2022/SUNAT, un anexo cada\n    uno, y el del registro vence antes que el de la declaración.\n\n    No es un reloj: dado un periodo y un dígito devuelve una fecha. Si queda tiempo o hay mora lo\n    calcula quien tiene el hoy, que no es el motor. Solo los años que SUNAT publicó resueltos.",
+   "mime": "application/json",
+   "nombre": "cronogramas_de_vencimiento"
+  },
+  "contaperu://configuracion": {
+   "descripcion": "Qué se configura y cómo: lo general y la sección de cada sistema contable, cada clave con su tipo, su valor\n    por defecto, su patrón y sus textos, y en qué columnas de su archivo puede ir cada dato (el centro de costo, por\n    ejemplo). Es lo que una aplicación lee para pintar su pantalla de configuración, y contra lo que se valida la\n    `configuracion` de las herramientas.",
+   "mime": "application/json",
+   "nombre": "configuracion_declarada"
+  },
+  "contaperu://drivers": {
+   "descripcion": "Los formatos de salida disponibles y qué libros genera cada uno.\n\n    Lo mismo que la herramienta del mismo nombre, y son las dos a propósito: un recurso se lee, y quien decide si\n    el modelo llega a leerlo es el cliente; una herramienta se llama, y el modelo la ve siempre.\n    ",
+   "mime": "application/json",
+   "nombre": "drivers_disponibles"
+  },
+  "contaperu://esquemas/diagnostico": {
+   "descripcion": "El JSON Schema de la respuesta de `diagnosticar`, también cuando la configuración no se puede aplicar. El SDK no\n    deja declararlo como `outputSchema` de la herramienta sin cambiar lo que responde, así que viaja como recurso.",
+   "mime": "application/schema+json",
+   "nombre": "esquema_diagnostico"
+  },
+  "contaperu://estandar/open-accounting": {
+   "descripcion": "El esquema JSON del documento contable `open-accounting`, con cada campo documentado.",
+   "mime": "application/schema+json",
+   "nombre": "esquema_open_accounting"
+  }
+ }
+}

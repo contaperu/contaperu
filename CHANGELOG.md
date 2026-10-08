@@ -4,7 +4,65 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [6.2.0] — 2026-10-08
+
+El servidor MCP deja de escribirse a mano. Era el **fichero más grande del repositorio** —619 líneas— y declaraba
+una por una sus 14 herramientas y sus 13 recursos, mientras la puerta HTTP se generaba sola desde
+`api.OPERACIONES`. El cuerpo no era el problema: **13 de las 14 herramientas eran un `return api.X(...)` de una
+línea** y los 13 recursos un `json.dumps` de una línea. Lo duplicado era **el contrato** —la firma, los tipos, los
+nombres de parámetro, el `format: date`—, escrito otra vez en anotaciones de Python; y de ahí salió la única
+divergencia contable que ha tenido esta puerta, tres herramientas suponiendo CONCAR. Lo decía su propio test:
+«dos fuentes para un mismo contrato divergen solas».
+
+Ahora hay una sola. Queda en **328 líneas**, y lo que sigue escrito es lo que de verdad es de esta puerta: el
+envoltorio que convierte un archivo en adjunto, el que dice un error como un «problem details» del RFC 9457, el
+tipo Python con que se describe cada parámetro y el arranque.
+
+**Lo que ve un cliente no cambió ni un byte**, y no es una promesa: la foto de las 14 herramientas y los 13
+recursos —con su texto, su `inputSchema` y sus anotaciones— se capturó **antes** del refactor, se congeló en
+`tests/fixtures/mcp/publicado.json` y el test pasó después sin regenerarla. Es la misma prueba que usó la 2.0 para
+demostrar que retirar la compatibilidad de la 0.x no rompía a nadie.
+
+### Cambiado
+
+- **Las herramientas y los recursos se derivan de `api.OPERACIONES`.** De cada operación salen su nombre, sus
+  parámetros, cuáles son obligatorios y sus valores por defecto — comprobado antes de tocar nada: los 14 ya
+  coincidían exactamente con la fachada. Esta puerta solo declara lo que es suyo: el **tipo Python** de cada uno de
+  los 15 parámetros (una vez cada uno, no una vez por herramienta), los dos recursos que no sirven JSON, los tres
+  que se nombran distinto de su operación y el renombre `lineas` → `asiento`.
+- **`Operacion` gana `archivo`**, que declara que una operación devuelve bytes y no solo datos. Hasta aquí las dos
+  puertas lo preguntaban con un `if op.nombre == "exportar"` escrito en cada una.
+- **El renombre de un parámetro deja de vivir en un test.** `lineas` se llama `asiento` por esta puerta porque para
+  un agente «asiento» dice de qué habla; estaba declarado en una constante de `tests/test_servidor_mcp.py`, que es
+  un sitio raro para un contrato.
+- **Los textos que lee el agente se mudan a `contaperu/api/textos.py`.** No son las descripciones del `api` —esas
+  son para quien programa y las publica OpenConta— y nunca lo fueron: son dos corpus paralelos y **nada comprobaba
+  que no se contradijeran**. Ahora cada uno tiene un sitio. Son de la familia de `CAMINO` y no de `REGLAS`: nombran
+  herramientas concretas, así que quien monte su propia capa de agente no se los lleva.
+- **La llamada pasa por la fachada**, `getattr(api, …)` resuelto en cada llamada y no la función guardada. Lo
+  destapó un test de la batería, y tiene su motivo: `Operacion.funcion` apunta al módulo interno `api.operaciones`,
+  y una puerta habla con `api` y nada más.
+
+### Arreglado
+
+Tres desfases que el refactor dejó ver, los tres del mismo tipo: una promesa que nadie vigilaba.
+
+- **`_obsoleto.RETIRO` decía «6.0» con el paquete en la 6.1.0**, o sea prometía retirar algo en una versión ya
+  pasada. Es **exactamente** el fallo que la 4.0 arregló y escribió como regla —«se mueve con cada mayor que cumple
+  lo prometido»—, y la 6.0 volvió a caer porque el único test que tocaba `RETIRO` lo interpolaba en el mensaje que
+  comprobaba. Pasa a `"7.0"` y entra su guardián en `tests/test_version.py`: el retiro prometido tiene que ser una
+  versión que **todavía no ha llegado**.
+- **`INTEGRAR.md` prometía «lo que promete la 4.x»** y firmas estables «hasta la 5.0», dos mayores atrás. Es la
+  sección que lee quien decide integrar el motor. Ahora dice la 6.x y la 7.0.
+- **El guardián que cuenta las herramientas reventaba a partir de 16.** Mapeaba los números a palabras del 6 al 15,
+  así que la herramienta número 16 no habría fallado con un mensaje: habría dado un `KeyError`. Llega a 30 y, si se
+  pasa, lo dice en una línea.
+
+### Añadido
+
+- **`tests/fixtures/mcp/publicado.json`** y su test: lo que el agente ve, congelado. Vigila que tocar la tabla no
+  mueva en silencio los textos ni los esquemas que un cliente del MCP ya está leyendo.
+
 
 ### Retirado
 

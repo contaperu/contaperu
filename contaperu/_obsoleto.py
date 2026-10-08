@@ -10,12 +10,16 @@ Las dos decisiones que lo hacen usable, y que conviene no perder:
 
 - **El aviso sale al USAR la ruta vieja, no al importar el módulo.** Por eso `reexportar` devuelve un `__getattr__` de
   módulo en vez de ejecutar nada en el cuerpo: un `import` en el arranque de una aplicación no ensucia su registro.
-- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 6.0, que
+- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 7.0, que
   es lo que promete `CLAUDE.md`: lo que se retira avisa durante toda la mayor anterior. **Se mueve con cada mayor que
   cumple lo prometido**, y la 4.0 cumplió: retiró el alias `asiento_neutral`, que era lo único que quedaba avisando.
   Decía «3.0» con el paquete ya en la 3.8, así que el aviso citaba una versión pasada — una promesa de retiro no puede
-  sostener nada si el número que da ya quedó atrás, y de ahí sale esta regla. **La 5.0 lo mueve a la 6.0** sin retirar
-  nada, porque llegó sin nadie avisando: no hay ninguna ruta ni ningún alias deprecado pendiente.
+  sostener nada si el número que da ya quedó atrás, y de ahí sale esta regla. La 5.0 lo movió a la 6.0 sin retirar
+  nada, porque llegó sin nadie avisando. Y la 6.0 **volvió a caer en lo mismo**: salió sin moverlo, así que durante
+  toda la 6.x este módulo prometía un retiro en «la 6.0», que ya era la versión en curso. Nada lo vigilaba —el único
+  test que lo tocaba lo interpolaba en el mensaje que comprobaba—, de modo que la regla de arriba no la hacía cumplir
+  nadie. **Desde la 6.2.0 sí**: `tests/test_version.py` exige que `RETIRO` sea mayor que la versión del paquete. Hoy
+  dice «7.0», que es la mayor siguiente y donde se retiran los puentes de la reestructuración.
 
   Y no se confunda con los **valores de catálogo** marcados obsoletos (`estandar/catalogos.json`, `obsoletos`), que la
   5.0 trae y que **no tienen retiro ninguno**: un nombre de Python obsoleto desaparece, un valor publicado del estándar
@@ -33,7 +37,7 @@ import importlib
 import warnings
 from typing import Any, Callable
 
-RETIRO = "6.0"
+RETIRO = "7.0"
 
 
 class RutaObsoleta(DeprecationWarning):

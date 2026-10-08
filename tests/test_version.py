@@ -83,3 +83,22 @@ def test_el_numero_esta_escrito_una_sola_vez_en_todo_el_repositorio():
         if literal in texto:
             donde.append(str(f.relative_to(RAIZ)).replace("\\", "/"))
     assert donde == ["contaperu/_version.py"], f"la versión aparece escrita en: {donde}"
+
+
+def test_el_retiro_prometido_es_una_version_que_todavia_no_ha_llegado():
+    """`_obsoleto.RETIRO` dice en qué versión desaparece lo que hoy avisa, y eso solo sostiene algo si el
+    número **todavía no ha llegado**.
+
+    El caso que lo trae, dos veces: la 4.0 encontró un `RETIRO` que decía «3.0» con el paquete en la 3.8, lo
+    arregló y escribió la regla —«se mueve con cada mayor que cumple lo prometido»—, y la **6.0 volvió a
+    salir sin moverlo**, así que durante toda la 6.x prometía un retiro en la versión en curso. Nadie lo vio
+    porque el único test que tocaba `RETIRO` lo interpolaba en el mensaje que comprobaba: una promesa sin
+    guardián no es una promesa.
+    """
+    from contaperu._obsoleto import RETIRO
+
+    mayor_del_retiro = int(RETIRO.split(".")[0])
+    mayor_de_hoy = int(contaperu.__version__.split(".")[0])
+    assert mayor_del_retiro > mayor_de_hoy, (
+        f"`_obsoleto.RETIRO` promete el retiro en la {RETIRO} y el paquete ya va por la "
+        f"{contaperu.__version__}: lo que avisa nunca se retiraría. Muévelo a la mayor siguiente.")

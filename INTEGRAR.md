@@ -540,12 +540,12 @@ Para actualizar:
 Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
 seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
-## Lo que promete la 4.x
+## Lo que promete la 6.x
 
-- **`contaperu.api` no cambia de nombre ni de firma** hasta la 5.0 (`tests/test_superficie_publica.py`). Pueden llegar
+- **`contaperu.api` no cambia de nombre ni de firma** hasta la 7.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
-- **Un nombre que cambia sigue resolviendo durante toda la 4.x**, y avisa con `contaperu.RutaObsoleta` diciendo cuál
-  usar, hasta la 5.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno: la 4.0 cumplió el único que avisaba —el driver
+- **Un nombre que cambia sigue resolviendo durante toda la 6.x**, y avisa con `contaperu.RutaObsoleta` diciendo cuál
+  usar, hasta la 7.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno: la 4.0 cumplió el único que avisaba —el driver
   que se llamó `asiento_neutral` hasta la 3.10 y hoy es `asiento_contable`—. Corre tu batería con
   `-W error::contaperu._obsoleto.RutaObsoleta` y te sale cada sitio donde uses uno.
 - **OpenConta crece sin romper**: una ruta o un campo que está, sigue.

@@ -74,6 +74,10 @@ class Operacion:
     salida: str = ""       # su esquema en `api/esquemas/`; vacío, un objeto sin más
     herramienta: str = ""  # la herramienta del MCP que la expone, si es una herramienta
     recurso: str = ""      # el recurso del MCP que la expone, si es un recurso
+    # Devuelve un archivo, no solo datos: los bytes van en base64 dentro de la respuesta. Lo declara la
+    # operación porque las dos puertas lo tratan distinto —el MCP lo manda como adjunto y las dos aplican el
+    # tope por llamada—, y hasta la 6.1.0 cada una lo preguntaba por el nombre literal de la operación.
+    archivo: bool = False
 
     @property
     def funcion(self) -> Callable:
@@ -111,7 +115,7 @@ OPERACIONES: tuple[Operacion, ...] = (
               herramienta="normalizar_detracciones"),
     Operacion("diagnosticar", "POST", "/v1/diagnosticar", "diagnostico", herramienta="diagnosticar"),
     Operacion("generar_asiento", "POST", "/v1/generar_asiento", "asiento", herramienta="generar_asiento"),
-    Operacion("exportar", "POST", "/v1/exportar", "exportacion", herramienta="exportar"),
+    Operacion("exportar", "POST", "/v1/exportar", "exportacion", herramienta="exportar", archivo=True),
     Operacion("cuadrar", "POST", "/v1/cuadrar", "cuadre", herramienta="validar_partida_doble"),
     # Cuánto es un libro y en qué cuentas cayó (3.4.0). Ninguna recibe `driver`: son del libro y del
     # asiento, no de un destino — lo que iría a un destino concreto ya lo dice `diagnosticar`.

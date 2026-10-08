@@ -112,9 +112,20 @@ def test_la_lista_de_vigentes_no_se_queda_atras():
                              "Van a `VIGENTES` o a `fechados`, con su motivo.")
 
 
-# Los numeros que el README dice de si mismo, escritos como palabra y como cifra.
-PALABRAS = {11: "once", 12: "doce", 13: "trece", 14: "catorce", 6: "seis", 7: "siete", 8: "ocho",
-            9: "nueve", 10: "diez", 15: "quince"}
+# Los numeros que el README dice de si mismo, escritos como palabra y como cifra. Llega hasta el 30 porque
+# antes llegaba hasta el 15 y la herramienta numero 16 no habria fallado: habria reventado con un `KeyError`,
+# que es lo que no se quiere de un guardian. Si alguna vez se pasa de 30, `palabra()` lo dice en una linea.
+PALABRAS = {6: "seis", 7: "siete", 8: "ocho", 9: "nueve", 10: "diez", 11: "once", 12: "doce", 13: "trece",
+            14: "catorce", 15: "quince", 16: "dieciseis", 17: "diecisiete", 18: "dieciocho",
+            19: "diecinueve", 20: "veinte", 21: "veintiuna", 22: "veintidos", 23: "veintitres",
+            24: "veinticuatro", 25: "veinticinco", 26: "veintiseis", 27: "veintisiete",
+            28: "veintiocho", 29: "veintinueve", 30: "treinta"}
+
+
+def en_palabra(cuantas: int) -> str:
+    """El numero en palabra, o un fallo que dice que hay que ampliar la tabla."""
+    assert cuantas in PALABRAS, f"{cuantas} no esta en PALABRAS: anade su palabra para que este test siga sirviendo"
+    return PALABRAS[cuantas]
 
 
 def test_el_readme_no_dice_cuantas_herramientas_hay_a_ojo():
@@ -136,13 +147,13 @@ def test_el_readme_no_dice_cuantas_herramientas_hay_a_ojo():
     integrar = texto("INTEGRAR.md")
 
     assert f"{herramientas} herramientas" in readme, f"el README no dice las {herramientas} que hay"
-    assert f"{PALABRAS[herramientas].capitalize()} herramientas" in readme
-    assert f"{PALABRAS[herramientas]} herramientas" in integrar
+    assert f"{en_palabra(herramientas).capitalize()} herramientas" in readme
+    assert f"{en_palabra(herramientas)} herramientas" in integrar
     assert f"{recursos} recursos" in readme, f"el README no dice los {recursos} que hay"
-    assert f"{PALABRAS[recursos]} recursos" in readme
+    assert f"{en_palabra(recursos)} recursos" in readme
 
     # Y ningun recuento viejo sobrevive en otra frase.
-    for numero, palabra in PALABRAS.items():
+    for numero, _ in PALABRAS.items():
         if numero not in (herramientas, recursos):
             assert f"{numero} herramientas" not in readme, f"queda un recuento viejo: {numero} herramientas"
             assert f"{numero} recursos" not in readme, f"queda un recuento viejo: {numero} recursos"

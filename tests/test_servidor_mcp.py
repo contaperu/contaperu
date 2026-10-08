@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from pathlib import Path
 
 import pytest
 
@@ -369,7 +370,7 @@ def test_un_pdf_por_el_protocolo_queda_pendiente_de_leer():
 
 
 def test_cada_herramienta_se_anuncia_de_solo_lectura_y_sin_salir_a_ningun_sitio():
-    """Hito 0.2: `readOnlyHint` y `openWorldHint` en las doce, recorriendo lo que ve el cliente."""
+    """Hito 0.2: `readOnlyHint` y `openWorldHint` en todas, recorriendo lo que ve el cliente."""
     herramientas = asyncio.run(mcp.list_tools())
     assert len(herramientas) == 14
     for herramienta in herramientas:
@@ -523,3 +524,53 @@ def test_servirlo_en_red_es_sin_sesiones_y_con_el_dominio_declarado(monkeypatch)
     assert arrancado["transporte"] == "streamable-http"
     assert servidor_mcp.mcp.settings.stateless_http is True, "un anonimo no puede ir acumulando sesiones"
     assert "contaperu.ejemplo.com" in servidor_mcp.mcp.settings.transport_security.allowed_hosts
+
+
+# --- lo que el agente ve, congelado ------------------------------------------------
+
+PUBLICADO = Path(__file__).resolve().parent / "fixtures" / "mcp" / "publicado.json"
+
+
+def publicado() -> dict:
+    """Lo que este servidor publica: cada herramienta con su descripción, su esquema de entrada y sus
+    anotaciones, y cada recurso con su nombre, su descripción y su tipo de contenido."""
+    herramientas = asyncio.run(mcp.list_tools())
+    recursos = asyncio.run(mcp.list_resources())
+    return {
+        "herramientas": {h.name: {"descripcion": h.description, "entrada": h.inputSchema,
+                                  "anotaciones": h.annotations.model_dump() if h.annotations else None}
+                         for h in herramientas},
+        "recursos": {str(r.uri): {"nombre": r.name, "descripcion": r.description, "mime": r.mimeType}
+                     for r in recursos},
+    }
+
+
+def regenerar() -> None:
+    PUBLICADO.parent.mkdir(parents=True, exist_ok=True)
+    PUBLICADO.write_bytes((json.dumps(publicado(), ensure_ascii=False, indent=1, sort_keys=True) + "\n")
+                          .encode("utf-8"))
+
+
+def test_lo_que_el_agente_ve_no_cambia_sin_que_se_decida():
+    """La superficie del MCP, congelada: los 14 nombres, los 13 recursos, y de cada uno el texto exacto, el
+    esquema que el SDK deriva de la firma y sus anotaciones.
+
+    **Es el test que sostiene la 6.2.0**, donde las herramientas dejaron de escribirse a mano y pasaron a
+    derivarse de `api.OPERACIONES`: este fixture se capturó ANTES del refactor y pasó después sin cambiar un
+    byte, que es la única forma de demostrar que a un cliente no le cambió nada. Lo que vigila desde entonces
+    es lo de siempre: que tocar la tabla no mueva en silencio lo que el agente lee.
+
+    Si cambia a propósito —una operación nueva, un texto mejor— se regenera:
+
+        python -c "import sys; sys.path.insert(0, 'tests'); import test_servidor_mcp as t; t.regenerar()"
+
+    Un cambio que NO se quería suele ser una de tres: un parámetro que se renombró en la fachada, un texto de
+    `api.textos` que se editó sin querer, o una versión nueva del SDK que escribe el `title` de otra forma.
+    El diff lo dice en una línea."""
+    congelado = json.loads(PUBLICADO.read_text(encoding="utf-8"))
+    hoy = publicado()
+    for tipo in ("herramientas", "recursos"):
+        assert set(hoy[tipo]) == set(congelado[tipo]), (
+            f"cambió el conjunto de {tipo}: faltan {sorted(set(congelado[tipo]) - set(hoy[tipo]))}, "
+            f"sobran {sorted(set(hoy[tipo]) - set(congelado[tipo]))}")
+    assert hoy == congelado, "lo que el agente ve cambió; si es a propósito, regenera fixtures/mcp/publicado.json"
