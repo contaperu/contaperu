@@ -10,7 +10,8 @@ from typing import Any
 
 from .. import asiento as asi
 from .. import configuracion as _declaracion
-from .. import drivers, partida_doble
+from .. import drivers
+from ..contable import partida_doble
 from .._version import __version__
 from ..asiento.huella import huella
 from ..asiento.resolucion import exigir_requisitos, fundir_config

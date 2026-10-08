@@ -57,6 +57,9 @@ CAPAS = {
     # sostiene todo lo demas: esta capa NO PUEDE importar un driver, asi que la garantia de que un
     # resumen no mire el destino es la capa y no una promesa escrita en un docstring.
     "contaperu.resumen": "nucleo",
+    # La contabilidad que no depende del país ni del régimen (6.4.0): la partida doble y cuánto suma un libro.
+    # Núcleo, y NO peruano: «Debe igual a Haber» no la discute ninguna jurisdicción.
+    "contaperu.contable": "nucleo",
     "contaperu.lectores": "nucleo", "contaperu.comparar_sire": "nucleo",
     # Los tributos del Perú agrupados (6.4.0): el IGV, las detracciones, la validación y el contraste con
     # lo que SUNAT tiene. Núcleo, y peruano: es casi toda la tupla `PERUANOS` de más abajo.

@@ -22,7 +22,7 @@ import inspect
 from dataclasses import dataclass
 from typing import Callable
 
-from .. import resumen
+from ..contable import resumen
 from .._version import OPEN_ACCOUNTING
 from . import operaciones
 

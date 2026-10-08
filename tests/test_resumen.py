@@ -10,7 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from contaperu import api, resumen
+from contaperu import api
+from contaperu.contable import resumen
 from contaperu.tributos import validar
 from contaperu.modelo import Comprobante, Libro
 

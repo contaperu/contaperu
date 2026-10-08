@@ -15,7 +15,7 @@ from ..errores import DocumentoInvalido, ErrorContaperu, ErroresBloqueantes
 from ..tributos.igv import IgvImposible, TotalImposible
 from ..lectores.sire_txt import SireInvalido
 from ..lectores.xml_ubl import XmlInvalido
-from ..partida_doble import Descuadre
+from ..contable.partida_doble import Descuadre
 from ..pcge.adaptar import TablaInvalida
 
 __all__ = ["CampoCambiaDeSigno", "ConfiguracionInvalida", "CorrelativoDesborda", "Descuadre", "DocumentoInvalido", "ErrorContaperu",

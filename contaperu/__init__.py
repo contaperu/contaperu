@@ -28,7 +28,8 @@ import importlib
 from ._version import OPEN_ACCOUNTING, __version__
 
 _SUBMODULOS = frozenset({
-    "api", "asiento", "catalogos", "comparar_sire", "configuracion", "detracciones", "drivers", "errores", "igv",
+    "api", "asiento", "catalogos", "comparar_sire", "configuracion", "contable", "detracciones", "drivers",
+    "errores", "igv",
     "lectores", "modelo", "partida_doble", "pcge", "pipeline", "puertas", "tributos", "validar",
 })
 _NOMBRES = {

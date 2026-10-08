@@ -10,10 +10,11 @@ from __future__ import annotations
 import importlib
 from typing import Sequence
 
-from .. import (_datos, catalogos, drivers, modelo, partida_doble, pcge,
-                resumen as _resumen,
+from .. import (_datos, catalogos, drivers, modelo, pcge,
                 vocabulario)
 from ..drivers import contrato
+from ..contable import partida_doble
+from ..contable import resumen as _resumen
 from ..tributos import comparar_sire as _comparar
 from ..tributos import detracciones
 from ..errores import DocumentoInvalido

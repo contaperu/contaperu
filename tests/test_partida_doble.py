@@ -8,7 +8,7 @@ import pytest
 
 from contaperu import asiento as asi
 from contaperu.pipeline import preparacion as prep
-from contaperu import partida_doble
+from contaperu.contable import partida_doble
 from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Libro
 from util import comprobante, con_imputaciones, construir_concar

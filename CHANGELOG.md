@@ -4,6 +4,54 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [6.4.0] — 2026-10-08
+
+Lo peruano y lo contable, cada uno en su paquete — y **nadie tiene que cambiar un import**: las seis rutas viejas
+siguen resolviendo, avisan con `RutaObsoleta` diciendo cuál usar y desaparecen en la 7.0. Es la última parte de la
+reestructuración y la única que mueve módulos de nombre; va en una **menor** porque deprecar no es romper.
+
+### Cambiado
+
+- **`contaperu/tributos/`** reúne lo que el motor sabe de los tributos del Perú: `igv`, `detracciones`, `validar`
+  y `comparar_sire`. Son lo que **no cambia con el régimen de renta** del contribuyente —el IGV lo manda su
+  propia ley y las detracciones el SPOT—, así que el día que entre un paquete por régimen, estos cuatro se quedan
+  fuera: dentro habría una copia por régimen y se separarían solas.
+- **`contaperu/contable/`** reúne `partida_doble` y `resumen`: la contabilidad que no depende del país ni del
+  régimen. «Debe igual a Haber» no la discute ninguna jurisdicción.
+- **`_obsoleto.reexportar` gana el parámetro `que`.** Sin él, el aviso decía «es una ruta de la 0.x», que para un
+  módulo que cambia de sitio hoy es falso; el docstring del módulo ya pedía que el texto no supusiera de qué
+  clase es lo que cambió, y le faltaba la mitad al mecanismo. `reexportar` llevaba cuatro mayores sin un solo
+  usuario, esperando exactamente esto.
+
+**`asiento/` y `pcge/` no se mueven, y es una decisión**: ya son paquetes con nombre propio y una sola
+responsabilidad, así que anidarlos no aclara nada; y `asiento/` es de lo que más parchea la rama de
+mantenimiento, donde cada fichero movido obliga a traducir el parche a mano. Tampoco `modelo` —lo importan 36 de
+los 83 ficheros— ni `configuracion`, que es transversal a núcleo, drivers y pipeline.
+
+### Cómo migrar
+
+Nada, si se usa `contaperu.api`: no cambia ni un nombre. Si se importa un módulo del núcleo directamente,
+`contaperu.igv` y los otros cinco siguen funcionando y el aviso dice la ruta nueva. Para verlos todos de una vez:
+
+    python -W error::contaperu._obsoleto.RutaObsoleta -m pytest
+
+### El detalle del puente, que es lo que hace que esto sea una menor
+
+Cada puente declara su `__all__` **construido del diccionario de destinos**, no escrito como literal. Hace dos
+cosas a la vez: `tests/test_superficie_publica` lo encuentra —mira `__all__` antes que `vars()`, que en un puente
+está vacío a propósito— y `ruff` no se queja de que nombre cosas que el módulo no define, porque las resuelve
+`__getattr__` al pedirlas. Sin ese detalle, el test daría «quitar un nombre público es la 2.0» y esto costaría
+una mayor. **La superficie pasa sin regenerarse**, que es la prueba de que no se rompió nada.
+
+Y los veinte ficheros que importaban las rutas viejas no se buscaron a mano: los nombró la batería uno por uno,
+porque el `filterwarnings` de `pyproject.toml` convierte `RutaObsoleta` en error. Entre ellos, dos que un `grep`
+no habría encontrado: un test de `diagnosticar` que lee `validar.py` **por su ruta** para recorrer su AST —con el
+puente ahí leía un fichero sin un solo código y su propio `assert` lo dijo— y cuatro imports dentro de una
+función, con su indentación.
+
+Ningún driver cambia un byte: el TXT del SIRE del mes real de 3018 comprobantes sale con el mismo sha256 y el
+snapshot de CONCAR no se movió.
+
 ## [6.3.2] — 2026-10-08
 
 **El archivo de ventas de STARSOFT empieza por `V`, no por la `C` de compras.** Es la misma corrección que
