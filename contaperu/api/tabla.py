@@ -131,6 +131,14 @@ OPERACIONES: tuple[Operacion, ...] = (
     Operacion("drivers_disponibles", "GET", "/v1/drivers", "drivers", herramienta="drivers_disponibles",
               recurso="contaperu://drivers"),
     Operacion("catalogos_sunat", "GET", "/v1/catalogos/sunat", "catalogos_sunat", recurso="contaperu://catalogos/sunat"),
+    # El contribuyente, no el comprobante: en qué régimen tributa y cuándo le vence el mes. Recursos y no
+    # herramientas, como los demás catálogos: son GET sin argumentos que se leen una vez. Y lo son por una razón
+    # más, que es la que los trae al motor: «qué libros estoy obligado a llevar» se pregunta SIN un documento
+    # delante, al dar de alta una empresa.
+    Operacion("regimenes_tributarios", "GET", "/v1/catalogos/regimenes",
+              recurso="contaperu://catalogos/regimenes"),
+    Operacion("cronogramas_de_vencimiento", "GET", "/v1/catalogos/vencimientos",
+              recurso="contaperu://catalogos/vencimientos"),
     # El canal del SIRE, como datos. No es un cliente: ver `operaciones.catalogos_api_sire`.
     Operacion("catalogos_api_sire", "GET", "/v1/catalogos/sire-api", recurso="contaperu://catalogos/sire-api"),
     # Y el FORMATO, columna a columna: dónde cae cada campo del anexo, o por qué no cae.

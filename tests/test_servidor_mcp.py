@@ -152,11 +152,18 @@ def test_los_recursos_son_legibles():
                     "contaperu://catalogos/pcge2026", "contaperu://configuracion",
                     "contaperu://esquemas/diagnostico", "contaperu://catalogos/sire-api",
                     "contaperu://catalogos/sire-campos", "contaperu://catalogos/ple-campos",
+                    "contaperu://catalogos/regimenes", "contaperu://catalogos/vencimientos",
                     "contaperu://campos/comprobante"}
     esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
     assert esquema["title"] == "open-accounting"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
     assert catalogos["tipos_comprobante"]["01"] == "Factura"
+    regimenes = json.loads(leer_recurso("contaperu://catalogos/regimenes"))["regimenes"]
+    assert regimenes["especial"]["pago_a_cuenta"]["tasa"] == "1.5"
+    assert regimenes["especial"]["libros_obligatorios"]["codigos_ple"] == ["080100", "140100"]
+    vencimientos = json.loads(leer_recurso("contaperu://catalogos/vencimientos"))["anios"]["2026"]
+    assert vencimientos["declaracion"]["202609"]["3"] == "2026-10-20"
+    assert vencimientos["atraso_registros"]["202609"]["3"] == "2026-10-19"
     del_estandar = json.loads(leer_recurso("contaperu://catalogos/estandar"))
     assert del_estandar["clases"]["codigos"]["activo"] and del_estandar["roles"]["version"]
     # El canal del SIRE: datos sobre una API ajena, no un cliente. Lo que se comprueba es que

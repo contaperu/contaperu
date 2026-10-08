@@ -1,0 +1,57 @@
+{
+ "_nota": "El régimen tributario del contribuyente, como datos: qué libros le obliga a llevar y cómo tributa. Responde dos preguntas, y una de ellas NO tiene un documento delante —«¿qué libros necesito?», que un ERP hace al dar de alta una empresa—, así que esto es un catálogo y no un campo del estándar. Cada regla trae su `cita` y una regla sin cita no entra (`catalogos.regimenes_tributarios()` se niega a arrancar). El régimen que todavía no tiene su norma leída se declara con `estado: pendiente_de_fuente` y SIN ninguna clave de regla: un valor ahí sería la regla sin fuente entrando por la puerta de atrás. Ojo con el nombre: «régimen especial» ya significa otra cosa en este repositorio —las columnas de detracción, percepción y retención de CONTASIS— y existen además el régimen de retenciones y el de percepciones del IGV, que son otros tributos; de ahí `regimenes_tributarios` y nunca `regimen` a secas. Las tasas y los importes son TEXTO: los lee `Decimal`.",
+ "actualizado_al": "2026-10-07",
+ "fuente": "Texto Único Ordenado de la Ley del Impuesto a la Renta, D.S. 179-2004-EF, Capítulo XV (Del Régimen Especial del Impuesto a la Renta), artículos 117 a 124-A, en sunat.gob.pe/legislacion/renta/ley/capxv.pdf, leído el 7-oct-2026.",
+ "nota": "Tabla parcial a propósito: solo el Régimen Especial, que es el que tiene su norma leída. Los otros tres entran cuando su texto esté delante, no por simetría. Los libros obligatorios se nombran por su código del PLE (`ple_campos.json`, `codigos_de_libro`) y no por `libro.tipo`: ese catálogo del estándar dice lo que el motor ESCRIBE —venta o compra—, no lo que la ley obliga a llevar, y el Régimen General exigirá nombrar el Diario, el Mayor y el de Inventarios y Balances, que no son tipos de libro de este estándar.",
+ "regimenes": {
+  "especial": {
+   "nombre": "Régimen Especial del Impuesto a la Renta",
+   "sigla": "RER",
+   "estado": "vigente",
+   "pago_a_cuenta": {
+    "tasa": "1.5",
+    "base": "ingresos_netos_mensuales_de_tercera_categoria",
+    "cancelatorio": true,
+    "cita": "Texto Único Ordenado de la Ley del Impuesto a la Renta, D.S. 179-2004-EF, art. 120 inciso a): «Los contribuyentes que se acojan al Régimen Especial pagarán una cuota ascendente a 1.5% (uno punto cinco por ciento) de sus ingresos netos mensuales provenientes de sus rentas de tercera categoría»; inciso b): «El pago de la cuota realizado como consecuencia de lo dispuesto en el presente artículo, tiene carácter cancelatorio». Artículo sustituido por el art. 26 del D.Leg. 1086, publicado el 28-6-2008 y vigente desde el 1-10-2008.",
+    "nota": "Cancelatorio significa que la cuota mensual agota el impuesto del periodo: no hay regularización anual de tercera categoría. El motor no CALCULA la cuota todavía —eso es una regla que emite un número y entra con su caso real, un formulario presentado—; publica la tasa para que la calcule quien integra."
+   },
+   "libros_obligatorios": {
+    "codigos_ple": [
+     "080100",
+     "140100"
+    ],
+    "cita": "Texto Único Ordenado de la Ley del Impuesto a la Renta, D.S. 179-2004-EF, art. 124: «Los sujetos del presente Régimen están obligados a llevar un Registro de Compras y un Registro de Ventas de acuerdo con las normas vigentes sobre la materia». Artículo sustituido por el art. 26 del D.Leg. 1086, publicado el 28-6-2008 y vigente desde el 1-10-2008.",
+    "nota": "Es el art. 124 y NO el 124-A, que es la declaración jurada anual del inventario. Dos registros y nada más: ni Diario, ni Mayor, ni Inventarios y Balances — y eso es lo que hace que el motor le sirva al RER sin plan de cuentas y sin asiento."
+   },
+   "topes": {
+    "moneda": "PEN",
+    "ingresos_netos_del_ejercicio": "525000",
+    "activos_fijos": "126000",
+    "activos_fijos_excepto": [
+     "predios",
+     "vehiculos"
+    ],
+    "adquisiciones_del_ejercicio": "525000",
+    "personas_por_turno": 10,
+    "cita": "Texto Único Ordenado de la Ley del Impuesto a la Renta, D.S. 179-2004-EF, art. 118 inciso a): no están comprendidos en el Régimen quienes en el transcurso de cada ejercicio gravable superen S/ 525 000,00 de ingresos netos (acápite i), cuyos activos fijos afectados a la actividad —con excepción de los predios y vehículos— superen S/ 126 000,00 (acápite ii), cuyas adquisiciones afectadas a la actividad acumuladas superen S/ 525 000,00 (acápite iii), o que desarrollen la actividad con personal afectado mayor a 10 personas por turno (acápite iv). Inciso a) sustituido por el art. 26 del D.Leg. 1086; el segundo párrafo del acápite (i) modificado por el art. 19 del D.Leg. 1112, publicado el 29-6-2012 y vigente desde el 1-1-2013.",
+    "nota": "Superar uno cualquiera saca del régimen. El art. 122 manda al Régimen MYPE Tributario o al General a partir del mes en que ocurre, así que el régimen de un contribuyente puede cambiar a mitad de ejercicio: quien integra el motor dice en qué régimen está CADA periodo, y el motor no lo deduce de los importes."
+   }
+  },
+  "general": {
+   "nombre": "Régimen General",
+   "estado": "pendiente_de_fuente",
+   "por_que": "Entra con el artículo 85 de la Ley del Impuesto a la Renta (los pagos a cuenta, el coeficiente y el 1,5 %) y con el artículo 65 más la RS 234-2006 que fijan sus libros por nivel de ingresos, leídos con el texto delante. Hasta entonces no declara ninguna regla: una tasa de memoria es exactamente lo que este fichero existe para impedir."
+  },
+  "mype_tributario": {
+   "nombre": "Régimen MYPE Tributario",
+   "estado": "pendiente_de_fuente",
+   "por_que": "Entra con el D.Leg. 1269 y su reglamento (D.S. 403-2016-EF): el tramo de las 15 UIT, la tasa progresiva del impuesto anual, el pago a cuenta mensual y los libros por nivel de ingresos."
+  },
+  "nuevo_rus": {
+   "nombre": "Nuevo Régimen Único Simplificado",
+   "sigla": "NRUS",
+   "estado": "pendiente_de_fuente",
+   "por_que": "Entra con el D.Leg. 937 y sus modificatorias: las categorías, la cuota fija mensual y qué libros exige (o no exige). Ojo al darlo por hecho: el NRUS no está obligado a llevar registros de ventas ni de compras, que es justo lo contrario del RER, y eso hay que leerlo en la norma antes de escribirlo."
+  }
+ }
+}

@@ -46,7 +46,7 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **2.0.0** y estándar **`open-accounting` 1.0**
+Librería **6.1.0** y estándar **`open-accounting` 1.0**
 (`contaperu/_version.py`).
 
 | Pieza | Hoy |
@@ -55,7 +55,7 @@ Librería **2.0.0** y estándar **`open-accounting` 1.0**
 | **Estándar y comunidad** | `open-accounting` 1.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
-| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 12 herramientas y 7 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
+| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 14 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
 | **Salida · SIRE** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
 | **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos) en pruebas, a la espera de que alguien importe un archivo |
 | **Salida · ERP** | El documento `open-accounting` en JSON, el CSV de canal intercambio y la puerta HTTP con OpenConta |
@@ -290,6 +290,7 @@ y hay un precedente de norma convertida en datos con su cita, `herramientas/extr
 | C8 | `padron*` como argumento, con forma `{ruc: {activo*, habido*, razon_social*}}`, y aviso de proveedor no habido | N · F | dato: la fuente legal del aviso + tope | Sin padrón no cambia nada; un nombre distinto del padrón no produce observación | 0.1 | 24 |
 | C11 | `tipos_de_cambio*` como argumento: **contrasta, no rellena** | N · F | dato: la fuente del tipo de cambio que rige | Un tipo de cambio distinto del publicado da un aviso | C8 | — |
 | C12 | **IGV por utilización de servicios de no domiciliados (91, 97, 98)**: el par de líneas autoliquidado con su `rol` y el archivo de no domiciliados del RCE | N · estándar · D | dato: un comprobante 91 real con su pago por el Formulario 1662 y un asiento aceptado por CONCAR | El 91 da cuatro líneas que cuadran; una factura 01 sale idéntica (snapshot); el `rol` entra por su enmienda | C1, E1 | 26 |
+| C13 | **Calcular el pago a cuenta del mes** con los dos registros delante: la base de la casilla 301 y la cuota de la 312, a partir de la tasa que ya publica `regimenes_tributarios` | N · F · D | dato: un formulario mensual presentado, con sus casillas | La base y la cuota coinciden celda a celda con el formulario; el régimen lo dice quien llama y el motor no lo deduce de los importes | 0.8, B8 | 31 |
 
 **No se hace.** Ejecutar las XSL; sustituir la Tabla 10 del SIRE por el Catálogo 01, que incluye menos tipos.
 
@@ -444,6 +445,8 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 | C1 | La hoja oficial de SUNAT con los códigos de retorno y las reglas de validación, con su fecha «actualizado al» (no entra al repositorio) | Descargada de SUNAT a `privado/` |
 | C8 · C11 | La fuente legal del aviso de no habido y del tipo de cambio que rige | Norma citada |
 | C12 | Un comprobante 91 con su pago por el Formulario 1662, y el asiento que CONCAR aceptó | De una empresa que pague servicios a un no domiciliado |
+| C13 | Un formulario mensual de IGV-Renta presentado, con sus casillas, para contrastar la base y la cuota | De un contribuyente del régimen que se calcule |
+| C13 | Los libros obligatorios, los topes y el pago a cuenta del Régimen General, el MYPE Tributario y el Nuevo RUS, cada uno con su artículo (el Especial ya está) | Norma citada |
 | J2-J6 | Un cliente real fuera del Perú, su sistema contable de destino y un archivo que ese sistema haya aceptado | Con el cliente |
 | **Legacy** | | |
 | A1-A5 | Plantillas y un mes importado de SISCONT y de STARSOFT; una respuesta aceptada de la API de STARSOFT Gold | Con quien use cada sistema |

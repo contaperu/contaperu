@@ -146,6 +146,29 @@ def catalogos_sunat() -> str:
     return json.dumps(api.catalogos_sunat(), ensure_ascii=False, indent=1)
 
 
+@mcp.resource("contaperu://catalogos/regimenes", mime_type="application/json")
+def regimenes_tributarios() -> str:
+    """Los regímenes tributarios del Perú y lo que cada uno obliga, con la cita de su artículo: la
+    tasa y la base de su pago a cuenta, los libros que obliga a llevar —por su código del PLE— y los
+    topes que sacan de él.
+
+    Hoy solo el Régimen Especial tiene su norma leída; los otros tres dicen qué hay que leer para
+    que entren, en vez de traer una tasa de memoria. El motor no calcula la cuota: publica la tasa."""
+    return json.dumps(api.regimenes_tributarios(), ensure_ascii=False, indent=1)
+
+
+@mcp.resource("contaperu://catalogos/vencimientos", mime_type="application/json")
+def cronogramas_de_vencimiento() -> str:
+    """Cuándo vence un mes: la fecha de la declaración y el pago, y la fecha máxima de atraso del
+    registro electrónico de ventas y de compras, por periodo y por último dígito de RUC, con la
+    columna de los buenos contribuyentes. Los dos salen de la RS 000281-2022/SUNAT, un anexo cada
+    uno, y el del registro vence antes que el de la declaración.
+
+    No es un reloj: dado un periodo y un dígito devuelve una fecha. Si queda tiempo o hay mora lo
+    calcula quien tiene el hoy, que no es el motor. Solo los años que SUNAT publicó resueltos."""
+    return json.dumps(api.cronogramas_de_vencimiento(), ensure_ascii=False, indent=1)
+
+
 @mcp.resource("contaperu://catalogos/sire-api", mime_type="application/json")
 def catalogos_api_sire() -> str:
     """El CANAL del SIRE, descrito: rutas por libro, parámetros obligatorios, los dos grants de

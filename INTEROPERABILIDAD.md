@@ -1275,8 +1275,16 @@ de C4. El motor nunca calcula una retención que no muestre el comprobante.
 - Un resumen anual por tercero, o la DAOT: el libro es mensual (`contaperu/modelo.py:113-128`) y la exclusión de lo
   anotado en registros electrónicos la vacía.
 - Sales tax, nexo o certificados de exención: no hay caso peruano; solo ilustran la puerta del §11.
-- Calendarios de vencimientos, pagos a cuenta y plazos de conservación: el núcleo no tiene reloj
-  (`tests/test_frontera.py:94`) ni disco.
+- Plazos de conservación, y **saber si un mes está en plazo**: el núcleo no tiene reloj
+  (`tests/test_frontera.py:94`) ni disco. Si queda tiempo, si hay mora o cuántos días faltan lo calcula quien
+  tiene el hoy, y el motor no lo tiene.
+  **Acotado el 7-oct-2026** (John): el descarte metía dos cosas distintas en el mismo saco. Un **calendario** de
+  vencimientos no es un reloj — dado un periodo y el último dígito del RUC devuelve una fecha, y la respuesta no
+  cambia según cuándo se pregunte—, así que es la misma figura que `validar.PLAZO_ANOTACION_MESES`, un plazo
+  normativo que vive en el núcleo con su cita. Entró en la 6.1.0 como datos: los dos cronogramas de la RS
+  000281-2022, el de la declaración (anexo I) y el de la fecha máxima de atraso de los registros electrónicos
+  (anexo II). Lo que sigue descartado es la pregunta que necesita el hoy. Y el **pago a cuenta**: la tasa es un
+  dato publicado (propuesta 31), pero calcular la cuota espera su caso real, un formulario presentado.
 - Asentar el 91 como costo, a imitación del *use tax*: en el Perú es crédito con requisitos.
 - Convertir monedas dentro de un resumen: sería una cifra nueva sin caso. Lo descartado es **convertir**, no
   informar cada moneda por su lado, que es lo que hace `resumen` desde la 3.4.0: sus totales son un mapa por
@@ -1618,6 +1626,7 @@ segundo caso o una versión del SDK.
 | 28 | Cuenta del proveedor distinta de la conocida, en `conciliar` | N · F | D2 y un caso real de cambio de cuenta (§6) | Sin el dato no cambia nada; con una cuenta nueva no hay certeza alta | `cuentas_conocidas*` | D | — |
 | 29 | Los padrones que deciden una retención llegan como dato | N | El de C4 (§7) | — | — | D | C4 |
 | 30 | La puerta a otra jurisdicción | N · D · estándar | Un cliente real fuera del Perú (§11) | Los criterios de J0-J6 en la hoja de ruta | `jurisdiccion*`, `impuestos[]*` | D | J0-J6 |
+| 31 | El régimen tributario del contribuyente como datos, y el cálculo de su pago a cuenta | N · F | La tabla entró en la 6.1.0 con los arts. 118, 120 y 124 de la LIR; **calcular** la cuota espera un formulario mensual presentado | La tasa, los topes y los libros contra su artículo; la cuota contra las casillas 301 y 312 de un formulario real | `regimenes_tributarios`, `pago_a_cuenta*` | C | C13 |
 | — | ¿Debe `generar_asiento` exigir lo que exige el destino? | F | §3 | — | — | pregunta | — |
 
 ### Lo que se descartó o queda en vigilancia
@@ -1647,7 +1656,8 @@ inventario sea uno.
 | Doble aprobación o un registro de cuentas bancarias de proveedores | descartado | §6 |
 | Un resumen anual por tercero, o la DAOT | descartado | §7 |
 | Sales tax, nexo y certificados de exención | descartado | §7 |
-| Calendarios de vencimientos, pagos a cuenta y plazos de conservación | descartado | §7 |
+| Saber si un mes está en plazo, y los plazos de conservación | descartado | §7 |
+| El calendario de vencimientos como tal | **acotado**: entró en la 6.1.0 como datos (no es un reloj) | §7 |
 | Asentar el tipo 91 como costo | descartado | §7 |
 | Convertir monedas dentro de un resumen | descartado | §7 |
 | Numscript o cualquier lenguaje de reglas contables | descartado | §8 |

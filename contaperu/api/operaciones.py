@@ -400,6 +400,46 @@ def campos_del_ple() -> dict:
     return catalogos.campos_del_ple()
 
 
+def regimenes_tributarios() -> dict:
+    """Los **regímenes tributarios** del Perú y lo que cada uno obliga, con la cita de su artículo: la tasa y la base
+    de su pago a cuenta, los libros que obliga a llevar —por su código del PLE— y los topes que sacan de él.
+
+    Para qué sirve, y por qué es un catálogo y no un campo del documento: responde dos preguntas, y una de ellas no
+    tiene un documento delante. «¿Qué libros estoy obligado a llevar?» se pregunta al dar de alta una empresa, antes
+    de cargar un comprobante — haría falta un libro para preguntar por los libros. La otra, «¿cómo tributo este
+    mes?», se contesta con los dos registros del mes delante, y la tasa sale de aquí.
+
+    Tabla parcial a propósito: hoy solo el **Régimen Especial**, el único con su norma leída (arts. 118, 120 y 124 de
+    la Ley del Impuesto a la Renta). Los otros tres se declaran `pendiente_de_fuente` y dicen qué hay que leer para
+    que entren, en vez de traer una tasa de memoria.
+
+    Lo que esto NO hace: **calcular la cuota**. Eso es una regla que emite un número y entra con su norma y con su
+    caso real, un formulario presentado. El motor publica la tasa; la aplica quien integra. Y el régimen de cada
+    periodo lo dice quien llama: superar un tope cambia de régimen a mitad de ejercicio (art. 122) y el motor no lo
+    deduce de los importes."""
+    return catalogos.regimenes_tributarios()
+
+
+def cronogramas_de_vencimiento() -> dict:
+    """Cuándo vence un mes: la fecha de la **declaración y el pago** (anexo I) y la **fecha máxima de atraso del
+    registro electrónico** de ventas y de compras (anexo II), por año, por periodo y por cada uno de los diez
+    dígitos de RUC, más la columna de los buenos contribuyentes y las UESP. Las fechas son texto `AAAA-MM-DD`.
+
+    Los dos salen de la misma resolución, la RS 000281-2022/SUNAT, que los fija en días hábiles «para el año 2023 y
+    siguientes». El del registro **vence antes** que el de la declaración: el registro se cierra para poder
+    declarar.
+
+    Por qué esto puede vivir en un motor sin reloj: **no es un reloj**. Dado un periodo y un dígito devuelve una
+    fecha, y la respuesta no cambia según cuándo se pregunte. Lo que necesita la fecha de hoy —si queda tiempo, si
+    hay mora, cuántos días faltan— no está aquí y no va a estar: eso lo calcula quien llama, que es quien tiene el
+    hoy.
+
+    Solo los años que SUNAT ya publicó resueltos, y es la única tabla del motor que envejece: derivar un año nuevo
+    pediría el calendario de feriados y de días no laborables, que cambia por decreto. Un periodo de un año que no
+    está no devuelve una fecha calculada — la librería se niega diciendo qué años conoce."""
+    return catalogos.cronogramas_de_vencimiento()
+
+
 def catalogos_del_estandar() -> dict:
     """Los catálogos que este estándar inventa —`roles`, `clases` y `tipos_de_libro`—, cada uno con su fuente y su
     versión. Son lo que un ERP de fuera necesita para leer una línea del asiento sin conocer el PCGE, y viven

@@ -4,6 +4,75 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [6.1.0] — 2026-10-07
+
+El contribuyente entra en el motor, como datos. Para decirle a una empresa del Régimen Especial cuánto paga hacía
+falta la tasa del art. 120 de la Ley del Impuesto a la Renta, y para decirle qué libros lleva, el art. 124 — y
+**ninguno de los dos estaba**: `RER`, `MYPE`, `NRUS` y `régimen tributario` daban cero resultados en todo el
+repositorio. Lo mismo con la fecha: el motor sabía que una compra se anota dentro de doce meses (Ley 29215) y no
+sabía cuándo vence el mes.
+
+Las dos cosas entran como **catálogo y no como campo del estándar**, y el motivo es el que decide la arquitectura:
+la pregunta «¿qué libros estoy obligado a llevar?» se hace **sin un documento delante** —al dar de alta una
+empresa—, y haría falta un libro para preguntar por los libros. El estándar describe un libro de un mes; esto
+describe al contribuyente.
+
+### Añadido
+
+- **`regimenes_tributarios`**, recurso y operación: los cuatro regímenes del Perú, y de cada uno la tasa y la base
+  de su pago a cuenta, los libros que obliga a llevar —por su **código del PLE**, no por `libro.tipo`— y los topes
+  que sacan de él. **Cada bloque cita su propio artículo** y no hay una fuente para toda la tabla, porque en el
+  Régimen Especial la tasa es el art. 120, los libros el **124** —no el 124-A, que es la declaración anual del
+  inventario— y los topes el 118. `catalogos.validar_regimenes()` se niega a cargar una regla sin cita, como
+  `pcge.adaptar`.
+  Solo el **Régimen Especial** entra con sus reglas: es el único con su norma leída. Los otros tres se declaran
+  `pendiente_de_fuente` y dicen **qué hay que leer** para que entren. Y el cargador exige que un régimen pendiente
+  **no traiga ninguna clave de regla**: ese es el test que de verdad protege, porque es por donde entraría mañana
+  una tasa de memoria.
+- **`cronogramas_de_vencimiento`**, recurso y operación, más `vence_la_declaracion()` y `vence_el_registro()` en la
+  librería: cuándo vence la declaración del mes y hasta cuándo se puede atrasar el registro electrónico, por
+  periodo y por cada uno de los diez dígitos de RUC, con la columna de los buenos contribuyentes y las UESP. Los
+  dos salen de la **misma resolución**, la RS 000281-2022/SUNAT, un anexo cada uno (el I y el II), y **el del
+  registro vence antes**: el registro se cierra para poder declarar.
+  El anexo agrupa los dígitos de dos en dos y aquí están **abiertos los diez**, que es como llega un RUC: agrupar
+  es trabajo que, si lo repite cada ERP, alguno lo hace mal — es la lección del `07` sin el `87` que trajo
+  `resumen` en la 3.4.0.
+- Dos ficheros de datos con su fuente, `datos/sunat/regimenes.json` y `datos/sunat/vencimientos.json`, y **30 tests
+  nuevos**: uno por regla, cada uno con su artículo en el docstring. Los de las fechas van por dos caminos a la
+  vez, anclas transcritas a mano de la tabla publicada y las **propiedades del anexo** —los grupos de dígitos, el
+  mes de vencimiento, el día que crece con el dígito, el registro que cierra antes—, porque el riesgo real de una
+  tabla copiada es un dedo torcido en una de sus 168 celdas y una propiedad lo caza en cualquier fila.
+
+### Lo que NO hace, y por qué
+
+- **No calcula la cuota.** Publica la tasa; la aplica quien integra. Calcular es una regla que emite un número y
+  aquí eso entra con su norma **y con su caso real**: un formulario mensual presentado, para contrastar celda a
+  celda. Queda como hito C13 de la hoja de ruta.
+- **No deduce el régimen.** Superar un tope cambia de régimen a mitad de ejercicio (art. 122), así que en qué
+  régimen está cada periodo lo dice quien llama, igual que la fecha.
+- **No dice si un mes está en plazo.** Eso necesita el hoy, y el motor no lo tiene: sigue siendo de quien llama.
+
+### El descarte que se acota
+
+`INTEROPERABILIDAD.md` tenía descartados los «calendarios de vencimientos, pagos a cuenta y plazos de
+conservación» con un motivo —«el núcleo no tiene reloj ni disco»— que metía **dos cosas distintas en el mismo
+saco**. Un reloj es `date.today()`: la respuesta cambia según cuándo lo llames. Un cronograma es una tabla
+publicada por resolución: dado un periodo y un dígito devuelve una fecha y no cambia nunca. Es la misma figura que
+`validar.PLAZO_ANOTACION_MESES`, que ya vivía en el núcleo con su cita. Lo descartado, acotado y con su fecha,
+pasa a ser la pregunta que necesita el hoy.
+
+Con una advertencia que va escrita en el propio fichero: **es la única tabla del motor que envejece.** La
+resolución fija los cronogramas en días hábiles y SUNAT publica la tabla resuelta de cada año; derivar un año
+pediría el calendario de feriados y de días no laborables, que cambia por decreto. Por eso el motor trae los años
+que conoce y **se niega a contestar por uno que no tiene**, diciendo cuáles son, en vez de calcular una fecha de
+vencimiento a ojo.
+
+### Cómo migrar
+
+Nada que hacer: todo es aditivo. El MCP pasa de 11 a **13 recursos** y las herramientas siguen siendo 14, así que
+un cliente que congele la lista de recursos la actualiza. El estándar **no se mueve** y ningún driver cambia un
+byte: el snapshot de CONCAR no se tocó.
+
 ## [6.0.0] — 2026-10-07
 
 Lo que STARSOFT destapó al importar su primer mes de verdad. El driver estaba escrito contra la documentación
