@@ -253,6 +253,25 @@ def test_lo_peruano_por_contenido_sigue_donde_se_dice(ruta):
     assert hasattr(importlib.import_module(modulo), nombre)
 
 
+# Tres submódulos se llaman igual que algo que su paquete exporta, y en los tres el atributo del paquete tiene que ser
+# la función: hay código que la llama así —`api/documento.py` hace `preparacion.documento(...)`—. Gana la función
+# porque `from .x import x` la enlaza después de que el sistema de imports ponga el módulo, y sigue ganando aunque
+# alguien importe el submódulo a mano o añada `from . import x`: lo segundo prefiere el atributo que ya existe.
+#
+# Lo que SÍ lo rompe es que la fachada deje de exportar el nombre; entonces el atributo es el módulo y la llamada
+# muere con «'module' object is not callable». Eso ya revienta ochenta y tres tests, pero ninguno lo dice: este lo
+# dice en una línea, y por eso vive aquí y no al lado de ninguno de ellos.
+TAPADOS = ("contaperu.asiento:huella", "contaperu.pcge:adaptar", "contaperu.pipeline.preparacion:documento")
+
+
+@pytest.mark.parametrize("ruta", TAPADOS)
+def test_donde_un_submodulo_se_llama_como_una_funcion_gana_la_funcion(ruta):
+    import importlib
+    paquete, _, nombre = ruta.partition(":")
+    importlib.import_module(f"{paquete}.{nombre}")   # importarlo explícitamente no cambia el atributo
+    assert callable(getattr(importlib.import_module(paquete), nombre))
+
+
 def test_no_hay_assert_en_el_paquete():
     """Un `assert` desaparece con `python -O`: lo que protege un archivo no puede depender de cómo se arranca Python. Lo
     que no se cumple se dice con una excepción del motor."""

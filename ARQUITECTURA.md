@@ -139,11 +139,12 @@ Tres cosas distintas llevan la palabra «asiento», y conviene no confundirlas a
 | **La pieza en Python** | `asiento/lineas.py` (`LineaDiario`), `asiento/indice.py` (`Cabecera`) | Su materialización. No es una copia: `tests/test_estandar.py` exige que digan lo mismo, ni un campo de más ni uno de menos |
 | **La entrega** | `drivers/asiento_contable/` | Un destino más, y de los cortos, que lo escribe sin traducirlo a vocabulario legacy |
 
-Lo que **no** es el asiento estándar, aunque comparta carpeta, es `asiento/motor.py` y `asiento/resolucion.py`: son
+Lo que **no** es el asiento estándar, aunque comparta carpeta, es `asiento/motor.py` y `asiento/resolucion/`: son
 **la contabilidad peruana** —IGV, detracciones, sub-diarios, catálogos SUNAT—. El reparto no es una opinión, está
 medido: `tests/fixtures/capas/acoplamiento_pe.json` registra que `asiento.lineas` toca un solo módulo peruano
-(`pcge`, del que sale la `clase`), que `asiento.motor` y `asiento.resolucion` tocan cuatro cada uno, y que
-`drivers.asiento_contable` **no aparece**, es decir, acoplamiento cero.
+(`pcge`, del que sale la `clase`), que `asiento.motor` toca cuatro, que de las cinco partes de `resolucion` la que
+más toca son tres (`clasificacion`) y `numeracion` **no aparece**, y que `drivers.asiento_contable` tampoco, es
+decir, acoplamiento cero.
 
 Un ERP de otro país usaría las dos primeras capas y tiraría `motor.py` a la basura. Por eso están separadas, y por eso
 el driver no se llama `asiento` a secas: `asiento` es la clave raíz del documento del estándar, y un driver no puede
@@ -171,9 +172,9 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 | Capa | Módulos | Qué sabe |
 |---|---|---|
 | base | `_version`, `_obsoleto`, `_datos`, `errores` | la versión, el aviso de las rutas viejas, los datos empaquetados, la base de los errores |
-| núcleo | `modelo/` (el libro, el comprobante, las coerciones), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `tributos/` (`igv`, `detracciones`, `validar`, `comparar_sire`), `contable/` (`partida_doble`, `resumen`), `asiento/`, `pcge/`, `lectores/`, `configuracion` | contabilidad peruana, sin disco, sin red y sin reloj |
+| núcleo | `modelo/` (el libro, el comprobante, las coerciones), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `tributos/` (`igv`, `detracciones`, `validar`, `comparar_sire`), `contable/` (`partida_doble`, `resumen`), `asiento/` (con `resolucion/` dentro: lo configurado, lo imputado, la clasificación, los requisitos y la numeración), `pcge/`, `lectores/`, `configuracion` | contabilidad peruana, sin disco, sin red y sin reloj |
 | drivers | `drivers/` (`contrato/` —su taxonomía, sus protocolos, sus accesores y su examen—, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
-| pipeline | `pipeline/` (`preparacion`, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
+| pipeline | `pipeline/` (`preparacion/` —el documento, la configuración, las entradas y los pasos de un mes—, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
 | api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa; cada nombre con su firma, congelados |
 | puertas | `puertas/` (`cli`, `servidor_mcp`, `servidor_http`, `comun`) | un protocolo; solo hablan con la api |
 

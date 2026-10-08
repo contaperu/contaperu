@@ -114,8 +114,20 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 - `git pull` antes de empezar: el repo se trabaja desde dos máquinas.
 - **Se trabaja directo en `main`, sin PR y sin ramas** (decisión de John, 14-sep-2026): commit y push cuando la
   batería pasa en local, y la CI de cada push a `main` lo confirma. Se puede porque cada consumidor fija una versión,
-  así que lo que entra en `main` no le llega a nadie hasta que se etiqueta. La última rama larga fue `motor-v1`, la de
-  la 1.0. Un contribuidor de fuera sí abre un PR (`CONTRIBUTING.md`).
+  así que lo que entra en `main` no le llega a nadie hasta que se etiqueta. Un contribuidor de fuera sí abre un PR
+  (`CONTRIBUTING.md`).
+- **Una rama se abre solo para lo que rompe** (8-oct-2026), y «lo que rompe» es una de dos cosas: que `main` quede
+  inservible a mitad de camino, o que haya que parchear una versión que alguien ya usa sin arrastrarle lo que viene
+  detrás. Partir un módulo en un paquete del mismo nombre **no es** de esas: la fachada reexporta los mismos nombres,
+  cada paso es un commit con la batería en verde y `main` sirve en todo momento. Deprecar con un puente tampoco. En
+  cambio, la 7.0 —el libro estricto y el retiro de los puentes— sí, porque entre el primer commit y el último los
+  consumidores no podrían adoptar nada.
+- **Hay una rama de mantenimiento, `6.0.x`**, de la que salieron la 6.0.1 y la 6.0.2 (la tasa legal del IGV y la V de
+  ventas de STARSOFT), las dos publicadas. Un parche nace ahí cuando hay que sacarlo sin lo que `main` lleva encima,
+  y después **se aplica también en `main`** para que no vuelva al adoptar la siguiente versión: así entraron la 6.3.1
+  y la 6.3.2. Hoy `main` va catorce commits por delante y `6.0.x` dos por su lado, así que un parche nuevo a un
+  fichero que la reestructuración movió **se traduce a la ruta nueva a mano**; no hay `cherry-pick` que lo haga. La
+  última rama larga fue `motor-v1`, la de la 1.0.
 - Entorno: `python -m venv .venv` y `pip install -e ".[dev]"` (trae `excel`, `schema`, `mcp`, `http`, `pytest`,
   `httpx`, `openapi-spec-validator` y `ruff`).
 - Batería: `pytest` (unos segundos; el snapshot va dentro). Antes de etiquetar, `diagnosticar` y `exportar` sobre un

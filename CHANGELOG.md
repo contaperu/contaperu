@@ -4,6 +4,53 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [6.5.0] — 2026-10-08
+
+Los dos ficheros más largos que quedaban, partidos por donde ya se partían solos. **Ninguna firma cambia y ningún
+import se toca**: cada uno es ahora un paquete del mismo nombre cuya fachada reexporta los mismos nombres, así que
+no hace falta ni un puente. Es el cierre de la reestructuración.
+
+### Cambiado
+
+- **`contaperu/pipeline/preparacion/`**, de 443 líneas a cuatro ficheros de 198 como mucho, por los cuatro
+  comentarios de sección que el propio fichero ya traía: `documento` (del diccionario del estándar al modelo y de
+  vuelta), `configuracion` (la configuración efectiva y la imputación de cada documento), `entradas` (lo que llega
+  por parámetro: claves previas, un base64, la fecha) y `pasos` (revisar, normalizar detracciones, preparar).
+- **`contaperu/asiento/resolucion/`**, de 539 líneas a cinco, y aquí el corte más útil **no estaba marcado**: la
+  sección «Clasificación» eran 348 líneas con dos familias intercaladas, las que dicen **qué es** un comprobante y
+  las que dicen **qué le falta**. Ahora `clasificacion` solo describe y `requisitos` solo decide que algo falta, y
+  el paquete se lee de abajo arriba: `configurado` → `imputado` → `clasificacion` → `requisitos` → `numeracion`.
+  `faltas.py` apunta a `resolucion.requisitos`: su docstring dice desde siempre que el catálogo es dato y las
+  reglas son código, y hasta hoy las reglas no tenían un fichero que se llamara como lo que hacen.
+- **El tope de las claves previas se mudó a `preparacion/entradas.py`**, al lado de la comprobación que lo usa. En
+  el fichero único, un test lo cambiaba con un monkeypatch sobre el módulo; partido, morder la fachada cambia su
+  reexportación y no el valor que lee `claves_previas_de`, y el test lo dijo en el primer intento.
+
+### Añadido
+
+- **Un test de los tres submódulos que se llaman igual que una función de su paquete** (`asiento.huella`,
+  `pcge.adaptar` y ahora `preparacion.documento`). El atributo del paquete tiene que ser la función, porque hay
+  código que la llama así; si la fachada dejara de exportar el nombre, el atributo sería el módulo y la llamada
+  moriría con «'module' object is not callable». Eso ya revienta ochenta y tres tests, pero ninguno lo decía.
+
+### El acoplamiento, ahora por partes
+
+`tests/fixtures/capas/acoplamiento_pe.json` tenía una línea para `asiento.resolucion` con cuatro módulos peruanos
+y otra para `pipeline.preparacion`. Ahora se ve el detalle: `numeracion` **no toca nada peruano**, el PCGE entra
+solo por `requisitos`, y de `preparacion` solo `pasos` llega a `tributos`. Es visibilidad y no promesa, así que el
+archivo se regeneró a propósito — y mide mejor que antes.
+
+### Cómo migrar
+
+Nada. `from contaperu.pipeline.preparacion import …` y `from contaperu.asiento.resolucion import …` siguen dando
+exactamente los mismos nombres, y `contaperu.asiento` reexporta los treinta y siete públicos de `resolucion` como
+siempre. Lo único que deja de alcanzarse es lo que esos dos módulos **importaban** y quedaba visible de rebote
+—`resolucion.Comprobante`, `preparacion.validar` y compañía—, que nunca fueron suyos; si algo los usaba, se piden
+a su módulo de verdad.
+
+El mes real de 3018 comprobantes sale con el mismo sha256 del TXT del SIRE, `570038c7a40cb4ff`, el snapshot de
+CONCAR no se movió, la superficie pública pasa sin regenerarse y la foto del MCP tampoco cambia.
+
 ## [6.4.0] — 2026-10-08
 
 Lo peruano y lo contable, cada uno en su paquete — y **nadie tiene que cambiar un import**: las seis rutas viejas
