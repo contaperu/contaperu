@@ -8,9 +8,10 @@
  ],
  "contaperu.api.operaciones": [
   "contaperu.catalogos",
-  "contaperu.comparar_sire",
   "contaperu.detracciones",
-  "contaperu.pcge"
+  "contaperu.pcge",
+  "contaperu.tributos",
+  "contaperu.tributos.comparar_sire"
  ],
  "contaperu.asiento.lineas": [
   "contaperu.pcge"

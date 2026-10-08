@@ -58,6 +58,9 @@ CAPAS = {
     # resumen no mire el destino es la capa y no una promesa escrita en un docstring.
     "contaperu.resumen": "nucleo",
     "contaperu.lectores": "nucleo", "contaperu.comparar_sire": "nucleo",
+    # Los tributos del Perú agrupados (6.4.0): el IGV, las detracciones, la validación y el contraste con
+    # lo que SUNAT tiene. Núcleo, y peruano: es casi toda la tupla `PERUANOS` de más abajo.
+    "contaperu.tributos": "nucleo",
     "contaperu.drivers": "drivers",
     "contaperu.pipeline": "pipeline",
     "contaperu.api": "api",
@@ -200,6 +203,7 @@ def test_el_nucleo_y_los_drivers_no_abren_archivos():
 # Los módulos que son contabilidad peruana por lo que IMPORTAN a otros: catálogos de SUNAT, IGV, detracciones,
 # validación de SUNAT, PCGE, los lectores del UBL de SUNAT y de la propuesta del SIRE, y el driver del SIRE.
 PERUANOS = ("contaperu.catalogos", "contaperu.igv", "contaperu.detracciones", "contaperu.validar", "contaperu.pcge",
+            "contaperu.tributos",
             "contaperu.lectores.xml_ubl", "contaperu.lectores.sire_txt", "contaperu.comparar_sire",
             "contaperu.drivers.sire")
 # Y los que lo son por lo que CONTIENEN, aunque no importen nada peruano. Separarlos es J2-J4, con un cliente real.

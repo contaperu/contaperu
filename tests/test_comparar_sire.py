@@ -4,7 +4,7 @@ La herramienta nació del contraste manual que encontró el fallo de estructura 
 25-ago-2026 (40 campos en vez de 33) antes de subir nada. Estos casos fijan lo que
 debe IGNORAR —para que no ahogue el informe en ruido— y lo que sí tiene que cantar.
 """
-from contaperu import comparar_sire as cs
+from contaperu.tributos import comparar_sire as cs
 
 # Una fila del reemplazo: 33 campos informados (el CAR, campo 4, va vacío).
 NUESTRA = ("20601111111|MI EMPRESA SAC|202607||01/07/2026||01|F001|246||6|20611111119|CLIENTE SAC|"

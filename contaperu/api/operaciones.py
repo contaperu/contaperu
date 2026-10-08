@@ -10,10 +10,11 @@ from __future__ import annotations
 import importlib
 from typing import Sequence
 
-from .. import (_datos, catalogos, comparar_sire as _comparar, detracciones, drivers, modelo, partida_doble, pcge,
+from .. import (_datos, catalogos, detracciones, drivers, modelo, partida_doble, pcge,
                 resumen as _resumen,
                 vocabulario)
 from ..drivers import contrato
+from ..tributos import comparar_sire as _comparar
 from ..errores import DocumentoInvalido
 from ..pipeline import armado, diagnostico, lectura, preparacion, salida
 from ..pipeline.salida import Exportado

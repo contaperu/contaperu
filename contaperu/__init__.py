@@ -29,7 +29,7 @@ from ._version import OPEN_ACCOUNTING, __version__
 
 _SUBMODULOS = frozenset({
     "api", "asiento", "catalogos", "comparar_sire", "configuracion", "detracciones", "drivers", "errores", "igv",
-    "lectores", "modelo", "partida_doble", "pcge", "pipeline", "puertas", "validar",
+    "lectores", "modelo", "partida_doble", "pcge", "pipeline", "puertas", "tributos", "validar",
 })
 _NOMBRES = {
     "Comprobante": "contaperu.modelo", "Libro": "contaperu.modelo", "Observacion": "contaperu.modelo",

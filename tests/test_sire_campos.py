@@ -17,7 +17,8 @@ from dataclasses import fields
 
 import pytest
 
-from contaperu import catalogos, comparar_sire
+from contaperu import catalogos
+from contaperu.tributos import comparar_sire
 from contaperu.drivers.kit.opciones import Opciones
 from contaperu.lectores.sire_txt import IGV_COMPRAS, POS_COMPRA, POS_VENTA, VALOR_NO_GRAVADO
 from contaperu.modelo import Comprobante

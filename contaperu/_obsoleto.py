@@ -66,13 +66,18 @@ def resolver(destino: str) -> Any:
 
 
 def reexportar(modulo: str, destinos: dict[str, str], *, avisa: bool = True,
-               nuevas: dict[str, str] | None = None) -> tuple[Callable, Callable]:
+               nuevas: dict[str, str] | None = None,
+               que: str = "una ruta de la 0.x") -> tuple[Callable, Callable]:
     """El `__getattr__` y el `__dir__` de un módulo cuyos nombres viven en otro sitio.
 
     `destinos` es `{"nombre": "paquete.modulo:atributo"}`. Cada nombre se resuelve al pedirlo, y avisa con
     `RutaObsoleta` si `avisa`. El aviso recomienda `nuevas[nombre]` si está —la ruta pública que la reemplaza, cuando
     no es el propio destino— y el destino si no. Un nombre que no está en `destinos` da el `AttributeError` de
-    siempre."""
+    siempre.
+
+    `que` dice QUÉ es lo que cambió, y se pasa tal cual a `avisar`. Su valor por defecto es de cuando este
+    mecanismo solo servía a las rutas de la 0.x; un módulo que cambia de sitio hoy dice que es eso, porque el
+    mensaje lo lee una persona y «es una ruta de la 0.x» sería falso."""
     nuevas = nuevas or {}
 
     def __getattr__(nombre: str) -> Any:
@@ -80,7 +85,7 @@ def reexportar(modulo: str, destinos: dict[str, str], *, avisa: bool = True,
         if destino is None:
             raise AttributeError(f"module {modulo!r} has no attribute {nombre!r}")
         if avisa:
-            avisar(f"{modulo}.{nombre}", nuevas.get(nombre) or destino.replace(":", "."))
+            avisar(f"{modulo}.{nombre}", nuevas.get(nombre) or destino.replace(":", "."), que=que)
         return resolver(destino)
 
     def __dir__() -> list[str]:
