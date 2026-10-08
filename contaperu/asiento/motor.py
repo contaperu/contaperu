@@ -27,7 +27,7 @@ from ..catalogos import (CATEGORIA_RENTA_4TA, TIPO_HONORARIOS, TIPOS_INVIERTEN, 
 from ..configuracion import CONFIG_POR_DEFECTO
 from ..detracciones import es_comodin, monto_detraccion, numero_pendiente, tasa_detraccion
 from .. import pcge, vocabulario
-from ..igv import base_imputable, igv_del_asiento, tasa_calculada
+from ..igv import base_imputable, igv_del_asiento, tasa_legal
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from .faltas import RepartoNoCuadra, SinClase, SinCuenta
 from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
@@ -236,7 +236,14 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # información repetida: qué es cada línea lo dice su `rol`, y su cuenta. El prefijo solo gastaba los
     # 30 caracteres que admite CONCAR en su columna de detalle. Cortarla sigue siendo cosa del driver.
     glosa = glosa_de(c)
-    tasa_leida = tasa_calculada(igv, Decimal(c.base_gravada or 0))
+    # La tasa LEGAL que cuadra con sus importes, no el cociente de los dos (08-oct-2026). El cociente devuelve el
+    # redondeo del emisor convertido en porcentaje: una notaría de S/ 30 con base 25.42 e IGV 4.58 —el exacto es
+    # 4.5756— da 18.0173…, y STARSOFT escribía `18.02` en su columna TASA IGV. Lo que esta línea promete es otra
+    # cosa, y lo dice `lineas.py`: la tasa del comprobante como texto («18», «10.5»). La tolerancia con la que
+    # `tasa_legal` decide es la MISMA con la que `validar` acepta un IGV (`catalogos.TOLERANCIA_IGV`): un solo
+    # número para las dos preguntas, así que todo comprobante que el motor da por bueno al 18 % lleva aquí un 18.
+    # Si ninguna tasa legal cuadra devuelve el cociente, y ahí el comprobante ya va marcado con IGV_NO_CUADRA.
+    tasa_leida = tasa_legal(igv, Decimal(c.base_gravada or 0))
     tasa = "" if tasa_leida is None else texto_tasa(tasa_leida)
     # El tipo de cambio del comprobante, venga en la moneda que venga: es un HECHO suyo y la línea lo
     # transporta (texto exacto; `float` solo al escribir una celda). Hasta la 2.1 se descartaba cuando la

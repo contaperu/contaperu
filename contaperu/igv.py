@@ -41,7 +41,13 @@ class TotalImposible(ErrorContaperu, ValueError):
 def tasa_calculada(igv, base_gravada) -> Decimal | None:
     """La tasa del comprobante, en %, tal como sale de sus importes. `None` si no hay de dónde leerla
     (sin IGV, o un IGV sin base). Sin redondear: quien la necesite entera —la columna AO de CONCAR— la
-    redondea él."""
+    redondea él.
+
+    **Esto NO se escribe en un archivo**: es el cociente crudo, así que lleva dentro el redondeo del emisor y
+    dice `18.02` donde la tasa es 18 (una base de 25.42 con un IGV de 4.58, cuyo exacto es 4.5756). Sirve para
+    DECIDIR —si cuadra, y el entero que CONCAR admite—; lo que va a un archivo o a la línea del asiento es
+    `tasa_legal`, que contesta «cuál de las tasas legales explica estos importes». Lo aprendió STARSOFT el
+    08-oct-2026, en una importación real."""
     igv, base = Decimal(igv or 0), Decimal(base_gravada or 0)
     if igv <= 0 or base <= 0:
         return None

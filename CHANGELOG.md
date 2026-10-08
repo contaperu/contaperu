@@ -4,6 +4,23 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [6.3.1] — 2026-10-08
+
+**La misma corrección que la 6.0.1**, que salió antes porque la necesitaba una instalación en producción
+fijada en la 6.0.x. Va aquí para que no se pierda al adoptar esta rama: el fallo vivía en el núcleo, y si solo
+se arreglara en la de mantenimiento volvería —y volvería en silencio, porque los casos congelados de aquí
+tampoco llevaban un comprobante con el redondeo del emisor—.
+
+`LineaDiario.tasa_igv` lleva la tasa **legal** que cuadra con los importes del comprobante (`igv.tasa_legal`),
+no el cociente `igv / base`. El cociente devuelve el redondeo del emisor convertido en porcentaje: una notaría
+con base `25.42` e IGV `4.58` —el 18 % exacto es `4.5756`— da `18.0173…`, y STARSOFT escribía `18.02` en su
+columna `TASA IGV`, donde su manual pide «el valor fijo del IGV vigente (18)». La tolerancia con la que se
+decide es la misma con la que `validar` acepta un IGV: un solo número para las dos preguntas.
+
+**Esto sí cambia un byte de un driver**, al revés que la 6.3.0: la columna `TASA IGV` de STARSOFT. CONCAR y
+CONTASIS no se mueven. El detalle entero, los cuatro formatos y el borde de la tolerancia, en la entrada de
+la 6.0.1 (rama `6.0.x`).
+
 ## [6.3.0] — 2026-10-08
 
 Los tres módulos que mezclaban temas pasan a paquete, **sin que cambie un solo import de nadie**. Es la parte
