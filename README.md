@@ -77,7 +77,7 @@ Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega
 
 - **SIRE:** el TXT de reemplazo del registro de ventas (RVIE) y del de compras (RCE), listo para subir a SUNAT.
 - **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y de STARSOFT
-  —este último en pruebas— y el registro de CONTASIS; SISCONT espera un archivo que ese sistema haya aceptado.
+  y el registro de CONTASIS; SISCONT espera un archivo que ese sistema haya aceptado.
 - **ERP:** los sistemas nuevos, en cualquier lenguaje. Reciben el documento `open-accounting` con su asiento **sin
   vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `asiento_contable`), el
   CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
@@ -260,7 +260,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | **Legacy** | |
 | Driver CONCAR (Excel de asientos) | listo |
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
-| Driver STARSOFT (asientos en Excel) | **en pruebas**: genera los archivos desde el 20-sep-2026; falta que STARSOFT importe uno — ver [Cómo aportar](#cómo-aportar) |
+| Driver STARSOFT (asientos en TXT de palotes) | **listo**: STARSOFT importó un mes de compras (7-oct-2026) y uno de ventas (8-oct-2026) |
 | Driver SISCONT | el contrato ya cubre lo que necesita; espera un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
 | **ERP** | |
 | Driver `asiento_contable`: el documento del estándar con sus comprobantes y su asiento | listo |

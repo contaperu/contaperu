@@ -46,7 +46,7 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **6.1.0** y estándar **`open-accounting` 1.0**
+Librería **7.0.0** y estándar **`open-accounting` 1.0**
 (`contaperu/_version.py`).
 
 | Pieza | Hoy |
@@ -57,7 +57,7 @@ Librería **6.1.0** y estándar **`open-accounting` 1.0**
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 14 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
 | **Salida · SIRE** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
-| **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos) en pruebas, a la espera de que alguien importe un archivo |
+| **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos), con un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct-2026 |
 | **Salida · ERP** | El documento `open-accounting` en JSON, el CSV de canal intercambio y la puerta HTTP con OpenConta |
 | Pendiente que depende de datos | SISCONT, la plantilla oficial de STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
 
@@ -197,7 +197,7 @@ red.
 abiertos, los rieles de pago y el fraude.
 
 **Qué hay hoy.** Nada de banco. La conciliación de constancias de detracción está pendiente de un archivo real, pero la
-mitad existe: `diagnosticar` ya lista las detracciones que esperan constancia (`_detraccion_pendiente`,
+mitad existe: `diagnosticar` ya lista las detracciones que esperan constancia (`detraccion_pendiente`,
 `contaperu/tributos/detracciones.py`) y el monto en soles enteros tiene su regla con fuente
 (`contaperu/tributos/detracciones.py`). Hay dos trampas para un lector de extractos: un `.xlsx` empieza como un ZIP y se
 desarma (`contaperu/lectores/archivos.py:56-58`), y un `.txt` se ignora como archivo auxiliar (`archivos.py:26`).
@@ -373,7 +373,7 @@ salida»; `CHANGELOG.md` 0.10.0):
 | A1 | SISCONT, registro de compras y ventas → `desde_comprobantes` | D | dato: plantilla + un mes importado | Las cuatro capas de prueba; un mes importado; fila en «Estado»; CHANGELOG y tag | — | — |
 | A2 | ¿Acepta SISCONT el TXT que genera el driver `sire`? (SISCONT importa la propuesta del SIRE, *según el proveedor*; qué formato, *no verificado*) | documentación | dato: una prueba | Nota en la guía; ningún código | — | — |
 | A3 | SISCONT, asientos → `desde_lineas` | D | dato: un caso que A1 no cubra | Igual que A1 | A1 | — |
-| A4 | **STARSOFT Desktop**, asientos → `desde_lineas`. **Hecho y aceptado** (2.0-2.3, cerrado en la 6.0): las dos plantillas calcadas del archivo real, y un **mes importado de verdad el 7-oct-2026**, que destapó lo que ningún vídeo decía — el nombre empieza por `C` y el TXT va suelto, sin el ZIP. Falta el archivo de **ventas** aceptado, que confirme la `C` en ese libro | D | dato: un mes de ventas importado | Igual que A1 | — | — |
+| A4 ✅ | **STARSOFT Desktop**, asientos → `desde_lineas`. **Hecho y aceptado** (2.0-2.3, cerrado en la 6.0): las dos plantillas calcadas del archivo real, un **mes de compras importado de verdad el 7-oct-2026** —que destapó lo que ningún vídeo decía: el TXT va suelto, sin el ZIP— y un **mes de ventas el 8-oct-2026**, que desmintió la simetría que se esperaba: el fichero no empieza por `C` en los dos libros, la letra es la del libro y el de ventas es `V-VENTAS_…` (6.0.2 y 6.3.2) | D | — | Igual que A1 | — | — |
 | A5 | **`starsoft_web`**: el cuerpo JSON de la API de STARSOFT Web (Gold Edition), como proyección pura de las líneas. **Abierto a la comunidad**: lo que resolvió A4 le sirve casi entero —siglas, sub-diarios, destino del IGV, cuentas y la proyección—; lo distinto es a dónde van los datos | D | dato: una respuesta aceptada guardada en `privado/` | Test contra el cuerpo aceptado; autenticarse y enviar es de la aplicación | A4 | — |
 | C10 | `plan_de_cuentas*` del destino, falta `cuenta_fuera_del_plan*`, marca de centro de costo y lista de centros | N · F · D | dato: plan exportado de CONCAR + un rechazo real de importación | Sin plan, snapshot idéntico; un plan sin la cuenta bloquea y `exportar` lanza | — | 11, 12, 13 |
 
@@ -527,7 +527,7 @@ espera un archivo real. **D**: espera un segundo caso o una versión del SDK.
 | 11 | Plan de cuentas del destino y falta `cuenta_fuera_del_plan` | N · F · D | Nota K de la plantilla de CONCAR | Plan sin la cuenta bloquea y `exportar` lanza; sin plan, snapshot idéntico | `plan_de_cuentas*`, `cuenta_fuera_del_plan*` | C | C10 |
 | 12 | `lleva_centro` por la marca del plan | N | Nota M; el propio docstring de `lleva_centro` | La marca manda sobre el prefijo (mutación) | — | C | C10 |
 | 13 | Centro de costo contra la lista `centros_costo` | N | Nota M, «Ver T.G. 05» | Un centro inexistente bloquea solo si llega la lista | — | C | C10 |
-| 14 | `aplicar_constancias` | N | Hoja de ruta; `_detraccion_pendiente` ya responde | De `PROVISIONADO` a `PAGADO` con el archivo real; sin pareja, igual | `aplicar_constancias*` | C | D1 |
+| 14 | `aplicar_constancias` | N | Hoja de ruta; `detraccion_pendiente` ya responde | De `PROVISIONADO` a `PAGADO` con el archivo real; sin pareja, igual | `aplicar_constancias*` | C | D1 |
 | 15 | Lector de extracto del banco X y el movimiento | N | El Excel o TXT del portal bancario, el formato confirmado en el Perú | Archivo real anonimizado; un libro Excel no se desarma como ZIP; deduplica | `Movimiento*`, `leer_extracto*` | C | D2 |
 | 16 | `conciliar` | N | Constancias primero; después cobros y pagos | Motivos legibles; cardinalidades; lo pendiente no se propone; tolerancia | `conciliar*` | C | D3 |
 | 17 | Asiento de tesorería | N · D | Cobros y pagos hacia el destino | Archivo aceptado del sub-diario de bancos; ITF con su norma | — | C | D6 |
