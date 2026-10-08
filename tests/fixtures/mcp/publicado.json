@@ -415,7 +415,7 @@
     "readOnlyHint": true,
     "title": null
    },
-   "descripcion": "Lee el TXT de la propuesta que SUNAT entrega en el SIRE y devuelve un documento\n    `open-accounting`.\n\n    Es lo que el contribuyente descarga de su SIRE con lo que SUNAT cree que compró o vendió;\n    a partir de ahí se compara con la realidad y se corrige. Acepta el TXT como texto o el ZIP\n    tal cual lo entrega SUNAT (`es_base64: true`).\n    ",
+   "descripcion": "Lee el TXT de la propuesta que SUNAT entrega en el SIRE y devuelve un documento\n    `open-accounting`.\n\n    Es lo que el contribuyente descarga de su SIRE con lo que SUNAT cree que compró o vendió;\n    a partir de ahí se compara con la realidad y se corrige. Acepta el TXT como texto o el ZIP\n    tal cual lo entrega SUNAT (`es_base64: true`).\n\n    `libro` es la cabecera, y son **exactamente cuatro claves**: `ruc`, `razon_social`, `periodo`\n    (AAAAMM) y `tipo` (`venta` o `compra`). Cualquier otra detiene la lectura diciendo su nombre;\n    el libro no admite ni anotaciones `_`.\n    ",
    "entrada": {
     "properties": {
      "contenido": {
@@ -449,7 +449,7 @@
     "readOnlyHint": true,
     "title": null
    },
-   "descripcion": "Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `open-accounting`.\n\n    Acepta un XML suelto como texto, o un ZIP en base64 con varios dentro (`es_base64: true`).\n    Descarta lo que no es un comprobante — las constancias de recepción (CDR) y las hojas de\n    estilo— y avisa de lo que no pudo leer. `libro` es la cabecera: RUC, periodo y si son\n    ventas o compras.\n    ",
+   "descripcion": "Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `open-accounting`.\n\n    Acepta un XML suelto como texto, o un ZIP en base64 con varios dentro (`es_base64: true`).\n    Descarta lo que no es un comprobante — las constancias de recepción (CDR) y las hojas de\n    estilo— y avisa de lo que no pudo leer.\n\n    `libro` es la cabecera, y son **exactamente cuatro claves**: `ruc`, `razon_social`, `periodo`\n    (AAAAMM) y `tipo` (`venta` o `compra`). Cualquier otra detiene la lectura diciendo su nombre;\n    el libro no admite ni anotaciones `_`.\n    ",
    "entrada": {
     "properties": {
      "contenido": {

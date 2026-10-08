@@ -24,8 +24,11 @@ PARA_HERRAMIENTA: dict[str, str] = {
 
     Acepta un XML suelto como texto, o un ZIP en base64 con varios dentro (`es_base64: true`).
     Descarta lo que no es un comprobante — las constancias de recepción (CDR) y las hojas de
-    estilo— y avisa de lo que no pudo leer. `libro` es la cabecera: RUC, periodo y si son
-    ventas o compras.
+    estilo— y avisa de lo que no pudo leer.
+
+    `libro` es la cabecera, y son **exactamente cuatro claves**: `ruc`, `razon_social`, `periodo`
+    (AAAAMM) y `tipo` (`venta` o `compra`). Cualquier otra detiene la lectura diciendo su nombre;
+    el libro no admite ni anotaciones `_`.
     """,
     'leer_propuesta_sire': """Lee el TXT de la propuesta que SUNAT entrega en el SIRE y devuelve un documento
     `open-accounting`.
@@ -33,6 +36,10 @@ PARA_HERRAMIENTA: dict[str, str] = {
     Es lo que el contribuyente descarga de su SIRE con lo que SUNAT cree que compró o vendió;
     a partir de ahí se compara con la realidad y se corrige. Acepta el TXT como texto o el ZIP
     tal cual lo entrega SUNAT (`es_base64: true`).
+
+    `libro` es la cabecera, y son **exactamente cuatro claves**: `ruc`, `razon_social`, `periodo`
+    (AAAAMM) y `tipo` (`venta` o `compra`). Cualquier otra detiene la lectura diciendo su nombre;
+    el libro no admite ni anotaciones `_`.
     """,
     'validar_comprobantes': """Revisa los comprobantes de un documento `open-accounting` y devuelve el mismo documento con
     `estado` y `observaciones` puestos en cada uno.

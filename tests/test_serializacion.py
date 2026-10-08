@@ -29,7 +29,21 @@ COMPRAS = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo
 
 def test_el_libro_va_y_vuelve():
     assert Libro.de_dict(COMPRAS.a_dict()) == COMPRAS
-    assert Libro.de_dict({**COMPRAS.a_dict(), "otra": "cosa"}) == COMPRAS       # lo desconocido se ignora
+
+
+def test_una_clave_que_no_es_del_libro_lo_detiene():
+    """Hasta la 6.5 esta misma línea afirmaba lo contrario —«lo desconocido se ignora»— en un fichero cuyo propio
+    docstring promete que «lo que no es de ellos se rechaza en vez de ignorarse». El esquema lo rechazaba desde
+    siempre por su `additionalProperties: false`; el código era más laxo que su contrato, y la 7.0 lo cierra.
+
+    El mensaje nombra TODAS las sobrantes y dice las cuatro que hay, porque el libro no tiene `datos_originales`
+    donde mandar lo que el motor no entiende."""
+    with pytest.raises(ValueError, match="Claves que no son de un libro: otra, sobra"):
+        Libro.de_dict({**COMPRAS.a_dict(), "otra": "cosa", "sobra": 1})
+    # Y una anotación `_` tampoco: `$defs.libro` es el único bloque del esquema sin `patternProperties` para `^_`,
+    # así que su sitio es la raíz del documento y no el libro.
+    with pytest.raises(ValueError, match="Claves que no son de un libro: _nota"):
+        Libro.de_dict({**COMPRAS.a_dict(), "_nota": "mía"})
 
 
 def test_un_libro_incompleto_se_rechaza():

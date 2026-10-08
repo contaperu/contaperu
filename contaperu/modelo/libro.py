@@ -52,8 +52,31 @@ class Libro:
 
     @classmethod
     def de_dict(cls, d: dict) -> "Libro":
-        """Lo desconocido se ignora; lo que falta llega vacío y lo rechaza la validación del libro (`ValueError`)."""
+        """**Lo desconocido NO se ignora** (7.0). Hasta la 6.5 se filtraba en silencio, y era el último sitio del
+        estándar donde pasaba: un dato que se cuela sin error es un dato que se pierde sin aviso.
+
+        Dejaba al lector **más laxo que el esquema publicado**, que rechaza por su `additionalProperties: false`
+        (`estandar/open-accounting.schema.json`, `$defs.libro`). Es el mismo agujero que la 4.0 cerró para el
+        comprobante, y el CHANGELOG de entonces dio por hecho que «faltaba solo el comprobante»: faltaba también
+        el libro. De ahí sale la forma de este rechazo —nombrar TODAS las sobrantes, no reventar en la primera—.
+
+        **Las claves `_` tampoco pasan**, y aquí es más estricto que el comprobante a propósito: `$defs.libro` es
+        el único bloque del esquema sin `patternProperties: {"^_": …}`, así que el estándar no admite una anotación
+        del productor dentro del libro. Su sitio es la raíz del documento.
+
+        **El mensaje dice las cuatro que hay** en vez de señalar una válvula: el comprobante puede mandar lo que
+        el motor no entiende a `datos_originales`, y el libro no tiene dónde. El molde es
+        `configuracion._errores_del_objeto`, que lista las claves válidas por eso mismo.
+
+        Lo que **falta** sigue llegando vacío: `razon_social` es opcional en la práctica —los golden traen tres
+        claves— y lo que no se puede suponer lo rechaza la validación del libro con su propio `ValueError`.
+        """
         if not isinstance(d, dict):
             raise ValueError("El libro tiene que ser un objeto con ruc, razon_social, periodo y tipo")
-        return cls(**{f.name: d.get(f.name, "") for f in fields(cls)})
+        validas = [f.name for f in fields(cls)]
+        desconocidas = sorted(set(d) - set(validas))
+        if desconocidas:
+            raise ValueError(f"Claves que no son de un libro: {', '.join(desconocidas)}. "
+                             f"Las que hay: {', '.join(validas)}")
+        return cls(**{nombre: d.get(nombre, "") for nombre in validas})
 
