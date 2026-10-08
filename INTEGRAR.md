@@ -311,7 +311,7 @@ grupo `erp`.
 ## Un driver para tu sistema contable
 
 Esto es el nivel 3: tu sistema importa un archivo con una forma suya. El contrato está en
-`contaperu/drivers/contrato.py` y la guía paso a paso, en `CONTRIBUTING.md`. Lo esencial:
+`contaperu/drivers/contrato/` y la guía paso a paso, en `CONTRIBUTING.md`. Lo esencial:
 
 - **Declara a quién entrega** (`CANAL`): `legacy` si es un sistema contable instalado que importa un archivo,
   `tributario` si es un registro que se presenta a SUNAT, `intercambio` si es un formato neutral. El motor lo presenta

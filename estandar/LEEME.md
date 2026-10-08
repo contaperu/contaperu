@@ -129,7 +129,7 @@ comprobante. Por las dos vías es el mismo objeto:
   el Excel de CONCAR, el CSV y los sistemas que importan asientos.
 
 Un sistema nuevo solo elige familia: el documento del que sale es el mismo. En el contrato de drivers
-(`contaperu/drivers/contrato.py`), la familia registro son las formas `linea` y `desde_comprobantes`, y la
+(`contaperu/drivers/contrato/`), la familia registro son las formas `linea` y `desde_comprobantes`, y la
 familia asiento, `desde_lineas`.
 
 ---

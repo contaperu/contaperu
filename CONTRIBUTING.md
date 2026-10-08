@@ -29,7 +29,7 @@ historia de un repositorio público no sale nunca más.
 ## Añadir un driver de salida
 
 Un driver traduce el asiento al formato que importa un sistema contable. El contrato completo está en
-[`contaperu/drivers/contrato.py`](contaperu/drivers/contrato.py); para un driver de **asientos** nuevo
+[`contaperu/drivers/contrato/`](contaperu/drivers/contrato/); para un driver de **asientos** nuevo
 (SISCONT, STARSOFT…) la forma es `desde_lineas`: el núcleo arma las líneas del asiento de
 `open-accounting`, las numera y exige que cuadren, y tu driver solo las traduce. No tienes que reimplementar
 ni una cuenta, ni un sentido, ni la detracción.

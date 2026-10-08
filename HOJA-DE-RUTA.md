@@ -52,7 +52,7 @@ Librería **6.1.0** y estándar **`open-accounting` 1.0**
 | Pieza | Hoy |
 |---|---|
 | **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
-| **Estándar y comunidad** | `open-accounting` 1.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato.py`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
+| **Estándar y comunidad** | `open-accounting` 1.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato/`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 14 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
@@ -307,7 +307,7 @@ cambio del estándar.
 doble, la línea del comprobante, la huella, la imputación, las faltas, la maquinaria de configuración y el registro de drivers.
 Son peruanos el `Libro` (`contaperu/modelo/libro.py`), los impuestos en campos fijos, la validación
 (`contaperu/validar.py:16`), los roles del asiento (`contaperu/asiento/motor.py:40`), las claves del contrato de driver
-(`contaperu/drivers/contrato.py:227-230`, `:280-286`) y el esquema del estándar. Desde la 1.0, `tests/test_capas.py`
+(`contaperu/drivers/contrato/:227-230`, `:280-286`) y el esquema del estándar. Desde la 1.0, `tests/test_capas.py`
 congela el acoplamiento con lo peruano (J0).
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
@@ -356,7 +356,7 @@ ellos. Para A4 y A5, la forma de la API de STARSOFT Gold campo a
 campo, comparada con las API de EE. UU. y con los estándares abiertos de factura: `API-DE-REGISTRO.md`.
 
 **Qué hay hoy.** CONCAR (asientos) y CONTASIS (registro) en uso, de canal legacy. Las formas del contrato
-(`contaperu/drivers/contrato.py`) y la receta con la que entró CONTASIS (`CONTRIBUTING.md`, «Añadir un driver de
+(`contaperu/drivers/contrato/`) y la receta con la que entró CONTASIS (`CONTRIBUTING.md`, «Añadir un driver de
 salida»; `CHANGELOG.md` 0.10.0):
 
 1. Pedir dos archivos al sistema: su plantilla y un mes que haya importado.

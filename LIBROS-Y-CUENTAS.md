@@ -625,6 +625,6 @@ que aportan a este documento)
   «Lo que se descartó, y por qué»
 - La derivación de la clase: `contaperu/pcge/clases.py`
 - Las seis llamadas que escriben el rol: `contaperu/asiento/motor.py`
-- Las ocho ranuras de cuenta y sus tres capas: `contaperu/configuracion.py`, `contaperu/drivers/contrato.py`,
+- Las ocho ranuras de cuenta y sus tres capas: `contaperu/configuracion.py`, `contaperu/drivers/contrato/`,
   `contaperu/drivers/*/datos.py`
 - La huella y lo que excluye: `contaperu/asiento/huella.py`

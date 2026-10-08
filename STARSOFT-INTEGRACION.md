@@ -794,7 +794,7 @@ Los seis campos de la última tabla son la única deuda real, y solo dos importa
 
 ## Lo que ya está hecho y no hay que rehacer
 
-- `contaperu/drivers/contrato.py` — `exige`, `no_caben` y la declaración de configuración. Ojo: **los 60
+- `contaperu/drivers/contrato/` — `exige`, `no_caben` y la declaración de configuración. Ojo: **los 60
   caracteres de glosa NO entran por `no_caben`** desde la 2.6 — se CORTAN al escribir, como en CONCAR y
   CONTASIS. `no_caben` es para lo que el sistema RECHAZA, no para lo que recorta.
 - `contaperu/drivers/kit/` — escribir `.xlsx` sin decidir contabilidad.

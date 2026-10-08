@@ -1846,7 +1846,7 @@ archivos, la mayoría tests y fixtures, y hay que distinguirlas de las 36 del es
 | `clase` obligatoria en cada línea, derivada del primer dígito de la cuenta | el esquema y `contaperu/asiento/motor.py` |
 | **Validar** la clase que llega, y observar una imputación a una cuenta de elemento 8 o 0 | `contaperu/pipeline/preparacion.py`, `contaperu/asiento/faltas.py` |
 | **La clase de cada cuenta en el catálogo del PCGE**, que hoy solo trae código, nombre y cuenta madre | `contaperu/datos/`, servido por `api.buscar_cuenta_pcge` |
-| `rol` y `libro.tipo` validados contra un catálogo publicado, no contra un enum | el esquema, `contaperu/modelo/libro.py`, `contaperu/drivers/contrato.py` |
+| `rol` y `libro.tipo` validados contra un catálogo publicado, no contra un enum | el esquema, `contaperu/modelo/libro.py`, `contaperu/drivers/contrato/` |
 | Los catálogos `roles`, `clases` y `tipos_de_libro`, con su versión | `contaperu/datos/`, servidos por `api.catalogos_*` |
 | La regla de degradación y la de versionado en tres niveles | `estandar/LEEME.md` |
 | La enmienda que acompaña el salto de versión | `estandar/enmiendas/` (hito E1, que todavía no existe) |

@@ -40,7 +40,12 @@ VIGENTES = ("README.md", "INTEGRAR.md", "ARQUITECTURA.md", "CLAUDE.md", "HOJA-DE
 # sobre el pasado. `CODE_OF_CONDUCT.md` y `SECURITY.md` no citan código.
 CITAN_CODIGO = VIGENTES + ("REFERENCIAS.md", "API-DE-REGISTRO.md", "LIBROS-Y-CUENTAS.md", "STARSOFT-INTEGRACION.md")
 
-# Una ruta de fichero del paquete citada en un documento, con su línea opcional: `contaperu/validar.py:244`.
+# Una ruta de FICHERO del paquete citada en un documento, con su línea opcional: `contaperu/validar.py:244`.
+#
+# Solo ficheros, y no carpetas: se intentó y trae más ruido que valor —las carpetas citadas incluyen las
+# **reservadas a propósito** (`contaperu/banco/`, `contaperu/jurisdicciones/`, que son hitos con su nombre ya
+# escrito), la ruta del estándar dentro de la rueda y los `github.com/contaperu/contaperu/…` de los enlaces—.
+# Un fichero que desaparece sí es siempre un error; una carpeta que todavía no existe puede ser una promesa.
 RUTA_CITADA = re.compile(r"`?(contaperu/[A-Za-z0-9_/]+\.(?:py|json))(?::\d+(?:-\d+)?)?`?")
 
 # Un documento nombra un driver así: `driver="x"`, `driver: "x"`, `--driver x` o «el driver `x`».
