@@ -36,8 +36,10 @@ def nombre_de_archivo(sistema: str, libro: Libro, opciones: Opciones | OpcionesA
     - `sistema` vacío → el nombre empieza por el libro, sin el `_` suelto delante. Es lo que piden CONCAR y
       CONTASIS, que escriben `COMPRAS_202609_<RUC>.xlsx` (John, 7-oct-2026). Dos archivos del mismo mes y RUC
       hacia los dos sistemas se llaman igual, y está asumido.
-    - `union` → con qué se pega el sistema al libro. STARSOFT exige que el nombre **empiece por `C`** y escribe
-      `C-COMPRAS_…`: ver `drivers/starsoft/salida.nombre`, donde está la fuente.
+    - `union` → con qué se pega el sistema al libro. STARSOFT escribe `C-COMPRAS_…` y `V-VENTAS_…`, y ahí
+      `sistema` no es el sistema sino **la letra del libro**: su manual exige que el nombre de compras empiece
+      por `C`, y el de ventas empieza por `V`. Quien decide cuál es `drivers/starsoft/salida.nombre`, donde
+      está la fuente de las dos; aquí solo se pega.
     """
     cabeza = f"{sistema.upper()}{union}" if sistema else ""
     return (f"{cabeza}{'VENTAS' if libro.es_venta else 'COMPRAS'}"
