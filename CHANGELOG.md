@@ -4,6 +4,33 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [6.0.2] — 2026-10-08
+
+**El archivo de ventas de STARSOFT empieza por `V`, no por la `C` de compras.** Lo confirmó un mes de ventas
+que STARSOFT importó (John, 8-oct-2026), que es justo la prueba que faltaba.
+
+La `C` de compras es del manual —«Datos generales»: *el nombre del archivo debe comenzar con la letra C*— y
+la demostró un mes real el 7-oct. El manual **no dice nada de ventas**, así que la 6.0 extendió esa misma `C`
+al otro libro por simetría y lo dejó escrito como `[por confirmar]` en tres sitios, a la espera de un archivo
+de ventas que entrara. Entró, y se llama `V-VENTAS_…`: la simetría era con la letra equivocada.
+
+### Cambios de comportamiento
+
+- **STARSOFT nombra el libro de ventas `V-VENTAS_<periodo>_<RUC>.txt`** (era `C-VENTAS_…`). Lo decide
+  `drivers/starsoft/salida.nombre`, que ahora pasa la letra del libro al kit en vez de una `C` fija.
+- **Compras no cambia**: sigue siendo `C-COMPRAS_<periodo>_<RUC>.txt`, que es el nombre probado contra la
+  máquina desde el 7-oct. Tampoco cambia el resto del patrón —el libro en plural, el periodo, el RUC y el
+  `.txt`—: solo la letra de delante.
+- Ningún otro driver se mueve. `kit.nombre_de_archivo` no cambia de firma ni de comportamiento: la letra viaja
+  por el parámetro `sistema`, que ya existía, con el `union="-"` que ya usaba STARSOFT.
+
+### Cómo migrar
+
+Nada que adaptar en el código que integra el motor. Lo que sí conviene saber: **los archivos de ventas ya
+exportados conservan su nombre** —quien los guarde con `C-VENTAS_…` los sigue teniendo así—, y el nombre no
+entra en ninguna huella, así que un mes no se marca como cambiado por esto. Volver a exportarlo saca el
+nombre nuevo.
+
 ## [6.0.1] — 2026-10-08
 
 **La tasa del IGV de la línea del asiento era el cociente `igv / base`, y el cociente no es la tasa.** Lo vio

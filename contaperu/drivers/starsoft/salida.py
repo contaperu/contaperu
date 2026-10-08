@@ -31,19 +31,23 @@ _COMO_VIENE = Opciones(sanear=False)
 
 
 def nombre(libro: Libro, opciones: OpcionesArchivo = OPCIONES) -> str:
-    """`C-COMPRAS_202609_<RUC>.txt`. **El nombre empieza por `C`, y no es decoración**: lo dicen los «Datos
-    generales» del manual —«el nombre del archivo de texto o Excel debe comenzar con la letra C»— y lo demostró
-    un mes real (John, 7-oct-2026).
+    """`C-COMPRAS_202609_<RUC>.txt` y `V-VENTAS_202609_<RUC>.txt`: **la letra es la del libro, y no es
+    decoración**.
 
-    El archivo que el motor nombraba `STARSOFT_COMPRAS_202609_<RUC>.txt` fue rechazado al importarlo, con un
-    «error de conversión de datos de carga masiva (truncado) en la fila 1, columna 2 (PERIODO)» que no habla del
-    nombre y despista; el MISMO archivo, renombrado a `C-COMPRAS_…`, entró. Los otros dos que importó ese día
-    llevaban la `C` desde el principio.
+    La `C` de compras la dicen los «Datos generales» del manual —«el nombre del archivo de texto o Excel debe
+    comenzar con la letra C»— y la demostró un mes real (John, 7-oct-2026): el archivo que el motor nombraba
+    `STARSOFT_COMPRAS_202609_<RUC>.txt` fue rechazado al importarlo, con un «error de conversión de datos de
+    carga masiva (truncado) en la fila 1, columna 2 (PERIODO)» que no habla del nombre y despista; el MISMO
+    archivo, renombrado a `C-COMPRAS_…`, entró. Los otros dos que importó ese día llevaban la `C` desde el
+    principio.
 
-    Ventas lleva la `C` igual que compras: el manual solo lo dice de compras, y queda `[por confirmar]` con un
-    archivo de ventas que entre.
+    **La `V` de ventas es del 8-oct-2026** (John, con un mes de ventas ya importado). El manual no dice nada de
+    ese libro, así que de la 6.0 a la 6.0.1 esta función extendió la `C` por simetría y lo dejó escrito como
+    `[por confirmar]`, a la espera de un archivo de ventas que STARSOFT aceptara. Ese archivo entró y se llama
+    `V-VENTAS_…`: la simetría era con la letra equivocada. Lo demás del patrón no cambia —el libro en plural, el
+    periodo, el RUC y el `.txt`—, solo la letra.
     """
-    return nombre_de_archivo("C", libro, opciones, union="-")
+    return nombre_de_archivo("V" if libro.es_venta else "C", libro, opciones, union="-")
 
 
 def _campo(valor: Any, clase: str, opciones: OpcionesArchivo) -> str:

@@ -10279,7 +10279,7 @@
  "exportar_con_observados/starsoft": {
   "driver": "starsoft",
   "formato": "starsoft_txt",
-  "archivo": "C-VENTAS_202512_20601234567.txt",
+  "archivo": "V-VENTAS_202512_20601234567.txt",
   "comprobantes": 11,
   "resumen": {
    "comprobantes": 11,
@@ -10308,7 +10308,7 @@
   },
   "_exportacion": {
    "driver": "starsoft",
-   "archivo": "C-VENTAS_202512_20601234567.txt",
+   "archivo": "V-VENTAS_202512_20601234567.txt",
    "huella": "fbb3b1f96c88d59398277957554491cc650cc6b48b948c5f8161ac665e03ffa9",
    "comprobantes": [
     {

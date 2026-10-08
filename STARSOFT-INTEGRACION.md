@@ -59,9 +59,15 @@ resultaron gemelos en forma —35 campos, `|`, CRLF, enter final, sin BOM ni TAB
 de rango, ningún espacio sobrante—. La única diferencia: **los que entraron iban renombrados a mano**,
 «se añadió `C-` y se borró `STARSOFT`». De ahí salen las dos reglas de la 6.0:
 
-1. **El nombre empieza por `C`.** El motor lo nombraba `STARSOFT_COMPRAS_<periodo>_<RUC>.txt`, que es
-   su patrón común; ahora escribe `C-COMPRAS_…` y `C-VENTAS_…` (`drivers/starsoft/salida.nombre`).
-   Lo de ventas es decisión de John y **[por confirmar]**: el manual solo lo dice de compras.
+1. **El nombre empieza por la letra del libro.** El motor lo nombraba
+   `STARSOFT_COMPRAS_<periodo>_<RUC>.txt`, que es su patrón común; ahora escribe `C-COMPRAS_…` y
+   `V-VENTAS_…` (`drivers/starsoft/salida.nombre`).
+
+   > **La `V` de ventas se confirmó el 8-oct-2026**, con un mes de ventas que STARSOFT importó (John). De la
+   > 6.0 a la 6.0.1 el driver escribía `C-VENTAS_…`: el manual solo habla de compras, así que la `C` se
+   > extendió al otro libro por simetría y quedó anotado aquí como `[por confirmar]`. **La simetría era con la
+   > letra equivocada.** Lo demás del patrón no cambió —el libro en plural, el periodo, el RUC y el `.txt`—,
+   > solo la letra.
 2. **El TXT va suelto, no en un ZIP.** «Lo que STARSOFT acepta es el TXT» (John): su pantalla de
    importación pide el archivo de texto. De la 2.3 a la 5.3 el motor lo envolvía —se eligió por
    parecido con el SIRE, sin un caso que lo pidiera— y nadie lo había subido para descubrirlo.
@@ -793,8 +799,9 @@ Los seis campos de la última tabla son la única deuda real, y solo dos importa
 ## Lo que falta
 
 1. **Las plantillas oficiales** (compras y ventas, `.xlsx` vacías con su cabecera).
-2. ~~**Un archivo aceptado por STARSOFT**~~ de **compras**: hecho el 7-oct-2026, y de ahí salieron el
-   nombre con `C` y el TXT sin ZIP. Falta el de **ventas**, que es el que confirma la `C` en ese libro.
+2. ~~**Un archivo aceptado por STARSOFT**~~: el de **compras** entró el 7-oct-2026, y de ahí salieron el
+   nombre con `C` y el TXT sin ZIP; el de **ventas**, el 8-oct-2026, y dijo que su letra es la `V` y no la
+   `C` que el driver había extendido por simetría. Los dos libros están probados contra la máquina.
 3. **Completar la tabla de siglas y sub-diarios** — la columna derecha de la comparación.
 4. **Qué hace STARSOFT con el tipo de asiento al importar**: ¿arma o solo clasifica?
 5. **Formato de los datos**: fecha (`dd/mm/aaaa` en el vídeo), separador decimal, longitudes, y si el

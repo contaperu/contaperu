@@ -433,11 +433,20 @@ def test_el_nombre_del_archivo_empieza_por_C():
     assert r["resumen"]["debe"] == r["resumen"]["haber"] == "1096.80"
 
 
-def test_el_archivo_de_ventas_tambien_empieza_por_C():
-    """El manual lo dice de compras y aquí vale para los dos, por decisión de John (7-oct-2026): queda
-    `[por confirmar]` con un archivo de ventas que STARSOFT importe."""
+def test_el_archivo_de_ventas_empieza_por_V():
+    """**Ventas lleva `V`, no la `C` de compras** (John, 8-oct-2026, con un mes de ventas ya importado).
+
+    La `C` de compras es del manual —«Datos generales»: el nombre debe comenzar con la letra `C`—, que no dice
+    nada de ventas. De la 6.0 a la 6.0.1 el driver extendió esa `C` al otro libro por simetría, y quedó escrito
+    como `[por confirmar]` a la espera de un archivo de ventas que STARSOFT aceptara. Ese archivo entró, y se
+    llama `V-VENTAS_…`: la simetría era con la letra equivocada.
+
+    Lo que NO cambia es el resto del patrón —el libro en plural, el periodo, el RUC y el `.txt`—: solo el
+    prefijo. El de compras sigue siendo `C-COMPRAS_…`, que es el único que estaba probado.
+    """
     r = _exportar(_venta())
-    assert r["archivo"] == f"C-VENTAS_202507_{RUC}.txt"
+    assert r["archivo"].startswith("V-")
+    assert r["archivo"] == f"V-VENTAS_202507_{RUC}.txt"
 
 
 def test_lo_que_se_descarga_es_el_TXT_y_no_un_ZIP():
