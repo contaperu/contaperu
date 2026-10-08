@@ -7,6 +7,7 @@ from decimal import Decimal as D
 
 import pytest
 
+from contaperu import catalogos as cat
 from contaperu import igv
 from contaperu.drivers.concar import tasa_igv_entera as tasa_igv
 from contaperu.modelo import Comprobante
@@ -143,55 +144,114 @@ def test_la_tasa_legal_es_la_que_cuadra_y_no_el_cociente():
 
 # ── Las cuatro respuestas a «¿cuál es la tasa del IGV?» ─────────────────────────────────────────────────────────
 #
-# Son cuatro y las cuatro están bien: cada formato pide una cosa distinta. Lo que no había era un sitio donde se
-# vieran juntas. Cada una tenía su motivo escrito en su archivo, así que para saber que difieren había que leer
-# tres drivers y el núcleo — y el snapshot de CONTASIS usa casos donde coinciden, de modo que no distinguiría si
-# alguien cambiara `tasa_legal` por `tasa_calculada`.
+# Son cuatro porque cada formato pide una cosa distinta, y lo que no había era un sitio donde se vieran juntas.
+#
+# **Y este bloque llegó tarde a su propio trabajo** (08-oct-2026). Existía desde antes y daba por buena la
+# respuesta mala: tenía congelado que STARSOFT escribiera `17.98` donde la tasa es 18, con un docstring
+# explicando que estaba bien. Sobrevivió a la corrección porque **copiaba** la regla del asiento en vez de
+# llamarla —dos líneas con un comentario que decía «la guarda es la de `asiento/motor.py`»—, así que seguir en
+# verde no probaba el motor: probaba la copia. Desde hoy `_las_cuatro` arma el asiento DE VERDAD, y por eso un
+# cambio en `motor.py` se ve aquí. Un test que reimplementa lo que vigila no vigila nada.
+#
+# Lo encontró una importación real en STARSOFT, no la batería.
 
 def _las_cuatro(igv_escrito: str, base: str) -> dict[str, object]:
-    """Lo que escribe cada uno para el mismo comprobante, por la misma función que usa de verdad."""
+    """Lo que escribe cada uno para el mismo comprobante, cada uno por la función que usa de verdad.
+
+    El núcleo **se lee del asiento armado**, no de una cuenta repetida aquí: es la única forma de que este test
+    caiga si `asiento/motor.py` cambia de función."""
+    from datetime import date
+
+    from contaperu.asiento import lineas_del_comprobante
     from contaperu.drivers.concar import tasa_igv_entera
     from contaperu.drivers.starsoft.proyeccion import con_dos_decimales
-    from contaperu.modelo import texto_tasa
+    from contaperu.pipeline import preparacion as prep
+    from util import comprobante, con_imputaciones, en_secciones
 
-    leida = igv.tasa_calculada(igv_escrito, D(base))
-    de_la_linea = "" if leida is None else texto_tasa(leida)   # la guarda es la de `asiento/motor.py`
+    c = comprobante(tipo_cp="01", serie="F001", numero="500", fecha_emision=date(2026, 8, 11),
+                    contraparte_tipo_doc="6", contraparte_doc="20131312955",
+                    contraparte_nombre="PROVEEDOR DE PRUEBA SAC", moneda="PEN",
+                    base_gravada=base, igv=igv_escrito, total=str(D(base) + D(igv_escrito)),
+                    destino_igv="DG", cuenta_contable="634301")
+    config = con_imputaciones(prep.config_aplicada(
+        en_secciones({"usa_centros_costo": False, "cuentas": {"igv": "401111"}}, "concar"), "concar"))
+    lineas = lineas_del_comprobante(c, config, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
+    de_la_linea = next(ln.tasa_igv for ln in lineas if ln.rol == "tercero")
     return {"nucleo": de_la_linea,
             "concar": tasa_igv_entera(D(igv_escrito), D(base)),
             "contasis": igv.tasa_legal(igv_escrito, base),
             "starsoft": con_dos_decimales(de_la_linea)}
 
 
-def test_las_cuatro_tasas_del_igv_difieren_a_proposito():
-    """El caso que las separa: 9.75 de IGV sobre 54.24 de base. El cociente da 17.98 y la tasa legal que cuadra
-    dentro de la tolerancia es 18.
+@pytest.mark.parametrize("igv_escrito,base,caso", [
+    ("4.58", "25.42", "la notaría de S/ 30 del archivo que STARSOFT rechazó: el cociente da 18.0173…"),
+    ("7.69", "42.71", "el consumo de S/ 50.40 del mismo archivo: el cociente da 18.0051…"),
+    ("0.15", "0.85", "un café de S/ 1.00, donde el redondeo pesa más: el cociente da 17.65"),
+    ("9.75", "54.24", "el 17.98 de redondear ítem a ítem, el que cita la plantilla de CONTASIS"),
+    ("18", "100", "y el exacto, que es el caso normal"),
+])
+def test_ninguna_de_las_cuatro_escribe_el_redondeo_del_emisor(igv_escrito, base, caso):
+    """La tasa de un comprobante del 18 % es 18, aunque sus importes vengan redondeados al céntimo.
 
-    - **El núcleo** escribe el cociente, sin suponer: `17.98`. Es lo que va en `linea.tasa_igv`.
-    - **CONCAR** lo redondea a entero desde los importes del comprobante, porque su columna AO solo admite entero.
-      No redondea la tasa de la línea: redondear dos veces puede dar otro entero.
-    - **CONTASIS** declara la tasa LEGAL, porque su plantilla pide «el porcentaje del IGV» con el ejemplo `18.00`
-      y el registro que validó escribe 18 aunque los importes, redondeados ítem a ítem, den 17.98.
-    - **STARSOFT** se queda con la de la línea y solo le pone dos decimales: es el único que no vuelve a leer el
-      comprobante.
+    El cociente `igv / base` devuelve ese redondeo convertido en porcentaje, y **cuanto más pequeño el importe,
+    más se nota**: medio céntimo sobre S/ 25 son dos centésimas de punto. Esto es lo que John vio en un TXT de
+    producción —`18.02` y `18.01` en el mismo archivo— el 08-oct-2026."""
+    assert _las_cuatro(igv_escrito, base) == {"nucleo": "18", "concar": 18,
+                                              "contasis": D("18.00"), "starsoft": "18.00"}, caso
+
+
+def test_lo_que_todavia_separa_a_las_cuatro_es_el_formato_y_no_la_tasa():
+    """Con una tasa reducida del 10.5 % las cuatro coinciden en la TASA y difieren en cómo la escriben.
+
+    - **El núcleo** la lleva como texto, sin ceros de más: `10.5`. Es lo que va en `linea.tasa_igv`.
+    - **CONCAR** la redondea a entero —**11**— porque su columna AO solo admite entero, y lo hace desde los
+      importes del comprobante: redondear dos veces puede dar otro entero. Su plantilla describe la columna con
+      «valores validos 0,10,18», así que este 11 sigue pendiente de una importación real.
+    - **CONTASIS** la declara con dos decimales, que es como su plantilla pide el «porcentaje del IGV».
+    - **STARSOFT** se queda con la de la línea y le pone dos decimales: es el único que no vuelve a leer el
+      comprobante, y por eso era el único al que le llegaba el cociente.
 
     Si alguna deja de ser la que es, esto lo dice — y dice cuál."""
-    assert _las_cuatro("9.75", "54.24") == {"nucleo": "17.98", "concar": 18,
-                                            "contasis": D("18.00"), "starsoft": "17.98"}
+    assert _las_cuatro("10.53", "100") == {"nucleo": "10.5", "concar": 11,
+                                           "contasis": D("10.50"), "starsoft": "10.50"}
 
 
-def test_con_una_tasa_exacta_las_cuatro_coinciden_y_por_eso_no_bastan_los_snapshots():
-    """18 % sobre 100: las cuatro dicen 18, cada una en su formato. Es el caso normal, y es justo el que hace que
-    un snapshot no distinga una función de otra — por eso hace falta el test de arriba."""
-    cuatro = _las_cuatro("18", "100")
-    assert cuatro == {"nucleo": "18", "concar": 18, "contasis": D("18.00"), "starsoft": "18.00"}
+def test_cuando_ninguna_tasa_legal_cuadra_se_escribe_el_cociente_y_no_un_18_inventado():
+    """El borde que se conserva a propósito: un IGV que no es ninguna tasa legal no se maquilla.
+
+    Ese comprobante ya lleva su `IGV_NO_CUADRA`, que bloquea la exportación salvo cuando viene de la propuesta
+    del SIRE —ahí es aviso (`validar`), y entonces sí llega al archivo—. Escribir `18.00` en esa celda sería
+    tapar en el archivo lo que la pantalla está diciendo."""
+    assert _las_cuatro("25", "100") == {"nucleo": "25", "concar": 25,
+                                        "contasis": D("25.00"), "starsoft": "25.00"}
+
+
+def test_la_tolerancia_de_la_tasa_es_LA_MISMA_con_la_que_validar_acepta_un_igv():
+    """No son dos umbrales: es `catalogos.TOLERANCIA_IGV`, y de ahí sale el borde exacto.
+
+    El peor desvío al redondear un importe al céntimo es medio céntimo, así que la tolerancia (5 céntimos) cubre
+    un redondeo único con holgura de 10× y el redondeo ítem a ítem hasta **diez ítems** en el peor caso
+    imaginable —que todos se desvíen hacia el mismo lado—; en la práctica se cancelan entre sí.
+
+    **Pasado ese borde se escribe el cociente, y es correcto que se escriba:** ensanchar la tolerancia para
+    cubrir más redondeo haría que `validar` aceptase más descuadres, porque el número es uno solo. Quien venga a
+    tocarlo lee esto antes."""
+    assert cat.TOLERANCIA_IGV == D("0.05")
+    # Diez ítems, cada uno desviado medio céntimo hacia arriba: el desvío es 0.05 justo, y entra.
+    assert _las_cuatro("180.05", "1000")["starsoft"] == "18.00"
+    # Once: 0.06, se sale. La celda dice 18.01 y el comprobante lleva su observación.
+    assert _las_cuatro("198.06", "1100")["starsoft"] == "18.01"
 
 
 def test_sin_igv_ninguna_se_inventa_una_tasa():
     """Una boleta sin crédito fiscal, una compra exonerada: no hay tasa que leer y ninguna supone el 18 %. CONCAR
-    tuvo un 18 de respaldo hasta el 10-sep-2026 y se quitó por eso."""
+    tuvo un 18 de respaldo hasta el 10-sep-2026 y se quitó por eso.
+
+    STARSOFT es el único que escribe algo, `0.00`, porque sus ejemplos oficiales llevan dos decimales en todas
+    las columnas numéricas incluso donde no aplican."""
     assert igv.tasa_calculada("0", D("100")) is None
     assert igv.tasa_legal("0", "100") is None
-    assert _las_cuatro("0", "100")["concar"] == ""
+    assert _las_cuatro("0", "100") == {"nucleo": "", "concar": "", "contasis": None, "starsoft": "0.00"}
 
 
 def test_editar_una_compra_no_gravada_no_pierde_el_importe_ni_lo_duplica():

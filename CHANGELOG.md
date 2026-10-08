@@ -4,6 +4,51 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [6.0.1] — 2026-10-08
+
+**La tasa del IGV de la línea del asiento era el cociente `igv / base`, y el cociente no es la tasa.** Lo vio
+John en un TXT de producción: la columna `TASA IGV` de STARSOFT decía `18.02` en una factura de notaría y
+`18.01` en una de consumo, en un mes donde la tasa es 18 % en todas.
+
+El motivo es el redondeo del emisor, devuelto en forma de porcentaje. La notaría trae base `25.42` e IGV
+`4.58`; el 18 % exacto de esa base es `4.5756`, así que el emisor redondeó al céntimo. Al dividir se recupera
+ese redondeo: `4.58 / 25.42 × 100` = `18.0173…`, que a dos decimales es `18.02`. **Cuanto más pequeño el
+importe, más se nota**: en un café de S/ 1.00 el cociente llega a dar `17.65`.
+
+### Cambios de comportamiento
+
+- **`LineaDiario.tasa_igv` lleva la tasa LEGAL que cuadra con los importes** (`igv.tasa_legal`), no el cociente
+  (`igv.tasa_calculada`). Es lo que su propio docstring prometía desde siempre —«la del comprobante como texto
+  (`"18"`, `"10.5"`)»— y lo que ya hacía CONTASIS por su cuenta. **La tolerancia con la que se decide es la
+  misma con la que `validar` acepta un IGV** (`catalogos.TOLERANCIA_IGV`, 5 céntimos): un solo número para las
+  dos preguntas, así que todo comprobante que el motor da por bueno al 18 % lleva un 18 en el archivo. Si
+  ninguna tasa legal cuadra se sigue escribiendo el cociente, y ese comprobante ya va marcado con
+  `IGV_NO_CUADRA`.
+- **STARSOFT escribe `18.00`** en su columna `TASA IGV`. Es el único driver al que le llegaba el cociente,
+  porque es el único que no vuelve a leer el comprobante: toma la tasa de la línea y le pone dos decimales.
+- **El CSV revisable y el documento `open-accounting`** dicen `18` donde decían `18.02`.
+- **CONCAR y CONTASIS no cambian.** CONCAR saca su entero de los importes del comprobante (su columna AO solo
+  admite entero) y CONTASIS ya llamaba a `tasa_legal`. Lo comprueban sus casos congelados, que no se mueven: de
+  las 344 apariciones de `tasa_igv` en los fixtures, 341 eran `"18"` y 3 `"10.5"` — ninguna llevaba el redondeo
+  del emisor, y por eso ningún snapshot lo distinguía.
+
+### Corregido
+
+- **El test cruzado de la tasa existía y daba por buena la respuesta mala.** `test_las_cuatro_tasas_del_igv…`
+  tenía congelado que STARSOFT escribiera `17.98` donde la tasa es 18, con un docstring explicando que estaba
+  bien. Y habría sobrevivido a esta corrección, porque **copiaba** la regla del asiento en vez de llamarla: dos
+  líneas con un comentario que decía «la guarda es la de `asiento/motor.py`». Seguir en verde no probaba el
+  motor, probaba la copia. Ahora `_las_cuatro` arma el asiento de verdad, así que un cambio en `motor.py` se ve
+  ahí. **Un test que reimplementa lo que vigila no vigila nada.**
+
+### Añadido
+
+- Los casos del archivo real como pruebas (`4.58 / 25.42`, `7.69 / 42.71`, el café de S/ 1.00 y el `17.98` de
+  redondear ítem a ítem), el que separa a los cuatro formatos por su FORMA y no por la tasa (una reducida del
+  10.5 %, donde CONCAR escribe 11), y **el borde de la tolerancia**: diez ítems desviados medio céntimo cada
+  uno entran justo (0.05) y once se salen (0.06). Ese último está ahí para que quien quiera ensanchar la
+  tolerancia lea en el sitio que el número lo comparte `validar`.
+
 ## [6.0.0] — 2026-10-07
 
 Lo que STARSOFT destapó al importar su primer mes de verdad. El driver estaba escrito contra la documentación

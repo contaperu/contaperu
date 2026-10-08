@@ -22,8 +22,11 @@ class LineaDiario:
     `documento` y `referencia` llevan `tipo_cp`, el código SUNAT de la Tabla 10 — **y solo eso** desde la 4.0: la
     sigla con la que cada sistema legacy llama a ese tipo la escribe su driver (`asiento.sigla_de_tipo`), que es quien
     conoce su tabla. `glosa` va entera: el corte es del driver.
-    `tasa_igv` es la del comprobante como texto (`"18"`, `"10.5"`), sin redondear a entero. El `tipo_cambio` y la `tasa`
-    de la detracción también van como texto exacto (`"3.550"`, `"4"`, desde la 1.0): `float` solo al escribir una celda.
+    `tasa_igv` es la tasa **legal** del comprobante como texto (`"18"`, `"10.5"`), sin redondear a entero: la que
+    cuadra con su base y su IGV dentro de la tolerancia de `validar` (`igv.tasa_legal`), **no el cociente de los dos**
+    —ese lleva dentro el redondeo del emisor y dice `18.02` donde la tasa es 18—. Hasta el 08-oct-2026 era el cociente
+    y este docstring ya prometía lo otro; lo descubrió un TXT que STARSOFT importó. El `tipo_cambio` y la `tasa` de la
+    detracción también van como texto exacto (`"3.550"`, `"4"`, desde la 1.0): `float` solo al escribir una celda.
     """
 
     cuenta: str

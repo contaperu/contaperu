@@ -74,11 +74,20 @@ cambiar lo único que está probado a cambio de cumplir una línea del manual qu
 Si algún día un archivo se rechaza **y ya empieza por `C`**, esta es la siguiente sospechosa; hasta
 entonces, no se toca.
 
-Lo mismo con la **columna 12, `TASA IGV`**: el archivo que entró la trae en `0.00` en sus 40 filas de
-proveedor (todas de destino `004`, no gravadas), de modo que el `0.00` está probado. Lo que sigue sin
-probarse es el `18.01` que escribe el motor cuando el IGV del comprobante no da la tasa exacta
-(`7.69 / 42.71`), donde el manual pide el valor fijo: queda anotado, y lo destraba el día que entre —o
-se rechace— un mes que lo lleve.
+La **columna 12, `TASA IGV`**, era la otra sospechosa anotada aquí, y **dejó de serlo el 08-oct-2026**.
+El archivo que entró la trae en `0.00` en sus 40 filas de proveedor (todas de destino `004`, no
+gravadas), así que el `0.00` estaba probado; lo que quedaba sin resolver era qué escribir cuando el IGV
+del comprobante no da la tasa exacta, y el caso que se citaba —`7.69 / 42.71`— apareció tal cual en el
+mes siguiente: un TXT de producción con `18.02` en una notaría y `18.01` en un consumo, en un mes donde
+la tasa es 18 % en todas.
+
+**Se resolvió a favor del manual, que pide «el valor fijo del IGV vigente (18)».** El motor escribía el
+cociente `igv / base`, que devuelve el redondeo del emisor convertido en porcentaje: la notaría trae base
+`25.42` e IGV `4.58` —el 18 % exacto es `4.5756`—, y al dividir sale `18.0173…`. Desde la **6.0.1** la
+línea del asiento lleva la tasa **legal** que cuadra con sus importes (`igv.tasa_legal`) y aquí sale
+`18.00`, **con la misma tolerancia con la que `validar` acepta un IGV**: 5 céntimos, un solo número para
+las dos preguntas. Si ninguna tasa legal cuadra se escribe el cociente y el comprobante va con su
+`IGV_NO_CUADRA` — tapar eso en el archivo sería contradecir lo que la pantalla dice.
 
 ### Compras — 39 ítems, 35 escritos
 

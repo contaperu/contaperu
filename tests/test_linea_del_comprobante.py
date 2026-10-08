@@ -251,10 +251,21 @@ def test_la_glosa_de_la_linea_va_entera_y_el_corte_es_del_driver():
     assert filas[0]["W"] == concepto[:30] and filas[0]["F"] == concepto[:40]
 
 
-def test_la_tasa_del_igv_viaja_exacta_y_concar_la_redondea():
+def test_la_tasa_del_igv_que_viaja_es_la_LEGAL_y_concar_la_redondea():
+    """La linea lleva la tasa que la ley reconoce, no el cociente `igv / base` (08-oct-2026).
+
+    El caso que lo separa es el de abajo, y es real: una notaria de S/ 30 con base 25.42 e IGV 4.58 —el 18 % exacto
+    seria 4.5756, y el emisor redondeo al centimo—. El cociente da 18.0173..., y asi STARSOFT escribia `18.02` en su
+    columna TASA IGV. La tolerancia con la que se decide es la de `validar`, una sola para las dos preguntas.
+
+    La reducida no cambia: 10.5 se escribe `10.5` y CONCAR la redondea a 11, porque su columna AO solo admite entero
+    y ese redondeo es suyo."""
     reducida = factura(base_gravada="100", igv="10.5", total="110.5")
     assert asi.lineas_del_comprobante(reducida, CONTAB, MES, "080001")[0].tasa_igv == "10.5"
     assert driver_concar.filas_de_comprobante(reducida, CONTAB, MES, "080001")[0]["AO"] == 11
+
+    notaria = factura(base_gravada="25.42", igv="4.58", total="30.00")
+    assert asi.lineas_del_comprobante(notaria, CONTAB, MES, "080001")[0].tasa_igv == "18"
 
 
 def test_una_nota_de_credito_lleva_los_dos_codigos_de_su_referencia():
