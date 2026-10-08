@@ -171,8 +171,8 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 | Capa | Módulos | Qué sabe |
 |---|---|---|
 | base | `_version`, `_obsoleto`, `_datos`, `errores` | la versión, el aviso de las rutas viejas, los datos empaquetados, la base de los errores |
-| núcleo | `modelo`, `catalogos`, `configuracion`, `igv`, `detracciones`, `validar`, `partida_doble`, `asiento`, `pcge`, `lectores`, `comparar_sire` | contabilidad peruana, sin disco, sin red y sin reloj |
-| drivers | `drivers/` (`contrato`, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
+| núcleo | `modelo/` (el libro, el comprobante, las coerciones), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `configuracion`, `igv`, `detracciones`, `validar`, `partida_doble`, `asiento/`, `pcge/`, `lectores/`, `resumen`, `comparar_sire` | contabilidad peruana, sin disco, sin red y sin reloj |
+| drivers | `drivers/` (`contrato/` —su taxonomía, sus protocolos, sus accesores y su examen—, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
 | pipeline | `pipeline/` (`preparacion`, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
 | api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa; cada nombre con su firma, congelados |
 | puertas | `puertas/` (`cli`, `servidor_mcp`, `servidor_http`, `comun`) | un protocolo; solo hablan con la api |

@@ -4,6 +4,55 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [6.3.0] — 2026-10-08
+
+Los tres módulos que mezclaban temas pasan a paquete, **sin que cambie un solo import de nadie**. Es la parte
+barata de una reestructuración y conviene saber por qué: partir un módulo en un paquete **del mismo nombre** no
+toca la superficie pública si el `__init__` reexporta los mismos nombres — `contaperu.drivers` y
+`contaperu.lectores` ya funcionaban así. La prueba de que no se rompió nada es que
+`tests/test_superficie_publica.py` pasa **sin regenerarse**, igual que en la 2.0.
+
+### Cambiado
+
+- **`catalogos.py`** (426 líneas) hacía cinco cosas: los códigos de un comprobante, los tributos, el canal y el
+  formato del SIRE, el formato del PLE y —desde la 6.1.0— el contribuyente. Ahora son seis ficheros, el mayor de
+  143 líneas. De paso se ve lo que tenía dentro sin querer: `ErrorContaperu` está en su superficie pública desde
+  que entraron las excepciones del contribuyente, así que se reexporta **a propósito** en vez de desaparecer.
+- **`modelo.py`** (466) mezclaba las coerciones de tipo, las dataclasses y la identidad de un comprobante. Las
+  coerciones no son modelo: son las utilidades de las que el modelo depende, y ahora tienen su fichero con las
+  dos constantes que mandan en todo el dinero —`CERO` y `CENTIMO`— al lado de quien redondea. **`Comprobante` se
+  queda entero**: partir una dataclass de cuarenta campos por tamaño dejaría la mitad lejos de la regla que los
+  valida. Es el módulo más usado del motor, 36 de los 83 ficheros.
+- **`drivers/contrato.py`** (587) tenía cuatro capas: la taxonomía de lo que existe, los protocolos tipados, los
+  accesores y el examen. Su docstring de 120 líneas se queda en el `__init__`, que es donde lo busca quien va a
+  escribir un driver.
+
+**Los tres que NO se parten, que también es una decisión**: `api/operaciones.py`, `asiento/motor.py` y
+`puertas/cli.py` son largos pero tienen una sola responsabilidad. Partir por tamaño un módulo coherente añade un
+nivel de indirección y no arregla nada.
+
+### Añadido
+
+- **El test que hace segura una reestructuración**: una ruta de código citada en un documento tiene que existir.
+  Encontró trabajo el primer día — `HOJA-DE-RUTA.md` citaba `contaperu/operaciones.py`, `contaperu/formato.py` y
+  `contaperu/generar.py` **en cinco sitios**, y esos tres módulos los retiró la 2.0 **cuatro mayores antes**.
+  Comprueba que el fichero exista y no el número de línea: una línea que se corre no engaña a nadie.
+  El **CHANGELOG queda fuera a propósito**, y es la exclusión que importa: es la bitácora, cita el código que
+  había el día de cada versión, y exigirle las rutas de hoy nos empujaría a mentir sobre el pasado. Las carpetas
+  también quedan fuera, con su motivo: las que los documentos citan incluyen las **reservadas** (`contaperu/banco/`,
+  `contaperu/jurisdicciones/`), que son hitos con su nombre ya escrito.
+
+### Arreglado
+
+- **Tres guardas que llevaban cuatro mayores vigilando el vacío.** `tests/test_frontera.py` filtraba `_compat`,
+  `cli.py` y `operaciones.py`, retirados en la 2.0: **tres de sus seis entradas no filtraban nada**, y un filtro
+  que nombra algo inexistente parece decir que ese algo existe. `tests/test_capas.py` tenía un test entero —«nadie
+  importa las rutas viejas»— que recorría una capa `compat` que **ningún módulo tiene**, así que pasaba vacío
+  siempre; y una constante `_DEBAJO` que no usaba nadie.
+
+Ningún driver cambia un byte: el TXT del SIRE del mes real de 3018 comprobantes sale con el mismo sha256, y el
+snapshot de CONCAR no se movió.
+
 ## [6.2.0] — 2026-10-08
 
 El servidor MCP deja de escribirse a mano. Era el **fichero más grande del repositorio** —619 líneas— y declaraba
