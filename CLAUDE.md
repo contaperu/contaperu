@@ -128,12 +128,16 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
   cambio la 7.0 —el libro estricto y el retiro de los puentes— sí lo fue, y se hizo en la rama `motor-v7`: entre el
   primer commit y el último los consumidores no podían adoptar nada, y la app tenía que probar su `rc` antes de que
   la versión final existiera.
-- **Hay una rama de mantenimiento, `6.0.x`**, de la que salieron la 6.0.1 y la 6.0.2 (la tasa legal del IGV y la V de
-  ventas de STARSOFT), las dos publicadas. Un parche nace ahí cuando hay que sacarlo sin lo que `main` lleva encima,
-  y después **se aplica también en `main`** para que no vuelva al adoptar la siguiente versión: así entraron la 6.3.1
-  y la 6.3.2. Hoy `main` va catorce commits por delante y `6.0.x` dos por su lado, así que un parche nuevo a un
-  fichero que la reestructuración movió **se traduce a la ruta nueva a mano**; no hay `cherry-pick` que lo haga. La
-  última rama larga fue `motor-v1`, la de la 1.0.
+- **Una rama de mantenimiento vive mientras alguien use su versión, y se borra cuando nadie la usa.** Hubo una,
+  `6.0.x`, de la que salieron la 6.0.1 y la 6.0.2 (la tasa legal del IGV y la V de ventas de STARSOFT): nacieron ahí
+  porque había que sacarlas sin lo que `main` llevaba encima —la reestructuración— y la app estaba fijada en la
+  6.0.2. Después **se aplicaron también en `main`** para que no volvieran al adoptar la siguiente versión: así
+  entraron la 6.3.1 y la 6.3.2. El día que la app adoptó la 7.0.0 la rama se quedó sin usuario y se borró
+  (8-oct-2026); sus dos commits **no se pierden**, porque son exactamente los tags `v6.0.1` y `v6.0.2`, que es lo que
+  hay que comprobar antes de borrar una rama así.
+  Si vuelve a hacer falta, se abre desde el tag de la versión que haya que parchear. Y la trampa, dicha una vez:
+  un parche a un fichero que la reestructuración movió **se traduce a la ruta nueva a mano**, porque no hay
+  `cherry-pick` que lo haga. Las dos ramas largas que ha habido son `motor-v1`, la de la 1.0, y `motor-v7`.
 - Entorno: `python -m venv .venv` y `pip install -e ".[dev]"` (trae `excel`, `schema`, `mcp`, `http`, `pytest`,
   `httpx`, `openapi-spec-validator` y `ruff`).
 - Batería: `pytest` (unos segundos; el snapshot va dentro). Antes de etiquetar, `diagnosticar` y `exportar` sobre un
