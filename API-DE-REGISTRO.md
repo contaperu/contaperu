@@ -512,9 +512,15 @@ vacíos por si acaso. Probado contra el esquema:
 | `cod_Detraccion: ""`, `tasa_Detraccion: 0` de relleno | **Rechazado**: «Additional properties are not allowed» |
 | `"subdiario": "10"` | **Rechazado**: es vocabulario de un sistema, no un hecho |
 
-Lo sostiene `additionalProperties: false` en la raíz, en el comprobante y en la detracción: **una clave que el
-estándar no conoce se rechaza en vez de ignorarse**, y quien se equivoca de nombre se entera en la primera llamada.
-La válvula para lo que el motor no entiende es `datos_originales`, que se transporta sin interpretar.
+Lo sostiene `additionalProperties: false` en la raíz, en el libro, en el comprobante y en la detracción: **una clave
+que el estándar no conoce se rechaza en vez de ignorarse**, y quien se equivoca de nombre se entera en la primera
+llamada. La válvula para lo que el motor no entiende es `datos_originales`, que se transporta sin interpretar.
+
+**El libro no tiene válvula, y es el bloque más estricto de todos**: ni `datos_originales` ni anotaciones `_`, porque
+`$defs.libro` es el único que no declara `patternProperties` para `^_`. Son cuatro claves —`ruc`, `razon_social`,
+`periodo`, `tipo`— y el rechazo las nombra. El motor lo cumple **desde la 7.0**: hasta la 6.5 el esquema las rechazaba
+y el código las ignoraba en silencio, que es el mismo desfase que la 4.0 cerró para el comprobante. La raíz sigue
+siendo la excepción: su lector lee cada bloque por su nombre y todavía no mira el conjunto.
 
 Y ausencia no es lo mismo que silencio del validador: **los importes que sí están tienen que cuadrar.** El motor
 comprueba que el total sea la suma de las casillas —por eso un recibo por honorarios con el importe en

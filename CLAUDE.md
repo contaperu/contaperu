@@ -44,10 +44,11 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
 ## Cómo está construido
 
 Por capas, de abajo arriba, que `tests/test_capas.py` hace cumplir: un **núcleo** que sabe contabilidad peruana y nada
-más (`modelo`, `lectores`, `validar`, `asiento`, `igv`, `detracciones`, `partida_doble`, `pcge`); **drivers** que
+más (`modelo/`, `lectores/`, `tributos/` —el IGV, las detracciones, la validación y el contraste con el SIRE—,
+`contable/` —la partida doble y el resumen—, `asiento/`, `pcge/`); **drivers** que
 conocen el formato de un destino y nada de contabilidad, cada uno con su canal (`drivers/concar` y `drivers/contasis`
 legacy, `drivers/sire` tributario, `drivers/csv` y `drivers/asiento_contable` intercambio, este con vocabulario neutral para los ERP, y los de terceros por *entry points*, con el contrato de
-`drivers/contrato.py` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
+`drivers/contrato/` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
 (`contaperu.api`, con la tabla de operaciones y el contrato OpenConta); y tres **puertas** que solo hablan con la api
 (`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x y la 4.0, el
 vocabulario de un ERP que llevaba la línea. El
@@ -74,9 +75,13 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   primera publicada es la 1.1.0— y la superficie pública de la 1.0 quedó intacta, lo que demuestra su test al pasar
   sin regenerarse. **La 4.0 sí rompe, y a propósito**: la línea del comprobante dejó de llevar el vocabulario de un
   ERP —la sigla del tipo y el código interno de la detracción—, así que la huella cambia para todos y la columna de
-  detracción del CSV cambia de significado sin cambiar de nombre. Antes de etiquetar una versión mayor se publica una
-  pre-release (`vX.Y.ZrcN`) y quien integra la prueba en su batería, también con
-  `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»).
+  detracción del CSV cambia de significado sin cambiar de nombre. **La 7.0 rompe dos veces**: retira los seis
+  atajos que la 6.4.0 dejó en la raíz al agrupar el núcleo —el que use `contaperu.api` no nota nada; el que importe
+  el núcleo cambia seis imports, y el mapa está en `INTEGRAR.md`— y el `libro` deja de ignorar en silencio una clave
+  que no es suya, que es el último bloque del estándar donde pasaba. Antes de etiquetar una versión mayor se publica
+  una pre-release (`vX.Y.ZrcN`) y quien integra la prueba en su batería, también con
+  `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»). **Hasta la 7.0 eso se prometía y no se
+  hacía**: solo la 1.0 y la 5.0 tuvieron su `rc`; la 2.0, la 3.0, la 4.0 y la 6.0 salieron sin ninguno.
 
 ## Lo que no se negocia
 
@@ -120,8 +125,9 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
   inservible a mitad de camino, o que haya que parchear una versión que alguien ya usa sin arrastrarle lo que viene
   detrás. Partir un módulo en un paquete del mismo nombre **no es** de esas: la fachada reexporta los mismos nombres,
   cada paso es un commit con la batería en verde y `main` sirve en todo momento. Deprecar con un puente tampoco. En
-  cambio, la 7.0 —el libro estricto y el retiro de los puentes— sí, porque entre el primer commit y el último los
-  consumidores no podrían adoptar nada.
+  cambio la 7.0 —el libro estricto y el retiro de los puentes— sí lo fue, y se hizo en la rama `motor-v7`: entre el
+  primer commit y el último los consumidores no podían adoptar nada, y la app tenía que probar su `rc` antes de que
+  la versión final existiera.
 - **Hay una rama de mantenimiento, `6.0.x`**, de la que salieron la 6.0.1 y la 6.0.2 (la tasa legal del IGV y la V de
   ventas de STARSOFT), las dos publicadas. Un parche nace ahí cuando hay que sacarlo sin lo que `main` lleva encima,
   y después **se aplica también en `main`** para que no vuelva al adoptar la siguiente versión: así entraron la 6.3.1

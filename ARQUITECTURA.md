@@ -197,8 +197,11 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 - **Las rutas de la 0.10** (`operaciones`, `generar`, `cli`, `servidor_mcp`, `formato`, `drivers.concar.construir`)
   las retiró la 2.0, sin tocar la superficie pública de la 1.0: ninguna versión publicada llegó a ofrecerlas, porque
   la 0.x nunca estuvo en PyPI. La **4.0** retiró lo que avisaba desde la 3.10 —el nombre `asiento_neutral` del driver—
-  y dos promesas que llevaban dos mayores sin cumplirse: la forma `construir` de un driver y el `CANAL` opcional. El
-  mecanismo con que se deprecia algo sigue en `_obsoleto.py`, sin usuarios y a propósito, para la próxima vez.
+  y dos promesas que llevaban dos mayores sin cumplirse: la forma `construir` de un driver y el `CANAL` opcional. La
+  **7.0** retiró los seis atajos que la 6.4.0 dejó en la raíz al agrupar el núcleo en `tributos/` y `contable/`, con
+  63 nombres de la superficie congelada: es la primera vez que una retirada se cobra en la mayor siguiente a la que
+  la anunció, que es como debería ir siempre. El mecanismo con que se deprecia algo sigue en `_obsoleto.py`, sin
+  usuarios y a propósito, para la próxima vez; `RETIRO` dice ahora `"8.0"`.
 - **El portal** (otro repositorio) usa la api y el nivel de extensión; el `resumen` de cada exportación, que guarda tal
   cual, conserva sus claves.
 - **Lo peruano, a la vista** (hito J0): qué módulos importan uno peruano queda congelado en

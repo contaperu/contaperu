@@ -540,14 +540,33 @@ Para actualizar:
 Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
 seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
-## Lo que promete la 6.x
+## Lo que promete la 7.x
 
-- **`contaperu.api` no cambia de nombre ni de firma** hasta la 7.0 (`tests/test_superficie_publica.py`). Pueden llegar
+- **`contaperu.api` no cambia de nombre ni de firma** hasta la 8.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
-- **Un nombre que cambia sigue resolviendo durante toda la 6.x**, y avisa con `contaperu.RutaObsoleta` diciendo cuál
-  usar, hasta la 7.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno: la 4.0 cumplió el único que avisaba —el driver
-  que se llamó `asiento_neutral` hasta la 3.10 y hoy es `asiento_contable`—. Corre tu batería con
-  `-W error::contaperu._obsoleto.RutaObsoleta` y te sale cada sitio donde uses uno.
+- **Un nombre que cambia sigue resolviendo durante toda la 7.x**, y avisa con `contaperu.RutaObsoleta` diciendo cuál
+  usar, hasta la 8.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno: la 7.0 cumplió los seis que avisaban. Corre tu
+  batería con `-W error::contaperu._obsoleto.RutaObsoleta` y te sale cada sitio donde uses uno.
+- **Si vienes de una 6.x y usabas el núcleo directamente**, la 7.0 retiró los seis atajos que la 6.4.0 dejó en la raíz
+  al agrupar el núcleo. El cambio es de import y nada más: lo que devuelve cada función es idéntico.
+
+  | Hasta la 6.5 | Desde la 7.0 |
+  |---|---|
+  | `contaperu.igv` | `contaperu.tributos.igv` |
+  | `contaperu.detracciones` | `contaperu.tributos.detracciones` |
+  | `contaperu.validar` | `contaperu.tributos.validar` |
+  | `contaperu.comparar_sire` | `contaperu.tributos.comparar_sire` |
+  | `contaperu.partida_doble` | `contaperu.contable.partida_doble` |
+  | `contaperu.resumen` | `contaperu.contable.resumen` |
+
+  **Quien solo usa `contaperu.api` no cambia una línea.** Y si usas el núcleo, el camino corto es instalar la 6.5.0
+  antes de la 7.0 y correr tu batería con `-W error::contaperu._obsoleto.RutaObsoleta`: ahí las rutas viejas todavía
+  resuelven y cada una te dice la suya. Con una advertencia: **el aviso sale al USAR el nombre, no al importar el
+  módulo**, así que una línea que ningún test tuyo toque no saldrá. Haz también un `grep` de las seis.
+- **El `libro` ya no se traga una clave que no es suya** (7.0). Son exactamente cuatro —`ruc`, `razon_social`,
+  `periodo`, `tipo`— y cualquier otra detiene la lectura diciendo su nombre; tampoco pasan las anotaciones `_`, que
+  van en la raíz del documento. Hasta la 6.5 se ignoraban en silencio, aunque el esquema las rechazara: si mandabas
+  una clave de más creyendo que el motor la leía, **no la leía**.
 - **OpenConta crece sin romper**: una ruta o un campo que está, sigue.
 - **La 2.0 retiró las rutas de la 0.10** (`contaperu.operaciones`, `contaperu.generar`, `contaperu.cli`,
   `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia

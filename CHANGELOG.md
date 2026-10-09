@@ -4,6 +4,88 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+Una mayor cobra promesas, y esta cobra dos. **Quien use `contaperu.api` no cambia una línea**; quien importe el
+núcleo directamente cambia seis imports, y el mapa está abajo.
+
+### Quitado
+
+- **Los seis atajos que la 6.4.0 dejó en la raíz** al agrupar el núcleo en `tributos/` y `contable/`. Llevaban toda
+  la 6.x resolviendo y avisando con `RutaObsoleta`, y `_obsoleto.RETIRO` decía desde la 6.2.0 que desaparecían aquí.
+  Es **la primera retirada que se cobra en la mayor siguiente a la que la anunció**: la de la 0.x tardó dos mayores
+  y la de `asiento_neutral`, una. `RETIRO` pasa a `"8.0"`.
+- De la superficie congelada salen **63 nombres y cuatro módulos** —`contaperu.igv` (22), `.detracciones` (23),
+  `.validar` (11) y `.partida_doble` (7)—, de 24 a 20. El fixture se editó **a mano, con el motivo escrito al
+  lado**, porque regenerarlo está prohibido para quitar; `comparar_sire` y `resumen` nunca se congelaron.
+
+### Cambiado
+
+- **El `libro` deja de tragarse lo que no entiende.** Era el último bloque del estándar que ignoraba en silencio una
+  clave desconocida, y dejaba al lector **más laxo que su propio esquema publicado**, que la rechaza desde siempre
+  por su `additionalProperties: false`. Es el mismo agujero que la 4.0 cerró para el comprobante; el CHANGELOG de
+  entonces dio por hecho que «faltaba solo el comprobante», y faltaba también el libro.
+
+  Son cuatro claves —`ruc`, `razon_social`, `periodo`, `tipo`— y el rechazo las nombra todas. **Tampoco pasan las
+  anotaciones `_`**, y aquí es más estricto que el comprobante a propósito: `$defs.libro` es el único bloque del
+  esquema que no declara `patternProperties` para `^_`, así que su sitio es la raíz del documento.
+
+  La prueba de que el silencio costaba algo la dio el script de verificación de esta misma tarde: mandaba `moneda`
+  dentro del libro creyendo que la llevaba. No la lleva —la moneda es de cada comprobante— y el motor la tiraba sin
+  decir nada. **Si mandabas una clave de más creyendo que el motor la leía, no la leía.**
+- `libro_de` deja de repetir el filtro a mano y llama a `Libro.de_dict`: la estrictez podía estar en un sitio y no
+  en el otro, y estuvo.
+
+### Cómo migrar
+
+Si usas `contaperu.api`, nada. Si importas el núcleo:
+
+| Hasta la 6.5 | Desde la 7.0 |
+|---|---|
+| `contaperu.igv` | `contaperu.tributos.igv` |
+| `contaperu.detracciones` | `contaperu.tributos.detracciones` |
+| `contaperu.validar` | `contaperu.tributos.validar` |
+| `contaperu.comparar_sire` | `contaperu.tributos.comparar_sire` |
+| `contaperu.partida_doble` | `contaperu.contable.partida_doble` |
+| `contaperu.resumen` | `contaperu.contable.resumen` |
+
+El camino corto es **instalar la 6.5.0 antes de la 7.0** y correr tu batería así:
+
+    python -W error::contaperu._obsoleto.RutaObsoleta -m pytest
+
+Ahí las rutas viejas todavía resuelven y cada una te dice la suya. Con una advertencia que conviene saber: **el
+aviso sale al USAR el nombre, no al importar el módulo**, así que una línea que ningún test tuyo toque no saldrá.
+Haz también un `grep` de las seis.
+
+Del libro: si alguna llamada manda una clave que no es de las cuatro, ahora da `DocumentoInvalido` por las tres
+puertas —422 `documento_invalido` por HTTP y por el MCP— diciendo cuál. **Las dos herramientas del MCP que reciben
+un libro dicen ahora sus cuatro claves**, porque el esquema que el SDK publica para ese argumento se deriva de la
+firma `libro: dict` y anuncia `additionalProperties: true`: un agente que leyera solo eso se llevaría el error.
+
+### Lo que no entra, y es una decisión
+
+**Las claves de la raíz del documento siguen sin validarse**, aunque el esquema sea estricto. Es el mismo defecto
+un piso más arriba, y queda fuera porque tiene más radio y una pregunta sin responder: `api.documento_de` ofrece
+`**extra` para las anotaciones `_*`, así que el motor podría producir un documento que su propio lector rechazara.
+Candidata a la 8.0. Lo que sí se corrigió es la frase de `API-DE-REGISTRO.md` que afirmaba que la raíz ya estaba
+protegida y **omitía el libro**, que sí lo estaba en el esquema y no en el código.
+
+### Dos cosas que aparecieron al hacerlo
+
+- **Un test llevaba cuatro versiones verde por el motivo equivocado.**
+  `test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento` leía `contaperu/igv.py` y `contaperu/detracciones.py`
+  **por su ruta** para recorrerlos, así que desde la 6.4.0 estaba leyendo los ficheros puente —veintitantas líneas
+  sin un solo `config.get`— en vez del núcleo. Lo delató el borrado, que le quitó el fichero de debajo. Apuntado a
+  `tributos/`, el invariante se cumple igual; pero ahora lo comprueba.
+- **`openapi-spec-validator` estaba declarado en el extra `dev` y no instalado**, así que la validación OpenAPI 3.1
+  del contrato se saltaba en silencio. Pasa, pero no se estaba corriendo.
+
+Y el **diagrama del recorrido por los módulos no se había tocado desde la 6.4.0**: seguía dibujando los cinco
+módulos en la raíz. No lo vigila ningún test.
+
+Ninguna salida cambia: el TXT del SIRE del mes real de 3018 comprobantes sale con el mismo sha256,
+`570038c7a40cb4ff`, y el snapshot de CONCAR no se movió ni una celda.
+
 ## [6.5.0] — 2026-10-08
 
 Los dos ficheros más largos que quedaban, partidos por donde ya se partían solos. **Ninguna firma cambia y ningún

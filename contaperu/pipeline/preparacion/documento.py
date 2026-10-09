@@ -45,8 +45,10 @@ def libro_de(doc: dict) -> Libro:
     if not isinstance(datos, dict):
         raise DocumentoInvalido("Falta el bloque `libro`: sin RUC, periodo y tipo no hay contabilidad.")
     try:
-        return Libro(ruc=datos.get("ruc", ""), razon_social=datos.get("razon_social", ""),
-                     periodo=datos.get("periodo", ""), tipo=datos.get("tipo", ""))
+        # `Libro.de_dict` y no cuatro `.get()` aquí: hasta la 7.0 este fichero repetía el filtro a mano, así que la
+        # estrictez podía estar en un sitio y no en el otro — y estuvo, porque el que ignoraba lo desconocido era
+        # este. Un solo sitio decide qué claves son del libro.
+        return Libro.de_dict(datos)
     except ValueError as e:
         raise DocumentoInvalido(str(e)) from None
 

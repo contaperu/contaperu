@@ -35,8 +35,13 @@ SUPERFICIE = Path(__file__).parent / "fixtures" / "superficie" / "1.0.json"
 
 APLICACION = "contaperu.api"
 EXTENSION = (
-    "contaperu.errores", "contaperu.modelo", "contaperu.catalogos", "contaperu.configuracion", "contaperu.igv",
-    "contaperu.detracciones", "contaperu.validar", "contaperu.partida_doble", "contaperu.asiento", "contaperu.pcge",
+    "contaperu.errores", "contaperu.modelo", "contaperu.catalogos", "contaperu.configuracion",
+    # Los cuatro puentes que la 6.4.0 dejó en la raíz al mudar el núcleo a `tributos/` y `contable/`
+    # —`contaperu.igv` (22 nombres), `.detracciones` (23), `.validar` (11) y `.partida_doble` (7)— se retiraron en
+    # la 7.0, con sus 63 nombres: es lo que una mayor permite y lo que su `RutaObsoleta` prometía durante toda la
+    # 6.x. Sus módulos de verdad no están aquí porque nunca se congelaron: lo congelado es `contaperu.api`, y lo
+    # demás de esta lista es la extensión que una aplicación usa.
+    "contaperu.asiento", "contaperu.pcge",
     "contaperu.lectores", "contaperu.lectores.archivos", "contaperu.lectores.sire_txt", "contaperu.lectores.xml_ubl",
     "contaperu.drivers", "contaperu.drivers.contrato", "contaperu.drivers.kit", "contaperu.drivers.concar", "contaperu.drivers.contasis",
     "contaperu.drivers.csv", "contaperu.drivers.sire", "contaperu.drivers.starsoft",

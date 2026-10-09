@@ -694,7 +694,11 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
     """El núcleo no vuelve a leer claves de un sistema (como leía las dos de la X de CONCAR hasta el 13-sep-2026). Las
     dos excepciones leen por el driver que las declara: `columnas`, el contrato (`centro_en_anexo`); y
     `monedas_codigo`, el requisito `moneda`, que solo exige quien la declara (lo comprueba `incumplimientos`)."""
-    archivos = [*sorted((PAQUETE / "asiento").rglob("*.py")), PAQUETE / "igv.py", PAQUETE / "detracciones.py",
+    # Las rutas van a `tributos/`, que es donde viven desde la 6.4.0. Apuntadas a la raíz leían el FICHERO PUENTE
+    # —veintitantas líneas sin un solo `config.get`—, así que este test pasó en verde por el motivo equivocado
+    # desde esa versión hasta que la 7.0 borró los puentes y el fichero dejó de existir.
+    archivos = [*sorted((PAQUETE / "asiento").rglob("*.py")),
+                PAQUETE / "tributos" / "igv.py", PAQUETE / "tributos" / "detracciones.py",
                 PAQUETE / "pipeline" / "armado.py",
                 *sorted((PAQUETE / "drivers" / "contrato").rglob("*.py"))]
     permitidas = GENERALES | DEL_ASIENTO | {"imputaciones", "columnas", "monedas_codigo"}
