@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [7.0.0] — 2026-10-08
 
 Una mayor cobra promesas, y esta cobra dos. **Quien use `contaperu.api` no cambia una línea**; quien importe el
 núcleo directamente cambia seis imports, y el mapa está abajo.
