@@ -217,6 +217,12 @@ ERP queda con tres hitos vivos.
 
 ## [8.2.0] — 2026-10-10
 
+> **Esta versión no se publicó** (decisión de John, 10-oct-2026): no tiene tag, no tiene Release y no está en
+> PyPI, así que `contaperu==8.2.0` no existe. Todo lo que trae **salió dentro de la 9.0.0**, el mismo día y unas
+> horas después; quien quiera la tesorería instala la 9.0.0. La sección se queda porque esto es la bitácora y
+> cuenta lo que entró y cuándo, no solo lo que se distribuyó. Publicarla ahora sería sostener una versión que
+> nadie pidió y que solo se diferencia de la 9.0.0 en no traer la rotura del eje.
+
 **La base de la tesorería, sacada de nueve estados de cuenta de producción.** El paquete que `ARQUITECTURA.md`
 llevaba reservado como `banco/` entra como **`contaperu/tesoreria/`**: una constancia de pago de tributos o el
 reintegro de una caja chica no son del banco, y es la palabra que el propio estándar ya usa para esto.

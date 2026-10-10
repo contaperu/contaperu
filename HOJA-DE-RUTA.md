@@ -103,7 +103,8 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - B6 · 1.0.0
 - B8 · 3.4.0 (`resumen` y `por_cuenta`: el caso lo trajo un conector que los escribió por su cuenta y le salió `07` donde el motor dice `("07","87")`)
 - B9 · 3.4.0 (`campos_del_comprobante` y `REGLAS`, por el mismo conector, que había copiado la lista de campos a mano y se dejó cinco)
-- D8 · 8.2.0 (la validación del maestro sale por la api; el argumento en el pipeline espera a que algo lo consuma)
+- D8 · 8.2.0 (la validación del maestro sale por la api; el argumento en el pipeline espera a que algo lo
+  consuma). **La 8.2.0 no se publicó**: su código salió dentro de la 9.0.0, así que para tenerlo se instala esa
 - El eje del libro · 9.0.0 (de `es_venta: bool` a la tabla `modelo.RASGOS`: no es un hito de ningún frente, es lo que había que arreglar antes de que B13 sumara el tercer libro)
 - A4 · 6.0.0 (STARSOFT Desktop: un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct; la `V` del archivo de ventas se corrigió en la 6.3.2)
 - J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
