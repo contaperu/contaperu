@@ -646,6 +646,33 @@
     "type": "object"
    }
   },
+  "validar_cuentas_bancarias": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.\n\n    **Es un argumento, no una tabla**: el motor lo recibe, lo valida y no lo guarda. Sin cuentas declaradas no\n    cambia nada; con ellas, un movimiento o una constancia pueden apuntar a su cuenta por el `id`.\n\n    Para: un CCI que no tenga sus 20 dígitos (se admite con espacios o con guiones, que es como lo imprime cada\n    banco), una moneda que no sea PEN o USD, o dos cuentas con el mismo `id`.\n\n    Avisa y no para: una cuenta sin su cuenta contable. **La 104 del PCGE la elige el contribuyente, cuenta por\n    cuenta** —la de soles no es la de dólares—, y el motor no la supone ni cuando conoce el banco. Si falta, lo\n    que hay que hacer es pedírsela al contador, no inventarla.\n    ",
+   "entrada": {
+    "properties": {
+     "cuentas": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "title": "Cuentas",
+      "type": "array"
+     }
+    },
+    "required": [
+     "cuentas"
+    ],
+    "title": "validar_cuentas_bancariasArguments",
+    "type": "object"
+   }
+  },
   "validar_partida_doble": {
    "anotaciones": {
     "destructiveHint": null,

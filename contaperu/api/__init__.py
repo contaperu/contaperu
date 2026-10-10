@@ -30,6 +30,7 @@ from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesb
                       TotalImposible, XmlInvalido, problema)
 from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, campos_del_ple, campos_del_sire, catalogo_pcge, catalogos_api_sire, catalogos_del_estandar, catalogos_sunat, comparar_sire,
                           campos_del_comprobante, config_aplicada, cronogramas_de_vencimiento, cuadrar,
+                          validar_cuentas_bancarias,
                           por_cuenta, regimenes_tributarios, resumen,
                           describir_configuracion, diagnosticar, drivers_disponibles, errores_de_configuracion,
                           esquema_diagnostico, esquema_open_accounting, exportar, exportar_archivo, generar_asiento, leer_archivos,
@@ -41,7 +42,7 @@ __all__ = [
     # operaciones
     "leer_xml", "leer_propuesta_sire", "leer_archivos", "documento_de", "revisar", "normalizar_detracciones",
     "diagnosticar", "generar_asiento", "exportar", "exportar_archivo", "cuadrar", "buscar_cuenta_pcge", "adaptar_pcge",
-    "resumen", "por_cuenta", "campos_del_comprobante",
+    "resumen", "por_cuenta", "campos_del_comprobante", "validar_cuentas_bancarias",
     "configuracion_por_defecto", "describir_configuracion", "config_aplicada", "errores_de_configuracion",
     "drivers_disponibles",
     "catalogos_sunat",

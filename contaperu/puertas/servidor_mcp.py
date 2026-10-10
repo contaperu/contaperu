@@ -163,6 +163,7 @@ TIPOS: dict[str, Any] = {
     "claves_previas": list[list[str | int | None]],
     "incluir_observados": bool,
     "lineas": list[dict],
+    "cuentas": list[dict],
     "agrupar_por": str,
     "texto": str,
     "codigo": str,

@@ -61,6 +61,9 @@ PARAMETROS: dict[str, dict] = {
     # la puerta la publica sola en vez de quedarse una versión por detrás.
     "agrupar_por": {"type": "string", "enum": list(resumen.AGRUPACIONES), "default": "",
                     "description": "Vacío, solo los totales del libro; `contraparte`, además por proveedor o cliente."},
+    "cuentas": {"type": "array", "items": {"type": "object"},
+                "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y "
+                               "la cuenta contable de cada una. Es un argumento; el motor no lo guarda."},
     "texto": {"type": "string", "default": "", "description": "Parte del nombre de la cuenta."},
     "codigo": {"type": "string", "default": "", "description": "El código de la cuenta."},
 }
@@ -125,6 +128,10 @@ OPERACIONES: tuple[Operacion, ...] = (
     # como `describir_configuracion`, y así el conjunto de herramientas no crece por una tabla.
     Operacion("campos_del_comprobante", "GET", "/v1/campos/comprobante", "campos_del_comprobante",
               recurso="contaperu://campos/comprobante"),
+    # El maestro de cuentas bancarias del contribuyente (8.2). Herramienta y no recurso: recibe un cuerpo, como
+    # `cuadrar`, y es lo que un ERP llama ANTES de mandar su maestro — no algo que se lea una vez.
+    Operacion("validar_cuentas_bancarias", "POST", "/v1/cuentas_bancarias", "cuentas_bancarias",
+              herramienta="validar_cuentas_bancarias"),
     Operacion("buscar_cuenta_pcge", "POST", "/v1/buscar_cuenta_pcge", "cuenta_pcge", herramienta="buscar_cuenta_pcge"),
     Operacion("adaptar_pcge", "POST", "/v1/adaptar_pcge", "adaptacion_pcge", herramienta="adaptar_pcge2026"),
     Operacion("configuracion_por_defecto", "GET", "/v1/configuracion/por_defecto", "configuracion",

@@ -1,0 +1,76 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/cuentas_bancarias.schema.json",
+ "title": "Cuentas bancarias declaradas",
+ "description": "El maestro de cuentas del contribuyente, comprobado. Es un argumento que aporta quien llama y que el motor no guarda: sin cuentas declaradas no cambia nada. Cada una lleva SU cuenta contable —la 104 del PCGE es un dato de la empresa, que el motor no deriva— y la que no la declare sale avisada, no corregida.",
+ "type": "object",
+ "properties": {
+  "cuentas": {
+   "type": "array",
+   "description": "Las que se pudieron leer, normalizadas: el CCI sin su separación y la moneda en mayúsculas.",
+   "items": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "description": "Cómo la nombra el contribuyente. Es la llave con la que un movimiento o una constancia apuntan a ella, así que no se repite."
+     },
+     "banco": {
+      "type": "string",
+      "description": "El nombre, tal cual. El código del CCI no se traduce: no hay catálogo de códigos de banco con fuente publicada."
+     },
+     "numero": {
+      "type": "string"
+     },
+     "cci": {
+      "type": "string",
+      "description": "20 dígitos, sin separación: 3 de la empresa del sistema financiero, 3 de la oficina, 12 de la cuenta y 2 de control."
+     },
+     "moneda": {
+      "type": "string",
+      "enum": ["PEN", "USD"]
+     },
+     "cuenta_contable": {
+      "type": "string",
+      "description": "La 104x del contribuyente. Vacía significa que no la declaró, no que el motor vaya a suponerla."
+     },
+     "codigo_de_banco": {
+      "type": "string",
+      "description": "Los tres primeros dígitos del CCI. Vacío significa que no se declaró CCI, no que sea otro banco."
+     }
+    },
+    "required": ["id", "banco", "numero", "cci", "moneda", "cuenta_contable", "codigo_de_banco"],
+    "additionalProperties": false
+   }
+  },
+  "avisos": {
+   "type": "array",
+   "description": "Lo que conviene mirar y no impide usar la cuenta. Hoy solo uno: la cuenta contable sin declarar.",
+   "items": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "codigo": {
+      "type": "string"
+     },
+     "texto": {
+      "type": "string"
+     },
+     "pedir_a": {
+      "type": "string"
+     }
+    },
+    "required": ["id", "codigo", "texto", "pedir_a"],
+    "additionalProperties": false
+   }
+  },
+  "cuantas": {
+   "type": "integer",
+   "minimum": 0
+  }
+ },
+ "required": ["cuentas", "avisos", "cuantas"],
+ "additionalProperties": false
+}

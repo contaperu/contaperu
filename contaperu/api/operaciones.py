@@ -10,7 +10,7 @@ from __future__ import annotations
 import importlib
 from typing import Sequence
 
-from .. import (_datos, catalogos, drivers, modelo, pcge,
+from .. import (_datos, catalogos, drivers, modelo, pcge, tesoreria,
                 vocabulario)
 from ..drivers import contrato
 from ..contable import partida_doble
@@ -110,6 +110,28 @@ def cuadrar(lineas: list[dict]) -> dict:
     """¿La suma del Debe es exactamente igual a la del Haber? Devuelve las dos sumas, la diferencia y cuántas líneas no
     dicen si son Debe o Haber."""
     return partida_doble.cuadra(lineas).a_dict()
+
+
+def validar_cuentas_bancarias(cuentas: list[dict]) -> dict:
+    """El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.
+
+    **Es un argumento y no una tabla**: el motor lo recibe, lo valida y no lo guarda. El estado —qué cuentas tiene
+    hoy la empresa— es del ERP, y lo que puede vivir aquí es su contrato. Sin cuentas declaradas no cambia nada.
+
+    Lo que comprueba: que el CCI tenga sus 20 dígitos (se admite con espacios o guiones, que es como lo imprime
+    cada banco), que la moneda sea una de las dos que un extracto peruano trae, y que ningún `id` se repita —es la
+    llave con la que un movimiento o una constancia apuntan a su cuenta—. Un fallo de esos **para**, porque seguir
+    con una cuenta que no se puede reconocer no lleva a ningún sitio.
+
+    Lo que **avisa y no para**: una cuenta sin cuenta contable. La 104 del PCGE es un dato de la empresa y el motor
+    no la deriva ni cuando conoce el banco, así que lo que hace es decir cuál falta y a quién pedírsela."""
+    leidas = tesoreria.leer(cuentas)
+    avisos = [{"id": c.id, "codigo": "CUENTA_BANCARIA_SIN_CUENTA_CONTABLE", "pedir_a": "contador",
+               "texto": f"La cuenta {c.id!r} no declara con qué cuenta contable se asienta. El motor no la supone: "
+                        f"es una divisionaria de la 104 y la elige el contribuyente, cuenta por cuenta"}
+              for c in leidas if not c.cuenta_contable]
+    return {"cuentas": [{**c.a_dict(), "codigo_de_banco": c.codigo_de_banco} for c in leidas],
+            "avisos": avisos, "cuantas": len(leidas)}
 
 
 def resumen(documento: dict, *, agrupar_por: str = "") -> dict:

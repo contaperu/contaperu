@@ -478,6 +478,50 @@
     }
    }
   },
+  "/v1/cuentas_bancarias": {
+   "post": {
+    "operationId": "validar_cuentas_bancarias",
+    "summary": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.",
+    "description": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.\n\n**Es un argumento y no una tabla**: el motor lo recibe, lo valida y no lo guarda. El estado —qué cuentas tiene\nhoy la empresa— es del ERP, y lo que puede vivir aquí es su contrato. Sin cuentas declaradas no cambia nada.\n\nLo que comprueba: que el CCI tenga sus 20 dígitos (se admite con espacios o guiones, que es como lo imprime\ncada banco), que la moneda sea una de las dos que un extracto peruano trae, y que ningún `id` se repita —es la\nllave con la que un movimiento o una constancia apuntan a su cuenta—. Un fallo de esos **para**, porque seguir\ncon una cuenta que no se puede reconocer no lleva a ningún sitio.\n\nLo que **avisa y no para**: una cuenta sin cuenta contable. La 104 del PCGE es un dato de la empresa y el motor\nno la deriva ni cuando conoce el banco, así que lo que hace es decir cuál falta y a quién pedírsela.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/validar_cuentas_bancarias_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/cuentas_bancarias"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
   "/v1/buscar_cuenta_pcge": {
    "post": {
     "operationId": "buscar_cuenta_pcge",
@@ -2779,6 +2823,100 @@
     ],
     "additionalProperties": false
    },
+   "cuentas_bancarias": {
+    "title": "Cuentas bancarias declaradas",
+    "description": "El maestro de cuentas del contribuyente, comprobado. Es un argumento que aporta quien llama y que el motor no guarda: sin cuentas declaradas no cambia nada. Cada una lleva SU cuenta contable —la 104 del PCGE es un dato de la empresa, que el motor no deriva— y la que no la declare sale avisada, no corregida.",
+    "type": "object",
+    "properties": {
+     "cuentas": {
+      "type": "array",
+      "description": "Las que se pudieron leer, normalizadas: el CCI sin su separación y la moneda en mayúsculas.",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string",
+         "description": "Cómo la nombra el contribuyente. Es la llave con la que un movimiento o una constancia apuntan a ella, así que no se repite."
+        },
+        "banco": {
+         "type": "string",
+         "description": "El nombre, tal cual. El código del CCI no se traduce: no hay catálogo de códigos de banco con fuente publicada."
+        },
+        "numero": {
+         "type": "string"
+        },
+        "cci": {
+         "type": "string",
+         "description": "20 dígitos, sin separación: 3 de la empresa del sistema financiero, 3 de la oficina, 12 de la cuenta y 2 de control."
+        },
+        "moneda": {
+         "type": "string",
+         "enum": [
+          "PEN",
+          "USD"
+         ]
+        },
+        "cuenta_contable": {
+         "type": "string",
+         "description": "La 104x del contribuyente. Vacía significa que no la declaró, no que el motor vaya a suponerla."
+        },
+        "codigo_de_banco": {
+         "type": "string",
+         "description": "Los tres primeros dígitos del CCI. Vacío significa que no se declaró CCI, no que sea otro banco."
+        }
+       },
+       "required": [
+        "id",
+        "banco",
+        "numero",
+        "cci",
+        "moneda",
+        "cuenta_contable",
+        "codigo_de_banco"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "avisos": {
+      "type": "array",
+      "description": "Lo que conviene mirar y no impide usar la cuenta. Hoy solo uno: la cuenta contable sin declarar.",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string"
+        },
+        "codigo": {
+         "type": "string"
+        },
+        "texto": {
+         "type": "string"
+        },
+        "pedir_a": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "codigo",
+        "texto",
+        "pedir_a"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "cuantas": {
+      "type": "integer",
+      "minimum": 0
+     }
+    },
+    "required": [
+     "cuentas",
+     "avisos",
+     "cuantas"
+    ],
+    "additionalProperties": false
+   },
    "cuenta_pcge": {
     "title": "Cuenta del PCGE 2026",
     "description": "Lo que se encontró en el catálogo oficial: la cuenta de un código —o la madre que lo gobierna, con `exacta` falso— y las cuentas cuyo nombre contiene el texto.",
@@ -3500,6 +3638,22 @@
        "$ref": "#/components/schemas/OpenAccounting_linea"
       },
       "description": "Las líneas del asiento."
+     }
+    }
+   },
+   "validar_cuentas_bancarias_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "cuentas"
+    ],
+    "properties": {
+     "cuentas": {
+      "type": "array",
+      "items": {
+       "type": "object"
+      },
+      "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y la cuenta contable de cada una. Es un argumento; el motor no lo guarda."
      }
     }
    },

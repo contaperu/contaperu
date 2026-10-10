@@ -169,6 +169,18 @@ PARA_HERRAMIENTA: dict[str, str] = {
     descuadres se compensan salen cuadradas en el total y descuadradas cada una. Y `roles` va en plural:
     con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.
     """,
+    'validar_cuentas_bancarias': """Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.
+
+    **Es un argumento, no una tabla**: el motor lo recibe, lo valida y no lo guarda. Sin cuentas declaradas no
+    cambia nada; con ellas, un movimiento o una constancia pueden apuntar a su cuenta por el `id`.
+
+    Para: un CCI que no tenga sus 20 dígitos (se admite con espacios o con guiones, que es como lo imprime cada
+    banco), una moneda que no sea PEN o USD, o dos cuentas con el mismo `id`.
+
+    Avisa y no para: una cuenta sin su cuenta contable. **La 104 del PCGE la elige el contribuyente, cuenta por
+    cuenta** —la de soles no es la de dólares—, y el motor no la supone ni cuando conoce el banco. Si falta, lo
+    que hay que hacer es pedírsela al contador, no inventarla.
+    """,
     'buscar_cuenta_pcge': """Busca una cuenta en el Plan Contable General Empresarial 2026, por nombre o por código.
 
     Con `texto` devuelve las cuentas cuyo nombre lo contiene (sin distinguir tildes ni mayúsculas).

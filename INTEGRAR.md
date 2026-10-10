@@ -230,7 +230,7 @@ Lo que conviene saber antes de publicarla:
 ## Para un agente de IA, por MCP
 
 Un cliente MCP local lo arranca por entrada y salida estándar; uno remoto, por Streamable HTTP
-(`contaperu-mcp --transporte http --dominio …`). Las catorce herramientas se anuncian de solo lectura y sin salir a la red,
+(`contaperu-mcp --transporte http --dominio …`). Las quince herramientas se anuncian de solo lectura y sin salir a la red,
 y sus nombres son los de siempre: `diagnosticar`, `exportar`, `generar_asiento`, `validar_comprobantes`… Cómo
 conectarlo a Claude está en el `README.md`.
 

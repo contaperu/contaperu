@@ -68,7 +68,7 @@ def leer_recurso(uri: str) -> str:
     return contenidos[0].content
 
 
-def test_estan_las_catorce_herramientas():
+def test_estan_las_quince_herramientas():
     """El conjunto EXACTO, no un `in`: una herramienta que se cuela sin querer tambien es un fallo.
 
     Quien conecta esto a su Claude ve esta lista y nada mas; anadir una es una decision, y este
@@ -79,7 +79,7 @@ def test_estan_las_catorce_herramientas():
         "configuracion_por_defecto", "validar_comprobantes", "validar_partida_doble",
         "generar_asiento", "exportar", "leer_xml_ubl", "leer_propuesta_sire",
         "adaptar_pcge2026", "normalizar_detracciones", "buscar_cuenta_pcge", "diagnosticar",
-        "drivers_disponibles",
+        "drivers_disponibles", "validar_cuentas_bancarias",
         # 3.4.0: cuanto es un libro y en que cuentas cayo. Ninguna pide destino.
         "resumen", "por_cuenta",
     }
@@ -372,7 +372,7 @@ def test_un_pdf_por_el_protocolo_queda_pendiente_de_leer():
 def test_cada_herramienta_se_anuncia_de_solo_lectura_y_sin_salir_a_ningun_sitio():
     """Hito 0.2: `readOnlyHint` y `openWorldHint` en todas, recorriendo lo que ve el cliente."""
     herramientas = asyncio.run(mcp.list_tools())
-    assert len(herramientas) == 14
+    assert len(herramientas) == 15
     for herramienta in herramientas:
         anotaciones = herramienta.annotations
         assert anotaciones is not None and anotaciones.readOnlyHint is True, herramienta.name
