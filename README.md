@@ -61,7 +61,7 @@ cada regla lleva al lado la norma o el archivo real que la justifica.
 
 ## Cómo funciona
 
-![Arquitectura colectiva: los comprobantes electrónicos y la propuesta del SIRE entran al estándar abierto open-accounting; de ahí al motor, que la comunidad abierta mejora; y el motor entrega a tres grupos: el SIRE, los sistemas legacy (CONCAR, CONTASIS y, próximamente, STARSOFT) y los ERP que vienen](diagramas/arquitectura-colectiva.svg)
+![Arquitectura colectiva: los comprobantes electrónicos y la propuesta del SIRE entran al estándar abierto open-accounting; de ahí al motor, que la comunidad abierta mejora; y el motor entrega a tres canales: SUNAT (el SIRE y el PLE), los sistemas legacy (CONCAR, CONTASIS y STARSOFT) y los ERP que vienen](diagramas/arquitectura-colectiva.svg)
 
 ContaPerú no es una aplicación que se abre: es el motor que va **dentro de un ERP externo**, sea un sistema contable en
 la nube, un portal para estudios o el sistema de gestión de una empresa. En el ERP externo el contador carga, revisa y
@@ -73,16 +73,17 @@ documento:
 2. **La propuesta del SIRE.** El TXT de SUNAT ya empaqueta todos los comprobantes del contribuyente en el periodo: con
    ese solo archivo, el mes entero llega a `open-accounting`.
 
-Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega lo que pida cada grupo de destinos:
+Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega lo que pida cada canal de destino:
 
-- **SIRE:** el TXT de reemplazo del registro de ventas (RVIE) y del de compras (RCE), listo para subir a SUNAT.
+- **SUNAT:** sus dos regímenes. El **SIRE**, con el TXT de reemplazo del registro de ventas (RVIE) y del de compras
+  (RCE), listo para subir; y el **PLE**, con el Libro Diario y el detalle del plan contable.
 - **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y de STARSOFT
   y el registro de CONTASIS; SISCONT espera un archivo que ese sistema haya aceptado.
 - **ERP:** los sistemas nuevos, en cualquier lenguaje. Reciben el documento `open-accounting` con su asiento **sin
   vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `asiento_contable`), el
   CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
 
-Cualquier entrada puede terminar en cualquiera de los tres grupos. Las cuentas, los sentidos del debe y el haber y la
+Cualquier entrada puede terminar en cualquiera de los tres canales. Las cuentas, los sentidos del debe y el haber y la
 detracción los decide el motor una sola vez, igual para todos los destinos. Y al costado del motor está la comunidad:
 quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 
@@ -111,7 +112,7 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 
 ### Por dónde pasa un comprobante
 
-![Qué carpeta y qué archivo toca un comprobante: entra por lectores/ (xml_ubl, sire_txt, archivos, _zip), pasa al modelo canónico (modelo, vocabulario, catalogos, que leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (tributos/ con validar, igv y detracciones, más configuracion), asiento/ arma la partida doble apoyándose en contable/ y pcge/, y drivers/ lo traduce a sus seis destinos; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/](diagramas/recorrido-por-los-modulos.svg)
+![Qué carpeta y qué archivo toca un comprobante: entra por lectores/ (xml_ubl, sire_txt, archivos, _zip), pasa al modelo canónico (modelo, vocabulario, catalogos, que leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (tributos/ con validar, igv y detracciones, más configuracion), asiento/ arma la partida doble apoyándose en contable/ y pcge/, y drivers/ lo traduce a sus ocho destinos; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/](diagramas/recorrido-por-los-modulos.svg)
 
 El mismo motor, un nivel más abajo: **las ocho carpetas del paquete y los archivos que toca un comprobante**, en el
 orden en que lo hacen.
@@ -174,10 +175,14 @@ en [INTEGRAR.md](INTEGRAR.md).
 | **Arquitectura colectiva** | Resolver la contabilidad automatizada una vez, en abierto y entre todos, en vez de que cada empresa construya su propia integración |
 | **Asiento** | El apunte de partida doble de un comprobante: sus líneas, con la misma suma al Debe y al Haber |
 | **Línea del comprobante** | Una línea de ese asiento: una cuenta, un sentido (Debe o Haber) y un importe. Es lo que cualquier sistema contable sabe recibir, y en el documento se llama `linea` |
-| **Registro** | El libro que se presenta a SUNAT —el de compras o el de ventas—, con una fila por comprobante y **sin cuentas**. Es la otra familia de salida frente al asiento, y un driver declara en cuál está; no es lo mismo que «registrar» un comprobante en una aplicación |
+| **Registro** | El libro de compras o de ventas, con una fila por comprobante y **sin cuentas**. Es la otra familia de salida frente al asiento, y un driver declara en cuál está; no es lo mismo que «registrar» un comprobante en una aplicación. Ojo: no todo lo que va a SUNAT es un registro — el Libro Diario del PLE es un asiento, con una fila por línea |
 | **Vocabulario legacy** | Las palabras que pide un sistema contable instalado y que no son contabilidad: la sigla del documento, el sub-diario, el correlativo. Un ERP nuevo no las necesita |
-| **SIRE** | El Sistema Integrado de Registros Electrónicos de SUNAT, donde se presentan el registro de ventas (RVIE) y el de compras (RCE) |
+| **Canal** | A quién entrega un driver lo que sale, y lo único que hay que declarar para saberlo: `sunat`, `legacy` o `erp`. Distinto de la **familia**, que dice *qué* entrega (un registro o un asiento) |
+| **SUNAT** | Como canal, **sus dos regímenes**: el SIRE, donde se presentan el registro de ventas (RVIE) y el de compras (RCE), y el PLE, por donde van el Libro Diario, los demás libros y el plan de cuentas. Son normas distintas y formatos distintos; lo que comparten es que se entregan a SUNAT, en texto |
+| **SIRE** | El Sistema Integrado de Registros Electrónicos de SUNAT, donde se presentan el registro de ventas (RVIE) y el de compras (RCE). **Es uno de los dos regímenes, no todo SUNAT** |
+| **PLE** | El Programa de Libros Electrónicos: el otro régimen, por donde se presentan el Libro Diario y el detalle del plan contable (RS 234-2006 y RS 286-2009) |
 | **Legacy** | Un sistema contable instalado que importa un archivo plano: CONCAR, CONTASIS, SISCONT, STARSOFT |
+| **ERP** | Un sistema nuevo, en cualquier lenguaje, que recibe el documento del estándar con su asiento sin vocabulario legacy — o el CSV de líneas de diario |
 | **Driver** | El traductor al formato de un sistema contable: sabe en qué columna va cada dato de CONCAR o de CONTASIS, pero nunca decide una cuenta |
 | **`open-accounting`** | El documento común: el libro, sus comprobantes y su asiento, escrito de una forma que cualquier sistema entiende |
 | **Núcleo** | La parte que sabe contabilidad peruana: valida el comprobante, calcula el IGV y arma el asiento |
@@ -214,10 +219,11 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 | Comprobante en dólares | el tipo de cambio del comprobante, y la detracción convertida a soles |
 | Comprobante extemporáneo | se asienta dentro del periodo, conservando la fecha del documento |
 
-**Exporta**, por grupo de destino:
+**Exporta**, por canal de destino:
 
-- **SIRE:** el TXT de reemplazo del RVIE y del RCE.
-- **Legacy:** a CONCAR (Excel de asientos de 41 columnas) y a CONTASIS (su registro de compras y de ventas en Excel).
+- **SUNAT:** el TXT de reemplazo del RVIE y del RCE (el SIRE), y el Libro Diario y el plan de cuentas (el PLE).
+- **Legacy:** a CONCAR (Excel de asientos de 41 columnas), a CONTASIS (su registro de compras y de ventas en Excel)
+  y a STARSOFT (sus asientos en TXT de palotes).
 - **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `asiento_contable`), y un CSV
   genérico con las líneas de diario, para cualquier destino que todavía no tenga driver.
 
@@ -484,7 +490,7 @@ lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna d
 | [CONTRIBUTING.md](CONTRIBUTING.md) | La regla que manda, nunca datos reales, cómo añadir un driver |
 | [estandar/LEEME.md](estandar/LEEME.md) | El estándar `open-accounting`: sus bloques, sus reglas y su versionado |
 | [REFERENCIAS.md](REFERENCIAS.md) | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU. |
-| [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md) | En qué orden crece el motor y qué dato destraba cada paso, con los frentes en el orden del flujo: entradas, estándar y comunidad, motor, y las salidas SIRE, Legacy y ERP |
+| [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md) | En qué orden crece el motor y qué dato destraba cada paso, con los frentes en el orden del flujo: entradas, estándar y comunidad, motor, y las salidas SUNAT, Legacy y ERP |
 | [CHANGELOG.md](CHANGELOG.md) | Cada versión con su porqué |
 | [SECURITY.md](SECURITY.md) | Cómo reportar una vulnerabilidad |
 
@@ -509,8 +515,8 @@ local accounting system expects — CONCAR, CONTASIS, the SIRE tax filing, or pl
 no network calls: JSON in, JSON or a file out.
 
 Its premise: automated accounting is not a problem each company should solve alone, but a matter of **collective
-architecture** — one open standard and one open engine, built together, serving the SIRE, legacy systems while they
-evolve, and the ERPs still to come.
+architecture** — one open standard and one open engine, built together, serving SUNAT —both the SIRE and the
+PLE—, legacy systems while they evolve, and the ERPs still to come.
 
 It also defines **`open-accounting`**, an open interchange format for Peruvian accounting documents
 (`estandar/`), with a formal JSON Schema. The rules aren't designed on paper: they come from real

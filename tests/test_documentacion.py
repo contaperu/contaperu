@@ -190,3 +190,33 @@ def test_ninguna_ruta_citada_en_un_documento_ha_dejado_de_existir(doc):
     fantasmas = sorted(r for r in citadas if not (RAIZ / r).exists())
     assert not fantasmas, (f"{doc} cita rutas que ya no existen: {fantasmas}. Si el código cambió de sitio, la "
                            "cita va a la ruta nueva; si desapareció, la frase sobra.")
+
+
+# Las palabras que el motor retiró y que un documento VIGENTE no puede seguir usando como si existieran. Cada una
+# con la que la sustituye, para que el error diga qué poner.
+#
+# Esto existe porque al renombrar los canales en la 8.0 nos dimos cuenta de que **ningún test vigilaba el
+# vocabulario de los documentos**: este fichero comprueba nombres de driver, versión del estándar, rutas citadas y
+# los recuentos del README, y nada más. Un `tributario` olvidado en `ARQUITECTURA.md` no habría puesto roja la
+# batería — exactamente el mismo despiste que dio origen a este fichero, y por el mismo motivo: la guarda del
+# renombrado fue un `grep` a mano.
+#
+# Solo los VIGENTES, y es la pareja de la exclusión del CHANGELOG: un documento que habla del presente no puede
+# nombrar algo que ya no existe; uno fechado cuenta lo que había su día y se deja en paz.
+RETIRADAS = {
+    "tributario": "`sunat`, el canal (ojo: «régimen tributario» y «registro tributario» son otra cosa y valen)",
+    "intercambio": "`erp`, el canal",
+}
+
+
+@pytest.mark.parametrize("doc", VIGENTES)
+def test_ningun_documento_vigente_usa_una_palabra_retirada(doc):
+    """Un documento del presente no nombra un valor que el motor ya no admite.
+
+    Se busca la palabra **entre acentos graves**, que es como se escribe un valor del contrato en estos documentos:
+    así `` `tributario` `` cae y «los regímenes tributarios del Perú» no. Distinguirlo importa porque las dos cosas
+    conviven en el mismo repositorio y una es correcta."""
+    contenido = texto(doc)
+    usadas = {palabra: con_que for palabra, con_que in RETIRADAS.items() if f"`{palabra}`" in contenido}
+    assert not usadas, (f"{doc} usa como valor una palabra que el motor retiró: "
+                        + "; ".join(f"`{p}` → usa {c}" for p, c in sorted(usadas.items())))

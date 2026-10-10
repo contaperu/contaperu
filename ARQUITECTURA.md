@@ -55,7 +55,7 @@ XML UBL / TXT del SIRE / JSON open-accounting
 ```
 
 Aparte va la familia **registro**: una fila por comprobante, sin asiento, así que sus drivers no pasan por el
-motor. El SIRE es un registro tributario y se escribe desde el comprobante (`linea(c, libro, idx, opciones)`). Un
+motor. El SIRE es un registro para SUNAT y se escribe desde el comprobante (`linea(c, libro, idx, opciones)`). Un
 sistema contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS)
 recibe los comprobantes con la configuración (`desde_comprobantes`) y lleva cuentas, pero no las
 decide: las lee de `asiento.partes_de` y `asiento.cuenta_tercero`, la misma resolución que usa el motor para el
@@ -63,7 +63,7 @@ asiento de CONCAR.
 
 ### Un mes, paso a paso
 
-![El recorrido de un mes dentro del motor: leer el XML o la propuesta del SIRE hasta open-accounting; preparar, revisar, seleccionar y exigir lo del destino; armar un asiento, un registro contable o un registro tributario; y responder con el archivo y cada comprobante](diagramas/recorrido-de-un-mes.svg)
+![El recorrido de un mes dentro del motor: leer el XML o la propuesta del SIRE hasta open-accounting; preparar, revisar, seleccionar y exigir lo del destino; armar un asiento, un registro contable o un registro a SUNAT; y responder con el archivo y cada comprobante](diagramas/recorrido-de-un-mes.svg)
 
 Lo mismo, visto desde `pipeline/`. Si llegan archivos de SUNAT, el motor primero los **lee** (`pipeline/lectura`) y
 los lleva al documento `open-accounting`: el XML de cada factura, suelto o en ZIP y sin los CDR, o el TXT de la
@@ -84,7 +84,8 @@ propuesta del SIRE. Desde ahí, cada mes recorre seis pasos:
      que cuadren al céntimo y les calcula la huella; el driver solo traduce cada línea.
    - **Registro contable** (`desde_comprobantes`: CONTASIS): el driver recibe los comprobantes y lee las cuentas de
      la misma resolución que usa el asiento.
-   - **Registro tributario** (`linea`: el SIRE): una línea por comprobante, sin cuentas, en un TXT con su ZIP.
+   - **Registro para SUNAT** (`linea`: el SIRE): una línea por comprobante, sin cuentas, en un TXT con su ZIP.
+     El PLE es el mismo canal con la otra forma: su fila es una línea del asiento (`desde_lineas`).
 6. **Responder** (`salida`). El archivo, el resumen y `_exportacion`: por cada comprobante, su identidad, su tramo de
    líneas y su huella, con la versión del motor que lo produjo.
 
@@ -164,9 +165,9 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 
 ```
  ENTRADA                                                         SALIDA (drivers, por canal)
- ERP en otro lenguaje ─HTTP/OpenConta─► puertas/servidor_http ─┐        ┌─ legacy:      concar · contasis
- Agente de IA ────────MCP────────────► puertas/servidor_mcp ──┼─► api ─► pipeline ─► núcleo ─┼─ tributario:  sire
- Contador ────────────CLI────────────► puertas/cli ───────────┘        └─ intercambio: csv
+ ERP en otro lenguaje ─HTTP/OpenConta─► puertas/servidor_http ─┐        ┌─ legacy: concar · contasis · starsoft
+ Agente de IA ────────MCP────────────► puertas/servidor_mcp ──┼─► api ─► pipeline ─► núcleo ─┼─ sunat:  sire · ple · ple_plan
+ Contador ────────────CLI────────────► puertas/cli ───────────┘        └─ erp:    csv · asiento_contable
 ```
 
 | Capa | Módulos | Qué sabe |
@@ -214,7 +215,7 @@ Un driver expone `NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, `nombre()` y **una**
 
 | Forma | Recibe | Para qué |
 |---|---|---|
-| `linea(c, libro, idx, opciones) -> str` | un comprobante | un registro tributario línea a línea (el SIRE) |
+| `linea(c, libro, idx, opciones) -> str` | un comprobante | un registro a SUNAT línea a línea (el SIRE) |
 | `desde_comprobantes(libro, comprobantes, config, opciones)` | los comprobantes y la configuración, con la imputación | el registro de un sistema contable que arma el asiento él mismo (CONTASIS) |
 | `desde_lineas(libro, lineas, config, opciones, *, indice=())` | las **líneas del asiento**, numeradas y cuadradas, y el índice de cada comprobante | **todo driver de asientos**, CONCAR incluido desde la 1.0 |
 
@@ -229,19 +230,37 @@ glosa de su columna F y la tasa entera de la AO, que se redondea una sola vez de
 | Canal | Qué es | Reglas | Drivers |
 |---|---|---|---|
 | `legacy` | un sistema contable instalado que importa un archivo | lleva cuentas; declara `EXIGE` | concar, contasis, starsoft; SISCONT cuando entre |
-| `tributario` | un registro que se presenta a SUNAT | forma `linea`, sin cuentas ni configuración | sire |
-| `intercambio` | un formato neutral para leer o integrar | forma `desde_lineas` | csv, asiento_contable |
+| `sunat` | un registro o libro que se presenta a SUNAT | forma `linea` (una fila por comprobante) o `desde_lineas` (una fila por línea del asiento) | sire, ple, ple_plan |
+| `erp` | un ERP, por el formato neutral del estándar | forma `desde_lineas` | csv, asiento_contable |
 
-Cada canal se presenta en uno de los tres grupos de destinos del motor (`contrato.GRUPOS`): `tributario` es **SIRE**,
-`legacy` es **Legacy** e `intercambio` es **ERP**.
+**Una palabra por destino, y es el canal** (8.0). Hasta la 7.x había una segunda tabla, `contrato.GRUPOS`, que lo
+traducía a «SIRE», «Legacy» y «ERP» para quien integra, y `drivers_disponibles` devolvía las dos. Se retiró porque
+eran dos vocabularios para lo mismo y el de fuera mentía: ver abajo.
 
-`api_erp` —escribir el cuerpo de la API de un ERP moderno— queda **reservado** (hito A5): el contrato lo rechaza. Un
-driver de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy`.
+**Por qué `sunat` y no `sire`.** Son dos regímenes distintos de SUNAT, no uno:
+
+| | Qué manda | Norma |
+|---|---|---|
+| **SIRE** | compras y ventas: el RVIE y el RCE | RS 112-2021 (anexo 2) y RS 040-2022 (anexo 8) |
+| **PLE** | el Libro Diario y los demás libros, y el plan de cuentas | RS 234-2006 (art. 6, formato 5.1) y RS 286-2009 (anexos 2 y 3) |
+
+El canal es el mismo —se entrega a SUNAT, en texto— y el régimen no. Hasta la 7.x los tres drivers se presentaban
+como grupo `sire`, así que **el motor llamaba SIRE al Libro Diario del PLE**. «Ése es el universo del SIRE, no el de
+SUNAT» (`LIBROS-Y-CUENTAS.md`, 1-oct-2026). Y lo que el canal fija sigue siendo lo de antes: se escribe **texto para
+SUNAT**, no un Excel ni un JSON. Lo que cambió en la 4.2 es de qué es su FILA: el SIRE escribe una por comprobante
+(forma `linea`, sin cuentas ni configuración) y el Libro Diario del PLE una por línea del asiento (`desde_lineas`,
+con cuentas y con su CUO), porque 595 de los 1441 asientos de un mes real no vienen de ningún registro de compras ni
+de ventas.
+
+`api_erp` —escribir el cuerpo de la API de un ERP moderno— queda **reservado** (hito A5): el contrato lo rechaza, y
+el criterio para admitirlo es que haya un formato que `erp` no pueda llevar. Ojo a la pareja: `erp` se admite y
+`api_erp` no, a una letra de distancia. **Un driver de terceros sin `CANAL` no se registra** desde la 4.0: es un
+incumplimiento del contrato y `drivers.de_terceros` lo deja fuera con su `AvisoDriver`.
 
 **El vocabulario dice con qué palabras llegan las líneas** (`VOCABULARIO`, 1.1). `legacy`, el de siempre: siglas,
 sub-diarios, correlativos y el documento comodín de la detracción, lo que importan CONCAR y los de su familia.
 `neutral`: las líneas del estándar sin nada de eso, por `rol` y código SUNAT. Es el de `asiento_contable`, la salida para
-un ERP nuevo, que parte del estándar en vez de reimplementar el IGV. Un driver neutral es de canal `intercambio`, no
+un ERP nuevo, que parte del estándar en vez de reimplementar el IGV. Un driver neutral es de canal `erp`, no
 declara claves legacy en su configuración y el núcleo solo le exige la cuenta. La contabilidad es la misma que la de
 CONCAR: `tests/test_driver_asiento_contable.py` compara cuentas, sentidos, importes y roles línea a línea.
 
