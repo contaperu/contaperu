@@ -72,8 +72,8 @@ ERP queda con tres hitos vivos.
   **B15** son el escalón de abajo, la determinación de cuentas con dimensiones y el nivel fino de la cuenta.
   **C17** dice cómo se integra más API de SUNAT sin romper nada: **describiendo**, con el molde que la 8.1 demostró
   con el SIRE, porque el núcleo puede saber la URL y no puede llamarla. **D8** es el registro de bancos **como
-  contrato y no como estado** —`cuentas_bancarias*` lo aporta quien llama, igual que `plan_de_cuentas*`, `padron*`
-  y `tipos_de_cambio*`—, y es el único de su frente que no espera un archivo. **E8** cierra el `118.005` numérico
+  contrato y no como estado** —`cuentas_bancarias*` lo aporta quien llama, con el molde de
+  `imputaciones` y `correlativos`, que ya lo hacen—, y es el único de su frente que no espera un archivo. **E8** cierra el `118.005` numérico
   que todavía valida.
 - **Una regla de trabajo nueva, en el §7 de la hoja de ruta**: **el motor va primero y el producto adopta
   después.** Nada se construye primero en la aplicación, y de ahí una consecuencia que conviene tener fechada
