@@ -4,6 +4,81 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+**Una palabra por destino.** El canal del contrato de drivers deja de decir `tributario` e `intercambio` y dice
+**`sunat`** y **`erp`**, con lo que `GRUPOS` —la tabla que los traducía a «SIRE», «Legacy» y «ERP» ante quien
+integra— y su accesor `grupo()` desaparecen. Quien no escriba drivers no nota nada; quien tenga uno propio cambia
+una línea.
+
+### Quitado
+
+- **`contrato.GRUPOS` y `contrato.grupo()`**, y con ellos la clave `grupo` de `drivers_disponibles` y de
+  `verificar_driver`, de su esquema publicado (`api/esquemas/drivers.schema.json`, donde estaba en `required`) y de
+  la salida del CLI. De la superficie congelada salen esos dos nombres y entra `CANALES_RENOMBRADOS`: de 57 a 56 en
+  `contaperu.drivers.contrato`, **editado a mano con el motivo al lado**, porque `regenerar()` existe solo para
+  añadir. El diff del fixture son tres líneas.
+- Del `enum` de `forma` del mismo esquema sale **`construir`**, la forma que la 4.0 retiró y que el contrato
+  publicado seguía ofreciendo.
+
+### Cambiado
+
+- **`tributario` → `sunat`** en `sire`, `ple` y `ple_plan`; **`intercambio` → `erp`** en `csv` y
+  `asiento_contable`. `legacy` no cambia.
+- Los mensajes del contrato hablan el vocabulario nuevo: «un driver de SUNAT escribe un registro o un libro de
+  texto», «un driver de ERP proyecta la línea del comprobante».
+
+### Por qué `sunat` y no `sire`
+
+Porque **el canal no era el SIRE: eran tres drivers**, y a los tres se les ponía el grupo `sire`. El PLE es el otro
+régimen de SUNAT, con otras normas y otro formato —la RS 234-2006 y la RS 286-2009 frente a la RS 112-2021 y la RS
+040-2022—, así que el motor **llamaba SIRE al Libro Diario del PLE**. Y no de pasada: estaba congelado en un test,
+que es lo que convierte un descuido en contrato. Ese test afirmaba `"ple": "sire"` y ahora afirma `"ple": "sunat"`.
+
+Las dos palabras viejas describían además el **otro** eje: `tributario` el formato que se escribe e `intercambio` el
+vocabulario con que se reciben las líneas, que es `VOCABULARIO` y ya tiene su campo. El canal contesta a quién se
+entrega, y ahora lo contesta una sola vez.
+
+### Cómo migrar
+
+Si usas `contaperu.api` para exportar, nada. Si **escribes un driver**, cambia su `CANAL`:
+
+| Hasta la 7.x | Desde la 8.0 |
+|---|---|
+| `tributario` | `sunat` |
+| `intercambio` | `erp` |
+| `legacy` | `legacy` (sin cambio) |
+
+El contrato te lo dice al examinar el driver: «CANAL 'tributario' se renombró en la 8.0: usa 'sunat'». Y si leías
+`grupo` de `drivers_disponibles` o de `verificar_driver`, usa `canal`: son los mismos tres destinos con el nombre
+del canal, y `sire` pasa a `sunat` porque cubre también el PLE.
+
+### Sin aviso previo, y es una decisión
+
+`CANAL` lo declara un driver, y los nueve que existen son de este repositorio: los ocho de serie y el `diario_json`
+de la batería. **No había a quién avisar** — y un aviso durante la 7.x habría puesto roja la propia batería, porque
+el `filterwarnings` de `pyproject.toml` convierte `RutaObsoleta` en error y cinco de nuestros drivers declaraban el
+nombre viejo. Lo que hay en su lugar es un rechazo que dice el nombre nuevo, con el trato de
+`configuracion.CLAVES_RETIRADAS`. `RETIRO` pasa a `"9.0"`.
+
+### Lo que se encontró de camino, y se arregló
+
+- **Ningún test vigilaba el vocabulario de los documentos.** `test_documentacion.py` comprobaba nombres de driver,
+  versión del estándar, rutas citadas y los recuentos del README; un `tributario` olvidado en un documento vigente
+  no habría puesto nada rojo. Es el mismo despiste que dio origen a ese fichero. Ahora hay una regla sobre los nueve
+  VIGENTES, y cazó tres documentos en su primera ejecución.
+- **Cuatro afirmaciones falsas** que el renombrado habría sellado: `ARQUITECTURA.md` describía el canal como «forma
+  `linea`, sin cuentas ni configuración | Drivers: sire» —las cuatro partes falsas desde la 4.2— y decía que un
+  driver sin `CANAL` se registra y se trata como `legacy`, falso desde la 4.0; `CLAUDE.md` listaba 5 de los 8
+  drivers; el glosario del README no tenía fila para ERP y su fila «Registro» era falsa para el PLE; y
+  `API-DE-REGISTRO.md` tenía una cuarta tabla de grupos nombrando el driver `asiento_neutral`, muerto en la 3.10.
+- **Los diagramas, que ningún test mira.** `puertas-y-api.svg` decía «11 herramientas · 6 recursos» cuando son 14 y
+  13, y «hasta la 2.0»: seis mayores de retraso. `arquitectura-colectiva.svg` daba STARSOFT por «próximo» con el
+  driver en producción. Y el texto alternativo del README decía «seis destinos» cuando son ocho.
+
+Ninguna salida se mueve: el TXT del SIRE del mes real de 3018 comprobantes sale con el mismo sha256,
+`570038c7a40cb4ff`, y el snapshot de CONCAR no se movió ni una celda.
+
 ## [7.0.0] — 2026-10-08
 
 Una mayor cobra promesas, y esta cobra dos. **Quien use `contaperu.api` no cambia una línea**; quien importe el
