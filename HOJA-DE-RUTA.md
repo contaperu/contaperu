@@ -56,9 +56,9 @@ Librería **7.0.0** y estándar **`open-accounting` 1.0**
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/tributos/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 14 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
-| **Salida · SUNAT** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
+| **Salida · SUNAT** | Canal `sunat`, que son **los dos regímenes**: el driver `sire` escribe el TXT de reemplazo del RVIE y del RCE; `ple` y `ple_plan`, el Libro Diario y el detalle del plan contable |
 | **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos), con un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct-2026 |
-| **Salida · ERP** | El documento `open-accounting` en JSON, el CSV de canal intercambio y la puerta HTTP con OpenConta |
+| **Salida · ERP** | El documento `open-accounting` en JSON, el CSV —los dos de canal `erp`— y la puerta HTTP con OpenConta |
 | Pendiente que depende de datos | SISCONT, la plantilla oficial de STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
 
 ### Cumplidos
@@ -327,6 +327,13 @@ estándar; poner la jurisdicción en la configuración (es del libro).
 
 **Objetivo.** Que lo que se presenta a SUNAT salga del mismo documento que los asientos y cuadre con lo que SUNAT ya
 tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de control.
+
+**Son dos regímenes y un solo canal** (`sunat`, desde la 8.0). El **SIRE** manda compras y ventas (RS 112-2021 y
+RS 040-2022) y es de lo que hablan los hitos de abajo. El **PLE** manda el Libro Diario y los demás libros, más el
+detalle del plan contable (RS 234-2006 y RS 286-2009), y lo escriben `ple` y `ple_plan` desde la 4.2 y la 4.3: su
+fila es una línea del asiento, no un comprobante. Lo que el PLE tiene pendiente no es un driver, es **de qué sacar
+los asientos que no vienen de compras ni de ventas** —la planilla, la depreciación, el asiento de destino—, que es
+595 de 1441 en el mes contrastado y entra por su libro, no por un rol nuevo (`LIBROS-Y-CUENTAS.md`).
 
 **Investigación.** El SIRE frente a las declaraciones de EE. UU. y la propuesta del RCE como lista de control:
 

@@ -213,10 +213,16 @@ RETIRADAS = {
 def test_ningun_documento_vigente_usa_una_palabra_retirada(doc):
     """Un documento del presente no nombra un valor que el motor ya no admite.
 
-    Se busca la palabra **entre acentos graves**, que es como se escribe un valor del contrato en estos documentos:
-    así `` `tributario` `` cae y «los regímenes tributarios del Perú» no. Distinguirlo importa porque las dos cosas
-    conviven en el mismo repositorio y una es correcta."""
+    Se busca de **dos** formas, y la segunda la pagó esta misma guarda: entre acentos graves, que es como se escribe
+    un valor del contrato, y precedida de «canal», que es como se escribe cuando a alguien se le olvidan los acentos.
+    Con solo la primera, la versión que estrenó este test dejó pasar «de canal tributario» y «el CSV de canal
+    intercambio» en `HOJA-DE-RUTA.md` — **en el mismo documento que se estaba editando**, y en la tabla que resume el
+    repositorio entero.
+
+    Las dos formas y no una barrida a secas, porque «los regímenes tributarios del Perú» y «un registro tributario»
+    son correctos y conviven con el canal en el mismo repositorio. Distinguirlos es el trabajo del test."""
     contenido = texto(doc)
-    usadas = {palabra: con_que for palabra, con_que in RETIRADAS.items() if f"`{palabra}`" in contenido}
+    usadas = {palabra: con_que for palabra, con_que in RETIRADAS.items()
+              if f"`{palabra}`" in contenido or f"canal {palabra}" in contenido}
     assert not usadas, (f"{doc} usa como valor una palabra que el motor retiró: "
                         + "; ".join(f"`{p}` → usa {c}" for p, c in sorted(usadas.items())))
