@@ -21,14 +21,15 @@ from .coerciones import (CENTIMO, CERO, a_decimal, fecha, monto, numero_sin_cero
 from .comprobante import (CAMPOS_DEL_DOCUMENTO, CAMPOS_DEL_SISTEMA, CAMPOS_DE_LA_REVISION, CONDICIONES_PAGO,
                           NOTAS, NOTAS_CREDITO, NOTAS_DEBITO, ORIGENES, RETIRADOS_EN_0_3, Comprobante,
                           Observacion, clave_de, identidad_de)
-from .libro import RASGOS, TIPOS_LIBRO, Libro, LibroSinRasgos, Rasgos, rasgos_de
+from .libro import (POR_OPERACION, RASGOS, TIPOS_LIBRO, Libro, LibroSinRasgos, Rasgos,
+                    SentidoNoLoDiceElLibro, rasgos_de)
 
 # Los mismos nombres que exponía el módulo, escritos a mano: lo que un consumidor importa no depende de en
 # qué fichero acabó cada cosa.
 __all__ = [
     "CAMPOS_DEL_DOCUMENTO", "CAMPOS_DEL_SISTEMA", "CAMPOS_DE_LA_REVISION", "CENTIMO", "CERO", "CONDICIONES_PAGO",
     "Comprobante", "Libro", "LibroSinRasgos", "NOTAS", "NOTAS_CREDITO", "NOTAS_DEBITO", "ORIGENES", "Observacion",
-    "RASGOS", "RETIRADOS_EN_0_3", "Rasgos", "rasgos_de",
+    "POR_OPERACION", "RASGOS", "RETIRADOS_EN_0_3", "Rasgos", "SentidoNoLoDiceElLibro", "rasgos_de",
     "ROUND_HALF_UP", "TIPOS_LIBRO", "a_decimal", "clave_de", "fecha", "identidad_de", "monto", "numero_sin_ceros",
     "serie_y_numero", "solo_digitos", "texto_tasa", "tipo_cambio", "vocabulario",
 ]

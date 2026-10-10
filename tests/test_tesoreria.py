@@ -147,6 +147,66 @@ def test_sin_referencia_la_clave_se_cae_a_lo_que_siempre_hay():
     assert len(nuevos) == 1 and len(repetidos) == 1
 
 
+def test_el_abono_entra_y_el_cargo_sale_con_las_palabras_de_la_nic_7():
+    """El cambio de perspectiva, que es la trampa de todo esto y por eso tiene su test.
+
+    El banco escribe `abono` porque en SUS libros tu depósito es un pasivo que le crece. En los TUYOS esa misma
+    plata entra a un activo, así que un abono es una **entrada** y va al debe. Quien lo lea al revés invierte el
+    asiento entero sin que falle nada."""
+    assert mov(sentido="abono").efecto == t.ENTRADA
+    assert mov(sentido="cargo").efecto == t.SALIDA
+    # Derivado y no almacenado: no hay forma de que el indicador y el efecto discrepen.
+    assert "efecto" not in mov().a_dict()
+
+
+def test_un_movimiento_nunca_es_una_transferencia():
+    """La decisión que sostiene el modelo. El catálogo tiene tres efectos porque la NIC 7 §9 excluye de los flujos
+    los traspasos entre partidas de efectivo —hay que poder nombrarlo para dejarlo fuera—, pero **una línea sola no
+    puede saber que es la mitad de un traspaso**: eso es una afirmación sobre un par, y el extracto no la hace.
+
+    Se declara (una constancia con una referencia `cuenta_propia`) o se propone (`conciliar`, que nunca confirma).
+    Si algún día esto devolviera `transferencia`, un lector de un extracto estaría afirmando lo que no ha visto."""
+    assert t.EFECTOS_DE_UN_MOVIMIENTO == (t.ENTRADA, t.SALIDA)
+    assert all(mov(sentido=s).efecto in t.EFECTOS_DE_UN_MOVIMIENTO for s in t.SENTIDOS)
+    assert "transferencia" not in t.EFECTOS_DE_UN_MOVIMIENTO
+
+
+def test_los_efectos_son_los_del_catalogo_publicado_y_no_una_copia():
+    """Dos listas que dicen lo mismo en dos sitios acaban diciendo cosas distintas. Es el mismo ancla que
+    `PROVISIONADO`/`PAGADO` tienen contra el `enum` del esquema.
+
+    El catálogo tiene **tres** y el movimiento solo puede tener **dos**: el tercero existe para el nivel de la
+    operación, no para el de la línea, y esa diferencia es a propósito."""
+    from contaperu import vocabulario
+
+    assert set(t.EFECTOS_DE_UN_MOVIMIENTO) < set(vocabulario.EFECTOS_DE_TESORERIA)
+    assert vocabulario.EFECTOS_DE_TESORERIA == ("entrada", "salida", "transferencia")
+    # Y su fuente es la norma, no nuestra opinión: sin ella el cargador del vocabulario no arranca.
+    assert "NIC 7" in vocabulario.FUENTES["efectos_de_tesoreria"]
+
+
+def test_un_libro_de_tesoreria_existe_y_el_motor_no_lo_origina():
+    """Las dos mitades de la fase, en un test. El tipo de libro existe —así que el dato puede entrar y validarse—
+    y el motor **todavía no sabe armar su asiento**, así que la puerta de la 8.2 lo para diciendo cuáles sabe.
+
+    Es la primera vez que esa guarda sirve de verdad: hasta hoy no había ningún libro del catálogo fuera de
+    `TIPOS_DEL_MOTOR`, y su docstring ya avisaba de que el día que lo hubiera, lo que fallaría sería esto."""
+    import pytest as _pytest
+
+    from contaperu.asiento import faltas, motor
+    from contaperu.modelo import POR_OPERACION, Libro
+
+    libro = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202608", tipo="tesoreria")
+    assert libro.es_tesoreria and not libro.es_venta and not libro.es_compra
+    assert libro.rasgos.origen == "movimientos"
+    assert libro.rasgos.sentido_principal == POR_OPERACION
+
+    with _pytest.raises(faltas.LibroQueElMotorNoOrigina) as e:
+        motor.lineas_e_indice_del_libro(libro, [], {}, {})
+    assert e.value.tipo == "tesoreria" and e.value.sabe == motor.TIPOS_DEL_MOTOR
+    assert "venta" in str(e.value) and "compra" in str(e.value)
+
+
 # ── El cuadre, que es lo que hace verificable a un lector ──────────────────
 
 def test_la_cadena_de_saldos_reproduce_la_del_banco():

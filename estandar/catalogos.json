@@ -54,7 +54,18 @@
   "nota": "Sale del enum del esquema al catálogo para que un registro nuevo no cueste una versión. Pero no degrada como el rol: quien recibe un libro que no conoce no puede adivinar qué hacer con él, así que su degradación es del destino — el driver que no lo declara en sus FORMATOS lo rechaza limpio, diciendo qué libros lleva.",
   "codigos": {
    "venta": "El registro de ventas e ingresos: lo que emitió en el periodo",
-   "compra": "El registro de compras: lo que el contribuyente adquirió en el periodo"
+   "compra": "El registro de compras: lo que el contribuyente adquirió en el periodo",
+   "tesoreria": "El movimiento del dinero: los extractos de las cuentas bancarias del contribuyente y las constancias de los pagos. Se llama `tesoreria` y no `banco` porque un pago de tributos o el reintegro de una caja chica no son del banco. Su destino es el Libro Diario, no el Libro Caja y Bancos: quien lleva el Diario 5.1 con sus campos de libre utilización se exime de ese libro electrónico"
+  }
+ },
+ "efectos_de_tesoreria": {
+  "fuente": "NIC 7 «Estado de Flujos de Efectivo», versión en español del IFRS Foundation, la misma que publica el MEF del Perú: «Flujos de efectivo son las entradas y salidas de efectivo y equivalentes al efectivo». Y su párrafo 9: los traspasos entre partidas que constituyen efectivo o equivalentes NO son flujos de efectivo, porque son gestión de tesorería y no actividad de operación, inversión ni financiación.",
+  "version": "1.0",
+  "nota": "Es el efecto de una OPERACIÓN sobre el efectivo, no el indicador de una línea del extracto. La línea trae el indicador del banco —`cargo` o `abono`, que es el `CdtDbtInd` de camt.053 y el subcampo C/D del tag 61 de un MT940— y de ahí se deriva `entrada` o `salida`. **`transferencia` no se deriva nunca de una línea**: una línea sola no puede saber que es la mitad de un traspaso, que es una afirmación sobre un par. Se declara (una constancia con una referencia `cuenta_propia`) o se propone (`conciliar`, que nunca confirma). Los dos ERP abiertos lo modelan igual: Odoo `payment_type` inbound/outbound/transfer y ERPNext Receive/Pay/Internal Transfer.",
+  "codigos": {
+   "entrada": "Entra efectivo a una cuenta del contribuyente: su cuenta de efectivo va al DEBE y la contrapartida la pone la imputación",
+   "salida": "Sale efectivo de una cuenta del contribuyente: su cuenta de efectivo va al HABER y la contrapartida la pone la imputación",
+   "transferencia": "Traspaso entre dos cuentas del propio contribuyente. **No es un flujo de efectivo** (NIC 7 §9) y por eso se nombra: para excluirlo y no contarlo dos veces. Es el único efecto cuyas DOS patas son cuentas declaradas, así que es el único que no necesita imputación"
   }
  }
 }

@@ -94,7 +94,10 @@ def test_un_tipo_de_libro_fuera_del_catalogo_lo_rechaza_el_modelo_y_no_el_esquem
     assert list(jsonschema.Draft202012Validator(esquema_open_accounting()).iter_errors(doc)) == []
     with pytest.raises(ValueError, match="Tipo de libro inválido"):
         Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA SAC", periodo="202601", tipo="otro")
-    assert set(TIPOS_LIBRO) == {"venta", "compra"}
+    # Lo que este test necesita es que `otro` NO esté, no congelar el tamaño del catálogo: de eso se encarga
+    # `test_vocabulario.test_el_catalogo_crece_solo_a_proposito`, que es su dueño. Afirmarlo aquí también era una
+    # segunda copia de la misma promesa, y se puso roja el día que el catálogo creció a propósito.
+    assert "otro" not in TIPOS_LIBRO
 
 
 def test_se_rechaza_lo_que_no_es_del_estandar(validador):

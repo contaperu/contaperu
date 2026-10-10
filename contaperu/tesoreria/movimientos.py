@@ -35,9 +35,27 @@ from ..modelo import CERO, fecha as _fecha, monto as _monto
 
 # Hacia dónde va el dinero, visto desde MI cuenta. Son las dos palabras que los tres bancos usan, con sus sinónimos:
 # BBVA titula la columna «CARGO/ABONO», Scotiabank «CARGO | ABONO» y BanBif «Débito | Crédito».
+# Lo que imprime el extracto, con las palabras del banco. Son las mismas dos del `CdtDbtInd` de camt.053
+# (`CRDT`/`DBIT`) y del subcampo C/D del tag 61 de un MT940: el importe va positivo y el signo lo lleva esto.
 CARGO = "cargo"
 ABONO = "abono"
 SENTIDOS = (CARGO, ABONO)
+
+# Y el EFECTO sobre el efectivo, que es otra cosa y por eso tiene otras palabras. Son las de la NIC 7: «Flujos de
+# efectivo son las **entradas y salidas** de efectivo y equivalentes al efectivo» —versión en español del IFRS
+# Foundation, la que publica el MEF del Perú—. Se nombran aquí para que nadie escriba la cadena a mano, y
+# `tests/test_tesoreria.py` las ancla al catálogo publicado: dos listas que dicen lo mismo en dos sitios acaban
+# diciendo cosas distintas.
+#
+# **Ojo con el cambio de perspectiva, que es la trampa de todo esto.** El banco escribe `abono` porque en SUS
+# libros tu depósito es un pasivo que le crece; en los TUYOS esa misma plata entra a un activo. Así que un abono es
+# una ENTRADA y va al DEBE, y un cargo es una SALIDA y va al HABER. Quien lo lea al revés invierte el asiento
+# entero sin que nada falle.
+ENTRADA = "entrada"
+SALIDA = "salida"
+# El tercero del catálogo, `transferencia`, **no está aquí a propósito**: un movimiento no puede tenerlo. Ver
+# `Movimiento.efecto`.
+EFECTOS_DE_UN_MOVIMIENTO = (ENTRADA, SALIDA)
 
 
 class MovimientoInvalido(ErrorContaperu, ValueError):
@@ -87,6 +105,27 @@ class Movimiento:
         # absoluto** —«el signo no es parte del dato»—, así que un `-200.00` de una columna con signo llega aquí
         # convertido. Eso es lo que hace falta: el lector mira el signo de la columna para poner `sentido` y pasa
         # el importe tal cual. Un `if importe < 0` aquí sería código que no puede ejecutarse nunca.
+
+    @property
+    def efecto(self) -> str:
+        """Qué le hace esta línea al efectivo: `entrada` o `salida`, con las palabras de la NIC 7.
+
+        **Derivado y no almacenado**, para que no puedan discrepar: el dato que un lector transcribe del archivo es
+        el indicador del banco, y esto es su consecuencia contable. Un abono entra —el efectivo va al debe— y un
+        cargo sale —al haber—.
+
+        **Nunca devuelve `transferencia`, y es la decisión que sostiene el modelo.** El catálogo tiene ese tercer
+        efecto porque la NIC 7 §9 excluye de los flujos los traspasos entre partidas de efectivo, así que hay que
+        poder nombrarlo para dejarlo fuera y no contarlo dos veces. Pero **una línea sola no puede saber que es la
+        mitad de un traspaso**: eso es una afirmación sobre un PAR —un cargo en una cuenta y un abono en otra— y el
+        extracto no lo dice. Se declara, cuando una constancia lo afirma con una referencia `cuenta_propia`, o se
+        propone, cuando `conciliar` empareja las dos patas; y `conciliar` propone y nunca confirma. Derivarlo aquí
+        sería dejar que un lector de un extracto afirme algo que no ha visto.
+
+        Es la misma forma que tienen los ERP abiertos, con el nivel bien puesto: Odoo y ERPNext ponen los tres
+        valores en el PAGO (`payment_type`: inbound/outbound/transfer, Receive/Pay/Internal Transfer) y el
+        indicador de dos valores en la línea del extracto."""
+        return SALIDA if self.es_cargo else ENTRADA
 
     @property
     def es_cargo(self) -> bool:

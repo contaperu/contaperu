@@ -21,6 +21,16 @@ from .coerciones import solo_digitos
 TIPOS_LIBRO = vocabulario.TIPOS_LIBRO
 
 
+# El valor de `sentido_principal` que dice «esto no lo decide el libro». En ventas el ingreso siempre va al haber
+# y en compras el gasto siempre al debe; en tesorería **depende de cada operación**, porque entra o sale dinero de
+# una misma cuenta de activo. Es el primer rasgo que no es una constante del libro, y por eso tiene nombre.
+POR_OPERACION = "por_operacion"
+
+
+class SentidoNoLoDiceElLibro(ValueError):
+    """Se le pidió al libro un lado que no es suyo: en tesorería lo dice cada operación."""
+
+
 @dataclass(frozen=True)
 class Rasgos:
     """Lo que el motor necesita saber de un libro para armar su asiento, declarado en vez de deducido.
@@ -50,17 +60,31 @@ class Rasgos:
         return self.tipo == "compra"
 
     @property
+    def decide_la_operacion(self) -> bool:
+        """¿El lado del hecho lo dice cada operación en vez del libro? Solo en tesorería, de momento."""
+        return self.sentido_principal == POR_OPERACION
+
+    @property
     def sentido_contraparte(self) -> str:
-        """Al revés que el hecho, siempre. Es la partida doble, y por eso se deriva en vez de declararse."""
+        """Al revés que el hecho, siempre. Es la partida doble, y por eso se deriva en vez de declararse.
+
+        **Y se niega a contestar cuando el lado lo dice la operación.** Hasta aquí la línea era
+        `"D" if sentido_principal == "H" else "H"`, que con cualquier valor que no fuera `"H"` devolvía `"H"`: con
+        `por_operacion` habría contestado «haber» callada y mal, que es exactamente el fallo que la 9.0 vino a
+        cerrar en el otro eje. Un `else` que acierta por casualidad mientras los valores son dos deja de acertar
+        en cuanto son tres."""
+        if self.decide_la_operacion:
+            raise SentidoNoLoDiceElLibro(
+                f"En un libro {self.tipo!r} el lado lo dice cada operación, no el libro: una entrada lleva la "
+                f"cuenta de efectivo al debe y una salida al haber. Pregúntale a la operación "
+                f"(`tesoreria.Movimiento.efecto`) en vez de al libro.")
         return "D" if self.sentido_principal == "H" else "H"
 
 
-# Los libros que el motor sabe ORIGINAR, con lo que los distingue. Son los mismos de `asiento.TIPOS_DEL_MOTOR`:
-# aquella tupla dice cuáles, esta tabla dice en qué se diferencian.
-#
-# El catálogo del estándar puede crecer sin que crezca esta tabla, y no es una inconsistencia: el catálogo dice
-# qué libros existen y esto dice cuáles sabe armar el motor. Uno que esté allí y no aquí se rechaza nombrando los
-# que sí (`asiento.LibroQueElMotorNoOrigina`).
+# En qué se diferencia cada tipo de libro del catálogo. **Ya no coincide con `asiento.TIPOS_DEL_MOTOR`**, y la
+# diferencia es la información útil: desde el 10-oct-2026 esta tabla tiene tres filas y aquella tupla dos, porque
+# el motor sabe qué ES un libro de tesorería y todavía no sabe armar su asiento. Un libro que esté aquí y no allí
+# se para en la puerta nombrando los que sí (`asiento.LibroQueElMotorNoOrigina`), que es para lo que se puso.
 RASGOS: dict[str, "Rasgos"] = {
     "venta": Rasgos(tipo="venta", sub_diario="sub_diario_ventas", cuenta_contraparte="clientes",
                     sentido_principal="H", da_credito_fiscal=False, lleva_detraccion=False,
@@ -68,11 +92,30 @@ RASGOS: dict[str, "Rasgos"] = {
     "compra": Rasgos(tipo="compra", sub_diario="sub_diario_compras", cuenta_contraparte="cxp",
                      sentido_principal="D", da_credito_fiscal=True, lleva_detraccion=True,
                      lleva_honorarios=True, origen="comprobantes"),
+    # El dinero moviéndose. Dos campos no son constantes aquí, y que la tabla lo enseñe es la mitad de su valor:
+    #
+    # - `cuenta_contraparte` está **vacía a propósito**: no hay una sola cuenta con la que se salde. Un lado es la
+    #   cuenta de efectivo que el contribuyente declaró en su maestro (su 104) y el otro lo pone la imputación,
+    #   igual que hoy pone la cuenta de un gasto — «sin imputación no hay cuenta» (`resolucion/imputado.py`). La
+    #   única excepción es la `transferencia`, cuyas dos patas son cuentas declaradas.
+    # - `sentido_principal` es `POR_OPERACION`: una entrada lleva el efectivo al debe y una salida al haber, así
+    #   que el lado es de cada operación. Es el primer rasgo que el libro no puede fijar.
+    # - `sub_diario` está vacío porque **su clave de configuración todavía no existe**, y eso es información y no
+    #   un hueco: entra con el hito D6, que pide un archivo del sub-diario de bancos que CONCAR haya aceptado. Se
+    #   intentó declararla ya y el contrato de drivers lo paró con la razón exacta — «una clave que nadie lee se
+    #   configura para nada»—, porque hasta que el motor origine este libro nadie puede leerla.
+    "tesoreria": Rasgos(tipo="tesoreria", sub_diario="", cuenta_contraparte="",
+                        sentido_principal=POR_OPERACION, da_credito_fiscal=False, lleva_detraccion=False,
+                        lleva_honorarios=False, origen="movimientos"),
 }
 
 
 class LibroSinRasgos(ValueError):
-    """Se pidieron los rasgos de algo que el motor no sabe armar, o de un booleano de antes de la 9.0."""
+    """Se pidieron los rasgos de algo que el motor no CONOCE, o de un booleano de antes de la 9.0.
+
+    No confundir con `asiento.LibroQueElMotorNoOrigina`, que es el otro «no» y hasta el 10-oct-2026 se decía con
+    las mismas palabras: éste es «no sé qué es un libro así» y aquél «sé lo que es y no sé armar su asiento». El
+    libro de tesorería es justo el caso que los separa, y por eso el mensaje tuvo que cambiar."""
 
 
 def rasgos_de(libro: Rasgos | Libro | str) -> Rasgos:
@@ -91,8 +134,8 @@ def rasgos_de(libro: Rasgos | Libro | str) -> Rasgos:
     tipo = getattr(libro, "tipo", libro)
     rasgos = RASGOS.get(str(tipo or "").strip().lower())
     if rasgos is None:
-        raise LibroSinRasgos(f"El motor no sabe armar el asiento de un libro {tipo!r}: "
-                             f"origina {', '.join(sorted(RASGOS))}")
+        raise LibroSinRasgos(f"El motor no conoce ningún libro de tipo {tipo!r}: "
+                             f"conoce {', '.join(sorted(RASGOS))}")
     return rasgos
 
 
@@ -137,6 +180,12 @@ class Libro:
         «compra». Lo sigue preguntando lo que tiene el libro en la mano —los lectores, `validar`, los drivers—;
         lo que recibe el eje por parámetro recibe los `rasgos`."""
         return self.tipo == "compra"
+
+    @property
+    def es_tesoreria(self) -> bool:
+        """La tercera, y entra con el mismo argumento que la segunda: tres preguntas separadas obligan a cada rama
+        a decidir, mientras que `not es_venta` daba por hecho que lo demás era una compra."""
+        return self.tipo == "tesoreria"
 
     @property
     def rasgos(self) -> Rasgos:

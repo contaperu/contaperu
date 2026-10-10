@@ -2,13 +2,29 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/catalogos_del_estandar.schema.json",
  "title": "Catálogos del estándar",
- "description": "Los catálogos que `open-accounting` inventa, frente a los de SUNAT, que se copian de la norma: los roles de una línea del asiento, las cinco clases contables y los tipos de libro. Cada uno con su fuente y su versión, porque se versionan aparte del esquema: un valor nuevo no sube la versión del documento.",
+ "description": "Los catálogos que `open-accounting` inventa, frente a los de SUNAT, que se copian de la norma: los roles de una línea del asiento, las cinco clases contables, los tipos de libro y el efecto de una operación de tesorería sobre el efectivo. Cada uno con su fuente y su versión, porque se versionan aparte del esquema: un valor nuevo no sube la versión del documento.",
  "type": "object",
- "required": ["roles", "clases", "tipos_de_libro"],
- "propertyNames": { "enum": ["roles", "clases", "tipos_de_libro"] },
+ "required": [
+  "roles",
+  "clases",
+  "tipos_de_libro",
+  "efectos_de_tesoreria"
+ ],
+ "propertyNames": {
+  "enum": [
+   "roles",
+   "clases",
+   "tipos_de_libro",
+   "efectos_de_tesoreria"
+  ]
+ },
  "additionalProperties": {
   "type": "object",
-  "required": ["fuente", "version", "codigos"],
+  "required": [
+   "fuente",
+   "version",
+   "codigos"
+  ],
   "additionalProperties": false,
   "properties": {
    "fuente": {
@@ -26,19 +42,36 @@
    "codigos": {
     "type": "object",
     "description": "Valor → qué significa.",
-    "additionalProperties": { "type": "string" }
+    "additionalProperties": {
+     "type": "string"
+    }
    },
    "obsoletos": {
     "type": "object",
     "description": "Los valores que siguen publicados y ya no se deben escribir: `{viejo: {usar, desde, por_que}}`. Es por donde un ERP migra sin escribir el mapeo a mano, y la razón de que exista es la regla del estándar: un valor publicado no se quita ni cambia de significado, así que cuando resulta equivocado se marca y entra otro al lado. **No hay versión de retiro: un valor de catálogo obsoleto no desaparece nunca**, porque los documentos ya guardados lo llevan dentro. Un valor que esté aquí sigue estando en `codigos` y sigue siendo válido al leerlo.",
     "additionalProperties": {
      "type": "object",
-     "required": ["usar", "desde", "por_que"],
+     "required": [
+      "usar",
+      "desde",
+      "por_que"
+     ],
      "additionalProperties": false,
      "properties": {
-      "usar": { "type": "string", "minLength": 1, "description": "El valor que lo reemplaza, que está en `codigos`." },
-      "desde": { "type": "string", "description": "La fecha en que se marcó (AAAA-MM-DD)." },
-      "por_que": { "type": "string", "minLength": 1, "description": "Qué estaba mal en el viejo." }
+      "usar": {
+       "type": "string",
+       "minLength": 1,
+       "description": "El valor que lo reemplaza, que está en `codigos`."
+      },
+      "desde": {
+       "type": "string",
+       "description": "La fecha en que se marcó (AAAA-MM-DD)."
+      },
+      "por_que": {
+       "type": "string",
+       "minLength": 1,
+       "description": "Qué estaba mal en el viejo."
+      }
      }
     }
    }

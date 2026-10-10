@@ -35,7 +35,7 @@ import copy
 from . import _datos
 
 _CATALOGOS = _datos.catalogos_del_estandar()
-_TABLAS = ("roles", "clases", "tipos_de_libro")
+_TABLAS = ("roles", "clases", "tipos_de_libro", "efectos_de_tesoreria")
 
 for _nombre in _TABLAS:
     if not (_CATALOGOS.get(_nombre) or {}).get("fuente"):
@@ -49,11 +49,20 @@ VERSIONES: dict[str, str] = {n: _CATALOGOS[n].get("version", "") for n in _TABLA
 ROLES_DESCRITOS: dict[str, str] = dict(_CATALOGOS["roles"]["codigos"])
 CLASES_DESCRITAS: dict[str, str] = dict(_CATALOGOS["clases"]["codigos"])
 TIPOS_DE_LIBRO_DESCRITOS: dict[str, str] = dict(_CATALOGOS["tipos_de_libro"]["codigos"])
+# El efecto de una operación de tesorería sobre el efectivo, con las palabras de la NIC 7: «Flujos de efectivo son
+# las **entradas y salidas** de efectivo y equivalentes al efectivo». Son tres y no dos porque su §9 dice que un
+# traspaso entre partidas de efectivo NO es un flujo, así que `transferencia` existe para poder excluirlo.
+#
+# **No es el indicador de una línea del extracto**, que es otra cosa y vive en `tesoreria.Movimiento.sentido` con
+# las palabras del banco (`cargo` | `abono`, el `CdtDbtInd` de camt.053). De ahí se deriva `entrada` o `salida`;
+# `transferencia` no se deriva nunca de una línea, porque una línea sola no sabe que es la mitad de un par.
+EFECTOS_DE_TESORERIA_DESCRITOS: dict[str, str] = dict(_CATALOGOS["efectos_de_tesoreria"]["codigos"])
 
 # Y las tuplas que usa el motor. Se conservan los nombres que ya estaban en la superficie pública.
 ROLES: tuple[str, ...] = tuple(ROLES_DESCRITOS)
 CLASES: tuple[str, ...] = tuple(CLASES_DESCRITAS)
 TIPOS_LIBRO: tuple[str, ...] = tuple(TIPOS_DE_LIBRO_DESCRITOS)
+EFECTOS_DE_TESORERIA: tuple[str, ...] = tuple(EFECTOS_DE_TESORERIA_DESCRITOS)
 
 
 def catalogos() -> dict:

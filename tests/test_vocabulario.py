@@ -35,19 +35,32 @@ TIPOS_DE_LIBRO_DE_LA_1_0 = ("venta", "compra")
 # en `obsoletos`, con su reemplazo.
 ROLES_DE_HOY = ROLES_DE_LA_1_0 + ("contrapartida", "tesoreria", "impuesto", "retencion", "recorte")
 
+# Y el tercer tipo de libro, que entró el 10-oct-2026: `tesoreria`, el dinero moviéndose. Es el primer valor que se
+# añade a esta tabla desde la 1.0, y por eso la promesa de abajo pasa a comprobarse por PREFIJO, como ya se hacía
+# con los roles — que es lo que su propio docstring prometía y para los libros no cumplía.
+TIPOS_DE_LIBRO_DE_HOY = TIPOS_DE_LIBRO_DE_LA_1_0 + ("tesoreria",)
+
+# Los efectos sobre el efectivo, que son catálogo propio desde el mismo día. Las palabras son las de la NIC 7
+# —«entradas y salidas de efectivo»— y son TRES porque su §9 excluye de los flujos los traspasos entre partidas de
+# efectivo: `transferencia` existe para poder dejarlo fuera y no contarlo dos veces, que es lo mismo que hacen Odoo
+# (`transfer`) y ERPNext (`Internal Transfer`).
+EFECTOS_DE_TESORERIA_DE_HOY = ("entrada", "salida", "transferencia")
+
 
 def test_los_valores_de_la_1_0_no_cambian():
     """La promesa de la 1.0: lo publicado sigue ahí, con su mismo nombre y en su mismo sitio. Que el catálogo crezca
     por detrás no la rompe; que algo de esto se moviera, sí."""
     assert vocabulario.ROLES[:len(ROLES_DE_LA_1_0)] == ROLES_DE_LA_1_0
     assert vocabulario.CLASES == CLASES_DE_LA_1_0
-    assert vocabulario.TIPOS_LIBRO == TIPOS_DE_LIBRO_DE_LA_1_0
+    assert vocabulario.TIPOS_LIBRO[:len(TIPOS_DE_LIBRO_DE_LA_1_0)] == TIPOS_DE_LIBRO_DE_LA_1_0
 
 
 def test_el_catalogo_crece_solo_a_proposito():
     """El otro lado de la promesa: añadir un valor pone esto rojo. Un catálogo que crece sin que nadie lo decida es
     un enum con más pasos (`estandar/LEEME.md`, «Quién gobierna los catálogos»)."""
     assert vocabulario.ROLES == ROLES_DE_HOY
+    assert vocabulario.TIPOS_LIBRO == TIPOS_DE_LIBRO_DE_HOY
+    assert vocabulario.EFECTOS_DE_TESORERIA == EFECTOS_DE_TESORERIA_DE_HOY
 
 
 def test_el_motor_no_escribe_todos_los_roles_del_catalogo():
@@ -136,7 +149,7 @@ def test_el_esquema_ya_no_los_enumera():
 
 def test_la_api_los_sirve_con_su_fuente():
     servidos = api.catalogos_del_estandar()
-    assert set(servidos) == {"roles", "clases", "tipos_de_libro"}
+    assert set(servidos) == set(vocabulario.FUENTES), "la api sirve los catalogos que hay, no una lista a mano"
     assert list(servidos["roles"]["codigos"]) == list(ROLES_DE_HOY)
     assert servidos["clases"]["fuente"] == vocabulario.FUENTES["clases"]
 
@@ -249,12 +262,33 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     diferencian. Si alguien añade uno a una y no a la otra, el motor se queda a medias sin avisar."""
     from contaperu.modelo.libro import RASGOS
 
-    assert set(RASGOS) == set(motor.TIPOS_DEL_MOTOR)
+    # Lo que el nombre promete es una inclusión, no una igualdad: todo libro que el motor origina tiene su fila.
+    # Al revés NO, y desde el 10-oct-2026 ya no es teórico — `tesoreria` tiene rasgos y no se origina.
+    assert set(motor.TIPOS_DEL_MOTOR) <= set(RASGOS)
+    # Y la invariante que lo ata: un libro cuyo `sub_diario` está vacío es uno que el motor NO puede originar,
+    # porque sin sub-diario no hay asiento que escribir. Es la señal de la tabla, dicha como test.
+    assert {k for k, r in RASGOS.items() if not r.sub_diario} == set(RASGOS) - set(motor.TIPOS_DEL_MOTOR)
     for tipo, r in RASGOS.items():
         assert r.tipo == tipo, "la clave de la tabla y el tipo de la fila tienen que ser el mismo"
+
+    # Lo que es cierto solo de los que el motor SÍ origina. Estaba escrito para todas las filas porque todas lo
+    # eran, y `tesoreria` es la que separa las dos cosas: lo que una fila promete y lo que promete un asiento.
+    for tipo in motor.TIPOS_DEL_MOTOR:
+        r = RASGOS[tipo]
         assert r.sentido_principal in ("D", "H")
         assert r.sentido_contraparte != r.sentido_principal, "la partida doble: el otro lado es el otro"
         assert r.sub_diario and r.cuenta_contraparte, "sin estos dos no se puede armar un asiento"
+
+    # Y de los que no: el lado no lo fija el libro, y pedírselo **para** en vez de contestar de más. Hasta la
+    # 9.0 ese `sentido_contraparte` era `"D" if sentido_principal == "H" else "H"`, que con un tercer valor
+    # habría devuelto «haber» callado y mal — el mismo fallo que la mayor vino a cerrar, una capa más abajo.
+    from contaperu.modelo import POR_OPERACION, SentidoNoLoDiceElLibro
+
+    for tipo in set(RASGOS) - set(motor.TIPOS_DEL_MOTOR):
+        r = RASGOS[tipo]
+        assert r.sentido_principal == POR_OPERACION and r.decide_la_operacion
+        with pytest.raises(SentidoNoLoDiceElLibro):
+            r.sentido_contraparte
 
 
 def test_los_dos_libros_se_diferencian_en_lo_que_se_diferencian():
@@ -282,7 +316,7 @@ def test_omitir_el_libro_ya_no_significa_compra_en_silencio():
     c = Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-08-01", total="118.00")
     with pytest.raises(LibroSinRasgos) as e:
         cuenta_tercero(c, {})
-    assert "no sabe armar" in str(e.value) and "compra, venta" in str(e.value)
+    assert "no conoce" in str(e.value) and "compra, tesoreria, venta" in str(e.value)
 
 
 def test_un_booleano_de_antes_de_la_9_0_dice_como_migrar():

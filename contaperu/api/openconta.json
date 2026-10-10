@@ -3239,18 +3239,20 @@
    },
    "catalogos_del_estandar": {
     "title": "Catálogos del estándar",
-    "description": "Los catálogos que `open-accounting` inventa, frente a los de SUNAT, que se copian de la norma: los roles de una línea del asiento, las cinco clases contables y los tipos de libro. Cada uno con su fuente y su versión, porque se versionan aparte del esquema: un valor nuevo no sube la versión del documento.",
+    "description": "Los catálogos que `open-accounting` inventa, frente a los de SUNAT, que se copian de la norma: los roles de una línea del asiento, las cinco clases contables, los tipos de libro y el efecto de una operación de tesorería sobre el efectivo. Cada uno con su fuente y su versión, porque se versionan aparte del esquema: un valor nuevo no sube la versión del documento.",
     "type": "object",
     "required": [
      "roles",
      "clases",
-     "tipos_de_libro"
+     "tipos_de_libro",
+     "efectos_de_tesoreria"
     ],
     "propertyNames": {
      "enum": [
       "roles",
       "clases",
-      "tipos_de_libro"
+      "tipos_de_libro",
+      "efectos_de_tesoreria"
      ]
     },
     "additionalProperties": {
