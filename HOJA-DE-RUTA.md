@@ -79,7 +79,7 @@ la decisión correcta de escalabilidad.
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 14 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
 | **Salida · SUNAT** | Canal `sunat`, que son **los dos regímenes**: el driver `sire` escribe el TXT de reemplazo del RVIE y del RCE; `ple` y `ple_plan`, el Libro Diario y el detalle del plan contable |
 | **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos), con un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct-2026 |
-| **Salida · ERP** | El documento `open-accounting` en JSON, el CSV —los dos de canal `erp`— y la puerta HTTP con OpenConta |
+| **Salida · ERP** | **La base está puesta.** De entrada, el documento `open-accounting` como forma canónica —un ERP no escribe un lector—; de salida, el asiento en el propio estándar y el CSV, los dos de canal `erp`. Cuatro puertas que dan el mismo documento (librería, CLI, MCP y HTTP), el contrato OpenConta generado de la tabla de operaciones, los catálogos citables por la URL de su tag, una batería de conformidad que se corre sin el motor y en cualquier lenguaje, `resumen` y `por_cuenta` para no reescribir «cuánto es este libro», `campos_del_comprobante` y `REGLAS` para quien monte su capa de agente, y la API del SIRE descrita como datos y funciones puras |
 | Pendiente que depende de datos | SISCONT, la plantilla oficial de STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
 
 ### Cumplidos
@@ -101,6 +101,9 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - B4 · 1.0.0 (adelantado sin esperar al integrador, por decisión de John del 14-sep-2026)
 - B5 · 1.0.0
 - B6 · 1.0.0
+- B8 · 3.4.0 (`resumen` y `por_cuenta`: el caso lo trajo un conector que los escribió por su cuenta y le salió `07` donde el motor dice `("07","87")`)
+- B9 · 3.4.0 (`campos_del_comprobante` y `REGLAS`, por el mismo conector, que había copiado la lista de campos a mano y se dejó cinco)
+- A4 · 6.0.0 (STARSOFT Desktop: un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct; la `V` del archivo de ventas se corrigió en la 6.3.2)
 - J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
 - J1 · 1.0.0 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)
 - E6 · 1.4.0 (20-sep-2026: las plantillas «El formato de mi sistema» y «Enmienda»)
@@ -110,58 +113,75 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 
 ## 2 · Qué sigue: orden de ejecución y dependencias
 
-El orden de ejecución: **Fase 0 → el motor (reglas y validación), en paralelo con la salida Legacy → las entradas
-y la salida SIRE a medida que llegan sus datos → el banco**, con **el estándar y la comunidad** acompañando desde el
-principio, porque sus enmiendas tienen que existir antes del primer bloque nuevo del esquema. La salida ERP ya quedó
-abierta en la 1.0 (B1-B6). **Otra jurisdicción** no entra en la secuencia hasta que llegue un cliente real fuera del
-Perú; sus dos primeros hitos, J0 y J1, los cumplió la 1.0 al ordenar el motor en capas.
+**El eje cambió el 10-oct-2026** (John): el motor dejó de ordenarse por los sistemas que ya existen y se ordena
+por **ser la base de cualquier ERP**. La capa encima se mantiene —CONCAR y CONTASIS siguen, y nadie tiene que
+cambiar de sistema— pero ya no es lo que manda el orden. Lo que lo manda es que **la app que integra el motor está
+creciendo hacia un ERP**: bancos, conciliaciones y más SUNAT. Y la secuencia que eso impone, que es la regla del §7:
+**el motor va primero, se etiqueta una versión, y el producto adopta después.**
+
+El orden de ejecución: **el ERP primero** —los tres hitos que le faltan al contrato para que un ERP pueda mandar lo
+que hoy no puede (B13-B15)— **→ el banco como contrato** (D8 hoy; D1 y D2 en cuanto lleguen sus dos archivos)
+**→ SUNAT, que no necesita un frente nuevo sino desbloquearse** (C16 con un token, B10 como decisión, C17 cuando la
+app pida la siguiente API), con **la salida Legacy en paralelo** esperando sus archivos y **el estándar y la
+comunidad** acompañando desde el principio, porque sus enmiendas tienen que existir antes del primer bloque nuevo
+del esquema. La puerta del ERP se abrió en la 1.0 (B1-B6) y lo que la 3.4 y la 8.1 le pusieron encima (B8, B9 y
+`contaperu/sunat/`) es lo que la hace una base y no una promesa. **Otra jurisdicción** no entra en la secuencia
+hasta que llegue un cliente real fuera del Perú; sus dos primeros hitos, J0 y J1, los cumplió la 1.0 al ordenar el
+motor en capas.
 
 ```
-FASE 0 (código) ──────────────────────────────────────────────────────────────────────────────────
- 0.0 identidad ──┬─► 0.1 claves_previas ──┬─► C8 padrón ─► C11 tipos de cambio
-                 │                        └─► C9 cruzar con la propuesta
-                 └─► 0.4 índice ─────────────┐
- 0.2 anotaciones MCP ────────────────────────┴─► B2 ─┐
- 0.5 disco fuera del núcleo ─┬─► C1 reglas SUNAT ─┬─► C2 código oficial
-                             │                    ├─► C3 CDR          [CDR reales]
-                             │                    ├─► C5 20 / 40      [XML + fuente]
-                             │                    └─► E4 revisión     [nueva versión SUNAT]
-                             └─► B1 fachada ─────────┴─► B3 OpenAPI ─► B4 HTTP [integrador]
-                                   └─► B6 guía
- 0.3 frase del LEEME ─► D1 constancias [archivo] ─────┐
- E1 enmiendas ─┬─► C2 · C3 · C4 · C5 · C12             ├─► D3 conciliar ─► D5 pasarela [reporte] ─► D6 asientos
-               ├─► D2 extracto [archivo] ──────────────┘                                           [fuente + aceptado]
-               │     ├─► D4 reglas bancarias [reglas reales]
-               │     ├─► B7 contrato de lector [segundo banco]
+LA BASE DEL ERP (lo primero) ─────────────────────────────────────────────────────────────────────
+ E1 enmiendas ─┬─► B13 libro.tipo del PLE ──► B15 nivel fino de la cuenta
+               ├─► E8 el importe numérico
+               └─► B14 determinación con dimensiones
+ B8 · B9 (3.4.0) ─► B11 propuesta y aprobación [un mes imputado por un agente] ─► B12 trazabilidad
+
+EL BANCO ─────────────────────────────────────────────────────────────────────────────────────────
+ D8 cuentas_bancarias [norma: CCI y códigos de banco]   ← sin esperar archivo
+ 0.3 frase del LEEME ─► D1 constancias [archivo del BN] ──┐
+ E1 enmiendas ─┬─► D2 extracto [archivo real] ────────────┴─► D3 conciliar ─► D5 pasarela [reporte]
+               │     ├─► D4 reglas bancarias [reglas reales]                        └─► D6 asientos
+               │     ├─► B7 contrato de lector [segundo banco]                 [fuente + aceptado]
                │     └─► D7 conectores [primer conector]
+               ├─► C2 · C3 · C4 · C5 · C12
                ├─► E2 conformidad
                └─► E3 política de retiro
 
-Sin dependencias de código: A1-A4 [archivos aceptados] · C6 [04 real] · C7 [RHE real] · C10 [plan + rechazo]
-                            · 0.6 · 0.7 · 0.8 · B5 · E5 guía de aporte · E6 plantilla de formato
-                            · E7 abrir el repositorio [decisión de John]
+SUNAT ────────────────────────────────────────────────────────────────────────────────────────────
+ contaperu/sunat/ (8.1) ─┬─► C16 lectores de la respuesta [una respuesta real por operación]
+                         ├─► C17 más APIs descritas [la siguiente que la app necesite]
+                         └─► B10 perfiles del MCP [decisión, antes de que algo pida credenciales]
+ C1 reglas SUNAT ─┬─► C2 código oficial · C3 CDR [CDR reales] · C5 20 / 40 [XML + fuente]
+                  ├─► C14 la norma como dato
+                  └─► E4 revisión [nueva versión SUNAT]
+ C8 padrón ─► C11 tipos de cambio          ·  C13 pago a cuenta [formulario presentado]
+ C15 consecuencia de `confianza` [un mes cargado desde PDF]
+
+Sin dependencias de código: A1-A3 [archivos aceptados] · C6 [04 real] · C7 [RHE real] · C10 [plan + rechazo]
+                            · E5 guía de aporte
 
 OTRA JURISDICCIÓN [un cliente real fuera del Perú] · J0 y J1 cumplidos en la 1.0
  J0 ─► J1 ─┬─► J2 (tras C1 y C2) ─┬─► J4 ─► J5 (con E1 y E3) ─► J6 [archivo aceptado]
            └─► J3 ────────────────┘
+
+La Fase 0 (0.0-0.8) y la puerta del ERP (B1-B6) están cumplidas: su grafo vive en el historial.
 ```
+
+Lo cumplido —la Fase 0 entera, E1, C1, C9, C2, E2, E3, E5, E6, la puerta del ERP (B1-B6) y B8 y B9— está en
+«Cumplidos» con su versión. Lo que queda, en el orden del eje nuevo:
 
 | Orden | Hitos | Arranca con |
 |---|---|---|
-| 1 | 0.0 → 0.1, 0.4 · 0.2 · 0.3 · 0.5 · 0.6 · 0.7 · 0.8 | código |
-| 2 | E1 | código |
-| 3 | C1 | dato público, ya disponible |
-| 4 | C9 · C2 | código |
-| 5 | E2 · E3 · E5 · E6 | código |
-| 6 | B1 · B2 · B5 · B3 · B6 | código |
-| en paralelo | A1-A4 | dato: archivos aceptados |
-| cuando llegue el dato | C3 · C4 · C5 · C6 · C7 · C8 · C10 · C11 · C12 | dato |
-| cuando llegue el dato | D1 · D2 → D3 · D4 → D5 → D6 | dato (D3 es código, tras D1 y D2) |
-| cuando haga falta | B4 · B7 · D7 · E4 | dato o decisión |
-| antes de que algo pida credenciales | B10 perfiles del MCP | decisión |
-| cuando llegue el dato | C14 la fuente como dato (tras C1) · C16 lectores del SIRE [respuesta real] | código / dato |
+| 1 · la base del ERP | **B13** `libro.tipo` con el catálogo del PLE → **B15** el nivel fino de la cuenta · **E8** el importe numérico | código, con su enmienda |
+| 2 · el banco, lo que no espera archivo | **D8** `cuentas_bancarias*` como argumento | norma: el CCI y los códigos de banco |
+| 3 · SUNAT, desbloquear | **C16** los lectores de la respuesta | dato: una respuesta real por operación, que se captura con `herramientas/comprobar_sire.py` |
+| 4 · antes de que algo pida credenciales | **B10** perfiles de herramientas del MCP | decisión |
+| en paralelo | A1-A3 legacy | dato: la plantilla de SISCONT y un mes importado |
+| cuando la app pida la siguiente API | **C17** más APIs de SUNAT descritas | dato: cuál, y su manual |
+| cuando llegue el dato | **B14** determinación con dimensiones · C3 · C4 · C5 · C6 · C7 · C8 · C10 · C11 · C12 · C13 · C14 (tras C1) | dato |
+| cuando lleguen los dos archivos | **D1** constancias del BN · **D2** extracto → **D3** conciliar · D4 → D5 → D6 | dato (D3 es código, tras D1 y D2) |
 | cuando haya un mes imputado por un agente | B11 → B12 · C15 consecuencia de `confianza` | caso real |
-| cuando John lo decida | E7 | decisión |
+| cuando haga falta | B7 · D7 · E4 | dato o decisión |
 | con un cliente real fuera del Perú | J0 → J1 → J2 · J3 → J4 → J5 → J6 | dato: el cliente, su destino y un archivo aceptado |
 
 ---
