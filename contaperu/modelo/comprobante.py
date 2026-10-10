@@ -306,7 +306,10 @@ def identidad_de(libro: Libro, c: Comprobante) -> dict[str, str]:
     que es la misma razón por la que `comparar_sire` lo deja fuera de su clave."""
     tipo_cp, serie, numero, contraparte = c.clave
     identidad = {"ruc": libro.ruc, "libro": libro.tipo, "tipo_cp": tipo_cp, "serie": serie, "numero": numero}
-    if not libro.es_venta:
+    # En forma positiva (`es_compra`) y no como `not es_venta`, que es lo que decía hasta la 9.0: esta función vive
+    # en `modelo`, por debajo de la puerta que para un libro que el motor no origina, así que aquí no hay nada que
+    # cubra un tercer tipo. Preguntado así, un libro nuevo no hereda la identidad de una compra.
+    if libro.es_compra:
         identidad["contraparte_doc"] = contraparte
     return identidad
 

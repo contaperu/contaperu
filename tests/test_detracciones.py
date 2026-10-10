@@ -25,10 +25,21 @@ from contaperu.asiento.configuracion import NUMERO_DETRACCION_PENDIENTE
 from contaperu.drivers import contasis as driver_contasis
 from contaperu.drivers import sire as driver_sire
 from contaperu.modelo import Comprobante, Libro
+from contaperu.modelo.libro import RASGOS
 
 # `con_imputaciones` mete las imputaciones de prueba en la configuración: desde la 3.0 la cuenta de un comprobante
 # es suya y llega por ahí, así que sin esto el asiento se plantaría con «sin cuenta contable».
 from util import comprobante as _comprobante_de_prueba, con_imputaciones     # noqa: E402
+
+
+def filas_de_comprobante(*a, libro=RASGOS["compra"], **kw):
+    """Las filas de CONCAR de un comprobante, con el libro que este fichero da por supuesto.
+
+    El libro va por defecto porque casi todo aquí son compras. Antes de la 9.0 lo ponía el defecto de la firma
+    del motor, y **ahí era el error que la mayor viene a quitar**: una función que supone «compra» cuando nadie
+    se lo dice. Aquí es legítimo, porque el fichero entero habla de un libro y decirlo una vez arriba es más
+    claro que repetirlo en cada llamada."""
+    return driver_concar.filas_de_comprobante(*a, libro=libro, **kw)
 
 CONTAB = con_imputaciones(prep.config_aplicada(None, "concar"))
 CODIGOS = detracciones.codigos_de(CONTAB)
@@ -150,7 +161,7 @@ def test_una_detraccion_limpiada_no_llega_al_asiento():
     """La consecuencia real de la regla: sin código válido no hay líneas de detracción."""
     c = comprobante({"codigo": "000", "porcentaje": 3})
     detracciones.normalizar([c], CONTAB)
-    filas = driver_concar.filas_de_comprobante(c, CONTAB, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
+    filas = filas_de_comprobante(c, CONTAB, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
     assert len(filas) == 3 and all(f["R"] != "DR" for f in filas)
 
 
@@ -179,7 +190,7 @@ def test_sin_tasa_en_el_comprobante_usa_la_de_la_tabla():
 def test_el_asiento_usa_el_mismo_monto():
     """Una sola implementación: lo que ve la persona es lo que sale en las líneas de la detracción."""
     c = comprobante({"codigo": "037", "porcentaje": 12}, total="330.40", base_gravada="280", igv="50.40")
-    filas = driver_concar.filas_de_comprobante(c, TABLA, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
+    filas = filas_de_comprobante(c, TABLA, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
     detraccion = [f for f in filas if f["R"] == "DR"]
     assert detraccion and all(f["O"] == 40 for f in detraccion)
 
@@ -255,7 +266,7 @@ def test_el_driver_de_asiento_y_el_de_registro_dicen_lo_MISMO():
     núcleo; CONTASIS nunca ve esa línea —su sistema arma el asiento— y hasta la 2.7 la reescribía por su cuenta,
     comodín incluido. Dos copias de una regla acaban diciendo cosas distintas; esto lo comprueba."""
     c = _compra_con_detraccion(nro_constancia="98765432109876543", fecha_constancia="2026-02-10")
-    lineas = asiento.lineas_del_comprobante(c, CONTAB, (date(2026, 1, 1), date(2026, 1, 31)), "0001")
+    lineas = asiento.lineas_del_comprobante(c, CONTAB, (date(2026, 1, 1), date(2026, 1, 31)), "0001", libro=RASGOS["compra"])
     de_la_linea = next(ln.detraccion for ln in lineas if ln.rol == "detraccion" and ln.detraccion)
     del_registro = driver_contasis.proyeccion._constancia(c, CONTAB)
     assert de_la_linea["nro_constancia"] == del_registro["U"] == "98765432109876543"
@@ -274,7 +285,7 @@ def test_el_comodin_del_numero_se_configura_y_llega_a_los_dos_caminos():
     c = _compra_con_detraccion()
 
     # El camino del ASIENTO: el documento comodín de la línea `DR` y la constancia de su bloque.
-    lineas = asiento.lineas_del_comprobante(c, propio, (date(2026, 1, 1), date(2026, 1, 31)), "0001")
+    lineas = asiento.lineas_del_comprobante(c, propio, (date(2026, 1, 1), date(2026, 1, 31)), "0001", libro=RASGOS["compra"])
     de_la_linea = next(ln for ln in lineas if ln.rol == "detraccion")
     assert de_la_linea.documento["serie_numero"] == "123456789"
     assert de_la_linea.detraccion["nro_constancia"] == "123456789"
@@ -350,7 +361,8 @@ def test_el_voucher_llega_al_documento_DR_de_CONCAR():
     """Lo que faltaba (3.2): el número real llegaba a STARSOFT y a CONTASIS y **no a CONCAR**, que es el destino en
     producción y donde el número del documento `DR` ES la constancia. El comodín solo ocupa su sitio."""
     def documento_dr(c, config=CONTAB) -> tuple[str, str]:
-        lineas = asiento.lineas_del_comprobante(c, config, (date(2026, 1, 1), date(2026, 1, 31)), "0001")
+        lineas = asiento.lineas_del_comprobante(c, config, (date(2026, 1, 1), date(2026, 1, 31)), "0001",
+                                                libro=RASGOS["compra"])
         dr = next(ln for ln in lineas if ln.rol == "detraccion")
         return driver_concar.proyeccion.fila(dr, c, config)["S"], dr.documento["serie_numero"]
 

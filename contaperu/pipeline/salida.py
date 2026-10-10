@@ -197,7 +197,7 @@ def exportar_archivo(doc: dict, *, driver: str, configuracion: dict | None = Non
     # sistema contable); los correlativos, además, el que arma asientos — y solo si hay que numerar.
     corr = None
     if contrato.arma_asientos(modulo) and dadas is None:
-        corr = asi.correlativos_de_partida(comprobantes, config, libro.es_venta, correlativos)
+        corr = asi.correlativos_de_partida(comprobantes, config, libro.rasgos, correlativos)
     return generar(libro, comprobantes, driver, incluir_errores=incluir_observados,
                    config=config if contrato.lleva_cuentas(modulo) else None, correlativos=corr, lineas=dadas)
 

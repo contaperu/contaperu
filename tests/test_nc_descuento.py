@@ -23,10 +23,21 @@ from contaperu.pipeline import salida as g
 from contaperu.pipeline import preparacion as prep
 from contaperu.lectores import sire_txt, xml_ubl
 from contaperu.modelo import Comprobante, Libro
+from contaperu.modelo.libro import RASGOS
 from test_sire_txt import FACTURA, NOTA, VENTAS, texto
 from test_xml_ubl import NC_CON_DESCUENTO
 from util import campos, cargar_golden
 from util import con_imputaciones, imputar
+
+
+def filas_de_comprobante(*a, libro=RASGOS["compra"], **kw):
+    """Las filas de CONCAR de un comprobante, con el libro que este fichero da por supuesto.
+
+    El libro va por defecto porque casi todo aquí son compras. Antes de la 9.0 lo ponía el defecto de la firma
+    del motor, y **ahí era el error que la mayor viene a quitar**: una función que supone «compra» cuando nadie
+    se lo dice. Aquí es legítimo, porque el fichero entero habla de un libro y decirlo una vez arriba es más
+    claro que repetirlo en cada llamada."""
+    return driver_concar.filas_de_comprobante(*a, libro=libro, **kw)
 
 COMPRAS = Libro(ruc=VENTAS.ruc, razon_social=VENTAS.razon_social, periodo=VENTAS.periodo, tipo="compra")
 
@@ -85,7 +96,7 @@ def test_el_asiento_revierte_tambien_el_igv():
     c = de_la_propuesta()
     imputar(c, cuenta_contable="701111", centro_costo="OBRA01")
     config = con_imputaciones(prep.config_aplicada(None, "concar"))
-    filas = driver_concar.filas_de_comprobante(c, config, MES, "050001", es_venta=True)
+    filas = filas_de_comprobante(c, config, MES, "050001", libro=RASGOS["venta"])
     assert sorted(D(str(f["O"])) for f in filas) == [D("1797.36"), D("9985.36"), D("11782.72")]
 
 

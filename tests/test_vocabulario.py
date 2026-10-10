@@ -13,7 +13,7 @@ import pytest
 from contaperu import api, vocabulario
 from contaperu.asiento import motor
 from contaperu.asiento.motor import ROLES
-from contaperu.modelo import TIPOS_LIBRO
+from contaperu.modelo import TIPOS_LIBRO, Comprobante, Libro
 
 # Los valores de la 1.0, escritos a mano, y **congelados para siempre**: lo que se publicó no se quita ni cambia de
 # significado ni se mueve de sitio, porque quien ya integró lo lee por su nombre y a veces por su orden.
@@ -240,3 +240,59 @@ def test_es_venta_y_es_compra_son_dos_preguntas_y_no_una():
     compra = Libro(ruc="20601234567", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
     assert (venta.es_venta, venta.es_compra) == (True, False)
     assert (compra.es_venta, compra.es_compra) == (False, True)
+
+
+# ── El eje del libro, que la 9.0 pasó de un booleano a una tabla ───────────
+
+def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
+    """Las dos tuplas tienen que decir lo mismo: `TIPOS_DEL_MOTOR` dice cuáles sabe armar y `RASGOS` en qué se
+    diferencian. Si alguien añade uno a una y no a la otra, el motor se queda a medias sin avisar."""
+    from contaperu.modelo.libro import RASGOS
+
+    assert set(RASGOS) == set(motor.TIPOS_DEL_MOTOR)
+    for tipo, r in RASGOS.items():
+        assert r.tipo == tipo, "la clave de la tabla y el tipo de la fila tienen que ser el mismo"
+        assert r.sentido_principal in ("D", "H")
+        assert r.sentido_contraparte != r.sentido_principal, "la partida doble: el otro lado es el otro"
+        assert r.sub_diario and r.cuenta_contraparte, "sin estos dos no se puede armar un asiento"
+
+
+def test_los_dos_libros_se_diferencian_en_lo_que_se_diferencian():
+    """El contenido de la tabla, anclado. Es lo que antes estaba repartido en medio centenar de `if es_venta`, y
+    tenerlo aquí junto es lo que hace que añadir un libro sea rellenar una fila y no auditar el núcleo."""
+    from contaperu.modelo.libro import RASGOS
+
+    venta, compra = RASGOS["venta"], RASGOS["compra"]
+    assert (venta.sentido_principal, venta.sentido_contraparte) == ("H", "D")
+    assert (compra.sentido_principal, compra.sentido_contraparte) == ("D", "H")
+    assert (venta.cuenta_contraparte, compra.cuenta_contraparte) == ("clientes", "cxp")
+    # El IGV de una compra es crédito fiscal; el de una venta es lo que se recauda, y por eso no lo es.
+    assert compra.da_credito_fiscal and not venta.da_credito_fiscal
+    # La detracción y los honorarios solo existen del lado de las compras.
+    assert compra.lleva_detraccion and compra.lleva_honorarios
+    assert not venta.lleva_detraccion and not venta.lleva_honorarios
+
+
+def test_omitir_el_libro_ya_no_significa_compra_en_silencio():
+    """**Es la razón de ser de la 9.0.** Hasta la 8.x estas funciones tenían `es_venta: bool = False`, así que
+    llamarlas sin decir el libro significaba «compra» sin que nadie lo hubiera dicho. Ahora para."""
+    from contaperu.asiento import cuenta_tercero
+    from contaperu.modelo.libro import LibroSinRasgos
+
+    c = Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-08-01", total="118.00")
+    with pytest.raises(LibroSinRasgos) as e:
+        cuenta_tercero(c, {})
+    assert "no sabe armar" in str(e.value) and "compra, venta" in str(e.value)
+
+
+def test_un_booleano_de_antes_de_la_9_0_dice_como_migrar():
+    """Un `True` que se cuele elegiría la rama equivocada en silencio, que es justo lo que esto viene a quitar.
+    Así que no se interpreta: se para, y el mensaje dice qué escribir en su lugar."""
+    from contaperu.modelo.libro import RASGOS, LibroSinRasgos, rasgos_de
+
+    with pytest.raises(LibroSinRasgos) as e:
+        rasgos_de(True)
+    assert "`libro.rasgos`" in str(e.value) and "RASGOS['venta']" in str(e.value)
+    # Y lo que sí acepta: unos rasgos, un libro o el tipo por su nombre.
+    libro = Libro(ruc="20601234567", razon_social="MI EMPRESA SAC", periodo="202608", tipo="venta")
+    assert rasgos_de(libro) is rasgos_de("venta") is libro.rasgos is RASGOS["venta"]

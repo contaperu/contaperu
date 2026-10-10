@@ -26,6 +26,17 @@ from contaperu import asiento as asi
 from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import concar as driver_concar, contrato
 from contaperu.modelo import Comprobante
+from contaperu.modelo.libro import RASGOS
+
+
+def filas_de_comprobante(*a, libro=RASGOS["compra"], **kw):
+    """Las filas de CONCAR de un comprobante, con el libro que este fichero da por supuesto.
+
+    El libro va por defecto porque casi todo aquí son compras. Antes de la 9.0 lo ponía el defecto de la firma
+    del motor, y **ahí era el error que la mayor viene a quitar**: una función que supone «compra» cuando nadie
+    se lo dice. Aquí es legítimo, porque el fichero entero habla de un libro y decirlo una vez arriba es más
+    claro que repetirlo en cada llamada."""
+    return driver_concar.filas_de_comprobante(*a, libro=libro, **kw)
 
 SNAPSHOT = Path(__file__).parent / "fixtures" / "snapshot"
 FILAS = SNAPSHOT / "concar_filas.json"
@@ -192,7 +203,7 @@ def _celda(v):
 
 def filas_de(caso) -> list[dict]:
     c, config, es_venta = armar(caso)
-    return driver_concar.filas_de_comprobante(c, config, MES, "080001", es_venta=es_venta)
+    return filas_de_comprobante(c, config, MES, "080001", libro=RASGOS["venta" if es_venta else "compra"])
 
 
 def serializar_filas(caso) -> list[dict]:
@@ -206,7 +217,7 @@ def serializar_lineas(caso) -> list[dict]:
     del IGV como texto exacto. Ningún importe, cuenta ni sentido cambió."""
     c, config, es_venta = armar(caso)
     anexos = contrato.centro_en_anexo(driver_concar, config)
-    return [ln.a_dict() for ln in asi.lineas_del_comprobante(c, config, MES, "080001", es_venta=es_venta,
+    return [ln.a_dict() for ln in asi.lineas_del_comprobante(c, config, MES, "080001", libro=RASGOS["venta" if es_venta else "compra"],
                                                               centro_en_anexo=anexos)]
 
 

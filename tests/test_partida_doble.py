@@ -11,7 +11,18 @@ from contaperu.pipeline import preparacion as prep
 from contaperu.contable import partida_doble
 from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Libro
+from contaperu.modelo.libro import RASGOS
 from util import comprobante, con_imputaciones, construir_concar
+
+
+def filas_de_comprobante(*a, libro=RASGOS["compra"], **kw):
+    """Las filas de CONCAR de un comprobante, con el libro que este fichero da por supuesto.
+
+    El libro va por defecto porque casi todo aquí son compras. Antes de la 9.0 lo ponía el defecto de la firma
+    del motor, y **ahí era el error que la mayor viene a quitar**: una función que supone «compra» cuando nadie
+    se lo dice. Aquí es legítimo, porque el fichero entero habla de un libro y decirlo una vez arriba es más
+    claro que repetirlo en cada llamada."""
+    return driver_concar.filas_de_comprobante(*a, libro=libro, **kw)
 
 CONTAB = con_imputaciones(prep.config_aplicada(None, "concar"))
 MES = (date(2026, 8, 1), date(2026, 8, 31))
@@ -70,7 +81,7 @@ def test_el_asiento_real_siempre_cuadra():
         "en dolares": cp(moneda="USD", tipo_cambio="3.5"),
     }
     for nombre, c in casos.items():
-        filas = driver_concar.filas_de_comprobante(c, CONTAB, MES, "080001")
+        filas = filas_de_comprobante(c, CONTAB, MES, "080001")
         r = partida_doble.cuadra(driver_concar.a_lineas(filas, CONTAB))
         assert r.cuadra, f"{nombre} no cuadra: {r.a_dict()}"
 

@@ -21,7 +21,18 @@ from contaperu import api
 from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import csv as driver_csv
 from contaperu.modelo import Comprobante, Libro
+from contaperu.modelo.libro import RASGOS
 from util import comprobante, con_imputaciones, en_secciones
+
+
+def filas_de_comprobante(*a, libro=RASGOS["compra"], **kw):
+    """Las filas de CONCAR de un comprobante, con el libro que este fichero da por supuesto.
+
+    El libro va por defecto porque casi todo aquí son compras. Antes de la 9.0 lo ponía el defecto de la firma
+    del motor, y **ahí era el error que la mayor viene a quitar**: una función que supone «compra» cuando nadie
+    se lo dice. Aquí es legítimo, porque el fichero entero habla de un libro y decirlo una vez arriba es más
+    claro que repetirlo en cada llamada."""
+    return driver_concar.filas_de_comprobante(*a, libro=libro, **kw)
 
 def configuracion(config_contable: dict | None = None) -> dict:
     """La configuración aplicada para CONCAR (la del entorno sobre la de por defecto) con las imputaciones de las
@@ -50,13 +61,13 @@ def test_el_centro_de_referencia_viaja_como_anexo_auxiliar():
     X— pero conviene fijarlo aquí y no descubrirlo desde el MCP o desde el driver CSV."""
     columnas = ["centro_costo", "anexo_auxiliar", "anexo_auxiliar_del_tercero"]
     ref = configuracion({"columnas": {"centro_costo": columnas}})
-    filas = driver_concar.filas_de_comprobante(factura(cuenta_contable="603201"), ref, MES, "080001")
+    filas = filas_de_comprobante(factura(cuenta_contable="603201"), ref, MES, "080001")
     gasto = driver_concar.desde_fila(filas[0])
     assert gasto.centro_costo == "" and gasto.anexo_auxiliar == "CC-64"
 
 
 def test_la_linea_neutral_dice_lo_mismo_que_la_columna():
-    filas = driver_concar.filas_de_comprobante(factura(), CONTAB, MES, "080084")
+    filas = filas_de_comprobante(factura(), CONTAB, MES, "080084")
     gasto, igv, proveedor = driver_concar.a_lineas(filas, CONTAB)
 
     assert gasto.cuenta == "659999" and gasto.debe_haber == "D" and gasto.importe == "4200.00"
@@ -74,13 +85,13 @@ def test_la_linea_neutral_dice_lo_mismo_que_la_columna():
 
 def test_el_codigo_de_moneda_del_erp_vuelve_a_iso():
     """En el Excel la moneda es 'MN' o 'US'; en el estándar, PEN y USD."""
-    pen = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(), CONTAB, MES, "080001"), CONTAB)[0]
-    usd = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(moneda="USD", tipo_cambio="3.5"), CONTAB, MES, "080002"), CONTAB)[0]
+    pen = driver_concar.a_lineas(filas_de_comprobante(factura(), CONTAB, MES, "080001"), CONTAB)[0]
+    usd = driver_concar.a_lineas(filas_de_comprobante(factura(moneda="USD", tipo_cambio="3.5"), CONTAB, MES, "080002"), CONTAB)[0]
     assert pen.moneda == "PEN" and usd.moneda == "USD" and usd.tipo_cambio == "3.5"
 
 
 def test_la_linea_de_detraccion_lleva_su_bloque():
-    filas = driver_concar.filas_de_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
+    filas = filas_de_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
     lineas = driver_concar.a_lineas(filas, CONTAB)
     assert len(lineas) == 5
     det = lineas[-1]
@@ -102,7 +113,7 @@ def test_el_excel_de_concar_vuelve_a_su_excel_sin_perder_columnas():
     for c in (factura(), factura(detraccion={"codigo": "027", "porcentaje": "4"}),
               factura(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="E001", ref_numero="871",
                       ref_fecha="2026-08-01")):
-        ida = driver_concar.filas_de_comprobante(c, CONTAB, MES, "080084")
+        ida = filas_de_comprobante(c, CONTAB, MES, "080084")
         cab = proyeccion.cabecera_de(c)
         vuelta = [proyeccion.fila(ln, cab, CONTAB) for ln in driver_concar.a_lineas(ida, CONTAB)]
         for antes, despues in zip(ida, vuelta):
@@ -115,7 +126,7 @@ def test_la_columna_ai_vuelve_al_codigo_de_sunat():
     que la empresa no mapeó, por sus tres primeros dígitos, que es como se numera esa tabla. El lector devuelve lo que
     dice el estándar —el Catálogo 54—, no el código de un ERP."""
     config = dict(CONTAB, detraccion_codigos={**CONTAB.get("detraccion_codigos", {}), "037": "03799"})
-    filas = driver_concar.filas_de_comprobante(factura(detraccion={"codigo": "037", "porcentaje": "10"}),
+    filas = filas_de_comprobante(factura(detraccion={"codigo": "037", "porcentaje": "10"}),
                                                config, MES, "080084")
     assert filas[-1]["AI"] == "03799"
     assert driver_concar.a_lineas(filas, config)[-1].detraccion["codigo"] == "037", "por el mapa"
@@ -125,7 +136,7 @@ def test_la_columna_ai_vuelve_al_codigo_de_sunat():
 
 
 def test_a_dict_no_arrastra_claves_vacias():
-    linea = driver_concar.a_lineas(driver_concar.filas_de_comprobante(factura(), CONTAB, MES, "080001"), CONTAB)[1]  # el IGV
+    linea = driver_concar.a_lineas(filas_de_comprobante(factura(), CONTAB, MES, "080001"), CONTAB)[1]  # el IGV
     d = linea.a_dict()
     assert "centro_costo" not in d and "referencia" not in d and "detraccion" not in d
     assert d["cuenta"] == "401111"
@@ -139,7 +150,7 @@ def test_las_lineas_validan_contra_el_estandar():
         "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                   "periodo": "202608", "tipo": "compra"},
         "asiento": [ln.a_dict() for ln in driver_concar.a_lineas(
-            driver_concar.filas_de_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084"),
+            filas_de_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084"),
             CONTAB)],
     }
     assert list(validador.iter_errors(doc)) == []
@@ -158,14 +169,14 @@ def test_las_dos_cuentas_del_sistema_se_leen_igual_y_con_su_respaldo():
     diagnóstico (`resolucion.cuentas_del_asiento`) ya era simétrico, que es lo que delató la diferencia."""
     sin_las_dos = dict(CONTAB, cuentas={k: v for k, v in CONTAB["cuentas"].items()
                                        if k not in ("igv", "retencion_4ta")})
-    lineas = asi.lineas_del_comprobante(factura(), sin_las_dos, MES, "080084")
+    lineas = asi.lineas_del_comprobante(factura(), sin_las_dos, MES, "080084", libro=RASGOS["compra"])
     del_impuesto = next(ln for ln in lineas if ln.rol == "impuesto")
     assert del_impuesto.cuenta == CONFIG_POR_DEFECTO["cuentas"]["igv"] == "401111"
 
     # Y la de la retención, que ya lo hacía, para que las dos queden fijadas por el mismo test y no se separen otra vez.
     rh = factura(tipo_cp="02", retencion="160.00", igv="0.00", base_gravada="0.00",
                  exonerado="2000.00", total="2000.00")
-    de_la_retencion = next(ln for ln in asi.lineas_del_comprobante(rh, sin_las_dos, MES, "150001")
+    de_la_retencion = next(ln for ln in asi.lineas_del_comprobante(rh, sin_las_dos, MES, "150001", libro=RASGOS["compra"])
                            if ln.rol == "retencion")
     assert de_la_retencion.cuenta == CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"] == "401721"
 
@@ -182,7 +193,7 @@ def test_la_linea_del_impuesto_dice_de_que_tributo_es():
     pone la precisión. Mismo patrón que `detraccion`, que lo hace desde la 1.0 con su código y su tasa."""
     from contaperu import catalogos
 
-    lineas = asi.lineas_del_comprobante(factura(), CONTAB, MES, "080084")
+    lineas = asi.lineas_del_comprobante(factura(), CONTAB, MES, "080084", libro=RASGOS["compra"])
     del_impuesto = next(ln for ln in lineas if ln.rol == "impuesto")
     assert del_impuesto.impuesto == {"codigo": "1000"} == {"codigo": catalogos.TRIBUTO_IGV}
     assert del_impuesto.impuesto["codigo"] in catalogos.TRIBUTOS
@@ -203,7 +214,7 @@ def test_la_linea_de_la_retencion_dice_de_que_tributo_y_de_que_categoria():
 
     rh = factura(tipo_cp="02", retencion="160.00", igv="0.00", base_gravada="0.00",
                  exonerado="2000.00", total="2000.00")
-    lineas = asi.lineas_del_comprobante(rh, CONTAB, MES, "150001")
+    lineas = asi.lineas_del_comprobante(rh, CONTAB, MES, "150001", libro=RASGOS["compra"])
     de_la_retencion = next(ln for ln in lineas if ln.rol == "retencion")
     assert de_la_retencion.retencion == {"codigo": "3000", "categoria": "4"}
     assert de_la_retencion.retencion["codigo"] == catalogos.TRIBUTO_RENTA
@@ -215,7 +226,7 @@ def test_la_linea_de_la_retencion_dice_de_que_tributo_y_de_que_categoria():
 
 
 def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
-    lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
+    lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084", libro=RASGOS["compra"])
     assert [ln.rol for ln in lineas] == ["principal", "impuesto", "tercero", "recorte", "detraccion"]
     assert all(ln.rol in asi.ROLES for ln in lineas)
     # La línea lleva el código de SUNAT y NO la sigla: `FT` es la T.G. 06 de CONCAR y la escribe su driver (4.0).
@@ -233,7 +244,7 @@ def test_la_linea_lleva_el_codigo_de_sunat_y_el_interno_lo_pone_cada_erp():
     DOS vocabularios, y la traducción la hace `drivers.concar.proyeccion.codigo_interno_detraccion`."""
     for vocabulario in ("legacy", "neutral"):
         lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES,
-                                            "080084", vocabulario=vocabulario)
+                                            "080084", libro=RASGOS["compra"], vocabulario=vocabulario)
         det = lineas[-1].detraccion
         assert det["codigo"] == "027", vocabulario
         assert "codigo_interno" not in det, f"el interno de la T.G. 28 no es del asiento ({vocabulario})"
@@ -245,9 +256,9 @@ def test_la_glosa_de_la_linea_va_entera_y_el_corte_es_del_driver():
     Que es cada linea lo dicen su `rol` y su cuenta; hasta la 2.1 las derivadas anteponian `IGV - `,
     `RET 4TA - ` o `DETRACCION - `, que ademas gastaba los 30 caracteres de la columna W de CONCAR."""
     concepto = "SERVICIO DE TRANSPORTE DE MATERIALES DE CONSTRUCCION A LA OBRA"
-    lineas = asi.lineas_del_comprobante(factura(concepto=concepto), CONTAB, MES, "080001")
+    lineas = asi.lineas_del_comprobante(factura(concepto=concepto), CONTAB, MES, "080001", libro=RASGOS["compra"])
     assert {ln.glosa for ln in lineas} == {concepto}
-    filas = driver_concar.filas_de_comprobante(factura(concepto=concepto), CONTAB, MES, "080001")
+    filas = filas_de_comprobante(factura(concepto=concepto), CONTAB, MES, "080001")
     assert filas[0]["W"] == concepto[:30] and filas[0]["F"] == concepto[:40]
 
 
@@ -261,17 +272,17 @@ def test_la_tasa_del_igv_que_viaja_es_la_LEGAL_y_concar_la_redondea():
     La reducida no cambia: 10.5 se escribe `10.5` y CONCAR la redondea a 11, porque su columna AO solo admite entero
     y ese redondeo es suyo."""
     reducida = factura(base_gravada="100", igv="10.5", total="110.5")
-    assert asi.lineas_del_comprobante(reducida, CONTAB, MES, "080001")[0].tasa_igv == "10.5"
-    assert driver_concar.filas_de_comprobante(reducida, CONTAB, MES, "080001")[0]["AO"] == 11
+    assert asi.lineas_del_comprobante(reducida, CONTAB, MES, "080001", libro=RASGOS["compra"])[0].tasa_igv == "10.5"
+    assert filas_de_comprobante(reducida, CONTAB, MES, "080001")[0]["AO"] == 11
 
     notaria = factura(base_gravada="25.42", igv="4.58", total="30.00")
-    assert asi.lineas_del_comprobante(notaria, CONTAB, MES, "080001")[0].tasa_igv == "18"
+    assert asi.lineas_del_comprobante(notaria, CONTAB, MES, "080001", libro=RASGOS["compra"])[0].tasa_igv == "18"
 
 
 def test_una_nota_de_credito_lleva_los_dos_codigos_de_su_referencia():
     nc = factura(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="E001",
                  ref_numero="871", ref_fecha="2026-08-01")
-    principal = asi.lineas_del_comprobante(nc, CONTAB, MES, "080001")[0]
+    principal = asi.lineas_del_comprobante(nc, CONTAB, MES, "080001", libro=RASGOS["compra"])[0]
     assert principal.documento["tipo_cp"] == "07" and principal.debe_haber == "H"
     assert principal.referencia == {"tipo_cp": "01", "serie_numero": "E001-871", "fecha": "2026-08-01"}
 
@@ -280,10 +291,11 @@ def test_lo_que_arma_el_motor_valida_contra_el_estandar():
     validador = Draft202012Validator(json.loads(ESQUEMA.read_text(encoding="utf-8")))
     nc = factura(tipo_cp="07", serie="FC01", numero="9", ref_tipo_cp="01", ref_serie="E001", ref_numero="871",
                  ref_fecha="2026-08-01", detraccion={"codigo": "027", "porcentaje": "4"})
-    lineas = (asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084")
-              + asi.lineas_del_comprobante(nc, CONTAB, MES, "080085")
+    lineas = (asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084", libro=RASGOS["compra"])
+              + asi.lineas_del_comprobante(nc, CONTAB, MES, "080085", libro=RASGOS["compra"])
               + asi.lineas_del_comprobante(factura(tipo_cp="02", retencion="336", igv="0", base_gravada="0",
-                                            inafecto="4956"), CONTAB, MES, "080086"))
+                                            inafecto="4956"), CONTAB, MES, "080086",
+                                           libro=RASGOS["compra"]))
     doc = {"open_accounting": "1.0",
            "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                      "periodo": "202608", "tipo": "compra"},

@@ -21,6 +21,7 @@ from contaperu.configuracion import ConfiguracionInvalida
 from contaperu.errores import ErrorContaperu
 from contaperu.lectores.xml_ubl import XmlInvalido
 from contaperu.modelo import Comprobante, Libro, identidad_de, numero_sin_ceros
+from contaperu.modelo.libro import RASGOS
 from util import GOLDEN
 
 LINEAS = json.loads((Path(__file__).parent / "fixtures" / "snapshot" / "lineas_legacy.json").read_text(encoding="utf-8"))
@@ -117,8 +118,8 @@ def test_numerar_en_orden_da_lo_mismo_que_numerar_sin_depender_de_la_identidad()
     documento = json.loads((GOLDEN / "compras_202601.json").read_text(encoding="utf-8"))
     comprobantes = prep.comprobantes_de(documento)
     config = prep.config_aplicada({"usa_centros_costo": False}, "concar")
-    en_orden, rangos = asi.numerar_en_orden(comprobantes, config, "202601", {"11": 5})
-    por_id, rangos_viejos = asi.numerar(comprobantes, config, "202601", {"11": 5})
+    en_orden, rangos = asi.numerar_en_orden(comprobantes, config, "202601", {"11": 5}, libro=RASGOS["compra"])
+    por_id, rangos_viejos = asi.numerar(comprobantes, config, "202601", {"11": 5}, libro=RASGOS["compra"])
     assert en_orden == ["010005", "010006", "010007"] == [por_id[id(c)] for c in comprobantes]
     assert rangos == rangos_viejos
 

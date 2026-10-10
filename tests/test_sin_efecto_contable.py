@@ -24,6 +24,7 @@ from contaperu.asiento import motor
 from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Comprobante, Libro
 from contaperu.pipeline import preparacion as prep
+from contaperu.modelo.libro import RASGOS
 from util import comprobante, con_imputaciones, en_secciones, por_la_fachada
 
 CONTAB = con_imputaciones(prep.config_aplicada(en_secciones(None, "concar"), "concar"))
@@ -47,7 +48,7 @@ def dado_de_baja(**kw) -> Comprobante:
 
 
 def lineas(c: Comprobante, config: dict = CONTAB) -> list:
-    return motor.lineas_del_comprobante(c, config, MES, "0001", opciones=driver_concar.OPCIONES, es_venta=True)
+    return motor.lineas_del_comprobante(c, config, MES, "0001", opciones=driver_concar.OPCIONES, libro=RASGOS["venta"])
 
 
 # ── El asiento ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -63,10 +64,10 @@ def test_un_comprobante_en_cero_no_pide_cuenta_ni_centro():
     incompleto para siempre. Se comprueba sin cuenta Y sin centro, que son las dos cosas que se le pedían."""
     c = dado_de_baja(cuenta_contable="", centro_costo="")
     assert lineas(c) == []                                        # antes: SinCuenta
-    assert asi.comprobantes_sin_cuenta([c], CONTAB, True) == [c]   # la regla suelta sigue diciendo la verdad…
+    assert asi.comprobantes_sin_cuenta([c], CONTAB, RASGOS["venta"]) == [c]   # la regla suelta sigue diciendo la verdad…
     # …y lo que cuenta es que `faltantes_para`, que es por donde pasan los tres caminos (diagnóstico, exportación y
     # `exigir_requisitos`), ya no lo pide.
-    faltan = asi.faltantes_para([c], CONTAB, True, exige={"cuenta_contable", "centro_costo"})
+    faltan = asi.faltantes_para([c], CONTAB, RASGOS["venta"], exige={"cuenta_contable", "centro_costo"})
     assert faltan["sin_cuenta"] == [] and faltan["sin_centro"] == []
 
 
@@ -76,7 +77,7 @@ def test_un_comprobante_en_cero_no_gasta_un_numero_de_voucher():
     venta = comprobante(tipo_cp="01", serie="F001", numero="118", fecha_emision="2026-02-11",
                         contraparte_doc="20602222226", contraparte_nombre="CLIENTE DE PRUEBA SAC",
                         base_gravada="100", igv="18", total="118", cuenta_contable="701101", centro_costo="CC-64")
-    numeros, rangos = asi.numerar_en_orden([dado_de_baja(), venta], CONTAB, "202602", {"05": 1}, es_venta=True)
+    numeros, rangos = asi.numerar_en_orden([dado_de_baja(), venta], CONTAB, "202602", {"05": 1}, libro=RASGOS["venta"])
     assert numeros == ["", "020001"]                              # el suyo en blanco; el 1 se lo lleva la venta
     assert rangos["05"]["comprobantes"] == 1 and rangos["05"]["hasta"] == 1
 
@@ -112,9 +113,10 @@ def test_con_la_opcion_encendida_vuelve_a_asentarse():
     assert [(l.cuenta, l.debe_haber, l.importe) for l in lineas(dado_de_baja(), con_opcion)] == [
         ("121201", "D", "0.00"), ("701101", "H", "0.00")]
     # Y entonces vuelve a pedir cuenta y a gastar número, que es el paquete entero.
-    faltan = asi.faltantes_para([dado_de_baja(cuenta_contable="")], con_opcion, True, exige={"cuenta_contable"})
+    faltan = asi.faltantes_para([dado_de_baja(cuenta_contable="")], con_opcion, RASGOS["venta"],
+                                exige={"cuenta_contable"})
     assert len(faltan["sin_cuenta"]) == 1
-    numeros, _ = asi.numerar_en_orden([dado_de_baja()], con_opcion, "202602", {"05": 1}, es_venta=True)
+    numeros, _ = asi.numerar_en_orden([dado_de_baja()], con_opcion, "202602", {"05": 1}, libro=RASGOS["venta"])
     assert numeros == ["020001"]
     # La clave viaja en la configuración general y está declarada, así que una aplicación la puede pintar.
     assert "asentar_sin_efecto_contable" in api.configuracion_por_defecto()

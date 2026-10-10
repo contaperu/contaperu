@@ -25,6 +25,7 @@ from ..kit import Opciones, celdas
 from ...pcge import clase_de
 from ...tributos.igv import tasa_calculada
 from ...modelo import Comprobante, Libro, numero_sin_ceros, serie_y_numero
+from ...modelo.libro import Rasgos
 from ..contrato import centro_en_anexo
 from . import datos
 from .datos import COLUMNAS, MARCA_CONVERSION, OPCIONES, TIPO_CONVERSION
@@ -135,14 +136,16 @@ def filas(c: Comprobante | Cabecera, lineas: list[LineaDiario], config: dict) ->
 
 
 def filas_de_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
-                         opciones: Opciones = OPCIONES, es_venta: bool = False) -> list[dict[str, Any]]:
+                         opciones: Opciones = OPCIONES,
+                         libro: Rasgos | None = None) -> list[dict[str, Any]]:
     """Un comprobante → sus filas del Excel de CONCAR (claves 'A'..'AO'): su asiento neutral, proyectado.
 
     Era `asiento.asiento()`, la puerta de siempre hacia las columnas de CONCAR; salió del núcleo el 12-sep-2026 para
     que el núcleo no importe un driver. La moneda se comprueba antes que nada, como siempre: un EUR no llega a buscar
     su cuenta."""
     codigo_moneda(c.moneda, config)
-    lineas = lineas_del_comprobante(c, config, limites, correlativo, opciones, es_venta, centro_en_anexo(datos, config))
+    lineas = lineas_del_comprobante(c, config, limites, correlativo, opciones, libro,
+                                    centro_en_anexo(datos, config))
     return filas(c, lineas, config)
 
 

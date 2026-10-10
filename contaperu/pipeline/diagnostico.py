@@ -171,7 +171,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     config = con_imputacion(config_aplicada(configuracion, driver), imputacion_del_documento(doc, imputacion, todos), todos)
     detracciones.normalizar(todos, config)
     validar.revisar(todos, libro, previas, config=config)
-    es_venta = libro.es_venta
+    rasgos = libro.rasgos
 
     excluidos = [c for c in todos if c.excluida]
     fuera = fuera_de([c for c in todos if not c.excluida], getattr(modulo, "EXCLUYE_TIPOS", None))
@@ -195,15 +195,15 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
         mirar |= {"tipo_cp", "moneda"}
     codigos = ("sin_sigla", "sin_codigo_de_moneda", "sin_denominacion")   # se dicen por su código, no por comprobante
     faltantes: dict[str, Any] = {clave: cuales if clave in codigos else [_serie_numero(c) for c in cuales]
-                                 for clave, cuales in asi.faltantes_para(candidatos, config, es_venta, mirar).items()}
+                                 for clave, cuales in asi.faltantes_para(candidatos, config, rasgos, mirar).items()}
     if contrato.lleva_cuentas(modulo) and callable(getattr(modulo, "no_caben", None)):
         faltantes["no_cabe"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
                                 in contrato.no_caben(modulo, libro, candidatos, config).items()}
     sub_diarios: dict[str, Any] = {}
     if legacy:
         con_equivalencia = [c for c in candidatos if c.tipo_cp not in faltantes["sin_sigla"]]
-        presentes = asi.sub_diarios_presentes(con_equivalencia, config, es_venta)
-        corr = asi.correlativos_de_partida(con_equivalencia, config, es_venta, correlativos)
+        presentes = asi.sub_diarios_presentes(con_equivalencia, config, rasgos)
+        corr = asi.correlativos_de_partida(con_equivalencia, config, rasgos, correlativos)
         faltantes["sin_correlativo"] = [s for s in presentes if s not in (correlativos or {})]
         etiquetas = asi.etiquetas_sub_diario(config)
         sub_diarios = {s: {"etiqueta": etiquetas.get(s, s), "comprobantes": n, "empieza_en": corr[s]}

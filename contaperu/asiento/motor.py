@@ -29,6 +29,7 @@ from ..tributos.detracciones import es_comodin, monto_detraccion, numero_pendien
 from .. import pcge, vocabulario
 from ..tributos.igv import base_imputable, igv_del_asiento, tasa_legal
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
+from ..modelo.libro import Rasgos, rasgos_de
 from .faltas import LibroQueElMotorNoOrigina, RepartoNoCuadra, SinClase, SinCuenta
 from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
 from .resolucion import (anulada_por_nota, asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero,
@@ -59,9 +60,9 @@ ROLES = vocabulario.ROLES
 ROLES_DEL_MOTOR = ("principal", "impuesto", "retencion", "tercero", "recorte", "detraccion")
 # Y lo mismo en el otro eje, que es el que faltaba: los libros que el motor sabe ORIGINAR, frente a los que el
 # catálogo publica (`vocabulario.TIPOS_LIBRO`). Hoy coinciden, y por eso esto parece de adorno. Deja de serlo el día
-# que el catálogo crezca —el hito B13, para recibir el diario de un ERP—, porque el motor decide por un booleano:
-# `es_venta` es `tipo == "venta"`, así que **un libro que no conoce saldría tratado como una compra, en silencio**,
-# con el debe y el haber al revés. Un rojo se arregla; una compra silenciosa se descubre en el cierre.
+# que el catálogo crezca —el hito B13, para recibir el diario de un ERP—: el catálogo dice qué libros existen y
+# esta tupla cuáles sabe armar el motor, y uno que esté allí y no aquí se rechaza nombrando los que sí. Lo que
+# cada uno tiene de distinto está en `modelo.RASGOS`, que es la tabla que la 9.0 puso en lugar del booleano.
 TIPOS_DEL_MOTOR = ("venta", "compra")
 # Las líneas que llevan además el centro de costo en su anexo auxiliar. Lo del estándar es la del tercero —el «doble
 # anexo», también en la línea que le descuenta la detracción—; cada driver lo cambia con las columnas que su sistema
@@ -196,7 +197,7 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = Fa
 
 
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
-                           opciones: Any = None, es_venta: bool = False,
+                           opciones: Any = None, libro: Rasgos | None = None,
                            centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
                            vocabulario: str = "legacy") -> list[LineaDiario]:
     """Un comprobante → sus líneas de diario (de 2 a 5, más una por parte si la base va repartida), en el orden
@@ -217,19 +218,20 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # A qué cuentas va la base: lo decide la imputación del documento, que llega aparte (una línea por parte si
     # trae reparto), o lo de siempre (`partes_de`). Una parte sin cuenta detiene el asiento igual que una fila sin
     # ella, y un reparto que no suma la base también: ese asiento no cuadraría.
-    partes = partes_de(c, config, es_venta)
+    rasgos = rasgos_de(libro)
+    partes = partes_de(c, config, rasgos)
     if not all(cuenta for cuenta, _, _ in partes):
         raise SinCuenta([c])
-    if reparto_no_cuadra(c, config, es_venta):
+    if reparto_no_cuadra(c, config, rasgos):
         raise RepartoNoCuadra([c])
-    es_honorarios = not es_venta and c.tipo_cp == TIPO_HONORARIOS
+    es_honorarios = rasgos.lleva_honorarios and c.tipo_cp == TIPO_HONORARIOS
     invierte = c.tipo_cp in TIPOS_INVIERTEN
     total = Decimal(c.total or 0).quantize(CENTIMO)
     # Compras: boleta y recibo por honorarios no dan crédito fiscal → todo al gasto, sin línea de IGV. En
     # VENTAS la boleta emitida SÍ lleva su IGV (débito fiscal del emisor). La regla vive en `igv.py`: la
     # comprobación de que un reparto cuadra con la base la necesita igual.
-    igv = igv_del_asiento(c, es_venta)
-    base = base_imputable(c, es_venta)
+    igv = igv_del_asiento(c, rasgos)
+    base = base_imputable(c, rasgos)
     ruc = (c.contraparte_doc or "").strip()
     usa_centros = config.get("usa_centros_costo", True)                                   # apagado: sin centro
     # El doble anexo del tercero lleva el centro del comprobante; con la base repartida, solo si todas las
@@ -265,11 +267,15 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # proceso (un contador, 30-ago-2026). La fecha del documento se conserva aparte, siempre.
     primero, ultimo = limites
     fecha_asiento = min(max(emision, primero), ultimo) if emision else primero
-    # Sentido de la partida: compras = gasto D / proveedor H; ventas = ingreso H / cliente D.
+    # Sentido de la partida, que **lo dice el libro desde la 9.0**: en una compra el gasto va al debe y el
+    # proveedor al haber; en una venta, el ingreso al haber y el cliente al debe. La contraparte no se declara, se
+    # deriva: es la partida doble. Hasta la 8.x esto era `("H","D") if es_venta else ("D","H")`, y era la línea
+    # más peligrosa del eje — con un libro que el motor no conociera habría puesto los dos lados al revés sin
+    # decir nada.
     # La nota de crédito invierte el caso que toque.
-    normal = ("H", "D") if es_venta else ("D", "H")
+    normal = (rasgos.sentido_principal, rasgos.sentido_contraparte)
     sentido_base, sentido_tercero = (normal[::-1] if invierte else normal)
-    sub_diario_asiento = "" if neutral else sub_diario(c, config, es_venta)
+    sub_diario_asiento = "" if neutral else sub_diario(c, config, rasgos)
 
     # `id_externo`: el id con el que el sistema que PRODUJO el comprobante lo conoce. Cierra el enlace entre la
     # línea, el comprobante y su imputación sin depender de la serie y el número, que son la identidad tributaria y
@@ -339,7 +345,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     linea_de_retencion = (linea("retencion", retenido, cuenta_retencion, sentido_tercero, glosa,
                                 retencion={"codigo": TRIBUTO_RENTA, "categoria": CATEGORIA_RENTA_4TA})
                           if retenido > 0 else None)
-    cuenta_del_tercero = cuenta_tercero(c, config, es_venta)
+    cuenta_del_tercero = cuenta_tercero(c, config, rasgos)
     anexo_tercero = centro_comun if ("tercero" in centro_en_anexo and not es_honorarios) else ""
     # El tercero: el proveedor en compras, el cliente en ventas.
     tercero = linea("tercero", total - retenido, cuenta_del_tercero, sentido_tercero,
@@ -361,7 +367,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # factura, solo la nota apunta hacia atrás. Y si la detracción ya tiene constancia de depósito, los dos hechos se
     # contradicen y esto no se decide aquí: se para antes (`comprobantes_anulados_con_deposito`).
     linea_recorte = linea_detraccion = None
-    if not es_venta and not es_honorarios and tiene_detraccion(c) and not anulada_por_nota(c, config):
+    if rasgos.lleva_detraccion and not es_honorarios and tiene_detraccion(c) and not anulada_por_nota(c, config):
         _, detraido = monto_detraccion(c, config)
         if detraido > 0:
             linea_recorte = linea("recorte", detraido, cuenta_del_tercero, sentido_base,
@@ -392,7 +398,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                                      documento=_limpio(documento_detraccion), referencia=_limpio(referencia_detraccion),
                                      detraccion=_detraccion(c, config, total, neutral))
 
-    if es_venta and not invierte:
+    if rasgos.es_venta and not invierte:
         # Venta normal: cliente (D) · IGV (H) · ingreso (H).
         #
         # El IGV va ANTES del ingreso desde la 2.2 (John, 21-sep-2026). Lo piden dos archivos reales de STARSOFT
@@ -413,23 +419,25 @@ def lineas_e_indice_del_libro(libro: Libro, comprobantes: list[Comprobante], con
     que usó cada sub-diario y el índice: qué tramo de líneas es de qué comprobante, con su cabecera
     (`asiento.indice`). Es la entrada de cualquier driver de asientos. Con `vocabulario="neutral"` no numera: no hay
     sub-diarios, y los rangos salen vacíos."""
-    # La puerta del eje del libro. De aquí abajo todo se decide por un booleano, así que lo que no sabe originar
-    # tiene que pararse ARRIBA: es el único sitio del motor que lo calcula desde un `Libro`, y por eso una sola
-    # guarda protege el medio centenar de `not es_venta` que hay detrás.
+    # La puerta del eje del libro: lo que el motor no sabe originar se para ARRIBA, antes de armar nada. Desde la
+    # 9.0 lo de abajo ya no decide por un booleano sino por los rasgos del libro, así que esto no es la única
+    # defensa — pero sigue siendo donde se dice en castellano qué libros sabe armar y cuál te han pasado.
     if libro.tipo not in TIPOS_DEL_MOTOR:
         raise LibroQueElMotorNoOrigina(libro.tipo, TIPOS_DEL_MOTOR)
-    es_venta = libro.es_venta
+    rasgos = libro.rasgos
     neutral = vocabulario == "neutral"
     if neutral:
         numeros, rangos = [""] * len(comprobantes), {}
     else:
-        numeros, rangos = numerar_en_orden(comprobantes, config, libro.periodo, correlativos, es_venta)
+        numeros, rangos = numerar_en_orden(comprobantes, config, libro.periodo, correlativos, rasgos)
     limites = limites_del_periodo(libro)
     lineas: list[LineaDiario] = []
     indice: list[ComprobanteDelAsiento] = []
     for posicion, (c, numero) in enumerate(zip(comprobantes, numeros)):
-        propias = lineas_del_comprobante(c, config, limites, numero, opciones, es_venta, centro_en_anexo, vocabulario)
-        indice.append(ComprobanteDelAsiento(posicion=posicion, sub_diario="" if neutral else sub_diario(c, config, es_venta),
+        propias = lineas_del_comprobante(c, config, limites, numero, opciones, rasgos, centro_en_anexo,
+                                         vocabulario)
+        indice.append(ComprobanteDelAsiento(posicion=posicion,
+                                            sub_diario="" if neutral else sub_diario(c, config, rasgos),
                                             correlativo=numero, desde=len(lineas), hasta=len(lineas) + len(propias),
                                             cabecera=cabecera_de(c)))
         lineas.extend(propias)

@@ -69,8 +69,8 @@ def _constancia(c: Comprobante, config: dict) -> dict[str, Any]:
 def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.OPCIONES) -> dict[str, Any]:
     """Lo que va en cada columna antes del formato de celda: textos sin rellenar, importes en `Decimal` (en soles y
     con el signo de la nota de crédito) y fechas como `date`. `no_caben` mira aquí los largos."""
-    es_venta = libro.es_venta
-    cuenta, centro, _ = partes_de(c, config, es_venta)[0]      # una sola parte: el núcleo ya exigió `cuenta_unica`
+    es_venta, rasgos = libro.es_venta, libro.rasgos
+    cuenta, centro, _ = partes_de(c, config, rasgos)[0]      # una sola parte: el núcleo ya exigió `cuenta_unica`
     # El centro, donde la cuenta lo lleva: la misma regla que pone el centro en la columna M de CONCAR.
     centro = centro if config.get("usa_centros_costo", True) and lleva_centro(cuenta, config) else ""
     # Y el mismo centro en la segunda columna de centro de costos, si la configuración la elige (John, 13-sep-2026).
@@ -90,7 +90,7 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
         "dolares": c.total * signo if es_usd else None,
         "cambio": (c.tipo_cambio if es_usd else Decimal(1)),
         "condicion": datos.CONDICIONES.get(c.condicion_pago, datos.CONDICION_SIN_DATO),
-        "tercero": cuenta_tercero(c, config, es_venta),
+        "tercero": cuenta_tercero(c, config, rasgos),
         "glosa": glosa_de(c),
         "ref_fecha": c.ref_fecha if nota else None,
         "ref_tipo": c.ref_tipo_cp if nota else "",

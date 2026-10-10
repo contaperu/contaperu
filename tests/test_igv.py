@@ -11,6 +11,7 @@ from contaperu import catalogos as cat
 from contaperu.tributos import igv
 from contaperu.drivers.concar import tasa_igv_entera as tasa_igv
 from contaperu.modelo import Comprobante
+from contaperu.modelo.libro import RASGOS
 
 
 def cp(**k):
@@ -175,7 +176,8 @@ def _las_cuatro(igv_escrito: str, base: str) -> dict[str, object]:
                     destino_igv="DG", cuenta_contable="634301")
     config = con_imputaciones(prep.config_aplicada(
         en_secciones({"usa_centros_costo": False, "cuentas": {"igv": "401111"}}, "concar"), "concar"))
-    lineas = lineas_del_comprobante(c, config, (date(2026, 8, 1), date(2026, 8, 31)), "080001")
+    lineas = lineas_del_comprobante(c, config, (date(2026, 8, 1), date(2026, 8, 31)), "080001",
+                                    libro=RASGOS["compra"])
     de_la_linea = next(ln.tasa_igv for ln in lineas if ln.rol == "tercero")
     return {"nucleo": de_la_linea,
             "concar": tasa_igv_entera(D(igv_escrito), D(base)),
@@ -300,8 +302,8 @@ def test_editar_una_compra_no_gravada_no_pierde_el_importe_ni_lo_duplica():
     assert cuadra(cp(base_gravada="100", igv="18", valor_no_gravado="50", total="168"), r) == ["IGV_NO_CUADRA"]
 
 
-def clase(c, es_venta=False):
-    return igv.clase_de_igv(c, es_venta)
+def clase(c, libro=RASGOS["compra"]):
+    return igv.clase_de_igv(c, libro)
 
 
 def test_la_clase_del_igv_sale_de_los_importes_y_no_del_destino():
@@ -330,21 +332,21 @@ def test_los_dos_libros_no_dan_las_mismas_clases():
     separadas. Con el mismo importe en `inafecto`, una venta dice «inafecto» y una compra, «no gravada».
     """
     from contaperu import catalogos as cat
-    assert clase(cp(inafecto="150", total="150"), es_venta=True) == "inafecto"
+    assert clase(cp(inafecto="150", total="150"), libro=RASGOS["venta"]) == "inafecto"
     assert clase(cp(inafecto="150", total="150")) == "no_gravada"
-    assert clase(cp(exonerado="50", total="50"), es_venta=True) == "exonerado"
+    assert clase(cp(exonerado="50", total="50"), libro=RASGOS["venta"]) == "exonerado"
     # «Importación» solo existe en compras: una venta con DUA es una exportación, y esa tiene su propia columna.
-    assert clase(cp(exportacion="100", total="100", anio_dua="2026"), es_venta=True) == "exportacion"
+    assert clase(cp(exportacion="100", total="100", anio_dua="2026"), libro=RASGOS["venta"]) == "exportacion"
     # Y cada clase que se devuelve tiene su nombre en castellano, sin que la pantalla lo escriba a mano.
     for c, es_venta, tabla in ((cp(base_gravada="100", igv="18", total="118"), False, cat.CLASES_IGV_COMPRA),
                                (cp(inafecto="150", total="150"), True, cat.CLASES_IGV_VENTA)):
-        assert clase(c, es_venta) in tabla
+        assert clase(c, RASGOS["venta" if es_venta else "compra"]) in tabla
 
 
 def test_un_comprobante_sin_importes_no_tiene_clase():
     """Así declara SUNAT lo que se da de baja: todo en cero. No es gravado ni no gravado, y decir cualquiera de las
     dos cosas sería inventar — la pantalla caía en «inafecto» por descarte y lo enseñaba con `0.00` al lado."""
-    assert clase(cp(total="0")) == "" and clase(cp(total="0"), es_venta=True) == ""
+    assert clase(cp(total="0")) == "" and clase(cp(total="0"), libro=RASGOS["venta"]) == ""
 
 
 def test_poner_el_importe_no_gravado_recalcula_la_base_sin_tocar_el_total():

@@ -25,7 +25,18 @@ from contaperu import asiento as asi
 from contaperu import api
 from contaperu.tributos import detracciones
 from contaperu.drivers import concar as driver_concar
+from contaperu.modelo.libro import RASGOS
 from test_snapshot_concar import CASOS, FILAS, MES, armar
+
+
+def filas_de_comprobante(*a, libro=RASGOS["compra"], **kw):
+    """Las filas de CONCAR de un comprobante, con el libro que este fichero da por supuesto.
+
+    El libro va por defecto porque casi todo aquí son compras. Antes de la 9.0 lo ponía el defecto de la firma
+    del motor, y **ahí era el error que la mayor viene a quitar**: una función que supone «compra» cuando nadie
+    se lo dice. Aquí es legítimo, porque el fichero entero habla de un libro y decirlo una vez arriba es más
+    claro que repetirlo en cada llamada."""
+    return driver_concar.filas_de_comprobante(*a, libro=libro, **kw)
 
 openpyxl = pytest.importorskip("openpyxl")
 
@@ -90,7 +101,7 @@ def filas_normalizadas(caso) -> list[dict]:
     c, config, es_venta = armar(caso)
     detracciones.normalizar([c], config)
     return [{letra: _normal(fila.get(letra)) for letra in LETRAS}
-            for fila in driver_concar.filas_de_comprobante(c, config, MES, "080001", es_venta=es_venta)]
+            for fila in filas_de_comprobante(c, config, MES, "080001", libro=RASGOS["venta" if es_venta else "compra"])]
 
 
 def test_los_rechazados_son_casos_del_snapshot():

@@ -7,6 +7,7 @@ import json
 import pytest
 
 from contaperu.configuracion import Campo, Columna, ConfiguracionInvalida, describir, por_defecto, validar
+from contaperu.modelo.libro import RASGOS
 
 CUENTA = r"^([0-9]{2,12})?$"
 POR_MONEDA = (Campo("PEN", "texto", "421201", patron=CUENTA), Campo("USD", "texto", "421202", patron=CUENTA))
@@ -295,8 +296,8 @@ def test_la_configuracion_aplicada_es_plana_y_la_guardada_no_sirve_para_lo_mismo
     aplicada = api.config_aplicada(CON_SECCION, driver="concar")
     guardada = {**api.configuracion_por_defecto(), **CON_SECCION}
 
-    assert (asiento.sub_diario(c, aplicada), asiento.sigla_documento(c, aplicada)) == ("11", "FT")
-    assert (asiento.sub_diario(c, guardada), asiento.sigla_documento(c, guardada)) == ("", "")
+    assert (asiento.sub_diario(c, aplicada, libro=RASGOS["compra"]), asiento.sigla_documento(c, aplicada)) == ("11", "FT")
+    assert (asiento.sub_diario(c, guardada, libro=RASGOS["compra"]), asiento.sigla_documento(c, guardada)) == ("", "")
 
 
 def test_es_exactamente_lo_que_prepara_cada_operacion():

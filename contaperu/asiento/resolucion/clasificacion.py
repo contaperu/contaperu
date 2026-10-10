@@ -11,6 +11,7 @@ from decimal import Decimal
 from ...catalogos import TIPO_HONORARIOS
 from ...configuracion import CONFIG_POR_DEFECTO
 from ...modelo import CENTIMO, Comprobante, a_decimal
+from ...modelo.libro import Rasgos, rasgos_de
 from ...tributos.detracciones import monto_detraccion
 from ...tributos.igv import base_imputable, igv_del_asiento
 from .configurado import _DEL_ASIENTO, cuenta_por_pagar_detraccion
@@ -80,20 +81,23 @@ def con_efecto_contable(comprobantes: list[Comprobante], config: dict | None = N
     return [c for c in comprobantes if not sin_efecto_contable(c)]
 
 
-def sub_diario(c: Comprobante, config: dict, es_venta: bool = False) -> str:
-    """Por USO: ventas → sub_diario_ventas; compras con detracción → sub_diario_detraccion;
-    un tipo con registro propio (boletas 13, honorarios 15) → el suyo; el resto → sub_diario_compras.
-    Estas cuatro fuentes son lo que una aplicación deja configurar."""
+def sub_diario(c: Comprobante, config: dict, libro: Rasgos | None = None) -> str:
+    """Por USO: el del libro; compras con detracción → sub_diario_detraccion; un tipo con registro propio
+    (boletas 13, honorarios 15) → el suyo. Estas cuatro fuentes son lo que una aplicación deja configurar.
+
+    **La clave de configuración la dice el libro y ya no un `if`** (9.0): `rasgos.sub_diario` es
+    `sub_diario_ventas` o `sub_diario_compras`, y un libro nuevo trae la suya sin tocar esta función."""
+    rasgos = rasgos_de(libro)
     equivalencia = equivalencia_tipo(c, config)
     if not equivalencia:
         return ""
-    if es_venta:
-        return str(config.get("sub_diario_ventas") or _DEL_ASIENTO["sub_diario_ventas"])
     de_detraccion = str(config.get("sub_diario_detraccion") or "").strip()
-    if de_detraccion and c.tipo_cp != TIPO_HONORARIOS and tiene_detraccion(c):
+    if rasgos.lleva_detraccion and de_detraccion and c.tipo_cp != TIPO_HONORARIOS and tiene_detraccion(c):
         return de_detraccion
-    return str(equivalencia.get("sub_diario") or config.get("sub_diario_compras")
-               or _DEL_ASIENTO["sub_diario_compras"])
+    suyo = config.get(rasgos.sub_diario) or _DEL_ASIENTO[rasgos.sub_diario]
+    if rasgos.es_venta:
+        return str(suyo)
+    return str(equivalencia.get("sub_diario") or suyo)
 
 
 def lleva_centro(cuenta: str, config: dict) -> bool:
@@ -111,19 +115,20 @@ def lleva_centro(cuenta: str, config: dict) -> bool:
     return bool(cuenta) and any(cuenta.startswith(p) for p in (str(x).strip() for x in (prefijos or [])) if p)
 
 
-def correlativos_de_partida(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
+def correlativos_de_partida(comprobantes: list[Comprobante], config: dict, libro: Rasgos | None = None,
                             dados: dict[str, int] | None = None) -> dict[str, int]:
     """Por dónde arranca cada sub-diario presente: el correlativo que se dio y, si no se dio, el 1. Es el valor de
     partida de `exportar`, `generar_asiento`, `diagnosticar` y la CLI; antes cada una lo armaba por su cuenta."""
     dados = dados or {}
-    return {sub: dados.get(sub, 1) for sub in sub_diarios_presentes(comprobantes, config, es_venta)}
+    return {sub: dados.get(sub, 1) for sub in sub_diarios_presentes(comprobantes, config, libro)}
 
 
-def sub_diarios_presentes(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> dict[str, int]:
+def sub_diarios_presentes(comprobantes: list[Comprobante], config: dict,
+                          libro: Rasgos | None = None) -> dict[str, int]:
     """{sub_diario: cuántos comprobantes} en el orden en que aparecen."""
     presentes: dict[str, int] = {}
     for c in comprobantes:
-        s = sub_diario(c, config, es_venta)
+        s = sub_diario(c, config, libro)
         if s:
             presentes[s] = presentes.get(s, 0) + 1
     return presentes
@@ -138,7 +143,7 @@ def anulada_por_nota(c: Comprobante, config: dict) -> bool:
     return bool(imputacion and imputacion.anulada_por_nota)
 
 
-def cuentas_del_asiento(c: Comprobante, config: dict, es_venta: bool = False) -> list[str]:
+def cuentas_del_asiento(c: Comprobante, config: dict, libro: Rasgos | None = None) -> list[str]:
     """TODAS las cuentas que tocarán las líneas del asiento de este comprobante: la de la base (una por parte si va
     repartida), la del IGV, la de la retención de 4ta, la del tercero y la de la detracción.
 
@@ -155,29 +160,31 @@ def cuentas_del_asiento(c: Comprobante, config: dict, es_venta: bool = False) ->
     cuentas_config = config.get("cuentas") or {}
     por_defecto = CONFIG_POR_DEFECTO["cuentas"]
     moneda = (c.moneda or "PEN").upper()
-    es_honorarios = not es_venta and c.tipo_cp == TIPO_HONORARIOS
-    cuentas = [cuenta for cuenta, _, _ in partes_de(c, config, es_venta)]
-    if igv_del_asiento(c, es_venta) > 0:
+    rasgos = rasgos_de(libro)
+    es_honorarios = rasgos.lleva_honorarios and c.tipo_cp == TIPO_HONORARIOS
+    cuentas = [cuenta for cuenta, _, _ in partes_de(c, config, rasgos)]
+    if igv_del_asiento(c, rasgos) > 0:
         cuentas.append(str(cuentas_config.get("igv") or por_defecto["igv"]))
     total = a_decimal(c.total).quantize(CENTIMO)
     retenido = min(a_decimal(c.retencion).quantize(CENTIMO), total) if es_honorarios else Decimal(0)
     if retenido > 0:
         cuentas.append(str(cuentas_config.get("retencion_4ta") or por_defecto["retencion_4ta"]))
-    cuentas.append(cuenta_tercero(c, config, es_venta))
-    if not es_venta and not es_honorarios and tiene_detraccion(c) and not anulada_por_nota(c, config):
+    cuentas.append(cuenta_tercero(c, config, rasgos))
+    if (rasgos.lleva_detraccion and not es_honorarios and tiene_detraccion(c)
+            and not anulada_por_nota(c, config)):
         _, detraido = monto_detraccion(c, config)
         if detraido > 0:
             cuentas.append(cuenta_por_pagar_detraccion(cuentas_config, moneda))
     return [cuenta for cuenta in cuentas if cuenta]
 
 
-def reparto_no_cuadra(c: Comprobante, config: dict, es_venta: bool = False) -> bool:
+def reparto_no_cuadra(c: Comprobante, config: dict, libro: Rasgos | None = None) -> bool:
     """¿El reparto de su imputación deja de sumar la base del asiento? Sin tolerancia, como la partida doble:
     un reparto que no cuadra da un asiento que no cuadra."""
     imputacion = imputacion_de(c, config)
     if imputacion is None or not imputacion.reparto:
         return False
-    return sum((p.importe for p in imputacion.reparto), Decimal("0.00")) != base_imputable(c, es_venta)
+    return sum((p.importe for p in imputacion.reparto), Decimal("0.00")) != base_imputable(c, libro)
 
 
 def con_reparto(comprobantes: list[Comprobante], config: dict) -> list[Comprobante]:

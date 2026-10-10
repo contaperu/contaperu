@@ -9,24 +9,27 @@ import calendar
 from datetime import date
 
 from ...modelo import Comprobante, Libro
+from ...modelo.libro import Rasgos
 from ..faltas import SinCorrelativo, SinSigla
 from .clasificacion import con_efecto_contable, sub_diario, sub_diarios_presentes
 from .requisitos import tipos_sin_sigla
 
 
 def numerar(comprobantes: list[Comprobante], config: dict, periodo: str,
-            correlativos: dict[str, int], es_venta: bool = False) -> tuple[dict[int, str], dict[str, dict]]:
+            correlativos: dict[str, int],
+            libro: Rasgos | None = None) -> tuple[dict[int, str], dict[str, dict]]:
     """Asigna a cada comprobante (por `id()` del objeto) su número `MMNNNN`, en el orden
     recibido (el natural del registro). Devuelve también el rango usado por sub-diario,
     que es lo que se recuerda para proponer el siguiente.
 
     Es la forma de la 0.x, que ata el resultado a la identidad de cada objeto; la del motor es `numerar_en_orden`."""
-    numeros, rangos = numerar_en_orden(comprobantes, config, periodo, correlativos, es_venta)
+    numeros, rangos = numerar_en_orden(comprobantes, config, periodo, correlativos, libro)
     return {id(c): numero for c, numero in zip(comprobantes, numeros)}, rangos
 
 
 def numerar_en_orden(comprobantes: list[Comprobante], config: dict, periodo: str,
-                     correlativos: dict[str, int], es_venta: bool = False) -> tuple[list[str], dict[str, dict]]:
+                     correlativos: dict[str, int],
+                     libro: Rasgos | None = None) -> tuple[list[str], dict[str, dict]]:
     """El número `MMNNNN` de cada comprobante, en el orden recibido y en la misma posición, y el rango usado por
     sub-diario. No depende de la identidad de los objetos: dos llamadas con los mismos datos dan lo mismo.
 
@@ -38,7 +41,7 @@ def numerar_en_orden(comprobantes: list[Comprobante], config: dict, periodo: str
     if sin_equivalencia:
         raise SinSigla(sin_equivalencia)
     con_asiento = con_efecto_contable(comprobantes, config)
-    presentes = sub_diarios_presentes(con_asiento, config, es_venta)
+    presentes = sub_diarios_presentes(con_asiento, config, libro)
     faltan = [s for s in presentes if s not in correlativos]
     if faltan:
         raise SinCorrelativo(faltan)
@@ -52,7 +55,7 @@ def numerar_en_orden(comprobantes: list[Comprobante], config: dict, periodo: str
         if id(c) in sin_numero:
             numeros.append("")
             continue
-        s = sub_diario(c, config, es_venta)
+        s = sub_diario(c, config, libro)
         n = contadores[s]
         numeros.append(f"{mes_mm}{n:04d}")
         rangos[s]["hasta"] = n

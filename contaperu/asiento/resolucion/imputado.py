@@ -10,6 +10,7 @@ from decimal import Decimal
 from ...catalogos import TIPO_HONORARIOS
 from ...configuracion import CONFIG_POR_DEFECTO
 from ...modelo import Comprobante
+from ...modelo.libro import Rasgos, rasgos_de
 from ..imputacion import Imputacion
 from .configurado import _cuenta_por_moneda, cuenta_honorarios, cuenta_por_pagar
 
@@ -21,7 +22,8 @@ def imputacion_de(c: Comprobante, config: dict) -> Imputacion | None:
     return Imputacion.de(valor) if valor is not None else None
 
 
-def partes_de(c: Comprobante, config: dict, es_venta: bool = False) -> list[tuple[str, str, Decimal | None]]:
+def partes_de(c: Comprobante, config: dict,
+              libro: Rasgos | None = None) -> list[tuple[str, str, Decimal | None]]:
     """A qué cuentas va la base del documento: `[(cuenta, centro, importe)]`, con importe None = la base entera.
 
     Con reparto en su imputación, una parte por cada una. Si no, una sola: la cuenta y el centro que traiga su
@@ -39,7 +41,7 @@ def partes_de(c: Comprobante, config: dict, es_venta: bool = False) -> list[tupl
     return [(cuenta, centro, None)]
 
 
-def cuenta_tercero(c: Comprobante, config: dict, es_venta: bool = False) -> str:
+def cuenta_tercero(c: Comprobante, config: dict, libro: Rasgos | None = None) -> str:
     """La cuenta del total: el cliente en ventas, el proveedor en compras (el recibo por honorarios, la suya).
 
     Manda la de la imputación del documento cuando el contador la decidió —un gasto de representación a la
@@ -51,11 +53,15 @@ def cuenta_tercero(c: Comprobante, config: dict, es_venta: bool = False) -> str:
         return imputacion.cuenta_tercero
     moneda = (c.moneda or "PEN").upper()
     cuentas = config.get("cuentas") or {}
-    if es_venta:
-        return _cuenta_por_moneda(cuentas.get("clientes"), moneda, CONFIG_POR_DEFECTO["cuentas"]["clientes"]["PEN"])
-    if c.tipo_cp == TIPO_HONORARIOS:
+    rasgos = rasgos_de(libro)
+    # **La clave de `cuentas` la dice el libro** (9.0) en vez de un `if`. Las dos ramas de abajo son las
+    # excepciones de un libro que lleva honorarios y se salda por la cuenta por pagar, no el caso general.
+    if rasgos.lleva_honorarios and c.tipo_cp == TIPO_HONORARIOS:
         return cuenta_honorarios(cuentas, moneda)
-    return cuenta_por_pagar(cuentas, moneda)
+    if rasgos.cuenta_contraparte == "cxp":
+        return cuenta_por_pagar(cuentas, moneda)
+    clave = rasgos.cuenta_contraparte
+    return _cuenta_por_moneda(cuentas.get(clave), moneda, CONFIG_POR_DEFECTO["cuentas"][clave]["PEN"])
 
 # `_cuenta_de_respaldo` murió en la 3.0 (John, 23-sep-2026): daba la cuenta de la configuración cuando la imputación
 # no traía ninguna —la de ingreso tenía hasta un valor de fábrica, `701101`— y con eso una venta sin cuenta salía

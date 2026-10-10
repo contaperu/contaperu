@@ -23,6 +23,7 @@ from contaperu.asiento.configuracion import CONFIGURACION_DEL_ASIENTO
 from contaperu.configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from contaperu.drivers import contrato
 from contaperu.drivers.kit import Opciones
+from contaperu.modelo.libro import RASGOS
 from util import GOLDEN, imputando
 
 # El golden viene de SUNAT: no trae cuenta —desde la 3.0 la pone su imputación, no la configuración— ni centros de
@@ -61,7 +62,7 @@ def _cuentas_del_golden(doc: dict, config: dict) -> list[str]:
     from contaperu.asiento import resolucion
     libro, comprobantes, cfg = prep.preparar(doc, config, False, None, "asiento_contable", None)
     return sorted({cuenta for c in comprobantes
-                   for cuenta in resolucion.cuentas_del_asiento(c, cfg, libro.es_venta)})
+                   for cuenta in resolucion.cuentas_del_asiento(c, cfg, libro.rasgos)})
 
 
 @pytest.mark.parametrize("nombre", sorted(drivers.DRIVERS))
@@ -250,10 +251,10 @@ def driver_de_registro(nombre: str = "registro") -> types.ModuleType:
     m.nombre = lambda libro, op=m.OPCIONES: f"{nombre}_{libro.ruc}_{libro.periodo}{op.extension}"
 
     def desde_comprobantes(libro, comprobantes, config, op=m.OPCIONES):
-        es_venta = libro.es_venta
+        rasgos = libro.rasgos
         filas = [f"{c.serie}-{c.numero}|{cuenta}|{centro}|{'' if importe is None else importe}|"
-                 f"{asi.cuenta_tercero(c, config, es_venta)}"
-                 for c in comprobantes for cuenta, centro, importe in asi.partes_de(c, config, es_venta)]
+                 f"{asi.cuenta_tercero(c, config, rasgos)}"
+                 for c in comprobantes for cuenta, centro, importe in asi.partes_de(c, config, rasgos)]
         return "\n".join(filas).encode("utf-8"), {"filas": len(filas)}
 
     m.desde_comprobantes = desde_comprobantes
@@ -305,7 +306,7 @@ def test_al_registro_le_llega_la_imputacion_y_no_le_pide_la_equivalencia_del_tip
     doc = sin_imputar()      # la imputación de este caso llega por el argumento, con su reparto
     primero = doc["comprobantes"][0]
     primero["id_externo"] = "fila-1"
-    base = base_imputable(Comprobante.de_dict(primero), False)
+    base = base_imputable(Comprobante.de_dict(primero), RASGOS["compra"])
     mitad = (base / 2).quantize(base)
     reparto = [{"importe": str(mitad), "cuenta_contable": "636301", "centro_costo": "SISTEMAS"},
                {"importe": str(base - mitad), "cuenta_contable": "632201", "centro_costo": "DESARROLLO"}]
@@ -382,7 +383,7 @@ def test_un_registro_de_una_cuenta_por_documento_no_admite_reparto(con_terceros)
     doc = sin_imputar()
     primero = doc["comprobantes"][0]
     primero["id_externo"] = "fila-1"
-    base = base_imputable(Comprobante.de_dict(primero), False)
+    base = base_imputable(Comprobante.de_dict(primero), RASGOS["compra"])
     imputacion = imputacion_de(doc, **{"fila-1": {"reparto": [{"importe": str(base - 1), "cuenta_contable": "636301"},
                                                               {"importe": "1", "cuenta_contable": "632201"}]}})
 

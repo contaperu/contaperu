@@ -71,7 +71,7 @@ def desde_lineas_con_indice(modulo, libro: Libro, comprobantes: list[Comprobante
         raise ValueError(f"El driver {modulo.NOMBRE!r} arma asientos: necesita `config` y `correlativos`")
     # Lo que ese destino exige (`contrato.exige`: lo del núcleo más su EXIGE) se comprueba ANTES de
     # armar nada: un driver `desde_lineas` nunca ve los comprobantes, así que solo el núcleo puede.
-    exigir_requisitos(comprobantes, config, libro.es_venta, contrato.exige(modulo))
+    exigir_requisitos(comprobantes, config, libro.rasgos, contrato.exige(modulo))
     # Lo que su formato no puede llevar detiene también a un driver de asientos, antes de armar nada.
     fuera = contrato.no_caben(modulo, libro, comprobantes, config)
     if fuera:
@@ -105,7 +105,7 @@ def desde_lineas_dadas(modulo, libro: Libro, comprobantes: list[Comprobante], li
     Lo que cambia es de dónde sale el índice: de reconocer las líneas en vez de generarlas
     (`asiento.indice_de_lineas_dadas`), por su `documento.id_externo`. Y los correlativos no se piden, porque cada
     línea trae el suyo."""
-    exigir_requisitos(comprobantes, config, libro.es_venta, contrato.exige(modulo))
+    exigir_requisitos(comprobantes, config, libro.rasgos, contrato.exige(modulo))
     fuera = contrato.no_caben(modulo, libro, comprobantes, config)
     if fuera:
         raise contrato.NoCabe(fuera)
@@ -129,7 +129,7 @@ def desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], op
     Sin asiento no hay cuadre ni huella."""
     if config is None:
         raise ValueError(f"El driver {modulo.NOMBRE!r} lleva cuentas: necesita `config`")
-    exigir_requisitos(comprobantes, config, libro.es_venta, contrato.exige(modulo))
+    exigir_requisitos(comprobantes, config, libro.rasgos, contrato.exige(modulo))
     fuera = contrato.no_caben(modulo, libro, comprobantes, config)
     if fuera:
         raise contrato.NoCabe(fuera)
@@ -154,11 +154,11 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
     incluidos = seleccionar(comprobantes)
     fuera = fuera_de(incluidos, getattr(modulo, "EXCLUYE_TIPOS", None))
     incluidos = [c for c in incluidos if c not in fuera]
-    exigir_requisitos(incluidos, config, libro.es_venta, contrato.exige(modulo))
+    exigir_requisitos(incluidos, config, libro.rasgos, contrato.exige(modulo))
     no_caben = contrato.no_caben(modulo, libro, incluidos, config)
     if no_caben:
         raise contrato.NoCabe(no_caben)
-    corr = asi.correlativos_de_partida(incluidos, config, libro.es_venta, correlativos)
+    corr = asi.correlativos_de_partida(incluidos, config, libro.rasgos, correlativos)
     # Directo a las líneas del asiento: sin pasar por las columnas de ningún ERP.
     neutrales, rangos, indice = asi.lineas_e_indice_del_libro(libro, incluidos, config, corr,
                                                               centro_en_anexo=contrato.centro_en_anexo(modulo, config),

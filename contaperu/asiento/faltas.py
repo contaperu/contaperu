@@ -190,9 +190,11 @@ class LibroQueElMotorNoOrigina(NoExportable):
     """Un libro cuyo tipo el catálogo publica y el motor no sabe armar.
 
     No es una falta de un comprobante y por eso no está en `FALTAS`: es de la cabecera, y se sabe antes de mirar
-    una sola fila. Existe porque el motor decide casi todo por `libro.es_venta`, y **lo que no es venta lo trata
-    como compra**: sin esta puerta, un libro nuevo del catálogo saldría con el debe y el haber invertidos y la
-    contraparte en la cuenta equivocada, sin un solo error. Aquí se para y se dice cuáles sabe originar.
+    una sola fila. Nació porque el motor decidía casi todo por `libro.es_venta` y **lo que no era venta lo trataba
+    como compra**: un libro nuevo del catálogo salía con el debe y el haber invertidos y la contraparte en la cuenta
+    equivocada, sin un solo error. La 9.0 cambió ese eje por una tabla (`modelo.RASGOS`), que es el arreglo, y esta
+    puerta **sigue haciendo falta igual**: la tabla tiene las filas que tiene, y un tipo del catálogo que no tenga
+    la suya hay que pararlo aquí y decir cuáles sabe originar, no dejar que falle dentro.
 
     Hoy no se dispara nunca —`TIPOS_DEL_MOTOR` y el catálogo coinciden— y ése es justo el momento de ponerla: el
     día que el catálogo crezca (B13), lo que falle será esto y no una exportación que nadie revisó."""

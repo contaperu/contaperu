@@ -27,6 +27,7 @@ from .. import catalogos as cat
 from ..catalogos import TOLERANCIA_IGV as TOLERANCIA
 from ..errores import ErrorContaperu
 from ..modelo import CENTIMO, CERO, Comprobante
+from ..modelo.libro import Rasgos, rasgos_de
 
 
 
@@ -76,20 +77,23 @@ def tasa_legal(igv, base_gravada) -> Decimal | None:
 SIN_CREDITO_FISCAL = ("02", "03")
 
 
-def igv_del_asiento(c: Comprobante, es_venta: bool) -> Decimal:
+def igv_del_asiento(c: Comprobante, libro: Rasgos) -> Decimal:
     """El IGV que va en su propia línea del asiento: el del comprobante, salvo en compras de un tipo sin
     crédito fiscal, donde es cero y ese importe se queda en la base."""
-    if not es_venta and c.tipo_cp in SIN_CREDITO_FISCAL:
+    # En un libro cuyo IGV ES crédito fiscal —las compras— hay tipos que no lo dan, y entonces ese importe se
+    # queda en la base en vez de tener línea propia. En ventas no aplica: ahí el IGV no es un crédito sino lo que
+    # se recauda, y siempre tiene su línea.
+    if rasgos_de(libro).da_credito_fiscal and c.tipo_cp in SIN_CREDITO_FISCAL:
         return Decimal(0)
     return Decimal(c.igv or 0).quantize(CENTIMO)
 
 
-def base_imputable(c: Comprobante, es_venta: bool) -> Decimal:
+def base_imputable(c: Comprobante, libro: Rasgos) -> Decimal:
     """Lo que va a la cuenta de la base —el gasto en compras, el ingreso en ventas—: el total menos el IGV
     con línea propia. Es lo que divide el reparto de la imputación de un documento, y por eso lo usan igual
     el asiento (`lineas_del_comprobante`) y la comprobación del reparto (`asiento.reparto_no_cuadra`): la regla vive
     una vez."""
-    return (Decimal(c.total or 0).quantize(CENTIMO) - igv_del_asiento(c, es_venta)).quantize(CENTIMO)
+    return (Decimal(c.total or 0).quantize(CENTIMO) - igv_del_asiento(c, libro)).quantize(CENTIMO)
 
 
 def por_destino(c: Comprobante) -> tuple[tuple[Decimal, Decimal], tuple[Decimal, Decimal], tuple[Decimal, Decimal]]:
@@ -185,7 +189,7 @@ def aplicar_igv(c: Comprobante, igv) -> dict[str, Decimal]:
             for k, v in fila.items()}
 
 
-def clase_de_igv(c: Comprobante, es_venta: bool) -> str:
+def clase_de_igv(c: Comprobante, libro: Rasgos) -> str:
     """Qué le cobraron de IGV a este comprobante, deducido de sus importes.
 
     **No se elige: sale de los importes** (John, 10-sep-2026), y por eso vive aquí y no en una columna: quien quiera
@@ -208,11 +212,12 @@ def clase_de_igv(c: Comprobante, es_venta: bool) -> str:
     caía en «inafecto» por descarte y lo enseñaba con un importe de `0.00` al lado, que es exactamente la confusión
     que esto viene a quitar.
     """
-    if not es_venta and (c.anio_dua or c.cod_dep_aduanera):
+    rasgos = rasgos_de(libro)
+    if rasgos.es_compra and (c.anio_dua or c.cod_dep_aduanera):
         return "importacion"
     no_gravado = c.adquisiciones_no_gravadas
     gravada = c.igv > 0 or c.base_gravada > 0
-    if es_venta:
+    if rasgos.es_venta:
         partes = [gravada, c.exonerado > 0, c.inafecto > 0, c.exportacion > 0]
         if sum(partes) > 1:
             return "mixto"

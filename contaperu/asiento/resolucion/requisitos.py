@@ -7,6 +7,7 @@ llama cada falta y a quién se le pide es el catálogo de `faltas.py`; aquí viv
 from __future__ import annotations
 
 from ...modelo import Comprobante
+from ...modelo.libro import Rasgos
 from ...pcge import clase_de as _clase_de
 from ...tributos.detracciones import (MARCA_SIRE, codigos_de, con_el_codigo_del_contador, esta_pendiente,
                                       normalizar_una)
@@ -36,10 +37,10 @@ def monedas_sin_codigo(comprobantes: list[Comprobante], config: dict) -> list[st
     return vistas
 
 
-def comprobantes_sin_cuenta(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
+def comprobantes_sin_cuenta(comprobantes: list[Comprobante], config: dict, libro: Rasgos | None = None) -> list[Comprobante]:
     """Las filas sin cuenta: basta con que a una parte de su base le falte (`partes_de`). Una parte del reparto
     no toma la cuenta por defecto: repartir entre la misma cuenta no reparte nada."""
-    return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, config, es_venta))]
+    return [c for c in comprobantes if not all(cuenta for cuenta, _, _ in partes_de(c, config, libro))]
 
 
 def comprobantes_anulados_con_deposito(comprobantes: list[Comprobante], config: dict) -> list[Comprobante]:
@@ -83,7 +84,7 @@ def comprobantes_sin_codigo_detraccion(comprobantes: list[Comprobante], config: 
             and normalizar_una(con_el_codigo_del_contador(c, config), codigos) is None]
 
 
-def cuentas_sin_denominacion(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[str]:
+def cuentas_sin_denominacion(comprobantes: list[Comprobante], config: dict, libro: Rasgos | None = None) -> list[str]:
     """Las cuentas que el asiento va a tocar y que la empresa **no ha dicho cómo se llaman**
     (`configuracion.denominacion_cuentas`), ordenadas y sin repetir.
 
@@ -95,21 +96,21 @@ def cuentas_sin_denominacion(comprobantes: list[Comprobante], config: dict, es_v
     desagrega hasta donde quiera, así que de `101101` solo sabría decir «Caja» donde la empresa escribe «CAJA CHICA
     M.N.». Inventarlo sería declararle a SUNAT una denominación que el contribuyente no usa."""
     denominaciones = config.get("denominacion_cuentas") or {}
-    faltan = {cuenta for c in comprobantes for cuenta in cuentas_del_asiento(c, config, es_venta)
+    faltan = {cuenta for c in comprobantes for cuenta in cuentas_del_asiento(c, config, libro)
               if not str(denominaciones.get(cuenta) or "").strip()}
     return sorted(faltan)
 
 
-def comprobantes_sin_clase(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
+def comprobantes_sin_clase(comprobantes: list[Comprobante], config: dict, libro: Rasgos | None = None) -> list[Comprobante]:
     """Las filas que tocarían una cuenta cuyo elemento del PCGE no tiene clase contable: el 8 (saldos intermediarios
     de gestión) y el 0 (cuentas de orden). Se miran **todas** las cuentas de su asiento (`cuentas_del_asiento`), no
     solo la de la base: basta con que una no tenga clase para que el asiento no se pueda armar, porque esa línea
     saldría sin `clase` y la clase es obligatoria desde la 1.0."""
     return [c for c in comprobantes
-            if any(not _clase_de(cuenta) for cuenta in cuentas_del_asiento(c, config, es_venta))]
+            if any(not _clase_de(cuenta) for cuenta in cuentas_del_asiento(c, config, libro))]
 
 
-def comprobantes_sin_centro(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
+def comprobantes_sin_centro(comprobantes: list[Comprobante], config: dict, libro: Rasgos | None = None) -> list[Comprobante]:
     """Las filas a las que les falta un centro de costo que SÍ hace falta.
 
     El centro es obligatorio solo donde de verdad se escribe: en la columna M de las cuentas de
@@ -117,7 +118,7 @@ def comprobantes_sin_centro(comprobantes: list[Comprobante], config: dict, es_ve
     NO bloquea nunca, ni siquiera con la X de su línea elegida como referencia: una referencia que se
     puede dejar en blanco no puede impedir exportar un mes.
 
-    `es_venta` va opcional a propósito, calcando a `comprobantes_sin_cuenta`: esto es una librería que se
+    `libro` va opcional a propósito, calcando a `comprobantes_sin_cuenta`: esto es una librería que se
     instala fuera, y un positional obligatorio sería romper su API pública por una regla interna
     de CONCAR. Ojo al llamarla: sin el flag, un libro de ventas resolvería la cuenta como gasto.
     """
@@ -127,16 +128,16 @@ def comprobantes_sin_centro(comprobantes: list[Comprobante], config: dict, es_ve
     def falta(c: Comprobante) -> bool:
         # Cada parte de la base con su cuenta y su centro (`partes_de`): basta con que a una le falte.
         return any(not (centro or "").strip() and lleva_centro(cuenta, config)
-                   for cuenta, centro, _ in partes_de(c, config, es_venta))
+                   for cuenta, centro, _ in partes_de(c, config, libro))
 
     return [c for c in comprobantes if falta(c)]
 
 
-def repartos_que_no_cuadran(comprobantes: list[Comprobante], config: dict, es_venta: bool = False) -> list[Comprobante]:
-    return [c for c in comprobantes if reparto_no_cuadra(c, config, es_venta)]
+def repartos_que_no_cuadran(comprobantes: list[Comprobante], config: dict, libro: Rasgos | None = None) -> list[Comprobante]:
+    return [c for c in comprobantes if reparto_no_cuadra(c, config, libro)]
 
 
-def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
+def faltantes_para(comprobantes: list[Comprobante], config: dict, libro: Rasgos | None = None,
                    exige: frozenset[str] | set[str] = frozenset()) -> dict[str, list]:
     """Lo que les falta a estos comprobantes para un destino que EXIGE eso — solo las claves exigidas.
 
@@ -157,13 +158,13 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
     if "cuenta_unica" in exige:
         salida["reparto_no_admitido"] = con_reparto(de_la_imputacion, config)
     if "cuenta_contable" in exige:
-        salida["sin_cuenta"] = comprobantes_sin_cuenta(de_la_imputacion, config, es_venta)
-        salida["sin_clase"] = comprobantes_sin_clase(de_la_imputacion, config, es_venta)
-        salida["reparto_que_no_cuadra"] = repartos_que_no_cuadran(de_la_imputacion, config, es_venta)
+        salida["sin_cuenta"] = comprobantes_sin_cuenta(de_la_imputacion, config, libro)
+        salida["sin_clase"] = comprobantes_sin_clase(de_la_imputacion, config, libro)
+        salida["reparto_que_no_cuadra"] = repartos_que_no_cuadran(de_la_imputacion, config, libro)
     if "centro_costo" in exige:
-        salida["sin_centro"] = comprobantes_sin_centro(de_la_imputacion, config, es_venta)
+        salida["sin_centro"] = comprobantes_sin_centro(de_la_imputacion, config, libro)
     if "denominacion" in exige:
-        salida["sin_denominacion"] = cuentas_sin_denominacion(de_la_imputacion, config, es_venta)
+        salida["sin_denominacion"] = cuentas_sin_denominacion(de_la_imputacion, config, libro)
     if "detraccion" in exige:
         salida["sin_codigo_detraccion"] = comprobantes_sin_codigo_detraccion(de_la_imputacion, config)
     # Esta NO depende de lo que el destino exija: no es un requisito de un formato, es que dos hechos del documento se
@@ -177,12 +178,12 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, es_venta: bool
     return salida
 
 
-def exigir_requisitos(comprobantes: list[Comprobante], config: dict, es_venta: bool = False,
+def exigir_requisitos(comprobantes: list[Comprobante], config: dict, libro: Rasgos | None = None,
                       exige: frozenset[str] | set[str] = frozenset()) -> None:
     """Hace cumplir `faltantes_para`: la primera falta, en el orden de `FALTAS` (tipo → moneda → reparto no admitido →
     cuenta → reparto que no cuadra → centro), detiene la exportación con su excepción. Un tipo sin sigla no se
     inventa."""
-    falta = faltantes_para(comprobantes, config, es_venta, exige)
+    falta = faltantes_para(comprobantes, config, libro, exige)
     for regla in FALTAS:
         if regla.excepcion is not None and falta.get(regla.clave):
             raise regla.excepcion(falta[regla.clave])

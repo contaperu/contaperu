@@ -122,15 +122,16 @@ paquete `asiento`, y **todas reciben la configuración ya aplicada**:
 
 ```python
 from contaperu import asiento
-from contaperu.modelo import Comprobante
+from contaperu.modelo import Comprobante, Libro
 
 config = api.config_aplicada(configuracion, driver="concar", documento=documento)   # desde la 1.2
 comprobantes = [Comprobante.de_dict(c) for c in documento["comprobantes"]]
+libro = Libro.de_dict(documento["libro"]).rasgos          # desde la 9.0: los rasgos, no un booleano
 
-faltan = asiento.faltantes_para(comprobantes, config, es_venta=False, exige=("cuenta_contable",))
+faltan = asiento.faltantes_para(comprobantes, config, libro, exige=("cuenta_contable",))
 print(sorted(faltan))                                     # ['sin_cuenta'] si nadie eligió la cuenta
-print(asiento.sub_diario(comprobantes[0], config))        # el sub-diario que llevará esa fila
-print(asiento.cuenta_tercero(comprobantes[0], config))    # la cuenta del total que usará el archivo
+print(asiento.sub_diario(comprobantes[0], config, libro))  # el sub-diario que llevará esa fila
+print(asiento.cuenta_tercero(comprobantes[0], config, libro))  # la cuenta del total que usará el archivo
 ```
 
 **Es la misma configuración con la que se genera**, no una aproximación: la arman las dos las operaciones por dentro.
@@ -569,6 +570,32 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   antes de la 7.0 y correr tu batería con `-W error::contaperu._obsoleto.RutaObsoleta`: ahí las rutas viejas todavía
   resuelven y cada una te dice la suya. Con una advertencia: **el aviso sale al USAR el nombre, no al importar el
   módulo**, así que una línea que ningún test tuyo toque no saldrá. Haz también un `grep` de las seis.
+- **Si llamas al paquete `asiento` o a `tributos.igv`, la 9.0 cambia un parámetro** y es el único cambio que
+  rompe. Catorce funciones recibían `es_venta: bool` y ahora reciben **los rasgos del libro**:
+
+  | Hasta la 8.x | Desde la 9.0 |
+  |---|---|
+  | `asiento.faltantes_para(cs, config, True, exige)` | `asiento.faltantes_para(cs, config, libro.rasgos, exige)` |
+  | `asiento.sub_diario(c, config, libro.es_venta)` | `asiento.sub_diario(c, config, libro.rasgos)` |
+  | `asiento.cuenta_tercero(c, config, False)` | `asiento.cuenta_tercero(c, config, RASGOS["compra"])` |
+  | `asiento.faltantes_para(cs, config)` *(sin decirlo)* | **ya no vale**: hay que decir el libro |
+
+  Con un `Libro` delante es siempre `libro.rasgos`; sin él, `modelo.RASGOS["venta"]` o `["compra"]`. Y vale
+  cualquiera de las tres formas: unos rasgos, un `Libro` o el tipo por su nombre.
+
+  **Un booleano no se interpreta: para, y el error dice qué escribir.** Es a propósito — un `True` que se colara
+  elegiría la rama equivocada en silencio, que es lo que esta mayor viene a quitar. Lo mismo con **omitirlo**:
+  hasta la 8.x no decir nada significaba «compra», y ése era el error.
+
+  **Por qué cambia.** El motor decidía casi todo con ese booleano y usaba `not es_venta` para decir «es compra»:
+  el sentido debe/haber, el crédito frente al débito fiscal, cliente frente a proveedor, el sub-diario. Correcto
+  con dos libros y un error silencioso con tres — un libro nuevo salía tratado como una compra, con el debe y el
+  haber al revés. Ahora cada tipo de libro declara lo que el motor necesita saber de él (`modelo.RASGOS`), y
+  añadir uno es añadir una fila.
+
+  **Ojo con una cosa, y la decimos nosotros**: el test de superficie pública **no caza este cambio**, porque de
+  los módulos de extensión congela los nombres y no las firmas. Los catorce nombres siguen ahí. Así que la
+  comprobación es un `grep` de `es_venta` en tu código, no la batería.
 - **El `libro` ya no se traga una clave que no es suya** (7.0). Son exactamente cuatro —`ruc`, `razon_social`,
   `periodo`, `tipo`— y cualquier otra detiene la lectura diciendo su nombre; tampoco pasan las anotaciones `_`, que
   van en la raíz del documento. Hasta la 6.5 se ignoraban en silencio, aunque el esquema las rechazara: si mandabas

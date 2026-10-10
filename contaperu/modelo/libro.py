@@ -1,7 +1,13 @@
 """El libro: la cabecera de lo que se registra —un RUC, un mes, ventas o compras—.
 
-Es lo primero que se valida de un documento y lo que decide todo lo demás: de `Libro.es_venta` cuelga qué
-cuentas se usan, qué sub-diario toca y qué columnas escribe cada driver.
+Es lo primero que se valida de un documento y lo que decide todo lo demás: de su tipo cuelga qué cuentas se usan,
+qué sub-diario toca y qué columnas escribe cada driver.
+
+**Y desde la 9.0 eso cuelga de una tabla y no de un booleano**, que es el cambio que rompe. Hasta la 8.x el motor
+preguntaba `libro.es_venta` en medio centenar de sitios y usaba `not es_venta` para decir «es compra»: correcto
+mientras el catálogo tuviera dos valores, y un error silencioso en cuanto tuviera tres. La 8.2 puso una puerta que
+lo paraba; la 9.0 lo arregla, que es distinto — **ahora cada tipo de libro declara lo que el motor necesita saber
+de él**, y añadir uno es añadir una fila en vez de auditar cincuenta `if`.
 """
 from __future__ import annotations
 
@@ -13,6 +19,82 @@ from .coerciones import solo_digitos
 
 # Del catálogo del estándar (`vocabulario.TIPOS_LIBRO`), que es la única fuente desde la 1.0.
 TIPOS_LIBRO = vocabulario.TIPOS_LIBRO
+
+
+@dataclass(frozen=True)
+class Rasgos:
+    """Lo que el motor necesita saber de un libro para armar su asiento, declarado en vez de deducido.
+
+    **Cada campo era un `if es_venta` repartido por el núcleo.** Juntarlos tiene tres efectos que valen la mayor
+    que cuesta: se ve de un vistazo en qué se diferencian dos libros, un libro nuevo es una fila, y lo que el
+    motor todavía no sabe hacer se nota — porque hay que rellenar el campo y no hay con qué.
+
+    `sentido_principal` es el del HECHO: en una venta el ingreso va al haber, en una compra el gasto va al debe.
+    La contraparte va al contrario, y por eso no se declara: se deriva."""
+
+    tipo: str
+    sub_diario: str             # la clave de configuración que nombra su sub-diario
+    cuenta_contraparte: str     # la clave de `cuentas` con la que se salda: a quién se le debe o quién debe
+    sentido_principal: str      # 'D' | 'H'
+    da_credito_fiscal: bool     # el IGV entra como crédito (compras) o como débito del que se recauda (ventas)
+    lleva_detraccion: bool
+    lleva_honorarios: bool      # el recibo por honorarios y su retención de 4ta
+    origen: str                 # de qué bloque del documento salen sus líneas
+
+    @property
+    def es_venta(self) -> bool:
+        return self.tipo == "venta"
+
+    @property
+    def es_compra(self) -> bool:
+        return self.tipo == "compra"
+
+    @property
+    def sentido_contraparte(self) -> str:
+        """Al revés que el hecho, siempre. Es la partida doble, y por eso se deriva en vez de declararse."""
+        return "D" if self.sentido_principal == "H" else "H"
+
+
+# Los libros que el motor sabe ORIGINAR, con lo que los distingue. Son los mismos de `asiento.TIPOS_DEL_MOTOR`:
+# aquella tupla dice cuáles, esta tabla dice en qué se diferencian.
+#
+# El catálogo del estándar puede crecer sin que crezca esta tabla, y no es una inconsistencia: el catálogo dice
+# qué libros existen y esto dice cuáles sabe armar el motor. Uno que esté allí y no aquí se rechaza nombrando los
+# que sí (`asiento.LibroQueElMotorNoOrigina`).
+RASGOS: dict[str, "Rasgos"] = {
+    "venta": Rasgos(tipo="venta", sub_diario="sub_diario_ventas", cuenta_contraparte="clientes",
+                    sentido_principal="H", da_credito_fiscal=False, lleva_detraccion=False,
+                    lleva_honorarios=False, origen="comprobantes"),
+    "compra": Rasgos(tipo="compra", sub_diario="sub_diario_compras", cuenta_contraparte="cxp",
+                     sentido_principal="D", da_credito_fiscal=True, lleva_detraccion=True,
+                     lleva_honorarios=True, origen="comprobantes"),
+}
+
+
+class LibroSinRasgos(ValueError):
+    """Se pidieron los rasgos de algo que el motor no sabe armar, o de un booleano de antes de la 9.0."""
+
+
+def rasgos_de(libro: Rasgos | Libro | str) -> Rasgos:
+    """Los rasgos de lo que sea que te hayan pasado: unos rasgos, un `Libro` o el tipo por su nombre.
+
+    Es generoso a propósito —quien llama pasa lo que tenga— con una excepción que es el motivo de que exista:
+    **un `bool` da un error que dice qué hacer**. Hasta la 8.x estas funciones recibían `es_venta`, y un `True`
+    que se colara elegiría la rama equivocada en silencio, que es justo lo que la 9.0 viene a quitar."""
+    if isinstance(libro, Rasgos):
+        return libro
+    if isinstance(libro, bool):
+        cual = "venta" if libro else "compra"
+        raise LibroSinRasgos(
+            f"Esto recibía `es_venta: bool` hasta la 8.x y desde la 9.0 recibe los rasgos del libro. "
+            f"En vez de {libro!r}, pasa `libro.rasgos`, o `modelo.RASGOS[{cual!r}]` si no tienes el libro.")
+    tipo = getattr(libro, "tipo", libro)
+    rasgos = RASGOS.get(str(tipo or "").strip().lower())
+    if rasgos is None:
+        raise LibroSinRasgos(f"El motor no sabe armar el asiento de un libro {tipo!r}: "
+                             f"origina {', '.join(sorted(RASGOS))}")
+    return rasgos
+
 
 @dataclass
 class Libro:
@@ -49,10 +131,17 @@ class Libro:
 
     @property
     def es_compra(self) -> bool:
-        """La pareja de `es_venta`, y no es redundante: hoy `not es_venta` significa «es compra» en medio centenar
-        de sitios, y eso solo es cierto mientras el catálogo tenga dos valores. Con las dos preguntas por separado,
-        un tipo de libro nuevo da `False` a las dos y **cada rama tiene que decidir** en vez de heredar «compra»."""
+        """La pareja de `es_venta`, y no es redundante: hasta la 8.x `not es_venta` significaba «es compra» en medio
+        centenar de sitios, y eso solo era cierto mientras el catálogo tuviera dos valores. Con las dos preguntas por
+        separado, un tipo de libro nuevo da `False` a las dos y **cada rama tiene que decidir** en vez de heredar
+        «compra». Lo sigue preguntando lo que tiene el libro en la mano —los lectores, `validar`, los drivers—;
+        lo que recibe el eje por parámetro recibe los `rasgos`."""
         return self.tipo == "compra"
+
+    @property
+    def rasgos(self) -> Rasgos:
+        """Lo que el motor necesita saber de este libro. Es lo que se le pasa al núcleo desde la 9.0."""
+        return rasgos_de(self.tipo)
 
     def a_dict(self) -> dict[str, str]:
         return {"ruc": self.ruc, "razon_social": self.razon_social, "periodo": self.periodo, "tipo": self.tipo}

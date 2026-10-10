@@ -15,6 +15,7 @@ import pytest
 from contaperu import api, pcge
 from contaperu.asiento import faltas
 from contaperu.asiento.motor import ROLES_DEL_MOTOR
+from contaperu.modelo.libro import RASGOS
 
 LIBRO = {"ruc": "20601234567", "periodo": "202601", "tipo": "compra"}
 COMPRA = {"tipo_cp": "01", "serie": "F001", "numero": "500", "fecha_emision": "2026-01-10",
@@ -176,8 +177,8 @@ def test_las_cuentas_que_el_diagnostico_mira_son_las_que_el_asiento_usa(descripc
         IMPUTACIONES[c.id_externo]["anulada_por_nota"] = True
     config = aplicada(cuentas=CUENTAS_DE_PRUEBA)
     del_asiento = {ln.cuenta for ln in lineas_del_comprobante(c, config, (date(2026, 1, 1), date(2026, 1, 31)),
-                                                              "000001", es_venta=es_venta)}
-    assert set(resolucion.cuentas_del_asiento(c, config, es_venta)) == del_asiento, descripcion
+                                                              "000001", libro=RASGOS["venta" if es_venta else "compra"])}
+    assert set(resolucion.cuentas_del_asiento(c, config, RASGOS["venta" if es_venta else "compra"])) == del_asiento, descripcion
 
 
 def test_una_cuenta_sin_clase_que_no_es_la_de_la_base_tambien_se_dice_antes_de_exportar():
@@ -212,7 +213,7 @@ def test_ninguna_linea_puede_salir_sin_clase_aunque_el_diagnostico_se_despiste()
                     contraparte_doc="20131312955", moneda="PEN", base_gravada="100.00", igv="18.00",
                     total="118.00", destino_igv="DG", cuenta_contable="891101")
     with pytest.raises(faltas.SinClase, match="sin clase contable"):
-        lineas_del_comprobante(c, aplicada(cuentas=CUENTAS_DE_PRUEBA), (date(2026, 1, 1), date(2026, 1, 31)), "000001")
+        lineas_del_comprobante(c, aplicada(cuentas=CUENTAS_DE_PRUEBA), (date(2026, 1, 1), date(2026, 1, 31)), "000001", libro=RASGOS["compra"])
 
 
 # ── La falta ──────────────────────────────────────────────────────────────────────────────────────────────────
