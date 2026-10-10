@@ -115,14 +115,14 @@ def test_agrupa_por_documento_y_no_por_nombre():
     r = resumen.del_libro(cs(dict(FACTURA, contraparte_nombre="FERRETERIA DEL SUR S.A.C."),
                              dict(FACTURA, numero="872", contraparte_nombre="FERRETERIA DEL SUR SAC",
                                   base_gravada="500.00", igv="90.00", total="590.00"),
-                             dict(FACTURA, numero="873", contraparte_doc="20512333797",
+                             dict(FACTURA, numero="873", contraparte_doc="20699999998",
                                   contraparte_nombre="OTRA COSA SAC", base_gravada="4000.00",
                                   igv="720.00", total="4720.00")),
                           agrupar_por="contraparte")
     assert r["agrupado_por"] == "contraparte" and len(r["grupos"]) == 2
     # De más a menos, que es la pregunta que se hace («a quién le compré más»).
     primero, segundo = r["grupos"]
-    assert primero["clave"] == "20512333797" and primero["totales"]["PEN"]["total"] == "4720.00"
+    assert primero["clave"] == "20699999998" and primero["totales"]["PEN"]["total"] == "4720.00"
     assert segundo["clave"] == "20602222226" and segundo["totales"]["PEN"]["total"] == "1770.00"
     assert segundo["etiqueta"] == "FERRETERIA DEL SUR SAC", "el nombre más reciente de sus filas"
     assert segundo["recuento"]["sumados"] == 2
@@ -130,7 +130,7 @@ def test_agrupa_por_documento_y_no_por_nombre():
 
 def test_una_contraparte_sin_nada_que_sumar_no_es_un_grupo():
     """Un proveedor cuyas dos filas están excluidas no es un proveedor de ese mes: es ruido en la lista."""
-    r = resumen.del_libro(cs(FACTURA, dict(FACTURA, numero="872", contraparte_doc="20512333797",
+    r = resumen.del_libro(cs(FACTURA, dict(FACTURA, numero="872", contraparte_doc="20699999998",
                                            excluida=True)), agrupar_por="contraparte")
     assert [g["clave"] for g in r["grupos"]] == ["20602222226"]
 

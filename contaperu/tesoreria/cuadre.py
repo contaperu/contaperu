@@ -73,10 +73,12 @@ def cuadra(movimientos: list, saldo_inicial: object = CERO, saldo_final: object 
     Un movimiento **sin** saldo propio no rompe nada: se le aplica su importe y se sigue. Hay extractos que solo
     dan el saldo al final de cada día.
 
-    **El ITF se descuenta aparte, y esto lo enseñó el archivo real.** En BBVA no está dentro del importe: va en su
-    propia columna y el saldo corrido lo resta igual. Con las cifras del extracto de agosto de 2026,
-    1 070 867,80 − 4 960,00 da 1 065 907,80 y el banco imprime 1 065 907,60 — los veinte céntimos que faltan son
-    el ITF de esa línea. Sin esto, el primer lector de BBVA habría «cuadrado mal» en la segunda fila del mes."""
+    **El ITF se descuenta aparte, y esto lo enseñó un archivo real.** En BBVA no está dentro del importe: va en su
+    propia columna y el saldo corrido lo resta igual. Con la cadena inventada de `tests/test_tesoreria.py`,
+    1 500,00 − 200,00 da 1 300,00 y la línea trae 1 299,80 — los veinte céntimos que faltan son el ITF. Las cifras
+    del extracto que lo enseñó **no se escriben**: un saldo es la posición de caja de una empresa y este
+    repositorio es público (regla 6). Sin esto, el primer lector de BBVA habría «cuadrado mal» en la segunda fila
+    del mes."""
     saldo = _monto(saldo_inicial)
     cargos = abonos = CERO
     rompe_en, diferencia = 0, CERO

@@ -1,9 +1,19 @@
-"""La forma de la tesorería, contrastada contra nueve extractos reales de producción.
+"""La forma de la tesorería, sacada de nueve extractos reales de producción.
 
 Los archivos no están aquí —son de una empresa y este repositorio es público: viven en `privado/extractos/`, que
-`.gitignore` bloquea—, pero **las cifras de los dos primeros movimientos del extracto de BBVA de agosto de 2026 sí
-están**, y son el mejor test que esta pieza puede tener: si la cadena de saldos no reproduce el saldo que el banco
-imprimió, algo está mal aquí y no en el banco.
+`.gitignore` bloquea—. **Y las cifras de este fichero son inventadas a propósito**, que es lo que la regla 6 exige
+y lo que hasta la 9.0.1 no se cumplió: llevaba el CCI, el número de cuenta y el saldo de una cuenta real, más dos
+movimientos con sus importes. Un CCI con su número de cuenta es la coordenada para mandarle dinero a esa cuenta, y
+un saldo es la posición de caja de la empresa. Nada de eso vuelve aquí.
+
+**Lo que el test prueba no son las cifras, es la aritmética**, y con números inventados se prueba igual: si la
+cadena de saldos no reproduce el saldo de la última línea, un lector está leyendo mal. Por eso los números de aquí
+son redondos y encadenan a mano —1 000,00 + 500,00 − 200,00 − 0,20 de ITF = 1 299,80—, que además hace el test
+legible. Los que vinieron del archivo real y no se pueden escribir se comprobaron en local, de lectura, una vez.
+
+Los **códigos de banco sí son los de verdad** (`011` BBVA, `009` Scotiabank): son norma publicada, no el dato de
+nadie, y son justo lo que el test comprueba. Lo que se inventa es la oficina, la cuenta y los dígitos de control
+—con el molde del RUC `20601234567`, seguro por no poder ser de ninguna empresa—.
 
 Lo que estos tests NO prueban, y conviene decirlo: no hay lector de ningún banco todavía. Se prueba la forma, la
 normalización del signo, la deduplicación y el cuadre. El parser de cada banco entra con su archivo delante.
@@ -17,21 +27,22 @@ import pytest
 
 from contaperu import tesoreria as t
 
-# De `BBVA SOLES.pdf`, agosto de 2026: el saldo anterior y los dos primeros movimientos, con su saldo corrido tal
-# como los imprime el banco. El CCI es el que el propio extracto publica al pie, y su `011` es la entidad.
-SALDO_ANTERIOR = "1069946.05"
-CCI_BBVA = "011 307 000100028777 69"
+# Inventados, y con la forma del CCI del Perú: 3 de entidad + 3 de oficina + 12 de cuenta + 2 de control. El `011`
+# es BBVA de verdad —norma publicada— y el resto no puede ser de nadie: oficina `999` y una cuenta de ceros.
+SALDO_ANTERIOR = "1000.00"
+CCI_BBVA = "011 999 000000000001 00"
+CCI_SCOTIABANK = "009-999-000000000002-00"
 
 
 def cuenta(**extra) -> t.CuentaBancaria:
-    datos = {"id": "bbva-soles", "banco": "BBVA", "numero": "0100028777", "cci": CCI_BBVA,
+    datos = {"id": "bbva-soles", "banco": "BBVA", "numero": "9999999999", "cci": CCI_BBVA,
              "moneda": "PEN", "cuenta_contable": "10411100"}
     return t.CuentaBancaria(**{**datos, **extra})
 
 
 def mov(**extra) -> t.Movimiento:
-    datos = {"cuenta": "bbva-soles", "fecha": "2026-08-03", "descripcion": "ABONO POR DEVOLUCION - CCE",
-             "importe": "921.75", "sentido": "abono", "moneda": "PEN"}
+    datos = {"cuenta": "bbva-soles", "fecha": "2026-08-03", "descripcion": "ABONO POR TRANSFERENCIA",
+             "importe": "500.00", "sentido": "abono", "moneda": "PEN"}
     return t.Movimiento(**{**datos, **extra})
 
 
@@ -40,10 +51,10 @@ def mov(**extra) -> t.Movimiento:
 def test_el_cci_se_normaliza_y_dice_su_banco():
     """Cada banco lo imprime a su manera —BBVA con espacios, Scotiabank con guiones— y es el mismo número."""
     c = cuenta()
-    assert c.cci == "01130700010002877769" and len(c.cci) == t.LARGO_CCI
+    assert c.cci == "01199900000000000100" and len(c.cci) == t.LARGO_CCI
     assert c.codigo_de_banco == "011"
-    assert t.normalizar_cci("009-202-000003675511-34") == "00920200000367551134"
-    assert t.banco_del_cci("009-202-000003675511-34") == "009"
+    assert t.normalizar_cci(CCI_SCOTIABANK) == "00999900000000000200"
+    assert t.banco_del_cci(CCI_SCOTIABANK) == "009"
     # Un CCI que no tiene la forma no se adivina: no hay banco, y se dice con vacío.
     assert t.banco_del_cci("123") == ""
 
@@ -52,7 +63,7 @@ def test_un_cci_corto_no_se_rellena_con_ceros():
     """Es la tentación evidente y sería un error: un CCI corto es un dato mal copiado, no uno al que le faltan
     ceros. Se para y se dice cuántos dígitos tiene."""
     with pytest.raises(t.CuentaInvalida) as e:
-        cuenta(cci="0113070001")
+        cuenta(cci="0119990000")
     assert "20 dígitos" in str(e.value) and "tiene 10" in str(e.value)
 
 
@@ -77,7 +88,7 @@ def test_sin_cuentas_declaradas_no_pasa_nada():
 
 def test_una_clave_que_no_es_de_una_cuenta_se_dice_por_su_nombre():
     with pytest.raises(t.CuentaInvalida) as e:
-        t.CuentaBancaria.de_dict({**cuenta().a_dict(), "titular": "C MEJIA"})
+        t.CuentaBancaria.de_dict({**cuenta().a_dict(), "titular": "CONTRIBUYENTE DE EJEMPLO"})
     assert "titular" in str(e.value)
 
 
@@ -86,11 +97,11 @@ def test_una_clave_que_no_es_de_una_cuenta_se_dice_por_su_nombre():
 def test_el_importe_va_siempre_positivo_y_el_signo_lo_dice_el_sentido():
     """BBVA trae una columna con el importe negativo cuando es cargo; Scotiabank y BanBif traen dos columnas. El
     modelo normaliza a una sola forma, que es la que ya usa la línea de diario con su `debe_haber`."""
-    cargo = mov(importe="4960.00", sentido="cargo", descripcion="C/ PROVEEDO.0803001")
-    assert cargo.importe == Decimal("4960.00") and cargo.es_cargo
+    cargo = mov(importe="200.00", sentido="cargo", descripcion="CARGO POR TRANSFERENCIA")
+    assert cargo.importe == Decimal("200.00") and cargo.es_cargo
     # Y un importe con signo NO se rechaza: se normaliza. `modelo.monto` devuelve el valor absoluto, que es lo que
     # un lector de BBVA necesita — mira el signo de la columna para poner `sentido` y pasa el importe tal cual.
-    assert mov(importe="-4960.00", sentido="cargo").importe == Decimal("4960.00")
+    assert mov(importe="-200.00", sentido="cargo").importe == Decimal("200.00")
 
 
 def test_un_movimiento_sin_fecha_no_pasa_porque_el_nucleo_no_tiene_reloj():
@@ -119,19 +130,19 @@ def test_el_itf_es_un_dato_del_banco_y_vacio_no_es_cero():
 def test_una_relectura_con_solape_no_duplica():
     """El criterio de salida del hito D2. Se baja el extracto dos veces y los repetidos se dicen, no se tiran en
     silencio: lo que el que integra necesita saber es cuántos se descartaron."""
-    a = mov(referencia="14051")
-    b = mov(referencia="14052", importe="4960.00", sentido="cargo")
-    nuevos, repetidos = t.sin_duplicados([a, b, mov(referencia="14051")])
+    a = mov(referencia="000001")
+    b = mov(referencia="000002", importe="200.00", sentido="cargo")
+    nuevos, repetidos = t.sin_duplicados([a, b, mov(referencia="000001")])
     assert len(nuevos) == 2 and len(repetidos) == 1
-    assert repetidos[0].referencia == "14051"
+    assert repetidos[0].referencia == "000001"
 
 
 def test_sin_referencia_la_clave_se_cae_a_lo_que_siempre_hay():
     """BanBif no da número de operación. La clave usa entonces cuenta, fecha, sentido, importe y descripción — y
     eso **puede colisionar a propósito**: dos comisiones idénticas el mismo día son dos movimientos y una clave."""
     sin_ref = mov(referencia="")
-    assert sin_ref.clave == t.clave_de("bbva-soles", "", date(2026, 8, 3), "abono", Decimal("921.75"),
-                                       "ABONO POR DEVOLUCION - CCE")
+    assert sin_ref.clave == t.clave_de("bbva-soles", "", date(2026, 8, 3), "abono", Decimal("500.00"),
+                                       "ABONO POR TRANSFERENCIA")
     nuevos, repetidos = t.sin_duplicados([sin_ref, mov(referencia="")])
     assert len(nuevos) == 1 and len(repetidos) == 1
 
@@ -139,31 +150,31 @@ def test_sin_referencia_la_clave_se_cae_a_lo_que_siempre_hay():
 # ── El cuadre, que es lo que hace verificable a un lector ──────────────────
 
 def test_la_cadena_de_saldos_reproduce_la_del_banco():
-    """Las cifras son las del extracto real de BBVA de agosto de 2026: 1 069 946,05 + 921,75 − 4 960,00."""
-    movs = [mov(referencia="14051", saldo="1070867.80"),
-            mov(referencia="14052", importe="4960.00", sentido="cargo", itf="0.20",
-                descripcion="C/ PROVEEDO.0803001", saldo="1065907.60")]
+    """La cadena encadena a mano: 1 000,00 + 500,00 = 1 500,00, y − 200,00 − 0,20 de ITF = 1 299,80."""
+    movs = [mov(referencia="000001", saldo="1500.00"),
+            mov(referencia="000002", importe="200.00", sentido="cargo", itf="0.20",
+                descripcion="CARGO POR TRANSFERENCIA", saldo="1299.80")]
     r = t.cuadra(movs, saldo_inicial=SALDO_ANTERIOR)
     assert r.cuadra, str(r)
-    assert r.saldo_final == Decimal("1065907.60")
-    assert (r.cargos, r.abonos) == (Decimal("4960.00"), Decimal("921.75"))
+    assert r.saldo_final == Decimal("1299.80")
+    assert (r.cargos, r.abonos) == (Decimal("200.00"), Decimal("500.00"))
 
 
 def test_el_itf_entra_en_la_cadena_aunque_no_este_en_la_columna_del_importe():
     """Lo enseñó el archivo real y es el tipo de cosa que un lector nuevo descubre tarde: en BBVA el ITF va en su
     propia columna y el saldo corrido lo resta igual. Sin restarlo, la segunda fila del mes ya no cuadra."""
-    sin_itf = t.cuadra([mov(importe="4960.00", sentido="cargo", saldo="1065907.60")],
-                       saldo_inicial="1070867.80")
+    sin_itf = t.cuadra([mov(importe="200.00", sentido="cargo", saldo="1299.80")],
+                       saldo_inicial="1500.00")
     assert not sin_itf.cuadra and sin_itf.diferencia == Decimal("-0.20")
-    con_itf = t.cuadra([mov(importe="4960.00", sentido="cargo", itf="0.20", saldo="1065907.60")],
-                       saldo_inicial="1070867.80")
+    con_itf = t.cuadra([mov(importe="200.00", sentido="cargo", itf="0.20", saldo="1299.80")],
+                       saldo_inicial="1500.00")
     assert con_itf.cuadra
 
 
 def test_una_linea_mal_leida_se_delata_en_el_acto_y_dice_cual():
     """Es para lo que existe esta función. Un lector de PDF se equivoca callado —se salta una línea, pega dos
     columnas— y el saldo corrido lo descubre sin que haga falta un humano."""
-    movs = [mov(saldo="1070867.80"), mov(importe="4960.00", sentido="cargo", saldo="999999.99")]
+    movs = [mov(saldo="1500.00"), mov(importe="200.00", sentido="cargo", saldo="999999.99")]
     r = t.cuadra(movs, saldo_inicial=SALDO_ANTERIOR)
     assert not r.cuadra and r.rompe_en == 2
     assert "se rompe en el movimiento 2" in str(r)
@@ -173,12 +184,12 @@ def test_una_linea_mal_leida_se_delata_en_el_acto_y_dice_cual():
 
 def test_un_movimiento_sin_saldo_propio_no_rompe_nada():
     """Hay extractos que solo dan el saldo al final de cada día. Se le aplica su importe y se sigue."""
-    r = t.cuadra([mov(), mov(importe="4960.00", sentido="cargo")], saldo_inicial=SALDO_ANTERIOR)
-    assert r.cuadra and r.saldo_final == Decimal("1065907.80")
+    r = t.cuadra([mov(), mov(importe="200.00", sentido="cargo")], saldo_inicial=SALDO_ANTERIOR)
+    assert r.cuadra and r.saldo_final == Decimal("1300.00")
 
 
 def test_el_saldo_final_declarado_se_comprueba_y_el_ausente_no_se_inventa():
-    r = t.cuadra([mov()], saldo_inicial=SALDO_ANTERIOR, saldo_final="1070867.80")
+    r = t.cuadra([mov()], saldo_inicial=SALDO_ANTERIOR, saldo_final="1500.00")
     assert r.cuadra
     malo = t.cuadra([mov()], saldo_inicial=SALDO_ANTERIOR, saldo_final="1.00")
     assert not malo.cuadra and malo.rompe_en == 1

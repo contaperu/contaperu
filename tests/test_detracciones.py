@@ -222,7 +222,7 @@ def test_no_avisa_si_coincide_o_si_la_tasa_sale_de_la_tabla():
 def _compra_con_detraccion(**extra) -> Comprobante:
     """Una factura afecta a detracción, con lo mínimo para que el asiento salga."""
     return _comprobante_de_prueba(tipo_cp="01", serie="F001", numero="123", fecha_emision=date(2026, 1, 15),
-                                  contraparte_doc="20512333797", contraparte_nombre="PROVEEDOR SAC", moneda="PEN",
+                                  contraparte_doc="20699999998", contraparte_nombre="PROVEEDOR SAC", moneda="PEN",
                                   base_gravada=Decimal("1000.00"), igv=Decimal("180.00"), total=Decimal("1180.00"),
                                   cuenta_contable="659999", detraccion={"codigo": "027", **extra})
 

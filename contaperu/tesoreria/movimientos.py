@@ -84,7 +84,7 @@ class Movimiento:
             raise MovimientoInvalido(f"Sentido inválido en la cuenta {self.cuenta!r}: {self.sentido!r} "
                                      f"({' | '.join(SENTIDOS)})")
         # No hay comprobación de importe negativo, y no es un olvido: `modelo.monto` **ya devuelve el valor
-        # absoluto** —«el signo no es parte del dato»—, así que un `-4960.00` del extracto de BBVA llega aquí
+        # absoluto** —«el signo no es parte del dato»—, así que un `-200.00` de una columna con signo llega aquí
         # convertido. Eso es lo que hace falta: el lector mira el signo de la columna para poner `sentido` y pasa
         # el importe tal cual. Un `if importe < 0` aquí sería código que no puede ejecutarse nunca.
 

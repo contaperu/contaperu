@@ -993,7 +993,7 @@
     "fecha_vencimiento": "2026-09-05",
     "id_externo": "f1",
     "contraparte_tipo_doc": "6",
-    "contraparte_doc": "20100017491",
+    "contraparte_doc": "20600000005",
     "contraparte_nombre": "EMPRESA DE ENERGIA",
     "concepto": "Energia electrica obra",
     "moneda": "PEN",
@@ -1065,7 +1065,7 @@
     "fecha": "2026-08-11",
     "moneda": "PEN",
     "glosa": "ENERGIA ELECTRICA OBRA",
-    "contraparte_doc": "20100017491",
+    "contraparte_doc": "20600000005",
     "documento": {
      "tipo_cp": "14",
      "serie_numero": "0001-98765",
@@ -1078,7 +1078,7 @@
   ],
   "_exportacion": {
    "driver": "asiento_contable",
-   "huella": "8bca51ebbf7e90dd11b3cf9ef547cfdc342c63bacb6921c8548b2b91d53330f9",
+   "huella": "d88f9fb878c7e422918ed92a553f7e3cb173c77566b482950575e3a8b3607c74",
    "comprobantes": [
     {
      "identidad": {
@@ -1087,13 +1087,13 @@
       "tipo_cp": "14",
       "serie": "0001",
       "numero": "98765",
-      "contraparte_doc": "20100017491"
+      "contraparte_doc": "20600000005"
      },
      "lineas": [
       0,
       3
      ],
-     "huella": "8bca51ebbf7e90dd11b3cf9ef547cfdc342c63bacb6921c8548b2b91d53330f9"
+     "huella": "d88f9fb878c7e422918ed92a553f7e3cb173c77566b482950575e3a8b3607c74"
     }
    ]
   }

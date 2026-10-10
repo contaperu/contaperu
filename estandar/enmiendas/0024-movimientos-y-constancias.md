@@ -63,8 +63,9 @@ Tres decisiones que el archivo real impuso y que conviene que estén escritas an
    cargo; Scotiabank y BanBif traen dos columnas. Es la misma regla que ya rige en `linea.debe_haber`.
 2. **El ITF es un campo, no un cálculo.** Lo da el banco: BBVA en una columna de la línea, Scotiabank como un
    movimiento propio («IMPUESTO A LOS DÉBITOS»). Las dos formas caben. **Y se descuenta del saldo aunque no esté
-   en la columna del importe** — con las cifras reales, 1 070 867,80 − 4 960,00 da 1 065 907,80 y el banco imprime
-   1 065 907,60; los veinte céntimos son el ITF. Un lector que no lo reste cuadra mal en la segunda fila del mes.
+   en la columna del importe** — con la cadena inventada de `tests/test_tesoreria.py`, 1 500,00 − 200,00 da
+   1 300,00 y la línea trae 1 299,80; los veinte céntimos son el ITF. Las cifras del extracto que lo enseñó no se
+   escriben, por la regla 6. Un lector que no lo reste cuadra mal en la segunda fila del mes.
 3. **La fecha llega completa.** Las líneas traen día y mes; el año está en la cabecera y lo baja quien lee el
    archivo, porque el núcleo no tiene reloj con el que adivinarlo.
 

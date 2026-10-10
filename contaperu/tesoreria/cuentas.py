@@ -19,12 +19,14 @@ from ..errores import ErrorContaperu
 # El Código de Cuenta Interbancario: **20 dígitos en cuatro grupos**, 3 + 3 + 12 + 2.
 #
 # La estructura está verificada contra dos extractos reales de agosto de 2026, que lo imprimen con su separación a
-# la vista: `011 307 000100028777 69` (BBVA) y `009-202-000003675511-34` (Scotiabank). Los tres primeros dígitos son
-# la empresa del sistema financiero, los tres siguientes su oficina, los doce la cuenta y los dos últimos el control.
+# la vista —BBVA con espacios, Scotiabank con guiones—. **Los números de esos extractos no se escriben aquí**: un CCI
+# con su cuenta es la coordenada para mandarle dinero a alguien, y este repositorio es público (regla 6). Con la
+# forma inventada: `011 999 000000000001 00`. Los tres primeros dígitos son la empresa del sistema financiero, los
+# tres siguientes su oficina, los doce la cuenta y los dos últimos el control.
 #
 # **Lo que NO está aquí es el catálogo de códigos de banco**, y es a propósito: no se ha conseguido su fuente
-# publicada. Escribirlo de memoria —`011` BBVA, `009` Scotiabank, los dos que sí constan en esos extractos, y el
-# resto adivinados— sería una regla sin fuente, que es la primera que no se negocia. Es el dato que el hito D8
+# publicada. Escribirlo de memoria —`011` BBVA y `009` Scotiabank son norma publicada y constan además en esos
+# extractos, pero el resto habría que adivinarlo— sería una regla sin fuente, que es la primera que no se negocia. Es el dato que el hito D8
 # espera. Mientras tanto el banco se declara por su nombre y el código se transporta sin interpretar.
 LARGO_CCI = 20
 PATRON_CCI = re.compile(r"^[0-9]{20}$")

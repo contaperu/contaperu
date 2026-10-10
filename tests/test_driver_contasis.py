@@ -176,7 +176,7 @@ def test_sus_cuentas_son_las_que_el_nucleo_decidiria(tipo, base, total, centro):
     `test_driver_asiento_contable` le lleva la contraria. Y la comparación en sí ya existía en
     `test_contrato_drivers` para un driver de registro DE MENTIRA, mientras el de verdad no la tenía.
     """
-    documento = imputado(FACTURA, dict(FACTURA, serie="F002", numero="00000456", contraparte_doc="20512333797"),
+    documento = imputado(FACTURA, dict(FACTURA, serie="F002", numero="00000456", contraparte_doc="20699999998"),
                     tipo=tipo)
     celdas = hoja(api.exportar(documento, driver="contasis", configuracion=CONTAB))
     filas = range(1, len(documento["comprobantes"]) + 1)

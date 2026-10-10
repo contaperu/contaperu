@@ -4,6 +4,50 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [9.0.1] — 2026-10-10
+
+**Se retiran del repositorio los datos reales de una cuenta bancaria.** Es la regla 6 —«nunca datos reales en el
+repositorio»—, la primera de las siete que no se negocian, y la 8.2 la rompió al escribir la forma de la tesorería
+con un extracto real delante: se quedaron dentro el **CCI, el número de cuenta y el saldo** de una cuenta de verdad,
+dos movimientos con sus importes y la razón social de la empresa. Un CCI con su número de cuenta es la coordenada
+para mandarle dinero a alguien, y un saldo es la posición de caja de una empresa.
+
+Estaban en **seis sitios**, y tres de ellos viajan dentro del paquete que se instala: `tests/test_tesoreria.py`,
+`contaperu/tesoreria/cuentas.py`, `contaperu/tesoreria/movimientos.py`, `contaperu/tesoreria/cuadre.py`, la enmienda
+0024 y este mismo CHANGELOG. **El hallazgo que cada sitio documentaba se queda** —que el ITF se descuenta del saldo
+y no está en la columna del importe sigue siendo la trampa que hace cuadrar mal a un lector nuevo—; lo que se fue es
+el número. La cadena que lo demuestra es ahora inventada y redonda: 1 000,00 + 500,00 − 200,00 − 0,20 de ITF =
+1 299,80, con la misma propiedad y más legible.
+
+**Lo que no se puede deshacer, dicho sin adornos:** el historial de git no se limpia, y la 9.0.0 ya salió a GitHub
+y a PyPI con esos datos dentro. Esta versión hace que dejen de estar en la vigente, no que nunca hayan estado.
+
+### Añadido · el guardián que faltaba
+
+`tests/test_datos_reales.py`. La regla 6 era **la única de las siete sin un test**, y lo que pasó es exactamente lo
+que pasa cuando una regla depende de que nos acordemos: lo encontró una persona buscando un ejemplo. Vigila las dos
+coordenadas que identifican a alguien:
+
+- **El CCI, con tolerancia cero**: cualquier cadena de 20 dígitos que no sea una de las declaradas seguras cae, y
+  también la forma con espacios o guiones con la que cada banco lo imprime. Es el que habría cazado esto.
+- **El RUC, con una regla más fina**, porque el motor valida la contraparte y la batería necesita RUC con el dígito
+  verificador correcto. La convención que ya usaba el resto es que un RUC inventado se delata con una corrida de
+  dígitos repetidos, así que uno con dígito válido tiene que ser de los cuatro declarados o llevar su corrida.
+
+El test se barre **a sí mismo**, y eso se notó al escribirlo: sus propios literales de mutación lo pusieron rojo, así
+que se componen en tiempo de ejecución. Y muerde, comprobado volviendo a meter el CCI en el paquete.
+
+### Cambiado · dos RUC que podían ser de alguien
+
+De los diecinueve RUC con dígito verificador válido que había, diecisiete llevaban su corrida y **dos no**. Se
+reemplazaron **sin averiguar de quién eran**, porque la regla no admite el beneficio de la duda y consultarlos en
+SUNAT habría sido preguntar por una empresa a un tercero sin necesidad.
+
+Uno de los dos vivía en el documento congelado del estándar, así que **su huella cambió a propósito**: el diff son
+tres apariciones del RUC y las dos copias de la huella, y nada más. No toca el Excel de CONCAR ni el de CONTASIS.
+
+---
+
 ## [9.0.0] — 2026-10-10
 
 **El eje del libro deja de ser un booleano y pasa a ser una tabla.** Es la única cosa que rompe, y rompe a
@@ -263,9 +307,10 @@ entra es forma nueva, y un arreglo que no se nota hoy y evita un error caro mañ
 
 ### Lo que los archivos reales enseñaron, y que ningún diseño en papel habría encontrado
 
-- **El ITF se descuenta del saldo y no está en la columna del importe.** Con las cifras del extracto de BBVA de
-  agosto de 2026, 1 070 867,80 − 4 960,00 da 1 065 907,80 y el banco imprime 1 065 907,60: los veinte céntimos que
-  faltan son el ITF de esa línea. Sin eso, el primer lector habría cuadrado mal en la segunda fila del mes.
+- **El ITF se descuenta del saldo y no está en la columna del importe.** Lo enseñó el extracto de BBVA de agosto
+  de 2026; sus cifras **se retiraron de este repositorio en la 9.0.1** y la cadena que lo demuestra es ahora la
+  inventada de `tests/test_tesoreria.py`: 1 500,00 − 200,00 da 1 300,00 y la línea trae 1 299,80, y esos veinte
+  céntimos son el ITF. Sin eso, el primer lector habría cuadrado mal en la segunda fila del mes.
 - **Cuatro de los nueve archivos no se abren con una librería estándar**: dos vienen cifrados con contraseña y dos
   traen la cabecera del PDF rota. Lo difícil de leer un extracto peruano no son las columnas.
 - Cada banco escribe el signo a su manera —BBVA una columna con el importe negativo, Scotiabank y BanBif dos

@@ -80,7 +80,7 @@ CASOS: list[tuple[str, str, dict]] = [
     # Un servicio público, de los tipos en que SUNAT exige la fecha de vencimiento.
     ("recibo_de_servicios_publicos", "compra",
      {"tipo_cp": "14", "serie": "0001", "numero": "00098765", "fecha_vencimiento": "2026-09-05",
-      "contraparte_doc": "20100017491", "contraparte_nombre": "EMPRESA DE ENERGIA",
+      "contraparte_doc": "20600000005", "contraparte_nombre": "EMPRESA DE ENERGIA",
       "base_gravada": "800.00", "igv": "144.00", "total": "944.00", "concepto": "Energia electrica obra"}),
 ]
 
