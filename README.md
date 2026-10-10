@@ -5,9 +5,9 @@
 
 **Motor abierto para la contabilidad peruana.** Lee los comprobantes electrónicos de SUNAT —factura, boleta, notas de
 crédito y débito, recibo por honorarios—, valida el IGV y las detracciones, arma los **asientos contables en partida
-doble** y entrega lo que pide cada destino: a **SUNAT** el TXT del **SIRE** (RVIE y RCE) y los libros del **PLE**; a
-los sistemas instalados el Excel de **CONCAR** o de **CONTASIS** y el TXT de **STARSOFT**; y a un **ERP** el asiento
-en el propio estándar, sin vocabulario de ningún sistema. Sin base de datos, sin estado, sin llamadas a la red: entra
+doble** y entrega lo que pide cada destino: a un **ERP** el asiento en el propio estándar, sin vocabulario de
+ningún sistema; a **SUNAT** el TXT del **SIRE** (RVIE y RCE) y los libros del **PLE**; y a los sistemas instalados el
+Excel de **CONCAR** o de **CONTASIS** y el TXT de **STARSOFT**. Sin base de datos, sin estado, sin llamadas a la red: entra
 un JSON, sale un JSON o un archivo.
 
 **La contabilidad automatizada no es un problema de cada empresa: es de arquitectura colectiva.** Un estándar abierto y
@@ -36,8 +36,8 @@ Eso no se arregla con una mejor organización interna de cada empresa. Se arregl
 - **Un estándar abierto**, [`open-accounting`](estandar/LEEME.md), para que todos los sistemas hablen el mismo idioma.
 - **Un motor abierto** que aplica las reglas contables peruanas una sola vez, cada una con su fuente, y que cualquiera
   puede revisar y mejorar.
-- **Salidas para todos:** el SIRE; los sistemas legacy mientras evolucionan, sin que nadie tenga que abandonarlos; y
-  los ERP que vienen, que no tendrán que reinventar el IGV porque nacerán sobre un estándar.
+- **Salidas para todos:** los ERP que vienen, que no tendrán que reinventar el IGV porque nacerán sobre un
+  estándar; el SIRE y el PLE; y los sistemas legacy mientras evolucionan, sin que nadie tenga que abandonarlos.
 
 Nadie queda amarrado a un proveedor, y lo que aprende uno lo aprovechan todos.
 
@@ -80,14 +80,14 @@ documento:
 
 Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega lo que pida cada canal de destino:
 
-- **SUNAT:** sus dos regímenes. El **SIRE**, con el TXT de reemplazo del registro de ventas (RVIE) y del de compras
-  (RCE), listo para subir; y el **PLE**, con el Libro Diario y el detalle del plan contable.
-- **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y de STARSOFT
-  y el registro de CONTASIS; SISCONT espera un archivo que ese sistema haya aceptado.
 - **ERP:** los sistemas nuevos, en cualquier lenguaje. Reciben el documento `open-accounting` con su asiento **sin
   vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `asiento_contable`), el
   CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta. **Es el canal que ordena el
   proyecto desde el 10-oct-2026**: lo que crece primero es lo que un ERP necesita y todavía no tiene.
+- **SUNAT:** sus dos regímenes. El **SIRE**, con el TXT de reemplazo del registro de ventas (RVIE) y del de compras
+  (RCE), listo para subir; y el **PLE**, con el Libro Diario y el detalle del plan contable.
+- **Legacy:** los sistemas contables instalados que importan un archivo. Hoy, los asientos de CONCAR y de STARSOFT
+  y el registro de CONTASIS; SISCONT espera un archivo que ese sistema haya aceptado.
 
 Cualquier entrada puede terminar en cualquiera de los tres canales. Las cuentas, los sentidos del debe y el haber y la
 detracción los decide el motor una sola vez, igual para todos los destinos. Y al costado del motor está la comunidad:
@@ -227,12 +227,12 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 
 **Exporta**, por canal de destino:
 
-- **SUNAT:** el TXT de reemplazo del RVIE y del RCE (el SIRE), y el Libro Diario y el plan de cuentas (el PLE).
-- **Legacy:** a CONCAR (Excel de asientos de 41 columnas), a CONTASIS (su registro de compras y de ventas en Excel)
-  y a STARSOFT (sus asientos en TXT de palotes).
 - **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `asiento_contable`), y un CSV
   genérico con las líneas de diario, para cualquier destino que todavía no tenga driver. El mismo documento **vuelve a
   entrar al motor y da el mismo asiento con la misma huella**, que es lo que lo hace un formato y no una salida.
+- **SUNAT:** el TXT de reemplazo del RVIE y del RCE (el SIRE), y el Libro Diario y el plan de cuentas (el PLE).
+- **Legacy:** a CONCAR (Excel de asientos de 41 columnas), a CONTASIS (su registro de compras y de ventas en Excel)
+  y a STARSOFT (sus asientos en TXT de palotes).
 
 **Le ahorra a un ERP lo que no tiene por qué escribir**, y es la parte que menos se ve:
 
@@ -284,6 +284,14 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | API pública estable, `contaperu.api`: cada nombre con su firma, congelados por un test | listo |
 | Servidor MCP y CLI | listo |
 | Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
+| **ERP** · el eje desde el 10-oct-2026 | |
+| Driver `asiento_contable`: el documento del estándar con sus comprobantes y su asiento | listo |
+| Driver CSV | listo |
+| Puerta HTTP con el contrato OpenConta | listo |
+| `resumen` y `por_cuenta`: cuánto es un libro, y el pre-mayor con su cuadre | listo |
+| `campos_del_comprobante` y `REGLAS`: qué pone cada uno, y el dominio sin nombrar una herramienta | listo |
+| Recibir un diario que no viene de compras ni de ventas (planilla, depreciación, destino) | **pendiente**: `libro.tipo` tiene dos valores, y son 595 de los 1 441 asientos de un mes real |
+| La cuenta según con quién y según qué, y el nivel fino de la cuenta | **pendiente de un caso real** — ver la hoja de ruta |
 | **SUNAT** · los dos regímenes | |
 | Driver SIRE (TXT de reemplazo del RVIE y del RCE) | listo |
 | Driver PLE (el Libro Diario, formato 5.1) y PLE-plan (el detalle del plan contable, 5.3) | listo, contra un libro presentado y aceptado con sus constancias |
@@ -294,14 +302,6 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
 | Driver STARSOFT (asientos en TXT de palotes) | **listo**: STARSOFT importó un mes de compras (7-oct-2026) y uno de ventas (8-oct-2026) |
 | Driver SISCONT | el contrato ya cubre lo que necesita; espera un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
-| **ERP** · el eje desde el 10-oct-2026 | |
-| Driver `asiento_contable`: el documento del estándar con sus comprobantes y su asiento | listo |
-| Driver CSV | listo |
-| Puerta HTTP con el contrato OpenConta | listo |
-| `resumen` y `por_cuenta`: cuánto es un libro, y el pre-mayor con su cuadre | listo |
-| `campos_del_comprobante` y `REGLAS`: qué pone cada uno, y el dominio sin nombrar una herramienta | listo |
-| Recibir un diario que no viene de compras ni de ventas (planilla, depreciación, destino) | **pendiente**: `libro.tipo` tiene dos valores, y son 595 de los 1 441 asientos de un mes real |
-| La cuenta según con quién y según qué, y el nivel fino de la cuenta | **pendiente de un caso real** — ver la hoja de ruta |
 
 Lo que no está listo no tiene fecha: tiene un orden y un dato que lo destraba, en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).
 
