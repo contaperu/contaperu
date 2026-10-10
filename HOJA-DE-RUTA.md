@@ -46,8 +46,29 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **7.0.0** y estándar **`open-accounting` 1.0**
+Librería **8.1.0** y estándar **`open-accounting` 1.0**
 (`contaperu/_version.py`).
+
+**Y escala, medido y reproducible.** Funciones puras, sin estado, sin red, sin disco y sin reloj: dos procesos nunca
+se pisan, así que la escala horizontal es trivial. Lo vertical se mide con `herramientas/medir.py`, que multiplica
+el golden de los doce casos:
+
+| Filas | `revisar` | `exportar` (SIRE) | por fila |
+|---|---|---|---|
+| 100 | 0,02 s | 0,03 s | 0,16 ms |
+| 1 000 | 0,12 s | 0,15 s | 0,12 ms |
+| 3 000 | 0,36 s | 0,46 s | 0,12 ms |
+| 5 000 | 0,62 s | 1,01 s | 0,13 ms |
+
+Lo que importa no es el número —depende de la máquina— sino **la forma**: en línea recta. Una curva que se dobla es
+una regresión cuadrática, y por eso el arnés viaja en el repositorio: una medida sin su arnés es una afirmación que
+nadie puede contrastar. La primera vez que se corrió encontró una (`exportar` excluía por igualdad recorriendo una
+lista: 5 000 filas tardaban 12,77 s), y se arregló en la 8.1.
+
+El tope está declarado y explicado: `MAXIMO_COMPROBANTES = 5000`, con el mensaje «divídelo por periodo o por lote».
+No es una limitación, es un contrato de lotes. **Lo que no escala no es el motor: es el ERP** —su base de datos, su
+concurrencia, su almacén del mes—, y por eso el reparto que ya está decidido, que el estado es del ERP, es también
+la decisión correcta de escalabilidad.
 
 | Pieza | Hoy |
 |---|---|
@@ -137,6 +158,9 @@ OTRA JURISDICCIÓN [un cliente real fuera del Perú] · J0 y J1 cumplidos en la 
 | cuando llegue el dato | C3 · C4 · C5 · C6 · C7 · C8 · C10 · C11 · C12 | dato |
 | cuando llegue el dato | D1 · D2 → D3 · D4 → D5 → D6 | dato (D3 es código, tras D1 y D2) |
 | cuando haga falta | B4 · B7 · D7 · E4 | dato o decisión |
+| antes de que algo pida credenciales | B10 perfiles del MCP | decisión |
+| cuando llegue el dato | C14 la fuente como dato (tras C1) · C16 lectores del SIRE [respuesta real] | código / dato |
+| cuando haya un mes imputado por un agente | B11 → B12 · C15 consecuencia de `confianza` | caso real |
 | cuando John lo decida | E7 | decisión |
 | con un cliente real fuera del Perú | J0 → J1 → J2 · J3 → J4 → J5 → J6 | dato: el cliente, su destino y un archivo aceptado |
 
@@ -328,6 +352,11 @@ estándar; poner la jurisdicción en la configuración (es del libro).
 **Objetivo.** Que lo que se presenta a SUNAT salga del mismo documento que los asientos y cuadre con lo que SUNAT ya
 tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de control.
 
+**La API del SIRE ya está descrita y armada** (8.1): `contaperu/sunat/` arma la petición de las once operaciones,
+lee el estado de un ticket y clasifica el rechazo de SUNAT, todo desde su catálogo y sin salir a la red — el núcleo
+puede saber la URL, lo que no puede es llamarla. `herramientas/comprobar_sire.py` la contrasta contra la API real
+con un token que trae quien lo tenga. **Lo que falta es evidencia**: ver el hito C16.
+
 **Son dos regímenes y un solo canal** (`sunat`, desde la 8.0). El **SIRE** manda compras y ventas (RS 112-2021 y
 RS 040-2022) y es de lo que hablan los hitos de abajo. El **PLE** manda el Libro Diario y los demás libros, más el
 detalle del plan contable (RS 234-2006 y RS 286-2009), y lo escriben `ple` y `ple_plan` desde la 4.2 y la 4.3: su
@@ -347,6 +376,7 @@ mira al documento es `campos_del_comprobante*`.
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
 | C9 | `cruzar_con_propuesta*`: lo cargado contra la propuesta del RCE, y el primer uso de `pedir_a: proveedor`; es la lista de control que EE. UU. no tiene | N · F | código | Tres cajones; ceros a la izquierda; un RUC mal escrito | 0.0 | 9 |
+| C16 | **Los lectores de la respuesta del SIRE**, que la 8.1 dejó fuera a propósito: la forma de lo que SUNAT contesta —el número de ticket con sus tres grafías, la lista de archivos con las dos erratas del manual— **no la sostiene un catálogo, la sostendría una respuesta real**, y no hay ninguna guardada. Mudar un lector no comprobado a un repositorio abierto no rompe nada: congela un mapeo que nadie verificó, con la solidez aparente que da estar en un motor con tests | N · F | dato: una respuesta real por operación, capturada con `herramientas/comprobar_sire.py` y anonimizada | Cada operación de lectura tiene su fixture y su lector, y el flujo de traer la propuesta —pedir, ticket, consultar, bajar— pasa entero en la batería **sin red** | — | 36 |
 
 **No se hace.** Descargar la propuesta ni presentar el registro: eso necesita red y Clave SOL, y es de quien use el
 motor.
@@ -383,6 +413,8 @@ salida»; `CHANGELOG.md` 0.10.0):
 | A4 ✅ | **STARSOFT Desktop**, asientos → `desde_lineas`. **Hecho y aceptado** (2.0-2.3, cerrado en la 6.0): las dos plantillas calcadas del archivo real, un **mes de compras importado de verdad el 7-oct-2026** —que destapó lo que ningún vídeo decía: el TXT va suelto, sin el ZIP— y un **mes de ventas el 8-oct-2026**, que desmintió la simetría que se esperaba: el fichero no empieza por `C` en los dos libros, la letra es la del libro y el de ventas es `V-VENTAS_…` (6.0.2 y 6.3.2) | D | — | Igual que A1 | — | — |
 | A5 | **`starsoft_web`**: el cuerpo JSON de la API de STARSOFT Web (Gold Edition), como proyección pura de las líneas. **Abierto a la comunidad**: lo que resolvió A4 le sirve casi entero —siglas, sub-diarios, destino del IGV, cuentas y la proyección—; lo distinto es a dónde van los datos | D | dato: una respuesta aceptada guardada en `privado/` | Test contra el cuerpo aceptado; autenticarse y enviar es de la aplicación | A4 | — |
 | C10 | `plan_de_cuentas*` del destino, falta `cuenta_fuera_del_plan*`, marca de centro de costo y lista de centros | N · F · D | dato: plan exportado de CONCAR + un rechazo real de importación | Sin plan, snapshot idéntico; un plan sin la cuenta bloquea y `exportar` lanza | — | 11, 12, 13 |
+| C14 | **La fuente de cada regla, como dato**: hoy la norma está en prosa al lado del código (regla 1, lo mejor del proyecto) y **un agente no la puede citar: tiene que creérsela**. Con `norma`, `articulo` y `vigencia` legibles por máquina, una observación puede decir «no te doy el crédito fiscal porque la Ley 29215 art. 2 da 12 meses y van 14» **citando**. El precedente existe: el cargador del PCGE rechaza un mapeo sin fuente, y `regimenes.json` exige la cita por bloque | N · F | código, tras C1 | Cada observación con regla detrás trae su fuente; una regla nueva sin ella no carga, como en el PCGE | C1 | 32 |
+| C15 | **Darle consecuencia a `confianza`**: el campo existe en el comprobante desde antes de que nadie lo usara (`origen`, `confianza`, por defecto `1.00`) y **hoy no lo mira nadie**. Falta el umbral y qué pasa debajo: un dato extraído por IA con 0,7 no puede tratarse como uno leído de un XML | N · F | caso real: un mes cargado desde PDF con su confianza por campo | Un dato por debajo del umbral sale como propuesta y no como hecho; el umbral lo pone quien llama, no el motor | B11 | 33 |
 
 **No se hace.** Un formato común para todos los legacy: el TXT del SIRE no lleva cuentas y pierde la imputación, y no
 consta que ninguno importe el Libro Diario 5.1 del PLE (*no verificado* en negativo). Ningún driver sale a la red.
@@ -410,6 +442,9 @@ con `rol` y los `tipo_cp`, y la guía [INTEGRAR.md](INTEGRAR.md), cuyos ejemplos
 | B1 | Las dos operaciones pasan a la fachada, y una tabla `OPERACIONES*` declara cada operación con su entrada y su salida (con `$ref` al esquema del estándar) | F | código | Cada herramienta MCP llama a una operación de la tabla; ninguna puerta importa `pcge` ni `detracciones` | 0.5 | — |
 | B2 | `motor*` (la versión) en `_asiento` y `_exportacion`, y `outputSchema` de `diagnosticar` que cubra también la respuesta con configuración inválida | F | código | Las dos formas validan; `motor` queda fuera de la huella | 0.2, 0.4 | 8, 10 |
 | B3 | **OpenAPI 3.1** generado por una herramienta desde `OPERACIONES*` | F · documentación | código | Regenerarlo no cambia bytes; los documentos de ejemplo validan como cuerpos | B1, B2 | — |
+| B10 | **Perfiles de herramientas en el MCP**: qué publica el servidor abierto y qué solo un integrador. Hoy publica las 14 siempre, con la misma anotación de solo lectura | F | decisión, antes de que exista algo que pida credenciales | Una herramienta marcada de integrador no aparece en el servidor público; la foto del MCP lo fija | B1 | 35 |
+| B11 | **Propuesta y aprobación con rastro**: el camino «el agente propone la cuenta, el humano confirma», con quién propuso qué y con qué huella. Hoy el motor valida o bloquea, y ese camino no existe | N · F | caso real: un mes imputado por un agente y revisado por un contador | Una propuesta no se exporta hasta que alguien la confirma; el rastro viaja en el documento y no en una base | 0.4 | 34 |
+| B12 | **Trazabilidad del agente** en `_exportacion`: hoy graba el driver, el archivo, la huella, la fecha y el motor, nunca quién lo pidió | F | B11 | Quien pidió la exportación queda en la anotación, y la huella no cambia por ello | B2, B11 | — |
 | B4 | Puerta **HTTP sin estado**, `servidor_http*`, con el extra `contaperu[http]*` | puerta | dato: un integrador no Python que lo necesite | Está en `PUERTAS` de `tests/test_frontera.py`; las tres puertas dan el mismo documento; comparte topes y la defensa de `Host` del MCP; publicar su imagen pide OK | B3 | — |
 | B5 | El CSV lleva `rol` y los `tipo_cp`, lo que un driver necesita para no adivinar | D | código | Columnas nuevas llenas; **se anuncia** porque cambia una salida | — | 7 |
 | B6 | **Guía «integrar ContaPerú en un ERP»**: la librería (Odoo, Frappe), la CLI por lotes, el MCP y, con B4, HTTP; niveles *de serie* (con archivo aceptado) y *comunidad* (paquete propio por entry points); checklist de contribución | documentación | código | Los ejemplos en Python se ejecutan en la batería; `contaperu://drivers` dice si cada driver es de serie | B1 | — |
@@ -462,6 +497,13 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 
 - **Nunca, por decisión:** emitir, firmar o enviar comprobantes; consultar la validez de un comprobante; descargar la
   propuesta del SIRE, el padrón o los tipos de cambio; leer PDF o fotos ([README.md](README.md), «Qué no hace»).
+- **Nunca, porque esto no es un ERP y es correcto que no lo sea:** interfaz, usuarios, permisos, multiempresa y
+  **persistencia**. Y con ellos **el estado**: el periodo y su cierre, el saldo de apertura, el plan de cuentas como
+  tabla viva. El motor recibe el estado en rodajas —los correlativos, las claves ya anotadas— y no lo guarda, que es
+  lo que lo deja sin reloj y sin base y por tanto reutilizable y escalable. La frontera es la misma que ya rige con
+  la aplicación que lo integra: *si cambia según cuándo o cuántas veces lo llames, no es del núcleo*. Lo que sí
+  puede entrar un día es el **esquema publicado** de esos conceptos y las funciones puras que los validan —eso es
+  contrato, no estado—, y entraría por el frente ERP con su caso real delante.
 - **Sin caso real todavía:** guías de remisión; SDKs generados; WASM; `sugerir_imputacion` (tiene la misma forma que la
   acción de una regla bancaria y entra con D4 si hace falta); `trazas` de un driver que consolide; `documento.id_externo`
   en la línea; pedir datos desde el MCP con el patrón de la especificación 2026-07-28, que espera un SDK que la hable; el archivo de 4ta del PLAME, análogo del 1099
@@ -505,9 +547,10 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 
 ## 8 · De dónde salió cada hito: el inventario de propuestas
 
-Las 31 propuestas que levantó la investigación del ciclo contable (13-14 de setiembre de 2026),
-cada una con el caso real que la destraba y el hito que le toca; «—» si todavía no tiene uno. Es a
-esta tabla a la que remite la columna **Propuesta** de los frentes.
+Las propuestas que ha levantado la investigación, cada una con el caso real que la destraba y el
+hito que le toca; «—» si todavía no tiene uno. Es a esta tabla a la que remite la columna
+**Propuesta** de los frentes. Son **36**: las 31 del ciclo contable (13-14 de setiembre de 2026) y
+las cinco del diagnóstico de la arquitectura (9-oct-2026), que van al final con su propia tabla.
 
 Vivió en `INTEROPERABILIDAD.md` hasta el 8-oct-2026, y se mudó aquí al retirarlo: la tabla la usa
 esta hoja y nadie más, así que dejar de ser una remisión a otro documento es lo que la mantiene
@@ -552,4 +595,22 @@ espera un archivo real. **D**: espera un segundo caso o una versión del SDK.
 | 29 | Los padrones que deciden una retención llegan como dato | N | El de C4 | — | — | D | C4 |
 | 30 | La puerta a otra jurisdicción | N · D · estándar | Un cliente real fuera del Perú | Los criterios de J0-J6 en la hoja de ruta | `jurisdiccion*`, `impuestos[]*` | D | J0-J6 |
 | 31 | El régimen tributario del contribuyente como datos, y el cálculo de su pago a cuenta | N · F | La tabla entró en la 6.1.0 con los arts. 118, 120 y 124 de la LIR; **calcular** la cuota espera un formulario mensual presentado | La tasa, los topes y los libros contra su artículo; la cuota contra las casillas 301 y 312 de un formulario real | `regimenes_tributarios`, `pago_a_cuenta*` | C | C13 |
-| — | ¿Debe `generar_asiento` exigir lo que exige el destino? | F | — | — | — | pregunta | — |
+
+### Las cinco del diagnóstico de la arquitectura (9-oct-2026)
+
+La pregunta era si esto tiene arquitectura de ERP, si la IA está integrada de verdad y si escala. Las respuestas, en
+corto: **no es un ERP y es correcto que no lo sea** (§6); **escala por construcción y está medido** (§1); y la IA
+**sí** está en la api y no en la puerta —el MCP se deriva de la tabla, `diagnosticar` describe y no decide, y las
+reglas del dominio no nombran ninguna herramienta, con un test que lo impone—. Lo que falta para que sea nativa de
+verdad es corto, y es esto:
+
+| # | Propuesta | Nivel | Caso real que la destraba | Test que la fijaría | Nombre | Prio | Hito |
+|---|---|---|---|---|---|---|---|
+| 32 | La fuente de cada regla, legible por máquina: un agente no puede citar la norma, tiene que creérsela | N · F | Hoy la norma está en prosa al lado del código; un agente que dice «la Ley 29215 art. 2 da 12 meses» lo está inventando | Cada observación con regla detrás trae `norma`, `articulo` y `vigencia`; una regla sin ellos no carga, como en el PCGE | `fuente*` en la observación | B | C14 |
+| 33 | Darle consecuencia a `confianza`, que existe y no la mira nadie | N · F | Un mes cargado desde PDF: hoy un dato con 0,7 se trata igual que uno leído de un XML | Un dato bajo el umbral sale como propuesta y no como hecho; el umbral lo pone quien llama | umbral en la configuración | B | C15 |
+| 34 | Propuesta y aprobación con rastro: el agente propone, el humano confirma | N · F | Un mes imputado por un agente y revisado por un contador. Hoy el motor valida o bloquea, y ese camino no existe | Una propuesta no se exporta sin confirmación; el rastro viaja en el documento, no en una base | `propuesta*`, `confirmada_por*` | C | B11 |
+| 35 | Perfiles de herramientas en el MCP: qué ve el servidor abierto y qué un integrador | F | Una herramienta que arme peticiones con credenciales no puede estar en el servidor público, y la API del SIRE ya existe (8.1) | Una herramienta de integrador no aparece en el servidor público; la foto del MCP lo fija | `perfil*` | B | B10 |
+| 36 | Los lectores de la respuesta del SIRE, con evidencia detrás | N · F | No hay ni una respuesta real guardada, y el `verificado` de cada operación está vacío. Mudar un lector no comprobado congela un mapeo que nadie verificó | El flujo de traer la propuesta pasa entero en la batería, sin red, desde fixtures capturados | `leer_respuesta_*` | C | C16 |
+
+La que se retira de la tabla de arriba: **«¿Debe `generar_asiento` exigir lo que exige el destino?»**, que no era
+una propuesta sino una pregunta, y que el §6 declara resuelta en la 1.0 desde hace siete mayores.
