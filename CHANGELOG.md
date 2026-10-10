@@ -4,6 +4,41 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [8.1.1] — 2026-10-09
+
+**`exportar` no era lineal, y ahora lo es.** El mes real de 3 018 comprobantes pasa de unos 5 s a **0,63 s**, y
+5 000 filas de **12,77 s a 1,01 s**. Ninguna salida se mueve: el TXT del SIRE del mes real sale con el mismo
+sha256 `570038c7a40cb4ff` y el snapshot de CONCAR no se movió ni una celda.
+
+### Arreglado
+
+- `pipeline/salida.py` excluía los tipos que un driver no lleva con `c not in fuera`, recorriendo una **lista** y
+  comparando dataclasses enteras: O(n·m) con una comparación cara dentro. Eran **612 055 llamadas a `__eq__` para
+  2 000 comprobantes**. Ahora excluye por identidad, que es exacta porque `fuera_de` **filtra** la misma lista y son
+  los mismos objetos — el mismo recurso que `numerar_en_orden` ya usaba.
+
+### Cómo se encontró, que es la parte que importa
+
+No lo encontró nadie leyendo código: lo encontró **`herramientas/medir.py` en su primera ejecución**, que entró en
+esta misma versión. `revisar` iba en línea recta —0,12 ms por fila a cualquier tamaño— y `exportar` pasaba de 0,3 ms
+a 2,55. Una curva que se dobla es una regresión cuadrática, y se ve a simple vista en cuanto alguien la dibuja.
+
+Es el argumento de por qué el arnés viaja en el repositorio: **una medida sin su arnés es una afirmación que nadie
+puede contrastar**, igual que una regla sin su fuente.
+
+### Añadido, fuera del paquete
+
+Tres herramientas en `herramientas/`, que no viajan en la rueda:
+
+- **`comprobar_sire.py`** contrasta el mapa de las once operaciones contra la API real. Recibe un **token** —nunca
+  una Clave SOL: pedirlo necesita un almacén de credenciales, que es de quien integra— y se niega a llamar nada que
+  no sea de grada `lectura`, porque el SIRE no tiene ambiente de pruebas. Existe por lo mismo que
+  `extraer_pcge2026.py`: para que **cualquiera** pueda rehacerlo y auditarlo, en vez de confiar en un mapa que
+  apareció de la nada.
+- **`regenerar.py`**, una puerta para las ocho de `regenerar()` que la batería tiene repartidas, cada una con su
+  conjuro de treinta caracteres.
+- **`medir.py`**, el arnés de arriba.
+
 ## [8.1.0] — 2026-10-09
 
 **`contaperu/sunat/`: la API del SIRE como funciones puras.** El motor sabía la URL desde el 21-sep-2026 —el catálogo
