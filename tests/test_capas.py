@@ -58,6 +58,10 @@ CAPAS = {
     # que la garantía de que un resumen no mire el destino es la capa y no una promesa escrita en un docstring.
     "contaperu.contable": "nucleo",
     "contaperu.lectores": "nucleo",
+    # La API del SIRE como funciones puras (8.1): armar la petición, el estado de un ticket, el rechazo de SUNAT.
+    # **Núcleo y no una puerta**, y es la decisión que lo hace legítimo: aquí se SABE la URL y no se llama nunca. El
+    # catálogo que lo sostiene viaja en `datos/sunat/`, y `test_frontera` sigue prohibiendo `httpx` y `socket`.
+    "contaperu.sunat": "nucleo",
     # Los tributos del Perú agrupados (6.4.0): el IGV, las detracciones, la validación y el contraste con
     # lo que SUNAT tiene. Núcleo, y peruano: es casi toda la tupla `PERUANOS` de más abajo.
     "contaperu.tributos": "nucleo",
@@ -202,10 +206,13 @@ def test_el_nucleo_y_los_drivers_no_abren_archivos():
 
 # Los módulos que son contabilidad peruana por lo que IMPORTAN a otros: catálogos de SUNAT, IGV, detracciones,
 # validación de SUNAT, PCGE, los lectores del UBL de SUNAT y de la propuesta del SIRE, y el driver del SIRE.
-PERUANOS = ("contaperu.catalogos", "contaperu.pcge", "contaperu.tributos",
+PERUANOS = ("contaperu.catalogos", "contaperu.pcge", "contaperu.tributos", "contaperu.sunat",
             "contaperu.lectores.xml_ubl", "contaperu.lectores.sire_txt", "contaperu.drivers.sire")
 # Y los que lo son por lo que CONTIENEN, aunque no importen nada peruano. Separarlos es J2-J4, con un cliente real.
 PERUANOS_POR_CONTENIDO = {
+    # Las once operaciones de la API del SIRE, cada una con el manual del que sale. No importa nada peruano —lee su
+    # catálogo por `_datos`— y es peruano de arriba abajo: separarlo es J2-J4, con un cliente real de fuera.
+    "contaperu.sunat:OPERACIONES": "las once operaciones de la API del SIRE, con la ruta y el manual de cada una",
     "contaperu.modelo:Libro": "exige un RUC de 11 dígitos y un periodo AAAAMM de venta o compra",
     "contaperu.modelo:Comprobante": "los impuestos del Perú en campos fijos (base gravada, IGV, ISC, IVAP, ICBPER)",
     "contaperu.configuracion:CONFIGURACION_GENERAL": "las cuentas del PCGE y las tasas de detracción",
