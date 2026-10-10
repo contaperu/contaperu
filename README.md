@@ -5,15 +5,20 @@
 
 **Motor abierto para la contabilidad peruana.** Lee los comprobantes electrónicos de SUNAT —factura, boleta, notas de
 crédito y débito, recibo por honorarios—, valida el IGV y las detracciones, arma los **asientos contables en partida
-doble** y los exporta al formato que pide tu sistema contable: el Excel de **CONCAR** o de **CONTASIS** y el TXT del
-**SIRE** (RVIE y RCE). Sin base de datos, sin estado, sin llamadas a la red: entra un JSON, sale un JSON o un archivo.
+doble** y entrega lo que pide cada destino: a **SUNAT** el TXT del **SIRE** (RVIE y RCE) y los libros del **PLE**; a
+los sistemas instalados el Excel de **CONCAR** o de **CONTASIS** y el TXT de **STARSOFT**; y a un **ERP** el asiento
+en el propio estándar, sin vocabulario de ningún sistema. Sin base de datos, sin estado, sin llamadas a la red: entra
+un JSON, sale un JSON o un archivo.
 
 **La contabilidad automatizada no es un problema de cada empresa: es de arquitectura colectiva.** Un estándar abierto y
 un motor abierto, construidos entre todos, para los sistemas que ya existen y para los ERP que vienen.
 
-**Encima de tu sistema contable, no en su lugar, y la base de los que vienen.** Nadie tiene que dejar CONCAR ni cambiar
-su forma de trabajar: el motor le quita la digitación. Y quien construya un ERP nuevo no tiene que reimplementar el IGV,
-las detracciones ni los sub-diarios: parte del estándar y del motor.
+**La base de cualquier ERP, y encima de tu sistema contable sin reemplazarlo.** Quien construya un ERP nuevo no
+tiene que reimplementar la contabilidad peruana: el IGV y sus destinos, las detracciones en sus dos tiempos, los
+sub-diarios, la validación contra las reglas de SUNAT y la partida doble ya están, con un test por regla y la norma
+citada al lado de cada una. Y **la capa hacia los sistemas que ya existen se queda, sin plazo de retiro**: nadie
+tiene que dejar CONCAR ni cambiar su forma de trabajar, y el motor le quita la digitación. Las dos cosas a la vez —
+primero fue solo la capa, y desde el 10-oct-2026 el eje es la base.
 
 Licencia MIT. Se dona a la comunidad contable peruana.
 
@@ -81,7 +86,8 @@ Desde ese documento, el motor valida cada comprobante, arma el asiento y entrega
   y el registro de CONTASIS; SISCONT espera un archivo que ese sistema haya aceptado.
 - **ERP:** los sistemas nuevos, en cualquier lenguaje. Reciben el documento `open-accounting` con su asiento **sin
   vocabulario legacy** —sin siglas, sub-diarios ni correlativos, por rol y código SUNAT— (driver `asiento_contable`), el
-  CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta.
+  CSV con las líneas de diario, o todo por la puerta HTTP con el contrato OpenConta. **Es el canal que ordena el
+  proyecto desde el 10-oct-2026**: lo que crece primero es lo que un ERP necesita y todavía no tiene.
 
 Cualquier entrada puede terminar en cualquiera de los tres canales. Las cuentas, los sentidos del debe y el haber y la
 detracción los decide el motor una sola vez, igual para todos los destinos. Y al costado del motor está la comunidad:
@@ -225,7 +231,22 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 - **Legacy:** a CONCAR (Excel de asientos de 41 columnas), a CONTASIS (su registro de compras y de ventas en Excel)
   y a STARSOFT (sus asientos en TXT de palotes).
 - **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `asiento_contable`), y un CSV
-  genérico con las líneas de diario, para cualquier destino que todavía no tenga driver.
+  genérico con las líneas de diario, para cualquier destino que todavía no tenga driver. El mismo documento **vuelve a
+  entrar al motor y da el mismo asiento con la misma huella**, que es lo que lo hace un formato y no una salida.
+
+**Le ahorra a un ERP lo que no tiene por qué escribir**, y es la parte que menos se ve:
+
+- **Cuánto es un libro.** `resumen` da la base gravada, el IGV y el total, cada moneda por su lado y con agrupación
+  por contraparte; `por_cuenta` da el pre-mayor con su cuadre. Existen porque un conector los escribió por su cuenta
+  y le salió `07` donde el motor dice `("07","87")`: una nota de crédito de no domiciliado que no restaba.
+- **Qué campos pone cada uno.** `campos_del_comprobante` reparte el comprobante en tres tramos —lo que trae el
+  documento, lo que pone el sistema y lo que decide la revisión— y `REGLAS` da las reglas del dominio **sin nombrar
+  ninguna herramienta de este motor**, para quien monte su propia capa de agente.
+- **La API del SIRE, descrita.** Las once operaciones con su ruta, su método y su grada; armar la petición, leer el
+  estado de un ticket y clasificar el rechazo de SUNAT. **El motor sabe la URL y no la llama**: enviar necesita red y
+  Clave SOL, y eso es de quien lo integra.
+- **Una batería de conformidad portable**, que se corre **sin el motor y en cualquier lenguaje**: si escribes tu
+  propia implementación del estándar, ahí está contra qué medirla.
 
 **Diagnostica** un mes antes de exportarlo: qué comprobantes bloquean y cuáles solo avisan, qué falta para el sistema de
 destino (cuenta, centro de costo, tipos sin sigla, monedas, correlativos, un reparto que no suma la base o que el
@@ -236,7 +257,9 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 ## Qué **no** hace
 
 - **No lee PDFs ni fotos.** Lee el XML, que es el comprobante electrónico, y la propuesta del SIRE.
-- **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red.
+- **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red. **Sí sabe cómo
+  es su API**: describe las once operaciones del SIRE y arma la petición exacta, para que quien la envíe no tenga que
+  adivinarla. Saber es un dato; llamar es entrada y salida, y eso es del integrador.
 - **No guarda nada.** Ni base de datos, ni archivos, ni sesiones.
 - **No emite comprobantes.** No genera, no firma y no envía facturas electrónicas.
 - **No reemplaza tu sistema contable.** Traduce hacia él — y para quien construye uno nuevo, le pone la base.
@@ -261,17 +284,24 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | API pública estable, `contaperu.api`: cada nombre con su firma, congelados por un test | listo |
 | Servidor MCP y CLI | listo |
 | Reglas del **PCGE 2026** | **pendiente de la norma** — ver abajo |
-| **SIRE** | |
+| **SUNAT** · los dos regímenes | |
 | Driver SIRE (TXT de reemplazo del RVIE y del RCE) | listo |
+| Driver PLE (el Libro Diario, formato 5.1) y PLE-plan (el detalle del plan contable, 5.3) | listo, contra un libro presentado y aceptado con sus constancias |
+| La API del SIRE descrita: las once operaciones, la petición armada, el ticket y el rechazo | listo (8.1) — **sin salir a la red**: enviar es del integrador |
+| Los lectores de lo que SUNAT contesta | **pendiente de una respuesta real** por operación, que se captura con `herramientas/comprobar_sire.py` |
 | **Legacy** | |
 | Driver CONCAR (Excel de asientos) | listo |
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
 | Driver STARSOFT (asientos en TXT de palotes) | **listo**: STARSOFT importó un mes de compras (7-oct-2026) y uno de ventas (8-oct-2026) |
 | Driver SISCONT | el contrato ya cubre lo que necesita; espera un archivo real aceptado — ver [Cómo aportar](#cómo-aportar) |
-| **ERP** | |
+| **ERP** · el eje desde el 10-oct-2026 | |
 | Driver `asiento_contable`: el documento del estándar con sus comprobantes y su asiento | listo |
 | Driver CSV | listo |
 | Puerta HTTP con el contrato OpenConta | listo |
+| `resumen` y `por_cuenta`: cuánto es un libro, y el pre-mayor con su cuadre | listo |
+| `campos_del_comprobante` y `REGLAS`: qué pone cada uno, y el dominio sin nombrar una herramienta | listo |
+| Recibir un diario que no viene de compras ni de ventas (planilla, depreciación, destino) | **pendiente**: `libro.tipo` tiene dos valores, y son 595 de los 1 441 asientos de un mes real |
+| La cuenta según con quién y según qué, y el nivel fino de la cuenta | **pendiente de un caso real** — ver la hoja de ruta |
 
 Lo que no está listo no tiene fecha: tiene un orden y un dato que lo destraba, en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).
 
@@ -490,7 +520,7 @@ lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna d
 | [CONTRIBUTING.md](CONTRIBUTING.md) | La regla que manda, nunca datos reales, cómo añadir un driver |
 | [estandar/LEEME.md](estandar/LEEME.md) | El estándar `open-accounting`: sus bloques, sus reglas y su versionado |
 | [REFERENCIAS.md](REFERENCIAS.md) | La investigación: lo que se tomó —y lo que no— de QuickBooks, Xero, los ERP grandes de EE. UU., las APIs unificadas, los estándares abiertos de factura (EN 16931, Peppol) y los ERP abiertos. Tres escalones: el asiento, el registro del comprobante y la clasificación de la cuenta |
-| [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md) | En qué orden crece el motor y qué dato destraba cada paso, con los frentes en el orden del flujo: entradas, estándar y comunidad, motor, y las salidas SUNAT, Legacy y ERP |
+| [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md) | En qué orden crece el motor y qué dato destraba cada paso. Desde el 10-oct-2026 lo ordena **ser la base de cualquier ERP**: primero lo que le falta a un ERP para mandar lo que hoy no puede, después el banco, después SUNAT, y los drivers legacy en paralelo |
 | [CHANGELOG.md](CHANGELOG.md) | Cada versión con su porqué |
 | [SECURITY.md](SECURITY.md) | Cómo reportar una vulnerabilidad |
 
@@ -510,13 +540,16 @@ OpenAPI · ERP
 ## In English
 
 **ContaPerú is the open accounting core for Peru.** It reads the electronic receipts issued through
-SUNAT (Peru's tax authority), builds the double-entry journal and exports it to the format each
-local accounting system expects — CONCAR, CONTASIS, the SIRE tax filing, or plain CSV. No database, no state,
-no network calls: JSON in, JSON or a file out.
+SUNAT (Peru's tax authority), builds the double-entry journal and delivers it to three kinds of destination:
+**SUNAT** (the SIRE tax filing and the PLE books), the **installed systems** that import a file (CONCAR, CONTASIS,
+STARSOFT) and an **ERP**, which gets the journal in the standard itself — no legacy vocabulary. No database, no
+state, no network calls: JSON in, JSON or a file out.
 
 Its premise: automated accounting is not a problem each company should solve alone, but a matter of **collective
-architecture** — one open standard and one open engine, built together, serving SUNAT —both the SIRE and the
-PLE—, legacy systems while they evolve, and the ERPs still to come.
+architecture** — one open standard and one open engine, built together. **Since 10 Oct 2026 the engine is organised
+around being the foundation any new ERP can be built on**: nobody writing one should have to reimplement Peruvian
+VAT, withholdings or sub-ledgers. The layer that translates towards the systems already installed stays, with no
+retirement date — nobody has to leave CONCAR.
 
 It also defines **`open-accounting`**, an open interchange format for Peruvian accounting documents
 (`estandar/`), with a formal JSON Schema. The rules aren't designed on paper: they come from real
