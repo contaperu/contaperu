@@ -4,6 +4,61 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+### Retirado
+
+- **Los tres documentos de trabajo de la raíz** (John, 10-oct-2026): `API-DE-REGISTRO.md` (1 982 líneas),
+  `STARSOFT-INTEGRACION.md` (820) y `LIBROS-Y-CUENTAS.md` (630). **3 432 líneas, y la raíz pasa de trece ficheros
+  `.md` a diez.** Los tres habían contestado su pregunta: el primero salió entero en `open-accounting` 1.0, el
+  segundo levantó un formato que la máquina ya confirmó con dos meses importados, y el tercero vio entrar su
+  candidata E en la 5.0. Lo que quedaba vivo **se mudó en vez de perderse**:
+  - **la investigación va a `REFERENCIAS.md`**, que pasa de 264 a 584 líneas y de mirar un escalón a mirar tres —el
+    asiento, el registro del comprobante y la clasificación de la cuenta—, cada uno con su fecha en la cabecera.
+    Entra lo que no estaba en ningún otro sitio: la tabla de nueve sistemas que compara `Bill` e `Invoice` (y no
+    `JournalEntry`), el modelo semántico de EN 16931 con sus `BT-`/`BG-` —donde está la razón de que el estándar
+    sacara la cuenta del comprobante: en Europa tampoco es parte de la factura—, los doce patrones del estándar de
+    facto, las dos tablas de «cómo lo resuelve el mundo» que sostienen las enmiendas 0009, 0010 y 0011, PCAOB AS
+    1105, y la determinación de cuentas de OFBiz, iDempiere y Business Central;
+  - **las ocho propuestas vivas van al §8 de `HOJA-DE-RUTA.md`**, del 37 al 44. Cuatro son las candidatas A, B, C y
+    D, que dejaban escrito que entrarían ahí «con su número, cuando el refinado cierre»; dos son agujeros
+    verificados que no estaban apuntados —un importe numérico con tres decimales todavía valida, y el centro de
+    costo solo llega a la línea principal—; y dos salen del plan de cuentas real de la empresa que lleva STARSOFT;
+  - **los descartes van con su motivo escrito, no citado**, que es lo que se aprendió al retirar
+    `INTEROPERABILIDAD.md`: los cinco motivos por los que el modelo de Odoo no puede *ser* el estándar, los ~250
+    subtipos de QuickBooks que son «el camino del que no se vuelve», la representación JSON de UBL, el rol por cada
+    hecho nuevo y la tabla cuenta → rol. Y en el §6 de la hoja de ruta, el tercer libro de honorarios con sus
+    cuatro costos desglosados;
+  - **la fuente del formato de STARSOFT baja al código**, que es la parte que no era obvia: ese documento era **la
+    única copia pública de la tabla de campos del manual**, porque `CONT_COMPRAS` y `CONT_VENTAS` son del
+    fabricante y `.gitignore` los bloquea prometiendo en su lugar que «lo que entra aquí son LOS DATOS». Entra
+    `datos.CAMPOS_DEL_MANUAL` con los 39 ítems de compras y los 34 de ventas, su longitud, su obligatoriedad y su
+    condición.
+- **El hito A5** (`starsoft_web`, el cuerpo JSON de la API de STARSOFT Web). Era el único hito cuya investigación
+  declarada era uno de los documentos retirados, y el §7 de la hoja de ruta no admite un hito sin el dato que lo
+  destraba. **El canal `api_erp` sigue reservado**: su criterio nunca fue el hito, sino que exista un formato que
+  `erp` no pueda llevar.
+
+### Cambiado
+
+- El mensaje con que el contrato rechaza un driver de canal `api_erp` **ya no cita el hito A5**, que no existe:
+  dice el criterio y nada más. Lo ve quien escribe un driver de terceros, así que se cuenta aquí.
+- El driver de STARSOFT pasa de **«EN PRUEBAS» a aceptado** en su propio docstring, que era el último sitio del
+  repositorio que se contradecía con el README y la hoja de ruta: STARSOFT importó un mes de compras el 7-oct-2026
+  y uno de ventas el 8.
+
+### Arreglado
+
+- Lo que la documentación decía mal y nadie veía: los recuentos de `drivers/starsoft/proyeccion.py` (38 y 34
+  columnas cuando son 35 y 27 desde que cambió la fuente), la columna del documento anulado citada como `Y` y `S`
+  cuando son `AC` y `T`, la tabla del asiento de `REFERENCIAS.md` con un `rol: igv` obsoleto desde el 1-oct-2026 y
+  dos citas suyas a `drivers/contrato.py`, que es un paquete desde la 6.4 y se escapaban del guardián de
+  `test_documentacion.py` solo por no llevar el prefijo `contaperu/`.
+- `CUENTAS_POR_DEFECTO` de STARSOFT dice ahora que la instalación real escribe `70410100` donde el manual escribe
+  `70410001`: la discrepancia estaba documentada y el código la callaba.
+
+---
+
 ## [8.1.1] — 2026-10-09
 
 **`exportar` no era lineal, y ahora lo es.** El mes real de 3 018 comprobantes pasa de unos 5 s a **0,63 s**, y
