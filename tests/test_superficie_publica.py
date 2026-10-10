@@ -42,6 +42,9 @@ EXTENSION = (
     # 6.x. Sus módulos de verdad no están aquí porque nunca se congelaron: lo congelado es `contaperu.api`, y lo
     # demás de esta lista es la extensión que una aplicación usa.
     "contaperu.asiento", "contaperu.pcge",
+    # La API del SIRE como funciones puras (8.1). Entra en la superficie congelada porque está para que la use quien
+    # integra: si no estuviera, la promesa de la mayor no la cubriría y podría irse sin avisar.
+    "contaperu.sunat",
     "contaperu.lectores", "contaperu.lectores.archivos", "contaperu.lectores.sire_txt", "contaperu.lectores.xml_ubl",
     "contaperu.drivers", "contaperu.drivers.contrato", "contaperu.drivers.kit", "contaperu.drivers.concar", "contaperu.drivers.contasis",
     "contaperu.drivers.csv", "contaperu.drivers.sire", "contaperu.drivers.starsoft",

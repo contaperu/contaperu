@@ -278,6 +278,21 @@
   "nombre_de": "",
   "resolver": ""
  },
+ "contaperu.sunat": {
+  "CODIGOS_DE_LIBRO": "",
+  "ESTADOS_DE_TICKET": "",
+  "GRADAS": "",
+  "OPERACIONES": "",
+  "SireRechaza": "",
+  "clasificar_error": "",
+  "cod_libro_de": "",
+  "estado_de_ticket": "",
+  "grada": "",
+  "libros": "",
+  "operaciones": "",
+  "peticion": "",
+  "sire_api": ""
+ },
  "contaperu.lectores": {
   "archivos": "",
   "sire_txt": "",

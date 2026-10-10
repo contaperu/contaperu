@@ -46,7 +46,8 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
 
 Por capas, de abajo arriba, que `tests/test_capas.py` hace cumplir: un **núcleo** que sabe contabilidad peruana y nada
 más (`modelo/`, `lectores/`, `tributos/` —el IGV, las detracciones, la validación y el contraste con el SIRE—,
-`contable/` —la partida doble y el resumen—, `asiento/`, `pcge/`); **drivers** que
+`contable/` —la partida doble y el resumen—, `asiento/`, `pcge/`, `sunat/` —la API del SIRE como funciones
+puras: se sabe la URL y no se llama nunca—); **drivers** que
 conocen el formato de un destino y nada de contabilidad, cada uno con su **canal**, que dice a quién entrega:
 `drivers/concar`, `drivers/contasis` y `drivers/starsoft` son `legacy`; `drivers/sire`, `drivers/ple` y
 `drivers/ple_plan` son `sunat` —el SIRE y el PLE, dos regímenes y un canal—; `drivers/csv` y

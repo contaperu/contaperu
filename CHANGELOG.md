@@ -4,6 +4,61 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [8.1.0] — 2026-10-09
+
+**`contaperu/sunat/`: la API del SIRE como funciones puras.** El motor sabía la URL desde el 21-sep-2026 —el catálogo
+`datos/sunat/sire_api.json` describe las once operaciones con su ruta, su método, sus obligatorios, los tickets, el
+TUS, los límites y la tabla de errores— pero no tenía ni una función que lo usara. Lo que faltaba no eran los datos:
+eran las funciones, probadas.
+
+### Añadido
+
+- **`peticion(operacion, …)`** — el método, la URL y los parámetros de cualquiera de las once, validando lo
+  obligatorio. Se le habla en el vocabulario del estándar (`registro="compra"`) y traduce al de la API
+  (`codLibro="080000"`). Rellena solo lo que el catálogo respalda: el `codLibro` y el `codOrigenEnvio`, que vale 2
+  desde la v22 del manual —el 1 de los manuales anteriores da 422—. Lo que va en la ruta no se repite en la consulta.
+- **`estado_de_ticket(codigo)`** — qué significa un `codEstadoProceso` y si hay que seguir sondeando. La decisión que
+  importa es la de los códigos que SUNAT **no documenta** y su API devuelve igual (07, 08 y 10, vistos en
+  producción): no son ni éxito ni fracaso, así que se sigue preguntando. Darlos por terminados perdería el trabajo.
+- **`clasificar_error(cod, errores)`** — el 422 con su trampa, que es la razón de que exista: **el código que importa
+  vive DENTRO de `errors`** y el de arriba es casi siempre «422» a secas. Mirar solo el de arriba hace que el 1024 no
+  se reconozca nunca, y el 1024 es la única idempotencia que la API ofrece. Dice además si lo que llegó es
+  idempotente —«esto ya se hizo»: 1024, 1008, 1009— o reintentable, que solo lo es el 1351.
+- `sire_api()`, `operaciones()`, `libros()`, `cod_libro_de(registro)` y `grada(operacion)` publican el catálogo y lo
+  que hace falta para usarlo. La **grada** no es una anotación: dice si quien envía puede llamar una operación sola,
+  y hace falta porque el SIRE **no tiene ambiente de pruebas** — toda prueba es contra producción con un RUC real.
+
+### El núcleo puede saber la URL; lo que no puede es llamarla
+
+Saber es un dato, llamar es entrada y salida. Lo que sale de `peticion` es un diccionario: quien tenga el socket lo
+convierte en llamada con su cliente, su token y sus reintentos. `tests/test_frontera.py` sigue prohibiendo `httpx` y
+`socket` en el núcleo, y eso es lo que hace que esto sea legítimo y no una grieta. **La credencial no cruza**: ni se
+guarda, ni se pide, ni se nombra.
+
+El sitio tiene precedente escrito: `ARQUITECTURA.md` ya decía «el banco — paquete reservado `contaperu/banco/` en la
+capa núcleo; los conectores, fuera del paquete». Misma decisión, tomada antes.
+
+### Lo que NO entra, y es la decisión que ordena el resto
+
+**Los lectores de la forma de cada respuesta.** Eso no lo sostiene un catálogo: lo sostendría una respuesta real, y
+no hay ninguna guardada. Traerlos tal cual no rompería nada — **congelaría un mapeo no comprobado en un repositorio
+abierto**, con la solidez aparente que da estar en un motor con tests. Primero la evidencia.
+
+Tampoco entra por la api ni por el MCP. Publicar una herramienta que arma peticiones a un tercero es una decisión
+sobre el perfil del servidor abierto, y esa decisión está pendiente con su propio nombre en la hoja de ruta. Hoy se
+usa como librería, que es donde vive quien envía.
+
+### Dos cosas que aparecieron escribiéndolo
+
+- **Un `0` es un valor.** `codTipoArchivo` vale 0 para el TXT (`libros.cod_tipo_archivo`), y la comprobación de
+  obligatorios lo trataba como ausente: pedía un dato que ya estaba. Tiene su test, porque un `if not valor` vuelve
+  solo.
+- **El guardián de la frontera cazó el docstring de este paquete**, que nombraba el repositorio de una aplicación
+  para explicar el reparto. Tiene razón: el motor es abierto y no supone ningún consumidor.
+
+`sunat/` entra en el mapa de capas como **núcleo** y en `PERUANOS`, así que el día que algo no peruano lo importe
+saldrá en el acoplamiento congelado. Y en la superficie pública, con sus trece nombres.
+
 ## [8.0.0] — 2026-10-09
 
 **Una palabra por destino.** El canal del contrato de drivers deja de decir `tributario` e `intercambio` y dice
