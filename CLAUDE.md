@@ -59,7 +59,9 @@ más (`modelo/`, `lectores/`, `tributos/` —el IGV, las detracciones, la valida
 `contable/` —la partida doble y el resumen—, `asiento/`, `pcge/`, `sunat/` —la API del SIRE como funciones
 puras: se sabe la URL y no se llama nunca— y `tesoreria/` —la cuenta bancaria que declara el contribuyente con su
 104, el movimiento de un extracto, la constancia de un pago y el cuadre de la cadena de saldos; la forma salió de
-nueve extractos reales y no hay lector de ningún banco todavía—); **drivers** que
+nueve extractos reales y no hay lector de ningún banco todavía. **Desde el 10-oct-2026 tiene su tipo de libro**,
+`tesoreria`, así que el dinero entra por el mismo circuito que un comprobante — y el motor todavía no sabe armar su
+asiento, que es el hito D6—); **drivers** que
 conocen el formato de un destino y nada de contabilidad, cada uno con su **canal**, que dice a quién entrega:
 `drivers/asiento_contable` y `drivers/csv` son `erp`, el primero con vocabulario neutral; `drivers/sire`,
 `drivers/ple` y `drivers/ple_plan` son `sunat` —el SIRE y el PLE, dos regímenes y un canal—; `drivers/concar`,
@@ -69,7 +71,12 @@ conocen el formato de un destino y nada de contabilidad, cada uno con su **canal
 (`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x y la 4.0, el
 vocabulario de un ERP que llevaba la línea. **De qué libro es un comprobante lo dice una tabla y no un booleano**
 desde la 9.0 (`modelo.RASGOS`): cada tipo de libro declara su sub-diario, su cuenta de contraparte, a qué lado va el
-hecho y qué reglas le toca —el porqué, en `ARQUITECTURA.md`—, y añadir un libro es añadir una fila. El
+hecho y qué reglas le toca —el porqué, en `ARQUITECTURA.md`—, y añadir un libro es añadir una fila. **Ya son tres**,
+y el tercero demostró para qué servía la tabla: dos de sus siete rasgos no pueden ser constantes —el lado lo dice
+cada operación y la contrapartida la pone la imputación—, y los vacíos son la señal de lo que el motor no sabe hacer
+todavía. El efecto de una operación de tesorería sobre el efectivo es `entrada | salida | transferencia`, con las
+palabras de la **NIC 7** y con su §9 como razón del tercero: un traspaso entre cuentas propias no es un flujo de
+efectivo, y se nombra para poder excluirlo. El
 asiento nace en las **líneas de diario neutrales** del estándar `open-accounting` y cada ERP es una proyección de ellas.
 Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LEEME.md`; cómo se integra, en
 `INTEGRAR.md`.

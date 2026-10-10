@@ -290,7 +290,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Puerta HTTP con el contrato OpenConta | listo |
 | `resumen` y `por_cuenta`: cuánto es un libro, y el pre-mayor con su cuadre | listo |
 | `campos_del_comprobante` y `REGLAS`: qué pone cada uno, y el dominio sin nombrar una herramienta | listo |
-| Recibir un diario que no viene de compras ni de ventas (planilla, depreciación, destino) | **pendiente**: `libro.tipo` tiene dos valores, y son 595 de los 1 441 asientos de un mes real |
+| Recibir un diario que no viene de compras ni de ventas (planilla, depreciación, destino) | **pendiente**: son 595 de los 1 441 asientos de un mes real. `libro.tipo` ya tiene tres valores —`venta`, `compra` y `tesoreria`—, así que el camino está abierto; lo que falta es el `diario` |
 | La cuenta según con quién y según qué, y el nivel fino de la cuenta | **pendiente de un caso real** — ver la hoja de ruta |
 | **SUNAT** · los dos regímenes | |
 | Driver SIRE (TXT de reemplazo del RVIE y del RCE) | listo |

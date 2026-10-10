@@ -26,8 +26,9 @@ bloque opcional no suben la versión (ver Versionado)—, así que esa URL devue
 1.0; un cambio de significado sube a 2.0 y estrena su propio tag.
 
 **Y la 1.0 es un compromiso:** nada de lo que existe se quita ni cambia de significado hasta una 2.0. Lo que hace
-sostenible esa promesa son los catálogos —`rol`, `clase` y `tipos_de_libro` viven fuera del esquema y crecen sin
-tocarlo— y las [enmiendas](enmiendas/LEEME.md), donde queda escrito cada cambio con su compatibilidad.
+sostenible esa promesa son los catálogos —`rol`, `clase`, `tipos_de_libro` y `efectos_de_tesoreria` viven fuera
+del esquema y crecen sin tocarlo— y las [enmiendas](enmiendas/LEEME.md), donde queda escrito cada cambio con su
+compatibilidad.
 
 Para comprobar un documento con el motor —lo lee con las mismas reglas que el servidor MCP y dice qué bloquea y qué
 falta—:

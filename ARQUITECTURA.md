@@ -173,14 +173,49 @@ motor en la base de un ERP y no solo en la capa sobre un sistema legacy.
 
 Desde la 9.0 cada tipo de libro **declara** lo que el motor necesita saber de él, en `modelo.RASGOS`:
 
-| Rasgo | Qué decide | `venta` | `compra` |
-|---|---|---|---|
-| `sub_diario` | la clave de configuración que nombra su sub-diario | `sub_diario_ventas` | `sub_diario_compras` |
-| `cuenta_contraparte` | la clave de `cuentas` con la que se salda | `clientes` | `cxp` |
-| `sentido_principal` | a qué lado va el hecho | `H` | `D` |
-| `da_credito_fiscal` | si su IGV es crédito o débito fiscal | no | sí |
-| `lleva_detraccion` · `lleva_honorarios` | qué reglas se le aplican | no | sí |
-| `origen` | de qué bloque del documento salen sus líneas | `comprobantes` | `comprobantes` |
+| Rasgo | Qué decide | `venta` | `compra` | `tesoreria` |
+|---|---|---|---|---|
+| `sub_diario` | la clave de configuración que nombra su sub-diario | `sub_diario_ventas` | `sub_diario_compras` | **vacío** |
+| `cuenta_contraparte` | la clave de `cuentas` con la que se salda | `clientes` | `cxp` | **vacío** |
+| `sentido_principal` | a qué lado va el hecho | `H` | `D` | **`por_operacion`** |
+| `da_credito_fiscal` | si su IGV es crédito o débito fiscal | no | sí | no |
+| `lleva_detraccion` · `lleva_honorarios` | qué reglas se le aplican | no | sí | no |
+| `origen` | de qué bloque del documento salen sus líneas | `comprobantes` | `comprobantes` | **`movimientos`** |
+
+**El tercer libro entró el 10-oct-2026 y los dos vacíos de su columna son la mitad de lo que vale la tabla.**
+`cuenta_contraparte` está vacía porque un libro de tesorería no se salda con una sola cuenta: un lado es la cuenta
+de efectivo que el contribuyente declaró —su 104— y el otro lo pone la imputación. Y `sub_diario` está vacío porque
+**su clave de configuración todavía no existe**: se intentó declararla y el contrato de drivers la paró con la razón
+exacta, «una clave que nadie lee se configura para nada». Entra con el hito D6, que pide un archivo del sub-diario
+de bancos que CONCAR haya aceptado. Un libro sin sub-diario es uno que el motor no puede armar, y eso es una
+invariante con su test.
+
+**Y `sentido_principal` deja de ser una constante.** En una venta el ingreso siempre va al haber y en una compra el
+gasto siempre al debe; en tesorería **un abono lleva el efectivo al debe y un cargo al haber**, así que el lado lo
+dice cada operación. El valor se llama `por_operacion`, y `sentido_contraparte` **se niega a derivar** cuando lo es:
+hasta entonces era `"D" if sentido_principal == "H" else "H"`, que con un tercer valor habría contestado «haber»
+callado y mal — el mismo fallo que la 9.0 vino a cerrar, una capa más abajo. Un `else` que acierta por casualidad
+mientras los valores son dos deja de acertar en cuanto son tres.
+
+**El efecto sobre el efectivo tiene tres valores y los nombra la NIC 7** (`efectos_de_tesoreria`, en el catálogo
+del estándar): «Flujos de efectivo son las **entradas y salidas** de efectivo y equivalentes al efectivo». El
+tercero, `transferencia`, existe porque el **§9** excluye de los flujos los traspasos entre partidas de efectivo
+—son gestión de tesorería—, así que hay que poder nombrarlo para dejarlo fuera y no contarlo dos veces. Es el mismo
+reparto que hacen Odoo (`payment_type`: `inbound`/`outbound`/`transfer`) y ERPNext (`Receive`/`Pay`/`Internal
+Transfer`); iDempiere lo resuelve con un booleano `IsReceipt`, que es exactamente lo que aquí se acabó de quitar.
+
+| efecto | la cuenta de efectivo | la contrapartida |
+|---|---|---|
+| `entrada` | **D** | la pone la imputación |
+| `salida` | **H** | la pone la imputación |
+| `transferencia` | **H** en la de origen, **D** en la de destino | **ninguna**: las dos patas son cuentas declaradas |
+
+**Y hay un límite que no se puede saltar:** `Movimiento.efecto` deriva `entrada` o `salida` del indicador del banco
+y **nunca devuelve `transferencia`**. Una línea sola no puede saber que es la mitad de un traspaso —es una
+afirmación sobre un par, y el extracto no la hace—. Se declara, cuando una constancia lo afirma con una referencia
+`cuenta_propia`, o se propone, cuando `conciliar` empareja las dos patas y nunca confirma. De ahí que los tres
+valores vivan en la **operación** y solo dos en la **línea**, que es el mismo nivel en que los ponen Odoo y
+ERPNext: el `payment_type` está en el pago, no en el extracto.
 
 **La contraparte no se declara: se deriva**, porque es la partida doble —`sentido_contraparte` es el otro lado de
 `sentido_principal`, y escribirlo dos veces sería un sitio donde pueden discrepar—.
