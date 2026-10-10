@@ -239,7 +239,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 - **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red.
 - **No guarda nada.** Ni base de datos, ni archivos, ni sesiones.
 - **No emite comprobantes.** No genera, no firma y no envía facturas electrónicas.
-- **No reemplaza tu sistema contable.** Traduce hacia él.
+- **No reemplaza tu sistema contable.** Traduce hacia él — y para quien construye uno nuevo, le pone la base.
 
 ---
 

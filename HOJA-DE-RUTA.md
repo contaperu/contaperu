@@ -575,8 +575,12 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
   un aviso con su caso real o el dato que lo destraba: es la forma colectiva de la hoja de ruta. El mantenedor decide y
   fusiona. Un hito nuevo entra solo si nombra su caso real o el dato que lo destraba. Los nombres con `*` se deciden al
   pasar a código.
+- **El motor va primero y el producto adopta después** (John, 10-oct-2026). Nada se construye primero en la
+  aplicación: se hace aquí, se etiqueta una versión y allá se cambia el número fijado y se despliega. Es por qué esta
+  hoja ordena el motor y no un producto, y por qué **un hito no se da por cumplido porque una aplicación ya lo
+  tenga**: se da por cumplido con su test, su versión y su entrada en el CHANGELOG.
 - **Dónde va un hito nuevo.** En el frente del flujo que le toca, con la letra de ese frente y el número siguiente
-  (E8, C13…). Un id no se reutiliza ni se renombra al moverse de frente.
+  (E9, C18…). Un id no se reutiliza ni se renombra al moverse de frente.
 - **Cuándo un hito está cumplido.**
   - De código: su test en la rama principal, una versión `vX.Y.Z` etiquetada y su entrada en `CHANGELOG.md`.
   - Un driver o un lector: además, el archivo aceptado o leído, con su fecha, como CONTASIS.

@@ -5,6 +5,13 @@ sin estado: todo entra por parámetro y sale por retorno. Esta guía es para qui
 un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 4.x. Los ejemplos se
 ejecutan en la batería del repositorio (`tests/test_integrar.py`): si uno deja de funcionar, la batería falla.
 
+**Lo que se integra no es un conversor, es una base.** El motor no está hecho para que tu ERP exporte a CONCAR y ahí
+acabe: está hecho para que **no tengas que escribir la contabilidad peruana**. El IGV y sus destinos, las
+detracciones en sus dos tiempos, los sub-diarios, la validación contra las reglas de SUNAT, los catálogos oficiales
+con su fuente y la partida doble sin tolerancia ya están, con un test por regla y la norma citada al lado de cada
+una. Tu ERP pone lo que es suyo —la pantalla, los usuarios, la base de datos, el periodo y su cierre— y recibe lo
+demás resuelto. La capa hacia los sistemas que ya existen sigue ahí, intacta, para quien la necesite.
+
 ## Qué puerta elegir
 
 | Si tu sistema… | Usa | Instala |

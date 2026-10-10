@@ -432,6 +432,11 @@ investigación y el diseño de cada pieza, ordenados por el ciclo contable y con
 el §8 de [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md), y lo tomado de las APIs de EE. UU., en
 [REFERENCIAS.md](REFERENCIAS.md).
 
-La idea que la ordena sigue siendo la de esta arquitectura: primero la compatibilidad con los sistemas que ya existen,
-después un lenguaje común (`open-accounting`, que crece con casos reales detrás) y, encima, más preguntas de agentes
-respondidas con reglas que ya tienen fuente.
+La idea que la ordena **cambió de eje el 10-oct-2026** (John), y conviene decir las dos versiones porque la
+primera explica cómo se construyó esto. Durante un año fue: primero la compatibilidad con los sistemas que ya
+existen, después un lenguaje común y, encima, las preguntas de un agente. Hoy es al revés: **el lenguaje común es el
+centro y el motor es la base de cualquier ERP**, con la capa hacia los legacy intacta y sin plazo de retiro, porque
+nadie tiene que cambiar de sistema contable y el cambio no puede ser abrupto.
+
+Lo que no cambia es cómo se construye: con casos reales detrás, cada regla con su fuente, y sin anunciar lo que no
+está en producción. El orden en que crece, con esa prioridad nueva, está en [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md).

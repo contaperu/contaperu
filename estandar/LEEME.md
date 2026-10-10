@@ -5,7 +5,12 @@ Un solo JSON que sirve para las tres cosas que un contador peruano necesita move
 
 Existe porque hoy no hay ninguno. CONCAR, CONTASIS y SISCONT importan cada uno su propio archivo plano;
 una IA que lee un PDF no tiene dónde depositar lo que extrajo; y quien cambia de sistema contable rehace la
-integración desde cero. El estándar no reemplaza a ninguno: es el idioma intermedio.
+integración desde cero. El estándar no reemplaza a ninguno: para ellos es **el idioma intermedio**.
+
+**Y para los que vienen es el suelo.** Un ERP nuevo no tiene que reimplementar el IGV, las detracciones ni los
+sub-diarios peruanos: parte de este documento y del motor que lo entiende. Esa es la mitad que cambia el cálculo —
+el estándar no es solo un traductor entre sistemas que ya existen, es la base sobre la que se construye uno nuevo—,
+y por eso lo que entra aquí se promete: un valor publicado no se quita ni cambia de significado.
 
 **Esquema formal:** [`open-accounting.schema.json`](open-accounting.schema.json) (JSON Schema draft 2020-12).
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
