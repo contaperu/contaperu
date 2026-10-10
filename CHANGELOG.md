@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [8.0.0] — 2026-10-09
 
 **Una palabra por destino.** El canal del contrato de drivers deja de decir `tributario` e `intercambio` y dice
 **`sunat`** y **`erp`**, con lo que `GRUPOS` —la tabla que los traducía a «SIRE», «Legacy» y «ERP» ante quien
