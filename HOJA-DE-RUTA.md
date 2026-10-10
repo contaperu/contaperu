@@ -103,6 +103,7 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - B6 · 1.0.0
 - B8 · 3.4.0 (`resumen` y `por_cuenta`: el caso lo trajo un conector que los escribió por su cuenta y le salió `07` donde el motor dice `("07","87")`)
 - B9 · 3.4.0 (`campos_del_comprobante` y `REGLAS`, por el mismo conector, que había copiado la lista de campos a mano y se dejó cinco)
+- D8 · 8.2.0 (la validación del maestro sale por la api; el argumento en el pipeline espera a que algo lo consuma)
 - A4 · 6.0.0 (STARSOFT Desktop: un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct; la `V` del archivo de ventas se corrigió en la 6.3.2)
 - J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
 - J1 · 1.0.0 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)
@@ -247,8 +248,12 @@ tapa tres trabajos con tres estados distintos:
 | **El extracto bancario** contra el libro | **Nada**, y es el que más código pide. Hay dos trampas ya localizadas para su lector: un `.xlsx` empieza como un ZIP y se desarma solo, y un `.txt` se ignora como archivo auxiliar (`contaperu/lectores/archivos.py`) | Un extracto real anonimizado (**D2**); con él, **D3** ya arranca con código |
 | **La propuesta del SIRE** contra lo que el contribuyente anotó | **Hecha y en uso**: `contaperu/tributos/comparar_sire.py`, expuesta como `api.comparar_sire`, compara el TXT de reemplazo contra la exportación del detalle del SIRE. Lo que falta no es la comparación, es de dónde sale el archivo: hoy lo baja una persona a mano | La otra mitad del hito **C16**, los lectores de la respuesta del SIRE |
 
-El paquete **`contaperu/banco/` está reservado** en la capa núcleo (`ARQUITECTURA.md`, «Lo que queda preparado») y
-todavía no existe: lo crea D2. Los conectores de entrada **nunca** viven dentro de `contaperu`, que es lo que D7
+El paquete **existe desde la 8.2 y se llama `contaperu/tesoreria/`**, no `banco/`: guarda también la constancia de
+un pago de tributos y la de un reintegro de caja chica, que no son del banco, y es la palabra que el estándar ya usa
+para esto (el rol `tesoreria`). Trae la cuenta bancaria que declara el contribuyente —con **su** cuenta contable, la
+104—, el movimiento de un extracto, la constancia de una operación con sus `referencias`, y el cuadre de la cadena
+de saldos, que es lo que hará verificable a cualquier lector. Lo que sigue fuera es leer un banco concreto (D2),
+conciliar (D3) y asentar (D6). Y los conectores de entrada **nunca** viven dentro de `contaperu`, que es lo que D7
 decide y lo que `tests/test_frontera.py` hace cumplir.
 
 **Investigación.** Lo que hace EE. UU. de verdad, los canales peruanos a la fecha de consulta, los proyectos
@@ -262,7 +267,7 @@ desarma (`contaperu/lectores/archivos.py:56-58`), y un `.txt` se ignora como arc
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
-| D8 | **`cuentas_bancarias*` como argumento, no como tabla.** El maestro de cuentas que aporta quien llama —banco, número, CCI, moneda, y la cuenta contable con la que se asienta— con las funciones puras que lo validan. Es el **registro antes de conciliar**, y es la única forma que el §6 admite: el estado es del ERP, y lo que puede vivir aquí es su contrato. El patrón está en producción y no hay que inventarlo: `imputaciones`, `correlativos`, `claves_previas` y la propia `configuracion` son argumentos que el motor recibe y no guarda. (`plan_de_cuentas*`, `padron*` y `tipos_de_cambio*` seguirán el mismo molde, pero **todavía no existen**: son C10, C8 y C11.) **Es el único hito de este frente que no espera un archivo** | N · F | dato: el formato del CCI y los códigos de banco con su fuente, que son norma publicada | Sin cuentas declaradas nada cambia; un CCI que no cumple su formato da observación y no excepción; una cuenta que no está en el maestro no se adivina | — | 46 |
+| D8 ✅ | **`cuentas_bancarias` como argumento, no como tabla.** Entró en la 8.2 por la api (`validar_cuentas_bancarias`), que es donde sirve a un ERP que no escribe Python; cablearlo por el pipeline espera a que algo lo consuma (D1 o D3). El maestro de cuentas que aporta quien llama —banco, número, CCI, moneda, y la cuenta contable con la que se asienta— con las funciones puras que lo validan. Es el **registro antes de conciliar**, y es la única forma que el §6 admite: el estado es del ERP, y lo que puede vivir aquí es su contrato. El patrón está en producción y no hay que inventarlo: `imputaciones`, `correlativos`, `claves_previas` y la propia `configuracion` son argumentos que el motor recibe y no guarda. (`plan_de_cuentas*`, `padron*` y `tipos_de_cambio*` seguirán el mismo molde, pero **todavía no existen**: son C10, C8 y C11.) **Es el único hito de este frente que no espera un archivo** | N · F | dato: el formato del CCI y los códigos de banco con su fuente, que son norma publicada | Sin cuentas declaradas nada cambia; un CCI que no cumple su formato da observación y no excepción; una cuenta que no está en el maestro no se adivina | — | 46 |
 | D1 | `aplicar_constancias*`: casar el archivo del banco con cada comprobante y escribirle su número y su fecha (el `estado` ya se deduce de los dos desde la 3.2, `detracciones.estado_de`) | N · F | dato: constancias reales (la consulta de pagos de detracciones de SOL o los movimientos de la cuenta del Banco de la Nación) | Con pareja, quedan número y fecha y la detracción pasa a `detracciones_pagadas`; sin pareja, queda igual | 0.3 | 14 |
 | D2 | `Movimiento*`, el lector del primer extracto y la deduplicación | N · estándar | dato: extracto real anonimizado | Un libro Excel no se desarma como ZIP; una relectura con solape no duplica | E1 | 15 |
 | D3 | `conciliar*` con `metodo*` y `certeza*`, la tabla `aplicaciones*`, `emparejar_transferencias*` y la tolerancia en porcentaje y en importe absoluto | N · F | código, tras D1 y D2 | Motivos legibles; la detracción como pago parcial; solo certeza alta va a lote; dentro del porcentaje y fuera del absoluto no hay certeza alta | D1, D2 | 16, 25 |

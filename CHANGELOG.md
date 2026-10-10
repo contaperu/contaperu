@@ -4,6 +4,69 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [8.2.0] — 2026-10-10
+
+**La base de la tesorería, sacada de nueve estados de cuenta de producción.** El paquete que `ARQUITECTURA.md`
+llevaba reservado como `banco/` entra como **`contaperu/tesoreria/`**: una constancia de pago de tributos o el
+reintegro de una caja chica no son del banco, y es la palabra que el propio estándar ya usa para esto.
+
+Nada de esto cambia una salida: ni el Excel de CONCAR, ni el TXT del SIRE, ni una firma de las que había. Lo que
+entra es forma nueva, y un arreglo que no se nota hoy y evita un error caro mañana.
+
+### Añadido
+
+- **`contaperu/tesoreria/`**, paquete hoja del núcleo —como `sunat/`, nadie de dentro lo importa y su público es
+  quien integra— con cuatro piezas. `CuentaBancaria`, que es lo que declara quien llama **con su cuenta contable**:
+  la 104 del PCGE es un dato de la empresa —la de soles no es la de dólares— y el motor no la deriva ni cuando
+  conoce el banco. `Movimiento`, una línea de extracto con la identidad que impide duplicar al releer un mes con
+  solape. `Constancia`, la prueba de **una** operación, con `referencias` de cuatro clases —un comprobante, un
+  tributo del Catálogo 05, un traspaso propio o texto libre— que es lo que la hace valer para cualquier pago sin
+  que el estándar enumere propósitos. Y el **cuadre de la cadena de saldos**, que es lo que convierte «leí un PDF»
+  en «lo leí bien».
+- **`api.validar_cuentas_bancarias`** (`POST /v1/cuentas_bancarias`, herramienta MCP), que es el hito **D8**. Para
+  lo que impide reconocer una cuenta —un CCI sin sus 20 dígitos, una moneda que no es PEN ni USD, dos cuentas con
+  el mismo `id`— y **avisa** de la que no declara su cuenta contable, que es lo que hay que pedirle al contador y
+  no inventar. Las herramientas del MCP pasan de catorce a quince.
+- **`asiento.TIPOS_DEL_MOTOR`** y **`Libro.es_compra`**, que son el arreglo que no se nota: ver abajo.
+- La **enmienda 0024**, `reservada`: la forma de `movimientos[]` y `constancias[]` escrita sin tocar el esquema.
+  `estandar/LEEME.md` ya nombraba `movimientos[]` como el ejemplo de bloque opcional que no sube la versión.
+
+### Arreglado
+
+- **El eje del libro dejaba decidir a un booleano sin nombre.** El motor usa `not libro.es_venta` para decir «es
+  compra» en el sentido debe/haber, en el crédito frente al débito fiscal y en cliente frente a proveedor. Es
+  correcto mientras el catálogo tenga dos valores; el día que tenga tres —el hito B13— **un libro nuevo saldría
+  tratado como una compra, en silencio**, con el debe y el haber al revés. Ahora hay una puerta en el único sitio
+  del motor que calcula ese booleano desde un `Libro`, y se niega con `LibroQueElMotorNoOrigina` nombrando los que
+  sí sabe armar. Es el mismo recurso que `ROLES_DEL_MOTOR` usa en el otro eje desde la 1.1 del catálogo.
+- La guarda común de los drivers decía «Tipo de libro no soportado» a secas mientras `ple_plan` escribía por su
+  cuenta el mensaje que **nombra los libros que sí lleva**. Ahora lo dice el común, y lo heredan CONCAR, PLE y
+  STARSOFT.
+- El mensaje de `Libro` escribía «(venta|compra)» a mano, así que un valor nuevo del catálogo lo dejaba mintiendo.
+
+### Lo que los archivos reales enseñaron, y que ningún diseño en papel habría encontrado
+
+- **El ITF se descuenta del saldo y no está en la columna del importe.** Con las cifras del extracto de BBVA de
+  agosto de 2026, 1 070 867,80 − 4 960,00 da 1 065 907,80 y el banco imprime 1 065 907,60: los veinte céntimos que
+  faltan son el ITF de esa línea. Sin eso, el primer lector habría cuadrado mal en la segunda fila del mes.
+- **Cuatro de los nueve archivos no se abren con una librería estándar**: dos vienen cifrados con contraseña y dos
+  traen la cabecera del PDF rota. Lo difícil de leer un extracto peruano no son las columnas.
+- Cada banco escribe el signo a su manera —BBVA una columna con el importe negativo, Scotiabank y BanBif dos
+  columnas—, así que el importe va siempre positivo y el sentido aparte, como ya hace `linea.debe_haber`.
+
+### Lo que NO entra, y por qué
+
+Ningún lector de ningún banco: cada parser entra con su archivo delante y su fixture anonimizado. Ninguna
+conciliación, que es D3 y necesita dos archivos. Ningún asiento de tesorería, que es D6 y espera la norma del ITF
+y un archivo que CONCAR haya aceptado —y el ITF **no tiene código en el Catálogo 05**, así que `linea.impuesto`
+todavía no puede nombrarlo—. El motor sigue sin emitir una sola línea de rol `tesoreria`, y un test lo fija.
+
+Tampoco entra el catálogo de códigos de banco, aunque estaba planificado: no se consiguió su fuente publicada, y
+escribirlo de memoria sería una regla sin fuente. Lo que sí entra es la estructura del CCI —20 dígitos, 3+3+12+2—
+verificada contra dos extractos que la imprimen con su separación a la vista.
+
+---
+
 ## [Sin publicar]
 
 **El eje cambió: de una capa encima de tu sistema contable a la base para cualquier ERP** (John, 10-oct-2026).

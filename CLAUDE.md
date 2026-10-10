@@ -57,7 +57,9 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
 Por capas, de abajo arriba, que `tests/test_capas.py` hace cumplir: un **núcleo** que sabe contabilidad peruana y nada
 más (`modelo/`, `lectores/`, `tributos/` —el IGV, las detracciones, la validación y el contraste con el SIRE—,
 `contable/` —la partida doble y el resumen—, `asiento/`, `pcge/`, `sunat/` —la API del SIRE como funciones
-puras: se sabe la URL y no se llama nunca—); **drivers** que
+puras: se sabe la URL y no se llama nunca— y `tesoreria/` —la cuenta bancaria que declara el contribuyente con su
+104, el movimiento de un extracto, la constancia de un pago y el cuadre de la cadena de saldos; la forma salió de
+nueve extractos reales y no hay lector de ningún banco todavía—); **drivers** que
 conocen el formato de un destino y nada de contabilidad, cada uno con su **canal**, que dice a quién entrega:
 `drivers/asiento_contable` y `drivers/csv` son `erp`, el primero con vocabulario neutral; `drivers/sire`,
 `drivers/ple` y `drivers/ple_plan` son `sunat` —el SIRE y el PLE, dos regímenes y un canal—; `drivers/concar`,
