@@ -29,8 +29,8 @@ from ..kit import OpcionesArchivo
 from ..kit import nombre_de_archivo as _nombre_de_archivo
 
 NOMBRE = "asiento_contable"
-# Un formato neutral para integrar: el grupo ERP (`drivers.contrato.GRUPOS`).
-CANAL = "intercambio"
+# Entrega a un ERP, por el formato neutral del estándar (`drivers.contrato.CANALES`).
+CANAL = "erp"
 VOCABULARIO = "neutral"
 FORMATOS = {"compra": "asiento_contable_json", "venta": "asiento_contable_json"}
 OPCIONES = OpcionesArchivo(extension=".json")

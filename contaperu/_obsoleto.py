@@ -37,7 +37,7 @@ import importlib
 import warnings
 from typing import Any, Callable
 
-RETIRO = "8.0"
+RETIRO = "9.0"
 
 
 class RutaObsoleta(DeprecationWarning):

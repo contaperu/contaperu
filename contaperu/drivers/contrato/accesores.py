@@ -16,7 +16,7 @@ from ...asiento.motor import CENTRO_EN_ANEXO
 from ...configuracion import Campo, Columna
 from ...modelo import Comprobante, Libro
 from .taxonomia import (EXIGE_NUCLEO_ASIENTO, EXIGE_NUCLEO_NEUTRAL, EXIGE_NUCLEO_REGISTRO, FAMILIA, FORMAS,
-                        GRUPOS, TIPO_DEL_PLAN, VOCABULARIO_POR_DEFECTO)
+                        TIPO_DEL_PLAN, VOCABULARIO_POR_DEFECTO)
 
 def forma(modulo: Any) -> str:
     """Cuál de las cuatro formas implementa el driver (la preferida si expone varias); '' si ninguna."""
@@ -30,8 +30,12 @@ def familia(modulo: Any) -> str:
 
 
 def canal(modulo: Any) -> str:
-    """A quién se entrega lo que sale: el `CANAL` que declara el driver. Vacío si no lo declara, que desde la 4.0 es
-    un incumplimiento y no un defecto: hasta la 3.10 se trataba como `legacy` y el grupo del destino se adivinaba."""
+    """A quién se entrega lo que sale: el `CANAL` que declara el driver —`legacy`, `sunat` o `erp`—. Vacío si no lo
+    declara, que desde la 4.0 es un incumplimiento y no un defecto: hasta la 3.10 se trataba como `legacy`.
+
+    Desde la 8.0 esta es la única palabra del destino. Había una segunda, `grupo()`, que traducía el canal a «SIRE»,
+    «Legacy» o «ERP» para quien integra; se retiró con su tabla porque eran dos vocabularios para lo mismo y el de
+    fuera mentía en el PLE."""
     return str(getattr(modulo, "CANAL", None) or "")
 
 
@@ -39,11 +43,6 @@ def declara_canal(modulo: Any) -> bool:
     """Si declara su `CANAL`, que es **obligatorio** desde la 4.0 (antes se trataba como `legacy`). Lo comprueba
     `incumplimientos`, así que un driver sin canal no carga; esto queda para que quien escriba uno lo pregunte."""
     return bool(getattr(modulo, "CANAL", None))
-
-
-def grupo(modulo: Any) -> str:
-    """El grupo de destinos al que entrega: `sire`, `legacy` o `erp`, según su canal; '' si el canal no existe."""
-    return GRUPOS.get(canal(modulo), "")
 
 
 def vocabulario(modulo: Any) -> str:
@@ -66,13 +65,13 @@ def acepta_indice(modulo: Any) -> bool:
 
 def lleva_cuentas(modulo: Any) -> bool:
     """¿Necesita la configuración contable del contribuyente? Todo driver que lleva cuentas: los de asientos y el
-    registro de un sistema contable (`desde_comprobantes`). El registro tributario (`linea`), no."""
+    registro de un sistema contable (`desde_comprobantes`). El registro de SUNAT con forma `linea`, no."""
     return forma(modulo) in ("desde_lineas", "desde_comprobantes")
 
 
 def arma_asientos(modulo: Any) -> bool:
     """¿Arma asientos, y necesita por eso además los correlativos? Las dos formas de la familia asiento, y desde la
-    4.2 también un **registro tributario que recibe las líneas** (`desde_lineas`).
+    4.2 también un **registro de SUNAT que recibe las líneas** (`desde_lineas`).
 
     Lo pidió el Libro Diario del PLE: su campo 2 es el CUO, que se compone del sub-diario y del correlativo del
     asiento, así que sin correlativos no hay archivo. Su familia es `registro` —viene del canal, y es correcta: lo que
@@ -94,7 +93,7 @@ def excluye_tipos(modulo: Any) -> frozenset[str]:
 
 def exige(modulo: Any) -> frozenset[str]:
     """Todo lo que ese destino exige para exportar: lo del núcleo para su forma más lo que el driver declara en
-    `EXIGE`. Un registro tributario (forma `linea`) no exige nada de esto: no lleva cuentas."""
+    `EXIGE`. Un registro de SUNAT con forma `linea` no exige nada de esto: no lleva cuentas."""
     declarado = frozenset(getattr(modulo, "EXIGE", None) or ())
     if arma_asientos(modulo):
         nucleo = EXIGE_NUCLEO_NEUTRAL if vocabulario(modulo) == "neutral" else EXIGE_NUCLEO_ASIENTO

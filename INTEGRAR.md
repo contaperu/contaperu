@@ -305,8 +305,7 @@ formato, y para eso está el driver `asiento_contable`. Si escribes un driver qu
 traductor más que mantener.
 
 Y el canal lo dice del formato, no de la edad del software: si tu importador pide siglas y correlativos es `legacy`
-aunque el sistema sea de este año, y si acepta las líneas del estándar es `intercambio`, que el motor presenta en su
-grupo `erp`.
+aunque el sistema sea de este año, y si acepta las líneas del estándar es `erp`.
 
 ## Un driver para tu sistema contable
 
@@ -314,8 +313,8 @@ Esto es el nivel 3: tu sistema importa un archivo con una forma suya. El contrat
 `contaperu/drivers/contrato/` y la guía paso a paso, en `CONTRIBUTING.md`. Lo esencial:
 
 - **Declara a quién entrega** (`CANAL`): `legacy` si es un sistema contable instalado que importa un archivo,
-  `tributario` si es un registro que se presenta a SUNAT, `intercambio` si es un formato neutral. El motor lo presenta
-  en uno de sus tres grupos de destinos —SIRE, Legacy o ERP— y `drivers_disponibles` dice el de cada driver.
+  `sunat` si es un registro o un libro que se presenta a SUNAT —por el SIRE o por el PLE, que son dos regímenes y
+  un solo canal—, `erp` si entrega el formato neutral del estándar. `drivers_disponibles` dice el de cada driver.
 - **Compruébalo antes de registrarlo**: `contaperu verificar-driver mi_paquete.mi_driver` dice si cumple el contrato y
   qué le falta (desde Python, `api.verificar_driver`).
 - **Un driver de asientos recibe las líneas ya armadas** (`desde_lineas`), numeradas y cuadradas, con el índice de cada

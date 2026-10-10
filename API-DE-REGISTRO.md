@@ -1432,12 +1432,16 @@ y los estados financieros— se queda en el sistema contable, y el motor no entr
 
 ### Lo que exige cada destino
 
-| Destino | Grupo | Qué exige |
+| Destino | Canal | Qué exige |
 |---|---|---|
-| `sire` | sire | **nada** |
-| `asiento_neutral` | erp | cuenta contable |
+| `sire` | sunat | **nada** |
+| `asiento_contable` | erp | cuenta contable |
 | `contasis` | legacy | cuenta contable, cuenta única |
 | `concar` | legacy | centro de costo, cuenta contable, moneda, tipo |
+
+> La columna se llamaba «Grupo» y traía `sire`/`erp`/`legacy`, la tabla que la 8.0 retiró: hoy la palabra del destino
+> es el **canal** y es una sola. Y el driver se llamaba `asiento_neutral` hasta la 3.10; su alias lo retiró la 4.0.
+> Esta tabla es del 24-sep-2026 y se corrige en lo que nombra código, no en lo que razonaba aquel día.
 
 El camino de los asientos sin software contable es **el más barato de los tres que llevan cuentas**, porque un driver
 neutral no declara claves de un sistema legacy y el núcleo solo le pide la cuenta.

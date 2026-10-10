@@ -56,7 +56,7 @@ Librería **7.0.0** y estándar **`open-accounting` 1.0**
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/tributos/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 14 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
-| **Salida · SIRE** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
+| **Salida · SUNAT** | El driver `sire` escribe el TXT de reemplazo del RVIE y del RCE, de canal tributario |
 | **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos), con un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct-2026 |
 | **Salida · ERP** | El documento `open-accounting` en JSON, el CSV de canal intercambio y la puerta HTTP con OpenConta |
 | Pendiente que depende de datos | SISCONT, la plantilla oficial de STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
@@ -323,7 +323,7 @@ congela el acoplamiento con lo peruano (J0).
 **No se hace.** Adelantar J2-J6 sin el cliente; tasas de impuestos sin fuente; traducir al inglés el vocabulario del
 estándar; poner la jurisdicción en la configuración (es del libro).
 
-### Salida · SIRE
+### Salida · SUNAT
 
 **Objetivo.** Que lo que se presenta a SUNAT salga del mismo documento que los asientos y cuadre con lo que SUNAT ya
 tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de control.

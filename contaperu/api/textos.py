@@ -8,7 +8,7 @@ que decidir cuál llamar y con qué, así que dicen lo que no se deduce de una f
 
 Están junto a `instrucciones.py` y son de la misma familia que `CAMINO`, **no que `REGLAS`**, y la distinción
 importa: `REGLAS` se la lleva quien monta su propia capa de agente, porque no nombra ninguna herramienta.
-Estos textos y `CAMINO` sí las nombran —«el recurso `contaperu://drivers` dice el grupo de cada uno»—, así que
+Estos textos y `CAMINO` sí las nombran —«el recurso `contaperu://drivers` dice el canal de cada uno»—, así que
 a quien tenga otras herramientas no le sirven tal cual, y prometerle a un modelo una herramienta que no existe
 es peor que no decirle nada. Por eso tampoco se reexportan en `contaperu.api`.
 
@@ -123,12 +123,17 @@ PARA_HERRAMIENTA: dict[str, str] = {
     `driver` **se declara siempre**: el sistema contable de un contribuyente es suyo, y un Excel de
     CONCAR importado en un CONTASIS no se nota hasta que ya está dentro.
 
-    Drivers disponibles, por grupo (el recurso `contaperu://drivers` dice el grupo de cada uno):
-      - SIRE:   `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el
+    Drivers disponibles, por canal —a quién entrega cada uno— (el recurso `contaperu://drivers` dice el de
+    cada cual):
+      - SUNAT:  `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el
                 contenido va en `texto` y el ZIP que sube a SUNAT, adjunto.
+                `ple` — el Libro Diario del PLE, que es el OTRO régimen de SUNAT: una fila por línea del
+                asiento, no por comprobante.
+                `ple_plan` — el detalle del plan contable del PLE (formato 5.3).
       - Legacy: `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.
                 `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como
                 `.xlsx`: una fila por comprobante, sin sub-diario (se elige al importar).
+                `starsoft` — los asientos en TXT de palotes.
       - ERP:    `csv` — las líneas de diario en columnas, en `texto` y también adjunto.
                 `asiento_contable` — el documento del estándar con sus comprobantes y su asiento, sin siglas ni
                 correlativos de ningún sistema legacy, adjunto como `.json`.
@@ -203,9 +208,12 @@ PARA_HERRAMIENTA: dict[str, str] = {
     """,
     'drivers_disponibles': """Los sistemas contables a los que se puede exportar, y qué pide cada uno.
 
-    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su canal y su
-    grupo (`sire`, `legacy` o `erp`), lo que **exige** para no negarse (CONCAR pide centro de costo y una moneda
-    con código; el CSV no) y si tiene sección propia en la configuración.
+    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su **canal** —a
+    quién entrega: `sunat`, `legacy` o `erp`—, lo que **exige** para no negarse (CONCAR pide centro de costo y
+    una moneda con código; el CSV no) y si tiene sección propia en la configuración.
+
+    Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas; el `ple`, el
+    Libro Diario y los demás libros.
 
     Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el
     contribuyente: esas tres lo exigen y no lo suponen.

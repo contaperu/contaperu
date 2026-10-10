@@ -23,7 +23,6 @@
     "enum": [
      "desde_lineas",
      "desde_comprobantes",
-     "construir",
      "linea"
     ]
    },
@@ -34,17 +33,10 @@
     ]
    },
    "canal": {
+    "description": "A quién entrega lo que sale: a SUNAT (el SIRE o el PLE), a un sistema contable instalado o a un ERP. Desde la 8.0 es la única palabra del destino: antes había además un `grupo` que la traducía, y mentía en el PLE.",
     "enum": [
      "legacy",
-     "tributario",
-     "intercambio"
-    ]
-   },
-   "grupo": {
-    "description": "El grupo de destinos al que entrega, según su canal: el SIRE, un sistema legacy o un ERP.",
-    "enum": [
-     "sire",
-     "legacy",
+     "sunat",
      "erp"
     ]
    },
@@ -74,7 +66,6 @@
    "forma",
    "familia",
    "canal",
-   "grupo",
    "vocabulario",
    "exige",
    "configurable",

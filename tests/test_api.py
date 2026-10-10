@@ -69,16 +69,23 @@ def test_verificar_un_driver_no_se_expone_por_ninguna_puerta_de_red():
     assert "verificar_driver" not in {op.nombre for op in api.OPERACIONES}
 
 
-def test_cada_driver_dice_su_grupo():
-    """Lo que sale va al SIRE, a un sistema legacy o a un ERP (John, 15-sep-2026): el grupo sale del canal."""
-    assert {nombre: datos["grupo"] for nombre, datos in api.drivers_disponibles().items()} == {
-        "sire": "sire", "concar": "legacy", "contasis": "legacy", "starsoft": "legacy", "ple": "sire", "ple_plan": "sire", "csv": "erp",
-        "asiento_contable": "erp"}
+def test_cada_driver_dice_a_quien_entrega():
+    """Lo que sale va a SUNAT, a un sistema legacy o a un ERP: lo dice el canal, y desde la 8.0 lo dice una sola vez.
+
+    Hasta la 7.x este test afirmaba el GRUPO, y con él congelaba la imprecisión que la 8.0 vino a arreglar:
+    `ple` y `ple_plan` salían como grupo `sire` cuando el PLE es el otro régimen de SUNAT."""
+    assert {nombre: datos["canal"] for nombre, datos in api.drivers_disponibles().items()} == {
+        "sire": "sunat", "ple": "sunat", "ple_plan": "sunat",
+        "concar": "legacy", "contasis": "legacy", "starsoft": "legacy",
+        "csv": "erp", "asiento_contable": "erp"}
+    # Y la palabra del destino es una: nadie devuelve ya un grupo.
+    assert not [d for d in api.drivers_disponibles().values() if "grupo" in d]
 
 
 def test_verificar_un_driver_dice_lo_que_le_falta():
     bien = api.verificar_driver("drivers_de_prueba.diario_json")
-    assert bien["cumple"] and bien["incumplimientos"] == [] and (bien["canal"], bien["grupo"]) == ("legacy", "legacy")
+    assert bien["cumple"] and bien["incumplimientos"] == [] and bien["canal"] == "legacy"
+    assert "grupo" not in bien
     with pytest.raises(ImportError, match="no_existe_este_driver"):
         api.verificar_driver("no_existe_este_driver")
 

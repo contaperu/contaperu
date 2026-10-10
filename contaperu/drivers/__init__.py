@@ -32,8 +32,9 @@ estándar» lo cuenta con las tres capas y su acoplamiento medido.
     siscont = "contaperu_siscont"
 
 aparece aquí solo, con su `NOMBRE`, en la CLI, en la api y en el servidor MCP. Declara su `CANAL` —`legacy` si es un
-sistema contable instalado que importa un archivo, `tributario` si es un registro que se presenta a SUNAT,
-`intercambio` si es un formato neutral— y la forma `desde_lineas` o `desde_comprobantes` (`contrato.py`). Es lo que permite
+sistema contable instalado que importa un archivo, `sunat` si es un registro o un libro que se presenta a SUNAT,
+`erp` si entrega el formato neutral del estándar— y la forma `desde_lineas` o `desde_comprobantes`
+(`contrato/`). Es lo que permite
 que la comunidad mantenga el driver de su ERP a su ritmo. Dos reglas: los de serie ganan ante un
 nombre repetido, y un driver que no cumple el contrato —o que revienta al importarse— se ignora con
 un `AvisoDriver` en vez de tumbar el registro entero. Para entrar AL repositorio sigue haciendo falta

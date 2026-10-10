@@ -16,7 +16,7 @@ from ..kit import Opciones, OpcionesArchivo
 from ..kit import columnas as _columnas_de_linea
 from .accesores import (arma_asientos, canal, configuracion, forma, lleva_cuentas, vocabulario)
 from .taxonomia import (DATOS_CON_COLUMNAS, _CUENTAS_DEL_PLAN, _LINEAS_CON_ANEXO,
-                        CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RESERVADOS, CLAVES_LEGACY, EXIGE_POSIBLES_ASIENTO, EXIGE_POSIBLES_REGISTRO, FORMAS, VOCABULARIOS, _CLAVES_QUE_NO_SON_DE_UNA_SECCION, _CUENTAS_GENERALES)
+                        CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RENOMBRADOS, CANALES_RESERVADOS, CLAVES_LEGACY, EXIGE_POSIBLES_ASIENTO, EXIGE_POSIBLES_REGISTRO, FORMAS, VOCABULARIOS, _CLAVES_QUE_NO_SON_DE_UNA_SECCION, _CUENTAS_GENERALES)
 
 def incumplimientos(modulo: Any) -> list[str]:
     """Lo que le falta a un driver para cumplir el contrato. Lista vacía = cumple."""
@@ -48,7 +48,7 @@ def incumplimientos(modulo: Any) -> list[str]:
     if declarado is not None:
         posibles = EXIGE_POSIBLES_REGISTRO if f == "desde_comprobantes" else EXIGE_POSIBLES_ASIENTO
         if f == "linea":
-            problemas.append("EXIGE no lo declara un registro tributario (forma `linea`): no lleva cuentas")
+            problemas.append("EXIGE no lo declara un registro de SUNAT con forma `linea`: no lleva cuentas")
         elif isinstance(declarado, str) or not all(isinstance(x, str) for x in declarado):
             problemas.append("EXIGE es un conjunto de textos")
         elif set(declarado) - posibles:
@@ -75,8 +75,8 @@ def _incumplimientos_del_vocabulario(modulo: Any, f: str) -> list[str]:
     problemas = []
     if f != "desde_lineas":
         problemas.append("un driver neutral recibe las líneas del estándar: su forma es `desde_lineas`")
-    if canal(modulo) != "intercambio":
-        problemas.append("un driver neutral entrega a un ERP: su canal es `intercambio`")
+    if canal(modulo) != "erp":
+        problemas.append("un driver neutral entrega a un ERP: su canal es `erp`")
     legacy = sorted({c.clave for c in configuracion(modulo) if isinstance(c, Campo)} & CLAVES_LEGACY)
     if legacy:
         problemas.append("un driver neutral no declara vocabulario legacy en CONFIGURACION: " + ", ".join(legacy))
@@ -89,9 +89,11 @@ def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
     declarado = getattr(modulo, "CANAL", None)
     if declarado is None:
         return [f"un driver declara CANAL ({', '.join(CANALES)}): es obligatorio desde la "
-                f"{CANAL_OBLIGATORIO_DESDE} y de él sale el grupo del destino"]
+                f"{CANAL_OBLIGATORIO_DESDE} y de él dependen las reglas que el contrato hace cumplir"]
     if declarado in CANALES_RESERVADOS:
         return [f"CANAL {declarado!r} está reservado y no se admite en la 1.0: {CANALES_RESERVADOS[declarado]}"]
+    if declarado in CANALES_RENOMBRADOS:
+        return [f"CANAL {declarado!r} se renombró en la 8.0: usa {CANALES_RENOMBRADOS[declarado]!r}"]
     if declarado not in CANALES:
         return [f"CANAL {declarado!r} no existe; los canales son {', '.join(CANALES)}"]
     if not f:
@@ -103,16 +105,16 @@ def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
         if not hasattr(modulo, "EXIGE"):
             problemas.append("un driver legacy declara EXIGE: lo que su sistema no puede importar sin (vacío si nada)")
         return problemas
-    # Un tributario escribe un registro de texto para SUNAT, y hasta la 4.2 eso quería decir una fila por
-    # comprobante, que es la forma `linea` y la del SIRE. El Libro Diario del PLE rompió el supuesto sin romper la
-    # regla: también es un registro de texto para SUNAT, pero **su fila es una línea del asiento**, no un
-    # comprobante —una compra con detracción son cinco filas—, así que su forma es `desde_lineas`. Lo que la regla
-    # protege sigue en pie: un tributario no escribe un Excel ni un JSON.
-    if declarado == "tributario" and f not in ("linea", "desde_lineas"):
-        return ["un driver tributario escribe un registro de texto para SUNAT: su forma es `linea` "
+    # Un driver de SUNAT escribe un registro de texto, y hasta la 4.2 eso quería decir una fila por comprobante, que
+    # es la forma `linea` y la del SIRE. El Libro Diario del PLE rompió el supuesto sin romper la regla: también es
+    # un registro de texto para SUNAT, pero **su fila es una línea del asiento**, no un comprobante —una compra con
+    # detracción son cinco filas—, así que su forma es `desde_lineas`. Lo que la regla protege sigue en pie: no se
+    # escribe un Excel ni un JSON para SUNAT.
+    if declarado == "sunat" and f not in ("linea", "desde_lineas"):
+        return ["un driver de SUNAT escribe un registro o un libro de texto: su forma es `linea` "
                 "(una fila por comprobante) o `desde_lineas` (una fila por línea del asiento)"]
-    if declarado == "intercambio" and f != "desde_lineas":
-        return ["un driver de intercambio proyecta la línea del comprobante: su forma es `desde_lineas`"]
+    if declarado == "erp" and f != "desde_lineas":
+        return ["un driver de ERP proyecta la línea del comprobante: su forma es `desde_lineas`"]
     return []
 
 
@@ -122,7 +124,7 @@ def _incumplimientos_de_la_configuracion(modulo: Any) -> list[str]:
     cuentas = getattr(modulo, "CUENTAS_POR_DEFECTO", None)
     if (declarada is not None or columnas is not None or cuentas is not None) and not lleva_cuentas(modulo):
         return ["CONFIGURACION, COLUMNAS_ELEGIBLES y CUENTAS_POR_DEFECTO son de un driver que lleva cuentas: un "
-                "registro tributario no se configura"]
+                "registro de SUNAT con forma `linea` no se configura"]
     problemas: list[str] = []
     if cuentas is not None:
         problemas += _incumplimientos_de_las_cuentas(cuentas)

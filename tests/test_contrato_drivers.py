@@ -109,15 +109,15 @@ def test_un_requisito_fuera_del_catalogo_no_pasa_el_contrato():
 
 
 def test_un_driver_de_texto_no_declara_exige():
-    tributario = types.ModuleType("tributario")
-    tributario.NOMBRE, tributario.FORMATOS, tributario.OPCIONES = "trib", {"venta": "trib"}, Opciones()
-    tributario.CANAL = "tributario"          # obligatorio desde la 4.0, como para un driver de verdad
-    tributario.nombre = lambda libro, op=None: "x.txt"
-    tributario.linea = lambda c, libro, idx, op=None: ""
-    assert contrato.incumplimientos(tributario) == []
-    tributario.EXIGE = frozenset()
-    assert contrato.incumplimientos(tributario) == [
-        "EXIGE no lo declara un registro tributario (forma `linea`): no lleva cuentas"]
+    de_sunat = types.ModuleType("de_sunat")
+    de_sunat.NOMBRE, de_sunat.FORMATOS, de_sunat.OPCIONES = "trib", {"venta": "trib"}, Opciones()
+    de_sunat.CANAL = "sunat"                 # obligatorio desde la 4.0, como para un driver de verdad
+    de_sunat.nombre = lambda libro, op=None: "x.txt"
+    de_sunat.linea = lambda c, libro, idx, op=None: ""
+    assert contrato.incumplimientos(de_sunat) == []
+    de_sunat.EXIGE = frozenset()
+    assert contrato.incumplimientos(de_sunat) == [
+        "EXIGE no lo declara un registro de SUNAT con forma `linea`: no lleva cuentas"]
 
 
 def test_lo_que_el_driver_exige_lo_hace_cumplir_el_nucleo(con_terceros):
@@ -565,15 +565,15 @@ def test_el_contrato_revisa_la_configuracion_que_declara_un_driver():
         "COLUMNAS_ELEGIBLES['centro_costo']: en un driver de asientos, 'x' dice qué línea del comprobante la llena: la fija, "
         "con el centro_costo de la principal; las demás, con el anexo_auxiliar de la principal o del tercero"]
 
-    tributario = types.ModuleType("tributario")
-    tributario.NOMBRE, tributario.FORMATOS, tributario.OPCIONES = "trib", {"venta": "trib"}, Opciones()
-    tributario.CANAL = "tributario"          # obligatorio desde la 4.0, como para un driver de verdad
-    tributario.nombre = lambda libro, op=None: "x.txt"
-    tributario.linea = lambda c, libro, idx, op=None: ""
-    tributario.CONFIGURACION = ()
-    assert contrato.incumplimientos(tributario) == [
+    de_sunat = types.ModuleType("de_sunat")
+    de_sunat.NOMBRE, de_sunat.FORMATOS, de_sunat.OPCIONES = "trib", {"venta": "trib"}, Opciones()
+    de_sunat.CANAL = "sunat"                 # obligatorio desde la 4.0, como para un driver de verdad
+    de_sunat.nombre = lambda libro, op=None: "x.txt"
+    de_sunat.linea = lambda c, libro, idx, op=None: ""
+    de_sunat.CONFIGURACION = ()
+    assert contrato.incumplimientos(de_sunat) == [
         "CONFIGURACION, COLUMNAS_ELEGIBLES y CUENTAS_POR_DEFECTO son de un driver que lleva cuentas: un registro "
-        "tributario no se configura"]
+        "de SUNAT con forma `linea` no se configura"]
 
     con_moneda = driver_de_prueba()
     con_moneda.EXIGE = frozenset({"moneda"})
@@ -855,28 +855,29 @@ def test_las_toleradas_siguen_haciendo_falta():
 
 def test_cada_driver_de_serie_declara_su_canal():
     assert {n: contrato.canal(m) for n, m in drivers.DE_SERIE.items()} == {
-        "sire": "tributario", "concar": "legacy", "csv": "intercambio", "contasis": "legacy",
-        "starsoft": "legacy", "ple": "tributario", "ple_plan": "tributario", "asiento_contable": "intercambio"}
+        "sire": "sunat", "ple": "sunat", "ple_plan": "sunat",
+        "concar": "legacy", "contasis": "legacy", "starsoft": "legacy",
+        "csv": "erp", "asiento_contable": "erp"}
     assert all(contrato.declara_canal(m) for m in drivers.DE_SERIE.values())
     assert api.drivers_disponibles()["concar"]["canal"] == "legacy"
 
 
 def test_las_reglas_de_cada_canal():
-    # Un tributario puede recibir las líneas desde la 4.2: lo pidió el Libro Diario del PLE, cuya fila ES una línea
-    # del asiento y no un comprobante. Lo que la regla protege sigue en pie —no escribe un Excel ni un JSON—, así que
-    # el que incumple ahora es el que usa la tercera forma.
-    tributario_de_lineas = driver_de_prueba("t")
-    tributario_de_lineas.CANAL = "tributario"
-    assert contrato.incumplimientos(tributario_de_lineas) == []
-    tributario_de_registro = driver_de_registro("tr")
-    tributario_de_registro.CANAL = "tributario"
-    assert contrato.incumplimientos(tributario_de_registro) == [
-        "un driver tributario escribe un registro de texto para SUNAT: su forma es `linea` "
+    # Un driver de SUNAT puede recibir las líneas desde la 4.2: lo pidió el Libro Diario del PLE, cuya fila ES una
+    # línea del asiento y no un comprobante. Lo que la regla protege sigue en pie —no escribe un Excel ni un JSON—,
+    # así que el que incumple ahora es el que usa la tercera forma.
+    sunat_de_lineas = driver_de_prueba("t")
+    sunat_de_lineas.CANAL = "sunat"
+    assert contrato.incumplimientos(sunat_de_lineas) == []
+    sunat_de_registro = driver_de_registro("tr")
+    sunat_de_registro.CANAL = "sunat"
+    assert contrato.incumplimientos(sunat_de_registro) == [
+        "un driver de SUNAT escribe un registro o un libro de texto: su forma es `linea` "
         "(una fila por comprobante) o `desde_lineas` (una fila por línea del asiento)"]
-    intercambio_de_registro = driver_de_registro("i")
-    intercambio_de_registro.CANAL = "intercambio"
-    assert contrato.incumplimientos(intercambio_de_registro) == [
-        "un driver de intercambio proyecta la línea del comprobante: su forma es `desde_lineas`"]
+    erp_de_registro = driver_de_registro("i")
+    erp_de_registro.CANAL = "erp"
+    assert contrato.incumplimientos(erp_de_registro) == [
+        "un driver de ERP proyecta la línea del comprobante: su forma es `desde_lineas`"]
     legacy_sin_exige = driver_de_prueba("l")
     del legacy_sin_exige.EXIGE
     assert contrato.incumplimientos(legacy_sin_exige) == [
@@ -900,13 +901,13 @@ def test_un_canal_reservado_o_desconocido_no_pasa(valor, motivo):
 
 def test_un_tercero_sin_canal_no_carga(con_terceros):
     """Declarar `CANAL` es obligatorio desde la 4.0. Hasta la 3.10 un driver sin canal se trataba como `legacy` con un
-    aviso que prometía «la 2.0» —con el paquete ya en la 3.10—, así que el grupo del destino (SIRE, legacy o ERP) se
-    adivinaba, y de él salen las reglas que el contrato hace cumplir."""
+    aviso que prometía «la 2.0» —con el paquete ya en la 3.10—, así que el destino se adivinaba, y de él salen las
+    reglas que el contrato hace cumplir."""
     sin_canal = driver_de_prueba("sincanal")
     del sin_canal.CANAL
     assert contrato.incumplimientos(sin_canal) == [
-        "un driver declara CANAL (legacy, tributario, intercambio): es obligatorio desde la 4.0 y de él sale el "
-        "grupo del destino"]
+        "un driver declara CANAL (legacy, sunat, erp): es obligatorio desde la 4.0 y de él dependen las reglas "
+        "que el contrato hace cumplir"]
     with pytest.warns(drivers.AvisoDriver, match="no cumple el contrato"):
         registrados = con_terceros(_Entrada("sincanal", sin_canal))
     assert "sincanal" not in registrados

@@ -13,8 +13,9 @@ SIRE y a un CSV genérico, y un servidor MCP para que un agente de IA lo use.
 Parte de una tesis: **la contabilidad automatizada no es un problema organizacional de cada empresa, sino de
 arquitectura colectiva** (open source). Por eso cumple dos papeles a la vez: es **la capa que trabaja encima de los
 sistemas legacy** (CONCAR y CONTASIS hoy; SISCONT y STARSOFT cuando entren) mientras evolucionan, y es **la base
-abierta —estándar y motor— sobre la que se construyen los ERP que vienen**. Sus destinos se agrupan en tres: **SIRE,
-legacy y ERP**. Licencia **MIT**; lo mantiene **Global
+abierta —estándar y motor— sobre la que se construyen los ERP que vienen**. Sus destinos se agrupan en tres,
+que son los **canales** del contrato de drivers: **SUNAT, legacy y ERP** (`sunat` cubre los dos regímenes, el SIRE
+y el PLE). Licencia **MIT**; lo mantiene **Global
 Procesos AI S.A.C.** (Lima). El repositorio (`github.com/contaperu/contaperu`) es **público**, y el paquete está
 **publicado en PyPI** desde el 19-sep-2026: **lo que entra en internet no sale**, tampoco del historial de git, así
 que se escribe siempre como lo que es (nada real de nadie, nada de infraestructura ajena a este repo). **Distribuir
@@ -46,8 +47,10 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
 Por capas, de abajo arriba, que `tests/test_capas.py` hace cumplir: un **núcleo** que sabe contabilidad peruana y nada
 más (`modelo/`, `lectores/`, `tributos/` —el IGV, las detracciones, la validación y el contraste con el SIRE—,
 `contable/` —la partida doble y el resumen—, `asiento/`, `pcge/`); **drivers** que
-conocen el formato de un destino y nada de contabilidad, cada uno con su canal (`drivers/concar` y `drivers/contasis`
-legacy, `drivers/sire` tributario, `drivers/csv` y `drivers/asiento_contable` intercambio, este con vocabulario neutral para los ERP, y los de terceros por *entry points*, con el contrato de
+conocen el formato de un destino y nada de contabilidad, cada uno con su **canal**, que dice a quién entrega:
+`drivers/concar`, `drivers/contasis` y `drivers/starsoft` son `legacy`; `drivers/sire`, `drivers/ple` y
+`drivers/ple_plan` son `sunat` —el SIRE y el PLE, dos regímenes y un canal—; `drivers/csv` y
+`drivers/asiento_contable` son `erp`, este con vocabulario neutral. Los de terceros entran por *entry points*, con el contrato de
 `drivers/contrato/` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
 (`contaperu.api`, con la tabla de operaciones y el contrato OpenConta); y tres **puertas** que solo hablan con la api
 (`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x y la 4.0, el
@@ -170,7 +173,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 
 | Documento | Qué responde |
 |---|---|
-| `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres grupos (SIRE, legacy y ERP); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
+| `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres canales (SUNAT, legacy y ERP); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
 | `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea del comprobante, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
 | `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, quién aporta cada variable y cuáles de las cuatro piezas aceptan las tuyas, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 2.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |

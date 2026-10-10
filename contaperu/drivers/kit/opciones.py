@@ -51,7 +51,7 @@ class OpcionesArchivo:
     # y sus ejemplos oficiales lo traen así; un formato que prefiera la celda vacía pone ''.
     cero: str = "0.00"
     # Cómo escribe las fechas el sistema de destino. **Vacío = como vienen**, en ISO, que es como viajan en el
-    # estándar: es lo que quiere un formato de intercambio (el CSV, el asiento neutral) y por eso es el defecto.
+    # estándar: es lo que quiere un driver de ERP (el CSV, el asiento neutral) y por eso es el defecto.
     # Un sistema contable pide las suyas —STARSOFT, `DD/MM/AAAA`—, y hasta la 2.3 no tenía dónde decirlo: sus
     # fechas salían en ISO. Los valores son los de `Opciones.fecha` y los traduce `kit.texto.formatear_fecha`.
     fecha: str = ""

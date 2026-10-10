@@ -306,9 +306,8 @@ def cmd_verificar_driver(args: argparse.Namespace) -> int:
     except ImportError as error:
         print(error, file=sys.stderr)
         return 2
-    grupo = resultado["grupo"] or "(ninguno)"
     print(f"Driver {resultado['nombre'] or args.modulo} · forma {resultado['forma'] or '(ninguna)'} · "
-          f"canal {resultado['canal']} · grupo {grupo}")
+          f"canal {resultado['canal'] or '(ninguno)'}")
     for aviso in resultado["avisos"]:
         print(f"   · {aviso}")
     if resultado["cumple"]:

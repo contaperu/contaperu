@@ -96,7 +96,7 @@ configuración, y cada cuenta la lees de `asiento.partes_de` (la de la base, o u
 `asiento.cuenta_tercero` (la del total), que la resuelven igual que para el asiento, con la imputación de cada
 documento dentro. El núcleo exige la cuenta antes de llamarte. Para un TXT por comprobante, como el SIRE, la forma es
 `linea`. `construir`, la forma de CONCAR hasta la 0.10, **la retiró la 4.0** —avisaba desde la 1.0— y un driver que
-la exponga ya no carga. Y **declarar `CANAL` es obligatorio** desde esa misma versión: sin él, el grupo del destino
+la exponga ya no carga. Y **declarar `CANAL` es obligatorio** desde esa misma versión: sin él, el destino
 se adivinaba.
 
 **Dos maneras de publicarlo:**
@@ -139,11 +139,12 @@ con el asiento cuadrado. Requisitos para que un driver entre **al repositorio**:
    `CorrelativoDesborda` de CONCAR (`sub_diario_desborda`: un sub-diario que pasaría de 9999). De lo que impide
    exportar, la CLI solo atrapa esa base y dice el motivo sin traceback; quien exporta lee su `clave` y sus
    `comprobantes`, y la puerta HTTP la responde como un 422 con esa `clave`.
-10. **Declara tu `CANAL`**: `legacy` si tu sistema contable importa un archivo, `tributario` si es un registro que se
-    presenta a SUNAT, `intercambio` si es un formato neutral. El contrato hace cumplir sus reglas (un `legacy` lleva
+10. **Declara tu `CANAL`**: `legacy` si tu sistema contable importa un archivo, `sunat` si es un registro o un libro
+    que se presenta a SUNAT —por el SIRE o por el PLE—, `erp` si entregas el formato neutral del estándar. El
+    contrato hace cumplir sus reglas (un `legacy` lleva
     cuentas y declara `EXIGE`); `api_erp` está reservado para escribir en la API de un ERP moderno y todavía no se
-    admite. Cada canal se presenta en uno de los grupos del motor: `tributario` es SIRE, `legacy` es Legacy e
-    `intercambio` es ERP.
+    admite, y el criterio para abrirlo es que haya un formato que `erp` no pueda llevar. **El canal es la única
+    palabra del destino** desde la 8.0: antes había además un «grupo» que lo traducía, y mentía en el PLE.
 
 ## Estilo
 
