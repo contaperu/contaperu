@@ -235,7 +235,21 @@ archivos reales en `privado/`); leer PDF o fotos.
 
 **Objetivo.** Que un hecho bancario —una línea de extracto o la liquidación de una pasarela de pagos— se lea, se
 deduplique, se empareje con lo que salda y, cuando haya fuente, se asiente. Al estilo de EE. UU., y con el núcleo sin
-red.
+red. **El registro va antes de conciliar**: sin saber qué cuentas tiene el contribuyente no hay contra qué casar
+nada, y por eso D8 es el primero del frente y el único que no espera un archivo.
+
+**Las tres conciliaciones, que no son la misma y estaban repartidas.** Conviene verlas juntas, porque la palabra
+tapa tres trabajos con tres estados distintos:
+
+| Conciliación | Qué hay hoy | Qué la destraba |
+|---|---|---|
+| **Las constancias de detracción** contra las compras del mes | **Media hecha.** `contaperu/tributos/detracciones.py` deduce `PROVISIONADO` o `PAGADO` del número y la fecha de la constancia, y `diagnosticar` lista las que esperan (`detraccion_pendiente`). Lo que falta es el casado: leer el archivo del banco y escribirle a cada comprobante su número y su fecha, sin que nadie teclee | Un archivo real del Banco de la Nación — la consulta de pagos de detracciones de SOL o los movimientos de esa cuenta. Es el hito **D1** |
+| **El extracto bancario** contra el libro | **Nada**, y es el que más código pide. Hay dos trampas ya localizadas para su lector: un `.xlsx` empieza como un ZIP y se desarma solo, y un `.txt` se ignora como archivo auxiliar (`contaperu/lectores/archivos.py`) | Un extracto real anonimizado (**D2**); con él, **D3** ya arranca con código |
+| **La propuesta del SIRE** contra lo que el contribuyente anotó | **Hecha y en uso**: `contaperu/tributos/comparar_sire.py`, expuesta como `api.comparar_sire`, compara el TXT de reemplazo contra la exportación del detalle del SIRE. Lo que falta no es la comparación, es de dónde sale el archivo: hoy lo baja una persona a mano | La otra mitad del hito **C16**, los lectores de la respuesta del SIRE |
+
+El paquete **`contaperu/banco/` está reservado** en la capa núcleo (`ARQUITECTURA.md`, «Lo que queda preparado») y
+todavía no existe: lo crea D2. Los conectores de entrada **nunca** viven dentro de `contaperu`, que es lo que D7
+decide y lo que `tests/test_frontera.py` hace cumplir.
 
 **Investigación.** Lo que hace EE. UU. de verdad, los canales peruanos a la fecha de consulta, los proyectos
 abiertos, los rieles de pago y el fraude.
