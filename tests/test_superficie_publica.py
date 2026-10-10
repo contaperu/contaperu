@@ -45,6 +45,10 @@ EXTENSION = (
     # La API del SIRE como funciones puras (8.1). Entra en la superficie congelada porque está para que la use quien
     # integra: si no estuviera, la promesa de la mayor no la cubriría y podría irse sin avisar.
     "contaperu.sunat",
+    # La tesorería (8.2): la cuenta bancaria que declara el contribuyente, el movimiento de un extracto, la
+    # constancia de un pago y el cuadre de la cadena de saldos. Por el mismo motivo que `sunat`: su público es
+    # quien integra, y lo que no está congelado puede irse sin avisar.
+    "contaperu.tesoreria",
     "contaperu.lectores", "contaperu.lectores.archivos", "contaperu.lectores.sire_txt", "contaperu.lectores.xml_ubl",
     "contaperu.drivers", "contaperu.drivers.contrato", "contaperu.drivers.kit", "contaperu.drivers.concar", "contaperu.drivers.contasis",
     "contaperu.drivers.csv", "contaperu.drivers.sire", "contaperu.drivers.starsoft",

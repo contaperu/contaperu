@@ -62,6 +62,10 @@ CAPAS = {
     # **Núcleo y no una puerta**, y es la decisión que lo hace legítimo: aquí se SABE la URL y no se llama nunca. El
     # catálogo que lo sostiene viaja en `datos/sunat/`, y `test_frontera` sigue prohibiendo `httpx` y `socket`.
     "contaperu.sunat": "nucleo",
+    # La tesorería (8.2): qué es una cuenta bancaria, un movimiento de extracto y una constancia de pago, y el
+    # cuadre de la cadena de saldos. **Núcleo y hoja**, como `sunat`: no lo importa nadie de dentro y su público es
+    # quien integra. Lo que lee bytes de un extracto vivirá fuera, igual que los conectores (D7).
+    "contaperu.tesoreria": "nucleo",
     # Los tributos del Perú agrupados (6.4.0): el IGV, las detracciones, la validación y el contraste con
     # lo que SUNAT tiene. Núcleo, y peruano: es casi toda la tupla `PERUANOS` de más abajo.
     "contaperu.tributos": "nucleo",
@@ -216,6 +220,9 @@ PERUANOS_POR_CONTENIDO = {
     "contaperu.modelo:Libro": "exige un RUC de 11 dígitos y un periodo AAAAMM de venta o compra",
     "contaperu.modelo:Comprobante": "los impuestos del Perú en campos fijos (base gravada, IGV, ISC, IVAP, ICBPER)",
     "contaperu.configuracion:CONFIGURACION_GENERAL": "las cuentas del PCGE y las tasas de detracción",
+    # El CCI es peruano de arriba abajo, y la constancia nombra el Catálogo 05 de SUNAT en sus referencias. No
+    # importa nada peruano —solo las coerciones del modelo—, así que es de los que se detectan por contenido.
+    "contaperu.tesoreria:LARGO_CCI": "el Código de Cuenta Interbancario del Perú: 20 dígitos, 3+3+12+2",
     "contaperu.asiento.configuracion:CONFIGURACION_DEL_ASIENTO": "la Tabla 10, los sub-diarios y la detracción",
 }
 
