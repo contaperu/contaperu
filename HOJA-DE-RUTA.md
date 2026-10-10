@@ -421,10 +421,11 @@ motor.
 
 ### Salida · Legacy: CONCAR, CONTASIS, SISCONT y STARSOFT
 
-**Objetivo.** Que SISCONT y STARSOFT Desktop salgan del mismo documento que CONCAR y CONTASIS, cada uno con su archivo aceptado,
-y que el motor conozca lo que el destino exige antes de que el sistema rechace una importación. Es la prioridad por uso:
-son, con CONCAR y CONTASIS, los sistemas contables que más estudios peruanos tienen instalados, y el motor trabaja
-encima de ellos mientras evolucionan.
+**Objetivo.** Que los cuatro sistemas instalados salgan del mismo documento, cada uno con su archivo aceptado, y que
+el motor conozca lo que el destino exige antes de que el sistema rechace una importación. **Tres ya salen** —CONCAR,
+CONTASIS y STARSOFT Desktop—; queda SISCONT. Este frente **no se retira ni tiene plazo**, aunque desde el
+10-oct-2026 ya no sea el que ordena el trabajo: son, con los otros dos, los sistemas contables que más estudios
+peruanos tienen instalados, y la promesa es que el motor trabaje encima de ellos mientras evolucionan.
 
 **Investigación.** Los tres escalones con que EE. UU. integra sistemas de escritorio sin API, y lo que se toma de
 ellos. Lo que un sistema espera recibir, comparado entre nueve plataformas y los estándares abiertos de factura, en

@@ -7,15 +7,18 @@ dice dónde buscarlo.
 ## Qué es
 
 `contaperu` es **el núcleo contable abierto del Perú**: el estándar de datos `open-accounting`, el motor que lee
-comprobantes (el XML de SUNAT, la propuesta del SIRE), los valida, arma el asiento y lo exporta a CONCAR, a CONTASIS, al
-SIRE y a un CSV genérico, y un servidor MCP para que un agente de IA lo use.
+comprobantes (el XML de SUNAT, la propuesta del SIRE), los valida, arma el asiento y lo entrega: a un ERP en el
+propio estándar, a SUNAT el TXT del SIRE y los libros del PLE, y a los sistemas instalados el archivo que cada uno
+importa —CONCAR, CONTASIS y STARSOFT—, más un CSV genérico. Y un servidor MCP para que un agente de IA lo use.
 
 Parte de una tesis: **la contabilidad automatizada no es un problema organizacional de cada empresa, sino de
-arquitectura colectiva** (open source). Por eso cumple dos papeles a la vez: es **la capa que trabaja encima de los
-sistemas legacy** (CONCAR y CONTASIS hoy; SISCONT y STARSOFT cuando entren) mientras evolucionan, y es **la base
-abierta —estándar y motor— sobre la que se construyen los ERP que vienen**. Sus destinos se agrupan en tres,
-que son los **canales** del contrato de drivers: **SUNAT, legacy y ERP** (`sunat` cubre los dos regímenes, el SIRE
-y el PLE). Licencia **MIT**; lo mantiene **Global
+arquitectura colectiva** (open source). Por eso cumple dos papeles a la vez, y **desde el 10-oct-2026 el primero
+ordena el trabajo**: es **la base abierta —estándar y motor— sobre la que se construye un ERP nuevo**, que no tiene
+que reimplementar el IGV ni las detracciones; y es **la capa que trabaja encima de los sistemas instalados**
+—CONCAR, CONTASIS y STARSOFT hoy, SISCONT cuando llegue su archivo— mientras evolucionan, **sin plazo de retiro**,
+porque nadie tiene que cambiar de sistema contable. Sus destinos se agrupan en tres, que son los **canales** del
+contrato de drivers, y van en ese orden: **ERP, SUNAT y legacy** (`sunat` cubre los dos regímenes, el SIRE y el
+PLE). Licencia **MIT**; lo mantiene **Global
 Procesos AI S.A.C.** (Lima). El repositorio (`github.com/contaperu/contaperu`) es **público**, y el paquete está
 **publicado en PyPI** desde el 19-sep-2026: **lo que entra en internet no sale**, tampoco del historial de git, así
 que se escribe siempre como lo que es (nada real de nadie, nada de infraestructura ajena a este repo). **Distribuir
@@ -39,6 +42,13 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
   la vez un ERP nuevo no tiene que reimplementar el IGV ni las detracciones: parte del estándar y del motor. La
   contabilidad automatizada se trata como arquitectura colectiva, no organizacional: un estándar y un motor comunes,
   mejorados entre todos. Es el enfoque que ordena el README y `HOJA-DE-RUTA.md`.
+- **Segunda ampliación de John (10-oct-2026): el eje se invierte.** De «una capa encima de tu sistema contable» a
+  **«la base para cualquier ERP»**. No es que la capa deje de valer —se queda, sin plazo, y «encima, no en lugar
+  de» sigue siendo la promesa a quien ya tiene su sistema—: es que **deja de ser lo que decide en qué orden crece
+  el motor**. Lo que decide es lo que a un ERP le falta, porque la aplicación que integra el motor está creciendo
+  hacia uno: bancos, conciliaciones y más API de SUNAT. Con ella entra una regla de secuencia que está en el §7 de
+  `HOJA-DE-RUTA.md`: **el motor va primero, se etiqueta una versión y el producto adopta después**; nada se
+  construye primero en la aplicación.
 - Es una copia y no una importación, a propósito: este repo se abrirá y no puede depender de un archivo del disco de
   nadie. Si la visión cambia, se actualiza esta sección con la fecha.
 
@@ -49,9 +59,9 @@ más (`modelo/`, `lectores/`, `tributos/` —el IGV, las detracciones, la valida
 `contable/` —la partida doble y el resumen—, `asiento/`, `pcge/`, `sunat/` —la API del SIRE como funciones
 puras: se sabe la URL y no se llama nunca—); **drivers** que
 conocen el formato de un destino y nada de contabilidad, cada uno con su **canal**, que dice a quién entrega:
-`drivers/concar`, `drivers/contasis` y `drivers/starsoft` son `legacy`; `drivers/sire`, `drivers/ple` y
-`drivers/ple_plan` son `sunat` —el SIRE y el PLE, dos regímenes y un canal—; `drivers/csv` y
-`drivers/asiento_contable` son `erp`, este con vocabulario neutral. Los de terceros entran por *entry points*, con el contrato de
+`drivers/asiento_contable` y `drivers/csv` son `erp`, el primero con vocabulario neutral; `drivers/sire`,
+`drivers/ple` y `drivers/ple_plan` son `sunat` —el SIRE y el PLE, dos regímenes y un canal—; `drivers/concar`,
+`drivers/contasis` y `drivers/starsoft` son `legacy`. Los de terceros entran por *entry points*, con el contrato de
 `drivers/contrato/` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
 (`contaperu.api`, con la tabla de operaciones y el contrato OpenConta); y tres **puertas** que solo hablan con la api
 (`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x y la 4.0, el
@@ -68,7 +78,10 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   este repo, así que un commit en `main` no la toca. **Romper una firma aquí la rompe el día que adopte esa versión**:
   por eso rige SemVer y lo que se retira avisa durante toda la mayor anterior. Un arreglo del motor es un commit en `main` y
   una versión con su tag; allá, cambiar la versión fijada y desplegar. Su lado del circuito está en
-  `contab-core/docs/FRONTERA.md`: cuando el trabajo cruza, se lee primero.
+  `contab-core/docs/FRONTERA.md`: cuando el trabajo cruza, se lee primero. **Y es la que mueve el eje
+  (10-oct-2026)**: está creciendo de «cargar → revisar → exportar» hacia un ERP —bancos, conciliaciones, más
+  SUNAT—, así que lo que el motor construye primero es lo que esa base necesita. Pero el orden no se invierte por
+  eso: **el motor va primero** y allá se adopta la versión, nunca al revés.
 - **Un MCP abierto en producción.** `contaperu-mcp` corre en `https://contaperu.globalprocesos.com/mcp` (Streamable
   HTTP, sin autenticación por diseño: no guarda nada de nadie, y el freno es de recursos). Actualizarlo es subir el
   repo al servidor y reconstruir su contenedor; el procedimiento y sus trampas (el `--dominio` que el SDK exige para
@@ -121,6 +134,10 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 ## Cómo se trabaja
 
 - `git pull` antes de empezar: el repo se trabaja desde dos máquinas.
+- **El motor va primero y el producto adopta después** (John, 10-oct-2026): nada se construye primero en la
+  aplicación. Se hace aquí, se etiqueta una versión y allá se cambia el número fijado y se despliega. De ahí una
+  consecuencia que conviene tener presente: **un hito de la hoja de ruta no se da por cumplido porque la
+  aplicación ya lo tenga**, sino con su test, su versión y su entrada en el CHANGELOG.
 - **Se trabaja directo en `main`, sin PR y sin ramas** (decisión de John, 14-sep-2026): commit y push cuando la
   batería pasa en local, y la CI de cada push a `main` lo confirma. Se puede porque cada consumidor fija una versión,
   así que lo que entra en `main` no le llega a nadie hasta que se etiqueta. Un contribuidor de fuera sí abre un PR
@@ -174,7 +191,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 
 | Documento | Qué responde |
 |---|---|
-| `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres canales (SUNAT, legacy y ERP); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
+| `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres canales en el orden del eje (ERP, SUNAT y legacy); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
 | `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea del comprobante, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
 | `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, quién aporta cada variable y cuáles de las cuatro piezas aceptan las tuyas, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 2.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
@@ -189,8 +206,9 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 El orden completo y qué destraba cada hito, en `HOJA-DE-RUTA.md` (§5, «Lo que hay que conseguir»). Aquí, lo que ya
 espera un archivo o una norma:
 
-- Drivers de **SISCONT y STARSOFT**: cada uno exige un archivo real que ese sistema haya importado, como pasó con
-  **CONTASIS**, aceptado el 13-sep-2026 al importar los archivos que genera su driver.
+- Driver de **SISCONT**: exige un archivo real que ese sistema haya importado, como pasó con **CONTASIS**
+  (13-sep-2026) y con **STARSOFT**, que ya no está pendiente —importó un mes de compras el 7-oct-2026 y uno de
+  ventas el 8—.
 - **Conciliación de constancias de detracción**: un archivo real del Banco de la Nación.
 - **El catálogo completo de detracciones** (`contaperu/datos/sunat/detracciones.json`): la tabla del motor trae los 14
   códigos que ya se reconocían; los demás del Catálogo 54 entran con los apéndices vigentes del SPOT como fuente. El ERP
