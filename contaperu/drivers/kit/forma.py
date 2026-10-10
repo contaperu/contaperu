@@ -17,7 +17,10 @@ def exigir_indice(sistema: str, libro: Any, lineas: list, indice: tuple, formato
     COMPROBANTE —su glosa entera, el IGV del total, el destino de la adquisición—. Eso viaja en el índice, y sin
     él las filas saldrían incompletas en silencio, que es peor que no salir."""
     if formatos.get(libro.tipo) is None:
-        raise ValueError("Tipo de libro no soportado")
+        # Nombrando los que SÍ lleva, que es la mitad útil del mensaje: el que integra no tiene por qué saber
+        # de memoria qué libros declara cada driver. El mensaje salió de `ple_plan`, que lo escribió bien por su
+        # cuenta mientras el común decía solo «no soportado».
+        raise ValueError(f"Tipo de libro no soportado: {libro.tipo!r}; {sistema} lleva {sorted(formatos)}")
     if lineas and not indice:
         raise ValueError(f"{sistema} escribe cada fila con la cabecera de su comprobante: necesita el `indice` "
                          f"del asiento")

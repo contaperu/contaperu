@@ -44,7 +44,8 @@ una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una cel
 CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()` y `lineas_del_libro()`.
 """
 from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO, NUMERO_DETRACCION_PENDIENTE
-from .faltas import (AnuladaConDeposito, CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA, Falta, SinCodigoDeMoneda, NoExportable,
+from .faltas import (AnuladaConDeposito, CONTADOR, FALTA, FALTAS, LibroQueElMotorNoOrigina, PROVEEDOR, SISTEMA,
+                     Falta, SinCodigoDeMoneda, NoExportable,
                      RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCodigoDetraccion, SinCuenta,
                      SinCorrelativo, SinSigla)
 from .resolucion import (anulada_por_nota, asienta_sin_efecto, comprobantes_anulados_con_deposito,
@@ -62,7 +63,8 @@ from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
 from .indice import Cabecera, ComprobanteDelAsiento, exportacion_de
-from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, LineaSinComprobante, cabecera_de, constancia_de,
+from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, TIPOS_DEL_MOTOR, LineaSinComprobante, cabecera_de,
+                    constancia_de,
                     glosa_de, indice_de_lineas_dadas, lineas_del_comprobante, lineas_del_libro,
                     lineas_e_indice_del_libro, rangos_de_lineas_dadas, serie_numero_de)
 
@@ -70,6 +72,7 @@ __all__ = [
     "CONFIGURACION_DEL_ASIENTO", "NUMERO_DETRACCION_PENDIENTE", "CONTADOR", "FALTA", "FALTAS",
     "PROVEEDOR", "SISTEMA", "Falta", "SinCodigoDeMoneda", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
     "SinCentro", "SinCodigoDetraccion", "SinCuenta", "SinCorrelativo", "SinSigla", "AnuladaConDeposito",
+    "LibroQueElMotorNoOrigina",
     "anulada_por_nota", "comprobantes_anulados_con_deposito", "asienta_sin_efecto",
     "comprobantes_sin_centro", "comprobantes_sin_codigo_detraccion", "comprobantes_sin_cuenta", "con_efecto_contable", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",
     "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo",
@@ -79,7 +82,7 @@ __all__ = [
     "repartos_que_no_cuadran", "sigla_de_tipo", "sigla_documento", "sin_efecto_contable", "sub_diario",
     "sub_diarios_presentes",
     "tiene_detraccion",
-    "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "ROLES_DEL_MOTOR", "glosa_de",
+    "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "ROLES_DEL_MOTOR", "TIPOS_DEL_MOTOR", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro", "lineas_e_indice_del_libro", "cabecera_de", "Cabecera",
     "indice_de_lineas_dadas", "rangos_de_lineas_dadas", "LineaSinComprobante",
     "ComprobanteDelAsiento", "MONEDAS_CODIGO", "constancia_de", "exportacion_de", "serie_numero_de",

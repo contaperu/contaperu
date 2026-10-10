@@ -29,7 +29,7 @@ from ..tributos.detracciones import es_comodin, monto_detraccion, numero_pendien
 from .. import pcge, vocabulario
 from ..tributos.igv import base_imputable, igv_del_asiento, tasa_legal
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
-from .faltas import RepartoNoCuadra, SinClase, SinCuenta
+from .faltas import LibroQueElMotorNoOrigina, RepartoNoCuadra, SinClase, SinCuenta
 from .indice import DETRACCION_DEL_ESTANDAR, Cabecera, ComprobanteDelAsiento
 from .resolucion import (anulada_por_nota, asienta_sin_efecto, cuenta_por_pagar_detraccion, cuenta_tercero,
                          limites_del_periodo, lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra,
@@ -57,6 +57,12 @@ ROLES = vocabulario.ROLES
 # salen con su clase» solo puede exigir estos seis, porque los otros dos no hay forma de producirlos desde un
 # comprobante. Confundirlos daba un rojo que invitaba a emitir un rol solo para que el test pasara.
 ROLES_DEL_MOTOR = ("principal", "impuesto", "retencion", "tercero", "recorte", "detraccion")
+# Y lo mismo en el otro eje, que es el que faltaba: los libros que el motor sabe ORIGINAR, frente a los que el
+# catálogo publica (`vocabulario.TIPOS_LIBRO`). Hoy coinciden, y por eso esto parece de adorno. Deja de serlo el día
+# que el catálogo crezca —el hito B13, para recibir el diario de un ERP—, porque el motor decide por un booleano:
+# `es_venta` es `tipo == "venta"`, así que **un libro que no conoce saldría tratado como una compra, en silencio**,
+# con el debe y el haber al revés. Un rojo se arregla; una compra silenciosa se descubre en el cierre.
+TIPOS_DEL_MOTOR = ("venta", "compra")
 # Las líneas que llevan además el centro de costo en su anexo auxiliar. Lo del estándar es la del tercero —el «doble
 # anexo», también en la línea que le descuenta la detracción—; cada driver lo cambia con las columnas que su sistema
 # elige (`drivers.contrato.centro_en_anexo`). La principal lo lleva ahí solo cuando su cuenta no lo lleva en la suya.
@@ -407,6 +413,11 @@ def lineas_e_indice_del_libro(libro: Libro, comprobantes: list[Comprobante], con
     que usó cada sub-diario y el índice: qué tramo de líneas es de qué comprobante, con su cabecera
     (`asiento.indice`). Es la entrada de cualquier driver de asientos. Con `vocabulario="neutral"` no numera: no hay
     sub-diarios, y los rangos salen vacíos."""
+    # La puerta del eje del libro. De aquí abajo todo se decide por un booleano, así que lo que no sabe originar
+    # tiene que pararse ARRIBA: es el único sitio del motor que lo calcula desde un `Libro`, y por eso una sola
+    # guarda protege el medio centenar de `not es_venta` que hay detrás.
+    if libro.tipo not in TIPOS_DEL_MOTOR:
+        raise LibroQueElMotorNoOrigina(libro.tipo, TIPOS_DEL_MOTOR)
     es_venta = libro.es_venta
     neutral = vocabulario == "neutral"
     if neutral:

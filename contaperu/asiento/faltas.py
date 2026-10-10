@@ -186,6 +186,25 @@ class AnuladaConDeposito(NoExportable):
         self.comprobantes = list(comprobantes)
 
 
+class LibroQueElMotorNoOrigina(NoExportable):
+    """Un libro cuyo tipo el catálogo publica y el motor no sabe armar.
+
+    No es una falta de un comprobante y por eso no está en `FALTAS`: es de la cabecera, y se sabe antes de mirar
+    una sola fila. Existe porque el motor decide casi todo por `libro.es_venta`, y **lo que no es venta lo trata
+    como compra**: sin esta puerta, un libro nuevo del catálogo saldría con el debe y el haber invertidos y la
+    contraparte en la cuenta equivocada, sin un solo error. Aquí se para y se dice cuáles sabe originar.
+
+    Hoy no se dispara nunca —`TIPOS_DEL_MOTOR` y el catálogo coinciden— y ése es justo el momento de ponerla: el
+    día que el catálogo crezca (B13), lo que falle será esto y no una exportación que nadie revisó."""
+
+    clave = "libro_que_el_motor_no_origina"
+
+    def __init__(self, tipo: str, sabe: tuple[str, ...]):
+        super().__init__(f"El motor no sabe armar el asiento de un libro {tipo!r}: origina {', '.join(sabe)}")
+        self.tipo = tipo
+        self.sabe = tuple(sabe)
+
+
 FALTAS: tuple[Falta, ...] = (
     Falta("sin_sigla", "tipo_cp", SinSigla,
           "de un tipo sin sigla en el sistema de destino", SISTEMA, "Tipos sin sigla"),

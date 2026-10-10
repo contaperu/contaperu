@@ -192,3 +192,51 @@ def test_el_catalogo_viaja_donde_el_esquema():
     assert json.loads(_datos.del_estandar(_datos.CATALOGOS_DEL_ESTANDAR).decode("utf-8"))
     pyproject = (Path(__file__).resolve().parent.parent / "pyproject.toml").read_text(encoding="utf-8")
     assert '"estandar/catalogos.json"' in pyproject
+
+
+def test_el_motor_no_origina_todos_los_libros_del_catalogo():
+    """La pareja del test de arriba, en el otro eje, y entra **antes** de que haga falta: hoy los dos conjuntos
+    coinciden y por eso parece de adorno.
+
+    Deja de serlo el día que el catálogo crezca —el hito B13, para recibir el diario de un ERP—, y ahí está el
+    motivo de ponerlo ya: el motor decide casi todo por `libro.es_venta`, y **lo que no es venta lo trata como
+    compra**. Sin la puerta, un libro nuevo saldría con el debe y el haber invertidos y la contraparte en la
+    cuenta equivocada, sin un solo error. Si algún día el motor aprende a originar un libro más, este test cae y
+    el valor se mueve a `TIPOS_DEL_MOTOR` a propósito."""
+    assert set(motor.TIPOS_DEL_MOTOR) <= set(vocabulario.TIPOS_LIBRO)
+    assert motor.TIPOS_DEL_MOTOR == ("venta", "compra")
+
+
+def test_un_libro_que_el_motor_no_origina_se_para_en_la_puerta():
+    """La puerta, probada con un libro que hoy no se puede construir: `Libro.__post_init__` rechaza cualquier tipo
+    que no esté en el catálogo, así que el tercero se finge.
+
+    Es el único sitio del motor que calcula `es_venta` desde un `Libro`, y por eso una sola guarda protege el medio
+    centenar de `not es_venta` que hay detrás."""
+    from dataclasses import dataclass
+
+    from contaperu.asiento import faltas
+
+    @dataclass
+    class LibroDeManana:
+        """Lo que `Libro` será cuando el catálogo crezca: aquí solo hace falta que tenga `tipo`."""
+
+        tipo: str = "diario"
+        ruc: str = "20601234567"
+        periodo: str = "202608"
+
+    with pytest.raises(faltas.LibroQueElMotorNoOrigina) as e:
+        motor.lineas_e_indice_del_libro(LibroDeManana(), [], {}, {})
+    assert "diario" in str(e.value) and "venta" in str(e.value) and "compra" in str(e.value)
+    assert e.value.tipo == "diario" and e.value.sabe == motor.TIPOS_DEL_MOTOR
+
+
+def test_es_venta_y_es_compra_son_dos_preguntas_y_no_una():
+    """Hoy son complementarias y mañana no: un tipo nuevo da `False` a las dos, que es justo lo que obliga a cada
+    rama a decidir en vez de heredar «compra»."""
+    from contaperu.modelo import Libro
+
+    venta = Libro(ruc="20601234567", razon_social="MI EMPRESA SAC", periodo="202608", tipo="venta")
+    compra = Libro(ruc="20601234567", razon_social="MI EMPRESA SAC", periodo="202608", tipo="compra")
+    assert (venta.es_venta, venta.es_compra) == (True, False)
+    assert (compra.es_venta, compra.es_compra) == (False, True)

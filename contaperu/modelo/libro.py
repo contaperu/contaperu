@@ -33,7 +33,7 @@ class Libro:
         if not re.fullmatch(r"20[0-9]{2}(0[1-9]|1[0-2])", self.periodo):
             raise ValueError(f"Periodo inválido: {self.periodo!r} (AAAAMM)")
         if self.tipo not in TIPOS_LIBRO:
-            raise ValueError(f"Tipo de libro inválido: {self.tipo!r} (venta|compra)")
+            raise ValueError(f"Tipo de libro inválido: {self.tipo!r} ({'|'.join(sorted(TIPOS_LIBRO))})")
 
     @property
     def anio(self) -> int:
@@ -46,6 +46,13 @@ class Libro:
     @property
     def es_venta(self) -> bool:
         return self.tipo == "venta"
+
+    @property
+    def es_compra(self) -> bool:
+        """La pareja de `es_venta`, y no es redundante: hoy `not es_venta` significa «es compra» en medio centenar
+        de sitios, y eso solo es cierto mientras el catálogo tenga dos valores. Con las dos preguntas por separado,
+        un tipo de libro nuevo da `False` a las dos y **cada rama tiene que decidir** en vez de heredar «compra»."""
+        return self.tipo == "compra"
 
     def a_dict(self) -> dict[str, str]:
         return {"ruc": self.ruc, "razon_social": self.razon_social, "periodo": self.periodo, "tipo": self.tipo}

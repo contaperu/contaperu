@@ -88,7 +88,7 @@ def validar(c: Comprobante, libro: Libro) -> None:
                                     else c.fecha_emision)
                 if _meses_hasta(libro, fecha_referencia) > PLAZO_ANOTACION_MESES:
                     aviso("CREDITO_FISCAL_FUERA_DE_PLAZO", f"Emitido en {c.fecha_emision:%m/%Y}, hace más de {PLAZO_ANOTACION_MESES} meses: fuera del plazo de anotación en el Registro de Compras (Ley 29215, art. 2)")
-    if not libro.es_venta:
+    if libro.es_compra:
         # Retención de 4ta: solo existe en el recibo por honorarios y nunca puede
         # pasarse del total (el neto que se paga saldría negativo en el asiento).
         if c.retencion > 0:
@@ -120,7 +120,7 @@ def validar(c: Comprobante, libro: Libro) -> None:
         error("RUC_INVALIDO", f"El RUC del {quien} ({c.contraparte_doc}) no es válido")
     elif c.contraparte_tipo_doc == "1" and len(documento) != 8:
         error("DNI_INVALIDO", f"El DNI del {quien} ({c.contraparte_doc}) debe tener 8 dígitos")
-    if not libro.es_venta and c.tipo_cp == "03" and c.igv > 0 and c.destino_igv != "DNG":
+    if libro.es_compra and c.tipo_cp == "03" and c.igv > 0 and c.destino_igv != "DNG":
         aviso("COMPRA_BOLETA", "Boleta de venta recibida: no da crédito fiscal, su IGV es costo. En el lápiz, 'Uso de la compra' → 'Solo para ventas sin IGV'")
     if not c.contraparte_nombre and c.tipo_cp not in cat.SIN_CONTRAPARTE_OK:
         aviso("NOMBRE_FALTA", f"Falta la razón social del {quien}")
@@ -269,7 +269,7 @@ def validar(c: Comprobante, libro: Libro) -> None:
         if libro.es_venta and emisor and emisor != libro.ruc:
             error("XML_DE_OTRO_RUC",
                   f"El XML lo emitió el RUC {emisor}, no {libro.ruc}: no es una venta de este cliente")
-        if not libro.es_venta and adquirente and adquirente != libro.ruc:
+        if libro.es_compra and adquirente and adquirente != libro.ruc:
             error("XML_PARA_OTRO_RUC", f"El XML está emitido al RUC {adquirente}, no a {libro.ruc}: no es una compra de este cliente")
         gratuitas = Decimal(str(c.datos_originales.get("gratuitas") or "0"))
         if gratuitas > 0:
@@ -280,7 +280,7 @@ def validar(c: Comprobante, libro: Libro) -> None:
         adquirente = solo_digitos((c.datos_originales.get("adquirente") or {}).get("doc", ""))
         if libro.es_venta and len(emisor) == 11 and emisor != libro.ruc:
             aviso("EMISOR_NO_COINCIDE", f"La IA leyó como emisor el RUC {emisor}, no {libro.ruc}: ¿es una venta de este cliente?")
-        if not libro.es_venta and len(adquirente) == 11 and adquirente != libro.ruc:
+        if libro.es_compra and len(adquirente) == 11 and adquirente != libro.ruc:
             aviso("ADQUIRENTE_NO_COINCIDE", f"La IA leyó que está emitido al RUC {adquirente}, no a {libro.ruc}: ¿es una compra de este cliente?")
         # Que un comprobante no lleve IGV NO es una observación (regla de contabilidad): la
         # columna "Afecto a IGV" ya lo dice en la propia tabla y se corrige ahí mismo con
@@ -413,7 +413,7 @@ def revisar(comprobantes: list[Comprobante], libro: Libro, claves_previas: Itera
         validar(c, libro)
     marcar_duplicados(comprobantes, claves_previas, claves_proceso, sin_contraparte=libro.es_venta)
     # Después de marcar duplicados, para no avisar sobre una factura que ya se descartó por repetida.
-    if not libro.es_venta:
+    if libro.es_compra:
         avisar_de_facturas_con_nota(comprobantes, config)
     for c in comprobantes:
         fijar_estado(c)
