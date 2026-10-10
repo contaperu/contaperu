@@ -896,7 +896,9 @@ def test_un_canal_reservado_o_desconocido_no_pasa(valor, motivo):
     driver = driver_de_prueba()
     driver.CANAL = valor
     [problema] = contrato.incumplimientos(driver)
-    assert motivo in problema and (valor != "api_erp" or "A5" in problema)
+    # De `api_erp` se exige además que el rechazo diga el criterio para admitirlo. Antes se exigía que citara el
+    # hito A5, y el hito se retiró el 10-oct-2026: un mensaje que remite a algo que no existe es peor que no remitir.
+    assert motivo in problema and (valor != "api_erp" or "no pueda llevar" in problema)
 
 
 def test_un_tercero_sin_canal_no_carga(con_terceros):

@@ -19,8 +19,9 @@ estándar promete cuando dice que un documento «se entiende solo, en cualquier 
 
 ## Fuente
 
-`API-DE-REGISTRO.md`, «El formato: uno solo, el del estándar». La forma la tenía ya la fachada: el
-argumento `imputacion` de `exportar`, `diagnosticar` y `generar_asiento`.
+Decisión de John, 15-sep-2026: si el estándar ya describe un documento, el cuerpo de una llamada para
+registrar no puede ser otra cosa. La forma la tenía ya la fachada: el argumento `imputacion` de `exportar`,
+`diagnosticar` y `generar_asiento`.
 
 ## Especificación
 

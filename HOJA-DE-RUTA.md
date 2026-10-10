@@ -137,7 +137,7 @@ FASE 0 (código) ─────────────────────
                ├─► E2 conformidad
                └─► E3 política de retiro
 
-Sin dependencias de código: A1-A5 [archivos aceptados] · C6 [04 real] · C7 [RHE real] · C10 [plan + rechazo]
+Sin dependencias de código: A1-A4 [archivos aceptados] · C6 [04 real] · C7 [RHE real] · C10 [plan + rechazo]
                             · 0.6 · 0.7 · 0.8 · B5 · E5 guía de aporte · E6 plantilla de formato
                             · E7 abrir el repositorio [decisión de John]
 
@@ -154,7 +154,7 @@ OTRA JURISDICCIÓN [un cliente real fuera del Perú] · J0 y J1 cumplidos en la 
 | 4 | C9 · C2 | código |
 | 5 | E2 · E3 · E5 · E6 | código |
 | 6 | B1 · B2 · B5 · B3 · B6 | código |
-| en paralelo | A1-A5 | dato: archivos aceptados |
+| en paralelo | A1-A4 | dato: archivos aceptados |
 | cuando llegue el dato | C3 · C4 · C5 · C6 · C7 · C8 · C10 · C11 · C12 | dato |
 | cuando llegue el dato | D1 · D2 → D3 · D4 → D5 → D6 | dato (D3 es código, tras D1 y D2) |
 | cuando haga falta | B4 · B7 · D7 · E4 | dato o decisión |
@@ -362,7 +362,8 @@ RS 040-2022) y es de lo que hablan los hitos de abajo. El **PLE** manda el Libro
 detalle del plan contable (RS 234-2006 y RS 286-2009), y lo escriben `ple` y `ple_plan` desde la 4.2 y la 4.3: su
 fila es una línea del asiento, no un comprobante. Lo que el PLE tiene pendiente no es un driver, es **de qué sacar
 los asientos que no vienen de compras ni de ventas** —la planilla, la depreciación, el asiento de destino—, que es
-595 de 1441 en el mes contrastado y entra por su libro, no por un rol nuevo (`LIBROS-Y-CUENTAS.md`).
+595 de 1 441 en el mes contrastado y entra por su libro del PLE, que es fuente normativa, no por un rol nuevo que
+habría que inventar y después mantener.
 
 **Investigación.** El SIRE frente a las declaraciones de EE. UU. y la propuesta del RCE como lista de control:
 
@@ -389,8 +390,8 @@ son, con CONCAR y CONTASIS, los sistemas contables que más estudios peruanos ti
 encima de ellos mientras evolucionan.
 
 **Investigación.** Los tres escalones con que EE. UU. integra sistemas de escritorio sin API, y lo que se toma de
-ellos. Para A4 y A5, la forma de la API de STARSOFT Gold campo a
-campo, comparada con las API de EE. UU. y con los estándares abiertos de factura: `API-DE-REGISTRO.md`.
+ellos. Lo que un sistema espera recibir, comparado entre nueve plataformas y los estándares abiertos de factura, en
+[REFERENCIAS.md](REFERENCIAS.md), «El registro del comprobante, comparado».
 
 **Qué hay hoy.** CONCAR (asientos) y CONTASIS (registro) en uso, de canal legacy. Las formas del contrato
 (`contaperu/drivers/contrato/`) y la receta con la que entró CONTASIS (`CONTRIBUTING.md`, «Añadir un driver de
@@ -411,7 +412,6 @@ salida»; `CHANGELOG.md` 0.10.0):
 | A2 | ¿Acepta SISCONT el TXT que genera el driver `sire`? (SISCONT importa la propuesta del SIRE, *según el proveedor*; qué formato, *no verificado*) | documentación | dato: una prueba | Nota en la guía; ningún código | — | — |
 | A3 | SISCONT, asientos → `desde_lineas` | D | dato: un caso que A1 no cubra | Igual que A1 | A1 | — |
 | A4 ✅ | **STARSOFT Desktop**, asientos → `desde_lineas`. **Hecho y aceptado** (2.0-2.3, cerrado en la 6.0): las dos plantillas calcadas del archivo real, un **mes de compras importado de verdad el 7-oct-2026** —que destapó lo que ningún vídeo decía: el TXT va suelto, sin el ZIP— y un **mes de ventas el 8-oct-2026**, que desmintió la simetría que se esperaba: el fichero no empieza por `C` en los dos libros, la letra es la del libro y el de ventas es `V-VENTAS_…` (6.0.2 y 6.3.2) | D | — | Igual que A1 | — | — |
-| A5 | **`starsoft_web`**: el cuerpo JSON de la API de STARSOFT Web (Gold Edition), como proyección pura de las líneas. **Abierto a la comunidad**: lo que resolvió A4 le sirve casi entero —siglas, sub-diarios, destino del IGV, cuentas y la proyección—; lo distinto es a dónde van los datos | D | dato: una respuesta aceptada guardada en `privado/` | Test contra el cuerpo aceptado; autenticarse y enviar es de la aplicación | A4 | — |
 | C10 | `plan_de_cuentas*` del destino, falta `cuenta_fuera_del_plan*`, marca de centro de costo y lista de centros | N · F · D | dato: plan exportado de CONCAR + un rechazo real de importación | Sin plan, snapshot idéntico; un plan sin la cuenta bloquea y `exportar` lanza | — | 11, 12, 13 |
 | C14 | **La fuente de cada regla, como dato**: hoy la norma está en prosa al lado del código (regla 1, lo mejor del proyecto) y **un agente no la puede citar: tiene que creérsela**. Con `norma`, `articulo` y `vigencia` legibles por máquina, una observación puede decir «no te doy el crédito fiscal porque la Ley 29215 art. 2 da 12 meses y van 14» **citando**. El precedente existe: el cargador del PCGE rechaza un mapeo sin fuente, y `regimenes.json` exige la cita por bloque | N · F | código, tras C1 | Cada observación con regla detrás trae su fuente; una regla nueva sin ella no carga, como en el PCGE | C1 | 32 |
 | C15 | **Darle consecuencia a `confianza`**: el campo existe en el comprobante desde antes de que nadie lo usara (`origen`, `confianza`, por defecto `1.00`) y **hoy no lo mira nadie**. Falta el umbral y qué pasa debajo: un dato extraído por IA con 0,7 no puede tratarse como uno leído de un XML | N · F | caso real: un mes cargado desde PDF con su confianza por campo | Un dato por debajo del umbral sale como propuesta y no como hecho; el umbral lo pone quien llama, no el motor | B11 | 33 |
@@ -488,7 +488,7 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 | C13 | Los libros obligatorios, los topes y el pago a cuenta del Régimen General, el MYPE Tributario y el Nuevo RUS, cada uno con su artículo (el Especial ya está) | Norma citada |
 | J2-J6 | Un cliente real fuera del Perú, su sistema contable de destino y un archivo que ese sistema haya aceptado | Con el cliente |
 | **Legacy** | | |
-| A1-A5 | Plantillas y un mes importado de SISCONT y de STARSOFT; una respuesta aceptada de la API de STARSOFT Gold | Con quien use cada sistema |
+| A1-A3 | La plantilla de SISCONT y un mes que haya importado | Con quien use SISCONT |
 | C10 | El plan de cuentas exportado de CONCAR y un rechazo de importación | Con un estudio que use CONCAR |
 
 ---
@@ -511,6 +511,17 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
   y un caso); emparejar órdenes de compra y recepciones (espera un cliente cuyo ERP las lleve).
 - **En vigilancia:** las finanzas abiertas de la SBS y un perfil FAPI peruano, cuando exista la regulación; la factura negociable y su
   Plataforma de Confirmación, si un cliente la usa como canal de conformidad.
+- **El tercer libro, `libro.tipo: honorario`: no se hace** (John, 18-sep-2026). Un recibo por honorarios entra en
+  el libro de compras, que es donde SUNAT lo pide, y el hecho de que sea honorario ya lo dice su `tipo_cp: 02`.
+  Abrir un libro propio costaba cuatro cosas y ninguna se pagaba con nada: partir en dos el documento de un mes que
+  hoy es uno; un valor más en un catálogo que promete no quitar nada; un camino nuevo en cada driver, que tendría
+  que decidir si lo escribe o lo ignora; y romper la identidad del comprobante, que es `libro.ruc` + `libro.tipo` +
+  la clave. **`libro` es el libro tributario**, no una categoría de gasto.
+- **Un driver para la API Web de STARSOFT (Gold Edition): tampoco** (John, 10-oct-2026). Fue el hito A5 y se retira
+  con la investigación que lo sostenía: era un cuerpo JSON sobre una API con IP pública y licencia por servidor, que
+  además no interesa al repositorio. Lo que resolvió A4 —siglas, sub-diarios, destino del IGV, cuentas y la
+  proyección— sigue sirviendo a quien quiera escribirlo fuera; el canal `api_erp` sigue reservado por su propio
+  criterio, que es que exista un formato que `erp` no pueda llevar.
 - **Descartado en el diseño** (`ARQUITECTURA.md`, «Lo que no se hace, y por qué»): la cuenta transitoria inmediata, *embeddings* en el motor, un
   lenguaje de requisitos declarativos, log con hash encadenado y fechas de bloqueo.
 - **Resuelta en la 1.0:** `generar_asiento` exige lo que exige el destino, igual que `exportar` (CHANGELOG, «Cambiado»).
@@ -549,8 +560,9 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 
 Las propuestas que ha levantado la investigación, cada una con el caso real que la destraba y el
 hito que le toca; «—» si todavía no tiene uno. Es a esta tabla a la que remite la columna
-**Propuesta** de los frentes. Son **36**: las 31 del ciclo contable (13-14 de setiembre de 2026) y
-las cinco del diagnóstico de la arquitectura (9-oct-2026), que van al final con su propia tabla.
+**Propuesta** de los frentes. Son **44**: las 31 del ciclo contable (13-14 de setiembre de 2026),
+las cinco del diagnóstico de la arquitectura (9-oct-2026) y las ocho que quedaron al limpiar la
+raíz (10-oct-2026); las dos últimas tandas van al final, cada una con su tabla.
 
 Vivió en `INTEROPERABILIDAD.md` hasta el 8-oct-2026, y se mudó aquí al retirarlo: la tabla la usa
 esta hoja y nadie más, así que dejar de ser una remisión a otro documento es lo que la mantiene
@@ -611,6 +623,25 @@ verdad es corto, y es esto:
 | 34 | Propuesta y aprobación con rastro: el agente propone, el humano confirma | N · F | Un mes imputado por un agente y revisado por un contador. Hoy el motor valida o bloquea, y ese camino no existe | Una propuesta no se exporta sin confirmación; el rastro viaja en el documento, no en una base | `propuesta*`, `confirmada_por*` | C | B11 |
 | 35 | Perfiles de herramientas en el MCP: qué ve el servidor abierto y qué un integrador | F | Una herramienta que arme peticiones con credenciales no puede estar en el servidor público, y la API del SIRE ya existe (8.1) | Una herramienta de integrador no aparece en el servidor público; la foto del MCP lo fija | `perfil*` | B | B10 |
 | 36 | Los lectores de la respuesta del SIRE, con evidencia detrás | N · F | No hay ni una respuesta real guardada, y el `verificado` de cada operación está vacío. Mudar un lector no comprobado congela un mapeo que nadie verificó | El flujo de traer la propuesta pasa entero en la batería, sin red, desde fixtures capturados | `leer_respuesta_*` | C | C16 |
+
+### Las ocho que quedaron al limpiar la raíz (10-oct-2026)
+
+Al retirar `API-DE-REGISTRO.md`, `STARSOFT-INTEGRACION.md` y `LIBROS-Y-CUENTAS.md` casi todo lo suyo estaba o ya
+ejecutado —las enmiendas 0008 a 0011, la gobernanza del estándar, el driver de STARSOFT en producción— o era
+investigación, que se fue a [REFERENCIAS.md](REFERENCIAS.md). Lo que no era ni lo uno ni lo otro son estas ocho:
+propuestas vivas que no tenían dónde esperar su caso. Las cuatro de en medio son las candidatas A, B, C y D de
+`LIBROS-Y-CUENTAS.md`, que dejaban dicho que entrarían aquí «con su número, cuando el refinado cierre».
+
+| # | Propuesta | Nivel | Caso real que la destraba | Test que la fijaría | Nombre | Prio | Hito |
+|---|---|---|---|---|---|---|---|
+| 37 | **Cerrar el importe numérico con más de dos decimales.** El estándar manda los importes en texto y acepta número por compatibilidad; `$defs.importe` limita la cadena con su patrón pero el número no lleva `multipleOf`, así que un `118.005` todavía valida y la contabilidad no perdona el céntimo | estándar · F | Ninguno hace falta: es un agujero del esquema, verificado a mano el 9-oct-2026 | Un documento con `118.005` numérico no valida; los que mandan texto siguen validando igual | — | B | — |
+| 38 | **El centro de costo en todas las líneas, con `reparto`.** Hoy `asiento/motor.py` lo pone solo en la línea principal y solo si la cuenta lo lleva; Xero, QuickBooks y NetSuite lo admiten en cada línea | N · F | Un mes con un gasto repartido entre dos centros de costo, de un contribuyente que lo lleve así | El centro viaja a la línea del impuesto y a la del tercero cuando el destino lo exige, y el snapshot de CONCAR no cambia si nadie lo pide | `reparto[]` | C | — |
+| 39 | **`libro.tipo` crece con el catálogo del PLE** (candidata A). No hace falta para *producir* —el driver ya escribe el Libro Diario 5.1 como el `sire` escribe el RVIE—, hace falta para **recibir** un diario de un ERP: hoy un asiento de planilla o de depreciación no tiene libro que lo nombre | N · estándar | Un ERP que mande un diario con asientos que no vienen de compras ni de ventas | Un libro del catálogo del PLE entra y sale intacto; `tipos_de_libro` no degrada, así que el que no se conoce se rechaza | `tipos_de_libro` | C | — |
+| 40 | **La divisionaria normativa en la línea** (candidata B, su mitad abierta). La otra mitad ya se resolvió al leer la estructura oficial: la **denominación** no es de la línea, vive en el formato 5.3 del PLE, una vez por cuenta | N · estándar | Un destino que exija el nivel del artículo 6 por línea y no lo pueda derivar del plan | La divisionaria entra opcional y el documento sigue validando sin ella | `cuenta_normativa*` | D | — |
+| 41 | **`tipo_de_cuenta`: los 18 `account_type` de Odoo, derivados de la divisionaria** (candidata C). No es copiar los ~250 subtipos de QuickBooks, que está descartado: son 18, sus grupos ya coinciden con las cinco `clases` y la asignación se deriva del PCGE, no se mantiene a mano | N · estándar | Un ERP que pida más que las cinco `clases` | Cada valor sale de la divisionaria con el artículo del PCGE al lado, como en el cargador del PCGE; entra opcional, nunca `required` | `tipo_de_cuenta*` | D | — |
+| 42 | **La tabla de determinación, con dimensiones** (candidata D). Formalizar `configuracion.cuentas` como papel × quién × qué → cuenta, resuelto por lo más específico, como OFBiz, iDempiere y Business Central. **Es la que cubre el hueco de investigación real**: la jerarquía de tres capas ya existe, lo que no existe es que la cuenta dependa de con quién o de qué | N · F | Un contribuyente cuya cuenta de proveedor cambie según el proveedor o la línea de negocio | La resolución elige siempre lo más específico, y sin dimensiones declaradas el resultado es byte a byte el de hoy | `cuentas` con ejes | C | — |
+| 43 | **Dos cuentas que un asiento real usa y el motor no sabe elegir**, las dos del plan de la empresa que lleva STARSOFT: el **IGV sin derecho a crédito fiscal**, que va a gasto (elemento 64) y no a la cuenta del IGV —eso es el prorrateo—, y la **devolución**, cuyo ingreso va a la 7091 del PCGE y no a la cuenta de venta. Si el motor arma la nota de crédito revirtiendo signos sobre la misma cuenta, no produce lo que ese contribuyente espera | N · F · D | Un contador y el PCGE: hay que confirmar las dos cuentas antes de escribir una regla | La nota de crédito de una devolución usa la cuenta de devoluciones, y el IGV no acreditable la de gasto, con su artículo al lado | — | C | — |
+| 44 | **Darle cuerpo a `no_caben()` con las longitudes del manual de STARSOFT**, que desde el 10-oct-2026 están en `contaperu/drivers/starsoft/datos.py` como dato y no como validación. Hoy la función devuelve `{}` a propósito | F · D | Un archivo que STARSOFT rechace por longitud, que es lo único que prueba que el límite es el que dice el manual | Un campo que se pasa de largo sale como observación antes de escribir el archivo, no como un rechazo de la máquina | — | C | — |
 
 La que se retira de la tabla de arriba: **«¿Debe `generar_asiento` exigir lo que exige el destino?»**, que no era
 una propuesta sino una pregunta, y que el §6 declara resuelta en la 1.0 desde hace siete mayores.

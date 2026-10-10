@@ -2,8 +2,8 @@
 
 **STARSOFT son dos productos, y este driver es el de escritorio** (John, 22-sep-2026): el que importa un
 archivo. El otro es **STARSOFT Web — Gold Edition**, que tiene **API pública**, y su driver se llamará
-`starsoft_web` el día que alguien lo escriba: es el hito A5 de la hoja de ruta, y la puerta está abierta
-para quien quiera. Lo que aquí está resuelto le sirve casi entero —las cuentas, las siglas, los
+`starsoft_web` el día que alguien lo escriba. **No está en la hoja de ruta**: fue el hito A5 y se retiró el
+10-oct-2026, con el motivo escrito en su §6. La puerta sigue abierta para quien quiera. Lo que aquí está resuelto le sirve casi entero —las cuentas, las siglas, los
 sub-diarios, el destino del IGV y la proyección son los mismos—; lo único distinto es a dónde van los
 datos: un archivo aquí, un cuerpo JSON allá.
 

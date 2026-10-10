@@ -19,7 +19,7 @@ las copias con el enum del esquema.
 
 ## Fuente
 
-`API-DE-REGISTRO.md`, «El papel de cada línea». ISO 20022 saca sus códigos a catálogos externos «para
+`REFERENCIAS.md`, «La clasificación de la cuenta, y qué cuenta usa cada papel». ISO 20022 saca sus códigos a catálogos externos «para
 añadir sin cambiar la versión del mensaje»; los tipos de documento de EN 16931 (`BT-3`) viven en una lista mantenida
 aparte de la norma; el SAF-T noruego terminó sacando la clasificación del esquema a una tabla.
 

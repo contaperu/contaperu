@@ -19,7 +19,7 @@ El caso real es el asiento neutral, que **viaja a otro sistema que no tiene el p
 
 ## Fuente
 
-`API-DE-REGISTRO.md`, «El papel de cada línea». Los cinco valores son los que QuickBooks
+`REFERENCIAS.md`, «La clasificación de la cuenta, y qué cuenta usa cada papel». Los cinco valores son los que QuickBooks
 (`Classification`), Xero (`Class`), Merge y Rutter (`classification`) comparten: es el único vocabulario común a los
 cuatro. La derivación es el PCGE 2026, Capítulo II: el primer dígito del código es el elemento.
 

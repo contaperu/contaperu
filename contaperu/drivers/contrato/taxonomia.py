@@ -31,8 +31,8 @@ CANALES = {
 CANALES_RENOMBRADOS = {"tributario": "sunat", "intercambio": "erp"}
 # Lo que tiene nombre y todavía no existe: el contrato lo rechaza diciendo por qué.
 CANALES_RESERVADOS = {
-    "api_erp": "escribir el cuerpo de la API de un ERP moderno es el hito A5 de la hoja de ruta: un canal nuevo solo "
-               "entra si hay un formato que `erp` no pueda llevar, y el cuerpo neutral de un ERP se envía tal cual",
+    "api_erp": "escribir el cuerpo de la API de un ERP moderno: un canal nuevo solo entra si hay un formato que "
+               "`erp` no pueda llevar, y el cuerpo neutral de un ERP se envía tal cual",
 }
 # Declarar el canal es OBLIGATORIO desde la 4.0. Hasta entonces un driver que no lo declaraba se trataba como
 # `legacy` con un aviso que prometía la 2.0 —y el paquete llegó a la 3.10 con la promesa sin cumplir—. Sin canal, el

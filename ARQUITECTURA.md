@@ -246,14 +246,15 @@ eran dos vocabularios para lo mismo y el de fuera mentía: ver abajo.
 
 El canal es el mismo —se entrega a SUNAT, en texto— y el régimen no. Hasta la 7.x los tres drivers se presentaban
 como grupo `sire`, así que **el motor llamaba SIRE al Libro Diario del PLE**. «Ése es el universo del SIRE, no el de
-SUNAT» (`LIBROS-Y-CUENTAS.md`, 1-oct-2026). Y lo que el canal fija sigue siendo lo de antes: se escribe **texto para
+SUNAT» (John, 1-oct-2026, al traer un Libro Diario presentado y aceptado). Y lo que el canal fija sigue siendo lo de antes: se escribe **texto para
 SUNAT**, no un Excel ni un JSON. Lo que cambió en la 4.2 es de qué es su FILA: el SIRE escribe una por comprobante
 (forma `linea`, sin cuentas ni configuración) y el Libro Diario del PLE una por línea del asiento (`desde_lineas`,
 con cuentas y con su CUO), porque 595 de los 1441 asientos de un mes real no vienen de ningún registro de compras ni
 de ventas.
 
-`api_erp` —escribir el cuerpo de la API de un ERP moderno— queda **reservado** (hito A5): el contrato lo rechaza, y
-el criterio para admitirlo es que haya un formato que `erp` no pueda llevar. Ojo a la pareja: `erp` se admite y
+`api_erp` —escribir el cuerpo de la API de un ERP moderno— queda **reservado**: el contrato lo rechaza, y el
+criterio para admitirlo es que haya un formato que `erp` no pueda llevar. Tuvo un hito detrás, A5, que se retiró el
+10-oct-2026 con la investigación que lo sostenía; la reserva no dependía de él. Ojo a la pareja: `erp` se admite y
 `api_erp` no, a una letra de distancia. **Un driver de terceros sin `CANAL` no se registra** desde la 4.0: es un
 incumplimiento del contrato y `drivers.de_terceros` lo deja fuera con su `AvisoDriver`.
 
@@ -298,20 +299,23 @@ de compras con el asiento cuadrado.
 
 - **Qué se sabe.** STARSOFT Desktop importa un **TXT de palotes, suelto** —35 campos en compras, 27 en
   ventas—, no un Excel. Cada fila es una cuenta con su debe o haber y las filas de un comprobante comparten
-  cabecera. Desde el 22-sep-2026 el formato está recalcado de **su documentación oficial** (`STARSOFT-INTEGRACION.md`),
-  que sustituyó a los dos vídeos con los que nació: sus sub-diarios (`04` compras, `03` ventas), sus siglas, la
+  cabecera. Desde el 22-sep-2026 el formato está recalcado de **su documentación oficial** —los manuales de importación
+  del fabricante, que no entran al repositorio por licencia y están volcados columna por columna en
+  `contaperu/drivers/starsoft/datos.py`—, que sustituyó a los dos vídeos con los que nació: sus sub-diarios (`04` compras, `03` ventas), sus siglas, la
   columna `DESTINO` —el destino del IGV de la adquisición, que CONCAR no tiene y que hizo crecer la cabecera del
   índice en la 1.4.0—, sus cuentas de ocho dígitos y la detracción, que en STARSOFT son **campos de la fila del
   proveedor y no dos líneas de asiento**.
-- **Qué falta: que alguien importe un mes.** Es lo único, y no depende de código. Por eso su docstring dice «EN
-  PRUEBAS» donde el de CONTASIS dice «Aceptado (13-sep-2026)». De sus ocho siglas, **seis constan** en el manual
+- **Qué falta.** Ya no falta el mes: STARSOFT importó uno de compras el **7-oct-2026** y uno de ventas el
+  **8-oct-2026**, y los dos destaparon cosas que ningún vídeo decía —el TXT va suelto, sin el ZIP, y el archivo de
+  ventas empieza por `V` y no por la `C` de compras—. Lo que falta son valores, no la aceptación. De sus ocho
+  siglas, **seis constan** en el manual
   (`FT`, `BV`, `CC`, `CD`, `TK`, `RC`) y **dos siguen marcadas `[por confirmar]`** —`02` (RH) y `05` (BA)—, que no
   aparecen en ningún ejemplo; el manual dice además que el tipo es «el que tiene registrado TU sistema», así que se
   cotejan contra el maestro de cada contribuyente y no se fijan aquí.
-- **Su API** lista seis endpoints sin esquema publicado, y es otro camino: `API-DE-REGISTRO.md`. Si algún día se
-  escribe por ahí, el envío y los reintentos son de la aplicación y no del motor —la identidad y la huella de cada
-  comprobante (`_exportacion.comprobantes`) son la clave de idempotencia—. Su libro «Standar» pediría enmendar
-  `libro.tipo` en el estándar.
+- **Su API Web no se hace** (John, 10-oct-2026): fue el hito A5 y se retiró, con el motivo escrito en el §6 de
+  [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md). Si alguien la escribe fuera, lo que resolvió el driver de escritorio le sirve
+  casi entero, y el envío y los reintentos son de la aplicación y no del motor —la identidad y la huella de cada
+  comprobante (`_exportacion.comprobantes`) son la clave de idempotencia—.
 
 ### Las mejoras se evalúan, y lo que haga falta se cambia
 
@@ -340,7 +344,7 @@ No son prohibiciones: es el precio de cada cambio, escrito antes de hacerlo. Qui
 | El contribuyente como datos | `catalogos.regimenes_tributarios()` y `catalogos.cronogramas_de_vencimiento()`: en qué régimen tributa y cuándo le vence el mes, **cada regla con la cita de su artículo** y un cargador que no arranca sin ella. Son catálogo y no campo del estándar porque «qué libros estoy obligado a llevar» se pregunta sin un documento delante. El cronograma cabe en un núcleo sin reloj porque no es un reloj: dado un periodo y un dígito de RUC devuelve una fecha | C13 |
 | CDR y no domiciliados | `lectores/cdr.py` reservado; los roles pueden crecer sin romper un driver | C3, C12 |
 | Otra jurisdicción | J0 como test, J1 como efecto de las capas, `jurisdicciones/pe` reservado, `open-accounting` 1.1 para J5 | J0-J6 |
-| La API de un ERP moderno | canal `api_erp` reservado y rechazado | A5 |
+| La API de un ERP moderno | canal `api_erp` reservado y rechazado; su hito se retiró el 10-oct-2026 | — |
 
 ## La capa para agentes
 

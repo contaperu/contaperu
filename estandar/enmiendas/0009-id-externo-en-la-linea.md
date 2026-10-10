@@ -19,7 +19,7 @@ existir — pero solo cuando hay imputaciones.
 
 ## Fuente
 
-`API-DE-REGISTRO.md`, «El comprobante y el asiento: por qué son dos bloques». Es el papel de `SourceID`
+`REFERENCIAS.md`, «El documento y su asiento, y el enlace entre los dos». Es el papel de `SourceID`
 y `SourceType` en Xero y de `SourceDocumentID` en SAF-T, que enlazan el asiento con su documento origen.
 
 ## Especificación

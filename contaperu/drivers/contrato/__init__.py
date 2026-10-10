@@ -48,7 +48,7 @@ siempre: siglas, sub-diarios, correlativos y el documento comodín de la detracc
 sin nada de eso, por `rol` y código SUNAT, para un ERP (el driver `asiento_contable`). Un driver neutral es de canal
 `erp`, no declara claves legacy en su configuración y el núcleo solo le exige la cuenta.
 
-`api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado (hito A5): el contrato lo rechaza, y el
+`api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado: el contrato lo rechaza, y el
 criterio para admitirlo es que haya un formato que `erp` no pueda llevar. Ojo a la pareja: `erp` se admite y `api_erp`
 no, a una letra de distancia. **Un driver de terceros sin `CANAL` no se registra** desde la 4.0: el contrato lo cuenta
 como incumplimiento y `drivers.de_terceros` lo deja fuera con su `AvisoDriver`.
