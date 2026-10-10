@@ -6,6 +6,27 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+**El eje cambió: de una capa encima de tu sistema contable a la base para cualquier ERP** (John, 10-oct-2026).
+Durante un año el proyecto se ordenó por los sistemas que ya existen —primero la compatibilidad con CONCAR y
+CONTASIS, después un lenguaje común, y encima las preguntas de un agente— y el frente del ERP se despachaba en una
+frase: «ya quedó abierta en la 1.0». Ahora manda lo contrario: **el lenguaje común es el centro y el motor es la
+base sobre la que se construye un ERP nuevo**, porque la aplicación que lo integra está creciendo hacia uno
+—bancos, conciliaciones, más SUNAT— y el motor le tiene que poner esa base, versión a versión.
+
+**La capa encima no se retira, y eso es parte de la decisión**: nadie tiene que dejar su sistema contable, el
+cambio no puede ser abrupto y los drivers legacy siguen sin plazo. Lo que cambia no es qué hace el motor, es **en
+qué orden crece**.
+
+**Y aquí está el negativo, que es lo que importa si integras el motor: no hay nada que adoptar.** Ni una firma
+cambia, ni un byte de ninguna salida, ni un valor de ningún catálogo. Es un cambio de prioridad escrito en los
+documentos; el código que lo ejecute vendrá en versiones futuras, cada una con su propia entrada aquí.
+
+Al reordenar aparecieron **tres hitos cumplidos que la hoja nunca marcó**, y son los que hacen cierta la frase «ya
+tiene la base de un ERP»: no era una aspiración, era que la tabla estaba atrasada. **B8 y B9 salieron en la
+3.4.0** —`resumen`, `por_cuenta`, `campos_del_comprobante` y `REGLAS`, los cuatro en la api y en su superficie
+congelada— y **A4 en la 6.0.0**, con su ✅ dentro de su propia fila desde el 7 de octubre. Con eso el frente del
+ERP queda con tres hitos vivos.
+
 ### Retirado
 
 - **Los tres documentos de trabajo de la raíz** (John, 10-oct-2026): `API-DE-REGISTRO.md` (1 982 líneas),
@@ -41,6 +62,30 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ### Cambiado
 
+- **La hoja de ruta se reordenó entera** por el eje nuevo: el §2 —el párrafo de orden, el grafo de dependencias y
+  la tabla— se rehízo junto, porque sus tres piezas se contradecían entre ellas y el grafo no tenía nodos para una
+  docena de hitos que solo vivían en la tabla. El orden pasa a ser: lo que a un ERP le falta, el banco, SUNAT, y
+  los legacy en paralelo.
+- **Seis hitos nuevos**, cada uno con el dato o el caso real que lo destraba. **B13** es el hueco grande y el más
+  barato de describir: `tipos_de_libro` tiene dos valores, `venta` y `compra`, así que **un ERP no tiene con qué
+  nombrar un asiento de planilla, de depreciación o de destino** —595 de los 1 441 de un mes real—. **B14** y
+  **B15** son el escalón de abajo, la determinación de cuentas con dimensiones y el nivel fino de la cuenta.
+  **C17** dice cómo se integra más API de SUNAT sin romper nada: **describiendo**, con el molde que la 8.1 demostró
+  con el SIRE, porque el núcleo puede saber la URL y no puede llamarla. **D8** es el registro de bancos **como
+  contrato y no como estado** —`cuentas_bancarias*` lo aporta quien llama, igual que `plan_de_cuentas*`, `padron*`
+  y `tipos_de_cambio*`—, y es el único de su frente que no espera un archivo. **E8** cierra el `118.005` numérico
+  que todavía valida.
+- **Una regla de trabajo nueva, en el §7 de la hoja de ruta**: **el motor va primero y el producto adopta
+  después.** Nada se construye primero en la aplicación, y de ahí una consecuencia que conviene tener fechada
+  porque es la que se va a tentar: **un hito no se da por cumplido porque una aplicación ya lo tenga**.
+- **El posicionamiento, en los cuatro sitios que decían media verdad**: `estandar/LEEME.md`, que es lo que leería
+  quien construye un ERP y se presentaba solo como «el idioma intermedio» entre sistemas que ya existen;
+  `INTEGRAR.md`, que se titula «Integrar ContaPerú en un ERP» y no posicionaba nada; el párrafo de cierre de
+  `ARQUITECTURA.md`, que fijaba el orden que el eje invierte y ahora lleva las dos versiones, porque la primera
+  explica cómo se construyó esto; y la única mitad sola del README.
+- **La portada lo dice desde la primera frase**, y los tres canales van en el orden nuevo —ERP, SUNAT, legacy— en
+  los cinco sitios donde el README los enumera y **en el diagrama**, que se redibujó. El glosario no: es un
+  diccionario, y ahí SUNAT, SIRE y PLE van seguidos porque los dos últimos son definiciones del primero.
 - El mensaje con que el contrato rechaza un driver de canal `api_erp` **ya no cita el hito A5**, que no existe:
   dice el criterio y nada más. Lo ve quien escribe un driver de terceros, así que se cuenta aquí.
 - El driver de STARSOFT pasa de **«EN PRUEBAS» a aceptado** en su propio docstring, que era el último sitio del
@@ -56,6 +101,16 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
   `test_documentacion.py` solo por no llevar el prefijo `contaperu/`.
 - `CUENTAS_POR_DEFECTO` de STARSOFT dice ahora que la instalación real escribe `70410100` donde el manual escribe
   `70410001`: la discrepancia estaba documentada y el código la callaba.
+- **Dos cosas en producción que la portada no anunciaba**, y el principio del proyecto corta en los dos sentidos:
+  solo se anuncia lo que está en producción, y lo que está, se anuncia. La tabla de estado tenía un grupo «SIRE» de
+  una sola fila cuando el canal se llama `sunat` desde la 8.0 y lleva **tres** drivers —`ple` y `ple_plan` escriben
+  el Libro Diario y el detalle del plan contable desde la 4.2 y la 4.3, contra un libro presentado y aceptado—. Y
+  no se nombraba en ningún sitio **lo que un ERP recibe y no tiene por qué escribir**: `resumen` y `por_cuenta`,
+  `campos_del_comprobante` y `REGLAS`, y la batería de conformidad que se corre sin el motor y en cualquier
+  lenguaje. El diagrama también lo decía a medias: su caja de SUNAT nombraba solo el SIRE.
+- **«No se conecta a SUNAT» se había quedado a medias con la 8.1.** Sigue sin salir un paquete a la red, pero el
+  motor **sí sabe cómo es la API del SIRE** y arma la petición exacta, para que quien la envíe no tenga que
+  adivinarla. Saber es un dato; llamar es entrada y salida. Dicho así es un rasgo y no una carencia.
 
 ---
 
