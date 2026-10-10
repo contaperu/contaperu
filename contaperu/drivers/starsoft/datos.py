@@ -3,9 +3,15 @@
 **De dónde sale cada cosa.** La fuente es **la documentación oficial de STARSOFT** desde el 22-sep-2026 —la tabla
 de campos de compras y de ventas, con ejemplos de TXT sacados del propio sistema—, y de ahí salen las columnas, las
 dos fechas y las cuentas que constan. Lo anterior a ella se levantó de dos vídeos del canal *ArchivoExcel*
-—«Importar asientos contables de compras al Star Soft» y su gemelo de ventas— y de las capturas de la hoja
-`PARAMETROS`; sigue vigente donde el manual no dice nada, y **el manual gana donde los dos hablan**. Está todo en
-`STARSOFT-INTEGRACION.md`, columna por columna, cada cosa con su fuente.
+—«Importar asientos contables de compras al Star Soft» (`watch?v=1HMTMsuQJAA`, 22:25) y su gemelo de ventas
+(`watch?v=iOq8Zh6avj8`, 20:16), leídos el 20-sep-2026— y de las capturas de la hoja `PARAMETROS`; sigue vigente
+donde el manual no dice nada, y **el manual gana donde los dos hablan**. De ahí vienen los minutos que se citan más
+abajo: «compras 7:34» es el primero de los dos vídeos.
+
+**El manual no entra al repositorio y su tabla sí**, que es la única manera de cumplir la regla de que ninguna
+regla viva sin su fuente. `CONT_COMPRAS` y `CONT_VENTAS` son del fabricante, así que `.gitignore` los bloquea y
+promete en su lugar que «lo que entra aquí son LOS DATOS»: eso es `CAMPOS_DEL_MANUAL`, abajo, con los 39 ítems de
+compras y los 34 de ventas, cada uno con su longitud, su obligatoriedad y la condición que el manual le pone.
 
 **Lo que NO consta se queda vacío**, y eso incluye la mitad de la tabla de siglas. Un tipo de comprobante sin
 equivalente detiene la exportación con `SinSigla`, que es la regla que no se negocia: es preferible que el
@@ -117,7 +123,11 @@ CUENTAS_POR_DEFECTO: dict = {
     "clientes": {"PEN": "12120001",                         # del manual
                  "USD": "12120002"},                        # deducida
     "compras": "60110100",                                  # John, 23-sep-2026
-    "ventas": "70410001",                                   # del manual
+    # Del manual, y OJO que la instalación real no la escribe igual: las capturas de John (21-sep-2026) traen
+    # `70410100`, un dígito distinto en la divisionaria. Las dos son PCGE 7041 —mercaderías—, así que el plan base
+    # sirve para elegir, que es para lo que está. Y la cuenta de ingreso **cambia con el tipo de venta**: la
+    # exonerada va a `70610100` y la mixta a `70510100`, que es otra razón para no imputar sola.
+    "ventas": "70410001",                                   # del manual (la instalación real: `70410100`)
 }
 
 
@@ -146,7 +156,7 @@ CUENTAS_POR_DEFECTO: dict = {
 # que un mes corriente no se exportaría entero. Un driver que se planta ante el comprobante más común de una
 # empresa no sirve para probar nada.
 #
-# El precio es que cinco valores son una suposición, y por eso van marcados aquí y en `STARSOFT-INTEGRACION.md`.
+# El precio es que cinco valores son una suposición, y por eso van marcados aquí, que es donde hay que mirarlos.
 # La diferencia con inventar está en que son un DEFECTO configurable, no una regla: el contribuyente los cambia
 # desde su sección sin tocar código, y `configuracion_por_defecto` ya advierte de que es «un punto de partida
 # razonable, no la verdad de ningún contribuyente». Se confirman con el manual de STARSOFT o con un mes real
@@ -166,8 +176,13 @@ TIPOS = {
     # Las dos que siguen SIN constar. No aparecen en ningún ejemplo ni en la tabla de campos, y el manual dice que
     # el tipo es «el que tiene registrado TU sistema», o sea de cada instalación: se cotejan con el maestro de
     # cada contribuyente, no se fijan aquí.
+    # Las dos salen de la tabla de equivalencias con CONCAR, que es de donde se heredaron las cinco: el `02` es
+    # el recibo por honorarios, que en CONCAR tiene además su propio sub-diario (el 15) y aquí no consta ninguno,
+    # y el `05` es la boleta de anticipo. **Lo que las cerraría es el maestro de tipos de documento de una
+    # instalación real**: un `SELECT` de su tabla de tipos, o un TXT que esa instalación haya importado con un
+    # recibo por honorarios dentro. No hace falta esperar a un mes entero.
     "02": {"sigla": "RH"},     # [por confirmar] — de CONCAR, sin su sub-diario propio, que tampoco consta
-    "05": {"sigla": "BA"},     # [por confirmar]
+    "05": {"sigla": "BA"},     # [por confirmar] — de CONCAR
 }
 
 # El sub-diario de la detracción va VACÍO, y no es un olvido: en CONCAR las compras con detracción tienen su
@@ -208,7 +223,7 @@ CONFIGURACION = (
 # —`CONT_COMPRAS` y `CONT_VENTAS`, «Sistema de Contabilidad · Documentación»—, con la tabla de campos
 # (longitud, obligatoriedad, formato y condiciones) y **ejemplos de TXT sacados del propio sistema**.
 # Los PDF no están en el repositorio —son de otra empresa y esto es público—: lo que dicen está volcado
-# en `STARSOFT-INTEGRACION.md`.
+# en `CAMPOS_DEL_MANUAL`, al final de este fichero.
 #
 # **Y trajeron la regla que la plantilla de Excel escondía: el número del ítem en el manual NO es su
 # posición en la línea.** Varias columnas dependen de un «concepto general» de cada instalación, y el
@@ -345,10 +360,10 @@ DESTINO = {"DG": "001", "DGNG": "002", "DNG": "003"}
 DESTINO_NO_GRAVADA = "004"
 DESTINO_IMPORTACION = "005"
 
-# La columna del documento anulado (`Y` en compras, `S` en ventas). Sale `0` y no en blanco (John,
-# 21-sep-2026): un comprobante que está entrando al registro no está anulado, y decirlo es más claro que
-# callarlo. La hoja de compras del vídeo admite las dos formas —«Blanco o `0` por defecto»,
-# `STARSOFT-INTEGRACION.md`— y entre las dos se elige la que afirma.
+# La columna del documento anulado (`AC` en compras, `T` en ventas; el campo 29 y el 23 del manual). Sale `0`
+# y no en blanco (John, 21-sep-2026): un comprobante que está entrando al registro no está anulado, y decirlo es
+# más claro que callarlo. Las dos formas valen: el manual dice «Poner 0 o dejarlo en blanco» y la hoja del vídeo
+# de compras lo rotula «Blanco o `0` por defecto» (10:49). Entre las dos se elige la que afirma.
 #
 # **El motor no sabe anular**: no hay un comprobante anulado que llegue hasta aquí, porque un comprobante
 # excluido no entra en el archivo. Si algún día el estándar lo trae, esta constante deja de ser el único
@@ -371,3 +386,117 @@ IGV_NO_PENDIENTE = "0"
 # razón: la glosa es texto libre, cortada sigue diciendo lo que decía, y los otros dos drivers la cortaban desde
 # siempre. Lo que no se corta es un CÓDIGO —una cuenta o una serie cortadas serían otra cuenta y otra serie—.
 LARGO_GLOSA = 60
+
+
+# ── La tabla de campos del manual ───────────────────────────────────────────────────────────────────
+#
+# **Esto es la fuente, no una validación.** Es lo que dicen `CONT_COMPRAS` y `CONT_VENTAS` del fabricante, leídos
+# el 22-sep-2026 y volcados aquí porque los PDF no pueden entrar a un repositorio público: 39 ítems en compras y 34
+# en ventas, con su longitud, su obligatoriedad y la condición que el manual les pone. **Nada de esto se comprueba
+# todavía** —`proyeccion.no_caben()` devuelve `{}` a propósito—, y activarlo pide lo único que lo probaría: un
+# archivo que STARSOFT haya rechazado por longitud. Está anotado en el §8 de la hoja de ruta.
+#
+# El número es el del MANUAL y no la posición en la línea: las columnas que dependen de un concepto general no se
+# escriben y no ocupan sitio (`CONDICIONALES`, arriba). La longitud se escribe como la distingue el manual: `≤18`
+# donde dice «Hasta 18», y `6` donde dice 6 a secas, que es exacto. `18,2` es dieciocho con dos decimales.
+CAMPOS_DEL_MANUAL = {
+    "compra": (
+        ( 1, "CUENTA CONTABLE",                     "≤18",  True,
+             "A ultimo nivel. Ejemplos del manual: 42120001, 40111000, 62010001"),
+        ( 2, "ANO Y MES DE PROCESO",                "6",    True,  "AAAAMM. Todos los registros, del mismo periodo"),
+        ( 3, "SUBDIARIO",                           "≤2",   True,  "Del mantenimiento de Subdiarios de Contabilidad"),
+        ( 4, "COMPROBANTE",                         "4",    True,
+             "Correlativo de 4 digitos, rellenando con ceros a la izquierda"),
+        ( 5, "FECHA DEL DOCUMENTO",                 "≤10",  True,
+             "Menor o igual al campo 15 y debe corresponder al periodo"),
+        ( 6, "TIPO DE ANEXO",                       "≤2",   False,
+             "Obligatorio si la cuenta tiene Tipo de Anexo. Proveedores: 03"),
+        ( 7, "CODIGO DEL PROVEEDOR",                "≤11",  False,
+             "Obligatorio si la cuenta tiene Tipo de Anexo y el anexo existe"),
+        ( 8, "TIPO DE DOCUMENTO",                   "≤2",   True,
+             "El que tiene registrado TU sistema (FT, BV, NC...)"),
+        ( 9, "SERIE Y NUMERO DEL DOCUMENTO",        "≤21",  True,
+             "Los 4 primeros son la serie; si es de 3, un espacio en blanco y el numero desde la quinta"),
+        (10, "FECHA DE VENCIMIENTO",                "≤10",  False, "Si viene, mayor o igual al campo 5"),
+        (11, "IGV",                                 "≤18,2",True,  "Solo si el campo 1 es una cuenta de Proveedores"),
+        (12, "TASA IGV",                            "≤10,2",True,  "Valor fijo del IGV vigente (18)"),
+        (13, "IMPORTE TOTAL DEL DOCUMENTO",         "≤18,2",True,
+             "En la cuenta de Proveedores, el total; en las demas, el importe de la cuenta"),
+        (14, "TIPO DE CONVERSION DEL TIPO DE CAMBIO","3",    True,  "Puede ser VTA o ESP. Sin distinguir por cuenta"),
+        (15, "FECHA DE REGISTRO",                   "≤10",  True,  "Debe corresponder al periodo informado"),
+        (16, "TIPO DE CAMBIO",                      "≤10,3",True,  "Obligatorio si el campo 14 es ESP"),
+        (17, "GLOSA",                               "≤60",  False, "Hasta 60 caracteres"),
+        (18, "TIPO DE DESTINO DE LA COMPRA",        "3",    True,
+             "001 gravada . 002 mixta . 003 no gravada . 004 no gravadas . 005 importacion"),
+        (19, "PORCENTAJE PARA OPERACIONES MIXTAS",  "≤18,2",False, "Solo con destino 002"),
+        (20, "VALOR CIF",                           "≤18,2",False, "Solo con destino 005"),
+        (21, "TIPO DE DOCUMENTO DE REFERENCIA",     "≤2",   False,
+             "Obligatorio si el campo 8 es nota de credito o debito"),
+        (22, "SERIE Y NUMERO DEL DOC. DE REFERENCIA","≤21",  False, "Misma regla de serie que el campo 9"),
+        (23, "CENTRO DE COSTO",                     "≤10",  False, "Obligatorio si la cuenta lo tiene configurado"),
+        (24, "AFECTO A DETRACCION",                 "1",    False, "1 si lo es; si no, 0 o en blanco"),
+        (25, "NUMERO DE DETRACCION",                "≤17",  False, "Solo si esta afecto a detraccion"),
+        (26, "FECHA DE DETRACCION",                 "≤10",  False, "Solo si esta afecto a detraccion"),
+        (27, "FECHA DEL DOC. DE REFERENCIA",        "≤10",  False,
+             "Obligatorio si el campo 8 es nota de credito o debito"),
+        (28, "GLOSA DEL MOVIMIENTO",                "≤60",  False, ""),
+        (29, "DOC. ANULADO",                        "1",    True,  "Poner 0 o dejarlo en blanco"),
+        (30, "IGV POR APLICAR",                     "1",    False, "0 o 1"),
+        (31, "CODIGO DE LA DETRACCION",             "5",    False, "Solo si esta afecto a detraccion"),
+        (32, "IMPORTACION",                         "1",    False, "0 o 1"),
+        (33, "DEBE O HABER",                        "1",    True,  "D o H"),
+        (34, "TASA DE DETRACCION",                  "≤18,2",False, "Solo si esta afecto a detraccion"),
+        (35, "IMPORTE DE DETRACCION",               "≤18,2",False, "Solo si esta afecto a detraccion"),
+        (36, "NRO. DE FILE",                        "≤12",  False,
+             "solo si el concepto general `PERS_SETOURS` es verdadero"),
+        (37, "OTROS TRIBUTOS",                      "≤18,2",False, "solo si `DATOS_ADIC_COM_TXT` es verdadero"),
+        (38, "IMP. A LA BOLSA DE PLASTICO",         "≤18,2",False,
+             "solo con el check de impuesto a la bolsa. Y solo en la fila de la cuenta de proveedores (42)"),
+        (39, "TIPO OPERACION DE DETRACCION",        "2",    False, "solo si `IMPDX_TIPOPE_DETRAC` es verdadero"),
+    ),
+    "venta": (
+        ( 1, "CUENTA CONTABLE",              "≤18",  True,
+             "A ultimo nivel. Ejemplos del manual: 12120001, 40111000, 70410001"),
+        ( 2, "ANO Y MES PROCESO",            "6",    True,  "AAAAMM"),
+        ( 3, "SUBDIARIO",                    "≤2",   True,  ""),
+        ( 4, "COMPROBANTE",                  "4",    True,  "Correlativo de 4 digitos con ceros a la izquierda"),
+        ( 5, "FECHA DE REGISTRO",            "≤10",  True,  "Debe corresponder al periodo informado"),
+        ( 6, "TIPO ANEXO",                   "≤2",   False, "Clientes: 02"),
+        ( 7, "CODIGO CLIENTE",               "≤11",  False, ""),
+        ( 8, "TIPO DE DOCUMENTO",            "≤2",   True,  "El que tiene registrado TU sistema"),
+        ( 9, "NUMERO DE DOCUMENTO",          "≤21",  True,
+             "4 primeros la serie; si tiene 3, un espacio; sin serie, cuatro espacios"),
+        (10, "NUM. DE DOC. FINAL",           "≤21",  False,
+             "solo si `DATOS_ADIC_VTAS_TXT` es verdadero. Para BV (03), TK (12) y codigo SUNAT 99"),
+        (11, "FECHA DE EMISION DEL DOCUMENTO","≤10",  True,
+             "Menor o igual al campo 5 y debe corresponder al periodo"),
+        (12, "DOCUMENTO DE REFERENCIA",      "≤2",   False, "Obligatorio en nota de credito o debito"),
+        (13, "NUMERO DE DOC. DE REFERENCIA", "≤21",  False, ""),
+        (14, "IGV",                          "≤18,2",True,
+             "Solo si el campo 1 es una cuenta de Clientes (12); en las demas, en blanco"),
+        (15, "VALOR ISC",                    "≤18,2",False, "solo si `MIGRA_ISC_TXT` es verdadero"),
+        (16, "OTROS TRIBUTOS",               "≤18,2",False, "solo si `DATOS_ADIC_VTAS_TXT` es verdadero"),
+        (17, "TASA DEL IGV",                 "≤10,2",True,  "Solo en la cuenta de Clientes; valor fijo (18)"),
+        (18, "IMPORTE",                      "≤18,2",True,
+             "En Clientes, el total del documento; en las demas, el de la cuenta"),
+        (19, "CONVERSION DE TIPO DE CAMBIO", "3",    True,  "VTA o ESP. En las demas cuentas puede estar en blanco"),
+        (20, "TIPO DE CAMBIO",               "≤10,3",True,  "Obligatorio si el campo 19 es ESP"),
+        (21, "GLOSA",                        "≤60",  False, "Hasta 60 caracteres"),
+        (22, "GLOSA DE MOVIMIENTO",          "≤60",  False, ""),
+        (23, "DOCUMENTO ANULADO",            "1",    True,  "0 no anulado . 1 anulado"),
+        (24, "DEBE / HABER",                 "1",    True,  "D o H"),
+        (25, "RUC DEL CLIENTE",              "11",   False, "Solo si el campo 1 es una cuenta de Clientes"),
+        (26, "RAZON SOCIAL DEL CLIENTE",     "≤50",  False, "Idem"),
+        (27, "CENTRO DE COSTO",              "≤10",  False, "Si la cuenta lo tiene configurado"),
+        (28, "FECHA DE VENCIMIENTO",         "≤10",  False, "Si viene, mayor o igual al campo 11"),
+        (29, "FECHA DEL DOC. REFERENCIA",    "≤10",  False, ""),
+        (30, "EXPORTACION",                  "1",    True,  "0 local . 1 exportacion"),
+        (31, "NRO. DE FILE",                 "≤12",  False, "solo si `PERS_SETOURS` es verdadero"),
+        (32, "EXONERADO",                    "≤18,2",False,
+             "solo si `EXONERADO_TXT` es verdadero. Y solo en la fila de Clientes"),
+        (33, "OTROS CARGOS",                 "≤18,2",False,
+             "solo si `OTROS_CARGOS_VTA` es verdadero. Y solo en la fila de Clientes"),
+        (34, "IMP. A LA BOLSA DE PLASTICO",  "≤18,2",False,
+             "solo con el check de impuesto a la bolsa. Y solo en la fila de Clientes"),
+    ),
+}

@@ -147,7 +147,7 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
     """Una línea del comprobante → una fila del archivo, con las claves del libro que toca (`datos.COLUMNAS`).
 
     **Compras y ventas no comparten ni las cabeceras**: son dos plantillas y se calca cada una de su fuente, así
-    que aquí solo se reparte. La de ventas sale de las capturas de la hoja real; la de compras, del vídeo.
+    que aquí solo se reparte. Las dos salen del manual del fabricante (22-sep-2026); antes, de las capturas y del vídeo.
     """
     arma = _fila_venta if libro.tipo == "venta" else _fila_compra
     todo = arma(ln, cab, libro, config, detraccion)
@@ -156,7 +156,7 @@ def fila(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
 
 def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
                  detraccion: LineaDiario | None = None) -> dict[str, Any]:
-    """Las 38 columnas de la plantilla de compras, con sus nombres literales.
+    """Las 35 columnas de la línea de compras, con sus nombres literales.
 
     `IGV` y `TASA IGV` van **solo en la fila del total** —la del rol `tercero`—, como en la captura: las otras
     dos filas del asiento las llevan vacías. Es para lo que existe el rol.
@@ -234,7 +234,7 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
 
 def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
                 detraccion: LineaDiario | None = None) -> dict[str, Any]:
-    """Las 34 columnas de la plantilla de ventas, con sus nombres literales.
+    """Las 27 columnas de la plantilla de ventas, con sus nombres literales.
 
     Dos reglas salen de la captura y no del vídeo: **`IGV` y `TASA IGV` van solo en la fila del cliente** —la del
     rol `tercero`, que es la primera del asiento—, y **`RUC CLIENTE` y `RAZON SOCIAL` también**, no repetidos en

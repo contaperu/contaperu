@@ -23,22 +23,33 @@ no `desde_comprobantes`, como CONTASIS. El asiento lo arma el núcleo; aquí sol
 Esa última columna es la que hizo falta ampliar la cabecera del índice en la 1.4.0: el dato existía en el
 estándar (`destino_igv`) y no llegaba a un driver de asientos.
 
-**Estado: EN PRUEBAS, con la documentación oficial en la mano desde el 22-sep-2026.** El formato se
-levantó el 20-sep-2026 de dos vídeos y sus capturas, y se recalcó el 22 contra la documentación de STARSOFT
-—`CONT_COMPRAS` y `CONT_VENTAS`, con la tabla de campos y ejemplos de TXT del propio sistema—, que corrigió
-tres cosas de golpe: **la línea lleva 35 campos en compras y 27 en ventas** (se escribían las columnas que
-dependen de un «concepto general» de cada instalación, que el manual manda no incluir), y **las dos fechas
-estaban cruzadas** — la del documento es la emisión y la de registro cae dentro del periodo, que solo se
-nota cuando el comprobante es extemporáneo. Todo en `STARSOFT-INTEGRACION.md`; los PDF no están en el
-repositorio porque son de otra empresa y esto es público.
+**Estado: aceptado.** STARSOFT importó un mes de compras el **7-oct-2026** y uno de ventas el **8-oct-2026**,
+y cada uno destapó algo que ningún vídeo decía: el TXT va suelto, sin el ZIP, y el archivo de ventas empieza
+por `V` y no por la `C` de compras, porque la letra es la del libro. Antes de eso ya había entrado uno
+(22-sep-2026) que llevaba los 38 campos y las fechas al revés, y es el que obligó a cambiar de fuente.
 
-Lo que sigue sin constar está marcado `[por confirmar]`, y la tabla de siglas depende de cada instalación
-—el manual dice «el tipo de comprobante que tiene registrado en su sistema externo»—: un tipo sin
-equivalente detiene la exportación en vez de inventarse uno.
+**La fuente, y cuál manda.** El formato se levantó el 20-sep-2026 de dos vídeos del canal *ArchivoExcel* y de
+las capturas de la hoja `PARAMETROS`, y se recalcó el 22 contra la documentación del fabricante —`CONT_COMPRAS`
+y `CONT_VENTAS`, con la tabla de campos y ejemplos de TXT del propio sistema—. **Donde los dos hablan, manda el
+manual**, y eso corrigió dos cosas de golpe: la línea lleva **35 campos en compras y 27 en ventas** (se
+escribían las columnas que dependen de un «concepto general» de cada instalación, que el manual manda no
+incluir) y **las dos fechas estaban cruzadas** —la del documento es la emisión y la de registro cae dentro del
+periodo, que solo se nota cuando el comprobante es extemporáneo—. Los PDF no están en el repositorio porque son
+de otra empresa y esto es público: su tabla de campos está volcada en `datos.CAMPOS_DEL_MANUAL`, ítem por ítem,
+con la longitud y la condición de cada uno.
 
-**Un archivo de este driver ya entró en STARSOFT** (John, 22-sep-2026), y eso es lo que destapó las tres
-correcciones de arriba. Lo que falta para la línea de «Aceptado (fecha)» que tiene CONTASIS es que entre
-uno **ya corregido**: el que importó llevaba los 38 campos y las fechas al revés.
+**La hoja `PARAMETROS`**, que sale de las capturas y no del manual, es el andamiaje de la macro de Excel y no
+del motor: cuatro pares de columnas cuenta/debe-haber por tipo de asiento, cinco tipos en compras y cuatro en
+ventas. **De ahí sale el límite de cuatro cuentas por asiento**, que no es del TXT —`proyeccion.no_caben`
+explica por qué no se hace cumplir— y que conviene saber de dónde viene el día que alguien lo proponga.
+
+**Lo que sigue sin constar está marcado `[por confirmar]`**, y hay cuatro marcas vivas con lo que cerraría cada
+una escrito al lado. Dos son siglas, el `RH` y el `BA` heredados de CONCAR, y las cierra el maestro de tipos de
+documento de una instalación (`datos.TIPOS`). Las otras dos son del destino del IGV —la precedencia entre el
+004 y el 005, y el umbral del 004— y las cierra un archivo aceptado con una DUA y un destino mixto en el mismo
+mes; están explicadas en `proyeccion.destino_de`, con el aviso de que son «de los errores que no dan error».
+La tabla de siglas depende además de cada instalación —el manual dice «el tipo de comprobante que tiene
+registrado en su sistema externo»—: un tipo sin equivalente detiene la exportación en vez de inventarse uno.
 
 **Lo que escribe es el TXT de palotes, suelto**, que es una de las dos vías de carga de STARSOFT; la otra
 es su plantilla de Excel. Hasta la 2.2 escribía un CSV, provisional, para poder revisarlo columna por

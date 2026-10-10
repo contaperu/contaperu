@@ -486,6 +486,7 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 | C12 | Un comprobante 91 con su pago por el Formulario 1662, y el asiento que CONCAR aceptó | De una empresa que pague servicios a un no domiciliado |
 | C13 | Un formulario mensual de IGV-Renta presentado, con sus casillas, para contrastar la base y la cuota | De un contribuyente del régimen que se calcule |
 | C13 | Los libros obligatorios, los topes y el pago a cuenta del Régimen General, el MYPE Tributario y el Nuevo RUS, cada uno con su artículo (el Especial ya está) | Norma citada |
+| 43 | Las dos cuentas que el plan real de STARSOFT usa y el motor no sabe elegir: a dónde va el IGV sin derecho a crédito fiscal, y la cuenta de ingreso de una devolución | Con un contador, y el PCGE delante |
 | J2-J6 | Un cliente real fuera del Perú, su sistema contable de destino y un archivo que ese sistema haya aceptado | Con el cliente |
 | **Legacy** | | |
 | A1-A3 | La plantilla de SISCONT y un mes que haya importado | Con quien use SISCONT |
