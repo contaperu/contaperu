@@ -6,7 +6,7 @@ salida, un solo documento»)—, y hay cuatro formas de driver. Un driver implem
 **Familia registro** — una fila por comprobante, sin asiento:
 
 - **`linea(c, libro, idx, opciones) -> str`** — un archivo de texto, una línea por comprobante. Es el TXT
-  del SIRE: un registro tributario, que se escribe desde el comprobante y no lleva cuentas.
+  del SIRE: un registro para SUNAT, que se escribe desde el comprobante y no lleva cuentas.
 - **`desde_comprobantes(libro, comprobantes, config, opciones) -> (bytes, resumen)`** — el archivo de un sistema
   contable que importa su registro de compras o de ventas y arma el asiento él mismo (CONTASIS). Recibe los comprobantes y la configuración, con la imputación de cada documento dentro, y
   **no decide ninguna cuenta**: las lee de `asiento.partes_de` (la de la base, o sus partes si hay reparto) y
@@ -30,22 +30,28 @@ dice que pase a `desde_lineas`.
 
 - **`legacy`** — un sistema contable instalado que importa un archivo (CONCAR, CONTASIS; STARSOFT y SISCONT cuando
   entren). Lleva cuentas y declara `EXIGE`, lo que su sistema no puede importar sin (vacío si nada).
-- **`tributario`** — un registro que se presenta a SUNAT. Dos formas, según de qué sea su FILA: `linea` cuando es un
-  comprobante (el SIRE, sin cuentas ni configuración) y `desde_lineas` cuando es una línea del asiento (el Libro
-  Diario del PLE, que sí lleva cuentas y numera su CUO con el sub-diario y el correlativo). Lo que el canal fija es
-  que escribe **texto para SUNAT**, no un Excel ni un JSON.
-- **`intercambio`** — un formato neutral para leer o integrar (el CSV). Forma `desde_lineas`: proyecta la línea.
+- **`sunat`** — un registro o libro que se presenta a SUNAT, por **cualquiera de sus dos regímenes**: el SIRE (el
+  RVIE y el RCE, RS 112-2021 y RS 040-2022) y el PLE (el Libro Diario y los demás, RS 234-2006 y RS 286-2009). Dos
+  formas, según de qué sea su FILA: `linea` cuando es un comprobante (el SIRE, sin cuentas ni configuración) y
+  `desde_lineas` cuando es una línea del asiento (el Libro Diario del PLE, que sí lleva cuentas y numera su CUO con
+  el sub-diario y el correlativo). Lo que el canal fija es que escribe **texto para SUNAT**, no un Excel ni un JSON.
+- **`erp`** — un ERP, por el formato neutral del estándar (el CSV, `asiento_contable`). Forma `desde_lineas`:
+  proyecta la línea.
 
-Cada canal se presenta en uno de los tres grupos de destinos del motor (`GRUPOS`): `tributario` es el **SIRE**, `legacy`
-es **legacy** e `intercambio` es **ERP**. `drivers_disponibles` dice el grupo de cada driver.
+**Una palabra por destino, y es el canal.** Hasta la 7.x había una segunda tabla, `GRUPOS`, que lo traducía a «SIRE»,
+«Legacy» y «ERP» para quien integra, y `drivers_disponibles` devolvía las dos. La 8.0 la retiró: eran dos vocabularios
+para lo mismo, y el de fuera mentía — `tributario` son tres drivers y a los tres se les presentaba como `sire`, cuando
+el PLE no es el SIRE.
 
 **El vocabulario** — con qué palabras recibe sus líneas un driver de asientos (`VOCABULARIO`, 1.1). `legacy`, el de
 siempre: siglas, sub-diarios, correlativos y el documento comodín de la detracción. `neutral`: las líneas del estándar
 sin nada de eso, por `rol` y código SUNAT, para un ERP (el driver `asiento_contable`). Un driver neutral es de canal
-`intercambio`, no declara claves legacy en su configuración y el núcleo solo le exige la cuenta.
+`erp`, no declara claves legacy en su configuración y el núcleo solo le exige la cuenta.
 
-`api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado (hito A5): el contrato lo rechaza. Un driver
-de terceros sin `CANAL` se registra con un `AvisoDriver` y se trata como `legacy` durante la 1.x.
+`api_erp`, escribir el cuerpo de la API de un ERP moderno, queda reservado (hito A5): el contrato lo rechaza, y el
+criterio para admitirlo es que haya un formato que `erp` no pueda llevar. Ojo a la pareja: `erp` se admite y `api_erp`
+no, a una letra de distancia. **Un driver de terceros sin `CANAL` no se registra** desde la 4.0: el contrato lo cuenta
+como incumplimiento y `drivers.de_terceros` lo deja fuera con su `AvisoDriver`.
 
 Todas exponen además `NOMBRE`, `FORMATOS` ({'venta'|'compra': identificador de la salida}),
 `OPCIONES` (una `kit.Opciones`, o una `kit.OpcionesArchivo` en un driver de archivo) y `nombre(libro, opciones) -> str`; las tres de archivo, su
@@ -115,27 +121,28 @@ from ...modelo import TIPOS_LIBRO, Comprobante, Libro
 from ..kit import Opciones, OpcionesArchivo
 from .accesores import (NoCabe, acepta_indice, arma_asientos, canal, centro_en_anexo, columnas_elegibles,
                         columnas_elegidas, configuracion, cuentas_por_defecto, declara_canal, describir,
-                        excluye_tipos, exige, familia, forma, grupo, lleva_cuentas, no_caben, plan_base,
+                        excluye_tipos, exige, familia, forma, lleva_cuentas, no_caben, plan_base,
                         seccion_por_defecto, vocabulario)
 from .examen import incumplimientos
 from .protocolos import Driver, DriverAsientoLineas, DriverRegistroArchivo, DriverRegistroTexto
-from .taxonomia import (CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RESERVADOS, CLAVES_DEL_PLAN,
+from .taxonomia import (CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RENOMBRADOS, CANALES_RESERVADOS, CLAVES_DEL_PLAN,
                         CLAVES_LEGACY, DATOS_CON_COLUMNAS, EXIGE_NUCLEO_ASIENTO, EXIGE_NUCLEO_NEUTRAL,
                         EXIGE_NUCLEO_REGISTRO, EXIGE_POSIBLES_ASIENTO, EXIGE_POSIBLES_REGISTRO, FAMILIA,
-                        FORMAS, GRUPOS, TIPO_DEL_PLAN, VOCABULARIO_POR_DEFECTO, VOCABULARIOS)
+                        FORMAS, TIPO_DEL_PLAN, VOCABULARIO_POR_DEFECTO, VOCABULARIOS)
 
 # Los nombres que este módulo tenía al alcance —los suyos y los que importaba—, escritos a mano porque
 # están en la superficie pública congelada: un driver de terceros puede estar importando cualquiera de
 # ellos de aquí, y retirarlo sin avisar rompería la promesa de la mayor anterior.
 __all__ = [
-    "CANALES", "CANALES_RESERVADOS", "CANAL_OBLIGATORIO_DESDE", "CENTRO_EN_ANEXO", "CLAVES_DEL_PLAN",
+    "CANALES", "CANALES_RENOMBRADOS", "CANALES_RESERVADOS", "CANAL_OBLIGATORIO_DESDE", "CENTRO_EN_ANEXO",
+    "CLAVES_DEL_PLAN",
     "CLAVES_LEGACY", "CONFIGURACION_DEL_ASIENTO", "CONFIGURACION_GENERAL", "Campo", "Columna", "Comprobante",
     "DATOS_CON_COLUMNAS", "Driver", "DriverAsientoLineas", "DriverRegistroArchivo", "DriverRegistroTexto",
     "EXIGE_NUCLEO_ASIENTO", "EXIGE_NUCLEO_NEUTRAL", "EXIGE_NUCLEO_REGISTRO", "EXIGE_POSIBLES_ASIENTO",
-    "EXIGE_POSIBLES_REGISTRO", "FAMILIA", "FORMAS", "GRUPOS", "Libro", "MONEDAS_CODIGO", "NoCabe", "NoExportable",
+    "EXIGE_POSIBLES_REGISTRO", "FAMILIA", "FORMAS", "Libro", "MONEDAS_CODIGO", "NoCabe", "NoExportable",
     "Opciones", "OpcionesArchivo", "PATRON_CUENTA", "TIPOS_LIBRO", "TIPO_DEL_PLAN", "TYPE_CHECKING", "VOCABULARIOS",
     "VOCABULARIO_POR_DEFECTO", "acepta_indice", "arma_asientos", "canal", "centro_en_anexo", "columnas_elegibles",
     "columnas_elegidas", "configuracion", "cuentas_por_defecto", "declara_canal", "describir", "excluye_tipos",
-    "exige", "familia", "forma", "grupo", "incumplimientos", "lleva_cuentas", "no_caben", "plan_base",
+    "exige", "familia", "forma", "incumplimientos", "lleva_cuentas", "no_caben", "plan_base",
     "seccion_por_defecto", "vocabulario",
 ]

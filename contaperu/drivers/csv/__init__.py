@@ -26,14 +26,16 @@ from ..kit.columnas import ColumnaDeLinea, escribir_csv
 from ...modelo import Libro
 
 NOMBRE = "csv"
-# Un formato neutral para leer o integrar: proyecta la línea del comprobante (`drivers.contrato.CANALES`).
-CANAL = "intercambio"
+# Entrega a un ERP: proyecta la línea del comprobante (`drivers.contrato.CANALES`). Su VOCABULARIO sigue siendo
+# el legacy por defecto, y es correcto: el canal dice a quién entrega; el vocabulario, con qué palabras recibe
+# sus líneas.
+CANAL = "erp"
 OPCIONES = Opciones(fecha="AAAA-MM-DD", extension=".csv")
 FORMATOS = {"compra": "csv_asiento", "venta": "csv_asiento"}
 CONTENT_TYPE = "text/csv; charset=utf-8"
 # Escribe la moneda en ISO y el centro de costo que haya: un mes sin centros sale igual, con la columna vacía. Sí
 # exige `detraccion` (4.1): sus filas llevan la línea de la detracción con su código del Catálogo 54, y sin el código
-# no la escribiría — un canal de intercambio que calla una detracción que SUNAT afirma miente igual que un legacy.
+# no la escribiría — un driver de ERP que calla una detracción que SUNAT afirma miente igual que un legacy.
 EXIGE = frozenset({"detraccion"})
 # Se configura lo que el núcleo lee al armar el asiento, y nada propio: escribe las líneas tal cual.
 CONFIGURACION = CONFIGURACION_DEL_ASIENTO
@@ -67,7 +69,7 @@ COLUMNAS_DE_LINEA: tuple[ColumnaDeLinea, ...] = tuple(
         ("referencia.serie_numero", "ref_serie_numero", "texto"),
         ("referencia.fecha", "ref_fecha", "fecha"),
         # El código de SUNAT del bien o servicio (Catálogo 54), que es lo que dice el estándar. Hasta la 3.10 aquí
-        # salía `detraccion.codigo_interno`, o sea la Tabla General 28 de CONCAR en un canal de intercambio: quien
+        # salía `detraccion.codigo_interno`, o sea la Tabla General 28 de CONCAR en un driver de ERP: quien
         # leyera este CSV desde otro sistema recibía `02702` y tenía que conocer CONCAR para entenderlo. La cabecera
         # no cambia, así que es un cambio silencioso para quien la busque por nombre: va primero en «Cómo migrar».
         ("detraccion.codigo", "detraccion_codigo", "texto"),

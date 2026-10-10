@@ -3,7 +3,7 @@ final.
 
 Es el segundo libro electrónico que escribe el motor, y el primero cuya **fila es una línea del asiento** y no un
 comprobante: una compra con detracción son cinco filas. Por eso su forma es `desde_lineas` y no `linea` como la del
-SIRE — el canal `tributario` admite las dos desde la 4.2 (`drivers/contrato.py`).
+SIRE — el canal `sunat` admite las dos desde la 4.2 (`contaperu/drivers/contrato/`).
 
 **El formato no se describe aquí**: columna a columna vive en `datos/sunat/ple_campos.json`, con de dónde sale cada
 una y qué hizo con ella un libro real que SUNAT aceptó. `tests/test_ple_campos.py` lo confronta con este módulo, así
@@ -30,8 +30,9 @@ from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
 from .comun import BANDERAS, ESTADO_DEL_PERIODO, OPCIONES, OPORTUNIDAD
 
 NOMBRE = "ple"
-# Un registro que se presenta a SUNAT (`drivers.contrato.CANALES`), como el SIRE.
-CANAL = "tributario"
+# Se presenta a SUNAT, como el SIRE, pero por el PLE: otro régimen, otras resoluciones y otro formato
+# (`drivers.contrato.CANALES`).
+CANAL = "sunat"
 # Los dos libros que el motor genera se escriben con el MISMO formato: el 5.1 no distingue compras de ventas, las
 # junta en el diario. No es `libro.tipo: diario` —eso sería recibir un diario de un ERP, que es otra cosa—: aquí se
 # toma el mes que el motor conoce y se escribe en formato Libro Diario, igual que el `sire` lo escribe como RVIE o

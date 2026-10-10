@@ -10,23 +10,34 @@ from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO
 from ...configuracion import CONFIGURACION_GENERAL, PATRON_CUENTA, Campo
 
 # A quién se entrega lo que sale. Un eje distinto de la familia (registro o asiento), que dice qué se entrega.
+#
+# Las tres palabras son las del destino, y desde la 8.0 son las únicas: hasta la 7.x el contrato decía `tributario` e
+# `intercambio` y una segunda tabla los traducía a «SIRE» y «ERP» para quien integra. Eran dos vocabularios para lo
+# mismo, y el de fuera además mentía: `tributario` son tres drivers —`sire`, `ple` y `ple_plan`— y a los tres se les
+# presentaba como grupo `sire`, cuando el PLE es otro régimen de SUNAT, con otras resoluciones y otro formato (la RS
+# 234-2006 y la RS 286-2009 frente a la RS 112-2021 y la RS 040-2022). `sunat` cubre los dos.
+#
+# Y las palabras viejas describían el OTRO eje: `tributario` el formato que se escribe e `intercambio` el vocabulario
+# con que se reciben las líneas — que es `VOCABULARIO` y ya tiene su campo. El canal contesta a quién se entrega.
 CANALES = {
     "legacy": "un sistema contable instalado que importa un archivo",
-    "tributario": "un registro que se presenta a SUNAT",
-    "intercambio": "un formato neutral para leer o integrar",
+    "sunat": "un registro o libro que se presenta a SUNAT",
+    "erp": "un ERP, por el formato neutral del estándar",
 }
+# Los nombres con que nacieron, para que el rechazo diga el nuevo en vez de «no existe». Mismo trato que
+# `configuracion.CLAVES_RETIRADAS`. La 8.0 los retira sin aviso previo y es a propósito: `CANAL` lo declara un driver,
+# y los nueve que existen son de este repositorio —los ocho de serie y el `diario_json` de la batería—, así que no
+# había a quién avisar. Un aviso durante la 7.x habría puesto roja la batería por sus propios drivers.
+CANALES_RENOMBRADOS = {"tributario": "sunat", "intercambio": "erp"}
 # Lo que tiene nombre y todavía no existe: el contrato lo rechaza diciendo por qué.
 CANALES_RESERVADOS = {
-    "api_erp": "escribir el cuerpo de la API de un ERP moderno es el hito A5 de la hoja de ruta, fuera de la 1.0: el "
-               "envío y los reintentos son de la aplicación",
+    "api_erp": "escribir el cuerpo de la API de un ERP moderno es el hito A5 de la hoja de ruta: un canal nuevo solo "
+               "entra si hay un formato que `erp` no pueda llevar, y el cuerpo neutral de un ERP se envía tal cual",
 }
 # Declarar el canal es OBLIGATORIO desde la 4.0. Hasta entonces un driver que no lo declaraba se trataba como
 # `legacy` con un aviso que prometía la 2.0 —y el paquete llegó a la 3.10 con la promesa sin cumplir—. Sin canal, el
-# grupo del destino (SIRE, legacy o ERP) se adivinaba, y de él dependen las reglas que el contrato hace cumplir.
+# destino se adivinaba, y de él dependen las reglas que el contrato hace cumplir.
 CANAL_OBLIGATORIO_DESDE = "4.0"
-# Cómo se presenta cada canal en la arquitectura del motor (John, 15-sep-2026): lo que sale va al SIRE, a un sistema
-# legacy o a un ERP. El canal es la regla que hace cumplir el contrato; el grupo, cómo se nombra ante quien integra.
-GRUPOS = {"tributario": "sire", "legacy": "legacy", "intercambio": "erp"}
 
 # Con qué vocabulario arma el núcleo las líneas de un driver de asientos (1.1): `legacy` —siglas, sub-diarios,
 # correlativos y el documento comodín de la detracción, lo que importan CONCAR y los de su familia— o `neutral`, las

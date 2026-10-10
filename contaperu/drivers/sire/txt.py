@@ -30,8 +30,8 @@ from ..kit import (
 from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
 
 NOMBRE = "sire"
-# Un registro que se presenta a SUNAT (`drivers.contrato.CANALES`).
-CANAL = "tributario"
+# Se presenta a SUNAT: el RVIE y el RCE, por el SIRE (`drivers.contrato.CANALES`).
+CANAL = "sunat"
 # Lo que no se anota en el registro que se declara a SUNAT (hoy: el recibo por
 # honorarios). El Excel de CONCAR no declara esto, así que sí los lleva.
 EXCLUYE_TIPOS = cat.FUERA_DEL_REGISTRO_SUNAT

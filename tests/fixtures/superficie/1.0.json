@@ -363,6 +363,7 @@
  },
  "contaperu.drivers.contrato": {
   "CANALES": "",
+  "CANALES_RENOMBRADOS": "",
   "CANALES_RESERVADOS": "",
   "CANAL_OBLIGATORIO_DESDE": "",
   "CENTRO_EN_ANEXO": "",
@@ -385,7 +386,6 @@
   "EXIGE_POSIBLES_REGISTRO": "",
   "FAMILIA": "",
   "FORMAS": "",
-  "GRUPOS": "",
   "Libro": "",
   "MONEDAS_CODIGO": "",
   "NoCabe": "",
@@ -412,7 +412,6 @@
   "exige": "",
   "familia": "",
   "forma": "",
-  "grupo": "",
   "incumplimientos": "",
   "lleva_cuentas": "",
   "no_caben": "",

@@ -48,6 +48,11 @@ EXTENSION = (
     # El talón que sostenía su nombre viejo (`asiento_neutral`, hasta la 3.10) se retiró en la 4.0, con sus trece
     # nombres: es lo que una mayor permite y lo que su aviso prometía.
     "contaperu.drivers.asiento_contable",
+    # Y de `contaperu.drivers.contrato` se fueron dos nombres en la 8.0, al quedarse el canal como única palabra del
+    # destino: `GRUPOS`, la tabla que lo traducía a «SIRE», «Legacy» y «ERP», y `grupo()`, su accesor. Eran un
+    # segundo vocabulario para lo mismo y el de fuera mentía —el PLE salía como `sire`—, así que lo que se quita es
+    # una imprecisión publicada, no una función que alguien pudiera querer. Entró `CANALES_RENOMBRADOS`, que es lo
+    # que hace que el rechazo del nombre viejo diga el nuevo.
 )
 TIPOS_DE_CONSTANTE = {"builtins", "decimal", "datetime"}
 

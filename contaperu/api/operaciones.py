@@ -250,15 +250,17 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
 
 def drivers_disponibles() -> dict:
     """Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal
-    (`legacy`, `tributario` o `intercambio`), su grupo (`sire`, `legacy` o `erp`), el vocabulario con que recibe sus
-    líneas (`legacy` o `neutral`), lo que exige, si se configura y su descripción."""
+    —a quién entrega: `legacy`, `sunat` o `erp`—, el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo
+    que exige, si se configura y su descripción.
+
+    Hasta la 7.x había además un `grupo` que traducía el canal a «SIRE», «Legacy» o «ERP». La 8.0 lo retiró: eran dos
+    palabras para lo mismo, y la de fuera mentía — el PLE salía como grupo `sire` y no es el SIRE."""
     return {
         nombre: {"formatos": modulo.FORMATOS,
                  "tipo": "texto" if contrato.forma(modulo) == "linea" else "archivo",
                  "forma": contrato.forma(modulo),
                  "familia": contrato.familia(modulo),
                  "canal": contrato.canal(modulo),
-                 "grupo": contrato.grupo(modulo),
                  "vocabulario": contrato.vocabulario(modulo),
                  "exige": sorted(contrato.exige(modulo)),
                  "configurable": bool(contrato.seccion_por_defecto(modulo)),
@@ -310,7 +312,7 @@ def verificar_documento(documento: dict) -> dict:
 
 def verificar_driver(modulo: str) -> dict:
     """Comprueba un driver contra el contrato antes de registrarlo: importa el módulo por su nombre (`paquete.driver`) y
-    dice su forma, su canal, su grupo, si cumple y qué le falta (`drivers.contrato.incumplimientos`), más los avisos con
+    dice su forma, su canal, si cumple y qué le falta (`drivers.contrato.incumplimientos`), más los avisos con
     que el registro lo aceptaría igual durante la 1.x.
 
     Solo para Python y la línea de comandos: importar código por su nombre nunca se expone por HTTP ni por MCP, y por
@@ -324,7 +326,7 @@ def verificar_driver(modulo: str) -> dict:
     # con el paquete en la 3.10. La 4.0 los cobró: las dos cosas son ya incumplimientos, no avisos.
     avisos: list[str] = []
     return {"modulo": modulo, "nombre": str(getattr(cargado, "NOMBRE", "") or ""), "forma": contrato.forma(cargado),
-            "canal": contrato.canal(cargado), "grupo": contrato.grupo(cargado), "cumple": not faltas,
+            "canal": contrato.canal(cargado), "cumple": not faltas,
             "incumplimientos": faltas, "avisos": avisos}
 
 

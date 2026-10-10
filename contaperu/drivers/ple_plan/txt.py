@@ -27,8 +27,8 @@ from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
 from ..ple.comun import BANDERAS, DIA_DEL_NOMBRE, ESTADO_DEL_PERIODO, OPCIONES, OPORTUNIDAD
 
 NOMBRE = "ple_plan"
-# Un registro que se presenta a SUNAT, como el 5.1 y como el SIRE.
-CANAL = "tributario"
+# Se presenta a SUNAT por el PLE, como el 5.1 (`drivers.contrato.CANALES`).
+CANAL = "sunat"
 # El mismo formato para los dos libros que el motor genera: el plan de cuentas que se usó en el mes es el mismo
 # fichero venga de compras o de ventas.
 FORMATOS = {"compra": "ple_5_3", "venta": "ple_5_3"}

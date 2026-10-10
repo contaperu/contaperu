@@ -209,7 +209,7 @@ def test_un_erp_no_tiene_seccion_propia_en_la_configuracion():
 
 def test_el_contrato_de_un_driver_neutral():
     assert contrato.incumplimientos(asiento_contable) == []
-    assert (contrato.vocabulario(asiento_contable), contrato.grupo(asiento_contable)) == ("neutral", "erp")
+    assert (contrato.vocabulario(asiento_contable), contrato.canal(asiento_contable)) == ("neutral", "erp")
     assert contrato.exige(asiento_contable) == {"cuenta_contable", "detraccion"}
     assert api.drivers_disponibles()["asiento_contable"]["vocabulario"] == "neutral"
     assert api.drivers_disponibles()["concar"]["vocabulario"] == "legacy"
@@ -220,7 +220,7 @@ def test_el_contrato_de_un_driver_neutral():
         falso.__dict__.update(cambios)
         return falso
 
-    assert any("canal es `intercambio`" in p for p in contrato.incumplimientos(copia(CANAL="legacy")))
+    assert any("canal es `erp`" in p for p in contrato.incumplimientos(copia(CANAL="legacy")))
     assert any("no existe" in p for p in contrato.incumplimientos(copia(VOCABULARIO="otro")))
     legacy = contrato.incumplimientos(copia(CONFIGURACION=CONFIGURACION_DEL_ASIENTO))
     assert any("no declara vocabulario legacy" in p for p in legacy)
