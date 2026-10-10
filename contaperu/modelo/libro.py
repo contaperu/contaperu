@@ -43,13 +43,21 @@ class Rasgos:
     La contraparte va al contrario, y por eso no se declara: se deriva."""
 
     tipo: str
-    sub_diario: str             # la clave de configuración que nombra su sub-diario
-    cuenta_contraparte: str     # la clave de `cuentas` con la que se salda: a quién se le debe o quién debe
-    sentido_principal: str      # 'D' | 'H'
+
+    # ── Qué ES este libro. Es lo que de verdad lo distingue, y por eso va primero (John, 10-oct-2026).
+    origen: str                 # de qué bloque del documento salen sus líneas
+    rol_principal: str          # el rol de la línea del hecho: el gasto, el ingreso, el dinero
+    sentido_principal: str      # 'D' | 'H', o `POR_OPERACION` cuando lo dice cada operación y no el libro
+    cuenta_contraparte: str     # la clave de `cuentas` con la que se salda; vacía si no la pone el libro
+    rol_contraparte: str        # el rol de la otra pata; vacío si depende de lo que la operación cancela
+
+    # ── Qué reglas le tocan. Las tres son de las compras, y por eso las tres son `False` en lo demás.
     da_credito_fiscal: bool     # el IGV entra como crédito (compras) o como débito del que se recauda (ventas)
     lleva_detraccion: bool
     lleva_honorarios: bool      # el recibo por honorarios y su retención de 4ta
-    origen: str                 # de qué bloque del documento salen sus líneas
+
+    # ── A dónde va. No es lo que un libro ES sino por dónde sale, y va al final por eso.
+    sub_diario: str             # la clave de configuración que nombra su sub-diario
 
     @property
     def es_venta(self) -> bool:
@@ -86,13 +94,24 @@ class Rasgos:
 # el motor sabe qué ES un libro de tesorería y todavía no sabe armar su asiento. Un libro que esté aquí y no allí
 # se para en la puerta nombrando los que sí (`asiento.LibroQueElMotorNoOrigina`), que es para lo que se puso.
 RASGOS: dict[str, "Rasgos"] = {
-    "venta": Rasgos(tipo="venta", sub_diario="sub_diario_ventas", cuenta_contraparte="clientes",
-                    sentido_principal="H", da_credito_fiscal=False, lleva_detraccion=False,
-                    lleva_honorarios=False, origen="comprobantes"),
-    "compra": Rasgos(tipo="compra", sub_diario="sub_diario_compras", cuenta_contraparte="cxp",
-                     sentido_principal="D", da_credito_fiscal=True, lleva_detraccion=True,
-                     lleva_honorarios=True, origen="comprobantes"),
-    # El dinero moviéndose. Dos campos no son constantes aquí, y que la tabla lo enseñe es la mitad de su valor:
+    "venta": Rasgos(tipo="venta", origen="comprobantes", rol_principal="principal", sentido_principal="H",
+                    cuenta_contraparte="clientes", rol_contraparte="tercero",
+                    da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
+                    sub_diario="sub_diario_ventas"),
+    "compra": Rasgos(tipo="compra", origen="comprobantes", rol_principal="principal", sentido_principal="D",
+                     cuenta_contraparte="cxp", rol_contraparte="tercero",
+                     da_credito_fiscal=True, lleva_detraccion=True, lleva_honorarios=True,
+                     sub_diario="sub_diario_compras"),
+    # El dinero moviéndose. **Tres** campos no son constantes aquí, y que la tabla lo enseñe es la mitad de su
+    # valor. El `rol_principal` sí lo es —la pata del efectivo lleva siempre el rol `tesoreria`, igual que en venta
+    # y compra lleva siempre `principal`—, y es el rasgo que más dice de los nueve: un libro cuyo rol principal el
+    # motor no emite es un libro que el motor no puede originar, y eso es una invariante con su test.
+    #
+    # Los tres que no son constantes:
+    #
+    # - `rol_contraparte` está vacío porque **depende de lo que el pago cancela**: `tercero` si es a un proveedor,
+    #   `principal` si es una comisión del banco, y `tesoreria` otra vez si es la otra pata de un traspaso entre
+    #   cuentas propias. El libro no lo sabe; lo sabe la operación.
     #
     # - `cuenta_contraparte` está **vacía a propósito**: no hay una sola cuenta con la que se salde. Un lado es la
     #   cuenta de efectivo que el contribuyente declaró en su maestro (su 104) y el otro lo pone la imputación,
@@ -104,9 +123,10 @@ RASGOS: dict[str, "Rasgos"] = {
     #   un hueco: entra con el hito D6, que pide un archivo del sub-diario de bancos que CONCAR haya aceptado. Se
     #   intentó declararla ya y el contrato de drivers lo paró con la razón exacta — «una clave que nadie lee se
     #   configura para nada»—, porque hasta que el motor origine este libro nadie puede leerla.
-    "tesoreria": Rasgos(tipo="tesoreria", sub_diario="", cuenta_contraparte="",
-                        sentido_principal=POR_OPERACION, da_credito_fiscal=False, lleva_detraccion=False,
-                        lleva_honorarios=False, origen="movimientos"),
+    "tesoreria": Rasgos(tipo="tesoreria", origen="movimientos", rol_principal="tesoreria",
+                        sentido_principal=POR_OPERACION, cuenta_contraparte="", rol_contraparte="",
+                        da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
+                        sub_diario=""),
 }
 
 

@@ -173,22 +173,38 @@ motor en la base de un ERP y no solo en la capa sobre un sistema legacy.
 
 Desde la 9.0 cada tipo de libro **declara** lo que el motor necesita saber de él, en `modelo.RASGOS`:
 
-| Rasgo | Qué decide | `venta` | `compra` | `tesoreria` |
+| | Rasgo | `venta` | `compra` | `tesoreria` |
 |---|---|---|---|---|
-| `sub_diario` | la clave de configuración que nombra su sub-diario | `sub_diario_ventas` | `sub_diario_compras` | **vacío** |
-| `cuenta_contraparte` | la clave de `cuentas` con la que se salda | `clientes` | `cxp` | **vacío** |
-| `sentido_principal` | a qué lado va el hecho | `H` | `D` | **`por_operacion`** |
-| `da_credito_fiscal` | si su IGV es crédito o débito fiscal | no | sí | no |
-| `lleva_detraccion` · `lleva_honorarios` | qué reglas se le aplican | no | sí | no |
-| `origen` | de qué bloque del documento salen sus líneas | `comprobantes` | `comprobantes` | **`movimientos`** |
+| **qué ES el libro** | `origen` — de qué bloque salen sus líneas | `comprobantes` | `comprobantes` | **`movimientos`** |
+| | `rol_principal` — el rol de la línea del hecho | `principal` | `principal` | **`tesoreria`** |
+| | `sentido_principal` — a qué lado va el hecho | `H` | `D` | **`por_operacion`** |
+| | `cuenta_contraparte` — con qué cuenta se salda | `clientes` | `cxp` | **vacío** |
+| | `rol_contraparte` — el rol de la otra pata | `tercero` | `tercero` | **vacío** |
+| **qué reglas le tocan** | `da_credito_fiscal` | no | sí | no |
+| | `lleva_detraccion` · `lleva_honorarios` | no | sí | no |
+| **a dónde va** | `sub_diario` | ventas | compras | **vacío** |
 
-**El tercer libro entró el 10-oct-2026 y los dos vacíos de su columna son la mitad de lo que vale la tabla.**
+El reparto en tres grupos es de John (10-oct-2026) y no es cosmético: **el sub-diario no es lo que define a un
+libro**, es por dónde sale, y tenerlo primero hacía parecer que sí. Lo que define a un libro son su origen, sus dos
+roles y su sentido. Las tres reglas del medio son todas de las compras, y por eso valen `no` en todo lo demás.
+
+**Y el motor LEE los dos roles en vez de tenerlos escritos a mano** (`asiento/motor.py`), que es lo que los
+convierte en rasgos y no en documentación: para venta y compra valen `principal` y `tercero`, que es exactamente
+lo que estaba en el código, y por eso cablearlos no movió ni una celda de los dos snapshots.
+
+**El tercer libro entró el 10-oct-2026 y los TRES vacíos de su columna son la mitad de lo que vale la tabla.**
 `cuenta_contraparte` está vacía porque un libro de tesorería no se salda con una sola cuenta: un lado es la cuenta
-de efectivo que el contribuyente declaró —su 104— y el otro lo pone la imputación. Y `sub_diario` está vacío porque
+de efectivo que el contribuyente declaró —su 104— y el otro lo pone la imputación. `rol_contraparte` está vacío por
+la misma razón vista desde el otro campo: el rol de la otra pata **depende de lo que el pago cancela** —`tercero` si
+es a un proveedor, `principal` si es una comisión del banco, y `tesoreria` otra vez si es la otra pata de un
+traspaso entre cuentas propias—. Y `sub_diario` está vacío porque
 **su clave de configuración todavía no existe**: se intentó declararla y el contrato de drivers la paró con la razón
 exacta, «una clave que nadie lee se configura para nada». Entra con el hito D6, que pide un archivo del sub-diario
 de bancos que CONCAR haya aceptado. Un libro sin sub-diario es uno que el motor no puede armar, y eso es una
-invariante con su test.
+invariante con su test — y hay otra mejor, que ata las dos tuplas por su contenido en vez de por una lista
+paralela: **un libro cuyo `rol_principal` el motor no emite es un libro que el motor no puede originar.** Venta y
+compra llevan `principal`, que está en `ROLES_DEL_MOTOR`; tesorería lleva `tesoreria`, que el catálogo tiene desde
+el 1-oct-2026 y esa tupla deja fuera a propósito.
 
 **Y `sentido_principal` deja de ser una constante.** En una venta el ingreso siempre va al haber y en una compra el
 gasto siempre al debe; en tesorería **un abono lleva el efectivo al debe y un cargo al haber**, así que el lado lo

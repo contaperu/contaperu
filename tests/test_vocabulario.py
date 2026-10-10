@@ -265,9 +265,14 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     # Lo que el nombre promete es una inclusión, no una igualdad: todo libro que el motor origina tiene su fila.
     # Al revés NO, y desde el 10-oct-2026 ya no es teórico — `tesoreria` tiene rasgos y no se origina.
     assert set(motor.TIPOS_DEL_MOTOR) <= set(RASGOS)
-    # Y la invariante que lo ata: un libro cuyo `sub_diario` está vacío es uno que el motor NO puede originar,
-    # porque sin sub-diario no hay asiento que escribir. Es la señal de la tabla, dicha como test.
-    assert {k for k, r in RASGOS.items() if not r.sub_diario} == set(RASGOS) - set(motor.TIPOS_DEL_MOTOR)
+    # Y la invariante que lo ata por el CONTENIDO y no por una lista paralela: **un libro cuyo rol principal el
+    # motor no emite es un libro que el motor no puede originar.** Venta y compra llevan `principal`, que está en
+    # `ROLES_DEL_MOTOR`; tesorería lleva `tesoreria`, que está en el catálogo y fuera de esa tupla a propósito
+    # desde el 1-oct-2026. El día que el motor aprenda a emitirlo, las dos cosas se mueven juntas o esto cae.
+    no_origina = set(RASGOS) - set(motor.TIPOS_DEL_MOTOR)
+    assert {k for k, r in RASGOS.items() if r.rol_principal not in motor.ROLES_DEL_MOTOR} == no_origina
+    # La misma frontera vista por el sub-diario, que es su consecuencia: sin sub-diario no hay asiento que escribir.
+    assert {k for k, r in RASGOS.items() if not r.sub_diario} == no_origina
     for tipo, r in RASGOS.items():
         assert r.tipo == tipo, "la clave de la tabla y el tipo de la fila tienen que ser el mismo"
 
@@ -300,6 +305,11 @@ def test_los_dos_libros_se_diferencian_en_lo_que_se_diferencian():
     assert (venta.sentido_principal, venta.sentido_contraparte) == ("H", "D")
     assert (compra.sentido_principal, compra.sentido_contraparte) == ("D", "H")
     assert (venta.cuenta_contraparte, compra.cuenta_contraparte) == ("clientes", "cxp")
+    # Los roles de las dos patas, que desde el 10-oct-2026 los LEE el motor en vez de tenerlos escritos a mano
+    # (`motor.lineas_del_comprobante`). En esto los dos libros coinciden, y por eso cablearlos no movió ninguna
+    # salida — que es lo que demuestra que fue un refactor y no un cambio de contabilidad.
+    assert venta.rol_principal == compra.rol_principal == "principal"
+    assert venta.rol_contraparte == compra.rol_contraparte == "tercero"
     # El IGV de una compra es crédito fiscal; el de una venta es lo que se recauda, y por eso no lo es.
     assert compra.da_credito_fiscal and not venta.da_credito_fiscal
     # La detracción y los honorarios solo existen del lado de las compras.

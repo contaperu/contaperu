@@ -323,8 +323,12 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     def principal(cuenta: str, centro: str, importe: Decimal) -> LineaDiario:   # gasto (compras) / ingreso (ventas)
         centro = (centro or "").strip() if usa_centros else ""
         en_linea = lleva_centro(cuenta, config)
-        return linea("principal", importe, cuenta, sentido_base, centro_costo=centro if en_linea else "",
-                     anexo_auxiliar=centro if (not en_linea and "principal" in centro_en_anexo) else "")
+        # El rol lo dice el libro y no esta función: desde el 10-oct-2026 es un rasgo (`rol_principal`), así que
+        # un libro nuevo trae el suyo sin tocar aquí. Para venta y compra vale `principal`, que es lo que estaba
+        # escrito a mano, y por eso ninguna salida cambia — es la prueba de que esto es un refactor.
+        return linea(rasgos.rol_principal, importe, cuenta, sentido_base,
+                     centro_costo=centro if en_linea else "",
+                     anexo_auxiliar=centro if (not en_linea and rasgos.rol_principal in centro_en_anexo) else "")
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
@@ -346,9 +350,9 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                                 retencion={"codigo": TRIBUTO_RENTA, "categoria": CATEGORIA_RENTA_4TA})
                           if retenido > 0 else None)
     cuenta_del_tercero = cuenta_tercero(c, config, rasgos)
-    anexo_tercero = centro_comun if ("tercero" in centro_en_anexo and not es_honorarios) else ""
-    # El tercero: el proveedor en compras, el cliente en ventas.
-    tercero = linea("tercero", total - retenido, cuenta_del_tercero, sentido_tercero,
+    anexo_tercero = centro_comun if (rasgos.rol_contraparte in centro_en_anexo and not es_honorarios) else ""
+    # La contraparte: el proveedor en compras, el cliente en ventas. Su rol también es un rasgo del libro.
+    tercero = linea(rasgos.rol_contraparte, total - retenido, cuenta_del_tercero, sentido_tercero,
                     contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
 
     # La detracción, calcada del Excel real validado en CONCAR (2026): el total COMPLETO queda en el
