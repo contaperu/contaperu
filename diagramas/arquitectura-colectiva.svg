@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="680" height="516" viewBox="0 0 680 516" role="img" aria-labelledby="titulo descripcion">
 <title id="titulo">Arquitectura colectiva: una base abierta para la contabilidad automatizada</title>
-<desc id="descripcion">Los comprobantes electrónicos de SUNAT en XML y la propuesta del SIRE, que trae todos los comprobantes del contribuyente, entran a un estándar abierto, open-accounting. De ahí pasan al motor, al que la comunidad abierta aporta y mejora. El motor entrega a tres canales de destino: SUNAT, con el TXT de reemplazo del RVIE y del RCE por el SIRE y el Libro Diario por el PLE; los sistemas legacy, CONCAR, CONTASIS y STARSOFT; y los ERP que vienen, con JSON, CSV y HTTP. Es una arquitectura colectiva: una base abierta para todos.</desc>
+<desc id="descripcion">Los comprobantes electrónicos de SUNAT en XML y la propuesta del SIRE, que trae todos los comprobantes del contribuyente, entran a un estándar abierto, open-accounting. De ahí pasan al motor, al que la comunidad abierta aporta y mejora. El motor entrega a tres canales de destino, y el primero es el que lo ordena: un ERP, que recibe el asiento en el propio estándar por JSON, CSV o HTTP; SUNAT, con sus dos regímenes, el TXT de reemplazo del RVIE y del RCE por el SIRE y el Libro Diario por el PLE; y los sistemas legacy, CONCAR, CONTASIS y STARSOFT, mientras evolucionan. Es una arquitectura colectiva: una base abierta para todos.</desc>
 <style>
 .fondo{fill:#FFFFFF}
 .t,.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
@@ -40,9 +40,9 @@
 <line class="flecha" x1="212" y1="244" x2="248" y2="244" marker-end="url(#punta)"/>
 <line class="flecha" x1="340" y1="282" x2="340" y2="330" marker-end="url(#punta)"/>
 <path class="flecha" d="M110 330V310H570V330" marker-start="url(#punta)" marker-end="url(#punta)"/>
-<g class="g"><rect x="20" y="332" width="180" height="104" rx="8" stroke-width="0.5"/><text class="t" x="110" y="356">SUNAT</text><text class="s" x="110" y="382">RVIE y RCE</text><text class="s" x="110" y="400">TXT de reemplazo</text></g>
-<g class="g"><rect x="250" y="332" width="180" height="104" rx="8" stroke-width="0.5"/><text class="t" x="340" y="356">Legacy</text><text class="s" x="340" y="382">CONCAR · CONTASIS</text><text class="s" x="340" y="400">STARSOFT</text></g>
-<g class="g"><rect x="480" y="332" width="180" height="104" rx="8" stroke-width="0.5"/><text class="t" x="570" y="356">ERP</text><text class="s" x="570" y="382">Los que vienen</text><text class="s" x="570" y="400">JSON · CSV · HTTP</text></g>
+<g class="g"><rect x="20" y="332" width="180" height="104" rx="8" stroke-width="0.5"/><text class="t" x="110" y="356">ERP</text><text class="s" x="110" y="382">El asiento en el estándar</text><text class="s" x="110" y="400">JSON · CSV · HTTP</text></g>
+<g class="g"><rect x="250" y="332" width="180" height="104" rx="8" stroke-width="0.5"/><text class="t" x="340" y="356">SUNAT</text><text class="s" x="340" y="382">SIRE · RVIE y RCE</text><text class="s" x="340" y="400">PLE · Libro Diario</text></g>
+<g class="g"><rect x="480" y="332" width="180" height="104" rx="8" stroke-width="0.5"/><text class="t" x="570" y="356">Legacy</text><text class="s" x="570" y="382">CONCAR · CONTASIS</text><text class="s" x="570" y="400">STARSOFT</text></g>
 <text class="s leyenda" x="340" y="470">Arquitectura colectiva: una base abierta para todos</text>
 <text class="s leyenda" x="340" y="492">Morado: la comunidad · azul: el estándar · verde azulado: el motor · gris: entradas y destinos</text>
 </svg>

@@ -66,7 +66,7 @@ cada regla lleva al lado la norma o el archivo real que la justifica.
 
 ## Cómo funciona
 
-![Arquitectura colectiva: los comprobantes electrónicos y la propuesta del SIRE entran al estándar abierto open-accounting; de ahí al motor, que la comunidad abierta mejora; y el motor entrega a tres canales: SUNAT (el SIRE y el PLE), los sistemas legacy (CONCAR, CONTASIS y STARSOFT) y los ERP que vienen](diagramas/arquitectura-colectiva.svg)
+![Arquitectura colectiva: los comprobantes electrónicos y la propuesta del SIRE entran al estándar abierto open-accounting; de ahí al motor, que la comunidad abierta mejora; y el motor entrega a tres canales: un ERP (el asiento en el propio estándar, por JSON, CSV o HTTP), SUNAT (el SIRE y el PLE) y los sistemas legacy (CONCAR, CONTASIS y STARSOFT)](diagramas/arquitectura-colectiva.svg)
 
 ContaPerú no es una aplicación que se abre: es el motor que va **dentro de un ERP externo**, sea un sistema contable en
 la nube, un portal para estudios o el sistema de gestión de una empresa. En el ERP externo el contador carga, revisa y
