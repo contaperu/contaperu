@@ -489,7 +489,7 @@ lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna d
 | [INTEGRAR.md](INTEGRAR.md) | Cómo integrarlo en un ERP: desde Python, por lotes, por MCP o por HTTP |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | La regla que manda, nunca datos reales, cómo añadir un driver |
 | [estandar/LEEME.md](estandar/LEEME.md) | El estándar `open-accounting`: sus bloques, sus reglas y su versionado |
-| [REFERENCIAS.md](REFERENCIAS.md) | Lo que se tomó (y lo que no) de QuickBooks, Xero y las APIs unificadas de EE. UU. |
+| [REFERENCIAS.md](REFERENCIAS.md) | La investigación: lo que se tomó —y lo que no— de QuickBooks, Xero, los ERP grandes de EE. UU., las APIs unificadas, los estándares abiertos de factura (EN 16931, Peppol) y los ERP abiertos. Tres escalones: el asiento, el registro del comprobante y la clasificación de la cuenta |
 | [HOJA-DE-RUTA.md](HOJA-DE-RUTA.md) | En qué orden crece el motor y qué dato destraba cada paso, con los frentes en el orden del flujo: entradas, estándar y comunidad, motor, y las salidas SUNAT, Legacy y ERP |
 | [CHANGELOG.md](CHANGELOG.md) | Cada versión con su porqué |
 | [SECURITY.md](SECURITY.md) | Cómo reportar una vulnerabilidad |
