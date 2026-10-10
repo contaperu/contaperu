@@ -4,11 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [9.0.0] — 2026-10-10
 
 **El eje del libro deja de ser un booleano y pasa a ser una tabla.** Es la única cosa que rompe, y rompe a
-propósito: hasta la 8.x catorce funciones públicas recibían `es_venta: bool`, el motor usaba `not es_venta` para
-decir «es compra» en medio centenar de sitios, y **no decir nada significaba compra**.
+propósito: hasta la 8.x veinte funciones recibían `es_venta: bool` —catorce de ellas públicas—, el motor usaba
+`not es_venta` para decir «es compra» en medio centenar de sitios, y **no decir nada significaba compra**.
 
 Mientras el catálogo tuvo dos libros eso fue correcto. Con tres deja de serlo, y de la peor manera: un libro nuevo
 —el diario de un ERP, que es el hito B13— habría salido tratado como una compra **sin un solo error**, con el debe
@@ -20,8 +20,10 @@ movieron ni una celda, y es la prueba de que esto es un refactor y no un cambio 
 
 ### Cambiado · lo que rompe
 
-- **`es_venta: bool` → los rasgos del libro** en catorce funciones de `contaperu.asiento` y tres de
-  `contaperu.tributos.igv`. Con un `Libro` delante se pasa `libro.rasgos`; sin él, `modelo.RASGOS["venta"]` o
+- **`es_venta: bool` → los rasgos del libro** en veinte funciones: diecisiete de `contaperu.asiento` —catorce de
+  ellas en su superficie congelada— y tres de `contaperu.tributos.igv`, que no es un módulo congelado. Las tres
+  tablas de abajo las nombran una por una.
+  Con un `Libro` delante se pasa `libro.rasgos`; sin él, `modelo.RASGOS["venta"]` o
   `["compra"]`. Acepta las tres formas: unos rasgos, un `Libro` o el tipo por su nombre. Cómo migrar, con su
   tabla de antes y después, en `INTEGRAR.md` §Versiones.
 - **Un booleano no se interpreta: para.** Un `True` que se colara elegiría la rama equivocada en silencio, que es
@@ -30,11 +32,52 @@ movieron ni una celda, y es la prueba de que esto es un refactor y no un cambio 
   cuando nadie se lo ha dicho. En los tests ese defecto **no desapareció, bajó al test**, que es su sitio: ahí sí
   hay un libro implícito, el del fichero.
 
-**Y esto rompió sin avisar antes, que es una excepción a nuestra propia regla.** `CLAUDE.md` promete que lo que se
-retira avisa durante toda la mayor anterior, y `es_venta` no avisó en ninguna 8.x: se sustituyó de golpe. Fue a
-propósito —un puente que siguiera aceptando el booleano mantendría vivo justo el camino que esta mayor viene a
-cerrar— y se pudo hacer porque el único consumidor fija su versión y es de la casa, con la `rc` haciendo de periodo
-de prueba. Queda escrito como excepción y no como costumbre; `_obsoleto.py` lo dice también desde dentro.
+### Cómo migrar
+
+**Si usas `contaperu.api`, nada**: sus firmas no cambian y su superficie congelada lo demuestra al pasar sin
+regenerarse. Esto lo nota quien llama al paquete `asiento` o a `tributos.igv` por su cuenta.
+
+La comprobación es un `grep` de `es_venta` en tu código, y la regla es una sola: **donde pasabas el booleano, pasa
+los rasgos del libro.**
+
+| Hasta la 8.x | Desde la 9.0 |
+|---|---|
+| `asiento.faltantes_para(cs, config, True, exige)` | `asiento.faltantes_para(cs, config, libro.rasgos, exige)` |
+| `asiento.sub_diario(c, config, libro.es_venta)` | `asiento.sub_diario(c, config, libro.rasgos)` |
+| `asiento.cuenta_tercero(c, config, False)` | `asiento.cuenta_tercero(c, config, RASGOS["compra"])` |
+| `asiento.faltantes_para(cs, config)` *(sin decirlo)* | **ya no vale**: hay que decir el libro |
+
+Con un `Libro` delante es siempre `libro.rasgos`; sin él, `modelo.RASGOS["venta"]` o `["compra"]`. Y vale cualquiera
+de las tres formas: unos rasgos, un `Libro` o el tipo por su nombre.
+
+**Lo que NO cambia**, para que nadie lo toque de más: `Libro.es_venta` sigue existiendo y `Libro.es_compra` también,
+así que todo lo que pregunta al libro directamente se queda como está. Lo que cambia es lo que **recibía el eje por
+parámetro**.
+
+**Son veinte funciones, y catorce de ellas son las públicas.** La distinción importa justo al hacer el `grep`,
+porque la superficie congelada no es la lista completa:
+
+| Dónde | Cuántas | Cuáles |
+|---|---|---|
+| `contaperu.asiento`, en la superficie congelada | 14 | `lineas_del_comprobante`, `faltantes_para`, `exigir_requisitos`, `numerar`, `numerar_en_orden`, `sub_diario`, `sub_diarios_presentes`, `correlativos_de_partida`, `partes_de`, `cuenta_tercero`, `reparto_no_cuadra`, `repartos_que_no_cuadran`, `comprobantes_sin_cuenta`, `comprobantes_sin_centro` |
+| `contaperu.asiento`, fuera de ella | 3 | `cuentas_del_asiento`, `cuentas_sin_denominacion`, `comprobantes_sin_clase` |
+| `contaperu.tributos.igv` | 3 | `igv_del_asiento`, `base_imputable`, `clase_de_igv` |
+
+`contaperu.tributos` no es un módulo congelado, así que esas tres nunca estuvieron cubiertas por el test de
+superficie. El mapa completo, en `INTEGRAR.md` §Versiones.
+
+### Sin aviso previo, y es una excepción
+
+`CLAUDE.md` promete que lo que se retira avisa durante toda la mayor anterior, y **`es_venta` no avisó en ninguna
+8.x: se sustituyó de golpe.** Fue a propósito —un puente que siguiera aceptando el booleano mantendría vivo justo el
+camino que esta mayor viene a cerrar— y se pudo hacer porque el único consumidor fija su versión y es de la casa,
+con la `rc` haciendo de periodo de prueba. Queda escrito como excepción y no como costumbre, aquí y dentro de
+`_obsoleto.py`.
+
+Y conviene decir por qué un aviso no habría servido en este caso concreto: lo que había que avisar es un **parámetro
+posicional**. Un `True` en la tercera posición no se puede deprecar sin aceptarlo, y aceptarlo es elegir la rama
+«venta» o «compra» en silencio, que es el fallo. El aviso llega igual, pero como error y en el momento de la
+llamada: `LibroSinRasgos` dice qué escribir en su lugar.
 
 ### Añadido
 
@@ -50,7 +93,7 @@ Añadir un libro pasa de auditar cincuenta `if` a rellenar una fila, y **lo que 
 nota**, porque hay que rellenar el campo y no hay con qué. Eso último es la mitad del valor: la tabla es también un
 inventario de lo que falta.
 
-Lo que **no** compra, y conviene no confundirlo: esto no acerca el asiento de un movimiento bancario. Las catorce
+Lo que **no** compra, y conviene no confundirlo: esto no acerca el asiento de un movimiento bancario. Las veinte
 funciones parten de un `Comprobante` y preguntan cosas que un extracto no tiene —sigla, IGV, detracción, cliente o
 proveedor—, así que un pago necesitará su propio camino de generación, no un tercer valor en el mismo. Lo dice el
 catálogo de roles desde la 1.1: «de un comprobante no sale una depreciación ni un pago».
@@ -59,7 +102,7 @@ catálogo de roles desde la 1.1: «de un comprobante no sale una depreciación n
 
 **El test de superficie pública no caza este cambio.** De `contaperu.api` congela las firmas, pero de los módulos
 de extensión —`asiento`, `modelo`, `lectores`, los drivers— congela **solo los nombres**, y los catorce nombres
-siguen ahí. Así que la promesa de la mayor cubre este cambio por su número de versión y por el CHANGELOG, no por
+siguen ahí (de `tributos` no congela nada). Así que la promesa de la mayor cubre este cambio por su número de versión y por el CHANGELOG, no por
 la batería. Quien integre: el `grep` de `es_venta` es la comprobación, no el test.
 
 ---

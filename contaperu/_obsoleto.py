@@ -23,7 +23,7 @@ Las dos decisiones que lo hacen usable, y que conviene no perder:
 
   La 7.0 fue la última que **cumplió** algo: retiró los seis atajos de la raíz que la 6.4.0 había dejado avisando. De
   la 8.0 y la 9.0 este módulo salió vacío, y de la 9.0 hay que decir por qué, porque rompió sin pasar por aquí: el
-  parámetro `es_venta` de catorce funciones no se depreció en ninguna 8.x, se sustituyó de golpe. Era deliberado —un
+  parámetro `es_venta` de veinte funciones no se depreció en ninguna 8.x, se sustituyó de golpe. Era deliberado —un
   puente que siguiera aceptando el booleano mantendría vivo justo el camino que la mayor viene a cerrar— y se pudo
   hacer porque el único consumidor fija su versión y es de la casa. **No convierte eso en costumbre**: lo que
   pueda avisar, avisa, y para eso está este módulo.

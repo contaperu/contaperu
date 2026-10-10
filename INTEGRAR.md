@@ -571,7 +571,8 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   resuelven y cada una te dice la suya. Con una advertencia: **el aviso sale al USAR el nombre, no al importar el
   módulo**, así que una línea que ningún test tuyo toque no saldrá. Haz también un `grep` de las seis.
 - **Si llamas al paquete `asiento` o a `tributos.igv`, la 9.0 cambia un parámetro** y es el único cambio que
-  rompe. Catorce funciones recibían `es_venta: bool` y ahora reciben **los rasgos del libro**:
+  rompe. Veinte funciones recibían `es_venta: bool` y ahora reciben **los rasgos del libro** —diecisiete de
+  `asiento`, catorce de ellas en su superficie congelada, y tres de `tributos.igv`, que no congela nada—:
 
   | Hasta la 8.x | Desde la 9.0 |
   |---|---|
@@ -594,8 +595,8 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   añadir uno es añadir una fila.
 
   **Ojo con una cosa, y la decimos nosotros**: el test de superficie pública **no caza este cambio**, porque de
-  los módulos de extensión congela los nombres y no las firmas. Los catorce nombres siguen ahí. Así que la
-  comprobación es un `grep` de `es_venta` en tu código, no la batería.
+  los módulos de extensión congela los nombres y no las firmas. Los catorce nombres siguen ahí, y de las otras
+  seis no sabe nada. Así que la comprobación es un `grep` de `es_venta` en tu código, no la batería.
 - **El `libro` ya no se traga una clave que no es suya** (7.0). Son exactamente cuatro —`ruc`, `razon_social`,
   `periodo`, `tipo`— y cualquier otra detiene la lectura diciendo su nombre; tampoco pasan las anotaciones `_`, que
   van en la raíz del documento. Hasta la 6.5 se ignoraban en silencio, aunque el esquema las rechazara: si mandabas

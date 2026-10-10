@@ -161,7 +161,8 @@ estándar frente a las de un sistema legacy.
 ### El eje del libro: una tabla, no un booleano (9.0)
 
 El otro eje que ordena el motor es **de qué libro es el comprobante**. De la 1.0 a la 8.x fue un `bool`: `es_venta`,
-que viajaba por catorce funciones públicas, y `not es_venta` quería decir «es compra». Con ese booleano el motor
+que viajaba por veinte funciones —diecisiete de `asiento` y tres del IGV, catorce de ellas en la superficie
+congelada—, y `not es_venta` quería decir «es compra». Con ese booleano el motor
 decidía el sentido debe/haber, el crédito frente al débito fiscal, cliente frente a proveedor, el sub-diario y los
 requisitos.
 
@@ -192,7 +193,7 @@ Lo que esto compra, y lo que no:
 - **Un booleano ya no se interpreta: para.** Es deliberado — un `True` que se colara elegiría la rama equivocada en
   silencio, que es justo lo que la mayor viene a cerrar. Y **omitir el libro tampoco vale**, que era el defecto de la
   firma y era el error.
-- **No acerca el asiento de un movimiento bancario.** Las catorce funciones parten de un `Comprobante` y preguntan
+- **No acerca el asiento de un movimiento bancario.** Las veinte funciones parten de un `Comprobante` y preguntan
   cosas que un extracto no tiene —sigla, IGV, detracción, cliente o proveedor—, así que un pago necesitará su propio
   camino de generación y no un tercer valor en este eje. Lo dice `ROLES_DEL_MOTOR` desde la 1.1: «de un comprobante
   no sale una depreciación ni un pago».

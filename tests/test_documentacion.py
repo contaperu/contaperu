@@ -43,8 +43,9 @@ CITAN_CODIGO = VIGENTES + ("REFERENCIAS.md",)
 # Una ruta de FICHERO del paquete citada en un documento, con su línea opcional: `contaperu/validar.py:244`.
 #
 # Solo ficheros, y no carpetas: se intentó y trae más ruido que valor —las carpetas citadas incluyen las
-# **reservadas a propósito** (`contaperu/banco/`, `contaperu/jurisdicciones/`, que son hitos con su nombre ya
-# escrito), la ruta del estándar dentro de la rueda y los `github.com/contaperu/contaperu/…` de los enlaces—.
+# **reservadas a propósito** (`contaperu/jurisdicciones/`, que es un hito con su nombre ya escrito; `contaperu/banco/`
+# lo era hasta la 8.2, que lo resolvió llamándolo `tesoreria/`), la ruta del estándar dentro de la rueda y los
+# `github.com/contaperu/contaperu/…` de los enlaces—.
 # Un fichero que desaparece sí es siempre un error; una carpeta que todavía no existe puede ser una promesa.
 RUTA_CITADA = re.compile(r"`?(contaperu/[A-Za-z0-9_/]+\.(?:py|json))(?::\d+(?:-\d+)?)?`?")
 
@@ -120,10 +121,12 @@ def test_la_lista_de_vigentes_no_se_queda_atras():
                              "Van a `VIGENTES` o a `fechados`, con su motivo.")
 
 
-# Los numeros que el README dice de si mismo, escritos como palabra y como cifra. Llega hasta el 30 porque
+# Los numeros que un documento dice de si mismo, escritos como palabra y como cifra. Llega hasta el 30 porque
 # antes llegaba hasta el 15 y la herramienta numero 16 no habria fallado: habria reventado con un `KeyError`,
 # que es lo que no se quiere de un guardian. Si alguna vez se pasa de 30, `palabra()` lo dice en una linea.
-PALABRAS = {6: "seis", 7: "siete", 8: "ocho", 9: "nueve", 10: "diez", 11: "once", 12: "doce", 13: "trece",
+# Empieza en el 3 desde la 9.0, que trajo un recuento de tres (las funciones del IGV).
+PALABRAS = {3: "tres", 4: "cuatro", 5: "cinco",
+            6: "seis", 7: "siete", 8: "ocho", 9: "nueve", 10: "diez", 11: "once", 12: "doce", 13: "trece",
             14: "catorce", 15: "quince", 16: "dieciseis", 17: "diecisiete", 18: "dieciocho",
             19: "diecinueve", 20: "veinte", 21: "veintiuna", 22: "veintidos", 23: "veintitres",
             24: "veinticuatro", 25: "veinticinco", 26: "veintiseis", 27: "veintisiete",
@@ -160,11 +163,89 @@ def test_el_readme_no_dice_cuantas_herramientas_hay_a_ojo():
     assert f"{recursos} recursos" in readme, f"el README no dice los {recursos} que hay"
     assert f"{en_palabra(recursos)} recursos" in readme
 
-    # Y ningun recuento viejo sobrevive en otra frase.
+    # Y ningun recuento viejo sobrevive en otra frase. Por PALABRA ENTERA: con un `in` pelado, «13 recursos»
+    # contiene «3 recursos» y el guardian senalaria como viejo el recuento bueno. No saltaba porque la tabla
+    # empezaba en el 6, que es una propiedad de la tabla y no de la comprobacion; la 9.0 bajo la tabla al 3.
     for numero, _ in PALABRAS.items():
         if numero not in (herramientas, recursos):
-            assert f"{numero} herramientas" not in readme, f"queda un recuento viejo: {numero} herramientas"
-            assert f"{numero} recursos" not in readme, f"queda un recuento viejo: {numero} recursos"
+            for cosa in ("herramientas", "recursos"):
+                assert not re.search(rf"\b{numero} {cosa}\b", readme), f"queda un recuento viejo: {numero} {cosa}"
+
+
+# Los documentos que dicen cuántas funciones reciben el eje del libro, y los contextos en que lo dicen. Un número
+# escrito en palabra se busca por lo que va DETRÁS, que es lo que lo convierte en una afirmación —«veinte
+# funciones», «catorce de ellas», «tres del IGV»— y, sobre todo, lo que dice CUÁL de los cuatro recuentos es.
+#
+# Cada contexto admite solo el suyo, y eso no es rigor de más: con los cuatro válidos en cualquier hueco, «catorce
+# funciones de `asiento`» pasaba, y es justo el error que hubo. Lo descubrió mutar el documento a mano.
+DICEN_EL_RECUENTO_DEL_EJE = ("ARQUITECTURA.md", "CLAUDE.md", "INTEGRAR.md")
+CONTEXTOS_DEL_EJE = {
+    # lo que va detrás del número        : qué recuentos caben ahí
+    r"funciones": ("total", "asiento"),
+    r"de ellas": ("publicas",),
+    r"del IGV|de `tributos\.igv`": ("igv",),
+}
+
+
+def _cuentas_del_eje() -> dict[str, int]:
+    """Cuántas funciones reciben los rasgos del libro, contadas del código y no de la cabeza.
+
+    Se cuenta con `ast` y por la ANOTACIÓN del parámetro, que es la definición de «recibe el eje»: una función que
+    lo reciba sin anotarlo no está en la cuenta, y eso es correcto —lo que un documento promete a quien integra es
+    una firma—."""
+    import ast
+
+    paquete = RAIZ / "contaperu"
+    recibe: dict[str, list[str]] = {"asiento": [], "igv": []}
+    for fichero in sorted(paquete.rglob("*.py")):
+        if not str(fichero).replace("\\", "/").endswith(("tributos/igv.py",)) and "asiento" not in fichero.parts:
+            continue
+        donde = "igv" if fichero.name == "igv.py" else "asiento"
+        for nodo in ast.walk(ast.parse(fichero.read_text("utf-8"))):
+            if not isinstance(nodo, ast.FunctionDef) or nodo.name.startswith("_"):
+                continue
+            if any(a.annotation is not None and "Rasgos" in ast.unparse(a.annotation)
+                   for a in nodo.args.args + nodo.args.kwonlyargs):
+                recibe[donde].append(nodo.name)
+
+    # Y cuántas de las de `asiento` están en la superficie congelada, que es de donde salía el «catorce».
+    import json
+
+    superficie = json.loads((RAIZ / "tests/fixtures/superficie/1.0.json").read_text("utf-8"))
+    publicas = [n for n in recibe["asiento"] if n in superficie.get("contaperu.asiento", {})]
+    return {"total": len(recibe["asiento"]) + len(recibe["igv"]), "asiento": len(recibe["asiento"]),
+            "publicas": len(publicas), "igv": len(recibe["igv"])}
+
+
+@pytest.mark.parametrize("doc", DICEN_EL_RECUENTO_DEL_EJE)
+def test_ningun_documento_dice_a_ojo_cuantas_funciones_reciben_el_eje_del_libro(doc):
+    """El hermano del recuento de herramientas, y su caso real es de la propia 9.0.
+
+    Los cinco documentos de esa versión dijeron «catorce funciones» porque catorce son las que están en la
+    superficie congelada —y son veinte las que cambian: diecisiete de `asiento` y tres del IGV—. Lo encontró un
+    `ast` escrito para otra cosa; la batería no lo vio, porque de los módulos de extensión congela los nombres y
+    no las firmas, así que nada se puso rojo.
+
+    No exige que cada documento dé los cuatro números: exige que **el que dé sea el que va en ese hueco**. Así
+    caen las dos formas de equivocarse: la que envejece sola —el día que el eje llegue a un libro más, todo lo que
+    diga «veinte» se pone rojo— y la de hoy, poner el recuento de las públicas donde va el de todas."""
+    cuentas = _cuentas_del_eje()
+    palabras = set(PALABRAS.values())
+    contenido = texto(doc)
+    alguno = False
+
+    for detras, cuales in CONTEXTOS_DEL_EJE.items():
+        caben = {en_palabra(cuentas[c]) for c in cuales}
+        dichas = {m.group(1).lower() for m in re.finditer(rf"\b([a-záéíóú]+) (?:{detras})\b", contenido)}
+        dichas &= palabras
+        alguno = alguno or bool(dichas)
+        mal = sorted(dichas - caben)
+        assert not mal, (
+            f"{doc} dice «{mal[0]} {detras.split('|')[0]}» y ahí va {' o '.join(sorted(caben))}. Hoy son "
+            f"{cuentas['total']} funciones: {cuentas['asiento']} de `asiento`, {cuentas['publicas']} de ellas en la "
+            f"superficie congelada, y {cuentas['igv']} del IGV.")
+
+    assert alguno, f"{doc} está en DICEN_EL_RECUENTO_DEL_EJE y no da ninguno: sácalo de la lista o escríbelo"
 
 
 @pytest.mark.parametrize("doc", CITAN_CODIGO)
