@@ -158,6 +158,72 @@ con aviso (`drivers.ALIAS`) y **la 4.0 lo retiró**, que es lo que el aviso prom
 contrato mide, que sigue llamándose `VOCABULARIO = "neutral"` porque eso sí es lo que describe: las palabras del
 estándar frente a las de un sistema legacy.
 
+### El eje del libro: una tabla, no un booleano (9.0)
+
+El otro eje que ordena el motor es **de qué libro es el comprobante**. De la 1.0 a la 8.x fue un `bool`: `es_venta`,
+que viajaba por catorce funciones públicas, y `not es_venta` quería decir «es compra». Con ese booleano el motor
+decidía el sentido debe/haber, el crédito frente al débito fiscal, cliente frente a proveedor, el sub-diario y los
+requisitos.
+
+Con dos libros era correcto. El problema no era el número de llamadas: era que **un tercer tipo de libro no habría
+dado ningún error** —habría salido tratado como una compra, con el debe y el haber invertidos y la contraparte en la
+cuenta equivocada—, y el próximo libro ya tiene nombre y número de hito: el **diario** de B13, el que convierte al
+motor en la base de un ERP y no solo en la capa sobre un sistema legacy.
+
+Desde la 9.0 cada tipo de libro **declara** lo que el motor necesita saber de él, en `modelo.RASGOS`:
+
+| Rasgo | Qué decide | `venta` | `compra` |
+|---|---|---|---|
+| `sub_diario` | la clave de configuración que nombra su sub-diario | `sub_diario_ventas` | `sub_diario_compras` |
+| `cuenta_contraparte` | la clave de `cuentas` con la que se salda | `clientes` | `cxp` |
+| `sentido_principal` | a qué lado va el hecho | `H` | `D` |
+| `da_credito_fiscal` | si su IGV es crédito o débito fiscal | no | sí |
+| `lleva_detraccion` · `lleva_honorarios` | qué reglas se le aplican | no | sí |
+| `origen` | de qué bloque del documento salen sus líneas | `comprobantes` | `comprobantes` |
+
+**La contraparte no se declara: se deriva**, porque es la partida doble —`sentido_contraparte` es el otro lado de
+`sentido_principal`, y escribirlo dos veces sería un sitio donde pueden discrepar—.
+
+Lo que esto compra, y lo que no:
+
+- **Añadir un libro pasa de auditar medio centenar de `if` a rellenar una fila**, y lo que el motor todavía no sabe
+  hacer **se nota**, porque hay que rellenar el campo y no hay con qué. Esa mitad es la que más vale: la tabla es
+  también un inventario de lo que falta.
+- **Un booleano ya no se interpreta: para.** Es deliberado — un `True` que se colara elegiría la rama equivocada en
+  silencio, que es justo lo que la mayor viene a cerrar. Y **omitir el libro tampoco vale**, que era el defecto de la
+  firma y era el error.
+- **No acerca el asiento de un movimiento bancario.** Las catorce funciones parten de un `Comprobante` y preguntan
+  cosas que un extracto no tiene —sigla, IGV, detracción, cliente o proveedor—, así que un pago necesitará su propio
+  camino de generación y no un tercer valor en este eje. Lo dice `ROLES_DEL_MOTOR` desde la 1.1: «de un comprobante
+  no sale una depreciación ni un pago».
+
+**Lo que la tabla no absorbió, y por qué.** De los rasgos solo se preguntan tres veces `es_venta`, y son los
+honestos: los sitios donde el **procedimiento** difiere y no solo un dato —el orden de las líneas de una venta
+(`asiento/motor.py`), la clasificación (`asiento/resolucion/clasificacion.py`) y la rama de venta de `clase_de_igv`
+(`tributos/igv.py`)—. Un rasgo más para disimularlos sería peor: diría que son datos cuando son procedimientos.
+
+Y **sigue habiendo `libro.es_venta` por el núcleo**, que es otra cosa y conviene no confundirla: son módulos que
+tienen el `Libro` en la mano y nunca recibieron el booleano por parámetro. Se reparten en dos grupos, y solo uno
+preocupa:
+
+- **Un formato con exactamente dos variantes**: el TXT del SIRE es el RVIE o el RCE (`lectores/sire_txt.py`,
+  `catalogos/sire.py`, `drivers/sire/txt.py`), en un XML la contraparte es el adquirente o el emisor
+  (`lectores/xml_ubl.py`), el nombre del archivo lleva VENTAS o COMPRAS (`drivers/kit/nombres.py`,
+  `drivers/starsoft/salida.py`), CONTASIS tiene dos juegos de columnas. Un tercer libro no tiene archivo del SIRE que
+  leer: ahí la pregunta es del formato, no de la contabilidad.
+- **Reglas que solo tiene una venta** (`tributos/validar.py`): están en forma positiva —`if libro.es_venta and …`—,
+  así que un libro nuevo se salta la regla de venta en vez de heredar la de compra, que es la dirección segura. La
+  única excepción es una palabra de un mensaje, «cliente» o «proveedor», y ahí el peor caso es una frase torcida.
+
+La 9.0 encontró **un** `not es_venta` fuera de eso y lo arregló: `modelo.identidad_de`, que mete el documento de la
+contraparte en la identidad de una compra. Importa porque vive en `modelo`, **por debajo** de la puerta que cierra
+este apartado, así que era el único sitio donde un libro nuevo heredaba algo sin que nada lo parase. Hoy pregunta
+`es_compra`.
+
+Y la guarda sigue puesta donde el eje se calcula: un libro que el motor no origina **detiene** la exportación
+(`asiento.faltas.LibroQueElMotorNoOrigina`). La tabla no la sustituye — tiene las filas que tiene, y un tipo del
+catálogo sin fila hay que pararlo ahí, no dejar que falle dentro.
+
 ## Capas, api y puertas
 
 Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abajo. No es una convención:

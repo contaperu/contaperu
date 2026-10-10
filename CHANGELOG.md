@@ -4,6 +4,66 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [9.0.0] — 2026-10-10
+
+**El eje del libro deja de ser un booleano y pasa a ser una tabla.** Es la única cosa que rompe, y rompe a
+propósito: hasta la 8.x catorce funciones públicas recibían `es_venta: bool`, el motor usaba `not es_venta` para
+decir «es compra» en medio centenar de sitios, y **no decir nada significaba compra**.
+
+Mientras el catálogo tuvo dos libros eso fue correcto. Con tres deja de serlo, y de la peor manera: un libro nuevo
+—el diario de un ERP, que es el hito B13— habría salido tratado como una compra **sin un solo error**, con el debe
+y el haber invertidos y la contraparte en la cuenta equivocada. La 8.2 puso una puerta que lo paraba; esto lo
+arregla, que es distinto.
+
+**Ninguna salida cambia.** Los dos snapshots —el Excel de CONCAR con sus 52 casos y el registro de CONTASIS— no se
+movieron ni una celda, y es la prueba de que esto es un refactor y no un cambio de contabilidad.
+
+### Cambiado · lo que rompe
+
+- **`es_venta: bool` → los rasgos del libro** en catorce funciones de `contaperu.asiento` y tres de
+  `contaperu.tributos.igv`. Con un `Libro` delante se pasa `libro.rasgos`; sin él, `modelo.RASGOS["venta"]` o
+  `["compra"]`. Acepta las tres formas: unos rasgos, un `Libro` o el tipo por su nombre. Cómo migrar, con su
+  tabla de antes y después, en `INTEGRAR.md` §Versiones.
+- **Un booleano no se interpreta: para.** Un `True` que se colara elegiría la rama equivocada en silencio, que es
+  justo lo que esta mayor viene a quitar, así que el error dice qué escribir en su lugar.
+- **Omitir el libro tampoco vale.** Era el defecto de la firma y era el error: una función que supone «compra»
+  cuando nadie se lo ha dicho. En los tests ese defecto **no desapareció, bajó al test**, que es su sitio: ahí sí
+  hay un libro implícito, el del fichero.
+
+**Y esto rompió sin avisar antes, que es una excepción a nuestra propia regla.** `CLAUDE.md` promete que lo que se
+retira avisa durante toda la mayor anterior, y `es_venta` no avisó en ninguna 8.x: se sustituyó de golpe. Fue a
+propósito —un puente que siguiera aceptando el booleano mantendría vivo justo el camino que esta mayor viene a
+cerrar— y se pudo hacer porque el único consumidor fija su versión y es de la casa, con la `rc` haciendo de periodo
+de prueba. Queda escrito como excepción y no como costumbre; `_obsoleto.py` lo dice también desde dentro.
+
+### Añadido
+
+- **`modelo.Rasgos` y `modelo.RASGOS`**: por cada tipo de libro, qué sub-diario usa, con qué cuenta se salda, a
+  qué lado va el hecho, si su IGV es crédito fiscal, si lleva detracción y honorarios, y de qué bloque salen sus
+  líneas. Cada campo era un `if es_venta` repartido por el núcleo. La contraparte no se declara: se deriva, porque
+  es la partida doble.
+- **`modelo.rasgos_de`** y **`Libro.rasgos`**, y **`modelo.LibroSinRasgos`** para el que se equivoque.
+
+### Lo que esto compra, dicho sin adornos
+
+Añadir un libro pasa de auditar cincuenta `if` a rellenar una fila, y **lo que el motor todavía no sabe hacer se
+nota**, porque hay que rellenar el campo y no hay con qué. Eso último es la mitad del valor: la tabla es también un
+inventario de lo que falta.
+
+Lo que **no** compra, y conviene no confundirlo: esto no acerca el asiento de un movimiento bancario. Las catorce
+funciones parten de un `Comprobante` y preguntan cosas que un extracto no tiene —sigla, IGV, detracción, cliente o
+proveedor—, así que un pago necesitará su propio camino de generación, no un tercer valor en el mismo. Lo dice el
+catálogo de roles desde la 1.1: «de un comprobante no sale una depreciación ni un pago».
+
+### Una advertencia sobre el mecanismo, que la encontramos haciendo esto
+
+**El test de superficie pública no caza este cambio.** De `contaperu.api` congela las firmas, pero de los módulos
+de extensión —`asiento`, `modelo`, `lectores`, los drivers— congela **solo los nombres**, y los catorce nombres
+siguen ahí. Así que la promesa de la mayor cubre este cambio por su número de versión y por el CHANGELOG, no por
+la batería. Quien integre: el `grep` de `es_venta` es la comprobación, no el test.
+
+---
+
 ## [8.2.0] — 2026-10-10
 
 **La base de la tesorería, sacada de nueve estados de cuenta de producción.** El paquete que `ARQUITECTURA.md`

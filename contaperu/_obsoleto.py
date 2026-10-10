@@ -10,7 +10,7 @@ Las dos decisiones que lo hacen usable, y que conviene no perder:
 
 - **El aviso sale al USAR la ruta vieja, no al importar el módulo.** Por eso `reexportar` devuelve un `__getattr__` de
   módulo en vez de ejecutar nada en el cuerpo: un `import` en el arranque de una aplicación no ensucia su registro.
-- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 7.0, que
+- **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 10.0, que
   es lo que promete `CLAUDE.md`: lo que se retira avisa durante toda la mayor anterior. **Se mueve con cada mayor que
   cumple lo prometido**, y la 4.0 cumplió: retiró el alias `asiento_neutral`, que era lo único que quedaba avisando.
   Decía «3.0» con el paquete ya en la 3.8, así que el aviso citaba una versión pasada — una promesa de retiro no puede
@@ -18,8 +18,15 @@ Las dos decisiones que lo hacen usable, y que conviene no perder:
   nada, porque llegó sin nadie avisando. Y la 6.0 **volvió a caer en lo mismo**: salió sin moverlo, así que durante
   toda la 6.x este módulo prometía un retiro en «la 6.0», que ya era la versión en curso. Nada lo vigilaba —el único
   test que lo tocaba lo interpolaba en el mensaje que comprobaba—, de modo que la regla de arriba no la hacía cumplir
-  nadie. **Desde la 6.2.0 sí**: `tests/test_version.py` exige que `RETIRO` sea mayor que la versión del paquete. Hoy
-  dice «7.0», que es la mayor siguiente y donde se retiran los puentes de la reestructuración.
+  nadie. **Desde la 6.2.0 sí**: `tests/test_version.py` exige que `RETIRO` sea mayor que la versión del paquete, y es
+  el test que ha movido este número en la 7.0, la 8.0 y la 9.0 — las tres veces en rojo primero, que es su trabajo.
+
+  La 7.0 fue la última que **cumplió** algo: retiró los seis atajos de la raíz que la 6.4.0 había dejado avisando. De
+  la 8.0 y la 9.0 este módulo salió vacío, y de la 9.0 hay que decir por qué, porque rompió sin pasar por aquí: el
+  parámetro `es_venta` de catorce funciones no se depreció en ninguna 8.x, se sustituyó de golpe. Era deliberado —un
+  puente que siguiera aceptando el booleano mantendría vivo justo el camino que la mayor viene a cerrar— y se pudo
+  hacer porque el único consumidor fija su versión y es de la casa. **No convierte eso en costumbre**: lo que
+  pueda avisar, avisa, y para eso está este módulo.
 
   Y no se confunda con los **valores de catálogo** marcados obsoletos (`estandar/catalogos.json`, `obsoletos`), que la
   5.0 trae y que **no tienen retiro ninguno**: un nombre de Python obsoleto desaparece, un valor publicado del estándar
@@ -37,7 +44,7 @@ import importlib
 import warnings
 from typing import Any, Callable
 
-RETIRO = "9.0"
+RETIRO = "10.0"
 
 
 class RutaObsoleta(DeprecationWarning):

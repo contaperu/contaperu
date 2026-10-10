@@ -67,7 +67,9 @@ conocen el formato de un destino y nada de contabilidad, cada uno con su **canal
 `drivers/contrato/` y el kit común de `drivers/kit`); un **pipeline** único (`pipeline/`); la **api** pública
 (`contaperu.api`, con la tabla de operaciones y el contrato OpenConta); y tres **puertas** que solo hablan con la api
 (`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x y la 4.0, el
-vocabulario de un ERP que llevaba la línea. El
+vocabulario de un ERP que llevaba la línea. **De qué libro es un comprobante lo dice una tabla y no un booleano**
+desde la 9.0 (`modelo.RASGOS`): cada tipo de libro declara su sub-diario, su cuenta de contraparte, a qué lado va el
+hecho y qué reglas le toca —el porqué, en `ARQUITECTURA.md`—, y añadir un libro es añadir una fila. El
 asiento nace en las **líneas de diario neutrales** del estándar `open-accounting` y cada ERP es una proyección de ellas.
 Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LEEME.md`; cómo se integra, en
 `INTEGRAR.md`.
@@ -97,7 +99,13 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   detracción del CSV cambia de significado sin cambiar de nombre. **La 7.0 rompe dos veces**: retira los seis
   atajos que la 6.4.0 dejó en la raíz al agrupar el núcleo —el que use `contaperu.api` no nota nada; el que importe
   el núcleo cambia seis imports, y el mapa está en `INTEGRAR.md`— y el `libro` deja de ignorar en silencio una clave
-  que no es suya, que es el último bloque del estándar donde pasaba. Antes de etiquetar una versión mayor se publica
+  que no es suya, que es el último bloque del estándar donde pasaba. **La 9.0 rompe un parámetro**: el eje del libro
+  dejó de ser `es_venta: bool` y pasó a ser la tabla `modelo.RASGOS` en catorce funciones de `asiento` y tres de
+  `tributos.igv`; el que use `contaperu.api` no nota nada, el que llame al paquete `asiento` cambia sus llamadas
+  (la tabla, en `INTEGRAR.md`). Ninguna salida cambió: los dos snapshots quedaron intactos. Y rompió **sin avisar
+  en una 8.x**, que es una excepción a la regla de abajo y está escrita como tal en `CHANGELOG.md` y en
+  `_obsoleto.py` — un puente que siguiera aceptando el booleano mantendría vivo el camino que la mayor cierra.
+  Antes de etiquetar una versión mayor se publica
   una pre-release (`vX.Y.ZrcN`) y quien integra la prueba en su batería, también con
   `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»). **Hasta la 7.0 eso se prometía y no se
   hacía**: solo la 1.0 y la 5.0 tuvieron su `rc`; la 2.0, la 3.0, la 4.0 y la 6.0 salieron sin ninguno.
