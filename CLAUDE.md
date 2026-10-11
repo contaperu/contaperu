@@ -71,13 +71,19 @@ conocen el formato de un destino y nada de contabilidad, cada uno con su **canal
 (`puertas/cli`, `puertas/servidor_mcp`, `puertas/servidor_http`). La 2.0 retiró las rutas de la 0.x y la 4.0, el
 vocabulario de un ERP que llevaba la línea. **De qué libro es un comprobante lo dice una tabla y no un booleano**
 desde la 9.0 (`modelo.RASGOS`): cada tipo de libro declara su sub-diario, su cuenta de contraparte, a qué lado va el
-hecho y qué reglas le toca —el porqué, en `ARQUITECTURA.md`—, y añadir un libro es añadir una fila. **Ya son tres**,
+hecho, **qué papeles caben en su asiento** y qué reglas le toca —el porqué, en `ARQUITECTURA.md`—, y añadir un libro
+es añadir una fila. **Ya son tres**,
 y el tercero demostró para qué servía la tabla: dos de sus siete rasgos no pueden ser constantes —el lado lo dice
 cada operación y la contrapartida la pone la imputación—, y los vacíos son la señal de lo que el motor no sabe hacer
 todavía. El efecto de una operación de tesorería sobre el efectivo es `entrada | salida | transferencia`, con las
 palabras de la **NIC 7** y con su §9 como razón del tercero: un traspaso entre cuentas propias no es un flujo de
 efectivo, y se nombra para poder excluirlo. El
 asiento nace en las **líneas de diario neutrales** del estándar `open-accounting` y cada ERP es una proyección de ellas.
+**Y el papel de una línea no es un campo**: desde la 2.0 del estándar se DERIVA de lo que la línea trae —su bloque
+tipado, su sentido y su contraparte, que es la lógica de SAF-T— y la regla vive en `drivers/kit/rol.py`, porque el
+`rol` existía para los sistemas de destino y no para la contabilidad. Lo que decidió retirarlo fue mirar los demás:
+ningún estándar abierto del asiento lo tiene, y el único precedente —Odoo— usa dos vocabularios distintos según si
+el asiento viene de una factura o de un pago.
 Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LEEME.md`; cómo se integra, en
 `INTEGRAR.md`.
 
@@ -112,6 +118,14 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   (la tabla, en `INTEGRAR.md`). Ninguna salida cambió: los dos snapshots quedaron intactos. Y rompió **sin avisar
   en una 8.x**, que es una excepción a la regla de abajo y está escrita como tal en `CHANGELOG.md` y en
   `_obsoleto.py` — un puente que siguiera aceptando el booleano mantendría vivo el camino que la mayor cierra.
+  **La 10.0 rompe quitando, y va con la 2.0 del estándar**: salen cuatro claves del documento —el `rol` de cada
+  línea, `documento.tipo`, `referencia.tipo` y `detraccion.estado`— y ninguna entra, así que migrar es un borrado
+  (`estandar/MIGRAR-A-2.0.md`). Ninguna salida se movió: los dos snapshots quedaron **byte a byte** idénticos. El
+  que use `contaperu.api` solo ve un argumento nuevo y opcional en `por_cuenta`; el que escriba documentos a mano
+  quita cuatro claves; el que tenga un driver de terceros pierde los nombres de canal de la 7.x y dos rutas de
+  columna. Y con ella se fue el andamio que existía para no romper el pasado —`drivers.ALIAS`, la maquinaria de
+  rutas de `_obsoleto` y `CANALES_RENOMBRADOS`—, pero **no el protocolo**: `RutaObsoleta`, `avisar` y `RETIRO` se
+  quedan porque están publicados y la app los usa.
   Antes de etiquetar una versión mayor se publica
   una pre-release (`vX.Y.ZrcN`) y quien integra la prueba en su batería, también con
   `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»). **Hasta la 7.0 eso se prometía y no se
