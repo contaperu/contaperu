@@ -960,3 +960,32 @@ def test_lo_que_no_cabe_detiene_tambien_la_forma_desde_lineas(con_terceros):
     with pytest.raises(contrato.NoCabe):
         api.exportar(documento_de_compras(), driver="corto", configuracion=CONTAB)
     assert api.diagnosticar(documento_de_compras(), driver="corto", configuracion=CONTAB)["faltantes"]["no_cabe"]
+
+
+def test_el_rol_que_declara_una_columna_es_un_rol_que_se_sabe_derivar():
+    """La invariante que ata los dos `rol` que hay en el repositorio, y que son dos cosas distintas con el mismo
+    nombre (9.2).
+
+    El de `Columna` es **configuración de un driver**: dice qué línea del asiento llena una columna de su archivo
+    —el centro de costo va en la de la línea principal, el anexo auxiliar en las que lo llevan—. Ese se queda. El
+    otro, el campo `rol` de una línea del estándar, se retira: desde la 9.2 nadie lo lee, porque
+    `drivers.kit.rol.rol_de()` lo deriva de los datos que la línea trae.
+
+    Lo que esta invariante impide es que se separen: si una columna declara un papel que la derivación no sabe
+    producir, esa columna **no se llenaría nunca** y nada lo diría. Antes de la 9.2 el rol venía estampado en la
+    línea, así que un valor inventado fallaba igual de callado; ahora hay un conjunto cerrado contra el que
+    compararlo."""
+    from contaperu.asiento import ROLES_DEL_MOTOR
+
+    declarados = {}
+    for nombre in sorted(drivers.DE_SERIE):
+        elegibles = getattr(drivers.obtener(nombre), "COLUMNAS_ELEGIBLES", {}) or {}
+        for dato, columnas in elegibles.items():
+            for c in columnas:
+                if c.rol:
+                    declarados.setdefault(c.rol, []).append(f"{nombre}.{dato}.{c.columna}")
+
+    assert declarados, "ningún driver declara el rol de una columna: el test dejó de medir algo"
+    fuera = {r: d for r, d in declarados.items() if r not in ROLES_DEL_MOTOR}
+    assert not fuera, (f"estas columnas declaran un papel que el motor no emite: {fuera}. Los que emite: "
+                      f"{sorted(ROLES_DEL_MOTOR)}. Una columna con un papel que no existe no se llena nunca.")

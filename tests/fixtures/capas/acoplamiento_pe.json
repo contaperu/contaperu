@@ -47,6 +47,9 @@
  "contaperu.drivers.contasis.proyeccion": [
   "contaperu.tributos.igv"
  ],
+ "contaperu.drivers.kit.rol": [
+  "contaperu.catalogos"
+ ],
  "contaperu.lectores": [
   "contaperu.lectores.sire_txt",
   "contaperu.lectores.xml_ubl"

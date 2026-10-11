@@ -274,9 +274,11 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     assert set(motor.TIPOS_DEL_MOTOR) <= set(RASGOS)
     # Y la invariante que lo ata por el CONTENIDO y no por una lista paralela: **un libro ninguno de cuyos roles
     # el motor emite es un libro que el motor no puede originar.** Venta y compra declaran roles que están todos en
-    # `ROLES_DEL_MOTOR` —de hecho lo definen—; tesorería declara `tesoreria` y `contrapartida`, que el catálogo
-    # publica desde el 1-oct-2026 y esa tupla deja fuera a propósito. El día que el motor aprenda a emitirlos, las
-    # dos cosas se mueven juntas o esto cae.
+    # `ROLES_DEL_MOTOR` —de hecho lo definen, porque esa tupla se deriva de ellos—; tesorería no declara ninguno,
+    # que es la única afirmación comprobable mientras el motor no emita ni una línea suya. El día que la emita, las
+    # dos cosas se mueven juntas o esto cae. En el catálogo sí hay roles que esa tupla deja fuera a propósito
+    # (`tesoreria` y `contrapartida`, desde el 1-oct-2026): son vocabulario para quien produce un asiento que el
+    # motor no origina.
     no_origina = set(RASGOS) - set(motor.TIPOS_DEL_MOTOR)
     # Y es una equivalencia EXACTA, no una inclusión: un libro declara roles si y solo si el motor lo origina.
     # Declararlos para uno que no se origina sería adivinar —no hay forma de medirlo ejecutando el motor— y el

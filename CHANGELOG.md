@@ -4,6 +4,89 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [9.2.0] — 2026-10-10
+
+**El `rol` de una línea deja de leerse en ninguna parte.** Sigue emitiéndose, ninguna salida cambia y los dos
+snapshots quedan intactos; lo que cambia es que ya **nadie decide por él**, porque los dos drivers que lo leían
+ahora lo derivan de los datos que la línea trae. Es el paso que convierte el campo en pura salida, y el que hace
+que retirarlo del estándar sea una línea y no un rediseño: **no se puede quitar un campo que algo lee.**
+
+De dónde sale (John, 10-oct-2026): el núcleo se está volviendo **la base de un ERP**, y de ahí un principio — *lo
+que existe para los sistemas de destino no puede vivir en el núcleo*. El rol lo inventamos nosotros. **Ningún
+estándar abierto del asiento lo tiene**: XBRL GL usa `account` + `documentType` + `debitCreditCode`; SAF-T
+distingue la línea por los datos que trae (`CustomerID`/`SupplierID`, `TaxInformation`); Beancount y hledger llevan
+cuenta e importe con signo. El único precedente es Odoo, y **parte el vocabulario en dos**:
+`product`/`tax`/`payment_term` en una factura y `liquidity`/`counterpart`/`writeoff` en un pago.
+
+### Añadido · `drivers.kit.rol.rol_de(linea, libro)`
+
+La derivación, en la capa que la usa. Es la lógica de SAF-T más un término que el Perú añade:
+
+| Lo que trae la línea | Su papel |
+|---|---|
+| un bloque `impuesto`, `retencion` o `detraccion` | ese mismo rol |
+| su `debe_haber` es el lado del tercero de este libro | `tercero` |
+| si no, y trae `contraparte_doc` | `recorte` |
+| si no | `principal` |
+
+El «lado del tercero» es `sentido_contraparte` de los rasgos del libro, **cambiado cuando el `tipo_cp` está en
+`TIPOS_INVIERTEN`**: en una nota de crédito los dos lados se invierten, y una nota de crédito de compra **puede
+llevar detracción**, así que el caso no es teórico. Un libro que no declara roles —tesorería— da
+`RolNoDerivable`, que dice que no hay nada que derivar y no finge una respuesta.
+
+**El orden de los dos últimos tramos se midió, y la primera versión estaba mal.** Preguntaba por `contraparte_doc`
+antes que por el lado y falló en una línea de las 324 que produce la batería: **el cliente de una boleta**, que no
+lleva RUC porque es un consumidor final, salía `principal` en vez de `tercero`. El sentido no tiene ese agujero.
+
+### Cambiado · los dos drivers que lo leían, cada uno por su camino
+
+- **CONCAR no necesitaba la derivación.** Su único uso era encontrar la línea de la detracción, y esa es la que
+  lleva el bloque `detraccion` —la misma función ya escribía cuatro columnas así—. **Y arregla la vuelta**: una
+  línea leída de un Excel de CONCAR no trae rol, así que volvía al archivo con el área (columna V) **vacía**,
+  perdiendo lo que la ida había escrito. El snapshot no lo veía porque solo mira la ida.
+- **STARSOFT sí la usa**, en sus cinco sitios: si una fila es la del total (en compras y en ventas), cuál es la
+  línea de la detracción, qué líneas no se escriben y en qué orden salen las filas de un comprobante. Sus dos
+  tablas siguen escritas con nombres de rol —son de ese driver, que es a quien le sirven—; lo que cambió es de
+  dónde sale el rol con el que se comparan.
+
+### Añadido · tres guardianes, y uno de ellos se amplía
+
+- **`tests/test_rol_derivado.py`**, el que sostiene todo lo demás: exige `rol_de(linea, libro) == linea.rol` en
+  **cada** línea de los tres meses que la batería caracteriza, por los cuatro drivers que producen líneas, con los
+  seis roles del motor ejercitados. Más los dos casos que ese barrido no trae y que son justo los que ejercitan la
+  inversión: la nota de crédito de una **venta** y la de una **compra con detracción**, donde el tercero y el
+  recorte caen al lado contrario del que caen siempre.
+- **El guardián sintáctico del `rol` pasa del núcleo a TODO el paquete.** Hasta aquí los drivers quedaban fuera
+  porque allí el rol sí mandaba; ya no hace falta. Quedan **dos excepciones declaradas con su motivo, y el test
+  falla también si una deja de hacer falta**: la api, que avisa de un rol fuera del catálogo y compara contra el
+  catálogo entero para informar, y el examen del contrato de drivers, que compara `Columna.rol`, que es otra cosa.
+- **La invariante que ata los dos `rol`**, que son dos cosas distintas con el mismo nombre.
+  `configuracion.Columna.rol` es configuración de un driver —qué línea llena cada columna de su archivo— y **se
+  queda**; lo que entra es que todo papel que una columna declare sea uno que la derivación sepa producir. Si no,
+  esa columna no se llenaría nunca y nada lo diría.
+
+**Cuatro mutaciones de la regla ponen el test rojo**: quitar la inversión de sentidos, cambiar el lado del tercero,
+reordenar los dos últimos tramos y quitar el bloque de la detracción. La de la inversión está además automatizada
+—se vacía `TIPOS_INVIERTEN` y la nota de crédito tiene que salir mal—, así que no sobrevive sin que nadie la
+ejecute a mano.
+
+### Arreglado · tres afirmaciones falsas en los documentos
+
+`ARQUITECTURA.md` describía la tabla de rasgos con `rol_principal` y `rol_contraparte`, que son del **intento
+intermedio que no sobrevivió** y que la propia 9.1 cuenta como descartado; decía «dos tests lo sostienen» con el
+paréntesis de la referencia **vacío**; y contaba los roles de tesorería como `tesoreria` y `contrapartida` cuando
+la tabla los declara **vacíos**. El último también estaba en un comentario de `tests/test_vocabulario.py`, al lado
+del test que comprueba justo lo contrario.
+
+### Lo que NO cambia
+
+Ninguna salida: los dos snapshots —el Excel de CONCAR celda a celda y el de CONTASIS— y los tres meses de
+caracterización quedan **intactos**, que es la prueba de que la derivación acierta. El motor sigue emitiendo el
+campo, el esquema del estándar no se toca y el CSV sigue llevando su columna `rol`. Quien integre esta versión no
+tiene nada que adaptar.
+
+---
+
 ## [9.1.0] — 2026-10-10
 
 **El dinero entra por el mismo circuito que un comprobante.** Con el tercer tipo de libro —`tesoreria`— y los dos

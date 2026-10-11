@@ -24,6 +24,7 @@ from typing import Any
 
 from ...asiento.indice import Cabecera
 from ...modelo import a_decimal, numero_sin_ceros
+from ..kit import rol
 from ..kit.texto import formatear_monto
 from ...asiento.lineas import LineaDiario
 from ...asiento.resolucion import sigla_de_tipo
@@ -163,7 +164,7 @@ def _fila_compra(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
     """
     doc, ref = ln.documento or {}, ln.referencia or {}
     det = (detraccion.detraccion if detraccion is not None else None) or {}
-    es_total = ln.rol == "tercero"
+    es_total = rol.rol_de(ln, libro) == "tercero"
     return {
         "CTA CONTABLE": ln.cuenta,
         "AÑO Y MES PROCESO": libro.periodo,
@@ -241,7 +242,7 @@ def _fila_venta(ln: LineaDiario, cab: Cabecera, libro: Any, config: dict,
     las demás filas como se hacía hasta ahora.
     """
     doc, ref = ln.documento or {}, ln.referencia or {}
-    es_total = ln.rol == "tercero"
+    es_total = rol.rol_de(ln, libro) == "tercero"
     return {
         "CTA CONTABLE": ln.cuenta,
         "AÑO Y MES PROCESO": libro.periodo,
@@ -292,10 +293,17 @@ def filas(cab: Cabecera, lineas: list[LineaDiario], libro: Any, config: dict) ->
       venta—, no el del asiento del motor (`datos.ORDEN_DE_LAS_FILAS`). En ventas coincidían salvo en la NOTA DE
       CRÉDITO, donde al invertirse los sentidos el núcleo la sacaba al revés y el manual la escribe como
       cualquier otra venta."""
-    de_la_detraccion = next((ln for ln in lineas if ln.rol == "detraccion"), None)
-    del_asiento = [ln for ln in lineas if ln.rol not in ROLES_DE_LA_DETRACCION]
+    # **El papel de cada línea se DERIVA de lo que trae** (9.2), con `kit.rol`: hasta aquí este driver leía el campo
+    # `rol` del asiento en cinco sitios, y era el último que lo hacía junto con una línea de CONCAR. Las dos tablas
+    # de abajo siguen escritas con nombres de rol —son de este driver, que es a quien le sirven—; lo que cambia es
+    # de dónde sale el rol con el que se comparan. El motivo, en `kit/rol.py`: lo que existe para los sistemas de
+    # destino no puede ser un dato del núcleo.
+    papel = {id(ln): rol.rol_de(ln, libro) for ln in lineas}
+    # La línea de la detracción, por su bloque, igual que en CONCAR: la que lo lleva ES la de la detracción.
+    de_la_detraccion = next((ln for ln in lineas if ln.detraccion), None)
+    del_asiento = [ln for ln in lineas if papel[id(ln)] not in ROLES_DE_LA_DETRACCION]
     orden = ORDEN_DE_LAS_FILAS.get(libro.tipo, ())
-    del_asiento.sort(key=lambda ln: orden.index(ln.rol) if ln.rol in orden else len(orden))
+    del_asiento.sort(key=lambda ln: orden.index(p) if (p := papel[id(ln)]) in orden else len(orden))
     return [fila(ln, cab, libro, config, de_la_detraccion) for ln in del_asiento]
 
 

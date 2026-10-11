@@ -184,7 +184,7 @@ Desde la 9.0 cada tipo de libro **declara** lo que el motor necesita saber de é
 | **a dónde va** | `sub_diario` | ventas | compras | **vacío** |
 
 El reparto en tres grupos es de John (10-oct-2026) y no es cosmético: **el sub-diario no es lo que define a un
-libro**, es por dónde sale, y tenerlo primero hacía parecer que sí. Lo que define a un libro son su origen, sus dos
+libro**, es por dónde sale, y tenerlo primero hacía parecer que sí. Lo que define a un libro son su origen, sus
 roles y su sentido. Las tres reglas del medio son todas de las compras, y por eso valen `no` en todo lo demás.
 
 **`roles` es una declaración y no un mapa, y la distinción costó un intento.** Hubo una versión con
@@ -205,32 +205,77 @@ asiento que el motor no origina. Vacío es, por tanto, una afirmación verdadera
 
 **Y el núcleo no manda por el rol, que desde el 10-oct-2026 es una promesa y no una casualidad.** El rol existe
 para que un destino encuentre la línea que su columna pide sin conocer la cuenta —que la elige cada empresa—, así
-que los drivers se bifurcan por él (diecisiete usos en siete ficheros) y el núcleo no: la huella lo excluye, el
-resumen solo lo recolecta para informarlo, y la api avisa de un rol desconocido con «se lee igual, el rol solo dice
-qué es. No rompe». Dos tests lo sostienen (): uno reescribe todos los roles y comprueba que la
-huella, el cuadre y los importes no se mueven, y otro prohíbe que el núcleo compare un rol contra un valor. Importa
-porque **lo que existe para los sistemas de destino no puede ser de lo que dependa la contabilidad**, y el núcleo
-se está volviendo la base de un ERP.
+que los drivers se bifurcaban por él y el núcleo no: la huella lo excluye, el resumen solo lo recolecta para
+informarlo, y la api avisa de un rol desconocido con «se lee igual, el rol solo dice qué es. No rompe». Dos tests
+lo sostienen (`tests/test_capas.py`): uno reescribe todos los roles y comprueba que la huella, el cuadre y los
+importes no se mueven, y otro prohíbe comparar un rol contra un valor. Importa porque **lo que existe para los
+sistemas de destino no puede ser de lo que dependa la contabilidad**, y el núcleo se está volviendo la base de un
+ERP.
 
 Lo que ningún estándar abierto del asiento tiene, por cierto, es el rol: XBRL GL usa `account` + `documentType` +
 `debitCreditCode`, y SAF-T distingue la línea por los datos que trae (`CustomerID`/`SupplierID`,
-`TaxInformation`). Beancount y hledger llevan cuenta e importe con signo. Y aun así el rol lleva algo que ninguno
-sabe expresar: en una compra con detracción, `tercero` y `recorte` son la misma cuenta y la misma contraparte sin
-ningún bloque tipado, y SAF-T las emitiría indistinguibles.
+`TaxInformation`). Beancount y hledger llevan cuenta e importe con signo. El único precedente es Odoo, y **usa dos
+vocabularios distintos**: `product`/`tax`/`payment_term` en una factura y `liquidity`/`counterpart`/`writeoff` en
+un pago.
+
+### El `rol` se DERIVA, y desde la 9.2 nadie lo lee
+
+Esa comparación es la que cerró la pregunta (John, 10-oct-2026): **si ningún estándar lo tiene, el rol no es un
+dato del asiento; es una conveniencia para los destinos.** Y si lo es, el sitio donde se calcula es la capa que lo
+usa. Así que vive en `drivers/kit/rol.py`, y el campo del estándar pasa a ser **pura salida**:
+
+| Lo que trae la línea | Su papel |
+|---|---|
+| un bloque `impuesto`, `retencion` o `detraccion` | ese mismo rol — es el `TaxInformation` de SAF-T |
+| su `debe_haber` es el lado del tercero de este libro | `tercero` |
+| si no, y trae `contraparte_doc` | `recorte` |
+| si no | `principal` |
+
+El «lado del tercero» es `sentido_contraparte`, **cambiado cuando `documento.tipo_cp` está en `TIPOS_INVIERTEN`**
+—en una nota de crédito los dos lados se invierten, y una nota de crédito de compra puede llevar detracción, así
+que el caso no es teórico—. Los tres bloques van primero porque dos de ellos, la retención y la detracción, caen
+en el lado de la contraparte y el tramo siguiente los llamaría `tercero`.
+
+**El orden de los dos últimos tramos se midió, y la primera versión estaba mal.** Preguntaba por `contraparte_doc`
+antes que por el lado, y falló en una línea de las 324 que produce la batería: el cliente de una **boleta**, que no
+lleva RUC porque es un consumidor final, salía `principal` en vez de `tercero`. El sentido no tiene ese agujero.
+
+Lo sostiene `tests/test_rol_derivado.py`, que exige la igualdad en **cada** línea de los tres meses que la batería
+caracteriza, por los cuatro drivers que producen líneas, más los dos casos que ese barrido no trae y que son justo
+los que ejercitan la inversión: la nota de crédito de una venta y la de una compra con detracción. Cuatro
+mutaciones de la regla —quitar la inversión, cambiar el lado, reordenar los tramos, quitar el bloque de la
+detracción— ponen el test rojo.
+
+Lo que queda, y es lo irreducible: `tercero` y `recorte` son la misma cuenta y la misma contraparte sin ningún
+bloque tipado, y SAF-T las emitiría indistinguibles. **Lo único que las separa es el sentido**, y por eso la
+derivación funciona: recortar un saldo es moverlo en dirección contraria a como nació.
+
+Los dos drivers que lo leían dejaron de hacerlo, y cada uno por su camino. **CONCAR no necesitaba la derivación**:
+su único uso era encontrar la línea de la detracción, y esa es la que lleva el bloque `detraccion` —la misma
+función ya escribía cuatro columnas así—. De paso arregla la vuelta: una línea leída de un Excel de CONCAR no trae
+rol, así que volvía al archivo con el área (columna V) vacía. **STARSOFT sí la usa**, en los cinco sitios donde
+mira si una fila es la del total o cómo se ordenan las filas de un comprobante; sus dos tablas siguen escritas con
+nombres de rol, porque son de ese driver, y lo que cambió es de dónde sale el rol con el que se comparan.
+
+**El otro `rol` se queda, y son dos cosas distintas con el mismo nombre.** `configuracion.Columna.rol` es
+configuración de un driver —dice qué línea del asiento llena una columna de su archivo—, no el rol de una línea.
+Una invariante los ata (`tests/test_contrato_drivers.py`): todo papel que una columna declara tiene que ser uno que
+la derivación sepa producir, o esa columna no se llenaría nunca y nada lo diría.
 
 **El tercer libro entró el 10-oct-2026 y los TRES vacíos de su columna son la mitad de lo que vale la tabla.**
 `cuenta_contraparte` está vacía porque un libro de tesorería no se salda con una sola cuenta: un lado es la cuenta
-de efectivo que el contribuyente declaró —su 104— y el otro lo pone la imputación. `rol_contraparte` está vacío por
-la misma razón vista desde el otro campo: el rol de la otra pata **depende de lo que el pago cancela** —`tercero` si
-es a un proveedor, `principal` si es una comisión del banco, y `tesoreria` otra vez si es la otra pata de un
-traspaso entre cuentas propias—. Y `sub_diario` está vacío porque
+de efectivo que el contribuyente declaró —su 104— y el otro lo pone la imputación. `roles` está vacío por la misma
+razón vista desde el otro campo: qué papeles hace cada pata **depende de lo que el pago cancela** —`tercero` si es
+a un proveedor, `principal` si es una comisión del banco, y la otra cara de un traspaso entre cuentas propias es
+otra vez efectivo—. Declararlos sería adivinar, y el intento salió incompleto a la primera. Y `sub_diario` está
+vacío porque
 **su clave de configuración todavía no existe**: se intentó declararla y el contrato de drivers la paró con la razón
 exacta, «una clave que nadie lee se configura para nada». Entra con el hito D6, que pide un archivo del sub-diario
 de bancos que CONCAR haya aceptado. Un libro sin sub-diario es uno que el motor no puede armar, y eso es una
-invariante con su test — y hay otra mejor, que ata las dos tuplas por su contenido en vez de por una lista
-paralela: **un libro cuyo `rol_principal` el motor no emite es un libro que el motor no puede originar.** Venta y
-compra llevan `principal`, que está en `ROLES_DEL_MOTOR`; tesorería lleva `tesoreria`, que el catálogo tiene desde
-el 1-oct-2026 y esa tupla deja fuera a propósito.
+invariante con su test — y hay otra mejor, que ata las dos tablas por su contenido en vez de por una lista
+paralela, y es una **equivalencia exacta**: un libro declara roles si y solo si el motor lo origina. De hecho
+`ROLES_DEL_MOTOR` se **deriva** de los roles que declaran venta y compra, así que las dos cosas se mueven juntas o
+el test cae.
 
 **Y `sentido_principal` deja de ser una constante.** En una venta el ingreso siempre va al haber y en una compra el
 gasto siempre al debe; en tesorería **un abono lleva el efectivo al debe y un cargo al haber**, así que el lado lo

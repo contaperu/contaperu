@@ -110,22 +110,29 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         "AO": (tasa_igv_entera(Decimal(cabecera.igv), Decimal(cabecera.base_gravada))
                if linea.tasa_igv not in ("", None) else ""),
     })
-    if linea.rol == "detraccion":
-        # La sigla de la T.G. 06. Hasta la 3.10 la traía el documento comodín que armaba el núcleo, que se la
-        # escribía igual al CSV y a STARSOFT; es vocabulario de CONCAR y se pone aquí.
-        f["R"] = tipo_doc_detraccion(config)
-        # El área (T.G. 26) es un número propio de cada empresa y solo va en esta fila (Excel validado).
-        # No se corta a los 3 caracteres de la plantilla: cortar un código lo manda a OTRA área en silencio.
-        f["V"] = str(config.get("detraccion_area") or "")
     if ref:
         f.update({"Z": sigla_de_tipo(ref.get("tipo_cp"), config) or ref.get("tipo", ""),
                   "AA": ref.get("serie_numero", ""),
                   "AB": _fecha(ref.get("fecha"))})
+    # **La línea de la detracción se reconoce por su bloque, no por su `rol`** (9.2). Era la única lectura del rol en
+    # este driver, y las cuatro columnas de abajo ya se escribían así: la línea que lleva el bloque `detraccion` ES la
+    # de la detracción, medido en las 324 líneas de la batería. Es la lógica de SAF-T —la línea se distingue por los
+    # datos que trae, no por una etiqueta— y es lo que deja el `rol` sin lectores para poder retirarlo.
+    #
+    # Y además arregla la VUELTA: una línea leída de un Excel de CONCAR no trae rol, así que hasta aquí volvía al
+    # archivo con la R puesta por su sigla literal y **la V vacía**, perdiendo el área que la ida había escrito.
     if det:
         base = _importe(det.get("base"))
-        f.update({"AI": codigo_interno_detraccion(det.get("codigo"), config),
-                  "AJ": celdas.numero(det.get("tasa", "")),
-                  "AK": base if es_usd else "", "AL": base if not es_usd else ""})
+        f.update({
+            # La sigla de la T.G. 06. Hasta la 3.10 la traía el documento comodín que armaba el núcleo, que se la
+            # escribía igual al CSV y a STARSOFT; es vocabulario de CONCAR y se pone aquí.
+            "R": tipo_doc_detraccion(config),
+            # El área (T.G. 26) es un número propio de cada empresa y solo va en esta fila (Excel validado).
+            # No se corta a los 3 caracteres de la plantilla: cortar un código lo manda a OTRA área en silencio.
+            "V": str(config.get("detraccion_area") or ""),
+            "AI": codigo_interno_detraccion(det.get("codigo"), config),
+            "AJ": celdas.numero(det.get("tasa", "")),
+            "AK": base if es_usd else "", "AL": base if not es_usd else ""})
     return f
 
 

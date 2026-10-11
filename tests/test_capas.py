@@ -246,17 +246,36 @@ def test_el_resumen_informa_los_roles_y_no_cuenta_con_ellos():
 _ROL = "rol"
 
 
-def test_ningun_modulo_del_nucleo_se_bifurca_por_el_rol():
+# Los dos módulos que pueden comparar un `rol`, con su motivo escrito. **Ninguno de los dos decide un asiento.**
+# Que la lista sea corta y nombrada es el punto: el test de abajo falla también si una entrada deja de hacer falta,
+# así que una excepción no se queda aquí por inercia.
+COMPARAN_UN_ROL_A_PROPOSITO = {
+    "contaperu.api.operaciones":
+        "informa de un rol que no está en el catálogo y dice que «se lee igual… No rompe». Compara contra el "
+        "catálogo ENTERO para avisar, no contra un valor para decidir.",
+    "contaperu.drivers.contrato.examen":
+        "`Columna.rol` no es el rol de una línea: es la configuración de un driver, que declara qué línea llena "
+        "cada columna. Son dos cosas con el mismo nombre, y esta se queda (la otra se va).",
+}
+
+
+def test_nadie_se_bifurca_por_el_rol_de_una_linea():
     """El hermano sintáctico del de arriba, y el que caza un `if linea.rol == "tercero"` **antes** de producción.
 
     Lo que prohíbe es COMPARAR el rol contra un valor, que es decidir por él. No prohíbe mirar si lo trae —
     `contable/resumen` hace `if campo(linea, "rol")` para saber si tiene algo que informar, y eso es correcto: es
     la presencia, no cuál. La diferencia es justo la línea que separa informar de decidir.
 
-    Los drivers quedan fuera a propósito: ahí el rol SÍ manda, porque es la columna que su sistema pide."""
+    **Desde la 9.2 vale para TODO el paquete y no solo para el núcleo** (John, 10-oct-2026). Hasta entonces los
+    drivers quedaban fuera porque allí el rol sí mandaba: era la columna que su sistema pide. Lo que cambió es de
+    dónde sale ese rol — `drivers.kit.rol.rol_de()` lo **deriva** de los datos que la línea trae, que es la lógica
+    de SAF-T, así que un driver ya no necesita que el asiento le traiga la etiqueta.
+
+    Importa porque es lo que convierte el campo en pura salida: **no se puede retirar un campo que algo lee**, y la
+    2.0 del estándar lo retira. Las dos excepciones van arriba, con su motivo."""
     culpables = []
     for modulo, archivo in MODULOS.items():
-        if capa(modulo) != "nucleo":
+        if modulo in COMPARAN_UN_ROL_A_PROPOSITO or modulo == "contaperu.drivers.kit.rol":
             continue
         for nodo in ast.walk(ast.parse(archivo.read_text(encoding="utf-8"))):
             if not isinstance(nodo, ast.Compare):
@@ -271,9 +290,19 @@ def test_ningun_modulo_del_nucleo_se_bifurca_por_el_rol():
                     culpables.append(f"{modulo}:{nodo.lineno}")
                     break
     assert not culpables, (
-        f"el núcleo compara el rol contra un valor en: {sorted(set(culpables))}. El rol es una etiqueta para los "
-        "destinos: el núcleo lo produce y no decide por él. Si hace falta decidir, el dato va en un bloque tipado "
-        "de la línea —como `impuesto` o `detraccion`, que es lo que hacen SAF-T y EN 16931— y no en el rol.")
+        f"se compara el rol contra un valor en: {sorted(set(culpables))}. El rol es una etiqueta de SALIDA: el "
+        "motor lo produce y nadie decide por él. Lo que un driver necesita lo deriva con "
+        "`drivers.kit.rol.rol_de()`; si hace falta decidir en el núcleo, el dato va en un bloque tipado de la "
+        "línea —como `impuesto` o `detraccion`, que es lo que hacen SAF-T y EN 16931— y no en el rol.")
+
+    # Y la otra mitad: una excepción que ya no se usa se quita. Si no, la lista crece y deja de decir nada.
+    sobran = [m for m in COMPARAN_UN_ROL_A_PROPOSITO
+              if not any(isinstance(d, (ast.Attribute, ast.Constant))
+                         and (getattr(d, "attr", None) == _ROL or getattr(d, "value", None) == _ROL)
+                         for n in ast.walk(ast.parse(MODULOS[m].read_text(encoding="utf-8")))
+                         if isinstance(n, ast.Compare) for d in ast.walk(n))]
+    assert not sobran, (f"estos módulos ya no comparan ningún rol, así que su excepción sobra: {sobran}. "
+                        "Quítala de COMPARAN_UN_ROL_A_PROPOSITO.")
 
 
 _LECTURAS = {"read_text", "read_bytes", "write_text", "write_bytes"}

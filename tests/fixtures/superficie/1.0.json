@@ -481,6 +481,7 @@
  "contaperu.drivers.kit": {
   "Opciones": "",
   "OpcionesArchivo": "",
+  "RolNoDerivable": "",
   "armar_archivo": "",
   "armar_linea": "",
   "celdas": "",
@@ -494,6 +495,8 @@
   "nombre_de_archivo": "",
   "nombre_de_libro_electronico": "",
   "nombres": "",
+  "rol": "",
+  "rol_de": "",
   "sanear": "",
   "xlsx": ""
  },
