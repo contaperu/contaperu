@@ -60,11 +60,11 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0014](0014-tipo-de-nota.md) | `tipo_nota`: por qué se emitió una nota de crédito o de débito | `final` |
 | [0015](0015-estado-del-comprobante-en-sunat.md) | `estado_sunat`: lo que SUNAT dice del comprobante en su registro | `final` |
 | [0016](0016-descuento-en-otros-conceptos.md) | `dscto_otros`: el descuento que el registro informa dentro de «otros conceptos» | `final` |
-| [0017](0017-el-codigo-interno-lo-pone-cada-erp.md) | `detraccion.codigo_interno`: el código interno lo pone cada ERP, no el estándar | `final` |
-| [0018](0018-la-sigla-del-tipo-la-pone-cada-erp.md) | `documento.tipo` y `referencia.tipo`: la sigla la pone cada ERP, no el estándar | `final` |
+| [0017](0017-el-codigo-interno-lo-pone-cada-erp.md) | `detraccion.codigo_interno`: el código interno lo pone cada ERP, no el estándar | `reemplazada` |
+| [0018](0018-la-sigla-del-tipo-la-pone-cada-erp.md) | `documento.tipo` y `referencia.tipo`: la sigla la pone cada ERP, no el estándar | `reemplazada` |
 | [0019](0019-anotaciones-dentro-de-la-detraccion.md) | El bloque `detraccion` admite anotaciones `_`, como la raíz | `final` |
 | [0020](0020-la-marca-de-detraccion-del-sire.md) | La marca de detracción del SIRE, y el `detraccion_codigo` que pone quien integra | `final` |
 | [0021](0021-contrapartida-y-tesoreria.md) | `contrapartida` y `tesoreria`: los dos papeles que el catálogo no sabía nombrar, y `medio_pago` en la línea | `final` |
 | [0022](0022-el-tributo-en-su-bloque.md) | El tributo sale del nombre del rol: `impuesto`, `retencion` y `recorte`, con sus bloques, y los obsoletos del catálogo | `final` |
 | [0023](0023-la-factura-anulada-no-provisiona-su-detraccion.md) | `anulada_por_nota` en la imputación: la factura anulada por una nota de crédito no provisiona su detracción | `final` |
-| [0024](0024-movimientos-y-constancias.md) | `movimientos` y `constancias` en la raíz: el dinero moviéndose, y lo que prueba cada movimiento. La constancia es por operación y el extracto es el mes completo | `aceptada` |
+| [0024](0024-movimientos-y-constancias.md) | `movimientos` y `constancias` en la raíz: el dinero moviéndose, y lo que prueba cada movimiento. La constancia es por operación y el extracto es el mes completo | `final` |

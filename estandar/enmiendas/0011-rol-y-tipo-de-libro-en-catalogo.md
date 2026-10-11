@@ -36,3 +36,13 @@ declara en sus `FORMATOS` rechazándolo limpio.
 
 De aquí sale la **regla de versionado en tres niveles** del estándar: un valor de catálogo no sube la versión, un
 bloque opcional tampoco, y solo cambiar lo que ya existe la sube.
+
+## Lo que la 2.0 del estándar cambió de esto (10-oct-2026)
+
+Esta enmienda sacó dos campos del `enum` del esquema a catálogos publicados, para que un valor nuevo no costara una
+versión del documento. **De los dos, el `rol` ya no es un campo**: la 2.0 lo retiró de la línea, porque era una
+etiqueta para los destinos y el papel de una línea se DERIVA de lo que trae. Su catálogo sigue publicado —es el
+vocabulario de esa derivación y lo que un driver declara en sus columnas—, pero no describe ninguna clave.
+
+**La mitad del `libro.tipo` sigue entera, y es la que demostró la tesis**: `tesoreria` entró el 10-oct-2026 como
+tercer tipo de libro **sin subir la versión del estándar**, que es exactamente lo que esta enmienda prometía.

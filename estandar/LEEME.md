@@ -453,8 +453,9 @@ vocabulario para quien produce un asiento que el motor no origina.
 
 ---
 
-**Si vienes de la 0.3**, la guía de migración está en [`MIGRAR-A-1.0.md`](MIGRAR-A-1.0.md): son tres cambios en el
-documento y uno en la clave de versión.
+**Si vienes de la 1.0**, la guía está en [`MIGRAR-A-2.0.md`](MIGRAR-A-2.0.md): **la 2.0 solo quita**, cuatro
+claves que ninguna hacía falta y la versión, y no hay nada que rellenar. Si vienes de la 0.3,
+[`MIGRAR-A-1.0.md`](MIGRAR-A-1.0.md) sigue ahí y hay que pasar por las dos.
 
 ---
 

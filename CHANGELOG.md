@@ -4,6 +4,147 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [10.0.0] — 2026-10-10 · con `open-accounting` 2.0
+
+**El estándar deja de llevar lo que nadie escribía, y el paquete deja de llevar el andamio.** Cuatro claves salen
+del documento y tres mecanismos salen del código. No entra ningún campo: **la 2.0 solo quita**, y por eso migrar es
+un borrado y no una traducción (`estandar/MIGRAR-A-2.0.md`).
+
+De dónde sale (John, 10-oct-2026): el núcleo se está volviendo **la base de un ERP**, y de ahí un principio — *lo
+que existe para los sistemas de destino no puede vivir en el núcleo* — y una decisión: aprovechar la mayor para
+borrar lo que existía solo para no romper el pasado.
+
+**Ninguna salida se mueve.** El Excel de CONCAR y el de CONTASIS quedan **celda a celda idénticos** —comprobado
+byte a byte contra el commit anterior a la tanda— y los tres meses caracterizados no mueven un importe. Ninguna
+huella cambia. Lo que un consumidor tiene que adaptar está en «Cómo migrar», al final.
+
+### El estándar · `open-accounting` 2.0
+
+**El `rol` de una línea sale del esquema**, y no se sustituye por nada: se **deriva** de lo que la línea trae. El
+bloque tipado identifica el impuesto, la retención y la detracción —que es la lógica de SAF-T—, el sentido dice
+cuál es la contraparte, y `contraparte_doc` separa el hecho de un recorte. La regla vive en
+`drivers/kit/rol.py` desde la 9.2 y es lo único que lo leía.
+
+Lo que lo decidió fue mirar qué hacen los demás: **ningún estándar abierto del asiento tiene un campo de rol**.
+XBRL GL usa cuenta, tipo de documento y D/H; SAF-T distingue la línea por los datos que trae
+(`CustomerID`/`SupplierID`, `TaxInformation`); Beancount y hledger llevan cuenta e importe con signo. El único
+precedente es Odoo, y **parte el vocabulario en dos** según si el asiento viene de una factura
+(`product`/`tax`/`payment_term`) o de un pago (`liquidity`/`counterpart`/`writeoff`).
+
+Con el campo se van **los tres `obsoletos` del catálogo `roles`** —`igv`, `retencion_4ta` y `detraccion_tercero`,
+los nombres que la 5.0 renombró—. Es la única excepción que este estándar ha hecho a «un valor obsoleto no
+desaparece nunca», y la razón vale más que el caso, así que queda escrita: **un valor obsoleto sobrevive mientras
+exista la clave donde se guardaba.** El catálogo se queda, con sus ocho valores vigentes, y ahora describe el
+vocabulario de la derivación y no una clave del documento.
+
+**Y las otras tres claves, que la 4.0 dejó a medias.** Aquella versión decidió que la línea no llevara el
+vocabulario de un ERP y retiró lo que el motor escribía **dejando los campos declarados**, lo que dejó tres
+promesas sin dueño durante tres mayores:
+
+- **`linea.documento.tipo` y `linea.referencia.tipo`** — la sigla con que cada ERP nombra un documento. El motor las
+  escribe en **cero** de las líneas de una factura, una compra con detracción o una nota de crédito; el único que
+  las escribía era el LECTOR de CONCAR, para conservar la sigla literal del archivo. Y eso dejó de hacer falta en
+  la 9.2, que reconoce la fila de la detracción por su bloque y reconstruye su columna R de la configuración: esa
+  `DR` era la única sigla fuera de la Tabla 10 y era toda la razón de ser del respaldo.
+- **`detraccion.estado`** — informativo, y su propia descripción decía que quien lee el documento no se fía de él.
+  Medido: el motor no lo escribe nunca y las cadenas `PROVISIONADO` y `PAGADO` **no salen de él** —lo que la api
+  publica son los dos cubos del diagnóstico—. Un enum publicado para un campo que nadie escribe es una trampa. Los
+  dos huecos que sí son el estado, el número de constancia y su fecha, se quedan.
+- **`detraccion.codigo_interno` ya no era válido**, y no se sabe desde cuándo: el bloque tiene
+  `additionalProperties: false` y no lo lista. La enmienda 0017 lleva escrito «el campo sigue siendo válido». No se
+  reescribe —una enmienda es el registro de una decisión—: se marca `reemplazada` y la corrección va en su cierre.
+
+Las enmiendas **0017** y **0018** pasan a `reemplazada`; la **0011** y la **0022** llevan su nota de cierre, y la
+0022 explica por qué esto se pudo hacer: una vez que el tributo vive en un bloque tipado, el bloque identifica la
+línea y la etiqueta deja de aportar nada. **No se mueve ni se renumera ninguna**, que es lo que se había propuesto:
+el número es su identificador, doce sitios la citan por su ruta y el repositorio es público.
+
+### El pre-mayor sigue informando los papeles, y es el hallazgo de esta versión
+
+El plan medía que la aplicación **no lee `linea.rol` en ninguna parte**, y es cierto. Lo que no vio es que el
+pre-mayor lo **recolecta**: `resumen.por_cuenta` publica `roles` por cuenta, y de ahí sale una columna del informe
+de la aplicación y de su herramienta MCP, con su propio test. Retirar el campo sin más la habría dejado vacía en
+silencio, y el contador habría perdido ver que su 42 hace de `tercero` y de `recorte` en el mismo asiento.
+
+**`por_cuenta` recibe el libro y deriva.** La api está por encima de `drivers` y puede; `contable/resumen` no, y es
+justo lo que la capa garantiza, así que el núcleo sigue solo AGRUPANDO lo que recibe y nunca calcula un papel. El
+informe derivado es **idéntico** al que salía del campo: comprobado sobre los tres meses caracterizados, dieciséis
+cuentas, cero diferencias. Sin libro la columna viene vacía y **`roles_derivados` lo dice**, porque una columna
+vacía que parece un dato es peor que no tenerla; un libro que no declara roles —tesorería— también, que es una
+pregunta sin respuesta; y un tipo que el motor no conoce **sí** para.
+
+### Retirado del paquete · el andamio, y solo el que lo era
+
+De los seis candidatos del inventario, **tres lo eran y tres no**, y lo que decidió cada caso fue medirlo:
+
+| Se va | Por qué |
+|---|---|
+| `drivers.ALIAS` y su rama de `obtener()` | Vacía desde la 4.0, que retiró el único alias que hubo. `ruff` no la cazaba porque el `if` «usa» la variable |
+| `_obsoleto.resolver`, `reexportar` y `funcion_obsoleta` | La maquinaria de las rutas de módulo de la 0.x, sin usuarios desde que la 7.0 cobró los seis puentes de la 6.4.0 |
+| `contrato.CANALES_RENOMBRADOS` | La 8.0 renombró dos canales «sin aviso previo y a propósito, porque los nueve drivers que existen son de este repositorio». Dos mayores después, nadie puede tener uno con el nombre viejo |
+
+**Lo que mantenía vivos los dos primeros era un test que se inventaba un alias y otro que inventaba un módulo**: un
+circuito cuyo único ejercicio es un test que lo fabrica no es un mecanismo en pie.
+
+Y lo que se queda, que es la otra mitad del trabajo:
+
+- **`RutaObsoleta`, `avisar` y `RETIRO`** no son andamio sino **protocolo publicado**: el `pyproject.toml` apunta
+  ahí su `filterwarnings`, `INTEGRAR.md` le dice a quien integra que corra su batería con
+  `-W error::contaperu._obsoleto.RutaObsoleta`, y la aplicación lo hace. `RETIRO` pasa a `"11.0"`.
+- **`configuracion.CLAVES_RETIRADAS`**, porque **la configuración no la versiona el estándar**: una guardada hace
+  dos años llega tal cual y su mensaje es la única guía que recibe quien la tenga.
+- **`RETIRADOS_EN_0_3`**, que tampoco es un puente: `cuenta_contable` dentro de un comprobante es donde una persona
+  la pone por intuición. Es el mismo mecanismo que `asiento.lineas.PISTA_DE_LA_CLAVE`, que nació en esta tanda para
+  decirle a quien manda un `rol` por dónde migrar.
+- **El argumento `imputacion=`**, que el inventario tenía por andamio de la 1.0 y no lo es: la aplicación usa el
+  bloque `imputaciones` del documento, pero el argumento es la forma de imputar **sin tocar el documento**.
+
+### Arreglado · once promesas de versión que habían quedado atrás, y su guardián
+
+`INTEGRAR.md` titulaba «Lo que promete la 7.x» y prometía firmas estables «hasta la 8.0» con el paquete en 9.2.0;
+el `README.md` y `contaperu/api/__init__.py` decían «hasta la 2.0», ocho mayores atrás; `CLAUDE.md` hablaba de «la
+2.x»; y `ARQUITECTURA.md` daba un `RETIRO` que no era el que estaba escrito.
+
+Es la misma clase de error que `_obsoleto.RETIRO` cometió **tres veces** hasta que la 6.2.0 le puso un test, así
+que entra el test: once frases exactas que se ponen rojas de golpe el día que el paquete suba de mayor. Van como
+frase y no como patrón a propósito — «hasta la 3.10» sale treinta y seis veces en el repositorio y casi todas son
+historia.
+
+Y uno más de la misma familia: **el índice de las enmiendas declara el estado de cada una y nada lo comprobaba**.
+Tres estaban desfasados al cerrar esta versión. Ahora un test los ata.
+
+### Cambiado · el CSV y el kit de columnas
+
+El CSV pierde `doc_tipo` y `ref_tipo`, que salían **siempre vacías**, y el kit de columnas deja de admitir esas dos
+rutas por lo mismo que dejó de admitir `codigo_interno` en la 4.0: una columna que declare un campo que ninguna
+línea lleva sale vacía en silencio, que es lo que esa tabla existe para impedir.
+
+Su columna `rol` **se queda, ahora derivada**: un CSV no es el estándar y puede llevar las columnas que quiera, y
+existe por una decisión de la 1.0 —que quien lea ese archivo no tenga que adivinar—. Para eso el kit gana el
+concepto de **ruta derivada** (`columnas.DERIVADAS`), que es donde tenía que estar, al lado de `kit/rol.py`.
+
+El documento de `asiento_contable` deja de llevar el `rol` de cada línea, porque **es** un documento del estándar.
+
+### Cómo migrar
+
+**Si produces documentos con el motor, nada**: la clave de versión la estampa él y el `rol` ya no lo escribe.
+`contaperu.api` no cambia una firma más que una: `por_cuenta` acepta un `libro` opcional.
+
+**Si escribes documentos a mano o guardas documentos de la 1.0**, está todo en
+[`estandar/MIGRAR-A-2.0.md`](estandar/MIGRAR-A-2.0.md): cuatro claves que se quitan —`linea.rol`,
+`documento.tipo`, `referencia.tipo` y `detraccion.estado`—, la clave de versión y las URL del tag nuevo. El motor
+**no lee un documento que se declare `1.0`**, y su rechazo nombra las cuatro.
+
+**Si llamas al paquete `asiento` directamente**, el campo `rol` ya no existe en `LineaDiario` y `de_dict` rechaza
+una línea que lo traiga **diciendo por dónde migrar**. Si necesitas el papel: `drivers.kit.rol.rol_de(linea, libro)`.
+
+**Si tienes un driver de terceros**, dos cosas: el canal ya no acepta los nombres de la 7.x —`tributario` e
+`intercambio`—, y una columna no puede declarar las rutas `documento.tipo` ni `referencia.tipo`. Tu `Columna.rol`
+sigue valiendo: es configuración de tu driver y no el rol de una línea, y ahora una invariante exige que el papel
+que declares sea uno que la derivación sepa producir.
+
+---
+
 ## [9.2.0] — 2026-10-10
 
 **El `rol` de una línea deja de leerse en ninguna parte.** Sigue emitiéndose, ninguna salida cambia y los dos

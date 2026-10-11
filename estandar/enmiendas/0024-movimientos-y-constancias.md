@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Estado** | aceptada |
+| **Estado** | final |
 | **Compatibilidad** | aditivo |
 | **Nivel** | estándar |
 | **Versión** | `open-accounting` 1.0. Dos bloques opcionales nuevos **no suben la versión**, y `estandar/LEEME.md` §Versionado ya nombraba `movimientos[]` del banco como su ejemplo |

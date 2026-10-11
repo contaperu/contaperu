@@ -84,3 +84,21 @@ def test_cada_nombre_reservado_del_leeme_tiene_su_enmienda(reservado: str):
                   if campo(p.read_text(encoding="utf-8"), "Estado") == "reservada"]
     assert any(f"`{reservado}`" in t or f"`linea.{reservado}`" in t for t in reservadas), \
         f"ningún archivo de enmienda reservada nombra {reservado}"
+
+
+def test_el_indice_dice_el_estado_que_cada_enmienda_declara():
+    """El índice es lo que se lee para saber qué está vivo, así que un estado desfasado ahí engaña más que la falta
+    de una entrada — y eso último ya lo vigila el test de arriba.
+
+    Lo trae un caso real: la 2.0 del estándar marcó dos enmiendas como `reemplazada` y promovió una a `final`, y el
+    índice siguió diciendo `final` y `aceptada` sin que nada se pusiera rojo. Es la misma clase de defecto que las
+    promesas de versión de `test_documentacion.py`: un dato escrito dos veces y mantenido a mano."""
+    indice = (ENMIENDAS / "LEEME.md").read_text(encoding="utf-8")
+    desfasados = []
+    for p in archivos():
+        declarado = campo(p.read_text(encoding="utf-8"), "Estado")
+        fila = re.search(rf"^\| \[\d+\]\({re.escape(p.name)}\) \| .+ \| `([^`]+)` \|$", indice, re.M)
+        assert fila, f"{p.name} no tiene fila con estado en el índice"
+        if fila.group(1) != declarado:
+            desfasados.append(f"{p.name}: el índice dice {fila.group(1)!r} y el fichero {declarado!r}")
+    assert not desfasados, desfasados

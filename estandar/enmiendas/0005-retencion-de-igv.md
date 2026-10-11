@@ -28,3 +28,10 @@ Campo `retencion_igv` en el comprobante: `{porcentaje, monto}`, opcional.
 
 **No es `retencion`**, que es la retención de renta de 4ta categoría que muestra un recibo por honorarios y que **sí**
 entra al asiento con su rol. Confundirlas es un error contable, y por eso los dos nombres se separan.
+
+## Nota de la 2.0 del estándar (10-oct-2026)
+
+«Entra al asiento con su rol» hay que leerlo con lo que la 2.0 hizo: el papel de una línea ya no viaja en ella, se
+deriva. La separación que esta enmienda defiende —la retención de renta y la del IGV son dos cosas y no se
+confunden— se sostiene igual, y mejor: lo que las distingue es el **bloque** `retencion` con su código del Catálogo
+05, no un nombre de rol.

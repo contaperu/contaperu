@@ -611,7 +611,9 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   una línea**: la superficie pública de la 1.0 sigue entera y su test pasa sin regenerarse. Lo que desapareció es lo
   que ninguna versión publicada llegó a ofrecer — la 0.x nunca estuvo en PyPI.
 - **El estándar es `open-accounting` 2.0**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
-  significado hasta una 2.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
-  se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **un `rol` que no conozcas se contabiliza con
-  `clase`, `debe_haber` e `importe`**. Si vienes de la 0.3, que el motor ya no acepta:
-  [`estandar/MIGRAR-A-1.0.md`](estandar/MIGRAR-A-1.0.md).
+  significado hasta una 3.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
+  se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **una línea se contabiliza con `cuenta`,
+  `debe_haber`, `importe` y `clase`**, que son los cuatro que exige. Si vienes de la 1.0, que el motor ya no
+  acepta: [`estandar/MIGRAR-A-2.0.md`](estandar/MIGRAR-A-2.0.md) — son cuatro claves que se quitan y nada que
+  rellenar. De la 0.3, [`estandar/MIGRAR-A-1.0.md`](estandar/MIGRAR-A-1.0.md) sigue ahí, y hay que pasar por las
+  dos.

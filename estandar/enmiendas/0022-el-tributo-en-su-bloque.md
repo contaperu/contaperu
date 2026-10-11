@@ -111,3 +111,15 @@ ya tenía de cada cosa: ni una de más.
   STARSOFT eran fallos silenciosos sin test. No lo eran: dejándolas atrás a propósito, **dos** de sus tests de
   aceptación fallan con la primera y **siete** con la segunda. El test nuevo no añade seguridad, añade el mensaje
   —allí el síntoma es una compra con cuatro filas donde el manual dice tres, y hay que deducir la causa—.
+
+## Lo que la 2.0 del estándar cambió de esto (10-oct-2026)
+
+Esta enmienda separó el papel de una línea del tributo que lleva: `igv` pasó a ser `impuesto` con su bloque, porque
+un rol que mete el tributo en su nombre no sabe decir que una línea es del ISC o del ICBPER. **Eso es justo lo que
+hizo posible retirar el campo en la 2.0**: una vez que el tributo vive en un bloque tipado, el bloque IDENTIFICA la
+línea, que es la lógica de SAF-T, y la etiqueta deja de aportar nada.
+
+Lo que cambia es dónde vive el papel: ya no en la línea, sino en la regla que lo deriva
+(`drivers/kit/rol.py`). Los tres nombres que esta enmienda retiró —`igv`, `retencion_4ta`,
+`detraccion_tercero`— salieron del catálogo con el campo, que es la única excepción que el estándar ha hecho a «un
+valor obsoleto no desaparece nunca»: sobrevive mientras exista la clave donde se guardaba.

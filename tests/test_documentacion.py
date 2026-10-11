@@ -32,7 +32,8 @@ RAIZ = Path(__file__).resolve().parents[1]
 # Lo que describe el estado de hoy. Escrito a mano y no con un glob: añadir un documento a esta lista es decidir que
 # ese documento habla del presente.
 VIGENTES = ("README.md", "INTEGRAR.md", "ARQUITECTURA.md", "CLAUDE.md", "HOJA-DE-RUTA.md", "CONTRIBUTING.md",
-            "estandar/LEEME.md", "estandar/MIGRAR-A-1.0.md", "estandar/enmiendas/LEEME.md")
+            "estandar/LEEME.md", "estandar/MIGRAR-A-1.0.md", "estandar/MIGRAR-A-2.0.md",
+            "estandar/enmiendas/LEEME.md")
 
 # Los que citan el código por su ruta y hablan del presente: los vigentes y los de investigación. **El CHANGELOG
 # queda fuera, y es la exclusión importante**: es la bitácora, cita el código que había el día de cada versión y por
