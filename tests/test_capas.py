@@ -186,6 +186,96 @@ def test_importar_el_modelo_no_carga_los_drivers_ni_la_fachada():
     assert not cargados & {"contaperu.drivers", "contaperu.api", "contaperu.pipeline", "openpyxl"}, sorted(cargados)
 
 
+# ── El `rol` es una etiqueta para los destinos, y el núcleo no manda por ella ─────────────────────────────────
+
+def _compra_con_detraccion() -> dict:
+    """Un documento que produce las cinco líneas con sus cinco roles distintos, que es lo que hace útil el test."""
+    return {"open_accounting": "1.0",
+            "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608",
+                      "tipo": "compra"},
+            "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "2026-08-05",
+                              "contraparte_doc": "20602222226", "contraparte_nombre": "PROVEEDOR SAC",
+                              "moneda": "PEN", "base_gravada": "1000.00", "igv": "180.00", "total": "1180.00",
+                              "detraccion": {"codigo": "037", "tasa": "12", "monto": "141.60"},
+                              "id_externo": "x1"}],
+            "imputaciones": {"x1": {"cuenta_contable": "6311100"}}}
+
+
+def test_el_nucleo_no_decide_nada_por_el_rol():
+    """Se genera un asiento, **se le reescriben todos los roles** y lo que el núcleo calcula no cambia.
+
+    Es la versión de comportamiento de una regla de arquitectura: el `rol` existe para que un destino encuentre la
+    línea que su columna pide sin conocer la cuenta —que la elige cada empresa—, y por eso los drivers se bifurcan
+    por él. El núcleo lo PRODUCE y no depende de él, y eso ya estaba dicho en tres sitios sin ningún test detrás:
+    `asiento.huella.SIN` lo excluye de la huella, `contable/resumen` solo lo recolecta para informarlo, y la api
+    avisa de un rol desconocido con «se lee igual, el rol solo dice qué es. No rompe».
+
+    Importa cuando el núcleo se convierte en la base de un ERP (John, 10-oct-2026): lo que existe para los sistemas
+    de destino no puede ser de lo que depende la contabilidad. Si algún día hace falta que el núcleo decida por el
+    rol, este test cae y hay que discutirlo, no descubrirlo."""
+    from contaperu import api
+    from contaperu.asiento import huella  # la función, que  reexporta
+    from contaperu.contable import partida_doble
+
+    lineas = api.generar_asiento(_compra_con_detraccion(), driver="asiento_contable", configuracion={})["asiento"]
+    assert len({ln["rol"] for ln in lineas}) == 5, "el caso tiene que traer los cinco roles o no prueba nada"
+
+    antes = (huella(lineas), partida_doble.cuadra(lineas))
+    revueltas = [{**ln, "rol": "un_rol_que_no_existe"} for ln in lineas]
+    despues = (huella(revueltas), partida_doble.cuadra(revueltas))
+    assert antes == despues, "el núcleo cambió de respuesta al cambiar solo los roles"
+
+
+def test_el_resumen_informa_los_roles_y_no_cuenta_con_ellos():
+    """El único módulo del núcleo que lee el rol, y lo que hace con él es **informarlo**: anota qué papeles juega
+    cada cuenta. Los importes no lo miran, y eso es lo que se comprueba aquí — reescribir los roles cambia lo que
+    el resumen dice de ellos y **ni un céntimo** de lo que suma."""
+    from contaperu import api
+    from contaperu.contable import resumen
+
+    lineas = api.generar_asiento(_compra_con_detraccion(), driver="asiento_contable", configuracion={})["asiento"]
+    def sin_los_roles(r: dict) -> dict:
+        return {k: v for k, v in r.items() if k != "cuentas"} | {
+            "cuentas": [{k: v for k, v in c.items() if k != "roles"} for c in r.get("cuentas", [])]}
+
+    original = resumen.por_cuenta(lineas)
+    revuelto = resumen.por_cuenta([{**ln, "rol": "un_rol_que_no_existe"} for ln in lineas])
+    assert sin_los_roles(original) == sin_los_roles(revuelto)
+
+
+_ROL = "rol"
+
+
+def test_ningun_modulo_del_nucleo_se_bifurca_por_el_rol():
+    """El hermano sintáctico del de arriba, y el que caza un `if linea.rol == "tercero"` **antes** de producción.
+
+    Lo que prohíbe es COMPARAR el rol contra un valor, que es decidir por él. No prohíbe mirar si lo trae —
+    `contable/resumen` hace `if campo(linea, "rol")` para saber si tiene algo que informar, y eso es correcto: es
+    la presencia, no cuál. La diferencia es justo la línea que separa informar de decidir.
+
+    Los drivers quedan fuera a propósito: ahí el rol SÍ manda, porque es la columna que su sistema pide."""
+    culpables = []
+    for modulo, archivo in MODULOS.items():
+        if capa(modulo) != "nucleo":
+            continue
+        for nodo in ast.walk(ast.parse(archivo.read_text(encoding="utf-8"))):
+            if not isinstance(nodo, ast.Compare):
+                continue
+            # Se mira TODO el subárbol de la comparación y no solo sus dos lados: el núcleo lee el campo con un
+            # accesor genérico (`campo(linea, "rol")`), así que buscar solo `.rol` o `["rol"]` dejaba pasar el
+            # caso real. Lo descubrió la mutación de este propio test, que es para lo que se mutan.
+            for dentro in ast.walk(nodo):
+                mira_el_rol = ((isinstance(dentro, ast.Attribute) and dentro.attr == _ROL)
+                               or (isinstance(dentro, ast.Constant) and dentro.value == _ROL))
+                if mira_el_rol:
+                    culpables.append(f"{modulo}:{nodo.lineno}")
+                    break
+    assert not culpables, (
+        f"el núcleo compara el rol contra un valor en: {sorted(set(culpables))}. El rol es una etiqueta para los "
+        "destinos: el núcleo lo produce y no decide por él. Si hace falta decidir, el dato va en un bloque tipado "
+        "de la línea —como `impuesto` o `detraccion`, que es lo que hacen SAF-T y EN 16931— y no en el rol.")
+
+
 _LECTURAS = {"read_text", "read_bytes", "write_text", "write_bytes"}
 
 

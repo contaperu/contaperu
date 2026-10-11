@@ -47,6 +47,12 @@ from .lineas import LineaDiario
 # Del catálogo del estándar (`vocabulario.ROLES`): una sola fuente, publicada y citable por la URL del tag. Estaba
 # aquí y otra vez como enum del esquema, y ningún test comparaba las dos.
 ROLES = vocabulario.ROLES
+# Y lo mismo en el otro eje, que es el que faltaba: los libros que el motor sabe ORIGINAR, frente a los que el
+# catálogo publica (`vocabulario.TIPOS_LIBRO`). Hoy coinciden, y por eso esto parece de adorno. Deja de serlo el día
+# que el catálogo crezca —el hito B13, para recibir el diario de un ERP—: el catálogo dice qué libros existen y
+# esta tupla cuáles sabe armar el motor, y uno que esté allí y no aquí se rechaza nombrando los que sí. Lo que
+# cada uno tiene de distinto está en `modelo.RASGOS`, que es la tabla que la 9.0 puso en lugar del booleano.
+TIPOS_DEL_MOTOR = ("venta", "compra")
 # Y los que el motor **escribe**, que desde la 1.1 del catálogo ya no son todos, y que desde la 5.0 **tampoco son
 # los seis de la 1.0**: tres de ellos se renombraron para sacarles el tributo del nombre, y los viejos siguen en el
 # catálogo marcados en `obsoletos`. Así que esta tupla y la de la 1.0 divergen para siempre, a propósito. `contrapartida` y `tesoreria`
@@ -57,13 +63,11 @@ ROLES = vocabulario.ROLES
 # porque puede recibir un documento que los traiga, así que lee `ROLES`. Un **test** que compruebe «todos los roles
 # salen con su clase» solo puede exigir estos seis, porque los otros dos no hay forma de producirlos desde un
 # comprobante. Confundirlos daba un rojo que invitaba a emitir un rol solo para que el test pasara.
-ROLES_DEL_MOTOR = ("principal", "impuesto", "retencion", "tercero", "recorte", "detraccion")
-# Y lo mismo en el otro eje, que es el que faltaba: los libros que el motor sabe ORIGINAR, frente a los que el
-# catálogo publica (`vocabulario.TIPOS_LIBRO`). Hoy coinciden, y por eso esto parece de adorno. Deja de serlo el día
-# que el catálogo crezca —el hito B13, para recibir el diario de un ERP—: el catálogo dice qué libros existen y
-# esta tupla cuáles sabe armar el motor, y uno que esté allí y no aquí se rechaza nombrando los que sí. Lo que
-# cada uno tiene de distinto está en `modelo.RASGOS`, que es la tabla que la 9.0 puso en lugar del booleano.
-TIPOS_DEL_MOTOR = ("venta", "compra")
+# **Se DERIVA de los rasgos desde el 10-oct-2026**, en el orden del catálogo: cada libro declara qué roles caben en
+# su asiento y esto es la unión de los que el motor sabe originar. Era una lista a mano y una lista a mano se
+# desincroniza; ahora añadir un libro no puede olvidarse de aquí, y un test lo comprueba ejecutando el motor.
+ROLES_DEL_MOTOR = tuple(r for r in vocabulario.ROLES
+                        if any(r in rasgos_de(tipo).roles for tipo in TIPOS_DEL_MOTOR))
 # Las líneas que llevan además el centro de costo en su anexo auxiliar. Lo del estándar es la del tercero —el «doble
 # anexo», también en la línea que le descuenta la detracción—; cada driver lo cambia con las columnas que su sistema
 # elige (`drivers.contrato.centro_en_anexo`). La principal lo lleva ahí solo cuando su cuenta no lo lleva en la suya.
@@ -323,12 +327,14 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     def principal(cuenta: str, centro: str, importe: Decimal) -> LineaDiario:   # gasto (compras) / ingreso (ventas)
         centro = (centro or "").strip() if usa_centros else ""
         en_linea = lleva_centro(cuenta, config)
-        # El rol lo dice el libro y no esta función: desde el 10-oct-2026 es un rasgo (`rol_principal`), así que
-        # un libro nuevo trae el suyo sin tocar aquí. Para venta y compra vale `principal`, que es lo que estaba
-        # escrito a mano, y por eso ninguna salida cambia — es la prueba de que esto es un refactor.
-        return linea(rasgos.rol_principal, importe, cuenta, sentido_base,
-                     centro_costo=centro if en_linea else "",
-                     anexo_auxiliar=centro if (not en_linea and rasgos.rol_principal in centro_en_anexo) else "")
+        # El rol va escrito y no sale del libro, y es a propósito: **esta función ES el camino del comprobante**,
+        # así que escribe roles de comprobante. Hubo un intento de leerlo de un rasgo `rol_principal`, y la premisa
+        # era falsa — un pago no tiene un «principal» fijo (en una comisión del banco el hecho es el gasto, no el
+        # dinero), así que parametrizar este camino para que sirviera a los dos era el mismo error que un solo
+        # vocabulario de roles para los dos. Lo que el libro declara es QUÉ roles caben (`rasgos.roles`), y un test
+        # lo comprueba ejecutando esto y comparando.
+        return linea("principal", importe, cuenta, sentido_base, centro_costo=centro if en_linea else "",
+                     anexo_auxiliar=centro if (not en_linea and "principal" in centro_en_anexo) else "")
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
                    for cuenta, centro, importe in partes]
@@ -350,9 +356,9 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                                 retencion={"codigo": TRIBUTO_RENTA, "categoria": CATEGORIA_RENTA_4TA})
                           if retenido > 0 else None)
     cuenta_del_tercero = cuenta_tercero(c, config, rasgos)
-    anexo_tercero = centro_comun if (rasgos.rol_contraparte in centro_en_anexo and not es_honorarios) else ""
-    # La contraparte: el proveedor en compras, el cliente en ventas. Su rol también es un rasgo del libro.
-    tercero = linea(rasgos.rol_contraparte, total - retenido, cuenta_del_tercero, sentido_tercero,
+    anexo_tercero = centro_comun if ("tercero" in centro_en_anexo and not es_honorarios) else ""
+    # El tercero: el proveedor en compras, el cliente en ventas.
+    tercero = linea("tercero", total - retenido, cuenta_del_tercero, sentido_tercero,
                     contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
 
     # La detracción, calcada del Excel real validado en CONCAR (2026): el total COMPLETO queda en el

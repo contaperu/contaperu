@@ -35,6 +35,8 @@ TIPOS_DE_LIBRO_DE_LA_1_0 = ("venta", "compra")
 # en `obsoletos`, con su reemplazo.
 ROLES_DE_HOY = ROLES_DE_LA_1_0 + ("contrapartida", "tesoreria", "impuesto", "retencion", "recorte")
 
+from contaperu.modelo.libro import RASGOS as RASGOS_DE_LIBRO  # noqa: E402  (al lado de lo que describe)
+
 # Y el tercer tipo de libro, que entró el 10-oct-2026: `tesoreria`, el dinero moviéndose. Es el primer valor que se
 # añade a esta tabla desde la 1.0, y por eso la promesa de abajo pasa a comprobarse por PREFIJO, como ya se hacía
 # con los roles — que es lo que su propio docstring prometía y para los libros no cumplía.
@@ -72,7 +74,12 @@ def test_el_motor_no_escribe_todos_los_roles_del_catalogo():
     assert set(motor.ROLES_DEL_MOTOR) < set(vocabulario.ROLES)
     # **Desde la 5.0 ya no es la tupla de la 1.0**, y divergen para siempre: tres de los seis se renombraron. Lo que
     # el motor emite son seis papeles, los mismos de siempre, con tres nombres nuevos.
-    assert motor.ROLES_DEL_MOTOR == ("principal", "impuesto", "retencion", "tercero", "recorte", "detraccion")
+    # El CONTENIDO, no el orden: la tupla se deriva de los rasgos en el orden del catálogo desde el 10-oct-2026,
+    # así que fijar el orden a mano aquí sería congelar un detalle de la derivación en vez de la promesa.
+    assert set(motor.ROLES_DEL_MOTOR) == {"principal", "impuesto", "retencion", "tercero", "recorte", "detraccion"}
+    # Y que de verdad se derive: es la unión de lo que declaran los libros que el motor origina, sin lista aparte.
+    declarados = {r for tipo in motor.TIPOS_DEL_MOTOR for r in RASGOS_DE_LIBRO[tipo].roles}
+    assert set(motor.ROLES_DEL_MOTOR) == declarados
     assert len(motor.ROLES_DEL_MOTOR) == len(ROLES_DE_LA_1_0) == 6
     # Lo que el motor NO emite: los dos de vocabulario, y los tres viejos, que están publicados y ya no se escriben.
     obsoletos = set(api.catalogos_del_estandar()["roles"]["obsoletos"])
@@ -265,12 +272,15 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     # Lo que el nombre promete es una inclusión, no una igualdad: todo libro que el motor origina tiene su fila.
     # Al revés NO, y desde el 10-oct-2026 ya no es teórico — `tesoreria` tiene rasgos y no se origina.
     assert set(motor.TIPOS_DEL_MOTOR) <= set(RASGOS)
-    # Y la invariante que lo ata por el CONTENIDO y no por una lista paralela: **un libro cuyo rol principal el
-    # motor no emite es un libro que el motor no puede originar.** Venta y compra llevan `principal`, que está en
-    # `ROLES_DEL_MOTOR`; tesorería lleva `tesoreria`, que está en el catálogo y fuera de esa tupla a propósito
-    # desde el 1-oct-2026. El día que el motor aprenda a emitirlo, las dos cosas se mueven juntas o esto cae.
+    # Y la invariante que lo ata por el CONTENIDO y no por una lista paralela: **un libro ninguno de cuyos roles
+    # el motor emite es un libro que el motor no puede originar.** Venta y compra declaran roles que están todos en
+    # `ROLES_DEL_MOTOR` —de hecho lo definen—; tesorería declara `tesoreria` y `contrapartida`, que el catálogo
+    # publica desde el 1-oct-2026 y esa tupla deja fuera a propósito. El día que el motor aprenda a emitirlos, las
+    # dos cosas se mueven juntas o esto cae.
     no_origina = set(RASGOS) - set(motor.TIPOS_DEL_MOTOR)
-    assert {k for k, r in RASGOS.items() if r.rol_principal not in motor.ROLES_DEL_MOTOR} == no_origina
+    assert {k for k, r in RASGOS.items() if not set(r.roles) & set(motor.ROLES_DEL_MOTOR)} == no_origina
+    # Todo libro declara al menos un rol: una fila sin roles no dice nada de su asiento.
+    assert all(r.roles for r in RASGOS.values())
     # La misma frontera vista por el sub-diario, que es su consecuencia: sin sub-diario no hay asiento que escribir.
     assert {k for k, r in RASGOS.items() if not r.sub_diario} == no_origina
     for tipo, r in RASGOS.items():
@@ -305,11 +315,10 @@ def test_los_dos_libros_se_diferencian_en_lo_que_se_diferencian():
     assert (venta.sentido_principal, venta.sentido_contraparte) == ("H", "D")
     assert (compra.sentido_principal, compra.sentido_contraparte) == ("D", "H")
     assert (venta.cuenta_contraparte, compra.cuenta_contraparte) == ("clientes", "cxp")
-    # Los roles de las dos patas, que desde el 10-oct-2026 los LEE el motor en vez de tenerlos escritos a mano
-    # (`motor.lineas_del_comprobante`). En esto los dos libros coinciden, y por eso cablearlos no movió ninguna
-    # salida — que es lo que demuestra que fue un refactor y no un cambio de contabilidad.
-    assert venta.rol_principal == compra.rol_principal == "principal"
-    assert venta.rol_contraparte == compra.rol_contraparte == "tercero"
+    # Los roles que caben en cada uno, MEDIDOS ejecutando el motor y no deducidos. Lo que los separa son los tres
+    # de las compras: la retención de 4ta de un recibo por honorarios, y las dos líneas de la detracción.
+    assert set(venta.roles) == {"principal", "impuesto", "tercero"}
+    assert set(compra.roles) - set(venta.roles) == {"retencion", "recorte", "detraccion"}
     # El IGV de una compra es crédito fiscal; el de una venta es lo que se recauda, y por eso no lo es.
     assert compra.da_credito_fiscal and not venta.da_credito_fiscal
     # La detracción y los honorarios solo existen del lado de las compras.

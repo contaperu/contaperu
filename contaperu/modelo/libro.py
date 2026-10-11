@@ -40,16 +40,27 @@ class Rasgos:
     motor todavía no sabe hacer se nota — porque hay que rellenar el campo y no hay con qué.
 
     `sentido_principal` es el del HECHO: en una venta el ingreso va al haber, en una compra el gasto va al debe.
-    La contraparte va al contrario, y por eso no se declara: se deriva."""
+    La contraparte va al contrario, y por eso no se declara: se deriva.
+
+    **`roles` es una declaración y no un mapa**, y la distinción costó un intento. Hubo una versión con
+    `rol_principal` y `rol_contraparte`, que suponía que todo libro tiene un hecho y una contraparte. En tesorería
+    eso no sobrevive: en un pago que cancela una deuda el hecho es el dinero moviéndose, y en una comisión del banco
+    el hecho es el gasto y el dinero es la otra cara. Preguntar «cuál es el principal» fuerza una respuesta que a
+    veces es mentira. Odoo lo esquiva no preguntándolo —su pago tiene `liquidity`, `counterpart` y `writeoff`, sin
+    jerarquía—, y esto hace lo mismo: el libro dice qué roles caben, no cuál manda.
+
+    Quién escribe cada rol en cada línea es de quien genera el asiento, y eso es correcto: el camino del
+    comprobante lleva roles de comprobante. La declaración se comprueba **ejecutando el motor y comparando lo que
+    sale con lo declarado** (`tests/test_vocabulario.py`), que es una garantía más fuerte que un campo que alguien
+    lee."""
 
     tipo: str
 
     # ── Qué ES este libro. Es lo que de verdad lo distingue, y por eso va primero (John, 10-oct-2026).
     origen: str                 # de qué bloque del documento salen sus líneas
-    rol_principal: str          # el rol de la línea del hecho: el gasto, el ingreso, el dinero
+    roles: tuple[str, ...]      # qué roles pueden aparecer en su asiento. Una DECLARACIÓN, no un mapa
     sentido_principal: str      # 'D' | 'H', o `POR_OPERACION` cuando lo dice cada operación y no el libro
     cuenta_contraparte: str     # la clave de `cuentas` con la que se salda; vacía si no la pone el libro
-    rol_contraparte: str        # el rol de la otra pata; vacío si depende de lo que la operación cancela
 
     # ── Qué reglas le tocan. Las tres son de las compras, y por eso las tres son `False` en lo demás.
     da_credito_fiscal: bool     # el IGV entra como crédito (compras) o como débito del que se recauda (ventas)
@@ -94,24 +105,21 @@ class Rasgos:
 # el motor sabe qué ES un libro de tesorería y todavía no sabe armar su asiento. Un libro que esté aquí y no allí
 # se para en la puerta nombrando los que sí (`asiento.LibroQueElMotorNoOrigina`), que es para lo que se puso.
 RASGOS: dict[str, "Rasgos"] = {
-    "venta": Rasgos(tipo="venta", origen="comprobantes", rol_principal="principal", sentido_principal="H",
-                    cuenta_contraparte="clientes", rol_contraparte="tercero",
+    # Los roles de cada uno están MEDIDOS ejecutando el motor, no deducidos: una venta y una compra simples dan
+    # los tres primeros; una compra con detracción añade `recorte` y `detraccion`; un recibo por honorarios añade
+    # `retencion`. De ahí sale `asiento.ROLES_DEL_MOTOR`, que ya no se mantiene a mano.
+    "venta": Rasgos(tipo="venta", origen="comprobantes",
+                    roles=("principal", "impuesto", "tercero"),
+                    sentido_principal="H", cuenta_contraparte="clientes",
                     da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
                     sub_diario="sub_diario_ventas"),
-    "compra": Rasgos(tipo="compra", origen="comprobantes", rol_principal="principal", sentido_principal="D",
-                     cuenta_contraparte="cxp", rol_contraparte="tercero",
+    "compra": Rasgos(tipo="compra", origen="comprobantes",
+                     roles=("principal", "impuesto", "tercero", "retencion", "recorte", "detraccion"),
+                     sentido_principal="D", cuenta_contraparte="cxp",
                      da_credito_fiscal=True, lleva_detraccion=True, lleva_honorarios=True,
                      sub_diario="sub_diario_compras"),
-    # El dinero moviéndose. **Tres** campos no son constantes aquí, y que la tabla lo enseñe es la mitad de su
-    # valor. El `rol_principal` sí lo es —la pata del efectivo lleva siempre el rol `tesoreria`, igual que en venta
-    # y compra lleva siempre `principal`—, y es el rasgo que más dice de los nueve: un libro cuyo rol principal el
-    # motor no emite es un libro que el motor no puede originar, y eso es una invariante con su test.
+    # El dinero moviéndose. Dos campos no son constantes aquí, y que la tabla lo enseñe es la mitad de su valor:
     #
-    # Los tres que no son constantes:
-    #
-    # - `rol_contraparte` está vacío porque **depende de lo que el pago cancela**: `tercero` si es a un proveedor,
-    #   `principal` si es una comisión del banco, y `tesoreria` otra vez si es la otra pata de un traspaso entre
-    #   cuentas propias. El libro no lo sabe; lo sabe la operación.
     #
     # - `cuenta_contraparte` está **vacía a propósito**: no hay una sola cuenta con la que se salde. Un lado es la
     #   cuenta de efectivo que el contribuyente declaró en su maestro (su 104) y el otro lo pone la imputación,
@@ -123,8 +131,12 @@ RASGOS: dict[str, "Rasgos"] = {
     #   un hueco: entra con el hito D6, que pide un archivo del sub-diario de bancos que CONCAR haya aceptado. Se
     #   intentó declararla ya y el contrato de drivers lo paró con la razón exacta — «una clave que nadie lee se
     #   configura para nada»—, porque hasta que el motor origine este libro nadie puede leerla.
-    "tesoreria": Rasgos(tipo="tesoreria", origen="movimientos", rol_principal="tesoreria",
-                        sentido_principal=POR_OPERACION, cuenta_contraparte="", rol_contraparte="",
+    # Y los dos de tesorería, que el catálogo publica desde el 1-oct-2026 y nadie había conectado con nada. **El
+    # tercero, para la comisión del banco y el ITF, NO se inventa aquí**: entra con el hito D6, con su caso y su
+    # fuente. Odoo lo llama `writeoff` y es la diferencia que nace dentro del pago.
+    "tesoreria": Rasgos(tipo="tesoreria", origen="movimientos",
+                        roles=("tesoreria", "contrapartida"),
+                        sentido_principal=POR_OPERACION, cuenta_contraparte="",
                         da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
                         sub_diario=""),
 }
