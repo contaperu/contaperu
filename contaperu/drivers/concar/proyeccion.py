@@ -94,11 +94,10 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         # (`tipo_cp`) y el mapa de siglas es configuración del asiento (`tipos`): la traducción la hace quien conoce
         # su tabla. Un tipo sin sigla no llega hasta aquí —detiene la exportación antes (`tipos_sin_sigla`)—.
         #
-        # El respaldo a `tipo` es para la VUELTA: una línea leída de un Excel de CONCAR (`desde_fila`) trae la sigla
-        # literal del archivo, y hay siglas que no salen de la Tabla 10 —la `DR` de la detracción es de esta misma
-        # T.G. 06— ni conservan el `rol` del que saldrían. Para una línea que arma el motor nunca entra, porque el
-        # asiento no escribe siglas: así la ida y vuelta devuelve el mismo Excel sin reabrir esa puerta.
-        "R": sigla_de_tipo(doc.get("tipo_cp"), config) or doc.get("tipo", ""),
+        # Sin respaldo desde la 2.0 del estándar: la línea ya no guarda la sigla literal del archivo, porque es
+        # vocabulario de un ERP. La única que no sale de la Tabla 10 es la `DR` de la detracción, y su fila se
+        # reconoce por el bloque unas líneas más abajo.
+        "R": sigla_de_tipo(doc.get("tipo_cp"), config),
         "S": doc.get("serie_numero", ""),
         # Sin fecha, T y U quedan en None y no en "": así salían antes de separar el asiento de su
         # formato, y el snapshot lo fija. En el .xlsx las dos son la misma celda vacía.
@@ -111,7 +110,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
                if linea.tasa_igv not in ("", None) else ""),
     })
     if ref:
-        f.update({"Z": sigla_de_tipo(ref.get("tipo_cp"), config) or ref.get("tipo", ""),
+        f.update({"Z": sigla_de_tipo(ref.get("tipo_cp"), config),
                   "AA": ref.get("serie_numero", ""),
                   "AB": _fecha(ref.get("fecha"))})
     # **La línea de la detracción se reconoce por su bloque, no por su `rol`** (9.2). Era la única lectura del rol en
@@ -221,23 +220,27 @@ def desde_fila(fila: dict, monedas: dict[str, str] | None = None,
     `detracciones` el código de SUNAT de la T.G. 28 ('02702' -> '027') y `siglas` el de la Tabla 10 desde la T.G. 06
     ('FT' -> '01'). Sin ellos, cada código se transporta tal cual.
 
-    **El `tipo_cp` hace falta para que la vuelta sea vuelta** (4.0): la sigla la escribe ahora este driver desde el
-    código de SUNAT, así que una línea leída sin `tipo_cp` volvía al Excel con las columnas R y Z vacías. La sigla
-    literal se conserva además en `tipo`, porque al leer un archivo es un dato de ese archivo y no una traducción.
+    **El `tipo_cp` hace falta para que la vuelta sea vuelta** (4.0): la sigla la escribe este driver desde el
+    código de SUNAT, así que una línea leída sin `tipo_cp` volvería al Excel con las columnas R y Z vacías.
+
+    **Hasta la 2.0 del estándar la sigla literal se guardaba además en `documento.tipo`**, como dato del archivo y
+    no como traducción. Ese campo se fue: era el vocabulario de un ERP dentro de una línea del estándar, que es lo
+    que la 4.0 decidió sacar. Y ya no hacía falta, medido: el único caso con una sigla fuera de la Tabla 10 es la
+    `DR` de la detracción, y desde la 9.2 su fila se reconoce por el bloque y su R se reconstruye de la
+    configuración. **La consecuencia, dicha**: una sigla que no esté en el mapa `tipos` del contribuyente no
+    sobrevive a la vuelta, y eso es un problema de su configuración que ahora se ve.
     """
     monedas = monedas or {}
     siglas = siglas or {}
     codigo = _texto_de(fila.get("E"))
     sigla_doc, sigla_ref = _texto_de(fila.get("R")), _texto_de(fila.get("Z"))
     documento = {
-        "tipo": sigla_doc,
         "tipo_cp": siglas.get(sigla_doc, ""),
         "serie_numero": _texto_de(fila.get("S")),
         "fecha_emision": _texto_de(fila.get("T")),
         "fecha_vencimiento": _texto_de(fila.get("U")),
     }
     referencia = {
-        "tipo": sigla_ref,
         "tipo_cp": siglas.get(sigla_ref, ""),
         "serie_numero": _texto_de(fila.get("AA")),
         "fecha": _texto_de(fila.get("AB")),

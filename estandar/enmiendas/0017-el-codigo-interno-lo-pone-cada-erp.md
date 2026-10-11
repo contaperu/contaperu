@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Estado** | final |
+| **Estado** | reemplazada |
 | **Compatibilidad** | el motor deja de emitirlo; el campo sigue siendo válido |
 | **Nivel** | motor |
 | **Versión** | `open-accounting` 1.0 (el esquema no cambia; lo que cambia es lo que el motor escribe) |
@@ -59,3 +59,16 @@ su mapa declarado en su propia sección de la configuración:
 - **No cambia qué códigos se reconocen.** Eso lo decide la tabla del motor (`datos/sunat/detracciones.json`) y lo
   que el ERP le sume con `detraccion_tasas`; el mapa de un driver solo dice cómo los llama su sistema. Un test ata
   las claves de ese mapa a la tabla del motor, para que no puedan separarse en silencio.
+
+## Reemplazada por la 2.0 del estándar (10-oct-2026)
+
+Esta enmienda retiró el `codigo_interno` de lo que **el motor escribe** y dejó el campo declarado. La 2.0 cerró el
+círculo para los otros dos campos de la misma familia —`documento.tipo` y `referencia.tipo`, de la
+[enmienda 0018](0018-la-sigla-del-tipo-la-pone-cada-erp.md)—, y al medirlos se descubrió que **este ya no estaba
+declarado**: el `$defs/detraccion` tiene `additionalProperties: false` y no lista `codigo_interno`, así que un
+documento que lo trajera **no valida**, y no se sabe desde cuándo.
+
+Lo de abajo, en «Qué NO hace», dice lo contrario. Se deja escrito tal cual —una enmienda es el registro de una
+decisión y no se reescribe— con la corrección aquí: **el campo no sigue siendo válido.** La lección es la que la
+2.0 aplica a los demás: retirar lo que el motor escribe y dejar el campo declarado deja una promesa sin dueño, y
+nadie vuelve a comprobarla.

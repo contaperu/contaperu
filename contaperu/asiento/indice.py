@@ -24,13 +24,16 @@ from .huella import huella
 from .lineas import LineaDiario
 
 
-# Las siete claves de la detracción que declara el estándar (`$defs/detraccion`, `additionalProperties: false`).
+# Las seis claves de la detracción que declara el estándar (`$defs/detraccion`, `additionalProperties: false`).
 # Por eso la cabecera FILTRA en vez de copiar el bloque (`motor._detraccion_del_estandar`): si no, el documento que
 # produce un driver fallaría su propio esquema en cuanto el bloque llevara algo de más, y puede llevarlo porque un
 # `Comprobante` no vigila las claves de ese dict. Lo que SÍ pasa el filtro, además de estas siete, son las anotaciones
 # del motor con guion bajo —`_tasa_tabla`, la tasa del Catálogo 54 con la que se calculó el monto—: el bloque las
 # admite desde la 4.0 (enmienda 0019), y hasta la 3.10 se llamaba `tasa_tabla` y se quedaba en esta frontera.
-DETRACCION_DEL_ESTANDAR = ("codigo", "porcentaje", "monto", "cuenta", "estado", "nro_constancia", "fecha_constancia")
+# `estado` era la séptima y salió en la 2.0: su propia descripción decía que quien lee el documento NO se fía de
+# él, y el motor no lo escribía nunca. El estado se deduce de la constancia y de su fecha, que son los dos datos que
+# no se pueden inventar (`tributos.detracciones.estado_de`).
+DETRACCION_DEL_ESTANDAR = ("codigo", "porcentaje", "monto", "cuenta", "nro_constancia", "fecha_constancia")
 
 
 @dataclass(frozen=True)

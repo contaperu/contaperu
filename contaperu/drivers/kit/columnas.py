@@ -21,8 +21,11 @@ from . import rol as _rol
 
 # Lo que puede llenar una columna: un campo de la línea del comprobante o, con punto, un campo de uno de sus bloques.
 BLOQUES: dict[str, tuple[str, ...]] = {
-    "documento": ("tipo", "tipo_cp", "serie_numero", "id_externo", "fecha_emision", "fecha_vencimiento"),
-    "referencia": ("tipo", "tipo_cp", "serie_numero", "fecha"),
+    # El `tipo` de los dos primeros salió en la 2.0 del estándar, por lo mismo que `codigo_interno` en la 4.0: era
+    # la sigla con que cada ERP nombra un documento, y eso lo pone su driver desde el código de SUNAT. Una columna
+    # que lo declarara saldría vacía en silencio, que es justo lo que esta tabla existe para impedir.
+    "documento": ("tipo_cp", "serie_numero", "id_externo", "fecha_emision", "fecha_vencimiento"),
+    "referencia": ("tipo_cp", "serie_numero", "fecha"),
     # `codigo_interno` salió en la 4.0: ninguna línea lo lleva ya —el código interno es de la tabla de cada ERP y lo
     # pone su driver—, así que una columna que lo declarara saldría vacía en silencio, que es justo lo que esta tabla
     # existe para impedir.

@@ -302,12 +302,25 @@ def test_el_comodin_del_numero_se_configura_y_llega_a_los_dos_caminos():
 ESQUEMA_DEL_ESTANDAR = Path(__file__).resolve().parents[1] / "estandar" / "open-accounting.schema.json"
 
 
-def test_los_dos_estados_son_exactamente_los_del_estandar():
-    """Los nombres se declaran en el motor para que nadie escriba la cadena a mano, y el esquema los declara para
-    quien no usa el motor. Dos listas que dicen lo mismo en dos sitios acaban diciendo cosas distintas."""
+def test_los_dos_estados_son_del_motor_y_no_del_estandar():
+    """Dónde vive el estado de una detracción, que la 2.0 del estándar dejó claro: **en el motor y en ningún sitio
+    más**.
+
+    El estándar declaraba un campo `detraccion.estado` con estos dos valores en un `enum`, y su propia descripción
+    decía que quien lee el documento NO se fía de él. Medido antes de retirarlo: el motor **no lo escribe nunca** y
+    las dos cadenas **no salen de él** —lo que la api publica son los dos cubos del diagnóstico,
+    `detracciones_pendientes` y `detracciones_pagadas`—. Un enum publicado para un campo que nadie escribe es una
+    promesa sin dueño.
+
+    Lo que queda es la regla: el estado se DEDUCE de la constancia y de su fecha (`estado_de`), que son los dos
+    datos que no se pueden inventar, y las dos constantes existen para que nadie escriba la cadena a mano."""
     esquema = json.loads(ESQUEMA_DEL_ESTANDAR.read_text(encoding="utf-8"))
-    del_estandar = esquema["$defs"]["detraccion"]["properties"]["estado"]["enum"]
-    assert del_estandar == [detracciones.PROVISIONADO, detracciones.PAGADO]
+    assert "estado" not in esquema["$defs"]["detraccion"]["properties"], "salió en la 2.0"
+    assert (detracciones.PROVISIONADO, detracciones.PAGADO) == ("PROVISIONADO", "PAGADO")
+    # Y los dos cubos del diagnóstico, que es por donde sí viaja la distinción, siguen siendo los suyos.
+    from contaperu.pipeline import diagnostico
+    assert set(diagnostico.CUBOS_DE_LA_DETRACCION.values()) == {"detracciones_pendientes", "detracciones_pagadas"}
+    assert set(diagnostico.CUBOS_DE_LA_DETRACCION) == {detracciones.PROVISIONADO, detracciones.PAGADO}
 
 
 def test_pagada_exige_el_numero_Y_la_fecha():

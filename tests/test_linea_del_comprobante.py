@@ -74,9 +74,10 @@ def test_la_linea_neutral_dice_lo_mismo_que_la_columna():
     assert gasto.centro_costo == "CC-64" and gasto.moneda == "PEN"
     assert gasto.sub_diario == "11" and gasto.correlativo == "080084"
     assert gasto.fecha == "2026-08-10"
-    # Al leer vuelven los DOS: el `tipo_cp` de SUNAT, que es lo que la línea lleva y de lo que el driver saca su
-    # columna R —sin él la vuelta no sería vuelta—, y la sigla literal del archivo, que es un dato de ese archivo.
-    assert gasto.documento == {"tipo": "FT", "tipo_cp": "01", "serie_numero": "E001-871",
+    # Al leer vuelve el `tipo_cp` de SUNAT, que es lo que la línea lleva y de lo que el driver saca su columna R:
+    # sin él la vuelta no sería vuelta. **La sigla literal ya no**, desde la 2.0 del estándar: `FT` es el
+    # vocabulario de CONCAR y no un dato de la línea, y el driver la vuelve a poner desde el código.
+    assert gasto.documento == {"tipo_cp": "01", "serie_numero": "E001-871",
                                "fecha_emision": "2026-08-10", "fecha_vencimiento": "2026-08-27"}
     assert igv.cuenta == "401111" and igv.glosa == gasto.glosa, "la misma glosa en todas las lineas"
     assert proveedor.cuenta == "421201" and proveedor.debe_haber == "H"
@@ -96,9 +97,11 @@ def test_la_linea_de_detraccion_lleva_su_bloque():
     assert len(lineas) == 5
     det = lineas[-1]
     assert det.cuenta == "421203" and det.debe_haber == "H" and det.importe == "198.00"
-    # La sigla sale de la columna R, que es de CONCAR: al volver a línea se recupera del archivo, aunque el asiento
-    # ya no la escriba. El código, en cambio, vuelve al de SUNAT: la AI lleva el interno de la T.G. 28.
-    assert det.documento["tipo"] == "DR" and det.documento["serie_numero"] == "999999999"
+    # La sigla de la columna R **no vuelve a la línea** desde la 2.0 del estándar: es vocabulario de CONCAR, y la
+    # `DR` de la detracción no está en la Tabla 10, así que la línea se queda sin `tipo_cp` — que es lo correcto,
+    # porque el documento de esa fila no es un comprobante de SUNAT. Al reescribirla, la R la pone el driver al
+    # reconocer la fila por su bloque `detraccion` (9.2). El código sí vuelve al de SUNAT: la AI lleva el interno.
+    assert "tipo" not in det.documento and det.documento["serie_numero"] == "999999999"
     assert det.detraccion == {"codigo": "027", "tasa": "4", "base": "4956.00"}
     assert det.glosa == lineas[0].glosa, "la misma glosa en todas las lineas, sin prefijo (2.2)"
 

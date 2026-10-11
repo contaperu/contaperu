@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Estado** | final |
+| **Estado** | reemplazada |
 | **Compatibilidad** | el motor deja de emitirlos; los campos siguen siendo válidos |
 | **Nivel** | motor |
 | **Versión** | `open-accounting` 1.0 (el esquema no cambia; lo que cambia es lo que el motor escribe) |
@@ -65,3 +65,19 @@ la escribe el driver del destino, en la columna que le toque, con **`asiento.sig
 `documento.id_externo`, así que la sigla entraba en el hash. Quien persista huellas para saber qué ya exportó deja de
 reconocer, una vez, todo lo anterior. Y la columna `doc_tipo` del CSV de intercambio, que decía `FT`, va vacía: el CSV
 es un canal neutral y la sigla era de CONCAR.
+
+## Reemplazada por la 2.0 del estándar (10-oct-2026)
+
+Esta enmienda retiró `documento.tipo` y `referencia.tipo` de lo que **el motor escribe** y dejó los campos
+declarados «así que un documento que los traiga sigue validando». La 2.0 los retira del esquema, que es la decisión
+de la 4.0 llevada hasta el final: la sigla con que un ERP nombra un documento no es parte de una línea del
+estándar.
+
+Lo que faltaba para poder hacerlo era que nadie los necesitara, y está medido: el motor los escribe en **0 de las
+líneas** de una factura, de una compra con detracción y de una nota de crédito, y el único que los escribía era el
+LECTOR de CONCAR, para conservar la sigla literal del archivo. La ida y vuelta completa ya no los necesita desde la
+9.2, que reconoce la fila de la detracción por su bloque y reconstruye su columna R de la configuración — esa `DR`
+era la única sigla fuera de la Tabla 10, y era la razón de ser del respaldo.
+
+**La consecuencia, dicha**: una sigla que no esté en el mapa `tipos` del contribuyente no sobrevive a la vuelta.
+Antes se arrastraba en silencio; ahora es un problema de su configuración que se ve.

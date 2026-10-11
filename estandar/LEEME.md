@@ -186,33 +186,37 @@ Es el caso peruano que rompe cualquier modelo que asuma que un asiento se cierra
 registra la compra **todavía no se ha depositado la detracción**, así que no existe el número de constancia;
 el depósito en el Banco de la Nación ocurre días después, y solo entonces se conoce.
 
-El estándar lo resuelve con un bloque de estado dentro del comprobante:
+El estándar lo resuelve con un bloque dentro del comprobante **cuyos dos huecos son el estado**:
 
 ```json
 "detraccion": {
   "codigo": "027",              "porcentaje": 4,
   "monto": "198.00",            "cuenta": "00-123-456789",
-  "estado": "PROVISIONADO",     "nro_constancia": "", "fecha_constancia": ""
+  "nro_constancia": "",         "fecha_constancia": ""
 }
 ```
 
-- **`PROVISIONADO`** (por defecto) — la compra está registrada, la detracción se debe. El asiento se genera
+- **Provisionada** — los dos huecos vacíos: la compra está registrada y la detracción se debe. El asiento se genera
   igual, con un número de documento comodín en la línea de la detracción.
-- **`PAGADO`** — se depositó. Se inyectan `nro_constancia` y `fecha_constancia`. **El asiento ya importado no se
+- **Pagada** — se depositó, y se inyectan `nro_constancia` y `fecha_constancia`. **El asiento ya importado no se
   regenera**: en un destino que suma lo que importa, como CONCAR, volver a importarlo duplica los asientos. Qué
   registra el segundo tiempo —el pago de la detracción, con su constancia— es una decisión contable que entrará con
   su fuente y un archivo real aceptado (hitos D1 y D6 de la hoja de ruta), no una regeneración.
 
+**Hasta la 1.0 el bloque llevaba además un campo `estado`** con los valores `PROVISIONADO` y `PAGADO`, y la 2.0 lo
+retiró. Su propia descripción decía que quien lee el documento no se fía de él, y la medición lo confirmó: el motor
+no lo escribía nunca y esas dos cadenas no salían de él. Un campo informativo que nadie escribe y nadie puede
+comprobar es una trampa; los dos huecos de arriba son el estado, y son datos que no se pueden inventar.
+
 El paso de uno a otro es una operación aparte, sin estado: entra el documento provisional y el archivo de
 constancias, sale el documento actualizado.
 
-**Y el `estado` no se lee: se deduce** (3.2). Es un campo informativo, para que se vea en una pantalla o en un
-informe, y quien lee el documento no puede comprobarlo. Lo que se comprueba son los dos datos que no se pueden
-inventar: una detracción cuenta como **pagada cuando tiene un `nro_constancia` que no es el número comodín Y una
-`fecha_constancia`**. Con el número y sin la fecha el depósito está a medias —el archivo del sistema contable ya
-lleva el número de verdad y la detracción sigue contando como pendiente, que es lo que hace que alguien vuelva a
-poner el día—, y un `estado` que diga `PAGADO` sin constancia no convierte en pagada una detracción que no lo está. **El monto se deposita siempre en soles**, incluso si la factura
-está en dólares: por eso `monto` es en soles aunque el resto del comprobante esté en otra moneda.
+**Y el estado no se declara: se deduce** (3.2, y desde la 2.0 no hay otra forma). Lo que se comprueba son los dos
+datos que no se pueden inventar: una detracción cuenta como **pagada cuando tiene un `nro_constancia` que no es el
+número comodín Y una `fecha_constancia`**. Con el número y sin la fecha el depósito está a medias —el archivo del
+sistema contable ya lleva el número de verdad y la detracción sigue contando como pendiente, que es lo que hace que
+alguien vuelva a poner el día—. **El monto se deposita siempre en soles**, incluso si la factura está en dólares:
+por eso `monto` es en soles aunque el resto del comprobante esté en otra moneda.
 
 **La tabla de detracciones vive en el motor.** El código, el nombre y la tasa de cada detracción, con su fuente, los
 trae el motor, y la API los entrega en `catalogos_sunat`. El ERP que lo integra puede sobreescribirla en su
@@ -232,19 +236,21 @@ adivinar:
   activo; 4 pasivo; 5 patrimonio; 6 y 9 gasto; 7 ingreso. No sale del rol — en una compra de mercadería el rol es
   `principal` y la línea es un activo—, y los elementos 8 y 0 no tienen clase, así que una imputación a una de esas
   cuentas no genera asiento. Son los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, y por eso son lo
-  único que un ERP de fuera entiende sin conocer el PCGE. **Con `clase`, `debe_haber` e `importe` se puede
-  contabilizar una línea aunque no se conozca su `rol`**: es la regla de degradación que permite que el catálogo de
-  roles crezca sin romper a nadie.
-- **`rol`** — qué papel cumple: `principal` (el gasto en compras, el ingreso en ventas), `impuesto`,
-  `retencion`, `tercero` (el proveedor o el cliente), `recorte` (lo que no se le paga al tercero) y
-  `detraccion`. Un ERP que pida el IGV en una columna aparte encuentra esa línea por su rol, no por su
-  cuenta, que la elige cada empresa. **El rol dice qué HACE la línea, no de qué tributo es**: eso lo dice
-  su bloque, `impuesto` o `retencion`, con el código del Catálogo 05. Hasta la 5.0 dos roles metían el
-  tributo en su nombre —`igv` y `retencion_4ta`—, y siguen publicados y marcados en `obsoletos`
-  ([enmienda 0022](enmiendas/0022-el-tributo-en-su-bloque.md)).
-- **`documento.tipo_cp`** y **`referencia.tipo_cp`** — el código SUNAT (Tabla 10). Es el que manda
-  (regla 4), y desde la 4.0 el único que viaja: la sigla del ERP la pone su driver (enmienda 0018). La línea `detraccion`
-  no lleva `tipo_cp`: su documento es la constancia pendiente, no un comprobante de SUNAT.
+  único que un ERP de fuera entiende sin conocer el PCGE. **Con `clase`, `debe_haber` e `importe` se contabiliza
+  una línea**, y eso es exactamente lo que la 2.0 llevó hasta el final: si basta con ellos, lo demás no es parte de
+  la línea.
+- **El papel de una línea NO es un campo** (2.0). Hasta la 1.0 cada línea llevaba su `rol` —`principal`,
+  `impuesto`, `retencion`, `tercero`, `recorte`, `detraccion`—, y existía para que un ERP que pide el IGV en una
+  columna aparte encontrara esa línea sin conocer su cuenta, que la elige cada empresa. **Se retiró porque se
+  DERIVA**: el bloque tipado identifica el impuesto, la retención y la detracción —que es la lógica de SAF-T—, el
+  sentido dice cuál es la contraparte, y la presencia de `contraparte_doc` separa el hecho de un recorte. Ningún
+  estándar abierto del asiento lo tenía: XBRL GL usa cuenta, tipo de documento y D/H. El vocabulario de los
+  papeles sigue publicado en el catálogo `roles`, porque un driver lo usa; lo que no sigue es la clave en la línea.
+- **`documento.tipo_cp`** y **`referencia.tipo_cp`** — el código SUNAT (Tabla 10). Es el que manda (regla 4) y
+  **el único que viaja**: la sigla con que lo nombre cada ERP la pone su driver desde este código. El motor dejó de
+  emitirla en la 4.0 (enmienda 0018) y la 2.0 retiró también los campos `documento.tipo` y `referencia.tipo`, que
+  seguían declarados sin que nadie los escribiera. La línea `detraccion` no lleva `tipo_cp`: su documento es la
+  constancia pendiente, no un comprobante de SUNAT.
 - **`detraccion.codigo`** — el código SUNAT del bien o servicio (Catálogo 54). El código interno con el que lo
   llame un ERP no es del estándar: lo traduce su driver, y el motor dejó de emitirlo en la 4.0 (enmienda 0017).
 - **`glosa`** es **la misma en todas las líneas del comprobante** y va entera, sin prefijos: qué es cada línea
@@ -393,7 +399,7 @@ que el motor transporta sin interpretar. **Cada uno tiene su enmienda** en
 |---|---|---|
 | línea | `id_en_destino` | El id con el que el sistema de destino conoce ese asiento (Merge `remote_id`, Rutter `platform_id`). Se llamaba `id_externo` hasta el 18-sep-2026, y se renombró antes de existir para que no se confunda con `linea.documento.id_externo`, que es el id del sistema que **produjo** el comprobante ([enmienda 0001](enmiendas/0001-id-en-destino.md)) |
 | comprobante, línea | `dimensiones` | `[{tipo, codigo}]`: área, proyecto, obra… más allá del `centro_costo`, que sigue siendo la primera (Xero `Tracking[]`) |
-| línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: hay **tres** `estado` más y ninguno significa esto — en el comprobante (`ok \| observada \| duplicada`, el veredicto de la validación), en la detracción (`PROVISIONADO \| PAGADO`) y, desde el 26-sep-2026, `estado_sunat` en el comprobante, que es lo que dice SUNAT en su propio registro y **se transporta sin traducir**. El día que SUNAT publique la tabla de valores de ese campo, la traducción viviría aquí o en un catálogo propio, **nunca dentro de `estado_sunat`** ([enmienda 0015](enmiendas/0015-estado-del-comprobante-en-sunat.md)) |
+| línea | `estado` | `propuesto \| exportado \| importado \| anulado`; el núcleo nunca escribiría `importado`. Ojo: hay **tres** `estado` más y ninguno significa esto — en el comprobante (`ok \| observada \| duplicada`, el veredicto de la validación), en la detracción (`PROVISIONADO \| PAGADO`, **retirado en la 2.0**: el estado se deduce de la constancia y de su fecha) y, desde el 26-sep-2026, `estado_sunat` en el comprobante, que es lo que dice SUNAT en su propio registro y **se transporta sin traducir**. El día que SUNAT publique la tabla de valores de ese campo, la traducción viviría aquí o en un catálogo propio, **nunca dentro de `estado_sunat`** ([enmienda 0015](enmiendas/0015-estado-del-comprobante-en-sunat.md)) |
 
 Lo que sí entró de esa propuesta: `_exportacion` (arriba), `EXIGE` en el contrato de driver y `pedir_a` en
 `diagnosticar` (`ARQUITECTURA.md`).

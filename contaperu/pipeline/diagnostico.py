@@ -56,6 +56,13 @@ PEDIR_A: dict[str, str] = {
 }
 
 
+# Los dos cubos en que el diagnóstico reparte una detracción, por su estado. **Es por donde la distinción viaja**:
+# el estándar declaraba un campo `detraccion.estado` con los dos valores y lo retiró en la 2.0 —nadie lo escribía y
+# las cadenas no salían del motor—, así que lo que un ERP lee son estos dos nombres y no el estado.
+CUBOS_DE_LA_DETRACCION: dict[str, str] = {detracciones.PROVISIONADO: "detracciones_pendientes",
+                                          detracciones.PAGADO: "detracciones_pagadas"}
+
+
 def detraccion_pendiente(c: Comprobante, config: dict | None = None) -> bool:
     """¿La detracción de este comprobante espera todavía su constancia del Banco de la Nación?
 
@@ -245,7 +252,7 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     saldrian = [_serie_numero(c) for c in candidatos if not c.tiene_errores]
 
     por_estado: dict[str, list[dict]] = {"detracciones_pendientes": [], "detracciones_pagadas": []}
-    donde = {detracciones.PROVISIONADO: "detracciones_pendientes", detracciones.PAGADO: "detracciones_pagadas"}
+    donde = CUBOS_DE_LA_DETRACCION
     for c in candidatos:
         clave = donde.get(detracciones.estado_de(c, config))
         if clave:

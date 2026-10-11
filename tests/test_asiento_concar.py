@@ -135,7 +135,10 @@ def test_un_excel_escrito_con_la_otra_sigla_se_relee_sin_perder_el_tipo():
     —o por un contribuyente con la otra— se releería con el mapa de hoy dejando su `tipo_cp` vacío, sin que nada lo
     dijera. Importa más desde la 5.2, que abrió la puerta de releer un asiento ya armado.
 
-    Al leer se aceptan las dos; al escribir sale solo la configurada."""
+    Al leer se aceptan las dos; al escribir sale solo la configurada. **Y la sigla literal ya no se guarda**: el
+    campo `documento.tipo` salió en la 2.0 del estándar porque era el vocabulario de un ERP dentro de una línea.
+    Lo que la relectura conserva es el código de SUNAT, que es el dato; la sigla la vuelve a poner el driver desde
+    él, y de ahí que las dos siglas tengan que resolver al mismo tipo."""
     from contaperu.drivers.concar import proyeccion as proyeccion_concar
 
     for sigla in ("NA", "NC"):
@@ -143,7 +146,7 @@ def test_un_excel_escrito_con_la_otra_sigla_se_relee_sin_perder_el_tipo():
                 "F": "631101", "O": "100.00", "H": "GLOSA"}
         leidas = proyeccion_concar.a_lineas([fila], CONTAB)
         assert leidas[0].documento["tipo_cp"] == "07", f"{sigla} no resolvió a su tipo de la Tabla 10"
-        assert leidas[0].documento["tipo"] == sigla, "la sigla del archivo se conserva tal cual"
+        assert "tipo" not in leidas[0].documento, "la sigla del archivo es vocabulario de CONCAR, no de la línea"
 
 
 def test_boleta_honorarios_nota_de_credito_y_tasa():

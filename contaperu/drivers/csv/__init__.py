@@ -61,11 +61,9 @@ COLUMNAS_DE_LINEA: tuple[ColumnaDeLinea, ...] = tuple(
         ("contraparte_doc", "contraparte_doc", "texto"),
         ("centro_costo", "centro_costo", "texto"),
         ("anexo_auxiliar", "anexo_auxiliar", "texto"),
-        ("documento.tipo", "doc_tipo", "texto"),
         ("documento.serie_numero", "doc_serie_numero", "texto"),
         ("documento.fecha_emision", "doc_fecha_emision", "fecha"),
         ("documento.fecha_vencimiento", "doc_fecha_vencimiento", "fecha"),
-        ("referencia.tipo", "ref_tipo", "texto"),
         ("referencia.serie_numero", "ref_serie_numero", "texto"),
         ("referencia.fecha", "ref_fecha", "fecha"),
         # El código de SUNAT del bien o servicio (Catálogo 54), que es lo que dice el estándar. Hasta la 3.10 aquí
