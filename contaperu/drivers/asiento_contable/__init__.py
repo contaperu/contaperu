@@ -9,8 +9,9 @@ sentidos y los mismos importes, decididos una sola vez por el núcleo (`tests/te
 
 **Se llamó `asiento_neutral` hasta la 3.10**, y ese nombre decía de qué se libraba en vez de qué es: «neutral» se
 eligió en la 0.7 para distinguir estas líneas de las columnas de CONCAR, de donde entonces se releían. Un ERP no busca
-un asiento neutral: busca el asiento contable. El nombre viejo sigue resolviendo toda la 3.x y avisa
-(`drivers.ALIAS`), y el vocabulario del contrato sigue llamándose `neutral`, que es lo que describe — las palabras del
+un asiento neutral: busca el asiento contable. El nombre viejo resolvió toda la 3.x avisando y la 4.0 lo retiró —y
+la 10.0 retiró también la tabla por la que resolvía, que llevaba seis mayores vacía—; el vocabulario del contrato
+sigue llamándose `neutral`, que es lo que describe — las palabras del
 estándar frente a las de un sistema legacy. Lo que un ERP necesita además de las líneas —qué tramo es de qué
 comprobante y su huella— va **dentro del archivo**, en `_exportacion`, desde la 3.1: hasta entonces esta frase decía
 lo mismo pero solo era cierta llamando al API, y quien recibiera el JSON a secas se quedaba sin ello.

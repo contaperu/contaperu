@@ -53,7 +53,10 @@ RETIRO = "11.0"
 class RutaObsoleta(DeprecationWarning):
     """Algo que cambió de nombre o de sitio, sigue funcionando y se retira en la versión mayor siguiente.
 
-    Lo usan las rutas de módulo (`reexportar`) y, desde la 3.10, el nombre viejo de un driver (`drivers.ALIAS`)."""
+    **Hoy no la usa nada**, y es una afirmación y no un hueco: la 7.0 cobró los seis puentes de la 6.4.0 y la 10.0
+    retiró los dos circuitos que la emitían —las rutas de módulo y el nombre viejo de un driver—, los dos sin
+    usuarios. Lo que la sostiene es el protocolo: la batería de este repositorio la convierte en error, así que el
+    día que algo la emita sin decirlo, algo se pone rojo."""
 
 
 def avisar(vieja: str, nueva: str, *, que: str = "una ruta de la 0.x", nivel: int = 3) -> None:
