@@ -20,6 +20,7 @@ normalización del signo, la deduplicación y el cuadre. El parser de cada banco
 """
 from __future__ import annotations
 
+import json
 from datetime import date
 from decimal import Decimal
 
@@ -463,12 +464,12 @@ def test_una_clave_que_no_es_de_un_movimiento_se_dice_por_su_nombre():
 
 # ── La operación de la api (9.1) ───────────────────────────────────────────
 
-def test_la_api_cuadra_cada_cuenta_y_deduce_el_saldo_inicial_si_nadie_lo_declara():
-    """El saldo inicial está en la cabecera del extracto, así que es de quien lee el archivo. Si no viene, se
-    deduce del primer movimiento y la cadena se comprueba de la segunda línea en adelante — **y se dice cuál fue
-    cuál**, que es lo que impide creerse un cuadre que solo se comprobó a medias.
+def test_la_api_resume_cada_cuenta_y_no_afirma_ningun_cuadre():
+    """`totales_por_cuenta` es un RESUMEN y el nombre lo dice: cuánto llegó de cada cuenta. No dice que encaje.
 
-    No es un consuelo: el caso real que destapó el ITF rompía justo en la segunda fila del mes."""
+    Hasta la 11.x aquí venía un `cuadre` que recorría la cadena de saldos corridos, y el test de abajo explica
+    por qué se fue. El ITF va en su propia columna del resumen porque no es un cargo del titular hacia un
+    tercero: es lo que el banco descuenta además."""
     from contaperu import api
 
     doc = documento_de_tesoreria(movimientos=[
@@ -476,21 +477,47 @@ def test_la_api_cuadra_cada_cuenta_y_deduce_el_saldo_inicial_si_nadie_lo_declara
         mov(referencia="000002", importe="200.00", sentido="cargo", itf="0.20", saldo="1299.80").a_dict()])
     r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
 
-    assert len(r["cuadre"]) == 1
-    uno = r["cuadre"][0]
-    assert uno["cuadra"] and uno["cuenta"] == "bbva-soles"
-    assert uno["saldo_inicial"] == "1000.00", "se deduce del primer movimiento y su saldo corrido"
-    assert uno["saldo_final"] == "1299.80" and not uno["saldo_inicial_declarado"]
-    assert uno["cuenta_contable"] == "10411100", "sale de la cuenta declarada, no de una suposición"
+    assert "cuadre" not in r, "la api dejó de juzgar cómo se leyó el archivo (12.0)"
+    assert r["totales_por_cuenta"] == [{"cuenta": "bbva-soles", "movimientos": 2, "cargos": "200.00",
+                                        "abonos": "500.00", "itf": "0.20", "cuenta_contable": "10411100"}]
     # Lo único que avisa es que a estos movimientos les falta su contrapartida, que es el `sin_cuenta` del dinero:
     # un extracto recién leído no la trae, y la pone el contador.
     assert {a["codigo"] for a in r["avisos"]} == {"MOVIMIENTO_SIN_IMPUTAR"}
     assert r["imputados"] == 0 and len(r["sin_imputar"]) == 2
 
-    # Declarándolo, la primera línea también se comprueba — y si está mal, se dice.
-    malo = api.revisar_tesoreria(doc, [cuenta().a_dict()], saldos_iniciales={"bbva-soles": "1.00"})
-    assert not malo["cuadre"][0]["cuadra"] and malo["cuadre"][0]["saldo_inicial_declarado"]
-    assert any(a["codigo"] == "EXTRACTO_NO_CUADRA" for a in malo["avisos"])
+
+def test_la_api_no_puede_afirmar_un_cuadre_que_no_comprobo():
+    """**El test que faltaba, y el que encontró todo esto.** Lo midió John el 11-oct-2026: *«el cuadre de saldos
+    no garantiza nada, y además no todos tienen eso»*.
+
+    `tesoreria.cuadra` devuelve `cuadra=True` cuando ninguna línea trae `saldo`, porque «cuadra» significa
+    «ninguna línea contradijo la cadena» y si ninguna la afirma, ninguna la contradice. Eso está bien en la
+    función —y su docstring ya lo dice— pero era veneno en la api: **un ERP que manda operaciones estructuradas
+    no trae saldos nunca**, así que recibía un verde en cada llamada mirando nada. Incluso con una línea
+    inventada en medio.
+
+    La regla que queda: la respuesta **no afirma nada sobre saldos** salvo cuando hay una cabecera que contrastar,
+    y entonces lo dice por `avisos`."""
+    from contaperu import api, tesoreria
+
+    # Operaciones estructuradas: ninguna trae `saldo`, que es el caso de cualquier ERP.
+    sin_saldos = [mov(referencia="000001", saldo="").a_dict(),
+                  mov(referencia="000002", importe="200.00", sentido="cargo", saldo="").a_dict()]
+    # La función publicada sigue diciendo `True`, y hace bien: nadie la contradijo.
+    assert tesoreria.cuadra(sin_saldos).cuadra
+
+    r = api.revisar_tesoreria(documento_de_tesoreria(movimientos=sin_saldos), [cuenta().a_dict()])
+    entero = json.dumps(r, ensure_ascii=False)
+    assert "cuadr" not in entero.lower(), "la respuesta no puede insinuar un cuadre que nadie comprobó"
+    assert [a["codigo"] for a in r["avisos"]] == ["MOVIMIENTO_SIN_IMPUTAR"] * 2
+
+    # Y con una línea inventada de 999 999, tampoco cambia nada: no había contra qué comprobarla.
+    con_falsa = api.revisar_tesoreria(
+        documento_de_tesoreria(movimientos=[*sin_saldos,
+                                            mov(referencia="000003", importe="999999.00",
+                                                sentido="cargo", saldo="").a_dict()]),
+        [cuenta().a_dict()])
+    assert con_falsa["totales_por_cuenta"][0]["cargos"] == "1000199.00", "se suma, que es lo único que se afirma"
 
 
 def test_la_api_informa_lo_no_atribuido_y_marca_lo_que_leyo_una_ia():
@@ -514,9 +541,9 @@ def test_la_api_informa_lo_no_atribuido_y_marca_lo_que_leyo_una_ia():
                                  "repartido": "4711.00", "sin_atribuir": "10.50"}]
     assert r["de_lectura_asistida"] == [{"cual": "00012345678", "origen": "pdf_texto", "confianza": "0.92"}]
     # Y no es un aviso: no hay nada que arreglar, solo algo que mirar.
-    assert not any(a["codigo"] == "EXTRACTO_NO_CUADRA" for a in r["avisos"])
-    # Un pago no trae saldo, así que su cuadre se mira en relativo y no se rompe por no tenerlo.
-    assert r["cuadre"][0]["cuadra"]
+    assert not [a for a in r["avisos"] if a["codigo"] != "MOVIMIENTO_SIN_IMPUTAR"]
+    # Un pago no trae saldo ni cabecera, así que no hay nada que contrastar — y no se afirma que lo haya.
+    assert r["totales_por_cuenta"][0]["cargos"] == "4721.50"
 
 
 def test_la_moneda_de_un_movimiento_se_contrasta_con_la_de_su_cuenta():
@@ -605,42 +632,50 @@ def un_mes() -> list:
             mov(referencia="000002", importe="200.00", sentido="cargo", itf="0.20", saldo="1299.80").a_dict()]
 
 
-def test_el_saldo_declarado_viaja_en_el_documento_y_se_comprueba():
-    """Hasta la 2.0 el saldo inicial entraba **solo como argumento**, así que un documento guardado no se podía
-    volver a comprobar: su cuadre dependía de un dato que no viajaba con él. Es lo que la enmienda 0008 arregló
-    para las imputaciones — «el archivo explica su propio asiento»."""
+def test_lo_que_el_banco_declaro_se_contrasta_contra_lo_que_llego():
+    """La única comprobación de saldos que se queda en la api, y lo que la hace valer: **no puede pasar en
+    vacío**. Solo corre si la cabecera declara algo, y entonces compara dos números que existen los dos.
+
+    Es la diferencia con la cadena de saldos corridos, que se fue en la 12.0 porque devolvía verde cuando no
+    había nada que mirar."""
     from contaperu import api
 
     doc = documento_de_tesoreria(movimientos=un_mes(), extractos=[extracto()])
     r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
-    uno = r["cuadre"][0]
-    assert uno["cuadra"] and uno["saldo_inicial_declarado"] and uno["saldo_final_declarado"]
-    assert uno["saldo_inicial"] == "1000.00" and uno["saldo_final"] == "1299.80"
     assert {a["codigo"] for a in r["avisos"]} == {"MOVIMIENTO_SIN_IMPUTAR"}, "falta la contrapartida, nada más"
+    assert r["totales_por_cuenta"][0] == {"cuenta": "bbva-soles", "movimientos": 2, "cargos": "200.00",
+                                          "abonos": "500.00", "itf": "0.20", "cuenta_contable": "10411100"}
 
 
-def test_el_saldo_final_declarado_es_el_segundo_control_y_antes_era_inalcanzable():
-    """**El hueco que esto cierra.** `tesoreria.cuadra` acepta un `saldo_final` desde la 8.2 y `revisar_tesoreria`
-    **no se lo pasaba nunca**, así que el segundo control estaba escrito y no se podía alcanzar por la api.
+def test_el_saldo_final_declarado_delata_la_linea_que_falta():
+    """Es aritmética sobre lo que mandaste —lo de antes, más lo que entró, menos lo que salió y menos el ITF—,
+    así que **no necesita que ninguna línea traiga su saldo**. Ése es el motivo de que esta comprobación se
+    quedara en la api cuando la cadena se fue.
 
-    Y vale por sí mismo: una lectura puede pasar la cadena de saldos corridos y fallar el total. Si se pierde la
-    ÚLTIMA línea del mes, las demás encadenan perfectamente entre sí — es justo lo que produce un lector de PDF."""
+    Y caza el caso que un lector de PDF produce: si se pierde la ÚLTIMA línea del mes, las demás encadenan
+    perfectamente entre sí y solo el total declarado lo nota."""
     from contaperu import api
 
     sin_la_ultima = documento_de_tesoreria(movimientos=un_mes()[:1], extractos=[extracto()])
     r = api.revisar_tesoreria(sin_la_ultima, [cuenta().a_dict()])
-    uno = r["cuadre"][0]
-    assert not uno["cuadra"], "el saldo final declarado delata la línea que falta"
-    assert uno["saldo_final"] == "1500.00" and uno["saldo_final_declarado"]
-    assert any(a["codigo"] == "EXTRACTO_NO_CUADRA" for a in r["avisos"])
-    # Y sin cabecera la misma lectura pasa: la cadena de la única línea que queda encadena con ella misma.
-    assert api.revisar_tesoreria(documento_de_tesoreria(movimientos=un_mes()[:1]),
-                                 [cuenta().a_dict()])["cuadre"][0]["cuadra"]
+    dicho = [a for a in r["avisos"] if a["codigo"] == "SALDO_FINAL_DECLARADO_NO_COINCIDE"]
+    assert dicho, "el saldo final declarado delata la línea que falta"
+    assert "1299.80" in dicho[0]["texto"] and "1500.00" in dicho[0]["texto"]
+
+    # Sin cabecera no hay contra qué comprobar, y entonces **no se dice nada**: no se inventa un cuadre.
+    muda = api.revisar_tesoreria(documento_de_tesoreria(movimientos=un_mes()[:1]), [cuenta().a_dict()])
+    assert not [a for a in muda["avisos"] if "SALDO" in a["codigo"] or "TOTAL" in a["codigo"]]
+
+    # Y las líneas sin `saldo` tampoco lo impiden: la cuenta sale igual.
+    sin_saldos = [{**m, "saldo": ""} for m in un_mes()[:1]]
+    igual = api.revisar_tesoreria(documento_de_tesoreria(movimientos=sin_saldos, extractos=[extracto()]),
+                                  [cuenta().a_dict()])
+    assert any(a["codigo"] == "SALDO_FINAL_DECLARADO_NO_COINCIDE" for a in igual["avisos"])
 
 
 def test_los_dos_totales_de_la_cabecera_se_contrastan():
-    """La tercera comprobación, y la que caza lo que el saldo final no puede: **un cargo y un abono perdidos por el
-    mismo importe dejan el saldo igual**. Los totales no."""
+    """La comprobación que caza lo que el saldo final no puede: **un cargo y un abono perdidos por el mismo
+    importe dejan el saldo igual**. Los totales no."""
     from contaperu import api
 
     doc = documento_de_tesoreria(movimientos=un_mes(),
@@ -648,24 +683,18 @@ def test_los_dos_totales_de_la_cabecera_se_contrastan():
     r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
     assert any(a["codigo"] == "TOTAL_DECLARADO_NO_COINCIDE" for a in r["avisos"])
     assert any("900.00" in a["texto"] and "200.00" in a["texto"] for a in r["avisos"])
-    # Y el cuadre en sí no se rompe por eso: son dos cosas distintas y se dicen aparte.
-    assert r["cuadre"][0]["cuadra"]
+    # Y es lo único que se dice: el resumen no opina, solo suma.
+    assert r["totales_por_cuenta"][0]["cargos"] == "200.00"
 
 
-def test_el_mismo_saldo_por_las_dos_vias_se_rechaza():
-    """El precedente exacto es `imputaciones` contra `imputacion`: dos vías para el mismo dato necesitan una regla
-    de cuál gana, y la regla honesta es que no haya dos."""
+def test_el_saldo_inicial_ya_no_entra_por_dos_vias():
+    """`saldos_iniciales` se fue con su único consumidor, la cadena, y con él la regla de «cuál de los dos gana»
+    —que solo existía porque había dos caminos para el mismo dato—. Queda `extractos[]`, que es uno."""
     from contaperu import api
-    from contaperu.errores import DocumentoInvalido
 
-    doc = documento_de_tesoreria(movimientos=un_mes(), extractos=[extracto()])
-    with pytest.raises(DocumentoInvalido) as e:
-        api.revisar_tesoreria(doc, [cuenta().a_dict()], saldos_iniciales={"bbva-soles": "1000.00"})
-    assert "bbva-soles" in str(e.value) and "cuál gana" in str(e.value)
-    # Una cabecera SIN saldo inicial y el argumento sí conviven: no hay dos datos, hay uno.
-    sin_saldo = documento_de_tesoreria(movimientos=un_mes(), extractos=[extracto(saldo_inicial=None)])
-    r = api.revisar_tesoreria(sin_saldo, [cuenta().a_dict()], saldos_iniciales={"bbva-soles": SALDO_ANTERIOR})
-    assert r["cuadre"][0]["cuadra"] and r["cuadre"][0]["saldo_inicial_declarado"]
+    with pytest.raises(TypeError):
+        api.revisar_tesoreria(documento_de_tesoreria(movimientos=un_mes()), [cuenta().a_dict()],
+                              saldos_iniciales={"bbva-soles": SALDO_ANTERIOR})
 
 
 def test_dos_cabeceras_de_la_misma_cuenta_no_pasan():
@@ -713,7 +742,7 @@ def test_el_erp_imputa_la_contrapartida_y_el_motor_no_adivina_ninguna():
     assert r["imputados"] == 1 and r["sin_imputar"] == []
     assert not [a for a in r["avisos"] if a["codigo"] == "MOVIMIENTO_SIN_IMPUTAR"]
     # Y la 104 sigue saliendo del maestro, no de la imputación.
-    assert r["cuadre"][0]["cuenta_contable"] == "10411100"
+    assert r["totales_por_cuenta"][0]["cuenta_contable"] == "10411100"
 
 
 def test_un_movimiento_sin_contrapartida_se_dice_y_es_el_sin_cuenta_del_dinero():
@@ -837,4 +866,4 @@ def test_sin_imputaciones_la_respuesta_es_la_de_siempre_mas_las_tres_claves():
 
     r = api.revisar_tesoreria(documento_de_tesoreria(movimientos=[mov().a_dict()]), [cuenta().a_dict()])
     assert r["imputados"] == 0 and r["transferencias_declaradas"] == []
-    assert r["cuadre"][0]["cuadra"]
+    assert r["totales_por_cuenta"][0]["movimientos"] == 1

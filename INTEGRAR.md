@@ -388,8 +388,8 @@ mes = {"open_accounting": api.OPEN_ACCOUNTING,
                         "moneda": "PEN", "saldo": "1500.00", "referencia": "000001", "origen": "archivo"}]}
 
 r = api.revisar_tesoreria(mes, cuentas=mi_maestro)
-print(r["cuadre"][0]["cuadra"], r["sin_imputar"])        # True ['000001']
-print([a["codigo"] for a in r["avisos"]])                 # ['MOVIMIENTO_SIN_IMPUTAR']
+print(r["totales_por_cuenta"][0]["abonos"], r["sin_imputar"])   # 500.00 ['000001']
+print([a["codigo"] for a in r["avisos"]])                        # ['MOVIMIENTO_SIN_IMPUTAR']
 
 # Con su contrapartida, el movimiento deja de esperar nada.
 mes["imputaciones_de_movimientos"] = {"mov-881": {"cuenta_contable": "1212100",
@@ -398,16 +398,36 @@ r = api.revisar_tesoreria(mes, cuentas=mi_maestro)
 print(r["imputados"], r["sin_imputar"], r["avisos"])      # 1 [] []
 ```
 
-`r["cuadre"]` trae, por cuenta, si la cadena de saldos encadena, **en qué movimiento se rompe** y con qué
-diferencia; si el saldo inicial y el final venían declarados o se dedujeron; y la cuenta contable que sale del
-maestro. `r["sin_imputar"]` dice qué movimientos **esperan su contrapartida**, que es el `sin_cuenta` del dinero.
+`r["totales_por_cuenta"]` es un **resumen** —cuántos movimientos trae cada cuenta, cuánto suman sus cargos y sus
+abonos, lo que el banco descontó por ITF y la cuenta contable que sale del maestro—: **no afirma que nada cuadre**.
+`r["sin_imputar"]` dice qué movimientos **esperan su contrapartida**, que es el `sin_cuenta` del dinero.
 `r["sin_atribuir"]` dice cuánto de un pago no reclama ninguna referencia —y **no se cierra**: qué es ese resto lo
 decides tú al imputar—. `r["de_lectura_asistida"]` marca lo que leyó un modelo, para que alguien lo mire.
 
-**El cuadre es lo que hace verificable cualquier vía de entrada.** Da igual si las filas salen del export del
-banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena no encadena, se dice **en qué línea**. Y
-la `confianza` que reporte un modelo no relaja nada, porque la confianza que reporta un modelo no separa de forma
-fiable lo correcto de lo incorrecto.
+**Lo único que el motor comprueba de los saldos es lo que el banco DECLARÓ contra lo que le mandaste**: si pones
+la cabecera en `extractos[]`, sus dos totales contra la suma de tus líneas y su saldo final contra la aritmética
+de esos mismos números (`TOTAL_DECLARADO_NO_COINCIDE`, `SALDO_FINAL_DECLARADO_NO_COINCIDE`). No necesita que
+ninguna línea traiga su `saldo`, y **caza una línea entera perdida**, que es lo que la cadena de saldos no caza.
+
+### Comprobar tu propia lectura: `tesoreria.cuadra`
+
+Si tú parseas un extracto —de un PDF, de un Excel pegado, de un export del banco— tienes algo que el motor no
+tiene: la **columna de saldo corrido**. Encadenarla es lo que convierte «leí un PDF» en «lo leí bien», y para eso
+está publicada `tesoreria.cuadra`:
+
+```python
+from contaperu import tesoreria
+
+leidas = [{"cuenta": "bbva-soles", "fecha": "2026-08-05", "importe": "500.00", "sentido": "abono",
+           "saldo": "1500.00"}]
+chequeo = tesoreria.cuadra(leidas, saldo_inicial="1000.00", saldo_final="1500.00")
+print(chequeo.cuadra, chequeo.rompe_en)                 # True 0
+```
+
+**Y la trampa que hay que conocer**: `cuadra` significa «ninguna línea contradijo la cadena», así que **si ninguna
+trae `saldo`, devuelve `True` sin haber comprobado nada**. Mira cuántas lo traían antes de creerte el verde. Por
+eso `revisar_tesoreria` ya no la llama: un ERP que manda operaciones estructuradas no trae saldos, y recibía un
+verde que no significaba nada. Aquí sí vale, porque aquí sí hay columna.
 
 ### El efecto sobre el efectivo, para tu estado de flujos (NIC 7)
 

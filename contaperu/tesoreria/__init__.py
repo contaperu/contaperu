@@ -20,7 +20,11 @@ equivalente, al cobrar o al pagar» (enmienda 0021).
   de aquí: sale del maestro.
 - `Referencia` — lo que un pago cancela: un comprobante, un tributo, un traspaso propio o texto libre. Es lo que
   hace que esto sirva para cualquier pago sin enumerar propósitos.
-- `cuadre` — la cadena de saldos del extracto, que es lo que convierte «leí un PDF» en «lo leí bien».
+- `cuadre` — la cadena de saldos del extracto, que es lo que convierte «leí un PDF» en «lo leí bien». **Es una
+  función para quien parsea, y desde la 12.0 la api ya no la llama**: `cuadra` significa «ninguna línea
+  contradijo la cadena», así que sin líneas con `saldo` devuelve verde sin haber mirado nada — y un ERP que manda
+  operaciones estructuradas no trae saldos nunca. Lo que `revisar_tesoreria` sí comprueba es lo que el banco
+  **declaró** en su cabecera contra la suma de lo que llegó, que es aritmética y no puede pasar en vacío.
 
 **No hay lectores de ningún banco**, y es a propósito: la forma salió de nueve extractos reales de agosto de 2026,
 pero cada parser entra con su archivo delante y su fixture anonimizado. Tampoco hay conciliación —casar un pago con

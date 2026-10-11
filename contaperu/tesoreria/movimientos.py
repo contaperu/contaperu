@@ -159,10 +159,13 @@ class Movimiento:
         self.fecha = _fecha(self.fecha)
         self.fecha_valor = _fecha(self.fecha_valor) or self.fecha
         self.importe = _monto(self.importe)
-        if self.saldo is not None and self.saldo != "":
-            self.saldo = _monto(self.saldo)
-        if self.itf is not None and self.itf != "":
-            self.itf = _monto(self.itf)
+        # Los dos opcionales que son importes: **vacío es `None`, no la cadena vacía**, que es lo que significa
+        # «el banco no lo dice». Hasta la 12.0 un `""` se quedaba dentro tal cual y `cuadra()` reventaba con un
+        # `TypeError` al restarlo — y mandar la clave vacía es lo normal en un ERP que serializa su tabla. Es la
+        # forma que `Extracto` ya tenía bien para sus cuatro saldos.
+        for campo in ("saldo", "itf"):
+            valor = getattr(self, campo)
+            setattr(self, campo, _monto(valor) if valor is not None and valor != "" else None)
         if not self.cuenta:
             raise MovimientoInvalido("Un movimiento necesita la cuenta a la que pertenece")
         if self.fecha is None:

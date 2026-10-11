@@ -68,11 +68,6 @@ PARAMETROS: dict[str, dict] = {
     "cuentas": {"type": "array", "items": esquema_de_la_api("cuenta_bancaria"),
                 "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y "
                                "la cuenta contable de cada una. Es un argumento; el motor no lo guarda."},
-    "saldos_iniciales": {"type": "object", "additionalProperties": {"type": "string"},
-                         "description": "Por cada `id` de cuenta, el saldo que había antes del primer movimiento. "
-                                        "Está en la cabecera del extracto, así que es de quien lee el archivo. Si "
-                                        "falta, se deduce del primer movimiento y la cadena se comprueba de la "
-                                        "segunda línea en adelante — y se dice cuál fue cuál."},
     "texto": {"type": "string", "default": "", "description": "Parte del nombre de la cuenta."},
     "codigo": {"type": "string", "default": "", "description": "El código de la cuenta."},
 }

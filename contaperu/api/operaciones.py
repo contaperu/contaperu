@@ -114,8 +114,7 @@ def cuadrar(lineas: list[dict]) -> dict:
     return partida_doble.cuadra(lineas).a_dict()
 
 
-def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
-                      saldos_iniciales: dict | None = None) -> dict:
+def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None) -> dict:
     """El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.
 
     **Una sola entrada** (3.0 del estándar), como `comprobantes[]` lo es de una compra o de una venta: venga de una
@@ -126,30 +125,26 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
     **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para
     asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las
     cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace
-    es lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.
+    es lo que sí se puede terminar hoy: validar la forma, deduplicar, resumir y reportar lo que no cierra.
 
-    **El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las
-    filas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de
-    saldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin
-    que nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un
-    modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación
-    determinista al lado—.
+    **Y no juzga cómo se leyó nada** (12.0), que es la regla que ordena lo que hay aquí dentro. Hasta la 11.x esto
+    recorría la cadena de saldos corridos línea a línea y devolvía un `cuadre`; el problema, que señaló John el
+    11-oct-2026 —*«el cuadre de saldos no garantiza nada, y además no todos tienen eso»*—, es que **sin líneas con
+    `saldo` devolvía `cuadra: true` sin haber mirado nada**, y con una línea inventada también. Un verde que no
+    significa nada es peor que ningún control, y para un ERP que manda operaciones estructuradas —que es lo que
+    este motor recibe— ése era siempre el caso.
 
-    **Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la
-    cabecera de cada hoja: su saldo anterior, su saldo actual y sus dos totales. Con eso un documento guardado
-    **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. El argumento
-    `saldos_iniciales` se conserva como segunda vía, y **declarar el mismo saldo por las dos se rechaza**: no hay
-    regla que diga cuál gana.
+    La cadena no desaparece: vive en **`tesoreria.cuadra`, publicada**, porque sigue siendo lo que convierte «leí
+    un PDF» en «lo leí bien». Lo que cambia es dónde se llama — **donde se hace el parseo**, que no es aquí.
 
-    **El saldo inicial se deriva si nadie lo declara**, y se dice cuál fue cuál. Sin él se deduce del primer
-    movimiento y la cadena se comprueba de la segunda línea en adelante. No es un consuelo: el caso real que
-    destapó el ITF rompía en la segunda fila del mes.
+    **Lo que sí se comprueba es lo que el banco DECLARÓ contra lo que mandaste.** Los dos totales de la cabecera
+    (`extractos[]`) contra la suma de las líneas, y su saldo final contra la aritmética de esos mismos números.
+    Es la diferencia que lo hace valer: **no puede pasar en vacío**, porque solo corre si la cabecera dice algo, y
+    entonces compara dos números que existen los dos. Y caza lo que la cadena no caza —una línea entera perdida,
+    porque las demás encadenan igual—.
 
-    **Y son dos controles encima del mismo dato**, que es lo que los hace valer: la cadena de saldos corridos
-    comprueba cada línea contra la siguiente, y el saldo final declarado comprueba el total. Una lectura puede
-    pasar el primero y fallar el segundo —si se perdió una línea entera al final del mes, la cadena de las demás
-    encadena—, y es justo el caso que produce un lector de PDF. Hasta la 3.0 ese segundo control estaba escrito en
-    `tesoreria.cuadra` y **nadie le pasaba el argumento**, así que era inalcanzable por aquí.
+    **El `cuadre` contable de verdad es la partida doble**, y tesorería no lo tiene todavía porque no arma asiento.
+    Llegará con D6, sobre las líneas, como el de cualquier libro.
 
     Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus
     `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se
@@ -170,38 +165,23 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
     cabeceras = preparacion.extractos_de(doc)
     imputadas = preparacion.imputaciones_de_movimientos_de(doc, movimientos)
     declaradas = {c.id: c for c in tesoreria.leer(cuentas)}
-    pedidos = {str(k): v for k, v in (saldos_iniciales or {}).items()}
-    dos_veces = sorted(c for c in pedidos if c in cabeceras and cabeceras[c].saldo_inicial is not None)
-    if dos_veces:
-        raise DocumentoInvalido(
-            f"El saldo inicial de {', '.join(dos_veces)} llega por el bloque `extractos` y por el argumento "
-            f"`saldos_iniciales`: no hay regla que diga cuál gana. Deja uno de los dos.")
 
     nuevos, repetidos = tesoreria.sin_duplicados(movimientos)
 
-    cuadres = []
+    # Un RESUMEN, y el nombre lo dice: cuántos movimientos tiene cada cuenta y cuánto suman sus dos sentidos. No
+    # afirma que nada cuadre. El ITF va aparte porque no es un cargo del titular hacia un tercero, es lo que el
+    # banco descuenta además — y las dos sumas se contrastan abajo contra lo que declaró la cabecera, si la hay.
+    totales = []
     for cuenta in dict.fromkeys(m.cuenta for m in nuevos):
         suyos = [m for m in nuevos if m.cuenta == cuenta]
-        cabecera = cabeceras.get(cuenta)
-        del_bloque = cabecera.saldo_inicial if cabecera and cabecera.saldo_inicial is not None else None
-        declarado = str(pedidos.get(cuenta) or "").strip() or ("" if del_bloque is None else str(del_bloque))
-        if declarado:
-            inicial = declarado
-        else:
-            # Lo que había antes del primer movimiento, deducido de su propio saldo corrido: un abono se le resta
-            # y un cargo se le suma, más su ITF. Si el primero no trae saldo no hay de dónde deducirlo y se parte
-            # de cero, que es lo que hace que la cadena se mire en relativo.
-            primero = suyos[0]
-            inicial = modelo.CERO
-            if primero.saldo is not None:
-                inicial = primero.saldo + (primero.importe if primero.es_cargo else -primero.importe)
-                if primero.itf is not None:
-                    inicial = inicial + primero.itf
-        final = cabecera.saldo_final if cabecera and cabecera.saldo_final is not None else None
-        r = tesoreria.cuadra(suyos, saldo_inicial=inicial, saldo_final=final)
-        cuadres.append({**r.a_dict(), "cuenta": cuenta, "saldo_inicial_declarado": bool(declarado),
-                        "saldo_final_declarado": final is not None,
-                        "cuenta_contable": (declaradas[cuenta].cuenta_contable if cuenta in declaradas else "")})
+        totales.append({
+            "cuenta": cuenta,
+            "movimientos": len(suyos),
+            "cargos": str(sum((m.importe for m in suyos if m.es_cargo), modelo.CERO)),
+            "abonos": str(sum((m.importe for m in suyos if not m.es_cargo), modelo.CERO)),
+            "itf": str(sum((m.itf for m in suyos if m.itf is not None), modelo.CERO)),
+            "cuenta_contable": (declaradas[cuenta].cuenta_contable if cuenta in declaradas else ""),
+        })
 
     # Los dos informes que antes salían de `constancias[]` y ahora salen del movimiento, que es la única entrada
     # (3.0 del estándar). `cual` en vez de `numero`: un movimiento se nombra por el número del papel que lo prueba
@@ -217,10 +197,13 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
         avisos.append({"codigo": "SIN_CUENTAS_DECLARADAS", "pedir_a": "quien integra",
                        "texto": "No se declaró el maestro de cuentas, así que no hay contra qué contrastar a qué "
                                 "cuenta apunta cada movimiento ni de qué 104 sale cada pago"})
-    # Los dos totales de la cabecera contra los que salen de las líneas. Es la tercera comprobación y la más
-    # barata: si uno no coincide, falta o sobra una línea, y el saldo final a veces no lo delata —una línea perdida
-    # de cargo y otra de abono por el mismo importe dejan el saldo igual—.
-    for c in cuadres:
+    # Lo que el banco DECLARÓ en la cabecera contra la suma de lo que llegó. Es la única comprobación de saldos
+    # que se queda aquí, y lo que la distingue de la que se fue es que **no puede pasar en vacío**: solo corre si
+    # la cabecera dice algo, y entonces compara dos números que existen. La cadena de saldos corridos, en cambio,
+    # devolvía «cuadra» cuando ninguna línea traía `saldo`, que es un verde que no significaba nada (John,
+    # 11-oct-2026: «el cuadre de saldos no garantiza nada, y además no todos tienen eso»). Vive ahora en
+    # `tesoreria.cuadra`, publicada para quien parsea un extracto, que es donde se comprueba una lectura.
+    for c in totales:
         cabecera = cabeceras.get(c["cuenta"])
         if cabecera is None:
             continue
@@ -232,6 +215,17 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
                                         f"{dicho} y las líneas suman {c[suma]}. Falta o sobra una línea: el saldo "
                                         f"final no siempre lo delata, porque un cargo y un abono perdidos por el "
                                         f"mismo importe lo dejan igual"})
+        # Y el saldo final, que es aritmética sobre los mismos números: lo de antes, más lo que entró, menos lo
+        # que salió y menos lo que el banco descontó por ITF. No necesita que ninguna línea traiga su saldo.
+        if cabecera.saldo_inicial is not None and cabecera.saldo_final is not None:
+            sale = (cabecera.saldo_inicial + modelo.monto(c["abonos"])
+                    - modelo.monto(c["cargos"]) - modelo.monto(c["itf"]))
+            if sale != cabecera.saldo_final:
+                avisos.append({"codigo": "SALDO_FINAL_DECLARADO_NO_COINCIDE", "pedir_a": "quien lee el archivo",
+                               "texto": f"La cabecera de {c['cuenta']!r} dice que se acaba en "
+                                        f"{cabecera.saldo_final} y de sus propios números sale {sale} "
+                                        f"({cabecera.saldo_inicial} + {c['abonos']} − {c['cargos']} − "
+                                        f"{c['itf']} de ITF). Falta o sobra un movimiento"})
     # La contrapartida que falta, y la cuenta de un traspaso que nadie declaró. Las dos son del mismo tipo que
     # `sin_cuenta` en un comprobante: el motor no la adivina y dice a quién pedirla.
     for m in nuevos:
@@ -247,13 +241,6 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
                            "texto": f"El movimiento {_nombre_de(m) or m.id_externo} declara un traspaso a la "
                                     f"cuenta {suya.cuenta_propia!r}, que no está en el maestro declarado: un "
                                     f"traspaso es entre dos cuentas propias, y la otra tiene que existir"})
-    for c in cuadres:
-        if not c["cuadra"]:
-            avisos.append({"codigo": "EXTRACTO_NO_CUADRA", "pedir_a": "quien lee el archivo",
-                           "texto": f"La cadena de saldos de {c['cuenta']!r} se rompe en el movimiento "
-                                    f"{c['rompe_en']} de {c['movimientos']}, con una diferencia de "
-                                    f"{c['diferencia']}. Casi siempre es una línea mal leída y no un error del "
-                                    f"banco"})
     for h in tesoreria.sin_cuenta_declarada(nuevos, list(declaradas.values())):
         avisos.append({"codigo": "CUENTA_NO_DECLARADA", "pedir_a": "quien integra",
                        "texto": f"Un {h['que']} ({h['cual'] or 'sin referencia'}) apunta a la cuenta "
@@ -278,8 +265,8 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
 
     return {"libro": libro.a_dict(), "movimientos": len(nuevos), "repetidos": len(repetidos),
             "imputados": len(nuevos) - len(sin_imputar), "sin_imputar": sin_imputar,
-            "transferencias_declaradas": traspasos,
-            "cuadre": cuadres, "sin_atribuir": sin_atribuir, "de_lectura_asistida": de_ia, "avisos": avisos}
+            "transferencias_declaradas": traspasos, "totales_por_cuenta": totales,
+            "sin_atribuir": sin_atribuir, "de_lectura_asistida": de_ia, "avisos": avisos}
 
 
 def _nombre_de(m) -> str:

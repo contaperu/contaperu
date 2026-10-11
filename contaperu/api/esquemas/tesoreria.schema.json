@@ -8,7 +8,7 @@
   "libro",
   "movimientos",
   "repetidos",
-  "cuadre",
+  "totales_por_cuenta",
   "sin_atribuir",
   "de_lectura_asistida",
   "avisos",
@@ -52,24 +52,18 @@
    "type": "integer",
    "minimum": 0
   },
-  "cuadre": {
-   "description": "Un cuadre por cuenta. `cuadra` es lo único que hay que mirar primero.",
+  "totales_por_cuenta": {
+   "description": "Por cuenta, cuánto llegó: cuántos movimientos, cuánto suman sus cargos y sus abonos, lo que el banco descontó por ITF y la cuenta contable que sale del maestro. **Es un resumen y no un control**: no afirma que nada cuadre. Hasta la 11.x aquí venía un `cuadre` que recorría la cadena de saldos corridos y devolvía `cuadra: true` cuando ninguna línea traía `saldo`, o sea sin haber comprobado nada; esa cadena vive ahora en `tesoreria.cuadra`, publicada para quien parsea un extracto. Lo que el banco declaró en su cabecera sí se contrasta contra estas sumas, y sale por `avisos`.",
    "type": "array",
    "items": {
     "type": "object",
     "required": [
      "cuenta",
-     "cuadra",
-     "saldo_inicial",
-     "saldo_final",
+     "movimientos",
      "cargos",
      "abonos",
-     "movimientos",
-     "rompe_en",
-     "diferencia",
-     "saldo_inicial_declarado",
-     "cuenta_contable",
-     "saldo_final_declarado"
+     "itf",
+     "cuenta_contable"
     ],
     "additionalProperties": false,
     "properties": {
@@ -77,46 +71,25 @@
       "type": "string",
       "description": "El `id` de la cuenta en el maestro."
      },
-     "cuadra": {
-      "type": "boolean"
-     },
-     "saldo_inicial": {
-      "type": "string"
-     },
-     "saldo_final": {
-      "type": "string",
-      "description": "El que RESULTA de aplicar los movimientos, no el declarado."
-     },
-     "cargos": {
-      "type": "string"
-     },
-     "abonos": {
-      "type": "string"
-     },
      "movimientos": {
       "type": "integer",
       "minimum": 0
      },
-     "rompe_en": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "En qué movimiento se rompió la cadena, 1 en adelante. 0 es ninguno."
-     },
-     "diferencia": {
+     "cargos": {
       "type": "string",
-      "description": "En esa línea: el saldo que trae menos el que sale de la cadena. Sin tolerancia — un céntimo no es un redondeo, es una línea mal leída."
+      "description": "La suma de los que sacan dinero. Sin el ITF."
      },
-     "saldo_inicial_declarado": {
-      "type": "boolean",
-      "description": "`false` significa que se dedujo del primer movimiento, así que la cadena se comprobó de la segunda línea en adelante."
+     "abonos": {
+      "type": "string",
+      "description": "La suma de los que lo meten."
+     },
+     "itf": {
+      "type": "string",
+      "description": "Lo que el banco descontó además, cuando lo trae en columna propia. Un cargo con fila propia no entra aquí: es un movimiento más."
      },
      "cuenta_contable": {
       "type": "string",
-      "description": "La 104 que declaró el contribuyente, o vacío si esa cuenta no está en el maestro."
-     },
-     "saldo_final_declarado": {
-      "type": "boolean",
-      "description": "Si el saldo final venía declarado en la cabecera del extracto y por tanto se comprobó. `false` = el `saldo_final` de arriba es solo el que RESULTA de las líneas, y nadie dijo contra qué."
+      "description": "La 104 de esa cuenta, del maestro declarado. Vacía si la cuenta no se declaró."
      }
     }
    }

@@ -185,18 +185,20 @@ PARA_HERRAMIENTA: dict[str, str] = {
     bancos que CONCAR haya aceptado. Esto hace lo que sí se puede terminar: validar la forma, deduplicar, cuadrar y
     decir lo que no cierra.
 
-    **El cuadre de la cadena de saldos es la puerta.** Da igual de dónde salieron las filas —el export del banco,
-    un Excel convertido, un modelo leyendo un PDF—: si la cadena no encadena, el parseo está mal y te digo en qué
-    línea. Eso es lo que permite que una IA participe sin que nadie tenga que creerle, y por eso la `confianza` que
-    reporte un modelo no relaja ninguna comprobación.
+    **No juzgo cómo leíste nada** (12.0). Hasta la 11.x recorría la cadena de saldos corridos y te devolvía un
+    `cuadre`; el problema es que **sin líneas con `saldo` decía `cuadra: true` sin haber mirado nada**, y con una
+    línea inventada también. Si mandas operaciones estructuradas —que es lo normal— ése era siempre el caso, así
+    que ese verde no significaba nada. La cadena sigue existiendo, en la función `tesoreria.cuadra`, para quien
+    parsea un extracto y quiere comprobar su propia lectura: ahí sí vale, y ahí es donde se llama.
 
-    **Los saldos que declara el banco van en el documento**, en `extractos[]`: una cabecera por cuenta, con su
-    saldo anterior, su saldo actual y sus dos totales. Con eso el documento **se puede volver a comprobar** más
-    tarde sin tener el archivo original delante, y se miran dos cosas en vez de una: la cadena línea a línea y el
-    total contra lo que el banco dijo —una lectura puede pasar la primera y fallar el segundo, que es lo que pasa
-    cuando se pierde una línea al final del mes—. El argumento `saldos_iniciales` sigue sirviendo como segunda vía,
-    pero declarar el mismo saldo por las dos **para**: no hay regla que diga cuál gana. Si no mandas ninguno, lo
-    deduzco del primer movimiento y la cadena se comprueba de la segunda línea en adelante; te digo cuál fue cuál.
+    **Lo que sí contrasto es lo que el banco DECLARÓ contra lo que me mandaste.** Si pones la cabecera en
+    `extractos[]` —saldo anterior, saldo actual y los dos totales—, comparo sus cargos y sus abonos con la suma de
+    las líneas, y su saldo final con la aritmética de esos mismos números. Eso **no puede pasar en vacío**: solo
+    corre si la cabecera dice algo. Y caza lo que una cadena no caza: **una línea entera perdida**, porque las
+    demás encadenan igual.
+
+    **Y `totales_por_cuenta` es un resumen, no un control**: cuántos movimientos tiene cada cuenta, cuánto suman
+    sus cargos y sus abonos, lo que el banco descontó por ITF y su cuenta contable. No afirma que nada cuadre.
 
     **La contrapartida la pones tú**, en `imputaciones_de_movimientos`, por el `id_externo` de cada movimiento:
     la 104 sale del maestro de cuentas y la otra cara se imputa, igual que la cuenta de un gasto llega en la

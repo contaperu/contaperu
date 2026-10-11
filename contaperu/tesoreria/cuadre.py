@@ -63,6 +63,19 @@ class CuadreExtracto:
 def cuadra(movimientos: list, saldo_inicial: object = CERO, saldo_final: object = None) -> CuadreExtracto:
     """Aplica los movimientos al saldo inicial y comprueba la cadena.
 
+    **Sin líneas que traigan `saldo` no comprueba nada, y aun así devuelve `cuadra=True`.** Hay que decirlo aquí
+    porque es la trampa: `cuadra` significa «ninguna línea contradijo la cadena», y si ninguna la afirma, ninguna
+    la contradice. Quien llame a esto tiene que mirar **cuántas traían saldo** antes de creerse el verde —el
+    `movimientos` del resultado las cuenta todas, no solo esas—. Por eso desde la 12.0 `revisar_tesoreria` ya no
+    la llama: un ERP que manda operaciones estructuradas no trae saldos nunca, y recibía un verde que no
+    significaba nada (John, 11-oct-2026: *«el cuadre de saldos no garantiza nada, y además no todos tienen eso»*).
+
+    **Dónde sí vale: en quien parsea.** Un extracto pegado o leído de un PDF trae su columna de saldo, y entonces
+    esto es lo que convierte «leí un PDF» en «lo leí bien». Por eso la función se queda publicada.
+
+    **Y no es el cuadre contable**, que es `contable.partida_doble` y mira el Debe contra el Haber. Éste mira una
+    lectura; aquél, un asiento. Tesorería tendrá el suyo cuando arme asiento, que es el hito D6.
+
     Dos comprobaciones, y la primera es la que más vale: **si una línea trae su propio saldo, tiene que ser el que
     sale de la cadena**, y la primera que no lo sea se señala por su posición. Un lector que se salta una línea o
     pega dos columnas lo descubre aquí y no en el cierre.

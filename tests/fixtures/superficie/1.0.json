@@ -72,7 +72,7 @@
   "regimenes_tributarios": "función() -> 'dict'",
   "resumen": "función(documento: 'dict', *, agrupar_por: 'str' = '') -> 'dict'",
   "revisar": "función(documento: 'dict', *, configuracion: 'dict | None' = None, imputacion: 'dict | None' = None, claves_previas: 'list | None' = None) -> 'dict'",
-  "revisar_tesoreria": "función(documento: 'dict', cuentas: 'list[dict] | None' = None, saldos_iniciales: 'dict | None' = None) -> 'dict'",
+  "revisar_tesoreria": "función(documento: 'dict', cuentas: 'list[dict] | None' = None) -> 'dict'",
   "serie_y_numero": "función(serie: 'str', numero: 'str') -> 'str'",
   "validar_cuentas_bancarias": "función(cuentas: 'list[dict]') -> 'dict'",
   "verificar_documento": "función(documento: 'dict') -> 'dict'",

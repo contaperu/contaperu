@@ -164,7 +164,6 @@ TIPOS: dict[str, Any] = {
     "incluir_observados": bool,
     "lineas": list[dict],
     "cuentas": list[dict],
-    "saldos_iniciales": dict,
     "agrupar_por": str,
     "texto": str,
     "codigo": str,

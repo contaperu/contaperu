@@ -168,8 +168,8 @@ def test_la_tesoreria_real_valida_con_cada_informe_lleno():
     _validar("tesoreria", respuesta)
     _validar("cuentas_bancarias", api.validar_cuentas_bancarias(cuentas))
 
-    assert respuesta["cuadre"][0]["cuadra"], "la cadena y el total declarado, los dos"
-    for informe in ("cuadre", "sin_atribuir", "de_lectura_asistida", "avisos", "sin_imputar",
+    assert "cuadre" not in respuesta, "la api dejó de juzgar cómo se leyó el archivo (12.0)"
+    for informe in ("totales_por_cuenta", "sin_atribuir", "de_lectura_asistida", "avisos", "sin_imputar",
                     "transferencias_declaradas"):
         assert respuesta[informe], f"{informe} vacío no ejercita su esquema de item"
     assert "constancias" not in respuesta, "la entrada de tesorería es una sola desde la 3.0"
