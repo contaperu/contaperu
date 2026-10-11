@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [12.0.0] — 2026-10-11 · con `open-accounting` 3.1
 
 **El motor juzga lo que recibe y no opina sobre cómo se leyó.** Es la regla que ordena esta versión, y sale de
 cuatro inconsistencias que John encontró revisando tesorería el 11-oct-2026, más una quinta que apareció
