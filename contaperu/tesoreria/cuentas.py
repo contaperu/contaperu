@@ -96,8 +96,19 @@ class CuentaBancaria:
         self.cuenta_contable = re.sub(r"[^0-9]", "", str(self.cuenta_contable or ""))
         if not self.id:
             raise CuentaInvalida("Una cuenta bancaria necesita un `id`: es con lo que un movimiento la nombra")
-        if not self.numero and not self.cci:
-            raise CuentaInvalida(f"La cuenta {self.id!r} no tiene número ni CCI: no hay forma de reconocerla")
+        # **Sin número ni CCI la cuenta VALE**, y hasta la 12.0.1 se rechazaba (11-oct-2026). Lo destapó John
+        # integrando, y lo delataba esta misma clase: su docstring dice que lo mínimo es «de quién es la cuenta,
+        # en qué moneda, y con qué cuenta contable se asienta», y el código exigía además un identificador.
+        #
+        # Los dos son ciertos, pero para cosas distintas. Para **registrar** un pago y **asentarlo** basta lo que
+        # dice el docstring: la 104 sale de aquí y la contrapartida de la imputación. El número y el CCI hacen
+        # falta para **casar** la cuenta con un archivo del banco, que es conciliar — el hito D3, que no existe
+        # todavía. Rechazar por adelantado un dato que solo necesita un paso que nadie puede dar aún obligaba a
+        # inventarse un número para poder declarar una cuenta.
+        #
+        # Así que es un aviso y no un rechazo, igual que la cuenta contable que falta: el mismo trato para la
+        # misma clase de hueco —lo que impide un paso POSTERIOR se dice, no se para—. `api.validar_cuentas_bancarias`
+        # lo emite como `CUENTA_BANCARIA_SIN_IDENTIFICADOR`.
         if self.cci and not PATRON_CCI.fullmatch(self.cci):
             raise CuentaInvalida(f"CCI inválido en la cuenta {self.id!r}: {self.cci!r} "
                                  f"({LARGO_CCI} dígitos; tiene {len(self.cci)})")

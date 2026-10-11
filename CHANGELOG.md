@@ -4,6 +4,35 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.1.0] — 2026-10-11
+
+**Una cuenta bancaria sin número ni CCI vale para registrar, y hasta hoy se rechazaba.** Lo destapó John
+integrándolo, y lo delataba la propia clase: el docstring de `CuentaBancaria` dice que lo mínimo es *«de
+quién es la cuenta, en qué moneda, y con qué cuenta contable se asienta»* y el código exigía **además** un
+identificador. **Ninguna prueba lo tocaba**, y por eso la contradicción sobrevivió desde la 8.2.
+
+**Ninguna salida se mueve** y el estándar no cambia: sigue en 3.1.
+
+### Cambiado · aditivo
+
+- **`CuentaBancaria` ya no exige `numero` ni `cci`.** Los dos enunciados eran ciertos, para cosas distintas:
+  para **registrar** un pago y **asentarlo** basta lo que dice el docstring —la 104 sale de la cuenta y la
+  contrapartida de la imputación—; el número y el CCI hacen falta para **casar** la cuenta con un archivo del
+  banco, que es conciliar (**D3**, que no existe todavía). Rechazar por adelantado un dato que solo necesita
+  un paso que nadie puede dar aún obligaba a **inventarse un número** para poder declarar una cuenta, que es
+  justo lo que un contrato no debe forzar.
+- **Acepta más y no rompe a nadie**: lo que antes entraba sigue entrando igual.
+
+### Añadido
+
+- **`CUENTA_BANCARIA_SIN_IDENTIFICADOR`** en `validar_cuentas_bancarias`, con el mismo trato que
+  `CUENTA_BANCARIA_SIN_CUENTA_CONTABLE`: **lo que impide un paso POSTERIOR se dice, no se para**. Dice qué es
+  lo que no se podrá hacer —casarla con un archivo del banco— en vez de impedir lo que sí se puede.
+- **Los dos casos que faltaban**: el que acepta la cuenta mínima y comprueba su aviso, y su gemelo, que fija
+  lo que SÍ sigue parando —sin `id` no hay con qué nombrarla, un CCI de diecinueve dígitos es uno mal copiado
+  y una moneda fuera del catálogo no se asienta en ninguna parte—. El primero se vio caer con el rechazo
+  puesto otra vez.
+
 ## [12.0.1] — 2026-10-11
 
 **Tres funciones leían con `getattr` lo que puede llegar como diccionario, y la peor fallaba hacia el

@@ -999,3 +999,49 @@ def test_un_reparto_lleva_una_glosa_por_parte():
     con_las_dos = t.ImputacionDeMovimiento(glosa="Pago a proveedores", reparto=[
         {"importe": "3000.00", "cuenta_contable": "4212100"}])
     assert con_las_dos.glosa == "Pago a proveedores" and len(con_las_dos.reparto) == 1
+
+
+def test_una_cuenta_sin_numero_ni_CCI_VALE_para_registrar_y_lo_dice():
+    """Lo destapó John integrando (11-oct-2026), y lo delataba esta misma clase.
+
+    El docstring de `CuentaBancaria` dice que lo mínimo es «de quién es la cuenta, en qué moneda, y con qué
+    cuenta contable se asienta» — y el código exigía ADEMÁS un número o un CCI, así que era más estricto que
+    lo que él mismo declara. Nadie lo probaba, y por eso la contradicción sobrevivió.
+
+    Los dos son ciertos, para cosas distintas. Para **registrar** un pago y **asentarlo** basta lo del
+    docstring: la 104 sale de la cuenta y la contrapartida de la imputación. El número y el CCI hacen falta
+    para **casar** la cuenta con un archivo del banco, que es conciliar — el hito D3, que no existe todavía.
+    Rechazar por adelantado un dato que solo necesita un paso que nadie puede dar aún obligaba a inventarse un
+    número para poder declarar una cuenta, que es exactamente lo que un contrato no debe forzar.
+
+    Así que avisa y no para, con el mismo trato que la cuenta contable que falta: **lo que impide un paso
+    POSTERIOR se dice, no se para**.
+    """
+    from contaperu import api
+
+    cuenta = t.CuentaBancaria(id="bbva-pen", banco="BBVA", moneda="PEN", cuenta_contable="104101")
+    assert (cuenta.numero, cuenta.cci) == ("", ""), "se acepta sin identificador"
+
+    r = api.validar_cuentas_bancarias([{"id": "bbva-pen", "banco": "BBVA", "moneda": "PEN",
+                                        "cuenta_contable": "104101"}])
+    codigos = [a["codigo"] for a in r["avisos"]]
+    assert codigos == ["CUENTA_BANCARIA_SIN_IDENTIFICADOR"], codigos
+    assert "casarla" in r["avisos"][0]["texto"].lower(), "y dice qué es lo que NO se podrá hacer"
+    assert r["cuantas"] == 1, "pero la cuenta entra en el maestro"
+
+    # Con su número, ni aviso: lo que faltaba era el identificador, no otra cosa.
+    con_numero = api.validar_cuentas_bancarias([{"id": "bbva-pen", "banco": "BBVA", "moneda": "PEN",
+                                                 "cuenta_contable": "104101", "numero": "0011-0307-0100028777"}])
+    assert con_numero["avisos"] == []
+
+
+def test_lo_que_SIGUE_parando_una_cuenta_bancaria():
+    """El aviso nuevo no abre la puerta a todo: sin `id` no hay con qué nombrarla, un CCI de diecinueve
+    dígitos es uno mal copiado y una moneda fuera del catálogo no se puede asentar en ninguna parte."""
+    for mal, porque in (
+        ({"banco": "BBVA", "moneda": "PEN"}, "necesita un `id`"),
+        ({"id": "x", "moneda": "PEN", "cci": "0" * 19}, "CCI inválido"),
+        ({"id": "x", "moneda": "XXX", "numero": "123"}, "Moneda inválida"),
+    ):
+        with pytest.raises(t.CuentaInvalida):
+            t.CuentaBancaria(**mal)
