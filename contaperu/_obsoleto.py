@@ -1,15 +1,21 @@
-"""El mecanismo con que un nombre que cambió sigue resolviendo, y avisa.
+"""Cómo se deprecia algo en este motor: una clase de aviso, una función que avisa y la versión en que se retira.
 
-Estuvo sin usarse desde que la 2.0 retiró la última ruta de la 0.x hasta que la 3.10 renombró el driver
-`asiento_neutral` a `asiento_contable`: ahí volvió a hacer falta, y por eso se había conservado. `RutaObsoleta` es
-parte de la API pública —una aplicación la filtra con precisión, sin apagar los avisos de nadie más—:
+**La 10.0 lo dejó en eso.** Hasta aquí traía además la maquinaria de las rutas de módulo de la 0.x —`resolver`,
+`reexportar` y `funcion_obsoleta`—, con cero usuarios desde que la 7.0 retiró las últimas, y la 10.0 la borró con el
+resto del andamio. Lo que queda no es andamio sino **protocolo**, y está publicado: el `pyproject.toml` de este
+repositorio apunta aquí su `filterwarnings`, `INTEGRAR.md` le dice a quien integra que corra su batería con
+`-W error::contaperu._obsoleto.RutaObsoleta`, y la aplicación lo hace. `RutaObsoleta` es parte de la API pública —se
+filtra con precisión, sin apagar los avisos de nadie más—:
 
     warnings.filterwarnings("ignore", category=contaperu.RutaObsoleta)
 
-Las dos decisiones que lo hacen usable, y que conviene no perder:
+Si hace falta que un nombre que cambia siga resolviendo, el `__getattr__` de módulo que lo hace son seis líneas y se
+escribe entonces, en el módulo que se mueve: es la regla 1 aplicada a nuestras propias herramientas. La decisión que
+conviene no perder al escribirlo es la que esa maquinaria tenía dentro: **el aviso sale al USAR la ruta vieja, no al
+importar el módulo**, para que un `import` en el arranque de una aplicación no ensucie su registro.
 
-- **El aviso sale al USAR la ruta vieja, no al importar el módulo.** Por eso `reexportar` devuelve un `__getattr__` de
-  módulo en vez de ejecutar nada en el cuerpo: un `import` en el arranque de una aplicación no ensucia su registro.
+Y la otra:
+
 - **`RETIRO` dice en qué versión desaparece**, y va en el mensaje. Lo que se deprecie ahora se retira en la 10.0, que
   es lo que promete `CLAUDE.md`: lo que se retira avisa durante toda la mayor anterior. **Se mueve con cada mayor que
   cumple lo prometido**, y la 4.0 cumplió: retiró el alias `asiento_neutral`, que era lo único que quedaba avisando.
@@ -39,12 +45,9 @@ ningún test usa una ruta vieja sin decirlo.
 """
 from __future__ import annotations
 
-import functools
-import importlib
 import warnings
-from typing import Any, Callable
 
-RETIRO = "10.0"
+RETIRO = "11.0"
 
 
 class RutaObsoleta(DeprecationWarning):
@@ -61,51 +64,3 @@ def avisar(vieja: str, nueva: str, *, que: str = "una ruta de la 0.x", nivel: in
     viejo, no a este archivo."""
     warnings.warn(f"`{vieja}` es {que} y se retira en la {RETIRO}: usa `{nueva}`.", RutaObsoleta,
                   stacklevel=nivel)
-
-
-def resolver(destino: str) -> Any:
-    """`"paquete.modulo:atributo.sub"` → el objeto; sin `:`, el módulo."""
-    modulo, _, atributo = destino.partition(":")
-    objeto: Any = importlib.import_module(modulo)
-    for parte in filter(None, atributo.split(".")):
-        objeto = getattr(objeto, parte)
-    return objeto
-
-
-def reexportar(modulo: str, destinos: dict[str, str], *, avisa: bool = True,
-               nuevas: dict[str, str] | None = None,
-               que: str = "una ruta de la 0.x") -> tuple[Callable, Callable]:
-    """El `__getattr__` y el `__dir__` de un módulo cuyos nombres viven en otro sitio.
-
-    `destinos` es `{"nombre": "paquete.modulo:atributo"}`. Cada nombre se resuelve al pedirlo, y avisa con
-    `RutaObsoleta` si `avisa`. El aviso recomienda `nuevas[nombre]` si está —la ruta pública que la reemplaza, cuando
-    no es el propio destino— y el destino si no. Un nombre que no está en `destinos` da el `AttributeError` de
-    siempre.
-
-    `que` dice QUÉ es lo que cambió, y se pasa tal cual a `avisar`. Su valor por defecto es de cuando este
-    mecanismo solo servía a las rutas de la 0.x; un módulo que cambia de sitio hoy dice que es eso, porque el
-    mensaje lo lee una persona y «es una ruta de la 0.x» sería falso."""
-    nuevas = nuevas or {}
-
-    def __getattr__(nombre: str) -> Any:
-        destino = destinos.get(nombre)
-        if destino is None:
-            raise AttributeError(f"module {modulo!r} has no attribute {nombre!r}")
-        if avisa:
-            avisar(f"{modulo}.{nombre}", nuevas.get(nombre) or destino.replace(":", "."), que=que)
-        return resolver(destino)
-
-    def __dir__() -> list[str]:
-        return sorted(destinos)
-
-    return __getattr__, __dir__
-
-
-def funcion_obsoleta(nueva: Callable, *, vieja: str, reemplazo: str) -> Callable:
-    """`nueva`, envuelta para que avise como `vieja` al llamarse."""
-    @functools.wraps(nueva)
-    def envoltorio(*args, **kwargs):
-        avisar(vieja, reemplazo)
-        return nueva(*args, **kwargs)
-
-    return envoltorio

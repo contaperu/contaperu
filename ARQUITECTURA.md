@@ -391,7 +391,7 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
   **7.0** retiró los seis atajos que la 6.4.0 dejó en la raíz al agrupar el núcleo en `tributos/` y `contable/`, con
   63 nombres de la superficie congelada: es la primera vez que una retirada se cobra en la mayor siguiente a la que
   la anunció, que es como debería ir siempre. El mecanismo con que se deprecia algo sigue en `_obsoleto.py`, sin
-  usuarios y a propósito, para la próxima vez; `RETIRO` dice ahora `"8.0"`.
+  usuarios y a propósito, para la próxima vez; `RETIRO` dice ahora `"11.0"`.
 - **El portal** (otro repositorio) usa la api y el nivel de extensión; el `resumen` de cada exportación, que guarda tal
   cual, conserva sus claves.
 - **Lo peruano, a la vista** (hito J0): qué módulos importan uno peruano queda congelado en
@@ -532,7 +532,7 @@ No son prohibiciones: es el precio de cada cambio, escrito antes de hacerlo. Qui
 | Reglas de SUNAT como datos | `_datos.leer_json("datos/sunat/…")`; `catalogos` las cargará sin cambiar sus nombres | C1-C2 |
 | El contribuyente como datos | `catalogos.regimenes_tributarios()` y `catalogos.cronogramas_de_vencimiento()`: en qué régimen tributa y cuándo le vence el mes, **cada regla con la cita de su artículo** y un cargador que no arranca sin ella. Son catálogo y no campo del estándar porque «qué libros estoy obligado a llevar» se pregunta sin un documento delante. El cronograma cabe en un núcleo sin reloj porque no es un reloj: dado un periodo y un dígito de RUC devuelve una fecha | C13 |
 | CDR y no domiciliados | `lectores/cdr.py` reservado; los roles pueden crecer sin romper un driver | C3, C12 |
-| Otra jurisdicción | J0 como test, J1 como efecto de las capas, `jurisdicciones/pe` reservado, `open-accounting` 1.1 para J5 | J0-J6 |
+| Otra jurisdicción | J0 como test, J1 como efecto de las capas, `jurisdicciones/pe` reservado, `open-accounting` 2.1 para J5 | J0-J6 |
 | La API de un ERP moderno | canal `api_erp` reservado y rechazado; su hito se retiró el 10-oct-2026 | — |
 
 ## La capa para agentes

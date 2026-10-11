@@ -1,4 +1,4 @@
-# open-accounting 1.0 — el documento contable universal del Perú
+# open-accounting 2.0 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -16,12 +16,12 @@ y por eso lo que entra aquí se promete: un valor publicado no se quita ni cambi
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estandar/open-accounting.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-2.0/estandar/open-accounting.schema.json
 ```
 
-Cuelga del tag **del estándar** (`open-accounting-1.0`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`open-accounting-2.0`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
-sirve como estándar. **El tag `open-accounting-1.0` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
+sirve como estándar. **El tag `open-accounting-2.0` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
 bloque opcional no suben la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la
 1.0; un cambio de significado sube a 2.0 y estrena su propio tag.
 
@@ -43,7 +43,7 @@ python -m contaperu.puertas.cli diagnosticar mi-documento.json
 
 ```json
 {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -322,7 +322,7 @@ necesitado todavía; se añade con un caso real detrás, no por si acaso.
 **`1.0` gana dos campos opcionales el 26-sep-2026 y no sube** (enmiendas 0014 y 0015): `tipo_nota`, por qué se
 emitió una nota, y `estado_sunat`, lo que SUNAT dice del comprobante en su propio registro. Los dos vienen de
 columnas que la propuesta del SIRE ya traía y que se descartaban al leer. Nada cambia de significado y un
-documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-1.0` avanza y la versión se
+documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-2.0` avanza y la versión se
 queda en `1.0`**.
 
 **`0.2` (11-sep-2026) cambia el significado de dos campos**, y por eso sube: `base_gravada` e `igv` pasan a ser
@@ -427,7 +427,7 @@ libro**— viven en [`catalogos.json`](catalogos.json), junto a este archivo, co
 la URL del tag igual que el esquema, así que un ERP de fuera los lee sin instalar nada:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-1.0/estandar/catalogos.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-2.0/estandar/catalogos.json
 ```
 
 **Por qué están fuera del esquema** (1.0): eran enums cerrados, así que el día que entre un hecho nuevo —los

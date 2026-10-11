@@ -125,7 +125,7 @@ from .accesores import (NoCabe, acepta_indice, arma_asientos, canal, centro_en_a
                         seccion_por_defecto, vocabulario)
 from .examen import incumplimientos
 from .protocolos import Driver, DriverAsientoLineas, DriverRegistroArchivo, DriverRegistroTexto
-from .taxonomia import (CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RENOMBRADOS, CANALES_RESERVADOS, CLAVES_DEL_PLAN,
+from .taxonomia import (CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RESERVADOS, CLAVES_DEL_PLAN,
                         CLAVES_LEGACY, DATOS_CON_COLUMNAS, EXIGE_NUCLEO_ASIENTO, EXIGE_NUCLEO_NEUTRAL,
                         EXIGE_NUCLEO_REGISTRO, EXIGE_POSIBLES_ASIENTO, EXIGE_POSIBLES_REGISTRO, FAMILIA,
                         FORMAS, TIPO_DEL_PLAN, VOCABULARIO_POR_DEFECTO, VOCABULARIOS)
@@ -134,7 +134,7 @@ from .taxonomia import (CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RENOMBRADOS, C
 # están en la superficie pública congelada: un driver de terceros puede estar importando cualquiera de
 # ellos de aquí, y retirarlo sin avisar rompería la promesa de la mayor anterior.
 __all__ = [
-    "CANALES", "CANALES_RENOMBRADOS", "CANALES_RESERVADOS", "CANAL_OBLIGATORIO_DESDE", "CENTRO_EN_ANEXO",
+    "CANALES", "CANALES_RESERVADOS", "CANAL_OBLIGATORIO_DESDE", "CENTRO_EN_ANEXO",
     "CLAVES_DEL_PLAN",
     "CLAVES_LEGACY", "CONFIGURACION_DEL_ASIENTO", "CONFIGURACION_GENERAL", "Campo", "Columna", "Comprobante",
     "DATOS_CON_COLUMNAS", "Driver", "DriverAsientoLineas", "DriverRegistroArchivo", "DriverRegistroTexto",

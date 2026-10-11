@@ -1,6 +1,6 @@
 {
  "compra_mixta_gravado_y_exonerado": {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -119,7 +119,7 @@
   }
  },
  "factura_usd_con_tipo_de_cambio": {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -242,7 +242,7 @@
   }
  },
  "nota_de_credito_con_tipo_nota": {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -381,7 +381,7 @@
   }
  },
  "compra_con_detraccion_sin_constancia": {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -547,7 +547,7 @@
   }
  },
  "detraccion_con_constancia_pegada": {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -717,7 +717,7 @@
   }
  },
  "honorarios_con_retencion": {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -834,7 +834,7 @@
   }
  },
  "venta_con_concepto_lleno": {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -952,7 +952,7 @@
   }
  },
  "recibo_de_servicios_publicos": {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",

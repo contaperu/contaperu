@@ -235,7 +235,10 @@ def test_el_nombre_viejo_del_driver_ya_no_existe():
     ninguna guarda de este repositorio lo habría visto, porque el valor de `driver` no está en ningún enum. Cumplido el
     aviso, se va: ni el nombre resuelve ni existe el módulo talón que sostenía las cuatro formas de importarlo.
 
-    Lo que NO se va con él es el mecanismo: `drivers.ALIAS` se queda vacío para el próximo renombrado."""
+    **Y con la 10.0 se fue también el mecanismo.** `drivers.ALIAS` se quedó «vacío para el próximo renombrado», y
+    el próximo no llegó en seis mayores; lo único que lo ejercitaba era un test que se inventaba un alias con
+    `monkeypatch`. Si vuelve a hacer falta, son cuatro líneas en `obtener()`, que es el único sitio por donde pasan
+    las cuatro puertas — y eso sí quedó escrito ahí, porque es lo que costó acertar."""
     import importlib
 
     from contaperu import drivers
@@ -244,23 +247,8 @@ def test_el_nombre_viejo_del_driver_ya_no_existe():
         drivers.obtener("asiento_neutral")
     with pytest.raises(ModuleNotFoundError):
         importlib.import_module("contaperu.drivers.asiento_neutral")
-    assert "asiento_neutral" not in drivers.ALIAS and not hasattr(drivers, "asiento_neutral")
+    assert not hasattr(drivers, "asiento_neutral") and not hasattr(drivers, "ALIAS")
     # Los archivos ya exportados llevan ese nombre DENTRO, en `_exportacion.driver`, y eso no lo arregla ninguna
     # versión: el alias cubría la entrada, no los datos que ya están en disco.
 
 
-def test_el_alias_de_un_driver_sigue_en_pie(monkeypatch):
-    """No queda ningún nombre viejo, pero el circuito que resuelve uno tiene que seguir funcionando: es lo que se usará
-    la próxima vez que un destino se renombre. Se prueba con un nombre de mentira, para no tener que deprecar nada de
-    verdad solo por cubrirlo — el mismo trato que `_obsoleto` recibe en `test_api.py`.
-
-    Lo que se comprueba es lo que costó acertar: que resuelva al driver nuevo, que avise con `RutaObsoleta` y que
-    **no** aparezca como un destino más en la lista que publica el registro."""
-    from contaperu import RutaObsoleta
-    from contaperu import drivers
-
-    monkeypatch.setitem(drivers.ALIAS, "nombre_de_antes", "asiento_contable")
-    with pytest.warns(RutaObsoleta, match="asiento_contable"):
-        assert drivers.obtener("nombre_de_antes") is drivers.obtener("asiento_contable")
-    assert "nombre_de_antes" not in drivers.DRIVERS
-    assert "nombre_de_antes" not in api.drivers_disponibles()

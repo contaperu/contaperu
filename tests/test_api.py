@@ -132,23 +132,35 @@ def test_el_paquete_raiz_no_ofrece_lo_retirado():
         assert getattr(contaperu, nombre)
 
 
-def test_el_mecanismo_de_deprecacion_sigue_en_pie():
-    """No queda ningún nombre deprecado —la 7.0 cobró los seis puentes de la 6.4.0—, pero el circuito con que se deprecia uno tiene que seguir funcionando: es
-    lo que se usará la próxima vez que algo cambie de sitio. Se prueba sobre un módulo de mentira, para no tener
-    que deprecar nada de verdad solo por cubrirlo.
+def test_el_protocolo_de_deprecacion_sigue_en_pie():
+    """Lo que queda del mecanismo después de la 10.0, que es lo que estaba publicado: la clase de aviso, la función
+    que avisa y la versión en que se retira.
 
-    Lo que se comprueba es lo que costó acertar: que el aviso salga al PEDIR el nombre —no al crear el
-    `__getattr__`—, que diga la ruta nueva y la versión en que desaparece, y que un nombre que no está siga dando
-    el `AttributeError` de siempre."""
-    from contaperu._obsoleto import RETIRO, reexportar
+    **La 10.0 borró la maquinaria de las rutas de módulo** —`resolver`, `reexportar`, `funcion_obsoleta`—, que
+    llevaba sin usuarios desde que la 7.0 cobró los seis puentes de la 6.4.0. Lo que la sostenía era este test,
+    sobre un módulo de mentira: un circuito cuyo único ejercicio es un test que lo inventa no es un mecanismo en
+    pie, es código muerto con coartada. Si vuelve a hacer falta que un nombre resuelva, el `__getattr__` del módulo
+    que se mueve son seis líneas y se escribe entonces.
 
-    obtener, listar = reexportar("paquete.viejo", {"Comprobante": "contaperu.modelo:Comprobante"},
-                                 nuevas={"Comprobante": "contaperu.api.Comprobante"})
-    assert listar() == ["Comprobante"]
-    with pytest.warns(api.RutaObsoleta, match=f"usa `contaperu.api.Comprobante`.*|se retira en la {RETIRO}"):
-        assert obtener("Comprobante") is api.Comprobante
-    with pytest.raises(AttributeError):
-        obtener("nombre_que_no_existe")
+    Lo que NO se borró es el protocolo, porque está publicado: `pyproject.toml` apunta aquí su `filterwarnings`,
+    `INTEGRAR.md` le dice a quien integra que corra su batería con `-W error::contaperu._obsoleto.RutaObsoleta`, y
+    la aplicación lo hace. Lo que se comprueba es que siga sirviendo para eso: que la clase sea un
+    `DeprecationWarning` —de ahí que un `-W` genérico también la cace—, que el aviso diga qué usar y en qué versión
+    desaparece, y que apunte a quien usó lo viejo y no a este archivo."""
+    import warnings
+
+    from contaperu._obsoleto import RETIRO, avisar
+
+    assert issubclass(api.RutaObsoleta, DeprecationWarning)
+    with pytest.warns(api.RutaObsoleta, match=f"se retira en la {RETIRO}: usa `lo_nuevo`") as avisos:
+        avisar("lo_viejo", "lo_nuevo", que="un nombre de mentira", nivel=2)
+    assert "un nombre de mentira" in str(avisos[0].message)
+    assert avisos[0].filename == __file__, "el aviso apunta a quien usó lo viejo"
+    # Y la batería de este repositorio lo convierte en error, así que ningún test usa una ruta vieja en silencio.
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", api.RutaObsoleta)
+        with pytest.raises(api.RutaObsoleta):
+            avisar("lo_viejo", "lo_nuevo")
 
 
 def test_un_error_del_motor_se_dice_con_su_clave():

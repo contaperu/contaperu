@@ -2,7 +2,7 @@
 
 ContaPerú convierte comprobantes de SUNAT en asientos y en los archivos que importan los sistemas contables peruanos,
 sin estado: todo entra por parámetro y sale por retorno. Esta guía es para quien construye un ERP, un portal contable o
-un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 4.x. Los ejemplos se
+un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 10.x. Los ejemplos se
 ejecutan en la batería del repositorio (`tests/test_integrar.py`): si uno deja de funcionar, la batería falla.
 
 **Lo que se integra no es un conversor, es una base.** El motor no está hecho para que tu ERP exporte a CONCAR y ahí
@@ -26,7 +26,7 @@ el mismo mes, el mismo diagnóstico, por cualquiera de ellas.
 
 ## Lo que entra y lo que sale
 
-Entra un **documento `open-accounting` 1.0** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
+Entra un **documento `open-accounting` 2.0** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
 compras) y los comprobantes tal como los emite SUNAT, con los importes en positivo y como texto exacto. Si tienes los
 XML o la propuesta del SIRE, el motor arma el documento por ti (`leer_xml`, `leer_propuesta_sire`).
 
@@ -200,7 +200,7 @@ los mismos nombres que los parámetros de la api:
 ```json
 {
   "documento": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"},
     "comprobantes": [{
       "tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "2026-01-15",
@@ -345,7 +345,7 @@ escribe un driver contra el contrato del motor; aquí se lee el documento contra
 
 ```json
 {
-  "open_accounting": "1.0",
+  "open_accounting": "2.0",
   "libro": {"ruc": "…", "razon_social": "…", "periodo": "202601", "tipo": "compra"},
   "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "45680", "fecha_emision": "2026-01-10",
                     "contraparte_doc": "20677777771", "contraparte_nombre": "MAYORISTA NACIONAL SAC",
@@ -547,13 +547,17 @@ Para actualizar:
 Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
 seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
-## Lo que promete la 7.x
+## Lo que promete la 10.x
 
-- **`contaperu.api` no cambia de nombre ni de firma** hasta la 8.0 (`tests/test_superficie_publica.py`). Pueden llegar
+- **`contaperu.api` no cambia de nombre ni de firma** hasta la 11.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
-- **Un nombre que cambia sigue resolviendo durante toda la 7.x**, y avisa con `contaperu.RutaObsoleta` diciendo cuál
-  usar, hasta la 8.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno: la 7.0 cumplió los seis que avisaban. Corre tu
-  batería con `-W error::contaperu._obsoleto.RutaObsoleta` y te sale cada sitio donde uses uno.
+- **Un nombre que cambia sigue resolviendo durante toda la 10.x**, y avisa con `contaperu.RutaObsoleta` diciendo
+  cuál usar, hasta la 11.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno, y conviene saber por qué: la 7.0
+  cumplió los seis que avisaban y de la 8.0, la 9.0 y la 10.0 no salió ninguno nuevo. La 9.0 rompió **sin** pasar
+  por aquí, a propósito —un puente que siguiera aceptando el `es_venta: bool` mantendría vivo justo el camino que
+  la mayor cerraba—, y la 10.0 retiró la maquinaria de las rutas de módulo, que llevaba tres mayores sin usarse.
+  Lo que no se retiró es esto: corre tu batería con `-W error::contaperu._obsoleto.RutaObsoleta` y te sale cada
+  sitio donde uses un nombre deprecado.
 - **Si vienes de una 6.x y usabas el núcleo directamente**, la 7.0 retiró los seis atajos que la 6.4.0 dejó en la raíz
   al agrupar el núcleo. El cambio es de import y nada más: lo que devuelve cada función es idéntico.
 
@@ -606,7 +610,7 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia
   una línea**: la superficie pública de la 1.0 sigue entera y su test pasa sin regenerarse. Lo que desapareció es lo
   que ninguna versión publicada llegó a ofrecer — la 0.x nunca estuvo en PyPI.
-- **El estándar es `open-accounting` 1.0**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
+- **El estándar es `open-accounting` 2.0**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
   significado hasta una 2.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
   se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **un `rol` que no conozcas se contabiliza con
   `clase`, `debe_haber` e `importe`**. Si vienes de la 0.3, que el motor ya no acepta:

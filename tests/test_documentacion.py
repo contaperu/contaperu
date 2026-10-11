@@ -63,10 +63,11 @@ AFIRMA_VERSION = (re.compile(r"open-accounting`?\**\s*\**`?(\d+\.\d+)\b"),
 # Las únicas versiones distintas de la vigente que un documento del presente puede citar, cada una con su motivo.
 OTRAS_VERSIONES: dict[str, set[str]] = {
     # El hito J5 de la hoja de ruta, que es lo próximo del estándar y se nombra por su número.
-    "HOJA-DE-RUTA.md": {"1.1"},
-    "ARQUITECTURA.md": {"1.1"},
-    # La guía de migración existe para hablar de la versión de la que se viene.
-    "estandar/MIGRAR-A-1.0.md": {"0.3"},
+    "HOJA-DE-RUTA.md": {"2.1"},
+    "ARQUITECTURA.md": {"2.1"},
+    # Una guía de migración existe para hablar de la versión de la que se viene, y de la que se va a.
+    "estandar/MIGRAR-A-1.0.md": {"0.3", "1.0"},
+    "estandar/MIGRAR-A-2.0.md": {"1.0"},
 }
 
 
@@ -78,9 +79,9 @@ def texto(doc: str) -> str:
 def test_ningun_documento_nombra_un_driver_que_no_existe(doc):
     """El caso que lo trae: `driver="open_accounting"` sobrevivió al renombrado en los dos documentos que más se leen."""
     nombrados = {next(g for g in m.groups() if g) for m in NOMBRA_DRIVER.finditer(texto(doc))}
-    # Los nombres viejos cuentan como existentes: siguen resolviendo y un documento puede explicar el renombrado
-    # usando la forma natural (`driver="asiento_neutral"`). Lo que se caza es un nombre que no resuelve de ninguna manera.
-    fantasmas = sorted(nombrados - set(drivers.DRIVERS) - set(drivers.ALIAS))
+    # Hasta la 10.0 los nombres viejos contaban como existentes, porque una tabla `ALIAS` los resolvía. Se retiró
+    # —estaba vacía desde la 4.0—, así que lo que se caza es un nombre que no resuelve, y punto.
+    fantasmas = sorted(nombrados - set(drivers.DRIVERS))
     assert not fantasmas, (f"{doc} nombra un driver que no existe: {fantasmas}. "
                            f"Los de serie son {sorted(drivers.DRIVERS)}")
 
@@ -301,3 +302,52 @@ def test_ningun_documento_vigente_usa_una_palabra_retirada(doc):
               if f"`{palabra}`" in contenido or f"canal {palabra}" in contenido}
     assert not usadas, (f"{doc} usa como valor una palabra que el motor retiró: "
                         + "; ".join(f"`{p}` → usa {c}" for p, c in sorted(usadas.items())))
+
+
+# ── Las promesas de versión, que envejecen solas si nadie las mira ──────────────────────────────────────────────
+
+# Dónde promete cada documento su estabilidad, con la frase EXACTA y qué número le toca. `{mayor}` es la mayor en
+# curso y `{siguiente}` la que viene, que es hasta donde llega la promesa.
+#
+# Va como frase exacta y no como patrón a propósito: «hasta la 3.10» aparece treinta y seis veces en el repositorio
+# y casi todas son historia —«hasta la 3.10 la sigla la traía el núcleo»—, así que un patrón genérico cazaría el
+# pasado. Lo que esta tabla sabe es dónde se promete, y eso hay que escribirlo.
+PROMESAS_DE_VERSION = (
+    ("INTEGRAR.md", "qué promete la {mayor}.x"),
+    ("INTEGRAR.md", "## Lo que promete la {mayor}.x"),
+    ("INTEGRAR.md", "no cambia de nombre ni de firma** hasta la {siguiente}.0"),
+    ("INTEGRAR.md", "sigue resolviendo durante toda la {mayor}.x"),
+    ("INTEGRAR.md", "hasta la {siguiente}.0 (`_obsoleto.RETIRO`)"),
+    ("README.md", "lo que pide cada una no cambian\nhasta la {siguiente}.0."),
+    ("README.md", "misma firma hasta la {siguiente}.0."),
+    ("CLAUDE.md", "lo que promete la {mayor}.x"),
+    ("contaperu/api/__init__.py", "estable durante toda la {mayor}.x"),
+    ("contaperu/api/__init__.py", "sigue su firma hasta la {siguiente}.0"),
+    ("ARQUITECTURA.md", '`RETIRO` dice ahora `"{siguiente}.0"`'),
+)
+
+
+@pytest.mark.parametrize("doc, frase", PROMESAS_DE_VERSION,
+                         ids=[f"{d}:{f[:34]}" for d, f in PROMESAS_DE_VERSION])
+def test_ninguna_promesa_de_version_queda_atras(doc, frase):
+    """Una promesa de estabilidad que cita una versión ya pasada no promete nada, y envejece sin que nada avise.
+
+    **Es la lección de `_obsoleto.RETIRO`, que la cometió tres veces**: decía «3.0» con el paquete en la 3.8, y
+    luego «6.0» durante toda la 6.x. Nada lo vigilaba hasta que la 6.2.0 le puso un test, y desde entonces ese test
+    ha movido el número en la 7.0, la 8.0 y la 9.0 —las tres veces en rojo primero, que es su trabajo—.
+
+    Lo que lo trae aquí: la 10.0 encontró cinco sitios con el mismo defecto y nadie los vigilaba. `INTEGRAR.md`
+    titulaba «Lo que promete la 7.x» y prometía firmas estables «hasta la 8.0» con el paquete en 9.2.0; el
+    `README.md` y `contaperu/api/__init__.py` decían «hasta la 2.0», que quedó atrás hace ocho mayores; y
+    `CLAUDE.md` hablaba de «la 2.x».
+
+    El día que el paquete suba de mayor, estas once afirmaciones se ponen rojas de golpe y hay que moverlas. Que
+    sea molesto es el punto: una promesa que se mueve sola no es una promesa."""
+    from contaperu import __version__
+
+    mayor = int(__version__.split(".")[0])
+    esperada = frase.format(mayor=mayor, siguiente=mayor + 1)
+    contenido = texto(doc)
+    assert esperada in contenido, (
+        f"{doc} no dice {esperada!r}. El paquete está en la {mayor}.x, así que lo que promete llega hasta la "
+        f"{mayor + 1}.0: mueve la frase, o esta tabla si la frase cambió de forma.")

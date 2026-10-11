@@ -58,8 +58,9 @@ EXTENSION = (
     # Y de `contaperu.drivers.contrato` se fueron dos nombres en la 8.0, al quedarse el canal como única palabra del
     # destino: `GRUPOS`, la tabla que lo traducía a «SIRE», «Legacy» y «ERP», y `grupo()`, su accesor. Eran un
     # segundo vocabulario para lo mismo y el de fuera mentía —el PLE salía como `sire`—, así que lo que se quita es
-    # una imprecisión publicada, no una función que alguien pudiera querer. Entró `CANALES_RENOMBRADOS`, que es lo
-    # que hace que el rechazo del nombre viejo diga el nuevo.
+    # una imprecisión publicada, no una función que alguien pudiera querer. Entró entonces `CANALES_RENOMBRADOS`,
+    # para que el rechazo del nombre viejo dijera el nuevo, y **la 10.0 lo retiró**: dos mayores después nadie puede
+    # tener un driver con el nombre de la 7.x, y la tabla no la ejercitaba ningún test.
 )
 TIPOS_DE_CONSTANTE = {"builtins", "decimal", "datetime"}
 
@@ -115,7 +116,8 @@ def test_nada_de_la_superficie_se_quita_ni_cambia():
     quitados = {m: sorted(set(nombres) - set(hoy.get(m, {}))) for m, nombres in congelada.items()}
     cambiados = {m: sorted(n for n, firma in nombres.items() if n in hoy.get(m, {}) and hoy[m][n] != firma)
                  for m, nombres in congelada.items()}
-    assert {m: q for m, q in quitados.items() if q} == {}, "quitar un nombre público es la 2.0"
+    assert {m: q for m, q in quitados.items() if q} == {}, (
+        "quitar un nombre público es cosa de una MAYOR del paquete: regenera el fixture a propósito")
     assert {m: c for m, c in cambiados.items() if c} == {}, "cambiar una firma de la api es la 2.0"
 
 

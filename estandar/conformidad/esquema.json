@@ -5,7 +5,7 @@
   {
    "description": "El mínimo: un libro y nada más",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -18,7 +18,7 @@
   {
    "description": "Un comprobante con los tres campos que exige y nada más",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -38,7 +38,7 @@
   {
    "description": "La ausencia es la respuesta: sin detracción no se manda nada",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -67,7 +67,7 @@
   {
    "description": "Una detracción en null vale: es lo mismo que no traerla",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -97,7 +97,7 @@
   {
    "description": "`detraccion: false` NO vale: no es un objeto de detracción, y el false de relleno es justo lo que este estándar no hace",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -127,7 +127,7 @@
   {
    "description": "Campos de relleno de otro sistema: se rechazan en la primera llamada y no al cerrar el mes",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -158,7 +158,7 @@
   {
    "description": "Vocabulario legacy en el comprobante: `subdiario` es de un sistema, no un hecho de SUNAT",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -188,7 +188,7 @@
   {
    "description": "La cuenta contable NO va en el comprobante: es la decisión de quien contabiliza, no el hecho",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -218,7 +218,7 @@
   {
    "description": "Con `imputaciones`, cada comprobante necesita su `id_externo`: es la llave con la que se casan",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -252,7 +252,7 @@
   {
    "description": "Con `imputaciones` y con `id_externo`",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -288,7 +288,7 @@
   {
    "description": "Sin `imputaciones` no se pide `id_externo`: el requisito es condicional de verdad",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -317,7 +317,7 @@
   {
    "description": "Una clave inventada dentro de una imputación",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -352,7 +352,7 @@
   {
    "description": "Un reparto con su importe",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -396,7 +396,7 @@
   {
    "description": "Una línea del asiento sin `clase`: obligatoria desde la 1.0",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -416,7 +416,7 @@
   {
    "description": "Una línea del asiento con la `clase` vacía: `required` sola no la atrapaba, porque el texto vacío es un texto",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -437,7 +437,7 @@
   {
    "description": "Una línea con su clase",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -480,7 +480,7 @@
   {
    "description": "El enlace de la línea con su comprobante, por el id del sistema que lo produjo",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -506,7 +506,7 @@
   {
    "description": "Un importe negativo: los importes van SIEMPRE en positivo y el signo lo pone el driver",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -535,7 +535,7 @@
   {
    "description": "Una fecha que no es AAAA-MM-DD",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -564,7 +564,7 @@
   {
    "description": "Un RUC que no tiene once dígitos",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "123",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -577,7 +577,7 @@
   {
    "description": "Un periodo que no existe",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -590,7 +590,7 @@
   {
    "description": "Una anotación del productor: cualquier clave que empiece con guion bajo se transporta y se ignora",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -619,7 +619,7 @@
   {
    "description": "Con qué se pagó: un código del catálogo de medios de pago de SUNAT",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -640,7 +640,7 @@
   {
    "description": "Un medio de pago de tres dígitos que el catálogo todavía no tiene: vale, porque SUNAT puede añadirlo y el significado no lo cuida el esquema",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -661,7 +661,7 @@
   {
    "description": "Un medio de pago sin forma de código: son tres dígitos, no uno",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -683,7 +683,7 @@
    "description": "Por qué se emitió la nota: un código del Catálogo 09 de SUNAT",
    "valid": true,
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -704,7 +704,7 @@
    "description": "El motivo de la nota es de dos caracteres: tres no caben",
    "valid": false,
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -725,7 +725,7 @@
    "description": "Un motivo que el catálogo todavía no tiene: vale, porque SUNAT amplía estas tablas y el receptor avisa en vez de rechazar",
    "valid": true,
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -746,7 +746,7 @@
    "description": "Lo que SUNAT dice del comprobante en su registro, tal como viene",
    "valid": true,
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -767,7 +767,7 @@
    "description": "El estado de SUNAT admite letras: el anexo del RVIE lo declara alfanumérico, así que el estándar no le impone forma de número",
    "valid": true,
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -788,7 +788,7 @@
    "description": "El estado de SUNAT es de dos caracteres como máximo",
    "valid": false,
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -808,7 +808,7 @@
   {
    "description": "Un libro de tesorería con sus movimientos y ningún comprobante",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -833,7 +833,7 @@
   {
    "description": "Un movimiento sin cuenta no vale: no hay forma de saber de quién es",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -853,7 +853,7 @@
   {
    "description": "Un sentido que no es cargo ni abono no vale",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -874,7 +874,7 @@
   {
    "description": "El importe de un movimiento va positivo: el signo lo lleva el sentido",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -895,7 +895,7 @@
   {
    "description": "Una constancia de pago masivo que se reparte entre dos comprobantes",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -943,7 +943,7 @@
   {
    "description": "Una constancia sin número no vale: es lo único que no se puede inventar",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -962,7 +962,7 @@
   {
    "description": "Una referencia de una clase que no está entre las cuatro no vale",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -990,7 +990,7 @@
   {
    "description": "Las cuatro clases de referencia, cada una con lo suyo",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -1040,7 +1040,7 @@
   {
    "description": "Los dos bloques en el mismo documento, que es lo normal en un mes",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -1071,7 +1071,7 @@
   {
    "description": "Una clave que no es de un movimiento no pasa, como en el resto del estándar",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",

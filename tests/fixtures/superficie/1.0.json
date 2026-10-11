@@ -398,7 +398,6 @@
   "solo_digitos": ""
  },
  "contaperu.drivers": {
-  "ALIAS": "",
   "AvisoDriver": "",
   "DE_SERIE": "",
   "DRIVERS": "",
@@ -422,7 +421,6 @@
  },
  "contaperu.drivers.contrato": {
   "CANALES": "",
-  "CANALES_RENOMBRADOS": "",
   "CANALES_RESERVADOS": "",
   "CANAL_OBLIGATORIO_DESDE": "",
   "CENTRO_EN_ANEXO": "",

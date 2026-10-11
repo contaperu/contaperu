@@ -3,7 +3,7 @@
 Aquí se registra **cómo crece el estándar**. Una enmienda por cambio, con su caso real, su fuente y el test que la
 sostiene.
 
-Existe porque `open-accounting` 1.0 promete no romper hasta una 2.0, y una promesa así necesita un mecanismo, no
+Existe porque `open-accounting` 2.0 promete no romper hasta una 3.0, y una promesa así necesita un mecanismo, no
 buena voluntad: sin un sitio donde quede escrito qué entró, por qué y con qué compatibilidad, la única forma de saber
 si un cambio rompe es leer el `git log`.
 

@@ -16,7 +16,7 @@ from ..kit import Opciones, OpcionesArchivo
 from ..kit import columnas as _columnas_de_linea
 from .accesores import (arma_asientos, canal, configuracion, forma, lleva_cuentas, vocabulario)
 from .taxonomia import (DATOS_CON_COLUMNAS, _CUENTAS_DEL_PLAN, _LINEAS_CON_ANEXO,
-                        CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RENOMBRADOS, CANALES_RESERVADOS, CLAVES_LEGACY, EXIGE_POSIBLES_ASIENTO, EXIGE_POSIBLES_REGISTRO, FORMAS, VOCABULARIOS, _CLAVES_QUE_NO_SON_DE_UNA_SECCION, _CUENTAS_GENERALES)
+                        CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RESERVADOS, CLAVES_LEGACY, EXIGE_POSIBLES_ASIENTO, EXIGE_POSIBLES_REGISTRO, FORMAS, VOCABULARIOS, _CLAVES_QUE_NO_SON_DE_UNA_SECCION, _CUENTAS_GENERALES)
 
 def incumplimientos(modulo: Any) -> list[str]:
     """Lo que le falta a un driver para cumplir el contrato. Lista vacía = cumple."""
@@ -92,8 +92,6 @@ def _incumplimientos_del_canal(modulo: Any, f: str) -> list[str]:
                 f"{CANAL_OBLIGATORIO_DESDE} y de él dependen las reglas que el contrato hace cumplir"]
     if declarado in CANALES_RESERVADOS:
         return [f"CANAL {declarado!r} está reservado y no se admite en la 1.0: {CANALES_RESERVADOS[declarado]}"]
-    if declarado in CANALES_RENOMBRADOS:
-        return [f"CANAL {declarado!r} se renombró en la 8.0: usa {CANALES_RENOMBRADOS[declarado]!r}"]
     if declarado not in CANALES:
         return [f"CANAL {declarado!r} no existe; los canales son {', '.join(CANALES)}"]
     if not f:

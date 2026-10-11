@@ -18,7 +18,7 @@ Los seis que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, sal
 - **`asiento_contable`** — el documento del estándar completo: el libro, sus comprobantes y su asiento, sin vocabulario
   legacy (sin siglas, sub-diarios ni correlativos). Es la salida para un ERP nuevo, que parte del estándar en vez de
   reimplementar el IGV, y desde la 3.10 se llama así: antes era `asiento_neutral`, que decía de qué se libraba en
-  lugar de qué es. El nombre viejo sigue resolviendo toda la 3.x (`ALIAS`).
+  lugar de qué es. El nombre viejo resolvió toda la 3.x y la 4.0 lo retiró.
 
 **`asiento_contable` no es la carpeta `contaperu/asiento/`.** Esa arma el asiento —decide cuentas, sentidos,
 importes y orden, y es contabilidad peruana—; este lo **escribe** tal como salió, sin traducirlo. La forma del
@@ -46,7 +46,6 @@ import warnings
 from importlib.metadata import entry_points
 from types import ModuleType
 
-from .. import _obsoleto
 from ..errores import ErrorContaperu
 from . import asiento_contable, concar, contasis, contrato, csv, ple, ple_plan, sire, starsoft
 from .kit import Opciones
@@ -56,17 +55,8 @@ DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv
                                    contasis.NOMBRE: contasis, starsoft.NOMBRE: starsoft,
                                    asiento_contable.NOMBRE: asiento_contable, ple.NOMBRE: ple, ple_plan.NOMBRE: ple_plan}
 DRIVER_POR_DEFECTO = "sire"
-# Los nombres viejos que siguen resolviendo, con el aviso de cuál usar. **No viven en `DE_SERIE` ni en `DRIVERS`**: ahí
-# aparecerían como un driver más en `api.drivers_disponibles()`, en el recurso `contaperu://drivers` y en la docena de
-# tests que comprueban la lista de destinos contra un conjunto escrito a mano. Un alias no es un destino: es la misma
-# salida por su nombre anterior.
-#
-# **Vacío desde la 4.0**, que retiró el único que hubo: `asiento_neutral`, el nombre que este driver tuvo hasta la
-# 3.10. La tabla se queda porque es el mecanismo —el día que se renombre otro destino, entra aquí y lo cubre en las
-# cuatro puertas de una vez—, igual que `_obsoleto` se conservó sin usuarios entre la 2.0 y la 3.10.
-ALIAS: dict[str, str] = {}
 
-__all__ = ["ALIAS", "DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver",
+__all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver",
            "LibroQueElDestinoNoLleva", "Opciones",
            "asiento_contable", "concar", "contasis", "contrato", "csv", "de_terceros",
            "formato_de", "obtener", "ple", "ple_plan", "recargar", "sire", "starsoft"]
@@ -176,18 +166,17 @@ def recargar() -> dict[str, ModuleType]:
 def obtener(nombre: str) -> ModuleType:
     """El módulo de un driver por su nombre, o el `ValueError` que dice cuáles hay.
 
-    Un nombre de `ALIAS` resuelve al driver que lo reemplazó y avisa con `RutaObsoleta` —la tabla está vacía desde la
-    4.0, que retiró el único que hubo; el circuito se queda para el próximo—. Aquí y no en el registro
-    porque **es el único sitio por donde pasan las cuatro puertas** —la librería, la CLI, HTTP y el MCP llegan todas a
-    `pipeline`, y `pipeline` llega aquí—, así que un alias puesto en este punto los cubre a los cuatro y no ensucia la
-    lista de destinos que ese mismo registro publica."""
+    Hasta la 10.0 pasaba por aquí una tabla `ALIAS` que resolvía el nombre viejo de un driver avisando con
+    `RutaObsoleta`. **Estaba vacía desde la 4.0**, que retiró el único que hubo, y «el circuito se queda para el
+    próximo» duró seis mayores sin uno. Se fue con el resto del andamio: si vuelve a hacer falta, son cuatro líneas.
+
+    Y la razón por la que iría aquí y no en el registro conviene no perderla, porque es lo que hacía que valiera la
+    pena: **es el único sitio por donde pasan las cuatro puertas** —la librería, la CLI, HTTP y el MCP llegan todas a
+    `pipeline`, y `pipeline` llega aquí—, así que un alias puesto en este punto los cubre a los cuatro y no ensucia
+    la lista de destinos que ese mismo registro publica."""
     try:
         return DRIVERS[nombre]
     except KeyError:
-        if nombre in ALIAS:
-            nuevo = ALIAS[nombre]
-            _obsoleto.avisar(f'driver="{nombre}"', f'driver="{nuevo}"', que="el nombre viejo de un driver")
-            return DRIVERS[nuevo]
         raise ValueError(f"Driver desconocido: {nombre!r}. Disponibles: {', '.join(DRIVERS)}") from None
 
 

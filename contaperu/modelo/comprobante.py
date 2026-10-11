@@ -320,6 +320,10 @@ _CAMPOS_MONTO = (
 )
 _CAMPOS_FECHA = ("fecha_emision", "fecha_vencimiento", "ref_fecha")
 # Los campos que salieron del comprobante en open-accounting 0.3: llegan en la imputación.
+# Las dos claves que salieron del comprobante en la 0.3, para que su rechazo diga adónde se movieron en vez de
+# «clave desconocida». **No es un puente a la 0.3 y la 10.0 no lo retiró por eso**: `cuenta_contable` dentro de un
+# comprobante es donde una persona la pone por intuición, así que el mensaje sirve igual a quien nunca vio una 0.3.
+# Es el mismo mecanismo que `asiento.lineas.PISTA_DE_LA_CLAVE`, que nació en la 10.0 para el `rol`.
 RETIRADOS_EN_0_3 = ("cuenta_contable", "centro_costo")
 
 _CAMPOS_TEXTO = (

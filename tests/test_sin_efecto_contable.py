@@ -141,7 +141,7 @@ LA_VENTA = dict(numero="118", base_gravada="100", igv="18", total="118", estado_
 def test_un_comprobante_en_cero_sigue_en_el_registro_del_sire():
     """**El hecho central**: el asiento es una cosa y el registro es otra. SUNAT declara lo que se da de baja en cero
     precisamente para no dejar huecos en el correlativo, así que quitarlo del TXT sería romper lo que se declara."""
-    r = exportar({"open_accounting": "1.0", "libro": LIBRO, "comprobantes": [fila(), fila(**LA_VENTA)]},
+    r = exportar({"open_accounting": "2.0", "libro": LIBRO, "comprobantes": [fila(), fila(**LA_VENTA)]},
                  driver="sire")
     assert r["comprobantes"] == 2
     filas = r["texto"].splitlines()
@@ -153,7 +153,7 @@ def test_un_comprobante_en_cero_sigue_en_el_registro_del_sire():
 def test_el_diagnostico_los_cuenta_aparte_y_el_mes_esta_listo():
     """No cuentan como faltantes ni impiden exportar, y tienen su propia casilla: `fuera_del_destino` significa otra
     cosa —«este destino no lleva ese tipo de comprobante»— y mezclarlos borraría la diferencia."""
-    doc = {"open_accounting": "1.0", "libro": LIBRO,
+    doc = {"open_accounting": "2.0", "libro": LIBRO,
            "comprobantes": [fila(cuenta_contable="", centro_costo=""), fila(**LA_VENTA)]}
     d = diagnosticar(doc, driver="concar")
     assert d["listo_para_exportar"] is True and d["por_que_no"] == []
@@ -161,7 +161,7 @@ def test_el_diagnostico_los_cuenta_aparte_y_el_mes_esta_listo():
     assert d["totales"]["fuera_del_destino"] == 0
     assert d["faltantes"]["sin_cuenta"] == [] and d["faltantes"]["sin_centro"] == []
     # Y el de al lado, que sí mueve dinero, sigue exigiéndose: esto no relaja nada para los demás.
-    sin_cuenta = diagnosticar({"open_accounting": "1.0", "libro": LIBRO,
+    sin_cuenta = diagnosticar({"open_accounting": "2.0", "libro": LIBRO,
                                "comprobantes": [fila(**{**LA_VENTA, "cuenta_contable": "", "centro_costo": ""})]},
                               driver="concar")
     assert sin_cuenta["por_que_no"] == ["1 sin cuenta contable"]
@@ -213,7 +213,7 @@ def test_un_mes_con_lo_que_sunat_declara_sale_por_los_cuatro_destinos():
     nota_sin_base = fila(tipo_cp="07", serie="E001", numero="222", base_gravada="0", igv="4546.31",
                          total="29803.61", estado_sunat="1", tipo_nota="01", ref_tipo_cp="01", ref_serie="E001",
                          ref_numero="1003", ref_fecha="2026-02-04")
-    doc = {"open_accounting": "1.0", "libro": LIBRO,
+    doc = {"open_accounting": "2.0", "libro": LIBRO,
            "comprobantes": [fila(), fila(**LA_VENTA), nota_descuento, nota_sin_base]}
     d = diagnosticar(doc, driver="sire")
     assert d["listo_para_exportar"] is True and d["por_que_no"] == []

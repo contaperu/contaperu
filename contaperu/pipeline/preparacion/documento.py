@@ -32,18 +32,25 @@ MAXIMO_CONSTANCIAS = 20000
 def version_del_documento(doc: dict) -> None:
     """Un documento que se declara de una versión anterior se rechaza diciendo qué cambió.
 
-    La 1.0 no acepta la 0.3 (John, 18-sep-2026: «como todavía ningún ERP no lo usa, puedes hacer la limpieza para que
-    esté bien»). Leer las dos habría costado dos caminos en el lector y una regla de cuál gana, para una
-    compatibilidad que nadie necesitaba. Un documento sin la clave no se rechaza: es lo que hace quien construye el
-    documento con el motor, que la estampa él."""
+    **Una mayor del estándar no lee la anterior**, y es la misma decisión las dos veces que ha pasado. La 1.0 no
+    aceptó la 0.3 (John, 18-sep-2026: «como todavía ningún ERP no lo usa, puedes hacer la limpieza para que esté
+    bien»), y la 2.0 no acepta la 1.0: leer las dos cuesta dos caminos en el lector y una regla de cuál gana.
+
+    La diferencia entre las dos veces, dicha porque importa: cuando salió la 1.0 nadie de fuera producía
+    documentos, y la 1.0 **lleva semanas en PyPI**. Lo que lo hace asumible está medido: el motor estampa él la
+    versión, así que un documento que lo use no la declara nunca; y quien la declare solo tiene que cambiar el
+    número y quitar lo que la 2.0 retiró, que es exactamente lo que `MIGRAR-A-2.0.md` enumera.
+
+    Un documento sin la clave no se rechaza: es lo que hace quien construye el documento con el motor."""
     declarada = str(doc.get("open_accounting") or "").strip()
     if declarada and declarada != OPEN_ACCOUNTING:
         raise DocumentoInvalido(
             f"Este documento se declara `open_accounting` {declarada} y el motor habla la {OPEN_ACCOUNTING}. "
-            "De la 0.3 a la 1.0 cambian tres cosas: la imputación va dentro del documento, en el bloque "
-            "`imputaciones` llaveado por `id_externo`; cada línea del asiento lleva su `clase`; y `rol` y "
-            "`libro.tipo` se validan contra el catálogo publicado del estándar. La guía, paso a paso, está en "
-            "`estandar/MIGRAR-A-1.0.md`.")
+            "De la 1.0 a la 2.0 lo que cambia es lo que SALE: el `rol` de cada línea del asiento, los campos "
+            "`documento.tipo` y `referencia.tipo` —la sigla con que cada ERP nombra un documento— y "
+            "`detraccion.estado`. Ninguno hacía falta: el papel de una línea se deriva de lo que trae, y el estado "
+            "de una detracción, de su constancia y su fecha. La guía, paso a paso, está en "
+            "`estandar/MIGRAR-A-2.0.md`.")
 
 
 def libro_de(doc: dict) -> Libro:

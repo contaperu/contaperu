@@ -26,7 +26,7 @@ def cs(*comprobantes: dict) -> list[Comprobante]:
 
 
 def doc(*comprobantes: dict, **libro) -> dict:
-    return {"open_accounting": "1.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
+    return {"open_accounting": "2.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
 
 
 # ── Lo que suma y lo que no ──────────────────────────────────────────────────────────────────

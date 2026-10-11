@@ -28,7 +28,6 @@ CANALES = {
 # `configuracion.CLAVES_RETIRADAS`. La 8.0 los retira sin aviso previo y es a propósito: `CANAL` lo declara un driver,
 # y los nueve que existen son de este repositorio —los ocho de serie y el `diario_json` de la batería—, así que no
 # había a quién avisar. Un aviso durante la 7.x habría puesto roja la batería por sus propios drivers.
-CANALES_RENOMBRADOS = {"tributario": "sunat", "intercambio": "erp"}
 # Lo que tiene nombre y todavía no existe: el contrato lo rechaza diciendo por qué.
 CANALES_RESERVADOS = {
     "api_erp": "escribir el cuerpo de la API de un ERP moderno: un canal nuevo solo entra si hay un formato que "
