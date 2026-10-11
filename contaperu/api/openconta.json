@@ -526,7 +526,7 @@
    "post": {
     "operationId": "revisar_tesoreria",
     "summary": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de los pagos.",
-    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de\n    los pagos.\n\n    **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para\n    asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las\n    cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace\n    es lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.\n\n    **El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las\n    filas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de\n    saldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin\n    que nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un\n    modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación\n    determinista al lado—.\n\n    **El saldo inicial de cada cuenta se deriva si no se declara**, y se dice cuál fue cuál. Está en la cabecera del\n    extracto, que es de quien lee el archivo; sin él, se deduce del primer movimiento y la cadena se comprueba de la\n    segunda línea en adelante. No es un consuelo: el caso real que destapó el ITF rompía en la segunda fila del mes.\n\nLo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus\n    `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se\n    reporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el\n    ITF dentro.\n\n    Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza\n    con su 104, y si no está en el maestro no hay nada que deducir.",
+    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de\n    los pagos.\n\n    **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para\n    asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las\n    cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace\n    es lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.\n\n    **El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las\n    filas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de\n    saldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin\n    que nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un\n    modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación\n    determinista al lado—.\n\n**Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la\n    cabecera de cada hoja: su saldo anterior, su saldo actual y sus dos totales. Con eso un documento guardado\n    **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. El argumento\n    `saldos_iniciales` se conserva como segunda vía, y **declarar el mismo saldo por las dos se rechaza**: no hay\n    regla que diga cuál gana.\n\n    **El saldo inicial se deriva si nadie lo declara**, y se dice cuál fue cuál. Sin él se deduce del primer\n    movimiento y la cadena se comprueba de la segunda línea en adelante. No es un consuelo: el caso real que\n    destapó el ITF rompía en la segunda fila del mes.\n\n    **Y son dos controles encima del mismo dato**, que es lo que los hace valer: la cadena de saldos corridos\n    comprueba cada línea contra la siguiente, y el saldo final declarado comprueba el total. Una lectura puede\n    pasar el primero y fallar el segundo —si se perdió una línea entera al final del mes, la cadena de las demás\n    encadena—, y es justo el caso que produce un lector de PDF. Hasta la 3.0 ese segundo control estaba escrito en\n    `tesoreria.cuadra` y **nadie le pasaba el argumento**, así que era inalcanzable por aquí.\n\nLo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus\n    `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se\n    reporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el\n    ITF dentro.\n\n    Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza\n    con su 104, y si no está en el maestro no hay nada que deducir.",
     "requestBody": {
      "required": true,
      "content": {
@@ -1110,6 +1110,13 @@
       "items": {
        "$ref": "#/components/schemas/OpenAccounting_movimiento"
       }
+     },
+     "extractos": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_extracto"
+      },
+      "description": "La cabecera de cada extracto del periodo, una por cuenta. Opcional: quien no la entienda la ignora, y sin ella el saldo inicial se deduce del primer movimiento. **Dos del mismo `id` se rechazan**: no hay regla que diga cuál de los dos saldos manda."
      },
      "emisor": {
       "description": "Quién generó este documento (software, versión). Informativo.",
@@ -2050,6 +2057,42 @@
       }
      }
     ]
+   },
+   "OpenAccounting_extracto": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "cuenta"
+    ],
+    "description": "La cabecera de un extracto: lo que el banco DECLARA de una cuenta en un periodo. **No es una entrada de operaciones** —no lleva movimientos dentro— sino lo que viene impreso arriba de la hoja, y es uno por cuenta y por periodo: no cabe en `libro`, que es uno por documento, ni en el maestro de cuentas, que es lo que la empresa ES y no lo que un periodo DIJO. Con esto un documento guardado **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. Son los dos controles encima del mismo dato: la cadena de saldos corridos comprueba cada línea contra la siguiente, y esto el total contra lo que el banco dijo.",
+    "properties": {
+     "cuenta": {
+      "type": "string",
+      "description": "El `id` de la cuenta en el maestro, igual que en el movimiento."
+     },
+     "desde": {
+      "$ref": "#/components/schemas/OpenAccounting_fecha",
+      "description": "El periodo que cubre la hoja. **Se reporta y nunca filtra.**"
+     },
+     "hasta": {
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "saldo_inicial": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "El saldo anterior que declara la hoja. Ausente no es cero: es «la hoja no lo dice», y entonces se deduce del primer movimiento y la cadena se comprueba de la segunda línea en adelante."
+     },
+     "saldo_final": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "El saldo actual que declara la hoja. Es el segundo control, y el que caza una línea perdida al final del mes: la cadena de las demás encadenaría igual."
+     },
+     "total_cargos": {
+      "$ref": "#/components/schemas/OpenAccounting_importe",
+      "description": "Lo que la hoja suma de cargos, para contrastarlo."
+     },
+     "total_abonos": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     }
+    }
    },
    "configuracion": {
     "title": "Configuración contable",
@@ -3274,7 +3317,8 @@
         "rompe_en",
         "diferencia",
         "saldo_inicial_declarado",
-        "cuenta_contable"
+        "cuenta_contable",
+        "saldo_final_declarado"
        ],
        "additionalProperties": false,
        "properties": {
@@ -3318,6 +3362,10 @@
         "cuenta_contable": {
          "type": "string",
          "description": "La 104 que declaró el contribuyente, o vacío si esa cuenta no está en el maestro."
+        },
+        "saldo_final_declarado": {
+         "type": "boolean",
+         "description": "Si el saldo final venía declarado en la cabecera del extracto y por tanto se comprobó. `false` = el `saldo_final` de arriba es solo el que RESULTA de las líneas, y nadie dijo contra qué."
         }
        }
       }

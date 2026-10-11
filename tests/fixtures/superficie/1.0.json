@@ -317,6 +317,8 @@
   "CuentaInvalida": "",
   "EFECTOS_DE_UN_MOVIMIENTO": "",
   "ENTRADA": "",
+  "Extracto": "",
+  "ExtractoInvalido": "",
   "ExtractoNoCuadra": "",
   "LARGO_CCI": "",
   "LECTURA_ASISTIDA": "",
@@ -339,6 +341,7 @@
   "exigir": "",
   "leer": "",
   "normalizar_cci": "",
+  "por_cuenta": "",
   "sin_cuenta_declarada": "",
   "sin_duplicados": ""
  },

@@ -48,6 +48,13 @@
     "$ref": "#/$defs/movimiento"
    }
   },
+  "extractos": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/extracto"
+   },
+   "description": "La cabecera de cada extracto del periodo, una por cuenta. Opcional: quien no la entienda la ignora, y sin ella el saldo inicial se deduce del primer movimiento. **Dos del mismo `id` se rechazan**: no hay regla que diga cuál de los dos saldos manda."
+  },
   "emisor": {
    "description": "Quién generó este documento (software, versión). Informativo.",
    "type": "object",
@@ -987,6 +994,42 @@
      }
     }
    ]
+  },
+  "extracto": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "cuenta"
+   ],
+   "description": "La cabecera de un extracto: lo que el banco DECLARA de una cuenta en un periodo. **No es una entrada de operaciones** —no lleva movimientos dentro— sino lo que viene impreso arriba de la hoja, y es uno por cuenta y por periodo: no cabe en `libro`, que es uno por documento, ni en el maestro de cuentas, que es lo que la empresa ES y no lo que un periodo DIJO. Con esto un documento guardado **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. Son los dos controles encima del mismo dato: la cadena de saldos corridos comprueba cada línea contra la siguiente, y esto el total contra lo que el banco dijo.",
+   "properties": {
+    "cuenta": {
+     "type": "string",
+     "description": "El `id` de la cuenta en el maestro, igual que en el movimiento."
+    },
+    "desde": {
+     "$ref": "#/$defs/fecha",
+     "description": "El periodo que cubre la hoja. **Se reporta y nunca filtra.**"
+    },
+    "hasta": {
+     "$ref": "#/$defs/fecha"
+    },
+    "saldo_inicial": {
+     "$ref": "#/$defs/importe",
+     "description": "El saldo anterior que declara la hoja. Ausente no es cero: es «la hoja no lo dice», y entonces se deduce del primer movimiento y la cadena se comprueba de la segunda línea en adelante."
+    },
+    "saldo_final": {
+     "$ref": "#/$defs/importe",
+     "description": "El saldo actual que declara la hoja. Es el segundo control, y el que caza una línea perdida al final del mes: la cadena de las demás encadenaría igual."
+    },
+    "total_cargos": {
+     "$ref": "#/$defs/importe",
+     "description": "Lo que la hoja suma de cargos, para contrastarlo."
+    },
+    "total_abonos": {
+     "$ref": "#/$defs/importe"
+    }
+   }
   }
  }
 }

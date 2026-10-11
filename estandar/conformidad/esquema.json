@@ -1304,6 +1304,95 @@
     ]
    },
    "valid": true
+  },
+  {
+   "description": "La cabecera de un extracto viaja en el documento, así que un documento guardado se puede volver a comprobar. Es lo que la enmienda 0008 hizo para las imputaciones",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "abono",
+      "saldo": "1500.00",
+      "referencia": "000001"
+     }
+    ],
+    "extractos": [
+     {
+      "cuenta": "bbva-soles",
+      "desde": "2026-08-01",
+      "hasta": "2026-08-31",
+      "saldo_inicial": "1000.00",
+      "saldo_final": "1500.00",
+      "total_cargos": "0.00",
+      "total_abonos": "500.00"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "De una cabecera solo la cuenta es obligatoria: lo demás lo imprime quien lo imprime",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "extractos": [
+     {
+      "cuenta": "bbva-soles"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Una cabecera sin cuenta no vale: no hay forma de saber de quién son esos saldos",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "extractos": [
+     {
+      "saldo_inicial": "1000.00"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una clave que no es de una cabecera no pasa, como en el resto del estándar",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "extractos": [
+     {
+      "cuenta": "bbva-soles",
+      "titular": "quien sea"
+     }
+    ]
+   },
+   "valid": false
   }
  ]
 }

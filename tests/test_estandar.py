@@ -15,7 +15,7 @@ from jsonschema import Draft202012Validator
 
 from contaperu import OPEN_ACCOUNTING
 from contaperu.modelo import Comprobante, Libro
-from contaperu.tesoreria import Movimiento, Referencia
+from contaperu.tesoreria import Extracto, Movimiento, Referencia
 
 from util import GOLDEN
 
@@ -53,7 +53,8 @@ def test_el_esquema_es_valido(validador):
 # en el modelo y no en el esquema —o al revés— sin que nada se pusiera rojo. Es el candado de la 3.0, que mueve
 # justo esos tres bloques.
 EL_ESQUEMA_Y_SU_DATACLASS = (("comprobante", Comprobante), ("libro", Libro),
-                             ("movimiento", Movimiento), ("referencia_de_pago", Referencia))
+                             ("movimiento", Movimiento), ("referencia_de_pago", Referencia),
+                             ("extracto", Extracto))
 
 
 def test_el_esquema_cubre_el_modelo_entero(esquema):

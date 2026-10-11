@@ -557,3 +557,109 @@ def test_las_reglas_de_compra_no_corren_por_descarte_en_un_libro_que_no_es_compr
     codigos = {o.codigo for cp in revisados for o in cp.observaciones}
     # Nada que hable de crédito fiscal, detracción ni honorarios: son de las compras y este libro no lo es.
     assert not {x for x in codigos if "DETRACCION" in x or "CREDITO" in x or "HONORARIO" in x}, codigos
+
+
+# ── La cabecera del extracto: el segundo control (3.0 del estándar) ────────
+
+def extracto(**extra) -> dict:
+    datos = {"cuenta": "bbva-soles", "desde": "2026-08-01", "hasta": "2026-08-31",
+             "saldo_inicial": SALDO_ANTERIOR, "saldo_final": "1299.80",
+             "total_cargos": "200.00", "total_abonos": "500.00"}
+    return t.Extracto(**{**datos, **extra}).a_dict()
+
+
+def un_mes() -> list:
+    """Dos líneas que cuadran: un abono de 500 y un cargo de 200 con 0,20 de ITF."""
+    return [mov(referencia="000001", saldo="1500.00").a_dict(),
+            mov(referencia="000002", importe="200.00", sentido="cargo", itf="0.20", saldo="1299.80").a_dict()]
+
+
+def test_el_saldo_declarado_viaja_en_el_documento_y_se_comprueba():
+    """Hasta la 2.0 el saldo inicial entraba **solo como argumento**, así que un documento guardado no se podía
+    volver a comprobar: su cuadre dependía de un dato que no viajaba con él. Es lo que la enmienda 0008 arregló
+    para las imputaciones — «el archivo explica su propio asiento»."""
+    from contaperu import api
+
+    doc = documento_de_tesoreria(movimientos=un_mes(), extractos=[extracto()])
+    r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    uno = r["cuadre"][0]
+    assert uno["cuadra"] and uno["saldo_inicial_declarado"] and uno["saldo_final_declarado"]
+    assert uno["saldo_inicial"] == "1000.00" and uno["saldo_final"] == "1299.80"
+    assert r["avisos"] == []
+
+
+def test_el_saldo_final_declarado_es_el_segundo_control_y_antes_era_inalcanzable():
+    """**El hueco que esto cierra.** `tesoreria.cuadra` acepta un `saldo_final` desde la 8.2 y `revisar_tesoreria`
+    **no se lo pasaba nunca**, así que el segundo control estaba escrito y no se podía alcanzar por la api.
+
+    Y vale por sí mismo: una lectura puede pasar la cadena de saldos corridos y fallar el total. Si se pierde la
+    ÚLTIMA línea del mes, las demás encadenan perfectamente entre sí — es justo lo que produce un lector de PDF."""
+    from contaperu import api
+
+    sin_la_ultima = documento_de_tesoreria(movimientos=un_mes()[:1], extractos=[extracto()])
+    r = api.revisar_tesoreria(sin_la_ultima, [cuenta().a_dict()])
+    uno = r["cuadre"][0]
+    assert not uno["cuadra"], "el saldo final declarado delata la línea que falta"
+    assert uno["saldo_final"] == "1500.00" and uno["saldo_final_declarado"]
+    assert any(a["codigo"] == "EXTRACTO_NO_CUADRA" for a in r["avisos"])
+    # Y sin cabecera la misma lectura pasa: la cadena de la única línea que queda encadena con ella misma.
+    assert api.revisar_tesoreria(documento_de_tesoreria(movimientos=un_mes()[:1]),
+                                 [cuenta().a_dict()])["cuadre"][0]["cuadra"]
+
+
+def test_los_dos_totales_de_la_cabecera_se_contrastan():
+    """La tercera comprobación, y la que caza lo que el saldo final no puede: **un cargo y un abono perdidos por el
+    mismo importe dejan el saldo igual**. Los totales no."""
+    from contaperu import api
+
+    doc = documento_de_tesoreria(movimientos=un_mes(),
+                                 extractos=[extracto(total_cargos="900.00", saldo_final=None)])
+    r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    assert any(a["codigo"] == "TOTAL_DECLARADO_NO_COINCIDE" for a in r["avisos"])
+    assert any("900.00" in a["texto"] and "200.00" in a["texto"] for a in r["avisos"])
+    # Y el cuadre en sí no se rompe por eso: son dos cosas distintas y se dicen aparte.
+    assert r["cuadre"][0]["cuadra"]
+
+
+def test_el_mismo_saldo_por_las_dos_vias_se_rechaza():
+    """El precedente exacto es `imputaciones` contra `imputacion`: dos vías para el mismo dato necesitan una regla
+    de cuál gana, y la regla honesta es que no haya dos."""
+    from contaperu import api
+    from contaperu.errores import DocumentoInvalido
+
+    doc = documento_de_tesoreria(movimientos=un_mes(), extractos=[extracto()])
+    with pytest.raises(DocumentoInvalido) as e:
+        api.revisar_tesoreria(doc, [cuenta().a_dict()], saldos_iniciales={"bbva-soles": "1000.00"})
+    assert "bbva-soles" in str(e.value) and "cuál gana" in str(e.value)
+    # Una cabecera SIN saldo inicial y el argumento sí conviven: no hay dos datos, hay uno.
+    sin_saldo = documento_de_tesoreria(movimientos=un_mes(), extractos=[extracto(saldo_inicial=None)])
+    r = api.revisar_tesoreria(sin_saldo, [cuenta().a_dict()], saldos_iniciales={"bbva-soles": SALDO_ANTERIOR})
+    assert r["cuadre"][0]["cuadra"] and r["cuadre"][0]["saldo_inicial_declarado"]
+
+
+def test_dos_cabeceras_de_la_misma_cuenta_no_pasan():
+    """No es un mes partido en dos hojas: es un documento que declara dos saldos iniciales para lo mismo."""
+    from contaperu.errores import DocumentoInvalido
+    from contaperu.pipeline import preparacion
+
+    with pytest.raises(DocumentoInvalido) as e:
+        preparacion.extractos_de(documento_de_tesoreria(extractos=[extracto(), extracto(saldo_inicial="9.00")]))
+    assert "bbva-soles" in str(e.value) and "dos documentos" in str(e.value)
+
+
+def test_el_periodo_de_la_cabecera_se_reporta_y_no_filtra():
+    """Un extracto de agosto con una línea de julio dentro es un error de quien leyó el archivo, no algo que el
+    motor deba arreglar escondiendo la línea. Se cuadra lo que llega, entero."""
+    from contaperu import api
+
+    de_julio = mov(referencia="000003", fecha="2026-07-20", saldo="1500.00").a_dict()
+    r = api.revisar_tesoreria(documento_de_tesoreria(movimientos=[de_julio], extractos=[extracto(saldo_final=None)]),
+                              [cuenta().a_dict()])
+    assert r["movimientos"] == 1, "la línea de julio no se filtra"
+
+
+def test_una_cabecera_que_acaba_antes_de_empezar_no_pasa():
+    with pytest.raises(t.ExtractoInvalido):
+        t.Extracto(cuenta="bbva-soles", desde="2026-08-31", hasta="2026-08-01")
+    with pytest.raises(t.ExtractoInvalido):
+        t.Extracto(cuenta="")

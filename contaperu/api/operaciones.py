@@ -131,9 +131,21 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
     modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación
     determinista al lado—.
 
-    **El saldo inicial de cada cuenta se deriva si no se declara**, y se dice cuál fue cuál. Está en la cabecera del
-    extracto, que es de quien lee el archivo; sin él, se deduce del primer movimiento y la cadena se comprueba de la
-    segunda línea en adelante. No es un consuelo: el caso real que destapó el ITF rompía en la segunda fila del mes.
+**Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la
+    cabecera de cada hoja: su saldo anterior, su saldo actual y sus dos totales. Con eso un documento guardado
+    **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. El argumento
+    `saldos_iniciales` se conserva como segunda vía, y **declarar el mismo saldo por las dos se rechaza**: no hay
+    regla que diga cuál gana.
+
+    **El saldo inicial se deriva si nadie lo declara**, y se dice cuál fue cuál. Sin él se deduce del primer
+    movimiento y la cadena se comprueba de la segunda línea en adelante. No es un consuelo: el caso real que
+    destapó el ITF rompía en la segunda fila del mes.
+
+    **Y son dos controles encima del mismo dato**, que es lo que los hace valer: la cadena de saldos corridos
+    comprueba cada línea contra la siguiente, y el saldo final declarado comprueba el total. Una lectura puede
+    pasar el primero y fallar el segundo —si se perdió una línea entera al final del mes, la cadena de las demás
+    encadena—, y es justo el caso que produce un lector de PDF. Hasta la 3.0 ese segundo control estaba escrito en
+    `tesoreria.cuadra` y **nadie le pasaba el argumento**, así que era inalcanzable por aquí.
 
 Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus
     `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se
@@ -145,15 +157,23 @@ Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y 
     doc = documento or {}
     libro = preparacion.libro_de(doc)
     movimientos = preparacion.movimientos_de(doc)
+    cabeceras = preparacion.extractos_de(doc)
     declaradas = {c.id: c for c in tesoreria.leer(cuentas)}
     pedidos = {str(k): v for k, v in (saldos_iniciales or {}).items()}
+    dos_veces = sorted(c for c in pedidos if c in cabeceras and cabeceras[c].saldo_inicial is not None)
+    if dos_veces:
+        raise DocumentoInvalido(
+            f"El saldo inicial de {', '.join(dos_veces)} llega por el bloque `extractos` y por el argumento "
+            f"`saldos_iniciales`: no hay regla que diga cuál gana. Deja uno de los dos.")
 
     nuevos, repetidos = tesoreria.sin_duplicados(movimientos)
 
     cuadres = []
     for cuenta in dict.fromkeys(m.cuenta for m in nuevos):
         suyos = [m for m in nuevos if m.cuenta == cuenta]
-        declarado = str(pedidos.get(cuenta) or "").strip()
+        cabecera = cabeceras.get(cuenta)
+        del_bloque = cabecera.saldo_inicial if cabecera and cabecera.saldo_inicial is not None else None
+        declarado = str(pedidos.get(cuenta) or "").strip() or ("" if del_bloque is None else str(del_bloque))
         if declarado:
             inicial = declarado
         else:
@@ -166,8 +186,10 @@ Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y 
                 inicial = primero.saldo + (primero.importe if primero.es_cargo else -primero.importe)
                 if primero.itf is not None:
                     inicial = inicial + primero.itf
-        r = tesoreria.cuadra(suyos, saldo_inicial=inicial)
+        final = cabecera.saldo_final if cabecera and cabecera.saldo_final is not None else None
+        r = tesoreria.cuadra(suyos, saldo_inicial=inicial, saldo_final=final)
         cuadres.append({**r.a_dict(), "cuenta": cuenta, "saldo_inicial_declarado": bool(declarado),
+                        "saldo_final_declarado": final is not None,
                         "cuenta_contable": (declaradas[cuenta].cuenta_contable if cuenta in declaradas else "")})
 
     # Los dos informes que antes salían de `constancias[]` y ahora salen del movimiento, que es la única entrada
@@ -184,6 +206,21 @@ Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y 
         avisos.append({"codigo": "SIN_CUENTAS_DECLARADAS", "pedir_a": "quien integra",
                        "texto": "No se declaró el maestro de cuentas, así que no hay contra qué contrastar a qué "
                                 "cuenta apunta cada movimiento ni de qué 104 sale cada pago"})
+    # Los dos totales de la cabecera contra los que salen de las líneas. Es la tercera comprobación y la más
+    # barata: si uno no coincide, falta o sobra una línea, y el saldo final a veces no lo delata —una línea perdida
+    # de cargo y otra de abono por el mismo importe dejan el saldo igual—.
+    for c in cuadres:
+        cabecera = cabeceras.get(c["cuenta"])
+        if cabecera is None:
+            continue
+        for clave, suma in (("total_cargos", "cargos"), ("total_abonos", "abonos")):
+            dicho = getattr(cabecera, clave)
+            if dicho is not None and str(dicho) != c[suma]:
+                avisos.append({"codigo": "TOTAL_DECLARADO_NO_COINCIDE", "pedir_a": "quien lee el archivo",
+                               "texto": f"La cabecera de {c['cuenta']!r} dice {clave.replace('total_', '')} por "
+                                        f"{dicho} y las líneas suman {c[suma]}. Falta o sobra una línea: el saldo "
+                                        f"final no siempre lo delata, porque un cargo y un abono perdidos por el "
+                                        f"mismo importe lo dejan igual"})
     for c in cuadres:
         if not c["cuadra"]:
             avisos.append({"codigo": "EXTRACTO_NO_CUADRA", "pedir_a": "quien lee el archivo",

@@ -71,7 +71,8 @@
      "rompe_en",
      "diferencia",
      "saldo_inicial_declarado",
-     "cuenta_contable"
+     "cuenta_contable",
+     "saldo_final_declarado"
     ],
     "additionalProperties": false,
     "properties": {
@@ -115,6 +116,10 @@
      "cuenta_contable": {
       "type": "string",
       "description": "La 104 que declaró el contribuyente, o vacío si esa cuenta no está en el maestro."
+     },
+     "saldo_final_declarado": {
+      "type": "boolean",
+      "description": "Si el saldo final venía declarado en la cabecera del extracto y por tanto se comprobó. `false` = el `saldo_final` de arriba es solo el que RESULTA de las líneas, y nadie dijo contra qué."
      }
     }
    }

@@ -13,6 +13,7 @@ from ...asiento.lineas import LineaDiario
 from ..._version import OPEN_ACCOUNTING
 from ...errores import DocumentoInvalido
 from ...modelo import Comprobante, Libro, serie_y_numero
+from ... import tesoreria
 from ...tesoreria import Movimiento
 
 
@@ -78,6 +79,20 @@ def comprobantes_de(doc: dict) -> list[Comprobante]:
         return [Comprobante.de_dict(c) for c in crudos]
     except (ValueError, TypeError) as e:
         raise DocumentoInvalido(f"Un comprobante no se pudo leer: {e}") from None
+
+
+def extractos_de(doc: dict) -> dict:
+    """El bloque `extractos`, por el `id` de su cuenta.
+
+    Devuelve un diccionario y no una lista porque es como se usa —se busca el de una cuenta— y porque así el
+    rechazo de dos del mismo `id` cae aquí, en la puerta, y no más adentro."""
+    crudos = doc.get("extractos") or []
+    if not isinstance(crudos, list):
+        raise DocumentoInvalido("`extractos` tiene que ser una lista.")
+    try:
+        return tesoreria.por_cuenta(crudos)
+    except (ValueError, TypeError) as e:
+        raise DocumentoInvalido(f"Un extracto no se pudo leer: {e}") from None
 
 
 def movimientos_de(doc: dict) -> list[Movimiento]:
