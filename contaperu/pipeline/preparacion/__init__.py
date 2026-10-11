@@ -14,12 +14,14 @@ from __future__ import annotations
 from .configuracion import (con_imputacion, config_aplicada, configuracion_por_defecto,
                             describir_configuracion, errores_de_configuracion, imputacion_del_documento)
 from .documento import (MAXIMO_COMPROBANTES, MAXIMO_MOVIMIENTOS, comprobantes_de, documento, extractos_de,
-                        libro_de, movimientos_de, lineas_de, serie_numero, version_del_documento)
+                        imputaciones_de_movimientos_de, libro_de, movimientos_de, lineas_de, serie_numero,
+                        version_del_documento)
 from .entradas import MAXIMO_CLAVES_PREVIAS, bytes_de, claves_previas_de, fecha_de
 from .pasos import normalizar_detracciones, preparar, revisar
 
 __all__ = ["MAXIMO_CLAVES_PREVIAS", "MAXIMO_COMPROBANTES", "MAXIMO_MOVIMIENTOS", "bytes_de",
-           "claves_previas_de", "comprobantes_de", "extractos_de", "movimientos_de",
+           "claves_previas_de", "comprobantes_de", "extractos_de", "imputaciones_de_movimientos_de",
+           "movimientos_de",
            "config_aplicada", "configuracion_por_defecto", "con_imputacion", "describir_configuracion",
            "documento", "errores_de_configuracion", "fecha_de", "imputacion_del_documento", "libro_de",
            "lineas_de", "normalizar_detracciones", "preparar", "revisar", "serie_numero",

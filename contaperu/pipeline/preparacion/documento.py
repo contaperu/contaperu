@@ -81,6 +81,19 @@ def comprobantes_de(doc: dict) -> list[Comprobante]:
         raise DocumentoInvalido(f"Un comprobante no se pudo leer: {e}") from None
 
 
+def imputaciones_de_movimientos_de(doc: dict, movimientos) -> dict:
+    """El bloque `imputaciones_de_movimientos`, por el `id_externo` del movimiento.
+
+    Recibe los movimientos porque una llave que no es de ninguno **se rechaza**: es la misma puerta que
+    `con_imputacion` pone para los comprobantes y por el mismo motivo — una llave mal escrita dejaría ese
+    movimiento sin su cuenta y sin aviso."""
+    crudas = doc.get("imputaciones_de_movimientos") or {}
+    try:
+        return tesoreria.leer_imputaciones(crudas, movimientos)
+    except (ValueError, TypeError) as e:
+        raise DocumentoInvalido(f"La imputación de un movimiento no se pudo leer: {e}") from None
+
+
 def extractos_de(doc: dict) -> dict:
     """El bloque `extractos`, por el `id` de su cuenta.
 

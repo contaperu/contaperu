@@ -454,7 +454,10 @@ def test_la_api_cuadra_cada_cuenta_y_deduce_el_saldo_inicial_si_nadie_lo_declara
     assert uno["saldo_inicial"] == "1000.00", "se deduce del primer movimiento y su saldo corrido"
     assert uno["saldo_final"] == "1299.80" and not uno["saldo_inicial_declarado"]
     assert uno["cuenta_contable"] == "10411100", "sale de la cuenta declarada, no de una suposición"
-    assert r["avisos"] == []
+    # Lo único que avisa es que a estos movimientos les falta su contrapartida, que es el `sin_cuenta` del dinero:
+    # un extracto recién leído no la trae, y la pone el contador.
+    assert {a["codigo"] for a in r["avisos"]} == {"MOVIMIENTO_SIN_IMPUTAR"}
+    assert r["imputados"] == 0 and len(r["sin_imputar"]) == 2
 
     # Declarándolo, la primera línea también se comprueba — y si está mal, se dice.
     malo = api.revisar_tesoreria(doc, [cuenta().a_dict()], saldos_iniciales={"bbva-soles": "1.00"})
@@ -585,7 +588,7 @@ def test_el_saldo_declarado_viaja_en_el_documento_y_se_comprueba():
     uno = r["cuadre"][0]
     assert uno["cuadra"] and uno["saldo_inicial_declarado"] and uno["saldo_final_declarado"]
     assert uno["saldo_inicial"] == "1000.00" and uno["saldo_final"] == "1299.80"
-    assert r["avisos"] == []
+    assert {a["codigo"] for a in r["avisos"]} == {"MOVIMIENTO_SIN_IMPUTAR"}, "falta la contrapartida, nada más"
 
 
 def test_el_saldo_final_declarado_es_el_segundo_control_y_antes_era_inalcanzable():
@@ -663,3 +666,147 @@ def test_una_cabecera_que_acaba_antes_de_empezar_no_pasa():
         t.Extracto(cuenta="bbva-soles", desde="2026-08-31", hasta="2026-08-01")
     with pytest.raises(t.ExtractoInvalido):
         t.Extracto(cuenta="")
+
+
+# ── La imputación de un movimiento: lo que el ERP pone (3.0 del estándar) ──
+
+def test_el_erp_imputa_la_contrapartida_y_el_motor_no_adivina_ninguna():
+    """La decisión de John (11-oct-2026): la contrapartida la pone su ERP, como ya hace con una compra. Y es la
+    misma doctrina que rige desde la 3.0 del paquete — **el motor no elige ninguna cuenta, la recibe**.
+
+    La 104 **no** sale de aquí: sale de la cuenta bancaria del maestro. Esto pone la otra cara."""
+    from contaperu import api
+
+    doc = documento_de_tesoreria(
+        movimientos=[mov(referencia="000002", importe="200.00", sentido="cargo", id_externo="mov-881").a_dict()],
+        imputaciones_de_movimientos={"mov-881": {"cuenta_contable": "4212100",
+                                                 "contraparte_doc": "20602222226", "centro_costo": "OBRA01"}})
+    r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    assert r["imputados"] == 1 and r["sin_imputar"] == []
+    assert not [a for a in r["avisos"] if a["codigo"] == "MOVIMIENTO_SIN_IMPUTAR"]
+    # Y la 104 sigue saliendo del maestro, no de la imputación.
+    assert r["cuadre"][0]["cuenta_contable"] == "10411100"
+
+
+def test_un_movimiento_sin_contrapartida_se_dice_y_es_el_sin_cuenta_del_dinero():
+    """El mismo trato que un comprobante sin cuenta: el motor no la adivina y dice a quién pedirla. Es lo que hace
+    usable el circuito «el ERP sube el extracto → el motor dice qué falta → el contador imputa»."""
+    from contaperu import api
+
+    r = api.revisar_tesoreria(documento_de_tesoreria(movimientos=[mov(id_externo="mov-881").a_dict()]),
+                              [cuenta().a_dict()])
+    # `mov()` no trae número del banco ni del papel, así que se nombra por su `id_externo`: es lo que hay.
+    assert r["imputados"] == 0 and r["sin_imputar"] == ["mov-881"]
+    falta = next(a for a in r["avisos"] if a["codigo"] == "MOVIMIENTO_SIN_IMPUTAR")
+    assert falta["pedir_a"] == "contador" and "la otra cara se imputa" in falta["texto"]
+
+
+def test_un_cargo_que_paga_tres_facturas_son_tres_partes():
+    """Es la cardinalidad que la 2.0 usó para justificar dos bloques, resuelta donde le toca: **dentro del item**,
+    igual que el reparto de una compra. Y cada parte lleva su propio tercero, porque un cargo puede pagar facturas
+    de tres proveedores distintos."""
+    from contaperu import api
+
+    doc = documento_de_tesoreria(
+        movimientos=[mov(importe="5000.00", sentido="cargo", id_externo="mov-882").a_dict()],
+        imputaciones_de_movimientos={"mov-882": {"reparto": [
+            {"importe": "3000.00", "cuenta_contable": "4212100", "contraparte_doc": "20602222226"},
+            {"importe": "1500.00", "cuenta_contable": "4212100", "contraparte_doc": "20607777773"},
+            {"importe": "500.00", "cuenta_contable": "6391000", "centro_costo": "ADMIN"}]}})
+    r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    assert r["imputados"] == 1 and r["sin_imputar"] == []
+
+
+def test_un_reparto_que_no_suma_el_importe_para_y_no_se_reporta():
+    """**Aquí bloquea**, al revés que `sin_atribuir`. Ese informe existe porque «qué es ese resto lo decide el
+    contador por la imputación»; y esto YA es la imputación, así que un reparto que no cuadra no es un dato que
+    falte sino una decisión mal hecha.
+
+    Y el ITF queda fuera de la suma: son sus dos líneas propias, que esperan su norma (D6)."""
+    from contaperu import api
+    from contaperu.errores import DocumentoInvalido
+
+    doc = documento_de_tesoreria(
+        movimientos=[mov(importe="5000.00", sentido="cargo", itf="0.50", id_externo="mov-882").a_dict()],
+        imputaciones_de_movimientos={"mov-882": {"reparto": [
+            {"importe": "3000.00", "cuenta_contable": "4212100"}]}})
+    with pytest.raises(DocumentoInvalido) as e:
+        api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    assert "3000.00" in str(e.value) and "5000.00" in str(e.value) and "exacto" in str(e.value)
+    # Justo el importe, sin contar el ITF, sí pasa.
+    doc["imputaciones_de_movimientos"]["mov-882"]["reparto"][0]["importe"] = "5000.00"
+    assert api.revisar_tesoreria(doc, [cuenta().a_dict()])["imputados"] == 1
+
+
+def test_el_traspaso_entre_cuentas_propias_se_declara_y_es_la_unica_via():
+    """El efecto `transferencia` del catálogo existe porque la **NIC 7 §9** excluye de los flujos los traspasos
+    entre partidas de efectivo, así que hay que poder nombrarlo para dejarlo fuera y no contarlo dos veces.
+
+    `Movimiento.efecto` **nunca** lo devuelve, y eso no cambia: una línea sola no puede saber que es la mitad de un
+    par. Lo que entra es la vía para declararlo — y la otra, `conciliar`, propone y nunca confirma (D3)."""
+    from contaperu import api
+
+    otra = cuenta(id="bbva-dolares", moneda="USD", numero="0011-0999-0000000002").a_dict()
+    doc = documento_de_tesoreria(
+        movimientos=[mov(importe="1000.00", sentido="cargo", id_externo="mov-883").a_dict()],
+        imputaciones_de_movimientos={"mov-883": {"cuenta_propia": "bbva-dolares"}})
+    r = api.revisar_tesoreria(doc, [cuenta().a_dict(), otra])
+    assert r["transferencias_declaradas"] == [
+        {"cual": "mov-883", "cuenta": "bbva-soles", "cuenta_propia": "bbva-dolares"}]
+    # El movimiento sigue sin poder decirlo por su cuenta: eso es lo que sostiene el modelo.
+    assert t.Movimiento.de_dict(doc["movimientos"][0]).efecto == "salida"
+    assert "transferencia" not in t.EFECTOS_DE_UN_MOVIMIENTO
+
+    # Y la otra cuenta tiene que existir: un traspaso es entre dos cuentas propias.
+    solo_una = api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    assert any(a["codigo"] == "CUENTA_PROPIA_NO_DECLARADA" for a in solo_una["avisos"])
+
+
+def test_las_tres_formas_de_imputar_se_excluyen():
+    """Las tres contestan la misma pregunta —cuál es la contrapartida— de tres maneras, así que dos a la vez no
+    tienen respuesta. Es el precedente exacto de la imputación de un comprobante: «¿cuál mandaría?»."""
+    with pytest.raises(t.ImputacionInvalida) as e:
+        t.ImputacionDeMovimiento.de({"cuenta_contable": "4212100",
+                                     "reparto": [{"importe": "1.00", "cuenta_contable": "42"}]})
+    assert "cuál mandaría" in str(e.value)
+    with pytest.raises(t.ImputacionInvalida) as e:
+        t.ImputacionDeMovimiento.de({"cuenta_propia": "otra", "centro_costo": "OBRA01"})
+    assert "no lleva nada más" in str(e.value)
+    # Una parte sin importe o sin cuenta tampoco: son lo único para lo que existe una parte.
+    with pytest.raises(t.ImputacionInvalida):
+        t.Parte(cuenta_contable="4212100")
+    with pytest.raises(t.ImputacionInvalida):
+        t.Parte(importe="100.00")
+
+
+def test_una_llave_que_no_es_de_ningun_movimiento_se_rechaza():
+    """Una llave mal escrita dejaría ese movimiento sin su cuenta **y sin aviso**, que es la clase de error que no
+    se ve hasta el cierre. Es la misma puerta que `con_imputacion` pone para los comprobantes."""
+    from contaperu import api
+    from contaperu.errores import DocumentoInvalido
+
+    doc = documento_de_tesoreria(movimientos=[mov(id_externo="mov-881").a_dict()],
+                                 imputaciones_de_movimientos={"mov-888": {"cuenta_contable": "4212100"}})
+    with pytest.raises(DocumentoInvalido) as e:
+        api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    assert "mov-888" in str(e.value)
+
+
+def test_una_clave_que_no_es_de_una_imputacion_se_dice_por_su_nombre():
+    """Lo desconocido se rechaza y no se ignora: la lección de la 7.0 con el `libro`. Y aquí importa más, porque
+    los campos de la imputación de un comprobante **no** son los de la de un movimiento."""
+    with pytest.raises(t.ImputacionInvalida) as e:
+        t.ImputacionDeMovimiento.de({"anulada_por_nota": True})
+    assert "anulada_por_nota" in str(e.value) and "cuenta_propia" in str(e.value)
+    with pytest.raises(t.ImputacionInvalida):
+        t.ImputacionDeMovimiento.de({"cuenta_tercero": "4212100"})
+
+
+def test_sin_imputaciones_la_respuesta_es_la_de_siempre_mas_las_tres_claves():
+    """Lo que hace que esto sea aditivo de verdad: un documento sin el bloque se revisa igual, y las tres claves
+    nuevas dicen lo que hay —ninguno imputado— en vez de faltar."""
+    from contaperu import api
+
+    r = api.revisar_tesoreria(documento_de_tesoreria(movimientos=[mov().a_dict()]), [cuenta().a_dict()])
+    assert r["imputados"] == 0 and r["transferencias_declaradas"] == []
+    assert r["cuadre"][0]["cuadra"]

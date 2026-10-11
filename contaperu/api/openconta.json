@@ -526,7 +526,7 @@
    "post": {
     "operationId": "revisar_tesoreria",
     "summary": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de los pagos.",
-    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de\n    los pagos.\n\n    **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para\n    asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las\n    cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace\n    es lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.\n\n    **El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las\n    filas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de\n    saldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin\n    que nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un\n    modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación\n    determinista al lado—.\n\n**Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la\n    cabecera de cada hoja: su saldo anterior, su saldo actual y sus dos totales. Con eso un documento guardado\n    **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. El argumento\n    `saldos_iniciales` se conserva como segunda vía, y **declarar el mismo saldo por las dos se rechaza**: no hay\n    regla que diga cuál gana.\n\n    **El saldo inicial se deriva si nadie lo declara**, y se dice cuál fue cuál. Sin él se deduce del primer\n    movimiento y la cadena se comprueba de la segunda línea en adelante. No es un consuelo: el caso real que\n    destapó el ITF rompía en la segunda fila del mes.\n\n    **Y son dos controles encima del mismo dato**, que es lo que los hace valer: la cadena de saldos corridos\n    comprueba cada línea contra la siguiente, y el saldo final declarado comprueba el total. Una lectura puede\n    pasar el primero y fallar el segundo —si se perdió una línea entera al final del mes, la cadena de las demás\n    encadena—, y es justo el caso que produce un lector de PDF. Hasta la 3.0 ese segundo control estaba escrito en\n    `tesoreria.cuadra` y **nadie le pasaba el argumento**, así que era inalcanzable por aquí.\n\nLo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus\n    `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se\n    reporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el\n    ITF dentro.\n\n    Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza\n    con su 104, y si no está en el maestro no hay nada que deducir.",
+    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de\n    los pagos.\n\n    **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para\n    asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las\n    cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace\n    es lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.\n\n    **El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las\n    filas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de\n    saldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin\n    que nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un\n    modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación\n    determinista al lado—.\n\n**Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la\n    cabecera de cada hoja: su saldo anterior, su saldo actual y sus dos totales. Con eso un documento guardado\n    **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. El argumento\n    `saldos_iniciales` se conserva como segunda vía, y **declarar el mismo saldo por las dos se rechaza**: no hay\n    regla que diga cuál gana.\n\n    **El saldo inicial se deriva si nadie lo declara**, y se dice cuál fue cuál. Sin él se deduce del primer\n    movimiento y la cadena se comprueba de la segunda línea en adelante. No es un consuelo: el caso real que\n    destapó el ITF rompía en la segunda fila del mes.\n\n    **Y son dos controles encima del mismo dato**, que es lo que los hace valer: la cadena de saldos corridos\n    comprueba cada línea contra la siguiente, y el saldo final declarado comprueba el total. Una lectura puede\n    pasar el primero y fallar el segundo —si se perdió una línea entera al final del mes, la cadena de las demás\n    encadena—, y es justo el caso que produce un lector de PDF. Hasta la 3.0 ese segundo control estaba escrito en\n    `tesoreria.cuadra` y **nadie le pasaba el argumento**, así que era inalcanzable por aquí.\n\nLo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus\n    `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se\n    reporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el\n    ITF dentro.\n\n    Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza\n    con su 104, y si no está en el maestro no hay nada que deducir.\n\n    **Y dice qué movimientos no tienen todavía su contrapartida** (3.0 del estándar), que es el `sin_cuenta` del\n    dinero: la 104 sale del maestro y la otra cara la pone el ERP en `imputaciones_de_movimientos`, igual que la\n    cuenta de un gasto llega en la imputación de su comprobante. Un reparto que no suma el importe **no se\n    reporta: para** — ese informe existe porque «qué es ese resto lo decide el contador por la imputación», y una\n    imputación a medias no es un dato que falte sino una decisión mal hecha.",
     "requestBody": {
      "required": true,
      "content": {
@@ -1118,6 +1118,16 @@
       },
       "description": "La cabecera de cada extracto del periodo, una por cuenta. Opcional: quien no la entienda la ignora, y sin ella el saldo inicial se deduce del primer movimiento. **Dos del mismo `id` se rechazan**: no hay regla que diga cuál de los dos saldos manda."
      },
+     "imputaciones_de_movimientos": {
+      "type": "object",
+      "propertyNames": {
+       "minLength": 1
+      },
+      "additionalProperties": {
+       "$ref": "#/components/schemas/OpenAccounting_imputacion_de_movimiento"
+      },
+      "description": "Por `id_externo` del movimiento, lo que el entorno decidió para él. **Bloque aparte de `imputaciones`, que es el de los comprobantes**, y no una extensión suya: un ERP tiene secuencias de id independientes para sus facturas y sus movimientos, así que el mismo `id_externo` puede ser las dos cosas y compartir el espacio de llaves obligaría a exigir unicidad entre bloques. Y los campos no son los mismos: un movimiento no tiene base, ni IGV, ni nota de crédito que lo anule."
+     },
      "emisor": {
       "description": "Quién generó este documento (software, versión). Informativo.",
       "type": "object",
@@ -1140,6 +1150,35 @@
       "then": {
        "properties": {
         "comprobantes": {
+         "items": {
+          "required": [
+           "id_externo"
+          ],
+          "properties": {
+           "id_externo": {
+            "minLength": 1
+           }
+          }
+         }
+        }
+       }
+      }
+     },
+     {
+      "description": "Con `imputaciones_de_movimientos`, cada movimiento necesita su `id_externo`: es la llave con la que se casan. Calcado del de `imputaciones`, y con el mismo cuidado — como se aplica ADEMÁS del `$ref`, una clave declarada solo aquí sería invisible para el `additionalProperties: false` del movimiento; `id_externo` ya está declarado allí, así que no se añaden `properties` nuevas en este `then`.",
+      "if": {
+       "required": [
+        "imputaciones_de_movimientos"
+       ],
+       "properties": {
+        "imputaciones_de_movimientos": {
+         "minProperties": 1
+        }
+       }
+      },
+      "then": {
+       "properties": {
+        "movimientos": {
          "items": {
           "required": [
            "id_externo"
@@ -2091,6 +2130,60 @@
      },
      "total_abonos": {
       "$ref": "#/components/schemas/OpenAccounting_importe"
+     }
+    }
+   },
+   "OpenAccounting_parte_de_imputacion_de_movimiento": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "importe",
+     "cuenta_contable"
+    ],
+    "description": "Un trozo del movimiento con su propia cuenta: un cargo que paga tres facturas son tres partes. **El importe es obligatorio**, al revés que en una referencia de pago —una referencia sin importe vale por el total y no hay nada que repartir—.",
+    "properties": {
+     "importe": {
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "cuenta_contable": {
+      "type": "string",
+      "description": "La contrapartida de esta parte."
+     },
+     "centro_costo": {
+      "type": "string"
+     },
+     "contraparte_doc": {
+      "type": "string",
+      "description": "El documento del tercero de esta parte: un cargo puede pagar facturas de tres proveedores distintos."
+     }
+    }
+   },
+   "OpenAccounting_imputacion_de_movimiento": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "Lo que el ERP decide sobre un movimiento porque el motor lo necesita y el papel no lo dice. **La 104 no sale de aquí**: sale de la cuenta bancaria que el contribuyente declaró en el maestro. Esto pone **la otra cara**, igual que la cuenta de un gasto llega en la imputación de su comprobante desde la 1.0. **Lo que NO es: lo que el pago cancela** — eso viaja en `movimiento.referencias[]` si el papel lo dice. Aquí va la cuenta, no el documento. Las tres formas se excluyen: una cuenta sola, un `reparto` o un `cuenta_propia`.",
+    "properties": {
+     "cuenta_contable": {
+      "type": "string",
+      "description": "La contrapartida, cuando es una."
+     },
+     "centro_costo": {
+      "type": "string"
+     },
+     "contraparte_doc": {
+      "type": "string",
+      "description": "El documento del tercero cuando el papel no lo dijo y el contador lo sabe. Sin él, un destino que llene su anexo auxiliar lo deja vacío."
+     },
+     "cuenta_propia": {
+      "type": "string",
+      "description": "El `id` de OTRA cuenta del maestro. **Declara el traspaso**, y es la única vía para afirmar el efecto `transferencia` sin conjeturar: la NIC 7 §9 lo excluye de los flujos, y un movimiento por sí solo no puede saber que es la mitad de un par. Excluye todo lo demás."
+     },
+     "reparto": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_parte_de_imputacion_de_movimiento"
+      },
+      "description": "Cuando un movimiento se parte entre varias cuentas. **Suma el importe del movimiento, exacto y sin tolerancia**, y el ITF queda fuera: son sus dos líneas propias. Excluye `cuenta_contable`, `centro_costo` y `contraparte_doc` al lado: ¿cuál mandaría?"
      }
     }
    },
@@ -3258,7 +3351,10 @@
      "cuadre",
      "sin_atribuir",
      "de_lectura_asistida",
-     "avisos"
+     "avisos",
+     "imputados",
+     "sin_imputar",
+     "transferencias_declaradas"
     ],
     "additionalProperties": false,
     "properties": {
@@ -3445,6 +3541,42 @@
         }
        }
       }
+     },
+     "imputados": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cuántos movimientos traen su contrapartida. Los que no, en `sin_imputar`."
+     },
+     "sin_imputar": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Los movimientos sin contrapartida, por el número del papel que los prueba o, si no lo tienen, por el del banco. **Es el `sin_cuenta` del dinero**: el motor no adivina una cuenta."
+     },
+     "transferencias_declaradas": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": [
+        "cual",
+        "cuenta",
+        "cuenta_propia"
+       ],
+       "properties": {
+        "cual": {
+         "type": "string"
+        },
+        "cuenta": {
+         "type": "string"
+        },
+        "cuenta_propia": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "Los traspasos entre cuentas propias que el ERP declaró. **Es la única vía para afirmarlos**: la NIC 7 §9 los excluye de los flujos de efectivo, y un movimiento por sí solo no puede saber que es la mitad de un par. La otra vía, `conciliar`, propone y nunca confirma."
      }
     }
    },

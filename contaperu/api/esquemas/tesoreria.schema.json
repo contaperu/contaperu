@@ -12,7 +12,10 @@
   "cuadre",
   "sin_atribuir",
   "de_lectura_asistida",
-  "avisos"
+  "avisos",
+  "imputados",
+  "sin_imputar",
+  "transferencias_declaradas"
  ],
  "additionalProperties": false,
  "properties": {
@@ -199,6 +202,42 @@
      }
     }
    }
+  },
+  "imputados": {
+   "type": "integer",
+   "minimum": 0,
+   "description": "Cuántos movimientos traen su contrapartida. Los que no, en `sin_imputar`."
+  },
+  "sin_imputar": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   },
+   "description": "Los movimientos sin contrapartida, por el número del papel que los prueba o, si no lo tienen, por el del banco. **Es el `sin_cuenta` del dinero**: el motor no adivina una cuenta."
+  },
+  "transferencias_declaradas": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "cual",
+     "cuenta",
+     "cuenta_propia"
+    ],
+    "properties": {
+     "cual": {
+      "type": "string"
+     },
+     "cuenta": {
+      "type": "string"
+     },
+     "cuenta_propia": {
+      "type": "string"
+     }
+    }
+   },
+   "description": "Los traspasos entre cuentas propias que el ERP declaró. **Es la única vía para afirmarlos**: la NIC 7 §9 los excluye de los flujos de efectivo, y un movimiento por sí solo no puede saber que es la mitad de un par. La otra vía, `conciliar`, propone y nunca confirma."
   }
  }
 }

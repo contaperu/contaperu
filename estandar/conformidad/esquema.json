@@ -1393,6 +1393,210 @@
     ]
    },
    "valid": false
+  },
+  {
+   "description": "Un movimiento imputado a una cuenta: la contrapartida la pone el ERP, igual que la cuenta de un gasto llega en la imputación de su comprobante. La 104 no sale de aquí: sale del maestro",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "cargo",
+      "id_externo": "mov-881"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "mov-881": {
+      "cuenta_contable": "4212100",
+      "contraparte_doc": "20602222226",
+      "centro_costo": "OBRA01"
+     }
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "Un cargo repartido entre tres cuentas, cada parte con su importe y su propio tercero",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "cargo",
+      "id_externo": "mov-881"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "mov-881": {
+      "reparto": [
+       {
+        "importe": "300.00",
+        "cuenta_contable": "4212100",
+        "contraparte_doc": "20602222226"
+       },
+       {
+        "importe": "150.00",
+        "cuenta_contable": "4212100",
+        "contraparte_doc": "20607777773"
+       },
+       {
+        "importe": "50.00",
+        "cuenta_contable": "6391000",
+        "centro_costo": "ADMIN"
+       }
+      ]
+     }
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "Un traspaso entre cuentas propias, declarado. Es la única vía para afirmar el efecto `transferencia` que la NIC 7 §9 excluye de los flujos: un movimiento por sí solo no puede saber que es la mitad de un par",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "cargo",
+      "id_externo": "mov-881"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "mov-881": {
+      "cuenta_propia": "bbva-dolares"
+     }
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "Con `imputaciones_de_movimientos`, cada movimiento necesita su `id_externo`: es la llave con la que se casan, y sin ella la decisión no se puede aplicar a nada",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "cargo"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "mov-881": {
+      "cuenta_contable": "4212100"
+     }
+    }
+   },
+   "valid": false
+  },
+  {
+   "description": "Sin el bloque, a un movimiento no se le pide `id_externo`",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "cargo"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Una clave que no es de una imputación de movimiento no pasa. **Importa más que de costumbre**: los campos de la imputación de un comprobante —`cuenta_tercero`, `detraccion_codigo`, `anulada_por_nota`— NO son los de un movimiento, y es una de las tres razones por las que este bloque es aparte",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "cargo",
+      "id_externo": "mov-881"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "mov-881": {
+      "anulada_por_nota": true
+     }
+    }
+   },
+   "valid": false
+  },
+  {
+   "description": "Una parte del reparto sin importe no vale: sin él no hay nada que repartir",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "cargo",
+      "id_externo": "mov-881"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "mov-881": {
+      "reparto": [
+       {
+        "cuenta_contable": "4212100"
+       }
+      ]
+     }
+    }
+   },
+   "valid": false
   }
  ]
 }

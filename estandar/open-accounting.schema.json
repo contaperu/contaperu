@@ -55,6 +55,16 @@
    },
    "description": "La cabecera de cada extracto del periodo, una por cuenta. Opcional: quien no la entienda la ignora, y sin ella el saldo inicial se deduce del primer movimiento. **Dos del mismo `id` se rechazan**: no hay regla que diga cuál de los dos saldos manda."
   },
+  "imputaciones_de_movimientos": {
+   "type": "object",
+   "propertyNames": {
+    "minLength": 1
+   },
+   "additionalProperties": {
+    "$ref": "#/$defs/imputacion_de_movimiento"
+   },
+   "description": "Por `id_externo` del movimiento, lo que el entorno decidió para él. **Bloque aparte de `imputaciones`, que es el de los comprobantes**, y no una extensión suya: un ERP tiene secuencias de id independientes para sus facturas y sus movimientos, así que el mismo `id_externo` puede ser las dos cosas y compartir el espacio de llaves obligaría a exigir unicidad entre bloques. Y los campos no son los mismos: un movimiento no tiene base, ni IGV, ni nota de crédito que lo anule."
+  },
   "emisor": {
    "description": "Quién generó este documento (software, versión). Informativo.",
    "type": "object",
@@ -77,6 +87,35 @@
    "then": {
     "properties": {
      "comprobantes": {
+      "items": {
+       "required": [
+        "id_externo"
+       ],
+       "properties": {
+        "id_externo": {
+         "minLength": 1
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "description": "Con `imputaciones_de_movimientos`, cada movimiento necesita su `id_externo`: es la llave con la que se casan. Calcado del de `imputaciones`, y con el mismo cuidado — como se aplica ADEMÁS del `$ref`, una clave declarada solo aquí sería invisible para el `additionalProperties: false` del movimiento; `id_externo` ya está declarado allí, así que no se añaden `properties` nuevas en este `then`.",
+   "if": {
+    "required": [
+     "imputaciones_de_movimientos"
+    ],
+    "properties": {
+     "imputaciones_de_movimientos": {
+      "minProperties": 1
+     }
+    }
+   },
+   "then": {
+    "properties": {
+     "movimientos": {
       "items": {
        "required": [
         "id_externo"
@@ -1028,6 +1067,60 @@
     },
     "total_abonos": {
      "$ref": "#/$defs/importe"
+    }
+   }
+  },
+  "parte_de_imputacion_de_movimiento": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "importe",
+    "cuenta_contable"
+   ],
+   "description": "Un trozo del movimiento con su propia cuenta: un cargo que paga tres facturas son tres partes. **El importe es obligatorio**, al revés que en una referencia de pago —una referencia sin importe vale por el total y no hay nada que repartir—.",
+   "properties": {
+    "importe": {
+     "$ref": "#/$defs/importe"
+    },
+    "cuenta_contable": {
+     "type": "string",
+     "description": "La contrapartida de esta parte."
+    },
+    "centro_costo": {
+     "type": "string"
+    },
+    "contraparte_doc": {
+     "type": "string",
+     "description": "El documento del tercero de esta parte: un cargo puede pagar facturas de tres proveedores distintos."
+    }
+   }
+  },
+  "imputacion_de_movimiento": {
+   "type": "object",
+   "additionalProperties": false,
+   "description": "Lo que el ERP decide sobre un movimiento porque el motor lo necesita y el papel no lo dice. **La 104 no sale de aquí**: sale de la cuenta bancaria que el contribuyente declaró en el maestro. Esto pone **la otra cara**, igual que la cuenta de un gasto llega en la imputación de su comprobante desde la 1.0. **Lo que NO es: lo que el pago cancela** — eso viaja en `movimiento.referencias[]` si el papel lo dice. Aquí va la cuenta, no el documento. Las tres formas se excluyen: una cuenta sola, un `reparto` o un `cuenta_propia`.",
+   "properties": {
+    "cuenta_contable": {
+     "type": "string",
+     "description": "La contrapartida, cuando es una."
+    },
+    "centro_costo": {
+     "type": "string"
+    },
+    "contraparte_doc": {
+     "type": "string",
+     "description": "El documento del tercero cuando el papel no lo dijo y el contador lo sabe. Sin él, un destino que llene su anexo auxiliar lo deja vacío."
+    },
+    "cuenta_propia": {
+     "type": "string",
+     "description": "El `id` de OTRA cuenta del maestro. **Declara el traspaso**, y es la única vía para afirmar el efecto `transferencia` sin conjeturar: la NIC 7 §9 lo excluye de los flujos, y un movimiento por sí solo no puede saber que es la mitad de un par. Excluye todo lo demás."
+    },
+    "reparto": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/parte_de_imputacion_de_movimiento"
+     },
+     "description": "Cuando un movimiento se parte entre varias cuentas. **Suma el importe del movimiento, exacto y sin tolerancia**, y el ITF queda fuera: son sus dos líneas propias. Excluye `cuenta_contable`, `centro_costo` y `contraparte_doc` al lado: ¿cuál mandaría?"
     }
    }
   }

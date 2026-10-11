@@ -15,6 +15,9 @@ equivalente, al cobrar o al pagar» (enmienda 0021).
 - `Extracto` — **la cabecera** de lo que el banco declaró de una cuenta en un periodo: su saldo anterior, su
   saldo actual y sus dos totales. No es una entrada de operaciones; es lo que permite comprobar un documento
   guardado y lo que caza una línea perdida al final del mes.
+- `ImputacionDeMovimiento` — **lo que el ERP decide** porque el motor lo necesita y el papel no lo dice: la
+  cuenta de la otra cara, su centro, el reparto cuando un cargo se parte, y el traspaso declarado. La 104 no sale
+  de aquí: sale del maestro.
 - `Referencia` — lo que un pago cancela: un comprobante, un tributo, un traspaso propio o texto libre. Es lo que
   hace que esto sirva para cualquier pago sin enumerar propósitos.
 - `cuadre` — la cadena de saldos del extracto, que es lo que convierte «leí un PDF» en «lo leí bien».
@@ -37,6 +40,7 @@ from __future__ import annotations
 
 from .cuadre import CuadreExtracto, ExtractoNoCuadra, cuadra, exigir
 from .extractos import Extracto, ExtractoInvalido, por_cuenta
+from .imputaciones import ImputacionDeMovimiento, ImputacionInvalida, Parte, leer as leer_imputaciones
 from .cuentas import (CuentaBancaria, CuentaInvalida, LARGO_CCI, MONEDAS, banco_del_cci, leer,
                       normalizar_cci, sin_cuenta_declarada)
 from .movimientos import (ABONO, API, ARCHIVO, CARGO, EFECTOS_DE_UN_MOVIMIENTO, ENTRADA, LECTURA_ASISTIDA, MANUAL,
@@ -47,7 +51,8 @@ from .referencias import (CLASES, CLAVES_POR_CLASE, COMPROBANTE, CUENTA_PROPIA, 
 
 __all__ = ["ABONO", "API", "ARCHIVO", "CARGO", "CLASES", "CLAVES_POR_CLASE", "COMPROBANTE", "CUENTA_PROPIA",
            "CuadreExtracto", "CuentaBancaria", "CuentaInvalida", "EFECTOS_DE_UN_MOVIMIENTO", "ENTRADA", "Extracto",
-           "ExtractoInvalido", "ExtractoNoCuadra", "LARGO_CCI", "LECTURA_ASISTIDA", "LIBRE", "MANUAL", "MONEDAS",
-           "Movimiento", "MovimientoInvalido", "ORIGENES", "PDF_TEXTO", "Referencia", "ReferenciaInvalida",
-           "SALIDA", "SENTIDOS", "TRIBUTO", "VISION", "banco_del_cci", "clave_de", "cuadra", "exigir", "leer",
-           "normalizar_cci", "por_cuenta", "sin_cuenta_declarada", "sin_duplicados"]
+           "ExtractoInvalido", "ExtractoNoCuadra", "ImputacionDeMovimiento", "ImputacionInvalida", "LARGO_CCI",
+           "LECTURA_ASISTIDA", "LIBRE", "MANUAL", "MONEDAS", "Movimiento", "MovimientoInvalido", "ORIGENES",
+           "PDF_TEXTO", "Parte", "Referencia", "ReferenciaInvalida", "SALIDA", "SENTIDOS", "TRIBUTO", "VISION",
+           "banco_del_cci", "clave_de", "cuadra", "exigir", "leer", "leer_imputaciones", "normalizar_cci",
+           "por_cuenta", "sin_cuenta_declarada", "sin_duplicados"]

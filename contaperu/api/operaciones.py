@@ -153,11 +153,18 @@ Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y 
     ITF dentro.
 
     Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza
-    con su 104, y si no está en el maestro no hay nada que deducir."""
+    con su 104, y si no está en el maestro no hay nada que deducir.
+
+    **Y dice qué movimientos no tienen todavía su contrapartida** (3.0 del estándar), que es el `sin_cuenta` del
+    dinero: la 104 sale del maestro y la otra cara la pone el ERP en `imputaciones_de_movimientos`, igual que la
+    cuenta de un gasto llega en la imputación de su comprobante. Un reparto que no suma el importe **no se
+    reporta: para** — ese informe existe porque «qué es ese resto lo decide el contador por la imputación», y una
+    imputación a medias no es un dato que falte sino una decisión mal hecha."""
     doc = documento or {}
     libro = preparacion.libro_de(doc)
     movimientos = preparacion.movimientos_de(doc)
     cabeceras = preparacion.extractos_de(doc)
+    imputadas = preparacion.imputaciones_de_movimientos_de(doc, movimientos)
     declaradas = {c.id: c for c in tesoreria.leer(cuentas)}
     pedidos = {str(k): v for k, v in (saldos_iniciales or {}).items()}
     dos_veces = sorted(c for c in pedidos if c in cabeceras and cabeceras[c].saldo_inicial is not None)
@@ -221,6 +228,21 @@ Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y 
                                         f"{dicho} y las líneas suman {c[suma]}. Falta o sobra una línea: el saldo "
                                         f"final no siempre lo delata, porque un cargo y un abono perdidos por el "
                                         f"mismo importe lo dejan igual"})
+    # La contrapartida que falta, y la cuenta de un traspaso que nadie declaró. Las dos son del mismo tipo que
+    # `sin_cuenta` en un comprobante: el motor no la adivina y dice a quién pedirla.
+    for m in nuevos:
+        if (m.id_externo or "") not in imputadas:
+            avisos.append({"codigo": "MOVIMIENTO_SIN_IMPUTAR", "pedir_a": "contador",
+                           "texto": f"El movimiento {_nombre_de(m) or m.id_externo or 'sin referencia'} de la "
+                                    f"cuenta {m.cuenta!r} no tiene contrapartida. La 104 sale del maestro; la otra "
+                                    f"cara se imputa, igual que la cuenta de un gasto"})
+            continue
+        suya = imputadas[m.id_externo]
+        if suya.es_traspaso and declaradas and suya.cuenta_propia not in declaradas:
+            avisos.append({"codigo": "CUENTA_PROPIA_NO_DECLARADA", "pedir_a": "quien integra",
+                           "texto": f"El movimiento {_nombre_de(m) or m.id_externo} declara un traspaso a la "
+                                    f"cuenta {suya.cuenta_propia!r}, que no está en el maestro declarado: un "
+                                    f"traspaso es entre dos cuentas propias, y la otra tiene que existir"})
     for c in cuadres:
         if not c["cuadra"]:
             avisos.append({"codigo": "EXTRACTO_NO_CUADRA", "pedir_a": "quien lee el archivo",
@@ -243,7 +265,16 @@ Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y 
                                     f"{m.cuenta!r} dice {m.moneda} y esa cuenta se declaró en {suya.moneda}. "
                                     f"Casi siempre es una línea de otro extracto o un `id` equivocado"})
 
+    sin_imputar = [_nombre_de(m) or m.id_externo
+                   for m in nuevos if (m.id_externo or "") not in imputadas]
+    traspasos = [{"cual": _nombre_de(m) or m.id_externo, "cuenta": m.cuenta,
+                  "cuenta_propia": imputadas[m.id_externo].cuenta_propia}
+                 for m in nuevos
+                 if m.id_externo in imputadas and imputadas[m.id_externo].es_traspaso]
+
     return {"libro": libro.a_dict(), "movimientos": len(nuevos), "repetidos": len(repetidos),
+            "imputados": len(nuevos) - len(sin_imputar), "sin_imputar": sin_imputar,
+            "transferencias_declaradas": traspasos,
             "cuadre": cuadres, "sin_atribuir": sin_atribuir, "de_lectura_asistida": de_ia, "avisos": avisos}
 
 
