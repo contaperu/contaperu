@@ -40,12 +40,13 @@ from __future__ import annotations
 
 from .cuadre import CuadreExtracto, ExtractoNoCuadra, cuadra, exigir
 from .extractos import Extracto, ExtractoInvalido, por_cuenta
-from .imputaciones import ImputacionDeMovimiento, ImputacionInvalida, Parte, leer as leer_imputaciones
+from .imputaciones import (ImputacionDeMovimiento, ImputacionInvalida, Parte, efecto_de,
+                           leer as leer_imputaciones)
 from .cuentas import (CuentaBancaria, CuentaInvalida, LARGO_CCI, MONEDAS, banco_del_cci, leer,
                       normalizar_cci, sin_cuenta_declarada)
 from .movimientos import (ABONO, API, ARCHIVO, CARGO, EFECTOS_DE_UN_MOVIMIENTO, ENTRADA, LECTURA_ASISTIDA, MANUAL,
-                          ORIGENES, PDF_TEXTO, SALIDA, SENTIDOS, VISION, Movimiento, MovimientoInvalido, clave_de,
-                          sin_duplicados)
+                          ORIGENES, PDF_TEXTO, SALIDA, SENTIDOS, TRANSFERENCIA, VISION, Movimiento,
+                          MovimientoInvalido, clave_de, sin_duplicados)
 from .referencias import (CLASES, CLAVES_POR_CLASE, COMPROBANTE, CUENTA_PROPIA, LIBRE, Referencia,
                           ReferenciaInvalida, TRIBUTO)
 
@@ -53,6 +54,8 @@ __all__ = ["ABONO", "API", "ARCHIVO", "CARGO", "CLASES", "CLAVES_POR_CLASE", "CO
            "CuadreExtracto", "CuentaBancaria", "CuentaInvalida", "EFECTOS_DE_UN_MOVIMIENTO", "ENTRADA", "Extracto",
            "ExtractoInvalido", "ExtractoNoCuadra", "ImputacionDeMovimiento", "ImputacionInvalida", "LARGO_CCI",
            "LECTURA_ASISTIDA", "LIBRE", "MANUAL", "MONEDAS", "Movimiento", "MovimientoInvalido", "ORIGENES",
-           "PDF_TEXTO", "Parte", "Referencia", "ReferenciaInvalida", "SALIDA", "SENTIDOS", "TRIBUTO", "VISION",
-           "banco_del_cci", "clave_de", "cuadra", "exigir", "leer", "leer_imputaciones", "normalizar_cci",
+           "PDF_TEXTO", "Parte", "Referencia", "ReferenciaInvalida", "SALIDA", "SENTIDOS", "TRANSFERENCIA",
+           "TRIBUTO", "VISION",
+           "banco_del_cci", "clave_de", "cuadra", "efecto_de", "exigir", "leer", "leer_imputaciones",
+           "normalizar_cci",
            "por_cuenta", "sin_cuenta_declarada", "sin_duplicados"]

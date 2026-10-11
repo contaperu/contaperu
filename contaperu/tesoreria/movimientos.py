@@ -75,8 +75,12 @@ SENTIDOS = (CARGO, ABONO)
 # entero sin que nada falle.
 ENTRADA = "entrada"
 SALIDA = "salida"
-# El tercero del catálogo, `transferencia`, **no está aquí a propósito**: un movimiento no puede tenerlo. Ver
-# `Movimiento.efecto`.
+# El tercero del catálogo se nombra aquí, con los otros dos, por la misma razón: que nadie escriba la cadena a
+# mano. Pero **no entra en `EFECTOS_DE_UN_MOVIMIENTO` a propósito**, porque un movimiento solo no puede tenerlo
+# (el porqué, en `Movimiento.efecto`). Quien lo produce es `imputaciones.efecto_de`, componiendo el movimiento con
+# lo que el ERP declaró. **Hasta la 12.0 no lo producía nadie**: el catálogo publicaba tres efectos y solo dos
+# tenían emisor, que es un valor que nadie podía emitir.
+TRANSFERENCIA = "transferencia"
 EFECTOS_DE_UN_MOVIMIENTO = (ENTRADA, SALIDA)
 
 

@@ -409,6 +409,28 @@ banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena no enc
 la `confianza` que reporte un modelo no relaja nada, porque la confianza que reporta un modelo no separa de forma
 fiable lo correcto de lo incorrecto.
 
+### El efecto sobre el efectivo, para tu estado de flujos (NIC 7)
+
+Un movimiento, por sí solo, solo puede decir dos cosas: el dinero **entra** o **sale**. El tercer efecto del
+catálogo, `transferencia`, no se deduce — **se declara**, porque una línea sola no puede saber que es la mitad de
+un traspaso entre dos cuentas tuyas. Quien lo compone es `efecto_de`, juntando el movimiento con lo que imputaste:
+
+```python
+from contaperu import tesoreria
+
+pago = tesoreria.Movimiento(cuenta="bbva-soles", fecha="2026-08-14", importe="4711.00", sentido="cargo")
+print(tesoreria.efecto_de(pago))                                       # salida
+print(tesoreria.efecto_de(pago, {"cuenta_contable": "4212100"}))       # salida: imputar no es traspasar
+print(tesoreria.efecto_de(pago, {"cuenta_propia": "bbva-dolares"}))    # transferencia, porque TÚ lo declaraste
+```
+
+Para qué sirve: la **NIC 7 §9** deja fuera de los flujos de efectivo los traspasos entre partidas que ya son
+efectivo, porque son gestión de tesorería y no actividad de la empresa. Si los cuentas como salida y entrada, el
+mismo dinero aparece dos veces en tu estado de flujos. Llama a esto para excluirlos.
+
+La otra forma de saberlo es casar las dos patas, que es `conciliar` (el hito D3) — y ésa **propone y nunca
+confirma**, así que lo que afirma un traspaso es siempre tu `cuenta_propia`.
+
 ### Lo que todavía NO hace
 
 **No asienta.** `revisar_tesoreria` registra, valida, cuadra y dice qué falta; no produce líneas de diario, así que

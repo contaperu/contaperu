@@ -185,6 +185,34 @@ def test_los_efectos_son_los_del_catalogo_publicado_y_no_una_copia():
     assert "NIC 7" in vocabulario.FUENTES["efectos_de_tesoreria"]
 
 
+def test_los_tres_efectos_del_catalogo_tienen_quien_los_emita():
+    """**Un valor de catálogo sin productor es un valor que nadie puede emitir**, y es lo que pasaba hasta la
+    12.0: el catálogo publicaba tres efectos, `Movimiento.efecto` daba dos y nada en el motor componía el tercero.
+    Lo encontró John el 11-oct-2026 preguntando por qué no estaba `transferencia`.
+
+    La respuesta no era añadirlo al movimiento —una línea sola sigue sin poder saberlo, y el test de arriba lo
+    fija— sino construir quien lo compone. `efecto_de` toma el movimiento y lo que el ERP **declaró**.
+
+    Este test recorre el catálogo entero: si mañana entra un cuarto efecto y nadie lo produce, se pone rojo."""
+    from contaperu import vocabulario
+
+    cargo = mov(sentido="cargo")
+    abono = mov(sentido="abono")
+    producibles = {
+        t.efecto_de(abono),                                          # entrada
+        t.efecto_de(cargo),                                          # salida
+        t.efecto_de(cargo, {"cuenta_propia": "bbva-dolares"}),       # transferencia, DECLARADA
+    }
+    assert producibles == set(vocabulario.EFECTOS_DE_TESORERIA), (
+        "hay un efecto en el catálogo que nadie sabe emitir")
+
+    # Una imputación que no declara traspaso no cambia nada: el tercero no se deduce de tener contrapartida.
+    assert t.efecto_de(cargo, {"cuenta_contable": "4212100"}) == t.SALIDA
+    assert t.efecto_de(cargo, None) == t.SALIDA
+    # Y el movimiento, por su cuenta, sigue sin poder decirlo. Es la invariante que sostiene el modelo.
+    assert cargo.efecto == t.SALIDA
+
+
 def test_un_libro_de_tesoreria_existe_y_el_motor_no_lo_origina():
     """Las dos mitades de la fase, en un test. El tipo de libro existe —así que el dato puede entrar y validarse—
     y el motor **todavía no sabe armar su asiento**, así que la puerta de la 8.2 lo para diciendo cuáles sabe.

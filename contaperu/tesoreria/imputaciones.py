@@ -32,6 +32,7 @@ from dataclasses import dataclass, field, fields
 
 from ..errores import ErrorContaperu
 from ..modelo import CERO, monto as _monto
+from .movimientos import TRANSFERENCIA
 
 
 class ImputacionInvalida(ErrorContaperu, ValueError):
@@ -148,6 +149,26 @@ class ImputacionDeMovimiento:
             raise ImputacionInvalida(f"Claves que no son de una imputación de movimiento: "
                                      f"{', '.join(desconocidas)}. Las que hay: {', '.join(validas)}")
         return cls(**{nombre: valor.get(nombre) for nombre in validas if nombre in valor})
+
+
+def efecto_de(movimiento, imputacion=None) -> str:
+    """Qué le hace al efectivo este movimiento, **compuesto** con lo que el ERP decidió: los tres del catálogo.
+
+    Es la pieza que faltaba, y por eso entra aquí y no en `Movimiento`. `Movimiento.efecto` nunca devuelve
+    `transferencia`, y hace bien: una línea sola no puede saber que es la mitad de un traspaso, porque eso es una
+    afirmación sobre un **par** y el extracto no la hace. Pero mientras nadie compusiera las dos cosas, el catálogo
+    publicaba tres efectos y solo dos tenían quien los emitiera — un valor que nadie podía producir.
+
+    El tercero **no se deriva: se declara**, con `cuenta_propia`, que es la única vía por la que alguien afirma que
+    las dos patas son suyas. La otra forma de saberlo es `conciliar`, emparejando las dos (el hito D3), y ésa
+    **propone y nunca confirma**.
+
+    Para qué sirve: la NIC 7 §9 deja fuera de los flujos de efectivo los traspasos entre partidas que ya son
+    efectivo, porque son gestión de tesorería y no actividad de la empresa. Un ERP que arme su estado de flujos
+    llama a esto para excluirlos y no contar dos veces el mismo dinero."""
+    if imputacion is not None and ImputacionDeMovimiento.de(imputacion).es_traspaso:
+        return TRANSFERENCIA
+    return movimiento.efecto
 
 
 def leer(imputaciones, movimientos) -> dict:
