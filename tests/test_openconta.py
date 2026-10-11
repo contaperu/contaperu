@@ -135,3 +135,27 @@ def test_los_documentos_de_ejemplo_validan_como_cuerpos():
         _validar("exportar_entrada", {"documento": documento})
     with pytest.raises(ValidationError):
         _validar("exportar_entrada", {"documento": documento, "driver": "concar", "sobra": True})
+
+
+def test_el_maestro_de_cuentas_esta_tipado_en_la_entrada_y_no_solo_en_la_salida():
+    """El parámetro `cuentas` decía `{"type": "object"}` —o sea nada— mientras el CCI de veinte dígitos y el
+    `PEN|USD` vivían solo en Python y en el esquema de **salida**. Un ERP que validara contra el contrato publicado
+    aceptaba cuentas que el motor rechaza, que es justo lo que un contrato existe para evitar.
+
+    Y va en `api/esquemas/` y no en el estándar porque **el maestro es un argumento y no parte del documento**: no
+    lo versiona `open-accounting`."""
+    import jsonschema
+
+    contrato = json.loads(VERSIONADO.read_text(encoding="utf-8"))
+    entrada = contrato["components"]["schemas"]["revisar_tesoreria_entrada"]
+    cuentas = entrada["properties"]["cuentas"]
+    assert cuentas["items"] == {"$ref": "#/components/schemas/cuenta_bancaria"}, "tipado, no un objeto cualquiera"
+
+    cuenta = contrato["components"]["schemas"]["cuenta_bancaria"]
+    assert cuenta["required"] == ["id"] and cuenta["additionalProperties"] is False
+    assert cuenta["properties"]["cci"]["pattern"] == "^$|^[0-9]{20}$"
+    assert cuenta["properties"]["moneda"]["enum"] == ["PEN", "USD"]
+    # Y lo que esto caza de verdad: un CCI de diecinueve dígitos deja de validar contra el contrato.
+    v = jsonschema.Draft202012Validator(cuenta)
+    assert list(v.iter_errors({"id": "bbva-soles", "cci": "0" * 19}))
+    assert not list(v.iter_errors({"id": "bbva-soles", "cci": "0" * 20, "moneda": "PEN"}))

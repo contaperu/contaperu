@@ -3245,6 +3245,52 @@
     ],
     "additionalProperties": false
    },
+   "cuenta_bancaria": {
+    "title": "Cuenta bancaria del contribuyente",
+    "description": "Una cuenta del maestro que aporta quien llama. **Es un argumento, no una tabla**: el motor no lo guarda y no lo versiona el estándar, así que su contrato vive aquí y no en `open-accounting`. Hasta la 3.0 este parámetro se declaraba como `{\"type\": \"object\"}` —o sea nada—, mientras el CCI de veinte dígitos y las monedas admitidas vivían solo en Python: un ERP que validara contra el contrato publicado aceptaba cuentas que el motor rechaza.",
+    "type": "object",
+    "required": [
+     "id"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Con qué nombre apunta a esta cuenta cada movimiento. Es la llave del maestro y la pone quien integra; el motor no la interpreta."
+     },
+     "banco": {
+      "type": "string",
+      "description": "El nombre del banco, tal como lo escriba quien integra. No hay catálogo de códigos de banco todavía: su fuente publicada no se consiguió, y el código del CCI se transporta sin traducir."
+     },
+     "numero": {
+      "type": "string",
+      "description": "El número de cuenta del banco. Hace falta éste o el CCI: sin ninguno de los dos no hay cuenta que declarar."
+     },
+     "cci": {
+      "type": "string",
+      "pattern": "^$|^[0-9]{20}$",
+      "description": "El Código de Cuenta Interbancario: **veinte dígitos exactos**, 3 de banco + 3 de oficina + 12 de cuenta + 2 de control. Se normaliza quitando lo que no sea dígito, y **no se rellena con ceros a la izquierda**: un CCI corto es un CCI mal copiado, no uno al que le falten ceros."
+     },
+     "moneda": {
+      "type": "string",
+      "enum": [
+       "PEN",
+       "USD"
+      ],
+      "description": "La moneda de la cuenta. **Aquí sí hay enum, y es el único sitio donde lo hay**: quien enumera monedas es el maestro, no cada movimiento — un movimiento solo tiene que tener forma ISO 4217. Una tercera moneda se declara primero como cuenta."
+     },
+     "cuenta_contable": {
+      "type": "string",
+      "pattern": "^([0-9]{2,12})?$",
+      "description": "La 104x del contribuyente para esta cuenta, que **el motor NO deriva ni supone**: cada cuenta corriente tiene su divisionaria —la de soles no es la de dólares, y la del Banco de la Nación tampoco—. Si no se declara, se avisa y no se adivina."
+     },
+     "datos_originales": {
+      "type": "object",
+      "description": "Lo que quien integra transporte sin interpretar."
+     }
+    }
+   },
    "cuentas_bancarias": {
     "title": "Cuentas bancarias declaradas",
     "description": "El maestro de cuentas del contribuyente, comprobado. Es un argumento que aporta quien llama y que el motor no guarda: sin cuentas declaradas no cambia nada. Cada una lleva SU cuenta contable —la 104 del PCGE es un dato de la empresa, que el motor no deriva— y la que no la declare sale avisada, no corregida.",
@@ -4321,7 +4367,7 @@
      "cuentas": {
       "type": "array",
       "items": {
-       "type": "object"
+       "$ref": "#/components/schemas/cuenta_bancaria"
       },
       "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y la cuenta contable de cada una. Es un argumento; el motor no lo guarda."
      }
@@ -4342,7 +4388,7 @@
      "cuentas": {
       "type": "array",
       "items": {
-       "type": "object"
+       "$ref": "#/components/schemas/cuenta_bancaria"
       },
       "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y la cuenta contable de cada una. Es un argumento; el motor no lo guarda."
      },

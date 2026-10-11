@@ -61,7 +61,11 @@ PARAMETROS: dict[str, dict] = {
     # la puerta la publica sola en vez de quedarse una versión por detrás.
     "agrupar_por": {"type": "string", "enum": list(resumen.AGRUPACIONES), "default": "",
                     "description": "Vacío, solo los totales del libro; `contraparte`, además por proveedor o cliente."},
-    "cuentas": {"type": "array", "items": {"type": "object"},
+    # Tipado por su esquema desde la 3.0 del estándar. Hasta entonces decía `{"type": "object"}`, o sea nada,
+    # mientras el CCI de veinte dígitos y el `PEN|USD` vivían solo en Python y en el esquema de SALIDA: un ERP que
+    # validara contra el contrato publicado aceptaba cuentas que el motor rechaza. Y va aquí y no en el estándar
+    # porque el maestro es un ARGUMENTO y no parte del documento, así que no lo versiona `open-accounting`.
+    "cuentas": {"type": "array", "items": esquema_de_la_api("cuenta_bancaria"),
                 "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y "
                                "la cuenta contable de cada una. Es un argumento; el motor no lo guarda."},
     "saldos_iniciales": {"type": "object", "additionalProperties": {"type": "string"},
