@@ -4,6 +4,100 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+**El motor juzga lo que recibe y no opina sobre cómo se leyó.** Es la regla que ordena esta versión, y sale de
+cuatro inconsistencias que John encontró revisando tesorería el 11-oct-2026, más una quinta que apareció
+**integrando** — que es la que más dice de las cinco, porque no la habría encontrado ninguna batería.
+
+**Ninguna salida se mueve.** Los cuatro snapshots de celdas —CONCAR y CONTASIS, filas y formato— quedan
+intactos; del documento congelado solo cambia el sello de la versión.
+
+### El estándar · `open-accounting` 3.1
+
+**Aditivo: entra `glosa` y no sale nada.** Un documento 3.0 sigue valiendo tal cual, así que no hay nada que
+migrar.
+
+**La glosa que se escribe en el libro**, en `imputaciones_de_movimientos` y en cada parte del reparto
+([enmienda 0029](estandar/enmiendas/0029-la-glosa-de-un-movimiento.md)). Es de John, integrando: *«en movimiento
+no existe la variable "glosa", y esto es importante para los libros»*. Tenía razón, y eso **falsifica lo que la
+11.0.0 escribió de sí misma** —«el contrato del dinero queda cerrado: un ERP ya puede decir **todo** lo que el
+motor necesitará para asentarlos»—. No podía decir esto, y lo piden los cuatro destinos: el campo 16 del Diario
+5.1 del PLE, las **dos** de CONCAR (principal a 40, detalle a 30) y las de CONTASIS y STARSOFT.
+
+Va en la imputación y no en el movimiento por tres razones, y la tercera decide: es una **decisión** y no un
+hecho del papel; `movimiento.descripcion` ya es otra cosa —el texto del banco, que además entra en la clave de
+deduplicación—; y **un cargo que paga tres facturas necesita tres glosas**, que es exactamente la distinción que
+CONCAR hace entre su «Glosa Principal» y su «Glosa Detalle». En el movimiento no cabrían tres.
+
+`tesoreria.glosa_de_movimiento` recorre el respaldo —parte → imputación → descripción → nombre de la
+contraparte— para que **ninguna línea salga sin glosa**, igual que `asiento.glosa_de` hace con un comprobante. En
+mayúsculas y **sin cortar**: el largo lo decide cada destino.
+
+**Y una regla de modelado que faltaba por escrito**
+([enmienda 0028](estandar/enmiendas/0028-un-cargo-del-banco-es-su-propio-movimiento.md)): **un cargo del banco es
+su propio movimiento**. Una comisión, los portes o el mantenimiento no tienen campo y no les hace falta — llegan
+como un item más, con su propia imputación. Eso resuelve una asimetría que nadie había nombrado: no le falta un
+campo a la comisión, **le sobra uno al ITF**. `movimiento.itf` se queda porque hay bancos que lo descuentan sin
+darle fila (BBVA lo pone en una columna), y entonces no hay movimiento que lo represente; su retiro se revisa
+junto con `saldo`, cuando llegue el primer lector de banco real.
+
+### Cambiado · rompe
+
+- **`revisar_tesoreria` deja de devolver `cuadre`** y de aceptar `saldos_iniciales`. El motivo, medido: la cadena
+  de saldos corridos devolvía **`cuadra: true` sin haber mirado nada** cuando ninguna línea traía `saldo` —y con
+  una línea inventada en medio, también—, que es el caso de **todo** ERP que manda operaciones estructuradas. Lo
+  dijo John así: *«el cuadre de saldos no garantiza nada, y además no todos tienen eso»*. Un verde que no
+  significa nada es peor que ningún control.
+- **La cadena no se pierde**: sigue publicada en `tesoreria.cuadra`, para quien parsea un extracto y tiene
+  columna de saldo. Ahí sí vale, y su docstring dice ahora la trampa. Lo que cambia es dónde se llama: **donde se
+  hace el parseo**, que no es la api.
+- **Lo que sí se comprueba es lo que el banco declaró** contra lo que llegó: los dos totales de la cabecera
+  (`TOTAL_DECLARADO_NO_COINCIDE`) y su saldo final contra la aritmética de esos mismos números
+  (`SALDO_FINAL_DECLARADO_NO_COINCIDE`, que sustituye a `EXTRACTO_NO_CUADRA`). **No puede pasar en vacío**, porque
+  solo corre si la cabecera dice algo, y caza lo que una cadena no caza: una línea entera perdida.
+- **Una cuenta bancaria se valida contra el catálogo ISO** y no contra una lista escrita a mano. Era
+  `("PEN","USD")`, **más estrecho que el catálogo del propio repositorio** —rechazaba una cuenta en euros aunque
+  `EUR` esté publicado con su fuente—. Ahora son las diez del Anexo 1 de la RS 112-2021, y añadir una es añadirla
+  al catálogo.
+
+### Añadido
+
+- **`totales_por_cuenta`** en la respuesta: cuántos movimientos, cargos, abonos, ITF y la cuenta contable de cada
+  cuenta. **Es un resumen y no un control**, y el nombre lo dice.
+- **`tesoreria.efecto_de(movimiento, imputacion)`**, que produce el tercer efecto del catálogo. Lo preguntó John:
+  `transferencia` no estaba en `EFECTOS_DE_UN_MOVIMIENTO` —y hace bien, porque una línea sola no puede saber que
+  es la mitad de un traspaso— pero **nada en el motor lo producía nunca**: el catálogo publicaba tres efectos y
+  solo dos tenían emisor. Sirve para excluir los traspasos de un estado de flujos, que es lo que pide la NIC 7
+  §9. Su test recorre el catálogo entero y exige que **cada valor tenga quien lo emita**.
+- **El alias de la moneda en CONTASIS es configuración** (`monedas_codigo`), como ya lo era en CONCAR: estaba
+  congelado en el driver, así que una instalación que escribiera otra letra no podía decirlo. Los valores de
+  fábrica son los de su plantilla, y por eso su snapshot no se mueve.
+
+### Corregido
+
+- **La puerta de versión del estándar comparaba igualdad exacta**, así que la primera menor habría **rechazado
+  todos los documentos de su mayor**. Una menor es aditiva por definición: un 3.0 es un 3.1 que no usa lo nuevo.
+  Ahora compara la mayor. No se había visto porque el estándar solo había tenido mayores (0.3, 1.0, 2.0, 3.0); la
+  3.1 es la primera menor y lo encontró. Su mensaje, además, seguía hablando solo del salto de la 1.0 a la 2.0.
+- **El esquema publicado fijaba su versión con un `const`**, con el mismo efecto sobre quien valide con el JSON:
+  pasa a un patrón de su mayor.
+- **Un `saldo` o un `itf` que llegaban como cadena vacía** se quedaban dentro tal cual y hacían reventar a
+  `cuadra()` con un `TypeError`. Mandar la clave vacía es lo normal en un ERP que serializa su tabla. Vacío es
+  `None`, que es la forma que `Extracto` ya tenía bien.
+
+### Cómo migrar
+
+1. **`revisar_tesoreria(documento, cuentas)`**: quita el argumento `saldos_iniciales` y declara esos saldos en el
+   bloque `extractos[]` del documento, que es la única vía ahora.
+2. **La clave `cuadre` de la respuesta ya no está.** Si la usabas para enseñar un cuadre, mira `avisos`: lo que
+   de verdad se comprobaba era contra la cabecera, y eso sigue. Y si parseas extractos, llama tú a
+   `tesoreria.cuadra(movimientos, saldo_inicial=…, saldo_final=…)` con los valores de tu cabecera —**mirando
+   cuántas líneas traían `saldo`** antes de creerte el verde—.
+3. **El aviso `EXTRACTO_NO_CUADRA` se llama ahora `SALDO_FINAL_DECLARADO_NO_COINCIDE`** y dice otra cosa: el
+   total declarado contra la aritmética, no la cadena línea a línea.
+4. **Nada del documento cambia.** El estándar 3.1 es aditivo y un documento 3.0 vale igual.
+
 ## [11.0.1] — 2026-10-11
 
 **Lo que `/v1/tesoreria` dice de sí misma se había quedado en la 9.1.** Ninguna línea de comportamiento cambia:

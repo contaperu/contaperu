@@ -2,7 +2,7 @@
 
 ContaPerú convierte comprobantes de SUNAT en asientos y en los archivos que importan los sistemas contables peruanos,
 sin estado: todo entra por parámetro y sale por retorno. Esta guía es para quien construye un ERP, un portal contable o
-un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 11.x. Los ejemplos se
+un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 12.x. Los ejemplos se
 ejecutan en la batería del repositorio (`tests/test_integrar.py`): si uno deja de funcionar, la batería falla.
 
 **Lo que se integra no es un conversor, es una base.** El motor no está hecho para que tu ERP exporte a CONCAR y ahí
@@ -758,13 +758,13 @@ Para actualizar:
 Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
 seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
-## Lo que promete la 11.x
+## Lo que promete la 12.x
 
-- **`contaperu.api` no cambia de nombre ni de firma** hasta la 12.0 (`tests/test_superficie_publica.py`). Pueden llegar
+- **`contaperu.api` no cambia de nombre ni de firma** hasta la 13.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
-- **Un nombre que cambia sigue resolviendo durante toda la 11.x**, y avisa con `contaperu.RutaObsoleta` diciendo
-  cuál usar, hasta la 12.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno, y conviene saber por qué: la 7.0
-  cumplió los seis que avisaban y de la 8.0, la 9.0 y la 10.0 no salió ninguno nuevo. La 9.0 rompió **sin** pasar
+- **Un nombre que cambia sigue resolviendo durante toda la 12.x**, y avisa con `contaperu.RutaObsoleta` diciendo
+  cuál usar, hasta la 13.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno, y conviene saber por qué: la 7.0
+  cumplió los seis que avisaban y de la 8.0, la 9.0, la 10.0 y la 12.0 no salió ninguno nuevo. La 9.0 rompió **sin** pasar
   por aquí, a propósito —un puente que siguiera aceptando el `es_venta: bool` mantendría vivo justo el camino que
   la mayor cerraba—, y la 10.0 retiró la maquinaria de las rutas de módulo, que llevaba tres mayores sin usarse.
   Lo que no se retiró es esto: corre tu batería con `-W error::contaperu._obsoleto.RutaObsoleta` y te sale cada
