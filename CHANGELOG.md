@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [10.0.0] — 2026-10-10 · con `open-accounting` 2.0
+## [10.0.0] — 2026-10-11 · con `open-accounting` 2.0
 
 **El estándar deja de llevar lo que nadie escribía, y el paquete deja de llevar el andamio.** Cuatro claves salen
 del documento y tres mecanismos salen del código. No entra ningún campo: **la 2.0 solo quita**, y por eso migrar es
@@ -17,6 +17,14 @@ borrar lo que existía solo para no romper el pasado.
 **Ninguna salida se mueve.** El Excel de CONCAR y el de CONTASIS quedan **celda a celda idénticos** —comprobado
 byte a byte contra el commit anterior a la tanda— y los tres meses caracterizados no mueven un importe. Ninguna
 huella cambia. Lo que un consumidor tiene que adaptar está en «Cómo migrar», al final.
+
+**Sale sin su pre-release** (John, 11-oct-2026), que es una excepción a la regla de este repositorio y se dice como
+tal. El tag `v10.0.0rc1` llegó a empujarse y su release **falló antes de publicar nada** —la etiqueta de una `rc`
+exige que `_version.py` diga `10.0.0rc1`—, y de ahí se decidió ir directo a la final. Lo que la `rc` habría
+cazado, dicho aquí para que no se descubra en producción: **la aplicación llama a `por_cuenta(lineas)` sin el
+libro**, así que su columna `roles` sale vacía hasta que le pase el tipo —que ya tiene a mano— y su
+`test_puertas_del_motor.py` busca `_obsoleto import reexportar`, que ya no existe, de modo que ese barrido se
+queda vacío en vez de rojo. Las dos cosas son de su lado y están en «Cómo migrar».
 
 ### El estándar · `open-accounting` 2.0
 
@@ -129,6 +137,11 @@ El documento de `asiento_contable` deja de llevar el `rol` de cada línea, porqu
 
 **Si produces documentos con el motor, nada**: la clave de versión la estampa él y el `rol` ya no lo escribe.
 `contaperu.api` no cambia una firma más que una: `por_cuenta` acepta un `libro` opcional.
+
+**Pero si lees la columna `roles` del pre-mayor, hay una línea que cambiar**: `por_cuenta(lineas)` devuelve
+`roles: []` y `roles_derivados: false`, porque el papel ya no viaja en la línea y sin el libro nadie puede
+derivarlo. Pásale el bloque `libro` del documento —`por_cuenta(lineas, libro)`— y la columna vuelve idéntica a la
+de antes. Es el único sitio donde esta versión quita algo que alguien estaba leyendo, y se dice primero por eso.
 
 **Si escribes documentos a mano o guardas documentos de la 1.0**, está todo en
 [`estandar/MIGRAR-A-2.0.md`](estandar/MIGRAR-A-2.0.md): cuatro claves que se quitan —`linea.rol`,

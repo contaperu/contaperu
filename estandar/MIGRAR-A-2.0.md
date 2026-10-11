@@ -7,8 +7,8 @@ es todo — y es un borrado, no una traducción: no hay ningún campo nuevo que 
 **El motor no acepta documentos que se declaren `1.0`**: se rechazan al leer el libro, con un mensaje que nombra lo
 que cambia. Es la misma decisión que la 1.0 tomó con la 0.3 —leer las dos cuesta dos caminos en el lector y una
 regla de cuál gana—, con una diferencia que conviene decir: cuando salió la 1.0 nadie de fuera producía documentos,
-y **la 1.0 lleva semanas publicada en PyPI**. De ahí que esta guía exista y que la versión saliera con una
-pre-release para que quien integra la probara antes.
+y **la 1.0 lleva semanas publicada en PyPI**. De ahí que esta guía exista y que sea exhaustiva: la versión salió
+**sin pre-release**, así que esto es lo único que tienes delante antes de adoptarla.
 
 ## 1 · La clave de versión
 
