@@ -4,6 +4,44 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [11.0.1] — 2026-10-11
+
+**Lo que `/v1/tesoreria` dice de sí misma se había quedado en la 9.1.** Ninguna línea de comportamiento cambia:
+las mismas firmas, las mismas respuestas, los dos snapshots de celdas intactos. Lo que estaba mal era lo que el
+motor **publica** sobre esa operación, y una parte no era prosa.
+
+### Corregido
+
+- **El esquema de salida exigía una clave que no existe.** `tesoreria.schema.json` llevaba `constancias` en su
+  `required`, que la 3.0 del estándar quitó, y nombraba por `numero` lo que la respuesta devuelve como `cual` en
+  `sin_atribuir` y en `de_lectura_asistida`. Resultado medible: **toda** respuesta real fallaba al validarse
+  contra el contrato que el propio motor publica. Afecta a quien valide por OpenConta; el MCP no, porque no
+  declara `outputSchema` —y eso es lo que impidió que se notara antes—.
+- **La descripción de la operación**, que OpenConta publica y un agente lee por el MCP, seguía prometiendo «los
+  movimientos de las cuentas **y las constancias de los pagos**» y explicaba el saldo inicial como si la vía
+  principal siguiera siendo el argumento `saldos_iniciales`. Ahora dice lo que la versión hizo: una sola entrada,
+  `extractos[]` para lo que declara el banco, `imputaciones_de_movimientos` para la contrapartida, los cinco
+  `origen` y los siete códigos de aviso por su nombre. Dos párrafos del docstring, además, salían sin sangría.
+- La misma frase caducada en el tipo de libro `tesoreria` de `estandar/catalogos.json`, en el `README.md` y en
+  `validar_cuentas_bancarias`.
+
+### Añadido
+
+- **El guardián que faltaba.** `test_openconta.py` validaba once respuestas reales contra su esquema y
+  **tesorería no era una de ellas**: por eso su contrato pudo envejecer dos versiones sin que nada se pusiera
+  rojo. Ahora entra, junto con `validar_cuentas_bancarias`, y **con los seis informes exigidos no vacíos** —un
+  array vacío valida contra cualquier esquema de item, así que un guardián que no mira dentro es un guardián que
+  no puede fallar, que es la trampa que dejó pasar el `numero`—. Tres mutaciones lo ponen rojo.
+
+### Cómo migrar
+
+Nada que adaptar. Si generaste un cliente desde el OpenConta de la 9.1, la 10.0 o la 11.0, ese cliente tiene un
+campo `constancias` que nunca llegó con valor y dos campos `numero` que nunca llegaron: regenéralo y desaparecen.
+
+**El tag `open-accounting-3.0` se mueve** con esta versión, porque `estandar/catalogos.json` es uno de los cuatro
+ficheros que sirve y su descripción del libro de tesorería cambió. **El estándar no cambia de número**: no se
+añadió ni se quitó nada del esquema, solo se corrigió una frase que describía dos entradas donde hay una.
+
 ## [11.0.0] — 2026-10-11 · con `open-accounting` 3.0
 
 **Una sola entrada para tesorería, y la contrapartida la pone el ERP.** Con esto el contrato del dinero queda

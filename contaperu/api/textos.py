@@ -169,8 +169,16 @@ PARA_HERRAMIENTA: dict[str, str] = {
     descuadres se compensan salen cuadradas en el total y descuadradas cada una. Y `roles` va en plural:
     con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.
     """,
-    'revisar_tesoreria': """Revisa el dinero de un periodo antes de conciliarlo: los movimientos de las cuentas y
-    las constancias de los pagos.
+    'revisar_tesoreria': """Revisa el dinero de un periodo antes de conciliarlo: los movimientos de las cuentas
+    del contribuyente.
+
+    **Hay una sola entrada**, igual que `comprobantes` lo es de una compra o de una venta: venga de una línea de
+    extracto o de una constancia de pago, mándalo como un `movimiento`. No busques un bloque de constancias — no
+    existe. Lo que distingue una línea de extracto de un pago no es una etiqueta: es el `saldo`, que solo un
+    extracto trae, y el `origen`, que dice cómo se leyó (`manual`, `archivo`, `api`, `pdf_texto`, `vision`; los
+    dos últimos marcan lectura asistida y salen en `de_lectura_asistida` para que alguien los revise).
+    Y el número del papel va en `constancia`, aparte del que le da el banco, que es `referencia`: **los dos
+    existen y pueden ser distintos** —una detracción pagada desde un banco tiene su vóucher y su N° de operación—.
 
     **No asienta nada**, y es a propósito: el asiento de tesorería espera la norma para asentar el ITF —que no
     tiene código en el Catálogo 05, así que su línea no se puede nombrar todavía— y un archivo del sub-diario de
@@ -179,24 +187,43 @@ PARA_HERRAMIENTA: dict[str, str] = {
 
     **El cuadre de la cadena de saldos es la puerta.** Da igual de dónde salieron las filas —el export del banco,
     un Excel convertido, un modelo leyendo un PDF—: si la cadena no encadena, el parseo está mal y te digo en qué
-    línea. Eso es lo que permite que una IA participe sin que nadie tenga que creerle.
+    línea. Eso es lo que permite que una IA participe sin que nadie tenga que creerle, y por eso la `confianza` que
+    reporte un modelo no relaja ninguna comprobación.
 
-    El saldo inicial de cada cuenta está en la cabecera del extracto y lo pone quien lee el archivo
-    (`saldos_iniciales`). Si no lo mandas, lo deduzco del primer movimiento y la cadena se comprueba de la segunda
-    línea en adelante; te digo cuál fue cuál.
+    **Los saldos que declara el banco van en el documento**, en `extractos[]`: una cabecera por cuenta, con su
+    saldo anterior, su saldo actual y sus dos totales. Con eso el documento **se puede volver a comprobar** más
+    tarde sin tener el archivo original delante, y se miran dos cosas en vez de una: la cadena línea a línea y el
+    total contra lo que el banco dijo —una lectura puede pasar la primera y fallar el segundo, que es lo que pasa
+    cuando se pierde una línea al final del mes—. El argumento `saldos_iniciales` sigue sirviendo como segunda vía,
+    pero declarar el mismo saldo por las dos **para**: no hay regla que diga cuál gana. Si no mandas ninguno, lo
+    deduzco del primer movimiento y la cadena se comprueba de la segunda línea en adelante; te digo cuál fue cuál.
 
-    Para: un movimiento sin cuenta, sin fecha o con un sentido que no es `cargo` ni `abono`; una constancia sin
-    número o sin fecha; y unas referencias que reclamen más de lo que se pagó, que es una suma imposible.
+    **La contrapartida la pones tú**, en `imputaciones_de_movimientos`, por el `id_externo` de cada movimiento:
+    la 104 sale del maestro de cuentas y la otra cara se imputa, igual que la cuenta de un gasto llega en la
+    imputación de su comprobante. Lleva `cuenta_contable`, `centro_costo` y `contraparte_doc`; o un `reparto` de
+    partes cuando un cargo paga varias cosas; o `cuenta_propia`, que es **la única forma de declarar un traspaso
+    entre dos cuentas tuyas** —lo que la NIC 7 excluye de los flujos de efectivo, y que el motor no puede adivinar
+    porque una línea sola no sabe que es la mitad de un par—. Con ese bloque cada movimiento necesita su
+    `id_externo`.
 
-    Avisa y no para: una cadena que no cuadra (casi siempre una línea mal leída, no un error del banco), un
-    movimiento o una constancia que apunta a una cuenta que no declaraste, y **lo que ninguna referencia reclama**
-    de una constancia. Ese resto no lo cierro: un cargo lleva el ITF dentro, y qué es lo que sobra lo decide el
-    contador por la imputación.
+    Para: un movimiento sin cuenta, sin fecha o con un sentido que no es `cargo` ni `abono`; un `origen` que no es
+    de los cinco; unas referencias que reclamen más de lo que se pagó, que es una suma imposible; un reparto que no
+    suma el importe exacto —eso no es un dato que falte, es una decisión a medias—; una llave de imputación que no
+    sea de ningún movimiento; y dos cabeceras de la misma cuenta.
+
+    Avisa y no para, cada aviso con su `pedir_a`: una cadena que no cuadra (`EXTRACTO_NO_CUADRA`, casi siempre una
+    línea mal leída y no un error del banco); un total de la cabecera que no cuadra con las líneas
+    (`TOTAL_DECLARADO_NO_COINCIDE`); un movimiento **sin contrapartida** (`MOVIMIENTO_SIN_IMPUTAR`, que es el
+    `sin_cuenta` del dinero); un movimiento o un traspaso que apunta a una cuenta que no declaraste
+    (`CUENTA_NO_DECLARADA`, `CUENTA_PROPIA_NO_DECLARADA`); una moneda que no es la de su cuenta
+    (`MONEDA_DISTINTA_DE_LA_CUENTA`); y **lo que ninguna referencia reclama** de un movimiento (`sin_atribuir`).
+    Ese resto no lo cierro: un cargo lleva el ITF dentro, y qué es lo que sobra lo decide el contador por la
+    imputación.
     """,
     'validar_cuentas_bancarias': """Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.
 
     **Es un argumento, no una tabla**: el motor lo recibe, lo valida y no lo guarda. Sin cuentas declaradas no
-    cambia nada; con ellas, un movimiento o una constancia pueden apuntar a su cuenta por el `id`.
+    cambia nada; con ellas, un movimiento apunta a su cuenta por el `id`, y un traspaso a la otra por el mismo.
 
     Para: un CCI que no tenga sus 20 dígitos (se admite con espacios o con guiones, que es como lo imprime cada
     banco), una moneda que no sea PEN o USD, o dos cuentas con el mismo `id`.

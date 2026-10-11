@@ -35,7 +35,7 @@
   "codigos": {
    "venta": "El registro de ventas e ingresos: lo que emitió en el periodo",
    "compra": "El registro de compras: lo que el contribuyente adquirió en el periodo",
-   "tesoreria": "El movimiento del dinero: los extractos de las cuentas bancarias del contribuyente y las constancias de los pagos. Se llama `tesoreria` y no `banco` porque un pago de tributos o el reintegro de una caja chica no son del banco. Su destino es el Libro Diario, no el Libro Caja y Bancos: quien lleva el Diario 5.1 con sus campos de libre utilización se exime de ese libro electrónico"
+   "tesoreria": "El movimiento del dinero: los movimientos de las cuentas bancarias del contribuyente, vengan de una línea de extracto o de una constancia de pago —una sola entrada, `movimientos`, como `comprobantes` lo es de una compra o de una venta—. Se llama `tesoreria` y no `banco` porque un pago de tributos o el reintegro de una caja chica no son del banco. Su destino es el Libro Diario, no el Libro Caja y Bancos: quien lleva el Diario 5.1 con sus campos de libre utilización se exime de ese libro electrónico"
   }
  },
  "efectos_de_tesoreria": {

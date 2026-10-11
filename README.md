@@ -428,8 +428,8 @@ Dieciseis herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría
 `configuracion_por_defecto`, `drivers_disponibles`, `validar_comprobantes`, `validar_partida_doble`,
 `generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`,
 `buscar_cuenta_pcge`, `adaptar_pcge2026`, `validar_cuentas_bancarias` (el maestro de cuentas del contribuyente,
-con la 104 que declara cada una) y `revisar_tesoreria` (los movimientos de las cuentas y las constancias de los
-pagos, con el cuadre de la cadena de saldos; no asienta), todas anunciadas de solo lectura. Y trece recursos: el esquema del
+con la 104 que declara cada una) y `revisar_tesoreria` (los movimientos de las cuentas —una sola entrada,
+venga de un extracto o de una constancia—, con el cuadre de la cadena de saldos y el del saldo que declara el banco; no asienta), todas anunciadas de solo lectura. Y trece recursos: el esquema del
 estándar, los catálogos de SUNAT, el canal del SIRE, **el formato del SIRE columna a columna** —dónde cae cada
 campo del anexo, o por qué no cae—, **el del Libro Diario 5.1 del PLE** —de dónde sale cada uno de sus 21 campos,
 con los códigos de libro de SUNAT—, los catálogos del propio estándar, el catálogo del PCGE 2026, los drivers

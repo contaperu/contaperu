@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "11.0.0",
+  "version": "11.0.1",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -482,7 +482,7 @@
    "post": {
     "operationId": "validar_cuentas_bancarias",
     "summary": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.",
-    "description": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.\n\n**Es un argumento y no una tabla**: el motor lo recibe, lo valida y no lo guarda. El estado —qué cuentas tiene\nhoy la empresa— es del ERP, y lo que puede vivir aquí es su contrato. Sin cuentas declaradas no cambia nada.\n\nLo que comprueba: que el CCI tenga sus 20 dígitos (se admite con espacios o guiones, que es como lo imprime\ncada banco), que la moneda sea una de las dos que un extracto peruano trae, y que ningún `id` se repita —es la\nllave con la que un movimiento o una constancia apuntan a su cuenta—. Un fallo de esos **para**, porque seguir\ncon una cuenta que no se puede reconocer no lleva a ningún sitio.\n\nLo que **avisa y no para**: una cuenta sin cuenta contable. La 104 del PCGE es un dato de la empresa y el motor\nno la deriva ni cuando conoce el banco, así que lo que hace es decir cuál falta y a quién pedírsela.",
+    "description": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.\n\n**Es un argumento y no una tabla**: el motor lo recibe, lo valida y no lo guarda. El estado —qué cuentas tiene\nhoy la empresa— es del ERP, y lo que puede vivir aquí es su contrato. Sin cuentas declaradas no cambia nada.\n\nLo que comprueba: que el CCI tenga sus 20 dígitos (se admite con espacios o guiones, que es como lo imprime\ncada banco), que la moneda sea una de las dos que un extracto peruano trae, y que ningún `id` se repita —es la\nllave con la que un movimiento apunta a su cuenta, y la que enlaza un traspaso con la otra—. Un fallo de esos **para**, porque seguir\ncon una cuenta que no se puede reconocer no lleva a ningún sitio.\n\nLo que **avisa y no para**: una cuenta sin cuenta contable. La 104 del PCGE es un dato de la empresa y el motor\nno la deriva ni cuando conoce el banco, así que lo que hace es decir cuál falta y a quién pedírsela.",
     "requestBody": {
      "required": true,
      "content": {
@@ -525,8 +525,8 @@
   "/v1/tesoreria": {
    "post": {
     "operationId": "revisar_tesoreria",
-    "summary": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de los pagos.",
-    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de\n    los pagos.\n\n    **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para\n    asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las\n    cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace\n    es lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.\n\n    **El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las\n    filas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de\n    saldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin\n    que nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un\n    modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación\n    determinista al lado—.\n\n**Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la\n    cabecera de cada hoja: su saldo anterior, su saldo actual y sus dos totales. Con eso un documento guardado\n    **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. El argumento\n    `saldos_iniciales` se conserva como segunda vía, y **declarar el mismo saldo por las dos se rechaza**: no hay\n    regla que diga cuál gana.\n\n    **El saldo inicial se deriva si nadie lo declara**, y se dice cuál fue cuál. Sin él se deduce del primer\n    movimiento y la cadena se comprueba de la segunda línea en adelante. No es un consuelo: el caso real que\n    destapó el ITF rompía en la segunda fila del mes.\n\n    **Y son dos controles encima del mismo dato**, que es lo que los hace valer: la cadena de saldos corridos\n    comprueba cada línea contra la siguiente, y el saldo final declarado comprueba el total. Una lectura puede\n    pasar el primero y fallar el segundo —si se perdió una línea entera al final del mes, la cadena de las demás\n    encadena—, y es justo el caso que produce un lector de PDF. Hasta la 3.0 ese segundo control estaba escrito en\n    `tesoreria.cuadra` y **nadie le pasaba el argumento**, así que era inalcanzable por aquí.\n\nLo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus\n    `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se\n    reporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el\n    ITF dentro.\n\n    Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza\n    con su 104, y si no está en el maestro no hay nada que deducir.\n\n    **Y dice qué movimientos no tienen todavía su contrapartida** (3.0 del estándar), que es el `sin_cuenta` del\n    dinero: la 104 sale del maestro y la otra cara la pone el ERP en `imputaciones_de_movimientos`, igual que la\n    cuenta de un gasto llega en la imputación de su comprobante. Un reparto que no suma el importe **no se\n    reporta: para** — ese informe existe porque «qué es ese resto lo decide el contador por la imputación», y una\n    imputación a medias no es un dato que falte sino una decisión mal hecha.",
+    "summary": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.",
+    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.\n\n**Una sola entrada** (3.0 del estándar), como `comprobantes[]` lo es de una compra o de una venta: venga de una\nlínea de extracto o de una constancia de pago, al motor llega un `movimiento`, y lo que los distingue no es una\netiqueta sino el `saldo`, que solo un extracto trae. Lo que el banco declara en la cabecera de la hoja va en\n`extractos[]`, y la contrapartida que decide el ERP en `imputaciones_de_movimientos`.\n\n**No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para\nasentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las\ncuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace\nes lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.\n\n**El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las\nfilas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de\nsaldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin\nque nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un\nmodelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación\ndeterminista al lado—.\n\n**Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la\ncabecera de cada hoja: su saldo anterior, su saldo actual y sus dos totales. Con eso un documento guardado\n**se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. El argumento\n`saldos_iniciales` se conserva como segunda vía, y **declarar el mismo saldo por las dos se rechaza**: no hay\nregla que diga cuál gana.\n\n**El saldo inicial se deriva si nadie lo declara**, y se dice cuál fue cuál. Sin él se deduce del primer\nmovimiento y la cadena se comprueba de la segunda línea en adelante. No es un consuelo: el caso real que\ndestapó el ITF rompía en la segunda fila del mes.\n\n**Y son dos controles encima del mismo dato**, que es lo que los hace valer: la cadena de saldos corridos\ncomprueba cada línea contra la siguiente, y el saldo final declarado comprueba el total. Una lectura puede\npasar el primero y fallar el segundo —si se perdió una línea entera al final del mes, la cadena de las demás\nencadena—, y es justo el caso que produce un lector de PDF. Hasta la 3.0 ese segundo control estaba escrito en\n`tesoreria.cuadra` y **nadie le pasaba el argumento**, así que era inalcanzable por aquí.\n\nLo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus\n`referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se\nreporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el\nITF dentro.\n\nY lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza\ncon su 104, y si no está en el maestro no hay nada que deducir.\n\n**Y dice qué movimientos no tienen todavía su contrapartida** (3.0 del estándar), que es el `sin_cuenta` del\ndinero: la 104 sale del maestro y la otra cara la pone el ERP en `imputaciones_de_movimientos`, igual que la\ncuenta de un gasto llega en la imputación de su comprobante. Un reparto que no suma el importe **no se\nreporta: para** — ese informe existe porque «qué es ese resto lo decide el contador por la imputación», y una\nimputación a medias no es un dato que falte sino una decisión mal hecha.",
     "requestBody": {
      "required": true,
      "content": {
@@ -539,7 +539,7 @@
     },
     "responses": {
      "200": {
-      "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de los pagos.",
+      "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.",
       "content": {
        "application/json": {
         "schema": {
@@ -3387,13 +3387,12 @@
    },
    "tesoreria": {
     "title": "Tesorería revisada",
-    "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta, lo que ninguna referencia de una constancia reclama, y lo que llegó de una lectura asistida. No lleva asiento: eso es el hito D6.",
+    "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta y del saldo que declaró el banco, cuáles traen su contrapartida y cuáles no, lo que ninguna referencia reclama y lo que llegó de una lectura asistida. No lleva asiento: eso es el hito D6.",
     "type": "object",
     "required": [
      "libro",
      "movimientos",
      "repetidos",
-     "constancias",
      "cuadre",
      "sin_atribuir",
      "de_lectura_asistida",
@@ -3435,11 +3434,6 @@
      },
      "repetidos": {
       "description": "Cuántos se descartaron por ser una relectura. No se tiran en silencio: lo que quien integra necesita saber es cuántos fueron.",
-      "type": "integer",
-      "minimum": 0
-     },
-     "constancias": {
-      "description": "Cuántas constancias se leyeron.",
       "type": "integer",
       "minimum": 0
      },
@@ -3513,20 +3507,21 @@
       }
      },
      "sin_atribuir": {
-      "description": "Las constancias donde lo que las referencias reclaman no llega al importe. **No es un error y no se cierra**: un cargo lleva el ITF dentro, y qué es ese resto lo decide el contador por la imputación.",
+      "description": "Los movimientos donde lo que sus `referencias` reclaman no llega al importe. **No es un error y no se cierra**: un cargo lleva el ITF dentro, y qué es ese resto lo decide el contador por la imputación.",
       "type": "array",
       "items": {
        "type": "object",
        "required": [
-        "numero",
+        "cual",
         "importe",
         "repartido",
         "sin_atribuir"
        ],
        "additionalProperties": false,
        "properties": {
-        "numero": {
-         "type": "string"
+        "cual": {
+         "type": "string",
+         "description": "El número del papel que prueba el pago si lo tiene y, si no, el que le dio el banco."
         },
         "importe": {
          "type": "string"
@@ -3541,19 +3536,20 @@
       }
      },
      "de_lectura_asistida": {
-      "description": "Las constancias cuyo `origen` dice que las leyó un modelo (`pdf_texto`, `vision`). Se nombran para que se puedan revisar, y **su confianza no relaja ninguna comprobación**: el cuadre es el mismo.",
+      "description": "Los movimientos cuyo `origen` dice que los leyó un modelo (`pdf_texto`, `vision`). Se nombran para que se puedan revisar, y **su confianza no relaja ninguna comprobación**: el cuadre es el mismo.",
       "type": "array",
       "items": {
        "type": "object",
        "required": [
-        "numero",
+        "cual",
         "origen",
         "confianza"
        ],
        "additionalProperties": false,
        "properties": {
-        "numero": {
-         "type": "string"
+        "cual": {
+         "type": "string",
+         "description": "El número del papel que prueba el pago si lo tiene y, si no, el que le dio el banco."
         },
         "origen": {
          "type": "string"

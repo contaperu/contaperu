@@ -116,8 +116,12 @@ def cuadrar(lineas: list[dict]) -> dict:
 
 def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
                       saldos_iniciales: dict | None = None) -> dict:
-    """El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de
-    los pagos.
+    """El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.
+
+    **Una sola entrada** (3.0 del estándar), como `comprobantes[]` lo es de una compra o de una venta: venga de una
+    línea de extracto o de una constancia de pago, al motor llega un `movimiento`, y lo que los distingue no es una
+    etiqueta sino el `saldo`, que solo un extracto trae. Lo que el banco declara en la cabecera de la hoja va en
+    `extractos[]`, y la contrapartida que decide el ERP en `imputaciones_de_movimientos`.
 
     **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para
     asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las
@@ -131,7 +135,7 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
     modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación
     determinista al lado—.
 
-**Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la
+    **Los saldos declarados viajan en el documento** (3.0 del estándar), en el bloque `extractos[]`, que es la
     cabecera de cada hoja: su saldo anterior, su saldo actual y sus dos totales. Con eso un documento guardado
     **se puede volver a comprobar**, que es lo que la enmienda 0008 hizo para las imputaciones. El argumento
     `saldos_iniciales` se conserva como segunda vía, y **declarar el mismo saldo por las dos se rechaza**: no hay
@@ -147,7 +151,7 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
     encadena—, y es justo el caso que produce un lector de PDF. Hasta la 3.0 ese segundo control estaba escrito en
     `tesoreria.cuadra` y **nadie le pasaba el argumento**, así que era inalcanzable por aquí.
 
-Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus
+    Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus
     `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se
     reporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el
     ITF dentro.
@@ -293,7 +297,7 @@ def validar_cuentas_bancarias(cuentas: list[dict]) -> dict:
 
     Lo que comprueba: que el CCI tenga sus 20 dígitos (se admite con espacios o guiones, que es como lo imprime
     cada banco), que la moneda sea una de las dos que un extracto peruano trae, y que ningún `id` se repita —es la
-    llave con la que un movimiento o una constancia apuntan a su cuenta—. Un fallo de esos **para**, porque seguir
+    llave con la que un movimiento apunta a su cuenta, y la que enlaza un traspaso con la otra—. Un fallo de esos **para**, porque seguir
     con una cuenta que no se puede reconocer no lleva a ningún sitio.
 
     Lo que **avisa y no para**: una cuenta sin cuenta contable. La 104 del PCGE es un dato de la empresa y el motor

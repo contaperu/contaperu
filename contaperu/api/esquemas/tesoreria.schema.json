@@ -2,13 +2,12 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/tesoreria.schema.json",
  "title": "Tesorería revisada",
- "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta, lo que ninguna referencia de una constancia reclama, y lo que llegó de una lectura asistida. No lleva asiento: eso es el hito D6.",
+ "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta y del saldo que declaró el banco, cuáles traen su contrapartida y cuáles no, lo que ninguna referencia reclama y lo que llegó de una lectura asistida. No lleva asiento: eso es el hito D6.",
  "type": "object",
  "required": [
   "libro",
   "movimientos",
   "repetidos",
-  "constancias",
   "cuadre",
   "sin_atribuir",
   "de_lectura_asistida",
@@ -50,11 +49,6 @@
   },
   "repetidos": {
    "description": "Cuántos se descartaron por ser una relectura. No se tiran en silencio: lo que quien integra necesita saber es cuántos fueron.",
-   "type": "integer",
-   "minimum": 0
-  },
-  "constancias": {
-   "description": "Cuántas constancias se leyeron.",
    "type": "integer",
    "minimum": 0
   },
@@ -128,20 +122,21 @@
    }
   },
   "sin_atribuir": {
-   "description": "Las constancias donde lo que las referencias reclaman no llega al importe. **No es un error y no se cierra**: un cargo lleva el ITF dentro, y qué es ese resto lo decide el contador por la imputación.",
+   "description": "Los movimientos donde lo que sus `referencias` reclaman no llega al importe. **No es un error y no se cierra**: un cargo lleva el ITF dentro, y qué es ese resto lo decide el contador por la imputación.",
    "type": "array",
    "items": {
     "type": "object",
     "required": [
-     "numero",
+     "cual",
      "importe",
      "repartido",
      "sin_atribuir"
     ],
     "additionalProperties": false,
     "properties": {
-     "numero": {
-      "type": "string"
+     "cual": {
+      "type": "string",
+      "description": "El número del papel que prueba el pago si lo tiene y, si no, el que le dio el banco."
      },
      "importe": {
       "type": "string"
@@ -156,19 +151,20 @@
    }
   },
   "de_lectura_asistida": {
-   "description": "Las constancias cuyo `origen` dice que las leyó un modelo (`pdf_texto`, `vision`). Se nombran para que se puedan revisar, y **su confianza no relaja ninguna comprobación**: el cuadre es el mismo.",
+   "description": "Los movimientos cuyo `origen` dice que los leyó un modelo (`pdf_texto`, `vision`). Se nombran para que se puedan revisar, y **su confianza no relaja ninguna comprobación**: el cuadre es el mismo.",
    "type": "array",
    "items": {
     "type": "object",
     "required": [
-     "numero",
+     "cual",
      "origen",
      "confianza"
     ],
     "additionalProperties": false,
     "properties": {
-     "numero": {
-      "type": "string"
+     "cual": {
+      "type": "string",
+      "description": "El número del papel que prueba el pago si lo tiene y, si no, el que le dio el banco."
      },
      "origen": {
       "type": "string"

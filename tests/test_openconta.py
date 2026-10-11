@@ -123,6 +123,58 @@ def test_las_demas_respuestas_reales_validan():
     _validar("problema", api.problema(api.ErroresBloqueantes([{"indice": 0}])))
 
 
+def test_la_tesoreria_real_valida_con_cada_informe_lleno():
+    """Faltaba, y por eso el contrato de `/v1/tesoreria` envejeció sin que nada se pusiera rojo.
+
+    Hasta la 11.0.1 esta operación era la única cuya respuesta no se validaba contra su esquema, y el esquema se
+    había quedado en la 9.1: exigía una clave `constancias` que la 3.0 del estándar quitó —así que **toda**
+    respuesta real fallaba contra el contrato que el propio motor publica— y nombraba por `numero` lo que el
+    motor devuelve como `cual`. Lo que lo delató fue instalar la versión publicada y validar a mano.
+
+    **Los seis informes se exigen llenos**, y eso es la mitad del test: un array vacío valida contra cualquier
+    esquema de item, así que un guardián que no mire dentro es un guardián que no puede fallar — la misma trampa
+    que tenía el caso de conformidad de las cuatro clases de referencia."""
+    cuentas = [{"id": "bbva-soles", "banco": "BBVA", "cci": "01199900000000000100", "moneda": "PEN",
+                "cuenta_contable": "1041100"},
+               {"id": "bbva-dolares", "banco": "BBVA", "cci": "00999900000000000200", "moneda": "USD",
+                "cuenta_contable": "1041200"}]
+    documento = {
+        "open_accounting": api.OPEN_ACCOUNTING,
+        "libro": {"ruc": "20601234567", "periodo": "202608", "tipo": "tesoreria"},
+        "extractos": [{"cuenta": "bbva-soles", "desde": "2026-08-01", "hasta": "2026-08-31",
+                       "saldo_inicial": "1000.00", "saldo_final": "1099.80",
+                       "total_cargos": "500.00", "total_abonos": "600.00"}],
+        "movimientos": [
+            {"id_externo": "m1", "cuenta": "bbva-soles", "fecha": "2026-08-03", "importe": "500.00",
+             "sentido": "abono", "moneda": "PEN", "referencia": "OP-1", "origen": "archivo", "saldo": "1500.00"},
+            # Lo leyó un modelo y sus referencias no reclaman todo: llena `de_lectura_asistida` y `sin_atribuir`.
+            {"id_externo": "m2", "cuenta": "bbva-soles", "fecha": "2026-08-10", "importe": "200.00",
+             "sentido": "cargo", "moneda": "PEN", "referencia": "OP-2", "constancia": "00012345678",
+             "itf": "0.20", "origen": "pdf_texto", "confianza": "0.92", "saldo": "1299.80",
+             "referencias": [{"clase": "libre", "datos": {"texto": "caja chica"}, "importe": "150.00"}]},
+            {"id_externo": "m3", "cuenta": "bbva-soles", "fecha": "2026-08-20", "importe": "300.00",
+             "sentido": "cargo", "moneda": "PEN", "referencia": "OP-3", "origen": "api", "saldo": "999.80"},
+            # Sin imputar: llena `sin_imputar` y el aviso que es el `sin_cuenta` del dinero.
+            {"id_externo": "m4", "cuenta": "bbva-soles", "fecha": "2026-08-28", "importe": "100.00",
+             "sentido": "abono", "moneda": "PEN", "referencia": "OP-4", "origen": "manual", "saldo": "1099.80"},
+        ],
+        "imputaciones_de_movimientos": {
+            "m1": {"cuenta_contable": "1212100", "contraparte_doc": "20607777773"},
+            "m2": {"cuenta_contable": "6391000", "centro_costo": "ADMIN"},
+            "m3": {"cuenta_propia": "bbva-dolares"},
+        },
+    }
+    respuesta = api.revisar_tesoreria(documento, cuentas)
+    _validar("tesoreria", respuesta)
+    _validar("cuentas_bancarias", api.validar_cuentas_bancarias(cuentas))
+
+    assert respuesta["cuadre"][0]["cuadra"], "la cadena y el total declarado, los dos"
+    for informe in ("cuadre", "sin_atribuir", "de_lectura_asistida", "avisos", "sin_imputar",
+                    "transferencias_declaradas"):
+        assert respuesta[informe], f"{informe} vacío no ejercita su esquema de item"
+    assert "constancias" not in respuesta, "la entrada de tesorería es una sola desde la 3.0"
+
+
 def test_los_documentos_de_ejemplo_validan_como_cuerpos():
     documento = dict(_golden(), open_accounting=api.OPEN_ACCOUNTING)     # un cuerpo lleva el documento completo
     _validar("exportar_entrada", {"documento": documento, "driver": "concar", "configuracion": CONFIG,
