@@ -28,7 +28,7 @@
      },
      "moneda": {
       "type": "string",
-      "enum": ["PEN", "USD"]
+      "enum": ["BRL", "CLP", "CNY", "COP", "EUR", "GBP", "JPY", "MXN", "PEN", "USD"]
      },
      "cuenta_contable": {
       "type": "string",

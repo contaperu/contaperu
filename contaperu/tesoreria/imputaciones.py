@@ -32,11 +32,23 @@ from dataclasses import dataclass, field, fields
 
 from ..errores import ErrorContaperu
 from ..modelo import CERO, monto as _monto
-from .movimientos import TRANSFERENCIA
+from .movimientos import TRANSFERENCIA, Movimiento
 
 
 class ImputacionInvalida(ErrorContaperu, ValueError):
     """Una imputación de movimiento que no se puede aplicar. Dice cuál y por qué."""
+
+
+def _campo(cosa, nombre: str):
+    """Un campo de algo que puede llegar como objeto o como diccionario.
+
+    **Las dos formas circulan**: dentro del motor viajan objetos y de fuera llegan dicts de JSON, que es lo que
+    manda un ERP. Es el mismo trato que dan `cuadre.cuadra`, `cuentas.sin_cuenta_declarada`, `contable.resumen` y
+    `drivers.kit.rol`; este módulo lo tenía resuelto en `cuentas.py` y no aquí, y de ese hueco salieron los tres
+    defectos que la revisión de consistencia del 11-oct-2026 encontró."""
+    if isinstance(cosa, dict):
+        return cosa.get(nombre)
+    return getattr(cosa, nombre, None)
 
 
 @dataclass
@@ -182,7 +194,11 @@ def efecto_de(movimiento, imputacion=None) -> str:
     llama a esto para excluirlos y no contar dos veces el mismo dinero."""
     if imputacion is not None and ImputacionDeMovimiento.de(imputacion).es_traspaso:
         return TRANSFERENCIA
-    return movimiento.efecto
+    # **El movimiento se normaliza y no se lee a pelo.** `efecto` es una propiedad DERIVADA del sentido, así que
+    # aquí no basta con leer un campo: hace falta el objeto. Un dict daba `AttributeError` —sin `clave`, o sea
+    # fuera del contrato de errores que la puerta HTTP traduce—, mientras su imputación sí se normalizaba dos
+    # líneas más arriba. La misma clase de argumento no puede tener dos tratos en la misma función.
+    return (movimiento if isinstance(movimiento, Movimiento) else Movimiento.de_dict(dict(movimiento))).efecto
 
 
 def glosa_de_movimiento(movimiento, imputacion=None, parte=None) -> str:
@@ -202,10 +218,10 @@ def glosa_de_movimiento(movimiento, imputacion=None, parte=None) -> str:
     un libro no admite una glosa en blanco. Lo encontró John integrando (11-oct-2026), y era un hueco del
     contrato: la 11.0.0 dijo que un ERP ya podía decir **todo** lo que el motor necesitaría para asentar, y no
     podía decir esto — que lo piden los cuatro destinos."""
-    de_la_parte = str(getattr(parte, "glosa", "") or "").strip()
-    de_la_imputacion = str(getattr(imputacion, "glosa", "") or "").strip()
-    del_banco = str(getattr(movimiento, "descripcion", "") or "").strip()
-    del_tercero = str(getattr(movimiento, "contraparte_nombre", "") or "").strip()
+    de_la_parte = str(_campo(parte, "glosa") or "").strip()
+    de_la_imputacion = str(_campo(imputacion, "glosa") or "").strip()
+    del_banco = str(_campo(movimiento, "descripcion") or "").strip()
+    del_tercero = str(_campo(movimiento, "contraparte_nombre") or "").strip()
     return (de_la_parte or de_la_imputacion or del_banco or del_tercero).upper()
 
 
@@ -223,13 +239,15 @@ def leer(imputaciones, movimientos) -> dict:
     if not isinstance(imputaciones, dict):
         raise ImputacionInvalida("`imputaciones_de_movimientos` es un objeto: {id_externo: {cuenta_contable, …}}")
     leidas = {str(k): ImputacionDeMovimiento.de(v) for k, v in imputaciones.items()}
-    ids = {str(getattr(m, "id_externo", "") or "").strip() for m in movimientos or ()}
+    ids = {str(_campo(m, "id_externo") or "").strip() for m in movimientos or ()}
     huerfanas = sorted(set(leidas) - (ids - {""}))
     if huerfanas:
         raise ImputacionInvalida(
             f"La imputación habla de movimientos que no están (id_externo): {', '.join(huerfanas)}.")
     for m in movimientos or ():
-        suya = leidas.get(str(getattr(m, "id_externo", "") or "").strip())
+        suya = leidas.get(str(_campo(m, "id_externo") or "").strip())
         if suya is not None:
-            suya.exigir_que_sume(m.importe, cual=(m.constancia or m.referencia or m.id_externo))
+            suya.exigir_que_sume(_monto(_campo(m, "importe")),
+                                 cual=(_campo(m, "constancia") or _campo(m, "referencia")
+                                       or _campo(m, "id_externo") or ""))
     return leidas

@@ -213,10 +213,11 @@ PARA_HERRAMIENTA: dict[str, str] = {
     suma el importe exacto —eso no es un dato que falte, es una decisión a medias—; una llave de imputación que no
     sea de ningún movimiento; y dos cabeceras de la misma cuenta.
 
-    Avisa y no para, cada aviso con su `pedir_a`: una cadena que no cuadra (`EXTRACTO_NO_CUADRA`, casi siempre una
-    línea mal leída y no un error del banco); un total de la cabecera que no cuadra con las líneas
-    (`TOTAL_DECLARADO_NO_COINCIDE`); un movimiento **sin contrapartida** (`MOVIMIENTO_SIN_IMPUTAR`, que es el
-    `sin_cuenta` del dinero); un movimiento o un traspaso que apunta a una cuenta que no declaraste
+    Avisa y no para, cada aviso con su `pedir_a`: un total de la cabecera que no cuadra con las líneas
+    (`TOTAL_DECLARADO_NO_COINCIDE`); el saldo final que declaró el banco contra la aritmética de esos mismos
+    números (`SALDO_FINAL_DECLARADO_NO_COINCIDE`, casi siempre una línea entera perdida y no un error del banco);
+    que no declararas ninguna cuenta (`SIN_CUENTAS_DECLARADAS`); un movimiento **sin contrapartida**
+    (`MOVIMIENTO_SIN_IMPUTAR`, que es el `sin_cuenta` del dinero); un movimiento o un traspaso que apunta a una cuenta que no declaraste
     (`CUENTA_NO_DECLARADA`, `CUENTA_PROPIA_NO_DECLARADA`); una moneda que no es la de su cuenta
     (`MONEDA_DISTINTA_DE_LA_CUENTA`); y **lo que ninguna referencia reclama** de un movimiento (`sin_atribuir`).
     Ese resto no lo cierro: un cargo lleva el ITF dentro, y qué es lo que sobra lo decide el contador por la
@@ -228,7 +229,8 @@ PARA_HERRAMIENTA: dict[str, str] = {
     cambia nada; con ellas, un movimiento apunta a su cuenta por el `id`, y un traspaso a la otra por el mismo.
 
     Para: un CCI que no tenga sus 20 dígitos (se admite con espacios o con guiones, que es como lo imprime cada
-    banco), una moneda que no sea PEN o USD, o dos cuentas con el mismo `id`.
+    banco), una moneda que no esté en el catálogo —las diez del Anexo 1 de la RS 112-2021—, o dos cuentas con el
+    mismo `id`.
 
     Avisa y no para: una cuenta sin su cuenta contable. **La 104 del PCGE la elige el contribuyente, cuenta por
     cuenta** —la de soles no es la de dólares—, y el motor no la supone ni cuando conoce el banco. Si falta, lo

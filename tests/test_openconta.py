@@ -11,7 +11,7 @@ import pytest
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import ValidationError
 
-from contaperu import api
+from contaperu import api, tesoreria
 from contaperu.api import openconta, tabla
 from util import GOLDEN, XML, imputando
 
@@ -206,8 +206,17 @@ def test_el_maestro_de_cuentas_esta_tipado_en_la_entrada_y_no_solo_en_la_salida(
     cuenta = contrato["components"]["schemas"]["cuenta_bancaria"]
     assert cuenta["required"] == ["id"] and cuenta["additionalProperties"] is False
     assert cuenta["properties"]["cci"]["pattern"] == "^$|^[0-9]{20}$"
-    assert cuenta["properties"]["moneda"]["enum"] == ["PEN", "USD"]
+    # **Contra lo que el motor acepta, no contra una lista escrita aquí.** Esta línea decía `["PEN", "USD"]` y
+    # con eso GARANTIZABA que el contrato siguiera mal: la 12.0.0 abrió `tesoreria.MONEDAS` a las diez del
+    # Anexo 1 de la RS 112-2021 y el esquema publicado se quedó en dos, así que un ERP que validara contra el
+    # contrato rechazaba una cuenta en euros que el motor acepta. Es **el mismo defecto que la 11.0.1 acababa de
+    # arreglar** en `tesoreria.schema.json`, reintroducido en sentido inverso una versión después. Un literal
+    # aquí no lo habría cazado nunca, porque el literal ERA el defecto.
+    assert cuenta["properties"]["moneda"]["enum"] == list(tesoreria.MONEDAS)
     # Y lo que esto caza de verdad: un CCI de diecinueve dígitos deja de validar contra el contrato.
     v = jsonschema.Draft202012Validator(cuenta)
     assert list(v.iter_errors({"id": "bbva-soles", "cci": "0" * 19}))
     assert not list(v.iter_errors({"id": "bbva-soles", "cci": "0" * 20, "moneda": "PEN"}))
+    # Y una del catálogo que no es ninguna de las dos de antes: si el contrato vuelve a estrecharse, cae aquí.
+    assert not list(v.iter_errors({"id": "bbva-euros", "moneda": "EUR"})), (
+        "el motor acepta las diez del catálogo; el contrato publicado tiene que aceptar las mismas")

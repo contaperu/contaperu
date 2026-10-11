@@ -283,7 +283,8 @@ def validar_cuentas_bancarias(cuentas: list[dict]) -> dict:
     hoy la empresa— es del ERP, y lo que puede vivir aquí es su contrato. Sin cuentas declaradas no cambia nada.
 
     Lo que comprueba: que el CCI tenga sus 20 dígitos (se admite con espacios o guiones, que es como lo imprime
-    cada banco), que la moneda sea una de las dos que un extracto peruano trae, y que ningún `id` se repita —es la
+    cada banco), que la moneda esté en el catálogo —las diez del Anexo 1 de la RS 112-2021, no solo las dos que
+    trae un extracto peruano corriente—, y que ningún `id` se repita —es la
     llave con la que un movimiento apunta a su cuenta, y la que enlaza un traspaso con la otra—. Un fallo de esos **para**, porque seguir
     con una cuenta que no se puede reconocer no lleva a ningún sitio.
 

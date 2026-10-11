@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "12.0.0",
+  "version": "12.0.1",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -482,7 +482,7 @@
    "post": {
     "operationId": "validar_cuentas_bancarias",
     "summary": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.",
-    "description": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.\n\n**Es un argumento y no una tabla**: el motor lo recibe, lo valida y no lo guarda. El estado —qué cuentas tiene\nhoy la empresa— es del ERP, y lo que puede vivir aquí es su contrato. Sin cuentas declaradas no cambia nada.\n\nLo que comprueba: que el CCI tenga sus 20 dígitos (se admite con espacios o guiones, que es como lo imprime\ncada banco), que la moneda sea una de las dos que un extracto peruano trae, y que ningún `id` se repita —es la\nllave con la que un movimiento apunta a su cuenta, y la que enlaza un traspaso con la otra—. Un fallo de esos **para**, porque seguir\ncon una cuenta que no se puede reconocer no lleva a ningún sitio.\n\nLo que **avisa y no para**: una cuenta sin cuenta contable. La 104 del PCGE es un dato de la empresa y el motor\nno la deriva ni cuando conoce el banco, así que lo que hace es decir cuál falta y a quién pedírsela.",
+    "description": "El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.\n\n**Es un argumento y no una tabla**: el motor lo recibe, lo valida y no lo guarda. El estado —qué cuentas tiene\nhoy la empresa— es del ERP, y lo que puede vivir aquí es su contrato. Sin cuentas declaradas no cambia nada.\n\nLo que comprueba: que el CCI tenga sus 20 dígitos (se admite con espacios o guiones, que es como lo imprime\ncada banco), que la moneda esté en el catálogo —las diez del Anexo 1 de la RS 112-2021, no solo las dos que\ntrae un extracto peruano corriente—, y que ningún `id` se repita —es la\nllave con la que un movimiento apunta a su cuenta, y la que enlaza un traspaso con la otra—. Un fallo de esos **para**, porque seguir\ncon una cuenta que no se puede reconocer no lleva a ningún sitio.\n\nLo que **avisa y no para**: una cuenta sin cuenta contable. La 104 del PCGE es un dato de la empresa y el motor\nno la deriva ni cuando conoce el banco, así que lo que hace es decir cuál falta y a quién pedírsela.",
     "requestBody": {
      "required": true,
      "content": {
@@ -3283,10 +3283,18 @@
      "moneda": {
       "type": "string",
       "enum": [
+       "BRL",
+       "CLP",
+       "CNY",
+       "COP",
+       "EUR",
+       "GBP",
+       "JPY",
+       "MXN",
        "PEN",
        "USD"
       ],
-      "description": "La moneda de la cuenta. **Aquí sí hay enum, y es el único sitio donde lo hay**: quien enumera monedas es el maestro, no cada movimiento — un movimiento solo tiene que tener forma ISO 4217. Una tercera moneda se declara primero como cuenta."
+      "description": "La moneda de la cuenta. **Aquí sí hay enum, y es el único sitio donde lo hay**: quien enumera monedas es el maestro, no cada movimiento — un movimiento solo tiene que tener forma ISO 4217. Son las diez del Anexo 1 de la RS 112-2021, las mismas que publica el catálogo del motor: añadir una es añadirla ahí. Hasta la 12.0.0 esta lista decía solo PEN y USD, más estrecha que el motor, así que un ERP que validara contra este contrato rechazaba una cuenta en euros que el motor acepta."
      },
      "cuenta_contable": {
       "type": "string",
@@ -3328,6 +3336,14 @@
         "moneda": {
          "type": "string",
          "enum": [
+          "BRL",
+          "CLP",
+          "CNY",
+          "COP",
+          "EUR",
+          "GBP",
+          "JPY",
+          "MXN",
           "PEN",
           "USD"
          ]

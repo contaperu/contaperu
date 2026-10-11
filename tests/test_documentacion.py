@@ -355,3 +355,36 @@ def test_ninguna_promesa_de_version_queda_atras(doc, frase):
     assert esperada in contenido, (
         f"{doc} no dice {esperada!r}. El paquete está en la {mayor}.x, así que lo que promete llega hasta la "
         f"{mayor + 1}.0: mueve la frase, o esta tabla si la frase cambió de forma.")
+
+
+def test_la_superficie_mcp_no_anuncia_un_codigo_que_nadie_emite():
+    """Lo que un agente lee por el MCP para decidir qué hacer tiene que nombrar códigos que lleguen de verdad.
+
+    **Nació de un fallo del 11-oct-2026, al revisar las consistencias de tesorería.** La 12.0.0 renombró
+    `EXTRACTO_NO_CUADRA` a `SALDO_FINAL_DECLARADO_NO_COINCIDE` —y le cambió el significado: ya no es la cadena
+    línea a línea sino el total declarado contra la aritmética—, pero la descripción de `revisar_tesoreria`
+    siguió anunciando el viejo y **sin mencionar el nuevo**. Un agente iba a esperar un código que nunca llega y
+    no conocía el que sí.
+
+    Nada lo cazó porque **nada contrastaba los códigos que el código emite con los que la documentación
+    publica**, y el snapshot del MCP congelaba el texto caducado — o sea que el único guardián que lo tocaba
+    garantizaba que siguiera igual.
+
+    Mira en un solo sentido a propósito: un código citado tiene que emitirse. Al revés no, porque una
+    descripción no está obligada a enumerar los suyos —la de un driver nombra dos de sus doce faltas— y exigirlo
+    convertiría cada aviso nuevo en una línea roja sin defecto detrás.
+    """
+    citados = set(re.findall(r"`([A-Z][A-Z0-9_]{3,})`", (RAIZ / "contaperu" / "api" / "textos.py")
+                             .read_text(encoding="utf-8")))
+    emitidos: set[str] = set()
+    for py in (RAIZ / "contaperu").rglob("*.py"):
+        if py.name == "textos.py":
+            continue
+        fuente = py.read_text(encoding="utf-8")
+        emitidos |= set(re.findall(r"\"([A-Z][A-Z0-9_]{3,})\"", fuente))
+        emitidos |= set(re.findall(r"'([A-Z][A-Z0-9_]{3,})'", fuente))
+
+    fantasmas = sorted(citados - emitidos)
+    assert not fantasmas, (
+        f"la superficie MCP anuncia códigos que el motor no emite: {', '.join(fantasmas)}. O se emiten, o la "
+        f"descripción deja de nombrarlos — un agente los está esperando.")

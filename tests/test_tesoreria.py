@@ -925,6 +925,59 @@ def test_la_glosa_recorre_su_cadena_de_respaldo_entera():
     assert len(t.glosa_de_movimiento(m, larga)) == 200
 
 
+def test_la_glosa_y_el_efecto_leen_un_diccionario_igual_que_un_objeto():
+    """**Las dos formas circulan, y aquí no circulaban.** Un ERP manda diccionarios de JSON; dentro del motor
+    viajan objetos. `cuadre.cuadra`, `cuentas.sin_cuenta_declarada` y `extractos.por_cuenta` ya aceptaban las
+    dos, y estas tres funciones **no** — leían con `getattr`, que sobre un dict no encuentra nada y devuelve el
+    valor por defecto sin levantar nada.
+
+    Lo que eso producía era lo contrario exacto de para lo que existe la glosa (revisión de consistencia que
+    pidió John, 11-oct-2026): con una imputación en forma de dict, **la glosa que el contador decidió se perdía
+    y salía al libro el texto crudo del banco** — literalmente el «TRANSFERENCIA A CUENTAS DE TERCEROS» que la
+    enmienda 0029 existe para evitar—, y con un movimiento en forma de dict salía **vacío**, rompiendo la
+    promesa de que ninguna línea sale sin glosa. En silencio las dos veces.
+
+    Lo que lo mantuvo vivo: los casos de arriba construyen objetos en todas sus ramas. Por eso éste no los
+    construye en ninguna.
+    """
+    m = {"cuenta": "bbva-soles", "fecha": "2026-03-14", "importe": "12282.60", "sentido": "cargo",
+         "descripcion": "Transferencia a cuentas de terceros", "contraparte_nombre": "Proveedor SAC"}
+
+    assert t.glosa_de_movimiento(m, {"glosa": "Pago fact F001-123"}) == "PAGO FACT F001-123", (
+        "la decisión del contador manda sobre el texto del banco, venga como venga")
+    assert t.glosa_de_movimiento(m) == "TRANSFERENCIA A CUENTAS DE TERCEROS", "y el respaldo sigue siendo el banco"
+    assert t.glosa_de_movimiento(m, {"glosa": "De la imputación"},
+                                 {"glosa": "De la parte", "importe": "1.00", "cuenta_contable": "6312"}) ==         "DE LA PARTE"
+
+    # `efecto` es una propiedad DERIVADA, así que aquí no basta leer un campo: el movimiento se normaliza. Antes
+    # daba `AttributeError` —sin `clave`, o sea fuera del contrato de errores— mientras su imputación sí se
+    # normalizaba dos líneas más arriba, en la misma función.
+    assert t.efecto_de(m) == "salida"
+    assert t.efecto_de(m, {"cuenta_propia": "bbva-dolares"}) == "transferencia"
+
+
+def test_la_imputacion_encuentra_un_movimiento_que_llega_como_diccionario():
+    """El tercero de la misma familia: `leer` buscaba el `id_externo` con `getattr`, así que con movimientos en
+    forma de dict **no encontraba ninguno** y rechazaba las llaves con un mensaje que decía lo contrario de lo
+    que pasaba: «habla de movimientos que no están», y estaban.
+
+    Un diagnóstico que acusa en falso es peor que uno que calla: manda a buscar el error donde no está."""
+    movimientos = [{"cuenta": "bbva-soles", "fecha": "2026-03-14", "importe": "500.00", "sentido": "cargo",
+                    "id_externo": "mov-1"}]
+    leidas = t.leer_imputaciones({"mov-1": {"cuenta_contable": "6312"}}, movimientos)
+    assert leidas["mov-1"].cuenta_contable == "6312"
+
+    # Y la puerta sigue cerrada para lo que de verdad no está: una llave mal escrita deja ese movimiento sin su
+    # cuenta y sin aviso, que es la clase de error que no se ve hasta el cierre.
+    with pytest.raises(t.ImputacionInvalida, match="mov-2"):
+        t.leer_imputaciones({"mov-2": {"cuenta_contable": "6312"}}, movimientos)
+
+    # El reparto se sigue exigiendo exacto aunque el movimiento llegue como dict: su importe también se leía
+    # con `getattr`, así que el tope que esto defiende viajaba en `None`.
+    with pytest.raises(t.ImputacionInvalida, match="tiene que ser exacto"):
+        t.leer_imputaciones({"mov-1": {"reparto": [{"importe": "499.00", "cuenta_contable": "6312"}]}}, movimientos)
+
+
 def test_un_reparto_lleva_una_glosa_por_parte():
     """**El argumento que decide dónde vive la glosa.** Un cargo que paga tres facturas se reparte en tres
     partes, y cada una va a su cuenta con su propio texto: eso es la «Glosa Detalle» de CONCAR, mientras la de

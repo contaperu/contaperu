@@ -27,8 +27,8 @@
   },
   "moneda": {
    "type": "string",
-   "enum": ["PEN", "USD"],
-   "description": "La moneda de la cuenta. **Aquí sí hay enum, y es el único sitio donde lo hay**: quien enumera monedas es el maestro, no cada movimiento — un movimiento solo tiene que tener forma ISO 4217. Una tercera moneda se declara primero como cuenta."
+   "enum": ["BRL", "CLP", "CNY", "COP", "EUR", "GBP", "JPY", "MXN", "PEN", "USD"],
+   "description": "La moneda de la cuenta. **Aquí sí hay enum, y es el único sitio donde lo hay**: quien enumera monedas es el maestro, no cada movimiento — un movimiento solo tiene que tener forma ISO 4217. Son las diez del Anexo 1 de la RS 112-2021, las mismas que publica el catálogo del motor: añadir una es añadirla ahí. Hasta la 12.0.0 esta lista decía solo PEN y USD, más estrecha que el motor, así que un ERP que validara contra este contrato rechazaba una cuenta en euros que el motor acepta."
   },
   "cuenta_contable": {
    "type": "string",

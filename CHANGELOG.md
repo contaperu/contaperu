@@ -4,6 +4,54 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.0.1] — 2026-10-11
+
+**Tres funciones leían con `getattr` lo que puede llegar como diccionario, y la peor fallaba hacia el
+resultado exacto que su enmienda existe para evitar.** Sale de la revisión de consistencias que pidió John el
+11-oct-2026, y de las siete cosas que miró, cuatro salieron limpias: el vocabulario frente al esquema (siete
+constantes, valor a valor), las seis excepciones (todas se lanzan, todas con su `clave`), y la coherencia con
+`modelo`, `catalogos` y `tributos` — ni un catálogo duplicado, ni una normalización reimplementada.
+
+**Ninguna salida se mueve** y el estándar no cambia: sigue en 3.1.
+
+### Corregido
+
+- **`glosa_de_movimiento` descartaba en silencio la glosa de una imputación en forma de diccionario**, y
+  devolvía en su lugar el texto crudo del banco — literalmente el «TRANSFERENCIA A CUENTAS DE TERCEROS» que la
+  [enmienda 0029](estandar/enmiendas/0029-la-glosa-de-un-movimiento.md) existe para evitar—. Con el movimiento
+  en forma de diccionario devolvía cadena vacía, rompiendo su promesa de que **ninguna línea sale sin glosa**.
+  Las dos veces sin levantar nada. Y la incoherencia estaba en el mismo archivo: `efecto_de`, veinte líneas más
+  abajo, **sí** normalizaba su imputación. La misma clase de argumento no puede tener dos tratos en la misma
+  función.
+- **`efecto_de` levantaba `AttributeError` con un movimiento en forma de diccionario** — sin `clave`, o sea
+  fuera del contrato de errores que la puerta HTTP traduce. Ahora lo normaliza, que es lo que hace falta:
+  `efecto` es una propiedad derivada y no un campo que se lea.
+- **`leer_imputaciones` rechazaba movimientos en forma de diccionario con un mensaje falso**: «habla de
+  movimientos que no están», y estaban. Un diagnóstico que acusa en falso es peor que uno que calla, porque
+  manda a buscar el error donde no está. Su `importe` también se leía así, de modo que el tope que `exigir_que_sume`
+  defiende viajaba en `None`.
+- **El contrato publicado del maestro de cuentas seguía en `PEN|USD`** mientras la 12.0.0 abrió
+  `tesoreria.MONEDAS` a las diez del Anexo 1 de la RS 112-2021. Un ERP que validara contra el contrato rechazaba
+  una cuenta en euros que el motor acepta. **Es el mismo defecto que la 11.0.1 acababa de arreglar** en
+  `tesoreria.schema.json`, reintroducido en sentido inverso una versión después — y lo sostenía un test que
+  afirmaba el valor equivocado, así que el único guardián que lo tocaba garantizaba que siguiera mal. Ahora el
+  test compara contra `tesoreria.MONEDAS`: un literal ahí no lo habría cazado nunca, porque el literal **era** el
+  defecto.
+- **La superficie MCP anunciaba `EXTRACTO_NO_CUADRA`**, que esta misma 12.0 había renombrado a
+  `SALDO_FINAL_DECLARADO_NO_COINCIDE` cambiándole además el significado, y **no mencionaba el nuevo**: un agente
+  esperaba un código que no llega y no conocía el que sí. Las descripciones de la moneda seguían diciendo «PEN o
+  USD».
+
+### Añadido
+
+- **Un guardián que contrasta los códigos que el motor emite con los que su superficie MCP publica**
+  (`test_la_superficie_mcp_no_anuncia_un_codigo_que_nadie_emite`). Es lo que faltaba de verdad: nada comparaba
+  las dos listas, y el snapshot del MCP **congelaba** el texto caducado, de modo que el único test que lo tocaba
+  garantizaba que no cambiara. Mira en un solo sentido a propósito — un código citado tiene que emitirse, pero
+  una descripción no está obligada a enumerar los suyos—.
+- **Los tres casos de entrada en forma de diccionario** que no existían, y por los que los tres defectos de
+  arriba estaban vivos: la batería construía objetos en todas sus ramas.
+
 ## [12.0.0] — 2026-10-11 · con `open-accounting` 3.1
 
 **El motor juzga lo que recibe y no opina sobre cómo se leyó.** Es la regla que ordena esta versión, y sale de
