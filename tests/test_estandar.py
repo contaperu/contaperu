@@ -15,6 +15,7 @@ from jsonschema import Draft202012Validator
 
 from contaperu import OPEN_ACCOUNTING
 from contaperu.modelo import Comprobante, Libro
+from contaperu.tesoreria import Constancia, Movimiento, Referencia
 
 from util import GOLDEN
 
@@ -47,9 +48,18 @@ def test_el_esquema_es_valido(validador):
     assert validador.schema["title"] == "open-accounting"
 
 
+# Cada `$def` del esquema con la dataclass que tiene que reproducir, uno a uno. **Los tres de tesorería entraron
+# aquí el 11-oct-2026 y estaban en paridad exacta**: hasta entonces nadie los ataba, así que un campo podía existir
+# en el modelo y no en el esquema —o al revés— sin que nada se pusiera rojo. Es el candado de la 3.0, que mueve
+# justo esos tres bloques.
+EL_ESQUEMA_Y_SU_DATACLASS = (("comprobante", Comprobante), ("libro", Libro),
+                             ("movimiento", Movimiento), ("constancia", Constancia),
+                             ("referencia_de_constancia", Referencia))
+
+
 def test_el_esquema_cubre_el_modelo_entero(esquema):
     """Uno a uno con las dataclasses: ni un campo de más ni uno de menos."""
-    for nombre, cls in (("comprobante", Comprobante), ("libro", Libro)):
+    for nombre, cls in EL_ESQUEMA_Y_SU_DATACLASS:
         del_modelo = {f.name for f in fields(cls)}
         del_esquema = set(esquema["$defs"][nombre]["properties"])
         assert del_modelo == del_esquema, (
@@ -141,9 +151,15 @@ def test_las_decisiones_contables_no_son_del_documento(esquema):
     """Las cuentas viven en la aplicación y llegan aparte, en la imputación (John, 12-sep-2026). Desde open-accounting
     0.3 el comprobante tampoco lleva la cuenta ni el centro, y un documento que todavía los trae se rechaza: perder su
     cuenta en silencio sería peor que no aceptarlo."""
-    propiedades = esquema["$defs"]["comprobante"]["properties"]
-    assert not {"cuenta_contable", "centro_costo", "cuenta_tercero", "imputaciones", "imputacion",
-                "reparto"} & set(propiedades)
+    # **Y vale para TODO lo que el documento transporta como hecho**, no solo para el comprobante (11-oct-2026):
+    # un movimiento del banco es el hecho de un testigo tan concreto como una factura, y si llevara la cuenta dentro,
+    # el mismo hecho sería distinto según quién lo contabiliza. Lo dice además una consecuencia práctica: dos
+    # lecturas del mismo movimiento tienen la misma `clave` y `sin_duplicados` se queda con la primera, así que una
+    # cuenta corregida en la segunda se perdería en silencio.
+    DECISIONES = {"cuenta_contable", "centro_costo", "cuenta_tercero", "imputaciones", "imputacion", "reparto"}
+    for nombre in ("comprobante", "movimiento", "constancia"):
+        propiedades = set(esquema["$defs"][nombre]["properties"])
+        assert not DECISIONES & propiedades, f"{nombre} lleva una decisión contable: {sorted(DECISIONES & propiedades)}"
     with pytest.raises(ValueError, match="imputación"):
         Comprobante.de_dict({"tipo_cp": "01", "cuenta_contable": "659999"})
     # **También vacías** (4.0). Hasta la 3.10 una `cuenta_contable: ""` se colaba en silencio, y eso dejaba al lector
