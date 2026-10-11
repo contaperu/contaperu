@@ -176,10 +176,9 @@ Desde la 9.0 cada tipo de libro **declara** lo que el motor necesita saber de é
 | | Rasgo | `venta` | `compra` | `tesoreria` |
 |---|---|---|---|---|
 | **qué ES el libro** | `origen` — de qué bloque salen sus líneas | `comprobantes` | `comprobantes` | **`movimientos`** |
-| | `rol_principal` — el rol de la línea del hecho | `principal` | `principal` | **`tesoreria`** |
+| | `roles` — qué roles caben en su asiento | `principal` `impuesto` `tercero` | los tres **+** `retencion` `recorte` `detraccion` | **vacío** |
 | | `sentido_principal` — a qué lado va el hecho | `H` | `D` | **`por_operacion`** |
 | | `cuenta_contraparte` — con qué cuenta se salda | `clientes` | `cxp` | **vacío** |
-| | `rol_contraparte` — el rol de la otra pata | `tercero` | `tercero` | **vacío** |
 | **qué reglas le tocan** | `da_credito_fiscal` | no | sí | no |
 | | `lleva_detraccion` · `lleva_honorarios` | no | sí | no |
 | **a dónde va** | `sub_diario` | ventas | compras | **vacío** |
@@ -188,9 +187,36 @@ El reparto en tres grupos es de John (10-oct-2026) y no es cosmético: **el sub-
 libro**, es por dónde sale, y tenerlo primero hacía parecer que sí. Lo que define a un libro son su origen, sus dos
 roles y su sentido. Las tres reglas del medio son todas de las compras, y por eso valen `no` en todo lo demás.
 
-**Y el motor LEE los dos roles en vez de tenerlos escritos a mano** (`asiento/motor.py`), que es lo que los
-convierte en rasgos y no en documentación: para venta y compra valen `principal` y `tercero`, que es exactamente
-lo que estaba en el código, y por eso cablearlos no movió ni una celda de los dos snapshots.
+**`roles` es una declaración y no un mapa, y la distinción costó un intento.** Hubo una versión con
+`rol_principal` y `rol_contraparte` que suponía que todo libro tiene un hecho y una contraparte. En tesorería eso
+no sobrevive: en un pago que cancela una deuda el hecho es el dinero moviéndose, y en una comisión del banco el
+hecho es el gasto y el dinero es la otra cara. Preguntar «cuál es el principal» fuerza una respuesta que a veces es
+mentira. **Odoo lo esquiva no preguntándolo** —su pago tiene `liquidity`, `counterpart` y `writeoff`, sin
+jerarquía—, y esto hace lo mismo. Quién escribe cada rol en cada línea es de quien genera el asiento, y el camino
+del comprobante escribe roles de comprobante porque ES el camino del comprobante.
+
+Los roles de venta y compra están **medidos ejecutando el motor**, no deducidos, y de su unión se **deriva**
+`asiento.ROLES_DEL_MOTOR`, que era una lista mantenida a mano. Los de tesorería están **vacíos a propósito**: el
+motor no emite ni una línea suya, así que no hay forma de medirlos, y el intento de declararlos salió incompleto a
+la primera —un pago a proveedor lleva el 42 con el documento del proveedor, que es `tercero`—. Si esa línea es
+`tercero` o `contrapartida` lo dirá el archivo del sub-diario de bancos que CONCAR acepte, que es el dato de D6.
+El catálogo ya lo decía al publicar `tesoreria` y `contrapartida`: son vocabulario **para quien produce** un
+asiento que el motor no origina. Vacío es, por tanto, una afirmación verdadera y comprobable.
+
+**Y el núcleo no manda por el rol, que desde el 10-oct-2026 es una promesa y no una casualidad.** El rol existe
+para que un destino encuentre la línea que su columna pide sin conocer la cuenta —que la elige cada empresa—, así
+que los drivers se bifurcan por él (diecisiete usos en siete ficheros) y el núcleo no: la huella lo excluye, el
+resumen solo lo recolecta para informarlo, y la api avisa de un rol desconocido con «se lee igual, el rol solo dice
+qué es. No rompe». Dos tests lo sostienen (): uno reescribe todos los roles y comprueba que la
+huella, el cuadre y los importes no se mueven, y otro prohíbe que el núcleo compare un rol contra un valor. Importa
+porque **lo que existe para los sistemas de destino no puede ser de lo que dependa la contabilidad**, y el núcleo
+se está volviendo la base de un ERP.
+
+Lo que ningún estándar abierto del asiento tiene, por cierto, es el rol: XBRL GL usa `account` + `documentType` +
+`debitCreditCode`, y SAF-T distingue la línea por los datos que trae (`CustomerID`/`SupplierID`,
+`TaxInformation`). Beancount y hledger llevan cuenta e importe con signo. Y aun así el rol lleva algo que ninguno
+sabe expresar: en una compra con detracción, `tercero` y `recorte` son la misma cuenta y la misma contraparte sin
+ningún bloque tipado, y SAF-T las emitiría indistinguibles.
 
 **El tercer libro entró el 10-oct-2026 y los TRES vacíos de su columna son la mitad de lo que vale la tabla.**
 `cuenta_contraparte` está vacía porque un libro de tesorería no se salda con una sola cuenta: un lado es la cuenta

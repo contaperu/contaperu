@@ -131,11 +131,21 @@ RASGOS: dict[str, "Rasgos"] = {
     #   un hueco: entra con el hito D6, que pide un archivo del sub-diario de bancos que CONCAR haya aceptado. Se
     #   intentó declararla ya y el contrato de drivers lo paró con la razón exacta — «una clave que nadie lee se
     #   configura para nada»—, porque hasta que el motor origine este libro nadie puede leerla.
-    # Y los dos de tesorería, que el catálogo publica desde el 1-oct-2026 y nadie había conectado con nada. **El
-    # tercero, para la comisión del banco y el ITF, NO se inventa aquí**: entra con el hito D6, con su caso y su
-    # fuente. Odoo lo llama `writeoff` y es la diferencia que nace dentro del pago.
+    # Y los roles de tesorería **se declaran vacíos a propósito**, que es la respuesta honesta a «¿cuáles serían?»
+    # (John, 10-oct-2026). Hubo un intento de poner `("tesoreria", "contrapartida")` y era una adivinanza
+    # disfrazada de dato: el motor no emite ni una línea de tesorería, así que no hay forma de medirlo —las filas de
+    # venta y compra SÍ están medidas ejecutándolo—, y además estaba incompleta, porque un pago a proveedor lleva el
+    # 42 con el documento del proveedor y eso es `tercero`.
+    #
+    # Lo que no se puede contestar sin el dato: si esa línea del 42 es `tercero` o `contrapartida`. Depende de qué
+    # necesite encontrar el destino, y el único que lo diría es un archivo del sub-diario de bancos que CONCAR haya
+    # aceptado — el hito D6. El catálogo ya lo decía al publicar `tesoreria` y `contrapartida`: son «vocabulario
+    # para quien produce un asiento que el motor no origina», o sea para el ERP que nos manda su diario.
+    #
+    # Vacío es por tanto una afirmación verdadera y comprobable: este libro no lo origina el motor. Y es la misma
+    # disciplina con la que el contrato de drivers paró el `sub_diario_bancos`.
     "tesoreria": Rasgos(tipo="tesoreria", origen="movimientos",
-                        roles=("tesoreria", "contrapartida"),
+                        roles=(),
                         sentido_principal=POR_OPERACION, cuenta_contraparte="",
                         da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
                         sub_diario=""),

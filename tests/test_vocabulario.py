@@ -278,9 +278,11 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     # publica desde el 1-oct-2026 y esa tupla deja fuera a propósito. El día que el motor aprenda a emitirlos, las
     # dos cosas se mueven juntas o esto cae.
     no_origina = set(RASGOS) - set(motor.TIPOS_DEL_MOTOR)
-    assert {k for k, r in RASGOS.items() if not set(r.roles) & set(motor.ROLES_DEL_MOTOR)} == no_origina
-    # Todo libro declara al menos un rol: una fila sin roles no dice nada de su asiento.
-    assert all(r.roles for r in RASGOS.values())
+    # Y es una equivalencia EXACTA, no una inclusión: un libro declara roles si y solo si el motor lo origina.
+    # Declararlos para uno que no se origina sería adivinar —no hay forma de medirlo ejecutando el motor— y el
+    # intento de hacerlo con tesorería salió incompleto a la primera.
+    assert {k for k, r in RASGOS.items() if r.roles} == set(motor.TIPOS_DEL_MOTOR)
+    assert {k for k, r in RASGOS.items() if not r.roles} == no_origina
     # La misma frontera vista por el sub-diario, que es su consecuencia: sin sub-diario no hay asiento que escribir.
     assert {k for k, r in RASGOS.items() if not r.sub_diario} == no_origina
     for tipo, r in RASGOS.items():
