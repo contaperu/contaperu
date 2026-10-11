@@ -208,7 +208,10 @@ def test_el_pre_mayor_acepta_lo_que_devuelve_generar_asiento():
     r = resumen.por_cuenta(armado["asiento"])
     assert r["cuadre"] == api.cuadrar(armado["asiento"])
     assert {c["cuenta"] for c in r["cuentas"]} == {ln["cuenta"] for ln in armado["asiento"]}
-    assert all(c["roles"] for c in r["cuentas"]), "el papel de cada línea lo pone el motor al armarla"
+    # **El motor no pone el papel de una línea** desde la 10.0: salió del estándar, y el resumen solo recolecta
+    # lo que le dan. Así que por aquí la columna viene vacía, y quien la quiera llena pasa por `api.por_cuenta`
+    # con el libro, que lo deriva (`tests/test_operaciones.py`). El núcleo no puede: no importa `drivers`.
+    assert all(c["roles"] == [] for c in r["cuentas"]), "el resumen agrupa, no deriva"
 
 
 # ── Por la api, que es por donde entra cualquiera ────────────────────────────────────────────

@@ -8,13 +8,15 @@ llevar bytes; quien los quiera en bytes tiene `exportar_archivo`.
 from __future__ import annotations
 
 import importlib
-from typing import Sequence
+from typing import Any, Sequence
 
 from .. import (_datos, catalogos, drivers, modelo, pcge, tesoreria,
                 vocabulario)
 from ..drivers import contrato
 from ..contable import partida_doble
 from ..contable import resumen as _resumen
+from ..drivers.kit import rol
+from ..modelo.libro import rasgos_de
 from ..tributos import comparar_sire as _comparar
 from ..tributos import detracciones
 from ..errores import DocumentoInvalido
@@ -260,7 +262,13 @@ def campos_del_comprobante() -> dict:
     }
 
 
-def por_cuenta(lineas: list[dict]) -> dict:
+def _como_dict(linea: Any) -> dict:
+    """Una línea como diccionario, venga ya como tal o como `LineaDiario`. Lo de siempre: las dos formas circulan,
+    y por esta puerta entran diccionarios."""
+    return dict(linea) if isinstance(linea, dict) else linea.a_dict()
+
+
+def por_cuenta(lineas: list[dict], libro: dict | None = None) -> dict:
     """El pre-mayor: en qué cuentas cayó el asiento, con su debe y su haber por moneda, y el cuadre.
 
     La misma entrada que `cuadrar`, y hermana suya: aquí no se contabiliza nada, se agrupa lo que el motor
@@ -271,9 +279,24 @@ def por_cuenta(lineas: list[dict]) -> dict:
     descuadres se compensan salen cuadradas en el total y descuadradas cada una. Los suma la misma función
     que `cuadrar`, así que el pre-mayor y el cuadre no pueden discrepar.
 
-    `roles` va en plural: con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.
+    `roles` va en plural: con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento. Y **pide el
+    `libro`**, porque desde la 10.0 el papel de una línea no viaja en ella: se **deriva** de lo que trae, y el lado
+    al que va la contraparte lo dice el libro (`drivers.kit.rol`). Sin él la columna viene vacía y
+    `roles_derivados` lo dice — nadie puede afirmar que una línea es el tercero sin saber si es una compra o una
+    venta, y una columna vacía sin avisar es peor que no tenerla.
+
+    Un libro que **no declara roles** —tesorería, mientras el motor no sepa armar su asiento— también devuelve la
+    columna vacía con `roles_derivados: false`: no es un error, es una pregunta sin respuesta todavía. Un `tipo`
+    que el motor no conoce **sí** es un error, y lo dice: un libro mal escrito dejaría la columna vacía en silencio.
     """
-    return _resumen.por_cuenta(lineas)
+    tipo = str(((libro or {}).get("tipo") or "")).strip()
+    if not tipo:
+        return {**_resumen.por_cuenta(lineas), "roles_derivados": False}
+    rasgos = rasgos_de(tipo)                      # un tipo desconocido para aquí, con la lista de los que conoce
+    if not rasgos.roles:
+        return {**_resumen.por_cuenta(lineas), "roles_derivados": False}
+    return {**_resumen.por_cuenta([{**d, "rol": rol.rol_de(d, rasgos)} for d in map(_como_dict, lineas)]),
+            "roles_derivados": True}
 
 
 # --- plan de cuentas ----------------------------------------------------------------
@@ -385,8 +408,12 @@ def verificar_documento(documento: dict) -> dict:
 
     Devuelve `{conforme, errores, avisos, open_accounting}`. La diferencia entre las dos listas es la del propio
     estándar: un **error** es que el documento no cumple el esquema, y ahí no hay nada que interpretar. Un
-    **aviso** es lo que el esquema no puede decir porque está en los catálogos y no en él —un `rol` que no
-    conocemos se degrada y no rompe la línea, pero un `tipo` de libro que no conocemos sí—, y quien lee decide.
+    **aviso** es lo que el esquema no puede decir porque está en los catálogos y no en él —un `tipo` de libro que
+    no conocemos rompe, porque de él dependen las columnas de cada registro—, y quien lee decide.
+
+    **Hasta la 10.0 había un segundo aviso, el del `rol` fuera del catálogo**, y se fue con el campo: una línea con
+    `rol` ya no se degrada, falla el esquema, porque `linea` no admite claves que no son suyas. Mantener el aviso
+    sería prometer una degradación que no ocurre.
 
     Solo para Python y la línea de comandos, por lo mismo que `verificar_driver` y por una razón más: valida con
     `jsonschema`, que es el extra `schema` y no una dependencia del núcleo. Lanza `ImportError` si no está."""
@@ -399,19 +426,12 @@ def verificar_documento(documento: dict) -> dict:
     errores = [f"{'/'.join(str(p) for p in e.absolute_path) or '(raíz)'}: {e.message}"
                for e in sorted(validador.iter_errors(documento), key=lambda e: list(e.absolute_path))]
 
-    catalogos = catalogos_del_estandar()
-    roles = set(catalogos["roles"]["codigos"])
-    tipos = set(catalogos["tipos_de_libro"]["codigos"])
+    tipos = set(catalogos_del_estandar()["tipos_de_libro"]["codigos"])
     avisos = []
     tipo = ((documento or {}).get("libro") or {}).get("tipo")
     if tipo is not None and tipo not in tipos:
         avisos.append(f"`libro.tipo` {tipo!r} no está en el catálogo ({', '.join(sorted(tipos))}): esto SÍ rompe, "
                       "porque de él dependen las columnas de cada registro")
-    desconocidos = sorted({str(ln.get("rol")) for ln in (documento or {}).get("asiento") or []
-                           if ln.get("rol") and ln.get("rol") not in roles})
-    if desconocidos:
-        avisos.append(f"roles fuera del catálogo ({', '.join(desconocidos)}): una línea con un rol que no conoces "
-                      "se lee igual, el rol solo dice qué es. No rompe.")
     return {"conforme": not errores, "errores": errores, "avisos": avisos,
             "open_accounting": (documento or {}).get("open_accounting", "")}
 

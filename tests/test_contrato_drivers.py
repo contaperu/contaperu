@@ -24,7 +24,7 @@ from contaperu.configuracion import CONFIGURACION_GENERAL, Campo, Columna
 from contaperu.drivers import contrato
 from contaperu.drivers.kit import Opciones
 from contaperu.modelo.libro import RASGOS
-from util import GOLDEN, imputando
+from util import GOLDEN, imputando, papel
 
 # El golden viene de SUNAT: no trae cuenta —desde la 3.0 la pone su imputación, no la configuración— ni centros de
 # costo, que SUNAT no conoce. Desde la 0.8 CONCAR exige el centro donde la cuenta lo lleva, así que este RUC declara
@@ -184,7 +184,8 @@ def driver_de_prueba(nombre: str = "prueba") -> types.ModuleType:
     m.nombre = lambda libro, op=m.OPCIONES: f"{nombre}_{libro.ruc}_{libro.periodo}{op.extension}"
 
     def desde_lineas(libro, lineas, config, op=m.OPCIONES):
-        texto = "\n".join(f"{ln.rol}|{ln.cuenta}|{ln.debe_haber}|{ln.importe}" for ln in lineas)
+        texto = "\n".join(f"{papel(ln, libro)}|{ln.cuenta}|{ln.debe_haber}|{ln.importe}"
+                          for ln in lineas)
         return texto.encode("utf-8"), {"lineas_escritas": len(lineas)}
 
     m.desde_lineas = desde_lineas
@@ -288,8 +289,8 @@ def test_un_registro_sale_sin_asiento_y_con_las_cuentas_del_asiento(con_terceros
     filas = [f.split("|") for f in r["texto"].splitlines()]
     assert len(filas) == r["resumen"]["filas"] == r["comprobantes"] == len(doc["comprobantes"])
     asiento = api.generar_asiento(doc, driver="concar", configuracion=CONTAB)["asiento"]
-    assert [f[1] for f in filas] == [ln["cuenta"] for ln in asiento if ln["rol"] == "principal"]
-    assert [f[4] for f in filas] == [ln["cuenta"] for ln in asiento if ln["rol"] == "tercero"]
+    assert [f[1] for f in filas] == [ln["cuenta"] for ln in asiento if papel(ln, "compra") == "principal"]
+    assert [f[4] for f in filas] == [ln["cuenta"] for ln in asiento if papel(ln, "compra") == "tercero"]
     assert not {"sub_diarios", "debe", "haber", "huella"} & set(r["resumen"])
     assert r["archivo"] == "registro_20601234567_202601.txt" and "huella" not in r["_exportacion"]
 

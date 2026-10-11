@@ -407,8 +407,7 @@
      {
       "cuenta": "6343001",
       "debe_haber": "D",
-      "importe": "10000.00",
-      "rol": "principal"
+      "importe": "10000.00"
      }
     ]
    },
@@ -429,7 +428,6 @@
       "cuenta": "6343001",
       "debe_haber": "D",
       "importe": "10000.00",
-      "rol": "principal",
       "clase": ""
      }
     ]
@@ -451,7 +449,6 @@
       "cuenta": "6343001",
       "debe_haber": "D",
       "importe": "10000.00",
-      "rol": "principal",
       "clase": "gasto"
      }
     ]
@@ -459,9 +456,9 @@
    "valid": true
   },
   {
-   "description": "Un rol que el catálogo todavía no tiene NO rompe el documento: quien lo reciba contabiliza con la clase, el sentido y el importe. Es la regla de degradación",
+   "description": "Una línea con `rol` NO es conforme desde la 2.0: el papel de una línea se DERIVA de lo que trae —el bloque tipado, el sentido y la contraparte— y dejó de viajar en ella. Era la única clave cuya degradación el estándar prometía, y la 2.0 llevó esa promesa hasta el final: si la línea se contabiliza sin el rol, el rol no es parte de la línea",
    "data": {
-    "open_accounting": "1.0",
+    "open_accounting": "2.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -473,12 +470,12 @@
       "cuenta": "421201",
       "debe_haber": "H",
       "importe": "100.00",
-      "rol": "percepcion",
-      "clase": "pasivo"
+      "clase": "pasivo",
+      "rol": "tercero"
      }
     ]
    },
-   "valid": true
+   "valid": false
   },
   {
    "description": "El enlace de la línea con su comprobante, por el id del sistema que lo produjo",

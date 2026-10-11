@@ -17,6 +17,7 @@ from dataclasses import dataclass, fields
 from typing import Any, Iterable
 
 from ...asiento.lineas import LineaDiario
+from . import rol as _rol
 
 # Lo que puede llenar una columna: un campo de la línea del comprobante o, con punto, un campo de uno de sus bloques.
 BLOQUES: dict[str, tuple[str, ...]] = {
@@ -27,6 +28,12 @@ BLOQUES: dict[str, tuple[str, ...]] = {
     # existe para impedir.
     "detraccion": ("codigo", "tasa", "base", "nro_constancia", "fecha_constancia"),
 }
+# Rutas que NO son un campo de la línea: se **derivan** de lo que la línea trae. Hoy solo el `rol`, que dejó de
+# viajar en la línea con el estándar 2.0 —era una etiqueta para los destinos y nadie decidía por ella— y que un
+# driver sigue queriendo en su columna para que quien lea su archivo no tenga que adivinar (la decisión es de la
+# 1.0). Derivarlo necesita el libro, porque el lado al que va la contraparte lo dice el libro: una columna derivada
+# sale VACÍA si quien escribe no lo pasa, y eso es lo que un driver no debe hacer.
+DERIVADAS: tuple[str, ...] = ("rol",)
 # Qué es el dato de una columna, para quien lo escriba en un formato que distingue (una celda, un ancho fijo).
 # Ojo: no es la `clase` de una línea del asiento (activo, pasivo…), que vive en `contaperu/vocabulario.py`.
 CLASES = ("texto", "importe", "fecha", "numero")
@@ -45,13 +52,19 @@ class ColumnaDeLinea:
 
 
 def rutas() -> frozenset[str]:
-    """Todas las rutas que una columna puede leer de la línea del comprobante."""
+    """Todas las rutas que una columna puede llenar: los campos de la línea, los de sus bloques y las derivadas."""
     simples = {campo.name for campo in fields(LineaDiario)} - set(BLOQUES)
-    return frozenset(simples | {f"{bloque}.{campo}" for bloque, campos in BLOQUES.items() for campo in campos})
+    return frozenset(simples | set(DERIVADAS)
+                     | {f"{bloque}.{campo}" for bloque, campos in BLOQUES.items() for campo in campos})
 
 
-def valor(linea: dict, ruta: str) -> Any:
-    """El valor de una ruta en una línea ya en diccionario (`LineaDiario.a_dict()`); vacío si no lo lleva."""
+def valor(linea: dict, ruta: str, libro: Any = None) -> Any:
+    """El valor de una ruta en una línea ya en diccionario (`LineaDiario.a_dict()`); vacío si no lo lleva.
+
+    Una ruta de `DERIVADAS` no está en la línea y se calcula; sin `libro` no se puede, y devuelve vacío en vez de
+    inventarse un papel."""
+    if ruta in DERIVADAS:
+        return _rol.rol_de(linea, libro) if libro is not None else ""
     if "." not in ruta:
         return linea.get(ruta, "")
     bloque, campo = ruta.split(".", 1)
@@ -82,20 +95,23 @@ def problemas(columnas: Any) -> list[str]:
     return salida
 
 
-def filas(lineas: Iterable[LineaDiario], columnas: Iterable[ColumnaDeLinea]) -> list[list[Any]]:
-    """Una fila por línea, con el valor de cada columna en su orden."""
+def filas(lineas: Iterable[LineaDiario], columnas: Iterable[ColumnaDeLinea],
+          libro: Any = None) -> list[list[Any]]:
+    """Una fila por línea, con el valor de cada columna en su orden. El `libro` hace falta para las `DERIVADAS`."""
     columnas = tuple(columnas)
-    return [[valor(linea, columna.ruta) for columna in columnas] for linea in (ln.a_dict() for ln in lineas)]
+    return [[valor(linea, columna.ruta, libro) for columna in columnas]
+            for linea in (ln.a_dict() if hasattr(ln, "a_dict") else dict(ln) for ln in lineas)]
 
 
 def escribir_csv(lineas: Iterable[LineaDiario], columnas: Iterable[ColumnaDeLinea], separador: str = ";",
-                 bom: bool = True) -> bytes:
+                 bom: bool = True, libro: Any = None) -> bytes:
     """Las líneas → un CSV con la cabecera de cada columna, filas terminadas en CRLF y comillas solo donde hacen falta.
-    `bom` antepone la marca UTF-8 con que Excel en español abre bien las tildes."""
+    `bom` antepone la marca UTF-8 con que Excel en español abre bien las tildes. El `libro` hace falta para las
+    columnas `DERIVADAS`; sin él salen vacías."""
     columnas = tuple(columnas)
     buf = io.StringIO(newline="")
     escritor = _csv.writer(buf, delimiter=separador, lineterminator="\r\n", quoting=_csv.QUOTE_MINIMAL)
     escritor.writerow([columna.cabecera for columna in columnas])
-    escritor.writerows(filas(lineas, columnas))
+    escritor.writerows(filas(lineas, columnas, libro))
     texto = buf.getvalue()
     return ("﻿" + texto if bom else texto).encode("utf-8")

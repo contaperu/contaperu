@@ -14,9 +14,9 @@ PLANTILLA = "La plantilla de importaciÃ³n de asientos del sistema, con su versiÃ
 
 
 def lineas() -> list[LineaDiario]:
-    return [LineaDiario(cuenta="631101", debe_haber="D", importe="100.00", rol="principal", glosa="SERVICIO; DE PRUEBA",
+    return [LineaDiario(cuenta="631101", debe_haber="D", importe="100.00", glosa="SERVICIO; DE PRUEBA",
                         documento={"tipo_cp": "01", "serie_numero": "F001-123"}),
-            LineaDiario(cuenta="421201", debe_haber="H", importe="100.00", rol="tercero",
+            LineaDiario(cuenta="421201", debe_haber="H", importe="100.00",
                         documento={"tipo_cp": "01", "serie_numero": "F001-123"})]
 
 

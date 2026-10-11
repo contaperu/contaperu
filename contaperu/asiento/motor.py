@@ -297,7 +297,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                       "serie_numero": serie_y_numero(c.ref_serie, numero_ref),
                       "fecha": _iso(c.ref_fecha)}
 
-    def linea(rol: str, importe: Decimal, cuenta_linea: str, sentido: str, glosa_linea: str = glosa,
+    def linea(importe: Decimal, cuenta_linea: str, sentido: str, glosa_linea: str = glosa,
               **extra) -> LineaDiario:
         # La clase es obligatoria en el estándar y `a_dict()` omite lo vacío, así que una línea sin ella produciría
         # un documento que el propio esquema 1.0 rechaza, y en silencio. Aquí se corta: es el último guardián, el que
@@ -308,7 +308,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
         if not clase_linea:
             raise SinClase([c])
         campos = dict(cuenta=cuenta_linea, debe_haber=sentido, importe=str(Decimal(importe).quantize(CENTIMO)),
-                      rol=rol, clase=clase_linea, sub_diario=sub_diario_asiento,
+                      clase=clase_linea, sub_diario=sub_diario_asiento,
                       correlativo=correlativo, fecha=_iso(fecha_asiento),
                       moneda=moneda, tipo_cambio=tc, glosa=glosa_linea, documento=_limpio(documento),
                       referencia=_limpio(referencia), tasa_igv=tasa)
@@ -327,13 +327,11 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     def principal(cuenta: str, centro: str, importe: Decimal) -> LineaDiario:   # gasto (compras) / ingreso (ventas)
         centro = (centro or "").strip() if usa_centros else ""
         en_linea = lleva_centro(cuenta, config)
-        # El rol va escrito y no sale del libro, y es a propósito: **esta función ES el camino del comprobante**,
-        # así que escribe roles de comprobante. Hubo un intento de leerlo de un rasgo `rol_principal`, y la premisa
-        # era falsa — un pago no tiene un «principal» fijo (en una comisión del banco el hecho es el gasto, no el
-        # dinero), así que parametrizar este camino para que sirviera a los dos era el mismo error que un solo
-        # vocabulario de roles para los dos. Lo que el libro declara es QUÉ roles caben (`rasgos.roles`), y un test
-        # lo comprueba ejecutando esto y comparando.
-        return linea("principal", importe, cuenta, sentido_base, centro_costo=centro if en_linea else "",
+        # Esta función ES el camino del comprobante, y hasta la 10.0 escribía el `rol` de cada línea. Ya no:
+        # el papel se **deriva** de lo que la línea trae (`drivers.kit.rol`), porque era una etiqueta para los
+        # destinos y no un dato del asiento. Lo que el libro declara sigue siendo QUÉ roles caben
+        # (`rasgos.roles`), y un test lo comprueba ejecutando esto y derivando.
+        return linea(importe, cuenta, sentido_base, centro_costo=centro if en_linea else "",
                      anexo_auxiliar=centro if (not en_linea and "principal" in centro_en_anexo) else "")
 
     principales = [principal(cuenta, centro, base if importe is None else importe)
@@ -346,19 +344,19 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # `KeyError: 'igv'` pelado, que no es un `ErrorContaperu` y por tanto no lo caza quien atrapa los errores del
     # motor. El espejo de esto en el diagnóstico (`resolucion.cuentas_del_asiento`) ya era simétrico.
     cuenta_impuesto = str((config.get("cuentas") or {}).get("igv") or CONFIG_POR_DEFECTO["cuentas"]["igv"])
-    linea_impuesto = (linea("impuesto", igv, cuenta_impuesto, sentido_base, glosa,
+    linea_impuesto = (linea(igv, cuenta_impuesto, sentido_base, glosa,
                             impuesto={"codigo": TRIBUTO_IGV})
                       if igv > 0 else None)
     cuenta_retencion = str((config.get("cuentas") or {}).get("retencion_4ta") or CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"])
     # La categoría es `4` con certeza y no por deducción: esta línea solo nace de un recibo por honorarios
     # (`retenido > 0` exige `es_honorarios`). El tributo es el 3000, Impuesto a la Renta, y no el del IGV.
-    linea_de_retencion = (linea("retencion", retenido, cuenta_retencion, sentido_tercero, glosa,
+    linea_de_retencion = (linea(retenido, cuenta_retencion, sentido_tercero, glosa,
                                 retencion={"codigo": TRIBUTO_RENTA, "categoria": CATEGORIA_RENTA_4TA})
                           if retenido > 0 else None)
     cuenta_del_tercero = cuenta_tercero(c, config, rasgos)
     anexo_tercero = centro_comun if ("tercero" in centro_en_anexo and not es_honorarios) else ""
     # El tercero: el proveedor en compras, el cliente en ventas.
-    tercero = linea("tercero", total - retenido, cuenta_del_tercero, sentido_tercero,
+    tercero = linea(total - retenido, cuenta_del_tercero, sentido_tercero,
                     contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
 
     # La detracción, calcada del Excel real validado en CONCAR (2026): el total COMPLETO queda en el
@@ -380,7 +378,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     if rasgos.lleva_detraccion and not es_honorarios and tiene_detraccion(c) and not anulada_por_nota(c, config):
         _, detraido = monto_detraccion(c, config)
         if detraido > 0:
-            linea_recorte = linea("recorte", detraido, cuenta_del_tercero, sentido_base,
+            linea_recorte = linea(detraido, cuenta_del_tercero, sentido_base,
                                              contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
             # De QUÉ documento sale esta detracción: en una factura, del propio comprobante (lo que
             # CONCAR aceptó). En una NOTA que ya referencia la factura que corrige se RESPETA esa
@@ -403,7 +401,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
                 documento_detraccion = {"serie_numero": constancia_de(c, config)["nro_constancia"],
                                         "id_externo": c.id_externo or "",
                                         "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
-            linea_detraccion = linea("detraccion", detraido, cuenta_detraccion, sentido_tercero,
+            linea_detraccion = linea(detraido, cuenta_detraccion, sentido_tercero,
                                      glosa, contraparte_doc=ruc,
                                      documento=_limpio(documento_detraccion), referencia=_limpio(referencia_detraccion),
                                      detraccion=_detraccion(c, config, total, neutral))

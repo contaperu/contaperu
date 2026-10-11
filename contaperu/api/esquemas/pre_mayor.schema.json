@@ -11,44 +11,82 @@
    "items": {
     "type": "object",
     "properties": {
-     "cuenta": {"type": "string"},
-     "clase": {"type": "string", "description": "gasto, ingreso, activo o pasivo. En singular: se deriva del primer dígito de la cuenta y no puede variar entre dos líneas de la misma."},
+     "cuenta": {
+      "type": "string"
+     },
+     "clase": {
+      "type": "string",
+      "description": "gasto, ingreso, activo o pasivo. En singular: se deriva del primer dígito de la cuenta y no puede variar entre dos líneas de la misma."
+     },
      "roles": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": {
+       "type": "string"
+      },
       "description": "Qué papeles hace en el asiento. En PLURAL: con una detracción, la cuenta por pagar sale como «tercero» y como «recorte» en el mismo asiento. Los valores son los del catálogo `roles` del estándar, que se publica aparte: aquí no se enumeran para que un rol nuevo no cueste una versión."
      },
-     "lineas": {"type": "integer", "minimum": 0},
+     "lineas": {
+      "type": "integer",
+      "minimum": 0
+     },
      "por_moneda": {
       "type": "object",
       "description": "Su debe y su haber en cada moneda. De una cuenta no se dice si cuadra: una cuenta no tiene por qué cuadrar.",
-      "propertyNames": {"pattern": "^[A-Z]{3}$"},
+      "propertyNames": {
+       "pattern": "^[A-Z]{3}$"
+      },
       "additionalProperties": {
        "type": "object",
        "properties": {
-        "debe": {"type": "string"},
-        "haber": {"type": "string"}
+        "debe": {
+         "type": "string"
+        },
+        "haber": {
+         "type": "string"
+        }
        },
-       "required": ["debe", "haber"],
+       "required": [
+        "debe",
+        "haber"
+       ],
        "additionalProperties": false
       }
      }
     },
-    "required": ["cuenta", "clase", "roles", "lineas", "por_moneda"],
+    "required": [
+     "cuenta",
+     "clase",
+     "roles",
+     "lineas",
+     "por_moneda"
+    ],
     "additionalProperties": false
    }
   },
   "por_moneda": {
    "type": "object",
    "description": "El cuadre de cada moneda, que dice algo que el global no puede: dos monedas cuyos descuadres se compensan salen cuadradas en el total y descuadradas cada una.",
-   "propertyNames": {"pattern": "^[A-Z]{3}$"},
-   "additionalProperties": {"$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/cuadre.schema.json"}
+   "propertyNames": {
+    "pattern": "^[A-Z]{3}$"
+   },
+   "additionalProperties": {
+    "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/cuadre.schema.json"
+   }
   },
   "cuadre": {
    "description": "El de todas las líneas juntas, lo mismo que devuelve `cuadrar`.",
    "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/cuadre.schema.json"
+  },
+  "roles_derivados": {
+   "type": "boolean",
+   "description": "Si la columna `roles` se pudo derivar. Desde la 10.0 el papel de una línea no viaja en ella: se deriva de lo que trae, y para eso hay que saber de qué libro es. Sin `libro`, o con uno que no declara roles —tesorería, mientras el motor no sepa armar su asiento—, `roles` viene VACÍA y esto es `false`. Se dice en vez de callarse, porque una columna vacía que parece un dato es peor que no tenerla."
   }
  },
- "required": ["cuentas", "por_moneda", "cuadre"],
+ "required": [
+  "cuentas",
+  "por_moneda",
+  "cuadre",
+  "roles_derivados"
+ ],
  "additionalProperties": false
 }

@@ -218,7 +218,9 @@ def test_generar_asiento_con_la_seccion_de_su_sistema():
                     configuracion=solo_m)
     assert not any(ln.get("anexo_auxiliar") for ln in concar["asiento"])
     csv = llamar("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, configuracion=solo_m, driver="csv")
-    assert [ln.get("anexo_auxiliar") for ln in csv["asiento"] if ln["rol"] == "tercero"] == ["CC-64"]
+    from contaperu.drivers.kit.rol import rol_de
+    assert [ln.get("anexo_auxiliar") for ln in csv["asiento"]
+            if rol_de(ln, "compra") == "tercero"] == ["CC-64"]
     negado = rechazo("generar_asiento", documento=DOCUMENTO, imputacion=IMPUTACION, driver="contasis")
     assert negado["clave"] == "valor_invalido" and "no arma asientos" in negado["detail"]
 

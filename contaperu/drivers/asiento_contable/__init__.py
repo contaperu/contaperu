@@ -3,7 +3,7 @@
 Es la salida del grupo ERP (John, 15-sep-2026). Un ERP nuevo, escrito en cualquier lenguaje, no importa el Excel de un
 sistema legacy: recibe el documento `open-accounting` con su bloque `asiento`, las líneas de la partida doble **sin
 vocabulario legacy** —sin siglas, sin sub-diarios, sin correlativos, y sin ninguno de los dos comodines de la
-detracción, ni el documento ni el número de constancia—, con el `rol` de cada línea y el código SUNAT de su documento
+detracción, ni el documento ni el número de constancia—, con el código SUNAT de su documento
 (`VOCABULARIO = "neutral"`, `drivers/contrato.py`). La contabilidad es la de CONCAR: las mismas cuentas, los mismos
 sentidos y los mismos importes, decididos una sola vez por el núcleo (`tests/test_driver_asiento_contable.py`).
 

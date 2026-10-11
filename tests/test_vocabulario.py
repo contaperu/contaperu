@@ -15,9 +15,16 @@ from contaperu.asiento import motor
 from contaperu.asiento.motor import ROLES
 from contaperu.modelo import TIPOS_LIBRO, Comprobante, Libro
 
-# Los valores de la 1.0, escritos a mano, y **congelados para siempre**: lo que se publicó no se quita ni cambia de
-# significado ni se mueve de sitio, porque quien ya integró lo lee por su nombre y a veces por su orden.
+# Los valores de la 1.0, escritos a mano, y congelados **mientras dure la mayor**: lo que se publicó no se quita ni
+# cambia de significado ni se mueve de sitio, porque quien ya integró lo lee por su nombre y a veces por su orden.
+#
+# **La 2.0 los movió, y es lo único que puede moverlos.** Los roles son el caso: `igv`, `retencion_4ta` y
+# `detraccion_tercero` —los tres que la 5.0 renombró y dejó en `obsoletos`— se fueron con el campo `rol`, que salió
+# de la línea. Las clases y los tipos de libro no se tocaron. Así que lo congelado de los roles es ahora el suelo de
+# la 2.0, y lo de la 1.0 queda escrito al lado para que el movimiento se vea.
 ROLES_DE_LA_1_0 = ("principal", "igv", "retencion_4ta", "tercero", "detraccion_tercero", "detraccion")
+ROLES_DE_LA_2_0 = ("principal", "tercero", "detraccion", "contrapartida", "tesoreria", "impuesto", "retencion",
+                   "recorte")
 CLASES_DE_LA_1_0 = ("activo", "pasivo", "patrimonio", "ingreso", "gasto")
 TIPOS_DE_LIBRO_DE_LA_1_0 = ("venta", "compra")
 
@@ -30,10 +37,12 @@ TIPOS_DE_LIBRO_DE_LA_1_0 = ("venta", "compra")
 # de destino, y el dinero moviéndose.
 #
 # `impuesto`, `retencion` y `recorte` entraron con la 5.0, y **no son valores nuevos sino los mismos tres papeles bien
-# nombrados**: los viejos metían el tributo en el nombre del rol. Van AL FINAL porque el orden es el de inserción y los
-# seis de la 1.0 tienen que seguir ocupando las seis primeras posiciones; los tres viejos siguen en `codigos` y además
-# en `obsoletos`, con su reemplazo.
-ROLES_DE_HOY = ROLES_DE_LA_1_0 + ("contrapartida", "tesoreria", "impuesto", "retencion", "recorte")
+# nombrados**: los viejos metían el tributo en el nombre del rol. Van AL FINAL porque el orden es el de inserción.
+#
+# Y desde la 2.0 del estándar **el catálogo ya no describe un campo del documento**: describe el vocabulario del papel
+# que la regla DERIVA de cada línea (`drivers.kit.rol`). De los ocho, seis se derivan hoy y dos están reservados para
+# el libro de tesorería, que el motor todavía no sabe armar.
+ROLES_DE_HOY = ROLES_DE_LA_2_0
 
 from contaperu.modelo.libro import RASGOS as RASGOS_DE_LIBRO  # noqa: E402  (al lado de lo que describe)
 
@@ -49,12 +58,19 @@ TIPOS_DE_LIBRO_DE_HOY = TIPOS_DE_LIBRO_DE_LA_1_0 + ("tesoreria",)
 EFECTOS_DE_TESORERIA_DE_HOY = ("entrada", "salida", "transferencia")
 
 
-def test_los_valores_de_la_1_0_no_cambian():
-    """La promesa de la 1.0: lo publicado sigue ahí, con su mismo nombre y en su mismo sitio. Que el catálogo crezca
-    por detrás no la rompe; que algo de esto se moviera, sí."""
-    assert vocabulario.ROLES[:len(ROLES_DE_LA_1_0)] == ROLES_DE_LA_1_0
+def test_los_valores_publicados_no_cambian_dentro_de_su_mayor():
+    """Lo publicado sigue ahí, con su mismo nombre y en su mismo sitio. Que el catálogo crezca por detrás no la
+    rompe; que algo de esto se moviera, sí. **Solo una mayor del estándar puede moverlo**, y la 2.0 lo hizo en un
+    catálogo y en ninguno más.
+
+    Las clases y los tipos de libro siguen midiéndose contra la 1.0 —no se tocaron—, y los roles contra la 2.0, que
+    es su suelo desde que el campo `rol` salió de la línea. Lo de la 1.0 se guarda arriba para que el movimiento se
+    pueda leer: tres de sus seis roles eran los `obsoletos` de la 5.0 y se fueron con el campo."""
+    assert vocabulario.ROLES[:len(ROLES_DE_LA_2_0)] == ROLES_DE_LA_2_0
     assert vocabulario.CLASES == CLASES_DE_LA_1_0
     assert vocabulario.TIPOS_LIBRO[:len(TIPOS_DE_LIBRO_DE_LA_1_0)] == TIPOS_DE_LIBRO_DE_LA_1_0
+    # Y los tres que se fueron, nombrados: si alguno volviera, volvería con otro significado.
+    assert set(ROLES_DE_LA_1_0) - set(vocabulario.ROLES) == {"igv", "retencion_4ta", "detraccion_tercero"}
 
 
 def test_el_catalogo_crece_solo_a_proposito():
@@ -65,27 +81,30 @@ def test_el_catalogo_crece_solo_a_proposito():
     assert vocabulario.EFECTOS_DE_TESORERIA == EFECTOS_DE_TESORERIA_DE_HOY
 
 
-def test_el_motor_no_escribe_todos_los_roles_del_catalogo():
-    """La distinción que entra con `contrapartida` y `tesoreria`, y que conviene que un test diga en voz alta: el
-    catálogo es lo que un driver tiene que **entender**, y `ROLES_DEL_MOTOR` lo que el motor **emite**.
+def test_la_regla_no_deriva_todos_los_roles_del_catalogo():
+    """La distinción que entró con `contrapartida` y `tesoreria`, y que conviene que un test diga en voz alta: el
+    catálogo es el vocabulario entero, y `ROLES_DEL_MOTOR` lo que la regla sabe **derivar** hoy.
 
-    Los dos nuevos son vocabulario para quien produce un asiento que el motor no origina. Si algún día el motor
-    empieza a emitirlos, este test cae y hay que mover el valor a `ROLES_DEL_MOTOR` a propósito."""
+    Los dos están RESERVADOS para el libro de tesorería, que el motor todavía no sabe armar (el hito D6). Si algún
+    día la regla empieza a producirlos, este test cae y hay que mover el valor a propósito.
+
+    Hasta la 10.0 la frase era «lo que el motor **emite**», porque el motor escribía el `rol` en cada línea. Ya no
+    lo escribe: el papel se deriva de lo que la línea trae, y la tupla sigue siendo la misma seis."""
     assert set(motor.ROLES_DEL_MOTOR) < set(vocabulario.ROLES)
-    # **Desde la 5.0 ya no es la tupla de la 1.0**, y divergen para siempre: tres de los seis se renombraron. Lo que
-    # el motor emite son seis papeles, los mismos de siempre, con tres nombres nuevos.
     # El CONTENIDO, no el orden: la tupla se deriva de los rasgos en el orden del catálogo desde el 10-oct-2026,
     # así que fijar el orden a mano aquí sería congelar un detalle de la derivación en vez de la promesa.
     assert set(motor.ROLES_DEL_MOTOR) == {"principal", "impuesto", "retencion", "tercero", "recorte", "detraccion"}
     # Y que de verdad se derive: es la unión de lo que declaran los libros que el motor origina, sin lista aparte.
     declarados = {r for tipo in motor.TIPOS_DEL_MOTOR for r in RASGOS_DE_LIBRO[tipo].roles}
     assert set(motor.ROLES_DEL_MOTOR) == declarados
-    assert len(motor.ROLES_DEL_MOTOR) == len(ROLES_DE_LA_1_0) == 6
-    # Lo que el motor NO emite: los dos de vocabulario, y los tres viejos, que están publicados y ya no se escriben.
-    obsoletos = set(api.catalogos_del_estandar()["roles"]["obsoletos"])
-    assert set(vocabulario.ROLES) - set(motor.ROLES_DEL_MOTOR) == {"contrapartida", "tesoreria"} | obsoletos
-    assert obsoletos == {"igv", "retencion_4ta", "detraccion_tercero"}
-    assert not (obsoletos & set(motor.ROLES_DEL_MOTOR)), "el motor no escribe un rol marcado como obsoleto"
+    assert len(motor.ROLES_DEL_MOTOR) == 6
+    # Lo que la regla NO produce son exactamente los dos reservados. Antes de la 2.0 eran cinco: estaban además los
+    # tres `obsoletos` de la 5.0, que se fueron del catálogo con el campo que los llevaba.
+    assert set(vocabulario.ROLES) - set(motor.ROLES_DEL_MOTOR) == {"contrapartida", "tesoreria"}
+
+    # Y que la regla no los devuelva por accidente, que es lo que «reservado» tiene que significar.
+    from contaperu.drivers.kit.rol import ROLES_QUE_DERIVA
+    assert ROLES_QUE_DERIVA == frozenset(motor.ROLES_DEL_MOTOR)
 
 
 def test_el_codigo_y_el_catalogo_son_lo_mismo():
@@ -111,6 +130,11 @@ def test_cada_tabla_puede_marcar_un_valor_como_obsoleto():
     anunciaba tres renombrados desde la 1.1 y **nunca llegó a la api**, porque `catalogos()` no lo propagaba y el
     esquema de salida lo habría rechazado."""
     servidos = api.catalogos_del_estandar()
+    # **Hoy ningún catálogo tiene ninguno, y es una afirmación y no un hueco**: los tres que había eran del `rol` y
+    # se fueron con el campo en la 2.0. El bucle de abajo no itera nada, así que lo que vigila esto hoy es la forma
+    # —la clave viaja siempre— y que el día que entre uno cumpla las cuatro reglas.
+    assert all(not tabla["obsoletos"] for tabla in servidos.values()), \
+        "entró un obsoleto nuevo: es una decisión, y se anuncia en el CHANGELOG"
     for nombre, tabla in servidos.items():
         assert "obsoletos" in tabla, f"{nombre}: la clave viaja siempre, vacía si no hay ninguno"
         for viejo, marca in tabla["obsoletos"].items():
@@ -121,22 +145,33 @@ def test_cada_tabla_puede_marcar_un_valor_como_obsoleto():
             assert marca["usar"] != viejo and marca["por_que"].strip()
 
 
-def test_un_valor_obsoleto_sigue_siendo_valido_al_leerlo():
-    """Marcarlo dice «no lo escribas más», no «esto ya no vale». Si invalidara, cada corrección del catálogo rompería
-    los documentos guardados, que es justo lo que la regla viene a evitar."""
+def test_un_valor_obsoleto_sobrevive_mientras_exista_la_clave_donde_se_guardaba():
+    """La regla, con la excepción que la 2.0 hizo — y la razón importa más que el caso.
+
+    Marcar un valor como obsoleto dice «no lo escribas más», no «esto ya no vale»: si invalidara, cada corrección
+    del catálogo rompería los documentos guardados. Por eso un valor obsoleto **no desaparece nunca**… mientras
+    exista la clave donde se guardaba. Los tres del `rol` se fueron con el campo: una línea no puede llevarlo, así
+    que describir su reemplazo no le sirve a nadie.
+
+    Lo que esto comprueba es que no quedó un cabo: ninguno de los tres sigue en el catálogo, y el campo tampoco."""
     import jsonschema
 
     from contaperu.asiento.lineas import LineaDiario
 
     roles = api.catalogos_del_estandar()["roles"]
-    for viejo in roles["obsoletos"]:
-        linea = LineaDiario.de_dict({"cuenta": "401111", "debe_haber": "D", "importe": "18.00",
-                                     "clase": "pasivo", "rol": viejo})
-        assert linea.rol == viejo
-        doc = {"open_accounting": api.OPEN_ACCOUNTING,
-               "libro": {"ruc": "20601234567", "periodo": "202601", "tipo": "compra"},
-               "asiento": [linea.a_dict()]}
-        assert list(jsonschema.Draft202012Validator(api.esquema_open_accounting()).iter_errors(doc)) == []
+    for viejo in ("igv", "retencion_4ta", "detraccion_tercero"):
+        assert viejo not in roles["codigos"] and viejo not in roles["obsoletos"]
+
+    # Y la clave tampoco: una línea con `rol` no se lee ni valida, y el rechazo dice por dónde se migra.
+    with pytest.raises(ValueError, match="rol_de"):
+        LineaDiario.de_dict({"cuenta": "401111", "debe_haber": "D", "importe": "18.00",
+                             "clase": "pasivo", "rol": "impuesto"})
+    doc = {"open_accounting": api.OPEN_ACCOUNTING,
+           "libro": {"ruc": "20601234567", "periodo": "202601", "tipo": "compra"},
+           "asiento": [{"cuenta": "401111", "debe_haber": "D", "importe": "18.00", "clase": "pasivo",
+                        "rol": "impuesto"}]}
+    assert list(jsonschema.Draft202012Validator(api.esquema_open_accounting()).iter_errors(doc)), \
+        "el esquema de la 2.0 no admite la clave"
 
 
 def test_cada_valor_esta_descrito():
@@ -146,12 +181,16 @@ def test_cada_valor_esta_descrito():
 
 
 def test_el_esquema_ya_no_los_enumera():
-    """Es el cambio de fondo: el día que entre un hecho nuevo, sus roles no cuestan una versión del estándar."""
+    """Es el cambio de fondo: el día que entre un hecho nuevo, sus valores no cuestan una versión del estándar.
+
+    Lo probaba sobre el `rol` y sobre `libro.tipo`; el `rol` salió del esquema en la 2.0, así que queda el tipo de
+    libro — que además es el que lo ha demostrado de verdad: `tesoreria` entró el 10-oct-2026 **sin subir la
+    versión del estándar**, que es exactamente lo que esta promesa decía."""
     esquema = api.esquema_open_accounting()
-    assert "enum" not in esquema["$defs"]["linea"]["properties"]["rol"]
+    assert "rol" not in esquema["$defs"]["linea"]["properties"], "el `rol` salió de la línea en la 2.0"
     assert "enum" not in esquema["$defs"]["libro"]["properties"]["tipo"]
     # Y el catálogo se cita en la descripción, para que quien lea el esquema sepa dónde están los valores.
-    assert "catalogos.json" in esquema["$defs"]["linea"]["properties"]["rol"]["description"]
+    assert "catalogos.json" in esquema["$defs"]["libro"]["properties"]["tipo"]["description"]
 
 
 def test_la_api_los_sirve_con_su_fuente():
@@ -169,18 +208,27 @@ def test_van_aparte_de_los_de_sunat():
 
 # ── La degradación, que no es igual para los dos ───────────────────────────────────────────────────────────────
 
-def test_un_rol_desconocido_no_rompe_la_linea():
-    """La regla que hace escalable el estándar: quien recibe contabiliza con `clase`, `debe_haber` e `importe` aunque
-    no conozca el rol. Un rol nuevo —la percepción, el anticipo— entra sin romper a ningún ERP ya integrado."""
+def test_una_linea_se_contabiliza_con_los_cuatro_que_el_estandar_exige():
+    """La regla que hace escalable el estándar, y lo que la 2.0 le hizo.
+
+    Decía: quien recibe contabiliza con `clase`, `debe_haber` e `importe` aunque no conozca el `rol`, así que un rol
+    nuevo entra sin romper a nadie. **La 2.0 llevó esa regla hasta el final**: si la línea se contabiliza sin el
+    rol, el rol no es parte de la línea. Salió, y lo que queda es lo que siempre bastaba — los cuatro obligatorios,
+    que son los que un ERP de fuera entiende sin conocer el PCGE.
+
+    Lo que sustituye a la degradación es la **derivación**: quien quiera el papel lo calcula de lo que la línea
+    trae (`drivers.kit.rol`), y por eso un papel nuevo sigue sin costar una versión del documento."""
+    import jsonschema
+
     from contaperu.asiento.lineas import LineaDiario
 
-    linea = LineaDiario.de_dict({"cuenta": "421201", "debe_haber": "H", "importe": "100.00",
-                                 "clase": "pasivo", "rol": "percepcion"})
-    assert linea.rol == "percepcion" and linea.clase == "pasivo"
+    linea = LineaDiario.de_dict({"cuenta": "421201", "debe_haber": "H", "importe": "100.00", "clase": "pasivo"})
+    assert (linea.cuenta, linea.debe_haber, linea.importe, linea.clase) == ("421201", "H", "100.00", "pasivo")
+    assert api.esquema_open_accounting()["$defs"]["linea"]["required"] == [
+        "cuenta", "debe_haber", "importe", "clase"], "los cuatro, y ninguno más"
     doc = {"open_accounting": api.OPEN_ACCOUNTING,
            "libro": {"ruc": "20601234567", "periodo": "202601", "tipo": "compra"},
            "asiento": [linea.a_dict()]}
-    import jsonschema
     assert list(jsonschema.Draft202012Validator(api.esquema_open_accounting()).iter_errors(doc)) == []
 
 

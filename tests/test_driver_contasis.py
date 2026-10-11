@@ -9,7 +9,7 @@ import pytest
 
 from contaperu import api
 from contaperu.drivers import contasis, contrato
-from util import imputando
+from util import imputando, papel
 
 LIBRO = {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608", "tipo": "compra"}
 FACTURA = {"tipo_cp": "01", "serie": "F001", "numero": "00000123", "fecha_emision": "2026-08-11",
@@ -157,7 +157,7 @@ def test_para_contasis_no_se_piden_sub_diarios_ni_equivalencias():
 def _cuentas_del_asiento(documento: dict, rol: str) -> list[str]:
     """Las cuentas que el asiento del núcleo pone en ese rol, para los mismos comprobantes."""
     asiento = api.generar_asiento(documento, driver="concar", configuracion=CONTAB)["asiento"]
-    return [ln["cuenta"] for ln in asiento if ln.get("rol") == rol]
+    return [ln["cuenta"] for ln in asiento if papel(ln, documento["libro"]["tipo"]) == rol]
 
 
 @pytest.mark.parametrize("tipo, base, total, centro", [("compra", "AF", "AH", "AI"), ("venta", "AB", "AD", "Z")])

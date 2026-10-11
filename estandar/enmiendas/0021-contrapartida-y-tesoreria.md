@@ -6,7 +6,7 @@
 | **Compatibilidad** | aditivo |
 | **Nivel** | estándar |
 | **Versión** | `open-accounting` 1.0 (aditivo: no sube la versión, avanza el tag). El catálogo de roles pasa a su `1.1` |
-| **Test** | `tests/test_vocabulario.py::test_el_motor_no_escribe_todos_los_roles_del_catalogo` |
+| **Test** | `tests/test_vocabulario.py::test_la_regla_no_deriva_todos_los_roles_del_catalogo` |
 
 ## Motivación
 

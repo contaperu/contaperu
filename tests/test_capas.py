@@ -202,28 +202,33 @@ def _compra_con_detraccion() -> dict:
 
 
 def test_el_nucleo_no_decide_nada_por_el_rol():
-    """Se genera un asiento, **se le reescriben todos los roles** y lo que el núcleo calcula no cambia.
+    """Se **anota** cada línea con un papel y lo que el núcleo calcula no cambia.
 
-    Es la versión de comportamiento de una regla de arquitectura: el `rol` existe para que un destino encuentre la
-    línea que su columna pide sin conocer la cuenta —que la elige cada empresa—, y por eso los drivers se bifurcan
-    por él. El núcleo lo PRODUCE y no depende de él, y eso ya estaba dicho en tres sitios sin ningún test detrás:
-    `asiento.huella.SIN` lo excluye de la huella, `contable/resumen` solo lo recolecta para informarlo, y la api
-    avisa de un rol desconocido con «se lee igual, el rol solo dice qué es. No rompe».
+    Es la versión de comportamiento de una regla de arquitectura, y desde la 10.0 mide una cosa distinta y más
+    útil: el `rol` **ya no viaja en la línea**, así que el núcleo no puede leer uno que el motor escribió. Lo que
+    sí puede llegarle es una línea que alguien anotó —la api lo hace para el pre-mayor, porque está por encima de
+    `drivers` y puede derivarlo—, y eso no tiene derecho a mover nada: ni la huella, ni el cuadre, ni un importe.
 
-    Importa cuando el núcleo se convierte en la base de un ERP (John, 10-oct-2026): lo que existe para los sistemas
-    de destino no puede ser de lo que depende la contabilidad. Si algún día hace falta que el núcleo decida por el
-    rol, este test cae y hay que discutirlo, no descubrirlo."""
+    `asiento.huella.SIN` sigue excluyendo el `rol` justo por esto, y es lo único que impide que anotar una línea le
+    cambie la huella. Si algún día hace falta que el núcleo decida por el rol, este test cae y hay que discutirlo,
+    no descubrirlo."""
     from contaperu import api
     from contaperu.asiento import huella  # la función, que  reexporta
     from contaperu.contable import partida_doble
+    from contaperu.drivers.kit.rol import rol_de
 
     lineas = api.generar_asiento(_compra_con_detraccion(), driver="asiento_contable", configuracion={})["asiento"]
-    assert len({ln["rol"] for ln in lineas}) == 5, "el caso tiene que traer los cinco roles o no prueba nada"
+    assert all("rol" not in ln for ln in lineas), "el motor dejó de emitir el `rol` en la 10.0"
+    papeles = {rol_de(ln, "compra") for ln in lineas}
+    assert len(papeles) == 5, f"el caso tiene que traer los cinco papeles o no prueba nada: {papeles}"
 
     antes = (huella(lineas), partida_doble.cuadra(lineas))
-    revueltas = [{**ln, "rol": "un_rol_que_no_existe"} for ln in lineas]
-    despues = (huella(revueltas), partida_doble.cuadra(revueltas))
-    assert antes == despues, "el núcleo cambió de respuesta al cambiar solo los roles"
+    # Las dos formas en que una línea puede llegar anotada: con su papel de verdad y con uno inventado. Ninguna
+    # mueve nada, que es la afirmación entera.
+    for anotar in (lambda ln: rol_de(ln, "compra"), lambda ln: "un_rol_que_no_existe"):
+        anotadas = [{**ln, "rol": anotar(ln)} for ln in lineas]
+        assert (huella(anotadas), partida_doble.cuadra(anotadas)) == antes, \
+            "el núcleo cambió de respuesta al anotar el papel de cada línea"
 
 
 def test_el_resumen_informa_los_roles_y_no_cuenta_con_ellos():
@@ -249,10 +254,9 @@ _ROL = "rol"
 # Los dos módulos que pueden comparar un `rol`, con su motivo escrito. **Ninguno de los dos decide un asiento.**
 # Que la lista sea corta y nombrada es el punto: el test de abajo falla también si una entrada deja de hacer falta,
 # así que una excepción no se queda aquí por inercia.
+# **Era una lista de dos y la 10.0 la dejó en uno**, y lo cazó este mismo test: `api.operaciones` avisaba de un
+# rol fuera del catálogo, y ese aviso se fue con el campo —una línea con `rol` ya no se degrada, falla el esquema—.
 COMPARAN_UN_ROL_A_PROPOSITO = {
-    "contaperu.api.operaciones":
-        "informa de un rol que no está en el catálogo y dice que «se lee igual… No rompe». Compara contra el "
-        "catálogo ENTERO para avisar, no contra un valor para decidir.",
     "contaperu.drivers.contrato.examen":
         "`Columna.rol` no es el rol de una línea: es la configuración de un driver, que declara qué línea llena "
         "cada columna. Son dos cosas con el mismo nombre, y esta se queda (la otra se va).",
@@ -271,8 +275,8 @@ def test_nadie_se_bifurca_por_el_rol_de_una_linea():
     dónde sale ese rol — `drivers.kit.rol.rol_de()` lo **deriva** de los datos que la línea trae, que es la lógica
     de SAF-T, así que un driver ya no necesita que el asiento le traiga la etiqueta.
 
-    Importa porque es lo que convierte el campo en pura salida: **no se puede retirar un campo que algo lee**, y la
-    2.0 del estándar lo retira. Las dos excepciones van arriba, con su motivo."""
+    Importa porque es lo que convirtió el campo en pura salida: **no se puede retirar un campo que algo lee**, y la
+    2.0 del estándar lo retiró. La excepción que queda va arriba, con su motivo."""
     culpables = []
     for modulo, archivo in MODULOS.items():
         if modulo in COMPARAN_UN_ROL_A_PROPOSITO or modulo == "contaperu.drivers.kit.rol":

@@ -22,7 +22,7 @@ from contaperu.pipeline import preparacion as prep
 from contaperu.drivers import csv as driver_csv
 from contaperu.modelo import Comprobante, Libro
 from contaperu.modelo.libro import RASGOS
-from util import comprobante, con_imputaciones, en_secciones
+from util import comprobante, con_imputaciones, en_secciones, papel
 
 
 def filas_de_comprobante(*a, libro=RASGOS["compra"], **kw):
@@ -170,14 +170,14 @@ def test_las_dos_cuentas_del_sistema_se_leen_igual_y_con_su_respaldo():
     sin_las_dos = dict(CONTAB, cuentas={k: v for k, v in CONTAB["cuentas"].items()
                                        if k not in ("igv", "retencion_4ta")})
     lineas = asi.lineas_del_comprobante(factura(), sin_las_dos, MES, "080084", libro=RASGOS["compra"])
-    del_impuesto = next(ln for ln in lineas if ln.rol == "impuesto")
+    del_impuesto = next(ln for ln in lineas if ln.impuesto)
     assert del_impuesto.cuenta == CONFIG_POR_DEFECTO["cuentas"]["igv"] == "401111"
 
     # Y la de la retención, que ya lo hacía, para que las dos queden fijadas por el mismo test y no se separen otra vez.
     rh = factura(tipo_cp="02", retencion="160.00", igv="0.00", base_gravada="0.00",
                  exonerado="2000.00", total="2000.00")
     de_la_retencion = next(ln for ln in asi.lineas_del_comprobante(rh, sin_las_dos, MES, "150001", libro=RASGOS["compra"])
-                           if ln.rol == "retencion")
+                           if ln.retencion)
     assert de_la_retencion.cuenta == CONFIG_POR_DEFECTO["cuentas"]["retencion_4ta"] == "401721"
 
     # La clave de configuración NO se renombró con el rol en la 5.0: sigue siendo `retencion_4ta`, porque es la cuenta
@@ -194,11 +194,11 @@ def test_la_linea_del_impuesto_dice_de_que_tributo_es():
     from contaperu import catalogos
 
     lineas = asi.lineas_del_comprobante(factura(), CONTAB, MES, "080084", libro=RASGOS["compra"])
-    del_impuesto = next(ln for ln in lineas if ln.rol == "impuesto")
+    del_impuesto = next(ln for ln in lineas if ln.impuesto)
     assert del_impuesto.impuesto == {"codigo": "1000"} == {"codigo": catalogos.TRIBUTO_IGV}
     assert del_impuesto.impuesto["codigo"] in catalogos.TRIBUTOS
     # El bloque es SOLO de su línea: ninguna otra lo lleva, como ninguna otra lleva la detracción.
-    assert [ln.rol for ln in lineas if ln.impuesto] == ["impuesto"]
+    assert [papel(ln, RASGOS["compra"]) for ln in lineas if ln.impuesto] == ["impuesto"]
     # Y NO lleva tasa, a propósito: la del IGV ya viaja en `tasa_igv` y con otra convención —fracción frente a
     # porcentaje—, y el ICBPER no tiene ninguna porque es un importe por bolsa.
     assert "tasa" not in del_impuesto.impuesto and del_impuesto.tasa_igv
@@ -215,20 +215,21 @@ def test_la_linea_de_la_retencion_dice_de_que_tributo_y_de_que_categoria():
     rh = factura(tipo_cp="02", retencion="160.00", igv="0.00", base_gravada="0.00",
                  exonerado="2000.00", total="2000.00")
     lineas = asi.lineas_del_comprobante(rh, CONTAB, MES, "150001", libro=RASGOS["compra"])
-    de_la_retencion = next(ln for ln in lineas if ln.rol == "retencion")
+    de_la_retencion = next(ln for ln in lineas if ln.retencion)
     assert de_la_retencion.retencion == {"codigo": "3000", "categoria": "4"}
     assert de_la_retencion.retencion["codigo"] == catalogos.TRIBUTO_RENTA
     assert de_la_retencion.retencion["categoria"] == catalogos.CATEGORIA_RENTA_4TA
     # El IMPORTE retenido no está aquí: está donde está el de cualquier línea, en `importe`. Este bloque dice de qué
     # es, y `comprobante.retencion` dice cuánto. Confundirlos es el error que costó un mes sin su línea de retención.
     assert de_la_retencion.importe == "160.00" and "monto" not in de_la_retencion.retencion
-    assert [ln.rol for ln in lineas if ln.retencion] == ["retencion"]
+    assert [papel(ln, RASGOS["compra"]) for ln in lineas if ln.retencion] == ["retencion"]
 
 
 def test_el_motor_dice_el_rol_y_el_codigo_sunat_de_cada_linea():
     lineas = asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084", libro=RASGOS["compra"])
-    assert [ln.rol for ln in lineas] == ["principal", "impuesto", "tercero", "recorte", "detraccion"]
-    assert all(ln.rol in asi.ROLES for ln in lineas)
+    papeles = [papel(ln, RASGOS["compra"]) for ln in lineas]
+    assert papeles == ["principal", "impuesto", "tercero", "recorte", "detraccion"]
+    assert all(p in asi.ROLES for p in papeles)
     # La línea lleva el código de SUNAT y NO la sigla: `FT` es la T.G. 06 de CONCAR y la escribe su driver (4.0).
     assert lineas[0].documento["tipo_cp"] == "01" and "tipo" not in lineas[0].documento
     # La detracción no es un comprobante de SUNAT: su documento es el DR, sin código de la Tabla 10;
@@ -301,7 +302,7 @@ def test_lo_que_arma_el_motor_valida_contra_el_estandar():
                      "periodo": "202608", "tipo": "compra"},
            "asiento": [ln.a_dict() for ln in lineas]}
     assert list(validador.iter_errors(doc)) == []
-    assert {ln.rol for ln in lineas} == set(asi.ROLES_DEL_MOTOR)
+    assert {papel(ln, RASGOS["compra"]) for ln in lineas} == set(asi.ROLES_DEL_MOTOR)
 
 
 # --- el driver CSV -----------------------------------------------------------------

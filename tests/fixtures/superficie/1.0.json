@@ -67,7 +67,7 @@
   "leer_propuesta_sire": "función(contenido: 'str', libro: 'dict', *, es_base64: 'bool' = False) -> 'dict'",
   "leer_xml": "función(contenido: 'str', libro: 'dict', *, es_base64: 'bool' = False) -> 'dict'",
   "normalizar_detracciones": "función(documento: 'dict', *, configuracion: 'dict | None' = None) -> 'dict'",
-  "por_cuenta": "función(lineas: 'list[dict]') -> 'dict'",
+  "por_cuenta": "función(lineas: 'list[dict]', libro: 'dict | None' = None) -> 'dict'",
   "problema": "función(error: 'BaseException') -> 'dict'",
   "regimenes_tributarios": "función() -> 'dict'",
   "resumen": "función(documento: 'dict', *, agrupar_por: 'str' = '') -> 'dict'",

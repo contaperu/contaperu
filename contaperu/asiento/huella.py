@@ -58,6 +58,9 @@ import hashlib
 import json
 from typing import Iterable
 
+# El `rol` se queda en la lista aunque **ninguna línea lo lleve ya** (10.0), y no es inercia: desde la 9.2 quien
+# necesita el papel de una línea lo deriva y lo anota —la api lo hace para el pre-mayor—, así que una línea anotada
+# puede llegar aquí. Excluirlo sigue siendo lo que impide que anotarla le cambie la huella.
 SIN = ("correlativo", "clase", "rol", "documento.id_externo", "medio_pago")
 
 

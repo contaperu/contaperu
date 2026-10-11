@@ -17,6 +17,8 @@ from contaperu.asiento import faltas
 from contaperu.asiento.motor import ROLES_DEL_MOTOR
 from contaperu.modelo.libro import RASGOS
 
+from util import papel  # noqa: E402
+
 LIBRO = {"ruc": "20601234567", "periodo": "202601", "tipo": "compra"}
 COMPRA = {"tipo_cp": "01", "serie": "F001", "numero": "500", "fecha_emision": "2026-01-10",
           "contraparte_tipo_doc": "6", "contraparte_doc": "20131312955",
@@ -64,12 +66,12 @@ def test_los_elementos_8_y_0_y_lo_que_no_es_cuenta_no_tienen_clase(cuenta):
 
 def test_una_compra_de_mercaderia_es_activo_y_no_gasto():
     """El caso diario que tumba la regla vieja: el rol es `principal` y la línea es un activo."""
-    principal = next(ln for ln in asiento("201101") if ln["rol"] == "principal")
+    principal = next(ln for ln in asiento("201101") if papel(ln, LIBRO["tipo"]) == "principal")
     assert (principal["clase"], principal["debe_haber"]) == ("activo", "D")
 
 
 def test_una_compra_de_servicio_si_es_gasto():
-    principal = next(ln for ln in asiento("634301") if ln["rol"] == "principal")
+    principal = next(ln for ln in asiento("634301") if papel(ln, LIBRO["tipo"]) == "principal")
     assert principal["clase"] == "gasto"
 
 
@@ -77,7 +79,7 @@ def test_el_igv_de_compras_es_pasivo_al_debe():
     """`401111` es elemento 4, así que su clase es `pasivo`. Con `debe_haber: D` la línea dice exactamente lo que
     pasa —reduce un tributo por pagar, que es el crédito fiscal—; llamarla `activo` al debe afirmaría otra cosa. Lo
     que el ERP de fuera necesita saber ya viaja igual: el rol dice que es impuesto."""
-    igv = next(ln for ln in asiento("634301") if ln["rol"] == "impuesto")
+    igv = next(ln for ln in asiento("634301") if ln.get("impuesto"))
     assert (igv["cuenta"], igv["clase"], igv["debe_haber"]) == ("401111", "pasivo", "D")
 
 
@@ -87,7 +89,7 @@ def test_el_igv_de_ventas_es_la_misma_cuenta_y_la_misma_clase_al_haber():
     doc = documento("701101")
     doc["libro"]["tipo"] = "venta"
     lineas = api.generar_asiento(doc, driver="asiento_contable", configuracion=SIN_CENTROS)["asiento"]
-    igv = next(ln for ln in lineas if ln["rol"] == "impuesto")
+    igv = next(ln for ln in lineas if ln.get("impuesto"))
     assert (igv["cuenta"], igv["clase"], igv["debe_haber"]) == ("401111", "pasivo", "H")
 
 
@@ -109,7 +111,7 @@ def test_todos_los_roles_tienen_clase_en_un_asiento_completo():
                           ("632101", {"tipo_cp": "02", "base_gravada": "0", "igv": "0",
                                       "inafecto": "3000.00", "total": "3000.00", "retencion": "240.00"})]:
         for ln in asiento(cuenta, **extra):
-            vistos[ln["rol"]] = ln["clase"]
+            vistos[papel(ln, LIBRO["tipo"])] = ln["clase"]
     assert set(vistos) == set(ROLES_DEL_MOTOR), (
         f"faltan roles por cubrir: {set(ROLES_DEL_MOTOR) - set(vistos)}")
     assert all(vistos.values()), vistos

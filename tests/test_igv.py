@@ -13,6 +13,8 @@ from contaperu.drivers.concar import tasa_igv_entera as tasa_igv
 from contaperu.modelo import Comprobante
 from contaperu.modelo.libro import RASGOS
 
+from util import papel  # noqa: E402
+
 
 def cp(**k):
     base = dict(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-08-11", moneda="PEN",
@@ -178,7 +180,7 @@ def _las_cuatro(igv_escrito: str, base: str) -> dict[str, object]:
         en_secciones({"usa_centros_costo": False, "cuentas": {"igv": "401111"}}, "concar"), "concar"))
     lineas = lineas_del_comprobante(c, config, (date(2026, 8, 1), date(2026, 8, 31)), "080001",
                                     libro=RASGOS["compra"])
-    de_la_linea = next(ln.tasa_igv for ln in lineas if ln.rol == "tercero")
+    de_la_linea = next(ln.tasa_igv for ln in lineas if papel(ln, RASGOS["compra"]) == "tercero")
     return {"nucleo": de_la_linea,
             "concar": tasa_igv_entera(D(igv_escrito), D(base)),
             "contasis": igv.tasa_legal(igv_escrito, base),

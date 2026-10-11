@@ -15,6 +15,15 @@ from typing import Any
 
 from ..pcge import clase_de
 
+# Lo que se le dice a quien manda una clave que FUE de la línea y ya no es. Un mensaje genérico mandaría a leer el
+# esquema a quien solo tiene que quitar una clave, y toda línea de un documento 1.0 lleva el `rol`. Es el mismo
+# trato que `modelo.rasgos_de` le da al `es_venta: bool` de la 8.x: el error dice qué hacer.
+PISTA_DE_LA_CLAVE: dict[str, str] = {
+    "rol": "El `rol` salió del estándar en la 2.0: era una etiqueta para los destinos y nadie decidía por ella. "
+           "Quítalo de la línea; si lo necesitas, se deriva con `contaperu.drivers.kit.rol.rol_de(linea, libro)`.",
+}
+
+
 @dataclass
 class LineaDiario:
     """Una línea del asiento, en el vocabulario de `open-accounting`.
@@ -32,7 +41,6 @@ class LineaDiario:
     cuenta: str
     debe_haber: str            # 'D' | 'H'
     importe: str
-    rol: str = ""              # ver `motor.ROLES`: principal, impuesto, retencion, tercero…
     # Qué es la cuenta de esta línea: activo, pasivo, patrimonio, ingreso o gasto. Obligatoria desde la 1.0, y
     # derivada del primer dígito de la cuenta (`pcge.clase_de`), no del rol: en una compra de mercadería el rol es
     # `principal` y la línea es un ACTIVO. Es lo único que un ERP de fuera entiende sin conocer el PCGE.
@@ -99,7 +107,9 @@ class LineaDiario:
             raise ValueError("Una línea del asiento tiene que ser un objeto")
         desconocidas = sorted(set(d) - {f.name for f in fields(cls)})
         if desconocidas:
-            raise ValueError(f"Claves que no son de una línea del asiento: {', '.join(desconocidas)}")
+            pistas = [PISTA_DE_LA_CLAVE[clave] for clave in desconocidas if clave in PISTA_DE_LA_CLAVE]
+            raise ValueError(f"Claves que no son de una línea del asiento: {', '.join(desconocidas)}"
+                             + "".join("\n" + p for p in pistas))
         faltan = [clave for clave in ("cuenta", "debe_haber", "importe", "clase")
                   if not str(d.get(clave) or "").strip()]
         if faltan:

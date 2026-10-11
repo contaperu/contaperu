@@ -233,15 +233,31 @@ def test_lo_que_el_esquema_rechaza_es_un_ERROR(tmp_path, capsys):
 def test_lo_que_solo_saben_los_catalogos_es_un_AVISO(tmp_path, capsys):
     """La distinción es la del propio estándar y por eso se enseña en dos listas: un **error** es no cumplir el
     esquema, y ahí no hay nada que interpretar. Un **aviso** es lo que el esquema no puede decir porque vive en
-    los catálogos — un `rol` desconocido se degrada y no rompe la línea; un `tipo` de libro desconocido sí rompe,
-    porque de él dependen las columnas de cada registro."""
+    los catálogos — un `tipo` de libro desconocido rompe, porque de él dependen las columnas de cada registro, y
+    el documento es **conforme** igual: el esquema no enumera los tipos para que uno nuevo no cueste una versión.
+
+    Hasta la 10.0 el otro ejemplo era un `rol` desconocido, que se degradaba. Se fue con el campo: una línea con
+    `rol` ya no avisa, **falla el esquema**, y eso lo comprueba el test de abajo."""
     documento = {"open_accounting": "1.0", "libro": {**LIBRO_OK, "tipo": "diario"},
-                 "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "100.00", "clase": "gasto",
-                              "rol": "inventado"}]}
+                 "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "100.00", "clase": "gasto"}]}
     codigo = cli.main(["verificar-documento", _escribir(tmp_path, documento)])
     salida = capsys.readouterr().out
     assert codigo == 0, "los catálogos avisan, no rechazan: el esquema es quien dice conforme o no"
-    assert "SÍ rompe" in salida and "inventado" in salida and "No rompe" in salida
+    assert "SÍ rompe" in salida and "diario" in salida
+
+
+def test_una_linea_con_rol_ya_no_es_conforme(tmp_path, capsys):
+    """El break de la 2.0 del estándar, visto por donde lo ve quien produce documentos.
+
+    El `rol` era una etiqueta para los destinos y nadie decidía por ella, así que salió de la línea: el papel se
+    **deriva** de lo que la línea trae. Y como `linea` no admite claves que no son suyas, una línea que lo lleve no
+    avisa — no es conforme, que es lo honesto: el campo no existe."""
+    documento = {"open_accounting": "2.0", "libro": {**LIBRO_OK, "tipo": "compra"},
+                 "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "100.00", "clase": "gasto",
+                              "rol": "principal"}]}
+    codigo = cli.main(["verificar-documento", _escribir(tmp_path, documento)])
+    salida = capsys.readouterr().out
+    assert codigo == 1 and "NO conforme" in salida and "rol" in salida
 
 
 def test_un_mes_de_verdad_no_sale_por_pantalla_entero(tmp_path, capsys):

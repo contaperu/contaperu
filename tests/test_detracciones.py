@@ -29,7 +29,7 @@ from contaperu.modelo.libro import RASGOS
 
 # `con_imputaciones` mete las imputaciones de prueba en la configuración: desde la 3.0 la cuenta de un comprobante
 # es suya y llega por ahí, así que sin esto el asiento se plantaría con «sin cuenta contable».
-from util import comprobante as _comprobante_de_prueba, con_imputaciones     # noqa: E402
+from util import comprobante as _comprobante_de_prueba, con_imputaciones, papel     # noqa: E402
 
 
 def filas_de_comprobante(*a, libro=RASGOS["compra"], **kw):
@@ -151,7 +151,7 @@ def test_el_asiento_y_el_diagnostico_dejan_en_blanco_la_misma_detraccion():
     imputacion = {"f1": {"cuenta_contable": "659999"}}      # la cuenta es del comprobante desde la 3.0
     asiento = api.generar_asiento(doc, driver="csv", configuracion=configuracion, imputacion=imputacion,
                                   incluir_observados=True)
-    assert all(linea.get("rol") != "detraccion" for linea in asiento["asiento"])
+    assert all(not linea.get("detraccion") for linea in asiento["asiento"])
     assert set(asiento["_asiento"]["sub_diarios"]) == {"11"}
     assert api.diagnosticar(doc, driver="csv", configuracion=configuracion,
                             imputacion=imputacion)["detracciones_pendientes"] == []
@@ -267,7 +267,7 @@ def test_el_driver_de_asiento_y_el_de_registro_dicen_lo_MISMO():
     comodín incluido. Dos copias de una regla acaban diciendo cosas distintas; esto lo comprueba."""
     c = _compra_con_detraccion(nro_constancia="98765432109876543", fecha_constancia="2026-02-10")
     lineas = asiento.lineas_del_comprobante(c, CONTAB, (date(2026, 1, 1), date(2026, 1, 31)), "0001", libro=RASGOS["compra"])
-    de_la_linea = next(ln.detraccion for ln in lineas if ln.rol == "detraccion" and ln.detraccion)
+    de_la_linea = next(ln.detraccion for ln in lineas if ln.detraccion)
     del_registro = driver_contasis.proyeccion._constancia(c, CONTAB)
     assert de_la_linea["nro_constancia"] == del_registro["U"] == "98765432109876543"
     assert de_la_linea["fecha_constancia"] == "2026-02-10" and del_registro["V"].date() == date(2026, 2, 10)
@@ -286,7 +286,7 @@ def test_el_comodin_del_numero_se_configura_y_llega_a_los_dos_caminos():
 
     # El camino del ASIENTO: el documento comodín de la línea `DR` y la constancia de su bloque.
     lineas = asiento.lineas_del_comprobante(c, propio, (date(2026, 1, 1), date(2026, 1, 31)), "0001", libro=RASGOS["compra"])
-    de_la_linea = next(ln for ln in lineas if ln.rol == "detraccion")
+    de_la_linea = next(ln for ln in lineas if ln.detraccion)
     assert de_la_linea.documento["serie_numero"] == "123456789"
     assert de_la_linea.detraccion["nro_constancia"] == "123456789"
 
@@ -363,7 +363,7 @@ def test_el_voucher_llega_al_documento_DR_de_CONCAR():
     def documento_dr(c, config=CONTAB) -> tuple[str, str]:
         lineas = asiento.lineas_del_comprobante(c, config, (date(2026, 1, 1), date(2026, 1, 31)), "0001",
                                                 libro=RASGOS["compra"])
-        dr = next(ln for ln in lineas if ln.rol == "detraccion")
+        dr = next(ln for ln in lineas if ln.detraccion)
         return driver_concar.proyeccion.fila(dr, c, config)["S"], dr.documento["serie_numero"]
 
     # Sin vóucher, el comodín, como siempre: es el caso normal al cerrar el mes.
@@ -513,7 +513,7 @@ def test_sin_marcar_la_factura_el_par_deja_colgada_la_detraccion():
     Se fija el comportamiento de HOY a propósito: no se arregla solo, hace falta que el contador lo diga. Si algún día
     el motor lo decidiera por su cuenta, este test cae y hay que decidirlo."""
     a = _par(anulada=False)
-    assert [l["rol"] for l in a if l["documento"].get("serie_numero") == "E001-209"] == [
+    assert [papel(l, "compra") for l in a if l["documento"].get("serie_numero") == "E001-209"] == [
         "principal", "impuesto", "tercero", "recorte"]
     assert _neto(a) == {"421201": "137.00", "421203": "-137.00"}
 
@@ -522,7 +522,7 @@ def test_marcada_como_anulada_la_factura_no_provisiona_y_el_par_cuadra():
     """**La prueba del cambio.** La factura marcada da tres líneas, su nota revierte esas tres, y no queda nada
     colgado. El 137 que decía que se le debía al Banco de la Nación desaparece, porque ese depósito no se hizo."""
     a = _par(anulada=True)
-    assert [l["rol"] for l in a if l["documento"].get("serie_numero") == "E001-209"] == [
+    assert [papel(l, "compra") for l in a if l["documento"].get("serie_numero") == "E001-209"] == [
         "principal", "impuesto", "tercero"]
     assert _neto(a) == {}, "el par tiene que cuadrar a cero"
     # Y la nota de crédito no se toca: sigue dando sus tres.
@@ -741,8 +741,8 @@ def test_con_el_codigo_del_contador_la_detraccion_llega_al_asiento():
     assert api.diagnosticar(doc, driver="concar", configuracion=configuracion,
                             imputacion=imputacion)["faltantes"]["sin_codigo_detraccion"] == []
     asi = api.generar_asiento(doc, driver="csv", configuracion=configuracion, imputacion=imputacion)
-    roles = [linea.get("rol") for linea in asi["asiento"]]
+    roles = [papel(linea, "compra") for linea in asi["asiento"]]
     assert roles.count("detraccion") == 1 and roles.count("recorte") == 1
     # 118 × 12 % = 14.16 → 14 soles enteros, y la línea lleva el código de SUNAT, no el interno de ningún ERP.
-    detra = next(linea for linea in asi["asiento"] if linea.get("rol") == "detraccion")
+    detra = next(linea for linea in asi["asiento"] if linea.get("detraccion"))
     assert detra["importe"] == "14.00" and detra["detraccion"]["codigo"] == "037"

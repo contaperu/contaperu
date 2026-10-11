@@ -117,3 +117,20 @@ def construir_concar(libro: Libro, comprobantes: list[Comprobante], config: dict
     from contaperu.drivers import concar
     from contaperu.pipeline import armado
     return armado.desde_lineas(concar, libro, comprobantes, opciones or concar.OPCIONES, config, correlativos)
+
+
+def papel(linea, libro) -> str:
+    """El papel de una línea, **derivado** — lo que hasta la 10.0 era `linea.rol`.
+
+    El campo salió del estándar en la 2.0: era una etiqueta para los destinos y nadie decidía por ella. Un test que
+    quiere «la línea del IGV» sigue teniendo esa pregunta, y la respuesta se deriva de lo que la línea trae
+    (`drivers.kit.rol`).
+
+    **El `libro` no tiene valor por defecto**, a propósito: el lado al que va la contraparte lo dice el libro, así
+    que suponer «compra» daría la respuesta cambiada en una venta sin que nada lo dijera. Es la misma lección que
+    la 9.0, cuando el eje dejó de ser un booleano con defecto.
+
+    Donde la línea lleva un bloque tipado —`impuesto`, `retencion`, `detraccion`— es mejor preguntar por el bloque:
+    es el discriminador de verdad y no hace falta el libro."""
+    from contaperu.drivers.kit.rol import rol_de
+    return rol_de(linea, libro)

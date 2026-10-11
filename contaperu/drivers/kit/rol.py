@@ -48,6 +48,13 @@ POR_SU_BLOQUE: tuple[tuple[str, str], ...] = (("impuesto", "impuesto"), ("retenc
                                               ("detraccion", "detraccion"))
 
 
+# Los papeles que esta regla puede devolver, enumerados al lado de la función que los devuelve. El catálogo del
+# estándar publica dos más —`contrapartida` y `tesoreria`—, y están RESERVADOS: los producirá la regla el día que el
+# motor sepa armar el asiento de un libro de tesorería (el hito D6). Que «reservado» signifique algo lo comprueba
+# `tests/test_vocabulario.py`, comparando esta tupla con lo que los libros declaran.
+ROLES_QUE_DERIVA: frozenset[str] = frozenset({rol for _, rol in POR_SU_BLOQUE} | {"tercero", "recorte", "principal"})
+
+
 class RolNoDerivable(ValueError):
     """Se pidió el rol de una línea de un libro cuyo asiento el motor no origina.
 

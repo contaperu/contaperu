@@ -590,10 +590,6 @@
      "type": "string",
      "minLength": 1
     },
-    "rol": {
-     "description": "Qué papel cumple la línea en la operación peruana. Los valores están en el catálogo `roles` de `estandar/catalogos.json`, publicado y versionado aparte del esquema, para que un rol nuevo no cueste una versión del documento. **Quien no conozca un rol tiene que poder contabilizar la línea con `clase`, `debe_haber` e `importe`**: es la regla de degradación que hace que el catálogo pueda crecer sin romper a ningún ERP ya integrado.",
-     "type": "string"
-    },
     "moneda": {
      "type": "string",
      "pattern": "^[A-Z]{3}$"

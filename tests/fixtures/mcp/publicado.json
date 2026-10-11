@@ -530,6 +530,19 @@
       },
       "title": "Asiento",
       "type": "array"
+     },
+     "libro": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Libro"
      }
     },
     "required": [

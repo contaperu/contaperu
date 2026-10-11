@@ -413,7 +413,7 @@
    "post": {
     "operationId": "por_cuenta",
     "summary": "El pre-mayor: en qué cuentas cayó el asiento, con su debe y su haber por moneda, y el cuadre.",
-    "description": "El pre-mayor: en qué cuentas cayó el asiento, con su debe y su haber por moneda, y el cuadre.\n\nLa misma entrada que `cuadrar`, y hermana suya: aquí no se contabiliza nada, se agrupa lo que el motor\nya contabilizó. Delata una imputación mal puesta sin abrir ningún archivo —una cuenta con un importe\nque no le toca salta a la vista en diez cuentas y no en seiscientas filas—.\n\nTrae el cuadre global y **también por moneda**, que dice algo que el global no puede: dos monedas cuyos\ndescuadres se compensan salen cuadradas en el total y descuadradas cada una. Los suma la misma función\nque `cuadrar`, así que el pre-mayor y el cuadre no pueden discrepar.\n\n`roles` va en plural: con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.",
+    "description": "El pre-mayor: en qué cuentas cayó el asiento, con su debe y su haber por moneda, y el cuadre.\n\nLa misma entrada que `cuadrar`, y hermana suya: aquí no se contabiliza nada, se agrupa lo que el motor\nya contabilizó. Delata una imputación mal puesta sin abrir ningún archivo —una cuenta con un importe\nque no le toca salta a la vista en diez cuentas y no en seiscientas filas—.\n\nTrae el cuadre global y **también por moneda**, que dice algo que el global no puede: dos monedas cuyos\ndescuadres se compensan salen cuadradas en el total y descuadradas cada una. Los suma la misma función\nque `cuadrar`, así que el pre-mayor y el cuadre no pueden discrepar.\n\n`roles` va en plural: con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento. Y **pide el\n`libro`**, porque desde la 10.0 el papel de una línea no viaja en ella: se **deriva** de lo que trae, y el lado\nal que va la contraparte lo dice el libro (`drivers.kit.rol`). Sin él la columna viene vacía y\n`roles_derivados` lo dice — nadie puede afirmar que una línea es el tercero sin saber si es una compra o una\nventa, y una columna vacía sin avisar es peor que no tenerla.\n\nUn libro que **no declara roles** —tesorería, mientras el motor no sepa armar su asiento— también devuelve la\ncolumna vacía con `roles_derivados: false`: no es un error, es una pregunta sin respuesta todavía. Un `tipo`\nque el motor no conoce **sí** es un error, y lo dice: un libro mal escrito dejaría la columna vacía en silencio.",
     "requestBody": {
      "required": true,
      "content": {
@@ -1652,10 +1652,6 @@
       "description": "Qué es la cuenta de esta línea: los cinco valores que QuickBooks, Xero, Merge y Rutter comparten, así que un ERP de fuera sabe qué hacer con ella sin conocer el PCGE. Se deriva del primer dígito de la cuenta (el elemento del PCGE) y no del rol: en una compra de mercadería el rol es `principal` y la línea es un activo. Los valores están en el catálogo `clases` del estándar, y ahí se congelan: son los únicos que un ERP de fuera entiende sin conocer el PCGE.",
       "type": "string",
       "minLength": 1
-     },
-     "rol": {
-      "description": "Qué papel cumple la línea en la operación peruana. Los valores están en el catálogo `roles` de `estandar/catalogos.json`, publicado y versionado aparte del esquema, para que un rol nuevo no cueste una versión del documento. **Quien no conozca un rol tiene que poder contabilizar la línea con `clase`, `debe_haber` e `importe`**: es la regla de degradación que hace que el catálogo pueda crecer sin romper a ningún ERP ya integrado.",
-      "type": "string"
      },
      "moneda": {
       "type": "string",
@@ -2999,12 +2995,17 @@
      "cuadre": {
       "description": "El de todas las líneas juntas, lo mismo que devuelve `cuadrar`.",
       "$ref": "#/components/schemas/cuadre"
+     },
+     "roles_derivados": {
+      "type": "boolean",
+      "description": "Si la columna `roles` se pudo derivar. Desde la 10.0 el papel de una línea no viaja en ella: se deriva de lo que trae, y para eso hay que saber de qué libro es. Sin `libro`, o con uno que no declara roles —tesorería, mientras el motor no sepa armar su asiento—, `roles` viene VACÍA y esto es `false`. Se dice en vez de callarse, porque una columna vacía que parece un dato es peor que no tenerla."
      }
     },
     "required": [
      "cuentas",
      "por_moneda",
-     "cuadre"
+     "cuadre",
+     "roles_derivados"
     ],
     "additionalProperties": false
    },
@@ -4064,6 +4065,11 @@
        "$ref": "#/components/schemas/OpenAccounting_linea"
       },
       "description": "Las líneas del asiento."
+     },
+     "libro": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting_libro",
+      "description": "La cabecera: RUC, periodo y si son ventas o compras."
      }
     }
    },

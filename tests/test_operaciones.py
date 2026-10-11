@@ -10,7 +10,7 @@ import pytest
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
 
-from util import imputando  # noqa: E402
+from util import imputando, papel  # noqa: E402
 
 LIBRO = {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
          "periodo": "202601", "tipo": "compra"}
@@ -236,7 +236,9 @@ def test_un_documento_sin_comprobantes_sigue_sin_exportar_aunque_traiga_asiento(
 
 
 def _del_rol(asiento: dict, *roles: str) -> list[tuple[str, str]]:
-    return [(ln["cuenta"], ln["importe"]) for ln in asiento["asiento"] if ln["rol"] in roles]
+    """Las líneas que hacen uno de esos papeles. El papel se **deriva** desde la 10.0: no viaja en la línea."""
+    return [(ln["cuenta"], ln["importe"]) for ln in asiento["asiento"]
+            if papel(ln, LIBRO["tipo"]) in roles]
 
 
 def test_la_cuenta_llega_solo_en_la_imputacion():
@@ -405,3 +407,56 @@ def test_un_error_en_lo_que_el_destino_SI_lleva_sigue_deteniendo_la_exportacion(
     with pytest.raises(DocumentoInvalido, match="observaciones que bloquean"):
         api.exportar_archivo(imputando(documento, "634301"), driver="concar", configuracion={},
                              correlativos={"11": 1, "13": 1})
+
+
+# ── El pre-mayor deriva los roles, porque el campo ya no viaja en la línea (10.0) ────────────────────────────
+
+def test_el_pre_mayor_deriva_los_roles_y_dice_si_pudo():
+    """La columna `roles` del pre-mayor sobrevive al retiro del campo, y el núcleo sigue sin calcular nada.
+
+    Es la pieza que faltaba en el plan de la 10.0: `linea.rol` no lo leía nadie, pero el pre-mayor lo
+    **recolectaba**, y la aplicación publica esa columna en su informe y en su herramienta MCP. Quitar el campo sin
+    más la habría dejado vacía en silencio. Como la api está por encima de `drivers` —y `contable/resumen` no lo
+    está, que es lo que la capa garantiza—, la derivación vive aquí: el resumen sigue solo AGRUPANDO lo que recibe.
+
+    El caso es el que da sentido a que `roles` sea plural: con una detracción, la cuenta por pagar sale como
+    `tercero` y como `recorte` en el mismo asiento."""
+    doc = imputando({"libro": {**LIBRO, "periodo": "202608"},
+                     "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "123",
+                                       "fecha_emision": "2026-08-11", "contraparte_doc": "20602222226",
+                                       "contraparte_nombre": "PROVEEDOR SAC", "moneda": "PEN",
+                                       "base_gravada": "1000.00", "igv": "180.00", "total": "1180.00",
+                                       "detraccion": {"codigo": "037", "porcentaje": 12}}]}, "631101")
+    lineas = api.generar_asiento(doc, driver="csv")["asiento"]
+
+    r = api.por_cuenta(lineas, doc["libro"])
+    assert r["roles_derivados"] is True
+    papeles = {c["cuenta"]: c["roles"] for c in r["cuentas"]}
+    cxp = next(c for c in papeles if c.startswith("42") and papeles[c] == ["recorte", "tercero"])
+    assert papeles[cxp] == ["recorte", "tercero"], "la misma cuenta, dos papeles en un asiento"
+
+    # Sin libro no se adivina: la columna viene vacía y **se dice**, que es lo que impide leer un hueco como un dato.
+    sin = api.por_cuenta(lineas)
+    assert sin["roles_derivados"] is False
+    assert all(c["roles"] == [] for c in sin["cuentas"])
+    # Y lo demás del informe es EXACTAMENTE lo mismo: la derivación no toca ni un importe ni un cuadre.
+    quitar = lambda x: {**{k: v for k, v in x.items() if k != "roles_derivados"},  # noqa: E731
+                        "cuentas": [{k: v for k, v in c.items() if k != "roles"} for c in x["cuentas"]]}
+    assert quitar(r) == quitar(sin)
+
+
+def test_un_libro_sin_roles_lo_dice_y_uno_que_no_existe_es_un_error():
+    """Dos huecos que no son lo mismo, y por eso no se contestan igual.
+
+    Tesorería **no declara roles** mientras el motor no sepa armar su asiento (el hito D6): la columna viene vacía
+    y `roles_derivados` lo dice, porque es una pregunta sin respuesta todavía. Un `tipo` que el motor no conoce es
+    otra cosa: un libro mal escrito dejaría la columna vacía en silencio, así que para y dice qué libros conoce."""
+    from contaperu.modelo.libro import LibroSinRasgos
+
+    lineas = [{"cuenta": "104111", "debe_haber": "D", "importe": "100.00", "clase": "activo", "moneda": "PEN"}]
+    tesoreria = api.por_cuenta(lineas, {**LIBRO, "tipo": "tesoreria"})
+    assert tesoreria["roles_derivados"] is False and tesoreria["cuentas"][0]["roles"] == []
+
+    with pytest.raises(LibroSinRasgos) as e:
+        api.por_cuenta(lineas, {**LIBRO, "tipo": "inventario"})
+    assert "compra" in str(e.value) and "venta" in str(e.value)

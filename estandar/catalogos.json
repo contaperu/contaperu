@@ -2,38 +2,18 @@
  "_nota": "Los catálogos que este estándar inventa, frente a los de SUNAT, que se copian de la norma (contaperu/datos/sunat/). Viven aquí, junto al esquema, para citarse por la URL del tag del estándar igual que él. Un valor nuevo en un catálogo NO sube la versión del documento (estandar/LEEME.md, «Versionado»): se publica con su fecha, y quien no lo conozca degrada con la `clase` de la línea. Quién aprueba un valor y cómo se propone: «Quién gobierna los catálogos».",
  "roles": {
   "fuente": "open-accounting: el papel que cumple cada línea en la operación peruana. No está en ninguna norma —es lo que este estándar aporta— y por eso tiene gobierno: estandar/LEEME.md, «Quién gobierna los catálogos».",
-  "version": "1.2",
-  "nota": "Un rol dice QUÉ HACE la línea en la operación; el tributo, cuando lo hay, va en su propio bloque —como ya hacía `detraccion` con su código y su tasa, y como hacen desde la 5.0 `impuesto` y `retencion`—. Seis los escribe el motor, que genera compras y ventas: una venta usa tres y una compra hasta seis, y la nota de crédito no añade ninguno porque reusa los mismos con los sentidos invertidos. Dos son VOCABULARIO para quien produce un asiento que el motor no origina —una depreciación, un pago, una planilla—: el motor no los emite y el esquema los acepta igual. Y tres están en `obsoletos`: siguen siendo válidos al leerlos y ya no se escriben. El catálogo no crece por gusto: cada valor entró con su caso real, y los tres de la 5.0 no son valores nuevos sino los mismos papeles bien nombrados.",
-  "hacia_donde_va": "Dicho a propósito, para que quien integre no se lleve una sorpresa. La 5.0 cerró lo que esta nota anunciaba desde la 1.1: `igv` y `retencion_4ta` metían el TRIBUTO en el nombre del rol, y `detraccion_tercero` nombraba por su causa lo que es un recorte del saldo de un tercero —que también pasa al pagar o al aplicar un anticipo—. Ahora son `impuesto`, `retencion` y `recorte`, con el tributo en su bloque, y los tres viejos están en `obsoletos` con su reemplazo, que es por donde se migra. Los siete papeles del modelo están completos: `principal`, `tercero`, `recorte`, `contrapartida`, `tesoreria`, `impuesto` y `retencion`. Lo que queda abierto no es vocabulario sino motor: `contrapartida` y `tesoreria` siguen sin emitirse porque de un comprobante no sale una depreciación ni un pago, y entrarán cuando el motor arme esos libros. No hay ningún renombrado más previsto.",
+  "version": "2.0",
+  "nota": "**No es un campo del documento.** Hasta la 1.0 una línea llevaba su `rol`; la 2.0 lo retiró, porque era una etiqueta para los destinos y nadie decidía por ella —ningún estándar abierto del asiento la tiene: XBRL GL usa cuenta, tipo de documento y D/H, y SAF-T distingue la línea por los datos que trae—. Lo que este catálogo publica es **el vocabulario del papel que se DERIVA de la línea**: qué trae y a qué lado va. Un rol dice QUÉ HACE la línea; el tributo, cuando lo hay, va en su propio bloque, y de hecho es el bloque el que identifica tres de los papeles. Seis se derivan hoy de una compra o de una venta: una venta usa tres y una compra hasta seis, y la nota de crédito no añade ninguno porque reusa los mismos con los sentidos invertidos. Dos están RESERVADOS para el libro de tesorería, que el motor todavía no sabe armar. Cada valor entró con su caso real.",
+  "hacia_donde_va": "Dicho a propósito, para que quien integre no se lleve una sorpresa. **La 2.0 retiró los tres `obsoletos` que venían de la 5.0** —`igv`, `retencion_4ta` y `detraccion_tercero`, que metían el tributo o la causa en el nombre del papel—: ya no pueden llegar en ningún documento, porque la clave que los llevaba no existe. Es una excepción a «un valor obsoleto no desaparece nunca» y solo una mayor puede hacerla. Lo que queda abierto no es vocabulario sino motor: `contrapartida` y `tesoreria` no se derivan todavía porque de un comprobante no sale una depreciación ni un pago, y la regla los producirá cuando el motor arme el asiento de tesorería (el hito D6, que espera un archivo del sub-diario de bancos que CONCAR haya aceptado). No hay ningún renombrado más previsto.",
   "codigos": {
    "principal": "El gasto en compras, el ingreso en ventas. Su cuenta la elige quien imputa",
-   "igv": "El IGV del comprobante. Al debe en compras es el crédito fiscal; al haber en ventas, el débito",
-   "retencion_4ta": "La retención de renta de 4ta categoría que muestra un recibo por honorarios",
    "tercero": "Lo que se le debe al proveedor o lo que debe el cliente: la cuenta del total",
-   "detraccion_tercero": "La parte del saldo del proveedor que no se le paga a él, porque se deposita",
    "detraccion": "La contrapartida: lo que se deposita en el Banco de la Nación, pendiente de constancia",
-   "contrapartida": "La otra cara de un hecho que no se le debe a nadie: la depreciación acumulada frente a su gasto, la cuenta de destino frente a la 79, una provisión. No la emite el motor",
-   "tesoreria": "El dinero moviéndose: caja, banco o equivalente, al cobrar o al pagar. Lleva el `medio_pago` de la línea, que dice con qué se movió. No la emite el motor",
+   "contrapartida": "La otra cara de un hecho que no se le debe a nadie: la depreciación acumulada frente a su gasto, la cuenta de destino frente a la 79, una provisión. **Reservado**: la regla no lo deriva todavía",
+   "tesoreria": "El dinero moviéndose: caja, banco o equivalente, al cobrar o al pagar. Lleva el `medio_pago` de la línea, que dice con qué se movió. **Reservado**: la regla no lo deriva todavía",
    "impuesto": "El tributo del comprobante. Al debe en compras es el crédito fiscal; al haber en ventas, el débito. Cuál es lo dice su bloque `impuesto` con el código del Catálogo 05 de SUNAT; el motor escribe el 1000, el IGV",
    "retencion": "Lo que se le retiene a un tercero y se le debe a SUNAT. De qué tributo y de qué categoría lo dice su bloque `retencion`; el motor escribe la de 4ta de un recibo por honorarios. Reemplaza a `retencion_4ta`",
    "recorte": "La parte del saldo de un tercero que no se le paga a él. El motor lo emite por la detracción, que se deposita; también lo es un anticipo que se aplica o una retención que se descuenta al pagar. Reemplaza a `detraccion_tercero`"
-  },
-  "obsoletos": {
-   "igv": {
-    "usar": "impuesto",
-    "desde": "2026-10-01",
-    "por_que": "metía el tributo en el nombre del rol: un rol dice qué hace la línea, y cuál es el tributo lo dice su bloque. Con `igv` no había forma de decir que una línea era del ISC o del ICBPER"
-   },
-   "retencion_4ta": {
-    "usar": "retencion",
-    "desde": "2026-10-01",
-    "por_que": "lo mismo, y con la categoría dentro del nombre: la de 4ta no es la única que existe. `retencion` dice el papel y su bloque dice el tributo (el 3000 del Catálogo 05) y la categoría de la Ley del Impuesto a la Renta"
-   },
-   "detraccion_tercero": {
-    "usar": "recorte",
-    "desde": "2026-10-01",
-    "por_que": "nombraba por su causa lo que es un papel: recortar el saldo de un tercero pasa también al aplicar un anticipo o al descontar una retención al pagar, y no solo por una detracción"
-   }
   }
  },
  "clases": {

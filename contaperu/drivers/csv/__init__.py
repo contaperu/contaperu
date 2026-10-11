@@ -78,6 +78,10 @@ COLUMNAS_DE_LINEA: tuple[ColumnaDeLinea, ...] = tuple(
         ("tasa_igv", "tasa_igv", "numero"),
         # Lo que un driver necesita para traducir sin adivinar (B5, 1.0): el papel de la línea y los códigos SUNAT del
         # documento y de su referencia. Van al final para no mover las columnas de siempre.
+        #
+        # **El `rol` es una columna DERIVADA desde la 10.0** (`kit.columnas.DERIVADAS`): dejó de viajar en la línea
+        # —salió del estándar en la 2.0— y se calcula de lo que la línea trae más el libro. La cabecera y el
+        # contenido no cambian, y por eso quien lea este CSV no nota nada: lo que cambió es de dónde sale.
         ("rol", "rol", "texto"),
         ("documento.tipo_cp", "doc_tipo_cp", "texto"),
         ("referencia.tipo_cp", "ref_tipo_cp", "texto"),
@@ -100,4 +104,4 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones
     Es el driver de asientos más sencillo que puede escribirse con la forma `desde_lineas` del
     contrato, y por eso sirve de plantilla: traduce vocabulario y nada más."""
     lineas = list(lineas)
-    return escribir_csv(lineas, COLUMNAS_DE_LINEA, separador, bom), {"filas": len(lineas)}
+    return escribir_csv(lineas, COLUMNAS_DE_LINEA, separador, bom, libro), {"filas": len(lineas)}

@@ -25,6 +25,11 @@ Es el espejo de `_obsoleto.py`, que hace esto con los nombres de Python, **con u
 aquí no hay `RETIRO`**. Un nombre de Python obsoleto desaparece en la mayor siguiente; un valor de catálogo obsoleto
 **no desaparece nunca**, porque los documentos ya guardados lo llevan dentro y seguirán llegando.
 
+**La 2.0 del estándar hizo la única excepción, y solo una mayor puede hacerla.** Los tres `obsoletos` del catálogo
+`roles` —`igv`, `retencion_4ta` y `detraccion_tercero`, que la 5.0 renombró— se fueron con el campo que los llevaba:
+el `rol` salió de la línea, así que no pueden llegar en ningún documento y describir su reemplazo no le sirve a
+nadie. La razón importa más que el caso: **un valor obsoleto sobrevive mientras exista la clave donde se guardaba.**
+
 **Por qué este módulo no se llama `estandar.py`**: chocaría con el directorio `contaperu/estandar/` que el
 `force-include` de `pyproject.toml` crea dentro de la rueda.
 """

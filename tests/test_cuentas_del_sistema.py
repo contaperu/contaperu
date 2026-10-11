@@ -18,7 +18,7 @@ import pytest
 from contaperu import api, drivers
 from contaperu.drivers import contrato
 from drivers_de_prueba import diario_json
-from util import GOLDEN, imputando
+from util import GOLDEN, imputando, papel
 
 # Cuentas a ocho dígitos, como las de STARSOFT: se declaran SOLO las que se apartan de lo general.
 CUENTAS_DEL_SISTEMA = {"cxp": {"PEN": "42120001", "USD": "42120002"}, "igv": "40111000"}
@@ -144,8 +144,8 @@ def test_el_asiento_lleva_la_cuenta_del_sistema_sin_configurar_nada(con_cuentas_
     """
     asiento = api.generar_asiento(imputando(_documento(), "62010001"), driver="diario_json",
                                   configuracion=CONFIG)["asiento"]
-    terceros = {linea["cuenta"] for linea in asiento if linea["rol"] == "tercero"}
-    igv = {linea["cuenta"] for linea in asiento if linea["rol"] == "impuesto"}
+    terceros = {linea["cuenta"] for linea in asiento if papel(linea, "compra") == "tercero"}
+    igv = {linea["cuenta"] for linea in asiento if linea.get("impuesto")}
     assert terceros == {"42120001"} and igv == {"40111000"}
 
 
