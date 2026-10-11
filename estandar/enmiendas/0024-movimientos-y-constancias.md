@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Estado** | final |
+| **Estado** | reemplazada |
 | **Compatibilidad** | aditivo |
 | **Nivel** | estándar |
 | **Versión** | `open-accounting` 1.0. Dos bloques opcionales nuevos **no suben la versión**, y `estandar/LEEME.md` §Versionado ya nombraba `movimientos[]` del banco como su ejemplo |
@@ -120,3 +120,19 @@ Y un obstáculo que conviene anotar bien, porque la primera versión de esta enm
 quite un prefijo de cinco bytes**, `$BOP$`, un centinela de impresora de *mainframe* delante del `%PDF-`. Los otros
 cinco abren directamente. Así que siete de nueve se leen hoy, no cinco. Lo difícil de un extracto peruano sigue sin
 ser las columnas, pero es menos difícil de lo que parecía.
+
+## Reemplazada por la 0025 (11-oct-2026)
+
+Esta enmienda metió el dinero en el estándar, y eso se queda: la forma de un movimiento, el ITF como campo, las
+cuatro clases de referencia y el cuadre de la cadena de saldos son suyos y no se tocan.
+
+**Lo que no sobrevivió fue partirlo en dos bloques.** La
+[enmienda 0025](0025-una-sola-entrada-para-tesoreria.md) funde `constancias[]` dentro de `movimientos[]`, por
+decisión de John: *«solo debe haber una entrada para tesorería»*. Y los tres argumentos con que esto se justificó
+—los testigos distintos, las cardinalidades, los ciclos de vida— no resisten mirarlos: el testigo era el campo
+`origen`, que el comprobante ya usaba; un cargo que paga un lote es un uno-a-muchos **dentro** de un item; y que
+una constancia exista antes del extracto es asunto de quien integra, porque un movimiento sin `saldo` y sin
+`referencia` del banco **es** exactamente eso.
+
+Lo que había delante y nadie leyó: **`modelo.RASGOS.origen` es singular**, una entrada por libro, así que
+`constancias[]` era un bloque que no era el origen de ningún libro.

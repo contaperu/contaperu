@@ -15,7 +15,7 @@ from jsonschema import Draft202012Validator
 
 from contaperu import OPEN_ACCOUNTING
 from contaperu.modelo import Comprobante, Libro
-from contaperu.tesoreria import Constancia, Movimiento, Referencia
+from contaperu.tesoreria import Movimiento, Referencia
 
 from util import GOLDEN
 
@@ -53,8 +53,7 @@ def test_el_esquema_es_valido(validador):
 # en el modelo y no en el esquema —o al revés— sin que nada se pusiera rojo. Es el candado de la 3.0, que mueve
 # justo esos tres bloques.
 EL_ESQUEMA_Y_SU_DATACLASS = (("comprobante", Comprobante), ("libro", Libro),
-                             ("movimiento", Movimiento), ("constancia", Constancia),
-                             ("referencia_de_constancia", Referencia))
+                             ("movimiento", Movimiento), ("referencia_de_pago", Referencia))
 
 
 def test_el_esquema_cubre_el_modelo_entero(esquema):
@@ -157,7 +156,7 @@ def test_las_decisiones_contables_no_son_del_documento(esquema):
     # lecturas del mismo movimiento tienen la misma `clave` y `sin_duplicados` se queda con la primera, así que una
     # cuenta corregida en la segunda se perdería en silencio.
     DECISIONES = {"cuenta_contable", "centro_costo", "cuenta_tercero", "imputaciones", "imputacion", "reparto"}
-    for nombre in ("comprobante", "movimiento", "constancia"):
+    for nombre in ("comprobante", "movimiento"):
         propiedades = set(esquema["$defs"][nombre]["properties"])
         assert not DECISIONES & propiedades, f"{nombre} lleva una decisión contable: {sorted(DECISIONES & propiedades)}"
     with pytest.raises(ValueError, match="imputación"):

@@ -893,7 +893,7 @@
    "valid": false
   },
   {
-   "description": "Una constancia de pago masivo que se reparte entre dos comprobantes",
+   "description": "Un pago masivo que se reparte entre dos comprobantes. **Es un movimiento más**: lo que hasta la 2.0 era un bloque `constancias[]` aparte entra con la forma del item de operación, con el número del papel en `constancia` y lo que cancela en `referencias`",
    "data": {
     "open_accounting": "2.0",
     "libro": {
@@ -902,19 +902,20 @@
      "periodo": "202608",
      "tipo": "tesoreria"
     },
-    "constancias": [
+    "movimientos": [
      {
-      "numero": "00012345678",
+      "cuenta": "bbva-soles",
       "fecha": "2026-08-14",
-      "importe": "4721.50",
-      "moneda": "PEN",
+      "importe": "9422.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
       "medio_pago": "003",
-      "cuenta_origen": "bbva-soles",
-      "concepto": "Pago Detracciones Masivo SUNAT",
+      "origen": "pdf_texto",
+      "confianza": "0.92",
       "referencias": [
        {
         "clase": "comprobante",
-        "importe": "1200.00",
+        "importe": "4711.00",
         "datos": {
          "tipo_cp": "01",
          "serie": "F001",
@@ -924,17 +925,15 @@
        },
        {
         "clase": "comprobante",
-        "importe": "3511.00",
+        "importe": "4711.00",
         "datos": {
          "tipo_cp": "01",
          "serie": "F001",
          "numero": "124",
-         "contraparte_doc": "20607777773"
+         "contraparte_doc": "20602222226"
         }
        }
-      ],
-      "origen": "pdf_texto",
-      "confianza": "0.92"
+      ]
      }
     ]
    },
@@ -988,7 +987,7 @@
    "valid": false
   },
   {
-   "description": "Las cuatro clases de referencia, cada una con lo suyo",
+   "description": "Las cuatro clases de referencia, cada una con lo suyo. **Hasta la 3.0 este caso no podía fallar**: el esquema no miraba dentro de `datos`, así que habría pasado igual con las claves equivocadas. Su gemelo negativo está justo debajo",
    "data": {
     "open_accounting": "2.0",
     "libro": {
@@ -997,11 +996,14 @@
      "periodo": "202608",
      "tipo": "tesoreria"
     },
-    "constancias": [
+    "movimientos": [
      {
-      "numero": "00012345678",
+      "cuenta": "bbva-soles",
       "fecha": "2026-08-14",
-      "importe": "100.00",
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "003",
       "referencias": [
        {
         "clase": "comprobante",
@@ -1038,7 +1040,7 @@
    "valid": true
   },
   {
-   "description": "Los dos bloques en el mismo documento, que es lo normal en un mes",
+   "description": "Un extracto y un pago en el mismo documento, que es lo normal en un mes. **Van en el mismo bloque desde la 3.0**: lo que los distingue no es una etiqueta sino el `saldo`, que solo una línea de extracto trae, y el `origen`, que dice cómo se leyó cada uno",
    "data": {
     "open_accounting": "2.0",
     "libro": {
@@ -1050,19 +1052,31 @@
     "movimientos": [
      {
       "cuenta": "bbva-soles",
-      "fecha": "2026-08-14",
-      "importe": "4721.50",
-      "sentido": "cargo",
-      "moneda": "PEN",
-      "itf": "0.20"
-     }
-    ],
-    "constancias": [
+      "fecha": "2026-08-05",
+      "importe": "500.00",
+      "sentido": "abono",
+      "saldo": "1500.00",
+      "referencia": "000001",
+      "origen": "archivo"
+     },
      {
-      "numero": "00012345678",
+      "cuenta": "bbva-soles",
       "fecha": "2026-08-14",
-      "importe": "4721.50",
-      "cuenta_origen": "bbva-soles"
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "003",
+      "origen": "pdf_texto",
+      "confianza": "0.9",
+      "referencias": [
+       {
+        "clase": "tributo",
+        "datos": {
+         "codigo": "1000",
+         "periodo": "202607"
+        }
+       }
+      ]
      }
     ]
    },
@@ -1089,6 +1103,207 @@
     ]
    },
    "valid": false
+  },
+  {
+   "description": "El bloque `constancias[]` **no existe desde la 3.0**: el pago es un movimiento más, así que la raíz no lo admite. Es la entrada única de tesorería, igual que `comprobantes[]` es la única de una compra o de una venta",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "constancias": [
+     {
+      "numero": "00012345678",
+      "fecha": "2026-08-14",
+      "importe": "4711.00"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una referencia de clase `tributo` con las claves de un comprobante no vale. **Es el gemelo negativo que faltaba**: hasta la 3.0 las claves de cada clase vivían solo en el código, así que un validador que usara este esquema aceptaba lo que el motor rechaza",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-14",
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "003",
+      "referencias": [
+       {
+        "clase": "tributo",
+        "datos": {
+         "tipo_cp": "01",
+         "serie": "F001",
+         "numero": "123"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una referencia sin ningún dato no cancela nada, así que no vale: `datos` necesita al menos una clave",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-14",
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "003",
+      "referencias": [
+       {
+        "clase": "libre",
+        "datos": {}
+       }
+      ]
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Un `origen` que no está entre los cinco no vale. **La lista es propia y no la del comprobante**: un `xml` o una propuesta del SIRE no son cosas de un banco, y aceptarlos sería inventar. El daño que esto evita es silencioso: un `ocr` dejaría de salir marcado como lectura asistida, o sea que lo que leyó un modelo dejaría de pedir revisión",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-14",
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "003",
+      "origen": "ocr"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "El `origen` de un comprobante tampoco vale en un movimiento: `sire` no es un banco",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-14",
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "003",
+      "origen": "sire"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "La moneda de un movimiento va en ISO 4217 y nada más. **Sin enum a propósito**: quien enumera monedas es el maestro de cuentas, no cada línea",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-14",
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "003",
+      "moneda": "soles"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "El medio de pago de un movimiento son tres dígitos: Tabla 1 del Anexo 3 de la RS 169-2015",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-14",
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "efectivo"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Los dos números de una operación conviven: el que le da el banco y el del papel que la prueba. Una detracción pagada desde un banco tiene los dos y los dos hacen falta",
+   "data": {
+    "open_accounting": "2.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-14",
+      "importe": "4711.00",
+      "sentido": "cargo",
+      "constancia": "00012345678",
+      "medio_pago": "003",
+      "referencia": "123456"
+     }
+    ]
+   },
+   "valid": true
   }
  ]
 }

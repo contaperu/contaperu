@@ -256,12 +256,16 @@ def test_el_saldo_final_declarado_se_comprueba_y_el_ausente_no_se_inventa():
     assert t.cuadra([mov()], saldo_inicial=SALDO_ANTERIOR, saldo_final=None).cuadra
 
 
-# ── La constancia, que vale para cualquier pago ────────────────────────────
+# ── El pago, que es un movimiento más: la entrada única (3.0 del estándar) ─
 
-def constancia(**extra) -> t.Constancia:
-    datos = {"numero": "00012345678", "fecha": "2026-08-14", "importe": "4711.00", "moneda": "PEN",
-             "medio_pago": "001", "cuenta_origen": "bbva-soles"}
-    return t.Constancia(**{**datos, **extra})
+def pago(**extra) -> t.Movimiento:
+    """Un movimiento que viene de una constancia y no de un extracto: tiene el número del papel y no tiene saldo.
+
+    Hasta la 2.0 esto era un objeto `Constancia` aparte. La fusión es de John (11-oct-2026): al motor llega un item
+    de operación, venga de donde venga, y lo que decía de qué testigo era lo dice su `origen`."""
+    datos = {"cuenta": "bbva-soles", "fecha": "2026-08-14", "importe": "4711.00", "sentido": "cargo",
+             "moneda": "PEN", "constancia": "00012345678", "medio_pago": "001"}
+    return t.Movimiento(**{**datos, **extra})
 
 
 @pytest.mark.parametrize("clase,datos", [
@@ -270,17 +274,28 @@ def constancia(**extra) -> t.Constancia:
     ("cuenta_propia", {"cuenta": "bbva-dolares"}),
     ("libre", {"texto": "Reintegro de caja chica de obra"}),
 ])
-def test_una_constancia_cancela_cualquier_cosa(clase, datos):
+def test_un_pago_cancela_cualquier_cosa(clase, datos):
     """Es lo que John pidió: «todo tipo de pagos, porque puede llamar a otra cuenta que no necesariamente
     proveedor». Las cuatro clases cubren el depósito de detracción, el pago de tributos, el traspaso propio y la
     caja chica **sin que el estándar enumere propósitos de pago**, que es la trampa de un modelo de tesorería."""
-    c = constancia(referencias=[{"clase": clase, "datos": datos}])
-    assert c.referencias[0].clase == clase
-    assert c.a_dict()["referencias"][0]["datos"] == {k: str(v) for k, v in datos.items()}
+    m = pago(referencias=[{"clase": clase, "datos": datos}])
+    assert m.referencias[0].clase == clase
+    assert m.a_dict()["referencias"][0]["datos"] == {k: str(v) for k, v in datos.items()}
+
+
+def test_los_dos_numeros_de_una_operacion_conviven_y_son_distintos():
+    """El del banco y el del papel que prueba el pago. **Es el caso diario de una detracción**: se paga desde BBVA,
+    así que el extracto le da su `N° OPER` y el Banco de la Nación su vóucher, y los dos hacen falta — el primero
+    es la llave con la que una relectura no duplica, y el segundo el que se escribe en el comprobante.
+
+    Por eso son dos campos y no uno: fundirlos obligaría a elegir cuál se pierde."""
+    m = pago(referencia="123456", constancia="00012345678")
+    assert m.referencia == "123456" and m.constancia == "00012345678"
+    assert m.clave == ("bbva-soles", "123456"), "la llave de deduplicación es la del banco"
 
 
 def test_una_referencia_no_lleva_lo_que_no_es_de_su_clase():
-    with pytest.raises(t.ConstanciaInvalida) as e:
+    with pytest.raises(t.ReferenciaInvalida) as e:
         t.Referencia(clase="tributo", datos={"codigo": "1000", "serie": "F001"})
     assert "serie" in str(e.value) and "codigo, periodo" in str(e.value)
 
@@ -288,32 +303,38 @@ def test_una_referencia_no_lleva_lo_que_no_es_de_su_clase():
 def test_lo_que_ninguna_referencia_reclama_se_reporta_y_no_se_cierra():
     """Un cargo lleva el ITF dentro, y un pago puede cancelar algo que el papel no nombra. El motor lo dice y no
     decide qué es: eso es del contador, por la imputación."""
-    c = constancia(importe="4721.50", referencias=[
+    m = pago(importe="4721.50", referencias=[
         {"clase": "comprobante", "datos": {"tipo_cp": "01", "serie": "F001", "numero": "123"},
          "importe": "4711.00"}])
-    assert c.repartido == Decimal("4711.00")
-    assert c.sin_atribuir == Decimal("10.50")
+    assert m.repartido == Decimal("4711.00")
+    assert m.sin_atribuir == Decimal("10.50")
     # Sin importes por referencia no hay reparto que comprobar: la referencia vale por el total.
-    assert constancia(referencias=[{"clase": "libre", "datos": {"texto": "x"}}]).sin_atribuir == Decimal("0.00")
+    assert pago(referencias=[{"clase": "libre", "datos": {"texto": "x"}}]).sin_atribuir == Decimal("0.00")
 
 
-def test_una_constancia_sin_numero_o_sin_fecha_no_pasa():
-    """El número es lo único que no se puede inventar, y la fecha del pago no es la de la factura: se paga días
-    después, a veces el mes siguiente."""
-    with pytest.raises(t.ConstanciaInvalida):
-        constancia(numero="")
-    with pytest.raises(t.ConstanciaInvalida) as e:
-        constancia(fecha="")
-    assert "no es el de la factura" in str(e.value)
+def test_un_origen_desconocido_no_pasa_y_es_un_cambio_de_la_3_0():
+    """Hasta la 2.0 el `origen` de una constancia se pasaba a minúsculas y se aceptaba cualquier cosa, y el daño
+    era silencioso: un `origen: "ocr"` **dejaba de salir en `de_lectura_asistida`**, o sea que lo que leyó un
+    modelo dejaba de pedir revisión sin que nada lo dijera.
+
+    Ahora para, que es el trato que `Comprobante` le da al suyo: mejor fallar que inventar. Y la lista es **propia**
+    y no la del comprobante: un `xml` o una propuesta del SIRE no son cosas de un banco."""
+    with pytest.raises(t.MovimientoInvalido) as e:
+        pago(origen="ocr")
+    assert "manual" in str(e.value) and "vision" in str(e.value)
+    assert "xml" not in t.ORIGENES and "sire" not in t.ORIGENES
+    # Y los dos que piden revisión son los dos del comprobante que significan lo mismo.
+    assert t.LECTURA_ASISTIDA == ("pdf_texto", "vision")
+    assert pago(origen="vision").de_lectura_asistida and not pago(origen="archivo").de_lectura_asistida
 
 
-def test_la_constancia_apunta_a_la_cuenta_por_su_id_y_no_a_una_cuenta_contable():
-    """Es la decisión que impide que el motor adivine un 104: la constancia nombra la cuenta declarada, y la
+def test_un_pago_apunta_a_la_cuenta_por_su_id_y_no_a_una_cuenta_contable():
+    """Es la decisión que impide que el motor adivine un 104: el movimiento nombra la cuenta declarada, y la
     contable sale de ahí."""
-    c = constancia()
+    m = pago()
     declaradas = {x.id: x for x in t.leer([cuenta().a_dict()])}
-    assert c.cuenta_origen in declaradas
-    assert declaradas[c.cuenta_origen].cuenta_contable == "10411100"
+    assert m.cuenta in declaradas
+    assert declaradas[m.cuenta].cuenta_contable == "10411100"
 
 
 # ── Y la frontera, dicha en un test ────────────────────────────────────────
@@ -333,13 +354,13 @@ def test_no_se_puede_repartir_mas_de_lo_que_se_pago():
     contador. Pero reclamar más de lo pagado no es un juicio contable: es una suma que no cuadra, y para.
 
     Es la puerta equivalente a la cadena de saldos de un extracto — la que hace verificable lo que leyó una IA."""
-    with pytest.raises(t.ConstanciaInvalida) as e:
-        constancia(importe="1000.00", referencias=[
+    with pytest.raises(t.MovimientoInvalido) as e:
+        pago(importe="1000.00", referencias=[
             {"clase": "libre", "datos": {"texto": "una"}, "importe": "600.00"},
             {"clase": "libre", "datos": {"texto": "otra"}, "importe": "600.00"}])
     assert "1200.00" in str(e.value) and "1000.00" in str(e.value)
     # Y justo hasta el importe sí vale: el reparto exacto es lo normal.
-    exacta = constancia(importe="1000.00", referencias=[
+    exacta = pago(importe="1000.00", referencias=[
         {"clase": "libre", "datos": {"texto": "una"}, "importe": "400.00"},
         {"clase": "libre", "datos": {"texto": "otra"}, "importe": "600.00"}])
     assert exacta.sin_atribuir == Decimal("0.00")
@@ -350,19 +371,20 @@ def test_una_cuenta_que_nadie_declaro_se_dice_y_no_se_adivina():
     deducir —ni el banco, ni la moneda, ni la cuenta contable—, así que se nombra.
 
     Hasta la 9.1 pasaba en silencio: un `id` mal escrito daba un movimiento perfectamente válido que no se podía
-    casar con ninguna cuenta, y eso no se ve hasta el cierre."""
+    casar con ninguna cuenta, y eso no se ve hasta el cierre. Y desde la 3.0 del estándar mira **un solo bloque**:
+    la `cuenta_origen` de una constancia era el segundo sitio donde preguntar lo mismo."""
     declaradas = [cuenta().a_dict()]
-    huerfanos = t.sin_cuenta_declarada([mov(cuenta="bbva-euros", referencia="000009")], [], declaradas)
+    huerfanos = t.sin_cuenta_declarada([mov(cuenta="bbva-euros", referencia="000009")], declaradas)
     assert huerfanos == [{"que": "movimiento", "cual": "000009", "cuenta": "bbva-euros"}]
-    # Una constancia también, por su `cuenta_origen`.
-    assert t.sin_cuenta_declarada([], [constancia(cuenta_origen="otra")], declaradas) == [
-        {"que": "constancia", "cual": "00012345678", "cuenta": "otra"}]
+    # Un pago, que es un movimiento más, cae por lo mismo.
+    assert t.sin_cuenta_declarada([pago(cuenta="otra")], declaradas) == [
+        {"que": "movimiento", "cual": "", "cuenta": "otra"}]
     # Lo que sí está declarado no sale, y sin maestro no se inventa un error: es un argumento opcional.
-    assert t.sin_cuenta_declarada([mov()], [constancia()], declaradas) == []
-    assert t.sin_cuenta_declarada([mov(cuenta="cualquiera")], [], []) == []
+    assert t.sin_cuenta_declarada([mov(), pago()], declaradas) == []
+    assert t.sin_cuenta_declarada([mov(cuenta="cualquiera")], []) == []
 
 
-# ── Los dos bloques entran por el documento (9.1) ──────────────────────────
+# ── El bloque entra por el documento ───────────────────────────────────────
 
 def documento_de_tesoreria(**extra) -> dict:
     return {"open_accounting": "2.0",
@@ -372,11 +394,28 @@ def documento_de_tesoreria(**extra) -> dict:
 
 def test_un_bloque_ausente_es_una_lista_vacia_y_no_un_error():
     """Igual que `comprobantes`: la raíz del estándar solo exige `open_accounting` y `libro`, así que un documento
-    puede traer unos, otros, los dos o ninguno."""
+    puede traer el bloque o no traerlo."""
     from contaperu.pipeline import preparacion
 
     assert preparacion.movimientos_de(documento_de_tesoreria()) == []
-    assert preparacion.constancias_de(documento_de_tesoreria()) == []
+
+
+def test_el_bloque_de_las_constancias_ya_no_existe():
+    """La entrada única de la 3.0, vista por donde la ve quien produce documentos: **no hay `constancias_de`** y la
+    raíz del esquema no admite el bloque. Lo que una constancia decía lo dice ahora un movimiento, con su `origen`
+    y sus `referencias`."""
+    import json
+    from pathlib import Path
+
+    from contaperu.pipeline import preparacion
+
+    assert not hasattr(preparacion, "constancias_de")
+    esquema = json.loads((Path(__file__).resolve().parents[1] / "estandar" / "open-accounting.schema.json")
+                         .read_text(encoding="utf-8"))
+    assert "constancias" not in esquema["properties"], "la raíz ya no lo admite"
+    assert "constancia" not in esquema["$defs"] and "referencia_de_constancia" not in esquema["$defs"]
+    # Y la referencia sigue, con el nombre de lo que es: lo que cancela un PAGO, venga de donde venga.
+    assert "referencia_de_pago" in esquema["$defs"]
 
 
 def test_una_clave_que_no_es_de_un_movimiento_se_dice_por_su_nombre():
@@ -391,7 +430,7 @@ def test_una_clave_que_no_es_de_un_movimiento_se_dice_por_su_nombre():
     assert "titular" in str(e.value)
     # Y un bloque que no es una lista tampoco se interpreta.
     with pytest.raises(DocumentoInvalido):
-        preparacion.constancias_de(documento_de_tesoreria(constancias={"numero": "1"}))
+        preparacion.movimientos_de(documento_de_tesoreria(movimientos={"cuenta": "bbva-soles"}))
 
 
 # ── La operación de la api (9.1) ───────────────────────────────────────────
@@ -424,24 +463,47 @@ def test_la_api_cuadra_cada_cuenta_y_deduce_el_saldo_inicial_si_nadie_lo_declara
 
 
 def test_la_api_informa_lo_no_atribuido_y_marca_lo_que_leyo_una_ia():
-    """Las dos cosas que hacen usable una constancia que salió de un PDF: lo que ninguna referencia reclama se
-    reporta **y no se cierra**, y lo que leyó un modelo se marca para que se pueda revisar.
+    """Las dos cosas que hacen usable un pago que salió de un PDF: lo que ninguna referencia reclama se reporta **y
+    no se cierra**, y lo que leyó un modelo se marca para que se pueda revisar.
 
     La confianza no relaja nada: el cuadre es el mismo. Es lo que la investigación de 2026 encuentra que funciona,
-    porque la confianza que reporta un modelo no separa de forma fiable lo correcto de lo incorrecto."""
+    porque la confianza que reporta un modelo no separa de forma fiable lo correcto de lo incorrecto.
+
+    Desde la 3.0 del estándar los dos informes salen del **movimiento**, que es la única entrada, y lo nombran por
+    `cual`: el número del papel si lo tiene, y si no el del banco."""
     from contaperu import api
 
-    doc = documento_de_tesoreria(constancias=[constancia(
+    doc = documento_de_tesoreria(movimientos=[pago(
         importe="4721.50", origen="pdf_texto", confianza="0.92",
         referencias=[{"clase": "comprobante", "importe": "4711.00",
                       "datos": {"tipo_cp": "01", "serie": "F001", "numero": "123"}}]).a_dict()])
     r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
 
-    assert r["sin_atribuir"] == [{"numero": "00012345678", "importe": "4721.50",
+    assert r["sin_atribuir"] == [{"cual": "00012345678", "importe": "4721.50",
                                  "repartido": "4711.00", "sin_atribuir": "10.50"}]
-    assert r["de_lectura_asistida"] == [{"numero": "00012345678", "origen": "pdf_texto", "confianza": "0.92"}]
+    assert r["de_lectura_asistida"] == [{"cual": "00012345678", "origen": "pdf_texto", "confianza": "0.92"}]
     # Y no es un aviso: no hay nada que arreglar, solo algo que mirar.
     assert not any(a["codigo"] == "EXTRACTO_NO_CUADRA" for a in r["avisos"])
+    # Un pago no trae saldo, así que su cuadre se mira en relativo y no se rompe por no tenerlo.
+    assert r["cuadre"][0]["cuadra"]
+
+
+def test_la_moneda_de_un_movimiento_se_contrasta_con_la_de_su_cuenta():
+    """Hasta la 3.0 no se contrastaba con nada: una cuenta en dólares aceptaba movimientos marcados en soles y
+    **nada fallaba**. Es el mismo tipo de error que un `id` mal escrito — no se ve hasta el cierre.
+
+    Y es un aviso y no un rechazo, porque el movimiento por sí solo es válido: lo que está mal es el par."""
+    from contaperu import api
+
+    en_dolares = cuenta(id="bbva-dolares", moneda="USD", numero="0011-0999-0000000002").a_dict()
+    doc = documento_de_tesoreria(movimientos=[mov(cuenta="bbva-dolares", moneda="PEN").a_dict()])
+    r = api.revisar_tesoreria(doc, [en_dolares])
+    assert any(a["codigo"] == "MONEDA_DISTINTA_DE_LA_CUENTA" for a in r["avisos"])
+    assert any("USD" in a["texto"] and "PEN" in a["texto"] for a in r["avisos"])
+    # La misma moneda no avisa, y una cuenta que no declara la suya tampoco: no se inventa el par.
+    assert not [a for a in api.revisar_tesoreria(
+        documento_de_tesoreria(movimientos=[mov(cuenta="bbva-dolares", moneda="USD").a_dict()]),
+        [en_dolares])["avisos"] if a["codigo"] == "MONEDA_DISTINTA_DE_LA_CUENTA"]
 
 
 def test_la_api_avisa_de_una_relectura_y_de_una_cuenta_que_no_se_declaro():

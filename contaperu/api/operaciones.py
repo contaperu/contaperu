@@ -135,16 +135,16 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
     extracto, que es de quien lee el archivo; sin él, se deduce del primer movimiento y la cadena se comprueba de la
     segunda línea en adelante. No es un consuelo: el caso real que destapó el ITF rompía en la segunda fila del mes.
 
-    Las constancias se revisan por su propio cuadre, que es aritmético y distinto: lo que las referencias reclaman
-    no puede pasar del importe —eso para al construirlas—, y **lo que ninguna reclama se reporta y no se cierra**,
-    porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el ITF dentro.
+Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus
+    `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se
+    reporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el
+    ITF dentro.
 
     Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza
     con su 104, y si no está en el maestro no hay nada que deducir."""
     doc = documento or {}
     libro = preparacion.libro_de(doc)
     movimientos = preparacion.movimientos_de(doc)
-    constancias = preparacion.constancias_de(doc)
     declaradas = {c.id: c for c in tesoreria.leer(cuentas)}
     pedidos = {str(k): v for k, v in (saldos_iniciales or {}).items()}
 
@@ -170,11 +170,14 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
         cuadres.append({**r.a_dict(), "cuenta": cuenta, "saldo_inicial_declarado": bool(declarado),
                         "cuenta_contable": (declaradas[cuenta].cuenta_contable if cuenta in declaradas else "")})
 
-    sin_atribuir = [{"numero": c.numero, "importe": str(c.importe), "repartido": str(c.repartido),
-                     "sin_atribuir": str(c.sin_atribuir)}
-                    for c in constancias if c.sin_atribuir > modelo.CERO]
-    de_ia = [{"numero": c.numero, "origen": c.origen, "confianza": str(c.confianza)}
-             for c in constancias if c.origen in ("pdf_texto", "vision")]
+    # Los dos informes que antes salían de `constancias[]` y ahora salen del movimiento, que es la única entrada
+    # (3.0 del estándar). `cual` en vez de `numero`: un movimiento se nombra por el número del papel que lo prueba
+    # si lo tiene, y si no por el del banco — los dos existen y pueden ser distintos.
+    sin_atribuir = [{"cual": _nombre_de(m), "importe": str(m.importe), "repartido": str(m.repartido),
+                     "sin_atribuir": str(m.sin_atribuir)}
+                    for m in nuevos if m.sin_atribuir > modelo.CERO]
+    de_ia = [{"cual": _nombre_de(m), "origen": m.origen, "confianza": str(m.confianza)}
+             for m in nuevos if m.de_lectura_asistida]
 
     avisos = []
     if not declaradas:
@@ -188,14 +191,30 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
                                     f"{c['rompe_en']} de {c['movimientos']}, con una diferencia de "
                                     f"{c['diferencia']}. Casi siempre es una línea mal leída y no un error del "
                                     f"banco"})
-    for h in tesoreria.sin_cuenta_declarada(nuevos, constancias, list(declaradas.values())):
+    for h in tesoreria.sin_cuenta_declarada(nuevos, list(declaradas.values())):
         avisos.append({"codigo": "CUENTA_NO_DECLARADA", "pedir_a": "quien integra",
                        "texto": f"Un {h['que']} ({h['cual'] or 'sin referencia'}) apunta a la cuenta "
                                 f"{h['cuenta']!r}, que no está en el maestro declarado"})
+    # La moneda de un movimiento contra la de su cuenta. Hasta la 3.0 no se contrastaba con nada, así que una
+    # cuenta en dólares aceptaba movimientos marcados en soles y nada fallaba — el tipo de error que no se ve
+    # hasta el cierre, igual que un `id` mal escrito.
+    for m in nuevos:
+        suya = declaradas.get(m.cuenta)
+        if m.moneda and suya and suya.moneda and m.moneda != suya.moneda:
+            avisos.append({"codigo": "MONEDA_DISTINTA_DE_LA_CUENTA", "pedir_a": "quien lee el archivo",
+                           "texto": f"El movimiento {_nombre_de(m) or 'sin referencia'} de la cuenta "
+                                    f"{m.cuenta!r} dice {m.moneda} y esa cuenta se declaró en {suya.moneda}. "
+                                    f"Casi siempre es una línea de otro extracto o un `id` equivocado"})
 
     return {"libro": libro.a_dict(), "movimientos": len(nuevos), "repetidos": len(repetidos),
-            "constancias": len(constancias), "cuadre": cuadres, "sin_atribuir": sin_atribuir,
-            "de_lectura_asistida": de_ia, "avisos": avisos}
+            "cuadre": cuadres, "sin_atribuir": sin_atribuir, "de_lectura_asistida": de_ia, "avisos": avisos}
+
+
+def _nombre_de(m) -> str:
+    """Cómo se nombra un movimiento en un informe: por el papel que lo prueba si lo tiene, y si no por el número
+    que le dio el banco. Los dos existen y pueden ser distintos — una detracción pagada desde BBVA tiene su vóucher
+    del Banco de la Nación y su `N° OPER`—, y para que una persona lo encuentre vale más el del papel."""
+    return m.constancia or m.referencia
 
 
 def validar_cuentas_bancarias(cuentas: list[dict]) -> dict:

@@ -13,7 +13,7 @@ from ...asiento.lineas import LineaDiario
 from ..._version import OPEN_ACCOUNTING
 from ...errores import DocumentoInvalido
 from ...modelo import Comprobante, Libro, serie_y_numero
-from ...tesoreria import Constancia, Movimiento
+from ...tesoreria import Movimiento
 
 
 # Tope de seguridad. Un mes de una PYME son decenas o cientos de comprobantes; muchos miles en
@@ -25,7 +25,6 @@ MAXIMO_COMPROBANTES = 5000
 # líneas y varias cuentas en el mismo documento las multiplican, así que el tope es más alto que el de los
 # comprobantes. Lo que no cambia es por qué existe: un número absurdo es casi siempre un error de quien llama.
 MAXIMO_MOVIMIENTOS = 20000
-MAXIMO_CONSTANCIAS = 20000
 
 # --- conversión entre el estándar y el modelo --------------------------------------
 
@@ -101,28 +100,6 @@ def movimientos_de(doc: dict) -> list[Movimiento]:
         return [Movimiento.de_dict(m) if isinstance(m, dict) else m for m in crudos]
     except (ValueError, TypeError) as e:
         raise DocumentoInvalido(f"Un movimiento no se pudo leer: {e}") from None
-
-
-def constancias_de(doc: dict) -> list[Constancia]:
-    """El bloque `constancias`, el otro de la enmienda 0024.
-
-    Son un bloque aparte de `movimientos` y no una variante suya porque son hechos de **testigos distintos**: el
-    banco dice qué pasó en la cuenta y el pagador dice qué pagó y qué cancela. Las cardinalidades tampoco cuadran
-    —un solo cargo paga un lote de detracciones— y los ciclos de vida difieren: una constancia existe semanas antes
-    de que llegue el extracto."""
-    crudos = doc.get("constancias") or []
-    if not isinstance(crudos, list):
-        raise DocumentoInvalido("`constancias` tiene que ser una lista.")
-    if len(crudos) > MAXIMO_CONSTANCIAS:
-        raise DocumentoInvalido(
-            f"{len(crudos)} constancias en una sola llamada; el tope es {MAXIMO_CONSTANCIAS}. "
-            "Divídelo por periodo o por lote.")
-    try:
-        return [Constancia.de_dict(c) if isinstance(c, dict) else c for c in crudos]
-    except (ValueError, TypeError) as e:
-        raise DocumentoInvalido(f"Una constancia no se pudo leer: {e}") from None
-
-
 def lineas_de(doc: dict) -> list[LineaDiario] | None:
     """Las líneas del bloque `asiento` del documento, o `None` si no lo trae (5.2).
 

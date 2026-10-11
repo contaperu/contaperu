@@ -67,4 +67,5 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0021](0021-contrapartida-y-tesoreria.md) | `contrapartida` y `tesoreria`: los dos papeles que el catálogo no sabía nombrar, y `medio_pago` en la línea | `final` |
 | [0022](0022-el-tributo-en-su-bloque.md) | El tributo sale del nombre del rol: `impuesto`, `retencion` y `recorte`, con sus bloques, y los obsoletos del catálogo | `final` |
 | [0023](0023-la-factura-anulada-no-provisiona-su-detraccion.md) | `anulada_por_nota` en la imputación: la factura anulada por una nota de crédito no provisiona su detracción | `final` |
-| [0024](0024-movimientos-y-constancias.md) | `movimientos` y `constancias` en la raíz: el dinero moviéndose, y lo que prueba cada movimiento. La constancia es por operación y el extracto es el mes completo | `final` |
+| [0024](0024-movimientos-y-constancias.md) | `movimientos` y `constancias` en la raíz: el dinero moviéndose, y lo que prueba cada movimiento. La constancia es por operación y el extracto es el mes completo | `reemplazada` |
+| [0025](0025-una-sola-entrada-para-tesoreria.md) | **Una sola entrada para tesorería**: el movimiento absorbe la constancia, con el número del papel, la contraparte, el medio de pago, lo que cancela y de dónde se leyó. `constancias[]` sale de la raíz | `final` |

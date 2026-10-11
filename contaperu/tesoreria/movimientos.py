@@ -1,9 +1,24 @@
-"""Una línea de un estado de cuenta: lo que el banco dice que pasó en mi cuenta.
+"""Un item de operación de tesorería: el dinero moviéndose en una cuenta del contribuyente.
 
-**Es un hecho de un testigo concreto**, y por eso no es lo mismo que una constancia. El banco ve su lado de la
-cuenta y sabe cuánto entró y cuánto salió; no sabe qué cancela cada cargo. La constancia lo sabe y no sabe el
-saldo. Son dos objetos, y John lo dijo antes de que se escribiera: «la constancia de transferencia es por
-operación y un estado de cuenta es todo completo».
+**Es la única entrada de un libro de tesorería**, igual que `comprobantes[]` es la única de una compra o de una
+venta (John, 11-oct-2026): *«el ERP como producto final puede recibir una constancia de pago o un estado de cuenta,
+pero al motor solo llega como item de operación… solo debe haber una entrada para tesorería»*.
+
+Hasta la 2.0 del estándar había dos bloques, `movimientos[]` y `constancias[]`, y los tres argumentos con que se
+justificaron no sobrevivieron a mirarlos:
+
+- «Son hechos de testigos distintos» — **el motor ya tenía la respuesta**: el testigo es el campo `origen`, que el
+  comprobante usa desde siempre. Una factura leída de un XML y una leída de una foto son la misma forma con otro
+  `origen`; una operación bancaria leída de un extracto y una leída de una constancia, también.
+- «Las cardinalidades no cuadran: un cargo paga un lote de detracciones» — **confunde un uno-a-muchos dentro de un
+  item con necesitar dos bloques**. Lo resuelve `referencias`, aquí dentro.
+- «Los ciclos de vida difieren: una constancia existe semanas antes del extracto» — **eso es del ERP**. Al motor
+  llega lo que haya, y un movimiento sin `saldo` y sin `referencia` del banco **ES** un pago cuyo extracto no ha
+  llegado.
+
+Y lo dice además la tabla de rasgos, que ya era así: `RASGOS.origen` es **singular** —`venta`→`comprobantes`,
+`compra`→`comprobantes`, `tesoreria`→`movimientos`—, así que `constancias[]` era un bloque huérfano que no era el
+origen de ningún libro.
 
 **La forma salió de nueve extractos reales de producción**, de agosto de 2026, de tres bancos que abren —BBVA,
 Scotiabank y BanBif—. Lo que tienen los tres: la cuenta con su CCI, una moneda, un periodo en la cabecera, y por
@@ -23,15 +38,22 @@ Lo que **no** comparten, y que esta clase normaliza:
 
 Lo que cada banco da y nadie más —el `ORIG` de Scotiabank, el `CAN` y la oficina de BBVA— viaja en
 `datos_originales` sin interpretar, igual que en el comprobante.
+
+**Lo que NO está aquí: la cuenta contable de la contrapartida.** La 104 sale de la cuenta bancaria que el
+contribuyente declaró —aquí solo se apunta a ella por su `id`— y la otra cara llega en
+`imputaciones_de_movimientos`, igual que la cuenta de un gasto. Es la doctrina de `asiento.resolucion.imputado`:
+sin imputación no hay cuenta. Y tiene una consecuencia práctica: dos lecturas del mismo movimiento comparten
+`clave` y `sin_duplicados` se queda con la primera, así que una cuenta corregida en la segunda se perdería.
 """
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 from datetime import date
 
 from ..errores import ErrorContaperu
 from ..modelo import CERO, fecha as _fecha, monto as _monto
+from .referencias import Referencia
 
 # Hacia dónde va el dinero, visto desde MI cuenta. Son las dos palabras que los tres bancos usan, con sus sinónimos:
 # BBVA titula la columna «CARGO/ABONO», Scotiabank «CARGO | ABONO» y BanBif «Débito | Crédito».
@@ -58,6 +80,25 @@ SALIDA = "salida"
 EFECTOS_DE_UN_MOVIMIENTO = (ENTRADA, SALIDA)
 
 
+# De dónde salió el dato. **Lista propia y no la del comprobante** —cuyos valores son `xml`, `pdf_texto`,
+# `vision`, `manual` y `sire`—: un `xml` o una propuesta del SIRE no son cosas de un banco, y aceptarlos sería
+# inventar, que es lo contrario de «mejor fallar que inventar». Lo que sí se comparte son los dos nombres que
+# significan exactamente lo mismo, `pdf_texto` y `vision`, **que son los dos que marcan lectura asistida**.
+MANUAL = "manual"        # lo escribió una persona
+ARCHIVO = "archivo"      # salió de un archivo estructurado del banco: un CSV, un XLSX, un MT940
+API = "api"              # lo dio el banco por su API
+PDF_TEXTO = "pdf_texto"  # se extrajo del texto de un PDF
+VISION = "vision"        # lo leyó un modelo de una imagen
+ORIGENES = (MANUAL, ARCHIVO, API, PDF_TEXTO, VISION)
+# Los dos que piden que alguien lo mire. Es lo que alimenta `de_lectura_asistida`, y **la confianza no relaja
+# ninguna comprobación**: el cuadre es el mismo, porque la investigación de 2026 encuentra que la confianza que
+# reporta un modelo no separa de forma fiable lo correcto de lo incorrecto.
+LECTURA_ASISTIDA = (PDF_TEXTO, VISION)
+
+# Lo que dice que esto vino de un EXTRACTO no es una etiqueta: es el `saldo`, que solo un extracto trae. Es la
+# lección del `rol` aplicada aquí — lo que se deriva no es un campo.
+
+
 class MovimientoInvalido(ErrorContaperu, ValueError):
     """Una línea de extracto que no se puede usar. Dice cuál y por qué, y no la arregla."""
 
@@ -74,8 +115,26 @@ class Movimiento:
     sentido: str = ""
     moneda: str = ""
     saldo: object = None                # el saldo corrido DESPUÉS de esta línea; None si el banco no lo da
-    referencia: str = ""                # el número que pone el banco: `N° OPER` en BBVA, `REFERENCIA` en Scotiabank
+    referencia: str = ""                # el número que pone el BANCO: `N° OPER` en BBVA, `REFERENCIA` en Scotiabank
     itf: object = None                  # cuando el banco lo adjunta a la línea (BBVA). None no es cero: es «no dice»
+    # ── Lo que absorbió de la constancia en la 3.0 del estándar ──────────────────────────────────────────────
+    # El número del PAPEL que prueba el pago: el vóucher del Banco de la Nación, el comprobante de una
+    # transferencia. **Es un campo aparte de `referencia` porque los dos existen y son distintos**: una detracción
+    # pagada desde BBVA tiene su `N° OPER` del banco y su vóucher del BN. Y es el que el hito D1 escribe en el
+    # `detraccion.nro_constancia` del comprobante, así que confundirlos rompería ese enlace.
+    constancia: str = ""
+    # A quién se le pagó o de quién se cobró, **cuando el papel lo dice** —un extracto no lo trae: su descripción
+    # es texto libre y leerla es conjetura—. Con **los mismos tres nombres que un comprobante**, no como un
+    # `beneficiario{}`: CONCAR llena su anexo auxiliar desde `contraparte_doc` y el tramo 3 de `kit.rol` decide por
+    # ese campo, así que el mismo nombre ahorra una traducción y un segundo vocabulario.
+    contraparte_tipo_doc: str = ""
+    contraparte_doc: str = ""
+    contraparte_nombre: str = ""
+    medio_pago: str = ""                # Tabla 1 del Anexo 3 de la RS 169-2015, el mismo catálogo que el comprobante
+    referencias: list = field(default_factory=list)   # qué cancela, cuando el papel lo dice
+    origen: str = ""                    # ver ORIGENES
+    confianza: object = None            # por debajo de 1 solo tiene sentido en lo que leyó un modelo
+    # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
     id_externo: str = ""                # el de quien integra, para reconocerlo cuando vuelva
     datos_originales: dict | None = None
 
@@ -85,6 +144,13 @@ class Movimiento:
         self.sentido = str(self.sentido or "").strip().lower()
         self.moneda = str(self.moneda or "").strip().upper()
         self.referencia = str(self.referencia or "").strip()
+        self.constancia = str(self.constancia or "").strip()
+        self.contraparte_tipo_doc = str(self.contraparte_tipo_doc or "").strip()
+        self.contraparte_doc = str(self.contraparte_doc or "").strip().upper()
+        self.contraparte_nombre = " ".join(str(self.contraparte_nombre or "").split())
+        self.medio_pago = re.sub(r"[^0-9]", "", str(self.medio_pago or ""))
+        self.origen = str(self.origen or "").strip().lower()
+        self.referencias = [r if isinstance(r, Referencia) else Referencia(**dict(r)) for r in (self.referencias or [])]
         self.id_externo = str(self.id_externo or "").strip()
         self.fecha = _fecha(self.fecha)
         self.fecha_valor = _fecha(self.fecha_valor) or self.fecha
@@ -101,6 +167,23 @@ class Movimiento:
         if self.sentido not in SENTIDOS:
             raise MovimientoInvalido(f"Sentido inválido en la cuenta {self.cuenta!r}: {self.sentido!r} "
                                      f"({' | '.join(SENTIDOS)})")
+        # **Un `origen` desconocido para**, y es un cambio de comportamiento de la 3.0: hasta aquí se pasaba a
+        # minúsculas y se aceptaba. El daño era concreto y silencioso — un `origen: "ocr"` dejaba de salir en
+        # `de_lectura_asistida`, o sea que **lo que leyó un modelo dejaba de pedir revisión sin que nada lo
+        # dijera**. Es el mismo trato que `Comprobante` le da al suyo: mejor fallar que inventar.
+        if self.origen and self.origen not in ORIGENES:
+            raise MovimientoInvalido(f"Origen inválido en la cuenta {self.cuenta!r}: {self.origen!r} "
+                                     f"({' | '.join(ORIGENES)})")
+        # **No se puede repartir más de lo que se movió**, y esto sí es un error y no un reporte. Lo que queda sin
+        # reclamar se informa y no se cierra (`sin_atribuir`), porque decidir qué es ese resto es del contador; pero
+        # reclamar 5 000 de un pago de 4 000 no es un juicio contable, es una suma que no cuadra. Es la puerta
+        # equivalente a la cadena de saldos: la que hace verificable lo que leyó un modelo.
+        if self.repartido > self.importe:
+            raise MovimientoInvalido(
+                f"Las referencias del movimiento {self.referencia or self.constancia or self.descripcion!r} "
+                f"reclaman {self.repartido} de un pago de {self.importe}: no se puede repartir más de lo que se "
+                f"movió. Lo que sobra sí se puede dejar sin reclamar — eso se informa en `sin_atribuir` y no es un "
+                f"error.")
         # No hay comprobación de importe negativo, y no es un olvido: `modelo.monto` **ya devuelve el valor
         # absoluto** —«el signo no es parte del dato»—, así que un `-200.00` de una columna con signo llega aquí
         # convertido. Eso es lo que hace falta: el lector mira el signo de la columna para poner `sentido` y pasa
@@ -132,6 +215,27 @@ class Movimiento:
         return self.sentido == CARGO
 
     @property
+    def repartido(self) -> object:
+        """Lo que las referencias dicen cancelar. Una referencia sin importe no suma: vale por el total."""
+        return sum((r.importe for r in self.referencias if r.importe not in (None, "")), CERO)
+
+    @property
+    def sin_atribuir(self) -> object:
+        """Lo que el movimiento cubre y ninguna referencia reclama.
+
+        **No es un error, y por eso no lo levanta nadie.** Un cargo lleva el ITF dentro, y un pago puede cancelar
+        algo que el papel no nombra. El motor lo reporta y nunca lo cierra; quién decide qué es ese resto es del
+        contador, por la imputación."""
+        if not any(r.importe not in (None, "") for r in self.referencias):
+            return CERO
+        return self.importe - self.repartido
+
+    @property
+    def de_lectura_asistida(self) -> bool:
+        """Si lo leyó un modelo y por tanto alguien tiene que mirarlo."""
+        return self.origen in LECTURA_ASISTIDA
+
+    @property
     def clave(self) -> tuple:
         """La identidad de un movimiento, que es lo que impide duplicar al releer un mes con solape.
 
@@ -149,12 +253,14 @@ class Movimiento:
             if f.name == "datos_originales":
                 if v:
                     d[f.name] = dict(v)
+            elif f.name == "referencias":
+                d[f.name] = [r.a_dict() for r in v]
             elif isinstance(v, date):
                 d[f.name] = v.isoformat()
             elif v is None:
                 d[f.name] = None
             else:
-                d[f.name] = str(v) if f.name in ("importe", "saldo", "itf") else v
+                d[f.name] = str(v) if f.name in ("importe", "saldo", "itf", "confianza") else v
         return d
 
     @classmethod
