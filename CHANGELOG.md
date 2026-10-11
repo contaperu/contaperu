@@ -158,7 +158,12 @@ que declares sea uno que la derivación sepa producir.
 
 ---
 
-## [9.2.0] — 2026-10-10
+## [9.2.0] — 2026-10-10 · nunca se etiquetó
+
+> **Esta versión no tiene tag ni Release**, así que no se puede instalar: su contenido sale publicado dentro de la
+> **10.0.0**, que la absorbió al día siguiente. Se queda escrita porque es la mitad del trabajo que hizo posible el
+> retiro del campo —derivar el papel y comprobar que la derivación es fiel—, y porque la 10.0 la cita. Quien venga
+> de la 9.1.0 adopta la 10.0.0 y recibe las dos.
 
 **El `rol` de una línea deja de leerse en ninguna parte.** Sigue emitiéndose, ninguna salida cambia y los dos
 snapshots quedan intactos; lo que cambia es que ya **nadie decide por él**, porque los dos drivers que lo leían
