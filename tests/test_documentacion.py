@@ -63,13 +63,15 @@ AFIRMA_VERSION = (re.compile(r"open-accounting`?\**\s*\**`?(\d+\.\d+)\b"),
 
 # Las únicas versiones distintas de la vigente que un documento del presente puede citar, cada una con su motivo.
 OTRAS_VERSIONES: dict[str, set[str]] = {
-    # El hito J5 de la hoja de ruta, que es lo próximo del estándar y se nombra por su número.
-    "HOJA-DE-RUTA.md": {"3.1"},
-    "ARQUITECTURA.md": {"3.1"},
+    # `3.2` es el hito J5, que es lo próximo del estándar y se nombra por su número — era la 3.1 hasta que la
+    # glosa de un movimiento se la llevó (12.0). Y `3.0` porque la hoja de ruta cuenta cuándo pasó cada cosa:
+    # el contrato del dinero se cerró en la 3.0, y eso no deja de ser cierto al subir a la 3.1.
+    "HOJA-DE-RUTA.md": {"3.0", "3.2"},
+    "ARQUITECTURA.md": {"3.0", "3.2"},
     # Una guía de migración existe para hablar de la versión de la que se viene, y de la que se va a.
     "estandar/MIGRAR-A-1.0.md": {"0.3", "1.0"},
     "estandar/MIGRAR-A-2.0.md": {"1.0", "2.0"},
-    "estandar/MIGRAR-A-3.0.md": {"2.0"},
+    "estandar/MIGRAR-A-3.0.md": {"2.0", "3.0"},
 }
 
 

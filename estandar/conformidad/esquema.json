@@ -1597,6 +1597,73 @@
     }
    },
    "valid": false
+  },
+  {
+   "description": "La glosa del libro: una en la imputación —la «Glosa Principal» de CONCAR— y una por parte del reparto, que es su «Glosa Detalle». Un cargo que paga dos facturas lleva dos",
+   "data": {
+    "open_accounting": "3.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "4500.00",
+      "sentido": "cargo",
+      "id_externo": "mov-882"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "mov-882": {
+      "glosa": "Pago a proveedores de agosto",
+      "reparto": [
+       {
+        "importe": "3000.00",
+        "cuenta_contable": "4212100",
+        "glosa": "Pago F001-123"
+       },
+       {
+        "importe": "1500.00",
+        "cuenta_contable": "4212100",
+        "glosa": "Pago F001-124"
+       }
+      ]
+     }
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "Su negativo: la glosa es texto. Un número no es una glosa",
+   "data": {
+    "open_accounting": "3.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-05",
+      "importe": "4500.00",
+      "sentido": "cargo",
+      "id_externo": "mov-882"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "mov-882": {
+      "cuenta_contable": "4212100",
+      "glosa": 123
+     }
+    }
+   },
+   "valid": false
   }
  ]
 }

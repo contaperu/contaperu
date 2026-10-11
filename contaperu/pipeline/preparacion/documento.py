@@ -30,27 +30,33 @@ MAXIMO_MOVIMIENTOS = 20000
 # --- conversión entre el estándar y el modelo --------------------------------------
 
 def version_del_documento(doc: dict) -> None:
-    """Un documento que se declara de una versión anterior se rechaza diciendo qué cambió.
+    """Un documento de otra MAYOR del estándar se rechaza diciendo qué cambió; de otra menor, se lee.
 
-    **Una mayor del estándar no lee la anterior**, y es la misma decisión las dos veces que ha pasado. La 1.0 no
-    aceptó la 0.3 (John, 18-sep-2026: «como todavía ningún ERP no lo usa, puedes hacer la limpieza para que esté
-    bien»), y la 2.0 no acepta la 1.0: leer las dos cuesta dos caminos en el lector y una regla de cuál gana.
+    **Una mayor no lee la anterior**, y es la misma decisión las tres veces que ha pasado. La 1.0 no aceptó la
+    0.3 (John, 18-sep-2026: «como todavía ningún ERP no lo usa, puedes hacer la limpieza para que esté bien»), la
+    2.0 no acepta la 1.0 y la 3.0 no acepta la 2.0: leer dos cuesta dos caminos en el lector y una regla de cuál
+    gana.
 
-    La diferencia entre las dos veces, dicha porque importa: cuando salió la 1.0 nadie de fuera producía
-    documentos, y la 1.0 **lleva semanas en PyPI**. Lo que lo hace asumible está medido: el motor estampa él la
-    versión, así que un documento que lo use no la declara nunca; y quien la declare solo tiene que cambiar el
-    número y quitar lo que la 2.0 retiró, que es exactamente lo que `MIGRAR-A-2.0.md` enumera.
+    **Una MENOR sí se lee, y hasta la 12.0 no se leía.** Esta comparación era de igualdad exacta, así que la
+    primera menor del estándar habría rechazado todos los documentos de su mayor — y una menor es **aditiva por
+    definición** (`estandar/LEEME.md`, «Versionado»): lo que trae son bloques y campos opcionales, de modo que un
+    documento 3.0 es un 3.1 sin usar lo nuevo. No se había visto porque el estándar solo había tenido mayores:
+    0.3, 1.0, 2.0, 3.0. La 3.1 es la primera menor, y la encontró.
+
+    Hacia adelante también se lee: un documento de una menor MAYOR que la nuestra puede traer una clave que no
+    conocemos, y entonces falla donde toca —en su bloque, con el nombre de la clave— en vez de con un número de
+    versión que no le dice a nadie qué arreglar.
 
     Un documento sin la clave no se rechaza: es lo que hace quien construye el documento con el motor."""
     declarada = str(doc.get("open_accounting") or "").strip()
-    if declarada and declarada != OPEN_ACCOUNTING:
+    if declarada and declarada.split(".")[0] != OPEN_ACCOUNTING.split(".")[0]:
         raise DocumentoInvalido(
             f"Este documento se declara `open_accounting` {declarada} y el motor habla la {OPEN_ACCOUNTING}. "
-            "De la 1.0 a la 2.0 lo que cambia es lo que SALE: el `rol` de cada línea del asiento, los campos "
-            "`documento.tipo` y `referencia.tipo` —la sigla con que cada ERP nombra un documento— y "
-            "`detraccion.estado`. Ninguno hacía falta: el papel de una línea se deriva de lo que trae, y el estado "
-            "de una detracción, de su constancia y su fecha. La guía, paso a paso, está en "
-            "`estandar/MIGRAR-A-2.0.md`.")
+            "Cada mayor del estándar retira algo y no lee la anterior: la 2.0 quitó de la línea el `rol`, "
+            "`documento.tipo`, `referencia.tipo` y `detraccion.estado` —ninguno hacía falta, porque se derivan de "
+            "lo que la línea ya trae—, y la 3.0 fundió `constancias[]` dentro de `movimientos[]`, que es la "
+            "entrada única de tesorería. La guía de cada salto, paso a paso, está en `estandar/MIGRAR-A-2.0.md` y "
+            "`estandar/MIGRAR-A-3.0.md`.")
 
 
 def libro_de(doc: dict) -> Libro:

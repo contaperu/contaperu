@@ -27,4 +27,4 @@ __version__ = "11.0.1"
 # librería saltó a `1.1.0` en la misma tanda en que el estándar llegó a `1.0`, y por eso el test se pone
 # rojo si alguien intenta publicar un estándar cuya versión sea prefijo de la del paquete: la separación
 # deja de depender de que nos acordemos.
-OPEN_ACCOUNTING = "3.0"
+OPEN_ACCOUNTING = "3.1"

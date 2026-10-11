@@ -10,7 +10,7 @@
    "name": "MIT",
    "identifier": "MIT"
   },
-  "x-open-accounting": "3.0"
+  "x-open-accounting": "3.1"
  },
  "paths": {
   "/v1/leer_xml": {
@@ -1079,9 +1079,9 @@
     },
     "properties": {
      "open_accounting": {
-      "description": "Versión del estándar que habla este documento.",
+      "description": "Versión del estándar que habla este documento. **Se fija la MAYOR y no la versión exacta**, porque una menor es aditiva por definición: un documento 3.0 es un 3.1 que no usa lo nuevo, y tiene que seguir validando. Una mayor distinta sí se rechaza —cada una retira algo—.",
       "type": "string",
-      "const": "3.0"
+      "pattern": "^3\\.[0-9]+$"
      },
      "libro": {
       "$ref": "#/components/schemas/OpenAccounting_libro"
@@ -1873,7 +1873,7 @@
       "$ref": "#/components/schemas/OpenAccounting_fecha"
      },
      "descripcion": {
-      "description": "La glosa del banco, tal cual.",
+      "description": "El texto que imprimió **el banco** en esa línea, tal cual. **No es la glosa del libro**: ésa la decide el contador y va en `imputaciones_de_movimientos` —aquí pondría «TRANSFERENCIA A CUENTAS DE TERCEROS BCP LOCAL», que no es lo que nadie quiere ver en un Libro Diario—. Y entra en la clave con la que una relectura no duplica, así que reescribirlo cambia la identidad del movimiento.",
       "type": "string"
      },
      "importe": {
@@ -2155,6 +2155,10 @@
      "contraparte_doc": {
       "type": "string",
       "description": "El documento del tercero de esta parte: un cargo puede pagar facturas de tres proveedores distintos."
+     },
+     "glosa": {
+      "description": "La glosa de ESTA parte, que es la «Glosa Detalle» de CONCAR. Es el motivo de que la glosa viva en la imputación y no en el movimiento: **un cargo que paga tres facturas necesita tres glosas**. Si no viene, manda la de la imputación.",
+      "type": "string"
      }
     }
    },
@@ -2184,6 +2188,10 @@
        "$ref": "#/components/schemas/OpenAccounting_parte_de_imputacion_de_movimiento"
       },
       "description": "Cuando un movimiento se parte entre varias cuentas. **Suma el importe del movimiento, exacto y sin tolerancia**, y el ITF queda fuera: son sus dos líneas propias. Excluye `cuenta_contable`, `centro_costo` y `contraparte_doc` al lado: ¿cuál mandaría?"
+     },
+     "glosa": {
+      "description": "Lo que se escribe en el libro por este movimiento. **Es una decisión del contador y no un hecho del papel**, y por eso vive aquí: `movimiento.descripcion` es el texto que imprimió el BANCO. La piden todos los destinos —campo 16 del Diario 5.1 del PLE, la «Glosa Principal» de CONCAR—. Si no viene, el motor usa la descripción del banco y, en su defecto, el nombre de la contraparte: **ninguna línea sale sin glosa**. Va sin cortar; el largo lo decide cada destino.",
+      "type": "string"
      }
     }
    },

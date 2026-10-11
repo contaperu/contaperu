@@ -274,7 +274,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
 | **Estándar y comunidad** | |
-| El estándar `open-accounting` 3.0, su esquema, sus catálogos y su batería de conformidad | listo |
+| El estándar `open-accounting` 3.1, su esquema, sus catálogos y su batería de conformidad | listo |
 | Contrato de driver y drivers de terceros por *entry points* | listo |
 | Paquete en PyPI | listo: `pip install contaperu` |
 | **Motor** | |

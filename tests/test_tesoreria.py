@@ -897,3 +897,52 @@ def test_sin_imputaciones_la_respuesta_es_la_de_siempre_mas_las_tres_claves():
     r = api.revisar_tesoreria(documento_de_tesoreria(movimientos=[mov().a_dict()]), [cuenta().a_dict()])
     assert r["imputados"] == 0 and r["transferencias_declaradas"] == []
     assert r["totales_por_cuenta"][0]["movimientos"] == 1
+
+
+def test_la_glosa_recorre_su_cadena_de_respaldo_entera():
+    """La glosa que se escribe en el libro, que el contrato **no tenía** hasta la 12.0 — y lo encontró John
+    integrando (11-oct-2026): *«en movimiento no existe la variable glosa, y esto es importante para los
+    libros»*. La piden los cuatro destinos: campo 16 del Diario 5.1 del PLE, las dos de CONCAR, y las suyas
+    CONTASIS y STARSOFT.
+
+    Vive en la imputación porque **es una decisión y no un hecho del papel**: `descripcion` es el texto del
+    banco, que además entra en la clave de deduplicación. La cadena se recorre hasta que algo diga algo, para que
+    ninguna línea salga sin glosa — la misma forma que `asiento.glosa_de` tiene para un comprobante."""
+    m = t.Movimiento(cuenta="bbva-soles", fecha="2026-03-14", importe="12282.60", sentido="cargo",
+                     descripcion="Transferencia a cuentas de terceros", contraparte_nombre="Proveedor SAC")
+    i = t.ImputacionDeMovimiento(cuenta_contable="4212100", glosa="Pago fact F001-123")
+    parte = t.Parte(importe="100.00", cuenta_contable="4212100", glosa="Su parte")
+
+    assert t.glosa_de_movimiento(m, i, parte) == "SU PARTE", "la de la parte manda sobre todo"
+    assert t.glosa_de_movimiento(m, i) == "PAGO FACT F001-123", "y la de la imputación sobre el banco"
+    assert t.glosa_de_movimiento(m) == "TRANSFERENCIA A CUENTAS DE TERCEROS", "el texto del banco, si no hay más"
+    sin_texto = t.Movimiento(cuenta="bbva-soles", fecha="2026-03-14", importe="1.00", sentido="cargo",
+                             contraparte_nombre="Proveedor SAC")
+    assert t.glosa_de_movimiento(sin_texto) == "PROVEEDOR SAC", "y el tercero antes que una celda vacía"
+
+    # **Sin cortar**: el largo lo decide cada destino (CONCAR corta a 40 y a 30, STARSOFT tiene su `LARGO_GLOSA`).
+    larga = t.ImputacionDeMovimiento(cuenta_contable="4212100", glosa="x" * 200)
+    assert len(t.glosa_de_movimiento(m, larga)) == 200
+
+
+def test_un_reparto_lleva_una_glosa_por_parte():
+    """**El argumento que decide dónde vive la glosa.** Un cargo que paga tres facturas se reparte en tres
+    partes, y cada una va a su cuenta con su propio texto: eso es la «Glosa Detalle» de CONCAR, mientras la de
+    la imputación es su «Glosa Principal». En el movimiento no cabrían tres."""
+    from contaperu import api
+
+    doc = documento_de_tesoreria(
+        movimientos=[mov(importe="4500.00", sentido="cargo", id_externo="mov-882").a_dict()],
+        imputaciones_de_movimientos={"mov-882": {"reparto": [
+            {"importe": "3000.00", "cuenta_contable": "4212100", "glosa": "Pago F001-123"},
+            {"importe": "1500.00", "cuenta_contable": "4212100", "glosa": "Pago F001-124"}]}})
+    r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    assert r["imputados"] == 1 and r["avisos"] == []
+
+    suya = t.ImputacionDeMovimiento.de(doc["imputaciones_de_movimientos"]["mov-882"])
+    el_mov = t.Movimiento.de_dict(doc["movimientos"][0])
+    assert [t.glosa_de_movimiento(el_mov, suya, p) for p in suya.reparto] == ["PAGO F001-123", "PAGO F001-124"]
+    # Y la glosa NO compite con el reparto: no contesta «cuál es la contrapartida», así que conviven.
+    con_las_dos = t.ImputacionDeMovimiento(glosa="Pago a proveedores", reparto=[
+        {"importe": "3000.00", "cuenta_contable": "4212100"}])
+    assert con_las_dos.glosa == "Pago a proveedores" and len(con_las_dos.reparto) == 1

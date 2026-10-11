@@ -114,6 +114,10 @@ class Movimiento:
     cuenta: str = ""                    # el `id` de la cuenta en `cuentas_bancarias`, no un número suelto
     fecha: date | None = None           # la de la operación
     fecha_valor: date | None = None     # cuándo cuenta para el saldo; los tres bancos la dan y casi siempre coincide
+    # El texto que imprimió **el banco**, tal cual. **No es la glosa del libro**: ésa es una decisión del
+    # contador y vive en la imputación (enmienda 0029). Hasta la 12.0 este campo se llamaba a sí mismo «la
+    # glosa del banco» y eso fue justo lo que despistó. Además entra en `clave`, así que reescribirlo
+    # cambia la identidad del movimiento y una relectura dejaría de reconocerlo.
     descripcion: str = ""
     importe: object = CERO              # SIEMPRE positivo: el signo lo dice `sentido`
     sentido: str = ""

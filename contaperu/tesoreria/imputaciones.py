@@ -47,11 +47,15 @@ class Parte:
     cuenta_contable: str = ""
     centro_costo: str = ""
     contraparte_doc: str = ""
+    # La glosa de ESTA parte, que es lo que hace que la glosa viva en la imputación y no en el movimiento: un
+    # cargo que paga tres facturas necesita tres glosas, y es literalmente la «Glosa Detalle» de CONCAR.
+    glosa: str = ""
 
     def __post_init__(self) -> None:
         self.cuenta_contable = str(self.cuenta_contable or "").strip()
         self.centro_costo = str(self.centro_costo or "").strip()
         self.contraparte_doc = str(self.contraparte_doc or "").strip().upper()
+        self.glosa = " ".join(str(self.glosa or "").split())
         # **El importe es obligatorio en una parte**, al revés que en una referencia: una referencia sin importe
         # vale por el total y no hay nada que repartir, pero un reparto sin importes no reparte nada.
         if self.importe is None or self.importe == "":
@@ -64,7 +68,7 @@ class Parte:
 
     def a_dict(self) -> dict:
         d = {"importe": str(self.importe), "cuenta_contable": self.cuenta_contable}
-        for clave in ("centro_costo", "contraparte_doc"):
+        for clave in ("centro_costo", "contraparte_doc", "glosa"):
             if getattr(self, clave):
                 d[clave] = getattr(self, clave)
         return d
@@ -77,6 +81,13 @@ class ImputacionDeMovimiento:
     cuenta_contable: str = ""
     centro_costo: str = ""
     contraparte_doc: str = ""
+    # **Lo que se escribe en el libro**, que es una decisión del contador y no un hecho del papel: por eso vive
+    # aquí y no en el movimiento (John, 11-oct-2026, integrando: «en movimiento no existe la variable glosa, y
+    # esto es importante para los libros»). `movimiento.descripcion` es el texto del BANCO —y además entra en la
+    # clave de deduplicación—, así que escribir «TRANSFERENCIA A CUENTAS DE TERCEROS BCP LOCAL» en el Libro
+    # Diario no es lo que nadie quiere. La piden todos los destinos: campo 16 del Diario 5.1 del PLE, y en CONCAR
+    # son dos —esta es su «Glosa Principal» y la de cada parte su «Glosa Detalle»—.
+    glosa: str = ""
     # El `id` de OTRA cuenta del maestro. **Es la única vía declarada para afirmar una transferencia**: el efecto
     # `transferencia` del catálogo existe porque la NIC 7 §9 excluye de los flujos los traspasos entre partidas de
     # efectivo, y `Movimiento.efecto` nunca lo devuelve porque una línea sola no puede saber que es la mitad de un
@@ -88,8 +99,11 @@ class ImputacionDeMovimiento:
         self.cuenta_contable = str(self.cuenta_contable or "").strip()
         self.centro_costo = str(self.centro_costo or "").strip()
         self.contraparte_doc = str(self.contraparte_doc or "").strip().upper()
+        self.glosa = " ".join(str(self.glosa or "").split())
         self.cuenta_propia = str(self.cuenta_propia or "").strip()
         self.reparto = [p if isinstance(p, Parte) else Parte(**dict(p)) for p in (self.reparto or [])]
+        # La `glosa` no entra en esta lista a propósito: no contesta «cuál es la contrapartida», así que
+        # no compite con el reparto ni con el traspaso. Un traspaso también se explica en el libro.
         sueltos = [c for c in ("cuenta_contable", "centro_costo", "contraparte_doc") if getattr(self, c)]
         if self.reparto and sueltos:
             raise ImputacionInvalida(
@@ -169,6 +183,30 @@ def efecto_de(movimiento, imputacion=None) -> str:
     if imputacion is not None and ImputacionDeMovimiento.de(imputacion).es_traspaso:
         return TRANSFERENCIA
     return movimiento.efecto
+
+
+def glosa_de_movimiento(movimiento, imputacion=None, parte=None) -> str:
+    """Lo que se escribe en el libro por este movimiento, con el respaldo recorrido hasta que algo diga algo.
+
+    ```
+    parte.glosa  →  imputacion.glosa  →  movimiento.descripcion  →  movimiento.contraparte_nombre
+    ```
+
+    Es la misma forma que `asiento.glosa_de` tiene para un comprobante —el concepto o, si no trae, el nombre de
+    la contraparte— y por el mismo motivo: **ninguna línea sale sin glosa**. En mayúsculas y **sin cortar**: el
+    largo lo decide cada destino, como ya hacen `LARGOS_DE_GLOSA` de CONCAR (40 la principal, 30 la del detalle)
+    y `LARGO_GLOSA` de STARSOFT.
+
+    **Por qué el último respaldo es el texto del banco y no al revés.** Lo que el contador decide manda sobre lo
+    que imprimió el banco, siempre; pero más vale «TRANSFERENCIA A CUENTAS DE TERCEROS» que una celda vacía, y
+    un libro no admite una glosa en blanco. Lo encontró John integrando (11-oct-2026), y era un hueco del
+    contrato: la 11.0.0 dijo que un ERP ya podía decir **todo** lo que el motor necesitaría para asentar, y no
+    podía decir esto — que lo piden los cuatro destinos."""
+    de_la_parte = str(getattr(parte, "glosa", "") or "").strip()
+    de_la_imputacion = str(getattr(imputacion, "glosa", "") or "").strip()
+    del_banco = str(getattr(movimiento, "descripcion", "") or "").strip()
+    del_tercero = str(getattr(movimiento, "contraparte_nombre", "") or "").strip()
+    return (de_la_parte or de_la_imputacion or del_banco or del_tercero).upper()
 
 
 def leer(imputaciones, movimientos) -> dict:

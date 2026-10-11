@@ -7,6 +7,7 @@ lo mismo — que es exactamente la clase de deriva que hace inútil a un formato
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import fields
 from pathlib import Path
 
@@ -127,14 +128,27 @@ def test_se_rechaza_lo_que_no_es_del_estandar(validador):
         assert list(validador.iter_errors(doc)), doc
 
 
-def test_el_esquema_declara_la_version_del_estandar_y_no_otra(esquema):
-    """Lo que le toca a este archivo: que el `const` del esquema y la constante del código sean el mismo número.
+def test_el_esquema_fija_la_mayor_del_estandar_y_acepta_sus_menores(esquema):
+    """Lo que le toca a este archivo: que el esquema y la constante del código hablen la misma MAYOR.
+
+    **No es un `const`, y eso cambió en la 12.0.** Lo era, y con él la primera menor del estándar habría
+    invalidado todos los documentos de su mayor — justo lo contrario de lo que una menor significa, que es
+    aditiva por definición: un 3.0 es un 3.1 que no usa lo nuevo. No se había visto porque el estándar solo
+    había tenido mayores (0.3, 1.0, 2.0, 3.0); la 3.1 es la primera menor y lo encontró.
 
     Antes esto terminaba con `__version__ != OPEN_ACCOUNTING`, y desde la 1.0 **eso pasaba por casualidad**
     (`"1.0.0" != "1.0"`) sin comprobar lo que de verdad confunde a los dos relojes, que es la relación de prefijo. La
     regla vive entera —y con su mensaje— en `test_version.py`, así que aquí no se deja una versión débil de ella que
     parezca cubrirla."""
-    assert esquema["properties"]["open_accounting"]["const"] == OPEN_ACCOUNTING
+    from jsonschema import Draft202012Validator
+
+    patron = esquema["properties"]["open_accounting"]["pattern"]
+    mayor = OPEN_ACCOUNTING.split(".")[0]
+    assert "const" not in esquema["properties"]["open_accounting"], "un const invalidaría cada menor nueva"
+    assert re.fullmatch(patron, OPEN_ACCOUNTING), "el esquema tiene que aceptar la versión que el motor habla"
+    assert re.fullmatch(patron, f"{mayor}.0"), "y la .0 de su mayor, que es un documento perfectamente válido"
+    assert not re.fullmatch(patron, f"{int(mayor) + 1}.0"), "otra mayor sí se rechaza: cada una retira algo"
+    Draft202012Validator.check_schema(esquema)
 
 
 def test_la_condicion_de_pago_se_normaliza_y_lo_demas_se_rechaza():

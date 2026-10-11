@@ -3,7 +3,7 @@
 Aquí se registra **cómo crece el estándar**. Una enmienda por cambio, con su caso real, su fuente y el test que la
 sostiene.
 
-Existe porque `open-accounting` 3.0 promete no romper hasta una 4.0, y una promesa así necesita un mecanismo, no
+Existe porque `open-accounting` 3.x promete no romper hasta una 4.0, y una promesa así necesita un mecanismo, no
 buena voluntad: sin un sitio donde quede escrito qué entró, por qué y con qué compatibilidad, la única forma de saber
 si un cambio rompe es leer el `git log`.
 
@@ -72,3 +72,4 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0026](0026-la-cabecera-del-extracto.md) | `extractos[]`: la cabecera de lo que el banco declaró —su saldo anterior, su saldo actual y sus dos totales—, para que un documento guardado se pueda volver a comprobar | `final` |
 | [0027](0027-la-imputacion-de-un-movimiento.md) | `imputaciones_de_movimientos`: la contrapartida de un movimiento la pone el ERP, con su reparto cuando un cargo se parte y el traspaso entre cuentas propias declarado | `final` |
 | [0028](0028-un-cargo-del-banco-es-su-propio-movimiento.md) | **Un cargo del banco es un movimiento**: una comisión, los portes o el mantenimiento no necesitan campo propio, y un pago con su ITF son dos asientos. `itf` se queda solo para los bancos que lo descuentan sin darle fila | `final` |
+| [0029](0029-la-glosa-de-un-movimiento.md) | **La glosa que se escribe en el libro**, en la imputación y en cada parte del reparto: la decide el contador, no el banco. La piden los cuatro destinos, y un cargo que paga tres facturas necesita tres | `final` |

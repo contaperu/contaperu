@@ -45,7 +45,7 @@ from __future__ import annotations
 from .cuadre import CuadreExtracto, ExtractoNoCuadra, cuadra, exigir
 from .extractos import Extracto, ExtractoInvalido, por_cuenta
 from .imputaciones import (ImputacionDeMovimiento, ImputacionInvalida, Parte, efecto_de,
-                           leer as leer_imputaciones)
+                           glosa_de_movimiento, leer as leer_imputaciones)
 from .cuentas import (CuentaBancaria, CuentaInvalida, LARGO_CCI, MONEDAS, banco_del_cci, leer,
                       normalizar_cci, sin_cuenta_declarada)
 from .movimientos import (ABONO, API, ARCHIVO, CARGO, EFECTOS_DE_UN_MOVIMIENTO, ENTRADA, LECTURA_ASISTIDA, MANUAL,
@@ -60,6 +60,7 @@ __all__ = ["ABONO", "API", "ARCHIVO", "CARGO", "CLASES", "CLAVES_POR_CLASE", "CO
            "LECTURA_ASISTIDA", "LIBRE", "MANUAL", "MONEDAS", "Movimiento", "MovimientoInvalido", "ORIGENES",
            "PDF_TEXTO", "Parte", "Referencia", "ReferenciaInvalida", "SALIDA", "SENTIDOS", "TRANSFERENCIA",
            "TRIBUTO", "VISION",
-           "banco_del_cci", "clave_de", "cuadra", "efecto_de", "exigir", "leer", "leer_imputaciones",
+           "banco_del_cci", "clave_de", "cuadra", "efecto_de", "exigir", "glosa_de_movimiento", "leer",
+           "leer_imputaciones",
            "normalizar_cci",
            "por_cuenta", "sin_cuenta_declarada", "sin_duplicados"]

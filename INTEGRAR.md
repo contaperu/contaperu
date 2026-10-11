@@ -26,7 +26,7 @@ el mismo mes, el mismo diagnóstico, por cualquiera de ellas.
 
 ## Lo que entra y lo que sale
 
-Entra un **documento `open-accounting` 3.0** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
+Entra un **documento `open-accounting` 3.1** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
 compras) y los comprobantes tal como los emite SUNAT, con los importes en positivo y como texto exacto. Si tienes los
 XML o la propuesta del SIRE, el motor arma el documento por ti (`leer_xml`, `leer_propuesta_sire`).
 
@@ -206,7 +206,7 @@ los mismos nombres que los parámetros de la api:
 ```json
 {
   "documento": {
-    "open_accounting": "3.0",
+    "open_accounting": "3.1",
     "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"},
     "comprobantes": [{
       "tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "2026-01-15",
@@ -311,7 +311,7 @@ misma forma, y lo que dice de dónde salió es su `origen`.
 
 ```json
 {
-  "open_accounting": "3.0",
+  "open_accounting": "3.1",
   "libro": { "ruc": "20601234567", "periodo": "202608", "tipo": "tesoreria" },
 
   "extractos": [
@@ -358,7 +358,8 @@ Y el **maestro de cuentas**, que no es parte del documento sino un argumento —
 | **La contrapartida** —la otra cara del asiento— | `imputaciones_de_movimientos`, por el `id_externo` del movimiento. Igual que la cuenta de un gasto llega en la imputación de su comprobante |
 | Qué cancela el pago, **si el papel lo dice** | `movimiento.referencias[]`, con cuatro clases: `comprobante`, `tributo`, `cuenta_propia`, `libre` |
 | Un traspaso entre tus propias cuentas | `imputaciones_de_movimientos` → `cuenta_propia`. **Es la única vía para declararlo**, y hace falta porque la NIC 7 §9 excluye esos traspasos de los flujos de efectivo |
-| El cuadre, la deduplicación y qué falta | el motor, en `revisar_tesoreria` |
+| **La glosa que se escribe en el libro** | `imputaciones_de_movimientos` → `glosa`, y **una por parte** cuando hay reparto. La decide el contador: `descripcion` es el texto del banco |
+| La deduplicación, los contrastes con la cabecera y qué falta | el motor, en `revisar_tesoreria` |
 
 ### Las cuatro cosas que conviene no confundir
 
@@ -374,6 +375,30 @@ Y el **maestro de cuentas**, que no es parte del documento sino un argumento —
    bancos que lo descuentan **sin darle fila** —BBVA lo pone en una columna—, y entonces no hay movimiento que lo
    represente. Vacío no es cero: es «el banco no lo dice». Y cuando el motor asiente, un pago de 2 000 con 0,50
    de ITF serán **dos asientos**.
+
+### La glosa: la decide el contador, no el banco
+
+`descripcion` es lo que imprimió el banco —«TRANSFERENCIA A CUENTAS DE TERCEROS BCP LOCAL»—, y además **entra en
+la clave de deduplicación**, así que no puede ser lo que alguien reescriba al revisar. La glosa del libro va en
+la imputación, y **en cada parte cuando hay reparto**: un cargo que paga tres facturas necesita tres, que es la
+«Glosa Detalle» de CONCAR frente a su «Glosa Principal».
+
+```json
+"imputaciones_de_movimientos": {
+  "mov-881": {"cuenta_contable": "4212100", "glosa": "Pago fact F001-123 PROVEEDOR SAC"},
+  "mov-882": {"glosa": "Pago a proveedores de agosto",
+              "reparto": [{"importe": "3000.00", "cuenta_contable": "4212100", "glosa": "Pago F001-123"},
+                          {"importe": "1500.00", "cuenta_contable": "4212100", "glosa": "Pago F001-124"}]}
+}
+```
+
+Si no la mandas, el motor cae a la descripción del banco y, en su defecto, al nombre de la contraparte: **ninguna
+línea sale sin glosa**, que es la misma regla que ya tiene la del comprobante. Va en mayúsculas y **sin cortar**
+—el largo lo decide cada destino, y CONCAR corta a 40 la principal y a 30 la del detalle—. Lo que saldría lo
+puedes ver con `tesoreria.glosa_de_movimiento(movimiento, imputacion, parte)`.
+
+La piden los cuatro destinos: es el campo 16 del Diario 5.1 del PLE y una columna obligada en CONCAR, CONTASIS y
+STARSOFT.
 
 ### La moneda: ISO en el documento, tu alias en tu casa
 
@@ -531,7 +556,7 @@ escribe un driver contra el contrato del motor; aquí se lee el documento contra
 
 ```json
 {
-  "open_accounting": "3.0",
+  "open_accounting": "3.1",
   "libro": {"ruc": "…", "razon_social": "…", "periodo": "202601", "tipo": "compra"},
   "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "45680", "fecha_emision": "2026-01-10",
                     "contraparte_doc": "20677777771", "contraparte_nombre": "MAYORISTA NACIONAL SAC",
@@ -796,7 +821,7 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia
   una línea**: la superficie pública de la 1.0 sigue entera y su test pasa sin regenerarse. Lo que desapareció es lo
   que ninguna versión publicada llegó a ofrecer — la 0.x nunca estuvo en PyPI.
-- **El estándar es `open-accounting` 3.0**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
+- **El estándar es `open-accounting` 3.1**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
   significado hasta una 4.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
   se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **una línea se contabiliza con `cuenta`,
   `debe_haber`, `importe` y `clase`**, que son los cuatro que exige. Si vienes de la 1.0, que el motor ya no
