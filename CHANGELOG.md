@@ -4,9 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
-
-**La 11.0.0, con `open-accounting` 3.0.** Esta sección es de donde la pre-release saca sus notas; al etiquetar la final se renombra a `## [11.0.0] — fecha`.
+## [11.0.0] — 2026-10-11 · con `open-accounting` 3.0
 
 **Una sola entrada para tesorería, y la contrapartida la pone el ERP.** Con esto el contrato del dinero queda
 cerrado: un ERP ya puede registrar los movimientos bancarios de un mes y decir **todo** lo que el motor necesitará
