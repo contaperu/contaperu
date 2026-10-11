@@ -807,6 +807,291 @@
      }
     ]
    }
+  },
+  {
+   "description": "Un libro de tesorería con sus movimientos y ningún comprobante",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-03",
+      "descripcion": "ABONO POR TRANSFERENCIA",
+      "importe": "500.00",
+      "sentido": "abono",
+      "moneda": "PEN",
+      "saldo": "1500.00",
+      "referencia": "000001"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Un movimiento sin cuenta no vale: no hay forma de saber de quién es",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "fecha": "2026-08-03",
+      "importe": "500.00",
+      "sentido": "abono"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Un sentido que no es cargo ni abono no vale",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-03",
+      "importe": "500.00",
+      "sentido": "entrada"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "El importe de un movimiento va positivo: el signo lo lleva el sentido",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-03",
+      "importe": "-500.00",
+      "sentido": "cargo"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una constancia de pago masivo que se reparte entre dos comprobantes",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "constancias": [
+     {
+      "numero": "00012345678",
+      "fecha": "2026-08-14",
+      "importe": "4721.50",
+      "moneda": "PEN",
+      "medio_pago": "003",
+      "cuenta_origen": "bbva-soles",
+      "concepto": "Pago Detracciones Masivo SUNAT",
+      "referencias": [
+       {
+        "clase": "comprobante",
+        "importe": "1200.00",
+        "datos": {
+         "tipo_cp": "01",
+         "serie": "F001",
+         "numero": "123",
+         "contraparte_doc": "20602222226"
+        }
+       },
+       {
+        "clase": "comprobante",
+        "importe": "3511.00",
+        "datos": {
+         "tipo_cp": "01",
+         "serie": "F001",
+         "numero": "124",
+         "contraparte_doc": "20607777773"
+        }
+       }
+      ],
+      "origen": "pdf_texto",
+      "confianza": "0.92"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Una constancia sin número no vale: es lo único que no se puede inventar",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "constancias": [
+     {
+      "fecha": "2026-08-14",
+      "importe": "4711.00"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una referencia de una clase que no está entre las cuatro no vale",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "constancias": [
+     {
+      "numero": "00012345678",
+      "fecha": "2026-08-14",
+      "importe": "100.00",
+      "referencias": [
+       {
+        "clase": "planilla",
+        "datos": {
+         "texto": "x"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Las cuatro clases de referencia, cada una con lo suyo",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "constancias": [
+     {
+      "numero": "00012345678",
+      "fecha": "2026-08-14",
+      "importe": "100.00",
+      "referencias": [
+       {
+        "clase": "comprobante",
+        "datos": {
+         "tipo_cp": "01",
+         "serie": "F001",
+         "numero": "123",
+         "contraparte_doc": "20602222226"
+        }
+       },
+       {
+        "clase": "tributo",
+        "datos": {
+         "codigo": "1000",
+         "periodo": "202607"
+        }
+       },
+       {
+        "clase": "cuenta_propia",
+        "datos": {
+         "cuenta": "bbva-dolares"
+        }
+       },
+       {
+        "clase": "libre",
+        "datos": {
+         "texto": "Reintegro de caja chica de obra"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Los dos bloques en el mismo documento, que es lo normal en un mes",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-14",
+      "importe": "4721.50",
+      "sentido": "cargo",
+      "moneda": "PEN",
+      "itf": "0.20"
+     }
+    ],
+    "constancias": [
+     {
+      "numero": "00012345678",
+      "fecha": "2026-08-14",
+      "importe": "4721.50",
+      "cuenta_origen": "bbva-soles"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Una clave que no es de un movimiento no pasa, como en el resto del estándar",
+   "data": {
+    "open_accounting": "1.0",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202608",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bbva-soles",
+      "fecha": "2026-08-03",
+      "importe": "500.00",
+      "sentido": "abono",
+      "titular": "quien sea"
+     }
+    ]
+   },
+   "valid": false
   }
  ]
 }

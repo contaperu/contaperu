@@ -4,6 +4,121 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [9.1.0] — 2026-10-10
+
+**El dinero entra por el mismo circuito que un comprobante.** Con el tercer tipo de libro —`tesoreria`— y los dos
+bloques de la enmienda 0024 en el esquema, un documento de puro banco ya es válido sin mentir: hasta ahora habría
+tenido que declararse compra o venta, y era eso lo que mantenía la enmienda `reservada`.
+
+**No asienta nada, y es a propósito.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la
+norma para asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las
+cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que entra es lo que
+sí se puede terminar hoy: **registrar, validar, cuadrar y conciliar lo que se pueda conciliar sin inventar reglas.**
+
+### El estándar · `movimientos[]` y `constancias[]`
+
+La **enmienda 0024 pasa de `reservada` a `aceptada`** y el esquema gana tres `$defs` —`movimiento`, `constancia` y
+`referencia_de_constancia`— más dos claves en `properties`, **ninguna en `required`**. Es aditivo y **no sube la
+versión del estándar**: es el segundo de los tres niveles de `estandar/LEEME.md` §Versionado, que ya nombraba
+`movimientos[]` del banco como su ejemplo canónico. Quien no los entienda los ignora.
+
+**Diez casos de conformidad nuevos** (33 → 43), que es lo que un ERP de fuera puede correr sin instalar nada: un
+libro de tesorería con sus movimientos y ningún comprobante, una constancia de pago masivo repartida entre dos
+comprobantes, las cuatro clases de referencia, y los seis rechazos que tienen que ocurrir.
+
+### El cuadre es la puerta, y es lo que hace verificable cualquier vía de entrada
+
+`revisar_tesoreria` por la api (la herramienta 16 del MCP, `POST /v1/tesoreria`): valida la forma, deduplica una
+relectura, **cuadra la cadena de saldos de cada cuenta** y reporta lo que no cierra. Da igual de dónde salieron las
+filas —el export del banco, un Excel convertido, un modelo leyendo un PDF—: si la cadena no encadena, el parseo está
+mal y se dice **en qué línea**.
+
+Eso es lo que permite que una IA participe sin que nadie tenga que creerle, y no es una opinión: la investigación de
+2026 encuentra que la confianza que reporta un modelo **no separa de forma fiable** lo correcto de lo incorrecto, y
+que lo que sí funciona es una comprobación determinista al lado. La teníamos construida desde la 8.2 sin usar.
+
+**El saldo inicial de cada cuenta se deduce si nadie lo declara, y se dice cuál fue cuál** (`saldo_inicial_declarado`).
+Está en la cabecera del extracto, así que es de quien lee el archivo; sin él, se saca del primer movimiento y la
+cadena se comprueba de la segunda línea en adelante. No es un consuelo: el caso real que destapó el ITF rompía justo
+en la segunda fila del mes.
+
+### Dos puertas que faltaban en el núcleo
+
+- **No se puede repartir más de lo que se pagó.** Lo que ninguna referencia reclama se informa y **no se cierra**
+  —un cargo lleva el ITF dentro, y qué es ese resto lo decide el contador por la imputación—, pero reclamar 5 000 de
+  un pago de 4 000 no es un juicio contable: es una suma que no cuadra. Es el cuadre propio de una constancia, y el
+  equivalente de la cadena de saldos para un papel que no trae saldos.
+- **Una cuenta que nadie declaró se nombra y no se adivina** (`tesoreria.sin_cuenta_declarada`). El `id` es la llave
+  con la que el dinero se enlaza con su 104; hasta aquí un `id` mal escrito daba un movimiento perfectamente válido
+  que no se podía casar con ninguna cuenta, y eso no se ve hasta el cierre.
+
+### Arreglado · el rechazo que el estándar prometía y no estaba ocurriendo
+
+El catálogo dice que «el driver que no declara un tipo de libro en sus `FORMATOS` lo rechaza limpio, **diciendo qué
+libros lleva**». No pasaba: los ocho drivers contestaban **«No hay comprobantes que procesar»**, que es engañoso,
+porque la razón verdadera es que ese destino no lleva ese libro.
+
+Y no era una falta de mensaje —`drivers.formato_de` ya lo tenía bien—: era un **orden de comprobaciones**, y se
+llamaba después de preparar. Ahora el tipo de libro se comprueba primero, y el error es
+`drivers.LibroQueElDestinoNoLleva`, que nombra los que sí lleva. **Sigue siendo un `ValueError`**, que es lo que era
+antes, así que quien lo atrapara por ahí no se rompe; y ahora es además un `ErrorContaperu`, así que quien atrapa los
+errores del motor lo caza.
+
+Nadie lo había notado porque hasta hoy no existía ningún libro del catálogo fuera de los dos que todos los drivers
+llevan. **El tercero lo destapó, que es exactamente para lo que servía añadirlo.**
+
+### Cambiado · los rasgos del libro, reagrupados (John, 10-oct-2026)
+
+El cuadro de `modelo.RASGOS` pasa de nueve filas a seis, en tres bloques: **qué ES el libro** (origen, roles,
+sentido, cuenta de contraparte), **qué reglas le tocan** y **a dónde va** (el sub-diario, que no es lo que define a
+un libro sino por dónde sale, y tenerlo primero hacía parecer que sí).
+
+Lo que faltaba eran **los roles**, y el catálogo ya los tenía desde el 1-oct-2026 sin que nadie los conectara. Cada
+libro declara ahora **qué roles caben en su asiento** —una declaración, no un mapa— y de ahí se **deriva**
+`asiento.ROLES_DEL_MOTOR`, que era una lista mantenida a mano. Los de venta y compra están medidos ejecutando el
+motor; los de tesorería **se declaran vacíos**, que es la única afirmación comprobable mientras el motor no emita ni
+una línea suya.
+
+Hubo un intento intermedio con `rol_principal` y `rol_contraparte` que no sobrevivió al primer caso real: un libro no
+siempre tiene un hecho y una contraparte —en un pago que cancela una deuda el hecho es el dinero, y en una comisión
+del banco es el gasto—, así que preguntar «cuál es el principal» fuerza una respuesta que a veces es mentira. Odoo lo
+esquiva no preguntándolo: su pago tiene `liquidity`, `counterpart` y `writeoff`, sin jerarquía.
+
+**Si construyes un `Rasgos` por posición, el orden de sus campos cambió.** Nadie lo hace —el motor los construye por
+nombre y lo normal es leerlos—, ningún campo desapareció y `roles` es nuevo; se dice por si acaso.
+
+### Añadido · el rol no manda en el núcleo, y ahora es una promesa
+
+`tests/test_capas.py` gana dos guardianes de una regla de arquitectura que era cierta **por accidente**: el `rol`
+existe para que un destino encuentre la línea que su columna pide sin conocer la cuenta, así que los drivers se
+bifurcan por él (diecisiete usos en siete ficheros) y **el núcleo no**. Ya lo decía en tres sitios sin test detrás:
+la huella lo excluye, el resumen solo lo recolecta para informarlo, y la api avisa de un rol desconocido con «se lee
+igual, el rol solo dice qué es. No rompe».
+
+Uno es de comportamiento —se reescriben todos los roles y la huella, el cuadre y los importes no se mueven— y el otro
+prohíbe que el núcleo compare un rol contra un valor. **Importa porque lo que existe para los sistemas de destino no
+puede ser de lo que dependa la contabilidad**, y el núcleo se está volviendo la base de un ERP.
+
+El sintáctico nació con un agujero que encontró su propia mutación: miraba `.rol` y `["rol"]`, y el núcleo lee el
+campo con un accesor genérico. Ahora mira el subárbol entero de la comparación.
+
+### Y lo que se buscó antes de escribirlo, para no rehacerlo
+
+Las palabras del efecto de una operación sobre el efectivo —`entrada`, `salida`, `transferencia`— son las de la
+**NIC 7** en su versión en español, la que publica el MEF del Perú: «Flujos de efectivo son las entradas y salidas de
+efectivo y equivalentes al efectivo». Y son **tres** porque su **§9** excluye de los flujos los traspasos entre
+partidas de efectivo: `transferencia` existe para poder quedar excluido y no contarse dos veces, que es la misma
+razón por la que Odoo tiene `transfer` y ERPNext `Internal Transfer`.
+
+`ingreso` se descartó con dos razones, y la de dentro es la más fuerte: **ya es una de las cinco clases de cuenta**
+del catálogo, además del Registro de Ventas e Ingresos.
+
+Y el límite que no se puede saltar: **una línea de extracto nunca es una `transferencia`**, porque eso es una
+afirmación sobre un *par* y el extracto no la hace. Se declara —una constancia con una referencia `cuenta_propia`— o
+se propone, y quien propone nunca confirma.
+
+---
+
 ## [9.0.1] — 2026-10-10
 
 **Se retiran del repositorio los datos reales de una cuenta bancaria.** Es la regla 6 —«nunca datos reales en el

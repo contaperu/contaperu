@@ -106,6 +106,7 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - D8 · 8.2.0 (la validación del maestro sale por la api; el argumento en el pipeline espera a que algo lo
   consuma). **La 8.2.0 no se publicó**: su código salió dentro de la 9.0.0, así que para tenerlo se instala esa
 - El eje del libro · 9.0.0 (de `es_venta: bool` a la tabla `modelo.RASGOS`: no es un hito de ningún frente, es lo que había que arreglar antes de que B13 sumara el tercer libro)
+- El tercer libro y la entrada del dinero · 9.1.0 (`tesoreria` en el catálogo, la enmienda 0024 aceptada, los dos bloques en el esquema y `revisar_tesoreria` por la api. **No asienta**: eso es D6)
 - A4 · 6.0.0 (STARSOFT Desktop: un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct; la `V` del archivo de ventas se corrigió en la 6.3.2)
 - J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
 - J1 · 1.0.0 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)

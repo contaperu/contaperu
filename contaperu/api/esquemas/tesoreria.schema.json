@@ -1,0 +1,199 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/tesoreria.schema.json",
+ "title": "Tesorería revisada",
+ "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta, lo que ninguna referencia de una constancia reclama, y lo que llegó de una lectura asistida. No lleva asiento: eso es el hito D6.",
+ "type": "object",
+ "required": [
+  "libro",
+  "movimientos",
+  "repetidos",
+  "constancias",
+  "cuadre",
+  "sin_atribuir",
+  "de_lectura_asistida",
+  "avisos"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "libro": {
+   "description": "La cabecera del documento. Se declara aquí y no se referencia al estándar: un esquema de salida se valida sin salir a la red, igual que el resto del contrato.",
+   "type": "object",
+   "required": [
+    "ruc",
+    "periodo",
+    "tipo"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "ruc": {
+     "type": "string"
+    },
+    "razon_social": {
+     "type": "string"
+    },
+    "periodo": {
+     "type": "string"
+    },
+    "tipo": {
+     "type": "string"
+    }
+   }
+  },
+  "movimientos": {
+   "description": "Cuántos quedaron después de descartar los repetidos.",
+   "type": "integer",
+   "minimum": 0
+  },
+  "repetidos": {
+   "description": "Cuántos se descartaron por ser una relectura. No se tiran en silencio: lo que quien integra necesita saber es cuántos fueron.",
+   "type": "integer",
+   "minimum": 0
+  },
+  "constancias": {
+   "description": "Cuántas constancias se leyeron.",
+   "type": "integer",
+   "minimum": 0
+  },
+  "cuadre": {
+   "description": "Un cuadre por cuenta. `cuadra` es lo único que hay que mirar primero.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "cuenta",
+     "cuadra",
+     "saldo_inicial",
+     "saldo_final",
+     "cargos",
+     "abonos",
+     "movimientos",
+     "rompe_en",
+     "diferencia",
+     "saldo_inicial_declarado",
+     "cuenta_contable"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "cuenta": {
+      "type": "string",
+      "description": "El `id` de la cuenta en el maestro."
+     },
+     "cuadra": {
+      "type": "boolean"
+     },
+     "saldo_inicial": {
+      "type": "string"
+     },
+     "saldo_final": {
+      "type": "string",
+      "description": "El que RESULTA de aplicar los movimientos, no el declarado."
+     },
+     "cargos": {
+      "type": "string"
+     },
+     "abonos": {
+      "type": "string"
+     },
+     "movimientos": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "rompe_en": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "En qué movimiento se rompió la cadena, 1 en adelante. 0 es ninguno."
+     },
+     "diferencia": {
+      "type": "string",
+      "description": "En esa línea: el saldo que trae menos el que sale de la cadena. Sin tolerancia — un céntimo no es un redondeo, es una línea mal leída."
+     },
+     "saldo_inicial_declarado": {
+      "type": "boolean",
+      "description": "`false` significa que se dedujo del primer movimiento, así que la cadena se comprobó de la segunda línea en adelante."
+     },
+     "cuenta_contable": {
+      "type": "string",
+      "description": "La 104 que declaró el contribuyente, o vacío si esa cuenta no está en el maestro."
+     }
+    }
+   }
+  },
+  "sin_atribuir": {
+   "description": "Las constancias donde lo que las referencias reclaman no llega al importe. **No es un error y no se cierra**: un cargo lleva el ITF dentro, y qué es ese resto lo decide el contador por la imputación.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "numero",
+     "importe",
+     "repartido",
+     "sin_atribuir"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "numero": {
+      "type": "string"
+     },
+     "importe": {
+      "type": "string"
+     },
+     "repartido": {
+      "type": "string"
+     },
+     "sin_atribuir": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "de_lectura_asistida": {
+   "description": "Las constancias cuyo `origen` dice que las leyó un modelo (`pdf_texto`, `vision`). Se nombran para que se puedan revisar, y **su confianza no relaja ninguna comprobación**: el cuadre es el mismo.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "numero",
+     "origen",
+     "confianza"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "numero": {
+      "type": "string"
+     },
+     "origen": {
+      "type": "string"
+     },
+     "confianza": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "avisos": {
+   "description": "Lo que hay que mirar, con a quién pedírselo. Ninguno para el proceso.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "codigo",
+     "pedir_a",
+     "texto"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "codigo": {
+      "type": "string"
+     },
+     "pedir_a": {
+      "type": "string"
+     },
+     "texto": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}

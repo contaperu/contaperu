@@ -47,6 +47,7 @@ from importlib.metadata import entry_points
 from types import ModuleType
 
 from .. import _obsoleto
+from ..errores import ErrorContaperu
 from . import asiento_contable, concar, contasis, contrato, csv, ple, ple_plan, sire, starsoft
 from .kit import Opciones
 
@@ -65,7 +66,8 @@ DRIVER_POR_DEFECTO = "sire"
 # cuatro puertas de una vez—, igual que `_obsoleto` se conservó sin usuarios entre la 2.0 y la 3.10.
 ALIAS: dict[str, str] = {}
 
-__all__ = ["ALIAS", "DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver", "Opciones",
+__all__ = ["ALIAS", "DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver",
+           "LibroQueElDestinoNoLleva", "Opciones",
            "asiento_contable", "concar", "contasis", "contrato", "csv", "de_terceros",
            "formato_de", "obtener", "ple", "ple_plan", "recargar", "sire", "starsoft"]
 
@@ -189,9 +191,29 @@ def obtener(nombre: str) -> ModuleType:
         raise ValueError(f"Driver desconocido: {nombre!r}. Disponibles: {', '.join(DRIVERS)}") from None
 
 
+class LibroQueElDestinoNoLleva(ErrorContaperu, ValueError):
+    """Un tipo de libro que el catálogo publica y este destino no declara en sus `FORMATOS`.
+
+    Es la degradación que el estándar promete para un tipo de libro, y es distinta de la de un `rol`: un rol
+    desconocido no rompe nada —la línea se contabiliza por su cuenta, su sentido y su importe—, pero **un libro
+    desconocido no se puede adivinar**, así que la degradación es del destino y tiene que decir qué sí lleva.
+
+    Hereda de `ValueError` además de `ErrorContaperu` porque eso era antes, y quien lo atrape por ahí sigue
+    atrapándolo."""
+
+    clave = "libro_que_el_destino_no_lleva"
+
+    def __init__(self, driver: str, tipo_libro: str, lleva):
+        super().__init__(f"El driver {driver!r} no lleva libros de tipo {tipo_libro!r}: "
+                         f"lleva {', '.join(sorted(lleva))}")
+        self.driver = driver
+        self.tipo = tipo_libro
+        self.lleva = tuple(sorted(lleva))
+
+
 def formato_de(nombre: str, tipo_libro: str) -> str:
     """'sire' + 'venta' → 'sire_rvie': el identificador de lo que se acaba de producir."""
     formatos = obtener(nombre).FORMATOS
     if tipo_libro not in formatos:
-        raise ValueError(f"El driver {nombre!r} no genera libros de tipo {tipo_libro!r}")
+        raise LibroQueElDestinoNoLleva(nombre, tipo_libro, formatos)
     return formatos[tipo_libro]

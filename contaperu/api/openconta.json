@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "9.0.1",
+  "version": "9.1.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -500,6 +500,50 @@
        "application/json": {
         "schema": {
          "$ref": "#/components/schemas/cuentas_bancarias"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/tesoreria": {
+   "post": {
+    "operationId": "revisar_tesoreria",
+    "summary": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de los pagos.",
+    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de\nlos pagos.\n\n**No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para\nasentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las\ncuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace\nes lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.\n\n**El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las\nfilas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de\nsaldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin\nque nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un\nmodelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación\ndeterminista al lado—.\n\n**El saldo inicial de cada cuenta se deriva si no se declara**, y se dice cuál fue cuál. Está en la cabecera del\nextracto, que es de quien lee el archivo; sin él, se deduce del primer movimiento y la cadena se comprueba de la\nsegunda línea en adelante. No es un consuelo: el caso real que destapó el ITF rompía en la segunda fila del mes.\n\nLas constancias se revisan por su propio cuadre, que es aritmético y distinto: lo que las referencias reclaman\nno puede pasar del importe —eso para al construirlas—, y **lo que ninguna reclama se reporta y no se cierra**,\nporque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el ITF dentro.\n\nY lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza\ncon su 104, y si no está en el maestro no hay nada que deducir.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/revisar_tesoreria_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de los pagos.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/tesoreria"
         }
        }
       }
@@ -1058,6 +1102,20 @@
       "type": "array",
       "items": {
        "$ref": "#/components/schemas/OpenAccounting_linea"
+      }
+     },
+     "movimientos": {
+      "description": "Movimientos de las cuentas de efectivo del contribuyente, tal como los imprime el extracto de su banco. Opcional: quien no los entienda los ignora. Cada uno apunta a su cuenta por el `id` del maestro que aporta quien llama, no por un número suelto.",
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_movimiento"
+      }
+     },
+     "constancias": {
+      "description": "Constancias de pago: la prueba de una operación, con lo que cancela. Opcional. Son un bloque aparte de `movimientos` porque son hechos de testigos distintos —el banco dice qué pasó en la cuenta y el pagador dice qué pagó—, las cardinalidades no cuadran (un solo cargo paga un lote de detracciones) y los ciclos de vida difieren: una constancia existe semanas antes de que llegue el extracto.",
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_constancia"
       }
      },
      "emisor": {
@@ -1767,6 +1825,175 @@
       "description": "Con qué se movió el dinero en esta línea: un código de tres dígitos del catálogo de medios de pago de SUNAT (Tabla 1 del Anexo 3 de la RS 169-2015), el mismo que el comprobante usa desde la enmienda 0004. Es de la línea con rol `tesoreria`, la que mueve caja o banco: el comprobante dice con qué se paga la operación y esta dice con qué se movió el dinero. Vacío significa que no se dice, no que fuera en efectivo. **No entra en la huella del asiento**: no cambia ningún asiento ni ningún importe.",
       "type": "string",
       "pattern": "^$|^[0-9]{3}$"
+     }
+    }
+   },
+   "OpenAccounting_movimiento": {
+    "description": "Una línea del extracto de una cuenta de efectivo. **El importe va siempre positivo y el signo lo lleva `sentido`**, que es la misma regla que ya rige en `linea.debe_haber` y lo que hacen los formatos bancarios: el `CdtDbtInd` de camt.053 y el subcampo C/D del tag 61 de un MT940 llevan el signo aparte del importe.",
+    "type": "object",
+    "required": [
+     "cuenta",
+     "fecha",
+     "importe",
+     "sentido"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "cuenta": {
+      "description": "El `id` de la cuenta en el maestro que aporta quien llama. No es una cuenta contable ni un número de cuenta del banco.",
+      "type": "string"
+     },
+     "fecha": {
+      "description": "La de la operación, completa. Las líneas de un extracto traen día y mes; el año está en la cabecera y lo baja quien lee el archivo, porque el núcleo no tiene reloj con el que adivinarlo.",
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "fecha_valor": {
+      "description": "La fecha valor del banco. Si no viene, cae a la de la operación.",
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "descripcion": {
+      "description": "La glosa del banco, tal cual.",
+      "type": "string"
+     },
+     "importe": {
+      "description": "Siempre positivo: el signo lo dice `sentido`.",
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "sentido": {
+      "description": "`cargo` sale dinero de la cuenta, `abono` entra. Son las palabras del banco; su efecto sobre el efectivo —entrada o salida, con las palabras de la NIC 7— lo deriva quien lee.",
+      "type": "string",
+      "enum": [
+       "cargo",
+       "abono"
+      ]
+     },
+     "moneda": {
+      "description": "ISO 4217. Un extracto trae una sola moneda.",
+      "type": "string"
+     },
+     "saldo": {
+      "description": "El saldo corrido DESPUÉS de esta línea, si el banco lo imprime. Es lo que hace verificable una lectura: la cadena tiene que encadenar.",
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "referencia": {
+      "description": "El número de operación del banco, si lo da. Es la llave con la que una relectura no duplica.",
+      "type": "string"
+     },
+     "itf": {
+      "description": "El Impuesto a las Transacciones Financieras de esta línea, cuando el banco lo trae en su propia columna. **Vacío no es cero: es «el banco no lo dice».** Y se descuenta del saldo aunque no esté dentro del importe.",
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "id_externo": {
+      "description": "El identificador de quien integra, para enlazar con su propio registro.",
+      "type": "string"
+     },
+     "datos_originales": {
+      "description": "Lo que el productor quiera transportar sin interpretar.",
+      "type": "object"
+     }
+    }
+   },
+   "OpenAccounting_referencia_de_constancia": {
+    "description": "Qué cancela un pago. **Cuatro clases y ninguna más**, y la última es texto libre: es lo que hace que una constancia valga para cualquier pago sin que el estándar enumere propósitos de pago, que es la trampa en la que cae un modelo de tesorería. Solo entra lo que el papel dice: que un cargo de 3 500 corresponda a una factura de 3 500 es una conjetura, y las conjeturas son de quien concilia, que nunca confirma.",
+    "type": "object",
+    "required": [
+     "clase",
+     "datos"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "clase": {
+      "description": "`comprobante` (la 4-tupla que lo identifica), `tributo` (código del Catálogo 05 y periodo), `cuenta_propia` (el traspaso entre cuentas del contribuyente, que no se cuenta dos veces) o `libre` (texto).",
+      "type": "string",
+      "enum": [
+       "comprobante",
+       "tributo",
+       "cuenta_propia",
+       "libre"
+      ]
+     },
+     "datos": {
+      "description": "Las claves que admite su clase, y solo ésas. Todos los valores son texto.",
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "importe": {
+      "description": "Cuánto de la constancia va a esta referencia, cuando el pago se reparte. Ausente significa «todo el importe». **La suma no tiene que igualar el importe**: un cargo lleva el ITF dentro, y lo que ninguna referencia reclama se reporta y no se cierra.",
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     }
+    }
+   },
+   "OpenAccounting_constancia": {
+    "description": "La prueba de un pago, con lo que cancela. Sirve para cualquiera —un proveedor, un tributo, un traspaso propio, una caja chica— y existe semanas antes de que llegue el extracto, que es por qué es un bloque aparte de `movimientos`.",
+    "type": "object",
+    "required": [
+     "numero",
+     "fecha",
+     "importe"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "numero": {
+      "description": "El número de la constancia o de la operación. Es lo único que no se puede inventar, y por eso es obligatorio.",
+      "type": "string"
+     },
+     "fecha": {
+      "description": "El día del pago, que no es el de la factura: se paga días después, a veces el mes siguiente.",
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "importe": {
+      "description": "El total pagado.",
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "moneda": {
+      "description": "ISO 4217.",
+      "type": "string"
+     },
+     "medio_pago": {
+      "description": "El código de la Tabla 1 del Anexo 3 de la RS 169-2015, el mismo que ya usa la línea del asiento.",
+      "type": "string"
+     },
+     "cuenta_origen": {
+      "description": "El `id` de la cuenta en el maestro de quien llama. **No es una cuenta contable**: la 104 sale de la cuenta declarada.",
+      "type": "string"
+     },
+     "beneficiario": {
+      "description": "A quién se le pagó: `{tipo_doc, doc, nombre}`.",
+      "type": "object"
+     },
+     "concepto": {
+      "description": "Lo que dice el papel.",
+      "type": "string"
+     },
+     "referencias": {
+      "description": "Qué cancela este pago. Vacío es válido: hay constancias que no dicen qué cancelan.",
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_referencia_de_constancia"
+      }
+     },
+     "origen": {
+      "description": "De dónde salió el dato: los mismos valores que el comprobante, y los dos de lectura asistida —`pdf_texto` y `vision`— son los que marcan lo que leyó un modelo.",
+      "type": "string"
+     },
+     "confianza": {
+      "description": "Entre 0 y 1. Por debajo de 1 solo tiene sentido en lo que leyó una IA, y **no relaja ninguna comprobación**: el cuadre es el mismo.",
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+       }
+      ]
+     },
+     "datos_originales": {
+      "description": "Lo que el productor quiera transportar sin interpretar.",
+      "type": "object"
      }
     }
    },
@@ -2917,6 +3144,203 @@
     ],
     "additionalProperties": false
    },
+   "tesoreria": {
+    "title": "Tesorería revisada",
+    "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta, lo que ninguna referencia de una constancia reclama, y lo que llegó de una lectura asistida. No lleva asiento: eso es el hito D6.",
+    "type": "object",
+    "required": [
+     "libro",
+     "movimientos",
+     "repetidos",
+     "constancias",
+     "cuadre",
+     "sin_atribuir",
+     "de_lectura_asistida",
+     "avisos"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "libro": {
+      "description": "La cabecera del documento. Se declara aquí y no se referencia al estándar: un esquema de salida se valida sin salir a la red, igual que el resto del contrato.",
+      "type": "object",
+      "required": [
+       "ruc",
+       "periodo",
+       "tipo"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "ruc": {
+        "type": "string"
+       },
+       "razon_social": {
+        "type": "string"
+       },
+       "periodo": {
+        "type": "string"
+       },
+       "tipo": {
+        "type": "string"
+       }
+      }
+     },
+     "movimientos": {
+      "description": "Cuántos quedaron después de descartar los repetidos.",
+      "type": "integer",
+      "minimum": 0
+     },
+     "repetidos": {
+      "description": "Cuántos se descartaron por ser una relectura. No se tiran en silencio: lo que quien integra necesita saber es cuántos fueron.",
+      "type": "integer",
+      "minimum": 0
+     },
+     "constancias": {
+      "description": "Cuántas constancias se leyeron.",
+      "type": "integer",
+      "minimum": 0
+     },
+     "cuadre": {
+      "description": "Un cuadre por cuenta. `cuadra` es lo único que hay que mirar primero.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "cuenta",
+        "cuadra",
+        "saldo_inicial",
+        "saldo_final",
+        "cargos",
+        "abonos",
+        "movimientos",
+        "rompe_en",
+        "diferencia",
+        "saldo_inicial_declarado",
+        "cuenta_contable"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "cuenta": {
+         "type": "string",
+         "description": "El `id` de la cuenta en el maestro."
+        },
+        "cuadra": {
+         "type": "boolean"
+        },
+        "saldo_inicial": {
+         "type": "string"
+        },
+        "saldo_final": {
+         "type": "string",
+         "description": "El que RESULTA de aplicar los movimientos, no el declarado."
+        },
+        "cargos": {
+         "type": "string"
+        },
+        "abonos": {
+         "type": "string"
+        },
+        "movimientos": {
+         "type": "integer",
+         "minimum": 0
+        },
+        "rompe_en": {
+         "type": "integer",
+         "minimum": 0,
+         "description": "En qué movimiento se rompió la cadena, 1 en adelante. 0 es ninguno."
+        },
+        "diferencia": {
+         "type": "string",
+         "description": "En esa línea: el saldo que trae menos el que sale de la cadena. Sin tolerancia — un céntimo no es un redondeo, es una línea mal leída."
+        },
+        "saldo_inicial_declarado": {
+         "type": "boolean",
+         "description": "`false` significa que se dedujo del primer movimiento, así que la cadena se comprobó de la segunda línea en adelante."
+        },
+        "cuenta_contable": {
+         "type": "string",
+         "description": "La 104 que declaró el contribuyente, o vacío si esa cuenta no está en el maestro."
+        }
+       }
+      }
+     },
+     "sin_atribuir": {
+      "description": "Las constancias donde lo que las referencias reclaman no llega al importe. **No es un error y no se cierra**: un cargo lleva el ITF dentro, y qué es ese resto lo decide el contador por la imputación.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "numero",
+        "importe",
+        "repartido",
+        "sin_atribuir"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "numero": {
+         "type": "string"
+        },
+        "importe": {
+         "type": "string"
+        },
+        "repartido": {
+         "type": "string"
+        },
+        "sin_atribuir": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "de_lectura_asistida": {
+      "description": "Las constancias cuyo `origen` dice que las leyó un modelo (`pdf_texto`, `vision`). Se nombran para que se puedan revisar, y **su confianza no relaja ninguna comprobación**: el cuadre es el mismo.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "numero",
+        "origen",
+        "confianza"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "numero": {
+         "type": "string"
+        },
+        "origen": {
+         "type": "string"
+        },
+        "confianza": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "avisos": {
+      "description": "Lo que hay que mirar, con a quién pedírselo. Ninguno para el proceso.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "codigo",
+        "pedir_a",
+        "texto"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "codigo": {
+         "type": "string"
+        },
+        "pedir_a": {
+         "type": "string"
+        },
+        "texto": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   },
    "cuenta_pcge": {
     "title": "Cuenta del PCGE 2026",
     "description": "Lo que se encontró en el catálogo oficial: la cuenta de un código —o la madre que lo gobierna, con `exacta` falso— y las cuentas cuyo nombre contiene el texto.",
@@ -3656,6 +4080,34 @@
        "type": "object"
       },
       "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y la cuenta contable de cada una. Es un argumento; el motor no lo guarda."
+     }
+    }
+   },
+   "revisar_tesoreria_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "cuentas": {
+      "type": "array",
+      "items": {
+       "type": "object"
+      },
+      "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y la cuenta contable de cada una. Es un argumento; el motor no lo guarda."
+     },
+     "saldos_iniciales": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      },
+      "description": "Por cada `id` de cuenta, el saldo que había antes del primer movimiento. Está en la cabecera del extracto, así que es de quien lee el archivo. Si falta, se deduce del primer movimiento y la cadena se comprueba de la segunda línea en adelante — y se dice cuál fue cuál."
      }
     }
    },

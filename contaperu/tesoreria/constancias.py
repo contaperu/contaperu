@@ -119,6 +119,16 @@ class Constancia:
                                      f"el de la factura: se paga días después, a veces el mes siguiente")
         if self.importe <= CERO:
             raise ConstanciaInvalida(f"La constancia {self.numero!r} no tiene importe: {self.importe}")
+        # **No se puede repartir más de lo que se pagó**, y esto sí es un error y no un reporte. Lo que queda sin
+        # reclamar se informa y no se cierra (`sin_atribuir`), porque decidir qué es ese resto es del contador; pero
+        # reclamar 5 000 de un pago de 4 000 no es un juicio contable, es una suma que no cuadra. Es la puerta
+        # equivalente a la cadena de saldos de un extracto: la que hace verificable lo que leyó una IA.
+        repartido = sum((r.importe for r in self.referencias if r.importe is not None), CERO)
+        if repartido > self.importe:
+            raise ConstanciaInvalida(
+                f"Las referencias de la constancia {self.numero!r} reclaman {repartido} de un pago de "
+                f"{self.importe}: no se puede repartir más de lo que se pagó. Lo que sobra del pago sí se puede "
+                f"dejar sin reclamar — eso se informa en `sin_atribuir` y no es un error.")
 
     @property
     def repartido(self) -> object:

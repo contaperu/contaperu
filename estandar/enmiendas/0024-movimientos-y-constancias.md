@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Estado** | reservada |
+| **Estado** | aceptada |
 | **Compatibilidad** | aditivo |
 | **Nivel** | estándar |
 | **Versión** | `open-accounting` 1.0. Dos bloques opcionales nuevos **no suben la versión**, y `estandar/LEEME.md` §Versionado ya nombraba `movimientos[]` del banco como su ejemplo |
-| **Test** | — mientras esté `reservada`. La forma vive en `contaperu/tesoreria/` con la suya (`tests/test_tesoreria.py`) |
+| **Test** | `tests/test_estandar.py` (los dos bloques validan y la raíz los admite sin `comprobantes`) y `tests/test_tesoreria.py` (la forma, el cuadre y la deduplicación) |
 
 ## Motivación
 
@@ -51,7 +51,7 @@ referencia a un comprobante es la misma 4-tupla que ya identifica uno.
 ## Especificación
 
 Dos bloques opcionales en la raíz del documento. **Quien no los entienda los ignora**, que es lo que los hace
-aditivos; y mientras esta enmienda esté `reservada`, quien tenga el dato lo transporta en `datos_originales`.
+aditivos. Entraron al esquema el 10-oct-2026, con el tipo de libro `tesoreria`: hasta entonces un documento de puro banco habría tenido que mentir declarándose compra o venta, y era eso lo que mantenía esta enmienda `reservada`.
 
 **`movimientos[]`** — una línea de un estado de cuenta: `cuenta` (el `id` en el maestro declarado), `fecha`,
 `fecha_valor`, `descripcion`, `importe`, `sentido` (`cargo` | `abono`), `moneda`, `saldo`, `referencia`, `itf`,
@@ -105,13 +105,18 @@ con su cabecera de contribuyente y periodo más `movimientos[]` ya es válido en
 
 ## Qué rompe
 
-Nada. Son dos bloques opcionales en la raíz, y mientras esta enmienda esté `reservada` el esquema no se toca
-siquiera.
+Nada. Son dos bloques opcionales en la raíz: quien no los entienda los ignora, y la raíz sigue exigiendo solo
+`open_accounting` y `libro`. Lo que se añadió son tres `$defs` nuevos —`movimiento`, `constancia` y
+`referencia_de_constancia`— y dos claves en `properties`, ninguna en `required`. Y **no sube la versión del
+estándar**, que es el segundo de los tres niveles de `LEEME.md` §Versionado.
 
-## Qué falta para pasar a `con caso real`
+## Qué falta para pasar a `final`
 
-Que un lector lea de verdad uno de los nueve extractos y devuelva movimientos que cuadren. La forma ya está en
-`contaperu/tesoreria/` con sus tests; lo que falta es el parser de un banco, y ahí hay un obstáculo que conviene
-anotar porque reordena el trabajo: **cuatro de los nueve archivos no se abren con una librería estándar** — dos
-vienen cifrados con contraseña y dos traen la cabecera del PDF rota. Lo difícil de un extracto peruano no son las
-columnas.
+Que un lector lea de verdad uno de los nueve extractos y devuelva movimientos que cuadren. La forma está publicada
+y el cuadre está probado; lo que falta es el parser de un banco.
+
+Y un obstáculo que conviene anotar bien, porque la primera versión de esta enmienda lo contó peor de lo que es:
+**dos de los nueve archivos no se abren** —los dos cifrados con contraseña— y otros **dos solo necesitan que se les
+quite un prefijo de cinco bytes**, `$BOP$`, un centinela de impresora de *mainframe* delante del `%PDF-`. Los otros
+cinco abren directamente. Así que siete de nueve se leen hoy, no cinco. Lo difícil de un extracto peruano sigue sin
+ser las columnas, pero es menos difícil de lo que parecía.

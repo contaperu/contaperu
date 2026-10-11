@@ -32,7 +32,8 @@ from __future__ import annotations
 from .constancias import (CLASES, CLAVES_POR_CLASE, COMPROBANTE, CUENTA_PROPIA, Constancia, ConstanciaInvalida,
                           LIBRE, Referencia, TRIBUTO)
 from .cuadre import CuadreExtracto, ExtractoNoCuadra, cuadra, exigir
-from .cuentas import (CuentaBancaria, CuentaInvalida, LARGO_CCI, MONEDAS, banco_del_cci, leer, normalizar_cci)
+from .cuentas import (CuentaBancaria, CuentaInvalida, LARGO_CCI, MONEDAS, banco_del_cci, leer,
+                      normalizar_cci, sin_cuenta_declarada)
 from .movimientos import (ABONO, CARGO, EFECTOS_DE_UN_MOVIMIENTO, ENTRADA, SALIDA, SENTIDOS,
                           Movimiento, MovimientoInvalido, clave_de, sin_duplicados)
 
@@ -40,4 +41,4 @@ __all__ = ["ABONO", "CARGO", "CLASES", "CLAVES_POR_CLASE", "COMPROBANTE", "CUENT
            "ConstanciaInvalida", "CuadreExtracto", "CuentaBancaria", "CuentaInvalida", "EFECTOS_DE_UN_MOVIMIENTO",
            "ENTRADA", "ExtractoNoCuadra", "LARGO_CCI", "LIBRE", "MONEDAS", "Movimiento", "MovimientoInvalido",
            "Referencia", "SALIDA", "SENTIDOS", "TRIBUTO", "banco_del_cci", "clave_de", "cuadra", "exigir", "leer",
-           "normalizar_cci", "sin_duplicados"]
+           "normalizar_cci", "sin_cuenta_declarada", "sin_duplicados"]

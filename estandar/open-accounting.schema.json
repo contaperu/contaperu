@@ -41,6 +41,20 @@
     "$ref": "#/$defs/linea"
    }
   },
+  "movimientos": {
+   "description": "Movimientos de las cuentas de efectivo del contribuyente, tal como los imprime el extracto de su banco. Opcional: quien no los entienda los ignora. Cada uno apunta a su cuenta por el `id` del maestro que aporta quien llama, no por un número suelto.",
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/movimiento"
+   }
+  },
+  "constancias": {
+   "description": "Constancias de pago: la prueba de una operación, con lo que cancela. Opcional. Son un bloque aparte de `movimientos` porque son hechos de testigos distintos —el banco dice qué pasó en la cuenta y el pagador dice qué pagó—, las cardinalidades no cuadran (un solo cargo paga un lote de detracciones) y los ciclos de vida difieren: una constancia existe semanas antes de que llegue el extracto.",
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/constancia"
+   }
+  },
   "emisor": {
    "description": "Quién generó este documento (software, versión). Informativo.",
    "type": "object",
@@ -748,6 +762,175 @@
      "description": "Con qué se movió el dinero en esta línea: un código de tres dígitos del catálogo de medios de pago de SUNAT (Tabla 1 del Anexo 3 de la RS 169-2015), el mismo que el comprobante usa desde la enmienda 0004. Es de la línea con rol `tesoreria`, la que mueve caja o banco: el comprobante dice con qué se paga la operación y esta dice con qué se movió el dinero. Vacío significa que no se dice, no que fuera en efectivo. **No entra en la huella del asiento**: no cambia ningún asiento ni ningún importe.",
      "type": "string",
      "pattern": "^$|^[0-9]{3}$"
+    }
+   }
+  },
+  "movimiento": {
+   "description": "Una línea del extracto de una cuenta de efectivo. **El importe va siempre positivo y el signo lo lleva `sentido`**, que es la misma regla que ya rige en `linea.debe_haber` y lo que hacen los formatos bancarios: el `CdtDbtInd` de camt.053 y el subcampo C/D del tag 61 de un MT940 llevan el signo aparte del importe.",
+   "type": "object",
+   "required": [
+    "cuenta",
+    "fecha",
+    "importe",
+    "sentido"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "cuenta": {
+     "description": "El `id` de la cuenta en el maestro que aporta quien llama. No es una cuenta contable ni un número de cuenta del banco.",
+     "type": "string"
+    },
+    "fecha": {
+     "description": "La de la operación, completa. Las líneas de un extracto traen día y mes; el año está en la cabecera y lo baja quien lee el archivo, porque el núcleo no tiene reloj con el que adivinarlo.",
+     "$ref": "#/$defs/fecha"
+    },
+    "fecha_valor": {
+     "description": "La fecha valor del banco. Si no viene, cae a la de la operación.",
+     "$ref": "#/$defs/fecha"
+    },
+    "descripcion": {
+     "description": "La glosa del banco, tal cual.",
+     "type": "string"
+    },
+    "importe": {
+     "description": "Siempre positivo: el signo lo dice `sentido`.",
+     "$ref": "#/$defs/importe"
+    },
+    "sentido": {
+     "description": "`cargo` sale dinero de la cuenta, `abono` entra. Son las palabras del banco; su efecto sobre el efectivo —entrada o salida, con las palabras de la NIC 7— lo deriva quien lee.",
+     "type": "string",
+     "enum": [
+      "cargo",
+      "abono"
+     ]
+    },
+    "moneda": {
+     "description": "ISO 4217. Un extracto trae una sola moneda.",
+     "type": "string"
+    },
+    "saldo": {
+     "description": "El saldo corrido DESPUÉS de esta línea, si el banco lo imprime. Es lo que hace verificable una lectura: la cadena tiene que encadenar.",
+     "$ref": "#/$defs/importe"
+    },
+    "referencia": {
+     "description": "El número de operación del banco, si lo da. Es la llave con la que una relectura no duplica.",
+     "type": "string"
+    },
+    "itf": {
+     "description": "El Impuesto a las Transacciones Financieras de esta línea, cuando el banco lo trae en su propia columna. **Vacío no es cero: es «el banco no lo dice».** Y se descuenta del saldo aunque no esté dentro del importe.",
+     "$ref": "#/$defs/importe"
+    },
+    "id_externo": {
+     "description": "El identificador de quien integra, para enlazar con su propio registro.",
+     "type": "string"
+    },
+    "datos_originales": {
+     "description": "Lo que el productor quiera transportar sin interpretar.",
+     "type": "object"
+    }
+   }
+  },
+  "referencia_de_constancia": {
+   "description": "Qué cancela un pago. **Cuatro clases y ninguna más**, y la última es texto libre: es lo que hace que una constancia valga para cualquier pago sin que el estándar enumere propósitos de pago, que es la trampa en la que cae un modelo de tesorería. Solo entra lo que el papel dice: que un cargo de 3 500 corresponda a una factura de 3 500 es una conjetura, y las conjeturas son de quien concilia, que nunca confirma.",
+   "type": "object",
+   "required": [
+    "clase",
+    "datos"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "clase": {
+     "description": "`comprobante` (la 4-tupla que lo identifica), `tributo` (código del Catálogo 05 y periodo), `cuenta_propia` (el traspaso entre cuentas del contribuyente, que no se cuenta dos veces) o `libre` (texto).",
+     "type": "string",
+     "enum": [
+      "comprobante",
+      "tributo",
+      "cuenta_propia",
+      "libre"
+     ]
+    },
+    "datos": {
+     "description": "Las claves que admite su clase, y solo ésas. Todos los valores son texto.",
+     "type": "object",
+     "additionalProperties": {
+      "type": "string"
+     }
+    },
+    "importe": {
+     "description": "Cuánto de la constancia va a esta referencia, cuando el pago se reparte. Ausente significa «todo el importe». **La suma no tiene que igualar el importe**: un cargo lleva el ITF dentro, y lo que ninguna referencia reclama se reporta y no se cierra.",
+     "$ref": "#/$defs/importe"
+    }
+   }
+  },
+  "constancia": {
+   "description": "La prueba de un pago, con lo que cancela. Sirve para cualquiera —un proveedor, un tributo, un traspaso propio, una caja chica— y existe semanas antes de que llegue el extracto, que es por qué es un bloque aparte de `movimientos`.",
+   "type": "object",
+   "required": [
+    "numero",
+    "fecha",
+    "importe"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "numero": {
+     "description": "El número de la constancia o de la operación. Es lo único que no se puede inventar, y por eso es obligatorio.",
+     "type": "string"
+    },
+    "fecha": {
+     "description": "El día del pago, que no es el de la factura: se paga días después, a veces el mes siguiente.",
+     "$ref": "#/$defs/fecha"
+    },
+    "importe": {
+     "description": "El total pagado.",
+     "$ref": "#/$defs/importe"
+    },
+    "moneda": {
+     "description": "ISO 4217.",
+     "type": "string"
+    },
+    "medio_pago": {
+     "description": "El código de la Tabla 1 del Anexo 3 de la RS 169-2015, el mismo que ya usa la línea del asiento.",
+     "type": "string"
+    },
+    "cuenta_origen": {
+     "description": "El `id` de la cuenta en el maestro de quien llama. **No es una cuenta contable**: la 104 sale de la cuenta declarada.",
+     "type": "string"
+    },
+    "beneficiario": {
+     "description": "A quién se le pagó: `{tipo_doc, doc, nombre}`.",
+     "type": "object"
+    },
+    "concepto": {
+     "description": "Lo que dice el papel.",
+     "type": "string"
+    },
+    "referencias": {
+     "description": "Qué cancela este pago. Vacío es válido: hay constancias que no dicen qué cancelan.",
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/referencia_de_constancia"
+     }
+    },
+    "origen": {
+     "description": "De dónde salió el dato: los mismos valores que el comprobante, y los dos de lectura asistida —`pdf_texto` y `vision`— son los que marcan lo que leyó un modelo.",
+     "type": "string"
+    },
+    "confianza": {
+     "description": "Entre 0 y 1. Por debajo de 1 solo tiene sentido en lo que leyó una IA, y **no relaja ninguna comprobación**: el cuadre es el mismo.",
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      }
+     ]
+    },
+    "datos_originales": {
+     "description": "Lo que el productor quiera transportar sin interpretar.",
+     "type": "object"
     }
    }
   }

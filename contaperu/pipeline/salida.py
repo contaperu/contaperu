@@ -24,7 +24,7 @@ from ..drivers.kit import texto as kit_texto
 from ..errores import ErroresBloqueantes
 from ..modelo import Comprobante, Libro
 from . import armado
-from .preparacion import fecha_de, lineas_de, preparar
+from .preparacion import fecha_de, libro_de, lineas_de, preparar
 from .seleccion import errores_de, fuera_de, seleccionar
 
 
@@ -188,6 +188,11 @@ def exportar_archivo(doc: dict, *, driver: str, configuracion: dict | None = Non
                      claves_previas: Any = None) -> Exportado:
     """El archivo de un documento hacia `driver`, en bytes: preparar, numerar desde los correlativos dados (o desde 1) y
     generar."""
+    # **El tipo de libro se comprueba PRIMERO**, antes de preparar nada. Si no, lo que el usuario recibe es «No hay
+    # comprobantes que procesar» —porque un libro de tesorería no los trae— y eso es engañoso: la razón verdadera es
+    # que este destino no lleva este libro. Es la degradación que el estándar promete para un tipo de libro, y hasta
+    # el 10-oct-2026 no ocurría porque no existía ningún libro del catálogo fuera de los dos que todos llevan.
+    drivers.formato_de(driver, libro_de(doc).tipo)
     libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     modulo = drivers.obtener(driver)
     # El asiento que el documento TRAIGA manda sobre el que el motor derivaría (5.2): quien lo produjo ya numeró, y

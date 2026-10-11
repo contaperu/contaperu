@@ -13,12 +13,19 @@ from ...asiento.lineas import LineaDiario
 from ..._version import OPEN_ACCOUNTING
 from ...errores import DocumentoInvalido
 from ...modelo import Comprobante, Libro, serie_y_numero
+from ...tesoreria import Constancia, Movimiento
 
 
 # Tope de seguridad. Un mes de una PYME son decenas o cientos de comprobantes; muchos miles en
 # una sola llamada es casi siempre un error de quien llama, y conviene decirlo en vez de
 # quedarse pensando.
 MAXIMO_COMPROBANTES = 5000
+
+# Y el de los movimientos, que es otro orden de magnitud: un mes de una cuenta bancaria activa son cientos de
+# líneas y varias cuentas en el mismo documento las multiplican, así que el tope es más alto que el de los
+# comprobantes. Lo que no cambia es por qué existe: un número absurdo es casi siempre un error de quien llama.
+MAXIMO_MOVIMIENTOS = 20000
+MAXIMO_CONSTANCIAS = 20000
 
 # --- conversión entre el estándar y el modelo --------------------------------------
 
@@ -65,6 +72,48 @@ def comprobantes_de(doc: dict) -> list[Comprobante]:
         return [Comprobante.de_dict(c) for c in crudos]
     except (ValueError, TypeError) as e:
         raise DocumentoInvalido(f"Un comprobante no se pudo leer: {e}") from None
+
+
+def movimientos_de(doc: dict) -> list[Movimiento]:
+    """El bloque `movimientos` del documento, que entró al estándar con la enmienda 0024.
+
+    Un bloque ausente es una lista vacía y no un error, igual que `comprobantes`: la raíz del estándar solo exige
+    `open_accounting` y `libro`, y un documento puede traer unos, otros, los dos o ninguno.
+
+    Quien rechaza lo que no entiende es `Movimiento.de_dict`, que nombra la clave sobrante — y eso es a propósito:
+    **un dato que se cuela sin error es un dato que se pierde sin aviso**, que es la lección de la 7.0 con el
+    `libro`."""
+    crudos = doc.get("movimientos") or []
+    if not isinstance(crudos, list):
+        raise DocumentoInvalido("`movimientos` tiene que ser una lista.")
+    if len(crudos) > MAXIMO_MOVIMIENTOS:
+        raise DocumentoInvalido(
+            f"{len(crudos)} movimientos en una sola llamada; el tope es {MAXIMO_MOVIMIENTOS}. "
+            "Divídelo por cuenta o por periodo.")
+    try:
+        return [Movimiento.de_dict(m) if isinstance(m, dict) else m for m in crudos]
+    except (ValueError, TypeError) as e:
+        raise DocumentoInvalido(f"Un movimiento no se pudo leer: {e}") from None
+
+
+def constancias_de(doc: dict) -> list[Constancia]:
+    """El bloque `constancias`, el otro de la enmienda 0024.
+
+    Son un bloque aparte de `movimientos` y no una variante suya porque son hechos de **testigos distintos**: el
+    banco dice qué pasó en la cuenta y el pagador dice qué pagó y qué cancela. Las cardinalidades tampoco cuadran
+    —un solo cargo paga un lote de detracciones— y los ciclos de vida difieren: una constancia existe semanas antes
+    de que llegue el extracto."""
+    crudos = doc.get("constancias") or []
+    if not isinstance(crudos, list):
+        raise DocumentoInvalido("`constancias` tiene que ser una lista.")
+    if len(crudos) > MAXIMO_CONSTANCIAS:
+        raise DocumentoInvalido(
+            f"{len(crudos)} constancias en una sola llamada; el tope es {MAXIMO_CONSTANCIAS}. "
+            "Divídelo por periodo o por lote.")
+    try:
+        return [Constancia.de_dict(c) if isinstance(c, dict) else c for c in crudos]
+    except (ValueError, TypeError) as e:
+        raise DocumentoInvalido(f"Una constancia no se pudo leer: {e}") from None
 
 
 def lineas_de(doc: dict) -> list[LineaDiario] | None:

@@ -129,3 +129,33 @@ def leer(cuentas: list | None) -> tuple[CuentaBancaria, ...]:
         raise CuentaInvalida(f"Hay cuentas bancarias con el mismo `id`: {', '.join(repetidos)}. "
                              f"El `id` es la llave con la que un movimiento las nombra, así que tiene que ser único")
     return leidas
+
+def sin_cuenta_declarada(movimientos=(), constancias=(), cuentas=()) -> list[dict]:
+    """Los movimientos y las constancias que apuntan a una cuenta que nadie declaró.
+
+    **Se reporta y no se adivina**, que es la misma doctrina que «sin imputación no hay cuenta»: el `id` de una
+    cuenta es la llave con la que el dinero se enlaza con su 104, y si no está en el maestro no hay nada que
+    deducir — ni el banco, ni la moneda, ni la cuenta contable.
+
+    Hasta la 9.1 esto pasaba en silencio: `Movimiento.cuenta` y `Constancia.cuenta_origen` se normalizaban y nadie
+    los contrastaba con nada, así que un `id` mal escrito producía un movimiento perfectamente válido que no se
+    podía casar con ninguna cuenta. Es el tipo de error que no se ve hasta el cierre.
+
+    Devuelve una lista de `{que, cual, cuenta}` para que quien llama diga cuál es cuál. Sin cuentas declaradas
+    devuelve vacío: es un argumento opcional y su ausencia no inventa un error."""
+    declaradas = {c.id for c in leer(list(cuentas) or None)}
+    if not declaradas:
+        return []
+    huerfanos: list[dict] = []
+    for m in movimientos or ():
+        cuenta = str(getattr(m, "cuenta", None) or (m.get("cuenta") if isinstance(m, dict) else "") or "").strip()
+        if cuenta and cuenta not in declaradas:
+            ref = str(getattr(m, "referencia", None) or (m.get("referencia") if isinstance(m, dict) else "") or "")
+            huerfanos.append({"que": "movimiento", "cual": ref, "cuenta": cuenta})
+    for c in constancias or ():
+        cuenta = str(getattr(c, "cuenta_origen", None)
+                     or (c.get("cuenta_origen") if isinstance(c, dict) else "") or "").strip()
+        if cuenta and cuenta not in declaradas:
+            num = str(getattr(c, "numero", None) or (c.get("numero") if isinstance(c, dict) else "") or "")
+            huerfanos.append({"que": "constancia", "cual": num, "cuenta": cuenta})
+    return huerfanos

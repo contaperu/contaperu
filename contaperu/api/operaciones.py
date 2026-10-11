@@ -112,6 +112,90 @@ def cuadrar(lineas: list[dict]) -> dict:
     return partida_doble.cuadra(lineas).a_dict()
 
 
+def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None,
+                      saldos_iniciales: dict | None = None) -> dict:
+    """El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas y las constancias de
+    los pagos.
+
+    **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para
+    asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las
+    cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace
+    es lo que sí se puede terminar hoy: validar la forma, deduplicar, **cuadrar** y reportar lo que no cierra.
+
+    **El cuadre es la puerta y no un extra**, y es lo que hace verificable cualquier vía de entrada. Da igual si las
+    filas salieron del export del banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena de
+    saldos no encadena, el parseo está mal y se dice en qué línea. Esa es la razón de que la IA pueda participar sin
+    que nadie la crea, y es lo que la investigación de 2026 encuentra que funciona —la confianza que reporta un
+    modelo no separa de forma fiable lo correcto de lo incorrecto; lo que lo separa es una comprobación
+    determinista al lado—.
+
+    **El saldo inicial de cada cuenta se deriva si no se declara**, y se dice cuál fue cuál. Está en la cabecera del
+    extracto, que es de quien lee el archivo; sin él, se deduce del primer movimiento y la cadena se comprueba de la
+    segunda línea en adelante. No es un consuelo: el caso real que destapó el ITF rompía en la segunda fila del mes.
+
+    Las constancias se revisan por su propio cuadre, que es aritmético y distinto: lo que las referencias reclaman
+    no puede pasar del importe —eso para al construirlas—, y **lo que ninguna reclama se reporta y no se cierra**,
+    porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el ITF dentro.
+
+    Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza
+    con su 104, y si no está en el maestro no hay nada que deducir."""
+    doc = documento or {}
+    libro = preparacion.libro_de(doc)
+    movimientos = preparacion.movimientos_de(doc)
+    constancias = preparacion.constancias_de(doc)
+    declaradas = {c.id: c for c in tesoreria.leer(cuentas)}
+    pedidos = {str(k): v for k, v in (saldos_iniciales or {}).items()}
+
+    nuevos, repetidos = tesoreria.sin_duplicados(movimientos)
+
+    cuadres = []
+    for cuenta in dict.fromkeys(m.cuenta for m in nuevos):
+        suyos = [m for m in nuevos if m.cuenta == cuenta]
+        declarado = str(pedidos.get(cuenta) or "").strip()
+        if declarado:
+            inicial = declarado
+        else:
+            # Lo que había antes del primer movimiento, deducido de su propio saldo corrido: un abono se le resta
+            # y un cargo se le suma, más su ITF. Si el primero no trae saldo no hay de dónde deducirlo y se parte
+            # de cero, que es lo que hace que la cadena se mire en relativo.
+            primero = suyos[0]
+            inicial = modelo.CERO
+            if primero.saldo is not None:
+                inicial = primero.saldo + (primero.importe if primero.es_cargo else -primero.importe)
+                if primero.itf is not None:
+                    inicial = inicial + primero.itf
+        r = tesoreria.cuadra(suyos, saldo_inicial=inicial)
+        cuadres.append({**r.a_dict(), "cuenta": cuenta, "saldo_inicial_declarado": bool(declarado),
+                        "cuenta_contable": (declaradas[cuenta].cuenta_contable if cuenta in declaradas else "")})
+
+    sin_atribuir = [{"numero": c.numero, "importe": str(c.importe), "repartido": str(c.repartido),
+                     "sin_atribuir": str(c.sin_atribuir)}
+                    for c in constancias if c.sin_atribuir > modelo.CERO]
+    de_ia = [{"numero": c.numero, "origen": c.origen, "confianza": str(c.confianza)}
+             for c in constancias if c.origen in ("pdf_texto", "vision")]
+
+    avisos = []
+    if not declaradas:
+        avisos.append({"codigo": "SIN_CUENTAS_DECLARADAS", "pedir_a": "quien integra",
+                       "texto": "No se declaró el maestro de cuentas, así que no hay contra qué contrastar a qué "
+                                "cuenta apunta cada movimiento ni de qué 104 sale cada pago"})
+    for c in cuadres:
+        if not c["cuadra"]:
+            avisos.append({"codigo": "EXTRACTO_NO_CUADRA", "pedir_a": "quien lee el archivo",
+                           "texto": f"La cadena de saldos de {c['cuenta']!r} se rompe en el movimiento "
+                                    f"{c['rompe_en']} de {c['movimientos']}, con una diferencia de "
+                                    f"{c['diferencia']}. Casi siempre es una línea mal leída y no un error del "
+                                    f"banco"})
+    for h in tesoreria.sin_cuenta_declarada(nuevos, constancias, list(declaradas.values())):
+        avisos.append({"codigo": "CUENTA_NO_DECLARADA", "pedir_a": "quien integra",
+                       "texto": f"Un {h['que']} ({h['cual'] or 'sin referencia'}) apunta a la cuenta "
+                                f"{h['cuenta']!r}, que no está en el maestro declarado"})
+
+    return {"libro": libro.a_dict(), "movimientos": len(nuevos), "repetidos": len(repetidos),
+            "constancias": len(constancias), "cuadre": cuadres, "sin_atribuir": sin_atribuir,
+            "de_lectura_asistida": de_ia, "avisos": avisos}
+
+
 def validar_cuentas_bancarias(cuentas: list[dict]) -> dict:
     """El maestro de cuentas bancarias del contribuyente, comprobado antes de usarlo.
 

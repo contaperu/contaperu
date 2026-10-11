@@ -169,6 +169,30 @@ PARA_HERRAMIENTA: dict[str, str] = {
     descuadres se compensan salen cuadradas en el total y descuadradas cada una. Y `roles` va en plural:
     con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.
     """,
+    'revisar_tesoreria': """Revisa el dinero de un periodo antes de conciliarlo: los movimientos de las cuentas y
+    las constancias de los pagos.
+
+    **No asienta nada**, y es a propósito: el asiento de tesorería espera la norma para asentar el ITF —que no
+    tiene código en el Catálogo 05, así que su línea no se puede nombrar todavía— y un archivo del sub-diario de
+    bancos que CONCAR haya aceptado. Esto hace lo que sí se puede terminar: validar la forma, deduplicar, cuadrar y
+    decir lo que no cierra.
+
+    **El cuadre de la cadena de saldos es la puerta.** Da igual de dónde salieron las filas —el export del banco,
+    un Excel convertido, un modelo leyendo un PDF—: si la cadena no encadena, el parseo está mal y te digo en qué
+    línea. Eso es lo que permite que una IA participe sin que nadie tenga que creerle.
+
+    El saldo inicial de cada cuenta está en la cabecera del extracto y lo pone quien lee el archivo
+    (`saldos_iniciales`). Si no lo mandas, lo deduzco del primer movimiento y la cadena se comprueba de la segunda
+    línea en adelante; te digo cuál fue cuál.
+
+    Para: un movimiento sin cuenta, sin fecha o con un sentido que no es `cargo` ni `abono`; una constancia sin
+    número o sin fecha; y unas referencias que reclamen más de lo que se pagó, que es una suma imposible.
+
+    Avisa y no para: una cadena que no cuadra (casi siempre una línea mal leída, no un error del banco), un
+    movimiento o una constancia que apunta a una cuenta que no declaraste, y **lo que ninguna referencia reclama**
+    de una constancia. Ese resto no lo cierro: un cargo lleva el ITF dentro, y qué es lo que sobra lo decide el
+    contador por la imputación.
+    """,
     'validar_cuentas_bancarias': """Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.
 
     **Es un argumento, no una tabla**: el motor lo recibe, lo valida y no lo guarda. Sin cuentas declaradas no

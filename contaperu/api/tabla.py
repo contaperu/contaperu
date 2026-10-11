@@ -64,6 +64,11 @@ PARAMETROS: dict[str, dict] = {
     "cuentas": {"type": "array", "items": {"type": "object"},
                 "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y "
                                "la cuenta contable de cada una. Es un argumento; el motor no lo guarda."},
+    "saldos_iniciales": {"type": "object", "additionalProperties": {"type": "string"},
+                         "description": "Por cada `id` de cuenta, el saldo que había antes del primer movimiento. "
+                                        "Está en la cabecera del extracto, así que es de quien lee el archivo. Si "
+                                        "falta, se deduce del primer movimiento y la cadena se comprueba de la "
+                                        "segunda línea en adelante — y se dice cuál fue cuál."},
     "texto": {"type": "string", "default": "", "description": "Parte del nombre de la cuenta."},
     "codigo": {"type": "string", "default": "", "description": "El código de la cuenta."},
 }
@@ -132,6 +137,9 @@ OPERACIONES: tuple[Operacion, ...] = (
     # `cuadrar`, y es lo que un ERP llama ANTES de mandar su maestro — no algo que se lea una vez.
     Operacion("validar_cuentas_bancarias", "POST", "/v1/cuentas_bancarias", "cuentas_bancarias",
               herramienta="validar_cuentas_bancarias"),
+    # El dinero de un periodo, revisado antes de conciliarlo (9.1). Recibe un cuerpo como `cuadrar`, y es lo que un
+    # ERP llama cuando ya tiene los movimientos estructurados — leer el PDF no es de aquí.
+    Operacion("revisar_tesoreria", "POST", "/v1/tesoreria", "tesoreria", herramienta="revisar_tesoreria"),
     Operacion("buscar_cuenta_pcge", "POST", "/v1/buscar_cuenta_pcge", "cuenta_pcge", herramienta="buscar_cuenta_pcge"),
     Operacion("adaptar_pcge", "POST", "/v1/adaptar_pcge", "adaptacion_pcge", herramienta="adaptar_pcge2026"),
     Operacion("configuracion_por_defecto", "GET", "/v1/configuracion/por_defecto", "configuracion",
