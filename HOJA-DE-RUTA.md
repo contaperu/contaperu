@@ -46,7 +46,7 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **10.0.0** y estándar **`open-accounting` 2.0**
+Librería **11.0.0** y estándar **`open-accounting` 3.0**
 (`contaperu/_version.py`).
 
 **Y escala, medido y reproducible.** Funciones puras, sin estado, sin red, sin disco y sin reloj: dos procesos nunca
@@ -73,7 +73,7 @@ la decisión correcta de escalabilidad.
 | Pieza | Hoy |
 |---|---|
 | **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
-| **Estándar y comunidad** | `open-accounting` 2.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato/`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
+| **Estándar y comunidad** | `open-accounting` 3.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato/`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/tributos/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 15 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
@@ -108,6 +108,7 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - El eje del libro · 9.0.0 (de `es_venta: bool` a la tabla `modelo.RASGOS`: no es un hito de ningún frente, es lo que había que arreglar antes de que B13 sumara el tercer libro)
 - El tercer libro y la entrada del dinero · 9.1.0 (`tesoreria` en el catálogo, la enmienda 0024 aceptada, los dos bloques en el esquema y `revisar_tesoreria` por la api. **No asienta**: eso es D6)
 - El papel de una línea se deriva · 9.2.0 y 10.0.0 (tampoco es un hito de ningún frente: es el eje nuevo aplicado al estándar. El `rol` existía para los sistemas de destino, así que salió del documento y se **deriva** de lo que la línea trae —`drivers/kit/rol.py`—; con él salieron `documento.tipo`, `referencia.tipo` y `detraccion.estado`, que la 4.0 había dejado declarados sin que nadie los escribiera. La 9.2.0 **no se etiquetó**: su contenido va dentro de la 10.0.0)
+- La entrada única de tesorería · 11.0.0 (el movimiento absorbe la constancia, la cabecera del extracto viaja en el documento y la contrapartida la pone el ERP. **Es la mitad de D6 que no esperaba archivo**, igual que D8 fue la mitad del banco que no lo esperaba: el contrato queda cerrado y lo que falta para asentar son la tasa del ITF con su norma y un archivo del sub-diario de bancos aceptado)
 - A4 · 6.0.0 (STARSOFT Desktop: un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct; la `V` del archivo de ventas se corrigió en la 6.3.2)
 - J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
 - J1 · 1.0.0 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)
@@ -263,7 +264,13 @@ decide y lo que `tests/test_frontera.py` hace cumplir.
 **Investigación.** Lo que hace EE. UU. de verdad, los canales peruanos a la fecha de consulta, los proyectos
 abiertos, los rieles de pago y el fraude.
 
-**Qué hay hoy.** Nada de banco. La conciliación de constancias de detracción está pendiente de un archivo real, pero la
+**Qué hay hoy.** El **contrato**, entero, y ningún lector. Desde la 8.2 está `contaperu/tesoreria/` —la cuenta
+que declara el contribuyente con su 104, el movimiento, lo que un pago cancela y el cuadre de la cadena de
+saldos— y desde la 3.0 del estándar el contrato está **cerrado**: una sola entrada (`movimientos[]`), la cabecera
+de cada extracto, y la contrapartida que pone el ERP en `imputaciones_de_movimientos`, con el aviso que dice qué
+movimientos la esperan. Lo que no hay es ningún parser de ningún banco, ni conciliación (D3), ni asiento (D6).
+
+La conciliación de constancias de detracción está pendiente de un archivo real, pero la
 mitad existe: `diagnosticar` ya lista las detracciones que esperan constancia (`detraccion_pendiente`,
 `contaperu/tributos/detracciones.py`) y el monto en soles enteros tiene su regla con fuente
 (`contaperu/tributos/detracciones.py`). Hay dos trampas para un lector de extractos: un `.xlsx` empieza como un ZIP y se
@@ -386,7 +393,7 @@ congela el acoplamiento con lo peruano (J0).
 | J2 | **La validación en dos tablas**: reglas universales y reglas peruanas registradas con código, nivel, `pedir_a` y fuente | N | dato: un cliente real fuera del Perú | Las mismas observaciones en toda la batería; `PEDIR_A` igual clave a clave | J1; después de C1 y C2, para no mover las reglas dos veces | 30 |
 | J3 | **Impuestos que emiten líneas**: el motor arma el principal y el tercero; el IGV, la 4ta y la detracción salen del perfil peruano; los roles son los universales más los de la jurisdicción | N | dato: un cliente real fuera del Perú | Snapshot de CONCAR y huella idénticos | J1 | 30 |
 | J4 | **El perfil peruano como paquete** `contaperu/jurisdicciones/pe*`, con el grupo de entry points `contaperu.jurisdicciones*` y `pe` por defecto | N · D | dato: un cliente real fuera del Perú | Test de conformidad de jurisdicción verde para `pe`; ningún módulo universal importa `pe`; rutas viejas re-exportadas | J2, J3 | 30 |
-| J5 | **`open-accounting` 2.1**: `libro.jurisdiccion*` con perfiles; `pe` conserva los campos de la 2.0 y las demás jurisdicciones usan `impuestos[]*` | estándar | dato: un cliente real fuera del Perú | Todo documento 1.0 valida y significa lo mismo —la 2.0 promete no romper hasta una 3.0—; enmienda en `final`; tag `open-accounting-2.1` | J4, E1, E3 | 30 |
+| J5 | **`open-accounting` 3.1**: `libro.jurisdiccion*` con perfiles; `pe` conserva los campos de la 3.0 y las demás jurisdicciones usan `impuestos[]*` | estándar | dato: un cliente real fuera del Perú | Todo documento 1.0 valida y significa lo mismo —la 3.0 promete no romper hasta una 4.0—; enmienda en `final`; tag `open-accounting-3.1` | J4, E1, E3 | 30 |
 | J6 | **La segunda jurisdicción**, en paquete propio por entry points o en el repositorio | N · D | dato: su archivo aceptado por su destino y la fuente de cada regla | Conformidad de jurisdicción; archivo aceptado; `pe` sin cambios | J5 | 30 |
 
 **No se hace.** Adelantar J2-J6 sin el cliente; tasas de impuestos sin fuente; traducir al inglés el vocabulario del

@@ -24,7 +24,7 @@ CUENTA_DE_COMPRAS, CUENTA_DE_VENTAS = "601101", "701101"
 
 def doc(*comprobantes: dict, **libro) -> dict:
     """El documento, SIN imputar: para los casos que traen su propia imputación por el argumento."""
-    return {"open_accounting": "2.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
+    return {"open_accounting": "3.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
 
 
 def imputado(*comprobantes: dict, **libro) -> dict:

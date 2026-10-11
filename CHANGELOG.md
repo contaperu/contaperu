@@ -4,6 +4,138 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [11.0.0] — 2026-10-11 · con `open-accounting` 3.0
+
+**Una sola entrada para tesorería, y la contrapartida la pone el ERP.** Con esto el contrato del dinero queda
+cerrado: un ERP ya puede registrar los movimientos bancarios de un mes y decir **todo** lo que el motor necesitará
+para asentarlos. Lo que falta para que salgan a un sistema contable no es contrato: es el hito D6, y espera la tasa
+del ITF con su norma y un archivo del sub-diario de bancos que CONCAR haya aceptado.
+
+**Ninguna salida se mueve.** El Excel de CONCAR y el de CONTASIS quedan celda a celda idénticos y ninguna huella
+cambia: esto no toca una línea del camino del comprobante.
+
+### El estándar · `open-accounting` 3.0
+
+**`constancias[]` se funde dentro de `movimientos[]`.** Es de John (11-oct-2026): *«el ERP como producto final
+puede recibir una constancia de pago o un estado de cuenta completo del mes, pero al motor solo llegaría como item
+de operación… solo debe haber una entrada para tesorería, parecido a los comprobantes que provienen de compra o
+venta»*.
+
+Y lo incómodo es que **el motor ya lo afirmaba en dos sitios que la 9.1 no miró**: `modelo.RASGOS.origen` es
+**singular** —`venta`→`comprobantes`, `compra`→`comprobantes`, `tesoreria`→`movimientos`—, así que `constancias[]`
+era un bloque **huérfano** que no era el origen de ningún libro; y la procedencia de un comprobante **ya era un
+campo y no otro bloque**, porque una factura leída de un XML y una leída de una foto son la misma forma con otro
+`origen`.
+
+De los tres argumentos con que la enmienda 0024 justificó dos bloques, **dos eran equivocados y el tercero no era
+del estándar**:
+
+| Lo que dijo | Qué pasa al mirarlo |
+|---|---|
+| «Son hechos de testigos distintos» | El testigo es el campo `origen`, que era el patrón del comprobante y no se aplicó aquí |
+| «Las cardinalidades no cuadran: un cargo paga un lote de detracciones» | Confunde un uno-a-muchos **dentro** de un item con necesitar dos bloques. Lo resuelve `referencias`, aquí dentro |
+| «Los ciclos de vida difieren: una constancia existe semanas antes del extracto» | Eso es de quien integra. **Un movimiento sin `saldo` y sin `referencia` del banco ES** un pago cuyo extracto no ha llegado |
+
+El movimiento gana ocho campos opcionales, y dos decisiones de forma que conviene no rehacer:
+
+- **`constancia` es un campo aparte de `referencia`**, porque los dos existen y son distintos en el caso diario:
+  una detracción pagada desde BBVA tiene su `N° OPER` del banco **y** su vóucher del Banco de la Nación. El primero
+  es la llave con la que una relectura no duplica; el segundo, el que se escribirá en el
+  `detraccion.nro_constancia` del comprobante. Fundirlos obligaría a elegir cuál se pierde.
+- **La contraparte lleva los mismos tres nombres que un comprobante** —`contraparte_tipo_doc`, `contraparte_doc`,
+  `contraparte_nombre`— en vez de un `beneficiario{}`: CONCAR llena su anexo auxiliar desde `contraparte_doc` y el
+  tramo 3 de `kit.rol` decide por ese campo, así que el mismo nombre ahorra una traducción y un segundo
+  vocabulario.
+
+Y `origen` lleva **lista propia** —`manual`, `archivo`, `api`, `pdf_texto`, `vision`— y no la del comprobante: un
+`xml` o una propuesta del `sire` no son cosas de un banco. Comparte los dos que significan lo mismo, que son los
+que marcan lectura asistida. **Lo que dice que algo vino de un extracto no es una etiqueta: es el `saldo`**, que
+solo un extracto trae. Es la lección del `rol` aplicada aquí.
+
+### Añadido · `extractos[]`, y un control que estaba escrito y era inalcanzable
+
+La cabecera de cada hoja: saldo anterior, saldo actual y los dos totales, uno por cuenta. Hasta aquí esos saldos
+entraban **solo como argumento**, así que un documento de tesorería guardado **no se podía volver a comprobar**.
+
+Y el hueco de verdad: **`tesoreria.cuadra` acepta un `saldo_final` desde la 8.2 y nadie se lo pasaba nunca.** El
+segundo control del extracto estaba implementado, probado en su módulo, y era **inalcanzable por la api**.
+
+Vale por sí mismo y no es simetría: una lectura puede pasar la cadena de saldos corridos y fallar el total — si se
+pierde la **última** línea del mes, las demás encadenan perfectamente entre sí, que es justo lo que produce un
+lector de PDF. Y los dos totales son la tercera comprobación, que caza lo que el saldo final no puede: **un cargo
+y un abono perdidos por el mismo importe dejan el saldo igual**.
+
+### Añadido · `imputaciones_de_movimientos`, el `sin_cuenta` del dinero
+
+La decisión que John tomó y que **no tenía dónde ponerse**: `imputaciones` se casa solo por el `id_externo` de un
+**comprobante** —hay un `allOf` que lo exige— y `Movimiento.id_externo` existía sin que nadie lo consumiera.
+
+Tres formas de contestar la misma pregunta, y se excluyen: una cuenta sola, un `reparto` cuando un cargo paga tres
+facturas, o un `cuenta_propia` que declara un traspaso. **La 104 no sale de aquí**: sale de la cuenta bancaria del
+maestro, donde se decidió que viva. Esto pone la otra cara.
+
+**Es un bloque aparte y no una extensión del que ya existe**, por tres razones y la primera es dirimente: el espacio
+de llaves colisionaría —un ERP tiene secuencias de id independientes para sus facturas y sus movimientos, así que
+`"fila-12"` puede ser las dos cosas—; los campos no son los mismos —la del comprobante lleva `cuenta_tercero`,
+`detraccion_codigo` y `anulada_por_nota`, y reusándola un movimiento podría llevarlos **legalmente**—; y el `allOf`
+de la raíz obligaría a poner `id_externo` a comprobantes que nadie imputa.
+
+Y desbloquea algo que no se podía decir de ninguna forma: **el traspaso entre cuentas propias**. El efecto
+`transferencia` existe porque la **NIC 7 §9** lo excluye de los flujos de efectivo, y `Movimiento.efecto` nunca lo
+devuelve —ni lo hará— porque una línea sola no puede saber que es la mitad de un par. `cuenta_propia` lo declara;
+la otra vía, `conciliar`, **propone y nunca confirma**.
+
+El reparto suma el importe **exacto y sin tolerancia**, con el ITF fuera, y aquí **bloquea** en vez de reportarse:
+`sin_atribuir` existe porque «qué es ese resto lo decide el contador por la imputación», y esto ya **es** la
+imputación.
+
+### Arreglado · lo que el esquema no decía y el motor sí
+
+Tres validaciones vivían **solo en Python**, así que un ERP que validara con el JSON publicado aceptaba lo que el
+motor rechaza. Dos tenían daño medible:
+
+- **El caso de conformidad «las cuatro clases de referencia, cada una con lo suyo» NO PODÍA FALLAR**, porque el
+  esquema no miraba dentro de `datos`. Habría pasado igual con las claves equivocadas. Ahora hay un `if/then` por
+  clase y su gemelo negativo.
+- **Un `origen: "ocr"` validaba** y dejaba de salir en `de_lectura_asistida`: **lo que leyó un modelo dejaba de
+  pedir revisión en silencio**. Ahora el esquema lo rechaza y el modelo también.
+- La **moneda** era `string` sin patrón —un `"soles"` valía— y no se contrastaba con nada: una cuenta en dólares
+  aceptaba movimientos en soles y nada fallaba. Ahora lleva la forma ISO del comprobante y el motor avisa del par.
+
+Y el **maestro de cuentas queda tipado en la ENTRADA de la api**, donde decía `{"type": "object"}`: el CCI de veinte
+dígitos y el `PEN|USD` vivían solo en Python y en el esquema de *salida*.
+
+### Arreglado · cuatro afirmaciones de los documentos
+
+- **La pregunta abierta de `modelo/libro.py` quedó contestada: el 42 de un pago a proveedor es `tercero`.** Cuatro
+  argumentos, tres comprobables — el catálogo define `tercero` como «la cuenta del total»; define `contrapartida`
+  como «la otra cara de un hecho que **no se le debe a nadie**», y un 42 se le debe a alguien; CONCAR llena su anexo
+  auxiliar desde esa línea y `CENTRO_EN_ANEXO` ya está cableado a `tercero`; y es derivable. De ahí la corrección:
+  **`contrapartida` no es vocabulario de tesorería**, su caso es el diario que un ERP produce (B13).
+- **`INTEGRAR.md` no mencionaba el dinero en absoluto**, siendo el documento que le dice a un ERP cómo integrar.
+  Entra su sección, con el ejemplo que la batería ejecuta. Y su «la imputación tiene cuatro campos» eran seis.
+- **`HOJA-DE-RUTA.md` decía «Qué hay hoy. Nada de banco»**, caducado desde la 8.2.
+- **`REFERENCIAS.md` tenía CERO sobre el banco** y tampoco lo declaraba como hueco, siendo el documento que dice de
+  sí mismo «lo que no está aquí no se ha mirado». El conocimiento de camt.053, del tag 61 de un MT940 y de la NIC 7
+  §9 existía en comentarios del código: sube a su casa, con los dos huecos que quedan declarados.
+
+### Cómo migrar
+
+Está todo en [`estandar/MIGRAR-A-3.0.md`](estandar/MIGRAR-A-3.0.md), y es corto: **la traducción es mecánica y nada
+se pierde**. Un bloque que se va con su tabla campo a campo, un único campo que hay que **añadir** —el `sentido`,
+que para una constancia es siempre `cargo` si era un pago—, el `$def` `referencia_de_constancia` renombrado a
+`referencia_de_pago`, y dos bloques nuevos que son opcionales.
+
+**Si produces documentos con el motor, nada.** `contaperu.api` no cambia ninguna firma; lo que cambia es la
+respuesta de `revisar_tesoreria`, que pierde la clave `constancias`, nombra sus dos informes por `cual` en vez de
+por `numero`, y gana `imputados`, `sin_imputar`, `transferencias_declaradas` y `saldo_final_declarado`.
+
+**Y lo que se pudo hacer limpio, con su razón:** `constancias[]` salió el 10-oct-2026, nadie de fuera produce
+documentos con él y la aplicación no lo consume. Es la regla de John del 18-sep-2026, la que permitió que la 1.0 no
+leyera la 0.3: *«como todavía ningún ERP no lo usa, puedes hacer la limpieza para que esté bien»*.
+
+---
+
 ## [10.0.0] — 2026-10-11 · con `open-accounting` 2.0
 
 **El estándar deja de llevar lo que nadie escribía, y el paquete deja de llevar el andamio.** Cuatro claves salen

@@ -33,7 +33,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 # ese documento habla del presente.
 VIGENTES = ("README.md", "INTEGRAR.md", "ARQUITECTURA.md", "CLAUDE.md", "HOJA-DE-RUTA.md", "CONTRIBUTING.md",
             "estandar/LEEME.md", "estandar/MIGRAR-A-1.0.md", "estandar/MIGRAR-A-2.0.md",
-            "estandar/enmiendas/LEEME.md")
+            "estandar/MIGRAR-A-3.0.md", "estandar/enmiendas/LEEME.md")
 
 # Los que citan el código por su ruta y hablan del presente: los vigentes y los de investigación. **El CHANGELOG
 # queda fuera, y es la exclusión importante**: es la bitácora, cita el código que había el día de cada versión y por
@@ -64,11 +64,12 @@ AFIRMA_VERSION = (re.compile(r"open-accounting`?\**\s*\**`?(\d+\.\d+)\b"),
 # Las únicas versiones distintas de la vigente que un documento del presente puede citar, cada una con su motivo.
 OTRAS_VERSIONES: dict[str, set[str]] = {
     # El hito J5 de la hoja de ruta, que es lo próximo del estándar y se nombra por su número.
-    "HOJA-DE-RUTA.md": {"2.1"},
-    "ARQUITECTURA.md": {"2.1"},
+    "HOJA-DE-RUTA.md": {"3.1"},
+    "ARQUITECTURA.md": {"3.1"},
     # Una guía de migración existe para hablar de la versión de la que se viene, y de la que se va a.
     "estandar/MIGRAR-A-1.0.md": {"0.3", "1.0"},
-    "estandar/MIGRAR-A-2.0.md": {"1.0"},
+    "estandar/MIGRAR-A-2.0.md": {"1.0", "2.0"},
+    "estandar/MIGRAR-A-3.0.md": {"2.0"},
 }
 
 

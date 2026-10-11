@@ -137,10 +137,18 @@ RASGOS: dict[str, "Rasgos"] = {
     # venta y compra SÍ están medidas ejecutándolo—, y además estaba incompleta, porque un pago a proveedor lleva el
     # 42 con el documento del proveedor y eso es `tercero`.
     #
-    # Lo que no se puede contestar sin el dato: si esa línea del 42 es `tercero` o `contrapartida`. Depende de qué
-    # necesite encontrar el destino, y el único que lo diría es un archivo del sub-diario de bancos que CONCAR haya
-    # aceptado — el hito D6. El catálogo ya lo decía al publicar `tesoreria` y `contrapartida`: son «vocabulario
-    # para quien produce un asiento que el motor no origina», o sea para el ERP que nos manda su diario.
+    # **Y la pregunta de si esa línea del 42 es `tercero` o `contrapartida` quedó contestada: es `tercero`**
+    # (11-oct-2026). Cuatro argumentos, tres comprobables: el catálogo define `tercero` como «la cuenta del total»,
+    # que es justo el saldo que un pago mueve; define `contrapartida` como «la otra cara de un hecho que **no se le
+    # debe a nadie**», y un 42 se le debe a alguien; CONCAR llena su anexo auxiliar desde esa línea y
+    # `contrato.CENTRO_EN_ANEXO` ya está cableado a `tercero`, así que con el otro la columna no se llenaría nunca;
+    # y es **derivable**, porque esa línea lleva `contraparte_doc` y la comisión del banco no.
+    #
+    # De ahí una corrección: **`contrapartida` no es vocabulario de tesorería.** Su caso real es la depreciación, el
+    # asiento de destino y la planilla, o sea el hito B13 — el diario que un ERP nos manda.
+    #
+    # Contestarlo no cambia esta tabla: los roles se declararán **medidos**, ejecutando el motor, el día que emita
+    # su primera línea de tesorería. Lo que se gana es que ese día no haya que decidirlo con prisa.
     #
     # Vacío es por tanto una afirmación verdadera y comprobable: este libro no lo origina el motor. Y es la misma
     # disciplina con la que el contrato de drivers paró el `sub_diario_bancos`.

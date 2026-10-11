@@ -387,7 +387,7 @@ def test_una_cuenta_que_nadie_declaro_se_dice_y_no_se_adivina():
 # ── El bloque entra por el documento ───────────────────────────────────────
 
 def documento_de_tesoreria(**extra) -> dict:
-    return {"open_accounting": "2.0",
+    return {"open_accounting": "3.0",
             "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608",
                       "tipo": "tesoreria"}, **extra}
 

@@ -24,7 +24,7 @@ FACTURA = {"tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "
 
 
 def documento(**extra) -> dict:
-    return {"open_accounting": "2.0", "libro": dict(LIBRO), "comprobantes": [dict(FACTURA, **extra)]}
+    return {"open_accounting": "3.0", "libro": dict(LIBRO), "comprobantes": [dict(FACTURA, **extra)]}
 
 
 # --- el estándar: qué admite y qué no ----------------------------------------------------------------------------

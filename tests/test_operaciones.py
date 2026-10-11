@@ -183,7 +183,7 @@ def _doc_con_imputacion() -> dict:
 
     libro, comps = cargar_golden("compras_202601.json")
     crudos = [dict(c.a_dict(), id_externo=f"f{n}") for n, c in enumerate(comps, 1)]
-    return {"open_accounting": "2.0", "libro": libro.a_dict(), "comprobantes": crudos,
+    return {"open_accounting": "3.0", "libro": libro.a_dict(), "comprobantes": crudos,
             "imputaciones": {f"f{n}": {"cuenta_contable": "631101", "centro_costo": "001"}
                              for n in range(1, len(crudos) + 1)}}
 

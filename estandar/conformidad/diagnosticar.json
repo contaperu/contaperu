@@ -4,7 +4,7 @@
   {
    "description": "Una compra imputada a una cuenta de gasto: lista para exportar",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -48,7 +48,7 @@
   {
    "description": "Sin imputación y sin cuenta por defecto: se le pide la cuenta al contador",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -93,7 +93,7 @@
   {
    "description": "Una cuenta del elemento 8 del PCGE no tiene clase contable: tampoco se puede armar el asiento",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -143,7 +143,7 @@
   {
    "description": "La cuenta SIN clase no es la de la base sino la del tercero: se dice igual, porque la línea que saldría sin `clase` es un documento que este esquema rechaza",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -194,7 +194,7 @@
   {
    "description": "Un comprobante en dólares sin tipo de cambio: SUNAT lo exige, así que el mes no exporta",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -239,7 +239,7 @@
   {
    "description": "En dólares con su tipo de cambio: pasa, y el asiento lo arrastra a cada línea",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -282,7 +282,7 @@
   {
    "description": "Un recibo por honorarios con el importe en `inafecto`, que es donde va: no genera crédito fiscal",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -325,7 +325,7 @@
   {
    "description": "El mismo recibo con el importe en `base_gravada`: el motor lo observa, porque una base gravada sin su IGV no cuadra. Es la razón de que el importe vaya en `inafecto`",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -370,7 +370,7 @@
   {
    "description": "Un recibo por honorarios queda FUERA del registro del SIRE: el tipo 02 no entra",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -406,7 +406,7 @@
   {
    "description": "Una nota de crédito con sus importes en POSITIVO: el signo lo pone el driver",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -452,7 +452,7 @@
   {
    "description": "Una compra con detracción: lista, y el diagnóstico la cuenta como pendiente de constancia",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -501,7 +501,7 @@
   {
    "description": "La propuesta del SIRE marca una compra con detracción y no dice cuál: se le pide el código del Catálogo 54 al contador",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -557,7 +557,7 @@
   {
    "description": "La misma compra marcada por el SIRE, pero el contador la declaró ANULADA por una nota de crédito: ya no se le pide el código, porque el asiento no lo va a usar",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -608,7 +608,7 @@
   {
    "description": "Con `imputaciones` y un comprobante sin `id_externo`: se rechaza en la puerta",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -686,7 +686,7 @@
   {
    "description": "El detalle del plan contable pide cómo llama la empresa a cada cuenta, y el motor solo conoce el nombre del PCGE: se le piden al contador, por cuenta y no por comprobante",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -738,7 +738,7 @@
   {
    "description": "Una factura marcada como anulada por una nota de crédito, pero con su detracción ya depositada: los dos hechos se contradicen y el motor no elige",
    "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {
      "ruc": "20601234567",
      "razon_social": "EMPRESA DE PRUEBA SAC",

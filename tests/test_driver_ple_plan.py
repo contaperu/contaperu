@@ -33,7 +33,7 @@ def documento(nombre_golden: str = "compras_202601.json", cuenta: str = "631101"
         d = c.a_dict()
         d["id_externo"] = f"f{n}"
         crudos.append(d)
-    return {"open_accounting": "2.0", "libro": libro.a_dict(), "comprobantes": crudos,
+    return {"open_accounting": "3.0", "libro": libro.a_dict(), "comprobantes": crudos,
             "imputaciones": {f"f{n}": {"cuenta_contable": cuenta, "centro_costo": "001"}
                              for n in range(1, len(crudos) + 1)}}
 

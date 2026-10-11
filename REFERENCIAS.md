@@ -7,7 +7,7 @@ los **ERP abiertos** (Odoo, Apache OFBiz, iDempiere) — y lo compara, campo a c
 con una propuesta concreta de qué añadir al estándar y qué no. Es la única casa de la investigación del repositorio:
 lo que no esté aquí no se ha mirado.
 
-**Mira tres escalones, y cada uno tiene su fecha**, que es lo que separa un documento de investigación de uno
+**Mira tres escalones y medio, y cada uno tiene su fecha**, que es lo que separa un documento de investigación de uno
 desactualizado:
 
 | Escalón | Qué compara | Investigación hecha el |
@@ -445,10 +445,36 @@ contador decidió.
   en el PLE**, que es fuente normativa: entran por `libro.tipo`, no por un rol que habría que inventar y después
   mantener.
 
+## El dinero: lo poco que se miró, y de dónde salió la forma
+
+**Este escalón no está investigado en plataformas, y conviene decirlo primero**: el contrato de tesorería se
+construyó mirando **archivos reales**, no modelos de datos de otros. Lo que sí se contrastó, y que estaba en
+comentarios del código en vez de aquí hasta el 11-oct-2026:
+
+| Lo que se contrastó | Con qué | Qué salió de ahí |
+|---|---|---|
+| **El signo de un movimiento** | el `CdtDbtInd` de **camt.053** (`CRDT`/`DBIT`) y el subcampo C/D del **tag 61 de un MT940** | que el importe va siempre positivo y el signo va aparte, igual que `linea.debe_haber`. Los dos estándares de mensajería bancaria hacen lo mismo |
+| **El efecto sobre el efectivo** | la **NIC 7** en su versión en español, la que publica el MEF, y su **§9** | las tres palabras `entrada`, `salida`, `transferencia`, y que la tercera existe para poder **excluir** un traspaso entre partidas de efectivo y no contarlo dos veces |
+| **Dónde pone cada ERP los tres valores** | Odoo (`payment_type`: inbound/outbound/transfer) y ERPNext (Receive/Pay/Internal Transfer) | que los tres van en el **pago** y el indicador de dos valores en la **línea del extracto** — que es el nivel que este estándar copió |
+| **La forma de un extracto peruano** | **nueve extractos reales** de agosto de 2026, de BBVA, Scotiabank y BanBif | los campos del movimiento, el ITF como **campo y no como cálculo**, y los cuatro de la cabecera: saldo anterior, total de cargos, total de abonos y saldo actual |
+
+Y el hallazgo de campo que ningún modelo de datos habría dado: **cuatro de los nueve archivos no se abren con una
+librería estándar** —dos vienen cifrados con contraseña y dos traen la cabecera del PDF rota—. Lo difícil de un
+extracto peruano no son las columnas.
+
 ## Lo que falta mirar
 
-Dos huecos declarados, para que nadie los dé por investigados:
+Cuatro huecos declarados, para que nadie los dé por investigados:
 
+- **Los modelos de tesorería de las plataformas**, que es el escalón que falta entero: cómo representan un extracto
+  y una conciliación QuickBooks, Xero, las unificadas y los ERP abiertos. El contrato de la 3.0 se hizo con
+  archivos reales delante, no comparándolo con ellos, y eso se nota en una cosa concreta: no se sabe si alguien
+  más separa «lo que el papel dice que cancela» de «lo que alguien decidió imputar», que es la distinción sobre la
+  que está construido.
+- **La tasa del ITF y el artículo que dice quién la soporta.** La Ley 28194 —la que crea el ITF— **ya está citada
+  tres veces en el repositorio**, pero siempre al servicio del catálogo de medios de pago (su artículo 5), nunca
+  del impuesto. Lo que falta es el TUO, el D.S. 150-2007-EF. Es el primero de los datos que bloquean el asiento de
+  tesorería, y no es un archivo de nadie: es trabajo de escritorio.
 - **El `ReportCode` de Xero**: el único campo de clasificación de cuenta que no está investigado en ningún documento
   del repositorio. Está en su API de cuentas.
 - **La licencia exacta del módulo `l10n_pe` de Odoo**, y qué `account_type` asigna a cada elemento del PCGE, en

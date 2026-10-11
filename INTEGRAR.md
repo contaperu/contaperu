@@ -2,7 +2,7 @@
 
 ContaPerú convierte comprobantes de SUNAT en asientos y en los archivos que importan los sistemas contables peruanos,
 sin estado: todo entra por parámetro y sale por retorno. Esta guía es para quien construye un ERP, un portal contable o
-un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 10.x. Los ejemplos se
+un agente y quiere usarlo. Dice qué puerta elegir, cómo se llama cada una y qué promete la 11.x. Los ejemplos se
 ejecutan en la batería del repositorio (`tests/test_integrar.py`): si uno deja de funcionar, la batería falla.
 
 **Lo que se integra no es un conversor, es una base.** El motor no está hecho para que tu ERP exporte a CONCAR y ahí
@@ -26,7 +26,7 @@ el mismo mes, el mismo diagnóstico, por cualquiera de ellas.
 
 ## Lo que entra y lo que sale
 
-Entra un **documento `open-accounting` 2.0** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
+Entra un **documento `open-accounting` 3.0** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
 compras) y los comprobantes tal como los emite SUNAT, con los importes en positivo y como texto exacto. Si tienes los
 XML o la propuesta del SIRE, el motor arma el documento por ti (`leer_xml`, `leer_propuesta_sire`).
 
@@ -55,11 +55,17 @@ sitios, y **solo dos aceptan variables que el motor no conoce**:
 | El vocabulario de tu sistema contable | tu sección de la configuración | **Sí, libres.** Tu driver declara sus campos con tipo, patrón y ayuda; el motor los valida y `describir_configuracion` los pinta |
 | Lo que el motor no entiende | `datos_originales` del comprobante, y las claves `_` de la raíz | **Sí, pero solo viajan.** Se transportan sin interpretar, y ningún driver las lee |
 
-**La imputación está cerrada a propósito.** Sus cuatro campos son las cuatro decisiones que un contador toma sobre un
-comprobante, y son pocas porque el motor **resuelve la cuenta una sola vez para todos los drivers**
+**La imputación está cerrada a propósito.** Sus campos son las decisiones que un contador toma sobre **un
+comprobante** —la cuenta, el centro, la del tercero, el código de la detracción, si una nota la anuló, y el reparto
+cuando la base se parte— y son pocas porque el motor **resuelve la cuenta una sola vez para todos los drivers**
 (`asiento.partes_de`, `asiento.cuenta_tercero`): la que decide tu Revisión sale igual en el Excel de CONCAR y en la
 columna de un sistema que importa registros. Si el objeto fuera libre, dos aplicaciones llamarían distinto a lo mismo y
 esa resolución única dejaría de existir.
+
+**Y hay una segunda imputación, la de un movimiento de tesorería**, en su propio bloque y con sus propios campos:
+`imputaciones_de_movimientos`. Es un bloque aparte y no una extensión del anterior porque tu ERP tiene secuencias
+de id independientes para sus facturas y sus movimientos —el mismo `id_externo` puede ser las dos cosas— y porque
+un movimiento no tiene base, ni IGV, ni nota de crédito que lo anule. Está en «El dinero», más abajo.
 
 **Lo que es de tu sistema va en tu sección**, y se configura **por contribuyente, no por comprobante**: así viven el
 medio de pago de CONTASIS, el código de área de la detracción de CONCAR y sus códigos de moneda. La prueba para saber
@@ -200,7 +206,7 @@ los mismos nombres que los parámetros de la api:
 ```json
 {
   "documento": {
-    "open_accounting": "2.0",
+    "open_accounting": "3.0",
     "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"},
     "comprobantes": [{
       "tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "2026-01-15",
@@ -297,6 +303,123 @@ modelo se inventa detracciones con mucha seguridad.
 Y si prefieres una sola instancia sin reescribir nada, `contaperu.puertas.servidor_mcp.mcp` es importable y le puedes
 añadir tus herramientas con `@mcp.tool()`. Funciona, pero estás mutando la instancia del motor: queda a tu cargo.
 
+## El dinero: registrar movimientos bancarios
+
+Un libro de tipo `tesoreria` tiene **una sola entrada**, igual que una compra o una venta tienen `comprobantes[]`:
+el bloque `movimientos[]`. Venga de una línea de un extracto o de una constancia de pago, al motor llega con la
+misma forma, y lo que dice de dónde salió es su `origen`.
+
+```json
+{
+  "open_accounting": "3.0",
+  "libro": { "ruc": "20601234567", "periodo": "202608", "tipo": "tesoreria" },
+
+  "extractos": [
+    { "cuenta": "bbva-soles", "desde": "2026-08-01", "hasta": "2026-08-31",
+      "saldo_inicial": "1000.00", "saldo_final": "1299.80",
+      "total_cargos": "200.20", "total_abonos": "500.00" }
+  ],
+
+  "movimientos": [
+    { "id_externo": "mov-881", "cuenta": "bbva-soles", "fecha": "2026-08-05",
+      "descripcion": "ABONO POR TRANSFERENCIA", "importe": "500.00", "sentido": "abono",
+      "moneda": "PEN", "saldo": "1500.00", "referencia": "000001", "origen": "archivo" },
+
+    { "id_externo": "mov-882", "cuenta": "bbva-soles", "fecha": "2026-08-14",
+      "descripcion": "PAGO DETRACCION", "importe": "200.00", "sentido": "cargo",
+      "moneda": "PEN", "saldo": "1299.80", "referencia": "000002", "itf": "0.20",
+      "constancia": "00012345678", "medio_pago": "003",
+      "contraparte_doc": "20602222226", "contraparte_nombre": "PROVEEDOR SAC",
+      "origen": "pdf_texto", "confianza": "0.92",
+      "referencias": [ { "clase": "comprobante",
+                         "datos": { "tipo_cp": "01", "serie": "F001", "numero": "123" } } ] }
+  ],
+
+  "imputaciones_de_movimientos": {
+    "mov-881": { "cuenta_contable": "1212100", "contraparte_doc": "20607777773" },
+    "mov-882": { "cuenta_contable": "4212100", "contraparte_doc": "20602222226", "centro_costo": "OBRA01" }
+  }
+}
+```
+
+Y el **maestro de cuentas**, que no es parte del documento sino un argumento —el motor no lo guarda—:
+
+```json
+[ { "id": "bbva-soles", "banco": "BBVA", "numero": "0011-0999-0000000001",
+    "cci": "01199900000000000100", "moneda": "PEN", "cuenta_contable": "10411100" } ]
+```
+
+### Lo que aportas tú y lo que resuelve el motor
+
+| Qué | Dónde |
+|---|---|
+| El movimiento, tal como lo imprime el banco o el papel | `movimientos[]` — solo `cuenta`, `fecha`, `importe` y `sentido` son obligatorios |
+| **La cuenta 104 de cada cuenta bancaria** | el **maestro**, en `cuenta_contable`. El motor **no la deriva**: cada cuenta corriente tiene su divisionaria, y la de soles no es la de dólares |
+| **La contrapartida** —la otra cara del asiento— | `imputaciones_de_movimientos`, por el `id_externo` del movimiento. Igual que la cuenta de un gasto llega en la imputación de su comprobante |
+| Qué cancela el pago, **si el papel lo dice** | `movimiento.referencias[]`, con cuatro clases: `comprobante`, `tributo`, `cuenta_propia`, `libre` |
+| Un traspaso entre tus propias cuentas | `imputaciones_de_movimientos` → `cuenta_propia`. **Es la única vía para declararlo**, y hace falta porque la NIC 7 §9 excluye esos traspasos de los flujos de efectivo |
+| El cuadre, la deduplicación y qué falta | el motor, en `revisar_tesoreria` |
+
+### Las cuatro cosas que conviene no confundir
+
+1. **`cuenta` no es una cuenta contable.** Es el `id` con que tú nombras esa cuenta en tu maestro. La contable sale
+   de ahí.
+2. **`referencia` y `constancia` son dos números distintos y los dos valen.** `referencia` es el que le da el banco
+   (`N° OPER`, `REFERENCIA`) y es la llave con la que una relectura no duplica; `constancia` es el del papel que
+   prueba el pago, como el vóucher del Banco de la Nación. Una detracción pagada desde un banco tiene los dos.
+3. **El importe va siempre positivo** y el signo lo lleva `sentido`: `cargo` sale, `abono` entra. Es el
+   `CdtDbtInd` de camt.053 y el subcampo C/D del tag 61 de un MT940.
+4. **El `itf` es un dato del banco, no un cálculo.** Vacío no es cero: es «el banco no lo dice». Y se resta del
+   saldo en los dos sentidos.
+
+### Lo que el motor te responde
+
+```python
+# El maestro es un argumento: el motor no lo guarda.
+mi_maestro = [{"id": "bbva-soles", "banco": "BBVA", "numero": "0011-0999-0000000001",
+               "cci": "01199900000000000100", "moneda": "PEN", "cuenta_contable": "10411100"}]
+
+mes = {"open_accounting": api.OPEN_ACCOUNTING,
+       "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
+                 "periodo": "202608", "tipo": "tesoreria"},
+       "extractos": [{"cuenta": "bbva-soles", "saldo_inicial": "1000.00", "saldo_final": "1500.00"}],
+       "movimientos": [{"id_externo": "mov-881", "cuenta": "bbva-soles", "fecha": "2026-08-05",
+                        "descripcion": "ABONO POR TRANSFERENCIA", "importe": "500.00", "sentido": "abono",
+                        "moneda": "PEN", "saldo": "1500.00", "referencia": "000001", "origen": "archivo"}]}
+
+r = api.revisar_tesoreria(mes, cuentas=mi_maestro)
+print(r["cuadre"][0]["cuadra"], r["sin_imputar"])        # True ['000001']
+print([a["codigo"] for a in r["avisos"]])                 # ['MOVIMIENTO_SIN_IMPUTAR']
+
+# Con su contrapartida, el movimiento deja de esperar nada.
+mes["imputaciones_de_movimientos"] = {"mov-881": {"cuenta_contable": "1212100",
+                                                  "contraparte_doc": "20607777773"}}
+r = api.revisar_tesoreria(mes, cuentas=mi_maestro)
+print(r["imputados"], r["sin_imputar"], r["avisos"])      # 1 [] []
+```
+
+`r["cuadre"]` trae, por cuenta, si la cadena de saldos encadena, **en qué movimiento se rompe** y con qué
+diferencia; si el saldo inicial y el final venían declarados o se dedujeron; y la cuenta contable que sale del
+maestro. `r["sin_imputar"]` dice qué movimientos **esperan su contrapartida**, que es el `sin_cuenta` del dinero.
+`r["sin_atribuir"]` dice cuánto de un pago no reclama ninguna referencia —y **no se cierra**: qué es ese resto lo
+decides tú al imputar—. `r["de_lectura_asistida"]` marca lo que leyó un modelo, para que alguien lo mire.
+
+**El cuadre es lo que hace verificable cualquier vía de entrada.** Da igual si las filas salen del export del
+banco, de un Excel convertido o de un modelo leyendo un PDF: si la cadena no encadena, se dice **en qué línea**. Y
+la `confianza` que reporte un modelo no relaja nada, porque la confianza que reporta un modelo no separa de forma
+fiable lo correcto de lo incorrecto.
+
+### Lo que todavía NO hace
+
+**No asienta.** `revisar_tesoreria` registra, valida, cuadra y dice qué falta; no produce líneas de diario, así que
+**un libro de tesorería no se puede exportar todavía** y cualquier driver lo rechaza nombrando los libros que sí
+lleva. Es el hito D6 de la hoja de ruta, y espera tres cosas que no son código: la norma para asentar el ITF —que
+además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las cuentas del PCGE con su cita y
+un archivo del sub-diario de bancos que un sistema contable haya aceptado.
+
+**Tampoco concilia.** Casar un pago con lo que cancela cuando el papel no lo dice es el hito D3, y lo que se decidió
+de él importa: `conciliar` **propone y nunca confirma**.
+
 ## ¿Te hace falta un driver? Casi seguro que no
 
 Antes de escribir nada, mira cuál de estos tres eres. Solo el tercero pide código.
@@ -345,7 +468,7 @@ escribe un driver contra el contrato del motor; aquí se lee el documento contra
 
 ```json
 {
-  "open_accounting": "2.0",
+  "open_accounting": "3.0",
   "libro": {"ruc": "…", "razon_social": "…", "periodo": "202601", "tipo": "compra"},
   "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "45680", "fecha_emision": "2026-01-10",
                     "contraparte_doc": "20677777771", "contraparte_nombre": "MAYORISTA NACIONAL SAC",
@@ -547,12 +670,12 @@ Para actualizar:
 Antes de una versión mayor sale una pre-release (`vX.Y.ZrcN`) para probarla así, sin desplegar. Los arreglos de
 seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
-## Lo que promete la 10.x
+## Lo que promete la 11.x
 
-- **`contaperu.api` no cambia de nombre ni de firma** hasta la 11.0 (`tests/test_superficie_publica.py`). Pueden llegar
+- **`contaperu.api` no cambia de nombre ni de firma** hasta la 12.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
-- **Un nombre que cambia sigue resolviendo durante toda la 10.x**, y avisa con `contaperu.RutaObsoleta` diciendo
-  cuál usar, hasta la 11.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno, y conviene saber por qué: la 7.0
+- **Un nombre que cambia sigue resolviendo durante toda la 11.x**, y avisa con `contaperu.RutaObsoleta` diciendo
+  cuál usar, hasta la 12.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno, y conviene saber por qué: la 7.0
   cumplió los seis que avisaban y de la 8.0, la 9.0 y la 10.0 no salió ninguno nuevo. La 9.0 rompió **sin** pasar
   por aquí, a propósito —un puente que siguiera aceptando el `es_venta: bool` mantendría vivo justo el camino que
   la mayor cerraba—, y la 10.0 retiró la maquinaria de las rutas de módulo, que llevaba tres mayores sin usarse.
@@ -610,8 +733,8 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia
   una línea**: la superficie pública de la 1.0 sigue entera y su test pasa sin regenerarse. Lo que desapareció es lo
   que ninguna versión publicada llegó a ofrecer — la 0.x nunca estuvo en PyPI.
-- **El estándar es `open-accounting` 2.0**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
-  significado hasta una 3.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
+- **El estándar es `open-accounting` 3.0**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
+  significado hasta una 4.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
   se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **una línea se contabiliza con `cuenta`,
   `debe_haber`, `importe` y `clase`**, que son los cuatro que exige. Si vienes de la 1.0, que el motor ya no
   acepta: [`estandar/MIGRAR-A-2.0.md`](estandar/MIGRAR-A-2.0.md) — son cuatro claves que se quitan y nada que
