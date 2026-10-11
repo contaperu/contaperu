@@ -1902,7 +1902,7 @@
       "type": "string"
      },
      "itf": {
-      "description": "El Impuesto a las Transacciones Financieras de esta línea, cuando el banco lo trae en su propia columna. **Vacío no es cero: es «el banco no lo dice».** Y se descuenta del saldo aunque no esté dentro del importe.",
+      "description": "El Impuesto a las Transacciones Financieras de esta línea, **cuando el banco lo descuenta sin darle fila** —BBVA lo pone en una columna al lado—. **Vacío no es cero: es «el banco no lo dice»**, y se descuenta del saldo aunque no esté dentro del importe. Es la excepción, no la regla: **un cargo del banco es su propio movimiento**, y una comisión, los portes o el mantenimiento llegan así, sin campo propio y sin necesitarlo. Cuando el motor asiente tesorería, un pago y su ITF serán dos asientos distintos —uno contra la cuenta del tercero y otro contra el gasto del impuesto—, así que este campo no ahorra un hecho: lo transporta hasta que haya quien lo asiente.",
       "$ref": "#/components/schemas/OpenAccounting_importe"
      },
      "constancia": {

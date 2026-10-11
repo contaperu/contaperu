@@ -289,6 +289,21 @@ permite que el resto pueda degradar.
 | `contraparte_doc` | Puede ir vacío en boletas a consumidor final. |
 | `origen` | Trazabilidad, no lógica: `xml` es un dato leído de la fuente oficial; `vision` lo leyó una IA de una foto y merece revisión humana. |
 | `confianza` | De 0 a 1. Solo tiene sentido por debajo de 1 en lo que leyó una IA. |
+| `itf` (de un movimiento) | **La excepción a la regla de abajo, y la única.** Existe porque hay bancos que descuentan el ITF **sin darle fila** —BBVA lo pone en una columna al lado—, así que no hay movimiento que lo represente y el saldo corrido lo resta igual. Vacío no es cero: es «el banco no lo dice». |
+
+### Un cargo del banco es su propio movimiento
+
+Lo dijo John el 11-oct-2026 integrando: *«todos los ITF o comisión van sobre una propia fila… a las finales, si
+pones un pago de 2 000 y su ITF de 0,50, serían dos asientos contables, uno por el pago y otro por el ITF»*.
+
+Es la regla de modelado de tesorería, y resuelve una asimetría que había: **una comisión, los portes o el
+mantenimiento no tienen campo y no les hace falta**. Llegan como un `movimiento` más, con su fecha, su importe,
+su sentido y **su propia imputación** —que es lo que les da su cuenta de gasto—. Nadie tiene que pedir un campo
+nuevo cada vez que un banco inventa un concepto, que es justo la trampa en la que cae un modelo que enumera.
+
+Y la consecuencia contable: un pago de 2 000 con 0,50 de ITF **son dos asientos**, uno contra la cuenta del
+tercero y otro contra la cuenta del impuesto. El motor no los arma todavía —es el hito D6 y espera la tasa del
+ITF con su norma—, pero el documento ya puede decirlos, que es lo que el estándar promete.
 
 ---
 

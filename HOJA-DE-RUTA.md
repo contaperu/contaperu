@@ -284,7 +284,7 @@ desarma (`contaperu/lectores/archivos.py:56-58`), y un `.txt` se ignora como arc
 | D3 | `conciliar*` con `metodo*` y `certeza*`, la tabla `aplicaciones*`, `emparejar_transferencias*` y la tolerancia en porcentaje y en importe absoluto | N · F | código, tras D1 y D2 | Motivos legibles; la detracción como pago parcial; solo certeza alta va a lote; dentro del porcentaje y fuera del absoluto no hay certeza alta | D1, D2 | 16, 25 |
 | D4 | `ReglaBanco*` y `aplicar_reglas*` | N | dato: reglas reales de un contador | Primera coincidencia por prioridad, con motivo; nunca confirma | D2 | — |
 | D5 | `LiquidacionPasarela*` y `Aviso*` | N · estándar | dato: el reporte real de una pasarela | El invariante del neto se cumple; los avisos nunca asientan | D3, E1 | — |
-| D6 | Asientos de tesorería y de liquidación | N · D | dato: cuentas del PCGE con su cita, el ITF con su norma, el tratamiento del IGV de la comisión y un archivo aceptado del sub-diario de bancos de CONCAR | Archivo aceptado; snapshot de CONCAR idéntico | D3, D5 | 17 |
+| D6 | Asientos de tesorería y de liquidación | N · D | dato: el ITF con su norma —**las cuentas del PCGE ya están, con su página: `6412` el gasto y `40181` el pasivo**—, el tratamiento del IGV de la comisión y un archivo aceptado del sub-diario de bancos de CONCAR. **Un pago y su ITF son dos asientos** (enmienda 0028) | Archivo aceptado; un pago con ITF sale en dos asientos; snapshot de CONCAR idéntico | D3, D5 | 17 |
 | D7 | Dónde viven los conectores de entrada | `App` o paquete aparte | dato: el primer conector real | Decisión escrita con el criterio de abajo | D2 o D5 | — |
 
 **D7 · Dónde viven los conectores: decisión abierta.** Webhooks de pasarelas, APIs de bancos, agregadores y lectura de

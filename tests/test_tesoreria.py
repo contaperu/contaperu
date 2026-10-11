@@ -546,6 +546,36 @@ def test_la_api_informa_lo_no_atribuido_y_marca_lo_que_leyo_una_ia():
     assert r["totales_por_cuenta"][0]["cargos"] == "4721.50"
 
 
+def test_un_cargo_del_banco_es_un_movimiento_y_no_necesita_campo_propio():
+    """La regla de modelado de la enmienda 0028, que resuelve una asimetría: el ITF tenía campo y una comisión
+    no tenía ninguno.
+
+    Dicho al derecho, **no le falta un campo a la comisión: le sobra uno al ITF**. Una comisión, los portes o el
+    mantenimiento llegan como un movimiento más, con su propia imputación, que es lo que les da su cuenta de
+    gasto. Así nadie tiene que pedir un campo nuevo cada vez que un banco inventa un concepto."""
+    from contaperu import api
+
+    doc = documento_de_tesoreria(
+        movimientos=[mov(referencia="000010", importe="2000.00", sentido="cargo", id_externo="pago").a_dict(),
+                     mov(referencia="000011", importe="15.00", sentido="cargo", id_externo="comision",
+                         descripcion="MANTENIMIENTO DE CUENTA").a_dict(),
+                     mov(referencia="000012", importe="4.50", sentido="cargo", id_externo="portes",
+                         descripcion="PORTES").a_dict()],
+        imputaciones_de_movimientos={"pago": {"cuenta_contable": "4212100"},
+                                     "comision": {"cuenta_contable": "6391000"},
+                                     "portes": {"cuenta_contable": "6391000"}})
+    r = api.revisar_tesoreria(doc, [cuenta().a_dict()])
+    assert r["imputados"] == 3 and r["avisos"] == [], "cada cargo es un hecho con su cuenta, sin campo nuevo"
+    assert r["totales_por_cuenta"][0]["cargos"] == "2019.50"
+    # Y el ITF de esos tres es cero porque ninguno lo lleva: el campo es para el banco que no le da fila.
+    assert r["totales_por_cuenta"][0]["itf"] == "0.00"
+
+    # El caso en que la regla NO se puede aplicar, que es el único motivo de que `itf` exista: BBVA lo descuenta
+    # del saldo sin darle fila, así que no hay movimiento que lo represente y sintetizarlo sería inventarlo.
+    sin_fila = documento_de_tesoreria(movimientos=[mov(importe="2000.00", sentido="cargo", itf="0.50").a_dict()])
+    assert api.revisar_tesoreria(sin_fila, [cuenta().a_dict()])["totales_por_cuenta"][0]["itf"] == "0.50"
+
+
 def test_la_moneda_de_un_movimiento_se_contrasta_con_la_de_su_cuenta():
     """Hasta la 3.0 no se contrastaba con nada: una cuenta en dólares aceptaba movimientos marcados en soles y
     **nada fallaba**. Es el mismo tipo de error que un `id` mal escrito — no se ve hasta el cierre.

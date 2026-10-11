@@ -120,7 +120,15 @@ class Movimiento:
     moneda: str = ""
     saldo: object = None                # el saldo corrido DESPUÉS de esta línea; None si el banco no lo da
     referencia: str = ""                # el número que pone el BANCO: `N° OPER` en BBVA, `REFERENCIA` en Scotiabank
-    itf: object = None                  # cuando el banco lo adjunta a la línea (BBVA). None no es cero: es «no dice»
+    # **Un cargo del banco es su propio movimiento**, y éste es la excepción que lo demuestra (John, 11-oct-2026:
+    # *«todos los ITF o comisión van sobre una propia fila… un pago de 2 000 y su ITF de 0,50 serían dos asientos,
+    # uno por el pago y otro por el ITF»*). Una comisión, los portes o el mantenimiento **no tienen campo y no les
+    # hace falta**: llegan como un movimiento más, con su fecha, su importe y su propia imputación. Este campo
+    # existe solo porque hay bancos que descuentan el ITF **sin darle fila** —BBVA lo pone en una columna al lado—
+    # y entonces no hay un movimiento que lo represente: el saldo corrido lo resta y la línea no lo dice. Su único
+    # lector es `cuadre.cuadra`, y se revisa junto con `saldo` cuando llegue el primer lector de banco real.
+    # None no es cero: es «el banco no lo dice».
+    itf: object = None
     # ── Lo que absorbió de la constancia en la 3.0 del estándar ──────────────────────────────────────────────
     # El número del PAPEL que prueba el pago: el vóucher del Banco de la Nación, el comprobante de una
     # transferencia. **Es un campo aparte de `referencia` porque los dos existen y son distintos**: una detracción
