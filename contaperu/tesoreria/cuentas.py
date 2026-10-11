@@ -14,6 +14,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, fields
 
+from .. import catalogos
 from ..errores import ErrorContaperu
 
 # El Código de Cuenta Interbancario: **20 dígitos en cuatro grupos**, 3 + 3 + 12 + 2.
@@ -30,9 +31,21 @@ from ..errores import ErrorContaperu
 # espera. Mientras tanto el banco se declara por su nombre y el código se transporta sin interpretar.
 LARGO_CCI = 20
 PATRON_CCI = re.compile(r"^[0-9]{20}$")
-# Las dos monedas que un extracto peruano trae. Una cuenta es de UNA moneda: no existe la cuenta mixta, y por eso
-# cada extracto declara la suya en la cabecera y nunca mezcla.
-MONEDAS = ("PEN", "USD")
+# Las monedas en que se puede declarar una cuenta, **derivadas del catálogo y no escritas a mano** (John,
+# 11-oct-2026: *«la fuente de monedas la trae el JSON ISO de monedas ya definidas en contaperu; la moneda no debe
+# ser manual»*, y antes: *«el que debe pesar son las monedas ya definidas en el repositorio»*). Su fuente es el
+# Anexo 1 de la RS 112-2021, Tabla 2, que son códigos ISO 4217.
+#
+# Hasta la 12.0 aquí había un `("PEN", "USD")` escrito a mano, y el problema no era que estuviera mal: era que
+# **era más estrecho que el catálogo** —rechazaba una cuenta en euros aunque `EUR` esté publicado— y que dos
+# listas que dicen lo mismo en dos sitios acaban diciendo cosas distintas. Añadir una moneda es añadirla al
+# catálogo, con su fuente, no cuenta por cuenta.
+#
+# Y lo que **no** es de aquí: cómo llame cada ERP a una moneda por dentro, o con qué letra la escriba para un
+# sistema legacy. Eso es su alias y su configuración (`monedas_codigo`), y en el documento la moneda va en ISO.
+#
+# Una cuenta es de UNA moneda: no existe la cuenta mixta, y por eso cada extracto declara la suya en la cabecera.
+MONEDAS = tuple(sorted(catalogos.MONEDAS))
 
 
 class CuentaInvalida(ErrorContaperu, ValueError):

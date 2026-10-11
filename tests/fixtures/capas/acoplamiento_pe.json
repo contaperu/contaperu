@@ -72,5 +72,8 @@
   "contaperu.tributos",
   "contaperu.tributos.detracciones",
   "contaperu.tributos.validar"
+ ],
+ "contaperu.tesoreria.cuentas": [
+  "contaperu.catalogos"
  ]
 }

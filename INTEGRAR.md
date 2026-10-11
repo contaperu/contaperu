@@ -369,8 +369,29 @@ Y el **maestro de cuentas**, que no es parte del documento sino un argumento —
    prueba el pago, como el vóucher del Banco de la Nación. Una detracción pagada desde un banco tiene los dos.
 3. **El importe va siempre positivo** y el signo lo lleva `sentido`: `cargo` sale, `abono` entra. Es el
    `CdtDbtInd` de camt.053 y el subcampo C/D del tag 61 de un MT940.
-4. **El `itf` es un dato del banco, no un cálculo.** Vacío no es cero: es «el banco no lo dice». Y se resta del
-   saldo en los dos sentidos.
+4. **Un cargo del banco es un movimiento, no un campo.** Una comisión, los portes o el mantenimiento llegan como
+   un movimiento más, con su propia imputación. El `itf` es la excepción y existe por un motivo concreto: hay
+   bancos que lo descuentan **sin darle fila** —BBVA lo pone en una columna—, y entonces no hay movimiento que lo
+   represente. Vacío no es cero: es «el banco no lo dice». Y cuando el motor asiente, un pago de 2 000 con 0,50
+   de ITF serán **dos asientos**.
+
+### La moneda: ISO en el documento, tu alias en tu casa
+
+En el documento la moneda va **en ISO 4217 y nada más** (`PEN`, `USD`, `EUR`…). Las que el motor reconoce son las
+del catálogo —`catalogos_sunat.monedas`, del Anexo 1 de la RS 112-2021—, y es contra ésas contra las que se valida
+una cuenta bancaria: una moneda que no esté ahí se rechaza al declarar la cuenta, y añadir una es añadirla al
+catálogo con su fuente.
+
+**Cómo la llames tú por dentro, o con qué letra la escriba tu sistema contable, es tuyo.** Eso es configuración
+del contribuyente, no del estándar: `monedas_codigo` en la sección de tu destino.
+
+```python
+print(api.configuracion_por_defecto("concar")["concar"]["monedas_codigo"])     # {'PEN': 'MN', 'USD': 'US'}
+print(api.configuracion_por_defecto("contasis")["contasis"]["monedas_codigo"])  # {'PEN': 'S', 'USD': 'D'}
+```
+
+Los valores de fábrica son los que dice la plantilla de cada sistema —CONCAR usa `US` y no `ME`; CONTASIS, `S` y
+`D`—, y si tu instalación escribe otra letra, la declaras y manda la tuya.
 
 ### Lo que el motor te responde
 

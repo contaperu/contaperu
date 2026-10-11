@@ -64,6 +64,15 @@ CONFIGURACION = (
           ayuda="El código del catálogo de medios de pago de SUNAT que llevan tus ventas cuando el documento no "
                 "dice el suyo: 001 es depósito en cuenta, 003 transferencia de fondos. Los 22, en "
                 "`catalogos_sunat.medios_pago`."),
+    # El mismo campo que CONCAR, y por el mismo motivo: **el alias de una moneda es del contribuyente**, no del
+    # driver. La plantilla de CONTASIS dice «NUEVOS SOLES (S) / DOLARES AMERICANOS (D)» y eso es el valor por
+    # defecto; una instalación que escriba otra letra ahora puede decirlo. Lo que llega en el documento es el
+    # código ISO, y esto lo traduce al salir.
+    Campo("monedas_codigo", "objeto", titulo="Monedas", grupo="monedas", campos=(
+        Campo("PEN", "texto", "S", titulo="Los soles se llaman", grupo="monedas",
+              ayuda="Cómo escribe tu CONTASIS la moneda nacional. La plantilla dice «NUEVOS SOLES (S)»."),
+        Campo("USD", "texto", "D", titulo="Los dólares se llaman", grupo="monedas",
+              ayuda="La plantilla dice «DOLARES AMERICANOS (D)»."))),
 )
 
 # La pestaña conserva su nombre, y el archivo va sin las filas 1-13 de la plantilla: su nota 3 dice «Eliminar la Fila
@@ -224,6 +233,11 @@ TOTAL = {"compra": "S", "venta": "P"}
 COLUMNAS_IGV = {"compra": frozenset({"K", "M", "O"}), "venta": frozenset({"N"})}
 
 # Comentarios de la plantilla: «NUEVOS SOLES (S) / DOLARES AMERICANOS (D)» y «Contado (CON) / Crédito (CRE)».
+# **Son el valor POR DEFECTO de `monedas_codigo`, no una tabla fija** (12.0). Hasta entonces estaban congelados
+# aquí mientras CONCAR ya lo hacía bien —la misma necesidad resuelta de dos maneras—, así que un contribuyente
+# cuyo CONTASIS escribiera otra letra no tenía forma de decirlo. Es lo que pidió John el 11-oct-2026: *«cada ERP
+# puede hacer su alias de la moneda o cambiar la nomenclatura para los sistemas legacy»*. Lo que no se negocia es
+# el otro lado: en el documento la moneda va en ISO 4217, y el alias es de cada destino.
 MONEDAS = {"PEN": "S", "USD": "D"}
 CONDICIONES = {"contado": "CON", "credito": "CRE"}
 # Un documento que no dice su condición va de contado: así llevan todas sus filas los dos registros validados.

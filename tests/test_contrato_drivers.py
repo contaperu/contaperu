@@ -458,10 +458,11 @@ def test_cada_driver_de_serie_declara_lo_que_se_configura_en_su_seccion():
     assert [c.clave for c in contrato.configuracion(drivers.concar)] == [
         *del_asiento, "monedas_codigo", "detraccion_tipo_doc", "detraccion_codigos", "detraccion_area"]
     assert [c.clave for c in contrato.configuracion(drivers.csv)] == del_asiento
-    assert [c.clave for c in contrato.configuracion(drivers.contasis)] == ["medio_pago"]
+    assert [c.clave for c in contrato.configuracion(drivers.contasis)] == ["medio_pago", "monedas_codigo"]
     assert contrato.configuracion(drivers.sire) == () and contrato.columnas_elegibles(drivers.sire) == {}
-    assert contrato.seccion_por_defecto(drivers.contasis) == {"medio_pago": "001",
-                                                              "columnas": {"centro_costo": ["centro_costo"]}}
+    assert contrato.seccion_por_defecto(drivers.contasis) == {
+        "medio_pago": "001", "monedas_codigo": {"PEN": "S", "USD": "D"},
+        "columnas": {"centro_costo": ["centro_costo"]}}
     concar = contrato.seccion_por_defecto(drivers.concar)
     assert concar["columnas"] == {"centro_costo": ["centro_costo", "anexo_auxiliar_del_tercero"]}
     assert concar["monedas_codigo"] == {"PEN": "MN", "USD": "US"}

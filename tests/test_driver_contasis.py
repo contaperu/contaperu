@@ -186,3 +186,29 @@ def test_sus_cuentas_son_las_que_el_nucleo_decidiria(tipo, base, total, centro):
                                                                                                   "tercero")
     # Y el centro, que sale de `lleva_centro`: apagado en esta configuración, va vacío en los dos lados.
     assert all(not str(celdas[f"{centro}{n}"].value or "").strip() for n in filas)
+
+
+def test_el_alias_de_cada_moneda_lo_declara_el_contribuyente():
+    """Hasta la 12.0 la letra de la moneda estaba congelada en el driver mientras CONCAR ya la configuraba: la
+    misma necesidad resuelta de dos maneras, y una instalación que escribiera otra letra no podía decirlo.
+
+    Es lo que pidió John el 11-oct-2026: *«cada ERP puede hacer su alias de la moneda o cambiar la nomenclatura
+    para los sistemas legacy»*. Y la otra mitad de su regla, que es la que no se negocia: **en el documento la
+    moneda va en ISO**, y esto solo la traduce al salir."""
+    de_fabrica = contrato.seccion_por_defecto(contasis)["monedas_codigo"]
+    assert de_fabrica == {"PEN": "S", "USD": "D"}, "lo que dice la plantilla, como valor por defecto"
+
+    # La columna AB de su plantilla es el código de la moneda.
+    suyo = contasis.fila(*_una_compra(), config={**CONTAB, "monedas_codigo": {"PEN": "N"}})
+    assert suyo["AB"] == "N", "el contribuyente manda sobre el valor de fábrica"
+    assert contasis.fila(*_una_compra(), config=CONTAB)["AB"] == "S", "y sin declarar nada, la plantilla"
+    # Es una mezcla y no un reemplazo: declarar los soles no deja los dólares sin letra.
+    solo_soles = {**CONTAB, "monedas_codigo": {"PEN": "N"}}
+    assert "USD" in contasis.proyeccion._monedas(solo_soles)
+
+
+def _una_compra():
+    from contaperu.modelo import Comprobante, Libro
+
+    d = imputado(FACTURA)
+    return Comprobante.de_dict(d["comprobantes"][0]), Libro.de_dict(d["libro"])

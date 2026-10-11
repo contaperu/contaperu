@@ -143,7 +143,8 @@ def test_la_configuracion_de_partida_es_lo_general_y_una_seccion_por_sistema():
     assert set(prep.config_aplicada(partida, "concar")) == set(CONFIG_POR_DEFECTO) | del_asiento | {
         "monedas_codigo", "detraccion_tipo_doc", "detraccion_codigos", "detraccion_area", "columnas"}
     assert set(prep.config_aplicada(partida, "csv")) == set(CONFIG_POR_DEFECTO) | del_asiento
-    assert set(prep.config_aplicada(partida, "contasis")) == set(CONFIG_POR_DEFECTO) | {"medio_pago", "columnas"}
+    assert set(prep.config_aplicada(partida, "contasis")) == (set(CONFIG_POR_DEFECTO)
+                                                         | {"medio_pago", "monedas_codigo", "columnas"})
     assert prep.config_aplicada(partida, "sire") == prep.config_aplicada(partida) == prep.config_aplicada()
 
 

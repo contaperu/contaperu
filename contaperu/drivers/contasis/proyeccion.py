@@ -66,6 +66,16 @@ def _constancia(c: Comprobante, config: dict) -> dict[str, Any]:
             "V": _fecha(celdas.fecha(constancia["fecha_constancia"], None))}
 
 
+def _monedas(config: dict) -> dict:
+    """El alias de cada moneda en ESTE CONTASIS, que lo declara el contribuyente.
+
+    Hasta la 12.0 era una tabla fija del driver, mientras CONCAR ya lo tenía configurable: la misma necesidad
+    resuelta de dos maneras, y una instalación que escribiera otra letra no podía decirlo. Lo que no cambia es el
+    otro lado — en el documento la moneda va en ISO 4217, de las que declara el catálogo."""
+    declaradas = config.get("monedas_codigo") or {}
+    return {**datos.MONEDAS, **{str(k).upper(): str(v) for k, v in declaradas.items() if str(v).strip()}}
+
+
 def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = datos.OPCIONES) -> dict[str, Any]:
     """Lo que va en cada columna antes del formato de celda: textos sin rellenar, importes en `Decimal` (en soles y
     con el signo de la nota de crédito) y fechas como `date`. `no_caben` mira aquí los largos."""
@@ -86,7 +96,7 @@ def valores(c: Comprobante, libro: Libro, config: dict, opciones: Opciones = dat
     cuentas = config.get("cuentas") or {}
     nota = c.es_nota
     comunes = {
-        "moneda": datos.MONEDAS.get(c.moneda, ""),
+        "moneda": _monedas(config).get(c.moneda, ""),
         "dolares": c.total * signo if es_usd else None,
         "cambio": (c.tipo_cambio if es_usd else Decimal(1)),
         "condicion": datos.CONDICIONES.get(c.condicion_pago, datos.CONDICION_SIN_DATO),
@@ -171,7 +181,7 @@ def no_caben(libro: Libro, comprobantes: list[Comprobante], config: dict) -> dic
     opciones = datos.OPCIONES
     salida: dict[str, list[Comprobante]] = {texto: [] for texto in datos.MOTIVOS.values()}
     for c in comprobantes:
-        if c.moneda not in datos.MONEDAS:
+        if c.moneda not in _monedas(config):
             salida[datos.MOTIVOS["moneda"]].append(c)
             continue
         if c.moneda == "USD" and not c.tipo_cambio:
