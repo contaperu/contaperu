@@ -13,7 +13,7 @@ from ...asiento.lineas import LineaDiario
 from ..._version import OPEN_ACCOUNTING
 from ...errores import DocumentoInvalido
 from ...modelo import Comprobante, Libro, serie_y_numero
-from ... import tesoreria
+from ... import aplicaciones, tesoreria
 from ...tesoreria import Movimiento
 
 
@@ -26,6 +26,10 @@ MAXIMO_COMPROBANTES = 5000
 # líneas y varias cuentas en el mismo documento las multiplican, así que el tope es más alto que el de los
 # comprobantes. Lo que no cambia es por qué existe: un número absurdo es casi siempre un error de quien llama.
 MAXIMO_MOVIMIENTOS = 20000
+
+# Y el de las aplicaciones, que son las más numerosas de las tres: un pago que cancela diez facturas son diez, y un
+# mes puede traer las de varios meses anteriores. Por eso dobla el de los movimientos. El motivo es el mismo.
+MAXIMO_APLICACIONES = 40000
 
 # --- conversión entre el estándar y el modelo --------------------------------------
 
@@ -98,6 +102,28 @@ def imputaciones_de_movimientos_de(doc: dict, movimientos) -> dict:
         return tesoreria.leer_imputaciones(crudas, movimientos)
     except (ValueError, TypeError) as e:
         raise DocumentoInvalido(f"La imputación de un movimiento no se pudo leer: {e}") from None
+
+
+def aplicaciones_de(doc: dict) -> tuple:
+    """El bloque `aplicaciones` del documento, que entró al estándar con la enmienda 0031.
+
+    **No se comprueba que lo que nombran esté aquí**, y eso es el contrato y no un olvido: una factura de enero
+    pagada en marzo se nombra desde el documento de marzo, y el comprobante está en el de enero. Lo que falta se
+    **avisa** (`aplicaciones.sin_documento_declarado`), con el mismo trato que una cuenta bancaria sin
+    identificador: lo que impide un paso posterior se dice, no se para.
+
+    Quien rechaza lo que no entiende es `Aplicacion.de_dict`, que nombra la clave sobrante."""
+    crudas = doc.get("aplicaciones") or []
+    if not isinstance(crudas, list):
+        raise DocumentoInvalido("`aplicaciones` tiene que ser una lista.")
+    if len(crudas) > MAXIMO_APLICACIONES:
+        raise DocumentoInvalido(
+            f"{len(crudas)} aplicaciones en una sola llamada; el tope es {MAXIMO_APLICACIONES}. "
+            "Divídelo por cuenta o por periodo.")
+    try:
+        return aplicaciones.leer(crudas)
+    except (ValueError, TypeError) as e:
+        raise DocumentoInvalido(f"Una aplicación no se pudo leer: {e}") from None
 
 
 def extractos_de(doc: dict) -> dict:

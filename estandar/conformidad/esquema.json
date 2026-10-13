@@ -1831,6 +1831,456 @@
     ]
    },
    "valid": false
+  },
+  {
+   "description": "Tres pagos que cancelan la misma factura: tres aplicaciones, y el tercero no es especial",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-1"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     },
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-2"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     },
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-3"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "480.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Una nota de credito contra la factura que anula, y un pago de tributo",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "07",
+        "serie": "FC01",
+        "numero": "9",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     },
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "tributo",
+       "datos": {
+        "codigo": "1011",
+        "periodo": "202602"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Una aplicacion propuesta vale en el documento: lo que no hace es mover un saldo",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "propuesto"
+     }
+    ]
+   },
+   "valid": true
+  },
+  {
+   "description": "Un tributo no paga: no cabe en `de`",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "tributo",
+       "datos": {
+        "codigo": "1011",
+        "periodo": "202602"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Un movimiento no se cancela: no cabe en `a`",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una aplicacion sin su origen no dice si es un hecho o una conjetura",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una aplicacion sin fecha no se puede situar en el tiempo",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "origen": "manual"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una aplicacion sin moneda no se basta a si misma",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Un extremo con las claves de otra clase no vale",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "codigo": "1011"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "Una aplicacion no lleva glosa: la del libro vive en la imputacion del movimiento",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "comprobante",
+       "datos": {
+        "tipo_cp": "01",
+        "serie": "F001",
+        "numero": "123",
+        "contraparte_doc": "20602222226"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual",
+      "glosa": "PAGO FACTURA"
+     }
+    ]
+   },
+   "valid": false
+  },
+  {
+   "description": "`libre` y `cuenta_propia` son clases de una referencia de pago, no de una aplicacion",
+   "data": {
+    "open_accounting": "3.3",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202603",
+     "tipo": "compra"
+    },
+    "aplicaciones": [
+     {
+      "de": {
+       "clase": "movimiento",
+       "datos": {
+        "id_externo": "mov-7"
+       }
+      },
+      "a": {
+       "clase": "libre",
+       "datos": {
+        "texto": "caja chica"
+       }
+      },
+      "importe": "400.00",
+      "moneda": "PEN",
+      "fecha": "2026-03-10",
+      "origen": "manual"
+     }
+    ]
+   },
+   "valid": false
   }
  ]
 }

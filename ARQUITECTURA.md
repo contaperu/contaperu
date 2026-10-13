@@ -362,7 +362,7 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 | Capa | Módulos | Qué sabe |
 |---|---|---|
 | base | `_version`, `_obsoleto`, `_datos`, `errores` | la versión, el aviso de las rutas viejas, los datos empaquetados, la base de los errores |
-| núcleo | `modelo/` (el libro, el comprobante, las coerciones), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `tributos/` (`igv`, `detracciones`, `validar`, `comparar_sire`), `contable/` (`partida_doble`, `resumen`), `asiento/` (con `resolucion/` dentro: lo configurado, lo imputado, la clasificación, los requisitos y la numeración), `pcge/`, `lectores/`, `sunat/` (la API del SIRE como funciones puras: se sabe la URL, no se llama), `configuracion` | contabilidad peruana, sin disco, sin red y sin reloj |
+| núcleo | `modelo/` (el libro, el comprobante, las coerciones), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `tributos/` (`igv`, `detracciones`, `validar`, `comparar_sire`), `contable/` (`partida_doble`, `resumen`), `asiento/` (con `resolucion/` dentro: lo configurado, lo imputado, la clasificación, los requisitos y la numeración), `pcge/`, `lectores/`, `sunat/` (la API del SIRE como funciones puras: se sabe la URL, no se llama), `tesoreria/`, `aplicaciones` (cuánto de un pago cancela un documento: el puente entre los tres libros), `configuracion` | contabilidad peruana, sin disco, sin red y sin reloj |
 | drivers | `drivers/` (`contrato/` —su taxonomía, sus protocolos, sus accesores y su examen—, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
 | pipeline | `pipeline/` (`preparacion/` —el documento, la configuración, las entradas y los pasos de un mes—, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
 | api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa; cada nombre con su firma, congelados |
@@ -532,7 +532,7 @@ No son prohibiciones: es el precio de cada cambio, escrito antes de hacerlo. Qui
 | Reglas de SUNAT como datos | `_datos.leer_json("datos/sunat/…")`; `catalogos` las cargará sin cambiar sus nombres | C1-C2 |
 | El contribuyente como datos | `catalogos.regimenes_tributarios()` y `catalogos.cronogramas_de_vencimiento()`: en qué régimen tributa y cuándo le vence el mes, **cada regla con la cita de su artículo** y un cargador que no arranca sin ella. Son catálogo y no campo del estándar porque «qué libros estoy obligado a llevar» se pregunta sin un documento delante. El cronograma cabe en un núcleo sin reloj porque no es un reloj: dado un periodo y un dígito de RUC devuelve una fecha | C13 |
 | CDR y no domiciliados | `lectores/cdr.py` reservado; los roles pueden crecer sin romper un driver | C3, C12 |
-| Otra jurisdicción | J0 como test, J1 como efecto de las capas, `jurisdicciones/pe` reservado, `open-accounting` 3.2 para J5 | J0-J6 |
+| Otra jurisdicción | J0 como test, J1 como efecto de las capas, `jurisdicciones/pe` reservado, `open-accounting` 3.3 para J5 | J0-J6 |
 | La API de un ERP moderno | canal `api_erp` reservado y rechazado; su hito se retiró el 10-oct-2026 | — |
 
 ## La capa para agentes

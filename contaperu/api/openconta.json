@@ -3,14 +3,14 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "12.2.0",
+  "version": "12.3.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
    "name": "MIT",
    "identifier": "MIT"
   },
-  "x-open-accounting": "3.2"
+  "x-open-accounting": "3.3"
  },
  "paths": {
   "/v1/leer_xml": {
@@ -1128,6 +1128,13 @@
       },
       "description": "Por `id_externo` del movimiento, lo que el entorno decidió para él. **Bloque aparte de `imputaciones`, que es el de los comprobantes**, y no una extensión suya: un ERP tiene secuencias de id independientes para sus facturas y sus movimientos, así que el mismo `id_externo` puede ser las dos cosas y compartir el espacio de llaves obligaría a exigir unicidad entre bloques. Y los campos no son los mismos: un movimiento no tiene base, ni IGV, ni nota de crédito que lo anule."
      },
+     "aplicaciones": {
+      "description": "Qué cancela qué, y por cuánto. El puente entre los tres libros: un pago de tesorería contra una factura de compras, una nota de crédito contra la factura que anula, un depósito de detracción contra su comprobante. El saldo de un documento se DERIVA de la suma de sus aplicaciones y no se guarda en ninguna parte.",
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/OpenAccounting_aplicacion"
+      }
+     },
      "emisor": {
       "description": "Quién generó este documento (software, versión). Informativo.",
       "type": "object",
@@ -2234,6 +2241,182 @@
      "glosa": {
       "description": "Lo que se escribe en el libro por este movimiento. **Es una decisión del contador y no un hecho del papel**, y por eso vive aquí: `movimiento.descripcion` es el texto que imprimió el BANCO. La piden todos los destinos —campo 16 del Diario 5.1 del PLE, la «Glosa Principal» de CONCAR—. Si no viene, el motor usa la descripción del banco y, en su defecto, el nombre de la contraparte: **ninguna línea sale sin glosa**. Va sin cortar; el largo lo decide cada destino.",
       "type": "string"
+     }
+    }
+   },
+   "OpenAccounting_extremo_de_aplicacion": {
+    "description": "Uno de los dos extremos de una aplicación: qué documento es, nombrado como `referencia_de_pago` nombra lo que un pago cancela. Las clases que caben en cada extremo las fija `aplicacion`: `movimiento` solo paga y `tributo` solo se cancela.",
+    "type": "object",
+    "required": [
+     "clase",
+     "datos"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "clase": {
+      "description": "`comprobante` (la 4-tupla que lo identifica), `movimiento` (su `id_externo`, la misma llave con la que le llega su imputación) o `tributo` (código del Catálogo 05 y periodo).",
+      "type": "string",
+      "enum": [
+       "comprobante",
+       "movimiento",
+       "tributo"
+      ]
+     },
+     "datos": {
+      "description": "Las claves que admite su clase, y solo ésas; el `allOf` de abajo las declara una por una. Todos los valores son texto. Al menos una con contenido: un extremo sin ningún dato no nombra nada.",
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      },
+      "minProperties": 1
+     }
+    },
+    "allOf": [
+     {
+      "if": {
+       "properties": {
+        "clase": {
+         "const": "comprobante"
+        }
+       },
+       "required": [
+        "clase"
+       ]
+      },
+      "then": {
+       "properties": {
+        "datos": {
+         "propertyNames": {
+          "enum": [
+           "tipo_cp",
+           "serie",
+           "numero",
+           "contraparte_doc"
+          ]
+         }
+        }
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "clase": {
+         "const": "movimiento"
+        }
+       },
+       "required": [
+        "clase"
+       ]
+      },
+      "then": {
+       "properties": {
+        "datos": {
+         "propertyNames": {
+          "enum": [
+           "id_externo"
+          ]
+         }
+        }
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "clase": {
+         "const": "tributo"
+        }
+       },
+       "required": [
+        "clase"
+       ]
+      },
+      "then": {
+       "properties": {
+        "datos": {
+         "propertyNames": {
+          "enum": [
+           "codigo",
+           "periodo"
+          ]
+         }
+        }
+       }
+      }
+     }
+    ]
+   },
+   "OpenAccounting_aplicacion": {
+    "description": "Cuánto de un pago (o de una nota de crédito) cancela un documento. Es un registro aparte y con su importe, N a N: un pago cancela varias facturas y una factura la cancelan varios pagos, y **tres pagos para una factura son tres aplicaciones, sin que el tercero sea especial** — nadie guarda que esté cerrada, el saldo se deriva de la suma. Lo que esto NO es: `movimiento.referencias`, que es lo que AFIRMA el papel. Una aplicación es lo que alguien DECIDIÓ aplicar, y por cuánto — el mismo corte que hay entre `movimiento` y `imputaciones_de_movimientos`.",
+    "type": "object",
+    "required": [
+     "de",
+     "a",
+     "importe",
+     "moneda",
+     "fecha",
+     "origen"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "de": {
+      "description": "Lo que paga: un `movimiento` del banco o un `comprobante` (una nota de crédito, un anticipo documentado).",
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/OpenAccounting_extremo_de_aplicacion"
+       },
+       {
+        "properties": {
+         "clase": {
+          "enum": [
+           "movimiento",
+           "comprobante"
+          ]
+         }
+        }
+       }
+      ]
+     },
+     "a": {
+      "description": "Lo que se cancela: un `comprobante` o un `tributo`. No cabe `cuenta_propia` ni un texto libre, porque una aplicación existe para reducir un saldo y solo un documento o un tributo tiene saldo.",
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/OpenAccounting_extremo_de_aplicacion"
+       },
+       {
+        "properties": {
+         "clase": {
+          "enum": [
+           "comprobante",
+           "tributo"
+          ]
+         }
+        }
+       }
+      ]
+     },
+     "importe": {
+      "description": "Cuánto de `de` se aplica a `a`. Positivo, como todo importe del estándar: la dirección la dicen los nombres de los dos extremos y no el signo.",
+      "$ref": "#/components/schemas/OpenAccounting_importe"
+     },
+     "moneda": {
+      "description": "ISO 4217. **Va aquí aunque esté en los documentos**, porque una aplicación puede nombrar un comprobante de otro mes que no viaja en este documento: tiene que bastarse. Dos aplicaciones en monedas distintas sobre el mismo comprobante no se suman.",
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+     },
+     "fecha": {
+      "description": "Cuándo se aplicó: la fecha del pago, la de la nota, o el día en que alguien lo decidió. Obligatoria porque sin ella la aplicación no se puede situar en el tiempo, y todo origen real la tiene.",
+      "$ref": "#/components/schemas/OpenAccounting_fecha"
+     },
+     "origen": {
+      "description": "De dónde sale: `declarado` lo afirma el papel —una constancia de detracción nombra su comprobante—, `manual` lo decidió una persona, y `propuesto` lo propuso una conciliación y **nadie lo ha confirmado**. La regla que lo hace valer: **una aplicación `propuesto` no cuenta para ningún saldo.**",
+      "type": "string",
+      "enum": [
+       "declarado",
+       "manual",
+       "propuesto"
+      ]
      }
     }
    },

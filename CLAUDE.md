@@ -65,7 +65,10 @@ línea de extracto o de una constancia de pago, al motor llega un `movimiento` c
 salió —lo que lo distingue no es una etiqueta, es el `saldo`, que solo un extracto trae—, con la cabecera de la hoja
 en `extractos[]` y con la contrapartida que pone el ERP en `imputaciones_de_movimientos`. **El contrato está
 cerrado y el motor todavía no sabe armar su asiento**, que es el hito D6 y espera la tasa del ITF con su norma y un
-archivo del sub-diario de bancos aceptado); **drivers** que
+archivo del sub-diario de bancos aceptado); **`aplicaciones`** —el puente entre los tres libros desde la 12.3:
+cuánto de un pago cancela un documento, N a N y con su importe, con el `origen` que separa un hecho (`declarado`,
+`manual`) de una conjetura (`propuesto`, que **no cuenta para ningún saldo**). Es a `referencias` lo que
+`imputaciones_de_movimientos` es a `movimiento`, y el saldo **se deriva de la suma y no se guarda**—; **drivers** que
 conocen el formato de un destino y nada de contabilidad, cada uno con su **canal**, que dice a quién entrega:
 `drivers/asiento_contable` y `drivers/csv` son `erp`, el primero con vocabulario neutral; `drivers/sire`,
 `drivers/ple` y `drivers/ple_plan` son `sunat` —el SIRE y el PLE, dos regímenes y un canal—; `drivers/concar`,

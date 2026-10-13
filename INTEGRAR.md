@@ -26,7 +26,7 @@ el mismo mes, el mismo diagnóstico, por cualquiera de ellas.
 
 ## Lo que entra y lo que sale
 
-Entra un **documento `open-accounting` 3.2** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
+Entra un **documento `open-accounting` 3.3** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
 compras) y los comprobantes tal como los emite SUNAT, con los importes en positivo y como texto exacto. Si tienes los
 XML o la propuesta del SIRE, el motor arma el documento por ti (`leer_xml`, `leer_propuesta_sire`).
 
@@ -206,7 +206,7 @@ los mismos nombres que los parámetros de la api:
 ```json
 {
   "documento": {
-    "open_accounting": "3.2",
+    "open_accounting": "3.3",
     "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"},
     "comprobantes": [{
       "tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "2026-01-15",
@@ -311,7 +311,7 @@ misma forma, y lo que dice de dónde salió es su `origen`.
 
 ```json
 {
-  "open_accounting": "3.2",
+  "open_accounting": "3.3",
   "libro": { "ruc": "20601234567", "periodo": "202608", "tipo": "tesoreria" },
 
   "extractos": [
@@ -556,7 +556,7 @@ escribe un driver contra el contrato del motor; aquí se lee el documento contra
 
 ```json
 {
-  "open_accounting": "3.2",
+  "open_accounting": "3.3",
   "libro": {"ruc": "…", "razon_social": "…", "periodo": "202601", "tipo": "compra"},
   "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "45680", "fecha_emision": "2026-01-10",
                     "contraparte_doc": "20677777771", "contraparte_nombre": "MAYORISTA NACIONAL SAC",
@@ -821,7 +821,7 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia
   una línea**: la superficie pública de la 1.0 sigue entera y su test pasa sin regenerarse. Lo que desapareció es lo
   que ninguna versión publicada llegó a ofrecer — la 0.x nunca estuvo en PyPI.
-- **El estándar es `open-accounting` 3.2**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
+- **El estándar es `open-accounting` 3.3**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
   significado hasta una 4.0. Un valor nuevo de catálogo y un bloque opcional no suben la versión; los catálogos
   se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **una línea se contabiliza con `cuenta`,
   `debe_haber`, `importe` y `clase`**, que son los cuatro que exige. Si vienes de la 1.0, que el motor ya no

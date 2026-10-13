@@ -66,6 +66,11 @@ CAPAS = {
     # cuadre de la cadena de saldos. **Núcleo y hoja**, como `sunat`: no lo importa nadie de dentro y su público es
     # quien integra. Lo que lee bytes de un extracto vivirá fuera, igual que los conectores (D7).
     "contaperu.tesoreria": "nucleo",
+    # El puente entre los tres libros (12.3): cuánto de un pago cancela un documento. **Núcleo y no pipeline** por
+    # lo mismo que `contable`: lo que decide si una factura está pagada no puede mirar un destino, y la capa es lo
+    # que lo garantiza. Importa de `tesoreria` las claves con que se nombra un comprobante, para no escribirlas dos
+    # veces. Y **no es peruano**: «cuánto de esto cancela aquello» no lo discute ninguna jurisdicción.
+    "contaperu.aplicaciones": "nucleo",
     # Los tributos del Perú agrupados (6.4.0): el IGV, las detracciones, la validación y el contraste con
     # lo que SUNAT tiene. Núcleo, y peruano: es casi toda la tupla `PERUANOS` de más abajo.
     "contaperu.tributos": "nucleo",

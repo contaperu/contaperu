@@ -138,7 +138,7 @@
      "observaciones": {
       "type": "array",
       "items": {
-       "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.2/estandar/open-accounting.schema.json#/$defs/observacion"
+       "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json#/$defs/observacion"
       }
      }
     },
@@ -160,7 +160,7 @@
      "observaciones": {
       "type": "array",
       "items": {
-       "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.2/estandar/open-accounting.schema.json#/$defs/observacion"
+       "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json#/$defs/observacion"
       }
      }
     },

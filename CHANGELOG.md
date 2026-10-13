@@ -4,6 +4,83 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.3.0] — 2026-10-12 · con `open-accounting` 3.3
+
+**El sustantivo que faltaba: `aplicaciones[]`.** Hasta hoy los tres libros del motor eran islas —`libro.tipo` vale
+`compra`, `venta` o `tesoreria`— y lo único que los unía era `movimiento.referencias`, que va en una sola
+dirección y cuyo importe es opcional. Con eso no se puede contestar si una factura está por cobrar o cobrada.
+
+Es la segunda de las tres versiones del trabajo del 12-oct-2026: la 12.2 guardó el pago esperado, esta trae el
+registro de la aplicación, y la siguiente deriva el pendiente.
+
+**Ninguna salida se mueve.** `aplicaciones` es un bloque de **entrada**: los cuatro snapshots de celdas y el del
+documento quedan como estaban, y de este último solo cambia el sello de la versión.
+
+### El estándar · `open-accounting` 3.3
+
+**Aditivo: entra un bloque opcional y no sale nada.** Un documento 3.2 sigue valiendo tal cual, así que no hay
+nada que migrar.
+
+**`aplicaciones[]`** ([enmienda 0031](estandar/enmiendas/0031-la-aplicacion-de-un-pago-a-un-documento.md)): cuánto
+de una cosa cancela otra. Seis campos, todos obligatorios —`de`, `a`, `importe`, `moneda`, `fecha` y `origen`—, y
+cada uno por su razón.
+
+**Es un registro aparte y N a N**, que es lo que hacen los ocho sistemas comparados sin una excepción: un pago
+cancela varias facturas y una factura la cancelan varios pagos. **Tres pagos para una factura son tres
+aplicaciones, y el tercero no es especial** — nadie guarda que esté cerrada, porque el saldo se deriva de la suma.
+
+**Por qué un bloque nuevo y no estirar `referencias`**, que es la pregunta que decide la forma: `referencias` dice
+lo que **afirma el papel**; una aplicación dice lo que alguien **decidió aplicar, y por cuánto**. Es el mismo corte
+que el estándar ya hizo dos veces, entre `movimiento` y `imputaciones_de_movimientos` (enmiendas 0025 y 0027).
+Dicho en una línea: **`aplicaciones` es a `referencias` lo que `imputaciones_de_movimientos` es a `movimiento`.**
+
+**`origen` convierte la doctrina en una regla comprobable.** `declarado` lo afirma el papel, `manual` lo decidió
+una persona, `propuesto` lo propuso una conciliación y nadie lo ha confirmado. Y la regla: **una `propuesto` no
+cuenta para ningún saldo** (`Aplicacion.cuenta_para_el_saldo`). Así «`conciliar` propone y nunca confirma» deja de
+ser un docstring repetido en seis sitios y pasa a ser algo que un test puede poner en rojo — y **le da a D3 su
+tipo de salida** sin que haya que inventarlo el día que llegue.
+
+**Cubre los tres enlaces y no solo uno.** En `de` cabe lo que paga —un `movimiento` o un `comprobante`, que es
+como entra **una nota de crédito contra la factura que anula**, el enlace que hasta hoy había que marcar a mano
+con `anulada_por_nota` porque «solo la nota apunta hacia atrás»— y en `a` lo que se cancela: un `comprobante` o un
+`tributo`.
+
+**Y funciona entre meses**, que es lo que hace falta de verdad: una factura de enero pagada en marzo se nombra
+desde el documento de marzo, porque `Comprobante.clave` no lleva el periodo a propósito. De ahí la decisión que
+más se nota: **lo que una aplicación nombra NO tiene que viajar en el documento**, así que su presencia se **avisa
+y no se exige** (`aplicaciones.sin_documento_declarado`), con el mismo trato que
+`CUENTA_BANCARIA_SIN_IDENTIFICADOR`.
+
+### Añadido
+
+- **`contaperu/aplicaciones.py`**, en el núcleo. **Núcleo y no pipeline** por lo mismo que `contable`: lo que
+  decide si una factura está pagada no puede mirar un destino, y la capa es lo que lo garantiza
+  (`tests/test_capas.py`). Y **no es peruano**: «cuánto de esto cancela aquello» no lo discute ninguna
+  jurisdicción. Trae `Aplicacion`, `Extremo`, `leer`, `sin_documento_declarado` y los catálogos de origen y clase.
+- **Las claves con que se nombra un comprobante o un tributo se toman de `tesoreria.referencias`** en vez de
+  volver a escribirlas, y un test lo ancla: son la misma forma de nombrar lo mismo, y dos listas separadas se
+  habrían separado.
+- **`preparacion.aplicaciones_de`** con su tope, `MAXIMO_APLICACIONES`, que **dobla el de los movimientos**: un
+  pago que cancela diez facturas son diez aplicaciones, y un mes puede traer las de varios meses anteriores.
+- **`tests/test_aplicaciones.py`**, con 53 casos, y **once de conformidad**. Dos de ellos son los que más
+  protegen: comprueban que **el esquema publicado y el motor admiten las mismas clases en cada cara y las mismas
+  claves por clase**. Es la lección de la 3.0 con `referencia_de_pago`, donde las claves vivían solo en Python y
+  un validador que usara el JSON publicado aceptaba lo que el motor rechaza.
+
+### Lo que esta versión NO hace
+
+- **No suma nada.** Derivar el pendiente de un comprobante es la 12.4: aquí se cierra que el documento **pueda
+  decirlo**.
+- **No escribe `conciliar`** (D3), que sigue esperando dos archivos reales. Esta versión define el **sustantivo**,
+  no el verbo.
+- **No retira `movimiento.referencias`**, que siguen siendo lo que el papel afirma y la fuente de la que `conciliar`
+  partirá.
+- **No admite `libre` ni `cuenta_propia`** como extremos, aunque sí sean clases de `referencia_de_pago`: una
+  aplicación reduce un saldo, y contra un texto libre no se deriva nada.
+- **No lleva glosa ni `id_externo` propio**, y los dos por el mismo motivo: serían claves que nadie lee, que es lo
+  que el contrato de drivers paró con `sub_diario_bancos`.
+- **No convierte monedas.** Dos aplicaciones en monedas distintas sobre el mismo comprobante no se suman.
+
 ## [12.2.0] — 2026-10-12 · con `open-accounting` 3.2
 
 **La norma obliga a declarar las cuotas de una factura al crédito, el lector las veía y tiraba todos sus

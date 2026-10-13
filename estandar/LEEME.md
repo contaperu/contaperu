@@ -1,4 +1,4 @@
-# open-accounting 3.2 — el documento contable universal del Perú
+# open-accounting 3.3 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -16,12 +16,12 @@ y por eso lo que entra aquí se promete: un valor publicado no se quita ni cambi
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.2/estandar/open-accounting.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json
 ```
 
-Cuelga del tag **del estándar** (`open-accounting-3.2`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`open-accounting-3.3`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
-sirve como estándar. **El tag `open-accounting-3.2` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
+sirve como estándar. **El tag `open-accounting-3.3` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
 bloque opcional no suben la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la
 1.0; un cambio de significado sube a 2.0 y estrena su propio tag.
 
@@ -43,7 +43,7 @@ python -m contaperu.puertas.cli diagnosticar mi-documento.json
 
 ```json
 {
-  "open_accounting": "3.2",
+  "open_accounting": "3.3",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -291,6 +291,8 @@ permite que el resto pueda degradar.
 | `contraparte_doc` | Puede ir vacío en boletas a consumidor final. |
 | `origen` | Trazabilidad, no lógica: `xml` es un dato leído de la fuente oficial; `vision` lo leyó una IA de una foto y merece revisión humana. |
 | `confianza` | De 0 a 1. Solo tiene sentido por debajo de 1 en lo que leyó una IA. |
+| `origen` (de una aplicación) | `declarado` lo afirma el papel —una constancia de detracción nombra su comprobante—, `manual` lo decidió una persona, y `propuesto` lo propuso una conciliación y **nadie lo ha confirmado**. Y la regla que lo hace valer: **una `propuesto` no cuenta para ningún saldo**. No es el `origen` de un comprobante ni el de un movimiento, que dicen de qué fuente se leyó el dato. |
+| `moneda` (de una aplicación) | **Va en la aplicación aunque esté en los documentos**, porque una aplicación puede nombrar un comprobante de otro mes que no viaja en este documento: tiene que bastarse. Y dos aplicaciones en monedas distintas sobre el mismo comprobante **no se suman**. |
 | `itf` (de un movimiento) | **La excepción a la regla de abajo, y la única.** Existe porque hay bancos que descuentan el ITF **sin darle fila** —BBVA lo pone en una columna al lado—, así que no hay movimiento que lo represente y el saldo corrido lo resta igual. Vacío no es cero: es «el banco no lo dice». |
 
 ### Un cargo del banco es su propio movimiento
@@ -306,6 +308,38 @@ nuevo cada vez que un banco inventa un concepto, que es justo la trampa en la qu
 Y la consecuencia contable: un pago de 2 000 con 0,50 de ITF **son dos asientos**, uno contra la cuenta del
 tercero y otro contra la cuenta del impuesto. El motor no los arma todavía —es el hito D6 y espera la tasa del
 ITF con su norma—, pero el documento ya puede decirlos, que es lo que el estándar promete.
+
+### Qué cancela qué: `aplicaciones[]` (3.3)
+
+El bloque que une los tres libros, y el que contesta «¿esta factura está pagada?»
+([enmienda 0031](enmiendas/0031-la-aplicacion-de-un-pago-a-un-documento.md)). Cada entrada dice **cuánto de una
+cosa cancela otra**:
+
+```json
+"aplicaciones": [
+  {"de": {"clase": "movimiento",  "datos": {"id_externo": "mov-7"}},
+   "a":  {"clase": "comprobante", "datos": {"tipo_cp": "01", "serie": "F001",
+                                            "numero": "123", "contraparte_doc": "20602222226"}},
+   "importe": "400.00", "moneda": "PEN", "fecha": "2026-03-10", "origen": "manual"}
+]
+```
+
+**Es un registro aparte y N a N**, no un campo ni una marca: un pago cancela varias facturas y una factura la
+cancelan varios pagos. **Tres pagos para una factura son tres aplicaciones, y el tercero no es especial** — nadie
+guarda que esté cerrada, porque **el saldo se deriva de la suma**. Así lo hacen los ocho sistemas que
+[`REFERENCIAS.md`](../REFERENCIAS.md) comparó, sin una excepción.
+
+**No es `movimiento.referencias`**, y la diferencia es la misma que hay entre un movimiento y su imputación:
+`referencias` es lo que **afirma el papel**, una aplicación es lo que alguien **decidió aplicar, y por cuánto**.
+Las dos conviven.
+
+**En `de` cabe lo que paga** —un `movimiento` o un `comprobante`, que es como entra una nota de crédito contra la
+factura que anula— y **en `a` lo que se cancela**: un `comprobante` o un `tributo`. No caben `libre` ni
+`cuenta_propia`: una aplicación reduce un saldo, y contra un texto libre no se deriva nada.
+
+**Un comprobante de otro mes se nombra igual que uno de este**, porque la identidad de un comprobante no lleva el
+periodo: una factura de enero pagada en marzo se nombra desde el documento de marzo. Y por eso **lo que una
+aplicación nombra no tiene que viajar en el documento**: el motor lo avisa, no lo rechaza.
 
 ---
 
@@ -339,7 +373,7 @@ necesitado todavía; se añade con un caso real detrás, no por si acaso.
 **`1.0` gana dos campos opcionales el 26-sep-2026 y no sube** (enmiendas 0014 y 0015): `tipo_nota`, por qué se
 emitió una nota, y `estado_sunat`, lo que SUNAT dice del comprobante en su propio registro. Los dos vienen de
 columnas que la propuesta del SIRE ya traía y que se descartaban al leer. Nada cambia de significado y un
-documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-3.2` avanza y la versión se
+documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-3.3` avanza y la versión se
 queda en `1.0`**.
 
 **`0.2` (11-sep-2026) cambia el significado de dos campos**, y por eso sube: `base_gravada` e `igv` pasan a ser
@@ -444,7 +478,7 @@ libro**— viven en [`catalogos.json`](catalogos.json), junto a este archivo, co
 la URL del tag igual que el esquema, así que un ERP de fuera los lee sin instalar nada:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.2/estandar/catalogos.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/catalogos.json
 ```
 
 **Por qué están fuera del esquema** (1.0): eran enums cerrados, así que el día que entre un hecho nuevo —los
