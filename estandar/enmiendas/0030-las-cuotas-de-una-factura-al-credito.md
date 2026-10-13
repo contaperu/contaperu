@@ -35,6 +35,11 @@ Para qué sirve guardarlas, que es lo que lo convierte en un hueco y no en un ca
 La tercera fila es la que más vale para un ERP: el total de la factura y lo que el cliente va a transferir son dos
 números distintos, y hasta ahora el motor solo tenía el primero.
 
+**Y está medido, no deducido** (12-oct-2026, sobre tres facturas reales al crédito, en local y de solo lectura):
+en las tres, `total − monto_pendiente` es **exactamente** el monto de la detracción, al céntimo. Es la definición
+de la norma comprobada contra documentos de verdad, y es lo que convierte el campo en el dato que le falta a
+cualquier cuenta por cobrar: lo que se le reclama al cliente no es el total del comprobante.
+
 ## Fuente
 
 **RS 000193-2020/SUNAT** (vigente desde el 01-09-2021) y su **Anexo 1**, el de los campos de la factura

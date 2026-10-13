@@ -158,6 +158,45 @@ con aviso (`drivers.ALIAS`) y **la 4.0 lo retiró**, que es lo que el aviso prom
 contrato mide, que sigue llamándose `VOCABULARIO = "neutral"` porque eso sí es lo que describe: las palabras del
 estándar frente a las de un sistema legacy.
 
+### Cómo se conectan los tres libros (12.3 y 12.4)
+
+Tres libros —`compra`, `venta`, `tesoreria`— y cuatro aristas entre ellos. Hasta la 12.2 **existían a medias y
+ninguna se recorría**:
+
+```
+compras/ventas ──ref_tipo_cp, ref_serie, ref_numero──► compras/ventas     la NC nombra su factura
+tesorería ─────── referencias[] ────────────────────► compras/ventas     el pago nombra lo que cancela
+compras/ventas ── documento{} ──────────────────────► asiento            la línea nombra su documento
+asiento ───────── id_en_destino ────────────────────► el destino         enmienda 0001, RESERVADA
+```
+
+La primera estaba en el dato y nadie la seguía: `anulada_por_nota` es una marca **a mano**, porque solo la nota
+apunta hacia atrás. La segunda está cerrada desde el estándar 3.0 y nadie la puebla, porque no hay lector de banco
+(D2) ni conciliación (D3). Con eso no se puede contestar «¿esta factura está pagada?».
+
+**Lo que faltaba era un sustantivo, no un verbo**: `aplicaciones[]` (enmienda 0031), un registro aparte que dice
+**cuánto de una cosa cancela otra**. N a N, con su importe, y con el `origen` que separa un hecho (`declarado`,
+`manual`) de una conjetura (`propuesto`, que no cuenta para ningún saldo). Conviven con `referencias` por lo mismo
+que conviven `movimiento` y su imputación: una dice lo que **afirma el papel** y la otra lo que alguien **decidió
+aplicar**.
+
+**Y el saldo no se guarda: se deriva.** `pendiente = total − Σ aplicaciones confirmadas`, y la palabra —«por
+pagar», «pagado»— es una lectura de ese número. No hay enum en el estándar, ni campo en el modelo, ni rasgo en la
+tabla del libro. Es el tercer uso del patrón, detrás del `rol` (10.0) y del estado de la detracción (2.0), y la
+razón de fondo está **medida fuera**: en Odoo, un marcador junto al número se desincronizó dos veces, y su propia
+recomendación es leer el residual y no el marcador. Las ocho plataformas comparadas en
+[REFERENCIAS.md](REFERENCIAS.md) lo derivan, sin una excepción.
+
+**Los meses se cruzan por argumento.** El libro es mensual y una factura de enero pagada en marzo vive en dos
+documentos; `partidas_previas` lo resuelve con el molde que ya existía en `claves_previas` — un argumento que el
+motor recibe y no guarda. Funciona porque la identidad de un comprobante no lleva el periodo.
+
+Y una consecuencia de capa que conviene no perder: **`aplicaciones` es núcleo** y el saldo por contraparte es
+**api**. Lo primero porque lo que decide si una factura está pagada no puede mirar un destino, y la capa es lo que
+lo garantiza. Lo segundo porque un saldo de proveedor es un **informe** y no una fuente: en cero no significa que
+todas sus facturas estén pagadas —una sobrepagada y una impaga se netean—, que es la vieja diferencia entre un
+estado de cuenta por partida abierta y uno de saldo arrastrado.
+
 ### El eje del libro: una tabla, no un booleano (9.0)
 
 El otro eje que ordena el motor es **de qué libro es el comprobante**. De la 1.0 a la 8.x fue un `bool`: `es_venta`,

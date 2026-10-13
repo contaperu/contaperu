@@ -108,6 +108,15 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - El eje del libro · 9.0.0 (de `es_venta: bool` a la tabla `modelo.RASGOS`: no es un hito de ningún frente, es lo que había que arreglar antes de que B13 sumara el tercer libro)
 - El tercer libro y la entrada del dinero · 9.1.0 (`tesoreria` en el catálogo, la enmienda 0024 aceptada, los dos bloques en el esquema y `revisar_tesoreria` por la api. **No asienta**: eso es D6)
 - El papel de una línea se deriva · 9.2.0 y 10.0.0 (tampoco es un hito de ningún frente: es el eje nuevo aplicado al estándar. El `rol` existía para los sistemas de destino, así que salió del documento y se **deriva** de lo que la línea trae —`drivers/kit/rol.py`—; con él salieron `documento.tipo`, `referencia.tipo` y `detraccion.estado`, que la 4.0 había dejado declarados sin que nadie los escribiera. La 9.2.0 **no se etiquetó**: su contenido va dentro de la 10.0.0)
+- El pago esperado · 12.2.0 (las cuotas de una factura al crédito con su importe y el `monto_pendiente` que no
+  es el total, enmienda 0030: la RS 193-2020 los obliga y el lector los veía y los tiraba. Tampoco es un hito de
+  ningún frente: es lo que faltaba para que una conciliación pueda comparar contra algo)
+- El puente entre los tres libros · 12.3.0 (`aplicaciones[]`, enmienda 0031: cuánto de un pago cancela un
+  documento, N a N y con su importe, y el `origen` que separa un hecho de una conjetura. **Le da a D3 su tipo de
+  salida**, que es la mitad que no esperaba archivo)
+- El pendiente derivado · 12.4.0 (`pendiente_de`, `partidas_previas` y la operación `estado_de_cuenta`. **Sin
+  ninguna columna de estado**, decisión de John del 12-oct-2026: el saldo se infiere del número y la palabra es
+  una lectura suya. Los meses se cruzan por argumento, con el molde de `claves_previas`)
 - La entrada única de tesorería · 11.0.0 (el movimiento absorbe la constancia, la cabecera del extracto viaja en el documento y la contrapartida la pone el ERP. **Es la mitad de D6 que no esperaba archivo**, igual que D8 fue la mitad del banco que no lo esperaba: el contrato queda cerrado y lo que falta para asentar son la tasa del ITF con su norma y un archivo del sub-diario de bancos aceptado)
 - A4 · 6.0.0 (STARSOFT Desktop: un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct; la `V` del archivo de ventas se corrigió en la 6.3.2)
 - J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
@@ -281,7 +290,7 @@ desarma (`contaperu/lectores/archivos.py:56-58`), y un `.txt` se ignora como arc
 | D8 ✅ | **`cuentas_bancarias` como argumento, no como tabla.** Entró en la 8.2 por la api (`validar_cuentas_bancarias`), que es donde sirve a un ERP que no escribe Python; cablearlo por el pipeline espera a que algo lo consuma (D1 o D3). El maestro de cuentas que aporta quien llama —banco, número, CCI, moneda, y la cuenta contable con la que se asienta— con las funciones puras que lo validan. Es el **registro antes de conciliar**, y es la única forma que el §6 admite: el estado es del ERP, y lo que puede vivir aquí es su contrato. El patrón está en producción y no hay que inventarlo: `imputaciones`, `correlativos`, `claves_previas` y la propia `configuracion` son argumentos que el motor recibe y no guarda. (`plan_de_cuentas*`, `padron*` y `tipos_de_cambio*` seguirán el mismo molde, pero **todavía no existen**: son C10, C8 y C11.) **Es el único hito de este frente que no espera un archivo** | N · F | dato: el formato del CCI y los códigos de banco con su fuente, que son norma publicada | Sin cuentas declaradas nada cambia; un CCI que no cumple su formato da observación y no excepción; una cuenta que no está en el maestro no se adivina | — | 46 |
 | D1 | `aplicar_constancias*`: casar el archivo del banco con cada comprobante y escribirle su número y su fecha (el `estado` ya se deduce de los dos desde la 3.2, `detracciones.estado_de`) | N · F | dato: constancias reales (la consulta de pagos de detracciones de SOL o los movimientos de la cuenta del Banco de la Nación) | Con pareja, quedan número y fecha y la detracción pasa a `detracciones_pagadas`; sin pareja, queda igual | 0.3 | 14 |
 | D2 | `Movimiento*`, el lector del primer extracto y la deduplicación | N · estándar | dato: extracto real anonimizado | Un libro Excel no se desarma como ZIP; una relectura con solape no duplica | E1 | 15 |
-| D3 | `conciliar*` con `metodo*` y `certeza*`, la tabla `aplicaciones*`, `emparejar_transferencias*` y la tolerancia en porcentaje y en importe absoluto | N · F | código, tras D1 y D2 | Motivos legibles; la detracción como pago parcial; solo certeza alta va a lote; dentro del porcentaje y fuera del absoluto no hay certeza alta | D1, D2 | 16, 25 |
+| D3 | `conciliar*` con `metodo*` y `certeza*`, `emparejar_transferencias*` y la tolerancia en porcentaje y en importe absoluto. **`aplicaciones` ya no es suya: existe desde la 12.3**, así que lo que D3 devuelve son aplicaciones con `origen: propuesto` —que no cuentan para ningún saldo— y no una forma propia | N · F | código, tras D1 y D2 | Motivos legibles; la detracción como pago parcial; solo certeza alta va a lote; dentro del porcentaje y fuera del absoluto no hay certeza alta; **una propuesta no mueve un pendiente hasta que alguien la pasa a `manual`** | D1, D2 | 16, 25, 50 |
 | D4 | `ReglaBanco*` y `aplicar_reglas*` | N | dato: reglas reales de un contador | Primera coincidencia por prioridad, con motivo; nunca confirma | D2 | — |
 | D5 | `LiquidacionPasarela*` y `Aviso*` | N · estándar | dato: el reporte real de una pasarela | El invariante del neto se cumple; los avisos nunca asientan | D3, E1 | — |
 | D6 | Asientos de tesorería y de liquidación | N · D | dato: el ITF con su norma —**las cuentas del PCGE ya están, con su página: `6412` el gasto y `40181` el pasivo**—, el tratamiento del IGV de la comisión y un archivo aceptado del sub-diario de bancos de CONCAR. **Un pago y su ITF son dos asientos** (enmienda 0028) | Archivo aceptado; un pago con ITF sale en dos asientos; snapshot de CONCAR idéntico | D3, D5 | 17 |
@@ -622,10 +631,14 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 
 Las propuestas que ha levantado la investigación, cada una con el caso real que la destraba y el
 hito que le toca; «—» si todavía no tiene uno. Es a esta tabla a la que remite la columna
-**Propuesta** de los frentes. Son **46**, en cuatro tandas: las 31 del ciclo contable (13-14 de
+**Propuesta** de los frentes. Son **50**, en cinco tandas: las 31 del ciclo contable (13-14 de
 setiembre de 2026), las cinco del diagnóstico de la arquitectura (9-oct-2026), las ocho que quedaron
-al limpiar la raíz y las dos del cambio de eje (las dos, del 10-oct-2026). Las tres últimas tandas
-van al final, cada una con su tabla.
+al limpiar la raíz, las tres del cambio de eje (las dos tandas, del 10-oct-2026) y las tres de la
+interconexión de los libros (12-oct-2026). Las cuatro últimas tandas van al final, cada una con su
+tabla.
+
+**El recuento decía 46 con 47 filas, y la cuarta tanda decía «las dos» con tres**: se corrigió el
+12-oct-2026, contándolas. La 47 entró sin tocar la prosa.
 
 Vivió en `INTEROPERABILIDAD.md` hasta el 8-oct-2026, y se mudó aquí al retirarlo: la tabla la usa
 esta hoja y nadie más, así que dejar de ser una remisión a otro documento es lo que la mantiene
@@ -709,7 +722,7 @@ propuestas vivas que no tenían dónde esperar su caso. Las cuatro de en medio s
 La que se retira de la tabla de arriba: **«¿Debe `generar_asiento` exigir lo que exige el destino?»**, que no era
 una propuesta sino una pregunta, y que el §6 declara resuelta en la 1.0 desde hace siete mayores.
 
-### Las dos del cambio de eje (10-oct-2026)
+### Las tres del cambio de eje (10-oct-2026)
 
 El eje pasó de «una capa encima de tu sistema contable» a «la base para cualquier ERP», y con él la regla de
 secuencia del §7: el motor va primero y el producto adopta después. Dos cosas que hasta ahora no tenían forma
@@ -720,3 +733,15 @@ quedaron con una, y las dos salen de lo que el motor ya construyó, no de un pla
 | 45 | **La API de SUNAT se integra describiendo, no llamando**: cada API entra con su catálogo fechado, sus funciones puras y su herramienta de contraste en `herramientas/`, como hizo la 8.1 con el SIRE. El motor sabe la URL y no la llama; quien envía es la aplicación, con sus credenciales | N · F | La siguiente API que la aplicación necesite, con su manual. No se describen por si acaso | La frontera sigue verde: ni red, ni credenciales nombradas, ni reloj. La herramienta de contraste se niega a llamar lo que no es de lectura | `sunat.*` | B | C17 |
 | 46 | **El registro de bancos como contrato y no como estado**: `cuentas_bancarias*` lo aporta quien llama, con el molde de `imputaciones` y `correlativos`, que ya lo hacen. Es la única forma que el §6 admite, y es el paso que va antes de cualquier conciliación: sin registro no hay contra qué conciliar | N · F | El formato del CCI y los códigos de banco con su fuente, que son norma publicada | Sin cuentas declaradas nada cambia; un CCI mal formado da observación y no excepción | `cuentas_bancarias*` | B | D8 |
 | 47 | **La detracción se asienta con dos líneas porque CONCAR lo hacía así**, y es la única pieza de forma legacy que vive en el núcleo: `recorte` al debe del proveedor y `detraccion` al haber, calcadas celda a celda del Excel validado. Un ERP que partiera del estándar la asentaría probablemente con una sola línea. Salió al revisar si el `rol` era un apaño para los legacy (John, 10-oct-2026): el rol NO lo es —lleva información que ni SAF-T ni EN 16931 saben expresar, porque `tercero` y `recorte` son la misma cuenta y la misma contraparte—, pero la FORMA del asiento sí viene de ahí | N · D | caso real: un archivo que CONCAR acepte con la forma nueva, y la decisión de John, porque mover esto mueve el snapshot de 52 casos (regla 2) | El Excel validado sigue importando, o se regenera a propósito y se dice | — | C | — |
+
+### Las tres de la interconexión de los libros (12-oct-2026)
+
+Lo que la investigación del cuarto escalón de [`REFERENCIAS.md`](REFERENCIAS.md) dejó **sin hacer**. Lo que sí se
+hizo —las cuotas, `aplicaciones[]` y el pendiente derivado— está en «Cumplidos», no aquí: esta tabla es de lo que
+espera algo.
+
+| # | Propuesta | Nivel | Caso real que la destraba | Test que la fijaría | Nombre | Prio | Hito |
+|---|---|---|---|---|---|---|---|
+| 48 | Comprobar que las cuotas de una factura al crédito **sumen** su monto neto pendiente | N | **Falta la norma**: la RS 193-2020 obliga a declarar los tres datos y no se ha leído que exija la aritmética entre ellos. Lo que falta es de escritorio, no un archivo | Una factura cuyas cuotas no suman el monto pendiente sale con un AVISO y se registra igual: lo que el documento declara no se rechaza | `CUOTAS_NO_SUMAN*` | C | — |
+| 49 | Retirar `datos_originales.cuotas`, redundante desde la 12.2 | N | Ninguno: es una limpieza de mayor. Trae solo las fechas, y `comprobante.cuotas` trae lo mismo con su importe | El snapshot del documento se mueve a propósito y ningún caso lo lee | — | B | 13.0 |
+| 50 | Que `conciliar` **devuelva `aplicaciones` con `origen: propuesto`** en vez de una forma propia | N · F | Los mismos dos archivos de D3. **Lo que ya no espera es su forma**: la 12.3 le dio el tipo de salida, así que el día que llegue no hay que inventarlo | Una propuesta no mueve ningún pendiente hasta que alguien la pasa a `manual` | `conciliar*` | C | D3 |
