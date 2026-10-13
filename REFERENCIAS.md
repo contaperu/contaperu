@@ -7,14 +7,15 @@ los **ERP abiertos** (Odoo, Apache OFBiz, iDempiere) — y lo compara, campo a c
 con una propuesta concreta de qué añadir al estándar y qué no. Es la única casa de la investigación del repositorio:
 lo que no esté aquí no se ha mirado.
 
-**Mira tres escalones y medio, y cada uno tiene su fecha**, que es lo que separa un documento de investigación de uno
-desactualizado:
+**Mira cuatro escalones y medio, y cada uno tiene su fecha**, que es lo que separa un documento de investigación de
+uno desactualizado:
 
 | Escalón | Qué compara | Investigación hecha el |
 |---|---|---|
 | **El asiento** | cómo modela cada uno un `JournalEntry` | 11-sep-2026 (librería 0.7.0) |
 | **El registro del comprobante** | lo que un sistema manda cuando dice «anota esta compra»: `Bill` e `Invoice` | 15 y 16-sep-2026 (librería 1.0.0, estándar 0.3) |
 | **La clasificación de la cuenta** | de dónde sale el papel de una línea y qué cuenta usa cada papel | 18-sep y 1-oct-2026 (librerías 1.0.0 y 4.1.0) |
+| **La aplicación de un pago** | cómo se registra que un pago cancela un documento, y de dónde sale el saldo | 12-oct-2026 (librería 12.1.0, estándar 3.1) |
 
 Todo se escribió sobre la documentación pública de cada sistema; las fuentes, con su fecha de consulta, están al
 final. Y se lee con una advertencia: **el repositorio avanzó desde entonces.** Donde la realidad adelantó al texto
@@ -462,15 +463,75 @@ Y el hallazgo de campo que ningún modelo de datos habría dado: **cuatro de los
 librería estándar** —dos vienen cifrados con contraseña y dos traen la cabecera del PDF rota—. Lo difícil de un
 extracto peruano no son las columnas.
 
+## La aplicación de un pago a un documento, comparada
+
+**Investigación hecha el 12-oct-2026** (librería 12.1.0, estándar 3.1). Contesta una pregunta concreta: cómo se
+interconectan compras, ventas y tesorería, y de dónde sale que una factura esté por cobrar o cobrada. Es la mitad
+que importaba del escalón que «Lo que falta mirar» declaraba entero; **cómo representa cada plataforma un extracto
+sigue sin mirarse**.
+
+Se miraron ocho sistemas, y **todos modelan lo mismo**:
+
+| Quién | El registro de aplicación | De dónde sale el saldo |
+|---|---|---|
+| **Odoo** | `account.partial.reconcile`, con la línea del debe, la del haber y el importe — **a nivel de línea de diario**, no de documento | `amount_residual`, **calculado**; un `full_reconcile_id` aparece cuando cierra. Y dos estados distintos: *In payment* ≠ *Paid* |
+| **ERPNext** | `Payment Ledger Entry`: un **ledger propio** de las cuentas por cobrar y por pagar, con `against_voucher_no` y un importe **con signo** — sustituyeron el debe y el haber por «tipo de cuenta + importe que admite negativos» | **la suma agrupada** por `against_voucher`. La factura entra apuntándose a sí misma, y los grupos con suma positiva están abiertos. **No hay columna de estado** |
+| **SAP** | el documento de compensación **`AUGBL`**, estampado en los dos lados. Un pago parcial deja los dos items abiertos y los enlaza por `REBZG` | **dos tablas**: `BSIK` los abiertos, `BSAK` los compensados |
+| **GnuCash** | el **lote** (`GNCLot`): **un lote por factura**, y todo *split* que la salda pertenece a él | `gnc_lot_get_balance()`; `gnc_lot_is_closed()` se deriva de ese saldo |
+| **SAF-T** | `Payments` → `PaymentLine` → `SourceDocumentID`, **uno o varios por línea** | no lo declara: es un fichero de auditoría, no un libro vivo |
+| **Codat** | `payment.lines[].links[]` = el tipo, el id del documento y el importe asignado, **en negativo** | `amountDue` en la factura, con `Submitted / PartiallyPaid / Paid` derivados |
+| **Merge** | `applied_payments`, el modelo *Payment Applied to Lines* | — |
+| **ISO 20022** | en el mensaje bancario: `RmtInf/Strd/RfrdDocInf` con el tipo **`CINV`**, el número del documento y su importe debido, **una entrada por documento** | lo trae el banco… **si lo reenvía**: las guías de implementación advierten que muchos lo truncan, y que el camt.054 suele traer más detalle que el camt.053 |
+
+### Las cuatro reglas que se repiten
+
+1. **La aplicación es un registro aparte con su importe.** No es un campo del documento ni una marca. Es N a N: un
+   pago cancela varias facturas y una factura la cancelan varios pagos. **Tres pagos para una factura son tres
+   registros, y el tercero no es especial**: nada necesita saber cuál la cierra.
+2. **Vive a nivel de línea**, no de documento: la línea de diario en Odoo, el `PaymentLine` en SAF-T, el *link* de
+   la línea del pago en Codat.
+3. **El saldo se DERIVA de la suma de aplicaciones y no se guarda.** La práctica de *open item* lo dice como
+   regla: el estado se deriva de los saldos vigentes y no del historial de asignaciones, y un registro de
+   asignación nunca debe implicar que su factura siga impaga.
+4. **La que solo SAP nombra: un pago parcial admite dos tratamientos.** *Partial* —la factura sigue abierta y el
+   pago es otro item abierto— o *residual* —la factura se cierra y nace un item nuevo por el resto—. Producen
+   libros distintos.
+
+### Y la pregunta que este documento dejaba abierta, contestada
+
+Decía: «no se sabe si alguien más separa "lo que el papel dice que cancela" de "lo que alguien decidió imputar"».
+**Nadie lo nombra.** El que más se acerca es Odoo con su *In payment* frente a *Paid* —«pagué» no es «el banco lo
+confirmó»—, pero eso son **dos grados de hecho**, no un hecho frente a una conjetura. La distinción sobre la que
+está construido `tesoreria` sobrevive a la comparación, y es **más fina que la del sector**.
+
+### Dos cosas que conviene no repetir mal
+
+- **La cuenta transitoria de Odoo no es su mecanismo central: es configuración opcional.** Su documentación dice
+  que *«por defecto, los pagos en Odoo no crean asientos»*, y que si la cuenta transitoria es la propia cuenta de
+  banco, un pago total lleva la factura a *Paid* sin pasar por la conciliación bancaria. Eso **refuerza** el
+  descarte de [ARQUITECTURA.md](ARQUITECTURA.md) —la cuenta transitoria inmediata— en vez de contradecirlo.
+- **Un marcador de estado al lado del número se desincroniza, y está medido en Odoo.** En su 19 se reportó que
+  borrar un `account.full.reconcile` deja el marcador nulo en líneas que la interfaz sigue mostrando conciliadas,
+  y la recomendación es leer `amount_residual` y no fiarse del marcador; en su 11, el filtro «Unreconciled» mira
+  el marcador en vez del residual y enseña líneas con residual cero. **Es el mismo argumento con que la 2.0
+  retiró `detraccion.estado`.**
+
+**Fiabilidad de lo de arriba**, porque no todo pesa igual: la documentación de Odoo sobre pagos, la de ERPNext
+sobre su *Payment Ledger*, la de SAP sobre pagos parciales y residuales, la de GnuCash sobre lotes y las de Codat
+y Merge son oficiales. Los nombres de campo internos de Odoo y los detalles de `BSIK`/`BSAK` salen de foros y de
+un modelo de datos de terceros. De SAF-T se miraron **implementaciones nacionales** (la descripción técnica danesa
+de la 2.0 y la guía rumana del D406) y no el XSD de la OCDE, así que si `SourceDocumentID` es obligatorio en la
+línea de pago **depende de la jurisdicción**. De ISO 20022, guías de implementación bancarias y no la definición
+del mensaje.
+
 ## Lo que falta mirar
 
 Cuatro huecos declarados, para que nadie los dé por investigados:
 
-- **Los modelos de tesorería de las plataformas**, que es el escalón que falta entero: cómo representan un extracto
-  y una conciliación QuickBooks, Xero, las unificadas y los ERP abiertos. El contrato de la 3.0 se hizo con
-  archivos reales delante, no comparándolo con ellos, y eso se nota en una cosa concreta: no se sabe si alguien
-  más separa «lo que el papel dice que cancela» de «lo que alguien decidió imputar», que es la distinción sobre la
-  que está construido.
+- **Cómo representa un extracto bancario cada plataforma**: QuickBooks, Xero, las unificadas y los ERP abiertos.
+  Es lo que queda del escalón del dinero: la **aplicación** de un pago a un documento ya se comparó arriba
+  (12-oct-2026), el extracto no. El contrato de la 3.0 se hizo con archivos reales delante, no comparándolo con
+  ellos.
 - **La tasa del ITF y el artículo que dice quién la soporta.** La Ley 28194 —la que crea el ITF— **ya está citada
   tres veces en el repositorio**, pero siempre al servicio del catálogo de medios de pago (su artículo 5), nunca
   del impuesto. Lo que falta es el TUO, el D.S. 150-2007-EF. Es el primero de los datos que bloquean el asiento de
@@ -608,3 +669,65 @@ Consultadas el 18-sep-2026 (los sistemas comerciales) y el 1-oct-2026 (los ERP a
 - Business Central, *VAT posting groups* («about **who**» y «about **what**»):
   https://learn.microsoft.com/en-us/dynamics365/business-central/finance-setup-vat
 - Odoo, los 18 `account_type` y sus grupos derivados: el modelo `account.account` de su documentación de desarrollo
+
+### De la aplicación de un pago
+
+Consultadas el 12-oct-2026.
+
+**Odoo**
+- Pagos, cuentas transitorias y los estados *In payment* / *Paid*, con la frase «por defecto, los pagos en Odoo no
+  crean asientos»: https://www.odoo.com/documentation/18.0/applications/finance/accounting/payments.html
+- `account.partial.reconcile` y su `full_reconcile_id`, en un modelo de datos de terceros (**fuente secundaria**):
+  https://documentation.invantive.com/2017R2/odoo-data-model/webhelp/odoo-connector-account-partial_reconcile.html
+- El marcador que se desincroniza del número, los dos casos (**fuentes secundarias**, avisos del repositorio):
+  https://github.com/odoo/odoo/issues/264790 (borrar un `full.reconcile` deja el marcador nulo; la recomendación
+  es leer `amount_residual`) y https://github.com/odoo/odoo/issues/32044 (el filtro «Unreconciled» mira el
+  marcador y enseña líneas con residual cero)
+
+**ERPNext**
+- *Payment Ledger*: el ledger propio de cobrar y pagar, `against_voucher_no`, el importe con signo en lugar del
+  debe y el haber, y que el saldo sale de la suma agrupada:
+  https://docs.frappe.io/erpnext/v14/user/manual/en/accounts/articles/payment_ledger
+
+**SAP**
+- *Partial Payments Versus Residual Items*, los dos tratamientos de un pago parcial:
+  https://help.sap.com/docs/SAP_S4HANA_CLOUD/918bca53037f408f91a2295d04ac16bc/279bad94d6414e05aab0cacf42eb3803.html
+- `AUGBL` como documento de compensación y el reparto `BSIK` / `BSAK` (**fuente secundaria**, foro):
+  https://community.sap.com/t5/enterprise-resource-planning-q-a/bsak-belnr-bsak-augbl-what-is-that/qaq-p/8798873
+
+**GnuCash**
+- Los lotes como mecanismo de cobrar y pagar, «un lote por factura»:
+  https://wiki.gnucash.org/docs/STABLE/lotsoverview.html
+- `gnc_lot_get_balance`, `gnc_lot_is_closed` y `xaccAccountFindOpenLots`:
+  https://code.gnucash.org/docs//STABLE/group__Lot.html
+
+**SAF-T** — se miraron **implementaciones nacionales**, no el XSD de la OCDE, así que lo obligatorio varía por
+jurisdicción
+- Descripción técnica danesa de SAF-T 2.0, con `Payment`, su línea, su liquidación y sus totales:
+  https://prodstoragehoeringspo.blob.core.windows.net/6a4c34f3-89fb-4b21-919c-848c9d71617a/Technical+Description%20of%20SAF-T%20v2.0%20Draft-compressed.pdf
+- Guía del D406 rumano, con el detalle por documento en la línea de pago:
+  https://finlight.ro/docs/ghidul-saf-t-finlight/payments/
+
+**Las unificadas**
+- Codat, registrar y conciliar el pago de una factura de compra: las líneas del pago, sus *links* con el importe
+  asignado en negativo, y `amountDue`: https://docs.codat.io/payables/async/payments/
+- Merge, el objeto `Invoice` con sus `payments` y sus `applied_payments` (*Payment Applied to Lines*):
+  https://docs.merge.dev/merge-unified/accounting/common-models/invoices/the-invoice-object
+
+**ISO 20022** — guías de implementación, no la definición del mensaje
+- La información de remesa estructurada (`RmtInf`, `Strd`, `RfrdDocInf`, el tipo `CINV`), y el aviso de que muchos
+  bancos la truncan: https://x9ware.com/iso-20022-remittance-information/
+- Guía de implementación de un camt.053 real, con esos mismos elementos:
+  https://www.bil.com/BIL-digital/assets/doc/BIL_CAMT053_V2_final.pdf
+
+**La práctica de *open item***
+- El estado se deriva de los saldos vigentes y no del historial de asignaciones; y la diferencia entre un estado
+  de cuenta por partida abierta y uno de saldo arrastrado:
+  https://invoicedataextraction.com/blog/open-item-vs-balance-forward-statement
+- Cómo una asignación mueve la partida abierta, en la documentación de Oracle Retail:
+  https://docs.oracle.com/cd/E95327_01/oroms/pdf/5/cws_help/AR02_02.htm
+
+**La forma de pago en la factura peruana** — es norma, no investigación comparada, y sostiene la enmienda 0030
+- RS 000193-2020/SUNAT, que obliga a declarar si la factura es al contado o al crédito y, al crédito, el monto
+  neto pendiente y la fecha y el monto de cada cuota: https://www.sunat.gob.pe/legislacion/superin/2020/193-2020.pdf
+- Su Anexo 1, el de los campos de la factura: https://www.sunat.gob.pe/legislacion/superin/2020/anexo1-193-2020.pdf
