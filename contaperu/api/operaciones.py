@@ -10,7 +10,7 @@ from __future__ import annotations
 import importlib
 from typing import Any, Sequence
 
-from .. import (_datos, catalogos, drivers, modelo, pcge, tesoreria,
+from .. import (_datos, aplicaciones, catalogos, drivers, modelo, pcge, tesoreria,
                 vocabulario)
 from ..drivers import contrato
 from ..contable import partida_doble
@@ -352,6 +352,120 @@ def _como_dict(linea: Any) -> dict:
     """Una línea como diccionario, venga ya como tal o como `LineaDiario`. Lo de siempre: las dos formas circulan,
     y por esta puerta entran diccionarios."""
     return dict(linea) if isinstance(linea, dict) else linea.a_dict()
+
+
+def estado_de_cuenta(documento: dict, partidas_previas: list[dict] | None = None,
+                     corte: str | None = None) -> dict:
+    """Qué queda por cobrar o por pagar, documento a documento y por contraparte. **Números, no estados.**
+
+    Deriva el pendiente de cada comprobante restándole lo que sus `aplicaciones` dicen que se le aplicó
+    (enmienda 0031). **No hay ninguna columna de estado y no la va a haber**: la palabra —«por cobrar», «pagado»—
+    es una lectura de `pendiente`, y es el tercer uso del patrón detrás del `rol` y del estado de la detracción.
+    La razón de fondo está medida fuera: un marcador al lado del número se desincroniza.
+
+    **`partidas_previas` es lo que no cabe en un mes**, y lo pone quien llama — el molde de `claves_previas`. Una
+    factura de enero pagada en marzo vive en dos documentos: el de enero la tiene, el de marzo tiene su pago. Cada
+    partida previa es la identidad del comprobante más lo que ya se sabía de él: `[{tipo_cp, serie, numero,
+    contraparte_doc, total, aplicado, moneda, vence}]`. Sin ella, un comprobante de otro mes aparece con lo
+    aplicado aquí y su total en blanco, y se dice.
+
+    **`corte` lo pone quien llama** y hace dos cosas: deja fuera las aplicaciones posteriores, y da los `dias`
+    entre el vencimiento y el corte —negativos si aún no vence—. Sin corte no hay ni filtro ni días: el núcleo no
+    tiene reloj (regla 4). **Los tramos de antigüedad no se calculan**: 30/60/90 es una convención de gestión sin
+    norma detrás, y quien la tenga la aplica sobre `dias`.
+
+    Y lo que no se suma nunca: **dos monedas**. Lo aplicado en una moneda distinta de la del documento se informa
+    aparte, igual que hace `resumen` desde la 3.4.0. Convertir sería una cifra nueva sin caso.
+    """
+    doc = documento or {}
+    libro = preparacion.libro_de(doc)
+    comprobantes = preparacion.comprobantes_de(doc)
+    todas = preparacion.aplicaciones_de(doc)
+    aplicadas = aplicaciones.hasta(todas, corte)
+    previas = preparacion.partidas_previas_de(partidas_previas)
+
+    # Lo de este documento y lo que venía de antes, en el mismo mapa: una partida previa es un comprobante que no
+    # viaja aquí, y para el pendiente da igual de qué documento salió.
+    aplicado = aplicaciones.aplicado_por_documento(aplicadas)
+    documentos, avisos = [], []
+    vistos = set()
+    for c in comprobantes:
+        antes = previas.get(c.clave, {}).get("aplicado") or modelo.CERO
+        ficha = aplicaciones.pendiente_de(c, aplicadas, aplicado_antes=antes)
+        vistos.add(c.clave)
+        documentos.append({"tipo_cp": c.tipo_cp, "serie": c.serie, "numero": c.numero,
+                           "contraparte_doc": c.contraparte_doc, "contraparte_nombre": c.contraparte_nombre,
+                           "de_otro_periodo": False, **_ficha_en_texto(ficha, corte)})
+    # Las que este documento aplica a comprobantes que no están aquí: salen con lo que diga su partida previa, y
+    # sin ella con el total en blanco. Es lo que impide que un pago de una factura de enero desaparezca del informe.
+    for clave, por_moneda in sorted(aplicado.items(), key=lambda kv: str(kv[0])):
+        if clave[0] != aplicaciones.COMPROBANTE or clave[1] in vistos:
+            continue
+        previa = previas.get(clave[1])
+        if previa is None:
+            avisos.append({"codigo": "PARTIDA_PREVIA_NO_DECLARADA", "pedir_a": "quien integra",
+                           "cual": "-".join(p for p in clave[1][1:3] if p),
+                           "texto": "Este documento aplica un importe a un comprobante que no viaja aquí y del que "
+                                    "no se declaró su partida previa, así que su total no se conoce y su pendiente "
+                                    "no se puede derivar"})
+        # La `clave` va dentro aunque no haya partida previa: es con ella con la que `pendiente_de` encuentra lo
+        # que este documento le aplicó, y sin ella el pago saldría en cero —que es el defecto que su caso cazó—.
+        ficha = aplicaciones.pendiente_de(previa or {"clave": clave[1], "moneda": next(iter(por_moneda), "PEN")},
+                                          aplicadas, aplicado_antes=(previa or {}).get("aplicado") or modelo.CERO)
+        documentos.append({"tipo_cp": clave[1][0], "serie": clave[1][1], "numero": clave[1][2],
+                           "contraparte_doc": clave[1][3], "contraparte_nombre": "",
+                           "de_otro_periodo": True, **_ficha_en_texto(ficha, corte)})
+
+    propuestas = [a for a in aplicadas if not a.cuenta_para_el_saldo]
+    if propuestas:
+        avisos.append({"codigo": "APLICACIONES_PROPUESTAS_NO_CONTADAS", "pedir_a": "contador",
+                       "cual": str(len(propuestas)),
+                       "texto": "Hay aplicaciones con origen `propuesto` y no se cuentan para ningún saldo: una "
+                                "conjetura no mueve un pendiente hasta que alguien la confirme"})
+    fuera = len(todas) - len(aplicadas)
+    if fuera:
+        avisos.append({"codigo": "APLICACIONES_POSTERIORES_AL_CORTE", "pedir_a": "sistema", "cual": str(fuera),
+                       "texto": f"{fuera} aplicaciones son posteriores al corte {corte} y quedan fuera"})
+    for doc_ficha in documentos:
+        if doc_ficha["en_otra_moneda"]:
+            avisos.append({"codigo": "APLICADO_EN_OTRA_MONEDA", "pedir_a": "contador",
+                           "cual": f'{doc_ficha["serie"]}-{doc_ficha["numero"]}',
+                           "texto": "Se aplicó un importe en una moneda distinta de la del documento, y no se "
+                                    "resta de su pendiente: el motor no convierte monedas"})
+
+    return {"libro": libro.a_dict(), "corte": corte or None, "documentos": documentos,
+            "por_contraparte": _por_contraparte(documentos), "avisos": avisos}
+
+
+def _ficha_en_texto(ficha: dict, corte: str | None) -> dict:
+    """La ficha del núcleo con sus importes en texto, y los `dias` si hay corte. `Decimal` de punta a punta: el
+    texto es el borde de salida."""
+    dias = None
+    tope, vence = preparacion.fecha_de(corte), ficha["vence"]
+    if tope and vence:
+        dias = (modelo.fecha(tope) - modelo.fecha(vence)).days
+    return {"moneda": ficha["moneda"], "total": str(ficha["total"]), "aplicado": str(ficha["aplicado"]),
+            "pendiente": str(ficha["pendiente"]), "vence": ficha["vence"], "dias": dias,
+            "en_otra_moneda": {m: str(i) for m, i in ficha["en_otra_moneda"].items()}}
+
+
+def _por_contraparte(documentos: list[dict]) -> list[dict]:
+    """El corte que pide cualquier gerente, y **una suma de pendientes derivados**: el saldo de un proveedor no es
+    una fuente, es un informe. Por eso se arma aquí y no en el núcleo, y por eso va por moneda — un saldo en cero
+    no significa que todas sus facturas estén pagadas, y sumar dos monedas lo escondería del todo."""
+    grupos: dict = {}
+    for d in documentos:
+        ficha = grupos.setdefault((d["contraparte_doc"], d["moneda"]),
+                                  {"contraparte_doc": d["contraparte_doc"], "nombre": "", "moneda": d["moneda"],
+                                   "documentos": 0, "total": modelo.CERO, "aplicado": modelo.CERO,
+                                   "pendiente": modelo.CERO})
+        ficha["nombre"] = ficha["nombre"] or d["contraparte_nombre"]
+        ficha["documentos"] += 1
+        for campo in ("total", "aplicado", "pendiente"):
+            ficha[campo] += modelo.a_decimal(d[campo])
+    ordenados = sorted(grupos.values(), key=lambda f: (-f["pendiente"], f["contraparte_doc"]))
+    return [{**f, "total": str(f["total"]), "aplicado": str(f["aplicado"]), "pendiente": str(f["pendiente"])}
+            for f in ordenados]
 
 
 def por_cuenta(lineas: list[dict], libro: dict | None = None) -> dict:

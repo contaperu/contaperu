@@ -199,6 +199,72 @@ def leer(crudas) -> tuple[Aplicacion, ...]:
     return tuple(a if isinstance(a, Aplicacion) else Aplicacion.de_dict(a) for a in crudas)
 
 
+def _campo(cosa, nombre: str):
+    """Lee un campo de un objeto o de un diccionario. Lo que llega aquí puede venir de las dos formas —un
+    `Comprobante` del modelo, o la fila que un ERP guardó— y tratarlas distinto es cómo nacieron tres defectos en
+    la 12.0.1."""
+    return cosa.get(nombre) if isinstance(cosa, dict) else getattr(cosa, nombre, None)
+
+
+def aplicado_por_documento(aplicaciones=()) -> dict:
+    """Cuánto se ha aplicado a cada documento, **por moneda**: `{clave: {moneda: importe}}`.
+
+    Es la suma, y nada más: la que ERPNext hace agrupando por `against_voucher` y la que Odoo esconde en su
+    `amount_residual`. Dos decisiones la gobiernan:
+
+    - **Solo las confirmadas.** Una `propuesto` no entra, y ahí es donde «`conciliar` propone y nunca confirma»
+      deja de ser doctrina.
+    - **Ninguna clave suma dos monedas**, igual que `resumen` desde la 3.4.0: por eso el valor es un mapa por
+      moneda y no un importe. Sumarlas sería convertir, y el motor no convierte.
+    """
+    totales: dict = {}
+    for aplicacion in aplicaciones:
+        if not aplicacion.cuenta_para_el_saldo:
+            continue
+        por_moneda = totales.setdefault(aplicacion.a.clave, {})
+        por_moneda[aplicacion.moneda] = por_moneda.get(aplicacion.moneda, CERO) + aplicacion.importe
+    return totales
+
+
+def pendiente_de(comprobante, aplicaciones=(), *, aplicado_antes=CERO) -> dict:
+    """Cuánto queda por cobrar o por pagar de ese comprobante. **Un número, no un estado.**
+
+    Devuelve `{total, aplicado, pendiente, moneda, vence, en_otra_moneda}`, y lo que manda es `pendiente`: la
+    palabra —«por pagar», «pagado»— es una lectura de ese número y **no es un campo en ninguna parte**. Es el
+    tercer uso del patrón, detrás del `rol` (10.0) y de `detracciones.estado_de` (2.0), y la razón de fondo está
+    medida en Odoo: un marcador de estado al lado del número se desincroniza.
+
+    `aplicado_antes` es lo aplicado en periodos que no viajan en este documento, y lo pone quien llama — el mismo
+    molde que `claves_previas`. Sin él, un comprobante de enero pagado en marzo saldría entero por cobrar.
+
+    **No calcula días de atraso ni tramos de antigüedad**: devuelve `vence` y el corte lo pone quien tiene el hoy
+    (regla 4: el núcleo no tiene reloj). Y los tramos tampoco, porque 30/60/90 es una convención de gestión sin
+    norma detrás: quien la tenga, la aplica.
+
+    **Lo aplicado en otra moneda se devuelve aparte y no se resta.** Convertir sería una cifra nueva sin caso.
+    """
+    moneda = str(_campo(comprobante, "moneda") or "PEN").upper()
+    total = _monto(_campo(comprobante, "total"))
+    clave = (COMPROBANTE, _campo(comprobante, "clave"))
+    por_moneda = aplicado_por_documento(aplicaciones).get(clave, {})
+    aplicado = _monto(aplicado_antes) + por_moneda.get(moneda, CERO)
+    vence = _campo(comprobante, "fecha_vencimiento")
+    return {"total": total, "aplicado": aplicado, "pendiente": total - aplicado, "moneda": moneda,
+            "vence": vence.isoformat() if hasattr(vence, "isoformat") else (str(vence or "") or None),
+            "en_otra_moneda": {m: i for m, i in por_moneda.items() if m != moneda}}
+
+
+def hasta(aplicaciones=(), corte=None) -> tuple:
+    """Las aplicaciones hechas hasta una fecha de corte, que **la pone quien llama**.
+
+    Sin corte devuelve todas. Existe aparte de `pendiente_de` porque es lo único que necesita una fecha, y así lo
+    que depende del calendario queda en una función que se ve."""
+    tope = _fecha(corte)
+    if tope is None:
+        return tuple(aplicaciones)
+    return tuple(a for a in aplicaciones if a.fecha <= tope)
+
+
 def sin_documento_declarado(aplicaciones=(), comprobantes=(), movimientos=()) -> list[dict]:
     """Las aplicaciones que nombran algo que no viaja en este documento, **para avisar y no para parar**.
 

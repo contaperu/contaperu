@@ -68,6 +68,13 @@ PARAMETROS: dict[str, dict] = {
     "cuentas": {"type": "array", "items": esquema_de_la_api("cuenta_bancaria"),
                 "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y "
                                "la cuenta contable de cada una. Es un argumento; el motor no lo guarda."},
+    # Las partidas abiertas de otros meses, con el molde de `claves_previas`: un argumento que el motor recibe y
+    # no guarda. Es lo que hace que un pendiente cruce meses sin que el libro deje de ser mensual.
+    "partidas_previas": {"type": "array", **esquema_de_la_api("partidas_previas"),
+                         "description": "Las partidas abiertas que vienen de otros meses."},
+    # La fecha de corte, que la pone quien llama: el núcleo no tiene reloj (`tests/test_frontera.py`).
+    "corte": {"type": ["string", "null"], "format": "date",
+              "description": "Deja fuera las aplicaciones posteriores y da los días contra el vencimiento."},
     "texto": {"type": "string", "default": "", "description": "Parte del nombre de la cuenta."},
     "codigo": {"type": "string", "default": "", "description": "El código de la cuenta."},
 }
@@ -128,6 +135,11 @@ OPERACIONES: tuple[Operacion, ...] = (
     # asiento, no de un destino — lo que iría a un destino concreto ya lo dice `diagnosticar`.
     Operacion("resumen", "POST", "/v1/resumen", "resumen", herramienta="resumen"),
     Operacion("por_cuenta", "POST", "/v1/por_cuenta", "pre_mayor", herramienta="por_cuenta"),
+    # Qué queda por cobrar o por pagar, derivado de las aplicaciones (12.4). Herramienta y no recurso: recibe un
+    # cuerpo, y es la pregunta que un contador le hace al mes que ya tiene cargado. Sin `driver`, como sus dos
+    # hermanas de arriba: un pendiente es del libro y no de un destino.
+    Operacion("estado_de_cuenta", "POST", "/v1/estado_de_cuenta", "estado_de_cuenta",
+              herramienta="estado_de_cuenta"),
     # Quién escribe cada campo. Recurso y no herramienta: es un GET sin argumentos que se lee una vez,
     # como `describir_configuracion`, y así el conjunto de herramientas no crece por una tabla.
     Operacion("campos_del_comprobante", "GET", "/v1/campos/comprobante", "campos_del_comprobante",

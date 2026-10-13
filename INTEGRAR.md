@@ -237,7 +237,7 @@ Lo que conviene saber antes de publicarla:
 ## Para un agente de IA, por MCP
 
 Un cliente MCP local lo arranca por entrada y salida estándar; uno remoto, por Streamable HTTP
-(`contaperu-mcp --transporte http --dominio …`). Las dieciseis herramientas se anuncian de solo lectura y sin salir a la red,
+(`contaperu-mcp --transporte http --dominio …`). Las diecisiete herramientas se anuncian de solo lectura y sin salir a la red,
 y sus nombres son los de siempre: `diagnosticar`, `exportar`, `generar_asiento`, `validar_comprobantes`… Cómo
 conectarlo a Claude está en el `README.md`.
 
@@ -507,6 +507,42 @@ un archivo del sub-diario de bancos que un sistema contable haya aceptado.
 
 **Tampoco concilia.** Casar un pago con lo que cancela cuando el papel no lo dice es el hito D3, y lo que se decidió
 de él importa: `conciliar` **propone y nunca confirma**.
+
+### Qué está pagado: `aplicaciones` y `estado_de_cuenta` (12.3 y 12.4)
+
+El puente entre tus tres libros. En el documento mandas **qué cancela qué, y por cuánto**:
+
+```json
+"aplicaciones": [
+  {"de": {"clase": "movimiento",  "datos": {"id_externo": "mov-7"}},
+   "a":  {"clase": "comprobante", "datos": {"tipo_cp": "01", "serie": "F001",
+                                            "numero": "123", "contraparte_doc": "20602222226"}},
+   "importe": "400.00", "moneda": "PEN", "fecha": "2026-03-10", "origen": "manual"}
+]
+```
+
+y `estado_de_cuenta` te devuelve el **pendiente** de cada documento y la suma por contraparte. Cinco cosas que
+conviene saber antes de integrarlo:
+
+1. **No hay ninguna columna de estado, y no la va a haber.** El número que manda es `pendiente`; «por pagar» o
+   «pagado» es una lectura suya. Si tu interfaz necesita la palabra, derívala del número **al pintarla** y no la
+   guardes: un marcador al lado del número se desincroniza, y está medido fuera
+   ([`REFERENCIAS.md`](REFERENCIAS.md), «La aplicación de un pago»).
+2. **Tres pagos para una factura son tres aplicaciones**, y el tercero no es especial. No hay nada que marcar
+   cuando se cierra.
+3. **`origen` separa el hecho de la conjetura**, y una `propuesto` **no cuenta para ningún saldo**. Es donde
+   encajará lo que proponga `conciliar` cuando exista: lo que convierte una candidata en un hecho es que alguien
+   la elija, y entonces pasa a `manual`.
+4. **Lo que viene de otros meses lo pones tú**, en `partidas_previas`: el libro es mensual y una factura de enero
+   pagada en marzo vive en dos documentos. Es el mismo molde que `claves_previas` — un argumento que el motor
+   recibe y no guarda. Si aplicas un importe a un comprobante que no viaja en el documento y no declaras su
+   partida, sale igual, con su total en blanco y su aviso: el pago no desaparece.
+5. **La fecha de corte también la pones tú.** Deja fuera las aplicaciones posteriores y te da los `dias` contra el
+   vencimiento, negativos si aún no vence. **Los tramos de antigüedad no se calculan**: 30/60/90 es una convención
+   de gestión sin norma detrás, y la aplicas tú sobre `dias`.
+
+Y lo que no hace: **no convierte monedas**. Lo aplicado en una moneda distinta de la del documento viene aparte,
+en `en_otra_moneda`, y no se resta del pendiente.
 
 ## ¿Te hace falta un driver? Casi seguro que no
 

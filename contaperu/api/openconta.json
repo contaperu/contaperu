@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "12.3.0",
+  "version": "12.4.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -431,6 +431,50 @@
        "application/json": {
         "schema": {
          "$ref": "#/components/schemas/pre_mayor"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/estado_de_cuenta": {
+   "post": {
+    "operationId": "estado_de_cuenta",
+    "summary": "Qué queda por cobrar o por pagar, documento a documento y por contraparte.",
+    "description": "Qué queda por cobrar o por pagar, documento a documento y por contraparte. **Números, no estados.**\n\nDeriva el pendiente de cada comprobante restándole lo que sus `aplicaciones` dicen que se le aplicó\n(enmienda 0031). **No hay ninguna columna de estado y no la va a haber**: la palabra —«por cobrar», «pagado»—\nes una lectura de `pendiente`, y es el tercer uso del patrón detrás del `rol` y del estado de la detracción.\nLa razón de fondo está medida fuera: un marcador al lado del número se desincroniza.\n\n**`partidas_previas` es lo que no cabe en un mes**, y lo pone quien llama — el molde de `claves_previas`. Una\nfactura de enero pagada en marzo vive en dos documentos: el de enero la tiene, el de marzo tiene su pago. Cada\npartida previa es la identidad del comprobante más lo que ya se sabía de él: `[{tipo_cp, serie, numero,\ncontraparte_doc, total, aplicado, moneda, vence}]`. Sin ella, un comprobante de otro mes aparece con lo\naplicado aquí y su total en blanco, y se dice.\n\n**`corte` lo pone quien llama** y hace dos cosas: deja fuera las aplicaciones posteriores, y da los `dias`\nentre el vencimiento y el corte —negativos si aún no vence—. Sin corte no hay ni filtro ni días: el núcleo no\ntiene reloj (regla 4). **Los tramos de antigüedad no se calculan**: 30/60/90 es una convención de gestión sin\nnorma detrás, y quien la tenga la aplica sobre `dias`.\n\nY lo que no se suma nunca: **dos monedas**. Lo aplicado en una moneda distinta de la del documento se informa\naparte, igual que hace `resumen` desde la 3.4.0. Convertir sería una cifra nueva sin caso.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/estado_de_cuenta_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Qué queda por cobrar o por pagar, documento a documento y por contraparte.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/estado_de_cuenta"
         }
        }
       }
@@ -2502,6 +2546,56 @@
      }
     }
    },
+   "partidas_previas": {
+    "title": "Partidas previas",
+    "description": "Las partidas abiertas que vienen de otros meses, porque el libro del motor es mensual y una factura de enero pagada en marzo vive en dos documentos. Cada una es la identidad del comprobante más lo que ya se sabía de él. Es un ARGUMENTO y lo pone quien llama: el motor no guarda saldos.",
+    "type": "array",
+    "maxItems": 20000,
+    "items": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "tipo_cp",
+      "serie",
+      "numero",
+      "contraparte_doc",
+      "total"
+     ],
+     "properties": {
+      "tipo_cp": {
+       "type": "string",
+       "description": "El código SUNAT de dos dígitos."
+      },
+      "serie": {
+       "type": "string"
+      },
+      "numero": {
+       "type": "string"
+      },
+      "contraparte_doc": {
+       "type": "string"
+      },
+      "total": {
+       "type": "string",
+       "description": "Lo que decía el documento."
+      },
+      "aplicado": {
+       "type": "string",
+       "default": "0",
+       "description": "Lo que ya se le había aplicado ANTES de este documento. Es el único dato que no se puede derivar de nada de aquí."
+      },
+      "moneda": {
+       "type": "string",
+       "pattern": "^$|^[A-Z]{3}$",
+       "default": "PEN"
+      },
+      "vence": {
+       "type": "string",
+       "description": "Su fecha de vencimiento, para los días de atraso contra el corte."
+      }
+     }
+    }
+   },
    "documento_anotado": {
     "title": "Documento revisado",
     "description": "Un documento `open-accounting` con lo que el motor anota al leerlo o revisarlo: `_lectura`, `_revision` o `_detracciones`.",
@@ -3435,6 +3529,178 @@
      "roles_derivados"
     ],
     "additionalProperties": false
+   },
+   "estado_de_cuenta": {
+    "title": "estado_de_cuenta",
+    "description": "Qué queda por cobrar o por pagar, documento a documento y por contraparte. **No hay ninguna columna de estado**: la palabra es una lectura de `pendiente`, y el pendiente se deriva de la suma de las aplicaciones confirmadas.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "libro",
+     "corte",
+     "documentos",
+     "por_contraparte",
+     "avisos"
+    ],
+    "properties": {
+     "libro": {
+      "description": "La cabecera del libro, tal como llegó.",
+      "type": "object"
+     },
+     "corte": {
+      "description": "La fecha de corte que puso quien llamó, o `null`. El núcleo no tiene reloj: sin corte no hay filtro ni días.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "documentos": {
+      "description": "Un documento por fila, con su pendiente derivado. Los de este documento primero y los de otros periodos después.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": [
+        "tipo_cp",
+        "serie",
+        "numero",
+        "contraparte_doc",
+        "contraparte_nombre",
+        "de_otro_periodo",
+        "moneda",
+        "total",
+        "aplicado",
+        "pendiente",
+        "vence",
+        "dias",
+        "en_otra_moneda"
+       ],
+       "properties": {
+        "tipo_cp": {
+         "type": "string"
+        },
+        "serie": {
+         "type": "string"
+        },
+        "numero": {
+         "type": "string"
+        },
+        "contraparte_doc": {
+         "type": "string"
+        },
+        "contraparte_nombre": {
+         "type": "string"
+        },
+        "de_otro_periodo": {
+         "description": "`true` cuando el comprobante no viaja en este documento y lo que se sabe de él viene de `partidas_previas`.",
+         "type": "boolean"
+        },
+        "moneda": {
+         "type": "string"
+        },
+        "total": {
+         "description": "Lo que dice el documento. En blanco —`0`— cuando el comprobante no viaja aquí y no se declaró su partida previa.",
+         "type": "string"
+        },
+        "aplicado": {
+         "description": "La suma de sus aplicaciones CONFIRMADAS, más lo aplicado antes de este documento. Una `propuesto` no entra.",
+         "type": "string"
+        },
+        "pendiente": {
+         "description": "`total` menos `aplicado`. Es el número que manda, y de él se lee la palabra.",
+         "type": "string"
+        },
+        "vence": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "dias": {
+         "description": "Días entre el vencimiento y el corte; negativos si aún no vence. `null` sin corte. **No hay tramos de antigüedad**: 30/60/90 es una convención de gestión sin norma detrás, y la aplica quien la tenga.",
+         "type": [
+          "integer",
+          "null"
+         ]
+        },
+        "en_otra_moneda": {
+         "description": "Lo aplicado en una moneda distinta de la del documento, que **no se resta**: el motor no convierte monedas.",
+         "type": "object",
+         "additionalProperties": {
+          "type": "string"
+         }
+        }
+       }
+      }
+     },
+     "por_contraparte": {
+      "description": "La suma de los pendientes derivados, por contraparte y por moneda, de más a menos. Es un INFORME y no una fuente: un saldo de proveedor en cero no significa que todas sus facturas estén pagadas.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": [
+        "contraparte_doc",
+        "nombre",
+        "moneda",
+        "documentos",
+        "total",
+        "aplicado",
+        "pendiente"
+       ],
+       "properties": {
+        "contraparte_doc": {
+         "type": "string"
+        },
+        "nombre": {
+         "type": "string"
+        },
+        "moneda": {
+         "type": "string"
+        },
+        "documentos": {
+         "type": "integer"
+        },
+        "total": {
+         "type": "string"
+        },
+        "aplicado": {
+         "type": "string"
+        },
+        "pendiente": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "avisos": {
+      "description": "Lo que impide derivar un pendiente o lo que se dejó fuera, dicho y no callado: `PARTIDA_PREVIA_NO_DECLARADA`, `APLICACIONES_PROPUESTAS_NO_CONTADAS`, `APLICACIONES_POSTERIORES_AL_CORTE` y `APLICADO_EN_OTRA_MONEDA`.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": [
+        "codigo",
+        "pedir_a",
+        "texto"
+       ],
+       "properties": {
+        "codigo": {
+         "type": "string"
+        },
+        "pedir_a": {
+         "type": "string"
+        },
+        "cual": {
+         "type": "string"
+        },
+        "texto": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
    },
    "campos_del_comprobante": {
     "title": "Quién escribe cada campo de un comprobante",
@@ -4572,6 +4838,33 @@
       "type": "object",
       "$ref": "#/components/schemas/OpenAccounting_libro",
       "description": "La cabecera: RUC, periodo y si son ventas o compras."
+     }
+    }
+   },
+   "estado_de_cuenta_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "partidas_previas": {
+      "type": "array",
+      "$ref": "#/components/schemas/partidas_previas",
+      "description": "Las partidas abiertas que vienen de otros meses."
+     },
+     "corte": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date",
+      "description": "Deja fuera las aplicaciones posteriores y da los días contra el vencimiento."
      }
     }
    },

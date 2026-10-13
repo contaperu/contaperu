@@ -192,6 +192,59 @@
     "type": "object"
    }
   },
+  "estado_de_cuenta": {
+   "anotaciones": {
+    "destructiveHint": null,
+    "idempotentHint": null,
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": null
+   },
+   "descripcion": "Qué queda por cobrar o por pagar, documento a documento y por contraparte.\n\n    **No hay ninguna columna de estado, y no la va a haber.** El número que manda es `pendiente`, y «por cobrar»\n    o «pagado» es una lectura suya: se deriva del total menos lo que sus aplicaciones dicen que se le aplicó. Si\n    buscas un campo que diga si una factura está pagada, no existe — mira su pendiente.\n\n    **Una aplicación con origen `propuesto` no cuenta.** Una conjetura no mueve un saldo hasta que una persona la\n    confirme, y cuando hay alguna se dice en los avisos para que el número no parezca mal calculado.\n\n    **Lo que viene de otros meses lo pones tú**, en `partidas_previas`: el libro del motor es mensual, y una\n    factura de enero pagada en marzo vive en dos documentos. Si este mes aplica un importe a un comprobante que\n    no viaja aquí y no declaraste su partida, sale igual —para que el pago no desaparezca— con su total en blanco\n    y su aviso.\n\n    **La fecha de corte también la pones tú**: deja fuera las aplicaciones posteriores y da los `dias` contra el\n    vencimiento, negativos si aún no vence. El motor no mira el reloj. Los tramos de antigüedad no se calculan:\n    30/60/90 es una convención de gestión sin norma detrás.\n\n    Y dos monedas nunca se suman: lo aplicado en otra moneda se informa aparte y no se resta del pendiente.\n    ",
+   "entrada": {
+    "properties": {
+     "corte": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "format": "date",
+      "title": "Corte"
+     },
+     "documento": {
+      "additionalProperties": true,
+      "title": "Documento",
+      "type": "object"
+     },
+     "partidas_previas": {
+      "anyOf": [
+       {
+        "items": {
+         "additionalProperties": true,
+         "type": "object"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Partidas Previas"
+     }
+    },
+    "required": [
+     "documento"
+    ],
+    "title": "estado_de_cuentaArguments",
+    "type": "object"
+   }
+  },
   "exportar": {
    "anotaciones": {
     "destructiveHint": null,

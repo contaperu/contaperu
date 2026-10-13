@@ -164,11 +164,14 @@ TIPOS: dict[str, Any] = {
     "incluir_observados": bool,
     "lineas": list[dict],
     "cuentas": list[dict],
+    "partidas_previas": list[dict],
     "agrupar_por": str,
     "texto": str,
     "codigo": str,
     # `fecha` ya trae su `| None` dentro del alias, con el `format: date` que la tabla declara para el contrato.
+    # `corte` es el mismo caso y por el mismo motivo: una fecha que pone quien llama, porque el motor no la tiene.
     "fecha": FECHA,
+    "corte": FECHA,
 }
 
 # El nombre con que un parámetro sale por esta puerta, cuando no es el de la api. `lineas` son las líneas del

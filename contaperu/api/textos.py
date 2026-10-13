@@ -169,6 +169,26 @@ PARA_HERRAMIENTA: dict[str, str] = {
     descuadres se compensan salen cuadradas en el total y descuadradas cada una. Y `roles` va en plural:
     con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.
     """,
+    'estado_de_cuenta': """Qué queda por cobrar o por pagar, documento a documento y por contraparte.
+
+    **No hay ninguna columna de estado, y no la va a haber.** El número que manda es `pendiente`, y «por cobrar»
+    o «pagado» es una lectura suya: se deriva del total menos lo que sus aplicaciones dicen que se le aplicó. Si
+    buscas un campo que diga si una factura está pagada, no existe — mira su pendiente.
+
+    **Una aplicación con origen `propuesto` no cuenta.** Una conjetura no mueve un saldo hasta que una persona la
+    confirme, y cuando hay alguna se dice en los avisos para que el número no parezca mal calculado.
+
+    **Lo que viene de otros meses lo pones tú**, en `partidas_previas`: el libro del motor es mensual, y una
+    factura de enero pagada en marzo vive en dos documentos. Si este mes aplica un importe a un comprobante que
+    no viaja aquí y no declaraste su partida, sale igual —para que el pago no desaparezca— con su total en blanco
+    y su aviso.
+
+    **La fecha de corte también la pones tú**: deja fuera las aplicaciones posteriores y da los `dias` contra el
+    vencimiento, negativos si aún no vence. El motor no mira el reloj. Los tramos de antigüedad no se calculan:
+    30/60/90 es una convención de gestión sin norma detrás.
+
+    Y dos monedas nunca se suman: lo aplicado en otra moneda se informa aparte y no se resta del pendiente.
+    """,
     'revisar_tesoreria': """Revisa el dinero de un periodo antes de conciliarlo: los movimientos de las cuentas
     del contribuyente.
 

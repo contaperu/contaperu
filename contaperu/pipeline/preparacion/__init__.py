@@ -17,10 +17,12 @@ from .documento import (MAXIMO_APLICACIONES, MAXIMO_COMPROBANTES, MAXIMO_MOVIMIE
                         comprobantes_de, documento, extractos_de,
                         imputaciones_de_movimientos_de, libro_de, movimientos_de, lineas_de, serie_numero,
                         version_del_documento)
-from .entradas import MAXIMO_CLAVES_PREVIAS, bytes_de, claves_previas_de, fecha_de
+from .entradas import (MAXIMO_CLAVES_PREVIAS, MAXIMO_PARTIDAS_PREVIAS, bytes_de, claves_previas_de,
+                       fecha_de, partidas_previas_de)
 from .pasos import normalizar_detracciones, preparar, revisar
 
 __all__ = ["MAXIMO_APLICACIONES", "MAXIMO_CLAVES_PREVIAS", "MAXIMO_COMPROBANTES", "MAXIMO_MOVIMIENTOS",
+           "MAXIMO_PARTIDAS_PREVIAS", "partidas_previas_de",
            "aplicaciones_de", "bytes_de",
            "claves_previas_de", "comprobantes_de", "extractos_de", "imputaciones_de_movimientos_de",
            "movimientos_de",

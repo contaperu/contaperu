@@ -1,0 +1,52 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/partidas_previas.schema.json",
+ "title": "Partidas previas",
+ "description": "Las partidas abiertas que vienen de otros meses, porque el libro del motor es mensual y una factura de enero pagada en marzo vive en dos documentos. Cada una es la identidad del comprobante más lo que ya se sabía de él. Es un ARGUMENTO y lo pone quien llama: el motor no guarda saldos.",
+ "type": "array",
+ "maxItems": 20000,
+ "items": {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+   "tipo_cp",
+   "serie",
+   "numero",
+   "contraparte_doc",
+   "total"
+  ],
+  "properties": {
+   "tipo_cp": {
+    "type": "string",
+    "description": "El código SUNAT de dos dígitos."
+   },
+   "serie": {
+    "type": "string"
+   },
+   "numero": {
+    "type": "string"
+   },
+   "contraparte_doc": {
+    "type": "string"
+   },
+   "total": {
+    "type": "string",
+    "description": "Lo que decía el documento."
+   },
+   "aplicado": {
+    "type": "string",
+    "default": "0",
+    "description": "Lo que ya se le había aplicado ANTES de este documento. Es el único dato que no se puede derivar de nada de aquí."
+   },
+   "moneda": {
+    "type": "string",
+    "pattern": "^$|^[A-Z]{3}$",
+    "default": "PEN"
+   },
+   "vence": {
+    "type": "string",
+    "description": "Su fecha de vencimiento, para los días de atraso contra el corte."
+   }
+  }
+ }
+}

@@ -1,0 +1,174 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/estado_de_cuenta.schema.json",
+ "title": "estado_de_cuenta",
+ "description": "Qué queda por cobrar o por pagar, documento a documento y por contraparte. **No hay ninguna columna de estado**: la palabra es una lectura de `pendiente`, y el pendiente se deriva de la suma de las aplicaciones confirmadas.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "libro",
+  "corte",
+  "documentos",
+  "por_contraparte",
+  "avisos"
+ ],
+ "properties": {
+  "libro": {
+   "description": "La cabecera del libro, tal como llegó.",
+   "type": "object"
+  },
+  "corte": {
+   "description": "La fecha de corte que puso quien llamó, o `null`. El núcleo no tiene reloj: sin corte no hay filtro ni días.",
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "documentos": {
+   "description": "Un documento por fila, con su pendiente derivado. Los de este documento primero y los de otros periodos después.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "tipo_cp",
+     "serie",
+     "numero",
+     "contraparte_doc",
+     "contraparte_nombre",
+     "de_otro_periodo",
+     "moneda",
+     "total",
+     "aplicado",
+     "pendiente",
+     "vence",
+     "dias",
+     "en_otra_moneda"
+    ],
+    "properties": {
+     "tipo_cp": {
+      "type": "string"
+     },
+     "serie": {
+      "type": "string"
+     },
+     "numero": {
+      "type": "string"
+     },
+     "contraparte_doc": {
+      "type": "string"
+     },
+     "contraparte_nombre": {
+      "type": "string"
+     },
+     "de_otro_periodo": {
+      "description": "`true` cuando el comprobante no viaja en este documento y lo que se sabe de él viene de `partidas_previas`.",
+      "type": "boolean"
+     },
+     "moneda": {
+      "type": "string"
+     },
+     "total": {
+      "description": "Lo que dice el documento. En blanco —`0`— cuando el comprobante no viaja aquí y no se declaró su partida previa.",
+      "type": "string"
+     },
+     "aplicado": {
+      "description": "La suma de sus aplicaciones CONFIRMADAS, más lo aplicado antes de este documento. Una `propuesto` no entra.",
+      "type": "string"
+     },
+     "pendiente": {
+      "description": "`total` menos `aplicado`. Es el número que manda, y de él se lee la palabra.",
+      "type": "string"
+     },
+     "vence": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "dias": {
+      "description": "Días entre el vencimiento y el corte; negativos si aún no vence. `null` sin corte. **No hay tramos de antigüedad**: 30/60/90 es una convención de gestión sin norma detrás, y la aplica quien la tenga.",
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "en_otra_moneda": {
+      "description": "Lo aplicado en una moneda distinta de la del documento, que **no se resta**: el motor no convierte monedas.",
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     }
+    }
+   }
+  },
+  "por_contraparte": {
+   "description": "La suma de los pendientes derivados, por contraparte y por moneda, de más a menos. Es un INFORME y no una fuente: un saldo de proveedor en cero no significa que todas sus facturas estén pagadas.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "contraparte_doc",
+     "nombre",
+     "moneda",
+     "documentos",
+     "total",
+     "aplicado",
+     "pendiente"
+    ],
+    "properties": {
+     "contraparte_doc": {
+      "type": "string"
+     },
+     "nombre": {
+      "type": "string"
+     },
+     "moneda": {
+      "type": "string"
+     },
+     "documentos": {
+      "type": "integer"
+     },
+     "total": {
+      "type": "string"
+     },
+     "aplicado": {
+      "type": "string"
+     },
+     "pendiente": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "avisos": {
+   "description": "Lo que impide derivar un pendiente o lo que se dejó fuera, dicho y no callado: `PARTIDA_PREVIA_NO_DECLARADA`, `APLICACIONES_PROPUESTAS_NO_CONTADAS`, `APLICACIONES_POSTERIORES_AL_CORTE` y `APLICADO_EN_OTRA_MONEDA`.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "codigo",
+     "pedir_a",
+     "texto"
+    ],
+    "properties": {
+     "codigo": {
+      "type": "string"
+     },
+     "pedir_a": {
+      "type": "string"
+     },
+     "cual": {
+      "type": "string"
+     },
+     "texto": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}

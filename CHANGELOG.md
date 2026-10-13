@@ -4,6 +4,74 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.4.0] — 2026-10-12
+
+**El pendiente, que es un número, y ninguna columna de estado.** Cierra el trabajo que la 12.2 y la 12.3
+prepararon: con las cuotas guardadas y las aplicaciones en el contrato, esta versión **deriva** cuánto queda por
+cobrar o por pagar de cada documento, y lo suma por contraparte.
+
+**La decisión que la ordena es de John, el 12-oct-2026**, y simplificó el diseño: el enum `por pagar | pagado` no
+se necesita, porque se infiere del saldo de cada comprobante. Así que **no hay ningún campo de estado** —ni en el
+estándar, ni en el modelo, ni como rasgo del libro— y la palabra es una lectura del número. El estándar **no se
+mueve**: sigue en `open-accounting` 3.3, y esto es todo motor.
+
+Cuatro evidencias lo respaldan, dos de fuera y dos de casa: **ERPNext no tiene columna de estado** y suma importes
+con signo agrupados por `against_voucher`; **Odoo escarmentó dos veces** por tener un marcador al lado del número
+—en su 19, borrar un `full.reconcile` deja el marcador nulo en líneas que la interfaz muestra conciliadas, y la
+recomendación es leer `amount_residual`—; **la aplicación que integra el motor ya lo decidió así** («`pendiente`
+se DERIVA… No hay columna de estado»); y **este repo ya lo hizo** cuando la 2.0 retiró `detraccion.estado`.
+
+### Añadido
+
+- **`aplicaciones.pendiente_de`**, que devuelve `{total, aplicado, pendiente, moneda, vence, en_otra_moneda}`.
+  Tercer uso del patrón derivado, detrás del `rol` (10.0) y de `detracciones.estado_de` (2.0).
+- **`aplicaciones.aplicado_por_documento`**: la suma, agrupada por documento **y por moneda**, de las aplicaciones
+  **confirmadas**. Una `propuesto` no entra, y ahí es donde «`conciliar` propone y nunca confirma» deja de ser
+  doctrina. Ninguna clave suma dos monedas, igual que `resumen` desde la 3.4.0.
+- **`aplicaciones.hasta`**: las aplicaciones hechas hasta un corte **que pone quien llama**. Vive aparte porque es
+  lo único que necesita una fecha, y así lo que depende del calendario queda a la vista.
+- **`api.estado_de_cuenta(documento, partidas_previas=None, corte=None)`**, en la tabla de operaciones, así que
+  sale sola por las tres puertas: `POST /v1/estado_de_cuenta` con su esquema en OpenConta, y la herramienta
+  decimoséptima del MCP. Devuelve `documentos`, `por_contraparte` y `avisos`.
+- **`preparacion.partidas_previas_de`** con su tope, `MAXIMO_PARTIDAS_PREVIAS`, **más bajo** que el de las claves
+  previas a propósito: una clave previa es una comparación y una partida abierta es un saldo, y nadie lleva cien
+  mil facturas abiertas. Dos partidas del mismo comprobante **se rechazan**: la segunda taparía a la primera y
+  esconderían un saldo.
+- **Cuatro avisos que dicen lo que no se pudo o no se contó**, en vez de callarlo:
+  `PARTIDA_PREVIA_NO_DECLARADA`, `APLICACIONES_PROPUESTAS_NO_CONTADAS`, `APLICACIONES_POSTERIORES_AL_CORTE` y
+  `APLICADO_EN_OTRA_MONEDA`.
+- **`tests/test_estado_de_cuenta.py`**, con 29 casos. **Uno es el que de verdad protege la decisión**:
+  `test_la_respuesta_no_trae_NINGUNA_columna_de_estado` recorre la respuesta buscando `estado`, `pagado`,
+  `por_cobrar` y cinco más, y se pone rojo si alguien los añade.
+
+### Cómo se cruzan los meses sin guardar nada
+
+El libro del motor es mensual y una factura de enero pagada en marzo vive en dos documentos. **No hacía falta
+romper eso**: el molde ya existía en `claves_previas` —lo anotado en otros periodos, que llega como argumento— y
+`partidas_previas` lo repite. Un libro a la vez, sin estado guardado y sin reloj. Funciona porque
+`Comprobante.clave` **no lleva el periodo a propósito**, y las partidas previas se reconocen con la misma
+normalización: «00000123» es «123».
+
+Y la decisión que más se nota en el informe: **un pago a un comprobante que no viaja en el documento sale igual**,
+marcado `de_otro_periodo`, con su total en blanco si no se declaró su partida y con el aviso que dice por qué.
+Callarlo habría hecho desaparecer el pago del estado de cuenta, que es lo peor que podía pasar.
+
+### Lo que esta versión NO hace
+
+- **No calcula tramos de antigüedad.** 30/60/90 es una convención de gestión sin norma detrás: la operación da los
+  `dias` contra el vencimiento y los reparte quien los tenga.
+- **No calcula los días en el núcleo**: `pendiente_de` devuelve `vence`, y el corte vive solo en la operación,
+  porque la fecha la pone quien llama (regla 4).
+- **No convierte monedas** ni resta lo aplicado en otra: se informa en `en_otra_moneda`.
+- **No recorta un sobrepago a cero.** Un pendiente negativo es un hecho, y esconderlo quitaría la señal de que
+  algo está mal.
+- **No deriva el saldo de un proveedor como fuente.** `por_contraparte` es una **suma de pendientes derivados**, y
+  por eso vive en la api y no en el núcleo: un saldo de proveedor en cero no significa que todas sus facturas
+  estén pagadas —una sobrepagada y una impaga se netean—, que es la diferencia entre un estado de cuenta por
+  partida abierta y uno de saldo arrastrado.
+- **No escribe `conciliar`** (D3). Con el sustantivo y el saldo ya definidos, lo que le falta siguen siendo dos
+  archivos reales.
+
 ## [12.3.0] — 2026-10-12 · con `open-accounting` 3.3
 
 **El sustantivo que faltaba: `aplicaciones[]`.** Hasta hoy los tres libros del motor eran islas —`libro.tipo` vale

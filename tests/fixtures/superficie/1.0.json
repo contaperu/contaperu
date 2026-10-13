@@ -60,6 +60,7 @@
   "errores_de_configuracion": "función(configuracion: 'dict | None') -> 'list[str]'",
   "esquema_diagnostico": "función() -> 'dict'",
   "esquema_open_accounting": "función() -> 'dict'",
+  "estado_de_cuenta": "función(documento: 'dict', partidas_previas: 'list[dict] | None' = None, corte: 'str | None' = None) -> 'dict'",
   "exportar": "función(documento: 'dict', *, driver: 'str', configuracion: 'dict | None' = None, imputacion: 'dict | None' = None, correlativos: 'dict | None' = None, incluir_observados: 'bool' = False, fecha: 'str | None' = None, claves_previas: 'list | None' = None) -> 'dict'",
   "exportar_archivo": "función(documento: 'dict', *, driver: 'str', configuracion: 'dict | None' = None, imputacion: 'dict | None' = None, correlativos: 'dict | None' = None, incluir_observados: 'bool' = False, claves_previas: 'list | None' = None) -> 'Exportado'",
   "generar_asiento": "función(documento: 'dict', *, driver: 'str', configuracion: 'dict | None' = None, imputacion: 'dict | None' = None, correlativos: 'dict | None' = None, incluir_observados: 'bool' = False, claves_previas: 'list | None' = None) -> 'dict'",
