@@ -223,6 +223,16 @@ class Comprobante:
         self.tipo_cambio = tipo_cambio(self.tipo_cambio)
         for f in _CAMPOS_FECHA:
             setattr(self, f, fecha(getattr(self, f)))
+        # **El vencimiento de una factura al crédito es la fecha de su última cuota**, y se deriva aquí para que la
+        # regla viva en UN solo sitio. Hasta la 12.4 vivía en `lectores/xml_ubl`, así que el mismo dato leído de un
+        # XML traía vencimiento y **dictado por un ERP no lo traía**: la misma asimetría entre el objeto y el
+        # diccionario que la 12.0.1 corrigió tres veces en tesorería.
+        #
+        # Y las cuotas MANDAN sobre lo que venga en el campo, igual que mandan sobre `condicion_pago` —«una factura
+        # con cuotas es a crédito aunque no lo diga en letras»—: con un calendario declarado, el vencimiento no es
+        # una opinión. Si las dos cosas discrepan, la que describe el calendario es la que se queda.
+        if self.cuotas:
+            self.fecha_vencimiento = max(fecha(cuota["fecha"]) for cuota in self.cuotas)
         for f in _CAMPOS_TEXTO:
             setattr(self, f, " ".join(str(getattr(self, f) or "").split()))
         self.tipo_cp = self.tipo_cp.zfill(2) if self.tipo_cp.isdigit() else self.tipo_cp.upper()

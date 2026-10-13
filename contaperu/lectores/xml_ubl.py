@@ -224,7 +224,9 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
                 cuenta = _t(medio_pago, "cac:PayeeFinancialAccount/cbc:ID")
         if cuenta:
             detraccion["cuenta"] = cuenta
-    vencimiento = max(c["fecha"] for c in cuotas) if cuotas else fecha(_t(raiz, "cbc:DueDate") or None)
+    # Solo lo que dice el XML. **El colapso de las cuotas ya no está aquí**: lo hace `Comprobante`, para que un
+    # documento dictado por un ERP con sus cuotas traiga el mismo vencimiento que uno leído de un XML (12.5).
+    vencimiento = fecha(_t(raiz, "cbc:DueDate") or None)
     # La condición de pago pasa al registro (`Comprobante.condicion_pago`); `datos_originales.forma_pago` sigue
     # guardando el texto tal como vino. Una factura con cuotas es a crédito aunque no lo diga en letras.
     forma_normalizada = forma_pago.strip().lower()

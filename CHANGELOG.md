@@ -4,6 +4,44 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.5.0] — 2026-10-13
+
+**Una factura al crédito dictada por un ERP exportaba su fecha de emisión como vencimiento.** Lo destapó John
+preguntando cómo funciona una factura de 10 000 pagada en tres partes: en el documento de ejemplo, con sus tres
+cuotas declaradas, `vence` salía nulo. El colapso de las cuotas vivía en el lector del XML, así que **el mismo
+dato leído traía vencimiento y dictado no lo traía** — la misma asimetría entre el objeto y el diccionario que la
+12.0.1 corrigió tres veces en tesorería, ahora entre dos puertas de entrada.
+
+**Y no era cosmético.** El vencimiento viaja en el `documento{}` de cada línea del asiento, y de ahí lo escriben
+**CONCAR en su columna U y CONTASIS en sus columnas B, X y AD**. Un ERP que dictara su factura al crédito con tres
+cuotas futuras exportaba, en esa columna, el día en que se emitió.
+
+### Corregido
+
+- **`Comprobante` deriva `fecha_vencimiento` de sus `cuotas`**, y el lector del XML deja de hacerlo: una regla,
+  un sitio. Con un calendario declarado, el vencimiento es la fecha de la última cuota.
+- **Las cuotas mandan sobre un vencimiento que las contradiga.** Es la misma precedencia que ya tenía
+  `condicion_pago`, que pasa a `credito` cuando hay cuotas aunque el documento no lo diga en letras: con un
+  calendario delante, el vencimiento no es una opinión. Sin cuotas no se toca nada.
+
+### Cambio de comportamiento, que se anuncia
+
+**La huella se mueve para un documento que declare cuotas y no declare vencimiento**, porque el vencimiento viaja
+dentro del `documento{}` de la línea. En la práctica no afecta a nadie: `cuotas` es un campo de la 12.2.0, de
+anteayer, y los cuatro snapshots de celdas y el del documento **no se movieron** —ninguno de sus casos declara
+cuotas—. Lo que cambia es el valor que sale, y cambia **de uno equivocado a uno correcto**.
+
+Para quien lea un XML no cambia nada: se comprobó contra tres facturas reales al crédito y las tres dan el mismo
+vencimiento que antes.
+
+### Añadido
+
+- **Cuatro casos** en `tests/test_cuotas.py`: el vencimiento de un documento dictado, la precedencia de las cuotas
+  sobre un vencimiento que las contradiga, que sin cuotas no se toque nada, y el que **mide el cambio**
+  —`test_las_cuotas_no_mueven_ninguna_cuenta_y_solo_mueven_el_vencimiento`, que recorre el asiento campo a campo y
+  exige que lo único distinto sea `documento.fecha_vencimiento`—. Ese reemplaza al que afirmaba que las cuotas no
+  cambiaban ningún asiento, que era verdad en la 12.4 y dejó de serlo a propósito.
+
 ## [12.4.0] — 2026-10-12
 
 **El pendiente, que es un número, y ninguna columna de estado.** Cierra el trabajo que la 12.2 y la 12.3

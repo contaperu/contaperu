@@ -69,8 +69,10 @@ Dos campos nuevos en el comprobante, **los dos opcionales**:
 
 - **`numero`** son los dígitos del identificador de la cuota (`Cuota001` → `"001"`), y vacío si el documento no
   los da. El prefijo es la etiqueta, no el dato.
-- **`fecha_vencimiento` no cambia**: sigue siendo la mayor de las fechas de las cuotas, o el `cbc:DueDate` si no
-  hay cuotas. Nada de lo que ya sale se mueve.
+- **`fecha_vencimiento` es la mayor de las fechas de las cuotas**, o el `cbc:DueDate` si no hay cuotas.
+  Ninguna salida de un XML se movió al entrar esto. **Desde la 12.5 la derivación vive en `Comprobante`**
+  y no en el lector del XML, para que un documento dictado por un ERP traiga el mismo vencimiento que uno
+  leído; hasta entonces el dictado se quedaba sin él.
 - **`condicion_pago` tampoco**: una factura con cuotas sigue siendo `credito` aunque no lo diga en letras.
 - Quien no conozca los dos campos los ignora y sigue valiendo su lectura del documento.
 

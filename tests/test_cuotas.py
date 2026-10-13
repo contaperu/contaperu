@@ -212,20 +212,55 @@ def test_el_documento_del_estandar_escribe_las_cuotas_y_las_OMITE_cuando_no_hay(
 
 # --- y lo que NO cambia ------------------------------------------------------------------------------------------
 
-def test_las_cuotas_no_cambian_ningun_asiento():
-    """Un vencimiento no mueve una cuenta. La huella es del asiento, y dos facturas que solo se diferencian en sus
-    cuotas tienen que dar la misma: si esto se rompiera, los cuatro snapshots de celdas se moverían."""
+def test_las_cuotas_no_mueven_ninguna_cuenta_y_solo_mueven_el_vencimiento():
+    """Lo único que las cuotas cambian del asiento es el VENCIMIENTO de su documento, y desde la 12.5 lo cambian a
+    propósito: antes una factura al crédito dictada con cuotas y sin `fecha_vencimiento` exportaba su fecha de
+    emisión como vencimiento, y eso lo escriben CONCAR (columna U) y CONTASIS (B, X y AD).
+
+    Ninguna cuenta se mueve, ningún importe y ningún lado. La huella sí, porque el vencimiento viaja en el
+    `documento{}` de la línea: se anuncia en el CHANGELOG."""
     from test_diagnosticar import FACTURA as COMPRA, doc
     from util import por_la_fachada
 
     generar = por_la_fachada(api.generar_asiento)
-    sin = generar(doc(dict(COMPRA)), driver="csv")
+    sin = generar(doc(dict(COMPRA)), driver="csv")["asiento"]
     con = generar(doc(dict(COMPRA, condicion_pago="credito", monto_pendiente="4000.00",
                            cuotas=[{"numero": "001", "fecha": "2026-09-10", "importe": "2000.00"},
                                    {"numero": "002", "fecha": "2026-10-10", "importe": "2956.00"}])),
-                  driver="csv")
-    assert sin["asiento"] == con["asiento"]
-    assert asiento.huella(sin["asiento"]) == asiento.huella(con["asiento"])
+                  driver="csv")["asiento"]
+    assert len(sin) == len(con)
+    for antes, ahora in zip(sin, con):
+        distintas = {k for k in set(antes) | set(ahora) if antes.get(k) != ahora.get(k)}
+        assert distintas == {"documento"}, f"las cuotas movieron algo más que el documento: {sorted(distintas)}"
+        assert {k for k in antes["documento"] if antes["documento"][k] != ahora["documento"][k]} == \
+               {"fecha_vencimiento"}
+        assert antes["documento"]["fecha_vencimiento"] == COMPRA["fecha_vencimiento"]
+        assert ahora["documento"]["fecha_vencimiento"] == "2026-10-10"      # la última cuota
+    assert asiento.huella(sin) != asiento.huella(con)
+
+
+def test_el_vencimiento_de_un_documento_DICTADO_sale_de_sus_cuotas():
+    """La asimetría que la 12.5 cierra: hasta la 12.4 el colapso vivía en el lector del XML, así que el mismo dato
+    leído traía vencimiento y **dictado por un ERP no lo traía**. Es la misma asimetría entre el objeto y el
+    diccionario que la 12.0.1 corrigió tres veces en tesorería."""
+    c = Comprobante(**dict(FACTURA, cuotas=[{"numero": "001", "fecha": "2026-09-10", "importe": "50.00"},
+                                            {"numero": "002", "fecha": "2026-11-20", "importe": "68.00"}]))
+    assert c.fecha_vencimiento == date(2026, 11, 20)
+
+
+def test_las_cuotas_mandan_sobre_un_vencimiento_que_las_contradiga():
+    """Con un calendario declarado, el vencimiento no es una opinión: si las dos cosas discrepan, se queda la que
+    describe el calendario. Es la misma precedencia que ya tiene `condicion_pago`, que pasa a `credito` cuando hay
+    cuotas aunque el documento no lo diga en letras."""
+    c = Comprobante(**dict(FACTURA, fecha_vencimiento="2026-08-31",
+                           cuotas=[{"numero": "001", "fecha": "2026-12-15", "importe": "118.00"}]))
+    assert c.fecha_vencimiento == date(2026, 12, 15)
+
+
+def test_sin_cuotas_el_vencimiento_es_el_que_declare_el_documento():
+    """Y la otra mitad: la derivación solo entra cuando hay un calendario. Al contado no se toca nada."""
+    c = Comprobante(**dict(FACTURA, fecha_vencimiento="2026-08-31"))
+    assert c.fecha_vencimiento == date(2026, 8, 31)
 
 
 def test_los_dos_campos_son_hechos_del_documento():
