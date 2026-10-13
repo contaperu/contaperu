@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "contaperu"
 dynamic = ["version"]          # se lee de contaperu/_version.py (ver [tool.hatch.version])
-description = "Nucleo contable abierto del Peru: lee comprobantes de SUNAT, arma la partida doble y exporta a los ERP tradicionales. Sin estado, sin base de datos."
+description = "Núcleo contable abierto del Perú: lee comprobantes de SUNAT, arma la partida doble y exporta a los ERP tradicionales. Sin estado, sin base de datos."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
