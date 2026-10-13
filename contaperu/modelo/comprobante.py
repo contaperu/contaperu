@@ -21,6 +21,36 @@ ORIGENES = ("xml", "pdf_texto", "vision", "manual", "sire")  # sire = importado 
 # `PaymentTerms FormaPago`: «Contado», o «Credito» con sus cuotas). Vacío = el documento no lo dice.
 CONDICIONES_PAGO = ("contado", "credito")
 
+# Las tres claves de una cuota (enmienda 0030). `numero` es opcional —el orden del array es el del documento—;
+# `fecha` e `importe` son obligatorios, igual que en el esquema publicado.
+CLAVES_DE_UNA_CUOTA = ("numero", "fecha", "importe")
+
+
+def _cuota_normalizada(valor: Any) -> dict:
+    """Una cuota, con sus tres valores en texto —como los de `detraccion`— y **sin admitir una clave que no es
+    suya**, nombrándolas todas.
+
+    Rechaza en vez de ignorar por la misma razón que `Comprobante.de_dict`: el esquema publicado ya rechaza por su
+    `additionalProperties: false`, y un lector más laxo que el esquema deja pasar un dato que después se pierde sin
+    aviso. Exige `fecha` e `importe` porque son los dos que el esquema declara obligatorios: una cuota que no dice
+    cuándo vence ni por cuánto no es una cuota."""
+    if not isinstance(valor, dict):
+        raise ValueError("Una cuota tiene que ser un objeto con su fecha y su importe")
+    sobrantes = sorted(set(valor) - set(CLAVES_DE_UNA_CUOTA))
+    if sobrantes:
+        raise ValueError(f"Claves que no son de una cuota: {', '.join(sobrantes)}. "
+                         f"Una cuota lleva {', '.join(CLAVES_DE_UNA_CUOTA)}")
+    faltan = [c for c in ("fecha", "importe") if c not in valor]
+    if faltan:
+        raise ValueError(f"A una cuota le falta {' y '.join(faltan)}: los dos son obligatorios "
+                         "(RS 000193-2020/SUNAT, Anexo 1)")
+    vence = fecha(valor["fecha"])
+    if vence is None:
+        raise ValueError("Una cuota sin fecha de vencimiento no dice cuándo vence")
+    return {"numero": solo_digitos(valor.get("numero")),
+            "fecha": vence.isoformat(),
+            "importe": str(monto(valor["importe"]))}
+
 # Qué tipos de la Tabla 10 son una nota, y cuáles de ellas restan. **Con nombre desde la 3.4.0**, que no
 # es cosmética: estaba dentro de las dos propiedades de abajo, así que quien resumía un libro fuera del
 # motor no tenía nada que citar y lo escribía a mano. La primera aplicación que lo hizo se quedó con el
@@ -44,7 +74,8 @@ NOTAS = NOTAS_CREDITO + NOTAS_DEBITO
 # es el valor: un campo nuevo en el modelo que nadie reparta deja el test rojo.
 CAMPOS_DEL_DOCUMENTO = (
     "tipo_cp", "serie", "numero", "numero_final", "fecha_emision", "fecha_vencimiento",
-    "condicion_pago", "medio_pago", "contraparte_tipo_doc", "contraparte_doc", "contraparte_nombre",
+    "condicion_pago", "cuotas", "monto_pendiente", "medio_pago",
+    "contraparte_tipo_doc", "contraparte_doc", "contraparte_nombre",
     "moneda", "tipo_cambio", "base_gravada", "igv", "dscto_base", "dscto_igv", "exonerado", "inafecto",
     "exportacion", "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "retencion", "destino_igv",
     "valor_no_gravado", "anio_dua", "cod_dep_aduanera", "clasif_bienes",
@@ -81,6 +112,17 @@ class Comprobante:
     fecha_emision: date | None = None
     fecha_vencimiento: date | None = None
     condicion_pago: str = ""        # contado | credito (CONDICIONES_PAGO); vacío = el documento no lo dice
+    # Las cuotas que declara una factura al crédito, en el orden del documento: su fecha de vencimiento y su
+    # importe, que la RS 000193-2020/SUNAT obliga a consignar (Anexo 1). Hasta la 12.2 el lector veía las fechas,
+    # las colapsaba en `fecha_vencimiento` y **tiraba los importes**; sin el importe no hay pago esperado contra el
+    # que conciliar, ni antigüedad por cuota. Sus valores van como TEXTO, igual que los de `detraccion`: lo que
+    # entra en un bloque estructurado ya viene normalizado, y `a_dict` no baja a convertir lo que hay dentro.
+    cuotas: list[dict] = field(default_factory=list)
+    # El MONTO NETO PENDIENTE DE PAGO que declara una factura al crédito, y el aviso es que **no es el total**: la
+    # norma lo define sin las retenciones ni las detracciones, así que es lo que de verdad se le va a cobrar a la
+    # contraparte. `None` = el documento no lo dice, y eso NO es cero, igual que en `valor_no_gravado`. El motor no
+    # lo deduce restándole al total: lo declara el emisor, y una resta no es un hecho del papel.
+    monto_pendiente: Decimal | None = None
     # CON QUÉ se paga, que es otra pregunta que `condicion_pago`: el código de tres dígitos del catálogo de medios
     # de pago de SUNAT (`catalogos.MEDIOS_PAGO`). Vacío = el documento no lo dice, y quien exporta usa el que tenga
     # configurado el contribuyente. **No se valida contra el catálogo al construir**, a diferencia de
@@ -176,6 +218,8 @@ class Comprobante:
         for f in _CAMPOS_MONTO:
             setattr(self, f, monto(getattr(self, f)))
         self.valor_no_gravado = None if self.valor_no_gravado in (None, "") else monto(self.valor_no_gravado)
+        self.monto_pendiente = None if self.monto_pendiente in (None, "") else monto(self.monto_pendiente)
+        self.cuotas = [_cuota_normalizada(c) for c in (self.cuotas or [])]
         self.tipo_cambio = tipo_cambio(self.tipo_cambio)
         for f in _CAMPOS_FECHA:
             setattr(self, f, fecha(getattr(self, f)))

@@ -112,6 +112,8 @@ def cabecera_de(c: Comprobante) -> Cabecera:
     return Cabecera(tipo_cp=c.tipo_cp or "", serie=c.serie or "", numero=c.numero or "",
                     numero_final=c.numero_final or "", fecha_emision=_iso(c.fecha_emision),
                     condicion_pago=c.condicion_pago or "", medio_pago=c.medio_pago or "",
+                    cuotas=[dict(cuota) for cuota in (c.cuotas or [])],
+                    monto_pendiente="" if c.monto_pendiente is None else str(c.monto_pendiente),
                     id_externo=c.id_externo or "",
                     contraparte_tipo_doc=c.contraparte_tipo_doc or "", contraparte_doc=c.contraparte_doc or "",
                     contraparte_nombre=c.contraparte_nombre or "", concepto=c.concepto or "",

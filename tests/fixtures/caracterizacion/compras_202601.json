@@ -1,6 +1,6 @@
 {
  "revisar": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -16,6 +16,8 @@
     "fecha_emision": "2026-01-10",
     "fecha_vencimiento": "2026-02-10",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20677777771",
@@ -68,6 +70,8 @@
     "fecha_emision": "2026-01-18",
     "fecha_vencimiento": "2026-02-18",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20633333336",
@@ -120,6 +124,8 @@
     "fecha_emision": "2026-01-25",
     "fecha_vencimiento": "2026-02-25",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20605555552",
@@ -260,7 +266,7 @@
   ]
  },
  "generar_asiento/concar": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -6065,7 +6071,7 @@
   ]
  },
  "generar_asiento/csv": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -6765,7 +6771,7 @@
   ]
  },
  "generar_asiento/starsoft": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -7272,7 +7278,7 @@
   ]
  },
  "generar_asiento/asiento_contable": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",

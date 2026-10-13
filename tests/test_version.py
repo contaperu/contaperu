@@ -58,7 +58,7 @@ def test_la_version_de_la_libreria_no_es_la_del_estandar_y_cada_una_vive_una_vez
     intentar publicar un estándar cuya versión sea prefijo de la del paquete pone la batería en rojo."""
     from contaperu import api
 
-    assert contaperu.OPEN_ACCOUNTING == "3.1"
+    assert contaperu.OPEN_ACCOUNTING == "3.2"
     assert api.OPEN_ACCOUNTING is contaperu.OPEN_ACCOUNTING
     assert not contaperu.__version__.startswith(contaperu.OPEN_ACCOUNTING), (
         f"la versión del estándar ({contaperu.OPEN_ACCOUNTING}) es prefijo de la de la librería "

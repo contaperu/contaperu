@@ -182,15 +182,19 @@ def test_los_dos_metodos_de_la_cabecera_no_pueden_separarse():
                            igv=Decimal("180.00"), total=Decimal("1180.00"), ref_tipo_cp="01", ref_serie="F001",
                            ref_numero="101", ref_fecha=date(2026, 8, 3),
                            detraccion={"codigo": "027", "monto": Decimal("47.00"), "_tasa_tabla": "4"})
-    for detraccion in ({"codigo": "027", "monto": Decimal("47.00"), "_tasa_tabla": "4"}, {}):
-        # Las dos clases de vacío: la cadena y el None de siempre, y el DICCIONARIO vacío, que solo aparece aquí
-        # —`detraccion` es el único campo de la cabecera que es un dict— y que por eso se prueba a propósito.
-        cab = motor.cabecera_de(replace(c, detraccion=detraccion))
+    variantes = (({"codigo": "027", "monto": Decimal("47.00"), "_tasa_tabla": "4"},
+                  [{"numero": "001", "fecha": "2026-09-11", "importe": "1180.00"}]),
+                 ({}, []))
+    for detraccion, cuotas in variantes:
+        # Las TRES clases de vacío, cada una con su campo, y por eso se prueban a propósito: la cadena y el None de
+        # siempre; el DICCIONARIO vacío, que es `detraccion`; y desde la 12.2 la LISTA vacía, que es `cuotas` de un
+        # comprobante al contado.
+        cab = motor.cabecera_de(replace(c, detraccion=detraccion, cuotas=cuotas))
         completo = cab.a_dict()
-        esperado = {k: v for k, v in completo.items() if k != "glosa" and v not in ("", None, {})}
-        assert cab.como_comprobante() == esperado, detraccion
+        esperado = {k: v for k, v in completo.items() if k != "glosa" and v not in ("", None, {}, [])}
+        assert cab.como_comprobante() == esperado, (detraccion, cuotas)
         # Y que la prueba no sea trivial: la cabecera llena tiene de las dos clases de campo.
-        assert completo["glosa"] and any(v in ("", None, {}) for v in completo.values())
+        assert completo["glosa"] and any(v in ("", None, {}, []) for v in completo.values())
 
 
 def test_lo_vacio_no_viaja_como_un_dato():

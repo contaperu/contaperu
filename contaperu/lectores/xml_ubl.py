@@ -184,7 +184,8 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         dscto_base, dscto_igv = base_gravada, igv
 
     # --- Formas de pago, detracción, retención ------------------------------
-    cuotas: list = []
+    cuotas: list[dict] = []
+    monto_pendiente: str | None = None
     forma_pago = ""
     detraccion: dict | None = None
     retencion: dict | None = None
@@ -193,11 +194,20 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         medio = _t(termino, "cbc:PaymentMeansID")
         if ident == "FormaPago":
             if medio.lower().startswith("cuota"):
-                cuota = fecha(_t(termino, "cbc:PaymentDueDate") or None)
-                if cuota:
-                    cuotas.append(cuota)
+                # Hasta la 12.2 de aquí solo salía la fecha, y el importe —que la RS 000193-2020/SUNAT obliga a
+                # consignar— se tiraba. Sin él no hay pago esperado contra el que conciliar (enmienda 0030).
+                vence = fecha(_t(termino, "cbc:PaymentDueDate") or None)
+                if vence:
+                    cuotas.append({"numero": medio, "fecha": vence,
+                                   "importe": str(monto(_t(termino, "cbc:Amount")))})
             elif medio:
                 forma_pago = medio
+                # El `cbc:Amount` del término de crédito es el MONTO NETO PENDIENTE DE PAGO, que no es el total:
+                # la norma lo define sin las retenciones ni las detracciones. Solo se guarda si el documento lo
+                # trae: ausente no es cero.
+                if medio.strip().lower().startswith(("credito", "crédito")):
+                    declarado = _t(termino, "cbc:Amount")
+                    monto_pendiente = str(monto(declarado)) if declarado else None
         elif ident == "Detraccion":
             detraccion = {
                 "codigo": medio,
@@ -214,7 +224,7 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
                 cuenta = _t(medio_pago, "cac:PayeeFinancialAccount/cbc:ID")
         if cuenta:
             detraccion["cuenta"] = cuenta
-    vencimiento = max(cuotas) if cuotas else fecha(_t(raiz, "cbc:DueDate") or None)
+    vencimiento = max(c["fecha"] for c in cuotas) if cuotas else fecha(_t(raiz, "cbc:DueDate") or None)
     # La condición de pago pasa al registro (`Comprobante.condicion_pago`); `datos_originales.forma_pago` sigue
     # guardando el texto tal como vino. Una factura con cuotas es a crédito aunque no lo diga en letras.
     forma_normalizada = forma_pago.strip().lower()
@@ -248,7 +258,9 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         "emisor": emisor,
         "adquirente": adquirente,
         "forma_pago": forma_pago,
-        "cuotas": [c.isoformat() for c in cuotas],
+        # Queda redundante desde la 12.2 —`comprobante.cuotas` trae lo mismo con su importe— y se mantiene durante
+        # toda la 12.x para no romper a quien lo esté leyendo. Su retiro se decide en la 13.0.
+        "cuotas": [c["fecha"].isoformat() for c in cuotas],
         "tributos": {k: [str(v[0]), str(v[1])] for k, v in acumulado.items()},
         "gratuitas": str(base_de(cat.TRIBUTO_GRATUITO)),
         "anticipo": str(anticipo),
@@ -264,6 +276,8 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         fecha_emision=fecha(_t(raiz, "cbc:IssueDate") or None),
         fecha_vencimiento=vencimiento,
         condicion_pago=condicion_pago,
+        cuotas=cuotas,
+        monto_pendiente=monto_pendiente,
         contraparte_tipo_doc=contraparte["tipo_doc"] or "6",
         contraparte_doc=contraparte["doc"],
         contraparte_nombre=contraparte["nombre"],

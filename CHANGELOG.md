@@ -4,6 +4,92 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.2.0] — 2026-10-12 · con `open-accounting` 3.2
+
+**La norma obliga a declarar las cuotas de una factura al crédito, el lector las veía y tiraba todos sus
+importes.** Sale de la pregunta de John del 12-oct-2026 —cómo se interconectan compras, ventas y tesorería, y de
+dónde sale que una factura esté por cobrar o cobrada— y de la investigación que la contestó, el cuarto escalón de
+`REFERENCIAS.md`. Es la primera de las tres versiones de ese trabajo: esta guarda **el pago esperado**, la
+siguiente el registro de la aplicación, y la tercera el pendiente derivado.
+
+**Ninguna salida contable se mueve.** Los cuatro snapshots de celdas —CONCAR y CONTASIS, filas y formato— quedan
+intactos, y la huella de un asiento no cambia: un vencimiento no mueve ninguna cuenta, y hay un caso que lo fija.
+
+### El estándar · `open-accounting` 3.2
+
+**Aditivo: entran dos campos del comprobante y no sale nada.** Un documento 3.1 sigue valiendo tal cual, así que
+no hay nada que migrar.
+
+**`cuotas` y `monto_pendiente`** ([enmienda 0030](estandar/enmiendas/0030-las-cuotas-de-una-factura-al-credito.md)),
+que la **RS 000193-2020/SUNAT** obliga a consignar en una factura al crédito desde el 01-09-2021: la fecha y el
+**importe** de cada cuota, y el monto neto pendiente de pago.
+
+Lo que lo convierte en un hueco y no en una mejora es lo que faltaba sin ellos:
+
+- **La antigüedad se calcula por cuota vencida**, no por la última fecha del documento. Hasta hoy una factura a
+  tres cuotas y una a una sola, con el mismo vencimiento final, daban **documentos indistinguibles**.
+- **El monto pendiente no es el total.** La norma lo define sin las retenciones ni las detracciones, así que es lo
+  que de verdad se le va a cobrar a la contraparte — y el motor solo tenía el total.
+- **Es el pago esperado**, que es de lo que depende la conciliación automática: en ISO 20022 hay que pedírselo al
+  banco, que suele truncarlo; aquí viene en el documento. Un cargo por el importe exacto de la cuota 2 en su fecha
+  de vencimiento no es la misma conjetura que «3 500 contra una factura de 3 500».
+
+**Y la prueba de que el motor ya sabía que estos tres datos existen estaba dentro**: el motivo **13** del Catálogo
+09 —«Corrección del monto neto pendiente de pago y/o la(s) fechas(s) de vencimiento… y/o los montos
+correspondientes a cada cuota»— lleva cargado en `datos/sunat/catalogos.json` con **esta misma resolución** como
+fuente. El estándar transportaba el código de un motivo que corrige tres datos que el estándar no guardaba.
+
+### Corregido
+
+- **El lector del XML dejó de tirar los importes.** `cac:PaymentTerms` con `PaymentMeansID` = `Cuota001` ya se
+  recorría desde que existe `condicion_pago`, y de cada cuota se guardaba **solo la fecha**; el `cbc:Amount` de
+  cada una y el del término `Credito` —el monto neto pendiente— se descartaban. Las fechas acababan en
+  `datos_originales.cuotas`, que es transporte sin interpretar: el motor no las entendía, las llevaba.
+- **`fecha_vencimiento` no cambia**: sigue siendo la mayor de las fechas de las cuotas, y un caso lo fija junto con
+  que las cuotas viajen **en el orden del documento**, que no tiene que ser el de sus fechas.
+
+### Añadido
+
+- **`Comprobante.cuotas` y `Comprobante.monto_pendiente`**, los dos en `CAMPOS_DEL_DOCUMENTO` porque los declara el
+  papel. Los valores de una cuota van en texto, como los de `detraccion`, y **una clave que no es suya se rechaza
+  nombrándola**: el lector no puede ser más laxo que el esquema publicado, que ya rechaza por su
+  `additionalProperties: false`. `fecha` e `importe` son obligatorios dentro de cada cuota.
+- **Los dos campos en la `Cabecera` del índice**, porque la cabecera lleva TODOS los hechos: sin ellos, el
+  documento que escribe un driver del estándar no podría volver a entrar al motor con lo que el papel declaraba,
+  que es la lección de la 3.9. Lo destapó `tests/test_cabecera.py`, que compara la cabecera contra el esquema
+  publicado y no contra una lista escrita a mano — la regla funcionando.
+- **`como_comprobante()` cuenta la lista vacía entre lo vacío.** Un comprobante al contado no declara cuotas, y
+  escribir `"cuotas": []` diría «no tiene ninguna» donde lo cierto es «el documento no habla de eso». Es la
+  tercera clase de vacío del método, detrás de la cadena y del diccionario.
+- **`tests/test_cuotas.py`**, con 25 casos: la lectura entera, la regresión de las tres cuotas, que el motor **no
+  deduce** el monto pendiente restándole al total, que nulo no es cero, la ida y la vuelta completa, los rechazos
+  del modelo y del esquema, y que la huella del asiento no se mueve. Más **seis casos de conformidad**.
+
+### Cambiado · aditivo
+
+- **`revisar` devuelve dos claves más** por comprobante, `cuotas` y `monto_pendiente`, como ya devolvía todos los
+  campos vacíos (`tipo_cambio: null`, `valor_no_gravado: null`, `datos_originales: {}`). Es aditivo y es lo que la
+  12.x promete: pueden llegar claves nuevas en las respuestas, nunca irse.
+- **`datos_originales.cuotas` queda redundante** —trae lo mismo con menos información, solo las fechas— y **se
+  mantiene durante toda la 12.x** para no romper a quien lo esté leyendo. Su retiro se decide en la 13.0.
+- **El hito J5 dejó de apartar un número del estándar.** Tuvo reservada la 3.1, se la llevó la glosa de un
+  movimiento en la 12.0, reservó la 3.2 y se la lleva esta versión. Ahora dice «la siguiente menor libre»: un hito
+  que espera un cliente real fuera del Perú no puede apartar una menor que el estándar necesita antes.
+
+### La investigación que lo respalda
+
+**`REFERENCIAS.md` gana su cuarto escalón** (12-oct-2026): **la aplicación de un pago a un documento**, comparada
+en ocho sistemas —Odoo, ERPNext, SAP, GnuCash, SAF-T, Codat, Merge e ISO 20022—. Cierra la mitad que importaba del
+hueco que ese documento declaraba entero, y contesta la pregunta que llevaba dentro: **nadie separa «lo que el
+papel dice que cancela» de «lo que alguien decidió imputar»**, y el que más se acerca es Odoo con su *In payment*
+frente a *Paid*, que son dos grados de hecho y no un hecho frente a una conjetura.
+
+De ahí salen cuatro reglas que ordenan lo que viene: la aplicación es un registro aparte con su importe y N a N;
+vive a nivel de línea; **el saldo se deriva de la suma y no se guarda**; y un pago parcial admite dos tratamientos.
+Y dos correcciones a lo que se venía repitiendo: la cuenta transitoria de Odoo **es configuración opcional** y no
+su mecanismo central —lo que refuerza su descarte en vez de contradecirlo—, y un marcador de estado al lado del
+número se desincroniza, medido en Odoo dos veces. Es el mismo argumento con que la 2.0 retiró `detraccion.estado`.
+
 ## [12.1.0] — 2026-10-11
 
 **Una cuenta bancaria sin número ni CCI vale para registrar, y hasta hoy se rechazaba.** Lo destapó John

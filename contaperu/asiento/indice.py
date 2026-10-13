@@ -64,6 +64,11 @@ class Cabecera:
     fecha_emision: str = ""
     fecha_vencimiento: str = ""
     condicion_pago: str = ""         # CUÁNDO se paga: contado | credito
+    # Las cuotas de una factura al crédito, con su fecha y su importe, ya en texto (enmienda 0030). Están aquí
+    # porque la cabecera lleva TODOS los hechos: sin ellas, el documento que escribe un driver del estándar no
+    # podría volver a entrar al motor con lo que el papel declaraba, que es la lección de la 3.9.
+    cuotas: list = field(default_factory=list)
+    monto_pendiente: str = ""        # el monto neto pendiente; vacío = el documento no lo dice, y no es cero
     medio_pago: str = ""             # CON QUÉ se paga: el código de SUNAT (`catalogos.MEDIOS_PAGO`)
     id_externo: str = ""
     # Contraparte
@@ -139,8 +144,11 @@ class Cabecera:
         pasa el `pattern` de `moneda` ni el `enum` de `contraparte_tipo_doc` — el estándar distingue «no lo sé» de
         «es esto», y lo primero se dice omitiendo la clave.
 
+        La lista vacía entra en lo vacío por lo mismo: un comprobante al contado no declara cuotas, y escribir
+        `"cuotas": []` diría «no tiene ninguna» donde lo cierto es «el documento no habla de eso».
+
         `tests/test_cabecera.py` lo comprueba contra el esquema publicado, campo a campo."""
-        return {k: v for k, v in asdict(self).items() if v not in ("", None, {})}
+        return {k: v for k, v in asdict(self).items() if v not in ("", None, {}, [])}
 
 
     @property

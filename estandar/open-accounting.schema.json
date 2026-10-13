@@ -1,6 +1,6 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.1/estandar/open-accounting.schema.json",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.2/estandar/open-accounting.schema.json",
  "title": "open-accounting",
  "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
  "type": "object",
@@ -221,6 +221,24 @@
       "credito"
      ],
      "description": "CUÁNDO se paga, según lo declara el documento (en la factura electrónica, PaymentTerms FormaPago; con cuotas es credito). Vacío = el documento no lo dice. Con qué se paga es `medio_pago`."
+    },
+    "cuotas": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/cuota"
+     },
+     "description": "Las cuotas que declara una factura al crédito, en el orden del documento: su fecha de vencimiento y su importe (RS 000193-2020/SUNAT, Anexo 1, obligatorias al crédito). Vacío = el documento no las dice, que es lo normal al contado. `fecha_vencimiento` sigue siendo la mayor de estas fechas."
+    },
+    "monto_pendiente": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/importe"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "El MONTO NETO PENDIENTE DE PAGO que declara una factura al crédito (RS 000193-2020/SUNAT, Anexo 1). **No es el total**: la norma lo define sin las retenciones ni las detracciones, así que es lo que de verdad se va a cobrar a la contraparte. `null` = el documento no lo dice, y eso NO es cero. El motor no lo deduce restándole al total: lo declara el emisor."
     },
     "medio_pago": {
      "type": "string",
@@ -523,6 +541,30 @@
     },
     "texto": {
      "type": "string"
+    }
+   }
+  },
+  "cuota": {
+   "description": "Una cuota de una factura al crédito: cuándo vence y por cuánto. La declara el documento y el motor no la deduce (RS 000193-2020/SUNAT, Anexo 1).",
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "fecha",
+    "importe"
+   ],
+   "properties": {
+    "numero": {
+     "type": "string",
+     "pattern": "^$|^[0-9]{1,4}$",
+     "description": "Los dígitos del identificador de la cuota: el `Cuota001` del XML es `001`. El prefijo es la etiqueta, no el dato. Vacío si el documento no lo da; el orden del array es el del documento."
+    },
+    "fecha": {
+     "$ref": "#/$defs/fecha",
+     "description": "La fecha de vencimiento de ESTA cuota (`cbc:PaymentDueDate`)."
+    },
+    "importe": {
+     "$ref": "#/$defs/importe",
+     "description": "El importe de ESTA cuota (`cbc:Amount`)."
     }
    }
   },

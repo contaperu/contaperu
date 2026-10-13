@@ -1,6 +1,6 @@
 {
  "revisar": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -16,6 +16,8 @@
     "fecha_emision": "2026-08-03",
     "fecha_vencimiento": "2026-09-02",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20607777773",
@@ -68,6 +70,8 @@
     "fecha_emision": "2026-08-05",
     "fecha_vencimiento": "2026-09-04",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20602222226",
@@ -120,6 +124,8 @@
     "fecha_emision": "2026-08-12",
     "fecha_vencimiento": null,
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20607777773",
@@ -172,6 +178,8 @@
     "fecha_emision": "2026-08-13",
     "fecha_vencimiento": null,
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20607777773",
@@ -224,6 +232,8 @@
     "fecha_emision": "2026-08-10",
     "fecha_vencimiento": "2026-08-27",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20602222226",
@@ -281,6 +291,8 @@
     "fecha_emision": "2026-08-14",
     "fecha_vencimiento": "2026-09-13",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20633333336",
@@ -338,6 +350,8 @@
     "fecha_emision": "2026-08-18",
     "fecha_vencimiento": null,
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20607777773",
@@ -390,6 +404,8 @@
     "fecha_emision": "2026-08-19",
     "fecha_vencimiento": null,
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20607777773",
@@ -442,6 +458,8 @@
     "fecha_emision": "2026-08-20",
     "fecha_vencimiento": null,
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20605555552",
@@ -500,6 +518,8 @@
     "fecha_emision": "2026-06-20",
     "fecha_vencimiento": "2026-07-20",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20677777771",
@@ -552,6 +572,8 @@
     "fecha_emision": "2026-08-25",
     "fecha_vencimiento": "2026-09-24",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20677777771",
@@ -604,6 +626,8 @@
     "fecha_emision": "2026-08-26",
     "fecha_vencimiento": "2026-09-10",
     "condicion_pago": "",
+    "cuotas": [],
+    "monto_pendiente": null,
     "medio_pago": "",
     "contraparte_tipo_doc": "6",
     "contraparte_doc": "20605555552",
@@ -816,7 +840,7 @@
   ]
  },
  "generar_asiento/concar": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -16678,7 +16702,7 @@
   ]
  },
  "generar_asiento/csv": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -18782,7 +18806,7 @@
   ]
  },
  "generar_asiento/starsoft": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -20417,7 +20441,7 @@
   ]
  },
  "generar_asiento/asiento_contable": {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",

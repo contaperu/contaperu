@@ -1,4 +1,4 @@
-# open-accounting 3.1 — el documento contable universal del Perú
+# open-accounting 3.2 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -16,12 +16,12 @@ y por eso lo que entra aquí se promete: un valor publicado no se quita ni cambi
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.1/estandar/open-accounting.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.2/estandar/open-accounting.schema.json
 ```
 
-Cuelga del tag **del estándar** (`open-accounting-3.1`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`open-accounting-3.2`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
-sirve como estándar. **El tag `open-accounting-3.1` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
+sirve como estándar. **El tag `open-accounting-3.2` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
 bloque opcional no suben la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la
 1.0; un cambio de significado sube a 2.0 y estrena su propio tag.
 
@@ -43,7 +43,7 @@ python -m contaperu.puertas.cli diagnosticar mi-documento.json
 
 ```json
 {
-  "open_accounting": "3.1",
+  "open_accounting": "3.2",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -280,6 +280,8 @@ permite que el resto pueda degradar.
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
 | `valor_no_gravado` | **Lo no gravado cuando el libro no lo desglosa.** El RVIE separa `exonerado` (campo 19) de `inafecto` (campo 20); el RCE tiene **una sola columna** (campo 21) que no dice cuál de los dos es, así que una compra importada del SIRE lo trae aquí y deja el desglose vacío a propósito. **Opcional, y nulo no es cero**: ausente significa «mira el desglose» y el motor usa `exonerado + inafecto`; declarado, manda él —también si vale cero—. El total se comprueba contra esa decisión, no contra la suma de los tres, o el importe se contaría dos veces; la hace el modelo una vez, en `adquisiciones_no_gravadas`. |
 | `condicion_pago` | `contado` o `credito`: lo que **declara** el documento. En la factura electrónica viene en `PaymentTerms FormaPago`, y una factura con cuotas es a crédito. Vacío no significa contado: significa que el documento no lo dice. |
+| `cuotas` | Las de una factura al crédito, con **su fecha y su importe**, en el orden del documento: la RS 000193-2020/SUNAT las obliga (Anexo 1), y sin el importe no hay pago esperado contra el que conciliar ni antigüedad por cuota. `fecha_vencimiento` **no cambia**: sigue siendo la mayor de estas fechas. Vacío al contado, que es lo normal. |
+| `monto_pendiente` | El **monto neto pendiente de pago** de una factura al crédito, y el aviso está en que **no es el total**: la norma lo define sin las retenciones ni las detracciones, así que es lo que de verdad se le va a cobrar a la contraparte. **Nulo no es cero**: ausente es «el documento no lo dice». El motor **no lo deduce** restándole al total — lo declara el emisor, y una resta no es un hecho del papel. |
 | `medio_pago` | **Con qué** se pagó, que es otra pregunta que `condicion_pago`: un código de tres dígitos del catálogo de medios de pago de SUNAT (`001` depósito en cuenta, `003` transferencia, `005` tarjeta de débito… `999` otros). Vacío = el documento no lo dice, y entonces quien exporta usa el que tenga configurado el contribuyente. Un código que el catálogo no tenga **no invalida el documento**: se avisa y se respeta, porque SUNAT puede añadir uno. |
 | `tipo_nota` | **Por qué** se emitió una nota: dos dígitos del Catálogo 09 de SUNAT si es de crédito (`07`, `87`) y del 10 si es de débito (`08`, `88`). **Son dos tablas y el mismo código significa cosas opuestas**: el `01` es «anulación de la operación» en una de crédito e «intereses por mora» en una de débito. Y el `01` del 09 dice que la nota anula **el comprobante que referencia**, no que la nota esté anulada. Vacío = el documento no lo dice, y eso no es un defecto: el TXT del SIRE no lleva esta columna. |
 | `estado_sunat` | Lo que dice **SUNAT** del comprobante en su registro («Est. Comp» del SIRE), y por tanto lo único del comprobante que no lo dice el papel. **Se transporta tal cual y no condiciona ninguna regla**: la norma lo llama referencial y **no publica su tabla de valores**, así que quien lo reciba lo enseña y no lo traduce. No es el `estado` de la revisión ni el de la detracción — hay tres. Lo que decide que un comprobante no lleve asiento es su importe en cero, que sí se puede comprobar. |
@@ -337,7 +339,7 @@ necesitado todavía; se añade con un caso real detrás, no por si acaso.
 **`1.0` gana dos campos opcionales el 26-sep-2026 y no sube** (enmiendas 0014 y 0015): `tipo_nota`, por qué se
 emitió una nota, y `estado_sunat`, lo que SUNAT dice del comprobante en su propio registro. Los dos vienen de
 columnas que la propuesta del SIRE ya traía y que se descartaban al leer. Nada cambia de significado y un
-documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-3.1` avanza y la versión se
+documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-3.2` avanza y la versión se
 queda en `1.0`**.
 
 **`0.2` (11-sep-2026) cambia el significado de dos campos**, y por eso sube: `base_gravada` e `igv` pasan a ser
@@ -442,7 +444,7 @@ libro**— viven en [`catalogos.json`](catalogos.json), junto a este archivo, co
 la URL del tag igual que el esquema, así que un ERP de fuera los lee sin instalar nada:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.1/estandar/catalogos.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.2/estandar/catalogos.json
 ```
 
 **Por qué están fuera del esquema** (1.0): eran enums cerrados, así que el día que entre un hecho nuevo —los
