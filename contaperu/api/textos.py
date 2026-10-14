@@ -200,48 +200,10 @@ PARA_HERRAMIENTA: dict[str, str] = {
     Y el número del papel va en `constancia`, aparte del que le da el banco, que es `referencia`: **los dos
     existen y pueden ser distintos** —una detracción pagada desde un banco tiene su vóucher y su N° de operación—.
 
-    **No asienta nada**, y es a propósito: el asiento de tesorería espera la norma para asentar el ITF —que no
-    tiene código en el Catálogo 05, así que su línea no se puede nombrar todavía— y un archivo del sub-diario de
-    bancos que CONCAR haya aceptado. Esto hace lo que sí se puede terminar: validar la forma, deduplicar, cuadrar y
-    decir lo que no cierra.
-
-    **No juzgo cómo leíste nada** (12.0). Hasta la 11.x recorría la cadena de saldos corridos y te devolvía un
-    `cuadre`; el problema es que **sin líneas con `saldo` decía `cuadra: true` sin haber mirado nada**, y con una
-    línea inventada también. Si mandas operaciones estructuradas —que es lo normal— ése era siempre el caso, así
-    que ese verde no significaba nada. La cadena sigue existiendo, en la función `tesoreria.cuadra`, para quien
-    parsea un extracto y quiere comprobar su propia lectura: ahí sí vale, y ahí es donde se llama.
-
-    **Lo que sí contrasto es lo que el banco DECLARÓ contra lo que me mandaste.** Si pones la cabecera en
-    `extractos[]` —saldo anterior, saldo actual y los dos totales—, comparo sus cargos y sus abonos con la suma de
-    las líneas, y su saldo final con la aritmética de esos mismos números. Eso **no puede pasar en vacío**: solo
-    corre si la cabecera dice algo. Y caza lo que una cadena no caza: **una línea entera perdida**, porque las
-    demás encadenan igual.
-
-    **Y `totales_por_cuenta` es un resumen, no un control**: cuántos movimientos tiene cada cuenta, cuánto suman
-    sus cargos y sus abonos, lo que el banco descontó por ITF y su cuenta contable. No afirma que nada cuadre.
-
-    **La contrapartida la pones tú**, en `imputaciones_de_movimientos`, por el `id_externo` de cada movimiento:
-    la 104 sale del maestro de cuentas y la otra cara se imputa, igual que la cuenta de un gasto llega en la
-    imputación de su comprobante. Lleva `cuenta_contable`, `centro_costo` y `contraparte_doc`; o un `reparto` de
-    partes cuando un cargo paga varias cosas; o `cuenta_propia`, que es **la única forma de declarar un traspaso
-    entre dos cuentas tuyas** —lo que la NIC 7 excluye de los flujos de efectivo, y que el motor no puede adivinar
-    porque una línea sola no sabe que es la mitad de un par—. Con ese bloque cada movimiento necesita su
-    `id_externo`.
-
-    Para: un movimiento sin cuenta, sin fecha o con un sentido que no es `cargo` ni `abono`; un `origen` que no es
-    de los cinco; unas referencias que reclamen más de lo que se pagó, que es una suma imposible; un reparto que no
-    suma el importe exacto —eso no es un dato que falte, es una decisión a medias—; una llave de imputación que no
-    sea de ningún movimiento; y dos cabeceras de la misma cuenta.
-
-    Avisa y no para, cada aviso con su `pedir_a`: un total de la cabecera que no cuadra con las líneas
-    (`TOTAL_DECLARADO_NO_COINCIDE`); el saldo final que declaró el banco contra la aritmética de esos mismos
-    números (`SALDO_FINAL_DECLARADO_NO_COINCIDE`, casi siempre una línea entera perdida y no un error del banco);
-    que no declararas ninguna cuenta (`SIN_CUENTAS_DECLARADAS`); un movimiento **sin contrapartida**
-    (`MOVIMIENTO_SIN_IMPUTAR`, que es el `sin_cuenta` del dinero); un movimiento o un traspaso que apunta a una cuenta que no declaraste
-    (`CUENTA_NO_DECLARADA`, `CUENTA_PROPIA_NO_DECLARADA`); una moneda que no es la de su cuenta
-    (`MONEDA_DISTINTA_DE_LA_CUENTA`); y **lo que ninguna referencia reclama** de un movimiento (`sin_atribuir`).
-    Ese resto no lo cierro: un cargo lleva el ITF dentro, y qué es lo que sobra lo decide el contador por la
-    imputación.
+    **Esta herramienta no asienta, y es a propósito**: mirar y asentar son dos preguntas distintas. Para el
+    asiento, `generar_asiento` con el driver `asiento_contable`, que escribe el documento del estándar.
+    Lo que sigue sin poder salir es el archivo de un sistema legacy: espera un sub-diario de bancos que
+    CONCAR haya aceptado.
     """,
     'validar_cuentas_bancarias': """Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.
 

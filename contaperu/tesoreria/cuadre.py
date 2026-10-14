@@ -74,7 +74,8 @@ def cuadra(movimientos: list, saldo_inicial: object = CERO, saldo_final: object 
     esto es lo que convierte «leí un PDF» en «lo leí bien». Por eso la función se queda publicada.
 
     **Y no es el cuadre contable**, que es `contable.partida_doble` y mira el Debe contra el Haber. Éste mira una
-    lectura; aquél, un asiento. Tesorería tendrá el suyo cuando arme asiento, que es el hito D6.
+    lectura; aquél, un asiento. **Desde la 12.8 tesorería tiene los dos**, y siguen siendo distintos: éste dice
+    si el extracto está completo y aquél si el asiento cierra.
 
     Dos comprobaciones, y la primera es la que más vale: **si una línea trae su propio saldo, tiene que ser el que
     sale de la cadena**, y la primera que no lo sea se señala por su posición. Un lector que se salta una línea o

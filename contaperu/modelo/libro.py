@@ -128,7 +128,8 @@ RASGOS: dict[str, "Rasgos"] = {
     # - `sentido_principal` es `POR_OPERACION`: una entrada lleva el efectivo al debe y una salida al haber, así
     #   que el lado es de cada operación. Es el primer rasgo que el libro no puede fijar.
     # - `sub_diario` está vacío porque **su clave de configuración todavía no existe**, y eso es información y no
-    #   un hueco: entra con el hito D6, que pide un archivo del sub-diario de bancos que CONCAR haya aceptado. Se
+    #   un hueco: entra con el archivo del sub-diario de bancos que CONCAR haya aceptado, y hasta entonces este
+    #   libro se arma pero no se numera (`LibroQueTodaviaNoSeNumera`). Se
     #   intentó declararla ya y el contrato de drivers lo paró con la razón exacta — «una clave que nadie lee se
     #   configura para nada»—, porque hasta que el motor origine este libro nadie puede leerla.
     # Y los roles de tesorería **se declaran vacíos a propósito**, que es la respuesta honesta a «¿cuáles serían?»
@@ -147,13 +148,19 @@ RASGOS: dict[str, "Rasgos"] = {
     # De ahí una corrección: **`contrapartida` no es vocabulario de tesorería.** Su caso real es la depreciación, el
     # asiento de destino y la planilla, o sea el hito B13 — el diario que un ERP nos manda.
     #
-    # Contestarlo no cambia esta tabla: los roles se declararán **medidos**, ejecutando el motor, el día que emita
-    # su primera línea de tesorería. Lo que se gana es que ese día no haya que decidirlo con prisa.
+    # **Y ese día llegó en la 12.8.** El motor emite su primera línea de tesorería, así que los roles se declaran
+    # MEDIDOS, que es lo que esta nota prometía: son `tesoreria`, `tercero` y `principal`, y los tres salen de
+    # ejecutarlo. La línea del 42 es `tercero` —contestado el 11-oct— y la del efectivo es `tesoreria`, que la
+    # regla distingue por el elemento **10 del PCGE**, «Efectivo y equivalentes al efectivo» (p. 17): es la fuente
+    # publicada que dice qué cuenta es dinero, y es palabra por palabra lo que el catálogo del estándar define como
+    # ese rol. Lo que no es ninguna de las dos —el gasto de una comisión— es `principal`.
     #
-    # Vacío es por tanto una afirmación verdadera y comprobable: este libro no lo origina el motor. Y es la misma
-    # disciplina con la que el contrato de drivers paró el `sub_diario_bancos`.
+    # **`sub_diario` sigue vacío, y ahora significa otra cosa**: no «este libro no lo origina el motor», sino
+    # «este libro todavía no se numera». La distinción la hizo visible tesorería y la comprueba
+    # `LibroQueTodaviaNoSeNumera`. La misma disciplina con la que el contrato de drivers paró el
+    # `sub_diario_bancos`: una clave que nadie lee se configura para nada.
     "tesoreria": Rasgos(tipo="tesoreria", origen="movimientos",
-                        roles=(),
+                        roles=("tesoreria", "tercero", "principal"),
                         sentido_principal=POR_OPERACION, cuenta_contraparte="",
                         da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
                         sub_diario=""),

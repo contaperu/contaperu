@@ -32,7 +32,8 @@ Lo que **no** comparten, y que esta clase normaliza:
 - **El ITF.** BBVA lo da **en una columna de la línea** y un total al pie; Scotiabank lo da como **un movimiento
   propio** («IMPUESTO A LOS DÉBITOS»); en el extracto de BanBif no aparece. Aquí cabe de las dos formas: como campo
   cuando el banco lo adjunta, y como un movimiento más cuando el banco lo asienta aparte. **Y nunca se calcula**:
-  lo da el banco. Lo que falta para asentarlo es su norma, que es el hito D6.
+  lo da el banco — y eso es justamente lo que permite asentarlo desde la 12.7, sin esperar ninguna tasa: un
+  asiento se da por hechos fehacientes y sustentados, y el extracto lo sustenta.
 - **El año.** Las líneas traen día y mes (`03-08`); el año está en la cabecera. Quien lee el archivo lo baja: aquí
   llega ya completo, porque el núcleo no tiene reloj con el que adivinarlo.
 

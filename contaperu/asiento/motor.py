@@ -52,7 +52,7 @@ ROLES = vocabulario.ROLES
 # que el catálogo crezca —el hito B13, para recibir el diario de un ERP—: el catálogo dice qué libros existen y
 # esta tupla cuáles sabe armar el motor, y uno que esté allí y no aquí se rechaza nombrando los que sí. Lo que
 # cada uno tiene de distinto está en `modelo.RASGOS`, que es la tabla que la 9.0 puso en lugar del booleano.
-TIPOS_DEL_MOTOR = ("venta", "compra")
+TIPOS_DEL_MOTOR = ("venta", "compra", "tesoreria")
 # Y los que el motor **escribe**, que desde la 1.1 del catálogo ya no son todos, y que desde la 5.0 **tampoco son
 # los seis de la 1.0**: tres de ellos se renombraron para sacarles el tributo del nombre, y los viejos siguen en el
 # catálogo marcados en `obsoletos`. Así que esta tupla y la de la 1.0 divergen para siempre, a propósito. `contrapartida` y `tesoreria`

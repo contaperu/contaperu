@@ -45,6 +45,7 @@ CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()
 """
 from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO, NUMERO_DETRACCION_PENDIENTE
 from .faltas import (AnuladaConDeposito, CONTADOR, CuentaSinClase, FALTA, FALTAS, LibroQueElMotorNoOrigina,
+                     LibroQueTodaviaNoSeNumera,
                      MovimientoSinImputar, PROVEEDOR, SISTEMA, SinCuentaDeEfectivo, TraspasoEnDosPatas,
                      Falta, SinCodigoDeMoneda, NoExportable,
                      RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCodigoDetraccion, SinCuenta,
@@ -63,9 +64,10 @@ from .resolucion import (anulada_por_nota, asienta_sin_efecto, comprobantes_anul
 from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
-from .indice import Cabecera, ComprobanteDelAsiento, exportacion_de
-from .movimiento import (CUENTA_ITF, GRUPO_EFECTIVO, cuenta_de_efectivo, lineas_del_movimiento,
-                        traspasos_en_dos_patas)
+from .indice import (Cabecera, CabeceraDeMovimiento, ComprobanteDelAsiento, MovimientoDelAsiento,
+                     exportacion_de, identidad_de_movimiento)
+from .movimiento import (CUENTA_ITF, GRUPO_EFECTIVO, cabecera_de_movimiento, cuenta_de_efectivo,
+                        lineas_del_movimiento, lineas_e_indice_de_movimientos, traspasos_en_dos_patas)
 from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, TIPOS_DEL_MOTOR, LineaSinComprobante, cabecera_de,
                     constancia_de,
                     glosa_de, indice_de_lineas_dadas, lineas_del_comprobante, lineas_del_libro,
@@ -77,7 +79,9 @@ __all__ = [
     "SinCentro", "SinCodigoDetraccion", "SinCuenta", "SinCorrelativo", "SinSigla", "AnuladaConDeposito",
     "LibroQueElMotorNoOrigina", "MovimientoSinImputar", "SinCuentaDeEfectivo", "TraspasoEnDosPatas",
     "CuentaSinClase", "CUENTA_ITF", "GRUPO_EFECTIVO", "cuenta_de_efectivo", "lineas_del_movimiento",
-    "traspasos_en_dos_patas",
+    "traspasos_en_dos_patas", "cabecera_de_movimiento", "lineas_e_indice_de_movimientos",
+    "LibroQueTodaviaNoSeNumera", "CabeceraDeMovimiento", "MovimientoDelAsiento",
+    "identidad_de_movimiento",
     "anulada_por_nota", "comprobantes_anulados_con_deposito", "asienta_sin_efecto",
     "comprobantes_sin_centro", "comprobantes_sin_codigo_detraccion", "comprobantes_sin_cuenta", "con_efecto_contable", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",
     "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo",

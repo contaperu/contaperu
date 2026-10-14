@@ -4,6 +4,74 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.8.0] — 2026-10-13
+
+**El motor origina el libro del dinero.** `TIPOS_DEL_MOTOR` pasa de dos a tres, y el tercero entra **por su propia
+puerta**: no se enseñó a la de los comprobantes a sacar un asiento de tesorería, se le abrió la suya. La de los
+comprobantes sigue siendo de comprobantes y lo dice.
+
+**Ninguna salida de compras ni de ventas se mueve.** Los cuatro snapshots de celdas y el del documento, intactos.
+
+### Lo que esto obligó a partir, que es el trabajo de verdad
+
+El repositorio tenía escrito en cinco sitios «el motor no origina tesorería», y **cada uno lo decía por una razón
+distinta**. Separarlas es casi toda esta versión:
+
+- **`roles` ⟺ el motor lo origina** pasa a ser **`roles` ⟺ la regla los deriva**. Tesorería declara los suyos
+  —`tesoreria`, `tercero`, `principal`— **medidos ejecutando el motor**, que es lo que su propia nota prometía
+  desde el 10-oct: *«los roles se declararán medidos, ejecutando el motor, el día que emita su primera línea»*.
+- **`sub_diario` vacío ⟺ no se origina** pasa a **⟺ no se NUMERA**, que es lo que de verdad significaba: el motor
+  sabe armar su asiento y no sabe numerarlo, porque numerar es por sub-diario y el suyo espera el archivo real que
+  diga cuál es. Lo comprueba una falta nueva, `LibroQueTodaviaNoSeNumera`, que además **cierra en voz alta la
+  puerta legacy**: hasta hoy ese camino reventaba con un `KeyError` pelado, fuera del contrato de errores.
+- **«Sin `sub_diario` y `cuenta_contraparte` no se puede armar un asiento»** era falso, y tesorería es la prueba.
+  Las tres cosas que ese bucle exigía —el lado fijo, el otro lado, y la cuenta con la que se salda— son
+  consecuencia de **una sola**: que el libro fije el lado. Ahora el bucle recorre los libros que lo fijan, y se
+  añade la equivalencia que la tabla ya tenía escrita en prosa: **la contrapartida la pone la imputación
+  exactamente cuando el lado no lo fija el libro**.
+- Y el bucle de los que **no** lo fijan se queda con su conjunto **nombrado**, porque al mover tesorería de un lado
+  al otro estuvo a un paso de quedarse vacío — y un test que deja de comprobar es el único que no avisa.
+
+### El rol `tesoreria` deja de estar reservado, y lo desbloqueó una fuente
+
+No una decisión: el **elemento 10 del PCGE 2026**, «Efectivo y equivalentes al efectivo» (p. 17), que es palabra
+por palabra lo que el catálogo del estándar define como ese rol. Con eso la regla distingue las tres líneas de un
+libro de tesorería sin adivinar: lleva `contraparte_doc` → `tercero` (la decisión del 11-oct); su cuenta empieza
+por `10` → `tesoreria`; si no → `principal`.
+
+La rama va **antes** de las otras dos, y no es un detalle: las dos leen `rasgos.sentido_contraparte`, que en un
+libro cuyo lado lo dice cada operación **levanta** en vez de contestar. El que sigue reservado es `contrapartida`,
+para el diario que produce un ERP (B13).
+
+### Añadido
+
+- **`lineas_e_indice_de_movimientos`**, hermana de `lineas_e_indice_del_libro` y con la misma forma de salida, para
+  que lo que viene después —cuadrar, hashear, escribir— no sepa de cuál de las dos salió.
+- **`CabeceraDeMovimiento` y `MovimientoDelAsiento`**, gemelos de los del comprobante. **No se reutiliza
+  `Cabecera`**: está anclada campo a campo contra el `$defs/comprobante`, así que meter un movimiento dentro haría
+  que `como_comprobante()` escribiera un comprobante que no existe. Su `como_movimiento()` valida contra
+  `$defs/movimiento`, con la misma disciplina.
+- **`identidad_de_movimiento`**, que es `Movimiento.clave` escrita, con un test que comprueba que el diccionario
+  reconstruye la tupla para que no puedan separarse.
+- **`exportacion_de` cambia de clave, no de forma**: devuelve `{"huella", libro.rasgos.origen: [...]}` —
+  `comprobantes` o `movimientos`—. **Para esto `RASGOS.origen` es singular**, y quien lee la respuesta sabe qué hay
+  dentro sin mirar. La identidad la pregunta a la entrada en vez de resolverla ella, que es lo que permite que la
+  misma función sirva para los dos.
+- **El maestro de cuentas bancarias es configuración** (`cuentas_bancarias`), decisión de John del 13-oct-2026.
+  Tiene a su favor algo que el diseño no había visto: **la aplicación que integra el motor ya lo trata así**, con
+  su pantalla de ajustes. Lo que valida cada cuenta sigue siendo `tesoreria.leer`, que existe desde la 8.2.
+- **Diez casos más** en `tests/test_asiento_movimiento.py`.
+
+### Cambiado
+
+- **`por_cuenta` de un libro de tesorería ya deriva sus roles** (`roles_derivados: true`), donde antes contestaba
+  que era una pregunta sin respuesta.
+- **Dos barridos de roles comparan ahora contra los de SU libro** y no contra todos los que el motor emite: el
+  séptimo sale del libro del dinero y de un comprobante no puede salir. Y el que exige que todos los roles tengan
+  clase **necesita los dos libros**, que es la prueba de que ese rol dejó de estar reservado por una razón.
+- **La prosa que dejó de ser verdad**, en seis sitios: `revisar_tesoreria` y su texto del MCP ya no dicen que el
+  asiento «espera tres datos que no tenemos», sino que mirar y asentar son dos preguntas distintas.
+
 ## [12.7.0] — 2026-10-13
 
 **El motor sabe armar la línea de diario de un movimiento de tesorería, y todavía nadie se la pide.** Es el grano

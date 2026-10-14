@@ -704,7 +704,10 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
                 PAQUETE / "tributos" / "igv.py", PAQUETE / "tributos" / "detracciones.py",
                 PAQUETE / "pipeline" / "armado.py",
                 *sorted((PAQUETE / "drivers" / "contrato").rglob("*.py"))]
-    permitidas = GENERALES | DEL_ASIENTO | {"imputaciones", "columnas", "monedas_codigo"}
+    # `imputaciones` e `imputaciones_de_movimientos` las INYECTA el pipeline dentro de la configuración: no se
+    # declaran como campo porque no son ajustes, son lo que el contador decidió para ESE documento.
+    permitidas = GENERALES | DEL_ASIENTO | {"imputaciones", "imputaciones_de_movimientos", "columnas",
+                                            "monedas_codigo"}
     ajenas = {str(f.relative_to(PAQUETE)).replace("\\", "/"): sorted(_claves_leidas(f) - permitidas) for f in archivos}
     assert {f: claves for f, claves in ajenas.items() if claves} == {}
     assert "monedas_codigo" in _propias(drivers.concar) and "moneda" in drivers.concar.EXIGE

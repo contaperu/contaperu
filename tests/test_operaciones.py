@@ -448,14 +448,14 @@ def test_el_pre_mayor_deriva_los_roles_y_dice_si_pudo():
 def test_un_libro_sin_roles_lo_dice_y_uno_que_no_existe_es_un_error():
     """Dos huecos que no son lo mismo, y por eso no se contestan igual.
 
-    Tesorería **no declara roles** mientras el motor no sepa armar su asiento (el hito D6): la columna viene vacía
-    y `roles_derivados` lo dice, porque es una pregunta sin respuesta todavía. Un `tipo` que el motor no conoce es
-    otra cosa: un libro mal escrito dejaría la columna vacía en silencio, así que para y dice qué libros conoce."""
+    **Tesorería dejó de ser un hueco en la 12.8**: declara sus roles y la regla los deriva, así que la columna sale
+    llena y `roles_derivados` lo dice. Lo que sigue siendo otra cosa es un `tipo` que el motor no conoce: un libro
+    mal escrito dejaría la columna vacía en silencio, así que para y dice qué libros conoce."""
     from contaperu.modelo.libro import LibroSinRasgos
 
     lineas = [{"cuenta": "104111", "debe_haber": "D", "importe": "100.00", "clase": "activo", "moneda": "PEN"}]
     tesoreria = api.por_cuenta(lineas, {**LIBRO, "tipo": "tesoreria"})
-    assert tesoreria["roles_derivados"] is False and tesoreria["cuentas"][0]["roles"] == []
+    assert tesoreria["roles_derivados"] is True and tesoreria["cuentas"][0]["roles"] == ["tesoreria"]
 
     with pytest.raises(LibroSinRasgos) as e:
         api.por_cuenta(lineas, {**LIBRO, "tipo": "inventario"})

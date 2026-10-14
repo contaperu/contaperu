@@ -17,9 +17,10 @@ su `Decimal` escrito, sin redondear nada.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Sequence
+from typing import Any, Sequence
 
 from ..modelo import Libro, clave_de, identidad_de
+from ..tesoreria import clave_de as clave_de_movimiento
 from .huella import huella
 from .lineas import LineaDiario
 
@@ -181,8 +182,110 @@ class ComprobanteDelAsiento:
         return {"posicion": self.posicion, "sub_diario": self.sub_diario, "correlativo": self.correlativo,
                 "lineas": [self.desde, self.hasta], "cabecera": self.cabecera.a_dict()}
 
+    def identidad(self, libro: Libro) -> dict:
+        """Con qué se reconoce este tramo si el documento vuelve a aparecer.
 
-def exportacion_de(libro: Libro, lineas: Sequence[LineaDiario], indice: Sequence[ComprobanteDelAsiento]) -> dict:
+        La pregunta la contesta la ENTRADA y no `exportacion_de`, que es lo que permite que la misma función sirva
+        para un comprobante y para un movimiento: cada uno sabe cómo se nombra, y el de arriba no tiene que saberlo.
+        """
+        return identidad_de(libro, self.cabecera)
+
+
+@dataclass(frozen=True)
+class CabeceraDeMovimiento:
+    """Los hechos de un movimiento que un driver necesita al lado de sus líneas, y que ninguna línea guarda.
+
+    Gemela de `Cabecera` y **no una reutilización**: aquélla está anclada campo a campo contra el `$defs/comprobante`
+    del estándar, así que meter un movimiento dentro haría que `como_comprobante()` escribiera un comprobante que no
+    existe. Aquí la promesa es la misma con el otro papel: todo hecho del movimiento, ningún dato del proceso —fuera
+    quedan `origen`, `confianza`, `datos_originales` y las `referencias`, que son lo que el papel dice que cancela y
+    no lo que se asentó—.
+
+    Todo en texto, como en el estándar."""
+
+    cuenta: str = ""                 # el `id` de la cuenta en el maestro, que es como un movimiento la nombra
+    cuenta_contable: str = ""        # y la 104 con la que se asentó, que sale del maestro y no del movimiento
+    fecha: str = ""
+    fecha_valor: str = ""
+    descripcion: str = ""            # el texto del banco, no la glosa del libro
+    importe: str = "0"
+    sentido: str = ""                # cargo | abono, lo que dice el papel
+    efecto: str = ""                 # entrada | salida | transferencia, ya compuesto con su imputación
+    moneda: str = ""
+    referencia: str = ""             # el número que dio el banco
+    constancia: str = ""             # el número del papel que lo prueba
+    contraparte_tipo_doc: str = ""
+    contraparte_doc: str = ""
+    contraparte_nombre: str = ""
+    medio_pago: str = ""
+    itf: str = ""                    # vacío no es cero: es «el banco no lo dice»
+    id_externo: str = ""
+
+    def a_dict(self) -> dict:
+        """Todos los campos, también los vacíos: un driver recibe la lista completa de hechos para saber que existen.
+        Para escribir un movimiento del estándar, `como_movimiento`."""
+        return asdict(self)
+
+    def como_movimiento(self) -> dict:
+        """Esta cabecera como un `movimiento` del estándar, listo para el bloque `movimientos` de un documento.
+
+        Espejo de `Cabecera.como_comprobante`, y con sus dos mismas diferencias: **fuera lo vacío**, porque el
+        estándar distingue «no lo sé» de «es esto» y lo primero se dice omitiendo la clave; y **fuera lo que el
+        estándar no declara**, que aquí es `cuenta_contable` —la 104 sale del maestro de cuentas, no del
+        movimiento— y `efecto`, que es derivado (`tesoreria.efecto_de`)."""
+        fuera = {"cuenta_contable", "efecto"}
+        return {k: v for k, v in asdict(self).items() if k not in fuera and v not in ("", None, {}, [])}
+
+    @property
+    def clave(self) -> tuple:
+        """La misma identidad de duplicados que `Movimiento.clave`, calculada con la misma función."""
+        return clave_de_movimiento(self.cuenta, self.referencia, self.fecha, self.sentido, self.importe,
+                                   self.descripcion)
+
+
+@dataclass(frozen=True)
+class MovimientoDelAsiento:
+    """Un movimiento dentro del asiento del libro. Misma forma que `ComprobanteDelAsiento`, para que `desde`,
+    `hasta` y `lineas()` sigan sirviendo sin que nadie tenga que saber de cuál de los dos se trata."""
+
+    posicion: int
+    sub_diario: str
+    correlativo: str
+    desde: int
+    hasta: int
+    cabecera: CabeceraDeMovimiento
+
+    def lineas(self, todas: Sequence[LineaDiario]) -> list[LineaDiario]:
+        return list(todas[self.desde:self.hasta])
+
+    def a_dict(self) -> dict:
+        return {"posicion": self.posicion, "sub_diario": self.sub_diario, "correlativo": self.correlativo,
+                "lineas": [self.desde, self.hasta], "cabecera": self.cabecera.a_dict()}
+
+    def identidad(self, libro: Libro) -> dict:
+        return identidad_de_movimiento(libro, self.cabecera)
+
+
+def identidad_de_movimiento(libro: Libro, m: Any) -> dict:
+    """La identidad estable de un movimiento: **su `clave` escrita**, con el RUC y el libro delante.
+
+    Dos ramas, las mismas dos de `tesoreria.clave_de`: con el número que dio el banco basta ese número, y sin él
+    hacen falta la fecha, el sentido, el importe y el texto. Un test comprueba que este diccionario reconstruye esa
+    tupla, para que no puedan separarse."""
+    cuenta = str(_de(m, "cuenta") or "")
+    referencia = str(_de(m, "referencia") or "")
+    base = {"ruc": libro.ruc, "libro": libro.tipo, "cuenta": cuenta}
+    if referencia:
+        return {**base, "referencia": referencia}
+    return {**base, "fecha": str(_de(m, "fecha") or ""), "sentido": str(_de(m, "sentido") or ""),
+            "importe": str(_de(m, "importe") or ""), "descripcion": str(_de(m, "descripcion") or "")}
+
+
+def _de(cosa: Any, nombre: str) -> Any:
+    return cosa.get(nombre) if isinstance(cosa, dict) else getattr(cosa, nombre, None)
+
+
+def exportacion_de(libro: Libro, lineas: Sequence[LineaDiario], indice: Sequence[Any]) -> dict:
     """Lo que hay que saber de un asiento para reconocerlo después: su huella y, por comprobante, su identidad, el
     tramo de líneas que le toca (`[desde, hasta)`) y la huella de ese tramo. Los tramos parten las líneas sin dejar
     hueco ni solaparse.
@@ -193,6 +296,9 @@ def exportacion_de(libro: Libro, lineas: Sequence[LineaDiario], indice: Sequence
     3.1 vivía solo en `pipeline/salida.py` y el archivo salía sin ello: quien recibiera el JSON a secas se quedaba
     sin la clave con la que no repetir un comprobante."""
     return {"huella": huella(lineas),
-            "comprobantes": [{"identidad": identidad_de(libro, entrada.cabecera),
-                              "lineas": [entrada.desde, entrada.hasta],
-                              "huella": huella(entrada.lineas(lineas))} for entrada in indice]}
+            # **La clave la dice la tabla**, y para eso `RASGOS.origen` es singular: `comprobantes` en una compra o
+            # una venta, `movimientos` en tesorería. No es cosmética — quien lee la respuesta sabe qué hay dentro
+            # sin mirar, y el día que entre un libro más no hay que decidirlo otra vez.
+            libro.rasgos.origen: [{"identidad": entrada.identidad(libro),
+                                   "lineas": [entrada.desde, entrada.hasta],
+                                   "huella": huella(entrada.lineas(lineas))} for entrada in indice]}

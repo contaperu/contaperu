@@ -305,7 +305,8 @@ def test_lo_que_arma_el_motor_valida_contra_el_estandar():
                      "periodo": "202608", "tipo": "compra"},
            "asiento": [ln.a_dict() for ln in lineas]}
     assert list(validador.iter_errors(doc)) == []
-    assert {papel(ln, RASGOS["compra"]) for ln in lineas} == set(asi.ROLES_DEL_MOTOR)
+    # Los de SU libro: el séptimo que el motor emite, `tesoreria`, sale del libro del dinero (12.8).
+    assert {papel(ln, RASGOS["compra"]) for ln in lineas} == set(RASGOS["compra"].roles)
 
 
 # --- el driver CSV -----------------------------------------------------------------

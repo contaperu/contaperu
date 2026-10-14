@@ -318,6 +318,25 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
           ayuda="Los centros de costo de la empresa, con su código y su nombre.",
           valores=Campo("", "objeto", grupo="centros", campos=(Campo("codigo", "texto", titulo="Código"),
                                                                Campo("nombre", "texto", titulo="Nombre")))),
+    # El maestro de cuentas bancarias del contribuyente (12.8), **que es configuración y no un bloque del
+    # documento**: es lo que la empresa ES —sus cuentas, con la 104 de cada una— y no lo que un periodo dijo.
+    # Decisión de John del 13-oct-2026, y tiene a su favor que la aplicación que integra el motor ya lo trata así:
+    # tiene su pantalla de ajustes, con sus `guardar_cuentas_bancarias` y `mis_cuentas_bancarias`. Entra entero y
+    # no por partes porque un traspaso necesita dos de ellas a la vez.
+    #
+    # Aquí se declara su FORMA, para que `describir_configuracion` lo publique y una aplicación sepa dónde
+    # guardarlo; lo que valida cada cuenta —el CCI de veinte dígitos, la moneda del catálogo, el `id` único— es
+    # `tesoreria.leer`, que ya existía como argumento de `validar_cuentas_bancarias` desde la 8.2.
+    Campo("cuentas_bancarias", "lista", titulo="Cuentas bancarias", grupo="cuentas",
+          ayuda="Las cuentas del contribuyente, cada una con la cuenta contable (su 104) con la que se asienta. "
+                "Sin ellas no se puede armar el asiento de un movimiento: el motor no deriva la 104.",
+          valores=Campo("", "objeto", grupo="cuentas", campos=(
+              Campo("id", "texto", titulo="Identificador"),
+              Campo("banco", "texto", titulo="Banco"),
+              Campo("numero", "texto", titulo="Número"),
+              Campo("cci", "texto", titulo="CCI"),
+              Campo("moneda", "texto", titulo="Moneda"),
+              Campo("cuenta_contable", "texto", titulo="Cuenta contable", patron=PATRON_CUENTA)))),
     # QUÉ cuentas lo llevan, por PREFIJO (el contador, 09-sep-2026): «la cuenta 63 y 65 tiene habilitado el centro de
     # costo, pero cuando es una cuenta 60 por defecto no se debe asignar un centro de costo». En el sistema contable
     # esa marca vive en cada cuenta del plan; aquí se declara por prefijo, que es lo que un estudio sabe decir. El `70`

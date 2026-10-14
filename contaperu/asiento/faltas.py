@@ -267,6 +267,24 @@ class TraspasoEnDosPatas(NoExportable):
         self.cuales = list(cuales)
 
 
+class LibroQueTodaviaNoSeNumera(NoExportable):
+    """Un libro que el motor origina y cuyo sub-diario todavía no tiene clave de configuración.
+
+    Es la otra mitad de `LibroQueElMotorNoOrigina`, y la separa una distinción que tesorería hizo visible: el motor
+    **sabe armar** su asiento y **no sabe numerarlo**, porque numerar es por sub-diario y el suyo espera un archivo
+    real que diga cuál es. Con vocabulario neutral no hace falta —ese documento no lleva correlativo—, así que lo
+    que esto para es el camino legacy, que si no reventaría con un `KeyError` pelado fuera del contrato de errores.
+    """
+
+    clave = "libro_que_todavia_no_se_numera"
+
+    def __init__(self, tipo: str):
+        super().__init__(f"El asiento de un libro {tipo!r} todavía no se numera: su sub-diario no tiene clave de "
+                         "configuración, y entra con el archivo real que lo pida. Sin numerar sí sale, con el "
+                         "vocabulario neutral del estándar")
+        self.tipo = tipo
+
+
 class CuentaSinClase(NoExportable):
     """Una cuenta de un elemento del PCGE que no tiene clase contable: el 8 y el 0.
 

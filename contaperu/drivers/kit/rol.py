@@ -41,6 +41,10 @@ from typing import Any
 from ...catalogos import TIPOS_INVIERTEN
 from ...modelo.libro import RASGOS, rasgos_de
 
+# El elemento del PCGE en el que vive el efectivo: «10 · EFECTIVO Y EQUIVALENTES AL EFECTIVO» (p. 17).
+# Es la fuente con la que se distingue la línea del dinero de la de un gasto en un libro de tesorería.
+GRUPO_EFECTIVO = "10"
+
 # Los tres roles que su propio bloque tipado identifica, en el orden en que se preguntan. El orden importa en uno:
 # la línea de la detracción **también** lleva `contraparte_doc`, así que si se preguntara antes por la contraparte
 # saldría clasificada como tercero.
@@ -48,13 +52,15 @@ POR_SU_BLOQUE: tuple[tuple[str, str], ...] = (("impuesto", "impuesto"), ("retenc
                                               ("detraccion", "detraccion"))
 
 
-# Los papeles que esta regla puede devolver, enumerados al lado de la función que los devuelve. El catálogo del
-# estándar publica dos más —`contrapartida` y `tesoreria`—, y están RESERVADOS **para dos hitos distintos**:
-# `tesoreria` para el asiento de tesorería (D6) y `contrapartida` para el diario que produce un ERP (B13). Un pago a
-# un proveedor NO usa `contrapartida`: su 42 lleva `contraparte_doc`, así que es `tercero` y la regla de abajo ya
-# sabría derivarlo. Que «reservado» signifique algo lo comprueba
-# `tests/test_vocabulario.py`, comparando esta tupla con lo que los libros declaran.
-ROLES_QUE_DERIVA: frozenset[str] = frozenset({rol for _, rol in POR_SU_BLOQUE} | {"tercero", "recorte", "principal"})
+# Los papeles que esta regla puede devolver, enumerados al lado de la función que los devuelve. **`tesoreria` dejó
+# de estar reservado en la 12.8**, cuando el motor empezó a emitir la línea del efectivo: lo que lo desbloqueó no
+# fue una decisión sino una fuente, el elemento **10 del PCGE** —«Efectivo y equivalentes al efectivo», p. 17—, que
+# es palabra por palabra lo que el catálogo del estándar define como ese rol («el dinero moviéndose: caja, banco o
+# equivalente»). El que sigue RESERVADO es `contrapartida`, para el diario que produce un ERP (B13), y un pago a un
+# proveedor NO lo usa: su 42 lleva `contraparte_doc`, así que es `tercero`. Que «reservado» signifique algo lo
+# comprueba `tests/test_vocabulario.py`, comparando esta tupla con lo que los libros declaran.
+ROLES_QUE_DERIVA: frozenset[str] = frozenset({rol for _, rol in POR_SU_BLOQUE}
+                                             | {"tercero", "recorte", "principal", "tesoreria"})
 
 
 class RolNoDerivable(ValueError):
@@ -62,7 +68,7 @@ class RolNoDerivable(ValueError):
 
     No es un fallo de la regla: es que no hay nada que derivar. Un libro de tesorería no declara roles
     (`modelo.RASGOS`) justamente porque el motor no emite ni una línea suya, así que nadie sabe todavía qué papeles
-    tendrá su asiento — lo dirá el archivo del destino que lo acepte, que es el hito D6."""
+    tendrá su asiento — lo dirá el archivo del destino que lo acepte."""
 
 
 def _campo(linea: Any, nombre: str) -> Any:
@@ -92,6 +98,16 @@ def rol_de(linea: Any, libro: Any) -> str:
     for bloque, rol in POR_SU_BLOQUE:
         if _campo(linea, bloque):
             return rol
+
+    # **El libro del dinero se deriva aparte, y antes**, por dos razones. Una es que sus dos tramos de abajo leen
+    # `rasgos.sentido_contraparte`, que en un libro cuyo lado lo dice cada operación **levanta** en vez de
+    # contestar. La otra es que aquí no hay un lado «de la contraparte» que preguntar: lo que distingue una línea
+    # de otra es QUÉ cuenta es, y para eso hay fuente publicada —el elemento 10 del PCGE—.
+    if rasgos.origen == "movimientos":
+        if str(_campo(linea, "contraparte_doc") or "").strip():
+            return "tercero"            # el 42 de un pago o el 12 de un cobro: se le debe a alguien
+        cuenta = str(_campo(linea, "cuenta") or "").strip()
+        return "tesoreria" if cuenta.startswith(GRUPO_EFECTIVO) else "principal"
 
     # El lado al que va la contraparte en este libro, cambiado si el comprobante invierte los sentidos.
     tipo_cp = str((_campo(linea, "documento") or {}).get("tipo_cp") or "").strip()

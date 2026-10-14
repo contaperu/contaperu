@@ -142,7 +142,7 @@ class ImputacionDeMovimiento:
         el contador por la imputación», y esto ya ES la imputación. Si el reparto no cuadra, lo que hay es una
         decisión a medias y no un dato que falte.
 
-        **El ITF queda fuera** de la suma: son sus dos líneas propias, y esperan su norma (el hito D6)."""
+        **El ITF queda fuera** de la suma: son sus dos líneas propias, en su propio asiento (12.7)."""
         if not self.reparto:
             return
         if self.repartido != importe:

@@ -100,21 +100,42 @@ def test_ninguna_linea_sale_sin_clase():
 
 
 def test_todos_los_roles_tienen_clase_en_un_asiento_completo():
-    """El asiento de un recibo por honorarios con retención y el de una compra con detracción cubren los seis roles
-    **que el motor escribe**.
+    """Los SIETE roles que el motor escribe, y hacen falta los dos libros para cubrirlos.
 
-    No los del catálogo, que desde el 1-oct-2026 son ocho: `contrapartida` y `tesoreria` son vocabulario para quien
-    produce un asiento que el motor no origina —una depreciación, un pago—, y no hay forma de sacarlos de un
-    comprobante. Exigirlos aquí invitaría a emitir un rol solo para que este test pasara."""
+    De un comprobante salen seis —el recibo por honorarios con retención y la compra con detracción—, y el séptimo,
+    `tesoreria`, **no se puede sacar de uno**: es la línea del dinero, y la emite el otro libro desde la 12.8. Que
+    este test necesite los dos es la prueba de que ese rol dejó de estar reservado por una razón y no por capricho.
+
+    El que sigue fuera es `contrapartida`, vocabulario para el diario que produce un ERP (B13): no hay forma de
+    sacarlo de ninguno de los dos, y exigirlo aquí invitaría a emitir un rol solo para que este test pasara."""
+    from contaperu import asiento as _asiento, tesoreria
+    from contaperu.configuracion import CONFIG_POR_DEFECTO
+    from contaperu.modelo import Libro
+
     vistos = {}
     for cuenta, extra in [("634301", {"detraccion": {"codigo": "037", "porcentaje": "12"}}),
                           ("632101", {"tipo_cp": "02", "base_gravada": "0", "igv": "0",
                                       "inafecto": "3000.00", "total": "3000.00", "retencion": "240.00"})]:
         for ln in asiento(cuenta, **extra):
             vistos[papel(ln, LIBRO["tipo"])] = ln["clase"]
+
+    # El libro del dinero: un pago a proveedor (el 42 es `tercero`, el banco es `tesoreria`) y una comisión, cuyo
+    # gasto es `principal` — los tres que la tabla declara para este libro.
+    banco = Libro(ruc="20601234567", razon_social="X", periodo="202601", tipo="tesoreria")
+    cuentas = tesoreria.por_id([{"id": "bbva", "moneda": "PEN", "cuenta_contable": "104101"}])
+    limites = _asiento.limites_del_periodo(banco)
+    for imputacion, doc in ((tesoreria.ImputacionDeMovimiento(cuenta_contable="421201",
+                                                              contraparte_doc="20602222226"), "mov-1"),
+                            (tesoreria.ImputacionDeMovimiento(cuenta_contable="639101"), "mov-2")):
+        m = tesoreria.Movimiento(cuenta="bbva", fecha="2026-01-15", importe="100.00", sentido="cargo",
+                                 moneda="PEN", id_externo=doc)
+        for ln in _asiento.lineas_del_movimiento(m, imputacion, cuentas, CONFIG_POR_DEFECTO, limites):
+            vistos[papel(ln.a_dict(), "tesoreria")] = ln.clase
+
     assert set(vistos) == set(ROLES_DEL_MOTOR), (
         f"faltan roles por cubrir: {set(ROLES_DEL_MOTOR) - set(vistos)}")
     assert all(vistos.values()), vistos
+    assert vistos["tesoreria"] == "activo", "el dinero es un activo, y lo dice su cuenta"
 
 
 # ── Todas las cuentas del asiento, no solo la de la base ──────────────────────────────────────────────────────

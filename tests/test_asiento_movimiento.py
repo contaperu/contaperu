@@ -286,9 +286,101 @@ def test_la_cuenta_del_efectivo_se_resuelve_en_un_solo_sitio():
     assert Decimal(CONFIG_POR_DEFECTO["cuentas"][asiento.CUENTA_ITF][:4]) == Decimal("6412")
 
 
-def test_el_libro_de_tesoreria_todavia_no_lo_origina_el_motor():
-    """Esta versión arma las líneas y nadie se las pide: `lineas_e_indice_del_libro` sigue parando. Es el grano
-    más fino de «el motor va primero»."""
-    with pytest.raises(asiento.LibroQueElMotorNoOrigina):
-        asiento.lineas_e_indice_del_libro(LIBRO, [], CONFIG_POR_DEFECTO, {})
+def test_el_libro_de_tesoreria_lo_origina_el_motor_por_su_propia_puerta():
+    """Desde la 12.8 el motor lo origina, y por una puerta distinta: la de los comprobantes sigue siendo de
+    comprobantes, y lo dice en vez de intentarlo."""
+    with pytest.raises(ValueError, match="no sale de movimientos"):
+        asiento.lineas_e_indice_de_movimientos(
+            Libro(ruc="20601234567", razon_social="X", periodo="202610", tipo="compra"), [], CONFIG_POR_DEFECTO)
+    assert "tesoreria" in asiento.TIPOS_DEL_MOTOR
     assert date(2026, 10, 1) == LIMITES[0] and date(2026, 10, 31) == LIMITES[1]
+
+
+# --- el índice, y la clave que dice la tabla (12.8) ----------------------------------------------------------------
+
+def documento_con(*movimientos, imputaciones=None) -> tuple:
+    """Lo que `lineas_e_indice_de_movimientos` recibe: la imputación y el maestro viajan DENTRO de la config, que es
+    el mismo sitio por el que ya llega la imputación de un comprobante."""
+    config = dict(CONFIG_POR_DEFECTO, imputaciones_de_movimientos=imputaciones or {},
+                  cuentas_bancarias=CUENTAS)
+    return asiento.lineas_e_indice_de_movimientos(LIBRO, list(movimientos), config)
+
+
+def test_el_indice_parte_las_lineas_sin_hueco_ni_solape():
+    uno, dos = mov(id_externo="m1"), mov(id_externo="m2", importe="15.00")
+    imputaciones = {"m1": imputacion(cuenta_contable="421201"), "m2": imputacion(cuenta_contable="639101")}
+    lineas, rangos, indice = documento_con(uno, dos, imputaciones=imputaciones)
+    assert rangos == {}, "con vocabulario neutral no se numera"
+    assert [(e.desde, e.hasta) for e in indice] == [(0, 2), (2, 4)]
+    assert sum(len(e.lineas(lineas)) for e in indice) == len(lineas)
+
+
+def test_la_cabecera_del_movimiento_lleva_la_104_y_el_efecto_ya_compuesto():
+    """Dos cosas que el movimiento NO trae y que ninguna línea guarda: con qué cuenta se asentó, y que ese cargo
+    era en realidad media transferencia."""
+    _, _, indice = documento_con(mov(id_externo="m1"),
+                                 imputaciones={"m1": imputacion(cuenta_propia="bcp-soles")})
+    cabecera = indice[0].cabecera
+    assert cabecera.cuenta_contable == "104101" and cabecera.efecto == "transferencia"
+    assert cabecera.cuenta == "bbva-soles" and cabecera.sentido == "cargo"
+
+
+def test_la_cabecera_escribe_un_movimiento_del_estandar():
+    """Espejo de `como_comprobante`: fuera lo vacío y fuera lo que el estándar no declara —la 104 sale del maestro
+    y el efecto es derivado—."""
+    jsonschema = pytest.importorskip("jsonschema")
+    from contaperu import api
+
+    _, _, indice = documento_con(mov(id_externo="m1"), imputaciones={"m1": imputacion(cuenta_contable="421201")})
+    escrito = indice[0].cabecera.como_movimiento()
+    assert "cuenta_contable" not in escrito and "efecto" not in escrito
+    assert not [k for k, v in escrito.items() if v in ("", None)]
+    validador = jsonschema.Draft202012Validator({"$ref": "#/$defs/movimiento",
+                                                 "$defs": api.esquema_open_accounting()["$defs"]})
+    assert list(validador.iter_errors(escrito)) == []
+
+
+def test_la_identidad_de_un_movimiento_es_su_clave_escrita():
+    """Un test que las ata: si el diccionario y la tupla se separan, dos movimientos iguales dejarían de
+    reconocerse en uno de los dos caminos y nadie lo vería."""
+    _, _, indice = documento_con(mov(id_externo="m1"), imputaciones={"m1": imputacion(cuenta_contable="421201")})
+    identidad = indice[0].identidad(LIBRO)
+    assert identidad == {"ruc": LIBRO.ruc, "libro": "tesoreria", "cuenta": "bbva-soles", "referencia": "000123"}
+    assert tuple(v for k, v in identidad.items() if k not in ("ruc", "libro")) == indice[0].cabecera.clave
+    # Y sin número del banco, las otras cinco piezas: la misma segunda rama de `clave_de`.
+    _, _, otro = documento_con(mov(id_externo="m2", referencia=""),
+                               imputaciones={"m2": imputacion(cuenta_contable="421201")})
+    assert set(otro[0].identidad(LIBRO)) == {"ruc", "libro", "cuenta", "fecha", "sentido", "importe", "descripcion"}
+
+
+def test_la_clave_de_la_exportacion_la_dice_la_tabla():
+    """`RASGOS.origen` es singular para esto: en tesorería la respuesta habla de `movimientos`, no de
+    `comprobantes`. Quien la lee sabe qué hay dentro sin mirar."""
+    lineas, _, indice = documento_con(mov(id_externo="m1"),
+                                      imputaciones={"m1": imputacion(cuenta_contable="421201")})
+    exportacion = asiento.exportacion_de(LIBRO, lineas, indice)
+    assert set(exportacion) == {"huella", "movimientos"}
+    assert exportacion["movimientos"][0]["lineas"] == [0, 2] and exportacion["movimientos"][0]["huella"]
+
+
+def test_un_movimiento_sin_imputar_los_reune_todos_antes_de_parar():
+    """Decirlos de uno en uno obliga a diez vueltas para arreglar diez."""
+    with pytest.raises(asiento.MovimientoSinImputar) as e:
+        documento_con(mov(id_externo="m1", referencia="A1"), mov(id_externo="m2", referencia="A2"))
+    assert "A1" in str(e.value) and "A2" in str(e.value)
+
+
+def test_un_traspaso_doble_para_antes_de_armar_nada():
+    ida, vuelta = mov(id_externo="m1", importe="5000.00"), mov(id_externo="m2", cuenta="bcp-soles",
+                                                               importe="5000.00", sentido="abono")
+    with pytest.raises(asiento.TraspasoEnDosPatas):
+        documento_con(ida, vuelta, imputaciones={"m1": imputacion(cuenta_propia="bcp-soles"),
+                                                 "m2": imputacion(cuenta_propia="bbva-soles")})
+
+
+def test_el_vocabulario_legacy_para_porque_el_libro_todavia_no_se_numera():
+    """La puerta legacy, cerrada en voz alta: sin sub-diario, `clasificacion.sub_diario` reventaría con un
+    `KeyError` pelado que no es un `ErrorContaperu` y que nadie atrapa."""
+    config = dict(CONFIG_POR_DEFECTO, imputaciones_de_movimientos={}, cuentas_bancarias=CUENTAS)
+    with pytest.raises(asiento.LibroQueTodaviaNoSeNumera, match="no se numera"):
+        asiento.lineas_e_indice_de_movimientos(LIBRO, [], config, vocabulario="legacy")

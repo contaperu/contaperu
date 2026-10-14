@@ -82,9 +82,11 @@ def test_los_papeles_de_un_mes_no_cambian_sin_que_se_decida():
     for archivo in sorted(congelado):
         assert hoy[archivo] == [list(fila) for fila in congelado[archivo]], archivo
 
-    from contaperu.asiento import ROLES_DEL_MOTOR
+    # Contra los roles de los libros que este barrido recorre —comprobantes— y no contra todos los que el motor
+    # emite: desde la 12.8 hay un séptimo, `tesoreria`, que sale del otro libro y de un comprobante no puede salir.
+    de_comprobantes = set(RASGOS["compra"].roles) | set(RASGOS["venta"].roles)
     vistos = {fila[2] for filas in hoy.values() for fila in filas}
-    assert vistos == set(ROLES_DEL_MOTOR), (sorted(vistos), sorted(ROLES_DEL_MOTOR))
+    assert vistos == de_comprobantes, (sorted(vistos), sorted(de_comprobantes))
     assert sum(len(f) for f in hoy.values()) >= 81, "el barrido se encogió"
 
 
@@ -198,13 +200,30 @@ def test_el_bloque_manda_sobre_el_lado():
 
 # ── Los libros que no declaran roles, y las formas en que se puede llamar ──────────────────────────────────────
 
-def test_un_libro_sin_roles_declarados_no_tiene_nada_que_derivar():
-    """Tesorería declara `roles=()` porque el motor no emite ni una línea suya. Pedir el papel de una de sus líneas
-    no es un fallo de la regla: es una pregunta sin respuesta todavía, y se dice así."""
-    assert RASGOS["tesoreria"].roles == ()
+def test_tesoreria_declara_sus_roles_y_la_regla_los_deriva():
+    """**Lo que esto decía hasta la 12.8**: tesorería declaraba `roles=()` porque el motor no emitía ni una línea
+    suya, y pedir el papel de una era una pregunta sin respuesta. Ya la tiene, y la respuesta tiene fuente: el
+    elemento 10 del PCGE dice qué cuenta es dinero.
+
+    La regla no usa el lado, y no puede: en este libro el lado lo dice cada operación, así que `sentido_contraparte`
+    levanta en vez de contestar. Lo que distingue una línea de otra es QUÉ cuenta es."""
+    assert set(RASGOS["tesoreria"].roles) == {"tesoreria", "tercero", "principal"}
+    assert rol_de({"cuenta": "104111", "debe_haber": "D", "importe": "100.00"}, "tesoreria") == "tesoreria"
+    assert rol_de({"cuenta": "421201", "debe_haber": "H", "importe": "100.00",
+                   "contraparte_doc": "20602222226"}, "tesoreria") == "tercero"
+    assert rol_de({"cuenta": "639101", "debe_haber": "D", "importe": "15.00"}, "tesoreria") == "principal"
+
+
+def test_un_libro_sin_roles_declarados_sigue_sin_tener_nada_que_derivar():
+    """La puerta no se fue con tesorería: el día que el catálogo crezca (B13), el libro nuevo entra sin roles y
+    pedir el papel de una de sus líneas tiene que seguir siendo una pregunta sin respuesta y no una adivinanza."""
+    from dataclasses import replace
+
+    inventado = replace(RASGOS["tesoreria"], tipo="diario", roles=())
     with pytest.raises(RolNoDerivable) as e:
-        rol_de({"cuenta": "104111", "debe_haber": "D", "importe": "100.00"}, "tesoreria")
-    assert "compra" in str(e.value) and "venta" in str(e.value), "tiene que decir qué libros SÍ los declaran"
+        rol_de({"cuenta": "104111", "debe_haber": "D", "importe": "100.00"}, inventado)
+    for libro in ("compra", "venta", "tesoreria"):
+        assert libro in str(e.value), "tiene que decir qué libros SÍ los declaran"
 
 
 def test_acepta_la_linea_como_objeto_y_como_diccionario():

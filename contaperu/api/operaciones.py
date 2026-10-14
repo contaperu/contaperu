@@ -122,43 +122,14 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None) -> dic
     etiqueta sino el `saldo`, que solo un extracto trae. Lo que el banco declara en la cabecera de la hoja va en
     `extractos[]`, y la contrapartida que decide el ERP en `imputaciones_de_movimientos`.
 
-    **No asienta nada.** El asiento de tesorería es el hito D6 y espera tres datos que no tenemos: la norma para
-    asentar el ITF —que además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las
-    cuentas del PCGE con su cita, y un archivo del sub-diario de bancos que CONCAR haya aceptado. Lo que esto hace
-    es lo que sí se puede terminar hoy: validar la forma, deduplicar, resumir y reportar lo que no cierra.
+    **Esta operación no asienta, y es a propósito: mirar y asentar son dos preguntas.** Aquí se revisa lo que
+    entró —qué se repitió, qué no tiene contrapartida, qué no cuadra contra lo que el banco declaró— y eso
+    no obliga a nada. El asiento lo arma `generar_asiento` desde la 12.8, y ahí lo que falta ya no se puede
+    reportar: sin la imputación o sin la 104 del maestro no hay línea que escribir.
 
-    **Y no juzga cómo se leyó nada** (12.0), que es la regla que ordena lo que hay aquí dentro. Hasta la 11.x esto
-    recorría la cadena de saldos corridos línea a línea y devolvía un `cuadre`; el problema, que señaló John el
-    11-oct-2026 —*«el cuadre de saldos no garantiza nada, y además no todos tienen eso»*—, es que **sin líneas con
-    `saldo` devolvía `cuadra: true` sin haber mirado nada**, y con una línea inventada también. Un verde que no
-    significa nada es peor que ningún control, y para un ERP que manda operaciones estructuradas —que es lo que
-    este motor recibe— ése era siempre el caso.
-
-    La cadena no desaparece: vive en **`tesoreria.cuadra`, publicada**, porque sigue siendo lo que convierte «leí
-    un PDF» en «lo leí bien». Lo que cambia es dónde se llama — **donde se hace el parseo**, que no es aquí.
-
-    **Lo que sí se comprueba es lo que el banco DECLARÓ contra lo que mandaste.** Los dos totales de la cabecera
-    (`extractos[]`) contra la suma de las líneas, y su saldo final contra la aritmética de esos mismos números.
-    Es la diferencia que lo hace valer: **no puede pasar en vacío**, porque solo corre si la cabecera dice algo, y
-    entonces compara dos números que existen los dos. Y caza lo que la cadena no caza —una línea entera perdida,
-    porque las demás encadenan igual—.
-
-    **El `cuadre` contable de verdad es la partida doble**, y tesorería no lo tiene todavía porque no arma asiento.
-    Llegará con D6, sobre las líneas, como el de cualquier libro.
-
-    Lo que un movimiento dice cancelar tiene su propio cuadre, que es aritmético y distinto: lo que sus
-    `referencias` reclaman no puede pasar del importe —eso para al construirlo—, y **lo que ninguna reclama se
-    reporta y no se cierra**, porque qué es ese resto lo decide el contador por la imputación. Un cargo lleva el
-    ITF dentro.
-
-    Y lo que apunta a una cuenta que nadie declaró se nombra: el `id` es la llave con la que el dinero se enlaza
-    con su 104, y si no está en el maestro no hay nada que deducir.
-
-    **Y dice qué movimientos no tienen todavía su contrapartida** (3.0 del estándar), que es el `sin_cuenta` del
-    dinero: la 104 sale del maestro y la otra cara la pone el ERP en `imputaciones_de_movimientos`, igual que la
-    cuenta de un gasto llega en la imputación de su comprobante. Un reparto que no suma el importe **no se
-    reporta: para** — ese informe existe porque «qué es ese resto lo decide el contador por la imputación», y una
-    imputación a medias no es un dato que falte sino una decisión mal hecha."""
+    Lo que sigue fuera es llevarlo a un sistema legacy: eso espera un archivo del sub-diario de bancos que
+    CONCAR haya aceptado, y con él su sub-diario y su correlativo.
+    """
     doc = documento or {}
     libro = preparacion.libro_de(doc)
     movimientos = preparacion.movimientos_de(doc)

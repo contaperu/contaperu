@@ -85,22 +85,25 @@ def test_la_regla_no_deriva_todos_los_roles_del_catalogo():
     """La distinción que entró con `contrapartida` y `tesoreria`, y que conviene que un test diga en voz alta: el
     catálogo es el vocabulario entero, y `ROLES_DEL_MOTOR` lo que la regla sabe **derivar** hoy.
 
-    Los dos están RESERVADOS para el libro de tesorería, que el motor todavía no sabe armar (el hito D6). Si algún
-    día la regla empieza a producirlos, este test cae y hay que mover el valor a propósito.
+    **`tesoreria` dejó de estar reservado en la 12.8**, cuando el motor emitió su primera línea de ese libro y la
+    regla aprendió a derivarla —por el elemento 10 del PCGE, que es la fuente publicada de qué cuenta es dinero—.
+    Queda uno, `contrapartida`, para el diario que produce un ERP (B13). Si algún día la regla empieza a
+    producirlo, este test cae y hay que mover el valor a propósito, que es justo lo que acaba de pasar con el otro.
 
     Hasta la 10.0 la frase era «lo que el motor **emite**», porque el motor escribía el `rol` en cada línea. Ya no
-    lo escribe: el papel se deriva de lo que la línea trae, y la tupla sigue siendo la misma seis."""
+    lo escribe: el papel se deriva de lo que la línea trae."""
     assert set(motor.ROLES_DEL_MOTOR) < set(vocabulario.ROLES)
     # El CONTENIDO, no el orden: la tupla se deriva de los rasgos en el orden del catálogo desde el 10-oct-2026,
     # así que fijar el orden a mano aquí sería congelar un detalle de la derivación en vez de la promesa.
-    assert set(motor.ROLES_DEL_MOTOR) == {"principal", "impuesto", "retencion", "tercero", "recorte", "detraccion"}
+    assert set(motor.ROLES_DEL_MOTOR) == {"principal", "impuesto", "retencion", "tercero", "recorte", "detraccion",
+                                          "tesoreria"}
     # Y que de verdad se derive: es la unión de lo que declaran los libros que el motor origina, sin lista aparte.
     declarados = {r for tipo in motor.TIPOS_DEL_MOTOR for r in RASGOS_DE_LIBRO[tipo].roles}
     assert set(motor.ROLES_DEL_MOTOR) == declarados
-    assert len(motor.ROLES_DEL_MOTOR) == 6
-    # Lo que la regla NO produce son exactamente los dos reservados. Antes de la 2.0 eran cinco: estaban además los
-    # tres `obsoletos` de la 5.0, que se fueron del catálogo con el campo que los llevaba.
-    assert set(vocabulario.ROLES) - set(motor.ROLES_DEL_MOTOR) == {"contrapartida", "tesoreria"}
+    assert len(motor.ROLES_DEL_MOTOR) == 7
+    # Lo que la regla NO produce es exactamente el reservado que queda. Antes de la 2.0 eran cinco: estaban además
+    # los tres `obsoletos` de la 5.0, que se fueron del catálogo con el campo que los llevaba.
+    assert set(vocabulario.ROLES) - set(motor.ROLES_DEL_MOTOR) == {"contrapartida"}
 
     # Y que la regla no los devuelva por accidente, que es lo que «reservado» tiene que significar.
     from contaperu.drivers.kit.rol import ROLES_QUE_DERIVA
@@ -270,9 +273,10 @@ def test_el_motor_no_origina_todos_los_libros_del_catalogo():
     motivo de ponerlo ya: el motor decide casi todo por `libro.es_venta`, y **lo que no es venta lo trata como
     compra**. Sin la puerta, un libro nuevo saldría con el debe y el haber invertidos y la contraparte en la
     cuenta equivocada, sin un solo error. Si algún día el motor aprende a originar un libro más, este test cae y
-    el valor se mueve a `TIPOS_DEL_MOTOR` a propósito."""
+    el valor se mueve a `TIPOS_DEL_MOTOR` a propósito — **y eso pasó en la 12.8**, con tesorería: dejó de ser de
+    adorno exactamente como se había anunciado, y el tercer libro entró por la puerta y no por la ventana."""
     assert set(motor.TIPOS_DEL_MOTOR) <= set(vocabulario.TIPOS_LIBRO)
-    assert motor.TIPOS_DEL_MOTOR == ("venta", "compra")
+    assert motor.TIPOS_DEL_MOTOR == ("venta", "compra", "tesoreria")
 
 
 def test_un_libro_que_el_motor_no_origina_se_para_en_la_puerta():
@@ -333,29 +337,43 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     # intento de hacerlo con tesorería salió incompleto a la primera.
     assert {k for k, r in RASGOS.items() if r.roles} == set(motor.TIPOS_DEL_MOTOR)
     assert {k for k, r in RASGOS.items() if not r.roles} == no_origina
-    # La misma frontera vista por el sub-diario, que es su consecuencia: sin sub-diario no hay asiento que escribir.
-    assert {k for k, r in RASGOS.items() if not r.sub_diario} == no_origina
+    # **El sub-diario ya NO es la misma frontera**, y tesorería es lo que las separó (12.8): el motor sabe armar su
+    # asiento y todavía no sabe NUMERARLO, porque numerar es por sub-diario y el suyo espera el archivo real que
+    # diga cuál es. Vacío significa ahora «este libro no se numera», que es comprobable, y lo comprueba
+    # `LibroQueTodaviaNoSeNumera` — no «este libro no se origina», que ya no sería verdad.
+    assert {k for k, r in RASGOS.items() if not r.sub_diario} == {"tesoreria"}
     for tipo, r in RASGOS.items():
         assert r.tipo == tipo, "la clave de la tabla y el tipo de la fila tienen que ser el mismo"
 
-    # Lo que es cierto solo de los que el motor SÍ origina. Estaba escrito para todas las filas porque todas lo
-    # eran, y `tesoreria` es la que separa las dos cosas: lo que una fila promete y lo que promete un asiento.
-    for tipo in motor.TIPOS_DEL_MOTOR:
-        r = RASGOS[tipo]
+    # **Lo que es cierto de los libros cuyo LADO lo fija el libro**, que no es lo mismo que «los que el motor
+    # origina» — y hasta la 12.8 lo parecía porque los dos conjuntos coincidían. Las tres cosas de abajo son
+    # consecuencia de UNA sola: que el libro fije el lado. Un libro que no lo fija no puede tener una cuenta de
+    # contraparte, porque no hay una sola con la que se salde.
+    for tipo, r in RASGOS.items():
+        if r.decide_la_operacion:
+            continue
         assert r.sentido_principal in ("D", "H")
         assert r.sentido_contraparte != r.sentido_principal, "la partida doble: el otro lado es el otro"
-        assert r.sub_diario and r.cuenta_contraparte, "sin estos dos no se puede armar un asiento"
+        assert r.cuenta_contraparte, "si el libro fija el lado, fija también contra qué se salda"
 
-    # Y de los que no: el lado no lo fija el libro, y pedírselo **para** en vez de contestar de más. Hasta la
-    # 9.0 ese `sentido_contraparte` era `"D" if sentido_principal == "H" else "H"`, que con un tercer valor
+    # Y de los que no lo fijan: el lado no lo dice el libro, y pedírselo **para** en vez de contestar de más. Hasta
+    # la 9.0 ese `sentido_contraparte` era `"D" if sentido_principal == "H" else "H"`, que con un tercer valor
     # habría devuelto «haber» callado y mal — el mismo fallo que la mayor vino a cerrar, una capa más abajo.
     from contaperu.modelo import POR_OPERACION, SentidoNoLoDiceElLibro
 
-    for tipo in set(RASGOS) - set(motor.TIPOS_DEL_MOTOR):
+    por_operacion = {k for k, r in RASGOS.items() if r.decide_la_operacion}
+    # **Nombrado, para que el bucle no pueda quedarse vacío sin ponerse rojo**: un test que deja de comprobar es el
+    # único que no avisa, y al mover tesorería de un conjunto al otro este bucle estuvo a un paso de vaciarse.
+    assert por_operacion == {"tesoreria"}
+    for tipo in por_operacion:
         r = RASGOS[tipo]
         assert r.sentido_principal == POR_OPERACION and r.decide_la_operacion
         with pytest.raises(SentidoNoLoDiceElLibro):
             r.sentido_contraparte
+
+    # Y la equivalencia que lo explica, que es lo que la tabla ya tenía escrito en prosa: la contrapartida la pone
+    # la imputación exactamente cuando el lado no lo fija el libro.
+    assert {k for k, r in RASGOS.items() if not r.cuenta_contraparte} == por_operacion
 
 
 def test_los_dos_libros_se_diferencian_en_lo_que_se_diferencian():

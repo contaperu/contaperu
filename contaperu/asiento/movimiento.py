@@ -41,9 +41,11 @@ from .. import pcge
 from .. import tesoreria
 from ..configuracion import CONFIG_POR_DEFECTO
 from ..modelo import CENTIMO, CERO, Rasgos, monto, rasgos_de
-from .faltas import CuentaSinClase, MovimientoSinImputar, SinCuentaDeEfectivo
+from .faltas import (CuentaSinClase, LibroQueTodaviaNoSeNumera, MovimientoSinImputar,
+                     SinCuentaDeEfectivo, TraspasoEnDosPatas)
+from .indice import CabeceraDeMovimiento, MovimientoDelAsiento
 from .lineas import LineaDiario
-from .resolucion import lleva_centro
+from .resolucion import limites_del_periodo, lleva_centro
 
 # El elemento del PCGE en el que vive el efectivo: «10 · EFECTIVO Y EQUIVALENTES AL EFECTIVO» (PCGE 2026, p. 17).
 # Es la fuente con la que la regla del rol distingue la línea del dinero de la de un gasto, y el motivo por el que
@@ -227,3 +229,75 @@ def _asiento_del_itf(m: Any, linea, lado_efectivo: str, efectivo: str, config: d
     gasto = linea(cuenta, "D", monto(itf))
     salida = linea(efectivo, "H", monto(itf))
     return [gasto, salida]
+
+
+def cabecera_de_movimiento(m: Any, imputacion: Any, cuentas: dict) -> CabeceraDeMovimiento:
+    """Los hechos del movimiento que un driver necesita al lado de sus líneas.
+
+    Lleva dos cosas que el movimiento **no** trae y que ninguna línea guarda: la `cuenta_contable` con la que se
+    asentó —que sale del maestro— y el `efecto` ya compuesto con su imputación, que es la única forma de saber que
+    un cargo era la mitad de un traspaso."""
+    cuenta = cuentas.get(str(_campo(m, "cuenta") or "")) if cuentas else None
+    itf = _campo(m, "itf")
+    return CabeceraDeMovimiento(
+        cuenta=str(_campo(m, "cuenta") or ""),
+        cuenta_contable=str(_campo(cuenta, "cuenta_contable") or "") if cuenta is not None else "",
+        fecha=_iso(_campo(m, "fecha")), fecha_valor=_iso(_campo(m, "fecha_valor")),
+        descripcion=str(_campo(m, "descripcion") or ""), importe=str(monto(_campo(m, "importe"))),
+        sentido=str(_campo(m, "sentido") or ""), efecto=tesoreria.efecto_de(m, imputacion),
+        moneda=str(_campo(m, "moneda") or ""), referencia=str(_campo(m, "referencia") or ""),
+        constancia=str(_campo(m, "constancia") or ""),
+        contraparte_tipo_doc=str(_campo(m, "contraparte_tipo_doc") or ""),
+        contraparte_doc=str(_campo(m, "contraparte_doc") or ""),
+        contraparte_nombre=str(_campo(m, "contraparte_nombre") or ""),
+        medio_pago=str(_campo(m, "medio_pago") or ""),
+        itf="" if itf is None else str(monto(itf)),
+        id_externo=str(_campo(m, "id_externo") or ""))
+
+
+def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correlativos: dict | None = None,
+                                   vocabulario: str = "neutral",
+                                   ) -> tuple[list[LineaDiario], dict, tuple[MovimientoDelAsiento, ...]]:
+    """Las líneas del asiento de un libro de tesorería, su índice y sus rangos por sub-diario.
+
+    Hermana de `motor.lineas_e_indice_del_libro` y con la misma forma de salida, para que lo que viene después
+    —cuadrar, hashear, escribir— no tenga que saber de cuál de las dos salió.
+
+    **La imputación y el maestro viajan dentro de `config`**, que es el mismo sitio por el que ya llega la
+    imputación de un comprobante: «se le entrega al núcleo dentro de la configuración, que es lo que ya recibe todo
+    el asiento».
+
+    Con vocabulario `neutral` no numera —`rangos` sale vacío—, igual que el comprobante: los correlativos de
+    tesorería esperan su sub-diario, y el sub-diario espera un archivo real que lo pida."""
+    rasgos = rasgos_de(libro)
+    if rasgos.origen != "movimientos":
+        raise ValueError(f"Un libro {rasgos.tipo!r} no sale de movimientos sino de {rasgos.origen!r}: "
+                         "sus líneas las arma `asiento.lineas_e_indice_del_libro`")
+    if vocabulario != "neutral" and not rasgos.sub_diario:
+        raise LibroQueTodaviaNoSeNumera(rasgos.tipo)
+
+    imputaciones = (config or {}).get("imputaciones_de_movimientos") or {}
+    cuentas = (config or {}).get("cuentas_bancarias") or {}
+    dobles = traspasos_en_dos_patas(movimientos, imputaciones)
+    if dobles:
+        raise TraspasoEnDosPatas(dobles)
+
+    limites = limites_del_periodo(libro) if hasattr(libro, "anio") else None
+    lineas: list[LineaDiario] = []
+    indice: list[MovimientoDelAsiento] = []
+    sin_imputar: list[str] = []
+    for posicion, m in enumerate(movimientos):
+        imputacion = imputaciones.get(str(_campo(m, "id_externo") or ""))
+        if imputacion is None and not _campo(m, "itf"):
+            # Se reúnen todas antes de parar: decirlas de una en una obliga a diez vueltas para arreglar diez.
+            sin_imputar.append(str(_campo(m, "constancia") or "") or str(_campo(m, "referencia") or "")
+                               or str(_campo(m, "id_externo") or ""))
+            continue
+        propias = lineas_del_movimiento(m, imputacion, cuentas, config, limites, "", None, rasgos, vocabulario)
+        indice.append(MovimientoDelAsiento(posicion=posicion, sub_diario="", correlativo="",
+                                           desde=len(lineas), hasta=len(lineas) + len(propias),
+                                           cabecera=cabecera_de_movimiento(m, imputacion, cuentas)))
+        lineas.extend(propias)
+    if sin_imputar:
+        raise MovimientoSinImputar(sin_imputar)
+    return lineas, {}, tuple(indice)

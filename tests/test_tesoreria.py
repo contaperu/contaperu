@@ -214,15 +214,14 @@ def test_los_tres_efectos_del_catalogo_tienen_quien_los_emita():
     assert cargo.efecto == t.SALIDA
 
 
-def test_un_libro_de_tesoreria_existe_y_el_motor_no_lo_origina():
-    """Las dos mitades de la fase, en un test. El tipo de libro existe —así que el dato puede entrar y validarse—
-    y el motor **todavía no sabe armar su asiento**, así que la puerta de la 8.2 lo para diciendo cuáles sabe.
+def test_un_libro_de_tesoreria_existe_y_el_motor_lo_origina_por_su_propia_puerta():
+    """**Lo que esto decía hasta la 12.8**: el tipo de libro existe y el motor todavía no sabe armar su asiento.
+    La segunda mitad dejó de ser cierta, y la forma en que dejó de serlo es la que importa — el motor no aprendió
+    a sacar un asiento de tesorería de la puerta de los comprobantes, sino que le abrió la suya.
 
-    Es la primera vez que esa guarda sirve de verdad: hasta hoy no había ningún libro del catálogo fuera de
-    `TIPOS_DEL_MOTOR`, y su docstring ya avisaba de que el día que lo hubiera, lo que fallaría sería esto."""
-    import pytest as _pytest
-
-    from contaperu.asiento import faltas, motor
+    Y la guarda que esto probaba **no se fue**: sigue parando cualquier libro del catálogo que el motor no
+    origine, que es para lo que se puso (el hito B13, el diario de un ERP)."""
+    from contaperu.asiento import motor, movimiento
     from contaperu.modelo import POR_OPERACION, Libro
 
     libro = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202608", tipo="tesoreria")
@@ -230,10 +229,10 @@ def test_un_libro_de_tesoreria_existe_y_el_motor_no_lo_origina():
     assert libro.rasgos.origen == "movimientos"
     assert libro.rasgos.sentido_principal == POR_OPERACION
 
-    with _pytest.raises(faltas.LibroQueElMotorNoOrigina) as e:
-        motor.lineas_e_indice_del_libro(libro, [], {}, {})
-    assert e.value.tipo == "tesoreria" and e.value.sabe == motor.TIPOS_DEL_MOTOR
-    assert "venta" in str(e.value) and "compra" in str(e.value)
+    # La puerta de los comprobantes sigue siendo de comprobantes, y lo dice.
+    assert "tesoreria" in motor.TIPOS_DEL_MOTOR
+    lineas, rangos, indice = movimiento.lineas_e_indice_de_movimientos(libro, [], {})
+    assert (lineas, rangos, indice) == ([], {}, ()), "un mes sin movimientos no es un error, es un mes vacío"
 
 
 # ── El cuadre, que es lo que hace verificable a un lector ──────────────────
