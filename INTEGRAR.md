@@ -822,8 +822,9 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   resuelven y cada una te dice la suya. Con una advertencia: **el aviso sale al USAR el nombre, no al importar el
   módulo**, así que una línea que ningún test tuyo toque no saldrá. Haz también un `grep` de las seis.
 - **Si llamas al paquete `asiento` o a `tributos.igv`, la 9.0 cambia un parámetro** y es el único cambio que
-  rompe. Veinte funciones recibían `es_venta: bool` y ahora reciben **los rasgos del libro** —diecisiete de
-  `asiento`, catorce de ellas en su superficie congelada, y tres de `tributos.igv`, que no congela nada—:
+  rompe. Las que recibían `es_venta: bool` ahora reciben **los rasgos del libro**, y hoy el eje viaja por
+  veintiuna funciones —dieciocho de `asiento`, quince de ellas en su superficie congelada, y tres de
+  `tributos.igv`, que no congela nada—:
 
   | Hasta la 8.x | Desde la 9.0 |
   |---|---|

@@ -200,8 +200,9 @@ estado de cuenta por partida abierta y uno de saldo arrastrado.
 ### El eje del libro: una tabla, no un booleano (9.0)
 
 El otro eje que ordena el motor es **de qué libro es el comprobante**. De la 1.0 a la 8.x fue un `bool`: `es_venta`,
-que viajaba por veinte funciones —diecisiete de `asiento` y tres del IGV, catorce de ellas en la superficie
-congelada—, y `not es_venta` quería decir «es compra». Con ese booleano el motor
+que viajaba por una veintena de ellas, y `not es_venta` quería decir «es compra». Hoy el eje —la tabla—
+viaja por veintiuna funciones: dieciocho de `asiento` —quince de ellas en la superficie congelada— y tres
+del IGV. La última en llegar es `lineas_del_movimiento`, que nació con la tabla y nunca tuvo booleano. Con ese booleano el motor
 decidía el sentido debe/haber, el crédito frente al débito fiscal, cliente frente a proveedor, el sub-diario y los
 requisitos.
 
@@ -354,10 +355,12 @@ Lo que esto compra, y lo que no:
 - **Un booleano ya no se interpreta: para.** Es deliberado — un `True` que se colara elegiría la rama equivocada en
   silencio, que es justo lo que la mayor viene a cerrar. Y **omitir el libro tampoco vale**, que era el defecto de la
   firma y era el error.
-- **No acerca el asiento de un movimiento bancario.** Las veinte funciones parten de un `Comprobante` y preguntan
-  cosas que un extracto no tiene —sigla, IGV, detracción, cliente o proveedor—, así que un pago necesitará su propio
-  camino de generación y no un tercer valor en este eje. Lo dice `ROLES_DEL_MOTOR` desde la 1.1: «de un comprobante
-  no sale una depreciación ni un pago».
+- **No acercó el asiento de un movimiento bancario, y la predicción se cumplió.** Decía aquí que las de
+  entonces parten de un `Comprobante` y preguntan cosas que un extracto no tiene —sigla, IGV, detracción,
+  cliente o proveedor—, así que un pago necesitaría **su propio camino de generación y no un tercer valor
+  en este eje**. Es exactamente lo que pasó: desde la 12.7 ese camino es `asiento/movimiento.py`, hermano
+  de `motor.py` y no una rama suya, porque no comparten ni una regla. Lo dice `ROLES_DEL_MOTOR` desde la
+  1.1: «de un comprobante no sale una depreciación ni un pago».
 
 **Lo que la tabla no absorbió, y por qué.** De los rasgos solo se preguntan tres veces `es_venta`, y son los
 honestos: los sitios donde el **procedimiento** difiere y no solo un dato —el orden de las líneas de una venta

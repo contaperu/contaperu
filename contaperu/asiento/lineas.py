@@ -81,7 +81,9 @@ class LineaDiario:
     # CON QUÉ se movió el dinero en ESTA línea: un código de `catalogos.MEDIOS_PAGO` (Tabla 1 del Anexo 3 de la
     # RS 169-2015). Completa el bloque que abrió la enmienda 0004, que lo dejó en el comprobante y en la `Cabecera`:
     # el catálogo decía con qué se paga, pero la línea que mueve el dinero no lo llevaba. Es de la línea de rol
-    # `tesoreria`, y el motor **no la emite todavía** — este campo es para quien produce ese asiento.
+    # `tesoreria`, y **desde la 12.7 el motor la emite**: `asiento.lineas_del_movimiento` la pone en la línea del
+    # efectivo y en ninguna otra —de un pago en dos patas, solo una se movió por un medio—. Estuvo reservado desde
+    # la 11.0 esperando justo eso, que es lo que un hueco declarado sirve para.
     #
     # **Fuera de la huella** (`huella.SIN`), y por el mismo motivo que la 0004 escribió al entrar: el medio de pago no
     # cambia ningún asiento ni ningún importe. Hasta hoy eso era cierto solo porque vivía en la `Cabecera`, que no se

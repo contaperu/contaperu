@@ -4,6 +4,72 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.7.0] — 2026-10-13
+
+**El motor sabe armar la línea de diario de un movimiento de tesorería, y todavía nadie se la pide.** Es el grano
+más fino de «el motor va primero»: la regla entra con sus casos y sin consumidor, y lo que la pide llega después.
+
+**Y no hubo que inventar ni una regla contable**, que es lo que hizo posible esta versión. La que gobierna esto ya
+estaba publicada con su fuente en el catálogo del estándar (`efectos_de_tesoreria`, NIC 7): una **entrada** lleva
+la cuenta de efectivo al DEBE, una **salida** al HABER, y una **transferencia** es el único efecto cuyas dos patas
+son cuentas declaradas. Con eso, la imputación que pone el ERP y la 104 del maestro salen las cinco formas.
+
+**Ninguna salida se mueve.** `lineas_e_indice_del_libro` sigue parando ante un libro de tesorería: originarlo es
+la versión siguiente.
+
+### Añadido
+
+- **`contaperu/asiento/movimiento.py`**, hermano de `motor.py` y **no una rama suya**: no comparten ni una regla
+  —allí hay IGV, detracción, honorarios y notas; aquí hay dos caras y un importe— y meterlo dentro habría puesto un
+  `if` en la primera línea de la función más cara del repositorio. Lo que sí comparten es todo lo que viene
+  después: `LineaDiario`, el cuadre, la huella y el resumen no saben de dónde salió una línea.
+- **`lineas_del_movimiento`**, con las cinco formas: el pago a un proveedor, el cobro, la comisión bancaria, el
+  reparto de un cargo que paga tres facturas y el traspaso entre cuentas propias. Cada asiento **cuadra por sí
+  solo**, sin tolerancia.
+- **`cuenta_de_efectivo`**, que resuelve la 104 del maestro en un solo sitio, y **`traspasos_en_dos_patas`**, que
+  caza el traspaso declarado por sus dos movimientos — desde uno solo no se puede ver, que es por lo que
+  `Movimiento.efecto` nunca devuelve `transferencia`.
+- **Cuatro faltas**: `MovimientoSinImputar`, `SinCuentaDeEfectivo`, `TraspasoEnDosPatas` y `CuentaSinClase`. Van
+  **fuera de la tabla `FALTAS`** por lo mismo que `LibroQueElMotorNoOrigina`: esa tabla reparte faltas por
+  comprobante, contándolas por su serie-número, y un movimiento no tiene ninguna de las dos cosas. Las tres
+  primeras **endurecen avisos que ya existen** —`revisar_tesoreria` dice hoy lo mismo sin parar nada—, y la razón
+  de que ahora paren es que mirar no obliga a nada y asentar sí: lo que falta ya no se puede reportar, porque no
+  hay línea que escribir sin ello.
+- **La cuenta del ITF en la configuración** (`cuentas.itf`, por defecto `641201`): la `6412` del PCGE 2026
+  —«Impuesto a las transacciones financieras», p. 40— escrita a seis dígitos como todas las de ahí.
+- **`tests/test_asiento_movimiento.py`**, con 28 casos.
+
+### El ITF se asienta, y su fuente es el documento
+
+Un pago de 2 000 con 0,50 de ITF **son dos asientos** ([enmienda 0028](estandar/enmiendas/0028-un-cargo-del-banco-es-su-propio-movimiento.md)):
+el del pago, y `6412` contra la cuenta de efectivo. Su importe **nunca se calcula**.
+
+Lo desbloqueó un criterio de John (13-oct-2026): *«el ITF se registra en base a lo que dice la constancia de pago o
+los movimientos bancarios… un asiento contable se da por hechos fehacientes y sustentados (vóucher de pago o estado
+de cuenta)»*. **Eso es su fuente**, y es exactamente la que la primera regla de la casa admite — la norma, la
+resolución **o el archivo real**. Hasta aquí se daba por bloqueado esperando la tasa del ITF, y la tasa no hace
+falta: el banco ya cobró y el extracto lo prueba. El `40181`, su pareja de pasivo, **no entra**: el banco ya lo
+retuvo, así que no queda nada por pagar.
+
+Y `movimiento.itf` **no se resta** del importe del pago. Restarlo descuadraría el asiento y escondería un cargo que
+el banco sí hizo.
+
+### Las decisiones que se escriben una vez porque entran en la huella
+
+- **El orden de las líneas es el Debe primero**, que es lo único que compras y ventas ya cumplían.
+- **El documento de la línea no lleva `tipo_cp`**: un vóucher del banco no es un comprobante de SUNAT, el mismo
+  precedente que la línea de la detracción.
+- **El `medio_pago` va en la línea del efectivo y en ninguna otra**, que es para lo que estaba reservado desde la
+  11.0: de un pago en dos patas, solo una se movió por un medio.
+
+### Cambiado · documentación
+
+- **Una predicción de la 9.0 se cumplió y se dice.** `ARQUITECTURA.md` decía que el eje del libro «no acerca el
+  asiento de un movimiento bancario» porque sus funciones parten de un `Comprobante`, y que un pago necesitaría
+  **su propio camino de generación y no un tercer valor en este eje**. Es exactamente lo que pasó.
+- **El recuento del eje sube**: hoy son veintiuna funciones —dieciocho de `asiento`, quince en la superficie
+  congelada— y los cuatro documentos que lo dan se mueven con él. Lo caza un test que existe para eso.
+
 ## [12.6.0] — 2026-10-13
 
 **Las tres puertas dan ahora la misma razón para la misma causa.** Pedirle a un destino un libro que no lleva

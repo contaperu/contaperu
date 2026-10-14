@@ -513,7 +513,7 @@ def test_el_contrato_revisa_las_cuentas_que_declara_un_driver():
     desconocida.CUENTAS_POR_DEFECTO = {"cxp_en_dolares": "42120002"}
     assert contrato.incumplimientos(desconocida) == [
         "`CUENTAS_POR_DEFECTO.cxp_en_dolares`: clave desconocida; las que hay: cxp, cxp_detraccion, "
-        "honorarios, retencion_4ta, igv, clientes, otros_tributos, icbper, compras, ventas"]
+        "honorarios, retencion_4ta, igv, clientes, otros_tributos, icbper, itf, compras, ventas"]
     mal_formato = driver_de_registro()
     mal_formato.CUENTAS_POR_DEFECTO = {"igv": "40-111-000"}
     assert contrato.incumplimientos(mal_formato) == [

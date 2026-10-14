@@ -44,7 +44,8 @@ una proyección más (`drivers/concar/proyeccion.py`), que no cambió ni una cel
 CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()` y `lineas_del_libro()`.
 """
 from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO, NUMERO_DETRACCION_PENDIENTE
-from .faltas import (AnuladaConDeposito, CONTADOR, FALTA, FALTAS, LibroQueElMotorNoOrigina, PROVEEDOR, SISTEMA,
+from .faltas import (AnuladaConDeposito, CONTADOR, CuentaSinClase, FALTA, FALTAS, LibroQueElMotorNoOrigina,
+                     MovimientoSinImputar, PROVEEDOR, SISTEMA, SinCuentaDeEfectivo, TraspasoEnDosPatas,
                      Falta, SinCodigoDeMoneda, NoExportable,
                      RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCodigoDetraccion, SinCuenta,
                      SinCorrelativo, SinSigla)
@@ -63,6 +64,8 @@ from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
 from .indice import Cabecera, ComprobanteDelAsiento, exportacion_de
+from .movimiento import (CUENTA_ITF, GRUPO_EFECTIVO, cuenta_de_efectivo, lineas_del_movimiento,
+                        traspasos_en_dos_patas)
 from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, TIPOS_DEL_MOTOR, LineaSinComprobante, cabecera_de,
                     constancia_de,
                     glosa_de, indice_de_lineas_dadas, lineas_del_comprobante, lineas_del_libro,
@@ -72,7 +75,9 @@ __all__ = [
     "CONFIGURACION_DEL_ASIENTO", "NUMERO_DETRACCION_PENDIENTE", "CONTADOR", "FALTA", "FALTAS",
     "PROVEEDOR", "SISTEMA", "Falta", "SinCodigoDeMoneda", "NoExportable", "RepartoNoAdmitido", "RepartoNoCuadra",
     "SinCentro", "SinCodigoDetraccion", "SinCuenta", "SinCorrelativo", "SinSigla", "AnuladaConDeposito",
-    "LibroQueElMotorNoOrigina",
+    "LibroQueElMotorNoOrigina", "MovimientoSinImputar", "SinCuentaDeEfectivo", "TraspasoEnDosPatas",
+    "CuentaSinClase", "CUENTA_ITF", "GRUPO_EFECTIVO", "cuenta_de_efectivo", "lineas_del_movimiento",
+    "traspasos_en_dos_patas",
     "anulada_por_nota", "comprobantes_anulados_con_deposito", "asienta_sin_efecto",
     "comprobantes_sin_centro", "comprobantes_sin_codigo_detraccion", "comprobantes_sin_cuenta", "con_efecto_contable", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",
     "cuenta_por_pagar", "cuenta_por_pagar_detraccion", "cuenta_tercero", "equivalencia_tipo",

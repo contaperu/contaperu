@@ -22,6 +22,9 @@
   "contaperu.tributos.detracciones",
   "contaperu.tributos.igv"
  ],
+ "contaperu.asiento.movimiento": [
+  "contaperu.pcge"
+ ],
  "contaperu.asiento.resolucion.clasificacion": [
   "contaperu.catalogos",
   "contaperu.tributos.detracciones",

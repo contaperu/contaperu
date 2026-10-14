@@ -284,6 +284,12 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
               ayuda="La cuenta de los otros tributos y cargos del documento. Vacía, esa columna sale en blanco."),
         Campo("icbper", "texto", "", titulo="ICBPER", grupo="cuentas", patron=PATRON_CUENTA,
               ayuda="La cuenta del impuesto a las bolsas de plástico. Vacía, esa columna sale en blanco."),
+        # El gasto del ITF, para el asiento de tesorería (12.7). Es la `6412` del PCGE 2026 —«Impuesto a las
+        # transacciones financieras», p. 40— escrita a seis dígitos como todas las de aquí. **No lleva la `40181`**,
+        # su pareja de pasivo: el banco ya lo retuvo del cargo, así que no queda nada por pagar.
+        Campo("itf", "texto", "641201", titulo="ITF", grupo="cuentas", patron=PATRON_CUENTA,
+              ayuda="El gasto del impuesto a las transacciones financieras, cuando el banco lo descuenta sin darle "
+                    "su propia fila. Su importe lo dice el banco y nunca se calcula."),
     )),
     # Cómo llama la EMPRESA a cada una de sus cuentas: `{"101101": "CAJA CHICA M.N."}`.
     #
