@@ -164,7 +164,7 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None) -> dic
     movimientos = preparacion.movimientos_de(doc)
     cabeceras = preparacion.extractos_de(doc)
     imputadas = preparacion.imputaciones_de_movimientos_de(doc, movimientos)
-    declaradas = {c.id: c for c in tesoreria.leer(cuentas)}
+    declaradas = tesoreria.por_id(cuentas)
 
     nuevos, repetidos = tesoreria.sin_duplicados(movimientos)
 

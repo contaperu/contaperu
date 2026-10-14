@@ -18,7 +18,7 @@ from ..asiento.resolucion import exigir_requisitos, fundir_config
 from ..configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
 from ..drivers import contrato
 from ..modelo import Comprobante, Libro, identidad_de
-from .preparacion import documento, preparar
+from .preparacion import documento, libro_de, preparar
 from .seleccion import fuera_de, seleccionar
 
 
@@ -148,6 +148,14 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
         con_asientos = [nombre for nombre, m in drivers.DRIVERS.items() if contrato.arma_asientos(m)]
         raise ValueError(f"El driver {driver!r} no arma asientos: las líneas salen con la configuración de uno que "
                          f"sí ({', '.join(con_asientos)})")
+    # **El tipo de libro se comprueba ANTES de preparar nada**, igual que en `salida.exportar_archivo` y por el mismo
+    # motivo: si no, lo que recibe quien pide el asiento de un libro que ese destino no lleva es «No hay comprobantes
+    # que procesar» —porque un libro de tesorería no los trae— y eso es engañoso. La razón verdadera es que ese
+    # destino no lleva ese libro, y `drivers.formato_de` ya sabe decirlo nombrando los que sí.
+    #
+    # `exportar` lo corrigió en la 9.1 y esta puerta se quedó atrás: nadie lo notó porque hasta el 10-oct-2026 no
+    # existía ningún libro del catálogo fuera de los dos que todos los drivers llevan.
+    drivers.formato_de(driver, libro_de(doc).tipo)
     libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     # Lo mismo que saldría en su archivo: sin excluidos ni duplicados, sin lo que ese destino no lleva, y exigiendo lo que
     # exige y lo que no cabe en su formato. El desborde de un sub-diario no se lanza aquí: se lee en `sub_diarios`.

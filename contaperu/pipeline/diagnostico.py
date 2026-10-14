@@ -34,6 +34,8 @@ PEDIR_A: dict[str, str] = {
     **{falta.clave: falta.pedir_a for falta in FALTAS},
     # una configuración que no cumple lo declarado se arregla donde se configura
     "configuracion_invalida": SISTEMA,
+    # y elegir un destino que no lleva ese libro también: lo que se cambia es el driver, no el mes
+    "libro_que_el_destino_no_lleva": SISTEMA,
     # errores de la validación
     "ANIO_DUA_FALTA": CONTADOR, "CONTRAPARTE_FALTA": CONTADOR, "DNI_INVALIDO": CONTADOR,
     "DSCTO_MAYOR_QUE_BASE": CONTADOR, "DUPLICADO": CONTADOR, "DUPLICADO_PERIODO_ANTERIOR": CONTADOR,
@@ -128,6 +130,34 @@ def que_falta(con_error: list[Comprobante], candidatos: list[Comprobante], falta
     return salida
 
 
+def _libro_que_el_destino_no_lleva(libro: Libro, driver: str, exige: frozenset[str], todos: list[Comprobante],
+                                   modulo: Any) -> dict:
+    """El diagnóstico de un mes cuyo libro ese destino no lleva: no hay nada que medir, y lo que falta no es del mes.
+
+    Hermano de `_sin_configuracion` y por el mismo motivo: la forma de la respuesta no cambia, cambia lo que dice.
+    La diferencia con `exportar` —que sí **lanza** `LibroQueElDestinoNoLleva`— es la de siempre entre preguntar y
+    hacer: ésta describe. Y el `pedir_a` es `sistema` porque elegir el destino es configuración, no una decisión
+    contable: lo que hay que cambiar es el driver, o llevar ese libro a otro sitio."""
+    lleva = sorted(getattr(modulo, "FORMATOS", {}))
+    return {
+        "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
+        "driver": driver,
+        "exige": sorted(exige),
+        "listo_para_exportar": False,
+        "por_que_no": [f"el destino {driver!r} no lleva libros de tipo {libro.tipo!r}"],
+        "que_falta": [{"motivo": "libro_que_el_destino_no_lleva", "comprobantes": [],
+                       "texto": f"{driver} lleva {', '.join(lleva)}",
+                       "pedir_a": PEDIR_A["libro_que_el_destino_no_lleva"]}],
+        "errores_de_configuracion": [],
+        # Se cuenta lo que el documento trae y nada más: sin un destino que lo lleve no se ha mirado ni un
+        # comprobante, y afirmar que alguno «saldría» sería falso.
+        "totales": {"comprobantes": len(todos), "saldrian": 0, "excluidos": sum(1 for c in todos if c.excluida),
+                    "fuera_del_destino": 0, "sin_efecto_contable": 0, "con_error": 0, "con_aviso": 0},
+        "bloqueantes": [], "avisos": [], "faltantes": {}, "detracciones_pendientes": [], "detracciones_pagadas": [],
+        "resumen_por_contraparte": {}, "sub_diarios": {}, "saldrian": [],
+    }
+
+
 def _sin_configuracion(libro: Libro, driver: str, exige: frozenset[str], todos: list[Comprobante],
                        errores: list[str]) -> dict:
     """El diagnóstico de un mes cuya configuración no se puede aplicar: sin ella no hay nada que medir, así que dice eso
@@ -172,6 +202,13 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     # Lo que ESE destino exige (`contrato.exige`): decide qué faltante deja el mes «no listo». El CSV
     # no exige centro ni moneda con código; CONCAR, los dos; el SIRE, nada de esto.
     exige = contrato.exige(modulo)
+    # Antes que nada: si ese destino no lleva este tipo de libro, no hay nada que diagnosticar y lo que se dice es
+    # eso. Iba sin comprobarse, así que un libro de tesorería contra CONCAR contestaba «no hay comprobantes que
+    # exportar» —cierto y engañoso: no es que falten, es que ese destino no lleva ese libro—. `exportar` lo
+    # corrigió en la 9.1 comprobándolo antes de preparar; aquí **no se lanza**, porque esta operación describe y no
+    # exige (su docstring: «No lanza por lo que le falte al mes: lo describe»).
+    if libro.tipo not in getattr(modulo, "FORMATOS", {}):
+        return _libro_que_el_destino_no_lleva(libro, driver, exige, todos, modulo)
     errores = errores_de_configuracion(configuracion)
     if errores:
         return _sin_configuracion(libro, driver, exige, todos, errores)

@@ -621,12 +621,64 @@ def test_cada_driver_rechaza_un_libro_de_tesoreria_nombrando_los_que_si_lleva():
 
     doc = documento_de_tesoreria(movimientos=[mov().a_dict()])
     for nombre in sorted(drivers.DE_SERIE):
+        lleva = sorted(drivers.obtener(nombre).FORMATOS)
         with pytest.raises(drivers.LibroQueElDestinoNoLleva) as e:
             api.exportar(doc, driver=nombre, configuracion={})
         assert e.value.tipo == "tesoreria" and e.value.driver == nombre
-        assert "compra" in str(e.value) and "venta" in str(e.value), "tiene que decir qué libros SÍ lleva"
+        for tipo in lleva:
+            assert tipo in str(e.value), "tiene que decir qué libros SÍ lleva"
     # Y sigue siendo un `ValueError`, que es lo que era antes: quien lo atrape por ahí no se rompe.
     assert issubclass(drivers.LibroQueElDestinoNoLleva, ValueError)
+
+
+def test_generar_asiento_tambien_dice_la_razon_verdadera():
+    """La misma corrección en la otra puerta que ACTÚA, y llegaba dos versiones tarde (12.6).
+
+    `exportar` comprueba el tipo de libro antes de preparar desde la 9.1; `generar_asiento` **nunca llamaba a
+    `drivers.formato_de`**, así que para un libro de tesorería moría en el único muro que tiene —«No hay
+    comprobantes que procesar»— diciendo que faltan comprobantes donde lo que pasa es que ese destino no lleva ese
+    libro. Las dos puertas tienen que dar la misma razón para la misma causa."""
+    from contaperu import api, drivers
+
+    doc = documento_de_tesoreria(movimientos=[mov().a_dict()])
+    for nombre in sorted(drivers.DE_SERIE):
+        if not drivers.contrato.arma_asientos(drivers.obtener(nombre)):
+            continue          # ésos se niegan antes, y por otra razón que también es la verdadera
+        with pytest.raises(drivers.LibroQueElDestinoNoLleva) as e:
+            api.generar_asiento(doc, driver=nombre, configuracion={})
+        assert e.value.tipo == "tesoreria" and e.value.driver == nombre
+
+
+def test_diagnosticar_lo_DICE_en_vez_de_lanzarlo():
+    """Y la tercera puerta no lanza, porque pregunta en vez de hacer: su contrato es «no lanza por lo que le falte
+    al mes: lo describe». Hasta la 12.6 contestaba «no hay comprobantes que exportar», que es cierto y engañoso a
+    la vez — no es que falten, es que ese destino no lleva ese libro."""
+    from contaperu import api
+
+    doc = documento_de_tesoreria(movimientos=[mov().a_dict()])
+    d = api.diagnosticar(doc, driver="concar", configuracion={})
+    assert d["listo_para_exportar"] is False
+    assert d["por_que_no"] == ["el destino 'concar' no lleva libros de tipo 'tesoreria'"]
+    assert [q["motivo"] for q in d["que_falta"]] == ["libro_que_el_destino_no_lleva"]
+    assert d["que_falta"][0]["pedir_a"] == "sistema", "lo que se cambia es el destino, no el mes"
+    assert "compra" in d["que_falta"][0]["texto"] and "venta" in d["que_falta"][0]["texto"]
+    # La forma de la respuesta no cambia: es la misma degradación que `_sin_configuracion`.
+    assert d["totales"]["saldrian"] == 0 and d["saldrian"] == [] and d["errores_de_configuracion"] == []
+
+
+def test_el_maestro_indexado_vive_en_un_solo_sitio():
+    """`por_id` es la búsqueda que un movimiento hace de su cuenta —y de su 104—, publicada (12.6). Estaba escrita
+    a mano dentro de `api.revisar_tesoreria`, y el asiento de tesorería la necesita en otro sitio: dos copias de la
+    misma búsqueda es como se separan."""
+    from contaperu import tesoreria
+
+    maestro = tesoreria.por_id([cuenta().a_dict()])
+    assert set(maestro) == {"bbva-soles"}
+    assert maestro["bbva-soles"].cuenta_contable == cuenta().cuenta_contable
+    assert tesoreria.por_id(None) == {} and tesoreria.por_id([]) == {}
+    # Y hereda la puerta de `leer`: dos cuentas con el mismo `id` no pasan.
+    with pytest.raises(tesoreria.CuentaInvalida):
+        tesoreria.por_id([cuenta().a_dict(), cuenta().a_dict()])
 
 
 def test_las_reglas_de_compra_no_corren_por_descarte_en_un_libro_que_no_es_compra():

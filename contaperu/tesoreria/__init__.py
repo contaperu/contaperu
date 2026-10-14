@@ -47,7 +47,7 @@ from .extractos import Extracto, ExtractoInvalido, por_cuenta
 from .imputaciones import (ImputacionDeMovimiento, ImputacionInvalida, Parte, efecto_de,
                            glosa_de_movimiento, leer as leer_imputaciones)
 from .cuentas import (CuentaBancaria, CuentaInvalida, LARGO_CCI, MONEDAS, banco_del_cci, leer,
-                      normalizar_cci, sin_cuenta_declarada)
+                      normalizar_cci, por_id, sin_cuenta_declarada)
 from .movimientos import (ABONO, API, ARCHIVO, CARGO, EFECTOS_DE_UN_MOVIMIENTO, ENTRADA, LECTURA_ASISTIDA, MANUAL,
                           ORIGENES, PDF_TEXTO, SALIDA, SENTIDOS, TRANSFERENCIA, VISION, Movimiento,
                           MovimientoInvalido, clave_de, sin_duplicados)
@@ -63,4 +63,4 @@ __all__ = ["ABONO", "API", "ARCHIVO", "CARGO", "CLASES", "CLAVES_POR_CLASE", "CO
            "banco_del_cci", "clave_de", "cuadra", "efecto_de", "exigir", "glosa_de_movimiento", "leer",
            "leer_imputaciones",
            "normalizar_cci",
-           "por_cuenta", "sin_cuenta_declarada", "sin_duplicados"]
+           "por_cuenta", "por_id", "sin_cuenta_declarada", "sin_duplicados"]

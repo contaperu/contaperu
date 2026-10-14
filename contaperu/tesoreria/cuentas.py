@@ -154,6 +154,20 @@ def leer(cuentas: list | None) -> tuple[CuentaBancaria, ...]:
                              f"El `id` es la llave con la que un movimiento las nombra, así que tiene que ser único")
     return leidas
 
+
+def por_id(cuentas: list | None) -> dict[str, CuentaBancaria]:
+    """El maestro indexado por el `id` con el que un movimiento nombra su cuenta.
+
+    Es `leer` más la búsqueda, que es como se usa de verdad: un movimiento dice `cuenta: "bbva-soles"` y lo que
+    hace falta es **su cuenta contable**, la 104 con la que se asienta. Vivía escrito a mano dentro de
+    `api.revisar_tesoreria` y se publica aquí porque el asiento de tesorería lo necesita en otro sitio: dos copias
+    de la misma búsqueda es como se separan.
+
+    Devuelve un diccionario y no una lista por lo mismo que `extractos.por_cuenta`: así se usa, y el rechazo de dos
+    `id` iguales cae en `leer`, en la puerta, y no más adentro."""
+    return {c.id: c for c in leer(cuentas)}
+
+
 def sin_cuenta_declarada(movimientos=(), cuentas=()) -> list[dict]:
     """Los movimientos que apuntan a una cuenta que nadie declaró.
 

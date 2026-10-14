@@ -4,6 +4,36 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.6.0] — 2026-10-13
+
+**Las tres puertas dan ahora la misma razón para la misma causa.** Pedirle a un destino un libro que no lleva
+—hoy, tesorería— contestaba tres cosas distintas, y dos de ellas mentían. Es la primera de las cinco versiones del
+asiento de tesorería para el ERP base: la que limpia el camino sin añadir nada de tesorería todavía.
+
+**Ninguna salida se mueve.**
+
+### Corregido
+
+- **`generar_asiento` nunca llamaba a `drivers.formato_de`**, así que con un libro de tesorería moría en el único
+  muro que tiene —«No hay comprobantes que procesar»— diciendo que faltan comprobantes donde lo que pasa es que
+  ese destino no lleva ese libro. Ahora lo comprueba **antes de preparar nada**, exactamente como `exportar` desde
+  la 9.1 y por el mismo motivo escrito. Llegaba con tres versiones de retraso: la 9.1 arregló una puerta y nadie
+  miró las otras dos.
+- **`diagnosticar` contestaba «no hay comprobantes que exportar»**, que es cierto y engañoso a la vez. Ahora lo
+  dice: `el destino 'concar' no lleva libros de tipo 'tesoreria'`, con `pedir_a: sistema` —lo que se cambia es el
+  destino, no el mes— y nombrando los que sí lleva. **Y no lanza**, porque esa operación pregunta en vez de hacer:
+  su contrato es describir, y la degradación tiene la forma de siempre, hermana de `_sin_configuracion`.
+
+### Añadido
+
+- **`tesoreria.por_id(cuentas)`**: el maestro indexado por el `id` con el que un movimiento nombra su cuenta —y
+  del que sale su 104—. Estaba escrito a mano dentro de `revisar_tesoreria`, y el asiento de tesorería lo necesita
+  en otro sitio: dos copias de la misma búsqueda es como se separan. Hereda la puerta de `leer`, así que dos
+  cuentas con el mismo `id` siguen sin pasar.
+- **Cuatro casos** en `tests/test_tesoreria.py`, uno por puerta y uno por `por_id`. Y el que ya recorría los ocho
+  destinos **deja de cablear «compra, venta»**: ahora deriva lo que cada uno lleva de sus propios `FORMATOS`, para
+  que el día que un destino lleve tesorería no haya que editar el test — que es justo lo que va a pasar.
+
 ## [12.5.0] — 2026-10-13
 
 **Una factura al crédito dictada por un ERP exportaba su fecha de emisión como vencimiento.** Lo destapó John
