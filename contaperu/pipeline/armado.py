@@ -17,8 +17,8 @@ from ..asiento.huella import huella
 from ..asiento.resolucion import exigir_requisitos, fundir_config
 from ..configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
 from ..drivers import contrato
-from ..modelo import Comprobante, Libro, identidad_de
-from .preparacion import documento, libro_de, preparar
+from ..modelo import RASGOS, Comprobante, Libro, identidad_de
+from .preparacion import documento, libro_de, preparar, preparar_tesoreria
 from .seleccion import fuera_de, seleccionar
 
 
@@ -52,6 +52,21 @@ def por_comprobante(libro: Libro, lineas: list, indice: tuple) -> list[dict]:
     respuesta y el driver que escribe el documento del estándar, que puede llevarlo dentro del archivo. Ya no
     hace falta pasarle los comprobantes: la identidad sale de la cabecera del índice, que sabe decir su clave."""
     return asi.exportacion_de(libro, lineas, indice)["comprobantes"]
+
+
+# De qué bloque puede salir el asiento de un libro, dicho por la tabla y no a mano: hoy `comprobantes` y
+# `movimientos`. La respuesta trae **las dos claves siempre**, la del libro con sus entradas y la otra vacía, que es
+# literalmente cierto —un libro de tesorería no tiene comprobantes— y le ahorra a quien la lee tener dos formas.
+# Al ser derivado, el día que la tabla gane una fila con otro origen la respuesta gana su clave sola, y el esquema
+# se pone rojo por quedarse atrás, que es lo que se quiere.
+ORIGENES = tuple(dict.fromkeys(r.origen for r in RASGOS.values()))
+
+
+def por_entrada(libro: Libro, lineas: list, indice: tuple) -> dict:
+    """Lo que la respuesta dice de cada entrada del asiento, bajo la clave de su origen (`comprobantes` o
+    `movimientos`), y la de los demás orígenes vacía."""
+    detalle = asi.exportacion_de(libro, lineas, indice)
+    return {clave: detalle.get(clave) or [] for clave in ORIGENES}
 
 
 def desde_lineas(modulo, libro: Libro, comprobantes: list[Comprobante], opciones: Any,
@@ -138,11 +153,15 @@ def desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], op
 
 def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None, correlativos: dict | None = None,
                     incluir_observados: bool = False, imputacion: dict | None = None, claves_previas: Any = None) -> dict:
-    """Comprobantes -> líneas de diario del estándar, sin formato de ningún ERP.
+    """Un libro -> líneas de diario del estándar, sin formato de ningún ERP.
 
     Con la configuración del sistema de `driver`, que tiene que armar asientos: sus siglas, sus sub-diarios y las
     columnas en que pone el centro de costo deciden lo que llevan las líneas, que son las mismas de su archivo. Es
-    `exportar` sin escribir el archivo, y exige lo mismo; mirar sin exigir es `diagnosticar`."""
+    `exportar` sin escribir el archivo, y exige lo mismo; mirar sin exigir es `diagnosticar`.
+
+    **De qué bloque del documento salen las líneas lo dice la tabla** (`libro.rasgos.origen`), y el dispatch ocurre
+    aquí y en `salida.exportar_archivo`, una sola vez en cada uno: ni un `if es_tesoreria` más adentro. Un libro de
+    compras o de ventas sale de sus `comprobantes` y uno de tesorería de sus `movimientos` (12.9)."""
     modulo = drivers.obtener(driver)
     if not contrato.arma_asientos(modulo):
         con_asientos = [nombre for nombre, m in drivers.DRIVERS.items() if contrato.arma_asientos(m)]
@@ -155,7 +174,17 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
     #
     # `exportar` lo corrigió en la 9.1 y esta puerta se quedó atrás: nadie lo notó porque hasta el 10-oct-2026 no
     # existía ningún libro del catálogo fuera de los dos que todos los drivers llevan.
-    drivers.formato_de(driver, libro_de(doc).tipo)
+    libro = libro_de(doc)
+    drivers.formato_de(driver, libro.tipo)
+    if libro.rasgos.origen == "movimientos":
+        return _asiento_de_movimientos(doc, modulo, driver, configuracion)
+    return _asiento_de_comprobantes(doc, modulo, driver, configuracion, correlativos, incluir_observados,
+                                    imputacion, claves_previas)
+
+
+def _asiento_de_comprobantes(doc: dict, modulo, driver: str, configuracion: dict | None, correlativos: dict | None,
+                             incluir_observados: bool, imputacion: dict | None, claves_previas: Any) -> dict:
+    """El asiento de un libro que sale de sus comprobantes: una compra, una venta."""
     libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     # Lo mismo que saldría en su archivo: sin excluidos ni duplicados, sin lo que ese destino no lleva, y exigiendo lo que
     # exige y lo que no cabe en su formato. El desborde de un sub-diario no se lanza aquí: se lee en `sub_diarios`.
@@ -171,11 +200,39 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
     neutrales, rangos, indice = asi.lineas_e_indice_del_libro(libro, incluidos, config, corr,
                                                               centro_en_anexo=contrato.centro_en_anexo(modulo, config),
                                                               vocabulario=contrato.vocabulario(modulo))
+    return _respuesta(libro, neutrales, rangos, indice)
+
+
+def _asiento_de_movimientos(doc: dict, modulo, driver: str, configuracion: dict | None) -> dict:
+    """El asiento de un libro que sale de sus movimientos: el dinero (12.9).
+
+    **No pasa por `exigir_requisitos` ni por `no_caben`, y no es un olvido.** Las dos están escritas sobre un
+    comprobante —`faltantes_para` recorre comprobantes y les pregunta por su tipo, su moneda, su detracción— así
+    que llamarlas con una lista vacía devolvería «nada falta» sin haber comprobado nada, que es peor que no
+    llamarlas. Lo que le falta a un movimiento para asentarse lo exige el propio asiento, con sus cuatro faltas y
+    el mismo trato que `revisar_tesoreria` daba a sus avisos: `MovimientoSinImputar`, `SinCuentaDeEfectivo`,
+    `TraspasoEnDosPatas` y `CuentaSinClase`.
+
+    El hueco queda **declarado**: el día que un destino exija algo que valga para una línea de tesorería —el
+    candidato es `denominacion`, que mira cuentas y no comprobantes— ese requisito necesita su hermano que recorra
+    movimientos. Hoy ninguno de los que exige un driver de serie lo es.
+
+    `correlativos` no llega aquí: con vocabulario neutral el motor no numera, y con uno legacy el libro se para en
+    `LibroQueTodaviaNoSeNumera` porque su sub-diario espera el archivo real que lo pida."""
+    libro, movimientos, config = preparar_tesoreria(doc, configuracion, driver)
+    neutrales, rangos, indice = asi.lineas_e_indice_de_movimientos(libro, movimientos, config,
+                                                                  vocabulario=contrato.vocabulario(modulo))
+    return _respuesta(libro, neutrales, rangos, indice)
+
+
+def _respuesta(libro: Libro, neutrales: list, rangos: dict, indice: tuple) -> dict:
+    """El documento con su bloque `asiento` y `_asiento`, igual venga de comprobantes o de movimientos: lo que sigue
+    —cuadrar, hashear, responder— no sabe de cuál de los dos salió, y ésa es la mitad del valor del dispatch."""
     lineas = [ln.a_dict() for ln in neutrales]
     cuadre = partida_doble.cuadra(lineas)
     salida = documento(libro, lineas=lineas)
     salida["_asiento"] = {"lineas": len(lineas), "sub_diarios": dict(rangos), "cuadre": cuadre.a_dict(),
                           "huella": huella(neutrales),
-                          "comprobantes": por_comprobante(libro, neutrales, indice),
+                          **por_entrada(libro, neutrales, indice),
                           "motor": __version__}
     return salida

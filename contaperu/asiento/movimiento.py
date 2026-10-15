@@ -277,7 +277,14 @@ def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correl
         raise LibroQueTodaviaNoSeNumera(rasgos.tipo)
 
     imputaciones = (config or {}).get("imputaciones_de_movimientos") or {}
+    # El maestro llega por las dos formas, y las dos son legítimas: **la lista** es como la guarda la configuración
+    # —es lo que una pantalla de ajustes edita y lo que `Campo("cuentas_bancarias", "lista")` declara— y **el
+    # diccionario** es como se usa, buscando por el `id` con el que un movimiento nombra su cuenta. Se normaliza
+    # aquí en vez de guardarla transformada en la configuración, que daría a una misma clave dos tipos según por
+    # dónde entre, y la haría fallar su propia validación al pasar otra vez por `armado.config_para`.
     cuentas = (config or {}).get("cuentas_bancarias") or {}
+    if isinstance(cuentas, (list, tuple)):
+        cuentas = tesoreria.por_id(list(cuentas))
     dobles = traspasos_en_dos_patas(movimientos, imputaciones)
     if dobles:
         raise TraspasoEnDosPatas(dobles)

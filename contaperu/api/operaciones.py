@@ -124,11 +124,14 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None) -> dic
 
     **Esta operación no asienta, y es a propósito: mirar y asentar son dos preguntas.** Aquí se revisa lo que
     entró —qué se repitió, qué no tiene contrapartida, qué no cuadra contra lo que el banco declaró— y eso
-    no obliga a nada. El asiento lo arma `generar_asiento` desde la 12.8, y ahí lo que falta ya no se puede
-    reportar: sin la imputación o sin la 104 del maestro no hay línea que escribir.
+    no obliga a nada. El asiento lo arma `generar_asiento` desde la 12.9, con un destino de canal `erp`, y ahí lo
+    que falta ya no se puede **reportar**: sin la imputación o sin la 104 del maestro no hay línea que escribir, así
+    que los tres avisos de aquí son allí tres excepciones. El maestro, que aquí es un argumento, allí viaja en la
+    configuración (`cuentas_bancarias`).
 
-    Lo que sigue fuera es llevarlo a un sistema legacy: eso espera un archivo del sub-diario de bancos que
-    CONCAR haya aceptado, y con él su sub-diario y su correlativo.
+    Lo que sigue fuera es el **archivo**: ningún driver de serie declara todavía este libro en sus `FORMATOS`, y
+    llevarlo a un sistema legacy espera además un archivo del sub-diario de bancos que CONCAR haya aceptado, con
+    el que vendrán su sub-diario y su correlativo.
     """
     doc = documento or {}
     libro = preparacion.libro_de(doc)

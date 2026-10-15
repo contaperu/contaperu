@@ -121,6 +121,11 @@ que es lo que la NIC 7 §9 excluye de los flujos.
   todo lo que el motor necesitará. Falta la tasa del ITF con su norma y un archivo del sub-diario de bancos que
   CONCAR haya aceptado (el hito D6).
 
+  *(Nota de la 12.9: ya lo asienta, y **ninguna de esas dos cosas hizo falta**. La tasa del ITF no, porque su
+  importe lo dice la constancia o el extracto y no un cálculo; el archivo tampoco, porque era para numerar un
+  sub-diario, que solo pide un sistema legacy. El contrato que esta versión cerró se usó tal cual, sin añadirle
+  ni un campo.)*
+
 ## Si guardas documentos de la 2.0
 
 El motor no los lee. La traducción es la tabla de arriba y no pierde nada; el único campo que hay que **añadir** es

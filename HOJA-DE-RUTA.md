@@ -106,7 +106,7 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - D8 · 8.2.0 (la validación del maestro sale por la api; el argumento en el pipeline espera a que algo lo
   consuma). **La 8.2.0 no se publicó**: su código salió dentro de la 9.0.0, así que para tenerlo se instala esa
 - El eje del libro · 9.0.0 (de `es_venta: bool` a la tabla `modelo.RASGOS`: no es un hito de ningún frente, es lo que había que arreglar antes de que B13 sumara el tercer libro)
-- El tercer libro y la entrada del dinero · 9.1.0 (`tesoreria` en el catálogo, la enmienda 0024 aceptada, los dos bloques en el esquema y `revisar_tesoreria` por la api. **No asienta**: eso es D6)
+- El tercer libro y la entrada del dinero · 9.1.0 (`tesoreria` en el catálogo, la enmienda 0024 aceptada, los dos bloques en el esquema y `revisar_tesoreria` por la api. **No asienta**: eso fue D6a, tres versiones después)
 - El papel de una línea se deriva · 9.2.0 y 10.0.0 (tampoco es un hito de ningún frente: es el eje nuevo aplicado al estándar. El `rol` existía para los sistemas de destino, así que salió del documento y se **deriva** de lo que la línea trae —`drivers/kit/rol.py`—; con él salieron `documento.tipo`, `referencia.tipo` y `detraccion.estado`, que la 4.0 había dejado declarados sin que nadie los escribiera. La 9.2.0 **no se etiquetó**: su contenido va dentro de la 10.0.0)
 - El pago esperado · 12.2.0 (las cuotas de una factura al crédito con su importe y el `monto_pendiente` que no
   es el total, enmienda 0030: la RS 193-2020 los obliga y el lector los veía y los tiraba. Tampoco es un hito de
@@ -117,7 +117,8 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
 - El pendiente derivado · 12.4.0 (`pendiente_de`, `partidas_previas` y la operación `estado_de_cuenta`. **Sin
   ninguna columna de estado**, decisión de John del 12-oct-2026: el saldo se infiere del número y la palabra es
   una lectura suya. Los meses se cruzan por argumento, con el molde de `claves_previas`)
-- La entrada única de tesorería · 11.0.0 (el movimiento absorbe la constancia, la cabecera del extracto viaja en el documento y la contrapartida la pone el ERP. **Es la mitad de D6 que no esperaba archivo**, igual que D8 fue la mitad del banco que no lo esperaba: el contrato queda cerrado y lo que falta para asentar son la tasa del ITF con su norma y un archivo del sub-diario de bancos aceptado)
+- La entrada única de tesorería · 11.0.0 (el movimiento absorbe la constancia, la cabecera del extracto viaja en el documento y la contrapartida la pone el ERP. **Es la mitad de D6 que no esperaba archivo**, igual que D8 fue la mitad del banco que no lo esperaba: el contrato queda cerrado y lo que entonces parecía faltar para asentar eran la tasa del ITF con su norma y un archivo del sub-diario de bancos aceptado — **las dos cayeron**: la tasa no hacía falta y el archivo era solo para un legacy, ver la entrada de abajo)
+- El asiento del dinero para el ERP base · 12.7.0 → 12.9.0 (**D6 se partió en cuatro** y las dos primeras partes entraron: la línea de un movimiento con sus cinco formas y el ITF como su propio asiento, el libro originado por el motor con sus roles medidos, y `generar_asiento` despachando por `libro.rasgos.origen`. **Ninguna de las dos necesitó el archivo que D6 esperaba**, y la tasa del ITF dejó de hacer falta porque el importe lo dice el banco: lo que esperaba un dato era llevarlo a un legacy, que es D6c)
 - A4 · 6.0.0 (STARSOFT Desktop: un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct; la `V` del archivo de ventas se corrigió en la 6.3.2)
 - J0 · 1.0.0 (14-sep-2026: el acoplamiento con lo peruano queda congelado en un test, sin mover código)
 - J1 · 1.0.0 (14-sep-2026: las dependencias ocultas se cortaron al ordenar el motor en capas que un test hace cumplir)
@@ -155,8 +156,9 @@ EL BANCO ───────────────────────�
  D8 cuentas_bancarias [norma: CCI y códigos de banco]   ← sin esperar archivo
  0.3 frase del LEEME ─► D1 constancias [archivo del BN] ──┐
  E1 enmiendas ─┬─► D2 extracto [archivo real] ────────────┴─► D3 conciliar ─► D5 pasarela [reporte]
-               │     ├─► D4 reglas bancarias [reglas reales]                        └─► D6 asientos
-               │     ├─► B7 contrato de lector [segundo banco]                 [fuente + aceptado]
+               │     ├─► D4 reglas bancarias [reglas reales]                        └─► D6d asiento de pasarela
+               │     ├─► B7 contrato de lector [segundo banco]
+               │  D6a asiento de tesorería ✅ ← sin esperar archivo · D6c hacia un legacy [archivo aceptado]
                │     └─► D7 conectores [primer conector]
                ├─► C2 · C3 · C4 · C5 · C12
                ├─► E2 conformidad
@@ -194,7 +196,7 @@ Lo cumplido —la Fase 0 entera, E1, C1, C9, C2, E2, E3, E5, E6, la puerta del E
 | en paralelo | A1-A3 legacy | dato: la plantilla de SISCONT y un mes importado |
 | cuando la app pida la siguiente API | **C17** más APIs de SUNAT descritas | dato: cuál, y su manual |
 | cuando llegue el dato | **B14** determinación con dimensiones · C3 · C4 · C5 · C6 · C7 · C8 · C10 · C11 · C12 · C13 · C14 (tras C1) | dato |
-| cuando lleguen los dos archivos | **D1** constancias del BN · **D2** extracto → **D3** conciliar · D4 → D5 → D6 | dato (D3 es código, tras D1 y D2) |
+| cuando lleguen los dos archivos | **D1** constancias del BN · **D2** extracto → **D3** conciliar · D4 → D5 → D6d · **D6c** tesorería hacia un legacy | dato (D3 es código, tras D1 y D2) |
 | cuando haya un mes imputado por un agente | B11 → B12 · C15 consecuencia de `confianza` | caso real |
 | cuando haga falta | B7 · D7 · E4 | dato o decisión |
 | con un cliente real fuera del Perú | J0 → J1 → J2 · J3 → J4 → J5 → J6 | dato: el cliente, su destino y un archivo aceptado |
@@ -267,7 +269,7 @@ un pago de tributos y la de un reintegro de caja chica, que no son del banco, y 
 para esto (el rol `tesoreria`). Trae la cuenta bancaria que declara el contribuyente —con **su** cuenta contable, la
 104—, el movimiento de un extracto, la constancia de una operación con sus `referencias`, y el cuadre de la cadena
 de saldos, que es lo que hará verificable a cualquier lector. Lo que sigue fuera es leer un banco concreto (D2),
-conciliar (D3) y asentar (D6). Y los conectores de entrada **nunca** viven dentro de `contaperu`, que es lo que D7
+conciliar (D3) y llevarlo a un sistema legacy (D6c); asentarlo para un ERP ya se hace (D6a, 12.9). Y los conectores de entrada **nunca** viven dentro de `contaperu`, que es lo que D7
 decide y lo que `tests/test_frontera.py` hace cumplir.
 
 **Investigación.** Lo que hace EE. UU. de verdad, los canales peruanos a la fecha de consulta, los proyectos
@@ -277,7 +279,7 @@ abiertos, los rieles de pago y el fraude.
 que declara el contribuyente con su 104, el movimiento, lo que un pago cancela y el cuadre de la cadena de
 saldos— y desde la 3.0 del estándar el contrato está **cerrado**: una sola entrada (`movimientos[]`), la cabecera
 de cada extracto, y la contrapartida que pone el ERP en `imputaciones_de_movimientos`, con el aviso que dice qué
-movimientos la esperan. Lo que no hay es ningún parser de ningún banco, ni conciliación (D3), ni asiento (D6).
+movimientos la esperan. Lo que no hay es ningún parser de ningún banco ni conciliación (D3). **El asiento sí**, desde la 12.9 y para el ERP base (D6a); lo que espera el archivo es llevarlo a un legacy (D6c).
 
 La conciliación de constancias de detracción está pendiente de un archivo real, pero la
 mitad existe: `diagnosticar` ya lista las detracciones que esperan constancia (`detraccion_pendiente`,
@@ -293,7 +295,10 @@ desarma (`contaperu/lectores/archivos.py:56-58`), y un `.txt` se ignora como arc
 | D3 | `conciliar*` con `metodo*` y `certeza*`, `emparejar_transferencias*` y la tolerancia en porcentaje y en importe absoluto. **`aplicaciones` ya no es suya: existe desde la 12.3**, así que lo que D3 devuelve son aplicaciones con `origen: propuesto` —que no cuentan para ningún saldo— y no una forma propia | N · F | código, tras D1 y D2 | Motivos legibles; la detracción como pago parcial; solo certeza alta va a lote; dentro del porcentaje y fuera del absoluto no hay certeza alta; **una propuesta no mueve un pendiente hasta que alguien la pasa a `manual`** | D1, D2 | 16, 25, 50 |
 | D4 | `ReglaBanco*` y `aplicar_reglas*` | N | dato: reglas reales de un contador | Primera coincidencia por prioridad, con motivo; nunca confirma | D2 | — |
 | D5 | `LiquidacionPasarela*` y `Aviso*` | N · estándar | dato: el reporte real de una pasarela | El invariante del neto se cumple; los avisos nunca asientan | D3, E1 | — |
-| D6 | Asientos de tesorería y de liquidación | N · D | dato: el ITF con su norma —**las cuentas del PCGE ya están, con su página: `6412` el gasto y `40181` el pasivo**—, el tratamiento del IGV de la comisión y un archivo aceptado del sub-diario de bancos de CONCAR. **Un pago y su ITF son dos asientos** (enmienda 0028) | Archivo aceptado; un pago con ITF sale en dos asientos; snapshot de CONCAR idéntico | D3, D5 | 17 |
+| D6a ✅ | **El asiento de tesorería para el ERP base.** Entró en tres pasos —12.7 la línea, 12.8 el libro originado, 12.9 el camino por la api— y **no esperó ningún archivo ni ninguna norma**, que es lo que corrigió su sitio: estaba detrás de D3 y D5 y no tenía que estarlo, porque asentar un movimiento ya imputado no necesita conciliar —la contrapartida es un hecho declarado, no una conjetura, y lo que D3 produce son aplicaciones con `origen: propuesto`, que no cuentan para ningún saldo—. No inventó ni una regla contable: la del catálogo (`efectos_de_tesoreria`, NIC 7) más la imputación más la 104 del maestro bastan para las cinco formas | N · D | código: el catálogo ya publicaba la regla con su fuente | Las cinco formas cuadran sin tolerancia; ninguna línea sin glosa; los dos snapshots byte a byte idénticos | — | 17 |
+| D6b ✅ | **El ITF, cerrado por criterio y no por tasa** (John, 13-oct-2026): *«el ITF se registra en base a lo que dice la constancia de pago o los movimientos bancarios… un asiento contable se da por hechos fehacientes y sustentados»*. Eso **es** su fuente, y es la que la regla 1 admite. Se asienta `6412` contra la cuenta de efectivo y su importe nunca se calcula; el `40181` no entra, porque el banco ya lo retuvo | N · D | — | Un movimiento con `itf` da dos asientos y uno sin él, uno | — | 17 |
+| D6c | **Tesorería hacia un sistema legacy.** Lo que de verdad espera el archivo: un sub-diario de bancos que CONCAR haya aceptado, y con él la clave de configuración del sub-diario, la numeración hermana de `numerar_en_orden` —que no se puede parchear: empieza por `tipos_sin_sigla`, y un movimiento no tiene `tipo_cp`— y una letra por libro en las `COLUMNAS_ELEGIBLES` de los tres drivers. Mientras no esté, el libro **se arma y no se numera** (`LibroQueTodaviaNoSeNumera`) | N · D | dato: un archivo aceptado del sub-diario de bancos de CONCAR, y el tratamiento del IGV de la comisión | Archivo aceptado; snapshot de CONCAR idéntico | D6a | 17 |
+| D6d | **La liquidación de una pasarela.** El otro asiento que D6 juntaba, y el que sí depende de lo de arriba | N · D | dato: el reporte real de una pasarela | El invariante del neto se cumple en el asiento | D5 | — |
 | D7 | Dónde viven los conectores de entrada | `App` o paquete aparte | dato: el primer conector real | Decisión escrita con el criterio de abajo | D2 o D5 | — |
 
 **D7 · Dónde viven los conectores: decisión abierta.** Webhooks de pasarelas, APIs de bancos, agregadores y lectura de
@@ -543,7 +548,7 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 | D1 | La consulta de pagos de detracciones de SOL o los movimientos de la cuenta del Banco de la Nación | Descargados por el contribuyente |
 | D2 | Tres meses de extracto de un banco, y la especificación de su MT940 o su archivo host-to-host | Con el ejecutivo del banco |
 | D5 | El reporte de liquidación de una pasarela, y cómo trata el IGV de su comisión (las páginas públicas de Culqi se contradicen) | Con un comercio real |
-| D6 | Las cuentas del PCGE, el ITF con su norma y un archivo aceptado del sub-diario de bancos de CONCAR | Norma citada y un estudio |
+| D6c | Un archivo aceptado del sub-diario de bancos de CONCAR, y el tratamiento del IGV de una comisión bancaria | Un estudio. **La tasa del ITF ya no hace falta**: el importe lo dice la constancia o el extracto, no un cálculo (John, 13-oct-2026) |
 | **Estándar y comunidad** | | |
 | E7 | La decisión de abrir el repositorio y la revisión de su historial | John |
 | **Motor** | | |
@@ -668,7 +673,7 @@ espera un archivo real. **D**: espera un segundo caso o una versión del SDK.
 | 14 | `aplicar_constancias` | N | Hoja de ruta; `detraccion_pendiente` ya responde | De `PROVISIONADO` a `PAGADO` con el archivo real; sin pareja, igual | `aplicar_constancias*` | C | D1 |
 | 15 | Lector de extracto del banco X y el movimiento | N | El Excel o TXT del portal bancario, el formato confirmado en el Perú | Archivo real anonimizado; un libro Excel no se desarma como ZIP; deduplica | `Movimiento*`, `leer_extracto*` | C | D2 |
 | 16 | `conciliar` | N | Constancias primero; después cobros y pagos | Motivos legibles; cardinalidades; lo pendiente no se propone; tolerancia | `conciliar*` | C | D3 |
-| 17 | Asiento de tesorería | N · D | Cobros y pagos hacia el destino | Archivo aceptado del sub-diario de bancos; ITF con su norma | — | C | D6 |
+| 17 | Asiento de tesorería | N · D | Cobros y pagos hacia el destino | Para el ERP base, **ninguno**: la regla ya estaba publicada con su fuente en el catálogo (12.7 → 12.9). Para un legacy, un archivo aceptado del sub-diario de bancos. El ITF **no espera su tasa**: el importe lo dice el banco | — | C | D6a ✅ · D6b ✅ · D6c |
 | 18 | `sugerir_imputacion` | N · F | La imputación repetida por proveedor | Determinista; mínimo; nunca escribe la imputación | `sugerir_imputacion*` | C | — |
 | 19 | Pedir lo que falta desde el MCP (MRTR) | F | Pedir una cuenta sin guardar estado | — | — | D | — |
 | 20 | Contrato de lector y *entry points* de lectores | N | El segundo banco | Un test de conformidad análogo al de drivers | `contaperu.lectores*` | D | B7 |

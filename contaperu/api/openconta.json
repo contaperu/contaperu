@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "12.8.0",
+  "version": "12.9.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -570,7 +570,7 @@
    "post": {
     "operationId": "revisar_tesoreria",
     "summary": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.",
-    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.\n\n**Una sola entrada** (3.0 del estándar), como `comprobantes[]` lo es de una compra o de una venta: venga de una\nlínea de extracto o de una constancia de pago, al motor llega un `movimiento`, y lo que los distingue no es una\netiqueta sino el `saldo`, que solo un extracto trae. Lo que el banco declara en la cabecera de la hoja va en\n`extractos[]`, y la contrapartida que decide el ERP en `imputaciones_de_movimientos`.\n\n**Esta operación no asienta, y es a propósito: mirar y asentar son dos preguntas.** Aquí se revisa lo que\nentró —qué se repitió, qué no tiene contrapartida, qué no cuadra contra lo que el banco declaró— y eso\nno obliga a nada. El asiento lo arma `generar_asiento` desde la 12.8, y ahí lo que falta ya no se puede\nreportar: sin la imputación o sin la 104 del maestro no hay línea que escribir.\n\nLo que sigue fuera es llevarlo a un sistema legacy: eso espera un archivo del sub-diario de bancos que\nCONCAR haya aceptado, y con él su sub-diario y su correlativo.",
+    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.\n\n**Una sola entrada** (3.0 del estándar), como `comprobantes[]` lo es de una compra o de una venta: venga de una\nlínea de extracto o de una constancia de pago, al motor llega un `movimiento`, y lo que los distingue no es una\netiqueta sino el `saldo`, que solo un extracto trae. Lo que el banco declara en la cabecera de la hoja va en\n`extractos[]`, y la contrapartida que decide el ERP en `imputaciones_de_movimientos`.\n\n**Esta operación no asienta, y es a propósito: mirar y asentar son dos preguntas.** Aquí se revisa lo que\nentró —qué se repitió, qué no tiene contrapartida, qué no cuadra contra lo que el banco declaró— y eso\nno obliga a nada. El asiento lo arma `generar_asiento` desde la 12.9, con un destino de canal `erp`, y ahí lo\nque falta ya no se puede **reportar**: sin la imputación o sin la 104 del maestro no hay línea que escribir, así\nque los tres avisos de aquí son allí tres excepciones. El maestro, que aquí es un argumento, allí viaja en la\nconfiguración (`cuentas_bancarias`).\n\nLo que sigue fuera es el **archivo**: ningún driver de serie declara todavía este libro en sus `FORMATOS`, y\nllevarlo a un sistema legacy espera además un archivo del sub-diario de bancos que CONCAR haya aceptado, con\nel que vendrán su sub-diario y su correlativo.",
     "requestBody": {
      "required": true,
      "content": {
@@ -2793,6 +2793,105 @@
     ],
     "additionalProperties": false
    },
+   "movimiento_de_la_respuesta": {
+    "title": "Un movimiento en la respuesta",
+    "description": "Lo que salió de un movimiento de tesorería: su identidad y, en un asiento, el tramo [desde, hasta) de sus líneas y la huella de ese tramo. Hermano de `comprobante_de_la_respuesta`, con la misma forma; lo que cambia es la identidad, porque un movimiento no tiene serie ni número.",
+    "type": "object",
+    "properties": {
+     "identidad": {
+      "type": "object",
+      "description": "La clave estable de un movimiento, escrita. Dos ramas y no una: con el número que le dio el banco (`referencia`) basta ese número; sin él hacen falta la fecha, el sentido, el importe y la descripción, que es lo que distingue dos líneas del mismo extracto.",
+      "oneOf": [
+       {
+        "properties": {
+         "ruc": {
+          "type": "string"
+         },
+         "libro": {
+          "const": "tesoreria"
+         },
+         "cuenta": {
+          "type": "string"
+         },
+         "referencia": {
+          "type": "string",
+          "minLength": 1
+         }
+        },
+        "required": [
+         "ruc",
+         "libro",
+         "cuenta",
+         "referencia"
+        ],
+        "additionalProperties": false
+       },
+       {
+        "properties": {
+         "ruc": {
+          "type": "string"
+         },
+         "libro": {
+          "const": "tesoreria"
+         },
+         "cuenta": {
+          "type": "string"
+         },
+         "fecha": {
+          "type": "string"
+         },
+         "sentido": {
+          "enum": [
+           "cargo",
+           "abono"
+          ]
+         },
+         "importe": {
+          "type": "string"
+         },
+         "descripcion": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "ruc",
+         "libro",
+         "cuenta",
+         "fecha",
+         "sentido",
+         "importe",
+         "descripcion"
+        ],
+        "additionalProperties": false
+       }
+      ]
+     },
+     "lineas": {
+      "type": "array",
+      "prefixItems": [
+       {
+        "type": "integer",
+        "minimum": 0
+       },
+       {
+        "type": "integer",
+        "minimum": 0
+       }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "huella": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "sha256 del contenido del asiento, sin el correlativo (`estandar/LEEME.md`)."
+     }
+    },
+    "required": [
+     "identidad"
+    ],
+    "additionalProperties": false
+   },
    "cuadre": {
     "title": "Cuadre",
     "description": "Si la suma del Debe es exactamente la del Haber.",
@@ -2831,7 +2930,7 @@
    },
    "asiento": {
     "title": "Asiento generado",
-    "description": "Un documento `open-accounting` con las líneas del asiento y `_asiento`: cuántas líneas, el rango de cada sub-diario, el cuadre, la huella, lo que salió de cada comprobante y la versión del motor.",
+    "description": "Un documento `open-accounting` con las líneas del asiento y `_asiento`: cuántas líneas, el rango de cada sub-diario, el cuadre, la huella, lo que salió de cada comprobante o de cada movimiento y la versión del motor.",
     "allOf": [
      {
       "$ref": "#/components/schemas/OpenAccounting"
@@ -2862,8 +2961,16 @@
          },
          "comprobantes": {
           "type": "array",
+          "description": "Lo que salió de cada comprobante. Vacío en un libro cuyo asiento no sale de comprobantes, como el de tesorería: la clave está siempre y es literalmente cierta.",
           "items": {
            "$ref": "#/components/schemas/comprobante_de_la_respuesta"
+          }
+         },
+         "movimientos": {
+          "type": "array",
+          "description": "Lo que salió de cada movimiento de tesorería, con la misma forma que `comprobantes` (12.9). Vacío en una compra o en una venta. De cuál de las dos claves viene el asiento lo dice el tipo de libro.",
+          "items": {
+           "$ref": "#/components/schemas/movimiento_de_la_respuesta"
           }
          },
          "motor": {
@@ -2876,6 +2983,7 @@
          "cuadre",
          "huella",
          "comprobantes",
+         "movimientos",
          "motor"
         ],
         "additionalProperties": false

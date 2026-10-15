@@ -1,0 +1,101 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/movimiento_de_la_respuesta.schema.json",
+ "title": "Un movimiento en la respuesta",
+ "description": "Lo que salió de un movimiento de tesorería: su identidad y, en un asiento, el tramo [desde, hasta) de sus líneas y la huella de ese tramo. Hermano de `comprobante_de_la_respuesta`, con la misma forma; lo que cambia es la identidad, porque un movimiento no tiene serie ni número.",
+ "type": "object",
+ "properties": {
+  "identidad": {
+   "type": "object",
+   "description": "La clave estable de un movimiento, escrita. Dos ramas y no una: con el número que le dio el banco (`referencia`) basta ese número; sin él hacen falta la fecha, el sentido, el importe y la descripción, que es lo que distingue dos líneas del mismo extracto.",
+   "oneOf": [
+    {
+     "properties": {
+      "ruc": {
+       "type": "string"
+      },
+      "libro": {
+       "const": "tesoreria"
+      },
+      "cuenta": {
+       "type": "string"
+      },
+      "referencia": {
+       "type": "string",
+       "minLength": 1
+      }
+     },
+     "required": [
+      "ruc",
+      "libro",
+      "cuenta",
+      "referencia"
+     ],
+     "additionalProperties": false
+    },
+    {
+     "properties": {
+      "ruc": {
+       "type": "string"
+      },
+      "libro": {
+       "const": "tesoreria"
+      },
+      "cuenta": {
+       "type": "string"
+      },
+      "fecha": {
+       "type": "string"
+      },
+      "sentido": {
+       "enum": [
+        "cargo",
+        "abono"
+       ]
+      },
+      "importe": {
+       "type": "string"
+      },
+      "descripcion": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "ruc",
+      "libro",
+      "cuenta",
+      "fecha",
+      "sentido",
+      "importe",
+      "descripcion"
+     ],
+     "additionalProperties": false
+    }
+   ]
+  },
+  "lineas": {
+   "type": "array",
+   "prefixItems": [
+    {
+     "type": "integer",
+     "minimum": 0
+    },
+    {
+     "type": "integer",
+     "minimum": 0
+    }
+   ],
+   "minItems": 2,
+   "maxItems": 2
+  },
+  "huella": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$",
+   "description": "sha256 del contenido del asiento, sin el correlativo (`estandar/LEEME.md`)."
+  }
+ },
+ "required": [
+  "identidad"
+ ],
+ "additionalProperties": false
+}

@@ -19,7 +19,7 @@ from .documento import (MAXIMO_APLICACIONES, MAXIMO_COMPROBANTES, MAXIMO_MOVIMIE
                         version_del_documento)
 from .entradas import (MAXIMO_CLAVES_PREVIAS, MAXIMO_PARTIDAS_PREVIAS, bytes_de, claves_previas_de,
                        fecha_de, partidas_previas_de)
-from .pasos import normalizar_detracciones, preparar, revisar
+from .pasos import normalizar_detracciones, preparar, preparar_tesoreria, revisar
 
 __all__ = ["MAXIMO_APLICACIONES", "MAXIMO_CLAVES_PREVIAS", "MAXIMO_COMPROBANTES", "MAXIMO_MOVIMIENTOS",
            "MAXIMO_PARTIDAS_PREVIAS", "partidas_previas_de",
@@ -28,5 +28,5 @@ __all__ = ["MAXIMO_APLICACIONES", "MAXIMO_CLAVES_PREVIAS", "MAXIMO_COMPROBANTES"
            "movimientos_de",
            "config_aplicada", "configuracion_por_defecto", "con_imputacion", "describir_configuracion",
            "documento", "errores_de_configuracion", "fecha_de", "imputacion_del_documento", "libro_de",
-           "lineas_de", "normalizar_detracciones", "preparar", "revisar", "serie_numero",
+           "lineas_de", "normalizar_detracciones", "preparar", "preparar_tesoreria", "revisar", "serie_numero",
            "version_del_documento"]

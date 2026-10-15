@@ -100,10 +100,12 @@ class Rasgos:
         return "D" if self.sentido_principal == "H" else "H"
 
 
-# En qué se diferencia cada tipo de libro del catálogo. **Ya no coincide con `asiento.TIPOS_DEL_MOTOR`**, y la
-# diferencia es la información útil: desde el 10-oct-2026 esta tabla tiene tres filas y aquella tupla dos, porque
-# el motor sabe qué ES un libro de tesorería y todavía no sabe armar su asiento. Un libro que esté aquí y no allí
-# se para en la puerta nombrando los que sí (`asiento.LibroQueElMotorNoOrigina`), que es para lo que se puso.
+# En qué se diferencia cada tipo de libro del catálogo. **Vuelve a coincidir con `asiento.TIPOS_DEL_MOTOR`** desde
+# la 12.8, y el que no coincidieran fue información útil mientras duró: entre el 10-oct-2026 y esa versión esta
+# tabla tuvo tres filas y aquella tupla dos, porque el motor sabía qué ES un libro de tesorería y no sabía armar su
+# asiento. Un libro que esté aquí y no allí se para en la puerta nombrando los que sí
+# (`asiento.LibroQueElMotorNoOrigina`), que es para lo que se puso y que hoy no se dispara nunca — y ése es el
+# momento de tenerla, porque el día que el catálogo crezca (B13) lo que falle será eso.
 RASGOS: dict[str, "Rasgos"] = {
     # Los roles de cada uno están MEDIDOS ejecutando el motor, no deducidos: una venta y una compra simples dan
     # los tres primeros; una compra con detracción añade `recorte` y `detraccion`; un recibo por honorarios añade

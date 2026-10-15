@@ -200,10 +200,14 @@ PARA_HERRAMIENTA: dict[str, str] = {
     Y el número del papel va en `constancia`, aparte del que le da el banco, que es `referencia`: **los dos
     existen y pueden ser distintos** —una detracción pagada desde un banco tiene su vóucher y su N° de operación—.
 
-    **Esta herramienta no asienta, y es a propósito**: mirar y asentar son dos preguntas distintas. Para el
-    asiento, `generar_asiento` con el driver `asiento_contable`, que escribe el documento del estándar.
-    Lo que sigue sin poder salir es el archivo de un sistema legacy: espera un sub-diario de bancos que
-    CONCAR haya aceptado.
+    **Esta herramienta no asienta, y es a propósito**: mirar y asentar son dos preguntas distintas. Aquí se mira,
+    y lo que falte se dice sin parar nada; `generar_asiento` sobre un libro de tesorería **para** cuando falta,
+    porque sin la contrapartida o sin la cuenta contable del maestro no hay línea que escribir.
+
+    **Y todavía no hay destino al que mandarlo**: ningún driver que viaje en el paquete declara este libro, así que
+    `generar_asiento` con `asiento_contable` lo rechaza diciendo qué libros lleva. Lo que ya existe es el asiento;
+    lo que falta es el archivo. Para un sistema legacy falta además un sub-diario de bancos que CONCAR haya
+    aceptado.
     """,
     'validar_cuentas_bancarias': """Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.
 

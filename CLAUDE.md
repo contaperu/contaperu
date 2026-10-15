@@ -63,9 +63,14 @@ hay lector de ningún banco todavía. **Desde el 10-oct-2026 tiene su tipo de li
 entra por el mismo circuito que un comprobante, y desde la 3.0 del estándar por **una sola entrada**: venga de una
 línea de extracto o de una constancia de pago, al motor llega un `movimiento` con su `origen` diciendo de dónde
 salió —lo que lo distingue no es una etiqueta, es el `saldo`, que solo un extracto trae—, con la cabecera de la hoja
-en `extractos[]` y con la contrapartida que pone el ERP en `imputaciones_de_movimientos`. **El contrato está
-cerrado y el motor todavía no sabe armar su asiento**, que es el hito D6 y espera la tasa del ITF con su norma y un
-archivo del sub-diario de bancos aceptado); **`aplicaciones`** —el puente entre los tres libros desde la 12.3:
+en `extractos[]` y con la contrapartida que pone el ERP en `imputaciones_de_movimientos`. **Y desde la 12.9 el
+motor arma su asiento para un ERP** (el hito D6a): las cinco formas —pago, cobro, cargo del banco, reparto y
+traspaso— salen sin inventar ninguna regla, porque la del catálogo (`efectos_de_tesoreria`, NIC 7) más la
+imputación más la 104 del maestro bastan, y el ITF es su propio asiento, `6412` contra la cuenta de efectivo, con
+el importe que dice el banco y no una tasa (criterio de John: un asiento se sustenta en un hecho fehaciente).
+`generar_asiento` despacha por `libro.rasgos.origen` y el maestro de cuentas viaja en la **configuración**. Lo que
+sigue esperando el archivo del sub-diario de bancos es llevarlo a un sistema legacy (D6c): hasta entonces el libro
+**se arma y no se numera**); **`aplicaciones`** —el puente entre los tres libros desde la 12.3:
 cuánto de un pago cancela un documento, N a N y con su importe, con el `origen` que separa un hecho (`declarado`,
 `manual`) de una conjetura (`propuesto`, que **no cuenta para ningún saldo**). Es a `referencias` lo que
 `imputaciones_de_movimientos` es a `movimiento`, y el saldo **se deriva de la suma y no se guarda**—; **drivers** que

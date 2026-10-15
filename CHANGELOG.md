@@ -4,6 +4,86 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.9.0] — 2026-10-14
+
+**El asiento del dinero se puede pedir.** El núcleo sabía armarlo desde la 12.7 y el motor declaraba ese libro
+como suyo desde la 12.8; lo que faltaba era el camino, y con él `api.generar_asiento` sobre un libro de tesorería
+devuelve sus líneas, su cuadre y su huella. Es el hito **D6a**, y resulta que **no esperaba ningún archivo ni
+ninguna norma**: la regla que gobierna esto estaba publicada con su fuente desde el 10-oct-2026
+(`efectos_de_tesoreria`, NIC 7), y con ella más la imputación que pone el ERP más la 104 del maestro salen las
+cinco formas.
+
+**Ninguna salida de compras ni de ventas se mueve.** Los cuatro snapshots de celdas y el del documento, intactos;
+ninguna huella cambia. Lo único que una respuesta de compras o de ventas gana es la clave `_asiento.movimientos`
+vacía, y está en el diff de la caracterización, línea a línea.
+
+### El dispatch, una sola vez y dicho por la tabla
+
+De qué bloque del documento salen las líneas lo dice `libro.rasgos.origen`, y la decisión ocurre **en una línea de
+`armado.generar_asiento`**: ni un `if es_tesoreria` más adentro. Para eso ese rasgo existe y para eso es singular.
+
+- **`preparar_tesoreria`**, hermano de `preparar` y no un parámetro suyo: su promesa es distinta hasta en la firma
+  —`preparar` dice «el libro y **todos** los comprobantes»— y sus pasos no se parecen. Lee los `movimientos`,
+  **descarta las relecturas por su clave** —bajar el extracto dos veces es lo normal, y asentarlo contaría el
+  dinero dos veces—, casa la imputación de cada uno y aplica la configuración hacia el destino.
+- **La imputación se casa contra TODOS los movimientos**, no solo contra los que entran: una que nombre el
+  descartado por repetido es correcta, y rechazarla sería castigar una relectura.
+- **El camino de los movimientos no pasa por `exigir_requisitos` ni por `no_caben`, y se dice por qué**: las dos
+  están escritas sobre un comprobante —`faltantes_para` les pregunta por su tipo, su moneda, su detracción—, así
+  que llamarlas con una lista vacía devolvería «nada falta» sin haber comprobado nada. Lo que le falta a un
+  movimiento lo exige el propio asiento. **El hueco queda declarado**: el día que un destino exija algo que valga
+  para una línea de tesorería —el candidato es `denominacion`, que mira cuentas y no comprobantes— ese requisito
+  necesita su hermano.
+
+### Añadido
+
+- **`pipeline.preparacion.preparar_tesoreria`** y, en `pipeline.armado`, `ORIGENES` y `por_entrada`.
+- **`_asiento.movimientos`** en la respuesta, con la misma forma que `comprobantes` —identidad, tramo de líneas y
+  huella— y su esquema publicado, `movimiento_de_la_respuesta.schema.json`, que declara **las dos ramas de la
+  identidad**: con el número que dio el banco basta ese número, y sin él hacen falta la fecha, el sentido, el
+  importe y la descripción.
+- **Las dos claves van siempre**, la del origen del libro con sus entradas y la otra vacía. Es literalmente cierto
+  —un libro de tesorería no tiene comprobantes— y le ahorra dos formas a quien lee la respuesta. `ORIGENES` se
+  **deriva** de `modelo.RASGOS`, así que el día que la tabla gane una fila con otro origen la respuesta gana su
+  clave sola y el esquema se pone rojo por quedarse atrás.
+- **El maestro de cuentas bancarias llega por la configuración** y el núcleo acepta las dos formas: la **lista**
+  que declara `Campo("cuentas_bancarias", "lista")` —lo que una pantalla de ajustes edita— y el **diccionario**
+  indexado por `id` —como se usa—. Se normaliza en el núcleo en vez de guardarlo transformado, que daría a una
+  misma clave dos tipos según por dónde entre y la haría fallar su propia validación al volver a pasar por
+  `armado.config_para`.
+- **`estandar/enmiendas/0032`**: el `documento` de una línea de tesorería. No entra ni sale ningún campo —es
+  descriptiva—, y dice lo que el estándar no decía: que `documento` no implica «comprobante de SUNAT». Va sin
+  `tipo_cp`, con el precedente de la línea de la detracción, y su `id_externo` es el del **movimiento**. El
+  catálogo de `roles` pasa a su **2.1**: `tesoreria` deja de estar reservado y se declara derivado con su regla.
+  **El estándar se queda en 3.3 y avanza su tag**, que es lo que la regla manda para una descripción y un catálogo
+  (precedente: la enmienda 0021).
+
+### Qué falta todavía, dicho antes de que se note
+
+- **El archivo.** Ningún driver que viaje en el paquete declara este libro en sus `FORMATOS`, así que `exportar`
+  —y `generar_asiento` con un destino de serie— lo rechaza nombrando los libros que sí lleva. Declararlo antes de
+  tener el camino de `exportar` dejaría a esa puerta dando el mensaje engañoso que la 12.6 quitó, así que la D se
+  prueba con un driver de prueba (`tests/drivers_de_prueba/erp_tesoreria.py`), como `diario_json` probó lo que
+  pedía STARSOFT.
+- **La numeración.** Con vocabulario legacy el libro se para en `LibroQueTodaviaNoSeNumera`: eso espera el archivo
+  del sub-diario de bancos que CONCAR haya aceptado, que es el hito **D6c** y lo único de D6 que de verdad
+  esperaba un dato.
+
+### Corregido
+
+- **Una línea que no compraba nada, quitada en vez de justificada.** `preparar_tesoreria` validaba además el
+  maestro «para decirlo en la puerta», y al romperla no caía ni un test: el núcleo ya da el mismo error y lo da
+  antes de armar una línea. Es la regla de la casa aplicada al revés de lo habitual — si al romper una línea ningún
+  test cae, o falta el test o falta la línea.
+- **La prosa que dejó de ser verdad con la 12.8**, que se había quedado atrás en tres sitios: el comentario de
+  `modelo.RASGOS` seguía diciendo que la tabla «ya no coincide con `TIPOS_DEL_MOTOR`» (vuelve a coincidir), y
+  `ARQUITECTURA.md` seguía diciendo que los roles de tesorería están vacíos y que el archivo del sub-diario diría
+  si el 42 de un pago es `tercero` o `contrapartida` — lo contestó el catálogo el 11-oct, no un archivo.
+- **D6 se parte en cuatro en la hoja de ruta** (`D6a`-`D6d`) y sale de detrás de D3 y D5, donde no tenía que
+  estar: asentar un movimiento ya imputado no necesita conciliar, porque la contrapartida es un hecho declarado y
+  no una conjetura — y lo que D3 producirá son aplicaciones con `origen: propuesto`, que no cuentan para ningún
+  saldo.
+
 ## [12.8.0] — 2026-10-13
 
 **El motor origina el libro del dinero.** `TIPOS_DEL_MOTOR` pasa de dos a tres, y el tercero entra **por su propia

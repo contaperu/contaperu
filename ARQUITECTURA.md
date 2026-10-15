@@ -71,7 +71,11 @@ propuesta del SIRE. Desde ahí, cada mes recorre seis pasos:
 
 1. **Preparar** (`preparacion`). Separa el libro de los comprobantes, aplica la configuración general y la sección
    del destino, y le pone a cada comprobante su imputación por el `id_externo`. Una imputación que no es de ningún
-   comprobante se rechaza.
+   comprobante se rechaza. **Un libro de tesorería tiene su propio paso**, `preparar_tesoreria`, porque sus pasos no
+   se parecen: lee los `movimientos`, descarta las relecturas por su clave, casa la imputación de cada uno y lee el
+   maestro de cuentas bancarias de la configuración. Quién elige entre los dos lo dice `libro.rasgos.origen`, y la
+   elección ocurre **una sola vez** en cada puerta (`armado.generar_asiento` y `salida.exportar_archivo`): ni un
+   `if es_tesoreria` más adentro.
 2. **Revisar** (`validar.revisar`, en el núcleo). Valida el RUC, el IGV, el total, la fecha y los duplicados, también
    contra lo ya anotado en otros periodos. Un error detiene la exportación; un aviso deja pasar el comprobante.
 3. **Seleccionar** (`seleccion`). Quedan fuera los excluidos, los duplicados y los tipos que el destino no lleva
@@ -216,7 +220,7 @@ Desde la 9.0 cada tipo de libro **declara** lo que el motor necesita saber de é
 | | Rasgo | `venta` | `compra` | `tesoreria` |
 |---|---|---|---|---|
 | **qué ES el libro** | `origen` — de qué bloque salen sus líneas | `comprobantes` | `comprobantes` | **`movimientos`** |
-| | `roles` — qué roles caben en su asiento | `principal` `impuesto` `tercero` | los tres **+** `retencion` `recorte` `detraccion` | **vacío** |
+| | `roles` — qué roles caben en su asiento | `principal` `impuesto` `tercero` | los tres **+** `retencion` `recorte` `detraccion` | **`tesoreria` `tercero` `principal`** (12.8) |
 | | `sentido_principal` — a qué lado va el hecho | `H` | `D` | **`por_operacion`** |
 | | `cuenta_contraparte` — con qué cuenta se salda | `clientes` | `cxp` | **vacío** |
 | **qué reglas le tocan** | `da_credito_fiscal` | no | sí | no |
@@ -235,13 +239,17 @@ mentira. **Odoo lo esquiva no preguntándolo** —su pago tiene `liquidity`, `co
 jerarquía—, y esto hace lo mismo. Quién escribe cada rol en cada línea es de quien genera el asiento, y el camino
 del comprobante escribe roles de comprobante porque ES el camino del comprobante.
 
-Los roles de venta y compra están **medidos ejecutando el motor**, no deducidos, y de su unión se **deriva**
-`asiento.ROLES_DEL_MOTOR`, que era una lista mantenida a mano. Los de tesorería están **vacíos a propósito**: el
-motor no emite ni una línea suya, así que no hay forma de medirlos, y el intento de declararlos salió incompleto a
-la primera —un pago a proveedor lleva el 42 con el documento del proveedor, que es `tercero`—. Si esa línea es
-`tercero` o `contrapartida` lo dirá el archivo del sub-diario de bancos que CONCAR acepte, que es el dato de D6.
-El catálogo ya lo decía al publicar `tesoreria` y `contrapartida`: son vocabulario **para quien produce** un
-asiento que el motor no origina. Vacío es, por tanto, una afirmación verdadera y comprobable.
+Los roles de los tres libros están **medidos ejecutando el motor**, no deducidos, y de su unión se **deriva**
+`asiento.ROLES_DEL_MOTOR`, que era una lista mantenida a mano. Los de tesorería estuvieron **vacíos a propósito**
+entre el 10-oct-2026 y la 12.8 —el motor no emitía ni una línea suya, así que no había forma de medirlos— y ese
+vacío era una afirmación verdadera y comprobable, no un hueco por rellenar. **Se llenaron midiendo**, en la 12.8:
+son `tesoreria`, `tercero` y `principal`. El que faltaba era el primero, y lo destrabó una fuente y no un archivo:
+el **elemento 10 del PCGE 2026**, «Efectivo y equivalentes al efectivo» (p. 17), que es palabra por palabra lo que
+el catálogo define como ese rol y lo que permite distinguir la línea del dinero de la de un gasto. Y la pregunta
+de si el 42 de un pago es `tercero` o `contrapartida` **no la contestó el archivo del sub-diario**, que es lo que
+esta nota esperaba: la contestó el catálogo el 11-oct-2026 —`contrapartida` es «la otra cara de un hecho que no se
+le debe a nadie», y un 42 se le debe a alguien—, con tres argumentos más, uno de ellos que es derivable porque esa
+línea lleva `contraparte_doc` y la comisión del banco no.
 
 **Y el núcleo no manda por el rol, que desde el 10-oct-2026 es una promesa y no una casualidad.** El rol existe
 para que un destino encuentre la línea que su columna pide sin conocer la cuenta —que la elige cada empresa—, así
@@ -304,18 +312,24 @@ la derivación sepa producir, o esa columna no se llenaría nunca y nada lo dir�
 
 **El tercer libro entró el 10-oct-2026 y los TRES vacíos de su columna son la mitad de lo que vale la tabla.**
 `cuenta_contraparte` está vacía porque un libro de tesorería no se salda con una sola cuenta: un lado es la cuenta
-de efectivo que el contribuyente declaró —su 104— y el otro lo pone la imputación. `roles` está vacío por la misma
+de efectivo que el contribuyente declaró —su 104— y el otro lo pone la imputación. `roles` estuvo vacío por la misma
 razón vista desde el otro campo: qué papeles hace cada pata **depende de lo que el pago cancela** —`tercero` si es
 a un proveedor, `principal` si es una comisión del banco, y la otra cara de un traspaso entre cuentas propias es
-otra vez efectivo—. Declararlos sería adivinar, y el intento salió incompleto a la primera. Y `sub_diario` está
+otra vez efectivo—; declararlos antes de emitir una línea era adivinar, y el intento salió incompleto a la primera.
+**Se llenó cuando se pudo medir** (12.8), que es la disciplina de la casa. Y `sub_diario` sigue
 vacío porque
 **su clave de configuración todavía no existe**: se intentó declararla y el contrato de drivers la paró con la razón
-exacta, «una clave que nadie lee se configura para nada». Entra con el hito D6, que pide un archivo del sub-diario
-de bancos que CONCAR haya aceptado. Un libro sin sub-diario es uno que el motor no puede armar, y eso es una
-invariante con su test — y hay otra mejor, que ata las dos tablas por su contenido en vez de por una lista
-paralela, y es una **equivalencia exacta**: un libro declara roles si y solo si el motor lo origina. De hecho
-`ROLES_DEL_MOTOR` se **deriva** de los roles que declaran venta y compra, así que las dos cosas se mueven juntas o
-el test cae.
+exacta, «una clave que nadie lee se configura para nada». Entra con el hito D6c, que pide un archivo del sub-diario
+de bancos que CONCAR haya aceptado.
+
+**Y ese último vacío enseñó que dos invariantes eran una sola afirmación disfrazada.** Hasta la 12.8 se decía «un
+libro sin sub-diario es uno que el motor no puede armar» y «un libro declara roles si y solo si el motor lo
+origina», y las dos juntas afirmaban más de lo que es cierto: tesorería se arma y **no se numera**, que son dos
+cosas distintas. Lo que quedó, partido y comprobable: un libro declara roles **si y solo si la regla los deriva**
+—comprobado ejecutando el motor y derivando con `rol_de`, no contra una lista—; y un libro sin `sub_diario`
+**no se numera**, lo que con vocabulario legacy levanta `LibroQueTodaviaNoSeNumera` en vez del `KeyError` pelado
+que levantaba antes. De hecho `ROLES_DEL_MOTOR` se **deriva** de los roles que declaran los tres libros, así que
+las dos cosas se mueven juntas o el test cae.
 
 **Y `sentido_principal` deja de ser una constante.** En una venta el ingreso siempre va al haber y en una compra el
 gasto siempre al debe; en tesorería **un abono lleva el efectivo al debe y un cargo al haber**, así que el lado lo
@@ -569,7 +583,7 @@ No son prohibiciones: es el precio de cada cambio, escrito antes de hacerlo. Qui
 | Punto | Qué hay en la 1.0 | Hito |
 |---|---|---|
 | Lectores de terceros | nombre reservado `lectores.contrato` y grupo `contaperu.lectores`: identificar, extraer, deduplicar | B7 |
-| El banco | **ya no está reservado**: `contaperu/tesoreria/` existe desde la 8.2 con la cuenta bancaria, el movimiento de un extracto, la constancia de un pago y el cuadre de la cadena de saldos. Lo que sigue fuera es leer un banco concreto, conciliar y asentar; y los conectores nunca entran al paquete | D1-D8 |
+| El banco | **ya no está reservado**: `contaperu/tesoreria/` existe desde la 8.2 con la cuenta bancaria, el movimiento de un extracto, la constancia de un pago y el cuadre de lo que el banco declara; y desde la 12.9 el motor **arma su asiento** para un ERP (`asiento/movimiento.py`, con el dispatch en `pipeline/armado`). Lo que sigue fuera es leer un banco concreto, conciliar, y escribir el archivo —el de un ERP es lo siguiente; el de un legacy espera el sub-diario de bancos—; y los conectores nunca entran al paquete | D1-D8 |
 | La API del SIRE | **ya no está reservada**: `contaperu/sunat/` arma la petición de cada una de las once operaciones, lee el estado de un ticket y clasifica el rechazo de SUNAT, todo desde su catálogo y sin salir a la red (8.1). Lo que **sigue fuera** es enviar: el socket, los reintentos, el reloj del ticket y las credenciales. Y lo que **todavía no está** son los lectores de la forma de cada respuesta: eso no lo sostiene un catálogo, lo sostendría una respuesta real, y no hay ninguna guardada | C-SIRE |
 | Reglas de SUNAT como datos | `_datos.leer_json("datos/sunat/…")`; `catalogos` las cargará sin cambiar sus nombres | C1-C2 |
 | El contribuyente como datos | `catalogos.regimenes_tributarios()` y `catalogos.cronogramas_de_vencimiento()`: en qué régimen tributa y cuándo le vence el mes, **cada regla con la cita de su artículo** y un cargador que no arranca sin ella. Son catálogo y no campo del estándar porque «qué libros estoy obligado a llevar» se pregunta sin un documento delante. El cronograma cabe en un núcleo sin reloj porque no es un reloj: dado un periodo y un dígito de RUC devuelve una fecha | C13 |

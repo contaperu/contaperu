@@ -497,13 +497,35 @@ mismo dinero aparece dos veces en tu estado de flujos. Llama a esto para excluir
 La otra forma de saberlo es casar las dos patas, que es `conciliar` (el hito D3) — y ésa **propone y nunca
 confirma**, así que lo que afirma un traspaso es siempre tu `cuenta_propia`.
 
+### El asiento del dinero (12.9)
+
+**`revisar_tesoreria` no asienta, y seguirá sin asentar: mirar y asentar son dos preguntas.** El asiento lo arma
+`generar_asiento`, igual que el de una compra, y lo que cambia es de dónde salen las líneas: de `movimientos[]` en
+vez de `comprobantes[]`, que es lo que dice el tipo de libro. Quien integra solo nota tres cosas:
+
+| | |
+|---|---|
+| El **maestro de cuentas** deja de ser un argumento | va en la configuración, en `cuentas_bancarias`, porque es lo que la empresa **es** y no lo que un periodo dijo. `describir_configuracion` lo publica, así que tu pantalla de ajustes lo puede pintar |
+| Lo que `revisar_tesoreria` **avisa**, asentar lo **para** | sin la contrapartida (`movimiento_sin_imputar`) o sin la cuenta contable de la 104 (`sin_cuenta_de_efectivo`) no hay línea que escribir. Mira primero y asienta después |
+| En `_asiento` la respuesta trae **`movimientos`** | con la misma forma que `comprobantes` —identidad, tramo de líneas y huella—, y la otra clave vacía. Las dos van siempre |
+
+Las cinco formas, y ninguna necesita una regla que no esté publicada: un **pago** deja la contrapartida al debe y
+el efectivo al haber; un **cobro** al revés y **sin línea de IGV**, porque el débito fiscal se reconoció en la
+venta; un **cargo del banco** es un gasto contra el efectivo; un **reparto** da una línea por parte y una sola de
+efectivo; y un **traspaso** es el único con sus dos patas declaradas, que es por lo que no lleva imputación. Si el
+banco descontó el **ITF** sin darle su propia línea, sale su propio asiento —`6412` contra el efectivo— por el
+importe que dice el banco: no se calcula, porque un asiento se sustenta en la constancia o en el extracto.
+
 ### Lo que todavía NO hace
 
-**No asienta.** `revisar_tesoreria` registra, valida, cuadra y dice qué falta; no produce líneas de diario, así que
-**un libro de tesorería no se puede exportar todavía** y cualquier driver lo rechaza nombrando los libros que sí
-lleva. Es el hito D6 de la hoja de ruta, y espera tres cosas que no son código: la norma para asentar el ITF —que
-además no tiene código en el Catálogo 05, así que su línea no se puede nombrar—, las cuentas del PCGE con su cita y
-un archivo del sub-diario de bancos que un sistema contable haya aceptado.
+**No escribe el archivo.** El asiento existe y **ningún driver que viaje en el paquete declara todavía este libro**
+en sus `FORMATOS`, así que `exportar` —y `generar_asiento` con un destino de serie— lo rechaza nombrando los libros
+que sí lleva. Es lo siguiente, y es lo único que falta para el canal `erp`.
+
+**No lo lleva a un sistema legacy.** Eso es el hito D6c y espera un archivo del sub-diario de bancos que un sistema
+contable haya aceptado, con el que vendrán su clave de sub-diario y su numeración. Mientras no esté, pedir el
+asiento con un destino de vocabulario legacy se para con `libro_que_todavia_no_se_numera`: el libro **se arma y no
+se numera**, que son dos cosas distintas.
 
 **Tampoco concilia.** Casar un pago con lo que cancela cuando el papel no lo dice es el hito D3, y lo que se decidió
 de él importa: `conciliar` **propone y nunca confirma**.

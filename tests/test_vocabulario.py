@@ -40,8 +40,10 @@ TIPOS_DE_LIBRO_DE_LA_1_0 = ("venta", "compra")
 # nombrados**: los viejos metían el tributo en el nombre del rol. Van AL FINAL porque el orden es el de inserción.
 #
 # Y desde la 2.0 del estándar **el catálogo ya no describe un campo del documento**: describe el vocabulario del papel
-# que la regla DERIVA de cada línea (`drivers.kit.rol`). De los ocho, seis se derivan hoy y dos están reservados para
-# el libro de tesorería, que el motor todavía no sabe armar.
+# que la regla DERIVA de cada línea (`drivers.kit.rol`). De los ocho, **siete se derivan desde la 12.8** —entró
+# `tesoreria`, cuando el motor emitió su primera línea de ese libro— y queda uno reservado, `contrapartida`, para el
+# diario que produce un ERP (B13). Hasta entonces eran seis y dos: la nota decía que los dos reservados eran «para el
+# libro de tesorería», y era un error que el 11-oct-2026 corrigió — el 42 de un pago es `tercero`.
 ROLES_DE_HOY = ROLES_DE_LA_2_0
 
 from contaperu.modelo.libro import RASGOS as RASGOS_DE_LIBRO  # noqa: E402  (al lado de lo que describe)

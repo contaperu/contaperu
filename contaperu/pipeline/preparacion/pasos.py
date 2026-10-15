@@ -4,17 +4,25 @@ driver necesita.
 Cada uno recibe un documento del estándar y devuelve otro: así se pueden dar de uno en uno, repetir, o saltarse
 el que no haga falta. `preparar` es el que juntan `generar_asiento` y `exportar`, y por eso vive aquí y no en
 cada uno.
+
+**Y desde la 12.9 son dos**: `preparar` prepara comprobantes y `preparar_tesoreria` prepara movimientos. Son
+hermanos y no un parámetro del primero, porque su promesa es distinta hasta en la firma —`preparar` dice en la
+suya «el libro y **todos** los comprobantes»— y porque los pasos no se parecen: allí se normalizan detracciones y
+se revisa cada comprobante contra las reglas del IGV, y aquí se descartan las relecturas del mismo extracto.
+Quien elige entre los dos es `armado.generar_asiento`, por `libro.rasgos.origen`, una sola vez.
 """
 from __future__ import annotations
 
 from typing import Any
 
 from ... import drivers
+from ... import tesoreria
 from ...errores import DocumentoInvalido
 from ...modelo import Comprobante, Libro
 from ...tributos import detracciones, validar
 from .configuracion import con_imputacion, config_aplicada, imputacion_del_documento
-from .documento import comprobantes_de, documento, libro_de, serie_numero
+from .documento import (comprobantes_de, documento, imputaciones_de_movimientos_de, libro_de,
+                        movimientos_de, serie_numero)
 from .entradas import claves_previas_de
 
 # --- los pasos de un mes -----------------------------------------------------------
@@ -113,3 +121,42 @@ def preparar(doc: dict, configuracion: dict | None, incluir_observados: bool, im
                 f"{len(con_error)} comprobantes tienen observaciones que bloquean. "
                 "Corrígelos, o pide `incluir_observados` si sabes lo que haces.")
     return libro, todos, config
+
+
+def preparar_tesoreria(doc: dict, configuracion: dict | None, driver: str = "",
+                       ) -> tuple[Libro, list, dict]:
+    """El libro, los movimientos que entran y la configuración aplicada hacia `driver`, con la imputación de cada
+    movimiento dentro.
+
+    Hermano de `preparar`, con la misma forma de salida para que lo que viene después no tenga que saber de cuál
+    salió. Lo que cambia es cada paso, porque un movimiento no es un comprobante:
+
+    - **Los repetidos se descartan aquí** (`tesoreria.sin_duplicados`), y es la diferencia más grande con
+      `preparar`, que devuelve «todos, incluidos los excluidos y los duplicados» para que quien llama los cuente.
+      Un movimiento repetido es una relectura del mismo extracto —se baja dos veces, y es lo normal— y asentarlo
+      contaría el dinero dos veces. Cuántos se descartaron **no lo dice el asiento**, por la misma simetría: el
+      `_asiento` de una compra tampoco cuenta sus duplicados ni sus excluidos; eso vive en el resumen de una
+      exportación, que es quien cuenta lo que se dejó fuera.
+    - **La imputación se casa contra TODOS los movimientos**, no solo contra los que entran: una imputación que
+      nombre el que se descartó por repetido es correcta, y rechazarla sería castigar una relectura. Es la misma
+      razón por la que `preparar` le pasa `todos` a `con_imputacion`.
+    - **El maestro de cuentas bancarias sale de la configuración** (decisión de John, 13-oct-2026) y pasa tal cual,
+      con el tipo que declara: una lista de cuentas, que es lo que una pantalla de ajustes edita. Quien la indexa
+      por `id` —y al indexarla la valida, con su motivo— es el núcleo, una vez por libro. Se intentó validarla
+      también aquí «para decirlo en la puerta» y **la línea no compraba nada**: al romperla no caía ni un test,
+      porque el núcleo ya da el mismo error y lo da antes de armar una línea.
+
+    No revisa los comprobantes ni normaliza detracciones: no hay ninguno. Lo que le falta a un movimiento para
+    poder asentarse —su contrapartida, la 104 de su cuenta, un traspaso declarado dos veces— lo exige el propio
+    asiento (`asiento/movimiento.py`), que es donde se sabe; mirarlo sin exigirlo es `api.revisar_tesoreria`."""
+    libro = libro_de(doc)
+    todos = movimientos_de(doc)
+    if not todos:
+        raise DocumentoInvalido("No hay movimientos que procesar.")
+    nuevos, _ = tesoreria.sin_duplicados(todos)
+    config = config_aplicada(configuracion, driver)
+    imputaciones = imputaciones_de_movimientos_de(doc, todos)
+    # `cuentas_bancarias` **no se toca**: viaja con el tipo que declara, y así pasa intacta su propia validación
+    # cada vez que la configuración vuelve a pasar por una puerta (`armado.config_para`). El núcleo la indexa por
+    # `id`, y al indexarla la valida.
+    return libro, nuevos, {**config, "imputaciones_de_movimientos": imputaciones}
