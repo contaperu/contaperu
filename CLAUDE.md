@@ -68,9 +68,11 @@ motor arma su asiento para un ERP** (el hito D6a): las cinco formas —pago, cob
 traspaso— salen sin inventar ninguna regla, porque la del catálogo (`efectos_de_tesoreria`, NIC 7) más la
 imputación más la 104 del maestro bastan, y el ITF es su propio asiento, `6412` contra la cuenta de efectivo, con
 el importe que dice el banco y no una tasa (criterio de John: un asiento se sustenta en un hecho fehaciente).
-`generar_asiento` despacha por `libro.rasgos.origen` y el maestro de cuentas viaja en la **configuración**. Lo que
-sigue esperando el archivo del sub-diario de bancos es llevarlo a un sistema legacy (D6c): hasta entonces el libro
-**se arma y no se numera**); **`aplicaciones`** —el puente entre los tres libros desde la 12.3:
+`generar_asiento` despacha por `libro.rasgos.origen` —y `exportar` igual, cada uno una sola vez— y el maestro de
+cuentas viaja en la **configuración**. **Y desde la 12.10 sale su archivo** por el driver neutral, que escribe el
+documento del estándar con sus cuatro bloques y vuelve a entrar dando lo mismo en los dos sentidos: reexportarlo da
+el archivo byte a byte y rearmarlo da la misma huella. Lo que sigue esperando el archivo del sub-diario de bancos
+es llevarlo a un sistema legacy (D6c): hasta entonces el libro **se arma y no se numera**); **`aplicaciones`** —el puente entre los tres libros desde la 12.3:
 cuánto de un pago cancela un documento, N a N y con su importe, con el `origen` que separa un hecho (`declarado`,
 `manual`) de una conjetura (`propuesto`, que **no cuenta para ningún saldo**). Es a `referencias` lo que
 `imputaciones_de_movimientos` es a `movimiento`, y el saldo **se deriva de la suma y no se guarda**—; **drivers** que

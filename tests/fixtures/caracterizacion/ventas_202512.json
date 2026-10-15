@@ -949,6 +949,7 @@
   "formato": "concar_xlsx",
   "archivo": "VENTAS_202512_20601234567.xlsx",
   "comprobantes": 11,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 11,
    "excluidos": 0,
@@ -1136,6 +1137,7 @@
      "huella": "b6f7b95ab2b7b76264df91710c3c38dd86193b2b42809383fd420acc29b05ab5"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -7359,6 +7361,7 @@
   "formato": "contasis_xlsx",
   "archivo": "VENTAS_202512_20601234567.xlsx",
   "comprobantes": 11,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 11,
    "excluidos": 0,
@@ -7475,6 +7478,7 @@
      }
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -9515,6 +9519,7 @@
   "formato": "csv_asiento",
   "archivo": "CSV_VENTAS_202512_20601234567.csv",
   "comprobantes": 11,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 11,
    "excluidos": 0,
@@ -9700,6 +9705,7 @@
      "huella": "b6f7b95ab2b7b76264df91710c3c38dd86193b2b42809383fd420acc29b05ab5"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
@@ -9932,6 +9938,7 @@
   "formato": "sire_rvie",
   "archivo": "LE2060123456720251200140400021112.TXT",
   "comprobantes": 11,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 11,
    "excluidos": 0,
@@ -10047,6 +10054,7 @@
      }
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202512||02/12/2025||01|F001|1001||6|20609999999|DISTRIBUIDORA COMERCIAL DEL NORTE SAC|0.00|25000.00|0.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||04/12/2025||01|F001|1002||6|20633333336|INVERSIONES TECNOLOGICAS PERU SRL|0.00|18500.00|0.00|3330.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|21830.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||05/12/2025||01|F001|1003||6|20655555553|CORPORACION INDUSTRIAL ANDINA SAC|0.00|32000.00|0.00|5760.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|37760.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||08/12/2025||01|F001|1004||6|20688888884|GRUPO EMPRESARIAL LIMA SAC|0.00|45000.00|0.00|8100.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|53100.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||10/12/2025||01|F001|1005||6|20644444440|COMERCIALIZADORA INTEGRAL DEL SUR EIRL|0.00|15500.00|0.00|2790.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|18290.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||12/12/2025||01|F001|1006||6|20666666667|SERVICIOS LOGISTICOS NACIONALES SA|0.00|28000.00|0.00|5040.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|33040.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||15/12/2025||01|F001|1007||6|20301234567|IMPORTADORA Y EXPORTADORA CENTRAL SAC|0.00|21000.00|0.00|3780.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|24780.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||03/12/2025||03|B001|5001||6|42589632|CLIENTE CONSUMIDOR FINAL|0.00|850.00|0.00|153.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1003.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||06/12/2025||03|B001|5002||6|45678912|CONSUMIDOR VARIOS|0.00|1200.00|0.00|216.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1416.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||09/12/2025||03|B001|5003||6||CLIENTES VARIOS - CONSOLIDADO DIARIO|0.00|42950.00|0.00|7731.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|50681.00|PEN|||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202512||19/12/2025||01|F001|1234||6|20123456789|MI CLIENTE MANUAL S.A.C.|0.00|5000.00|0.00|900.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|5900.00|PEN|||||||\r\n",
@@ -10303,6 +10311,7 @@
   "formato": "starsoft_txt",
   "archivo": "V-VENTAS_202512_20601234567.txt",
   "comprobantes": 11,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 11,
    "excluidos": 0,
@@ -10488,6 +10497,7 @@
      "huella": "0a5ef29e23a9a3f35d7fc8315610bfada0824039b4d7b6be71f95c5d940247cb"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/plain",
@@ -10729,6 +10739,7 @@
   "formato": "asiento_contable_json",
   "archivo": "ASIENTO_CONTABLE_VENTAS_202512_20601234567.json",
   "comprobantes": 11,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 11,
    "excluidos": 0,
@@ -10906,6 +10917,7 @@
      "huella": "5d7c77fac781ba41ef1ff4fc87451fe84e7c6f7f57c1125b9021790eb4fcf2ea"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/json"

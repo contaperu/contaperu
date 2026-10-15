@@ -137,6 +137,11 @@ class Cabecera:
         """
         return {**asdict(self), "glosa": self.glosa}
 
+    def como_entrada(self) -> dict:
+        """Lo mismo que `como_comprobante`, por el nombre que no dice cuál de las dos cabeceras es (ver
+        `CabeceraDeMovimiento.como_entrada`)."""
+        return self.como_comprobante()
+
     def como_comprobante(self) -> dict:
         """Esta cabecera como un `comprobante` del estándar, listo para el bloque `comprobantes` de un documento.
 
@@ -236,6 +241,14 @@ class CabeceraDeMovimiento:
         fuera = {"cuenta_contable", "efecto"}
         return {k: v for k, v in asdict(self).items() if k not in fuera and v not in ("", None, {}, [])}
 
+    def como_entrada(self) -> dict:
+        """Lo mismo que `como_movimiento`, por el nombre que no dice cuál de las dos cabeceras es.
+
+        Existe para que quien escribe el documento del estándar no tenga que preguntar de qué libro viene: la
+        clave del bloque la da `entradas_de` desde la tabla, y el contenido lo da el objeto. Las dos de una vez,
+        y ni un `if` en el driver."""
+        return self.como_movimiento()
+
     @property
     def clave(self) -> tuple:
         """La misma identidad de duplicados que `Movimiento.clave`, calculada con la misma función."""
@@ -302,3 +315,15 @@ def exportacion_de(libro: Libro, lineas: Sequence[LineaDiario], indice: Sequence
             libro.rasgos.origen: [{"identidad": entrada.identidad(libro),
                                    "lineas": [entrada.desde, entrada.hasta],
                                    "huella": huella(entrada.lineas(lineas))} for entrada in indice]}
+
+
+def entradas_de(libro: Libro, indice: Sequence[Any]) -> dict:
+    """El bloque del documento del que salió este asiento, bajo su propia clave: `{"comprobantes": [...]}` o
+    `{"movimientos": [...]}`.
+
+    Es lo que un driver que escriba el documento del estándar necesita para que su archivo **se baste**, y existe
+    aquí por lo mismo que `exportacion_de`: la clave la dice la tabla (`RASGOS.origen`) y el contenido lo dice cada
+    cabecera (`como_entrada`), así que el driver no tiene que preguntar de qué libro viene. Se devuelve un
+    diccionario de una clave, y no la lista, para que se desempaquete con `**` donde se escribe el documento.
+    """
+    return {libro.rasgos.origen: [entrada.cabecera.como_entrada() for entrada in indice]}

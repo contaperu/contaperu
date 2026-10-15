@@ -516,16 +516,31 @@ efectivo; y un **traspaso** es el único con sus dos patas declaradas, que es po
 banco descontó el **ITF** sin darle su propia línea, sale su propio asiento —`6412` contra el efectivo— por el
 importe que dice el banco: no se calcula, porque un asiento se sustenta en la constancia o en el extracto.
 
-### Lo que todavía NO hace
+### El archivo, y lo que promete el ida y vuelta (12.10)
 
-**No escribe el archivo.** El asiento existe y **ningún driver que viaje en el paquete declara todavía este libro**
-en sus `FORMATOS`, así que `exportar` —y `generar_asiento` con un destino de serie— lo rechaza nombrando los libros
-que sí lleva. Es lo siguiente, y es lo único que falta para el canal `erp`.
+`exportar` con el driver **`asiento_contable`** escribe el documento del estándar con **cuatro bloques**: el
+`libro`, los `movimientos`, sus `imputaciones_de_movimientos` y el `asiento`, más `_exportacion` en la raíz. El
+nombre sale de la convención de siempre: `ASIENTO_CONTABLE_TESORERIA_202610_<RUC>.json`.
+
+**Con los cuatro el archivo se basta, y eso es más de lo que promete el de compras.** El ida y vuelta vale en los
+dos sentidos, y los dos están en la batería:
+
+- **reexportarlo** da el mismo archivo **byte a byte** — el bloque `asiento` que trae manda y no se rearma, así
+  que si tú llevas el asiento, tus cuentas son las que salen;
+- **rearmarlo** —quitándole el `asiento`— da la **misma huella** y las mismas líneas, porque los movimientos y su
+  imputación están dentro. El documento de una compra no puede prometer esto: no escribe su bloque `imputaciones`,
+  y el porqué está en el propio driver.
+
+En la respuesta, `movimientos` dice cuántos salieron y `_exportacion.movimientos` lo que salió de cada uno
+—identidad, tramo de líneas y huella—. `comprobantes` va en cero, y las dos claves van siempre.
+
+### Lo que todavía NO hace
 
 **No lo lleva a un sistema legacy.** Eso es el hito D6c y espera un archivo del sub-diario de bancos que un sistema
 contable haya aceptado, con el que vendrán su clave de sub-diario y su numeración. Mientras no esté, pedir el
 asiento con un destino de vocabulario legacy se para con `libro_que_todavia_no_se_numera`: el libro **se arma y no
-se numera**, que son dos cosas distintas.
+se numera**, que son dos cosas distintas. El CSV entra con ellos, aunque su canal sea `erp`: escribe la columna
+`rol`, que es vocabulario de un destino.
 
 **Tampoco concilia.** Casar un pago con lo que cancela cuando el papel no lo dice es el hito D3, y lo que se decidió
 de él importa: `conciliar` **propone y nunca confirma**.

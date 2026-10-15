@@ -4,6 +4,79 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.10.0] — 2026-10-14
+
+**El archivo del dinero, y el ida y vuelta cerrado.** La 12.9 dejó el asiento de tesorería pedible y sin destino
+al que mandarlo; aquí el driver neutral declara el libro —su formato es el estándar mismo, que lleva los tres— y
+escribe el documento completo. Con esto el hito **D6a** está cerrado: un ERP puede cargar sus movimientos,
+imputarlos y recibir su asiento en el estándar, sin pasar por ningún formato legacy.
+
+**Ninguna salida de compras ni de ventas se mueve**: los cuatro snapshots de celdas y el del documento, intactos;
+ninguna huella cambia. Lo que una respuesta de compras gana es `movimientos` en cero y `_exportacion.movimientos`
+vacía, y está en el diff de la caracterización.
+
+### El ida y vuelta, en los dos sentidos
+
+Es lo que de verdad prueba que un formato sirve, y el de tesorería promete **más** que el de compras:
+
+- **Reexportarlo da el mismo archivo byte a byte.** El bloque `asiento` que trae manda y no se rearma (5.2), así
+  que un ERP que lleve él el asiento ve salir sus cuentas y no las que el motor derivaría — hay un test que cambia
+  una divisionaria a mano para comprobarlo.
+- **Rearmarlo da la misma huella y las mismas líneas.** El archivo lleva los `movimientos` **y sus
+  `imputaciones_de_movimientos`**, así que quitándole el `asiento` el motor lo vuelve a armar igual. El de compras
+  no puede prometer esto porque no escribe su bloque `imputaciones`, y la asimetría tiene su razón escrita: allí
+  el esquema exige `id_externo` en todos los comprobantes cuando ese bloque no está vacío, y un mes cuyo productor
+  no puso ids daría un documento que falla su propio esquema. En tesorería ese riesgo no existe — **todo
+  movimiento que se pudo asentar ya tiene su `id_externo`**, porque sin él no habría encontrado su contrapartida.
+
+### El último booleano de antes de la 9.0
+
+El nombre de un archivo salía de `'VENTAS' if libro.es_venta else 'COMPRAS'`, así que el de tesorería se habría
+llamado **«COMPRAS»**. Se arregla con un rasgo más en la tabla, `etiqueta_de_archivo`, y no con un diccionario en
+`drivers/kit/nombres.py`: eso habría sido una tabla paralela a `modelo.RASGOS`, que es exactamente lo que la 9.0
+vino a quitar. Añadir un libro vuelve a ser añadir una fila, y el archivo sale
+`ASIENTO_CONTABLE_TESORERIA_202610_<RUC>.json`.
+
+### Añadido
+
+- **`asiento_contable.FORMATOS["tesoreria"]`**, y `desde_lineas` escribiendo **el bloque del que salió el
+  asiento** —`comprobantes` o `movimientos`, que lo dice la tabla— sin un solo `if` en el driver: las dos
+  cabeceras contestan `como_entrada()` y la clave la pone `asiento.entradas_de`, hermana de `exportacion_de`.
+- **`asiento.indice_de_movimientos_dados`**, la vuelta de `lineas_e_indice_de_movimientos`: de unas líneas dadas
+  al índice de qué tramo es de qué movimiento, por el mismo `documento.id_externo` que usa el otro camino. Con su
+  `LineaSinMovimiento`, hermana de `LineaSinComprobante`.
+- **`armado.desde_movimientos` y `armado.por_movimiento`.** Las dos entradas —generar las líneas o reconocerlas—
+  van en **una** función y no en dos, al contrario que en el camino del comprobante, y se dice por qué: allí son
+  dos porque una pide requisitos y la otra no pide correlativos, y aquí no hay ni una cosa ni la otra.
+- **`salida.generar_de_movimientos`** y el dispatch por `libro.rasgos.origen` en `exportar_archivo`, en el mismo
+  sitio relativo que en `generar_asiento`. **No selecciona ni mira errores, y no es un olvido**: `seleccionar`,
+  `fuera_de` y `errores_de` están escritos sobre `excluida`, `estado` y `observaciones`, y un movimiento no tiene
+  ninguna de las tres.
+- **`Exportado` gana `movimientos` y `por_movimiento`**, y la respuesta las dos claves, como `_asiento` ya hacía.
+  El resumen de un libro de tesorería cuenta **los repetidos** —«el resumen de una exportación cuenta lo que se
+  dejó fuera», y aquí lo que se deja fuera es la relectura del mismo extracto— y lleva el ITF aparte de los
+  cargos, con el mismo criterio que `revisar_tesoreria`.
+- **`configuracion.NO_SON_CONFIGURACION`**: las dos imputaciones viajan dentro de la configuración y ninguna **es**
+  configuración. Estaba dicho en un sitio y hacía falta en tres, y la segunda apareció al exportar el primer libro
+  de tesorería — `armado.config_para` la rechazaba como «clave desconocida», que es cierto y no ayuda. Ahora
+  `errores_de_configuracion` dice dónde va de verdad, y el invariante que vigila qué claves lee un driver **lee
+  esa tupla** en vez de repetirla.
+- **`LibroQueEseDestinoNoArma`**, para un destino que declare un libro de movimientos y no arme asientos. Hoy no
+  se dispara con ningún driver de serie, y ése es el momento de ponerla: lo que saldría es un archivo vacío con
+  pinta de correcto.
+
+### Qué falta todavía
+
+- **El sistema legacy**, que es el hito **D6c** y lo único de D6 que de verdad espera un dato: un archivo del
+  sub-diario de bancos que CONCAR haya aceptado, con el que vendrán su clave de sub-diario y su numeración
+  —hermana de `numerar_en_orden`, que no se puede parchear porque empieza por `tipos_sin_sigla` y un movimiento no
+  tiene `tipo_cp`— y una letra por libro en las `COLUMNAS_ELEGIBLES` de los tres drivers legacy. Hasta entonces un
+  destino de vocabulario legacy se niega con `libro_que_todavia_no_se_numera`.
+- **El CSV**, aunque su canal sea `erp`: escribe la columna `rol`, que es vocabulario de un destino, así que entra
+  con los legacy.
+- **`tipo_cambio` de un movimiento**: no existe en el modelo. Para el ERP base no cambia ningún importe; para
+  CONCAR es una columna, y entra con su enmienda.
+
 ## [12.9.0] — 2026-10-14
 
 **El asiento del dinero se puede pedir.** El núcleo sabía armarlo desde la 12.7 y el motor declaraba ese libro

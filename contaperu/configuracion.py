@@ -250,6 +250,16 @@ def _cuenta_por_moneda(clave: str, titulo: str, soles: str, dolares: str, ayuda:
         Campo("USD", "texto", dolares, titulo="Dólares", grupo="cuentas", patron=PATRON_CUENTA)))
 
 
+# Lo que VIAJA dentro de la configuración y no ES configuración: la imputación de cada comprobante y la de cada
+# movimiento. Son datos del documento —los decide el contador para ese mes, no para la empresa— y llegan por aquí
+# porque es lo que ya recibe todo el asiento («se le entrega al núcleo dentro de la configuración»). Están
+# nombradas en un solo sitio porque hay tres que necesitan saberlo: `errores_de_configuracion`, para decir dónde
+# van de verdad en vez de «clave desconocida»; `armado.config_para`, para no validarlas contra lo que se declara; y
+# el invariante que comprueba qué claves lee un driver. Hasta la 12.10 solo estaba la primera, y la segunda se
+# descubrió al exportar el primer libro de tesorería: `config_para` la rechazaba como desconocida.
+NO_SON_CONFIGURACION = ("imputaciones", "imputaciones_de_movimientos")
+
+
 # Lo general de la contabilidad. **Las cuentas de aquí son el PCGE a seis dígitos, que es como numeran CONCAR y
 # CONTASIS**: salieron de ahí y hasta la 2.5 no estaba dicho en ninguna parte, lo que las hacía parecer universales.
 # No lo son — STARSOFT numera a ocho—, y por eso un driver puede declarar las suyas y apartarse de estas

@@ -21,11 +21,29 @@ from .. import drivers
 from .._version import __version__
 from ..drivers import contrato
 from ..drivers.kit import texto as kit_texto
-from ..errores import ErroresBloqueantes
+from ..errores import ErrorContaperu, ErroresBloqueantes
 from ..modelo import Comprobante, Libro
 from . import armado
-from .preparacion import fecha_de, libro_de, lineas_de, preparar
+from .preparacion import fecha_de, libro_de, lineas_de, preparar, preparar_tesoreria
 from .seleccion import errores_de, fuera_de, seleccionar
+
+
+class LibroQueEseDestinoNoArma(ErrorContaperu, ValueError):
+    """Un destino declara llevar un libro cuyo asiento tiene que armar el motor, y ese destino no arma asientos.
+
+    No es `LibroQueElDestinoNoLleva` —ése es «este formato no lleva ese libro»— sino el paso siguiente: lo lleva y
+    no sabe recibirlo. Hoy no se dispara con ningún driver de serie, y ése es justo el momento de ponerla: el día
+    que un driver de terceros declare `tesoreria` en un registro de una fila por comprobante, lo que falle será
+    esto y no un archivo vacío que parece correcto."""
+
+    clave = "libro_que_ese_destino_no_arma"
+
+    def __init__(self, tipo: str, driver: str):
+        super().__init__(f"El driver {driver!r} declara llevar el libro {tipo!r}, cuyo asiento arma el motor, y no "
+                         f"es un driver de asientos: un registro es una fila por comprobante y un libro {tipo!r} "
+                         f"no tiene comprobantes")
+        self.tipo = tipo
+        self.driver = driver
 
 
 @dataclass
@@ -38,6 +56,10 @@ class Exportado:
     comprimido: bytes        # el ZIP del TXT; b'' en los drivers de archivo
     comprobantes: int        # cuántos comprobantes salieron
     resumen: dict
+    # Y cuántos MOVIMIENTOS, en un libro de tesorería (12.10). Son dos campos y no uno llamado «entradas» porque
+    # los dos van siempre en la respuesta —el otro en cero—, que es literalmente cierto y le ahorra dos formas a
+    # quien la lee; es la misma decisión que `_asiento.comprobantes`/`movimientos`.
+    movimientos: int = 0
     # Lo que se guarda y se descarga: el ZIP del TXT, o el Excel tal cual.
     archivo: str = ""
     contenido: bytes = b""
@@ -45,6 +67,7 @@ class Exportado:
     # Lo que la respuesta dice de cada comprobante que salió (hito 0.4): su identidad y, en un asiento, su tramo de
     # líneas y su huella.
     por_comprobante: list = field(default_factory=list)
+    por_movimiento: list = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if not self.archivo:
@@ -103,6 +126,61 @@ def _resumen(comprobantes: list[Comprobante], incluidos: list[Comprobante], erro
         "total": str(sum((c.total * signo(c) for c in incluidos), Decimal("0.00"))),
         "igv": str(sum((c.igv * signo(c) for c in incluidos), Decimal("0.00"))),
     }
+
+
+def _resumen_de_movimientos(movimientos: list, repetidos: int) -> dict:
+    """Lo que guarda quien exporta un libro de tesorería: cuántos movimientos salieron, cuántos se descartaron por
+    relectura y cuánto suman sus dos sentidos.
+
+    **Los repetidos se cuentan**, y es la razón por la que este resumen existe en vez de reusar el otro: el de un
+    comprobante cuenta excluidos y duplicados porque «el resumen de una exportación cuenta lo que se dejó fuera»
+    (`preparacion.preparar`), y bajar el extracto dos veces es la forma normal de dejar algo fuera aquí.
+
+    El ITF va aparte de los cargos, con el mismo criterio que `revisar_tesoreria`: no es un cargo del titular hacia
+    un tercero, es lo que el banco descuenta además."""
+    def suma(cuales) -> str:
+        return str(sum((m.importe for m in cuales), Decimal("0.00")))
+
+    return {
+        "movimientos": len(movimientos),
+        "repetidos": repetidos,
+        "cargos": suma([m for m in movimientos if m.es_cargo]),
+        "abonos": suma([m for m in movimientos if not m.es_cargo]),
+        "itf": str(sum((m.itf for m in movimientos if m.itf is not None), Decimal("0.00"))),
+    }
+
+
+def generar_de_movimientos(libro: Libro, movimientos: list, driver: str, opciones: Any = None,
+                           config: dict | None = None, lineas: list | None = None,
+                           repetidos: int = 0) -> Exportado:
+    """El archivo de un libro de tesorería. Hermano de `generar`, y lo que comparten es la forma de la respuesta.
+
+    **No selecciona ni mira errores**, y no es un olvido: `seleccionar`, `fuera_de` y `errores_de` están escritos
+    sobre un comprobante —su `excluida`, su `estado`, sus `observaciones`— y un movimiento no tiene ninguna de las
+    tres. Lo que se deja fuera aquí es la relectura del mismo extracto, y eso ya lo hizo `preparar_tesoreria`; lo
+    que impide armar el asiento lo para el propio asiento.
+
+    **Un destino que declare este libro y no arme asientos se para en voz alta.** Hoy no puede pasar con un driver
+    de serie —el único que lo declara es el neutral—, y ése es el momento de ponerlo: un registro es una fila por
+    comprobante y aquí no hay comprobantes, así que lo que saldría es un archivo vacío con pinta de correcto."""
+    modulo = drivers.obtener(driver)
+    opciones = opciones or modulo.OPCIONES
+    formato = drivers.formato_de(driver, libro.tipo)
+    if not contrato.arma_asientos(modulo):
+        raise LibroQueEseDestinoNoArma(libro.tipo, driver)
+    if config is not None:
+        config = armado.config_para(modulo, config)
+    contenido, extra, lineas, indice = armado.desde_movimientos(modulo, libro, movimientos, opciones, config, lineas)
+    # `archivo` y `contenido` los rellena `__post_init__` desde `nombre` y `comprimido`, que aquí van vacíos: un
+    # libro de tesorería no sale envuelto en un ZIP, que es de quien declara `comprimir` (hoy ningún driver de serie).
+    return Exportado(
+        nombre=modulo.nombre(libro, opciones), nombre_comprimido="", formato=formato, driver=driver,
+        texto=b"", comprimido=b"", comprobantes=0, movimientos=len(movimientos),
+        resumen={**_resumen_de_movimientos(movimientos, repetidos), **extra},
+        contenido=contenido,
+        content_type=getattr(modulo, "CONTENT_TYPE", "application/octet-stream"),
+        por_movimiento=armado.por_movimiento(libro, lineas, indice),
+    )
 
 
 def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones: Any = None,
@@ -192,7 +270,12 @@ def exportar_archivo(doc: dict, *, driver: str, configuracion: dict | None = Non
     # comprobantes que procesar» —porque un libro de tesorería no los trae— y eso es engañoso: la razón verdadera es
     # que este destino no lleva este libro. Es la degradación que el estándar promete para un tipo de libro, y hasta
     # el 10-oct-2026 no ocurría porque no existía ningún libro del catálogo fuera de los dos que todos llevan.
-    drivers.formato_de(driver, libro_de(doc).tipo)
+    libro = libro_de(doc)
+    drivers.formato_de(driver, libro.tipo)
+    # **El dispatch por origen, igual que en `armado.generar_asiento` y en el mismo sitio relativo**: una sola vez
+    # por puerta y ni un `if es_tesoreria` más adentro (12.10).
+    if libro.rasgos.origen == "movimientos":
+        return _archivo_de_movimientos(doc, driver, configuracion)
     libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     modulo = drivers.obtener(driver)
     # El asiento que el documento TRAIGA manda sobre el que el motor derivaría (5.2): quien lo produjo ya numeró, y
@@ -207,16 +290,33 @@ def exportar_archivo(doc: dict, *, driver: str, configuracion: dict | None = Non
                    config=config if contrato.lleva_cuentas(modulo) else None, correlativos=corr, lineas=dadas)
 
 
+def _archivo_de_movimientos(doc: dict, driver: str, configuracion: dict | None) -> Exportado:
+    """El archivo de un libro de tesorería, de punta a punta (12.10).
+
+    `incluir_observados` no llega aquí porque no hay nada que incluir: las observaciones son de un comprobante.
+    Y los repetidos se cuentan sobre el bloque crudo —`len(doc["movimientos"]) - len(los que entran)`— en vez de
+    releerlo: construir veinte mil movimientos otra vez para contar los descartados sería caro, y la cuenta es
+    exacta porque `preparar_tesoreria` solo quita relecturas."""
+    libro, movimientos, config = preparar_tesoreria(doc, configuracion, driver)
+    crudos = doc.get("movimientos") or []
+    # El asiento que el documento TRAIGA manda sobre el que el motor derivaría, igual que en el otro camino (5.2):
+    # quien lo produjo ya decidió, y rearmarlo podría cambiar lo que ya salió.
+    dadas = lineas_de(doc) if contrato.forma(drivers.obtener(driver)) == "desde_lineas" else None
+    return generar_de_movimientos(libro, movimientos, driver, config=config, lineas=dadas,
+                                  repetidos=len(crudos) - len(movimientos))
+
+
 def respuesta(exp: Exportado, cuando: str | None = None) -> dict:
     """Lo que se responde de una exportación, en JSON: el archivo en base64 (y en texto si es legible) y `_exportacion`,
     la anotación con que un productor reconoce lo que ya exportó."""
     salida: dict[str, Any] = {
         "driver": exp.driver, "formato": exp.formato, "archivo": exp.nombre,
-        "comprobantes": exp.comprobantes, "resumen": exp.resumen,
+        "comprobantes": exp.comprobantes, "movimientos": exp.movimientos, "resumen": exp.resumen,
         "_exportacion": {"driver": exp.driver, "archivo": exp.nombre,
                          **({"huella": exp.resumen["huella"]} if exp.resumen.get("huella") else {}),
                          **({"fecha": cuando} if cuando else {}),
-                         "comprobantes": exp.por_comprobante, "motor": __version__},
+                         "comprobantes": exp.por_comprobante, "movimientos": exp.por_movimiento,
+                         "motor": __version__},
     }
     if exp.texto:
         salida["texto"] = exp.texto.decode("utf-8", errors="replace")

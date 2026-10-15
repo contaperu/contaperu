@@ -16,7 +16,13 @@
   },
   "comprobantes": {
    "type": "integer",
-   "minimum": 0
+   "minimum": 0,
+   "description": "Cuántos comprobantes salieron. Cero en un libro cuyo asiento no sale de comprobantes, como el de tesorería."
+  },
+  "movimientos": {
+   "type": "integer",
+   "minimum": 0,
+   "description": "Cuántos movimientos de tesorería salieron (12.10). Cero en una compra o en una venta. Las dos claves van siempre."
   },
   "resumen": {
    "type": "object"
@@ -45,6 +51,13 @@
       "$ref": "comprobante_de_la_respuesta.schema.json"
      }
     },
+    "movimientos": {
+     "type": "array",
+     "description": "Lo que salió de cada movimiento de tesorería, con la misma forma que `comprobantes` (12.10).",
+     "items": {
+      "$ref": "movimiento_de_la_respuesta.schema.json"
+     }
+    },
     "motor": {
      "type": "string"
     }
@@ -53,6 +66,7 @@
     "driver",
     "archivo",
     "comprobantes",
+    "movimientos",
     "motor"
    ],
    "additionalProperties": false
@@ -78,6 +92,7 @@
   "formato",
   "archivo",
   "comprobantes",
+  "movimientos",
   "resumen",
   "_exportacion"
  ],

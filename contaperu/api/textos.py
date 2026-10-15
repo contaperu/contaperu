@@ -202,12 +202,16 @@ PARA_HERRAMIENTA: dict[str, str] = {
 
     **Esta herramienta no asienta, y es a propósito**: mirar y asentar son dos preguntas distintas. Aquí se mira,
     y lo que falte se dice sin parar nada; `generar_asiento` sobre un libro de tesorería **para** cuando falta,
-    porque sin la contrapartida o sin la cuenta contable del maestro no hay línea que escribir.
+    porque sin la contrapartida o sin la cuenta contable del maestro no hay línea que escribir. Así que mira
+    primero y asienta después.
 
-    **Y todavía no hay destino al que mandarlo**: ningún driver que viaje en el paquete declara este libro, así que
-    `generar_asiento` con `asiento_contable` lo rechaza diciendo qué libros lleva. Lo que ya existe es el asiento;
-    lo que falta es el archivo. Para un sistema legacy falta además un sub-diario de bancos que CONCAR haya
-    aceptado.
+    Para el asiento y su archivo, `generar_asiento` y `exportar` con el driver `asiento_contable`, que escribe el
+    documento del estándar con sus movimientos, su imputación y su asiento — y con los tres el archivo vuelve a
+    entrar y da lo mismo. **Las cuentas bancarias van en la configuración** (`cuentas_bancarias`), no como
+    argumento: la 104 de cada una sale de ahí y el motor no la deriva.
+
+    Lo que sigue sin poder salir es el archivo de un sistema legacy: espera un sub-diario de bancos que CONCAR
+    haya aceptado, y hasta entonces un destino legacy se niega diciendo que ese libro todavía no se numera.
     """,
     'validar_cuentas_bancarias': """Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.
 

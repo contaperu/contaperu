@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "12.9.0",
+  "version": "12.10.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -570,7 +570,7 @@
    "post": {
     "operationId": "revisar_tesoreria",
     "summary": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.",
-    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.\n\n**Una sola entrada** (3.0 del estándar), como `comprobantes[]` lo es de una compra o de una venta: venga de una\nlínea de extracto o de una constancia de pago, al motor llega un `movimiento`, y lo que los distingue no es una\netiqueta sino el `saldo`, que solo un extracto trae. Lo que el banco declara en la cabecera de la hoja va en\n`extractos[]`, y la contrapartida que decide el ERP en `imputaciones_de_movimientos`.\n\n**Esta operación no asienta, y es a propósito: mirar y asentar son dos preguntas.** Aquí se revisa lo que\nentró —qué se repitió, qué no tiene contrapartida, qué no cuadra contra lo que el banco declaró— y eso\nno obliga a nada. El asiento lo arma `generar_asiento` desde la 12.9, con un destino de canal `erp`, y ahí lo\nque falta ya no se puede **reportar**: sin la imputación o sin la 104 del maestro no hay línea que escribir, así\nque los tres avisos de aquí son allí tres excepciones. El maestro, que aquí es un argumento, allí viaja en la\nconfiguración (`cuentas_bancarias`).\n\nLo que sigue fuera es el **archivo**: ningún driver de serie declara todavía este libro en sus `FORMATOS`, y\nllevarlo a un sistema legacy espera además un archivo del sub-diario de bancos que CONCAR haya aceptado, con\nel que vendrán su sub-diario y su correlativo.",
+    "description": "El dinero de un periodo, revisado antes de conciliarlo: los movimientos de las cuentas del contribuyente.\n\n**Una sola entrada** (3.0 del estándar), como `comprobantes[]` lo es de una compra o de una venta: venga de una\nlínea de extracto o de una constancia de pago, al motor llega un `movimiento`, y lo que los distingue no es una\netiqueta sino el `saldo`, que solo un extracto trae. Lo que el banco declara en la cabecera de la hoja va en\n`extractos[]`, y la contrapartida que decide el ERP en `imputaciones_de_movimientos`.\n\n**Esta operación no asienta, y es a propósito: mirar y asentar son dos preguntas.** Aquí se revisa lo que\nentró —qué se repitió, qué no tiene contrapartida, qué no cuadra contra lo que el banco declaró— y eso\nno obliga a nada. El asiento lo arma `generar_asiento` desde la 12.9, con un destino de canal `erp`, y ahí lo\nque falta ya no se puede **reportar**: sin la imputación o sin la 104 del maestro no hay línea que escribir, así\nque los tres avisos de aquí son allí tres excepciones. El maestro, que aquí es un argumento, allí viaja en la\nconfiguración (`cuentas_bancarias`).\n\nY el **archivo** sale desde la 12.10 por el driver neutral, que escribe el documento del estándar con sus tres\nbloques —los movimientos, su imputación y el asiento— y vuelve a entrar dando lo mismo. Lo que sigue fuera es\nllevarlo a un sistema legacy: eso espera un archivo del sub-diario de bancos que CONCAR haya aceptado, con el\nque vendrán su sub-diario y su correlativo.",
     "requestBody": {
      "required": true,
      "content": {
@@ -3013,7 +3013,13 @@
      },
      "comprobantes": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "Cuántos comprobantes salieron. Cero en un libro cuyo asiento no sale de comprobantes, como el de tesorería."
+     },
+     "movimientos": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cuántos movimientos de tesorería salieron (12.10). Cero en una compra o en una venta. Las dos claves van siempre."
      },
      "resumen": {
       "type": "object"
@@ -3042,6 +3048,13 @@
          "$ref": "#/components/schemas/comprobante_de_la_respuesta"
         }
        },
+       "movimientos": {
+        "type": "array",
+        "description": "Lo que salió de cada movimiento de tesorería, con la misma forma que `comprobantes` (12.10).",
+        "items": {
+         "$ref": "#/components/schemas/movimiento_de_la_respuesta"
+        }
+       },
        "motor": {
         "type": "string"
        }
@@ -3050,6 +3063,7 @@
        "driver",
        "archivo",
        "comprobantes",
+       "movimientos",
        "motor"
       ],
       "additionalProperties": false
@@ -3075,6 +3089,7 @@
      "formato",
      "archivo",
      "comprobantes",
+     "movimientos",
      "resumen",
      "_exportacion"
     ],

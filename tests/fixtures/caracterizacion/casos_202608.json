@@ -1948,6 +1948,7 @@
   "formato": "concar_xlsx",
   "archivo": "COMPRAS_202608_20601234567.xlsx",
   "comprobantes": 12,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 12,
    "excluidos": 0,
@@ -2188,6 +2189,7 @@
      "huella": "4034fe76d88640d5e432be03138fc3e1393ebd4e288fff3f24520f71f9709354"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -9173,6 +9175,7 @@
   "formato": "concar_xlsx",
   "archivo": "COMPRAS_202608_20601234567.xlsx",
   "comprobantes": 12,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 12,
    "excluidos": 0,
@@ -9413,6 +9416,7 @@
      "huella": "4034fe76d88640d5e432be03138fc3e1393ebd4e288fff3f24520f71f9709354"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -17811,6 +17815,7 @@
   "formato": "csv_asiento",
   "archivo": "CSV_COMPRAS_202608_20601234567.csv",
   "comprobantes": 12,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 12,
    "excluidos": 0,
@@ -18046,6 +18051,7 @@
      "huella": "4034fe76d88640d5e432be03138fc3e1393ebd4e288fff3f24520f71f9709354"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
@@ -18056,6 +18062,7 @@
   "formato": "csv_asiento",
   "archivo": "CSV_COMPRAS_202608_20601234567.csv",
   "comprobantes": 12,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 12,
    "excluidos": 0,
@@ -18291,6 +18298,7 @@
      "huella": "4034fe76d88640d5e432be03138fc3e1393ebd4e288fff3f24520f71f9709354"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
@@ -18419,6 +18427,7 @@
   "formato": "sire_rce",
   "archivo": "LE2060123456720260800080400021112.TXT",
   "comprobantes": 10,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 10,
    "excluidos": 0,
@@ -18535,6 +18544,7 @@
      }
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202608||03/08/2026|02/09/2026|01|F001||101||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||05/08/2026|04/09/2026|01|F001||102||6|20602222226|PROVEEDOR DE PRUEBA SAC|500.00|90.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|590.00|USD|3.750|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||12/08/2026||07|FC01||5||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|-100.00|-18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|-118.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||13/08/2026||08|FD01||2||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|50.00|9.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|59.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||10/08/2026|27/08/2026|01|E001||871||6|20602222226|PROVEEDOR DE PRUEBA SAC|4200.00|756.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|4956.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||14/08/2026|13/09/2026|01|F002||45||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|2000.00|360.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2360.00|USD|3.700|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/08/2026||03|B001||88||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|100.00|18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|118.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/06/2026|20/07/2026|01|F001||90||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|300.00|54.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|354.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||25/08/2026|24/09/2026|01|F001||103||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||26/08/2026|10/09/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|200.00|36.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|236.00|PEN||||||||||||||||\r\n",
@@ -18545,6 +18555,7 @@
   "formato": "sire_rce",
   "archivo": "LE2060123456720260800080400021112.TXT",
   "comprobantes": 10,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 10,
    "excluidos": 0,
@@ -18661,6 +18672,7 @@
      }
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202608||03/08/2026|02/09/2026|01|F001||101||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||05/08/2026|04/09/2026|01|F001||102||6|20602222226|PROVEEDOR DE PRUEBA SAC|500.00|90.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|590.00|USD|3.750|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||12/08/2026||07|FC01||5||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|-100.00|-18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|-118.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||13/08/2026||08|FD01||2||6|20607777773|ELECTROMECANICA DE PRUEBA S.R.L.|50.00|9.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|59.00|PEN||03/08/2026|01|F001||101||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||10/08/2026|27/08/2026|01|E001||871||6|20602222226|PROVEEDOR DE PRUEBA SAC|4200.00|756.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|4956.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||14/08/2026|13/09/2026|01|F002||45||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|2000.00|360.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2360.00|USD|3.700|||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/08/2026||03|B001||88||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|100.00|18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|118.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||20/06/2026|20/07/2026|01|F001||90||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|300.00|54.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|354.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||25/08/2026|24/09/2026|01|F001||103||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|1000.00|180.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202608||26/08/2026|10/09/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|200.00|36.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|236.00|PEN||||||||||||||||\r\n",
@@ -19881,6 +19893,7 @@
   "formato": "starsoft_txt",
   "archivo": "C-COMPRAS_202608_20601234567.txt",
   "comprobantes": 12,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 12,
    "excluidos": 0,
@@ -20092,6 +20105,7 @@
      "huella": "15fd685eea5db309575a015866d3d65985ca2031d79c0b8ece7040d92d90d9da"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/plain",
@@ -20102,6 +20116,7 @@
   "formato": "starsoft_txt",
   "archivo": "C-COMPRAS_202608_20601234567.txt",
   "comprobantes": 12,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 12,
    "excluidos": 0,
@@ -20313,6 +20328,7 @@
      "huella": "15fd685eea5db309575a015866d3d65985ca2031d79c0b8ece7040d92d90d9da"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/plain",
@@ -21431,6 +21447,7 @@
   "formato": "asiento_contable_json",
   "archivo": "ASIENTO_CONTABLE_COMPRAS_202608_20601234567.json",
   "comprobantes": 12,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 12,
    "excluidos": 0,
@@ -21634,6 +21651,7 @@
      "huella": "b238d0faec1a9a3bfa7eed236144f3522a9d2f03ec906d6c42e66177f8ba8aaa"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/json"
@@ -21643,6 +21661,7 @@
   "formato": "asiento_contable_json",
   "archivo": "ASIENTO_CONTABLE_COMPRAS_202608_20601234567.json",
   "comprobantes": 12,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 12,
    "excluidos": 0,
@@ -21846,6 +21865,7 @@
      "huella": "b238d0faec1a9a3bfa7eed236144f3522a9d2f03ec906d6c42e66177f8ba8aaa"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/json"

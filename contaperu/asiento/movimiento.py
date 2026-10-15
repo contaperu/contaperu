@@ -308,3 +308,69 @@ def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correl
     if sin_imputar:
         raise MovimientoSinImputar(sin_imputar)
     return lineas, {}, tuple(indice)
+
+
+class LineaSinMovimiento(ValueError):
+    """Una línea del asiento que llega de fuera y no se puede atribuir a ningún movimiento del documento.
+
+    Hermana de `LineaSinComprobante` y con su mismo papel en el otro camino: lo que se rechaza es lo que daría un
+    archivo incompleto con pinta de correcto."""
+
+
+def indice_de_movimientos_dados(movimientos, lineas: list[LineaDiario], config: dict | None = None,
+                                ) -> tuple[MovimientoDelAsiento, ...]:
+    """Unas líneas que YA vienen armadas → el índice de qué tramo es de qué movimiento (12.10).
+
+    La vuelta de `lineas_e_indice_de_movimientos`, y hermana exacta de `motor.indice_de_lineas_dadas`: allí el
+    índice nace de generar las líneas y aquí de reconocerlas. **El enlace es el mismo**,
+    `linea.documento.id_externo`, que en un libro de movimientos es el del movimiento
+    ([enmienda 0032](../../estandar/enmiendas/0032-el-documento-de-una-linea-de-tesoreria.md)). No se adivina por
+    cuenta ni por importe.
+
+    `config` se pide para reconstruir la cabecera entera —el `efecto` sale de la imputación y la `cuenta_contable`
+    del maestro, y ninguna línea guarda ni una de las dos—. Sin él la cabecera sale sin esos dos campos, que es
+    exactamente lo que `como_movimiento()` omite, así que **el bloque `movimientos` reescrito sale igual**; lo que
+    se pierde es lo que vería un driver que lea `cabecera.a_dict()`.
+
+    **Las dos líneas del ITF van dentro del tramo de su movimiento**, porque llevan su mismo `id_externo`: su
+    asiento es aparte, pero el hecho que lo produjo es el mismo cargo.
+
+    Se rechaza en voz alta lo mismo que en el otro camino: una línea sin `id_externo` o con uno que ningún
+    movimiento tiene, y las líneas de un mismo movimiento **no contiguas**, porque el índice es un tramo."""
+    imputaciones = (config or {}).get("imputaciones_de_movimientos") or {}
+    cuentas = (config or {}).get("cuentas_bancarias") or {}
+    if isinstance(cuentas, (list, tuple)):
+        cuentas = tesoreria.por_id(list(cuentas))
+
+    de_su_id: dict[str, tuple[int, Any]] = {}
+    for posicion, m in enumerate(movimientos):
+        clave = str(_campo(m, "id_externo") or "")
+        if clave:
+            de_su_id[clave] = (posicion, m)
+
+    indice: list[MovimientoDelAsiento] = []
+    vistos: set[str] = set()
+    i = 0
+    while i < len(lineas):
+        id_externo = str((lineas[i].documento or {}).get("id_externo") or "")
+        if not id_externo:
+            raise LineaSinMovimiento(
+                f"la línea {i + 1} del asiento no dice de qué movimiento es: le falta `documento.id_externo`, "
+                "que es el enlace con el bloque `movimientos`")
+        if id_externo not in de_su_id:
+            raise LineaSinMovimiento(
+                f"la línea {i + 1} del asiento dice ser del movimiento {id_externo!r}, que no está en el documento")
+        if id_externo in vistos:
+            raise LineaSinMovimiento(
+                f"las líneas del movimiento {id_externo!r} no van seguidas: el índice de un asiento es un tramo, "
+                "así que un movimiento partido en dos trozos no se puede representar")
+        vistos.add(id_externo)
+        desde = i
+        while i < len(lineas) and str((lineas[i].documento or {}).get("id_externo") or "") == id_externo:
+            i += 1
+        posicion, m = de_su_id[id_externo]
+        indice.append(MovimientoDelAsiento(
+            posicion=posicion, sub_diario=lineas[desde].sub_diario, correlativo=lineas[desde].correlativo,
+            desde=desde, hasta=i,
+            cabecera=cabecera_de_movimiento(m, imputaciones.get(id_externo), cuentas)))
+    return tuple(indice)

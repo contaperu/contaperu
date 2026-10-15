@@ -15,7 +15,8 @@ from ..contable import partida_doble
 from .._version import __version__
 from ..asiento.huella import huella
 from ..asiento.resolucion import exigir_requisitos, fundir_config
-from ..configuracion import CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, ConfiguracionInvalida
+from ..configuracion import (CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, NO_SON_CONFIGURACION,
+                             ConfiguracionInvalida)
 from ..drivers import contrato
 from ..modelo import RASGOS, Comprobante, Libro, identidad_de
 from .preparacion import documento, libro_de, preparar, preparar_tesoreria
@@ -31,7 +32,7 @@ def config_para(modulo, config: dict) -> dict:
     if secciones:
         raise ConfiguracionInvalida([f"`{clave}` es la sección de un sistema: aquí llega la configuración ya aplicada "
                                      "(`operaciones.config_aplicada(configuracion, driver)`)" for clave in secciones])
-    errores = _declaracion.validar({k: v for k, v in config.items() if k != "imputaciones"},
+    errores = _declaracion.validar({k: v for k, v in config.items() if k not in NO_SON_CONFIGURACION},
                                    (*CONFIGURACION_GENERAL, *contrato.configuracion(modulo)),
                                    contrato.columnas_elegibles(modulo))
     if errores:
@@ -133,6 +134,46 @@ def desde_lineas_dadas(modulo, libro: Libro, comprobantes: list[Comprobante], li
     resumen = {"filas": len(lineas), "sub_diarios": asi.rangos_de_lineas_dadas(indice),
                "debe": str(cuadre.debe), "haber": str(cuadre.haber), "huella": huella(lineas), **extra}
     return contenido, resumen, lineas, indice
+
+
+def desde_movimientos(modulo, libro: Libro, movimientos: list, opciones: Any, config: dict | None = None,
+                      lineas: list | None = None) -> tuple[bytes, dict, list, tuple]:
+    """Un driver de asientos que recibe un libro de movimientos (12.10): el núcleo arma las líneas, exige que
+    cuadren, y el driver solo las traduce. La misma promesa que `desde_lineas_con_indice` en el otro camino.
+
+    **Las dos entradas en una función y no en dos**, al contrario que en el camino del comprobante
+    (`desde_lineas_con_indice` y `desde_lineas_dadas`): allí son dos porque la rama de las líneas dadas pide
+    requisitos y no pide correlativos, y aquí no hay ni una cosa ni la otra —un movimiento no tiene tipo ni moneda
+    que exigir y su libro todavía no se numera—, así que lo único que cambia entre las dos es de dónde salen las
+    líneas y de dónde sale el índice: de generarlas, o de reconocerlas por su `documento.id_externo`.
+
+    Lo que **no** cambia: el asiento tiene que cuadrar, y lo que el formato del destino no lleva lo para antes de
+    escribir nada."""
+    if config is None:
+        raise ValueError(f"El driver {modulo.NOMBRE!r} arma asientos: necesita `config`")
+    fuera = contrato.no_caben(modulo, libro, [], config)
+    if fuera:
+        raise contrato.NoCabe(fuera)
+    if lineas is None:
+        lineas, rangos, indice = asi.lineas_e_indice_de_movimientos(libro, movimientos, config,
+                                                                    vocabulario=contrato.vocabulario(modulo))
+    else:
+        indice = asi.indice_de_movimientos_dados(movimientos, lineas, config)
+        rangos = asi.rangos_de_lineas_dadas(indice)
+    cuadre = partida_doble.exigir(lineas)
+    if contrato.acepta_indice(modulo):
+        contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones, indice=indice)
+    else:
+        contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones)
+    resumen = {"filas": len(lineas), "sub_diarios": dict(rangos),
+               "debe": str(cuadre.debe), "haber": str(cuadre.haber), "huella": huella(lineas), **extra}
+    return contenido, resumen, lineas, indice
+
+
+def por_movimiento(libro: Libro, lineas: list, indice: tuple) -> list[dict]:
+    """Lo que la respuesta dice de cada movimiento de un asiento: su identidad, su tramo de líneas y su huella.
+    Hermano de `por_comprobante`, y los dos salen de `asiento.exportacion_de`."""
+    return asi.exportacion_de(libro, lineas, indice)["movimientos"]
 
 
 def desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], opciones: Any,

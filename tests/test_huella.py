@@ -55,8 +55,10 @@ def lineas(**cambios):
 
 
 def _sin_detalle(exportacion: dict) -> dict:
-    """`_exportacion` sin lo que dice de cada comprobante ni la versión del motor (hitos 0.4 y B2)."""
-    return {k: v for k, v in exportacion.items() if k not in ("comprobantes", "motor")}
+    """`_exportacion` sin lo que dice de cada entrada —de cada comprobante o de cada movimiento— ni la versión del
+    motor (hitos 0.4 y B2). Las dos claves van siempre desde la 12.10, la del libro con sus entradas y la otra
+    vacía."""
+    return {k: v for k, v in exportacion.items() if k not in ("comprobantes", "movimientos", "motor")}
 
 
 def test_la_misma_entrada_da_la_misma_huella_y_es_la_de_siempre():

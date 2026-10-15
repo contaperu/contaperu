@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 
 from ..._version import OPEN_ACCOUNTING, __version__
+from ...asiento import entradas_de as _entradas_de
 from ...asiento import exportacion_de as _exportacion_de
 from ...modelo import Libro
 from ..kit import OpcionesArchivo
@@ -33,7 +34,11 @@ NOMBRE = "asiento_contable"
 # Entrega a un ERP, por el formato neutral del estándar (`drivers.contrato.CANALES`).
 CANAL = "erp"
 VOCABULARIO = "neutral"
-FORMATOS = {"compra": "asiento_contable_json", "venta": "asiento_contable_json"}
+# **Los tres libros del catálogo** desde la 12.10: su formato es el estándar mismo, que los lleva todos. Fue el
+# último en declarar tesorería a propósito y no por descuido — declararla antes de que `exportar` supiera escribirla
+# habría dejado a esa puerta dando «No hay comprobantes que procesar», que es el mensaje engañoso que la 12.6 quitó.
+FORMATOS = {"compra": "asiento_contable_json", "venta": "asiento_contable_json",
+            "tesoreria": "asiento_contable_json"}
 OPCIONES = OpcionesArchivo(extension=".json")
 CONTENT_TYPE = "application/json"
 # Del núcleo le basta la cuenta de cada línea: el tipo va en su código SUNAT y la moneda en ISO. Exige `detraccion`
@@ -49,8 +54,10 @@ def nombre(libro: Libro, opciones: OpcionesArchivo = OPCIONES) -> str:
 
 
 def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tuple[bytes, dict]:
-    """Las líneas del comprobante, ya armadas y cuadradas por el núcleo → el documento `open-accounting` **completo**,
-    en JSON: sus tres bloques —`libro`, `comprobantes` y `asiento`— y `_exportacion` en la raíz.
+    """Las líneas que el núcleo ya armó y cuadró → el documento `open-accounting` **completo**, en JSON: el `libro`,
+    **el bloque del que salió el asiento** —`comprobantes` o `movimientos`, que lo dice la tabla— el `asiento`, y
+    `_exportacion` en la raíz. En tesorería va además `imputaciones_de_movimientos`, y el porqué de esa asimetría
+    está en `_imputaciones_de_movimientos`.
 
     **El bloque `comprobantes` entra en la 3.9**, y con él se acaba la carencia que tenía este archivo: un asiento
     solo, sin los comprobantes, no dice qué parte de una compra mixta era exonerada —100 gravado más 50 exonerado
@@ -76,8 +83,31 @@ def desde_lineas(libro, lineas, config, opciones=OPCIONES, *, indice=()) -> tupl
     productor puede llevar ahí `_exportacion`. Lo que la respuesta del API añade y el archivo no puede saber es
     `fecha` —la pone quien llama— y `archivo`, que aquí sería su propio nombre."""
     documento = {"open_accounting": OPEN_ACCOUNTING, "libro": libro.a_dict(),
-                 "comprobantes": [entrada.cabecera.como_comprobante() for entrada in indice],
+                 **_entradas_de(libro, indice),
+                 **_imputaciones_de_movimientos(libro, config),
                  "asiento": [linea.a_dict() for linea in lineas],
                  "_exportacion": {"driver": NOMBRE, "motor": __version__,
                                   **_exportacion_de(libro, lineas, indice)}}
     return json.dumps(documento, ensure_ascii=False, indent=1).encode("utf-8"), {"lineas": len(lineas)}
+
+
+def _imputaciones_de_movimientos(libro, config: dict | None) -> dict:
+    """El bloque `imputaciones_de_movimientos`, en un libro de tesorería y solo ahí (12.10).
+
+    **Aquí sí se escribe, y en compras no**, y la asimetría tiene su razón: el bloque `imputaciones` de un
+    comprobante no se escribe porque el esquema exige `id_externo` en TODOS los comprobantes cuando ese bloque no
+    está vacío, y un mes cuyo productor no puso ids daría un documento que falla su propio esquema. En tesorería
+    ese riesgo no existe: la imputación de un movimiento se busca por su `id_externo`, así que **todo movimiento
+    que se pudo asentar ya tiene uno** —sin él no habría encontrado su contrapartida y el asiento se habría
+    parado—.
+
+    Y lo que compra es la promesa fuerte: con los tres bloques el archivo vuelve a entrar al motor y **rearma** el
+    mismo asiento, no solo lo reexporta. En compras eso queda en manos de quien pasa la misma imputación que la
+    primera vez."""
+    if libro.rasgos.origen != "movimientos":
+        return {}
+    imputaciones = (config or {}).get("imputaciones_de_movimientos") or {}
+    if not imputaciones:
+        return {}
+    return {"imputaciones_de_movimientos": {clave: imputacion.a_dict()
+                                            for clave, imputacion in imputaciones.items()}}

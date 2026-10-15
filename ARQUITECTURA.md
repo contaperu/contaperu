@@ -226,10 +226,17 @@ Desde la 9.0 cada tipo de libro **declara** lo que el motor necesita saber de é
 | **qué reglas le tocan** | `da_credito_fiscal` | no | sí | no |
 | | `lleva_detraccion` · `lleva_honorarios` | no | sí | no |
 | **a dónde va** | `sub_diario` | ventas | compras | **vacío** |
+| | `etiqueta_de_archivo` — cómo se llama en el nombre de un archivo | VENTAS | COMPRAS | **TESORERIA** (12.10) |
 
 El reparto en tres grupos es de John (10-oct-2026) y no es cosmético: **el sub-diario no es lo que define a un
 libro**, es por dónde sale, y tenerlo primero hacía parecer que sí. Lo que define a un libro son su origen, sus
 roles y su sentido. Las tres reglas del medio son todas de las compras, y por eso valen `no` en todo lo demás.
+
+**El último rasgo entró con la 12.10 y su historia es la de la 9.0 otra vez**: el nombre de un archivo salía de
+`'VENTAS' if libro.es_venta else 'COMPRAS'`, el último sitio donde el booleano que esa versión retiró seguía
+decidiendo algo — y habría llamado «COMPRAS» a un archivo de tesorería. Podía arreglarse con un diccionario en
+`drivers/kit/nombres.py`, y eso habría sido una tabla paralela a ésta, que es exactamente lo que la 9.0 vino a
+quitar. Añadir un libro vuelve a ser añadir una fila.
 
 **`roles` es una declaración y no un mapa, y la distinción costó un intento.** Hubo una versión con
 `rol_principal` y `rol_contraparte` que suponía que todo libro tiene un hecho y una contraparte. En tesorería eso
@@ -583,7 +590,7 @@ No son prohibiciones: es el precio de cada cambio, escrito antes de hacerlo. Qui
 | Punto | Qué hay en la 1.0 | Hito |
 |---|---|---|
 | Lectores de terceros | nombre reservado `lectores.contrato` y grupo `contaperu.lectores`: identificar, extraer, deduplicar | B7 |
-| El banco | **ya no está reservado**: `contaperu/tesoreria/` existe desde la 8.2 con la cuenta bancaria, el movimiento de un extracto, la constancia de un pago y el cuadre de lo que el banco declara; y desde la 12.9 el motor **arma su asiento** para un ERP (`asiento/movimiento.py`, con el dispatch en `pipeline/armado`). Lo que sigue fuera es leer un banco concreto, conciliar, y escribir el archivo —el de un ERP es lo siguiente; el de un legacy espera el sub-diario de bancos—; y los conectores nunca entran al paquete | D1-D8 |
+| El banco | **ya no está reservado**: `contaperu/tesoreria/` existe desde la 8.2 con la cuenta bancaria, el movimiento de un extracto, la constancia de un pago y el cuadre de lo que el banco declara; desde la 12.9 el motor **arma su asiento** para un ERP (`asiento/movimiento.py`, con el dispatch en `pipeline/armado`) y desde la 12.10 **escribe su archivo** por el driver neutral, con el ida y vuelta cerrado. Lo que sigue fuera es leer un banco concreto, conciliar, y llevarlo a un sistema legacy, que espera el sub-diario de bancos; y los conectores nunca entran al paquete | D1-D8 |
 | La API del SIRE | **ya no está reservada**: `contaperu/sunat/` arma la petición de cada una de las once operaciones, lee el estado de un ticket y clasifica el rechazo de SUNAT, todo desde su catálogo y sin salir a la red (8.1). Lo que **sigue fuera** es enviar: el socket, los reintentos, el reloj del ticket y las credenciales. Y lo que **todavía no está** son los lectores de la forma de cada respuesta: eso no lo sostiene un catálogo, lo sostendría una respuesta real, y no hay ninguna guardada | C-SIRE |
 | Reglas de SUNAT como datos | `_datos.leer_json("datos/sunat/…")`; `catalogos` las cargará sin cambiar sus nombres | C1-C2 |
 | El contribuyente como datos | `catalogos.regimenes_tributarios()` y `catalogos.cronogramas_de_vencimiento()`: en qué régimen tributa y cuándo le vence el mes, **cada regla con la cita de su artículo** y un cargador que no arranca sin ella. Son catálogo y no campo del estándar porque «qué libros estoy obligado a llevar» se pregunta sin un documento delante. El cronograma cabe en un núcleo sin reloj porque no es un reloj: dado un periodo y un dígito de RUC devuelve una fecha | C13 |

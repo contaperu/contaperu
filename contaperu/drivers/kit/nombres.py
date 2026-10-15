@@ -40,9 +40,14 @@ def nombre_de_archivo(sistema: str, libro: Libro, opciones: Opciones | OpcionesA
       `sistema` no es el sistema sino **la letra del libro**: su manual exige que el nombre de compras empiece
       por `C`, y el de ventas empieza por `V`. Quien decide cuál es `drivers/starsoft/salida.nombre`, donde
       está la fuente de las dos; aquí solo se pega.
+
+    **Cómo se llama el libro en el nombre lo dice la tabla** (`modelo.RASGOS`, `etiqueta_de_archivo`) desde la
+    12.10, y hasta entonces lo decidía `'VENTAS' if libro.es_venta else 'COMPRAS'` — el último sitio donde el
+    booleano que la 9.0 retiró seguía decidiendo algo, y el que habría llamado «COMPRAS» a un archivo de
+    tesorería. Añadir un libro vuelve a ser añadir una fila.
     """
     cabeza = f"{sistema.upper()}{union}" if sistema else ""
-    return (f"{cabeza}{'VENTAS' if libro.es_venta else 'COMPRAS'}"
+    return (f"{cabeza}{libro.rasgos.etiqueta_de_archivo}"
             f"_{libro.periodo}_{libro.ruc}{opciones.extension}")
 
 

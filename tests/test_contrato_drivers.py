@@ -16,6 +16,7 @@ import types
 
 import pytest
 
+from contaperu import configuracion
 from contaperu import drivers
 from contaperu import api
 from contaperu.pipeline import preparacion as prep
@@ -655,7 +656,8 @@ def test_lo_que_se_lee_de_la_configuracion_esta_declarado_y_lo_declarado_se_lee(
     for doc, imputacion in _meses_que_pasan_por_todo():
         api.exportar(doc, driver=nombre, configuracion={}, imputacion=imputacion, incluir_observados=True)
     modulo = drivers.obtener(nombre)
-    assert leidas - (GENERALES | _propias(modulo) | {"imputaciones"}) == set(), f"{nombre} lee claves sin declarar"
+    assert leidas - (GENERALES | _propias(modulo) | LAS_DOS_IMPUTACIONES) == set(), \
+        f"{nombre} lee claves sin declarar"
     assert _propias(modulo) - leidas == set(), f"{nombre} declara claves que no lee"
 
 
@@ -682,12 +684,22 @@ def _claves_leidas(archivo: pathlib.Path) -> set[str]:
     return claves
 
 
+# Lo que un driver puede leer de `config` además de lo general y de su sección: **las dos imputaciones**, que no
+# son configuración sino datos del documento que viajan dentro de ella —«se le entrega al núcleo dentro de la
+# configuración, que es lo que ya recibe todo el asiento»—. La de un movimiento entró con la 12.10, cuando el
+# driver neutral empezó a escribirla en su archivo para que un documento de tesorería se baste.
+#
+# **Se LEE del código en vez de repetirse aquí**: la misma lista la necesitan `errores_de_configuracion` y
+# `armado.config_para`, y una copia en el test dejaría de avisar justo cuando el código añada la tercera.
+LAS_DOS_IMPUTACIONES = set(configuracion.NO_SON_CONFIGURACION)
+
+
 @pytest.mark.parametrize("nombre", sorted(drivers.DE_SERIE))
 def test_ningun_driver_lee_por_su_nombre_una_clave_que_no_declara(nombre):
-    """La misma regla, leída en el código: cada `config.get("x")` de un driver es de lo general, de su sección o la
-    imputación. Caza también lo que el mes de prueba no llega a recorrer."""
+    """La misma regla, leída en el código: cada `config.get("x")` de un driver es de lo general, de su sección o una
+    de las dos imputaciones. Caza también lo que el mes de prueba no llega a recorrer."""
     modulo = drivers.obtener(nombre)
-    permitidas = GENERALES | _propias(modulo) | {"imputaciones"}
+    permitidas = GENERALES | _propias(modulo) | LAS_DOS_IMPUTACIONES
     ajenas = {str(f.relative_to(PAQUETE)).replace("\\", "/"): sorted(_claves_leidas(f) - permitidas)
               for f in sorted(pathlib.Path(modulo.__file__).parent.rglob("*.py"))}
     assert {f: claves for f, claves in ajenas.items() if claves} == {}

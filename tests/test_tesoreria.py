@@ -608,18 +608,35 @@ def test_la_api_avisa_de_una_relectura_y_de_una_cuenta_que_no_se_declaro():
 
 # ── Lo que un destino hace con un libro que no lleva (9.1) ─────────────────
 
-def test_cada_driver_rechaza_un_libro_de_tesoreria_nombrando_los_que_si_lleva():
+def _los_que_no_llevan_tesoreria() -> list[str]:
+    """Los drivers de serie que no declaran el libro de tesorería, **con su complemento nombrado**.
+
+    Desde la 12.10 hay uno que sí lo lleva, `asiento_contable`, y por eso este reparto se calcula en vez de
+    escribirse: un bucle sobre «todos» dejaría de comprobar lo que comprueba en cuanto entre el siguiente. Y se
+    afirma cuál es el que lo lleva, para que el conjunto no se vacíe ni crezca en silencio — un test que deja de
+    comprobar es el único que no avisa."""
+    from contaperu import drivers
+
+    llevan = sorted(n for n in drivers.DE_SERIE if "tesoreria" in drivers.obtener(n).FORMATOS)
+    assert llevan == ["asiento_contable"], (
+        "cambió quién lleva el libro de tesorería: decídelo a propósito y mueve este test")
+    return sorted(set(drivers.DE_SERIE) - set(llevan))
+
+
+def test_cada_driver_que_no_lleva_tesoreria_lo_rechaza_nombrando_los_que_si_lleva():
     """La degradación que el estándar promete para un tipo de libro, y que **no estaba ocurriendo**: los ocho
     drivers contestaban «No hay comprobantes que procesar», que es engañoso — la razón verdadera es que ese destino
     no lleva ese libro.
 
     No era una falta de mensaje, `drivers.formato_de` ya lo tenía bien: era un orden de comprobaciones, y se
     llamaba después de preparar. Nadie lo había notado porque hasta el 10-oct-2026 no existía ningún libro del
-    catálogo fuera de los dos que todos los drivers llevan. El tercero lo destapó."""
+    catálogo fuera de los dos que todos los drivers llevan. El tercero lo destapó.
+
+    **Siete de los ocho**, desde la 12.10: el neutral lo lleva, porque su formato es el estándar mismo."""
     from contaperu import api, drivers
 
     doc = documento_de_tesoreria(movimientos=[mov().a_dict()])
-    for nombre in sorted(drivers.DE_SERIE):
+    for nombre in _los_que_no_llevan_tesoreria():
         lleva = sorted(drivers.obtener(nombre).FORMATOS)
         with pytest.raises(drivers.LibroQueElDestinoNoLleva) as e:
             api.exportar(doc, driver=nombre, configuracion={})
@@ -640,7 +657,7 @@ def test_generar_asiento_tambien_dice_la_razon_verdadera():
     from contaperu import api, drivers
 
     doc = documento_de_tesoreria(movimientos=[mov().a_dict()])
-    for nombre in sorted(drivers.DE_SERIE):
+    for nombre in _los_que_no_llevan_tesoreria():
         if not drivers.contrato.arma_asientos(drivers.obtener(nombre)):
             continue          # ésos se niegan antes, y por otra razón que también es la verdadera
         with pytest.raises(drivers.LibroQueElDestinoNoLleva) as e:

@@ -421,3 +421,18 @@ def test_un_booleano_de_antes_de_la_9_0_dice_como_migrar():
     # Y lo que sí acepta: unos rasgos, un libro o el tipo por su nombre.
     libro = Libro(ruc="20601234567", razon_social="MI EMPRESA SAC", periodo="202608", tipo="venta")
     assert rasgos_de(libro) is rasgos_de("venta") is libro.rasgos is RASGOS["venta"]
+
+
+def test_cada_libro_dice_como_se_llama_en_el_nombre_de_un_archivo():
+    """El rasgo que entró con la 12.10, y con él se fue el último sitio donde el booleano de antes de la 9.0
+    decidía algo: `drivers/kit/nombres.py` hacía `'VENTAS' if libro.es_venta else 'COMPRAS'`, así que un archivo de
+    tesorería se habría llamado «COMPRAS».
+
+    Está en la tabla y no en un diccionario aparte porque una tabla paralela a `RASGOS` es exactamente lo que la
+    9.0 vino a quitar. **En plural donde el uso lo tiene y en singular donde lo tiene**, que es cómo lo dice un
+    contador — por eso se declara en vez de derivarse del `tipo`."""
+    etiquetas = {tipo: r.etiqueta_de_archivo for tipo, r in RASGOS_DE_LIBRO.items()}
+    assert etiquetas == {"venta": "VENTAS", "compra": "COMPRAS", "tesoreria": "TESORERIA"}
+    # Y que ninguna se quede vacía al añadir una fila, que es lo que esto tiene que cazar.
+    assert all(e.isupper() and e.isalpha() for e in etiquetas.values())
+    assert set(etiquetas) == set(vocabulario.TIPOS_LIBRO), "un libro del catálogo sin su etiqueta no tiene nombre"

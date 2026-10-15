@@ -69,6 +69,15 @@ class Rasgos:
 
     # ── A dónde va. No es lo que un libro ES sino por dónde sale, y va al final por eso.
     sub_diario: str             # la clave de configuración que nombra su sub-diario
+    # Cómo se llama este libro DENTRO del nombre de un archivo: `COMPRAS_202610_<RUC>.xlsx`. Es un rasgo del libro
+    # y no de cada driver porque la convención es una sola para todos (`drivers/kit/nombres.py`), y está aquí y no
+    # en una tabla aparte porque una tabla paralela a ésta es exactamente lo que la 9.0 vino a quitar: hasta la
+    # 12.10 el nombre salía de `'VENTAS' if libro.es_venta else 'COMPRAS'`, el último sitio donde el booleano de
+    # antes de la 9.0 seguía decidiendo algo — y habría llamado «COMPRAS» a un archivo de tesorería.
+    #
+    # En plural donde el uso lo tiene («compras», «ventas») y en singular donde lo tiene («tesorería»): es cómo lo
+    # dice un contador, y por eso se declara en vez de derivarse del `tipo`.
+    etiqueta_de_archivo: str
 
     @property
     def es_venta(self) -> bool:
@@ -114,12 +123,12 @@ RASGOS: dict[str, "Rasgos"] = {
                     roles=("principal", "impuesto", "tercero"),
                     sentido_principal="H", cuenta_contraparte="clientes",
                     da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
-                    sub_diario="sub_diario_ventas"),
+                    sub_diario="sub_diario_ventas", etiqueta_de_archivo="VENTAS"),
     "compra": Rasgos(tipo="compra", origen="comprobantes",
                      roles=("principal", "impuesto", "tercero", "retencion", "recorte", "detraccion"),
                      sentido_principal="D", cuenta_contraparte="cxp",
                      da_credito_fiscal=True, lleva_detraccion=True, lleva_honorarios=True,
-                     sub_diario="sub_diario_compras"),
+                     sub_diario="sub_diario_compras", etiqueta_de_archivo="COMPRAS"),
     # El dinero moviéndose. Dos campos no son constantes aquí, y que la tabla lo enseñe es la mitad de su valor:
     #
     #
@@ -165,7 +174,7 @@ RASGOS: dict[str, "Rasgos"] = {
                         roles=("tesoreria", "tercero", "principal"),
                         sentido_principal=POR_OPERACION, cuenta_contraparte="",
                         da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
-                        sub_diario=""),
+                        sub_diario="", etiqueta_de_archivo="TESORERIA"),
 }
 
 

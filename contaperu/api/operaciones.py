@@ -129,9 +129,10 @@ def revisar_tesoreria(documento: dict, cuentas: list[dict] | None = None) -> dic
     que los tres avisos de aquí son allí tres excepciones. El maestro, que aquí es un argumento, allí viaja en la
     configuración (`cuentas_bancarias`).
 
-    Lo que sigue fuera es el **archivo**: ningún driver de serie declara todavía este libro en sus `FORMATOS`, y
-    llevarlo a un sistema legacy espera además un archivo del sub-diario de bancos que CONCAR haya aceptado, con
-    el que vendrán su sub-diario y su correlativo.
+    Y el **archivo** sale desde la 12.10 por el driver neutral, que escribe el documento del estándar con sus tres
+    bloques —los movimientos, su imputación y el asiento— y vuelve a entrar dando lo mismo. Lo que sigue fuera es
+    llevarlo a un sistema legacy: eso espera un archivo del sub-diario de bancos que CONCAR haya aceptado, con el
+    que vendrán su sub-diario y su correlativo.
     """
     doc = documento or {}
     libro = preparacion.libro_de(doc)

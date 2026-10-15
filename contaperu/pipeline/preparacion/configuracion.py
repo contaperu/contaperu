@@ -54,6 +54,9 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
         elif clave == "imputaciones":
             errores.append("`imputaciones` no va en la configuración: la imputación de cada documento llega en el "
                            "bloque `imputaciones` del documento o en el argumento `imputacion`")
+        elif clave == "imputaciones_de_movimientos":
+            errores.append("`imputaciones_de_movimientos` no va en la configuración: la contrapartida de cada "
+                           "movimiento llega en el bloque `imputaciones_de_movimientos` del documento")
         elif clave in drivers.DRIVERS and drivers.contrato.lleva_cuentas(drivers.DRIVERS[clave]):
             errores.append(f"`{clave}` no tiene sección: ese sistema no tiene nada propio que configurar, solo lo general")
         elif clave in drivers.DRIVERS:

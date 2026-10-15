@@ -65,8 +65,9 @@ from .huella import huella
 from .imputacion import Imputacion, Parte
 from .lineas import LineaDiario
 from .indice import (Cabecera, CabeceraDeMovimiento, ComprobanteDelAsiento, MovimientoDelAsiento,
-                     exportacion_de, identidad_de_movimiento)
-from .movimiento import (CUENTA_ITF, GRUPO_EFECTIVO, cabecera_de_movimiento, cuenta_de_efectivo,
+                     entradas_de, exportacion_de, identidad_de_movimiento)
+from .movimiento import (CUENTA_ITF, GRUPO_EFECTIVO, LineaSinMovimiento, cabecera_de_movimiento,
+                        cuenta_de_efectivo, indice_de_movimientos_dados,
                         lineas_del_movimiento, lineas_e_indice_de_movimientos, traspasos_en_dos_patas)
 from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, TIPOS_DEL_MOTOR, LineaSinComprobante, cabecera_de,
                     constancia_de,
@@ -80,6 +81,7 @@ __all__ = [
     "LibroQueElMotorNoOrigina", "MovimientoSinImputar", "SinCuentaDeEfectivo", "TraspasoEnDosPatas",
     "CuentaSinClase", "CUENTA_ITF", "GRUPO_EFECTIVO", "cuenta_de_efectivo", "lineas_del_movimiento",
     "traspasos_en_dos_patas", "cabecera_de_movimiento", "lineas_e_indice_de_movimientos",
+    "indice_de_movimientos_dados", "LineaSinMovimiento",
     "LibroQueTodaviaNoSeNumera", "CabeceraDeMovimiento", "MovimientoDelAsiento",
     "identidad_de_movimiento",
     "anulada_por_nota", "comprobantes_anulados_con_deposito", "asienta_sin_efecto",
@@ -94,5 +96,6 @@ __all__ = [
     "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "ROLES_DEL_MOTOR", "TIPOS_DEL_MOTOR", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro", "lineas_e_indice_del_libro", "cabecera_de", "Cabecera",
     "indice_de_lineas_dadas", "rangos_de_lineas_dadas", "LineaSinComprobante",
-    "ComprobanteDelAsiento", "MONEDAS_CODIGO", "constancia_de", "exportacion_de", "serie_numero_de",
+    "ComprobanteDelAsiento", "MONEDAS_CODIGO", "constancia_de", "entradas_de", "exportacion_de",
+    "serie_numero_de",
 ]

@@ -535,6 +535,7 @@
   "formato": "concar_xlsx",
   "archivo": "COMPRAS_202601_20601234567.xlsx",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -613,6 +614,7 @@
      "huella": "607586c31ccf05853b37ea41ab9e64399df126ba68bad8867c18976574ca05c1"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2618,6 +2620,7 @@
   "formato": "concar_xlsx",
   "archivo": "COMPRAS_202601_20601234567.xlsx",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -2696,6 +2699,7 @@
      "huella": "607586c31ccf05853b37ea41ab9e64399df126ba68bad8867c18976574ca05c1"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -4779,6 +4783,7 @@
   "formato": "contasis_xlsx",
   "archivo": "COMPRAS_202601_20601234567.xlsx",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -4826,6 +4831,7 @@
      }
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -5385,6 +5391,7 @@
   "formato": "contasis_xlsx",
   "archivo": "COMPRAS_202601_20601234567.xlsx",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -5432,6 +5439,7 @@
      }
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -6341,6 +6349,7 @@
   "formato": "csv_asiento",
   "archivo": "CSV_COMPRAS_202601_20601234567.csv",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -6417,6 +6426,7 @@
      "huella": "607586c31ccf05853b37ea41ab9e64399df126ba68bad8867c18976574ca05c1"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
@@ -6427,6 +6437,7 @@
   "formato": "csv_asiento",
   "archivo": "CSV_COMPRAS_202601_20601234567.csv",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -6503,6 +6514,7 @@
      "huella": "607586c31ccf05853b37ea41ab9e64399df126ba68bad8867c18976574ca05c1"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/csv; charset=utf-8",
@@ -6579,6 +6591,7 @@
   "formato": "sire_rce",
   "archivo": "LE2060123456720260100080400021112.TXT",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -6625,6 +6638,7 @@
      }
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202601||10/01/2026|10/02/2026|01|F001||45680||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|40000.00|7200.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|47200.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||18/01/2026|18/02/2026|01|E001||12347||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|25000.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||25/01/2026|25/02/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|1800.00|324.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2124.00|PEN||||||||||||||||\r\n",
@@ -6635,6 +6649,7 @@
   "formato": "sire_rce",
   "archivo": "LE2060123456720260100080400021112.TXT",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -6681,6 +6696,7 @@
      }
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "texto": "20601234567|EMPRESA DE PRUEBA SAC|202601||10/01/2026|10/02/2026|01|F001||45680||6|20677777771|MAYORISTA NACIONAL DE PRODUCTOS SAC|40000.00|7200.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|47200.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||18/01/2026|18/02/2026|01|E001||12347||6|20633333336|IMPORTADORA ASIA PACIFICO SRL|25000.00|4500.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|29500.00|PEN||||||||||||||||\r\n20601234567|EMPRESA DE PRUEBA SAC|202601||25/01/2026|25/02/2026|14|||12345679||6|20605555552|ELECTRICIDAD DE PRUEBA SAA|1800.00|324.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|2124.00|PEN||||||||||||||||\r\n",
@@ -7042,6 +7058,7 @@
   "formato": "starsoft_txt",
   "archivo": "C-COMPRAS_202601_20601234567.txt",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -7118,6 +7135,7 @@
      "huella": "c834a52f4c27bfdf1fbfb313ce3f7cbd26fa895a1dec88d0e9636c39021b457f"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/plain",
@@ -7128,6 +7146,7 @@
   "formato": "starsoft_txt",
   "archivo": "C-COMPRAS_202601_20601234567.txt",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -7204,6 +7223,7 @@
      "huella": "c834a52f4c27bfdf1fbfb313ce3f7cbd26fa895a1dec88d0e9636c39021b457f"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "text/plain",
@@ -7523,6 +7543,7 @@
   "formato": "asiento_contable_json",
   "archivo": "ASIENTO_CONTABLE_COMPRAS_202601_20601234567.json",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -7591,6 +7612,7 @@
      "huella": "6c48151d3f230c002f9ecd7d070098c7776c2f7713dcf0e863874e75af2d7426"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/json"
@@ -7600,6 +7622,7 @@
   "formato": "asiento_contable_json",
   "archivo": "ASIENTO_CONTABLE_COMPRAS_202601_20601234567.json",
   "comprobantes": 3,
+  "movimientos": 0,
   "resumen": {
    "comprobantes": 3,
    "excluidos": 0,
@@ -7668,6 +7691,7 @@
      "huella": "6c48151d3f230c002f9ecd7d070098c7776c2f7713dcf0e863874e75af2d7426"
     }
    ],
+   "movimientos": [],
    "motor": "(versión del motor)"
   },
   "content_type": "application/json"

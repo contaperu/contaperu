@@ -280,6 +280,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | **Motor** | |
 | Validación del comprobante y de la partida doble | listo |
 | Asiento: compras, ventas, honorarios, notas y detracción | listo |
+| **Asiento de tesorería**: pagos, cobros, cargos del banco, repartos y traspasos, con el ITF como su propio asiento | **listo** para un ERP (12.10): el documento del estándar con sus movimientos, su imputación y su asiento, y el archivo vuelve a entrar dando lo mismo. Hacia un sistema legacy, **pendiente de un archivo real** del sub-diario de bancos |
 | `diagnosticar`: qué falta, para qué destino y a quién pedírselo | listo |
 | API pública estable, `contaperu.api`: cada nombre con su firma, congelados por un test | listo |
 | Servidor MCP y CLI | listo |
@@ -431,7 +432,7 @@ columna de estado**),
 `generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`,
 `buscar_cuenta_pcge`, `adaptar_pcge2026`, `validar_cuentas_bancarias` (el maestro de cuentas del contribuyente,
 con la 104 que declara cada una) y `revisar_tesoreria` (los movimientos de las cuentas —una sola entrada,
-venga de un extracto o de una constancia—, con el cuadre de la cadena de saldos y el del saldo que declara el banco; no asienta), todas anunciadas de solo lectura. Y trece recursos: el esquema del
+venga de un extracto o de una constancia—, con el cuadre de los totales y del saldo que declara el banco; **mirar y asentar son dos preguntas, y el asiento lo arma `generar_asiento`**), todas anunciadas de solo lectura. Y trece recursos: el esquema del
 estándar, los catálogos de SUNAT, el canal del SIRE, **el formato del SIRE columna a columna** —dónde cae cada
 campo del anexo, o por qué no cae—, **el del Libro Diario 5.1 del PLE** —de dónde sale cada uno de sus 21 campos,
 con los códigos de libro de SUNAT—, los catálogos del propio estándar, el catálogo del PCGE 2026, los drivers
