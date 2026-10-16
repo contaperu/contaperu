@@ -211,7 +211,8 @@ def _sin_configuracion(libro: Libro, driver: str, exige: frozenset[str], todos: 
     }
 
 
-def _del_dinero(doc: dict, libro: Libro, modulo: Any, driver: str, configuracion: dict | None) -> dict:
+def _del_dinero(doc: dict, libro: Libro, modulo: Any, driver: str, *, configuracion: dict | None,
+                **_del_registro) -> dict:
     """El diagnóstico de un libro de tesorería: cuánto dinero trae el mes y qué impediría asentarlo (12.12).
 
     **Hasta la 12.11 este camino no existía y el libro se diagnosticaba en vacío**: el driver neutral declara
@@ -313,9 +314,16 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     modulo = drivers.obtener(driver)
     # **El dispatch por origen, igual que en `armado.generar_asiento` y en `salida.exportar_archivo`**: una sola vez
     # por puerta y ni un `if es_tesoreria` más adentro. Va lo primero porque de él depende QUÉ se mira y, por tanto,
-    # qué forma tiene la respuesta: un libro de tesorería no tiene comprobantes que contar (12.12).
-    if libro.rasgos.origen == "movimientos":
-        return _del_dinero(doc, libro, modulo, driver, configuracion)
+    # qué forma tiene la respuesta: un libro de tesorería no tiene comprobantes que contar (12.12). Por tabla y no
+    # por un `if` desde la 13.1.
+    return CAMINOS_DEL_DIAGNOSTICO[libro.rasgos.origen](
+        doc, libro, modulo, driver, configuracion=configuracion, correlativos=correlativos,
+        imputacion=imputacion, claves_previas=claves_previas)
+
+
+def _del_registro(doc: dict, libro: Libro, modulo: Any, driver: str, *, configuracion: dict | None,
+                  correlativos: dict | None, imputacion: dict | None, claves_previas: Any) -> dict:
+    """Lo que hay que mirar de un libro que sale de sus comprobantes: una compra, una venta."""
     todos = comprobantes_de(doc)
     previas = claves_previas_de(claves_previas)
     opciones = getattr(modulo, "OPCIONES", None)
@@ -450,3 +458,9 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
         "sub_diarios": sub_diarios,
         "saldrian": saldrian,
     }
+
+
+# **Qué se mira en un libro, dicho por la tabla** (13.1), igual que `armado.CAMINOS_DEL_ASIENTO` y
+# `salida.CAMINOS_DEL_ARCHIVO`. Aquí el despacho decide además **la forma de la respuesta**, que desde la 13.0 es
+# un `oneOf` de dos: por eso era el `if` más caro de los tres y el que más se nota al quitarlo.
+CAMINOS_DEL_DIAGNOSTICO = {"comprobantes": _del_registro, "movimientos": _del_dinero}

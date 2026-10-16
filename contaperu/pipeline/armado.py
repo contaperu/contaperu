@@ -219,14 +219,14 @@ def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None
     # existía ningún libro del catálogo fuera de los dos que todos los drivers llevan.
     libro = libro_de(doc)
     drivers.formato_de(driver, libro.tipo)
-    if libro.rasgos.origen == "movimientos":
-        return _asiento_de_movimientos(doc, modulo, driver, configuracion)
-    return _asiento_de_comprobantes(doc, modulo, driver, configuracion, correlativos, incluir_observados,
-                                    imputacion, claves_previas)
+    return CAMINOS_DEL_ASIENTO[libro.rasgos.origen](
+        doc, modulo, driver, configuracion=configuracion, correlativos=correlativos,
+        incluir_observados=incluir_observados, imputacion=imputacion, claves_previas=claves_previas)
 
 
-def _asiento_de_comprobantes(doc: dict, modulo, driver: str, configuracion: dict | None, correlativos: dict | None,
-                             incluir_observados: bool, imputacion: dict | None, claves_previas: Any) -> dict:
+def _asiento_de_comprobantes(doc: dict, modulo, driver: str, *, configuracion: dict | None,
+                             correlativos: dict | None, incluir_observados: bool, imputacion: dict | None,
+                             claves_previas: Any) -> dict:
     """El asiento de un libro que sale de sus comprobantes: una compra, una venta."""
     libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     # Lo mismo que saldría en su archivo: sin excluidos ni duplicados, sin lo que ese destino no lleva, y exigiendo lo que
@@ -246,8 +246,12 @@ def _asiento_de_comprobantes(doc: dict, modulo, driver: str, configuracion: dict
     return _respuesta(libro, neutrales, rangos, indice)
 
 
-def _asiento_de_movimientos(doc: dict, modulo, driver: str, configuracion: dict | None) -> dict:
+def _asiento_de_movimientos(doc: dict, modulo, driver: str, *, configuracion: dict | None, **_del_registro) -> dict:
     """El asiento de un libro que sale de sus movimientos: el dinero (12.9).
+
+    `**_del_registro` se traga los cuatro argumentos que solo tienen sentido en el otro camino —los correlativos,
+    los observados, la imputación y las claves previas—: las dos funciones de la tabla se llaman igual, y lo que
+    una no usa lo dice su firma en vez de obligar a la puerta a saber cuál es cuál.
 
     **No pasa por `exigir_requisitos` ni por `no_caben`, y no es un olvido.** Las dos están escritas sobre un
     comprobante —`faltantes_para` recorre comprobantes y les pregunta por su tipo, su moneda, su detracción— así
@@ -279,3 +283,12 @@ def _respuesta(libro: Libro, neutrales: list, rangos: dict, indice: tuple) -> di
                           **por_entrada(libro, neutrales, indice),
                           "motor": __version__}
     return salida
+
+
+# **De qué bloque sale el asiento, dicho por la tabla y no por un `if`** (13.1). La clave es el `origen` de la fila
+# del libro, no su nombre: por eso hay dos entradas y tres libros, y un libro nuevo que entre por un bloque que ya
+# está aquí no añade ninguna. Uno que estrene bloque da `KeyError` en la puerta, que es lo que se quiere — antes
+# caía en el `else` y salía tratado como una compra.
+#
+# Va al final del módulo porque las dos funciones tienen que existir ya; es el único motivo.
+CAMINOS_DEL_ASIENTO = {"comprobantes": _asiento_de_comprobantes, "movimientos": _asiento_de_movimientos}

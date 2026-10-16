@@ -273,9 +273,15 @@ def exportar_archivo(doc: dict, *, driver: str, configuracion: dict | None = Non
     libro = libro_de(doc)
     drivers.formato_de(driver, libro.tipo)
     # **El dispatch por origen, igual que en `armado.generar_asiento` y en el mismo sitio relativo**: una sola vez
-    # por puerta y ni un `if es_tesoreria` más adentro (12.10).
-    if libro.rasgos.origen == "movimientos":
-        return _archivo_de_movimientos(doc, driver, configuracion)
+    # por puerta y ni un `if es_tesoreria` más adentro (12.10); por tabla y no por un `if` desde la 13.1.
+    return CAMINOS_DEL_ARCHIVO[libro.rasgos.origen](
+        doc, driver, configuracion=configuracion, correlativos=correlativos,
+        incluir_observados=incluir_observados, imputacion=imputacion, claves_previas=claves_previas)
+
+
+def _archivo_de_comprobantes(doc: dict, driver: str, *, configuracion: dict | None, correlativos: dict | None,
+                             incluir_observados: bool, imputacion: dict | None, claves_previas: Any) -> Exportado:
+    """El archivo de un libro que sale de sus comprobantes: una compra, una venta."""
     libro, comprobantes, config = preparar(doc, configuracion, incluir_observados, imputacion, driver, claves_previas)
     modulo = drivers.obtener(driver)
     # El asiento que el documento TRAIGA manda sobre el que el motor derivaría (5.2): quien lo produjo ya numeró, y
@@ -290,7 +296,7 @@ def exportar_archivo(doc: dict, *, driver: str, configuracion: dict | None = Non
                    config=config if contrato.lleva_cuentas(modulo) else None, correlativos=corr, lineas=dadas)
 
 
-def _archivo_de_movimientos(doc: dict, driver: str, configuracion: dict | None) -> Exportado:
+def _archivo_de_movimientos(doc: dict, driver: str, *, configuracion: dict | None, **_del_registro) -> Exportado:
     """El archivo de un libro de tesorería, de punta a punta (12.10).
 
     `incluir_observados` no llega aquí porque no hay nada que incluir: las observaciones son de un comprobante.
@@ -340,3 +346,9 @@ def exportar(doc: dict, *, driver: str, configuracion: dict | None = None, corre
     exp = exportar_archivo(doc, driver=driver, configuracion=configuracion, correlativos=correlativos,
                            incluir_observados=incluir_observados, imputacion=imputacion, claves_previas=claves_previas)
     return respuesta(exp, cuando)
+
+
+# **De qué bloque sale el archivo, por la misma tabla y el mismo motivo que `armado.CAMINOS_DEL_ASIENTO`** (13.1):
+# la clave es el `origen` de la fila, no el nombre del libro. `_archivo_de_movimientos` ignora por firma los
+# cuatro argumentos del otro camino, para que la puerta llame igual a las dos.
+CAMINOS_DEL_ARCHIVO = {"comprobantes": _archivo_de_comprobantes, "movimientos": _archivo_de_movimientos}
