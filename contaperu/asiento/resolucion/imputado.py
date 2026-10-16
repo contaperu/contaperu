@@ -11,7 +11,7 @@ from ...catalogos import TIPO_HONORARIOS
 from ...configuracion import CONFIG_POR_DEFECTO
 from ...modelo import Comprobante
 from ...modelo.libro import Rasgos, rasgos_de
-from ..imputacion import Imputacion
+from ...comprobantes.imputacion import Imputacion
 from .configurado import _cuenta_por_moneda, cuenta_honorarios, cuenta_por_pagar
 
 

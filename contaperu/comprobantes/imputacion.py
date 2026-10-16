@@ -21,13 +21,22 @@ la base del asiento (`igv.base_imputable`), y lo comprueba `resolucion.reparto_n
 centro al lado es ambiguo —¿cuál manda?— y se rechaza al leerlo, en vez de elegir uno en silencio.
 
 Aquí solo vive la forma: ninguna regla contable.
+
+**Esta es la imputación del COMPROBANTE. El dinero tiene la suya**, `tesoreria.ImputacionDeMovimiento`, y son
+dos contratos distintos del estándar que no se funden: viajan bajo dos claves (`imputaciones` y
+`imputaciones_de_movimientos`), comparten tres campos de seis y el resto no — aquí `cuenta_tercero`,
+`detraccion_codigo` y `anulada_por_nota`; allá `contraparte_doc`, `glosa` y `cuenta_propia`. El porqué de no
+reusar una para la otra está escrito en `tesoreria/imputaciones.py`.
+
+El import es a `..modelo.coerciones` y no a `..modelo`, por lo mismo que en `comprobante.py`: `modelo/__init__`
+resuelve los nombres de este paquete perezosamente, y pedirle el paquete desde aquí cerraría el círculo.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from ..modelo import CERO, monto
+from ..modelo.coerciones import CERO, monto
 
 
 def _texto(v) -> str:
@@ -36,7 +45,15 @@ def _texto(v) -> str:
 
 @dataclass
 class Parte:
-    """Una parte del reparto de la base: su importe, su cuenta y, si la lleva, su centro de costo."""
+    """Una parte del reparto de la base: su importe, su cuenta y, si la lleva, su centro de costo.
+
+    **No es `tesoreria.Parte`**, aunque se llamen igual y las dos repartan. Tres diferencias, y ninguna es de
+    estilo: aquí el `importe` es opcional y por defecto `CERO`, allá es obligatorio y mayor que cero; aquí la
+    `cuenta_contable` puede quedar vacía y salir de la configuración, allá es obligatoria; y allá hay dos campos
+    más (`contraparte_doc` y `glosa`). Lo que las separa es quién valida: el reparto de un comprobante se
+    describe y lo comprueba `resolucion.reparto_no_cuadra` contra la base imputable, y el de un movimiento se
+    exige en la puerta contra el importe del movimiento.
+    """
 
     importe: Decimal = CERO
     cuenta_contable: str = ""

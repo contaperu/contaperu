@@ -192,3 +192,32 @@ def test_el_id_de_la_linea_no_entra_en_la_huella():
     otra_serie = [dict(ln, documento=dict(ln["documento"], serie_numero="X999-1")) if ln.get("documento") else ln
                   for ln in original]
     assert huella(otra_serie) != huella(original)
+
+
+def test_las_dos_partes_no_son_la_misma_clase_y_no_se_funden():
+    """`comprobantes.Parte` y `tesoreria.Parte` se llaman igual, reparten las dos y NO son intercambiables.
+
+    Se escribe como test y no solo como comentario porque la tentación es real: dos dataclasses con el mismo
+    nombre, tres campos comunes y un `a_dict()` cada una invitan a «limpiar» fundiéndolas. Fundirlas cambiaría
+    en silencio qué se valida, que es justo lo que las separa — y las dos están en la superficie congelada, así
+    que renombrar una tampoco es gratis.
+
+    Las tres diferencias que lo impiden, afirmadas abajo: el importe es opcional aquí y obligatorio allá; la
+    cuenta puede faltar aquí y allá no; y allá hay dos campos más (`contraparte_doc` y `glosa`).
+    """
+    import dataclasses
+
+    from contaperu import comprobantes, tesoreria
+
+    assert comprobantes.Parte is not tesoreria.Parte
+
+    del_comprobante = {c.name for c in dataclasses.fields(comprobantes.Parte)}
+    del_movimiento = {c.name for c in dataclasses.fields(tesoreria.Parte)}
+    assert del_comprobante == {"importe", "cuenta_contable", "centro_costo"}
+    assert del_movimiento - del_comprobante == {"contraparte_doc", "glosa"}
+
+    # Aquí una parte vacía es legal: lo que falte sale de la configuración del entorno.
+    assert comprobantes.Parte().cuenta_contable == ""
+    # Allá no: sin importe y sin cuenta, la puerta la rechaza en vez de asentar un cero.
+    with pytest.raises(tesoreria.ImputacionInvalida):
+        tesoreria.Parte()

@@ -62,7 +62,7 @@ from .resolucion import (anulada_por_nota, asienta_sin_efecto, comprobantes_anul
                          repartos_que_no_cuadran, sigla_de_tipo, sigla_documento, sin_efecto_contable, sub_diario,
                          sub_diarios_presentes, tiene_detraccion, tipos_sin_sigla)
 from .huella import huella
-from .imputacion import Imputacion, Parte
+from ..comprobantes.imputacion import Imputacion, Parte
 from .lineas import LineaDiario
 from .indice import (Cabecera, CabeceraDeMovimiento, ComprobanteDelAsiento, MovimientoDelAsiento,
                      entradas_de, exportacion_de, identidad_de_movimiento)
