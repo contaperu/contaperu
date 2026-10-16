@@ -33,6 +33,22 @@ intactos sin tocarlos.
 
 - `asiento/motor.py` pasa a **`asiento/comprobante.py`**, hermano de `movimiento.py`. `contaperu.asiento.motor`
   nunca estuvo congelado y `contaperu.asiento` conserva sus nombres.
+- **`asiento/faltas.py` e `asiento/indice.py` pasan a ser paquetes del mismo nombre**, con el mismo corte y los
+  mismos tres nombres de fichero que los dos motores del asiento: `comprobante.py`, `movimiento.py` y `comun.py`.
+  Los cortes no hubo que buscarlos —`FALTAS` declara en su docstring que sus filas se cuentan por comprobante, y
+  el bloque del dinero lleva desde la 12.7 un rótulo que dice que va FUERA de esa tabla y por qué—, así que lo
+  único que se decidió fue dónde va lo que no es de un libro ni del otro: `NoExportable`, la forma de una fila
+  (`Falta`), a quién se le pide, `LibroQueElMotorNoOrigina` —que nombra los tipos de libro que el motor sabe
+  armar, tesorería incluida— y, en el índice, `exportacion_de` y `entradas_de`. Esas dos últimas resultan ser el
+  motivo de que las dos cabeceras tengan `clave`, `identidad()` y `como_entrada()` con esos nombres: son 46
+  líneas que preguntan por `libro.rasgos.origen` sin un solo `if`.
+- Lo que ya no era verdad en los comentarios que se movían, corregido al moverlos: el rótulo de la 12.7 decía
+  «las cuatro» faltas del dinero y son **cinco** desde que entró `CuentaSinClase`, y decía que «las tres primeras»
+  endurecen avisos de `revisar_tesoreria` cuando los tres avisos los endurecen las **dos** primeras
+  —`CUENTA_NO_DECLARADA` y `CUENTA_BANCARIA_SIN_CUENTA_CONTABLE` son las dos ramas de `SinCuentaDeEfectivo`, como
+  dice su propio docstring—; `DETRACCION_DEL_ESTANDAR` decía «estas siete» claves y son **seis** desde que `estado`
+  salió en la 2.0, cosa que el propio párrafo explica dos líneas más abajo; y tres citas apuntaban a rutas que esta
+  misma versión dejó sin existir (`motor.…` dos veces, `faltas.py` una).
 - `contable/resumen.del_libro` se va a `comprobantes/resumen.py` y `contable/resumen.py` la reexporta, junto con
   `AGRUPACIONES` e `IMPORTES`. `AGRUPACIONES` es el `enum` de un esquema público, así que moverla sin dejar la
   ruta habría cambiado el contrato OpenConta por un refactor: no cambió, y `generar_openconta.py --comprobar` lo
@@ -58,8 +74,6 @@ mutando los tres rechazos uno a uno, y los tres hacen caer tests.
 - **`tributos/` no se movió**, y es una decisión y no un olvido: es el paquete de lo **peruano** —casi entera la
   tupla `PERUANOS`— y la hoja de ruta lo reserva para `jurisdicciones/pe` (hito **J4**). `comprobantes/` dice QUÉ
   es un comprobante; `tributos/`, DÓNDE rige. Meterlo dentro habría obligado a sacarlo otra vez.
-- **`asiento/faltas.py` e `indice.py` no se parten**, aunque sus cortes están localizados y rotulados en el
-  propio código. Va en la tanda siguiente.
 - **`diagnosticar` sigue sin camino de tesorería**, y conviene decirlo porque no se ve: con
   `driver="asiento_contable"` y `libro.tipo="tesoreria"` pasa el chequeo de «ese destino no lleva ese libro»
   —porque ese driver sí lo declara— y sigue por la ruta de comprobantes, devolviendo todos los contadores en

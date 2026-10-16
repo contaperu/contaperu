@@ -36,7 +36,7 @@
 <g class="a"><rect x="40" y="176" width="430" height="56" rx="8" stroke-width="0.5"/><text class="t" x="255" y="194">Las reglas deterministas</text><text class="s" x="255" y="212">tributos/ · validar · igv · detracciones · configuracion.py</text></g>
 <line class="flecha" x1="255" y1="234" x2="255" y2="250" marker-end="url(#punta)"/>
 
-<g class="a"><rect x="40" y="252" width="430" height="90" rx="8" stroke-width="0.5"/><text class="t" x="255" y="274">asiento/ — aquí vive la contabilidad</text><text class="s" x="255" y="294">comprobante.py · movimiento.py · comun.py · lineas.py</text><text class="s" x="255" y="312">resolucion/ · indice.py · huella.py · faltas.py · configuracion.py</text></g>
+<g class="a"><rect x="40" y="252" width="430" height="90" rx="8" stroke-width="0.5"/><text class="t" x="255" y="274">asiento/ — aquí vive la contabilidad</text><text class="s" x="255" y="294">comprobante.py · movimiento.py · comun.py · lineas.py</text><text class="s" x="255" y="312">resolucion/ · indice/ · faltas/ · huella.py · configuracion.py</text></g>
 <line class="flecha" x1="255" y1="344" x2="255" y2="360" marker-end="url(#punta)"/>
 
 <g class="a"><rect x="40" y="362" width="430" height="74" rx="8" stroke-width="0.5"/><text class="t" x="255" y="382">drivers/ — traducen, no deciden</text><text class="s" x="255" y="400">contrato.py · kit/</text><text class="s" x="255" y="418">concar · contasis · sire · csv · starsoft · asiento_contable</text></g>

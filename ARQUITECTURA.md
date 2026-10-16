@@ -142,7 +142,7 @@ Tres cosas distintas llevan la palabra «asiento», y conviene no confundirlas a
 | Capa | Dónde | Qué es |
 |---|---|---|
 | **La forma** | `estandar/open-accounting.schema.json`, `$defs.linea` (con `enmiendas/` y `conformidad/`) | **La fuente.** El contrato que lee un ERP de terceros, en cualquier lenguaje |
-| **La pieza en Python** | `asiento/lineas.py` (`LineaDiario`), `asiento/indice.py` (`Cabecera`) | Su materialización. No es una copia: `tests/test_estandar.py` exige que digan lo mismo, ni un campo de más ni uno de menos |
+| **La pieza en Python** | `asiento/lineas.py` (`LineaDiario`), `asiento/indice/comprobante.py` (`Cabecera`) | Su materialización. No es una copia: `tests/test_estandar.py` exige que digan lo mismo, ni un campo de más ni uno de menos |
 | **La entrega** | `drivers/asiento_contable/` | Un destino más, y de los cortos, que lo escribe sin traducirlo a vocabulario legacy |
 
 Lo que **no** es el asiento estándar, aunque comparta carpeta, es `asiento/comprobante.py` y `asiento/resolucion/`: son
