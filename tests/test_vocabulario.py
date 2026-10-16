@@ -317,6 +317,24 @@ def test_es_venta_y_es_compra_son_dos_preguntas_y_no_una():
     assert (compra.es_venta, compra.es_compra) == (False, True)
 
 
+def _particion_con_gente(cuales: set, nombre: str, resto: set) -> None:
+    """Las dos mitades de una partición de `RASGOS` tienen gente, así que ningún bucle de abajo pasa en vacío.
+
+    **Sustituye a dos literales que nombraban a `tesoreria`** (13.1). Decían `== {"tesoreria"}` y estaban puestos
+    a conciencia: lo que protegían es que el bucle siguiente no se quedara sin nada que recorrer y pasara verde
+    sin comprobar nada — «al mover tesorería de un conjunto al otro este bucle estuvo a un paso de vaciarse».
+    Esa garantía se conserva entera y sin nombrar a nadie.
+
+    Nombrar al libro de al lado era correcto con dos libros y deja de serlo con cuatro: un libro de caja chica,
+    uno de rendiciones o uno de asientos de ajuste **deciden el lado por operación y no tienen sub-diario**, así
+    que los dos literales se ponían rojos por un libro que entra bien — y el rojo diría «cambia este literal»,
+    que es ruido, en vez de «esto no se comprobó», que es la alarma de verdad.
+    """
+    assert cuales, (f"ningún libro {nombre}: el bucle que lo recorre no comprueba nada y pasa verde en vacío. "
+                    "Si de verdad ya no queda ninguno, este test hay que repensarlo, no borrarlo.")
+    assert resto, f"TODOS los libros {nombre}: el bucle del otro lado no comprueba nada."
+
+
 # ── El eje del libro, que la 9.0 pasó de un booleano a una tabla ───────────
 
 def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
@@ -353,7 +371,8 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     # asiento y todavía no sabe NUMERARLO, porque numerar es por sub-diario y el suyo espera el archivo real que
     # diga cuál es. Vacío significa ahora «este libro no se numera», que es comprobable, y lo comprueba
     # `LibroQueTodaviaNoSeNumera` — no «este libro no se origina», que ya no sería verdad.
-    assert {k for k, r in RASGOS.items() if not r.sub_diario} == {"tesoreria"}
+    sin_sub_diario = {k for k, r in RASGOS.items() if not r.sub_diario}
+    _particion_con_gente(sin_sub_diario, "se numera", set(RASGOS) - sin_sub_diario)
     for tipo, r in RASGOS.items():
         assert r.tipo == tipo, "la clave de la tabla y el tipo de la fila tienen que ser el mismo"
 
@@ -376,7 +395,7 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     por_operacion = {k for k, r in RASGOS.items() if r.decide_la_operacion}
     # **Nombrado, para que el bucle no pueda quedarse vacío sin ponerse rojo**: un test que deja de comprobar es el
     # único que no avisa, y al mover tesorería de un conjunto al otro este bucle estuvo a un paso de vaciarse.
-    assert por_operacion == {"tesoreria"}
+    _particion_con_gente(por_operacion, "decide el lado por operación", set(RASGOS) - por_operacion)
     for tipo in por_operacion:
         r = RASGOS[tipo]
         assert r.sentido_principal == POR_OPERACION and r.decide_la_operacion
