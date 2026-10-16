@@ -636,14 +636,17 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 
 Las propuestas que ha levantado la investigación, cada una con el caso real que la destraba y el
 hito que le toca; «—» si todavía no tiene uno. Es a esta tabla a la que remite la columna
-**Propuesta** de los frentes. Son **50**, en cinco tandas: las 31 del ciclo contable (13-14 de
+**Propuesta** de los frentes. Son **51**, en seis tandas: las 31 del ciclo contable (13-14 de
 setiembre de 2026), las cinco del diagnóstico de la arquitectura (9-oct-2026), las ocho que quedaron
-al limpiar la raíz, las tres del cambio de eje (las dos tandas, del 10-oct-2026) y las tres de la
-interconexión de los libros (12-oct-2026). Las cuatro últimas tandas van al final, cada una con su
-tabla.
+al limpiar la raíz, las tres del cambio de eje (las dos tandas, del 10-oct-2026), las tres de la
+interconexión de los libros (12-oct-2026) y la del libro que falta (16-oct-2026). Las cinco últimas
+tandas van al final, cada una con su tabla.
 
 **El recuento decía 46 con 47 filas, y la cuarta tanda decía «las dos» con tres**: se corrigió el
-12-oct-2026, contándolas. La 47 entró sin tocar la prosa.
+12-oct-2026, contándolas. La 47 entró sin tocar la prosa. Desde la 13.1 **lo cuenta un test**
+(`tests/test_documentacion.py`), por el mismo motivo por el que se cuentan las herramientas del MCP
+en el README: un número escrito a mano en la prosa de al lado de una tabla envejece sin que nada
+avise, y éste ya lo hizo una vez.
 
 Vivió en `INTEROPERABILIDAD.md` hasta el 8-oct-2026, y se mudó aquí al retirarlo: la tabla la usa
 esta hoja y nadie más, así que dejar de ser una remisión a otro documento es lo que la mantiene
@@ -750,3 +753,14 @@ espera algo.
 | 48 | Comprobar que las cuotas de una factura al crédito **sumen** su monto neto pendiente | N | **Falta la norma**: la RS 193-2020 obliga a declarar los tres datos y no se ha leído que exija la aritmética entre ellos. Lo que falta es de escritorio, no un archivo | Una factura cuyas cuotas no suman el monto pendiente sale con un AVISO y se registra igual: lo que el documento declara no se rechaza | `CUOTAS_NO_SUMAN*` | C | — |
 | 49 | Retirar `datos_originales.cuotas`, redundante desde la 12.2 | N | Ninguno: es una limpieza de mayor. Trae solo las fechas, y `comprobante.cuotas` trae lo mismo con su importe | El snapshot del documento se mueve a propósito y ningún caso lo lee | — | B | 13.0 |
 | 50 | Que `conciliar` **devuelva `aplicaciones` con `origen: propuesto`** en vez de una forma propia | N · F | Los mismos dos archivos de D3. **Lo que ya no espera es su forma**: la 12.3 le dio el tipo de salida, así que el día que llegue no hay que inventarlo | Una propuesta no mueve ningún pendiente hasta que alguien la pasa a `manual` | `conciliar*` | C | D3 |
+
+### La del libro que falta (16-oct-2026)
+
+Salió al preguntarse si la arquitectura aguanta los libros que vienen —inventario, caja chica, rendiciones,
+asientos de ajuste—. La respuesta fue que **casi todos ya tienen sitio**: caja chica y rendiciones son
+tesorería desde la enmienda 0024, y la planilla, la depreciación y el asiento de destino entran por el Libro
+Diario 5.1, que es el hito B13. El único que pedía libro propio y no lo tiene es el inventario.
+
+| # | Propuesta | Nivel | Caso real que la destraba | Test que la fijaría | Nombre | Prio | Hito |
+|---|---|---|---|---|---|---|---|
+| 51 | **El inventario permanente como tipo de libro**: los formatos **12.1** (en unidades físicas) y **13.1** (valorizado) del PLE. Hermana de la 39: entra por `libro.tipo` y no por un rol nuevo, como todo hecho que ya tiene su libro en el PLE | N · estándar | **Dos cosas, y falta la primera**: los códigos del PLE de esos dos formatos **con su resolución al lado** —no están en `datos/sunat/ple_campos.json` y escribirlos de memoria sería una regla sin fuente, que es lo que dejó fuera al grupo 01 (enmienda 0024)—, y un mes real de un ERP que lleve kardex | Un libro `inventario` del catálogo entra y sale intacto; el driver que no lo declara lo rechaza nombrando los que sí; el snapshot de CONCAR no se mueve | `tipos_de_libro` | C | B13 |

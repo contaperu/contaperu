@@ -177,6 +177,32 @@ def test_el_readme_no_dice_cuantas_herramientas_hay_a_ojo():
                 assert not re.search(rf"\b{numero} {cosa}\b", readme), f"queda un recuento viejo: {numero} {cosa}"
 
 
+def test_la_hoja_de_ruta_no_dice_cuantas_propuestas_hay_a_ojo():
+    """El §8 dice en prosa cuántas propuestas tiene y en cuántas tandas. Aquí se cuentan, no se recuerdan.
+
+    Es el hermano del de arriba, y nace del mismo despiste ya consumado: la propia hoja de ruta lo cuenta —«el
+    recuento decía 46 con 47 filas, y la cuarta tanda decía “las dos” con tres»—, se corrigió a mano el
+    12-oct-2026 y nada impedía que volviera a pasar. Una propuesta que entra sin tocar la prosa de al lado es
+    exactamente lo que ya ocurrió con la 47.
+
+    Se cuenta por la primera columna de las tablas, que es el número de la propuesta, y se exige además que
+    estén TODAS: un hueco en la numeración es una propuesta que se borró sin renumerar o un número repetido.
+    """
+    hoja = texto("HOJA-DE-RUTA.md")
+    seccion = hoja[hoja.index("## 8 · De dónde salió cada hito"):]
+    numeros = [int(n) for n in re.findall(r"^\| (\d+) \|", seccion, re.M)]
+    tandas = len(re.findall(r"^### ", seccion, re.M)) + 1   # las del ciclo contable van en la tabla de arriba
+
+    assert sorted(numeros) == list(range(1, len(numeros) + 1)), (
+        f"la numeración del §8 tiene huecos o repetidos: van del {min(numeros)} al {max(numeros)} y son "
+        f"{len(numeros)}. Una propuesta no se borra: se marca cumplida o se dice por qué no se hace.")
+    assert f"Son **{len(numeros)}**" in seccion, (
+        f"el §8 tiene {len(numeros)} propuestas y su prosa no lo dice. El número va escrito a mano al lado de la "
+        f"tabla y por eso se cuenta aquí: ya se quedó atrás una vez.")
+    assert f"en {en_palabra(tandas)} tandas" in seccion, (
+        f"el §8 tiene {tandas} tandas —una por cada `###` más la del ciclo contable— y su prosa dice otra cosa.")
+
+
 # Los documentos que dicen cuántas funciones reciben el eje del libro, y los contextos en que lo dicen. Un número
 # escrito en palabra se busca por lo que va DETRÁS, que es lo que lo convierte en una afirmación —«veinte
 # funciones», «catorce de ellas», «tres del IGV»— y, sobre todo, lo que dice CUÁL de los cuatro recuentos es.
