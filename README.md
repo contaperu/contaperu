@@ -138,28 +138,141 @@ líneas, qué papeles caben en su asiento y qué reglas le tocan. Cada capa que 
 un diccionario tecleado por esa fila, nunca preguntando por el nombre del libro — y hay un test que recorre el
 paquete entero y lo prohíbe.
 
-Dónde vive cada cosa:
+Dónde vive cada cosa. **Las carpetas de primer nivel son la estructura canónica**: nada se añade ahí sin que
+`tests/test_capas.py` diga a qué capa pertenece y por qué.
 
 ```
 contaperu/
-├── modelo/          el libro y sus rasgos, las coerciones a Decimal y fecha
-├── comprobantes/    una compra o una venta: su forma, su identidad, su imputación,
-│                    sus lectores (XML de SUNAT, TXT del SIRE) y cuánto suma el mes
-├── tesoreria/       el dinero: la cuenta bancaria, el movimiento y su imputación
-├── asiento/         la partida doble: un motor por libro (`comprobante`, `movimiento`)
-│                    y `comun/` debajo; la línea de diario, las faltas y el índice
-├── contable/        lo que no depende del país: Debe = Haber, y el pre-mayor
-├── tributos/        lo peruano: IGV, detracciones, validación, contraste con el SIRE
-├── catalogos/       los códigos de SUNAT, cada uno con la resolución de la que sale
-├── pcge/            el plan de cuentas 2026 y de qué clase es cada cuenta
-├── sunat/           la API del SIRE descrita: se sabe la URL y no se llama nunca
-├── lectores/        la ruta de siempre de los lectores, que viven en comprobantes/
-├── drivers/         ocho destinos, por canal: ERP, SUNAT y los sistemas instalados
-├── pipeline/        leer, preparar, armar, diagnosticar y escribir un mes
-├── api/             lo que una aplicación usa, con su contrato OpenConta
-├── puertas/         Python, consola, MCP y HTTP
-└── aplicaciones.py  el puente entre los libros: cuánto de un pago cancela un documento
+│
+├── modelo/              EL EJE. Qué es un libro y qué lo distingue de otro
+│   ├── libro.py           la tabla RASGOS: los cuatro libros, una fila cada uno
+│   ├── coerciones.py      a Decimal, a fecha, a número de serie
+│   └── accesores.py       leer un campo venga como objeto o como diccionario
+│
+├── comprobantes/        LIBRO 1 y 2 · una compra o una venta
+│   ├── comprobante.py     sus 40 campos y su identidad (qué lo hace duplicado)
+│   ├── imputacion.py      lo que el contador decide: cuenta, centro, detracción
+│   ├── xml_ubl.py         lee el XML de SUNAT
+│   ├── sire_txt.py        lee el TXT de la propuesta del SIRE
+│   ├── archivos.py        desarma el ZIP y reparte lo que hay dentro
+│   └── resumen.py         cuánto compró o vendió un RUC en el mes
+│
+├── tesoreria/           LIBRO 3 · el dinero
+│   ├── movimientos.py     la única entrada: venga de un extracto o de una constancia
+│   ├── imputaciones.py    la contrapartida, que la pone el ERP
+│   ├── cuentas.py         las cuentas bancarias del contribuyente, con su 104
+│   ├── extractos.py       la cabecera de lo que el banco declaró
+│   ├── referencias.py     qué cancela un pago
+│   └── cuadre.py          la cadena de saldos: «¿leí bien el extracto?»
+│                        (LIBRO 4 · el diario no tiene carpeta: llega ya armado)
+│
+├── asiento/             LA PARTIDA DOBLE. Un motor por libro, y lo común debajo
+│   ├── comprobante.py     el asiento de una compra o una venta
+│   ├── movimiento.py      el asiento del dinero
+│   ├── comun.py           lo que los dos hacen igual
+│   ├── lineas.py          la línea de diario: el bloque `asiento` del estándar
+│   ├── resolucion/        qué cuenta, qué sub-diario, qué correlativo, qué falta
+│   ├── faltas/            lo que impide exportar, por libro
+│   ├── indice/            qué tramo de líneas es de qué comprobante o movimiento
+│   └── huella.py          el sha256 que identifica un asiento
+│
+├── contable/            LO UNIVERSAL. No depende del país ni del régimen
+│   ├── partida_doble.py   Debe = Haber, sin tolerancia
+│   └── resumen.py         el pre-mayor: cuánto cayó en cada cuenta
+│
+├── tributos/            LO PERUANO. Las normas, no los libros
+│   ├── igv.py             se LEE del comprobante, nunca se supone
+│   ├── detracciones.py    el Catálogo 54 y los dos tiempos del depósito
+│   ├── validar.py         las reglas deterministas y los duplicados
+│   └── comparar_sire.py   lo nuestro contra lo que SUNAT tiene
+│
+├── catalogos/           LOS CÓDIGOS DE SUNAT, cada uno con su resolución
+├── pcge/                EL PLAN DE CUENTAS 2026 y de qué clase es cada cuenta
+├── sunat/               LA API DEL SIRE descrita: se sabe la URL y no se llama
+├── lectores/            la ruta de siempre de los lectores (viven en comprobantes/)
+│
+├── drivers/             LOS DESTINOS. Traducen; no deciden ninguna cuenta
+│   ├── contrato/          lo que un driver tiene que exponer, y su examen
+│   ├── kit/               lo común: columnas, celdas, nombres de archivo, el rol
+│   ├── asiento_contable/  canal ERP · el documento del estándar, sin vocabulario ajeno
+│   ├── csv/               canal ERP · una fila por línea
+│   ├── sire/              canal SUNAT · el TXT del RVIE y del RCE
+│   ├── ple/ · ple_plan/   canal SUNAT · el Libro Diario 5.1 y su plan de cuentas 5.3
+│   └── concar/ · contasis/ · starsoft/   canal legacy · lo que cada sistema importa
+│
+├── pipeline/            LA ORQUESTACIÓN de un mes, escrita una sola vez
+│   ├── lectura.py         de archivos a documento
+│   ├── preparacion/       el documento, la configuración y los pasos de cada libro
+│   ├── seleccion.py       qué entra y qué se queda fuera
+│   ├── armado.py          → el asiento          ┐
+│   ├── salida.py          → el archivo          ├ los tres eligen camino por el
+│   └── diagnostico.py     → qué falta           ┘ `origen` del libro, en una tabla
+│
+├── api/                 LA SUPERFICIE PÚBLICA, congelada dentro de cada mayor
+│   ├── operaciones.py     lo que una aplicación llama
+│   ├── tabla.py           la tabla de operaciones, de la que sale todo lo demás
+│   ├── esquemas/          el JSON Schema de cada entrada y cada respuesta
+│   └── openconta.json     el contrato OpenAPI, generado y verificado
+│
+├── puertas/             LOS PROTOCOLOS. Solo hablan con api/
+│   ├── cli.py             la línea de comandos
+│   ├── servidor_mcp.py    para un asistente de IA
+│   └── servidor_http.py   para un ERP en cualquier lenguaje
+│
+├── datos/sunat/         los catálogos que viajan en el paquete, con su fuente
+├── aplicaciones.py      el puente entre libros: cuánto de un pago cancela un documento
+├── configuracion.py     lo que cada empresa declara: sus cuentas, sus centros, sus tasas
+├── vocabulario.py       los roles, las clases y los tipos de libro del estándar
+└── errores.py           el error del motor, con su clave estable
 ```
+
+Y **el repositorio alrededor del paquete**, que es la otra mitad de lo que hay que saber para moverse:
+
+```
+contaperu/               ← el paquete de arriba: lo que se instala con `pip`
+│
+├── estandar/            EL ESTÁNDAR `open-accounting`, que se publica aparte del motor
+│   ├── open-accounting.schema.json   el esquema del documento
+│   ├── catalogos.json                los roles, las clases y los cuatro tipos de libro
+│   ├── LEEME.md                      el texto normativo: qué significa cada bloque
+│   ├── enmiendas/                    33 enmiendas, cada una con su motivo y su fuente
+│   ├── conformidad/                  casos para probar OTRA implementación, sin este motor
+│   └── MIGRAR-A-1.0.md · 2.0 · 3.0   qué tocar al subir de versión mayor
+│
+├── tests/               LA BATERÍA. 74 ficheros, y es donde vive la mitad del porqué
+│   ├── test_capas.py                 nadie importa fuera de su capa
+│   ├── test_frontera.py              el núcleo no toca disco, red ni reloj
+│   ├── test_superficie_publica.py    lo que se promete no cambia sin que se vea
+│   ├── test_snapshot_concar.py       el Excel validado, celda a celda (52 casos)
+│   ├── fixtures/                     las fotos congeladas y los documentos de ejemplo
+│   └── drivers_de_prueba/            drivers de mentira, para probar el contrato
+│
+├── herramientas/        LO QUE SE CORRE A MANO, nunca en producción
+│   ├── regenerar.py                  la puerta única a las fotos congeladas
+│   ├── generar_openconta.py          regenera el contrato desde la tabla de operaciones
+│   └── comprobar_sire.py · medir.py  capturar respuestas reales · medir rendimiento
+│
+├── diagramas/           los cinco SVG que ilustran este README
+├── .github/workflows/   `tests.yml` en cada push · `release.yml` al empujar un tag
+│
+├── README.md            esto
+├── ARQUITECTURA.md      las capas y sus porqués, y lo que no se negocia
+├── INTEGRAR.md          cómo meter el motor en un ERP, con ejemplos que se ejecutan
+├── estandar/LEEME.md    el estándar, para quien no use este motor
+├── HOJA-DE-RUTA.md      en qué orden crece, y qué dato destraba cada cosa
+├── REFERENCIAS.md       lo que se miró de otros sistemas, y lo que se descartó
+├── CHANGELOG.md         cada versión con su porqué: la bitácora, y en ningún otro sitio
+└── CONTRIBUTING.md      la regla que manda: ninguna regla contable sin su fuente
+```
+
+Y una carpeta que **no** está y se nombra a propósito: `privado/`, que `.gitignore` bloquea. Ahí viven los
+archivos reales de contribuyentes con los que se contrasta el motor —un mes de compras, un extracto, un Libro
+Diario aceptado—. **Nada de eso entra al repositorio**: lo que entra son los datos que dejan, y siempre con el
+RUC de ejemplo.
+
+La mitad del código está en dos sitios, y no por casualidad: **`drivers/` es con diferencia lo más grande**
+—ocho formatos ajenos, cada uno con sus manías— y **`asiento/` lo segundo**, que es donde vive la contabilidad.
+Todo lo demás es más pequeño de lo que suele esperarse.
 
 La mitad del código está en dos sitios, y no por casualidad: **`drivers/` es con diferencia lo más grande**
 —ocho formatos ajenos, cada uno con sus manías— y **`asiento/` lo segundo**, que es donde vive la contabilidad.
