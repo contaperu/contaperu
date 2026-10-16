@@ -1,36 +1,22 @@
-"""Lo que puede impedir exportar un mes a un destino, en UNA tabla: su clave en `faltantes`, el requisito del
-contrato de driver que la hace bloquear, la excepción con que el núcleo se niega, el texto que lee una persona, a quién
-pedírsela y el título con que la lista la CLI.
+"""Lo que puede impedir exportar un mes de COMPROBANTES a un destino, en UNA tabla: su clave en `faltantes`, el
+requisito del contrato de driver que la hace bloquear, la excepción con que el núcleo se niega, el texto que lee una
+persona, a quién pedírsela y el título con que la lista la CLI.
 
 Hasta el 12-sep-2026 esto vivía en cinco sitios —`REQUISITO_DE`, `TEXTO_FALTANTE`, las claves de faltas de `PEDIR_A`,
 la tupla de `por_que_no` y los títulos de la CLI—, cada uno con su orden. Ahora hay uno, el de la comprobación: primero
 lo que impide clasificar (el tipo, la moneda) y después lo de cada documento.
+
+**Las filas de `FALTAS` son faltas POR COMPROBANTE**: se cuentan por su serie-número y se reparten entre
+`bloqueantes` y `avisos`. Ésa es la línea por la que este fichero se separó de `faltas/movimiento.py`, donde está
+lo del dinero, que no tiene ni una cosa ni la otra.
 
 Las reglas no están aquí: las comprueba `resolucion.requisitos`, que es su fichero hermano. Esto dice cómo se
 llaman y a quién se le piden.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from ..errores import ErrorContaperu
-from ..modelo import Comprobante
-
-# A quién se le pide. **contador**: se decide mirando el documento o el plan de cuentas. **sistema**: la configuración
-# del destino o un dato público que no está en el papel. **proveedor** queda reservado (ver `operaciones.PEDIR_A`).
-CONTADOR, SISTEMA, PROVEEDOR = "contador", "sistema", "proveedor"
-
-
-class NoExportable(ErrorContaperu):
-    """La base de todo lo que impide exportar a un destino. Quien llama atrapa esta y lee `clave` (la de su fila de
-    `FALTAS`, o la propia de un driver) y `comprobantes`, vacía cuando lo que falta es un código: un tipo, una moneda,
-    un sub-diario."""
-
-    clave = ""
-
-    def __init__(self, mensaje: str, comprobantes: list[Comprobante] | None = None):
-        super().__init__(mensaje)
-        self.comprobantes = list(comprobantes or [])
+from ...modelo import Comprobante
+from .comun import CONTADOR, SISTEMA, Falta, NoExportable
 
 
 class SinSigla(NoExportable):
@@ -94,7 +80,7 @@ class SinCodigoDetraccion(NoExportable):
     Detiene la exportación, y no es una cortesía: **el hecho lo afirma SUNAT en su propio registro**, no lo infiere el
     motor. Un contador que acepta esa propuesta está aceptando que esos comprobantes tienen detracción, así que
     exportarlos sin ella contradice el archivo que acaba de aceptar — y lo haría en silencio, porque sin código no hay
-    tasa, sin tasa el monto es 0 y la línea no nace (`motor.lineas_del_comprobante`). El asiento saldría con la cuenta
+    tasa, sin tasa el monto es 0 y la línea no nace (`asiento.lineas_del_comprobante`). El asiento saldría con la cuenta
     por pagar al proveedor inflada y nadie se enteraría.
 
     El código no se inventa (la misma regla que `SinSigla`): de él salen la tasa de la tabla y el monto, así que
@@ -157,16 +143,6 @@ class SinCorrelativo(NoExportable):
         self.sub_diarios = sub_diarios
 
 
-@dataclass(frozen=True)
-class Falta:
-    clave: str
-    requisito: str                          # el de `contrato.exige` que la hace bloquear; '' = no bloquea por requisito
-    excepcion: type[NoExportable] | None    # con la que se niega el núcleo; None = la declara otro (el driver)
-    texto: str                              # detrás de un número: «3 sin cuenta contable»
-    pedir_a: str
-    titulo: str                             # el de la CLI
-
-
 class AnuladaConDeposito(NoExportable):
     """Facturas marcadas como anuladas por una nota de crédito cuya detracción **ya tiene constancia de depósito**.
 
@@ -184,120 +160,6 @@ class AnuladaConDeposito(NoExportable):
     def __init__(self, comprobantes: list):
         super().__init__(f"{len(comprobantes)} factura(s) marcadas como anuladas con su detracción ya depositada")
         self.comprobantes = list(comprobantes)
-
-
-class LibroQueElMotorNoOrigina(NoExportable):
-    """Un libro cuyo tipo el catálogo publica y el motor no sabe armar.
-
-    No es una falta de un comprobante y por eso no está en `FALTAS`: es de la cabecera, y se sabe antes de mirar
-    una sola fila. Nació porque el motor decidía casi todo por `libro.es_venta` y **lo que no era venta lo trataba
-    como compra**: un libro nuevo del catálogo salía con el debe y el haber invertidos y la contraparte en la cuenta
-    equivocada, sin un solo error. La 9.0 cambió ese eje por una tabla (`modelo.RASGOS`), que es el arreglo, y esta
-    puerta **sigue haciendo falta igual**: la tabla tiene las filas que tiene, y un tipo del catálogo que no tenga
-    la suya hay que pararlo aquí y decir cuáles sabe originar, no dejar que falle dentro.
-
-    Hoy no se dispara nunca —`TIPOS_DEL_MOTOR` y el catálogo coinciden— y ése es justo el momento de ponerla: el
-    día que el catálogo crezca (B13), lo que falle será esto y no una exportación que nadie revisó."""
-
-    clave = "libro_que_el_motor_no_origina"
-
-    def __init__(self, tipo: str, sabe: tuple[str, ...]):
-        super().__init__(f"El motor no sabe armar el asiento de un libro {tipo!r}: origina {', '.join(sabe)}")
-        self.tipo = tipo
-        self.sabe = tuple(sabe)
-
-
-# --- lo que impide armar el asiento de un movimiento (12.7) ----------------------------------------------------
-#
-# Las cuatro van FUERA de `FALTAS` por el mismo motivo que `LibroQueElMotorNoOrigina`: esa tabla reparte faltas
-# **por comprobante** —las cuenta por su serie-número y las reparte entre `bloqueantes` y `avisos`—, y un
-# movimiento no tiene ni una cosa ni la otra. Lo que sí comparten con ella es el trato: un `NoExportable` con su
-# `clave`, que es lo que una puerta atrapa y traduce.
-#
-# Y las tres primeras **endurecen avisos que ya existen**: `revisar_tesoreria` dice hoy `MOVIMIENTO_SIN_IMPUTAR`,
-# `CUENTA_NO_DECLARADA` y `CUENTA_BANCARIA_SIN_CUENTA_CONTABLE` sin parar nada, porque mirar no obliga a nada.
-# Asentar sí: ahí lo que falta ya no se puede reportar, porque no hay línea que escribir sin ello.
-
-
-class MovimientoSinImputar(NoExportable):
-    """Movimientos sin su contrapartida: el otro lado del asiento no lo pone el motor.
-
-    Es «sin imputación no hay cuenta» aplicado al dinero. La 104 sale del maestro de cuentas, pero contra qué se
-    salda —un gasto, la cuenta de un proveedor, un tributo— lo decide el contador, y adivinarlo sería imputar en
-    silencio a un comodín que nadie eligió, que es exactamente lo que la 3.0 quitó de los comprobantes."""
-
-    clave = "movimiento_sin_imputar"
-
-    def __init__(self, cuales: list[str]):
-        super().__init__(f"{len(cuales)} movimiento(s) sin imputación, así que no hay con qué saldarlos: "
-                         + ", ".join(cuales))
-        self.cuales = list(cuales)
-
-
-class SinCuentaDeEfectivo(NoExportable):
-    """La cuenta de efectivo de un movimiento no se puede resolver: su `id` no está en el maestro, o está y no
-    declara su cuenta contable.
-
-    **El motor no deriva la 104**: la declara el contribuyente en su maestro, porque cada empresa abre las
-    divisionarias que quiere. Sin ella no hay una de las dos patas."""
-
-    clave = "sin_cuenta_de_efectivo"
-
-    def __init__(self, cuales: list[str], motivo: str = ""):
-        super().__init__(f"{len(cuales)} cuenta(s) de efectivo sin resolver ({motivo}): " + ", ".join(cuales))
-        self.cuales = list(cuales)
-        self.motivo = motivo
-
-
-class TraspasoEnDosPatas(NoExportable):
-    """Un traspaso entre cuentas propias declarado por sus DOS movimientos.
-
-    Un traspaso ya tiene sus dos patas en un solo asiento —es el único efecto cuyas dos cuentas están declaradas—,
-    así que asentar también el movimiento espejo contaría el mismo dinero dos veces. Se para en vez de elegir uno
-    de los dos, porque elegirlo sería una decisión del contador y no del motor.
-
-    **Un falso positivo posible**: dos traspasos reales de ida y vuelta por el mismo importe en el mismo mes. Vale
-    la pena: pararlos es un aviso que alguien lee, y contarlos dos veces es un saldo falso que nadie ve."""
-
-    clave = "traspaso_en_dos_patas"
-
-    def __init__(self, cuales: list[str]):
-        super().__init__(f"{len(cuales)} traspaso(s) declarados por sus dos movimientos, que contarían el dinero "
-                         "dos veces: " + ", ".join(cuales))
-        self.cuales = list(cuales)
-
-
-class LibroQueTodaviaNoSeNumera(NoExportable):
-    """Un libro que el motor origina y cuyo sub-diario todavía no tiene clave de configuración.
-
-    Es la otra mitad de `LibroQueElMotorNoOrigina`, y la separa una distinción que tesorería hizo visible: el motor
-    **sabe armar** su asiento y **no sabe numerarlo**, porque numerar es por sub-diario y el suyo espera un archivo
-    real que diga cuál es. Con vocabulario neutral no hace falta —ese documento no lleva correlativo—, así que lo
-    que esto para es el camino legacy, que si no reventaría con un `KeyError` pelado fuera del contrato de errores.
-    """
-
-    clave = "libro_que_todavia_no_se_numera"
-
-    def __init__(self, tipo: str):
-        super().__init__(f"El asiento de un libro {tipo!r} todavía no se numera: su sub-diario no tiene clave de "
-                         "configuración, y entra con el archivo real que lo pida. Sin numerar sí sale, con el "
-                         "vocabulario neutral del estándar")
-        self.tipo = tipo
-
-
-class CuentaSinClase(NoExportable):
-    """Una cuenta de un elemento del PCGE que no tiene clase contable: el 8 y el 0.
-
-    Es `SinClase` para el dinero, y va aparte porque aquélla cuenta COMPROBANTES y aquí lo que hay son cuentas:
-    nombrar la cuenta es más útil que nombrar el movimiento, porque el arreglo está en la imputación o en el
-    maestro."""
-
-    clave = "cuenta_sin_clase"
-
-    def __init__(self, cuentas: list[str]):
-        super().__init__(f"{len(cuentas)} cuenta(s) de un elemento sin clase contable (el 8 y el 0 del PCGE no la "
-                         "tienen): " + ", ".join(cuentas))
-        self.cuentas = list(cuentas)
 
 
 FALTAS: tuple[Falta, ...] = (

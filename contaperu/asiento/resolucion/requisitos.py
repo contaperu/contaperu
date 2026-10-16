@@ -2,7 +2,8 @@
 
 `faltantes_para` **describe** y `exigir_requisitos` **lanza**: una sola lista de reglas para las tres cosas que
 la consultan —exportar, armar el asiento y diagnosticar—, y así ninguna puede ser más laxa que otra. Cómo se
-llama cada falta y a quién se le pide es el catálogo de `faltas.py`; aquí viven las reglas que lo comprueban.
+llama cada falta y a quién se le pide es el catálogo de `faltas/comprobante.py`; aquí viven las reglas que lo
+comprueban.
 """
 from __future__ import annotations
 
