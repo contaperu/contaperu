@@ -224,13 +224,19 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         # El documento que no se puede leer, o una imputación que no es de él: el motivo va en `e`.
         print(f"No se puede diagnosticar: {error}", file=sys.stderr)
         return 2
-    libro, totales = diagnostico["libro"], diagnostico["totales"]
+    libro = diagnostico["libro"]
     print(f"Libro: {libro['tipo'].upper()} {libro['periodo']} · RUC {libro['ruc']} · destino {diagnostico['driver']}")
-    # **La respuesta tiene una forma por libro** (12.12), y `totales` dice cuál: la de tesorería cuenta movimientos
-    # y no trae ninguna de las claves del comprobante. Se mira aquí una sola vez, en vez de preguntar por cada clave
-    # con un `.get`, que es como se acaba imprimiendo un informe a medias sin que nadie lo note.
-    if "movimientos" in totales:
-        return _diagnostico_del_dinero(diagnostico)
+    # **La respuesta tiene una forma por libro** (12.12), y se elige aquí una sola vez, en vez de preguntar por cada
+    # clave con un `.get`, que es como se acaba imprimiendo un informe a medias sin que nadie lo note. **Lo decide
+    # el tipo del libro y no la forma de la respuesta** (13.1): hasta entonces esto miraba si `totales` traía
+    # `movimientos`, o sea deducía el libro de un síntoma, porque una puerta solo habla con `api` y `api` no
+    # publicaba los rasgos. Ahora los publica y esto pregunta.
+    return IMPRESORES[api.rasgos_de(libro["tipo"]).origen](diagnostico)
+
+
+def _diagnostico_del_registro(diagnostico: dict) -> int:
+    """El informe de un libro que sale de sus comprobantes: una compra, una venta."""
+    totales = diagnostico["totales"]
     print(f"Comprobantes: {totales['comprobantes']} · saldrían {totales['saldrian']} · "
           f"excluidos {totales['excluidos']} · fuera del destino {totales['fuera_del_destino']} · "
           f"con error {totales['con_error']} · con aviso {totales['con_aviso']}")
@@ -449,3 +455,9 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# **Qué informe se imprime, por el origen del libro** (13.1), igual que las tablas del pipeline y de los drivers.
+# La cabecera —el libro, el periodo, el RUC y el destino— es común y se imprime antes, porque la trae cualquier
+# forma de la respuesta.
+IMPRESORES = {"comprobantes": _diagnostico_del_registro, "movimientos": _diagnostico_del_dinero}

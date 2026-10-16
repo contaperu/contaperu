@@ -39,7 +39,7 @@ from __future__ import annotations
 from typing import Any
 
 from ...catalogos import TIPOS_INVIERTEN
-from ...modelo.libro import RASGOS, rasgos_de
+from ...modelo.libro import RASGOS, Rasgos, rasgos_de
 
 # El elemento del PCGE en el que vive el efectivo: «10 · EFECTIVO Y EQUIVALENTES AL EFECTIVO» (p. 17).
 # Es la fuente con la que se distingue la línea del dinero de la de un gasto en un libro de tesorería.
@@ -99,19 +99,35 @@ def rol_de(linea: Any, libro: Any) -> str:
         if _campo(linea, bloque):
             return rol
 
-    # **El libro del dinero se deriva aparte, y antes**, por dos razones. Una es que sus dos tramos de abajo leen
-    # `rasgos.sentido_contraparte`, que en un libro cuyo lado lo dice cada operación **levanta** en vez de
-    # contestar. La otra es que aquí no hay un lado «de la contraparte» que preguntar: lo que distingue una línea
-    # de otra es QUÉ cuenta es, y para eso hay fuente publicada —el elemento 10 del PCGE—.
-    if rasgos.origen == "movimientos":
-        if str(_campo(linea, "contraparte_doc") or "").strip():
-            return "tercero"            # el 42 de un pago o el 12 de un cobro: se le debe a alguien
-        cuenta = str(_campo(linea, "cuenta") or "").strip()
-        return "tesoreria" if cuenta.startswith(GRUPO_EFECTIVO) else "principal"
+    # Lo que queda depende de POR DÓNDE entró el libro, y lo elige la tabla del final (13.1).
+    return DERIVACION_DEL_ROL[rasgos.origen](linea, rasgos)
 
+
+def _rol_del_dinero(linea: Any, rasgos: Rasgos) -> str:
+    """El rol de una línea de tesorería: lo distingue QUÉ cuenta es, no a qué lado cae.
+
+    **Se deriva aparte del comprobante, y no es una variante suya**, por dos razones. Una es que el camino del
+    comprobante lee `rasgos.sentido_contraparte`, que en un libro cuyo lado lo dice cada operación **levanta** en
+    vez de contestar. La otra es que aquí no hay un lado «de la contraparte» que preguntar: lo que distingue una
+    línea de otra es qué cuenta es, y para eso hay fuente publicada —el elemento 10 del PCGE—.
+    """
+    if str(_campo(linea, "contraparte_doc") or "").strip():
+        return "tercero"            # el 42 de un pago o el 12 de un cobro: se le debe a alguien
+    cuenta = str(_campo(linea, "cuenta") or "").strip()
+    return "tesoreria" if cuenta.startswith(GRUPO_EFECTIVO) else "principal"
+
+
+def _rol_del_comprobante(linea: Any, rasgos: Rasgos) -> str:
+    """El rol de una línea de una compra o una venta: lo dice el lado al que cae, contra el del libro."""
     # El lado al que va la contraparte en este libro, cambiado si el comprobante invierte los sentidos.
     tipo_cp = str((_campo(linea, "documento") or {}).get("tipo_cp") or "").strip()
     lado_del_tercero = rasgos.sentido_principal if tipo_cp in TIPOS_INVIERTEN else rasgos.sentido_contraparte
     if str(_campo(linea, "debe_haber") or "") == lado_del_tercero:
         return "tercero"
     return "recorte" if str(_campo(linea, "contraparte_doc") or "").strip() else "principal"
+
+
+# **Cómo se deriva el rol, dicho por el origen del libro y no por su nombre** (13.1). Los tramos de antes de la
+# tabla —el guardián de los `roles` vacíos y `POR_SU_BLOQUE`— son comunes a los dos y se quedan arriba: lo que
+# cambia es solo el final, que en un comprobante mira el lado y en el dinero mira la cuenta.
+DERIVACION_DEL_ROL = {"comprobantes": _rol_del_comprobante, "movimientos": _rol_del_dinero}

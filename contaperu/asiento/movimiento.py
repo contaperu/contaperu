@@ -50,6 +50,12 @@ from .comun import iso as _iso, limpio as _limpio
 from ..modelo.accesores import campo as _campo
 from .resolucion import limites_del_periodo, lleva_centro
 
+# El bloque del documento que este motor sabe asentar. Es la IDENTIDAD del módulo, no una decisión: la guarda de
+# abajo no elige camino —de eso se encargan las tablas de cada capa— sino que afirma «este motor es el del dinero»
+# y manda al otro a quien se equivoque de puerta. Escrito como constante para que se lea así y para que no parezca
+# uno de los `if` por nombre de libro que la 13.1 retiró.
+MI_ORIGEN = "movimientos"
+
 # El elemento del PCGE en el que vive el efectivo: «10 · EFECTIVO Y EQUIVALENTES AL EFECTIVO» (PCGE 2026, p. 17).
 # Es la fuente con la que la regla del rol distingue la línea del dinero de la de un gasto, y el motivo por el que
 # una cuenta de efectivo que no empiece así se avisa.
@@ -295,7 +301,7 @@ def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correl
     Con vocabulario `neutral` no numera —`rangos` sale vacío—, igual que el comprobante: los correlativos de
     tesorería esperan su sub-diario, y el sub-diario espera un archivo real que lo pida."""
     rasgos = rasgos_de(libro)
-    if rasgos.origen != "movimientos":
+    if rasgos.origen != MI_ORIGEN:
         raise ValueError(f"Un libro {rasgos.tipo!r} no sale de movimientos sino de {rasgos.origen!r}: "
                          "sus líneas las arma `asiento.lineas_e_indice_del_libro`")
     if vocabulario != "neutral" and not rasgos.sub_diario:

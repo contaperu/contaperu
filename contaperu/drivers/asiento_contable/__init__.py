@@ -104,10 +104,28 @@ def _imputaciones_de_movimientos(libro, config: dict | None) -> dict:
     Y lo que compra es la promesa fuerte: con los tres bloques el archivo vuelve a entrar al motor y **rearma** el
     mismo asiento, no solo lo reexporta. En compras eso queda en manos de quien pasa la misma imputación que la
     primera vez."""
-    if libro.rasgos.origen != "movimientos":
-        return {}
+    return BLOQUES_POR_ORIGEN[libro.rasgos.origen](config)
+
+
+def _sin_bloques_extra(config: dict | None) -> dict:
+    """Un libro de comprobantes no escribe aquí su imputación, y es una afirmación y no un olvido.
+
+    La de un comprobante lleva la cuenta que el contador eligió, y volcarla al archivo haría que al releerlo se
+    rearmara con ella sin que nadie la pasara otra vez — que es justo lo que en tesorería se quiere y aquí no:
+    allí la imputación es lo que el ERP decidió sobre un hecho del banco, y sin ella el movimiento no tiene
+    contrapartida. Lo de arriba lo explica entero; esto es el `return {}` con nombre."""
+    return {}
+
+
+def _bloque_de_imputaciones(config: dict | None) -> dict:
+    """Las imputaciones del dinero, que sí viajan en el archivo para que vuelva a entrar y rearme lo mismo."""
     imputaciones = (config or {}).get("imputaciones_de_movimientos") or {}
     if not imputaciones:
         return {}
     return {"imputaciones_de_movimientos": {clave: imputacion.a_dict()
                                             for clave, imputacion in imputaciones.items()}}
+
+
+# **Qué bloques extra escribe el archivo, por el origen del libro** (13.1). Hoy solo el dinero escribe uno; la
+# entrada de `comprobantes` existe para que su ausencia sea una decisión escrita y no un `else` vacío.
+BLOQUES_POR_ORIGEN = {"comprobantes": _sin_bloques_extra, "movimientos": _bloque_de_imputaciones}

@@ -18,7 +18,7 @@ from __future__ import annotations
 from .._obsoleto import RutaObsoleta
 from .._version import OPEN_ACCOUNTING, __version__
 from ..asiento.faltas import FALTAS
-from ..modelo import Comprobante, Libro, Observacion, serie_y_numero
+from ..modelo import Comprobante, Libro, Observacion, rasgos_de, serie_y_numero
 from ..pipeline.preparacion import MAXIMO_CLAVES_PREVIAS, MAXIMO_COMPROBANTES
 from ..pipeline.salida import Exportado
 from .documento import documento_de
@@ -39,6 +39,10 @@ from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, campos_del_ple, camp
 from .tabla import OPERACIONES, Operacion
 
 __all__ = [
+    # Los rasgos de un tipo de libro, que es como una puerta sabe POR DÓNDE entra un libro sin adivinarlo por una
+    # clave de la respuesta. `puertas` solo puede importar `api` (`tests/test_frontera.py`), así que hasta la 13.1
+    # la consola miraba si `totales` traía `movimientos` — un dato de la forma para deducir un hecho del libro.
+    "rasgos_de",
     # operaciones
     "leer_xml", "leer_propuesta_sire", "leer_archivos", "documento_de", "revisar", "normalizar_detracciones",
     "diagnosticar", "generar_asiento", "exportar", "exportar_archivo", "cuadrar", "buscar_cuenta_pcge", "adaptar_pcge",
