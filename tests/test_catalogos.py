@@ -215,7 +215,7 @@ def test_los_codigos_de_tributo_son_los_del_anexo():
 
 
 def test_cada_constante_de_tributo_apunta_a_su_fila():
-    """Los nueve nombres de siempre, más el `3000` que entró con la tabla. Son los que `lectores/xml_ubl.py` usa para
+    """Los nueve nombres de siempre, más el `3000` que entró con la tabla. Son los que `comprobantes/xml_ubl.py` usa para
     repartir los importes del XML, así que un valor cambiado manda el IGV a la columna del ISC."""
     esperado = {"TRIBUTO_IGV": "1000", "TRIBUTO_IVAP": "1016", "TRIBUTO_ISC": "2000", "TRIBUTO_RENTA": "3000",
                 "TRIBUTO_ICBPER": "7152", "TRIBUTO_EXPORTACION": "9995", "TRIBUTO_GRATUITO": "9996",

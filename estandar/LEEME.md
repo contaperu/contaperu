@@ -172,7 +172,7 @@ trabajo del driver, y un tipo sin equivalente **detiene la exportación en vez d
 
 **5. Lo que no se entiende, se transporta.** `datos_originales` es un objeto libre donde el productor guarda lo
 suyo. El núcleo lo lleva de un extremo al otro y no lo interpreta, salvo las cuatro claves que escribe su propio
-lector de XML (`lectores/xml_ubl.py`) y que lee la validación (`validar.py`): `anticipo`, `emisor`, `adquirente` y
+lector de XML (`comprobantes/xml_ubl.py`) y que lee la validación (`validar.py`): `anticipo`, `emisor`, `adquirente` y
 `gratuitas`. Un productor que las escriba les da ese mismo sentido.
 
 De un registro del SIRE, **qué acaba en un campo y qué solo se transporta** está publicado columna a columna en

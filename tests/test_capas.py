@@ -379,6 +379,11 @@ def test_el_nucleo_y_los_drivers_no_abren_archivos():
 # Los módulos que son contabilidad peruana por lo que IMPORTAN a otros: catálogos de SUNAT, IGV, detracciones,
 # validación de SUNAT, PCGE, los lectores del UBL de SUNAT y de la propuesta del SIRE, y el driver del SIRE.
 PERUANOS = ("contaperu.catalogos", "contaperu.pcge", "contaperu.tributos", "contaperu.sunat",
+            # Los dos lectores, por sus dos rutas: desde la 12.11 viven en `comprobantes/` —leen comprobantes y
+            # solo comprobantes— y sus fachadas siguen en `lectores/` porque están en la superficie congelada.
+            # Las cuatro entradas son la misma pareja de ficheros vista desde los dos sitios, y las cuatro son
+            # peruanas: el XML de SUNAT y el TXT del SIRE no los emite nadie más.
+            "contaperu.comprobantes.xml_ubl", "contaperu.comprobantes.sire_txt",
             "contaperu.lectores.xml_ubl", "contaperu.lectores.sire_txt", "contaperu.drivers.sire")
 # Y los que lo son por lo que CONTIENEN, aunque no importen nada peruano. Separarlos es J2-J4, con un cliente real.
 PERUANOS_POR_CONTENIDO = {

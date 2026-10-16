@@ -392,9 +392,9 @@ Y **sigue habiendo `libro.es_venta` por el núcleo**, que es otra cosa y convien
 tienen el `Libro` en la mano y nunca recibieron el booleano por parámetro. Se reparten en dos grupos, y solo uno
 preocupa:
 
-- **Un formato con exactamente dos variantes**: el TXT del SIRE es el RVIE o el RCE (`lectores/sire_txt.py`,
+- **Un formato con exactamente dos variantes**: el TXT del SIRE es el RVIE o el RCE (`comprobantes/sire_txt.py`,
   `catalogos/sire.py`, `drivers/sire/txt.py`), en un XML la contraparte es el adquirente o el emisor
-  (`lectores/xml_ubl.py`), el nombre del archivo lleva VENTAS o COMPRAS (`drivers/kit/nombres.py`,
+  (`comprobantes/xml_ubl.py`), el nombre del archivo lleva VENTAS o COMPRAS (`drivers/kit/nombres.py`,
   `drivers/starsoft/salida.py`), CONTASIS tiene dos juegos de columnas. Un tercer libro no tiene archivo del SIRE que
   leer: ahí la pregunta es del formato, no de la contabilidad.
 - **Reglas que solo tiene una venta** (`tributos/validar.py`): están en forma positiva —`if libro.es_venta and …`—,

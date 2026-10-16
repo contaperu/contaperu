@@ -11,7 +11,7 @@
 ## Motivación
 
 **La norma obliga a declararlas, el lector las ve y las pierde.** Una factura al crédito trae, por obligación, el
-monto neto pendiente de pago y **la fecha y el monto de cada cuota**; `contaperu/lectores/xml_ubl.py` lee **solo
+monto neto pendiente de pago y **la fecha y el monto de cada cuota**; `contaperu/comprobantes/xml_ubl.py` lee **solo
 las fechas**, las colapsa a su máximo para `fecha_vencimiento` y **descarta todos los importes**. Las fechas
 acaban en `datos_originales.cuotas`, que es transporte sin interpretar: el motor no las entiende, las lleva.
 

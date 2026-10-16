@@ -42,7 +42,7 @@ def test_reconoce_la_propuesta_con_y_sin_cabecera():
 
 
 def test_la_propuesta_en_un_zip_desmedido_no_se_abre():
-    """La propuesta puede venir dentro de su ZIP, y se lee con los mismos topes que cualquier ZIP (`lectores/_zip.py`):
+    """La propuesta puede venir dentro de su ZIP, y se lee con los mismos topes que cualquier ZIP (`comprobantes/_zip.py`):
     un TXT que se infla miles de veces no se descomprime."""
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:

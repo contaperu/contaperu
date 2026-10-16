@@ -72,7 +72,7 @@ la decisión correcta de escalabilidad.
 
 | Pieza | Hoy |
 |---|---|
-| **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/lectores/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
+| **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/comprobantes/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
 | **Estándar y comunidad** | `open-accounting` 3.3 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato/`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/tributos/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
@@ -218,7 +218,7 @@ posteriores. Las propuestas de origen están en la tabla del §8, y cada hito ci
 | **0.4** | **Índice por comprobante** `_asiento.comprobantes*` y `_exportacion.comprobantes*`: identidad, rango de líneas y huella por comprobante. En la familia registro, sin huella | F | Los rangos son una partición exacta; cada rango cuadra; `HUELLA_FACTURA` (`tests/test_huella.py:24`) no cambia | 0.0 | 4 |
 | **0.5** | **El disco sale del núcleo**: `comparar_sire.leer` y `pcge.adaptar.cargar_equivalencias(ruta)` (`contaperu/pcge/adaptar.py:89`) reciben bytes o `dict`, y un único `datos_empaquetados*()` con `importlib.resources` lee lo que viaja dentro del paquete | puerta · N | Un test cae si otro módulo del núcleo abre un archivo | — | 5 |
 | **0.6** | **Tipo de cambio y tasa de detracción como texto** en la línea del comprobante (hoy `float`, `contaperu/asiento/motor.py:71` y `:111`); `float` solo al escribir la columna | N · D | Snapshot de CONCAR intacto; la huella de las tandas en dólares o con detracción cambia con literal nuevo y **se anuncia** en el CHANGELOG | — | 6 |
-| **0.7** | **Un PDF o una foto enviados a `leer_xml` cuentan como pendientes de leer**, no como «XML inválido» (hoy los cuenta `lectores/archivos.py` como `ilegibles`) | F | Test por el MCP y por la CLI: `_lectura.pendientes_de_leer` = 1 | — | — |
+| **0.7** | **Un PDF o una foto enviados a `leer_xml` cuentan como pendientes de leer**, no como «XML inválido» (hoy los cuenta `comprobantes/archivos.py` como `ilegibles`) | F | Test por el MCP y por la CLI: `_lectura.pendientes_de_leer` = 1 | — | — |
 | **0.8** | **Coherencia de `diagnosticar`**: que `totales.saldrian` y la lista `saldrian` cuenten lo mismo, que el serie-número se escriba igual que en la línea (a confirmar al empezar), y que el resumen por contraparte no sume soles con dólares (`contaperu/pipeline/diagnostico.py:279`) | F | Test que fija la misma cifra y el mismo nombre; dos monedas del mismo RUC no dan un único total | — | 23 |
 
 ---
@@ -233,7 +233,7 @@ quien tenga red y credenciales.
 
 **Investigación.** Cómo llega la factura en EE. UU. y en el Perú, y los proyectos que leen el UBL de SUNAT:
 
-**Qué hay hoy.** Tres raíces de XML, y cualquier otra da «Raíz XML no reconocida» (`contaperu/lectores/xml_ubl.py:31`);
+**Qué hay hoy.** Tres raíces de XML, y cualquier otra da «Raíz XML no reconocida» (`contaperu/comprobantes/xml_ubl.py:31`);
 el CDR se ignora; la propuesta del SIRE se lee entera; un PDF o una foto quedan pendientes de leer.
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
@@ -261,7 +261,7 @@ tapa tres trabajos con tres estados distintos:
 | Conciliación | Qué hay hoy | Qué la destraba |
 |---|---|---|
 | **Las constancias de detracción** contra las compras del mes | **Media hecha.** `contaperu/tributos/detracciones.py` deduce `PROVISIONADO` o `PAGADO` del número y la fecha de la constancia, y `diagnosticar` lista las que esperan (`detraccion_pendiente`). Lo que falta es el casado: leer el archivo del banco y escribirle a cada comprobante su número y su fecha, sin que nadie teclee | Un archivo real del Banco de la Nación — la consulta de pagos de detracciones de SOL o los movimientos de esa cuenta. Es el hito **D1** |
-| **El extracto bancario** contra el libro | **Nada**, y es el que más código pide. Hay dos trampas ya localizadas para su lector: un `.xlsx` empieza como un ZIP y se desarma solo, y un `.txt` se ignora como archivo auxiliar (`contaperu/lectores/archivos.py`) | Un extracto real anonimizado (**D2**); con él, **D3** ya arranca con código |
+| **El extracto bancario** contra el libro | **Nada**, y es el que más código pide. Hay dos trampas ya localizadas para su lector: un `.xlsx` empieza como un ZIP y se desarma solo, y un `.txt` se ignora como archivo auxiliar (`contaperu/comprobantes/archivos.py`) | Un extracto real anonimizado (**D2**); con él, **D3** ya arranca con código |
 | **La propuesta del SIRE** contra lo que el contribuyente anotó | **Hecha y en uso**: `contaperu/tributos/comparar_sire.py`, expuesta como `api.comparar_sire`, compara el TXT de reemplazo contra la exportación del detalle del SIRE. Lo que falta no es la comparación, es de dónde sale el archivo: hoy lo baja una persona a mano | La otra mitad del hito **C16**, los lectores de la respuesta del SIRE |
 
 El paquete **existe desde la 8.2 y se llama `contaperu/tesoreria/`**, no `banco/`: guarda también la constancia de
@@ -285,7 +285,7 @@ La conciliación de constancias de detracción está pendiente de un archivo rea
 mitad existe: `diagnosticar` ya lista las detracciones que esperan constancia (`detraccion_pendiente`,
 `contaperu/tributos/detracciones.py`) y el monto en soles enteros tiene su regla con fuente
 (`contaperu/tributos/detracciones.py`). Hay dos trampas para un lector de extractos: un `.xlsx` empieza como un ZIP y se
-desarma (`contaperu/lectores/archivos.py:56-58`), y un `.txt` se ignora como archivo auxiliar (`archivos.py:26`).
+desarma (`contaperu/comprobantes/archivos.py:56-58`), y un `.txt` se ignora como archivo auxiliar (`archivos.py:26`).
 
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|

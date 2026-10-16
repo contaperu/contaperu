@@ -145,7 +145,7 @@ def test_un_zip_desmedido_no_se_abre(monkeypatch):
     """Un ZIP de kilobytes que se expande a gigas agotaría la memoria de quien lo abre. Cada entrada tiene tope de tamaño
     y de proporción, y cada ZIP, tope total; lo que pasa de uno queda como error y el resto sigue. Los topes se rebajan
     aquí para no crear gigas en la batería."""
-    from contaperu.lectores import _zip
+    from contaperu.comprobantes import _zip
 
     # proporción: ceros que comprimen miles de veces
     lote = archivos.expandir("bomba.zip", _zip_de(**{"ceros.xml": b"\0" * 200_000, "bien.xml": b"<x/>"}))

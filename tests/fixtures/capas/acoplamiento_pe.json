@@ -40,6 +40,10 @@
   "contaperu.pcge",
   "contaperu.tributos.detracciones"
  ],
+ "contaperu.comprobantes.archivos": [
+  "contaperu.comprobantes.sire_txt",
+  "contaperu.comprobantes.xml_ubl"
+ ],
  "contaperu.drivers": [
   "contaperu.drivers.sire"
  ],
@@ -54,10 +58,6 @@
   "contaperu.catalogos"
  ],
  "contaperu.lectores": [
-  "contaperu.lectores.sire_txt",
-  "contaperu.lectores.xml_ubl"
- ],
- "contaperu.lectores.archivos": [
   "contaperu.lectores.sire_txt",
   "contaperu.lectores.xml_ubl"
  ],
