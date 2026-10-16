@@ -146,6 +146,14 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   columna. Y con ella se fue el andamio que existía para no romper el pasado —`drivers.ALIAS`, la maquinaria de
   rutas de `_obsoleto` y `CANALES_RENOMBRADOS`—, pero **no el protocolo**: `RutaObsoleta`, `avisar` y `RETIRO` se
   quedan porque están publicados y la app los usa.
+  **La 13.0 rompe una forma, no un nombre**, y es la primera que lo hace: `diagnosticar` devuelve otra cosa para
+  un libro de **tesorería** —`totales.movimientos`, `totales.repetidos` y las cinco faltas del dinero, en vez de
+  `totales.comprobantes`, `bloqueantes`, `avisos`, las detracciones, el resumen por contraparte, los sub-diarios
+  y `exige`—, así que quien leyera `totales.comprobantes` de ese libro recibe ahora un `KeyError` donde antes
+  recibía un `0`. Ese `0` era el defecto: ese camino no existía y la operación contestaba la forma de otro libro
+  sin mirar un movimiento. **Para compras y ventas no cambia ni una clave**, y el esquema lo demuestra: pasó a
+  ser un `oneOf` de dos formas cerradas y la del registro es idéntica a la de antes. Salió como mayor y no como
+  menor porque cambiar la forma de una respuesta pública es romper, aunque lo que se rompa fuera mentira.
   Antes de etiquetar una versión mayor se publica
   una pre-release (`vX.Y.ZrcN`) y quien integra la prueba en su batería, también con
   `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»). **Hasta la 7.0 eso se prometía y no se
@@ -244,7 +252,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 |---|---|
 | `README.md` | La portada, para contadores y para quien integra: la tesis de la arquitectura colectiva y qué resuelve en palabras de contador; cómo funciona, con los destinos en tres canales en el orden del eje (ERP, SUNAT y legacy); el motor por dentro, y las puertas y la API pública, con sus diagramas (`diagramas/`); un glosario, qué sabe hacer y qué no, estado, cómo aportar sin programar, instalar y las puertas, y las palabras clave con las que se encuentra el repositorio |
 | `ARQUITECTURA.md` | Las capas, el flujo de un comprobante, la línea del comprobante, la api y las puertas, cómo se enchufa un driver (contrato v1, canales, STARSOFT), lo que queda preparado, lo que no se negocia |
-| `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, quién aporta cada variable y cuáles de las cuatro piezas aceptan las tuyas, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 12.x; sus ejemplos se ejecutan en la batería |
+| `INTEGRAR.md` | Cómo integrar el motor en un ERP: qué puerta elegir, quién aporta cada variable y cuáles de las cuatro piezas aceptan las tuyas, la librería, la CLI por lotes, HTTP con OpenConta, el MCP, un driver propio y lo que promete la 13.x; sus ejemplos se ejecutan en la batería |
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | **La única casa de la investigación**: lo que no está aquí no se ha mirado. Cuatro escalones y medio, cada uno con su fecha: el **asiento** en QuickBooks, Xero y las unificadas (de ahí salió la 0.8.0); el **registro del comprobante** en nueve plataformas, con los estándares abiertos de factura (EN 16931 y Peppol con sus `BT-`/`BG-`, y por qué la cuenta contable no es parte de la factura); la **clasificación de la cuenta** —dónde vive el papel de una línea, la determinación de cuentas de los ERP abiertos y el enlace documento↔asiento, que son la fuente de las enmiendas 0009, 0010 y 0011—; y **la aplicación de un pago** en ocho sistemas (Odoo, ERPNext, SAP, GnuCash, SAF-T, Codat, Merge e ISO 20022), de donde salen las enmiendas 0030 y 0031: todos la modelan como un registro aparte con su importe, a nivel de línea y N a N, y **ninguno guarda el saldo** —lo derivan—. Más los doce patrones del estándar de facto, cuyo número doce es por qué este estándar existe: nadie tiene un campo de retención. Y **el medio**, el dinero, que es medio a propósito: su forma salió de nueve extractos reales y no de comparar plataformas, así que lo que se contrastó es el signo contra camt.053 y MT940, el efecto contra la NIC 7 §9 y el nivel contra Odoo y ERPNext — y el hueco está declarado. Los descartes van con su motivo escrito, no citado |

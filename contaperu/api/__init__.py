@@ -1,4 +1,4 @@
-"""La API pública de ContaPerú: lo que una aplicación usa, estable durante toda la 12.x.
+"""La API pública de ContaPerú: lo que una aplicación usa, estable durante toda la 13.x.
 
     from contaperu import api
 
@@ -7,7 +7,7 @@
         resultado = api.exportar(documento, driver="concar", configuracion=config, imputacion=imputacion)
 
 Documento `open-accounting` entra, diccionario sale; el documento va primero y todo lo demás por su nombre. Lo que está
-en `__all__` sigue su firma hasta la 13.0 (`tests/test_superficie_publica.py`): en una versión menor pueden llegar
+en `__all__` sigue su firma hasta la 14.0 (`tests/test_superficie_publica.py`): en una versión menor pueden llegar
 parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`, nunca quitarse.
 
 Debajo de la API está el nivel de extensión —`modelo`, `asiento`, `drivers.contrato`…—, para quien escribe un driver o

@@ -455,7 +455,7 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
   **7.0** retiró los seis atajos que la 6.4.0 dejó en la raíz al agrupar el núcleo en `tributos/` y `contable/`, con
   63 nombres de la superficie congelada: es la primera vez que una retirada se cobra en la mayor siguiente a la que
   la anunció, que es como debería ir siempre. El mecanismo con que se deprecia algo sigue en `_obsoleto.py`, sin
-  usuarios y a propósito, para la próxima vez; `RETIRO` dice ahora `"13.0"`.
+  usuarios y a propósito, para la próxima vez; `RETIRO` dice ahora `"14.0"`.
 - **El portal** (otro repositorio) usa la api y el nivel de extensión; el `resumen` de cada exportación, que guarda tal
   cual, conserva sus claves.
 - **Lo peruano, a la vista** (hito J0): qué módulos importan uno peruano queda congelado en

@@ -4,7 +4,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [12.12.0] — 2026-10-16
+## [13.0.0] — 2026-10-16
+
+**Por qué es una mayor, y no la 12.12 con la que se escribió.** Lo de abajo arregla un libro que se
+diagnosticaba en vacío, y arreglarlo **cambia la forma de una respuesta pública**: quien pidiera el diagnóstico
+de un libro de tesorería recibía un dict con las claves del comprobante y ahora recibe otro distinto, así que un
+`totales.comprobantes` que devolvía `0` hoy es un `KeyError`. Que ese `0` fuera mentira no lo hace compatible: lo
+que se rompe es la forma, no la verdad. **Para compras y ventas no cambia ni una clave** —el esquema pasó a ser
+un `oneOf` y la rama del registro es idéntica—, así que quien no toque libros de tesorería sube sin mirar.
+Se numeró 12.12.0 mientras se escribía y subió a 13.0.0 antes de existir ninguna etiqueta: **es la primera mayor
+que rompe una forma y no un nombre**, y por eso la decisión se escribe aquí en vez de darse por sabida.
 
 **El libro que se diagnosticaba en vacío.** `diagnosticar` no tenía camino de tesorería, y **fallaba en
 silencio**: con `driver="asiento_contable"` y un libro de tipo `tesoreria` con movimientos dentro, pasaba el muro
