@@ -24,6 +24,18 @@ from typing import Any, Callable, Iterable, Sequence
 from ..modelo.accesores import campo
 from .lineas import LineaDiario
 
+# Los bloques del documento de los que este paquete sabe sacar un asiento, uno por motor: `comprobantes.py` y
+# `movimiento.py`. **Un origen entra en esta tupla cuando existe el módulo que arma su asiento**, y eso es
+# escribir un motor, no rellenar una fila — por eso se escribe a mano aquí y no se deriva de `RASGOS`, que dice
+# qué libros existen y no cuáles sabe originar el motor.
+#
+# De aquí sale `TIPOS_DEL_MOTOR`, que hasta la 13.1 era una tupla de nombres de libro tecleada a mano: una tabla
+# paralela a `RASGOS`, que es lo que la 9.0 vino a quitar. Al derivarla, un libro nuevo que entre por un bloque
+# que ya tiene motor queda originado sin tocar una línea, y uno que estrene bloque se para en
+# `LibroQueElMotorNoOrigina` nombrando los que sí — que es la diferencia entre «no sé qué es esto» y «sé lo que
+# es y todavía no sé armarlo».
+ORIGENES_CON_MOTOR: tuple[str, ...] = ("comprobantes", "movimientos")
+
 
 def iso(fecha: date | None) -> str:
     """Una fecha como la escribe el estándar, y vacío si no la hay."""

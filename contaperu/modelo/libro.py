@@ -178,6 +178,20 @@ RASGOS: dict[str, "Rasgos"] = {
 }
 
 
+# De qué bloques del documento salen los libros que hay, sin repetir y en el orden del catálogo. Es una COLUMNA de
+# la tabla de arriba, no una tabla paralela: no crece con cada libro, sino con cada forma de entrar —hoy dos, y
+# tres libros—. Por eso es la clave con la que cada capa decide qué camino toma un libro (`CAMINOS_DEL_ASIENTO` y
+# sus hermanas), en lugar de preguntar por el nombre de uno: un libro nuevo que entre por `movimientos` no añade
+# una entrada en ninguna de esas tablas, y uno que estrene bloque las pone rojas todas a la vez, que es lo que se
+# quiere — estrenar un bloque es escribir un motor, no rellenar una fila.
+#
+# Vivía calcado en `pipeline/armado.py` y sube aquí porque lo leen tres capas, y el núcleo es la única que las
+# tres pueden ver. **No se llama `ORIGENES` a secas** porque esa palabra ya está cogida dos veces para otra cosa
+# —de dónde salió un comprobante (`manual`, `archivo`, `api`) y de dónde salió una aplicación—, y son ejes
+# distintos que se leerían igual.
+ORIGENES_DE_LIBRO: tuple[str, ...] = tuple(dict.fromkeys(r.origen for r in RASGOS.values()))
+
+
 class LibroSinRasgos(ValueError):
     """Se pidieron los rasgos de algo que el motor no CONOCE, o de un booleano de antes de la 9.0.
 

@@ -18,7 +18,7 @@ from ..asiento.resolucion import exigir_requisitos, fundir_config
 from ..configuracion import (CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, NO_SON_CONFIGURACION,
                              ConfiguracionInvalida)
 from ..drivers import contrato
-from ..modelo import RASGOS, Comprobante, Libro, identidad_de
+from ..modelo import ORIGENES_DE_LIBRO, Comprobante, Libro, identidad_de
 from .preparacion import documento, libro_de, preparar, preparar_tesoreria
 from .seleccion import fuera_de, seleccionar
 
@@ -60,7 +60,9 @@ def por_comprobante(libro: Libro, lineas: list, indice: tuple) -> list[dict]:
 # literalmente cierto —un libro de tesorería no tiene comprobantes— y le ahorra a quien la lee tener dos formas.
 # Al ser derivado, el día que la tabla gane una fila con otro origen la respuesta gana su clave sola, y el esquema
 # se pone rojo por quedarse atrás, que es lo que se quiere.
-ORIGENES = tuple(dict.fromkeys(r.origen for r in RASGOS.values()))
+#
+# Desde la 13.1 se deriva una sola vez, en `modelo`, porque la leen tres capas; aquí se conserva el nombre corto.
+ORIGENES = ORIGENES_DE_LIBRO
 
 
 def por_entrada(libro: Libro, lineas: list, indice: tuple) -> dict:

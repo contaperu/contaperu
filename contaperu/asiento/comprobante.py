@@ -54,7 +54,11 @@ ROLES = vocabulario.ROLES
 # que el catálogo crezca —el hito B13, para recibir el diario de un ERP—: el catálogo dice qué libros existen y
 # esta tupla cuáles sabe armar el motor, y uno que esté allí y no aquí se rechaza nombrando los que sí. Lo que
 # cada uno tiene de distinto está en `modelo.RASGOS`, que es la tabla que la 9.0 puso en lugar del booleano.
-TIPOS_DEL_MOTOR = ("venta", "compra", "tesoreria")
+# **Derivada desde la 13.1**, y antes era esta misma tupla con los tres nombres tecleados: una tabla paralela a
+# `RASGOS`, justo lo que la 9.0 quitó del resto del motor. Lo que de verdad decide si el motor sabe originar un
+# libro no es su nombre, es **de qué bloque salen sus líneas**, y eso ya lo dice su fila: un libro cuyo origen
+# tenga motor queda aquí dentro sin que nadie lo escriba.
+TIPOS_DEL_MOTOR = tuple(t for t in vocabulario.TIPOS_LIBRO if rasgos_de(t).origen in comun.ORIGENES_CON_MOTOR)
 # Y los que el motor **escribe**, que desde la 1.1 del catálogo ya no son todos, y que desde la 5.0 **tampoco son
 # los seis de la 1.0**: tres de ellos se renombraron para sacarles el tributo del nombre, y los viejos siguen en el
 # catálogo marcados en `obsoletos`. Así que esta tupla y la de la 1.0 divergen para siempre, a propósito. `contrapartida` y `tesoreria`
