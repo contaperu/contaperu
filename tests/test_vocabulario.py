@@ -12,6 +12,7 @@ import pytest
 
 from contaperu import api, vocabulario
 from contaperu.asiento import comprobante as motor
+from contaperu.asiento import comun
 from contaperu.asiento.comprobante import ROLES
 from contaperu.modelo import TIPOS_LIBRO, Comprobante, Libro
 
@@ -333,12 +334,21 @@ def test_cada_libro_que_el_motor_origina_tiene_sus_rasgos():
     # dos cosas se mueven juntas o esto cae. En el catálogo sí hay roles que esa tupla deja fuera a propósito
     # (`tesoreria` y `contrapartida`, desde el 1-oct-2026): son vocabulario para quien produce un asiento que el
     # motor no origina.
-    no_origina = set(RASGOS) - set(motor.TIPOS_DEL_MOTOR)
     # Y es una equivalencia EXACTA, no una inclusión: un libro declara roles si y solo si el motor lo origina.
     # Declararlos para uno que no se origina sería adivinar —no hay forma de medirlo ejecutando el motor— y el
     # intento de hacerlo con tesorería salió incompleto a la primera.
-    assert {k for k, r in RASGOS.items() if r.roles} == set(motor.TIPOS_DEL_MOTOR)
-    assert {k for k, r in RASGOS.items() if not r.roles} == no_origina
+    #
+    # **Derivada por los dos lados desde la 13.1**, y eso desata un nudo. Antes el lado derecho era
+    # `TIPOS_DEL_MOTOR`, una tupla de nombres escrita a mano, así que la fila de un libro nuevo y su motor tenían
+    # que entrar en el MISMO commit: sin roles no podías meterlo en la tupla, y sin estar en la tupla no podías
+    # medir sus roles. Ahora las dos caras salen de `ORIGENES_CON_MOTOR` —qué bloques tienen motor—, de modo que
+    # una fila cuyo origen aún no tenga motor entra sola, sin roles y sin romper nada, y se para en
+    # `LibroQueElMotorNoOrigina`. Lo que sigue atado, y es correcto, es un libro que reutilice un origen que ya
+    # tiene motor: ése entra con sus roles medidos. Pero medirlos ya no es escribir un motor, es correr el test
+    # de abajo y pegar lo que imprime.
+    con_motor = {k for k, r in RASGOS.items() if r.origen in comun.ORIGENES_CON_MOTOR}
+    assert {k for k, r in RASGOS.items() if r.roles} == con_motor
+    assert {k for k, r in RASGOS.items() if not r.roles} == set(RASGOS) - con_motor
     # **El sub-diario ya NO es la misma frontera**, y tesorería es lo que las separó (12.8): el motor sabe armar su
     # asiento y todavía no sabe NUMERARLO, porque numerar es por sub-diario y el suyo espera el archivo real que
     # diga cuál es. Vacío significa ahora «este libro no se numera», que es comprobable, y lo comprueba
@@ -436,3 +446,55 @@ def test_cada_libro_dice_como_se_llama_en_el_nombre_de_un_archivo():
     # Y que ninguna se quede vacía al añadir una fila, que es lo que esto tiene que cazar.
     assert all(e.isupper() and e.isalpha() for e in etiquetas.values())
     assert set(etiquetas) == set(vocabulario.TIPOS_LIBRO), "un libro del catálogo sin su etiqueta no tiene nombre"
+
+
+def test_los_roles_declarados_son_los_que_el_motor_emite_de_verdad():
+    """Lo declarado en `RASGOS.roles`, contra lo que sale de **ejecutar** los dos motores. Cierra el círculo.
+
+    Hasta la 13.1 nada comparaba las dos cosas. `test_cada_libro_que_el_motor_origina_tiene_sus_rasgos` solo
+    comprueba que la tupla **no esté vacía**, y `test_los_dos_libros_se_diferencian_en_lo_que_se_diferencian`
+    ancla unos literales que alguien midió una vez y escribió a mano — su comentario dice «MEDIDOS ejecutando el
+    motor», y era verdad el día que se escribieron y no después. Entre las dos se podía declarar un rol de más, o
+    dejarse uno fuera, sin que nada cayera: fue justo lo que pasó con tesorería, cuyo primer intento de declarar
+    sus roles «salió incompleto a la primera».
+
+    Por qué importa ahora: desde la 13.1 un libro que reutilice un origen con motor entra **solo con su fila**, y
+    lo único que tiene que medir son sus roles. Este test es el que convierte «medirlos» en correr la batería y
+    pegar lo que imprime, en vez de leerse el motor.
+
+    El rol ya no es un campo de la línea —la 10.0 lo retiró del estándar—, así que se deriva con la regla
+    publicada, `drivers.kit.rol.rol_de`, que es la misma que usa cualquier destino.
+    """
+    import json
+
+    from contaperu import api
+    from contaperu.drivers.kit.rol import rol_de
+    from contaperu.modelo.libro import RASGOS, rasgos_de
+    from test_asiento_de_tesoreria import CONFIG as CONFIG_DINERO, _documento, mov
+    from test_rol_derivado import DOCUMENTOS, asiento_de
+    from util import GOLDEN
+
+    emitidos: dict[str, set[str]] = {tipo: set() for tipo in motor.TIPOS_DEL_MOTOR}
+
+    for archivo, config, imputacion, cuenta in DOCUMENTOS:
+        tipo = json.loads((GOLDEN / archivo).read_text(encoding="utf-8"))["libro"]["tipo"]
+        for linea in asiento_de(archivo, config, imputacion, cuenta, "asiento_contable"):
+            emitidos[tipo].add(rol_de(linea, rasgos_de(tipo)))
+
+    # El dinero no tiene documento en `golden/`: se arma el mínimo que produce sus tres roles —un pago con
+    # contraparte, su cara de efectivo y una comisión, que es el `principal` de un libro sin comprobante—.
+    # Referencias distintas a propósito: dos movimientos de la misma cuenta y fecha con la misma referencia son
+    # una relectura del extracto, y `preparar_tesoreria` descarta el segundo — que es lo que debe hacer.
+    dinero = _documento([mov(id_externo="m1", referencia="000111", importe="118.00", descripcion="pago"),
+                         mov(id_externo="m2", referencia="000222", importe="10.00", descripcion="comision")],
+                        {"m1": {"cuenta_contable": "421201", "contraparte_doc": "20602222226"},
+                         "m2": {"cuenta_contable": "639101"}})
+    for linea in api.generar_asiento(dinero, driver="asiento_contable", configuracion=CONFIG_DINERO)["asiento"]:
+        emitidos["tesoreria"].add(rol_de(linea, rasgos_de("tesoreria")))
+
+    for tipo, salieron in emitidos.items():
+        declarados = set(RASGOS[tipo].roles)
+        assert salieron == declarados, (
+            f"el libro {tipo!r} declara los roles {tuple(sorted(declarados))} y el motor emite "
+            f"{tuple(sorted(salieron))}. Declarar uno de más es prometer lo que no sale, y dejarse uno fuera es "
+            f"lo que hace que un destino no lo escriba: la fila dice {tuple(sorted(salieron))}.")
