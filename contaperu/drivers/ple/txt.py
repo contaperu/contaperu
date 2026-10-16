@@ -37,6 +37,16 @@ CANAL = "sunat"
 # junta en el diario. No es `libro.tipo: diario` —eso sería recibir un diario de un ERP, que es otra cosa—: aquí se
 # toma el mes que el motor conoce y se escribe en formato Libro Diario, igual que el `sire` lo escribe como RVIE o
 # RCE.
+# **El Libro Diario todavía NO**, y es a propósito (B13, 16-oct-2026). Este driver es el que más sentido haría
+# —lo que escribe **es** el Formato 5.1, que es literalmente ese libro—, pero sus filas se construyen recorriendo
+# el ÍNDICE, y un libro que llega armado no lo tiene: sus entradas son sus propias líneas. Declararlo hoy habría
+# dado un TXT **vacío con pinta de correcto**, que es peor que no llevarlo.
+#
+# Es el mismo criterio con el que `asiento_contable` esperó a declarar tesorería hasta que `exportar` supo
+# escribirla: un driver gana un libro cuando sabe escribirlo, no cuando el libro existe. Lo que falta aquí es
+# que `desde_lineas` sepa agrupar por `documento.id_externo` cuando no hay índice, y los cuatro campos que hoy
+# saca de la cabecera del comprobante —tipo de documento, serie, número y vencimiento— salgan vacíos, que es lo
+# que hace el archivo real en sus asientos sin comprobante.
 FORMATOS = {"compra": "ple_5_1", "venta": "ple_5_1"}
 # El `charset` dice la verdad de los bytes, y viaja hasta la api, el HTTP y el MCP: va con la `codificacion`
 # de `comun.OPCIONES`, que es cp1252 desde la 5.2.

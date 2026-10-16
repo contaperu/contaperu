@@ -31,7 +31,8 @@ NOMBRE = "csv"
 # sus líneas.
 CANAL = "erp"
 OPCIONES = Opciones(fecha="AAAA-MM-DD", extension=".csv")
-FORMATOS = {"compra": "csv_asiento", "venta": "csv_asiento"}
+# El CSV es una fila por línea de diario y no mira de qué libro vino, así que el `diario` entra sin nada más.
+FORMATOS = {"compra": "csv_asiento", "venta": "csv_asiento", "diario": "csv_asiento"}
 CONTENT_TYPE = "text/csv; charset=utf-8"
 # Escribe la moneda en ISO y el centro de costo que haya: un mes sin centros sale igual, con la columna vacía. Sí
 # exige `detraccion` (4.1): sus filas llevan la línea de la detracción con su código del Catálogo 54, y sin el código

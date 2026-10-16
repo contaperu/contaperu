@@ -28,8 +28,8 @@ import importlib
 
 from .coerciones import (CENTIMO, CERO, a_decimal, fecha, monto, numero_sin_ceros, serie_y_numero,
                          solo_digitos, texto_tasa, tipo_cambio)
-from .libro import (ORIGENES_DE_LIBRO, POR_OPERACION, RASGOS, TIPOS_LIBRO, Libro, LibroSinRasgos, Rasgos,
-                    SentidoNoLoDiceElLibro, rasgos_de)
+from .libro import (ORIGEN_YA_ARMADO, ORIGENES_DE_LIBRO, POR_OPERACION, RASGOS, TIPOS_LIBRO, Libro,
+                    LibroSinRasgos, Rasgos, SentidoNoLoDiceElLibro, rasgos_de)
 
 # Lo que ahora vive en `contaperu.comprobantes` y se sigue pidiendo aquí. El valor es el módulo de verdad, para
 # que el aviso de dónde está cada cosa sea el propio diccionario y no un comentario que se despiste.
@@ -46,7 +46,7 @@ _DEL_COMPROBANTE = {
 __all__ = [
     "CAMPOS_DEL_DOCUMENTO", "CAMPOS_DEL_SISTEMA", "CAMPOS_DE_LA_REVISION", "CENTIMO", "CERO", "CONDICIONES_PAGO",
     "Comprobante", "Libro", "LibroSinRasgos", "NOTAS", "NOTAS_CREDITO", "NOTAS_DEBITO", "ORIGENES", "Observacion",
-    "ORIGENES_DE_LIBRO", "POR_OPERACION", "RASGOS", "RETIRADOS_EN_0_3", "Rasgos",
+    "ORIGEN_YA_ARMADO", "ORIGENES_DE_LIBRO", "POR_OPERACION", "RASGOS", "RETIRADOS_EN_0_3", "Rasgos",
     "SentidoNoLoDiceElLibro", "rasgos_de",
     "ROUND_HALF_UP", "TIPOS_LIBRO", "a_decimal", "clave_de", "fecha", "identidad_de", "monto", "numero_sin_ceros",
     "serie_y_numero", "solo_digitos", "texto_tasa", "tipo_cambio", "vocabulario",

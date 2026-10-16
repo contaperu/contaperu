@@ -52,7 +52,11 @@ from contaperu.modelo.libro import RASGOS as RASGOS_DE_LIBRO  # noqa: E402  (al 
 # Y el tercer tipo de libro, que entró el 10-oct-2026: `tesoreria`, el dinero moviéndose. Es el primer valor que se
 # añade a esta tabla desde la 1.0, y por eso la promesa de abajo pasa a comprobarse por PREFIJO, como ya se hacía
 # con los roles — que es lo que su propio docstring prometía y para los libros no cumplía.
-TIPOS_DE_LIBRO_DE_HOY = TIPOS_DE_LIBRO_DE_LA_1_0 + ("tesoreria",)
+# Y el cuarto, con B13 (16-oct-2026): el Libro Diario, el contenedor genérico del PLE. Es el primero que el
+# motor **no origina** —sus líneas llegan armadas en el bloque `asiento`— y por eso no está en
+# `TIPOS_DEL_MOTOR`: entra al catálogo y se queda fuera del motor, que es la asimetría que el test de abajo
+# anunciaba desde la 1.0.
+TIPOS_DE_LIBRO_DE_HOY = TIPOS_DE_LIBRO_DE_LA_1_0 + ("tesoreria", "diario")
 
 # Los efectos sobre el efectivo, que son catálogo propio desde el mismo día. Las palabras son las de la NIC 7
 # —«entradas y salidas de efectivo»— y son TRES porque su §9 excluye de los flujos los traspasos entre partidas de
@@ -436,7 +440,7 @@ def test_omitir_el_libro_ya_no_significa_compra_en_silencio():
     c = Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-08-01", total="118.00")
     with pytest.raises(LibroSinRasgos) as e:
         cuenta_tercero(c, {})
-    assert "no conoce" in str(e.value) and "compra, tesoreria, venta" in str(e.value)
+    assert "no conoce" in str(e.value) and "compra, diario, tesoreria, venta" in str(e.value)
 
 
 def test_un_booleano_de_antes_de_la_9_0_dice_como_migrar():
@@ -461,7 +465,7 @@ def test_cada_libro_dice_como_se_llama_en_el_nombre_de_un_archivo():
     9.0 vino a quitar. **En plural donde el uso lo tiene y en singular donde lo tiene**, que es cómo lo dice un
     contador — por eso se declara en vez de derivarse del `tipo`."""
     etiquetas = {tipo: r.etiqueta_de_archivo for tipo, r in RASGOS_DE_LIBRO.items()}
-    assert etiquetas == {"venta": "VENTAS", "compra": "COMPRAS", "tesoreria": "TESORERIA"}
+    assert etiquetas == {"venta": "VENTAS", "compra": "COMPRAS", "tesoreria": "TESORERIA", "diario": "DIARIO"}
     # Y que ninguna se quede vacía al añadir una fila, que es lo que esto tiene que cazar.
     assert all(e.isupper() and e.isalpha() for e in etiquetas.values())
     assert set(etiquetas) == set(vocabulario.TIPOS_LIBRO), "un libro del catálogo sin su etiqueta no tiene nombre"

@@ -21,10 +21,10 @@ from .. import drivers
 from .._version import __version__
 from ..drivers import contrato
 from ..drivers.kit import texto as kit_texto
-from ..errores import ErrorContaperu, ErroresBloqueantes
+from ..errores import DocumentoInvalido, ErrorContaperu, ErroresBloqueantes
 from ..modelo import Comprobante, Libro
 from . import armado
-from .preparacion import fecha_de, libro_de, lineas_de, preparar, preparar_tesoreria
+from .preparacion import config_aplicada, fecha_de, libro_de, lineas_de, preparar, preparar_tesoreria
 from .seleccion import errores_de, fuera_de, seleccionar
 
 
@@ -351,4 +351,39 @@ def exportar(doc: dict, *, driver: str, configuracion: dict | None = None, corre
 # **De qué bloque sale el archivo, por la misma tabla y el mismo motivo que `armado.CAMINOS_DEL_ASIENTO`** (13.1):
 # la clave es el `origen` de la fila, no el nombre del libro. `_archivo_de_movimientos` ignora por firma los
 # cuatro argumentos del otro camino, para que la puerta llame igual a las dos.
-CAMINOS_DEL_ARCHIVO = {"comprobantes": _archivo_de_comprobantes, "movimientos": _archivo_de_movimientos}
+def _archivo_del_diario(doc: dict, driver: str, *, configuracion: dict | None, **_del_registro) -> Exportado:
+    """El archivo de un libro que llega ya armado: el Libro Diario (B13).
+
+    Las líneas no se producen, se pasan. El destino las recibe por `lineas=` como cualquier asiento dado —es el
+    mismo camino que usa un documento de compras que ya trae su bloque `asiento`, y por eso aquí no hay nada
+    nuevo—, y **no se numeran**: el CUO viene de quien las mandó.
+
+    `incluir_observados` y `claves_previas` no llegan: son de comprobantes, y este libro no los tiene.
+    """
+    libro = libro_de(doc)
+    dadas = lineas_de(doc)
+    if not dadas:
+        raise DocumentoInvalido(
+            f"Un libro {libro.tipo!r} llega con su asiento ya armado y este documento no trae el bloque "
+            "`asiento`: no hay líneas que escribir, y el motor no sabe producirlas para este libro.")
+    modulo = drivers.obtener(driver)
+    opciones = modulo.OPCIONES
+    formato = drivers.formato_de(driver, libro.tipo)
+    if not contrato.arma_asientos(modulo):
+        raise LibroQueEseDestinoNoArma(libro.tipo, driver)
+    config = config_aplicada(configuracion, driver) if contrato.lleva_cuentas(modulo) else None
+    if config is not None:
+        config = armado.config_para(modulo, config)
+    contenido, extra, lineas, _ = armado.desde_lineas_ya_armadas(modulo, libro, dadas, opciones, config)
+    # Ni comprobantes ni movimientos: lo que este libro trae son líneas, y se cuentan como tales. `por_movimiento`
+    # va vacío por lo mismo que el índice — no hay entradas aparte que detallar.
+    return Exportado(
+        nombre=modulo.nombre(libro, opciones), nombre_comprimido="", formato=formato, driver=driver,
+        texto=b"", comprimido=b"", comprobantes=0, movimientos=0,
+        resumen=extra, contenido=contenido,
+        content_type=getattr(modulo, "CONTENT_TYPE", "application/octet-stream"),
+    )
+
+
+CAMINOS_DEL_ARCHIVO = {"comprobantes": _archivo_de_comprobantes, "movimientos": _archivo_de_movimientos,
+                       "asiento": _archivo_del_diario}

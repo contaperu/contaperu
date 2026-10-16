@@ -51,6 +51,17 @@ def test_nadie_decide_por_el_nombre_de_un_origen():
     la propia tabla `RASGOS`, donde el literal es el dato. Un `MI_ORIGEN = "movimientos"` tampoco, porque declarar
     de qué es un módulo no es elegir camino — y la guarda que lo usa afirma su identidad, no despacha.
     """
+    def _habla_del_origen(nodo) -> bool:
+        """Que el otro lado de la comparación sea el origen de un libro, y no otra cosa con el mismo nombre.
+
+        Hace falta desde que el Libro Diario entró con `origen="asiento"`: «asiento» nombra además el bloque del
+        documento y la **familia** de un driver (`contrato.familia(modulo) == "asiento"`), que es otro eje. Mirar
+        solo el literal daba por culpable a quien comparaba la familia, que no decide nada de un libro.
+        """
+        if isinstance(nodo, ast.Attribute):
+            return nodo.attr == "origen"
+        return isinstance(nodo, ast.Name) and nodo.id == "origen"
+
     culpables: dict[str, list[int]] = {}
     for ruta, arbol in _modulos():
         if ruta in TOLERADAS:
@@ -59,7 +70,8 @@ def test_nadie_decide_por_el_nombre_de_un_origen():
             if not isinstance(nodo, ast.Compare):
                 continue
             partes = [nodo.left, *nodo.comparators]
-            if any(isinstance(p, ast.Constant) and p.value in ORIGENES_DE_LIBRO for p in partes):
+            literal = any(isinstance(p, ast.Constant) and p.value in ORIGENES_DE_LIBRO for p in partes)
+            if literal and any(_habla_del_origen(p) for p in partes):
                 culpables.setdefault(ruta, []).append(nodo.lineno)
 
     assert culpables == {}, (

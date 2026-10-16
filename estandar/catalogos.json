@@ -30,12 +30,13 @@
  },
  "tipos_de_libro": {
   "fuente": "Los registros que SUNAT define y que este estándar transporta. El valor es el del estándar; su equivalencia con cada archivo de destino la declara el driver en sus FORMATOS.",
-  "version": "1.0",
+  "version": "1.1",
   "nota": "Sale del enum del esquema al catálogo para que un registro nuevo no cueste una versión. Pero no degrada como el rol: quien recibe un libro que no conoce no puede adivinar qué hacer con él, así que su degradación es del destino — el driver que no lo declara en sus FORMATOS lo rechaza limpio, diciendo qué libros lleva.",
   "codigos": {
    "venta": "El registro de ventas e ingresos: lo que emitió en el periodo",
    "compra": "El registro de compras: lo que el contribuyente adquirió en el periodo",
-   "tesoreria": "El movimiento del dinero: los movimientos de las cuentas bancarias del contribuyente, vengan de una línea de extracto o de una constancia de pago —una sola entrada, `movimientos`, como `comprobantes` lo es de una compra o de una venta—. Se llama `tesoreria` y no `banco` porque un pago de tributos o el reintegro de una caja chica no son del banco. Su destino es el Libro Diario, no el Libro Caja y Bancos: quien lleva el Diario 5.1 con sus campos de libre utilización se exime de ese libro electrónico"
+   "tesoreria": "El movimiento del dinero: los movimientos de las cuentas bancarias del contribuyente, vengan de una línea de extracto o de una constancia de pago —una sola entrada, `movimientos`, como `comprobantes` lo es de una compra o de una venta—. Se llama `tesoreria` y no `banco` porque un pago de tributos o el reintegro de una caja chica no son del banco. Su destino es el Libro Diario, no el Libro Caja y Bancos: quien lleva el Diario 5.1 con sus campos de libre utilización se exime de ese libro electrónico",
+   "diario": "El Libro Diario: todo asiento que no sea del registro de compras ni del de ventas —la planilla, la depreciación, el asiento de destino, un ajuste—. Es el **contenedor genérico** del PLE y por eso entra uno solo y no un valor por cada hecho: cada uno de esos hechos tiene su libro en la RS 234-2006 —el Registro de Activos Fijos, el de Costos, el de Planillas— y todos asientan en el Formato 5.1. Sus líneas llegan YA ARMADAS en el bloque `asiento`: el motor no las origina, las recibe, porque armar una planilla pide reglas de planilla. Quien lleva el 5.1 con sus campos de libre utilización se exime del Libro Caja y Bancos, que es por lo que `tesoreria` también acaba aquí."
   }
  },
  "efectos_de_tesoreria": {

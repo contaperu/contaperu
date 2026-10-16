@@ -39,7 +39,7 @@ from __future__ import annotations
 from typing import Any
 
 from ...catalogos import TIPOS_INVIERTEN
-from ...modelo.libro import RASGOS, Rasgos, rasgos_de
+from ...modelo.libro import ORIGEN_YA_ARMADO, RASGOS, Rasgos, rasgos_de
 
 # El elemento del PCGE en el que vive el efectivo: «10 · EFECTIVO Y EQUIVALENTES AL EFECTIVO» (p. 17).
 # Es la fuente con la que se distingue la línea del dinero de la de un gasto en un libro de tesorería.
@@ -89,6 +89,12 @@ def rol_de(linea: Any, libro: Any) -> str:
     ni `tesoreria`: son vocabulario para quien produce un asiento que el motor no origina, y por eso están en el
     catálogo y fuera de esa tupla."""
     rasgos = rasgos_de(libro)
+    # **Un libro que llega ya armado no tiene rol que derivar, y eso es un dato y no un fallo** (B13): la columna
+    # existe en el CSV y en el pre-mayor, y lo que corresponde escribir ahí es nada. Lanzar sería tratar «aquí
+    # eso no se puede saber» como «te equivocaste», y dejaría a un destino neutral sin poder escribir un diario
+    # que por lo demás está completo. Quien produjo esas líneas sabe qué papel cumple cada una; este motor no.
+    if rasgos.origen == ORIGEN_YA_ARMADO:
+        return ""
     if not rasgos.roles:
         con_roles = sorted(t for t, r in RASGOS.items() if r.roles)
         raise RolNoDerivable(
@@ -130,4 +136,17 @@ def _rol_del_comprobante(linea: Any, rasgos: Rasgos) -> str:
 # **Cómo se deriva el rol, dicho por el origen del libro y no por su nombre** (13.1). Los tramos de antes de la
 # tabla —el guardián de los `roles` vacíos y `POR_SU_BLOQUE`— son comunes a los dos y se quedan arriba: lo que
 # cambia es solo el final, que en un comprobante mira el lado y en el dinero mira la cuenta.
-DERIVACION_DEL_ROL = {"comprobantes": _rol_del_comprobante, "movimientos": _rol_del_dinero}
+def _rol_de_lo_ya_armado(linea: Any, rasgos: Rasgos) -> str:
+    """Un libro que llega armado **no tiene rol que derivar**: la columna sale vacía.
+
+    La regla lee el lado contra el del libro, o la cuenta contra el elemento 10 del PCGE. Un Libro Diario no fija
+    lado —cada asiento el suyo— y sus líneas pueden ser cualquier cosa: una planilla, una depreciación, un
+    ajuste. Derivar aquí sería adivinar. En la práctica no se alcanza, porque `rol_de` corta antes por el mismo
+    motivo; está escrita para que la tabla esté completa y el día que alguien cambie aquel atajo esto siga
+    diciendo lo mismo.
+    """
+    return ""
+
+
+DERIVACION_DEL_ROL = {"comprobantes": _rol_del_comprobante, "movimientos": _rol_del_dinero,
+                      "asiento": _rol_de_lo_ya_armado}

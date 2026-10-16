@@ -38,7 +38,8 @@ VOCABULARIO = "neutral"
 # último en declarar tesorería a propósito y no por descuido — declararla antes de que `exportar` supiera escribirla
 # habría dejado a esa puerta dando «No hay comprobantes que procesar», que es el mensaje engañoso que la 12.6 quitó.
 FORMATOS = {"compra": "asiento_contable_json", "venta": "asiento_contable_json",
-            "tesoreria": "asiento_contable_json"}
+            "tesoreria": "asiento_contable_json",
+            "diario": "asiento_contable_json"}
 OPCIONES = OpcionesArchivo(extension=".json")
 CONTENT_TYPE = "application/json"
 # Del núcleo le basta la cuenta de cada línea: el tipo va en su código SUNAT y la moneda en ISO. Exige `detraccion`
@@ -128,4 +129,7 @@ def _bloque_de_imputaciones(config: dict | None) -> dict:
 
 # **Qué bloques extra escribe el archivo, por el origen del libro** (13.1). Hoy solo el dinero escribe uno; la
 # entrada de `comprobantes` existe para que su ausencia sea una decisión escrita y no un `else` vacío.
-BLOQUES_POR_ORIGEN = {"comprobantes": _sin_bloques_extra, "movimientos": _bloque_de_imputaciones}
+BLOQUES_POR_ORIGEN = {"comprobantes": _sin_bloques_extra, "movimientos": _bloque_de_imputaciones,
+                      # Un libro que llega armado no trae imputación que volcar: sus líneas ya tienen la cuenta
+                      # puesta por quien las mandó, que es lo que significa «ya armado».
+                      "asiento": _sin_bloques_extra}

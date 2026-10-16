@@ -310,13 +310,16 @@ def _mes() -> dict:
          "mov-2": {"cuenta_contable": "639101"}})
 
 
-def test_el_driver_neutral_lleva_los_tres_libros_y_el_nombre_lo_dice():
+def test_el_driver_neutral_lleva_los_cuatro_libros_y_el_nombre_lo_dice():
     """El nombre del archivo sale de la tabla desde la 12.10 (`etiqueta_de_archivo`). Hasta entonces lo decidía
     `'VENTAS' if libro.es_venta else 'COMPRAS'` —el último sitio donde el booleano que la 9.0 retiró seguía
-    decidiendo algo— y habría llamado «COMPRAS» a un archivo de tesorería."""
+    decidiendo algo— y habría llamado «COMPRAS» a un archivo de tesorería.
+
+    **Eran tres y son cuatro desde B13** (16-oct-2026), con el Libro Diario. Que este test se pusiera rojo al
+    declararlo es su trabajo: un driver gana un libro a propósito, nunca de pasada."""
     from contaperu.drivers import asiento_contable
 
-    assert sorted(asiento_contable.FORMATOS) == ["compra", "tesoreria", "venta"]
+    assert sorted(asiento_contable.FORMATOS) == ["compra", "diario", "tesoreria", "venta"]
     r, _ = _exportado(_mes())
     assert r["archivo"] == "ASIENTO_CONTABLE_TESORERIA_202610_20601234567.json"
     assert "COMPRAS" not in r["archivo"] and "VENTAS" not in r["archivo"]

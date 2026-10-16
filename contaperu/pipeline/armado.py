@@ -12,14 +12,15 @@ from .. import asiento as asi
 from .. import configuracion as _declaracion
 from .. import drivers
 from ..contable import partida_doble
+from ..errores import DocumentoInvalido
 from .._version import __version__
 from ..asiento.huella import huella
 from ..asiento.resolucion import exigir_requisitos, fundir_config
 from ..configuracion import (CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, NO_SON_CONFIGURACION,
                              ConfiguracionInvalida)
 from ..drivers import contrato
-from ..modelo import ORIGENES_DE_LIBRO, Comprobante, Libro, identidad_de
-from .preparacion import documento, libro_de, preparar, preparar_tesoreria
+from ..modelo import ORIGEN_YA_ARMADO, ORIGENES_DE_LIBRO, Comprobante, Libro, identidad_de
+from .preparacion import documento, libro_de, lineas_de, preparar, preparar_tesoreria
 from .seleccion import fuera_de, seleccionar
 
 
@@ -62,7 +63,10 @@ def por_comprobante(libro: Libro, lineas: list, indice: tuple) -> list[dict]:
 # se pone rojo por quedarse atrás, que es lo que se quiere.
 #
 # Desde la 13.1 se deriva una sola vez, en `modelo`, porque la leen tres capas; aquí se conserva el nombre corto.
-ORIGENES = ORIGENES_DE_LIBRO
+# **Sin el bloque del asiento** (B13): un libro que llega ya armado no tiene entradas aparte que listar —son sus
+# propias líneas, que ya van en la respuesta—, así que abrirle una clave sería meter el asiento dentro de sí
+# mismo. Por eso esto no es `ORIGENES_DE_LIBRO` a secas y la respuesta de una compra no gana una clave vacía.
+ORIGENES = tuple(o for o in ORIGENES_DE_LIBRO if o != ORIGEN_YA_ARMADO)
 
 
 def por_entrada(libro: Libro, lineas: list, indice: tuple) -> dict:
@@ -136,6 +140,24 @@ def desde_lineas_dadas(modulo, libro: Libro, comprobantes: list[Comprobante], li
     resumen = {"filas": len(lineas), "sub_diarios": asi.rangos_de_lineas_dadas(indice),
                "debe": str(cuadre.debe), "haber": str(cuadre.haber), "huella": huella(lineas), **extra}
     return contenido, resumen, lineas, indice
+
+
+def desde_lineas_ya_armadas(modulo, libro: Libro, lineas: list, opciones: Any,
+                            config: dict | None = None) -> tuple:
+    """Las líneas de un libro que llega armado, hacia su destino. Sin índice y sin numerar (B13).
+
+    Hermana de `desde_lineas_dadas` y más corta por lo que NO hace: no exige requisitos —están escritos sobre
+    comprobantes y este libro no los tiene—, no construye índice —no hay entradas aparte que indexar— y no
+    numera, porque el CUO viene de quien mandó las líneas. Lo que sí hace es lo que no se negocia: **cuadrar**.
+    """
+    cuadre = partida_doble.exigir(lineas)
+    if contrato.acepta_indice(modulo):
+        contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones, indice=())
+    else:
+        contenido, extra = modulo.desde_lineas(libro, lineas, config, opciones)
+    resumen = {"filas": len(lineas), "sub_diarios": {}, "debe": str(cuadre.debe), "haber": str(cuadre.haber),
+               "huella": huella(lineas), **extra}
+    return contenido, resumen, lineas, ()
 
 
 def desde_movimientos(modulo, libro: Libro, movimientos: list, opciones: Any, config: dict | None = None,
@@ -272,6 +294,30 @@ def _asiento_de_movimientos(doc: dict, modulo, driver: str, *, configuracion: di
     return _respuesta(libro, neutrales, rangos, indice)
 
 
+def _asiento_del_diario(doc: dict, modulo, driver: str, *, configuracion: dict | None, **_del_registro) -> dict:
+    """El asiento de un libro que **llega ya armado**: el Libro Diario (B13).
+
+    Es el tercer camino y el único que no arma nada. Sus líneas vienen en el bloque `asiento` del documento, que
+    el estándar admite de entrada desde la 1.0 y `lineas_de` lee desde la 5.2, y tienen que venir así porque
+    armarlas pediría reglas que este motor no tiene: una planilla pide las de la planilla y una depreciación el
+    activo y su vida útil. Lo que el motor aporta aquí no es el asiento, es **lo mismo que aporta a los otros
+    dos cuando ya existen**: leer cada línea con su contrato —`LineaDiario.de_dict` exige la clase y la verifica
+    contra el PCGE—, cuadrarlo, darle su huella y dejarlo listo para cualquier destino.
+
+    **Ni índice ni rangos**, y las dos ausencias son afirmaciones. No hay índice porque no hay entradas aparte
+    que indexar: las entradas de este libro son sus propias líneas. Y no hay rangos porque **ya viene numerado**
+    —el CUO es de quien lo mandó— y renumerar le cambiaría el número a un asiento que puede estar presentado.
+    """
+    libro = libro_de(doc)
+    dadas = lineas_de(doc)
+    if not dadas:
+        raise DocumentoInvalido(
+            f"Un libro {libro.tipo!r} llega con su asiento ya armado y este documento no trae el bloque "
+            "`asiento`. No es que esté vacío: es que de este libro el motor no sabe armar líneas, solo "
+            "recibirlas — las de una planilla o una depreciación las produce quien tiene esas reglas.")
+    return _respuesta(libro, dadas, {}, ())
+
+
 def _respuesta(libro: Libro, neutrales: list, rangos: dict, indice: tuple) -> dict:
     """El documento con su bloque `asiento` y `_asiento`, igual venga de comprobantes o de movimientos: lo que sigue
     —cuadrar, hashear, responder— no sabe de cuál de los dos salió, y ésa es la mitad del valor del dispatch."""
@@ -291,4 +337,5 @@ def _respuesta(libro: Libro, neutrales: list, rangos: dict, indice: tuple) -> di
 # caía en el `else` y salía tratado como una compra.
 #
 # Va al final del módulo porque las dos funciones tienen que existir ya; es el único motivo.
-CAMINOS_DEL_ASIENTO = {"comprobantes": _asiento_de_comprobantes, "movimientos": _asiento_de_movimientos}
+CAMINOS_DEL_ASIENTO = {"comprobantes": _asiento_de_comprobantes, "movimientos": _asiento_de_movimientos,
+                       "asiento": _asiento_del_diario}

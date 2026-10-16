@@ -7,6 +7,8 @@ necesita para llevar a cada fila los datos de la cabecera de su comprobante.
 """
 from __future__ import annotations
 
+from ...modelo import ORIGEN_YA_ARMADO
+
 from typing import Any, Callable, Iterable
 
 
@@ -21,7 +23,10 @@ def exigir_indice(sistema: str, libro: Any, lineas: list, indice: tuple, formato
         # de memoria qué libros declara cada driver. El mensaje salió de `ple_plan`, que lo escribió bien por su
         # cuenta mientras el común decía solo «no soportado».
         raise ValueError(f"Tipo de libro no soportado: {libro.tipo!r}; {sistema} lleva {sorted(formatos)}")
-    if lineas and not indice:
+    # **Salvo que el libro llegue ya armado** (B13): un Libro Diario no tiene entradas aparte de las que ya son
+    # sus líneas, así que no hay cabecera que aportar y exigir un índice sería pedir algo que no puede existir.
+    # Lo que el driver escriba de esas filas es lo que la línea trae, que es todo lo que hay.
+    if lineas and not indice and libro.rasgos.origen != ORIGEN_YA_ARMADO:
         raise ValueError(f"{sistema} escribe cada fila con la cabecera de su comprobante: necesita el `indice` "
                          f"del asiento")
 

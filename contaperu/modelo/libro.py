@@ -170,6 +170,27 @@ RASGOS: dict[str, "Rasgos"] = {
     # «este libro todavía no se numera». La distinción la hizo visible tesorería y la comprueba
     # `LibroQueTodaviaNoSeNumera`. La misma disciplina con la que el contrato de drivers paró el
     # `sub_diario_bancos`: una clave que nadie lee se configura para nada.
+    # **El Libro Diario (B13, 16-oct-2026): el libro que no se arma, se RECIBE.** Es el tercer caso del eje y la
+    # 13.1 no lo había previsto: estrena origen y **no estrena motor**. Sus líneas llegan ya hechas en el bloque
+    # `asiento` del documento —que el estándar admite de entrada desde la 1.0 y el motor lee desde la 5.2—, y
+    # tienen que llegar así porque armarlas pediría reglas que este motor no tiene ni va a tener: una planilla
+    # pide las reglas de la planilla y una depreciación pide el activo y su vida útil.
+    #
+    # Por qué UN libro y no uno por hecho —`planilla`, `depreciacion`, `destino`—: porque cada uno de esos hechos
+    # **ya tiene su libro en la RS 234-2006** —el Registro de Planillas, el de Activos Fijos, el de Costos— y los
+    # tres asientan en el mismo Formato 5.1, que es el contenedor genérico. Abrir uno por hecho sería inventar
+    # categorías de gasto y llamarlas libros, que es lo que el `honorario` ya intentó y se descartó: `libro` es el
+    # libro tributario. Medido en el 5.1 aceptado de un mes real: 1 441 asientos en 19 sub-diarios, de los que
+    # unos 530 no son del registro de compras ni del de ventas.
+    #
+    # Los cinco campos vacíos o falsos dicen lo que el motor no hace con él, que es casi todo, y es correcto:
+    # `roles` vacío porque no emite ninguna línea suya —se las dan—, `sub_diario` vacío porque **ya vienen
+    # numeradas** por quien las mandó (el CUO es suyo y renumerar le cambiaría el número a un asiento presentado),
+    # y las tres reglas de compras no le tocan.
+    "diario": Rasgos(tipo="diario", origen="asiento",
+                     roles=(), sentido_principal=POR_OPERACION, cuenta_contraparte="",
+                     da_credito_fiscal=False, lleva_detraccion=False, lleva_honorarios=False,
+                     sub_diario="", etiqueta_de_archivo="DIARIO"),
     "tesoreria": Rasgos(tipo="tesoreria", origen="movimientos",
                         roles=("tesoreria", "tercero", "principal"),
                         sentido_principal=POR_OPERACION, cuenta_contraparte="",
@@ -190,6 +211,13 @@ RASGOS: dict[str, "Rasgos"] = {
 # —de dónde salió un comprobante (`manual`, `archivo`, `api`) y de dónde salió una aplicación—, y son ejes
 # distintos que se leerían igual.
 ORIGENES_DE_LIBRO: tuple[str, ...] = tuple(dict.fromkeys(r.origen for r in RASGOS.values()))
+
+# El bloque donde van las LÍNEAS de un asiento, que es también el origen de un libro que llega ya armado —el
+# Libro Diario—. Tiene nombre propio porque es el único origen que no describe una entrada aparte: las entradas
+# de una compra son sus comprobantes y las de tesorería sus movimientos, pero las de un diario **son sus propias
+# líneas**, que ya están en la respuesta. De ahí que `armado.por_entrada` no le abra una clave: sería repetir el
+# asiento dentro de sí mismo.
+ORIGEN_YA_ARMADO = "asiento"
 
 
 class LibroSinRasgos(ValueError):

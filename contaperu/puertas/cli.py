@@ -211,6 +211,26 @@ def _diagnostico_del_dinero(diagnostico: dict) -> int:
     return 1
 
 
+def _diagnostico_del_diario(diagnostico: dict) -> int:
+    """El diagnóstico de un libro que llega ya armado, impreso (B13).
+
+    El informe más corto de los tres, y por el mismo motivo por el que su respuesta es la más corta: de un libro
+    que el motor no origina no hay nada que exigirle a quien lo mandó sobre cómo armarlo. Lo que se imprime es lo
+    único que un destino necesita antes de escribirlo — cuántas líneas, cuántos asientos y si cuadra.
+    """
+    totales, cuadre = diagnostico["totales"], diagnostico["cuadre"]
+    print(f"Líneas: {totales['lineas']} · asientos {totales['asientos']} · "
+          f"debe {cuadre['debe']} contra haber {cuadre['haber']}")
+    print()
+    for error in diagnostico.get("errores_de_configuracion") or []:
+        print(f"  !! Configuración: {error}")
+    if diagnostico["listo_para_exportar"]:
+        print(f"LISTO para exportar: {totales['lineas']} líneas en {totales['asientos']} asientos.")
+        return 0
+    print("NO está listo: " + "; ".join(diagnostico["por_que_no"]) + ".")
+    return 1
+
+
 def cmd_diagnosticar(args: argparse.Namespace) -> int:
     """Qué bloquea, qué falta y qué saldría, antes de generar nada."""
     datos = _leer_json(args.json)
@@ -460,4 +480,5 @@ if __name__ == "__main__":
 # **Qué informe se imprime, por el origen del libro** (13.1), igual que las tablas del pipeline y de los drivers.
 # La cabecera —el libro, el periodo, el RUC y el destino— es común y se imprime antes, porque la trae cualquier
 # forma de la respuesta.
-IMPRESORES = {"comprobantes": _diagnostico_del_registro, "movimientos": _diagnostico_del_dinero}
+IMPRESORES = {"comprobantes": _diagnostico_del_registro, "movimientos": _diagnostico_del_dinero,
+              "asiento": _diagnostico_del_diario}

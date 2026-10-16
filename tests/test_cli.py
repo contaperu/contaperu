@@ -238,13 +238,17 @@ def test_lo_que_solo_saben_los_catalogos_es_un_AVISO(tmp_path, capsys):
     el documento es **conforme** igual: el esquema no enumera los tipos para que uno nuevo no cueste una versión.
 
     Hasta la 10.0 el otro ejemplo era un `rol` desconocido, que se degradaba. Se fue con el campo: una línea con
-    `rol` ya no avisa, **falla el esquema**, y eso lo comprueba el test de abajo."""
-    documento = {"open_accounting": "3.0", "libro": {**LIBRO_OK, "tipo": "diario"},
+    `rol` ya no avisa, **falla el esquema**, y eso lo comprueba el test de abajo.
+
+    **El ejemplo era `diario` y dejó de servir el 16-oct-2026**, porque ese libro entró de verdad con B13. Es la
+    mejor señal de que la promesa del catálogo funciona —un libro nuevo no costó una versión del esquema— y la
+    razón de que ahora el ejemplo sea un valor que nadie va a registrar nunca."""
+    documento = {"open_accounting": "3.0", "libro": {**LIBRO_OK, "tipo": "libro_que_nadie_registra"},
                  "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "100.00", "clase": "gasto"}]}
     codigo = cli.main(["verificar-documento", _escribir(tmp_path, documento)])
     salida = capsys.readouterr().out
     assert codigo == 0, "los catálogos avisan, no rechazan: el esquema es quien dice conforme o no"
-    assert "SÍ rompe" in salida and "diario" in salida
+    assert "SÍ rompe" in salida and "libro_que_nadie_registra" in salida
 
 
 def test_una_linea_con_rol_ya_no_es_conforme(tmp_path, capsys):

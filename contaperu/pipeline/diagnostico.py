@@ -13,9 +13,12 @@ from .. import drivers
 from ..tributos import detracciones, validar
 from ..asiento.faltas import CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
 from ..drivers import contrato
+from ..contable import partida_doble
+from ..errores import ErrorContaperu
 from ..modelo import Comprobante, Libro
 from .preparacion import (claves_previas_de, comprobantes_de, con_imputacion, config_aplicada,
-                          errores_de_configuracion, imputacion_del_documento, libro_de, preparar_tesoreria)
+                          errores_de_configuracion, imputacion_del_documento, libro_de, lineas_de,
+                          preparar_tesoreria)
 from .preparacion import serie_numero as _serie_numero
 from .seleccion import fuera_de
 
@@ -463,4 +466,53 @@ def _del_registro(doc: dict, libro: Libro, modulo: Any, driver: str, *, configur
 # **Qué se mira en un libro, dicho por la tabla** (13.1), igual que `armado.CAMINOS_DEL_ASIENTO` y
 # `salida.CAMINOS_DEL_ARCHIVO`. Aquí el despacho decide además **la forma de la respuesta**, que desde la 13.0 es
 # un `oneOf` de dos: por eso era el `if` más caro de los tres y el que más se nota al quitarlo.
-CAMINOS_DEL_DIAGNOSTICO = {"comprobantes": _del_registro, "movimientos": _del_dinero}
+def _del_diario(doc: dict, libro: Libro, modulo: Any, driver: str, *, configuracion: dict | None,
+                **_del_registro) -> dict:
+    """Lo que hay que mirar de un libro que llega ya armado: el Libro Diario (B13).
+
+    Es el diagnóstico más corto de los tres, y eso es una afirmación: de un libro que el motor no origina **no
+    hay nada que exigirle a quien lo manda sobre cómo armarlo**, porque ya está armado. Lo que sí se puede decir
+    —y es lo único que un destino necesita saber antes de escribirlo— es cuántas líneas trae, cuántos asientos
+    son, si **cuadra** y si ese destino lleva este libro.
+
+    Por eso no trae `bloqueantes`, `avisos`, detracciones ni sub-diarios: son del comprobante. Ni `faltantes`
+    como el dinero: sus cinco faltas son las de armar un asiento, y aquí no se arma ninguno. Rellenar esas
+    casillas con ceros diría «se miró y no hay» donde la verdad es «aquí eso no existe», que es el fallo que la
+    13.0 vino a cerrar en el otro libro.
+    """
+    por_que_no: list[str] = []
+    try:
+        drivers.formato_de(driver, libro.tipo)
+    except ErrorContaperu as e:
+        por_que_no.append(str(e))
+
+    dadas = []
+    try:
+        dadas = lineas_de(doc) or []
+    except ErrorContaperu as e:
+        por_que_no.append(str(e))
+    if not dadas and not por_que_no:
+        por_que_no.append("el documento no trae el bloque `asiento`, que es de donde salen las líneas de este "
+                          "libro: el motor no sabe armarlas, solo recibirlas")
+
+    lineas = [ln.a_dict() for ln in dadas]
+    cuadre = partida_doble.cuadra(lineas)
+    if lineas and not cuadre.cuadra:
+        por_que_no.append(f"el asiento no cuadra: debe {cuadre.debe} contra haber {cuadre.haber}")
+    # Un asiento es un CUO, y en el estándar el enlace es `documento.id_externo`: las líneas que lo comparten son
+    # el mismo asiento. Sin él, cada línea cuenta por su cuenta, que es lo que dice un documento que no lo trae.
+    asientos = {str((ln.get("documento") or {}).get("id_externo") or f"_{i}") for i, ln in enumerate(lineas)}
+
+    return {
+        "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
+        "driver": driver,
+        "listo_para_exportar": not por_que_no,
+        "por_que_no": por_que_no,
+        "que_falta": [],
+        "errores_de_configuracion": [],
+        "totales": {"lineas": len(lineas), "asientos": len(asientos)},
+        "cuadre": cuadre.a_dict(),
+    }
+
+
+CAMINOS_DEL_DIAGNOSTICO = {"comprobantes": _del_registro, "movimientos": _del_dinero, "asiento": _del_diario}
