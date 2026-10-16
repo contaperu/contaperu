@@ -178,12 +178,13 @@ Tres cosas más que ayudan a leerlo:
 
 ### Por dónde pasa un comprobante
 
-![Qué carpeta y qué archivo toca un comprobante: entra por comprobantes/ (xml_ubl, sire_txt, archivos, _zip), que es también donde vive su forma (modelo, vocabulario y catalogos leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (tributos/ con validar, igv y detracciones, más configuracion), asiento/ arma la partida doble apoyándose en contable/ y pcge/, y drivers/ lo traduce a sus ocho destinos por canal; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/, y al final las carpetas que este recorrido no toca: tesoreria/, aplicaciones y sunat/](diagramas/recorrido-por-los-modulos.svg)
+![Qué carpeta y qué archivo toca un comprobante: entra por comprobantes/ (xml_ubl, sire_txt, archivos, _zip), que es también donde vive su forma (modelo, vocabulario y catalogos leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (tributos/ con validar, igv y detracciones, más configuracion), asiento/ arma la partida doble apoyándose en contable/ y pcge/, y drivers/ lo traduce a sus ocho destinos por canal; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/, y al final lo que este recorrido no toca, porque es el de uno de los cuatro libros: tesoreria/ el dinero, el diario que llega ya armado, aplicaciones y sunat/](diagramas/recorrido-por-los-modulos.svg)
 
 El mismo motor, un nivel más abajo: **los archivos que toca un comprobante**, en el orden en que lo hacen. El
-paréntesis del final son las carpetas que este recorrido NO toca, porque el paquete tiene más libros que el
-comprobante: `tesoreria/` es el dinero, `aplicaciones` dice cuánto de un pago cancela un documento, y `sunat/`
-es la API del SIRE.
+franja del final es lo que este recorrido NO toca, porque es el de **uno de los cuatro libros**: `tesoreria/`
+es el dinero; el **diario** llega ya armado y el motor no lo origina —sus líneas las produce quien tiene las
+reglas de una planilla o de una depreciación—; `aplicaciones` dice cuánto de un pago cancela un documento; y
+`sunat/` es la API del SIRE.
 
 - **`comprobantes`** es el paquete de una compra o una venta: sus **lectores** convierten un archivo que ya existe
   —el XML UBL de SUNAT, el TXT de la propuesta del SIRE— en un `Comprobante`, que es una fila del registro, y
