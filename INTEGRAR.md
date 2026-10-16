@@ -509,6 +509,15 @@ vez de `comprobantes[]`, que es lo que dice el tipo de libro. Quien integra solo
 | Lo que `revisar_tesoreria` **avisa**, asentar lo **para** | sin la contrapartida (`movimiento_sin_imputar`) o sin la cuenta contable de la 104 (`sin_cuenta_de_efectivo`) no hay línea que escribir. Mira primero y asienta después |
 | En `_asiento` la respuesta trae **`movimientos`** | con la misma forma que `comprobantes` —identidad, tramo de líneas y huella—, y la otra clave vacía. Las dos van siempre |
 
+**Y antes de asentar, `diagnosticar` (12.12).** El camino normal —`diagnosticar` antes de `exportar`— vale igual
+para el dinero, con la respuesta de la forma de su libro: `totales` cuenta `movimientos`, `repetidos` —las
+relecturas del mismo extracto, que no se asientan— y `saldrian`, y `faltantes` trae las cinco faltas del dinero
+por la misma clave con que se niega la excepción. Dos diferencias que conviene saber: **`saldrian` es todo o
+nada**, porque el asiento de un libro de tesorería se arma entero o no se arma; y **las claves que son de un
+comprobante no están** —ni `bloqueantes`, ni `avisos`, ni las detracciones, ni los sub-diarios, ni el resumen por
+contraparte, ni `exige`—, porque un cero diría que se miró algo que aquí no existe. El esquema de la respuesta
+(`GET /v1/esquemas/diagnostico.schema.json`) publica las dos formas en un `oneOf`.
+
 Las cinco formas, y ninguna necesita una regla que no esté publicada: un **pago** deja la contrapartida al debe y
 el efectivo al haber; un **cobro** al revés y **sin línea de IGV**, porque el débito fiscal se reconoció en la
 venta; un **cargo del banco** es un gasto contra el efectivo; un **reparto** da una línea por parte y una sola de

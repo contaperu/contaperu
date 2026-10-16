@@ -276,3 +276,196 @@ def test_el_resumen_por_contraparte_no_suma_soles_con_dolares():
     r = diagnosticar(doc(FACTURA, usd), driver="concar")["resumen_por_contraparte"]["20602222226"]
     assert r["por_moneda"] == {"PEN": "4956.00", "USD": "118.00"}
     assert (r["moneda"], r["total"], r["comprobantes"]) == ("PEN", "4956.00", 2)
+
+
+# --- el tercer libro: el dinero ------------------------------------------------------------------------------
+#
+# `diagnosticar` se quedó atrás cuando entró `tesoreria` (12.11): el driver neutral declara el libro, así que la
+# respuesta pasaba el muro de «ese destino no lleva ese libro» y seguía por la ruta del comprobante
+# —`comprobantes_de` devuelve lista vacía— y **contestaba todos los contadores en cero sin mirar ni un
+# movimiento**. No es que no hubiera nada: es que no se miró nada, y las dos cosas se dicen distinto.
+
+CUENTAS = [{"id": "bbva-soles", "banco": "BBVA", "moneda": "PEN", "cuenta_contable": "104101"},
+           {"id": "bcp-soles", "banco": "BCP", "moneda": "PEN", "cuenta_contable": "104102"}]
+DINERO = {"cuentas_bancarias": CUENTAS, "usa_centros_costo": False}
+
+
+def mov(**campos) -> dict:
+    base = {"cuenta": "bbva-soles", "fecha": "2026-10-15", "importe": "2000.00", "sentido": "cargo",
+            "moneda": "PEN", "descripcion": "TRANSFERENCIA A TERCEROS", "medio_pago": "003",
+            "referencia": "000123", "id_externo": "mov-1"}
+    return dict(base, **campos)
+
+
+def plata(movimientos: list[dict], imputaciones: dict | None = None) -> dict:
+    return {"open_accounting": "3.0",
+            "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202610",
+                      "tipo": "tesoreria"},
+            "movimientos": movimientos,
+            "imputaciones_de_movimientos": imputaciones or {}}
+
+
+def test_un_mes_de_tesoreria_se_mira_de_verdad_en_vez_de_salir_en_cero():
+    """El fallo que esto arregla: dos movimientos dentro y la respuesta decía «no hay comprobantes que exportar»
+    con todo en cero. Cierto por casualidad —no hay comprobantes— y engañoso: el mes tiene dinero, y uno de los
+    dos movimientos no se puede asentar."""
+    d = api.diagnosticar(plata([mov(), mov(id_externo="mov-2", referencia="000124", importe="15.00",
+                                           descripcion="COMISION")],
+                               {"mov-1": {"cuenta_contable": "421201"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert d["totales"]["movimientos"] == 2, "los dos se contaron"
+    assert d["listo_para_exportar"] is False
+    assert d["por_que_no"] == ["1 movimiento(s) sin imputación, así que no hay con qué saldarlos"]
+    assert [(q["motivo"], q["movimientos"], q["pedir_a"]) for q in d["que_falta"]] == [
+        ("movimiento_sin_imputar", ["000124"], "contador")]
+
+
+def test_un_mes_de_tesoreria_limpio_esta_listo_y_dice_lo_que_saldria():
+    d = api.diagnosticar(plata([mov(), mov(id_externo="mov-2", referencia="000124", sentido="abono")],
+                               {"mov-1": {"cuenta_contable": "421201"}, "mov-2": {"cuenta_contable": "121201"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert d["listo_para_exportar"] is True and d["por_que_no"] == [] and d["que_falta"] == []
+    assert d["saldrian"] == ["000123", "000124"], "por el papel que los prueba, como los nombra el asiento"
+    assert d["totales"] == {"movimientos": 2, "repetidos": 0, "saldrian": 2}
+    assert all(cuales == [] for cuales in d["faltantes"].values()), "vacías = se comprobaron"
+
+
+def test_lo_que_saldria_en_tesoreria_es_todo_o_nada():
+    """A diferencia de un comprobante con error, que se queda fuera y deja salir a los demás: si un movimiento no
+    se puede asentar, el asiento del libro no sale. Por eso `saldrian` se vacía entero."""
+    d = api.diagnosticar(plata([mov(), mov(id_externo="mov-2", referencia="000124")],
+                               {"mov-1": {"cuenta_contable": "421201"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert d["saldrian"] == [] and d["totales"]["saldrian"] == len(d["saldrian"]) == 0
+
+
+def test_las_relecturas_se_cuentan_aparte_y_no_se_asientan_dos_veces():
+    """Bajar el mismo extracto dos veces es lo normal, y `preparar_tesoreria` descarta el repetido. El diagnóstico
+    lo dice en vez de callarlo: el mes trae tres filas y se asientan dos."""
+    d = api.diagnosticar(plata([mov(), mov(), mov(id_externo="mov-2", referencia="000124")],
+                               {"mov-1": {"cuenta_contable": "421201"}, "mov-2": {"cuenta_contable": "421201"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert d["totales"] == {"movimientos": 3, "repetidos": 1, "saldrian": 2}
+    assert d["listo_para_exportar"] is True
+
+
+def test_la_cuenta_de_efectivo_que_falta_se_dice_por_su_id_y_no_por_el_movimiento():
+    """La 104 no se deriva: la declara el contribuyente en su maestro. Y lo que se nombra es la cuenta, porque el
+    arreglo está ahí y no en el movimiento."""
+    d = api.diagnosticar(plata([mov(cuenta="interbank-soles")], {"mov-1": {"cuenta_contable": "421201"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert [(q["motivo"], q["movimientos"]) for q in d["que_falta"]] == [
+        ("sin_cuenta_de_efectivo", ["interbank-soles"])]
+    assert d["por_que_no"] == ["1 cuenta(s) de efectivo sin resolver"]
+
+
+def test_la_misma_cuenta_sin_104_en_dos_movimientos_es_un_solo_arreglo():
+    """Lo que se nombra es lo que hay que arreglar, y declarar esa cuenta arregla los dos de golpe. Decirla dos
+    veces haría contar mal a quien cuenta: «2 cuentas sin resolver» donde hay una."""
+    d = api.diagnosticar(plata([mov(cuenta="interbank-soles"),
+                                mov(cuenta="interbank-soles", id_externo="mov-2", referencia="000124")],
+                               {"mov-1": {"cuenta_contable": "421201"},
+                                "mov-2": {"cuenta_contable": "421201"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert d["faltantes"]["sin_cuenta_de_efectivo"] == ["interbank-soles"]
+    assert d["por_que_no"] == ["1 cuenta(s) de efectivo sin resolver"]
+
+
+def test_un_traspaso_declarado_por_sus_dos_patas_se_dice_antes_de_contar_el_dinero_dos_veces():
+    d = api.diagnosticar(plata([mov(id_externo="ida", cuenta="bbva-soles", sentido="cargo", importe="500.00"),
+                                mov(id_externo="vuelta", cuenta="bcp-soles", sentido="abono", importe="500.00")],
+                               {"ida": {"cuenta_propia": "bcp-soles"}, "vuelta": {"cuenta_propia": "bbva-soles"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert [q["motivo"] for q in d["que_falta"]] == ["traspaso_en_dos_patas"]
+    assert d["que_falta"][0]["movimientos"] == ["bcp-soles ↔ bbva-soles por 500.00"]
+
+
+def test_una_cuenta_de_un_elemento_sin_clase_se_dice_por_la_cuenta():
+    """El 8 y el 0 del PCGE no tienen clase contable, y una línea sin clase no se escribe."""
+    d = api.diagnosticar(plata([mov()], {"mov-1": {"cuenta_contable": "801101"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert [(q["motivo"], q["movimientos"]) for q in d["que_falta"]] == [("cuenta_sin_clase", ["801101"])]
+
+
+def test_un_mes_de_tesoreria_sin_movimientos_lo_dice_y_no_lanza():
+    """`preparar_tesoreria` sí lanza «No hay movimientos que procesar», porque va a hacer. Ésta describe."""
+    d = api.diagnosticar(plata([]), driver="asiento_contable", configuracion=DINERO)
+    assert d["listo_para_exportar"] is False and d["por_que_no"] == ["no hay movimientos que exportar"]
+    assert d["totales"] == {"movimientos": 0, "repetidos": 0, "saldrian": 0}
+
+
+def test_la_configuracion_que_no_se_puede_aplicar_tambien_se_describe_en_tesoreria():
+    d = api.diagnosticar(plata([mov()]), driver="asiento_contable", configuracion={"clave_que_no_existe": 1})
+    assert d["errores_de_configuracion"] and d["listo_para_exportar"] is False
+    assert [q["motivo"] for q in d["que_falta"]] == ["configuracion_invalida"]
+    assert d["totales"] == {"movimientos": 1, "repetidos": 0, "saldrian": 0}, "no se miró ni un movimiento"
+
+
+def test_la_respuesta_del_dinero_no_rellena_con_ceros_lo_que_es_de_un_comprobante():
+    """`excluida`, `estado` y `observaciones` son campos del comprobante, y la detracción y el sub-diario también.
+    Un movimiento no tiene ninguno, así que esas claves **no salen** en vez de salir en cero: un cero dice «se miró
+    y no hay», y aquí no había nada que mirar."""
+    d = api.diagnosticar(plata([mov()], {"mov-1": {"cuenta_contable": "421201"}}),
+                         driver="asiento_contable", configuracion=DINERO)
+    assert set(d) == {"libro", "driver", "listo_para_exportar", "por_que_no", "que_falta",
+                      "errores_de_configuracion", "totales", "faltantes", "saldrian"}
+    assert set(d["totales"]) == {"movimientos", "repetidos", "saldrian"}
+
+
+def test_el_destino_que_no_lleva_tesoreria_lo_dice_con_la_forma_del_dinero():
+    """La degradación de siempre, con los contadores del libro que se preguntó: antes decía `comprobantes: 0` de
+    un libro que no los tiene."""
+    d = api.diagnosticar(plata([mov(), mov(id_externo="mov-2", referencia="000124")]),
+                         driver="concar", configuracion={})
+    assert d["por_que_no"] == ["el destino 'concar' no lleva libros de tipo 'tesoreria'"]
+    assert [q["motivo"] for q in d["que_falta"]] == ["libro_que_el_destino_no_lleva"]
+    assert d["totales"] == {"movimientos": 2, "repetidos": 0, "saldrian": 0}
+
+
+def test_lo_que_el_diagnostico_DICE_es_lo_que_la_exportacion_LANZA():
+    """El contrato entre las dos puertas, caso por caso: el `motivo` del diagnóstico es la `clave` de la excepción
+    con la que el asiento se niega. Si una se renombra sin la otra, esto cae."""
+    from contaperu import asiento as asi
+
+    casos = [
+        ([mov()], {}, asi.MovimientoSinImputar),
+        ([mov(cuenta="interbank-soles")], {"mov-1": {"cuenta_contable": "421201"}}, asi.SinCuentaDeEfectivo),
+        ([mov()], {"mov-1": {"cuenta_contable": "801101"}}, asi.CuentaSinClase),
+        ([mov(id_externo="ida", importe="500.00"),
+          mov(id_externo="vuelta", cuenta="bcp-soles", sentido="abono", importe="500.00")],
+         {"ida": {"cuenta_propia": "bcp-soles"}, "vuelta": {"cuenta_propia": "bbva-soles"}},
+         asi.TraspasoEnDosPatas),
+    ]
+    for movimientos, imputaciones, excepcion in casos:
+        documento = plata(movimientos, imputaciones)
+        d = api.diagnosticar(documento, driver="asiento_contable", configuracion=DINERO)
+        assert [q["motivo"] for q in d["que_falta"]] == [excepcion.clave]
+        with pytest.raises(excepcion):
+            api.exportar(documento, driver="asiento_contable", configuracion=DINERO)
+
+
+def test_el_libro_que_todavia_no_se_numera_se_comprueba_aunque_hoy_no_lo_alcance_ningun_driver():
+    """Ninguno de serie lleva tesorería con vocabulario legacy, así que por `diagnosticar` no se llega hoy. La
+    comprobación corre igual, en el núcleo, y por eso la clave está: el día que un driver legacy declare el libro,
+    lo que dirá es esto y no un `KeyError`."""
+    from contaperu import asiento as asi
+    from contaperu.pipeline.preparacion import libro_de
+
+    libro = libro_de(plata([mov()]))
+    faltan = asi.faltantes_de_movimientos(libro, [], {}, vocabulario="legacy")
+    assert faltan["libro_que_todavia_no_se_numera"] == ["tesoreria"]
+    assert asi.faltantes_de_movimientos(libro, [], {})["libro_que_todavia_no_se_numera"] == []
+
+
+def test_las_cinco_faltas_del_dinero_tienen_su_texto_y_a_quien_pedirsela():
+    """La tabla de `diagnostico.py` y las excepciones del núcleo dicen lo mismo. **No están en `asiento.FALTAS`**,
+    que reparte faltas por comprobante; lo que comparten es el trato, no la tabla."""
+    from contaperu import asiento as asi
+
+    clases = (asi.MovimientoSinImputar, asi.SinCuentaDeEfectivo, asi.TraspasoEnDosPatas,
+              asi.LibroQueTodaviaNoSeNumera, asi.CuentaSinClase)
+    assert set(diag.FALTAS_DEL_DINERO) == {clase.clave for clase in clases}
+    assert {f.clave for f in asi.FALTAS}.isdisjoint(diag.FALTAS_DEL_DINERO)
+    for clave, (texto, pedir_a) in diag.FALTAS_DEL_DINERO.items():
+        assert texto and pedir_a in (diag.CONTADOR, diag.SISTEMA)
+        assert diag.PEDIR_A[clave] == pedir_a

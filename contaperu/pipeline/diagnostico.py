@@ -15,9 +15,37 @@ from ..asiento.faltas import CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA  # noqa
 from ..drivers import contrato
 from ..modelo import Comprobante, Libro
 from .preparacion import (claves_previas_de, comprobantes_de, con_imputacion, config_aplicada,
-                          errores_de_configuracion, imputacion_del_documento, libro_de)
+                          errores_de_configuracion, imputacion_del_documento, libro_de, preparar_tesoreria)
 from .preparacion import serie_numero as _serie_numero
 from .seleccion import fuera_de
+
+# --- lo que puede impedir asentar el dinero -----------------------------------------
+#
+# Las cinco faltas de tesorería con el texto que lee una persona y a quién pedírsela, que es lo que `asiento.FALTAS`
+# da para un comprobante. **Están aquí y no en esa tabla**, y el porqué lo escribe `asiento/faltas.py`: aquélla
+# reparte faltas por comprobante —las cuenta por su serie-número y las reparte entre `bloqueantes` y `avisos`— y un
+# movimiento no tiene ni una cosa ni la otra. Lo que comparten es el trato, no la tabla.
+#
+# Se teclean por la `clave` de su excepción y no a mano, para que renombrar una las renombre en los dos sitios; el
+# orden es el de la comprobación (`asiento.FALTAS_DEL_MOVIMIENTO`). El texto va detrás de un número —«2 movimiento(s)
+# sin imputación»— y **se trae su propio sustantivo**, porque no siempre es el movimiento: lo que se nombra es lo que
+# hay que arreglar, y para la 104 que falta eso es la cuenta.
+#
+# A quién: `contador` las cuatro primeras, con el mismo criterio de abajo —la contrapartida la decide él, la 104 la
+# declara el contribuyente en su plan, cuál de las dos patas declara el traspaso es suyo y una cuenta del elemento 8
+# es un error de imputación—. `sistema` la quinta: es haber elegido un destino de vocabulario legacy para un libro
+# que todavía no tiene sub-diario, y lo que se cambia es el driver, como en `libro_que_el_destino_no_lleva`.
+FALTAS_DEL_DINERO: dict[str, tuple[str, str]] = {
+    asi.LibroQueTodaviaNoSeNumera.clave: (
+        "libro(s) que el motor todavía no sabe numerar: su sub-diario espera el archivo real que lo pida", SISTEMA),
+    asi.TraspasoEnDosPatas.clave: (
+        "traspaso(s) declarados por sus dos movimientos, que contarían el dinero dos veces", CONTADOR),
+    asi.MovimientoSinImputar.clave: ("movimiento(s) sin imputación, así que no hay con qué saldarlos", CONTADOR),
+    asi.SinCuentaDeEfectivo.clave: ("cuenta(s) de efectivo sin resolver", CONTADOR),
+    asi.CuentaSinClase.clave: (
+        "cuenta(s) de un elemento sin clase contable (el 8 y el 0 del PCGE no la tienen)", CONTADOR),
+}
+
 
 # --- a quién se le pide lo que falta ------------------------------------------------
 
@@ -32,6 +60,8 @@ from .seleccion import fuera_de
 PEDIR_A: dict[str, str] = {
     # lo que falta para el destino (claves de `faltantes`): lo dice su tabla, `asiento.FALTAS`
     **{falta.clave: falta.pedir_a for falta in FALTAS},
+    # y las del dinero, que tienen la suya por lo que dice el bloque de arriba
+    **{clave: pedir_a for clave, (_, pedir_a) in FALTAS_DEL_DINERO.items()},
     # una configuración que no cumple lo declarado se arregla donde se configura
     "configuracion_invalida": SISTEMA,
     # y elegir un destino que no lleva ese libro también: lo que se cambia es el driver, no el mes
@@ -181,6 +211,96 @@ def _sin_configuracion(libro: Libro, driver: str, exige: frozenset[str], todos: 
     }
 
 
+def _del_dinero(doc: dict, libro: Libro, modulo: Any, driver: str, configuracion: dict | None) -> dict:
+    """El diagnóstico de un libro de tesorería: cuánto dinero trae el mes y qué impediría asentarlo (12.12).
+
+    **Hasta la 12.11 este camino no existía y el libro se diagnosticaba en vacío**: el driver neutral declara
+    `tesoreria` en sus `FORMATOS` desde la 12.10, así que la respuesta pasaba el muro de «ese destino no lleva ese
+    libro» y seguía por la ruta del comprobante, donde `comprobantes_de` devuelve lista vacía. Contestaba todos los
+    contadores en cero y «no hay comprobantes que exportar» sin haber mirado ni un movimiento: cierto por
+    casualidad y engañoso, que es lo peor que puede hacer una operación que existe para que nadie exporte a ciegas.
+    Sus dos hermanas —`armado.generar_asiento` y `salida.exportar_archivo`— bifurcaban desde la 12.9 y la 12.10.
+
+    **Describe lo que el asiento hace cumplir**, como en el otro camino: las cinco faltas salen de
+    `asiento.faltantes_de_movimientos`, que es la misma comprobación que `lineas_e_indice_de_movimientos` hace al
+    armar, contestada entera en vez de parando en la primera. Por eso el `motivo` de `que_falta` es la `clave` de
+    la excepción con la que `exportar` se niega.
+
+    **Y lo que no es de un movimiento no sale en cero: no sale.** `excluida`, `estado` y `observaciones` son campos
+    del comprobante, y la detracción, el sub-diario y la contraparte también; rellenar sus contadores con ceros
+    diría «se miró y no hay» donde la verdad es «aquí eso no existe» — que es exactamente el fallo que esto
+    arregla, en pequeño. Tampoco sale `exige`: lo que un driver exige (`contrato.exige`) está escrito sobre
+    comprobantes y **ninguno de esos requisitos se comprueba aquí**, así que publicar la lista haría creer que sí.
+    El hueco está declarado en `armado._asiento_de_movimientos`.
+
+    Lo que el mes tiene —cuánto entró por cuenta, qué no cuadra contra lo que el banco declaró— no se repite aquí:
+    eso es `api.revisar_tesoreria`, que mira el dinero. Ésta contesta una sola pregunta, la de siempre: **¿sale?**
+    """
+    # El bloque crudo, sin construir un movimiento: para contar las filas que trae el documento basta, y
+    # `preparar_tesoreria` —que sí los construye— lanza si no hay ninguno, porque va a hacer y no a mirar.
+    crudos = doc.get("movimientos") or []
+    if libro.tipo not in getattr(modulo, "FORMATOS", {}):
+        lleva = sorted(getattr(modulo, "FORMATOS", {}))
+        return _sin_mirar_el_dinero(
+            libro, driver, crudos, [f"el destino {driver!r} no lleva libros de tipo {libro.tipo!r}"],
+            [{"motivo": "libro_que_el_destino_no_lleva", "movimientos": [],
+              "texto": f"{driver} lleva {', '.join(lleva)}", "pedir_a": PEDIR_A["libro_que_el_destino_no_lleva"]}])
+    errores = errores_de_configuracion(configuracion)
+    if errores:
+        return _sin_mirar_el_dinero(
+            libro, driver, crudos, [f"la configuración tiene {len(errores)} {'error' if len(errores) == 1 else 'errores'}"],
+            [{"motivo": "configuracion_invalida", "movimientos": [],
+              "texto": "la configuración no cumple lo que declaran el motor y su sistema",
+              "pedir_a": PEDIR_A["configuracion_invalida"]}], errores)
+    if not crudos:
+        return _sin_mirar_el_dinero(libro, driver, crudos, ["no hay movimientos que exportar"], [])
+
+    libro, movimientos, config = preparar_tesoreria(doc, configuracion, driver)
+    faltan = asi.faltantes_de_movimientos(libro, movimientos, config, vocabulario=contrato.vocabulario(modulo))
+    hay = [(clave, cuales) for clave, cuales in faltan.items() if cuales]
+    por_que_no = [f"{len(cuales)} {FALTAS_DEL_DINERO[clave][0]}" for clave, cuales in hay]
+    # **Todo o nada**, y es la diferencia de fondo con un comprobante: uno con errores se queda fuera y los demás
+    # salen, pero el asiento de un libro de tesorería se arma entero o no se arma —`lineas_e_indice_de_movimientos`
+    # se niega—, así que lo que saldría con una sola falta encima es nada.
+    saldrian = [] if por_que_no else [asi.nombre_de_movimiento(m) for m in movimientos]
+    return {
+        "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
+        "driver": driver,
+        "listo_para_exportar": not por_que_no,
+        "por_que_no": por_que_no,
+        "que_falta": [{"motivo": clave, "texto": FALTAS_DEL_DINERO[clave][0], "movimientos": cuales,
+                       "pedir_a": PEDIR_A[clave]} for clave, cuales in hay],
+        "errores_de_configuracion": [],
+        # Las relecturas se cuentan porque el mes las trae y el asiento no las lleva: `preparar_tesoreria` descarta
+        # el movimiento repetido —bajar dos veces el mismo extracto es lo normal— y callarlo dejaría una resta que
+        # nadie puede explicar. Es la misma cuenta que hace el resumen de la exportación.
+        "totales": {"movimientos": len(crudos), "repetidos": len(crudos) - len(movimientos),
+                    "saldrian": len(saldrian)},
+        "faltantes": faltan,
+        "saldrian": saldrian,
+    }
+
+
+def _sin_mirar_el_dinero(libro: Libro, driver: str, crudos: list, por_que_no: list[str], que_falta: list[dict],
+                         errores: list[str] | None = None) -> dict:
+    """La respuesta de un mes de tesorería del que no se ha mirado ni un movimiento, con su razón.
+
+    Lo que `_libro_que_el_destino_no_lleva` y `_sin_configuracion` son en el otro camino, en uno solo porque aquí
+    las dos razones —y la de un mes vacío— dicen lo mismo de los contadores: las filas que el documento trae se
+    cuentan, porque contarlas no es mirarlas, y lo demás va en cero porque de verdad no se comprobó."""
+    return {
+        "libro": {"ruc": libro.ruc, "periodo": libro.periodo, "tipo": libro.tipo},
+        "driver": driver,
+        "listo_para_exportar": False,
+        "por_que_no": por_que_no,
+        "que_falta": que_falta,
+        "errores_de_configuracion": list(errores or []),
+        "totales": {"movimientos": len(crudos), "repetidos": 0, "saldrian": 0},
+        "faltantes": {},
+        "saldrian": [],
+    }
+
+
 def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, correlativos: dict | None = None,
                  imputacion: dict | None = None, claves_previas: Any = None) -> dict:
     """Todo lo que hay que mirar de un mes ANTES de exportarlo, en una sola respuesta.
@@ -190,9 +310,14 @@ def diagnosticar(doc: dict, *, driver: str, configuracion: dict | None = None, c
     `libro`, o comprobantes ilegibles).
     """
     libro = libro_de(doc)
+    modulo = drivers.obtener(driver)
+    # **El dispatch por origen, igual que en `armado.generar_asiento` y en `salida.exportar_archivo`**: una sola vez
+    # por puerta y ni un `if es_tesoreria` más adentro. Va lo primero porque de él depende QUÉ se mira y, por tanto,
+    # qué forma tiene la respuesta: un libro de tesorería no tiene comprobantes que contar (12.12).
+    if libro.rasgos.origen == "movimientos":
+        return _del_dinero(doc, libro, modulo, driver, configuracion)
     todos = comprobantes_de(doc)
     previas = claves_previas_de(claves_previas)
-    modulo = drivers.obtener(driver)
     opciones = getattr(modulo, "OPCIONES", None)
 
     def _serie_numero(c: Comprobante) -> str:

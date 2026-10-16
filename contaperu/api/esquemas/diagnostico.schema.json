@@ -2,324 +2,465 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/diagnostico.schema.json",
  "title": "Diagnóstico",
- "description": "Todo lo que hay que mirar de un mes antes de exportarlo hacia un destino. Tiene la misma forma cuando la configuración no se puede aplicar: entonces `errores_de_configuracion` dice por qué y lo demás va vacío.",
- "type": "object",
- "properties": {
-  "libro": {
+ "description": "Todo lo que hay que mirar de un mes antes de exportarlo hacia un destino. **Tiene una forma por libro**, y la dice su tipo: la del registro cuenta comprobantes y la del dinero cuenta movimientos, sin las claves que solo un comprobante tiene.",
+ "oneOf": [
+  {
+   "title": "El diagnóstico de un libro de registro",
+   "description": "Compras y ventas: lo que se cuenta son comprobantes. Tiene esta misma forma cuando la configuración no se puede aplicar y cuando el destino no lleva el libro: entonces `errores_de_configuracion` o `que_falta` dicen por qué y lo demás va vacío.",
    "type": "object",
    "properties": {
-    "ruc": {
-     "type": "string"
-    },
-    "periodo": {
-     "type": "string"
-    },
-    "tipo": {
-     "type": "string"
-    }
-   },
-   "required": [
-    "ruc",
-    "periodo",
-    "tipo"
-   ],
-   "additionalProperties": false
-  },
-  "driver": {
-   "type": "string"
-  },
-  "exige": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "listo_para_exportar": {
-   "type": "boolean"
-  },
-  "por_que_no": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "que_falta": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "motivo": {
-      "type": "string"
-     },
-     "texto": {
-      "type": "string"
-     },
-     "comprobantes": {
-      "type": "array",
-      "items": {
+    "libro": {
+     "type": "object",
+     "properties": {
+      "ruc": {
+       "type": "string"
+      },
+      "periodo": {
+       "type": "string"
+      },
+      "tipo": {
        "type": "string"
       }
      },
-     "pedir_a": {
-      "enum": [
-       "contador",
-       "sistema",
-       "proveedor"
-      ]
+     "required": [
+      "ruc",
+      "periodo",
+      "tipo"
+     ],
+     "additionalProperties": false
+    },
+    "driver": {
+     "type": "string"
+    },
+    "exige": {
+     "type": "array",
+     "items": {
+      "type": "string"
      }
     },
-    "required": [
-     "motivo",
-     "texto",
-     "comprobantes",
-     "pedir_a"
-    ],
-    "additionalProperties": false
-   }
-  },
-  "errores_de_configuracion": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "totales": {
-   "type": "object",
-   "properties": {
-    "comprobantes": {
-     "type": "integer",
-     "minimum": 0
+    "listo_para_exportar": {
+     "type": "boolean"
+    },
+    "por_que_no": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "que_falta": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "properties": {
+       "motivo": {
+        "type": "string"
+       },
+       "texto": {
+        "type": "string"
+       },
+       "comprobantes": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       "pedir_a": {
+        "enum": [
+         "contador",
+         "sistema",
+         "proveedor"
+        ]
+       }
+      },
+      "required": [
+       "motivo",
+       "texto",
+       "comprobantes",
+       "pedir_a"
+      ],
+      "additionalProperties": false
+     }
+    },
+    "errores_de_configuracion": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "totales": {
+     "type": "object",
+     "properties": {
+      "comprobantes": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "saldrian": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "excluidos": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "fuera_del_destino": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "sin_efecto_contable": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "Cuántos no llevan asiento porque no mueven dinero (total, IGV y retención en cero, y sin detracción): no piden cuenta ni centro ni gastan número de vóucher, pero SÍ salen en el registro que se declara a SUNAT. Es donde caen los comprobantes que SUNAT da de baja, que declara con todos los importes en cero para no dejar huecos en el correlativo. Cero si la configuración pide asentarlos igual (asentar_sin_efecto_contable)."
+      },
+      "con_error": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "con_aviso": {
+       "type": "integer",
+       "minimum": 0
+      }
+     },
+     "required": [
+      "comprobantes",
+      "saldrian",
+      "excluidos",
+      "fuera_del_destino",
+      "sin_efecto_contable",
+      "con_error",
+      "con_aviso"
+     ],
+     "additionalProperties": false
+    },
+    "bloqueantes": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "properties": {
+       "serie_numero": {
+        "type": "string"
+       },
+       "observaciones": {
+        "type": "array",
+        "items": {
+         "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json#/$defs/observacion"
+        }
+       }
+      },
+      "required": [
+       "serie_numero",
+       "observaciones"
+      ],
+      "additionalProperties": false
+     }
+    },
+    "avisos": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "properties": {
+       "serie_numero": {
+        "type": "string"
+       },
+       "observaciones": {
+        "type": "array",
+        "items": {
+         "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json#/$defs/observacion"
+        }
+       }
+      },
+      "required": [
+       "serie_numero",
+       "observaciones"
+      ],
+      "additionalProperties": false
+     }
+    },
+    "faltantes": {
+     "type": "object"
+    },
+    "detracciones_pendientes": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "properties": {
+       "serie_numero": {
+        "type": "string"
+       },
+       "codigo": {
+        "type": "string"
+       },
+       "monto": {
+        "type": "string"
+       },
+       "nro_constancia": {
+        "type": "string"
+       },
+       "fecha_constancia": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "serie_numero",
+       "codigo",
+       "monto",
+       "nro_constancia",
+       "fecha_constancia"
+      ],
+      "additionalProperties": false
+     }
+    },
+    "detracciones_pagadas": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "properties": {
+       "serie_numero": {
+        "type": "string"
+       },
+       "codigo": {
+        "type": "string"
+       },
+       "monto": {
+        "type": "string"
+       },
+       "nro_constancia": {
+        "type": "string"
+       },
+       "fecha_constancia": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "serie_numero",
+       "codigo",
+       "monto",
+       "nro_constancia",
+       "fecha_constancia"
+      ],
+      "additionalProperties": false
+     }
+    },
+    "resumen_por_contraparte": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "properties": {
+       "nombre": {
+        "type": "string"
+       },
+       "comprobantes": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "total": {
+        "type": "string"
+       },
+       "moneda": {
+        "type": "string"
+       },
+       "por_moneda": {
+        "type": "object",
+        "additionalProperties": {
+         "type": "string"
+        }
+       }
+      },
+      "required": [
+       "nombre",
+       "comprobantes",
+       "total",
+       "moneda",
+       "por_moneda"
+      ],
+      "additionalProperties": false
+     }
+    },
+    "sub_diarios": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "properties": {
+       "etiqueta": {
+        "type": "string"
+       },
+       "comprobantes": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "empieza_en": {
+        "type": "integer",
+        "minimum": 1
+       }
+      },
+      "required": [
+       "etiqueta",
+       "comprobantes",
+       "empieza_en"
+      ],
+      "additionalProperties": false
+     }
     },
     "saldrian": {
-     "type": "integer",
-     "minimum": 0
-    },
-    "excluidos": {
-     "type": "integer",
-     "minimum": 0
-    },
-    "fuera_del_destino": {
-     "type": "integer",
-     "minimum": 0
-    },
-    "sin_efecto_contable": {
-     "type": "integer",
-     "minimum": 0,
-     "description": "Cuántos no llevan asiento porque no mueven dinero (total, IGV y retención en cero, y sin detracción): no piden cuenta ni centro ni gastan número de vóucher, pero SÍ salen en el registro que se declara a SUNAT. Es donde caen los comprobantes que SUNAT da de baja, que declara con todos los importes en cero para no dejar huecos en el correlativo. Cero si la configuración pide asentarlos igual (asentar_sin_efecto_contable)."
-    },
-    "con_error": {
-     "type": "integer",
-     "minimum": 0
-    },
-    "con_aviso": {
-     "type": "integer",
-     "minimum": 0
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
     }
    },
    "required": [
-    "comprobantes",
-    "saldrian",
-    "excluidos",
-    "fuera_del_destino",
-    "sin_efecto_contable",
-    "con_error",
-    "con_aviso"
+    "libro",
+    "driver",
+    "exige",
+    "listo_para_exportar",
+    "por_que_no",
+    "que_falta",
+    "errores_de_configuracion",
+    "totales",
+    "bloqueantes",
+    "avisos",
+    "faltantes",
+    "detracciones_pendientes",
+    "detracciones_pagadas",
+    "resumen_por_contraparte",
+    "sub_diarios",
+    "saldrian"
    ],
    "additionalProperties": false
   },
-  "bloqueantes": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "serie_numero": {
-      "type": "string"
-     },
-     "observaciones": {
-      "type": "array",
-      "items": {
-       "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json#/$defs/observacion"
-      }
-     }
-    },
-    "required": [
-     "serie_numero",
-     "observaciones"
-    ],
-    "additionalProperties": false
-   }
-  },
-  "avisos": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "serie_numero": {
-      "type": "string"
-     },
-     "observaciones": {
-      "type": "array",
-      "items": {
-       "$ref": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json#/$defs/observacion"
-      }
-     }
-    },
-    "required": [
-     "serie_numero",
-     "observaciones"
-    ],
-    "additionalProperties": false
-   }
-  },
-  "faltantes": {
-   "type": "object"
-  },
-  "detracciones_pendientes": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "serie_numero": {
-      "type": "string"
-     },
-     "codigo": {
-      "type": "string"
-     },
-     "monto": {
-      "type": "string"
-     },
-     "nro_constancia": {
-      "type": "string"
-     },
-     "fecha_constancia": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "serie_numero",
-     "codigo",
-     "monto",
-     "nro_constancia",
-     "fecha_constancia"
-    ],
-    "additionalProperties": false
-   }
-  },
-  "detracciones_pagadas": {
-   "type": "array",
-   "items": {
-    "type": "object",
-    "properties": {
-     "serie_numero": {
-      "type": "string"
-     },
-     "codigo": {
-      "type": "string"
-     },
-     "monto": {
-      "type": "string"
-     },
-     "nro_constancia": {
-      "type": "string"
-     },
-     "fecha_constancia": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "serie_numero",
-     "codigo",
-     "monto",
-     "nro_constancia",
-     "fecha_constancia"
-    ],
-    "additionalProperties": false
-   }
-  },
-  "resumen_por_contraparte": {
+  {
+   "title": "El diagnóstico de un libro de tesorería",
+   "description": "El dinero: lo que se cuenta son movimientos. **Las claves que son de un comprobante no salen** —ni `bloqueantes`, ni `avisos`, ni las detracciones, ni los sub-diarios, ni el resumen por contraparte, ni `exige`—, porque un cero diría «se miró y no hay» donde la verdad es que eso aquí no existe. Lo que el mes tiene por cuenta se pregunta aparte, con `revisar_tesoreria`.",
    "type": "object",
-   "additionalProperties": {
-    "type": "object",
-    "properties": {
-     "nombre": {
+   "properties": {
+    "libro": {
+     "type": "object",
+     "properties": {
+      "ruc": {
+       "type": "string"
+      },
+      "periodo": {
+       "type": "string"
+      },
+      "tipo": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "ruc",
+      "periodo",
+      "tipo"
+     ],
+     "additionalProperties": false
+    },
+    "driver": {
+     "type": "string"
+    },
+    "listo_para_exportar": {
+     "type": "boolean"
+    },
+    "por_que_no": {
+     "type": "array",
+     "items": {
       "type": "string"
-     },
-     "comprobantes": {
-      "type": "integer",
-      "minimum": 0
-     },
-     "total": {
-      "type": "string"
-     },
-     "moneda": {
-      "type": "string"
-     },
-     "por_moneda": {
+     }
+    },
+    "que_falta": {
+     "type": "array",
+     "items": {
       "type": "object",
-      "additionalProperties": {
+      "properties": {
+       "motivo": {
+        "type": "string"
+       },
+       "texto": {
+        "type": "string"
+       },
+       "movimientos": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "Lo que hay que arreglar, que no siempre es el movimiento: la cuenta bancaria sin su 104 y la cuenta sin clase se nombran por la cuenta."
+       },
+       "pedir_a": {
+        "enum": [
+         "contador",
+         "sistema",
+         "proveedor"
+        ]
+       }
+      },
+      "required": [
+       "motivo",
+       "texto",
+       "movimientos",
+       "pedir_a"
+      ],
+      "additionalProperties": false
+     }
+    },
+    "errores_de_configuracion": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "totales": {
+     "type": "object",
+     "properties": {
+      "movimientos": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "Las filas que el documento trae en su bloque `movimientos`."
+      },
+      "repetidos": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "Cuántas de ellas son una relectura del mismo extracto y no se asientan: bajarlo dos veces es lo normal."
+      },
+      "saldrian": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "Todo o nada, al revés que un comprobante con errores: el asiento de un libro de tesorería se arma entero o no se arma, así que con una sola falta encima esto es 0."
+      }
+     },
+     "required": [
+      "movimientos",
+      "repetidos",
+      "saldrian"
+     ],
+     "additionalProperties": false
+    },
+    "faltantes": {
+     "type": "object",
+     "description": "Las cinco faltas del dinero por su clave —la misma con que se niega la excepción del núcleo—, cada una con lo que hay que arreglar. Van siempre las cinco, vacías cuando no falta nada, y eso significa que se comprobaron. Vacío del todo si no se miró ningún movimiento.",
+     "additionalProperties": {
+      "type": "array",
+      "items": {
        "type": "string"
       }
      }
     },
-    "required": [
-     "nombre",
-     "comprobantes",
-     "total",
-     "moneda",
-     "por_moneda"
-    ],
-    "additionalProperties": false
-   }
-  },
-  "sub_diarios": {
-   "type": "object",
-   "additionalProperties": {
-    "type": "object",
-    "properties": {
-     "etiqueta": {
+    "saldrian": {
+     "type": "array",
+     "items": {
       "type": "string"
      },
-     "comprobantes": {
-      "type": "integer",
-      "minimum": 0
-     },
-     "empieza_en": {
-      "type": "integer",
-      "minimum": 1
-     }
-    },
-    "required": [
-     "etiqueta",
-     "comprobantes",
-     "empieza_en"
-    ],
-    "additionalProperties": false
-   }
-  },
-  "saldrian": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
+     "description": "Los movimientos que saldrían, por el papel que los prueba o el número del banco."
+    }
+   },
+   "required": [
+    "libro",
+    "driver",
+    "listo_para_exportar",
+    "por_que_no",
+    "que_falta",
+    "errores_de_configuracion",
+    "totales",
+    "faltantes",
+    "saldrian"
+   ],
+   "additionalProperties": false
   }
- },
- "required": [
-  "libro",
-  "driver",
-  "exige",
-  "listo_para_exportar",
-  "por_que_no",
-  "que_falta",
-  "errores_de_configuracion",
-  "totales",
-  "bloqueantes",
-  "avisos",
-  "faltantes",
-  "detracciones_pendientes",
-  "detracciones_pagadas",
-  "resumen_por_contraparte",
-  "sub_diarios",
-  "saldrian"
- ],
- "additionalProperties": false
+ ]
 }

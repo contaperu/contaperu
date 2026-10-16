@@ -59,6 +59,14 @@ GRUPO_EFECTIVO = "10"
 # financieras», p. 40), escrita a seis dígitos como todas las de aquí, que es como numeran CONCAR y CONTASIS.
 CUENTA_ITF = "itf"
 
+# Las cinco con que este módulo se niega a asentar un movimiento, en el orden en que se comprueban: el libro
+# primero —se sabe antes de mirar una fila—, después lo que solo se ve con todos los movimientos delante, y al
+# final las tres de cada uno. Viven aquí y no en la tabla `FALTAS` por lo que dice `faltas.py`: aquélla reparte
+# faltas **por comprobante** y un movimiento no lo es. Es la lista de claves que `faltantes_de_movimientos`
+# contesta y la que `diagnosticar` traduce, así que una falta nueva del dinero entra por aquí.
+FALTAS_DEL_MOVIMIENTO = (LibroQueTodaviaNoSeNumera, TraspasoEnDosPatas, MovimientoSinImputar,
+                         SinCuentaDeEfectivo, CuentaSinClase)
+
 
 
 
@@ -75,6 +83,32 @@ def cuenta_de_efectivo(cual: str, cuentas: dict) -> str:
     if not contable:
         raise SinCuentaDeEfectivo([str(cual or "")], "declarada sin su cuenta contable")
     return contable
+
+
+def nombre_de_movimiento(m: Any) -> str:
+    """Cómo se nombra un movimiento cuando hay que señalarlo: por el papel que lo prueba si lo tiene, por el número
+    que le dio el banco si no, y por su `id_externo` cuando no trae ninguno de los dos.
+
+    La misma regla que `api.revisar_tesoreria` usa en sus informes, con una cola más: aquí el nombre tiene que
+    existir siempre, porque es con lo que una falta señala cuál arreglar."""
+    return (str(_campo(m, "constancia") or "") or str(_campo(m, "referencia") or "")
+            or str(_campo(m, "id_externo") or ""))
+
+
+def imputaciones_y_cuentas(config: dict | None) -> tuple[dict, dict]:
+    """Las dos cosas que todo camino de tesorería saca de la configuración: la imputación de cada movimiento y el
+    maestro de cuentas bancarias **indexado por `id`**.
+
+    El maestro llega por las dos formas, y las dos son legítimas: **la lista** es como la guarda la configuración
+    —es lo que una pantalla de ajustes edita y lo que `Campo("cuentas_bancarias", "lista")` declara— y **el
+    diccionario** es como se usa, buscando por el `id` con el que un movimiento nombra su cuenta. Se normaliza
+    aquí en vez de guardarla transformada en la configuración, que daría a una misma clave dos tipos según por
+    dónde entre, y la haría fallar su propia validación al pasar otra vez por `armado.config_para`."""
+    imputaciones = (config or {}).get("imputaciones_de_movimientos") or {}
+    cuentas = (config or {}).get("cuentas_bancarias") or {}
+    if isinstance(cuentas, (list, tuple)):
+        cuentas = tesoreria.por_id(list(cuentas))
+    return imputaciones, cuentas
 
 
 def traspasos_en_dos_patas(movimientos, imputaciones: dict) -> list[str]:
@@ -267,15 +301,7 @@ def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correl
     if vocabulario != "neutral" and not rasgos.sub_diario:
         raise LibroQueTodaviaNoSeNumera(rasgos.tipo)
 
-    imputaciones = (config or {}).get("imputaciones_de_movimientos") or {}
-    # El maestro llega por las dos formas, y las dos son legítimas: **la lista** es como la guarda la configuración
-    # —es lo que una pantalla de ajustes edita y lo que `Campo("cuentas_bancarias", "lista")` declara— y **el
-    # diccionario** es como se usa, buscando por el `id` con el que un movimiento nombra su cuenta. Se normaliza
-    # aquí en vez de guardarla transformada en la configuración, que daría a una misma clave dos tipos según por
-    # dónde entre, y la haría fallar su propia validación al pasar otra vez por `armado.config_para`.
-    cuentas = (config or {}).get("cuentas_bancarias") or {}
-    if isinstance(cuentas, (list, tuple)):
-        cuentas = tesoreria.por_id(list(cuentas))
+    imputaciones, cuentas = imputaciones_y_cuentas(config)
     dobles = traspasos_en_dos_patas(movimientos, imputaciones)
     if dobles:
         raise TraspasoEnDosPatas(dobles)
@@ -288,8 +314,7 @@ def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correl
         imputacion = imputaciones.get(str(_campo(m, "id_externo") or ""))
         if imputacion is None and not _campo(m, "itf"):
             # Se reúnen todas antes de parar: decirlas de una en una obliga a diez vueltas para arreglar diez.
-            sin_imputar.append(str(_campo(m, "constancia") or "") or str(_campo(m, "referencia") or "")
-                               or str(_campo(m, "id_externo") or ""))
+            sin_imputar.append(nombre_de_movimiento(m))
             continue
         propias = lineas_del_movimiento(m, imputacion, cuentas, config, limites, "", None, rasgos, vocabulario)
         indice.append(MovimientoDelAsiento(posicion=posicion, sub_diario="", correlativo="",
@@ -299,6 +324,58 @@ def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correl
     if sin_imputar:
         raise MovimientoSinImputar(sin_imputar)
     return lineas, {}, tuple(indice)
+
+
+def faltantes_de_movimientos(libro: Any, movimientos, config: dict,
+                             vocabulario: str = "neutral") -> dict[str, list[str]]:
+    """Lo que impediría asentar estos movimientos, TODO de una vez y sin parar: lo que `diagnosticar` cuenta.
+
+    Hermana de `resolucion.faltantes_para` y con su mismo papel —describir lo que la otra hace cumplir—, pero
+    construida al revés, y el motivo es dónde vive cada regla. A un comprobante se le puede preguntar qué le falta
+    **sin armar su asiento**, porque las reglas son suyas: `comprobantes_sin_cuenta` mira su imputación y ya está.
+    A un movimiento no: lo que le falta solo se sabe armando su línea —la 104 sale del maestro, el lado sale del
+    efecto, la clase sale de la cuenta que resulte—, así que esto **arma y recoge lo que se cae**, en vez de
+    copiar las cinco comprobaciones a un segundo sitio donde envejecerían distinto. Las líneas se tiran; lo que se
+    guarda es la falta. Es la misma garantía que el otro camino da con una sola lista de reglas, conseguida de la
+    única forma que aquí sirve.
+
+    Las cinco claves van **siempre**, vacías cuando no falta nada, y eso significa «esto se comprobó» —el mismo
+    criterio de `faltantes_para`—. Ninguna cuelga de un requisito del destino (`contrato.exige`), porque los que
+    un driver exige hoy están escritos sobre comprobantes y ninguno vale para una línea de tesorería; el hueco
+    está declarado en `armado._asiento_de_movimientos`.
+
+    Y lo que nombra cada lista es lo que hay que arreglar, que no siempre es el movimiento: la cuenta bancaria sin
+    104 y la cuenta sin clase se dicen por la cuenta, porque el arreglo está en el maestro o en la imputación.
+    """
+    rasgos = rasgos_de(libro)
+    faltan: dict[str, list[str]] = {clase.clave: [] for clase in FALTAS_DEL_MOVIMIENTO}
+    if vocabulario != "neutral" and not rasgos.sub_diario:
+        faltan[LibroQueTodaviaNoSeNumera.clave].append(rasgos.tipo)
+
+    imputaciones, cuentas = imputaciones_y_cuentas(config)
+    faltan[TraspasoEnDosPatas.clave] = traspasos_en_dos_patas(movimientos, imputaciones)
+
+    limites = limites_del_periodo(libro) if hasattr(libro, "anio") else None
+    for m in movimientos:
+        imputacion = imputaciones.get(str(_campo(m, "id_externo") or ""))
+        if imputacion is None and not _campo(m, "itf"):
+            faltan[MovimientoSinImputar.clave].append(nombre_de_movimiento(m))
+            continue
+        try:
+            lineas_del_movimiento(m, imputacion, cuentas, config, limites, "", None, rasgos, vocabulario)
+        except MovimientoSinImputar:
+            faltan[MovimientoSinImputar.clave].append(nombre_de_movimiento(m))
+        except SinCuentaDeEfectivo as falta:
+            _sumar(faltan[SinCuentaDeEfectivo.clave], falta.cuales)
+        except CuentaSinClase as falta:
+            _sumar(faltan[CuentaSinClase.clave], falta.cuentas)
+    return faltan
+
+
+def _sumar(cuales: list[str], nuevas) -> None:
+    """Añade sin repetir y en el orden en que aparecieron: dos movimientos de la misma cuenta sin 104 son **un**
+    arreglo, no dos, y decirlo dos veces haría contar mal al que cuenta."""
+    cuales.extend(cual for cual in nuevas if cual not in cuales)
 
 
 class LineaSinMovimiento(ValueError):
@@ -328,11 +405,7 @@ def indice_de_movimientos_dados(movimientos, lineas: list[LineaDiario], config: 
 
     Se rechaza en voz alta lo mismo que en el otro camino: una línea sin `id_externo` o con uno que ningún
     movimiento tiene, y las líneas de un mismo movimiento **no contiguas**, porque el índice es un tramo."""
-    imputaciones = (config or {}).get("imputaciones_de_movimientos") or {}
-    cuentas = (config or {}).get("cuentas_bancarias") or {}
-    if isinstance(cuentas, (list, tuple)):
-        cuentas = tesoreria.por_id(list(cuentas))
-
+    imputaciones, cuentas = imputaciones_y_cuentas(config)
     return comun.indice_de_lineas_por_id(
         movimientos, lineas, excepcion=LineaSinMovimiento, sustantivo="movimiento", bloque="movimientos",
         clase=MovimientoDelAsiento,

@@ -97,6 +97,31 @@ def test_el_diagnostico_y_la_exportacion_reales_validan(driver):
     _validar("exportacion", api.exportar(documento, driver=driver, configuracion=CONFIG, fecha="2026-09-14"))
 
 
+def test_el_diagnostico_del_dinero_valida_contra_su_forma_y_no_contra_la_otra():
+    """La segunda forma del diagnóstico (12.12), la de un libro de tesorería. **Y que no valide contra la del
+    registro es la mitad del test**: dos formas que se solapan no son dos formas, y el `oneOf` las separa porque
+    cada una cierra sus claves."""
+    cuentas = [{"id": "bbva-soles", "banco": "BBVA", "moneda": "PEN", "cuenta_contable": "104101"}]
+    documento = {
+        "open_accounting": api.OPEN_ACCOUNTING,
+        "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202610",
+                  "tipo": "tesoreria"},
+        "movimientos": [{"cuenta": "bbva-soles", "fecha": "2026-10-15", "importe": "2000.00", "sentido": "cargo",
+                         "moneda": "PEN", "descripcion": "PAGO A PROVEEDOR", "referencia": "000123",
+                         "id_externo": "mov-1"},
+                        {"cuenta": "bbva-soles", "fecha": "2026-10-16", "importe": "15.00", "sentido": "cargo",
+                         "moneda": "PEN", "descripcion": "COMISION", "referencia": "000124",
+                         "id_externo": "mov-2"}],
+        "imputaciones_de_movimientos": {"mov-1": {"cuenta_contable": "421201"}}}
+    diagnostico = api.diagnosticar(documento, driver="asiento_contable",
+                                   configuracion={**CONFIG, "cuentas_bancarias": cuentas})
+    assert diagnostico["que_falta"], "el de la comisión no se puede asentar, y el esquema lo ve lleno"
+    _validar("diagnostico", diagnostico)
+    registro, _ = _contrato()["components"]["schemas"]["diagnostico"]["oneOf"]
+    with pytest.raises(ValidationError):
+        Draft202012Validator({**_contrato(), **registro}).validate(diagnostico)
+
+
 def test_el_diagnostico_con_la_configuracion_invalida_tambien_valida():
     """Hito B2: la otra forma de la respuesta de `diagnosticar`, la de una configuración que no se puede aplicar."""
     diagnostico = api.diagnosticar(_golden(), driver="concar", configuracion={"clave_que_no_existe": 1})

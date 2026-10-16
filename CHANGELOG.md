@@ -4,6 +4,74 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.12.0] — 2026-10-16
+
+**El libro que se diagnosticaba en vacío.** `diagnosticar` no tenía camino de tesorería, y **fallaba en
+silencio**: con `driver="asiento_contable"` y un libro de tipo `tesoreria` con movimientos dentro, pasaba el muro
+de «ese destino no lleva ese libro» —ese driver lo declara desde la 12.10— y seguía por la ruta del comprobante,
+donde `comprobantes_de` devuelve lista vacía. Salían todos los contadores en cero y un «no hay comprobantes que
+exportar» que era cierto por casualidad: no es que falten, es que ese libro no los tiene. Es lo peor que puede
+hacer la operación que existe justamente para que nadie exporte a ciegas — y un mes con un movimiento sin imputar,
+que `exportar` sí para, se veía igual que un mes limpio. Sus dos hermanas bifurcan por `libro.rasgos.origen` desde
+la 12.9 (`generar_asiento`) y la 12.10 (`exportar`); ésta se quedó atrás, y la 12.11 lo dejó escrito como hueco
+conocido en vez de arreglarlo en medio de una mudanza de ficheros.
+
+**Ahora contesta, y lo que contesta es la pregunta de siempre: ¿sale?** Cuántos movimientos trae el mes, cuántos
+son una relectura del mismo extracto, cuáles saldrían y qué impediría asentarlos, con las cinco faltas del dinero
+y a quién pedirle cada una. **El `motivo` de `que_falta` es la `clave` de la excepción con la que `exportar` se
+niega**, y eso lo prueba un test que recorre los cuatro casos por las dos puertas: una describe lo que la otra
+hace cumplir, que es la relación que el registro ya tenía entre `faltantes_para` y `exigir_requisitos`.
+
+**Y lo que no es de un movimiento no sale en cero: no sale.** `excluida`, `estado` y `observaciones` son campos
+del comprobante, y la detracción, el sub-diario y la contraparte también. Rellenar sus casillas con ceros diría
+«se miró y no hay» donde la verdad es «aquí eso no existe» — el mismo fallo que esta versión arregla, en pequeño.
+Así que la respuesta de un libro de tesorería **no trae** `bloqueantes`, `avisos`, `detracciones_pendientes`,
+`detracciones_pagadas`, `resumen_por_contraparte` ni `sub_diarios`, y tampoco `exige`: lo que un driver exige
+(`contrato.exige`) está escrito sobre comprobantes y **ninguno de esos requisitos se comprueba** en este camino,
+así que publicar la lista haría creer que sí. El hueco sigue declarado donde ya estaba,
+`armado._asiento_de_movimientos`.
+
+### Añadido
+
+- **`asiento.faltantes_de_movimientos(libro, movimientos, config, vocabulario="neutral")`**: lo que impediría
+  asentar esos movimientos, todo de una vez y sin parar. Es a `lineas_e_indice_de_movimientos` lo que
+  `faltantes_para` es a `exigir_requisitos`, **construida al revés y por un motivo**: a un comprobante se le puede
+  preguntar qué le falta sin armar su asiento, porque las reglas son suyas; a un movimiento no —la 104 sale del
+  maestro, el lado sale del efecto, la clase sale de la cuenta que resulte—, así que ésta arma, recoge lo que se
+  cae y tira las líneas. Copiar las cinco comprobaciones a un segundo sitio las habría dejado envejecer distinto.
+- **`asiento.FALTAS_DEL_MOVIMIENTO`**, las cinco con que el asiento del dinero se niega, en el orden en que se
+  comprueban, y **`asiento.nombre_de_movimiento`**, la regla de cómo se nombra uno cuando hay que señalarlo: el
+  papel que lo prueba, el número del banco si no, el `id_externo` si tampoco.
+- `diagnosticar` responde para un libro de tesorería, con `totales` de `movimientos`, `repetidos` y `saldrian`, y
+  `faltantes` con las cinco claves siempre puestas —vacías cuando no falta nada, que es como se dice «esto se
+  comprobó»—.
+- **Las relecturas se cuentan.** `preparar_tesoreria` descarta el movimiento repetido —bajar dos veces el mismo
+  extracto es lo normal— y callarlo dejaba una resta que nadie podía explicar.
+
+### Cambiado · cambio de comportamiento
+
+- **La respuesta de `diagnosticar` para un libro de tesorería cambia de forma**, porque la que tenía era la de
+  otro libro y estaba vacía. `saldrian` es **todo o nada**, y es la diferencia de fondo con un comprobante: uno
+  con errores se queda fuera y los demás salen, pero el asiento de un libro de tesorería se arma entero o no se
+  arma, así que con una sola falta encima lo que saldría es nada.
+- **`diagnostico.schema.json` pasa a ser un `oneOf` de dos formas**, la del registro y la del dinero, cada una
+  cerrada (`additionalProperties: false`). La del registro **no cambia ni una clave**. Que la del dinero no valide
+  contra la del registro es parte del test: dos formas que se solapan no son dos formas.
+- Las cinco faltas del dinero **siguen fuera de `asiento.FALTAS`**, y esta versión es cuando se decidió a
+  conciencia en vez de por omisión: esa tabla reparte faltas **por comprobante** —las cuenta por su serie-número y
+  las reparte entre `bloqueantes` y `avisos`— y un movimiento no tiene ni una cosa ni la otra. Lo que comparten es
+  el trato, no la tabla. Su texto y a quién pedírselas viven en `FALTAS_DEL_DINERO` (`pipeline/diagnostico.py`),
+  tecleadas por la `clave` de su excepción para que renombrar una las renombre en los dos sitios.
+
+### Cómo migrar
+
+- **Si lees el diagnóstico de un libro de compras o de ventas, no hay nada que hacer**: ni una clave se movió, y
+  los dos snapshots de celdas, el del documento y las huellas quedaron intactos.
+- **Si lo leías para un libro de tesorería**, lo que recibías eran ceros: `totales.comprobantes`,
+  `bloqueantes`, `avisos`, `detracciones_*`, `resumen_por_contraparte`, `sub_diarios` y `exige` ya no están, y en
+  su sitio hay `totales.movimientos`, `totales.repetidos` y las cinco faltas del dinero en `faltantes`. El tipo de
+  libro dice qué forma esperar, como en el documento del estándar.
+
 ## [12.11.0] — 2026-10-16
 
 **El comprobante tiene su paquete.** Desde la 8.2 existe `contaperu/tesoreria/`, que agrupa la forma del dinero
