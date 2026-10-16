@@ -52,6 +52,12 @@ CAPAS = {
     # Núcleo como su hermano `catalogos`, y no «peruano»: los cinco valores de `clase` son universales.
     "contaperu.vocabulario": "nucleo",
     "contaperu.asiento": "nucleo", "contaperu.pcge": "nucleo",
+    # El comprobante de compra o de venta (12.11): qué dice el papel y qué cuatro datos lo distinguen de otro.
+    # Es el espejo de `tesoreria` sobre el otro libro, y **núcleo y hoja** como él: lo que SALE de un comprobante
+    # —el asiento— no está aquí, igual que el asiento de un movimiento no está en `tesoreria`. Y **no es
+    # peruano**, aunque `Comprobante` lo sea por contenido: lo que lo hace peruano son los impuestos en campos
+    # fijos, que están declarados abajo en `PERUANOS_POR_CONTENIDO` y se separan con J2-J4.
+    "contaperu.comprobantes": "nucleo",
     # La contabilidad que no depende del país ni del régimen (6.4.0): la partida doble y cuánto suma un libro.
     # Núcleo, y NO peruano: «Debe igual a Haber» no la discute ninguna jurisdicción. Y **núcleo y no pipeline**
     # para el resumen, que es la decisión que sostiene todo lo demás: esta capa NO PUEDE importar un driver, así
@@ -189,6 +195,40 @@ def test_importar_el_modelo_no_carga_los_drivers_ni_la_fachada():
     salida = subprocess.run([sys.executable, "-c", codigo], capture_output=True, text=True, cwd=RAIZ, check=True)
     cargados = set(json.loads(salida.stdout))
     assert not cargados & {"contaperu.drivers", "contaperu.api", "contaperu.pipeline", "openpyxl"}, sorted(cargados)
+
+
+def test_cada_submodulo_se_importa_el_primero_sin_ciclos():
+    """Cada paquete de primer nivel importado **de primero**, con `sys.modules` limpio entre uno y otro.
+
+    Un ciclo de imports no es una propiedad del código: es una propiedad del ORDEN en que se entra. La batería
+    importa `contaperu.api` casi siempre antes que nada, así que un círculo entre dos paquetes de abajo puede
+    estar verde aquí y reventar en la aplicación que importe el de dentro primero. Esto lo caza.
+
+    Lo pide la 12.11, que sacó el comprobante a su paquete: `comprobantes/comprobante.py` necesita
+    `modelo.coerciones`, y pedir un módulo hoja despierta a su paquete, de modo que si `modelo/__init__`
+    volviera a importar `comprobantes` en su cabecera —en vez de perezosamente— `import contaperu.comprobantes`
+    moriría con `ImportError` y `import contaperu.modelo` seguiría pasando.
+
+    Un proceso y no uno por módulo: limpiar `contaperu*` de `sys.modules` deja el siguiente import empezando de
+    cero, que es lo que se quiere probar, y evita pagar sesenta arranques de intérprete.
+    """
+    codigo = """
+import importlib, json, sys
+fallos = {}
+for nombre in json.loads(sys.argv[1]):
+    for cargado in [m for m in sys.modules if m == "contaperu" or m.startswith("contaperu.")]:
+        del sys.modules[cargado]
+    try:
+        importlib.import_module(nombre)
+    except Exception as e:
+        fallos[nombre] = f"{type(e).__name__}: {e}"
+print(json.dumps(fallos))
+"""
+    import contaperu
+    nombres = sorted(f"contaperu.{s}" for s in contaperu._SUBMODULOS)
+    salida = subprocess.run([sys.executable, "-c", codigo, json.dumps(nombres)],
+                            capture_output=True, text=True, cwd=RAIZ, check=True)
+    assert json.loads(salida.stdout) == {}, salida.stdout
 
 
 # ── El `rol` es una etiqueta para los destinos, y el núcleo no manda por ella ─────────────────────────────────
@@ -346,6 +386,10 @@ PERUANOS_POR_CONTENIDO = {
     # catálogo por `_datos`— y es peruano de arriba abajo: separarlo es J2-J4, con un cliente real de fuera.
     "contaperu.sunat:OPERACIONES": "las once operaciones de la API del SIRE, con la ruta y el manual de cada una",
     "contaperu.modelo:Libro": "exige un RUC de 11 dígitos y un periodo AAAAMM de venta o compra",
+    "contaperu.comprobantes:Comprobante": "los impuestos del Perú en campos fijos (base gravada, IGV, ISC, IVAP, ICBPER)",
+    # El mismo de la línea de arriba, pedido por su ruta vieja: desde la 12.11 `Comprobante` vive en
+    # `comprobantes/` y `modelo` lo resuelve perezosamente. Que esta entrada siga verde es lo que prueba que la
+    # fachada no perdió el nombre, así que no se quita aunque parezca repetida.
     "contaperu.modelo:Comprobante": "los impuestos del Perú en campos fijos (base gravada, IGV, ISC, IVAP, ICBPER)",
     "contaperu.configuracion:CONFIGURACION_GENERAL": "las cuentas del PCGE y las tasas de detracción",
     # El CCI es peruano de arriba abajo, y la constancia nombra el Catálogo 05 de SUNAT en sus referencias. No

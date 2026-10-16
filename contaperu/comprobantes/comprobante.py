@@ -5,6 +5,13 @@ cuatro datos distinguen un comprobante de otro, que es la pregunta que decide un
 
 `Comprobante` se queda entero, con sus cuarenta campos y su lector estricto: partir una dataclass por tamaño
 dejaría la mitad de los campos lejos de la regla que los valida.
+
+**Los dos imports de abajo son a los módulos HOJA de `modelo`, y eso no es estilo: es lo que evita un ciclo.**
+`modelo/__init__` reexporta los nombres de este fichero, así que un `from ..modelo import …` aquí cerraría el
+círculo —`import contaperu.comprobantes` despertaría a `modelo`, que pediría este módulo a medio ejecutar— y
+reventaría con `ImportError` según quién entrase primero. Por eso `modelo/__init__` resuelve estos nombres
+perezosamente y aquí se nombran `..modelo.coerciones` y `..modelo.libro`, que no importan nada de vuelta.
+`tests/test_capas.py` lo vigila importando cada submódulo en su propio intérprete.
 """
 from __future__ import annotations
 
@@ -13,8 +20,8 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from .coerciones import CENTIMO, CERO, fecha, monto, solo_digitos, tipo_cambio
-from .libro import Libro
+from ..modelo.coerciones import CENTIMO, CERO, fecha, monto, solo_digitos, tipo_cambio
+from ..modelo.libro import Libro
 
 ORIGENES = ("xml", "pdf_texto", "vision", "manual", "sire")  # sire = importado de la propuesta de SUNAT
 # Lo que declara el documento sobre su pago. En la factura electrónica es obligatorio desde 2021 (UBL
