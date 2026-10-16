@@ -100,7 +100,7 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 - **Arriba, tu sistema:** el **ERP externo** recibe lo que sube el contador, los XML o el TXT de la propuesta del SIRE.
   Guarda, revisa y descarga: todo lo que necesita red, disco o credenciales vive ahí, no en el motor.
 - **En el medio, el documento común:** lo que el ERP le pasa al motor es un documento
-  [`open-accounting`](estandar/LEEME.md), con el libro (RUC, periodo, compras o ventas) y los comprobantes. Tiene su
+  [`open-accounting`](estandar/LEEME.md), con el libro (RUC, periodo y cuál de los cuatro: compras, ventas, tesorería o diario) y sus hechos. Tiene su
   [esquema formal](estandar/open-accounting.schema.json). La imputación (la cuenta y el centro de costo de cada
   comprobante) y la configuración contable de la empresa no van dentro: llegan aparte, por el `id_externo` de cada
   comprobante.
@@ -115,6 +115,66 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
   Un driver de la comunidad se enchufa sin tocar este repositorio.
 - **Abajo, los destinos:** el TXT del SIRE, los asientos de CONCAR, el registro de CONTASIS o el resultado de vuelta al
   ERP, en JSON y con su diagnóstico.
+
+### Cómo está organizado el código
+
+El paquete se entiende con **dos ejes**, y casi todo lo demás se deduce de ellos.
+
+**El primero son las capas**, de abajo arriba. Cada una solo puede usar las de abajo, y eso no es una costumbre:
+`tests/test_capas.py` lo comprueba fichero a fichero y se pone rojo si alguien se salta el orden.
+
+| Capa | Carpetas | Qué sabe | Qué NO puede |
+|---|---|---|---|
+| **base** | `errores`, `_datos`, `_version` | los errores, leer los datos empaquetados | nada de contabilidad |
+| **núcleo** | `modelo`, `comprobantes`, `tesoreria`, `asiento`, `contable`, `tributos`, `catalogos`, `pcge`, `sunat`, `aplicaciones`, `configuracion`, `vocabulario` | **toda la contabilidad peruana** | tocar disco, red o reloj; saber a qué ERP va |
+| **drivers** | `drivers/` (ocho destinos + `contrato` y `kit`) | el formato de un sistema concreto | decidir una cuenta |
+| **pipeline** | `pipeline/` | cómo se orquesta un mes | ser llamado directamente desde fuera |
+| **api** | `api/` | la superficie pública y congelada | —— |
+| **puertas** | `puertas/` (Python, CLI, MCP, HTTP) | hablar un protocolo | saltarse la api |
+
+**El segundo son los libros**, que hoy son cuatro: `compra`, `venta`, `tesoreria` y `diario`. Un libro **no es un
+`if` repartido por el código**: es una fila en la tabla `modelo.RASGOS`, que declara de qué bloque salen sus
+líneas, qué papeles caben en su asiento y qué reglas le tocan. Cada capa que necesita distinguirlos lo hace con
+un diccionario tecleado por esa fila, nunca preguntando por el nombre del libro — y hay un test que recorre el
+paquete entero y lo prohíbe.
+
+Dónde vive cada cosa:
+
+```
+contaperu/
+├── modelo/          el libro y sus rasgos, las coerciones a Decimal y fecha
+├── comprobantes/    una compra o una venta: su forma, su identidad, su imputación,
+│                    sus lectores (XML de SUNAT, TXT del SIRE) y cuánto suma el mes
+├── tesoreria/       el dinero: la cuenta bancaria, el movimiento y su imputación
+├── asiento/         la partida doble: un motor por libro (`comprobante`, `movimiento`)
+│                    y `comun/` debajo; la línea de diario, las faltas y el índice
+├── contable/        lo que no depende del país: Debe = Haber, y el pre-mayor
+├── tributos/        lo peruano: IGV, detracciones, validación, contraste con el SIRE
+├── catalogos/       los códigos de SUNAT, cada uno con la resolución de la que sale
+├── pcge/            el plan de cuentas 2026 y de qué clase es cada cuenta
+├── sunat/           la API del SIRE descrita: se sabe la URL y no se llama nunca
+├── lectores/        la ruta de siempre de los lectores, que viven en comprobantes/
+├── drivers/         ocho destinos, por canal: ERP, SUNAT y los sistemas instalados
+├── pipeline/        leer, preparar, armar, diagnosticar y escribir un mes
+├── api/             lo que una aplicación usa, con su contrato OpenConta
+├── puertas/         Python, consola, MCP y HTTP
+└── aplicaciones.py  el puente entre los libros: cuánto de un pago cancela un documento
+```
+
+La mitad del código está en dos sitios, y no por casualidad: **`drivers/` es con diferencia lo más grande**
+—ocho formatos ajenos, cada uno con sus manías— y **`asiento/` lo segundo**, que es donde vive la contabilidad.
+Todo lo demás es más pequeño de lo que suele esperarse.
+
+Tres cosas más que ayudan a leerlo:
+
+- **Nada de lo que está dentro de `contaperu/` toca el disco, la red ni el reloj**, salvo `_datos`, que lee los
+  catálogos que viajan en el paquete. La fecha la pone quien llama. Lo vigila `tests/test_frontera.py`.
+- **Los destinos van por canal, no por nombre**: `erp` (el estándar y el CSV), `sunat` (SIRE y PLE) y `legacy`
+  (CONCAR, CONTASIS, STARSOFT). Un driver declara qué libros lleva, y el que no lleva uno lo rechaza diciendo
+  cuáles sí.
+- **La documentación de cada decisión está en el código, al lado de la regla**, y el porqué de cada versión en
+  [`CHANGELOG.md`](CHANGELOG.md). Si algo parece arbitrario, el comentario de encima suele decir qué archivo real
+  o qué resolución lo obligó.
 
 ### Por dónde pasa un comprobante
 
@@ -240,6 +300,10 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 
 **Le ahorra a un ERP lo que no tiene por qué escribir**, y es la parte que menos se ve:
 
+- **Recibir un Libro Diario, no solo producirlo.** Un ERP puede mandar sus asientos ya armados —la planilla, la
+  depreciación, el asiento de destino, un ajuste— con `libro.tipo: "diario"`, y el motor los lee, los **cuadra**,
+  les da su huella y los lleva a su destino. Es el único libro que el motor no origina, y tiene que ser así:
+  armar una planilla pide las reglas de la planilla, que este motor no tiene ni debe inventar.
 - **Cuánto es un libro.** `resumen` da la base gravada, el IGV y el total, cada moneda por su lado y con agrupación
   por contraparte; `por_cuenta` da el pre-mayor con su cuadre. Existen porque un conector los escribió por su cuenta
   y le salió `07` donde el motor dice `("07","87")`: una nota de crédito de no domiciliado que no restaba.
