@@ -1,0 +1,22 @@
+Constancia de operación - Procesada
+01 de junio 2026 a las 10:12 am
+Datos de operación con documentos en Soles
+Datos de la operación
+Tipo de operación Pago de letras y facturas
+Estado Procesada
+Número de operación 941212
+Fecha de proceso 01/06/2026 - 10:05 AM
+Datos del proceso de operación
+Código de solicitud 84999999
+Datos de pago
+Aceptante EMPRESA DE PRUEBA SAC
+Cuenta 191-1111111-0-11
+Tipo Corriente Soles
+Datos de documentos preparados
+Monto S/ 76,167.55
+Documentos Letras 0
+Documentos Facturas 1
+Documentos Total 1
+Documentos
+PROVEEDOR N° DE DOC. N° ÚNICO VENCIMIENTO MONTO INTERÉS/ COMISIÓN TOTAL
+PROVEEDOR UNO SAC E001262 743_1640_5 01/06/2026 S/ 76,167.55 S/ 89.25 S/ 76,256.80

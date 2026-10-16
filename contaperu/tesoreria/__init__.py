@@ -26,11 +26,17 @@ equivalente, al cobrar o al pagar» (enmienda 0021).
   operaciones estructuradas no trae saldos nunca. Lo que `revisar_tesoreria` sí comprueba es lo que el banco
   **declaró** en su cabecera contra la suma de lo que llegó, que es aritmética y no puede pasar en vacío.
 
-**No hay lectores de ningún banco**, y es a propósito: la forma salió de nueve extractos reales de agosto de 2026,
-pero cada parser entra con su archivo delante y su fixture anonimizado. Tampoco hay conciliación —casar un pago con
-lo que cancela es el hito D3 y necesita dos archivos— ni asiento de tesorería, que es D6 y espera la norma del ITF
-y un archivo que CONCAR haya aceptado. **El motor no emite todavía ninguna línea de rol `tesoreria`**, y
-`asiento.TIPOS_DEL_MOTOR` dice por qué: de un comprobante no sale un pago.
+**Y desde la 13.3 hay un lector**, `constancias/`: el primero, y entró como se prometió —con 80 PDF reales
+delante y sus fixtures anonimizados—. Lee cinco formatos de dos bancos y devuelve una lista de `Movimiento`,
+porque de un papel salen hasta tres: el pago y las comisiones que el banco cobra aparte. **Recibe texto, nunca un
+PDF.** Lo que sigue sin lector es el **extracto**, que es otro papel y otro hito (D2): una constancia dice lo que
+el contribuyente ordenó; un extracto, lo que el banco hizo, con su saldo corrido y su ITF cuantificado. La forma
+de `Movimiento` salió de nueve extractos reales de agosto de 2026 y los espera.
+
+Tampoco hay **conciliación** —casar un pago con lo que cancela cuando el papel no lo dice es el hito D3 y necesita
+el extracto delante—. El asiento sí está, desde la 12.9: las cinco formas salen cuadradas y el ITF se asienta con
+el importe que da el banco. Lo que falta de ahí es llevarlo a un sistema legacy (D6c), que espera un Excel de
+bancos que CONCAR haya aceptado.
 
 **Y nada de esto sale a la red.** El lector que algún día lea un extracto recibirá **bytes**, como ya hacen los de
 `lectores`: bajar el archivo del banco es de quien integra, igual que enviar al SIRE. Lo que sí se sabe aquí es qué
@@ -42,6 +48,7 @@ extracto peruano no son las columnas.
 """
 from __future__ import annotations
 
+from . import constancias
 from .cuadre import CuadreExtracto, ExtractoNoCuadra, cuadra, exigir
 from .extractos import Extracto, ExtractoInvalido, por_cuenta
 from .imputaciones import (ImputacionDeMovimiento, ImputacionInvalida, Parte, efecto_de,
@@ -60,7 +67,8 @@ __all__ = ["ABONO", "API", "ARCHIVO", "CARGO", "CLASES", "CLAVES_POR_CLASE", "CO
            "LECTURA_ASISTIDA", "LIBRE", "MANUAL", "MONEDAS", "Movimiento", "MovimientoInvalido", "ORIGENES",
            "PDF_TEXTO", "Parte", "Referencia", "ReferenciaInvalida", "SALIDA", "SENTIDOS", "TRANSFERENCIA",
            "TRIBUTO", "VISION",
-           "banco_del_cci", "clave_de", "cuadra", "efecto_de", "exigir", "glosa_de_movimiento", "leer",
+           "banco_del_cci", "clave_de", "constancias", "cuadra", "efecto_de", "exigir",
+           "glosa_de_movimiento", "leer",
            "leer_imputaciones",
            "normalizar_cci",
            "por_cuenta", "por_id", "sin_cuenta_declarada", "sin_duplicados"]

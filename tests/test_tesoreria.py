@@ -1099,7 +1099,7 @@ def test_una_cuenta_sin_numero_ni_CCI_VALE_para_registrar_y_lo_dice():
 
     # Con su número, ni aviso: lo que faltaba era el identificador, no otra cosa.
     con_numero = api.validar_cuentas_bancarias([{"id": "bbva-pen", "banco": "BBVA", "moneda": "PEN",
-                                                 "cuenta_contable": "104101", "numero": "0011-0307-0100028777"}])
+                                                 "cuenta_contable": "104101", "numero": "0119-9900-0000000100"}])
     assert con_numero["avisos"] == []
 
 

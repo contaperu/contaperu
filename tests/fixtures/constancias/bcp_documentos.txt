@@ -1,0 +1,32 @@
+Constancia de operación - Procesada
+28 de abril 2026 a las 03:04 pm
+Datos de operación con documentos en Dólares
+Datos de la operación
+Tipo de operación Pago de letras y facturas
+Estado Procesada
+Número de operación 939049
+Fecha de proceso 28/04/2026 - 02:48 PM
+Datos del proceso de operación
+Código de solicitud 84711418
+Preparada por USUARIO DE PRUEBA
+Fecha de preparación 28/04/2026 - 12:47 PM
+Firmada por OTRO USUARIO DE PRUEBA
+Enviada por OTRO USUARIO DE PRUEBA
+Fecha de envío 28/04/2026 - 02:48 PM
+Datos de pago
+Aceptante EMPRESA DE PRUEBA SAC
+Cuenta 191-3333333-1-33
+Tipo Corriente Dólares
+Datos de documentos preparados
+Monto $ 27,006.60
+Documentos Letras 1
+Documentos Facturas 2
+Documentos Total 3
+28/4/26, 15:04 Telecrédito
+Constancia de operación - Procesada
+Documentos
+PROVEEDOR N° DE DOC. N° ÚNICO VENCIMIENTO MONTO INTERÉS/ COMISIÓN TOTAL
+PROVEEDOR UNO SAC 484326 754_2000_2 17/09/2026 $ 15,579.93 $ 0.00 $ 15,579.93
+PROVEEDOR DOS EIRL F7991345 754_3574_6 19/09/2026 $ 1,125.27 $ 0.00 $ 1,125.27
+PROVEEDOR TRES SRL F0111408 754_4617_0 20/09/2026 $ 10,301.40 $ 0.00 $ 10,301.40
+28/4/26, 15:04 Telecrédito

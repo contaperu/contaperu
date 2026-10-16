@@ -1,0 +1,14 @@
+2026/05/18 14:35:20EMPRESA DE PRUEBA SAC
+x 
+Su operación ha sido realizada
+Número de Operación 000002267
+Tipo de Operación TRANSF A CTAS DE TERCEROS
+Número de Cuenta de Cargo 01199900000000000300 
+Titular de la Cuenta Cargo EMPRESA DE PRUEBA SAC
+Importe Cargado 873.85    DOLARES
+Cuenta / Tarjeta / Servicio Beneficiario 01199900000000000400    PROVEEDOR UNO SAC
+Fecha / Hora 2026-05-18     14:04:40
+Tipo de cambio 0.0000
+Número de Contrato 0
+Referencia OP 12477 BANCA AUTOMATIC
+Consulta de Operaciones

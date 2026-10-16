@@ -1,0 +1,35 @@
+2026/09/08 18:33:36EMPRESA DE PRUEBA SAC
+Consulta de la Orden - Antes del proceso
+Nro. Orden Planilla Descripción
+Enviada
+Cuenta de Cargo
+Fecha Hora
+0908004 PAGO DE PROVEEDORES RFF 08/09/2026 18:31:27 0119-9900-0000000100
+Abonos Enviados Moneda de Cargo Importe Inicialmente informado Horario de Ejecución Situación
+2 SOLES 3,195.00 INMEDIATA ABONOS OK
+Consulta de la Orden - Después del proceso
+No. Movimiento de Cargo 000000000
+Fecha y Hora de Ejecución 08/09/2026 - 18:31:27
+Abonos procesados 2
+Importe cargado por abonos 3,195.00 - SOLES
+Abonos NO procesados 0
+Importe NO abonado 0.00 - SOLES
+Comisión por Otra Plaza 0.00 - SOLES
+Comisión Interbancaria 5.00 - SOLES
+TOTAL CARGADO 3,200.00 - SOLES
+  Ver contenido de la planilla   
+Relación de las cuentas de abono
+Sel No. Cuenta Banco Titular Doc.Identidad Importe Celular Correo Cant. Doc. Situación
+Consulta de Pagos Masivos
+ 
+1 00399900000000000500   INTERBANK PERSONA DE PRUEBA UNO L - 41074220 2,500.00 0 ABONO ENVIADO
+ 
+2 00999900000000000200   Scotiabank PROVEEDOR DOS EIRL R - 20607777773 695.00 0 ABONO ENVIADO
+ 
+Horario:
+Entidad Financiera Hora de envío de tuoperación
+-Banco de Crédito
+-Scotiabank
+-Banco de Comercio
+-Interbank
+-BanBif

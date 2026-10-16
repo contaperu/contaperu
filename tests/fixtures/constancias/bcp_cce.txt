@@ -1,0 +1,38 @@
+05/08/2026
+Consulta de Operaciones -
+05 de agosto 2026 a las 08:03 a. m.
+Procesada
+Datos de la operación
+Tipo de operación
+Estado
+Transferencia a otros bancos locales - Diferida
+Procesada
+02024280Número de operación
+Fecha de proceso 04/08/2026 - 11:21 pm
+Datos de procesos de la operación
+Código de solicitud 97504436
+Preparada por USUARIO DE PRUEBA
+Fecha de preparación 04/08/2026 - 06:48 pm
+Firmada por OTRO USUARIO DE PRUEBA
+Enviada por OTRO USUARIO DE PRUEBA
+Fecha de envío 04/08/2026 - 11:21 pm
+Datos de la cuenta de origen
+Titular
+Cuenta
+Tipo Corriente Soles
+191-1111111-0-11
+EMPRESA DE PRUEBA SAC
+Datos de la transferencia
+Monto Transferido
+S/ 4.30
+S/ 210,154.53
+S/ 210,150.23
+Comisión CCE
+Monto total
+Datos del beneficiario
+Titular PROVEEDOR DOS EIRL
+RUC 20607777773
+CCI 018-000000000870803-04
+Banco Banco de la Nación
+ITF Afecta
+Referencia OP 13646

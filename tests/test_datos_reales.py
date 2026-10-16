@@ -37,8 +37,16 @@ RAIZ = pathlib.Path(__file__).resolve().parents[1]
 # motor valida la contraparte y un RUC inválido daría `RUC_INVALIDO` en vez de probar lo que el test quiere probar.
 RUCS_SEGUROS = ("20131312955", "20601234567", "20602222226", "20607777773")
 
-# Los de `tests/test_tesoreria.py`: código de entidad real —norma publicada— y el resto inventado.
-CCIS_SEGUROS = ("01199900000000000100", "00999900000000000200")
+# Código de entidad real —norma publicada— y el resto inventado: oficina `999` y una cuenta corrida que no puede
+# ser de nadie. Los dos primeros son de `tests/test_tesoreria.py`; los tres siguientes entraron con el lector de
+# constancias (`tests/fixtures/constancias/`), que necesita distinguir la cuenta de cargo del contribuyente, la
+# del beneficiario de una transferencia y la de un abono a otro banco — y además la misma cuenta escrita de dos
+# maneras, que es lo que el lector tiene que reconocer.
+CCIS_SEGUROS = ("01199900000000000100",   # la cuenta en soles del contribuyente (BBVA, 011)
+                "00999900000000000200",   # un abono a Scotiabank (009)
+                "01199900000000000300",   # la cuenta en dólares del contribuyente (BBVA, 011)
+                "01199900000000000400",   # el beneficiario de una operación suelta (BBVA, 011)
+                "00399900000000000500")   # un abono a Interbank (003)
 
 # Donde se busca. Solo texto, y nunca `privado/` —que es donde un archivo real SÍ puede vivir, de lectura y en
 # local— ni el entorno virtual.
