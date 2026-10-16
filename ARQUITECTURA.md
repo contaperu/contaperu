@@ -374,6 +374,19 @@ Lo que esto compra, y lo que no:
 - **Añadir un libro pasa de auditar medio centenar de `if` a rellenar una fila**, y lo que el motor todavía no sabe
   hacer **se nota**, porque hay que rellenar el campo y no hay con qué. Esa mitad es la que más vale: la tabla es
   también un inventario de lo que falta.
+- **Y desde la 13.1 es verdad del todo, con su medida.** La 9.0 convirtió en tabla *qué es* un libro y dejó *de
+  qué bloque salen sus líneas* en un `if` repetido en siete sitios, donde el `else` significaba «comprobantes»:
+  un cuarto libro añadía un `elif` en los siete y el que se olvidara salía tratado como una compra, que es el
+  mismo fallo una capa más abajo. Ahora cada capa elige en un diccionario tecleado por `origen`
+  —`CAMINOS_DEL_ASIENTO`, `CAMINOS_DEL_ARCHIVO`, `CAMINOS_DEL_DIAGNOSTICO`, `DERIVACION_DEL_ROL`,
+  `BLOQUES_POR_ORIGEN`, `IMPRESORES`—, y no es una tabla paralela porque no se teclea por libro: hay tantas
+  entradas como **bloques de entrada** —hoy dos, para tres libros—, así que un libro que reutilice un bloque no
+  añade ninguna. Lo comprueba `tests/test_despacho_por_origen.py`: un guardián por AST con su lista de toleradas
+  vacía, y un libro de mentira que entra en la tabla y llega hasta donde le toca sin que se escriba una línea.
+- **La línea de corte, que ahora es nítida: un libro que reutiliza un bloque es una fila; uno que estrena bloque
+  es un motor.** Lo primero son dos datos —la entrada en el catálogo publicado y la fila de `RASGOS`— y cero
+  código. Lo segundo es escribir el módulo que arma su asiento y declararlo en `asiento.comun.ORIGENES_CON_MOTOR`,
+  y hasta que exista el libro entra igual y se para en `LibroQueElMotorNoOrigina` nombrando los que sí.
 - **Un booleano ya no se interpreta: para.** Es deliberado — un `True` que se colara elegiría la rama equivocada en
   silencio, que es justo lo que la mayor viene a cerrar. Y **omitir el libro tampoco vale**, que era el defecto de la
   firma y era el error.

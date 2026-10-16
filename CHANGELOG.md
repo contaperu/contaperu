@@ -4,6 +4,71 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [13.1.0] — 2026-10-16
+
+**«Añadir un libro es añadir una fila» deja de ser una frase.** El repo lo promete tres veces desde la 9.0, y
+era verdad a medias: aquella mayor convirtió en tabla **qué es** un libro —`modelo.RASGOS`— y dejó **de qué
+bloque salen sus líneas** en un `if origen == "movimientos"` repetido en **siete sitios**, con un `else` que
+significaba «comprobantes» sin decirlo. Un cuarto libro añadía un `elif` en los siete, y el que se olvidara
+salía tratado como una compra en silencio — el mismo fallo que la 9.0 vino a cerrar, una capa más abajo.
+
+Salió al preguntarse si la arquitectura aguanta lo que viene: inventario, caja chica, rendiciones, asientos de
+ajuste. La respuesta fue que **el problema no era dónde estaban las carpetas** —`comprobantes/` y `tesoreria/`
+son dos vecinos del núcleo, no los dos contenedores del paquete, y nueve de las trece carpetas son capas que
+sirven a todos los libros— sino que un libro nuevo tocaba 63 puntos y 37 eran ramas de código.
+
+### Cambiado · ninguna salida se mueve
+
+- **Las seis capas eligen por tabla**: `CAMINOS_DEL_ASIENTO`, `CAMINOS_DEL_ARCHIVO`, `CAMINOS_DEL_DIAGNOSTICO`,
+  `DERIVACION_DEL_ROL`, `BLOQUES_POR_ORIGEN` e `IMPRESORES`, todas tecleadas por `origen`. **No es la tabla
+  paralela que la 9.0 prohibió**, y la diferencia es exacta: una tabla paralela se teclea por `tipo` y crece con
+  cada libro; éstas se teclean por una **columna** de `RASGOS` y crecen con cada forma de entrar — dos entradas
+  para tres libros, y cero entradas nuevas para un libro que reutilice un bloque.
+- **`TIPOS_DEL_MOTOR` se deriva** en vez de ser tres nombres escritos a mano, que era la última tabla paralela
+  que quedaba. Da la misma tupla, en el mismo orden.
+- **La consola dejó de adivinar.** Hacía `if "movimientos" in totales`, o sea deducía de qué libro era la
+  respuesta por un síntoma de su forma, y lo hacía porque una puerta solo habla con `api` y `api` no publicaba
+  los rasgos. Ahora los publica —`api.rasgos_de`, aditivo— y pregunta por el libro.
+- La guarda del motor del dinero **no se convirtió en tabla**: afirma su identidad, no despacha. Su literal pasa
+  a ser `MI_ORIGEN` para que se lea como lo que es.
+
+### Añadido
+
+- `modelo.ORIGENES_DE_LIBRO` y `asiento.comun.ORIGENES_CON_MOTOR`, que son las dos mitades de la línea de corte:
+  por dónde se entra, y por dónde el motor sabe armar.
+- `tests/test_despacho_por_origen.py`, la medida: un guardián por AST que prohíbe decidir por el nombre de un
+  origen —con la lista de toleradas **vacía**, de siete a cero—, el inventario de las seis tablas por inclusión,
+  y **el libro de mentira**, que mete una fila y comprueba hasta dónde llega sin tocar una línea.
+- El test que compara los roles **declarados** con los que el motor **emite**, ejecutándolo. No existía: uno
+  comprobaba que la tupla no estuviera vacía y otro anclaba literales medidos una vez. Entre los dos se podía
+  declarar un rol de más o dejarse uno fuera sin que nada cayera — que es lo que le pasó a tesorería.
+- El guardián del recuento del §8 de `HOJA-DE-RUTA.md`, que ya se había quedado atrás una vez.
+- La **propuesta 51**: el inventario permanente (PLE 12.1 y 13.1), anotada y no escrita, porque los códigos de
+  esos formatos no están en el repositorio y «ninguna regla sin fuente» lo bloquea igual que bloqueó el grupo 01.
+
+### El nudo que se desata, que es para lo que sirve todo esto
+
+Hasta ahora la fila de un libro y su motor tenían que entrar en el **mismo commit**: los roles se declaran
+midiendo lo que el motor emite, y `TIPOS_DEL_MOTOR` era una tupla a mano, así que sin roles no entrabas en la
+tupla y sin la tupla no podías medir. Derivadas las dos caras, **una fila entra sola**. Lo demuestra el libro de
+mentira: con un bloque sin motor, el motor la para nombrando los que sí origina; con un bloque que ya lo tiene
+—el caso de caja chica—, recorre el circuito entero y lo único que la detiene es que ningún driver declare ese
+libro, que es la degradación que el estándar promete.
+
+**Y un libro no es una fila: son dos datos.** Lo descubrió el test al escribirse — hace falta la entrada en el
+catálogo publicado del estándar, contra el que `Libro` valida su tipo, y la fila de `RASGOS`. Ninguna es código.
+
+### Lo que esta versión NO hace
+
+- **No mueve ninguna carpeta.** La pregunta que la abrió era si las demás debían meterse dentro de
+  `comprobantes/` y `tesoreria/`, y la respuesta es no: son capas, y meterlas en un libro cambiaría el eje de
+  capas por el eje de libro.
+- **No añade ningún libro**, y en particular no hace **B13** —`libro.tipo` creciendo con el catálogo del PLE,
+  que es lo que permitiría recibir planilla, depreciación, destino y ajustes—. Es el orden 1 de la hoja de ruta
+  y su dato ya está; esto es lo que lo abarata.
+- **Caja chica y rendiciones siguen siendo tesorería**, que es lo que la enmienda 0024 decidió: «un pago de
+  tributos, un reintegro de caja chica y un depósito de detracción son el mismo hecho con otra contrapartida».
+
 ## [13.0.0] — 2026-10-16
 
 **Por qué es una mayor, y no la 12.12 con la que se escribió.** Lo de abajo arregla un libro que se
