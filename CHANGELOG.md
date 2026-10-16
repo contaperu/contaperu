@@ -4,6 +4,62 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [13.2.0] — 2026-10-16
+
+**El Libro Diario: el cuarto libro, y el primero que el motor no arma sino que recibe.** Cierra el hito **B13**,
+que era el orden 1 de la hoja de ruta. El hueco que tapaba: un ERP no tenía con qué nombrar un asiento de
+planilla, de depreciación o de destino. Medido sobre el Libro Diario 5.1 presentado y aceptado de un mes real,
+son 12 094 líneas en 1 441 asientos repartidos en 19 sub-diarios, de los que unos 530 no vienen del registro de
+compras ni del de ventas.
+
+**Entra un libro y no uno por hecho**, y no es una preferencia: cada uno de esos hechos **ya tiene su libro** en
+la RS 234-2006 —el de Planillas, el Registro de Activos Fijos, el de Costos— y los tres asientan en el mismo
+Formato 5.1, que es el contenedor genérico. Uno por hecho sería inventar categorías de gasto y llamarlas libros,
+que es lo que el `honorario` intentó y se descartó: `libro` es el libro tributario.
+
+### El tercer caso del eje, que la 13.1 no había previsto
+
+Un **origen nuevo que no es un motor**. Sus líneas llegan ya hechas en el bloque `asiento` —que el estándar
+admite de entrada desde la 1.0 y el motor lee desde la 5.2— y tienen que llegar así, porque armarlas pediría
+reglas que este motor no tiene ni va a tener: una planilla pide las de la planilla y una depreciación el activo
+y su vida útil. Lo que el motor aporta no es el asiento: es leer cada línea con su contrato, **cuadrarla**,
+darle su huella y llevarla a un destino.
+
+Y se nota lo que la 13.1 compró: **la fila entró y el motor la trató bien sin tocar una línea del motor**. Lo
+que hubo que escribir son las tres entradas de las tablas de las capas, y nada más.
+
+### Añadido
+
+- El valor `diario` en el catálogo `tipos_de_libro` del estándar (su catálogo pasa a `1.1`; **la versión del
+  documento no se mueve**, que es lo que la enmienda 0011 prometió), con la **enmienda 0033**.
+- Su fila en `modelo.RASGOS`, con `origen="asiento"`, sin roles y sin sub-diario — los tres vacíos dicen lo que
+  el motor no hace con él, que es casi todo.
+- Su camino en las tres capas: `_asiento_del_diario`, `_archivo_del_diario` y `_del_diario`, más
+  `armado.desde_lineas_ya_armadas`, que no exige requisitos, no indexa y no numera, pero cuadra.
+- `tests/test_libro_diario.py`, con el ida y vuelta cerrado: el archivo neutral vuelve a entrar, rearma la misma
+  huella y reexportarlo da el archivo byte a byte.
+- Lo declaran **`asiento_contable` y `csv`**.
+
+### Dos decisiones que salieron al hacerlo, las dos con precedente
+
+- **El PLE no lo declara todavía**, y es la ausencia que más dice: es el driver que escribe el 5.1, o sea
+  literalmente este libro. Sus filas se construyen recorriendo el índice de comprobantes, y un libro que llega
+  armado no tiene índice, así que declararlo habría dado un TXT **vacío con pinta de correcto**. Es el mismo
+  criterio con el que `asiento_contable` esperó a declarar tesorería hasta que `exportar` supo escribirla: un
+  driver gana un libro cuando sabe escribirlo, no cuando el libro existe. Lo que falta está escrito en su
+  `FORMATOS`.
+- **El `rol` de una línea de diario es vacío, no un error.** La columna existe en el CSV y en el pre-mayor y lo
+  que toca escribir ahí es nada: lanzar sería tratar «aquí eso no se puede saber» como «te equivocaste», y
+  dejaría a un destino neutral sin poder escribir un diario que por lo demás está completo.
+
+### Lo que esta versión NO hace
+
+- **No sabe armar ningún asiento de los que recibe**, y no es un pendiente: es la definición del libro.
+- **`diagnosticar` de un diario no trae `bloqueantes`, `avisos`, detracciones ni sub-diarios**, por lo mismo que
+  no los trae el de tesorería: son del comprobante, y publicarlos en cero diría «se miró y no hay» donde la
+  verdad es «aquí eso no existe».
+- El `ple` y los tres legacy siguen rechazándolo limpio, nombrando los libros que sí llevan.
+
 ## [13.1.0] — 2026-10-16
 
 **«Añadir un libro es añadir una fila» deja de ser una frase.** El repo lo promete tres veces desde la 9.0, y
