@@ -15,6 +15,12 @@ mes en `contable/`. La asimetría se veía en una tabla: `Movimiento` e `Imputac
   reparto de la base. Llega aparte, con el `id_externo` como llave. Es la pareja de `Comprobante` igual que
   `ImputacionDeMovimiento` lo es de `Movimiento`, y por eso están juntas: tenerlas en paquetes distintos era la
   asimetría que esto vino a arreglar.
+- `resumen.del_libro` — **cuánto es un mes**: la base, el IGV y el total, cada moneda por su lado y con la nota
+  de crédito restando. Estaba en `contable/`, el paquete de lo que no depende del país, y no cumplía su
+  criterio: para sumar un libro hay que saber qué códigos de la Tabla 10 son nota de crédito. Su hermano
+  `por_cuenta`, el pre-mayor, sí lo cumple y se quedó allí.
+- Los **lectores**: `xml_ubl` (el XML UBL 2.1 de SUNAT), `sire_txt` (el TXT de la propuesta) y `archivos`, que
+  desarma el ZIP y reparte. Son la puerta de entrada de este libro y de ningún otro.
 
 **No hay asiento**, que es lo que SALE de un comprobante y vive en `asiento/`, igual que el asiento de un
 movimiento no vive en `tesoreria/`. **No hay tributos**: el IGV, las detracciones y la validación son de

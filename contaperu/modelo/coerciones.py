@@ -32,6 +32,16 @@ def texto_tasa(tasa: Decimal) -> str:
     return format(tasa.quantize(CENTIMO, rounding=ROUND_HALF_UP).normalize(), "f")
 
 
+def texto_monto(valor: Decimal) -> str:
+    """Un importe como se cita: TEXTO de dos decimales, que es como sale el dinero por toda la api.
+
+    Vive aquí desde la 12.11 porque la usan los dos resúmenes —el del libro, que suma comprobantes, y el
+    pre-mayor, que agrupa líneas— y al separarlos en dos paquetes habría quedado copiada. Es hermana de
+    `texto_tasa`: las dos contestan «cómo se escribe esto», y por eso están juntas.
+    """
+    return str(valor.quantize(CENTIMO))
+
+
 def serie_y_numero(serie: str, numero: str) -> str:
     """«F001-123», o solo la parte que haya: un documento sin serie (un DUA, un recibo de servicios) se nombra por su
     número, y sin número por su serie."""
