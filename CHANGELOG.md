@@ -4,6 +4,71 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [12.11.0] — 2026-10-16
+
+**El comprobante tiene su paquete.** Desde la 8.2 existe `contaperu/tesoreria/`, que agrupa la forma del dinero
+—el movimiento, su imputación, la cuenta, el cuadre—, y no había su espejo para compras y ventas: el hecho vivía
+en `modelo/`, lo que el ERP decide en `asiento/`, sus lectores en `lectores/` y la suma del mes en `contable/`.
+La asimetría se veía en una tabla: `Movimiento` e `ImputacionDeMovimiento` eran vecinos, y `Comprobante` e
+`Imputacion`, que son la misma pareja del otro libro, estaban en paquetes distintos sin más razón que la
+historia. Nace `contaperu/comprobantes/` y recibe las cuatro piezas.
+
+**No rompe a nadie, y esa es la condición con la que se hizo.** Las rutas viejas siguen resolviendo porque cada
+fachada reexporta los mismos nombres —el patrón de la 6.3.0 y la 6.5.0, no el de la 6.4.0: **no hay ningún
+puente con aviso y no se deprecia nada**—. La prueba no es un razonamiento: `tests/fixtures/superficie/1.0.json`
+solo **añade** la clave `contaperu.comprobantes` y no pierde ni un nombre, las cuatro claves `contaperu.lectores*`
+siguen enteras, y los cuatro snapshots de celdas, el del documento, la caracterización y las huellas quedaron
+intactos sin tocarlos.
+
+### Añadido
+
+- **`contaperu/comprobantes/`**, núcleo y hoja como `tesoreria/`, con `Comprobante` y su identidad, `Imputacion`
+  y `Parte`, los lectores `xml_ubl`, `sire_txt` y `archivos`, y `resumen.del_libro`.
+- **`contaperu/modelo/accesores.py`** con `campo(cosa, nombre)`, y **`contaperu/asiento/comun.py`** con `iso`,
+  `limpio` e `indice_de_lineas_por_id`.
+- **`contaperu/modelo/coerciones.texto_monto`**, hermana de `texto_tasa`.
+- Un test que importa **cada paquete de primer nivel de primero**, con `sys.modules` limpio entre uno y otro.
+
+### Cambiado · nada que adaptar
+
+- `asiento/motor.py` pasa a **`asiento/comprobante.py`**, hermano de `movimiento.py`. `contaperu.asiento.motor`
+  nunca estuvo congelado y `contaperu.asiento` conserva sus nombres.
+- `contable/resumen.del_libro` se va a `comprobantes/resumen.py` y `contable/resumen.py` la reexporta, junto con
+  `AGRUPACIONES` e `IMPORTES`. `AGRUPACIONES` es el `enum` de un esquema público, así que moverla sin dejar la
+  ruta habría cambiado el contrato OpenConta por un refactor: no cambió, y `generar_openconta.py --comprobar` lo
+  dice sin regenerarlo.
+- `modelo/__init__` resuelve los trece nombres del comprobante **perezosamente**. No es estilo: sin eso,
+  `import contaperu.comprobantes` moría con `ImportError` mientras `import contaperu.modelo` seguía pasando.
+
+### Cuatro copias que eran una, y una quinta que apareció buscándolas
+
+El accesor «objeto o diccionario» estaba escrito **cuatro** veces —`asiento/movimiento.py`, `asiento/indice.py`,
+`tesoreria/imputaciones.py` y `aplicaciones.py`—, y **dos de ellas llevaban un docstring citando los tres
+defectos que nacieron justamente de no tenerla en un solo sitio**. La cuarta no estaba en el inventario: salió
+al buscar las otras tres.
+
+`indice_de_lineas_dadas` e `indice_de_movimientos_dados` eran **el mismo bucle** —mismo enlace por
+`linea.documento.id_externo`, mismos tres rechazos, mismo tramo `desde`/`hasta`—; solo cambiaban la excepción, el
+sustantivo de los mensajes y con qué se arma la cabecera. El docstring del segundo ya lo admitía: «hermana
+exacta». Los textos de los tres mensajes **no cambian ni una letra**, porque los lee quien integra; comprobado
+mutando los tres rechazos uno a uno, y los tres hacen caer tests.
+
+### Lo que esta versión NO hace
+
+- **`tributos/` no se movió**, y es una decisión y no un olvido: es el paquete de lo **peruano** —casi entera la
+  tupla `PERUANOS`— y la hoja de ruta lo reserva para `jurisdicciones/pe` (hito **J4**). `comprobantes/` dice QUÉ
+  es un comprobante; `tributos/`, DÓNDE rige. Meterlo dentro habría obligado a sacarlo otra vez.
+- **`asiento/faltas.py` e `indice.py` no se parten**, aunque sus cortes están localizados y rotulados en el
+  propio código. Va en la tanda siguiente.
+- **`diagnosticar` sigue sin camino de tesorería**, y conviene decirlo porque no se ve: con
+  `driver="asiento_contable"` y `libro.tipo="tesoreria"` pasa el chequeo de «ese destino no lleva ese libro»
+  —porque ese driver sí lo declara— y sigue por la ruta de comprobantes, devolviendo todos los contadores en
+  cero sin mirar un movimiento. Sus hermanos `exportar` y `generar_asiento` sí bifurcan por
+  `libro.rasgos.origen`. Es un hueco conocido, no una regresión de esta versión.
+- El `alt` del README decía «las ocho carpetas del paquete» y eran **catorce** desde hace varias versiones: ese
+  recuento no lo vigila ningún test. Queda corregido, y el diagrama al día en lo que esta tanda movió — sigue
+  debiendo `sunat/`, `tesoreria/` y `aplicaciones`, y los destinos son ocho y no seis.
+
 ## [12.10.0] — 2026-10-14
 
 **El archivo del dinero, y el ida y vuelta cerrado.** La 12.9 dejó el asiento de tesorería pedible y sin destino

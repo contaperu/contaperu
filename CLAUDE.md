@@ -55,8 +55,13 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
 ## Cómo está construido
 
 Por capas, de abajo arriba, que `tests/test_capas.py` hace cumplir: un **núcleo** que sabe contabilidad peruana y nada
-más (`modelo/`, `lectores/`, `tributos/` —el IGV, las detracciones, la validación y el contraste con el SIRE—,
-`contable/` —la partida doble y el resumen—, `asiento/`, `pcge/`, `sunat/` —la API del SIRE como funciones
+más (`modelo/` —el libro y las coerciones—, `comprobantes/` —desde la 12.11 el comprobante tiene su paquete,
+espejo del de `tesoreria/`: su forma y su identidad, su imputación, sus tres lectores y cuánto suma un mes; lo
+que SALE de él es el asiento y está en `asiento/`, y lo que dice DÓNDE rige son los tributos, que se quedan
+aparte porque ese es el otro eje, el de `jurisdicciones/pe`—, `lectores/` —la ruta de siempre de esos tres
+lectores, que sigue sirviendo—, `tributos/` —el IGV, las detracciones, la validación y el contraste con el SIRE—,
+`contable/` —la partida doble y el pre-mayor—, `asiento/` —sus dos motores hermanos, `comprobante` y
+`movimiento`, con `comun/` debajo—, `pcge/`, `sunat/` —la API del SIRE como funciones
 puras: se sabe la URL y no se llama nunca— y `tesoreria/` —la cuenta bancaria que declara el contribuyente con su
 104, el **item de operación** y el cuadre de la cadena de saldos; la forma salió de nueve extractos reales y no
 hay lector de ningún banco todavía. **Desde el 10-oct-2026 tiene su tipo de libro**, `tesoreria`, así que el dinero

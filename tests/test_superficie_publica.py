@@ -49,6 +49,12 @@ EXTENSION = (
     # constancia de un pago y el cuadre de la cadena de saldos. Por el mismo motivo que `sunat`: su público es
     # quien integra, y lo que no está congelado puede irse sin avisar.
     "contaperu.tesoreria",
+    # El comprobante (12.11): su forma, su identidad, lo que el ERP decide sobre él y cuánto suma un mes. Entra
+    # por el mismo motivo que `tesoreria`, del que es espejo: su público es quien integra. Lo que esa versión
+    # mudó aquí dentro —de `modelo`, de `asiento`, de `lectores` y de `contable`— **no se quitó de donde
+    # estaba**: las cuatro rutas viejas siguen abajo en esta lista y en el fixture, y que sigan ahí intactas es
+    # la prueba de que la mudanza no rompió a nadie y por eso cupo en una menor.
+    "contaperu.comprobantes",
     "contaperu.lectores", "contaperu.lectores.archivos", "contaperu.lectores.sire_txt", "contaperu.lectores.xml_ubl",
     "contaperu.drivers", "contaperu.drivers.contrato", "contaperu.drivers.kit", "contaperu.drivers.concar", "contaperu.drivers.contasis",
     "contaperu.drivers.csv", "contaperu.drivers.sire", "contaperu.drivers.starsoft",

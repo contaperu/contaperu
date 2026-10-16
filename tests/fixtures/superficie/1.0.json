@@ -373,6 +373,23 @@
   "sin_cuenta_declarada": "",
   "sin_duplicados": ""
  },
+ "contaperu.comprobantes": {
+  "CAMPOS_DEL_DOCUMENTO": "",
+  "CAMPOS_DEL_SISTEMA": "",
+  "CAMPOS_DE_LA_REVISION": "",
+  "CONDICIONES_PAGO": "",
+  "Comprobante": "",
+  "Imputacion": "",
+  "NOTAS": "",
+  "NOTAS_CREDITO": "",
+  "NOTAS_DEBITO": "",
+  "ORIGENES": "",
+  "Observacion": "",
+  "Parte": "",
+  "RETIRADOS_EN_0_3": "",
+  "clave_de": "",
+  "identidad_de": ""
+ },
  "contaperu.lectores": {
   "archivos": "",
   "sire_txt": "",

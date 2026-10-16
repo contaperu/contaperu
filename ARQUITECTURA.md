@@ -38,7 +38,8 @@ que se puede confiar en cada capa porque la de abajo ya está probada con archiv
 XML UBL / TXT del SIRE / JSON open-accounting
           │
           ▼
-   lectores/  ──►  Comprobante (modelo.py: Decimal, positivo, fechas date)
+   comprobantes/  ──►  Comprobante (Decimal, positivo, fechas date)
+   (xml_ubl, sire_txt, archivos)
           │
           ▼
    validar.py  ──►  observaciones: error (bloquea) | aviso (se exporta igual)
@@ -425,7 +426,7 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 | Capa | Módulos | Qué sabe |
 |---|---|---|
 | base | `_version`, `_obsoleto`, `_datos`, `errores` | la versión, el aviso de las rutas viejas, los datos empaquetados, la base de los errores |
-| núcleo | `modelo/` (el libro, el comprobante, las coerciones), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `tributos/` (`igv`, `detracciones`, `validar`, `comparar_sire`), `contable/` (`partida_doble`, `resumen`), `asiento/` (con `resolucion/` dentro: lo configurado, lo imputado, la clasificación, los requisitos y la numeración), `pcge/`, `lectores/`, `sunat/` (la API del SIRE como funciones puras: se sabe la URL, no se llama), `tesoreria/`, `aplicaciones` (cuánto de un pago cancela un documento: el puente entre los tres libros), `configuracion` | contabilidad peruana, sin disco, sin red y sin reloj |
+| núcleo | `modelo/` (el libro, las coerciones, el accesor objeto-o-dict), `comprobantes/` (el comprobante y su identidad, su imputación, sus lectores —`xml_ubl`, `sire_txt`, `archivos`— y cuánto suma un mes), `tesoreria/` (su espejo del otro lado: la cuenta bancaria, el movimiento, su imputación y el cuadre de saldos), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `tributos/` (`igv`, `detracciones`, `validar`, `comparar_sire`), `contable/` (`partida_doble`, `resumen.por_cuenta`), `asiento/` (`comprobante` y `movimiento`, los dos motores, con `comun/` debajo y `resolucion/` dentro: lo configurado, lo imputado, la clasificación, los requisitos y la numeración), `pcge/`, `lectores/` (la ruta de siempre de los tres lectores), `sunat/` (la API del SIRE como funciones puras: se sabe la URL, no se llama), `aplicaciones` (cuánto de un pago cancela un documento: el puente entre los tres libros), `configuracion` | contabilidad peruana, sin disco, sin red y sin reloj |
 | drivers | `drivers/` (`contrato/` —su taxonomía, sus protocolos, sus accesores y su examen—, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
 | pipeline | `pipeline/` (`preparacion/` —el documento, la configuración, las entradas y los pasos de un mes—, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
 | api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa; cada nombre con su firma, congelados |

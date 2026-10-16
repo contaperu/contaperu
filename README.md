@@ -118,13 +118,15 @@ quien lo usa también lo mejora ([Cómo aportar](#cómo-aportar)).
 
 ### Por dónde pasa un comprobante
 
-![Qué carpeta y qué archivo toca un comprobante: entra por lectores/ (xml_ubl, sire_txt, archivos, _zip), pasa al modelo canónico (modelo, vocabulario, catalogos, que leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (tributos/ con validar, igv y detracciones, más configuracion), asiento/ arma la partida doble apoyándose en contable/ y pcge/, y drivers/ lo traduce a sus ocho destinos; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/](diagramas/recorrido-por-los-modulos.svg)
+![Qué carpeta y qué archivo toca un comprobante: entra por comprobantes/ (xml_ubl, sire_txt, archivos, _zip), que es también donde vive su forma (modelo, vocabulario y catalogos leen datos/sunat/ con su fuente), lo revisan las reglas deterministas (tributos/ con validar, igv y detracciones, más configuracion), asiento/ arma la partida doble apoyándose en contable/ y pcge/, y drivers/ lo traduce a sus ocho destinos; por debajo, pipeline/ orquesta, api/ expone la superficie congelada y puertas/ solo habla con api/](diagramas/recorrido-por-los-modulos.svg)
 
-El mismo motor, un nivel más abajo: **las ocho carpetas del paquete y los archivos que toca un comprobante**, en el
-orden en que lo hacen.
+El mismo motor, un nivel más abajo: **las catorce carpetas del paquete y los archivos que toca un comprobante**, en
+el orden en que lo hacen.
 
-- **`lectores`** convierten un archivo que ya existe —el XML UBL de SUNAT, el TXT de la propuesta del SIRE— en
-  comprobantes del **`modelo`**, que es el modelo canónico: un comprobante es una fila del registro.
+- **`comprobantes`** es el paquete de una compra o una venta: sus **lectores** convierten un archivo que ya existe
+  —el XML UBL de SUNAT, el TXT de la propuesta del SIRE— en un `Comprobante`, que es una fila del registro, y
+  guardan además lo que el contador decide sobre él y cuánto suma el mes. Su espejo del otro lado es
+  **`tesoreria`**, que hace lo mismo con el dinero. (`lectores` sigue sirviendo como la ruta de siempre.)
 - **`validar`, `igv` y `detracciones`** aplican las reglas deterministas. El IGV **se lee** de los importes del
   comprobante, nunca se supone; y la detracción se contrasta con la tabla del contribuyente antes de tocarla.
 - **`asiento`** es donde vive la contabilidad de verdad: qué cuenta, qué sentido, cuántas líneas y con qué correlativo.
