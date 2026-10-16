@@ -90,6 +90,23 @@ def _comun(texto: str, tipo: str, cuentas, sena: str) -> dict:
                                                     or linea_con(texto, sena))}}
 
 
+def _lo_que_cobra_el_banco(campos: dict, cuanto, divisa: str, como_se_llama: str, concepto: str) -> Movimiento:
+    """La comisión como su propio movimiento (enmienda 0028), y **sin la referencia del pago**.
+
+    Esto último lo enseñó armar el asiento de los papeles reales, no leerlos: `Movimiento.clave` es
+    `(cuenta, referencia)` cuando hay referencia, porque «la del banco basta y sobra: es suya y no se repite
+    dentro de una cuenta». Darle al cobro el número de operación del pago los hacía **el mismo movimiento**, y el
+    motor descartaba el segundo como repetido — con razón: la clave decía que lo era.
+
+    Y no se inventa un número derivado (`…-COM`): el banco no le dio ninguno a este cobro, y fabricar una
+    referencia bancaria es de la misma familia que inventar una sigla. Sin referencia, la clave se cae a lo que
+    siempre hay —cuenta, fecha, sentido, importe y descripción—, que es justamente el caso para el que ese
+    camino existe. El número de la operación de la que salió se queda en `datos_originales`."""
+    suyos = {**campos["datos_originales"], "concepto": concepto, "operacion": campos["referencia"]}
+    return Movimiento(importe=cuanto, moneda=divisa, descripcion=como_se_llama,
+                      **{**campos, "referencia": "", "datos_originales": suyos})
+
+
 def _orden_interna(texto: str) -> list:
     """La orden de pago de la empresa (`Referencia OP 14292`), que es la llave con la que ella une el pago a lo
     que paga. No es un documento tributario y no tiene clase propia: viaja en `libre`, que existe para esto."""
@@ -132,8 +149,7 @@ def cce(texto: str, cuentas=()) -> list[Movimiento]:
                       referencias=_orden_interna(texto), **campos)
     if not comision:
         return [pago]
-    aparte = {**campos, "datos_originales": {**campos["datos_originales"], "concepto": "comision_cce"}}
-    return [pago, Movimiento(importe=comision, moneda=divisa, descripcion="Comisión CCE", **aparte)]
+    return [pago, _lo_que_cobra_el_banco(campos, comision, divisa, "Comisión CCE", "comision_cce")]
 
 
 def documentos(texto: str, cuentas=()) -> list[Movimiento]:

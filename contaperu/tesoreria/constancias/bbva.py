@@ -154,9 +154,14 @@ def masivos(texto: str, cuentas=()) -> list[Movimiento]:
     salen = [cargo]
     for nombre, cuanto in cobradas:
         if cuanto:
+            # Sin la referencia de la planilla, y por la misma razón que en el BCP: `Movimiento.clave` es
+            # `(cuenta, referencia)`, así que compartirla haría de las dos cosas un solo movimiento y el motor
+            # descartaría la segunda como repetida. Las dos comisiones del BBVA se distinguen entre sí por su
+            # descripción, que es lo que la clave larga mira.
             salen.append(Movimiento(importe=cuanto, moneda=divisa, descripcion=nombre,
-                                    datos_originales={**suyos, "concepto": nombre.lower().replace(" ", "_")},
-                                    **comun))
+                                    datos_originales={**suyos, "concepto": nombre.lower().replace(" ", "_"),
+                                                      "operacion": comun["referencia"]},
+                                    **{**comun, "referencia": ""}))
     return salen
 
 

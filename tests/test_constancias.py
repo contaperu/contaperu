@@ -257,6 +257,55 @@ def test_una_planilla_sin_su_tabla_de_abonos_se_lee_igual():
     assert not [r for r in cargo.referencias if r.importe], "sin tabla no hay abonos que referenciar"
 
 
+def test_la_comision_no_lleva_la_referencia_del_pago_porque_seria_el_mismo_movimiento():
+    """Lo cazó armar el asiento de los papeles reales, no leerlos — y por eso este test existe.
+
+    `Movimiento.clave` es `(cuenta, referencia)` cuando hay referencia, porque «la del banco basta y sobra: es
+    suya y no se repite dentro de una cuenta». Darle al cobro el número de operación del pago los convertía en
+    **el mismo movimiento**, y el motor descartaba el segundo como repetido: de 61 movimientos leídos, tres no
+    llegaban al asiento. La clave decía que eran repetidos, y la clave no se equivocaba.
+
+    Tampoco se fabrica un número derivado: el banco no le dio ninguno a este cobro, e inventar una referencia
+    bancaria es de la misma familia que inventar una sigla. El número de la operación de la que salió se queda en
+    `datos_originales`, donde no miente sobre lo que es."""
+    from contaperu.tesoreria import sin_duplicados
+
+    for fixture in ("bcp_cce", "bbva_masivos"):
+        pago, comision = leer(fixture)
+        assert pago.referencia, "el pago sí lleva el número que le dio el banco"
+        assert comision.referencia == "", f"{fixture}: la comisión no tiene número propio y no se le inventa"
+        assert comision.datos_originales["operacion"] == pago.referencia
+        assert pago.clave != comision.clave, f"{fixture}: dos movimientos, dos claves"
+        entran, repetidos = sin_duplicados([pago, comision])
+        assert len(entran) == 2 and not repetidos, f"{fixture}: los dos tienen que entrar"
+
+
+def test_un_papel_con_comision_arma_dos_asientos_y_los_dos_cuadran():
+    """El circuito entero sobre el formato que más piezas mueve: leer, imputar y asentar.
+
+    Son dos asientos y no uno con cuatro líneas, porque son dos hechos: lo que se pagó y lo que el banco cobró.
+    Y el efectivo que sale de la cuenta tiene que ser lo que dice el papel, comisión incluida."""
+    movimientos = leer("bcp_cce")
+    for i, m in enumerate(movimientos):
+        m.id_externo = f"mov-{i}"
+
+    mes = {"open_accounting": api.OPEN_ACCOUNTING,
+           "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
+                     "periodo": "202608", "tipo": "tesoreria"},
+           "movimientos": [m.a_dict() for m in movimientos],
+           "imputaciones_de_movimientos": {m.id_externo: {"cuenta_contable": "4212100", "glosa": "PAGO"}
+                                           for m in movimientos}}
+    configuracion = {"cuentas_bancarias": [{"id": "BCP-SOLES", "banco": "BCP", "numero": "191-1111111-0-11",
+                                            "moneda": "PEN", "cuenta_contable": "104101"}]}
+    respuesta = api.generar_asiento(mes, driver="asiento_contable", configuracion=configuracion)
+
+    assert respuesta["_asiento"]["cuadre"]["cuadra"] is True
+    assert respuesta["_asiento"]["lineas"] == 4, "dos hechos, dos asientos de dos líneas"
+    del_efectivo = [ln for ln in respuesta["asiento"] if ln["cuenta"] == "104101"]
+    assert sum(Decimal(ln["importe"]) for ln in del_efectivo) == Decimal("210154.53"), "el monto total del papel"
+    assert all(ln["debe_haber"] == "H" for ln in del_efectivo), "de una cuenta de efectivo, un pago sale"
+
+
 # --- el maestro de cuentas, que no es opcional --------------------------------------------------------------------
 
 def test_sin_el_maestro_no_sale_un_movimiento_y_se_dice_qué_cuenta_falta():

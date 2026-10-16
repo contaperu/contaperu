@@ -84,6 +84,22 @@ sale son glifos `/0 /1 /2`. O sea que **algo más de una cuarta parte pide OCR o
 integra. `reconocer` los aparta devolviendo vacío en vez de fallar, porque no son constancias rotas: son otra
 cosa. Los **58 legibles se leen sin un fallo** y arman **61 movimientos**.
 
+### Un defecto que solo salio al armar el asiento, y no al leer
+
+Las comisiones llevaban **la referencia del pago**, y `Movimiento.clave` es `(cuenta, referencia)` cuando hay
+referencia, porque «la del banco basta y sobra: es suya y no se repite dentro de una cuenta». Así que el cobro y
+el pago eran **el mismo movimiento** y el motor descartaba el segundo como repetido — con razón: la clave decía
+que lo era. De los 61 movimientos que arman los 58 papeles, **tres no llegaban al asiento**.
+
+Se arregló dejando la comisión **sin referencia**, que es la verdad: el banco no le dio ninguna. No se fabrica un
+número derivado (`…-COM`), porque inventar una referencia bancaria es de la misma familia que inventar una sigla;
+el número de la operación de la que salió se queda en `datos_originales`. Sin referencia, la clave se cae a
+cuenta, fecha, sentido, importe y descripción, que es justamente el caso para el que ese camino existe.
+
+Lo que esto dice del método: **leer los 58 papeles sin un fallo no demostraba que sirvieran**. Hizo falta armar
+su asiento —58 asientos, 122 líneas, el efectivo cuadrando con lo que dice cada papel— para que el defecto
+apareciera. Ahora hay un test por cada mitad.
+
 ### Arreglado
 
 - **Cinco números de cuenta reales** que se habían colado en el repositorio, tres de ellos copiados de los PDF.
