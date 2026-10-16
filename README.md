@@ -163,7 +163,8 @@ contaperu/
 │   ├── cuentas.py         las cuentas bancarias del contribuyente, con su 104
 │   ├── extractos.py       la cabecera de lo que el banco declaró
 │   ├── referencias.py     qué cancela un pago
-│   └── cuadre.py          la cadena de saldos: «¿leí bien el extracto?»
+│   ├── cuadre.py          la cadena de saldos: «¿leí bien el extracto?»
+│   └── constancias/       el primer lector: cinco formatos de dos bancos, de texto
 │                        (LIBRO 4 · el diario no tiene carpeta: llega ya armado)
 │
 ├── asiento/             LA PARTIDA DOBLE. Un motor por libro, y lo común debajo

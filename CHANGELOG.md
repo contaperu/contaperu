@@ -4,6 +4,95 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [13.3.0] — 2026-10-16
+
+**El primer lector de tesorería.** `tesoreria/` llevaba desde la 11.x con el contrato entero y **ningún lector**,
+y no era un olvido: su propio módulo decía por qué —«cada parser entra con su archivo delante y su fixture
+anonimizado»—. Entraron **80 PDF reales** de un contribuyente peruano de 2026, de dos bancos, y de ahí sale
+`contaperu/tesoreria/constancias/`. Cierra el hito **D2a**, que es nuevo: no es D2 —el extracto sigue sin lector,
+y es otro papel— ni D1 —las constancias de detracción del Banco de la Nación siguen esperando el suyo—.
+
+**Recibe texto y nunca un PDF.** Es la misma frontera que `comprobantes/sire_txt.py` tiene con el TXT del SIRE y
+por la misma razón: el núcleo no toca disco ni abre formatos binarios (`tests/test_frontera.py`). Sacar el texto
+es de quien integra, con una librería o con un modelo.
+
+**Y devuelve una lista, no un movimiento.** De un solo papel salen hasta tres, porque la comisión que cobra el
+banco es su propio movimiento —la enmienda 0028— y el banco la escribe en su propio renglón. La planilla del BBVA
+lo enseña de golpe: un cargo, una comisión interbancaria y una por otra plaza, las tres de la misma cuenta.
+
+### Cinco formatos, que son cinco papeles
+
+| `formato` | Banco | Qué trae de propio |
+|---|---|---|
+| `bcp_terceros` | BCP | un cargo, sin documento del beneficiario (29 de los 80) |
+| `bcp_cce` | BCP | el **RUC** y el CCI, la comisión CCE aparte, e «ITF: Afecta» |
+| `bcp_documentos` | BCP (Telecrédito) | **la tabla de documentos que el cargo cancela** |
+| `bbva_operacion` | BBVA | la cuenta del beneficiario con su nombre |
+| `bbva_masivos` | BBVA | **un cargo con N abonos** y sus dos comisiones |
+
+El tercero es el que destraba lo que se pedía —seleccionar comprobantes, que pueden venir del SIRE, y pasarlos a
+pago—: es **el banco declarando qué documentos cancela el cargo**, o sea las `aplicaciones` sin que nadie las
+teclee. Sus filas salen como `referencias` del movimiento, cada una con su importe.
+
+### Cuatro reglas que no salen de un papel sino de medirlos todos
+
+1. **La primera cuenta del texto es la de cargo.** En los 38 papeles del BCP es siempre una del contribuyente,
+   nunca la del beneficiario. Hacía falta una regla porque la tabla del PDF se deshace al pasarla a texto y «la
+   que sigue a *Datos de la cuenta de origen*» no existe como línea.
+2. **Los importes se identifican por aritmética y no por posición.** Los tres del CCE —transferido, comisión y
+   total— salen en un orden que no es el de sus etiquetas, y de tres números hay una sola partición en la que uno
+   es la suma de los otros dos. Eso no depende de cómo se extrajo el texto; la posición sí. **Si no cuadran, no
+   sale nada**, y ése es el cuadre que convierte «leí un PDF» en «lo leí bien».
+3. **El importe de un pago con documentos es la suma de la columna TOTAL.** Los dos únicos papeles con interés de
+   los siete no lo declaran igual: en una letra el `Monto` de arriba lo incluye (33 045,00 + 143,68 = 33 188,68) y
+   en una factura no (dice 76 167,55 cuando de la cuenta salen 76 256,80). Con un papel de cada clase **no hay
+   regla que escribir**, así que no se inventa: se usan los TOTAL, que no son ambiguos, y el `Monto` declarado
+   sirve solo para cuadrar que la tabla se leyó entera.
+4. **La misma cuenta escrita de dos formas es la misma cuenta.** El BBVA mete dos dígitos de control en medio en
+   la operación suelta y no en la planilla, así que ninguna contiene a la otra; lo que no cambia es en qué acaba.
+   Ocho de sus dieciséis papeles venían así.
+
+### Lo que el lector no pone, porque el papel no lo dice
+
+- **El ITF.** El CCE lo declara «Afecta» y no lo cifra. Se asienta con el importe que da el banco y nunca con una
+  tasa (John, 13-oct-2026), así que ese movimiento llega por el extracto.
+- **El tipo y la serie de un comprobante.** La tabla da «546», que es el número con el que el banco conoce el
+  papel, no la terna que lo identifica en el estándar. Inventarlas sería inventar una sigla, así que las filas
+  salen como `libre` y es el ERP —o D3— quien las convierte cuando tenga con qué.
+- **El banco de un abono** que no esté en la lista de entidades que el propio documento trae al pie.
+
+### El maestro de cuentas no es opcional, y está bien que no lo sea
+
+`Movimiento.cuenta` es el `id` del maestro y no un número, así que el lector pide las `cuentas_bancarias`
+declaradas y resuelve el número del papel contra ellas. Eso garantiza que lo que entra al libro apunta a una
+cuenta con su 104 y su moneda. Sin ella se niega diciendo el número del papel, que es lo único que hace falta
+para declararla.
+
+### Lo que esto NO cambia, y es la mitad de la noticia
+
+- **El estándar no se movió**: `open-accounting` sigue en 3.3, sin un campo nuevo ni una enmienda. Todo cabía en
+  `Movimiento` y en `Referencia`, lo que confirma la decisión de la 3.0 de dejar **una sola entrada** para
+  tesorería: una constancia y un extracto son la misma forma con otro `origen`. Y que `ORIGENES` ya distinguiera
+  `pdf_texto` de `vision` antes de que existiera este lector resultó ser exactamente lo que hacía falta.
+- **Ninguna salida cambió.** Los dos snapshots, intactos.
+- **La superficie pública crece en un nombre**, `tesoreria.constancias`.
+
+### Lo que los 80 papeles dejaron dicho, y conviene saber antes de integrarlo
+
+**22 de los 80 no dan texto legible** con una librería estándar: sus fuentes vienen sin tabla ToUnicode y lo que
+sale son glifos `/0 /1 /2`. O sea que **algo más de una cuarta parte pide OCR o un modelo**, y eso es de quien
+integra. `reconocer` los aparta devolviendo vacío en vez de fallar, porque no son constancias rotas: son otra
+cosa. Los **58 legibles se leen sin un fallo** y arman **61 movimientos**.
+
+### Arreglado
+
+- **Cinco números de cuenta reales** que se habían colado en el repositorio, tres de ellos copiados de los PDF.
+  Los cazó `tests/test_datos_reales.py`, que es exactamente para lo que existe. Con ellos cayó **uno que estaba
+  en `tests/test_tesoreria.py` desde antes y que nadie había visto**, porque el test de CCI solo mira veinte
+  dígitos seguidos y ése iba con guiones. Se declararon tres CCI seguros nuevos con su motivo.
+- **La portada de `tesoreria/`** decía que no había asiento de tesorería y que esperaba la norma del ITF: las dos
+  cosas son falsas desde la 12.9 y la 12.7.
+
 ## [13.2.0] — 2026-10-16
 
 **El Libro Diario: el cuarto libro, y el primero que el motor no arma sino que recibe.** Cierra el hito **B13**,

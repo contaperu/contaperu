@@ -63,8 +63,10 @@ lectores, que sigue sirviendo—, `tributos/` —el IGV, las detracciones, la va
 `contable/` —la partida doble y el pre-mayor—, `asiento/` —sus dos motores hermanos, `comprobante` y
 `movimiento`, con `comun/` debajo—, `pcge/`, `sunat/` —la API del SIRE como funciones
 puras: se sabe la URL y no se llama nunca— y `tesoreria/` —la cuenta bancaria que declara el contribuyente con su
-104, el **item de operación** y el cuadre de la cadena de saldos; la forma salió de nueve extractos reales y no
-hay lector de ningún banco todavía. **Desde el 10-oct-2026 tiene su tipo de libro**, `tesoreria`, así que el dinero
+104, el **item de operación** y el cuadre de la cadena de saldos; la forma salió de nueve extractos reales, y
+desde la 13.3 tiene **su primer lector** —`constancias/`, cinco formatos de dos bancos, que recibe **texto y
+nunca un PDF** y devuelve una lista porque la comisión del banco es su propio movimiento—; el del **extracto**
+sigue pendiente, que es otro papel. **Desde el 10-oct-2026 tiene su tipo de libro**, `tesoreria`, así que el dinero
 entra por el mismo circuito que un comprobante, y desde la 3.0 del estándar por **una sola entrada**: venga de una
 línea de extracto o de una constancia de pago, al motor llega un `movimiento` con su `origen` diciendo de dónde
 salió —lo que lo distingue no es una etiqueta, es el `saldo`, que solo un extracto trae—, con la cabecera de la hoja

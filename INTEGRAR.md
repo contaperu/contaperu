@@ -444,6 +444,51 @@ r = api.revisar_tesoreria(mes, cuentas=mi_maestro)
 print(r["imputados"], r["sin_imputar"], r["avisos"])      # 1 [] []
 ```
 
+### Y si lo que tienes es el PDF de una constancia (13.3)
+
+Desde la 13.3 no hace falta que armes el `movimiento` a mano cuando lo que tienes es una constancia de pago del
+banco: `tesoreria.constancias` la lee. **Recibe el texto, nunca el PDF** —sacarlo es tuyo, con una librería o con
+un modelo, igual que bajar el archivo del banco—, y devuelve **una lista** de movimientos, porque de un papel
+salen hasta tres: el pago y las comisiones que el banco cobra aparte.
+
+```python
+from contaperu.tesoreria import constancias
+
+texto = open("tests/fixtures/constancias/bcp_documentos.txt", encoding="utf-8").read()
+print(constancias.reconocer(texto))              # bcp_documentos
+
+el_maestro = [{"id": "bcp-dolares", "banco": "BCP", "numero": "191-3333333-1-33",
+               "moneda": "USD", "cuenta_contable": "10412100"}]
+pago, = constancias.leer(texto, el_maestro)
+print(pago.cuenta, pago.sentido, pago.importe, pago.moneda)   # bcp-dolares cargo 27006.60 USD
+print(pago.referencia, pago.origen)                           # 939049 pdf_texto
+
+# Y en este formato el banco declara qué documentos cancela el cargo: eso son tus `aplicaciones`.
+for r in pago.referencias:
+    print(r.importe, r.datos["texto"])
+```
+
+Cinco formatos, de dos bancos: `bcp_terceros`, `bcp_cce`, `bcp_documentos`, `bbva_operacion` y `bbva_masivos`.
+Cuatro cosas que conviene saber antes de enchufarlo:
+
+1. **El maestro no es opcional**, porque `movimiento.cuenta` es el `id` de *tu* cuenta y no un número. Si la del
+   papel no está declarada, se niega diciéndote el número — que es lo único que necesitas para añadirla. Acepta
+   tus dicts igual que `revisar_tesoreria`.
+2. **Los importes se cuadran y, si no cuadran, no sale nada** (`ConstanciaIlegible`). Es a propósito: un pago mal
+   leído entra al libro y nadie lo nota.
+3. **`reconocer` devuelve vacío** para lo que no es una constancia, y no falla: así apartas una carpeta entera.
+   Y cuenta con esto, que salió de medir 80 PDF reales: **algo más de una cuarta parte no da texto legible** con
+   una librería estándar —fuentes sin tabla ToUnicode, y salen glifos—. Ésos piden OCR o un modelo, y entonces el
+   `origen` del movimiento que armes es `vision` y no `pdf_texto`.
+4. **Lo que el papel no dice, el lector no lo pone**: ni el ITF —que el formato interbancario declara «Afecta» y
+   no cifra—, ni el tipo y la serie de un comprobante. Las filas de documentos salen como referencias `libre` con
+   su texto, y convertirlas en `comprobante` es tuyo (o de la conciliación, cuando exista).
+
+La contrapartida sigue siendo tuya: el lector no la inventa. Lo que sale de aquí entra en `movimientos[]` tal
+cual, y tú le añades su `id_externo` y su `imputaciones_de_movimientos`.
+
+### Lo que el motor te responde, en detalle
+
 `r["totales_por_cuenta"]` es un **resumen** —cuántos movimientos trae cada cuenta, cuánto suman sus cargos y sus
 abonos, lo que el banco descontó por ITF y la cuenta contable que sale del maestro—: **no afirma que nada cuadre**.
 `r["sin_imputar"]` dice qué movimientos **esperan su contrapartida**, que es el `sin_cuenta` del dinero.

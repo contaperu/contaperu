@@ -176,8 +176,10 @@ asiento ───────── id_en_destino ──────────
 ```
 
 La primera estaba en el dato y nadie la seguía: `anulada_por_nota` es una marca **a mano**, porque solo la nota
-apunta hacia atrás. La segunda está cerrada desde el estándar 3.0 y nadie la puebla, porque no hay lector de banco
-(D2) ni conciliación (D3). Con eso no se puede contestar «¿esta factura está pagada?».
+apunta hacia atrás. La segunda está cerrada desde el estándar 3.0 y **desde la 13.3 sí hay quien la puebla** —el
+lector de constancias (D2a), y en uno de sus cinco formatos es el banco mismo el que declara qué documentos
+cancela el cargo—, pero sigue sin haber conciliación (D3) para cuando el papel no lo dice. Y con `referencias`
+sola nunca se podría contestar «¿esta factura está pagada?», que es lo que viene a continuación.
 
 **Lo que faltaba era un sustantivo, no un verbo**: `aplicaciones[]` (enmienda 0031), un registro aparte que dice
 **cuánto de una cosa cancela otra**. N a N, con su importe, y con el `origen` que separa un hecho (`declarado`,

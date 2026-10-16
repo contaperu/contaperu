@@ -23,6 +23,7 @@ from decimal import Decimal, InvalidOperation
 
 from ...errores import ErrorContaperu
 from ...modelo import monto as _monto
+from ...modelo.accesores import campo
 
 
 class ConstanciaIlegible(ErrorContaperu, ValueError):
@@ -176,12 +177,15 @@ def cuenta_declarada(numero: str, cuentas) -> str:
     del_papel = digitos(numero)
     if len(del_papel) >= MINIMO_PARA_RECONOCER:
         for cuenta in cuentas or ():
-            for suyo in (digitos(getattr(cuenta, "numero", "")), digitos(getattr(cuenta, "cci", ""))):
+            # El maestro llega de las dos formas y las dos valen: objetos dentro del motor, dicts de JSON cuando
+            # lo manda un ERP — que es como lo recibe `api.revisar_tesoreria`. `campo` existe para no tratarlas
+            # distinto, que es de donde salieron tres defectos en su día.
+            for suyo in (digitos(campo(cuenta, "numero") or ""), digitos(campo(cuenta, "cci") or "")):
                 if len(suyo) < MINIMO_PARA_RECONOCER:
                     continue
                 if (suyo in del_papel or del_papel in suyo
                         or suyo[-DIGITOS_DE_LA_COLA:] == del_papel[-DIGITOS_DE_LA_COLA:]):
-                    return cuenta.id
+                    return str(campo(cuenta, "id") or "")
     raise ConstanciaIlegible(
         f"la cuenta de cargo del papel ({numero}) no es ninguna de las que declara el maestro; "
         f"declárala en `cuentas_bancarias` con su cuenta contable y su moneda")

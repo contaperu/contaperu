@@ -269,18 +269,27 @@ El paquete **existe desde la 8.2 y se llama `contaperu/tesoreria/`**, no `banco/
 un pago de tributos y la de un reintegro de caja chica, que no son del banco, y es la palabra que el estándar ya usa
 para esto (el rol `tesoreria`). Trae la cuenta bancaria que declara el contribuyente —con **su** cuenta contable, la
 104—, el movimiento de un extracto, la constancia de una operación con sus `referencias`, y el cuadre de la cadena
-de saldos, que es lo que hará verificable a cualquier lector. Lo que sigue fuera es leer un banco concreto (D2),
-conciliar (D3) y llevarlo a un sistema legacy (D6c); asentarlo para un ERP ya se hace (D6a, 12.9). Y los conectores de entrada **nunca** viven dentro de `contaperu`, que es lo que D7
+de saldos, que es lo que hace verificable a un lector. Leer una **constancia** ya se hace (D2a, 13.3) y asentarla
+para un ERP también (D6a, 12.9); lo que sigue fuera es leer un **extracto** (D2), conciliar (D3) y llevarlo a un
+sistema legacy (D6c). Y los conectores de entrada **nunca** viven dentro de `contaperu`, que es lo que D7
 decide y lo que `tests/test_frontera.py` hace cumplir.
 
 **Investigación.** Lo que hace EE. UU. de verdad, los canales peruanos a la fecha de consulta, los proyectos
 abiertos, los rieles de pago y el fraude.
 
-**Qué hay hoy.** El **contrato**, entero, y ningún lector. Desde la 8.2 está `contaperu/tesoreria/` —la cuenta
-que declara el contribuyente con su 104, el movimiento, lo que un pago cancela y el cuadre de la cadena de
-saldos— y desde la 3.0 del estándar el contrato está **cerrado**: una sola entrada (`movimientos[]`), la cabecera
-de cada extracto, y la contrapartida que pone el ERP en `imputaciones_de_movimientos`, con el aviso que dice qué
-movimientos la esperan. Lo que no hay es ningún parser de ningún banco ni conciliación (D3). **El asiento sí**, desde la 12.9 y para el ERP base (D6a); lo que espera el archivo es llevarlo a un legacy (D6c).
+**Qué hay hoy.** El **contrato** entero y, desde la 13.3, **el primer lector**. Desde la 8.2 está
+`contaperu/tesoreria/` —la cuenta que declara el contribuyente con su 104, el movimiento, lo que un pago cancela
+y el cuadre de la cadena de saldos— y desde la 3.0 del estándar el contrato está **cerrado**: una sola entrada
+(`movimientos[]`), la cabecera de cada extracto, y la contrapartida que pone el ERP en
+`imputaciones_de_movimientos`, con el aviso que dice qué movimientos la esperan. **El asiento también**, desde la
+12.9 y para el ERP base (D6a); lo que espera el archivo es llevarlo a un legacy (D6c).
+
+Y desde la 13.3 está `tesoreria/constancias/` (**D2a**), que lee cinco formatos de dos bancos y devuelve
+movimientos. Lo que sigue sin lector es **el extracto** (D2), que es otro papel —una constancia dice lo que el
+contribuyente ordenó; un extracto, lo que el banco hizo, con su saldo corrido y su ITF cifrado—, y sigue sin
+haber **conciliación** (D3). De lo que el lector dejó medido hay un dato que vale para los dos hitos que vienen:
+de 80 PDF reales, **22 no dan texto legible** con una librería estándar —fuentes sin tabla ToUnicode—, así que
+algo más de una cuarta parte de los papeles de un mes pide OCR o un modelo, y eso es de quien integra.
 
 La conciliación de constancias de detracción está pendiente de un archivo real, pero la
 mitad existe: `diagnosticar` ya lista las detracciones que esperan constancia (`detraccion_pendiente`,
@@ -292,7 +301,8 @@ desarma (`contaperu/comprobantes/archivos.py:56-58`), y un `.txt` se ignora como
 |---|---|---|---|---|---|---|
 | D8 ✅ | **`cuentas_bancarias` como argumento, no como tabla.** Entró en la 8.2 por la api (`validar_cuentas_bancarias`), que es donde sirve a un ERP que no escribe Python; cablearlo por el pipeline espera a que algo lo consuma (D1 o D3). El maestro de cuentas que aporta quien llama —banco, número, CCI, moneda, y la cuenta contable con la que se asienta— con las funciones puras que lo validan. Es el **registro antes de conciliar**, y es la única forma que el §6 admite: el estado es del ERP, y lo que puede vivir aquí es su contrato. El patrón está en producción y no hay que inventarlo: `imputaciones`, `correlativos`, `claves_previas` y la propia `configuracion` son argumentos que el motor recibe y no guarda. (`plan_de_cuentas*`, `padron*` y `tipos_de_cambio*` seguirán el mismo molde, pero **todavía no existen**: son C10, C8 y C11.) **Es el único hito de este frente que no espera un archivo** | N · F | dato: el formato del CCI y los códigos de banco con su fuente, que son norma publicada | Sin cuentas declaradas nada cambia; un CCI que no cumple su formato da observación y no excepción; una cuenta que no está en el maestro no se adivina | — | 46 |
 | D1 | `aplicar_constancias*`: casar el archivo del banco con cada comprobante y escribirle su número y su fecha (el `estado` ya se deduce de los dos desde la 3.2, `detracciones.estado_de`) | N · F | dato: constancias reales (la consulta de pagos de detracciones de SOL o los movimientos de la cuenta del Banco de la Nación) | Con pareja, quedan número y fecha y la detracción pasa a `detracciones_pagadas`; sin pareja, queda igual | 0.3 | 14 |
-| D2 | `Movimiento*`, el lector del primer extracto y la deduplicación | N · estándar | dato: extracto real anonimizado | Un libro Excel no se desarma como ZIP; una relectura con solape no duplica | E1 | 15 |
+| D2a ✅ | **El lector de constancias de pago.** Entró en la 13.3 con 80 PDF reales delante, de dos bancos y cinco formatos, y **sin tocar el estándar**: todo cabía en `Movimiento` y en `Referencia`, que es lo que la 3.0 prometió al dejar una sola entrada. Recibe **texto y nunca un PDF** —misma frontera que el TXT del SIRE— y devuelve **una lista**, porque la comisión del banco es su propio movimiento (0028) y el banco la escribe en su propio renglón. El formato de letras y facturas del BCP trae además **la tabla de documentos que el cargo cancela**, o sea las `aplicaciones` declaradas por el banco. **No esperó ningún archivo que no estuviera ya**: los papeles llegaron y el contrato ya los admitía | N | dato: 80 constancias reales de dos bancos | Los 58 papeles legibles se leen sin un fallo; los importes de cada papel cuadran entre sí o no sale nada; ninguna cuenta que no esté en el maestro se adivina; el lector no abre un archivo | — | 15 |
+| D2 | `Movimiento*`, el lector del primer **extracto** y la deduplicación. Lo que lo separa de D2a: un extracto trae el **saldo corrido** —que es lo único que lo distingue de una constancia— y el **ITF cifrado**, que es lo que falta para asentarlo | N · estándar | dato: extracto real anonimizado | Un libro Excel no se desarma como ZIP; una relectura con solape no duplica | E1 | 15 |
 | D3 | `conciliar*` con `metodo*` y `certeza*`, `emparejar_transferencias*` y la tolerancia en porcentaje y en importe absoluto. **`aplicaciones` ya no es suya: existe desde la 12.3**, así que lo que D3 devuelve son aplicaciones con `origen: propuesto` —que no cuentan para ningún saldo— y no una forma propia | N · F | código, tras D1 y D2 | Motivos legibles; la detracción como pago parcial; solo certeza alta va a lote; dentro del porcentaje y fuera del absoluto no hay certeza alta; **una propuesta no mueve un pendiente hasta que alguien la pasa a `manual`** | D1, D2 | 16, 25, 50 |
 | D4 | `ReglaBanco*` y `aplicar_reglas*` | N | dato: reglas reales de un contador | Primera coincidencia por prioridad, con motivo; nunca confirma | D2 | — |
 | D5 | `LiquidacionPasarela*` y `Aviso*` | N · estándar | dato: el reporte real de una pasarela | El invariante del neto se cumple; los avisos nunca asientan | D3, E1 | — |
