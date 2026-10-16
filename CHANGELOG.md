@@ -68,6 +68,17 @@ así que publicar la lista haría creer que sí. El hueco sigue declarado donde 
   el trato, no la tabla. Su texto y a quién pedírselas viven en `FALTAS_DEL_DINERO` (`pipeline/diagnostico.py`),
   tecleadas por la `clave` de su excepción para que renombrar una las renombre en los dos sitios.
 
+### Y la deuda que la 12.11 dejó escrita, saldada
+
+- **El diagrama decía «seis destinos» y son ocho**: faltaban `ple` y `ple_plan`, los dos del canal `sunat`. Ahora
+  los nombra por canal, en el orden del eje: ERP, SUNAT y legacy.
+- **`tesoreria/`, `aplicaciones` y `sunat/` no faltaban del diagrama por descuido**, y decirlo así en la 12.11 fue
+  plantearlo mal: ese diagrama es **el recorrido de un comprobante**, y ninguna de las tres está en ese recorrido.
+  Lo que sí estaba mal era el texto que lo presentaba, que prometía «las carpetas del paquete». Ahora el diagrama
+  cierra con una franja que dice lo que son —el paquete tiene más libros que el comprobante— y el README promete
+  lo que el dibujo da. Un inventario de carpetas y el recorrido de un hecho son dos dibujos distintos, y mezclarlos
+  era lo que hacía envejecer a éste.
+
 ### Cómo migrar
 
 - **Si lees el diagnóstico de un libro de compras o de ventas, no hay nada que hacer**: ni una clave se movió, y

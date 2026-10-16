@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="680" height="778" viewBox="0 0 680 778" role="img" aria-labelledby="titulo descripcion">
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="844" viewBox="0 0 680 844" role="img" aria-labelledby="titulo descripcion">
 <title id="titulo">Qué carpeta y qué archivo toca un comprobante, de punta a punta</title>
-<desc id="descripcion">El recorrido de un comprobante por el paquete, carpeta a carpeta. Entra por comprobantes, el paquete de una compra o una venta, con sus lectores xml_ubl, sire_txt y archivos, y con la forma del comprobante y su imputacion. Se apoya en el modelo y su vocabulario: modelo, vocabulario y catalogos, que leen los catálogos de datos de SUNAT con su fuente. Lo revisan las reglas deterministas, agrupadas en la carpeta tributos: validar, igv y detracciones, con configuracion aparte. La carpeta asiento arma la partida doble con sus dos motores hermanos, comprobante y movimiento, y comun debajo, mas lineas, resolucion, indice, huella, faltas y su configuracion, apoyándose en la carpeta contable, cuyo partida_doble comprueba que el Debe iguale al Haber, y en pcge. Los drivers lo traducen sin decidir cuentas: contrato y kit, y los seis destinos concar, contasis, sire, csv, starsoft y asiento_contable; comparar_sire, también en tributos, contrasta lo generado con lo que SUNAT ya tiene. Por debajo, pipeline orquesta todo lo anterior con lectura, preparacion, seleccion, armado, diagnostico y salida; api expone la superficie pública congelada con operaciones, tabla, documento, errores, openconta y esquemas; y puertas, que solo hablan con api, ofrece cli, servidor MCP y servidor HTTP. Al final, los módulos de servicio del paquete.</desc>
+<desc id="descripcion">El recorrido de un comprobante por el paquete, carpeta a carpeta. Entra por comprobantes, el paquete de una compra o una venta, con sus lectores xml_ubl, sire_txt y archivos, y con la forma del comprobante y su imputacion. Se apoya en el modelo y su vocabulario: modelo, vocabulario y catalogos, que leen los catálogos de datos de SUNAT con su fuente. Lo revisan las reglas deterministas, agrupadas en la carpeta tributos: validar, igv y detracciones, con configuracion aparte. La carpeta asiento arma la partida doble con sus dos motores hermanos, comprobante y movimiento, y comun debajo, mas lineas, resolucion, indice, huella, faltas y su configuracion, apoyándose en la carpeta contable, cuyo partida_doble comprueba que el Debe iguale al Haber, y en pcge. Los drivers lo traducen sin decidir cuentas: contrato y kit, y los ocho destinos, por canal: asiento_contable y csv para un ERP, sire, ple y ple_plan para SUNAT, y concar, contasis y starsoft para los sistemas instalados; comparar_sire, también en tributos, contrasta lo generado con lo que SUNAT ya tiene. Por debajo, pipeline orquesta todo lo anterior con lectura, preparacion, seleccion, armado, diagnostico y salida; api expone la superficie pública congelada con operaciones, tabla, documento, errores, openconta y esquemas; y puertas, que solo hablan con api, ofrece cli, servidor MCP y servidor HTTP. Y al final, dos cosas: que este recorrido es el de un comprobante y el paquete tiene mas libros —tesoreria, el dinero; aplicaciones, que dice cuanto de un pago cancela un documento; y sunat, la API del SIRE—, y los modulos de servicio del paquete.</desc>
 <style>
 .fondo{fill:#FFFFFF}
 .t,.s{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central}
@@ -25,7 +25,7 @@
 <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </marker>
 </defs>
-<rect class="fondo" x="0" y="0" width="680" height="778" rx="12"/>
+<rect class="fondo" x="0" y="0" width="680" height="844" rx="12"/>
 
 <g class="a"><rect x="40" y="24" width="430" height="56" rx="8" stroke-width="0.5"/><text class="t" x="255" y="42">comprobantes/ — el papel de una compra o una venta</text><text class="s" x="255" y="60">xml_ubl.py · sire_txt.py · archivos.py · comprobante.py · imputacion.py</text></g>
 <line class="flecha" x1="255" y1="82" x2="255" y2="98" marker-end="url(#punta)"/>
@@ -39,7 +39,7 @@
 <g class="a"><rect x="40" y="252" width="430" height="90" rx="8" stroke-width="0.5"/><text class="t" x="255" y="274">asiento/ — aquí vive la contabilidad</text><text class="s" x="255" y="294">comprobante.py · movimiento.py · comun.py · lineas.py</text><text class="s" x="255" y="312">resolucion/ · indice/ · faltas/ · huella.py · configuracion.py</text></g>
 <line class="flecha" x1="255" y1="344" x2="255" y2="360" marker-end="url(#punta)"/>
 
-<g class="a"><rect x="40" y="362" width="430" height="74" rx="8" stroke-width="0.5"/><text class="t" x="255" y="382">drivers/ — traducen, no deciden</text><text class="s" x="255" y="400">contrato.py · kit/</text><text class="s" x="255" y="418">concar · contasis · sire · csv · starsoft · asiento_contable</text></g>
+<g class="a"><rect x="40" y="362" width="430" height="74" rx="8" stroke-width="0.5"/><text class="t" x="255" y="382">drivers/ — traducen, no deciden</text><text class="s" x="255" y="400">contrato.py · kit/</text><text class="s" x="255" y="418">asiento_contable · csv · sire · ple · ple_plan · concar · contasis · starsoft</text></g>
 
 <g class="v"><rect x="490" y="100" width="150" height="56" rx="8" stroke-width="0.5"/><text class="t" x="565" y="118">datos/sunat/</text><text class="s" x="565" y="136">Catálogos con su fuente</text></g>
 <line class="flecha" x1="488" y1="128" x2="472" y2="128" marker-end="url(#punta)"/>
@@ -59,5 +59,6 @@
 
 <g class="m"><rect x="40" y="636" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="654">puertas/ — solo hablan con api/</text><text class="s" x="340" y="672">cli.py · servidor_mcp.py · servidor_http.py · comun.py</text></g>
 
-<g class="g"><rect x="40" y="702" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="720">De servicio, para todo el paquete</text><text class="s" x="340" y="738">__init__.py · errores.py · _datos.py · _version.py · _obsoleto.py</text></g>
+<g class="v"><rect x="40" y="702" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="720">Fuera de este recorrido: el paquete tiene más libros que el comprobante</text><text class="s" x="340" y="738">tesoreria/ — el dinero · aplicaciones.py — qué cancela qué · sunat/ — la API del SIRE</text></g>
+<g class="g"><rect x="40" y="768" width="600" height="56" rx="8" stroke-width="0.5"/><text class="t" x="340" y="786">De servicio, para todo el paquete</text><text class="s" x="340" y="804">__init__.py · errores.py · _datos.py · _version.py · _obsoleto.py</text></g>
 </svg>
