@@ -157,7 +157,10 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   Antes de etiquetar una versión mayor se publica
   una pre-release (`vX.Y.ZrcN`) y quien integra la prueba en su batería, también con
   `-W error::contaperu._obsoleto.RutaObsoleta` (`INTEGRAR.md`, «Versiones»). **Hasta la 7.0 eso se prometía y no se
-  hacía**: solo la 1.0 y la 5.0 tuvieron su `rc`; la 2.0, la 3.0, la 4.0 y la 6.0 salieron sin ninguno.
+  hacía**: solo la 1.0 y la 5.0 tuvieron su `rc`; la 2.0, la 3.0, la 4.0 y la 6.0 salieron sin ninguno. **Y la
+  13.0 tampoco lo tuvo**, por decisión de John (16-oct-2026) y no por olvido: lo que rompe solo alcanza a un
+  libro que ninguna aplicación lee todavía por esa puerta —`diagnosticar` sobre tesorería devolvía ceros—, así
+  que no había a quién dejarle probar nada. Se anota porque este recuento existe para que no se pierda la cuenta.
 
 ## Lo que no se negocia
 
