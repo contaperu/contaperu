@@ -19,7 +19,7 @@ from ...asiento.configuracion import MONEDAS_CODIGO
 from ...asiento.faltas import SinCodigoDeMoneda
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
-from ...asiento.motor import cabecera_de, lineas_del_comprobante, serie_numero_de
+from ...asiento.comprobante import cabecera_de, lineas_del_comprobante, serie_numero_de
 from ...asiento.resolucion import sigla_de_tipo
 from ..kit import Opciones, celdas
 from ...pcge import clase_de

@@ -12,7 +12,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from ...asiento.resolucion import cuenta_tercero, lleva_centro, partes_de
-from ...asiento.motor import constancia_de, glosa_de
+from ...asiento.comprobante import constancia_de, glosa_de
 from ...configuracion import por_defecto
 from ..contrato import columnas_elegidas
 from ..kit import Opciones, celdas, formatear_numero, negativo

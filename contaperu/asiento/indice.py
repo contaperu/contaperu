@@ -20,6 +20,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Sequence
 
 from ..modelo import Libro, clave_de, identidad_de
+from ..modelo.accesores import campo as _de
 from ..tesoreria import clave_de as clave_de_movimiento
 from .huella import huella
 from .lineas import LineaDiario
@@ -294,8 +295,6 @@ def identidad_de_movimiento(libro: Libro, m: Any) -> dict:
             "importe": str(_de(m, "importe") or ""), "descripcion": str(_de(m, "descripcion") or "")}
 
 
-def _de(cosa: Any, nombre: str) -> Any:
-    return cosa.get(nombre) if isinstance(cosa, dict) else getattr(cosa, nombre, None)
 
 
 def exportacion_de(libro: Libro, lineas: Sequence[LineaDiario], indice: Sequence[Any]) -> dict:

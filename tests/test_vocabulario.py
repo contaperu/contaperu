@@ -11,8 +11,8 @@ import json
 import pytest
 
 from contaperu import api, vocabulario
-from contaperu.asiento import motor
-from contaperu.asiento.motor import ROLES
+from contaperu.asiento import comprobante as motor
+from contaperu.asiento.comprobante import ROLES
 from contaperu.modelo import TIPOS_LIBRO, Comprobante, Libro
 
 # Los valores de la 1.0, escritos a mano, y congelados **mientras dure la mayor**: lo que se publicó no se quita ni

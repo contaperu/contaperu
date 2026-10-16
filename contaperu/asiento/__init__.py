@@ -69,7 +69,7 @@ from .indice import (Cabecera, CabeceraDeMovimiento, ComprobanteDelAsiento, Movi
 from .movimiento import (CUENTA_ITF, GRUPO_EFECTIVO, LineaSinMovimiento, cabecera_de_movimiento,
                         cuenta_de_efectivo, indice_de_movimientos_dados,
                         lineas_del_movimiento, lineas_e_indice_de_movimientos, traspasos_en_dos_patas)
-from .motor import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, TIPOS_DEL_MOTOR, LineaSinComprobante, cabecera_de,
+from .comprobante import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, TIPOS_DEL_MOTOR, LineaSinComprobante, cabecera_de,
                     constancia_de,
                     glosa_de, indice_de_lineas_dadas, lineas_del_comprobante, lineas_del_libro,
                     lineas_e_indice_del_libro, rangos_de_lineas_dadas, serie_numero_de)

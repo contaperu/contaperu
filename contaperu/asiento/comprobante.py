@@ -36,6 +36,8 @@ from .resolucion import (anulada_por_nota, asienta_sin_efecto, cuenta_por_pagar_
                          limites_del_periodo, lleva_centro, numerar_en_orden, partes_de, reparto_no_cuadra,
                          sin_efecto_contable, sub_diario, tiene_detraccion)
 from .lineas import LineaDiario
+from . import comun
+from .comun import iso as _iso, limpio as _limpio
 
 # Hasta la 0.10 este módulo importaba las `Opciones` de los drivers solo para quitar los ceros del número: el núcleo
 # dependía de una pieza de los drivers. Desde la 1.0 lee `opciones.sin_ceros` de lo que llegue; los dos nombres
@@ -80,8 +82,6 @@ def glosa_de(c: Comprobante) -> str:
     return ((c.concepto or "").strip() or (c.contraparte_nombre or "").strip()).upper()
 
 
-def _iso(fecha: date | None) -> str:
-    return fecha.isoformat() if fecha else ""
 
 
 def _detraccion_del_estandar(c: Comprobante) -> dict:
@@ -146,9 +146,6 @@ def serie_numero_de(c: Comprobante, opciones: Any = None) -> str:
     return serie_y_numero((c.serie or "").strip(), _numero(c.numero, opciones))
 
 
-def _limpio(campos: dict) -> dict:
-    """Sin las claves vacías: un documento `open-accounting` no lleva ruido."""
-    return {k: v for k, v in campos.items() if v not in ("", None)}
 
 
 def constancia_de(c: Comprobante, config: dict | None = None, *, comodin: bool = True) -> dict[str, str]:
@@ -480,36 +477,9 @@ def indice_de_lineas_dadas(comprobantes: list[Comprobante], lineas: list[LineaDi
     una línea sin `id_externo` o con uno que ningún comprobante tiene, y las líneas de un mismo comprobante **no
     contiguas** —el índice es un tramo `desde`/`hasta`, así que un asiento partido en dos trozos no se puede
     representar—."""
-    de_su_id: dict[str, tuple[int, Comprobante]] = {}
-    for posicion, c in enumerate(comprobantes):
-        if c.id_externo:
-            de_su_id[str(c.id_externo)] = (posicion, c)
-
-    indice: list[ComprobanteDelAsiento] = []
-    vistos: set[str] = set()
-    i = 0
-    while i < len(lineas):
-        id_externo = str((lineas[i].documento or {}).get("id_externo") or "")
-        if not id_externo:
-            raise LineaSinComprobante(
-                f"la línea {i + 1} del asiento no dice de qué comprobante es: le falta `documento.id_externo`, "
-                "que es el enlace con el bloque `comprobantes`")
-        if id_externo not in de_su_id:
-            raise LineaSinComprobante(
-                f"la línea {i + 1} del asiento dice ser del comprobante {id_externo!r}, que no está en el documento")
-        if id_externo in vistos:
-            raise LineaSinComprobante(
-                f"las líneas del comprobante {id_externo!r} no van seguidas: el índice de un asiento es un tramo, "
-                "así que un comprobante partido en dos trozos no se puede representar")
-        vistos.add(id_externo)
-        desde = i
-        while i < len(lineas) and str((lineas[i].documento or {}).get("id_externo") or "") == id_externo:
-            i += 1
-        posicion, c = de_su_id[id_externo]
-        indice.append(ComprobanteDelAsiento(posicion=posicion, sub_diario=lineas[desde].sub_diario,
-                                            correlativo=lineas[desde].correlativo, desde=desde, hasta=i,
-                                            cabecera=cabecera_de(c)))
-    return tuple(indice)
+    return comun.indice_de_lineas_por_id(
+        comprobantes, lineas, excepcion=LineaSinComprobante, sustantivo="comprobante", bloque="comprobantes",
+        clase=ComprobanteDelAsiento, cabecera=lambda c, _id: cabecera_de(c))
 
 
 def rangos_de_lineas_dadas(indice: tuple[ComprobanteDelAsiento, ...]) -> dict[str, dict]:

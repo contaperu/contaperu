@@ -44,7 +44,7 @@ XML UBL / TXT del SIRE / JSON open-accounting
    validar.py  ──►  observaciones: error (bloquea) | aviso (se exporta igual)
           │
           ▼
-   asiento/motor.py  ──►  LineaDiario × 2..5   ◄── ESTA ES LA FUENTE
+   asiento/comprobante.py ─►  LineaDiario × 2..5   ◄── ESTA ES LA FUENTE
           │                (cuenta, D/H, importe, rol, sub-diario, correlativo,
           │                 documento.tipo_cp, glosa entera, tasa exacta)
           │
@@ -113,7 +113,7 @@ es, y porque la premisa se invirtió en esta misma versión: ya no es la versió
 adjetivo sigue vivo donde sí describe —`VOCABULARIO = "neutral"` en el contrato de driver, las palabras del estándar
 frente a las de un sistema legacy—.
 
-Desde la 0.7 la dirección está invertida. `asiento/motor.py` arma las líneas en el vocabulario de
+Desde la 0.7 la dirección está invertida. `asiento/comprobante.py` arma las líneas en el vocabulario de
 `open-accounting` y CONCAR es una proyección más. Lo que hace posible el cambio sin riesgo es
 `tests/test_snapshot_concar.py`: 42 casos con las 41 columnas congeladas celda a celda **antes** del
 refactor (hoy son 52). Ese Excel lleva un año importándose en CONCARs de producción; el snapshot es la garantía de
@@ -144,7 +144,7 @@ Tres cosas distintas llevan la palabra «asiento», y conviene no confundirlas a
 | **La pieza en Python** | `asiento/lineas.py` (`LineaDiario`), `asiento/indice.py` (`Cabecera`) | Su materialización. No es una copia: `tests/test_estandar.py` exige que digan lo mismo, ni un campo de más ni uno de menos |
 | **La entrega** | `drivers/asiento_contable/` | Un destino más, y de los cortos, que lo escribe sin traducirlo a vocabulario legacy |
 
-Lo que **no** es el asiento estándar, aunque comparta carpeta, es `asiento/motor.py` y `asiento/resolucion/`: son
+Lo que **no** es el asiento estándar, aunque comparta carpeta, es `asiento/comprobante.py` y `asiento/resolucion/`: son
 **la contabilidad peruana** —IGV, detracciones, sub-diarios, catálogos SUNAT—. El reparto no es una opinión, está
 medido: `tests/fixtures/capas/acoplamiento_pe.json` registra que `asiento.lineas` toca un solo módulo peruano
 (`pcge`, del que sale la `clase`), que `asiento.motor` toca cuatro, que de las cinco partes de `resolucion` la que
@@ -385,7 +385,7 @@ Lo que esto compra, y lo que no:
 
 **Lo que la tabla no absorbió, y por qué.** De los rasgos solo se preguntan tres veces `es_venta`, y son los
 honestos: los sitios donde el **procedimiento** difiere y no solo un dato —el orden de las líneas de una venta
-(`asiento/motor.py`), la clasificación (`asiento/resolucion/clasificacion.py`) y la rama de venta de `clase_de_igv`
+(`asiento/comprobante.py`), la clasificación (`asiento/resolucion/clasificacion.py`) y la rama de venta de `clase_de_igv`
 (`tributos/igv.py`)—. Un rasgo más para disimularlos sería peor: diría que son datos cuando son procedimientos.
 
 Y **sigue habiendo `libro.es_venta` por el núcleo**, que es otra cosa y conviene no confundirla: son módulos que

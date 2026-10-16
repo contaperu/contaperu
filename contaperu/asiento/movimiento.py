@@ -45,6 +45,9 @@ from .faltas import (CuentaSinClase, LibroQueTodaviaNoSeNumera, MovimientoSinImp
                      SinCuentaDeEfectivo, TraspasoEnDosPatas)
 from .indice import CabeceraDeMovimiento, MovimientoDelAsiento
 from .lineas import LineaDiario
+from . import comun
+from .comun import iso as _iso, limpio as _limpio
+from ..modelo.accesores import campo as _campo
 from .resolucion import limites_del_periodo, lleva_centro
 
 # El elemento del PCGE en el que vive el efectivo: «10 · EFECTIVO Y EQUIVALENTES AL EFECTIVO» (PCGE 2026, p. 17).
@@ -57,18 +60,6 @@ GRUPO_EFECTIVO = "10"
 CUENTA_ITF = "itf"
 
 
-def _iso(fecha: date | None) -> str:
-    return fecha.isoformat() if fecha else ""
-
-
-def _limpio(campos: dict) -> dict:
-    return {k: v for k, v in campos.items() if v not in ("", None)}
-
-
-def _campo(cosa: Any, nombre: str) -> Any:
-    """Un campo de algo que puede venir como objeto o como diccionario. Las dos formas circulan, y tratarlas
-    distinto es como nacieron tres defectos en la 12.0.1."""
-    return cosa.get(nombre) if isinstance(cosa, dict) else getattr(cosa, nombre, None)
 
 
 def cuenta_de_efectivo(cual: str, cuentas: dict) -> str:
@@ -342,35 +333,7 @@ def indice_de_movimientos_dados(movimientos, lineas: list[LineaDiario], config: 
     if isinstance(cuentas, (list, tuple)):
         cuentas = tesoreria.por_id(list(cuentas))
 
-    de_su_id: dict[str, tuple[int, Any]] = {}
-    for posicion, m in enumerate(movimientos):
-        clave = str(_campo(m, "id_externo") or "")
-        if clave:
-            de_su_id[clave] = (posicion, m)
-
-    indice: list[MovimientoDelAsiento] = []
-    vistos: set[str] = set()
-    i = 0
-    while i < len(lineas):
-        id_externo = str((lineas[i].documento or {}).get("id_externo") or "")
-        if not id_externo:
-            raise LineaSinMovimiento(
-                f"la línea {i + 1} del asiento no dice de qué movimiento es: le falta `documento.id_externo`, "
-                "que es el enlace con el bloque `movimientos`")
-        if id_externo not in de_su_id:
-            raise LineaSinMovimiento(
-                f"la línea {i + 1} del asiento dice ser del movimiento {id_externo!r}, que no está en el documento")
-        if id_externo in vistos:
-            raise LineaSinMovimiento(
-                f"las líneas del movimiento {id_externo!r} no van seguidas: el índice de un asiento es un tramo, "
-                "así que un movimiento partido en dos trozos no se puede representar")
-        vistos.add(id_externo)
-        desde = i
-        while i < len(lineas) and str((lineas[i].documento or {}).get("id_externo") or "") == id_externo:
-            i += 1
-        posicion, m = de_su_id[id_externo]
-        indice.append(MovimientoDelAsiento(
-            posicion=posicion, sub_diario=lineas[desde].sub_diario, correlativo=lineas[desde].correlativo,
-            desde=desde, hasta=i,
-            cabecera=cabecera_de_movimiento(m, imputaciones.get(id_externo), cuentas)))
-    return tuple(indice)
+    return comun.indice_de_lineas_por_id(
+        movimientos, lineas, excepcion=LineaSinMovimiento, sustantivo="movimiento", bloque="movimientos",
+        clase=MovimientoDelAsiento,
+        cabecera=lambda m, id_externo: cabecera_de_movimiento(m, imputaciones.get(id_externo), cuentas))

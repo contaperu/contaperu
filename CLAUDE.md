@@ -211,7 +211,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
   caso real en local, solo lectura.
 - Código muerto: `ruff check .`, también en el CI. **Solo caza imports y variables que no usa nadie, redefiniciones
   y nombres sin definir; nunca estilo** (`[tool.ruff.lint]` en `pyproject.toml`, con el porqué). Entró el
-  22-sep-2026 y lo primero que encontró fueron tres variables muertas en `asiento/motor.py` del refactor 0.7.
+  22-sep-2026 y lo primero que encontró fueron tres variables muertas en `asiento/comprobante.py` del refactor 0.7.
 - **Publicar una versión es empujar su tag, y solo eso le llega a quien integra el motor**: un commit en `main` no le
   cambia nada a nadie, porque cada consumidor fija una versión exacta. Antes del tag, `contaperu/_version.py` con la
   versión nueva y en `CHANGELOG.md` su sección `## [X.Y.Z] — fecha` (con «Cómo migrar» si hay algo que adaptar).

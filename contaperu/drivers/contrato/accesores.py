@@ -12,7 +12,7 @@ from typing import Any
 
 from ... import configuracion as _declaracion
 from ...asiento.faltas import NoExportable
-from ...asiento.motor import CENTRO_EN_ANEXO
+from ...asiento.comprobante import CENTRO_EN_ANEXO
 from ...configuracion import Campo, Columna
 from ...modelo import Comprobante, Libro
 from .taxonomia import (EXIGE_NUCLEO_ASIENTO, EXIGE_NUCLEO_NEUTRAL, EXIGE_NUCLEO_REGISTRO, FAMILIA, FORMAS,

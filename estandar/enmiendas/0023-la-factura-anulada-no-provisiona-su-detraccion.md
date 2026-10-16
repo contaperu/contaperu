@@ -31,7 +31,7 @@ Dos cosas distintas, y conviene separarlas.
 
 **El hecho contable** —que una detracción provisionada de una factura anulada no es una obligación— no necesita
 norma: es la propia definición del asiento provisional, que el motor ya documenta («la constancia no existe todavía al
-provisionar», `asiento/motor.py`).
+provisionar», `asiento/comprobante.py`).
 
 **Que SUNAT no lo dice, que es lo que obliga a que lo diga el contador, sí está medido.** Sobre un **SIRE RCE de
 setiembre de 2026** presentado y aceptado (27 filas: 23 facturas y 4 notas de crédito), comparando las cuatro

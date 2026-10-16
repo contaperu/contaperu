@@ -230,7 +230,7 @@ def test_sus_dos_tablas_de_roles_son_del_catalogo_vigente():
         for rol in orden:
             assert rol in del_catalogo and rol not in obsoletos, f"ORDEN_DE_LAS_FILAS[{libro}]: `{rol}` se quedo atras"
     # Y que sean los que el MOTOR emite: ordenar u omitir por un rol que nunca llega no hace nada.
-    from contaperu.asiento import motor
+    from contaperu.asiento import comprobante as motor
     assert set(starsoft.datos.ROLES_DE_LA_DETRACCION) <= set(motor.ROLES_DEL_MOTOR)
     assert all(set(o) <= set(motor.ROLES_DEL_MOTOR) for o in starsoft.datos.ORDEN_DE_LAS_FILAS.values())
 

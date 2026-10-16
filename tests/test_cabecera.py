@@ -25,7 +25,7 @@ from decimal import Decimal
 import pytest
 
 from contaperu import api, modelo
-from contaperu.asiento import motor
+from contaperu.asiento import comprobante as motor
 from contaperu.asiento.indice import Cabecera
 
 # Los únicos campos del comprobante que NO son hechos contables: dicen de dónde salió el dato y qué opina la

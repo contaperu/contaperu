@@ -115,7 +115,7 @@ from typing import TYPE_CHECKING
 
 from ...asiento.configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO
 from ...asiento.faltas import NoExportable
-from ...asiento.motor import CENTRO_EN_ANEXO
+from ...asiento.comprobante import CENTRO_EN_ANEXO
 from ...configuracion import CONFIGURACION_GENERAL, PATRON_CUENTA, Campo, Columna
 from ...modelo import TIPOS_LIBRO, Comprobante, Libro
 from ..kit import Opciones, OpcionesArchivo

@@ -34,6 +34,7 @@ from .errores import ErrorContaperu
 from .modelo import CERO, clave_de, fecha as _fecha, monto as _monto
 # Las claves de `comprobante` y de `tributo` se toman de donde ya estaban en vez de volver a escribirlas: son la
 # misma forma de nombrar lo mismo, y dos listas separadas se habrían separado.
+from .modelo.accesores import campo as _campo
 from .tesoreria.referencias import CLAVES_POR_CLASE as _CLAVES_DE_REFERENCIA
 
 # De dónde sale una aplicación.
@@ -199,11 +200,6 @@ def leer(crudas) -> tuple[Aplicacion, ...]:
     return tuple(a if isinstance(a, Aplicacion) else Aplicacion.de_dict(a) for a in crudas)
 
 
-def _campo(cosa, nombre: str):
-    """Lee un campo de un objeto o de un diccionario. Lo que llega aquí puede venir de las dos formas —un
-    `Comprobante` del modelo, o la fila que un ERP guardó— y tratarlas distinto es cómo nacieron tres defectos en
-    la 12.0.1."""
-    return cosa.get(nombre) if isinstance(cosa, dict) else getattr(cosa, nombre, None)
 
 
 def aplicado_por_documento(aplicaciones=()) -> dict:

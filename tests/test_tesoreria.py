@@ -221,7 +221,7 @@ def test_un_libro_de_tesoreria_existe_y_el_motor_lo_origina_por_su_propia_puerta
 
     Y la guarda que esto probaba **no se fue**: sigue parando cualquier libro del catálogo que el motor no
     origine, que es para lo que se puso (el hito B13, el diario de un ERP)."""
-    from contaperu.asiento import motor, movimiento
+    from contaperu.asiento import comprobante as motor, movimiento
     from contaperu.modelo import POR_OPERACION, Libro
 
     libro = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202608", tipo="tesoreria")

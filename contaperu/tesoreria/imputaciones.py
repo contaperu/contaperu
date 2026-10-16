@@ -32,6 +32,7 @@ from dataclasses import dataclass, field, fields
 
 from ..errores import ErrorContaperu
 from ..modelo import CERO, monto as _monto
+from ..modelo.accesores import campo as _campo
 from .movimientos import TRANSFERENCIA, Movimiento
 
 
@@ -39,16 +40,6 @@ class ImputacionInvalida(ErrorContaperu, ValueError):
     """Una imputación de movimiento que no se puede aplicar. Dice cuál y por qué."""
 
 
-def _campo(cosa, nombre: str):
-    """Un campo de algo que puede llegar como objeto o como diccionario.
-
-    **Las dos formas circulan**: dentro del motor viajan objetos y de fuera llegan dicts de JSON, que es lo que
-    manda un ERP. Es el mismo trato que dan `cuadre.cuadra`, `cuentas.sin_cuenta_declarada`, `contable.resumen` y
-    `drivers.kit.rol`; este módulo lo tenía resuelto en `cuentas.py` y no aquí, y de ese hueco salieron los tres
-    defectos que la revisión de consistencia del 11-oct-2026 encontró."""
-    if isinstance(cosa, dict):
-        return cosa.get(nombre)
-    return getattr(cosa, nombre, None)
 
 
 @dataclass

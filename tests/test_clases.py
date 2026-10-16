@@ -14,7 +14,7 @@ import pytest
 
 from contaperu import api, pcge
 from contaperu.asiento import faltas
-from contaperu.asiento.motor import ROLES_DEL_MOTOR
+from contaperu.asiento.comprobante import ROLES_DEL_MOTOR
 from contaperu.modelo.libro import RASGOS
 
 from util import papel  # noqa: E402

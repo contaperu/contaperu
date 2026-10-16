@@ -20,7 +20,7 @@ from datetime import date
 from contaperu import api, asiento as asi
 from contaperu.tributos import validar
 from contaperu.tributos import comparar_sire
-from contaperu.asiento import motor
+from contaperu.asiento import comprobante as motor
 from contaperu.drivers import concar as driver_concar
 from contaperu.modelo import Comprobante, Libro
 from contaperu.pipeline import preparacion as prep

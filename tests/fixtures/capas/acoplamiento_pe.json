@@ -13,14 +13,14 @@
   "contaperu.tributos.comparar_sire",
   "contaperu.tributos.detracciones"
  ],
- "contaperu.asiento.lineas": [
-  "contaperu.pcge"
- ],
- "contaperu.asiento.motor": [
+ "contaperu.asiento.comprobante": [
   "contaperu.catalogos",
   "contaperu.pcge",
   "contaperu.tributos.detracciones",
   "contaperu.tributos.igv"
+ ],
+ "contaperu.asiento.lineas": [
+  "contaperu.pcge"
  ],
  "contaperu.asiento.movimiento": [
   "contaperu.pcge"
