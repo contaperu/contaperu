@@ -176,6 +176,41 @@ def _lista(titulo: str, elementos: list, vacio: str = "ninguno") -> None:
     print(f"{titulo}: {', '.join(str(elemento) for elemento in primeros)}{cola}")
 
 
+def _pedir_lo_que_falta(entradas: list[dict], clave: str) -> None:
+    """El «a quién se le pide» de cada falta. Igual para los dos libros: lo único que cambia es si lo que se nombra
+    son comprobantes o movimientos, y eso lo dice `clave`."""
+    quien = {"contador": "Pedir al contador", "sistema": "Ajustar en el sistema", "proveedor": "Pedir al proveedor"}
+    for falta in entradas:
+        destinatario = quien.get(falta["pedir_a"], falta["pedir_a"])
+        # El recuento va dentro del paréntesis y no delante del texto: aquí conviven los textos de `FALTAS`, que
+        # están escritos para seguir a un número («sin cuenta contable»), con los de una observación, que son
+        # frases enteras («El RUC del cliente no es válido»). Un número delante solo encaja en la mitad.
+        primeros, resto = _cortado(falta[clave])
+        cuales = f" ({', '.join(primeros)}{f' … y {resto} más' if resto else ''})" if primeros else ""
+        print(f"  -> {destinatario}: {falta['texto']}{cuales}")
+
+
+def _diagnostico_del_dinero(diagnostico: dict) -> int:
+    """El diagnóstico de un libro de tesorería, impreso (12.12).
+
+    Lo que se cuenta son movimientos, y **no hay bloques de observaciones, de detracciones ni de sub-diarios**
+    porque un movimiento no tiene ninguno. Las relecturas se dicen con todas las letras: son filas que el mes trae
+    y el asiento no lleva, y sin nombrarlas la resta no cuadra a ojo."""
+    totales = diagnostico["totales"]
+    print(f"Movimientos: {totales['movimientos']} · saldrían {totales['saldrian']} · "
+          f"relecturas descartadas {totales['repetidos']}")
+    print()
+    for error in diagnostico.get("errores_de_configuracion") or []:
+        print(f"  !! Configuración: {error}")
+    _pedir_lo_que_falta(diagnostico.get("que_falta") or [], "movimientos")
+    print()
+    if diagnostico["listo_para_exportar"]:
+        print(f"LISTO para exportar: {len(diagnostico['saldrian'])} movimientos.")
+        return 0
+    print("NO está listo: " + "; ".join(diagnostico["por_que_no"]) + ".")
+    return 1
+
+
 def cmd_diagnosticar(args: argparse.Namespace) -> int:
     """Qué bloquea, qué falta y qué saldría, antes de generar nada."""
     datos = _leer_json(args.json)
@@ -191,6 +226,11 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         return 2
     libro, totales = diagnostico["libro"], diagnostico["totales"]
     print(f"Libro: {libro['tipo'].upper()} {libro['periodo']} · RUC {libro['ruc']} · destino {diagnostico['driver']}")
+    # **La respuesta tiene una forma por libro** (12.12), y `totales` dice cuál: la de tesorería cuenta movimientos
+    # y no trae ninguna de las claves del comprobante. Se mira aquí una sola vez, en vez de preguntar por cada clave
+    # con un `.get`, que es como se acaba imprimiendo un informe a medias sin que nadie lo note.
+    if "movimientos" in totales:
+        return _diagnostico_del_dinero(diagnostico)
     print(f"Comprobantes: {totales['comprobantes']} · saldrían {totales['saldrian']} · "
           f"excluidos {totales['excluidos']} · fuera del destino {totales['fuera_del_destino']} · "
           f"con error {totales['con_error']} · con aviso {totales['con_aviso']}")
@@ -225,16 +265,7 @@ def cmd_diagnosticar(args: argparse.Namespace) -> int:
         _lista("Detracciones ya depositadas",
                [f"{pagada['serie_numero']} · {pagada['nro_constancia']} del {pagada['fecha_constancia']}"
                 for pagada in diagnostico["detracciones_pagadas"]])
-    if diagnostico.get("que_falta"):
-        quien = {"contador": "Pedir al contador", "sistema": "Ajustar en el sistema", "proveedor": "Pedir al proveedor"}
-        for falta in diagnostico["que_falta"]:
-            destinatario = quien.get(falta["pedir_a"], falta["pedir_a"])
-            # El recuento va dentro del paréntesis y no delante del texto: aquí conviven los textos de `FALTAS`, que
-            # están escritos para seguir a un número («sin cuenta contable»), con los de una observación, que son
-            # frases enteras («El RUC del cliente no es válido»). Un número delante solo encaja en la mitad.
-            primeros, resto = _cortado(falta["comprobantes"])
-            cuales = f" ({', '.join(primeros)}{f' … y {resto} más' if resto else ''})" if primeros else ""
-            print(f"  -> {destinatario}: {falta['texto']}{cuales}")
+    _pedir_lo_que_falta(diagnostico.get("que_falta") or [], "comprobantes")
     for sub_diario, rango in diagnostico["sub_diarios"].items():
         print(f"  Sub-diario {sub_diario} ({rango['etiqueta']}): {rango['comprobantes']} comprobantes "
               f"desde el {rango['empieza_en']}")

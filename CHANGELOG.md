@@ -47,6 +47,11 @@ así que publicar la lista haría creer que sí. El hueco sigue declarado donde 
   comprobó»—.
 - **Las relecturas se cuentan.** `preparar_tesoreria` descarta el movimiento repetido —bajar dos veces el mismo
   extracto es lo normal— y callarlo dejaba una resta que nadie podía explicar.
+- **`contaperu diagnosticar` imprime la forma del libro que se le pregunta**: «Movimientos: 2 · saldrían 0 ·
+  relecturas descartadas 0» y el «a quién se le pide» de cada falta, sin los bloques de observaciones, de
+  detracciones ni de sub-diarios, que un movimiento no tiene. Bifurca donde bifurca el motor, una sola vez y
+  mirando `totales`: leer las claves del comprobante con un `.get` cada una es como se imprime un informe a
+  medias sin que nadie lo note.
 
 ### Cambiado · cambio de comportamiento
 

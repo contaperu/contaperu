@@ -292,3 +292,41 @@ def test_un_mes_de_verdad_no_sale_por_pantalla_entero(tmp_path, capsys):
     pedido = next(linea for linea in out.splitlines() if "Pedir al contador" in linea)
     assert pedido.count(",") == cli.TOPE - 1 and pedido.endswith("… y 18 más)")
     assert "NO está listo: 30 sin cuenta contable" in out
+
+
+def test_diagnosticar_un_libro_de_tesoreria_por_la_consola(tmp_path, capsys):
+    """La CLI imprime la forma del libro que se le pregunta (12.12). Antes de que `diagnosticar` tuviera camino de
+    tesorería imprimía «Comprobantes: 0» de un libro que no los tiene; con la respuesta nueva **reventaría** con un
+    `KeyError` si siguiera leyendo las claves del comprobante, así que bifurca donde bifurca el motor."""
+    cuentas = [{"id": "bbva-soles", "banco": "BBVA", "moneda": "PEN", "cuenta_contable": "104101"}]
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps({"usa_centros_costo": False, "cuentas_bancarias": cuentas}), encoding="utf-8")
+    documento = tmp_path / "mes.json"
+    documento.write_text(json.dumps({
+        "open_accounting": "3.0",
+        "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202610",
+                  "tipo": "tesoreria"},
+        "movimientos": [{"cuenta": "bbva-soles", "fecha": "2026-10-15", "importe": "2000.00", "sentido": "cargo",
+                         "moneda": "PEN", "descripcion": "PAGO A PROVEEDOR", "referencia": "000123",
+                         "id_externo": "mov-1"},
+                        {"cuenta": "bbva-soles", "fecha": "2026-10-16", "importe": "15.00", "sentido": "cargo",
+                         "moneda": "PEN", "descripcion": "COMISION", "referencia": "000124",
+                         "id_externo": "mov-2"}],
+        "imputaciones_de_movimientos": {"mov-1": {"cuenta_contable": "421201"}}}), encoding="utf-8")
+
+    orden = ["diagnosticar", str(documento), "--driver", "asiento_contable", "--config", str(config)]
+    assert cli.main(orden) == 1
+    out = capsys.readouterr().out
+    assert "Libro: TESORERIA 202610" in out
+    assert "Movimientos: 2 · saldrían 0 · relecturas descartadas 0" in out
+    assert "Comprobantes:" not in out, "no los tiene, así que no se nombran"
+    assert "-> Pedir al contador: movimiento(s) sin imputación" in out and "(000124)" in out
+    assert "NO está listo: 1 movimiento(s) sin imputación" in out
+
+    # Imputado el segundo, sale listo y se cuenta en movimientos.
+    documento.write_text(documento.read_text(encoding="utf-8").replace(
+        '"imputaciones_de_movimientos": {"mov-1": {"cuenta_contable": "421201"}}',
+        '"imputaciones_de_movimientos": {"mov-1": {"cuenta_contable": "421201"}, '
+        '"mov-2": {"cuenta_contable": "639101"}}'), encoding="utf-8")
+    assert cli.main(orden) == 0
+    assert "LISTO para exportar: 2 movimientos." in capsys.readouterr().out
