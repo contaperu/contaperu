@@ -1,4 +1,4 @@
-# open-accounting 3.3 — el documento contable universal del Perú
+# open-accounting 4.0 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -16,12 +16,12 @@ y por eso lo que entra aquí se promete: un valor publicado no se quita ni cambi
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.0/estandar/open-accounting.schema.json
 ```
 
-Cuelga del tag **del estándar** (`open-accounting-3.3`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`open-accounting-4.0`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
-sirve como estándar. **El tag `open-accounting-3.3` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
+sirve como estándar. **El tag `open-accounting-4.0` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
 bloque opcional no suben la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la
 1.0; un cambio de significado sube a 2.0 y estrena su propio tag.
 
@@ -43,7 +43,7 @@ python -m contaperu.puertas.cli diagnosticar mi-documento.json
 
 ```json
 {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -276,7 +276,8 @@ permite que el resto pueda degradar.
 | `base_gravada`, `igv` | El importe **neto** de la operación, tras cualquier descuento. Así lo dan el `TaxableAmount` y el `TaxAmount` del XML, y así cuadra el total: base + IGV + no gravados + cargos. |
 | `dscto_otros` | **El único «dscto_» que SÍ mueve el total**, y por eso está aquí. Es la parte de `otros` que el registro informa en negativo: un descuento global que no forma base (SIRE, campo 24 del RCE y 25 del RVIE, que llevan **el neto con signo** en una sola columna). Va en positivo como todo importe y **resta**. Al leer, un negativo ahí es esto **solo si su signo es contrario al del total**: en una nota de crédito todos los campos vienen negativos y ese signo lo pone el driver. |
 | `dscto_base`, `dscto_igv` | **No suman ni restan.** Dicen qué parte de la base y del IGV informa el registro en sus columnas de descuento (SIRE ventas, campos 16 y 18). Una nota de crédito de descuento global va **entera** ahí —así la registra SUNAT— y entonces valen lo mismo que `base_gravada` e `igv`. |
-| `retencion` | Es la **retención de renta de 4ta** que muestra un recibo por honorarios. **No** es la retención del IGV del 3 %, que no entra en ningún asiento y que las IAs confunden constantemente con una detracción. |
+| `retencion_4ta` | La **retención de renta de 4ta** que muestra un recibo por honorarios (8 % del bruto). Se llamaba `retencion` hasta la 4.0, y ese nombre genérico costó dos averías reales ([enmienda 0034](enmiendas/0034-un-nombre-por-retencion.md)). |
+| `retencion_igv` | La del **régimen de retenciones del IGV** (3 %), `{porcentaje, monto}`. **No entra en ninguna línea de asiento** —es un hecho del pago— pero sí llega al driver. Las IAs la confunden constantemente con una detracción, y hasta la 4.0 no tenía dónde aterrizar. |
 | `destino_igv` | Solo compras. `DG` gravadas, `DGNG` mixtas, `DNG` no gravadas. Decide qué columnas usa el registro que se declara. |
 | `valor_no_gravado` | **Lo no gravado cuando el libro no lo desglosa.** El RVIE separa `exonerado` (campo 19) de `inafecto` (campo 20); el RCE tiene **una sola columna** (campo 21) que no dice cuál de los dos es, así que una compra importada del SIRE lo trae aquí y deja el desglose vacío a propósito. **Opcional, y nulo no es cero**: ausente significa «mira el desglose» y el motor usa `exonerado + inafecto`; declarado, manda él —también si vale cero—. El total se comprueba contra esa decisión, no contra la suma de los tres, o el importe se contaría dos veces; la hace el modelo una vez, en `adquisiciones_no_gravadas`. |
 | `condicion_pago` | `contado` o `credito`: lo que **declara** el documento. En la factura electrónica viene en `PaymentTerms FormaPago`, y una factura con cuotas es a crédito. Vacío no significa contado: significa que el documento no lo dice. |
@@ -373,7 +374,7 @@ necesitado todavía; se añade con un caso real detrás, no por si acaso.
 **`1.0` gana dos campos opcionales el 26-sep-2026 y no sube** (enmiendas 0014 y 0015): `tipo_nota`, por qué se
 emitió una nota, y `estado_sunat`, lo que SUNAT dice del comprobante en su propio registro. Los dos vienen de
 columnas que la propuesta del SIRE ya traía y que se descartaban al leer. Nada cambia de significado y un
-documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-3.3` avanza y la versión se
+documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-4.0` avanza y la versión se
 queda en `1.0`**.
 
 **`0.2` (11-sep-2026) cambia el significado de dos campos**, y por eso sube: `base_gravada` e `igv` pasan a ser
@@ -455,11 +456,10 @@ que el motor transporta sin interpretar. **Cada uno tiene su enmienda** en
 Lo que sí entró de esa propuesta: `_exportacion` (arriba), `EXIGE` en el contrato de driver y `pedir_a` en
 `diagnosticar` (`ARQUITECTURA.md`).
 
-Y tres que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso real o una decisión —el cuarto, `medio_pago`, **entró el 25-sep-2026** ([enmienda 0004](enmiendas/0004-medio-de-pago.md)): la decisión que le faltaba era si es dato del documento o valor del contribuyente, y la respuesta fue las dos cosas—:
+Y dos que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso real o una decisión. De los cuatro que había, **dos ya entraron**: `medio_pago` el 25-sep-2026 ([enmienda 0004](enmiendas/0004-medio-de-pago.md)) —le faltaba decidir si es dato del documento o valor del contribuyente, y la respuesta fue las dos cosas— y `retencion_igv` el 20-oct-2026 ([enmienda 0005](enmiendas/0005-retencion-de-igv.md)), cuyo caso real fue una aplicación volcando el 3 % del IGV en el campo de la renta de 4ta porque no tenía dónde ponerlo:
 
 | Dónde | Nombre | Qué será |
 |---|---|---|
-| comprobante | `retencion_igv` | `{porcentaje, monto}`: la retención del IGV del 3 %, que el XML trae en `PaymentTerms Retencion`. **No es `retencion`**, que es la renta de 4ta |
 | comprobante | `percepcion` | El régimen de percepciones del IGV |
 | comprobante | `no_domiciliado` | El número del comprobante que emite un sujeto no domiciliado |
 
@@ -478,7 +478,7 @@ libro**— viven en [`catalogos.json`](catalogos.json), junto a este archivo, co
 la URL del tag igual que el esquema, así que un ERP de fuera los lee sin instalar nada:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/catalogos.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.0/estandar/catalogos.json
 ```
 
 **Por qué están fuera del esquema** (1.0): eran enums cerrados, así que el día que entre un hecho nuevo —los

@@ -190,7 +190,10 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
     monto_pendiente: str | None = None
     forma_pago = ""
     detraccion: dict | None = None
-    retencion: dict | None = None
+    # El bloque crudo del término de pago, que vale para las DOS retenciones según el tipo de
+    # comprobante (ver más abajo). Se llama así y no `retencion` porque en este archivo ese nombre
+    # ya es el del campo y el del rol.
+    bloque_retencion: dict | None = None
     for termino in raiz.findall("cac:PaymentTerms", NS):
         ident = _t(termino, "cbc:ID")
         medio = _t(termino, "cbc:PaymentMeansID")
@@ -217,8 +220,8 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
                 "monto": str(monto(_t(termino, "cbc:Amount"))),
             }
         elif ident == "Retencion":
-            retencion = {"porcentaje": _t(termino, "cbc:PaymentPercent"),
-                         "monto": str(monto(_t(termino, "cbc:Amount")))}
+            bloque_retencion = {"porcentaje": _t(termino, "cbc:PaymentPercent"),
+                                "monto": str(monto(_t(termino, "cbc:Amount")))}
     if detraccion is not None:
         cuenta = ""
         for medio_pago in raiz.findall("cac:PaymentMeans", NS):
@@ -269,7 +272,9 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         "gratuitas": str(base_de(cat.TRIBUTO_GRATUITO)),
         "anticipo": str(anticipo),
         "tax_inclusive": _t(totales, "cbc:TaxInclusiveAmount"),
-        "retencion": retencion,
+        # Tal como viene del papel, sin interpretar. Su destino es `retencion_igv` o
+        # `retencion_4ta` según el tipo de comprobante, y aquí queda el crudo para auditoría.
+        "retencion": bloque_retencion,
         "motivo_nota": motivo,
         **({"descuentos_globales": descuentos} if descuentos else {}),
     }
@@ -299,10 +304,18 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         icbper=tributo_de(cat.TRIBUTO_ICBPER),
         otros=tributo_de(cat.TRIBUTO_OTROS),
         total=total,
-        # `PaymentTerms Retencion` del XML es el RÉGIMEN DE RETENCIONES DEL IGV (3 %)
-        # de las facturas y NO entra en ningún asiento (se ignora). La retención de 4ta
-        # solo existe en el recibo por honorarios, y ahí sí parte el asiento.
-        retencion=monto(retencion.get("monto")) if (retencion and tipo_cp == "02") else monto(0),
+        # **Un término de pago, dos tributos, y lo decide el TIPO DE COMPROBANTE** (4.0).
+        # `PaymentTerms Retencion` es la renta de 4ta en un recibo por honorarios y el Régimen
+        # de Retenciones del IGV en una factura. Hasta la 3.3 el segundo caso **se leía y se
+        # tiraba** —llegaba hasta aquí y se cambiaba por un cero—, así que el dato existía en el
+        # XML, sobrevivía en `datos_originales` y no había campo donde ponerlo. Esa es la
+        # ausencia que la enmienda 0005 vino a cerrar, y el caso real que la destrabó: una
+        # aplicación volcando el 3 % del IGV en la columna de la 4ta porque no tenía otra.
+        #
+        # La de 4ta entra en el asiento; la del IGV **en ninguno** (no es un hecho del
+        # comprobante sino del pago), y viaja para quien lleve la tesorería.
+        retencion_4ta=monto(bloque_retencion.get("monto")) if (bloque_retencion and tipo_cp == "02") else monto(0),
+        retencion_igv=bloque_retencion if (bloque_retencion and tipo_cp != "02") else None,
         # Por qué se emitió la nota. Lo lee este mismo lector desde la 1.x en `cac:DiscrepancyResponse/cbc:ResponseCode`
         # —es el mismo catálogo que cita el SIRE, el 09 o el 10 según el tipo— y hasta la 3.5.0 se quedaba solo en
         # `datos_originales["motivo_nota"]`, donde nadie lo miraba. Ahí sigue con su `referencia` y su `descripcion`,

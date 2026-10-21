@@ -115,7 +115,7 @@ def test_todos_los_roles_tienen_clase_en_un_asiento_completo():
     vistos = {}
     for cuenta, extra in [("634301", {"detraccion": {"codigo": "037", "porcentaje": "12"}}),
                           ("632101", {"tipo_cp": "02", "base_gravada": "0", "igv": "0",
-                                      "inafecto": "3000.00", "total": "3000.00", "retencion": "240.00"})]:
+                                      "inafecto": "3000.00", "total": "3000.00", "retencion_4ta": "240.00"})]:
         for ln in asiento(cuenta, **extra):
             vistos[papel(ln, LIBRO["tipo"])] = ln["clase"]
 
@@ -165,7 +165,7 @@ def aplicada(**general) -> dict:
      {"tipo_cp": "03", "base_gravada": "0", "igv": "0", "inafecto": "118.00"}, False),
     ("recibo por honorarios con retención de 4ta",
      {"tipo_cp": "02", "base_gravada": "0", "igv": "0", "inafecto": "3000.00", "total": "3000.00",
-      "retencion": "240.00"}, False),
+      "retencion_4ta": "240.00"}, False),
     ("recibo por honorarios sin retención, que es lo normal con suspensión",
      {"tipo_cp": "02", "base_gravada": "0", "igv": "0", "inafecto": "3000.00", "total": "3000.00"}, False),
     ("nota de crédito, que invierte los sentidos", {"tipo_cp": "07", "ref_tipo_cp": "01", "ref_serie": "F001",

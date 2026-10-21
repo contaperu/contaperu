@@ -218,12 +218,12 @@ def test_un_documento_conforme_sale_con_cero(tmp_path, capsys):
     """Lo que un tercero necesita para comprobar lo que produce sin escribirle a nadie, que es lo que el LEEME del
     estándar ofrece. Hasta la 3.1 el esquema estaba publicado y la única forma de correrlo era clonar el
     repositorio y lanzar pytest."""
-    codigo = cli.main(["verificar-documento", _escribir(tmp_path, {"open_accounting": "3.0", "libro": LIBRO_OK})])
+    codigo = cli.main(["verificar-documento", _escribir(tmp_path, {"open_accounting": "4.0", "libro": LIBRO_OK})])
     assert codigo == 0 and "CONFORME" in capsys.readouterr().out
 
 
 def test_lo_que_el_esquema_rechaza_es_un_ERROR(tmp_path, capsys):
-    documento = {"open_accounting": "3.0", "libro": LIBRO_OK,
+    documento = {"open_accounting": "4.0", "libro": LIBRO_OK,
                  "asiento": [{"cuenta": "631101", "debe_haber": "X", "importe": "100.00", "clase": "gasto"}]}
     codigo = cli.main(["verificar-documento", _escribir(tmp_path, documento)])
     salida = capsys.readouterr().out
@@ -243,7 +243,7 @@ def test_lo_que_solo_saben_los_catalogos_es_un_AVISO(tmp_path, capsys):
     **El ejemplo era `diario` y dejó de servir el 16-oct-2026**, porque ese libro entró de verdad con B13. Es la
     mejor señal de que la promesa del catálogo funciona —un libro nuevo no costó una versión del esquema— y la
     razón de que ahora el ejemplo sea un valor que nadie va a registrar nunca."""
-    documento = {"open_accounting": "3.0", "libro": {**LIBRO_OK, "tipo": "libro_que_nadie_registra"},
+    documento = {"open_accounting": "4.0", "libro": {**LIBRO_OK, "tipo": "libro_que_nadie_registra"},
                  "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "100.00", "clase": "gasto"}]}
     codigo = cli.main(["verificar-documento", _escribir(tmp_path, documento)])
     salida = capsys.readouterr().out
@@ -257,7 +257,7 @@ def test_una_linea_con_rol_ya_no_es_conforme(tmp_path, capsys):
     El `rol` era una etiqueta para los destinos y nadie decidía por ella, así que salió de la línea: el papel se
     **deriva** de lo que la línea trae. Y como `linea` no admite claves que no son suyas, una línea que lo lleve no
     avisa — no es conforme, que es lo honesto: el campo no existe."""
-    documento = {"open_accounting": "3.0", "libro": {**LIBRO_OK, "tipo": "compra"},
+    documento = {"open_accounting": "4.0", "libro": {**LIBRO_OK, "tipo": "compra"},
                  "asiento": [{"cuenta": "631101", "debe_haber": "D", "importe": "100.00", "clase": "gasto",
                               "rol": "principal"}]}
     codigo = cli.main(["verificar-documento", _escribir(tmp_path, documento)])
@@ -307,7 +307,7 @@ def test_diagnosticar_un_libro_de_tesoreria_por_la_consola(tmp_path, capsys):
     config.write_text(json.dumps({"usa_centros_costo": False, "cuentas_bancarias": cuentas}), encoding="utf-8")
     documento = tmp_path / "mes.json"
     documento.write_text(json.dumps({
-        "open_accounting": "3.0",
+        "open_accounting": "4.0",
         "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202610",
                   "tipo": "tesoreria"},
         "movimientos": [{"cuenta": "bbva-soles", "fecha": "2026-10-15", "importe": "2000.00", "sentido": "cargo",

@@ -26,7 +26,7 @@ def cs(*comprobantes: dict) -> list[Comprobante]:
 
 
 def doc(*comprobantes: dict, **libro) -> dict:
-    return {"open_accounting": "3.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
+    return {"open_accounting": "4.0", "libro": dict(LIBRO, **libro), "comprobantes": list(comprobantes)}
 
 
 # ── Lo que suma y lo que no ──────────────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ def test_el_resumen_es_del_libro_y_no_de_un_destino():
     recibe driver: lo que iría a un destino concreto ya lo dice `diagnosticar`, y son dos cifras distintas
     a propósito."""
     honorarios = dict(FACTURA, tipo_cp="02", numero="874", base_gravada="0", igv="0", total="500.00",
-                      retencion="40.00")
+                      retencion_4ta="40.00")
     r = resumen.del_libro(cs(FACTURA, honorarios))
     assert r["recuento"]["sumados"] == 2 and r["totales"]["PEN"]["total"] == "1680.00"
 

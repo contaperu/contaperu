@@ -71,7 +71,7 @@ CASOS: list[tuple[str, str, dict]] = [
      {"tipo_cp": "02", "serie": "R001", "numero": "00000007", "contraparte_tipo_doc": "1",
       "contraparte_doc": "45678912", "contraparte_nombre": "CONSULTOR INDEPENDIENTE",
       "base_gravada": "0.00", "igv": "0.00", "exonerado": "5000.00", "total": "5000.00",
-      "retencion": "400.00", "concepto": "Asesoria de ingenieria"}),
+      "retencion_4ta": "400.00", "concepto": "Asesoria de ingenieria"}),
     # En una venta con concepto propio, el nombre del cliente ya no cabe en la glosa: solo el comprobante lo lleva.
     ("venta_con_concepto_lleno", "venta",
      {"contraparte_doc": "20131312955", "contraparte_nombre": "CONSTRUCTORA DEL NORTE SAC",

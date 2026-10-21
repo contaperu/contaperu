@@ -35,7 +35,7 @@ def una(**extra) -> dict:
 
 
 def doc(*aplicaciones: dict, **extra) -> dict:
-    return {"open_accounting": "3.3", "libro": dict(LIBRO), "aplicaciones": list(aplicaciones), **extra}
+    return {"open_accounting": "4.0", "libro": dict(LIBRO), "aplicaciones": list(aplicaciones), **extra}
 
 
 # --- la forma -----------------------------------------------------------------------------------------------------

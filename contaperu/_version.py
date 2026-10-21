@@ -15,7 +15,7 @@ como apareció el `0.1.0` de arriba.
 """
 from __future__ import annotations
 
-__version__ = "13.3.0"
+__version__ = "14.0.0"
 
 # La versión del ESTÁNDAR de datos, que es otro reloj: `open-accounting` es el formato que se publica para
 # que otros lo usen y cambia poquísimo, mientras la librería cambia cada vez que se corrige un
@@ -27,4 +27,4 @@ __version__ = "13.3.0"
 # librería saltó a `1.1.0` en la misma tanda en que el estándar llegó a `1.0`, y por eso el test se pone
 # rojo si alguien intenta publicar un estándar cuya versión sea prefijo de la del paquete: la separación
 # deja de depender de que nos acordemos.
-OPEN_ACCOUNTING = "3.3"
+OPEN_ACCOUNTING = "4.0"

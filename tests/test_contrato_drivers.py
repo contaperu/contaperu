@@ -630,7 +630,7 @@ def _meses_que_pasan_por_todo() -> list[tuple[dict, dict]]:
         dict(base, tipo_cp="07", serie="FC01", numero="9003", ref_tipo_cp="01", ref_serie=base["serie"],
              ref_numero=base["numero"], ref_fecha=base["fecha_emision"]),
         dict(base, tipo_cp="02", serie="E001", numero="9004", base_gravada="0", igv="0", inafecto="1000",
-             total="1000", retencion="80"),
+             total="1000", retencion_4ta="80"),
         dict(base, tipo_cp="03", serie="B001", numero="9005"),
     ]
     ventas = json.loads((GOLDEN / "ventas_202512.json").read_text(encoding="utf-8"))

@@ -82,7 +82,17 @@ class Cabecera:
     otros: str = "0"
     dscto_otros: str = "0"           # la parte de `otros` que el registro informa en negativo (resta del total)
     total: str = "0"
-    retencion: str = "0"             # la de renta de 4ta que MUESTRA el recibo por honorarios
+    retencion_4ta: str = "0"         # la de renta de 4ta que MUESTRA el recibo por honorarios
+    # Y la del RÉGIMEN DE RETENCIONES DEL IGV (3 %), `{porcentaje, monto}`. **No entra en ninguna
+    # línea de asiento** (enmienda 0005: es un hecho del pago, no del comprobante), pero sí llega
+    # hasta aquí, y la diferencia importa: la regla de esta cabecera es que lleva TODOS los hechos
+    # del comprobante, y lo que la justifica es que a STARSOFT se le cayó por el camino un dato que
+    # el estándar ya declaraba. Un driver que la necesite —CONTASIS la pide en su «condición de
+    # retención»— la encuentra aquí en vez de descubrir que no existe.
+    #
+    # Vacía se OMITE al escribir el documento (`como_comprobante`), que es cómo se traduce el `None`
+    # del comprobante: «nadie lo dijo» no es «se dijo que no hay».
+    retencion_igv: dict = field(default_factory=dict)
     # Solo compras
     destino_igv: str = "DG"          # DG gravadas | DGNG mixtas | DNG no gravadas
     valor_no_gravado: str = "0"      # YA RESUELTO: si el comprobante no lo trae, exonerado + inafecto

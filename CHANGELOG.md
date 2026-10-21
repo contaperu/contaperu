@@ -4,6 +4,61 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [14.0.0] — 2026-10-20
+
+### Un nombre por retención (`open-accounting` 4.0)
+
+El Perú tiene dos retenciones que en castellano se llaman igual, y el comprobante tenía **un** campo llamado
+`retencion`. Ese nombre genérico costó dos averías de verdad, y las dos estaban ya documentadas en este
+repositorio:
+
+1. Alguien escribió `retencion_4ta` —el nombre específico, el que parece natural— donde el campo se llamaba
+   `retencion`. El lector lo filtraba en silencio y **el mes se exportó entero sin su línea de retención**: solo
+   se veía leyendo las celdas del Excel. De ahí salió el rechazo de claves desconocidas de `de_dict` (3.10).
+2. Una aplicación que integra el motor volcó en ese campo el **3 % del IGV** que SUNAT declara de una factura,
+   porque **no había dónde ponerlo**: dos facturas de producción acabaron observadas con `RETENCION_NO_APLICA`
+   (20-oct-2026). El aviso del motor era lo único que estaba bien.
+
+La segunda es el **caso real** que la enmienda 0005 esperaba desde que reservó el nombre `retencion_igv`: «un
+destino que lo pida». Las dos juntas dicen que el problema no era el mapeo de nadie, era el nombre.
+
+- **`comprobante.retencion` pasa a `comprobante.retencion_4ta`** (enmienda 0034). La grafia es `4ta` y no
+  `cuarta` a propósito: la cuenta configurada ya se llamaba `cuentas.retencion_4ta` en los tres drivers y en la
+  configuración publicada, así que con el campo escrito igual **la avería 1 es imposible de cometer**.
+- **Nace `comprobante.retencion_igv`**, `{porcentaje, monto}`, opcional (enmienda 0005). El XML lo trae en
+  `cac:PaymentTerms` con `cbc:ID = "Retencion"` y el lector **ya lo leía y lo tiraba**: llegaba hasta el
+  constructor y se cambiaba por un cero. Ausente o `null` significa «nadie lo dijo», que no es lo mismo que un
+  monto en cero.
+- **No entra en ninguna línea de asiento** —es un hecho del pago, no del comprobante— **pero sí llega a la
+  cabecera que ve un driver**, porque la regla de esta casa es que todo hecho del comprobante llegue: lo que la
+  justifica es que a STARSOFT se le cayó por el camino un dato que el estándar ya declaraba. Hoy ningún driver
+  lo usa; CONTASIS lo pide en su «condición de retención» y lo encontrará ahí.
+- **Aviso nuevo `RETENCION_IGV_TASA`** (nivel aviso, nunca error): el porcentaje declarado se aleja más de
+  0,5 pp del 3 % (R.S. 037-2002/SUNAT; el 3 % rige desde el 01-03-2014). Avisa **sin mirar la fecha**, la misma
+  decisión que la tasa del IGV.
+- **`RETENCION_NO_APLICA` se queda y ahora dice adónde ir**: una retención de 4ta en algo que no es un recibo
+  sigue avisando, y el texto nombra el campo que sí existe.
+- **Quien manda `retencion` lee cuál de las dos quería** (`RENOMBRADOS_EN_4_0`), en vez de «clave
+  desconocida»: es lo que no se pudo decir la primera vez.
+
+**Y lo que esta versión NO mueve, que es la mitad que importa:** ni una celda de ningún Excel. De los siete
+snapshots congelados, cambia **uno** —el del documento del estándar, y solo el nombre de la clave—; los cuatro
+de CONCAR y CONTASIS y los dos de líneas y papeles derivados quedan byte a byte, porque un archivo de salida no
+lleva dentro el nombre de un campo. Fue el criterio de salida del cambio y la batería lo comprueba.
+
+`_obsoleto.RETIRO` pasa a la 15.0. No incumple nada: ese módulo no lo usa nada desde la 10.0.
+
+### Cómo migrar
+
+Un renombrado y un número. Si tu documento no trae `retencion`, solo sube `open_accounting` a `4.0`:
+
+```diff
+-  "retencion": "160.00"
++  "retencion_4ta": "160.00"
+```
+
+La guía entera, con el campo nuevo y lo que no cambia, en `estandar/MIGRAR-A-4.0.md`.
+
 ## [13.3.0] — 2026-10-16
 
 **El primer lector de tesorería.** `tesoreria/` llevaba desde la 11.x con el contrato entero y **ningún lector**,

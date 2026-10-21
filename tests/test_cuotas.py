@@ -63,7 +63,7 @@ def con_cuotas(*cuotas: tuple[str, str, str]) -> Comprobante:
 
 
 def documento(**extra) -> dict:
-    return {"open_accounting": "3.2", "libro": dict(LIBRO), "comprobantes": [dict(FACTURA, **extra)]}
+    return {"open_accounting": "4.0", "libro": dict(LIBRO), "comprobantes": [dict(FACTURA, **extra)]}
 
 
 # --- lo que el XML declara y ahora llega -------------------------------------------------------------------------

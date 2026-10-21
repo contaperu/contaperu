@@ -88,6 +88,17 @@ def glosa_de(c: Comprobante) -> str:
 
 
 
+def _retencion_igv_del_estandar(c: Comprobante) -> dict:
+    """La retención del IGV con lo que el estándar admite: `porcentaje` y `monto`, sin las vacías.
+
+    **Filtra por el mismo motivo que `_detraccion_del_estandar`**, y no por simetría: `$defs/retencion_igv`
+    es un bloque cerrado y quien usa la librería construye sus comprobantes en memoria, donde un
+    `Comprobante` no vigila las claves de este dict. Copiarlo tal cual haría que el documento de un driver
+    fallara su propio esquema en cuanto el bloque llevara algo de más."""
+    bloque = c.retencion_igv if isinstance(c.retencion_igv, dict) else {}
+    return {k: str(bloque[k]) for k in ("porcentaje", "monto") if bloque.get(k) not in (None, "")}
+
+
 def _detraccion_del_estandar(c: Comprobante) -> dict:
     """La detracción del comprobante con lo que el estándar admite: sus siete claves declaradas y las anotaciones
     `_`. Sin las vacías, porque el estándar distingue «no lo sé» de «es esto» y lo primero se dice omitiendo la clave.
@@ -129,7 +140,8 @@ def cabecera_de(c: Comprobante) -> Cabecera:
                     dscto_base=str(c.dscto_base), dscto_igv=str(c.dscto_igv), exonerado=str(c.exonerado),
                     inafecto=str(c.inafecto), exportacion=str(c.exportacion), isc=str(c.isc),
                     base_ivap=str(c.base_ivap), ivap=str(c.ivap), icbper=str(c.icbper), otros=str(c.otros), dscto_otros=str(c.dscto_otros),
-                    total=str(c.total), retencion=str(c.retencion),
+                    total=str(c.total), retencion_4ta=str(c.retencion_4ta),
+                    retencion_igv=_retencion_igv_del_estandar(c),
                     destino_igv=c.destino_igv or "", valor_no_gravado=str(c.adquisiciones_no_gravadas),
                     anio_dua=c.anio_dua or "", cod_dep_aduanera=c.cod_dep_aduanera or "",
                     clasif_bienes=c.clasif_bienes or "", id_contrato=c.id_contrato or "",
@@ -321,7 +333,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # Recibo por honorarios con retención de 4ta: el gasto va por el TOTAL, la retención al Haber en
     # su cuenta de tributos, y a la cuenta por pagar solo el NETO que se le paga al profesional (regla
     # de contabilidad). Sin retención —lo normal con suspensión— el total completo va a la cuenta por pagar.
-    retenido = Decimal(c.retencion or 0).quantize(CENTIMO) if es_honorarios else Decimal(0)
+    retenido = Decimal(c.retencion_4ta or 0).quantize(CENTIMO) if es_honorarios else Decimal(0)
     if retenido > total:
         retenido = total
     # La CUENTA decide dónde va el centro (el contador, 09-sep-2026): en su línea si la cuenta lo lleva

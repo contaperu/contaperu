@@ -149,7 +149,7 @@ def test_las_lineas_validan_contra_el_estandar():
     """Lo que produce el motor tiene que caber en el bloque `asiento` de open-accounting."""
     validador = Draft202012Validator(json.loads(ESQUEMA.read_text(encoding="utf-8")))
     doc = {
-        "open_accounting": "3.0",
+        "open_accounting": "4.0",
         "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                   "periodo": "202608", "tipo": "compra"},
         "asiento": [ln.a_dict() for ln in driver_concar.a_lineas(
@@ -177,7 +177,7 @@ def test_las_dos_cuentas_del_sistema_se_leen_igual_y_con_su_respaldo():
     assert del_impuesto.cuenta == CONFIG_POR_DEFECTO["cuentas"]["igv"] == "401111"
 
     # Y la de la retención, que ya lo hacía, para que las dos queden fijadas por el mismo test y no se separen otra vez.
-    rh = factura(tipo_cp="02", retencion="160.00", igv="0.00", base_gravada="0.00",
+    rh = factura(tipo_cp="02", retencion_4ta="160.00", igv="0.00", base_gravada="0.00",
                  exonerado="2000.00", total="2000.00")
     de_la_retencion = next(ln for ln in asi.lineas_del_comprobante(rh, sin_las_dos, MES, "150001", libro=RASGOS["compra"])
                            if ln.retencion)
@@ -215,7 +215,7 @@ def test_la_linea_de_la_retencion_dice_de_que_tributo_y_de_que_categoria():
     que es trabajo independiente —el artículo 33 del TUO de la Ley del Impuesto a la Renta—."""
     from contaperu import catalogos
 
-    rh = factura(tipo_cp="02", retencion="160.00", igv="0.00", base_gravada="0.00",
+    rh = factura(tipo_cp="02", retencion_4ta="160.00", igv="0.00", base_gravada="0.00",
                  exonerado="2000.00", total="2000.00")
     lineas = asi.lineas_del_comprobante(rh, CONTAB, MES, "150001", libro=RASGOS["compra"])
     de_la_retencion = next(ln for ln in lineas if ln.retencion)
@@ -297,10 +297,10 @@ def test_lo_que_arma_el_motor_valida_contra_el_estandar():
                  ref_fecha="2026-08-01", detraccion={"codigo": "027", "porcentaje": "4"})
     lineas = (asi.lineas_del_comprobante(factura(detraccion={"codigo": "027", "porcentaje": "4"}), CONTAB, MES, "080084", libro=RASGOS["compra"])
               + asi.lineas_del_comprobante(nc, CONTAB, MES, "080085", libro=RASGOS["compra"])
-              + asi.lineas_del_comprobante(factura(tipo_cp="02", retencion="336", igv="0", base_gravada="0",
+              + asi.lineas_del_comprobante(factura(tipo_cp="02", retencion_4ta="336", igv="0", base_gravada="0",
                                             inafecto="4956"), CONTAB, MES, "080086",
                                            libro=RASGOS["compra"]))
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
                      "periodo": "202608", "tipo": "compra"},
            "asiento": [ln.a_dict() for ln in lineas]}

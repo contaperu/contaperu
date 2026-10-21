@@ -66,7 +66,7 @@ def sin_efecto_contable(c: Comprobante) -> bool:
     Lo que esto NO cambia: el comprobante **sigue en el registro** que se declara a SUNAT. El asiento es una cosa y el
     registro es otra, y el correlativo de SUNAT necesita su fila —por eso los da de baja en cero en vez de quitarlos—.
     """
-    return c.total == 0 and c.igv == 0 and c.retencion == 0 and not tiene_detraccion(c)
+    return c.total == 0 and c.igv == 0 and c.retencion_4ta == 0 and not tiene_detraccion(c)
 
 
 def asienta_sin_efecto(config: dict | None = None) -> bool:
@@ -166,7 +166,7 @@ def cuentas_del_asiento(c: Comprobante, config: dict, libro: Rasgos | None = Non
     if igv_del_asiento(c, rasgos) > 0:
         cuentas.append(str(cuentas_config.get("igv") or por_defecto["igv"]))
     total = a_decimal(c.total).quantize(CENTIMO)
-    retenido = min(a_decimal(c.retencion).quantize(CENTIMO), total) if es_honorarios else Decimal(0)
+    retenido = min(a_decimal(c.retencion_4ta).quantize(CENTIMO), total) if es_honorarios else Decimal(0)
     if retenido > 0:
         cuentas.append(str(cuentas_config.get("retencion_4ta") or por_defecto["retencion_4ta"]))
     cuentas.append(cuenta_tercero(c, config, rasgos))

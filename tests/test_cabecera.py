@@ -228,7 +228,7 @@ def test_la_cabecera_no_entra_en_la_huella():
     con `DGNG`— darían huellas distintas, y el aviso de lote repetido dejaría de dispararse. Quien necesita
     saber si un comprobante cambió tiene su propia huella, en la aplicación.
     """
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
                      "periodo": "202507", "tipo": "compra"},
            "comprobantes": [{"tipo_cp": "01", "serie": "F136", "numero": "431", "fecha_emision": "2025-07-01",

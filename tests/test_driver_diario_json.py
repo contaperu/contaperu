@@ -90,7 +90,11 @@ def test_los_hechos_tributarios_del_comprobante_llegan_al_driver(registrado):
     assert (cabecera["anio_dua"], cabecera["cod_dep_aduanera"]) == ("2025", "118")
     assert (cabecera["contraparte_tipo_doc"], cabecera["clasif_bienes"]) == ("6", "1")
     # Y los demas hechos tributarios viajan aunque este comprobante no los traiga: la cabecera los declara todos.
-    for campo in ("exonerado", "inafecto", "exportacion", "isc", "ivap", "icbper", "otros", "retencion",
+    #
+    # `retencion_igv` NO esta en esta lista y no es un olvido: es un BLOQUE, y `como_comprobante` omite lo
+    # vacio para no decir «se dijo que no hay» donde lo cierto es «nadie lo dijo». Que llega cuando la hay
+    # lo vigila `test_retenciones.py`; esta lista comprueba que los ESCALARES viajan siempre, aun en cero.
+    for campo in ("exonerado", "inafecto", "exportacion", "isc", "ivap", "icbper", "otros", "retencion_4ta",
                   "valor_no_gravado", "dscto_base", "dscto_igv", "numero_final", "id_contrato"):
         assert campo in cabecera, f"{campo} no llega al driver"
 

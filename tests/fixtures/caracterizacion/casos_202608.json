@@ -1,6 +1,6 @@
 {
  "revisar": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -38,7 +38,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "1180.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -92,7 +93,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "590.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -146,7 +148,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "118.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -200,7 +203,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "59.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -254,7 +258,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "4956.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -313,7 +318,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "2360.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -372,7 +378,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "1500.00",
-    "retencion": "120.00",
+    "retencion_4ta": "120.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -426,7 +433,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "1200.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -480,7 +488,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "118.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -540,7 +549,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "354.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -594,7 +604,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "1180.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -648,7 +659,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "236.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -840,7 +852,7 @@
   ]
  },
  "generar_asiento/concar": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -16707,7 +16719,7 @@
   ]
  },
  "generar_asiento/csv": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -18820,7 +18832,7 @@
   ]
  },
  "generar_asiento/starsoft": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -20460,7 +20472,7 @@
   ]
  },
  "generar_asiento/asiento_contable": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",

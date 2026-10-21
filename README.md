@@ -339,7 +339,7 @@ API y devuelven la respuesta. Por eso el mismo mes da el mismo resultado por las
 
 La **API pública** (`contaperu.api`) es la lista de operaciones que comparten las cuatro puertas: leer, revisar,
 diagnosticar, generar el asiento, exportar… Es también una promesa: sus nombres y lo que pide cada una no cambian
-hasta la 14.0. Cada error lleva una clave estable (`sin_cuenta`, `no_cabe`, `sin_sigla`…), que la puerta HTTP entrega
+hasta la 15.0. Cada error lleva una clave estable (`sin_cuenta`, `no_cabe`, `sin_sigla`…), que la puerta HTTP entrega
 en formato RFC 9457.
 
 La **tabla de operaciones** (`api/tabla.py`) tiene una fila por operación, con su ruta HTTP y su nombre en el MCP. De
@@ -457,7 +457,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
 | **Estándar y comunidad** | |
-| El estándar `open-accounting` 3.3, su esquema, sus catálogos y su batería de conformidad | listo |
+| El estándar `open-accounting` 4.0, su esquema, sus catálogos y su batería de conformidad | listo |
 | Contrato de driver y drivers de terceros por *entry points* | listo |
 | Paquete en PyPI | listo: `pip install contaperu` |
 | **Motor** | |
@@ -589,7 +589,7 @@ Path(archivo.archivo).write_bytes(archivo.contenido)            # el Excel que i
 ```
 
 `contaperu.api` es la API pública: el documento primero, todo lo demás por su nombre, y el mismo nombre y la
-misma firma hasta la 14.0. Cómo integrarlo en un ERP —desde Python, por lotes, por MCP o por HTTP desde cualquier
+misma firma hasta la 15.0. Cómo integrarlo en un ERP —desde Python, por lotes, por MCP o por HTTP desde cualquier
 lenguaje—, en [INTEGRAR.md](INTEGRAR.md).
 
 ### Para un ERP en cualquier lenguaje: la puerta HTTP

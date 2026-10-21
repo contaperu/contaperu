@@ -48,7 +48,7 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0002](0002-dimensiones.md) | `dimensiones` — los ejes analíticos más allá del centro de costo | `reservada` |
 | [0003](0003-estado-de-la-linea.md) | `linea.estado` — en qué punto del circuito está esa línea | `reservada` |
 | [0004](0004-medio-de-pago.md) | `medio_pago` — el código de medio de pago de SUNAT | `final` |
-| [0005](0005-retencion-de-igv.md) | `retencion_igv` — la retención del 3 % del régimen de retenciones | `reservada` |
+| [0005](0005-retencion-de-igv.md) | `retencion_igv` — la retención del 3 % del régimen de retenciones | `final` |
 | [0006](0006-percepcion.md) | `percepcion` — el régimen de percepciones del IGV | `reservada` |
 | [0007](0007-no-domiciliado.md) | `no_domiciliado` — el comprobante de un sujeto del exterior | `reservada` |
 | [0008](0008-imputaciones-en-el-documento.md) | `imputaciones` en la raíz: el archivo explica su propio asiento | `final` |
@@ -76,4 +76,5 @@ ISO 20022 y de EN 16931, y la razón de que sus mensajes sobrevivan décadas.
 | [0030](0030-las-cuotas-de-una-factura-al-credito.md) | **Las cuotas de una factura al crédito, con su importe**, y el `monto_pendiente` que no es el total: la norma los obliga y el lector los veía y los tiraba. Es el pago esperado contra el que se concilia | `final` |
 | [0031](0031-la-aplicacion-de-un-pago-a-un-documento.md) | **`aplicaciones[]`: cuánto de esto cancela aquello.** El puente entre los tres libros, N a N y con su importe, y el `origen` que separa un hecho de una conjetura — una `propuesto` no cuenta para ningún saldo | `final` |
 | [0032](0032-el-documento-de-una-linea-de-tesoreria.md) | **El `documento` de una línea de tesorería**: un vóucher no es un comprobante de SUNAT, así que va sin `tipo_cp`, y el `id_externo` es el del movimiento. Y `tesoreria` deja de ser un rol reservado: se deriva, con el elemento 10 del PCGE como fuente | `final` |
+| [0034](0034-un-nombre-por-retencion.md) | **Un nombre por retención**: el campo `retencion` pasa a `retencion_4ta`, porque el nombre genérico costó dos averías —un mes exportado sin su línea y el 3 % del IGV en la columna de la 4ta—. El rol y la cuenta no se renombran | `final` |
 | [0033](0033-el-libro-diario-el-cuarto-libro-y-el-primero-que-no-se-arma.md) | **El Libro Diario, el cuarto libro y el primero que no se arma sino que se recibe**: la planilla, la depreciación y el asiento de destino entran por su libro del PLE, con sus líneas ya hechas en el bloque `asiento`, porque armarlas pediría reglas que el motor no tiene. Un valor de catálogo, ni un campo nuevo | `final` |

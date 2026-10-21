@@ -258,7 +258,7 @@ def test_las_faltas_del_asiento_son_las_de_revisar_tesoreria_endurecidas():
     puede reportar lo que falta y un asiento no puede escribirlo."""
     from contaperu import api
 
-    doc = {"open_accounting": "3.3",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
                      "periodo": "202610", "tipo": "tesoreria"},
            "movimientos": [mov().a_dict()]}

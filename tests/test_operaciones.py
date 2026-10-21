@@ -183,7 +183,7 @@ def _doc_con_imputacion() -> dict:
 
     libro, comps = cargar_golden("compras_202601.json")
     crudos = [dict(c.a_dict(), id_externo=f"f{n}") for n, c in enumerate(comps, 1)]
-    return {"open_accounting": "3.0", "libro": libro.a_dict(), "comprobantes": crudos,
+    return {"open_accounting": "4.0", "libro": libro.a_dict(), "comprobantes": crudos,
             "imputaciones": {f"f{n}": {"cuenta_contable": "631101", "centro_costo": "001"}
                              for n in range(1, len(crudos) + 1)}}
 
@@ -382,7 +382,7 @@ def test_un_error_en_lo_que_el_destino_no_lleva_no_impide_el_archivo():
     from contaperu.modelo import Libro
 
     honorario = _comprobante_1_2_1(9, tipo_cp="02", serie="E001", base_gravada="0", igv="0",
-                                   inafecto="1000.00", total="1000.00", retencion="9999.00")
+                                   inafecto="1000.00", total="1000.00", retencion_4ta="9999.00")
     comprobantes = [_comprobante_1_2_1(1), honorario]
     validar.revisar(comprobantes, Libro(**LIBRO_1_2_1))
     assert honorario.tiene_errores, "el caso deja de probar algo si el recibo ya no bloquea"
@@ -399,7 +399,7 @@ def test_un_error_en_lo_que_el_destino_SI_lleva_sigue_deteniendo_la_exportacion(
     from contaperu.modelo import Libro
 
     honorario = _comprobante_1_2_1(9, tipo_cp="02", serie="E001", base_gravada="0", igv="0",
-                                   inafecto="1000.00", total="1000.00", retencion="9999.00")
+                                   inafecto="1000.00", total="1000.00", retencion_4ta="9999.00")
     comprobantes = [_comprobante_1_2_1(1), honorario]
     validar.revisar(comprobantes, Libro(**LIBRO_1_2_1))
 

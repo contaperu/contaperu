@@ -38,7 +38,7 @@ def _compra(**cambios) -> dict:
                    "contraparte_nombre": "PROVEEDOR DE PRUEBA SAC", "base_gravada": "929.49", "igv": "167.31",
                    "total": "1096.80", "moneda": "PEN", "concepto": "CELULARES", "id_externo": "fila-1"}
     comprobante.update(cambios)
-    return {"open_accounting": "3.0",
+    return {"open_accounting": "4.0",
             "libro": {"ruc": RUC, "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202507", "tipo": "compra"},
             "comprobantes": [comprobante]}
 

@@ -89,20 +89,36 @@ def validar(c: Comprobante, libro: Libro) -> None:
                 if _meses_hasta(libro, fecha_referencia) > PLAZO_ANOTACION_MESES:
                     aviso("CREDITO_FISCAL_FUERA_DE_PLAZO", f"Emitido en {c.fecha_emision:%m/%Y}, hace más de {PLAZO_ANOTACION_MESES} meses: fuera del plazo de anotación en el Registro de Compras (Ley 29215, art. 2)")
     if libro.es_compra:
-        # Retención de 4ta: solo existe en el recibo por honorarios y nunca puede
-        # pasarse del total (el neto que se paga saldría negativo en el asiento).
-        if c.retencion > 0:
+        # **Las dos retenciones de una compra, cada una con lo suyo** (4.0). Se llamaban igual
+        # hasta la 3.3 y de ahí salió el aviso de abajo: una aplicación volcó el 3 % del IGV en
+        # la columna de la 4ta y este código lo cazó. El aviso era correcto; el nombre no.
+        #
+        # Renta de 4ta: solo existe en el recibo por honorarios y nunca puede pasarse del
+        # total (el neto que se paga saldría negativo en el asiento).
+        if c.retencion_4ta > 0:
             if c.tipo_cp != "02":
-                aviso("RETENCION_NO_APLICA", "La retención de 4ta solo se registra en recibos por honorarios; aquí no se usará")
-            elif c.retencion > c.total:
-                error("RETENCION_MAYOR", f"La retención ({c.retencion}) es mayor que el total del recibo ({c.total})")
+                aviso("RETENCION_NO_APLICA", "La retención de 4ta solo se registra en recibos por honorarios; aquí no se usará. Si es el régimen de retenciones del IGV, su sitio es `retencion_igv`")
+            elif c.retencion_4ta > c.total:
+                error("RETENCION_MAYOR", f"La retención ({c.retencion_4ta}) es mayor que el total del recibo ({c.total})")
             elif c.total > 0:
                 # La retención de 4ta es el 8 % del honorario BRUTO. Si el porcentaje sale
                 # lejos de 8, casi siempre es que el total quedó con el NETO recibido (que
                 # ya tiene la retención descontada): 26.09 sobre 300 da 8.7 %, sobre 326.09 da 8.
-                tasa = (c.retencion / c.total * 100).quantize(Decimal("0.01"))
+                tasa = (c.retencion_4ta / c.total * 100).quantize(Decimal("0.01"))
                 if abs(tasa - Decimal("8")) > Decimal("0.5"):
                     aviso("RETENCION_TASA", f"La retención es el {tasa} % del total: revisa que el total sea el honorario bruto, no el neto recibido")
+        # Régimen de Retenciones del IGV: el 3 % sobre el importe total de la operación que el
+        # comprador agente de retención le retiene al proveedor (R.S. 037-2002/SUNAT; el 3 %
+        # rige desde el 01-03-2014, R.S. 033-2014). **No entra en ningún asiento** (enmienda
+        # 0005), así que esto es `aviso` y nunca `error`: no puede frenarle el mes a nadie, la
+        # misma regla que `medio_pago`.
+        #
+        # Y avisa SIN mirar la fecha, como la tasa del IGV: la vigencia por tramos se descartó
+        # a propósito (un porcentaje que no es el de hoy se le enseña al contador y decide él).
+        if c.retencion_igv:
+            declarada = _a_decimal(c.retencion_igv.get("porcentaje"))
+            if declarada and abs(declarada - Decimal("3")) > Decimal("0.5"):
+                aviso("RETENCION_IGV_TASA", f"La retención del IGV viene al {declarada} % y el régimen es del 3 %: revisa el comprobante")
         if c.tipo_cp in cat.EXIGEN_VENCIMIENTO and c.fecha_vencimiento is None:
             error("VENCIMIENTO_FALTA", f"El tipo {c.tipo_cp} exige fecha de vencimiento o de pago")
         if c.tipo_cp in cat.ADUANEROS and not c.anio_dua:

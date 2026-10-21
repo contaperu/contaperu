@@ -35,7 +35,7 @@ def pago(importe: str, *, cual: str = "mov-1", fecha: str = "2026-03-20", origen
 
 
 def doc(*aplicaciones: dict, comprobantes=(FACTURA,)) -> dict:
-    return {"open_accounting": "3.3", "libro": dict(LIBRO),
+    return {"open_accounting": "4.0", "libro": dict(LIBRO),
             "comprobantes": [dict(c) for c in comprobantes], "aplicaciones": list(aplicaciones)}
 
 

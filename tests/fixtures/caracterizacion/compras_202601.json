@@ -1,6 +1,6 @@
 {
  "revisar": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -38,7 +38,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "47200.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -92,7 +93,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "29500.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -146,7 +148,8 @@
     "otros": "0.00",
     "dscto_otros": "0.00",
     "total": "2124.00",
-    "retencion": "0.00",
+    "retencion_4ta": "0.00",
+    "retencion_igv": null,
     "destino_igv": "DG",
     "valor_no_gravado": null,
     "anio_dua": "",
@@ -266,7 +269,7 @@
   ]
  },
  "generar_asiento/concar": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -6080,7 +6083,7 @@
   ]
  },
  "generar_asiento/csv": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -6789,7 +6792,7 @@
   ]
  },
  "generar_asiento/starsoft": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -7301,7 +7304,7 @@
   ]
  },
  "generar_asiento/asiento_contable": {
-  "open_accounting": "3.3",
+  "open_accounting": "4.0",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",

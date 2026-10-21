@@ -204,7 +204,7 @@ def test_recibo_por_honorarios_con_retencion_de_4ta():
     suspensión) sigue siendo de dos líneas: nunca se calcula el 8 % solo."""
     rh = lambda **k: cp(tipo_cp="02", serie="E001", numero="7", base_gravada="0", igv="0",
                         inafecto="2000", total="2000", concepto="Asesoria contable", **k)
-    con = filas_de_comprobante(rh(retencion="160"), CONTAB, MES, "080005")
+    con = filas_de_comprobante(rh(retencion_4ta="160"), CONTAB, MES, "080005")
     assert len(con) == 3 and [f["N"] for f in con] == ["D", "H", "H"]
     assert [f["K"] for f in con] == ["631101", "401721", "424101"]
     assert [f["O"] for f in con] == [2000.0, 160.0, 1840.0]        # gasto total · retención · NETO
@@ -217,13 +217,13 @@ def test_recibo_por_honorarios_con_retencion_de_4ta():
     assert len(sin) == 2 and [f["O"] for f in sin] == [2000.0, 2000.0]
     # La cuenta de la retención se configura por RUC
     config = configuracion({"cuentas": {"retencion_4ta": "401722"}})
-    assert filas_de_comprobante(rh(retencion="160"), config, MES, "080007")[1]["K"] == "401722"
+    assert filas_de_comprobante(rh(retencion_4ta="160"), config, MES, "080007")[1]["K"] == "401722"
     # En dólares, el neto va a 424102 y la retención también en USD
-    usd = filas_de_comprobante(rh(retencion="16", moneda="USD", tipo_cambio="3.55"), CONTAB, MES, "080008")
+    usd = filas_de_comprobante(rh(retencion_4ta="16", moneda="USD", tipo_cambio="3.55"), CONTAB, MES, "080008")
     assert usd[1]["P"] == 16.0 and usd[2]["K"] == "424102" and usd[2]["P"] == 1984.0
     # Una retención en algo que no es recibo por honorarios NO parte el asiento
-    assert len(filas_de_comprobante(cp(retencion="18"), CONTAB, MES, "080009")) == 3
-    assert filas_de_comprobante(cp(retencion="18"), CONTAB, MES, "080009")[2]["O"] == 118.0
+    assert len(filas_de_comprobante(cp(retencion_4ta="18"), CONTAB, MES, "080009")) == 3
+    assert filas_de_comprobante(cp(retencion_4ta="18"), CONTAB, MES, "080009")[2]["O"] == 118.0
 
 
 def test_el_interruptor_de_centros_de_costo():

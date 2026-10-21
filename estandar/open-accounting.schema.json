@@ -1,6 +1,6 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-3.3/estandar/open-accounting.schema.json",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.0/estandar/open-accounting.schema.json",
  "title": "open-accounting",
  "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
  "type": "object",
@@ -16,9 +16,9 @@
  },
  "properties": {
   "open_accounting": {
-   "description": "Versión del estándar que habla este documento. **Se fija la MAYOR y no la versión exacta**, porque una menor es aditiva por definición: un documento 3.0 es un 3.1 que no usa lo nuevo, y tiene que seguir validando. Una mayor distinta sí se rechaza —cada una retira algo—.",
+   "description": "Versión del estándar que habla este documento. **Se fija la MAYOR y no la versión exacta**, porque una menor es aditiva por definición: un documento 4.0 es un 4.1 que no usa lo nuevo, y tiene que seguir validando. Una mayor distinta sí se rechaza —cada una retira algo—.",
    "type": "string",
-   "pattern": "^3\\.[0-9]+$"
+   "pattern": "^4\\.[0-9]+$"
   },
   "libro": {
    "$ref": "#/$defs/libro"
@@ -346,9 +346,19 @@
      "$ref": "#/$defs/importe",
      "description": "Importe total del comprobante, tal como lo dice el documento. El motor comprueba que cuadre con la suma de sus partes dentro de la tolerancia, y lo observa si no (`TOTAL_NO_CUADRA`)."
     },
-    "retencion": {
+    "retencion_4ta": {
      "$ref": "#/$defs/importe",
-     "description": "Retención de renta de 4ta que MUESTRA el recibo por honorarios. No es la retención del IGV, que no entra en ningún asiento."
+     "description": "Retención de renta de 4ta que MUESTRA el recibo por honorarios (8 % del honorario bruto). Se llamaba `retencion` hasta la 3.3, y ese nombre genérico produjo dos averías reales: un lector que se tragaba `retencion_4ta` en silencio y una aplicación que volcó aquí el 3 % del IGV. **No es `retencion_igv`**, que es otro tributo. Es la única de las dos que entra en un asiento."
+    },
+    "retencion_igv": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/retencion_igv"
+      },
+      {
+       "type": "null"
+      }
+     ]
     },
     "destino_igv": {
      "enum": [
@@ -572,6 +582,30 @@
     "importe": {
      "$ref": "#/$defs/importe",
      "description": "El importe de ESTA cuota (`cbc:Amount`)."
+    }
+   }
+  },
+  "retencion_igv": {
+   "description": "RÉGIMEN DE RETENCIONES DEL IGV: el 3 % sobre el importe total de la operación que el comprador agente de retención le retiene al proveedor (R.S. 037-2002/SUNAT; el 3 % rige desde el 01-03-2014, R.S. 033-2014). El XML lo trae en `cac:PaymentTerms` con `cbc:ID = \"Retencion\"`. **No entra en ninguna línea de asiento** —no es un hecho del comprobante sino del pago (enmienda 0005)—, pero **sí llega a la cabecera que ve un driver**, y la diferencia importa: lo primero es contabilidad y lo segundo es no perder un dato por el camino. Hoy ningún driver lo usa; CONTASIS lo pide en su «condición de retención» y lo encontrará ahí. **Ausente o `null` significa que nadie lo dijo**, que no es lo mismo que un monto en cero.",
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "porcentaje": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 100
+      }
+     ],
+     "description": "El porcentaje que declara el comprobante. El motor avisa (`RETENCION_IGV_TASA`) si se aleja más de 0,5 pp del 3 %, sin mirar la fecha: un porcentaje que no es el de hoy se le enseña al contador y decide él."
+    },
+    "monto": {
+     "$ref": "#/$defs/importe",
+     "description": "El importe retenido, tal como lo dice el comprobante. Nunca se calcula solo."
     }
    }
   },
@@ -799,7 +833,7 @@
      }
     },
     "retencion": {
-     "description": "Qué se le retiene a un tercero, cuando el rol de la línea es `retencion`. Sin este bloque el rol habría perdido información respecto del `retencion_4ta` al que reemplaza: la categoría estaba en el nombre, y la de 4ta no es la única que existe. **No se confunde con `comprobante.retencion`**, que es el IMPORTE retenido que muestra el comprobante; esto dice de qué es. Y tampoco con el régimen de retenciones del IGV, que es otro tributo y tendrá su propio campo. Entra en la huella.",
+     "description": "Qué se le retiene a un tercero, cuando el rol de la línea es `retencion`. Sin este bloque el rol habría perdido información respecto del `retencion_4ta` al que reemplaza: la categoría estaba en el nombre, y la de 4ta no es la única que existe. **No se confunde con `comprobante.retencion_4ta`**, que es el IMPORTE retenido que muestra el comprobante; esto dice de qué es. Y tampoco con el régimen de retenciones del IGV, que es otro tributo y tiene su propio campo desde la 4.0, `comprobante.retencion_igv`. Entra en la huella.",
      "type": "object",
      "additionalProperties": false,
      "required": [

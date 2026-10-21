@@ -18,7 +18,7 @@ from contaperu.puertas.servidor_mcp import LOCALES, mcp, seguridad
 from util import XML
 
 DOCUMENTO = {
-    "open_accounting": "3.0",
+    "open_accounting": "4.0",
     "libro": {"ruc": "20601111111", "razon_social": "EMPRESA DE PRUEBA SAC",
               "periodo": "202608", "tipo": "compra"},
     "comprobantes": [{
@@ -329,7 +329,7 @@ def test_normalizar_detracciones_descarta_lo_que_no_reconoce():
 
 
 def test_un_documento_sin_libro_falla_diciendo_por_que():
-    negado = rechazo("generar_asiento", documento={"open_accounting": "3.0", "comprobantes": []}, driver="concar")
+    negado = rechazo("generar_asiento", documento={"open_accounting": "4.0", "comprobantes": []}, driver="concar")
     assert negado["clave"] == "documento_invalido" and "libro" in negado["detail"]
 
 

@@ -502,7 +502,7 @@ def _par(anulada: bool, detraccion: dict | None = None) -> list[dict]:
     factura = dict(FACTURA_CON_DETRACCION, id_externo="f1")
     if detraccion is not None:
         factura["detraccion"] = detraccion
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
            "comprobantes": [factura, dict(SU_NOTA_DE_CREDITO, id_externo="f2")],
            "imputaciones": {"f1": {"cuenta_contable": "631101", "centro_costo": "001",
@@ -546,7 +546,7 @@ def test_el_comprobante_anulado_sigue_entero_en_el_registro():
     """La frontera que `sin_efecto_contable` ya tiene escrita: el asiento es una cosa y el registro es otra. La
     factura anulada **sigue saliendo en el que se declara a SUNAT**, con su detracción y todo, porque el correlativo
     de SUNAT necesita su fila y la marca es del asiento, no del registro."""
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
            "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1")],
            "imputaciones": {"f1": {"cuenta_contable": "631101", "anulada_por_nota": True}}}
@@ -577,7 +577,7 @@ def test_anulada_con_su_deposito_ya_hecho_se_para_y_dice_cual():
 def test_el_diagnostico_lo_dice_y_a_quien_pedirselo():
     """Y bloquea para CUALQUIER driver, no solo para los que exigen la detracción: no es que al destino le falte un
     dato, es que dos hechos del documento se contradicen."""
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
            "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1",
                                  detraccion={"codigo": "027", "porcentaje": "4",
@@ -632,7 +632,7 @@ def test_el_motor_avisa_de_la_factura_que_tiene_nota_de_credito():
 
     Avisa y no decide: que una factura tenga nota de crédito no significa que esté anulada —puede ser un descuento o
     una corrección—, pero sí que conviene mirarla. El aviso nombra la nota, para no tener que buscarla."""
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
            "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1"),
                             dict(SU_NOTA_DE_CREDITO, id_externo="f2")]}
@@ -655,7 +655,7 @@ def test_el_motor_avisa_de_la_factura_que_tiene_nota_de_credito():
 def test_la_factura_ya_marcada_no_recibe_el_aviso_que_le_pide_marcarla():
     """El mismo código, otro texto (5.3.1). Decirle «márcala en su imputación» a una factura que YA está marcada es
     pedir algo hecho, y el contador aprende a no leer un aviso que no sabe si le habla a él."""
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
            "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1"),
                             dict(SU_NOTA_DE_CREDITO, id_externo="f2")],
@@ -675,7 +675,7 @@ def test_la_marcada_sin_su_nota_en_el_lote_tambien_deja_rastro():
 
     Es el caso NORMAL —una factura de setiembre que se anula con una nota de octubre—, y por eso el texto no es un
     reproche: dice lo que pasa. Sin él, la marca hacía desaparecer dos líneas del asiento y nada lo contaba."""
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
            "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1")],
            "imputaciones": {"f1": {"cuenta_contable": "631101", "anulada_por_nota": True}}}
@@ -692,7 +692,7 @@ def test_la_marcada_sin_su_nota_en_el_lote_tambien_deja_rastro():
 def test_sin_marcar_y_sin_nota_no_se_avisa_de_nada():
     """La otra mitad del aviso nuevo: no sale por tener detracción, sale por estar MARCADA. Si saliera siempre sería
     ruido en un mes de tres mil filas, que es lo que este repositorio ya se niega a hacer con las notas parciales."""
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
            "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1")],
            "imputaciones": {"f1": {"cuenta_contable": "631101"}}}
@@ -706,7 +706,7 @@ def test_el_resumen_cuenta_las_anuladas_para_que_no_desaparezcan_en_silencio():
     `anuladas_por_nota` y no `anuladas`: «anulado» ya significa otra cosa en este dominio —la comunicación de baja de
     SUNAT— y son dos hechos distintos. Un nombre por cosa."""
     def doc(anulada):
-        return {"open_accounting": "3.0",
+        return {"open_accounting": "4.0",
                 "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
                 "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1"),
                                  dict(SU_NOTA_DE_CREDITO, id_externo="f2")],
@@ -728,7 +728,7 @@ def test_una_nota_de_credito_parcial_no_dispara_el_aviso():
     """Una nota que no anula el total es un DESCUENTO o una devolución parcial, no una anulación: la factura conserva
     sus cinco líneas y nadie tiene que mirar nada. Avisar aquí sería ruido en un mes de tres mil filas."""
     parcial = dict(SU_NOTA_DE_CREDITO, base_gravada="1000.00", igv="180.00", total="1180.00")
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202609", "tipo": "compra"},
            "comprobantes": [dict(FACTURA_CON_DETRACCION, id_externo="f1"), dict(parcial, id_externo="f2")]}
     r = api.revisar(doc)
@@ -739,7 +739,7 @@ def test_una_nota_de_credito_parcial_no_dispara_el_aviso():
 def test_una_nota_cuya_factura_no_esta_en_el_lote_no_avisa_de_nada():
     """El caso que ningún dato puede resolver: la nota llega el mes siguiente y su factura no está aquí. No hay de
     dónde deducirlo, y por eso el campo de la imputación existe — para que el contador lo marque a mano."""
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "", "periodo": "202610", "tipo": "compra"},
            "comprobantes": [dict(SU_NOTA_DE_CREDITO, id_externo="f2", fecha_emision="2026-10-05")]}
     r = api.revisar(doc)

@@ -82,19 +82,23 @@ def test_un_comprobante_con_una_clave_que_no_es_suya_se_rechaza():
     """Una clave que el estándar no declara se rechaza en vez de ignorarse (4.0), que es lo que `INTEGRAR.md` promete:
     «un dato que se cuela sin error es un dato que se pierde sin aviso».
 
-    Pasaba de verdad, y así se encontró: un `retencion_4ta` donde el campo se llama `retencion` exportaba el mes
+    Pasaba de verdad, y así se encontró: un `retencion_4ta` donde el campo se llamaba `retencion` exportaba el mes
     entero **sin la línea de retención de 4ta**, y solo se veía leyendo las celdas del Excel. Además dejaba al lector
     más laxo que el esquema publicado, que ya rechaza por su `additionalProperties: false`.
 
-    **Y desde la 5.0 el ejemplo vale por otro motivo, que conviene dejar escrito.** El rol se renombró a `retencion`,
-    así que `retencion_4ta` ya no es ni un campo ni un rol: es un nombre muerto, y el de alguien que escriba desde una
-    integración vieja. Que siga fallando en voz alta es justo lo que hace falta. Lo que ya no protege es la diferencia
-    de nombre —el rol y el campo se llaman igual ahora, como `detraccion`, que es campo, bloque y rol a la vez—, sino
-    que el comprobante rechace cualquier clave que no sea suya, que es lo que este test fija."""
+    **Y en la 4.0 del estándar el ejemplo se da la vuelta, que es la mejor prueba de que el nombre era el problema.**
+    `retencion_4ta` **es** ahora el campo —porque hay dos retenciones y cada una tiene su nombre— y el muerto es
+    `retencion`, el genérico que las confundía. Quien escriba desde una integración vieja ya no lee «clave
+    desconocida» sino **cuál de las dos quiere** (`RENOMBRADOS_EN_4_0`), que es lo que no se pudo decir la primera
+    vez. Lo que este test fija no cambia: el comprobante rechaza cualquier clave que no sea suya, y las nombra
+    todas."""
     base = {"tipo_cp": "01", "serie": "F001", "numero": "1", "total": "118"}
 
-    with pytest.raises(ValueError, match="retencion_4ta"):
-        Comprobante.de_dict({**base, "retencion_4ta": "240"})
+    # El nombre genérico, que es el que ya no existe: el mensaje dice las DOS a las que pudo referirse.
+    with pytest.raises(ValueError, match="retencion_4ta.*retencion_igv"):
+        Comprobante.de_dict({**base, "retencion": "240"})
+    # Y el nombre nuevo sí entra, que es la otra mitad de la misma afirmación.
+    assert Comprobante.de_dict({**base, "retencion_4ta": "240"}).retencion_4ta == Decimal("240.00")
     # Las nombra TODAS y ordenadas, no revienta en la primera, y dice adónde va lo que el motor no entiende.
     with pytest.raises(ValueError, match="aaa, zzz.*datos_originales"):
         Comprobante.de_dict({**base, "zzz": 1, "aaa": 2})

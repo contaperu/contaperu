@@ -235,7 +235,7 @@ print(json.dumps(fallos))
 
 def _compra_con_detraccion() -> dict:
     """Un documento que produce las cinco líneas con sus cinco roles distintos, que es lo que hace útil el test."""
-    return {"open_accounting": "3.0",
+    return {"open_accounting": "4.0",
             "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608",
                       "tipo": "compra"},
             "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "2026-08-05",

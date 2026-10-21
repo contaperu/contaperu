@@ -1,6 +1,6 @@
 {
   "_nota": "Documento inventado para la caracterización de la 1.0 (rama motor-v1, etapa 1, 14-sep-2026): un mes de compras que pasa por soles y dólares, nota de crédito y de débito, detracción en soles y en dólares, recibos por honorarios con y sin retención, boleta, recibo de servicios públicos, extemporáneo y reparto. RUC seguros y proveedores de prueba; la imputación de cada documento está en tests/test_caracterizacion.py.",
-  "open_accounting": "3.0",
+  "open_accounting": "4.0",
   "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202608", "tipo": "compra"},
   "comprobantes": [
     {"id_externo": "c01", "tipo_cp": "01", "serie": "F001", "numero": "00000101", "fecha_emision": "2026-08-03",
@@ -34,7 +34,7 @@
     {"id_externo": "c07", "tipo_cp": "02", "serie": "E001", "numero": "15", "fecha_emision": "2026-08-18",
      "contraparte_tipo_doc": "6", "contraparte_doc": "20607777773",
      "contraparte_nombre": "ELECTROMECANICA DE PRUEBA S.R.L.", "moneda": "PEN",
-     "base_gravada": "0", "igv": "0", "inafecto": "1500.00", "total": "1500.00", "retencion": "120.00",
+     "base_gravada": "0", "igv": "0", "inafecto": "1500.00", "total": "1500.00", "retencion_4ta": "120.00",
      "concepto": "Asesoria contable de agosto"},
     {"id_externo": "c08", "tipo_cp": "02", "serie": "E001", "numero": "16", "fecha_emision": "2026-08-19",
      "contraparte_tipo_doc": "6", "contraparte_doc": "20607777773",

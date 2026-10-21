@@ -44,8 +44,13 @@ Reglas que conviene tener claras antes de armar un documento:
   - Los importes van SIEMPRE en positivo. Una nota de crédito se marca con su tipo —`07`, o `87`
     si es de no domiciliado—, nunca con importes negativos: quien resta es la contabilidad.
   - `tipo_cp` es el código de la Tabla 10 de SUNAT, no la sigla del sistema contable.
-  - La `retencion` de un comprobante es la de renta de 4ta de un recibo por honorarios. La
-    retención del IGV del 3 % NO es una detracción y no entra en el asiento.
+  - **Hay DOS retenciones y cada una tiene su campo**, porque en castellano se llaman igual:
+    `retencion_4ta` es la renta de 4ta del 8 % que muestra un recibo por honorarios (y es la
+    única que entra en el asiento), y `retencion_igv` es el 3 % del régimen de retenciones que
+    el comprador agente de retención le retiene al proveedor de una factura, `{porcentaje,
+    monto}`. La del IGV **NO es una detracción** y no entra en ninguna línea de asiento. Hasta la
+    4.0 había un solo campo llamado `retencion` y esa ambigüedad costó dos errores de verdad: si
+    escribes `retencion`, el motor te dirá cuál de las dos querías.
   - Cada contribuyente tiene su plan de cuentas y sus sub-diarios: van en `configuracion`, con lo
     general en la raíz y lo de cada sistema contable en su sección (`concar`, `csv`, `contasis`).
     Lo que se configura lo declara cada sistema; ningún valor por defecto es la verdad de nadie.

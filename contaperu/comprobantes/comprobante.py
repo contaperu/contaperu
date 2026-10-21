@@ -84,7 +84,7 @@ CAMPOS_DEL_DOCUMENTO = (
     "condicion_pago", "cuotas", "monto_pendiente", "medio_pago",
     "contraparte_tipo_doc", "contraparte_doc", "contraparte_nombre",
     "moneda", "tipo_cambio", "base_gravada", "igv", "dscto_base", "dscto_igv", "exonerado", "inafecto",
-    "exportacion", "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "retencion", "destino_igv",
+    "exportacion", "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "retencion_4ta", "retencion_igv", "destino_igv",
     "valor_no_gravado", "anio_dua", "cod_dep_aduanera", "clasif_bienes",
     "tipo_nota", "ref_fecha", "ref_tipo_cp", "ref_serie", "ref_numero", "detraccion", "id_contrato", "concepto",
 )
@@ -165,11 +165,25 @@ class Comprobante:
     # esto. Caso real: una factura de grifo con 96.00 no gravado y −13.40 aquí, total 82.60.
     dscto_otros: Decimal = CERO
     total: Decimal = CERO
-    # Retención de renta de 4ta que MUESTRA el recibo por honorarios (tipo 02).
-    # 0 = sin retención; nunca se calcula el 8 % solo (con suspensión no la hay y
-    # lo que la documenta es el comprobante). NO confundir con el régimen de
-    # retenciones del IGV de las facturas, que no entra en ningún asiento.
-    retencion: Decimal = CERO
+    # **Las dos retenciones, con un nombre cada una** (4.0). Hasta la 3.3 la de 4ta se
+    # llamaba `retencion` a secas, y ese nombre genérico costó dos averias distintas: un
+    # `retencion_4ta` que el lector se tragaba en silencio y exportaba el mes sin su línea
+    # (lo cuenta `de_dict`), y una aplicación que volcó aquí el 3 % del IGV de dos facturas
+    # —el motor lo cazó con RETENCION_NO_APLICA, que es justo lo que ese aviso vigila—.
+    #
+    # Renta de 4ta que MUESTRA el recibo por honorarios (tipo 02). 0 = sin retención; nunca
+    # se calcula el 8 % solo (con suspensión no la hay y lo que la documenta es el
+    # comprobante). Es la única de las dos que entra en un asiento.
+    retencion_4ta: Decimal = CERO
+    # Régimen de Retenciones del IGV: el 3 % que el comprador agente de retención le retiene
+    # al proveedor, que el XML trae en `cac:PaymentTerms` con `cbc:ID = "Retencion"`.
+    # `{porcentaje, monto}` como texto ya normalizado, igual que `detraccion` y `cuotas`.
+    #
+    # **`None` y `{}` no son lo mismo, y la diferencia es el dato**: `None` es «nadie lo
+    # dijo» y un monto en cero sería «se dijo que no hay». Por eso no tiene `default_factory`.
+    # **No entra en ningún asiento** (enmienda 0005): no es un hecho del comprobante sino
+    # del pago, así que viaja para quien lleve la tesorería y ni un driver lo mira.
+    retencion_igv: dict | None = None
     # Solo compras
     destino_igv: str = "DG"         # DG gravadas | DGNG mixtas | DNG no gravadas (decide las columnas 14-19 / 15-20)
     valor_no_gravado: Decimal | None = None  # campo 20 / 21; None → exonerado + inafecto
@@ -339,6 +353,12 @@ class Comprobante:
         if retirados:
             raise ValueError(f"{', '.join(retirados)} ya no va en el comprobante (open-accounting 0.3): la cuenta y "
                              "el centro de cada documento llegan en la imputación, por id_externo")
+        renombrados = sorted(k for k in RENOMBRADOS_EN_4_0 if k in d)
+        if renombrados:
+            raise ValueError(
+                f"{', '.join(renombrados)} se renombró en open-accounting 4.0: la de renta de 4ta de un "
+                "recibo por honorarios es `retencion_4ta`, y la del régimen de retenciones del IGV de una "
+                "factura es `retencion_igv` ({porcentaje, monto}). Son dos tributos distintos")
         desconocidas = sorted(set(d) - {f.name for f in fields(cls)})
         if desconocidas:
             raise ValueError(f"Claves que no son de un comprobante: {', '.join(desconocidas)}. Un hecho que el "
@@ -377,7 +397,7 @@ def identidad_de(libro: Libro, c: Comprobante) -> dict[str, str]:
 
 _CAMPOS_MONTO = (
     "base_gravada", "igv", "dscto_base", "dscto_igv", "exonerado", "inafecto", "exportacion",
-    "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "retencion",
+    "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "retencion_4ta",
 )
 _CAMPOS_FECHA = ("fecha_emision", "fecha_vencimiento", "ref_fecha")
 # Los campos que salieron del comprobante en open-accounting 0.3: llegan en la imputación.
@@ -386,6 +406,12 @@ _CAMPOS_FECHA = ("fecha_emision", "fecha_vencimiento", "ref_fecha")
 # comprobante es donde una persona la pone por intuición, así que el mensaje sirve igual a quien nunca vio una 0.3.
 # Es el mismo mecanismo que `asiento.lineas.PISTA_DE_LA_CLAVE`, que nació en la 10.0 para el `rol`.
 RETIRADOS_EN_0_3 = ("cuenta_contable", "centro_costo")
+
+# Y la que se RENOMBRÓ en la 4.0, por el mismo mecanismo y por un motivo más fuerte: quien manda
+# `retencion` no se equivocó de sitio, se equivocó de época, y lo que necesita leer es **cuál de las
+# dos** quiere. Sin esta rama el mensaje sería «claves que no son de un comprobante», que no dice
+# ni que el campo exista ni cómo se llama ahora.
+RENOMBRADOS_EN_4_0 = {"retencion": "retencion_4ta"}
 
 _CAMPOS_TEXTO = (
     "tipo_cp", "serie", "numero", "numero_final", "contraparte_tipo_doc", "contraparte_doc",

@@ -23,7 +23,10 @@ CABECERA = ("**Estado**", "**Compatibilidad**", "**Nivel**", "**Versión**", "**
 # impide que un nombre quede tomado en un sitio y libre en el otro.
 # `medio_pago` salió de aquí el 25-sep-2026: entró en el estándar (enmienda 0004, `final`), y un nombre que
 # ya existe no está reservado. Es el test diciendo la verdad sobre lo que hay, que es para lo que está.
-RESERVADOS = ("id_en_destino", "dimensiones", "estado", "retencion_igv", "percepcion", "no_domiciliado")
+# Y `retencion_igv` salió el 20-oct-2026 por lo mismo (enmienda 0005): su caso real fue una aplicación
+# volcando el 3 % del IGV en el campo de la renta de 4ta porque no tenía dónde ponerlo. `percepcion`
+# sigue reservada: es su hermana y todavía no tiene caso.
+RESERVADOS = ("id_en_destino", "dimensiones", "estado", "percepcion", "no_domiciliado")
 
 
 def archivos() -> list[Path]:

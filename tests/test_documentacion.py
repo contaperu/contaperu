@@ -33,7 +33,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 # ese documento habla del presente.
 VIGENTES = ("README.md", "INTEGRAR.md", "ARQUITECTURA.md", "CLAUDE.md", "HOJA-DE-RUTA.md", "CONTRIBUTING.md",
             "estandar/LEEME.md", "estandar/MIGRAR-A-1.0.md", "estandar/MIGRAR-A-2.0.md",
-            "estandar/MIGRAR-A-3.0.md", "estandar/enmiendas/LEEME.md")
+            "estandar/MIGRAR-A-3.0.md", "estandar/MIGRAR-A-4.0.md", "estandar/enmiendas/LEEME.md")
 
 # Los que citan el código por su ruta y hablan del presente: los vigentes y los de investigación. **El CHANGELOG
 # queda fuera, y es la exclusión importante**: es la bitácora, cita el código que había el día de cada versión y por
@@ -68,10 +68,15 @@ OTRAS_VERSIONES: dict[str, set[str]] = {
     # el contrato del dinero se cerró en la 3.0, y eso no deja de ser cierto al subir a la 3.1.
     "HOJA-DE-RUTA.md": {"3.0", "3.2"},
     "ARQUITECTURA.md": {"3.0", "3.2"},
+    # `3.3` porque INTEGRAR cuenta DESDE CUÁNDO el motor hace algo —«hasta la 3.3 el motor no la tenía, así
+    # que la escribía cada aplicación»—, y eso no deja de ser cierto al subir a la 4.0. Una guia de migracion
+    # tiene las suyas abajo por el mismo motivo.
+    "INTEGRAR.md": {"3.3"},
     # Una guía de migración existe para hablar de la versión de la que se viene, y de la que se va a.
     "estandar/MIGRAR-A-1.0.md": {"0.3", "1.0"},
     "estandar/MIGRAR-A-2.0.md": {"1.0", "2.0"},
     "estandar/MIGRAR-A-3.0.md": {"2.0", "3.0"},
+    "estandar/MIGRAR-A-4.0.md": {"3.0", "3.3", "4.0"},
 }
 
 

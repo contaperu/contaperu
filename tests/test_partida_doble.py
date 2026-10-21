@@ -74,7 +74,7 @@ def test_el_asiento_real_siempre_cuadra():
 
     casos = {
         "factura": cp(),
-        "honorarios": cp(tipo_cp="02", base_gravada="1000", igv="0", total="1000", retencion="80"),
+        "honorarios": cp(tipo_cp="02", base_gravada="1000", igv="0", total="1000", retencion_4ta="80"),
         "nota de credito": cp(tipo_cp="07", ref_tipo_cp="01", ref_serie="F001", ref_numero="1"),
         "con detraccion": cp(base_gravada="4200", igv="756", total="4956",
                              detraccion={"codigo": "027", "porcentaje": "4"}),

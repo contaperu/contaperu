@@ -58,9 +58,10 @@ def version_del_documento(doc: dict) -> None:
             f"Este documento se declara `open_accounting` {declarada} y el motor habla la {OPEN_ACCOUNTING}. "
             "Cada mayor del estándar retira algo y no lee la anterior: la 2.0 quitó de la línea el `rol`, "
             "`documento.tipo`, `referencia.tipo` y `detraccion.estado` —ninguno hacía falta, porque se derivan de "
-            "lo que la línea ya trae—, y la 3.0 fundió `constancias[]` dentro de `movimientos[]`, que es la "
-            "entrada única de tesorería. La guía de cada salto, paso a paso, está en `estandar/MIGRAR-A-2.0.md` y "
-            "`estandar/MIGRAR-A-3.0.md`.")
+            "lo que la línea ya trae—, la 3.0 fundió `constancias[]` dentro de `movimientos[]`, que es la "
+            "entrada única de tesorería, y la 4.0 renombró `retencion` a `retencion_4ta` porque el Perú tiene dos "
+            "retenciones y ese nombre servía para las dos. La guía de cada salto, paso a paso, está en "
+            "`estandar/MIGRAR-A-2.0.md`, `estandar/MIGRAR-A-3.0.md` y `estandar/MIGRAR-A-4.0.md`.")
 
 
 def libro_de(doc: dict) -> Libro:

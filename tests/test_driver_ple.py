@@ -31,7 +31,7 @@ def documento(nombre_golden: str, cuenta: str = "631101", centro: str = "001") -
         d = c.a_dict()
         d["id_externo"] = f"f{n}"
         crudos.append(d)
-    return {"open_accounting": "3.0", "libro": libro.a_dict(), "comprobantes": crudos,
+    return {"open_accounting": "4.0", "libro": libro.a_dict(), "comprobantes": crudos,
             "imputaciones": {f"f{n}": {"cuenta_contable": cuenta, "centro_costo": centro}
                              for n in range(1, len(crudos) + 1)}}
 
@@ -136,7 +136,7 @@ def test_un_comprobante_sin_vencimiento_no_se_inventa_uno():
     que el documento nunca tuvo es inventarse un dato tributario. La cabecera conserva la verdad, así que el 5.1
     escribe su fecha nula — como hace el archivo contrastado en 4088 de sus 6446 filas con comprobante."""
     from contaperu.drivers import ple
-    doc = {"open_accounting": "3.0",
+    doc = {"open_accounting": "4.0",
            "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC",
                      "periodo": "202601", "tipo": "compra"},
            "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "00000123",
