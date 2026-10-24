@@ -216,3 +216,53 @@ def test_sin_forma_de_pago_la_condicion_queda_vacia():
     """Vacío no es contado: es que el documento no lo dice. La nota de crédito de prueba no la trae."""
     c = xml_ubl.parsear(leer("20131312955-07-FC01-7.xml"), VENTAS, "FC01-7.xml")
     assert c.datos_originales["forma_pago"] == "" and c.condicion_pago == ""
+
+
+# ── El recibo por honorarios electrónico, que SUNAT declara factura (24-oct-2026) ──
+# La fixture es un recibo real anonimizado. Su trampa está en el propio archivo: trae
+# `<cbc:InvoiceTypeCode>01</cbc:InvoiceTypeCode>`, o sea que SUNAT lo declara factura, y el
+# `PayableAmount` es el NETO ya retenido. Lo único que dice la verdad es la categoría de la
+# retención de la línea, `RET 4TA`, y de ahí cuelga todo.
+
+
+def test_recibo_por_honorarios_se_lee_como_tipo_02():
+    """El bruto va a `inafecto` y a `total`, y la retención aparte: la forma que el motor ya fijaba."""
+    c = xml_ubl.parsear(leer("10601111115-02-E001-186.xml"), COMPRAS, "E001-186.xml")
+    assert (c.tipo_cp, c.serie, c.numero) == ("02", "E001", "186")
+    assert (c.contraparte_tipo_doc, c.contraparte_doc) == ("6", "10601111115")
+    assert c.moneda == "PEN"                                  # no trae DocumentCurrencyCode
+    assert (c.base_gravada, c.igv) == (Decimal("0.00"), Decimal("0.00"))
+    assert c.inafecto == Decimal("2450.00") and c.total == Decimal("2450.00")
+    assert c.retencion_4ta == Decimal("196.00") and c.retencion_igv is None
+    validar.revisar([c], COMPRAS)
+    assert c.observaciones == [] and c.estado == "ok"
+
+
+def test_sin_la_sena_el_recibo_se_lee_como_hoy():
+    """Quitada `RET 4TA`, el lector vuelve a creerle al archivo. Es la mutación que prueba que la
+    seña es la que carga: sin ella sale `01` y el total descuadra, que es el fallo de antes."""
+    sin_sena = leer("10601111115-02-E001-186.xml").replace(b"RET 4TA", b"IGV")
+    c = xml_ubl.parsear(sin_sena, COMPRAS)
+    assert c.tipo_cp == "01" and c.total == Decimal("2254.00")
+    validar.revisar([c], COMPRAS)
+    assert [o.codigo for o in c.observaciones] == ["TOTAL_NO_CUADRA"]
+
+
+def test_una_factura_con_serie_E_sigue_siendo_factura():
+    """La serie `E` dice «emitido desde SOL», NO «es un recibo»: las facturas emitidas desde el
+    portal también la llevan (hay una real en `privado/`). Reconocer el recibo por la serie daría
+    falso positivo en todas ellas, y este caso lo deja clavado."""
+    factura = leer("20131312955-01-F001-123.xml").replace(b"F001-123", b"E001-123")
+    c = xml_ubl.parsear(factura, VENTAS)
+    assert (c.tipo_cp, c.serie) == ("01", "E001")
+    assert c.retencion_4ta == Decimal("0.00")
+
+
+def test_el_rastro_del_recibo_conserva_el_neto_y_el_tributo_crudo():
+    """El neto que se sobrescribe no se pierde, y el tributo sigue cayendo con su clave VACÍA: el
+    `TaxScheme` del recibo viene vacío, que es por lo que no se lo puede reconocer por el código."""
+    c = xml_ubl.parsear(leer("10601111115-02-E001-186.xml"), COMPRAS)
+    rastro = c.datos_originales["honorarios"]
+    assert rastro["neto_declarado"] == "2254.00" and rastro["porcentaje"] == "8.00"
+    assert rastro["bruto"] == "2450.00" and rastro["retencion"] == "196.00"
+    assert c.datos_originales["tributos"] == {"": ["2450.00", "196.00"]}

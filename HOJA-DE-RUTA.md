@@ -86,6 +86,10 @@ la decisión correcta de escalabilidad.
 
 Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANGELOG.
 
+- C7 · 14.1.0 (el recibo por honorarios leído del XML de SUNAT, que lo declara `01`: la seña es la
+  categoría `RET 4TA` de su línea, presente también cuando la retención es 0,00. La serie `E###` **no**
+  sirve —las facturas emitidas desde SOL también la llevan— y por el código del tributo tampoco, porque
+  el `TaxScheme` del recibo viene vacío)
 - B13 · 13.2.0
 - 0.0 · 1.0.0
 - 0.1 · 1.0.0
@@ -175,7 +179,7 @@ SUNAT ────────────────────────�
  C8 padrón ─► C11 tipos de cambio          ·  C13 pago a cuenta [formulario presentado]
  C15 consecuencia de `confianza` [un mes cargado desde PDF]
 
-Sin dependencias de código: A1-A3 [archivos aceptados] · C6 [04 real] · C7 [RHE real] · C10 [plan + rechazo]
+Sin dependencias de código: A1-A3 [archivos aceptados] · C6 [04 real] · C10 [plan + rechazo]
                             · E5 guía de aporte
 
 OTRA JURISDICCIÓN [un cliente real fuera del Perú] · J0 y J1 cumplidos en la 1.0
@@ -185,7 +189,7 @@ OTRA JURISDICCIÓN [un cliente real fuera del Perú] · J0 y J1 cumplidos en la 
 La Fase 0 (0.0-0.8) y la puerta del ERP (B1-B6) están cumplidas: su grafo vive en el historial.
 ```
 
-Lo cumplido —la Fase 0 entera, E1, C1, C9, C2, E2, E3, E5, E6, la puerta del ERP (B1-B6), B8, B9 y B13— está en
+Lo cumplido —la Fase 0 entera, E1, C1, C9, C2, E2, E3, E5, E6, la puerta del ERP (B1-B6), B8, B9, B13 y C7— está en
 «Cumplidos» con su versión. Lo que queda, en el orden del eje nuevo:
 
 | Orden | Hitos | Arranca con |
@@ -196,7 +200,7 @@ Lo cumplido —la Fase 0 entera, E1, C1, C9, C2, E2, E3, E5, E6, la puerta del E
 | 4 · antes de que algo pida credenciales | **B10** perfiles de herramientas del MCP | decisión |
 | en paralelo | A1-A3 legacy | dato: la plantilla de SISCONT y un mes importado |
 | cuando la app pida la siguiente API | **C17** más APIs de SUNAT descritas | dato: cuál, y su manual |
-| cuando llegue el dato | **B14** determinación con dimensiones · C3 · C4 · C5 · C6 · C7 · C8 · C10 · C11 · C12 · C13 · C14 (tras C1) | dato |
+| cuando llegue el dato | **B14** determinación con dimensiones · C3 · C4 · C5 · C6 · C8 · C10 · C11 · C12 · C13 · C14 (tras C1) | dato |
 | cuando lleguen los dos archivos | **D1** constancias del BN · **D2** extracto → **D3** conciliar · D4 → D5 → D6d · **D6c** tesorería hacia un legacy | dato (D3 es código, tras D1 y D2) |
 | cuando haya un mes imputado por un agente | B11 → B12 · C15 consecuencia de `confianza` | caso real |
 | cuando haga falta | B7 · D7 · E4 | dato o decisión |
@@ -242,7 +246,6 @@ el CDR se ignora; la propuesta del SIRE se lee entera; un PDF o una foto quedan 
 | C3 | `leer_cdr*`: aceptado, observado y rechazado; abrir el ZIP en que suele llegar | N · F | dato: CDR reales | Un rechazo produce su observación con el código oficial | C1, E1 | — |
 | C5 | Comprobantes de **retención (20)** y **percepción (40)** en un bloque propio | N · estándar | dato: XML reales + la fuente de su tratamiento | No entran al RCE ni al RVIE; ningún driver los escribe sin fuente | C1, E1 | — |
 | C6 | **Liquidación de compra (04)**: la contraparte es el vendedor, no quien emite | N | dato: XML real | Sin falso `XML_PARA_OTRO_RUC` (test de mutación) | — | — |
-| C7 | **Recibo por honorarios electrónico** leído del archivo de SOL | N | dato: archivo real | Tipo 02 con `retencion`; sin falso `RETENCION_TASA` | — | — |
 | B7 | **Contrato de lector** y entry points `contaperu.lectores*`, el espejo de entrada del contrato de driver (el `Importer` de beangulp: identificar, extraer, deduplicar) | N | dato: el segundo lector bancario | Test de conformidad análogo a `tests/test_contrato_drivers.py` | D2 | 20 |
 
 **No se hace.** Leer guías de remisión (09/31), que no tienen efecto contable; portar código PHP (se toman las rutas
@@ -555,7 +558,7 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 | Para | Qué | Cómo |
 |---|---|---|
 | **Entradas** | | |
-| C3 · C5 · C6 · C7 | CDR (aceptado, observado, rechazado), XML de retención, percepción y liquidación de compra, recibo por honorarios de SOL | De empresas que los emitan o reciban, anonimizados |
+| C3 · C5 · C6 | CDR (aceptado, observado, rechazado), XML de retención, percepción y liquidación de compra | De empresas que los emitan o reciban, anonimizados |
 | D1 | La consulta de pagos de detracciones de SOL o los movimientos de la cuenta del Banco de la Nación | Descargados por el contribuyente |
 | D2 | Tres meses de extracto de un banco, y la especificación de su MT940 o su archivo host-to-host | Con el ejecutivo del banco |
 | D5 | El reporte de liquidación de una pasarela, y cómo trata el IGV de su comisión (las páginas públicas de Culqi se contradicen) | Con un comercio real |
@@ -590,7 +593,7 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 - **Sin caso real todavía:** guías de remisión; SDKs generados; WASM; `sugerir_imputacion` (tiene la misma forma que la
   acción de una regla bancaria y entra con D4 si hace falta); `trazas` de un driver que consolide; `documento.id_externo`
   en la línea; pedir datos desde el MCP con el patrón de la especificación 2026-07-28, que espera un SDK que la hable; el archivo de 4ta del PLAME, análogo del 1099
-  (espera un archivo importado y C7); `cuentas_conocidas*`, la cuenta del proveedor distinta de la conocida (espera D2
+  (espera un archivo importado; C7 cayó en la 14.1.0); `cuentas_conocidas*`, la cuenta del proveedor distinta de la conocida (espera D2
   y un caso); emparejar órdenes de compra y recepciones (espera un cliente cuyo ERP las lleve).
 - **En vigilancia:** las finanzas abiertas de la SBS y un perfil FAPI peruano, cuando exista la regulación; la factura negociable y su
   Plataforma de Confirmación, si un cliente la usa como canal de conformidad.

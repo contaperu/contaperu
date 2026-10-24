@@ -50,7 +50,11 @@ CCIS_SEGUROS = ("01199900000000000100",   # la cuenta en soles del contribuyente
 
 # Donde se busca. Solo texto, y nunca `privado/` —que es donde un archivo real SÍ puede vivir, de lectura y en
 # local— ni el entorno virtual.
-EXTENSIONES = ("*.py", "*.md", "*.json", "*.txt", "*.csv", "*.toml", "*.yml", "*.yaml")
+#
+# `*.xml` entró el 24-oct-2026, y llegaba tarde: las fixtures de `tests/fixtures/xml/` son el ÚNICO texto del
+# repositorio que esta regla no miraba, y son justo las que se anonimizan a mano desde un archivo real. Se añadió
+# al entrar la del recibo por honorarios, y los seis XML que ya había pasaron sin tocar nada.
+EXTENSIONES = ("*.py", "*.md", "*.json", "*.txt", "*.csv", "*.toml", "*.yml", "*.yaml", "*.xml")
 FUERA = ("privado", ".venv", ".git", "__pycache__", "node_modules")
 
 # Un RUC: 11 dígitos con uno de los cuatro prefijos que SUNAT asigna (10 y 15 persona natural, 17, 20 jurídica).

@@ -2,7 +2,10 @@
 
 Lee desde bytes (los XML llegan en UTF-8 con o sin BOM y a veces en
 ISO-8859-1) con `defusedxml`, que bloquea entidades externas y bombas XML.
-Soporta las raíces `Invoice` (facturas y boletas), `CreditNote` y `DebitNote`;
+Soporta las raíces `Invoice` (facturas, boletas y el RECIBO POR HONORARIOS
+electrónico, que SUNAT emite con esta misma raíz y declarando `01`: se
+distingue por la categoría de su retención, ver `_honorarios`), `CreditNote`
+y `DebitNote`;
 detecta el CDR (`ApplicationResponse`) para que quien llame lo ignore, y
 rechaza UBL 2.0 con un mensaje claro (sus totales viven en
 `sac:AdditionalMonetaryTotal`, otro mundo).
@@ -32,6 +35,10 @@ NS = {
 }
 RAIZ_CDR = "ApplicationResponse"
 RAICES = {"Invoice": None, "CreditNote": "07", "DebitNote": "08"}
+# La categoría con la que SUNAT marca la retención de 4ta en un recibo por honorarios. No está en el
+# Catálogo 05 —no es un tributo del IGV— y ninguna factura la emite: es la única seña del documento.
+# En `_honorarios` están los archivos reales con que se midió.
+CATEGORIA_RETENCION_4TA = "RET 4TA"
 
 
 class XmlInvalido(ErrorContaperu, ValueError):
@@ -114,6 +121,48 @@ def _parte(elemento: Element | None) -> dict:
     return {"tipo_doc": tipo_doc, "doc": doc.strip(), "nombre": " ".join(nombre.split())}
 
 
+def _honorarios(raiz: Element) -> dict | None:
+    """El bruto, la retención y su tasa si este `Invoice` es un RECIBO POR HONORARIOS electrónico;
+    `None` si no lo es, y entonces el lector sigue su camino de siempre.
+
+    **El archivo miente sobre su propio tipo**, y es la razón de ser de esta función: un recibo trae
+    `<cbc:InvoiceTypeCode>01</cbc:InvoiceTypeCode>`, igual que una factura, porque SUNAT lo emite
+    desde el portal con la plantilla de `Invoice`. Lo que sí dice la verdad es la categoría de la
+    retención de su línea, `RET 4TA`.
+
+    Medido sobre dos recibos reales (24-oct-2026), uno de ellos la E001-186 que está anonimizada en
+    `tests/fixtures/xml/`:
+
+    - en la RAÍZ, `cac:TaxTotal/cac:TaxSubtotal` trae el BRUTO en `cbc:TaxableAmount` (2 450,00) y
+      la retención en `cbc:TaxAmount` (196,00), con `cac:TaxCategory/cbc:ID` = `A` y un
+      `cac:TaxScheme` **vacío** —de ahí que el tributo se acumule con la clave vacía y **no** con un
+      código del Catálogo 05, que es por lo que un recibo no se puede reconocer por su tributo—;
+    - en la LÍNEA está la seña, y también la tasa (`cbc:Percent`, 8,00). Ojo con su
+      `cac:TaxTotal/cbc:TaxAmount`: vale 2 450,00, o sea **el bruto y no un tributo**;
+    - `cac:LegalMonetaryTotal/cbc:PayableAmount` es el NETO ya retenido (2 254,00).
+
+    Dos hechos que acotan la regla. La seña está **también en el recibo cuya retención es 0,00**,
+    así que marca el documento y no el importe. Y la serie `E###` **no** sirve de seña, porque las
+    facturas emitidas desde el portal de SUNAT también la llevan —hay una real en `privado/`, y un
+    caso de `tests/test_xml_ubl.py` lo deja clavado—.
+
+    La retención no se deriva de la tasa: es un importe que el documento afirma, y calcularlo sería
+    justo el error que `RETENCION_TASA` existe para cazar.
+    """
+    marcado = any(" ".join((nodo.text or "").split()).upper() == CATEGORIA_RETENCION_4TA
+                  for nodo in raiz.iterfind(".//cac:TaxCategory/cbc:ID", NS))
+    if not marcado:
+        return None
+    subtotal = raiz.find("cac:TaxTotal/cac:TaxSubtotal", NS)
+    linea = raiz.find("cac:InvoiceLine/cac:TaxTotal/cac:TaxSubtotal", NS)
+    return {
+        "bruto": monto(_t(subtotal, "cbc:TaxableAmount")),
+        "retencion": monto(_t(subtotal, "cbc:TaxAmount")),
+        "porcentaje": _t(linea, "cbc:Percent"),
+        "neto_declarado": str(monto(_t(raiz, "cac:LegalMonetaryTotal/cbc:PayableAmount"))),
+    }
+
+
 def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante:
     """Convierte un XML de SUNAT en un `Comprobante` visto desde el libro:
     en ventas la contraparte es el adquirente; en compras, el emisor."""
@@ -130,6 +179,12 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
     if not numero:
         raise XmlInvalido("El XML no trae cbc:ID (serie-número)")
     tipo_cp = RAICES[local] or (_t(raiz, "cbc:InvoiceTypeCode") or "01")[:2]
+    # Un recibo por honorarios se declara `01` en su propio XML, así que el tipo que dice el archivo
+    # se corrige por la seña de su retención. Solo con raíz `Invoice`: una nota de crédito de un
+    # recibo ya trae su `07` por `RAICES` y no se le toca.
+    honorarios = _honorarios(raiz) if local == "Invoice" else None
+    if honorarios:
+        tipo_cp = cat.TIPO_HONORARIOS
 
     emisor = _parte(raiz.find("cac:AccountingSupplierParty", NS))
     adquirente = _parte(raiz.find("cac:AccountingCustomerParty", NS))
@@ -157,12 +212,27 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         totales = raiz.find("cac:RequestedMonetaryTotal", NS)  # nota de débito
     total = monto(_t(totales, "cbc:PayableAmount"))
     anticipo = monto(_t(totales, "cbc:PrepaidAmount"))
+    if honorarios:
+        # El `PayableAmount` de un recibo es el NETO ya retenido; la forma del motor es el BRUTO con la
+        # retención aparte, porque la retención no resta del total: la reparte el asiento. Así cuadra
+        # «base + IGV + no gravado» y no salta un `TOTAL_NO_CUADRA` falso, que es lo que pasaba hasta
+        # la 14.1. La forma la fijaban ya cuatro sitios, y ninguno se movió:
+        # `estandar/conformidad/diagnosticar.json`, `tests/test_retenciones.py`,
+        # `tests/test_snapshot_concar.py` y `tests/test_asiento_concar.py`.
+        total = honorarios["bruto"]
 
     base_gravada, igv = base_de(cat.TRIBUTO_IGV), tributo_de(cat.TRIBUTO_IGV)
     if not acumulado and totales is not None:
         # XML sin subtotales por tributo: lo mejor que se puede hacer
         igv = monto(_t(raiz, "cac:TaxTotal/cbc:TaxAmount"))
         base_gravada = monto(_t(totales, "cbc:LineExtensionAmount"))
+    inafecto = base_de(cat.TRIBUTO_INAFECTO)
+    if honorarios:
+        # En un recibo no hay nada gravado y el bruto entero es inafecto. Los ceros se ponen a mano
+        # porque hoy salían cero **por casualidad**: el tributo del recibo cae con la clave vacía, así
+        # que `base_de(TRIBUTO_IGV)` no lo encuentra. Una casualidad no es una regla.
+        base_gravada = igv = Decimal("0.00")
+        inafecto = honorarios["bruto"]
 
     # --- Descuento global (campos 16 y 18 del SIRE) --------------------------
     # La base y el IGV que da el XML (TaxableAmount, TaxAmount) ya son NETOS del descuento, y así se guardan.
@@ -276,6 +346,10 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         # `retencion_4ta` según el tipo de comprobante, y aquí queda el crudo para auditoría.
         "retencion": bloque_retencion,
         "motivo_nota": motivo,
+        # Lo que se sobrescribe al leer un recibo no se pierde: el neto que declara el documento, su
+        # tasa, y las dos cifras de las que salen `total`, `inafecto` y `retencion_4ta`.
+        **({"honorarios": {clave: str(valor) for clave, valor in honorarios.items()}}
+           if honorarios else {}),
         **({"descuentos_globales": descuentos} if descuentos else {}),
     }
     return Comprobante(
@@ -296,7 +370,7 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         dscto_base=dscto_base,
         dscto_igv=dscto_igv,
         exonerado=base_de(cat.TRIBUTO_EXONERADO),
-        inafecto=base_de(cat.TRIBUTO_INAFECTO),
+        inafecto=inafecto,
         exportacion=base_de(cat.TRIBUTO_EXPORTACION),
         isc=tributo_de(cat.TRIBUTO_ISC),
         base_ivap=base_de(cat.TRIBUTO_IVAP),
@@ -314,8 +388,13 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> Comprobante
         #
         # La de 4ta entra en el asiento; la del IGV **en ninguno** (no es un hecho del
         # comprobante sino del pago), y viaja para quien lleve la tesorería.
-        retencion_4ta=monto(bloque_retencion.get("monto")) if (bloque_retencion and tipo_cp == "02") else monto(0),
-        retencion_igv=bloque_retencion if (bloque_retencion and tipo_cp != "02") else None,
+        # En los dos recibos reales medidos el único `PaymentTerms` es `FormaPago`: la 4ta llega por
+        # `cac:TaxTotal` y no por el término de pago. La vía del término se queda detrás, para un recibo
+        # que sí declare su `02` —si SUNAT lo arregla algún día— y la traiga ahí.
+        retencion_4ta=(honorarios["retencion"] if honorarios else
+                       monto(bloque_retencion.get("monto"))
+                       if (bloque_retencion and tipo_cp == cat.TIPO_HONORARIOS) else monto(0)),
+        retencion_igv=bloque_retencion if (bloque_retencion and tipo_cp != cat.TIPO_HONORARIOS) else None,
         # Por qué se emitió la nota. Lo lee este mismo lector desde la 1.x en `cac:DiscrepancyResponse/cbc:ResponseCode`
         # —es el mismo catálogo que cita el SIRE, el 09 o el 10 según el tipo— y hasta la 3.5.0 se quedaba solo en
         # `datos_originales["motivo_nota"]`, donde nadie lo miraba. Ahí sigue con su `referencia` y su `descripcion`,

@@ -4,6 +4,58 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [14.1.0] — 2026-10-24
+
+### El recibo por honorarios, leído del XML que SUNAT emite
+
+El motor leía un **recibo por honorarios electrónico** como si fuera una factura, y no por descuido: el XML
+que emite SUNAT **declara** `<cbc:InvoiceTypeCode>01</cbc:InvoiceTypeCode>`, igual que una factura, porque el
+recibo se emite desde el portal con la plantilla de `Invoice`. El lector le hacía caso.
+
+Lo que sí dice la verdad es la categoría de la retención de su línea, `RET 4TA`, que no está en el Catálogo
+05 y que ninguna factura emite. De ahí cuelga el arreglo entero: si falta, el lector se comporta exactamente
+como antes. Dos cosas que se midieron y acotan la regla: la seña está **también en el recibo cuya retención
+es 0,00**, así que marca el documento y no el importe; y la serie `E###` **no** sirve de seña, porque las
+facturas emitidas desde el portal de SUNAT también la llevan —reconocer el recibo por la serie habría dado
+falso positivo en todas ellas—.
+
+Con esto cae el hito **C7**, que esperaba el archivo real desde que se escribió.
+
+### Cambios de comportamiento
+
+Quien lea el XML de un recibo recibe otras cifras al adoptar esta versión. Antes entraba observado con un
+`TOTAL_NO_CUADRA` de nivel **error** —un diagnóstico falso: lo que no cuadraba era el tipo—, así que nadie
+podía estar exportándolo bien.
+
+- **`tipo_cp` pasa de `01` a `02`**, y con él se enciende todo lo del tipo: el recibo queda fuera del TXT del
+  SIRE y del registro de CONTASIS, no reclama crédito fiscal, y entra al asiento por su sub-diario propio
+  («RH», 15) contra la cuenta de terceros 424101/424102.
+- **`total` pasa del neto al bruto** (2 254,00 → 2 450,00 en el archivo medido). El `PayableAmount` de un
+  recibo ya viene retenido, y la forma del motor es el bruto con la retención aparte, porque la retención no
+  resta del total: la reparte el asiento. Era ya la forma que fijaban cuatro sitios del repositorio.
+- **`inafecto` toma el bruto**, y `base_gravada` e `igv` quedan en cero a propósito: antes salían cero **por
+  casualidad**, porque el tributo de un recibo se acumula con la clave **vacía** —su `TaxScheme` viene
+  vacío— y no se lo encontraba por su código del Catálogo 05.
+- **`retencion_4ta` deja de ser cero.** Se lee del `cac:TaxTotal` de la raíz y no del término de pago: en los
+  dos recibos reales medidos el único `PaymentTerms` es `FormaPago`. La vía del término se queda detrás, por
+  si algún día llega un recibo que sí declare su `02` y la traiga ahí.
+- **La identidad del comprobante cambia**, y con ella la detección de duplicados, porque `clave_de` lleva el
+  tipo. Es el arreglo funcionando —ahora un recibo leído del XML coincide con el mismo recibo leído del PDF,
+  que es como entraban hasta hoy—, pero conviene saberlo antes de adoptar.
+- `datos_originales` gana la clave `honorarios` con el neto declarado, la tasa y las dos cifras de las que
+  salen los campos. El esquema **no** cambia: ese bloque es espacio libre del productor.
+
+### Lo que no se movió
+
+Ninguna firma, ninguna clave del estándar y ningún archivo de salida: el snapshot de CONCAR (52 casos) sale
+idéntico y la conformidad no se tocó. `open-accounting` se queda en 4.0.
+
+### Y de paso
+
+**`tests/test_datos_reales.py` ya mira los `*.xml`.** Las fixtures XML eran el único texto del repositorio
+que el guardián de la regla 6 —nunca datos reales— no vigilaba, y son justo las que se anonimizan a mano
+desde un archivo real. Se añadió al entrar la del recibo, y los seis que ya había pasaron sin tocar nada.
+
 ## [14.0.0] — 2026-10-20
 
 ### Un nombre por retención (`open-accounting` 4.0)

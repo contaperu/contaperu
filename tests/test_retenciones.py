@@ -212,6 +212,11 @@ def _xml_con_retencion(ruta: str) -> bytes:
     versión cambia no es cómo se lee, sino **dónde aterriza**. El día que haya un XML real de un
     agente de retención, entra como fixture y este ayudante se retira.
 
+    **Ese día no es el 24-oct-2026**, aunque lo parezca: ese día entró un recibo por honorarios real
+    (`10601111115-02-E001-186.xml`), y su retención es la de **4ta**, que llega por `cac:TaxTotal` y
+    no por el término de pago. El 3 % del Régimen de Retenciones del **IGV** sigue sin archivo real,
+    así que este ayudante se queda.
+
     Se usa el **124** y no el 123 porque aquél llega con detracción, y una factura con detracción y
     retención a la vez no es un caso real: si hay SPOT no hay retención. El 124 trae solo su forma de
     pago, y además viene en USD —que prueba de paso que el bloque viaja como lo dice el papel—.
@@ -240,3 +245,54 @@ def test_en_una_FACTURA_el_termino_de_pago_es_la_retencion_del_igv():
     assert c.retencion_igv == {"porcentaje": "3.00", "monto": "22.30"}
     assert c.retencion_4ta == Decimal("0.00"), "en una factura no hay renta de 4ta"
     assert c.datos_originales["retencion"] == c.retencion_igv, "y el crudo sigue en el rastro"
+
+
+# --- y la otra mitad: el RECIBO, cuya retención no viene del término de pago -------------------
+# Entró el 24-oct-2026 con el primer recibo por honorarios real de la batería. Hasta entonces este
+# archivo solo tenía la mitad del IGV, y la de 4ta se probaba con comprobantes dictados a mano.
+
+RECIBO = "10601111115-02-E001-186.xml"
+COMPRAS_RECIBO = dict(ruc="20604444447", razon_social="CLIENTE DE PRUEBA S.A.",
+                      periodo="202601", tipo="compra")
+
+
+def _recibo() -> dict:
+    from pathlib import Path
+    crudo = (Path(__file__).parent / "fixtures" / "xml" / RECIBO).read_text(encoding="utf-8")
+    return api.leer_xml(crudo, COMPRAS_RECIBO)
+
+
+def test_en_un_RECIBO_la_retencion_sale_del_TaxTotal_y_no_del_termino_de_pago():
+    """El espejo del caso de la factura, y la diferencia está en de dónde sale el dato: el recibo
+    real **no trae** `PaymentTerms Retencion` —su único término de pago es `FormaPago`—, así que la
+    4ta se lee de `cac:TaxTotal`. Por eso no basta con mirar el término de pago para las dos."""
+    c = Comprobante.de_dict(_recibo()["comprobantes"][0])
+    assert c.tipo_cp == "02"
+    assert c.retencion_4ta == Decimal("196.00")
+    assert c.retencion_igv is None, "en un recibo no hay retención del IGV"
+    assert c.datos_originales["retencion"] is None, "y el término de pago no trae nada"
+    assert c.datos_originales["honorarios"]["porcentaje"] == "8.00"
+
+
+def test_el_asiento_del_recibo_leido_del_XML_cuadra_y_va_al_sub_diario_15():
+    """El círculo cerrado: un recibo leído del XML aterriza en el MISMO asiento que uno dictado a
+    mano —tres líneas, sub-diario 15, la cuenta de terceros 424101 y la retención en su cuenta—.
+    Y cuadra, que es lo que demuestra que el bruto en `total` es la forma correcta: si el total
+    fuera el neto, el gasto no cubriría las dos líneas del Haber."""
+    doc = _recibo()
+    doc["comprobantes"][0]["id_externo"] = "recibo-1"
+    lineas = api.generar_asiento(
+        doc, driver="concar",
+        imputacion={"recibo-1": {"cuenta_contable": "631101", "centro_costo": "01"}},
+        correlativos={"02": "080001"})["asiento"]
+    assert [(l["cuenta"], l["debe_haber"], l["importe"]) for l in lineas] == [
+        ("631101", "D", "2450.00"),      # el gasto, por el BRUTO
+        ("401721", "H", "196.00"),       # la retención de 4ta
+        ("424101", "H", "2254.00"),      # lo que se le debe al profesional
+    ]
+    assert {l["sub_diario"] for l in lineas} == {"15"}
+    assert lineas[1]["retencion"] == {"codigo": "3000", "categoria": "4"}
+    assert lineas[2]["contraparte_doc"] == "10601111115"
+    debe = sum(Decimal(l["importe"]) for l in lineas if l["debe_haber"] == "D")
+    haber = sum(Decimal(l["importe"]) for l in lineas if l["debe_haber"] == "H")
+    assert debe == haber == Decimal("2450.00")
