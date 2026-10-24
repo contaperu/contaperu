@@ -266,3 +266,24 @@ def test_el_rastro_del_recibo_conserva_el_neto_y_el_tributo_crudo():
     assert rastro["neto_declarado"] == "2254.00" and rastro["porcentaje"] == "8.00"
     assert rastro["bruto"] == "2450.00" and rastro["retencion"] == "196.00"
     assert c.datos_originales["tributos"] == {"": ["2450.00", "196.00"]}
+
+
+def test_un_recibo_que_no_retiene_nada_se_lee_igual_y_sin_falso_RETENCION_TASA():
+    """Y es el caso MAYORITARIO, no el raro: sobre 40 recibos reales de un mes, **26 traen retención
+    cero** —suspensión del Formulario 1609, o importe bajo el mínimo— y solo 14 retienen el 8 %
+    (medido el 23-oct-2026 sobre el listado del portal SOL; `contab-core/docs/sol/HONORARIOS.md`).
+
+    Importa por dos cosas. La seña `RET 4TA` sigue estando —la plantilla la emite con el importe en
+    cero, así que marca el documento y no el importe—, y el cero **no puede** disparar
+    `RETENCION_TASA`, que avisa cuando la retención no sale al 8 % del total: un cero no es una tasa
+    distinta, es que no hubo retención. Las dos mitades del criterio de salida del hito C7.
+    """
+    crudo = leer("10601111115-02-E001-186.xml").decode("utf-8")
+    # el mismo recibo sin retener: el importe a cero y el neto igual al bruto
+    sin_retener = crudo.replace(">196.00<", ">0.00<").replace(">2254.00<", ">2450.00<")
+    c = xml_ubl.parsear(sin_retener.encode("utf-8"), COMPRAS)
+    assert c.tipo_cp == "02", "la seña no depende del importe"
+    assert c.inafecto == Decimal("2450.00") and c.total == Decimal("2450.00")
+    assert c.retencion_4ta == Decimal("0.00")
+    validar.revisar([c], COMPRAS)
+    assert c.observaciones == [] and c.estado == "ok"
