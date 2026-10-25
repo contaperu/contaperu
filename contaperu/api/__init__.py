@@ -21,6 +21,7 @@ from ..asiento.faltas import FALTAS
 from ..modelo import Comprobante, Libro, Observacion, rasgos_de, serie_y_numero
 from ..pipeline.preparacion import MAXIMO_CLAVES_PREVIAS, MAXIMO_COMPROBANTES
 from ..pipeline.salida import Exportado
+from ..pipeline.seleccion import errores_de, fuera_de, seleccionar
 from .documento import documento_de
 from .instrucciones import CAMINO, INSTRUCCIONES, PRESENTACION, REGLAS
 from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesborda, Descuadre, DocumentoInvalido, ErrorContaperu,
@@ -59,6 +60,17 @@ __all__ = [
     # lo que se le dice a un agente: las REGLAS del dominio, que no nombran ninguna herramienta, y el
     # texto entero de este servidor. Quien monta su propia capa de agente se trae `REGLAS`.
     "REGLAS", "CAMINO", "PRESENTACION", "INSTRUCCIONES",
+    # QUÉ SALE EN EL ARCHIVO, antes de generarlo (14.2.0). Quien integra el motor tiene que poder decirle a
+    # su contador cuántos comprobantes van a entrar, cuáles quedan fuera porque ese destino no lleva su tipo
+    # —el recibo por honorarios no va al TXT del SIRE— y cuáles lo bloquean, y tiene que poder decirlo ANTES
+    # de generar. Hasta la 14.1 esa respuesta solo existía dentro de `pipeline`, que es interno por contrato,
+    # así que la única salida era reimplementarla: la app en producción lo hizo, y su copia se apartó de ésta
+    # sin que nadie lo notara. Dos códigos respondiendo «¿qué sale?» es lo que hace que una pantalla prometa
+    # un número y el archivo traiga otro.
+    #
+    # `etiqueta`, que vive en el mismo módulo, NO se publica: no decide nada —da formato a un nombre— y su
+    # dependencia, `serie_y_numero`, ya está aquí desde siempre.
+    "seleccionar", "fuera_de", "errores_de",
     # lo que devuelve o recibe
     "Exportado", "Comprobante", "Libro", "Observacion", "FALTAS", "serie_y_numero", "MAXIMO_COMPROBANTES",
     "MAXIMO_CLAVES_PREVIAS",

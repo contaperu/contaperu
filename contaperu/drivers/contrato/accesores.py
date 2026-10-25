@@ -91,6 +91,21 @@ def excluye_tipos(modulo: Any) -> frozenset[str]:
     return frozenset(getattr(modulo, "EXCLUYE_TIPOS", None) or ())
 
 
+def correlativo_con_mes(modulo: Any) -> bool:
+    """¿Ese destino escribe el correlativo con el mes delante? (su `CORRELATIVO_CON_MES`, opcional).
+
+    El motor numera `070001` —mes más cuatro dígitos (`asiento.numerar`)— y eso es lo que llevan CONCAR y el
+    CSV. STARSOFT le quita el mes y escribe `0001`, porque empieza en uno y sigue. Por defecto **sí**, que es
+    como numera el núcleo: un driver solo lo declara cuando se aparta.
+
+    Existe porque quien integra el motor tiene que poder enseñar ese número ANTES de generar el archivo —si la
+    pantalla pone el mes delante y el archivo no lo trae, promete un correlativo que no existe—, y hasta la
+    14.1 la única forma era mirar si el módulo del driver tenía cierta función, o sea adivinar por su nombre.
+    Es la misma razón de `excluye_tipos`, aquí arriba.
+    """
+    return bool(getattr(modulo, "CORRELATIVO_CON_MES", True))
+
+
 def exige(modulo: Any) -> frozenset[str]:
     """Todo lo que ese destino exige para exportar: lo del núcleo para su forma más lo que el driver declara en
     `EXIGE`. Un registro de SUNAT con forma `linea` no exige nada de esto: no lleva cuentas."""

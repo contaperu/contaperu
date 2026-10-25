@@ -734,6 +734,29 @@ def test_lo_que_cada_destino_no_lleva_se_pregunta_al_contrato():
                      "concar": [], "csv": [], "starsoft": [], "asiento_contable": [], "ple": [], "ple_plan": []}
 
 
+def test_el_formato_del_correlativo_se_pregunta_al_contrato_y_no_al_modulo():
+    """Quien integra el motor tiene que poder enseñar el correlativo ANTES de generar el archivo, y no todos
+    los destinos lo escriben igual: el núcleo numera `070001` —mes más cuatro dígitos (`asiento.numerar`)— y
+    STARSOFT escribe `0001`, porque empieza en uno y sigue.
+
+    Hasta la 14.2 eso no se podía preguntar, así que la app en producción lo deducía mirando si el módulo del
+    driver tenía una función llamada `correlativo_de_starsoft`: adivinar por el nombre de un detalle de
+    implementación. Es la misma lección que `EXCLUYE_TIPOS` en la 2.7 y que las cuentas en la 3.0 — quien
+    integra le pregunta al contrato, no al módulo.
+
+    Por defecto **sí lleva el mes**, que es como numera el núcleo: un driver solo lo declara cuando se aparta.
+    """
+    con_mes = {n: contrato.correlativo_con_mes(m) for n, m in drivers.DE_SERIE.items()}
+    assert con_mes == {"starsoft": False,
+                       "sire": True, "contasis": True, "concar": True, "csv": True,
+                       "asiento_contable": True, "ple": True, "ple_plan": True}
+    # Y lo que declara el driver es lo que el accesor responde: si se le quita la constante, vuelve al
+    # defecto del núcleo. Sin esto, el accesor podría estar devolviendo un literal y nadie lo vería.
+    class SinDeclarar:
+        pass
+    assert contrato.correlativo_con_mes(SinDeclarar()) is True
+
+
 def test_las_cuentas_de_un_driver_se_leen_por_su_accesor_y_no_en_crudo():
     """`CUENTAS_POR_DEFECTO` guarda DOS cosas desde la 3.0, y lo que decide cuál es la clave: las contrapartidas
     —`cxp`, `igv`, `clientes`…— son configuración y las usa el asiento; `compras` y `ventas` **no imputan nada**,

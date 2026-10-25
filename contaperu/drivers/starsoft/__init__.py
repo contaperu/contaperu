@@ -62,10 +62,12 @@ from __future__ import annotations
 from . import datos, proyeccion
 from .datos import (CANAL, COLUMNAS, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, CUENTAS_POR_DEFECTO, EXIGE,
                     FORMATOS, NOMBRE, OPCIONES)
-from .proyeccion import correlativo_de_starsoft, destino_de, fila, filas, no_caben, numero_del_documento
+from .proyeccion import (CORRELATIVO_CON_MES, correlativo_de_starsoft, destino_de, fila, filas, no_caben,
+                         numero_del_documento)
 from .salida import desde_lineas, escribir, nombre
 
 __all__ = ["CANAL", "COLUMNAS", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "CUENTAS_POR_DEFECTO",
-           "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "correlativo_de_starsoft", "datos", "desde_lineas",
+           "CORRELATIVO_CON_MES", "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "correlativo_de_starsoft", "datos",
+           "desde_lineas",
            "destino_de", "escribir", "fila",
            "filas", "no_caben", "nombre", "numero_del_documento", "proyeccion"]

@@ -4,6 +4,44 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [14.2.0] — 2026-10-25
+
+### Qué sale en el archivo, y con qué correlativo, se pueden preguntar antes de generarlo
+
+Dos cosas que una aplicación necesita para decirle a su contador **qué va a pasar** antes de que pase, y que
+hasta hoy solo se podían saber generando el archivo o adivinando. Las dos son aditivas: nada cambia de firma
+y nada desaparece.
+
+**Tres funciones de `pipeline/seleccion.py` salen por `contaperu.api`:** `seleccionar` (cuáles entran,
+descartando los duplicados), `fuera_de` (cuáles quedan fuera porque ese destino no lleva su tipo — el recibo
+por honorarios no va al TXT del SIRE) y `errores_de` (cuáles lo bloquean, con la forma que ya tenían).
+
+El motivo no es de comodidad. Esa es **la misma pregunta que el motor responde al generar**, así que quien
+integra tenía dos salidas: generar para saberlo, o reimplementarla. La aplicación en producción eligió lo
+segundo —`contaperu.pipeline` es interno por contrato y lo dice en su `__init__`— y su copia se apartó de
+ésta sin que nadie de este lado se enterara. Dos códigos respondiendo «¿qué sale?» es lo que hace que una
+pantalla prometa 52 comprobantes y el archivo traiga 51.
+
+`etiqueta`, que vive en el mismo módulo, **no se publica**: no decide nada —da formato a un nombre— y su
+única dependencia, `serie_y_numero`, ya estaba aquí. Quien la quiera la compone en una línea.
+
+**Y un accesor nuevo del contrato de drivers: `correlativo_con_mes`.** El núcleo numera `070001` —mes más
+cuatro dígitos (`asiento.numerar`)— y STARSOFT escribe `0001`, porque «el correlativo de comprobantes o
+vouchers debe iniciar siempre en el número uno». Quien integra necesita saberlo para enseñar ese número
+antes de generar: si la pantalla pone el mes delante y el archivo no lo trae, promete un correlativo que no
+existe. Hasta hoy la única forma era mirar si el módulo del driver tenía una función llamada
+`correlativo_de_starsoft` — adivinar por el nombre de un detalle de implementación.
+
+Ahora el driver lo **declara** (`CORRELATIVO_CON_MES`, que solo escribe quien se aparta del núcleo) y el
+contrato lo responde. Es la misma lección que `EXCLUYE_TIPOS` en la 2.7 y las cuentas en la 3.0: quien
+integra le pregunta al contrato, no al módulo.
+
+### Sin cambios de comportamiento
+
+Ninguna función cambia lo que hace ni lo que devuelve. `seleccionar`, `fuera_de` y `errores_de` son las
+mismas que ya corrían dentro del pipeline, y `correlativo_con_mes` solo pone nombre a algo que los drivers
+ya hacían. Quien adopte esta versión no ve ninguna diferencia salvo que puede preguntar más cosas.
+
 ## [14.1.0] — 2026-10-24
 
 ### El recibo por honorarios, leído del XML que SUNAT emite

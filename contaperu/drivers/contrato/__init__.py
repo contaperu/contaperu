@@ -120,9 +120,9 @@ from ...configuracion import CONFIGURACION_GENERAL, PATRON_CUENTA, Campo, Column
 from ...modelo import TIPOS_LIBRO, Comprobante, Libro
 from ..kit import Opciones, OpcionesArchivo
 from .accesores import (NoCabe, acepta_indice, arma_asientos, canal, centro_en_anexo, columnas_elegibles,
-                        columnas_elegidas, configuracion, cuentas_por_defecto, declara_canal, describir,
-                        excluye_tipos, exige, familia, forma, lleva_cuentas, no_caben, plan_base,
-                        seccion_por_defecto, vocabulario)
+                        columnas_elegidas, configuracion, correlativo_con_mes, cuentas_por_defecto,
+                        declara_canal, describir, excluye_tipos, exige, familia, forma, lleva_cuentas,
+                        no_caben, plan_base, seccion_por_defecto, vocabulario)
 from .examen import incumplimientos
 from .protocolos import Driver, DriverAsientoLineas, DriverRegistroArchivo, DriverRegistroTexto
 from .taxonomia import (CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RESERVADOS, CLAVES_DEL_PLAN,
@@ -142,7 +142,8 @@ __all__ = [
     "EXIGE_POSIBLES_REGISTRO", "FAMILIA", "FORMAS", "Libro", "MONEDAS_CODIGO", "NoCabe", "NoExportable",
     "Opciones", "OpcionesArchivo", "PATRON_CUENTA", "TIPOS_LIBRO", "TIPO_DEL_PLAN", "TYPE_CHECKING", "VOCABULARIOS",
     "VOCABULARIO_POR_DEFECTO", "acepta_indice", "arma_asientos", "canal", "centro_en_anexo", "columnas_elegibles",
-    "columnas_elegidas", "configuracion", "cuentas_por_defecto", "declara_canal", "describir", "excluye_tipos",
+    "columnas_elegidas", "configuracion", "correlativo_con_mes", "cuentas_por_defecto", "declara_canal",
+    "describir", "excluye_tipos",
     "exige", "familia", "forma", "incumplimientos", "lleva_cuentas", "no_caben", "plan_base",
     "seccion_por_defecto", "vocabulario",
 ]

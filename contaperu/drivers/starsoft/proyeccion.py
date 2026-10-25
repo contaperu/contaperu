@@ -32,7 +32,14 @@ from . import datos
 from .datos import ORDEN_DE_LAS_FILAS, ROLES_DE_LA_DETRACCION
 
 LARGO_SERIE = 4       # F001 · 001 + espacio: la serie ocupa cuatro en la plantilla
-LARGO_VOUCHER = 4      # 0001: los cuatro dígitos con los que numera el motor, sin el mes delante
+LARGO_VOUCHER = 4
+# **Este destino escribe el correlativo SIN el mes delante** (14.2.0). El motor numera `070001` —mes más
+# cuatro dígitos, que es lo que piden CONCAR y el CSV— y aquí se escribe `0001`, porque «el correlativo de
+# comprobantes o vouchers debe iniciar siempre en el número uno» (compras 6:15). Se declara en vez de
+# dejar que se deduzca de que exista `correlativo_de_starsoft`: quien integra el motor necesita saberlo
+# para enseñar el número ANTES de generar el archivo, y preguntarle a un módulo si tiene cierta función es
+# adivinar por el nombre. Lo responde `contrato.correlativo_con_mes`.
+CORRELATIVO_CON_MES = False      # 0001: los cuatro dígitos con los que numera el motor, sin el mes delante
 
 
 def destino_de(cab: Cabecera) -> str:
