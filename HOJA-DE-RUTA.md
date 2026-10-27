@@ -46,8 +46,9 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **11.0.0** y estándar **`open-accounting` 3.0**
-(`contaperu/_version.py`).
+Librería **14.2.0** y estándar **`open-accounting` 4.0** — y el número que vale es siempre el de
+`contaperu/_version.py`, no el de esta línea: llegó a decir «11.0.0 y 3.0» con la 14.2.0 ya publicada,
+contradiciendo a la tabla que viene treinta líneas más abajo, que sí decía 4.0.
 
 **Y escala, medido y reproducible.** Funciones puras, sin estado, sin red, sin disco y sin reloj: dos procesos nunca
 se pisan, así que la escala horizontal es trivial. Lo vertical se mide con `herramientas/medir.py`, que multiplica
@@ -75,12 +76,12 @@ la decisión correcta de escalabilidad.
 | **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/comprobantes/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
 | **Estándar y comunidad** | `open-accounting` 4.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato/`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/tributos/validar.py`); duplicados dentro del lote y contra lo ya anotado |
-| **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por tanda |
-| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP con 15 herramientas y 13 recursos, y puerta HTTP con el contrato OpenConta; hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
+| **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por lote |
+| **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP y puerta HTTP con el contrato OpenConta (cuántas herramientas y cuántos recursos publica **no se escribe aquí**, porque envejece solo y este archivo llegó a decir 11, 14 y 15 en tres sitios a la vez: lo declara `contaperu/api/tabla.py`); hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |
 | **Salida · SUNAT** | Canal `sunat`, que son **los dos regímenes**: el driver `sire` escribe el TXT de reemplazo del RVIE y del RCE; `ple` y `ple_plan`, el Libro Diario y el detalle del plan contable |
 | **Salida · Legacy** | CONCAR (asientos) y CONTASIS (registro), de canal legacy; STARSOFT (asientos), con un mes de compras importado el 7-oct-2026 y uno de ventas el 8-oct-2026 |
 | **Salida · ERP** | **La base está puesta.** De entrada, el documento `open-accounting` como forma canónica —un ERP no escribe un lector—; de salida, el asiento en el propio estándar y el CSV, los dos de canal `erp`. Cuatro puertas que dan el mismo documento (librería, CLI, MCP y HTTP), el contrato OpenConta generado de la tabla de operaciones, los catálogos citables por la URL de su tag, una batería de conformidad que se corre sin el motor y en cualquier lenguaje, `resumen` y `por_cuenta` para no reescribir «cuánto es este libro», `campos_del_comprobante` y `REGLAS` para quien monte su capa de agente, y la API del SIRE descrita como datos y funciones puras |
-| Pendiente que depende de datos | SISCONT, la plantilla oficial de STARSOFT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026 |
+| Pendiente que depende de datos | SISCONT, la conciliación de constancias de detracción, las equivalencias del PCGE 2026. (La plantilla de STARSOFT salió de esta lista el 22-sep-2026: el formato está recalcado de la documentación oficial del fabricante y los dos libros fueron aceptados; lo que queda son dos siglas por confirmar) |
 
 ### Cumplidos
 
@@ -189,8 +190,9 @@ OTRA JURISDICCIÓN [un cliente real fuera del Perú] · J0 y J1 cumplidos en la 
 La Fase 0 (0.0-0.8) y la puerta del ERP (B1-B6) están cumplidas: su grafo vive en el historial.
 ```
 
-Lo cumplido —la Fase 0 entera, E1, C1, C9, C2, E2, E3, E5, E6, la puerta del ERP (B1-B6), B8, B9, B13 y C7— está en
-«Cumplidos» con su versión. Lo que queda, en el orden del eje nuevo:
+Lo cumplido está en «Cumplidos» con su versión, y **esa lista manda**: esta línea llegó a enumerar a mano
+cinco hitos —C1, C2, C9, E3 y E5— que sus propias filas tenían sin ✅, así que dos sitios decían cosas
+distintas del mismo hito. Un recuento escrito dos veces diverge; se lee el de abajo. Lo que queda, en el orden del eje nuevo:
 
 | Orden | Hitos | Arranca con |
 |---|---|---|
@@ -309,7 +311,7 @@ desarma (`contaperu/comprobantes/archivos.py:56-58`), y un `.txt` se ignora como
 | D3 | `conciliar*` con `metodo*` y `certeza*`, `emparejar_transferencias*` y la tolerancia en porcentaje y en importe absoluto. **`aplicaciones` ya no es suya: existe desde la 12.3**, así que lo que D3 devuelve son aplicaciones con `origen: propuesto` —que no cuentan para ningún saldo— y no una forma propia | N · F | código, tras D1 y D2 | Motivos legibles; la detracción como pago parcial; solo certeza alta va a lote; dentro del porcentaje y fuera del absoluto no hay certeza alta; **una propuesta no mueve un pendiente hasta que alguien la pasa a `manual`** | D1, D2 | 16, 25, 50 |
 | D4 | `ReglaBanco*` y `aplicar_reglas*` | N | dato: reglas reales de un contador | Primera coincidencia por prioridad, con motivo; nunca confirma | D2 | — |
 | D5 | `LiquidacionPasarela*` y `Aviso*` | N · estándar | dato: el reporte real de una pasarela | El invariante del neto se cumple; los avisos nunca asientan | D3, E1 | — |
-| D6a ✅ | **El asiento de tesorería para el ERP base, y su archivo.** Entró en cuatro pasos —12.7 la línea, 12.8 el libro originado, 12.9 el camino por la api, 12.10 el archivo del driver neutral con el ida y vuelta cerrado— y **no esperó ningún archivo ni ninguna norma**, que es lo que corrigió su sitio: estaba detrás de D3 y D5 y no tenía que estarlo, porque asentar un movimiento ya imputado no necesita conciliar —la contrapartida es un hecho declarado, no una conjetura, y lo que D3 produce son aplicaciones con `origen: propuesto`, que no cuentan para ningún saldo—. No inventó ni una regla contable: la del catálogo (`efectos_de_tesoreria`, NIC 7) más la imputación más la 104 del maestro bastan para las cinco formas | N · D | código: el catálogo ya publicaba la regla con su fuente | Las cinco formas cuadran sin tolerancia; ninguna línea sin glosa; el archivo vuelve a entrar y da el mismo archivo byte a byte y, rearmándolo, la misma huella; los dos snapshots byte a byte idénticos | — | 17 |
+| D6a ✅ | **El asiento de tesorería para el ERP base, y su archivo.** Entró en cuatro pasos —12.7 la línea, 12.8 el libro originado, 12.9 el camino por la api, 12.10 el archivo del driver `asiento_contable` con el ida y vuelta cerrado— y **no esperó ningún archivo ni ninguna norma**, que es lo que corrigió su sitio: estaba detrás de D3 y D5 y no tenía que estarlo, porque asentar un movimiento ya imputado no necesita conciliar —la contrapartida es un hecho declarado, no una conjetura, y lo que D3 produce son aplicaciones con `origen: propuesto`, que no cuentan para ningún saldo—. No inventó ni una regla contable: la del catálogo (`efectos_de_tesoreria`, NIC 7) más la imputación más la 104 del maestro bastan para las cinco formas | N · D | código: el catálogo ya publicaba la regla con su fuente | Las cinco formas cuadran sin tolerancia; ninguna línea sin glosa; el archivo vuelve a entrar y da el mismo archivo byte a byte y, rearmándolo, la misma huella; los dos snapshots byte a byte idénticos | — | 17 |
 | D6b ✅ | **El ITF, cerrado por criterio y no por tasa** (John, 13-oct-2026): *«el ITF se registra en base a lo que dice la constancia de pago o los movimientos bancarios… un asiento contable se da por hechos fehacientes y sustentados»*. Eso **es** su fuente, y es la que la regla 1 admite. Se asienta `6412` contra la cuenta de efectivo y su importe nunca se calcula; el `40181` no entra, porque el banco ya lo retuvo | N · D | — | Un movimiento con `itf` da dos asientos y uno sin él, uno | — | 17 |
 | D6c | **Tesorería hacia un sistema legacy.** Lo que de verdad espera el archivo: un sub-diario de bancos que CONCAR haya aceptado, y con él la clave de configuración del sub-diario, la numeración hermana de `numerar_en_orden` —que no se puede parchear: empieza por `tipos_sin_sigla`, y un movimiento no tiene `tipo_cp`— y una letra por libro en las `COLUMNAS_ELEGIBLES` de los tres drivers. Mientras no esté, el libro **se arma y no se numera** (`LibroQueTodaviaNoSeNumera`) | N · D | dato: un archivo aceptado del sub-diario de bancos de CONCAR, y el tratamiento del IGV de la comisión | Archivo aceptado; snapshot de CONCAR idéntico | D6a | 17 |
 | D6d | **La liquidación de una pasarela.** El otro asiento que D6 juntaba, y el que sí depende de lo de arriba | N · D | dato: el reporte real de una pasarela | El invariante del neto se cumple en el asiento | D5 | — |
@@ -388,7 +390,7 @@ y hay un precedente de norma convertida en datos con su cita, `herramientas/extr
 |---|---|---|---|---|---|---|
 | C1 | `herramientas/extraer_reglas_sunat*.py` → JSON empaquetado con `actualizado_al`, hoja y fila de cada dato: códigos de retorno, catálogos y solo las reglas con efecto contable | N · herramienta | dato público, ya disponible | Reproducible; lo que hoy está a mano en `catalogos.py` está contenido en el JSON o la diferencia queda listada; la hoja de cálculo no entra al repositorio | 0.5 | — |
 | C2 | `codigo_sunat*` en la observación, como campo añadido: los códigos propios no se renombran | N · estándar | código | Cada código citado existe en el JSON; la tabla `PEDIR_A` no cambia | C1, E1 | — |
-| C4 | `retencion_igv` (nombre reservado) desde `PaymentTerms` de la factura | N · estándar | dato: un destino que lo pida | `retencion` (renta de 4ta) intacta; snapshot idéntico | E1 | 29 |
+| C4 ✅ | **`retencion_igv` desde `PaymentTerms` de la factura**, `{porcentaje, monto}`, opcional (enmienda 0005) | N · estándar | dato: un destino que lo pida — **llegó**: el caso real que la enmienda esperaba | La de 4ta intacta; snapshot idéntico | E1 | 29 · **salió en la 14.0.0** (20-oct-2026). Esa misma versión renombró `retencion` a `retencion_4ta`, así que el criterio tal como estaba escrito ya no se podía ni leer |
 | C8 | `padron*` como argumento, con forma `{ruc: {activo*, habido*, razon_social*}}`, y aviso de proveedor no habido | N · F | dato: la fuente legal del aviso + tope | Sin padrón no cambia nada; un nombre distinto del padrón no produce observación | 0.1 | 24 |
 | C11 | `tipos_de_cambio*` como argumento: **contrasta, no rellena** | N · F | dato: la fuente del tipo de cambio que rige | Un tipo de cambio distinto del publicado da un aviso | C8 | — |
 | C12 | **IGV por utilización de servicios de no domiciliados (91, 97, 98)**: el par de líneas autoliquidado con su `rol` y el archivo de no domiciliados del RCE | N · estándar · D | dato: un comprobante 91 real con su pago por el Formulario 1662 y un asiento aceptado por CONCAR | El 91 da cuatro líneas que cuadran; una factura 01 sale idéntica (snapshot); el `rol` entra por su enmienda | C1, E1 | 26 |
@@ -524,7 +526,7 @@ con `rol` y los `tipo_cp`, y la guía [INTEGRAR.md](INTEGRAR.md), cuyos ejemplos
 | B1 | Las dos operaciones pasan a la fachada, y una tabla `OPERACIONES*` declara cada operación con su entrada y su salida (con `$ref` al esquema del estándar) | F | código | Cada herramienta MCP llama a una operación de la tabla; ninguna puerta importa `pcge` ni `detracciones` | 0.5 | — |
 | B2 | `motor*` (la versión) en `_asiento` y `_exportacion`, y `outputSchema` de `diagnosticar` que cubra también la respuesta con configuración inválida | F | código | Las dos formas validan; `motor` queda fuera de la huella | 0.2, 0.4 | 8, 10 |
 | B3 | **OpenAPI 3.1** generado por una herramienta desde `OPERACIONES*` | F · documentación | código | Regenerarlo no cambia bytes; los documentos de ejemplo validan como cuerpos | B1, B2 | — |
-| B10 | **Perfiles de herramientas en el MCP**: qué publica el servidor abierto y qué solo un integrador. Hoy publica las 14 siempre, con la misma anotación de solo lectura | F | decisión, antes de que exista algo que pida credenciales | Una herramienta marcada de integrador no aparece en el servidor público; la foto del MCP lo fija | B1 | 35 |
+| B10 | **Perfiles de herramientas en el MCP**: qué publica el servidor abierto y qué solo un integrador. Hoy publica todas siempre, con la misma anotación de solo lectura | F | decisión, antes de que exista algo que pida credenciales | Una herramienta marcada de integrador no aparece en el servidor público; la foto del MCP lo fija | B1 | 35 |
 | B11 | **Propuesta y aprobación con rastro**: el camino «el agente propone la cuenta, el humano confirma», con quién propuso qué y con qué huella. Hoy el motor valida o bloquea, y ese camino no existe | N · F | caso real: un mes imputado por un agente y revisado por un contador | Una propuesta no se exporta hasta que alguien la confirma; el rastro viaja en el documento y no en una base | 0.4 | 34 |
 | B12 | **Trazabilidad del agente** en `_exportacion`: hoy graba el driver, el archivo, la huella, la fecha y el motor, nunca quién lo pidió | F | B11 | Quien pidió la exportación queda en la anotación, y la huella no cambia por ello | B2, B11 | — |
 | B4 | Puerta **HTTP sin estado**, `servidor_http*`, con el extra `contaperu[http]*` | puerta | dato: un integrador no Python que lo necesite | Está en `PUERTAS` de `tests/test_frontera.py`; las tres puertas dan el mismo documento; comparte topes y la defensa de `Host` del MCP; publicar su imagen pide OK | B3 | — |
@@ -564,7 +566,7 @@ Para cada hito que espera un dato: qué hay que conseguir y con quién, en el or
 | D5 | El reporte de liquidación de una pasarela, y cómo trata el IGV de su comisión (las páginas públicas de Culqi se contradicen) | Con un comercio real |
 | D6c | Un archivo aceptado del sub-diario de bancos de CONCAR, y el tratamiento del IGV de una comisión bancaria | Un estudio. **La tasa del ITF ya no hace falta**: el importe lo dice la constancia o el extracto, no un cálculo (John, 13-oct-2026) |
 | **Estándar y comunidad** | | |
-| E7 | La decisión de abrir el repositorio y la revisión de su historial | John |
+| E7 | **Solo la revisión del historial.** Abrir ya se decidió y se hizo el 20-sep-2026 (fila E7 ✅ del §4); lo que queda debiendo es el historial, que conserva correos de trabajo del autor. Reescribirlo rompe los hashes y los tags publicados, así que es una decisión, no una tarea | John |
 | **Motor** | | |
 | C1 | La hoja oficial de SUNAT con los códigos de retorno y las reglas de validación, con su fecha «actualizado al» (no entra al repositorio) | Descargada de SUNAT a `privado/` |
 | C8 · C11 | La fuente legal del aviso de no habido y del tipo de cambio que rige | Norma citada |

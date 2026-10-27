@@ -215,21 +215,24 @@ requisitos.
 
 Con dos libros era correcto. El problema no era el número de llamadas: era que **un tercer tipo de libro no habría
 dado ningún error** —habría salido tratado como una compra, con el debe y el haber invertidos y la contraparte en la
-cuenta equivocada—, y el próximo libro ya tiene nombre y número de hito: el **diario** de B13, el que convierte al
-motor en la base de un ERP y no solo en la capa sobre un sistema legacy.
+cuenta equivocada—, y ese tercer libro tenía nombre y número de hito: el **diario** de B13, el que convierte al
+motor en la base de un ERP y no solo en la capa sobre un sistema legacy. **Entró en la 13.2.0** (16-oct-2026), así que hoy son cuatro.
 
 Desde la 9.0 cada tipo de libro **declara** lo que el motor necesita saber de él, en `modelo.RASGOS`:
 
-| | Rasgo | `venta` | `compra` | `tesoreria` |
-|---|---|---|---|---|
-| **qué ES el libro** | `origen` — de qué bloque salen sus líneas | `comprobantes` | `comprobantes` | **`movimientos`** |
-| | `roles` — qué roles caben en su asiento | `principal` `impuesto` `tercero` | los tres **+** `retencion` `recorte` `detraccion` | **`tesoreria` `tercero` `principal`** (12.8) |
-| | `sentido_principal` — a qué lado va el hecho | `H` | `D` | **`por_operacion`** |
-| | `cuenta_contraparte` — con qué cuenta se salda | `clientes` | `cxp` | **vacío** |
-| **qué reglas le tocan** | `da_credito_fiscal` | no | sí | no |
-| | `lleva_detraccion` · `lleva_honorarios` | no | sí | no |
-| **a dónde va** | `sub_diario` | ventas | compras | **vacío** |
-| | `etiqueta_de_archivo` — cómo se llama en el nombre de un archivo | VENTAS | COMPRAS | **TESORERIA** (12.10) |
+| | Rasgo | `venta` | `compra` | `tesoreria` | `diario` (13.2) |
+|---|---|---|---|---|---|
+| **qué ES el libro** | `origen` — de qué bloque salen sus líneas | `comprobantes` | `comprobantes` | **`movimientos`** | **`asiento`** |
+| | `roles` — qué roles caben en su asiento | `principal` `impuesto` `tercero` | los tres **+** `retencion` `recorte` `detraccion` | **`tesoreria` `tercero` `principal`** (12.8) | **ninguno** |
+| | `sentido_principal` — a qué lado va el hecho | `H` | `D` | **`por_operacion`** | **`por_operacion`** |
+| | `cuenta_contraparte` — con qué cuenta se salda | `clientes` | `cxp` | **vacío** | **vacío** |
+| **qué reglas le tocan** | `da_credito_fiscal` | no | sí | no | no |
+| | `lleva_detraccion` · `lleva_honorarios` | no | sí | no | no |
+| **a dónde va** | `sub_diario` | ventas | compras | **vacío** | **vacío** |
+| | `etiqueta_de_archivo` — cómo se llama en el nombre de un archivo | VENTAS | COMPRAS | **TESORERIA** (12.10) | **DIARIO** |
+
+Los tres vacíos del `diario` dicen lo que el motor **no** hace con él: le llega el asiento ya armado, así que no
+deriva roles, no elige contraparte y no tiene sub-diario propio.
 
 El reparto en tres grupos es de John (10-oct-2026) y no es cosmético: **el sub-diario no es lo que define a un
 libro**, es por dónde sale, y tenerlo primero hacía parecer que sí. Lo que define a un libro son su origen, sus
@@ -382,7 +385,7 @@ Lo que esto compra, y lo que no:
   mismo fallo una capa más abajo. Ahora cada capa elige en un diccionario tecleado por `origen`
   —`CAMINOS_DEL_ASIENTO`, `CAMINOS_DEL_ARCHIVO`, `CAMINOS_DEL_DIAGNOSTICO`, `DERIVACION_DEL_ROL`,
   `BLOQUES_POR_ORIGEN`, `IMPRESORES`—, y no es una tabla paralela porque no se teclea por libro: hay tantas
-  entradas como **bloques de entrada** —hoy dos, para tres libros—, así que un libro que reutilice un bloque no
+  entradas como **bloques de entrada** —hoy tres (`comprobantes`, `movimientos` y `asiento`), para cuatro libros—, así que un libro que reutilice un bloque no
   añade ninguna. Lo comprueba `tests/test_despacho_por_origen.py`: un guardián por AST con su lista de toleradas
   vacía, y un libro de mentira que entra en la tabla y llega hasta donde le toca sin que se escriba una línea.
 - **La línea de corte, que ahora es nítida: un libro que reutiliza un bloque es una fila; uno que estrena bloque
@@ -603,10 +606,10 @@ No son prohibiciones: es el precio de cada cambio, escrito antes de hacerlo. Qui
 
 ### Lo que queda preparado, sin símbolo público
 
-| Punto | Qué hay en la 1.0 | Hito |
+| Punto | Qué hay (cada fila dice desde qué versión) | Hito |
 |---|---|---|
 | Lectores de terceros | nombre reservado `lectores.contrato` y grupo `contaperu.lectores`: identificar, extraer, deduplicar | B7 |
-| El banco | **ya no está reservado**: `contaperu/tesoreria/` existe desde la 8.2 con la cuenta bancaria, el movimiento de un extracto, la constancia de un pago y el cuadre de lo que el banco declara; desde la 12.9 el motor **arma su asiento** para un ERP (`asiento/movimiento.py`, con el dispatch en `pipeline/armado`) y desde la 12.10 **escribe su archivo** por el driver neutral, con el ida y vuelta cerrado. Lo que sigue fuera es leer un banco concreto, conciliar, y llevarlo a un sistema legacy, que espera el sub-diario de bancos; y los conectores nunca entran al paquete | D1-D8 |
+| El banco | **ya no está reservado**: `contaperu/tesoreria/` existe desde la 8.2 con la cuenta bancaria, el movimiento de un extracto, la constancia de un pago y el cuadre de lo que el banco declara; desde la 12.9 el motor **arma su asiento** para un ERP (`asiento/movimiento.py`, con el dispatch en `pipeline/armado`) y desde la 12.10 **escribe su archivo** por el driver `asiento_contable`, con el ida y vuelta cerrado. Lo que sigue fuera es leer un banco concreto, conciliar, y llevarlo a un sistema legacy, que espera el sub-diario de bancos; y los conectores nunca entran al paquete | D1-D8 |
 | La API del SIRE | **ya no está reservada**: `contaperu/sunat/` arma la petición de cada una de las once operaciones, lee el estado de un ticket y clasifica el rechazo de SUNAT, todo desde su catálogo y sin salir a la red (8.1). Lo que **sigue fuera** es enviar: el socket, los reintentos, el reloj del ticket y las credenciales. Y lo que **todavía no está** son los lectores de la forma de cada respuesta: eso no lo sostiene un catálogo, lo sostendría una respuesta real, y no hay ninguna guardada | C-SIRE |
 | Reglas de SUNAT como datos | `_datos.leer_json("datos/sunat/…")`; `catalogos` las cargará sin cambiar sus nombres | C1-C2 |
 | El contribuyente como datos | `catalogos.regimenes_tributarios()` y `catalogos.cronogramas_de_vencimiento()`: en qué régimen tributa y cuándo le vence el mes, **cada regla con la cita de su artículo** y un cargador que no arranca sin ella. Son catálogo y no campo del estándar porque «qué libros estoy obligado a llevar» se pregunta sin un documento delante. El cronograma cabe en un núcleo sin reloj porque no es un reloj: dado un periodo y un dígito de RUC devuelve una fecha | C13 |

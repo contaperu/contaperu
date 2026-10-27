@@ -18,10 +18,16 @@ Lo mismo al revés: si encuentras una regla mal puesta, **abre un issue con el c
 ## Nunca subas datos reales
 
 Ni comprobantes de clientes, ni RUC de empresas que existen, ni razones sociales reales, ni claves. Para los
-tests hay dos RUC seguros:
+tests hay RUC seguros, y **cuál usar depende de dónde va**:
 
 - `20131312955` — el de la propia SUNAT, el que usa en sus ejemplos.
-- `20601234567` — inventado, con dígito verificador válido.
+- `20601234567` — inventado, y con el **dígito verificador MAL a propósito**: debería acabar en 5. Eso es
+  justamente lo que lo hace seguro, porque así no puede ser de ninguna empresa. Vale como RUC del
+  **contribuyente** —el del libro, que el motor no valida— y es el que usan los fixtures y los ejemplos.
+  (Hasta el 26-oct-2026 esta línea decía «con dígito verificador válido», que es lo contrario.)
+- **Como contraparte ése no sirve**, y más vale saberlo antes de perder un rato: el RUC del proveedor o del
+  cliente **sí** se valida, y devuelve `RUC_INVALIDO`. Para una contraparte de ejemplo, los de la batería:
+  `20602222226` y `20607777773`.
 
 El `.gitignore` bloquea `privado/` y `*.privado.*`, pero el filtro que importa eres tú: lo que entra en la
 historia de un repositorio público no sale nunca más.

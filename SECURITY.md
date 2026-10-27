@@ -36,12 +36,18 @@ el arreglo, y tu nombre va en el CHANGELOG salvo que prefieras lo contrario.
 
 | Versión | Recibe arreglos de seguridad |
 |---|---|
-| 2.x, la última publicada | sí, como versión de parche |
-| 1.x y anteriores | no: se actualiza a la 2.x, que no cambió la API pública |
+| **La última publicada** | sí, como versión de parche |
+| Cualquier anterior | no: se actualiza a la última |
+
+**Cuál es la última no se escribe aquí a mano**, y el motivo es este archivo: hasta el 26-oct-2026 esta tabla
+decía «2.x, la última publicada» con la 14.2.0 ya fuera —ocho mayores de desfase en la página que alguien abre
+justo **cuando acaba de encontrar un fallo**—. Lo dicen la fuente de verdad: el [CHANGELOG](CHANGELOG.md), los
+tags del repositorio y [PyPI](https://pypi.org/project/contaperu/).
 
 Un arreglo de seguridad sale como versión de parche de la última publicada, sin cambiar la API pública
 (`contaperu.api`) ni el contrato OpenConta. Si un arreglo exigiera romper algo, se dice aquí y en el CHANGELOG antes de
 publicarlo.
 
-Subir de la 1.x a la 2.x no pide tocar código: la 2.0 solo retiró las rutas de la 0.x, que ninguna versión publicada
-llegó a ofrecer.
+**Subir de una mayor a otra sí puede pedir tocar código**: el motor ha roto a propósito varias veces, y cada
+rotura está contada en el CHANGELOG con su porqué y lo que hay que cambiar. Si estás en una versión vieja porque
+migrar no te sale a cuenta y encuentras un fallo de seguridad, escribe igual: se mira el caso.

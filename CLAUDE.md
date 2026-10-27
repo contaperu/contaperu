@@ -25,18 +25,25 @@ que se escribe siempre como lo que es (nada real de nadie, nada de infraestructu
 sigue siendo publicar**: sacar una versión a PyPI o a GHCR, o abrir la imagen del MCP, pide revisión y el OK
 explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino automático por eso.
 
-## De qué visión sale (copia del `VISION.md` de Global Procesos AI, 13-sep-2026)
+## De qué visión sale (copia del `VISION.md` de Global Procesos AI, 26-oct-2026)
 
+- **El porqué, que está por encima de todo lo demás:** contribuir a la humanidad liberando a las personas del
+  trabajo repetitivo, para que dediquen su tiempo a lo que da valor. **Este repositorio es la parte de eso que no
+  se cobra**: el estándar y el motor son abiertos para que quien quiera hacer contabilidad peruana correcta no
+  tenga que reimplementar el IGV ni las detracciones, ni pedir permiso, ni pagar. Un país entero se ahorra
+  programar cien veces la misma norma.
 - **Misión:** devolverle a las personas el tiempo que hoy se les va en trabajo repetitivo, con automatización e IA al
   alcance de cualquier empresa, **montadas encima de los sistemas que ya usan**.
 - Los principios que gobiernan este repo: **encima, no en lugar de** (nadie cambia de sistema contable: CONCAR se
   queda y el motor le quita la digitación); **resultados, no tecnología**; **solo se anuncia lo que ya está en
   producción**; **el conocimiento se queda en casa del cliente** (por eso el núcleo es abierto: quien lo use no
-  depende de nadie).
+  depende de nadie); **un solo núcleo, varias puertas** (la capacidad vive una vez y una puerta traduce un
+  protocolo: aquí son la CLI, el MCP y la HTTP, y ninguna reimplementa nada); y **la máquina propone, la persona
+  autoriza** (ningún agente ejecuta algo con efecto real por una instrucción en lenguaje natural).
 - Su sitio en la hoja de ruta: es **el motor de la línea 2**, la capa contable inteligente sobre CONCAR o cualquier
-  sistema (el producto Contabilidad Inteligente), cuyo MVP es cargar comprobantes → revisar → exportar a un clic el
-  Excel de CONCAR o de CONTASIS y/o el TXT del SIRE. Regla vigente del producto: **se afina lo que existe, no se
-  añaden módulos**; en el motor eso significa que cada regla entra con su fuente y su caso real, no por si acaso.
+  sistema — el producto **7X Perú** (se llamó «Contabilidad Inteligente» hasta el 26-sep-2026), cuyo MVP fue cargar
+  comprobantes → revisar → exportar a un clic el archivo de su sistema contable y/o el TXT del SIRE. En el motor,
+  lo que gobierna es que **cada regla entra con su fuente y su caso real, no por si acaso**.
 - **Ampliación de John (15-sep-2026):** ContaPerú ya no es solo la capa sobre los sistemas legacy; también monta las
   bases para los ERP que vienen. «Encima, no en lugar de» sigue valiendo para quien ya tiene su sistema contable, y a
   la vez un ERP nuevo no tiene que reimplementar el IGV ni las detracciones: parte del estándar y del motor. La
@@ -45,12 +52,22 @@ explícito de John, y el trabajo `pypi` de `release.yml` está fuera del camino 
 - **Segunda ampliación de John (10-oct-2026): el eje se invierte.** De «una capa encima de tu sistema contable» a
   **«la base para cualquier ERP»**. No es que la capa deje de valer —se queda, sin plazo, y «encima, no en lugar
   de» sigue siendo la promesa a quien ya tiene su sistema—: es que **deja de ser lo que decide en qué orden crece
-  el motor**. Lo que decide es lo que a un ERP le falta, porque la aplicación que integra el motor está creciendo
-  hacia uno: bancos, conciliaciones y más API de SUNAT. Con ella entra una regla de secuencia que está en el §7 de
+  el motor**. Lo que decide es lo que a un ERP le falta. Con ella entra una regla de secuencia que está en el §7 de
   `HOJA-DE-RUTA.md`: **el motor va primero, se etiqueta una versión y el producto adopta después**; nada se
   construye primero en la aplicación.
-- Es una copia y no una importación, a propósito: este repo se abrirá y no puede depender de un archivo del disco de
-  nadie. Si la visión cambia, se actualiza esta sección con la fecha.
+- **Y cómo se concilia con que la casa no vende un ERP (John, 26-oct-2026):** *el motor sí, y el producto por
+  dentro.* El motor es la base sobre la que **otros** construyen su ERP, y 7X Perú va cubriendo por dentro lo que a
+  un ERP le falta —bancos, conciliación, cuentas por pagar— **sin cambiar la promesa comercial**: nunca se vende
+  como reemplazo, nunca se pide migrar. Hasta esta fecha esta sección decía que la aplicación «está creciendo hacia
+  uno», que se leía como lo contrario.
+- **Lápida — «se afina lo que existe, no se añaden módulos» (23-ago-2026 → 26-oct-2026).** Era la regla del
+  producto que esta sección copiaba. Cerró el tramo 1 y se retiró: en octubre entraron tesorería, bancos,
+  detracciones, una tercera puerta y cuatro pantallas mientras la regla seguía escrita diciendo que no. Lo que
+  ordena el crecimiento es el eje de arriba. Si reaparece en un grep, es código revivido.
+- Es una copia y no una importación, a propósito: este repositorio **es público** (desde el 20-sep-2026) y no puede
+  depender de un archivo del disco de nadie. **La copia se actualiza en el mismo cambio que la fuente** — entre el
+  13-sep y el 26-oct-2026 no se hizo, y las dos ampliaciones de arriba vivieron solo aquí: la fuente estuvo seis
+  semanas por detrás de su propia copia.
 
 ## Cómo está construido
 
@@ -76,7 +93,7 @@ traspaso— salen sin inventar ninguna regla, porque la del catálogo (`efectos_
 imputación más la 104 del maestro bastan, y el ITF es su propio asiento, `6412` contra la cuenta de efectivo, con
 el importe que dice el banco y no una tasa (criterio de John: un asiento se sustenta en un hecho fehaciente).
 `generar_asiento` despacha por `libro.rasgos.origen` —y `exportar` igual, cada uno una sola vez— y el maestro de
-cuentas viaja en la **configuración**. **Y desde la 12.10 sale su archivo** por el driver neutral, que escribe el
+cuentas viaja en la **configuración**. **Y desde la 12.10 sale su archivo** por el driver `asiento_contable`, que escribe el
 documento del estándar con sus cuatro bloques y vuelve a entrar dando lo mismo en los dos sentidos: reexportarlo da
 el archivo byte a byte y rearmarlo da la misma huella. Lo que sigue esperando el archivo del sub-diario de bancos
 es llevarlo a un sistema legacy (D6c): hasta entonces el libro **se arma y no se numera**); **`aplicaciones`** —el puente entre los tres libros desde la 12.3:
@@ -110,8 +127,8 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
 
 ## Quién lo consume, y el peaje
 
-- **Una aplicación en producción.** Contabilidad Inteligente (`contab-core`, repositorio privado de Global Procesos
-  AI) usa el motor como lo usaría cualquier ERP: **fija una versión publicada** (en su `api/MOTOR.txt`, el número y
+- **Una aplicación en producción.** **7X Perú** (`contab-core`, repositorio privado de Global Procesos
+  AI; se llamó «Contabilidad Inteligente» hasta el 26-sep-2026) usa el motor como lo usaría cualquier ERP: **fija una versión publicada** (en su `api/MOTOR.txt`, el número y
   el commit del tag) y adopta las nuevas cuando decide, después de leer su Release. Nada de allá lee la carpeta de
   este repo, así que un commit en `main` no la toca. **Romper una firma aquí la rompe el día que adopte esa versión**:
   por eso rige SemVer y lo que se retira avisa durante toda la mayor anterior. Un arreglo del motor es un commit en `main` y
@@ -261,7 +278,7 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
 | `CONTRIBUTING.md` | La regla que manda (ninguna regla sin fuente), nunca datos reales, cómo añadir un driver, estilo, antes de un PR |
 | `estandar/LEEME.md` | El estándar `open-accounting`: sus bloques, sus reglas, la detracción en dos tiempos, las anotaciones del motor, los nombres reservados, su versionado |
 | `REFERENCIAS.md` | **La única casa de la investigación**: lo que no está aquí no se ha mirado. Cuatro escalones y medio, cada uno con su fecha: el **asiento** en QuickBooks, Xero y las unificadas (de ahí salió la 0.8.0); el **registro del comprobante** en nueve plataformas, con los estándares abiertos de factura (EN 16931 y Peppol con sus `BT-`/`BG-`, y por qué la cuenta contable no es parte de la factura); la **clasificación de la cuenta** —dónde vive el papel de una línea, la determinación de cuentas de los ERP abiertos y el enlace documento↔asiento, que son la fuente de las enmiendas 0009, 0010 y 0011—; y **la aplicación de un pago** en ocho sistemas (Odoo, ERPNext, SAP, GnuCash, SAF-T, Codat, Merge e ISO 20022), de donde salen las enmiendas 0030 y 0031: todos la modelan como un registro aparte con su importe, a nivel de línea y N a N, y **ninguno guarda el saldo** —lo derivan—. Más los doce patrones del estándar de facto, cuyo número doce es por qué este estándar existe: nadie tiene un campo de retención. Y **el medio**, el dinero, que es medio a propósito: su forma salió de nueve extractos reales y no de comparar plataformas, así que lo que se contrastó es el signo contra camt.053 y MT940, el efecto contra la NIC 7 §9 y el nivel contra Odoo y ERPNext — y el hueco está declarado. Los descartes van con su motivo escrito, no citado |
-| `HOJA-DE-RUTA.md` | En qué orden crece el motor, **ordenado desde el 10-oct-2026 por ser la base de cualquier ERP y no por la capa encima de los legacy**, que se mantiene: qué sigue y los seis frentes (la puerta para cualquier ERP, el banco, leer y validar más, los drivers legacy, el estándar y otra jurisdicción), hitos con criterio de salida y el dato que destraba cada uno. Y la regla de secuencia del §7: **el motor va primero y el producto adopta después**. Solo orden: cada hito cita su propuesta por número, y el §8 es el inventario de las 47 —en cuatro tandas— con el caso real que destraba cada una |
+| `HOJA-DE-RUTA.md` | En qué orden crece el motor, **ordenado desde el 10-oct-2026 por ser la base de cualquier ERP y no por la capa encima de los legacy**, que se mantiene: qué sigue y los seis frentes (la puerta para cualquier ERP, el banco, leer y validar más, los drivers legacy, el estándar y otra jurisdicción), hitos con criterio de salida y el dato que destraba cada uno. Y la regla de secuencia del §7: **el motor va primero y el producto adopta después**. Solo orden: cada hito cita su propuesta por número, y el §8 es el inventario de las propuestas —cuántas son lo dice él, que ya se corrigió el recuento una vez— con el caso real que destraba cada una |
 | `CHANGELOG.md` | Cada versión con su porqué; la bitácora del motor vive aquí y en ningún otro sitio |
 | `SECURITY.md` · `CODE_OF_CONDUCT.md` | Cómo reportar una vulnerabilidad; cómo se convive en el proyecto |
 

@@ -474,7 +474,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Puerta HTTP con el contrato OpenConta | listo |
 | `resumen` y `por_cuenta`: cuánto es un libro, y el pre-mayor con su cuadre | listo |
 | `campos_del_comprobante` y `REGLAS`: qué pone cada uno, y el dominio sin nombrar una herramienta | listo |
-| Recibir un diario que no viene de compras ni de ventas (planilla, depreciación, destino) | **pendiente**: son 595 de los 1 441 asientos de un mes real. `libro.tipo` ya tiene tres valores —`venta`, `compra` y `tesoreria`—, así que el camino está abierto; lo que falta es el `diario` |
+| Recibir un diario que no viene de compras ni de ventas (planilla, depreciación, destino) | **listo** desde la 13.2.0 (16-oct-2026), hito B13: el **Libro Diario** es el cuarto tipo de `libro.tipo`, junto a `venta`, `compra` y `tesoreria`. Eran 595 de los 1 441 asientos de un mes real |
 | La cuenta según con quién y según qué, y el nivel fino de la cuenta | **pendiente de un caso real** — ver la hoja de ruta |
 | **SUNAT** · los dos regímenes | |
 | Driver SIRE (TXT de reemplazo del RVIE y del RCE) | listo |
@@ -744,8 +744,7 @@ It also defines **`open-accounting`**, an open interchange format for Peruvian a
 files that production accounting systems and SUNAT actually accepted.
 
 A stable Python API (`contaperu.api`), an MCP server for AI agents and a stateless HTTP port described by the
-**OpenConta** contract (an OpenAPI 3.1 document) let any ERP use it, in any language. For now it installs from
-source or from PyPI (`pip install "contaperu[todo]"`). The docs are in Spanish, because
+**OpenConta** contract (an OpenAPI 3.1 document) let any ERP use it, in any language. It installs from PyPI (`pip install "contaperu[todo]"`) or from source. The docs are in Spanish, because
 that's the language of the domain and of the people who use it — but issues and pull requests in English are welcome.
 
 *Keywords: Peruvian accounting, Peru tax, SUNAT e-invoicing, electronic invoices, double-entry bookkeeping, accounting
