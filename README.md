@@ -52,8 +52,9 @@ ContaPerú se ocupa de lo que hoy se hace a mano:
 
 - **El registro de compras y el de ventas**, a partir de los XML que emite SUNAT o de la propuesta del SIRE, sin
   digitar comprobante por comprobante.
-- **El asiento de cada comprobante**, con los casos que suelen salir mal: IGV, detracción, retención de cuarta
-  categoría, notas de crédito, comprobantes en dólares y extemporáneos.
+- **El asiento de cada comprobante**, con los casos que suelen salir mal: IGV, detracción, **las dos
+  retenciones** —la de cuarta categoría y la del IGV—, notas de crédito, comprobantes en dólares y
+  extemporáneos.
 - **Revisar antes de exportar.** Dice qué falta para tu sistema —una cuenta, un centro de costo, una sigla, un
   correlativo— y a quién hay que pedírselo, por serie-número y sin corregir ni inventar nada.
 - **El archivo listo para importar**: el Excel de asientos de CONCAR, el registro de CONTASIS o el TXT de reemplazo de
@@ -404,6 +405,15 @@ tolerancia: un céntimo de diferencia detiene la exportación.
 | Comprobante en dólares | el tipo de cambio del comprobante, y la detracción convertida a soles |
 | Comprobante extemporáneo | se asienta dentro del periodo, conservando la fecha del documento |
 
+⚠️ **Las dos retenciones tienen un nombre cada una**, y si vienes de una versión anterior a la 14.0 es lo
+primero que hay que cambiar: el comprobante llevaba un solo campo llamado `retencion`, genérico, y en el Perú
+hay **dos** retenciones que en castellano se llaman igual. Hoy son **`retencion_4ta`** (la de cuarta categoría,
+la del recibo por honorarios, que sí entra en el asiento) y **`retencion_igv`** (`{porcentaje, monto}`, el 3 %
+que SUNAT declara de una factura; es un hecho del pago, así que **no** genera línea, pero llega a la cabecera
+que ve un driver). Ese nombre genérico costó dos averías reales —un mes exportado sin su línea de retención, y
+el 3 % del IGV volcado donde no iba—, y por eso ya no existe: un documento que aún mande `retencion` **se
+rechaza**, en vez de ignorarse en silencio como antes.
+
 **Exporta**, por canal de destino:
 
 - **ERP:** el documento `open-accounting` con su asiento sin vocabulario legacy (driver `asiento_contable`), y un CSV
@@ -719,7 +729,7 @@ lo que produce, así que dos llamadas iguales dan el mismo resultado y ninguna d
 Contabilidad peruana · software contable Perú · motor contable · código abierto · SUNAT · SIRE · RVIE · RCE · PLE ·
 comprobantes de pago electrónicos · factura electrónica · boleta de venta · nota de crédito · recibo por honorarios ·
 XML UBL 2.1 · registro de compras · registro de ventas · asientos contables · partida doble · libro diario ·
-PCGE 2026 · IGV · detracciones · retención de cuarta categoría · CONCAR · CONTASIS · SISCONT · STARSOFT · estudio
+PCGE 2026 · IGV · detracciones · retención de cuarta categoría · retención del IGV · CONCAR · CONTASIS · SISCONT · STARSOFT · estudio
 contable · automatización contable · contabilidad abierta · arquitectura colectiva · inteligencia artificial · MCP ·
 OpenAPI · ERP
 
