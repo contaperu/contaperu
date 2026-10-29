@@ -168,21 +168,30 @@ def validar(c: Comprobante, libro: Libro) -> None:
     if c.base_gravada > 0 or c.igv > 0:
         esperado = c.base_gravada * Decimal(cat.TASA_IGV)
         if not _cuadra(c.igv, esperado):
-            reducida = next((candidata for candidata in cat.TASAS_IGV_REDUCIDAS
-                             if _cuadra(c.igv, c.base_gravada * Decimal(candidata))), None)
             # TRES salidas y no dos (28-oct-2026): no cuadra con ninguna tasa conocida; cuadra con una
             # reducida que YA NO RIGE, y entonces que alguien la mire; o cuadra con una **vigente**, y
-            # entonces no hay nada que decir. Hasta hoy el 10,5 % —el de las MYPE de hospedaje— avisaba
-            # en cada una de sus facturas, y un aviso que sale siempre sobre lo correcto no es una
-            # señal: es ruido, y encima dejaba el comprobante y su mes en «observada».
-            # Es el mismo criterio con el que este archivo retiró `CONFIANZA_BAJA` y el aviso de «no
-            # lleva IGV»: no se tiñe de «mírame» lo que solo es una clasificación correcta y visible.
-            if not reducida:
+            # entonces no hay nada que decir. Hasta hoy el 10,5 % —el de las MYPE de restaurantes,
+            # hoteles y alojamiento turístico— avisaba en cada una de sus facturas, y un aviso que sale
+            # siempre sobre lo correcto no es una señal: es ruido, y encima dejaba el comprobante y su
+            # mes en «observada». Es el mismo criterio con el que este archivo retiró `CONFIANZA_BAJA` y
+            # el aviso de «no lleva IGV»: no se tiñe de «mírame» lo que solo es una clasificación
+            # correcta y visible.
+            #
+            # ⚠️ **La vigente se busca PRIMERO, y no es un detalle de orden.** La tolerancia va en
+            # unidades de IMPORTE (±0,05), así que por debajo de una base de diez soles el 10 % y el
+            # 10,5 % son indistinguibles —con base 10, 1.00 contra 1.05 es exactamente 0,05— y recorrer
+            # primero las reducidas devolvía el 10 %, que ya no rige, con lo que el aviso volvía a salir.
+            # Un menú de nueve soles es el caso más común del sector al que esta tasa sirve.
+            vigente = next((t for t in cat.TASAS_IGV_VIGENTES
+                            if _cuadra(c.igv, c.base_gravada * Decimal(t))), None)
+            retirada = next((t for t in cat.TASAS_IGV_REDUCIDAS
+                             if _cuadra(c.igv, c.base_gravada * Decimal(t))), None)
+            if vigente is None and retirada is None:
                 c.observar("IGV_NO_CUADRA", nivel_descuadre,
                            f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} "
                            f"(esperado {esperado:.2f}){ya_declarado}")
-            elif reducida not in cat.TASAS_IGV_VIGENTES:
-                aviso("IGV_TASA_REDUCIDA", f"IGV al {Decimal(reducida) * 100:.1f} % (tasa reducida); verifica que corresponda")
+            elif vigente is None:
+                aviso("IGV_TASA_REDUCIDA", f"IGV al {Decimal(retirada) * 100:.1f} % (una tasa reducida que ya no rige); verifica que corresponda")
     # Sin los descuentos: la base y el IGV ya son netos (estandar/LEEME.md, open-accounting 0.2).
     #
     # Lo no gravado entra por `adquisiciones_no_gravadas` y NO como `exonerado + inafecto`, que es lo que

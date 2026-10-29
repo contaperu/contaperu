@@ -26,6 +26,16 @@ cuadra con ninguna tasa conocida (`IGV_NO_CUADRA`, error), cuadra con una reduci
 Es el mismo criterio con el que este archivo ya había retirado `CONFIANZA_BAJA` y el aviso de «no lleva IGV»: no se
 tiñe de «mírame» lo que solo es una clasificación correcta y visible.
 
+⚠️ **La vigente se busca primero, y eso no es un detalle de orden.** La tolerancia del IGV va en unidades de
+IMPORTE (±0,05), así que por debajo de una base de diez soles el 10 % y el 10,5 % son indistinguibles —con base
+10, 1.00 contra 1.05 es exactamente 0,05—: recorrer primero las reducidas devolvía el 10 %, que ya no rige, y el
+aviso volvía a salir. En un menú de nueve soles, que es el caso más común del sector al que esta tasa sirve. Hay
+un caso que lo fija con las dos bases.
+
+**Y el aviso cambia de texto**: dice «una tasa reducida que ya no rige» en vez de «tasa reducida». Desde hoy solo
+sale para las retiradas, así que lo que se pregunta ya no es si la tasa es reducida —lo es y está bien— sino si
+una tasa que caducó corresponde. Ninguna prueba de los dos repos afirmaba ese texto.
+
 **Y la regla estrena fuente.** El 10,5 % no es un IGV que subió —el reducido sigue en 8 %—: lo que cambió es el
 Impuesto de Promoción Municipal, del 2 % al 2,5 %. Ley 32219 (la prórroga de la tasa reducida) y Ley 32387 (el IPM),
 citadas ahora junto a la constante. Hasta hoy esta regla no tenía ninguna fuente escrita, solo un «(restaurantes y

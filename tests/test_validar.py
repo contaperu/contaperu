@@ -52,6 +52,12 @@ def test_una_tasa_vigente_no_se_observa():
     """
     c = cp(igv="10.5", total="110.5")
     assert codigos(c) == [] and c.estado == "ok"
+    # ⚠️ Y con una base PEQUEÑA, que es donde estaba el defecto: la tolerancia va en importe, así que
+    # con diez soles de base el 10 % y el 10,5 % son indistinguibles (1.00 contra 1.05, exactamente
+    # 0,05). Buscando primero entre las reducidas salía el 10 %, que ya no rige, y el aviso volvía —en
+    # un menú de nueve soles, que es el caso más común del sector al que esta tasa sirve.
+    for base, igv, total in (("10", "1.05", "11.05"), ("9", "0.95", "9.95")):
+        assert codigos(cp(base_gravada=base, igv=igv, total=total)) == [], f"base {base} al 10,5 %"
     for igv, total in (("10", "110"), ("8", "108")):
         assert codigos(cp(igv=igv, total=total)) == ["IGV_TASA_REDUCIDA"], f"el {igv} % ya no rige: que lo miren"
     # Y lo que no cuadra con NINGUNA tasa conocida sigue siendo un error: callar la vigente no se lo come.
