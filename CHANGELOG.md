@@ -4,6 +4,39 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [14.3.0] — 2026-10-28
+
+### Una tasa de IGV que rige HOY ya no se avisa
+
+El 10,5 % de las MYPE de restaurantes, hoteles y alojamiento turístico salía con `IGV_TASA_REDUCIDA`
+—«verifica que corresponda»— en **cada una** de sus facturas. Es nivel aviso y nunca bloqueó nada, pero
+`fijar_estado` no mira el nivel: cualquier observación deja el comprobante en `observada`, así que un hotel que
+factura correctamente tenía todas sus facturas —y con ellas su mes— en el color de «esto necesita que lo mires».
+Lo encontró un contador con dos facturas de hospedaje a las que no les faltaba absolutamente nada.
+
+El aviso existe para una tasa reducida que **ya no rige**, y para eso sigue: el 10 % y el 8 % lo dan igual. Lo que
+faltaba era la distinción, porque `TASAS_IGV_REDUCIDAS` mezclaba las tres sin decir cuál es la de hoy.
+
+**`catalogos.TASAS_IGV_VIGENTES`** es nueva y aditiva: dice qué rige, la general y el 10,5 %. `TASAS_IGV_REDUCIDAS`
+**no se toca**, porque es otra pregunta —qué tasas sabe RECONOCER el motor— y de ella depende `igv.tasa_legal`: una
+factura de 2023 al 8 % se sigue leyendo, asentando y exportando igual. La validación pasa de dos salidas a tres: no
+cuadra con ninguna tasa conocida (`IGV_NO_CUADRA`, error), cuadra con una reducida que ya no rige
+(`IGV_TASA_REDUCIDA`, aviso), o cuadra con una vigente, y entonces no hay nada que decir.
+
+Es el mismo criterio con el que este archivo ya había retirado `CONFIANZA_BAJA` y el aviso de «no lleva IGV»: no se
+tiñe de «mírame» lo que solo es una clasificación correcta y visible.
+
+**Y la regla estrena fuente.** El 10,5 % no es un IGV que subió —el reducido sigue en 8 %—: lo que cambió es el
+Impuesto de Promoción Municipal, del 2 % al 2,5 %. Ley 32219 (la prórroga de la tasa reducida) y Ley 32387 (el IPM),
+citadas ahora junto a la constante. Hasta hoy esta regla no tenía ninguna fuente escrita, solo un «(restaurantes y
+hoteles)» en un comentario, lo que contradecía la norma de la casa: ninguna regla sin fuente. ⚠️ Las dos leyes se
+tomaron de prensa especializada y **no** del texto en El Peruano ni de SUNAT.
+
+**Sin tramos de vigencia por fecha**, que es una decisión y no un olvido: la validación no mira la fecha del
+comprobante, igual que `RETENCION_IGV_TASA`. Una factura de 2023 al 8 % avisa hoy como avisaba ayer. La prórroga
+llega hasta el 31-dic-2026 y ese día cambia la constante, con su cita al lado — el molde de
+`PLAZO_ANOTACION_MESES`.
+
 ## [14.2.0] — 2026-10-25
 
 ### Qué sale en el archivo, y con qué correlativo, se pueden preguntar antes de generarlo

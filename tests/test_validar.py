@@ -39,9 +39,24 @@ def test_comprobante_limpio():
 
 def test_igv_no_cuadra_y_tasa_reducida():
     assert codigos(cp(igv="20", total="120")) == ["IGV_NO_CUADRA"]
-    c = cp(igv="10", total="110")                       # 10 % restaurantes
+    c = cp(igv="10", total="110")                       # 10 %: la reducida que rigió hasta 2025
     assert codigos(c) == ["IGV_TASA_REDUCIDA"] and c.estado == "observada" and not c.tiene_errores
     assert codigos(cp(igv="18.04", total="118.04")) == []   # tolerancia ±0.05
+
+
+def test_una_tasa_vigente_no_se_observa():
+    """El 10,5 % de las MYPE de restaurantes, hoteles y alojamiento turístico es la tasa CORRECTA desde que el
+    IPM subió al 2,5 %, así que no se dice nada de él. Hasta el 28-oct-2026 avisaba, y ese aviso salía en TODAS
+    las facturas de un hotel: dejaba cada una —y con ella su mes— en «observada» para siempre, que es el color
+    de «esto necesita que lo mires». Las reducidas que ya no rigen sí avisan, que es para lo que el aviso sirve.
+    """
+    c = cp(igv="10.5", total="110.5")
+    assert codigos(c) == [] and c.estado == "ok"
+    for igv, total in (("10", "110"), ("8", "108")):
+        assert codigos(cp(igv=igv, total=total)) == ["IGV_TASA_REDUCIDA"], f"el {igv} % ya no rige: que lo miren"
+    # Y lo que no cuadra con NINGUNA tasa conocida sigue siendo un error: callar la vigente no se lo come.
+    malo = cp(igv="20", total="120")
+    assert codigos(malo, COMPRAS) == ["IGV_NO_CUADRA"] and malo.tiene_errores
 
 
 def test_total_no_cuadra_y_anticipo():

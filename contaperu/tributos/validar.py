@@ -170,12 +170,19 @@ def validar(c: Comprobante, libro: Libro) -> None:
         if not _cuadra(c.igv, esperado):
             reducida = next((candidata for candidata in cat.TASAS_IGV_REDUCIDAS
                              if _cuadra(c.igv, c.base_gravada * Decimal(candidata))), None)
-            if reducida:
-                aviso("IGV_TASA_REDUCIDA", f"IGV al {Decimal(reducida) * 100:.1f} % (tasa reducida); verifica que corresponda")
-            else:
+            # TRES salidas y no dos (28-oct-2026): no cuadra con ninguna tasa conocida; cuadra con una
+            # reducida que YA NO RIGE, y entonces que alguien la mire; o cuadra con una **vigente**, y
+            # entonces no hay nada que decir. Hasta hoy el 10,5 % —el de las MYPE de hospedaje— avisaba
+            # en cada una de sus facturas, y un aviso que sale siempre sobre lo correcto no es una
+            # señal: es ruido, y encima dejaba el comprobante y su mes en «observada».
+            # Es el mismo criterio con el que este archivo retiró `CONFIANZA_BAJA` y el aviso de «no
+            # lleva IGV»: no se tiñe de «mírame» lo que solo es una clasificación correcta y visible.
+            if not reducida:
                 c.observar("IGV_NO_CUADRA", nivel_descuadre,
                            f"IGV {c.igv} no es el 18 % de la base {c.base_gravada} "
                            f"(esperado {esperado:.2f}){ya_declarado}")
+            elif reducida not in cat.TASAS_IGV_VIGENTES:
+                aviso("IGV_TASA_REDUCIDA", f"IGV al {Decimal(reducida) * 100:.1f} % (tasa reducida); verifica que corresponda")
     # Sin los descuentos: la base y el IGV ya son netos (estandar/LEEME.md, open-accounting 0.2).
     #
     # Lo no gravado entra por `adquisiciones_no_gravadas` y NO como `exonerado + inafecto`, que es lo que

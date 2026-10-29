@@ -263,6 +263,16 @@ def test_las_tasas_de_igv_son_las_de_la_1_0():
     assert all(isinstance(t, str) for t in (catalogos.TASA_IGV, *catalogos.TASAS_IGV_REDUCIDAS))
 
 
+def test_las_tasas_vigentes_son_tasas_que_el_motor_reconoce():
+    """`TASAS_IGV_VIGENTES` dice qué rige HOY y `TASAS_IGV_REDUCIDAS` qué sabe LEER el motor: son dos preguntas
+    distintas y por eso son dos tuplas. Pero una vigente que no estuviera entre las reconocidas no silenciaría
+    nada —la validación no llega a compararla: antes falla el cuadre y sale `IGV_NO_CUADRA`—, y el aviso
+    seguiría saliendo sin que nadie supiera por qué. La general tiene que estar: es la vigente por excelencia."""
+    assert set(catalogos.TASAS_IGV_VIGENTES) <= {catalogos.TASA_IGV, *catalogos.TASAS_IGV_REDUCIDAS}
+    assert catalogos.TASA_IGV in catalogos.TASAS_IGV_VIGENTES
+    assert all(isinstance(t, str) for t in catalogos.TASAS_IGV_VIGENTES)
+
+
 def test_la_tolerancia_del_igv_es_la_de_la_1_0():
     """Vivía en `validar.py` y la leía también `igv.py`, que por eso dependía de la validación entera. Es la MISMA
     para las dos, y que lo sea es lo que hace que `igv.tasa_legal` reconozca exactamente las tasas que `validar`

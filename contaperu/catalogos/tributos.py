@@ -65,10 +65,25 @@ CLASES_IGV_VENTA = {
     "mixto": "Mixto",
 }
 
-# Tasas de IGV que la validación reconoce. La general es 18 %; las reducidas
-# (restaurantes y hoteles) se aceptan con aviso, no como error.
+# Tasas de IGV que la validación RECONOCE: la general y las reducidas de las MYPE de restaurantes,
+# hoteles y alojamiento turístico. Reconocer no es aprobar —qué rige HOY lo dice `TASAS_IGV_VIGENTES`,
+# aquí abajo—: una factura de 2023 al 8 % se sigue leyendo, se asienta y se exporta igual, y
+# `igv.tasa_legal` recorre esta tupla para decir qué tasa escribir en el archivo.
 TASA_IGV = "0.18"
 TASAS_IGV_REDUCIDAS = ("0.10", "0.105", "0.08")
+# Las que RIGEN hoy, que es otra pregunta (28-oct-2026). Una reducida que ya no rige se avisa para que
+# alguien la mire (`IGV_TASA_REDUCIDA`); una vigente no dice nada, porque es la tasa correcta y
+# repetirlo en cada factura de un hotel no es una señal: es ruido, y además dejaba el comprobante
+# —y con él su mes— en «observada» para siempre.
+#
+# El 10,5 % **no es un IGV que subió**: el reducido sigue en 8 %, y lo que cambió es el Impuesto de
+# Promoción Municipal, del 2 % al 2,5 %. Ley 32219 (prórroga de la tasa reducida) y Ley 32387 (el IPM).
+# ⚠️ Las dos se tomaron de prensa especializada, NO del texto en El Peruano ni de SUNAT: antes de
+# apoyarse en ellas para otra cosa, verificarlas.
+# ⚠️ La prórroga llega hasta el **31-dic-2026**. Ese día cambia esta constante, con su cita al lado —el
+# mismo molde que `PLAZO_ANOTACION_MESES`—. **No hay tramos por fecha, y es deliberado** (John,
+# 27-sep-2026 y 28-oct-2026): esto no mira la fecha del comprobante, solo dice qué rige hoy.
+TASAS_IGV_VIGENTES = (TASA_IGV, "0.105")
 # Cuánto puede separarse el IGV escrito del calculado por redondeos del emisor. Vivía en `validar.py` y la leía
 # también `igv.py`, que por eso dependía de la validación entera (1.0: las dependencias ocultas se cortan).
 TOLERANCIA_IGV = Decimal("0.05")

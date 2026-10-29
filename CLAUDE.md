@@ -128,8 +128,10 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
 ## Quién lo consume, y el peaje
 
 - **Una aplicación en producción.** **7X Perú** (`contab-core`, repositorio privado de Global Procesos
-  AI; se llamó «Contabilidad Inteligente» hasta el 26-sep-2026) usa el motor como lo usaría cualquier ERP: **fija una versión publicada** (en su `api/MOTOR.txt`, el número y
-  el commit del tag) y adopta las nuevas cuando decide, después de leer su Release. Nada de allá lee la carpeta de
+  AI; se llamó «Contabilidad Inteligente» hasta el 26-sep-2026) usa el motor como lo usaría cualquier ERP: **fija una versión publicada** (en su
+  `api/requirements.txt`, `contaperu[excel,mcp]==X.Y.Z`, desde PyPI) y adopta las nuevas cuando decide, después de
+  leer su Release. Esta línea decía «en su `api/MOTOR.txt`, el número y el commit del tag» y ese archivo **no
+  existe allá** (comprobado el 28-oct-2026): el número vive en una sola línea, la de `requirements.txt`. Nada de allá lee la carpeta de
   este repo, así que un commit en `main` no la toca. **Romper una firma aquí la rompe el día que adopte esa versión**:
   por eso rige SemVer y lo que se retira avisa durante toda la mayor anterior. Un arreglo del motor es un commit en `main` y
   una versión con su tag; allá, cambiar la versión fijada y desplegar. Su lado del circuito está en
