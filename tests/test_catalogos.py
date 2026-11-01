@@ -150,12 +150,12 @@ def test_el_01_significa_cosas_distintas_en_los_dos_catalogos():
 
 def test_el_catalogo_de_una_nota_lo_elige_su_tipo_de_comprobante():
     """**El test que cierra el 87 para este campo.** Mirar solo `("07", "08")` —que es lo que dice
-    `catalogos.TIPOS_NOTA`, y significa otra cosa— dejaría a la nota de crédito de no domiciliado y a la de débito
-    especial sin catálogo EN SILENCIO: su código se avisaría como desconocido siempre."""
-    assert catalogos.motivos_de_nota("07") is catalogos.MOTIVOS_NOTA_CREDITO
-    assert catalogos.motivos_de_nota("87") is catalogos.MOTIVOS_NOTA_CREDITO
-    assert catalogos.motivos_de_nota("08") is catalogos.MOTIVOS_NOTA_DEBITO
-    assert catalogos.motivos_de_nota("88") is catalogos.MOTIVOS_NOTA_DEBITO
+    `catalogos.TIPOS_NOTA`, y significa otra cosa— dejaría a las notas especiales y a las del no domiciliado sin
+    catálogo EN SILENCIO: su código se avisaría como desconocido siempre."""
+    for credito in ("07", "87", "97"):
+        assert catalogos.motivos_de_nota(credito) is catalogos.MOTIVOS_NOTA_CREDITO, credito
+    for debito in ("08", "88", "98"):
+        assert catalogos.motivos_de_nota(debito) is catalogos.MOTIVOS_NOTA_DEBITO, debito
     # Lo que no es una nota no tiene motivo, y eso incluye el vacío y la basura.
     assert catalogos.motivos_de_nota("01") == {}
     assert catalogos.motivos_de_nota("") == {}
@@ -164,7 +164,7 @@ def test_el_catalogo_de_una_nota_lo_elige_su_tipo_de_comprobante():
 
 def test_las_dos_listas_de_notas_dicen_lo_mismo():
     """`catalogos` y `modelo` son dos módulos hoja que no se importan entre sí, así que cada uno tiene su copia de
-    los cuatro códigos de nota. Lo que impide que se separen es este test. Y `catalogos.NOTAS` se DERIVA de los dos
+    los seis códigos de nota. Lo que impide que se separen es este test. Y `catalogos.NOTAS` se DERIVA de los dos
     conjuntos, así que dentro de `catalogos` no puede haber desacuerdo."""
     from contaperu import modelo
     assert set(catalogos.NOTAS_CREDITO) == set(modelo.NOTAS_CREDITO)
@@ -287,3 +287,15 @@ def test_la_tasa_general_y_las_reducidas_no_se_pisan():
     """Un duplicado haría que `igv.tasa_legal` devolviera la primera que cuadre y nadie lo notaría."""
     todas = (catalogos.TASA_IGV, *catalogos.TASAS_IGV_REDUCIDAS)
     assert len(set(todas)) == len(todas)
+
+
+def test_el_registro_de_no_domiciliados_es_lo_que_el_catalogo_llama_de_no_domiciliado():
+    """El arreglo de la 15.3.0, anclado al texto del propio catálogo y no a una lista escrita a mano: hasta la 15.2 el
+    motor llamaba «de no domiciliado» al 87, que la Tabla 10 llama nota de crédito ESPECIAL, y dejaba fuera de las
+    notas al 97 y al 98, que son las del no domiciliado de verdad."""
+    del_catalogo = {t for t, nombre in catalogos.TIPOS_CP.items() if "no domiciliado" in nombre.lower()}
+    assert del_catalogo == catalogos.DEL_REGISTRO_DE_NO_DOMICILIADOS == {"91", "97", "98"}
+    assert "especial" in catalogos.TIPOS_CP["87"].lower() and "especial" in catalogos.TIPOS_CP["88"].lower()
+    assert "97" in catalogos.NOTAS_CREDITO and "98" in catalogos.NOTAS_DEBITO
+    # Y los dos usos del asiento: la 97 invierte como la 07 y las dos llevan su referencia, como la 07 y la 08.
+    assert "97" in catalogos.TIPOS_INVIERTEN and {"97", "98"} <= set(catalogos.TIPOS_NOTA)

@@ -681,7 +681,7 @@ seguir remitiendo a sus secciones.
 | Sales tax, nexo o certificados de exención | No hay caso peruano |
 | Saber si un mes está en plazo, y los plazos de conservación | **Necesita el hoy**, y el núcleo no tiene reloj (`tests/test_frontera.py`). Si queda tiempo o hay mora lo calcula quien tiene la fecha |
 | El calendario de vencimientos como tal | **Acotado el 7-oct-2026**: un calendario no es un reloj —dado un periodo y un dígito de RUC devuelve siempre la misma fecha—, así que entró en la 6.1.0 como datos, con los dos anexos de la RS 000281-2022. Lo descartado sigue siendo la pregunta de arriba |
-| Asentar el tipo 91 como costo, a imitación del *use tax* | En el Perú es crédito con requisitos |
+| Asentar el tipo 91 como costo, a imitación del *use tax* | En el Perú es crédito con requisitos. **Lo descartado es asentar su IGV como costo**: desde la 15.3.0 el 91 entra al asiento como una compra común —gasto contra proveedor, sin ninguna línea de IGV—, porque el documento del exterior no lo lleva y el crédito vive en el 1662, que es otro comprobante |
 | **Convertir** monedas dentro de un resumen | Sería una cifra nueva sin caso. Lo descartado es convertir, **no** informar cada moneda por su lado, que es lo que `resumen` hace desde la 3.4.0: sus totales son un mapa por moneda y ninguna clave suma dos |
 | Numscript o cualquier lenguaje de reglas contables (Formance) | Las reglas viven en código, con su fuente al lado (`CONTRIBUTING.md`) |
 | Importes en enteros de la unidad mínima (TigerBeetle) | El texto exacto con `Decimal` ya lo resuelve y no pierde la moneda de vista |

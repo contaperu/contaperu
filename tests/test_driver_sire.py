@@ -209,6 +209,25 @@ def test_el_recibo_por_honorarios_no_va_al_registro_de_sunat():
     assert exc.comprobantes == 3 and exc.resumen["fuera_del_destino"] == 0
 
 
+def test_el_no_domiciliado_va_en_su_registro_y_no_en_este():
+    """El 91 y sus notas se anotan en el registro de compras de no domiciliados (080500), y este driver escribe el
+    080400: una fila de otro registro aquí la rechazaría SUNAT o la contaría dos veces. Entraron a la tabla cuando se
+    empezaron a leer (15.3.0), y desde entonces el TXT las deja fuera y lo dice, como al recibo por honorarios."""
+    libro = cargar_golden("compras_202601.json")[0]
+    comun = dict(fecha_emision="2026-01-10", contraparte_tipo_doc="0", contraparte_doc="ABCDE1234F",
+                 contraparte_nombre="PROVEEDOR DEL EXTERIOR", moneda="USD", tipo_cambio="3.750", valor_no_gravado="100",
+                 total="100")
+    cs = [Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-01-10", contraparte_tipo_doc="6",
+                      contraparte_doc="20604444447", contraparte_nombre="PROVEEDOR", base_gravada="100", igv="18",
+                      total="118"),
+          Comprobante(tipo_cp="91", serie="EXT1", numero="7", **comun),
+          Comprobante(tipo_cp="97", serie="EXT1", numero="8", **comun),
+          Comprobante(tipo_cp="98", serie="EXT1", numero="9", **comun)]
+    exp = g.generar(libro, cs, "sire")
+    assert exp.comprobantes == 1 and exp.resumen["fuera_del_destino"] == 3
+    assert b"EXT1" not in exp.texto and exp.texto.count(b"\r\n") == 1
+
+
 def test_una_nota_que_cambiaria_de_signo_no_se_escribe_y_dice_cual():
     """Hasta la 0.10 esto era un `assert`: con `python -O` el TXT habría salido con el campo 15 en positivo."""
     from contaperu.drivers import sire

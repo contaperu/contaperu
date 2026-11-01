@@ -57,6 +57,13 @@
         "type": "string"
       }
     },
+    "del_registro_de_no_domiciliados": {
+      "type": "array",
+      "description": "Los tipos de comprobante que se anotan en el registro de compras de no domiciliados (080500) y no en el TXT del SIRE que escribe el motor (080400): el 91 y sus notas, el 97 y el 98. Sí van al asiento. Desde la 15.3.0; no es obligatorio para que una respuesta de antes siga siendo válida.",
+      "items": {
+        "type": "string"
+      }
+    },
     "detracciones": {
       "type": "object",
       "description": "La tabla de detracciones del motor, con su fuente: cada código SUNAT con su nombre y su tasa. El ERP que integra el motor la puede sobreescribir en su configuración (detraccion_tasas, detraccion_nombres).",

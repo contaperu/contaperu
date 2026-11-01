@@ -12,8 +12,10 @@ from decimal import Decimal
 import pytest
 
 from contaperu import catalogos
+from contaperu.comprobantes import sire_txt as lector
 from contaperu.lectores import archivos, sire_txt
 from contaperu.modelo import Libro
+from contaperu.tributos import validar
 
 CABECERA = ("Ruc|Razon Social|Periodo|CAR SUNAT|Fecha de emisión|Fecha Vcto/Pago|Tipo CP/Doc.|Serie del CDP|"
             "Nro CP o Doc. Nro Inicial (Rango)|Nro Final (Rango)|Tipo Doc Identidad|Nro Doc Identidad|"
@@ -361,42 +363,102 @@ def test_lo_declarado_de_ventas_llega_sin_cabecera_y_se_lee_igual():
 
 def test_dentro_del_zip_de_lo_declarado_se_lee_el_registro_aunque_vaya_segundo():
     """El ZIP trae dos TXT y el lector tomaba **el primero de la lista**. En el real el registro iba primero, por suerte:
-    con el de no domiciliados delante, `parsear` habría leído ese y fallado en la primera fila."""
+    con el de no domiciliados delante, `parsear` habría leído ese y fallado en la primera fila. Y desde la 15.3.0 el de
+    no domiciliados también se lee: el ZIP entero da las compras de los dos registros."""
     registro = CABECERA_DEL_REGISTRO + "\n" + "|".join(_compra() + [""] * 39)
     no_dom = CABECERA_NO_DOMICILIADOS + "\n" + NO_DOMICILIADO
     zip_ = _declarado((DE_NO_DOMICILIADOS, no_dom), (REGISTRO, registro))
     assert sire_txt.es_sire(zip_)
-    assert [c.numero for c in sire_txt.parsear(zip_, COMPRAS)] == ["501"]
+    assert [(c.tipo_cp, c.numero) for c in sire_txt.parsear(zip_, COMPRAS)] == [("01", "501"), ("91", "7")]
 
 
-def test_el_registro_de_no_domiciliados_se_dice_en_vez_de_callarse():
-    """El de no domiciliados tiene su propio formato —el periodo delante, país, renta y retención detrás— y el motor
-    todavía no lo lee. Hasta la 15.1 caía con las hojas de estilo, como un acompañante, y sus filas se perdían sin un
-    error: en el mes real eran diez. Ahora va a `no_leidos`, con sus filas contadas, **y no a errores**: el registro de
-    al lado se leyó bien, y un integrador que pare con cualquier error dejaría de enseñar lo declarado entero."""
+# ── Lo que se lee del registro de NO DOMICILIADOS (15.3.0) ─────────────────────────────────────────────────────────
+# Los rótulos de SUNAT para cada campo que el lector lee: el ancla del mapa, porque este registro no tiene escritor con
+# el que confrontarlo (`datos/sunat/sire_campos.json` no lo lleva, y el lector dice por qué).
+ROTULOS_LEIDOS = {
+    "fecha_emision": "Fecha de emisión", "tipo_cp": "Tipo CP/Doc.", "serie": "Serie del CP",
+    "numero": "Nro CP o Doc.", "otros": "Otros", "total": "Total CP", "moneda": "Moneda",
+    "tipo_cambio": "Tipo de Cambio", "contraparte_nombre": "Apellidos Nombres/ Razón Social del sujeto No Dom.",
+    "contraparte_doc": "ID sujeto No Dom.",
+}
+
+
+def test_cada_campo_del_mapa_es_la_columna_que_dice_sunat():
+    """El mapa del lector contra la cabecera que SUNAT pone en lo declarado. Un índice corrido leería el país como
+    moneda o el domicilio como proveedor, y nada más lo diría: las dos columnas son texto."""
+    rotulos = [r.strip() for r in CABECERA_NO_DOMICILIADOS.split("|")]
+    assert {campo: rotulos[i] for campo, i in lector.POS_NO_DOMICILIADO.items()} == ROTULOS_LEIDOS
+    assert rotulos[lector.VALOR_DE_ADQUISICIONES] == "Val. Adquisiciones"
+    assert rotulos.index("CLU1") == lector.CAMPOS_NO_DOMICILIADO       # los 35 del anexo, y detrás las libres
+
+
+def test_un_no_domiciliado_entra_con_lo_basico_y_la_fila_entera_viaja():
+    """Lo que el comprobante tiene donde ponerlo (John, 01-nov-2026: «lo básico ahora»), y el resto —el país, el IGV
+    de utilización, la renta— en la fila cruda. La identificación del proveedor va **con sus letras** y con el tipo
+    «0»: en el mes real había un código interno, un PAN de la India y un RUC peruano, y ninguno es un RUC del
+    proveedor. Y valida sin un error: cuadra con su valor no gravado y no se le pide un RUC."""
+    campos = CAMPOS_NO_DOMICILIADO[:19] + ["ABCDE1234F"] + CAMPOS_NO_DOMICILIADO[20:]
+    contenido = (CABECERA_NO_DOMICILIADOS + "\n" + "|".join(campos + [""] * 10)).encode("utf-8")
+    [c] = sire_txt.parsear(contenido, COMPRAS)
+    assert (c.tipo_cp, c.serie, c.numero, c.fecha_emision.isoformat()) == ("91", "E001", "7", "2026-08-12")
+    assert (c.contraparte_tipo_doc, c.contraparte_doc, c.contraparte_nombre) == ("0", "ABCDE1234F",
+                                                                                 "PROVEEDOR DEL EXTERIOR")
+    assert (c.moneda, c.tipo_cambio) == ("USD", Decimal("3.750"))
+    assert c.valor_no_gravado == Decimal("100.00") and c.total == Decimal("100.00") and c.igv == 0
+    assert c.origen == "sire" and c.datos_originales["sire"][16] == "9249"      # el país, en la fila cruda
+    validar.revisar([c], COMPRAS)
+    assert [o.codigo for o in c.observaciones if o.nivel == "error"] == []
+
+
+def test_el_que_se_presenta_se_lee_por_su_forma_aunque_su_nombre_no_lo_diga():
+    """El que se PRESENTA no trae cabecera —diez filas de 36 campos y palote, en el caso real— y se reconoce por la
+    forma de su fila: el periodo, el CAR y la fecha. Con su nombre de libro electrónico o sin él. Y la exportación
+    renombrada, por su cabecera."""
+    fila_presentada = "|".join(CAMPOS_NO_DOMICILIADO + [""]) + "|"
+    assert len(fila_presentada.split("|")) == 37          # 36 campos y el palote, como el real
+    presentado = "\r\n".join([fila_presentada] * 3).encode("utf-8")
+    for nombre in (DE_NO_DOMICILIADOS, "no-domiciliados.txt"):
+        res = archivos.convertir_xml(archivos.expandir(nombre, presentado), COMPRAS)
+        assert [c.tipo_cp for c in res.comprobantes] == ["91"] * 3 and res.no_leidos == [] and res.errores == []
+    renombrado = (CABECERA_NO_DOMICILIADOS + "\n" + NO_DOMICILIADO).encode("utf-8")
+    con_cabecera = archivos.convertir_xml(archivos.expandir("no-domiciliados.txt", renombrado), COMPRAS)
+    assert len(con_cabecera.comprobantes) == 1 and con_cabecera.no_leidos == [] and con_cabecera.ignorados == []
+
+
+def test_el_registro_de_no_domiciliados_se_lee_junto_al_otro():
+    """Lo que vino a cerrar la 15.3.0: hasta la 15.2 este registro iba a `no_leidos` y en el mes real se quedaban diez
+    compras fuera de la tabla. Ahora el ZIP de lo declarado da las tres, y `no_leidos` queda vacío."""
     registro = CABECERA_DEL_REGISTRO + "\n" + "|".join(_compra() + [""] * 39)
     otro = CAMPOS_NO_DOMICILIADO[:5] + ["8"] + CAMPOS_NO_DOMICILIADO[6:]
     no_dom = CABECERA_NO_DOMICILIADOS + "\n" + NO_DOMICILIADO + "\n" + "|".join(otro + [""] * 10)
     lote = archivos.expandir("declarado.zip", _declarado((REGISTRO, registro), (DE_NO_DOMICILIADOS, no_dom)))
     res = archivos.convertir_xml(lote, COMPRAS)
-    assert len(res.comprobantes) == 1 and res.errores == [] and res.ignorados == []
-    assert res.no_leidos == [{"archivo": f"declarado.zip/{DE_NO_DOMICILIADOS}", "codigo": "080500", "filas": 2,
-                              "motivo": "Es el registro de compras de no domiciliados del SIRE: tiene su propio "
-                                        "formato y este lector todavía no lo lee"}]
+    assert [(c.tipo_cp, c.numero) for c in res.comprobantes] == [("01", "501"), ("91", "7"), ("91", "8")]
+    assert res.no_leidos == [] and res.errores == [] and res.ignorados == []
+    assert res.comprobantes[1].archivo_nombre == f"declarado.zip/{DE_NO_DOMICILIADOS}"
 
 
-def test_el_de_no_domiciliados_se_reconoce_por_su_nombre_o_por_su_cabecera():
-    """El que se PRESENTA no trae cabecera —diez filas de 36 campos y palote, en el caso real—, así que lo delata el
-    código de su nombre. Y la exportación renombrada lo delata su cabecera, que empieza por el periodo."""
-    fila_presentada = "|".join(CAMPOS_NO_DOMICILIADO + [""]) + "|"
-    assert len(fila_presentada.split("|")) == 37          # 36 campos y el palote, como el real
-    presentado = "\r\n".join([fila_presentada] * 3).encode("utf-8")
-    sin_cabecera = archivos.convertir_xml(archivos.expandir(DE_NO_DOMICILIADOS, presentado), COMPRAS)
-    assert [(n["codigo"], n["filas"]) for n in sin_cabecera.no_leidos] == [("080500", 3)]
-    renombrado = (CABECERA_NO_DOMICILIADOS + "\n" + NO_DOMICILIADO).encode("utf-8")
-    con_cabecera = archivos.convertir_xml(archivos.expandir("no-domiciliados.txt", renombrado), COMPRAS)
-    assert [(n["codigo"], n["filas"]) for n in con_cabecera.no_leidos] == [("080500", 1)]
-    assert con_cabecera.ignorados == [] and con_cabecera.errores == []
+@pytest.mark.parametrize("libro,nombre,motivo", [
+    (VENTAS, DE_NO_DOMICILIADOS, "va en el libro de compras"),
+    (COMPRAS, "LE20602222220202608000805000011112.txt", "es del RUC 20602222220"),
+    (Libro(ruc="20601111111", razon_social="MI EMPRESA SAC", periodo="202609", tipo="compra"), DE_NO_DOMICILIADOS,
+     "es del periodo 202608"),
+])
+def test_un_registro_de_no_domiciliados_ajeno_falla_con_su_motivo(libro, nombre, motivo):
+    """Las mismas negativas que el otro registro: otro RUC —que aquí va en el NOMBRE, porque la fila no lo trae—, otro
+    periodo, o el libro de ventas. Un error con su motivo, no comprobantes de otro proceso."""
+    res = archivos.convertir_xml(archivos.expandir(nombre, NO_DOMICILIADO.encode("utf-8")), libro)
+    assert res.comprobantes == [] and len(res.errores) == 1 and motivo in res.errores[0]["motivo"]
+
+
+def test_uno_que_dice_ser_de_no_domiciliados_y_no_tiene_su_forma_se_dice():
+    """Si SUNAT le cambia la forma, su nombre lo sigue delatando: va a `no_leidos` como cualquier registro cambiado,
+    con sus filas contadas, en vez de una tabla vacía o de leerse con un mapa que ya no es el suyo."""
+    res = archivos.convertir_xml(archivos.expandir(DE_NO_DOMICILIADOS, b"202608|otra|forma\n202608|otra|forma"),
+                                 COMPRAS)
+    assert res.comprobantes == [] and res.errores == []
+    assert [(n["codigo"], n["filas"]) for n in res.no_leidos] == [("080500", 2)]
+    assert "puede que SUNAT la haya cambiado" in res.no_leidos[0]["motivo"]
 
 
 def test_un_registro_del_sire_con_una_forma_que_no_se_conoce_no_da_una_tabla_vacia():

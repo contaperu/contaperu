@@ -1,8 +1,10 @@
 """Los catálogos de un comprobante —tipos, documentos de identidad, monedas, medios de pago, motivos de
 nota— y las reglas del motor sobre esos códigos.
 
-Van juntos a propósito: una regla como «el 87 es la nota de crédito del no domiciliado» no se entiende sin el
-catálogo del que sale el 87, y separarlas obligaría a ir a dos sitios para leer una sola cosa.
+Van juntos a propósito: una regla como «el 97 es la nota de crédito del no domiciliado» no se entiende sin el
+catálogo del que sale el 97, y separarlas obligaría a ir a dos sitios para leer una sola cosa. (Hasta la 15.2 este
+ejemplo decía «el 87», y era el error que la 15.3.0 corrigió: el propio catálogo llama al 87 «nota de crédito
+especial».)
 """
 from __future__ import annotations
 
@@ -15,11 +17,17 @@ EXIGEN_VENCIMIENTO = frozenset({"14", "46", "50", "51", "52", "53", "54"})
 # Comprobantes en los que el ICBPER va con 0.00 aunque no aplique (nunca vacío).
 # Notas: llevan documento modificado obligatorio. Se separan en crédito y débito porque su catálogo de motivos es
 # distinto —el 09 y el 10— y porque el «01» significa cosas opuestas en cada uno; `NOTAS` se DERIVA de los dos, así
-# que aquí no se pueden desacordar. Los mismos cuatro códigos viven en `modelo.NOTAS_CREDITO`/`NOTAS_DEBITO`: los dos
+# que aquí no se pueden desacordar. Los mismos seis códigos viven en `modelo.NOTAS_CREDITO`/`NOTAS_DEBITO`: los dos
 # módulos son hojas y no se importan entre sí, así que lo que impide que se separen es un test
 # (`test_catalogos.py::test_las_dos_listas_de_notas_dicen_lo_mismo`), no la buena voluntad.
-NOTAS_CREDITO = frozenset({"07", "87"})     # 07 domiciliado · 87 no domiciliado
-NOTAS_DEBITO = frozenset({"08", "88"})      # las hermanas que suman
+#
+# **Tres de cada, y la 97 es la del no domiciliado** (15.3.0). Hasta la 15.2 estas listas decían «07 domiciliado · 87
+# no domiciliado», y el catálogo de este mismo motor dice otra cosa: la 87 es la nota de crédito ESPECIAL y la 97, la
+# del no domiciliado (Tabla 10; el 88 y el 98, sus hermanas de débito). La 97 y la 98 no eran notas para el motor —no
+# restaban en el resumen ni pedían referencia— y nadie lo notó porque ninguna había llegado; llegaron con el registro
+# de no domiciliados que se empezó a leer en esta misma versión. La 87 y la 88 siguen aquí: especiales, pero notas.
+NOTAS_CREDITO = frozenset({"07", "87", "97"})     # 07 · 87 especial · 97 del no domiciliado
+NOTAS_DEBITO = frozenset({"08", "88", "98"})      # las hermanas que suman
 NOTAS = NOTAS_CREDITO | NOTAS_DEBITO
 # Comprobantes aduaneros: llevan año de la DUA y código de dependencia.
 ADUANEROS = frozenset({"50", "51", "52", "53", "54"})
@@ -30,10 +38,20 @@ SIN_CONTRAPARTE_OK = frozenset({"03", "12", "13", "16", "36", "00"})
 # al asiento contable (Excel de CONCAR, sub-diario 15): son gasto de la empresa.
 # Se filtran en `generar()` según lo que declare cada driver (`EXCLUYE_TIPOS`).
 FUERA_DEL_REGISTRO_SUNAT = frozenset({"02"})
+# Los comprobantes del registro de compras de NO DOMICILIADOS (Anexo 9 de la RS 040-2022, §8.5): el comprobante del
+# exterior y sus dos notas. Se anotan en SU registro, el 080500, y por eso el driver `sire` —que escribe el 080400— los
+# deja fuera: un 91 en ese archivo sería una fila de otro registro. SÍ entran al asiento contable, como cualquier
+# compra (John, 01-nov-2026: «como compra común, con mi sigla»). Desde la 15.3.0, que es cuando se empezaron a leer.
+DEL_REGISTRO_DE_NO_DOMICILIADOS = frozenset({"91", "97", "98"})
 
 # Tipos con un tratamiento propio en el asiento: el recibo por honorarios (su cuenta y su retención de 4ta), la boleta
-# (su registro), la nota de crédito (invierte el asiento) y las notas (llevan el documento que modifican).
-TIPO_HONORARIOS, TIPO_BOLETA, TIPOS_INVIERTEN, TIPOS_NOTA = "02", "03", ("07",), ("07", "08")
+# (su registro), la nota de crédito (invierte el asiento) y las notas (llevan el documento que modifican). La 97 y la
+# 98, las del no domiciliado, se asientan como la 07 y la 08 (15.3.0).
+#
+# ⚠️ **La 87 y la 88 NO están aquí, y no se tocaron a ciegas.** Restan en el resumen (son `NOTAS_CREDITO`) pero no
+# invierten el asiento ni llevan su referencia: una 87 se asienta hoy como una compra. Es una pregunta abierta para
+# John desde el 01-nov-2026, porque «especial» puede querer decir justo eso, y aquí no se decide por analogía.
+TIPO_HONORARIOS, TIPO_BOLETA, TIPOS_INVIERTEN, TIPOS_NOTA = "02", "03", ("07", "97"), ("07", "08", "97", "98")
 
 # Tipo de documento de identidad (Anexo 1 de la RS 112-2021).
 TIPOS_DOC_IDENTIDAD: dict[str, str] = dict(CATALOGOS["tipos_documento_identidad"]["codigos"])

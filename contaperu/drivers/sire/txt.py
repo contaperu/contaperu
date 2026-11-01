@@ -34,7 +34,10 @@ NOMBRE = "sire"
 CANAL = "sunat"
 # Lo que no se anota en el registro que se declara a SUNAT (hoy: el recibo por
 # honorarios). El Excel de CONCAR no declara esto, así que sí los lleva.
-EXCLUYE_TIPOS = cat.FUERA_DEL_REGISTRO_SUNAT
+#
+# Y lo que se anota en OTRO registro (15.3.0): el comprobante del no domiciliado y sus notas van en el
+# 080500, y este driver escribe el 080400 y el 140400. Un 91 aquí sería una fila de otro registro.
+EXCLUYE_TIPOS = cat.FUERA_DEL_REGISTRO_SUNAT | cat.DEL_REGISTRO_DE_NO_DOMICILIADOS
 
 # `palote_final=True` y `rvie_vacios=0` salen del archivo REAL que SUNAT aceptó (RVIE de julio
 # de un contribuyente real, contrastado el 25-ago-2026): cada línea lleva 33 campos y termina en '|'. Antes

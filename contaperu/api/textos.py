@@ -152,7 +152,7 @@ PARA_HERRAMIENTA: dict[str, str] = {
     Lo que un contador pregunta antes de dar un mes por bueno. **No pide destino**: es del libro, no de un
     archivo — si lo que quieres es qué saldría hacia un sistema contable concreto, eso es `diagnosticar`.
 
-    Dos avisos para decírselos a quien pregunte: **las notas de crédito restan** (los tipos 07 y 87), así
+    Dos avisos para decírselos a quien pregunte: **las notas de crédito restan** (los tipos 07, 87 y 97), así
     que el total no cuadra sumando a mano lo que se ve; y **soles y dólares no se suman entre sí**, porque
     sumar importes nominales de dos monedas no da ningún total. Lo excluido y lo marcado duplicado se
     cuentan en `recuento` y no suman.

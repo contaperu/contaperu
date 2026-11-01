@@ -3,8 +3,8 @@
 Un caso por cada cosa que se puede equivocar **en silencio**, que en un resumen es casi todo: una cifra
 mal sumada cuadra consigo misma y nadie la audita. El caso que trajo estas dos funciones al motor es el
 mejor ejemplo: la primera aplicación que las escribió se quedó con el `07` donde el motor dice
-`("07", "87")`, así que una nota de crédito de no domiciliado le sumaba en vez de restarle, y su total
-cuadraba con su propia tabla.
+`("07", "87")`, así que una nota de crédito `87` le sumaba en vez de restarle, y su total cuadraba con su
+propia tabla. (El motor la llamaba «de no domiciliado»; la del no domiciliado es la `97`, desde la 15.3.0.)
 """
 from __future__ import annotations
 
@@ -31,18 +31,20 @@ def doc(*comprobantes: dict, **libro) -> dict:
 
 # ── Lo que suma y lo que no ──────────────────────────────────────────────────────────────────
 
-def test_una_nota_de_credito_resta_y_la_de_no_domiciliado_tambien():
-    """**El caso que trajo esta función al motor.** El `87` es una nota de crédito de no domiciliado, y
-    quien copia la regla se queda con el `07` porque es la que ve todos los días."""
-    for tipo_cp in ("07", "87"):
+def test_una_nota_de_credito_resta_y_la_especial_y_la_de_no_domiciliado_tambien():
+    """**El caso que trajo esta función al motor.** El `87` es la nota de crédito especial y el `97` la del no
+    domiciliado, y quien copia la regla se queda con el `07` porque es la que ve todos los días. El `97` entró en
+    la 15.3.0: hasta entonces el motor llamaba «de no domiciliado» al `87` y al `97` lo sumaba."""
+    for tipo_cp in ("07", "87", "97"):
         r = resumen.del_libro(cs(FACTURA, dict(FACTURA, numero="872", tipo_cp=tipo_cp,
                                                base_gravada="100.00", igv="18.00", total="118.00")))
         assert r["totales"]["PEN"] == {"base_gravada": "900.00", "igv": "162.00",
                                        "total": "1062.00", "sumados": 2}, tipo_cp
     # Y una nota de DÉBITO suma, que es lo que la hace la hermana y no la misma cosa.
-    r = resumen.del_libro(cs(FACTURA, dict(FACTURA, numero="873", tipo_cp="08",
-                                           base_gravada="100.00", igv="18.00", total="118.00")))
-    assert r["totales"]["PEN"]["total"] == "1298.00"
+    for tipo_cp in ("08", "88", "98"):
+        r = resumen.del_libro(cs(FACTURA, dict(FACTURA, numero="873", tipo_cp=tipo_cp,
+                                               base_gravada="100.00", igv="18.00", total="118.00")))
+        assert r["totales"]["PEN"]["total"] == "1298.00", tipo_cp
 
 
 def test_dos_monedas_no_se_suman_en_ninguna_clave():

@@ -613,7 +613,7 @@
     "readOnlyHint": true,
     "title": null
    },
-   "descripcion": "Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.\n\n    Lo que un contador pregunta antes de dar un mes por bueno. **No pide destino**: es del libro, no de un\n    archivo — si lo que quieres es qué saldría hacia un sistema contable concreto, eso es `diagnosticar`.\n\n    Dos avisos para decírselos a quien pregunte: **las notas de crédito restan** (los tipos 07 y 87), así\n    que el total no cuadra sumando a mano lo que se ve; y **soles y dólares no se suman entre sí**, porque\n    sumar importes nominales de dos monedas no da ningún total. Lo excluido y lo marcado duplicado se\n    cuentan en `recuento` y no suman.\n\n    Con `agrupar_por=\"contraparte\"`, los mismos totales por proveedor o cliente, de más a menos.\n    ",
+   "descripcion": "Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.\n\n    Lo que un contador pregunta antes de dar un mes por bueno. **No pide destino**: es del libro, no de un\n    archivo — si lo que quieres es qué saldría hacia un sistema contable concreto, eso es `diagnosticar`.\n\n    Dos avisos para decírselos a quien pregunte: **las notas de crédito restan** (los tipos 07, 87 y 97), así\n    que el total no cuadra sumando a mano lo que se ve; y **soles y dólares no se suman entre sí**, porque\n    sumar importes nominales de dos monedas no da ningún total. Lo excluido y lo marcado duplicado se\n    cuentan en `recuento` y no suman.\n\n    Con `agrupar_por=\"contraparte\"`, los mismos totales por proveedor o cliente, de más a menos.\n    ",
    "entrada": {
     "properties": {
      "agrupar_por": {

@@ -4,7 +4,8 @@ El motor sabía armar el asiento de un mes y decir qué le faltaba, y **no sabí
 único que sumaba dinero era el `resumen` de una exportación, así que para saber cuánto compró un RUC en
 agosto había que generarle un archivo. Quien integraba el motor lo escribía por su cuenta, y ahí es donde
 se ve por qué no era suyo: la primera aplicación que lo hizo se quedó con el `07` donde el motor dice
-`("07", "87")`, así que una nota de crédito de no domiciliado **le sumaba en vez de restarle**.
+`("07", "87")`, así que una nota de crédito `87` **le sumaba en vez de restarle**. (El motor la llamaba «de no
+domiciliado» y era la especial: la del no domiciliado es la `97`, que suma a la lista desde la 15.3.0.)
 
 **Está aquí desde la 12.11, y antes estaba en `contable/`.** El criterio de ingreso de aquel paquete es «la
 contabilidad que no depende del país ni del régimen» —Debe igual a Haber no la discute ninguna

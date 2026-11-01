@@ -639,7 +639,11 @@ def catalogos_sunat() -> dict:
     y no se gobiernan.
 
     Ojo con dos claves que se parecen y no son lo mismo: `notas` son los TIPOS DE COMPROBANTE que son notas (07, 08,
-    87 y 88), y los dos `motivos_nota_*` dicen POR QUÉ se emitió una (los Catálogos 09 y 10 del Anexo N.° 8)."""
+    87, 88, 97 y 98), y los dos `motivos_nota_*` dicen POR QUÉ se emitió una (los Catálogos 09 y 10 del Anexo N.° 8).
+
+    Y dos que dicen qué NO va en el TXT del SIRE, por dos motivos distintos: `fuera_del_registro_sunat` no se anota en
+    ningún registro que se declare (el recibo por honorarios) y `del_registro_de_no_domiciliados` se anota en OTRO, el
+    080500 (15.3.0). Los dos van al asiento."""
     return {
         "tipos_comprobante": catalogos.TIPOS_CP,
         "tipos_documento_identidad": catalogos.TIPOS_DOC_IDENTIDAD,
@@ -652,6 +656,7 @@ def catalogos_sunat() -> dict:
         "clases_igv_compra": catalogos.CLASES_IGV_COMPRA,
         "clases_igv_venta": catalogos.CLASES_IGV_VENTA,
         "fuera_del_registro_sunat": sorted(catalogos.FUERA_DEL_REGISTRO_SUNAT),
+        "del_registro_de_no_domiciliados": sorted(catalogos.DEL_REGISTRO_DE_NO_DOMICILIADOS),
         "detracciones": detracciones.tabla_del_motor(),
         "fuentes": dict(catalogos.FUENTES),
     }

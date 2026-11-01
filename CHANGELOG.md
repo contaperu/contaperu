@@ -4,6 +4,51 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.3.0] — 2026-11-01
+
+### Se lee el registro de compras de no domiciliados
+
+El ZIP de lo declarado de compras trae dos TXT, y de la 15.1 a la 15.2 el segundo —el registro de no domiciliados,
+080500— se reconocía y se decía en `no_leidos` sin leerse: en el mes real con el que se midió eran diez compras fuera
+de la tabla. **Ahora `comprobantes.sire_txt.parsear` lo lee**, con su mapa (`POS_NO_DOMICILIADO`, Anexo 9 de la RS
+040-2022, §8.5), suelto o dentro del ZIP junto al otro registro, y en sus dos formas: la exportación de lo declarado
+(cabecera, 35 columnas y CLU1 a CLU10) y la que se presenta (sin cabecera, 36 campos y palote), que se reconoce por
+la forma de su fila —el periodo, el CAR y la fecha— o por el código de su nombre.
+
+- **Se lee lo básico** (decisión de quien lo pidió): fecha, tipo, serie, número, el valor de las adquisiciones (a
+  `valor_no_gravado`, porque el documento del exterior no lleva IGV), otros, total, moneda, tipo de cambio y el
+  proveedor. **Su identificación va tal cual, con sus letras**, y con el tipo `0` del Catálogo 06: en el mes real
+  había un código interno, un PAN de la India y un RUC peruano, y el registro no trae columna de tipo.
+- **Lo demás viaja en la fila cruda** (`datos_originales["sire"]`): el país, el beneficiario, el IGV de utilización
+  del campo 14, la renta bruta y neta, la tasa, el impuesto retenido y el convenio. Darles forma es la enmienda 0007
+  (`no_domiciliado`), que sigue reservada hasta que haya un asiento que los use.
+- **Las negativas de siempre**: otro RUC (aquí va en el nombre del archivo, porque la fila no lo trae), otro periodo o
+  el libro de ventas fallan con su motivo. Y uno cuyo nombre dice 080500 sin ninguna de las dos formas va a
+  `no_leidos`, como cualquier registro que SUNAT haya cambiado.
+- **No está en `datos/sunat/sire_campos.json`**: ese mapa confronta lector y escritor, y este registro no tiene
+  escritor. Su ancla es la cabecera de SUNAT, columna a columna, en una prueba.
+
+### Fuera del TXT del SIRE, dentro del asiento
+
+- **`catalogos.DEL_REGISTRO_DE_NO_DOMICILIADOS`** (91, 97 y 98, nuevo en la superficie pública): se anotan en su
+  registro, el 080500, y el driver `sire` —que escribe el 080400— los deja fuera y los cuenta en `fuera_del_destino`,
+  como al recibo por honorarios. `catalogos_sunat` lo publica en `del_registro_de_no_domiciliados`.
+- **En el asiento, el 91 es una compra común**: el gasto contra el proveedor, sin ninguna línea de IGV, con la sigla
+  que el entorno configure en `tipos` —sin ella se planta, como cualquier tipo sin sigla—. No contradice el descarte
+  de `ARQUITECTURA.md` («asentar el 91 como costo»): lo descartado es asentar su IGV como costo, y aquí no se asienta
+  ningún IGV porque el documento no lo lleva; el crédito vive en el 1662. El par autoliquidado y la renta retenida
+  siguen siendo el hito C12.
+
+### Corregido
+
+- **La nota de crédito del no domiciliado es la 97, no la 87.** `NOTAS_CREDITO` decía «07 domiciliado · 87 no
+  domiciliado» en sus dos copias, y el catálogo de este mismo motor llama a la 87 «nota de crédito especial». Ahora
+  son `07 · 87 · 97` y `08 · 88 · 98`: la 97 resta en `resumen`, pide su referencia y tiene catálogo de motivos; en el
+  asiento invierte como la 07, y las dos llevan su documento modificado (`TIPOS_INVIERTEN`, `TIPOS_NOTA`). Hasta hoy no
+  había llegado ninguna; llegan con el registro que se empezó a leer en esta versión.
+- **La 87 y la 88 no se tocaron en el asiento**, y queda dicho en `catalogos/comprobantes.py`: restan en el resumen
+  pero no invierten ni llevan referencia. Es una pregunta abierta, porque «especial» puede querer decir justo eso.
+
 ## [15.2.1] — 2026-11-01
 
 ### Corregido

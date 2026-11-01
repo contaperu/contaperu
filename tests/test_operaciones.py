@@ -334,8 +334,11 @@ def test_un_pdf_o_una_foto_quedan_pendientes_de_leer(bytes_):
 
 def test_un_libro_de_sunat_que_no_se_sabe_leer_llega_hasta_la_lectura_de_la_api():
     """`no_leidos` no se queda en el lector: quien integra por la API recibe el mismo parte que la línea de comandos.
-    Si se quedara abajo, el silencio que la 15.1 vino a cerrar seguiría abierto en la puerta por la que entra un ERP."""
-    no_domiciliados = b"Periodo|CAR SUNAT|Fecha de emisi\xc3\xb3n\n202609||12/09/2026\n202609||13/09/2026"
+    Si se quedara abajo, el silencio que la 15.1 vino a cerrar seguiría abierto en la puerta por la que entra un ERP.
+
+    El registro de no domiciliados se lee desde la 15.3.0, así que el ejemplo es uno que su NOMBRE dice 080500 y cuyo
+    contenido no tiene ninguna de sus dos formas: lo que pasaría el día que SUNAT se la cambie."""
+    no_domiciliados = b"202609|otra|forma\n202609|otra|forma"
     documento = api.leer_archivos([("LE20601111111202609000805000011112.txt", no_domiciliados)],
                                   dict(LIBRO, tipo="compra"))
     assert [(n["codigo"], n["filas"]) for n in documento["_lectura"]["no_leidos"]] == [("080500", 2)]

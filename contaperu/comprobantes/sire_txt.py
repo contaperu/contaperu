@@ -20,8 +20,13 @@ Entran los dos formatos, porque comparten el orden de los campos informados:
 baja con `registro_pedir` (`sunat/`), llega en el formato de la exportación: en compras, cabecera y las 41 columnas
 de siempre más las 39 de libre utilización (CLU1 a CLU39), que se ignoran como en la propuesta. Un mes real de 1 326
 comprobantes se leyó entero, sin un error. Lo que sí trae distinto es un **segundo TXT en el mismo ZIP**, el registro
-de no domiciliados, y de ahí dos cosas de abajo: dentro de un ZIP se busca el TXT que tiene la forma del SIRE, y no el
-primero de la lista; y ese otro registro se reconoce y se dice (`libro_sin_leer`), en vez de ignorarse en silencio.
+de no domiciliados, y de ahí que dentro de un ZIP se busque el TXT que tiene la forma del SIRE, y no el primero de la
+lista.
+
+**Y ese segundo TXT también se lee** (15.3.0). Es el registro de compras de no domiciliados (Anexo 9 de la RS
+040-2022, §8.5): tiene su propio formato —el periodo delante, ni RUC del proveedor ni columnas de IGV, y detrás el
+país, la renta y la retención— y entra por `parsear` igual que el otro, con su mapa (`POS_NO_DOMICILIADO`). De la
+15.1 a la 15.2 se reconocía y se decía en `no_leidos`: diez compras del mes real se quedaban fuera de la tabla.
 **En ventas llega sin cabecera**: 38 campos y palote, en el orden de la exportación (15.2.1, un mes real de 14
 comprobantes). Es una tercera forma de las mismas columnas, y entra por la misma regla que el reemplazo: una fila que
 empieza por el RUC y el periodo.
@@ -47,6 +52,7 @@ from __future__ import annotations
 
 import io
 import posixpath
+import re
 import zipfile
 from decimal import Decimal
 
@@ -115,15 +121,46 @@ FECHAS = {"fecha_emision", "fecha_vencimiento", "ref_fecha"}
 MINIMO_CAMPOS = 30
 
 # Los libros electrónicos que SUNAT entrega o recibe llevan el código del libro EN EL NOMBRE (`LE` + RUC + periodo +
-# … + código de seis dígitos: `drivers/kit/nombres.py`). Los del SIRE no son los del PLE. Este lector lee los dos
-# primeros; el tercero es el registro de compras de **no domiciliados**, que viaja con lo declarado en el mismo ZIP y
-# tiene su propio formato —ni RUC del proveedor ni las columnas del IGV: país, renta bruta, tasa y retención—. El
-# código se comprobó en dos archivos reales del 01-nov-2026: el que bajó `registro_pedir` y el que se presentó.
+# … + código de seis dígitos: `drivers/kit/nombres.py`). Los del SIRE no son los del PLE. Este lector lee los tres: el
+# tercero es el registro de compras de **no domiciliados**, que viaja con lo declarado en el mismo ZIP y tiene su
+# propio formato —ni RUC del proveedor ni las columnas del IGV: país, renta bruta, tasa y retención—. El código se
+# comprobó en dos archivos reales del 01-nov-2026: el que bajó `registro_pedir` y el que se presentó.
 CODIGOS_DEL_SIRE = {"080400": "el registro de compras", "140400": "el registro de ventas",
                     "080500": "el registro de compras de no domiciliados"}
 NO_DOMICILIADOS = "080500"
 # Su exportación empieza así, y no por «RUC»: el periodo va primero porque el titular está en el nombre del archivo.
 CABECERA_NO_DOMICILIADOS = ("periodo", "car sunat")
+
+# ── El registro de compras de NO DOMICILIADOS (15.3.0) ──────────────────────────────────────────────────────────────
+# Anexo 9 de la RS 040-2022, «8.5 Registro de Compras – operaciones con sujetos no domiciliados»: 35 campos, en este
+# orden en las dos formas que se han visto —la exportación de lo declarado, con cabecera y diez columnas libres
+# (CLU1 a CLU10) detrás, y la que se presenta, sin cabecera, con un campo 36 vacío y palote—. Índices 0-based, o sea
+# el número de campo del anexo menos uno, como los de arriba.
+#
+# Se lee **lo que el comprobante tiene donde ponerlo** (John, 01-nov-2026: «lo básico ahora»): fecha, tipo, serie,
+# número, importes, moneda y el proveedor. Lo demás —el CAR, el documento que sustenta el crédito (el 1662), el IGV
+# de utilización del campo 14, el país, el beneficiario, la renta bruta y neta, la tasa, el impuesto retenido, el
+# convenio y la modalidad— **no se pierde**: viaja en `datos_originales["sire"]`, la fila cruda, como en el otro
+# registro. Darle forma es la enmienda 0007 (`no_domiciliado`), que sigue reservada hasta que haya un asiento que lo
+# use: el del IGV de utilización y la renta retenida (HOJA-DE-RUTA, C12).
+#
+# **No está en `datos/sunat/sire_campos.json`**, y no es un olvido: ese mapa existe para confrontar al lector con el
+# escritor del driver `sire`, y este registro no tiene escritor —ya está declarado, y esto es leerlo—. Su ancla es la
+# cabecera de SUNAT: `tests/test_sire_txt.py` comprueba cada índice contra el rótulo de su columna.
+POS_NO_DOMICILIADO = {
+    "fecha_emision": 2, "tipo_cp": 3, "serie": 4, "numero": 5, "otros": 7, "total": 8,
+    "moneda": 14, "tipo_cambio": 15, "contraparte_nombre": 17, "contraparte_doc": 19,
+}
+# El campo 7, «Valor de las adquisiciones»: lo que se compró, que el documento del exterior no grava. Va a
+# `valor_no_gravado` —«valor de las adquisiciones no gravadas», la columna con la que el otro registro dice lo mismo—
+# y por eso aparte del mapa: solo se declara cuando trae importe, con el mismo idioma que `VALOR_NO_GRAVADO`.
+VALOR_DE_ADQUISICIONES = 6
+CAMPOS_NO_DOMICILIADO = 35
+# El documento del proveedor del exterior no es un RUC ni un DNI: es el que le da su país —en el mes real, un código
+# interno, un PAN de la India de diez caracteres y hasta un RUC peruano—, y el registro no trae columna de tipo. El
+# «0» del Catálogo 06 es el documento tributario del no domiciliado sin RUC; aquí el número se guarda **tal cual, con
+# sus letras**, y por eso `validar` no lo pasa por `solo_digitos` (solo lo hace con los tipos 1 y 6).
+TIPO_DOC_NO_DOMICILIADO = "0"
 
 
 def _texto(datos: bytes) -> str:
@@ -144,26 +181,31 @@ def _tiene_la_forma(texto: str) -> bool:
     return False
 
 
-def _del_zip(datos: bytes) -> bytes:
-    """El TXT del SIRE que va dentro de un ZIP: **el primero que tenga su forma**, no el primero de la lista.
-
-    Lo declarado trae dos —el registro y el de no domiciliados— y tomar el primero dependía del orden en que SUNAT
-    los metiera. Si ninguno tiene la forma, se devuelve el primero, para que quien lee falle con su motivo de siempre.
-    """
+def _txts_del_zip(datos: bytes) -> list[tuple[str, bytes]]:
+    """Los TXT de un ZIP, con su nombre y en el orden en que vienen. Lo declarado trae dos: el registro y el de no
+    domiciliados, y el orden en que SUNAT los mete no está escrito en ninguna parte."""
     with zipfile.ZipFile(io.BytesIO(datos)) as z:
         nombres = [n for n in z.namelist() if n.lower().endswith(".txt")]
         if not nombres:
             raise SireInvalido("El ZIP no trae ningún TXT dentro")
-        primero: bytes | None = None
+        txts = []
         for nombre in nombres:
             try:
-                contenido = _zip.leer(z, z.getinfo(nombre))
+                txts.append((nombre, _zip.leer(z, z.getinfo(nombre))))
             except _zip.Desmedido as e:
                 raise SireInvalido(str(e)) from None
-            if _tiene_la_forma(_texto(contenido[:4096])):
-                return contenido
-            primero = contenido if primero is None else primero
-        return primero if primero is not None else b""
+        return txts
+
+
+def _del_zip(datos: bytes) -> bytes:
+    """El registro del SIRE que va dentro de un ZIP: **el primero que tenga su forma**, no el primero de la lista.
+
+    Tomar el primero dependía del orden en que SUNAT metiera los dos TXT de lo declarado. Si ninguno tiene la forma,
+    se devuelve el primero, para que quien lee falle con su motivo de siempre. El de no domiciliados no se busca aquí:
+    lo lee `parsear` aparte, con su propio mapa.
+    """
+    txts = _txts_del_zip(datos)
+    return next((c for _, c in txts if _tiene_la_forma(_texto(c[:4096]))), txts[0][1])
 
 
 def leer_lineas(datos: bytes) -> list[list[str]]:
@@ -176,29 +218,61 @@ def leer_lineas(datos: bytes) -> list[list[str]]:
     return filas
 
 
-def es_sire(datos: bytes) -> bool:
-    """¿Esto es una propuesta del SIRE? Se mira el contenido, no el nombre.
+def _se_lee(datos: bytes) -> bool:
+    return _tiene_la_forma(_texto(datos[:4096])) or es_no_domiciliados(datos)
 
-    Acepta el TXT suelto y el ZIP tal cual lo entrega SUNAT (dentro de la aplicación que lo use los
-    ZIP ya vienen abiertos, pero desde la CLI o los tests entra el ZIP entero).
+
+def es_sire(datos: bytes) -> bool:
+    """¿Esto es un archivo del SIRE que este lector lee? Se mira el contenido, no el nombre.
+
+    Lo es el registro de compras o de ventas —la propuesta, el reemplazo o lo declarado— y, desde la 15.3.0, el de
+    compras de no domiciliados. Acepta el TXT suelto y el ZIP tal cual lo entrega SUNAT (dentro de la aplicación que
+    lo use los ZIP ya vienen abiertos, pero desde la CLI o los tests entra el ZIP entero).
     """
     try:
         if zipfile.is_zipfile(io.BytesIO(datos)):
-            datos = _del_zip(datos)
-        return _tiene_la_forma(_texto(datos[:4096]))
+            return any(_se_lee(c) for _, c in _txts_del_zip(datos))
+        return _se_lee(datos)
     except Exception:  # noqa: BLE001
         return False
 
 
-def es_no_domiciliados(datos: bytes) -> bool:
-    """¿Es la exportación del registro de compras de no domiciliados? Por su cabecera, que empieza por el periodo.
+# La fecha de emisión tal como la escribe el registro de no domiciliados: es lo que separa una de sus filas de una del
+# otro registro, que empieza por el RUC.
+_FECHA_DEL_REGISTRO = re.compile(r"\d{2}/\d{2}/\d{4}")
 
-    El que se PRESENTA no trae cabecera —diez filas de 36 campos y palote, en el caso real—, así que ese se reconoce
-    por el código de su nombre (`libro_sin_leer`)."""
+
+def es_no_domiciliados(datos: bytes) -> bool:
+    """¿Es el registro de compras de no domiciliados? Por su primera línea con algo, en las dos formas que se han visto.
+
+    La exportación de lo declarado trae una cabecera que empieza por el periodo; la que se PRESENTA no trae cabecera
+    —diez filas de 36 campos y palote, en el caso real—, y se reconoce por la forma de su fila: el periodo, el CAR y
+    la fecha de emisión, con al menos los 35 campos del anexo. Las dos se separan del otro registro por lo mismo: el
+    titular está en el nombre del archivo, así que la fila no empieza por un RUC sino por el periodo.
+
+    El código del nombre (`080500`) también lo delata, pero eso lo mira quien tiene el nombre (`parsear`): aquí solo
+    hay bytes."""
     for linea in _texto(datos[:4096]).splitlines():
-        if linea.strip():
-            return tuple(c.strip().lower() for c in linea.split("|")[:2]) == CABECERA_NO_DOMICILIADOS
+        if not linea.strip():
+            continue
+        campos = [c.strip() for c in linea.split("|")]
+        if tuple(c.lower() for c in campos[:2]) == CABECERA_NO_DOMICILIADOS:
+            return True
+        return (len(campos) >= CAMPOS_NO_DOMICILIADO and len(campos[0]) == 6 and campos[0].isdigit()
+                and _FECHA_DEL_REGISTRO.fullmatch(campos[2]) is not None)
     return False
+
+
+def _codigo_del_nombre(nombre: str) -> str:
+    """El código del libro que dice el nombre de un libro electrónico, o `""` si no lo dice.
+
+    Se busca DESPUÉS del RUC: un RUC puede contener «140400» y se leería como el registro de ventas."""
+    base = posixpath.basename(nombre)
+    return next((c for c in CODIGOS_DEL_SIRE if es_libro_electronico(base) and c in base[13:]), "")
+
+
+def _de_no_domiciliados(datos: bytes, nombre: str) -> bool:
+    return es_no_domiciliados(datos) or _codigo_del_nombre(nombre) == NO_DOMICILIADOS
 
 
 def es_libro_electronico(nombre: str) -> bool:
@@ -219,15 +293,13 @@ def libro_sin_leer(nombre: str, datos: bytes) -> dict:
     compras de no domiciliados de lo declarado, y así se perdería el registro entero el día que SUNAT le cambiara la
     forma: una tabla vacía donde había mil filas, sin un error. Que se diga cuántas filas no se leyeron deja la
     decisión a quien integra.
+
+    El de no domiciliados tuvo aquí su rama propia de la 15.1 a la 15.2 («tiene su propio formato y este lector
+    todavía no lo lee»). Desde la 15.3.0 se lee, así que solo llega aquí si su nombre lo dice y su contenido no tiene
+    ninguna de las dos formas conocidas: es el caso de abajo, el de cualquier registro que SUNAT haya cambiado.
     """
-    base = posixpath.basename(nombre)
     filas = sum(1 for linea in _texto(datos).splitlines() if linea.split("|")[0].strip().isdigit())
-    # El código se busca DESPUÉS del RUC: un RUC puede contener «140400» y se leería como el registro de ventas.
-    codigo = next((c for c in CODIGOS_DEL_SIRE if es_libro_electronico(base) and c in base[13:]), "")
-    if codigo == NO_DOMICILIADOS or es_no_domiciliados(datos):
-        return {"archivo": nombre, "codigo": NO_DOMICILIADOS, "filas": filas,
-                "motivo": "Es el registro de compras de no domiciliados del SIRE: tiene su propio formato y este lector "
-                          "todavía no lo lee"}
+    codigo = _codigo_del_nombre(nombre)
     if codigo:
         return {"archivo": nombre, "codigo": codigo, "filas": filas,
                 "motivo": f"Su nombre dice que es {CODIGOS_DEL_SIRE[codigo]} del SIRE y no tiene la forma que este "
@@ -319,12 +391,96 @@ def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
     )
 
 
-def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> list[Comprobante]:
-    """TXT (o ZIP) de la propuesta → comprobantes del libro que se está trabajando.
+def _un_no_domiciliado(campos: list[str], archivo_nombre: str) -> Comprobante:
+    """Una fila del registro de no domiciliados → el comprobante, con lo que tiene donde ponerlo (`POS_NO_DOMICILIADO`)."""
+    datos: dict[str, object] = {k: _valor(campos, i) for k, i in POS_NO_DOMICILIADO.items()}
+    # «Otros conceptos» con signo, con la misma regla que el otro registro (`_una`): un negativo contrario al total es
+    # un descuento global; en una nota, todo viene negativo porque lo es la operación entera.
+    bruto_otros = _con_signo(str(datos["otros"] or "0"))
+    if bruto_otros < 0 and _con_signo(str(datos["total"] or "0")) >= 0:
+        datos["otros"], datos["dscto_otros"] = "0", str(-bruto_otros)
+    datos["otros"] = datos["otros"] or "0"
+    datos["total"] = datos["total"] or "0"
+    datos["fecha_emision"] = datos["fecha_emision"] or None
+    # El tipo de cambio solo cuando la moneda no es soles, como en el otro registro y en el TXT que escribe el driver.
+    if str(datos["moneda"]).upper() in ("", "PEN"):
+        datos["tipo_cambio"] = ""
+    valor = _valor(campos, VALOR_DE_ADQUISICIONES)
+    if valor and valor.strip("0.-"):
+        datos["valor_no_gravado"] = valor
+    return Comprobante(
+        **datos,  # type: ignore[arg-type]
+        contraparte_tipo_doc=TIPO_DOC_NO_DOMICILIADO,
+        origen=ORIGEN,
+        confianza=Decimal("1.00"),      # es el dato de SUNAT, no la lectura de una IA
+        archivo_nombre=archivo_nombre,
+        datos_originales={"sire": campos},     # la fila entera: el país, el IGV de utilización y la renta viajan aquí
+    )
 
-    Falla con un motivo concreto —RUC, periodo o tipo de registro— en vez de cargar
-    comprobantes que no son de este proceso.
+
+def _parsear_no_domiciliados(datos: bytes, libro: Libro, archivo_nombre: str, nombre_del_txt: str) -> list[Comprobante]:
+    """El registro de compras de no domiciliados → comprobantes del libro de compras, con las mismas negativas que el
+    otro registro: otro RUC, otro periodo o una fila que no es de este anexo."""
+    if libro.es_venta:
+        raise SireInvalido("Es el registro de compras de no domiciliados: va en el libro de compras, no en el de ventas")
+    filas = [linea.split("|") for linea in _texto(datos).splitlines() if linea.strip()]
+    if filas and tuple(c.strip().lower() for c in filas[0][:2]) == CABECERA_NO_DOMICILIADOS:
+        filas = filas[1:]          # la exportación trae cabecera; lo que se presenta, no
+    if not filas:
+        raise SireInvalido("El registro de no domiciliados no tiene ninguna fila")
+    # El titular no va en la fila: va en el nombre del archivo, cuando lo trae.
+    base = posixpath.basename(nombre_del_txt)
+    ruc = base[2:13] if es_libro_electronico(base) else ""
+    if ruc and ruc != libro.ruc:
+        raise SireInvalido(f"El archivo es del RUC {ruc} y este cliente es {libro.ruc}")
+    periodos = {f[0].strip() for f in filas if f[0].strip()}
+    if periodos and libro.periodo not in periodos:
+        raise SireInvalido(f"El archivo es del periodo {sorted(periodos)[0]} y este proceso es de {libro.periodo}")
+
+    comprobantes = []
+    for i, campos in enumerate(filas, 1):
+        if len(campos) < CAMPOS_NO_DOMICILIADO:
+            raise SireInvalido(f"La fila {i} del registro de no domiciliados tiene {len(campos)} campos y su anexo "
+                               f"tiene {CAMPOS_NO_DOMICILIADO}")
+        try:
+            c = _un_no_domiciliado(campos, archivo_nombre)
+        except ValueError as e:
+            raise SireInvalido(f"La fila {i} del registro de no domiciliados no se pudo leer ({e})") from e
+        if not c.fecha_emision or not c.tipo_cp.strip():
+            raise SireInvalido(f"La fila {i} del registro de no domiciliados no trae fecha de emisión o tipo de "
+                               "comprobante")
+        comprobantes.append(c)
+    return comprobantes
+
+
+def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> list[Comprobante]:
+    """TXT (o ZIP) del SIRE → comprobantes del libro que se está trabajando.
+
+    Lee el registro de compras o de ventas y, desde la 15.3.0, el de compras de no domiciliados: suelto —se reconoce
+    por su contenido o por el código de su nombre— o dentro del ZIP de lo declarado, junto al otro. Falla con un
+    motivo concreto —RUC, periodo o tipo de registro— en vez de cargar comprobantes que no son de este proceso.
     """
+    if zipfile.is_zipfile(io.BytesIO(datos)):
+        txts = _txts_del_zip(datos)
+        de_no_domiciliados = [(n, c) for n, c in txts if _de_no_domiciliados(c, n)]
+        resto = [c for n, c in txts if not _de_no_domiciliados(c, n)]
+        comprobantes = []
+        registro = next((c for c in resto if _tiene_la_forma(_texto(c[:4096]))), None)
+        if registro is not None:
+            comprobantes = _parsear_registro(registro, libro, archivo_nombre)
+        elif not de_no_domiciliados:
+            # Ninguno tiene ninguna de las formas: se lee el primero para fallar con su motivo de siempre.
+            comprobantes = _parsear_registro(resto[0], libro, archivo_nombre)
+        for nombre, contenido in de_no_domiciliados:
+            comprobantes.extend(_parsear_no_domiciliados(contenido, libro, archivo_nombre, nombre))
+        return comprobantes
+    if _de_no_domiciliados(datos, archivo_nombre):
+        return _parsear_no_domiciliados(datos, libro, archivo_nombre, archivo_nombre)
+    return _parsear_registro(datos, libro, archivo_nombre)
+
+
+def _parsear_registro(datos: bytes, libro: Libro, archivo_nombre: str) -> list[Comprobante]:
+    """El registro de compras o de ventas (un TXT, ya fuera de su ZIP) → comprobantes."""
     filas = leer_lineas(datos)
     if not filas:
         raise SireInvalido("El archivo del SIRE no tiene ninguna fila")

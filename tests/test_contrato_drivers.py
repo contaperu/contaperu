@@ -728,9 +728,10 @@ def test_el_nucleo_solo_lee_lo_general_y_lo_del_asiento():
 def test_lo_que_cada_destino_no_lleva_se_pregunta_al_contrato():
     """`EXCLUYE_TIPOS` era lo único del contrato que quien integra el motor leía con un `getattr` crudo, mientras
     `exige`, `no_caben` y `canal` tenían su accesor. Ahora lo tiene: el SIRE y CONTASIS dejan fuera el recibo por
-    honorarios, y quien no declara nada devuelve el conjunto vacío en vez de `None`."""
+    honorarios, y quien no declara nada devuelve el conjunto vacío en vez de `None`. Y desde la 15.3.0 el SIRE deja
+    fuera también lo del registro de no domiciliados, que se anota en el 080500 y no en el que él escribe."""
     fuera = {n: sorted(contrato.excluye_tipos(m)) for n, m in drivers.DE_SERIE.items()}
-    assert fuera == {"sire": ["02"], "contasis": ["02"],
+    assert fuera == {"sire": ["02", "91", "97", "98"], "contasis": ["02"],
                      "concar": [], "csv": [], "starsoft": [], "asiento_contable": [], "ple": [], "ple_plan": []}
 
 

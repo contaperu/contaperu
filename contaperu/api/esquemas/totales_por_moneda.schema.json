@@ -19,7 +19,7 @@
    },
    "total": {
     "type": "string",
-    "description": "Con las notas de crédito restando (los tipos 07 y 87)."
+    "description": "Con las notas de crédito restando (los tipos 07, 87 y 97)."
    },
    "sumados": {
     "type": "integer",

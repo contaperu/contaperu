@@ -41,8 +41,8 @@ sistema, y el de los campos del comprobante, cuáles los pone el documento y cu�
 
 REGLAS = """\
 Reglas que conviene tener claras antes de armar un documento:
-  - Los importes van SIEMPRE en positivo. Una nota de crédito se marca con su tipo —`07`, o `87`
-    si es de no domiciliado—, nunca con importes negativos: quien resta es la contabilidad.
+  - Los importes van SIEMPRE en positivo. Una nota de crédito se marca con su tipo —`07`, `87` la
+    especial o `97` la del no domiciliado—, nunca con importes negativos: quien resta es la contabilidad.
   - `tipo_cp` es el código de la Tabla 10 de SUNAT, no la sigla del sistema contable.
   - **Hay DOS retenciones y cada una tiene su campo**, porque en castellano se llaman igual:
     `retencion_4ta` es la renta de 4ta del 8 % que muestra un recibo por honorarios (y es la

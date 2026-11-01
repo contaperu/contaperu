@@ -451,8 +451,10 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 ## Qué **no** hace
 
 - **No lee PDFs ni fotos.** Lee el XML, que es el comprobante electrónico, y la propuesta del SIRE o lo declarado.
-- **No lee todavía el registro de no domiciliados.** Llega con lo declarado y tiene su propio formato: el motor lo
-  reconoce y dice cuántas filas trae sin leer (`no_leidos`), en vez de saltárselo en silencio.
+- **No asienta el IGV de utilización ni la renta retenida de un no domiciliado.** Su registro se lee desde la
+  15.3.0, y el 91 sale en el asiento como una compra común —gasto contra proveedor, con la sigla de tu sistema—;
+  esos dos importes, el país y el convenio viajan en la fila cruda (`datos_originales`) hasta que haya un asiento
+  aceptado que los use (HOJA-DE-RUTA, C12).
 - **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red. **Sí sabe cómo
   es su API**: describe las doce operaciones del SIRE y arma la petición exacta, para que quien la envíe no tenga que
   adivinarla. Saber es un dato; llamar es entrada y salida, y eso es del integrador.

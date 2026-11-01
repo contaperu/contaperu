@@ -29,7 +29,8 @@ from __future__ import annotations
 # entraron (6.1.0): quitarlo sería retirar un nombre sin avisar, así que se reexporta a propósito.
 from ..errores import ErrorContaperu
 from ._fuente import FUENTES
-from .comprobantes import (ADUANEROS, EXIGEN_VENCIMIENTO, FUERA_DEL_REGISTRO_SUNAT, MEDIOS_PAGO, MONEDAS,
+from .comprobantes import (ADUANEROS, DEL_REGISTRO_DE_NO_DOMICILIADOS, EXIGEN_VENCIMIENTO,
+                           FUERA_DEL_REGISTRO_SUNAT, MEDIOS_PAGO, MONEDAS,
                            MOTIVOS_NOTA_CREDITO, MOTIVOS_NOTA_DEBITO, NOTAS, NOTAS_CREDITO, NOTAS_DEBITO,
                            SCHEME_A_TIPO_DOC, SIN_CONTRAPARTE_OK, TIPO_BOLETA, TIPO_HONORARIOS,
                            TIPOS_CP, TIPOS_DOC_IDENTIDAD, TIPOS_INVIERTEN, TIPOS_NOTA,
@@ -50,7 +51,7 @@ from .tributos import (CATEGORIA_RENTA_4TA, CLASES_IGV_COMPRA, CLASES_IGV_VENTA,
 # llevarse uno por descuido, y lo que un consumidor importa no depende de en qué fichero acabó.
 __all__ = [
     "ADUANEROS", "CATEGORIA_RENTA_4TA", "CLASES_IGV_COMPRA", "CLASES_IGV_VENTA", "CRONOGRAMAS", "CatalogoInvalido",
-    "ESTADOS_DE_REGIMEN", "EXIGEN_VENCIMIENTO", "ErrorContaperu", "FORMATO_PLE", "FUENTES",
+    "DEL_REGISTRO_DE_NO_DOMICILIADOS", "ESTADOS_DE_REGIMEN", "EXIGEN_VENCIMIENTO", "ErrorContaperu", "FORMATO_PLE", "FUENTES",
     "FUERA_DEL_REGISTRO_SUNAT", "MEDIOS_PAGO", "MONEDAS", "MOTIVOS_NOTA_CREDITO", "MOTIVOS_NOTA_DEBITO", "NOTAS",
     "NOTAS_CREDITO", "NOTAS_DEBITO", "REGISTRO_SIRE", "REGLAS_DE_REGIMEN", "RUTA_REGIMENES", "RUTA_VENCIMIENTOS",
     "SCHEME_A_TIPO_DOC", "SIN_CONTRAPARTE_OK", "SinCronograma", "TASAS_IGV_REDUCIDAS", "TASAS_IGV_VIGENTES", "TASA_IGV", "TIPOS_CP",

@@ -111,6 +111,27 @@ def test_dolares_con_tipo_de_cambio_del_comprobante():
     assert e.value.monedas == ["EUR"] and concar.monedas_sin_codigo([cp(moneda="EUR"), cp()], CONTAB) == ["EUR"]
 
 
+def test_el_no_domiciliado_se_asienta_como_una_compra_comun_con_la_sigla_del_entorno():
+    """John, 01-nov-2026: el 91 sale en el Excel **«como compra común, con mi sigla»**. El documento del exterior no
+    lleva IGV —el crédito vive en el 1662, que es otro comprobante—, así que son dos filas: el gasto al Debe y el
+    proveedor al Haber, en dólares a la 421202, con su documento con letras en el anexo. Sin la sigla en la
+    configuración se planta y no se inventa una (es la regla de siempre). Y la 97, su nota de crédito, invierte como
+    la 07 (15.3.0)."""
+    exterior = dict(tipo_cp="91", serie="8ABCDEFG", numero="9", contraparte_tipo_doc="0",
+                    contraparte_doc="ABCDE1234F", contraparte_nombre="PROVEEDOR DEL EXTERIOR", moneda="USD",
+                    tipo_cambio="3.750", base_gravada="0", igv="0", valor_no_gravado="100", total="100")
+    with pytest.raises(concar.SinSigla) as e:
+        construir_concar(COMPRAS, [cp(**exterior)], CONTAB, {"11": 1})
+    assert e.value.tipos == ["91"]
+    config = configuracion({"tipos": {"91": {"sigla": "XX"}, "97": {"sigla": "YY"}}})
+    filas = filas_de_comprobante(cp(**exterior), config, MES, "080001")
+    assert [(f["K"], f["N"], f["O"]) for f in filas] == [("631101", "D", 100.0), ("421202", "H", 100.0)]
+    assert all((f["R"], f["S"], f["E"], f["G"], f["B"]) == ("XX", "8ABCDEFG-9", "US", 3.75, "11") for f in filas)
+    assert filas[1]["L"] == "ABCDE1234F"
+    nota = filas_de_comprobante(cp(**dict(exterior, tipo_cp="97", numero="10")), config, MES, "080002")
+    assert [(f["K"], f["N"]) for f in nota] == [("631101", "H"), ("421202", "D")] and nota[0]["R"] == "YY"
+
+
 def test_concar_solo_difiere_de_la_tabla_general_en_la_nota_de_credito():
     """CONCAR estrena tabla de siglas propia en la 5.3, escrita entera como la de STARSOFT. Este test es lo que
     impide que las otras SIETE se separen de la general en silencio el día que una de ellas cambie.

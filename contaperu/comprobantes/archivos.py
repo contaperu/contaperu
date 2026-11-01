@@ -7,7 +7,8 @@ La subida puede traer el ZIP tal cual lo entrega el facturador (XML + CDR
 - ZIP anidados no se abren (se reportan);
 - el CDR se detecta por su raíz XML, no por el nombre;
 - un libro electrónico de SUNAT que no se sabe leer **se dice** (`no_leidos`, con sus filas contadas): no es un
-  acompañante como la hoja de estilos, y callarlo perdía filas sin un error (01-nov-2026).
+  acompañante como la hoja de estilos, y callarlo perdía filas sin un error (01-nov-2026). El de compras de no
+  domiciliados, que fue el que lo estrenó, se lee desde la 15.3.0.
 """
 from __future__ import annotations
 
@@ -49,13 +50,13 @@ class Entrada:
 
     @property
     def es_sire(self) -> bool:
-        """La propuesta que SUNAT entrega al exportar un periodo (se mira el contenido)."""
+        """Un registro del SIRE que se lee —la propuesta, lo declarado o el de no domiciliados— (se mira el contenido)."""
         return self.extension in EXT_TEXTO and sire_txt.es_sire(self.datos)
 
     @property
     def es_libro_de_sunat(self) -> bool:
         """Un TXT que SUNAT nombró como libro electrónico (`LE` + RUC…), o el registro de no domiciliados por su
-        cabecera. Si además tiene la forma del SIRE se lee; si no, va a `no_leidos` en vez de ignorarse."""
+        forma. Si además tiene una forma que el lector conoce se lee; si no, va a `no_leidos` en vez de ignorarse."""
         return self.extension in EXT_TEXTO and (sire_txt.es_libro_electronico(self.nombre)
                                                 or sire_txt.es_no_domiciliados(self.datos))
 
@@ -135,8 +136,9 @@ class ResultadoLectura:
     errores: list[dict] = field(default_factory=list)
     ignorados: list[str] = field(default_factory=list)   # CDR y similares
     pendientes_ia: list[Entrada] = field(default_factory=list)  # PDF/foto: los lee la IA, fuera de esta librería
-    # Libros de SUNAT que este lector no lee —el de no domiciliados que viaja con lo declarado—: {archivo, codigo,
-    # filas, motivo}. No son errores, porque el resto se leyó bien; tampoco ignorados, porque traen comprobantes.
+    # Libros de SUNAT que este lector no lee —uno que SUNAT nombró como libro y cuya forma no se conoce—: {archivo,
+    # codigo, filas, motivo}. No son errores, porque el resto se leyó bien; tampoco ignorados, porque traen
+    # comprobantes. Lo estrenó el de no domiciliados que viaja con lo declarado, que desde la 15.3.0 se lee.
     no_leidos: list[dict] = field(default_factory=list)
 
 
@@ -156,6 +158,7 @@ def convertir_xml(lote: Lote, libro: Libro) -> ResultadoLectura:
                 r.errores.append({"archivo": e.nombre, "motivo": str(ex)})
         elif e.es_sire:
             try:
+                # `parsear` sabe cuál de los registros es: el de compras o ventas, o el de no domiciliados.
                 r.comprobantes.extend(sire_txt.parsear(e.datos, libro, archivo_nombre=e.nombre))
             except sire_txt.SireInvalido as ex:
                 r.errores.append({"archivo": e.nombre, "motivo": str(ex)})

@@ -61,11 +61,15 @@ def _cuota_normalizada(valor: Any) -> dict:
 # Qué tipos de la Tabla 10 son una nota, y cuáles de ellas restan. **Con nombre desde la 3.4.0**, que no
 # es cosmética: estaba dentro de las dos propiedades de abajo, así que quien resumía un libro fuera del
 # motor no tenía nada que citar y lo escribía a mano. La primera aplicación que lo hizo se quedó con el
-# `07` y se dejó el `87` —la nota de crédito de no domiciliado—, así que esa **sumaba en vez de restar**:
-# el importe entraba con el signo contrario y el total cuadraba consigo mismo. Un nombre público es lo
-# que permite que la próxima lo pregunte en vez de deducirlo.
-NOTAS_CREDITO = ("07", "87")             # 07 domiciliado · 87 no domiciliado
-NOTAS_DEBITO = ("08", "88")              # las hermanas que suman
+# `07` y se dejó el `87`, así que esa **sumaba en vez de restar**: el importe entraba con el signo
+# contrario y el total cuadraba consigo mismo. Un nombre público es lo que permite que la próxima lo
+# pregunte en vez de deducirlo.
+#
+# Y el mismo error lo tuvo el motor (15.3.0): llamaba «de no domiciliado» a la `87`, que su catálogo
+# llama «especial», y se dejaba fuera a la `97` y la `98`, las del no domiciliado de verdad. Las tres de
+# cada lado, como en `catalogos.NOTAS_CREDITO`; las compara un test.
+NOTAS_CREDITO = ("07", "87", "97")       # 07 · 87 especial · 97 del no domiciliado
+NOTAS_DEBITO = ("08", "88", "98")        # las hermanas que suman
 NOTAS = NOTAS_CREDITO + NOTAS_DEBITO
 
 # ── Quién escribe cada campo (3.4.0) ────────────────────────────────────────────────────────────

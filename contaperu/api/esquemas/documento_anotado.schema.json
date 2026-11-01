@@ -45,7 +45,7 @@
        }
       },
       "no_leidos": {
-       "description": "Libros electrónicos de SUNAT que el motor no sabe leer, dichos en vez de ignorados: el registro de compras de no domiciliados que viaja con lo declarado (código 080500), o un registro del SIRE cuyo nombre lo dice y cuya forma no es la conocida. `filas` cuenta las que no entraron. Desde la 15.1.0; no es obligatorio para que un documento de antes siga siendo válido.",
+       "description": "Libros electrónicos de SUNAT que el motor no sabe leer, dichos en vez de ignorados: un registro del SIRE cuyo nombre lo dice y cuya forma no es la conocida, o un libro que no reconoce. `filas` cuenta las que no entraron. Desde la 15.1.0, cuando lo estrenó el registro de compras de no domiciliados (080500), que desde la 15.3.0 se lee; no es obligatorio para que un documento de antes siga siendo válido.",
        "type": "array",
        "items": {
         "type": "object",

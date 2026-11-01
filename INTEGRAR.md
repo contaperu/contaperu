@@ -263,8 +263,8 @@ de datos y tu sesión. **Son dos capas, no una**, y juntarlas obligaría al moto
 metía en el mismo saco dos cosas distintas: qué mes, qué registro y qué filtro solo lo sabes tú, pero que una nota de
 crédito reste, que dos monedas no se sumen, que una excluida no cuente y que las líneas se agrupen por cuenta es
 contabilidad. Hasta la 3.3 el motor no la tenía, así que la escribía cada aplicación — y a la primera que lo hizo le
-salió con el `07` donde el motor dice `("07", "87")`: una nota de crédito de no domiciliado le **sumaba** en vez de
-restarle, y el total cuadraba con su propia tabla.
+salió con el `07` donde el motor dice `("07", "87")`: una nota de crédito `87` le **sumaba** en vez de restarle, y el
+total cuadraba con su propia tabla. (Desde la 15.3.0 la lista es `("07", "87", "97")`: la 97 es la del no domiciliado.)
 
 Dos formas de combinarlas, y la primera no cuesta nada:
 
