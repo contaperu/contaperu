@@ -18,15 +18,15 @@ Está lo que **el catálogo sostiene con su fuente**, que es verificable sin red
 - `peticion(operacion, …)` — el método, la URL y los parámetros de cada una de las doce, validando lo obligatorio.
 - `estado_de_ticket(codigo)` — qué significa un código de estado y si hay que seguir sondeando.
 - `estado_de_periodo(codigo)` — si un mes ya se generó, o sea, si hay algo DECLARADO que bajar con `registro_pedir`.
-- `verificado(operacion, registro=…)` — si esa operación se midió contra producción para ese libro, y cuándo: lo
-  declarado de compras sí, el de ventas todavía no (15.2.0).
+- `verificado(operacion, registro=…)` — si esa operación se midió contra producción para ese libro, y cuándo. Lo
+  declarado entró en ventas sin medir (15.2.0) y se midió el mismo día (15.2.1).
 - `clasificar_error(cod, errores)` — el 422 de SUNAT, con su trampa, y si lo que llegó es idempotente o reintentable.
 
 **No está el lector de la forma de cada respuesta**, y es a propósito. Eso no lo sostiene el catálogo: lo sostendría
-una respuesta real guardada, y aquí no hay ninguna. Lo que sí hay desde el 01-nov-2026 son dos operaciones
+una respuesta real guardada, y aquí no hay ninguna. Lo que sí hay desde el 01-nov-2026 son cuatro operaciones
 **`verificado`** —medidas contra producción, la fecha al lado—: `periodos`, de la que salieron los códigos de
-`estado_de_periodo`, y `registro_pedir` en compras, cuyo archivo resultó ser el formato que `comprobantes.sire_txt` ya
-leía. La de ventas está escrita del manual y espera su medición.
+`estado_de_periodo`; `registro_pedir` en los dos libros, cuyos archivos resultaron ser formatos que
+`comprobantes.sire_txt` ya leía; y `ticket_consultar` y `ticket_archivo`, por las que pasaron.
 Los lectores que la aplicación usa en producción están escritos contra el manual, y traerlos aquí tal cual no
 rompería nada: **congelaría un mapeo no comprobado en el repositorio abierto**, con la solidez aparente que da estar
 en un motor con tests. Primero la evidencia, después la mudanza.

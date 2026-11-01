@@ -82,6 +82,7 @@
       "ruta": "rvierce/gestionprocesosmasivos/web/masivo/consultaestadotickets",
       "params_obligatorios": ["perIni", "perFin", "page", "perPage", "codLibro", "codOrigenEnvio"],
       "fuente": "Compras v28 5.31",
+      "verificado": "2026-11-01",
       "_nota": "perIni y perFin son obligatorios AUNQUE se pregunte por un solo ticket: el numTicket no codifica el periodo, así que quien llama tiene que recordar a qué periodo pertenece cada ticket. Si pierde esa asociación, el trabajo es irrecuperable."
     },
     "ticket_archivo": {
@@ -89,6 +90,7 @@
       "ruta": "rvierce/gestionprocesosmasivos/web/masivo/archivoreporte",
       "params_obligatorios": ["nomArchivoReporte", "codTipoArchivoReporte", "perTributario", "codProceso", "numTicket", "codLibro"],
       "fuente": "Compras v28 5.32",
+      "verificado": "2026-11-01",
       "_nota": "Los cuatro últimos los exige DESDE LA v24 (10-ene-2025). Sin ellos responde 500, no 400. Además SUNAT escribe la clave del tipo de dos maneras en sus propios manuales (`codTipoAchivoReporte`, sin la «r», y `codTipoArchivoReporte`): conviene aceptar las dos al leer."
     },
     "propuesta_reemplazar": {
@@ -154,8 +156,8 @@
       },
       "cod_proceso_por_libro": {"080000": "70", "140000": "23"},
       "fuente": "Compras v28 5.51 · Ventas v29 5.27",
-      "verificado_por_libro": {"080000": "2026-11-01"},
-      "_nota_ventas": "VENTAS (15.2.0), del manual y SIN MEDIR: la 5.27, «descargar RVIE por periodo». No se parece a la de compras: otra ruta, el periodo como `perTributario` y el libro como `codLibro` en la consulta, sin `codMoneda` ni `lisPeriodos`, y el `codProceso` de su ejemplo es el 23, «Generar reporte Libro RVIE» en el Anexo I. En compras el manual se equivocó en dos cosas que solo se vieron al medir, así que su libro **no está en `verificado_por_libro`** y quien lo use solo debería hacerlo para medirlo.",
+      "verificado_por_libro": {"080000": "2026-11-01", "140000": "2026-11-01"},
+      "_nota_ventas": "VENTAS: la 5.27, «descargar RVIE por periodo». No se parece a la de compras: otra ruta, el periodo como `perTributario` y el libro como `codLibro` en la consulta, sin `codMoneda` ni `lisPeriodos`. Entró del manual en la 15.2.0 y se MIDIÓ contra producción el mismo 01-nov-2026 (15.2.1), con setiembre de 2026 de un RUC real: (1) el `codProceso` 23 del ejemplo —«Generar reporte Libro RVIE» en el Anexo I— lo aceptó a la primera; (2) el ticket terminó en 06 con un ZIP de UN TXT —140400 en el nombre—, sin cabecera, de 38 campos y palote, en el orden de la exportación de la propuesta (las columnas que lee `comprobantes.sire_txt` caen todas en su sitio, comprobado columna a columna por su forma); (3) el motor lo lee tal cual: 14 comprobantes, sin un error y sin nada en `no_leidos`. A diferencia de compras, no trae un segundo registro.",
       "_nota": "LO DECLARADO de un periodo: el registro que se GENERÓ en SOL, que no es la propuesta. La propuesta es el borrador de SUNAT, sigue viva y se actualiza a diario aunque el mes ya esté generado: en un RUC real, la de setiembre de 2026 traía 3 040 comprobantes y lo generado, 1 326. Devuelve un ticket, y el archivo se baja con `ticket_archivo`, como la propuesta. Lo que se MIDIÓ contra producción el 01-nov-2026, que es más de lo que el manual sostiene: (1) `codMoneda` es obligatorio aunque el manual no lo marque —sin él responde 1061— y con `PEN` llegan también los comprobantes en dólares; (2) el manual describe `codProceso` con 00 (no domiciliados), 01 (se aceptó la propuesta) y 02 (se reemplazó), y su propio ejemplo manda 70: el 70 es el que respondió; (3) `lisPeriodos` con el mismo periodo de la ruta; (4) el ticket termina en 06 con un ZIP de DOS TXT: el registro de compras —080400 en el nombre—, con el formato de la exportación de la propuesta (cabecera, las 41 columnas y CLU1 a CLU39), que `comprobantes.sire_txt` lee tal cual; y el de no domiciliados —080500—, con el suyo (cabecera, 35 columnas y CLU1 a CLU10), que el motor todavía no lee y la lectura de archivos devuelve en `no_leidos`, con sus filas contadas. Lo de ventas, en `_nota_ventas`. **Los parámetros, el código de proceso y lo verificado van POR LIBRO** (`params_obligatorios_por_libro`, `cod_proceso_por_libro`, `verificado_por_libro`): en esta operación los dos libros no piden lo mismo, y un solo valor para los dos sería verdad en uno y mentira en el otro."
     }
   },

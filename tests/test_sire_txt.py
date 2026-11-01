@@ -346,6 +346,19 @@ def test_lo_declarado_se_lee_como_la_exportacion_y_sus_columnas_libres_se_ignora
     assert c.datos_originales["sire"][41] == "algo puesto a mano"     # viaja en la fila cruda, y nada más
 
 
+def test_lo_declarado_de_ventas_llega_sin_cabecera_y_se_lee_igual():
+    """En ventas, lo que bajó `registro_pedir` (15.2.1, un mes real de 14 comprobantes) es una TERCERA forma de las
+    mismas columnas: sin cabecera, 38 campos y palote, en el orden de la exportación. Entra por la regla de siempre —una
+    fila que empieza por el RUC y el periodo— y se lee sin un cambio."""
+    fila = "|".join(FACTURA.split("|")[:38] + [""])
+    assert len(fila.split("|")) == 39 and fila.endswith("|")
+    contenido = (fila + "\r\n").encode("utf-8")
+    assert sire_txt.es_sire(contenido)
+    c = sire_txt.parsear(contenido, VENTAS)[0]
+    assert (c.tipo_cp, c.serie, c.numero) == ("01", "E001", "1032")
+    assert c.total == Decimal("242202.25") and c.moneda == "PEN" and c.estado_sunat == "1"
+
+
 def test_dentro_del_zip_de_lo_declarado_se_lee_el_registro_aunque_vaya_segundo():
     """El ZIP trae dos TXT y el lector tomaba **el primero de la lista**. En el real el registro iba primero, por suerte:
     con el de no domiciliados delante, `parsear` habría leído ese y fallado en la primera fila."""

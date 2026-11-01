@@ -22,6 +22,9 @@ de siempre más las 39 de libre utilización (CLU1 a CLU39), que se ignoran como
 comprobantes se leyó entero, sin un error. Lo que sí trae distinto es un **segundo TXT en el mismo ZIP**, el registro
 de no domiciliados, y de ahí dos cosas de abajo: dentro de un ZIP se busca el TXT que tiene la forma del SIRE, y no el
 primero de la lista; y ese otro registro se reconoce y se dice (`libro_sin_leer`), en vez de ignorarse en silencio.
+**En ventas llega sin cabecera**: 38 campos y palote, en el orden de la exportación (15.2.1, un mes real de 14
+comprobantes). Es una tercera forma de las mismas columnas, y entra por la misma regla que el reemplazo: una fila que
+empieza por el RUC y el periodo.
 
 Lo que la propuesta NO trae, y por eso no se inventa aquí: el concepto del
 comprobante, la cuenta contable, el centro de costo y el detalle de la detracción. Son

@@ -109,17 +109,17 @@ def test_el_codigo_de_proceso_de_otra_operacion_no_se_rellena_en_ticket_archivo(
                                               codTipoArchivo=0)["params"]
 
 
-def test_lo_declarado_de_ventas_es_otro_servicio_y_esta_sin_medir():
+def test_lo_declarado_de_ventas_es_otro_servicio_y_se_midio():
     """El RVIE tiene su propia descarga del registro (Ventas v29 5.27), y no se parece a la de compras: otra ruta, el
     periodo como `perTributario` en la consulta —su ruta no tiene hueco—, el libro como `codLibro`, sin `codMoneda` ni
-    `lisPeriodos`, y el `codProceso` de su ejemplo, el 23 («Generar reporte Libro RVIE»). Todo eso sale del manual y
-    **no se ha medido**: en compras el manual se equivocó en dos cosas, así que su libro no está verificado."""
+    `lisPeriodos`, y el `codProceso` de su ejemplo, el 23 («Generar reporte Libro RVIE»). Entró del manual en la 15.2.0
+    y se midió el mismo día (15.2.1): el 23 respondió a la primera y el archivo lo leyó el motor sin un cambio."""
     p = sunat.peticion("registro_pedir", registro="venta", periodo="202609", codTipoArchivo=0)
     assert p["url"].endswith("/rvierce/gestionlibro/web/registroslibros/descarga")
     assert p["params"] == {"codTipoArchivo": 0, "codLibro": "140000", "codOrigenEnvio": "2",
                            "perTributario": "202609", "codProceso": "23"}
     assert p["cod_proceso"] == "23"
-    assert sunat.verificado("registro_pedir", registro="venta") == ""
+    assert sunat.verificado("registro_pedir", registro="venta") == "2026-11-01"
     # Lo de compras no se le contagia: sin `codTipoArchivo` se niega, y no pide lo que solo pide el otro libro.
     with pytest.raises(CatalogoDelSireInvalido, match="exige codTipoArchivo"):
         sunat.peticion("registro_pedir", registro="venta", periodo="202609")
@@ -131,6 +131,8 @@ def test_lo_medido_se_pregunta_por_libro():
     assert sunat.verificado("periodos", registro="venta") == sunat.verificado("periodos", registro="compra") == "2026-11-01"
     assert sunat.verificado("propuesta_pedir", registro="compra") == ""
     assert sunat.verificado("registro_pedir", cod_libro="080000") == "2026-11-01"
+    # Las dos de los tickets, por las que pasó la medición de lo declarado (15.2.1).
+    assert sunat.verificado("ticket_consultar", registro="venta") == sunat.verificado("ticket_archivo") == "2026-11-01"
 
 
 def test_lo_que_falta_en_un_libro_no_cae_al_valor_general():

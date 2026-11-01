@@ -4,6 +4,20 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.2.1] — 2026-11-01
+
+### Corregido
+
+- **Lo declarado de ventas, medido.** La 15.2.0 lo trajo del manual (Ventas v29 5.27) sin `verificado`; se midió
+  contra producción el mismo día, con setiembre de 2026 de un RUC real, y `verificado_por_libro` lo dice ahora para
+  los dos libros. Lo medido: el `codProceso` 23 del ejemplo respondió a la primera; el ticket terminó en 06 con un ZIP
+  de UN TXT —sin el registro de no domiciliados que acompaña a compras—, **sin cabecera, de 38 campos y palote**, en
+  el orden de la exportación; y `comprobantes.sire_txt` lo leyó sin un cambio: 14 comprobantes, sin un error. Una
+  prueba fija esa tercera forma de las mismas columnas.
+- **`ticket_consultar` y `ticket_archivo` llevan `verificado`**: la misma medición pasó por las dos.
+
+No cambia ninguna petición ni ninguna salida: cambia lo que el catálogo afirma, y ahora lo afirma con evidencia.
+
 ## [15.2.0] — 2026-11-01
 
 ### Lo declarado de ventas, del manual y sin medir
