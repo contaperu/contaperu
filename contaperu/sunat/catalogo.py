@@ -49,6 +49,14 @@ def _valido(tabla: dict) -> dict:
                 "API ajena es una regla: si cambia, hay que poder ir a mirar de dónde salió.")
         if not (op.get("ruta") or op.get("ruta_por_libro")):
             raise CatalogoDelSireInvalido(f"La operación {nombre!r} no dice su ruta ni su ruta por libro.")
+        # Lo que va POR LIBRO (15.2.0) solo puede hablar de libros que la operación tiene: un parámetro o una
+        # verificación de un libro sin ruta es un dato que nadie va a usar y que alguien va a creer.
+        libros_con_ruta = set(op.get("ruta_por_libro") or {})
+        for campo in ("params_obligatorios_por_libro", "cod_proceso_por_libro", "verificado_por_libro"):
+            sobran = set(op.get(campo) or {}) - libros_con_ruta
+            if sobran:
+                raise CatalogoDelSireInvalido(
+                    f"La operación {nombre!r} declara `{campo}` para {', '.join(sorted(sobran))}, que no tiene ruta.")
     return tabla
 
 

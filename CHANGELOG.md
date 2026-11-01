@@ -4,6 +4,35 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.2.0] — 2026-11-01
+
+### Lo declarado de ventas, del manual y sin medir
+
+La 15.1 trajo lo declarado de compras, medido contra producción. El de ventas existe (Ventas v29 5.27, «descargar
+RVIE por periodo») y **no se parece**: otra ruta, el periodo como `perTributario` en la consulta, el libro como
+`codLibro`, sin `codMoneda` ni `lisPeriodos`, y el `codProceso` de su ejemplo es el 23, «Generar reporte Libro RVIE»
+en el Anexo I. Entra escrito del manual y **sin verificar**, a propósito: en compras el manual se equivocó en dos
+cosas que solo se vieron al medir. La medición es el paso siguiente.
+
+### Añadido
+
+- **`registro_pedir` en ventas**, con sus parámetros y su código de proceso.
+- **Lo que difiere por libro se declara por libro**: `params_obligatorios_por_libro`, `cod_proceso_por_libro` y
+  `verificado_por_libro`, que `peticion` lee cuando la operación los tiene. Lo que falta en uno no cae al valor
+  general —dos libros que no piden lo mismo no comparten lo que a uno le falta— y el catálogo no arranca si uno de
+  esos campos habla de un libro sin ruta.
+- **`sunat.verificado(operacion, registro=…)`**: si esa operación se midió contra producción para ese libro, y
+  cuándo. Es la pregunta de quien automatiza: lo declarado de compras sí, el de ventas todavía no.
+- **`peticion` rellena `perTributario`** con el `periodo` cuando la operación lo exige y su ruta no lo lleva dentro.
+  Es el mismo dato con el nombre de SUNAT, y solo pasa en lo declarado de ventas.
+
+### Cambia
+
+- **`registro_pedir` ya no tiene `verificado`, `params_obligatorios` ni `cod_proceso` de operación entera**: los tres
+  pasan a su forma por libro, porque con ventas dentro un solo valor sería verdad en un libro y mentira en el otro.
+  `peticion` devuelve lo mismo que antes para compras; quien leyera `operaciones()["registro_pedir"]["verificado"]`
+  —la 15.1 salió hoy mismo y solo la usa una aplicación— pregunta ahora `sunat.verificado(…)`.
+
 ## [15.1.0] — 2026-11-01
 
 ### Lo declarado de un periodo, que no es la propuesta

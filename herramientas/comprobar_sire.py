@@ -56,7 +56,7 @@ def comprobar(token: str, registro: str, periodo: str, operaciones: tuple[str, .
                       f"script: toca un mes o declara ante SUNAT.")
                 continue
             try:
-                p = sunat.peticion(nombre, registro=registro, periodo=periodo, **_extras(nombre, periodo))
+                p = sunat.peticion(nombre, registro=registro, periodo=periodo, **_extras(nombre, periodo, registro))
             except Exception as e:  # noqa: BLE001 — una operación que no se puede armar se dice y se sigue
                 print(f"  {nombre:16s} NO SE PUDO ARMAR — {type(e).__name__}: {e}")
                 fallos += 1
@@ -76,15 +76,16 @@ def comprobar(token: str, registro: str, periodo: str, operaciones: tuple[str, .
     return fallos
 
 
-def _extras(operacion: str, periodo: str) -> dict:
+def _extras(operacion: str, periodo: str, registro: str) -> dict:
     """Lo que cada lectura exige además del registro y el periodo, con el valor más inofensivo."""
     # `codTipoArchivo` 0 es el TXT (`libros.cod_tipo_archivo`). Es un 0 de verdad, no un «vacío».
     if operacion in ("excluidos", "no_incluidos"):
         return {"codTipoArchivo": 0}
-    # Lo declarado, con lo que se midió el 01-nov-2026: PEN no deja fuera los dólares, y el periodo de la lista es el
-    # mismo de la ruta. `codProceso` y `codOrigen` los pone `peticion`, porque el catálogo los respalda.
+    # Lo declarado. En compras, con lo que se midió el 01-nov-2026: PEN no deja fuera los dólares, y el periodo de la
+    # lista es el mismo de la ruta. En ventas no hay ni lo uno ni lo otro (5.27). `codProceso`, `codOrigen`,
+    # `perTributario` y `codLibro` los pone `peticion`, porque el catálogo los respalda.
     if operacion == "registro_pedir":
-        return {"codTipoArchivo": 0, "codMoneda": "PEN", "lisPeriodos": periodo}
+        return {"codTipoArchivo": 0, **({"codMoneda": "PEN", "lisPeriodos": periodo} if registro == "compra" else {})}
     return {}
 
 

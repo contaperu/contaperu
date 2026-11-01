@@ -43,8 +43,14 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
     `registro`; `codOrigenEnvio`, que vale `2` («servicio API») desde la v22 del manual —el `1` de los manuales
     anteriores da 422—, y `codOrigen`, que es ese mismo dato con el nombre que le da la descarga de lo declarado; y
     `codProceso` **solo cuando la operación lo exige y declara el suyo** (`registro_pedir`, el 70 medido): el
-    catálogo lo respalda, y quien llama no tiene por qué saber que el manual dice otra cosa. Nada más: un valor que el
-    catálogo no respalde lo pone quien llama — el `codMoneda` y el `lisPeriodos` de lo declarado, por ejemplo.
+    catálogo lo respalda, y quien llama no tiene por qué saber que el manual dice otra cosa; y `perTributario`, cuando
+    la operación lo exige y la ruta no lleva el periodo dentro (lo declarado de ventas): es el `periodo` que llegó, el
+    mismo dato con el nombre de SUNAT. Nada más: un valor que el catálogo no respalde lo pone quien llama — el
+    `codMoneda` y el `lisPeriodos` de lo declarado en compras, por ejemplo.
+
+    **Y por libro, cuando el catálogo lo dice** (15.2.0): una operación puede pedir parámetros distintos y producir un
+    código de proceso distinto en cada libro (`params_obligatorios_por_libro`, `cod_proceso_por_libro`). Es lo que
+    pasa con lo declarado, que en compras y en ventas son dos servicios con la misma pregunta.
 
     **Lo que NO hace:** enviar, firmar, reintentar ni mirar el reloj. Y no toca el token: la credencial viaja con
     quien envía, nunca por aquí.
@@ -70,7 +76,8 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
     # Los huecos de la ruta se llenan con lo que se sabe. `periodo` y `cod_libro` van aparte porque los nombra el
     # estándar; el resto —`indEliminar`— son de la API y llegan por `params`.
     disponibles: dict[str, Any] = {"cod_libro": cod_libro, "periodo": periodo, **params}
-    for hueco in _HUECO.findall(ruta):
+    huecos_de_esta = _HUECO.findall(ruta)
+    for hueco in huecos_de_esta:
         if _vacio(disponibles.get(hueco)):
             raise CatalogoDelSireInvalido(
                 f"La ruta de {operacion!r} necesita {hueco!r} y no llegó: {ruta}")
@@ -79,16 +86,21 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
     usados = set(_HUECO.findall(str(op.get("ruta") or "") + "".join(op.get("ruta_por_libro", {}).values())))
     consulta = {k: v for k, v in params.items() if k not in usados}
 
-    obligatorios = list(op.get("params_obligatorios") or [])
+    obligatorios = list(_del_libro(op, "params_obligatorios", cod_libro) or [])
+    cod_proceso = str(_del_libro(op, "cod_proceso", cod_libro) or "")
     if "codLibro" in obligatorios and "codLibro" not in consulta and cod_libro:
         consulta["codLibro"] = cod_libro
     for nombre in ("codOrigenEnvio", "codOrigen"):      # el mismo dato: la 5.51 lo llama `codOrigen`
         if nombre in obligatorios and nombre not in consulta:
             consulta[nombre] = str(_CATALOGO["cod_origen_envio"]["valor"])
+    # El periodo, con el nombre de SUNAT, donde la ruta no lo lleva dentro y la operación lo exige (lo declarado de
+    # ventas). Si la ruta lo lleva, ya está en ella, y `ticket_archivo` lo recibe de quien recuerda el ticket.
+    if "perTributario" in obligatorios and "perTributario" not in consulta and periodo and "periodo" not in huecos_de_esta:
+        consulta["perTributario"] = periodo
     # El código de proceso va como PARÁMETRO solo donde la operación lo exige y declara el suyo. En `ticket_archivo`
     # también es obligatorio, pero ahí es el de OTRA operación —la que pidió el ticket— y lo pone quien lo recuerda.
-    if "codProceso" in obligatorios and "codProceso" not in consulta and op.get("cod_proceso"):
-        consulta["codProceso"] = str(op["cod_proceso"])
+    if "codProceso" in obligatorios and "codProceso" not in consulta and cod_proceso:
+        consulta["codProceso"] = cod_proceso
     faltan = [p for p in obligatorios if _vacio(consulta.get(p))]
     if faltan:
         raise CatalogoDelSireInvalido(
@@ -104,4 +116,28 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
             # El código de proceso que ESTA operación produce, con el que luego se pide el archivo de su ticket.
             # Se inyecta como parámetro solo donde la propia operación lo exige (arriba); en `ticket_archivo` lo pone
             # quien recuerda de qué operación venía el ticket.
-            "cod_proceso": str(op.get("cod_proceso") or "")}
+            "cod_proceso": cod_proceso}
+
+
+def verificado(operacion: str, *, registro: str = "", cod_libro: str = "") -> str:
+    """La fecha en que esa operación se MIDIÓ contra producción para ese libro, o `""` si no se ha medido.
+
+    Es la pregunta que tiene que hacerse quien automatiza: el SIRE no tiene ambiente de pruebas y sus manuales se
+    contradicen, así que «el catálogo la describe» no es lo mismo que «se la vio responder». Lo declarado (15.2.0) es el
+    caso que lo pide: en compras se midió y en ventas solo está escrita del manual. Una operación medida entera
+    (`verificado`) vale para sus dos libros; una medida por libro (`verificado_por_libro`), solo para los que nombra.
+    """
+    op = _operacion(operacion)
+    if registro and not cod_libro:
+        cod_libro = cod_libro_de(registro)
+    return str(_del_libro(op, "verificado", cod_libro) or "")
+
+
+def _del_libro(op: dict, campo: str, cod_libro: str) -> Any:
+    """El valor de `campo` para ese libro: el de `<campo>_por_libro` si la operación lo declara así, y si no, el de la
+    operación entera. Lo que falta en el de por libro NO cae al general: dos libros que no piden lo mismo no comparten
+    lo que a uno le falta."""
+    por_libro = op.get(f"{campo}_por_libro")
+    if isinstance(por_libro, dict):
+        return por_libro.get(cod_libro)
+    return op.get(campo)

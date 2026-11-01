@@ -90,7 +90,7 @@ def test_lo_declarado_se_pide_con_lo_que_se_midio_y_lo_demas_lo_pone_quien_llama
     assert p["params"] == {"codTipoArchivo": 0, "codMoneda": "PEN", "lisPeriodos": "202609",
                            "codOrigen": "2", "codProceso": "70"}
     assert p["cod_proceso"] == "70"
-    assert sunat.operaciones()["registro_pedir"]["verificado"] == "2026-11-01"
+    assert sunat.verificado("registro_pedir", registro="compra") == "2026-11-01"
     with pytest.raises(CatalogoDelSireInvalido, match="exige codMoneda"):
         sunat.peticion("registro_pedir", registro="compra", periodo="202609", codTipoArchivo=0, lisPeriodos="202609")
     # Quien sabe otro código de proceso puede mandarlo: lo que se rellena no pisa lo que llega.
@@ -109,12 +109,53 @@ def test_el_codigo_de_proceso_de_otra_operacion_no_se_rellena_en_ticket_archivo(
                                               codTipoArchivo=0)["params"]
 
 
-def test_lo_declarado_solo_existe_en_compras():
-    """El RVIE tiene su propia descarga del registro, y no se ha leído ni medido: copiar la ruta de compras sería
-    inventarse una llamada que, cruzada de libro, contesta 500 de nginx y parece una caída de SUNAT."""
-    with pytest.raises(CatalogoDelSireInvalido, match="no tiene ruta para el libro '140000'"):
-        sunat.peticion("registro_pedir", registro="venta", periodo="202609", codTipoArchivo=0, codMoneda="PEN",
-                       lisPeriodos="202609")
+def test_lo_declarado_de_ventas_es_otro_servicio_y_esta_sin_medir():
+    """El RVIE tiene su propia descarga del registro (Ventas v29 5.27), y no se parece a la de compras: otra ruta, el
+    periodo como `perTributario` en la consulta —su ruta no tiene hueco—, el libro como `codLibro`, sin `codMoneda` ni
+    `lisPeriodos`, y el `codProceso` de su ejemplo, el 23 («Generar reporte Libro RVIE»). Todo eso sale del manual y
+    **no se ha medido**: en compras el manual se equivocó en dos cosas, así que su libro no está verificado."""
+    p = sunat.peticion("registro_pedir", registro="venta", periodo="202609", codTipoArchivo=0)
+    assert p["url"].endswith("/rvierce/gestionlibro/web/registroslibros/descarga")
+    assert p["params"] == {"codTipoArchivo": 0, "codLibro": "140000", "codOrigenEnvio": "2",
+                           "perTributario": "202609", "codProceso": "23"}
+    assert p["cod_proceso"] == "23"
+    assert sunat.verificado("registro_pedir", registro="venta") == ""
+    # Lo de compras no se le contagia: sin `codTipoArchivo` se niega, y no pide lo que solo pide el otro libro.
+    with pytest.raises(CatalogoDelSireInvalido, match="exige codTipoArchivo"):
+        sunat.peticion("registro_pedir", registro="venta", periodo="202609")
+
+
+def test_lo_medido_se_pregunta_por_libro():
+    """`verificado` es la pregunta de quien automatiza: el catálogo describe muchas operaciones que nadie ha visto
+    responder. Medida entera, vale para los dos libros; medida por libro, solo para los que nombra."""
+    assert sunat.verificado("periodos", registro="venta") == sunat.verificado("periodos", registro="compra") == "2026-11-01"
+    assert sunat.verificado("propuesta_pedir", registro="compra") == ""
+    assert sunat.verificado("registro_pedir", cod_libro="080000") == "2026-11-01"
+
+
+def test_lo_que_falta_en_un_libro_no_cae_al_valor_general():
+    """Si una operación declara un campo POR LIBRO, el libro que no aparece no hereda el general: dos libros que no piden
+    lo mismo no comparten lo que a uno le falta. Ninguna operación del catálogo tiene hoy los dos, así que se prueba
+    con una hecha a mano —el día que alguna los tenga, ésta es la regla—."""
+    from contaperu.sunat.peticiones import _del_libro
+
+    op = {"verificado": "2026-01-01", "verificado_por_libro": {"080000": "2026-11-01"}}
+    assert _del_libro(op, "verificado", "080000") == "2026-11-01"
+    assert _del_libro(op, "verificado", "140000") is None
+    assert _del_libro({"verificado": "2026-01-01"}, "verificado", "140000") == "2026-01-01"
+
+
+def test_lo_que_va_por_libro_solo_habla_de_libros_con_ruta():
+    """Un parámetro o una verificación de un libro sin ruta es un dato que nadie va a usar y que alguien va a creer: el
+    catálogo no arranca así."""
+    import copy
+
+    from contaperu.sunat import catalogo
+
+    tabla = copy.deepcopy(sunat.sire_api())
+    tabla["operaciones"]["excluidos"]["verificado_por_libro"] = {"140000": "2026-11-01"}   # excluidos es solo de compras
+    with pytest.raises(CatalogoDelSireInvalido, match="verificado_por_libro"):
+        catalogo._valido(tabla)
 
 
 def test_el_estado_de_un_periodo_dice_si_hay_algo_declarado_que_bajar():

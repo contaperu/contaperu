@@ -145,13 +145,18 @@
     "registro_pedir": {
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
       "ruta_por_libro": {
-        "080000": "rce/ajustesposteriores/web/ajustesposteriores/{periodo}/solicitardescarga"
+        "080000": "rce/ajustesposteriores/web/ajustesposteriores/{periodo}/solicitardescarga",
+        "140000": "rvierce/gestionlibro/web/registroslibros/descarga"
       },
-      "params_obligatorios": ["codTipoArchivo", "codMoneda", "codProceso", "codOrigen", "lisPeriodos"],
-      "cod_proceso": "70",
-      "fuente": "Compras v28 5.51",
-      "verificado": "2026-11-01",
-      "_nota": "LO DECLARADO de un periodo: el registro que se GENERÓ en SOL, que no es la propuesta. La propuesta es el borrador de SUNAT, sigue viva y se actualiza a diario aunque el mes ya esté generado: en un RUC real, la de setiembre de 2026 traía 3 040 comprobantes y lo generado, 1 326. Devuelve un ticket, y el archivo se baja con `ticket_archivo`, como la propuesta. Lo que se MIDIÓ contra producción el 01-nov-2026, que es más de lo que el manual sostiene: (1) `codMoneda` es obligatorio aunque el manual no lo marque —sin él responde 1061— y con `PEN` llegan también los comprobantes en dólares; (2) el manual describe `codProceso` con 00 (no domiciliados), 01 (se aceptó la propuesta) y 02 (se reemplazó), y su propio ejemplo manda 70: el 70 es el que respondió; (3) `lisPeriodos` con el mismo periodo de la ruta; (4) el ticket termina en 06 con un ZIP de DOS TXT: el registro de compras —080400 en el nombre—, con el formato de la exportación de la propuesta (cabecera, las 41 columnas y CLU1 a CLU39), que `comprobantes.sire_txt` lee tal cual; y el de no domiciliados —080500—, con el suyo (cabecera, 35 columnas y CLU1 a CLU10), que el motor todavía no lee y la lectura de archivos devuelve en `no_leidos`, con sus filas contadas. Solo compras: el RVIE tiene su propia descarga del registro y no se ha leído ni medido."
+      "params_obligatorios_por_libro": {
+        "080000": ["codTipoArchivo", "codMoneda", "codProceso", "codOrigen", "lisPeriodos"],
+        "140000": ["perTributario", "codOrigenEnvio", "codTipoArchivo", "codProceso", "codLibro"]
+      },
+      "cod_proceso_por_libro": {"080000": "70", "140000": "23"},
+      "fuente": "Compras v28 5.51 · Ventas v29 5.27",
+      "verificado_por_libro": {"080000": "2026-11-01"},
+      "_nota_ventas": "VENTAS (15.2.0), del manual y SIN MEDIR: la 5.27, «descargar RVIE por periodo». No se parece a la de compras: otra ruta, el periodo como `perTributario` y el libro como `codLibro` en la consulta, sin `codMoneda` ni `lisPeriodos`, y el `codProceso` de su ejemplo es el 23, «Generar reporte Libro RVIE» en el Anexo I. En compras el manual se equivocó en dos cosas que solo se vieron al medir, así que su libro **no está en `verificado_por_libro`** y quien lo use solo debería hacerlo para medirlo.",
+      "_nota": "LO DECLARADO de un periodo: el registro que se GENERÓ en SOL, que no es la propuesta. La propuesta es el borrador de SUNAT, sigue viva y se actualiza a diario aunque el mes ya esté generado: en un RUC real, la de setiembre de 2026 traía 3 040 comprobantes y lo generado, 1 326. Devuelve un ticket, y el archivo se baja con `ticket_archivo`, como la propuesta. Lo que se MIDIÓ contra producción el 01-nov-2026, que es más de lo que el manual sostiene: (1) `codMoneda` es obligatorio aunque el manual no lo marque —sin él responde 1061— y con `PEN` llegan también los comprobantes en dólares; (2) el manual describe `codProceso` con 00 (no domiciliados), 01 (se aceptó la propuesta) y 02 (se reemplazó), y su propio ejemplo manda 70: el 70 es el que respondió; (3) `lisPeriodos` con el mismo periodo de la ruta; (4) el ticket termina en 06 con un ZIP de DOS TXT: el registro de compras —080400 en el nombre—, con el formato de la exportación de la propuesta (cabecera, las 41 columnas y CLU1 a CLU39), que `comprobantes.sire_txt` lee tal cual; y el de no domiciliados —080500—, con el suyo (cabecera, 35 columnas y CLU1 a CLU10), que el motor todavía no lee y la lectura de archivos devuelve en `no_leidos`, con sus filas contadas. Lo de ventas, en `_nota_ventas`. **Los parámetros, el código de proceso y lo verificado van POR LIBRO** (`params_obligatorios_por_libro`, `cod_proceso_por_libro`, `verificado_por_libro`): en esta operación los dos libros no piden lo mismo, y un solo valor para los dos sería verdad en uno y mentira en el otro."
     }
   },
 
