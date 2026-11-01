@@ -1498,7 +1498,7 @@
      "tipo_nota": {
       "type": "string",
       "maxLength": 2,
-      "description": "Por qué se emitió la nota: el Catálogo 09 de SUNAT si es de crédito (07, 87, 97) y el 10 si es de débito (08, 88, 98) — dos tablas distintas, y el «01» significa cosas opuestas en cada una. Vacío = el documento no lo dice, que es lo habitual; un código que no esté en el catálogo se avisa y se respeta. SIN patrón numérico a propósito: el anexo del RVIE lo declara numérico y el del RCE alfanumérico, así que el estándar admite los dos. NO viaja en el TXT del SIRE: la norma dice que ese campo no se considera para construirlo. Y OJO: el «01» del Catálogo 09 dice que la nota anula el comprobante que referencia, no que la nota esté anulada."
+      "description": "Por qué se emitió la nota: el Catálogo 09 de SUNAT si es de crédito (07, 87) y el 10 si es de débito (08, 88) — dos tablas distintas, y el «01» significa cosas opuestas en cada una. Vacío = el documento no lo dice, que es lo habitual; un código que no esté en el catálogo se avisa y se respeta. SIN patrón numérico a propósito: el anexo del RVIE lo declara numérico y el del RCE alfanumérico, así que el estándar admite los dos. NO viaja en el TXT del SIRE: la norma dice que ese campo no se considera para construirlo. Y OJO: el «01» del Catálogo 09 dice que la nota anula el comprobante que referencia, no que la nota esté anulada."
      },
      "ref_fecha": {
       "$ref": "#/components/schemas/OpenAccounting_fecha"

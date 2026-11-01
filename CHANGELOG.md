@@ -48,6 +48,10 @@ la forma de su fila —el periodo, el CAR y la fecha— o por el código de su n
   había llegado ninguna; llegan con el registro que se empezó a leer en esta versión.
 - **La 87 y la 88 no se tocaron en el asiento**, y queda dicho en `catalogos/comprobantes.py`: restan en el resumen
   pero no invierten ni llevan referencia. Es una pregunta abierta, porque «especial» puede querer decir justo eso.
+- **Lo que NO se corrigió todavía: la descripción de `tipo_nota` en el esquema del estándar**, que sigue diciendo «de
+  crédito (07, 87)». Es texto, no regla —el catálogo de motivos lo elige `motivos_de_nota`, que ya cubre la 97—, y
+  cambiarlo obligaría a mover el tag `open-accounting-4.0`, que ya está publicado. Entra con la próxima versión del
+  estándar.
 
 ## [15.2.1] — 2026-11-01
 
