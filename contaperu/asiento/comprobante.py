@@ -226,10 +226,10 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     `vocabulario="neutral"` (1.1) arma las mismas líneas —las mismas cuentas, sentidos, importes y roles— sin el
     vocabulario de un sistema legacy: sin sub-diario ni correlativo, sin la sigla del documento ni de su referencia, y
     con la detracción sobre el propio comprobante en vez del documento comodín `DR` y `9999999999`."""
-    # Lo que no mueve dinero no tiene asiento que armar, y se decide ANTES de pedir cuentas: un comprobante dado de
-    # baja por SUNAT llega con todos sus importes en cero, y hasta la 3.5.0 pedía cuenta contable para acabar
-    # produciendo dos líneas a `0.00` que cuadraban entre sí. Se puede volver al comportamiento anterior con
-    # `asentar_sin_efecto_contable`. El comprobante sigue en el registro que se declara a SUNAT: eso no lo decide aquí.
+    # Lo que no mueve dinero se asienta con sus líneas a `0.00` —el de fábrica desde la 15.0: un estudio registra lo
+    # que SUNAT declara en cero para que su sistema cuadre con el registro de SUNAT—, salvo con
+    # `asentar_sin_efecto_contable` apagado, que es lo de la 3.5.0 a la 14.x: entonces no hay asiento que armar, y se
+    # decide ANTES de pedir cuentas. El comprobante sigue en el registro que se declara a SUNAT: eso no lo decide aquí.
     if sin_efecto_contable(c) and not asienta_sin_efecto(config):
         return []
     neutral = vocabulario == "neutral"

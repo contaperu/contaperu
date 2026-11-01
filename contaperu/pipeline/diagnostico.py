@@ -359,8 +359,9 @@ def _del_registro(doc: dict, libro: Libro, modulo: Any, driver: str, *, configur
     candidatos = [c for c in todos if not c.excluida and c not in fuera]
     con_error = [c for c in candidatos if c.tiene_errores]
     con_aviso = [c for c in candidatos if c.observaciones and not c.tiene_errores]
-    # Los que no llevan asiento porque no mueven dinero (`asiento.sin_efecto_contable`): siguen en el registro, pero no
-    # se les pide cuenta ni centro. Se cuentan para que una pantalla pueda decir «3 dados de baja» en vez de callarlos.
+    # Los que no llevan asiento porque no mueven dinero, con `asentar_sin_efecto_contable` apagado: siguen en el
+    # registro, pero no se les pide cuenta ni centro. Se cuentan para que una pantalla pueda decir «3 dados de baja» en
+    # vez de callarlos. Encendido —el de fábrica desde la 15.0— la casilla se queda en 0, porque se asientan.
     sin_asiento = [c for c in candidatos if c not in asi.con_efecto_contable(candidatos, config)]
 
     # Lo que se mira: lo que ese destino exige y, además, lo que solo informa —la cuenta y el centro a todo el que lleva
@@ -443,7 +444,7 @@ def _del_registro(doc: dict, libro: Libro, modulo: Any, driver: str, *, configur
         # `sin_efecto_contable` (3.5.0) es su propia casilla y no se suma a `fuera_del_destino`, que significa otra
         # cosa: «este destino no lleva ese tipo de comprobante». Estos sí salen en el registro —el correlativo de SUNAT
         # los necesita—; lo que no tienen es asiento, así que no piden cuenta ni gastan vóucher. Con
-        # `asentar_sin_efecto_contable` encendido la casilla se queda en 0, porque entonces sí se asientan.
+        # `asentar_sin_efecto_contable` encendido —el de fábrica desde la 15.0— la casilla se queda en 0.
         "totales": {"comprobantes": len(todos), "saldrian": len(saldrian), "excluidos": len(excluidos),
                     "fuera_del_destino": len(fuera), "sin_efecto_contable": len(sin_asiento),
                     "con_error": len(con_error), "con_aviso": len(con_aviso)},

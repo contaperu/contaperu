@@ -4,6 +4,50 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.0.0] — 2026-10-31
+
+### El comprobante en cero se asienta de fábrica
+
+**Por qué es una mayor.** No cambia ninguna forma ni ningún nombre: cambia lo que hace el de fábrica. Un
+comprobante sin efecto contable —total, IGV y retención en cero, y sin detracción; el que SUNAT declara en cero
+cuando el contribuyente lo da de baja— **sale en el asiento** con sus líneas a `0.00` (en una venta, `12` al debe y
+`70` al haber), gasta su número de vóucher y **se le pide lo mismo que a cualquier otro**. Quien integre y tenga
+uno así sin cuenta verá que su exportación a CONCAR, que ayer salía, hoy se planta en `SinCuenta`. Eso es
+incompatible aunque no se rompa ninguna clave, y por SemVer va como mayor.
+
+**Lo que lo trajo.** Un estudio generó el Excel de CONCAR de un mes de ventas y la factura que su cliente dio de
+baja no salió: «12 DEBE 0 / 7011 HABER 0 así debe salir». El estudio registra en su sistema lo que SUNAT declara en
+cero, para que su registro cuadre con el de SUNAT, y traer esos comprobantes es decisión de quien importa: ponerles
+lo que su sistema pide también lo es. La clave `asentar_sin_efecto_contable` existía desde la 3.5.0, pero apagada
+de fábrica, y la aplicación que integra el motor no la enseñaba.
+
+**Lo que se pide es lo de su sistema, sin una regla aparte para el cero.** Lo decide lo que exige cada destino con
+la configuración del entorno, igual que a una factura con importes en la misma situación: CONCAR, la cuenta, y el
+centro solo si esa cuenta lo lleva y los centros están encendidos; CONTASIS, STARSOFT, el CSV y el asiento neutral,
+la cuenta; el SIRE, nada, porque el registro de SUNAT no lleva cuentas. Una prueba lo compara caso a caso —seis
+destinos por cinco situaciones— y otra ancla lo que se pide, en el diagnóstico y al exportar, para que la
+comparación no pase en verde si los dos cambiaran a la vez.
+
+**Lo que no cambia.** El comprobante sigue en el registro que se declara a SUNAT, con la clave encendida o apagada.
+Lo que mueve dinero se asienta siempre. Y lo que decide sigue siendo el importe, no el estado que SUNAT le ponga.
+
+**El código.** Solo cambia el de fábrica: el `Campo` de `configuracion.py` y `asiento.asienta_sin_efecto`, que con
+la clave ausente ahora dice que sí, así que una configuración guardada antes de la 15.0 también asienta. Lo demás ya
+leía el interruptor desde la 3.5.0 —`lineas_del_comprobante`, `faltantes_para`, `numerar_en_orden` y la casilla
+`totales.sin_efecto_contable` del diagnóstico, que con el de fábrica se queda en 0—. Los esquemas no se tocan:
+describen la casilla de los que no llevan asiento, y eso sigue siendo verdad. La enmienda 0015 del estándar lo
+cuenta como era entonces, apagado, y se queda así: es historia.
+
+**Y las promesas pasan a la 15.x.** `contaperu.api` no cambia de nombre ni de firma hasta la 16.0. No había nada
+avisando con `RutaObsoleta`, así que esta mayor no retira nada y `_obsoleto.RETIRO` pasa a `"16.0"`, como la 5.0.
+
+### Cómo migrar
+
+- **Quien quiera lo de la 3.5.0 a la 14.x** —sin asiento, sin cuenta ni centro y sin gastar número— lo escribe en
+  la configuración general: `"asentar_sin_efecto_contable": false`.
+- **Quien suba sin tocar nada**: un comprobante en cero sin cuenta detiene la exportación a un destino que exige
+  cuenta, como cualquier otro. Se le pone su cuenta —y su centro, si su sistema lo pide— o se apaga la clave.
+
 ## [14.3.0] — 2026-10-28
 
 ### Una tasa de IGV que rige HOY ya no se avisa

@@ -51,8 +51,9 @@ def tiene_detraccion(c: Comprobante) -> bool:
 def sin_efecto_contable(c: Comprobante) -> bool:
     """¿Este comprobante no mueve dinero? Total, IGV y retención en cero, y sin detracción.
 
-    Es lo que decide que no pida cuenta contable ni centro, que no gaste un número de vóucher y que no produzca líneas
-    de asiento —salvo que la configuración diga lo contrario (`asentar_sin_efecto_contable`, apagado de fábrica)—.
+    **Con `asentar_sin_efecto_contable` apagado** es lo que decide que no pida cuenta contable ni centro, que no gaste
+    un número de vóucher y que no produzca líneas de asiento. **Encendido —el de fábrica desde la 15.0—** sale en el
+    asiento con sus líneas a cero y se le pide lo mismo que a cualquier otro comprobante.
 
     **Decide por el importe y no por lo que SUNAT diga del comprobante**, y eso es el punto: el «Est. Comp» del SIRE
     viene sin tabla de valores publicada, así que apoyarse en él sería inventarle un significado, mientras «no mueve
@@ -70,8 +71,9 @@ def sin_efecto_contable(c: Comprobante) -> bool:
 
 
 def asienta_sin_efecto(config: dict | None = None) -> bool:
-    """¿La configuración pide asentar igual lo que no mueve dinero? De fábrica, no."""
-    return bool((config or {}).get("asentar_sin_efecto_contable", False))
+    """¿La configuración pide asentar igual lo que no mueve dinero? **De fábrica, sí** (15.0): una clave ausente es
+    el de fábrica, y solo un `false` escrito vuelve a lo de antes."""
+    return bool((config or {}).get("asentar_sin_efecto_contable", True))
 
 
 def con_efecto_contable(comprobantes: list[Comprobante], config: dict | None = None) -> list[Comprobante]:

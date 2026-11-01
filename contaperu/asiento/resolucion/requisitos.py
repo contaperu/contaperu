@@ -145,10 +145,12 @@ def faltantes_para(comprobantes: list[Comprobante], config: dict, libro: Rasgos 
     No lanza: describe. Es la misma comprobación que `exigir_requisitos` hace cumplir, y la que
     `diagnosticar` cuenta por serie-número; una sola lista de reglas para las tres.
 
-    **Lo que no mueve dinero no se le pide a nadie** (`sin_efecto_contable`): un comprobante dado de baja por SUNAT
-    llega con todos sus importes en cero y no hay cuenta, centro ni reparto que ponerle. Se filtra aquí, en el único
-    sitio donde se decide qué le falta a una imputación, y no en cada regla por separado. La sigla y el código de
-    moneda **sí se le siguen pidiendo**: los escribe también un driver de registro, que no arma ningún asiento.
+    **Lo que no lleva asiento no se le pide a nadie** (`con_efecto_contable`): con `asentar_sin_efecto_contable`
+    apagado, un comprobante dado de baja por SUNAT llega con todos sus importes en cero y no hay cuenta, centro ni
+    reparto que ponerle. **Encendido —el de fábrica desde la 15.0— se le pide lo mismo que a cualquiera**, porque
+    entonces sí lleva asiento. Se decide aquí, en el único sitio donde se decide qué le falta a una imputación, y no en
+    cada regla por separado. La sigla y el código de moneda se le piden siempre: los escribe también un driver de
+    registro, que no arma ningún asiento.
     """
     de_la_imputacion = con_efecto_contable(comprobantes, config)
     salida: dict[str, list] = {}

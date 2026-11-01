@@ -1,12 +1,14 @@
-"""El comprobante que no mueve dinero: sale en el registro y no lleva asiento (3.5.0).
+"""El comprobante que no mueve dinero: sale en el registro, y desde la 15.0 también en el asiento con sus líneas a cero.
 
 Nace de un mes real declarado ante SUNAT. Cuando un contribuyente da de baja un comprobante, SUNAT **no lo quita del
 registro**: lo declara con todos sus importes en cero —hasta el tipo de cambio— para que el correlativo no quede con
 huecos. En un registro de ventas de 52 filas eran cinco: tres facturas y dos notas de crédito.
 
-El motor los trataba como comprobantes normales de importe cero, y eso dejaba dos salidas y las dos malas: o se
-quedaban sin cuenta contable y el mes no cerraba nunca, o se les inventaba una y entraban al Excel como **dos líneas de
-asiento a `0.00`** con su número de vóucher gastado.
+De la 3.5.0 a la 14.x el motor los apartaba del asiento: no pedían cuenta ni centro, no gastaban número de vóucher y no
+producían líneas. **Desde la 15.0 se asientan de fábrica** (John, 31-oct-2026): «12 DEBE 0 / 7011 HABER 0 así debe
+salir». Un estudio registra en su sistema lo que SUNAT declara en cero, para que su registro cuadre con el de SUNAT, y
+traerlo es decisión de quien importa: por eso **se le pide lo que exija su sistema, como a cualquier otro**, y no una
+regla aparte. Lo de antes sigue con `asentar_sin_efecto_contable: false`, y sus pruebas lo piden así, explícito.
 
 **Lo que decide es el importe, no lo que SUNAT diga del comprobante.** El «Est. Comp» del SIRE se transporta y se
 enseña, pero no manda: la norma no publica su tabla de valores, así que decidir con él sería inventarle un significado.
@@ -16,6 +18,8 @@ una foto o dictado por un ERP, que no trae estado ninguno.
 from __future__ import annotations
 
 from datetime import date
+
+import pytest
 
 from contaperu import api, asiento as asi
 from contaperu.tributos import validar
@@ -28,6 +32,7 @@ from contaperu.modelo.libro import RASGOS
 from util import comprobante, con_imputaciones, en_secciones, por_la_fachada
 
 CONTAB = con_imputaciones(prep.config_aplicada(en_secciones(None, "concar"), "concar"))
+APAGADO = {**CONTAB, "asentar_sin_efecto_contable": False}      # lo de la 3.5.0 a la 14.x
 MES = (date(2026, 2, 1), date(2026, 2, 28))
 VENTAS = Libro(ruc="20601111111", razon_social="EMPRESA DE PRUEBA SAC", periodo="202602", tipo="venta")
 
@@ -47,83 +52,56 @@ def dado_de_baja(**kw) -> Comprobante:
     return comprobante(**{**base, **kw})
 
 
+def la_venta_de_al_lado() -> Comprobante:
+    return comprobante(tipo_cp="01", serie="F001", numero="118", fecha_emision="2026-02-11",
+                       contraparte_doc="20602222226", contraparte_nombre="CLIENTE DE PRUEBA SAC",
+                       base_gravada="100", igv="18", total="118", cuenta_contable="701101", centro_costo="CC-64")
+
+
 def lineas(c: Comprobante, config: dict = CONTAB) -> list:
     return motor.lineas_del_comprobante(c, config, MES, "0001", opciones=driver_concar.OPCIONES, libro=RASGOS["venta"])
 
 
-# ── El asiento ─────────────────────────────────────────────────────────────────────────────────────────────────
-
-def test_un_comprobante_en_cero_no_produce_asiento():
-    """Antes salían dos líneas a `0.00` que cuadraban entre sí: `121201 D 0.00` y `701101 H 0.00`. Un vóucher con dos
-    líneas en cero no es contabilidad, es ruido en el diario."""
-    assert lineas(dado_de_baja()) == []
+def en_texto(ls: list) -> list[tuple[str, str, str]]:
+    return [(linea.cuenta, linea.debe_haber, linea.importe) for linea in ls]
 
 
-def test_un_comprobante_en_cero_no_pide_cuenta_ni_centro():
-    """Y esto es lo que de verdad dolía: a un comprobante dado de baja no se le pone cuenta, así que el mes se quedaba
-    incompleto para siempre. Se comprueba sin cuenta Y sin centro, que son las dos cosas que se le pedían."""
-    c = dado_de_baja(cuenta_contable="", centro_costo="")
-    assert lineas(c) == []                                        # antes: SinCuenta
-    assert asi.comprobantes_sin_cuenta([c], CONTAB, RASGOS["venta"]) == [c]   # la regla suelta sigue diciendo la verdad…
-    # …y lo que cuenta es que `faltantes_para`, que es por donde pasan los tres caminos (diagnóstico, exportación y
-    # `exigir_requisitos`), ya no lo pide.
-    faltan = asi.faltantes_para([c], CONTAB, RASGOS["venta"], exige={"cuenta_contable", "centro_costo"})
-    assert faltan["sin_cuenta"] == [] and faltan["sin_centro"] == []
+# ── De fábrica (15.0): se asienta, con sus líneas a cero ───────────────────────────────────────────────────────────
+
+def test_de_fabrica_un_comprobante_en_cero_sale_en_el_asiento_con_sus_lineas_a_cero():
+    """Lo que John pidió al ver que su venta dada de baja faltaba en el Excel de CONCAR: «12 DEBE 0 / 7011 HABER 0 así
+    debe salir». Y una clave AUSENTE es el de fábrica: solo un `false` escrito vuelve a lo de antes, así que una
+    configuración guardada antes de la 15.0, que no la tiene, también asienta."""
+    esperado = [("121201", "D", "0.00"), ("701101", "H", "0.00")]
+    assert en_texto(lineas(dado_de_baja())) == esperado
+    sin_la_clave = {k: v for k, v in CONTAB.items() if k != "asentar_sin_efecto_contable"}
+    assert en_texto(lineas(dado_de_baja(), sin_la_clave)) == esperado
+    assert asi.asienta_sin_efecto(None) is True and asi.asienta_sin_efecto({}) is True
+    # La clave viaja en la configuración general y está declarada, así que una aplicación la puede pintar y apagar.
+    assert api.configuracion_por_defecto()["asentar_sin_efecto_contable"] is True
+    assert api.errores_de_configuracion({"asentar_sin_efecto_contable": False}) == []
 
 
-def test_un_comprobante_en_cero_no_gasta_un_numero_de_voucher():
-    """Si consumiera uno, el asiento tendría un vóucher sin líneas y el rango que se recuerda para el mes siguiente
-    contaría comprobantes que nunca se escribieron."""
-    venta = comprobante(tipo_cp="01", serie="F001", numero="118", fecha_emision="2026-02-11",
-                        contraparte_doc="20602222226", contraparte_nombre="CLIENTE DE PRUEBA SAC",
-                        base_gravada="100", igv="18", total="118", cuenta_contable="701101", centro_costo="CC-64")
-    numeros, rangos = asi.numerar_en_orden([dado_de_baja(), venta], CONTAB, "202602", {"05": 1}, libro=RASGOS["venta"])
-    assert numeros == ["", "020001"]                              # el suyo en blanco; el 1 se lo lleva la venta
-    assert rangos["05"]["comprobantes"] == 1 and rangos["05"]["hasta"] == 1
+def test_de_fabrica_gasta_su_numero_de_voucher():
+    """Si sale en el asiento, sale con su vóucher: el correlativo de CONCAR no puede saltarse un asiento que existe, y
+    el rango que se recuerda para el mes siguiente cuenta los dos."""
+    numeros, rangos = asi.numerar_en_orden([dado_de_baja(), la_venta_de_al_lado()], CONTAB, "202602", {"05": 1},
+                                           libro=RASGOS["venta"])
+    assert numeros == ["020001", "020002"]
+    assert rangos["05"]["comprobantes"] == 2 and rangos["05"]["hasta"] == 2
 
 
-def test_lo_que_mueve_dinero_sigue_asentandose():
-    """Los tres casos que NO se apartan, y el segundo es el que más importa: total cero con IGV distinto de cero existe
-    de verdad —una nota de crédito que SUNAT tiene con la base sin declarar— y ahí sí hay algo que mirar."""
-    normal = dado_de_baja(base_gravada="100", igv="18", total="118")
-    assert len(lineas(normal)) == 3
-    con_igv = dado_de_baja(igv="18")                              # total 0 pero IGV 18
-    assert len(lineas(con_igv)) == 3
-    con_detraccion = dado_de_baja(detraccion={"codigo": "022", "porcentaje": "12", "monto": "0"})
-    assert lineas(con_detraccion) != []
-    con_retencion = dado_de_baja(tipo_cp="02", serie="R001", retencion_4ta="10")
-    assert asi.sin_efecto_contable(con_retencion) is False
+def test_de_fabrica_sin_cuenta_se_planta_como_cualquier_otro():
+    """La cara del paquete que se nota: sin cuenta, el asiento no se arma —igual que el de una factura con importes—,
+    porque traerlo fue decisión de quien importa y ponerle lo que su sistema pide también lo es."""
+    sin_cuenta = dado_de_baja(cuenta_contable="", centro_costo="")
+    with pytest.raises(asi.SinCuenta):
+        lineas(sin_cuenta)
+    faltan = asi.faltantes_para([sin_cuenta], CONTAB, RASGOS["venta"], exige={"cuenta_contable", "centro_costo"})
+    assert faltan["sin_cuenta"] == [sin_cuenta]
 
 
-def test_el_predicado_no_mira_el_estado_de_sunat():
-    """**El test que impide que esto se apoye en un código sin tabla publicada.** El mismo comprobante en cero se
-    aparta igual con estado «2», con «1», con uno inventado o sin estado — y uno que mueve dinero se asienta igual
-    aunque SUNAT lo marque con «2»."""
-    for estado in ("2", "1", "", "9", "a1"):
-        assert asi.sin_efecto_contable(dado_de_baja(estado_sunat=estado)) is True
-        assert lineas(dado_de_baja(estado_sunat=estado)) == []
-    # Y al revés: el estado no aparta a quien sí mueve dinero.
-    assert lineas(dado_de_baja(estado_sunat="2", base_gravada="100", igv="18", total="118")) != []
-
-
-def test_con_la_opcion_encendida_vuelve_a_asentarse():
-    """Configurable por quien integre el ERP (John, 26-sep-2026), con el comportamiento nuevo por defecto. Quien
-    quiera esas líneas en cero las tiene con una clave, y sin tocar el motor."""
-    con_opcion = {**CONTAB, "asentar_sin_efecto_contable": True}
-    assert [(l.cuenta, l.debe_haber, l.importe) for l in lineas(dado_de_baja(), con_opcion)] == [
-        ("121201", "D", "0.00"), ("701101", "H", "0.00")]
-    # Y entonces vuelve a pedir cuenta y a gastar número, que es el paquete entero.
-    faltan = asi.faltantes_para([dado_de_baja(cuenta_contable="")], con_opcion, RASGOS["venta"],
-                                exige={"cuenta_contable"})
-    assert len(faltan["sin_cuenta"]) == 1
-    numeros, _ = asi.numerar_en_orden([dado_de_baja()], con_opcion, "202602", {"05": 1}, libro=RASGOS["venta"])
-    assert numeros == ["020001"]
-    # La clave viaja en la configuración general y está declarada, así que una aplicación la puede pintar.
-    assert "asentar_sin_efecto_contable" in api.configuracion_por_defecto()
-    assert api.errores_de_configuracion({"asentar_sin_efecto_contable": True}) == []
-
-
-# ── El registro: ahí sí sale ────────────────────────────────────────────────────────────────────────────────────
+# ── Lo que se le pide: lo de su sistema, ni más ni menos ───────────────────────────────────────────────────────────
 
 def fila(**kw) -> dict:
     """El comprobante como lo manda una aplicación, con su cuenta y su centro: `por_la_fachada` los convierte en su
@@ -137,25 +115,99 @@ def fila(**kw) -> dict:
 
 LA_VENTA = dict(numero="118", base_gravada="100", igv="18", total="118", estado_sunat="1")
 
+# Cada situación: lo que le falta al comprobante y la configuración del entorno. `70` lleva centro de fábrica
+# (`cuentas_con_centro`), así que la tercera lo quita de la lista para que la cuenta NO lo lleve.
+SITUACIONES = {
+    "sin cuenta": (dict(cuenta_contable="", centro_costo=""), None),
+    "sin centro en una cuenta que lo lleva": (dict(centro_costo=""), None),
+    "sin centro en una cuenta que no lo lleva": (dict(centro_costo=""), {"cuentas_con_centro": ["62", "63", "65"]}),
+    "sin centro con los centros apagados": (dict(centro_costo=""), {"usa_centros_costo": False}),
+    "con todo puesto": ({}, None),
+}
+DESTINOS = ("concar", "contasis", "starsoft", "csv", "asiento_contable", "sire")
 
-def test_un_comprobante_en_cero_sigue_en_el_registro_del_sire():
-    """**El hecho central**: el asiento es una cosa y el registro es otra. SUNAT declara lo que se da de baja en cero
-    precisamente para no dejar huecos en el correlativo, así que quitarlo del TXT sería romper lo que se declara."""
-    r = exportar({"open_accounting": "4.0", "libro": LIBRO, "comprobantes": [fila(), fila(**LA_VENTA)]},
-                 driver="sire")
-    assert r["comprobantes"] == 2
-    filas = r["texto"].splitlines()
-    assert len(filas) == 2
-    assert filas[0].split("|")[8] == "117"      # el dado de baja tiene su fila, con su número…
-    assert filas[0].split("|")[25] == "0.00"    # …y su total en cero, como lo tiene SUNAT
+
+def veredicto(driver: str, situacion: str, **importes) -> tuple:
+    """Lo que el diagnóstico dice de UN comprobante en esa situación: si está listo, por qué no, y cuántos caen en cada
+    falta. Sin el serie-número, para poder compararlo con el de otro comprobante."""
+    cambio, config = SITUACIONES[situacion]
+    d = diagnosticar({"open_accounting": "4.0", "libro": LIBRO, "comprobantes": [fila(**{**importes, **cambio})]},
+                     driver=driver, configuracion=config)
+    return d["listo_para_exportar"], d["por_que_no"], {falta: len(cuales) for falta, cuales in d["faltantes"].items()}
 
 
-def test_el_diagnostico_los_cuenta_aparte_y_el_mes_esta_listo():
+@pytest.mark.parametrize("driver", DESTINOS)
+@pytest.mark.parametrize("situacion", list(SITUACIONES))
+def test_de_fabrica_se_le_pide_lo_mismo_que_a_una_factura_con_importes(driver, situacion):
+    """**El corazón del cambio** (John: «un comprobante en cero sí debe pedir lo que la configuración de cada sistema
+    lo diga»). No hay una regla aparte para el cero: cada destino con la configuración del entorno decide, y el
+    comprobante en cero recibe exactamente el veredicto de una factura con importes en la misma situación."""
+    assert veredicto(driver, situacion) == veredicto(driver, situacion, **LA_VENTA)
+
+
+def test_lo_que_pide_cada_sistema_es_lo_de_siempre():
+    """La comparación de arriba pasaría en verde si el cero y la factura dejaran de pedir lo mismo A LA VEZ; esto ancla
+    lo que se le pide al comprobante en cero, destino por destino. CONCAR, la cuenta, y el centro solo si esa cuenta lo
+    lleva y los centros están encendidos; CONTASIS, la cuenta y nunca el centro, porque no lo exige; el SIRE, nada,
+    porque el registro de SUNAT no lleva cuentas."""
+    por_que_no = {
+        ("concar", "sin cuenta"): ["1 sin cuenta contable"],
+        ("concar", "sin centro en una cuenta que lo lleva"): ["1 sin centro de costo en una cuenta que lo lleva"],
+        ("concar", "sin centro en una cuenta que no lo lleva"): [],
+        ("concar", "sin centro con los centros apagados"): [],
+        ("contasis", "sin cuenta"): ["1 sin cuenta contable"],
+        ("contasis", "sin centro en una cuenta que lo lleva"): [],
+        ("sire", "sin cuenta"): [],
+    }
+    for (driver, situacion), esperado in por_que_no.items():
+        listo, motivos, _ = veredicto(driver, situacion)
+        assert (listo, motivos) == (not esperado, esperado), (driver, situacion)
+        # Y al exportar, que es lo que se vive: el archivo sale con él, o se planta con la falta de su sistema. El
+        # diagnóstico solo cuenta lo que el destino exige, pero la exportación lo hace cumplir por su lado.
+        cambio, config = SITUACIONES[situacion]
+        doc = {"open_accounting": "4.0", "libro": LIBRO, "comprobantes": [fila(**cambio)]}
+        if esperado:
+            with pytest.raises(asi.NoExportable):
+                exportar(doc, driver=driver, configuracion=config)
+        else:
+            assert exportar(doc, driver=driver, configuracion=config)["comprobantes"] == 1, (driver, situacion)
+
+
+# ── Apagado: lo de la 3.5.0 a la 14.x, con la clave en `false` ─────────────────────────────────────────────────────
+
+def test_apagado_un_comprobante_en_cero_no_produce_asiento():
+    """Para quien prefiera no ver en su diario un vóucher con dos líneas a `0.00` que cuadran entre sí."""
+    assert lineas(dado_de_baja(), APAGADO) == []
+
+
+def test_apagado_un_comprobante_en_cero_no_pide_cuenta_ni_centro():
+    """Lo que llevó a apagarlo en la 3.5.0: a un comprobante dado de baja no se le ponía cuenta, así que el mes se
+    quedaba incompleto para siempre. Se comprueba sin cuenta Y sin centro, que son las dos cosas que se le pedían."""
+    c = dado_de_baja(cuenta_contable="", centro_costo="")
+    assert lineas(c, APAGADO) == []                                    # encendido: SinCuenta
+    assert asi.comprobantes_sin_cuenta([c], APAGADO, RASGOS["venta"]) == [c]   # la regla suelta sigue diciendo la verdad…
+    # …y lo que cuenta es que `faltantes_para`, que es por donde pasan los tres caminos (diagnóstico, exportación y
+    # `exigir_requisitos`), no lo pide.
+    faltan = asi.faltantes_para([c], APAGADO, RASGOS["venta"], exige={"cuenta_contable", "centro_costo"})
+    assert faltan["sin_cuenta"] == [] and faltan["sin_centro"] == []
+
+
+def test_apagado_un_comprobante_en_cero_no_gasta_un_numero_de_voucher():
+    """Si consumiera uno, el asiento tendría un vóucher sin líneas y el rango que se recuerda para el mes siguiente
+    contaría comprobantes que nunca se escribieron."""
+    numeros, rangos = asi.numerar_en_orden([dado_de_baja(), la_venta_de_al_lado()], APAGADO, "202602", {"05": 1},
+                                           libro=RASGOS["venta"])
+    assert numeros == ["", "020001"]                              # el suyo en blanco; el 1 se lo lleva la venta
+    assert rangos["05"]["comprobantes"] == 1 and rangos["05"]["hasta"] == 1
+
+
+def test_apagado_el_diagnostico_los_cuenta_aparte_y_el_mes_esta_listo():
     """No cuentan como faltantes ni impiden exportar, y tienen su propia casilla: `fuera_del_destino` significa otra
     cosa —«este destino no lleva ese tipo de comprobante»— y mezclarlos borraría la diferencia."""
+    apagado = {"asentar_sin_efecto_contable": False}
     doc = {"open_accounting": "4.0", "libro": LIBRO,
            "comprobantes": [fila(cuenta_contable="", centro_costo=""), fila(**LA_VENTA)]}
-    d = diagnosticar(doc, driver="concar")
+    d = diagnosticar(doc, driver="concar", configuracion=apagado)
     assert d["listo_para_exportar"] is True and d["por_que_no"] == []
     assert d["totales"]["sin_efecto_contable"] == 1
     assert d["totales"]["fuera_del_destino"] == 0
@@ -163,8 +215,54 @@ def test_el_diagnostico_los_cuenta_aparte_y_el_mes_esta_listo():
     # Y el de al lado, que sí mueve dinero, sigue exigiéndose: esto no relaja nada para los demás.
     sin_cuenta = diagnosticar({"open_accounting": "4.0", "libro": LIBRO,
                                "comprobantes": [fila(**{**LA_VENTA, "cuenta_contable": "", "centro_costo": ""})]},
-                              driver="concar")
+                              driver="concar", configuracion=apagado)
     assert sin_cuenta["por_que_no"] == ["1 sin cuenta contable"]
+    # Encendido, el mismo mes se planta en el comprobante en cero, y la casilla se queda en 0: ya no se apartan.
+    encendido = diagnosticar(doc, driver="concar")
+    assert encendido["por_que_no"] == ["1 sin cuenta contable"] and encendido["totales"]["sin_efecto_contable"] == 0
+
+
+# ── Con los dos ─────────────────────────────────────────────────────────────────────────────────────────────────
+
+def test_lo_que_mueve_dinero_se_asienta_siempre():
+    """Los tres casos que NUNCA se apartan, con la clave encendida o apagada, y el segundo es el que más importa: total
+    cero con IGV distinto de cero existe de verdad —una nota de crédito que SUNAT tiene con la base sin declarar— y
+    ahí sí hay algo que mirar."""
+    for config in (CONTAB, APAGADO):
+        normal = dado_de_baja(base_gravada="100", igv="18", total="118")
+        assert len(lineas(normal, config)) == 3
+        con_igv = dado_de_baja(igv="18")                              # total 0 pero IGV 18
+        assert len(lineas(con_igv, config)) == 3
+        con_detraccion = dado_de_baja(detraccion={"codigo": "022", "porcentaje": "12", "monto": "0"})
+        assert lineas(con_detraccion, config) != []
+    con_retencion = dado_de_baja(tipo_cp="02", serie="R001", retencion_4ta="10")
+    assert asi.sin_efecto_contable(con_retencion) is False
+
+
+def test_el_predicado_no_mira_el_estado_de_sunat():
+    """**El test que impide que esto se apoye en un código sin tabla publicada.** El mismo comprobante en cero se
+    trata igual con estado «2», con «1», con uno inventado o sin estado —asentado de fábrica, apartado con la clave
+    apagada— y uno que mueve dinero se asienta igual aunque SUNAT lo marque con «2»."""
+    for estado in ("2", "1", "", "9", "a1"):
+        assert asi.sin_efecto_contable(dado_de_baja(estado_sunat=estado)) is True
+        assert len(lineas(dado_de_baja(estado_sunat=estado))) == 2
+        assert lineas(dado_de_baja(estado_sunat=estado), APAGADO) == []
+    # Y al revés: el estado no aparta a quien sí mueve dinero.
+    assert lineas(dado_de_baja(estado_sunat="2", base_gravada="100", igv="18", total="118"), APAGADO) != []
+
+
+def test_un_comprobante_en_cero_sigue_en_el_registro_del_sire():
+    """**El hecho central**: el asiento es una cosa y el registro es otra. SUNAT declara lo que se da de baja en cero
+    precisamente para no dejar huecos en el correlativo, así que quitarlo del TXT sería romper lo que se declara —con
+    la clave encendida o apagada—."""
+    for config in (None, {"asentar_sin_efecto_contable": False}):
+        r = exportar({"open_accounting": "4.0", "libro": LIBRO, "comprobantes": [fila(), fila(**LA_VENTA)]},
+                     driver="sire", configuracion=config)
+        assert r["comprobantes"] == 2
+        filas = r["texto"].splitlines()
+        assert len(filas) == 2
+        assert filas[0].split("|")[8] == "117"      # el dado de baja tiene su fila, con su número…
+        assert filas[0].split("|")[25] == "0.00"    # …y su total en cero, como lo tiene SUNAT
 
 
 # ── Lo que se dice de él ────────────────────────────────────────────────────────────────────────────────────────
@@ -205,7 +303,7 @@ def test_un_mes_con_lo_que_sunat_declara_sale_por_los_cuatro_destinos():
 
     Antes de la 3.5.0 esto devolvía `listo_para_exportar: False` con «1 comprobantes con observaciones que bloquean», y
     `pipeline/salida.generar` miraba los errores ANTES de saber el destino: caían el TXT del SIRE, CONCAR, CONTASIS y
-    STARSOFT por igual."""
+    STARSOFT por igual. Desde la 15.0 el comprobante en cero entra también en el asiento: salen los cuatro."""
     nota_descuento = fila(tipo_cp="07", serie="FC01", numero="37", base_gravada="7464.75", igv="1343.65",
                           dscto_base="7464.75", dscto_igv="1343.65", total="8808.40", estado_sunat="1",
                           tipo_nota="09", ref_tipo_cp="01", ref_serie="F001", ref_numero="83",
@@ -217,11 +315,14 @@ def test_un_mes_con_lo_que_sunat_declara_sale_por_los_cuatro_destinos():
            "comprobantes": [fila(), fila(**LA_VENTA), nota_descuento, nota_sin_base]}
     d = diagnosticar(doc, driver="sire")
     assert d["listo_para_exportar"] is True and d["por_que_no"] == []
-    assert d["totales"]["con_error"] == 0 and d["totales"]["sin_efecto_contable"] == 1
-    # Y sale por los cuatro destinos sin forzar nada: el registro los lleva y el asiento se salta el que no mueve dinero.
+    assert d["totales"]["con_error"] == 0 and d["totales"]["sin_efecto_contable"] == 0
     for driver in ("sire", "concar", "contasis", "starsoft"):
-        r = exportar(doc, driver=driver)
-        assert r["comprobantes"] >= 3, driver
+        assert exportar(doc, driver=driver)["comprobantes"] == 4, driver
+    # Con la clave apagada sale igual por los cuatro, y el asiento se salta el que no mueve dinero.
+    apagado = {"asentar_sin_efecto_contable": False}
+    assert diagnosticar(doc, driver="sire", configuracion=apagado)["totales"]["sin_efecto_contable"] == 1
+    for driver in ("sire", "concar", "contasis", "starsoft"):
+        assert exportar(doc, driver=driver, configuracion=apagado)["comprobantes"] >= 3, driver
 
 
 def test_el_comparador_reconoce_el_tipo_de_cambio_de_un_comprobante_dado_de_baja():

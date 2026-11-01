@@ -47,7 +47,7 @@ from __future__ import annotations
 
 import warnings
 
-RETIRO = "15.0"
+RETIRO = "16.0"
 
 
 class RutaObsoleta(DeprecationWarning):
