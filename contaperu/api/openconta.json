@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "15.0.1",
+  "version": "15.1.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -2669,6 +2669,36 @@
            },
            "required": [
             "archivo",
+            "motivo"
+           ],
+           "additionalProperties": false
+          }
+         },
+         "no_leidos": {
+          "description": "Libros electrónicos de SUNAT que el motor no sabe leer, dichos en vez de ignorados: el registro de compras de no domiciliados que viaja con lo declarado (código 080500), o un registro del SIRE cuyo nombre lo dice y cuya forma no es la conocida. `filas` cuenta las que no entraron. Desde la 15.1.0; no es obligatorio para que un documento de antes siga siendo válido.",
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "archivo": {
+             "type": "string"
+            },
+            "codigo": {
+             "type": "string",
+             "pattern": "^([0-9]{6})?$"
+            },
+            "filas": {
+             "type": "integer",
+             "minimum": 0
+            },
+            "motivo": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "archivo",
+            "codigo",
+            "filas",
             "motivo"
            ],
            "additionalProperties": false

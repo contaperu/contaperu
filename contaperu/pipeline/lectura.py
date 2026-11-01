@@ -42,7 +42,7 @@ def leer_xml(contenido: str, libro: dict, es_base64: bool = False) -> dict:
     validar.revisar(comprobantes, lib)
     return documento(lib, comprobantes,
                      _lectura={"ignorados": len(res.ignorados), "errores": res.errores,
-                               "pendientes_de_leer": len(res.pendientes_ia)})
+                               "pendientes_de_leer": len(res.pendientes_ia), "no_leidos": res.no_leidos})
 
 
 def leer_archivos(archivos: Iterable[tuple[str, bytes | None]], libro: dict) -> dict:
@@ -50,8 +50,9 @@ def leer_archivos(archivos: Iterable[tuple[str, bytes | None]], libro: dict) -> 
 
     Es la lectura de quien tiene los archivos en la mano, como la línea de comandos: el nombre de cada uno queda como
     procedencia (`archivo_nombre`). Un archivo que no se pudo abrir llega con `None` en vez de bytes y se anota como
-    error, en su orden. `_lectura` dice cuántos se leyeron, cuántos se ignoraron, cuáles fallaron y cuántos PDF o
-    imágenes quedan pendientes de leer."""
+    error, en su orden. `_lectura` dice cuántos se leyeron, cuántos se ignoraron, cuáles fallaron, cuántos PDF o
+    imágenes quedan pendientes de leer y qué libros de SUNAT no se saben leer (`no_leidos`, con sus filas): el de no
+    domiciliados que viaja con lo declarado, por ejemplo."""
     lib = libro_de({"libro": libro})
     lote = lectura_archivos.Lote()
     for nombre, datos in archivos:
@@ -64,7 +65,8 @@ def leer_archivos(archivos: Iterable[tuple[str, bytes | None]], libro: dict) -> 
     validar.revisar(comprobantes, lib)
     return documento(lib, comprobantes,
                      _lectura={"archivos": len(lote.entradas), "ignorados": len(res.ignorados),
-                               "errores": res.errores, "pendientes_de_leer": len(res.pendientes_ia)})
+                               "errores": res.errores, "pendientes_de_leer": len(res.pendientes_ia),
+                               "no_leidos": res.no_leidos})
 
 
 def leer_propuesta_sire(contenido: str, libro: dict, es_base64: bool = False) -> dict:

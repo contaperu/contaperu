@@ -291,3 +291,125 @@ def test_entra_tal_cual_lo_entrega_sunat_dentro_del_zip():
     lote = archivos.expandir("propuesta.zip", buf.getvalue())
     res = archivos.convertir_xml(lote, VENTAS)
     assert len(res.comprobantes) == 2
+
+
+# ── Lo DECLARADO (01-nov-2026) ───────────────────────────────────────────────────────────────────────────────────
+# El registro que se generó en SOL, bajado con `registro_pedir`. La forma es la del archivo real —los rótulos, que son
+# de SUNAT y no de nadie— y los datos son inventados: el ZIP traía dos TXT y una carpeta vacía, en este orden.
+CABECERA_DEL_REGISTRO = (
+    "RUC|Apellidos y Nombres o Razón social|Periodo|CAR SUNAT|Fecha de emisión|Fecha Vcto/Pago|Tipo CP/Doc.|"
+    "Serie del CDP|Año|Nro CP o Doc. Nro Inicial (Rango)|Nro Final (Rango)|Tipo Doc Identidad|Nro Doc Identidad|"
+    "Apellidos Nombres/ Razón Social|BI Gravado DG|IGV / IPM DG|BI Gravado DGNG|IGV / IPM DGNG|BI Gravado DNG|"
+    "IGV / IPM DNG|Valor Adq. NG|ISC|ICBPER|Otros Trib/ Cargos|Total CP|Moneda|Tipo de Cambio|"
+    "Fecha Emisión Doc Modificado|Tipo CP Modificado|Serie CP Modificado|COD. DAM O DSI|Nro CP Modificado|"
+    "Clasif de Bss y Sss|ID Proyecto Operadores/Partícipes|PorcPart|IMB|CAR Orig/ Ind E o I|Detracción|Tipo de Nota|"
+    "Est. Comp.|Incal|" + "|".join(f"CLU{i}" for i in range(1, 40)))
+CABECERA_NO_DOMICILIADOS = (
+    "Periodo|CAR SUNAT|Fecha de emisión|Tipo CP/Doc.|Serie del CP|Nro CP o Doc.|Val. Adquisiciones|Otros |Total CP |"
+    "Tipo CP CF|Serie CP CF|Año|Nro CP o Doc. CF|Monto Ret.|Moneda|Tipo de Cambio|País|"
+    "Apellidos Nombres/ Razón Social del sujeto No Dom.|Domicilio|ID sujeto No Dom.|ID beneficiario|"
+    "Apellidos Nombres/ Razón Social del beneficiario|País beneficiario|Vínculo|Rta. Bta.|Deduc./Costo|Rta. Neta|Tasa|"
+    "Impto.|Convenio|Exon.|Tipo Rta|Mod. Serv.|Art. 76|CAR Orig.|" + "|".join(f"CLU{i}" for i in range(1, 11)))
+# Una compra a un proveedor del exterior, con la forma del archivo real: el periodo delante, y país y renta detrás.
+# Son los 35 campos informados; la exportación añade las 10 columnas libres y el que se presenta, uno vacío y palote.
+CAMPOS_NO_DOMICILIADO = ["202608", "", "12/08/2026", "91", "E001", "7", "100.00", "0.00", "100.00", "00", "", "",
+                         "", "0.00", "USD", "3.750", "9249", "PROVEEDOR DEL EXTERIOR", "UNA CALLE DEL EXTERIOR",
+                         "X0000001", "", "", "", "00", "0.00", "0.00", "0.00", "0.00", "0.00", "00", "", "01", "1", "",
+                         ""]
+NO_DOMICILIADO = "|".join(CAMPOS_NO_DOMICILIADO + [""] * 10)
+REGISTRO = "LE20601111111202608000804000011112.txt"
+DE_NO_DOMICILIADOS = "LE20601111111202608000805000011112.txt"
+
+
+def _declarado(*entradas: tuple[str, str]) -> bytes:
+    """El ZIP de lo declarado, con sus entradas en el orden que se le diga — y la carpeta vacía que trae el real."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        for nombre, contenido in entradas:
+            z.writestr(nombre, contenido)
+        z.writestr("LE20601111111080400011112/", "")
+    return buf.getvalue()
+
+
+def test_lo_declarado_se_lee_como_la_exportacion_y_sus_columnas_libres_se_ignoran():
+    """El registro generado llega en el formato de la EXPORTACIÓN: cabecera, las 41 columnas de siempre y 39 de libre
+    utilización. Un mes real de 1 326 compras se leyó entero sin un cambio en el lector (01-nov-2026), y esto lo fija:
+    lo que pone la persona en una CLU no se lee como un dato del comprobante."""
+    fila = _compra() + ["algo puesto a mano"] + [""] * 38
+    assert len(fila) == 80 and len(CABECERA_DEL_REGISTRO.split("|")) == 80
+    assert len(CABECERA_NO_DOMICILIADOS.split("|")) == len(NO_DOMICILIADO.split("|")) == 45
+    contenido = (CABECERA_DEL_REGISTRO + "\n" + "|".join(fila)).encode("utf-8")
+    assert sire_txt.es_sire(contenido)
+    c = sire_txt.parsear(contenido, COMPRAS)[0]
+    assert (c.tipo_cp, c.serie, c.numero, c.contraparte_doc) == ("01", "F001", "501", "20608888889")
+    assert c.base_gravada == Decimal("4200.00") and c.igv == Decimal("756.00") and c.total == Decimal("4956.00")
+    assert c.datos_originales["sire"][41] == "algo puesto a mano"     # viaja en la fila cruda, y nada más
+
+
+def test_dentro_del_zip_de_lo_declarado_se_lee_el_registro_aunque_vaya_segundo():
+    """El ZIP trae dos TXT y el lector tomaba **el primero de la lista**. En el real el registro iba primero, por suerte:
+    con el de no domiciliados delante, `parsear` habría leído ese y fallado en la primera fila."""
+    registro = CABECERA_DEL_REGISTRO + "\n" + "|".join(_compra() + [""] * 39)
+    no_dom = CABECERA_NO_DOMICILIADOS + "\n" + NO_DOMICILIADO
+    zip_ = _declarado((DE_NO_DOMICILIADOS, no_dom), (REGISTRO, registro))
+    assert sire_txt.es_sire(zip_)
+    assert [c.numero for c in sire_txt.parsear(zip_, COMPRAS)] == ["501"]
+
+
+def test_el_registro_de_no_domiciliados_se_dice_en_vez_de_callarse():
+    """El de no domiciliados tiene su propio formato —el periodo delante, país, renta y retención detrás— y el motor
+    todavía no lo lee. Hasta la 15.1 caía con las hojas de estilo, como un acompañante, y sus filas se perdían sin un
+    error: en el mes real eran diez. Ahora va a `no_leidos`, con sus filas contadas, **y no a errores**: el registro de
+    al lado se leyó bien, y un integrador que pare con cualquier error dejaría de enseñar lo declarado entero."""
+    registro = CABECERA_DEL_REGISTRO + "\n" + "|".join(_compra() + [""] * 39)
+    otro = CAMPOS_NO_DOMICILIADO[:5] + ["8"] + CAMPOS_NO_DOMICILIADO[6:]
+    no_dom = CABECERA_NO_DOMICILIADOS + "\n" + NO_DOMICILIADO + "\n" + "|".join(otro + [""] * 10)
+    lote = archivos.expandir("declarado.zip", _declarado((REGISTRO, registro), (DE_NO_DOMICILIADOS, no_dom)))
+    res = archivos.convertir_xml(lote, COMPRAS)
+    assert len(res.comprobantes) == 1 and res.errores == [] and res.ignorados == []
+    assert res.no_leidos == [{"archivo": f"declarado.zip/{DE_NO_DOMICILIADOS}", "codigo": "080500", "filas": 2,
+                              "motivo": "Es el registro de compras de no domiciliados del SIRE: tiene su propio "
+                                        "formato y este lector todavía no lo lee"}]
+
+
+def test_el_de_no_domiciliados_se_reconoce_por_su_nombre_o_por_su_cabecera():
+    """El que se PRESENTA no trae cabecera —diez filas de 36 campos y palote, en el caso real—, así que lo delata el
+    código de su nombre. Y la exportación renombrada lo delata su cabecera, que empieza por el periodo."""
+    fila_presentada = "|".join(CAMPOS_NO_DOMICILIADO + [""]) + "|"
+    assert len(fila_presentada.split("|")) == 37          # 36 campos y el palote, como el real
+    presentado = "\r\n".join([fila_presentada] * 3).encode("utf-8")
+    sin_cabecera = archivos.convertir_xml(archivos.expandir(DE_NO_DOMICILIADOS, presentado), COMPRAS)
+    assert [(n["codigo"], n["filas"]) for n in sin_cabecera.no_leidos] == [("080500", 3)]
+    renombrado = (CABECERA_NO_DOMICILIADOS + "\n" + NO_DOMICILIADO).encode("utf-8")
+    con_cabecera = archivos.convertir_xml(archivos.expandir("no-domiciliados.txt", renombrado), COMPRAS)
+    assert [(n["codigo"], n["filas"]) for n in con_cabecera.no_leidos] == [("080500", 1)]
+    assert con_cabecera.ignorados == [] and con_cabecera.errores == []
+
+
+def test_un_registro_del_sire_con_una_forma_que_no_se_conoce_no_da_una_tabla_vacia():
+    """El riesgo que esto vino a cerrar: el día que SUNAT cambie la forma del registro, el TXT dejaría de reconocerse,
+    caería con las hojas de estilo y lo declarado saldría VACÍO, sin un error. Su nombre dice lo que es, así que se
+    dice con sus filas, y quien integra decide."""
+    otra_forma = b"Ruc|Periodo|Total\n20601111111|202608|4956.00\n20601111111|202608|10.00"
+    res = archivos.convertir_xml(archivos.expandir(REGISTRO, otra_forma), COMPRAS)
+    assert res.comprobantes == [] and res.ignorados == []
+    assert [(n["codigo"], n["filas"]) for n in res.no_leidos] == [("080400", 2)]
+    assert "puede que SUNAT la haya cambiado" in res.no_leidos[0]["motivo"]
+
+
+def test_el_codigo_del_libro_se_busca_despues_del_ruc():
+    """El código va en el nombre DETRÁS del RUC, y un RUC puede contenerlo: este lleva «140400» dentro —y el dígito
+    verificador mal a propósito, para que no pueda ser de nadie—. Buscarlo en el nombre entero lo leería como el
+    registro de ventas."""
+    res = archivos.convertir_xml(archivos.expandir("LE20140400120202608000101000011112.txt", b"20260800|algo"),
+                                 COMPRAS)
+    assert [(n["codigo"], n["filas"]) for n in res.no_leidos] == [("", 1)]
+    assert res.no_leidos[0]["motivo"] == "Es un libro electrónico de SUNAT que este lector no reconoce"
+
+
+def test_un_txt_que_no_es_de_sunat_sigue_siendo_un_acompanante():
+    """Lo de arriba no puede volver ruidoso el ZIP de un facturador: un `.txt` cualquiera —unas notas, un léeme— no
+    se llama `LE` + RUC ni empieza por «Periodo|CAR SUNAT», y se sigue ignorando como siempre."""
+    for nombre in ("leeme.txt", "LE-notas.txt", "LEEME20601111111.txt"):
+        res = archivos.convertir_xml(archivos.expandir(nombre, b"notas del contador"), COMPRAS)
+        assert res.ignorados == [nombre] and res.no_leidos == [], nombre

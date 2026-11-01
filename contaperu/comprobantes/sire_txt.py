@@ -16,6 +16,13 @@ Entran los dos formatos, porque comparten el orden de los campos informados:
   final, sin cabecera. Es el que genera este mismo portal, así que un archivo puede
   salir y volver a entrar.
 
+**Y lo DECLARADO entra por aquí sin cambiar nada** (medido el 01-nov-2026). El registro que se generó en SOL, que se
+baja con `registro_pedir` (`sunat/`), llega en el formato de la exportación: en compras, cabecera y las 41 columnas
+de siempre más las 39 de libre utilización (CLU1 a CLU39), que se ignoran como en la propuesta. Un mes real de 1 326
+comprobantes se leyó entero, sin un error. Lo que sí trae distinto es un **segundo TXT en el mismo ZIP**, el registro
+de no domiciliados, y de ahí dos cosas de abajo: dentro de un ZIP se busca el TXT que tiene la forma del SIRE, y no el
+primero de la lista; y ese otro registro se reconoce y se dice (`libro_sin_leer`), en vez de ignorarse en silencio.
+
 Lo que la propuesta NO trae, y por eso no se inventa aquí: el concepto del
 comprobante, la cuenta contable, el centro de costo y el detalle de la detracción. Son
 datos del comprobante, no del registro; `validar.py` lo avisa con `SIRE_SIN_DETALLE`.
@@ -36,6 +43,7 @@ archivo no da y estorbaba para escribir el de verdad.
 from __future__ import annotations
 
 import io
+import posixpath
 import zipfile
 from decimal import Decimal
 
@@ -103,22 +111,62 @@ MONTOS = {"exportacion", "base_gravada", "dscto_base", "igv", "dscto_igv", "exon
 FECHAS = {"fecha_emision", "fecha_vencimiento", "ref_fecha"}
 MINIMO_CAMPOS = 30
 
+# Los libros electrónicos que SUNAT entrega o recibe llevan el código del libro EN EL NOMBRE (`LE` + RUC + periodo +
+# … + código de seis dígitos: `drivers/kit/nombres.py`). Los del SIRE no son los del PLE. Este lector lee los dos
+# primeros; el tercero es el registro de compras de **no domiciliados**, que viaja con lo declarado en el mismo ZIP y
+# tiene su propio formato —ni RUC del proveedor ni las columnas del IGV: país, renta bruta, tasa y retención—. El
+# código se comprobó en dos archivos reales del 01-nov-2026: el que bajó `registro_pedir` y el que se presentó.
+CODIGOS_DEL_SIRE = {"080400": "el registro de compras", "140400": "el registro de ventas",
+                    "080500": "el registro de compras de no domiciliados"}
+NO_DOMICILIADOS = "080500"
+# Su exportación empieza así, y no por «RUC»: el periodo va primero porque el titular está en el nombre del archivo.
+CABECERA_NO_DOMICILIADOS = ("periodo", "car sunat")
+
 
 def _texto(datos: bytes) -> str:
     return datos.decode("utf-8-sig", errors="replace")
 
 
-def leer_lineas(datos: bytes) -> list[list[str]]:
-    """Filas del TXT (o del TXT que va dentro del ZIP), sin la cabecera si la trae."""
-    if zipfile.is_zipfile(io.BytesIO(datos)):
-        with zipfile.ZipFile(io.BytesIO(datos)) as z:
-            nombres = [n for n in z.namelist() if n.lower().endswith(".txt")]
-            if not nombres:
-                raise SireInvalido("El ZIP no trae ningún TXT dentro")
+def _tiene_la_forma(texto: str) -> bool:
+    """¿Este texto es una propuesta (o un registro) del SIRE? Por su primera línea con algo."""
+    for linea in texto.splitlines():
+        if not linea.strip():
+            continue
+        campos = linea.split("|")
+        if campos[0].strip().lower() == "ruc" and len(campos) >= MINIMO_CAMPOS:
+            return True            # la cabecera de la exportación
+        # Una fila: RUC de 11 dígitos, periodo AAAAMM y bastantes columnas.
+        return (len(campos) >= MINIMO_CAMPOS and campos[0].strip().isdigit()
+                and len(campos[0].strip()) == 11 and campos[2].strip().isdigit() and len(campos[2].strip()) == 6)
+    return False
+
+
+def _del_zip(datos: bytes) -> bytes:
+    """El TXT del SIRE que va dentro de un ZIP: **el primero que tenga su forma**, no el primero de la lista.
+
+    Lo declarado trae dos —el registro y el de no domiciliados— y tomar el primero dependía del orden en que SUNAT
+    los metiera. Si ninguno tiene la forma, se devuelve el primero, para que quien lee falle con su motivo de siempre.
+    """
+    with zipfile.ZipFile(io.BytesIO(datos)) as z:
+        nombres = [n for n in z.namelist() if n.lower().endswith(".txt")]
+        if not nombres:
+            raise SireInvalido("El ZIP no trae ningún TXT dentro")
+        primero: bytes | None = None
+        for nombre in nombres:
             try:
-                datos = _zip.leer(z, z.getinfo(nombres[0]))
+                contenido = _zip.leer(z, z.getinfo(nombre))
             except _zip.Desmedido as e:
                 raise SireInvalido(str(e)) from None
+            if _tiene_la_forma(_texto(contenido[:4096])):
+                return contenido
+            primero = contenido if primero is None else primero
+        return primero if primero is not None else b""
+
+
+def leer_lineas(datos: bytes) -> list[list[str]]:
+    """Filas del TXT (o del TXT del SIRE que va dentro del ZIP), sin la cabecera si la trae."""
+    if zipfile.is_zipfile(io.BytesIO(datos)):
+        datos = _del_zip(datos)
     filas = [l.split("|") for l in _texto(datos).splitlines() if l.strip()]
     if filas and filas[0][0].strip().lower() == "ruc":
         filas = filas[1:]          # la exportación trae cabecera; el reemplazo no
@@ -133,24 +181,56 @@ def es_sire(datos: bytes) -> bool:
     """
     try:
         if zipfile.is_zipfile(io.BytesIO(datos)):
-            with zipfile.ZipFile(io.BytesIO(datos)) as z:
-                dentro = [n for n in z.namelist() if n.lower().endswith(".txt")]
-                if not dentro:
-                    return False
-                datos = _zip.leer(z, z.getinfo(dentro[0]))
-        texto = _texto(datos[:4096])
+            datos = _del_zip(datos)
+        return _tiene_la_forma(_texto(datos[:4096]))
     except Exception:  # noqa: BLE001
         return False
-    for linea in texto.splitlines():
-        if not linea.strip():
-            continue
-        campos = linea.split("|")
-        if campos[0].strip().lower() == "ruc" and len(campos) >= MINIMO_CAMPOS:
-            return True            # la cabecera de la exportación
-        # Una fila: RUC de 11 dígitos, periodo AAAAMM y bastantes columnas.
-        return (len(campos) >= MINIMO_CAMPOS and campos[0].strip().isdigit()
-                and len(campos[0].strip()) == 11 and campos[2].strip().isdigit() and len(campos[2].strip()) == 6)
+
+
+def es_no_domiciliados(datos: bytes) -> bool:
+    """¿Es la exportación del registro de compras de no domiciliados? Por su cabecera, que empieza por el periodo.
+
+    El que se PRESENTA no trae cabecera —diez filas de 36 campos y palote, en el caso real—, así que ese se reconoce
+    por el código de su nombre (`libro_sin_leer`)."""
+    for linea in _texto(datos[:4096]).splitlines():
+        if linea.strip():
+            return tuple(c.strip().lower() for c in linea.split("|")[:2]) == CABECERA_NO_DOMICILIADOS
     return False
+
+
+def es_libro_electronico(nombre: str) -> bool:
+    """¿El nombre es el que SUNAT impone a un libro electrónico? `LE` y el RUC de once dígitos, al principio."""
+    base = posixpath.basename(nombre)
+    return len(base) > 13 and base[:2].upper() == "LE" and base[2:13].isdigit()
+
+
+def libro_sin_leer(nombre: str, datos: bytes) -> dict:
+    """Un libro electrónico de SUNAT que este lector no lee, dicho en vez de callado.
+
+    Devuelve `{archivo, codigo, filas, motivo}`: `codigo` es el del libro en la tabla de SUNAT, si el nombre o la
+    cabecera lo dicen, y `filas` cuenta las que empiezan por un número —un RUC o un periodo—, que es lo que separa una
+    fila de una cabecera en todos los libros que se han visto.
+
+    **Existe por el silencio que había antes**: un TXT que no tenía la forma del SIRE se trataba como un acompañante
+    —como la hoja de estilos que meten los facturadores en su ZIP— y se ignoraba sin decir nada. Así se perdían las
+    compras de no domiciliados de lo declarado, y así se perdería el registro entero el día que SUNAT le cambiara la
+    forma: una tabla vacía donde había mil filas, sin un error. Que se diga cuántas filas no se leyeron deja la
+    decisión a quien integra.
+    """
+    base = posixpath.basename(nombre)
+    filas = sum(1 for linea in _texto(datos).splitlines() if linea.split("|")[0].strip().isdigit())
+    # El código se busca DESPUÉS del RUC: un RUC puede contener «140400» y se leería como el registro de ventas.
+    codigo = next((c for c in CODIGOS_DEL_SIRE if es_libro_electronico(base) and c in base[13:]), "")
+    if codigo == NO_DOMICILIADOS or es_no_domiciliados(datos):
+        return {"archivo": nombre, "codigo": NO_DOMICILIADOS, "filas": filas,
+                "motivo": "Es el registro de compras de no domiciliados del SIRE: tiene su propio formato y este lector "
+                          "todavía no lo lee"}
+    if codigo:
+        return {"archivo": nombre, "codigo": codigo, "filas": filas,
+                "motivo": f"Su nombre dice que es {CODIGOS_DEL_SIRE[codigo]} del SIRE y no tiene la forma que este "
+                          "lector conoce: puede que SUNAT la haya cambiado"}
+    return {"archivo": nombre, "codigo": "", "filas": filas,
+            "motivo": "Es un libro electrónico de SUNAT que este lector no reconoce"}
 
 
 def _valor(campos: list[str], i: int) -> str:

@@ -40,8 +40,11 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
     reconozca lo que escribe.
 
     **Qué se rellena solo, y por qué:** el `cod_libro` de la ruta y del parámetro `codLibro`, porque sale de
-    `registro`; y `codOrigenEnvio`, que vale `2` («servicio API») desde la v22 del manual —el `1` de los manuales
-    anteriores da 422—. Nada más: un valor que el catálogo no respalde lo pone quien llama.
+    `registro`; `codOrigenEnvio`, que vale `2` («servicio API») desde la v22 del manual —el `1` de los manuales
+    anteriores da 422—, y `codOrigen`, que es ese mismo dato con el nombre que le da la descarga de lo declarado; y
+    `codProceso` **solo cuando la operación lo exige y declara el suyo** (`registro_pedir`, el 70 medido): el
+    catálogo lo respalda, y quien llama no tiene por qué saber que el manual dice otra cosa. Nada más: un valor que el
+    catálogo no respalde lo pone quien llama — el `codMoneda` y el `lisPeriodos` de lo declarado, por ejemplo.
 
     **Lo que NO hace:** enviar, firmar, reintentar ni mirar el reloj. Y no toca el token: la credencial viaja con
     quien envía, nunca por aquí.
@@ -79,8 +82,13 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
     obligatorios = list(op.get("params_obligatorios") or [])
     if "codLibro" in obligatorios and "codLibro" not in consulta and cod_libro:
         consulta["codLibro"] = cod_libro
-    if "codOrigenEnvio" in obligatorios and "codOrigenEnvio" not in consulta:
-        consulta["codOrigenEnvio"] = str(_CATALOGO["cod_origen_envio"]["valor"])
+    for nombre in ("codOrigenEnvio", "codOrigen"):      # el mismo dato: la 5.51 lo llama `codOrigen`
+        if nombre in obligatorios and nombre not in consulta:
+            consulta[nombre] = str(_CATALOGO["cod_origen_envio"]["valor"])
+    # El código de proceso va como PARÁMETRO solo donde la operación lo exige y declara el suyo. En `ticket_archivo`
+    # también es obligatorio, pero ahí es el de OTRA operación —la que pidió el ticket— y lo pone quien lo recuerda.
+    if "codProceso" in obligatorios and "codProceso" not in consulta and op.get("cod_proceso"):
+        consulta["codProceso"] = str(op["cod_proceso"])
     faltan = [p for p in obligatorios if _vacio(consulta.get(p))]
     if faltan:
         raise CatalogoDelSireInvalido(
@@ -94,6 +102,6 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
             "grada": str(op["grada"]),
             "devuelve": str(op.get("devuelve") or ""),
             # El código de proceso que ESTA operación produce, con el que luego se pide el archivo de su ticket.
-            # Informativo: no se inyecta como parámetro porque solo `ticket_archivo` lo exige, y allí lo pone quien
-            # recuerda de qué operación venía el ticket.
+            # Se inyecta como parámetro solo donde la propia operación lo exige (arriba); en `ticket_archivo` lo pone
+            # quien recuerda de qué operación venía el ticket.
             "cod_proceso": str(op.get("cod_proceso") or "")}

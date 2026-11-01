@@ -1,7 +1,7 @@
 """Comprueba contra la API real del SIRE que el mapa del motor es cierto, y guarda lo que SUNAT contestó.
 
 Existe por lo mismo que `extraer_pcge2026.py`: **para que cualquiera pueda rehacerlo y auditarlo**, en vez de tener
-que confiar en un JSON que apareció de la nada. El motor publica las once operaciones del SIRE —ruta, método,
+que confiar en un JSON que apareció de la nada. El motor publica las doce operaciones del SIRE —ruta, método,
 parámetros— en `contaperu/datos/sunat/sire_api.json`, y desde la 8.1 las arma con `contaperu.sunat.peticion`. Sin
 una herramienta como esta, ese mapa es una afirmación que nadie de fuera puede contrastar.
 
@@ -18,7 +18,7 @@ token es un argumento, igual que allí el PDF del PCGE es un argumento. Se pasa 
 
 El SIRE **no tiene ambiente de pruebas** (`limites.ambiente_de_pruebas`: «NO EXISTE… toda prueba del SIRE es contra
 producción con un RUC real»). Por eso cada operación declara su `grada`, y esta herramienta **se niega** a llamar
-una que no sea de lectura. Las siete de lectura son idempotentes: no cambian nada en SUNAT. Las otras cuatro tocan
+una que no sea de lectura. Las ocho de lectura son idempotentes: no cambian nada en SUNAT. Las otras cuatro tocan
 un mes o declaran, y no se prueban con un script: se hacen en un cierre de verdad, a mano y mirando.
 
 ## Lo que guarda es CRUDO
@@ -56,7 +56,7 @@ def comprobar(token: str, registro: str, periodo: str, operaciones: tuple[str, .
                       f"script: toca un mes o declara ante SUNAT.")
                 continue
             try:
-                p = sunat.peticion(nombre, registro=registro, periodo=periodo, **_extras(nombre))
+                p = sunat.peticion(nombre, registro=registro, periodo=periodo, **_extras(nombre, periodo))
             except Exception as e:  # noqa: BLE001 — una operación que no se puede armar se dice y se sigue
                 print(f"  {nombre:16s} NO SE PUDO ARMAR — {type(e).__name__}: {e}")
                 fallos += 1
@@ -76,10 +76,16 @@ def comprobar(token: str, registro: str, periodo: str, operaciones: tuple[str, .
     return fallos
 
 
-def _extras(operacion: str) -> dict:
+def _extras(operacion: str, periodo: str) -> dict:
     """Lo que cada lectura exige además del registro y el periodo, con el valor más inofensivo."""
     # `codTipoArchivo` 0 es el TXT (`libros.cod_tipo_archivo`). Es un 0 de verdad, no un «vacío».
-    return {"codTipoArchivo": 0} if operacion in ("excluidos", "no_incluidos") else {}
+    if operacion in ("excluidos", "no_incluidos"):
+        return {"codTipoArchivo": 0}
+    # Lo declarado, con lo que se midió el 01-nov-2026: PEN no deja fuera los dólares, y el periodo de la lista es el
+    # mismo de la ruta. `codProceso` y `codOrigen` los pone `peticion`, porque el catálogo los respalda.
+    if operacion == "registro_pedir":
+        return {"codTipoArchivo": 0, "codMoneda": "PEN", "lisPeriodos": periodo}
+    return {}
 
 
 def _explicar(operacion: str, respuesta) -> None:

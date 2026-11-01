@@ -120,6 +120,8 @@ def cmd_generar(args: argparse.Namespace) -> int:
           f"{lectura['pendientes_de_leer']} PDF/imagen (pendientes de IA) · {len(lectura['errores'])} con error")
     for error in lectura["errores"]:
         print(f"  !! {error['archivo']}: {error['motivo']}")
+    for libro_sin_leer in lectura.get("no_leidos", []):
+        print(f"  -- {libro_sin_leer['archivo']}: {libro_sin_leer['motivo']} ({libro_sin_leer['filas']} filas sin leer)")
     print()
     print(_tabla(documento["comprobantes"]))
     print()

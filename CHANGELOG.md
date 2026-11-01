@@ -4,6 +4,61 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.1.0] — 2026-11-01
+
+### Lo declarado de un periodo, que no es la propuesta
+
+**Lo que lo trajo.** Un estudio comparó la propuesta del SIRE de setiembre de 2026 con lo que ese mes había
+declarado y no se parecían: la propuesta traía 3 040 compras. La propuesta es el **borrador** de SUNAT, sigue viva y
+se actualiza a diario aunque el mes ya se haya generado; lo declarado es el registro que se **generó** en SOL, y se
+pide por otro servicio. Se midió contra producción el 01-nov-2026, con un RUC real: lo generado tenía 1 326.
+
+### Añadido
+
+- **`registro_pedir`, la duodécima operación del SIRE** (Compras v28 5.51): baja lo declarado de un periodo. Es de
+  lectura y devuelve un ticket, como `propuesta_pedir`, y su archivo se baja con `ticket_archivo`. Es la primera
+  operación del catálogo con **`verificado`**, y lo medido está en su nota porque es más de lo que el manual
+  sostiene: `codMoneda` es obligatorio aunque el manual no lo marque, y con `PEN` llegan también los de dólares; el
+  manual describe `codProceso` con 00, 01 y 02 y su ejemplo manda **70**, que es el que respondió. Solo compras: el
+  RVIE tiene su propia descarga y no se ha leído ni medido. `no_existe_por_api` sigue diciendo que **generar** el
+  registro es de una persona en SOL; bajar lo generado ya no lo es.
+- **`sunat.estado_de_periodo(codigo)`** y **`sunat.ESTADOS_DE_PERIODO`**: si un mes ya se generó, o sea, si hay algo
+  declarado que bajar. El manual no dice los códigos de `periodos`; se midieron —01 y 02 «Presentado», 03 «No
+  Presentado»— y viven en `estados_de_periodo` con su fuente, que el catálogo exige para arrancar. **Un código que no
+  se conoce cuenta como no presentado**: lo seguro es seguir con la propuesta y no pedir un registro que quizá no
+  existe. `periodos` también lleva `verificado`.
+- **`no_leidos` en la lectura de archivos** (`ResultadoLectura.no_leidos` y `_lectura.no_leidos` en `leer_xml` y
+  `leer_archivos`): los libros electrónicos de SUNAT que el motor no sabe leer, con `{archivo, codigo, filas,
+  motivo}`. Lo declarado trae en el mismo ZIP el **registro de compras de no domiciliados** (código 080500), con su
+  propio formato —el periodo delante, país, renta y retención detrás—, que el motor todavía no lee. Se reconoce por
+  el código de su nombre o por su cabecera, y se comprobó contra los dos archivos reales: el que bajó
+  `registro_pedir` y el que se presentó. La línea de comandos lo enseña debajo de los errores.
+
+### Cambia
+
+- **Un libro de SUNAT que no se sabe leer ya no se ignora en silencio.** Hasta la 15.0, un `.txt` sin la forma del
+  SIRE caía con las hojas de estilo y los `.css` del facturador, como un acompañante, y sus filas se perdían sin un
+  error: así se perdían las diez compras de no domiciliados del mes real, y así se perdería el registro entero el
+  día que SUNAT le cambiara la forma —una tabla vacía donde había mil filas—. Ahora un `.txt` que se llama como un
+  libro electrónico (`LE` + RUC…), o que trae la cabecera del de no domiciliados, va a `no_leidos` con sus filas
+  contadas. **No va a `errores`**, a propósito: el registro de al lado se leyó bien, y quien pare ante cualquier
+  error dejaría de enseñar lo declarado entero. Un `.txt` cualquiera —unas notas, un léeme— se sigue ignorando como
+  siempre, y ningún archivo de salida cambió: los dos snapshots quedaron intactos.
+- **Dentro de un ZIP, `sire_txt` lee el TXT que tiene la forma del SIRE**, no el primero de la lista. Lo declarado
+  trae dos, y en el real el registro iba primero por suerte.
+- **`peticion` rellena dos parámetros más, y los dos los respalda el catálogo**: `codOrigen`, que es el
+  `codOrigenEnvio` de las demás con el nombre que le da la 5.51, y `codProceso` **solo** donde la operación lo exige y
+  declara el suyo. En `ticket_archivo` sigue poniéndolo quien recuerda de qué operación venía el ticket, y lo que
+  llega nunca se pisa.
+
+### Lo que NO cambia
+
+- **El lector del registro.** Lo declarado llega en el formato de la exportación —cabecera, las 41 columnas y CLU1
+  a CLU39—, y `comprobantes.sire_txt` lo leyó entero, 1 326 comprobantes, sin un cambio. Una prueba con los rótulos
+  del archivo real y datos inventados lo fija.
+- **Ninguna forma ni ningún nombre**: `no_leidos` se añade, y en el esquema de `documento_anotado` no es obligatorio,
+  para que un documento de ayer siga siendo válido.
+
 ## [15.0.1] — 2026-10-31
 
 ### Corregido

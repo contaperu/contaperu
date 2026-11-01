@@ -387,9 +387,9 @@ PERUANOS = ("contaperu.catalogos", "contaperu.pcge", "contaperu.tributos", "cont
             "contaperu.lectores.xml_ubl", "contaperu.lectores.sire_txt", "contaperu.drivers.sire")
 # Y los que lo son por lo que CONTIENEN, aunque no importen nada peruano. Separarlos es J2-J4, con un cliente real.
 PERUANOS_POR_CONTENIDO = {
-    # Las once operaciones de la API del SIRE, cada una con el manual del que sale. No importa nada peruano —lee su
+    # Las doce operaciones de la API del SIRE, cada una con el manual del que sale. No importa nada peruano —lee su
     # catálogo por `_datos`— y es peruano de arriba abajo: separarlo es J2-J4, con un cliente real de fuera.
-    "contaperu.sunat:OPERACIONES": "las once operaciones de la API del SIRE, con la ruta y el manual de cada una",
+    "contaperu.sunat:OPERACIONES": "las doce operaciones de la API del SIRE, con la ruta y el manual de cada una",
     "contaperu.modelo:Libro": "exige un RUC de 11 dígitos y un periodo AAAAMM de venta o compra",
     "contaperu.comprobantes:Comprobante": "los impuestos del Perú en campos fijos (base gravada, IGV, ISC, IVAP, ICBPER)",
     # El mismo de la línea de arriba, pedido por su ruta vieja: desde la 12.11 `Comprobante` vive en

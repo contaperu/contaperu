@@ -1,4 +1,4 @@
-"""El catálogo de la API del SIRE, leído una vez y validado: las once operaciones, los libros y las gradas.
+"""El catálogo de la API del SIRE, leído una vez y validado: las doce operaciones, los libros y las gradas.
 
 Mismo trato que la tabla de regímenes (`catalogos/contribuyente.py`): si falta el fichero o su fuente, el motor no
 arranca. Un catálogo sin fuente es una regla sin fuente, y en este proyecto eso no entra.
@@ -28,6 +28,12 @@ def _valido(tabla: dict) -> dict:
                                       "API ajena cambia, y un mapa sin fecha no se puede contrastar.")
     if not (tabla.get("fuentes") or {}):
         raise CatalogoDelSireInvalido(f"El catálogo del SIRE no cita sus manuales ({RUTA}, `fuentes`).")
+    periodos = tabla.get("estados_de_periodo") or {}
+    if not (periodos.get("estados") and str(periodos.get("fuente") or "").strip()):
+        raise CatalogoDelSireInvalido(
+            f"El catálogo del SIRE no trae los estados de un periodo con su fuente ({RUTA}, `estados_de_periodo`). "
+            "El manual no dice los códigos: sin la medición de la que salen, «¿este mes ya se generó?» es una "
+            "suposición.")
     for nombre, op in (tabla.get("operaciones") or {}).items():
         if nombre.startswith("_"):
             continue
@@ -54,7 +60,7 @@ def _tabla() -> dict:
 
 
 _CATALOGO = _tabla()
-# Las once, sin la nota del fichero. En orden de catálogo, que es el del flujo: pedir, sondear, bajar, reemplazar…
+# Las doce, sin la nota del fichero. En orden de catálogo, que es el del flujo: pedir, sondear, bajar, reemplazar…
 OPERACIONES: tuple[str, ...] = tuple(n for n in _CATALOGO["operaciones"] if not n.startswith("_"))
 # `cod_libro` de la API: 080000 el RCE y 140000 el RVIE. **No es** el código del nombre del archivo (080400/140400),
 # que vive en `drivers/sire`: confundirlos no da 404, da 500 de nginx, y se lee como si SUNAT estuviera caída.
@@ -62,13 +68,13 @@ CODIGOS_DE_LIBRO: tuple[str, ...] = tuple(c for c in _CATALOGO["libros"] if not 
 
 
 def sire_api() -> dict:
-    """El catálogo entero, copiado: las once operaciones, los hosts, los libros, los tickets, el TUS, los errores y
-    los límites, con su `actualizado_al` y sus fuentes. Se copia porque quien lo pide puede guardarlo."""
+    """El catálogo entero, copiado: las doce operaciones, los hosts, los libros, los tickets, los estados de un
+    periodo, el TUS, los errores y los límites, con su `actualizado_al` y sus fuentes. Se copia porque quien lo pide puede guardarlo."""
     return copy.deepcopy(_CATALOGO)
 
 
 def operaciones() -> dict[str, dict]:
-    """Las once operaciones por su nombre, copiadas, cada una con su método, su grada, su ruta y su fuente."""
+    """Las doce operaciones por su nombre, copiadas, cada una con su método, su grada, su ruta y su fuente."""
     return {n: copy.deepcopy(_CATALOGO["operaciones"][n]) for n in OPERACIONES}
 
 

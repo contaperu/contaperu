@@ -1,6 +1,6 @@
 {
   "_nota": "El CANAL del SIRE, como datos. El motor no sale a la red y no va a salir: esto NO es un cliente, es la descripción de una API ajena — rutas, parámetros obligatorios y códigos de retorno— para que quien escriba su propio conector no tenga que reunirla otra vez a mano desde dos PDF que se contradicen entre sí. Mismo papel que `datos/sunat/catalogos.json` con la norma, o que los formatos de CONCAR y CONTASIS con sistemas ajenos: describir sin ejecutar. Quien lo consuma pone el transporte, las credenciales y el estado; nada de eso vive aquí ni vivirá.",
-  "actualizado_al": "2026-09-21",
+  "actualizado_al": "2026-11-01",
   "fuentes": {
     "compras": "Manual de servicios Web Api - SIRE_Compras v28 (13-ago-2025), cpe.sunat.gob.pe",
     "ventas": "Manual de servicios Web Api - SIRE_Ventas v29 (17-feb-2026), cpe.sunat.gob.pe",
@@ -55,7 +55,7 @@
   "cod_origen_envio": {
     "valor": "2",
     "significa": "servicio API",
-    "_nota": "Desde la v22 (05-mar-2024). El 1 de los manuales anteriores da 422, y `numRuc` dejó de ser parámetro en todos los servicios: va dentro del token."
+    "_nota": "Desde la v22 (05-mar-2024). El 1 de los manuales anteriores da 422, y `numRuc` dejó de ser parámetro en todos los servicios: va dentro del token. Casi todas lo llaman `codOrigenEnvio`; la descarga de lo declarado (`registro_pedir`, 5.51) lo llama `codOrigen` y lo describe igual —«Código de origen de envío: 2 Servicio web»—: es el mismo dato con otro nombre, y con el 2 respondió (medido el 01-nov-2026)."
   },
 
   "operaciones": {
@@ -63,7 +63,9 @@
     "periodos": {
       "metodo": "GET", "grada": "lectura", "devuelve": "json",
       "ruta": "rvierce/padron/web/omisos/{cod_libro}/periodos",
-      "fuente": "Compras v28 5.33"
+      "fuente": "Compras v28 5.33",
+      "verificado": "2026-11-01",
+      "_nota": "Devuelve una lista de ejercicios (`numEjercicio`, `desEstado`), cada uno con su `lisPeriodos`: un mes por elemento, con `perTributario`, `codEstado` y `desEstado`. Es la pregunta «¿este mes ya se generó?», y la respuesta la lee `estado_de_periodo` con la tabla `estados_de_periodo`, de abajo."
     },
     "propuesta_pedir": {
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
@@ -139,11 +141,32 @@
       "ruta": "rvierce/gestionlibro/web/registroslibros/constancia/constanciarecepcion",
       "params_obligatorios": ["nomConstanciaRecepcion"],
       "fuente": "Compras v28 5.49"
+    },
+    "registro_pedir": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
+      "ruta_por_libro": {
+        "080000": "rce/ajustesposteriores/web/ajustesposteriores/{periodo}/solicitardescarga"
+      },
+      "params_obligatorios": ["codTipoArchivo", "codMoneda", "codProceso", "codOrigen", "lisPeriodos"],
+      "cod_proceso": "70",
+      "fuente": "Compras v28 5.51",
+      "verificado": "2026-11-01",
+      "_nota": "LO DECLARADO de un periodo: el registro que se GENERÓ en SOL, que no es la propuesta. La propuesta es el borrador de SUNAT, sigue viva y se actualiza a diario aunque el mes ya esté generado: en un RUC real, la de setiembre de 2026 traía 3 040 comprobantes y lo generado, 1 326. Devuelve un ticket, y el archivo se baja con `ticket_archivo`, como la propuesta. Lo que se MIDIÓ contra producción el 01-nov-2026, que es más de lo que el manual sostiene: (1) `codMoneda` es obligatorio aunque el manual no lo marque —sin él responde 1061— y con `PEN` llegan también los comprobantes en dólares; (2) el manual describe `codProceso` con 00 (no domiciliados), 01 (se aceptó la propuesta) y 02 (se reemplazó), y su propio ejemplo manda 70: el 70 es el que respondió; (3) `lisPeriodos` con el mismo periodo de la ruta; (4) el ticket termina en 06 con un ZIP de DOS TXT: el registro de compras —080400 en el nombre—, con el formato de la exportación de la propuesta (cabecera, las 41 columnas y CLU1 a CLU39), que `comprobantes.sire_txt` lee tal cual; y el de no domiciliados —080500—, con el suyo (cabecera, 35 columnas y CLU1 a CLU10), que el motor todavía no lee y la lectura de archivos devuelve en `no_leidos`, con sus filas contadas. Solo compras: el RVIE tiene su propia descarga del registro y no se ha leído ni medido."
+    }
+  },
+
+  "estados_de_periodo": {
+    "_nota": "El `codEstado` de cada mes en la respuesta de `periodos`. El manual no dice los códigos: se MIDIERON contra producción el 01-nov-2026, con un RUC real, en compras y en ventas por igual y sobre cuatro ejercicios —27 meses en 01, 2 en 02 y 12 en 03—. Qué separa el 01 del 02, que dicen lo mismo, no se sabe; para «¿hay algo declarado que bajar?», los dos cuentan. **Un código que no está aquí cuenta como NO presentado**, y es la decisión que importa: lo seguro con un estado que no se reconoce es seguir trabajando con la propuesta, que es lo que se hacía antes de poder preguntar, y no pedir un registro que quizá no existe.",
+    "fuente": "Compras v28 5.33 (la forma) y la medición del 01-nov-2026 (los códigos)",
+    "estados": {
+      "01": {"nombre": "Presentado", "presentado": true},
+      "02": {"nombre": "Presentado", "presentado": true},
+      "03": {"nombre": "No Presentado", "presentado": false}
     }
   },
 
   "no_existe_por_api": {
-    "generar_el_registro": "RS 000040-2022 art. 8.3 y la FAQ oficial n.º 5: la generación del registro solo se hace entrando por SUNAT Operaciones en Línea, y la pulsa una persona. **Es el techo de cualquier integración con el SIRE**: se puede dejar el mes en preliminar y nada más. Quien construya un conector debería decírselo a su usuario en vez de dejarle creer que falta algo por programar."
+    "generar_el_registro": "RS 000040-2022 art. 8.3 y la FAQ oficial n.º 5: la generación del registro solo se hace entrando por SUNAT Operaciones en Línea, y la pulsa una persona. **Es el techo de cualquier integración con el SIRE**: se puede dejar el mes en preliminar y nada más. Quien construya un conector debería decírselo a su usuario en vez de dejarle creer que falta algo por programar. Lo que sí se puede es BAJAR lo que se generó (`registro_pedir`): generar sigue siendo de una persona en SOL, y saber qué se generó ya no."
   },
 
   "tickets": {

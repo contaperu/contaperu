@@ -328,8 +328,27 @@ def test_un_pdf_o_una_foto_quedan_pendientes_de_leer(bytes_):
     import base64
 
     documento = api.leer_xml(base64.b64encode(bytes_).decode(), LIBRO, es_base64=True)
-    assert documento["_lectura"] == {"ignorados": 0, "errores": [], "pendientes_de_leer": 1}
+    assert documento["_lectura"] == {"ignorados": 0, "errores": [], "pendientes_de_leer": 1, "no_leidos": []}
     assert documento["comprobantes"] == []
+
+
+def test_un_libro_de_sunat_que_no_se_sabe_leer_llega_hasta_la_lectura_de_la_api():
+    """`no_leidos` no se queda en el lector: quien integra por la API recibe el mismo parte que la línea de comandos.
+    Si se quedara abajo, el silencio que la 15.1 vino a cerrar seguiría abierto en la puerta por la que entra un ERP."""
+    no_domiciliados = b"Periodo|CAR SUNAT|Fecha de emisi\xc3\xb3n\n202609||12/09/2026\n202609||13/09/2026"
+    documento = api.leer_archivos([("LE20601111111202609000805000011112.txt", no_domiciliados)],
+                                  dict(LIBRO, tipo="compra"))
+    assert [(n["codigo"], n["filas"]) for n in documento["_lectura"]["no_leidos"]] == [("080500", 2)]
+    assert documento["_lectura"]["errores"] == [] and documento["comprobantes"] == []
+    # Y por la otra puerta de lectura, con el ZIP tal cual lo baja `registro_pedir`.
+    import base64
+    import io
+    import zipfile
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("LE20601111111202609000805000011112.txt", no_domiciliados)
+    por_xml = api.leer_xml(base64.b64encode(buf.getvalue()).decode(), dict(LIBRO, tipo="compra"), es_base64=True)
+    assert [n["codigo"] for n in por_xml["_lectura"]["no_leidos"]] == ["080500"]
 
 
 # ── Lo que `preparar` no puede adelantarle al driver (1.2.1) ──────────────────────────────────────────────────

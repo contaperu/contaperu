@@ -434,10 +434,13 @@ estándar; poner la jurisdicción en la configuración (es del libro).
 **Objetivo.** Que lo que se presenta a SUNAT salga del mismo documento que los asientos y cuadre con lo que SUNAT ya
 tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de control.
 
-**La API del SIRE ya está descrita y armada** (8.1): `contaperu/sunat/` arma la petición de las once operaciones,
-lee el estado de un ticket y clasifica el rechazo de SUNAT, todo desde su catálogo y sin salir a la red — el núcleo
-puede saber la URL, lo que no puede es llamarla. `herramientas/comprobar_sire.py` la contrasta contra la API real
-con un token que trae quien lo tenga. **Lo que falta es evidencia**: ver el hito C16.
+**La API del SIRE ya está descrita y armada** (8.1): `contaperu/sunat/` arma la petición de las doce operaciones,
+lee el estado de un ticket y el de un periodo y clasifica el rechazo de SUNAT, todo desde su catálogo y sin salir a
+la red — el núcleo puede saber la URL, lo que no puede es llamarla. `herramientas/comprobar_sire.py` la contrasta
+contra la API real con un token que trae quien lo tenga. **Lo que falta es evidencia**: ver el hito C16. La primera
+llegó en la 15.1, medida contra producción el 01-nov-2026: `periodos` y `registro_pedir` —bajar lo **declarado**
+de un periodo, que no es la propuesta— llevan `verificado`, y el archivo de lo declarado resultó ser el formato que
+el lector ya leía. Las respuestas no se guardaron en el repositorio, porque eran de un RUC real.
 
 **Son dos regímenes y un solo canal** (`sunat`, desde la 8.0). El **SIRE** manda compras y ventas (RS 112-2021 y
 RS 040-2022) y es de lo que hablan los hitos de abajo. El **PLE** manda el Libro Diario y los demás libros, más el

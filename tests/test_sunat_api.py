@@ -12,26 +12,29 @@ from contaperu import sunat
 from contaperu.sunat.catalogo import CatalogoDelSireInvalido
 
 
-def test_el_catalogo_trae_las_once_operaciones_y_cada_una_cita_su_manual():
+def test_el_catalogo_trae_las_doce_operaciones_y_cada_una_cita_su_manual():
     """Si SUNAT añade una operación, aparece aquí sola. Y ninguna entra sin la fuente de la que sale: la ruta de una
-    API ajena es una regla, y si cambia hay que poder ir a mirar de dónde salió."""
-    assert len(sunat.OPERACIONES) == 11
+    API ajena es una regla, y si cambia hay que poder ir a mirar de dónde salió. La duodécima, `registro_pedir`,
+    entró el 01-nov-2026: bajar lo DECLARADO de un periodo, que no es la propuesta."""
+    assert len(sunat.OPERACIONES) == 12
     assert set(sunat.OPERACIONES) == {
         "periodos", "propuesta_pedir", "ticket_consultar", "ticket_archivo", "propuesta_reemplazar",
-        "propuesta_aceptar", "preliminar_registrar", "preliminar_eliminar", "excluidos", "no_incluidos", "constancia"}
+        "propuesta_aceptar", "preliminar_registrar", "preliminar_eliminar", "excluidos", "no_incluidos", "constancia",
+        "registro_pedir"}
     for nombre, op in sunat.operaciones().items():
         assert op["fuente"].strip(), f"{nombre} no cita su manual"
         assert op["grada"] in sunat.GRADAS, f"{nombre} no declara con qué cuidado se la llama"
 
 
-def test_las_gradas_reparten_las_once_en_siete_dos_y_dos():
-    """La grada no es una anotación: decide si quien envía puede llamarla sola. Siete lecturas que no cambian nada,
+def test_las_gradas_reparten_las_doce_en_ocho_dos_y_dos():
+    """La grada no es una anotación: decide si quien envía puede llamarla sola. Ocho lecturas que no cambian nada,
     dos escrituras que tocan un mes y dos declarativas que declaran de verdad ante SUNAT. Y hace falta porque el
     SIRE **no tiene ambiente de pruebas**: toda prueba es contra producción."""
     por_grada: dict[str, list[str]] = {}
     for nombre in sunat.OPERACIONES:
         por_grada.setdefault(sunat.grada(nombre), []).append(nombre)
-    assert {g: len(ns) for g, ns in por_grada.items()} == {"lectura": 7, "escritura": 2, "declarativa": 2}
+    assert {g: len(ns) for g, ns in por_grada.items()} == {"lectura": 8, "escritura": 2, "declarativa": 2}
+    assert "registro_pedir" in por_grada["lectura"]
     assert sorted(por_grada["declarativa"]) == ["preliminar_registrar", "propuesta_aceptar"]
     assert sorted(por_grada["escritura"]) == ["preliminar_eliminar", "propuesta_reemplazar"]
 
@@ -74,8 +77,65 @@ def test_lo_que_se_rellena_solo_sale_del_catalogo_y_nada_mas():
     assert sunat.peticion("periodos", registro="compra")["params"] == {}
 
 
+def test_lo_declarado_se_pide_con_lo_que_se_midio_y_lo_demas_lo_pone_quien_llama():
+    """`registro_pedir` (Compras v28 5.51) se midió contra producción el 01-nov-2026, y por eso lleva `verificado`. De
+    ahí salen las dos cosas que la petición rellena sola —`codOrigen`, que es el `codOrigenEnvio` de las demás con
+    otro nombre, y `codProceso` 70, el del ejemplo del manual y el que respondió, aunque su texto describa 00, 01 y
+    02— y las dos que NO: `codMoneda`, que SUNAT exige aunque el manual no lo marque, y `lisPeriodos`. Esas las decide
+    quien llama, y la petición se niega sin ellas en vez de inventarlas."""
+    p = sunat.peticion("registro_pedir", registro="compra", periodo="202609",
+                       codTipoArchivo=0, codMoneda="PEN", lisPeriodos="202609")
+    assert p["metodo"] == "GET" and p["grada"] == "lectura" and p["devuelve"] == "ticket"
+    assert p["url"].endswith("/rce/ajustesposteriores/web/ajustesposteriores/202609/solicitardescarga")
+    assert p["params"] == {"codTipoArchivo": 0, "codMoneda": "PEN", "lisPeriodos": "202609",
+                           "codOrigen": "2", "codProceso": "70"}
+    assert p["cod_proceso"] == "70"
+    assert sunat.operaciones()["registro_pedir"]["verificado"] == "2026-11-01"
+    with pytest.raises(CatalogoDelSireInvalido, match="exige codMoneda"):
+        sunat.peticion("registro_pedir", registro="compra", periodo="202609", codTipoArchivo=0, lisPeriodos="202609")
+    # Quien sabe otro código de proceso puede mandarlo: lo que se rellena no pisa lo que llega.
+    assert sunat.peticion("registro_pedir", registro="compra", periodo="202609", codTipoArchivo=0, codMoneda="PEN",
+                          lisPeriodos="202609", codProceso="02")["params"]["codProceso"] == "02"
+
+
+def test_el_codigo_de_proceso_de_otra_operacion_no_se_rellena_en_ticket_archivo():
+    """`ticket_archivo` también exige `codProceso`, pero el suyo es el de la operación que pidió el ticket, y eso solo lo
+    sabe quien lo recuerda. Rellenarlo con cualquier cosa bajaría el archivo de otro proceso, o ninguno."""
+    with pytest.raises(CatalogoDelSireInvalido, match="codProceso"):
+        sunat.peticion("ticket_archivo", registro="compra", nomArchivoReporte="x.zip", codTipoArchivoReporte="00",
+                       perTributario="202609", numTicket="20260300000188")
+    # Y la propuesta declara su 10 pero no lo exige como parámetro: tampoco se le añade.
+    assert "codProceso" not in sunat.peticion("propuesta_pedir", registro="compra", periodo="202609",
+                                              codTipoArchivo=0)["params"]
+
+
+def test_lo_declarado_solo_existe_en_compras():
+    """El RVIE tiene su propia descarga del registro, y no se ha leído ni medido: copiar la ruta de compras sería
+    inventarse una llamada que, cruzada de libro, contesta 500 de nginx y parece una caída de SUNAT."""
+    with pytest.raises(CatalogoDelSireInvalido, match="no tiene ruta para el libro '140000'"):
+        sunat.peticion("registro_pedir", registro="venta", periodo="202609", codTipoArchivo=0, codMoneda="PEN",
+                       lisPeriodos="202609")
+
+
+def test_el_estado_de_un_periodo_dice_si_hay_algo_declarado_que_bajar():
+    """Los códigos de `periodos` no los dice el manual: se midieron el 01-nov-2026 en cuatro ejercicios de un RUC real.
+    El 01 y el 02 se llaman los dos «Presentado» y los dos cuentan; el 03 no. Y lo que decide algo es el que NO se
+    conoce: cuenta como no presentado, porque lo seguro es seguir con la propuesta y no pedir un registro que quizá no
+    existe — lo contrario de un ticket desconocido, que se sigue sondeando."""
+    assert sunat.ESTADOS_DE_PERIODO == ("01", "02", "03")
+    assert sunat.estado_de_periodo("01") == {"codigo": "01", "nombre": "Presentado", "presentado": True,
+                                             "conocido": True}
+    assert sunat.estado_de_periodo("02")["presentado"] is True
+    assert sunat.estado_de_periodo(" 03 ") == {"codigo": "03", "nombre": "No Presentado", "presentado": False,
+                                               "conocido": True}
+    assert sunat.estado_de_periodo("09") == {"codigo": "09", "nombre": "", "presentado": False, "conocido": False}
+    assert sunat.estado_de_periodo("")["presentado"] is False
+    assert sunat.estado_de_periodo("_nota")["conocido"] is False
+
+
 def test_una_ruta_por_libro_sin_saber_el_libro_se_niega_diciendo_como():
-    """Ocho de las once tienen ruta distinta para el RCE y el RVIE. Adivinar cuál es sería inventarse una llamada."""
+    """Varias de las doce tienen ruta distinta para el RCE y el RVIE, o solo para uno de los dos. Adivinar cuál es
+    sería inventarse una llamada."""
     with pytest.raises(CatalogoDelSireInvalido, match='registro="compra"'):
         sunat.peticion("propuesta_pedir", periodo="202609", codTipoArchivo=0)
     with pytest.raises(CatalogoDelSireInvalido, match="necesita 'periodo'"):
