@@ -4,6 +4,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.0.1] — 2026-10-31
+
+### Corregido
+
+- **El aviso de lo que SUNAT declara en cero ya no habla del asiento.** `TOTAL_CERO_EN_LA_PROPUESTA` decía «No pide
+  cuenta ni entra al asiento; si ya no tiene efecto, exclúyelo», que era la regla de la 3.5.0 a la 14.x. La 15.0 la
+  dio la vuelta de fábrica y el aviso se quedó contando la de antes: el contador leía que no hacía falta cuenta y el
+  Excel se le plantaba pidiéndola. Lo que se pide lo decide la configuración, que la validación no recibe, así que
+  el texto se queda en lo que vale con `asentar_sin_efecto_contable` encendido o apagado: «SUNAT lo informa con
+  todos los importes en cero, con estado «2»: así declara lo que se da de baja, y el registro lo lleva igual». El
+  código del aviso no cambia, y sigue sin decir «anulado». Una prueba nueva lo fija.
+
 ## [15.0.0] — 2026-10-31
 
 ### El comprobante en cero se asienta de fábrica

@@ -238,12 +238,17 @@ def validar(c: Comprobante, libro: Libro) -> None:
     # Y **se le quitó la mordaza `and not c.es_nota`** (3.5.0): una nota en cero no decía nada, así que en un mes real
     # dos notas dadas de baja salían `estado="ok"` sin una palabra. Esa condición venía del commit inicial del núcleo,
     # sin test que la defendiera ni motivo escrito, y una nota en cero merece la misma mirada que una factura en cero.
+    #
+    # Y **no dice nada del asiento** (15.0.1). Decía «No pide cuenta ni entra al asiento», que era la regla de la 3.5.0
+    # a la 14.x y dejó de serlo cuando la 15.0 encendió `asentar_sin_efecto_contable` de fábrica: el aviso afirmaba lo
+    # contrario de lo que el motor hacía dos líneas después. Lo que pide o no pide lo decide la configuración, y esta
+    # función no la recibe, así que el aviso se queda en lo que vale con la clave encendida o apagada.
     if c.total == 0:
         if c.origen == "sire":
             estado = f", con estado «{c.estado_sunat}»" if c.estado_sunat else ""
             aviso("TOTAL_CERO_EN_LA_PROPUESTA",
                   f"SUNAT lo informa con todos los importes en cero{estado}: así declara lo que se da de baja, y el "
-                  f"registro lo lleva igual. No pide cuenta ni entra al asiento; si ya no tiene efecto, exclúyelo")
+                  f"registro lo lleva igual")
         else:
             aviso("TOTAL_CERO", "Importe total en cero")
 

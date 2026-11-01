@@ -46,7 +46,7 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **15.0.0** y estándar **`open-accounting` 4.0** — y el número que vale es siempre el de
+Librería **15.0.1** y estándar **`open-accounting` 4.0** — y el número que vale es siempre el de
 `contaperu/_version.py`, no el de esta línea: llegó a decir «11.0.0 y 3.0» con la 14.2.0 ya publicada,
 contradiciendo a la tabla que viene treinta líneas más abajo, que sí decía 4.0.
 

@@ -280,6 +280,18 @@ def test_el_aviso_de_la_propuesta_cita_el_estado_y_no_lo_traduce():
     assert all(o.nivel == "aviso" for o in c.observaciones) and not c.tiene_errores
 
 
+def test_el_aviso_no_promete_nada_del_asiento():
+    """Hasta la 15.0.1 decía «No pide cuenta ni entra al asiento», y desde la 15.0 el motor hace lo contrario de
+    fábrica: el contador leía en la Revisión que no hacía falta cuenta y el Excel se le plantaba pidiéndola. Lo que se
+    pide lo decide la configuración, que la validación no recibe, así que el aviso no puede hablar de eso."""
+    c = dado_de_baja()
+    validar.revisar([c], VENTAS)
+    texto = next(o.texto for o in c.observaciones if o.codigo == "TOTAL_CERO_EN_LA_PROPUESTA").lower()
+    assert "asiento" not in texto and "cuenta" not in texto
+    # Y lo que dice sigue siendo cierto con la clave encendida y apagada: el registro lo lleva.
+    assert "el registro lo lleva igual" in texto
+
+
 def test_una_nota_en_cero_ya_no_se_calla():
     """El agujero que tenía el aviso: `TOTAL_CERO` llevaba un `and not c.es_nota` desde el commit inicial del núcleo,
     sin test que lo defendiera ni motivo escrito. Por eso, de los cinco comprobantes en cero del mes real, las dos
