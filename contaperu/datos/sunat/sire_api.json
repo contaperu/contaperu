@@ -128,15 +128,17 @@
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
       "ruta_por_libro": {"080000": "rce/propuesta/web/excluidos/{periodo}/exportaexcluidos"},
       "params_obligatorios": ["codTipoArchivo", "codOrigenEnvio"],
-      "fuente": "Compras v28 5.37",
-      "_nota": "Solo existe en compras."
+      "cod_proceso": "97",
+      "fuente": "Compras v28 5.37 · Anexo I",
+      "_nota": "Solo existe en compras. Su código de proceso es el 97, «Exportar comprobantes excluidos» en el Anexo I de los dos manuales (15.4.0, sin medir): el que se usaba fuera del motor era el 12, que el Anexo I llama «Generar archivo exportar preliminar». Al bajar el archivo manda el que diga SUNAT al consultar el ticket."
     },
     "no_incluidos": {
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
       "ruta_por_libro": {"140000": "rvie/propuesta/web/noincluidos/{periodo}/exportanoincluidos"},
       "params_obligatorios": ["codTipoArchivo"],
-      "fuente": "Ventas v29",
-      "_nota": "Solo existe en ventas."
+      "cod_proceso": "11",
+      "fuente": "Ventas v29 5.19 · Anexo I",
+      "_nota": "Solo existe en ventas. Su código de proceso es el 11, «Generar archivo exportar no incluidos» en el Anexo I de ventas (15.4.0, sin medir); como en `excluidos`, el 12 que se usaba fuera del motor es el de exportar el preliminar."
     },
     "constancia": {
       "metodo": "GET", "grada": "lectura", "devuelve": "binario",
@@ -159,6 +161,37 @@
       "verificado_por_libro": {"080000": "2026-11-01", "140000": "2026-11-01"},
       "_nota_ventas": "VENTAS: la 5.27, «descargar RVIE por periodo». No se parece a la de compras: otra ruta, el periodo como `perTributario` y el libro como `codLibro` en la consulta, sin `codMoneda` ni `lisPeriodos`. Entró del manual en la 15.2.0 y se MIDIÓ contra producción el mismo 01-nov-2026 (15.2.1), con setiembre de 2026 de un RUC real: (1) el `codProceso` 23 del ejemplo —«Generar reporte Libro RVIE» en el Anexo I— lo aceptó a la primera; (2) el ticket terminó en 06 con un ZIP de UN TXT —140400 en el nombre—, sin cabecera, de 38 campos y palote, en el orden de la exportación de la propuesta (las columnas que lee `comprobantes.sire_txt` caen todas en su sitio, comprobado columna a columna por su forma); (3) el motor lo lee tal cual: 14 comprobantes, sin un error y sin nada en `no_leidos`. A diferencia de compras, no trae un segundo registro.",
       "_nota": "LO DECLARADO de un periodo: el registro que se GENERÓ en SOL, que no es la propuesta. La propuesta es el borrador de SUNAT, sigue viva y se actualiza a diario aunque el mes ya esté generado: en un RUC real, la de setiembre de 2026 traía 3 040 comprobantes y lo generado, 1 326. Devuelve un ticket, y el archivo se baja con `ticket_archivo`, como la propuesta. Lo que se MIDIÓ contra producción el 01-nov-2026, que es más de lo que el manual sostiene: (1) `codMoneda` es obligatorio aunque el manual no lo marque —sin él responde 1061— y con `PEN` llegan también los comprobantes en dólares; (2) el manual describe `codProceso` con 00 (no domiciliados), 01 (se aceptó la propuesta) y 02 (se reemplazó), y su propio ejemplo manda 70: el 70 es el que respondió; (3) `lisPeriodos` con el mismo periodo de la ruta; (4) el ticket termina en 06 con un ZIP de DOS TXT: el registro de compras —080400 en el nombre—, con el formato de la exportación de la propuesta (cabecera, las 41 columnas y CLU1 a CLU39), que `comprobantes.sire_txt` lee tal cual; y el de no domiciliados —080500—, con el suyo (cabecera, 35 columnas y CLU1 a CLU10), que `comprobantes.sire_txt` también lee desde la 15.3.0 —hasta la 15.2 la lectura de archivos lo devolvía en `no_leidos`, con sus filas contadas—. Lo de ventas, en `_nota_ventas`. **Los parámetros, el código de proceso y lo verificado van POR LIBRO** (`params_obligatorios_por_libro`, `cod_proceso_por_libro`, `verificado_por_libro`): en esta operación los dos libros no piden lo mismo, y un solo valor para los dos sería verdad en uno y mentira en el otro."
+    },
+    "inconsistencias_comprobante": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
+      "ruta_por_libro": {
+        "080000": "rce/inconsistencias/web/periodoinconsistencias/{periodo}/{cod_libro}/exportarinconsistenciasporcomprobantes",
+        "140000": "rvie/inconsistencias/web/periodoinconsistencias/{periodo}/exporta"
+      },
+      "params_obligatorios_por_libro": {
+        "080000": ["codTipoArchivo", "codOrigenEnvio"],
+        "140000": ["codTipoArchivo"]
+      },
+      "cod_proceso": "13",
+      "fuente": "Compras v28 5.44 · Ventas v29 5.25 · Anexo I",
+      "_nota": "Las inconsistencias que SUNAT ve en cada comprobante del periodo (15.4.0, del manual y SIN MEDIR). Devuelve un ticket, y el archivo se baja con `ticket_archivo`. `codTipoArchivo` es 0 txt y 1 Excel en los dos manuales; en compras se exige además `codOrigenEnvio`, en ventas no. Las dos admiten filtros opcionales —fechas, `codInconsistencia`, el documento del proveedor o cliente, el tipo, la serie y el número, rangos de importe— que van por `params`. Su código de proceso es el 13, «Generar archivo exportar inconsistencias» en el Anexo I de los dos manuales. Hasta la 15.3 la declaraba fuera del motor la aplicación que la usaba, con la misma ruta: era la única de las que una integración necesitaba que el catálogo no tenía."
+    },
+    "inconsistencias_resumen": {
+      "metodo_por_libro": {"080000": "POST", "140000": "GET"},
+      "grada": "lectura", "devuelve": "json",
+      "ruta_por_libro": {
+        "080000": "rvierce/resumen/web/resumeninconsistencias/{periodo}",
+        "140000": "rvierce/resumen/web/resumeninconsistencias/{periodo}"
+      },
+      "params_obligatorios": ["codTipoResumen", "codLibro"],
+      "fuente": "Compras v28 5.36 · Ventas v29 5.21",
+      "_nota": "El resumen de lo que SUNAT ve del periodo (15.4.0, del manual y SIN MEDIR): un JSON con `cantidad` y `monto`, y en cada uno el porcentaje de comprobantes con inconsistencias relacionadas con el crédito fiscal (`porcentajeRelFiscal`), las no relacionadas (`porcentajeNoRelFiscal`), las que no tienen ninguna (`porcentajeSinValidaciones`) y el `total`. **El método va POR LIBRO** (`metodo_por_libro`), porque los manuales no coinciden: compras lo documenta como POST —aunque solo lee y no lleva cuerpo— y ventas como GET. La ruta es la misma en los dos. `codTipoResumen`: compras lista 1 propuesta, 2 preliminar, 3 incluidos o excluidos, 4 registro, 5 preliminar registrado y 6 ajustes posteriores; ventas solo admite del 1 al 4 y no dice qué es cada uno."
+    },
+    "casillas": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "binario",
+      "ruta": "rvierce/casillas/e/casillaspropuestas/{periodo}/reporte/{tipoReporte}/{tipoDescarga}",
+      "fuente": "Compras v28 5.41 · Ventas v29 5.23",
+      "_nota": "El reporte de las casillas del periodo, las que pre-llenan el formulario 621 (15.4.0, del manual y SIN MEDIR). **No lleva libro**: ni la ruta ni los parámetros lo nombran, y los dos manuales describen la misma URL, así que es un reporte del periodo y no de un registro. Devuelve el archivo directamente, sin ticket. `tipoReporte` es 1 preliminar o 2 comparada. Y `tipoDescarga` **no está claro**: ventas lo da como 0 txt, 1 xls y 2 pdf; compras remite a su Anexo III, pero su propio ejemplo escribe `txt` en letras (`…/reporte/1/txt`). Se pasa como llegue; lo decidirá la medición."
     }
   },
 

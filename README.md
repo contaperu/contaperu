@@ -435,8 +435,9 @@ rechaza**, en vez de ignorarse en silencio como antes.
 - **Qué campos pone cada uno.** `campos_del_comprobante` reparte el comprobante en tres tramos —lo que trae el
   documento, lo que pone el sistema y lo que decide la revisión— y `REGLAS` da las reglas del dominio **sin nombrar
   ninguna herramienta de este motor**, para quien monte su propia capa de agente.
-- **La API del SIRE, descrita.** Las doce operaciones con su ruta, su método y su grada —entre ellas, bajar lo
-  **declarado** de un periodo, que no es la propuesta—; armar la petición, leer el estado de un ticket y el de un
+- **La API del SIRE, descrita.** Sus operaciones con su ruta, su método y su grada —entre ellas, bajar lo
+  **declarado** de un periodo, que no es la propuesta, y desde la 15.4.0 las inconsistencias que SUNAT ve, su resumen
+  y el reporte de casillas del 621—; armar la petición, leer el estado de un ticket y el de un
   periodo, y clasificar el rechazo de SUNAT. **El motor sabe la URL y no la llama**: enviar necesita red y Clave SOL,
   y eso es de quien lo integra.
 - **Una batería de conformidad portable**, que se corre **sin el motor y en cualquier lenguaje**: si escribes tu
@@ -456,7 +457,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
   esos dos importes, el país y el convenio viajan en la fila cruda (`datos_originales`) hasta que haya un asiento
   aceptado que los use (HOJA-DE-RUTA, C12).
 - **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red. **Sí sabe cómo
-  es su API**: describe las doce operaciones del SIRE y arma la petición exacta, para que quien la envíe no tenga que
+  es su API**: describe las operaciones del SIRE y arma la petición exacta, para que quien la envíe no tenga que
   adivinarla. Saber es un dato; llamar es entrada y salida, y eso es del integrador.
 - **No guarda nada.** Ni base de datos, ni archivos, ni sesiones.
 - **No emite comprobantes.** No genera, no firma y no envía facturas electrónicas.
@@ -494,7 +495,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | **SUNAT** · los dos regímenes | |
 | Driver SIRE (TXT de reemplazo del RVIE y del RCE) | listo |
 | Driver PLE (el Libro Diario, formato 5.1) y PLE-plan (el detalle del plan contable, 5.3) | listo, contra un libro presentado y aceptado con sus constancias |
-| La API del SIRE descrita: las doce operaciones, la petición armada, el ticket, el estado de un periodo y el rechazo | listo (8.1; lo declarado, desde la 15.1) — **sin salir a la red**: enviar es del integrador |
+| La API del SIRE descrita: sus operaciones, la petición armada, el ticket, el estado de un periodo y el rechazo | listo (8.1; lo declarado, desde la 15.1) — **sin salir a la red**: enviar es del integrador |
 | Los lectores de lo que SUNAT contesta | **pendiente de una respuesta real** por operación, que se captura con `herramientas/comprobar_sire.py` |
 | **Legacy** | |
 | Driver CONCAR (Excel de asientos) | listo |

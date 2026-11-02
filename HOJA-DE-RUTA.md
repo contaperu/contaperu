@@ -434,7 +434,7 @@ estándar; poner la jurisdicción en la configuración (es del libro).
 **Objetivo.** Que lo que se presenta a SUNAT salga del mismo documento que los asientos y cuadre con lo que SUNAT ya
 tiene: el TXT de reemplazo del RVIE y del RCE, y la propuesta como lista de control.
 
-**La API del SIRE ya está descrita y armada** (8.1): `contaperu/sunat/` arma la petición de las doce operaciones,
+**La API del SIRE ya está descrita y armada** (8.1): `contaperu/sunat/` arma la petición de sus operaciones,
 lee el estado de un ticket y el de un periodo y clasifica el rechazo de SUNAT, todo desde su catálogo y sin salir a
 la red — el núcleo puede saber la URL, lo que no puede es llamarla. `herramientas/comprobar_sire.py` la contrasta
 contra la API real con un token que trae quien lo tenga. **Lo que falta es evidencia**: ver el hito C16. La primera

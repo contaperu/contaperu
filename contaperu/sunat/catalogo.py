@@ -1,4 +1,4 @@
-"""El catálogo de la API del SIRE, leído una vez y validado: las doce operaciones, los libros y las gradas.
+"""El catálogo de la API del SIRE, leído una vez y validado: sus operaciones, los libros y las gradas.
 
 Mismo trato que la tabla de regímenes (`catalogos/contribuyente.py`): si falta el fichero o su fuente, el motor no
 arranca. Un catálogo sin fuente es una regla sin fuente, y en este proyecto eso no entra.
@@ -41,8 +41,16 @@ def _valido(tabla: dict) -> dict:
             raise CatalogoDelSireInvalido(
                 f"La operación {nombre!r} no declara una grada de {GRADAS}: sin ella, quien envía no puede saber si "
                 "puede llamarla sola o necesita un acto explícito.")
-        if not str(op.get("metodo") or "").strip():
+        # El método, o el de cada libro (15.4.0): el resumen de inconsistencias es POST en el manual de compras y GET en
+        # el de ventas. Con `metodo_por_libro`, cada libro con ruta tiene que tener el suyo: uno sin método no se
+        # podría llamar, y caer a un método general sería decir de un libro lo que el manual dice del otro.
+        por_libro = op.get("metodo_por_libro") or {}
+        if not str(op.get("metodo") or "").strip() and not por_libro:
             raise CatalogoDelSireInvalido(f"La operación {nombre!r} no dice su método HTTP.")
+        sin_metodo = set(op.get("ruta_por_libro") or {}) - {c for c, m in por_libro.items() if str(m or "").strip()}
+        if por_libro and sin_metodo:
+            raise CatalogoDelSireInvalido(
+                f"La operación {nombre!r} declara su método por libro y le falta el de {', '.join(sorted(sin_metodo))}.")
         if not str(op.get("fuente") or "").strip():
             raise CatalogoDelSireInvalido(
                 f"La operación {nombre!r} no cita el manual del que sale. Ninguna regla sin fuente, y la ruta de una "
@@ -52,7 +60,8 @@ def _valido(tabla: dict) -> dict:
         # Lo que va POR LIBRO (15.2.0) solo puede hablar de libros que la operación tiene: un parámetro o una
         # verificación de un libro sin ruta es un dato que nadie va a usar y que alguien va a creer.
         libros_con_ruta = set(op.get("ruta_por_libro") or {})
-        for campo in ("params_obligatorios_por_libro", "cod_proceso_por_libro", "verificado_por_libro"):
+        for campo in ("params_obligatorios_por_libro", "cod_proceso_por_libro", "verificado_por_libro",
+                      "metodo_por_libro"):
             sobran = set(op.get(campo) or {}) - libros_con_ruta
             if sobran:
                 raise CatalogoDelSireInvalido(
@@ -68,7 +77,7 @@ def _tabla() -> dict:
 
 
 _CATALOGO = _tabla()
-# Las doce, sin la nota del fichero. En orden de catálogo, que es el del flujo: pedir, sondear, bajar, reemplazar…
+# Las operaciones, sin la nota del fichero. En orden de catálogo, que es el del flujo: pedir, sondear, bajar, reemplazar…
 OPERACIONES: tuple[str, ...] = tuple(n for n in _CATALOGO["operaciones"] if not n.startswith("_"))
 # `cod_libro` de la API: 080000 el RCE y 140000 el RVIE. **No es** el código del nombre del archivo (080400/140400),
 # que vive en `drivers/sire`: confundirlos no da 404, da 500 de nginx, y se lee como si SUNAT estuviera caída.
@@ -76,13 +85,13 @@ CODIGOS_DE_LIBRO: tuple[str, ...] = tuple(c for c in _CATALOGO["libros"] if not 
 
 
 def sire_api() -> dict:
-    """El catálogo entero, copiado: las doce operaciones, los hosts, los libros, los tickets, los estados de un
+    """El catálogo entero, copiado: las operaciones, los hosts, los libros, los tickets, los estados de un
     periodo, el TUS, los errores y los límites, con su `actualizado_al` y sus fuentes. Se copia porque quien lo pide puede guardarlo."""
     return copy.deepcopy(_CATALOGO)
 
 
 def operaciones() -> dict[str, dict]:
-    """Las doce operaciones por su nombre, copiadas, cada una con su método, su grada, su ruta y su fuente."""
+    """Las operaciones por su nombre, copiadas, cada una con su método, su grada, su ruta y su fuente."""
     return {n: copy.deepcopy(_CATALOGO["operaciones"][n]) for n in OPERACIONES}
 
 

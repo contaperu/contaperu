@@ -1,7 +1,7 @@
 """Comprueba contra la API real del SIRE que el mapa del motor es cierto, y guarda lo que SUNAT contestó.
 
 Existe por lo mismo que `extraer_pcge2026.py`: **para que cualquiera pueda rehacerlo y auditarlo**, en vez de tener
-que confiar en un JSON que apareció de la nada. El motor publica las doce operaciones del SIRE —ruta, método,
+que confiar en un JSON que apareció de la nada. El motor publica las operaciones del SIRE —ruta, método,
 parámetros— en `contaperu/datos/sunat/sire_api.json`, y desde la 8.1 las arma con `contaperu.sunat.peticion`. Sin
 una herramienta como esta, ese mapa es una afirmación que nadie de fuera puede contrastar.
 

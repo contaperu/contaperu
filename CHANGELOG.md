@@ -4,6 +4,37 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.4.0] — 2026-11-01
+
+### Lo que SUNAT ve del periodo: tres operaciones del SIRE, del manual y sin medir
+
+Una aplicación que integra el motor pidió leer lo que SUNAT ve de un periodo antes de generarlo —qué comprobante tiene
+una inconsistencia— y las casillas con las que pre-llena el formulario 621. El catálogo de la API del SIRE suma tres
+operaciones, todas de grada `lectura` y **sin `verificado`**: se escriben del manual y se miden antes de que nadie las
+use donde importa, como se hizo con lo declarado.
+
+- **`inconsistencias_comprobante`** (Compras 5.44 · Ventas 5.25). Pide el archivo de las inconsistencias por
+  comprobante; devuelve un ticket, y su código de proceso es el 13 del Anexo I. En compras exige `codOrigenEnvio` y en
+  ventas no. Hasta la 15.3 la declaraba fuera del motor la aplicación que la usaba: era la única de las que una
+  integración necesitaba que el catálogo no tenía.
+- **`inconsistencias_resumen`** (Compras 5.36 · Ventas 5.21). El porcentaje de comprobantes con inconsistencias,
+  relacionadas o no con el crédito fiscal, en cantidad y en monto. Devuelve JSON.
+- **`casillas`** (Compras 5.41 · Ventas 5.23). El reporte de las casillas del periodo, preliminar o comparada.
+  **No lleva libro**: los dos manuales describen la misma URL. Devuelve el archivo sin ticket, y el tipo de descarga
+  no está claro en los manuales (ventas: 0 txt, 1 xls, 2 pdf; compras escribe `txt` en su ejemplo).
+
+### El método puede ir por libro
+
+- **`metodo_por_libro`**, con las mismas reglas que los otros campos por libro: solo para libros con ruta, y cada
+  libro con ruta tiene que tener el suyo. Lo pide el resumen de inconsistencias, que el manual de compras documenta
+  como POST y el de ventas como GET. `peticion` devuelve el del libro.
+
+### Corregido
+
+- **Los códigos de proceso de `excluidos` (97) y `no_incluidos` (11)**, los del Anexo I de los dos manuales. No los
+  declaraba el catálogo, y fuera del motor se usaba el 12, que el Anexo I llama «Generar archivo exportar preliminar».
+  Al bajar el archivo de un ticket manda el que diga SUNAT al consultarlo, así que el error no había mordido.
+
 ## [15.3.2] — 2026-11-01
 
 ### Corregido

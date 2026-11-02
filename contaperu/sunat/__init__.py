@@ -1,7 +1,8 @@
 """La API del SIRE como funciones puras: armar la petición, leer el estado de un ticket, clasificar un error.
 
 **El núcleo puede saber la URL; lo que no puede es llamarla.** Saber es un dato; llamar es entrada y salida. El
-catálogo `datos/sunat/sire_api.json` describe once operaciones desde el 21-sep-2026 y doce desde el 01-nov-2026
+catálogo `datos/sunat/sire_api.json` describe once operaciones desde el 21-sep-2026, doce desde el 01-nov-2026 y quince desde la 15.4.0 —las
+inconsistencias por comprobante, su resumen y el reporte de casillas del 621, del manual y sin medir—
 —ruta, método, parámetros obligatorios, código de proceso, el protocolo TUS, los tickets, los estados de un periodo,
 los límites y la tabla de errores—, y su propia nota
 lo dice: «esto NO es un cliente, es la descripción de una API ajena». Lo que faltaba no eran los datos: eran las
@@ -15,7 +16,8 @@ cruzan nunca: el token viaja con quien envía, no por aquí. Ni se guarda, ni se
 
 Está lo que **el catálogo sostiene con su fuente**, que es verificable sin red y sin una sola respuesta real:
 
-- `peticion(operacion, …)` — el método, la URL y los parámetros de cada una de las doce, validando lo obligatorio.
+- `peticion(operacion, …)` — el método —el de su libro, si el catálogo lo da así—, la URL y los parámetros de cada una,
+  validando lo obligatorio.
 - `estado_de_ticket(codigo)` — qué significa un código de estado y si hay que seguir sondeando.
 - `estado_de_periodo(codigo)` — si un mes ya se generó, o sea, si hay algo DECLARADO que bajar con `registro_pedir`.
 - `verificado(operacion, registro=…)` — si esa operación se midió contra producción para ese libro, y cuándo. Lo

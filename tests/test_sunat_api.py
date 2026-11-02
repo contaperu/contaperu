@@ -12,29 +12,31 @@ from contaperu import sunat
 from contaperu.sunat.catalogo import CatalogoDelSireInvalido
 
 
-def test_el_catalogo_trae_las_doce_operaciones_y_cada_una_cita_su_manual():
+def test_el_catalogo_trae_sus_operaciones_y_cada_una_cita_su_manual():
     """Si SUNAT añade una operación, aparece aquí sola. Y ninguna entra sin la fuente de la que sale: la ruta de una
     API ajena es una regla, y si cambia hay que poder ir a mirar de dónde salió. La duodécima, `registro_pedir`,
-    entró el 01-nov-2026: bajar lo DECLARADO de un periodo, que no es la propuesta."""
-    assert len(sunat.OPERACIONES) == 12
+    entró el 01-nov-2026: bajar lo DECLARADO de un periodo, que no es la propuesta. Y en la 15.4.0 las tres que leen
+    lo que SUNAT ve del periodo: las inconsistencias por comprobante, su resumen y el reporte de casillas del 621."""
+    assert len(sunat.OPERACIONES) == 15
     assert set(sunat.OPERACIONES) == {
         "periodos", "propuesta_pedir", "ticket_consultar", "ticket_archivo", "propuesta_reemplazar",
         "propuesta_aceptar", "preliminar_registrar", "preliminar_eliminar", "excluidos", "no_incluidos", "constancia",
-        "registro_pedir"}
+        "registro_pedir", "inconsistencias_comprobante", "inconsistencias_resumen", "casillas"}
     for nombre, op in sunat.operaciones().items():
         assert op["fuente"].strip(), f"{nombre} no cita su manual"
         assert op["grada"] in sunat.GRADAS, f"{nombre} no declara con qué cuidado se la llama"
 
 
-def test_las_gradas_reparten_las_doce_en_ocho_dos_y_dos():
-    """La grada no es una anotación: decide si quien envía puede llamarla sola. Ocho lecturas que no cambian nada,
+def test_las_gradas_reparten_las_quince_en_once_dos_y_dos():
+    """La grada no es una anotación: decide si quien envía puede llamarla sola. Once lecturas que no cambian nada,
     dos escrituras que tocan un mes y dos declarativas que declaran de verdad ante SUNAT. Y hace falta porque el
     SIRE **no tiene ambiente de pruebas**: toda prueba es contra producción."""
     por_grada: dict[str, list[str]] = {}
     for nombre in sunat.OPERACIONES:
         por_grada.setdefault(sunat.grada(nombre), []).append(nombre)
-    assert {g: len(ns) for g, ns in por_grada.items()} == {"lectura": 8, "escritura": 2, "declarativa": 2}
-    assert "registro_pedir" in por_grada["lectura"]
+    assert {g: len(ns) for g, ns in por_grada.items()} == {"lectura": 11, "escritura": 2, "declarativa": 2}
+    assert {"registro_pedir", "inconsistencias_comprobante", "inconsistencias_resumen", "casillas"} <= set(
+        por_grada["lectura"])
     assert sorted(por_grada["declarativa"]) == ["preliminar_registrar", "propuesta_aceptar"]
     assert sorted(por_grada["escritura"]) == ["preliminar_eliminar", "propuesta_reemplazar"]
 
@@ -249,3 +251,65 @@ def test_el_catalogo_se_copia_al_salir():
     primero["operaciones"]["periodos"]["metodo"] = "DELETE"
     assert sunat.sire_api()["operaciones"]["periodos"]["metodo"] == "GET"
     assert sunat.operaciones()["periodos"]["metodo"] == "GET"
+
+
+# ── Lo que SUNAT ve del periodo (15.4.0): del manual y SIN MEDIR ─────────────────────────────────────────────────
+
+def test_las_inconsistencias_por_comprobante_piden_lo_suyo_en_cada_libro():
+    """Estuvo fuera del motor hasta la 15.3, en la aplicación que la usaba. En compras se exige `codOrigenEnvio` y en
+    ventas no (5.44 y 5.25), y las dos producen el código 13 del Anexo I, con el que se baja el archivo del ticket."""
+    compras = sunat.peticion("inconsistencias_comprobante", registro="compra", periodo="202610", codTipoArchivo=0)
+    assert compras["url"].endswith(
+        "/rce/inconsistencias/web/periodoinconsistencias/202610/080000/exportarinconsistenciasporcomprobantes")
+    assert compras["params"] == {"codTipoArchivo": 0, "codOrigenEnvio": "2"} and compras["cod_proceso"] == "13"
+    ventas = sunat.peticion("inconsistencias_comprobante", registro="venta", periodo="202610", codTipoArchivo=0)
+    assert ventas["url"].endswith("/rvie/inconsistencias/web/periodoinconsistencias/202610/exporta")
+    assert ventas["params"] == {"codTipoArchivo": 0} and ventas["devuelve"] == "ticket"
+    assert not sunat.verificado("inconsistencias_comprobante", registro="compra")
+
+
+def test_el_resumen_de_inconsistencias_es_post_en_compras_y_get_en_ventas():
+    """Los dos manuales no coinciden en el método (5.36 POST, 5.21 GET) y el catálogo no elige: lo dice por libro. Lo
+    demás es igual —la misma ruta, el libro en `codLibro`, que se rellena solo— y devuelve un JSON, no un ticket."""
+    compras = sunat.peticion("inconsistencias_resumen", registro="compra", periodo="202610", codTipoResumen=1)
+    ventas = sunat.peticion("inconsistencias_resumen", registro="venta", periodo="202610", codTipoResumen=1)
+    assert (compras["metodo"], ventas["metodo"]) == ("POST", "GET")
+    assert compras["url"].endswith("/rvierce/resumen/web/resumeninconsistencias/202610")
+    assert compras["params"] == {"codTipoResumen": 1, "codLibro": "080000"}
+    assert ventas["params"] == {"codTipoResumen": 1, "codLibro": "140000"} and ventas["devuelve"] == "json"
+    with pytest.raises(CatalogoDelSireInvalido, match="exige codTipoResumen"):
+        sunat.peticion("inconsistencias_resumen", registro="compra", periodo="202610")
+
+
+def test_las_casillas_son_del_periodo_y_no_de_un_libro():
+    """El reporte de casillas del 621 (5.41 y 5.23) no nombra libro: los dos manuales describen la misma URL. El tipo de
+    reporte y el de descarga van en la ruta y se pasan como lleguen —el de descarga no está claro en los manuales—."""
+    p = sunat.peticion("casillas", periodo="202610", tipoReporte=2, tipoDescarga=0)
+    assert p["url"].endswith("/rvierce/casillas/e/casillaspropuestas/202610/reporte/2/0")
+    assert p["params"] == {} and p["metodo"] == "GET" and p["devuelve"] == "binario"
+    with pytest.raises(CatalogoDelSireInvalido, match="necesita 'tipoReporte'"):
+        sunat.peticion("casillas", periodo="202610", tipoDescarga=0)
+
+
+def test_excluidos_y_no_incluidos_producen_el_codigo_del_anexo_i():
+    """El 97 «Exportar comprobantes excluidos» y el 11 «Generar archivo exportar no incluidos». El 12 que se usaba fuera
+    del motor es «Generar archivo exportar preliminar»."""
+    assert sunat.peticion("excluidos", registro="compra", periodo="202610", codTipoArchivo=0)["cod_proceso"] == "97"
+    assert sunat.peticion("no_incluidos", registro="venta", periodo="202610", codTipoArchivo=0)["cod_proceso"] == "11"
+
+
+def test_el_metodo_por_libro_cubre_cada_libro_con_ruta_y_ninguno_mas():
+    """Con `metodo_por_libro`, un libro con ruta y sin método no se podría llamar, y un método para un libro sin ruta es
+    un dato que alguien va a creer. Las dos cosas paran el catálogo."""
+    import copy
+
+    from contaperu.sunat import catalogo
+
+    sin_ventas = copy.deepcopy(sunat.sire_api())
+    sin_ventas["operaciones"]["inconsistencias_resumen"]["metodo_por_libro"] = {"080000": "POST"}
+    with pytest.raises(CatalogoDelSireInvalido, match="le falta el de 140000"):
+        catalogo._valido(sin_ventas)
+    de_mas = copy.deepcopy(sunat.sire_api())
+    de_mas["operaciones"]["excluidos"]["metodo_por_libro"] = {"080000": "GET", "140000": "GET"}
+    with pytest.raises(CatalogoDelSireInvalido, match="metodo_por_libro"):
+        catalogo._valido(de_mas)
