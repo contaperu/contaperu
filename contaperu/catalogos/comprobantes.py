@@ -48,13 +48,16 @@ FUERA_DEL_REGISTRO_SUNAT = frozenset({"02"})
 DEL_REGISTRO_DE_NO_DOMICILIADOS = frozenset({"91", "97", "98"})
 
 # Tipos con un tratamiento propio en el asiento: el recibo por honorarios (su cuenta y su retención de 4ta), la boleta
-# (su registro), la nota de crédito (invierte el asiento) y las notas (llevan el documento que modifican). La 97 y la
-# 98, las del no domiciliado, se asientan como la 07 y la 08 (15.3.0).
+# (su registro), las notas de crédito (invierten el asiento) y las notas (llevan el documento que modifican). Las tres
+# de crédito y las tres de débito de `NOTAS_CREDITO`/`NOTAS_DEBITO`: la 97 y la 98, las del no domiciliado, desde la
+# 15.3.0; la 87 y la 88, las especiales, desde la 15.3.2.
 #
-# ⚠️ **La 87 y la 88 NO están aquí, y no se tocaron a ciegas.** Restan en el resumen (son `NOTAS_CREDITO`) pero no
-# invierten el asiento ni llevan su referencia: una 87 se asienta hoy como una compra. Es una pregunta abierta para
-# John desde el 01-nov-2026, porque «especial» puede querer decir justo eso, y aquí no se decide por analogía.
-TIPO_HONORARIOS, TIPO_BOLETA, TIPOS_INVIERTEN, TIPOS_NOTA = "02", "03", ("07", "97"), ("07", "08", "97", "98")
+# **La 87 invierte desde la 15.3.2, decidido por John el 01-nov-2026** («Sí, que invierta»). Hasta entonces restaba en
+# el resumen —es `NOTAS_CREDITO`— y se asentaba como una COMPRA, o sea que el libro y el asiento decían cosas opuestas
+# del mismo comprobante. Se dejó fuera a propósito mientras «especial» pudiera querer decir otra cosa, y se planteó en
+# vez de decidirlo por analogía. La Tabla 11 de la RS 040-2022 la pone en el registro de compras (8.4), como a la 07.
+TIPO_HONORARIOS, TIPO_BOLETA, TIPOS_INVIERTEN, TIPOS_NOTA = ("02", "03", ("07", "87", "97"),
+                                                             ("07", "08", "87", "88", "97", "98"))
 
 # Tipo de documento de identidad (Anexo 1 de la RS 112-2021).
 TIPOS_DOC_IDENTIDAD: dict[str, str] = dict(CATALOGOS["tipos_documento_identidad"]["codigos"])

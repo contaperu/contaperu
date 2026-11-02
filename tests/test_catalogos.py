@@ -299,3 +299,11 @@ def test_el_registro_de_no_domiciliados_es_lo_que_el_catalogo_llama_de_no_domici
     assert "97" in catalogos.NOTAS_CREDITO and "98" in catalogos.NOTAS_DEBITO
     # Y los dos usos del asiento: la 97 invierte como la 07 y las dos llevan su referencia, como la 07 y la 08.
     assert "97" in catalogos.TIPOS_INVIERTEN and {"97", "98"} <= set(catalogos.TIPOS_NOTA)
+
+
+def test_toda_nota_de_credito_invierte_el_asiento_y_toda_nota_lleva_su_referencia():
+    """El libro y el asiento no pueden decir cosas opuestas del mismo comprobante: lo que resta en el resumen
+    (`NOTAS_CREDITO`) es lo que invierte el asiento, y toda nota lleva el documento que modifica. Hasta la 15.3.2 la 87
+    restaba en el resumen y se asentaba como una compra; John lo decidió el 01-nov-2026: «Sí, que invierta»."""
+    assert set(catalogos.TIPOS_INVIERTEN) == set(catalogos.NOTAS_CREDITO)
+    assert set(catalogos.TIPOS_NOTA) == set(catalogos.NOTAS)

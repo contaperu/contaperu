@@ -4,6 +4,19 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.3.2] — 2026-11-01
+
+### Corregido
+
+- **La 87, la nota de crédito especial, invierte el asiento como la 07** (John, 01-nov-2026: «Sí, que invierta»).
+  Restaba en el `resumen` —es `NOTAS_CREDITO`— y se asentaba como una compra, así que el libro y el Excel decían
+  cosas opuestas del mismo comprobante. La 15.3.0 la había dejado fuera a propósito, como pregunta abierta, y la
+  Tabla 11 de la RS 040-2022 la pone en el registro de compras (8.4), como a la 07. Su hermana, la 88, se asienta como
+  la 08.
+- **Y las dos llevan el documento que modifican** (`TIPOS_NOTA`), que en el camino al Excel se perdía. Ahora
+  `TIPOS_INVIERTEN` es exactamente `NOTAS_CREDITO` y `TIPOS_NOTA` exactamente `NOTAS`, y un test lo exige: lo que resta
+  en el libro es lo que invierte en el asiento.
+
 ## [15.3.1] — 2026-11-01
 
 ### Corregido

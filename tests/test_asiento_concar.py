@@ -132,6 +132,19 @@ def test_el_no_domiciliado_se_asienta_como_una_compra_comun_con_la_sigla_del_ent
     assert [(f["K"], f["N"]) for f in nota] == [("631101", "H"), ("421202", "D")] and nota[0]["R"] == "YY"
 
 
+def test_las_notas_especiales_se_asientan_como_la_07_y_la_08():
+    """John, 01-nov-2026: la 87 invierte como la 07 («Sí, que invierta»). Restaba en el resumen y se asentaba como una
+    compra, así que el libro y el Excel decían cosas opuestas del mismo comprobante. Su hermana, la 88, suma como la 08.
+    Y las dos llevan el documento que modifican, que antes se perdía en el camino al Excel."""
+    config = configuracion({"tipos": {"87": {"sigla": "NE"}, "88": {"sigla": "DE"}}})
+    referencia = dict(ref_tipo_cp="01", ref_serie="F001", ref_numero="00000123", ref_fecha="2026-08-01")
+    especial = filas_de_comprobante(cp(tipo_cp="87", serie="FC01", numero="9", **referencia), config, MES, "080002")
+    assert [f["N"] for f in especial] == ["H", "H", "D"] and especial[0]["R"] == "NE"
+    assert (especial[0]["Z"], especial[0]["AA"]) == ("FT", "F001-123") and debe_haber(especial) == (118, 118)
+    de_debito = filas_de_comprobante(cp(tipo_cp="88", serie="FD01", numero="3", **referencia), config, MES, "080003")
+    assert [f["N"] for f in de_debito] == ["D", "D", "H"] and de_debito[0]["AA"] == "F001-123"
+
+
 def test_concar_solo_difiere_de_la_tabla_general_en_la_nota_de_credito():
     """CONCAR estrena tabla de siglas propia en la 5.3, escrita entera como la de STARSOFT. Este test es lo que
     impide que las otras SIETE se separen de la general en silencio el día que una de ellas cambie.
