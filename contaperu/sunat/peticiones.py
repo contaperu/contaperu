@@ -108,8 +108,8 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
             f"{', '.join(obligatorios)} ({op['fuente']}).")
 
     return {"operacion": operacion,
-            # El del libro cuando el catálogo lo declara así (15.4.0, el resumen de inconsistencias); si no, el de la
-            # operación entera.
+            # El del libro cuando el catálogo lo declara así (15.4.0; hoy ninguna operación, ver `catalogo`); si no, el
+            # de la operación entera.
             "metodo": str(_del_libro(op, "metodo", cod_libro) or ""),
             "url": f"{_CATALOGO['hosts']['sire']}/{ruta}",
             "params": consulta,

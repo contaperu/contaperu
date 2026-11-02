@@ -4,6 +4,36 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.4.1] — 2026-11-01
+
+### Lo medido de las tres operaciones de la 15.4.0
+
+Se llamaron contra producción el mismo día, con un mes sin presentar de un RUC real. Lo medido queda en el catálogo,
+en una `_nota_medida` por operación, y lo que respondió se marca `verificado` en su libro.
+
+- **`inconsistencias_comprobante`, verificada en compras.** El ticket termina en 06 con un ZIP de un TXT. **La
+  cabecera trae 21 rótulos y las filas 20 campos**: falta «Tipo Doc. Emisor» y desde ahí la fila va corrida un lugar,
+  así que un lector no puede fiarse de la cabecera. La fecha llega con hora, y cada fila lleva el código de la
+  inconsistencia, su descripción, su monto y un semáforo (1 o 2). En ventas, el mismo mes respondió 1070.
+- **`inconsistencias_resumen`, verificada en ventas.** El JSON del manual, con el periodo en `perPeriodoTributario` y
+  `codTipoResumen` como texto.
+- **`casillas`** respondió 1070 en las dos vistas y con los dos tipos de descarga: el mes no estaba declarado, y las
+  casillas salen de lo declarado. El tipo de descarga queda por decidir sobre un mes presentado.
+- **`excluidos`** dio ticket y el ticket se quedó en 01 los cuatro minutos que se le esperó.
+
+### Corregido
+
+- **El resumen de inconsistencias es GET en los dos libros.** El manual de compras lo documenta como POST, y la 15.4.0
+  le creyó: medido, el POST respondió 405. `metodo_por_libro` se queda sin operación que lo use; el catálogo lo sigue
+  admitiendo, con sus reglas.
+
+### Añadido
+
+- **`errores.sin_datos`, y `SireRechaza.sin_datos`.** El 1070 («No se ha encontrado información de comprobantes de
+  pago en Periodo Seleccionado», medido) y el 1518 («No existen documentos para exportar», que estaba entre los
+  frecuentes) no son un fallo de la petición: son SUNAT diciendo que no tiene nada de ese periodo. Quien lee lo que
+  SUNAT ve de un mes los trata como una lista vacía. `contaperu.sunat.errores.SIN_DATOS` los lista.
+
 ## [15.4.0] — 2026-11-01
 
 ### Lo que SUNAT ve del periodo: tres operaciones del SIRE, del manual y sin medir

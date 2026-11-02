@@ -226,7 +226,19 @@ def test_un_codigo_que_el_catalogo_no_conoce_se_dice_igual_y_no_se_pierde():
     el manual— y se conservan todos los que llegaron."""
     e = sunat.clasificar_error("422", mensaje="Algo nuevo", errores=[{"cod": "9999", "msg": "x"}])
     assert e.codigo == "9999" and e.mensaje == "Algo nuevo" and e.codigos == ("422", "9999")
-    assert not e.idempotente and not e.reintentable
+    assert not e.idempotente and not e.reintentable and not e.sin_datos
+
+
+def test_sin_datos_es_un_vacio_y_no_un_fallo():
+    """El 1070 —medido el 01-nov-2026 en un mes sin presentar— y el 1518 dicen que SUNAT no tiene nada de ese periodo:
+    la petición estaba bien. Quien lee lo que SUNAT ve de un mes lo trata como una lista vacía. Llega como cualquier
+    rechazo, con el código dentro de `errors`, y no se confunde con «ya se hizo» ni con «repítelo»."""
+    for codigo in ("1070", "1518"):
+        e = sunat.clasificar_error("422", errores=[{"cod": codigo}], operacion="inconsistencias_comprobante")
+        assert e.codigo == codigo and e.sin_datos and not e.idempotente and not e.reintentable
+    assert "No se ha encontrado información" in sunat.clasificar_error("422", errores=[{"cod": "1070"}]).mensaje
+    # Un error de validación, en cambio, no es un vacío: el periodo mal escrito es culpa de quien llama.
+    assert not sunat.clasificar_error("422", errores=[{"cod": "1006"}]).sin_datos
 
 
 @pytest.mark.parametrize("codigo, terminado, descargable", [("01", False, False), ("03", True, True),
@@ -253,7 +265,7 @@ def test_el_catalogo_se_copia_al_salir():
     assert sunat.operaciones()["periodos"]["metodo"] == "GET"
 
 
-# ── Lo que SUNAT ve del periodo (15.4.0): del manual y SIN MEDIR ─────────────────────────────────────────────────
+# ── Lo que SUNAT ve del periodo (15.4.0, del manual; medido en parte el 01-nov-2026, 15.4.1) ─────────────────────
 
 def test_las_inconsistencias_por_comprobante_piden_lo_suyo_en_cada_libro():
     """Estuvo fuera del motor hasta la 15.3, en la aplicación que la usaba. En compras se exige `codOrigenEnvio` y en
@@ -265,15 +277,20 @@ def test_las_inconsistencias_por_comprobante_piden_lo_suyo_en_cada_libro():
     ventas = sunat.peticion("inconsistencias_comprobante", registro="venta", periodo="202610", codTipoArchivo=0)
     assert ventas["url"].endswith("/rvie/inconsistencias/web/periodoinconsistencias/202610/exporta")
     assert ventas["params"] == {"codTipoArchivo": 0} and ventas["devuelve"] == "ticket"
-    assert not sunat.verificado("inconsistencias_comprobante", registro="compra")
+    # Medida en compras el 01-nov-2026 (15.4.1); en ventas SUNAT respondió 1070 y su forma sigue sin verse.
+    assert sunat.verificado("inconsistencias_comprobante", registro="compra")
+    assert not sunat.verificado("inconsistencias_comprobante", registro="venta")
 
 
-def test_el_resumen_de_inconsistencias_es_post_en_compras_y_get_en_ventas():
-    """Los dos manuales no coinciden en el método (5.36 POST, 5.21 GET) y el catálogo no elige: lo dice por libro. Lo
-    demás es igual —la misma ruta, el libro en `codLibro`, que se rellena solo— y devuelve un JSON, no un ticket."""
+def test_el_resumen_de_inconsistencias_es_get_en_los_dos_libros_aunque_compras_diga_post():
+    """El manual de compras (5.36) lo documenta POST y el de ventas (5.21) GET. La 15.4.0 le creyó a cada uno, y al
+    medir (01-nov-2026) el POST de compras respondió 405 y el GET de ventas, el JSON: es GET en los dos. Lo demás es
+    igual —la misma ruta, el libro en `codLibro`, que se rellena solo— y devuelve un JSON, no un ticket."""
     compras = sunat.peticion("inconsistencias_resumen", registro="compra", periodo="202610", codTipoResumen=1)
     ventas = sunat.peticion("inconsistencias_resumen", registro="venta", periodo="202610", codTipoResumen=1)
-    assert (compras["metodo"], ventas["metodo"]) == ("POST", "GET")
+    assert (compras["metodo"], ventas["metodo"]) == ("GET", "GET")
+    assert sunat.verificado("inconsistencias_resumen", registro="venta")
+    assert not sunat.verificado("inconsistencias_resumen", registro="compra")
     assert compras["url"].endswith("/rvierce/resumen/web/resumeninconsistencias/202610")
     assert compras["params"] == {"codTipoResumen": 1, "codLibro": "080000"}
     assert ventas["params"] == {"codTipoResumen": 1, "codLibro": "140000"} and ventas["devuelve"] == "json"

@@ -130,7 +130,7 @@
       "params_obligatorios": ["codTipoArchivo", "codOrigenEnvio"],
       "cod_proceso": "97",
       "fuente": "Compras v28 5.37 · Anexo I",
-      "_nota": "Solo existe en compras. Su código de proceso es el 97, «Exportar comprobantes excluidos» en el Anexo I de los dos manuales (15.4.0, sin medir): el que se usaba fuera del motor era el 12, que el Anexo I llama «Generar archivo exportar preliminar». Al bajar el archivo manda el que diga SUNAT al consultar el ticket."
+      "_nota": "Solo existe en compras. Su código de proceso es el 97, «Exportar comprobantes excluidos» en el Anexo I de los dos manuales (15.4.0, sin medir): el que se usaba fuera del motor era el 12, que el Anexo I llama «Generar archivo exportar preliminar». Al bajar el archivo manda el que diga SUNAT al consultar el ticket. Lo medido el 01-nov-2026, con un mes sin presentar de un RUC real: SUNAT aceptó el pedido y dio ticket, y el ticket se quedó en 01 («cargado») los cuatro minutos que se le esperó. Ni respondió ni falló: no se sabe todavía cuánto tarda, ni qué trae."
     },
     "no_incluidos": {
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
@@ -174,24 +174,27 @@
       },
       "cod_proceso": "13",
       "fuente": "Compras v28 5.44 · Ventas v29 5.25 · Anexo I",
-      "_nota": "Las inconsistencias que SUNAT ve en cada comprobante del periodo (15.4.0, del manual y SIN MEDIR). Devuelve un ticket, y el archivo se baja con `ticket_archivo`. `codTipoArchivo` es 0 txt y 1 Excel en los dos manuales; en compras se exige además `codOrigenEnvio`, en ventas no. Las dos admiten filtros opcionales —fechas, `codInconsistencia`, el documento del proveedor o cliente, el tipo, la serie y el número, rangos de importe— que van por `params`. Su código de proceso es el 13, «Generar archivo exportar inconsistencias» en el Anexo I de los dos manuales. Hasta la 15.3 la declaraba fuera del motor la aplicación que la usaba, con la misma ruta: era la única de las que una integración necesitaba que el catálogo no tenía."
+      "verificado_por_libro": {"080000": "2026-11-01"},
+      "_nota_medida": "MEDIDA EN COMPRAS el 01-nov-2026 (15.4.1), con un mes sin presentar de un RUC real: el ticket terminó en 06 con un ZIP de UN TXT en UTF-8, sin palote al final. **La cabecera tiene 21 rótulos y las filas 20 campos**: falta «Tipo Doc. Emisor», y desde ahí todo va corrido un lugar —donde el rótulo dice tipo de documento, la fila trae el número—. Un lector que se fíe de la cabecera lee la fila desplazada. Las 20 de la fila, en orden: archivo cargado (vacío), número de operación, campo de registro (0, 15 o 25), fecha de emisión con hora (AAAA-MM-DD HH:MM:SS), fecha de pago o vencimiento, tipo, serie, número, número de documento del emisor, su razón social, moneda (PEN, USD), base y IGV DG, base e IGV DGNG, total (con signo en las notas), **código de la inconsistencia**, su descripción, el monto de la inconsistencia y un semáforo (1 o 2, sin leyenda en el manual). Se vieron tres códigos: 313 (nota de crédito por monto superior al comprobante que modifica, en el mismo periodo), 325 (el campo 25 no cuadra con la suma de los 15 al 24 salvo el 22) y 330 (factura al crédito sin estado conforme en la plataforma de factoring). EN VENTAS, el mismo mes respondió 1070 («No se ha encontrado información…»): SUNAT no tenía nada que reportar, que es un vacío y no un error (`errores.sin_datos`); su forma sigue sin verse.",
+      "_nota": "Las inconsistencias que SUNAT ve en cada comprobante del periodo (15.4.0, del manual). Devuelve un ticket, y el archivo se baja con `ticket_archivo`. `codTipoArchivo` es 0 txt y 1 Excel en los dos manuales; en compras se exige además `codOrigenEnvio`, en ventas no. Las dos admiten filtros opcionales —fechas, `codInconsistencia`, el documento del proveedor o cliente, el tipo, la serie y el número, rangos de importe— que van por `params`. Su código de proceso es el 13, «Generar archivo exportar inconsistencias» en el Anexo I de los dos manuales. Hasta la 15.3 la declaraba fuera del motor la aplicación que la usaba, con la misma ruta: era la única de las que una integración necesitaba que el catálogo no tenía."
     },
     "inconsistencias_resumen": {
-      "metodo_por_libro": {"080000": "POST", "140000": "GET"},
-      "grada": "lectura", "devuelve": "json",
+      "metodo": "GET", "grada": "lectura", "devuelve": "json",
       "ruta_por_libro": {
         "080000": "rvierce/resumen/web/resumeninconsistencias/{periodo}",
         "140000": "rvierce/resumen/web/resumeninconsistencias/{periodo}"
       },
       "params_obligatorios": ["codTipoResumen", "codLibro"],
       "fuente": "Compras v28 5.36 · Ventas v29 5.21",
-      "_nota": "El resumen de lo que SUNAT ve del periodo (15.4.0, del manual y SIN MEDIR): un JSON con `cantidad` y `monto`, y en cada uno el porcentaje de comprobantes con inconsistencias relacionadas con el crédito fiscal (`porcentajeRelFiscal`), las no relacionadas (`porcentajeNoRelFiscal`), las que no tienen ninguna (`porcentajeSinValidaciones`) y el `total`. **El método va POR LIBRO** (`metodo_por_libro`), porque los manuales no coinciden: compras lo documenta como POST —aunque solo lee y no lleva cuerpo— y ventas como GET. La ruta es la misma en los dos. `codTipoResumen`: compras lista 1 propuesta, 2 preliminar, 3 incluidos o excluidos, 4 registro, 5 preliminar registrado y 6 ajustes posteriores; ventas solo admite del 1 al 4 y no dice qué es cada uno."
+      "verificado_por_libro": {"140000": "2026-11-01"},
+      "_nota_medida": "MEDIDO el 01-nov-2026 (15.4.1), con un mes sin presentar de un RUC real. **En ventas, GET respondió** con el JSON del manual y dos diferencias: el periodo se llama `perPeriodoTributario` —no `perTributario`— y `codTipoResumen` llega como texto. **En compras, el POST del manual respondió 405** (método no permitido), así que el manual se equivoca: la 15.4.0 lo declaraba POST por libro, y la 15.4.1 lo pasa a GET, como ventas —sin medir todavía en compras—. Con eso `metodo_por_libro` se queda sin operación que lo use: el catálogo lo sigue admitiendo, por si un manual vuelve a separar los dos libros con razón.",
+      "_nota": "El resumen de lo que SUNAT ve del periodo: un JSON con `cantidad` y `monto`, y en cada uno el porcentaje de comprobantes con inconsistencias relacionadas con el crédito fiscal (`porcentajeRelFiscal`), las no relacionadas (`porcentajeNoRelFiscal`), las que no tienen ninguna (`porcentajeSinValidaciones`) y el `total`. La ruta es la misma en los dos libros. `codTipoResumen`: compras lista 1 propuesta, 2 preliminar, 3 incluidos o excluidos, 4 registro, 5 preliminar registrado y 6 ajustes posteriores; ventas solo admite del 1 al 4 y no dice qué es cada uno."
     },
     "casillas": {
       "metodo": "GET", "grada": "lectura", "devuelve": "binario",
       "ruta": "rvierce/casillas/e/casillaspropuestas/{periodo}/reporte/{tipoReporte}/{tipoDescarga}",
       "fuente": "Compras v28 5.41 · Ventas v29 5.23",
-      "_nota": "El reporte de las casillas del periodo, las que pre-llenan el formulario 621 (15.4.0, del manual y SIN MEDIR). **No lleva libro**: ni la ruta ni los parámetros lo nombran, y los dos manuales describen la misma URL, así que es un reporte del periodo y no de un registro. Devuelve el archivo directamente, sin ticket. `tipoReporte` es 1 preliminar o 2 comparada. Y `tipoDescarga` **no está claro**: ventas lo da como 0 txt, 1 xls y 2 pdf; compras remite a su Anexo III, pero su propio ejemplo escribe `txt` en letras (`…/reporte/1/txt`). Se pasa como llegue; lo decidirá la medición."
+      "_nota": "El reporte de las casillas del periodo, las que pre-llenan el formulario 621 (15.4.0, del manual y SIN MEDIR). **No lleva libro**: ni la ruta ni los parámetros lo nombran, y los dos manuales describen la misma URL, así que es un reporte del periodo y no de un registro. Devuelve el archivo directamente, sin ticket. `tipoReporte` es 1 preliminar o 2 comparada. Y `tipoDescarga` **no está claro**: ventas lo da como 0 txt, 1 xls y 2 pdf; compras remite a su Anexo III, pero su propio ejemplo escribe `txt` en letras (`…/reporte/1/txt`). Se pasa como llegue; lo decidirá la medición. Lo medido el 01-nov-2026 sobre un mes SIN PRESENTAR: las dos vistas, con `0` y con `txt`, respondieron 1070 («No se ha encontrado información…», `errores.sin_datos`). Es lo esperable —las casillas salen de lo que se declara, y ese mes no tenía nada declarado—, así que `tipoDescarga` sigue sin decidirse: se mide sobre un mes presentado."
     }
   },
 
@@ -242,6 +245,11 @@
     "reintentables": {
       "1351": "Se ha producido un error al realizar el envío del archivo, por favor volver a intentar el envío."
     },
+    "_nota_sin_datos": "`sin_datos` es SUNAT diciendo que no hay nada que dar: no es un fallo de la petición —los parámetros pasaron su validación— sino un vacío. Quien lee lo que SUNAT ve de un periodo tiene que tratarlo como una lista vacía, no como un error: una pantalla que dijera «falló» delante de un mes sin inconsistencias enseñaría lo contrario de lo que pasa (15.4.1).",
+    "sin_datos": {
+      "1070": "No se ha encontrado información de comprobantes de pago en Periodo Seleccionado. MEDIDO el 01-nov-2026 en un mes sin presentar: lo respondieron los no incluidos y las inconsistencias de ventas, y las casillas.",
+      "1518": "No existen documentos para exportar. Del manual, sin medir; hasta la 15.4.0 estaba entre los frecuentes."
+    },
     "frecuentes": {
       "1006": "perTributario con formato distinto de yyyymm",
       "1007": "El periodo de búsqueda no debe ser mayor a la fecha actual",
@@ -252,7 +260,6 @@
       "1161": "codLibro no permitido o no válido",
       "1346": "El tamaño del comprimido .zip debe ser menor o igual a 6 GB",
       "1348": "La extensión del archivo debe ser .zip",
-      "1518": "No existen documentos para exportar",
       "2293": "Para registrar el preliminar primero hay que reemplazar la propuesta"
     }
   },

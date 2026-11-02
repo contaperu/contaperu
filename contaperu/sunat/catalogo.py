@@ -41,9 +41,11 @@ def _valido(tabla: dict) -> dict:
             raise CatalogoDelSireInvalido(
                 f"La operación {nombre!r} no declara una grada de {GRADAS}: sin ella, quien envía no puede saber si "
                 "puede llamarla sola o necesita un acto explícito.")
-        # El método, o el de cada libro (15.4.0): el resumen de inconsistencias es POST en el manual de compras y GET en
-        # el de ventas. Con `metodo_por_libro`, cada libro con ruta tiene que tener el suyo: uno sin método no se
-        # podría llamar, y caer a un método general sería decir de un libro lo que el manual dice del otro.
+        # El método, o el de cada libro (15.4.0). Lo estrenó el resumen de inconsistencias, que el manual de compras da
+        # como POST y el de ventas como GET; medido, era GET en los dos (15.4.1), así que hoy ninguna operación lo usa
+        # y queda por si un manual vuelve a separar los libros con razón. Con `metodo_por_libro`, cada libro con ruta
+        # tiene que tener el suyo: uno sin método no se podría llamar, y caer a un método general sería decir de un
+        # libro lo que el manual dice del otro.
         por_libro = op.get("metodo_por_libro") or {}
         if not str(op.get("metodo") or "").strip() and not por_libro:
             raise CatalogoDelSireInvalido(f"La operación {nombre!r} no dice su método HTTP.")

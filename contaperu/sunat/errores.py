@@ -18,13 +18,20 @@ _ERRORES = _CATALOGO["errores"]
 IDEMPOTENTES: frozenset[str] = frozenset(_ERRORES["idempotentes"])
 # Lo que el propio manual manda repetir.
 REINTENTABLES: frozenset[str] = frozenset(_ERRORES["reintentables"])
+# «No hay nada que dar» (15.4.1): la petición estaba bien y SUNAT no tiene datos de ese periodo. Quien lee lo que
+# SUNAT ve de un mes —sus inconsistencias, sus casillas— lo trata como una lista vacía y no como un fallo. El 1070 se
+# midió el 01-nov-2026 en un mes sin presentar.
+SIN_DATOS: frozenset[str] = frozenset(_ERRORES["sin_datos"])
+# Los grupos con código conocido, en el orden en que se buscan.
+_GRUPOS = ("idempotentes", "reintentables", "sin_datos", "frecuentes")
 
 
 class SireRechaza(ErrorContaperu, ValueError):
     """SUNAT rechazó la petición y dijo por qué.
 
     `codigo` es el que importa —el de dentro de `errors`, no el «422» de arriba—, `idempotente` dice si significa
-    «esto ya se hizo» y `reintentable` si el manual manda repetir."""
+    «esto ya se hizo», `reintentable` si el manual manda repetir y `sin_datos` si SUNAT solo dice que no tiene nada
+    de ese periodo: un vacío, no un fallo."""
 
     def __init__(self, codigo: str, mensaje: str, *, operacion: str = "", codigos: tuple[str, ...] = ()) -> None:
         super().__init__(f"{operacion + ': ' if operacion else ''}[{codigo}] {mensaje}")
@@ -35,6 +42,7 @@ class SireRechaza(ErrorContaperu, ValueError):
         self.codigos = codigos
         self.idempotente = codigo in IDEMPOTENTES
         self.reintentable = codigo in REINTENTABLES
+        self.sin_datos = codigo in SIN_DATOS
 
 
 def clasificar_error(cod: Any, *, mensaje: str = "", errores: list[dict] | None = None,
@@ -51,7 +59,7 @@ def clasificar_error(cod: Any, *, mensaje: str = "", errores: list[dict] | None 
     candidatos = [str(cod or "").strip()]
     candidatos += [str((e or {}).get("cod") or "").strip() for e in (errores or [])]
     candidatos = [c for c in candidatos if c]
-    conocidos = IDEMPOTENTES | REINTENTABLES | frozenset(_ERRORES["frecuentes"])
+    conocidos = frozenset(c for grupo in _GRUPOS for c in _ERRORES[grupo])
     elegido = next((c for c in candidatos if c in conocidos), "")
     if not elegido:
         internos = [c for c in candidatos[1:] if c]
@@ -62,7 +70,7 @@ def clasificar_error(cod: Any, *, mensaje: str = "", errores: list[dict] | None 
 
 def _texto_de(codigo: str) -> str:
     """Lo que el catálogo dice de ese código, si lo trae. Sirve cuando SUNAT no manda mensaje."""
-    for grupo in ("idempotentes", "reintentables", "frecuentes"):
+    for grupo in _GRUPOS:
         if codigo in _ERRORES[grupo]:
             return str(_ERRORES[grupo][codigo])
     return ""
