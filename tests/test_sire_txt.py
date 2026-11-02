@@ -314,7 +314,8 @@ CABECERA_NO_DOMICILIADOS = (
     "Impto.|Convenio|Exon.|Tipo Rta|Mod. Serv.|Art. 76|CAR Orig.|" + "|".join(f"CLU{i}" for i in range(1, 11)))
 # Una compra a un proveedor del exterior, con la forma del archivo real: el periodo delante, y país y renta detrás.
 # Son los 35 campos informados; la exportación añade las 10 columnas libres y el que se presenta, uno vacío y palote.
-CAMPOS_NO_DOMICILIADO = ["202608", "", "12/08/2026", "91", "E001", "7", "100.00", "0.00", "100.00", "00", "", "",
+# Los importes van EN SOLES, como en el real (15.3.1): 375.00 es una factura de 100 dólares al 3.750.
+CAMPOS_NO_DOMICILIADO = ["202608", "", "12/08/2026", "91", "E001", "7", "375.00", "0.00", "375.00", "00", "", "",
                          "", "0.00", "USD", "3.750", "9249", "PROVEEDOR DEL EXTERIOR", "UNA CALLE DEL EXTERIOR",
                          "X0000001", "", "", "", "00", "0.00", "0.00", "0.00", "0.00", "0.00", "00", "", "01", "1", "",
                          ""]
@@ -488,3 +489,47 @@ def test_un_txt_que_no_es_de_sunat_sigue_siendo_un_acompanante():
     for nombre in ("leeme.txt", "LE-notas.txt", "LEEME20601111111.txt"):
         res = archivos.convertir_xml(archivos.expandir(nombre, b"notas del contador"), COMPRAS)
         assert res.ignorados == [nombre] and res.no_leidos == [], nombre
+
+
+# ── En qué moneda vienen los importes (15.3.1) ─────────────────────────────────────────────────────────────────────
+# El nombre de un libro electrónico con sus cuatro banderas; la tercera es la moneda de la contabilidad.
+def _nombre_con_banderas(banderas: str) -> str:
+    ruc, periodo, dia, codigo, oportunidad = "20601111111", "202608", "00", "080500", "00"
+    return f"LE{ruc}{periodo}{dia}{codigo}{oportunidad}{banderas}.txt"
+
+
+def _fila_de(moneda: str, tipo_cambio: str, valor: str) -> bytes:
+    campos = list(CAMPOS_NO_DOMICILIADO)
+    campos[6], campos[8], campos[14], campos[15] = valor, valor, moneda, tipo_cambio
+    return "|".join(campos + [""]).encode("utf-8") + b"|"
+
+
+def test_los_importes_vienen_en_soles_y_el_comprobante_dice_su_moneda():
+    """El caso que lo trajo, con sus cifras: una suscripción de 20 dólares que el registro anota en soles —67.24 al
+    3.362, la regla 5 del campo 16 del Anexo 9— y que la 15.3.0 leyó como 67.24 «USD». Ahora el comprobante dice lo que
+    dice el papel, y la fila cruda sigue diciendo lo que dice el registro."""
+    nombre = _nombre_con_banderas("1112")
+    assert len(nombre.rsplit(".", 1)[0]) == 33          # el largo de un libro electrónico de verdad
+    [c] = sire_txt.parsear(_fila_de("USD", "3.362", "67.24"), COMPRAS, nombre)
+    assert (c.moneda, c.tipo_cambio, c.total, c.valor_no_gravado) == ("USD", Decimal("3.362"), Decimal("20.00"),
+                                                                       Decimal("20.00"))
+    assert c.datos_originales["sire"][8] == "67.24"
+    # En soles no hay nada que convertir, y sin la bandera —un archivo renombrado— se entiende soles.
+    [en_soles] = sire_txt.parsear(_fila_de("PEN", "", "67.24"), COMPRAS, nombre)
+    assert (en_soles.moneda, en_soles.total, en_soles.tipo_cambio) == ("PEN", Decimal("67.24"), None)
+    [renombrado] = sire_txt.parsear(_fila_de("USD", "3.362", "67.24"), COMPRAS, "no-domiciliados.txt")
+    assert renombrado.total == Decimal("20.00")
+
+
+def test_una_contabilidad_en_dolares_no_se_convierte_y_lo_que_no_se_sabe_no_se_adivina():
+    """Quien lleva su contabilidad en dólares (tercera bandera «2») anota en dólares: un comprobante en dólares no se
+    toca. Uno en otra moneda pasó por soles antes de llegar a dólares, y esa vuelta no se ha visto en un archivo
+    real; y un comprobante en dólares sin tipo de cambio no se puede devolver a su moneda. Los dos fallan con su
+    motivo en vez de dar un importe que nadie escribió."""
+    en_dolares = _nombre_con_banderas("1122")
+    [c] = sire_txt.parsear(_fila_de("USD", "3.362", "20.00"), COMPRAS, en_dolares)
+    assert (c.moneda, c.total) == ("USD", Decimal("20.00"))
+    with pytest.raises(sire_txt.SireInvalido, match="contabilidad en USD y el comprobante es de EUR"):
+        sire_txt.parsear(_fila_de("EUR", "4.100", "20.00"), COMPRAS, en_dolares)
+    with pytest.raises(sire_txt.SireInvalido, match="USD sin tipo de cambio"):
+        sire_txt.parsear(_fila_de("USD", "", "67.24"), COMPRAS, _nombre_con_banderas("1112"))

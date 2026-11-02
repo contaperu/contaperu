@@ -4,6 +4,22 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.3.1] — 2026-11-01
+
+### Corregido
+
+- **Los importes del registro de no domiciliados vienen en la moneda de la CONTABILIDAD, no en la del comprobante.**
+  La 15.3.0 los leyó como si fueran de la moneda del comprobante, y una suscripción de 20 dólares salió como 67.24
+  «USD»: era 20 × 3.362, en soles. Lo dice la regla 5 del campo 16 del Anexo 9 de la RS 040-2022 —el tipo de cambio
+  es «el utilizado para la conversión a soles en caso lleve su contabilidad en soles»— y lo dice el nombre del
+  archivo, cuya tercera bandera es la moneda en que se lleva (1 soles, 2 dólares). Ahora `sire_txt` devuelve cada
+  importe a la moneda del comprobante con el tipo de cambio de su fila, al céntimo: las diez filas del mes real dan lo
+  que dice cada factura (9.99, 100.00, 18.82, 24.00, 20.00… y 201 885.23 dólares). Los soles se conservan en la fila
+  cruda (`datos_originales["sire"]`), y el asiento los recompone con ese mismo tipo de cambio.
+- **Lo que no se sabe convertir no se adivina**: un comprobante en otra moneda sin tipo de cambio, o uno que no está en
+  dólares de quien lleva su contabilidad en dólares —que pasó por soles antes, y esa vuelta no se ha visto en un
+  archivo real—, hacen fallar la lectura con su motivo. Sin la bandera en el nombre se entienden soles.
+
 ## [15.3.0] — 2026-11-01
 
 ### Se lee el registro de compras de no domiciliados
