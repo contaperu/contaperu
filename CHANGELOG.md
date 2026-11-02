@@ -4,6 +4,25 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.4.2] — 2026-11-01
+
+### Lo medido sobre un mes presentado
+
+La segunda medición fue sobre setiembre de 2026, un mes ya generado, con el mismo RUC real. Queda en las notas de
+cada operación del catálogo.
+
+- **`excluidos`, verificada.** Ticket en 06 y un TXT con el formato de la exportación de la propuesta, que
+  `comprobantes.sire_txt` lee tal cual. En un mes presentado, los excluidos son lo que SUNAT tenía en la propuesta y
+  no se declaró: incluyen todos los comprobantes con la inconsistencia 341, «no se encuentra en el archivo plano».
+- **`inconsistencias_resumen`, verificada en los dos libros**: el GET respondió también en compras.
+- **`inconsistencias_comprobante`**: la cabecera cambia de un mes a otro —la de un mes sin presentar empieza por
+  «Archivo cargado», la de uno presentado no—, pero siempre trae un rótulo más que las filas, porque a las filas les
+  falta «Tipo Doc. Emisor». Y en setiembre **cada fila venía dos veces**, idénticas. Siete códigos más, con su
+  descripción y su semáforo.
+- **`casillas`**: la preliminar respondió 1070, porque un mes generado ya no tiene preliminar, y la comparada con
+  `0` respondió 200 con el cuerpo vacío. El tipo de descarga sigue por decidir; el Anexo III de compras, que la nota
+  citaba sin leer, dice 0 txt, 1 csv y 2 excel.
+
 ## [15.4.1] — 2026-11-01
 
 ### Lo medido de las tres operaciones de la 15.4.0

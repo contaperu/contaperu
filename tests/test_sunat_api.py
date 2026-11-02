@@ -284,13 +284,14 @@ def test_las_inconsistencias_por_comprobante_piden_lo_suyo_en_cada_libro():
 
 def test_el_resumen_de_inconsistencias_es_get_en_los_dos_libros_aunque_compras_diga_post():
     """El manual de compras (5.36) lo documenta POST y el de ventas (5.21) GET. La 15.4.0 le creyó a cada uno, y al
-    medir (01-nov-2026) el POST de compras respondió 405 y el GET de ventas, el JSON: es GET en los dos. Lo demás es
-    igual —la misma ruta, el libro en `codLibro`, que se rellena solo— y devuelve un JSON, no un ticket."""
+    medir (01-nov-2026) el POST de compras respondió 405 y el GET respondió en los dos libros: es GET en los dos, y está
+    verificado en los dos. Lo demás es igual —la misma ruta, el libro en `codLibro`, que se rellena solo— y devuelve un
+    JSON, no un ticket."""
     compras = sunat.peticion("inconsistencias_resumen", registro="compra", periodo="202610", codTipoResumen=1)
     ventas = sunat.peticion("inconsistencias_resumen", registro="venta", periodo="202610", codTipoResumen=1)
     assert (compras["metodo"], ventas["metodo"]) == ("GET", "GET")
-    assert sunat.verificado("inconsistencias_resumen", registro="venta")
-    assert not sunat.verificado("inconsistencias_resumen", registro="compra")
+    assert sunat.verificado("inconsistencias_resumen", registro="venta") == "2026-11-01"
+    assert sunat.verificado("inconsistencias_resumen", registro="compra") == "2026-11-01"
     assert compras["url"].endswith("/rvierce/resumen/web/resumeninconsistencias/202610")
     assert compras["params"] == {"codTipoResumen": 1, "codLibro": "080000"}
     assert ventas["params"] == {"codTipoResumen": 1, "codLibro": "140000"} and ventas["devuelve"] == "json"
@@ -312,6 +313,9 @@ def test_excluidos_y_no_incluidos_producen_el_codigo_del_anexo_i():
     """El 97 «Exportar comprobantes excluidos» y el 11 «Generar archivo exportar no incluidos». El 12 que se usaba fuera
     del motor es «Generar archivo exportar preliminar»."""
     assert sunat.peticion("excluidos", registro="compra", periodo="202610", codTipoArchivo=0)["cod_proceso"] == "97"
+    # Los excluidos se midieron sobre un mes presentado (15.4.2); los no incluidos, solo con un 1070.
+    assert sunat.verificado("excluidos", registro="compra") == "2026-11-01"
+    assert not sunat.verificado("no_incluidos", registro="venta")
     assert sunat.peticion("no_incluidos", registro="venta", periodo="202610", codTipoArchivo=0)["cod_proceso"] == "11"
 
 

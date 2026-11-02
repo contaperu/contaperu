@@ -3,7 +3,7 @@
 **El núcleo puede saber la URL; lo que no puede es llamarla.** Saber es un dato; llamar es entrada y salida. El
 catálogo `datos/sunat/sire_api.json` describe once operaciones desde el 21-sep-2026, doce desde el 01-nov-2026 y quince desde la 15.4.0 —las
 inconsistencias por comprobante, su resumen y el reporte de casillas del 621, del manual; las dos primeras se
-midieron en parte en la 15.4.1, que trajo también el grupo de errores `sin_datos`—
+midieron en la 15.4.1 y la 15.4.2, que trajeron también el grupo de errores `sin_datos`—
 —ruta, método, parámetros obligatorios, código de proceso, el protocolo TUS, los tickets, los estados de un periodo,
 los límites y la tabla de errores—, y su propia nota
 lo dice: «esto NO es un cliente, es la descripción de una API ajena». Lo que faltaba no eran los datos: eran las
