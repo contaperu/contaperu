@@ -25,14 +25,18 @@ Está lo que **el catálogo sostiene con su fuente**, que es verificable sin red
   declarado entró en ventas sin medir (15.2.0) y se midió el mismo día (15.2.1).
 - `clasificar_error(cod, errores)` — el 422 de SUNAT, con su trampa, y si lo que llegó es idempotente o reintentable.
 
-**No está el lector de la forma de cada respuesta**, y es a propósito. Eso no lo sostiene el catálogo: lo sostendría
-una respuesta real guardada, y aquí no hay ninguna. Lo que sí hay desde el 01-nov-2026 son cuatro operaciones
-**`verificado`** —medidas contra producción, la fecha al lado—: `periodos`, de la que salieron los códigos de
-`estado_de_periodo`; `registro_pedir` en los dos libros, cuyos archivos resultaron ser formatos que
-`comprobantes.sire_txt` ya leía; y `ticket_consultar` y `ticket_archivo`, por las que pasaron.
-Los lectores que la aplicación usa en producción están escritos contra el manual, y traerlos aquí tal cual no
-rompería nada: **congelaría un mapeo no comprobado en el repositorio abierto**, con la solidez aparente que da estar
-en un motor con tests. Primero la evidencia, después la mudanza.
+**Un lector de respuesta solo entra después de medir.** Escribirlo contra el manual congelaría un mapeo no comprobado
+en el repositorio abierto, con la solidez aparente que da estar en un motor con tests: primero la evidencia, después la
+mudanza. Las operaciones **`verificado`** —medidas contra producción, la fecha al lado— son la evidencia, y de ahí
+salió lo que hay:
+
+- `periodos` dio los códigos de `estado_de_periodo`, y `registro_pedir`, `excluidos` y `no_incluidos` traen formatos
+  que `comprobantes.sire_txt` ya leía: no necesitan lector propio.
+- `leer_inconsistencias(datos)` y `leer_casillas(datos)` (15.5.0) leen lo que contestan `inconsistencias_comprobante`
+  y `casillas`, medidas el 01-nov-2026 en un mes sin presentar y en uno presentado. Las dos formas reales contradicen
+  al manual, y el lector dice en su docstring cómo.
+
+Lo medido era de un RUC real y no entra aquí: las pruebas usan archivos sintéticos con la misma forma.
 
 ## Por qué el SIRE no tiene ambiente de pruebas, y qué se hace entonces
 
@@ -48,8 +52,9 @@ from .catalogo import (CODIGOS_DE_LIBRO, GRADAS, OPERACIONES, cod_libro_de, libr
 from .errores import SireRechaza, clasificar_error
 from .periodos import ESTADOS_DE_PERIODO, estado_de_periodo
 from .peticiones import grada, peticion, verificado
+from .respuestas import leer_casillas, leer_inconsistencias
 from .tickets import ESTADOS_DE_TICKET, estado_de_ticket
 
 __all__ = ["CODIGOS_DE_LIBRO", "ESTADOS_DE_PERIODO", "ESTADOS_DE_TICKET", "GRADAS", "OPERACIONES", "SireRechaza",
-           "clasificar_error", "cod_libro_de", "estado_de_periodo", "estado_de_ticket", "grada", "libros",
-           "operaciones", "peticion", "sire_api", "verificado"]
+           "clasificar_error", "cod_libro_de", "estado_de_periodo", "estado_de_ticket", "grada", "leer_casillas",
+           "leer_inconsistencias", "libros", "operaciones", "peticion", "sire_api", "verificado"]

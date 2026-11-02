@@ -4,7 +4,29 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [15.5.0] — 2026-11-01
+
+### Los lectores de lo que SUNAT ve de un periodo
+
+Lo que contestan dos operaciones del SIRE, leído, después de medirlas contra producción en un mes sin presentar y en
+uno presentado. Están en `contaperu.sunat` (`sunat/respuestas.py`), reciben los bytes de la respuesta —o el ZIP que la
+trae— y fallan con `SireInvalido` y su motivo ante una forma que no es la medida, nunca con una lista a medias.
+
+- **`leer_inconsistencias(datos)`** → `{por_comprobante, del_archivo}`. Cada entrada de `por_comprobante` es
+  `{clave, codigo, descripcion, semaforo, campo, monto}`: `clave` es la de `clave_de`, la misma con que una aplicación
+  sabe si ya tiene el comprobante, y `monto` un `Decimal` con su signo. `del_archivo` son las que no nombran
+  comprobante, como la cantidad o los montos totales del archivo distintos de la propuesta. Resuelve las tres cosas
+  que se midieron: a las filas les falta «Tipo Doc. Emisor» y van corridas un lugar respecto de la cabecera; la
+  cabecera cambia de un mes a otro, así que cada dato se busca por su rótulo; y cada fila puede venir dos veces.
+- **`leer_casillas(datos)`** → `{numero_de_orden, ventas, compras}`, una fila por concepto del 621:
+  `{casilla, concepto, registro, inconsistencias, propuesta, declarado, diferencia}`. Los importes, `Decimal` con su
+  signo, y `None` donde la columna no aplica —vacío no es cero—. Las filas de desglose al 18 % y al 10 % van sin
+  casilla, debajo de la suya.
+
+Probados sobre archivos sintéticos con la forma medida, y contra los archivos reales de la medición antes de publicar:
+1 941 inconsistencias distintas, como el conteo hecho a mano, y en las 53 filas de casillas la diferencia es la
+propuesta menos lo declarado. Los excluidos y los no incluidos no necesitan lector propio —traen el formato de la
+propuesta, que `comprobantes.sire_txt` ya lee— y el resumen de inconsistencias es un JSON que se usa tal cual.
 
 ### Lo medido de las casillas del 621
 

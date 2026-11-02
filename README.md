@@ -438,7 +438,8 @@ rechaza**, en vez de ignorarse en silencio como antes.
 - **La API del SIRE, descrita.** Sus operaciones con su ruta, su método y su grada —entre ellas, bajar lo
   **declarado** de un periodo, que no es la propuesta, y desde la 15.4.0 las inconsistencias que SUNAT ve, su resumen
   y el reporte de casillas del 621—; armar la petición, leer el estado de un ticket y el de un
-  periodo, y clasificar el rechazo de SUNAT. **El motor sabe la URL y no la llama**: enviar necesita red y Clave SOL,
+  periodo, y clasificar el rechazo de SUNAT. Y desde la 15.5.0, **leer lo que SUNAT contesta** de las inconsistencias
+  por comprobante y de las casillas (`leer_inconsistencias`, `leer_casillas`), con la forma medida contra producción. **El motor sabe la URL y no la llama**: enviar necesita red y Clave SOL,
   y eso es de quien lo integra.
 - **Una batería de conformidad portable**, que se corre **sin el motor y en cualquier lenguaje**: si escribes tu
   propia implementación del estándar, ahí está contra qué medirla.
@@ -496,7 +497,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Driver SIRE (TXT de reemplazo del RVIE y del RCE) | listo |
 | Driver PLE (el Libro Diario, formato 5.1) y PLE-plan (el detalle del plan contable, 5.3) | listo, contra un libro presentado y aceptado con sus constancias |
 | La API del SIRE descrita: sus operaciones, la petición armada, el ticket, el estado de un periodo y el rechazo | listo (8.1; lo declarado, desde la 15.1) — **sin salir a la red**: enviar es del integrador |
-| Los lectores de lo que SUNAT contesta | **pendiente de una respuesta real** por operación, que se captura con `herramientas/comprobar_sire.py` |
+| Los lectores de lo que SUNAT contesta | **en parte** (15.5.0): las inconsistencias por comprobante y las casillas del 621, medidas contra producción; el resto, **pendiente de una respuesta real** por operación, que se captura con `herramientas/comprobar_sire.py` |
 | **Legacy** | |
 | Driver CONCAR (Excel de asientos) | listo |
 | Driver CONTASIS (registro de compras y de ventas en Excel) | **listo**: CONTASIS importó los archivos que genera (13-sep-2026) |
