@@ -40,7 +40,10 @@ SIN_CONTRAPARTE_OK = frozenset({"03", "12", "13", "16", "36", "00"})
 FUERA_DEL_REGISTRO_SUNAT = frozenset({"02"})
 # Los comprobantes del registro de compras de NO DOMICILIADOS (Anexo 9 de la RS 040-2022, §8.5): el comprobante del
 # exterior y sus dos notas. Se anotan en SU registro, el 080500, y por eso el driver `sire` —que escribe el 080400— los
-# deja fuera: un 91 en ese archivo sería una fila de otro registro. SÍ entran al asiento contable, como cualquier
+# deja fuera: un 91 en ese archivo sería una fila de otro registro. **La fuente es la Tabla 11 de esa misma norma**,
+# que da a cada tipo tres columnas —«Información de la propuesta del RCE», «8.4 Registro de Compras» y «8.5
+# Información de operaciones con sujetos no domiciliados»—: el 91, el 97 y el 98 dicen No · No · Sí, y el 87 y el 88,
+# las especiales, No · Sí · No (John lo contrastó en SUNAT el 01-nov-2026). SÍ entran al asiento contable, como cualquier
 # compra (John, 01-nov-2026: «como compra común, con mi sigla»). Desde la 15.3.0, que es cuando se empezaron a leer.
 DEL_REGISTRO_DE_NO_DOMICILIADOS = frozenset({"91", "97", "98"})
 
