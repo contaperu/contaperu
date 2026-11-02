@@ -4,6 +4,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+### Lo medido de las casillas del 621
+
+- **`casillas`, verificada.** El tipo de descarga es `txt` en letras, como el ejemplo del manual de compras: con los
+  códigos 0, 1 y 2 de los dos anexos, SUNAT responde 204 sin cuerpo. La vista comparada de un mes presentado es un
+  texto en dos bloques, ventas y compras, con siete columnas: el concepto, su casilla del 621, lo del contribuyente,
+  las inconsistencias, la propuesta de SUNAT, lo declarado en la DDJJ y la diferencia. La preliminar de un mes ya
+  generado responde 1070. El detalle, en la nota de la operación.
+
 ## [15.4.2] — 2026-11-01
 
 ### Lo medido sobre un mes presentado

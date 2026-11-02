@@ -301,10 +301,12 @@ def test_el_resumen_de_inconsistencias_es_get_en_los_dos_libros_aunque_compras_d
 
 def test_las_casillas_son_del_periodo_y_no_de_un_libro():
     """El reporte de casillas del 621 (5.41 y 5.23) no nombra libro: los dos manuales describen la misma URL. El tipo de
-    reporte y el de descarga van en la ruta y se pasan como lleguen —el de descarga no está claro en los manuales—."""
-    p = sunat.peticion("casillas", periodo="202610", tipoReporte=2, tipoDescarga=0)
-    assert p["url"].endswith("/rvierce/casillas/e/casillaspropuestas/202610/reporte/2/0")
+    reporte y el de descarga van en la ruta y se pasan como lleguen: los manuales no coincidían en el de descarga, y al
+    medirlo (01-nov-2026) solo `txt` en letras trajo algo; los códigos 0, 1 y 2 respondieron 204."""
+    p = sunat.peticion("casillas", periodo="202609", tipoReporte=2, tipoDescarga="txt")
+    assert p["url"].endswith("/rvierce/casillas/e/casillaspropuestas/202609/reporte/2/txt")
     assert p["params"] == {} and p["metodo"] == "GET" and p["devuelve"] == "binario"
+    assert sunat.verificado("casillas") == "2026-11-01"
     with pytest.raises(CatalogoDelSireInvalido, match="necesita 'tipoReporte'"):
         sunat.peticion("casillas", periodo="202610", tipoDescarga=0)
 
