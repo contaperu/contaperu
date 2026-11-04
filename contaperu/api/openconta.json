@@ -799,7 +799,7 @@
    "get": {
     "operationId": "catalogos_sunat",
     "summary": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas, medios de pago, los motivos de una nota de crédito y de una de débito, los códigos de tributo, las clases de IGV y la tabla de detracciones, con su fuente.",
-    "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas,\nmedios de pago, los motivos de una nota de crédito y de una de débito, los códigos de tributo, las clases de IGV\ny la tabla de detracciones, con su fuente.\nLa de detracciones es la única que el ERP puede sobreescribir en su configuración; las demás se copian de la norma\ny no se gobiernan.\n\nOjo con dos claves que se parecen y no son lo mismo: `notas` son los TIPOS DE COMPROBANTE que son notas (07, 08,\n87, 88, 97 y 98), y los dos `motivos_nota_*` dicen POR QUÉ se emitió una (los Catálogos 09 y 10 del Anexo N.° 8).\n\nY dos que dicen qué NO va en el TXT del SIRE, por dos motivos distintos: `fuera_del_registro_sunat` no se anota en\nningún registro que se declare (el recibo por honorarios) y `del_registro_de_no_domiciliados` se anota en OTRO, el\n080500 (15.3.0). Los dos van al asiento.",
+    "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas,\nmedios de pago, los motivos de una nota de crédito y de una de débito, los códigos de tributo, las clases de IGV\ny la tabla de detracciones, con su fuente.\nLa de detracciones es la única que el ERP puede sobreescribir en su configuración; las demás se copian de la norma\ny no se gobiernan.\n\nOjo con dos claves que se parecen y no son lo mismo: `notas` son los TIPOS DE COMPROBANTE que son notas (07, 08,\n87, 88, 97 y 98), y los dos `motivos_nota_*` dicen POR QUÉ se emitió una (los Catálogos 09 y 10 del Anexo N.° 8).\n\nY dos que dicen qué NO va en el TXT del SIRE, por dos motivos distintos: `fuera_del_registro_sunat` no se anota en\nningún registro que se declare (el recibo por honorarios) y `del_registro_de_no_domiciliados` se anota en OTRO, el\n080500 (15.3.0). Los dos van al asiento.\n\nDesde la 15.6.0, los seis catálogos de ese registro de no domiciliados (Anexo 01 de la RS 040-2022): `paises`,\n`vinculos_economicos`, `convenios_doble_imposicion`, `tipos_renta`, `modalidades_servicio` y\n`exoneraciones_no_domiciliado`; y `convenios_por_pais`, qué país tiene convenio, con qué código y desde cuándo, que\nes lo que usa `catalogos.convenio_sugerido`. Su fuente va en `fuentes` con las demás.",
     "responses": {
      "200": {
       "description": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento de identidad, monedas, medios de pago, los motivos de una nota de crédito y de una de débito, los códigos de tributo, las clases de IGV y la tabla de detracciones, con su fuente.",
@@ -4685,6 +4685,73 @@
       "description": "Los tipos de comprobante que se anotan en el registro de compras de no domiciliados (080500) y no en el TXT del SIRE que escribe el motor (080400): el 91 y sus notas, el 97 y el 98. Sí van al asiento. Desde la 15.3.0; no es obligatorio para que una respuesta de antes siga siendo válida.",
       "items": {
        "type": "string"
+      }
+     },
+     "paises": {
+      "type": "object",
+      "description": "El código de país de 4 dígitos y su nombre (Tabla 16 del Anexo 01 de la RS 040-2022): el país de residencia de un no domiciliado, campo 17 del registro 080500. El 9589 es el Perú. Desde la 15.6.0, como los cinco que siguen; no son obligatorios para que una respuesta de antes siga siendo válida.",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "vinculos_economicos": {
+      "type": "object",
+      "description": "El tipo de vinculación económica entre el contribuyente y el no domiciliado (Tabla 17), según el art. 24 del Reglamento de la LIR; el 00 es «sin vinculación».",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "convenios_doble_imposicion": {
+      "type": "object",
+      "description": "Los convenios para evitar la doble tributación (Tabla 18): el 00 es «ninguno» y el 09 «otros». La tabla no nombra el convenio con Japón.",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "tipos_renta": {
+      "type": "object",
+      "description": "El tipo de renta de fuente peruana del no domiciliado (Tabla 19), con el artículo de la LIR que la hace de fuente peruana.",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "modalidades_servicio": {
+      "type": "object",
+      "description": "Dónde se prestó el servicio del no domiciliado (Tabla 20): íntegramente en el Perú, en parte, o exclusivamente en el extranjero.",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "exoneraciones_no_domiciliado": {
+      "type": "object",
+      "description": "Las exoneraciones de operaciones de no domiciliados del art. 19 de la LIR (Tabla 21).",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "convenios_por_pais": {
+      "type": "object",
+      "description": "Qué país (Tabla 16) tiene convenio para evitar la doble imposición con el Perú, con su código de la Tabla 18 —vacío cuando la tabla no le da uno, como a Japón—, el instrumento y desde cuándo se aplica. Es la tabla que usa `catalogos.convenio_sugerido`; no es de SUNAT, y su fuente va en `fuentes`.",
+      "additionalProperties": {
+       "type": "object",
+       "properties": {
+        "convenio": {
+         "type": "string"
+        },
+        "instrumento": {
+         "type": "string"
+        },
+        "desde": {
+         "type": "string",
+         "format": "date"
+        }
+       },
+       "required": [
+        "convenio",
+        "instrumento",
+        "desde"
+       ],
+       "additionalProperties": false
       }
      },
      "detracciones": {

@@ -39,6 +39,9 @@ from .contribuyente import (CRONOGRAMAS, ESTADOS_DE_REGIMEN, REGLAS_DE_REGIMEN, 
                             RUTA_VENCIMIENTOS, CatalogoInvalido, SinCronograma, anios_con_cronograma,
                             cronogramas_de_vencimiento, regimenes_tributarios, validar_regimenes,
                             vence_el_registro, vence_la_declaracion)
+from .no_domiciliados import (CONVENIOS_DOBLE_IMPOSICION, CONVENIOS_POR_PAIS, EXONERACIONES_NO_DOMICILIADO,
+                              FUENTE_CONVENIOS, MODALIDADES_SERVICIO, PAIS_PERU, PAISES, SIN_CONVENIO, TIPOS_RENTA,
+                              VINCULOS_ECONOMICOS, convenio_sugerido)
 from .ple import FORMATO_PLE, campos_del_ple, columnas_del_ple
 from .sire import REGISTRO_SIRE, api_sire, campos_del_sire, columnas_del_sire, nombres_del_sire
 from .tributos import (CATEGORIA_RENTA_4TA, CLASES_IGV_COMPRA, CLASES_IGV_VENTA, TASA_IGV,
@@ -50,15 +53,21 @@ from .tributos import (CATEGORIA_RENTA_4TA, CLASES_IGV_COMPRA, CLASES_IGV_VENTA,
 # Los mismos nombres que exponía el módulo, escritos a mano: así una reorganización interna no puede
 # llevarse uno por descuido, y lo que un consumidor importa no depende de en qué fichero acabó.
 __all__ = [
-    "ADUANEROS", "CATEGORIA_RENTA_4TA", "CLASES_IGV_COMPRA", "CLASES_IGV_VENTA", "CRONOGRAMAS", "CatalogoInvalido",
-    "DEL_REGISTRO_DE_NO_DOMICILIADOS", "ESTADOS_DE_REGIMEN", "EXIGEN_VENCIMIENTO", "ErrorContaperu", "FORMATO_PLE", "FUENTES",
-    "FUERA_DEL_REGISTRO_SUNAT", "MEDIOS_PAGO", "MONEDAS", "MOTIVOS_NOTA_CREDITO", "MOTIVOS_NOTA_DEBITO", "NOTAS",
-    "NOTAS_CREDITO", "NOTAS_DEBITO", "REGISTRO_SIRE", "REGLAS_DE_REGIMEN", "RUTA_REGIMENES", "RUTA_VENCIMIENTOS",
-    "SCHEME_A_TIPO_DOC", "SIN_CONTRAPARTE_OK", "SinCronograma", "TASAS_IGV_REDUCIDAS", "TASAS_IGV_VIGENTES", "TASA_IGV", "TIPOS_CP",
-    "TIPOS_DOC_IDENTIDAD", "TIPOS_INVIERTEN", "TIPOS_NOTA", "TIPO_BOLETA", "TIPO_HONORARIOS", "TOLERANCIA_IGV",
+    "ADUANEROS", "CATEGORIA_RENTA_4TA", "CLASES_IGV_COMPRA", "CLASES_IGV_VENTA", "CONVENIOS_DOBLE_IMPOSICION",
+    "CONVENIOS_POR_PAIS", "CRONOGRAMAS", "CatalogoInvalido",
+    "DEL_REGISTRO_DE_NO_DOMICILIADOS", "ESTADOS_DE_REGIMEN", "EXIGEN_VENCIMIENTO", "EXONERACIONES_NO_DOMICILIADO",
+    "ErrorContaperu", "FORMATO_PLE", "FUENTES", "FUENTE_CONVENIOS",
+    "FUERA_DEL_REGISTRO_SUNAT", "MEDIOS_PAGO", "MODALIDADES_SERVICIO", "MONEDAS", "MOTIVOS_NOTA_CREDITO",
+    "MOTIVOS_NOTA_DEBITO", "NOTAS", "NOTAS_CREDITO", "NOTAS_DEBITO", "PAISES", "PAIS_PERU", "REGISTRO_SIRE",
+    "REGLAS_DE_REGIMEN", "RUTA_REGIMENES", "RUTA_VENCIMIENTOS",
+    "SCHEME_A_TIPO_DOC", "SIN_CONTRAPARTE_OK", "SIN_CONVENIO", "SinCronograma", "TASAS_IGV_REDUCIDAS",
+    "TASAS_IGV_VIGENTES", "TASA_IGV", "TIPOS_CP",
+    "TIPOS_DOC_IDENTIDAD", "TIPOS_INVIERTEN", "TIPOS_NOTA", "TIPOS_RENTA", "TIPO_BOLETA", "TIPO_HONORARIOS",
+    "TOLERANCIA_IGV",
     "TRIBUTOS", "TRIBUTO_EXONERADO", "TRIBUTO_EXPORTACION", "TRIBUTO_GRATUITO", "TRIBUTO_ICBPER", "TRIBUTO_IGV",
-    "TRIBUTO_INAFECTO", "TRIBUTO_ISC", "TRIBUTO_IVAP", "TRIBUTO_OTROS", "TRIBUTO_RENTA", "anios_con_cronograma",
-    "api_sire", "campos_del_ple", "campos_del_sire", "columnas_del_ple", "columnas_del_sire",
+    "TRIBUTO_INAFECTO", "TRIBUTO_ISC", "TRIBUTO_IVAP", "TRIBUTO_OTROS", "TRIBUTO_RENTA", "VINCULOS_ECONOMICOS",
+    "anios_con_cronograma",
+    "api_sire", "campos_del_ple", "campos_del_sire", "columnas_del_ple", "columnas_del_sire", "convenio_sugerido",
     "cronogramas_de_vencimiento", "motivos_de_nota", "nombres_del_sire", "regimenes_tributarios", "ruc_valido",
     "validar_regimenes", "vence_el_registro", "vence_la_declaracion",
 ]

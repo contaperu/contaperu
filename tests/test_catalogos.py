@@ -35,15 +35,19 @@ def test_los_catalogos_son_los_de_la_1_0():
 
 def test_cada_catalogo_viene_de_datos_con_su_fuente():
     datos = _datos.leer_json("datos/sunat/catalogos.json")
-    # Siete desde la 5.0, cuando `tributos` entró. Es una igualdad de conjuntos y no un conteo a propósito: una tabla
-    # nueva pone esto rojo y hay que decidirla, que es el único punto del repositorio donde «entró un catálogo de
-    # SUNAT» se declara.
+    # Siete desde la 5.0, cuando `tributos` entró, y trece desde la 15.6.0, con los seis del registro de no
+    # domiciliados (`test_catalogos_no_domiciliados.py`). Es una igualdad de conjuntos y no un conteo a propósito: una
+    # tabla nueva pone esto rojo y hay que decidirla, que es el único punto del repositorio donde «entró un catálogo
+    # de SUNAT» se declara.
     assert set(datos) == {"tipos_comprobante", "tipos_documento_identidad", "monedas", "medios_pago",
-                          "motivos_nota_credito", "motivos_nota_debito", "tributos"}
+                          "motivos_nota_credito", "motivos_nota_debito", "tributos",
+                          "paises", "vinculos_economicos", "convenios_doble_imposicion", "tipos_renta",
+                          "modalidades_servicio", "exoneraciones_no_domiciliado"}
     assert all(tabla["fuente"].strip() for tabla in datos.values())
     assert catalogos.TIPOS_CP == datos["tipos_comprobante"]["codigos"]
     assert catalogos.FUENTES == {nombre: tabla["fuente"] for nombre, tabla in datos.items()}
-    assert api.catalogos_sunat()["fuentes"] == catalogos.FUENTES
+    # La de los convenios por país no es de SUNAT y vive en su propio fichero, así que entra en `fuentes` aparte.
+    assert api.catalogos_sunat()["fuentes"] == {**catalogos.FUENTES, "convenios_por_pais": catalogos.FUENTE_CONVENIOS}
 
 
 # ── Los medios de pago (Anexo 3 de la RS 169-2015) ─────────────────────────────────────────────────────────────

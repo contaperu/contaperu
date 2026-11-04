@@ -1,0 +1,60 @@
+{
+ "fuente": "Los instrumentos para evitar la doble imposición que el Perú aplica, con el país de residencia (Tabla 16 del Anexo 01 de la RS 040-2022), el código que les da la Tabla 18 de esa misma norma y desde cuándo se aplican: los convenios bilaterales con Chile y Canadá (2004), Brasil (2010), México, Corea, Suiza y Portugal (2015) y Japón (2022), y la Decisión 578 de la Comunidad Andina (2005) para Bolivia, Colombia y Ecuador. La lista y las fechas son las de la orientación de SUNAT «Convenios para evitar la doble imposición» y los textos publicados por el MEF. Japón no tiene código en la Tabla 18.",
+ "por_pais": {
+  "9149": {
+   "convenio": "01",
+   "instrumento": "Convenio con Canadá",
+   "desde": "2004-01-01"
+  },
+  "9211": {
+   "convenio": "02",
+   "instrumento": "Convenio con Chile",
+   "desde": "2004-01-01"
+  },
+  "9097": {
+   "convenio": "03",
+   "instrumento": "Decisión 578 de la Comunidad Andina",
+   "desde": "2005-01-01"
+  },
+  "9169": {
+   "convenio": "03",
+   "instrumento": "Decisión 578 de la Comunidad Andina",
+   "desde": "2005-01-01"
+  },
+  "9239": {
+   "convenio": "03",
+   "instrumento": "Decisión 578 de la Comunidad Andina",
+   "desde": "2005-01-01"
+  },
+  "9105": {
+   "convenio": "04",
+   "instrumento": "Convenio con Brasil",
+   "desde": "2010-01-01"
+  },
+  "9493": {
+   "convenio": "05",
+   "instrumento": "Convenio con México",
+   "desde": "2015-01-01"
+  },
+  "9190": {
+   "convenio": "06",
+   "instrumento": "Convenio con la República de Corea",
+   "desde": "2015-01-01"
+  },
+  "9767": {
+   "convenio": "07",
+   "instrumento": "Convenio con la Confederación Suiza",
+   "desde": "2015-01-01"
+  },
+  "9607": {
+   "convenio": "08",
+   "instrumento": "Convenio con Portugal",
+   "desde": "2015-01-01"
+  },
+  "9399": {
+   "convenio": "",
+   "instrumento": "Convenio con Japón",
+   "desde": "2022-01-01"
+  }
+ }
+}

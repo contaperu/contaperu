@@ -4,6 +4,33 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+### Los catálogos del registro de no domiciliados
+
+El primer paso para darle forma al no domiciliado: los seis catálogos contra los que se leen las columnas del registro
+080500 que hasta hoy viajaban crudas. Salen del **Anexo 01 de la RS 040-2022** —la norma del SIRE—, transcritos del PDF
+de SUNAT, en `datos/sunat/catalogos.json` con su fuente, y en `contaperu.catalogos`:
+
+- **`PAISES`** (Tabla 16, 273 códigos de cuatro dígitos; el 9589 es el Perú, `PAIS_PERU`). Siete nombres se
+  corrigieron de cómo los deja el PDF: tres traen un «?» donde va una letra (ESPAÑA, ASCENCIÓN, CAMPIONE D'ITALIA) y
+  cuatro salen con las palabras pegadas.
+- **`VINCULOS_ECONOMICOS`** (Tabla 17, art. 24 del Reglamento de la LIR), **`CONVENIOS_DOBLE_IMPOSICION`** (Tabla 18),
+  **`TIPOS_RENTA`** (Tabla 19, con el artículo de la LIR de cada renta), **`MODALIDADES_SERVICIO`** (Tabla 20) y
+  **`EXONERACIONES_NO_DOMICILIADO`** (Tabla 21, art. 19 de la LIR).
+- ⚠️ **Los números son los del SIRE.** El Anexo 3 de la RS 169-2015, el del PLE, numeraba las mismas tablas 35, 27, 25,
+  31, 32 y 33. Por eso cada catálogo se nombra por lo que es y el número solo vive en su fuente.
+
+Y **`convenio_sugerido(pais, fecha)`**: el convenio para evitar la doble imposición que le toca a un no domiciliado por
+su país de residencia, en la fecha de emisión —Chile y Canadá desde 2004, la Decisión 578 de la CAN para Bolivia,
+Colombia y Ecuador desde 2005, Brasil desde 2010, México, Corea, Suiza y Portugal desde 2015—, con su motivo. Es una
+sugerencia: aplicarlo exige el certificado de residencia (D.S. 090-2008-EF). Japón tiene convenio desde 2022 y la Tabla
+18 no le da código, así que devuelve vacío y no elige «09 Otros» por su cuenta; el Perú y un país que no existe, también
+vacío. La tabla de qué país tiene convenio es del motor (`datos/sunat/convenios.json`, `CONVENIOS_POR_PAIS`), con su
+fuente.
+
+`api.catalogos_sunat()` los sirve todos, con su esquema; son claves nuevas y no obligatorias.
+
 ## [15.5.0] — 2026-11-01
 
 ### Los lectores de lo que SUNAT ve de un periodo

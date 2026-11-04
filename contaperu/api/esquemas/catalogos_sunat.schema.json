@@ -64,6 +64,73 @@
         "type": "string"
       }
     },
+    "paises": {
+      "type": "object",
+      "description": "El código de país de 4 dígitos y su nombre (Tabla 16 del Anexo 01 de la RS 040-2022): el país de residencia de un no domiciliado, campo 17 del registro 080500. El 9589 es el Perú. Desde la 15.6.0, como los cinco que siguen; no son obligatorios para que una respuesta de antes siga siendo válida.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "vinculos_economicos": {
+      "type": "object",
+      "description": "El tipo de vinculación económica entre el contribuyente y el no domiciliado (Tabla 17), según el art. 24 del Reglamento de la LIR; el 00 es «sin vinculación».",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "convenios_doble_imposicion": {
+      "type": "object",
+      "description": "Los convenios para evitar la doble tributación (Tabla 18): el 00 es «ninguno» y el 09 «otros». La tabla no nombra el convenio con Japón.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tipos_renta": {
+      "type": "object",
+      "description": "El tipo de renta de fuente peruana del no domiciliado (Tabla 19), con el artículo de la LIR que la hace de fuente peruana.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "modalidades_servicio": {
+      "type": "object",
+      "description": "Dónde se prestó el servicio del no domiciliado (Tabla 20): íntegramente en el Perú, en parte, o exclusivamente en el extranjero.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "exoneraciones_no_domiciliado": {
+      "type": "object",
+      "description": "Las exoneraciones de operaciones de no domiciliados del art. 19 de la LIR (Tabla 21).",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "convenios_por_pais": {
+      "type": "object",
+      "description": "Qué país (Tabla 16) tiene convenio para evitar la doble imposición con el Perú, con su código de la Tabla 18 —vacío cuando la tabla no le da uno, como a Japón—, el instrumento y desde cuándo se aplica. Es la tabla que usa `catalogos.convenio_sugerido`; no es de SUNAT, y su fuente va en `fuentes`.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "convenio": {
+            "type": "string"
+          },
+          "instrumento": {
+            "type": "string"
+          },
+          "desde": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "convenio",
+          "instrumento",
+          "desde"
+        ],
+        "additionalProperties": false
+      }
+    },
     "detracciones": {
       "type": "object",
       "description": "La tabla de detracciones del motor, con su fuente: cada código SUNAT con su nombre y su tasa. El ERP que integra el motor la puede sobreescribir en su configuración (detraccion_tasas, detraccion_nombres).",

@@ -643,7 +643,12 @@ def catalogos_sunat() -> dict:
 
     Y dos que dicen qué NO va en el TXT del SIRE, por dos motivos distintos: `fuera_del_registro_sunat` no se anota en
     ningún registro que se declare (el recibo por honorarios) y `del_registro_de_no_domiciliados` se anota en OTRO, el
-    080500 (15.3.0). Los dos van al asiento."""
+    080500 (15.3.0). Los dos van al asiento.
+
+    Desde la 15.6.0, los seis catálogos de ese registro de no domiciliados (Anexo 01 de la RS 040-2022): `paises`,
+    `vinculos_economicos`, `convenios_doble_imposicion`, `tipos_renta`, `modalidades_servicio` y
+    `exoneraciones_no_domiciliado`; y `convenios_por_pais`, qué país tiene convenio, con qué código y desde cuándo, que
+    es lo que usa `catalogos.convenio_sugerido`. Su fuente va en `fuentes` con las demás."""
     return {
         "tipos_comprobante": catalogos.TIPOS_CP,
         "tipos_documento_identidad": catalogos.TIPOS_DOC_IDENTIDAD,
@@ -658,7 +663,14 @@ def catalogos_sunat() -> dict:
         "fuera_del_registro_sunat": sorted(catalogos.FUERA_DEL_REGISTRO_SUNAT),
         "del_registro_de_no_domiciliados": sorted(catalogos.DEL_REGISTRO_DE_NO_DOMICILIADOS),
         "detracciones": detracciones.tabla_del_motor(),
-        "fuentes": dict(catalogos.FUENTES),
+        "paises": catalogos.PAISES,
+        "vinculos_economicos": catalogos.VINCULOS_ECONOMICOS,
+        "convenios_doble_imposicion": catalogos.CONVENIOS_DOBLE_IMPOSICION,
+        "tipos_renta": catalogos.TIPOS_RENTA,
+        "modalidades_servicio": catalogos.MODALIDADES_SERVICIO,
+        "exoneraciones_no_domiciliado": catalogos.EXONERACIONES_NO_DOMICILIADO,
+        "convenios_por_pais": catalogos.CONVENIOS_POR_PAIS,
+        "fuentes": {**catalogos.FUENTES, "convenios_por_pais": catalogos.FUENTE_CONVENIOS},
     }
 
 
