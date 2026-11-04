@@ -454,9 +454,10 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 
 - **No lee PDFs ni fotos.** Lee el XML, que es el comprobante electrónico, y la propuesta del SIRE o lo declarado.
 - **No asienta el IGV de utilización ni la renta retenida de un no domiciliado.** Su registro se lee desde la
-  15.3.0, y el 91 sale en el asiento como una compra común —gasto contra proveedor, con la sigla de tu sistema—;
-  esos dos importes, el país y el convenio viajan en la fila cruda (`datos_originales`) hasta que haya un asiento
-  aceptado que los use (HOJA-DE-RUTA, C12).
+  15.3.0 y se escribe desde la 15.6.0 (el driver `sire_no_domiciliados`, el TXT del 080500), con el país, la renta,
+  el convenio y lo demás en el bloque `no_domiciliado` del comprobante (`open-accounting` 4.1); pero el 91 sale en
+  el asiento como una compra común —gasto contra proveedor, con la sigla de tu sistema— hasta que haya un asiento
+  aceptado que use esos importes (HOJA-DE-RUTA, C12).
 - **No se conecta a SUNAT.** No hay credenciales, no hay Clave SOL, no sale ni un paquete a la red. **Sí sabe cómo
   es su API**: describe las operaciones del SIRE y arma la petición exacta, para que quien la envíe no tenga que
   adivinarla. Saber es un dato; llamar es entrada y salida, y eso es del integrador.
