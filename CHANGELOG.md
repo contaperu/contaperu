@@ -6,6 +6,25 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### Las reglas del no domiciliado
+
+`validar` revisa el 91, sus notas y el bloque `no_domiciliado`, cada regla con su norma. **Dos errores y el resto
+avisos**, y la proporción es la que se midió: el registro real que SUNAT aceptó en setiembre de 2026 trae filas con el
+Perú como país del no domiciliado y una renta neta que no es la bruta menos la deducción, y si eso bloqueara, el motor
+le negaría el mes a quien ya lo tiene declarado. Ese registro no da ni un error.
+
+- Errores: **`NO_DOMICILIADO_EN_VENTAS`** —el 91, el 97 y el 98 solo van en compras (Tabla 11 de la RS 040-2022)— y
+  **`NO_DOMICILIADO_CON_IGV`** —el 080500 no tiene columnas de base gravada ni de IGV, y escrito ese IGV se perdería—.
+- Avisos: `NO_DOMICILIADO_NO_APLICA` (el bloque en otro tipo), un `*_DESCONOCIDO` por cada tabla —país, vinculación,
+  convenio, tipo de renta, modalidad, exoneración—, `PAIS_PERU_NO_DOMICILIADO` (LIR art. 7), `RENTA_NETA_NO_CUADRA`
+  (salvo las presunciones del art. 48), `IMPUESTO_RETENIDO_NO_CUADRA` (la neta por la tasa, art. 76),
+  `CONVENIO_NO_ES_DEL_PAIS` (con el sugerido en el texto), `IGV_UTILIZACION_NO_CUADRA` (el 18 % de lo comprado en
+  soles, Ley del IGV arts. 1 b), 13 y 17) y `EXONERACION_CON_IMPUESTO` (art. 19).
+- **Un 91 sin el bloque no se observa**: los que entraron antes no lo traen, y lo que el 080500 exige lo pedirá su
+  driver al exportar. ⚠️ Un 91 que sí lo trae puede pasar de «ok» a «observada» por un aviso: es un cambio de
+  comportamiento a propósito.
+- La tasa por tipo de renta todavía no se comprueba: exige citar los arts. 54 y 56 de la LIR código por código.
+
 ### El lector del 080500 rellena el bloque
 
 Lo que hasta la 15.5 viajaba solo en la fila cruda entra al bloque `no_domiciliado` del comprobante: el país, el

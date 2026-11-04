@@ -46,6 +46,101 @@ def _meses_hasta(libro: Libro, fecha) -> int:
     return (libro.anio - fecha.year) * 12 + (libro.mes - fecha.month)
 
 
+def _validar_no_domiciliado(c: Comprobante, libro: Libro, error, aviso) -> None:
+    """Las reglas del comprobante de un no domiciliado (15.6.0): el 91, sus notas 97 y 98, y el bloque `no_domiciliado`.
+
+    **Dos errores y el resto avisos, y la proporción es la que se midió.** En el registro real que SUNAT aceptó en
+    setiembre de 2026 hay filas cuya renta neta no es la bruta menos la deducción, y otras con un convenio que no es el
+    de su país: si esas reglas bloquearan, el motor le negaría el mes a quien ya lo tiene declarado. Lo que sí bloquea
+    son las dos cosas que el registro 080500 no puede llevar: una venta y un IGV en sus columnas.
+
+    El nivel va literal en cada llamada: `test_diagnosticar.py` recorre con `ast.walk` las de `error(...)` y
+    `aviso(...)` para comprobar que `PEDIR_A` cubre cada código."""
+    bloque = c.no_domiciliado if isinstance(c.no_domiciliado, dict) else {}
+    es_del_exterior = c.tipo_cp in cat.DEL_REGISTRO_DE_NO_DOMICILIADOS
+    if not es_del_exterior and not bloque:
+        return
+    # El 91, el 97 y el 98 son del registro de compras: la Tabla 11 de la RS 040-2022 los pone en su columna 8.5, de
+    # operaciones con sujetos no domiciliados, y en ninguna de ventas.
+    if libro.es_venta:
+        error("NO_DOMICILIADO_EN_VENTAS", "El comprobante de un no domiciliado (91, 97, 98) solo va en el registro de "
+                                          "compras (Tabla 11 de la RS 040-2022)")
+        return
+    if not es_del_exterior:
+        aviso("NO_DOMICILIADO_NO_APLICA", f"El bloque del no domiciliado solo va en un 91, 97 o 98: en un "
+                                          f"{c.tipo_cp} se ignora")
+        return
+    # El registro 080500 no tiene columnas de base gravada ni de IGV (Anexo 9, §8.5): el comprobante del exterior no lo
+    # grava, y el IGV de la utilización del servicio va en su campo 14, `igv_utilizacion`. Un IGV aquí se perdería sin
+    # aviso al escribirlo.
+    if c.base_gravada > 0 or c.igv > 0:
+        error("NO_DOMICILIADO_CON_IGV", "Un comprobante del exterior no lleva base gravada ni IGV: lo comprado va en "
+                                        "el valor no gravado, y el IGV de la utilización del servicio en el bloque "
+                                        "del no domiciliado (Anexo 9 de la RS 040-2022)")
+    if not bloque:
+        return
+
+    # Los códigos contra sus tablas (Anexo 01 de la RS 040-2022). Avisos, y el valor se respeta, por lo mismo que el
+    # medio de pago: SUNAT añade filas a sus tablas y un código nuevo no puede frenarle el mes a nadie.
+    for clave in ("pais", "beneficiario_pais"):
+        if bloque.get(clave) and bloque[clave] not in cat.PAISES:
+            aviso("PAIS_DESCONOCIDO", f"El país {bloque[clave]} no está en la Tabla 16 de SUNAT: sale igual, "
+                                      "compruébalo")
+    if bloque.get("vinculo") and bloque["vinculo"] not in cat.VINCULOS_ECONOMICOS:
+        aviso("VINCULO_DESCONOCIDO", f"La vinculación {bloque['vinculo']} no está en la Tabla 17 de SUNAT")
+    if bloque.get("convenio") and bloque["convenio"] not in cat.CONVENIOS_DOBLE_IMPOSICION:
+        aviso("CONVENIO_DESCONOCIDO", f"El convenio {bloque['convenio']} no está en la Tabla 18 de SUNAT")
+    if bloque.get("tipo_renta") and bloque["tipo_renta"] not in cat.TIPOS_RENTA:
+        aviso("TIPO_RENTA_DESCONOCIDO", f"El tipo de renta {bloque['tipo_renta']} no está en la Tabla 19 de SUNAT")
+    if bloque.get("modalidad") and bloque["modalidad"] not in cat.MODALIDADES_SERVICIO:
+        aviso("MODALIDAD_DESCONOCIDA", f"La modalidad {bloque['modalidad']} no está en la Tabla 20 de SUNAT")
+    if bloque.get("exoneracion") and bloque["exoneracion"] not in cat.EXONERACIONES_NO_DOMICILIADO:
+        aviso("EXONERACION_DESCONOCIDA", f"La exoneración {bloque['exoneracion']} no está en la Tabla 21 de SUNAT")
+
+    # Un no domiciliado reside fuera del Perú (LIR, art. 7). El 9589 en su país es casi siempre un error de captura:
+    # en el registro real de setiembre hay filas así, y SUNAT las aceptó.
+    if bloque.get("pais") == cat.PAIS_PERU:
+        aviso("PAIS_PERU_NO_DOMICILIADO", "El país del no domiciliado es el Perú (9589), y un no domiciliado reside "
+                                          "fuera del país (LIR, art. 7): revisa el país de residencia")
+
+    # La renta y su retención, con la tolerancia del IGV. La neta es la bruta menos la deducción (LIR, art. 76), salvo
+    # las presunciones del art. 48, que fijan la neta como un porcentaje de la bruta: por eso es aviso, y por eso el
+    # registro real tiene una fila que no cuadra.
+    bruta, deduccion, neta = (bloque.get("renta_bruta"), bloque.get("deduccion"), bloque.get("renta_neta"))
+    if bruta not in (None, "") and neta not in (None, ""):
+        esperada = _a_decimal(bruta) - _a_decimal(deduccion)
+        if not _cuadra(_a_decimal(neta), esperada):
+            aviso("RENTA_NETA_NO_CUADRA", f"La renta neta {neta} no es la bruta {bruta} menos la deducción "
+                                          f"{deduccion or '0.00'} ({esperada:.2f}): si es una renta presunta del art. "
+                                          "48 de la LIR, está bien")
+    porcentaje, impuesto = bloque.get("porcentaje"), bloque.get("impuesto_retenido")
+    if neta not in (None, "") and porcentaje not in (None, "") and impuesto not in (None, ""):
+        esperado = (_a_decimal(neta) * _a_decimal(porcentaje) / 100).quantize(Decimal("0.01"))
+        if not _cuadra(_a_decimal(impuesto), esperado):
+            aviso("IMPUESTO_RETENIDO_NO_CUADRA", f"El impuesto retenido {impuesto} no es el {porcentaje} % de la renta "
+                                                 f"neta {neta} ({esperado:.2f}) (LIR, art. 76)")
+    if bloque.get("exoneracion") and _a_decimal(impuesto) > 0:
+        aviso("EXONERACION_CON_IMPUESTO", f"Lleva la exoneración {bloque['exoneracion']} del art. 19 de la LIR y un "
+                                          f"impuesto retenido de {impuesto}: con la exoneración no se retiene")
+
+    # El convenio que le toca al país (`catalogos.convenio_sugerido`), si el motor puede decirlo.
+    if bloque.get("pais") and bloque.get("convenio"):
+        sugerido = cat.convenio_sugerido(bloque["pais"], c.fecha_emision)
+        if sugerido["convenio"] and sugerido["convenio"] != bloque["convenio"]:
+            aviso("CONVENIO_NO_ES_DEL_PAIS", f"El convenio {bloque['convenio']} no es el de su país: "
+                                             f"{sugerido['motivo']}")
+
+    # El IGV de la utilización del servicio es el 18 % de la retribución (Ley del IGV, arts. 1 b), 13 y 17), en soles:
+    # lo comprado, en la moneda del comprobante, por su tipo de cambio. Solo si se declaró: un cero es que no hubo.
+    igv_utilizacion = _a_decimal(bloque.get("igv_utilizacion"))
+    if igv_utilizacion > 0:
+        cambio = c.tipo_cambio if (c.moneda != "PEN" and c.tipo_cambio) else Decimal(1)
+        esperado = (c.adquisiciones_no_gravadas * cambio * Decimal(cat.TASA_IGV)).quantize(Decimal("0.01"))
+        if not _cuadra(igv_utilizacion, esperado):
+            aviso("IGV_UTILIZACION_NO_CUADRA", f"El IGV de utilización {igv_utilizacion} no es el 18 % de lo comprado "
+                                               f"en soles ({esperado:.2f})")
+
+
 def validar(c: Comprobante, libro: Libro) -> None:
     """Aplica todas las reglas a un comprobante (añade observaciones, no las borra)."""
     def error(codigo: str, texto: str) -> None:
@@ -276,6 +371,9 @@ def validar(c: Comprobante, libro: Libro) -> None:
     if c.medio_pago and c.medio_pago not in cat.MEDIOS_PAGO:
         aviso("MEDIO_PAGO_DESCONOCIDO",
               f"El medio de pago {c.medio_pago} no está en la tabla de SUNAT: sale igual, compruébalo")
+
+    # --- No domiciliado (15.6.0, enmienda 0007) ---------------------------------------------------
+    _validar_no_domiciliado(c, libro, error, aviso)
 
     # --- Notas de crédito / débito -------------------------------------------------------
     if c.es_nota:
