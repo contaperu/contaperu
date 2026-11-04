@@ -1,6 +1,6 @@
 {
  "revisar": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -51,6 +51,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "",
     "origen": "xml",
@@ -106,6 +107,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "",
     "origen": "xml",
@@ -161,6 +163,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "",
     "origen": "xml",
@@ -269,7 +272,7 @@
   ]
  },
  "generar_asiento/concar": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -6083,7 +6086,7 @@
   ]
  },
  "generar_asiento/csv": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -6792,7 +6795,7 @@
   ]
  },
  "generar_asiento/starsoft": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -7304,7 +7307,7 @@
   ]
  },
  "generar_asiento/asiento_contable": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",

@@ -58,6 +58,55 @@ def _cuota_normalizada(valor: Any) -> dict:
             "fecha": vence.isoformat(),
             "importe": str(monto(valor["importe"]))}
 
+
+# Las claves del bloque del no domiciliado (enmienda 0007, open-accounting 4.1), en el orden del registro 080500: lo
+# que ese registro pide del comprobante de un proveedor del exterior y que el resto del comprobante no dice.
+NO_DOMICILIADO_IMPORTES = ("renta_bruta", "deduccion", "renta_neta", "impuesto_retenido", "igv_utilizacion")
+# Los códigos de las Tablas 16 a 21 que son de ancho fijo y solo de dígitos, con ese ancho: quien manda «9» quiere decir
+# «09», como en `tipo_nota`. La exoneración y la modalidad no van aquí: sus tablas numeran 1, 2, 3… sin ceros.
+NO_DOMICILIADO_ANCHOS = {"pais": 4, "beneficiario_pais": 4, "vinculo": 2, "convenio": 2, "tipo_renta": 2}
+CLAVES_NO_DOMICILIADO = (
+    "pais", "domicilio", "beneficiario_doc", "beneficiario_nombre", "beneficiario_pais", "vinculo",
+    "renta_bruta", "deduccion", "renta_neta", "porcentaje", "impuesto_retenido", "igv_utilizacion",
+    "convenio", "exoneracion", "tipo_renta", "modalidad", "art_76",
+    "sustento_tipo_cp", "sustento_serie", "sustento_anio_dua", "sustento_numero",
+)
+
+
+def _no_domiciliado_normalizado(valor: Any) -> dict | None:
+    """El bloque del no domiciliado con sus valores en texto —como `retencion_igv` y `detraccion`—, **sin lo vacío** y
+    **sin admitir una clave que no es suya**, nombrándolas todas.
+
+    `None` sigue siendo `None` («nadie lo dijo»), igual que en `retencion_igv`. Lo vacío se quita porque el estándar
+    dice «no lo sé» omitiendo la clave. Los importes van en soles, con dos decimales, porque así los declara el
+    registro (el esquema lo explica). **No se valida contra los catálogos aquí**: un código que no existe es un aviso
+    de `validar`, no un error al construir, por lo mismo que `medio_pago` —SUNAT puede añadir filas a sus tablas—."""
+    if valor is None:
+        return None
+    if not isinstance(valor, dict):
+        raise ValueError("El bloque `no_domiciliado` tiene que ser un objeto")
+    sobrantes = sorted(set(valor) - set(CLAVES_NO_DOMICILIADO))
+    if sobrantes:
+        raise ValueError(f"Claves que no son del bloque `no_domiciliado`: {', '.join(sobrantes)}. "
+                         f"Lleva {', '.join(CLAVES_NO_DOMICILIADO)}")
+    bloque: dict[str, str] = {}
+    for clave in CLAVES_NO_DOMICILIADO:
+        crudo = valor.get(clave)
+        if crudo is None or str(crudo).strip() == "":
+            continue
+        if clave in NO_DOMICILIADO_IMPORTES:
+            bloque[clave] = str(monto(crudo))
+        elif clave == "porcentaje":
+            try:
+                bloque[clave] = str(Decimal(str(crudo).strip().replace(",", ".")))
+            except ArithmeticError as error:
+                raise ValueError(f"El porcentaje del no domiciliado no es un número: {crudo!r}") from error
+        else:
+            texto = " ".join(str(crudo).split())
+            ancho = NO_DOMICILIADO_ANCHOS.get(clave)
+            bloque[clave] = texto.zfill(ancho) if ancho and texto.isdigit() else texto
+    return bloque
+
 # Qué tipos de la Tabla 10 son una nota, y cuáles de ellas restan. **Con nombre desde la 3.4.0**, que no
 # es cosmética: estaba dentro de las dos propiedades de abajo, así que quien resumía un libro fuera del
 # motor no tenía nada que citar y lo escribía a mano. La primera aplicación que lo hizo se quedó con el
@@ -90,7 +139,8 @@ CAMPOS_DEL_DOCUMENTO = (
     "moneda", "tipo_cambio", "base_gravada", "igv", "dscto_base", "dscto_igv", "exonerado", "inafecto",
     "exportacion", "isc", "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "retencion_4ta", "retencion_igv", "destino_igv",
     "valor_no_gravado", "anio_dua", "cod_dep_aduanera", "clasif_bienes",
-    "tipo_nota", "ref_fecha", "ref_tipo_cp", "ref_serie", "ref_numero", "detraccion", "id_contrato", "concepto",
+    "tipo_nota", "ref_fecha", "ref_tipo_cp", "ref_serie", "ref_numero", "detraccion", "no_domiciliado",
+    "id_contrato", "concepto",
 )
 # Lo que pone el sistema que lo produce: de dónde salió el dato y cómo se le llama desde fuera. Nada de
 # esto lo dice el papel, así que una puerta de entrada no lo acepta de quien dicta. Y lo que diga del comprobante la
@@ -207,6 +257,13 @@ class Comprobante:
     ref_serie: str = ""
     ref_numero: str = ""
     detraccion: dict | None = None  # {codigo, porcentaje, monto, cuenta, fecha_constancia, nro_constancia}
+    # Lo que el registro de compras de no domiciliados (080500) pide de un comprobante del exterior y que el resto de
+    # este comprobante no dice: país, beneficiario, vínculo, renta, tasa, impuesto retenido, IGV de utilización,
+    # convenio, exoneración, tipo de renta, modalidad, art. 76 y el documento que sustenta el crédito fiscal
+    # (`CLAVES_NO_DOMICILIADO`; enmienda 0007, open-accounting 4.1). **Sus importes van EN SOLES**, como los declara
+    # el registro, aunque el comprobante sea en dólares. `None` es «nadie lo dijo», como en `retencion_igv`. **No entra
+    # en ningún asiento todavía**: el del IGV de utilización y la renta retenida es otro hito, con un caso real.
+    no_domiciliado: dict | None = None
     id_contrato: str = ""
     # La glosa del documento. La cuenta y el centro no están aquí: no son hechos del documento sino decisiones de cada
     # entorno, y llegan aparte, en la imputación (`asiento.Imputacion`, por `id_externo`). Salieron del comprobante en
@@ -245,6 +302,7 @@ class Comprobante:
         self.valor_no_gravado = None if self.valor_no_gravado in (None, "") else monto(self.valor_no_gravado)
         self.monto_pendiente = None if self.monto_pendiente in (None, "") else monto(self.monto_pendiente)
         self.cuotas = [_cuota_normalizada(c) for c in (self.cuotas or [])]
+        self.no_domiciliado = _no_domiciliado_normalizado(self.no_domiciliado)
         self.tipo_cambio = tipo_cambio(self.tipo_cambio)
         for f in _CAMPOS_FECHA:
             setattr(self, f, fecha(getattr(self, f)))

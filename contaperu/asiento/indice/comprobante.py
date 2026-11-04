@@ -113,6 +113,11 @@ class Cabecera:
     # La detracción del comprobante: las claves del estándar (`DETRACCION_DEL_ESTANDAR`) y las anotaciones `_` del
     # motor, que el bloque admite desde la 4.0. Incluye la `cuenta` del Banco de la Nación, que ninguna línea lleva.
     detraccion: dict = field(default_factory=dict)
+    # Lo del no domiciliado (open-accounting 4.1): país, renta, convenio, tipo de renta… con sus importes en soles.
+    # **No entra en ninguna línea de asiento** —el del IGV de utilización y la renta retenida es otro hito—, pero llega
+    # hasta aquí por la regla de esta cabecera: lleva TODOS los hechos del comprobante, y el driver del 080500 es el
+    # primero que lo lee. Vacío se omite al escribir el documento, como `retencion_igv`.
+    no_domiciliado: dict = field(default_factory=dict)
 
     @property
     def glosa(self) -> str:

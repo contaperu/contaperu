@@ -1,6 +1,6 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.0/estandar/open-accounting.schema.json",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.1/estandar/open-accounting.schema.json",
  "title": "open-accounting",
  "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
  "type": "object",
@@ -391,7 +391,7 @@
     "tipo_nota": {
      "type": "string",
      "maxLength": 2,
-     "description": "Por qué se emitió la nota: el Catálogo 09 de SUNAT si es de crédito (07, 87) y el 10 si es de débito (08, 88) — dos tablas distintas, y el «01» significa cosas opuestas en cada una. Vacío = el documento no lo dice, que es lo habitual; un código que no esté en el catálogo se avisa y se respeta. SIN patrón numérico a propósito: el anexo del RVIE lo declara numérico y el del RCE alfanumérico, así que el estándar admite los dos. NO viaja en el TXT del SIRE: la norma dice que ese campo no se considera para construirlo. Y OJO: el «01» del Catálogo 09 dice que la nota anula el comprobante que referencia, no que la nota esté anulada."
+     "description": "Por qué se emitió la nota: el Catálogo 09 de SUNAT si es de crédito (07, 87, 97) y el 10 si es de débito (08, 88, 98) — dos tablas distintas, y el «01» significa cosas opuestas en cada una. Vacío = el documento no lo dice, que es lo habitual; un código que no esté en el catálogo se avisa y se respeta. SIN patrón numérico a propósito: el anexo del RVIE lo declara numérico y el del RCE alfanumérico, así que el estándar admite los dos. NO viaja en el TXT del SIRE: la norma dice que ese campo no se considera para construirlo. Y OJO: el «01» del Catálogo 09 dice que la nota anula el comprobante que referencia, no que la nota esté anulada."
     },
     "ref_fecha": {
      "$ref": "#/$defs/fecha"
@@ -410,6 +410,16 @@
      "anyOf": [
       {
        "$ref": "#/$defs/detraccion"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "no_domiciliado": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/no_domiciliado"
       },
       {
        "type": "null"
@@ -606,6 +616,149 @@
     "monto": {
      "$ref": "#/$defs/importe",
      "description": "El importe retenido, tal como lo dice el comprobante. Nunca se calcula solo."
+    }
+   }
+  },
+  "no_domiciliado": {
+   "description": "OPERACIONES CON SUJETOS NO DOMICILIADOS (open-accounting 4.1, enmienda 0007): lo que el registro de compras de no domiciliados del SIRE (Anexo 9 de la RS 040-2022, §8.5) pide del comprobante de un proveedor del exterior y que el resto del comprobante no dice. Va en un 91, 97 o 98, y solo en compras. El número de la factura del exterior es `serie`/`numero` y el proveedor, `contraparte_nombre`/`contraparte_doc` (con el tipo «0»): no se repiten aquí. **Los importes de este bloque van EN SOLES**, como los declara el registro, aunque el comprobante sea en otra moneda: el impuesto retenido se calcula sobre la renta en soles y no se puede devolver a la moneda del comprobante sin perder céntimos. Una clave omitida es «el documento no lo dice». Los códigos son de las Tablas 16 a 21 del Anexo 01 de esa norma, que el motor publica en `catalogos_sunat`.",
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "pais": {
+     "type": "string",
+     "pattern": "^[0-9]{4}$",
+     "description": "País de residencia del no domiciliado: Tabla 16 (campo 17). El 9589 es el Perú, y un no domiciliado reside fuera."
+    },
+    "domicilio": {
+     "type": "string",
+     "description": "Domicilio en el extranjero (campo 19)."
+    },
+    "beneficiario_doc": {
+     "type": "string",
+     "description": "Identificación tributaria del beneficiario efectivo, si no es el proveedor (campo 21)."
+    },
+    "beneficiario_nombre": {
+     "type": "string",
+     "description": "Nombre del beneficiario efectivo (campo 22)."
+    },
+    "beneficiario_pais": {
+     "type": "string",
+     "pattern": "^([0-9]{4})?$",
+     "description": "País del beneficiario efectivo: Tabla 16 (campo 23)."
+    },
+    "vinculo": {
+     "type": "string",
+     "pattern": "^([0-9]{2})?$",
+     "description": "Vinculación económica con el contribuyente: Tabla 17 (campo 24), según el art. 24 del Reglamento de la LIR; 00 es sin vinculación."
+    },
+    "renta_bruta": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/importe"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Renta bruta, en soles (campo 25)."
+    },
+    "deduccion": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/importe"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Deducción o costo computable, en soles (campo 26)."
+    },
+    "renta_neta": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/importe"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Renta neta, en soles (campo 27): la bruta menos la deducción, salvo las presunciones del art. 48 de la LIR."
+    },
+    "porcentaje": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 100
+      }
+     ],
+     "description": "La tasa de retención aplicada, en porcentaje (campo 28)."
+    },
+    "impuesto_retenido": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/importe"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "El impuesto a la renta retenido, en soles (campo 29): la renta neta por el porcentaje."
+    },
+    "igv_utilizacion": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/importe"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "El IGV de la utilización del servicio, en soles (campo 14, «Monto Ret.»): lo que el usuario domiciliado paga por el no domiciliado y que no va en `igv`, porque el comprobante del exterior no lo grava."
+    },
+    "convenio": {
+     "type": "string",
+     "pattern": "^([0-9]{2})?$",
+     "description": "Convenio para evitar la doble tributación: Tabla 18 (campo 30); 00 es ninguno."
+    },
+    "exoneracion": {
+     "type": "string",
+     "pattern": "^([0-9]{1,2})?$",
+     "description": "Exoneración del art. 19 de la LIR que se aplica: Tabla 21 (campo 31)."
+    },
+    "tipo_renta": {
+     "type": "string",
+     "pattern": "^([0-9]{2})?$",
+     "description": "Tipo de renta de fuente peruana: Tabla 19 (campo 32)."
+    },
+    "modalidad": {
+     "type": "string",
+     "pattern": "^[0-9]?$",
+     "description": "Modalidad del servicio prestado: Tabla 20 (campo 33)."
+    },
+    "art_76": {
+     "type": "string",
+     "pattern": "^1?$",
+     "description": "«1» si se aplica el penúltimo párrafo del art. 76 de la LIR (campo 34)."
+    },
+    "sustento_tipo_cp": {
+     "type": "string",
+     "description": "Tipo del comprobante o documento que sustenta el crédito fiscal (campo 10)."
+    },
+    "sustento_serie": {
+     "type": "string",
+     "description": "Su serie (campo 11)."
+    },
+    "sustento_anio_dua": {
+     "type": "string",
+     "description": "El año de su DUA o DSI, cuando lo es (campo 12)."
+    },
+    "sustento_numero": {
+     "type": "string",
+     "description": "Su número (campo 13)."
     }
    }
   },

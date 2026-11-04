@@ -1,6 +1,6 @@
 {
  "revisar": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -51,6 +51,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Grilletes y conectores",
     "origen": "xml",
@@ -106,6 +107,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Repuestos importados",
     "origen": "xml",
@@ -161,6 +163,7 @@
     "ref_serie": "F001",
     "ref_numero": "00000101",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Devolucion de grilletes",
     "origen": "xml",
@@ -216,6 +219,7 @@
     "ref_serie": "F001",
     "ref_numero": "00000101",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Interes por pago tardio",
     "origen": "xml",
@@ -276,6 +280,7 @@
      "monto": "198",
      "_tasa_tabla": "4"
     },
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Servicio de transporte de materiales",
     "origen": "xml",
@@ -336,6 +341,7 @@
      "monto": "1048",
      "_tasa_tabla": "12"
     },
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Mantenimiento de equipos",
     "origen": "xml",
@@ -391,6 +397,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Asesoria contable de agosto",
     "origen": "xml",
@@ -446,6 +453,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Asesoria tributaria",
     "origen": "xml",
@@ -501,6 +509,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Utiles de oficina",
     "origen": "xml",
@@ -562,6 +571,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Materiales de junio",
     "origen": "xml",
@@ -617,6 +627,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Licencias y equipos de oficina",
     "origen": "xml",
@@ -672,6 +683,7 @@
     "ref_serie": "",
     "ref_numero": "",
     "detraccion": null,
+    "no_domiciliado": null,
     "id_contrato": "",
     "concepto": "Energia electrica de agosto",
     "origen": "xml",
@@ -852,7 +864,7 @@
   ]
  },
  "generar_asiento/concar": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -16719,7 +16731,7 @@
   ]
  },
  "generar_asiento/csv": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -18832,7 +18844,7 @@
   ]
  },
  "generar_asiento/starsoft": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",
@@ -20472,7 +20484,7 @@
   ]
  },
  "generar_asiento/asiento_contable": {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro": {
    "ruc": "20601234567",
    "razon_social": "EMPRESA DE PRUEBA SAC",

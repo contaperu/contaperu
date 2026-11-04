@@ -1,4 +1,4 @@
-# open-accounting 4.0 — el documento contable universal del Perú
+# open-accounting 4.1 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -16,14 +16,15 @@ y por eso lo que entra aquí se promete: un valor publicado no se quita ni cambi
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.0/estandar/open-accounting.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.1/estandar/open-accounting.schema.json
 ```
 
-Cuelga del tag **del estándar** (`open-accounting-4.0`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`open-accounting-4.1`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
-sirve como estándar. **El tag `open-accounting-4.0` avanza con cada cambio aditivo** —un valor nuevo de catálogo o un
-bloque opcional no suben la versión (ver Versionado)—, así que esa URL devuelve el último esquema compatible con la
-1.0; un cambio de significado sube a 2.0 y estrena su propio tag.
+sirve como estándar. **Un tag publicado no se mueve**: hasta la 3.x el tag avanzaba con cada cambio aditivo, y desde
+la 4.0 un cambio del esquema —un bloque opcional, como el del no domiciliado— estrena su menor y su tag (ver
+Versionado). Un documento de la menor anterior sigue validando, porque una menor es aditiva por definición; un
+cambio de significado sube la mayor.
 
 **Y la 1.0 es un compromiso:** nada de lo que existe se quita ni cambia de significado hasta una 2.0. Lo que hace
 sostenible esa promesa son los catálogos —`rol`, `clase`, `tipos_de_libro` y `efectos_de_tesoreria` viven fuera
@@ -43,7 +44,7 @@ python -m contaperu.puertas.cli diagnosticar mi-documento.json
 
 ```json
 {
-  "open_accounting": "4.0",
+  "open_accounting": "4.1",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -342,6 +343,26 @@ factura que anula— y **en `a` lo que se cancela**: un `comprobante` o un `trib
 periodo: una factura de enero pagada en marzo se nombra desde el documento de marzo. Y por eso **lo que una
 aplicación nombra no tiene que viajar en el documento**: el motor lo avisa, no lo rechaza.
 
+### El comprobante de un no domiciliado (4.1)
+
+Un proveedor del exterior no emite un comprobante de la Tabla 10: emite su propia factura, y el comprobante la
+lleva como un **91** (sus notas, 97 y 98), en compras, con el proveedor en `contraparte_*` —documento del tipo «0», tal
+cual, con sus letras— y lo que se compró en `valor_no_gravado`, porque el comprobante del exterior no lleva IGV. Lo
+que el registro de compras de no domiciliados del SIRE (el 080500, Anexo 9 de la RS 040-2022) pide además va en el
+bloque **`no_domiciliado`**: el país de residencia y el domicilio; el beneficiario efectivo, si es otro; la
+vinculación económica; la renta bruta, la deducción, la renta neta, el porcentaje y el impuesto retenido; el IGV de
+la utilización del servicio; el convenio para evitar la doble imposición, la exoneración, el tipo de renta, la
+modalidad del servicio y el art. 76; y el documento que sustenta el crédito fiscal. Los códigos son de las Tablas 16 a
+21 del Anexo 01 de esa norma, que el motor publica en `catalogos_sunat`.
+
+Dos cosas que conviene mirar dos veces:
+
+- **Sus importes van en SOLES**, aunque la factura sea en dólares, porque así los declara el registro: el impuesto
+  retenido se calcula sobre la renta en soles, y devolverlo a dólares perdería céntimos. Es la única excepción a «los
+  importes van en la moneda del comprobante», y es del bloque, no del comprobante: `total` sigue en la suya.
+- **No entra en ningún asiento todavía.** El 91 se asienta como una compra común; el IGV de utilización y la renta
+  retenida son otro paso, con un caso real.
+
 ---
 
 ## Versionado
@@ -356,8 +377,8 @@ La regla del versionado, en **tres niveles** (1.0):
 | Cambio | Ejemplo | ¿Sube la versión? |
 |---|---|---|
 | **Un valor nuevo en un catálogo** | Un rol `percepcion`; un libro `honorario` | **No.** Se publica el catálogo con su fecha, y quien no conoce el valor degrada con `clase` |
-| **Un bloque opcional nuevo** | `movimientos[]` del banco; `plan_de_cuentas` | **No.** Quien no lo entiende lo ignora |
-| **Cambiar lo que ya existe** | Volver obligatorio un campo, quitarlo, cambiar su significado | **Sí** |
+| **Un bloque opcional nuevo** | `movimientos[]` del banco; `plan_de_cuentas`; `no_domiciliado` | **La menor, no la mayor.** Quien no lo entiende lo ignora, y un documento de la menor anterior sigue validando. Hasta la 3.x podía entrar sin subir, avanzando el tag; desde la 4.0 el tag publicado no se mueve, así que estrena el suyo |
+| **Cambiar lo que ya existe** | Volver obligatorio un campo, quitarlo, cambiar su significado | **Sí, la mayor** |
 
 Con esa regla, un hecho nuevo entra como **bloque propio** y nunca como valor forzado en el enum de otro: un
 movimiento bancario no tiene tipo de comprobante, ni serie, ni IGV, y meterlo como «tipo de libro» rompería a todo el
@@ -367,6 +388,12 @@ tipos de documento.
 - Las claves que empiezan con `_` son anotaciones de quien produce el archivo. Se transportan y se ignoran;
   nunca llevan datos con significado contable.
 
+**`4.1` (03-nov-2026) añade al comprobante el bloque `no_domiciliado`** (enmienda
+[0007](enmiendas/0007-no-domiciliado.md), §«El comprobante de un no domiciliado»): lo que el registro de compras de no
+domiciliados del SIRE pide de una factura del exterior. Es aditivo —un documento 4.0 es un 4.1 que no lo usa— y
+sube la menor porque el tag `open-accounting-4.0` ya está publicado. Entra con él la deuda que la 4.0 dejó escrita: la
+descripción de `tipo_nota` nombra las notas del no domiciliado, la 97 y la 98.
+
 `0.1` es la primera versión publicada y se deriva de un modelo que lleva un año generando el Excel de CONCAR
 y el TXT del SIRE de empresas reales — no de un diseño en papel. Lo que falte, faltará porque nadie lo ha
 necesitado todavía; se añade con un caso real detrás, no por si acaso.
@@ -374,8 +401,8 @@ necesitado todavía; se añade con un caso real detrás, no por si acaso.
 **`1.0` gana dos campos opcionales el 26-sep-2026 y no sube** (enmiendas 0014 y 0015): `tipo_nota`, por qué se
 emitió una nota, y `estado_sunat`, lo que SUNAT dice del comprobante en su propio registro. Los dos vienen de
 columnas que la propuesta del SIRE ya traía y que se descartaban al leer. Nada cambia de significado y un
-documento sin ellos se exporta exactamente igual, así que **el tag `open-accounting-4.0` avanza y la versión se
-queda en `1.0`**.
+documento sin ellos se exporta exactamente igual, así que **el tag de la 1.0 avanzó y la versión se quedó en
+`1.0`**.
 
 **`0.2` (11-sep-2026) cambia el significado de dos campos**, y por eso sube: `base_gravada` e `igv` pasan a ser
 siempre netos y `dscto_base`/`dscto_igv` dejan de restarse del total. En `0.1` el descuento se restaba de una
@@ -456,12 +483,11 @@ que el motor transporta sin interpretar. **Cada uno tiene su enmienda** en
 Lo que sí entró de esa propuesta: `_exportacion` (arriba), `EXIGE` en el contrato de driver y `pedir_a` en
 `diagnosticar` (`ARQUITECTURA.md`).
 
-Y dos que pide el registro de CONTASIS (12-sep-2026) y que esperan un caso real o una decisión. De los cuatro que había, **dos ya entraron**: `medio_pago` el 25-sep-2026 ([enmienda 0004](enmiendas/0004-medio-de-pago.md)) —le faltaba decidir si es dato del documento o valor del contribuyente, y la respuesta fue las dos cosas— y `retencion_igv` el 20-oct-2026 ([enmienda 0005](enmiendas/0005-retencion-de-igv.md)), cuyo caso real fue una aplicación volcando el 3 % del IGV en el campo de la renta de 4ta porque no tenía dónde ponerlo:
+Y uno que pidió el registro de CONTASIS (12-sep-2026) y que espera un caso real o una decisión. De los cuatro que había, **tres ya entraron**: `medio_pago` el 25-sep-2026 ([enmienda 0004](enmiendas/0004-medio-de-pago.md)) —le faltaba decidir si es dato del documento o valor del contribuyente, y la respuesta fue las dos cosas—, `retencion_igv` el 20-oct-2026 ([enmienda 0005](enmiendas/0005-retencion-de-igv.md)), cuyo caso real fue una aplicación volcando el 3 % del IGV en el campo de la renta de 4ta porque no tenía dónde ponerlo, y `no_domiciliado` el 03-nov-2026 ([enmienda 0007](enmiendas/0007-no-domiciliado.md), open-accounting 4.1), que no resultó ser un número sino el bloque que pide el registro 080500 del SIRE:
 
 | Dónde | Nombre | Qué será |
 |---|---|---|
 | comprobante | `percepcion` | El régimen de percepciones del IGV |
-| comprobante | `no_domiciliado` | El número del comprobante que emite un sujeto no domiciliado |
 
 Lo que ya sale en la segunda columna de centro de costos de CONTASIS es el **mismo** centro del documento, si la
 sección `contasis` la elige en `columnas.centro_costo` (13-sep-2026, `drivers/contasis/datos.py`): el mismo dato en
@@ -478,7 +504,7 @@ libro**— viven en [`catalogos.json`](catalogos.json), junto a este archivo, co
 la URL del tag igual que el esquema, así que un ERP de fuera los lee sin instalar nada:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.0/estandar/catalogos.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.1/estandar/catalogos.json
 ```
 
 **Por qué están fuera del esquema** (1.0): eran enums cerrados, así que el día que entre un hecho nuevo —los

@@ -26,7 +26,9 @@ CABECERA = ("**Estado**", "**Compatibilidad**", "**Nivel**", "**Versión**", "**
 # Y `retencion_igv` salió el 20-oct-2026 por lo mismo (enmienda 0005): su caso real fue una aplicación
 # volcando el 3 % del IGV en el campo de la renta de 4ta porque no tenía dónde ponerlo. `percepcion`
 # sigue reservada: es su hermana y todavía no tiene caso.
-RESERVADOS = ("id_en_destino", "dimensiones", "estado", "percepcion", "no_domiciliado")
+# Y `no_domiciliado` salió el 03-nov-2026 (enmienda 0007, open-accounting 4.1): no resultó ser el número del
+# comprobante del exterior que preveía la reserva sino el bloque que pide el registro 080500 del SIRE.
+RESERVADOS = ("id_en_destino", "dimensiones", "estado", "percepcion")
 
 
 def archivos() -> list[Path]:

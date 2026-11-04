@@ -46,7 +46,7 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **15.0.1** y estándar **`open-accounting` 4.0** — y el número que vale es siempre el de
+Librería **15.0.1** y estándar **`open-accounting` 4.1** — y el número que vale es siempre el de
 `contaperu/_version.py`, no el de esta línea: llegó a decir «11.0.0 y 3.0» con la 14.2.0 ya publicada,
 contradiciendo a la tabla que viene treinta líneas más abajo, que sí decía 4.0.
 
@@ -74,7 +74,7 @@ la decisión correcta de escalabilidad.
 | Pieza | Hoy |
 |---|---|
 | **Entradas** · lectores | XML UBL 2.1 con raíz `Invoice`, `CreditNote` o `DebitNote` (`contaperu/comprobantes/xml_ubl.py:31`); ZIP; propuesta del SIRE. El CDR se reconoce y se ignora. Un PDF o una foto quedan pendientes de leer |
-| **Estándar y comunidad** | `open-accounting` 4.0 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato/`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
+| **Estándar y comunidad** | `open-accounting` 4.1 con su esquema, sus catálogos publicados, sus enmiendas y su batería de conformidad; drivers de terceros por el grupo `contaperu.drivers`, con el contrato v1 (`contaperu/drivers/contrato/`); plantillas de aviso «Regla mal puesta», «Error», «Enmienda» y «El formato de mi sistema». El repositorio es público |
 | **Motor** · validación | Observaciones propias, estables por contrato (`contaperu/tributos/validar.py`); duplicados dentro del lote y contra lo ya anotado |
 | **Motor** · asiento | Línea del comprobante con `rol`, cuadre sin tolerancia, detracción en dos tiempos, huella por lote |
 | **Motor** · puertas | API pública `contaperu.api` sobre un pipeline único; CLI, servidor MCP y puerta HTTP con el contrato OpenConta (cuántas herramientas y cuántos recursos publica **no se escribe aquí**, porque envejece solo y este archivo llegó a decir 11, 14 y 15 en tres sitios a la vez: lo declara `contaperu/api/tabla.py`); hay un `Dockerfile`. La 2.0 retiró las rutas de la 0.x |

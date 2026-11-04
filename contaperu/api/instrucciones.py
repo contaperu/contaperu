@@ -51,6 +51,12 @@ Reglas que conviene tener claras antes de armar un documento:
     monto}`. La del IGV **NO es una detracción** y no entra en ninguna línea de asiento. Hasta la
     4.0 había un solo campo llamado `retencion` y esa ambigüedad costó dos errores de verdad: si
     escribes `retencion`, el motor te dirá cuál de las dos querías.
+  - La factura de un proveedor del EXTERIOR es un `91` (sus notas, `97` y `98`), en compras, con el
+    proveedor en `contraparte_*` —documento tipo `0`, con sus letras— y lo comprado en
+    `valor_no_gravado`, sin IGV. La renta que se le retiene NO va en `retencion_4ta`: va en el bloque
+    `no_domiciliado` (desde la 4.1), con el país, el tipo de renta, el porcentaje, el impuesto, el
+    convenio y la modalidad, **y sus importes en SOLES** aunque la factura sea en dólares. Los códigos,
+    en `catalogos_sunat`; el convenio que le toca a un país, en `catalogos.convenio_sugerido`.
   - Cada contribuyente tiene su plan de cuentas y sus sub-diarios: van en `configuracion`, con lo
     general en la raíz y lo de cada sistema contable en su sección (`concar`, `csv`, `contasis`).
     Lo que se configura lo declara cada sistema; ningún valor por defecto es la verdad de nadie.

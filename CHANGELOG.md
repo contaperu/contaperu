@@ -6,6 +6,28 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### El estándar · `open-accounting` 4.1: el bloque del no domiciliado
+
+**El comprobante gana `no_domiciliado`** (enmienda 0007, de `reservada` a `final`): lo que el registro de compras de no
+domiciliados del SIRE —el 080500, Anexo 9 de la RS 040-2022— pide de una factura del exterior y que el resto del
+comprobante no dice. Un objeto cerrado, o nulo, con el país y el domicilio; el beneficiario efectivo; la vinculación;
+la renta bruta, la deducción, la renta neta, el porcentaje y el impuesto retenido; el IGV de la utilización del
+servicio; el convenio, la exoneración, el tipo de renta, la modalidad y el art. 76; y el documento que sustenta el
+crédito fiscal. Ninguna clave es obligatoria en el estándar: las exigirá el driver del 080500.
+
+- ⚠️ **Sus importes van EN SOLES**, como los declara el registro, aunque la factura sea en dólares. Medido sobre un
+  registro real: el impuesto retenido se calculó en soles y no vuelve igual si se convierte. Es la única excepción a
+  «los importes van en la moneda del comprobante», y es del bloque.
+- **La reserva preveía otra cosa** —un texto con el número del comprobante del exterior—, y se cambió antes de
+  publicar: ese número ya vive en `serie` y `numero`.
+- **No entra en ningún asiento**: el 91 se sigue asentando como compra común, y un test lo fija comparando el asiento
+  con y sin el bloque. Sí llega a la cabecera que ve un driver y vuelve al documento tal cual.
+- **Sube la menor, no la mayor**: un documento 4.0 es un 4.1 que no usa el bloque. Sube porque el tag
+  `open-accounting-4.0` ya está publicado y no se mueve, y el LEEME del estándar deja de decir que el tag avanza.
+- Entra la deuda que la 4.0 dejó escrita: la descripción de `tipo_nota` nombra las notas del no domiciliado, 97 y 98.
+- Las instrucciones del agente dicen dónde va la renta retenida a un proveedor del exterior —en el bloque, no en
+  `retencion_4ta`— y que sus importes van en soles.
+
 ### Los catálogos del registro de no domiciliados
 
 El primer paso para darle forma al no domiciliado: los seis catálogos contra los que se leen las columnas del registro

@@ -28,6 +28,7 @@ from ..configuracion import CONFIG_POR_DEFECTO
 from ..tributos.detracciones import es_comodin, monto_detraccion, numero_pendiente, tasa_detraccion
 from .. import pcge, vocabulario
 from ..tributos.igv import base_imputable, igv_del_asiento, tasa_legal
+from ..comprobantes.comprobante import CLAVES_NO_DOMICILIADO
 from ..modelo import CENTIMO, Comprobante, Libro, numero_sin_ceros, serie_y_numero, texto_tasa
 from ..modelo.libro import Rasgos, rasgos_de
 from .faltas import LibroQueElMotorNoOrigina, RepartoNoCuadra, SinClase, SinCuenta
@@ -99,6 +100,14 @@ def _retencion_igv_del_estandar(c: Comprobante) -> dict:
     return {k: str(bloque[k]) for k in ("porcentaje", "monto") if bloque.get(k) not in (None, "")}
 
 
+def _no_domiciliado_del_estandar(c: Comprobante) -> dict:
+    """El bloque del no domiciliado con lo que el estándar admite, sin las vacías. Filtra por lo mismo que
+    `_retencion_igv_del_estandar`: el bloque es cerrado, y un dict asignado DESPUÉS de construir el comprobante se
+    salta su normalización."""
+    bloque = c.no_domiciliado if isinstance(c.no_domiciliado, dict) else {}
+    return {k: str(bloque[k]) for k in CLAVES_NO_DOMICILIADO if bloque.get(k) not in (None, "")}
+
+
 def _detraccion_del_estandar(c: Comprobante) -> dict:
     """La detracción del comprobante con lo que el estándar admite: sus siete claves declaradas y las anotaciones
     `_`. Sin las vacías, porque el estándar distingue «no lo sé» de «es esto» y lo primero se dice omitiendo la clave.
@@ -136,6 +145,7 @@ def cabecera_de(c: Comprobante) -> Cabecera:
                     ref_tipo_cp=c.ref_tipo_cp or "", ref_serie=c.ref_serie or "",
                     ref_numero=c.ref_numero or "", ref_fecha=_iso(c.ref_fecha),
                     detraccion=_detraccion_del_estandar(c),
+                    no_domiciliado=_no_domiciliado_del_estandar(c),
                     moneda=c.moneda or "", base_gravada=str(c.base_gravada), igv=str(c.igv),
                     dscto_base=str(c.dscto_base), dscto_igv=str(c.dscto_igv), exonerado=str(c.exonerado),
                     inafecto=str(c.inafecto), exportacion=str(c.exportacion), isc=str(c.isc),

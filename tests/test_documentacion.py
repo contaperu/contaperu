@@ -72,6 +72,9 @@ OTRAS_VERSIONES: dict[str, set[str]] = {
     # que la escribía cada aplicación»—, y eso no deja de ser cierto al subir a la 4.0. Una guia de migracion
     # tiene las suyas abajo por el mismo motivo.
     "INTEGRAR.md": {"3.3"},
+    # `4.0` porque el LEEME cuenta por qué la 4.1 subió de número —el tag `open-accounting-4.0` ya estaba publicado y
+    # no se mueve— y que un documento 4.0 sigue validando: las dos cosas siguen siendo ciertas en la 4.1.
+    "estandar/LEEME.md": {"4.0"},
     # Una guía de migración existe para hablar de la versión de la que se viene, y de la que se va a.
     "estandar/MIGRAR-A-1.0.md": {"0.3", "1.0"},
     "estandar/MIGRAR-A-2.0.md": {"1.0", "2.0"},
