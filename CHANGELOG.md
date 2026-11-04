@@ -6,6 +6,17 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### El lector del 080500 rellena el bloque
+
+Lo que hasta la 15.5 viajaba solo en la fila cruda entra al bloque `no_domiciliado` del comprobante: el país, el
+domicilio, el beneficiario, la vinculación, la renta bruta, la deducción, la renta neta, la tasa, el impuesto retenido,
+el IGV de utilización, el convenio, la exoneración, el tipo de renta, la modalidad, el art. 76 y el documento que
+sustenta el crédito fiscal (`sire_txt.POS_DEL_BLOQUE_NO_DOMICILIADO`, cada índice anclado al rótulo de SUNAT). **Sus
+importes se copian tal cual, en soles**, sin devolverlos a la moneda del comprobante como los de valor y total; en una
+nota del no domiciliado, en positivo. Lo vacío de la fila no entra, y la fila cruda sigue viajando en
+`datos_originales["sire"]`. El registro real de setiembre de 2026 entra entero, cada fila con su país y su tipo de
+renta, y su documento valida contra el esquema 4.1.
+
 ### El estándar · `open-accounting` 4.1: el bloque del no domiciliado
 
 **El comprobante gana `no_domiciliado`** (enmienda 0007, de `reservada` a `final`): lo que el registro de compras de no

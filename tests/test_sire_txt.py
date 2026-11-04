@@ -393,9 +393,60 @@ def test_cada_campo_del_mapa_es_la_columna_que_dice_sunat():
     assert rotulos.index("CLU1") == lector.CAMPOS_NO_DOMICILIADO       # los 35 del anexo, y detrás las libres
 
 
+# Y los del bloque `no_domiciliado` (15.6.0, enmienda 0007): lo que hasta la 15.5 viajaba solo en la fila cruda.
+ROTULOS_DEL_BLOQUE = {
+    "sustento_tipo_cp": "Tipo CP CF", "sustento_serie": "Serie CP CF", "sustento_anio_dua": "Año",
+    "sustento_numero": "Nro CP o Doc. CF", "igv_utilizacion": "Monto Ret.", "pais": "País",
+    "domicilio": "Domicilio", "beneficiario_doc": "ID beneficiario",
+    "beneficiario_nombre": "Apellidos Nombres/ Razón Social del beneficiario", "beneficiario_pais": "País beneficiario",
+    "vinculo": "Vínculo", "renta_bruta": "Rta. Bta.", "deduccion": "Deduc./Costo", "renta_neta": "Rta. Neta",
+    "porcentaje": "Tasa", "impuesto_retenido": "Impto.", "convenio": "Convenio", "exoneracion": "Exon.",
+    "tipo_renta": "Tipo Rta", "modalidad": "Mod. Serv.", "art_76": "Art. 76",
+}
+
+
+def test_cada_clave_del_bloque_es_la_columna_que_dice_sunat():
+    """El bloque contra la cabecera de SUNAT, y que el mapa cubra todas las claves del bloque menos ninguna: una que el
+    lector no rellenara llegaría siempre vacía aunque la fila la trajera."""
+    from contaperu.comprobantes.comprobante import CLAVES_NO_DOMICILIADO
+
+    rotulos = [r.strip() for r in CABECERA_NO_DOMICILIADOS.split("|")]
+    assert {campo: rotulos[i] for campo, i in lector.POS_DEL_BLOQUE_NO_DOMICILIADO.items()} == ROTULOS_DEL_BLOQUE
+    assert set(lector.POS_DEL_BLOQUE_NO_DOMICILIADO) == set(CLAVES_NO_DOMICILIADO)
+    # Ninguna columna se lee dos veces, ni a la vez en el comprobante y en el bloque.
+    usados = list(lector.POS_NO_DOMICILIADO.values()) + list(lector.POS_DEL_BLOQUE_NO_DOMICILIADO.values())
+    assert len(usados) == len(set(usados)) and lector.VALOR_DE_ADQUISICIONES not in usados
+
+
+def test_lo_del_no_domiciliado_entra_al_bloque_en_soles_y_en_positivo():
+    """El país, la renta, la tasa, el impuesto, el convenio, el tipo de renta y la modalidad, al bloque; sus importes
+    TAL CUAL en soles —el comprobante es de 100 dólares y la renta de 375 soles—, y en una nota, en positivo."""
+    campos = list(CAMPOS_NO_DOMICILIADO)
+    campos[24:29] = ["375.00", "0.00", "375.00", "30.00", "112.50"]       # renta bruta, deducción, neta, tasa, impuesto
+    campos[13] = "67.50"                                                 # el IGV de utilización
+    contenido = (CABECERA_NO_DOMICILIADOS + "\n" + "|".join(campos + [""] * 10)).encode("utf-8")
+    [c] = sire_txt.parsear(contenido, COMPRAS)
+    assert c.total == Decimal("100.00"), "el comprobante sigue en su moneda"
+    b = c.no_domiciliado
+    assert (b["pais"], b["domicilio"], b["vinculo"], b["convenio"], b["tipo_renta"], b["modalidad"]) == (
+        "9249", "UNA CALLE DEL EXTERIOR", "00", "00", "01", "1")
+    assert (b["renta_bruta"], b["renta_neta"], b["impuesto_retenido"], b["igv_utilizacion"]) == (
+        "375.00", "375.00", "112.50", "67.50")
+    assert b["porcentaje"] == "30.00"
+    assert "exoneracion" not in b and "art_76" not in b, "lo vacío de la fila no entra"
+    assert c.datos_originales["sire"][16] == "9249", "y la fila cruda sigue viajando"
+
+    nota = list(campos)
+    nota[3], nota[6], nota[8], nota[24], nota[26], nota[28] = "97", "-375.00", "-375.00", "-375.00", "-375.00", "-112.50"
+    contenido = (CABECERA_NO_DOMICILIADOS + "\n" + "|".join(nota + [""] * 10)).encode("utf-8")
+    [n] = sire_txt.parsear(contenido, COMPRAS)
+    assert (n.no_domiciliado["renta_bruta"], n.no_domiciliado["impuesto_retenido"]) == ("375.00", "112.50")
+
+
 def test_un_no_domiciliado_entra_con_lo_basico_y_la_fila_entera_viaja():
-    """Lo que el comprobante tiene donde ponerlo (John, 01-nov-2026: «lo básico ahora»), y el resto —el país, el IGV
-    de utilización, la renta— en la fila cruda. La identificación del proveedor va **con sus letras** y con el tipo
+    """Lo que el comprobante tiene donde ponerlo (John, 01-nov-2026: «lo básico ahora»), y la fila entera en
+    `datos_originales` —desde la 15.6 el país, el IGV de utilización y la renta van además al bloque `no_domiciliado`,
+    y lo fija el caso de abajo—. La identificación del proveedor va **con sus letras** y con el tipo
     «0»: en el mes real había un código interno, un PAN de la India y un RUC peruano, y ninguno es un RUC del
     proveedor. Y valida sin un error: cuadra con su valor no gravado y no se le pide un RUC."""
     campos = CAMPOS_NO_DOMICILIADO[:19] + ["ABCDE1234F"] + CAMPOS_NO_DOMICILIADO[20:]

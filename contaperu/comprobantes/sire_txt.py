@@ -137,19 +137,27 @@ CABECERA_NO_DOMICILIADOS = ("periodo", "car sunat")
 # (CLU1 a CLU10) detrás, y la que se presenta, sin cabecera, con un campo 36 vacío y palote—. Índices 0-based, o sea
 # el número de campo del anexo menos uno, como los de arriba.
 #
-# Se lee **lo que el comprobante tiene donde ponerlo** (John, 01-nov-2026: «lo básico ahora»): fecha, tipo, serie,
-# número, importes, moneda y el proveedor. Lo demás —el CAR, el documento que sustenta el crédito (el 1662), el IGV
-# de utilización del campo 14, el país, el beneficiario, la renta bruta y neta, la tasa, el impuesto retenido, el
-# convenio y la modalidad— **no se pierde**: viaja en `datos_originales["sire"]`, la fila cruda, como en el otro
-# registro. Darle forma es la enmienda 0007 (`no_domiciliado`), que sigue reservada hasta que haya un asiento que lo
-# use: el del IGV de utilización y la renta retenida (HOJA-DE-RUTA, C12).
+# Lo que el comprobante tenía donde ponerlo desde la 15.3.0 (John, 01-nov-2026: «lo básico ahora»): fecha, tipo,
+# serie, número, importes, moneda y el proveedor (`POS_NO_DOMICILIADO`). **Y desde la 15.6.0, lo demás**: el país, el
+# beneficiario, la renta, la tasa, el impuesto retenido, el IGV de utilización, el convenio, el tipo de renta, la
+# modalidad y el documento que sustenta el crédito van al bloque `no_domiciliado` del comprobante (enmienda 0007,
+# open-accounting 4.1; `POS_DEL_BLOQUE_NO_DOMICILIADO`). La fila cruda sigue viajando en `datos_originales["sire"]`:
+# el CAR no tiene sitio, y quien quiera comparar con lo que SUNAT vio lo tiene ahí.
 #
-# **No está en `datos/sunat/sire_campos.json`**, y no es un olvido: ese mapa existe para confrontar al lector con el
-# escritor del driver `sire`, y este registro no tiene escritor —ya está declarado, y esto es leerlo—. Su ancla es la
-# cabecera de SUNAT: `tests/test_sire_txt.py` comprueba cada índice contra el rótulo de su columna.
+# Cada índice se ancla al rótulo de su columna en la cabecera de SUNAT: `tests/test_sire_txt.py` los compara.
 POS_NO_DOMICILIADO = {
     "fecha_emision": 2, "tipo_cp": 3, "serie": 4, "numero": 5, "otros": 7, "total": 8,
     "moneda": 14, "tipo_cambio": 15, "contraparte_nombre": 17, "contraparte_doc": 19,
+}
+# El bloque del no domiciliado, campo a campo (Anexo 9, §8.5; índice = número de campo menos uno). **Sus importes se
+# copian TAL CUAL, en soles** —la moneda de la contabilidad—, sin devolverlos a la del comprobante como los de arriba:
+# así los define el bloque, y el impuesto retenido no vuelve igual si se convierte (medido en el registro real).
+POS_DEL_BLOQUE_NO_DOMICILIADO = {
+    "sustento_tipo_cp": 9, "sustento_serie": 10, "sustento_anio_dua": 11, "sustento_numero": 12,
+    "igv_utilizacion": 13, "pais": 16, "domicilio": 18,
+    "beneficiario_doc": 20, "beneficiario_nombre": 21, "beneficiario_pais": 22, "vinculo": 23,
+    "renta_bruta": 24, "deduccion": 25, "renta_neta": 26, "porcentaje": 27, "impuesto_retenido": 28,
+    "convenio": 29, "exoneracion": 30, "tipo_renta": 31, "modalidad": 32, "art_76": 33,
 }
 # El campo 7, «Valor de las adquisiciones»: lo que se compró, que el documento del exterior no grava. Va a
 # `valor_no_gravado` —«valor de las adquisiciones no gravadas», la columna con la que el otro registro dice lo mismo—
@@ -463,8 +471,27 @@ def _un_no_domiciliado(campos: list[str], archivo_nombre: str, contabilidad: str
         origen=ORIGEN,
         confianza=Decimal("1.00"),      # es el dato de SUNAT, no la lectura de una IA
         archivo_nombre=archivo_nombre,
-        datos_originales={"sire": campos},     # la fila entera: el país, el IGV de utilización y la renta viajan aquí
+        no_domiciliado=_bloque_no_domiciliado(campos),
+        datos_originales={"sire": campos},     # la fila entera: el CAR no tiene sitio, y viaja aquí
     )
+
+
+# Los importes del bloque. Van en positivo como todo importe del estándar: en una nota del no domiciliado (97, 98) la
+# fila los trae negativos porque lo es la operación entera, y el signo lo pone el tipo.
+_IMPORTES_DEL_BLOQUE = ("igv_utilizacion", "renta_bruta", "deduccion", "renta_neta", "impuesto_retenido")
+
+
+def _bloque_no_domiciliado(campos: list[str]) -> dict[str, str]:
+    """Lo del no domiciliado de una fila, al bloque del comprobante: tal cual, con sus importes EN SOLES y en positivo.
+    Lo vacío no entra —es «la fila no lo dice»—, y lo valida después `validar` contra los catálogos, no aquí: un
+    código que no está en una tabla es un aviso, no una fila que no se lee."""
+    bloque: dict[str, str] = {}
+    for clave, indice in POS_DEL_BLOQUE_NO_DOMICILIADO.items():
+        valor = _valor(campos, indice).strip()
+        if not valor:
+            continue
+        bloque[clave] = str(abs(_con_signo(valor))) if clave in _IMPORTES_DEL_BLOQUE else valor
+    return bloque
 
 
 def _parsear_no_domiciliados(datos: bytes, libro: Libro, archivo_nombre: str, nombre_del_txt: str) -> list[Comprobante]:
