@@ -67,7 +67,8 @@ que nadie escriba un byte.
 Y opcional en cualquier forma, `no_caben(libro, comprobantes, config) -> {motivo: [comprobantes]}`: lo que su
 formato no puede llevar aunque la contabilidad esté completa —una moneda que no tiene, un código más largo que su
 columna—. `diagnosticar` lo lista antes de exportar y el núcleo se niega con `NoCabe` antes de escribir un byte, en
-toda forma que lleva cuentas: un código no se corta ni una moneda se inventa.
+toda forma —desde la 15.6.0 también en la de `linea`, que lo estrenó el registro de no domiciliados—: un código no se
+corta ni una moneda se inventa.
 
 Y opcional en un driver `desde_lineas` de columnas simples, `COLUMNAS_DE_LINEA` (1.1): el formato declarado como tabla
 de `kit.columnas.ColumnaDeLinea` —cabecera, campo de la línea que la llena y su fuente—, que escribe `kit.columnas`. El

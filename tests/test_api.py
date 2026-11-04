@@ -75,7 +75,7 @@ def test_cada_driver_dice_a_quien_entrega():
     Hasta la 7.x este test afirmaba el GRUPO, y con él congelaba la imprecisión que la 8.0 vino a arreglar:
     `ple` y `ple_plan` salían como grupo `sire` cuando el PLE es el otro régimen de SUNAT."""
     assert {nombre: datos["canal"] for nombre, datos in api.drivers_disponibles().items()} == {
-        "sire": "sunat", "ple": "sunat", "ple_plan": "sunat",
+        "sire": "sunat", "sire_no_domiciliados": "sunat", "ple": "sunat", "ple_plan": "sunat",
         "concar": "legacy", "contasis": "legacy", "starsoft": "legacy",
         "csv": "erp", "asiento_contable": "erp"}
     # Y la palabra del destino es una: nadie devuelve ya un grupo.

@@ -6,6 +6,34 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### El driver `sire_no_domiciliados`: el TXT del 080500
+
+**El motor escribe el registro de compras de no domiciliados del SIRE** (Anexo 9 de la RS 040-2022, §8.5), hermano del
+driver `sire`: el mismo canal, `sunat`, y otro registro, así que otro archivo. Lleva **solo el 91, el 97 y el 98** —el
+complemento exacto de lo que deja fuera el `sire`: entre los dos parten las compras del mes sin solaparse, y un test
+lo ancla—; lo demás sale en el resumen como «fuera del destino».
+
+- **La forma es la del registro real que SUNAT aceptó** en setiembre de 2026: 35 campos, el 36 vacío y palote, CRLF,
+  el CAR vacío, DD/MM/AAAA, importes y tasa con dos decimales y el tipo de cambio con tres; el nombre,
+  `LE` + RUC + periodo + `00080500001112.TXT`.
+- **Los importes van en soles.** Los de valor y total, que el comprobante lleva en su moneda, se multiplican por su tipo
+  de cambio —lo inverso del lector—; los del bloque `no_domiciliado` ya están en soles y se copian tal cual. Una nota
+  del no domiciliado va en negativo, y la tasa, nunca: es un porcentaje.
+- **La ida y vuelta con el registro real** (`tests/test_driver_sire_no_domiciliados.py`; se salta si el archivo, fuera
+  de Git, no está): leído y vuelto a escribir, cada fila sale igual campo a campo. La única diferencia son los espacios
+  dobles dentro de la razón social y del domicilio, que el modelo colapsa al leer: el mismo ruido conocido de la razón
+  social del 080400.
+- **No se escribe** un no domiciliado sin país —el campo 17 no puede ir vacío: `SinPaisDelNoDomiciliado`— ni uno en
+  otra moneda sin su tipo de cambio, que saldría en dólares bajo el rótulo de soles.
+- Lo que **no** está medido todavía es que SUNAT acepte un archivo escrito por este driver: eso es cargarlo (5.5), y
+  es otro paso. Tampoco el salto de línea del final: el registro aceptado no lo lleva y este, como el `sire`, sí.
+
+**`no_caben` se pregunta en toda forma de driver.** El contrato lo prometía «opcional en cualquier forma», pero el núcleo
+solo lo consultaba a los que llevan cuentas —`diagnosticar` y la negativa con `NoCabe`—, porque ningún driver de
+`linea` lo declaraba. El del 080500 es el primero, y desde ahora `diagnosticar` lo lista y la forma `linea` también se
+niega antes de escribir un byte. A los drivers de serie no les cambia nada: los otros tres que lo declaran llevan
+cuentas.
+
 ### Las reglas del no domiciliado
 
 `validar` revisa el 91, sus notas y el bloque `no_domiciliado`, cada regla con su norma. **Dos errores y el resto

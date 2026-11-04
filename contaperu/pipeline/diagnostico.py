@@ -385,7 +385,9 @@ def _del_registro(doc: dict, libro: Libro, modulo: Any, driver: str, *, configur
     codigos = ("sin_sigla", "sin_codigo_de_moneda", "sin_denominacion")   # se dicen por su código, no por comprobante
     faltantes: dict[str, Any] = {clave: cuales if clave in codigos else [_serie_numero(c) for c in cuales]
                                  for clave, cuales in asi.faltantes_para(candidatos, config, rasgos, mirar).items()}
-    if contrato.lleva_cuentas(modulo) and callable(getattr(modulo, "no_caben", None)):
+    # Para todo el que lo declare, lleve cuentas o no (15.6.0): el registro de no domiciliados no lleva cuentas y su
+    # formato también tiene lo que no cabe.
+    if callable(getattr(modulo, "no_caben", None)):
         faltantes["no_cabe"] = {motivo: [_serie_numero(c) for c in lista] for motivo, lista
                                 in contrato.no_caben(modulo, libro, candidatos, config).items()}
     sub_diarios: dict[str, Any] = {}

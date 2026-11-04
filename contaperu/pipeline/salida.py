@@ -246,6 +246,13 @@ def generar(libro: Libro, comprobantes: list[Comprobante], driver: str, opciones
             archivo=nombre, contenido=contenido, content_type=tipo, por_comprobante=detalle,
         )
 
+    # Lo que su formato no puede llevar detiene también a un driver de `linea` (15.6.0). Hasta entonces solo se
+    # preguntaba a los que llevan cuentas, porque ninguno de `linea` declaraba `no_caben`; el del 080500 es el primero:
+    # un no domiciliado sin país no tiene fila que escribir.
+    no_cabe = contrato.no_caben(modulo, libro, incluidos, config)
+    if no_cabe:
+        raise contrato.NoCabe(no_cabe)
+
     # Unir y codificar vive en el kit desde la 4.2: lo comparte con el driver del Libro Diario del PLE, que por la
     # forma de su fila es `desde_lineas` y no pasa por aquí. La política de codificación es una sola.
     texto = kit_texto.armar_archivo(lineas_de_texto(libro, incluidos, driver, opciones), opciones)

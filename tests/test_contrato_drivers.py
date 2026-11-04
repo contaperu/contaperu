@@ -16,6 +16,7 @@ import types
 
 import pytest
 
+from contaperu import catalogos
 from contaperu import configuracion
 from contaperu import drivers
 from contaperu import api
@@ -731,8 +732,16 @@ def test_lo_que_cada_destino_no_lleva_se_pregunta_al_contrato():
     honorarios, y quien no declara nada devuelve el conjunto vacío en vez de `None`. Y desde la 15.3.0 el SIRE deja
     fuera también lo del registro de no domiciliados, que se anota en el 080500 y no en el que él escribe."""
     fuera = {n: sorted(contrato.excluye_tipos(m)) for n, m in drivers.DE_SERIE.items()}
-    assert fuera == {"sire": ["02", "91", "97", "98"], "contasis": ["02"],
+    # Y el del 080500 (15.6.0) es su complemento exacto: todo el catálogo menos el 91, el 97 y el 98. Los dos
+    # drivers de SUNAT parten el libro de compras sin solaparse.
+    del_exterior = sorted(set(catalogos.TIPOS_CP) - catalogos.DEL_REGISTRO_DE_NO_DOMICILIADOS)
+    assert fuera == {"sire": ["02", "91", "97", "98"], "contasis": ["02"], "sire_no_domiciliados": del_exterior,
                      "concar": [], "csv": [], "starsoft": [], "asiento_contable": [], "ple": [], "ple_plan": []}
+    lleva_el_sire = set(catalogos.TIPOS_CP) - set(fuera["sire"])
+    lleva_el_080500 = set(catalogos.TIPOS_CP) - set(fuera["sire_no_domiciliados"])
+    assert lleva_el_sire & lleva_el_080500 == set()
+    # Entre los dos llevan todo el catálogo menos el recibo por honorarios, que va a su propio registro.
+    assert lleva_el_sire | lleva_el_080500 == set(catalogos.TIPOS_CP) - {"02"}
 
 
 def test_el_formato_del_correlativo_se_pregunta_al_contrato_y_no_al_modulo():
@@ -749,7 +758,7 @@ def test_el_formato_del_correlativo_se_pregunta_al_contrato_y_no_al_modulo():
     """
     con_mes = {n: contrato.correlativo_con_mes(m) for n, m in drivers.DE_SERIE.items()}
     assert con_mes == {"starsoft": False,
-                       "sire": True, "contasis": True, "concar": True, "csv": True,
+                       "sire": True, "sire_no_domiciliados": True, "contasis": True, "concar": True, "csv": True,
                        "asiento_contable": True, "ple": True, "ple_plan": True}
     # Y lo que declara el driver es lo que el accesor responde: si se le quita la constante, vuelve al
     # defecto del núcleo. Sin esto, el accesor podría estar devolviendo un literal y nadie lo vería.
@@ -897,7 +906,7 @@ def test_las_toleradas_siguen_haciendo_falta():
 
 def test_cada_driver_de_serie_declara_su_canal():
     assert {n: contrato.canal(m) for n, m in drivers.DE_SERIE.items()} == {
-        "sire": "sunat", "ple": "sunat", "ple_plan": "sunat",
+        "sire": "sunat", "sire_no_domiciliados": "sunat", "ple": "sunat", "ple_plan": "sunat",
         "concar": "legacy", "contasis": "legacy", "starsoft": "legacy",
         "csv": "erp", "asiento_contable": "erp"}
     assert all(contrato.declara_canal(m) for m in drivers.DE_SERIE.values())

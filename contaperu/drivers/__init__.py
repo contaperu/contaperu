@@ -6,6 +6,9 @@ Los seis que vienen de serie, por grupo de destino —SIRE, legacy y ERP—, sal
 - **`sire`** — el TXT que se sube a SUNAT para reemplazar la propuesta del Registro de Ventas
   (RVIE) o de Compras (RCE). Es lo que la norma exige hoy: el PLE quedó reemplazado por el SIRE
   para estos dos registros.
+- **`sire_no_domiciliados`** — su hermano, el TXT del registro de compras de no domiciliados (el 080500): solo el 91,
+  el 97 y el 98, que el `sire` deja fuera. Escrito contra el registro real que SUNAT aceptó (setiembre de 2026); que
+  acepte uno escrito por él, todavía no está medido (15.6.0).
 - **`concar`** — el Excel de asientos que importa CONCAR, uno de los sistemas contables más
   usados del país.
 - **`contasis`** — el registro de compras o de ventas en Excel que importa CONTASIS, que arma el
@@ -47,19 +50,21 @@ from importlib.metadata import entry_points
 from types import ModuleType
 
 from ..errores import ErrorContaperu
-from . import asiento_contable, concar, contasis, contrato, csv, ple, ple_plan, sire, starsoft
+from . import (asiento_contable, concar, contasis, contrato, csv, ple, ple_plan, sire, sire_no_domiciliados,
+               starsoft)
 from .kit import Opciones
 
 GRUPO = "contaperu.drivers"
 DE_SERIE: dict[str, ModuleType] = {sire.NOMBRE: sire, concar.NOMBRE: concar, csv.NOMBRE: csv,
                                    contasis.NOMBRE: contasis, starsoft.NOMBRE: starsoft,
-                                   asiento_contable.NOMBRE: asiento_contable, ple.NOMBRE: ple, ple_plan.NOMBRE: ple_plan}
+                                   asiento_contable.NOMBRE: asiento_contable, ple.NOMBRE: ple, ple_plan.NOMBRE: ple_plan,
+                                   sire_no_domiciliados.NOMBRE: sire_no_domiciliados}
 DRIVER_POR_DEFECTO = "sire"
 
 __all__ = ["DE_SERIE", "DRIVERS", "DRIVER_POR_DEFECTO", "GRUPO", "AvisoDriver",
            "LibroQueElDestinoNoLleva", "Opciones",
            "asiento_contable", "concar", "contasis", "contrato", "csv", "de_terceros",
-           "formato_de", "obtener", "ple", "ple_plan", "recargar", "sire", "starsoft"]
+           "formato_de", "obtener", "ple", "ple_plan", "recargar", "sire", "sire_no_domiciliados", "starsoft"]
 
 
 class AvisoDriver(UserWarning):
