@@ -16,29 +16,34 @@ def test_el_catalogo_trae_sus_operaciones_y_cada_una_cita_su_manual():
     """Si SUNAT añade una operación, aparece aquí sola. Y ninguna entra sin la fuente de la que sale: la ruta de una
     API ajena es una regla, y si cambia hay que poder ir a mirar de dónde salió. La duodécima, `registro_pedir`,
     entró el 01-nov-2026: bajar lo DECLARADO de un periodo, que no es la propuesta. Y en la 15.4.0 las tres que leen
-    lo que SUNAT ve del periodo: las inconsistencias por comprobante, su resumen y el reporte de casillas del 621."""
-    assert len(sunat.OPERACIONES) == 15
+    lo que SUNAT ve del periodo: las inconsistencias por comprobante, su resumen y el reporte de casillas del 621. Y en
+    la 15.6.0, del manual y sin medir, las tres del registro de no domiciliados y el resumen de un periodo."""
+    assert len(sunat.OPERACIONES) == 19
     assert set(sunat.OPERACIONES) == {
         "periodos", "propuesta_pedir", "ticket_consultar", "ticket_archivo", "propuesta_reemplazar",
         "propuesta_aceptar", "preliminar_registrar", "preliminar_eliminar", "excluidos", "no_incluidos", "constancia",
-        "registro_pedir", "inconsistencias_comprobante", "inconsistencias_resumen", "casillas"}
+        "registro_pedir", "inconsistencias_comprobante", "inconsistencias_resumen", "casillas",
+        "no_domiciliados_cargar", "no_domiciliados_eliminar_comprobante", "no_domiciliados_exportar_preliminar",
+        "resumen"}
     for nombre, op in sunat.operaciones().items():
         assert op["fuente"].strip(), f"{nombre} no cita su manual"
         assert op["grada"] in sunat.GRADAS, f"{nombre} no declara con qué cuidado se la llama"
 
 
-def test_las_gradas_reparten_las_quince_en_once_dos_y_dos():
-    """La grada no es una anotación: decide si quien envía puede llamarla sola. Once lecturas que no cambian nada,
-    dos escrituras que tocan un mes y dos declarativas que declaran de verdad ante SUNAT. Y hace falta porque el
+def test_las_gradas_reparten_las_diecinueve_en_trece_cuatro_y_dos():
+    """La grada no es una anotación: decide si quien envía puede llamarla sola. Trece lecturas que no cambian nada,
+    cuatro escrituras que tocan un mes y dos declarativas que declaran de verdad ante SUNAT. Y hace falta porque el
     SIRE **no tiene ambiente de pruebas**: toda prueba es contra producción."""
     por_grada: dict[str, list[str]] = {}
     for nombre in sunat.OPERACIONES:
         por_grada.setdefault(sunat.grada(nombre), []).append(nombre)
-    assert {g: len(ns) for g, ns in por_grada.items()} == {"lectura": 11, "escritura": 2, "declarativa": 2}
+    assert {g: len(ns) for g, ns in por_grada.items()} == {"lectura": 13, "escritura": 4, "declarativa": 2}
     assert {"registro_pedir", "inconsistencias_comprobante", "inconsistencias_resumen", "casillas"} <= set(
         por_grada["lectura"])
     assert sorted(por_grada["declarativa"]) == ["preliminar_registrar", "propuesta_aceptar"]
-    assert sorted(por_grada["escritura"]) == ["preliminar_eliminar", "propuesta_reemplazar"]
+    # Cargar el 080500 y quitar uno de sus comprobantes cambian lo que SUNAT tiene del mes, aunque no declaren.
+    assert sorted(por_grada["escritura"]) == ["no_domiciliados_cargar", "no_domiciliados_eliminar_comprobante",
+                                              "preliminar_eliminar", "propuesta_reemplazar"]
 
 
 def test_el_registro_del_estandar_se_traduce_al_cod_libro_de_la_api():
@@ -336,3 +341,49 @@ def test_el_metodo_por_libro_cubre_cada_libro_con_ruta_y_ninguno_mas():
     de_mas["operaciones"]["excluidos"]["metodo_por_libro"] = {"080000": "GET", "140000": "GET"}
     with pytest.raises(CatalogoDelSireInvalido, match="metodo_por_libro"):
         catalogo._valido(de_mas)
+
+
+# ── El registro de no domiciliados (15.6.0, del manual; sin medir) ───────────────────────────────────────────────
+def test_las_del_registro_de_no_domiciliados_solo_existen_en_compras():
+    for nombre in ("no_domiciliados_cargar", "no_domiciliados_eliminar_comprobante",
+                   "no_domiciliados_exportar_preliminar"):
+        with pytest.raises(CatalogoDelSireInvalido, match="080000"):
+            sunat.peticion(nombre, registro="venta", periodo="202609", codTipoArchivo=0)
+        # Y ninguna se ha visto responder: quien automatiza tiene que saberlo antes de llamarla.
+        assert sunat.verificado(nombre, registro="compra") == ""
+
+
+def test_exportar_el_preliminar_de_no_domiciliados_pide_un_ticket_del_proceso_96():
+    p = sunat.peticion("no_domiciliados_exportar_preliminar", registro="compra", periodo="202609", codTipoArchivo=0)
+    assert p["metodo"] == "GET" and p["grada"] == "lectura" and p["devuelve"] == "ticket"
+    assert p["url"].endswith("/rce/preliminar/web/nodomiciliados/202609/exportapreliminarnd")
+    assert p["params"] == {"codTipoArchivo": 0, "codOrigenEnvio": "2"}
+    # El 96, «Generar archivo exportar preliminar - RCE No Domiciliados» del Anexo I: con él se baja el archivo.
+    assert p["cod_proceso"] == "96"
+
+
+def test_cargar_el_080500_es_una_escritura_por_tus_con_el_proceso_56():
+    p = sunat.peticion("no_domiciliados_cargar", registro="compra", periodo="202609")
+    assert p["metodo"] == "POST" and p["grada"] == "escritura" and p["devuelve"] == "ticket"
+    assert p["url"].endswith("/rvierce/receptorpreliminar/web/preliminar/upload")
+    assert p["cod_proceso"] == "56"
+    assert sunat.operaciones()["no_domiciliados_cargar"]["protocolo"] == "TUS 1.0.0"
+
+
+def test_quitar_un_comprobante_no_domiciliado_es_un_put_con_el_periodo_en_la_ruta():
+    p = sunat.peticion("no_domiciliados_eliminar_comprobante", registro="compra", periodo="202609")
+    assert p["metodo"] == "PUT" and p["grada"] == "escritura"
+    assert p["url"].endswith("/rce/libronodomiciliado/web/nodomiciliados/202609/eliminarcomprobantepreliminarnd")
+
+
+def test_el_resumen_lleva_su_tipo_y_su_archivo_en_la_ruta_y_el_libro_en_la_consulta():
+    p = sunat.peticion("resumen", registro="compra", periodo="202609", codTipoResumen=7, codTipoArchivo=0)
+    assert p["devuelve"] == "binario" and p["grada"] == "lectura"
+    assert p["url"].endswith("/rvierce/resumen/web/resumencomprobantes/202609/7/0/exporta")
+    assert p["params"] == {"codLibro": "080000"}
+    assert sunat.operaciones()["resumen"]["tipos_de_resumen"]["7"] == "no domiciliados"
+    # La misma ruta en ventas, con su libro.
+    assert sunat.peticion("resumen", registro="venta", periodo="202609", codTipoResumen=1,
+                          codTipoArchivo=0)["params"] == {"codLibro": "140000"}
+    with pytest.raises(CatalogoDelSireInvalido, match="codTipoResumen"):
+        sunat.peticion("resumen", registro="compra", periodo="202609", codTipoArchivo=0)

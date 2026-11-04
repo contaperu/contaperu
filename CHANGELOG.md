@@ -6,6 +6,25 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### El catálogo del SIRE: el registro de no domiciliados y el resumen
+
+Cuatro operaciones nuevas en `datos/sunat/sire_api.json`, **del manual y sin medir** —ninguna lleva `verificado`, y
+`sunat.verificado` lo dice a quien automatiza—:
+
+- **`no_domiciliados_exportar_preliminar`** (Compras v28 5.39): lo que SUNAT tiene en el preliminar de no
+  domiciliados del mes. Una lectura con ticket, del proceso 96 del Anexo I, y con filtros opcionales por importe,
+  fecha, proveedor, tipo, serie y número.
+- **`no_domiciliados_cargar`** (5.5): subir el TXT del 080500 por TUS, con el proceso 56. **Es una escritura**, y es
+  la única validación del registro que existe por API: SUNAT lo valida al procesar el ticket (procesos 67 y 79). Que
+  una factura del exterior sea auténtica no lo dice ningún servicio.
+- **`no_domiciliados_eliminar_comprobante`** (5.38): quitar comprobantes del preliminar, por su CAR. El único PUT del
+  catálogo, y su nota apunta tres cosas del manual que no cuadran.
+- **`resumen`** (Compras 5.35 · Ventas 5.20): el resumen de un periodo en uno de sus siete tipos
+  (`tipos_de_resumen`); el 7 es el de no domiciliados. Devuelve el archivo sin ticket.
+
+Y `preliminar_eliminar` dice ya qué hace su `indEliminar` en compras: el 1 borra todo el preliminar y el 2, solo lo de
+no domiciliados. Las gradas quedan en trece lecturas, cuatro escrituras y dos declarativas.
+
 ### El driver `sire_no_domiciliados`: el TXT del 080500
 
 **El motor escribe el registro de compras de no domiciliados del SIRE** (Anexo 9 de la RS 040-2022, §8.5), hermano del

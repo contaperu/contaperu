@@ -122,7 +122,8 @@
         "080000": "rce/preliminar/web/registroslibros/{periodo}/{indEliminar}/eliminapreliminar",
         "140000": "rvierce/gestionlibro/web/registroslibros/{periodo}/eliminapreliminar"
       },
-      "fuente": "Compras v28 5.17 · Ventas v29"
+      "fuente": "Compras v28 5.17 · Ventas v29",
+      "_nota": "En compras, `indEliminar` dice qué se borra del preliminar: `1`, todo; `2`, solo lo de no domiciliados (Compras v28 5.17). Con el 2 se deshace entera una carga del 080500 (`no_domiciliados_cargar`); un comprobante suelto se quita con `no_domiciliados_eliminar_comprobante`. Sin medir."
     },
     "excluidos": {
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
@@ -199,6 +200,38 @@
       "verificado": "2026-11-01",
       "_nota_medida": "MEDIDO el 01-nov-2026 sobre setiembre de 2026, un mes PRESENTADO de un RUC real, probando los cuatro tipos de descarga en las dos vistas. **`tipoDescarga` es `txt` EN LETRAS**, como el ejemplo de compras: con `0`, `1` y `2` —los códigos de los dos anexos— la comparada respondió **204** sin cuerpo. La **preliminar** respondió 1070 con los cuatro: un mes generado ya no tiene preliminar. La **comparada** con `txt` devolvió un texto UTF-8 sin BOM —aunque el `Content-Type` diga `application/xls`—, separado por `|`, sin palote al final y sin espacios alrededor de los campos, en **dos bloques**: primero Ventas y después Compras, separados por dos líneas vacías. Cada bloque abre con una línea de rótulos y otra de guiones. Los rótulos son siete: el bloque (`Ventas` o `Compras`), `Casilla`, lo del contribuyente (`RVIE contribuyente` en ventas, `Preliminar RCE contribuyente` en compras), `Inconsistencias en registros`, `Propuesta SUNAT`, `DDJJ N° <número de orden>` —en el bloque de compras decía `DDJJ N° 0`— y `Diferencia Propuesta vs DDJJ`. Cada fila es un concepto con su número de casilla del 621 (100, 101, 154, 155, 102, 103, 160 a 163, 106, 127, 105, 109, 112, 340 y 131 en ventas; 107, 108, 156, 157, 110, 111, 113 a 117, 119, 120, 122, 178, 172, 173 y 140 en compras), y las de desglose al 18 % y al 10 % vienen sin número, debajo de la suya. Los importes, con coma de miles y punto decimal (`1,234.56`, `-1,234.56`); vacío donde la columna no aplica. Sobre un mes SIN PRESENTAR, las dos vistas respondieron 1070 con `0` y con `txt`. Queda la hipótesis de que la preliminar exista mientras hay un preliminar registrado.",
       "_nota": "El reporte de las casillas del periodo, las que pre-llenan el formulario 621 (15.4.0, del manual). Lo lee `sunat.leer_casillas` (15.5.0). **No lleva libro**: ni la ruta ni los parámetros lo nombran, y los dos manuales describen la misma URL, así que es un reporte del periodo y no de un registro. Devuelve el archivo directamente, sin ticket. `tipoReporte` es 1 preliminar o 2 comparada. `tipoDescarga`: ventas lo da como 0 txt, 1 xls y 2 pdf; compras remite a su Anexo III —0 txt, 1 csv, 2 excel—, pero su propio ejemplo escribe `txt` en letras (`…/reporte/1/txt`), y es el ejemplo el que acierta (`_nota_medida`). Los dos listan el 1082 «código tipo de descarga no permitido». Se pasa como llegue."
+    },
+    "no_domiciliados_cargar": {
+      "metodo": "POST", "grada": "escritura", "devuelve": "ticket", "protocolo": "TUS 1.0.0",
+      "ruta_por_libro": {"080000": "rvierce/receptorpreliminar/web/preliminar/upload"},
+      "cod_proceso": "56",
+      "fuente": "Compras v28 5.5 · Anexo I",
+      "_nota": "Sube el registro de compras de no domiciliados —el TXT del 080500 que escribe el driver `sire_no_domiciliados`, en un ZIP— al preliminar del mes. Por TUS, con la metadata de `tus` igual que `propuesta_reemplazar`; lo que cambia es la ruta, el `codProceso`, el 56 («Carga No Domiciliados» en el Anexo I), y que el `codLibro` es el del RCE, 080000, no el 080500 del nombre del archivo. **Es una escritura**: no declara, pero cambia lo que SUNAT tiene del mes, y el SIRE no tiene ambiente de pruebas. Y es **la única validación del 080500 que existe por API**: SUNAT lo valida al procesar el ticket (procesos 67 y 79, «Validar No Domiciliados», del Anexo I). Que una factura del exterior sea auténtica no lo dice ningún servicio: SUNAT no registra lo que emite un extranjero. Sin medir."
+    },
+    "no_domiciliados_eliminar_comprobante": {
+      "metodo": "PUT", "grada": "escritura", "devuelve": "json",
+      "ruta_por_libro": {"080000": "rce/libronodomiciliado/web/nodomiciliados/{periodo}/eliminarcomprobantepreliminarnd"},
+      "fuente": "Compras v28 5.38",
+      "_nota": "Quita del preliminar de no domiciliados los comprobantes del cuerpo: `noDomiciliados`, una lista de `{codCar, codTipoCDP, numSerieCDP, numCDP}`. **Pide el CAR**, que lo pone SUNAT al cargar: antes de quitar uno hay que leerlo con `no_domiciliados_exportar_preliminar`. Tres cosas del manual que no cuadran: su descripción dice que genera un ticket y su salida es un 200 con JSON; los tipos que dice admitir son los de otro servicio (00, 01, 03… 56) y no incluyen el 91, el 97 ni el 98, los únicos del registro; y es el único PUT del catálogo. Sin medir."
+    },
+    "no_domiciliados_exportar_preliminar": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
+      "ruta_por_libro": {"080000": "rce/preliminar/web/nodomiciliados/{periodo}/exportapreliminarnd"},
+      "params_obligatorios": ["codTipoArchivo", "codOrigenEnvio"],
+      "cod_proceso": "96",
+      "fuente": "Compras v28 5.39 · Anexo I",
+      "_nota": "Lo que SUNAT tiene en el preliminar de no domiciliados del mes: un ticket, y el archivo se baja con `ticket_archivo` con el `codProceso` 96 («Generar archivo exportar preliminar - RCE No Domiciliados», Anexo I). Filtros opcionales: `mtoTotalDesde` y `mtoTotalHasta` (van juntos), `fecEmisionIni` y `fecEmisionFin` (juntos, dentro del periodo), `numDocIdentidadClienteProveedor`, `codTipoCDP`, `numSerieCDP`, `numCDP` y `numDocAdquiriente`. El manual dice las fechas en dd/mm/aaaa y su propio ejemplo las manda en aaaa-mm-dd. Es una lectura: no cambia nada. Lo que conteste sobre un mes ya presentado —el preliminar vacío o lo declarado— no se ha visto. Sin medir."
+    },
+    "resumen": {
+      "metodo": "GET", "grada": "lectura", "devuelve": "binario",
+      "ruta_por_libro": {
+        "080000": "rvierce/resumen/web/resumencomprobantes/{periodo}/{codTipoResumen}/{codTipoArchivo}/exporta",
+        "140000": "rvierce/resumen/web/resumencomprobantes/{periodo}/{codTipoResumen}/{codTipoArchivo}/exporta"
+      },
+      "params_obligatorios": ["codLibro"],
+      "tipos_de_resumen": {"1": "propuesta", "2": "preliminar", "3": "no incluidos (ventas) o excluidos (compras)", "4": "registro", "5": "preliminar registrado", "6": "ajustes posteriores", "7": "no domiciliados"},
+      "fuente": "Compras v28 5.35 · Ventas v29 5.20",
+      "_nota": "El resumen de un periodo, de uno de siete tipos (`tipos_de_resumen`, el `codTipoResumen` de la ruta); el 7 es el de no domiciliados. Devuelve el archivo directamente, sin ticket. Aquí `codTipoArchivo` es 0 txt y 1 csv **en los dos libros**, a diferencia de la tabla de `libros`, donde ventas dice 1 excel y 2 csv. El ejemplo del manual de ventas manda `codLibro=14000`, con un cero de menos. Sin medir."
     }
   },
 
