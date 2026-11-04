@@ -54,7 +54,7 @@ def test_un_no_domiciliado_con_igv_es_un_error():
 
 
 def test_el_bloque_en_otro_tipo_se_avisa_y_se_ignora():
-    c = Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-09-10", contraparte_doc="20100047218",
+    c = Comprobante(tipo_cp="01", serie="F001", numero="1", fecha_emision="2026-09-10", contraparte_doc="20602222226",
                     contraparte_nombre="PROVEEDOR SAC", base_gravada="100.00", igv="18.00", total="118.00",
                     no_domiciliado={"pais": "9249"})
     assert _codigos(c).get("NO_DOMICILIADO_NO_APLICA") == "aviso"
