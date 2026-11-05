@@ -6,6 +6,28 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 
 ## [Sin publicar]
 
+### El no domiciliado, en su sub-diario: el 19, con la sigla «91» de fábrica
+
+⚠️ **Cambio de comportamiento a propósito.** Hasta la 15.6.0 un 91 salía en el Excel de CONCAR en el sub-diario de
+compras (el 11), como una compra común, y sin sigla en la configuración se plantaba. Desde esta versión va a **su
+propio sub-diario, el 19** —el molde del recibo por honorarios con su 15—, y trae **la sigla «91» de fábrica** (John,
+04-nov-2026: «para el excel concar el subdiario 19»; «el 91 es un código interno para SUNAT, pero mayormente lo único
+que se ve son facturas; hagamos por default el 91 para avanzar»). Las dos cosas son configuración: quien tenga otra
+sigla u otro número los cambia en `tipos.91`. Lo que ya se exportó no se mueve.
+
+- `tipos` gana `"91": {"sigla": "91", "sub_diario": "19"}` en la configuración del asiento y en la de CONCAR.
+- **La 97 y la 98 van al sub-diario del 91** cuando no tienen uno propio (`clasificacion.sub_diario`): son las notas
+  del mismo registro, y así se cambia un solo número. No traen sigla de fábrica, porque casi no se ven: si llega una,
+  el Excel la pide, como siempre.
+- `etiquetas_sub_diario` rotula el 19 «No domiciliados».
+- `catalogos.TIPO_NO_DOMICILIADO`, el 91 con nombre.
+
+### `sire_txt.bloque_de_la_fila`, pública
+
+El bloque del no domiciliado de una fila del 080500 (se llamaba `_bloque_no_domiciliado`). Una aplicación que guardó la
+fila cruda —`datos_originales["sire"]`, que viaja con cada comprobante leído de ese registro— reconstruye el bloque con
+ella sin volver a pedirlo a SUNAT y sin copiar las posiciones de las columnas.
+
 ### Lo medido del preliminar de no domiciliados
 
 `no_domiciliados_exportar_preliminar` (5.39) se midió el 04-nov-2026 con un RUC real y pasa a `verificado`. **El SIRE no

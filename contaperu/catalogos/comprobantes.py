@@ -46,6 +46,9 @@ FUERA_DEL_REGISTRO_SUNAT = frozenset({"02"})
 # las especiales, No · Sí · No (John lo contrastó en SUNAT el 01-nov-2026). SÍ entran al asiento contable, como cualquier
 # compra (John, 01-nov-2026: «como compra común, con mi sigla»). Desde la 15.3.0, que es cuando se empezaron a leer.
 DEL_REGISTRO_DE_NO_DOMICILIADOS = frozenset({"91", "97", "98"})
+# El comprobante del no domiciliado, sin sus notas: el que lleva el sub-diario de su registro (15.6.1), y del que
+# la 97 y la 98 lo toman cuando no tienen uno propio.
+TIPO_NO_DOMICILIADO = "91"
 
 # Tipos con un tratamiento propio en el asiento: el recibo por honorarios (su cuenta y su retención de 4ta), la boleta
 # (su registro), las notas de crédito (invierten el asiento) y las notas (llevan el documento que modifican). Las tres

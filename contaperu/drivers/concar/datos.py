@@ -78,7 +78,8 @@ TIPO_DOC_DETRACCION = "DR"
 TIPOS = {"01": {"sigla": "FT"}, "02": {"sigla": "RH", "sub_diario": "15"},
          "03": {"sigla": "BV", "sub_diario": "13"}, "05": {"sigla": "BA"},
          "07": {"sigla": "NA"},      # CONSTA: la T.G. 06 de la instalación de John (2-oct-2026)
-         "08": {"sigla": "ND"}, "12": {"sigla": "TK"}, "14": {"sigla": "RC"}}
+         "08": {"sigla": "ND"}, "12": {"sigla": "TK"}, "14": {"sigla": "RC"},
+         "91": {"sigla": "91", "sub_diario": "19"}}   # el no domiciliado, en su registro (15.6.1)
 # Escrita entera y no derivada de la general, como la de STARSOFT: así se lee de un tirón qué tiene esta instalación.
 # Que las otras SIETE sigan siendo las de la tabla general lo guarda un test
 # (`test_asiento_concar.py::test_concar_solo_difiere_de_la_tabla_general_en_la_nota_de_credito`), para que no se

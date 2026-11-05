@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ...catalogos import TIPO_BOLETA, TIPO_HONORARIOS
+from ...catalogos import TIPO_BOLETA, TIPO_HONORARIOS, TIPO_NO_DOMICILIADO
 from ...configuracion import CONFIG_POR_DEFECTO, por_defecto
 from ..configuracion import CONFIGURACION_DEL_ASIENTO
 
@@ -43,6 +43,7 @@ def etiquetas_sub_diario(config: dict) -> dict[str, str]:
         (str(config.get("sub_diario_detraccion") or "").strip(), "Compras con detracción"),
         (str((tipos.get(TIPO_BOLETA) or {}).get("sub_diario") or "").strip(), "Boletas de venta"),
         (str((tipos.get(TIPO_HONORARIOS) or {}).get("sub_diario") or "").strip(), "Recibos por honorarios"),
+        (str((tipos.get(TIPO_NO_DOMICILIADO) or {}).get("sub_diario") or "").strip(), "No domiciliados"),
     ]
     etiquetas: dict[str, str] = {}
     for numero, uso in usos:

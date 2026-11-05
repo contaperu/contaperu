@@ -220,3 +220,15 @@ def test_el_preliminar_real_y_lo_declarado_dicen_lo_mismo():
         if sorted(o.codigo for o in p.observaciones) != sorted(o.codigo for o in d.observaciones):
             distintos.append("avisos")
     assert not distintos, f"lo que el preliminar dice distinto que lo declarado: {sorted(set(distintos))}"
+
+
+def test_el_bloque_se_reconstruye_desde_la_fila_cruda_guardada():
+    """`sire_txt.bloque_de_la_fila` es pública desde la 15.6.1 para que una aplicación que guardó la fila cruda
+    (`datos_originales["sire"]`) recupere el bloque sin volver a pedirlo a SUNAT. Tiene que dar lo mismo que el lector."""
+    from contaperu.comprobantes import sire_txt
+    from contaperu.modelo import Libro
+
+    libro = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202609", tipo="compra")
+    [leido] = sire_txt.parsear(_como_el_preliminar(_del_exterior()), libro, archivo_nombre="preliminar.txt")
+    assert sire_txt.bloque_de_la_fila(leido.datos_originales["sire"]) == leido.no_domiciliado
+    assert leido.no_domiciliado["pais"] == "9249"

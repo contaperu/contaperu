@@ -34,12 +34,15 @@ _SUB_DIARIO = r"^([0-9]{1,4})?$"       # de 1 a 4 dígitos, como texto: los cero
 
 CONFIGURACION_DEL_ASIENTO: tuple[Campo, ...] = (
     # Código SUNAT (Tabla 10) → {sigla (en CONCAR, su columna R y su T.G. 06), sub-diario}. Los habituales: 11 compras,
-    # 13 boletas, 15 honorarios (y 10 para la factura con detracción, abajo). Los demás tipos de la Tabla 10 NO están
+    # 13 boletas, 15 honorarios, 19 no domiciliados (y 10 para la factura con detracción, abajo). El 91 trae de fábrica
+    # la sigla «91» (John, 04-nov-2026: «el 91 es un código interno para SUNAT, pero mayormente lo único que se ve son
+    # facturas; hagamos por default el 91 para avanzar»), y la 97 y la 98 toman su sub-diario (`sub_diario`). Los demás tipos de la Tabla 10 NO están
     # a propósito: cada sistema tiene su tabla de documentos, así que van por empresa. Un tipo solo lleva `sub_diario`
     # cuando su registro ES otro (boletas, honorarios); el que pone la empresa gana al sub-diario por uso.
     Campo("tipos", "mapa", {"01": {"sigla": "FT"}, "02": {"sigla": "RH", "sub_diario": "15"},
                             "03": {"sigla": "BV", "sub_diario": "13"}, "05": {"sigla": "BA"}, "07": {"sigla": "NC"},
-                            "08": {"sigla": "ND"}, "12": {"sigla": "TK"}, "14": {"sigla": "RC"}},
+                            "08": {"sigla": "ND"}, "12": {"sigla": "TK"}, "14": {"sigla": "RC"},
+                            "91": {"sigla": "91", "sub_diario": "19"}},
           titulo="Tipos de comprobante", grupo="tipos", claves=r"^[0-9]{2}$",
           ayuda="La sigla con la que TU sistema llama a cada tipo de SUNAT. Vienen rellenas para que no empieces "
                 "de cero, pero son de cada instalación —tu sistema contable deja cambiarlas—: compáralas una vez "

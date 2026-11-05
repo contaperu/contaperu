@@ -111,25 +111,39 @@ def test_dolares_con_tipo_de_cambio_del_comprobante():
     assert e.value.monedas == ["EUR"] and concar.monedas_sin_codigo([cp(moneda="EUR"), cp()], CONTAB) == ["EUR"]
 
 
-def test_el_no_domiciliado_se_asienta_como_una_compra_comun_con_la_sigla_del_entorno():
+def test_el_no_domiciliado_se_asienta_en_su_sub_diario_con_la_sigla_91():
     """John, 01-nov-2026: el 91 sale en el Excel **«como compra común, con mi sigla»**. El documento del exterior no
     lleva IGV —el crédito vive en el 1662, que es otro comprobante—, así que son dos filas: el gasto al Debe y el
-    proveedor al Haber, en dólares a la 421202, con su documento con letras en el anexo. Sin la sigla en la
-    configuración se planta y no se inventa una (es la regla de siempre). Y la 97, su nota de crédito, invierte como
-    la 07 (15.3.0)."""
+    proveedor al Haber, en dólares a la 421202, con su documento con letras en el anexo. Y la 97, su nota de crédito,
+    invierte como la 07 (15.3.0).
+
+    **Y desde la 15.6.1 va a SU sub-diario, el 19, con la sigla «91» de fábrica** (John, 04-nov-2026: «para el excel
+    concar el subdiario 19»; «el 91 es un código interno para SUNAT, pero mayormente lo único que se ve son facturas;
+    hagamos por default el 91 para avanzar»). Hasta entonces salía en el 11 y sin sigla se plantaba."""
     exterior = dict(tipo_cp="91", serie="8ABCDEFG", numero="9", contraparte_tipo_doc="0",
                     contraparte_doc="ABCDE1234F", contraparte_nombre="PROVEEDOR DEL EXTERIOR", moneda="USD",
                     tipo_cambio="3.750", base_gravada="0", igv="0", valor_no_gravado="100", total="100")
-    with pytest.raises(concar.SinSigla) as e:
-        construir_concar(COMPRAS, [cp(**exterior)], CONTAB, {"11": 1})
-    assert e.value.tipos == ["91"]
-    config = configuracion({"tipos": {"91": {"sigla": "XX"}, "97": {"sigla": "YY"}}})
-    filas = filas_de_comprobante(cp(**exterior), config, MES, "080001")
+    filas = filas_de_comprobante(cp(**exterior), configuracion({}), MES, "190001")
     assert [(f["K"], f["N"], f["O"]) for f in filas] == [("631101", "D", 100.0), ("421202", "H", 100.0)]
-    assert all((f["R"], f["S"], f["E"], f["G"], f["B"]) == ("XX", "8ABCDEFG-9", "US", 3.75, "11") for f in filas)
+    assert all((f["R"], f["S"], f["E"], f["G"], f["B"]) == ("91", "8ABCDEFG-9", "US", 3.75, "19") for f in filas)
     assert filas[1]["L"] == "ABCDE1234F"
-    nota = filas_de_comprobante(cp(**dict(exterior, tipo_cp="97", numero="10")), config, MES, "080002")
-    assert [(f["K"], f["N"]) for f in nota] == [("631101", "H"), ("421202", "D")] and nota[0]["R"] == "YY"
+    # La sigla del entorno gana a la de fábrica, y el sub-diario se queda.
+    config = configuracion({"tipos": {"91": {"sigla": "XX"}, "97": {"sigla": "YY"}}})
+    filas = filas_de_comprobante(cp(**exterior), config, MES, "190001")
+    assert all((f["R"], f["B"]) == ("XX", "19") for f in filas)
+    # La 97 invierte y va al sub-diario de su 91, sin uno propio.
+    nota = filas_de_comprobante(cp(**dict(exterior, tipo_cp="97", numero="10")), config, MES, "190002")
+    assert [(f["K"], f["N"]) for f in nota] == [("631101", "H"), ("421202", "D")]
+    assert all((f["R"], f["B"]) == ("YY", "19") for f in nota)
+    # Si el contador renumera el 91, la nota lo sigue; si la nota lleva el suyo, lo conserva.
+    renumerado = configuracion({"tipos": {"91": {"sub_diario": "20"}, "97": {"sigla": "YY"}}})
+    assert {f["B"] for f in filas_de_comprobante(cp(**dict(exterior, tipo_cp="97")), renumerado, MES, "200001")} == {"20"}
+    propio = configuracion({"tipos": {"97": {"sigla": "YY", "sub_diario": "21"}}})
+    assert {f["B"] for f in filas_de_comprobante(cp(**dict(exterior, tipo_cp="97")), propio, MES, "210001")} == {"21"}
+    # La 97 no trae sigla de fábrica: sin la del entorno se planta y no se inventa una (la regla de siempre).
+    with pytest.raises(concar.SinSigla) as e:
+        construir_concar(COMPRAS, [cp(**dict(exterior, tipo_cp="97"))], CONTAB, {"19": 1})
+    assert e.value.tipos == ["97"]
 
 
 def test_las_notas_especiales_se_asientan_como_la_07_y_la_08():
@@ -723,7 +737,7 @@ def test_etiquetas_sub_diario_siguen_a_la_renumeracion():
     # Con los defaults, el mapa clásico
     assert concar.etiquetas_sub_diario(CONTAB) == {
         "05": "Ventas", "11": "Compras", "10": "Compras con detracción",
-        "13": "Boletas de venta", "15": "Recibos por honorarios",
+        "13": "Boletas de venta", "15": "Recibos por honorarios", "19": "No domiciliados",
     }
     # El estudio renumera honorarios a 33: el 33 sale etiquetado, el 15 desaparece
     config = configuracion({"tipos": {"02": {"sub_diario": "33"}}})

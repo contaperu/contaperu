@@ -471,7 +471,7 @@ def _un_no_domiciliado(campos: list[str], archivo_nombre: str, contabilidad: str
         origen=ORIGEN,
         confianza=Decimal("1.00"),      # es el dato de SUNAT, no la lectura de una IA
         archivo_nombre=archivo_nombre,
-        no_domiciliado=_bloque_no_domiciliado(campos),
+        no_domiciliado=bloque_de_la_fila(campos),
         datos_originales={"sire": campos},     # la fila entera: el CAR no tiene sitio, y viaja aquí
     )
 
@@ -480,12 +480,17 @@ def _un_no_domiciliado(campos: list[str], archivo_nombre: str, contabilidad: str
 # fila los trae negativos porque lo es la operación entera, y el signo lo pone el tipo.
 _IMPORTES_DEL_BLOQUE = ("igv_utilizacion", "renta_bruta", "deduccion", "renta_neta", "impuesto_retenido")
 
-# Las claves del bloque donde un «0» de SUNAT es «sin dato» (15.6.1): ver `_bloque_no_domiciliado`.
+# Las claves del bloque donde un «0» de SUNAT es «sin dato» (15.6.1): ver `bloque_de_la_fila`.
 CERO_ES_VACIO = frozenset({"exoneracion", "art_76", "sustento_anio_dua"})
 
 
-def _bloque_no_domiciliado(campos: list[str]) -> dict[str, str]:
-    """Lo del no domiciliado de una fila, al bloque del comprobante: tal cual, con sus importes EN SOLES y en positivo.
+def bloque_de_la_fila(campos: list[str]) -> dict[str, str]:
+    """Lo del no domiciliado de una fila del 080500, al bloque del comprobante: tal cual, con sus importes EN SOLES y en
+    positivo.
+
+    **Pública desde la 15.6.1** (se llamaba `_bloque_no_domiciliado`): una aplicación que guardó la fila cruda
+    —`datos_originales["sire"]`, que viaja con cada comprobante leído de este registro— reconstruye el bloque con
+    ella sin volver a pedirle nada a SUNAT y sin copiar las posiciones de las columnas, que son de este módulo.
     Lo vacío no entra —es «la fila no lo dice»—, y lo valida después `validar` contra los catálogos, no aquí: un
     código que no está en una tabla es un aviso, no una fila que no se lee.
 

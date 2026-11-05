@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from ...catalogos import TIPO_HONORARIOS
+from ...catalogos import DEL_REGISTRO_DE_NO_DOMICILIADOS, TIPO_HONORARIOS, TIPO_NO_DOMICILIADO
 from ...configuracion import CONFIG_POR_DEFECTO
 from ...modelo import CENTIMO, Comprobante, a_decimal
 from ...modelo.libro import Rasgos, rasgos_de
@@ -85,7 +85,11 @@ def con_efecto_contable(comprobantes: list[Comprobante], config: dict | None = N
 
 def sub_diario(c: Comprobante, config: dict, libro: Rasgos | None = None) -> str:
     """Por USO: el del libro; compras con detracción → sub_diario_detraccion; un tipo con registro propio
-    (boletas 13, honorarios 15) → el suyo. Estas cuatro fuentes son lo que una aplicación deja configurar.
+    (boletas 13, honorarios 15, no domiciliados 19) → el suyo. Estas cuatro fuentes son lo que una aplicación deja
+    configurar.
+
+    **La 97 y la 98 van al sub-diario del 91** si no tienen uno propio (15.6.1): son las notas del mismo registro, y
+    así el contador cambia un solo número en vez de tres. Una que lleve el suyo, lo conserva.
 
     **La clave de configuración la dice el libro y ya no un `if`** (9.0): `rasgos.sub_diario` es
     `sub_diario_ventas` o `sub_diario_compras`, y un libro nuevo trae la suya sin tocar esta función."""
@@ -99,7 +103,11 @@ def sub_diario(c: Comprobante, config: dict, libro: Rasgos | None = None) -> str
     suyo = config.get(rasgos.sub_diario) or _DEL_ASIENTO[rasgos.sub_diario]
     if rasgos.es_venta:
         return str(suyo)
-    return str(equivalencia.get("sub_diario") or suyo)
+    propio = str(equivalencia.get("sub_diario") or "").strip()
+    if not propio and c.tipo_cp in DEL_REGISTRO_DE_NO_DOMICILIADOS:
+        del_registro = (config.get("tipos") or {}).get(TIPO_NO_DOMICILIADO)
+        propio = str((del_registro or {}).get("sub_diario") or "").strip() if isinstance(del_registro, dict) else ""
+    return str(propio or suyo)
 
 
 def lleva_centro(cuenta: str, config: dict) -> bool:
