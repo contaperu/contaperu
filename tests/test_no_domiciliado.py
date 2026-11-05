@@ -135,3 +135,88 @@ def test_el_bloque_no_entra_en_ningun_asiento():
     assert con == sin
     assert huella_con == huella_sin
     assert con, "y hay asiento: el 91 se asienta como compra común"
+
+
+# ── El preliminar de no domiciliados (5.39), medido el 04-nov-2026 (15.6.1) ────────────────────────────────────────
+def _como_el_preliminar(c: Comprobante) -> bytes:
+    """Un 080500 escrito por el driver, puesto en la forma del preliminar que exporta SUNAT: una cabecera, filas de 35
+    campos sin palote, LF, el CAR que pone SUNAT y un 0 en la exoneración, el art. 76 y el año de la DUA."""
+    from contaperu.drivers import sire_no_domiciliados as nd
+    from contaperu.modelo import Libro
+
+    libro = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202609", tipo="compra")
+    campos = nd.linea(c, libro, 1).rstrip("\r\n").split("|")[:35]
+    campos[1] = "2026091234567"                       # el CAR, que en el preliminar ya está
+    for indice in (11, 30, 33):                       # año de la DUA (12), exoneración (31) y art. 76 (34)
+        campos[indice] = "0"
+    cabecera = ["Periodo", "CAR SUNAT"] + [f"Rotulo {i}" for i in range(3, 36)] + [f"CLU{i}" for i in range(1, 11)]
+    return ("|".join(cabecera) + "\n" + "|".join(campos)).encode("utf-8")
+
+
+def test_el_cero_del_preliminar_es_vacio_y_no_da_avisos():
+    """SUNAT escribe un 0 donde lo declarado deja vacíos la exoneración, el art. 76 y el año de la DUA. Leído tal cual, el
+    0 no es ningún código de la Tabla 21 y cada fila daba dos avisos falsos."""
+    from contaperu.comprobantes import sire_txt
+    from contaperu.modelo import Libro
+    from contaperu.tributos import validar
+
+    libro = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202609", tipo="compra")
+    [leido] = sire_txt.parsear(_como_el_preliminar(_del_exterior()), libro, archivo_nombre="preliminar.txt")
+    assert not ({"exoneracion", "art_76", "sustento_anio_dua"} & set(leido.no_domiciliado))
+    validar.validar(leido, libro)
+    assert not {o.codigo for o in leido.observaciones} & {"EXONERACION_DESCONOCIDA", "EXONERACION_CON_IMPUESTO"}
+
+
+def test_un_codigo_de_exoneracion_de_verdad_se_sigue_leyendo():
+    """Lo que se vacía es el 0, no la columna: una exoneración que sí está en la tabla entra al bloque."""
+    from contaperu.comprobantes import sire_txt
+    from contaperu.modelo import Libro
+
+    libro = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202609", tipo="compra")
+    crudo = _como_el_preliminar(_del_exterior()).decode("utf-8").split("\n")
+    fila = crudo[1].split("|")
+    fila[30] = "1"
+    [leido] = sire_txt.parsear(("\n".join([crudo[0], "|".join(fila)])).encode("utf-8"), libro,
+                               archivo_nombre="preliminar.txt")
+    assert leido.no_domiciliado["exoneracion"] == "1"
+
+
+def test_el_preliminar_real_y_lo_declarado_dicen_lo_mismo():
+    """El mismo mes en las dos formas en que SUNAT lo da: el preliminar de no domiciliados (5.39) y lo declarado (5.51).
+    Tienen que dar las mismas facturas, campo a campo —la tasa, como número: el preliminar la escribe sin decimales—, y
+    los mismos avisos. Se salta si los dos archivos reales no están en tests/fixtures/privado/sire (fuera de Git)."""
+    from decimal import Decimal
+
+    from contaperu.comprobantes import sire_txt
+    from contaperu.modelo import Libro
+    from contaperu.tributos import validar
+
+    datos, nombre = _registro_real()
+    preliminares = sorted(PRIVADO.glob("preliminar-no-domiciliados-*.txt"))
+    if not preliminares:
+        pytest.skip("sin el preliminar de no domiciliados real en tests/fixtures/privado/sire (fuera de Git)")
+    libro = Libro(ruc=nombre[2:13], razon_social="", periodo=nombre[13:19], tipo="compra")
+
+    def leer(crudo: bytes, archivo: str) -> dict:
+        cs = sire_txt.parsear(crudo, libro, archivo_nombre=archivo)
+        for c in cs:
+            validar.validar(c, libro)
+        return {(c.serie, c.numero, c.contraparte_doc): c for c in cs}
+
+    declarado = leer(datos, nombre)
+    preliminar = leer(preliminares[0].read_bytes(), preliminares[0].name)
+    assert set(preliminar) == set(declarado), "no son las mismas facturas"
+    distintos = []
+    for clave, p in preliminar.items():
+        d = declarado[clave]
+        bp, bd = dict(p.no_domiciliado or {}), dict(d.no_domiciliado or {})
+        if Decimal(bp.pop("porcentaje", "0")) != Decimal(bd.pop("porcentaje", "0")):
+            distintos.append("porcentaje")
+        distintos += [k for k in set(bp) | set(bd) if bp.get(k) != bd.get(k)]
+        for campo in ("tipo_cp", "fecha_emision", "moneda", "tipo_cambio", "valor_no_gravado", "total",
+                      "contraparte_nombre"):
+            if getattr(p, campo) != getattr(d, campo):
+                distintos.append(campo)
+        if sorted(o.codigo for o in p.observaciones) != sorted(o.codigo for o in d.observaciones):
+            distintos.append("avisos")
+    assert not distintos, f"lo que el preliminar dice distinto que lo declarado: {sorted(set(distintos))}"

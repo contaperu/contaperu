@@ -238,7 +238,8 @@ def test_sin_datos_es_un_vacio_y_no_un_fallo():
     """El 1070 —medido el 01-nov-2026 en un mes sin presentar— y el 1518 dicen que SUNAT no tiene nada de ese periodo:
     la petición estaba bien. Quien lee lo que SUNAT ve de un mes lo trata como una lista vacía. Llega como cualquier
     rechazo, con el código dentro de `errors`, y no se confunde con «ya se hizo» ni con «repítelo»."""
-    for codigo in ("1070", "1518"):
+    # Y el 1124, medido el 04-nov-2026: el preliminar de no domiciliados de un mes al que no se cargó ninguno.
+    for codigo in ("1070", "1518", "1124"):
         e = sunat.clasificar_error("422", errores=[{"cod": codigo}], operacion="inconsistencias_comprobante")
         assert e.codigo == codigo and e.sin_datos and not e.idempotente and not e.reintentable
     assert "No se ha encontrado información" in sunat.clasificar_error("422", errores=[{"cod": "1070"}]).mensaje
@@ -349,7 +350,10 @@ def test_las_del_registro_de_no_domiciliados_solo_existen_en_compras():
                    "no_domiciliados_exportar_preliminar"):
         with pytest.raises(CatalogoDelSireInvalido, match="080000"):
             sunat.peticion(nombre, registro="venta", periodo="202609", codTipoArchivo=0)
-        # Y ninguna se ha visto responder: quien automatiza tiene que saberlo antes de llamarla.
+    # Exportar el preliminar se midió el 04-nov-2026 (15.6.1); cargar y quitar son escrituras y no se han visto
+    # responder: quien automatiza tiene que saberlo antes de llamarlas.
+    assert sunat.verificado("no_domiciliados_exportar_preliminar", registro="compra") == "2026-11-04"
+    for nombre in ("no_domiciliados_cargar", "no_domiciliados_eliminar_comprobante"):
         assert sunat.verificado(nombre, registro="compra") == ""
 
 

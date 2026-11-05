@@ -220,6 +220,8 @@
       "params_obligatorios": ["codTipoArchivo", "codOrigenEnvio"],
       "cod_proceso": "96",
       "fuente": "Compras v28 5.39 · Anexo I",
+      "verificado": "2026-11-04",
+      "_nota_medida": "MEDIDO el 04-nov-2026 con un RUC real (15.6.1), sobre setiembre —presentado, con diez facturas del exterior— y octubre —sin ninguna cargada—. **El SIRE no arma una propuesta de no domiciliados**: el preliminar es lo que el contribuyente carga después de pagar el 1662, así que un mes sin cargar responde 1124 al pedir, sin ticket (`errores.sin_datos`). Setiembre: el ticket terminó en 06 con un ZIP de UN TXT en UTF-8, LF y sin palote: cabecera de 45 rótulos —los 35 campos del 080500 y CLU1 a CLU10— y filas de 35 campos, con el CAR que puso SUNAT. `comprobantes.sire_txt` lo lee tal cual y da **las mismas diez facturas que lo declarado (5.51), campo a campo**, salvo dos formas de escribir lo mismo: la tasa sin decimales («30» por «30.00») y un 0 donde lo declarado deja vacíos la exoneración, el art. 76 y el año de la DUA, que el lector lee como vacío desde la 15.6.1.",
       "_nota": "Lo que SUNAT tiene en el preliminar de no domiciliados del mes: un ticket, y el archivo se baja con `ticket_archivo` con el `codProceso` 96 («Generar archivo exportar preliminar - RCE No Domiciliados», Anexo I). Filtros opcionales: `mtoTotalDesde` y `mtoTotalHasta` (van juntos), `fecEmisionIni` y `fecEmisionFin` (juntos, dentro del periodo), `numDocIdentidadClienteProveedor`, `codTipoCDP`, `numSerieCDP`, `numCDP` y `numDocAdquiriente`. El manual dice las fechas en dd/mm/aaaa y su propio ejemplo las manda en aaaa-mm-dd. Es una lectura: no cambia nada. Lo que conteste sobre un mes ya presentado —el preliminar vacío o lo declarado— no se ha visto. Sin medir."
     },
     "resumen": {
@@ -231,6 +233,7 @@
       "params_obligatorios": ["codLibro"],
       "tipos_de_resumen": {"1": "propuesta", "2": "preliminar", "3": "no incluidos (ventas) o excluidos (compras)", "4": "registro", "5": "preliminar registrado", "6": "ajustes posteriores", "7": "no domiciliados"},
       "fuente": "Compras v28 5.35 · Ventas v29 5.20",
+      "_nota_medida": "Pedido el 04-nov-2026 el tipo 7 (no domiciliados) en compras de un RUC real: respondió 1070 en setiembre —que tiene diez facturas del exterior presentadas y su preliminar vivo— y en octubre. Así que no se ha visto la forma de ningún resumen, y por eso sigue sin `verificado`: qué periodo y qué estado del registro hacen falta para que conteste algo está por averiguar.",
       "_nota": "El resumen de un periodo, de uno de siete tipos (`tipos_de_resumen`, el `codTipoResumen` de la ruta); el 7 es el de no domiciliados. Devuelve el archivo directamente, sin ticket. Aquí `codTipoArchivo` es 0 txt y 1 csv **en los dos libros**, a diferencia de la tabla de `libros`, donde ventas dice 1 excel y 2 csv. El ejemplo del manual de ventas manda `codLibro=14000`, con un cero de menos. Sin medir."
     }
   },
@@ -285,7 +288,8 @@
     "_nota_sin_datos": "`sin_datos` es SUNAT diciendo que no hay nada que dar: no es un fallo de la petición —los parámetros pasaron su validación— sino un vacío. Quien lee lo que SUNAT ve de un periodo tiene que tratarlo como una lista vacía, no como un error: una pantalla que dijera «falló» delante de un mes sin inconsistencias enseñaría lo contrario de lo que pasa (15.4.1).",
     "sin_datos": {
       "1070": "No se ha encontrado información de comprobantes de pago en Periodo Seleccionado. MEDIDO el 01-nov-2026 en un mes sin presentar: lo respondieron los no incluidos y las inconsistencias de ventas, y las casillas.",
-      "1518": "No existen documentos para exportar. Del manual, sin medir; hasta la 15.4.0 estaba entre los frecuentes."
+      "1518": "No existen documentos para exportar. Del manual, sin medir; hasta la 15.4.0 estaba entre los frecuentes.",
+      "1124": "La búsqueda realizada no devolvió registros. MEDIDO el 04-nov-2026 al pedir el preliminar de no domiciliados (`no_domiciliados_exportar_preliminar`) de un mes al que la empresa todavía no había cargado ninguno: llega al pedir, sin ticket. El SIRE no tiene propuesta de no domiciliados —ese preliminar es lo que el contribuyente carga—, así que en un mes sin ninguno es un vacío y no un fallo."
     },
     "frecuentes": {
       "1006": "perTributario con formato distinto de yyyymm",

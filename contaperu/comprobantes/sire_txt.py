@@ -480,15 +480,23 @@ def _un_no_domiciliado(campos: list[str], archivo_nombre: str, contabilidad: str
 # fila los trae negativos porque lo es la operación entera, y el signo lo pone el tipo.
 _IMPORTES_DEL_BLOQUE = ("igv_utilizacion", "renta_bruta", "deduccion", "renta_neta", "impuesto_retenido")
 
+# Las claves del bloque donde un «0» de SUNAT es «sin dato» (15.6.1): ver `_bloque_no_domiciliado`.
+CERO_ES_VACIO = frozenset({"exoneracion", "art_76", "sustento_anio_dua"})
+
 
 def _bloque_no_domiciliado(campos: list[str]) -> dict[str, str]:
     """Lo del no domiciliado de una fila, al bloque del comprobante: tal cual, con sus importes EN SOLES y en positivo.
     Lo vacío no entra —es «la fila no lo dice»—, y lo valida después `validar` contra los catálogos, no aquí: un
-    código que no está en una tabla es un aviso, no una fila que no se lee."""
+    código que no está en una tabla es un aviso, no una fila que no se lee.
+
+    **Y un «0» en `CERO_ES_VACIO` también es vacío** (15.6.1). Medido el 04-nov-2026 con el mismo mes en las dos formas
+    en que SUNAT lo da: lo declarado (5.51) deja vacías la exoneración, el art. 76 y el año de la DUA, y el preliminar de
+    no domiciliados (5.39) escribe ahí un 0. Ninguno de los tres es un código —la Tabla 21 empieza en 1, y un año no es
+    0—, así que leerlos tal cual daba en las diez filas de ese mes dos avisos que lo declarado no da."""
     bloque: dict[str, str] = {}
     for clave, indice in POS_DEL_BLOQUE_NO_DOMICILIADO.items():
         valor = _valor(campos, indice).strip()
-        if not valor:
+        if not valor or (clave in CERO_ES_VACIO and valor == "0"):
             continue
         bloque[clave] = str(abs(_con_signo(valor))) if clave in _IMPORTES_DEL_BLOQUE else valor
     return bloque

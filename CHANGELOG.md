@@ -4,6 +4,22 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+### Lo medido del preliminar de no domiciliados
+
+`no_domiciliados_exportar_preliminar` (5.39) se midió el 04-nov-2026 con un RUC real y pasa a `verificado`. **El SIRE no
+arma una propuesta de no domiciliados**: el preliminar es lo que el contribuyente carga después de pagar el 1662. En un
+mes con facturas cargadas, el ticket trae un TXT con cabecera y filas de 35 campos que el motor lee tal cual, y da las
+mismas facturas que lo declarado, campo a campo. En un mes sin ninguna, SUNAT contesta al pedir con el **1124**, «La
+búsqueda realizada no devolvió registros», que entra en `errores.sin_datos`: es un vacío, no un fallo.
+
+- **Un 0 de SUNAT en la exoneración, el art. 76 y el año de la DUA se lee como vacío**
+  (`sire_txt.CERO_ES_VACIO`). El preliminar lo escribe donde lo declarado deja la casilla vacía, y ninguno de los tres
+  es un código: leído tal cual, cada fila daba dos avisos falsos —`EXONERACION_DESCONOCIDA` y
+  `EXONERACION_CON_IMPUESTO`— que lo declarado no da. Una exoneración que sí está en la Tabla 21 se sigue leyendo.
+- El resumen del tipo 7 respondió 1070 en los dos meses, incluido el que tiene facturas: sigue sin `verificado`.
+
 ## [15.6.0] — 2026-11-04 · con `open-accounting` 4.1
 
 ### El catálogo del SIRE: el registro de no domiciliados y el resumen
