@@ -121,6 +121,49 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
             "cod_proceso": cod_proceso}
 
 
+# Los tipos del registro de compras de no domiciliados: el comprobante del exterior y sus dos notas. Son los únicos que
+# hay en su preliminar, aunque la 5.38 liste los de otro servicio (`no_domiciliados_eliminar_comprobante`, su nota).
+TIPOS_DEL_REGISTRO_NO_DOMICILIADOS = ("91", "97", "98")
+# El CAR que SUNAT pone al cargar: 27 letras y dígitos, medido (`comprobantes.sire_txt.car_de` lo dice entero).
+_CAR = re.compile(r"^[A-Za-z0-9]{27}$")
+
+
+class CuerpoInvalido(ValueError):
+    """Lo que se quiere mandar no tiene la forma que el SIRE pide. Se dice ANTES de enviar: con una escritura, un dato
+    a medias no da un error, da otro resultado."""
+
+
+def cuerpo_para_quitar_no_domiciliados(comprobantes: list[dict]) -> dict:
+    """El cuerpo de `no_domiciliados_eliminar_comprobante`: `{"noDomiciliados": [{codCar, codTipoCDP, numSerieCDP,
+    numCDP}]}` (Compras v28 5.38). Sin enviarlo.
+
+    Cada comprobante llega con los nombres del estándar —`car`, `tipo_cp`, `serie`, `numero`— y como los tiene SUNAT en
+    su preliminar: el CAR se saca de ahí (`comprobantes.sire_txt.car_de`) y la serie y el número se mandan tal cual, sin
+    quitarles ceros, porque es así como SUNAT los encuentra. **Todo se valida antes**: el CAR con su forma medida —27
+    letras y dígitos, no los «27 dígitos» del manual—, el tipo entre los del registro (91, 97, 98), y la serie y el
+    número presentes. Uno mal hecho es un `CuerpoInvalido` y no se arma nada: es una escritura sobre producción, y un
+    CAR equivocado quitaría otro comprobante o ninguno. Una lista vacía también falla: no hay nada que quitar.
+    """
+    if not comprobantes:
+        raise CuerpoInvalido("No hay ningún comprobante que quitar del preliminar de no domiciliados.")
+    lista = []
+    for i, c in enumerate(comprobantes, 1):
+        car = str(c.get("car") or "").strip()
+        tipo = str(c.get("tipo_cp") or "").strip()
+        serie = str(c.get("serie") or "").strip()
+        numero = str(c.get("numero") or "").strip()
+        if not _CAR.match(car):
+            raise CuerpoInvalido(f"El comprobante {i} no trae un CAR de 27 letras y dígitos: sin él SUNAT no sabe cuál "
+                                 "quitar. Se lee del preliminar con `no_domiciliados_exportar_preliminar`.")
+        if tipo not in TIPOS_DEL_REGISTRO_NO_DOMICILIADOS:
+            raise CuerpoInvalido(f"El comprobante {i} es de tipo «{tipo}», y en el registro de no domiciliados solo hay "
+                                 f"{', '.join(TIPOS_DEL_REGISTRO_NO_DOMICILIADOS)}.")
+        if not serie or not numero:
+            raise CuerpoInvalido(f"Al comprobante {i} le falta la serie o el número.")
+        lista.append({"codCar": car, "codTipoCDP": tipo, "numSerieCDP": serie, "numCDP": numero})
+    return {"noDomiciliados": lista}
+
+
 def verificado(operacion: str, *, registro: str = "", cod_libro: str = "") -> str:
     """La fecha en que esa operación se MIDIÓ contra producción para ese libro, o `""` si no se ha medido.
 

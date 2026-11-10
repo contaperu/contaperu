@@ -391,3 +391,49 @@ def test_el_resumen_lleva_su_tipo_y_su_archivo_en_la_ruta_y_el_libro_en_la_consu
                           codTipoArchivo=0)["params"] == {"codLibro": "140000"}
     with pytest.raises(CatalogoDelSireInvalido, match="codTipoResumen"):
         sunat.peticion("resumen", registro="compra", periodo="202609", codTipoArchivo=0)
+
+
+# ── 15.7.0: deshacer el preliminar y quitar un no domiciliado ───────────────────────────────────────────────────────
+
+def test_eliminar_el_preliminar_es_un_put_en_los_dos_libros_como_dicen_los_manuales():
+    """Compras v28 5.17 y Ventas v30 5.15 dicen PUT, sin cuerpo. Hasta la 15.6 decía POST, y en ventas tenía la ruta de
+    «eliminar preliminar REGISTRADO» (5.36), que es otra operación y pide un cuerpo con el id del registro."""
+    compras = sunat.peticion("preliminar_eliminar", registro="compra", periodo="202609", indEliminar=2)
+    assert compras["metodo"] == "PUT" and compras["grada"] == "escritura"
+    assert compras["url"].endswith("/rce/preliminar/web/registroslibros/202609/2/eliminapreliminar")
+    assert compras["params"] == {}
+    ventas = sunat.peticion("preliminar_eliminar", registro="venta", periodo="202609")
+    assert ventas["metodo"] == "PUT"
+    assert ventas["url"].endswith("/rvierce/gestionlibro/web/registroslibros/202609/eliminarreemplazo")
+    assert ventas["params"] == {"codLibro": "140000"}, "el libro va en la consulta, como en el ejemplo del manual"
+    with pytest.raises(CatalogoDelSireInvalido, match="indEliminar"):
+        sunat.peticion("preliminar_eliminar", registro="compra", periodo="202609")
+
+
+CAR = "ABC1234567890ABCD1234567890"          # 27 letras y dígitos, con la forma de los medidos
+
+
+def test_el_cuerpo_para_quitar_no_domiciliados_es_el_de_la_5_38():
+    cuerpo = sunat.cuerpo_para_quitar_no_domiciliados([
+        {"car": CAR, "tipo_cp": "91", "serie": "8ABCDEFG", "numero": "0007"},
+        {"car": CAR.lower(), "tipo_cp": "97", "serie": "NC01", "numero": "1"}])
+    assert cuerpo == {"noDomiciliados": [
+        {"codCar": CAR, "codTipoCDP": "91", "numSerieCDP": "8ABCDEFG", "numCDP": "0007"},
+        {"codCar": CAR.lower(), "codTipoCDP": "97", "numSerieCDP": "NC01", "numCDP": "1"}]}, \
+        "la serie y el número van como los tiene SUNAT: sin quitar ceros"
+
+
+@pytest.mark.parametrize("comprobante,dice", [
+    ({"car": "1234567890123456789012345678", "tipo_cp": "91", "serie": "A", "numero": "1"}, "CAR"),   # 28
+    ({"car": "1234567890123", "tipo_cp": "91", "serie": "A", "numero": "1"}, "CAR"),                  # el corto
+    ({"car": "ABC1234567890ABCD123456789-", "tipo_cp": "91", "serie": "A", "numero": "1"}, "CAR"),
+    ({"car": CAR, "tipo_cp": "01", "serie": "F001", "numero": "1"}, "91, 97, 98"),
+    ({"car": CAR, "tipo_cp": "91", "serie": "", "numero": "1"}, "serie o el número"),
+    ({"car": CAR, "tipo_cp": "91", "serie": "A", "numero": " "}, "serie o el número"),
+])
+def test_un_cuerpo_a_medias_no_se_arma(comprobante, dice):
+    """Es una escritura sobre producción: un CAR equivocado quitaría otro comprobante o ninguno, y SUNAT no lo diría."""
+    with pytest.raises(sunat.CuerpoInvalido, match=dice):
+        sunat.cuerpo_para_quitar_no_domiciliados([comprobante])
+    with pytest.raises(sunat.CuerpoInvalido, match="ningún comprobante"):
+        sunat.cuerpo_para_quitar_no_domiciliados([])

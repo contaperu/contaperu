@@ -4,6 +4,33 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.7.0] — 2026-11-09
+
+### Deshacer el preliminar es PUT, como dicen los dos manuales
+
+⚠️ **Cambio de comportamiento a propósito.** `preliminar_eliminar` decía POST y los dos manuales dicen **PUT**, sin
+cuerpo (Compras v28 5.17 · Ventas v30 5.15). Y en ventas tenía la ruta de **otra** operación —«eliminar preliminar
+REGISTRADO» (Ventas v30 5.36 · Compras v28 5.60), que pide un cuerpo con el id del registro—: la de deshacer un reemplazo
+es `…/registroslibros/{periodo}/eliminarreemplazo`, con el `codLibro` en la consulta. Quien la armaba con el motor
+hasta la 15.6 habría llamado a la operación equivocada. En compras, `indEliminar` es `1` (todo) o `2` (solo lo de no
+domiciliados). Sigue sin medir: es una escritura.
+
+### Quitar un no domiciliado del preliminar: el CAR y el cuerpo
+
+- **`comprobantes.sire_txt.car_de(comprobante)`**: el CAR que SUNAT le puso a un comprobante del 080500 al cargarlo,
+  sacado de la fila cruda (`datos_originales["sire"]`), donde viajaba sin que nadie lo pudiera nombrar. Solo de lo leído
+  del registro de no domiciliados —en el otro registro esa columna es la razón social—, y solo con la forma medida.
+- **El CAR son 27 letras y dígitos**, medido en el preliminar de setiembre de 2026: el manual dice «solo dato numérico
+  de 27 dígitos» (error 1136) y se equivoca.
+- **`sunat.cuerpo_para_quitar_no_domiciliados(comprobantes)`**: el cuerpo de `no_domiciliados_eliminar_comprobante`
+  (`noDomiciliados[{codCar, codTipoCDP, numSerieCDP, numCDP}]`). Valida antes de armar —el CAR, el tipo (91, 97 o 98,
+  `sunat.TIPOS_DEL_REGISTRO_NO_DOMICILIADOS`), la serie y el número— y lanza `sunat.CuerpoInvalido`: es una escritura
+  sobre producción, y un CAR equivocado quitaría otro comprobante o ninguno.
+
+### Menor
+
+- El docstring de `contaperu.sunat` ya no cuenta las operaciones a mano («quince», cuando eran veinte).
+
 ## [15.6.1] — 2026-11-04
 
 ### El no domiciliado, en su sub-diario: el 19, con la sigla «91» de fábrica

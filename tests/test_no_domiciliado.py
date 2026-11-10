@@ -232,3 +232,22 @@ def test_el_bloque_se_reconstruye_desde_la_fila_cruda_guardada():
     [leido] = sire_txt.parsear(_como_el_preliminar(_del_exterior()), libro, archivo_nombre="preliminar.txt")
     assert sire_txt.bloque_de_la_fila(leido.datos_originales["sire"]) == leido.no_domiciliado
     assert leido.no_domiciliado["pais"] == "9249"
+
+
+def test_el_car_se_saca_del_preliminar_y_solo_de_ahi():
+    """`car_de` (15.7.0): el CAR que SUNAT puso al cargar, de la fila cruda de un comprobante del 080500. Del preliminar
+    sale; de lo declarado, que lo trae vacío, no; y de una compra del otro registro tampoco, aunque su segunda columna
+    tenga algo: ahí es la razón social."""
+    from contaperu.comprobantes import sire_txt
+    from contaperu.modelo import Libro
+
+    libro = Libro(ruc="20601234567", razon_social="EMPRESA DE PRUEBA SAC", periodo="202609", tipo="compra")
+    car = "ABC1234567890ABCD1234567890"
+    preliminar = _como_el_preliminar(_del_exterior()).decode("utf-8").replace("2026091234567", car).encode("utf-8")
+    [leido] = sire_txt.parsear(preliminar, libro, archivo_nombre="preliminar.txt")
+    assert sire_txt.car_de(leido) == car
+    # El CAR de la fila de prueba de siempre tiene 13 caracteres: no es la forma medida y no se devuelve.
+    [corto] = sire_txt.parsear(_como_el_preliminar(_del_exterior()), libro, archivo_nombre="preliminar.txt")
+    assert sire_txt.car_de(corto) == ""
+    sin_bloque = Comprobante(tipo_cp="01", serie="F001", numero="1", datos_originales={"sire": ["202609", car]})
+    assert sire_txt.car_de(sin_bloque) == "", "sin bloque de no domiciliado, la segunda columna no es un CAR"

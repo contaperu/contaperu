@@ -1,12 +1,10 @@
 """La API del SIRE como funciones puras: armar la petición, leer el estado de un ticket, clasificar un error.
 
 **El núcleo puede saber la URL; lo que no puede es llamarla.** Saber es un dato; llamar es entrada y salida. El
-catálogo `datos/sunat/sire_api.json` describe once operaciones desde el 21-sep-2026, doce desde el 01-nov-2026 y quince desde la 15.4.0 —las
-inconsistencias por comprobante, su resumen y el reporte de casillas del 621, del manual; las dos primeras se
-midieron en la 15.4.1 y la 15.4.2, que trajeron también el grupo de errores `sin_datos`—
-—ruta, método, parámetros obligatorios, código de proceso, el protocolo TUS, los tickets, los estados de un periodo,
-los límites y la tabla de errores—, y su propia nota
-lo dice: «esto NO es un cliente, es la descripción de una API ajena». Lo que faltaba no eran los datos: eran las
+catálogo `datos/sunat/sire_api.json` describe las operaciones del SIRE —cuántas son lo dice él (`operaciones()`), y no
+se escribe aquí: este párrafo decía «quince» cuando ya eran veinte— con su ruta, método, parámetros obligatorios,
+código de proceso, el protocolo TUS, los tickets, los estados de un periodo, los límites y la tabla de errores, y su
+propia nota lo dice: «esto NO es un cliente, es la descripción de una API ajena». Lo que faltaba no eran los datos: eran las
 funciones que los usan, probadas. Eso es este paquete.
 
 Quien envía es otro, y el reparto es el mismo de siempre: el motor sabe **qué dice** el SIRE y quien lo integra sabe
@@ -51,10 +49,12 @@ from __future__ import annotations
 from .catalogo import (CODIGOS_DE_LIBRO, GRADAS, OPERACIONES, cod_libro_de, libros, operaciones, sire_api)
 from .errores import SireRechaza, clasificar_error
 from .periodos import ESTADOS_DE_PERIODO, estado_de_periodo
-from .peticiones import grada, peticion, verificado
+from .peticiones import (TIPOS_DEL_REGISTRO_NO_DOMICILIADOS, CuerpoInvalido, cuerpo_para_quitar_no_domiciliados,
+                         grada, peticion, verificado)
 from .respuestas import leer_casillas, leer_inconsistencias
 from .tickets import ESTADOS_DE_TICKET, estado_de_ticket
 
 __all__ = ["CODIGOS_DE_LIBRO", "ESTADOS_DE_PERIODO", "ESTADOS_DE_TICKET", "GRADAS", "OPERACIONES", "SireRechaza",
-           "clasificar_error", "cod_libro_de", "estado_de_periodo", "estado_de_ticket", "grada", "leer_casillas",
+           "TIPOS_DEL_REGISTRO_NO_DOMICILIADOS", "CuerpoInvalido", "clasificar_error", "cod_libro_de",
+           "cuerpo_para_quitar_no_domiciliados", "estado_de_periodo", "estado_de_ticket", "grada", "leer_casillas",
            "leer_inconsistencias", "libros", "operaciones", "peticion", "sire_api", "verificado"]

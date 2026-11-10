@@ -507,6 +507,32 @@ def bloque_de_la_fila(campos: list[str]) -> dict[str, str]:
     return bloque
 
 
+# Dónde va el CAR en una fila del 080500: la segunda columna, «CAR SUNAT» (`CABECERA_NO_DOMICILIADOS`).
+POS_CAR = 1
+# **El CAR medido son 27 letras y dígitos** (el preliminar de setiembre de 2026, 04-nov-2026). El manual de la 5.38 dice
+# «solo dato numérico de 27 dígitos» (error 1136) y se equivoca: de los CAR reales que se miraron, ninguno era solo de
+# dígitos.
+_CAR = re.compile(r"^[A-Za-z0-9]{27}$")
+
+
+def car_de(c: Comprobante) -> str:
+    """El CAR que SUNAT le puso a un comprobante del registro de no domiciliados al cargarlo, o `""` si no lo tiene.
+
+    Lo necesita quien quiera quitar un comprobante del preliminar (`no_domiciliados_eliminar_comprobante`, cuyo cuerpo
+    arma `sunat.cuerpo_para_quitar_no_domiciliados`): el CAR no tiene sitio en el comprobante y viaja en la fila cruda,
+    `datos_originales["sire"]`. Solo en lo leído del 080500 —un comprobante con su bloque `no_domiciliado`—, porque en
+    la fila del otro registro esa columna es la razón social. Lo DECLARADO lo trae vacío (medido): el CAR sale del
+    preliminar (`no_domiciliados_exportar_preliminar`). Uno que no tiene la forma medida no se devuelve: mandarle a SUNAT
+    un CAR a medias quitaría otro comprobante o ninguno, y no lo diría."""
+    if not c.no_domiciliado:
+        return ""
+    fila = (c.datos_originales or {}).get("sire")
+    if not isinstance(fila, (list, tuple)) or len(fila) <= POS_CAR:
+        return ""
+    car = str(fila[POS_CAR] or "").strip()
+    return car if _CAR.match(car) else ""
+
+
 def _parsear_no_domiciliados(datos: bytes, libro: Libro, archivo_nombre: str, nombre_del_txt: str) -> list[Comprobante]:
     """El registro de compras de no domiciliados → comprobantes del libro de compras, con las mismas negativas que el
     otro registro: otro RUC, otro periodo o una fila que no es de este anexo."""

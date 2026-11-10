@@ -117,13 +117,14 @@
       "fuente": "Compras v28 5.4 · Ventas v29"
     },
     "preliminar_eliminar": {
-      "metodo": "POST", "grada": "escritura", "devuelve": "json",
+      "metodo": "PUT", "grada": "escritura", "devuelve": "json",
       "ruta_por_libro": {
         "080000": "rce/preliminar/web/registroslibros/{periodo}/{indEliminar}/eliminapreliminar",
-        "140000": "rvierce/gestionlibro/web/registroslibros/{periodo}/eliminapreliminar"
+        "140000": "rvierce/gestionlibro/web/registroslibros/{periodo}/eliminarreemplazo"
       },
-      "fuente": "Compras v28 5.17 · Ventas v29",
-      "_nota": "En compras, `indEliminar` dice qué se borra del preliminar: `1`, todo; `2`, solo lo de no domiciliados (Compras v28 5.17). Con el 2 se deshace entera una carga del 080500 (`no_domiciliados_cargar`); un comprobante suelto se quita con `no_domiciliados_eliminar_comprobante`. Sin medir."
+      "params_obligatorios_por_libro": {"080000": [], "140000": ["codLibro"]},
+      "fuente": "Compras v28 5.17 · Ventas v30 5.15",
+      "_nota": "Deshace el preliminar del mes: lo que dejó un reemplazo de la propuesta. **PUT en los dos libros y sin cuerpo**, como dicen los dos manuales (15.7.0; hasta la 15.6 decía POST). En compras, `indEliminar` dice qué se borra: `1`, todo el preliminar; `2`, solo lo de no domiciliados (errores 2266 y 2009 si falta o no vale). Con el 2 se deshace entera una carga del 080500 (`no_domiciliados_cargar`); un comprobante suelto se quita con `no_domiciliados_eliminar_comprobante`. En ventas es `eliminarreemplazo`, con el `codLibro` en la consulta: «eliminar el preliminar y todos los datos del reemplazo de la propuesta». ⚠️ Hasta la 15.6 la ruta de ventas era la de OTRA operación, «eliminar preliminar REGISTRADO» (Ventas v30 5.36 · Compras v28 5.60: `…/registroslibros/{periodo}/eliminapreliminar?codLibro=`, PUT con un cuerpo `{id, codTipoRegistro}` que se saca de «consultar preliminares registrados», 5.61), que no está en este catálogo. Sin medir."
     },
     "excluidos": {
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
@@ -212,7 +213,7 @@
       "metodo": "PUT", "grada": "escritura", "devuelve": "json",
       "ruta_por_libro": {"080000": "rce/libronodomiciliado/web/nodomiciliados/{periodo}/eliminarcomprobantepreliminarnd"},
       "fuente": "Compras v28 5.38",
-      "_nota": "Quita del preliminar de no domiciliados los comprobantes del cuerpo: `noDomiciliados`, una lista de `{codCar, codTipoCDP, numSerieCDP, numCDP}`. **Pide el CAR**, que lo pone SUNAT al cargar: antes de quitar uno hay que leerlo con `no_domiciliados_exportar_preliminar`. Tres cosas del manual que no cuadran: su descripción dice que genera un ticket y su salida es un 200 con JSON; los tipos que dice admitir son los de otro servicio (00, 01, 03… 56) y no incluyen el 91, el 97 ni el 98, los únicos del registro; y es el único PUT del catálogo. Sin medir."
+      "_nota": "Quita del preliminar de no domiciliados los comprobantes del cuerpo: `noDomiciliados`, una lista de `{codCar, codTipoCDP, numSerieCDP, numCDP}`, que arma `sunat.cuerpo_para_quitar_no_domiciliados` (15.7.0). **Pide el CAR**, que lo pone SUNAT al cargar: antes de quitar uno hay que leerlo con `no_domiciliados_exportar_preliminar` y sacarlo con `comprobantes.sire_txt.car_de`. **El CAR son 27 letras y dígitos**, medido en el preliminar de setiembre de 2026 (04-nov-2026): el manual dice «solo dato numérico de 27 dígitos» (error 1136) y se equivoca. Tres cosas más del manual que no cuadran: su descripción dice que genera un ticket y su salida es un 200 con JSON; los tipos que dice admitir son los de otro servicio (00, 01, 03… 56) y no incluyen el 91, el 97 ni el 98, los únicos del registro; y hasta la 15.7.0 —que lo es también `preliminar_eliminar`— era el único PUT del catálogo. Sin medir."
     },
     "no_domiciliados_exportar_preliminar": {
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
