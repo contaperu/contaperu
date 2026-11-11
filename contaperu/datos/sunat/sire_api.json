@@ -83,6 +83,7 @@
       "params_obligatorios": ["perIni", "perFin", "page", "perPage", "codLibro", "codOrigenEnvio"],
       "fuente": "Compras v28 5.31",
       "verificado": "2026-11-01",
+      "_nota_medida": "Medido además el 10-nov-2026 (15.8.0) SIN `numTicket`, un periodo entero: lista todos los tickets del periodo y del libro —37 de compras y 10 de ventas en setiembre de 2026, incluidos los de lo hecho en SOL: cargas de no domiciliados (proceso 56) y sus validaciones (61)—, y lo mismo con `codOrigenEnvio` 2 que con 1: el origen no filtra. Cada ticket trae `archivoReporte`, `codEstadoProceso`, `codProceso`, `desEstadoProceso`, `desProceso`, `detalleTicket`, `fecActualizacion`, `fecCargaImportacion`, `fecInicioProceso`, `horaActualizacion`, `horaInicioProceso`, `nomArchivoImportacion`, `numTicket`, `perTributario`, `showReporteDescarga` y `subProcesos`. **Ninguno trae `nomConstanciaRecepcion`** en ese nivel: ver `constancia`.",
       "_nota": "perIni y perFin son obligatorios AUNQUE se pregunte por un solo ticket: el numTicket no codifica el periodo, así que quien llama tiene que recordar a qué periodo pertenece cada ticket. Si pierde esa asociación, el trabajo es irrecuperable."
     },
     "ticket_archivo": {
@@ -148,7 +149,8 @@
       "metodo": "GET", "grada": "lectura", "devuelve": "binario",
       "ruta": "rvierce/gestionlibro/web/registroslibros/constancia/constanciarecepcion",
       "params_obligatorios": ["nomConstanciaRecepcion"],
-      "fuente": "Compras v28 5.49"
+      "fuente": "Compras v28 5.49",
+      "_nota": "La constancia de recepción del registro GENERADO, en PDF (`archivoPdf`, procesos 45 y 46 del Anexo I). `nomConstanciaRecepcion` es «el nombre o la ruta del archivo generado», y el ejemplo del manual es el nombre de un libro electrónico con `.pdf` (`LE…080400….pdf`). **No viene en los tickets** (medido el 10-nov-2026: ninguno de los 47 de un periodo presentado lo trae, ver `ticket_consultar`), así que la hipótesis es que se arma con el nombre del TXT de lo declarado (`registro_pedir`). Sin medir."
     },
     "registro_pedir": {
       "metodo": "GET", "grada": "lectura", "devuelve": "ticket",
@@ -189,8 +191,10 @@
         "140000": "rvierce/resumen/web/resumeninconsistencias/{periodo}"
       },
       "params_obligatorios": ["codTipoResumen", "codLibro"],
+      "tipos_de_resumen_por_libro": {"080000": ["1", "2", "3", "4", "5", "6"], "140000": ["1", "2", "3", "4"]},
       "fuente": "Compras v28 5.36 · Ventas v29 5.21",
       "verificado": "2026-11-01",
+      "_nota_tipos": "MEDIDOS TODOS LOS TIPOS el 10-nov-2026 (15.8.0), en los dos libros y en un mes presentado y otro sin presentar: todos contestan con el mismo JSON —ninguno dio 1070—, y donde no hay nada que resumir los cuatro números llegan en 0 (enteros). Lo que admite cada libro lo hace cumplir `peticion` (`tipos_de_resumen_por_libro`).",
       "_nota_medida": "MEDIDO el 01-nov-2026 con un RUC real. **Es GET en los dos libros**: en ventas respondió por GET sobre un mes sin presentar, y en compras **el POST del manual respondió 405** (método no permitido) —el manual se equivoca— y el GET respondió sobre un mes presentado (15.4.2). La 15.4.0 lo declaraba POST en compras, la 15.4.1 lo pasó a GET, y con eso `metodo_por_libro` se quedó sin operación que lo use: el catálogo lo sigue admitiendo, por si un manual vuelve a separar los dos libros con razón. El JSON es el del manual con dos diferencias: el periodo se llama `perPeriodoTributario` —no `perTributario`— y `codTipoResumen` llega como texto. Los porcentajes llegan como entero o con decimales según el valor, y el `total` de `monto`, con decimales.",
       "_nota": "El resumen de lo que SUNAT ve del periodo: un JSON con `cantidad` y `monto`, y en cada uno el porcentaje de comprobantes con inconsistencias relacionadas con el crédito fiscal (`porcentajeRelFiscal`), las no relacionadas (`porcentajeNoRelFiscal`), las que no tienen ninguna (`porcentajeSinValidaciones`) y el `total`. La ruta es la misma en los dos libros. `codTipoResumen`: compras lista 1 propuesta, 2 preliminar, 3 incluidos o excluidos, 4 registro, 5 preliminar registrado y 6 ajustes posteriores; ventas solo admite del 1 al 4 y no dice qué es cada uno."
     },
@@ -233,9 +237,11 @@
       },
       "params_obligatorios": ["codLibro"],
       "tipos_de_resumen": {"1": "propuesta", "2": "preliminar", "3": "no incluidos (ventas) o excluidos (compras)", "4": "registro", "5": "preliminar registrado", "6": "ajustes posteriores", "7": "no domiciliados"},
+      "tipos_de_resumen_por_libro": {"080000": ["1", "2", "3", "4", "5", "6", "7"], "140000": ["1", "2", "3", "4", "5", "6"]},
       "fuente": "Compras v28 5.35 · Ventas v29 5.20",
-      "_nota_medida": "Pedido el 04-nov-2026 el tipo 7 (no domiciliados) en compras de un RUC real: respondió 1070 en setiembre —que tiene diez facturas del exterior presentadas y su preliminar vivo— y en octubre. Así que no se ha visto la forma de ningún resumen, y por eso sigue sin `verificado`: qué periodo y qué estado del registro hacen falta para que conteste algo está por averiguar.",
-      "_nota": "El resumen de un periodo, de uno de siete tipos (`tipos_de_resumen`, el `codTipoResumen` de la ruta); el 7 es el de no domiciliados. Devuelve el archivo directamente, sin ticket. Aquí `codTipoArchivo` es 0 txt y 1 csv **en los dos libros**, a diferencia de la tabla de `libros`, donde ventas dice 1 excel y 2 csv. El ejemplo del manual de ventas manda `codLibro=14000`, con un cero de menos. Sin medir."
+      "verificado_por_libro": {"080000": "2026-11-10", "140000": "2026-11-10"},
+      "_nota_medida": "MEDIDO el 10-nov-2026 (15.8.0) con un RUC real, en los dos libros, con setiembre de 2026 —presentado— y octubre —sin presentar—, pidiendo cada tipo en txt (`codTipoArchivo` 0). **Contesta con un TXT**: UTF-8 sin BOM, LF, sin salto al final; una línea de rótulos —13 en compras y 15 en ventas, que `sunat.COLUMNAS_DEL_RESUMEN` nombra— y una fila por tipo de comprobante («01-Factura», «07-Nota de Crédito», con las notas de crédito en negativo), importes con punto decimal y sin miles, y al final una fila «TOTAL ». Lo lee `sunat.leer_resumen`. Qué tipo contestó: en el mes PRESENTADO, en compras del 1 al 5 —y el 2, el 4 y el 5 iguales byte a byte, porque el mes ya se generó— y en ventas el 1, el 4 y el 5; el 6 (ajustes posteriores) y, en compras, el 7 (no domiciliados) dieron 1070. En el mes SIN PRESENTAR, solo el 1 (la propuesta), en los dos libros. El 7 dio 1070 también el 04-nov-2026, así que su forma sigue sin verse.",
+      "_nota": "El resumen de un periodo, de uno de siete tipos (`tipos_de_resumen`, el `codTipoResumen` de la ruta); el 7 es el de no domiciliados y solo existe en compras (`tipos_de_resumen_por_libro`, que `peticion` hace cumplir). Devuelve el archivo directamente, sin ticket. Aquí `codTipoArchivo` es 0 txt y 1 csv **en los dos libros**, a diferencia de la tabla de `libros`, donde ventas dice 1 excel y 2 csv. El ejemplo del manual de ventas manda `codLibro=14000`, con un cero de menos."
     }
   },
 

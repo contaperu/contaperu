@@ -82,6 +82,14 @@ def peticion(operacion: str, *, registro: str = "", periodo: str = "", **params:
             raise CatalogoDelSireInvalido(
                 f"La ruta de {operacion!r} necesita {hueco!r} y no llegó: {ruta}")
     ruta = _HUECO.sub(lambda m: str(disponibles[m.group(1)]), ruta)
+    # El tipo de resumen, solo entre los que ese libro admite (15.8.0): el 7 —no domiciliados— es de compras, y el
+    # resumen de inconsistencias de ventas solo va del 1 al 4. Pedir otro no da un 400: da un 422 o un 500 de SUNAT.
+    tipos_del_libro = (op.get("tipos_de_resumen_por_libro") or {}).get(cod_libro)
+    tipo_pedido = disponibles.get("codTipoResumen")
+    if tipos_del_libro and not _vacio(tipo_pedido) and str(tipo_pedido) not in tipos_del_libro:
+        raise CatalogoDelSireInvalido(
+            f"La operación {operacion!r} no admite el tipo de resumen {tipo_pedido!r} en el libro {cod_libro}; "
+            f"admite {', '.join(tipos_del_libro)}.")
     # Lo que se fue a la ruta no se repite en la cadena de consulta.
     usados = set(_HUECO.findall(str(op.get("ruta") or "") + "".join(op.get("ruta_por_libro", {}).values())))
     consulta = {k: v for k, v in params.items() if k not in usados}

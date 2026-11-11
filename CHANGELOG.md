@@ -4,6 +4,26 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.8.0] — 2026-11-10
+
+### El resumen de un periodo, medido y con su lector
+
+Medido el 10-nov-2026 con un RUC real, en los dos libros, con un mes presentado y otro sin presentar (lo medido, con sus
+cifras, en las notas de `resumen`, `inconsistencias_resumen`, `ticket_consultar` y `constancia` del catálogo).
+
+- **`sunat.leer_resumen(datos, registro=…)`**: el TXT de `resumen` —una línea de rótulos, una fila por tipo de
+  comprobante («01-Factura», con las notas de crédito en negativo) y una fila «TOTAL »— leído por sus rótulos. Devuelve
+  `{filas, total}` con los importes en `Decimal` y las claves de `sunat.COLUMNAS_DEL_RESUMEN`: 13 en compras, 15 en
+  ventas. Otra forma es un `SireInvalido`.
+- **`resumen` pasa a `verificado` en los dos libros.** En el mes presentado contestan los tipos 1 a 5 de compras y el
+  1, 4 y 5 de ventas; en el sin presentar, solo el 1. El 6 y el 7 dieron 1070.
+- **El resumen de inconsistencias contesta en todos sus tipos**, con el mismo JSON.
+- **`peticion` valida el tipo de resumen por libro** (`tipos_de_resumen_por_libro`): el 7 es solo de compras, y el
+  resumen de inconsistencias de ventas va del 1 al 4.
+- **La constancia de recepción no viene en los tickets**: ninguno de los 47 de un periodo presentado trae
+  `nomConstanciaRecepcion`, se pidan con un origen o con el otro. El manual la nombra como el TXT de lo generado con
+  `.pdf`, y así queda anotado, sin medir.
+
 ## [15.7.0] — 2026-11-09
 
 ### Deshacer el preliminar es PUT, como dicen los dos manuales

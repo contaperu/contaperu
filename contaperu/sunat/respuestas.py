@@ -1,14 +1,17 @@
-"""Leer lo que SUNAT contesta cuando se le pregunta qué ve de un periodo: las inconsistencias por comprobante y el
-reporte de las casillas del 621.
+"""Leer lo que SUNAT contesta cuando se le pregunta qué ve de un periodo: las inconsistencias por comprobante, el
+reporte de las casillas del 621 y el resumen del periodo.
 
 Los dos se escribieron **después de medir** (01-nov-2026, con un RUC real, en un mes sin presentar y en uno
 presentado), y cada decisión de abajo sale de lo que se vio y no del manual —que en los dos se equivoca—. Lo medido,
 con sus cifras, está en las notas de cada operación en `datos/sunat/sire_api.json`. Las pruebas usan archivos
 sintéticos con la forma real: lo de un contribuyente no entra en este repositorio.
 
+Y el **resumen** de un periodo (`leer_resumen`, 15.8.0), escrito después de medirlo el 10-nov-2026: una fila por
+tipo de comprobante con sus importes y el total.
+
 Lo que NO tiene lector aquí, y por qué: los **excluidos** y los **no incluidos** llegan con el formato de la
 exportación de la propuesta, que `comprobantes.sire_txt` ya lee; y el **resumen de inconsistencias** es un JSON de dos
-niveles que se usa tal cual llega.
+niveles que se usa tal cual llega —medido en todos sus tipos el 10-nov-2026—.
 
 Los dos lectores reciben los bytes de la respuesta —o el ZIP que la trae, como lo baja `ticket_archivo`— y no abren
 archivos ni salen a la red: son núcleo.
@@ -27,7 +30,7 @@ from ..comprobantes import _zip
 from ..comprobantes.comprobante import clave_de
 from ..comprobantes.sire_txt import SireInvalido
 
-__all__ = ["leer_casillas", "leer_inconsistencias"]
+__all__ = ["COLUMNAS_DEL_RESUMEN", "leer_casillas", "leer_inconsistencias", "leer_resumen"]
 
 
 def _normal(rotulo: str) -> str:
@@ -240,3 +243,88 @@ def leer_casillas(datos: bytes | str) -> dict[str, Any]:
     if not vistos:
         raise SireInvalido("No es un reporte de casillas: no trae el bloque de ventas ni el de compras")
     return resultado
+
+
+# ── El resumen de un periodo (`resumen`) ─────────────────────────────────────────────────────────────────────────────
+
+# Rótulo (normalizado) → la clave con que se lee. Donde el estándar tiene el campo, su nombre (`base_gravada`, `igv`,
+# `exonerado`…); donde no lo separa —las tres destinaciones del IGV de compras—, el de SUNAT.
+_DEL_RESUMEN = {
+    "tipo de documento": "tipo",
+    "total documentos": "documentos",
+    # compras (RCE): 13 columnas
+    "bi gravado dg": "base_dg", "igv ipm dg": "igv_dg",
+    "bi gravado dgng": "base_dgng", "igv ipm dgng": "igv_dgng",
+    "bi gravado dng": "base_dng", "igv ipm dng": "igv_dng",
+    "valor adq ng": "valor_no_gravado",
+    # ventas (RVIE): 15 columnas
+    "valor facturado la exportacion": "exportacion",
+    "base imponible de la operacion gravada": "base_gravada",
+    "dscto de la base imponible": "dscto_base",
+    "monto total del igv": "igv",
+    "dscto del igv": "dscto_igv",
+    "importe total de la operacion exonerada": "exonerado",
+    "importe total de la operacion inafecta": "inafecto",
+    "base imponible de la operacion gravada con el impuesto a las ventas del arroz pilado": "base_ivap",
+    "impuesto a las ventas del arroz pilado": "ivap",
+    # los dos
+    "isc": "isc", "icbper": "icbper", "otros trib cargos": "otros", "total cp": "total",
+}
+# Las columnas de cada libro, en el orden medido. Una cabecera que no es una de estas dos no se lee.
+COLUMNAS_DEL_RESUMEN = {
+    "compra": ("tipo", "documentos", "base_dg", "igv_dg", "base_dgng", "igv_dgng", "base_dng", "igv_dng",
+               "valor_no_gravado", "isc", "icbper", "otros", "total"),
+    "venta": ("tipo", "documentos", "exportacion", "base_gravada", "dscto_base", "igv", "dscto_igv", "exonerado",
+              "inafecto", "isc", "base_ivap", "ivap", "icbper", "otros", "total"),
+}
+# «01-Factura», «07-Nota de Crédito», «54-Liquidación de Cobranza»: el código de la Tabla 10 y su nombre.
+_TIPO_Y_NOMBRE = re.compile(r"^\s*(\d{2})\s*-\s*(.*?)\s*$")
+
+
+def leer_resumen(datos: bytes | str, *, registro: str) -> dict[str, Any]:
+    """El archivo de `resumen`, leído: una fila por tipo de comprobante con cuántos son y sus importes, y el total.
+
+    Devuelve `{"filas": [...], "total": {...}}`. Cada fila es `{tipo_cp, nombre, documentos, <importes>}` y el total,
+    `{documentos, <importes>}`. Los importes, con las claves de `COLUMNAS_DEL_RESUMEN` según el libro (`registro`,
+    «compra» o «venta»), son `Decimal` con su signo —las notas de crédito llegan en negativo— y `None` donde la celda
+    venga vacía. `documentos` es un entero.
+
+    Lo medido (10-nov-2026, un RUC real, setiembre presentado y octubre sin presentar): un TXT en UTF-8, sin BOM, con LF
+    y sin salto al final; una línea de rótulos —13 en compras, 15 en ventas— y una fila por tipo de documento
+    («01-Factura»), con los importes en punto decimal y sin separador de miles, y al final una fila «TOTAL ». Una forma
+    que no es esta es un `SireInvalido`: otra cabecera, una fila sin su código, un campo de más o de menos, o sin total.
+    """
+    if registro not in COLUMNAS_DEL_RESUMEN:
+        raise ValueError(f"registro desconocido: {registro!r} (se esperaba «compra» o «venta»)")
+    lineas = [linea for linea in _texto(datos).splitlines() if linea.strip()]
+    if not lineas:
+        raise SireInvalido("El resumen viene vacío")
+    rotulos = [_normal(c) for c in _campos(lineas[0])]
+    columnas = tuple(_DEL_RESUMEN.get(r, "") for r in rotulos)
+    if columnas != COLUMNAS_DEL_RESUMEN[registro]:
+        raise SireInvalido(f"La cabecera del resumen no es la que se midió para el registro de {registro}s: "
+                           f"{', '.join(c.strip() for c in _campos(lineas[0]))}")
+    filas: list[dict[str, Any]] = []
+    total: dict[str, Any] | None = None
+    for n, linea in enumerate(lineas[1:], start=2):
+        campos = _campos(linea)
+        if len(campos) != len(columnas):
+            raise SireInvalido(f"La línea {n} del resumen trae {len(campos)} campos y su cabecera {len(columnas)}")
+        if total is not None:
+            raise SireInvalido(f"La línea {n} del resumen viene después del total")
+        donde = f"La línea {n} del resumen"
+        try:
+            documentos = int(campos[1].strip())
+        except ValueError:
+            raise SireInvalido(f"{donde}: «{campos[1].strip()}» no es una cantidad de documentos") from None
+        importes = {c: _importe(v, donde=donde) for c, v in zip(columnas[2:], campos[2:])}
+        if _normal(campos[0]) == "total":
+            total = {"documentos": documentos, **importes}
+            continue
+        tipo = _TIPO_Y_NOMBRE.match(campos[0])
+        if not tipo:
+            raise SireInvalido(f"{donde} no dice de qué tipo de documento es: «{campos[0].strip()}»")
+        filas.append({"tipo_cp": tipo.group(1), "nombre": tipo.group(2), "documentos": documentos, **importes})
+    if total is None:
+        raise SireInvalido("El resumen no trae su fila de TOTAL")
+    return {"filas": filas, "total": total}

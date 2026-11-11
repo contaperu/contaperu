@@ -437,3 +437,73 @@ def test_un_cuerpo_a_medias_no_se_arma(comprobante, dice):
         sunat.cuerpo_para_quitar_no_domiciliados([comprobante])
     with pytest.raises(sunat.CuerpoInvalido, match="ningún comprobante"):
         sunat.cuerpo_para_quitar_no_domiciliados([])
+
+
+# ── 15.8.0: el resumen de un periodo, medido ────────────────────────────────────────────────────────────────────────
+
+_CABECERA_COMPRAS = ("Tipo de Documento|Total Documentos|BI Gravado DG|IGV / IPM DG|BI Gravado DGNG|IGV / IPM DGNG|"
+                     "BI Gravado DNG|IGV / IPM DNG|Valor Adq. NG|ISC|ICBPER|Otros Trib/ Cargos|Total CP")
+_CABECERA_VENTAS = ("Tipo de Documento|Total Documentos|Valor facturado la exportación|Base imponible de la operación "
+                    "gravada|Dscto. de la Base Imponible|Monto Total del IGV|Dscto. del IGV|Importe total de la "
+                    "operación exonerada|Importe total de la operación inafecta|ISC|Base imponible de la operación "
+                    "gravada con el Impuesto a las Ventas del Arroz Pilado|Impuesto a las Ventas del Arroz Pilado|"
+                    "ICBPER|Otros Trib/ Cargos|Total CP")
+
+
+def _resumen_de_compras(*filas: str) -> bytes:
+    """Con la forma medida el 10-nov-2026: UTF-8 sin BOM, LF, sin salto al final y la fila TOTAL con su espacio."""
+    return "\n".join([_CABECERA_COMPRAS, *filas]).encode("utf-8")
+
+
+FACTURAS = "01-Factura|3|1000.00|180.00|0.00|0.00|0.00|0.00|50.00|0.00|0.00|0.00|1230.00"
+NOTAS = "07-Nota de Crédito|1|-100.00|-18.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|-118.00"
+TOTAL = "TOTAL |4|900.00|162.00|0.00|0.00|0.00|0.00|50.00|0.00|0.00|0.00|1112.00"
+
+
+def test_el_resumen_de_compras_se_lee_por_sus_rotulos_y_con_su_signo():
+    from decimal import Decimal
+
+    r = sunat.leer_resumen(_resumen_de_compras(FACTURAS, NOTAS, TOTAL), registro="compra")
+    assert [(f["tipo_cp"], f["nombre"], f["documentos"]) for f in r["filas"]] == [
+        ("01", "Factura", 3), ("07", "Nota de Crédito", 1)]
+    assert r["filas"][0]["base_dg"] == Decimal("1000.00") and r["filas"][0]["valor_no_gravado"] == Decimal("50.00")
+    assert r["filas"][1]["total"] == Decimal("-118.00"), "las notas de crédito llegan en negativo"
+    assert r["total"] == {"documentos": 4, **{c: r["total"][c] for c in sunat.COLUMNAS_DEL_RESUMEN["compra"][2:]}}
+    assert r["total"]["total"] == Decimal("1112.00")
+
+
+def test_el_resumen_de_ventas_tiene_sus_quince_columnas():
+    from decimal import Decimal
+
+    fila = "01-Factura|2|0.00|500.00|0.00|90.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|590.00"
+    total = "TOTAL |2|0.00|500.00|0.00|90.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|590.00"
+    r = sunat.leer_resumen("\n".join([_CABECERA_VENTAS, fila, total]), registro="venta")
+    assert r["filas"][0]["base_gravada"] == Decimal("500.00") and r["filas"][0]["igv"] == Decimal("90.00")
+    assert r["total"]["documentos"] == 2
+
+
+@pytest.mark.parametrize("datos,registro,dice", [
+    (_resumen_de_compras(FACTURAS, TOTAL), "venta", "cabecera"),            # la cabecera de compras, leída como ventas
+    (_resumen_de_compras(FACTURAS), "compra", "TOTAL"),                     # sin su fila de total
+    (_resumen_de_compras("Factura|3" + "|0.00" * 11, TOTAL), "compra", "tipo de documento"),
+    (_resumen_de_compras(FACTURAS + "|0.00", TOTAL), "compra", "campos"),
+    (_resumen_de_compras(TOTAL, FACTURAS), "compra", "después del total"),
+    (_resumen_de_compras("01-Factura|tres" + "|0.00" * 11, TOTAL), "compra", "cantidad de documentos"),
+    (b"", "compra", "vacío"),
+])
+def test_un_resumen_con_otra_forma_no_se_lee(datos, registro, dice):
+    from contaperu.comprobantes.sire_txt import SireInvalido
+
+    with pytest.raises(SireInvalido, match=dice):
+        sunat.leer_resumen(datos, registro=registro)
+
+
+def test_el_tipo_de_resumen_se_valida_por_libro():
+    """El 7 (no domiciliados) es de compras; el resumen de inconsistencias de ventas va del 1 al 4."""
+    assert sunat.peticion("resumen", registro="compra", periodo="202609", codTipoResumen=7, codTipoArchivo=0)
+    with pytest.raises(CatalogoDelSireInvalido, match="no admite el tipo de resumen"):
+        sunat.peticion("resumen", registro="venta", periodo="202609", codTipoResumen=7, codTipoArchivo=0)
+    assert sunat.peticion("inconsistencias_resumen", registro="compra", periodo="202609", codTipoResumen="6")
+    with pytest.raises(CatalogoDelSireInvalido, match="admite 1, 2, 3, 4"):
+        sunat.peticion("inconsistencias_resumen", registro="venta", periodo="202609", codTipoResumen="5")
+    assert sunat.verificado("resumen", registro="venta") == "2026-11-10"

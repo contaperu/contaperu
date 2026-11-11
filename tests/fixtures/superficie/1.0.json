@@ -333,6 +333,7 @@
  },
  "contaperu.sunat": {
   "CODIGOS_DE_LIBRO": "",
+  "COLUMNAS_DEL_RESUMEN": "",
   "CuerpoInvalido": "",
   "ESTADOS_DE_PERIODO": "",
   "ESTADOS_DE_TICKET": "",
@@ -348,6 +349,7 @@
   "grada": "",
   "leer_casillas": "",
   "leer_inconsistencias": "",
+  "leer_resumen": "",
   "libros": "",
   "operaciones": "",
   "peticion": "",

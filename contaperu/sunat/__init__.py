@@ -33,6 +33,8 @@ salió lo que hay:
 - `leer_inconsistencias(datos)` y `leer_casillas(datos)` (15.5.0) leen lo que contestan `inconsistencias_comprobante`
   y `casillas`, medidas el 01-nov-2026 en un mes sin presentar y en uno presentado. Las dos formas reales contradicen
   al manual, y el lector dice en su docstring cómo.
+- `leer_resumen(datos, registro=…)` (15.8.0) lee lo que contesta `resumen`, medido el 10-nov-2026 en los dos libros:
+  una fila por tipo de comprobante con sus importes, y el total.
 
 Lo medido era de un RUC real y no entra aquí: las pruebas usan archivos sintéticos con la misma forma.
 
@@ -51,10 +53,10 @@ from .errores import SireRechaza, clasificar_error
 from .periodos import ESTADOS_DE_PERIODO, estado_de_periodo
 from .peticiones import (TIPOS_DEL_REGISTRO_NO_DOMICILIADOS, CuerpoInvalido, cuerpo_para_quitar_no_domiciliados,
                          grada, peticion, verificado)
-from .respuestas import leer_casillas, leer_inconsistencias
+from .respuestas import COLUMNAS_DEL_RESUMEN, leer_casillas, leer_inconsistencias, leer_resumen
 from .tickets import ESTADOS_DE_TICKET, estado_de_ticket
 
 __all__ = ["CODIGOS_DE_LIBRO", "ESTADOS_DE_PERIODO", "ESTADOS_DE_TICKET", "GRADAS", "OPERACIONES", "SireRechaza",
            "TIPOS_DEL_REGISTRO_NO_DOMICILIADOS", "CuerpoInvalido", "clasificar_error", "cod_libro_de",
            "cuerpo_para_quitar_no_domiciliados", "estado_de_periodo", "estado_de_ticket", "grada", "leer_casillas",
-           "leer_inconsistencias", "libros", "operaciones", "peticion", "sire_api", "verificado"]
+           "leer_inconsistencias", "leer_resumen", "COLUMNAS_DEL_RESUMEN", "libros", "operaciones", "peticion", "sire_api", "verificado"]
