@@ -54,7 +54,9 @@ import io
 import posixpath
 import re
 import zipfile
+from collections.abc import Iterable
 from decimal import ROUND_HALF_UP, Decimal
+from typing import Any
 
 from . import _zip
 from ..tributos import detracciones as _detracciones
@@ -335,7 +337,9 @@ def _con_signo(v: str) -> Decimal:
     return Decimal((v or "0").replace(",", ""))
 
 
-def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
+def _una(campos: list[str], libro: Libro, archivo_nombre: str, contabilidad: str = "PEN") -> Comprobante:
+    """Una fila del registro de ventas o de compras → el comprobante. `contabilidad` es la moneda en que vienen sus
+    importes (`MONEDA_DE_LA_CONTABILIDAD`), que no es la del comprobante: ver `_a_su_moneda`."""
     pos = POS_VENTA if libro.es_venta else POS_COMPRA
     datos = {k: _valor(campos, i) for k, i in pos.items()}
     # «Otros conceptos, tributos y cargos» (RCE campo 24, RVIE campo 25) es un NETO CON SIGNO, y un negativo
@@ -399,6 +403,9 @@ def _una(campos: list[str], libro: Libro, archivo_nombre: str) -> Comprobante:
             raise ValueError("los descuentos (campos 16 y 18) vienen en positivo y SUNAT los escribe en negativo")
         datos.update(base_gravada=str(abs(b15 + d16)), dscto_base=str(abs(d16)),
                      igv=str(abs(i17 + d18)), dscto_igv=str(abs(d18)))
+    # **Y en la moneda del comprobante** (15.9.0): la fila los trae en soles aunque el papel sea en dólares. Va al final,
+    # cuando ya se decidió con el signo de SUNAT qué es descuento y qué pareja de compras trae importe.
+    _a_su_moneda(datos, _IMPORTES_DEL_REGISTRO, contabilidad)
     return Comprobante(
         **datos,
         # `concepto` se queda vacío: la propuesta no lo trae y el Excel de CONCAR ya
@@ -427,6 +434,39 @@ def _en_la_moneda_del_comprobante(importe: str, tipo_cambio: Decimal) -> str:
     return str((_con_signo(importe) / tipo_cambio).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
+# Los importes de una fila de ventas o de compras que vuelven a la moneda del comprobante (15.9.0): los de `MONTOS` y el
+# valor no gravado de compras. La base y el IGV de compras van dentro de `base_gravada` e `igv` cuando se leen.
+_IMPORTES_DEL_REGISTRO = (*sorted(MONTOS), "valor_no_gravado")
+
+
+def _a_su_moneda(datos: dict[str, Any], importes: Iterable[str], contabilidad: str) -> None:
+    """Los importes de una fila, de la moneda de la CONTABILIDAD a la del comprobante, en su sitio.
+
+    **En los registros del SIRE los importes van en la moneda en que se lleva la contabilidad**, y la moneda y el tipo
+    de cambio de la fila dicen de qué moneda era el papel. Se supo primero en el de no domiciliados (15.3.1, regla 5 del
+    campo 16 del Anexo 9) y el 11-nov-2026 en los otros dos: la propuesta de ventas de un mes real traía una factura en
+    dólares con su importe en soles y la etiqueta «USD» —el del papel por su tipo de cambio—, y las compras en dólares
+    leídas así le preguntaban a la Consulta Integrada por un total que no existe. Se dividen por el tipo de cambio de la fila, que es el que se usó para
+    llevarlos a soles.
+
+    Sin él no hay forma de devolverlos, y el anexo lo exige, así que la fila no se lee. Quien lleva su contabilidad en
+    dólares y anota un comprobante en otra moneda pasó por soles antes (regla 5 del campo 16): esa vuelta no se ha visto
+    en un archivo real y no se adivina."""
+    moneda = str(datos.get("moneda") or "").strip().upper()
+    if not moneda or moneda == contabilidad:
+        return
+    if contabilidad != "PEN":
+        raise ValueError(f"lleva su contabilidad en {contabilidad} y el comprobante es de {moneda}: este lector solo "
+                         "sabe devolver a su moneda los importes de una contabilidad en soles")
+    tipo_cambio = _con_signo(str(datos.get("tipo_cambio") or "0"))
+    if tipo_cambio <= 0:
+        raise ValueError(f"está en {moneda} sin tipo de cambio, y sus importes vienen en soles: no se pueden devolver a "
+                         f"{moneda}")
+    for campo in importes:
+        if datos.get(campo) not in (None, ""):
+            datos[campo] = _en_la_moneda_del_comprobante(str(datos[campo]), tipo_cambio)
+
+
 def _un_no_domiciliado(campos: list[str], archivo_nombre: str, contabilidad: str = "PEN") -> Comprobante:
     """Una fila del registro de no domiciliados → el comprobante, con lo que tiene donde ponerlo (`POS_NO_DOMICILIADO`).
 
@@ -449,22 +489,9 @@ def _un_no_domiciliado(campos: list[str], archivo_nombre: str, contabilidad: str
     valor = _valor(campos, VALOR_DE_ADQUISICIONES)
     if valor and valor.strip("0.-"):
         datos["valor_no_gravado"] = valor
-    # **Los importes, de la moneda de la contabilidad a la del comprobante** (15.3.1). En dólares, de quien lleva su
-    # contabilidad en soles: se dividen por el tipo de cambio de la fila, que es el que se usó para llevarlos a soles.
-    # Sin él no hay forma de devolverlos, y el anexo lo exige, así que la fila no se lee. Quien lleva su contabilidad en
-    # dólares y anota un comprobante en otra moneda pasó por soles antes (regla 5 del campo 16): esa vuelta no se ha
-    # visto en un archivo real y no se adivina.
-    if moneda and moneda != contabilidad:
-        if contabilidad != "PEN":
-            raise ValueError(f"lleva su contabilidad en {contabilidad} y el comprobante es de {moneda}: este lector "
-                             "solo sabe devolver a su moneda los importes de una contabilidad en soles")
-        tipo_cambio = _con_signo(str(datos["tipo_cambio"] or "0"))
-        if tipo_cambio <= 0:
-            raise ValueError(f"está en {moneda} sin tipo de cambio, y sus importes vienen en soles: no se pueden "
-                             f"devolver a {moneda}")
-        for campo in ("otros", "dscto_otros", "total", "valor_no_gravado"):
-            if campo in datos:
-                datos[campo] = _en_la_moneda_del_comprobante(str(datos[campo]), tipo_cambio)
+    # **Los importes, de la moneda de la contabilidad a la del comprobante** (15.3.1; `_a_su_moneda`, que desde la
+    # 15.9.0 hace lo mismo con los otros dos registros).
+    _a_su_moneda(datos, ("otros", "dscto_otros", "total", "valor_no_gravado"), contabilidad)
     return Comprobante(
         **datos,  # type: ignore[arg-type]
         contraparte_tipo_doc=TIPO_DOC_NO_DOMICILIADO,
@@ -579,14 +606,14 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> list[Compro
     if zipfile.is_zipfile(io.BytesIO(datos)):
         txts = _txts_del_zip(datos)
         de_no_domiciliados = [(n, c) for n, c in txts if _de_no_domiciliados(c, n)]
-        resto = [c for n, c in txts if not _de_no_domiciliados(c, n)]
+        resto = [(n, c) for n, c in txts if not _de_no_domiciliados(c, n)]
         comprobantes = []
-        registro = next((c for c in resto if _tiene_la_forma(_texto(c[:4096]))), None)
+        registro = next(((n, c) for n, c in resto if _tiene_la_forma(_texto(c[:4096]))), None)
         if registro is not None:
-            comprobantes = _parsear_registro(registro, libro, archivo_nombre)
+            comprobantes = _parsear_registro(registro[1], libro, archivo_nombre, registro[0])
         elif not de_no_domiciliados:
             # Ninguno tiene ninguna de las formas: se lee el primero para fallar con su motivo de siempre.
-            comprobantes = _parsear_registro(resto[0], libro, archivo_nombre)
+            comprobantes = _parsear_registro(resto[0][1], libro, archivo_nombre, resto[0][0])
         for nombre, contenido in de_no_domiciliados:
             comprobantes.extend(_parsear_no_domiciliados(contenido, libro, archivo_nombre, nombre))
         return comprobantes
@@ -595,8 +622,10 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> list[Compro
     return _parsear_registro(datos, libro, archivo_nombre)
 
 
-def _parsear_registro(datos: bytes, libro: Libro, archivo_nombre: str) -> list[Comprobante]:
-    """El registro de compras o de ventas (un TXT, ya fuera de su ZIP) → comprobantes."""
+def _parsear_registro(datos: bytes, libro: Libro, archivo_nombre: str, nombre_del_txt: str = "") -> list[Comprobante]:
+    """El registro de compras o de ventas (un TXT, ya fuera de su ZIP) → comprobantes. El nombre del TXT —el de dentro
+    del ZIP, o el del archivo suelto— dice en qué moneda se lleva la contabilidad, y con ella sus importes."""
+    contabilidad = _moneda_de_la_contabilidad(nombre_del_txt or archivo_nombre)
     filas = leer_lineas(datos)
     if not filas:
         raise SireInvalido("El archivo del SIRE no tiene ninguna fila")
@@ -613,7 +642,7 @@ def _parsear_registro(datos: bytes, libro: Libro, archivo_nombre: str) -> list[C
         if len(campos) < MINIMO_CAMPOS:
             raise SireInvalido(f"La fila {i} tiene {len(campos)} campos: no parece un archivo del SIRE")
         try:
-            c = _una(campos, libro, archivo_nombre)
+            c = _una(campos, libro, archivo_nombre, contabilidad)
         except ValueError as e:
             raise SireInvalido(f"La fila {i} no se pudo leer ({e}). "
                                f"¿Es el registro de {'ventas' if libro.es_venta else 'compras'}?") from e

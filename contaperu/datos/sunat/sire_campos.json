@@ -1,6 +1,6 @@
 {
  "_nota": "El FORMATO del SIRE, columna a columna: de cada campo del anexo, dónde cae en el documento `open-accounting` o por qué no cae, y si el TXT de reemplazo lo devuelve. Es la lista de control de que nada del registro se pierde en silencio —tres de las cuatro versiones anteriores a este archivo fueron columnas del SIRE mal leídas o ignoradas—, y describe sin ejecutar, como `sire_api.json` con el canal y como los formatos de CONCAR y de CONTASIS con sistemas ajenos. **Una columna ignorada no se pierde**: la fila entera viaja en `datos_originales['sire']`. Los números son los del anexo (1-based), no los índices del lector.",
- "actualizado_al": "2026-09-30",
+ "actualizado_al": "2026-11-11",
  "fuentes": {
   "rvie": "Anexo 3 de la RS 112-2021 (los campos informados) y su Anexo N.° 2 (los dos que completa la Administración y sí se leen)",
   "rce": "Anexo 11 de la RS 040-2022 (los campos informados) y su Anexo 8, §8.4 (los cuatro finales)",
@@ -212,14 +212,16 @@
      "nombre": "total",
      "campo": "total",
      "lectura": "directa",
-     "vuelve": "dato"
+     "vuelve": "dato",
+     "nota": "En una fila en otra moneda, el driver lo escribe como la suma con signo de las columnas ya convertidas a soles, como viene en la propuesta: convertirlo aparte puede dejarlo a un céntimo de esa suma."
     },
     {
      "n": 27,
      "nombre": "moneda",
      "campo": "moneda",
      "lectura": "directa",
-     "vuelve": "dato"
+     "vuelve": "dato",
+     "nota": "La moneda del PAPEL, no la de los importes de la fila: esos van en la moneda en que se lleva la contabilidad —la tercera bandera del nombre, `1` = soles— aunque el comprobante sea en dólares (15.9.0; 11-nov-2026, una factura en dólares de un mes real venía con el importe del papel por su tipo de cambio). El lector los devuelve a esta moneda dividiendo por el tipo de cambio de la fila, y el driver los escribe en soles multiplicando por él."
     },
     {
      "n": 28,
@@ -516,14 +518,16 @@
      "nombre": "total",
      "campo": "total",
      "lectura": "directa",
-     "vuelve": "dato"
+     "vuelve": "dato",
+     "nota": "En una fila en otra moneda, el driver lo escribe como la suma con signo de las columnas ya convertidas a soles, como viene en la propuesta: convertirlo aparte puede dejarlo a un céntimo de esa suma."
     },
     {
      "n": 26,
      "nombre": "moneda",
      "campo": "moneda",
      "lectura": "directa",
-     "vuelve": "dato"
+     "vuelve": "dato",
+     "nota": "La moneda del PAPEL, no la de los importes de la fila: esos van en la moneda en que se lleva la contabilidad —la tercera bandera del nombre, `1` = soles— aunque el comprobante sea en dólares (15.9.0; 11-nov-2026, una factura en dólares de un mes real venía con el importe del papel por su tipo de cambio). El lector los devuelve a esta moneda dividiendo por el tipo de cambio de la fila, y el driver los escribe en soles multiplicando por él."
     },
     {
      "n": 27,

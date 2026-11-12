@@ -20,6 +20,9 @@ Nombre (Tabla 13 / Tabla 6): LE + RUC + AAAAMM + 00 + libro (140400 / 080400)
 """
 from __future__ import annotations
 
+from dataclasses import replace
+from decimal import ROUND_HALF_UP, Decimal
+
 from ... import catalogos as cat
 from ...asiento.faltas import NoExportable
 from ...tributos.igv import por_destino
@@ -60,6 +63,58 @@ class CampoCambiaDeSigno(NoExportable):
     def __init__(self, c: Comprobante):
         super().__init__(f"{c.serie}-{c.numero}: DSCTO_MAYOR_QUE_BASE (el campo 15 o el 17 del RVIE cambiaría de signo)",
                          [c])
+
+
+# **Los importes del registro van en SOLES aunque el comprobante sea en dólares** (15.9.0): es la moneda en que se lleva
+# la contabilidad —la tercera bandera del nombre, `1` = soles (`BANDERAS`)—, y la moneda y el tipo de cambio de la fila
+# dicen de qué moneda era el papel. Así los trae SUNAT en su propuesta (11-nov-2026: una factura en dólares de un mes real
+# venía con el importe del papel por su tipo de cambio), y así los devuelve el lector a su moneda
+# (`sire_txt._a_su_moneda`).
+# Hasta la 15.8.0 este driver escribía los dólares tal cual en esas columnas, y un comprobante en dólares quedaba
+# declarado por debajo, dividido por el tipo de cambio.
+_IMPORTES_EN_SOLES = ("exportacion", "base_gravada", "dscto_base", "igv", "dscto_igv", "exonerado", "inafecto", "isc",
+                      "base_ivap", "ivap", "icbper", "otros", "dscto_otros", "total", "valor_no_gravado")
+_CENTIMO = Decimal("0.01")
+# Las columnas cuya suma con signo es el importe total, y dónde va el total (índices 0-based: número de campo menos
+# uno). En ventas, del 14 al 25 y el total en el 26 (medido en la exportación real de agosto, 11-sep-2026); en compras,
+# del 15 al 24 y el total en el 25.
+_PARTES_Y_TOTAL = {"RVIE": (13, 25, 25), "RCE": (14, 24, 24)}
+
+
+def _se_convierte(c: Comprobante) -> bool:
+    """Si sus importes se escriben por su tipo de cambio: en otra moneda y con el tipo de cambio puesto.
+
+    Sin tipo de cambio no hay cómo, y normalmente no llega aquí: `validar` lo detiene con `TC_FALTA`, de nivel error.
+    Llega solo si quien exporta pidió incluir los errores (`--incluir-errores`), y entonces sale como siempre, con sus
+    importes tal cual y el tipo de cambio vacío: lo que el archivo dice es lo que el comprobante tiene, y el error ya
+    está dicho."""
+    return c.moneda != "PEN" and bool(c.tipo_cambio) and c.tipo_cambio > 0
+
+
+def en_soles(c: Comprobante) -> Comprobante:
+    """El comprobante con sus importes en soles, para escribirlo en el registro del SIRE: cada uno por su tipo de
+    cambio, al céntimo. Uno en soles —o sin tipo de cambio (`_se_convierte`)— vuelve tal cual.
+
+    El tipo de cambio es el que sale en la fila: el comprobante ya lo guarda con sus tres decimales
+    (`modelo.coerciones.tipo_cambio`), así que sus soles son sus dólares por su propio tipo de cambio."""
+    if not _se_convierte(c):
+        return c
+    tipo_cambio = c.tipo_cambio or Decimal(1)
+    cambios = {campo: (valor * tipo_cambio).quantize(_CENTIMO, rounding=ROUND_HALF_UP)
+               for campo in _IMPORTES_EN_SOLES if (valor := getattr(c, campo)) is not None}
+    return replace(c, **cambios)
+
+
+def _el_total_es_la_suma(campos: list[str], registro: str, opciones: Opciones) -> None:
+    """En una fila convertida a soles, el total es la suma con signo de sus columnas, como en la propuesta de SUNAT.
+
+    Convertir cada importe por separado y además el total puede dejarlos a un céntimo: 0.005 de redondeo por columna.
+    SUNAT escribe el total como la suma de las columnas —así venía la factura en dólares del 11-nov-2026: base más IGV,
+    al céntimo—, y una fila que no suma es una fila que puede rechazar. Solo en las filas en otra moneda: en soles el
+    archivo sale exactamente como antes."""
+    desde, hasta, total = _PARTES_Y_TOTAL[registro]
+    suma = sum((Decimal(x) for x in campos[desde:hasta] if x), Decimal(0))
+    campos[total] = _firmado(suma, opciones)
 
 
 def _exigir_campos(campos: list[str], esperados: int, registro: str) -> None:
@@ -137,7 +192,11 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCI
 
     El campo 6 (vencimiento) va VACÍO salvo en los tipos que lo exigen: es opcional y así
     lo manda el archivo que SUNAT aceptó, y una fecha de más es una validación de más.
+
+    Los importes, en soles (`en_soles`): el comprobante en dólares se escribe por su tipo de cambio.
     """
+    convertido = _se_convierte(c)
+    c = en_soles(c)
     neg = negativo(c, opciones)
     m = lambda d, n=neg: formatear_monto(d, opciones, n)  # noqa: E731
     # Base e IGV son netos y los descuentos, la parte que el registro informa aparte (estandar/LEEME.md). El
@@ -176,6 +235,8 @@ def linea_rvie(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCI
         formatear_numero(c.ref_numero, opciones),        # 32 número del comprobante modificado
         sanear(c.id_contrato, opciones),           # 33 identificador del proyecto / contrato
     ] + [""] * opciones.rvie_vacios                # 34-40 los completa la Administración
+    if convertido:
+        _el_total_es_la_suma(campos, "RVIE", opciones)
     _exigir_campos(campos, 33 + opciones.rvie_vacios, "RVIE")
     return armar_linea(campos, opciones)
 
@@ -188,7 +249,11 @@ def linea_rce(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCIO
     del Anexo 11 lo pide de forma explícita ("deberán mostrarse vacíos"), al revés que
     la del Anexo 3 de ventas ("los completa la Administración"), que resultó significar
     que NO se mandan. Sigue siendo una opción: si compras devolviera el 453, `rce_vacios=0`.
+
+    Los importes, en soles (`en_soles`), como en ventas.
     """
+    convertido = _se_convierte(c)
+    c = en_soles(c)
     neg = negativo(c, opciones)
     m = lambda d, n=neg: formatear_monto(d, opciones, n)  # noqa: E731
     campos = _cabecera(c, libro, opciones) + [
@@ -217,5 +282,7 @@ def linea_rce(c: Comprobante, libro: Libro, idx: int, opciones: Opciones = OPCIO
         "",                                  # 36 IMB (Ley 31053)
         "",                                  # 37 CAR original (solo ajustes posteriores)
     ] + [""] * opciones.rce_vacios                 # 38-41 detracción, tipo de nota, estado, inconsistencias
+    if convertido:
+        _el_total_es_la_suma(campos, "RCE", opciones)
     _exigir_campos(campos, 37 + opciones.rce_vacios, "RCE")
     return armar_linea(campos, opciones)

@@ -8,6 +8,7 @@ un cliente—, así que aquí se prueba la forma que se comprobó con ellos: nú
 fechas DD/MM/AAAA, CRLF, nombre del archivo, signo de las notas de crédito, tipo de cambio y saneado
 a ASCII.
 """
+from dataclasses import replace
 from decimal import Decimal
 
 import pytest
@@ -101,8 +102,58 @@ def test_usd_con_tipo_cambio_y_pen_sin_tc():
                       tipo_cambio="3.7512", base_gravada="500", igv="90", total="590")
     f = campos(g.lineas_de_texto(libro, [usd], "sire")[0], palote_final=False)
     assert f[26] == "USD" and f[27] == "3.751"
+    # Y sus importes, en soles por el tipo de cambio que sale en la fila (15.9.0): el comprobante lo guarda con tres
+    # decimales, así que es 500 × 3.751 y no × 3.7512.
+    assert (f[14], f[16], f[25]) == ("1875.50", "337.59", "2213.09")
     f = campos(g.lineas_de_texto(libro, comprobantes[:1], "sire")[0], palote_final=False)
     assert f[26] == "PEN" and f[27] == ""           # en el SIRE: obligatorio solo si ≠ PEN
+
+
+def _en_dolares(**importes) -> Comprobante:
+    return Comprobante(tipo_cp="01", serie="F001", numero="9", fecha_emision="2025-12-21", contraparte_tipo_doc="6",
+                       contraparte_doc="20131312955", contraparte_nombre="X", moneda="USD", **importes)
+
+
+def test_en_dolares_el_registro_lleva_soles_y_el_total_es_la_suma_de_sus_columnas():
+    """**En el RVIE y el RCE los importes van en la moneda de la contabilidad** (15.9.0), que es la de la tercera
+    bandera del nombre: soles. Hasta la 15.8.0 salían los dólares tal cual y el comprobante quedaba declarado dividido
+    por su tipo de cambio.
+
+    Y el total no se convierte aparte: es la suma de las columnas, como lo escribe SUNAT. Con estos importes la
+    diferencia se ve —118.01 × 3.333 = 393.33, y 333.33 + 59.99 = 393.32—, y una fila que no suma se puede rechazar."""
+    libro, _ = cargar_golden("ventas_202512.json")
+    usd = _en_dolares(tipo_cambio="3.333", base_gravada="100.01", igv="18.00", total="118.01")
+    f = campos(g.lineas_de_texto(libro, [usd], "sire")[0], palote_final=False)
+    assert (f[14], f[16], f[25], f[26], f[27]) == ("333.33", "59.99", "393.32", "USD", "3.333")
+    # El comprobante no cambia: se convierte lo que se escribe, no lo que se guardó.
+    assert usd.total == Decimal("118.01")
+
+    nota = replace(usd, tipo_cp="07", serie="FC01", ref_tipo_cp="01", ref_serie="F001", ref_numero="9",
+                   ref_fecha=usd.fecha_emision)
+    f = campos(g.lineas_de_texto(libro, [nota], "sire")[0], palote_final=False)
+    assert (f[14], f[16], f[25]) == ("-333.33", "-59.99", "-393.32"), "la nota, con su signo y la misma suma"
+
+
+def test_una_compra_en_dolares_lleva_en_soles_hasta_lo_no_gravado_y_los_otros():
+    libro, _ = cargar_golden("compras_202601.json")
+    usd = _en_dolares(tipo_cambio="3.500", base_gravada="1000", igv="180", valor_no_gravado="100", dscto_otros="10",
+                      total="1270")
+    f = campos(g.lineas_de_texto(libro, [usd], "sire")[0], palote_final=False)
+    assert f[14:24] == ["3500.00", "630.00", "0.00", "0.00", "0.00", "0.00", "350.00", "0.00", "0.00", "-35.00"]
+    assert (f[24], f[25], f[26]) == ("4445.00", "USD", "3.500")
+    # Y su total también es la suma de sus columnas: 333.33 + 59.99 = 393.32, aunque 118.01 × 3.333 sea 393.33.
+    con_redondeo = _en_dolares(tipo_cambio="3.333", base_gravada="100.01", igv="18.00", total="118.01")
+    f = campos(g.lineas_de_texto(libro, [con_redondeo], "sire")[0], palote_final=False)
+    assert (f[14], f[15], f[24]) == ("333.33", "59.99", "393.32")
+
+
+def test_en_dolares_sin_tipo_de_cambio_sale_como_esta():
+    """No llega aquí sin pedirlo: `validar` lo para con `TC_FALTA`. Con `--incluir-errores` sale tal cual, con el tipo de
+    cambio vacío, en vez de inventarle uno o de reventar a mitad del archivo."""
+    libro, _ = cargar_golden("ventas_202512.json")
+    f = campos(g.lineas_de_texto(libro, [_en_dolares(base_gravada="100", igv="18", total="118")], "sire")[0],
+               palote_final=False)
+    assert (f[14], f[16], f[25], f[27]) == ("100.00", "18.00", "118.00", "")
 
 
 def test_en_soles_el_tipo_de_cambio_NO_sale_aunque_el_comprobante_lo_traiga():

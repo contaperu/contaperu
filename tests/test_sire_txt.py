@@ -584,3 +584,107 @@ def test_una_contabilidad_en_dolares_no_se_convierte_y_lo_que_no_se_sabe_no_se_a
         sire_txt.parsear(_fila_de("EUR", "4.100", "20.00"), COMPRAS, en_dolares)
     with pytest.raises(sire_txt.SireInvalido, match="USD sin tipo de cambio"):
         sire_txt.parsear(_fila_de("USD", "", "67.24"), COMPRAS, _nombre_con_banderas("1112"))
+
+
+# ── Y en los registros de ventas y de compras (15.9.0) ─────────────────────────────────────────────────────────────
+# El 11-nov-2026, en la propuesta de ventas de un mes real: una factura en dólares venía con su importe en soles y la
+# moneda USD, que es el del papel por su tipo de cambio. Los números de aquí son inventados y redondos: 1000 dólares de
+# base y 180 de IGV al 3.500 son 3500.00 y 630.00 soles en la fila.
+DE_VENTAS = "LE2060111111120260800140400001112.txt"
+DE_COMPRAS = "LE2060111111120260800080400001112.txt"
+assert len(DE_VENTAS) == len(DE_COMPRAS) == 33 + 4, "el largo de un libro electrónico: sin él, la bandera no se lee"
+
+
+def _venta_en(moneda: str, tipo_cambio: str, base: str, igv: str, total: str, fila: str = FACTURA) -> str:
+    campos = fila.split("|")
+    campos[14], campos[16], campos[25], campos[26], campos[27] = base, igv, total, moneda, tipo_cambio
+    return "|".join(campos)
+
+
+def test_una_venta_en_dolares_se_lee_en_dolares_aunque_la_fila_venga_en_soles():
+    """Lo que vio John en la pantalla: el importe en soles con la etiqueta de dólares. El comprobante dice ahora lo que
+    dice el papel, la fila cruda sigue diciendo lo que dice SUNAT y valida sin un error: cuadra en su moneda."""
+    fila = _venta_en("USD", "3.500", "3500.00", "630.00", "4130.00")
+    for nombre in (DE_VENTAS, "propuesta.txt", ""):          # con la bandera de soles, o sin nombre que la diga
+        [c] = sire_txt.parsear(texto(fila), VENTAS, nombre)
+        assert (c.moneda, c.tipo_cambio) == ("USD", Decimal("3.500")), nombre
+        assert (c.base_gravada, c.igv, c.total) == (Decimal("1000.00"), Decimal("180.00"), Decimal("1180.00")), nombre
+    assert c.datos_originales["sire"][25] == "4130.00"
+    validar.revisar([c], VENTAS)
+    assert [o.codigo for o in c.observaciones if o.nivel == "error"] == []
+
+
+def test_una_nota_en_dolares_vuelve_a_su_moneda_con_su_descuento():
+    """La nota de crédito como descuento (campos 16 y 18 en negativo): los descuentos también vuelven a dólares, y se
+    deciden antes con el signo de SUNAT, que la división no cambia."""
+    campos = _venta_en("USD", "3.500", "0", "0", "-4130.00", fila=NOTA).split("|")
+    campos[15], campos[17] = "-3500.00", "-630.00"
+    [n] = sire_txt.parsear(texto("|".join(campos)), VENTAS, DE_VENTAS)
+    assert (n.dscto_base, n.dscto_igv) == (Decimal("1000.00"), Decimal("180.00"))
+    assert (n.base_gravada, n.igv, n.total) == (Decimal("1000.00"), Decimal("180.00"), Decimal("1180.00"))
+
+
+def test_una_compra_en_dolares_se_lee_en_dolares_con_todos_sus_importes():
+    """En compras van además lo no gravado (campo 21) y «otros» con su descuento (24). Es el caso de las compras que se
+    validaban con el total en soles y la Consulta Integrada contestaba que no existían."""
+    fila = _compra(c14="3500.00", c15="630.00", c20="350.00", c23="-35.00", c24="4445.00", c25="USD", c26="3.500")
+    [c] = sire_txt.parsear(texto("|".join(fila), con_cabecera=False), COMPRAS, DE_COMPRAS)
+    assert (c.moneda, c.tipo_cambio, c.destino_igv) == ("USD", Decimal("3.500"), "DG")
+    assert (c.base_gravada, c.igv, c.valor_no_gravado) == (Decimal("1000.00"), Decimal("180.00"), Decimal("100.00"))
+    assert (c.otros, c.dscto_otros, c.total) == (0, Decimal("10.00"), Decimal("1270.00"))
+    validar.revisar([c], COMPRAS)
+    assert [o.codigo for o in c.observaciones if o.nivel == "error"] == []
+    # Y la otra pareja de destino, la de lo gravado y no gravado: también vuelve.
+    otra = _compra(c14="0", c15="0", c16="3500.00", c17="630.00", c24="4130.00", c25="USD", c26="3.500")
+    [d] = sire_txt.parsear(texto("|".join(otra), con_cabecera=False), COMPRAS, DE_COMPRAS)
+    assert (d.destino_igv, d.base_gravada, d.igv, d.total) == ("DGNG", Decimal("1000.00"), Decimal("180.00"),
+                                                                Decimal("1180.00"))
+
+
+def test_en_soles_y_con_la_contabilidad_en_dolares_la_fila_se_lee_tal_cual():
+    """Lo que no se toca: una fila en soles, y un comprobante en dólares de quien lleva su contabilidad en dólares
+    (tercera bandera «2»), que ya viene en su moneda."""
+    [soles] = sire_txt.parsear(texto(FACTURA), VENTAS, DE_VENTAS)
+    assert (soles.base_gravada, soles.total, soles.tipo_cambio) == (Decimal("205256.14"), Decimal("242202.25"), None)
+    en_dolares = DE_VENTAS.replace("1112.txt", "1122.txt")
+    [c] = sire_txt.parsear(texto(_venta_en("USD", "3.500", "1000.00", "180.00", "1180.00")), VENTAS, en_dolares)
+    assert (c.moneda, c.total) == ("USD", Decimal("1180.00"))
+
+
+def test_una_venta_en_dolares_sin_tipo_de_cambio_no_se_lee():
+    """Sin él no hay cómo devolverla, y dar 4130 «USD» es justo lo que se vino a quitar: la fila falla con su motivo."""
+    with pytest.raises(sire_txt.SireInvalido, match="USD sin tipo de cambio"):
+        sire_txt.parsear(texto(_venta_en("USD", "", "3500.00", "630.00", "4130.00")), VENTAS, DE_VENTAS)
+
+
+def test_dentro_del_zip_la_bandera_es_la_del_txt_de_dentro():
+    """La propuesta llega en su ZIP, y la moneda de la contabilidad la dice el nombre del TXT de dentro, no el del ZIP."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr(DE_VENTAS.replace("1112.txt", "1122.txt"),
+                   texto(_venta_en("USD", "3.500", "1000.00", "180.00", "1180.00")).decode("utf-8"))
+    [c] = sire_txt.parsear(buf.getvalue(), VENTAS, "propuesta.zip")
+    assert c.total == Decimal("1180.00"), "contabilidad en dólares: no se divide"
+
+
+@pytest.mark.parametrize("fila,libro,nombre", [
+    (_venta_en("USD", "3.447", "340444.44", "61280.01", "401724.45"), VENTAS, DE_VENTAS),
+    (_venta_en("USD", "3.500", "3500.00", "630.00", "4130.00"), VENTAS, DE_VENTAS),
+    ("|".join(_compra(c14="3500.00", c15="630.00", c20="350.00", c23="-35.00", c24="4445.00", c25="USD",
+                      c26="3.500")), COMPRAS, DE_COMPRAS),
+])
+def test_ida_y_vuelta_la_fila_que_sale_es_la_que_entro(fila, libro, nombre):
+    """Lector y driver juntos: lo que entra en soles, se lee en dólares y vuelve a salir en soles, igual columna a
+    columna. La primera, del tamaño del caso real y con céntimos que no salen redondos: 116,543.21 dólares al 3.447, con
+    su base y su IGV llevados a soles cada uno al céntimo y el total como su suma, como lo escribe SUNAT. Es exacto
+    porque el tipo de cambio es mayor que uno: dividir y redondear al céntimo pierde menos de lo que el redondeo de
+    vuelta recupera."""
+    from contaperu.drivers.sire import txt as driver
+    [c] = sire_txt.parsear(texto(fila, con_cabecera=False), libro, nombre)
+    if libro is VENTAS:
+        assert c.total == Decimal({"401724.45": "116543.21", "4130.00": "1180.00"}[fila.split("|")[25]])
+    sale = driver.linea(c, libro, 1).split("|")
+    entra = fila.split("|")
+    importes = range(13, 26) if libro is VENTAS else range(14, 25)
+    assert [sale[i] for i in importes] == [entra[i] if entra[i] not in ("", "0") else "0.00" for i in importes]
+    assert sale[26 if libro is VENTAS else 25] == "USD"

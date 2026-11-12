@@ -4,6 +4,35 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.9.0] — 2026-11-11
+
+### Los importes en dólares del RVIE y del RCE vienen en soles
+
+⚠️ **Cambio de comportamiento a propósito, en el lector y en el driver `sire`.** En los registros del SIRE los importes
+van en la moneda en que se lleva la contabilidad —la tercera bandera del nombre, `1` = soles— aunque el comprobante sea
+en dólares; la moneda y el tipo de cambio de la fila dicen de qué moneda era el papel. El motor lo sabía desde la 15.3.1,
+pero solo en el registro de no domiciliados. Lo destapó una propuesta de ventas real el 11-nov-2026: una factura en
+dólares salía con su importe en soles y la etiqueta «USD», y las compras en dólares leídas así le preguntaban a la
+Consulta Integrada por un total que no existe.
+
+- **Leer** (`comprobantes.sire_txt`): las filas de ventas y de compras en otra moneda vuelven a la del comprobante,
+  dividiendo cada importe por el tipo de cambio de la fila y al céntimo —base, IGV, sus descuentos, exonerado, inafecto,
+  ISC, IVAP, ICBPER, otros, lo no gravado y el total—, después de decidir con el signo de SUNAT qué es descuento y qué
+  pareja de compras trae importe. Las mismas negativas que el no domiciliado: sin tipo de cambio la fila no se lee, y
+  una contabilidad en dólares con un comprobante en otra moneda tampoco. La fila cruda sigue en
+  `datos_originales["sire"]`, en soles. Dentro del ZIP, la bandera es la del TXT de dentro.
+- **Escribir** (`drivers.sire.txt`): una fila en otra moneda sale en soles, cada importe por su tipo de cambio
+  (`en_soles`), y **el total como la suma con signo de sus columnas**, como lo escribe SUNAT: convertirlo aparte puede
+  dejarlo a un céntimo. Hasta la 15.8.0 salían los dólares tal cual, y el comprobante quedaba declarado dividido por su
+  tipo de cambio. Un comprobante en dólares sin tipo de cambio —solo llega con `--incluir-errores`, porque `validar` lo
+  para con `TC_FALTA`— sale como antes.
+- **La ida y vuelta es exacta**: lo que entra en soles se lee en dólares y vuelve a salir igual, columna a columna,
+  porque el tipo de cambio es mayor que uno. Las filas en soles no cambian ni un byte.
+- `datos/sunat/sire_campos.json` lo anota en la moneda y en el total de los dos registros.
+
+**Para quien integra:** lo que ya se importó del SIRE en dólares con una versión anterior tiene sus importes en soles.
+Volver a leer la fila cruda con esta versión los da en su moneda.
+
 ## [15.8.0] — 2026-11-10
 
 ### El resumen de un periodo, medido y con su lector
