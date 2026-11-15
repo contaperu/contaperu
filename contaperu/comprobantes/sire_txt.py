@@ -510,6 +510,24 @@ _IMPORTES_DEL_BLOQUE = ("igv_utilizacion", "renta_bruta", "deduccion", "renta_ne
 # Las claves del bloque donde un «0» de SUNAT es «sin dato» (15.6.1): ver `bloque_de_la_fila`.
 CERO_ES_VACIO = frozenset({"exoneracion", "art_76", "sustento_anio_dua"})
 
+# **Lo declarado puede llegar SIN la columna del impuesto retenido** (15.9.1). Medido el 14-nov-2026 en lo declarado de
+# setiembre de un RUC real, bajado con `registro_pedir`: la cabecera trae sus 45 columnas —los 35 campos y CLU1 a
+# CLU10— y cada una de las diez filas trae 44. Falta el campo 29, «Impto.»: hasta la tasa todo cuadra con el preliminar
+# del mismo mes, y desde ahí cada valor está una columna a la izquierda —el convenio donde va el impuesto, el tipo de
+# renta donde va la exoneración—, y el importe del impuesto no está en ninguna parte de la fila. Leída por posición, el
+# convenio «01» de un proveedor salía en la pantalla como un impuesto retenido de 1.00. Una fila de ese largo se lee con
+# el hueco puesto en su sitio, o sea **sin impuesto**: la fila no lo dice y no se calcula. Las otras tres formas medidas
+# (45 con las libres, 35 del preliminar, 37 de la que se presenta) no se tocan.
+_COLUMNAS_LIBRES = 10
+_SIN_EL_IMPUESTO = CAMPOS_NO_DOMICILIADO + _COLUMNAS_LIBRES - 1
+
+
+def _con_el_impuesto_en_su_sitio(campos: list[str]) -> list[str]:
+    if len(campos) != _SIN_EL_IMPUESTO:
+        return campos
+    i = POS_DEL_BLOQUE_NO_DOMICILIADO["impuesto_retenido"]
+    return [*campos[:i], "", *campos[i:]]
+
 
 def bloque_de_la_fila(campos: list[str]) -> dict[str, str]:
     """Lo del no domiciliado de una fila del 080500, al bloque del comprobante: tal cual, con sus importes EN SOLES y en
@@ -524,7 +542,10 @@ def bloque_de_la_fila(campos: list[str]) -> dict[str, str]:
     **Y un «0» en `CERO_ES_VACIO` también es vacío** (15.6.1). Medido el 04-nov-2026 con el mismo mes en las dos formas
     en que SUNAT lo da: lo declarado (5.51) deja vacías la exoneración, el art. 76 y el año de la DUA, y el preliminar de
     no domiciliados (5.39) escribe ahí un 0. Ninguno de los tres es un código —la Tabla 21 empieza en 1, y un año no es
-    0—, así que leerlos tal cual daba en las diez filas de ese mes dos avisos que lo declarado no da."""
+    0—, así que leerlos tal cual daba en las diez filas de ese mes dos avisos que lo declarado no da.
+
+    **Y una fila sin la columna del impuesto se lee con el hueco en su sitio** (15.9.1, `_SIN_EL_IMPUESTO`)."""
+    campos = _con_el_impuesto_en_su_sitio(list(campos))
     bloque: dict[str, str] = {}
     for clave, indice in POS_DEL_BLOQUE_NO_DOMICILIADO.items():
         valor = _valor(campos, indice).strip()

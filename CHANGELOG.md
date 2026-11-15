@@ -4,6 +4,28 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.9.1] — 2026-11-14
+
+### Lo declarado de no domiciliados puede llegar sin la columna del impuesto retenido
+
+Medido el 14-nov-2026 en lo declarado de setiembre de un RUC real, bajado con `registro_pedir`: la cabecera del 080500
+trae sus 45 columnas —los 35 campos del anexo y CLU1 a CLU10— y cada una de las diez filas trae **44**. Falta el campo
+29, «Impto.»: hasta la tasa todo cuadra con el preliminar y con el TXT presentado del mismo mes, y desde ahí cada valor
+está una columna a la izquierda; el importe del impuesto no está en ninguna parte de la fila. Leída por posición, el
+convenio `01` de un proveedor llegaba al bloque como un impuesto retenido de 1.00, el tipo de renta como exoneración y
+la modalidad como tipo de renta. Lo vio John en la pantalla: «RENTA dice 1 sol». En el TXT presentado los diez
+impuestos suman 1,019.34, y la declaración de retenciones de ese mes pagó S/ 1,020.
+
+- **Leer** (`comprobantes.sire_txt.bloque_de_la_fila`): una fila del 080500 de 44 columnas se lee con el hueco del
+  impuesto puesto en su sitio, así que el bloque sale **sin `impuesto_retenido`** —la fila no lo dice y el motor no lo
+  calcula— y con el convenio, la exoneración, el tipo de renta, la modalidad y el art. 76 en sus claves. La fila cruda
+  sigue en `datos_originales["sire"]` como la dio SUNAT, y reconstruir el bloque con ella da lo mismo.
+- Las otras tres formas medidas no cambian: la exportación con sus 45 columnas, el preliminar de 35 y la que se presenta,
+  de 37.
+
+**Para quien integra:** un bloque leído de lo declarado con una versión anterior puede tener un impuesto retenido que es
+el código del convenio. Volver a leer la fila cruda con esta versión lo deja vacío.
+
 ## [15.9.0] — 2026-11-11
 
 ### Los importes en dólares del RVIE y del RCE vienen en soles

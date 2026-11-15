@@ -443,6 +443,29 @@ def test_lo_del_no_domiciliado_entra_al_bloque_en_soles_y_en_positivo():
     assert (n.no_domiciliado["renta_bruta"], n.no_domiciliado["impuesto_retenido"]) == ("375.00", "112.50")
 
 
+def test_lo_declarado_sin_la_columna_del_impuesto_no_corre_el_bloque():
+    """Medido el 14-nov-2026 en lo declarado de setiembre de un RUC real (`registro_pedir`, las diez filas): la cabecera
+    tiene sus 45 columnas y cada fila 44, porque SUNAT no escribe el «Impto.» y lo de detrás se corre una a la
+    izquierda. Leído por posición, el convenio «01» salía como un impuesto retenido de 1.00, el tipo de renta como
+    exoneración y la modalidad como tipo de renta. El bloque se lee sin el impuesto —la fila no lo trae— y con todo lo
+    demás en su sitio; y lo mismo desde la fila cruda, que es como lo reconstruye una aplicación."""
+    campos = list(CAMPOS_NO_DOMICILIADO)
+    campos[24:35] = ["375", "0", "375", "30", "112.50", "01", "0", "18", "1", "0", ""]
+    corta = campos[:28] + campos[29:]                                    # sin el campo 29, «Impto.»
+    contenido = (CABECERA_NO_DOMICILIADOS + "\n" + "|".join(corta + [""] * 10)).encode("utf-8")
+    assert len(CABECERA_NO_DOMICILIADOS.split("|")) == 45 and len(contenido.decode().splitlines()[1].split("|")) == 44
+    [c] = sire_txt.parsear(contenido, COMPRAS)
+    b = c.no_domiciliado
+    assert "impuesto_retenido" not in b, "la fila no lo trae, y no se inventa"
+    assert (b["renta_bruta"], b["renta_neta"], b["porcentaje"]) == ("375.00", "375.00", "30")
+    assert (b["convenio"], b["tipo_renta"], b["modalidad"]) == ("01", "18", "1")
+    assert "exoneracion" not in b and "art_76" not in b, "sus «0» son vacío, como en el preliminar"
+    assert len(c.datos_originales["sire"]) == 44, "la fila cruda viaja como la dio SUNAT"
+    desde_la_fila = lector.bloque_de_la_fila(c.datos_originales["sire"])
+    assert "impuesto_retenido" not in desde_la_fila
+    assert (desde_la_fila["convenio"], desde_la_fila["tipo_renta"], desde_la_fila["modalidad"]) == ("01", "18", "1")
+
+
 def test_un_no_domiciliado_entra_con_lo_basico_y_la_fila_entera_viaja():
     """Lo que el comprobante tiene donde ponerlo (John, 01-nov-2026: «lo básico ahora»), y la fila entera en
     `datos_originales` —desde la 15.6 el país, el IGV de utilización y la renta van además al bloque `no_domiciliado`,
