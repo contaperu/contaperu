@@ -225,3 +225,71 @@ def test_por_la_api_el_resumen_dice_de_que_libro_es():
     assert r["libro"] == {"ruc": "20601111111", "periodo": "202608", "tipo": "compra"}
     assert r["totales"]["PEN"]["total"] == "1180.00"
     assert api.resumen(doc(FACTURA), agrupar_por="contraparte")["grupos"][0]["clave"] == "20602222226"
+
+
+# ── Lo del no domiciliado (15.10.0) ──────────────────────────────────────────────────────────
+# El cuadre de las retenciones a no domiciliados (contab-core, 14-nov-2026): lo retenido en el 080500 contra lo
+# declarado en el PDT 617 y lo pagado con el 1662. Lo retenido es una suma del libro, y sumar el libro es del motor.
+
+def _del_exterior(numero: str, doc_: str, bloque: dict | None, tipo_cp: str = "91") -> dict:
+    fila = {"tipo_cp": tipo_cp, "serie": "8ABCDEFG", "numero": numero, "fecha_emision": "2026-08-12",
+            "contraparte_tipo_doc": "0", "contraparte_doc": doc_, "contraparte_nombre": "PROVEEDOR DEL EXTERIOR",
+            "moneda": "USD", "tipo_cambio": "3.750", "valor_no_gravado": "100.00", "total": "100.00"}
+    if bloque is not None:
+        fila["no_domiciliado"] = bloque
+    return fila
+
+
+def test_el_libro_suma_lo_retenido_al_no_domiciliado_en_soles_y_la_nota_resta():
+    """La renta neta, el impuesto retenido y el IGV de utilización del mes, **en soles** —como los lleva el bloque,
+    aunque la factura sea en dólares— y con la nota de crédito del exterior (97) restando, como el resto del libro.
+    Cuenta los comprobantes y los proveedores distintos, y **cuántos no traen impuesto**: una suma con un hueco no
+    puede leerse como el total. Lo excluido y lo duplicado no suman, igual que arriba."""
+    r = resumen.del_libro(cs(
+        FACTURA,
+        _del_exterior("7", "X0000001", {"renta_neta": "375.00", "porcentaje": "30", "impuesto_retenido": "112.50",
+                                        "igv_utilizacion": "67.50"}),
+        _del_exterior("8", "X0000001", {"renta_neta": "125.00", "porcentaje": "30", "impuesto_retenido": "37.50",
+                                        "igv_utilizacion": "22.50"}),
+        _del_exterior("9", "X0000002", {"renta_neta": "200.00", "porcentaje": "30", "igv_utilizacion": "36.00"}),
+        _del_exterior("10", "X0000001", {"renta_neta": "75.00", "porcentaje": "30", "impuesto_retenido": "22.50",
+                                         "igv_utilizacion": "13.50"}, tipo_cp="97"),
+        dict(_del_exterior("11", "X0000003", {"renta_neta": "999.00", "impuesto_retenido": "299.70"}), excluida=True),
+    ))
+    assert r["no_domiciliado"] == {"comprobantes": 4, "proveedores": 2, "sin_impuesto_retenido": 1,
+                                   "renta_neta": "625.00", "impuesto_retenido": "127.50",
+                                   "igv_utilizacion": "112.50"}, r["no_domiciliado"]
+    assert r["totales"]["PEN"]["total"] == "1180.00", "el resto del libro no cambia"
+
+
+def test_un_91_sin_bloque_cuenta_como_sin_impuesto_y_un_libro_sin_ninguno_dice_none():
+    """Una factura del exterior que se leyó sin su bloque es del registro igual: cuenta, no suma y se dice entre las
+    que no traen impuesto. Un libro sin ninguna no tiene nada que decir de esto: `None`, no ceros."""
+    r = resumen.del_libro(cs(FACTURA, _del_exterior("7", "X0000001", None)))
+    assert r["no_domiciliado"] == {"comprobantes": 1, "proveedores": 1, "sin_impuesto_retenido": 1,
+                                   "renta_neta": "0.00", "impuesto_retenido": "0.00", "igv_utilizacion": "0.00"}
+    assert resumen.del_libro(cs(FACTURA))["no_domiciliado"] is None
+    assert api.resumen(doc(FACTURA))["no_domiciliado"] is None, "y por la api, la misma clave"
+
+
+def test_lo_que_devuelve_la_api_cumple_su_esquema():
+    """El esquema de `resumen` no admite claves que no declare, y nada comparaba la salida con él: la 15.10.0 añadió
+    `no_domiciliado` y la batería pasó en verde con el esquema rechazándola. Se valida aquí, con y sin facturas del
+    exterior y con y sin grupos, resolviendo los `$ref` desde la carpeta de esquemas: el núcleo no sale a la red."""
+    import json
+    import pathlib
+
+    from jsonschema import Draft202012Validator
+    from referencing import Registry, Resource
+
+    carpeta = pathlib.Path(api.__file__).parent / "esquemas"
+    esquemas = [json.loads(f.read_text(encoding="utf-8")) for f in sorted(carpeta.glob("*.json"))]
+    registro = Registry().with_resources((e["$id"], Resource.from_contents(e)) for e in esquemas if "$id" in e)
+    esquema = next(e for e in esquemas if e.get("$id", "").endswith("/resumen.schema.json"))
+    validador = Draft202012Validator(esquema, registry=registro)
+    exterior = _del_exterior("7", "X0000001", {"renta_neta": "375.00", "porcentaje": "30",
+                                               "impuesto_retenido": "112.50"})
+    for documento in (doc(FACTURA), doc(FACTURA, exterior)):
+        for agrupar in ("", "contraparte"):
+            errores = [e.message for e in validador.iter_errors(api.resumen(documento, agrupar_por=agrupar))]
+            assert errores == [], (agrupar, errores)

@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "15.9.1",
+  "version": "15.10.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -3910,6 +3910,48 @@
        ],
        "additionalProperties": false
       }
+     },
+     "no_domiciliado": {
+      "type": [
+       "object",
+       "null"
+      ],
+      "description": "Lo retenido y lo pagado por las facturas del exterior (91, 97, 98), en soles, con la nota de crédito restando; null si el libro no tiene ninguna. Desde la 15.10.0.",
+      "properties": {
+       "comprobantes": {
+        "type": "integer",
+        "description": "Cuántos del registro de no domiciliados entraron en la suma: sin lo excluido ni lo duplicado."
+       },
+       "proveedores": {
+        "type": "integer",
+        "description": "Cuántos documentos de proveedor distintos: lo que el PDT 617 llama cantidad de registros."
+       },
+       "sin_impuesto_retenido": {
+        "type": "integer",
+        "description": "Cuántos no traen el impuesto retenido: si no es cero, la suma del impuesto no es el total."
+       },
+       "renta_neta": {
+        "type": "string",
+        "description": "La suma de la renta neta, en soles: la base imponible de las retenciones."
+       },
+       "impuesto_retenido": {
+        "type": "string",
+        "description": "La suma del impuesto retenido, en soles."
+       },
+       "igv_utilizacion": {
+        "type": "string",
+        "description": "La suma del IGV de la utilización del servicio, en soles."
+       }
+      },
+      "required": [
+       "comprobantes",
+       "proveedores",
+       "sin_impuesto_retenido",
+       "renta_neta",
+       "impuesto_retenido",
+       "igv_utilizacion"
+      ],
+      "additionalProperties": false
      }
     },
     "required": [

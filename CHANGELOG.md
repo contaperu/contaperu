@@ -4,6 +4,34 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.10.0] — 2026-11-14
+
+### El resumen de un libro suma lo retenido al no domiciliado
+
+Hasta hoy el resumen sumaba base, IGV y total, y nada del bloque `no_domiciliado`. Pero lo que se retiene y se paga
+por las facturas del exterior es justo lo que se declara en el PDT 617 y se paga con el 1662, y el cuadre entre las
+tres cosas se hacía a mano. En un mes real ese cuadre encontró una diferencia de base que nadie había visto. Lo
+retenido es una suma del libro, y sumar el libro es del motor.
+
+- **`resumen` y `comprobantes.resumen.del_libro` devuelven `no_domiciliado`.** En soles, como lo lleva el bloque
+  aunque la factura sea en dólares, trae:
+  - la suma de `renta_neta`, `impuesto_retenido` e `igv_utilizacion`, con la nota de crédito del exterior (97)
+    restando como en el resto del libro;
+  - `comprobantes`, cuántos entraron en la suma;
+  - `proveedores`, los documentos distintos, que es lo que el 617 llama «cantidad de registros»;
+  - `sin_impuesto_retenido`, cuántos no traen el impuesto. Una suma con un hueco no puede leerse como el total, y lo
+    declarado de SUNAT llega sin esa columna (15.9.1).
+
+  Qué es del registro lo dice el tipo (91, 97, 98) y no el bloque: un 91 leído sin él cuenta y no suma. Sin ninguna
+  factura del exterior, la clave vale `null`. Los grupos no la llevan.
+- **El esquema de la salida lo declara** (`api/esquemas/resumen.schema.json`).
+  - Una prueba nueva compara ya la salida con él, resolviendo los `$ref` en local.
+  - Nada lo hacía, y la primera versión de este cambio pasaba la batería con el esquema rechazando la clave.
+- **El resumen importa el catálogo de los tipos del registro de no domiciliados**, y queda a la vista en el
+  acoplamiento con lo peruano (`tests/fixtures/capas/acoplamiento_pe.json`).
+
+**Para quien integra:** una clave nueva en la salida, sin cambiar ninguna de las que había.
+
 ## [15.9.1] — 2026-11-14
 
 ### Lo declarado de no domiciliados puede llegar sin la columna del impuesto retenido

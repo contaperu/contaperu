@@ -44,6 +44,9 @@
   "contaperu.comprobantes.sire_txt",
   "contaperu.comprobantes.xml_ubl"
  ],
+ "contaperu.comprobantes.resumen": [
+  "contaperu.catalogos"
+ ],
  "contaperu.drivers": [
   "contaperu.drivers.sire"
  ],

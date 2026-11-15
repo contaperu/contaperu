@@ -43,6 +43,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Iterable
 
+from ..catalogos import DEL_REGISTRO_DE_NO_DOMICILIADOS
 from ..modelo.coerciones import CERO, texto_monto as _texto
 from .comprobante import Comprobante
 
@@ -54,6 +55,12 @@ AGRUPACIONES: tuple[str, ...] = ("", "contraparte")
 # Las tres cifras de dinero de un libro, con el nombre que el campo ya tiene en el modelo y en el
 # estándar. `base_gravada` y no «base»: un resumen no le pone nombre nuevo a un dato que ya se llama algo.
 IMPORTES: tuple[str, ...] = ("base_gravada", "igv", "total")
+
+# **Y lo del no domiciliado** (15.10.0): lo que se retiene y se paga por las facturas del exterior —la renta neta, el
+# impuesto retenido y el IGV de la utilización del servicio—, con los nombres que esas claves ya tienen en el bloque
+# `no_domiciliado` (enmienda 0007). Es lo que el PDT 617 declara (base y tributo de «Ret. No Domiciliadas») y lo que se
+# paga con el Formulario 1662, así que sumarlo es la mitad de un cuadre que hasta hoy se hacía a mano.
+IMPORTES_DEL_NO_DOMICILIADO: tuple[str, ...] = ("renta_neta", "impuesto_retenido", "igv_utilizacion")
 
 
 def _cubos(comprobantes: Iterable[Comprobante]) -> tuple[dict, dict]:
@@ -82,6 +89,34 @@ def _cubos(comprobantes: Iterable[Comprobante]) -> tuple[dict, dict]:
     return recuento, totales
 
 
+def _del_no_domiciliado(comprobantes: list[Comprobante]) -> dict | None:
+    """Lo retenido y lo pagado por las facturas del exterior del libro, **en soles**, o `None` si no hay ninguna.
+
+    **En soles** porque así los lleva el bloque, aunque la factura sea en dólares: es la moneda del registro y de la
+    declaración. **La nota de crédito del exterior (97) resta**, como el resto del libro; lo excluido y lo duplicado no
+    entran. Qué es del registro lo dice el tipo (`catalogos.DEL_REGISTRO_DE_NO_DOMICILIADOS`) y no el bloque: un 91 que
+    se leyó sin él sigue siendo del registro, cuenta y no suma.
+
+    `sin_impuesto_retenido` dice cuántos de los que cuentan no traen el impuesto, porque **una suma con un hueco no
+    puede leerse como el total**: lo declarado de SUNAT, por ejemplo, llega sin esa columna (15.9.1). Y `proveedores`
+    cuenta los documentos distintos, que es lo que el PDT 617 llama «cantidad de registros» (medido en un mes real:
+    diez facturas de seis proveedores, y la casilla dice seis)."""
+    suyos = [c for c in comprobantes if not c.excluida and c.estado != "duplicada"
+             and (c.tipo_cp in DEL_REGISTRO_DE_NO_DOMICILIADOS or c.no_domiciliado)]
+    if not suyos:
+        return None
+    sumas = dict.fromkeys(IMPORTES_DEL_NO_DOMICILIADO, CERO)
+    for c in suyos:
+        signo = Decimal(-1) if c.es_nota_credito else Decimal(1)
+        bloque = c.no_domiciliado or {}
+        for clave in IMPORTES_DEL_NO_DOMICILIADO:
+            sumas[clave] += signo * Decimal(str(bloque.get(clave) or "0"))
+    return {"comprobantes": len(suyos),
+            "proveedores": len({c.contraparte_doc or "" for c in suyos}),
+            "sin_impuesto_retenido": sum(1 for c in suyos if not (c.no_domiciliado or {}).get("impuesto_retenido")),
+            **{clave: _texto(valor) for clave, valor in sumas.items()}}
+
+
 def _cuanto(totales: dict) -> tuple:
     """Para ordenar grupos: por los soles y, sin soles, por la mayor de las otras monedas.
 
@@ -106,6 +141,9 @@ def del_libro(comprobantes: Iterable[Comprobante], *, agrupar_por: str = "") -> 
     Con `agrupar_por="contraparte"`, los mismos totales por proveedor o cliente, de más a menos, agrupados
     por su **documento** y no por su nombre: el mismo RUC llega escrito de tres maneras según quién lo
     leyera, y por el nombre saldría partido en tres.
+
+    Y `no_domiciliado` (15.10.0): lo retenido y lo pagado por las facturas del exterior, en soles, o `None` si el
+    libro no tiene ninguna (`_del_no_domiciliado`). Solo arriba: los grupos no lo llevan.
     """
     agrupar_por = (agrupar_por or "").strip().lower()
     if agrupar_por not in AGRUPACIONES:
@@ -114,7 +152,8 @@ def del_libro(comprobantes: Iterable[Comprobante], *, agrupar_por: str = "") -> 
 
     todos = list(comprobantes)
     recuento, totales = _cubos(todos)
-    salida = {"recuento": recuento, "totales": totales, "agrupado_por": agrupar_por, "grupos": []}
+    salida = {"recuento": recuento, "totales": totales, "agrupado_por": agrupar_por, "grupos": [],
+              "no_domiciliado": _del_no_domiciliado(todos)}
     if not agrupar_por:
         return salida
 
