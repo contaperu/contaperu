@@ -275,9 +275,13 @@ Dos formas de combinarlas, y la primera no cuesta nada:
 from mcp.server.fastmcp import FastMCP
 
 from contaperu import api
-from contaperu.puertas.servidor_mcp import INSTRUCCIONES
 
-mio = FastMCP("mi-erp", instructions=INSTRUCCIONES)
+# Las reglas del DOCUMENTO valen llames como llames al motor; las de la llamada hablan de argumentos que tus
+# herramientas quizá no tienen (`imputacion`, `claves_previas`). Las reglas, antes que nada: Claude Code solo lee
+# los primeros 2 048 caracteres de las instrucciones.
+REGLAS = "\n".join(f"- {regla}" for regla in api.REGLAS_POR_CLAVE["documento"].values())
+mio = FastMCP("mi-erp", instructions=f"Reglas que conviene tener claras antes de armar un documento:\n{REGLAS}\n\n"
+                                     "Mi ERP: sus meses y el diagnóstico del motor.")
 
 
 @mio.tool()
@@ -295,10 +299,14 @@ def diagnosticar(documento: dict, driver: str) -> dict:
 print(f"servidor con las tuyas y las del motor: {mio.name}")
 ```
 
-**Trae `INSTRUCCIONES`, aunque no traigas nada más.** Es lo que el servidor del motor le dice al agente antes de que
-toque nada —que los importes van siempre en positivo, que `tipo_cp` es el código de la Tabla 10 y no la sigla del
-sistema, que la retención del IGV del 3 % **no** es una detracción—, y está en el `__all__` a propósito. Sin eso, un
-modelo se inventa detracciones con mucha seguridad.
+**Trae las reglas, aunque no traigas nada más.** Son lo que el servidor del motor le dice al agente antes de que toque
+nada —que los importes van siempre en positivo, que `tipo_cp` es el código de la Tabla 10 y no la sigla del sistema,
+que la retención del IGV del 3 % **no** es una detracción—, y están en el `__all__` a propósito. Desde la 15.15.0
+tienen nombre y ámbito, `api.REGLAS_POR_CLAVE`: las del `documento` son de cualquiera que arme uno, y las de la
+`llamada`, de quien llama a estas operaciones con `configuracion`, `imputacion` o `claves_previas`. Si tus
+herramientas reciben esos argumentos, `api.REGLAS` es la unión de las dos; `INSTRUCCIONES` no te sirve, porque lleva
+el camino de las herramientas del motor y en tu servidor no existen. Sin las reglas, un modelo se inventa
+detracciones con mucha seguridad.
 
 Y si prefieres una sola instancia sin reescribir nada, `contaperu.puertas.servidor_mcp.mcp` es importable y le puedes
 añadir tus herramientas con `@mcp.tool()`. Funciona, pero estás mutando la instancia del motor: queda a tu cargo.

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -147,6 +148,152 @@ def test_las_reglas_del_dominio_no_nombran_ninguna_herramienta():
     assert api.REGLAS in mcp.instructions and api.CAMINO in mcp.instructions
     for uri in (str(r.uri) for r in asyncio.run(mcp.list_resources())):
         assert uri not in api.REGLAS, f"las REGLAS citan el recurso {uri} de este servidor"
+
+
+# Lo que Claude Code lee de las instrucciones de un servidor MCP: los primeros 2 048 caracteres, y nada más (medido el
+# 21-nov-2026). Se corta en unidades UTF-16, que son las de una cadena de JavaScript; en castellano coinciden con los
+# caracteres, y se cuenta así para que una letra fuera del plano básico no las separe sin que se vea.
+RECORTE_DEL_CLIENTE = 2048
+
+
+def lo_que_lee_el_cliente(texto: str) -> str:
+    return texto.encode("utf-16-le")[:2 * RECORTE_DEL_CLIENTE].decode("utf-16-le", errors="ignore")
+
+
+def test_todas_las_reglas_caben_en_lo_que_lee_el_cliente():
+    """Una regla que el cliente corta no existe para su modelo.
+
+    Hasta la 15.14 las instrucciones medían 3 832 caracteres y las reglas empezaban en el 831, detrás del camino de
+    las herramientas: un desarrollador que conectaba este servidor a su Claude Code recibía las cuatro primeras y la
+    mitad de la quinta —la del no domiciliado—, y las del plan de cuentas, la imputación, las claves previas y la
+    cuenta que no se inventa no le llegaban. Desde la 15.15 van antes del camino y caben enteras, y esto es el
+    trinquete: una regla nueva paga su sitio acortando otra, y lo que se pase se ve aquí y no en la conversación de
+    alguien.
+    """
+    leido = lo_que_lee_el_cliente(mcp.instructions)
+    assert leido.count("Reglas que conviene tener claras") == 1, "el encabezado de las reglas tiene que llegar, y una vez"
+    for ambito, reglas in api.REGLAS_POR_CLAVE.items():
+        for clave, texto in reglas.items():
+            assert texto in leido, (f"la regla {ambito}.{clave} no cabe en los {RECORTE_DEL_CLIENTE} caracteres que "
+                                    f"lee el cliente: las instrucciones miden {len(mcp.instructions)}")
+
+
+def test_las_reglas_son_la_union_de_las_que_tienen_nombre():
+    """`REGLAS` sigue existiendo, y es exactamente lo que `REGLAS_POR_CLAVE` tiene, en su orden.
+
+    Si alguien escribiera una regla suelta en `REGLAS` sin darle clave, quien se trae las del documento por su
+    nombre no la vería nunca; y una con clave que no llegara a `REGLAS` faltaría en el servidor del motor.
+    """
+    assert set(api.REGLAS_POR_CLAVE) == {"documento", "llamada"}
+    vinietas = [linea[2:] for linea in api.REGLAS.splitlines() if linea.startswith("- ")]
+    con_nombre = [texto for reglas in api.REGLAS_POR_CLAVE.values() for texto in reglas.values()]
+    assert vinietas == con_nombre
+    assert api.REGLAS.splitlines()[0] == "Reglas que conviene tener claras antes de armar un documento:"
+    assert len(api.REGLAS.splitlines()) == 1 + len(con_nombre), "en `REGLAS` hay texto que no es de ninguna regla"
+
+
+def test_las_reglas_del_documento_no_nombran_nada_de_la_llamada():
+    """Las del documento son para quien arma un documento y llama al motor de OTRA forma.
+
+    Las importa un conector que no tiene `imputacion`, ni `claves_previas`, ni `configuracion`, ni el catálogo
+    `catalogos_sunat`: si una de ellas nombra un argumento, una operación o un destino de este motor, ese conector le
+    habla a su modelo de algo que no existe. Lo que sí pueden nombrar son los campos del estándar —`codigo` es el de la
+    detracción aunque también sea un argumento de `buscar_cuenta_pcge`—, así que se descuentan.
+    """
+    from contaperu.api.tabla import PARAMETROS
+
+    esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
+    campos: set[str] = set()
+
+    def recorrer(nodo) -> None:
+        if isinstance(nodo, dict):
+            if isinstance(nodo.get("properties"), dict):
+                campos.update(nodo["properties"])
+            for valor in nodo.values():
+                recorrer(valor)
+        elif isinstance(nodo, list):
+            for valor in nodo:
+                recorrer(valor)
+
+    recorrer(esquema)
+    de_la_llamada = ((set(PARAMETROS) | {op.nombre for op in api.OPERACIONES}
+                      | {op.herramienta for op in api.OPERACIONES if op.herramienta}
+                      | set(api.drivers_disponibles())) - campos)
+    for clave, texto in api.REGLAS_POR_CLAVE["documento"].items():
+        nombrados = set(re.findall(r"`([^`]+)`", texto)) & de_la_llamada
+        assert not nombrados, f"la regla documento.{clave} nombra {sorted(nombrados)}, que son de la llamada"
+
+
+def test_las_secciones_que_se_nombran_son_las_que_se_configuran():
+    """La lista de secciones se escribía a mano y se quedó en `concar`, `csv` y `contasis` con seis secciones vivas.
+
+    Se compara con lo que la configuración valida de verdad —`describir_configuracion`—, en los dos sitios donde se
+    nombra: la regla de la configuración y la descripción de `configuracion_por_defecto`.
+    """
+    secciones = set(api.describir_configuracion()["sistemas"])
+    assert secciones >= {"concar", "csv", "contasis", "starsoft", "ple", "ple_plan"}
+    descripcion = {t.name: t.description for t in asyncio.run(mcp.list_tools())}["configuracion_por_defecto"]
+    for donde, texto in (("la regla llamada.configuracion", api.REGLAS_POR_CLAVE["llamada"]["configuracion"]),
+                         ("la descripción de `configuracion_por_defecto`", descripcion)):
+        nombradas = set(re.findall(r"`([a-z_]+)`", texto)) & set(api.drivers_disponibles())
+        assert nombradas == secciones, f"{donde} nombra {sorted(nombradas)} y se configuran {sorted(secciones)}"
+
+
+def test_exportar_nombra_cada_destino():
+    """La lista de destinos de `exportar` va por canal y con lo que entrega cada uno, así que se escribe a mano.
+
+    Escrita a mano envejece: le faltaba `sire_no_domiciliados` desde la 15.6. Esto la ata a los drivers que hay.
+    """
+    descripcion = {t.name: t.description for t in asyncio.run(mcp.list_tools())}["exportar"]
+    faltan = sorted(d for d in api.drivers_disponibles() if f"`{d}` —" not in descripcion)
+    assert not faltan, f"la descripción de `exportar` no presenta estos destinos: {faltan}"
+
+
+def rama_de_texto(esquema: dict) -> dict:
+    """La parte de un esquema que describe el texto: él mismo, o su rama `string` si es opcional (`anyOf` con null)."""
+    for rama in esquema.get("anyOf", [esquema]):
+        if rama.get("type") == "string":
+            return rama
+    return {}
+
+
+def test_cada_parametro_dice_lo_que_dice_la_tabla():
+    """Los 52 parámetros de las 18 herramientas llegaban con un nombre y un tipo, y la tabla ya los describía.
+
+    Se compara con `op.entrada`, que es el esquema con que la puerta HTTP y el contrato publican la MISMA operación: la
+    descripción de cada parámetro, y su `enum` y su `format` en la rama del texto. Y `driver`, que la tabla no cierra
+    porque el contrato no sabe qué drivers de terceros habrá, lleva los que este servidor tiene al arrancar.
+    """
+    por_nombre = {t.name: t for t in asyncio.run(mcp.list_tools())}
+    vistos = 0
+    for op in api.OPERACIONES:
+        if not op.herramienta:
+            continue
+        renombra = RENOMBRA.get(op.herramienta, {})
+        for nombre, de_la_tabla in op.entrada["properties"].items():
+            publicado = por_nombre[op.herramienta].inputSchema["properties"][renombra.get(nombre, nombre)]
+            donde = f"{op.herramienta}.{nombre}"
+            assert publicado.get("description") == de_la_tabla["description"], donde
+            rama = rama_de_texto(publicado)
+            for clave in ("enum", "format"):
+                if clave in de_la_tabla:
+                    assert rama.get(clave) == de_la_tabla[clave], f"{donde}: su `{clave}` no es el de la tabla"
+            if nombre == "driver":
+                assert rama["enum"] == list(api.drivers_disponibles()), donde
+            vistos += 1
+    assert vistos == 52
+
+
+def test_solo_se_cierran_los_parametros_que_tienen_lista():
+    """Un `enum` es una promesa de que no hay más valores, y solo dos parámetros la pueden hacer.
+
+    `driver` —los destinos de este servidor— y `agrupar_por`. Los catálogos de SUNAT siguen abiertos aunque el motor
+    los conozca: un tipo de comprobante o un código de detracción que SUNAT añada tiene que poder llegar al motor y
+    que sea él quien diga qué hace con él, no el esquema de una herramienta quien lo rechace antes.
+    """
+    cerrados = {nombre for t in asyncio.run(mcp.list_tools()) for nombre, esquema in t.inputSchema["properties"].items()
+                if "enum" in rama_de_texto(esquema)}
+    assert cerrados == {"driver", "agrupar_por"}
 
 
 def test_los_recursos_son_legibles():

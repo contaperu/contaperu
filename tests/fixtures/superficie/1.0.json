@@ -24,6 +24,7 @@
   "Operacion": "clase",
   "PRESENTACION": "valor",
   "REGLAS": "valor",
+  "REGLAS_POR_CLAVE": "valor",
   "RepartoNoAdmitido": "clase",
   "RepartoNoCuadra": "clase",
   "RutaObsoleta": "clase",

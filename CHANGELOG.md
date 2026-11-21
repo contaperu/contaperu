@@ -4,6 +4,62 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.15.0] — 2026-11-21
+
+### Las reglas para modelos, con nombre y ámbito, y todas dentro de lo que lee Claude Code
+
+`api.REGLAS` era un solo texto y quien llama al motor de otra forma no se la podía traer: habla de `imputacion`,
+`claves_previas` y `catalogos_sunat`, que en su conector no existen. Y el servidor MCP del motor publicaba unas
+instrucciones de 3 832 caracteres con las reglas detrás del camino de sus herramientas, empezando en el 831, cuando
+Claude Code solo lee los primeros 2 048 (medido el 21-nov-2026): la regla del no domiciliado le llegaba cortada y las
+cinco siguientes no le llegaban.
+
+- **`api.REGLAS_POR_CLAVE`**, nombre público nuevo: `{"documento": {clave: texto}, "llamada": {clave: texto}}`.
+  - Las del **documento** valen para cualquiera que arme uno: `importes_en_positivo`, `tabla_10`, `dos_retenciones`,
+    `detraccion`, `no_domiciliado`, `plan_de_cuentas`, `cuenta_no_se_inventa` y `lo_que_pone_el_sistema`. No nombran
+    ningún argumento, operación ni destino del motor, y un test lo vigila descontando los campos del estándar.
+  - Las de la **llamada** son de quien llama a estas operaciones: `configuracion`, `imputacion`, `claves_previas` y
+    `falla_y_dice_por_que`, que era el párrafo de cierre.
+  - Se importa `from contaperu.api import REGLAS_POR_CLAVE`; las del documento, `REGLAS_POR_CLAVE["documento"]`.
+- **`REGLAS` sigue existiendo y es la unión**, con el encabezado de siempre y una viñeta por regla, en ese orden.
+- **Cambia lo que dicen**, y quien se traía `REGLAS` lo nota:
+  - se reescribieron más cortas, sin la historia de cada una, para que quepan;
+  - entra la de la detracción: va por su código del Catálogo 54 contrastado con la tabla del contribuyente, y no se
+    deduce del porcentaje del PDF, que comparten varios códigos —solo lo decían las descripciones de las herramientas—;
+  - la lista de secciones de la configuración pasa de tres a seis (faltaban `starsoft`, `ple` y `ple_plan`) y deja de
+    escribirse a mano: sale del contrato de cada driver de serie;
+  - de dónde salen los códigos del no domiciliado y el convenio de cada país se mudó al `CAMINO`, porque nombra un
+    recurso de este servidor.
+- **Las instrucciones del MCP ponen las reglas antes del camino** y miden 2 793 caracteres: las reglas van del 176 al
+  2 028. `PRESENTACION` quedó en una línea. Lo vigila `RECORTE_DEL_CLIENTE` en `tests/test_servidor_mcp.py`, contando
+  en unidades UTF-16 como un cliente en JavaScript, y es un trinquete: una regla nueva paga su sitio acortando otra.
+
+**Para quien integra:** el encabezado «Reglas que conviene tener claras» y las frases «SIEMPRE en positivo», «Tabla 10
+de SUNAT», «NO es una detracción» y «plan de cuentas y sus sub-diarios» se conservan, así que partir el texto por ahí
+sigue funcionando; pero si te traías el texto entero para un servidor tuyo, lo correcto es traerte las del documento
+por su clave (`INTEGRAR.md`, «Tu propio MCP con el del motor debajo»).
+
+### El MCP describe sus 52 parámetros
+
+Las 18 herramientas publicaban cada parámetro con un nombre y un tipo, y nada más, mientras la puerta HTTP los
+describía desde `api/tabla.PARAMETROS`. Ahora el MCP los publica desde ahí: la `description` de los 52, y el `enum` y
+el `format` que la tabla declara, dentro de la rama del texto para que un opcional siga admitiendo `null`.
+
+- **`driver` lleva su `enum`**, contado al arrancar desde `drivers_disponibles`, que suma los drivers de terceros que
+  haya instalados. Por eso no está en la tabla: el contrato OpenConta es un archivo publicado y no puede saberlos. Es
+  esquema y no validación: un destino que no existe lo sigue rechazando el motor con su `clave`.
+- **`agrupar_por` lleva el suyo**, que la tabla ya tenía. Son los dos únicos cerrados, y un test lo fija: los catálogos
+  de SUNAT siguen abiertos, para que un código nuevo llegue al motor y lo juzgue él.
+- No se llevan los `$ref` de la tabla: apuntan a URLs que un cliente MCP no sale a buscar.
+
+### Los textos del MCP que envejecieron
+
+- `exportar` presenta `sire_no_domiciliados`, y deja de decir que solo `concar` y `csv` arman asiento: lo comprueban
+  todos los de asiento, y cuáles son de registro lo dice su `familia`. Un test lo ata a los drivers que hay.
+- `configuracion_por_defecto` nombra las seis secciones, derivadas como en la regla.
+- `revisar_tesoreria` decía que ningún sistema legacy llevaba el libro de tesorería, y la 15.14.0 lo llevó a CONCAR.
+- `drivers_disponibles` nombra `sire_no_domiciliados` entre los de `sunat`.
+
 ## [15.14.0] — 2026-11-21
 
 ### CONCAR lleva el libro de tesorería, calcado del pago que un CONCAR real aceptó

@@ -12,6 +12,7 @@
    "entrada": {
     "properties": {
      "asiento": {
+      "description": "Las líneas del asiento.",
       "items": {
        "additionalProperties": true,
        "type": "object"
@@ -40,11 +41,13 @@
     "properties": {
      "codigo": {
       "default": "",
+      "description": "El código de la cuenta.",
       "title": "Codigo",
       "type": "string"
      },
      "texto": {
       "default": "",
+      "description": "Parte del nombre de la cuenta.",
       "title": "Texto",
       "type": "string"
      }
@@ -61,12 +64,23 @@
     "readOnlyHint": true,
     "title": null
    },
-   "descripcion": "La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas\n    de detracción— y una sección por sistema contable con lo suyo (`concar`: siglas y sub-diarios,\n    códigos, columnas del centro de costo; `csv`: siglas, sub-diarios y códigos de la detracción;\n    `contasis`: medio de pago y columnas del centro de costo).\n\n    **Con `driver`, la de quien lleva ese sistema**: lo general con las cuentas de ese sistema y solo\n    su sección. Pásalo siempre que sepas a qué sistema contable exporta el contribuyente, porque las\n    cuentas de fábrica son las del PCGE a seis dígitos y hay sistemas que numeran de otra forma.\n\n    Es un punto de partida razonable, no la verdad de ningún contribuyente: el plan de cuentas\n    y los sub-diarios los decide cada empresa. Cópiala, cámbiale lo que toque y pásala como\n    `configuracion` en las demás herramientas: se valida entera, y lo que no existe se dice.\n    ",
+   "descripcion": "La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas\n    de detracción— y una sección por cada sistema contable que tiene algo propio:\n    `concar`, `csv`, `contasis`, `starsoft`, `ple`, `ple_plan`.\n    Siglas, sub-diarios, códigos, columnas del centro de costo: lo que lleva cada una lo dice\n    `contaperu://configuracion`.\n\n    **Con `driver`, la de quien lleva ese sistema**: lo general con las cuentas de ese sistema y solo\n    su sección. Pásalo siempre que sepas a qué sistema contable exporta el contribuyente, porque las\n    cuentas de fábrica son las del PCGE a seis dígitos y hay sistemas que numeran de otra forma.\n\n    Es un punto de partida razonable, no la verdad de ningún contribuyente: el plan de cuentas\n    y los sub-diarios los decide cada empresa. Cópiala, cámbiale lo que toque y pásala como\n    `configuracion` en las demás herramientas: se valida entera, y lo que no existe se dice.\n    ",
    "entrada": {
     "properties": {
      "driver": {
       "anyOf": [
        {
+        "enum": [
+         "sire",
+         "concar",
+         "csv",
+         "contasis",
+         "starsoft",
+         "asiento_contable",
+         "ple",
+         "ple_plan",
+         "sire_no_domiciliados"
+        ],
         "type": "string"
        },
        {
@@ -74,6 +88,7 @@
        }
       ],
       "default": null,
+      "description": "El sistema de destino (`drivers_disponibles`).",
       "title": "Driver"
      }
     },
@@ -118,6 +133,7 @@
        }
       ],
       "default": null,
+      "description": "Lo ya anotado en otros periodos del mismo RUC.",
       "title": "Claves Previas"
      },
      "configuracion": {
@@ -131,6 +147,7 @@
        }
       ],
       "default": null,
+      "description": "La configuración contable del contribuyente.",
       "title": "Configuracion"
      },
      "correlativos": {
@@ -144,14 +161,28 @@
        }
       ],
       "default": null,
+      "description": "Por qué número empieza cada sub-diario; sin él, en 1.",
       "title": "Correlativos"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      },
      "driver": {
+      "description": "El sistema de destino (`drivers_disponibles`).",
+      "enum": [
+       "sire",
+       "concar",
+       "csv",
+       "contasis",
+       "starsoft",
+       "asiento_contable",
+       "ple",
+       "ple_plan",
+       "sire_no_domiciliados"
+      ],
       "title": "Driver",
       "type": "string"
      },
@@ -166,6 +197,7 @@
        }
       ],
       "default": null,
+      "description": "Lo decidido para cada documento, por `id_externo`.",
       "title": "Imputacion"
      }
     },
@@ -185,7 +217,7 @@
     "readOnlyHint": true,
     "title": null
    },
-   "descripcion": "Los sistemas contables a los que se puede exportar, y qué pide cada uno.\n\n    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su **canal** —a\n    quién entrega: `sunat`, `legacy` o `erp`—, lo que **exige** para no negarse (CONCAR pide centro de costo y\n    una moneda con código; el CSV no) y si tiene sección propia en la configuración.\n\n    Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas; el `ple`, el\n    Libro Diario y los demás libros.\n\n    Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el\n    contribuyente: esas tres lo exigen y no lo suponen.\n    ",
+   "descripcion": "Los sistemas contables a los que se puede exportar, y qué pide cada uno.\n\n    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su **canal** —a\n    quién entrega: `sunat`, `legacy` o `erp`—, lo que **exige** para no negarse (CONCAR pide centro de costo y\n    una moneda con código; el CSV no) y si tiene sección propia en la configuración.\n\n    Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas, y\n    `sire_no_domiciliados` las compras del exterior; el `ple`, el Libro Diario y los demás libros.\n\n    Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el\n    contribuyente: esas tres lo exigen y no lo suponen.\n    ",
    "entrada": {
     "properties": {},
     "title": "drivers_disponiblesArguments",
@@ -206,6 +238,7 @@
      "corte": {
       "anyOf": [
        {
+        "format": "date",
         "type": "string"
        },
        {
@@ -213,11 +246,12 @@
        }
       ],
       "default": null,
-      "format": "date",
+      "description": "Deja fuera las aplicaciones posteriores y da los días contra el vencimiento.",
       "title": "Corte"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      },
@@ -235,6 +269,7 @@
        }
       ],
       "default": null,
+      "description": "Las partidas abiertas que vienen de otros meses.",
       "title": "Partidas Previas"
      }
     },
@@ -253,7 +288,7 @@
     "readOnlyHint": true,
     "title": null
    },
-   "descripcion": "Genera el archivo que espera un sistema contable, ya listo para importar.\n\n    Devuelve dos cosas: un resumen en JSON (nombre del archivo, comprobantes, debe y haber, y en\n    `_exportacion` la **huella** del asiento que salió: si vuelves a exportar lo mismo, la huella se\n    repite, y el Excel de CONCAR se SUMA al importarlo dos veces) y **el archivo adjunto**, para\n    guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.\n    `imputacion` es la misma de `generar_asiento`.\n\n    `driver` **se declara siempre**: el sistema contable de un contribuyente es suyo, y un Excel de\n    CONCAR importado en un CONTASIS no se nota hasta que ya está dentro.\n\n    Drivers disponibles, por canal —a quién entrega cada uno— (el recurso `contaperu://drivers` dice el de\n    cada cual):\n      - SUNAT:  `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el\n                contenido va en `texto` y el ZIP que sube a SUNAT, adjunto.\n                `ple` — el Libro Diario del PLE, que es el OTRO régimen de SUNAT: una fila por línea del\n                asiento, no por comprobante.\n                `ple_plan` — el detalle del plan contable del PLE (formato 5.3).\n      - Legacy: `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.\n                `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como\n                `.xlsx`: una fila por comprobante, sin sub-diario (se elige al importar).\n                `starsoft` — los asientos en TXT de palotes.\n      - ERP:    `csv` — las líneas de diario en columnas, en `texto` y también adjunto.\n                `asiento_contable` — el documento del estándar con sus comprobantes y su asiento, sin siglas ni\n                correlativos de ningún sistema legacy, adjunto como `.json`.\n\n    Antes de escribir nada, en los drivers que arman asiento (`concar`, `csv`) comprueba que cuadre; si\n    no cuadra, falla. `contasis` y `sire` no arman asiento: `contasis` se niega antes por lo que exige y\n    por lo que no cabe en su formato (`no_cabe`).\n    ",
+   "descripcion": "Genera el archivo que espera un sistema contable, ya listo para importar.\n\n    Devuelve dos cosas: un resumen en JSON (nombre del archivo, comprobantes, debe y haber, y en\n    `_exportacion` la **huella** del asiento que salió: si vuelves a exportar lo mismo, la huella se\n    repite, y el Excel de CONCAR se SUMA al importarlo dos veces) y **el archivo adjunto**, para\n    guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.\n    `imputacion` es la misma de `generar_asiento`.\n\n    `driver` **se declara siempre**: el sistema contable de un contribuyente es suyo, y un Excel de\n    CONCAR importado en un CONTASIS no se nota hasta que ya está dentro.\n\n    Drivers disponibles, por canal —a quién entrega cada uno— (el recurso `contaperu://drivers` dice el de\n    cada cual):\n      - SUNAT:  `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el\n                contenido va en `texto` y el ZIP que sube a SUNAT, adjunto.\n                `sire_no_domiciliados` — el TXT del registro de compras de no domiciliados (el 080500):\n                solo los `91`, `97` y `98`, que el `sire` deja fuera; en `texto` y con su ZIP adjunto.\n                `ple` — el Libro Diario del PLE, que es el OTRO régimen de SUNAT: una fila por línea del\n                asiento, no por comprobante.\n                `ple_plan` — el detalle del plan contable del PLE (formato 5.3).\n      - Legacy: `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.\n                `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como\n                `.xlsx`: una fila por comprobante, sin sub-diario (se elige al importar).\n                `starsoft` — los asientos en TXT de palotes.\n      - ERP:    `csv` — las líneas de diario en columnas, en `texto` y también adjunto.\n                `asiento_contable` — el documento del estándar con sus comprobantes y su asiento, sin siglas ni\n                correlativos de ningún sistema legacy, adjunto como `.json`.\n\n    Antes de escribir nada, en los drivers que arman asiento comprueba que cuadre; si no cuadra, falla.\n    Los de registro —su `familia` en `drivers_disponibles`— no arman asiento: `contasis` se niega antes\n    por lo que exige y por lo que no cabe en su formato (`no_cabe`).\n    ",
    "entrada": {
     "properties": {
      "claves_previas": {
@@ -282,6 +317,7 @@
        }
       ],
       "default": null,
+      "description": "Lo ya anotado en otros periodos del mismo RUC.",
       "title": "Claves Previas"
      },
      "configuracion": {
@@ -295,6 +331,7 @@
        }
       ],
       "default": null,
+      "description": "La configuración contable del contribuyente.",
       "title": "Configuracion"
      },
      "correlativos": {
@@ -308,20 +345,35 @@
        }
       ],
       "default": null,
+      "description": "Por qué número empieza cada sub-diario; sin él, en 1.",
       "title": "Correlativos"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      },
      "driver": {
+      "description": "El sistema de destino (`drivers_disponibles`).",
+      "enum": [
+       "sire",
+       "concar",
+       "csv",
+       "contasis",
+       "starsoft",
+       "asiento_contable",
+       "ple",
+       "ple_plan",
+       "sire_no_domiciliados"
+      ],
       "title": "Driver",
       "type": "string"
      },
      "fecha": {
       "anyOf": [
        {
+        "format": "date",
         "type": "string"
        },
        {
@@ -329,7 +381,7 @@
        }
       ],
       "default": null,
-      "format": "date",
+      "description": "La fecha de la exportación (AAAA-MM-DD).",
       "title": "Fecha"
      },
      "imputacion": {
@@ -343,10 +395,12 @@
        }
       ],
       "default": null,
+      "description": "Lo decidido para cada documento, por `id_externo`.",
       "title": "Imputacion"
      },
      "incluir_observados": {
       "default": false,
+      "description": "Generar aunque haya comprobantes con observaciones que bloquean.",
       "title": "Incluir Observados",
       "type": "boolean"
      }
@@ -396,6 +450,7 @@
        }
       ],
       "default": null,
+      "description": "Lo ya anotado en otros periodos del mismo RUC.",
       "title": "Claves Previas"
      },
      "configuracion": {
@@ -409,6 +464,7 @@
        }
       ],
       "default": null,
+      "description": "La configuración contable del contribuyente.",
       "title": "Configuracion"
      },
      "correlativos": {
@@ -422,14 +478,28 @@
        }
       ],
       "default": null,
+      "description": "Por qué número empieza cada sub-diario; sin él, en 1.",
       "title": "Correlativos"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      },
      "driver": {
+      "description": "El sistema de destino (`drivers_disponibles`).",
+      "enum": [
+       "sire",
+       "concar",
+       "csv",
+       "contasis",
+       "starsoft",
+       "asiento_contable",
+       "ple",
+       "ple_plan",
+       "sire_no_domiciliados"
+      ],
       "title": "Driver",
       "type": "string"
      },
@@ -444,10 +514,12 @@
        }
       ],
       "default": null,
+      "description": "Lo decidido para cada documento, por `id_externo`.",
       "title": "Imputacion"
      },
      "incluir_observados": {
       "default": false,
+      "description": "Generar aunque haya comprobantes con observaciones que bloquean.",
       "title": "Incluir Observados",
       "type": "boolean"
      }
@@ -472,16 +544,19 @@
    "entrada": {
     "properties": {
      "contenido": {
+      "description": "El archivo: texto tal cual o, con `es_base64`, en base64.",
       "title": "Contenido",
       "type": "string"
      },
      "es_base64": {
       "default": false,
+      "description": "`contenido` viene en base64 (un ZIP, siempre).",
       "title": "Es Base64",
       "type": "boolean"
      },
      "libro": {
       "additionalProperties": true,
+      "description": "La cabecera: RUC, periodo y si son ventas o compras.",
       "title": "Libro",
       "type": "object"
      }
@@ -506,16 +581,19 @@
    "entrada": {
     "properties": {
      "contenido": {
+      "description": "El archivo: texto tal cual o, con `es_base64`, en base64.",
       "title": "Contenido",
       "type": "string"
      },
      "es_base64": {
       "default": false,
+      "description": "`contenido` viene en base64 (un ZIP, siempre).",
       "title": "Es Base64",
       "type": "boolean"
      },
      "libro": {
       "additionalProperties": true,
+      "description": "La cabecera: RUC, periodo y si son ventas o compras.",
       "title": "Libro",
       "type": "object"
      }
@@ -550,10 +628,12 @@
        }
       ],
       "default": null,
+      "description": "La configuración contable del contribuyente.",
       "title": "Configuracion"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      }
@@ -577,6 +657,7 @@
    "entrada": {
     "properties": {
      "asiento": {
+      "description": "Las líneas del asiento.",
       "items": {
        "additionalProperties": true,
        "type": "object"
@@ -595,6 +676,7 @@
        }
       ],
       "default": null,
+      "description": "La cabecera: RUC, periodo y si son ventas o compras.",
       "title": "Libro"
      }
     },
@@ -627,15 +709,29 @@
        }
       ],
       "default": null,
+      "description": "La configuración contable del contribuyente.",
       "title": "Configuracion"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      },
      "driver": {
       "default": "",
+      "description": "El sistema de destino (`drivers_disponibles`).",
+      "enum": [
+       "sire",
+       "concar",
+       "csv",
+       "contasis",
+       "starsoft",
+       "asiento_contable",
+       "ple",
+       "ple_plan",
+       "sire_no_domiciliados"
+      ],
       "title": "Driver",
       "type": "string"
      },
@@ -650,6 +746,7 @@
        }
       ],
       "default": null,
+      "description": "Lo decidido para cada documento, por `id_externo`.",
       "title": "Imputacion"
      }
     },
@@ -673,11 +770,17 @@
     "properties": {
      "agrupar_por": {
       "default": "",
+      "description": "Vacío, solo los totales del libro; `contraparte`, además por proveedor o cliente.",
+      "enum": [
+       "",
+       "contraparte"
+      ],
       "title": "Agrupar Por",
       "type": "string"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      }
@@ -697,7 +800,7 @@
     "readOnlyHint": true,
     "title": null
    },
-   "descripcion": "Revisa el dinero de un periodo antes de conciliarlo: los movimientos de las cuentas\n    del contribuyente.\n\n    **Hay una sola entrada**, igual que `comprobantes` lo es de una compra o de una venta: venga de una línea de\n    extracto o de una constancia de pago, mándalo como un `movimiento`. No busques un bloque de constancias — no\n    existe. Lo que distingue una línea de extracto de un pago no es una etiqueta: es el `saldo`, que solo un\n    extracto trae, y el `origen`, que dice cómo se leyó (`manual`, `archivo`, `api`, `pdf_texto`, `vision`; los\n    dos últimos marcan lectura asistida y salen en `de_lectura_asistida` para que alguien los revise).\n    Y el número del papel va en `constancia`, aparte del que le da el banco, que es `referencia`: **los dos\n    existen y pueden ser distintos** —una detracción pagada desde un banco tiene su vóucher y su N° de operación—.\n\n    **Esta herramienta no asienta, y es a propósito**: mirar y asentar son dos preguntas distintas. Aquí se mira,\n    y lo que falte se dice sin parar nada; `generar_asiento` sobre un libro de tesorería **para** cuando falta,\n    porque sin la contrapartida o sin la cuenta contable del maestro no hay línea que escribir. Así que mira\n    primero y asienta después.\n\n    Para el asiento y su archivo, `generar_asiento` y `exportar` con el driver `asiento_contable`, que escribe el\n    documento del estándar con sus movimientos, su imputación y su asiento — y con los tres el archivo vuelve a\n    entrar y da lo mismo. **Las cuentas bancarias van en la configuración** (`cuentas_bancarias`), no como\n    argumento: la 104 de cada una sale de ahí y el motor no la deriva.\n\n    Lo que sigue sin poder salir es el archivo de un sistema legacy: espera un sub-diario de bancos que CONCAR\n    haya aceptado, y hasta entonces un destino legacy se niega diciendo que ese libro todavía no se numera.\n    ",
+   "descripcion": "Revisa el dinero de un periodo antes de conciliarlo: los movimientos de las cuentas\n    del contribuyente.\n\n    **Hay una sola entrada**, igual que `comprobantes` lo es de una compra o de una venta: venga de una línea de\n    extracto o de una constancia de pago, mándalo como un `movimiento`. No busques un bloque de constancias — no\n    existe. Lo que distingue una línea de extracto de un pago no es una etiqueta: es el `saldo`, que solo un\n    extracto trae, y el `origen`, que dice cómo se leyó (`manual`, `archivo`, `api`, `pdf_texto`, `vision`; los\n    dos últimos marcan lectura asistida y salen en `de_lectura_asistida` para que alguien los revise).\n    Y el número del papel va en `constancia`, aparte del que le da el banco, que es `referencia`: **los dos\n    existen y pueden ser distintos** —una detracción pagada desde un banco tiene su vóucher y su N° de operación—.\n\n    **Esta herramienta no asienta, y es a propósito**: mirar y asentar son dos preguntas distintas. Aquí se mira,\n    y lo que falte se dice sin parar nada; `generar_asiento` sobre un libro de tesorería **para** cuando falta,\n    porque sin la contrapartida o sin la cuenta contable del maestro no hay línea que escribir. Así que mira\n    primero y asienta después.\n\n    Para el asiento y su archivo, `generar_asiento` y `exportar` con el driver `asiento_contable`, que escribe el\n    documento del estándar con sus movimientos, su imputación y su asiento — y con los tres el archivo vuelve a\n    entrar y da lo mismo. **Las cuentas bancarias van en la configuración** (`cuentas_bancarias`), no como\n    argumento: la 104 de cada una sale de ahí y el motor no la deriva.\n\n    Y hacia un sistema legacy sale por `concar`, numerado por el sub-diario de cada cuenta bancaria: una cuenta\n    sin su `sub_diario` en `cuentas_bancarias` lo detiene (`cuenta_bancaria_sin_sub_diario`), y los `correlativos`\n    dicen por qué número empieza cada uno. Los demás sistemas legacy no llevan este libro.\n    ",
    "entrada": {
     "properties": {
      "cuentas": {
@@ -714,10 +817,12 @@
        }
       ],
       "default": null,
+      "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y la cuenta contable de cada una. Es un argumento; el motor no lo guarda.",
       "title": "Cuentas"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      }
@@ -766,6 +871,7 @@
        }
       ],
       "default": null,
+      "description": "Lo ya anotado en otros periodos del mismo RUC.",
       "title": "Claves Previas"
      },
      "configuracion": {
@@ -779,10 +885,12 @@
        }
       ],
       "default": null,
+      "description": "La configuración contable del contribuyente.",
       "title": "Configuracion"
      },
      "documento": {
       "additionalProperties": true,
+      "description": "Un documento `open-accounting`.",
       "title": "Documento",
       "type": "object"
      },
@@ -797,6 +905,7 @@
        }
       ],
       "default": null,
+      "description": "Lo decidido para cada documento, por `id_externo`.",
       "title": "Imputacion"
      }
     },
@@ -819,6 +928,7 @@
    "entrada": {
     "properties": {
      "cuentas": {
+      "description": "El maestro de cuentas bancarias del contribuyente: banco, número, CCI, moneda y la cuenta contable de cada una. Es un argumento; el motor no lo guarda.",
       "items": {
        "additionalProperties": true,
        "type": "object"
@@ -846,6 +956,7 @@
    "entrada": {
     "properties": {
      "asiento": {
+      "description": "Las líneas del asiento.",
       "items": {
        "additionalProperties": true,
        "type": "object"

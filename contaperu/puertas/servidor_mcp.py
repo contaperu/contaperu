@@ -43,12 +43,13 @@ from typing import Annotated, Any, Callable, get_type_hints
 
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
-from pydantic import Field
+from pydantic import Field, TypeAdapter, WithJsonSchema
 
 from mcp.types import BlobResourceContents, CallToolResult, EmbeddedResource, TextContent, ToolAnnotations
 
 from .. import _datos, api
 from ..api import textos
+from ..api.tabla import PARAMETROS
 from .comun import LOCALES, MAXIMO_ARCHIVO, hosts_permitidos, origenes_permitidos, peso_de_base64
 
 __all__ = ["INSTRUCCIONES", "LOCALES", "MAXIMO_ARCHIVO", "REGLAS", "SOLO_LECTURA", "contesta", "main", "mcp",
@@ -110,8 +111,8 @@ def contesta(funcion: Callable[..., Any]) -> Callable[..., CallToolResult]:
         return resultado if isinstance(resultado, CallToolResult) else _dicho(resultado)
 
     # La firma se entrega ya resuelta. Este módulo aplaza las anotaciones (`from __future__ import annotations`),
-    # así que `inspect.signature` las devuelve como texto, y un alias declarado aquí —`FECHA`— deja de resolverse
-    # al mirarlas desde el envoltorio. Con las pistas resueltas, el SDK ve exactamente los mismos tipos que veía
+    # así que `inspect.signature` las devuelve como texto, y un alias declarado aquí —lo fue `FECHA` hasta la
+    # 15.15.0— deja de resolverse al mirarlas desde el envoltorio. Con las pistas resueltas, el SDK ve exactamente los mismos tipos que veía
     # antes de decorar.
     firma = inspect.signature(funcion)
     pistas = get_type_hints(funcion, include_extras=True)
@@ -137,11 +138,6 @@ mcp._mcp_server.version = api.__version__
 # la red—, así que un cliente puede llamarla sin pedir confirmación por un efecto que no tiene.
 SOLO_LECTURA = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
 
-# Una fecha del calendario, no una cadena cualquiera: `api/tabla.py` ya lo declara asi para la puerta HTTP y
-# el contrato, y las dos puertas describen lo que reciben con las mismas palabras.
-FECHA = Annotated[str | None, Field(json_schema_extra={"format": "date"})]
-
-
 # --- de la tabla a las herramientas y los recursos ---------------------------------
 #
 # Lo único que esta puerta declara de cada parámetro es su TIPO PYTHON, porque es de lo que el SDK deriva el
@@ -151,6 +147,11 @@ FECHA = Annotated[str | None, Field(json_schema_extra={"format": "date"})]
 #
 # Un tipo opcional se deriva: con valor por defecto `None` es `T | None`; con cualquier otro —`False`, `""`—
 # es `T` a secas, que es lo que estaba escrito a mano en las 14 firmas.
+#
+# **Y lo que dice cada parámetro tampoco se escribe aquí** (15.15.0): su `description`, su `enum` y su `format`
+# salen de `api/tabla.PARAMETROS`, que ya los declaraba para la puerta HTTP y el contrato. Hasta entonces los 52
+# parámetros de las 18 herramientas llegaban al agente con un nombre y un tipo y nada más, mientras la puerta de al
+# lado los describía: un agente tenía que adivinar qué era `correlativos` o qué valores admitía `agrupar_por`.
 TIPOS: dict[str, Any] = {
     "documento": dict,
     "contenido": str,
@@ -168,11 +169,42 @@ TIPOS: dict[str, Any] = {
     "agrupar_por": str,
     "texto": str,
     "codigo": str,
-    # `fecha` ya trae su `| None` dentro del alias, con el `format: date` que la tabla declara para el contrato.
-    # `corte` es el mismo caso y por el mismo motivo: una fecha que pone quien llama, porque el motor no la tiene.
-    "fecha": FECHA,
-    "corte": FECHA,
+    # Dos fechas que pone quien llama, porque el motor no tiene reloj. Su `format: date` ya no se declara aquí con
+    # un alias: lo dice la tabla, como el de cualquier otro parámetro.
+    "fecha": str,
+    "corte": str,
 }
+
+# De lo que la tabla declara de un parámetro, lo que se publica además del tipo. **No se llevan los `$ref`**: apuntan
+# a los esquemas publicados por URL, y un cliente MCP no sale a buscarlos —uno estricto, además, rechazaría la
+# herramienta entera por un esquema que no puede resolver—. Lo que el agente necesita de un documento está en el
+# recurso `contaperu://estandar/open-accounting`, que se lee sin red.
+DE_LA_TABLA = ("enum", "format")
+
+# Los destinos, como `enum` de `driver`, contados AL ARRANCAR: son los de `drivers.DRIVERS`, que suma los de serie y
+# los de terceros que haya instalados (`drivers_disponibles` los lee de ahí). Por eso no viven en la tabla: el contrato
+# OpenConta es un archivo que se publica, y no puede saber qué driver de terceros tendrá instalado quien lo sirva.
+# Y la lista es un `enum` del esquema y no una validación: un destino que no existe lo sigue rechazando el motor, con
+# su `clave` y la lista de los que hay, en vez de un error del SDK que el agente no sabría leer.
+DESTINOS: tuple[str, ...] = tuple(api.drivers_disponibles())
+POR_LA_PUERTA = {"driver": {"enum": list(DESTINOS)}}
+
+
+def _anotacion(nombre: str, opcional: bool) -> Any:
+    """El tipo con que se publica un parámetro: el de `TIPOS`, con lo que la tabla dice de él.
+
+    El `enum` y el `format` van en la rama del texto y no al lado del `anyOf`: en un parámetro opcional, un `enum` en
+    la raíz del esquema dejaría fuera el `null` que la firma admite. La descripción va en el campo, que es donde la
+    lee un cliente.
+    """
+    declarado = PARAMETROS[nombre]
+    tipo = TIPOS[nombre]
+    extra = {**{clave: declarado[clave] for clave in DE_LA_TABLA if clave in declarado}, **POR_LA_PUERTA.get(nombre, {})}
+    if extra:
+        tipo = Annotated[tipo, WithJsonSchema({**TypeAdapter(tipo).json_schema(), **extra})]
+    if opcional:
+        tipo = tipo | None
+    return Annotated[tipo, Field(description=declarado["description"])]
 
 # El nombre con que un parámetro sale por esta puerta, cuando no es el de la api. `lineas` son las líneas del
 # asiento, y para un agente «asiento» dice de qué está hablando; la api lo llama por lo que es. Vivía en una
@@ -202,14 +234,11 @@ ARCHIVOS = (("contenido_base64", "archivo", "content_type"),
 
 
 def _firma_de(operacion: api.Operacion) -> inspect.Signature:
-    """La firma con que esta puerta publica una operación: sus nombres y defaults, con el tipo de `TIPOS`."""
+    """La firma con que esta puerta publica una operación: sus nombres y defaults, con el tipo de `_anotacion`."""
     parametros = []
     for p in inspect.signature(operacion.funcion).parameters.values():
-        tipo = TIPOS[p.name]
-        if p.default is None and tipo is not FECHA:
-            tipo = tipo | None
         parametros.append(inspect.Parameter(RENOMBRA.get(p.name, p.name), inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                                            default=p.default, annotation=tipo))
+                                            default=p.default, annotation=_anotacion(p.name, p.default is None)))
     return inspect.Signature(parametros, return_annotation=CallToolResult)
 
 

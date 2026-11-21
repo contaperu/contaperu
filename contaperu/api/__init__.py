@@ -23,7 +23,7 @@ from ..pipeline.preparacion import MAXIMO_CLAVES_PREVIAS, MAXIMO_COMPROBANTES
 from ..pipeline.salida import Exportado
 from ..pipeline.seleccion import errores_de, fuera_de, seleccionar
 from .documento import documento_de
-from .instrucciones import CAMINO, INSTRUCCIONES, PRESENTACION, REGLAS
+from .instrucciones import CAMINO, INSTRUCCIONES, PRESENTACION, REGLAS, REGLAS_POR_CLAVE
 from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesborda, Descuadre, DocumentoInvalido, ErrorContaperu,
                       ErroresBloqueantes, IgvImposible, NoCabe, NoExportable, RepartoNoAdmitido, RepartoNoCuadra,
                       SinCentro, SinCodigoDeMoneda, SinCodigoDetraccion, SinCorrelativo, SinCuenta, SinSigla,
@@ -58,8 +58,9 @@ __all__ = [
     # la tabla que exponen las puertas
     "OPERACIONES", "Operacion",
     # lo que se le dice a un agente: las REGLAS del dominio, que no nombran ninguna herramienta, y el
-    # texto entero de este servidor. Quien monta su propia capa de agente se trae `REGLAS`.
-    "REGLAS", "CAMINO", "PRESENTACION", "INSTRUCCIONES",
+    # texto entero de este servidor. Quien monta su propia capa de agente se trae `REGLAS`; y si llama al motor
+    # de otra forma, las del documento por su clave (15.15.0): `REGLAS_POR_CLAVE["documento"]`.
+    "REGLAS", "REGLAS_POR_CLAVE", "CAMINO", "PRESENTACION", "INSTRUCCIONES",
     # QUÉ SALE EN EL ARCHIVO, antes de generarlo (14.2.0). Quien integra el motor tiene que poder decirle a
     # su contador cuántos comprobantes van a entrar, cuáles quedan fuera porque ese destino no lleva su tipo
     # —el recibo por honorarios no va al TXT del SIRE— y cuáles lo bloquean, y tiene que poder decirlo ANTES

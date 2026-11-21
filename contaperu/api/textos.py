@@ -18,6 +18,12 @@ como docstring, y se conserva: es lo que el agente lee hoy, byte a byte (`tests/
 """
 from __future__ import annotations
 
+from .instrucciones import SISTEMAS_CON_SECCION
+
+# Las secciones de la configuración, derivadas como en las reglas: la descripción de `configuracion_por_defecto`
+# nombraba tres —`concar`, `csv`, `contasis`— cuando ya eran seis.
+_SECCIONES = ", ".join(f"`{nombre}`" for nombre in SISTEMAS_CON_SECCION)
+
 # Por el nombre de la herramienta, que es como la ve el agente.
 PARA_HERRAMIENTA: dict[str, str] = {
     'leer_xml_ubl': """Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `open-accounting`.
@@ -127,6 +133,8 @@ PARA_HERRAMIENTA: dict[str, str] = {
     cada cual):
       - SUNAT:  `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el
                 contenido va en `texto` y el ZIP que sube a SUNAT, adjunto.
+                `sire_no_domiciliados` — el TXT del registro de compras de no domiciliados (el 080500):
+                solo los `91`, `97` y `98`, que el `sire` deja fuera; en `texto` y con su ZIP adjunto.
                 `ple` — el Libro Diario del PLE, que es el OTRO régimen de SUNAT: una fila por línea del
                 asiento, no por comprobante.
                 `ple_plan` — el detalle del plan contable del PLE (formato 5.3).
@@ -138,9 +146,9 @@ PARA_HERRAMIENTA: dict[str, str] = {
                 `asiento_contable` — el documento del estándar con sus comprobantes y su asiento, sin siglas ni
                 correlativos de ningún sistema legacy, adjunto como `.json`.
 
-    Antes de escribir nada, en los drivers que arman asiento (`concar`, `csv`) comprueba que cuadre; si
-    no cuadra, falla. `contasis` y `sire` no arman asiento: `contasis` se niega antes por lo que exige y
-    por lo que no cabe en su formato (`no_cabe`).
+    Antes de escribir nada, en los drivers que arman asiento comprueba que cuadre; si no cuadra, falla.
+    Los de registro —su `familia` en `drivers_disponibles`— no arman asiento: `contasis` se niega antes
+    por lo que exige y por lo que no cabe en su formato (`no_cabe`).
     """,
     'validar_partida_doble': """Comprueba que la suma del Debe sea exactamente igual a la del Haber.
 
@@ -226,8 +234,9 @@ PARA_HERRAMIENTA: dict[str, str] = {
     entrar y da lo mismo. **Las cuentas bancarias van en la configuración** (`cuentas_bancarias`), no como
     argumento: la 104 de cada una sale de ahí y el motor no la deriva.
 
-    Lo que sigue sin poder salir es el archivo de un sistema legacy: espera un sub-diario de bancos que CONCAR
-    haya aceptado, y hasta entonces un destino legacy se niega diciendo que ese libro todavía no se numera.
+    Y hacia un sistema legacy sale por `concar`, numerado por el sub-diario de cada cuenta bancaria: una cuenta
+    sin su `sub_diario` en `cuentas_bancarias` lo detiene (`cuenta_bancaria_sin_sub_diario`), y los `correlativos`
+    dicen por qué número empieza cada uno. Los demás sistemas legacy no llevan este libro.
     """,
     'validar_cuentas_bancarias': """Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.
 
@@ -266,10 +275,11 @@ PARA_HERRAMIENTA: dict[str, str] = {
     Para saber si una cuenta existe o cómo se llama, la herramienta es `buscar_cuenta_pcge`; esta
     no es esa.
     """,
-    'configuracion_por_defecto': """La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas
-    de detracción— y una sección por sistema contable con lo suyo (`concar`: siglas y sub-diarios,
-    códigos, columnas del centro de costo; `csv`: siglas, sub-diarios y códigos de la detracción;
-    `contasis`: medio de pago y columnas del centro de costo).
+    'configuracion_por_defecto': f"""La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas
+    de detracción— y una sección por cada sistema contable que tiene algo propio:
+    {_SECCIONES}.
+    Siglas, sub-diarios, códigos, columnas del centro de costo: lo que lleva cada una lo dice
+    `contaperu://configuracion`.
 
     **Con `driver`, la de quien lleva ese sistema**: lo general con las cuentas de ese sistema y solo
     su sección. Pásalo siempre que sepas a qué sistema contable exporta el contribuyente, porque las
@@ -285,8 +295,8 @@ PARA_HERRAMIENTA: dict[str, str] = {
     quién entrega: `sunat`, `legacy` o `erp`—, lo que **exige** para no negarse (CONCAR pide centro de costo y
     una moneda con código; el CSV no) y si tiene sección propia en la configuración.
 
-    Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas; el `ple`, el
-    Libro Diario y los demás libros.
+    Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas, y
+    `sire_no_domiciliados` las compras del exterior; el `ple`, el Libro Diario y los demás libros.
 
     Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el
     contribuyente: esas tres lo exigen y no lo suponen.

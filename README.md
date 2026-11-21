@@ -434,7 +434,8 @@ rechaza**, en vez de ignorarse en silencio como antes.
   y le salió `07` donde el motor dice `("07","87")`: una nota de crédito de no domiciliado que no restaba.
 - **Qué campos pone cada uno.** `campos_del_comprobante` reparte el comprobante en tres tramos —lo que trae el
   documento, lo que pone el sistema y lo que decide la revisión— y `REGLAS` da las reglas del dominio **sin nombrar
-  ninguna herramienta de este motor**, para quien monte su propia capa de agente.
+  ninguna herramienta de este motor**, para quien monte su propia capa de agente; desde la 15.15, también por su clave
+  y su ámbito (`REGLAS_POR_CLAVE`), para quien llame al motor de otra forma y solo quiera las del documento.
 - **La API del SIRE, descrita.** Sus operaciones con su ruta, su método y su grada —entre ellas, bajar lo
   **declarado** de un periodo, que no es la propuesta, y desde la 15.4.0 las inconsistencias que SUNAT ve, su resumen
   y el reporte de casillas del 621—; armar la petición, leer el estado de un ticket y el de un
