@@ -50,7 +50,7 @@ EXIGE_NUCLEO_NEUTRAL = frozenset({"cuenta_contable"})
 # —la sigla de la T.G. 06 y el mapa de la T.G. 28— salieron de `CONFIGURACION_DEL_ASIENTO` a la sección de CONCAR en la
 # 4.0, y siguen siendo vocabulario legacy: se nombran a mano para que un driver neutral tampoco pueda declararlas.
 CLAVES_LEGACY = frozenset({c.clave for c in CONFIGURACION_DEL_ASIENTO}
-                          | {MONEDAS_CODIGO, "detraccion_tipo_doc", "detraccion_codigos"})
+                          | {MONEDAS_CODIGO, "detraccion_tipo_doc", "detraccion_codigos", "tesoreria_tipo_doc"})
 
 # En orden de preferencia: si un driver expone dos, el núcleo usa la primera.
 FORMAS = ("desde_lineas", "desde_comprobantes", "linea")

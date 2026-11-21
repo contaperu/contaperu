@@ -45,7 +45,7 @@ CONCAR y sus datos viven en su driver; el núcleo arma `lineas_del_comprobante()
 """
 from .configuracion import CONFIGURACION_DEL_ASIENTO, MONEDAS_CODIGO, NUMERO_DETRACCION_PENDIENTE
 from .faltas import (AnuladaConDeposito, CONTADOR, CuentaSinClase, FALTA, FALTAS, LibroQueElMotorNoOrigina,
-                     LibroQueTodaviaNoSeNumera,
+                     LibroQueTodaviaNoSeNumera, CuentaBancariaSinSubDiario,
                      MovimientoSinImputar, PROVEEDOR, SISTEMA, SinCuentaDeEfectivo, TraspasoEnDosPatas,
                      Falta, SinCodigoDeMoneda, NoExportable,
                      RepartoNoAdmitido, RepartoNoCuadra, SinCentro, SinCodigoDetraccion, SinCuenta,
@@ -86,7 +86,7 @@ __all__ = [
     "faltantes_de_movimientos", "lineas_del_movimiento", "nombre_de_movimiento",
     "traspasos_en_dos_patas", "cabecera_de_movimiento", "lineas_e_indice_de_movimientos",
     "indice_de_movimientos_dados", "LineaSinMovimiento",
-    "LibroQueTodaviaNoSeNumera", "CabeceraDeMovimiento", "MovimientoDelAsiento",
+    "LibroQueTodaviaNoSeNumera", "CuentaBancariaSinSubDiario", "CabeceraDeMovimiento", "MovimientoDelAsiento",
     "identidad_de_movimiento",
     "anulada_por_nota", "comprobantes_anulados_con_deposito", "asienta_sin_efecto",
     "comprobantes_sin_centro", "comprobantes_sin_codigo_detraccion", "comprobantes_sin_cuenta", "con_efecto_contable", "con_reparto", "correlativos_de_partida", "cuenta_honorarios",

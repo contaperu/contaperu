@@ -20,6 +20,7 @@ from ...asiento.faltas import SinCodigoDeMoneda
 from ...asiento.indice import Cabecera
 from ...asiento.lineas import LineaDiario
 from ...asiento.comprobante import cabecera_de, lineas_del_comprobante, serie_numero_de
+from ...asiento.movimiento import GRUPO_EFECTIVO
 from ...asiento.resolucion import sigla_de_tipo
 from ..kit import Opciones, celdas
 from ...pcge import clase_de
@@ -71,6 +72,16 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
     """Una línea del comprobante → una fila del Excel (claves 'A'..'AO', en el orden de la plantilla). `c` es la cabecera del
     comprobante (`asiento.indice`) o el propio comprobante: de ahí salen la glosa de la F y la tasa de la AO."""
     cabecera = _cabecera(c)
+    # AO: CONCAR solo admite la tasa entera. Se redondea desde los importes del comprobante y no desde la tasa de la
+    # línea, que ya va redondeada a 2 decimales: redondear dos veces puede dar otro entero.
+    tasa = (tasa_igv_entera(Decimal(cabecera.igv), Decimal(cabecera.base_gravada))
+            if linea.tasa_igv not in ("", None) else "")
+    return _fila(linea, config, cabecera.glosa, tasa)
+
+
+def _fila(linea: LineaDiario, config: dict, glosa_principal: str, tasa: Any) -> dict[str, Any]:
+    """Lo de una línea que es igual en los dos libros que CONCAR lleva: un comprobante y un movimiento. Lo que cambia
+    entre ellos —de dónde sale la glosa de la F y la tasa de la AO— llega hecho (`fila`, `fila_de_movimiento`)."""
     es_usd = linea.moneda == "USD"
     importe = _importe(linea.importe)
     doc, ref, det = linea.documento or {}, linea.referencia or {}, linea.detraccion or {}
@@ -80,7 +91,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         "E": codigo_moneda(linea.moneda, config),
         # F: la glosa de la cabecera, igual en todas las filas del comprobante; W: la de la línea, con
         # su prefijo. Una sola glosa, dos largos: lo único que cambia es lo que admite CONCAR.
-        "F": cabecera.glosa[:datos.LARGOS_DE_GLOSA["F"]], "W": linea.glosa[:datos.LARGOS_DE_GLOSA["W"]],
+        "F": glosa_principal[:datos.LARGOS_DE_GLOSA["F"]], "W": linea.glosa[:datos.LARGOS_DE_GLOSA["W"]],
         # Con el T.C. del comprobante la conversión es especial ('C'); sin él, CONCAR lo busca en su tabla.
         # **Solo en moneda extranjera**, que es como está validado el Excel que importa un CONCAR real: un
         # apunte en soles no se convierte. Desde la 2.2 la línea puede traer T.C. también en PEN —lo pide
@@ -103,11 +114,7 @@ def fila(linea: LineaDiario, c: Comprobante | Cabecera, config: dict) -> dict[st
         # formato, y el snapshot lo fija. En el .xlsx las dos son la misma celda vacía.
         "T": _fecha(doc.get("fecha_emision"), None), "U": _fecha(doc.get("fecha_vencimiento"), None),
         "X": linea.anexo_auxiliar,
-        # AO: CONCAR solo admite la tasa entera. Se redondea desde los importes del comprobante y no
-        # desde la tasa de la línea, que ya va redondeada a 2 decimales: redondear dos veces puede
-        # dar otro entero.
-        "AO": (tasa_igv_entera(Decimal(cabecera.igv), Decimal(cabecera.base_gravada))
-               if linea.tasa_igv not in ("", None) else ""),
+        "AO": tasa,
     })
     if ref:
         f.update({"Z": sigla_de_tipo(ref.get("tipo_cp"), config),
@@ -139,6 +146,45 @@ def filas(c: Comprobante | Cabecera, lineas: list[LineaDiario], config: dict) ->
     """Las líneas de UN comprobante → sus filas del Excel. `c` es su cabecera o el propio comprobante."""
     cabecera = _cabecera(c)
     return [fila(ln, cabecera, config) for ln in lineas]
+
+
+# ── El libro de tesorería (15.14.0) ─────────────────────────────────────────────────────────────────────────────
+# Calcado del pago que un CONCAR real aceptó (sub-diario de bancos, 21-nov-2026; el archivo vive fuera del
+# repositorio): una 42 por factura con SU documento —tipo, serie-número, emisión y vencimiento— y la del banco al
+# final, con la suma. Lo que es formato de CONCAR y se decide aquí son cuatro cosas, medidas en ese archivo.
+
+
+def tipo_doc_tesoreria(config: dict) -> str:
+    """Columna R de una línea cuyo documento es el vóucher —la del banco, la del ITF—: la sigla de su T.G. 06. `TL` es
+    la del pago que CONCAR aceptó, y se configura como la de la detracción (`tesoreria_tipo_doc`)."""
+    return str(config.get("tesoreria_tipo_doc") or datos.TIPO_DOC_TESORERIA)
+
+
+def fila_de_movimiento(linea: LineaDiario, cabecera: Any, config: dict) -> dict[str, Any]:
+    """Una línea de un movimiento → una fila del Excel. `cabecera` es la del movimiento (`asiento.indice`).
+
+    Lo que se aparta de la fila de un comprobante, cada cosa como está en el pago real:
+    - **F, la glosa principal, es la de la LÍNEA**: cada 42 lleva la de su factura y la del banco «PAGOS VARIOS». En
+      un comprobante es la misma en todas sus filas; en un pago no, porque cada 42 es de otra factura;
+    - **R del vóucher**: una línea sin tipo de la Tabla 10 —la del banco— lleva la sigla de tesorería;
+    - **L de la línea del efectivo es su propia cuenta**: CONCAR anexa una cuenta de bancos a sí misma (104101 en las
+      dos columnas). La reconoce el elemento 10 del PCGE, que es como el motor reconoce el dinero;
+    - **U cae a la fecha del documento** cuando no hay vencimiento: un vóucher no vence, y el archivo aceptado lo lleva
+      igual a la T.
+    Sin tasa de IGV: un pago no la tiene."""
+    f = _fila(linea, config, linea.glosa, "")
+    if not (linea.documento or {}).get("tipo_cp"):
+        f["R"] = tipo_doc_tesoreria(config)
+    if str(linea.cuenta or "").startswith(GRUPO_EFECTIVO):
+        f["L"] = linea.cuenta
+    if f["U"] in ("", None):
+        f["U"] = f["T"]
+    return f
+
+
+def filas_de_movimiento(cabecera: Any, lineas: list[LineaDiario], config: dict) -> list[dict[str, Any]]:
+    """Las líneas de UN movimiento → sus filas del Excel, en el orden del asiento: las 42 y el banco al final."""
+    return [fila_de_movimiento(ln, cabecera, config) for ln in lineas]
 
 
 def filas_de_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,

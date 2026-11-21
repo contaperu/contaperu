@@ -21,8 +21,8 @@ from .comprobante import (FALTA, FALTAS, AnuladaConDeposito, RepartoNoAdmitido, 
                           SinCodigoDeMoneda, SinCodigoDetraccion, SinCorrelativo, SinCuenta, SinDenominacion,
                           SinSigla)
 from .comun import CONTADOR, PROVEEDOR, SISTEMA, Falta, LibroQueElMotorNoOrigina, NoExportable
-from .movimiento import (CuentaSinClase, LibroQueTodaviaNoSeNumera, MovimientoSinImputar, SinCuentaDeEfectivo,
-                         TraspasoEnDosPatas)
+from .movimiento import (CuentaBancariaSinSubDiario, CuentaSinClase, LibroQueTodaviaNoSeNumera, MovimientoSinImputar,
+                         SinCuentaDeEfectivo, TraspasoEnDosPatas)
 
 __all__ = ["CONTADOR", "SISTEMA", "PROVEEDOR", "NoExportable", "Falta", "FALTA", "FALTAS",
            "LibroQueElMotorNoOrigina",
@@ -30,4 +30,4 @@ __all__ = ["CONTADOR", "SISTEMA", "PROVEEDOR", "NoExportable", "Falta", "FALTA",
            "SinCodigoDetraccion", "RepartoNoCuadra", "SinCentro", "SinClase", "SinCorrelativo",
            "AnuladaConDeposito",
            "MovimientoSinImputar", "SinCuentaDeEfectivo", "TraspasoEnDosPatas", "LibroQueTodaviaNoSeNumera",
-           "CuentaSinClase"]
+           "CuentaSinClase", "CuentaBancariaSinSubDiario"]

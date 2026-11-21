@@ -458,7 +458,8 @@ def test_cada_driver_de_serie_declara_lo_que_se_configura_en_su_seccion():
     El SIRE no se configura: no lleva cuentas."""
     del_asiento = [c.clave for c in CONFIGURACION_DEL_ASIENTO]
     assert [c.clave for c in contrato.configuracion(drivers.concar)] == [
-        *del_asiento, "monedas_codigo", "detraccion_tipo_doc", "detraccion_codigos", "detraccion_area"]
+        *del_asiento, "monedas_codigo", "detraccion_tipo_doc", "tesoreria_tipo_doc", "detraccion_codigos",
+        "detraccion_area"]
     assert [c.clave for c in contrato.configuracion(drivers.csv)] == del_asiento
     assert [c.clave for c in contrato.configuracion(drivers.contasis)] == ["medio_pago", "monedas_codigo"]
     assert contrato.configuracion(drivers.sire) == () and contrato.columnas_elegibles(drivers.sire) == {}
@@ -644,6 +645,15 @@ def _meses_que_pasan_por_todo() -> list[tuple[dict, dict]]:
     return meses
 
 
+def _un_mes_de_banco() -> dict:
+    """Un pago con su línea del banco: lo mínimo para que un driver que lleva tesorería lea lo suyo."""
+    return {"libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202611",
+                      "tipo": "tesoreria"},
+            "movimientos": [{"cuenta": "bcp-soles", "fecha": "2026-11-03", "importe": "100.00", "sentido": "cargo",
+                             "moneda": "PEN", "constancia": "0311261348", "id_externo": "pago-1"}],
+            "imputaciones_de_movimientos": {"pago-1": {"cuenta_contable": "421201", "contraparte_doc": "20602222226"}}}
+
+
 @pytest.mark.parametrize("nombre", ["concar", "contasis", "csv", "starsoft"])
 def test_lo_que_se_lee_de_la_configuracion_esta_declarado_y_lo_declarado_se_lee(nombre, monkeypatch):
     """Se exportan un mes de compras y uno de ventas que pasan por todo, y se anota cada clave que se lee de la
@@ -657,6 +667,11 @@ def test_lo_que_se_lee_de_la_configuracion_esta_declarado_y_lo_declarado_se_lee(
     for doc, imputacion in _meses_que_pasan_por_todo():
         api.exportar(doc, driver=nombre, configuracion={}, imputacion=imputacion, incluir_observados=True)
     modulo = drivers.obtener(nombre)
+    # Y un mes de banco a quien lleva tesorería (15.14.0): la sigla de la línea del banco solo se lee ahí.
+    if "tesoreria" in modulo.FORMATOS:
+        api.exportar(_un_mes_de_banco(), driver=nombre,
+                     configuracion={"cuentas_bancarias": [{"id": "bcp-soles", "banco": "BCP", "moneda": "PEN",
+                                                           "cuenta_contable": "104101", "sub_diario": "24"}]})
     assert leidas - (GENERALES | _propias(modulo) | LAS_DOS_IMPUTACIONES) == set(), \
         f"{nombre} lee claves sin declarar"
     assert _propias(modulo) - leidas == set(), f"{nombre} declara claves que no lee"

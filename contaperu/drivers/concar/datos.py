@@ -18,7 +18,9 @@ CANAL = "legacy"
 # El `fecha` no lo lee nadie al escribir: una celda de Excel lleva una fecha de verdad y el formato lo pone
 # `number_format` (`xlsx.py`). Queda declarado porque es cómo se ve la columna en CONCAR.
 OPCIONES = Opciones(fecha="DD/MM/AAAA", extension=".xlsx")
-FORMATOS = {"compra": "concar_xlsx", "venta": "concar_xlsx"}
+# Y el libro de TESORERÍA desde la 15.14.0, calcado del pago que un CONCAR real aceptó (sub-diario de bancos,
+# 21-nov-2026; el archivo vive fuera del repositorio): una 42 por factura y la línea del banco al final.
+FORMATOS = {"compra": "concar_xlsx", "venta": "concar_xlsx", "tesoreria": "concar_xlsx"}
 CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 # Lo que CONCAR no puede importar sin (contrato de driver, `EXIGE`): el centro de costo en las cuentas
 # que lo llevan en la columna M —el contador, 06-sep-2026: obligatorio donde de verdad se escribe— y
@@ -61,6 +63,10 @@ SUFIJO_T28 = "01"
 # La sigla de la T.G. 06 con la que nace una empresa: la del Excel real que CONCAR aceptó. Hasta la 3.10 se llamaba
 # `asiento.TIPO_DOC_DETRACCION` y era un nombre público del núcleo, que es donde no debía estar.
 TIPO_DOC_DETRACCION = "DR"
+# Y la de la línea del banco de un movimiento —y de toda línea cuyo documento es el vóucher, como la del ITF—: la `TL`
+# del pago real que CONCAR aceptó (15.14.0). El vóucher no es un comprobante de SUNAT, así que no hay tipo de la
+# Tabla 10 del que sacarla: es vocabulario de esta instalación, y por eso se configura (`tesoreria_tipo_doc`).
+TIPO_DOC_TESORERIA = "TL"
 
 # La sigla de la nota de crédito, que es de CONCAR y no de la tabla general del asiento.
 #
@@ -110,6 +116,12 @@ CONFIGURACION = (
     Campo("detraccion_tipo_doc", "texto", TIPO_DOC_DETRACCION, titulo="Tipo de documento de la detracción",
           grupo="detracciones", patron=r"^[A-Z0-9]{1,2}$",
           ayuda="La sigla de tu Tabla General 06 para la línea de la detracción (en el Excel validado, DR)."),
+    # Columna R de la línea del banco (15.14.0): la sigla de la T.G. 06 para el documento de un movimiento, que es su
+    # vóucher. `TL`, la del pago que CONCAR aceptó, y como la de la detracción cada contribuyente la numera a su gusto.
+    Campo("tesoreria_tipo_doc", "texto", TIPO_DOC_TESORERIA, titulo="Tipo de documento de la línea del banco",
+          grupo="tipos", patron=r"^[A-Z0-9]{1,2}$",
+          ayuda="La sigla de tu Tabla General 06 para la línea del banco de un pago o un cobro (en el Excel "
+                "validado, TL)."),
     # Columna AI: código SUNAT del bien o servicio (3 dígitos, viene en el XML) → código interno de la T.G. 28 de
     # CONCAR (5 dígitos: el de SUNAT + 2 propios). Un código que no esté aquí sale como SUNAT + `SUFIJO_T28`.
     # QUÉ ENTRA (los más usados, no todos): todo el Anexo 3 —los servicios, que son lo que un estudio ve a diario— más
@@ -245,18 +257,19 @@ ANCHOS = {
 # ingreso; la X, su anexo auxiliar.
 COLUMNAS_ELEGIBLES = {"centro_costo": (
     # La principal, siempre: la M de la línea cuya cuenta lleva centro (`cuentas_con_centro`).
-    Columna("centro_costo", "Código de Centro de Costo", {"compra": "M", "venta": "M"}, fija=True,
+    Columna("centro_costo", "Código de Centro de Costo", {"compra": "M", "venta": "M", "tesoreria": "M"}, fija=True,
             ayuda="En la línea del gasto o del ingreso, cuando su cuenta lleva centro de costo.",
             rol="principal", campo="centro_costo"),
     # «Algunas empresas optan en colocar la columna X como referencia el centro de costo» (el contador, 09-sep-2026).
     # Sin marcar: la plantilla avisa de que X solo se llena «si Cuenta Contable tiene seleccionado Tipo de Anexo
     # Referencia», y escribirla donde no toca puede hacer que CONCAR rechace la importación. Nunca va en M y X a la vez.
-    Columna("anexo_auxiliar", "Código de Anexo Auxiliar", {"compra": "X", "venta": "X"},
+    Columna("anexo_auxiliar", "Código de Anexo Auxiliar", {"compra": "X", "venta": "X", "tesoreria": "X"},
             ayuda="En la línea del gasto o del ingreso cuya cuenta NO lleva centro, como referencia. Solo si esa "
                   "cuenta tiene anexo referencia en tu CONCAR.",
             rol="principal", campo="anexo_auxiliar"),
     # El «doble anexo»: el centro también en la línea del proveedor o del cliente, como en el Excel que CONCAR aceptó.
-    Columna("anexo_auxiliar_del_tercero", "Código de Anexo Auxiliar", {"compra": "X", "venta": "X"}, marcada=True,
+    Columna("anexo_auxiliar_del_tercero", "Código de Anexo Auxiliar", {"compra": "X", "venta": "X", "tesoreria": "X"},
+            marcada=True,
             ayuda="En la línea del proveedor o del cliente. Nunca en un recibo por honorarios, ni cuando la base se "
                   "reparte entre centros distintos.",
             rol="tercero", campo="anexo_auxiliar"),

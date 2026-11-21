@@ -41,7 +41,7 @@ from .. import pcge
 from .. import tesoreria
 from ..configuracion import CONFIG_POR_DEFECTO
 from ..modelo import CENTIMO, CERO, Rasgos, monto, rasgos_de
-from .faltas import (CuentaSinClase, LibroQueTodaviaNoSeNumera, MovimientoSinImputar,
+from .faltas import (CuentaBancariaSinSubDiario, CuentaSinClase, LibroQueTodaviaNoSeNumera, MovimientoSinImputar,
                      SinCuentaDeEfectivo, TraspasoEnDosPatas)
 from .indice import CabeceraDeMovimiento, MovimientoDelAsiento
 from .lineas import LineaDiario
@@ -74,8 +74,12 @@ CUENTA_ITF = "itf"
 # final las tres de cada uno. Viven aquí y no en la tabla `FALTAS` por lo que dice `faltas.py`: aquélla reparte
 # faltas **por comprobante** y un movimiento no lo es. Es la lista de claves que `faltantes_de_movimientos`
 # contesta y la que `diagnosticar` traduce, así que una falta nueva del dinero entra por aquí.
-FALTAS_DEL_MOVIMIENTO = (LibroQueTodaviaNoSeNumera, TraspasoEnDosPatas, MovimientoSinImputar,
-                         SinCuentaDeEfectivo, CuentaSinClase)
+#
+# **La sexta entra en la 15.14.0, `CuentaBancariaSinSubDiario`**, y es la que sustituye a la primera: tesorería se numera
+# por el sub-diario de cada cuenta bancaria. `LibroQueTodaviaNoSeNumera` ya no se lanza, pero su clave se queda —siempre
+# vacía— porque `diagnosticar` la publica y quitarla cambiaría su contrato.
+FALTAS_DEL_MOVIMIENTO = (LibroQueTodaviaNoSeNumera, CuentaBancariaSinSubDiario, TraspasoEnDosPatas,
+                         MovimientoSinImputar, SinCuentaDeEfectivo, CuentaSinClase)
 
 
 
@@ -148,7 +152,7 @@ def traspasos_en_dos_patas(movimientos, imputaciones: dict) -> list[str]:
 def lineas_del_movimiento(m: Any, imputacion: Any, cuentas: dict, config: dict,
                           limites: tuple[date, date], correlativo: str = "",
                           opciones: Any = None, libro: Rasgos | None = None,
-                          vocabulario: str = "neutral") -> list[LineaDiario]:
+                          vocabulario: str = "neutral", sub_diario: str | None = None) -> list[LineaDiario]:
     """Las líneas de diario de un movimiento, cuadradas entre ellas.
 
     `cuentas` es el maestro **ya indexado** (`tesoreria.por_id`) y no una cuenta resuelta, porque un traspaso
@@ -181,7 +185,11 @@ def lineas_del_movimiento(m: Any, imputacion: Any, cuentas: dict, config: dict,
     documento = _limpio({"serie_numero": nombre, "id_externo": str(_campo(m, "id_externo") or ""),
                          "fecha_emision": _iso(fecha_movimiento)})
     glosa = tesoreria.glosa_de_movimiento(m, imputacion)
-    sub_diario = "" if neutral or rasgos is None else rasgos.sub_diario
+    # El sub-diario lo da quien numera —el de la cuenta bancaria, desde la 15.14.0— y, si no lo da, el del libro.
+    if neutral:
+        sub_diario = ""
+    elif sub_diario is None:
+        sub_diario = rasgos.sub_diario if rasgos is not None else ""
 
     def linea(cuenta: str, sentido: str, cuanto: Decimal, glosa_linea: str = "", **extra) -> LineaDiario:
         clase = pcge.clase_de(cuenta)
@@ -326,19 +334,32 @@ def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correl
     imputación de un comprobante: «se le entrega al núcleo dentro de la configuración, que es lo que ya recibe todo
     el asiento».
 
-    Con vocabulario `neutral` no numera —`rangos` sale vacío—, igual que el comprobante: los correlativos de
-    tesorería esperan su sub-diario, y el sub-diario espera un archivo real que lo pida."""
+    Con vocabulario `neutral` no numera —`rangos` sale vacío—, igual que el comprobante.
+
+    **Con uno legacy, numera por el sub-diario de la CUENTA BANCARIA de cada movimiento** (15.14.0): en CONCAR cada
+    banco tiene el suyo —el 24 del BCP, el 26 del BBVA—, que el usuario declara en su maestro
+    (`CuentaBancaria.sub_diario`), y el pago entra en el de su cuenta. El número es el de las compras: `MM` más cuatro
+    dígitos, uno por movimiento en el orden recibido y empezando por lo que diga `correlativos` para cada sub-diario
+    —el 1 si no lo dice—. Una cuenta sin sub-diario para el libro entero (`CuentaBancariaSinSubDiario`), nombrando las
+    cuentas: hasta la 15.13 esto paraba siempre en `LibroQueTodaviaNoSeNumera`, porque el archivo real que dijera cuál
+    era el sub-diario de bancos todavía no había llegado."""
     rasgos = rasgos_de(libro)
     if rasgos.origen != MI_ORIGEN:
         raise ValueError(f"Un libro {rasgos.tipo!r} no sale de movimientos sino de {rasgos.origen!r}: "
                          "sus líneas las arma `asiento.lineas_e_indice_del_libro`")
-    if vocabulario != "neutral" and not rasgos.sub_diario:
-        raise LibroQueTodaviaNoSeNumera(rasgos.tipo)
+    neutral = vocabulario == "neutral"
 
     imputaciones, cuentas = imputaciones_y_cuentas(config)
     dobles = traspasos_en_dos_patas(movimientos, imputaciones)
     if dobles:
         raise TraspasoEnDosPatas(dobles)
+    if not neutral:
+        sin_sub_diario = cuentas_sin_sub_diario(movimientos, cuentas)
+        if sin_sub_diario:
+            raise CuentaBancariaSinSubDiario(sin_sub_diario)
+    mes = str(getattr(libro, "periodo", "") or "")[4:6]
+    contadores: dict[str, int] = {}
+    rangos: dict[str, dict] = {}
 
     limites = limites_del_periodo(libro) if hasattr(libro, "anio") else None
     lineas: list[LineaDiario] = []
@@ -350,14 +371,48 @@ def lineas_e_indice_de_movimientos(libro: Any, movimientos, config: dict, correl
             # Se reúnen todas antes de parar: decirlas de una en una obliga a diez vueltas para arreglar diez.
             sin_imputar.append(nombre_de_movimiento(m))
             continue
-        propias = lineas_del_movimiento(m, imputacion, cuentas, config, limites, "", None, rasgos, vocabulario)
-        indice.append(MovimientoDelAsiento(posicion=posicion, sub_diario="", correlativo="",
+        sub_diario, correlativo, n = "", "", 0
+        if not neutral:
+            sub_diario = sub_diario_de_la_cuenta(m, cuentas)
+            n = contadores.setdefault(sub_diario, int((correlativos or {}).get(sub_diario, 1)))
+            if n < 1:
+                raise ValueError("Los correlativos empiezan en 1")
+            correlativo = f"{mes}{n:04d}"
+        propias = lineas_del_movimiento(m, imputacion, cuentas, config, limites, correlativo, None, rasgos,
+                                        vocabulario, sub_diario=sub_diario)
+        if not neutral:
+            rango = rangos.setdefault(sub_diario, {"desde": n, "hasta": n - 1, "comprobantes": 0})
+            rango["hasta"], rango["comprobantes"] = n, rango["comprobantes"] + 1
+            contadores[sub_diario] = n + 1
+        indice.append(MovimientoDelAsiento(posicion=posicion, sub_diario=sub_diario, correlativo=correlativo,
                                            desde=len(lineas), hasta=len(lineas) + len(propias),
                                            cabecera=cabecera_de_movimiento(m, imputacion, cuentas)))
         lineas.extend(propias)
     if sin_imputar:
         raise MovimientoSinImputar(sin_imputar)
-    return lineas, {}, tuple(indice)
+    # Los mismos campos que el rango de un sub-diario de compras (`numerar_en_orden`): `comprobantes` cuenta asientos,
+    # que aquí son movimientos, y es lo que quien exporta lee para proponer el correlativo del mes siguiente.
+    for rango in rangos.values():
+        rango["desde_codigo"], rango["hasta_codigo"] = f"{mes}{rango['desde']:04d}", f"{mes}{rango['hasta']:04d}"
+        rango["desborda"] = rango["hasta"] > 9999
+    return lineas, rangos, tuple(indice)
+
+
+def sub_diario_de_la_cuenta(m: Any, cuentas: dict) -> str:
+    """El sub-diario de la cuenta bancaria de un movimiento, o vacío: el de su maestro (`CuentaBancaria.sub_diario`)."""
+    return str(_campo(cuentas.get(str(_campo(m, "cuenta") or "")), "sub_diario") or "").strip()
+
+
+def cuentas_sin_sub_diario(movimientos, cuentas: dict) -> list[str]:
+    """Las cuentas de estos movimientos que el maestro declara SIN sub-diario, cada una una vez y en el orden en que
+    aparecen. Una cuenta que no está en el maestro no sale aquí: eso es `SinCuentaDeEfectivo`, y decirla dos veces
+    mandaría a arreglar lo mismo por dos sitios."""
+    sin: list[str] = []
+    for m in movimientos:
+        cuenta = str(_campo(m, "cuenta") or "")
+        if cuenta in cuentas and not sub_diario_de_la_cuenta(m, cuentas) and cuenta not in sin:
+            sin.append(cuenta)
+    return sin
 
 
 def faltantes_de_movimientos(libro: Any, movimientos, config: dict,
@@ -383,10 +438,10 @@ def faltantes_de_movimientos(libro: Any, movimientos, config: dict,
     """
     rasgos = rasgos_de(libro)
     faltan: dict[str, list[str]] = {clase.clave: [] for clase in FALTAS_DEL_MOVIMIENTO}
-    if vocabulario != "neutral" and not rasgos.sub_diario:
-        faltan[LibroQueTodaviaNoSeNumera.clave].append(rasgos.tipo)
 
     imputaciones, cuentas = imputaciones_y_cuentas(config)
+    if vocabulario != "neutral":
+        faltan[CuentaBancariaSinSubDiario.clave] = cuentas_sin_sub_diario(movimientos, cuentas)
     faltan[TraspasoEnDosPatas.clave] = traspasos_en_dos_patas(movimientos, imputaciones)
 
     limites = limites_del_periodo(libro) if hasattr(libro, "anio") else None

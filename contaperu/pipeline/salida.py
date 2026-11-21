@@ -152,7 +152,7 @@ def _resumen_de_movimientos(movimientos: list, repetidos: int) -> dict:
 
 def generar_de_movimientos(libro: Libro, movimientos: list, driver: str, opciones: Any = None,
                            config: dict | None = None, lineas: list | None = None,
-                           repetidos: int = 0) -> Exportado:
+                           repetidos: int = 0, correlativos: dict[str, int] | None = None) -> Exportado:
     """El archivo de un libro de tesorería. Hermano de `generar`, y lo que comparten es la forma de la respuesta.
 
     **No selecciona ni mira errores**, y no es un olvido: `seleccionar`, `fuera_de` y `errores_de` están escritos
@@ -170,7 +170,8 @@ def generar_de_movimientos(libro: Libro, movimientos: list, driver: str, opcione
         raise LibroQueEseDestinoNoArma(libro.tipo, driver)
     if config is not None:
         config = armado.config_para(modulo, config)
-    contenido, extra, lineas, indice = armado.desde_movimientos(modulo, libro, movimientos, opciones, config, lineas)
+    contenido, extra, lineas, indice = armado.desde_movimientos(modulo, libro, movimientos, opciones, config, lineas,
+                                                                correlativos)
     # `archivo` y `contenido` los rellena `__post_init__` desde `nombre` y `comprimido`, que aquí van vacíos: un
     # libro de tesorería no sale envuelto en un ZIP, que es de quien declara `comprimir` (hoy ningún driver de serie).
     return Exportado(
@@ -303,7 +304,8 @@ def _archivo_de_comprobantes(doc: dict, driver: str, *, configuracion: dict | No
                    config=config if contrato.lleva_cuentas(modulo) else None, correlativos=corr, lineas=dadas)
 
 
-def _archivo_de_movimientos(doc: dict, driver: str, *, configuracion: dict | None, **_del_registro) -> Exportado:
+def _archivo_de_movimientos(doc: dict, driver: str, *, configuracion: dict | None, correlativos: dict | None = None,
+                            **_del_registro) -> Exportado:
     """El archivo de un libro de tesorería, de punta a punta (12.10).
 
     `incluir_observados` no llega aquí porque no hay nada que incluir: las observaciones son de un comprobante.
@@ -315,8 +317,9 @@ def _archivo_de_movimientos(doc: dict, driver: str, *, configuracion: dict | Non
     # El asiento que el documento TRAIGA manda sobre el que el motor derivaría, igual que en el otro camino (5.2):
     # quien lo produjo ya decidió, y rearmarlo podría cambiar lo que ya salió.
     dadas = lineas_de(doc) if contrato.forma(drivers.obtener(driver)) == "desde_lineas" else None
+    # Y por dónde empieza cada sub-diario de bancos, desde la 15.14.0: como en compras, lo dice quien exporta.
     return generar_de_movimientos(libro, movimientos, driver, config=config, lineas=dadas,
-                                  repetidos=len(crudos) - len(movimientos))
+                                  repetidos=len(crudos) - len(movimientos), correlativos=correlativos)
 
 
 def respuesta(exp: Exportado, cuando: str | None = None) -> dict:

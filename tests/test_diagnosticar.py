@@ -414,10 +414,10 @@ def test_la_respuesta_del_dinero_no_rellena_con_ceros_lo_que_es_de_un_comprobant
 
 def test_el_destino_que_no_lleva_tesoreria_lo_dice_con_la_forma_del_dinero():
     """La degradación de siempre, con los contadores del libro que se preguntó: antes decía `comprobantes: 0` de
-    un libro que no los tiene."""
+    un libro que no los tiene. Con CONTASIS, que no lleva tesorería: CONCAR la lleva desde la 15.14.0."""
     d = api.diagnosticar(plata([mov(), mov(id_externo="mov-2", referencia="000124")]),
-                         driver="concar", configuracion={})
-    assert d["por_que_no"] == ["el destino 'concar' no lleva libros de tipo 'tesoreria'"]
+                         driver="contasis", configuracion={})
+    assert d["por_que_no"] == ["el destino 'contasis' no lleva libros de tipo 'tesoreria'"]
     assert [q["motivo"] for q in d["que_falta"]] == ["libro_que_el_destino_no_lleva"]
     assert d["totales"] == {"movimientos": 2, "repetidos": 0, "saldrian": 0}
 
@@ -444,17 +444,19 @@ def test_lo_que_el_diagnostico_DICE_es_lo_que_la_exportacion_LANZA():
             api.exportar(documento, driver="asiento_contable", configuracion=DINERO)
 
 
-def test_el_libro_que_todavia_no_se_numera_se_comprueba_aunque_hoy_no_lo_alcance_ningun_driver():
-    """Ninguno de serie lleva tesorería con vocabulario legacy, así que por `diagnosticar` no se llega hoy. La
-    comprobación corre igual, en el núcleo, y por eso la clave está: el día que un driver legacy declare el libro,
-    lo que dirá es esto y no un `KeyError`."""
+def test_la_clave_del_libro_que_todavia_no_se_numera_sigue_y_va_vacia():
+    """Desde la 15.14.0 ningún libro para por eso —tesorería se numera por el sub-diario de cada cuenta bancaria—, pero
+    la clave sigue en lo que `diagnosticar` publica, vacía, para no cambiar su contrato. Lo que la sustituye es
+    `cuenta_bancaria_sin_sub_diario`, que solo se mira con un destino que numera."""
     from contaperu import asiento as asi
     from contaperu.pipeline.preparacion import libro_de
 
     libro = libro_de(plata([mov()]))
-    faltan = asi.faltantes_de_movimientos(libro, [], {}, vocabulario="legacy")
-    assert faltan["libro_que_todavia_no_se_numera"] == ["tesoreria"]
-    assert asi.faltantes_de_movimientos(libro, [], {})["libro_que_todavia_no_se_numera"] == []
+    cuentas = {"cuentas_bancarias": [{"id": "bbva-soles", "moneda": "PEN", "cuenta_contable": "104101"}]}
+    legacy = asi.faltantes_de_movimientos(libro, [mov()], cuentas, vocabulario="legacy")
+    assert legacy["libro_que_todavia_no_se_numera"] == []
+    assert legacy["cuenta_bancaria_sin_sub_diario"] == ["bbva-soles"]
+    assert asi.faltantes_de_movimientos(libro, [mov()], cuentas)["cuenta_bancaria_sin_sub_diario"] == []
 
 
 def test_las_cinco_faltas_del_dinero_tienen_su_texto_y_a_quien_pedirsela():
@@ -463,7 +465,7 @@ def test_las_cinco_faltas_del_dinero_tienen_su_texto_y_a_quien_pedirsela():
     from contaperu import asiento as asi
 
     clases = (asi.MovimientoSinImputar, asi.SinCuentaDeEfectivo, asi.TraspasoEnDosPatas,
-              asi.LibroQueTodaviaNoSeNumera, asi.CuentaSinClase)
+              asi.LibroQueTodaviaNoSeNumera, asi.CuentaBancariaSinSubDiario, asi.CuentaSinClase)
     assert set(diag.FALTAS_DEL_DINERO) == {clase.clave for clase in clases}
     assert {f.clave for f in asi.FALTAS}.isdisjoint(diag.FALTAS_DEL_DINERO)
     for clave, (texto, pedir_a) in diag.FALTAS_DEL_DINERO.items():

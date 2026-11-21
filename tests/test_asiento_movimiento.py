@@ -378,9 +378,9 @@ def test_un_traspaso_doble_para_antes_de_armar_nada():
                                                  "m2": imputacion(cuenta_propia="bbva-soles")})
 
 
-def test_el_vocabulario_legacy_para_porque_el_libro_todavia_no_se_numera():
-    """La puerta legacy, cerrada en voz alta: sin sub-diario, `clasificacion.sub_diario` reventaría con un
-    `KeyError` pelado que no es un `ErrorContaperu` y que nadie atrapa."""
+def test_el_vocabulario_legacy_ya_no_para_en_el_libro_sino_en_la_cuenta_sin_sub_diario():
+    """Hasta la 15.13 la puerta legacy se cerraba con `LibroQueTodaviaNoSeNumera` antes de mirar nada. Desde la 15.14.0
+    el libro se numera por el sub-diario de cada cuenta bancaria: sin movimientos no hay nada que numerar, y lo que
+    para es una cuenta que no lo declara (`test_tesoreria_concar.py`)."""
     config = dict(CONFIG_POR_DEFECTO, imputaciones_de_movimientos={}, cuentas_bancarias=CUENTAS)
-    with pytest.raises(asiento.LibroQueTodaviaNoSeNumera, match="no se numera"):
-        asiento.lineas_e_indice_de_movimientos(LIBRO, [], config, vocabulario="legacy")
+    assert asiento.lineas_e_indice_de_movimientos(LIBRO, [], config, vocabulario="legacy") == ([], {}, ())

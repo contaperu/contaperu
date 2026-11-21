@@ -41,6 +41,10 @@ from .seleccion import fuera_de
 FALTAS_DEL_DINERO: dict[str, tuple[str, str]] = {
     asi.LibroQueTodaviaNoSeNumera.clave: (
         "libro(s) que el motor todavía no sabe numerar: su sub-diario espera el archivo real que lo pida", SISTEMA),
+    # 15.14.0: tesorería se numera por el sub-diario de cada cuenta bancaria, y el que lo pone es el contador, en su
+    # maestro. Es la que sustituye a la de arriba, que ya no se lanza.
+    asi.CuentaBancariaSinSubDiario.clave: (
+        "cuenta(s) bancaria(s) sin su sub-diario: sin él el asiento no se numera", CONTADOR),
     asi.TraspasoEnDosPatas.clave: (
         "traspaso(s) declarados por sus dos movimientos, que contarían el dinero dos veces", CONTADOR),
     asi.MovimientoSinImputar.clave: ("movimiento(s) sin imputación, así que no hay con qué saldarlos", CONTADOR),

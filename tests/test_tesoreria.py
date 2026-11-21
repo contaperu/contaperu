@@ -611,14 +611,14 @@ def test_la_api_avisa_de_una_relectura_y_de_una_cuenta_que_no_se_declaro():
 def _los_que_no_llevan_tesoreria() -> list[str]:
     """Los drivers de serie que no declaran el libro de tesorería, **con su complemento nombrado**.
 
-    Desde la 12.10 hay uno que sí lo lleva, `asiento_contable`, y por eso este reparto se calcula en vez de
-    escribirse: un bucle sobre «todos» dejaría de comprobar lo que comprueba en cuanto entre el siguiente. Y se
+    Desde la 12.10 hay uno que sí lo lleva, `asiento_contable`, y desde la 15.14.0 dos: CONCAR, con el pago que un
+    CONCAR real aceptó. Por eso este reparto se calcula en vez de escribirse: un bucle sobre «todos» dejaría de comprobar lo que comprueba en cuanto entre el siguiente. Y se
     afirma cuál es el que lo lleva, para que el conjunto no se vacíe ni crezca en silencio — un test que deja de
     comprobar es el único que no avisa."""
     from contaperu import drivers
 
     llevan = sorted(n for n in drivers.DE_SERIE if "tesoreria" in drivers.obtener(n).FORMATOS)
-    assert llevan == ["asiento_contable"], (
+    assert llevan == ["asiento_contable", "concar"], (
         "cambió quién lleva el libro de tesorería: decídelo a propósito y mueve este test")
     return sorted(set(drivers.DE_SERIE) - set(llevan))
 
@@ -632,7 +632,8 @@ def test_cada_driver_que_no_lleva_tesoreria_lo_rechaza_nombrando_los_que_si_llev
     llamaba después de preparar. Nadie lo había notado porque hasta el 10-oct-2026 no existía ningún libro del
     catálogo fuera de los dos que todos los drivers llevan. El tercero lo destapó.
 
-    **Siete de los ocho**, desde la 12.10: el neutral lo lleva, porque su formato es el estándar mismo."""
+    **Siete de los ocho** desde la 12.10 —el neutral lo lleva, porque su formato es el estándar mismo— y seis desde la
+    15.14.0, que CONCAR lo lleva también."""
     from contaperu import api, drivers
 
     doc = documento_de_tesoreria(movimientos=[mov().a_dict()])
@@ -672,9 +673,9 @@ def test_diagnosticar_lo_DICE_en_vez_de_lanzarlo():
     from contaperu import api
 
     doc = documento_de_tesoreria(movimientos=[mov().a_dict()])
-    d = api.diagnosticar(doc, driver="concar", configuracion={})
+    d = api.diagnosticar(doc, driver="contasis", configuracion={})       # CONCAR lo lleva desde la 15.14.0
     assert d["listo_para_exportar"] is False
-    assert d["por_que_no"] == ["el destino 'concar' no lleva libros de tipo 'tesoreria'"]
+    assert d["por_que_no"] == ["el destino 'contasis' no lleva libros de tipo 'tesoreria'"]
     assert [q["motivo"] for q in d["que_falta"]] == ["libro_que_el_destino_no_lleva"]
     assert d["que_falta"][0]["pedir_a"] == "sistema", "lo que se cambia es el destino, no el mes"
     assert "compra" in d["que_falta"][0]["texto"] and "venta" in d["que_falta"][0]["texto"]

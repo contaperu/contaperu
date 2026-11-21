@@ -70,6 +70,11 @@ class LibroQueTodaviaNoSeNumera(NoExportable):
     **sabe armar** su asiento y **no sabe numerarlo**, porque numerar es por sub-diario y el suyo espera un archivo
     real que diga cuál es. Con vocabulario neutral no hace falta —ese documento no lleva correlativo—, así que lo
     que esto para es el camino legacy, que si no reventaría con un `KeyError` pelado fuera del contrato de errores.
+
+    ⚰️ **Desde la 15.14.0 no se lanza**: el archivo real llegó —un pago que CONCAR aceptó, con su sub-diario de
+    bancos— y tesorería se numera por el sub-diario de CADA cuenta bancaria (John, 21-nov-2026: «en cada cuenta
+    bancaria»). Lo que hoy para el camino legacy es `CuentaBancariaSinSubDiario`. Se conserva porque es un nombre
+    público congelado y su clave sigue en `faltantes_de_movimientos`, siempre vacía: quitarla es una mayor.
     """
 
     clave = "libro_que_todavia_no_se_numera"
@@ -79,6 +84,22 @@ class LibroQueTodaviaNoSeNumera(NoExportable):
                          "configuración, y entra con el archivo real que lo pida. Sin numerar sí sale, con el "
                          "vocabulario neutral del estándar")
         self.tipo = tipo
+
+
+class CuentaBancariaSinSubDiario(NoExportable):
+    """Cuentas bancarias sin su sub-diario, en un destino que numera el asiento (15.14.0).
+
+    En CONCAR cada banco tiene su sub-diario —el 24 del BCP, el 26 del BBVA, como los numere cada estudio— y un
+    movimiento entra en el de su cuenta (John, 21-nov-2026). **No hay uno de fábrica**: lo pone el usuario en su
+    maestro (`CuentaBancaria.sub_diario`), y sin él el asiento no se puede numerar. Se dice por la CUENTA y no por el
+    movimiento, porque el arreglo está en el maestro: diez pagos del mismo banco son un solo arreglo."""
+
+    clave = "cuenta_bancaria_sin_sub_diario"
+
+    def __init__(self, cuales: list[str]):
+        super().__init__(f"{len(cuales)} cuenta(s) bancaria(s) sin su sub-diario, y sin él el asiento no se numera: "
+                         + ", ".join(cuales))
+        self.cuales = list(cuales)
 
 
 class CuentaSinClase(NoExportable):

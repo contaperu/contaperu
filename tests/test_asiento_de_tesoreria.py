@@ -222,9 +222,10 @@ def test_dos_cuentas_con_el_mismo_id_para_el_asiento_con_su_motivo(registrados):
     assert "bbva-soles" in str(e.value)
 
 
-def test_un_destino_legacy_dice_que_ese_libro_todavia_no_se_numera(registrados):
-    """Con vocabulario legacy hace falta un sub-diario, y el de tesorería espera el archivo real que lo pida. Hasta
-    la 12.8 esto reventaba con un `KeyError` pelado que no era un `ErrorContaperu`."""
+def test_un_destino_legacy_numera_por_el_sub_diario_de_la_cuenta_bancaria(registrados):
+    """Con vocabulario legacy hace falta un sub-diario, y desde la 15.14.0 es el de la CUENTA BANCARIA de cada
+    movimiento (John, 21-nov-2026: «en cada cuenta bancaria»). Hasta entonces el libro se paraba siempre en
+    `LibroQueTodaviaNoSeNumera`, esperando el archivo real que dijera cuál era: llegó con un pago que CONCAR aceptó."""
     doc = _documento([mov()], {"mov-1": {"cuenta_contable": "421201"}})
     # El driver legacy de prueba no declara el libro, así que primero habla el formato; con él declarado, el que
     # habla es la numeración. Se prueban los dos, que son dos negativas distintas.
@@ -232,9 +233,12 @@ def test_un_destino_legacy_dice_que_ese_libro_todavia_no_se_numera(registrados):
         api.generar_asiento(doc, driver="diario_json", configuracion=CONFIG)
     diario_json.FORMATOS["tesoreria"] = "diario_json"
     try:
-        with pytest.raises(asiento.LibroQueTodaviaNoSeNumera) as e:
+        with pytest.raises(asiento.CuentaBancariaSinSubDiario) as e:
             api.generar_asiento(doc, driver="diario_json", configuracion=CONFIG)
-        assert e.value.clave == "libro_que_todavia_no_se_numera"
+        assert e.value.clave == "cuenta_bancaria_sin_sub_diario" and e.value.cuales == ["bbva-soles"]
+        con_sub_diario = dict(CONFIG, cuentas_bancarias=[dict(c, sub_diario="24") for c in CUENTAS])
+        r = api.generar_asiento(doc, driver="diario_json", configuracion=con_sub_diario, correlativos={"24": 7})
+        assert {(ln["sub_diario"], ln["correlativo"]) for ln in r["asiento"]} == {("24", "100007")}
     finally:
         del diario_json.FORMATOS["tesoreria"]
 

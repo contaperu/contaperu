@@ -4,6 +4,35 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.14.0] — 2026-11-21
+
+### CONCAR lleva el libro de tesorería, calcado del pago que un CONCAR real aceptó
+
+Hasta la 15.13 un libro de tesorería solo salía por el driver neutral: con un vocabulario legacy se paraba en
+`LibroQueTodaviaNoSeNumera`, esperando el archivo real que dijera cuál era el sub-diario de bancos. Llegó: un pago a
+proveedores que CONCAR aceptó (sub-diario de bancos, pago del 03-nov-2026; el archivo vive fuera del repositorio), y lo
+que se midió en él, columna a columna, es lo que este driver escribe.
+
+- **CONCAR declara el libro `tesoreria`** (`FORMATOS`). Cada línea con lo de una de compras —sub-diario, número,
+  fechas, moneda `MN`, conversión `V` y marca `S`, importes en O y Q— y cuatro cosas propias, medidas en el pago:
+  - **la glosa principal (F) es la de la LÍNEA**: cada 42 lleva la de su factura y la del banco «PAGOS VARIOS»;
+  - **la línea cuyo documento es el vóucher** —la del banco, la del ITF— lleva la sigla de tesorería en R: `TL` por
+    defecto, configurable en la sección `concar` como `tesoreria_tipo_doc`, hermana de `detraccion_tipo_doc`;
+  - **la línea del efectivo se anexa a sí misma** (L = su 104), que es como la lleva CONCAR;
+  - **el vencimiento (U) cae a la fecha del documento** cuando no hay: un vóucher no vence, y el pago lo lleva igual.
+- **Se numera por el sub-diario de CADA cuenta bancaria** (John, 21-nov-2026: «en cada cuenta bancaria»), el que el
+  usuario declara en su maestro (`CuentaBancaria.sub_diario`, 15.13.0): el número es el de las compras, mes más cuatro
+  dígitos, uno por movimiento y empezando por lo que digan los `correlativos` de cada sub-diario —el 1 si no lo dicen—.
+  El resumen de la exportación lleva el rango de cada sub-diario con el nombre de su banco («BCP PEN»).
+- **Una cuenta sin sub-diario para el libro**: `asiento.CuentaBancariaSinSubDiario`, clave
+  `cuenta_bancaria_sin_sub_diario`, nombrando las cuentas. `diagnosticar` la dice antes, a quien se la pide: el
+  contador, en su maestro. `LibroQueTodaviaNoSeNumera` ya no se lanza; se conserva por la superficie congelada, y su
+  clave sigue en lo que `diagnosticar` publica, siempre vacía.
+- `exportar`, `exportar_archivo` y `generar_asiento` pasan los `correlativos` también a un libro de tesorería.
+
+**Para quien integra:** si exportas tesorería a CONCAR, declara el `sub_diario` de cada cuenta bancaria y pasa los
+`correlativos` de esos sub-diarios, como en compras. Con el driver neutral no cambia nada.
+
 ## [15.13.1] — 2026-11-21
 
 ### `por_pagar` recibe el sistema de la compra: en STARSOFT la cuenta del proveedor es la 42120001

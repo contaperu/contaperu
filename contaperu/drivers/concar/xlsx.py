@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Any
 
 from ...asiento.faltas import NoExportable
-from ...asiento.indice import ComprobanteDelAsiento
+from ...asiento.indice import CabeceraDeMovimiento, ComprobanteDelAsiento, MovimientoDelAsiento
 from ...asiento.lineas import LineaDiario
 from ...asiento.resolucion import etiquetas_sub_diario, limites_del_periodo
 from ...modelo import Libro
@@ -109,7 +109,8 @@ def _desbordan(indice: tuple[ComprobanteDelAsiento, ...]) -> dict[str, int]:
     return {s: n for s, n in hasta.items() if n > MAXIMO_CORRELATIVO}
 
 
-def _sub_diarios(indice: tuple[ComprobanteDelAsiento, ...], config: dict) -> dict[str, dict]:
+def _sub_diarios(indice: tuple[ComprobanteDelAsiento, ...], config: dict,
+                 etiquetas: dict[str, str] | None = None) -> dict[str, dict]:
     """El rango de cada sub-diario, como lo guarda quien exporta para proponer el siguiente: su etiqueta, desde y hasta
     qué número llegó, cuántos comprobantes lleva, los dos códigos `MMNNNN` y si desborda.
 
@@ -119,7 +120,7 @@ def _sub_diarios(indice: tuple[ComprobanteDelAsiento, ...], config: dict) -> dic
     el portal lee. Y el que manda es este: `pipeline/armado.py` funde el resumen del driver AL FINAL, así que lo
     que el driver devuelva pisa lo del núcleo. Lo que se repite son tres cifras que el driver no recibe y tiene
     que sacar del índice; cambiarlo pediría pasarle los rangos a `desde_lineas`, y eso es tocar el contrato."""
-    etiquetas = etiquetas_sub_diario(config)
+    etiquetas = etiquetas if etiquetas is not None else etiquetas_sub_diario(config)
     rangos: dict[str, dict] = {}
     for entrada in indice:
         n = _numero(entrada)
@@ -145,8 +146,28 @@ def desde_lineas(libro: Libro, lineas: list[LineaDiario], config: dict, opciones
     desbordan = _desbordan(indice)
     if desbordan:
         raise CorrelativoDesborda(desbordan)
-    filas = forma.filas_del_indice(indice, lineas, lambda cab, suyas: proyeccion.filas(cab, suyas, config))
+    # Cada entrada se proyecta con SU cabecera (15.14.0): la de un movimiento no trae ni la glosa del comprobante ni su
+    # tasa. Se pregunta a la entrada y no al nombre del origen del libro: eso lo dice la tabla de cada capa.
+    de_movimientos = any(isinstance(e, MovimientoDelAsiento) for e in indice)
+    filas = forma.filas_del_indice(indice, lineas, lambda cab, suyas: (
+        proyeccion.filas_de_movimiento(cab, suyas, config) if isinstance(cab, CabeceraDeMovimiento)
+        else proyeccion.filas(cab, suyas, config)))
     primero, _ = limites_del_periodo(libro)
     resumen = {"fechas": "por comprobante (extemporáneos al " + formatear_fecha(primero, opciones) + ")",
-               "sub_diarios": _sub_diarios(indice, config)}
+               "sub_diarios": _sub_diarios(indice, config,
+                                           _etiquetas_de_los_bancos(config) if de_movimientos else None)}
     return escribir_xlsx(filas), resumen
+
+
+def _etiquetas_de_los_bancos(config: dict) -> dict[str, str]:
+    """El nombre de cada sub-diario de bancos: el de su cuenta, «{banco} {moneda}» (15.14.0). Los de compras y ventas
+    salen de la configuración (`etiquetas_sub_diario`); los de bancos los declara el maestro, uno por cuenta, y si dos
+    cuentas comparten sub-diario se dicen las dos."""
+    etiquetas: dict[str, list[str]] = {}
+    for c in (config.get("cuentas_bancarias") or []):
+        leer = c.get if isinstance(c, dict) else (lambda k, _c=c: getattr(_c, k, ""))
+        sub_diario = str(leer("sub_diario") or "").strip()
+        if sub_diario:
+            nombre_de_la_cuenta = " ".join(p for p in (str(leer("banco") or "").strip(), str(leer("moneda") or "")) if p)
+            etiquetas.setdefault(sub_diario, []).append(nombre_de_la_cuenta or str(leer("id") or ""))
+    return {s: " · ".join(n) for s, n in etiquetas.items()}

@@ -162,15 +162,16 @@ def desde_lineas_ya_armadas(modulo, libro: Libro, lineas: list, opciones: Any,
 
 
 def desde_movimientos(modulo, libro: Libro, movimientos: list, opciones: Any, config: dict | None = None,
-                      lineas: list | None = None) -> tuple[bytes, dict, list, tuple]:
+                      lineas: list | None = None, correlativos: dict | None = None) -> tuple[bytes, dict, list, tuple]:
     """Un driver de asientos que recibe un libro de movimientos (12.10): el núcleo arma las líneas, exige que
     cuadren, y el driver solo las traduce. La misma promesa que `desde_lineas_con_indice` en el otro camino.
 
     **Las dos entradas en una función y no en dos**, al contrario que en el camino del comprobante
     (`desde_lineas_con_indice` y `desde_lineas_dadas`): allí son dos porque la rama de las líneas dadas pide
-    requisitos y no pide correlativos, y aquí no hay ni una cosa ni la otra —un movimiento no tiene tipo ni moneda
-    que exigir y su libro todavía no se numera—, así que lo único que cambia entre las dos es de dónde salen las
-    líneas y de dónde sale el índice: de generarlas, o de reconocerlas por su `documento.id_externo`.
+    requisitos y no pide correlativos, y aquí no hay requisitos —un movimiento no tiene tipo ni moneda que exigir—,
+    así que lo único que cambia entre las dos es de dónde salen las líneas y de dónde sale el índice: de generarlas,
+    o de reconocerlas por su `documento.id_externo`. Los `correlativos` solo los lee la primera (15.14.0): unas líneas
+    dadas ya vienen numeradas.
 
     Lo que **no** cambia: el asiento tiene que cuadrar, y lo que el formato del destino no lleva lo para antes de
     escribir nada."""
@@ -180,7 +181,7 @@ def desde_movimientos(modulo, libro: Libro, movimientos: list, opciones: Any, co
     if fuera:
         raise contrato.NoCabe(fuera)
     if lineas is None:
-        lineas, rangos, indice = asi.lineas_e_indice_de_movimientos(libro, movimientos, config,
+        lineas, rangos, indice = asi.lineas_e_indice_de_movimientos(libro, movimientos, config, correlativos,
                                                                     vocabulario=contrato.vocabulario(modulo))
     else:
         indice = asi.indice_de_movimientos_dados(movimientos, lineas, config)
@@ -301,11 +302,12 @@ def _asiento_de_comprobantes(doc: dict, modulo, driver: str, *, configuracion: d
     return _respuesta(libro, neutrales, rangos, indice)
 
 
-def _asiento_de_movimientos(doc: dict, modulo, driver: str, *, configuracion: dict | None, **_del_registro) -> dict:
+def _asiento_de_movimientos(doc: dict, modulo, driver: str, *, configuracion: dict | None,
+                            correlativos: dict | None = None, **_del_registro) -> dict:
     """El asiento de un libro que sale de sus movimientos: el dinero (12.9).
 
-    `**_del_registro` se traga los cuatro argumentos que solo tienen sentido en el otro camino —los correlativos,
-    los observados, la imputación y las claves previas—: las dos funciones de la tabla se llaman igual, y lo que
+    `**_del_registro` se traga los tres argumentos que solo tienen sentido en el otro camino —los observados, la
+    imputación y las claves previas—: las dos funciones de la tabla se llaman igual, y lo que
     una no usa lo dice su firma en vez de obligar a la puerta a saber cuál es cuál.
 
     **No pasa por `exigir_requisitos` ni por `no_caben`, y no es un olvido.** Las dos están escritas sobre un
@@ -319,10 +321,11 @@ def _asiento_de_movimientos(doc: dict, modulo, driver: str, *, configuracion: di
     candidato es `denominacion`, que mira cuentas y no comprobantes— ese requisito necesita su hermano que recorra
     movimientos. Hoy ninguno de los que exige un driver de serie lo es.
 
-    `correlativos` no llega aquí: con vocabulario neutral el motor no numera, y con uno legacy el libro se para en
-    `LibroQueTodaviaNoSeNumera` porque su sub-diario espera el archivo real que lo pida."""
+    **`correlativos` llega desde la 15.14.0**: con un vocabulario legacy el libro se numera por el sub-diario de cada
+    cuenta bancaria (`asiento.lineas_e_indice_de_movimientos`), y por dónde empieza cada uno lo dice quien exporta,
+    como en compras. Con el neutral no se numera y no se lee."""
     libro, movimientos, config = preparar_tesoreria(doc, configuracion, driver)
-    neutrales, rangos, indice = asi.lineas_e_indice_de_movimientos(libro, movimientos, config,
+    neutrales, rangos, indice = asi.lineas_e_indice_de_movimientos(libro, movimientos, config, correlativos,
                                                                   vocabulario=contrato.vocabulario(modulo))
     return _respuesta(libro, neutrales, rangos, indice)
 
