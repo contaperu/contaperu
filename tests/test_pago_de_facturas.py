@@ -55,12 +55,12 @@ def compras(*comprobantes) -> dict:
                       "comprobantes": [copy.deepcopy(c) for c in comprobantes]}, "631101")
 
 
-def lo_que_la_compra_dejo_en_su_cuenta(doc: dict) -> dict[str, tuple[str, Decimal]]:
+def lo_que_la_compra_dejo_en_su_cuenta(doc: dict, driver: str = "csv") -> dict[str, tuple[str, Decimal]]:
     """Del asiento REAL de la compra —el motor, no una cuenta del test—: por serie-número, la cuenta del tercero y su
     saldo acreedor (haber − debe) en esa cuenta."""
-    lineas = api.generar_asiento(doc, driver="csv", incluir_observados=True)["asiento"]
+    lineas = api.generar_asiento(doc, driver=driver, incluir_observados=True)["asiento"]
     salida: dict[str, tuple[str, Decimal]] = {}
-    for fila in api.por_pagar(doc)["documentos"]:
+    for fila in api.por_pagar(doc, driver=driver)["documentos"]:
         nombre = f"{fila['serie']}-{fila['numero'].lstrip('0')}"
         suyas = [ln for ln in lineas if ln["cuenta"] == fila["cuenta_contable"]
                  and (ln.get("documento") or {}).get("serie_numero") == nombre]
@@ -72,12 +72,14 @@ def lo_que_la_compra_dejo_en_su_cuenta(doc: dict) -> dict[str, tuple[str, Decima
 
 # --- por_pagar: la regla del asiento de la compra, sin copiarla ------------------------------------------------
 
-def test_por_pagar_dice_lo_que_el_asiento_de_la_compra_dejo_en_la_cuenta_del_proveedor():
+@pytest.mark.parametrize("driver", ["csv", "starsoft", "asiento_contable"])
+def test_por_pagar_dice_lo_que_el_asiento_de_la_compra_dejo_en_la_cuenta_del_proveedor(driver):
     """La simple, la de la detracción, el recibo por honorarios y la nota de crédito: las cuatro formas en que lo
-    que se le paga al tercero NO es el total."""
+    que se le paga al tercero NO es el total. **Y en cada sistema** (15.13.1): STARSOFT lleva otra cuenta por pagar, y
+    sin el `driver` el pago nombraba la 421201 mientras su compra se provisionaba en la 42120001."""
     doc = compras(SIMPLE, CON_DETRACCION, HONORARIOS, NOTA)
-    asentado = lo_que_la_compra_dejo_en_su_cuenta(doc)
-    filas = {f"{f['serie']}-{f['numero'].lstrip('0')}": f for f in api.por_pagar(doc)["documentos"]}
+    asentado = lo_que_la_compra_dejo_en_su_cuenta(doc, driver)
+    filas = {f"{f['serie']}-{f['numero'].lstrip('0')}": f for f in api.por_pagar(doc, driver=driver)["documentos"]}
     assert set(filas) == set(asentado) == {"E001-3507", "F001-88", "E001-45", "E001-12"}
     for nombre, (cuenta, saldo) in asentado.items():
         assert Decimal(filas[nombre]["por_pagar"]) == saldo, nombre
@@ -107,6 +109,13 @@ def test_por_pagar_trae_lo_que_necesita_la_linea_del_pago():
         "tipo_cp": "01", "serie": "F001", "numero": "00000088", "contraparte_doc": OTRO,
         "fecha_emision": "2026-10-28", "fecha_vencimiento": "2026-10-28", "moneda": "PEN"}
     assert fila["glosa"] == asiento.glosa_de(Comprobante.de_dict(CON_DETRACCION))
+
+
+def test_por_pagar_toma_la_cuenta_del_sistema_de_la_compra():
+    """Sin `driver`, la general; con el de STARSOFT, la suya. Es la diferencia que el vigilante de arriba caza."""
+    doc = compras(SIMPLE)
+    assert api.por_pagar(doc)["documentos"][0]["cuenta_contable"] == "421201"
+    assert api.por_pagar(doc, driver="starsoft")["documentos"][0]["cuenta_contable"] == "42120001"
 
 
 def test_por_pagar_lee_la_cuenta_del_tercero_de_la_imputacion():

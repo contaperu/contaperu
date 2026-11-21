@@ -4,6 +4,23 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.13.1] — 2026-11-21
+
+### `por_pagar` recibe el sistema de la compra: en STARSOFT la cuenta del proveedor es la 42120001
+
+Medido al integrarlo en la aplicación, antes de que nadie lo usara: `por_pagar` preparaba el documento con la
+configuración **general**, así que daba la 421201 para todos. Pero cada sistema tiene su cuenta por pagar en su sección
+—STARSOFT la 42120001 en soles y la 42120002 en dólares—, y un pago que nombra otra cuenta que la de su provisión no la
+cancela. Pasarle la configuración ya aplicada tampoco servía: el motor la rechaza, porque lleva en la raíz claves que son
+de una sección.
+
+- **`api.por_pagar(…, driver=…)`**, opcional y al final de la firma, también por HTTP y por el MCP: el sistema donde se
+  asentó la compra, el mismo que se le pasa a `exportar`. Vacío, lo general, que es lo que hacía la 15.13.0.
+- El vigilante compara ahora `por_pagar` con el asiento real de la compra **en cada sistema** —el CSV, STARSOFT y el
+  asiento neutral—, y cae si se le quita el `driver` a la preparación.
+
+**Para quien integra:** si llevas la contabilidad en un sistema con su propia sección de cuentas, pasa su `driver`.
+
 ## [15.13.0] — 2026-11-21
 
 ### Pagar compras: cada línea 42 lleva la factura que cancela, y `api.por_pagar` dice cuánto (open-accounting 4.2)

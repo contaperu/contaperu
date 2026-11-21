@@ -198,6 +198,9 @@ PARA_HERRAMIENTA: dict[str, str] = {
     **Es lo que dice el documento, no lo pendiente**: lo que ya se pagó en otro movimiento lo resta
     `estado_de_cuenta`. Una nota de crédito sale en negativo, porque resta.
 
+    **Pasa el `driver` del sistema donde se asentó la compra**, el mismo que le pasas a `exportar`: cada sistema tiene
+    su cuenta por pagar —en STARSOFT la 42120001, no la 421201—, y sin él sale la de la configuración general.
+
     Con cada fila se arma una parte del reparto del movimiento: `{importe, cuenta_contable, contraparte_doc,
     comprobante: {tipo_cp, serie, numero, contraparte_doc, fecha_emision, fecha_vencimiento}}`, y su línea lleva el
     documento de esa factura en vez del vóucher. Una parte por documento, nunca una por proveedor.

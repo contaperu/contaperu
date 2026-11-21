@@ -217,19 +217,23 @@ def desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], op
     return modulo.desde_comprobantes(libro, comprobantes, config, opciones)
 
 
-def por_pagar(doc: dict, *, configuracion: dict | None = None, imputacion: dict | None = None) -> dict:
+def por_pagar(doc: dict, *, configuracion: dict | None = None, imputacion: dict | None = None,
+              driver: str = "") -> dict:
     """De cada compra del documento, lo que se le debe al tercero y en qué cuenta: lo que un pago tiene que cancelar.
 
     **Solo compras**: en ventas la misma pregunta es qué se cobra, y no tiene caso todavía. Se prepara como para
     asentar —la configuración general con la imputación de cada documento, y las detracciones normalizadas— pero
     **no se para por nada**: pagar una factura no necesita la cuenta de su gasto ni que esté validada, y lo que el
-    asiento de la compra exija se le pide a la compra, no a su pago. Las excluidas y las duplicadas no salen."""
+    asiento de la compra exija se le pide a la compra, no a su pago. Las excluidas y las duplicadas no salen.
+
+    **`driver` es el sistema donde se asentó la compra** (15.13.1): la cuenta del proveedor es la de SU sección de la
+    configuración —en STARSOFT la 42120001, no la 421201—, y un pago que no la nombra no cancela la provisión."""
     tipo = libro_de(doc).tipo
     if tipo != "compra":
         raise DocumentoInvalido(f"`por_pagar` es de un libro de compras, y este es de {tipo}")
     # `preparar` entero, y no sus pasos copiados: la cuenta del tercero y la detracción tienen que salir del mismo
     # documento preparado que el asiento —la imputación dentro, la detracción normalizada, los duplicados marcados—.
-    libro, todos, config = preparar(doc, configuracion, True, imputacion)
+    libro, todos, config = preparar(doc, configuracion, True, imputacion, driver)
     documentos = []
     for c in seleccionar(todos):
         debe = asi.lo_que_se_le_debe(c, config, libro.rasgos)

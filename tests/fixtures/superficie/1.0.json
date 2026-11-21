@@ -71,7 +71,7 @@
   "leer_xml": "función(contenido: 'str', libro: 'dict', *, es_base64: 'bool' = False) -> 'dict'",
   "normalizar_detracciones": "función(documento: 'dict', *, configuracion: 'dict | None' = None) -> 'dict'",
   "por_cuenta": "función(lineas: 'list[dict]', libro: 'dict | None' = None) -> 'dict'",
-  "por_pagar": "función(documento: 'dict', *, configuracion: 'dict | None' = None, imputacion: 'dict | None' = None) -> 'dict'",
+  "por_pagar": "función(documento: 'dict', *, configuracion: 'dict | None' = None, imputacion: 'dict | None' = None, driver: 'str' = '') -> 'dict'",
   "problema": "función(error: 'BaseException') -> 'dict'",
   "rasgos_de": "función(libro: 'Rasgos | Libro | str') -> 'Rasgos'",
   "regimenes_tributarios": "función() -> 'dict'",
