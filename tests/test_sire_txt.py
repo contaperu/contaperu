@@ -7,6 +7,7 @@ El orden se verificó columna a columna contra una exportación real (26-ago-202
 """
 import io
 import zipfile
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -780,3 +781,74 @@ def test_sin_cabecera_ni_filas_sigue_sin_ser_una_propuesta():
         assert not sire_txt.es_sire(datos)
         with pytest.raises(sire_txt.SireInvalido, match="ninguna fila"):
             sire_txt.parsear(datos, VENTAS, DE_LA_PROPUESTA_VACIA)
+
+
+# ── Y la fila en dólares que llega SIN tipo de cambio, con el del día (15.12.0) ─────────────────────────────────────
+# Medido el 21-nov-2026 en un RUC real: SUNAT entrega filas en dólares con el tipo de cambio en blanco —una de 71 en la
+# propuesta de un mes, y TODAS las de su exportación de excluidos— con el importe en soles, y una sola tumbaba el
+# archivo entero. Quien llama da el tipo de cambio de cada día (el que SUNAT publica, que el motor no puede ir a buscar)
+# y la fila toma el de su fecha de emisión. Los números, inventados y redondos.
+DEL_DIA = {date(2026, 8, 10): "3.500"}
+
+
+def test_una_compra_en_dolares_sin_tipo_de_cambio_toma_el_de_su_dia():
+    fila = _compra(c14="3500.00", c15="630.00", c24="4130.00", c25="USD", c26="")
+    [c] = sire_txt.parsear(texto("|".join(fila), con_cabecera=False), COMPRAS, DE_COMPRAS, tipos_de_cambio=DEL_DIA)
+    assert (c.moneda, c.tipo_cambio) == ("USD", Decimal("3.500")), "el del día queda escrito en el comprobante"
+    assert (c.base_gravada, c.igv, c.total) == (Decimal("1000.00"), Decimal("180.00"), Decimal("1180.00"))
+    assert c.datos_originales["sire"][26] == "", "la fila cruda sigue diciendo lo que dijo SUNAT"
+    validar.revisar([c], COMPRAS)
+    assert [o.codigo for o in c.observaciones if o.nivel == "error"] == []
+
+
+def test_el_tipo_de_cambio_de_la_fila_manda_sobre_el_del_dia():
+    """La tabla es para la fila que no trae el suyo: la que lo trae se divide por el suyo, aunque el del día sea otro."""
+    fila = _compra(c14="3500.00", c15="630.00", c24="4130.00", c25="USD", c26="3.500")
+    [c] = sire_txt.parsear(texto("|".join(fila), con_cabecera=False), COMPRAS, DE_COMPRAS,
+                           tipos_de_cambio={date(2026, 8, 10): "7.000"})
+    assert (c.tipo_cambio, c.total) == (Decimal("3.500"), Decimal("1180.00"))
+
+
+def test_una_venta_en_dolares_sin_tipo_de_cambio_tambien_toma_el_de_su_dia():
+    fila = _venta_en("USD", "", "3500.00", "630.00", "4130.00")
+    [c] = sire_txt.parsear(texto(fila), VENTAS, DE_VENTAS, tipos_de_cambio={date(2026, 8, 1): "3.500"})
+    assert (c.moneda, c.tipo_cambio, c.total) == ("USD", Decimal("3.500"), Decimal("1180.00"))
+
+
+def test_sin_el_tipo_de_cambio_de_su_dia_la_fila_sigue_sin_leerse_y_lo_dice():
+    """Una tabla que no tiene ese día no es licencia para adivinar: falla, y dice qué día faltaba. Y sin tabla, como
+    hasta la 15.11."""
+    fila = _compra(c14="3500.00", c15="630.00", c24="4130.00", c25="USD", c26="")
+    archivo = texto("|".join(fila), con_cabecera=False)
+    with pytest.raises(sire_txt.SireInvalido, match="no hay uno publicado para el 2026-08-10"):
+        sire_txt.parsear(archivo, COMPRAS, DE_COMPRAS, tipos_de_cambio={date(2026, 8, 11): "3.500"})
+    with pytest.raises(sire_txt.SireInvalido, match="no hay uno publicado para el 2026-08-10"):
+        sire_txt.parsear(archivo, COMPRAS, DE_COMPRAS, tipos_de_cambio={date(2026, 8, 10): "0"})
+    with pytest.raises(sire_txt.SireInvalido, match="USD sin tipo de cambio, y sus importes vienen en soles"):
+        sire_txt.parsear(archivo, COMPRAS, DE_COMPRAS)
+
+
+def test_el_de_no_domiciliados_tambien_toma_el_de_su_dia():
+    nombre = _nombre_con_banderas("1112")
+    [c] = sire_txt.parsear(_fila_de("USD", "", "67.24"), COMPRAS, nombre, tipos_de_cambio={date(2026, 8, 12): "3.362"})
+    assert (c.moneda, c.tipo_cambio, c.total) == ("USD", Decimal("3.362"), Decimal("20.00"))
+
+
+def test_la_tabla_llega_al_sire_por_la_lectura_de_archivos():
+    """`convertir_xml` es la puerta por la que lee la aplicación: la tabla tiene que llegar hasta el SIRE."""
+    fila = _compra(c14="3500.00", c15="630.00", c24="4130.00", c25="USD", c26="")
+    lote = archivos.expandir(DE_COMPRAS, texto("|".join(fila), con_cabecera=False))
+    sin = archivos.convertir_xml(lote, COMPRAS)
+    assert not sin.comprobantes and "sin tipo de cambio" in sin.errores[0]["motivo"]
+    con = archivos.convertir_xml(lote, COMPRAS, tipos_de_cambio=DEL_DIA)
+    assert [c.total for c in con.comprobantes] == [Decimal("1180.00")] and not con.errores
+
+
+def test_dentro_del_zip_tambien_toma_el_de_su_dia():
+    """La propuesta y los excluidos llegan en su ZIP: la tabla tiene que llegar al TXT de dentro."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr(DE_COMPRAS, texto("|".join(_compra(c14="3500.00", c15="630.00", c24="4130.00", c25="USD", c26="")),
+                                     con_cabecera=False).decode("utf-8"))
+    [c] = sire_txt.parsear(buf.getvalue(), COMPRAS, "excluidos.zip", tipos_de_cambio=DEL_DIA)
+    assert (c.tipo_cambio, c.total) == (Decimal("3.500"), Decimal("1180.00"))

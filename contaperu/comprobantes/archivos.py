@@ -142,9 +142,13 @@ class ResultadoLectura:
     no_leidos: list[dict] = field(default_factory=list)
 
 
-def convertir_xml(lote: Lote, libro: Libro) -> ResultadoLectura:
+def convertir_xml(lote: Lote, libro: Libro,
+                  tipos_de_cambio: sire_txt.TiposDeCambio | None = None) -> ResultadoLectura:
     """Convierte las entradas XML de un lote. Los PDF/imágenes quedan en
-    `pendientes_ia`; el resto se reporta."""
+    `pendientes_ia`; el resto se reporta.
+
+    `tipos_de_cambio` (15.12.0, opcional) es el tipo de cambio de cada día, fecha → valor, y solo lo usa el SIRE: una
+    fila en otra moneda que llega sin el suyo toma el del día de emisión (`sire_txt._a_su_moneda`)."""
     r = ResultadoLectura(errores=list(lote.errores))
     for e in lote.entradas:
         if e.es_auxiliar:
@@ -159,7 +163,8 @@ def convertir_xml(lote: Lote, libro: Libro) -> ResultadoLectura:
         elif e.es_sire:
             try:
                 # `parsear` sabe cuál de los registros es: el de compras o ventas, o el de no domiciliados.
-                r.comprobantes.extend(sire_txt.parsear(e.datos, libro, archivo_nombre=e.nombre))
+                r.comprobantes.extend(sire_txt.parsear(e.datos, libro, archivo_nombre=e.nombre,
+                                                       tipos_de_cambio=tipos_de_cambio))
             except sire_txt.SireInvalido as ex:
                 r.errores.append({"archivo": e.nombre, "motivo": str(ex)})
         elif e.es_libro_de_sunat:

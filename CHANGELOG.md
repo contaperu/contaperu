@@ -4,6 +4,34 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.12.0] — 2026-11-21
+
+### La fila del SIRE en dólares que llega sin tipo de cambio toma el del día, si quien llama lo da
+
+Medido el 21-nov-2026 en un RUC real: **SUNAT entrega filas en otra moneda con el tipo de cambio en blanco**. En la
+propuesta de compras de un mes, una de sus 71 filas en dólares; en su exportación de **excluidos**, todas: 65 de 65,
+133 de 133, 160 de 160 y 216 de 216, en cinco meses distintos. El importe viene **en soles**, como en la propuesta: se
+comparó con la misma factura en la propuesta de otro mes, que sí traía su tipo de cambio, y en 57 de 58 el total es el
+mismo número. Como desde la 15.9.0 el lector devuelve esos importes a la moneda del comprobante dividiéndolos por el
+tipo de cambio de la fila, **una sola fila así tumbaba el archivo entero**: los excluidos de esos cinco meses no se
+pudieron leer nunca, y tampoco aquella propuesta.
+
+El motor no sale a la red, así que el tipo de cambio de cada día lo pone quien llama:
+
+- **`sire_txt.parsear(…, tipos_de_cambio=…)` y `archivos.convertir_xml(…, tipos_de_cambio=…)`**, opcionales: un mapa
+  fecha → tipo de cambio (`sire_txt.TiposDeCambio`). Lo esperado es el que SUNAT publica para cada día, que es el del
+  Reglamento del IGV (art. 5, num. 17) y contra el que el SIRE valida.
+- **Una fila en otra moneda sin tipo de cambio toma el de su fecha de emisión**, sus importes vuelven a la moneda del
+  comprobante con él y **queda escrito en el comprobante**. La fila cruda sigue en `datos_originales["sire"]`, con su
+  columna en blanco: el que usó el emisor pudo ser otro.
+- **La fila que trae el suyo se divide por el suyo**, diga lo que diga el mapa.
+- **Sin mapa, la fila falla como hasta la 15.11**. Con un mapa que no tiene ese día —o lo tiene en cero—, falla también,
+  y el motivo dice qué día faltaba: no se adivina.
+- Vale para los tres registros que lee este módulo —ventas, compras y no domiciliados— y dentro del ZIP.
+
+**Para quien integra:** nada cambia si no pasas el mapa. Si lo pasas, un archivo que antes fallaba por una fila en
+dólares sin tipo de cambio se lee entero.
+
 ## [15.11.0] — 2026-11-20
 
 ### La propuesta del SIRE sin comprobantes se lee como cero, y no como un libro desconocido
