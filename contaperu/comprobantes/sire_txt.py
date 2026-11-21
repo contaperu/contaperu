@@ -31,6 +31,10 @@ país, la renta y la retención— y entra por `parsear` igual que el otro, con 
 comprobantes). Es una tercera forma de las mismas columnas, y entra por la misma regla que el reemplazo: una fila que
 empieza por el RUC y el periodo.
 
+**Y la propuesta SIN comprobantes se lee como lo que es: cero** (15.11.0). Cuando SUNAT todavía no tiene nada del
+periodo, entrega la cabecera sola, y con dos BOM delante en vez de uno (`_texto`). Hasta la 15.10 eso salía como «un
+libro con una forma que este lector no conoce», y la aplicación no tenía forma de distinguirlo de un cambio de SUNAT.
+
 Lo que la propuesta NO trae, y por eso no se inventa aquí: el concepto del
 comprobante, la cuenta contable, el centro de costo y el detalle de la detracción. Son
 datos del comprobante, no del registro; `validar.py` lo avisa con `SIRE_SIN_DETALLE`.
@@ -185,7 +189,18 @@ _BANDERA_DE_MONEDA = 31
 
 
 def _texto(datos: bytes) -> str:
-    return datos.decode("utf-8-sig", errors="replace")
+    """Los bytes de un TXT de SUNAT, como texto y **sin ningún BOM delante** (15.11.0).
+
+    `utf-8-sig` quita uno, y SUNAT puede poner dos: medido el 20-nov-2026, la propuesta de ventas de un mes sin
+    comprobantes llegó con `EF BB BF EF BB BF` delante de la cabecera, mientras las que traen filas llevan uno solo.
+    El segundo se quedaba pegado a la primera columna —`"\\ufeffRuc"`, que `strip()` no quita porque para Python no es
+    un espacio—, la cabecera dejaba de reconocerse y el archivo salía como un libro con una forma desconocida."""
+    return datos.decode("utf-8-sig", errors="replace").lstrip("\ufeff")
+
+
+def _es_cabecera(campos: list[str]) -> bool:
+    """¿Es la cabecera de la exportación? Empieza por «RUC» y tiene las columnas del registro."""
+    return campos[0].strip().lower() == "ruc" and len(campos) >= MINIMO_CAMPOS
 
 
 def _tiene_la_forma(texto: str) -> bool:
@@ -194,7 +209,7 @@ def _tiene_la_forma(texto: str) -> bool:
         if not linea.strip():
             continue
         campos = linea.split("|")
-        if campos[0].strip().lower() == "ruc" and len(campos) >= MINIMO_CAMPOS:
+        if _es_cabecera(campos):
             return True            # la cabecera de la exportación
         # Una fila: RUC de 11 dígitos, periodo AAAAMM y bastantes columnas.
         return (len(campos) >= MINIMO_CAMPOS and campos[0].strip().isdigit()
@@ -643,13 +658,43 @@ def parsear(datos: bytes, libro: Libro, archivo_nombre: str = "") -> list[Compro
     return _parsear_registro(datos, libro, archivo_nombre)
 
 
+# Qué libro dice el código del nombre de cada registro, para saber si un registro vacío es del que se trabaja.
+_ES_DE_VENTAS = {"140400": True, "080400": False}
+
+
+def _vacio_de_este_libro(libro: Libro, nombre: str) -> None:
+    """Un registro sin filas no dice de quién es: lo dice su NOMBRE, cuando es el de un libro electrónico. Se comprueba
+    el RUC y si es de ventas o de compras, que es lo que con filas comprobaría la propia fila.
+
+    **El periodo no se comprueba**, porque el AAAAMM del nombre no siempre es el periodo: lo declarado de mayo de 2026,
+    bajado con `registro_pedir` en noviembre, se llama `LE` + RUC + `202611` (medido el 20-nov-2026). Sin nombre de
+    libro electrónico no hay contra qué comprobar nada, y se acepta vacío: la cabecera ya dijo qué es."""
+    base = posixpath.basename(nombre)
+    if not es_libro_electronico(base):
+        return
+    ruc = base[2:13]
+    if ruc != libro.ruc:
+        raise SireInvalido(f"El archivo es del RUC {ruc} y este cliente es {libro.ruc}")
+    es_de_ventas = _ES_DE_VENTAS.get(_codigo_del_nombre(base))
+    if es_de_ventas is not None and es_de_ventas != libro.es_venta:
+        raise SireInvalido(f"Es {CODIGOS_DEL_SIRE[_codigo_del_nombre(base)]}: va en el libro de "
+                           f"{'ventas' if es_de_ventas else 'compras'}, no en el de "
+                           f"{'ventas' if libro.es_venta else 'compras'}")
+
+
 def _parsear_registro(datos: bytes, libro: Libro, archivo_nombre: str, nombre_del_txt: str = "") -> list[Comprobante]:
     """El registro de compras o de ventas (un TXT, ya fuera de su ZIP) → comprobantes. El nombre del TXT —el de dentro
     del ZIP, o el del archivo suelto— dice en qué moneda se lleva la contabilidad, y con ella sus importes."""
     contabilidad = _moneda_de_la_contabilidad(nombre_del_txt or archivo_nombre)
     filas = leer_lineas(datos)
     if not filas:
-        raise SireInvalido("El archivo del SIRE no tiene ninguna fila")
+        # **Su cabecera y ninguna fila es un registro SIN comprobantes** (15.11.0), no un archivo roto: es lo que
+        # SUNAT entrega cuando aún no tiene nada del periodo —medido en la propuesta de ventas de un mes que llevaba
+        # cuatro días—. Sin cabecera tampoco hay nada que diga qué es, y eso sí falla.
+        if not _tiene_la_forma(_texto(datos)):
+            raise SireInvalido("El archivo del SIRE no tiene ninguna fila")
+        _vacio_de_este_libro(libro, nombre_del_txt or archivo_nombre)
+        return []
 
     rucs = {f[0].strip() for f in filas if f and f[0].strip()}
     if rucs and libro.ruc not in rucs:

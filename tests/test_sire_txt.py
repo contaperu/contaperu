@@ -711,3 +711,72 @@ def test_ida_y_vuelta_la_fila_que_sale_es_la_que_entro(fila, libro, nombre):
     importes = range(13, 26) if libro is VENTAS else range(14, 25)
     assert [sale[i] for i in importes] == [entra[i] if entra[i] not in ("", "0") else "0.00" for i in importes]
     assert sale[26 if libro is VENTAS else 25] == "USD"
+
+
+# ── La propuesta SIN comprobantes (15.11.0) ────────────────────────────────────────────────────────────────────────
+# Medido el 20-nov-2026 en la propuesta de ventas de un mes que llevaba cuatro días: SUNAT entregó su cabecera de 40
+# columnas, ninguna fila y DOS BOM delante (`EF BB BF EF BB BF`); las que traen filas llevan uno. Aquí, la misma forma
+# con un RUC inventado: la cabecera es un rótulo de SUNAT, no un dato de nadie.
+DOBLE_BOM = b"\xef\xbb\xbf" * 2
+VACIA = DOBLE_BOM + (CABECERA + "\r\n").encode("utf-8")
+# El nombre con la forma del real: `LE` + RUC + AAAAMM + `00` + el código del registro de ventas + `01EXP2`.
+DE_LA_PROPUESTA_VACIA = "LE20601111111202608" + "00140400" + "01EXP2.txt"
+
+
+def _en_un_zip(nombre: str, datos: bytes) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr(nombre, datos)
+    return buf.getvalue()
+
+
+def test_la_propuesta_sin_comprobantes_se_lee_como_cero_y_no_como_una_forma_desconocida():
+    """Lo que vio John el 20-nov-2026: «no tiene la forma que este lector conoce (0 filas)» sobre la propuesta de un mes
+    en el que SUNAT aún no tenía nada. Es una propuesta vacía y se dice así: cero comprobantes, sin error y sin nada en
+    `no_leidos`, suelta y dentro de su ZIP, que es como llega."""
+    assert sire_txt.es_sire(VACIA)
+    assert sire_txt.parsear(VACIA, VENTAS, DE_LA_PROPUESTA_VACIA) == []
+    for nombre, datos in ((DE_LA_PROPUESTA_VACIA, VACIA),
+                          ("propuesta.zip", _en_un_zip(DE_LA_PROPUESTA_VACIA, VACIA))):
+        res = archivos.convertir_xml(archivos.expandir(nombre, datos), VENTAS)
+        assert (res.comprobantes, res.errores, res.no_leidos, res.ignorados) == ([], [], [], []), nombre
+    assert sire_txt.parsear(_en_un_zip(DE_LA_PROPUESTA_VACIA, VACIA), VENTAS, "propuesta.zip") == []
+
+
+def test_una_fila_con_dos_bom_delante_se_lee_igual_que_con_uno():
+    """El segundo BOM se quedaba pegado a la primera columna —`"\\ufeffRuc"`, que `strip()` no quita— y la cabecera
+    dejaba de reconocerse. Se quitan todos, así que traiga filas o no, el archivo se lee igual."""
+    [con_uno] = sire_txt.parsear(b"\xef\xbb\xbf" + texto(FACTURA), VENTAS)
+    [con_dos] = sire_txt.parsear(DOBLE_BOM + texto(FACTURA), VENTAS)
+    assert (con_dos.serie, con_dos.numero, con_dos.total) == (con_uno.serie, con_uno.numero, con_uno.total)
+    assert con_dos.total == Decimal("242202.25")
+
+
+@pytest.mark.parametrize("libro,nombre,motivo", [
+    (Libro(ruc="20111111111", razon_social="OTRA SAC", periodo="202608", tipo="venta"), DE_LA_PROPUESTA_VACIA,
+     "RUC 20601111111"),
+    (COMPRAS, DE_LA_PROPUESTA_VACIA, "va en el libro de ventas, no en el de compras"),
+    (VENTAS, DE_LA_PROPUESTA_VACIA.replace("00140400", "00080400"), "va en el libro de compras, no en el de ventas"),
+])
+def test_un_registro_vacio_ajeno_falla_por_su_nombre(libro, nombre, motivo):
+    """Sin filas no hay fila que diga de quién es: lo dice el nombre, y uno de otro RUC o del otro libro no se toma por
+    «SUNAT no tiene nada» en el que se está trabajando."""
+    with pytest.raises(sire_txt.SireInvalido, match=motivo):
+        sire_txt.parsear(VACIA, libro, nombre)
+
+
+def test_el_periodo_de_un_registro_vacio_no_se_lee_del_nombre():
+    """El AAAAMM del nombre no siempre es el periodo: lo declarado de mayo, bajado en noviembre, se llama `…202611…`
+    (medido el 20-nov-2026). Leído como periodo, rechazaría un registro vacío que sí es de este mes. Sin nombre de libro
+    electrónico tampoco hay nada que comprobar: la cabecera ya dijo qué es."""
+    de_otro_mes = DE_LA_PROPUESTA_VACIA.replace("202608", "202611")
+    assert sire_txt.parsear(VACIA, VENTAS, de_otro_mes) == []
+    assert sire_txt.parsear(VACIA, VENTAS, "propuesta.txt") == []
+
+
+def test_sin_cabecera_ni_filas_sigue_sin_ser_una_propuesta():
+    """Lo vacío de verdad no dice qué es: no se lee como una propuesta sin comprobantes."""
+    for datos in (b"", DOBLE_BOM, DOBLE_BOM + b"\r\n"):
+        assert not sire_txt.es_sire(datos)
+        with pytest.raises(sire_txt.SireInvalido, match="ninguna fila"):
+            sire_txt.parsear(datos, VENTAS, DE_LA_PROPUESTA_VACIA)

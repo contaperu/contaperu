@@ -4,6 +4,36 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.11.0] — 2026-11-20
+
+### La propuesta del SIRE sin comprobantes se lee como cero, y no como un libro desconocido
+
+Medido el 20-nov-2026 en la propuesta de ventas de un mes que llevaba cuatro días: SUNAT todavía no tenía nada del
+periodo y entregó **su cabecera de 40 columnas, ninguna fila y dos BOM delante** (`EF BB BF EF BB BF`). Las que traen
+filas llevan uno solo: se comprobó con la de ese mismo mes dos semanas después y con la del mes anterior.
+
+El lector tropezaba dos veces:
+
+- **`utf-8-sig` quita un BOM, no dos.** El segundo se quedaba pegado a la primera columna (`"\ufeffRuc"`, que `strip()`
+  no quita porque para Python no es un espacio), la cabecera dejaba de reconocerse y el archivo, cuyo nombre dice
+  `140400`, salía en `no_leidos` como «un registro con una forma que este lector no conoce». La aplicación no tenía forma
+  de distinguir eso de un cambio de formato de SUNAT, y lo enseñaba como un error.
+- **Con un solo BOM tampoco entraba**: la cabecera sin filas fallaba con «El archivo del SIRE no tiene ninguna fila».
+
+Lo que cambia:
+
+- **Se quitan todos los BOM del principio** de cualquier TXT de SUNAT que lea este módulo, traiga filas o no.
+- **Un registro de compras o de ventas con su cabecera y ninguna fila devuelve cero comprobantes**, sin error y sin nada en
+  `no_leidos`. Sin cabecera sigue fallando como antes: lo vacío de verdad no dice qué es.
+- **Sin filas, de quién es lo dice el nombre**, cuando es el de un libro electrónico: el RUC (`[2:13]`) y si es el
+  registro de ventas (`140400`) o el de compras (`080400`). Uno de otro RUC o del otro libro falla con su motivo, como
+  fallaría su primera fila. **El periodo no se comprueba**, porque el AAAAMM del nombre no siempre lo es: lo declarado
+  de mayo de 2026, bajado con `registro_pedir` en noviembre, se llama `LE` + RUC + `202611`.
+
+**Para quien integra:** un cambio de comportamiento. `parsear` devuelve `[]` donde antes lanzaba `SireInvalido`, y
+`convertir_xml` deja de poner ese archivo en `no_leidos`. Si tu aplicación trataba «ningún comprobante y algo en
+`no_leidos`» como un error, una propuesta vacía de SUNAT deja de serlo.
+
 ## [15.10.0] — 2026-11-14
 
 ### El resumen de un libro suma lo retenido al no domiciliado
