@@ -335,7 +335,7 @@ API y devuelven la respuesta. Por eso el mismo mes da el mismo resultado por las
 |---|---|---|
 | **Python** | Un programa en Python | `from contaperu import api` y `api.exportar(documento, driver="concar", ...)`: llama directo a la API |
 | **CLI** (`contaperu`) | Quien trabaja en la consola o por lotes | Seis comandos: `generar`, `desde-json`, `diagnosticar`, `configuracion`, `comparar` y `verificar-driver`, que comprueba un driver propio contra el contrato |
-| **MCP** (`contaperu-mcp`) | Un asistente de IA | 17 herramientas de solo lectura y 13 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
+| **MCP** (`contaperu-mcp`) | Un asistente de IA | 18 herramientas de solo lectura y 13 recursos, por stdio o HTTP; el archivo vuelve con hasta 4 MB |
 | **HTTP** (`contaperu-http`) | Un ERP en cualquier lenguaje | `POST /v1/exportar`, `POST /v1/diagnosticar`…; responde 421 a un `Host` no declarado, corta la petición en 10 MB y atiende 16 a la vez |
 
 La **API pública** (`contaperu.api`) es la lista de operaciones que comparten las cuatro puertas: leer, revisar,
@@ -475,7 +475,7 @@ respuesta, por serie-número, sin corregir ni inventar nada.
 | Lectura de XML UBL 2.1 y de la propuesta del SIRE | listo |
 | Conciliación de constancias de detracción | **pendiente de un archivo real** del Banco de la Nación |
 | **Estándar y comunidad** | |
-| El estándar `open-accounting` 4.1, su esquema, sus catálogos y su batería de conformidad | listo |
+| El estándar `open-accounting` 4.2, su esquema, sus catálogos y su batería de conformidad | listo |
 | Contrato de driver y drivers de terceros por *entry points* | listo |
 | Paquete en PyPI | listo: `pip install contaperu` |
 | **Motor** | |
@@ -625,10 +625,11 @@ RFC 9457 con una `clave` estable. La guía, en [INTEGRAR.md](INTEGRAR.md).
 
 ### Para un agente de IA: el servidor MCP
 
-Diecisiete herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
+Dieciocho herramientas: `diagnosticar` (qué bloquea, qué falta y qué saldría, **antes** de exportar),
 `resumen` (cuánto es el libro, cada moneda por su lado), `por_cuenta` (en qué cuentas cayó el asiento)
 y `estado_de_cuenta` (qué queda por cobrar o por pagar, derivado de las aplicaciones: **sin ninguna
-columna de estado**),
+columna de estado**), `por_pagar` (lo que un pago tiene que cancelar de cada compra, con la regla del
+asiento de la compra),
 `configuracion_por_defecto`, `drivers_disponibles`, `validar_comprobantes`, `validar_partida_doble`,
 `generar_asiento`, `exportar`, `leer_xml_ubl`, `leer_propuesta_sire`, `normalizar_detracciones`,
 `buscar_cuenta_pcge`, `adaptar_pcge2026`, `validar_cuentas_bancarias` (el maestro de cuentas del contribuyente,

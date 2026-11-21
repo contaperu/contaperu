@@ -66,7 +66,10 @@ OTRAS_VERSIONES: dict[str, set[str]] = {
     # `3.2` es el hito J5, que es lo próximo del estándar y se nombra por su número — era la 3.1 hasta que la
     # glosa de un movimiento se la llevó (12.0). Y `3.0` porque la hoja de ruta cuenta cuándo pasó cada cosa:
     # el contrato del dinero se cerró en la 3.0, y eso no deja de ser cierto al subir a la 3.1.
-    "HOJA-DE-RUTA.md": {"3.0", "3.2"},
+    # Y `4.1` (15.13.0) en los tres que cuentan EN QUÉ versión entró el bloque del no domiciliado: lo trajo la 4.1, y
+    # eso no deja de ser cierto al subir a la 4.2. El LEEME, además, cuenta por qué la 4.2 subió de número.
+    "HOJA-DE-RUTA.md": {"3.0", "3.2", "4.1"},
+    "README.md": {"4.1"},
     "ARQUITECTURA.md": {"3.0", "3.2"},
     # `3.3` porque INTEGRAR cuenta DESDE CUÁNDO el motor hace algo —«hasta la 3.3 el motor no la tenía, así
     # que la escribía cada aplicación»—, y eso no deja de ser cierto al subir a la 4.0. Una guia de migracion
@@ -74,7 +77,7 @@ OTRAS_VERSIONES: dict[str, set[str]] = {
     "INTEGRAR.md": {"3.3"},
     # `4.0` porque el LEEME cuenta por qué la 4.1 subió de número —el tag `open-accounting-4.0` ya estaba publicado y
     # no se mueve— y que un documento 4.0 sigue validando: las dos cosas siguen siendo ciertas en la 4.1.
-    "estandar/LEEME.md": {"4.0"},
+    "estandar/LEEME.md": {"4.0", "4.1"},
     # Una guía de migración existe para hablar de la versión de la que se viene, y de la que se va a.
     "estandar/MIGRAR-A-1.0.md": {"0.3", "1.0"},
     "estandar/MIGRAR-A-2.0.md": {"1.0", "2.0"},

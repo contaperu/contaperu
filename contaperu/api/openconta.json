@@ -3,14 +3,14 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "15.12.0",
+  "version": "15.13.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
    "name": "MIT",
    "identifier": "MIT"
   },
-  "x-open-accounting": "4.1"
+  "x-open-accounting": "4.2"
  },
  "paths": {
   "/v1/leer_xml": {
@@ -475,6 +475,50 @@
        "application/json": {
         "schema": {
          "$ref": "#/components/schemas/estado_de_cuenta"
+        }
+       }
+      }
+     },
+     "400": {
+      "$ref": "#/components/responses/MalFormado"
+     },
+     "413": {
+      "$ref": "#/components/responses/DemasiadoGrande"
+     },
+     "422": {
+      "$ref": "#/components/responses/NoProcesable"
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/por_pagar": {
+   "post": {
+    "operationId": "por_pagar",
+    "summary": "De cada compra, lo que se le debe al proveedor y en qué cuenta: lo que un pago tiene que cancelar (15.13.0).",
+    "description": "De cada compra, lo que se le debe al proveedor y en qué cuenta: lo que un pago tiene que cancelar (15.13.0).\n\nLa cuenta y el importe salen de **la misma regla que el asiento de la compra** —la cuenta del tercero de su\nimputación o de la configuración, y el total menos la retención de 4ta y la detracción—, así que un pago armado\ncon esto cancela exactamente lo que la compra provisionó. Con ello se arma la imputación del movimiento: una\nparte del reparto por documento, con su `comprobante` (enmienda 0035). Solo compras; no valida ni se para.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/por_pagar_entrada"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "De cada compra, lo que se le debe al proveedor y en qué cuenta: lo que un pago tiene que cancelar (15.13.0).",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/por_pagar"
         }
        }
       }
@@ -2439,13 +2483,46 @@
      "glosa": {
       "description": "La glosa de ESTA parte, que es la «Glosa Detalle» de CONCAR. Es el motivo de que la glosa viva en la imputación y no en el movimiento: **un cargo que paga tres facturas necesita tres glosas**. Si no viene, manda la de la imputación.",
       "type": "string"
+     },
+     "comprobante": {
+      "description": "**El comprobante que esta parte cancela** (4.2, enmienda 0035), y su línea del asiento lleva el documento de él en vez del vóucher: una cuenta por pagar o por cobrar se lleva POR DOCUMENTO, y en CONCAR una 42 que no lleva su factura no la cancela en la cuenta corriente del proveedor. Lo pone quien arma el pago —es una decisión, como la cuenta, y por eso va al lado de ella—, y nombra el comprobante con la misma 4-tupla que una referencia de clase `comprobante`, más las dos fechas que su línea lleva. Su `contraparte_doc` no puede contradecir el de la parte.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "tipo_cp",
+       "numero"
+      ],
+      "properties": {
+       "tipo_cp": {
+        "type": "string",
+        "minLength": 1,
+        "description": "El tipo de comprobante (Tabla 10 de SUNAT)."
+       },
+       "serie": {
+        "type": "string"
+       },
+       "numero": {
+        "type": "string",
+        "minLength": 1
+       },
+       "contraparte_doc": {
+        "type": "string"
+       },
+       "fecha_emision": {
+        "$ref": "#/components/schemas/OpenAccounting_fecha"
+       },
+       "fecha_vencimiento": {
+        "$ref": "#/components/schemas/OpenAccounting_fecha",
+        "description": "Sin ella, su línea lleva la emisión, como la de su compra."
+       }
+      }
      }
     }
    },
    "OpenAccounting_imputacion_de_movimiento": {
     "type": "object",
     "additionalProperties": false,
-    "description": "Lo que el ERP decide sobre un movimiento porque el motor lo necesita y el papel no lo dice. **La 104 no sale de aquí**: sale de la cuenta bancaria que el contribuyente declaró en el maestro. Esto pone **la otra cara**, igual que la cuenta de un gasto llega en la imputación de su comprobante desde la 1.0. **Lo que NO es: lo que el pago cancela** — eso viaja en `movimiento.referencias[]` si el papel lo dice. Aquí va la cuenta, no el documento. Las tres formas se excluyen: una cuenta sola, un `reparto` o un `cuenta_propia`.",
+    "description": "Lo que el ERP decide sobre un movimiento porque el motor lo necesita y el papel no lo dice. **La 104 no sale de aquí**: sale de la cuenta bancaria que el contribuyente declaró en el maestro. Esto pone **la otra cara**, igual que la cuenta de un gasto llega en la imputación de su comprobante desde la 1.0. **Lo que NO es: lo que el pago cancela** — eso viaja en `movimiento.referencias[]` si el papel lo dice. Aquí va la cuenta, no el documento. Salvo en una parte del `reparto` (4.2): su `comprobante` dice qué factura cancela esa parte, porque su línea tiene que llevar el documento de esa factura. Las tres formas se excluyen: una cuenta sola, un `reparto` o un `cuenta_propia`.",
     "properties": {
      "cuenta_contable": {
       "type": "string",
@@ -4225,6 +4302,103 @@
      }
     }
    },
+   "por_pagar": {
+    "title": "por_pagar",
+    "description": "De cada compra, lo que se le debe al proveedor y en qué cuenta: lo que un pago tiene que cancelar. Sale de **la misma regla que el asiento de la compra**, así que un pago armado con esto cancela exactamente lo que la compra provisionó. Es lo que dice el documento, no lo pendiente: lo ya pagado lo resta `estado_de_cuenta`.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "libro",
+     "documentos"
+    ],
+    "properties": {
+     "libro": {
+      "description": "La cabecera del libro, tal como llegó.",
+      "type": "object"
+     },
+     "documentos": {
+      "description": "Una fila por comprobante, en el orden del documento. Las excluidas y las duplicadas no salen.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": [
+        "tipo_cp",
+        "serie",
+        "numero",
+        "contraparte_doc",
+        "contraparte_nombre",
+        "id_externo",
+        "fecha_emision",
+        "fecha_vencimiento",
+        "moneda",
+        "total",
+        "retencion_4ta",
+        "detraccion",
+        "por_pagar",
+        "cuenta_contable",
+        "glosa"
+       ],
+       "properties": {
+        "tipo_cp": {
+         "type": "string"
+        },
+        "serie": {
+         "type": "string"
+        },
+        "numero": {
+         "type": "string"
+        },
+        "contraparte_doc": {
+         "type": "string"
+        },
+        "contraparte_nombre": {
+         "type": "string"
+        },
+        "id_externo": {
+         "description": "El del comprobante, o vacío si no lo trae.",
+         "type": "string"
+        },
+        "fecha_emision": {
+         "description": "AAAA-MM-DD, o vacío si el comprobante no la trae.",
+         "type": "string"
+        },
+        "fecha_vencimiento": {
+         "description": "AAAA-MM-DD. Sin vencimiento, la emisión: es lo que lleva la línea de su compra.",
+         "type": "string"
+        },
+        "moneda": {
+         "type": "string"
+        },
+        "total": {
+         "description": "El total del comprobante.",
+         "type": "string"
+        },
+        "retencion_4ta": {
+         "description": "Lo retenido de un recibo por honorarios, que no se le paga al proveedor. `0.00` en lo demás.",
+         "type": "string"
+        },
+        "detraccion": {
+         "description": "Lo que se deposita en el Banco de la Nación, que tampoco se le paga a él. `0.00` si no tiene, o si el contador la anuló por una nota.",
+         "type": "string"
+        },
+        "por_pagar": {
+         "description": "`total` − `retencion_4ta` − `detraccion`: lo que la compra deja en `cuenta_contable`. Negativo en una nota de crédito, que resta.",
+         "type": "string"
+        },
+        "cuenta_contable": {
+         "description": "La cuenta del proveedor, con la regla del asiento de la compra: la de su imputación o la de la configuración.",
+         "type": "string"
+        },
+        "glosa": {
+         "description": "La glosa de la línea de su compra.",
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   },
    "campos_del_comprobante": {
     "title": "Quién escribe cada campo de un comprobante",
     "description": "Qué campos los pone el documento, cuáles el sistema que lo produce y cuáles la revisión. Los tres tramos no se solapan y cubren el comprobante entero. Es lo que una puerta de entrada necesita para saber qué acepta de quien escribe.",
@@ -4315,6 +4489,10 @@
       "pattern": "^([0-9]{2,12})?$",
       "description": "La 104x del contribuyente para esta cuenta, que **el motor NO deriva ni supone**: cada cuenta corriente tiene su divisionaria —la de soles no es la de dólares, y la del Banco de la Nación tampoco—. Si no se declara, se avisa y no se adivina."
      },
+     "sub_diario": {
+      "type": "string",
+      "description": "El sub-diario con que el sistema de destino asienta lo de esta cuenta —en CONCAR cada banco tiene el suyo: el 24, el 26, como los numere cada estudio—. **Sin valor de fábrica**: lo pone quien integra, y vacío es que no se declaró (15.13.0)."
+     },
      "datos_originales": {
       "type": "object",
       "description": "Lo que quien integra transporte sin interpretar."
@@ -4366,6 +4544,10 @@
          "type": "string",
          "description": "La 104x del contribuyente. Vacía significa que no la declaró, no que el motor vaya a suponerla."
         },
+        "sub_diario": {
+         "type": "string",
+         "description": "El sub-diario de esta cuenta. Vacío significa que no se declaró: el motor no pone uno de fábrica."
+        },
         "codigo_de_banco": {
          "type": "string",
          "description": "Los tres primeros dígitos del CCI. Vacío significa que no se declaró CCI, no que sea otro banco."
@@ -4378,6 +4560,7 @@
         "cci",
         "moneda",
         "cuenta_contable",
+        "sub_diario",
         "codigo_de_banco"
        ],
        "additionalProperties": false
@@ -4425,7 +4608,7 @@
    },
    "tesoreria": {
     "title": "Tesorería revisada",
-    "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta y del saldo que declaró el banco, cuáles traen su contrapartida y cuáles no, lo que ninguna referencia reclama y lo que llegó de una lectura asistida. No lleva asiento: eso es el hito D6.",
+    "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta y del saldo que declaró el banco, cuáles traen su contrapartida y cuáles no, lo que ninguna referencia reclama y lo que llegó de una lectura asistida. No lleva asiento, y no porque el motor no lo arme —lo arma desde la 12.9, hito D6a—: mirar y asentar son dos preguntas, y el asiento lo da `generar_asiento`.",
     "type": "object",
     "required": [
      "libro",
@@ -5462,6 +5645,30 @@
       ],
       "format": "date",
       "description": "Deja fuera las aplicaciones posteriores y da los días contra el vencimiento."
+     }
+    }
+   },
+   "por_pagar_entrada": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "documento"
+    ],
+    "properties": {
+     "documento": {
+      "type": "object",
+      "$ref": "#/components/schemas/OpenAccounting",
+      "description": "Un documento `open-accounting`."
+     },
+     "configuracion": {
+      "type": "object",
+      "$ref": "#/components/schemas/configuracion",
+      "description": "La configuración contable del contribuyente."
+     },
+     "imputacion": {
+      "type": "object",
+      "$ref": "#/components/schemas/imputacion",
+      "description": "Lo decidido para cada documento, por `id_externo`."
      }
     }
    },

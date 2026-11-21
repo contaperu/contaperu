@@ -346,7 +346,9 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
               Campo("numero", "texto", titulo="Número"),
               Campo("cci", "texto", titulo="CCI"),
               Campo("moneda", "texto", titulo="Moneda"),
-              Campo("cuenta_contable", "texto", titulo="Cuenta contable", patron=PATRON_CUENTA)))),
+              Campo("cuenta_contable", "texto", titulo="Cuenta contable", patron=PATRON_CUENTA),
+              # 15.13.0: en qué sub-diario entra lo de esta cuenta. Sin valor de fábrica: lo pone el usuario.
+              Campo("sub_diario", "texto", titulo="Sub-diario")))),
     # QUÉ cuentas lo llevan, por PREFIJO (el contador, 09-sep-2026): «la cuenta 63 y 65 tiene habilitado el centro de
     # costo, pero cuando es una cuenta 60 por defecto no se debe asignar un centro de costo». En el sistema contable
     # esa marca vive en cada cuenta del plan; aquí se declara por prefijo, que es lo que un estudio sabe decir. El `70`

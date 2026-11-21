@@ -35,6 +35,10 @@
    "pattern": "^([0-9]{2,12})?$",
    "description": "La 104x del contribuyente para esta cuenta, que **el motor NO deriva ni supone**: cada cuenta corriente tiene su divisionaria —la de soles no es la de dólares, y la del Banco de la Nación tampoco—. Si no se declara, se avisa y no se adivina."
   },
+  "sub_diario": {
+   "type": "string",
+   "description": "El sub-diario con que el sistema de destino asienta lo de esta cuenta —en CONCAR cada banco tiene el suyo: el 24, el 26, como los numere cada estudio—. **Sin valor de fábrica**: lo pone quien integra, y vacío es que no se declaró (15.13.0)."
+  },
   "datos_originales": {
    "type": "object",
    "description": "Lo que quien integra transporte sin interpretar."

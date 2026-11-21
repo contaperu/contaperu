@@ -85,6 +85,10 @@ class CuentaBancaria:
     cci: str = ""
     moneda: str = ""
     cuenta_contable: str = ""       # la 104x del contribuyente, que el motor NO deriva
+    # El sub-diario con que el sistema de destino asienta lo de ESTA cuenta (15.13.0): en CONCAR cada banco tiene el
+    # suyo —el 24 del BCP, el 26 del BBVA, como los numere cada estudio—, y un pago entra en el de su cuenta. **Sin
+    # valor de fábrica**: lo pone el usuario (John, 21-nov-2026), y vacío significa que no lo declaró.
+    sub_diario: str = ""
     datos_originales: dict | None = None
 
     def __post_init__(self) -> None:
@@ -94,6 +98,7 @@ class CuentaBancaria:
         self.cci = normalizar_cci(self.cci)
         self.moneda = str(self.moneda or "").strip().upper()
         self.cuenta_contable = re.sub(r"[^0-9]", "", str(self.cuenta_contable or ""))
+        self.sub_diario = str(self.sub_diario or "").strip()
         if not self.id:
             raise CuentaInvalida("Una cuenta bancaria necesita un `id`: es con lo que un movimiento la nombra")
         # **Sin número ni CCI la cuenta VALE**, y hasta la 12.0.1 se rechazaba (11-oct-2026). Lo destapó John

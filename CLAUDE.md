@@ -153,8 +153,8 @@ Todo esto, con sus porqués, en `ARQUITECTURA.md`; el estándar, en `estandar/LE
   atajos que la 6.4.0 dejó en la raíz al agrupar el núcleo —el que use `contaperu.api` no nota nada; el que importe
   el núcleo cambia seis imports, y el mapa está en `INTEGRAR.md`— y el `libro` deja de ignorar en silencio una clave
   que no es suya, que es el último bloque del estándar donde pasaba. **La 9.0 rompe un parámetro**: el eje del libro
-  dejó de ser `es_venta: bool` y pasó a ser la tabla `modelo.RASGOS`, que hoy viaja por dieciocho funciones
-  de `asiento` —quince de ellas en su superficie congelada— y tres de `tributos.igv`, que no es un módulo
+  dejó de ser `es_venta: bool` y pasó a ser la tabla `modelo.RASGOS`, que hoy viaja por veinte funciones
+  de `asiento` —diecisiete de ellas en su superficie congelada— y tres de `tributos.igv`, que no es un módulo
   congelado; el que use `contaperu.api` no nota nada, el que llame al paquete `asiento` cambia sus llamadas
   (la tabla, en `INTEGRAR.md`). Ninguna salida cambió: los dos snapshots quedaron intactos. Y rompió **sin avisar
   en una 8.x**, que es una excepción a la regla de abajo y está escrita como tal en `CHANGELOG.md` y en

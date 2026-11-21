@@ -34,12 +34,16 @@
       "type": "string",
       "description": "La 104x del contribuyente. Vacía significa que no la declaró, no que el motor vaya a suponerla."
      },
+     "sub_diario": {
+      "type": "string",
+      "description": "El sub-diario de esta cuenta. Vacío significa que no se declaró: el motor no pone uno de fábrica."
+     },
      "codigo_de_banco": {
       "type": "string",
       "description": "Los tres primeros dígitos del CCI. Vacío significa que no se declaró CCI, no que sea otro banco."
      }
     },
-    "required": ["id", "banco", "numero", "cci", "moneda", "cuenta_contable", "codigo_de_banco"],
+    "required": ["id", "banco", "numero", "cci", "moneda", "cuenta_contable", "sub_diario", "codigo_de_banco"],
     "additionalProperties": false
    }
   },

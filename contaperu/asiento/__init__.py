@@ -74,7 +74,8 @@ from .movimiento import (CUENTA_ITF, FALTAS_DEL_MOVIMIENTO, GRUPO_EFECTIVO, Line
 from .comprobante import (CENTRO_EN_ANEXO, ROLES, ROLES_DEL_MOTOR, TIPOS_DEL_MOTOR, LineaSinComprobante, cabecera_de,
                     constancia_de,
                     glosa_de, indice_de_lineas_dadas, lineas_del_comprobante, lineas_del_libro,
-                    lineas_e_indice_del_libro, rangos_de_lineas_dadas, serie_numero_de)
+                    lineas_e_indice_del_libro, lo_que_se_le_debe, rangos_de_lineas_dadas, retenido_y_detraido,
+                    serie_numero_de)
 
 __all__ = [
     "CONFIGURACION_DEL_ASIENTO", "NUMERO_DETRACCION_PENDIENTE", "CONTADOR", "FALTA", "FALTAS",
@@ -98,6 +99,7 @@ __all__ = [
     "tiene_detraccion",
     "tipos_sin_sigla", "huella", "Imputacion", "Parte", "LineaDiario", "CENTRO_EN_ANEXO", "ROLES", "ROLES_DEL_MOTOR", "TIPOS_DEL_MOTOR", "glosa_de",
     "lineas_del_comprobante", "lineas_del_libro", "lineas_e_indice_del_libro", "cabecera_de", "Cabecera",
+    "lo_que_se_le_debe", "retenido_y_detraido",
     "indice_de_lineas_dadas", "rangos_de_lineas_dadas", "LineaSinComprobante",
     "ComprobanteDelAsiento", "MONEDAS_CODIGO", "constancia_de", "entradas_de", "exportacion_de",
     "serie_numero_de",

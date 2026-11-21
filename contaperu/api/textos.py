@@ -189,6 +189,19 @@ PARA_HERRAMIENTA: dict[str, str] = {
 
     Y dos monedas nunca se suman: lo aplicado en otra moneda se informa aparte y no se resta del pendiente.
     """,
+    'por_pagar': """De cada compra, lo que se le debe al proveedor y en qué cuenta: lo que un pago tiene que cancelar.
+
+    Llámala **antes de armar un pago**, y no hagas la cuenta tú: `por_pagar` es el total menos la retención de 4ta
+    (recibo por honorarios) y la detracción (va al Banco de la Nación, no al proveedor), y `cuenta_contable` sale de
+    la misma regla que el asiento de la compra. Si la rehaces y te sale otra cifra, el pago no cancela la compra.
+
+    **Es lo que dice el documento, no lo pendiente**: lo que ya se pagó en otro movimiento lo resta
+    `estado_de_cuenta`. Una nota de crédito sale en negativo, porque resta.
+
+    Con cada fila se arma una parte del reparto del movimiento: `{importe, cuenta_contable, contraparte_doc,
+    comprobante: {tipo_cp, serie, numero, contraparte_doc, fecha_emision, fecha_vencimiento}}`, y su línea lleva el
+    documento de esa factura en vez del vóucher. Una parte por documento, nunca una por proveedor.
+    """,
     'revisar_tesoreria': """Revisa el dinero de un periodo antes de conciliarlo: los movimientos de las cuentas
     del contribuyente.
 

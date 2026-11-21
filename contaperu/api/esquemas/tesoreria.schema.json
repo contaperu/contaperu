@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/tesoreria.schema.json",
  "title": "Tesorería revisada",
- "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta y del saldo que declaró el banco, cuáles traen su contrapartida y cuáles no, lo que ninguna referencia reclama y lo que llegó de una lectura asistida. No lleva asiento: eso es el hito D6.",
+ "description": "El dinero de un periodo revisado antes de conciliarlo: cuántos movimientos quedaron tras deduplicar, el cuadre de la cadena de saldos de cada cuenta y del saldo que declaró el banco, cuáles traen su contrapartida y cuáles no, lo que ninguna referencia reclama y lo que llegó de una lectura asistida. No lleva asiento, y no porque el motor no lo arme —lo arma desde la 12.9, hito D6a—: mirar y asentar son dos preguntas, y el asiento lo da `generar_asiento`.",
  "type": "object",
  "required": [
   "libro",

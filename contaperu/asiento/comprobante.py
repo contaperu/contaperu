@@ -225,6 +225,44 @@ def _detraccion(c: Comprobante, config: dict, total: Decimal, neutral: bool = Fa
                     **constancia_de(c, config, comodin=not neutral)})
 
 
+def retenido_y_detraido(c: Comprobante, config: dict, libro: Rasgos | None = None) -> tuple[Decimal, Decimal]:
+    """Lo que sale de la cuenta del tercero sin pasar por él: la retención de 4ta de un recibo por honorarios y la
+    detracción, que se deposita en el Banco de la Nación. Los dos en positivo, al céntimo.
+
+    **Es la regla del asiento de la compra**, y vive aquí para que la lean los dos que la necesitan: el asiento
+    —que deja en la cuenta del tercero el total menos esto— y `api.por_pagar`, que dice cuánto se le paga
+    (15.13.0). Dos copias divergirían, y un pago que no cancela exactamente lo que la compra acreditó deja la cuenta
+    corriente del proveedor con un saldo que nadie debe.
+
+    La retención solo en un recibo por honorarios, y nunca mayor que el total. La detracción solo si el libro la
+    lleva, la factura la tiene y el contador no la marcó anulada por una nota (5.3): esa no se provisiona."""
+    rasgos = rasgos_de(libro)
+    total = Decimal(c.total or 0).quantize(CENTIMO)
+    es_honorarios = rasgos.lleva_honorarios and c.tipo_cp == TIPO_HONORARIOS
+    retenido = min(Decimal(c.retencion_4ta or 0).quantize(CENTIMO), total) if es_honorarios else Decimal(0)
+    detraido = Decimal(0)
+    if rasgos.lleva_detraccion and not es_honorarios and tiene_detraccion(c) and not anulada_por_nota(c, config):
+        _, detraido = monto_detraccion(c, config)
+        detraido = max(Decimal(detraido), Decimal(0))
+    return retenido, detraido
+
+
+def lo_que_se_le_debe(c: Comprobante, config: dict, libro: Rasgos | None = None) -> dict:
+    """Lo que el asiento de esta compra deja en la cuenta del tercero, que es exactamente lo que un pago tiene que
+    cancelar: la cuenta (`cuenta_tercero`) y el importe —el total menos la retención de 4ta y la detracción, que
+    salen de esa cuenta por otro camino (`retenido_y_detraido`)—.
+
+    Una nota que invierte (la de crédito) resta: su importe sale en negativo. Lo usa `api.por_pagar` (15.13.0), y
+    existe para que un ERP pague sin rehacer la regla del asiento: con una copia, el pago y la provisión dirían dos
+    cifras distintas del mismo documento."""
+    total = Decimal(c.total or 0).quantize(CENTIMO)
+    retenido, detraido = retenido_y_detraido(c, config, libro)
+    neto = total - retenido - detraido
+    return {"cuenta_contable": cuenta_tercero(c, config, libro), "retencion_4ta": retenido.quantize(CENTIMO),
+            "detraccion": Decimal(detraido).quantize(CENTIMO),
+            "por_pagar": (-neto if c.tipo_cp in TIPOS_INVIERTEN else neto).quantize(CENTIMO)}
+
+
 def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, date], correlativo: str,
                            opciones: Any = None, libro: Rasgos | None = None,
                            centro_en_anexo: frozenset[str] = CENTRO_EN_ANEXO,
@@ -343,9 +381,7 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # Recibo por honorarios con retención de 4ta: el gasto va por el TOTAL, la retención al Haber en
     # su cuenta de tributos, y a la cuenta por pagar solo el NETO que se le paga al profesional (regla
     # de contabilidad). Sin retención —lo normal con suspensión— el total completo va a la cuenta por pagar.
-    retenido = Decimal(c.retencion_4ta or 0).quantize(CENTIMO) if es_honorarios else Decimal(0)
-    if retenido > total:
-        retenido = total
+    retenido, detraido = retenido_y_detraido(c, config, libro)
     # La CUENTA decide dónde va el centro (el contador, 09-sep-2026): en su línea si la cuenta lo lleva
     # habilitado, y si no, como referencia (anexo auxiliar) cuando el sistema lo elige así. Nunca en los
     # dos. El doble anexo del tercero es otra cosa y no depende de esto.
@@ -400,36 +436,34 @@ def lineas_del_comprobante(c: Comprobante, config: dict, limites: tuple[date, da
     # factura, solo la nota apunta hacia atrás. Y si la detracción ya tiene constancia de depósito, los dos hechos se
     # contradicen y esto no se decide aquí: se para antes (`comprobantes_anulados_con_deposito`).
     linea_recorte = linea_detraccion = None
-    if rasgos.lleva_detraccion and not es_honorarios and tiene_detraccion(c) and not anulada_por_nota(c, config):
-        _, detraido = monto_detraccion(c, config)
-        if detraido > 0:
-            linea_recorte = linea(detraido, cuenta_del_tercero, sentido_base,
-                                             contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
-            # De QUÉ documento sale esta detracción: en una factura, del propio comprobante (lo que
-            # CONCAR aceptó). En una NOTA que ya referencia la factura que corrige se RESPETA esa
-            # referencia: ningún archivo validado dice otra cosa. Pendiente de una NC real.
-            cuenta_detraccion = cuenta_por_pagar_detraccion(config["cuentas"], moneda)
-            if neutral:
-                # Sin documento comodín: la detracción es del propio comprobante, y la constancia llega después.
-                documento_detraccion, referencia_detraccion = documento, referencia
-            else:
-                referencia_detraccion = referencia if referencia.get("tipo_cp") else {
-                    "tipo_cp": c.tipo_cp, "serie_numero": serie_numero, "fecha": _iso(emision)}
-                # El número del documento `DR` **es** la constancia del depósito: el comodín solo ocupa su sitio
-                # mientras nadie la haya pegado (3.2). Hasta entonces aquí se escribía el comodín y nada más, así
-                # que el vóucher llegaba a STARSOFT y a CONTASIS y no a CONCAR, que es donde vive esa columna —y
-                # el LEEME de CONCAR ya prometía lo contrario. La FECHA del documento sigue siendo la de la
-                # factura: ningún Excel validado dice que sea la del depósito, y eso no se decide de memoria.
-                # Sin `tipo`: la sigla de la T.G. 06 (`DR`) es de CONCAR y la escribe su driver en la columna R
-                # (`drivers.concar.proyeccion.tipo_doc_detraccion`). Lo demás del comodín se queda, porque es
-                # contabilidad y no formato: dice que este depósito está pendiente.
-                documento_detraccion = {"serie_numero": constancia_de(c, config)["nro_constancia"],
-                                        "id_externo": c.id_externo or "",
-                                        "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
-            linea_detraccion = linea(detraido, cuenta_detraccion, sentido_tercero,
-                                     glosa, contraparte_doc=ruc,
-                                     documento=_limpio(documento_detraccion), referencia=_limpio(referencia_detraccion),
-                                     detraccion=_detraccion(c, config, total, neutral))
+    if detraido > 0:
+        linea_recorte = linea(detraido, cuenta_del_tercero, sentido_base,
+                                         contraparte_doc=ruc, anexo_auxiliar=anexo_tercero)
+        # De QUÉ documento sale esta detracción: en una factura, del propio comprobante (lo que
+        # CONCAR aceptó). En una NOTA que ya referencia la factura que corrige se RESPETA esa
+        # referencia: ningún archivo validado dice otra cosa. Pendiente de una NC real.
+        cuenta_detraccion = cuenta_por_pagar_detraccion(config["cuentas"], moneda)
+        if neutral:
+            # Sin documento comodín: la detracción es del propio comprobante, y la constancia llega después.
+            documento_detraccion, referencia_detraccion = documento, referencia
+        else:
+            referencia_detraccion = referencia if referencia.get("tipo_cp") else {
+                "tipo_cp": c.tipo_cp, "serie_numero": serie_numero, "fecha": _iso(emision)}
+            # El número del documento `DR` **es** la constancia del depósito: el comodín solo ocupa su sitio
+            # mientras nadie la haya pegado (3.2). Hasta entonces aquí se escribía el comodín y nada más, así
+            # que el vóucher llegaba a STARSOFT y a CONTASIS y no a CONCAR, que es donde vive esa columna —y
+            # el LEEME de CONCAR ya prometía lo contrario. La FECHA del documento sigue siendo la de la
+            # factura: ningún Excel validado dice que sea la del depósito, y eso no se decide de memoria.
+            # Sin `tipo`: la sigla de la T.G. 06 (`DR`) es de CONCAR y la escribe su driver en la columna R
+            # (`drivers.concar.proyeccion.tipo_doc_detraccion`). Lo demás del comodín se queda, porque es
+            # contabilidad y no formato: dice que este depósito está pendiente.
+            documento_detraccion = {"serie_numero": constancia_de(c, config)["nro_constancia"],
+                                    "id_externo": c.id_externo or "",
+                                    "fecha_emision": _iso(emision), "fecha_vencimiento": _iso(vencimiento)}
+        linea_detraccion = linea(detraido, cuenta_detraccion, sentido_tercero,
+                                 glosa, contraparte_doc=ruc,
+                                 documento=_limpio(documento_detraccion), referencia=_limpio(referencia_detraccion),
+                                 detraccion=_detraccion(c, config, total, neutral))
 
     if rasgos.es_venta and not invierte:
         # Venta normal: cliente (D) · IGV (H) · ingreso (H).

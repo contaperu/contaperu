@@ -1,0 +1,99 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/por_pagar.schema.json",
+ "title": "por_pagar",
+ "description": "De cada compra, lo que se le debe al proveedor y en qué cuenta: lo que un pago tiene que cancelar. Sale de **la misma regla que el asiento de la compra**, así que un pago armado con esto cancela exactamente lo que la compra provisionó. Es lo que dice el documento, no lo pendiente: lo ya pagado lo resta `estado_de_cuenta`.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "libro",
+  "documentos"
+ ],
+ "properties": {
+  "libro": {
+   "description": "La cabecera del libro, tal como llegó.",
+   "type": "object"
+  },
+  "documentos": {
+   "description": "Una fila por comprobante, en el orden del documento. Las excluidas y las duplicadas no salen.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "tipo_cp",
+     "serie",
+     "numero",
+     "contraparte_doc",
+     "contraparte_nombre",
+     "id_externo",
+     "fecha_emision",
+     "fecha_vencimiento",
+     "moneda",
+     "total",
+     "retencion_4ta",
+     "detraccion",
+     "por_pagar",
+     "cuenta_contable",
+     "glosa"
+    ],
+    "properties": {
+     "tipo_cp": {
+      "type": "string"
+     },
+     "serie": {
+      "type": "string"
+     },
+     "numero": {
+      "type": "string"
+     },
+     "contraparte_doc": {
+      "type": "string"
+     },
+     "contraparte_nombre": {
+      "type": "string"
+     },
+     "id_externo": {
+      "description": "El del comprobante, o vacío si no lo trae.",
+      "type": "string"
+     },
+     "fecha_emision": {
+      "description": "AAAA-MM-DD, o vacío si el comprobante no la trae.",
+      "type": "string"
+     },
+     "fecha_vencimiento": {
+      "description": "AAAA-MM-DD. Sin vencimiento, la emisión: es lo que lleva la línea de su compra.",
+      "type": "string"
+     },
+     "moneda": {
+      "type": "string"
+     },
+     "total": {
+      "description": "El total del comprobante.",
+      "type": "string"
+     },
+     "retencion_4ta": {
+      "description": "Lo retenido de un recibo por honorarios, que no se le paga al proveedor. `0.00` en lo demás.",
+      "type": "string"
+     },
+     "detraccion": {
+      "description": "Lo que se deposita en el Banco de la Nación, que tampoco se le paga a él. `0.00` si no tiene, o si el contador la anuló por una nota.",
+      "type": "string"
+     },
+     "por_pagar": {
+      "description": "`total` − `retencion_4ta` − `detraccion`: lo que la compra deja en `cuenta_contable`. Negativo en una nota de crédito, que resta.",
+      "type": "string"
+     },
+     "cuenta_contable": {
+      "description": "La cuenta del proveedor, con la regla del asiento de la compra: la de su imputación o la de la configuración.",
+      "type": "string"
+     },
+     "glosa": {
+      "description": "La glosa de la línea de su compra.",
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}

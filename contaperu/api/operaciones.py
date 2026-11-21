@@ -88,6 +88,16 @@ def generar_asiento(documento: dict, *, driver: str, configuracion: dict | None 
                                   claves_previas=claves_previas)
 
 
+def por_pagar(documento: dict, *, configuracion: dict | None = None, imputacion: dict | None = None) -> dict:
+    """De cada compra, lo que se le debe al proveedor y en qué cuenta: lo que un pago tiene que cancelar (15.13.0).
+
+    La cuenta y el importe salen de **la misma regla que el asiento de la compra** —la cuenta del tercero de su
+    imputación o de la configuración, y el total menos la retención de 4ta y la detracción—, así que un pago armado
+    con esto cancela exactamente lo que la compra provisionó. Con ello se arma la imputación del movimiento: una
+    parte del reparto por documento, con su `comprobante` (enmienda 0035). Solo compras; no valida ni se para."""
+    return armado.por_pagar(documento, configuracion=configuracion, imputacion=imputacion)
+
+
 def exportar(documento: dict, *, driver: str, configuracion: dict | None = None, imputacion: dict | None = None,
              correlativos: dict | None = None, incluir_observados: bool = False, fecha: str | None = None,
              claves_previas: list | None = None) -> dict:

@@ -6,6 +6,7 @@ exigió lo que ese destino pide.
 """
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 from .. import asiento as asi
@@ -19,7 +20,7 @@ from ..asiento.resolucion import exigir_requisitos, fundir_config
 from ..configuracion import (CONFIG_POR_DEFECTO, CONFIGURACION_GENERAL, NO_SON_CONFIGURACION,
                              ConfiguracionInvalida)
 from ..drivers import contrato
-from ..modelo import ORIGEN_YA_ARMADO, ORIGENES_DE_LIBRO, Comprobante, Libro, identidad_de
+from ..modelo import CENTIMO, ORIGEN_YA_ARMADO, ORIGENES_DE_LIBRO, Comprobante, Libro, identidad_de
 from .preparacion import documento, libro_de, lineas_de, preparar, preparar_tesoreria
 from .seleccion import fuera_de, seleccionar
 
@@ -214,6 +215,34 @@ def desde_comprobantes(modulo, libro: Libro, comprobantes: list[Comprobante], op
     if fuera:
         raise contrato.NoCabe(fuera)
     return modulo.desde_comprobantes(libro, comprobantes, config, opciones)
+
+
+def por_pagar(doc: dict, *, configuracion: dict | None = None, imputacion: dict | None = None) -> dict:
+    """De cada compra del documento, lo que se le debe al tercero y en qué cuenta: lo que un pago tiene que cancelar.
+
+    **Solo compras**: en ventas la misma pregunta es qué se cobra, y no tiene caso todavía. Se prepara como para
+    asentar —la configuración general con la imputación de cada documento, y las detracciones normalizadas— pero
+    **no se para por nada**: pagar una factura no necesita la cuenta de su gasto ni que esté validada, y lo que el
+    asiento de la compra exija se le pide a la compra, no a su pago. Las excluidas y las duplicadas no salen."""
+    tipo = libro_de(doc).tipo
+    if tipo != "compra":
+        raise DocumentoInvalido(f"`por_pagar` es de un libro de compras, y este es de {tipo}")
+    # `preparar` entero, y no sus pasos copiados: la cuenta del tercero y la detracción tienen que salir del mismo
+    # documento preparado que el asiento —la imputación dentro, la detracción normalizada, los duplicados marcados—.
+    libro, todos, config = preparar(doc, configuracion, True, imputacion)
+    documentos = []
+    for c in seleccionar(todos):
+        debe = asi.lo_que_se_le_debe(c, config, libro.rasgos)
+        emision = c.fecha_emision.isoformat() if c.fecha_emision else ""
+        vence = c.fecha_vencimiento.isoformat() if c.fecha_vencimiento else emision
+        documentos.append({"tipo_cp": c.tipo_cp, "serie": c.serie, "numero": c.numero,
+                           "contraparte_doc": c.contraparte_doc, "contraparte_nombre": c.contraparte_nombre,
+                           "id_externo": c.id_externo or "", "fecha_emision": emision, "fecha_vencimiento": vence,
+                           "moneda": (c.moneda or "PEN").upper(), "total": str(Decimal(c.total or 0).quantize(CENTIMO)),
+                           "retencion_4ta": str(debe["retencion_4ta"]), "detraccion": str(debe["detraccion"]),
+                           "por_pagar": str(debe["por_pagar"]), "cuenta_contable": debe["cuenta_contable"],
+                           "glosa": asi.glosa_de(c)})
+    return {"libro": libro.a_dict(), "documentos": documentos}
 
 
 def generar_asiento(doc: dict, *, driver: str, configuracion: dict | None = None, correlativos: dict | None = None,

@@ -203,7 +203,8 @@ def test_las_dos_partes_no_son_la_misma_clase_y_no_se_funden():
     que renombrar una tampoco es gratis.
 
     Las tres diferencias que lo impiden, afirmadas abajo: el importe es opcional aquí y obligatorio allá; la
-    cuenta puede faltar aquí y allá no; y allá hay dos campos más (`contraparte_doc` y `glosa`).
+    cuenta puede faltar aquí y allá no; y allá hay tres campos más (`contraparte_doc`, `glosa` y, desde la 15.13.0,
+    `comprobante`: la factura que esa parte de un pago cancela, que una parte de una compra no tiene).
     """
     import dataclasses
 
@@ -214,7 +215,7 @@ def test_las_dos_partes_no_son_la_misma_clase_y_no_se_funden():
     del_comprobante = {c.name for c in dataclasses.fields(comprobantes.Parte)}
     del_movimiento = {c.name for c in dataclasses.fields(tesoreria.Parte)}
     assert del_comprobante == {"importe", "cuenta_contable", "centro_costo"}
-    assert del_movimiento - del_comprobante == {"contraparte_doc", "glosa"}
+    assert del_movimiento - del_comprobante == {"contraparte_doc", "glosa", "comprobante"}
 
     # Aquí una parte vacía es legal: lo que falte sale de la configuración del entorno.
     assert comprobantes.Parte().cuenta_contable == ""

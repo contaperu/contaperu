@@ -4,6 +4,42 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.13.0] — 2026-11-21
+
+### Pagar compras: cada línea 42 lleva la factura que cancela, y `api.por_pagar` dice cuánto (open-accounting 4.2)
+
+Pagarle a un proveedor es revertir su 42 contra el banco, y el motor lo asienta desde la 12.9. Le faltaban dos cosas,
+medidas en un pago real que un CONCAR aceptó (sub-diario de bancos; el archivo vive fuera del repositorio):
+
+- **Una 42 se lleva por documento.** En aquel pago cada línea del proveedor lleva SU factura —tipo, serie-número,
+  emisión y vencimiento—, una por documento y nunca agrupada por proveedor, y solo la del banco lleva el vóucher. El
+  motor ponía el vóucher en todas, y una 42 sin su factura no la cancela en la cuenta corriente del proveedor.
+- **Cuánto se le debe a cada uno lo ponía quien llamaba**, rehaciendo la regla del asiento de la compra. Con una cifra
+  distinta, el pago no cancela lo que la compra provisionó.
+
+Lo que entra:
+
+- **`open-accounting` 4.2** ([enmienda 0035](estandar/enmiendas/0035-el-comprobante-de-una-parte-del-reparto.md)): una
+  parte del `reparto` de un movimiento admite `comprobante`, `{tipo_cp, serie, numero, contraparte_doc, fecha_emision,
+  fecha_vencimiento}`, con `tipo_cp` y `numero` obligatorios. Es aditivo: un documento 4.1 vale igual. Se valida en la
+  puerta (`tesoreria.ImputacionInvalida`): una clave que sobra, un número que falta, una fecha que no lo es o un
+  `contraparte_doc` que contradice el de la parte.
+- **La línea de esa parte lleva el documento de su factura**, escrito como la línea de su compra —el número sin ceros a
+  la izquierda según el destino, y el vencimiento que cae a la emisión—; su tercero cae al del comprobante si la parte
+  no trae el suyo. La línea del banco sigue con el vóucher (0032), y una parte sin `comprobante` también.
+- **`api.por_pagar(documento, configuracion=…, imputacion=…)`**, también por HTTP (`POST /v1/por_pagar`) y por el MCP
+  (`por_pagar`): de cada compra, la cuenta del proveedor y lo que la compra le dejó en ella —el total menos la retención
+  de 4ta y la detracción; en negativo una nota de crédito—, con la moneda, las fechas y la glosa. **Sale de la misma
+  regla que el asiento**: `asiento.retenido_y_detraido`, extraída de `lineas_del_comprobante`, y `asiento.cuenta_tercero`.
+  Prepara el documento como para asentar pero **no se para** por lo que bloquearía el asiento de la compra; las excluidas
+  y las duplicadas no salen. Solo compras. Es lo que dice el documento, no lo pendiente: eso es `estado_de_cuenta`.
+- **`CuentaBancaria.sub_diario`**, y su campo en `cuentas_bancarias` de la configuración: el sub-diario con que el
+  sistema de destino asienta lo de esa cuenta (en CONCAR cada banco tiene el suyo). **Sin valor de fábrica**: lo pone
+  el usuario. Todavía no lo usa ningún driver; lo usará el de CONCAR cuando escriba el libro de bancos (D6c).
+
+**Para quien integra:** nada cambia si no usas lo nuevo. `validar_cuentas_bancarias` devuelve además `sub_diario` en cada
+cuenta, vacío si no lo declaras. Los `$ref` al estándar citan el tag `open-accounting-4.2`.
+
 ## [15.12.0] — 2026-11-21
 
 ### La fila del SIRE en dólares que llega sin tipo de cambio toma el del día, si quien llama lo da

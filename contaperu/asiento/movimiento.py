@@ -47,6 +47,10 @@ from .indice import CabeceraDeMovimiento, MovimientoDelAsiento
 from .lineas import LineaDiario
 from . import comun
 from .comun import iso as _iso, limpio as _limpio
+# El número de una línea con la regla de ceros de su destino: el MISMO que escribe la línea de la compra, para que el
+# documento de una parte que paga una factura salga escrito igual que el de su provisión (enmienda 0035).
+from .comprobante import _numero
+from ..modelo.coerciones import serie_y_numero
 from ..modelo.accesores import campo as _campo
 from .resolucion import limites_del_periodo, lleva_centro
 
@@ -203,17 +207,22 @@ def lineas_del_movimiento(m: Any, imputacion: Any, cuentas: dict, config: dict,
     else:
         if imputacion is None:
             raise MovimientoSinImputar([nombre or str(_campo(m, "id_externo") or "")])
-        contrarias = _contrapartidas(m, imputacion, importe, lado_contrario, linea, config)
+        contrarias = _contrapartidas(m, imputacion, importe, lado_contrario, linea, config, opciones)
 
     del_pago = [del_efectivo, *contrarias] if entra else [*contrarias, del_efectivo]
     return del_pago + _asiento_del_itf(m, linea, lado_efectivo, efectivo, config)
 
 
-def _contrapartidas(m: Any, imputacion: Any, importe: Decimal, lado: str, linea, config: dict) -> list[LineaDiario]:
+def _contrapartidas(m: Any, imputacion: Any, importe: Decimal, lado: str, linea, config: dict,
+                    opciones: Any = None) -> list[LineaDiario]:
     """La otra cara, que pone el ERP: una cuenta, o una por cada parte cuando el movimiento se reparte.
 
     El reparto ya viene cuadrado: `ImputacionDeMovimiento.exigir_que_sume` lo bloqueó al leer el documento, exacto
-    y sin tolerancia. Aquí solo se escribe."""
+    y sin tolerancia. Aquí solo se escribe.
+
+    **La parte que nombra su comprobante lleva el documento de ese comprobante** (15.13.0, enmienda 0035): una 42 se
+    lleva por documento, y en el Excel de pagos que un CONCAR real aceptó cada línea del proveedor lleva su factura
+    —tipo, serie-número, fecha y vencimiento— y solo la del banco lleva el vóucher."""
     reparto = list(_campo(imputacion, "reparto") or [])
     contraparte_del_movimiento = str(_campo(m, "contraparte_doc") or "")
     if not reparto:
@@ -226,21 +235,40 @@ def _contrapartidas(m: Any, imputacion: Any, importe: Decimal, lado: str, linea,
                                    tesoreria.glosa_de_movimiento(m, imputacion), config)]
     return [_una_contrapartida(linea, str(_campo(p, "cuenta_contable") or ""), lado, monto(_campo(p, "importe")),
                                str(_campo(p, "centro_costo") or ""),
-                               str(_campo(p, "contraparte_doc") or "") or contraparte_del_movimiento,
-                               tesoreria.glosa_de_movimiento(m, imputacion, p), config)
+                               (str(_campo(p, "contraparte_doc") or "")
+                                or str((_campo(p, "comprobante") or {}).get("contraparte_doc") or "")
+                                or contraparte_del_movimiento),
+                               tesoreria.glosa_de_movimiento(m, imputacion, p), config,
+                               documento=_documento_del_comprobante(_campo(p, "comprobante"), opciones))
             for p in reparto]
 
 
+def _documento_del_comprobante(comprobante: Any, opciones: Any = None) -> dict | None:
+    """El documento de la línea de una parte que nombra el comprobante que paga, o `None` para dejar el del vóucher.
+
+    Escrito **como lo escribe la línea de ese comprobante en su compra** —el serie-número con la misma regla de ceros
+    (`comprobante._numero`, según las opciones del destino) y el vencimiento que cae a la emisión—, porque el sistema
+    de destino casa el pago con la provisión por ese documento: escrito distinto, no lo cancela."""
+    c = dict(comprobante or {})
+    if not c:
+        return None
+    emision = c.get("fecha_emision") or ""
+    return _limpio({"tipo_cp": c.get("tipo_cp") or "",
+                    "serie_numero": serie_y_numero((c.get("serie") or "").strip(), _numero(c.get("numero") or "", opciones)),
+                    "fecha_emision": emision, "fecha_vencimiento": c.get("fecha_vencimiento") or emision})
+
+
 def _una_contrapartida(linea, cuenta: str, lado: str, importe: Decimal, centro: str, contraparte: str,
-                       glosa: str, config: dict) -> LineaDiario:
+                       glosa: str, config: dict, documento: dict | None = None) -> LineaDiario:
     """Una línea de la otra cara. El centro va si la cuenta lo lleva, con la MISMA regla que un comprobante
     (`cuentas_con_centro`): una cuenta de gasto lo lleva y la del proveedor no, y eso no cambia porque el dinero
     venga de un banco."""
     usa_centros = config.get("usa_centros_costo", True) if config else True
     en_linea = lleva_centro(cuenta, config or {})
+    extra = {"documento": documento} if documento else {}
     return linea(cuenta, lado, importe, glosa,
                  centro_costo=(centro if (usa_centros and en_linea) else ""),
-                 contraparte_doc=contraparte)
+                 contraparte_doc=contraparte, **extra)
 
 
 def _asiento_del_itf(m: Any, linea, lado_efectivo: str, efectivo: str, config: dict) -> list[LineaDiario]:

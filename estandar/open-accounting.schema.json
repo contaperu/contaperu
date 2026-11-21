@@ -1,6 +1,6 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.1/estandar/open-accounting.schema.json",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.2/estandar/open-accounting.schema.json",
  "title": "open-accounting",
  "description": "Documento contable universal del Perú. Tres bloques: la cabecera tributaria (qué RUC, qué mes, ventas o compras), los comprobantes soporte tal como los emite SUNAT, y las líneas de diario puras. Los importes van SIEMPRE en positivo: el signo de una nota de crédito lo pone el driver de salida, no el dato.",
  "type": "object",
@@ -1332,13 +1332,46 @@
     "glosa": {
      "description": "La glosa de ESTA parte, que es la «Glosa Detalle» de CONCAR. Es el motivo de que la glosa viva en la imputación y no en el movimiento: **un cargo que paga tres facturas necesita tres glosas**. Si no viene, manda la de la imputación.",
      "type": "string"
+    },
+    "comprobante": {
+     "description": "**El comprobante que esta parte cancela** (4.2, enmienda 0035), y su línea del asiento lleva el documento de él en vez del vóucher: una cuenta por pagar o por cobrar se lleva POR DOCUMENTO, y en CONCAR una 42 que no lleva su factura no la cancela en la cuenta corriente del proveedor. Lo pone quien arma el pago —es una decisión, como la cuenta, y por eso va al lado de ella—, y nombra el comprobante con la misma 4-tupla que una referencia de clase `comprobante`, más las dos fechas que su línea lleva. Su `contraparte_doc` no puede contradecir el de la parte.",
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "tipo_cp",
+      "numero"
+     ],
+     "properties": {
+      "tipo_cp": {
+       "type": "string",
+       "minLength": 1,
+       "description": "El tipo de comprobante (Tabla 10 de SUNAT)."
+      },
+      "serie": {
+       "type": "string"
+      },
+      "numero": {
+       "type": "string",
+       "minLength": 1
+      },
+      "contraparte_doc": {
+       "type": "string"
+      },
+      "fecha_emision": {
+       "$ref": "#/$defs/fecha"
+      },
+      "fecha_vencimiento": {
+       "$ref": "#/$defs/fecha",
+       "description": "Sin ella, su línea lleva la emisión, como la de su compra."
+      }
+     }
     }
    }
   },
   "imputacion_de_movimiento": {
    "type": "object",
    "additionalProperties": false,
-   "description": "Lo que el ERP decide sobre un movimiento porque el motor lo necesita y el papel no lo dice. **La 104 no sale de aquí**: sale de la cuenta bancaria que el contribuyente declaró en el maestro. Esto pone **la otra cara**, igual que la cuenta de un gasto llega en la imputación de su comprobante desde la 1.0. **Lo que NO es: lo que el pago cancela** — eso viaja en `movimiento.referencias[]` si el papel lo dice. Aquí va la cuenta, no el documento. Las tres formas se excluyen: una cuenta sola, un `reparto` o un `cuenta_propia`.",
+   "description": "Lo que el ERP decide sobre un movimiento porque el motor lo necesita y el papel no lo dice. **La 104 no sale de aquí**: sale de la cuenta bancaria que el contribuyente declaró en el maestro. Esto pone **la otra cara**, igual que la cuenta de un gasto llega en la imputación de su comprobante desde la 1.0. **Lo que NO es: lo que el pago cancela** — eso viaja en `movimiento.referencias[]` si el papel lo dice. Aquí va la cuenta, no el documento. Salvo en una parte del `reparto` (4.2): su `comprobante` dice qué factura cancela esa parte, porque su línea tiene que llevar el documento de esa factura. Las tres formas se excluyen: una cuenta sola, un `reparto` o un `cuenta_propia`.",
    "properties": {
     "cuenta_contable": {
      "type": "string",

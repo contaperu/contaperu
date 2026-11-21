@@ -140,6 +140,9 @@ OPERACIONES: tuple[Operacion, ...] = (
     # hermanas de arriba: un pendiente es del libro y no de un destino.
     Operacion("estado_de_cuenta", "POST", "/v1/estado_de_cuenta", "estado_de_cuenta",
               herramienta="estado_de_cuenta"),
+    # Lo que un pago tiene que cancelar de cada compra (15.13.0). La pareja de la de arriba: aquella dice cuánto
+    # queda, esta cuánto dejó la compra en la cuenta del proveedor y en cuál, con la regla del asiento. Sin `driver`.
+    Operacion("por_pagar", "POST", "/v1/por_pagar", "por_pagar", herramienta="por_pagar"),
     # Quién escribe cada campo. Recurso y no herramienta: es un GET sin argumentos que se lee una vez,
     # como `describir_configuracion`, y así el conjunto de herramientas no crece por una tabla.
     Operacion("campos_del_comprobante", "GET", "/v1/campos/comprobante", "campos_del_comprobante",

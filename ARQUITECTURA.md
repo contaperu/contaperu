@@ -208,8 +208,8 @@ estado de cuenta por partida abierta y uno de saldo arrastrado.
 
 El otro eje que ordena el motor es **de qué libro es el comprobante**. De la 1.0 a la 8.x fue un `bool`: `es_venta`,
 que viajaba por una veintena de ellas, y `not es_venta` quería decir «es compra». Hoy el eje —la tabla—
-viaja por veintiuna funciones: dieciocho de `asiento` —quince de ellas en la superficie congelada— y tres
-del IGV. La última en llegar es `lineas_del_movimiento`, que nació con la tabla y nunca tuvo booleano. Con ese booleano el motor
+viaja por veinte funciones de `asiento` —diecisiete de ellas en la superficie congelada— y por tres
+del IGV. Las últimas en llegar son `retenido_y_detraido` y `lo_que_se_le_debe` (15.13.0), que nacieron con la tabla y nunca tuvieron booleano. Con ese booleano el motor
 decidía el sentido debe/haber, el crédito frente al débito fiscal, cliente frente a proveedor, el sub-diario y los
 requisitos.
 

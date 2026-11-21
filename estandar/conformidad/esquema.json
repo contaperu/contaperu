@@ -2478,6 +2478,163 @@
     ]
    },
    "valid": false
+  },
+  {
+   "description": "Un pago de dos facturas de dos proveedores (4.2): cada parte del reparto nombra el comprobante que cancela, con su fecha y su vencimiento",
+   "data": {
+    "open_accounting": "4.2",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202611",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bcp-soles",
+      "fecha": "2026-11-03",
+      "importe": "1631.80",
+      "sentido": "cargo",
+      "id_externo": "pago-1"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "pago-1": {
+      "glosa": "PAGOS VARIOS",
+      "reparto": [
+       {
+        "importe": "1180.00",
+        "cuenta_contable": "421201",
+        "contraparte_doc": "20602222226",
+        "comprobante": {
+         "tipo_cp": "01",
+         "serie": "E001",
+         "numero": "3507",
+         "contraparte_doc": "20602222226",
+         "fecha_emision": "2026-09-24",
+         "fecha_vencimiento": "2026-10-24"
+        }
+       },
+       {
+        "importe": "451.80",
+        "cuenta_contable": "421201",
+        "contraparte_doc": "20607777773",
+        "comprobante": {
+         "tipo_cp": "01",
+         "serie": "F001",
+         "numero": "88",
+         "contraparte_doc": "20607777773",
+         "fecha_emision": "2026-10-28"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "valid": true
+  },
+  {
+   "description": "El comprobante de una parte sin su número no vale: sin él la línea no dice qué factura cancela",
+   "data": {
+    "open_accounting": "4.2",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202611",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bcp-soles",
+      "fecha": "2026-11-03",
+      "importe": "1631.80",
+      "sentido": "cargo",
+      "id_externo": "pago-1"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "pago-1": {
+      "glosa": "PAGOS VARIOS",
+      "reparto": [
+       {
+        "importe": "1180.00",
+        "cuenta_contable": "421201",
+        "contraparte_doc": "20602222226",
+        "comprobante": {
+         "tipo_cp": "01",
+         "serie": "E001",
+         "contraparte_doc": "20602222226"
+        }
+       },
+       {
+        "importe": "451.80",
+        "cuenta_contable": "421201",
+        "contraparte_doc": "20607777773",
+        "comprobante": {
+         "tipo_cp": "01",
+         "serie": "F001",
+         "numero": "88",
+         "contraparte_doc": "20607777773",
+         "fecha_emision": "2026-10-28"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "valid": false
+  },
+  {
+   "description": "El comprobante de una parte no lleva importe: el importe es el de la parte",
+   "data": {
+    "open_accounting": "4.2",
+    "libro": {
+     "ruc": "20601234567",
+     "razon_social": "EMPRESA DE PRUEBA SAC",
+     "periodo": "202611",
+     "tipo": "tesoreria"
+    },
+    "movimientos": [
+     {
+      "cuenta": "bcp-soles",
+      "fecha": "2026-11-03",
+      "importe": "1631.80",
+      "sentido": "cargo",
+      "id_externo": "pago-1"
+     }
+    ],
+    "imputaciones_de_movimientos": {
+     "pago-1": {
+      "glosa": "PAGOS VARIOS",
+      "reparto": [
+       {
+        "importe": "1180.00",
+        "cuenta_contable": "421201",
+        "contraparte_doc": "20602222226",
+        "comprobante": {
+         "tipo_cp": "01",
+         "serie": "E001",
+         "numero": "3507",
+         "importe": "1180.00"
+        }
+       },
+       {
+        "importe": "451.80",
+        "cuenta_contable": "421201",
+        "contraparte_doc": "20607777773",
+        "comprobante": {
+         "tipo_cp": "01",
+         "serie": "F001",
+         "numero": "88",
+         "contraparte_doc": "20607777773",
+         "fecha_emision": "2026-10-28"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "valid": false
   }
  ]
 }

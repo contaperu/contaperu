@@ -25,6 +25,11 @@ de dólares, y la del Banco de la Nación tampoco—, así que el motor no la de
 
 **Lo que esto NO es: lo que el pago cancela.** Eso viaja en `movimiento.referencias[]` si el papel lo dice, y
 casarlo con un comprobante es el hito D3. Aquí va **la cuenta**, no el documento.
+
+**Salvo en una parte del reparto, desde la 15.13.0 (enmienda 0035): `Parte.comprobante`.** Una cuenta por pagar se
+lleva POR DOCUMENTO —en CONCAR, la 42 de un pago tiene que llevar la factura que cancela o no la cancela en su
+cuenta corriente—, así que la línea de cada parte necesita saber de qué factura es. No es la referencia del papel:
+es la decisión de quien arma el pago, la misma clase de dato que la cuenta, y por eso va al lado de ella.
 """
 from __future__ import annotations
 
@@ -32,12 +37,53 @@ from dataclasses import dataclass, field, fields
 
 from ..errores import ErrorContaperu
 from ..modelo import CERO, monto as _monto
+from ..modelo.coerciones import fecha as _fecha
 from ..modelo.accesores import campo as _campo
 from .movimientos import TRANSFERENCIA, Movimiento
 
 
 class ImputacionInvalida(ErrorContaperu, ValueError):
     """Una imputación de movimiento que no se puede aplicar. Dice cuál y por qué."""
+
+
+# Lo que nombra el comprobante que paga una parte (enmienda 0035): la 4-tupla con la que una referencia de clase
+# `comprobante` ya lo nombra (`referencias.CLAVES_POR_CLASE`), y sus dos fechas, que su línea lleva en su documento.
+CLAVES_DEL_COMPROBANTE = ("tipo_cp", "serie", "numero", "contraparte_doc", "fecha_emision", "fecha_vencimiento")
+
+
+def _comprobante_de_la_parte(valor, contraparte: str) -> dict:
+    """El comprobante que paga una parte, limpio y validado, o `{}` si no viene.
+
+    Rechaza lo que no reconoce, nombrándolo, como una referencia; pide el tipo y el número, que son los que dicen
+    qué documento es; las fechas en ISO; y que su documento no contradiga el de la parte: si las dos lo dicen, una
+    de las dos está mal."""
+    if not valor:
+        return {}
+    if not isinstance(valor, dict):
+        raise ImputacionInvalida("El `comprobante` de una parte es un objeto: {tipo_cp, serie, numero, ...}")
+    sobran = sorted(set(valor) - set(CLAVES_DEL_COMPROBANTE))
+    if sobran:
+        raise ImputacionInvalida(f"El comprobante de una parte no lleva {', '.join(sobran)}. "
+                                 f"Lleva: {', '.join(CLAVES_DEL_COMPROBANTE)}")
+    c = {k: str(v).strip() for k, v in valor.items() if v not in (None, "") and str(v).strip()}
+    if "contraparte_doc" in c:
+        c["contraparte_doc"] = c["contraparte_doc"].upper()
+    if not c.get("tipo_cp") or not c.get("numero"):
+        raise ImputacionInvalida("El comprobante de una parte necesita su `tipo_cp` y su `numero`: sin ellos su línea "
+                                 "no dice qué factura cancela")
+    for k in ("fecha_emision", "fecha_vencimiento"):
+        if k in c:
+            try:
+                leida = _fecha(c[k])
+            except ValueError:
+                leida = None
+            if leida is None:
+                raise ImputacionInvalida(f"Fecha inválida en el comprobante de una parte ({k}): {c[k]!r}")
+            c[k] = leida.isoformat()
+    if contraparte and c.get("contraparte_doc") and c["contraparte_doc"] != contraparte:
+        raise ImputacionInvalida(f"Una parte dice que es de {contraparte} y su comprobante es de "
+                                 f"{c['contraparte_doc']}: una de las dos está mal")
+    return c
 
 
 
@@ -53,12 +99,16 @@ class Parte:
     # La glosa de ESTA parte, que es lo que hace que la glosa viva en la imputación y no en el movimiento: un
     # cargo que paga tres facturas necesita tres glosas, y es literalmente la «Glosa Detalle» de CONCAR.
     glosa: str = ""
+    # **El comprobante que esta parte cancela** (15.13.0, enmienda 0035): su línea lleva su documento en vez del
+    # vóucher, porque una 42 se lleva por documento. Lo pone quien arma el pago; sin él, la línea es la de siempre.
+    comprobante: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.cuenta_contable = str(self.cuenta_contable or "").strip()
         self.centro_costo = str(self.centro_costo or "").strip()
         self.contraparte_doc = str(self.contraparte_doc or "").strip().upper()
         self.glosa = " ".join(str(self.glosa or "").split())
+        self.comprobante = _comprobante_de_la_parte(self.comprobante, self.contraparte_doc)
         # **El importe es obligatorio en una parte**, al revés que en una referencia: una referencia sin importe
         # vale por el total y no hay nada que repartir, pero un reparto sin importes no reparte nada.
         if self.importe is None or self.importe == "":
@@ -74,6 +124,8 @@ class Parte:
         for clave in ("centro_costo", "contraparte_doc", "glosa"):
             if getattr(self, clave):
                 d[clave] = getattr(self, clave)
+        if self.comprobante:
+            d["comprobante"] = dict(self.comprobante)
         return d
 
 

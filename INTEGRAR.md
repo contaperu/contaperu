@@ -26,7 +26,7 @@ el mismo mes, el mismo diagnóstico, por cualquiera de ellas.
 
 ## Lo que entra y lo que sale
 
-Entra un **documento `open-accounting` 4.1** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
+Entra un **documento `open-accounting` 4.2** (`estandar/LEEME.md`): la cabecera del libro (RUC, periodo, ventas o
 compras) y los comprobantes tal como los emite SUNAT, con los importes en positivo y como texto exacto. Si tienes los
 XML o la propuesta del SIRE, el motor arma el documento por ti (`leer_xml`, `leer_propuesta_sire`).
 
@@ -206,7 +206,7 @@ los mismos nombres que los parámetros de la api:
 ```json
 {
   "documento": {
-    "open_accounting": "4.1",
+    "open_accounting": "4.2",
     "libro": {"ruc": "20601234567", "razon_social": "EMPRESA DE PRUEBA SAC", "periodo": "202601", "tipo": "compra"},
     "comprobantes": [{
       "tipo_cp": "01", "serie": "F001", "numero": "123", "fecha_emision": "2026-01-15",
@@ -237,7 +237,7 @@ Lo que conviene saber antes de publicarla:
 ## Para un agente de IA, por MCP
 
 Un cliente MCP local lo arranca por entrada y salida estándar; uno remoto, por Streamable HTTP
-(`contaperu-mcp --transporte http --dominio …`). Las diecisiete herramientas se anuncian de solo lectura y sin salir a la red,
+(`contaperu-mcp --transporte http --dominio …`). Las dieciocho herramientas se anuncian de solo lectura y sin salir a la red,
 y sus nombres son los de siempre: `diagnosticar`, `exportar`, `generar_asiento`, `validar_comprobantes`… Cómo
 conectarlo a Claude está en el `README.md`.
 
@@ -311,7 +311,7 @@ misma forma, y lo que dice de dónde salió es su `origen`.
 
 ```json
 {
-  "open_accounting": "4.1",
+  "open_accounting": "4.2",
   "libro": { "ruc": "20601234567", "periodo": "202608", "tipo": "tesoreria" },
 
   "extractos": [
@@ -683,7 +683,7 @@ escribe un driver contra el contrato del motor; aquí se lee el documento contra
 
 ```json
 {
-  "open_accounting": "4.1",
+  "open_accounting": "4.2",
   "libro": {"ruc": "…", "razon_social": "…", "periodo": "202601", "tipo": "compra"},
   "comprobantes": [{"tipo_cp": "01", "serie": "F001", "numero": "45680", "fecha_emision": "2026-01-10",
                     "contraparte_doc": "20677777771", "contraparte_nombre": "MAYORISTA NACIONAL SAC",
@@ -914,8 +914,8 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   módulo**, así que una línea que ningún test tuyo toque no saldrá. Haz también un `grep` de las seis.
 - **Si llamas al paquete `asiento` o a `tributos.igv`, la 9.0 cambia un parámetro** y es el único cambio que
   rompe. Las que recibían `es_venta: bool` ahora reciben **los rasgos del libro**, y hoy el eje viaja por
-  veintiuna funciones —dieciocho de `asiento`, quince de ellas en su superficie congelada, y tres de
-  `tributos.igv`, que no congela nada—:
+  veinte funciones de `asiento` —diecisiete de ellas en su superficie congelada— y por tres de
+  `tributos.igv`, que no congela nada:
 
   | Hasta la 8.x | Desde la 9.0 |
   |---|---|
@@ -949,9 +949,9 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
   `contaperu.servidor_mcp`, `contaperu.formato` y `drivers.concar.construir`). **Quien integró con la 1.x no cambia
   una línea**: la superficie pública de la 1.0 sigue entera y su test pasa sin regenerarse. Lo que desapareció es lo
   que ninguna versión publicada llegó a ofrecer — la 0.x nunca estuvo en PyPI.
-- **El estándar es `open-accounting` 4.1**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
+- **El estándar es `open-accounting` 4.2**, y eso es un compromiso: nada de lo que existe se quita ni cambia de
   significado hasta una 5.0. Un valor nuevo de catálogo no sube la versión y un bloque opcional sube la menor —la 4.1
-  trajo el del no domiciliado—, porque el tag publicado no se mueve: un documento 4.0 sigue validando; los catálogos
+  trajo el del no domiciliado y la 4.2 el comprobante de una parte del reparto—, porque el tag publicado no se mueve: un documento 4.0 sigue validando; los catálogos
   se leen de [`estandar/catalogos.json`](estandar/catalogos.json) y **una línea se contabiliza con `cuenta`,
   `debe_haber`, `importe` y `clase`**, que son los cuatro que exige.
   **La 4.0 cobró exactamente lo que la 3.x prometía poder cobrar**, y es un solo renombrado: `retencion` pasa a

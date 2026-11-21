@@ -1,4 +1,4 @@
-# open-accounting 4.1 — el documento contable universal del Perú
+# open-accounting 4.2 — el documento contable universal del Perú
 
 Un solo JSON que sirve para las tres cosas que un contador peruano necesita mover de un sistema a otro:
 **qué libro es**, **qué comprobantes lo componen** y **cómo queda el asiento**.
@@ -16,10 +16,10 @@ y por eso lo que entra aquí se promete: un valor publicado no se quita ni cambi
 Su identificador canónico —el `$id` con el que se cita este estándar desde fuera— es:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.1/estandar/open-accounting.schema.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.2/estandar/open-accounting.schema.json
 ```
 
-Cuelga del tag **del estándar** (`open-accounting-4.1`), no del de la librería: la versión del paquete sube
+Cuelga del tag **del estándar** (`open-accounting-4.2`), no del de la librería: la versión del paquete sube
 cada vez que se corrige un driver, y un identificador que se mueve bajo los pies de quien lo cita no
 sirve como estándar. **Un tag publicado no se mueve**: hasta la 3.x el tag avanzaba con cada cambio aditivo, y desde
 la 4.0 un cambio del esquema —un bloque opcional, como el del no domiciliado— estrena su menor y su tag (ver
@@ -44,7 +44,7 @@ python -m contaperu.puertas.cli diagnosticar mi-documento.json
 
 ```json
 {
-  "open_accounting": "4.1",
+  "open_accounting": "4.2",
   "libro":        { "ruc": "20601234567", "razon_social": "EMPRESA SAC",
                     "periodo": "202601", "tipo": "compra" },
   "comprobantes": [ { "tipo_cp": "01", "serie": "F001", "numero": "00045680", "…": "…" } ],
@@ -308,8 +308,30 @@ su sentido y **su propia imputación** —que es lo que les da su cuenta de gast
 nuevo cada vez que un banco inventa un concepto, que es justo la trampa en la que cae un modelo que enumera.
 
 Y la consecuencia contable: un pago de 2 000 con 0,50 de ITF **son dos asientos**, uno contra la cuenta del
-tercero y otro contra la cuenta del impuesto. El motor no los arma todavía —es el hito D6 y espera la tasa del
-ITF con su norma—, pero el documento ya puede decirlos, que es lo que el estándar promete.
+tercero y otro contra la cuenta del impuesto. El motor los arma desde la 12.9 (hito D6a), y el ITF no espera su
+tasa: su importe lo dice el banco (D6b). El documento ya podía decirlos antes, que es lo que el estándar promete.
+
+### Un pago de varias facturas: una parte por documento (4.2)
+
+Un cargo que paga treinta facturas, de uno o de varios proveedores, se imputa con un `reparto` de **una parte por
+factura** —nunca una por proveedor— y cada parte nombra **el comprobante que cancela**
+([enmienda 0035](enmiendas/0035-el-comprobante-de-una-parte-del-reparto.md)):
+
+```json
+"imputaciones_de_movimientos": {
+  "pago-1": {"glosa": "PAGOS VARIOS", "reparto": [
+    {"importe": "1180.00", "cuenta_contable": "421201", "contraparte_doc": "20602222226",
+     "comprobante": {"tipo_cp": "01", "serie": "E001", "numero": "3507",
+                     "fecha_emision": "2026-09-24", "fecha_vencimiento": "2026-10-24"}},
+    {"importe": "451.80", "cuenta_contable": "421201", "contraparte_doc": "20607777773",
+     "comprobante": {"tipo_cp": "01", "serie": "F001", "numero": "88", "fecha_emision": "2026-10-28"}}]}}
+```
+
+La línea de cada parte lleva **el documento de su factura** —tipo, serie-número, emisión y vencimiento—, escrito como
+lo escribe la línea de su compra, porque una cuenta por pagar se lleva por documento: en CONCAR, una 42 que lleva el
+vóucher del banco no cancela la factura en la cuenta corriente del proveedor. La del banco sigue con el suyo. Cuánto
+poner en cada parte lo dice `api.por_pagar` con la regla del asiento de la compra —el total menos la retención de
+4ta y la detracción—, para que el pago cancele exactamente lo que la compra provisionó.
 
 ### Qué cancela qué: `aplicaciones[]` (3.3)
 
@@ -393,6 +415,11 @@ tipos de documento.
 domiciliados del SIRE pide de una factura del exterior. Es aditivo —un documento 4.0 es un 4.1 que no lo usa— y
 sube la menor porque el tag `open-accounting-4.0` ya está publicado. Entra con él la deuda que la 4.0 dejó escrita: la
 descripción de `tipo_nota` nombra las notas del no domiciliado, la 97 y la 98.
+
+**`4.2` (21-nov-2026) añade a una parte del `reparto` de un movimiento su `comprobante`** (enmienda
+[0035](enmiendas/0035-el-comprobante-de-una-parte-del-reparto.md), §«Un pago de varias facturas»): la factura que esa
+parte cancela, para que su línea lleve el documento de ella. Es aditivo —un documento 4.1 es un 4.2 que no lo usa— y
+sube la menor porque el tag `open-accounting-4.1` ya está publicado.
 
 `0.1` es la primera versión publicada y se deriva de un modelo que lleva un año generando el Excel de CONCAR
 y el TXT del SIRE de empresas reales — no de un diseño en papel. Lo que falte, faltará porque nadie lo ha
@@ -504,7 +531,7 @@ libro**— viven en [`catalogos.json`](catalogos.json), junto a este archivo, co
 la URL del tag igual que el esquema, así que un ERP de fuera los lee sin instalar nada:
 
 ```
-https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.1/estandar/catalogos.json
+https://raw.githubusercontent.com/contaperu/contaperu/open-accounting-4.2/estandar/catalogos.json
 ```
 
 **Por qué están fuera del esquema** (1.0): eran enums cerrados, así que el día que entre un hecho nuevo —los
