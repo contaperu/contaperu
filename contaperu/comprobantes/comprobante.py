@@ -163,6 +163,26 @@ class Observacion:
         return {"codigo": self.codigo, "nivel": self.nivel, "texto": self.texto}
 
 
+@dataclass(frozen=True)
+class CodigoDeObservacion:
+    """Lo que significa un código de observación, sin un comprobante delante: su nivel, a quién se le pide y su texto
+    (15.16.0). Es la entrada del catálogo que una pantalla lee para su leyenda, y su forma **no es de ningún país**:
+    por eso vive aquí, junto a `Observacion`, y la tabla que la llena —la del Perú— en `tributos.observaciones`.
+
+    `texto` es el significado y no el mensaje: el de cada observación lleva los datos del comprobante («IGV 15.00
+    no es el 18 % de la base 100.00»), y éste lo que vale para todos. `nivel_por_origen` es donde el nivel cambia
+    según de dónde salió el comprobante: un descuadre que escribió SUNAT en su propuesta avisa y no bloquea."""
+
+    nivel: str                  # 'error' | 'aviso', el de casi siempre
+    pedir_a: str                # 'contador' | 'sistema' (`asiento.faltas`)
+    texto: str
+    nivel_por_origen: dict[str, str] = field(default_factory=dict, compare=False, hash=False)
+
+    def nivel_para(self, origen: str) -> str:
+        """El nivel con que sale en un comprobante de ese `origen` (`ORIGENES`)."""
+        return self.nivel_por_origen.get(origen, self.nivel)
+
+
 @dataclass
 class Comprobante:
     # Identificación

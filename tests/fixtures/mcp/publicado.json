@@ -217,7 +217,7 @@
     "readOnlyHint": true,
     "title": null
    },
-   "descripcion": "Los sistemas contables a los que se puede exportar, y qué pide cada uno.\n\n    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su **canal** —a\n    quién entrega: `sunat`, `legacy` o `erp`—, lo que **exige** para no negarse (CONCAR pide centro de costo y\n    una moneda con código; el CSV no) y si tiene sección propia en la configuración.\n\n    Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas, y\n    `sire_no_domiciliados` las compras del exterior; el `ple`, el Libro Diario y los demás libros.\n\n    Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el\n    contribuyente: esas tres lo exigen y no lo suponen.\n    ",
+   "descripcion": "Los sistemas contables a los que se puede exportar, y qué pide cada uno.\n\n    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su **canal** —a\n    quién entrega: `sunat`, `legacy` o `erp`—, lo que **exige** para no negarse (CONCAR pide centro de costo y\n    una moneda con código; el CSV no), si tiene sección propia en la configuración y cómo se le dice a una\n    persona (`nombre_de_pantalla`: «CONCAR», no `concar`).\n\n    Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas, y\n    `sire_no_domiciliados` las compras del exterior; el `ple`, el Libro Diario y los demás libros.\n\n    Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el\n    contribuyente: esas tres lo exigen y no lo suponen.\n    ",
    "entrada": {
     "properties": {},
     "title": "drivers_disponiblesArguments",
@@ -983,6 +983,11 @@
    "descripcion": "Los catálogos que este estándar inventa: los roles de una línea del asiento, las cinco clases contables y\n    los tipos de libro, cada uno con su fuente y su versión.",
    "mime": "application/json",
    "nombre": "catalogos_del_estandar"
+  },
+  "contaperu://catalogos/observaciones": {
+   "descripcion": "Qué significa cada código de observación que la validación deja en un\n    comprobante: su nivel —`error` impide exportarlo, `aviso` no—, a quién pedírselo (`contador` o `sistema`) y su\n    texto, que vale para cualquier comprobante.\n\n    Léelo para explicarle una observación a quien revisa sin adivinarla, y para saber a quién preguntar. En\n    `nivel_por_origen` está lo que cambia según de dónde salió el comprobante: `IGV_NO_CUADRA` en uno traído de la\n    propuesta del SIRE avisa y no bloquea, porque lo escribió SUNAT.",
+   "mime": "application/json",
+   "nombre": "catalogo_de_observaciones"
   },
   "contaperu://catalogos/pcge2026": {
    "descripcion": "El catálogo oficial de cuentas del Plan Contable General Empresarial 2026: cada cuenta con\n    su nombre y la página de la norma que lo dice.\n\n    Sirve para dos cosas: poner el nombre de una cuenta, y comprobar que la cuenta que se va a\n    escribir existe. **Que una cuenta no esté aquí no la invalida**: el PCGE llega a cinco dígitos\n    y cada empresa abre sus divisionarias debajo — `603201` es válida y no aparece en la norma.\n    ",

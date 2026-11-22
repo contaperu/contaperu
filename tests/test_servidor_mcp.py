@@ -304,8 +304,12 @@ def test_los_recursos_son_legibles():
                     "contaperu://esquemas/diagnostico", "contaperu://catalogos/sire-api",
                     "contaperu://catalogos/sire-campos", "contaperu://catalogos/ple-campos",
                     "contaperu://catalogos/regimenes", "contaperu://catalogos/vencimientos",
-                    "contaperu://campos/comprobante"}
+                    "contaperu://campos/comprobante", "contaperu://catalogos/observaciones"}
     esquema = json.loads(leer_recurso("contaperu://estandar/open-accounting"))
+    # Qué significa cada observación (15.16.0): el mismo catálogo que `api`, con lo que cambia según el origen.
+    observaciones = json.loads(leer_recurso("contaperu://catalogos/observaciones"))
+    assert observaciones == api.catalogo_de_observaciones()
+    assert observaciones["IGV_NO_CUADRA"]["nivel_por_origen"] == {"sire": "aviso"}
     assert esquema["title"] == "open-accounting"
     catalogos = json.loads(leer_recurso("contaperu://catalogos/sunat"))
     assert catalogos["tipos_comprobante"]["01"] == "Factura"
@@ -481,6 +485,19 @@ def test_normalizar_detracciones_descarta_lo_que_no_reconoce():
 def test_un_documento_sin_libro_falla_diciendo_por_que():
     negado = rechazo("generar_asiento", documento={"open_accounting": "4.0", "comprobantes": []}, driver="concar")
     assert negado["clave"] == "documento_invalido" and "libro" in negado["detail"]
+
+
+def test_un_rechazo_dice_cuales_comprobantes_por_el_protocolo():
+    """El agente que recibe un «1 comprobante(s) sin cuenta contable» sabe cuál (15.16.0): con su nombre, sus partes y
+    el `id_externo` con que lo mandó. Es la misma `api.problema` de la puerta HTTP."""
+    documento = json.loads(json.dumps(DOCUMENTO))
+    documento["comprobantes"][0]["id_externo"] = "fila-871"
+    negado = rechazo("exportar", documento=documento, driver="concar",
+                     imputacion={"fila-871": {"centro_costo": "CC-64"}})
+    assert negado["clave"] == "sin_cuenta"
+    assert negado["comprobantes"] == [{"comprobante": "01 E001-871", "id_externo": "fila-871",
+                                       "partes": {"tipo_cp": "01", "serie": "E001", "numero": "871",
+                                                  "contraparte_doc": "20602222226"}}]
 
 
 def test_un_comprobante_con_error_bloquea_la_exportacion():

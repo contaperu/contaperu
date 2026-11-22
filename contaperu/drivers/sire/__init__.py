@@ -3,7 +3,7 @@
 RVIE (ventas, Anexo 3, 33 campos) y RCE (compras, Anexo 11, 37 + 4).
 """
 from .txt import (CANAL, CampoCambiaDeSigno, EXCLUYE_TIPOS, FORMATOS, LIBRO_COMPRAS, LIBRO_VENTAS, NOMBRE,
-                  OPCIONES, OPORTUNIDAD_REEMPLAZO, linea, linea_rce, linea_rvie, nombre)
+                  NOMBRE_DE_PANTALLA, OPCIONES, OPORTUNIDAD_REEMPLAZO, linea, linea_rce, linea_rvie, nombre)
 
 __all__ = ["CANAL", "CampoCambiaDeSigno", "EXCLUYE_TIPOS", "FORMATOS", "LIBRO_COMPRAS", "LIBRO_VENTAS", "NOMBRE",
-           "OPCIONES", "OPORTUNIDAD_REEMPLAZO", "linea", "linea_rce", "linea_rvie", "nombre"]
+           "NOMBRE_DE_PANTALLA", "OPCIONES", "OPORTUNIDAD_REEMPLAZO", "linea", "linea_rce", "linea_rvie", "nombre"]

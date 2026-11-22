@@ -3,8 +3,8 @@
 El hermano del driver `sire`: el mismo canal y otro registro. Lo que escribe y de dónde sale cada campo está en
 `txt.py`; la forma, del registro real que SUNAT aceptó en setiembre de 2026.
 """
-from .txt import (BANDERAS, CAMPOS, CANAL, EXCLUYE_TIPOS, FORMATOS, LIBRO_NO_DOMICILIADOS, MOTIVOS, NOMBRE, OPCIONES,
-                  OPORTUNIDAD, SinPaisDelNoDomiciliado, linea, no_caben, nombre)
+from .txt import (BANDERAS, CAMPOS, CANAL, EXCLUYE_TIPOS, FORMATOS, LIBRO_NO_DOMICILIADOS, MOTIVOS, NOMBRE,
+                  NOMBRE_DE_PANTALLA, OPCIONES, OPORTUNIDAD, SinPaisDelNoDomiciliado, linea, no_caben, nombre)
 
 __all__ = ["BANDERAS", "CAMPOS", "CANAL", "EXCLUYE_TIPOS", "FORMATOS", "LIBRO_NO_DOMICILIADOS", "MOTIVOS", "NOMBRE",
-           "OPCIONES", "OPORTUNIDAD", "SinPaisDelNoDomiciliado", "linea", "no_caben", "nombre"]
+           "NOMBRE_DE_PANTALLA", "OPCIONES", "OPORTUNIDAD", "SinPaisDelNoDomiciliado", "linea", "no_caben", "nombre"]

@@ -77,6 +77,9 @@ def test_un_rechazo_del_motor_es_un_422_con_su_clave():
     respuesta = _cliente().post("/v1/exportar", json={"documento": documento, "driver": "concar",
                                                      "configuracion": {}})
     _es_problema(respuesta, 422, "sin_centro")
+    # Y dice cuáles (15.16.0), con el `id_externo` con que los mandó quien llama: antes llegaba solo «3 comprobante(s)».
+    assert [c["id_externo"] for c in respuesta.json()["comprobantes"]] == [c["id_externo"]
+                                                                           for c in documento["comprobantes"]]
     sin_libro = _cliente().post("/v1/revisar", json={"documento": {"comprobantes": []}})
     _es_problema(sin_libro, 422, "documento_invalido")
 

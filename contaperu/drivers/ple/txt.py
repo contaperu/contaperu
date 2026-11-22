@@ -30,6 +30,8 @@ from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
 from .comun import BANDERAS, ESTADO_DEL_PERIODO, OPCIONES, OPORTUNIDAD
 
 NOMBRE = "ple"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "PLE · Libro Diario"
 # Se presenta a SUNAT, como el SIRE, pero por el PLE: otro régimen, otras resoluciones y otro formato
 # (`drivers.contrato.CANALES`).
 CANAL = "sunat"

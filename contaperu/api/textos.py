@@ -293,7 +293,8 @@ PARA_HERRAMIENTA: dict[str, str] = {
 
     Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su **canal** —a
     quién entrega: `sunat`, `legacy` o `erp`—, lo que **exige** para no negarse (CONCAR pide centro de costo y
-    una moneda con código; el CSV no) y si tiene sección propia en la configuración.
+    una moneda con código; el CSV no), si tiene sección propia en la configuración y cómo se le dice a una
+    persona (`nombre_de_pantalla`: «CONCAR», no `concar`).
 
     Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas, y
     `sire_no_domiciliados` las compras del exterior; el `ple`, el Libro Diario y los demás libros.
@@ -361,6 +362,13 @@ PARA_RECURSO: dict[str, str] = {
     escribir existe. **Que una cuenta no esté aquí no la invalida**: el PCGE llega a cinco dígitos
     y cada empresa abre sus divisionarias debajo — `603201` es válida y no aparece en la norma.
     """,
+    'contaperu://catalogos/observaciones': """Qué significa cada código de observación que la validación deja en un
+    comprobante: su nivel —`error` impide exportarlo, `aviso` no—, a quién pedírselo (`contador` o `sistema`) y su
+    texto, que vale para cualquier comprobante.
+
+    Léelo para explicarle una observación a quien revisa sin adivinarla, y para saber a quién preguntar. En
+    `nivel_por_origen` está lo que cambia según de dónde salió el comprobante: `IGV_NO_CUADRA` en uno traído de la
+    propuesta del SIRE avisa y no bloquea, porque lo escribió SUNAT.""",
     'contaperu://estandar/open-accounting': """El esquema JSON del documento contable `open-accounting`, con cada campo documentado.""",
     'contaperu://esquemas/diagnostico': """El JSON Schema de la respuesta de `diagnosticar`, también cuando la configuración no se puede aplicar. El SDK no
     deja declararlo como `outputSchema` de la herramienta sin cambiar lo que responde, así que viaja como recurso.""",

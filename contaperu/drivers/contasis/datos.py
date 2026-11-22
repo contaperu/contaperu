@@ -14,6 +14,8 @@ from ...configuracion import Campo, Columna
 from ..kit import Opciones
 
 NOMBRE = "contasis"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "CONTASIS"
 # Un sistema contable instalado que importa un archivo (`drivers.contrato.CANALES`).
 CANAL = "legacy"
 FORMATOS = {"compra": "contasis_xlsx", "venta": "contasis_xlsx"}

@@ -50,6 +50,17 @@ def vocabulario(modulo: Any) -> str:
     return getattr(modulo, "VOCABULARIO", None) or VOCABULARIO_POR_DEFECTO
 
 
+def nombre_de_pantalla(modulo: Any) -> str:
+    """Cómo se le dice a una persona: el `NOMBRE_DE_PANTALLA` que declara —«CONCAR», «SIRE»— o, si no lo declara, su
+    `NOMBRE`, que es la clave que va en `driver` (15.16.0).
+
+    Opcional, y por eso no rompe a un driver de terceros escrito antes: sin él se le dice por su clave, que es lo que
+    hacía hasta hoy toda aplicación que no lo escribiera a mano. Los de serie lo declaran todos, así que quien
+    integra no tiene que llevar su propia tabla de nombres."""
+    declarado = getattr(modulo, "NOMBRE_DE_PANTALLA", None)
+    return declarado if isinstance(declarado, str) and declarado.strip() else str(getattr(modulo, "NOMBRE", "") or "")
+
+
 def acepta_indice(modulo: Any) -> bool:
     """¿Su `desde_lineas` recibe el índice de cada comprobante? Lo decide su firma: un parámetro `indice` o `**kwargs`.
     Así un driver de terceros escrito antes de la 1.0 sigue funcionando sin él."""

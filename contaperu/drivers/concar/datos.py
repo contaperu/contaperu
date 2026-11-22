@@ -13,6 +13,8 @@ from ...configuracion import Campo, Columna
 from ..kit import Opciones
 
 NOMBRE = "concar"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "CONCAR"
 # Un sistema contable instalado que importa un archivo (`drivers.contrato.CANALES`).
 CANAL = "legacy"
 # El `fecha` no lo lee nadie al escribir: una celda de Excel lleva una fecha de verdad y el formato lo pone

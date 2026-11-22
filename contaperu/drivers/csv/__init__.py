@@ -26,6 +26,8 @@ from ..kit.columnas import ColumnaDeLinea, escribir_csv
 from ...modelo import Libro
 
 NOMBRE = "csv"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "CSV"
 # Entrega a un ERP: proyecta la línea del comprobante (`drivers.contrato.CANALES`). Su VOCABULARIO sigue siendo
 # el legacy por defecto, y es correcto: el canal dice a quién entrega; el vocabulario, con qué palabras recibe
 # sus líneas.

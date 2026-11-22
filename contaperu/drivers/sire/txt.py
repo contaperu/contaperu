@@ -33,6 +33,8 @@ from ..kit import (
 from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
 
 NOMBRE = "sire"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "SIRE"
 # Se presenta a SUNAT: el RVIE y el RCE, por el SIRE (`drivers.contrato.CANALES`).
 CANAL = "sunat"
 # Lo que no se anota en el registro que se declara a SUNAT (hoy: el recibo por

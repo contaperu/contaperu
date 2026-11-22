@@ -19,6 +19,7 @@ from ..drivers.kit import rol
 from ..modelo.libro import rasgos_de
 from ..tributos import comparar_sire as _comparar
 from ..tributos import detracciones
+from ..tributos import observaciones as _observaciones
 from ..errores import DocumentoInvalido
 from ..pipeline import armado, diagnostico, lectura, preparacion, salida
 from ..pipeline.salida import Exportado
@@ -570,7 +571,8 @@ def errores_de_configuracion(configuracion: dict | None) -> list[str]:
 def drivers_disponibles() -> dict:
     """Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal
     —a quién entrega: `legacy`, `sunat` o `erp`—, el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo
-    que exige, si se configura y su descripción.
+    que exige, si se configura, su descripción y, desde la 15.16.0, cómo se le dice a una persona
+    (`nombre_de_pantalla`: «CONCAR» para `concar`; un driver de terceros que no lo declara, por su nombre).
 
     Hasta la 7.x había además un `grupo` que traducía el canal a «SIRE», «Legacy» o «ERP». La 8.0 lo retiró: eran dos
     palabras para lo mismo, y la de fuera mentía — el PLE salía como grupo `sire` y no es el SIRE."""
@@ -583,7 +585,8 @@ def drivers_disponibles() -> dict:
                  "vocabulario": contrato.vocabulario(modulo),
                  "exige": sorted(contrato.exige(modulo)),
                  "configurable": bool(contrato.seccion_por_defecto(modulo)),
-                 "descripcion": ((modulo.__doc__ or "").strip().splitlines() or [""])[0]}
+                 "descripcion": ((modulo.__doc__ or "").strip().splitlines() or [""])[0],
+                 "nombre_de_pantalla": contrato.nombre_de_pantalla(modulo)}
         for nombre, modulo in drivers.DRIVERS.items()
     }
 
@@ -786,6 +789,22 @@ def catalogos_del_estandar() -> dict:
     No están en `catalogos_sunat` a propósito: esos se copian de la norma y estos se gobiernan (`estandar/LEEME.md`,
     «Quién gobierna los catálogos»)."""
     return vocabulario.catalogos()
+
+
+def catalogo_de_observaciones() -> dict:
+    """Cada código que la validación puede dejar en un comprobante, por código: su `nivel` —`error`, que impide
+    exportarlo, o `aviso`—, a quién pedírselo (`pedir_a`: `contador` o `sistema`), su `texto` y, en
+    `nivel_por_origen`, dónde ese nivel cambia según de dónde salió el comprobante: un descuadre que viene de la
+    propuesta del SIRE avisa en vez de bloquear, porque lo escribió SUNAT.
+
+    Es la leyenda de una pantalla de revisión, y lo que hace falta para no escribirla aparte (15.16.0). `texto` es lo
+    que significa el código para cualquier comprobante; el mensaje de cada observación sigue diciendo el suyo, con sus
+    datos. Son los mismos `pedir_a` que da `diagnosticar`, porque salen de esta misma tabla. Son los códigos del Perú:
+    partirlos en reglas universales y peruanas, con la fuente de cada una, espera a otra jurisdicción
+    (`HOJA-DE-RUTA.md`, J2)."""
+    return {codigo: {"nivel": entrada.nivel, "nivel_por_origen": dict(entrada.nivel_por_origen),
+                     "pedir_a": entrada.pedir_a, "texto": entrada.texto}
+            for codigo, entrada in sorted(_observaciones.CATALOGO.items())}
 
 
 def catalogo_pcge() -> dict:

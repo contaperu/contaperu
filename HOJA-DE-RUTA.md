@@ -46,7 +46,7 @@ hitos con su propuesta y lo que no se hace. La tabla usa estas columnas y marcas
 
 ## 1 · Dónde estamos
 
-Librería **15.13.0** y estándar **`open-accounting` 4.2** — y el número que vale es siempre el de
+Librería **15.16.0** y estándar **`open-accounting` 4.2** — y el número que vale es siempre el de
 `contaperu/_version.py`, no el de esta línea: llegó a decir «11.0.0 y 3.0» con la 14.2.0 ya publicada,
 contradiciendo a la tabla que viene treinta líneas más abajo, que sí decía 4.0.
 
@@ -389,7 +389,7 @@ y hay un precedente de norma convertida en datos con su cita, `herramientas/extr
 | id | Hito | Nivel | Arranca con | Criterio de salida | Depende de | Propuesta |
 |---|---|---|---|---|---|---|
 | C1 | `herramientas/extraer_reglas_sunat*.py` → JSON empaquetado con `actualizado_al`, hoja y fila de cada dato: códigos de retorno, catálogos y solo las reglas con efecto contable | N · herramienta | dato público, ya disponible | Reproducible; lo que hoy está a mano en `catalogos.py` está contenido en el JSON o la diferencia queda listada; la hoja de cálculo no entra al repositorio | 0.5 | — |
-| C2 | `codigo_sunat*` en la observación, como campo añadido: los códigos propios no se renombran | N · estándar | código | Cada código citado existe en el JSON; la tabla `PEDIR_A` no cambia | C1, E1 | — |
+| C2 | `codigo_sunat*` en la observación, como campo añadido: los códigos propios no se renombran. Desde la 15.16.0 tiene dónde ir también sin un comprobante delante: la entrada de cada código en el catálogo de observaciones (`api.catalogo_de_observaciones`) | N · estándar | código | Cada código citado existe en el JSON; la tabla `PEDIR_A` no cambia | C1, E1 | — |
 | C4 ✅ | **`retencion_igv` desde `PaymentTerms` de la factura**, `{porcentaje, monto}`, opcional (enmienda 0005) | N · estándar | dato: un destino que lo pida — **llegó**: el caso real que la enmienda esperaba | La de 4ta intacta; snapshot idéntico | E1 | 29 · **salió en la 14.0.0** (20-oct-2026). Esa misma versión renombró `retencion` a `retencion_4ta`, así que el criterio tal como estaba escrito ya no se podía ni leer |
 | C8 | `padron*` como argumento, con forma `{ruc: {activo*, habido*, razon_social*}}`, y aviso de proveedor no habido | N · F | dato: la fuente legal del aviso + tope | Sin padrón no cambia nada; un nombre distinto del padrón no produce observación | 0.1 | 24 |
 | C11 | `tipos_de_cambio*` como argumento: **contrasta, no rellena** | N · F | dato: la fuente del tipo de cambio que rige | Un tipo de cambio distinto del publicado da un aviso | C8 | — |
@@ -420,13 +420,13 @@ congela el acoplamiento con lo peruano (J0).
 |---|---|---|---|---|---|---|
 | J0 | **El acoplamiento se ve**: un test de frontera lista los módulos que importan lo peruano y los que lo son por contenido (`Libro`, `CONFIGURACION_GENERAL`, `asiento/configuracion`). No mueve código | N (test) | dato: un cliente real fuera del Perú | Pasa con la lista de hoy; un import peruano nuevo en un módulo universal lo rompe | — | 30 |
 | J1 | **Cortar las dependencias ocultas**. **Hecho en la 1.0** al ordenar el motor en capas: lo que describía este hito —`formato` → `igv` → `validar` → `catalogos`, y el registro de drivers dentro de `generar`— eran módulos de la 0.x que la 2.0 retiró, y hoy `tests/test_capas.py` no admite una sola importación fuera de su capa (`TOLERADAS` está vacía), con re-exportación en las rutas viejas | N | dato: un cliente real fuera del Perú | La lista de J0 se reduce; snapshot de CONCAR y huella idénticos; los símbolos que usa la aplicación se importan igual | J0 | 30 |
-| J2 | **La validación en dos tablas**: reglas universales y reglas peruanas registradas con código, nivel, `pedir_a` y fuente | N | dato: un cliente real fuera del Perú | Las mismas observaciones en toda la batería; `PEDIR_A` igual clave a clave | J1; después de C1 y C2, para no mover las reglas dos veces | 30 |
+| J2 ◐ | **La validación en dos tablas**: reglas universales y reglas peruanas registradas con código, nivel, `pedir_a` y fuente. **Lo que no dependía de un país se adelantó en la 15.16.0**: cada código de `validar.py` está registrado con su nivel —y dónde cambia según el origen—, su `pedir_a` y su texto en `tributos/observaciones.py`, que se publica en `api.catalogo_de_observaciones`; la forma de cada entrada, `comprobantes.CodigoDeObservacion`, vive fuera de lo peruano, y `PEDIR_A` sale de esa tabla igual clave a clave. No se partió nada ni se movió ninguna regla. Lo que sigue esperando al cliente es lo que sí depende del país: partir la tabla en universal y peruana, y la fuente de cada regla | N | dato: un cliente real fuera del Perú | Las mismas observaciones en toda la batería; `PEDIR_A` igual clave a clave | J1; después de C1 y C2, para no mover las reglas dos veces | 30 |
 | J3 | **Impuestos que emiten líneas**: el motor arma el principal y el tercero; el IGV, la 4ta y la detracción salen del perfil peruano; los roles son los universales más los de la jurisdicción | N | dato: un cliente real fuera del Perú | Snapshot de CONCAR y huella idénticos | J1 | 30 |
 | J4 | **El perfil peruano como paquete** `contaperu/jurisdicciones/pe*`, con el grupo de entry points `contaperu.jurisdicciones*` y `pe` por defecto | N · D | dato: un cliente real fuera del Perú | Test de conformidad de jurisdicción verde para `pe`; ningún módulo universal importa `pe`; rutas viejas re-exportadas | J2, J3 | 30 |
 | J5 | **La siguiente menor libre del estándar**: `libro.jurisdiccion*` con perfiles; `pe` conserva los campos de la 3.x y las demás jurisdicciones usan `impuestos[]*` | estándar | dato: un cliente real fuera del Perú | Todo documento 3.x valida y significa lo mismo —la 3.x promete no romper hasta una 4.0—; enmienda en `final`; su tag nuevo servido. **Aquí ya no se escribe un número**: tuvo reservada la 3.1, se la llevó la glosa de un movimiento (12.0), reservó la 3.2 y se la llevaron las cuotas de una factura al crédito (12.2). Un hito que espera un cliente real no puede apartar una menor que el estándar necesita antes | J4, E1, E3 | 30 |
 | J6 | **La segunda jurisdicción**, en paquete propio por entry points o en el repositorio | N · D | dato: su archivo aceptado por su destino y la fuente de cada regla | Conformidad de jurisdicción; archivo aceptado; `pe` sin cambios | J5 | 30 |
 
-**No se hace.** Adelantar J2-J6 sin el cliente; tasas de impuestos sin fuente; traducir al inglés el vocabulario del
+**No se hace.** Adelantar J2-J6 sin el cliente —lo que la 15.16.0 adelantó de J2 es lo que no lo necesita: registrar y publicar los códigos que ya había, sin partirlos—; tasas de impuestos sin fuente; traducir al inglés el vocabulario del
 estándar; poner la jurisdicción en la configuración (es del libro).
 
 ### Salida · SUNAT

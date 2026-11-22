@@ -181,6 +181,10 @@ OPERACIONES: tuple[Operacion, ...] = (
     Operacion("catalogos_del_estandar", "GET", "/v1/catalogos/estandar", "catalogos_del_estandar",
               recurso="contaperu://catalogos/estandar"),
     Operacion("catalogo_pcge", "GET", "/v1/catalogos/pcge2026", recurso="contaperu://catalogos/pcge2026"),
+    # Qué significa cada código de la validación (15.16.0). Recurso y no herramienta, como los demás catálogos: un GET
+    # sin argumentos que se lee una vez, para la leyenda de una pantalla o para que un agente sepa a quién preguntar.
+    Operacion("catalogo_de_observaciones", "GET", "/v1/catalogos/observaciones", "catalogo_de_observaciones",
+              recurso="contaperu://catalogos/observaciones"),
     Operacion("esquema_open_accounting", "GET", "/v1/estandar/open-accounting.schema.json",
               recurso="contaperu://estandar/open-accounting"),
     Operacion("esquema_diagnostico", "GET", "/v1/esquemas/diagnostico.schema.json",

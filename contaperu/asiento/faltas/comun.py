@@ -16,7 +16,7 @@ from ...errores import ErrorContaperu
 from ...modelo import Comprobante
 
 # A quién se le pide. **contador**: se decide mirando el documento o el plan de cuentas. **sistema**: la configuración
-# del destino o un dato público que no está en el papel. **proveedor** queda reservado (ver `operaciones.PEDIR_A`).
+# del destino o un dato público que no está en el papel. **proveedor** queda reservado (ver `pipeline.diagnostico.PEDIR_A`).
 CONTADOR, SISTEMA, PROVEEDOR = "contador", "sistema", "proveedor"
 
 

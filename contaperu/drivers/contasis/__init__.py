@@ -32,10 +32,10 @@ driver, escrito contra la plantilla oficial y un registro que CONTASIS ya había
 """
 from . import datos
 from .datos import (CANAL, COLUMNAS_ELEGIBLES, CONFIGURACION, CONTENT_TYPE, CUENTAS_POR_DEFECTO, EXCLUYE_TIPOS,
-                    EXIGE, FORMATOS, NOMBRE, OPCIONES)
+                    EXIGE, FORMATOS, NOMBRE, NOMBRE_DE_PANTALLA, OPCIONES)
 from .proyeccion import fila, no_caben, valores
 from .xlsx import escribir_xlsx, desde_comprobantes, nombre
 
 __all__ = ["CANAL", "COLUMNAS_ELEGIBLES", "CONFIGURACION", "CONTENT_TYPE", "CUENTAS_POR_DEFECTO", "EXCLUYE_TIPOS",
-           "EXIGE", "FORMATOS", "NOMBRE", "OPCIONES", "escribir_xlsx", "datos", "desde_comprobantes", "fila",
-           "no_caben", "nombre", "valores"]
+           "EXIGE", "FORMATOS", "NOMBRE", "NOMBRE_DE_PANTALLA", "OPCIONES", "escribir_xlsx", "datos",
+           "desde_comprobantes", "fila", "no_caben", "nombre", "valores"]

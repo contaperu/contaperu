@@ -31,6 +31,8 @@ from ..kit import negativo as _negativo
 from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
 
 NOMBRE = "sire_no_domiciliados"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "SIRE · No domiciliados"
 # Se presenta a SUNAT, por el SIRE, como el 080400 (`drivers.contrato.CANALES`).
 CANAL = "sunat"
 FORMATOS = {"compra": "sire_rce_no_domiciliados"}

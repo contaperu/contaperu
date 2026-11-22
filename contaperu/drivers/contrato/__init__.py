@@ -53,10 +53,11 @@ criterio para admitirlo es que haya un formato que `erp` no pueda llevar. Ojo a 
 no, a una letra de distancia. **Un driver de terceros sin `CANAL` no se registra** desde la 4.0: el contrato lo cuenta
 como incumplimiento y `drivers.de_terceros` lo deja fuera con su `AvisoDriver`.
 
-Todas exponen además `NOMBRE`, `FORMATOS` ({'venta'|'compra': identificador de la salida}),
-`OPCIONES` (una `kit.Opciones`, o una `kit.OpcionesArchivo` en un driver de archivo) y `nombre(libro, opciones) -> str`; las tres de archivo, su
-`CONTENT_TYPE`. Opcional: `EXCLUYE_TIPOS`, los tipos SUNAT que ese destino no lleva; y, en un driver que
-lleva cuentas, `EXIGE`: lo que ese sistema no puede importar sin y que el núcleo, si no se lo dicen, deja
+Todas exponen además `NOMBRE` —la clave que va en `driver`—, `FORMATOS` ({'venta'|'compra': identificador de la
+salida}), `OPCIONES` (una `kit.Opciones`, o una `kit.OpcionesArchivo` en un driver de archivo) y `nombre(libro, opciones)
+-> str`; las tres de archivo, su `CONTENT_TYPE`. Opcional: `NOMBRE_DE_PANTALLA` (15.16.0), cómo se le dice a una
+persona —«CONCAR», «SIRE»—, que sin declararlo es su `NOMBRE` (`nombre_de_pantalla`); `EXCLUYE_TIPOS`, los tipos SUNAT
+que ese destino no lleva; y, en un driver que lleva cuentas, `EXIGE`: lo que ese sistema no puede importar sin y que el núcleo, si no se lo dicen, deja
 pasar (`EXIGE_POSIBLES_ASIENTO`; en uno de registro, `EXIGE_POSIBLES_REGISTRO`). Lo que el núcleo exige se declare o
 no (`EXIGE_NUCLEO_ASIENTO`, `EXIGE_NUCLEO_REGISTRO`) es aquello sin lo que no hay nada que escribir: la cuenta
 contable, y en un asiento además la equivalencia del tipo, de la que sale el sub-diario. `exige(modulo)` devuelve
@@ -123,7 +124,7 @@ from ..kit import Opciones, OpcionesArchivo
 from .accesores import (NoCabe, acepta_indice, arma_asientos, canal, centro_en_anexo, columnas_elegibles,
                         columnas_elegidas, configuracion, correlativo_con_mes, cuentas_por_defecto,
                         declara_canal, describir, excluye_tipos, exige, familia, forma, lleva_cuentas,
-                        no_caben, plan_base, seccion_por_defecto, vocabulario)
+                        no_caben, nombre_de_pantalla, plan_base, seccion_por_defecto, vocabulario)
 from .examen import incumplimientos
 from .protocolos import Driver, DriverAsientoLineas, DriverRegistroArchivo, DriverRegistroTexto
 from .taxonomia import (CANAL_OBLIGATORIO_DESDE, CANALES, CANALES_RESERVADOS, CLAVES_DEL_PLAN,
@@ -145,6 +146,6 @@ __all__ = [
     "VOCABULARIO_POR_DEFECTO", "acepta_indice", "arma_asientos", "canal", "centro_en_anexo", "columnas_elegibles",
     "columnas_elegidas", "configuracion", "correlativo_con_mes", "cuentas_por_defecto", "declara_canal",
     "describir", "excluye_tipos",
-    "exige", "familia", "forma", "incumplimientos", "lleva_cuentas", "no_caben", "plan_base",
+    "exige", "familia", "forma", "incumplimientos", "lleva_cuentas", "no_caben", "nombre_de_pantalla", "plan_base",
     "seccion_por_defecto", "vocabulario",
 ]

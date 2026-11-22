@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/problema.schema.json",
  "title": "Problema",
- "description": "Un rechazo, como «problem details» del RFC 9457 (`application/problem+json`). `clave` lo nombra de forma estable; `errores`, si el error los trae, los lista.",
+ "description": "Un rechazo, como «problem details» del RFC 9457 (`application/problem+json`). `clave` lo nombra de forma estable; `errores`, si el error los trae, los lista; y `comprobantes`, si el motor se negó por unos comprobantes concretos, dice cuáles.",
  "type": "object",
  "properties": {
   "type": {
@@ -22,6 +22,54 @@
   },
   "errores": {
    "type": "array"
+  },
+  "comprobantes": {
+   "description": "Los comprobantes por los que el motor se negó (15.16.0), para casarlos con los tuyos: por tu `id_externo`, por su nombre —el mismo de `errores_de`— o por sus `partes`, normalizadas como la clave del motor (la serie en mayúsculas, el número sin ceros delante y el documento solo con sus dígitos), que es lo que devuelve `leer_nombre_del_comprobante`. Solo está si hay alguno.",
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "properties": {
+     "comprobante": {
+      "type": "string",
+      "description": "Su nombre: el tipo y la serie-número, «01 F001-123»."
+     },
+     "partes": {
+      "type": "object",
+      "properties": {
+       "tipo_cp": {
+        "type": "string"
+       },
+       "serie": {
+        "type": "string"
+       },
+       "numero": {
+        "type": "string"
+       },
+       "contraparte_doc": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "tipo_cp",
+       "serie",
+       "numero",
+       "contraparte_doc"
+      ],
+      "additionalProperties": false
+     },
+     "id_externo": {
+      "type": "string",
+      "description": "Con el que lo conoce quien mandó el documento; vacío si no lo dio."
+     }
+    },
+    "required": [
+     "comprobante",
+     "partes",
+     "id_externo"
+    ],
+    "additionalProperties": false
+   }
   }
  },
  "required": [

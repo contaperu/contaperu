@@ -18,6 +18,7 @@ from __future__ import annotations
 from .._obsoleto import RutaObsoleta
 from .._version import OPEN_ACCOUNTING, __version__
 from ..asiento.faltas import FALTAS
+from ..comprobantes.nombre import leer_nombre_del_comprobante, nombre_del_comprobante
 from ..modelo import Comprobante, Libro, Observacion, rasgos_de, serie_y_numero
 from ..pipeline.preparacion import MAXIMO_CLAVES_PREVIAS, MAXIMO_COMPROBANTES
 from ..pipeline.salida import Exportado
@@ -29,7 +30,8 @@ from .errores import (CampoCambiaDeSigno, ConfiguracionInvalida, CorrelativoDesb
                       SinCentro, SinCodigoDeMoneda, SinCodigoDetraccion, SinCorrelativo, SinCuenta, SinSigla,
                       SireInvalido, TablaInvalida,
                       TotalImposible, XmlInvalido, problema)
-from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, campos_del_ple, campos_del_sire, catalogo_pcge, catalogos_api_sire, catalogos_del_estandar, catalogos_sunat, comparar_sire,
+from .operaciones import (adaptar_pcge, buscar_cuenta_pcge, campos_del_ple, campos_del_sire, catalogo_de_observaciones,
+                          catalogo_pcge, catalogos_api_sire, catalogos_del_estandar, catalogos_sunat, comparar_sire,
                           campos_del_comprobante, config_aplicada, cronogramas_de_vencimiento, cuadrar,
                           revisar_tesoreria, validar_cuentas_bancarias,
                           estado_de_cuenta, por_cuenta, por_pagar, regimenes_tributarios, resumen,
@@ -53,6 +55,9 @@ __all__ = [
     "drivers_disponibles",
     "catalogos_sunat",
     "catalogos_api_sire", "campos_del_ple", "campos_del_sire", "catalogo_pcge", "catalogos_del_estandar", "esquema_open_accounting", "esquema_diagnostico", "comparar_sire",
+    # Qué significa cada código de la validación, con su nivel y a quién pedírselo (15.16.0): la leyenda de una
+    # pantalla de revisión, que hasta entonces cada aplicación escribía por su cuenta. `PEDIR_A` sale de la misma tabla.
+    "catalogo_de_observaciones",
     "regimenes_tributarios", "cronogramas_de_vencimiento",
     "contrato_openconta", "verificar_documento", "verificar_driver",
     # la tabla que exponen las puertas
@@ -69,9 +74,17 @@ __all__ = [
     # sin que nadie lo notara. Dos códigos respondiendo «¿qué sale?» es lo que hace que una pantalla prometa
     # un número y el archivo traiga otro.
     #
-    # `etiqueta`, que vive en el mismo módulo, NO se publica: no decide nada —da formato a un nombre— y su
-    # dependencia, `serie_y_numero`, ya está aquí desde siempre.
+    # `etiqueta`, que vive en el mismo módulo, no se publicó entonces: «no decide nada —da formato a un nombre— y su
+    # dependencia, `serie_y_numero`, ya está aquí desde siempre». Lo de abajo dice por qué eso cambió.
     "seleccionar", "fuera_de", "errores_de",
+    # CÓMO SE NOMBRA UN COMPROBANTE, y cómo se lee un nombre de vuelta (15.16.0). El motivo de arriba dejó de valer por
+    # los hechos: el nombre de `etiqueta` ya salía en una respuesta pública —`errores_de()[i]["comprobante"]`— y la
+    # aplicación en producción lo copiaba byte a byte para nombrar igual que el motor, y armaba a mano los nombres que
+    # aceptan sus lotes. Un formato que sale en una respuesta es un contrato, y una copia de un contrato se aparta.
+    # Se publica con su nombre y no como `etiqueta`, que en el motor es también la de un sub-diario; `etiqueta` sigue
+    # siendo el nombre interno y llama a éste. Y entra con su inversa, que sí decide: lee lo que escribe una persona o
+    # un ERP y lo normaliza como la clave del motor, sin una segunda copia de esa regla.
+    "nombre_del_comprobante", "leer_nombre_del_comprobante",
     # lo que devuelve o recibe
     "Exportado", "Comprobante", "Libro", "Observacion", "FALTAS", "serie_y_numero", "MAXIMO_COMPROBANTES",
     "MAXIMO_CLAVES_PREVIAS",

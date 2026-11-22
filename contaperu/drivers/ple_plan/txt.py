@@ -27,6 +27,8 @@ from ..kit import nombre_de_libro_electronico as _nombre_de_libro_electronico
 from ..ple.comun import BANDERAS, DIA_DEL_NOMBRE, ESTADO_DEL_PERIODO, OPCIONES, OPORTUNIDAD
 
 NOMBRE = "ple_plan"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "PLE · Plan de cuentas"
 # Se presenta a SUNAT por el PLE, como el 5.1 (`drivers.contrato.CANALES`).
 CANAL = "sunat"
 # El mismo formato para los dos libros que el motor genera: el plan de cuentas que se usó en el mes es el mismo

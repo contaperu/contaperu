@@ -444,7 +444,7 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 | Capa | Módulos | Qué sabe |
 |---|---|---|
 | base | `_version`, `_obsoleto`, `_datos`, `errores` | la versión, el aviso de las rutas viejas, los datos empaquetados, la base de los errores |
-| núcleo | `modelo/` (el libro, las coerciones, el accesor objeto-o-dict), `comprobantes/` (el comprobante y su identidad, su imputación, sus lectores —`xml_ubl`, `sire_txt`, `archivos`— y cuánto suma un mes), `tesoreria/` (su espejo del otro lado: la cuenta bancaria, el movimiento, su imputación y el cuadre de saldos), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `tributos/` (`igv`, `detracciones`, `validar`, `comparar_sire`), `contable/` (`partida_doble`, `resumen.por_cuenta`), `asiento/` (`comprobante` y `movimiento`, los dos motores, con `comun/` debajo y `resolucion/` dentro: lo configurado, lo imputado, la clasificación, los requisitos y la numeración), `pcge/`, `lectores/` (la ruta de siempre de los tres lectores), `sunat/` (la API del SIRE como funciones puras: se sabe la URL, no se llama), `aplicaciones` (cuánto de un pago cancela un documento: el puente entre los tres libros), `configuracion` | contabilidad peruana, sin disco, sin red y sin reloj |
+| núcleo | `modelo/` (el libro, las coerciones, el accesor objeto-o-dict), `comprobantes/` (el comprobante y su identidad, su nombre, su imputación, sus lectores —`xml_ubl`, `sire_txt`, `archivos`— y cuánto suma un mes), `tesoreria/` (su espejo del otro lado: la cuenta bancaria, el movimiento, su imputación y el cuadre de saldos), `catalogos/` (los comprobantes, los tributos, el SIRE, el PLE, el contribuyente), `tributos/` (`igv`, `detracciones`, `validar` y el catálogo de sus códigos, `observaciones`, `comparar_sire`), `contable/` (`partida_doble`, `resumen.por_cuenta`), `asiento/` (`comprobante` y `movimiento`, los dos motores, con `comun/` debajo y `resolucion/` dentro: lo configurado, lo imputado, la clasificación, los requisitos y la numeración), `pcge/`, `lectores/` (la ruta de siempre de los tres lectores), `sunat/` (la API del SIRE como funciones puras: se sabe la URL, no se llama), `aplicaciones` (cuánto de un pago cancela un documento: el puente entre los tres libros), `configuracion` | contabilidad peruana, sin disco, sin red y sin reloj |
 | drivers | `drivers/` (`contrato/` —su taxonomía, sus protocolos, sus accesores y su examen—, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
 | pipeline | `pipeline/` (`preparacion/` —el documento, la configuración, las entradas y los pasos de un mes—, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
 | api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa; cada nombre con su firma, congelados |
@@ -458,7 +458,11 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 - **La api** (`contaperu.api`) habla en documentos `open-accounting`: el documento primero, lo demás por su nombre,
   `driver` sin valor por defecto. Su superficie queda congelada con su firma (`tests/test_superficie_publica.py`), y
   debajo queda el nivel de extensión —`modelo`, `asiento`, `drivers.contrato`, `drivers.kit`…— para quien escribe un
-  driver. Cada error hereda de `ErrorContaperu` y lleva una `clave` estable; `api.problema` lo dice como RFC 9457.
+  driver. Cada error hereda de `ErrorContaperu` y lleva una `clave` estable; `api.problema` lo dice como RFC 9457, y
+  desde la 15.16 dice además **cuáles comprobantes** rechazó el motor, con su `id_externo`, su nombre y sus partes.
+  Ese nombre es uno solo —«01 F001-123», `nombre_del_comprobante`, el mismo de `errores_de`— y tiene su inversa,
+  `leer_nombre_del_comprobante`, que normaliza lo que escribe una persona con la regla de la clave y no con una
+  copia de ella.
 - **La tabla de operaciones** (`api.OPERACIONES`) declara de cada operación su entrada (JSON Schema 2020-12, sacada de
   su firma), su salida, su ruta HTTP y su nombre en el MCP. De ella salen las herramientas y recursos del MCP, las
   rutas de la puerta HTTP y **OpenConta**, el contrato en formato OpenAPI 3.1 que se versiona en
@@ -482,7 +486,9 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 
 ## Cómo se enchufa un driver
 
-Un driver expone `NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, `nombre()` y **una** forma (`drivers/contrato.py`):
+Un driver expone `NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, `nombre()` y **una** forma (`drivers/contrato.py`). Y
+opcional, `NOMBRE_DE_PANTALLA` (15.16): cómo se le dice a una persona —«CONCAR» y no `concar`—, que sin declararlo es
+su `NOMBRE` y que `drivers_disponibles` sirve. Las formas:
 
 | Forma | Recibe | Para qué |
 |---|---|---|
@@ -632,6 +638,13 @@ Desde la 0.8 responde además **para qué destino** (`exige`) y **a quién pedir
 si es configuración del destino o un dato público que no está en el papel; `proveedor` reservado). Y
 cada exportación deja su **huella** (`_exportacion.huella`, `asiento/huella.py`): la misma
 exportación repetida lleva la misma, que es lo que permite avisar de que ese contenido ya salió.
+
+Y desde la 15.16 eso se lee también **sin un mes delante**: `catalogo_de_observaciones` da cada código de la
+validación con su nivel, a quién pedírselo y lo que significa, de la misma tabla de la que sale `pedir_a`
+(`tributos/observaciones.py`). Las reglas siguen en `validar.py`, y un test lee sus llamadas para que la tabla no
+diga otro nivel. La forma de cada entrada (`comprobantes.CodigoDeObservacion`) está fuera de `tributos` porque no es
+de ningún país: es lo que se adelanta del hito J2, que sigue esperando partir la tabla en reglas universales y
+peruanas.
 
 Esa es la forma en que crecerá esta capa: **cada pregunta de un agente se responde con reglas que ya
 tienen fuente**, nunca con una regla nueva escrita para el agente.

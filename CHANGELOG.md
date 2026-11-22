@@ -4,6 +4,82 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [15.16.0] — 2026-11-21
+
+### Un comprobante se nombra de una sola forma, y lo que alguien escribe se lee de vuelta
+
+Había tres nombres para un comprobante: `api.serie_y_numero` («F001-123»), `pipeline.seleccion.etiqueta` («01
+F001-123») y el `serie_numero_de` de cada driver. El segundo no se publicaba porque «no decide nada, da formato a un
+nombre», y su resultado salía igual en `api.errores_de()[i]["comprobante"]`: era un contrato sin nombre, y la
+aplicación en producción lo copiaba byte a byte y armaba a mano los nombres que aceptan sus lotes.
+
+- **`api.nombre_del_comprobante(comprobante, *, con_contraparte=False)`**, nombre público nuevo: «01 F001-123», y
+  con `con_contraparte=True` el documento de la contraparte delante, «20602222226 01 F001-123». Es **byte a byte**
+  el de `errores_de`, que ahora lo llama: la serie y el número van como vienen en el documento. Acepta un
+  `Comprobante` o un diccionario con `tipo_cp`, `serie`, `numero` y `contraparte_doc` —una fila de un ERP—, sin
+  inventar el tipo que no venga.
+- **`api.leer_nombre_del_comprobante(texto)`**, su inversa: lee «F001-0123», «01 F001-123», «20602222226
+  F001-123» o «20602222226 01 F001-0123» y devuelve `{"tipo_cp", "serie", "numero", "contraparte_doc"}` normalizados
+  como la clave del motor —el tipo con sus dos dígitos, la serie en mayúsculas, el número sin ceros delante y el
+  documento solo con sus dígitos—, con `""` en lo que el nombre no dijo. Lo normaliza el propio `Comprobante`, así
+  que no hay una segunda copia de `clave_de`.
+- **Lo que no entiende lo rechaza** con un `ValueError` que dice qué, en vez de adivinar: un nombre sin guion («123»
+  casaría con cualquier comprobante numerado así), uno con dos guiones, una sigla de un sistema contable («FT») en
+  vez del tipo de la Tabla 10, o más de tres partes. No deduce el tipo de la serie: la E001 la llevan el recibo por
+  honorarios y la factura emitida desde SOL.
+- **`etiqueta` sigue siendo interna**, y por un motivo que ya no es el de antes: en el motor «etiqueta» es también la
+  de un sub-diario, y la respuesta pública llama a este dato `comprobante`. Ahora llama a la función pública.
+- **`asiento.serie_numero_de` se queda como está**, porque no es un nombre para una persona: es la serie-número tal
+  como la escribe la línea de cada destino, con o sin ceros según sus opciones.
+
+**Para quien integra:** un documento sin serie se nombra por su número («14 12345679») y ese nombre no se puede leer
+de vuelta: se pide por su `id_externo`.
+
+### El rechazo dice cuáles comprobantes
+
+`api.problema()` copiaba `errores` y nada más, así que por HTTP y por MCP un `SinCentro` llegaba como «3
+comprobante(s) sin centro de costo» sin decir cuáles, aunque la excepción los llevaba en `comprobantes`.
+
+- **El problema lleva `comprobantes`** cuando el motor se negó por unos concretos —sin cuenta, sin centro, sin
+  clase, un reparto, la detracción, lo que no cabe en el formato—: cada uno con su `comprobante` (el nombre de
+  arriba), sus `partes` (las de `leer_nombre_del_comprobante`) y su `id_externo`, que es la llave de quien lo mandó.
+  Cuando lo que falta es un código —una sigla, una moneda— la lista no viene: no es cosa de un comprobante.
+- **`api/esquemas/problema.schema.json` se abre solo para ese miembro**: sigue con `additionalProperties: false` y
+  la forma de cada comprobante también es cerrada.
+
+### El catálogo de observaciones
+
+- **`api.catalogo_de_observaciones()`**, nombre público nuevo, en `GET /v1/catalogos/observaciones` y en el recurso
+  `contaperu://catalogos/observaciones`: los **59** códigos que `tributos/validar.py` puede dejar en un comprobante,
+  cada uno con su `nivel` (`error` o `aviso`), su `pedir_a` (`contador` o `sistema`), su `texto` —lo que significa
+  para cualquier comprobante; el mensaje de cada observación sigue llevando sus datos— y `nivel_por_origen`, donde el
+  nivel cambia según de dónde salió el comprobante: `IGV_NO_CUADRA` y `TOTAL_NO_CUADRA` avisan en vez de bloquear si
+  vienen de la propuesta del SIRE.
+- **La tabla vive en `tributos/observaciones.py`, y `PEDIR_A` sale de ella** en vez de escribir los códigos a mano:
+  queda igual clave a clave. Las reglas no se movieron; un test lee las llamadas de `validar.py` y se pone en rojo si
+  un código se emite sin estar en el catálogo, si está y nadie lo emite o si su nivel no es el de su llamada, y
+  valida un comprobante de cada origen para los dos cuyo nivel es una variable.
+- **Es lo que se adelanta del hito J2**, lo que no depende de un país: la forma de cada entrada,
+  `comprobantes.CodigoDeObservacion`, vive fuera de `tributos`. Partir la tabla en reglas universales y peruanas, con
+  la fuente de cada una, sigue esperando a otra jurisdicción (`HOJA-DE-RUTA.md`).
+
+### Cada driver dice cómo se le llama en pantalla
+
+- **`NOMBRE_DE_PANTALLA`**, opcional en el contrato de un driver, y **`contrato.nombre_de_pantalla(modulo)`**, que lo
+  lee: «CONCAR», «CONTASIS», «STARSOFT», «SIRE», «SIRE · No domiciliados», «PLE · Libro Diario», «PLE · Plan de
+  cuentas», «CSV» y «open-accounting». Los nueve de serie lo declaran.
+- **`drivers_disponibles()` lo sirve** en `nombre_de_pantalla`, y su esquema lo pide. Un driver de terceros que no lo
+  declara cumple el contrato y sale con su `NOMBRE`; uno que lo declara vacío, o que no es un texto, no lo cumple.
+
+Ninguna firma pública cambió: la superficie congelada solo crece (`nombre_del_comprobante`,
+`leer_nombre_del_comprobante`, `catalogo_de_observaciones`, `contrato.nombre_de_pantalla` y `NOMBRE_DE_PANTALLA` en
+cada driver congelado), y los snapshots de CONCAR y CONTASIS no se movieron. El MCP gana un recurso (son catorce).
+
+**Para quien integra:** dos respuestas llevan una clave nueva —`comprobantes` en un rechazo y `nombre_de_pantalla` en
+`drivers_disponibles`—, que es lo que la 15.x permite. Si validas esas respuestas contra el `problema.schema.json` o
+el `drivers.schema.json` de una versión anterior, que son cerrados, la clave nueva no cabe: toma los de esta versión
+(o el contrato OpenConta que la acompaña).
+
 ## [15.15.0] — 2026-11-21
 
 ### Las reglas para modelos, con nombre y ámbito, y todas dentro de lo que lee Claude Code

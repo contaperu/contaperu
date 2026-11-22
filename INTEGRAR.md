@@ -117,7 +117,20 @@ if diagnostico["listo_para_exportar"]:
 ```
 
 Cada función recibe el documento primero y todo lo demás por su nombre; las que van hacia un sistema piden `driver`,
-sin valor por defecto. Los que hay los dice `api.drivers_disponibles()`.
+sin valor por defecto. Los que hay los dice `api.drivers_disponibles()`, y desde la 15.16 también cómo se le dice cada
+uno a una persona: su `nombre_de_pantalla` es «CONCAR» para `concar` y «SIRE» para `sire`, así que tu pantalla no
+necesita su propia tabla de nombres. Un driver de terceros que no lo declara sale con su clave.
+
+Y lo que `diagnosticar` dice de cada comprobante por un código —`IGV_NO_CUADRA`, `RUC_INVALIDO`— lo explica
+`api.catalogo_de_observaciones()`, también sin un mes delante: el nivel de cada código, a quién pedírselo y lo que
+significa, que es la leyenda de una pantalla de revisión.
+
+```python
+leyenda = api.catalogo_de_observaciones()
+print(leyenda["IGV_NO_CUADRA"]["nivel"], leyenda["IGV_NO_CUADRA"]["pedir_a"])   # error contador
+print(leyenda["IGV_NO_CUADRA"]["nivel_por_origen"])   # {'sire': 'aviso'}: lo que escribió SUNAT avisa y no bloquea
+print(api.drivers_disponibles()["concar"]["nombre_de_pantalla"])                # CONCAR
+```
 
 ### Si haces tu propio pre-vuelo
 
@@ -177,8 +190,38 @@ Todo rechazo es un `api.ErrorContaperu` con una `clave` estable, que es lo que c
 try:
     api.exportar(documento, driver="concar", configuracion={}, imputacion=imputacion)
 except api.ErrorContaperu as error:
-    print(error.clave, "·", api.problema(error)["detail"])          # sin_centro · 3 comprobante(s) sin centro…
+    problema = api.problema(error)
+    print(error.clave, "·", problema["detail"])                    # sin_centro · 3 comprobante(s) sin centro…
+    for cual in problema.get("comprobantes", []):                  # desde la 15.16: CUÁLES son
+        print(cual["id_externo"], cual["comprobante"], cual["partes"]["numero"])   # fila-1 01 F001-00045680 45680
 ```
+
+Cuando el motor se niega por unos comprobantes concretos —sin cuenta, sin centro, lo que no cabe en el formato—, el
+problema dice **cuáles** en `comprobantes`, por las tres puertas: su `id_externo`, que es tu propia llave; su nombre,
+el mismo de `errores_de`; y sus `partes`, normalizadas como la clave del motor. Si lo que falta es un código —una
+sigla, una moneda— no es cosa de un comprobante y la lista no viene.
+
+### Nombrar un comprobante, y leer el nombre que te escriben
+
+Un comprobante tiene un nombre para personas y ERP, el mismo que ya ves en `errores_de`: el tipo de la Tabla 10 y la
+serie-número como vienen en el documento. Y tiene su inversa, que lee lo que escribe un contador o manda un ERP y lo
+normaliza como la clave del motor —la serie en mayúsculas, el número sin ceros delante, el tipo con sus dos dígitos y
+el documento solo con sus dígitos—, así que no tienes que copiar esa regla para casar un nombre con tus filas:
+
+```python
+primero = documento["comprobantes"][0]
+print(api.nombre_del_comprobante(primero))                          # 01 F001-00045680
+print(api.nombre_del_comprobante(primero, con_contraparte=True))    # 20677777771 01 F001-00045680
+print(api.leer_nombre_del_comprobante("20602222226 01 F001-0123"))
+# {'tipo_cp': '01', 'serie': 'F001', 'numero': '123', 'contraparte_doc': '20602222226'}
+print(api.leer_nombre_del_comprobante("F001-0123"))   # lo que no dice, vacío: el tipo y el proveedor
+```
+
+Acepta el nombre con o sin el tipo y con o sin el documento delante, que en compras es lo que distingue la F001-123
+de dos proveedores. **Lo que no entiende, lo rechaza** con un `ValueError` que dice qué: un nombre sin guion entre
+la serie y el número —«123» casaría con cualquier comprobante numerado así—, uno con dos guiones o una sigla de tu
+sistema contable en vez del tipo. Un documento sin serie se nombra por su número y no se puede leer de vuelta:
+pídelo por su `id_externo`. Lo vacío del resultado es lo que el nombre no dijo, y compara solo lo que vino.
 
 ## Por lotes, con la línea de comandos
 

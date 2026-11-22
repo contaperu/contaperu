@@ -11,7 +11,8 @@
   "contaperu.pcge",
   "contaperu.tributos",
   "contaperu.tributos.comparar_sire",
-  "contaperu.tributos.detracciones"
+  "contaperu.tributos.detracciones",
+  "contaperu.tributos.observaciones"
  ],
  "contaperu.asiento.comprobante": [
   "contaperu.catalogos",
@@ -70,6 +71,7 @@
  "contaperu.pipeline.diagnostico": [
   "contaperu.tributos",
   "contaperu.tributos.detracciones",
+  "contaperu.tributos.observaciones",
   "contaperu.tributos.validar"
  ],
  "contaperu.pipeline.lectura": [

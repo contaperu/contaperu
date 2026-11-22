@@ -29,6 +29,8 @@ from ...configuracion import Campo, Columna
 from ..kit import OpcionesArchivo
 
 NOMBRE = "starsoft"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "STARSOFT"
 # Un sistema contable instalado que importa un archivo (`drivers.contrato.CANALES`).
 CANAL = "legacy"
 

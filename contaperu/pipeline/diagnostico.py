@@ -10,7 +10,7 @@ from typing import Any
 
 from .. import asiento as asi
 from .. import drivers
-from ..tributos import detracciones, validar
+from ..tributos import detracciones, observaciones, validar
 from ..asiento.faltas import CONTADOR, FALTA, FALTAS, PROVEEDOR, SISTEMA  # noqa: F401  (PROVEEDOR: reservado)
 from ..drivers import contrato
 from ..contable import partida_doble
@@ -63,7 +63,8 @@ FALTAS_DEL_DINERO: dict[str, tuple[str, str]] = {
 # destino o un dato público que no está en el papel (el T.C. lo publica SUNAT). **`proveedor` queda
 # reservado**: el motor ve un documento y no puede afirmar que lo que falta esté en el papel del
 # proveedor; entrará con un caso real (la constancia de detracción conciliada, por ejemplo).
-# `tests/test_diagnosticar.py` recorre `validar.py` y comprueba que ningún código se quede fuera.
+# `tests/test_diagnosticar.py` recorre `validar.py` y comprueba que ningún código se quede fuera, y
+# `tests/test_catalogo_de_observaciones.py`, que el catálogo dice el nivel de cada llamada.
 PEDIR_A: dict[str, str] = {
     # lo que falta para el destino (claves de `faltantes`): lo dice su tabla, `asiento.FALTAS`
     **{falta.clave: falta.pedir_a for falta in FALTAS},
@@ -73,33 +74,9 @@ PEDIR_A: dict[str, str] = {
     "configuracion_invalida": SISTEMA,
     # y elegir un destino que no lleva ese libro también: lo que se cambia es el driver, no el mes
     "libro_que_el_destino_no_lleva": SISTEMA,
-    # errores de la validación
-    "ANIO_DUA_FALTA": CONTADOR, "CONTRAPARTE_FALTA": CONTADOR, "DNI_INVALIDO": CONTADOR,
-    "DSCTO_MAYOR_QUE_BASE": CONTADOR, "DUPLICADO": CONTADOR, "DUPLICADO_PERIODO_ANTERIOR": CONTADOR,
-    "FECHA_FALTA": CONTADOR, "FECHA_POSTERIOR": CONTADOR, "IGV_NO_CUADRA": CONTADOR,
-    "MONEDA_INVALIDA": CONTADOR, "NOTA_SIN_FECHA_REF": CONTADOR, "NOTA_SIN_REFERENCIA": CONTADOR,
-    "NUMERO_FALTA": CONTADOR, "RETENCION_MAYOR": CONTADOR, "RUC_INVALIDO": CONTADOR, "SERIE_FALTA": CONTADOR,
-    "TC_FALTA": SISTEMA, "TOTAL_NO_CUADRA": CONTADOR, "VENCIMIENTO_FALTA": CONTADOR,
-    "XML_DE_OTRO_RUC": CONTADOR, "XML_PARA_OTRO_RUC": CONTADOR,
-    "NO_DOMICILIADO_EN_VENTAS": CONTADOR, "NO_DOMICILIADO_CON_IGV": CONTADOR,
-    # avisos (no bloquean; están para que la tabla sea completa)
-    "ADQUIRENTE_NO_COINCIDE": CONTADOR, "ANTICIPO": CONTADOR, "BOLETA_SIN_DOC": CONTADOR,
-    "COMPRA_BOLETA": CONTADOR, "CREDITO_FISCAL_FUERA_DE_PLAZO": CONTADOR, "DETRACCION_TASA_DISTINTA": CONTADOR,
-    "EMISOR_NO_COINCIDE": CONTADOR, "FACTURA_CON_NOTA_DE_CREDITO": CONTADOR,
-    "FACTURA_ANULADA_SIN_NOTA": CONTADOR,
-    "GRATUITAS": CONTADOR, "IGV_TASA_REDUCIDA": CONTADOR,
-    "MEDIO_PAGO_DESCONOCIDO": CONTADOR, "NOMBRE_FALTA": CONTADOR,
-    "PERIODO_ANTERIOR": CONTADOR, "RETENCION_IGV_TASA": CONTADOR,
-    "RETENCION_NO_APLICA": CONTADOR, "RETENCION_TASA": CONTADOR,
-    "SIRE_SIN_DETALLE": CONTADOR, "TIPO_CP_DESCONOCIDO": CONTADOR,
-    "TIPO_NOTA_DESCONOCIDO": CONTADOR, "TIPO_NOTA_NO_APLICA": CONTADOR, "TOTAL_CERO": CONTADOR,
-    "TOTAL_CERO_EN_LA_PROPUESTA": CONTADOR,
-    # los del no domiciliado (15.6.0): los decide quien conoce el contrato con el proveedor del exterior
-    "CONVENIO_DESCONOCIDO": CONTADOR, "CONVENIO_NO_ES_DEL_PAIS": CONTADOR, "EXONERACION_CON_IMPUESTO": CONTADOR,
-    "EXONERACION_DESCONOCIDA": CONTADOR, "IGV_UTILIZACION_NO_CUADRA": CONTADOR,
-    "IMPUESTO_RETENIDO_NO_CUADRA": CONTADOR, "MODALIDAD_DESCONOCIDA": CONTADOR,
-    "NO_DOMICILIADO_NO_APLICA": CONTADOR, "PAIS_DESCONOCIDO": CONTADOR, "PAIS_PERU_NO_DOMICILIADO": CONTADOR,
-    "RENTA_NETA_NO_CUADRA": CONTADOR, "TIPO_RENTA_DESCONOCIDO": CONTADOR, "VINCULO_DESCONOCIDO": CONTADOR,
+    # y cada código de la validación, con el suyo: lo dice su catálogo (15.16.0), que es donde se escribe una vez. Hasta
+    # la 15.15 se escribía aquí, código a código, y el catálogo público no existía.
+    **{codigo: entrada.pedir_a for codigo, entrada in observaciones.CATALOGO.items()},
 }
 
 

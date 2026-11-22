@@ -264,7 +264,8 @@ Y las de trabajo, que no están en `ARQUITECTURA.md`:
   otra versión. PyPI va aparte y a mano, con el OK de John.
 - Un driver nuevo pide **un archivo real que ese ERP haya aceptado**: `CONTRIBUTING.md` §«Añadir un driver de
   salida». El contrato (`NOMBRE`, `CANAL`, `FORMATOS`, `OPCIONES`, una forma —`desde_lineas` o `desde_comprobantes`
-  para lo nuevo—, `EXIGE`, `VOCABULARIO` —legacy o neutral—, y lo que se configura: `CONFIGURACION` y `COLUMNAS_ELEGIBLES`) lo comprueba
+  para lo nuevo—, `EXIGE`, `VOCABULARIO` —legacy o neutral—, `NOMBRE_DE_PANTALLA` —cómo se le dice a una persona;
+  opcional—, y lo que se configura: `CONFIGURACION` y `COLUMNAS_ELEGIBLES`) lo comprueba
   `drivers.contrato.incumplimientos()`.
 - Tras cambiar una operación, un esquema de `contaperu/api/esquemas/` o la versión: `python
   herramientas/generar_openconta.py`. La batería falla si `contaperu/api/openconta.json` no está al día.

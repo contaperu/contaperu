@@ -1,0 +1,51 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/catalogo_de_observaciones.schema.json",
+ "title": "Catálogo de observaciones",
+ "description": "Cada código que la validación puede dejar en un comprobante, por código: su nivel, a quién pedírselo, su texto y dónde el nivel cambia según de dónde salió el comprobante (15.16.0).",
+ "type": "object",
+ "propertyNames": {
+  "pattern": "^[A-Z][A-Z0-9_]+$"
+ },
+ "additionalProperties": {
+  "type": "object",
+  "properties": {
+   "nivel": {
+    "enum": [
+     "error",
+     "aviso"
+    ],
+    "description": "`error` impide exportar el comprobante hasta corregirlo o apartarlo; `aviso` se exporta igual."
+   },
+   "nivel_por_origen": {
+    "type": "object",
+    "description": "El nivel cuando el comprobante salió de ese `origen` (`xml`, `pdf_texto`, `vision`, `manual` o `sire`), si no es el de `nivel`. Vacío casi siempre.",
+    "additionalProperties": {
+     "enum": [
+      "error",
+      "aviso"
+     ]
+    }
+   },
+   "pedir_a": {
+    "enum": [
+     "contador",
+     "sistema"
+    ],
+    "description": "Quién lo resuelve: el contador, mirando el documento o el plan de cuentas, o el sistema, con su configuración o un dato público."
+   },
+   "texto": {
+    "type": "string",
+    "minLength": 1,
+    "description": "Lo que significa el código para cualquier comprobante; el mensaje de cada observación lleva además sus datos."
+   }
+  },
+  "required": [
+   "nivel",
+   "nivel_por_origen",
+   "pedir_a",
+   "texto"
+  ],
+  "additionalProperties": false
+ }
+}

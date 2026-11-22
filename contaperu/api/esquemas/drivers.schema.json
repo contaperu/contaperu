@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://raw.githubusercontent.com/contaperu/contaperu/main/contaperu/api/esquemas/drivers.schema.json",
  "title": "Drivers disponibles",
- "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia, su canal y su grupo.",
+ "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia, su canal y su nombre de pantalla.",
  "type": "object",
  "additionalProperties": {
   "type": "object",
@@ -58,6 +58,11 @@
    },
    "descripcion": {
     "type": "string"
+   },
+   "nombre_de_pantalla": {
+    "type": "string",
+    "minLength": 1,
+    "description": "Cómo se le dice a una persona: «CONCAR», «SIRE» (15.16.0). La clave del objeto es la que va en `driver`; un driver de terceros que no lo declara sale con ella."
    }
   },
   "required": [
@@ -69,7 +74,8 @@
    "vocabulario",
    "exige",
    "configurable",
-   "descripcion"
+   "descripcion",
+   "nombre_de_pantalla"
   ],
   "additionalProperties": false
  }

@@ -6,11 +6,15 @@
 """
 from __future__ import annotations
 
-from ..modelo import Comprobante, serie_y_numero
+from ..comprobantes.nombre import nombre_del_comprobante
+from ..modelo import Comprobante
 
 
 def etiqueta(c: Comprobante) -> str:
-    return f"{c.tipo_cp} {serie_y_numero(c.serie, c.numero)}".strip()
+    """El nombre con que una respuesta cita un comprobante: «01 F001-123». Desde la 15.16 es el nombre público
+    (`api.nombre_del_comprobante`, que vive en `comprobantes.nombre`) y no una copia: el formato ya salía en
+    `errores_de` y quien lo necesitaba fuera lo copiaba byte a byte."""
+    return nombre_del_comprobante(c)
 
 
 def errores_de(comprobantes: list[Comprobante]) -> list[dict]:

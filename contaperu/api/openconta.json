@@ -3,7 +3,7 @@
  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
  "info": {
   "title": "OpenConta",
-  "version": "15.15.0",
+  "version": "15.16.0",
   "summary": "El contrato de la puerta HTTP de ContaPerú, el núcleo contable abierto del Perú.",
   "description": "Documento `open-accounting` entra, JSON sale. Sin estado: cada petición trae todo lo que necesita y el servidor no guarda nada. Los importes viajan como texto exacto y los archivos binarios, en base64. Los rechazos son «problem details» (RFC 9457) con una `clave` estable.",
   "license": {
@@ -817,11 +817,11 @@
   "/v1/drivers": {
    "get": {
     "operationId": "drivers_disponibles",
-    "summary": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal —a quién entrega: `legacy`, `sunat` o `erp`—, el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo que exige, si se configura y su descripción.",
-    "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal\n—a quién entrega: `legacy`, `sunat` o `erp`—, el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo\nque exige, si se configura y su descripción.\n\nHasta la 7.x había además un `grupo` que traducía el canal a «SIRE», «Legacy» o «ERP». La 8.0 lo retiró: eran dos\npalabras para lo mismo, y la de fuera mentía — el PLE salía como grupo `sire` y no es el SIRE.",
+    "summary": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal —a quién entrega: `legacy`, `sunat` o `erp`—, el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo que exige, si se configura, su descripción y, desde la 15.16.0, cómo se le dice a una persona (`nombre_de_pantalla`: «CONCAR» para `concar`; un driver de terceros que no lo declara, por su nombre).",
+    "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal\n—a quién entrega: `legacy`, `sunat` o `erp`—, el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo\nque exige, si se configura, su descripción y, desde la 15.16.0, cómo se le dice a una persona\n(`nombre_de_pantalla`: «CONCAR» para `concar`; un driver de terceros que no lo declara, por su nombre).\n\nHasta la 7.x había además un `grupo` que traducía el canal a «SIRE», «Legacy» o «ERP». La 8.0 lo retiró: eran dos\npalabras para lo mismo, y la de fuera mentía — el PLE salía como grupo `sire` y no es el SIRE.",
     "responses": {
      "200": {
-      "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal —a quién entrega: `legacy`, `sunat` o `erp`—, el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo que exige, si se configura y su descripción.",
+      "description": "Los sistemas a los que se exporta, por nombre: qué libros genera cada uno, su forma, su familia, su canal —a quién entrega: `legacy`, `sunat` o `erp`—, el vocabulario con que recibe sus líneas (`legacy` o `neutral`), lo que exige, si se configura, su descripción y, desde la 15.16.0, cómo se le dice a una persona (`nombre_de_pantalla`: «CONCAR» para `concar`; un driver de terceros que no lo declara, por su nombre).",
       "content": {
        "application/json": {
         "schema": {
@@ -1026,6 +1026,31 @@
        "application/json": {
         "schema": {
          "type": "object"
+        }
+       }
+      }
+     },
+     "421": {
+      "$ref": "#/components/responses/HostNoPermitido"
+     },
+     "500": {
+      "$ref": "#/components/responses/ErrorInterno"
+     }
+    }
+   }
+  },
+  "/v1/catalogos/observaciones": {
+   "get": {
+    "operationId": "catalogo_de_observaciones",
+    "summary": "Cada código que la validación puede dejar en un comprobante, por código: su `nivel` —`error`, que impide exportarlo, o `aviso`—, a quién pedírselo (`pedir_a`: `contador` o `sistema`), su `texto` y, en `nivel_por_origen`, dónde ese nivel cambia según de dónde salió el comprobante: un descuadre que viene de la propuesta del SIRE avisa en vez de bloquear, porque lo escribió SUNAT.",
+    "description": "Cada código que la validación puede dejar en un comprobante, por código: su `nivel` —`error`, que impide\nexportarlo, o `aviso`—, a quién pedírselo (`pedir_a`: `contador` o `sistema`), su `texto` y, en\n`nivel_por_origen`, dónde ese nivel cambia según de dónde salió el comprobante: un descuadre que viene de la\npropuesta del SIRE avisa en vez de bloquear, porque lo escribió SUNAT.\n\nEs la leyenda de una pantalla de revisión, y lo que hace falta para no escribirla aparte (15.16.0). `texto` es lo\nque significa el código para cualquier comprobante; el mensaje de cada observación sigue diciendo el suyo, con sus\ndatos. Son los mismos `pedir_a` que da `diagnosticar`, porque salen de esta misma tabla. Son los códigos del Perú:\npartirlos en reglas universales y peruanas, con la fuente de cada una, espera a otra jurisdicción\n(`HOJA-DE-RUTA.md`, J2).",
+    "responses": {
+     "200": {
+      "description": "Cada código que la validación puede dejar en un comprobante, por código: su `nivel` —`error`, que impide exportarlo, o `aviso`—, a quién pedírselo (`pedir_a`: `contador` o `sistema`), su `texto` y, en `nivel_por_origen`, dónde ese nivel cambia según de dónde salió el comprobante: un descuadre que viene de la propuesta del SIRE avisa en vez de bloquear, porque lo escribió SUNAT.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/catalogo_de_observaciones"
         }
        }
       }
@@ -4929,7 +4954,7 @@
    },
    "drivers": {
     "title": "Drivers disponibles",
-    "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia, su canal y su grupo.",
+    "description": "Los sistemas a los que se exporta, por nombre, con su forma, su familia, su canal y su nombre de pantalla.",
     "type": "object",
     "additionalProperties": {
      "type": "object",
@@ -4985,6 +5010,11 @@
       },
       "descripcion": {
        "type": "string"
+      },
+      "nombre_de_pantalla": {
+       "type": "string",
+       "minLength": 1,
+       "description": "Cómo se le dice a una persona: «CONCAR», «SIRE» (15.16.0). La clave del objeto es la que va en `driver`; un driver de terceros que no lo declara sale con ella."
       }
      },
      "required": [
@@ -4996,7 +5026,8 @@
       "vocabulario",
       "exige",
       "configurable",
-      "descripcion"
+      "descripcion",
+      "nombre_de_pantalla"
      ],
      "additionalProperties": false
     }
@@ -5288,9 +5319,58 @@
      }
     }
    },
+   "catalogo_de_observaciones": {
+    "title": "Catálogo de observaciones",
+    "description": "Cada código que la validación puede dejar en un comprobante, por código: su nivel, a quién pedírselo, su texto y dónde el nivel cambia según de dónde salió el comprobante (15.16.0).",
+    "type": "object",
+    "propertyNames": {
+     "pattern": "^[A-Z][A-Z0-9_]+$"
+    },
+    "additionalProperties": {
+     "type": "object",
+     "properties": {
+      "nivel": {
+       "enum": [
+        "error",
+        "aviso"
+       ],
+       "description": "`error` impide exportar el comprobante hasta corregirlo o apartarlo; `aviso` se exporta igual."
+      },
+      "nivel_por_origen": {
+       "type": "object",
+       "description": "El nivel cuando el comprobante salió de ese `origen` (`xml`, `pdf_texto`, `vision`, `manual` o `sire`), si no es el de `nivel`. Vacío casi siempre.",
+       "additionalProperties": {
+        "enum": [
+         "error",
+         "aviso"
+        ]
+       }
+      },
+      "pedir_a": {
+       "enum": [
+        "contador",
+        "sistema"
+       ],
+       "description": "Quién lo resuelve: el contador, mirando el documento o el plan de cuentas, o el sistema, con su configuración o un dato público."
+      },
+      "texto": {
+       "type": "string",
+       "minLength": 1,
+       "description": "Lo que significa el código para cualquier comprobante; el mensaje de cada observación lleva además sus datos."
+      }
+     },
+     "required": [
+      "nivel",
+      "nivel_por_origen",
+      "pedir_a",
+      "texto"
+     ],
+     "additionalProperties": false
+    }
+   },
    "problema": {
     "title": "Problema",
-    "description": "Un rechazo, como «problem details» del RFC 9457 (`application/problem+json`). `clave` lo nombra de forma estable; `errores`, si el error los trae, los lista.",
+    "description": "Un rechazo, como «problem details» del RFC 9457 (`application/problem+json`). `clave` lo nombra de forma estable; `errores`, si el error los trae, los lista; y `comprobantes`, si el motor se negó por unos comprobantes concretos, dice cuáles.",
     "type": "object",
     "properties": {
      "type": {
@@ -5310,6 +5390,54 @@
      },
      "errores": {
       "type": "array"
+     },
+     "comprobantes": {
+      "description": "Los comprobantes por los que el motor se negó (15.16.0), para casarlos con los tuyos: por tu `id_externo`, por su nombre —el mismo de `errores_de`— o por sus `partes`, normalizadas como la clave del motor (la serie en mayúsculas, el número sin ceros delante y el documento solo con sus dígitos), que es lo que devuelve `leer_nombre_del_comprobante`. Solo está si hay alguno.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+       "type": "object",
+       "properties": {
+        "comprobante": {
+         "type": "string",
+         "description": "Su nombre: el tipo y la serie-número, «01 F001-123»."
+        },
+        "partes": {
+         "type": "object",
+         "properties": {
+          "tipo_cp": {
+           "type": "string"
+          },
+          "serie": {
+           "type": "string"
+          },
+          "numero": {
+           "type": "string"
+          },
+          "contraparte_doc": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "tipo_cp",
+          "serie",
+          "numero",
+          "contraparte_doc"
+         ],
+         "additionalProperties": false
+        },
+        "id_externo": {
+         "type": "string",
+         "description": "Con el que lo conoce quien mandó el documento; vacío si no lo dio."
+        }
+       },
+       "required": [
+        "comprobante",
+        "partes",
+        "id_externo"
+       ],
+       "additionalProperties": false
+      }
      }
     },
     "required": [

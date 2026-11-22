@@ -237,6 +237,41 @@ def test_el_registro_queda_limpio_despues():
     assert set(drivers.DRIVERS) == set(drivers.DE_SERIE)
 
 
+# --- cómo se le dice a una persona (15.16.0) -------------------------------------------------------------------
+
+NOMBRES_DE_PANTALLA = {"concar": "CONCAR", "contasis": "CONTASIS", "starsoft": "STARSOFT", "sire": "SIRE",
+                       "sire_no_domiciliados": "SIRE · No domiciliados", "ple": "PLE · Libro Diario",
+                       "ple_plan": "PLE · Plan de cuentas", "csv": "CSV", "asiento_contable": "open-accounting"}
+
+
+def test_cada_driver_de_serie_declara_su_nombre_de_pantalla():
+    """Lo DECLARA, no lo hereda de su clave: una aplicación que pinte `concar` donde el contador lee «CONCAR» es la
+    que hasta la 15.15 tenía que llevar su propia tabla."""
+    assert {n: m.NOMBRE_DE_PANTALLA for n, m in drivers.DE_SERIE.items()} == NOMBRES_DE_PANTALLA
+    disponibles = api.drivers_disponibles()
+    assert {n: d["nombre_de_pantalla"] for n, d in disponibles.items()} == NOMBRES_DE_PANTALLA
+
+
+def test_un_driver_de_terceros_sin_nombre_de_pantalla_se_dice_por_su_clave(con_terceros):
+    """Opcional, para no romper a nadie: el que no lo declara cumple el contrato y sale con su `NOMBRE`."""
+    sin = driver_de_prueba("sin_pantalla")
+    assert not hasattr(sin, "NOMBRE_DE_PANTALLA") and contrato.incumplimientos(sin) == []
+    con = driver_de_prueba("con_pantalla")
+    con.NOMBRE_DE_PANTALLA = "Mi ERP"
+    con_terceros(_Entrada("sin_pantalla", sin), _Entrada("con_pantalla", con))
+    disponibles = api.drivers_disponibles()
+    assert disponibles["sin_pantalla"]["nombre_de_pantalla"] == "sin_pantalla"
+    assert disponibles["con_pantalla"]["nombre_de_pantalla"] == "Mi ERP"
+
+
+@pytest.mark.parametrize("declarado", ["", "   ", None, 7])
+def test_un_nombre_de_pantalla_que_no_se_puede_leer_no_cumple_el_contrato(declarado):
+    m = driver_de_prueba()
+    m.NOMBRE_DE_PANTALLA = declarado
+    assert [p for p in contrato.incumplimientos(m) if "NOMBRE_DE_PANTALLA" in p]
+    assert contrato.nombre_de_pantalla(m) == "prueba"
+
+
 # --- la familia registro: un sistema contable que importa su registro y arma el asiento él mismo ------------
 
 def driver_de_registro(nombre: str = "registro") -> types.ModuleType:

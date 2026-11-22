@@ -31,6 +31,8 @@ from ..kit import OpcionesArchivo
 from ..kit import nombre_de_archivo as _nombre_de_archivo
 
 NOMBRE = "asiento_contable"
+# Cómo se le dice a una persona (`contrato.nombre_de_pantalla`, 15.16.0): `NOMBRE` es la clave que va en `driver`.
+NOMBRE_DE_PANTALLA = "open-accounting"
 # Entrega a un ERP, por el formato neutral del estándar (`drivers.contrato.CANALES`).
 CANAL = "erp"
 VOCABULARIO = "neutral"

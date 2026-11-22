@@ -26,7 +26,8 @@ from .tabla import BASE_ESQUEMAS, ESTANDAR, OPERACIONES
 ESQUEMAS = ("configuracion", "imputacion", "claves_previas", "partidas_previas", "documento_anotado", "comprobante_de_la_respuesta",
             "movimiento_de_la_respuesta",
             "cuadre", "asiento", "exportacion", "diagnostico", "recuento", "totales_por_moneda", "resumen", "pre_mayor", "estado_de_cuenta", "por_pagar", "campos_del_comprobante", "cuenta_bancaria", "cuentas_bancarias", "tesoreria", "cuenta_pcge",
-            "adaptacion_pcge", "drivers", "catalogos_sunat", "catalogos_del_estandar", "problema")
+            "adaptacion_pcge", "drivers", "catalogos_sunat", "catalogos_del_estandar", "catalogo_de_observaciones",
+            "problema")
 ESTANDAR_EN_COMPONENTES = "OpenAccounting"
 
 _PROBLEMA = {"application/problem+json": {"schema": {"$ref": "#/components/schemas/problema"}}}

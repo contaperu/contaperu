@@ -146,6 +146,20 @@ def test_las_demas_respuestas_reales_validan():
     _validar("catalogos_sunat", api.catalogos_sunat())
     _validar("configuracion", api.configuracion_por_defecto())
     _validar("problema", api.problema(api.ErroresBloqueantes([{"indice": 0}])))
+    _validar("catalogo_de_observaciones", api.catalogo_de_observaciones())
+
+
+def test_el_problema_con_sus_comprobantes_valida_y_el_esquema_sigue_cerrado():
+    """El esquema se abrió solo para `comprobantes` (15.16.0): cualquier otro miembro sigue sin caber."""
+    with pytest.raises(api.SinCentro) as negado:
+        api.exportar(_golden(), driver="concar", configuracion={})
+    problema = api.problema(negado.value)
+    assert problema["comprobantes"]
+    _validar("problema", problema)
+    with pytest.raises(ValidationError):
+        _validar("problema", {**problema, "cuales": []})
+    with pytest.raises(ValidationError):
+        _validar("problema", {**problema, "comprobantes": [{**problema["comprobantes"][0], "sobra": 1}]})
 
 
 def test_la_tesoreria_real_valida_con_cada_informe_lleno():

@@ -24,6 +24,11 @@ def incumplimientos(modulo: Any) -> list[str]:
     nombre = getattr(modulo, "NOMBRE", None)
     if not isinstance(nombre, str) or not nombre.strip():
         problemas.append("falta NOMBRE (texto)")
+    # Opcional (15.16.0): sin él se le dice por su `NOMBRE`. Declarado, tiene que poder leerse.
+    if hasattr(modulo, "NOMBRE_DE_PANTALLA"):
+        pantalla = getattr(modulo, "NOMBRE_DE_PANTALLA")
+        if not isinstance(pantalla, str) or not pantalla.strip():
+            problemas.append("NOMBRE_DE_PANTALLA es un texto que no está vacío: cómo se le dice a una persona")
     formatos = getattr(modulo, "FORMATOS", None)
     if not isinstance(formatos, dict) or not formatos:
         problemas.append("falta FORMATOS ({'venta'|'compra': identificador})")
