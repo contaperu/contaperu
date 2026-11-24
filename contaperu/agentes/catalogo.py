@@ -9,7 +9,7 @@ Separa dos cosas que un servidor generado una a una desde su tabla confunde:
 Pocas herramientas pensadas para un flujo rinden más que una por operación, y los servidores grandes convergen en lo
 mismo: un registro de operaciones con sus metadatos (riesgo, grupo, a quién se publica, qué nombre se retiró) que se
 PROYECTA en herramientas, en vez de publicarse tal cual. Este módulo es ese registro, sin el SDK del protocolo: la
-proyección sobre el SDK va aparte, y cuando cambie la versión mayor del SDK solo cambia esa.
+proyección sobre el SDK vive en `agentes.servidor`, y cuando cambie la versión mayor del SDK solo cambia esa.
 
 Las reglas que hacen segura una familia se comprueban al construir el catálogo, no se confían a la buena voluntad:
 **una herramienta, un nivel de riesgo** —sus operaciones miran todas, o escriben todas, y llevan huella todas o

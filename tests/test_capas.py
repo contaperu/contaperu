@@ -183,8 +183,9 @@ def test_las_toleradas_siguen_existiendo():
 
 def test_las_puertas_hablan_solo_con_la_api():
     """Una puerta traduce un protocolo: si importara el núcleo o el pipeline, dejaría de haber una api entre ellas y el
-    motor, y el mismo documento podría salir distinto según por dónde llega."""
-    culpables = {m: sorted(d for d in importaciones(m) if capa(d) not in ("base", "api", "puertas"))
+    motor, y el mismo documento podría salir distinto según por dónde llega. La base MCP (`agentes`, 16.0) está encima
+    de la api, así que hablar con ella es hablar con la api."""
+    culpables = {m: sorted(d for d in importaciones(m) if capa(d) not in ("base", "api", "agentes", "puertas"))
                  for m in MODULOS if capa(m) == "puertas"}
     assert {m: d for m, d in culpables.items() if d} == {}
 

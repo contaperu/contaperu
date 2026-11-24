@@ -72,7 +72,7 @@ EXTENSION = (
 )
 # Lo público que aún no se promete: se usa, pero sus nombres pueden cambiar en una menor. Que no esté en la superficie
 # es una decisión escrita, no un olvido, y el test de abajo obliga a sacarlo de aquí al congelarlo.
-PROVISIONALES = ("contaperu.agentes", "contaperu.agentes.vigilancia")
+PROVISIONALES = ("contaperu.agentes", "contaperu.agentes.vigilancia", "contaperu.agentes.servidor")
 TIPOS_DE_CONSTANTE = {"builtins", "decimal", "datetime"}
 
 

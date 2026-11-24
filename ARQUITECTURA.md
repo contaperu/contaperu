@@ -666,8 +666,12 @@ quería montar las suyas encima tenía que modificar esa instancia. Los servidor
 
 Y trae lo que el esquema no hace: el SDK valida con pydantic, que no mira un `enum` declarado solo en el esquema y
 descarta en silencio un argumento que no conoce, así que el despacho de los modos dice con `entrada_invalida` lo que no
-va. **No importa el SDK ni pydantic** (`tests/test_agentes.py`): la proyección sobre el SDK irá en `agentes.servidor`,
-una puerta más, y será lo único que cambie con la versión mayor del SDK. El catálogo de las herramientas del motor,
+va. **No importa el SDK ni pydantic** (`tests/test_agentes.py`): la proyección sobre el SDK es `agentes.servidor`, una
+puerta más, y es lo único que cambia con la versión mayor del SDK. Ahí vive `Servidor`, por el que pasa cada llamada
+—el nombre retirado, la `guarda` donde la aplicación pone su autenticación, la herramienta, la traducción de nombres
+y el error dicho con su clave—; `registrar`, que proyecta un catálogo con una función o una `familia` por
+herramienta y no deja que dos se llamen igual; y `crear_servidor` y `registrar_del_motor`, que son FÁBRICAS: el
+servidor de `contaperu-mcp` es `crear_servidor()`, y el de un integrador lleva las del motor con su prefijo. El catálogo de las herramientas del motor,
 `DEL_MOTOR`, se deriva de `api.OPERACIONES` y dice lo mismo que el servidor publica.
 
 **Y lo que un servidor publica se vigila como una API** (`agentes.vigilancia`): un modelo elige por esos textos, un

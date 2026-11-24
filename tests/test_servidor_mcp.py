@@ -577,10 +577,12 @@ def test_el_destino_no_se_supone():
 
 def test_sin_destino_la_llamada_se_niega():
     """Y se niega antes de tocar nada, no generando el archivo del sistema equivocado."""
-    # Este sí sigue siendo una excepción del SDK, y está bien: un argumento que el `inputSchema` prohíbe no llega
-    # al motor, así que no hay rechazo del motor que contar. Lo que el motor niega sale con su clave (ver abajo).
-    with pytest.raises(Exception, match="driver"):
-        asyncio.run(mcp.call_tool("diagnosticar", {"documento": DOCUMENTO, "imputacion": IMPUTACION}))
+    # Este lo niega el SDK y no el motor, y está bien: un argumento que el `inputSchema` exige no llega al motor, así
+    # que no hay rechazo del motor que contar. Lo que el motor niega sale con su clave (ver abajo). Hasta la 15.x esto
+    # era una excepción al llamar a `call_tool` desde Python y un `is_error` por el protocolo; desde la 16.0 la base
+    # contesta igual por los dos caminos, con el texto del SDK.
+    resultado = asyncio.run(mcp.call_tool("diagnosticar", {"documento": DOCUMENTO, "imputacion": IMPUTACION}))
+    assert resultado.is_error and "driver" in resultado.content[0].text
 
 
 def test_los_destinos_se_pueden_preguntar_llamando_y_no_solo_leyendo():

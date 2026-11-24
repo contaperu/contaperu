@@ -6,8 +6,8 @@ entonces se congelan con sus firmas, como `contaperu.api`. Lo que no cambia es e
 - `contaperu.agentes` no importa el SDK del protocolo ni pydantic: es el catálogo —qué operación va en qué
   herramienta, con qué modo, qué arriesga, a quién se publica y qué nombre se retiró—, el despacho de los modos, la
   traducción de nombres y el recorte de listas. Se sostiene igual con cualquier versión del SDK.
-- la proyección sobre el SDK (`MCPServer`) irá en `contaperu.agentes.servidor`, y será lo único que cambie cuando cambie
-  su versión mayor.
+- `contaperu.agentes.servidor` es la proyección sobre el SDK (`MCPServer`), y es lo único que cambia cuando cambie su
+  versión mayor: el servidor por el que pasa cada llamada, `registrar`, y las fábricas del servidor del motor.
 
 El catálogo de las herramientas del motor es `DEL_MOTOR`, derivado de `api.OPERACIONES`. Y el kit de vigilantes de lo
 que un servidor publica —la foto, el peso, los topes, las reglas y los nombres fantasma— es `agentes.vigilancia`.

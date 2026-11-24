@@ -318,47 +318,79 @@ total cuadraba con su propia tabla. (Desde la 15.3.0 la lista es `("07", "87", "
 Dos formas de combinarlas, y la primera no cuesta nada:
 
 1. **Dos servidores.** Un cliente MCP se conecta a varios: el tuyo y `contaperu-mcp` al lado. Cero trabajo.
-2. **Uno solo**, delegando en la api las que son del motor:
+2. **Uno solo, sobre la base MCP** (`contaperu.agentes`, desde la 16.0 y provisional hasta que la adopte su primer
+   integrador). Declaras tus operaciones en un catálogo —en qué herramienta va cada una, con qué modo y qué arriesga—,
+   las registras en un `Servidor`, y le sumas las del motor con su prefijo:
 
 ```python
-from mcp.server.mcpserver import MCPServer
-
 from contaperu import api
+from contaperu.agentes import Catalogo, Ficha, Riesgo
+from contaperu.agentes.servidor import Servidor, familia, registrar, registrar_del_motor
 
 # Las reglas del DOCUMENTO valen llames como llames al motor; las de la llamada hablan de argumentos que tus
 # herramientas quizá no tienen (`imputacion`, `claves_previas`). Las reglas, antes que nada: Claude Code solo lee
 # los primeros 2 048 caracteres de las instrucciones.
 REGLAS = "\n".join(f"- {regla}" for regla in api.REGLAS_POR_CLAVE["documento"].values())
-mio = MCPServer("mi-erp", instructions=f"Reglas que conviene tener claras antes de armar un documento:\n{REGLAS}\n\n"
-                                       "Mi ERP: sus meses y el diagnóstico del motor.")
+mio = Servidor("mi-erp", instrucciones=f"Reglas que conviene tener claras antes de armar un documento:\n{REGLAS}\n\n"
+                                       "Mi ERP: sus meses, un informe del mes y el diagnóstico del motor.")
+
+# Tus herramientas, que necesitan TUS datos. Dos operaciones de una misma familia van en UNA herramienta con `que`;
+# la que se llama como la herramienta es la de por defecto. Todo lo de una herramienta arriesga lo mismo.
+MIO = Catalogo([
+    Ficha("mis_meses", "mis_meses", titulo="Los meses de un RUC"),
+    Ficha("informe_del_mes", "informe_del_mes", modo="totales", titulo="Un informe del mes"),
+    Ficha("por_proveedor", "informe_del_mes", modo="proveedores"),
+    Ficha("guardar_nota", "guardar_nota", riesgo=Riesgo(escribe=True)),
+])
 
 
-@mio.tool()
 def mis_meses(ruc: str) -> dict:
-    """Los meses de ese RUC. Esta es TUYA: necesita tu base de datos."""
+    """Los meses de ese RUC. Para lo que pasó en uno, `informe_del_mes`."""
     return {"ruc": ruc, "meses": ["202601"]}
 
 
-@mio.tool()
-def diagnosticar(documento: dict, driver: str) -> dict:
-    """Y esta delega en el motor, que es quien sabe si el mes está listo."""
-    return api.diagnosticar(documento, driver=driver)
+def totales(ruc: str, periodo: str) -> dict:
+    return {"ruc": ruc, "periodo": periodo, "total": "4956.00"}
 
 
+def por_proveedor(ruc: str, periodo: str, proveedor: str) -> dict:
+    return {"ruc": ruc, "periodo": periodo, "proveedor": proveedor, "total": "4956.00"}
+
+
+def guardar_nota(ruc: str, texto: str) -> dict:
+    """Guarda una nota del RUC. Escribe: el cliente pide permiso antes."""
+    return {"guardada": texto}
+
+
+registrar(mio, MIO, {
+    "mis_meses": mis_meses,
+    "informe_del_mes": familia("Un informe del mes: `totales` (por defecto) o `proveedores`, con `proveedor`.",
+                               {"totales": totales, "proveedores": por_proveedor}),
+    "guardar_nota": guardar_nota,
+})
+# Y las del motor que te sirvan, con su prefijo: `exportar` es un nombre que cualquiera tiene, y dos herramientas con
+# el mismo nombre no conviven (`ChoqueDeNombres`).
+registrar_del_motor(mio, herramientas=["diagnosticar"], recursos=False)
 print(f"servidor con las tuyas y las del motor: {mio.name}")
 ```
 
-**Trae las reglas, aunque no traigas nada más.** Son lo que el servidor del motor le dice al agente antes de que toque
-nada —que los importes van siempre en positivo, que `tipo_cp` es el código de la Tabla 10 y no la sigla del sistema,
-que la retención del IGV del 3 % **no** es una detracción—, y están en el `__all__` a propósito. Desde la 15.15.0
-tienen nombre y ámbito, `api.REGLAS_POR_CLAVE`: las del `documento` son de cualquiera que arme uno, y las de la
-`llamada`, de quien llama a estas operaciones con `configuracion`, `imputacion` o `claves_previas`. Si tus
-herramientas reciben esos argumentos, `api.REGLAS` es la unión de las dos; `INSTRUCCIONES` no te sirve, porque lleva
-el camino de las herramientas del motor y en tu servidor no existen. Sin las reglas, un modelo se inventa
-detracciones con mucha seguridad.
+Lo que la base hace por ti en cada llamada, sin que lo escribas:
 
-Y si prefieres una sola instancia sin reescribir nada, `contaperu.puertas.servidor_mcp.mcp` es importable y le puedes
-añadir tus herramientas con `@mcp.tool()`. Funciona, pero estás mutando la instancia del motor: queda a tu cargo.
+- **El despacho de `que`**: un modo que no existe, un parámetro de otro modo o el obligatorio que falta se contestan con
+  la clave `entrada_invalida`. El esquema no lo hace solo: el SDK descarta en silencio un argumento que no conoce.
+- **Los nombres de operación, dichos como se alcanzan**: si `mis_meses` dice «`por_proveedor`», al agente le llega
+  «`informe_del_mes` (`que: proveedores`)», y con el prefijo del servidor si lo lleva.
+- **Los nombres retirados**: quien llame a `por_proveedor`, que fue una herramienta, recibe dónde está ahora.
+- **Tu autenticación, sin que la base guarde nada**: `Servidor(..., guarda=...)` corre antes de cada llamada con el
+  nombre, el modo y los argumentos, y niega lanzando una excepción; `visibles=...` decide qué ve quien llama; y
+  `token_verifier`, `auth` y lo demás del SDK pasan tal cual. Un error de una herramienta llega con su clave, también
+  el de un `ErrorContaperu`, cuyo texto la v2 del SDK no copiaría.
+- **Los vigilantes** de lo que publicas, en `contaperu.agentes.vigilancia`: la foto, el peso, los nombres fantasma.
+
+Y si solo quieres el servidor del motor con lo que elijas —algunas herramientas, un prefijo, tu guarda—, es una
+fábrica: `crear_servidor(herramientas=["diagnosticar", "exportar"], prefijo="cp_", guarda=...)`. Dos servidores no
+comparten nada. `contaperu.puertas.servidor_mcp.mcp` sigue siendo importable —es el que sirve `contaperu-mcp`, hecho
+con esa misma fábrica—, pero añadirle herramientas es modificar el servidor público del motor: mejor uno tuyo.
 
 ## El dinero: registrar movimientos bancarios
 

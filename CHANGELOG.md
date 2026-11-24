@@ -39,8 +39,25 @@ sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `m
   nombres que valen para Claude con las anotaciones del catálogo, y ningún texto que cite una operación de la tabla
   que aquí no es una herramienta, como `revisar` por `validar_comprobantes`—.
 
+- **`contaperu.agentes.servidor`, la base sobre el SDK**, provisional como el resto. `Servidor` es el `MCPServer`
+  del SDK con el recorrido que hace cada llamada: un nombre retirado contesta dónde está ahora, o se atiende si la
+  retirada lo permite; la `guarda` de la aplicación corre antes y niega con su clave —es donde un integrador pone su
+  autenticación, sin que contaperu guarde identidades ni estado—; `visibles` filtra lo que ve quien llama, y lo
+  oculto tampoco se llama; y lo que contesta cita las operaciones con el nombre de esta puerta. Un error de una
+  herramienta llega con su clave: la v2 del SDK solo copia el texto de un `ToolError`. `registrar` proyecta un
+  catálogo con una función por herramienta o una `familia` por modo, con el despacho de `que` hecho, lo fijado
+  (`fijar`) fuera del esquema y un `ChoqueDeNombres` en vez del aviso del SDK, que se queda con la primera. Y
+  `crear_servidor` y `registrar_del_motor` son fábricas: el motor en un servidor nuevo, o en el de otro con el
+  prefijo `contaperu_`.
+
 ### Cambia
 
+- **El servidor de `contaperu-mcp` es `crear_servidor()`**, una aplicación de la base como lo sería la de un
+  integrador, y lo que había en `servidor_mcp` —los adjuntos, el «problem details», los tipos de los parámetros y el
+  arranque— vive en `agentes.servidor`. Los nueve nombres de su `__all__` siguen importándose, y **lo que publica no
+  se movió ni un byte**. Una diferencia para quien llame a `call_tool` desde Python: lo que el SDK rechaza antes de
+  llegar al motor —un argumento obligatorio que falta— ya no es una excepción sino un `is_error`, que es lo que
+  siempre vio un cliente por el protocolo.
 - **El servidor MCP sobre el SDK v2.** Se presenta con su versión desde el constructor, y no escribiéndola en un
   atributo privado después de crearlo, que era lo único que la 1.x permitía. Las opciones de HTTP —sin sesiones y con
   la defensa del `Host`— van en la llamada que lo arranca. Atiende a los clientes 2025 y a los 2026-07-28 desde el
