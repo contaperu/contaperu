@@ -4,6 +4,24 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [Sin publicar]
+
+Lo que va camino de la **16.0.0**: el MCP del motor pasa al SDK v2 de Python (`mcp` 2.3) y se convierte en una base
+sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `main` en verde.
+
+**La foto de lo que publica el servidor MCP, completa antes de migrar.** `tests/fixtures/mcp/publicado.json`
+congelaba las herramientas y los recursos, pero no tres cosas que un cambio de SDK puede mover sin que se vea:
+
+- **cómo se presenta el servidor**: su nombre, sus instrucciones y que su versión sea la de contaperu y no la del SDK.
+  Se le pregunta por el protocolo, con un cliente en memoria, y no a los atributos del objeto;
+- **el orden** en que publica herramientas y recursos, porque `tools/list` es una lista y un cliente la enseña así;
+- **el título y el esquema de salida** de cada herramienta, y el título de cada recurso. Hoy son todos nulos.
+
+Se amplió con el SDK 1.30 y ningún valor de los que ya estaban cambió. Es la vara de la migración, que tiene que
+pasar sin mover un byte, igual que en la 6.2.0. Y lo que `INTEGRAR.md` enseña a importar de la puerta —los nueve
+nombres de `servidor_mcp.__all__`— queda fijado por su propio test, porque la base va a vaciar ese módulo en
+reexportaciones.
+
 ## [15.16.0] — 2026-11-21
 
 ### Un comprobante se nombra de una sola forma, y lo que alguien escribe se lee de vuelta

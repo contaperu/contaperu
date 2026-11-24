@@ -26,7 +26,9 @@
     ],
     "title": "adaptar_pcge2026Arguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "buscar_cuenta_pcge": {
    "anotaciones": {
@@ -54,7 +56,9 @@
     },
     "title": "buscar_cuenta_pcgeArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "configuracion_por_defecto": {
    "anotaciones": {
@@ -94,7 +98,9 @@
     },
     "title": "configuracion_por_defectoArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "diagnosticar": {
    "anotaciones": {
@@ -207,7 +213,9 @@
     ],
     "title": "diagnosticarArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "drivers_disponibles": {
    "anotaciones": {
@@ -222,7 +230,9 @@
     "properties": {},
     "title": "drivers_disponiblesArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "estado_de_cuenta": {
    "anotaciones": {
@@ -278,7 +288,9 @@
     ],
     "title": "estado_de_cuentaArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "exportar": {
    "anotaciones": {
@@ -411,7 +423,9 @@
     ],
     "title": "exportarArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "generar_asiento": {
    "anotaciones": {
@@ -530,7 +544,9 @@
     ],
     "title": "generar_asientoArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "leer_propuesta_sire": {
    "anotaciones": {
@@ -567,7 +583,9 @@
     ],
     "title": "leer_propuesta_sireArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "leer_xml_ubl": {
    "anotaciones": {
@@ -604,7 +622,9 @@
     ],
     "title": "leer_xml_ublArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "normalizar_detracciones": {
    "anotaciones": {
@@ -643,7 +663,9 @@
     ],
     "title": "normalizar_detraccionesArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "por_cuenta": {
    "anotaciones": {
@@ -685,7 +707,9 @@
     ],
     "title": "por_cuentaArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "por_pagar": {
    "anotaciones": {
@@ -755,7 +779,9 @@
     ],
     "title": "por_pagarArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "resumen": {
    "anotaciones": {
@@ -790,7 +816,9 @@
     ],
     "title": "resumenArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "revisar_tesoreria": {
    "anotaciones": {
@@ -832,7 +860,9 @@
     ],
     "title": "revisar_tesoreriaArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "validar_comprobantes": {
    "anotaciones": {
@@ -914,7 +944,9 @@
     ],
     "title": "validar_comprobantesArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "validar_cuentas_bancarias": {
    "anotaciones": {
@@ -942,7 +974,9 @@
     ],
     "title": "validar_cuentas_bancariasArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   },
   "validar_partida_doble": {
    "anotaciones": {
@@ -970,79 +1004,138 @@
     ],
     "title": "validar_partida_dobleArguments",
     "type": "object"
-   }
+   },
+   "salida": null,
+   "titulo": null
   }
+ },
+ "orden": {
+  "herramientas": [
+   "leer_xml_ubl",
+   "leer_propuesta_sire",
+   "validar_comprobantes",
+   "normalizar_detracciones",
+   "diagnosticar",
+   "generar_asiento",
+   "exportar",
+   "validar_partida_doble",
+   "resumen",
+   "por_cuenta",
+   "estado_de_cuenta",
+   "por_pagar",
+   "validar_cuentas_bancarias",
+   "revisar_tesoreria",
+   "buscar_cuenta_pcge",
+   "adaptar_pcge2026",
+   "configuracion_por_defecto",
+   "drivers_disponibles"
+  ],
+  "recursos": [
+   "contaperu://campos/comprobante",
+   "contaperu://configuracion",
+   "contaperu://drivers",
+   "contaperu://catalogos/sunat",
+   "contaperu://catalogos/regimenes",
+   "contaperu://catalogos/vencimientos",
+   "contaperu://catalogos/sire-api",
+   "contaperu://catalogos/sire-campos",
+   "contaperu://catalogos/ple-campos",
+   "contaperu://catalogos/estandar",
+   "contaperu://catalogos/pcge2026",
+   "contaperu://catalogos/observaciones",
+   "contaperu://estandar/open-accounting",
+   "contaperu://esquemas/diagnostico"
+  ]
  },
  "recursos": {
   "contaperu://campos/comprobante": {
    "descripcion": "Qué campos de un comprobante los pone el DOCUMENTO, cuáles el SISTEMA que lo produce y cuáles la\n    REVISIÓN, más los tres que son obligatorios.\n\n    Léelo antes de armar un documento con datos que alguien te dicte: lo que está en `sistema` o en\n    `revision` no lo dice el papel —el estado, el origen, la confianza, si está apartado— y ponerlo tú es\n    decidir por el sistema que va a recibirlo. Los tres tramos cubren el comprobante entero.",
    "mime": "application/json",
-   "nombre": "campos_del_comprobante"
+   "nombre": "campos_del_comprobante",
+   "titulo": null
   },
   "contaperu://catalogos/estandar": {
    "descripcion": "Los catálogos que este estándar inventa: los roles de una línea del asiento, las cinco clases contables y\n    los tipos de libro, cada uno con su fuente y su versión.",
    "mime": "application/json",
-   "nombre": "catalogos_del_estandar"
+   "nombre": "catalogos_del_estandar",
+   "titulo": null
   },
   "contaperu://catalogos/observaciones": {
    "descripcion": "Qué significa cada código de observación que la validación deja en un\n    comprobante: su nivel —`error` impide exportarlo, `aviso` no—, a quién pedírselo (`contador` o `sistema`) y su\n    texto, que vale para cualquier comprobante.\n\n    Léelo para explicarle una observación a quien revisa sin adivinarla, y para saber a quién preguntar. En\n    `nivel_por_origen` está lo que cambia según de dónde salió el comprobante: `IGV_NO_CUADRA` en uno traído de la\n    propuesta del SIRE avisa y no bloquea, porque lo escribió SUNAT.",
    "mime": "application/json",
-   "nombre": "catalogo_de_observaciones"
+   "nombre": "catalogo_de_observaciones",
+   "titulo": null
   },
   "contaperu://catalogos/pcge2026": {
    "descripcion": "El catálogo oficial de cuentas del Plan Contable General Empresarial 2026: cada cuenta con\n    su nombre y la página de la norma que lo dice.\n\n    Sirve para dos cosas: poner el nombre de una cuenta, y comprobar que la cuenta que se va a\n    escribir existe. **Que una cuenta no esté aquí no la invalida**: el PCGE llega a cinco dígitos\n    y cada empresa abre sus divisionarias debajo — `603201` es válida y no aparece en la norma.\n    ",
    "mime": "application/json",
-   "nombre": "catalogo_pcge2026"
+   "nombre": "catalogo_pcge2026",
+   "titulo": null
   },
   "contaperu://catalogos/ple-campos": {
    "descripcion": "El FORMATO del Libro Diario 5.1 del PLE columna a columna: de cada uno de sus 21 campos, su número,\n    el nombre de SUNAT, de dónde lo saca el driver al escribirlo —o por qué va vacío— y qué hizo con esa\n    columna un libro real que SUNAT aceptó.\n\n    Trae también los códigos de libro del PLE y la nomenclatura del fichero `LE…`. No confundirlos con los\n    del SIRE, que son otros.",
    "mime": "application/json",
-   "nombre": "campos_del_ple"
+   "nombre": "campos_del_ple",
+   "titulo": null
   },
   "contaperu://catalogos/regimenes": {
    "descripcion": "Los regímenes tributarios del Perú y lo que cada uno obliga, con la cita de su artículo: la\n    tasa y la base de su pago a cuenta, los libros que obliga a llevar —por su código del PLE— y los\n    topes que sacan de él.\n\n    Hoy solo el Régimen Especial tiene su norma leída; los otros tres dicen qué hay que leer para\n    que entren, en vez de traer una tasa de memoria. El motor no calcula la cuota: publica la tasa.",
    "mime": "application/json",
-   "nombre": "regimenes_tributarios"
+   "nombre": "regimenes_tributarios",
+   "titulo": null
   },
   "contaperu://catalogos/sire-api": {
    "descripcion": "El CANAL del SIRE, descrito: rutas por libro, parámetros obligatorios, los dos grants de\n    OAuth, la metadata de TUS, los estados del ticket y los códigos de retorno, con su fuente.\n\n    El motor no se conecta a SUNAT: esto describe la API para quien escriba su propio conector.\n    Y avisa de su techo — «Generar el registro» no existe por API.",
    "mime": "application/json",
-   "nombre": "catalogos_api_sire"
+   "nombre": "catalogos_api_sire",
+   "titulo": null
   },
   "contaperu://catalogos/sire-campos": {
    "descripcion": "El FORMATO del SIRE columna a columna: de cada campo del anexo del RVIE y del RCE, su número, el\n    nombre de SUNAT, el campo del documento donde cae —o el motivo por el que no cae— y si el TXT de\n    reemplazo lo devuelve.\n\n    Sirve para contestar «¿dónde acabó esta columna?» y «¿qué del registro no se usa?». Una columna que el\n    motor no lee no se pierde: la fila entera viaja en `datos_originales[\"sire\"]`.",
    "mime": "application/json",
-   "nombre": "campos_del_sire"
+   "nombre": "campos_del_sire",
+   "titulo": null
   },
   "contaperu://catalogos/sunat": {
    "descripcion": "Los catálogos de SUNAT que entiende el motor: tipos de comprobante, tipos de documento\n    de identidad y monedas.",
    "mime": "application/json",
-   "nombre": "catalogos_sunat"
+   "nombre": "catalogos_sunat",
+   "titulo": null
   },
   "contaperu://catalogos/vencimientos": {
    "descripcion": "Cuándo vence un mes: la fecha de la declaración y el pago, y la fecha máxima de atraso del\n    registro electrónico de ventas y de compras, por periodo y por último dígito de RUC, con la\n    columna de los buenos contribuyentes. Los dos salen de la RS 000281-2022/SUNAT, un anexo cada\n    uno, y el del registro vence antes que el de la declaración.\n\n    No es un reloj: dado un periodo y un dígito devuelve una fecha. Si queda tiempo o hay mora lo\n    calcula quien tiene el hoy, que no es el motor. Solo los años que SUNAT publicó resueltos.",
    "mime": "application/json",
-   "nombre": "cronogramas_de_vencimiento"
+   "nombre": "cronogramas_de_vencimiento",
+   "titulo": null
   },
   "contaperu://configuracion": {
    "descripcion": "Qué se configura y cómo: lo general y la sección de cada sistema contable, cada clave con su tipo, su valor\n    por defecto, su patrón y sus textos, y en qué columnas de su archivo puede ir cada dato (el centro de costo, por\n    ejemplo). Es lo que una aplicación lee para pintar su pantalla de configuración, y contra lo que se valida la\n    `configuracion` de las herramientas.",
    "mime": "application/json",
-   "nombre": "configuracion_declarada"
+   "nombre": "configuracion_declarada",
+   "titulo": null
   },
   "contaperu://drivers": {
    "descripcion": "Los formatos de salida disponibles y qué libros genera cada uno.\n\n    Lo mismo que la herramienta del mismo nombre, y son las dos a propósito: un recurso se lee, y quien decide si\n    el modelo llega a leerlo es el cliente; una herramienta se llama, y el modelo la ve siempre.\n    ",
    "mime": "application/json",
-   "nombre": "drivers_disponibles"
+   "nombre": "drivers_disponibles",
+   "titulo": null
   },
   "contaperu://esquemas/diagnostico": {
    "descripcion": "El JSON Schema de la respuesta de `diagnosticar`, también cuando la configuración no se puede aplicar. El SDK no\n    deja declararlo como `outputSchema` de la herramienta sin cambiar lo que responde, así que viaja como recurso.",
    "mime": "application/schema+json",
-   "nombre": "esquema_diagnostico"
+   "nombre": "esquema_diagnostico",
+   "titulo": null
   },
   "contaperu://estandar/open-accounting": {
    "descripcion": "El esquema JSON del documento contable `open-accounting`, con cada campo documentado.",
    "mime": "application/schema+json",
-   "nombre": "esquema_open_accounting"
+   "nombre": "esquema_open_accounting",
+   "titulo": null
   }
+ },
+ "servidor": {
+  "instrucciones": "Núcleo contable del Perú: de comprobantes de SUNAT a asientos y archivos contables, determinista y sin estado.\n\nReglas que conviene tener claras antes de armar un documento:\n- Los importes van SIEMPRE en positivo: una nota de crédito se marca con su tipo (`07`, `87` o `97`), nunca en negativo.\n- `tipo_cp` es el código de la Tabla 10 de SUNAT, no la sigla del sistema contable.\n- Hay DOS retenciones: `retencion_4ta`, la renta de 4ta (8 %) de un recibo por honorarios, la única que entra en el asiento, y `retencion_igv`, el 3 % que un agente de retención le retiene a una factura. La del IGV NO es una detracción.\n- La detracción va por su `codigo` del Catálogo 54, contrastado con la tabla del contribuyente; no se deduce del porcentaje del PDF, que varios códigos comparten.\n- La factura de un proveedor del EXTERIOR (documento tipo `0`) es un `91`, con notas `97` y `98`, en compras y con lo comprado en `valor_no_gravado`, sin IGV; su renta retenida va en el bloque `no_domiciliado`, no en `retencion_4ta`, y en SOLES aunque sea en dólares.\n- Cada contribuyente tiene su plan de cuentas y sus sub-diarios; ningún valor por defecto es la verdad de nadie.\n- Una cuenta contable no se inventa: se contrasta con el PCGE, aunque no estar en él no la invalida (las divisionarias son de cada empresa).\n- El estado, el origen, si está apartado y lo observado no los dice el papel: los pone el sistema que lo recibe.\n- El plan y los sub-diarios van en `configuracion`: lo general en la raíz y cada sistema en su sección (`concar`, `csv`, `contasis`, `starsoft`, `ple`, `ple_plan`).\n- La cuenta, el centro de costo, la cuenta del total y el reparto de cada comprobante van en `imputacion`, por su `id_externo`, y no en el documento; lo que falte sale de la `configuracion`.\n- Lo anotado en otros periodos del RUC va en `claves_previas` ([tipo_cp, serie, numero, contraparte_doc]): lo que coincida sale DUPLICADO_PERIODO_ANTERIOR; en ventas no cuenta el cliente.\n- Lo que no se puede hacer bien falla y dice por qué: nada se inventa.\n\nEl camino normal:\n  1. `leer_xml_ubl` o `leer_propuesta_sire` si tienes archivos de SUNAT; si ya tienes los datos\n     estructurados, arma tú el documento `open-accounting` (mira el recurso del esquema).\n  2. `validar_comprobantes` para ver qué observaciones hay antes de nada.\n  3. `generar_asiento` para las líneas de diario, o `exportar` directamente al formato del ERP.\n  4. `resumen` para saber cuánto es el libro, y `por_cuenta` para ver en qué cuentas cayó.\n\nY tres que se leen en vez de llamarse: el recurso de la configuración dice qué se configura de cada\nsistema; el de los campos del comprobante, cuáles los pone el documento y cuáles el sistema; y el de los\ncatálogos de SUNAT trae los códigos del bloque `no_domiciliado` y el convenio de cada país.\n",
+  "nombre": "contaperu",
+  "version": "la del paquete"
  }
 }

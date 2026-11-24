@@ -111,6 +111,22 @@ def test_el_servidor_se_presenta_con_SU_version():
     assert mcp._mcp_server.version == contaperu.__version__
 
 
+# Lo que `INTEGRAR.md` enseña a importar de esta puerta. `puertas` está fuera de la superficie congelada, pero estos
+# nueve nombres los usa quien integra —`REGLAS` y la instancia `mcp`, sobre todo—, y la base MCP va a vaciar el módulo
+# en reexportaciones (plan del 23-nov-2026): si una se pierde por el camino, tiene que caer aquí y no en el ERP de otro.
+REEXPORTADOS = {"INSTRUCCIONES", "LOCALES", "MAXIMO_ARCHIVO", "REGLAS", "SOLO_LECTURA", "contesta", "main", "mcp",
+                "seguridad"}
+
+
+def test_lo_que_se_importa_de_la_puerta_sigue_importandose():
+    from contaperu.puertas import servidor_mcp
+
+    assert set(servidor_mcp.__all__) == REEXPORTADOS, "cambió lo que la puerta MCP exporta"
+    faltan = sorted(nombre for nombre in REEXPORTADOS if not hasattr(servidor_mcp, nombre))
+    assert not faltan, f"se anuncian en `__all__` y no se pueden importar: {faltan}"
+    assert servidor_mcp.REGLAS == api.REGLAS and servidor_mcp.INSTRUCCIONES == api.INSTRUCCIONES
+
+
 def test_publicarlo_detras_de_un_proxy_exige_declarar_el_dominio():
     """Sin declararlo, el SDK responde 421 a todo lo que llegue por el nombre publico.
 
@@ -702,16 +718,50 @@ def test_servirlo_en_red_es_sin_sesiones_y_con_el_dominio_declarado(monkeypatch)
 PUBLICADO = Path(__file__).resolve().parent / "fixtures" / "mcp" / "publicado.json"
 
 
+async def _saludo():
+    """Lo que el servidor contesta al `initialize`: su nombre, su versión y sus instrucciones, tal como le llegan a un
+    cliente. Se le pregunta por el protocolo, con un cliente en memoria, y no a los atributos del objeto: lo que se
+    congela es lo que sale por el cable, que es lo único que no puede cambiar al migrar el SDK."""
+    import anyio
+    from mcp.client.session import ClientSession
+    from mcp.shared.memory import create_client_server_memory_streams
+
+    servidor = mcp._mcp_server
+    async with create_client_server_memory_streams() as (del_cliente, del_servidor), anyio.create_task_group() as tg:
+        tg.start_soon(lambda: servidor.run(*del_servidor, servidor.create_initialization_options()))
+        async with ClientSession(*del_cliente) as sesion:
+            saludo = await sesion.initialize()
+        tg.cancel_scope.cancel()
+    return saludo
+
+
 def publicado() -> dict:
-    """Lo que este servidor publica: cada herramienta con su descripción, su esquema de entrada y sus
-    anotaciones, y cada recurso con su nombre, su descripción y su tipo de contenido."""
+    """Lo que este servidor publica, entero (Parte 0 del plan de la base MCP, 23-nov-2026):
+
+    - cómo se presenta: su nombre, que su versión es la del paquete y sus instrucciones;
+    - el ORDEN de las herramientas y de los recursos, porque `tools/list` es una lista y un cliente la enseña así;
+    - cada herramienta con su título, su descripción, su esquema de entrada, el de salida y sus anotaciones;
+    - y cada recurso con su nombre, su título, su descripción y su tipo de contenido.
+
+    Hasta ese día faltaban la presentación, los títulos, el esquema de salida y el orden, y eso es justo lo que
+    puede moverse en silencio al cambiar de SDK."""
     herramientas = asyncio.run(mcp.list_tools())
     recursos = asyncio.run(mcp.list_resources())
+    saludo = asyncio.run(_saludo())
     return {
-        "herramientas": {h.name: {"descripcion": h.description, "entrada": h.inputSchema,
+        "servidor": {"nombre": saludo.serverInfo.name,
+                     # La versión cambia en cada release, así que no se congela el número sino la regla: que el servidor
+                     # se presente con la de contaperu y no con la del SDK (`test_el_servidor_se_presenta_con_SU_version`).
+                     "version": ("la del paquete" if saludo.serverInfo.version == contaperu.__version__
+                                 else saludo.serverInfo.version),
+                     "instrucciones": saludo.instructions},
+        "orden": {"herramientas": [h.name for h in herramientas], "recursos": [str(r.uri) for r in recursos]},
+        "herramientas": {h.name: {"titulo": h.title, "descripcion": h.description, "entrada": h.inputSchema,
+                                  "salida": h.outputSchema,
                                   "anotaciones": h.annotations.model_dump() if h.annotations else None}
                          for h in herramientas},
-        "recursos": {str(r.uri): {"nombre": r.name, "descripcion": r.description, "mime": r.mimeType}
+        "recursos": {str(r.uri): {"nombre": r.name, "titulo": r.title, "descripcion": r.description,
+                                  "mime": r.mimeType}
                      for r in recursos},
     }
 
@@ -723,8 +773,8 @@ def regenerar() -> None:
 
 
 def test_lo_que_el_agente_ve_no_cambia_sin_que_se_decida():
-    """La superficie del MCP, congelada: los 14 nombres, los 13 recursos, y de cada uno el texto exacto, el
-    esquema que el SDK deriva de la firma y sus anotaciones.
+    """La superficie del MCP, congelada: cómo se presenta el servidor, en qué orden publica, y de cada herramienta y
+    cada recurso el texto exacto, el esquema que el SDK deriva de la firma y sus anotaciones (`publicado`).
 
     **Es el test que sostiene la 6.2.0**, donde las herramientas dejaron de escribirse a mano y pasaron a
     derivarse de `api.OPERACIONES`: este fixture se capturó ANTES del refactor y pasó después sin cambiar un
@@ -737,7 +787,10 @@ def test_lo_que_el_agente_ve_no_cambia_sin_que_se_decida():
 
     Un cambio que NO se quería suele ser una de tres: un parámetro que se renombró en la fachada, un texto de
     `api.textos` que se editó sin querer, o una versión nueva del SDK que escribe el `title` de otra forma.
-    El diff lo dice en una línea."""
+    El diff lo dice en una línea.
+
+    **Y es la vara de la migración al SDK v2** (plan de la base MCP, 23-nov-2026): se amplió con el SDK 1.30 y tiene
+    que pasar sin cambiar un byte después de migrar, igual que en la 6.2.0."""
     congelado = json.loads(PUBLICADO.read_text(encoding="utf-8"))
     hoy = publicado()
     for tipo in ("herramientas", "recursos"):
