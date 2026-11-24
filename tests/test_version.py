@@ -13,6 +13,7 @@ que **haya una sola copia**. Por eso estos tests miran el `pyproject.toml` en ve
 """
 from __future__ import annotations
 
+import asyncio
 import pathlib
 import tomllib
 
@@ -45,7 +46,13 @@ def test_las_dos_puertas_se_presentan_con_la_version_de_la_libreria():
     from contaperu.puertas.servidor_mcp import mcp
 
     assert contaperu.__version__ == contaperu._version.__version__
-    assert mcp._mcp_server.version == contaperu.__version__
+    async def saludo() -> str:
+        from mcp import Client
+
+        async with Client(mcp) as cliente:
+            return cliente.server_info.version
+
+    assert asyncio.run(saludo()) == contaperu.__version__
 
 
 def test_la_version_de_la_libreria_no_es_la_del_estandar_y_cada_una_vive_una_vez():

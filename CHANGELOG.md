@@ -9,6 +9,25 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 Lo que va camino de la **16.0.0**: el MCP del motor pasa al SDK v2 de Python (`mcp` 2.3) y se convierte en una base
 sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `main` en verde.
 
+### Rompe
+
+- **El extra `[mcp]` pide `mcp>=2.3,<3`**, el SDK v2 de Python, y ya no la 1.x. La 1.x solo recibe arreglos críticos y
+  la v2 es la estable desde el 02-oct-2026. Quien tenga en el mismo entorno `mcp` 1.x, o `fastmcp` 3.x, que la exige,
+  se queda en la 15.16 hasta migrar. `fastmcp` 4.x pide justo `mcp>=2.3`, así que ahora sí convive. **La librería sin
+  el extra no cambia**: `contaperu.api` sigue sin depender del SDK.
+- **`contaperu.puertas.servidor_mcp.mcp` es un `MCPServer`** (`mcp.server.mcpserver`) y no un `FastMCP`. Quien le
+  añadía herramientas con `@mcp.tool()`, como enseñaba `INTEGRAR.md`, sigue pudiendo. Lo que cambia es lo del SDK:
+  los atributos van en snake_case (`input_schema`, `is_error`, `mime_type`) y `call_tool` devuelve siempre un
+  `CallToolResult`.
+
+### Cambia
+
+- **El servidor MCP sobre el SDK v2.** Se presenta con su versión desde el constructor, y no escribiéndola en un
+  atributo privado después de crearlo, que era lo único que la 1.x permitía. Las opciones de HTTP —sin sesiones y con
+  la defensa del `Host`— van en la llamada que lo arranca. Atiende a los clientes 2025 y a los 2026-07-28 desde el
+  mismo endpoint, y una herramienta pesada (`exportar`) corre en un hilo y no bloquea a las demás.
+  **Lo que publica no se movió ni un byte**: `publicado.json` pasó sin regenerarse.
+
 **La foto de lo que publica el servidor MCP, completa antes de migrar.** `tests/fixtures/mcp/publicado.json`
 congelaba las herramientas y los recursos, pero no tres cosas que un cambio de SDK puede mover sin que se vea:
 

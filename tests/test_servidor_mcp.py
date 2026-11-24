@@ -39,17 +39,17 @@ def llamar(herramienta: str, **argumentos):
     """El JSON de una llamada que sale bien.
 
     Desde la 1.3.0 toda herramienta contesta un `CallToolResult`, como ya hacia `exportar`: el resultado
-    en el primer bloque de texto, y con `isError` el rechazo (ver `rechazo`).
+    en el primer bloque de texto, y con `is_error` el rechazo (ver `rechazo`).
     """
     resultado = asyncio.run(mcp.call_tool(herramienta, argumentos))
-    assert not resultado.isError, resultado.content[0].text
+    assert not resultado.is_error, resultado.content[0].text
     return json.loads(resultado.content[0].text)
 
 
 def rechazo(herramienta: str, **argumentos) -> dict:
     """El «problem details» de una llamada que se niega: su `clave` estable, su `detail` y su `status`."""
     resultado = asyncio.run(mcp.call_tool(herramienta, argumentos))
-    assert resultado.isError, "se esperaba un rechazo y la llamada salio bien"
+    assert resultado.is_error, "se esperaba un rechazo y la llamada salio bien"
     return json.loads(resultado.content[0].text)
 
 
@@ -59,7 +59,7 @@ def exportar(**argumentos):
     Se separan aquí para que cada test diga cuál de las dos cosas está mirando.
     """
     resultado = asyncio.run(mcp.call_tool("exportar", argumentos))
-    assert not resultado.isError, resultado.content[0].text
+    assert not resultado.is_error, resultado.content[0].text
     resumen, *adjuntos = resultado.content
     return json.loads(resumen.text), [a.resource for a in adjuntos]
 
@@ -107,8 +107,9 @@ def test_diagnosticar_por_el_protocolo():
 
 
 def test_el_servidor_se_presenta_con_SU_version():
-    """Sin ponersela a mano, FastMCP saluda con la version del SDK: «contaperu 1.30.0»."""
-    assert mcp._mcp_server.version == contaperu.__version__
+    """Sin ponérsela, el SDK 1.x saludaba con la suya —«contaperu 1.30.0»— y la v2 con una vacía. Se le pregunta por
+    el protocolo, como la ve un cliente."""
+    assert asyncio.run(_saludo())["version"] == contaperu.__version__
 
 
 # Lo que `INTEGRAR.md` enseña a importar de esta puerta. `puertas` está fuera de la superficie congelada, pero estos
@@ -144,7 +145,7 @@ def test_cada_herramienta_se_explica_sola():
     """Un agente elige la herramienta por su descripción: ninguna puede ir sin una."""
     for t in asyncio.run(mcp.list_tools()):
         assert t.description and len(t.description) > 80, t.name
-        assert t.inputSchema["type"] == "object"
+        assert t.input_schema["type"] == "object"
 
 
 def test_las_reglas_del_dominio_no_nombran_ninguna_herramienta():
@@ -287,7 +288,7 @@ def test_cada_parametro_dice_lo_que_dice_la_tabla():
             continue
         renombra = RENOMBRA.get(op.herramienta, {})
         for nombre, de_la_tabla in op.entrada["properties"].items():
-            publicado = por_nombre[op.herramienta].inputSchema["properties"][renombra.get(nombre, nombre)]
+            publicado = por_nombre[op.herramienta].input_schema["properties"][renombra.get(nombre, nombre)]
             donde = f"{op.herramienta}.{nombre}"
             assert publicado.get("description") == de_la_tabla["description"], donde
             rama = rama_de_texto(publicado)
@@ -307,7 +308,7 @@ def test_solo_se_cierran_los_parametros_que_tienen_lista():
     los conozca: un tipo de comprobante o un código de detracción que SUNAT añada tiene que poder llegar al motor y
     que sea él quien diga qué hace con él, no el esquema de una herramienta quien lo rechace antes.
     """
-    cerrados = {nombre for t in asyncio.run(mcp.list_tools()) for nombre, esquema in t.inputSchema["properties"].items()
+    cerrados = {nombre for t in asyncio.run(mcp.list_tools()) for nombre, esquema in t.input_schema["properties"].items()
                 if "enum" in rama_de_texto(esquema)}
     assert cerrados == {"driver", "agrupar_por"}
 
@@ -407,7 +408,7 @@ def test_exportar_a_concar_devuelve_el_excel_COMO_ARCHIVO():
     """El Excel tiene que llegar como archivo, no como una tira de base64 dentro del JSON.
 
     Es la diferencia entre que el cliente lo ofrezca para guardar y que lo enseñe como un muro
-    de letras: hace falta el recurso incrustado con su `blob` y su `mimeType`.
+    de letras: hace falta el recurso incrustado con su `blob` y su `mimeType` (`mime_type` en la v2 del SDK).
     """
     r, adjuntos = exportar(documento=DOCUMENTO, driver="concar", imputacion=IMPUTACION)
     assert r["archivo"].endswith(".xlsx") and r["formato"] == "concar_xlsx"
@@ -415,7 +416,7 @@ def test_exportar_a_concar_devuelve_el_excel_COMO_ARCHIVO():
     assert "contenido_base64" not in r, "los bytes van en el adjunto, no repetidos en el JSON"
 
     excel, = adjuntos
-    assert excel.mimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    assert excel.mime_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert str(excel.uri).endswith(r["archivo"])
     import base64
     import io
@@ -431,7 +432,7 @@ def test_exportar_al_sire_devuelve_texto_y_su_zip_adjunto():
     assert r["archivo"].endswith(".TXT") and r["texto"].count("|") > 30
     assert "zip_base64" not in r and r["archivo_zip"].endswith(".zip")
     zip_, = adjuntos
-    assert zip_.mimeType == "application/zip"
+    assert zip_.mime_type == "application/zip"
     import base64
     assert base64.b64decode(zip_.blob)[:2] == b"PK"
 
@@ -440,7 +441,7 @@ def test_exportar_a_csv_es_legible():
     r, adjuntos = exportar(documento=DOCUMENTO, driver="csv", imputacion=IMPUTACION)
     assert r["texto"].splitlines()[0].startswith("sub_diario;correlativo")
     csv, = adjuntos
-    assert csv.mimeType == "text/csv"                # sin el `; charset=utf-8` del content-type
+    assert csv.mime_type == "text/csv"                # sin el `; charset=utf-8` del content-type
 
 
 def test_leer_un_xml_de_sunat():
@@ -556,13 +557,14 @@ def test_un_pdf_por_el_protocolo_queda_pendiente_de_leer():
 
 
 def test_cada_herramienta_se_anuncia_de_solo_lectura_y_sin_salir_a_ningun_sitio():
-    """Hito 0.2: `readOnlyHint` y `openWorldHint` en todas, recorriendo lo que ve el cliente."""
+    """Hito 0.2: `readOnlyHint` y `openWorldHint` en todas, recorriendo lo que ve el cliente (en la v2 del SDK, sus
+    atributos van en snake_case; por el cable siguen siendo esos dos nombres, que es lo que congela `publicado.json`)."""
     herramientas = asyncio.run(mcp.list_tools())
     assert len(herramientas) == 18
     for herramienta in herramientas:
         anotaciones = herramienta.annotations
-        assert anotaciones is not None and anotaciones.readOnlyHint is True, herramienta.name
-        assert anotaciones.openWorldHint is False, herramienta.name
+        assert anotaciones is not None and anotaciones.read_only_hint is True, herramienta.name
+        assert anotaciones.open_world_hint is False, herramienta.name
 
 
 def test_el_destino_no_se_supone():
@@ -576,7 +578,7 @@ def test_el_destino_no_se_supone():
     """
     por_nombre = {t.name: t for t in asyncio.run(mcp.list_tools())}
     for nombre in ("generar_asiento", "diagnosticar", "exportar"):
-        entrada = por_nombre[nombre].inputSchema
+        entrada = por_nombre[nombre].input_schema
         assert "driver" in entrada["required"], f"{nombre}: el driver se supone"
         assert "default" not in entrada["properties"]["driver"], f"{nombre}: el driver trae un destino de fabrica"
 
@@ -635,7 +637,7 @@ def test_la_puerta_mcp_recibe_lo_mismo_que_la_http():
         entrada = op.entrada
         esperadas = {renombra.get(n, n) for n in entrada["properties"]}
         obligatorias = {renombra.get(n, n) for n in entrada["required"]}
-        real = por_nombre[op.herramienta].inputSchema
+        real = por_nombre[op.herramienta].input_schema
         assert set(real["properties"]) == esperadas, f"{op.herramienta}: recibe otra cosa que POST {op.ruta}"
         assert set(real.get("required", [])) == obligatorias, f"{op.herramienta}: exige otra cosa que POST {op.ruta}"
 
@@ -672,6 +674,39 @@ def test_un_error_que_no_es_del_motor_no_ensena_su_texto(monkeypatch):
     assert "secreta" not in json.dumps(negado), "una ruta interna no sale por una puerta publica"
 
 
+def test_un_cliente_2025_y_uno_2026_ven_el_mismo_servidor():
+    """La v2 del SDK habla la especificación 2026-07-28, sin estado, y sigue atendiendo el `initialize` de la 2025
+    desde el mismo sitio (16.0). Los clientes de Claude no cambian todos a la vez, así que los dos tienen que ver lo
+    mismo: la presentación y las herramientas, con su esquema."""
+    from mcp import Client
+
+    async def ver(modo: str) -> tuple:
+        async with Client(mcp, mode=modo) as cliente:
+            herramientas = (await cliente.list_tools()).tools
+            return cliente.protocol_version, [(h.name, h.description, h.input_schema) for h in herramientas]
+
+    nueva, lo_que_ve_la_nueva = asyncio.run(ver("auto"))
+    vieja, lo_que_ve_la_vieja = asyncio.run(ver("legacy"))
+    assert (nueva, vieja) == ("2026-07-28", "2025-11-25"), "cambió lo que negocia cada era"
+    assert lo_que_ve_la_nueva == lo_que_ve_la_vieja
+    assert asyncio.run(_saludo("auto")) == asyncio.run(_saludo("legacy"))
+
+
+def test_una_herramienta_corre_fuera_del_hilo_que_atiende_a_los_demas(monkeypatch):
+    """Las herramientas del motor son funciones síncronas. Con el SDK 1.x corrían en el mismo hilo que el bucle de
+    eventos, así que un `exportar` de un mes gordo dejaba esperando a todos los demás clientes del servidor; la v2 las
+    manda a un hilo aparte (16.0). Lo que se mira es dónde corre la operación de verdad, parcheando la fachada, que es
+    a la que llama la puerta en cada llamada (`_llamada`)."""
+    import threading
+
+    original = api.drivers_disponibles
+    donde = []
+    monkeypatch.setattr("contaperu.api.drivers_disponibles",
+                        lambda *a, **k: donde.append(threading.current_thread()) or original(*a, **k))
+    llamar("drivers_disponibles")
+    assert donde and donde[0] is not threading.main_thread(), "corrió en el hilo del bucle de eventos"
+
+
 def test_ninguna_herramienta_declara_esquema_de_salida():
     """Lo que devuelven se describe en su descripcion y, para `diagnosticar`, en su recurso.
 
@@ -680,7 +715,7 @@ def test_ninguna_herramienta_declara_esquema_de_salida():
     empiece a inventarse uno se vea en la bateria y no en produccion.
     """
     for herramienta in asyncio.run(mcp.list_tools()):
-        assert herramienta.outputSchema is None, herramienta.name
+        assert herramienta.output_schema is None, herramienta.name
 
 
 def test_el_servidor_solo_admite_stdio_y_http(capsys):
@@ -706,11 +741,24 @@ def test_servirlo_en_red_es_sin_sesiones_y_con_el_dominio_declarado(monkeypatch)
     from contaperu.puertas import servidor_mcp
 
     arrancado = {}
-    monkeypatch.setattr(servidor_mcp.mcp, "run", lambda transport: arrancado.update(transporte=transport))
+    monkeypatch.setattr(servidor_mcp.mcp, "run", lambda transport, **opciones: arrancado.update(transporte=transport,
+                                                                                               **opciones))
     servidor_mcp.main(["--transporte", "http", "--host", "0.0.0.0", "--dominio", "contaperu.ejemplo.com"])
     assert arrancado["transporte"] == "streamable-http"
-    assert servidor_mcp.mcp.settings.stateless_http is True, "un anonimo no puede ir acumulando sesiones"
-    assert "contaperu.ejemplo.com" in servidor_mcp.mcp.settings.transport_security.allowed_hosts
+    assert (arrancado["host"], arrancado["port"]) == ("0.0.0.0", 8000)
+    assert arrancado["stateless_http"] is True, "un anonimo no puede ir acumulando sesiones"
+    assert "contaperu.ejemplo.com" in arrancado["transport_security"].allowed_hosts
+
+
+def test_por_entrada_y_salida_estandar_no_lleva_nada_de_la_red(monkeypatch):
+    """`stdio` arranca sin opciones: en la v2 del SDK pasarle las de HTTP sería un error de tipos."""
+    from contaperu.puertas import servidor_mcp
+
+    arrancado = {}
+    monkeypatch.setattr(servidor_mcp.mcp, "run", lambda transport, **opciones: arrancado.update(transporte=transport,
+                                                                                               **opciones))
+    servidor_mcp.main([])
+    assert arrancado == {"transporte": "stdio"}
 
 
 # --- lo que el agente ve, congelado ------------------------------------------------
@@ -718,21 +766,17 @@ def test_servirlo_en_red_es_sin_sesiones_y_con_el_dominio_declarado(monkeypatch)
 PUBLICADO = Path(__file__).resolve().parent / "fixtures" / "mcp" / "publicado.json"
 
 
-async def _saludo():
-    """Lo que el servidor contesta al `initialize`: su nombre, su versión y sus instrucciones, tal como le llegan a un
-    cliente. Se le pregunta por el protocolo, con un cliente en memoria, y no a los atributos del objeto: lo que se
-    congela es lo que sale por el cable, que es lo único que no puede cambiar al migrar el SDK."""
-    import anyio
-    from mcp.client.session import ClientSession
-    from mcp.shared.memory import create_client_server_memory_streams
+async def _saludo(modo: str = "auto") -> dict:
+    """Cómo se presenta el servidor: su nombre, su versión y sus instrucciones, tal como le llegan a un cliente. Se le
+    pregunta por el protocolo, con el cliente en memoria del SDK, y no a los atributos del objeto: lo que se congela es
+    lo que sale por el cable, que es lo único que no puede cambiar al migrar el SDK.
 
-    servidor = mcp._mcp_server
-    async with create_client_server_memory_streams() as (del_cliente, del_servidor), anyio.create_task_group() as tg:
-        tg.start_soon(lambda: servidor.run(*del_servidor, servidor.create_initialization_options()))
-        async with ClientSession(*del_cliente) as sesion:
-            saludo = await sesion.initialize()
-        tg.cancel_scope.cancel()
-    return saludo
+    `modo` es la era del protocolo: `auto` habla la 2026-07-28 y `legacy`, el `initialize` de la 2025."""
+    from mcp import Client
+
+    async with Client(mcp, mode=modo) as cliente:
+        return {"nombre": cliente.server_info.name, "version": cliente.server_info.version,
+                "instrucciones": cliente.instructions}
 
 
 def publicado() -> dict:
@@ -749,19 +793,19 @@ def publicado() -> dict:
     recursos = asyncio.run(mcp.list_resources())
     saludo = asyncio.run(_saludo())
     return {
-        "servidor": {"nombre": saludo.serverInfo.name,
+        "servidor": {"nombre": saludo["nombre"],
                      # La versión cambia en cada release, así que no se congela el número sino la regla: que el servidor
                      # se presente con la de contaperu y no con la del SDK (`test_el_servidor_se_presenta_con_SU_version`).
-                     "version": ("la del paquete" if saludo.serverInfo.version == contaperu.__version__
-                                 else saludo.serverInfo.version),
-                     "instrucciones": saludo.instructions},
+                     "version": "la del paquete" if saludo["version"] == contaperu.__version__ else saludo["version"],
+                     "instrucciones": saludo["instrucciones"]},
         "orden": {"herramientas": [h.name for h in herramientas], "recursos": [str(r.uri) for r in recursos]},
-        "herramientas": {h.name: {"titulo": h.title, "descripcion": h.description, "entrada": h.inputSchema,
-                                  "salida": h.outputSchema,
-                                  "anotaciones": h.annotations.model_dump() if h.annotations else None}
+        "herramientas": {h.name: {"titulo": h.title, "descripcion": h.description, "entrada": h.input_schema,
+                                  "salida": h.output_schema,
+                                  # Por su alias, que es como viaja: en la v2 del SDK los atributos van en snake_case.
+                                  "anotaciones": h.annotations.model_dump(by_alias=True) if h.annotations else None}
                          for h in herramientas},
         "recursos": {str(r.uri): {"nombre": r.name, "titulo": r.title, "descripcion": r.description,
-                                  "mime": r.mimeType}
+                                  "mime": r.mime_type}
                      for r in recursos},
     }
 

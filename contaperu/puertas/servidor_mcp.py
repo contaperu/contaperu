@@ -41,7 +41,7 @@ import json
 import sys
 from typing import Annotated, Any, Callable, get_type_hints
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
 from pydantic import Field, TypeAdapter, WithJsonSchema
 
@@ -69,7 +69,7 @@ def _adjunto(nombre: str, b64: str, mime: str) -> EmbeddedResource:
         type="resource",
         resource=BlobResourceContents(
             uri=f"contaperu://salida/{nombre}",
-            mimeType=mime.split(";")[0].strip() or "application/octet-stream",
+            mime_type=mime.split(";")[0].strip() or "application/octet-stream",
             blob=b64,
         ),
     )
@@ -90,7 +90,7 @@ def _rechazo(error: BaseException) -> CallToolResult:
     lo enmascara. Sin esto, lo que la puerta HTTP se cuida de no enseñar salía entero por la puerta MCP,
     que además es la que está publicada sin autenticación.
     """
-    return CallToolResult(isError=True, content=[
+    return CallToolResult(is_error=True, content=[
         TextContent(type="text", text=json.dumps(api.problema(error), ensure_ascii=False, indent=1))])
 
 
@@ -129,10 +129,11 @@ def contesta(funcion: Callable[..., Any]) -> Callable[..., CallToolResult]:
 INSTRUCCIONES = api.INSTRUCCIONES
 REGLAS = api.REGLAS
 
-mcp = FastMCP("contaperu", instructions=INSTRUCCIONES)
-# FastMCP no deja poner la version en su constructor y, sin esto, el servidor se presenta en el
-# saludo con la version del SDK: «contaperu 1.30.0», que no es ninguna version de contaperu.
-mcp._mcp_server.version = api.__version__
+# El SDK v2 de Python (`mcp` 2.3, desde la 16.0) llama `MCPServer` a lo que la 1.x llamaba `FastMCP`, y por fin deja
+# poner la versión en el constructor. Hasta entonces se escribía en un atributo privado después de crearlo, porque sin
+# eso el servidor se presentaba con la del SDK —«contaperu 1.30.0», que no es ninguna versión de contaperu—, y en la
+# v2 el que no la declara se presenta con una vacía.
+mcp = MCPServer("contaperu", instructions=INSTRUCCIONES, version=api.__version__)
 
 # Hito 0.2: cada herramienta se anuncia de solo lectura y sin salir a ningún sitio —no guarda nada, no toca el disco ni
 # la red—, así que un cliente puede llamarla sin pedir confirmación por un efecto que no tiene.
@@ -346,21 +347,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--version", action="version", version=f"contaperu {api.__version__}")
     args = ap.parse_args(argv)
 
-    if args.transporte == "http":
-        mcp.settings.host = args.host
-        mcp.settings.port = args.puerto
-        # Sin sesiones: cada peticion se atiende sola y el servidor no guarda nada entre una y
-        # otra, que es lo que este modulo dice de si mismo. Ademas quita de en medio el unico
-        # recurso que un desconocido podria ir acumulando en un servidor sin autenticacion:
-        # sesiones abiertas (el SDK admite 10.000 y las mantiene media hora).
-        mcp.settings.stateless_http = True
-        mcp.settings.transport_security = seguridad(args.dominio)
-        if not args.dominio and args.host not in ("127.0.0.1", "localhost", "::1"):
-            print("aviso: sin --dominio solo se atienden peticiones cuyo Host sea localhost; "
-                  "desde fuera responde 421. Al publicarlo detras de un proxy hay que declarar "
-                  "el nombre publico:  --dominio contaperu.ejemplo.com", file=sys.stderr)
-    transporte: Any = "streamable-http" if args.transporte == "http" else args.transporte
-    mcp.run(transport=transporte)
+    if args.transporte != "http":
+        mcp.run(transport="stdio")
+        return 0
+    if not args.dominio and args.host not in ("127.0.0.1", "localhost", "::1"):
+        print("aviso: sin --dominio solo se atienden peticiones cuyo Host sea localhost; "
+              "desde fuera responde 421. Al publicarlo detras de un proxy hay que declarar "
+              "el nombre publico:  --dominio contaperu.ejemplo.com", file=sys.stderr)
+    # En la v2 del SDK lo del transporte va en la llamada que lo arranca y no en el servidor: un `MCPServer` no sabe por
+    # dónde se le va a servir. Sin sesiones: cada peticion se atiende sola y el servidor no guarda nada entre una y
+    # otra, que es lo que este modulo dice de si mismo. Ademas quita de en medio el unico recurso que un desconocido
+    # podria ir acumulando en un servidor sin autenticacion: sesiones abiertas (el SDK admite 10.000 y las mantiene media
+    # hora). Solo vale para los clientes que hablan la especificacion 2025: con la 2026-07-28 no hay sesion que abrir.
+    mcp.run(transport="streamable-http", host=args.host, port=args.puerto, stateless_http=True,
+            transport_security=seguridad(args.dominio))
     return 0
 
 

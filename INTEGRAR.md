@@ -284,6 +284,12 @@ Un cliente MCP local lo arranca por entrada y salida estándar; uno remoto, por 
 y sus nombres son los de siempre: `diagnosticar`, `exportar`, `generar_asiento`, `validar_comprobantes`… Cómo
 conectarlo a Claude está en el `README.md`.
 
+**Va sobre el SDK v2 de Python** (`mcp` 2.3 o posterior, desde la 16.0), que llama `MCPServer` a lo que la 1.x llamaba
+`FastMCP`. Atiende a los clientes que hablan la especificación 2025, con su `initialize`, y a los de la 2026-07-28, sin
+estado, desde el mismo endpoint. Si tu servidor sigue en `mcp` 1.x o en `fastmcp` 3.x, que exige esa misma línea, no
+puedes instalar `contaperu[mcp]` 16 a su lado: quédate en la 15.16 hasta que migres. La librería sin el extra, en
+cambio, no depende del SDK y se instala con cualquiera.
+
 ### Tu propio MCP con el del motor debajo
 
 Si tu ERP quiere su capa de agente —que configure, saque reportes, analice tus datos o cargue una factura—, **eso no
@@ -315,7 +321,7 @@ Dos formas de combinarlas, y la primera no cuesta nada:
 2. **Uno solo**, delegando en la api las que son del motor:
 
 ```python
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from contaperu import api
 
@@ -323,8 +329,8 @@ from contaperu import api
 # herramientas quizá no tienen (`imputacion`, `claves_previas`). Las reglas, antes que nada: Claude Code solo lee
 # los primeros 2 048 caracteres de las instrucciones.
 REGLAS = "\n".join(f"- {regla}" for regla in api.REGLAS_POR_CLAVE["documento"].values())
-mio = FastMCP("mi-erp", instructions=f"Reglas que conviene tener claras antes de armar un documento:\n{REGLAS}\n\n"
-                                     "Mi ERP: sus meses y el diagnóstico del motor.")
+mio = MCPServer("mi-erp", instructions=f"Reglas que conviene tener claras antes de armar un documento:\n{REGLAS}\n\n"
+                                       "Mi ERP: sus meses y el diagnóstico del motor.")
 
 
 @mio.tool()
