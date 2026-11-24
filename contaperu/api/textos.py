@@ -305,6 +305,30 @@ PARA_HERRAMIENTA: dict[str, str] = {
 }
 
 # Por la URI del recurso.
+# El título de cada herramienta (16.0): lo que el cliente enseña en pantalla en vez del nombre. No cuenta en lo que
+# pesa una herramienta —ese peso es su nombre, su descripción y su esquema—, y sale en el `title` de la herramienta y en
+# el de sus anotaciones, que es donde lo buscan los clientes de antes.
+TITULOS: dict[str, str] = {
+    "leer_xml_ubl": "Leer un XML de SUNAT",
+    "leer_propuesta_sire": "Leer la propuesta del SIRE",
+    "validar_comprobantes": "Validar los comprobantes",
+    "normalizar_detracciones": "Normalizar las detracciones",
+    "diagnosticar": "Diagnosticar un mes",
+    "generar_asiento": "Generar el asiento",
+    "exportar": "Exportar a un sistema",
+    "validar_partida_doble": "Validar la partida doble",
+    "resumen": "Resumen de un libro",
+    "por_cuenta": "Pre-mayor por cuenta",
+    "estado_de_cuenta": "Estado de cuenta",
+    "por_pagar": "Lo que queda por pagar",
+    "validar_cuentas_bancarias": "Validar las cuentas bancarias",
+    "revisar_tesoreria": "Revisar la tesorería",
+    "buscar_cuenta_pcge": "Buscar una cuenta del PCGE",
+    "adaptar_pcge2026": "Adaptar al PCGE 2026",
+    "configuracion_por_defecto": "La configuración por defecto",
+    "drivers_disponibles": "Los sistemas de destino",
+}
+
 PARA_RECURSO: dict[str, str] = {
     'contaperu://campos/comprobante': """Qué campos de un comprobante los pone el DOCUMENTO, cuáles el SISTEMA que lo produce y cuáles la
     REVISIÓN, más los tres que son obligatorios.

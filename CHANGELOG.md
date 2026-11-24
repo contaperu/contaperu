@@ -50,6 +50,20 @@ sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `m
   `crear_servidor` y `registrar_del_motor` son fábricas: el motor en un servidor nuevo, o en el de otro con el
   prefijo `contaperu_`.
 
+- **B10, los perfiles: qué publica el servidor abierto y qué solo un integrador.** Cada operación de la tabla dice
+  su `perfil` —`publico` o `integrador`— y una de integrador escribe por qué en `por_que_integrador`: sin ese motivo
+  no carga. Las dos puertas filtran con la misma tabla (`contaperu-mcp --perfil`, `contaperu-http --perfil`,
+  `crear_servidor(perfil=…)` y `crear_app(perfil=…)`), y lo de un integrador no aparece en el servidor público por
+  ninguna de las dos. **Hoy las 18 son públicas**, así que el servidor abierto no cambia: lo que llegue con
+  credenciales nace de integrador.
+- **Los grupos y las perillas.** Cada herramienta del motor tiene su `grupo`, que sigue el camino de un mes: `leer`,
+  `validar`, `asentar`, `informes`, `tesoreria`, `pcge` y `catalogos`. `contaperu-mcp` arranca con lo que se elija
+  (`--grupo`, `--herramienta`, `--solo-lectura`, `--perfil`), y sin ninguna perilla sirve lo de siempre.
+- **Un título por herramienta** (`api.textos.TITULOS`): «Leer un XML de SUNAT», «Diagnosticar un mes»… Es lo que el
+  cliente enseña en pantalla en vez del nombre, y va en el `title` de la herramienta y en el de sus anotaciones. No
+  pesa en el contexto. **Es lo único que cambió de lo que publica el servidor**: `publicado.json` se regeneró a
+  propósito, y su diff son los 18 títulos en sus dos sitios.
+
 ### Cambia
 
 - **El servidor de `contaperu-mcp` es `crear_servidor()`**, una aplicación de la base como lo sería la de un

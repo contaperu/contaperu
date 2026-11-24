@@ -80,6 +80,12 @@ PARAMETROS: dict[str, dict] = {
 }
 
 
+# A quién se publica una operación (B10, 16.0). `publico` es lo que sirve el servidor abierto, sin autenticación;
+# `integrador`, lo que solo monta quien tiene su propio servidor encima. La base MCP los repite en `agentes.PERFILES`, y
+# `tests/test_perfiles.py` vigila que digan lo mismo: la api no puede importar la base, que está encima.
+PERFILES = ("publico", "integrador")
+
+
 @dataclass(frozen=True)
 class Operacion:
     nombre: str            # el de la función en `contaperu.api`
@@ -92,6 +98,22 @@ class Operacion:
     # operación porque las dos puertas lo tratan distinto —el MCP lo manda como adjunto y las dos aplican el
     # tope por llamada—, y hasta la 6.1.0 cada una lo preguntaba por el nombre literal de la operación.
     archivo: bool = False
+    # El grupo de su herramienta en el MCP (16.0), que sigue el camino de un mes: leer, validar, asentar, los informes, la
+    # tesorería, el PCGE y los catálogos. `contaperu-mcp --grupo` publica solo los que se nombren, y quien monta las del
+    # motor en su servidor elige igual.
+    grupo: str = ""
+    # A quién se publica (B10, 16.0): ver `PERFILES`. Una operación de integrador escribe por qué no sale en el servidor
+    # abierto —una que arme peticiones con credenciales, por ejemplo—, y sin ese motivo no carga, como una regla sin
+    # fuente. Hoy son todas públicas.
+    perfil: str = "publico"
+    por_que_integrador: str = ""
+
+    def __post_init__(self) -> None:
+        if self.perfil not in PERFILES:
+            raise ValueError(f"{self.nombre}: el perfil «{self.perfil}» no es uno de {', '.join(PERFILES)}")
+        if (self.perfil == "integrador") != bool(self.por_que_integrador):
+            raise ValueError(f"{self.nombre}: una operación de integrador dice por qué no sale en el servidor "
+                             "abierto (`por_que_integrador`), y solo ella lo dice")
 
     @property
     def funcion(self) -> Callable:
@@ -121,28 +143,28 @@ class Operacion:
 
 
 OPERACIONES: tuple[Operacion, ...] = (
-    Operacion("leer_xml", "POST", "/v1/leer_xml", "documento_anotado", herramienta="leer_xml_ubl"),
+    Operacion("leer_xml", "POST", "/v1/leer_xml", "documento_anotado", herramienta="leer_xml_ubl", grupo="leer"),
     Operacion("leer_propuesta_sire", "POST", "/v1/leer_propuesta_sire", "documento_anotado",
-              herramienta="leer_propuesta_sire"),
-    Operacion("revisar", "POST", "/v1/revisar", "documento_anotado", herramienta="validar_comprobantes"),
+              herramienta="leer_propuesta_sire", grupo="leer"),
+    Operacion("revisar", "POST", "/v1/revisar", "documento_anotado", herramienta="validar_comprobantes", grupo="validar"),
     Operacion("normalizar_detracciones", "POST", "/v1/normalizar_detracciones", "documento_anotado",
-              herramienta="normalizar_detracciones"),
-    Operacion("diagnosticar", "POST", "/v1/diagnosticar", "diagnostico", herramienta="diagnosticar"),
-    Operacion("generar_asiento", "POST", "/v1/generar_asiento", "asiento", herramienta="generar_asiento"),
-    Operacion("exportar", "POST", "/v1/exportar", "exportacion", herramienta="exportar", archivo=True),
-    Operacion("cuadrar", "POST", "/v1/cuadrar", "cuadre", herramienta="validar_partida_doble"),
+              herramienta="normalizar_detracciones", grupo="validar"),
+    Operacion("diagnosticar", "POST", "/v1/diagnosticar", "diagnostico", herramienta="diagnosticar", grupo="validar"),
+    Operacion("generar_asiento", "POST", "/v1/generar_asiento", "asiento", herramienta="generar_asiento", grupo="asentar"),
+    Operacion("exportar", "POST", "/v1/exportar", "exportacion", herramienta="exportar", grupo="asentar", archivo=True),
+    Operacion("cuadrar", "POST", "/v1/cuadrar", "cuadre", herramienta="validar_partida_doble", grupo="asentar"),
     # Cuánto es un libro y en qué cuentas cayó (3.4.0). Ninguna recibe `driver`: son del libro y del
     # asiento, no de un destino — lo que iría a un destino concreto ya lo dice `diagnosticar`.
-    Operacion("resumen", "POST", "/v1/resumen", "resumen", herramienta="resumen"),
-    Operacion("por_cuenta", "POST", "/v1/por_cuenta", "pre_mayor", herramienta="por_cuenta"),
+    Operacion("resumen", "POST", "/v1/resumen", "resumen", herramienta="resumen", grupo="informes"),
+    Operacion("por_cuenta", "POST", "/v1/por_cuenta", "pre_mayor", herramienta="por_cuenta", grupo="informes"),
     # Qué queda por cobrar o por pagar, derivado de las aplicaciones (12.4). Herramienta y no recurso: recibe un
     # cuerpo, y es la pregunta que un contador le hace al mes que ya tiene cargado. Sin `driver`, como sus dos
     # hermanas de arriba: un pendiente es del libro y no de un destino.
     Operacion("estado_de_cuenta", "POST", "/v1/estado_de_cuenta", "estado_de_cuenta",
-              herramienta="estado_de_cuenta"),
+              herramienta="estado_de_cuenta", grupo="informes"),
     # Lo que un pago tiene que cancelar de cada compra (15.13.0). La pareja de la de arriba: aquella dice cuánto
     # queda, esta cuánto dejó la compra en la cuenta del proveedor y en cuál, con la regla del asiento. Sin `driver`.
-    Operacion("por_pagar", "POST", "/v1/por_pagar", "por_pagar", herramienta="por_pagar"),
+    Operacion("por_pagar", "POST", "/v1/por_pagar", "por_pagar", herramienta="por_pagar", grupo="informes"),
     # Quién escribe cada campo. Recurso y no herramienta: es un GET sin argumentos que se lee una vez,
     # como `describir_configuracion`, y así el conjunto de herramientas no crece por una tabla.
     Operacion("campos_del_comprobante", "GET", "/v1/campos/comprobante", "campos_del_comprobante",
@@ -150,18 +172,18 @@ OPERACIONES: tuple[Operacion, ...] = (
     # El maestro de cuentas bancarias del contribuyente (8.2). Herramienta y no recurso: recibe un cuerpo, como
     # `cuadrar`, y es lo que un ERP llama ANTES de mandar su maestro — no algo que se lea una vez.
     Operacion("validar_cuentas_bancarias", "POST", "/v1/cuentas_bancarias", "cuentas_bancarias",
-              herramienta="validar_cuentas_bancarias"),
+              herramienta="validar_cuentas_bancarias", grupo="tesoreria"),
     # El dinero de un periodo, revisado antes de conciliarlo (9.1). Recibe un cuerpo como `cuadrar`, y es lo que un
     # ERP llama cuando ya tiene los movimientos estructurados — leer el PDF no es de aquí.
-    Operacion("revisar_tesoreria", "POST", "/v1/tesoreria", "tesoreria", herramienta="revisar_tesoreria"),
-    Operacion("buscar_cuenta_pcge", "POST", "/v1/buscar_cuenta_pcge", "cuenta_pcge", herramienta="buscar_cuenta_pcge"),
-    Operacion("adaptar_pcge", "POST", "/v1/adaptar_pcge", "adaptacion_pcge", herramienta="adaptar_pcge2026"),
+    Operacion("revisar_tesoreria", "POST", "/v1/tesoreria", "tesoreria", herramienta="revisar_tesoreria", grupo="tesoreria"),
+    Operacion("buscar_cuenta_pcge", "POST", "/v1/buscar_cuenta_pcge", "cuenta_pcge", herramienta="buscar_cuenta_pcge", grupo="pcge"),
+    Operacion("adaptar_pcge", "POST", "/v1/adaptar_pcge", "adaptacion_pcge", herramienta="adaptar_pcge2026", grupo="pcge"),
     Operacion("configuracion_por_defecto", "GET", "/v1/configuracion/por_defecto", "configuracion",
-              herramienta="configuracion_por_defecto"),
+              herramienta="configuracion_por_defecto", grupo="catalogos"),
     Operacion("describir_configuracion", "GET", "/v1/configuracion", recurso="contaperu://configuracion"),
     # La única que sale por las dos: un recurso lo lee quien quiere, y quien decide si el modelo llega a leerlo es
     # el cliente. Desde que `driver` se declara (1.3), preguntar qué destinos hay no puede depender de esa decisión.
-    Operacion("drivers_disponibles", "GET", "/v1/drivers", "drivers", herramienta="drivers_disponibles",
+    Operacion("drivers_disponibles", "GET", "/v1/drivers", "drivers", herramienta="drivers_disponibles", grupo="catalogos",
               recurso="contaperu://drivers"),
     Operacion("catalogos_sunat", "GET", "/v1/catalogos/sunat", "catalogos_sunat", recurso="contaperu://catalogos/sunat"),
     # El contribuyente, no el comprobante: en qué régimen tributa y cuándo le vence el mes. Recursos y no

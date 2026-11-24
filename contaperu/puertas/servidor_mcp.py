@@ -39,6 +39,7 @@ import argparse
 import sys
 
 from .. import api
+from ..agentes import PERFILES, CatalogoInvalido
 from ..agentes.servidor import SOLO_LECTURA, contesta, crear_servidor, seguridad, servir
 from .comun import LOCALES, MAXIMO_ARCHIVO
 
@@ -72,9 +73,26 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dominio", action="append", default=[], metavar="NOMBRE",
                     help="nombre publico por el que se sirve, si va detras de un proxy "
                          "(repetible). Sin esto solo se atienden peticiones a localhost")
+    # Las perillas (16.0): qué parte del motor se publica. Por defecto, lo de siempre: todo lo del perfil público.
+    ap.add_argument("--perfil", default="publico", choices=PERFILES,
+                    help="publico (por defecto), lo que sirve el servidor abierto; integrador suma lo que no sale en él")
+    ap.add_argument("--grupo", action="append", default=[], metavar="GRUPO",
+                    help="publica solo las herramientas de ese grupo (repetible): leer, validar, asentar, informes, "
+                         "tesoreria, pcge, catalogos")
+    ap.add_argument("--herramienta", action="append", default=[], metavar="NOMBRE",
+                    help="publica solo esa herramienta (repetible)")
+    ap.add_argument("--solo-lectura", action="store_true",
+                    help="deja fuera lo que escribe (hoy ninguna herramienta del motor escribe)")
     ap.add_argument("--version", action="version", version=f"contaperu {api.__version__}")
     args = ap.parse_args(argv)
-    servir(mcp, transporte=args.transporte, host=args.host, puerto=args.puerto, dominios=args.dominio)
+    servidor = mcp
+    if args.perfil != "publico" or args.grupo or args.herramienta or args.solo_lectura:
+        try:
+            servidor = crear_servidor(perfil=args.perfil, grupos=args.grupo or None,
+                                      herramientas=args.herramienta or None, solo_lectura=args.solo_lectura)
+        except CatalogoInvalido as error:
+            ap.error("; ".join(error.faltas))
+    servir(servidor, transporte=args.transporte, host=args.host, puerto=args.puerto, dominios=args.dominio)
     return 0
 
 

@@ -387,9 +387,13 @@ Lo que la base hace por ti en cada llamada, sin que lo escribas:
   el de un `ErrorContaperu`, cuyo texto la v2 del SDK no copiaría.
 - **Los vigilantes** de lo que publicas, en `contaperu.agentes.vigilancia`: la foto, el peso, los nombres fantasma.
 
-Y si solo quieres el servidor del motor con lo que elijas —algunas herramientas, un prefijo, tu guarda—, es una
-fábrica: `crear_servidor(herramientas=["diagnosticar", "exportar"], prefijo="cp_", guarda=...)`. Dos servidores no
-comparten nada. `contaperu.puertas.servidor_mcp.mcp` sigue siendo importable —es el que sirve `contaperu-mcp`, hecho
+Y si solo quieres el servidor del motor con lo que elijas —algunas herramientas, un grupo, un prefijo, tu guarda—, es
+una fábrica: `crear_servidor(herramientas=["diagnosticar", "exportar"], prefijo="cp_", guarda=...)`. Dos servidores no
+comparten nada. Los grupos siguen el camino de un mes —`leer`, `validar`, `asentar`, `informes`, `tesoreria`, `pcge` y
+`catalogos`—, y lo mismo se elige al arrancar: `contaperu-mcp --grupo leer --grupo validar`, `--herramienta exportar`
+o `--solo-lectura`. Cada operación dice además a quién se publica (`perfil`): el servidor abierto sirve lo `publico`, y
+`--perfil integrador` —o `crear_servidor(perfil="integrador")`, o `contaperu-http --perfil integrador`— suma lo que
+solo tiene sentido detrás de una autenticación. Hoy todo es público. `contaperu.puertas.servidor_mcp.mcp` sigue siendo importable —es el que sirve `contaperu-mcp`, hecho
 con esa misma fábrica—, pero añadirle herramientas es modificar el servidor público del motor: mejor uno tuyo.
 
 ## El dinero: registrar movimientos bancarios

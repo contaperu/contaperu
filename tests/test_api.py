@@ -59,7 +59,8 @@ def test_el_mcp_expone_exactamente_la_tabla():
 
     herramientas = {h.name for h in asyncio.run(mcp.list_tools())}
     recursos = {str(r.uri) for r in asyncio.run(mcp.list_resources())}
-    assert herramientas == {op.herramienta for op in api.OPERACIONES if op.herramienta}
+    # El servidor abierto publica lo del perfil público (B10, 16.0); lo de un integrador lo vigila `test_perfiles.py`.
+    assert herramientas == {op.herramienta for op in api.OPERACIONES if op.herramienta and op.perfil == "publico"}
     assert recursos == {op.recurso for op in api.OPERACIONES if op.recurso}
 
 

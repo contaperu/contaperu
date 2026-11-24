@@ -40,7 +40,7 @@ from ..api.tabla import PARAMETROS
 from ..errores import ErrorContaperu
 from ..puertas.comun import MAXIMO_ARCHIVO, hosts_permitidos, origenes_permitidos, peso_de_base64
 from .catalogo import MIRA, Catalogo, CatalogoInvalido, Herramienta, Retirada, nombre_valido
-from .del_motor import DEL_MOTOR
+from .del_motor import DEL_MOTOR, catalogo_del_motor
 from .despacho import EntradaInvalida, operacion_del_modo, solo_los_de_su_modo
 
 __all__ = ["SOLO_LECTURA", "ChoqueDeNombres", "Familia", "Servidor", "como_problema", "contesta", "crear_servidor",
@@ -564,7 +564,8 @@ def registrar_del_motor(servidor: Servidor, *, perfil: str = "integrador", grupo
     Lleva el prefijo `contaperu_` por defecto porque en el servidor de otro sus nombres pueden chocar con los suyos
     (`exportar` es un nombre que cualquiera tiene). Los recursos no lo llevan: su dirección `contaperu://` ya es única.
     """
-    elegido = DEL_MOTOR.elegir(perfil=perfil, grupos=grupos, herramientas=herramientas, solo_lectura=solo_lectura)
+    elegido = catalogo_del_motor().elegir(perfil=perfil, grupos=grupos, herramientas=herramientas,
+                                          solo_lectura=solo_lectura)
     por_herramienta = {op.herramienta: op for op in api.OPERACIONES if op.herramienta}
     publicadas = registrar(servidor, elegido, {n: _herramienta_de(por_herramienta[n]) for n in elegido.herramientas},
                            prefijo=prefijo, fijar=fijar)

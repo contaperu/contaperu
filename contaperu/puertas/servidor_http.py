@@ -48,6 +48,7 @@ from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
 from .. import api
+from ..api.tabla import PERFILES
 from .comun import (ESPERA_INACTIVA, MAXIMO_ARCHIVO, MAXIMO_CONEXIONES, MAXIMO_PETICION, hosts_permitidos,
                     peso_de_base64)
 
@@ -188,10 +189,15 @@ async def _http_exception(request: Request, error: HTTPException) -> Response:
                      "en /openconta.json.", clave)
 
 
-def crear_app(*, dominios: Iterable[str] = (), maximo_peticion: int = MAXIMO_PETICION) -> Starlette:
+def crear_app(*, dominios: Iterable[str] = (), maximo_peticion: int = MAXIMO_PETICION,
+              perfil: str = "publico") -> Starlette:
     """La aplicación ASGI de la puerta: las rutas de la tabla, `/salud` y `/openconta.json`, detrás de la defensa del
     `Host` (los locales y cada `dominios` declarado)."""
-    rutas = [_ruta(op, maximo_peticion) for op in api.OPERACIONES]
+    # El mismo perfil que el MCP (B10, 16.0): lo de un integrador no sale en el servidor abierto por ninguna puerta.
+    # Dos fuentes para un mismo contrato divergen solas, así que las dos puertas preguntan a la misma tabla.
+    if perfil not in PERFILES:
+        raise ValueError(f"el perfil «{perfil}» no es uno de {', '.join(PERFILES)}")
+    rutas = [_ruta(op, maximo_peticion) for op in api.OPERACIONES if perfil == "integrador" or op.perfil == "publico"]
     rutas += [Route("/salud", _salud, methods=["GET"]), Route("/openconta.json", _openconta, methods=["GET"])]
     return Starlette(routes=rutas, middleware=[Middleware(DefensaDeHost, permitidos=hosts_permitidos(dominios))],
                      exception_handlers={HTTPException: _http_exception})
@@ -207,6 +213,9 @@ def main(argv: list[str] | None = None) -> int:
     analizador.add_argument("--dominio", action="append", default=[], metavar="NOMBRE",
                             help="nombre público por el que se sirve, si va detrás de un proxy (repetible). Sin esto "
                                  "solo se atienden peticiones a localhost")
+    analizador.add_argument("--perfil", default="publico", choices=PERFILES,
+                            help="publico (por defecto), lo que sirve el servidor abierto; integrador suma lo que no "
+                                 "sale en él")
     analizador.add_argument("--version", action="version", version=f"contaperu {api.__version__}")
     args = analizador.parse_args(argv)
     if not args.dominio and args.host not in ("127.0.0.1", "localhost", "::1"):
@@ -215,7 +224,7 @@ def main(argv: list[str] | None = None) -> int:
               file=sys.stderr)
     import uvicorn
 
-    uvicorn.run(crear_app(dominios=args.dominio), host=args.host, port=args.puerto, server_header=False,
+    uvicorn.run(crear_app(dominios=args.dominio, perfil=args.perfil), host=args.host, port=args.puerto, server_header=False,
                 proxy_headers=False, limit_concurrency=MAXIMO_CONEXIONES, timeout_keep_alive=ESPERA_INACTIVA)
     return 0
 

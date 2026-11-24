@@ -15,9 +15,9 @@ que un servidor publica —la foto, el peso, los topes, las reglas y los nombres
 from __future__ import annotations
 
 from .catalogo import MIRA, PERFILES, Catalogo, CatalogoInvalido, Ficha, Herramienta, Retirada, Riesgo, nombre_valido
-from .del_motor import DEL_MOTOR
+from .del_motor import DEL_MOTOR, catalogo_del_motor
 from .despacho import SIN_VALOR, EntradaInvalida, operacion_del_modo, recortar, solo_los_de_su_modo
 
 __all__ = ["DEL_MOTOR", "MIRA", "PERFILES", "SIN_VALOR", "Catalogo", "CatalogoInvalido", "EntradaInvalida", "Ficha",
-           "Herramienta", "Retirada", "Riesgo", "nombre_valido", "operacion_del_modo", "recortar",
-           "solo_los_de_su_modo"]
+           "Herramienta", "Retirada", "Riesgo", "catalogo_del_motor", "nombre_valido", "operacion_del_modo",
+           "recortar", "solo_los_de_su_modo"]

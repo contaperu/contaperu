@@ -91,6 +91,7 @@ Cada hito cumplido se anota aquí como `id · versión`; el porqué, en el CHANG
   categoría `RET 4TA` de su línea, presente también cuando la retención es 0,00. La serie `E###` **no**
   sirve —las facturas emitidas desde SOL también la llevan— y por el código del tributo tampoco, porque
   el `TaxScheme` del recibo viene vacío)
+- B10 · 16.0.0 (los perfiles en la base MCP: `perfil` y su motivo en la tabla, y las dos puertas filtran igual; hoy las 18 son públicas)
 - B13 · 13.2.0
 - 0.0 · 1.0.0
 - 0.1 · 1.0.0
@@ -143,8 +144,8 @@ creciendo hacia un ERP**: bancos, conciliaciones y más SUNAT. Y la secuencia qu
 
 El orden de ejecución: **el ERP primero** —los tres hitos que le faltan al contrato para que un ERP pueda mandar lo
 que hoy no puede (B13-B15)— **→ el banco como contrato** (D8 hoy; D1 y D2 en cuanto lleguen sus dos archivos)
-**→ SUNAT, que no necesita un frente nuevo sino desbloquearse** (C16 con un token, B10 como decisión, C17 cuando la
-app pida la siguiente API), con **la salida Legacy en paralelo** esperando sus archivos y **el estándar y la
+**→ SUNAT, que no necesita un frente nuevo sino desbloquearse** (C16 con un token y C17 cuando la
+app pida la siguiente API; B10 ya está, en la 16.0.0), con **la salida Legacy en paralelo** esperando sus archivos y **el estándar y la
 comunidad** acompañando desde el principio, porque sus enmiendas tienen que existir antes del primer bloque nuevo
 del esquema. La puerta del ERP se abrió en la 1.0 (B1-B6) y lo que la 3.4 y la 8.1 le pusieron encima (B8, B9 y
 `contaperu/sunat/`) es lo que la hace una base y no una promesa. **Otra jurisdicción** no entra en la secuencia
@@ -173,7 +174,7 @@ EL BANCO ───────────────────────�
 SUNAT ────────────────────────────────────────────────────────────────────────────────────────────
  contaperu/sunat/ (8.1) ─┬─► C16 lectores de la respuesta [una respuesta real por operación]
                          ├─► C17 más APIs descritas [la siguiente que la app necesite]
-                         └─► B10 perfiles del MCP [decisión, antes de que algo pida credenciales]
+                         └─► ~~B10~~ perfiles del MCP (16.0.0)
  C1 reglas SUNAT ─┬─► C2 código oficial · C3 CDR [CDR reales] · C5 20 / 40 [XML + fuente]
                   ├─► C14 la norma como dato
                   └─► E4 revisión [nueva versión SUNAT]
@@ -199,7 +200,7 @@ distintas del mismo hito. Un recuento escrito dos veces diverge; se lee el de ab
 | 1 · la base del ERP | ~~B13~~ (13.2.0) → **B15** el nivel fino de la cuenta · **E8** el importe numérico | código, con su enmienda |
 | 2 · el banco, lo que no espera archivo | **D8** `cuentas_bancarias*` como argumento | norma: el CCI y los códigos de banco |
 | 3 · SUNAT, desbloquear | **C16** los lectores de la respuesta | dato: una respuesta real por operación, que se captura con `herramientas/comprobar_sire.py` |
-| 4 · antes de que algo pida credenciales | **B10** perfiles de herramientas del MCP | decisión |
+| 4 · antes de que algo pida credenciales | ~~B10~~ (16.0.0) perfiles de herramientas del MCP | hecho |
 | en paralelo | A1-A3 legacy | dato: la plantilla de SISCONT y un mes importado |
 | cuando la app pida la siguiente API | **C17** más APIs de SUNAT descritas | dato: cuál, y su manual |
 | cuando llegue el dato | **B14** determinación con dimensiones · C3 · C4 · C5 · C6 · C8 · C10 · C11 · C12 · C13 · C14 (tras C1) | dato |
@@ -529,7 +530,7 @@ con `rol` y los `tipo_cp`, y la guía [INTEGRAR.md](INTEGRAR.md), cuyos ejemplos
 | B1 | Las dos operaciones pasan a la fachada, y una tabla `OPERACIONES*` declara cada operación con su entrada y su salida (con `$ref` al esquema del estándar) | F | código | Cada herramienta MCP llama a una operación de la tabla; ninguna puerta importa `pcge` ni `detracciones` | 0.5 | — |
 | B2 | `motor*` (la versión) en `_asiento` y `_exportacion`, y `outputSchema` de `diagnosticar` que cubra también la respuesta con configuración inválida | F | código | Las dos formas validan; `motor` queda fuera de la huella | 0.2, 0.4 | 8, 10 |
 | B3 | **OpenAPI 3.1** generado por una herramienta desde `OPERACIONES*` | F · documentación | código | Regenerarlo no cambia bytes; los documentos de ejemplo validan como cuerpos | B1, B2 | — |
-| B10 | **Perfiles de herramientas en el MCP**: qué publica el servidor abierto y qué solo un integrador. Hoy publica todas siempre, con la misma anotación de solo lectura | F | decisión, antes de que exista algo que pida credenciales | Una herramienta marcada de integrador no aparece en el servidor público; la foto del MCP lo fija | B1 | 35 |
+| **B10 ✅** | **Perfiles de herramientas en el MCP.** Cumplido en la **16.0.0**, dentro de la base MCP (`contaperu.agentes`): cada operación de `api.OPERACIONES` dice su `perfil` —`publico`, lo que sirve el servidor abierto, o `integrador`, lo que solo monta quien tiene su servidor encima— y una de integrador escribe por qué en `por_que_integrador`, o no carga. Las dos puertas filtran con la misma tabla: `crear_servidor(perfil=…)` y `contaperu-mcp --perfil`, `crear_app(perfil=…)` y `contaperu-http --perfil`. Lo prueba una operación sintética pasada a integrador, que no aparece en ninguna de las dos; la foto del MCP fija el conjunto público. Hoy las 18 son públicas: lo que llegue con credenciales nace de integrador | F | hecho | — | B1 | 35 |
 | B11 | **Propuesta y aprobación con rastro**: el camino «el agente propone la cuenta, el humano confirma», con quién propuso qué y con qué huella. Hoy el motor valida o bloquea, y ese camino no existe | N · F | caso real: un mes imputado por un agente y revisado por un contador | Una propuesta no se exporta hasta que alguien la confirma; el rastro viaja en el documento y no en una base | 0.4 | 34 |
 | B12 | **Trazabilidad del agente** en `_exportacion`: hoy graba el driver, el archivo, la huella, la fecha y el motor, nunca quién lo pidió | F | B11 | Quien pidió la exportación queda en la anotación, y la huella no cambia por ello | B2, B11 | — |
 | B4 | Puerta **HTTP sin estado**, `servidor_http*`, con el extra `contaperu[http]*` | puerta | dato: un integrador no Python que lo necesite | Está en `PUERTAS` de `tests/test_frontera.py`; las tres puertas dan el mismo documento; comparte topes y la defensa de `Host` del MCP; publicar su imagen pide OK | B3 | — |

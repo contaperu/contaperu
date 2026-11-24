@@ -6,7 +6,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Adaptar al PCGE 2026"
    },
    "descripcion": "Adapta las cuentas de un asiento al Plan Contable General Empresarial 2026.\n\n    **La tabla de equivalencias está vacía, y hoy eso es lo correcto**: este proyecto nace en 2026\n    y trabaja con el PCGE 2026 desde el primer asiento, así que no hay plan anterior del que\n    traducir. La herramienta existe como riel para el día que una modificatoria sustituya cuentas;\n    mientras tanto devuelve el asiento intacto y lo dice en su informe (`sin_tabla`).\n\n    Cuando llegue esa modificatoria, cada equivalencia entrará **con la cita del artículo que la\n    respalda** —el cargador se niega a leer un mapeo sin ella—, porque una equivalencia inventada\n    produce estados financieros incorrectos en la contabilidad de quien confíe en esto.\n\n    Para saber si una cuenta existe o cómo se llama, la herramienta es `buscar_cuenta_pcge`; esta\n    no es esa.\n    ",
    "entrada": {
@@ -28,7 +28,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Adaptar al PCGE 2026"
   },
   "buscar_cuenta_pcge": {
    "anotaciones": {
@@ -36,7 +36,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Buscar una cuenta del PCGE"
    },
    "descripcion": "Busca una cuenta en el Plan Contable General Empresarial 2026, por nombre o por código.\n\n    Con `texto` devuelve las cuentas cuyo nombre lo contiene (sin distinguir tildes ni mayúsculas).\n    Con `codigo` devuelve esa cuenta y, si no está en la norma, **la cuenta madre que la gobierna**:\n    de `603201` sale `6032 Suministros`, porque el PCGE llega a cinco dígitos y las divisionarias\n    las abre cada empresa. Un código que no resuelve ni por su elemento está mal escrito.\n\n    Úsala antes de decidir la `cuenta_contable` de un comprobante: es la diferencia entre elegir\n    una cuenta que existe y proponer uno que suena bien.\n    ",
    "entrada": {
@@ -58,7 +58,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Buscar una cuenta del PCGE"
   },
   "configuracion_por_defecto": {
    "anotaciones": {
@@ -66,7 +66,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "La configuración por defecto"
    },
    "descripcion": "La configuración contable de partida: lo general en la raíz —cuentas, centros de costo, tasas\n    de detracción— y una sección por cada sistema contable que tiene algo propio:\n    `concar`, `csv`, `contasis`, `starsoft`, `ple`, `ple_plan`.\n    Siglas, sub-diarios, códigos, columnas del centro de costo: lo que lleva cada una lo dice\n    `contaperu://configuracion`.\n\n    **Con `driver`, la de quien lleva ese sistema**: lo general con las cuentas de ese sistema y solo\n    su sección. Pásalo siempre que sepas a qué sistema contable exporta el contribuyente, porque las\n    cuentas de fábrica son las del PCGE a seis dígitos y hay sistemas que numeran de otra forma.\n\n    Es un punto de partida razonable, no la verdad de ningún contribuyente: el plan de cuentas\n    y los sub-diarios los decide cada empresa. Cópiala, cámbiale lo que toque y pásala como\n    `configuracion` en las demás herramientas: se valida entera, y lo que no existe se dice.\n    ",
    "entrada": {
@@ -100,7 +100,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "La configuración por defecto"
   },
   "diagnosticar": {
    "anotaciones": {
@@ -108,7 +108,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Diagnosticar un mes"
    },
    "descripcion": "Dice todo lo que hay que mirar de un mes ANTES de exportarlo. **Llámala antes de `exportar`.**\n\n    En una sola respuesta: si el mes está listo (`listo_para_exportar`) y, si no, por qué\n    (`por_que_no`); qué comprobantes tienen observaciones que bloquean y cuáles solo avisos, por su\n    serie-número; qué falta para el sistema de destino —cuenta contable, centro de costo, tipos de\n    comprobante sin sigla, monedas que no admite, un reparto entre cuentas que no admite\n    (`reparto_no_admitido`), lo que no cabe en su formato (`no_cabe`), sub-diarios sin correlativo—; qué\n    detracciones esperan todavía su constancia (`detracciones_pendientes`) y cuáles ya están\n    depositadas (`detracciones_pagadas`) — una detracción cuenta como pagada cuando tiene un número\n    de constancia que no es el comodín **y** la fecha del depósito, así que una que trae número y no\n    fecha sigue saliendo como pendiente y lo que hay que pedir es la fecha; un resumen por proveedor o cliente; desde qué\n    correlativo arrancaría cada sub-diario; y la lista de lo que saldría.\n\n    `driver` es el sistema de destino y **se declara siempre** (los que hay, en `contaperu://drivers`):\n    lo que falta depende de él, así que suponerlo devolvería el diagnóstico de otro sistema.\n    `exige` dice qué pide ese destino (el CSV no exige centro de costo; CONCAR sí), y `que_falta`\n    agrupa por motivo lo que de verdad bloquea, con **`pedir_a`**: `contador` si se resuelve mirando\n    el documento o el plan de cuentas, `sistema` si es configuración del destino o un dato público\n    que no está en el papel. Úsalo para redactar la pregunta a quien toca, en vez de adivinar.\n\n    No corrige nada ni inventa nada: un comprobante sin cuenta se arregla donde se revisa, y aquí\n    solo se dice cuál es. Es la herramienta para enseñarle a la persona qué va a salir antes de\n    generar un archivo que luego se importa en su sistema contable. `imputacion` es la misma de\n    `generar_asiento`: un reparto que no suma la base sale en `faltantes.reparto_que_no_cuadra`.\n    Si la `configuracion` no cumple lo que se declara en `contaperu://configuracion`, lo dice en\n    `errores_de_configuracion`, cada error con su ruta. La forma de la respuesta está en el recurso\n    `contaperu://esquemas/diagnostico`.\n    ",
    "entrada": {
@@ -215,7 +215,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Diagnosticar un mes"
   },
   "drivers_disponibles": {
    "anotaciones": {
@@ -223,7 +223,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Los sistemas de destino"
    },
    "descripcion": "Los sistemas contables a los que se puede exportar, y qué pide cada uno.\n\n    Por nombre —el que va en `driver`—: qué archivos genera, si arma asientos o es un registro, su **canal** —a\n    quién entrega: `sunat`, `legacy` o `erp`—, lo que **exige** para no negarse (CONCAR pide centro de costo y\n    una moneda con código; el CSV no), si tiene sección propia en la configuración y cómo se le dice a una\n    persona (`nombre_de_pantalla`: «CONCAR», no `concar`).\n\n    Ojo con `sunat`: son los dos regímenes, el SIRE y el PLE. El `sire` manda compras y ventas, y\n    `sire_no_domiciliados` las compras del exterior; el `ple`, el Libro Diario y los demás libros.\n\n    Llámala antes de `diagnosticar`, `generar_asiento` o `exportar` cuando no sepas qué destino usa el\n    contribuyente: esas tres lo exigen y no lo suponen.\n    ",
    "entrada": {
@@ -232,7 +232,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Los sistemas de destino"
   },
   "estado_de_cuenta": {
    "anotaciones": {
@@ -240,7 +240,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Estado de cuenta"
    },
    "descripcion": "Qué queda por cobrar o por pagar, documento a documento y por contraparte.\n\n    **No hay ninguna columna de estado, y no la va a haber.** El número que manda es `pendiente`, y «por cobrar»\n    o «pagado» es una lectura suya: se deriva del total menos lo que sus aplicaciones dicen que se le aplicó. Si\n    buscas un campo que diga si una factura está pagada, no existe — mira su pendiente.\n\n    **Una aplicación con origen `propuesto` no cuenta.** Una conjetura no mueve un saldo hasta que una persona la\n    confirme, y cuando hay alguna se dice en los avisos para que el número no parezca mal calculado.\n\n    **Lo que viene de otros meses lo pones tú**, en `partidas_previas`: el libro del motor es mensual, y una\n    factura de enero pagada en marzo vive en dos documentos. Si este mes aplica un importe a un comprobante que\n    no viaja aquí y no declaraste su partida, sale igual —para que el pago no desaparezca— con su total en blanco\n    y su aviso.\n\n    **La fecha de corte también la pones tú**: deja fuera las aplicaciones posteriores y da los `dias` contra el\n    vencimiento, negativos si aún no vence. El motor no mira el reloj. Los tramos de antigüedad no se calculan:\n    30/60/90 es una convención de gestión sin norma detrás.\n\n    Y dos monedas nunca se suman: lo aplicado en otra moneda se informa aparte y no se resta del pendiente.\n    ",
    "entrada": {
@@ -290,7 +290,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Estado de cuenta"
   },
   "exportar": {
    "anotaciones": {
@@ -298,7 +298,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Exportar a un sistema"
    },
    "descripcion": "Genera el archivo que espera un sistema contable, ya listo para importar.\n\n    Devuelve dos cosas: un resumen en JSON (nombre del archivo, comprobantes, debe y haber, y en\n    `_exportacion` la **huella** del asiento que salió: si vuelves a exportar lo mismo, la huella se\n    repite, y el Excel de CONCAR se SUMA al importarlo dos veces) y **el archivo adjunto**, para\n    guardarlo tal cual. `fecha` (AAAA-MM-DD) es opcional y la pones tú: este servidor no mira el reloj.\n    `imputacion` es la misma de `generar_asiento`.\n\n    `driver` **se declara siempre**: el sistema contable de un contribuyente es suyo, y un Excel de\n    CONCAR importado en un CONTASIS no se nota hasta que ya está dentro.\n\n    Drivers disponibles, por canal —a quién entrega cada uno— (el recurso `contaperu://drivers` dice el de\n    cada cual):\n      - SUNAT:  `sire` — el TXT para reemplazar la propuesta del RVIE o del RCE en SUNAT: el\n                contenido va en `texto` y el ZIP que sube a SUNAT, adjunto.\n                `sire_no_domiciliados` — el TXT del registro de compras de no domiciliados (el 080500):\n                solo los `91`, `97` y `98`, que el `sire` deja fuera; en `texto` y con su ZIP adjunto.\n                `ple` — el Libro Diario del PLE, que es el OTRO régimen de SUNAT: una fila por línea del\n                asiento, no por comprobante.\n                `ple_plan` — el detalle del plan contable del PLE (formato 5.3).\n      - Legacy: `concar` — el Excel de asientos de 41 columnas, adjunto como `.xlsx`.\n                `contasis` — el registro de compras o de ventas que importa CONTASIS, adjunto como\n                `.xlsx`: una fila por comprobante, sin sub-diario (se elige al importar).\n                `starsoft` — los asientos en TXT de palotes.\n      - ERP:    `csv` — las líneas de diario en columnas, en `texto` y también adjunto.\n                `asiento_contable` — el documento del estándar con sus comprobantes y su asiento, sin siglas ni\n                correlativos de ningún sistema legacy, adjunto como `.json`.\n\n    Antes de escribir nada, en los drivers que arman asiento comprueba que cuadre; si no cuadra, falla.\n    Los de registro —su `familia` en `drivers_disponibles`— no arman asiento: `contasis` se niega antes\n    por lo que exige y por lo que no cabe en su formato (`no_cabe`).\n    ",
    "entrada": {
@@ -425,7 +425,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Exportar a un sistema"
   },
   "generar_asiento": {
    "anotaciones": {
@@ -433,7 +433,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Generar el asiento"
    },
    "descripcion": "Convierte los comprobantes en líneas de diario, sin el formato de ningún sistema.\n\n    Devuelve el bloque `asiento` del estándar: cuenta, debe o haber, importe, moneda, glosa,\n    centro de costo y el documento que lo respalda. Es lo que sirve para revisar el asiento, o\n    para cargarlo en un sistema que no tenga driver todavía.\n\n    `correlativos` dice por qué número empieza cada sub-diario ({\"11\": 1}); si no se pasa,\n    empieza en 1. Con `incluir_observados` se genera aunque haya comprobantes con errores —\n    útil para ver qué saldría, arriesgado para presentar.\n\n    `imputacion` trae lo que se decidió para cada comprobante, por su `id_externo`: su\n    `cuenta_contable`, su `centro_costo`, la `cuenta_tercero` (la del total) o un `reparto` de la base\n    entre cuentas ([{importe, cuenta_contable, centro_costo}], que tiene que sumar la base). Lo que no\n    traiga sale de la configuración.\n\n    `driver` es el sistema de asientos cuya sección de la configuración se aplica: sus siglas, sus\n    sub-diarios y las columnas en que pone el centro de costo. **Se declara siempre** —los que hay están\n    en el recurso `contaperu://drivers`—, porque el sistema de un contribuyente es suyo y suponerlo arma\n    el asiento de otro. Exige lo mismo que `exportar` hacia ese sistema —en CONCAR, el centro de costo y\n    una moneda con código—; para ver qué falta sin que se niegue, `diagnosticar`.\n    ",
    "entrada": {
@@ -546,7 +546,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Generar el asiento"
   },
   "leer_propuesta_sire": {
    "anotaciones": {
@@ -554,7 +554,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Leer la propuesta del SIRE"
    },
    "descripcion": "Lee el TXT de la propuesta que SUNAT entrega en el SIRE y devuelve un documento\n    `open-accounting`.\n\n    Es lo que el contribuyente descarga de su SIRE con lo que SUNAT cree que compró o vendió;\n    a partir de ahí se compara con la realidad y se corrige. Acepta el TXT como texto o el ZIP\n    tal cual lo entrega SUNAT (`es_base64: true`).\n\n    `libro` es la cabecera, y son **exactamente cuatro claves**: `ruc`, `razon_social`, `periodo`\n    (AAAAMM) y `tipo` (`venta` o `compra`). Cualquier otra detiene la lectura diciendo su nombre;\n    el libro no admite ni anotaciones `_`.\n    ",
    "entrada": {
@@ -585,7 +585,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Leer la propuesta del SIRE"
   },
   "leer_xml_ubl": {
    "anotaciones": {
@@ -593,7 +593,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Leer un XML de SUNAT"
    },
    "descripcion": "Lee el XML UBL 2.1 de la factura electrónica de SUNAT y devuelve un documento `open-accounting`.\n\n    Acepta un XML suelto como texto, o un ZIP en base64 con varios dentro (`es_base64: true`).\n    Descarta lo que no es un comprobante — las constancias de recepción (CDR) y las hojas de\n    estilo— y avisa de lo que no pudo leer.\n\n    `libro` es la cabecera, y son **exactamente cuatro claves**: `ruc`, `razon_social`, `periodo`\n    (AAAAMM) y `tipo` (`venta` o `compra`). Cualquier otra detiene la lectura diciendo su nombre;\n    el libro no admite ni anotaciones `_`.\n    ",
    "entrada": {
@@ -624,7 +624,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Leer un XML de SUNAT"
   },
   "normalizar_detracciones": {
    "anotaciones": {
@@ -632,7 +632,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Normalizar las detracciones"
    },
    "descripcion": "Contrasta la detracción de cada comprobante con la tabla del contribuyente y deja en\n    blanco la que no reconozca.\n\n    Sirve sobre todo después de leer comprobantes con un modelo de lenguaje: la confusión más\n    común es tomar la **retención del IGV** (el 3 % que retiene un agente de retención cuando la\n    factura pasa de S/ 700, y que no toca el registro de compras) por una detracción.\n    ",
    "entrada": {
@@ -665,7 +665,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Normalizar las detracciones"
   },
   "por_cuenta": {
    "anotaciones": {
@@ -673,7 +673,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Pre-mayor por cuenta"
    },
    "descripcion": "El pre-mayor: en qué cuentas cayó un asiento, con su debe y su haber por moneda, y el cuadre.\n\n    Recibe las líneas que devuelve `generar_asiento`. Delata una imputación mal puesta sin generar ningún\n    archivo: una cuenta con un importe que no le toca salta a la vista en una lista de diez cuentas y no en\n    una tabla de seiscientas filas.\n\n    Trae el cuadre global y también **por moneda**, que dice algo que el global no puede: dos monedas cuyos\n    descuadres se compensan salen cuadradas en el total y descuadradas cada una. Y `roles` va en plural:\n    con una detracción, la cuenta por pagar hace dos papeles en el mismo asiento.\n    ",
    "entrada": {
@@ -709,7 +709,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Pre-mayor por cuenta"
   },
   "por_pagar": {
    "anotaciones": {
@@ -717,7 +717,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Lo que queda por pagar"
    },
    "descripcion": "De cada compra, lo que se le debe al proveedor y en qué cuenta: lo que un pago tiene que cancelar.\n\n    Llámala **antes de armar un pago**, y no hagas la cuenta tú: `por_pagar` es el total menos la retención de 4ta\n    (recibo por honorarios) y la detracción (va al Banco de la Nación, no al proveedor), y `cuenta_contable` sale de\n    la misma regla que el asiento de la compra. Si la rehaces y te sale otra cifra, el pago no cancela la compra.\n\n    **Es lo que dice el documento, no lo pendiente**: lo que ya se pagó en otro movimiento lo resta\n    `estado_de_cuenta`. Una nota de crédito sale en negativo, porque resta.\n\n    **Pasa el `driver` del sistema donde se asentó la compra**, el mismo que le pasas a `exportar`: cada sistema tiene\n    su cuenta por pagar —en STARSOFT la 42120001, no la 421201—, y sin él sale la de la configuración general.\n\n    Con cada fila se arma una parte del reparto del movimiento: `{importe, cuenta_contable, contraparte_doc,\n    comprobante: {tipo_cp, serie, numero, contraparte_doc, fecha_emision, fecha_vencimiento}}`, y su línea lleva el\n    documento de esa factura en vez del vóucher. Una parte por documento, nunca una por proveedor.\n    ",
    "entrada": {
@@ -781,7 +781,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Lo que queda por pagar"
   },
   "resumen": {
    "anotaciones": {
@@ -789,7 +789,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Resumen de un libro"
    },
    "descripcion": "Cuánto es este libro: base gravada, IGV y total, **cada moneda por su lado**.\n\n    Lo que un contador pregunta antes de dar un mes por bueno. **No pide destino**: es del libro, no de un\n    archivo — si lo que quieres es qué saldría hacia un sistema contable concreto, eso es `diagnosticar`.\n\n    Dos avisos para decírselos a quien pregunte: **las notas de crédito restan** (los tipos 07, 87 y 97), así\n    que el total no cuadra sumando a mano lo que se ve; y **soles y dólares no se suman entre sí**, porque\n    sumar importes nominales de dos monedas no da ningún total. Lo excluido y lo marcado duplicado se\n    cuentan en `recuento` y no suman.\n\n    Con `agrupar_por=\"contraparte\"`, los mismos totales por proveedor o cliente, de más a menos.\n    ",
    "entrada": {
@@ -818,7 +818,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Resumen de un libro"
   },
   "revisar_tesoreria": {
    "anotaciones": {
@@ -826,7 +826,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Revisar la tesorería"
    },
    "descripcion": "Revisa el dinero de un periodo antes de conciliarlo: los movimientos de las cuentas\n    del contribuyente.\n\n    **Hay una sola entrada**, igual que `comprobantes` lo es de una compra o de una venta: venga de una línea de\n    extracto o de una constancia de pago, mándalo como un `movimiento`. No busques un bloque de constancias — no\n    existe. Lo que distingue una línea de extracto de un pago no es una etiqueta: es el `saldo`, que solo un\n    extracto trae, y el `origen`, que dice cómo se leyó (`manual`, `archivo`, `api`, `pdf_texto`, `vision`; los\n    dos últimos marcan lectura asistida y salen en `de_lectura_asistida` para que alguien los revise).\n    Y el número del papel va en `constancia`, aparte del que le da el banco, que es `referencia`: **los dos\n    existen y pueden ser distintos** —una detracción pagada desde un banco tiene su vóucher y su N° de operación—.\n\n    **Esta herramienta no asienta, y es a propósito**: mirar y asentar son dos preguntas distintas. Aquí se mira,\n    y lo que falte se dice sin parar nada; `generar_asiento` sobre un libro de tesorería **para** cuando falta,\n    porque sin la contrapartida o sin la cuenta contable del maestro no hay línea que escribir. Así que mira\n    primero y asienta después.\n\n    Para el asiento y su archivo, `generar_asiento` y `exportar` con el driver `asiento_contable`, que escribe el\n    documento del estándar con sus movimientos, su imputación y su asiento — y con los tres el archivo vuelve a\n    entrar y da lo mismo. **Las cuentas bancarias van en la configuración** (`cuentas_bancarias`), no como\n    argumento: la 104 de cada una sale de ahí y el motor no la deriva.\n\n    Y hacia un sistema legacy sale por `concar`, numerado por el sub-diario de cada cuenta bancaria: una cuenta\n    sin su `sub_diario` en `cuentas_bancarias` lo detiene (`cuenta_bancaria_sin_sub_diario`), y los `correlativos`\n    dicen por qué número empieza cada uno. Los demás sistemas legacy no llevan este libro.\n    ",
    "entrada": {
@@ -862,7 +862,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Revisar la tesorería"
   },
   "validar_comprobantes": {
    "anotaciones": {
@@ -870,7 +870,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Validar los comprobantes"
    },
    "descripcion": "Revisa los comprobantes de un documento `open-accounting` y devuelve el mismo documento con\n    `estado` y `observaciones` puestos en cada uno.\n\n    Comprueba lo que se puede comprobar sin salir a ningún sitio: que el RUC sea un RUC, que el\n    IGV cuadre con la base, que el total sea la suma de sus partes, que la fecha no sea posterior\n    al periodo (error; una venta de un mes anterior solo avisa, y una compra anterior, solo pasados\n    los 12 meses del plazo de anotación), que no haya duplicados —en el lote y, con `claves_previas`, contra lo ya\n    anotado en otros periodos—. Las observaciones de nivel `error`\n    bloquean la exportación; las de nivel `aviso` no.\n\n    También descarta las detracciones cuyo código no está en la tabla del contribuyente, que es\n    de donde salen los códigos inventados cuando una IA confunde la retención del IGV con una\n    detracción. Con `imputacion` —la misma de `generar_asiento`— comprueba además que cada llave\n    hable de un comprobante que está: una huérfana sale aquí y no al exportar.\n    ",
    "entrada": {
@@ -946,7 +946,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Validar los comprobantes"
   },
   "validar_cuentas_bancarias": {
    "anotaciones": {
@@ -954,7 +954,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Validar las cuentas bancarias"
    },
    "descripcion": "Comprueba el maestro de cuentas bancarias del contribuyente antes de usarlo.\n\n    **Es un argumento, no una tabla**: el motor lo recibe, lo valida y no lo guarda. Sin cuentas declaradas no\n    cambia nada; con ellas, un movimiento apunta a su cuenta por el `id`, y un traspaso a la otra por el mismo.\n\n    Para: un CCI que no tenga sus 20 dígitos (se admite con espacios o con guiones, que es como lo imprime cada\n    banco), una moneda que no esté en el catálogo —las diez del Anexo 1 de la RS 112-2021—, o dos cuentas con el\n    mismo `id`.\n\n    Avisa y no para: una cuenta sin su cuenta contable. **La 104 del PCGE la elige el contribuyente, cuenta por\n    cuenta** —la de soles no es la de dólares—, y el motor no la supone ni cuando conoce el banco. Si falta, lo\n    que hay que hacer es pedírsela al contador, no inventarla.\n    ",
    "entrada": {
@@ -976,7 +976,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Validar las cuentas bancarias"
   },
   "validar_partida_doble": {
    "anotaciones": {
@@ -984,7 +984,7 @@
     "idempotentHint": null,
     "openWorldHint": false,
     "readOnlyHint": true,
-    "title": null
+    "title": "Validar la partida doble"
    },
    "descripcion": "Comprueba que la suma del Debe sea exactamente igual a la del Haber.\n\n    Sin tolerancia: un céntimo de diferencia es un asiento mal armado. Devuelve las dos sumas,\n    la diferencia y cuántas líneas no dicen si son Debe o Haber.\n    ",
    "entrada": {
@@ -1006,7 +1006,7 @@
     "type": "object"
    },
    "salida": null,
-   "titulo": null
+   "titulo": "Validar la partida doble"
   }
  },
  "orden": {
