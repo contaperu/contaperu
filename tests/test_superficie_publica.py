@@ -7,7 +7,9 @@ Dos niveles (ver `contaperu/api/__init__.py`):
   doble, el PCGE, los lectores, el registro y el contrato de drivers, y cada driver de serie. De estos se congelan los
   nombres: su `__all__` si lo declaran, y si no, los nombres públicos que son del paquete.
 
-`pipeline`, `puertas` y `_datos` son internos y no entran.
+`pipeline`, `puertas` y `_datos` son internos y no entran. **`agentes`, la base MCP, tampoco todavía**: es pública pero
+provisional en la 16.0, y entra con sus firmas en una 16.x, cuando la haya adoptado su primer integrador
+(`PROVISIONALES`).
 
 **El archivo sigue llamándose `1.0.json` después de la 2.0, y a propósito.** La 2.0 retiró la compatibilidad con la
 0.x —cinco módulos que solo redirigían y su copia en `_compat`— sin tocar ni un nombre de esta superficie: que este
@@ -68,6 +70,9 @@ EXTENSION = (
     # para que el rechazo del nombre viejo dijera el nuevo, y **la 10.0 lo retiró**: dos mayores después nadie puede
     # tener un driver con el nombre de la 7.x, y la tabla no la ejercitaba ningún test.
 )
+# Lo público que aún no se promete: se usa, pero sus nombres pueden cambiar en una menor. Que no esté en la superficie
+# es una decisión escrita, no un olvido, y el test de abajo obliga a sacarlo de aquí al congelarlo.
+PROVISIONALES = ("contaperu.agentes",)
 TIPOS_DE_CONSTANTE = {"builtins", "decimal", "datetime"}
 
 
@@ -132,3 +137,15 @@ def test_lo_nuevo_entra_en_la_superficie_a_proposito():
     nuevos = {m: sorted(set(nombres) - set(congelada.get(m, {}))) for m, nombres in superficie().items()}
     assert {m: n for m, n in nuevos.items() if n} == {}, (
         "hay nombres públicos nuevos: si son a propósito, regenera fixtures/superficie/1.0.json")
+
+
+def test_lo_provisional_no_esta_congelado_y_declara_lo_que_ofrece():
+    """Lo provisional declara su `__all__` —es lo que se congelará— y no aparece en la superficie: congelarlo es sacarlo
+    de `PROVISIONALES` y añadirlo a `EXTENSION`, a propósito y en el mismo commit."""
+    congelado = json.loads(SUPERFICIE.read_text(encoding="utf-8"))
+    for nombre_modulo in PROVISIONALES:
+        assert nombre_modulo not in EXTENSION and nombre_modulo not in congelado, nombre_modulo
+        modulo = importlib.import_module(nombre_modulo)
+        assert modulo.__all__, f"{nombre_modulo} no dice qué ofrece"
+        faltan = [n for n in modulo.__all__ if not hasattr(modulo, n)]
+        assert not faltan, f"{nombre_modulo} anuncia lo que no tiene: {faltan}"

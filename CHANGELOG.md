@@ -20,6 +20,16 @@ sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `m
   los atributos van en snake_case (`input_schema`, `is_error`, `mime_type`) y `call_tool` devuelve siempre un
   `CallToolResult`.
 
+### Añade
+
+- **`contaperu.agentes`, la base para publicar herramientas de agente**, provisional hasta que la adopte su primer
+  integrador. Es el catálogo de lo que publica un servidor MCP y no importa el SDK: cada operación con la herramienta en
+  la que va, su modo (`que`), su riesgo, su grupo y su perfil; las herramientas que juntan una familia, con la de por
+  defecto primero; los nombres que se retiraron; la traducción de una operación citada en un texto al nombre con que
+  se alcanza por la puerta, con su prefijo; el despacho de los modos y el recorte de listas que dice cuánto falta. Las
+  reglas que hacen segura una familia —un nivel de riesgo, un grupo y un perfil por herramienta, nombres que acepta
+  el API de Claude— se comprueban al construirlo. `DEL_MOTOR` es el catálogo de las 18 del motor, derivado de la tabla.
+
 ### Cambia
 
 - **El servidor MCP sobre el SDK v2.** Se presenta con su versión desde el constructor, y no escribiéndola en un

@@ -8,7 +8,8 @@ cada módulo del paquete pertenece a una capa, y una capa solo importa de las qu
     drivers  el contrato, el kit común y cada driver
     pipeline la preparación y la orquestación de un mes
     api      la fachada estable
-    puertas  CLI, MCP y HTTP: solo hablan con la api
+    agentes  la base MCP: el catálogo de lo que un servidor publica, sin el SDK del protocolo (16.0)
+    puertas  CLI, MCP y HTTP: solo hablan con la api y con la base MCP
 
 Además, aquí se hacen visibles dos cosas que la hoja de ruta pedía antes de mover código:
 
@@ -83,6 +84,11 @@ CAPAS = {
     "contaperu.drivers": "drivers",
     "contaperu.pipeline": "pipeline",
     "contaperu.api": "api",
+    # La base MCP (16.0): el catálogo de lo que un servidor publica, sin el SDK del protocolo. Está ENCIMA de la api
+    # —el catálogo del motor se deriva de `api.OPERACIONES`— y debajo de las puertas, que lo proyectan. Su único
+    # módulo con el SDK, `agentes.servidor`, es una puerta más: traduce un protocolo.
+    "contaperu.agentes": "agentes",
+    "contaperu.agentes.servidor": "puertas",
     "contaperu.puertas": "puertas",
 }
 PUEDE = {
@@ -91,7 +97,8 @@ PUEDE = {
     "drivers": {"base", "nucleo", "drivers"},
     "pipeline": {"base", "nucleo", "drivers", "pipeline"},
     "api": {"base", "nucleo", "drivers", "pipeline", "api"},
-    "puertas": {"base", "api", "puertas"},
+    "agentes": {"base", "api", "agentes"},
+    "puertas": {"base", "api", "agentes", "puertas"},
 }
 
 # Lo que todavía importa una capa que no le toca, con su motivo. Vacía desde que las puertas hablan solo con la api

@@ -448,7 +448,8 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 | drivers | `drivers/` (`contrato/` —su taxonomía, sus protocolos, sus accesores y su examen—, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
 | pipeline | `pipeline/` (`preparacion/` —el documento, la configuración, las entradas y los pasos de un mes—, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
 | api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa; cada nombre con su firma, congelados |
-| puertas | `puertas/` (`cli`, `servidor_mcp`, `servidor_http`, `comun`) | un protocolo; solo hablan con la api |
+| agentes | `agentes/` (`catalogo`, `despacho`, `del_motor`), provisional desde la 16.0 | qué operación va en qué herramienta, con qué modo, qué arriesga y a quién se publica; sin el SDK del protocolo |
+| puertas | `puertas/` (`cli`, `servidor_mcp`, `servidor_http`, `comun`) | un protocolo; solo hablan con la api y con la base MCP |
 
 - **El pipeline** es el único dueño de la preparación: del documento al libro y los comprobantes, la configuración
   aplicada hacia un destino con la imputación dentro, las claves previas, la selección de lo que sale, lo que exige el
@@ -648,6 +649,26 @@ peruanas.
 
 Esa es la forma en que crecerá esta capa: **cada pregunta de un agente se responde con reglas que ya
 tienen fuente**, nunca con una regla nueva escrita para el agente.
+
+### La base MCP: un catálogo que se proyecta (16.0, provisional)
+
+Hasta la 15.x el servidor MCP derivaba una herramienta por operación de la tabla, en una instancia única, y quien
+quería montar las suyas encima tenía que modificar esa instancia. Los servidores grandes convergen en otra forma: un
+**catálogo de operaciones con sus metadatos que se proyecta** en herramientas. Eso es `contaperu.agentes`, y separa:
+
+- **la operación**, que es la capacidad, de **la herramienta**, que es lo que ve el agente. Una herramienta puede juntar
+  varias operaciones de una familia y elegir con `que`, y la que conserva el nombre de una de ellas es la de por defecto;
+- **el riesgo** (`Riesgo`: mira, escribe, borra, pide huella, sale a la red), del que salen las anotaciones. **Una
+  herramienta tiene un solo nivel**, y el catálogo se niega a construirse si no, porque un cliente pide permiso por
+  herramienta y no por modo;
+- **a quién se publica** (`perfil`: `publico` o `integrador`, el B10) y **en qué grupo**, para que un servidor elija;
+- **los nombres retirados**, que contestan dónde está ahora la herramienta en vez de un «desconocida».
+
+Y trae lo que el esquema no hace: el SDK valida con pydantic, que no mira un `enum` declarado solo en el esquema y
+descarta en silencio un argumento que no conoce, así que el despacho de los modos dice con `entrada_invalida` lo que no
+va. **No importa el SDK ni pydantic** (`tests/test_agentes.py`): la proyección sobre el SDK irá en `agentes.servidor`,
+una puerta más, y será lo único que cambie con la versión mayor del SDK. El catálogo de las herramientas del motor,
+`DEL_MOTOR`, se deriva de `api.OPERACIONES` y dice lo mismo que el servidor publica.
 
 ## Lo que no se negocia
 

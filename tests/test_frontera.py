@@ -20,18 +20,19 @@ PAQUETE = pathlib.Path(__file__).resolve().parents[1] / "contaperu"
 
 # Las puertas: módulos que el núcleo NO puede importar. Son adaptadores — hablan un protocolo de
 # fuera (argv y stdout; JSON-RPC) y dependen de cosas que el núcleo no necesita.
-PUERTAS = {"cli", "servidor_mcp", "servidor_http", "puertas"}
+PUERTAS = {"cli", "servidor_mcp", "servidor_http", "puertas", "agentes"}
 
 # Por donde pasan las puertas para llegar al motor.
 FACHADA = "api"
 
-# Lo que no es núcleo: las puertas y la api.
+# Lo que no es núcleo: las puertas, la api y la base MCP.
 #
 # Hasta la 6.2.0 estos dos conjuntos nombraban además `_compat`, `cli.py` y `operaciones.py`, que eran las rutas
 # de la 0.x y sus módulos: **la 2.0 los retiró y nadie quitó el filtro**, así que durante cuatro mayores tres de
 # sus seis entradas no filtraban nada. Un filtro que nombra algo inexistente no es inocuo: parece decir que ese
 # algo existe y hay que tratarlo aparte.
-CARPETAS_FUERA = {"puertas", "api"}
+# Y desde la 16.0 la base MCP, `agentes`: está encima de la api y su `servidor` habla el SDK del protocolo.
+CARPETAS_FUERA = {"puertas", "api", "agentes"}
 
 
 def modulos_del_nucleo() -> list[pathlib.Path]:
