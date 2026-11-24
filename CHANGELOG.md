@@ -29,6 +29,15 @@ sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `m
   se alcanza por la puerta, con su prefijo; el despacho de los modos y el recorte de listas que dice cuánto falta. Las
   reglas que hacen segura una familia —un nivel de riesgo, un grupo y un perfil por herramienta, nombres que acepta
   el API de Claude— se comprueban al construirlo. `DEL_MOTOR` es el catálogo de las 18 del motor, derivado de la tabla.
+- **`contaperu.agentes.vigilancia`, el kit de vigilantes** de lo que publica un servidor MCP, provisional como la base:
+  funciones puras sobre `tools/list` tal como viaja, que devuelven las faltas en castellano. La foto que se congela
+  —ahora con los modos de `que`—, el peso con un presupuesto que es un trinquete en los dos sentidos, el tope de la
+  descripción, el número exacto, los nombres que acepta Claude, las anotaciones y los modos frente al catálogo, la
+  huella con sus dos parámetros, las reglas dentro de los 2 048 caracteres que lee el cliente y donde se aplican, y
+  los nombres fantasma. **El servidor del motor lo usa primero**: su foto sale del kit sin cambiar un byte, y gana
+  cuatro vigilantes que no tenía —un presupuesto de 31 000 caracteres (pesa 30 090), un tope de 2 400 por descripción,
+  nombres que valen para Claude con las anotaciones del catálogo, y ningún texto que cite una operación de la tabla
+  que aquí no es una herramienta, como `revisar` por `validar_comprobantes`—.
 
 ### Cambia
 

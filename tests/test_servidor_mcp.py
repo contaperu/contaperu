@@ -14,6 +14,7 @@ import pytest
 
 import contaperu
 from contaperu import api
+from contaperu.agentes import DEL_MOTOR, vigilancia
 from contaperu.puertas.servidor_mcp import LOCALES, mcp, seguridad
 
 from util import XML
@@ -167,16 +168,6 @@ def test_las_reglas_del_dominio_no_nombran_ninguna_herramienta():
         assert uri not in api.REGLAS, f"las REGLAS citan el recurso {uri} de este servidor"
 
 
-# Lo que Claude Code lee de las instrucciones de un servidor MCP: los primeros 2 048 caracteres, y nada más (medido el
-# 21-nov-2026). Se corta en unidades UTF-16, que son las de una cadena de JavaScript; en castellano coinciden con los
-# caracteres, y se cuenta así para que una letra fuera del plano básico no las separe sin que se vea.
-RECORTE_DEL_CLIENTE = 2048
-
-
-def lo_que_lee_el_cliente(texto: str) -> str:
-    return texto.encode("utf-16-le")[:2 * RECORTE_DEL_CLIENTE].decode("utf-16-le", errors="ignore")
-
-
 def test_todas_las_reglas_caben_en_lo_que_lee_el_cliente():
     """Una regla que el cliente corta no existe para su modelo.
 
@@ -187,12 +178,13 @@ def test_todas_las_reglas_caben_en_lo_que_lee_el_cliente():
     trinquete: una regla nueva paga su sitio acortando otra, y lo que se pase se ve aquí y no en la conversación de
     alguien.
     """
-    leido = lo_que_lee_el_cliente(mcp.instructions)
+    leido = vigilancia.lo_que_lee_el_cliente(mcp.instructions)
     assert leido.count("Reglas que conviene tener claras") == 1, "el encabezado de las reglas tiene que llegar, y una vez"
-    for ambito, reglas in api.REGLAS_POR_CLAVE.items():
-        for clave, texto in reglas.items():
-            assert texto in leido, (f"la regla {ambito}.{clave} no cabe en los {RECORTE_DEL_CLIENTE} caracteres que "
-                                    f"lee el cliente: las instrucciones miden {len(mcp.instructions)}")
+    # Por el kit de la base MCP (`agentes.vigilancia`), que es el mismo que usa quien monta su servidor encima.
+    reglas = {f"{ambito}.{clave}": texto for ambito, de_ese in api.REGLAS_POR_CLAVE.items()
+              for clave, texto in de_ese.items()}
+    assert not vigilancia.reglas_cortadas(mcp.instructions, reglas), vigilancia.reglas_cortadas(mcp.instructions,
+                                                                                                reglas)
 
 
 def test_las_reglas_son_la_union_de_las_que_tienen_nombre():
@@ -761,6 +753,50 @@ def test_por_entrada_y_salida_estandar_no_lleva_nada_de_la_red(monkeypatch):
     assert arrancado == {"transporte": "stdio"}
 
 
+# --- el kit de vigilantes de la base MCP, sobre el servidor del motor -------------------------------------
+
+# Lo que pesa lo que el servidor publica en cada conversación: el nombre, la descripción y el esquema de entrada de sus
+# 18 herramientas (`vigilancia.peso`). Medido el 23-nov-2026 en 30 090. Es un trinquete en los dos sentidos: crecer es
+# una decisión, y adelgazar obliga a bajar el número para que lo ganado no se gaste sin que se vea.
+PRESUPUESTO = 31_000
+# La más larga es la de `exportar`, con 2 325.
+TOPE_DE_LA_DESCRIPCION = 2_400
+
+
+def test_el_servidor_cabe_en_su_presupuesto():
+    assert not vigilancia.fuera_de_presupuesto(herramientas_publicadas(), {"": PRESUPUESTO}), (
+        vigilancia.fuera_de_presupuesto(herramientas_publicadas(), {"": PRESUPUESTO}))
+
+
+def test_ninguna_descripcion_pasa_del_tope():
+    largas = vigilancia.descripciones_largas(herramientas_publicadas(), TOPE_DE_LA_DESCRIPCION)
+    assert not largas, largas
+
+
+def test_los_nombres_valen_para_claude_y_son_los_del_catalogo():
+    """El API de Claude no admite el punto que el protocolo sí; y lo que el servidor anuncia de cada herramienta es lo
+    que su riesgo dice en el catálogo del motor, sin `que`, porque ninguna junta operaciones."""
+    publicadas = herramientas_publicadas()
+    faltas = (vigilancia.nombres_invalidos(publicadas) + vigilancia.numero_distinto(publicadas, 18)
+              + vigilancia.anotaciones_distintas(publicadas, DEL_MOTOR)
+              + vigilancia.que_distinto_de_la_tabla(publicadas, DEL_MOTOR)
+              + vigilancia.huella_sin_confirmo(publicadas, DEL_MOTOR))
+    assert not faltas, faltas
+
+
+def test_ningun_texto_manda_a_una_herramienta_que_no_existe():
+    """Las instrucciones, las descripciones y los recursos solo citan herramientas que este servidor tiene. Lo que
+    caza son los nombres de la tabla que no son herramientas aquí —una operación que se publica con otro nombre, como
+    `revisar` como `validar_comprobantes`—, porque un agente que lee `revisar` lo llama."""
+    publicadas = herramientas_publicadas()
+    textos = {"las instrucciones": mcp.instructions,
+              **{h["name"]: h.get("description") or "" for h in publicadas},
+              **{r["uri"]: r.get("description") or "" for r in recursos_publicados()}}
+    de_la_tabla = {op.nombre for op in api.OPERACIONES}
+    faltas = vigilancia.fantasmas(textos, [h["name"] for h in publicadas], de_la_tabla.__contains__)
+    assert not faltas, faltas
+
+
 # --- lo que el agente ve, congelado ------------------------------------------------
 
 PUBLICADO = Path(__file__).resolve().parent / "fixtures" / "mcp" / "publicado.json"
@@ -789,25 +825,23 @@ def publicado() -> dict:
 
     Hasta ese día faltaban la presentación, los títulos, el esquema de salida y el orden, y eso es justo lo que
     puede moverse en silencio al cambiar de SDK."""
-    herramientas = asyncio.run(mcp.list_tools())
-    recursos = asyncio.run(mcp.list_resources())
     saludo = asyncio.run(_saludo())
-    return {
-        "servidor": {"nombre": saludo["nombre"],
-                     # La versión cambia en cada release, así que no se congela el número sino la regla: que el servidor
-                     # se presente con la de contaperu y no con la del SDK (`test_el_servidor_se_presenta_con_SU_version`).
-                     "version": "la del paquete" if saludo["version"] == contaperu.__version__ else saludo["version"],
-                     "instrucciones": saludo["instrucciones"]},
-        "orden": {"herramientas": [h.name for h in herramientas], "recursos": [str(r.uri) for r in recursos]},
-        "herramientas": {h.name: {"titulo": h.title, "descripcion": h.description, "entrada": h.input_schema,
-                                  "salida": h.output_schema,
-                                  # Por su alias, que es como viaja: en la v2 del SDK los atributos van en snake_case.
-                                  "anotaciones": h.annotations.model_dump(by_alias=True) if h.annotations else None}
-                         for h in herramientas},
-        "recursos": {str(r.uri): {"nombre": r.name, "titulo": r.title, "descripcion": r.description,
-                                  "mime": r.mime_type}
-                     for r in recursos},
-    }
+    # La arma el kit de la base MCP (`agentes.vigilancia.foto`), que es lo que usa cualquier servidor montado encima.
+    return vigilancia.foto(herramientas_publicadas(), recursos_publicados(), servidor={
+        "nombre": saludo["nombre"],
+        # La versión cambia en cada release, así que no se congela el número sino la regla: que el servidor se presente
+        # con la de contaperu y no con la del SDK (`test_el_servidor_se_presenta_con_SU_version`).
+        "version": "la del paquete" if saludo["version"] == contaperu.__version__ else saludo["version"],
+        "instrucciones": saludo["instrucciones"]})
+
+
+def herramientas_publicadas() -> list[dict]:
+    """`tools/list` tal como viaja: en JSON y por su alias, porque en la v2 del SDK los atributos van en snake_case."""
+    return [h.model_dump(by_alias=True, mode="json") for h in asyncio.run(mcp.list_tools())]
+
+
+def recursos_publicados() -> list[dict]:
+    return [r.model_dump(by_alias=True, mode="json") for r in asyncio.run(mcp.list_resources())]
 
 
 def regenerar() -> None:
@@ -837,8 +871,5 @@ def test_lo_que_el_agente_ve_no_cambia_sin_que_se_decida():
     que pasar sin cambiar un byte después de migrar, igual que en la 6.2.0."""
     congelado = json.loads(PUBLICADO.read_text(encoding="utf-8"))
     hoy = publicado()
-    for tipo in ("herramientas", "recursos"):
-        assert set(hoy[tipo]) == set(congelado[tipo]), (
-            f"cambió el conjunto de {tipo}: faltan {sorted(set(congelado[tipo]) - set(hoy[tipo]))}, "
-            f"sobran {sorted(set(hoy[tipo]) - set(congelado[tipo]))}")
-    assert hoy == congelado, "lo que el agente ve cambió; si es a propósito, regenera fixtures/mcp/publicado.json"
+    assert hoy == congelado, ("lo que el agente ve cambió; si es a propósito, regenera fixtures/mcp/publicado.json: "
+                              + " · ".join(vigilancia.diferencias(congelado, hoy)))

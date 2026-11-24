@@ -670,6 +670,14 @@ va. **No importa el SDK ni pydantic** (`tests/test_agentes.py`): la proyección 
 una puerta más, y será lo único que cambie con la versión mayor del SDK. El catálogo de las herramientas del motor,
 `DEL_MOTOR`, se deriva de `api.OPERACIONES` y dice lo mismo que el servidor publica.
 
+**Y lo que un servidor publica se vigila como una API** (`agentes.vigilancia`): un modelo elige por esos textos, un
+cliente guarda esos nombres y lo que pesan sale del contexto de cada conversación. El kit son funciones puras sobre
+`tools/list` tal como viaja, que devuelven la lista de faltas: la foto que se congela (con el orden y los modos), el
+peso con un presupuesto que es un trinquete en los dos sentidos, el tope de la descripción, el número exacto de
+herramientas, nombres que acepte Claude, las anotaciones y los modos que dice el catálogo, la huella con sus dos
+parámetros, las reglas dentro de los 2 048 caracteres que lee el cliente y en la herramienta donde se aplican, y
+los textos que mandan a una herramienta que no existe. El servidor del motor es el primero que lo usa.
+
 ## Lo que no se negocia
 
 1. **Ninguna regla contable sin fuente.** La norma, la resolución o el archivo real que la justifica va

@@ -9,7 +9,8 @@ entonces se congelan con sus firmas, como `contaperu.api`. Lo que no cambia es e
 - la proyección sobre el SDK (`MCPServer`) irá en `contaperu.agentes.servidor`, y será lo único que cambie cuando cambie
   su versión mayor.
 
-El catálogo de las herramientas del motor es `DEL_MOTOR`, derivado de `api.OPERACIONES`.
+El catálogo de las herramientas del motor es `DEL_MOTOR`, derivado de `api.OPERACIONES`. Y el kit de vigilantes de lo
+que un servidor publica —la foto, el peso, los topes, las reglas y los nombres fantasma— es `agentes.vigilancia`.
 """
 from __future__ import annotations
 
