@@ -9,6 +9,22 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 Lo que va camino de la **16.0.0**: el MCP del motor pasa al SDK v2 de Python (`mcp` 2.3) y se convierte en una base
 sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `main` en verde.
 
+**Sale primero como `16.0.0rc1`** (25-nov-2026), la pre-release que toda mayor tiene antes de existir, para que quien
+integra el motor la pruebe en su batería. `contaperu.api` no cambia ni un nombre ni una firma: la superficie congelada
+pasa sin regenerarse. Lo que rompe es el SDK del extra `[mcp]`, y solo a quien lo use.
+
+### Cómo migrar
+
+- **Si solo usas `contaperu.api`, el CLI o la puerta HTTP**: nada. Sin el extra `[mcp]` no se instala el SDK.
+- **Si usas el extra `[mcp]`**: el SDK pasa a la v2. Si tu servidor importaba `from mcp.server.fastmcp import FastMCP`,
+  ahora es `from mcp.server.mcpserver import MCPServer`; las opciones de HTTP van en `run(...)` o en
+  `streamable_http_app(...)` y no en el constructor, y los atributos del SDK van en snake_case. La guía es la del SDK:
+  https://py.sdk.modelcontextprotocol.io/v2/migration/
+- **Si montabas herramientas sobre `servidor_mcp.mcp`**: sigue funcionando, pero lo recomendado es un servidor propio
+  sobre la base (`contaperu.agentes.servidor`), como enseña `INTEGRAR.md`.
+- **Si llamas a `call_tool` desde Python** y esperabas una excepción cuando falta un argumento obligatorio: ahora es un
+  resultado con `is_error`, que es lo que siempre vio un cliente por el protocolo.
+
 ### Rompe
 
 - **El extra `[mcp]` pide `mcp>=2.3,<3`**, el SDK v2 de Python, y ya no la 1.x. La 1.x solo recibe arreglos críticos y
