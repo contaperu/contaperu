@@ -9,13 +9,17 @@ El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del *
 Lo que va camino de la **16.0.0**: el MCP del motor pasa al SDK v2 de Python (`mcp` 2.3) y se convierte en una base
 sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `main` en verde.
 
-**Sale primero como `16.0.0rc1`** (25-nov-2026), la pre-release que toda mayor tiene antes de existir, para que quien
-integra el motor la pruebe en su batería. `contaperu.api` no cambia ni un nombre ni una firma: la superficie congelada
-pasa sin regenerarse. Lo que rompe es el SDK del extra `[mcp]`, y solo a quien lo use.
+**Sale primero como pre-release**, la que toda mayor tiene antes de existir, para que quien integra el motor la
+pruebe en su batería: la `16.0.0rc1` (25-nov-2026) y la `16.0.0rc2` (25-nov-2026), que suma el rango de las tasas de
+detracción y el patrón de la sigla de CONCAR. `contaperu.api` no cambia ni un nombre ni una firma: la superficie
+congelada pasa sin regenerarse. Lo que rompe es el SDK del extra `[mcp]`, a quien lo use, y una configuración con una
+tasa o una sigla fuera de sus reglas, que deja de valer.
 
 ### Cómo migrar
 
-- **Si solo usas `contaperu.api`, el CLI o la puerta HTTP**: nada. Sin el extra `[mcp]` no se instala el SDK.
+- **Si solo usas `contaperu.api`, el CLI o la puerta HTTP**: nada del SDK, que sin el extra `[mcp]` no se instala.
+- **Si guardas configuraciones**: pásales `errores_de_configuracion` antes de actualizar. Una tasa de detracción fuera
+  de 0 a 100, o una sigla de CONCAR de más de dos caracteres o en minúsculas, deja de valer y detiene la exportación.
 - **Si usas el extra `[mcp]`**: el SDK pasa a la v2. Si tu servidor importaba `from mcp.server.fastmcp import FastMCP`,
   ahora es `from mcp.server.mcpserver import MCPServer`; las opciones de HTTP van en `run(...)` o en
   `streamable_http_app(...)` y no en el constructor, y los atributos del SDK van en snake_case. La guía es la del SDK:
