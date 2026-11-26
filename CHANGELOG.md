@@ -4,16 +4,19 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
-## [Sin publicar]
+## [16.0.0] — 2026-11-25
 
-Lo que va camino de la **16.0.0**: el MCP del motor pasa al SDK v2 de Python (`mcp` 2.3) y se convierte en una base
-sobre la que otro servidor monta lo suyo. Se hace por partes, y cada una deja `main` en verde.
+**El MCP del motor pasa al SDK v2 de Python (`mcp` 2.3) y se convierte en una base** sobre la que otro servidor monta
+lo suyo: un catálogo que se proyecta en herramientas, un kit de vigilantes de lo que se publica y un servidor con su
+guarda, sus familias y sus fábricas. Con ella se cumple el B10, los perfiles: qué publica el servidor abierto y qué solo
+un integrador.
 
-**Sale primero como pre-release**, la que toda mayor tiene antes de existir, para que quien integra el motor la
-pruebe en su batería: la `16.0.0rc1` (25-nov-2026) y la `16.0.0rc2` (25-nov-2026), que suma el rango de las tasas de
-detracción y el patrón de la sigla de CONCAR. `contaperu.api` no cambia ni un nombre ni una firma: la superficie
-congelada pasa sin regenerarse. Lo que rompe es el SDK del extra `[mcp]`, a quien lo use, y una configuración con una
-tasa o una sigla fuera de sus reglas, que deja de valer.
+**Salió antes como dos pre-releases**, como toda mayor: la `16.0.0rc1` y la `16.0.0rc2`, que sumó el rango de las tasas
+de detracción y el patrón de la sigla de CONCAR. La aplicación que integra el motor probó la rc2 en su batería con su
+conector ya en la v2, y lo que ese conector declara —títulos, descripciones, esquemas y anotaciones de sus 51
+herramientas— salió idéntico byte a byte. `contaperu.api` no cambia ni un nombre ni una firma: la superficie congelada
+pasa sin regenerarse. Lo que rompe es el SDK del extra `[mcp]`, a quien lo use, y una configuración con una tasa o una
+sigla fuera de sus reglas, que deja de valer.
 
 ### Cómo migrar
 
