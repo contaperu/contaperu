@@ -374,6 +374,11 @@ registrar_del_motor(mio, herramientas=["diagnosticar"], recursos=False)
 print(f"servidor con las tuyas y las del motor: {mio.name}")
 ```
 
+**Si ya escribes tus herramientas a mano**, cada una con su firma y su modelo de salida y con los decoradores del SDK
+(`@mio.tool(...)`), no hace falta pasarlas por `registrar`: después de registrarlas, `mio.declarar(MIO)` pone su
+catálogo bajo la base (16.1). Una herramienta del catálogo que no esté registrada, o que se declare dos veces, es un
+error.
+
 Lo que la base hace por ti en cada llamada, sin que lo escribas:
 
 - **El despacho de `que`**: un modo que no existe, un parámetro de otro modo o el obligatorio que falta se contestan con

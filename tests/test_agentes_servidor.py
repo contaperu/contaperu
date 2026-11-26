@@ -265,3 +265,45 @@ def test_por_el_protocolo_un_rechazo_de_la_guarda_es_un_is_error():
 
     resultado = asyncio.run(por_el_protocolo())
     assert resultado.is_error and json.loads(resultado.content[0].text)["detail"] == "Sin permiso."
+
+
+# --- declarar: el servidor que escribe sus herramientas a mano (16.1) ----------------------------------------------
+
+def a_mano() -> Servidor:
+    """Un servidor que registra sus herramientas con los decoradores del SDK, cada una con su firma, y después declara
+    su catálogo, que es lo que hace el de una aplicación con sus modelos de salida propios."""
+    s = Servidor("a-mano")
+
+    @s.tool(name="informe")
+    def informe(periodo: str, que: str = "resumen") -> dict:
+        return {"que": que, "siguiente": "Para el detalle, `por_cuenta`.", "en_curso": list(en_curso())}
+
+    @s.tool(name="guardar")
+    def guardar_a_mano(nombre: str, confirmo: bool = False, huella: str = "") -> dict:
+        return {"guardado": nombre}
+
+    s.declarar(catalogo())
+    return s
+
+
+def test_lo_declarado_se_traduce_y_sabe_su_modo():
+    respuesta = datos(llamar(a_mano(), "informe", periodo="202611", que="totales"))
+    assert respuesta["siguiente"] == "Para el detalle, `informe` (`que: cuentas`).", "sin declarar no se traducía"
+    assert respuesta["en_curso"] == ["informe", "totales"]
+
+
+def test_lo_declarado_contesta_sus_nombres_retirados():
+    retirada = llamar(a_mano(), "por_cuenta", periodo="202611")
+    assert retirada.is_error and retirada.content[0].text == (
+        "`por_cuenta` ya no es una herramienta: ahora es `informe` con `que: cuentas`.")
+
+
+def test_no_se_declara_lo_que_no_esta_ni_dos_veces():
+    s = Servidor("x")
+    s.tool(name="informe")(resumen)
+    with pytest.raises(CatalogoInvalido, match="`guardar` no está registrada en este servidor"):
+        s.declarar(catalogo())
+    otro = a_mano()
+    with pytest.raises(CatalogoInvalido, match="`informe` ya está declarada"):
+        otro.declarar(catalogo())
+

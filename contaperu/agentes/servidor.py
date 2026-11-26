@@ -11,7 +11,9 @@ Lo que añade al `MCPServer` del SDK, y que todo servidor montado encima necesit
   error dicho con su clave. Y `visibles`, que filtra lo que `tools/list` enseña según quién llama.
 - **`registrar`**, que proyecta un `Catalogo` en herramientas: una función por herramienta, o una `familia` de
   funciones —una por modo— detrás de una sola con `que`. Un nombre repetido es un error (`ChoqueDeNombres`), no el
-  aviso del SDK, que se queda con la primera y tapa la segunda sin que se vea.
+  aviso del SDK, que se queda con la primera y tapa la segunda sin que se vea. Y **`Servidor.declarar`** (16.1), para el
+  servidor que escribe sus herramientas a mano con los decoradores del SDK: pone su catálogo bajo la base sin volver a
+  registrarlas, con la misma traducción, las mismas retiradas y el mismo modo en curso.
 - **`crear_servidor`** y **`registrar_del_motor`**, que publican las herramientas y los recursos del motor en un servidor
   nuevo o en el de otro. Una FÁBRICA, y no una instancia que se modifica: dos servidores no comparten nada.
 - **`servir`**, el arranque por entrada y salida estándar o por HTTP, sin sesiones y con la defensa del `Host`.
@@ -193,6 +195,28 @@ class Servidor(MCPServer):
             raise ChoqueDeNombres(f"Ya hay un recurso `{uri}` en este servidor.")
         super().add_resource(resource)
         self._uris.add(uri)
+
+    def declarar(self, catalogo: Catalogo, *, prefijo: str = "") -> list[str]:
+        """Pone bajo la base las herramientas de `catalogo` que ya están registradas en este servidor (16.1). Desde ahí,
+        lo que contestan cita las operaciones con el nombre de esta puerta, sus nombres retirados contestan dónde están
+        ahora y `en_curso()` dice con qué modo se las llamó. Devuelve los nombres declarados.
+
+        Es para el servidor que escribe sus herramientas a mano, cada una con su firma y su modelo de salida, con los
+        decoradores del SDK (`@servidor.tool(...)`), y no puede pasarlas por `registrar`, que las arma desde funciones y
+        declara las suyas solo. Una herramienta del catálogo que no esté registrada, o que ya esté declarada, es un
+        error: un catálogo que dice más de lo que el servidor sirve, o lo dice dos veces, es un catálogo equivocado.
+        """
+        faltas = [f"`{prefijo}{nombre}` no está registrada en este servidor" for nombre in catalogo.herramientas
+                  if prefijo + nombre not in self._nombres]
+        faltas += [f"`{prefijo}{nombre}` ya está declarada" for nombre in catalogo.herramientas
+                   if prefijo + nombre in self._publicadas]
+        if faltas:
+            raise CatalogoInvalido(faltas)
+        for nombre, h in catalogo.herramientas.items():
+            self._publicadas[prefijo + nombre] = _Publicada(catalogo, h, prefijo)
+        for retirada in catalogo.retiradas.values():
+            self._retiradas.setdefault(prefijo + retirada.nombre, (retirada, prefijo))
+        return [prefijo + nombre for nombre in catalogo.herramientas]
 
     def _visible(self, nombres: list[str]) -> set[str]:
         return set(nombres) if self._visibles is None else set(self._visibles(nombres))
@@ -384,10 +408,8 @@ def registrar(servidor: Servidor, catalogo: Catalogo, funciones: Mapping[str, Ca
         servidor.add_tool(funcion, publicado, title=h.titulo or None,
                           description=catalogo.en_la_puerta(descripcion, prefijo),
                           annotations=ToolAnnotations(**h.anotaciones()))
-        servidor._publicadas[publicado] = _Publicada(catalogo, h, prefijo)
         publicadas.append(publicado)
-    for retirada in catalogo.retiradas.values():
-        servidor._retiradas.setdefault(prefijo + retirada.nombre, (retirada, prefijo))
+    servidor.declarar(catalogo, prefijo=prefijo)
     return publicadas
 
 

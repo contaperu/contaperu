@@ -4,6 +4,22 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [16.1.0] — 2026-11-25
+
+**Lo primero que enseñó adoptar la base MCP.** La aplicación que integra el motor escribe sus 51 herramientas a mano,
+cada una con su firma y su modelo de salida, con los decoradores del SDK. El `Servidor` de la 16.0 solo conocía el
+catálogo de las que se registran con `registrar`, así que a esas no les traducía los nombres de operación ni les
+contestaba los nombres retirados: montar ese conector encima habría perdido las dos cosas.
+
+### Añade
+
+- **`Servidor.declarar(catalogo, prefijo="")`**: pone bajo la base las herramientas de un catálogo que ya están
+  registradas en el servidor. Desde ahí, lo que contestan cita las operaciones con el nombre de esa puerta, sus nombres
+  retirados contestan dónde están ahora y `en_curso()` dice con qué modo se las llamó, igual que con las de `registrar`,
+  que ahora declara las suyas por el mismo camino. Una herramienta del catálogo que no esté registrada, o que ya esté
+  declarada, es un `CatalogoInvalido`. La base sigue siendo provisional: esto es lo que la 16.0 prometía, corregir lo
+  que la adopción enseñe sin esperar a la 17.0.
+
 ## [16.0.0] — 2026-11-25
 
 **El MCP del motor pasa al SDK v2 de Python (`mcp` 2.3) y se convierte en una base** sobre la que otro servidor monta
