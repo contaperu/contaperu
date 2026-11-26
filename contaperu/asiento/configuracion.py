@@ -50,6 +50,8 @@ CONFIGURACION_DEL_ASIENTO: tuple[Campo, ...] = (
                 "entra y el comprobante queda registrado como otra cosa. Un tipo sin sigla sí detiene la "
                 "exportación.",
           valores=Campo("", "objeto", grupo="tipos", campos=(
+              # Sin patrón aquí, a propósito (16.0.0): el largo de la sigla lo pone la tabla de documentos de cada
+              # sistema, y lo declara su driver —CONCAR, el de su T.G. 06—. STARSOFT no tiene uno documentado.
               Campo("sigla", "texto", titulo="Sigla", grupo="tipos"),
               Campo("sub_diario", "texto", titulo="Sub-diario propio", grupo="tipos", patron=_SUB_DIARIO)))),
     # Los sub-diarios se gobiernan POR USO (29-ago-2026): ventas → detracción → registro propio del tipo → compras.

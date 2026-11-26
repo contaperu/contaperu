@@ -362,3 +362,56 @@ def test_no_sale_por_http_ni_por_mcp_a_proposito():
 
     assert "config_aplicada" in api.__all__
     assert "config_aplicada" not in {o.nombre for o in api.OPERACIONES}
+
+
+# ── Los límites de un número, declarados (16.0.0) ─────────────────────────────────────────────────────────────────────
+# Una declaración aparte para no mover las listas de `CAMPOS`, que otras pruebas comparan enteras.
+CON_LIMITES = (
+    Campo("porcentaje", "numero", minimo=0, maximo=100),
+    Campo("desde_uno", "numero", minimo=1),
+    Campo("tasas", "mapa", {}, claves=r"^[0-9]{3}$", valores=Campo("", "numero", admite_nulo=True, minimo=0, maximo=100)),
+)
+
+
+def test_un_numero_fuera_de_sus_limites_se_dice_con_los_dos_y_los_extremos_valen():
+    assert validar({"porcentaje": 0, "desde_uno": 1, "tasas": {"037": 100, "030": None, "027": 12.5}}, CON_LIMITES) == []
+    assert validar({"porcentaje": 100.5, "desde_uno": 0, "tasas": {"037": -1}}, CON_LIMITES) == [
+        "`porcentaje`: el número 100.5 no está entre 0 y 100",
+        "`desde_uno`: el número 0 no está entre 1 y sin límite",
+        "`tasas.037`: el número -1 no está entre 0 y 100"]
+
+
+def test_describir_dice_los_limites_y_calla_los_que_no_hay():
+    campos = describir(CON_LIMITES)["campos"]
+    assert (campos[0]["minimo"], campos[0]["maximo"]) == (0, 100)
+    assert campos[1]["minimo"] == 1 and "maximo" not in campos[1]
+    assert campos[2]["valores"]["maximo"] == 100
+    assert "minimo" not in describir(CAMPOS)["campos"][3]["valores"], "sin límite declarado, no se inventa uno"
+
+
+def test_la_tasa_de_una_detraccion_es_un_porcentaje_y_la_sigla_de_un_tipo_la_de_su_sistema():
+    """Las dos reglas que cada pantalla escribía a su manera (16.0.0): ahora las declara el motor, y una aplicación
+    las lee de `describir_configuracion` en vez de copiarlas. La de la sigla, la de CONCAR: STARSOFT no tiene un largo
+    documentado, y su propia prueba escribe un «GRT»."""
+    from contaperu import api
+
+    descripcion = api.describir_configuracion(driver="concar")
+    tasas = next(c for c in descripcion["general"]["campos"] if c["clave"] == "detraccion_tasas")
+    assert (tasas["valores"]["minimo"], tasas["valores"]["maximo"]) == (0, 100)
+    tipos = next(c for c in descripcion["campos"] if c["clave"] == "tipos")
+    sigla = next(c for c in tipos["valores"]["campos"] if c["clave"] == "sigla")
+    assert sigla["patron"] == "^([A-Z0-9]{1,2})?$"
+
+    assert api.errores_de_configuracion({"detraccion_tasas": {"027": 120},
+                                         "concar": {"tipos": {"54": {"sigla": "lc"}, "13": {"sigla": "OTR"}}}}) == [
+        "`detraccion_tasas.027`: el número 120 no está entre 0 y 100",
+        '`concar.tipos.54.sigla`: el texto "lc" no cumple el patrón ^([A-Z0-9]{1,2})?$',
+        '`concar.tipos.13.sigla`: el texto "OTR" no cumple el patrón ^([A-Z0-9]{1,2})?$']
+    # Vacía es «sin sigla»: en CONCAR la detiene la exportación con su motivo, no la configuración.
+    assert api.errores_de_configuracion({"concar": {"tipos": {"01": {"sigla": ""}}}}) == []
+    # Y en STARSOFT no hay largo que exigir.
+    tipos_de_starsoft = next(c for c in api.describir_configuracion(driver="starsoft")["campos"] if c["clave"] == "tipos")
+    assert "patron" not in next(c for c in tipos_de_starsoft["valores"]["campos"] if c["clave"] == "sigla")
+    assert api.errores_de_configuracion({"starsoft": {"tipos": {"31": {"sigla": "GRT"}}}}) == []
+    # Las siglas de fábrica de cada sistema cumplen la suya: si una no, el sistema nacería con la configuración inválida.
+    assert api.errores_de_configuracion(api.configuracion_por_defecto()) == []

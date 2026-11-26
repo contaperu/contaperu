@@ -93,12 +93,28 @@ TIPOS = {"01": {"sigla": "FT"}, "02": {"sigla": "RH", "sub_diario": "15"},
 # (`test_asiento_concar.py::test_concar_solo_difiere_de_la_tabla_general_en_la_nota_de_credito`), para que no se
 # separen en silencio el día que una de ellas cambie.
 
+# La sigla de un tipo en CONCAR (16.0.0): la de su T.G. 06, una o dos letras o números en mayúsculas, como las siglas
+# sueltas de abajo —la de la detracción y la del banco—. Era la única sin patrón, y cada pantalla escribía el suyo; una
+# de ellas exigía los dos caracteres a cualquier sistema, también a STARSOFT, que no tiene un largo documentado.
+# **Vacía vale**, como un sub-diario o una cuenta vacíos: es «este tipo no tiene sigla», y eso lo detiene la
+# exportación con su motivo (`tipos_sin_sigla`), no la configuración.
+SIGLA_DEL_TIPO = r"^([A-Z0-9]{1,2})?$"
+
+
+def _tipos_de_concar(campo: Campo) -> Campo:
+    """`tipos` del asiento con las siglas de CONCAR de fábrica y el patrón de su T.G. 06 en la sigla."""
+    if campo.valores is None:
+        return replace(campo, por_defecto=TIPOS)
+    campos = tuple(replace(c, patron=SIGLA_DEL_TIPO) if c.clave == "sigla" else c for c in campo.valores.campos)
+    return replace(campo, por_defecto=TIPOS, valores=replace(campo.valores, campos=campos))
+
+
 # Lo que se configura en la sección `concar`: lo que el núcleo lee al armar el asiento, y lo propio de este formato.
 CONFIGURACION = (
     # Se cambia el valor por defecto del campo que el asiento ya declara, y no se declara otro: la clave sigue siendo
     # `tipos` y el núcleo la lee de ahí. Es el patrón de `drivers/starsoft/datos.py`, cuyo comentario lo explica —
-    # declarar una clave propia sería tener el mismo dato dos veces.
-    *(replace(campo, por_defecto=TIPOS) if campo.clave == "tipos" else campo
+    # declarar una clave propia sería tener el mismo dato dos veces. Lo mismo con el patrón de la sigla (16.0.0).
+    *(_tipos_de_concar(campo) if campo.clave == "tipos" else campo
       for campo in CONFIGURACION_DEL_ASIENTO),
     # Columna E, el código de la T.G. 03. CONCAR solo admite MN y US (rechaza ME): otra moneda detiene la exportación.
     Campo("monedas_codigo", "objeto", titulo="Monedas", grupo="monedas", campos=(

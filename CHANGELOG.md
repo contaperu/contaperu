@@ -35,6 +35,10 @@ pasa sin regenerarse. Lo que rompe es el SDK del extra `[mcp]`, y solo a quien l
   añadía herramientas con `@mcp.tool()`, como enseñaba `INTEGRAR.md`, sigue pudiendo. Lo que cambia es lo del SDK:
   los atributos van en snake_case (`input_schema`, `is_error`, `mime_type`) y `call_tool` devuelve siempre un
   `CallToolResult`.
+- **Una configuración con una tasa de detracción fuera de 0 a 100, o con una sigla de CONCAR de más de dos caracteres
+  o en minúsculas, deja de valer.** `errores_de_configuracion` la dice con su ruta y `ConfiguracionInvalida` detiene la
+  exportación; antes salía al archivo tal cual. Si guardas configuraciones, pásales `errores_de_configuracion` antes
+  de actualizar.
 
 ### Añade
 
@@ -79,6 +83,13 @@ pasa sin regenerarse. Lo que rompe es el SDK del extra `[mcp]`, y solo a quien l
   cliente enseña en pantalla en vez del nombre, y va en el `title` de la herramienta y en el de sus anotaciones. No
   pesa en el contexto. **Es lo único que cambió de lo que publica el servidor**: `publicado.json` se regeneró a
   propósito, y su diff son los 18 títulos en sus dos sitios.
+- **Los límites de un número, y la sigla de CONCAR con su patrón.** `Campo` gana `minimo` y `maximo`, los dos
+  incluidos, que `describir` publica y `validar` hace cumplir. La tasa de cada detracción (`detraccion_tasas`) los
+  declara: de 0 a 100. Y la sigla de cada tipo en CONCAR declara el patrón de su T.G. 06 —una o dos letras o números en
+  mayúsculas, o vacía, que es «sin sigla»—, el mismo que ya tenían la de la detracción y la del banco; en el núcleo y
+  en STARSOFT no se pone, porque STARSOFT no tiene un largo documentado y su propia prueba escribe un «GRT». Son dos
+  reglas que una aplicación escribía en su pantalla, y la que lo hacía las tenía dos veces sin que coincidieran en si
+  el 0 valía: ahora las lee de `describir_configuracion`.
 
 ### Cambia
 

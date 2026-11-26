@@ -41,9 +41,14 @@ class Campo:
     """Una clave de la configuración.
 
     `tipo` es `texto`, `booleano`, `numero`, `lista`, `mapa` (claves libres que cumplen `claves`, cada valor como
-    `valores`) u `objeto` (solo las claves de `campos`). `patron` es la expresión regular que un texto cumple entero.
-    `por_defecto` en None deja la clave fuera de los valores por defecto; en un objeto, sus `campos` los arman.
-    `titulo`, `ayuda` y `grupo` son para la pantalla de quien la edita."""
+    `valores`) u `objeto` (solo las claves de `campos`). `patron` es la expresión regular que un texto cumple entero, y
+    `minimo` y `maximo` los límites de un número, los dos incluidos. `por_defecto` en None deja la clave fuera de los
+    valores por defecto; en un objeto, sus `campos` los arman. `titulo`, `ayuda` y `grupo` son para la pantalla de quien
+    la edita.
+
+    Un límite se declara aquí y no en quien la pinta (16.0.0): una aplicación que valida antes de guardar —para decirlo
+    en su campo y no al exportar— lo lee de `describir`. Antes la tasa de una detracción no declaraba su rango y cada
+    pantalla escribía el suyo, y dos de la misma aplicación ya no coincidían en si el 0 valía."""
     clave: str
     tipo: str
     por_defecto: Any = None
@@ -55,6 +60,8 @@ class Campo:
     campos: tuple[Campo, ...] = ()
     claves: str = ""
     valores: Campo | None = None
+    minimo: float | None = None
+    maximo: float | None = None
 
 
 @dataclass(frozen=True)
@@ -99,6 +106,13 @@ def _como_llego(valor: Any) -> str:
     return type(valor).__name__
 
 
+def _limite(limite: float | None) -> str:
+    """Un límite como se lee: «0» y no «0.0», y sin él, que no lo hay."""
+    if limite is None:
+        return "sin límite"
+    return str(int(limite)) if float(limite).is_integer() else str(limite)
+
+
 def _ruta(donde: str, clave: str) -> str:
     return f"{donde}.{clave}" if donde else clave
 
@@ -122,6 +136,9 @@ def _errores_del_valor(valor: Any, campo: Campo, donde: str) -> list[str]:
         return [f"`{donde}`: se esperaba {_ESPERADO[campo.tipo]} y llegó {_como_llego(valor)}"]
     if campo.tipo == "texto" and campo.patron and not re.fullmatch(campo.patron, valor):
         return [f"`{donde}`: {_como_llego(valor)} no cumple el patrón {campo.patron}"]
+    if campo.tipo == "numero" and ((campo.minimo is not None and valor < campo.minimo)
+                                   or (campo.maximo is not None and valor > campo.maximo)):
+        return [f"`{donde}`: {_como_llego(valor)} no está entre {_limite(campo.minimo)} y {_limite(campo.maximo)}"]
     errores: list[str] = []
     if campo.tipo == "lista" and campo.valores is not None:
         for i, item in enumerate(valor):
@@ -218,6 +235,10 @@ def _describir_campo(campo: Campo) -> dict:
         descripcion["patron"] = campo.patron
     if campo.admite_nulo:
         descripcion["admite_nulo"] = True
+    if campo.minimo is not None:
+        descripcion["minimo"] = campo.minimo
+    if campo.maximo is not None:
+        descripcion["maximo"] = campo.maximo
     if campo.campos:
         descripcion["campos"] = [_describir_campo(c) for c in campo.campos]
     if campo.claves:
@@ -375,7 +396,8 @@ CONFIGURACION_GENERAL: tuple[Campo, ...] = (
           ayuda="El número con el que sale una detracción cuyo depósito todavía no tiene constancia."),
     Campo("detraccion_tasas", "mapa", {}, titulo="Tasa de cada detracción", grupo="detracciones", claves=r"^[0-9]{3}$",
           ayuda="Sobreescribe la tasa de la tabla del motor para un código, o suma uno que no esté (null: sin tasa).",
-          valores=Campo("", "numero", grupo="detracciones", admite_nulo=True)),
+          # Un porcentaje, del 0 al 100 (16.0.0): lo declara el motor para que quien la edite lo diga en su campo.
+          valores=Campo("", "numero", grupo="detracciones", admite_nulo=True, minimo=0, maximo=100)),
     # El nombre de un código que ya está en la tabla, si el ERP lo quiere decir de otra forma. El de un código que no
     # está no lo suma: para sumarlo se le da su tasa arriba.
     Campo("detraccion_nombres", "mapa", {}, titulo="Nombre de cada detracción", grupo="detracciones",
