@@ -86,6 +86,34 @@ def test_lo_que_anuncia_el_servidor_es_lo_del_catalogo():
     assert vigilancia.anotaciones_distintas(con_prefijo, CATALOGO, prefijo="p_") == []
 
 
+TITULADO = Catalogo([Ficha("informe", "informe", modo="resumen"), Ficha("por_cuenta", "informe", modo="cuentas"),
+                     Ficha("guardar", "guardar", riesgo=ESCRIBE)], titulos={"informe": "Un informe del mes"})
+
+
+def test_el_titulo_va_en_la_herramienta_y_no_hace_falta_en_las_anotaciones():
+    """Un servidor que pone el título en la herramienta y no en sus anotaciones —lo que el protocolo pide— no tiene
+    pistas distintas de su riesgo (16.2: hasta entonces se marcaba entero)."""
+    en_la_herramienta = [{**herramienta("informe", que=QUE), "title": "Un informe del mes",
+                          "annotations": {"readOnlyHint": True, "openWorldHint": False}}]
+    assert vigilancia.anotaciones_distintas(en_la_herramienta, TITULADO) == []
+    assert vigilancia.titulos_distintos(en_la_herramienta, TITULADO) == []
+    repetido = [{**en_la_herramienta[0], "annotations": {**en_la_herramienta[0]["annotations"],
+                                                          "title": "Un informe del mes"}}]
+    assert vigilancia.titulos_distintos(repetido, TITULADO) == [], "repetirlo en las anotaciones también vale"
+
+
+def test_un_titulo_que_no_es_el_del_catalogo_se_dice():
+    otro = [{**herramienta("informe", que=QUE), "title": "Informes"}]
+    assert vigilancia.titulos_distintos(otro, TITULADO) == [
+        "`informe` se titula «Informes» y el catálogo dice «Un informe del mes»"]
+    mal_repetido = [{**herramienta("informe", que=QUE), "title": "Un informe del mes",
+                     "annotations": {"readOnlyHint": True, "title": "Otro"}}]
+    assert vigilancia.titulos_distintos(mal_repetido, TITULADO) == [
+        "`informe` repite en sus anotaciones el título «Otro», que no es el suyo"]
+    sin_titulo = [{**herramienta("guardar", confirmo={}, huella={}), "title": "Guardar"}]
+    assert vigilancia.titulos_distintos(sin_titulo, TITULADO), "un catálogo sin título espera que no haya ninguno"
+
+
 def test_que_ofrece_los_modos_del_catalogo_y_nada_mas():
     assert vigilancia.que_distinto_de_la_tabla(BUENAS, CATALOGO) == []
     otro_orden = [herramienta("informe", que={"type": "string", "enum": ["cuentas", "resumen"]})]

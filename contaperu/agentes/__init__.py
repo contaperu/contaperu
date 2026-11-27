@@ -1,7 +1,8 @@
 """La base para publicar el motor —y lo de quien lo integra— como herramientas para un agente de IA.
 
-**Provisional en la 16.0**: sus nombres pueden cambiar en una 16.x hasta que la adopte su primer integrador, y
-entonces se congelan con sus firmas, como `contaperu.api`. Lo que no cambia es el reparto:
+**Congelada desde la 16.2** con sus firmas, como `contaperu.api`: sus nombres no cambian hasta la 17.0. Nació
+provisional en la 16.0 y se congeló cuando su primer integrador la había adoptado entera, con lo que esa adopción
+enseñó ya dentro (`Servidor.declarar`, los títulos aparte de las pistas). El reparto:
 
 - `contaperu.agentes` no importa el SDK del protocolo ni pydantic: es el catálogo —qué operación va en qué
   herramienta, con qué modo, qué arriesga, a quién se publica y qué nombre se retiró—, el despacho de los modos, la

@@ -21,9 +21,10 @@ from typing import Any, Callable, Iterable, Mapping, Sequence
 
 from .catalogo import Catalogo, nombre_valido
 
-__all__ = ["RECORTE_DEL_CLIENTE", "anotaciones_distintas", "descripciones_largas", "diferencias", "fantasmas", "foto",
-           "fuera_de_presupuesto", "huella_sin_confirmo", "lo_que_lee_el_cliente", "nombres_invalidos",
-           "numero_distinto", "peso", "que_distinto_de_la_tabla", "reglas_ausentes", "reglas_cortadas"]
+__all__ = ["PISTAS", "RECORTE_DEL_CLIENTE", "anotaciones_distintas", "descripciones_largas", "diferencias", "fantasmas",
+           "foto", "fuera_de_presupuesto", "huella_sin_confirmo", "lo_que_lee_el_cliente", "nombres_invalidos",
+           "numero_distinto", "peso", "que_distinto_de_la_tabla", "reglas_ausentes", "reglas_cortadas",
+           "titulos_distintos"]
 
 Herramientas = Sequence[Mapping[str, Any]]
 
@@ -100,14 +101,16 @@ def peso(herramienta: Mapping[str, Any]) -> int:
 
 
 def fuera_de_presupuesto(herramientas: Herramientas, presupuesto: Mapping[str, int],
-                         grupo_de: Mapping[str, str] | Callable[[str], str] = lambda _: "",
+                         grupo_de: Mapping[str, str] | Callable[[str], str] | None = None,
                          holgura: int = 1000) -> list[str]:
     """Cada grupo dentro de su presupuesto, y no muy por debajo: **un trinquete en los dos sentidos**. Lo que crece sin
     que nadie lo vea es lo que se quiere evitar, y un presupuesto que se quedó alto deja crecer sin que se vea.
 
-    `grupo_de` dice el grupo de cada herramienta por su nombre; por defecto todas van en uno, el `""`.
+    `grupo_de` dice el grupo de cada herramienta por su nombre; sin él, todas van en uno, el `""`. (Su valor por defecto
+    era una `lambda` hasta la 16.2, y una firma que lleva una dirección de memoria no se puede congelar.)
     """
-    de = grupo_de.get if isinstance(grupo_de, Mapping) else grupo_de
+    de: Callable[[str], str | None] = ((lambda _: "") if grupo_de is None
+                                       else grupo_de.get if isinstance(grupo_de, Mapping) else grupo_de)
     por_grupo: dict[str, list[tuple[int, str]]] = {}
     for h in herramientas:
         por_grupo.setdefault(de(h["name"]) or "", []).append((peso(h), h["name"]))
@@ -157,19 +160,44 @@ def _modos(herramienta: Mapping[str, Any]) -> list[str] | None:
     return list(rama.get("enum") or [])
 
 
+# Las pistas del protocolo que salen del riesgo. El título no está aquí: es de la herramienta, y sus anotaciones pueden
+# repetirlo o no —el servidor del motor lo repite, otros no—, así que lo mira `titulos_distintos` (16.2).
+PISTAS = ("readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint")
+
+
 def anotaciones_distintas(herramientas: Herramientas, catalogo: Catalogo, prefijo: str = "") -> list[str]:
-    """Las anotaciones de cada herramienta son las que dice su riesgo en el catálogo. Una clave que el servidor no
-    manda vale lo mismo que `null`: así sirve igual con lo que da el SDK que con lo que viaja por el cable."""
+    """Las pistas de cada herramienta (`PISTAS`) son las que dice su riesgo en el catálogo. Una clave que el servidor no
+    manda vale lo mismo que `null`: así sirve igual con lo que da el SDK que con lo que viaja por el cable.
+
+    Hasta la 16.1 comparaba también el título dentro de las anotaciones, y marcaba entero a un servidor que lo pone en
+    la herramienta y no ahí, que es lo que el protocolo pide: lo vio el primero que la adoptó, con sus 51 herramientas."""
     faltas = []
     for h in herramientas:
         declarada = catalogo.herramientas.get(h["name"].removeprefix(prefijo))
         if declarada is None:
             faltas.append(f"`{h['name']}` no está en el catálogo")
             continue
-        esperadas, vivas = declarada.anotaciones(), h.get("annotations") or {}
-        distintas = sorted(k for k in set(esperadas) | set(vivas) if esperadas.get(k) != vivas.get(k))
+        esperadas, vivas = declarada.riesgo.anotaciones(), h.get("annotations") or {}
+        distintas = [k for k in PISTAS if esperadas.get(k) != vivas.get(k)]
         if distintas:
             faltas.append(f"`{h['name']}` anuncia {', '.join(distintas)} distinto de su riesgo")
+    return faltas
+
+
+def titulos_distintos(herramientas: Herramientas, catalogo: Catalogo, prefijo: str = "") -> list[str]:
+    """El título de cada herramienta es el del catálogo, y si sus anotaciones lo repiten, dicen el mismo (16.2). Un
+    catálogo sin título espera que no haya ninguno."""
+    faltas = []
+    for h in herramientas:
+        declarada = catalogo.herramientas.get(h["name"].removeprefix(prefijo))
+        if declarada is None:
+            continue
+        esperado = declarada.titulo or None
+        if h.get("title") != esperado:
+            faltas.append(f"`{h['name']}` se titula «{h.get('title')}» y el catálogo dice «{esperado}»")
+        anotado = (h.get("annotations") or {}).get("title")
+        if anotado is not None and anotado != esperado:
+            faltas.append(f"`{h['name']}` repite en sus anotaciones el título «{anotado}», que no es el suyo")
     return faltas
 
 

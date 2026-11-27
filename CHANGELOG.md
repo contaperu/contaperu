@@ -4,6 +4,27 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 El versionado del **paquete** es [SemVer](https://semver.org/lang/es/); el del **estándar
 `open-accounting`** (antes `pe-ledger`) va por su cuenta y se documenta en `estandar/LEEME.md`.
 
+## [16.2.0] — 2026-11-26
+
+**La base MCP se congela.** Su primer integrador la adoptó entera —su conector de 51 herramientas corre sobre el
+`Servidor` de la base, con su catálogo y con los vigilantes del kit en sus pruebas— y lo que esa adopción enseñó ya
+está dentro. Desde esta versión `contaperu.agentes`, `contaperu.agentes.servidor` y `contaperu.agentes.vigilancia`
+prometen lo que `contaperu.api`: sus nombres y sus firmas no cambian hasta la 17.0, y la superficie congelada los
+fija.
+
+### Cambia
+
+- **`vigilancia.anotaciones_distintas` mira solo las pistas** (`PISTAS`: solo lectura, destructivo, idempotente, sale
+  a la red). Comparaba también el título dentro de las anotaciones, y marcaba entero a un servidor que lo pone en la
+  herramienta y no ahí, que es lo que pide el protocolo: lo vio el integrador al adoptar el kit, con sus 51.
+- **`vigilancia.fuera_de_presupuesto`** toma `grupo_de=None` en vez de una `lambda` por defecto, que dejaba en su firma
+  una dirección de memoria distinta en cada ejecución: una firma así no se puede congelar.
+
+### Añade
+
+- **`vigilancia.titulos_distintos`**: el título de cada herramienta es el del catálogo, y si sus anotaciones lo repiten,
+  dicen el mismo. El servidor del motor, que lo pone en los dos sitios, lo pasa.
+
 ## [16.1.0] — 2026-11-25
 
 **Lo primero que enseñó adoptar la base MCP.** La aplicación que integra el motor escribe sus 51 herramientas a mano,

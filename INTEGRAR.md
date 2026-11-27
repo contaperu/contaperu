@@ -318,8 +318,7 @@ total cuadraba con su propia tabla. (Desde la 15.3.0 la lista es `("07", "87", "
 Dos formas de combinarlas, y la primera no cuesta nada:
 
 1. **Dos servidores.** Un cliente MCP se conecta a varios: el tuyo y `contaperu-mcp` al lado. Cero trabajo.
-2. **Uno solo, sobre la base MCP** (`contaperu.agentes`, desde la 16.0 y provisional hasta que la adopte su primer
-   integrador). Declaras tus operaciones en un catálogo —en qué herramienta va cada una, con qué modo y qué arriesga—,
+2. **Uno solo, sobre la base MCP** (`contaperu.agentes`, desde la 16.0, y congelada con sus firmas desde la 16.2). Declaras tus operaciones en un catálogo —en qué herramienta va cada una, con qué modo y qué arriesga—,
    las registras en un `Servidor`, y le sumas las del motor con su prefijo:
 
 ```python
@@ -987,6 +986,9 @@ seguridad llegan solo a la última versión publicada (`SECURITY.md`).
 
 - **`contaperu.api` no cambia de nombre ni de firma** hasta la 17.0 (`tests/test_superficie_publica.py`). Pueden llegar
   parámetros opcionales, claves nuevas en las respuestas y anotaciones `_*`; nunca irse.
+- **Y la base MCP tampoco** desde la 16.2: `contaperu.agentes`, `contaperu.agentes.servidor` y
+  `contaperu.agentes.vigilancia` se congelan igual, con sus firmas. Lo que montes encima —tu catálogo, tu `Servidor`,
+  los vigilantes de tus pruebas— no se te rompe dentro de la 16.x.
 - **Un nombre que cambia sigue resolviendo durante toda la 16.x**, y avisa con `contaperu.RutaObsoleta` diciendo
   cuál usar, hasta la 17.0 (`_obsoleto.RETIRO`). Ahora mismo no hay ninguno, y conviene saber por qué: la 7.0
   cumplió los seis que avisaban y de la 8.0, la 9.0, la 10.0 y la 12.0 no salió ninguno nuevo. La 9.0 rompió **sin** pasar

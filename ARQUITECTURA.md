@@ -448,7 +448,7 @@ Desde la 1.0 el motor se ordena en capas, y cada una solo importa de las de abaj
 | drivers | `drivers/` (`contrato/` —su taxonomía, sus protocolos, sus accesores y su examen—, `kit`, cada driver) | el formato de un destino, nada de contabilidad |
 | pipeline | `pipeline/` (`preparacion/` —el documento, la configuración, las entradas y los pasos de un mes—, `lectura`, `seleccion`, `armado`, `salida`, `diagnostico`) | cómo se prepara y se orquesta un mes, escrito una vez |
 | api | `api/` (`operaciones`, `tabla`, `documento`, `errores`, `openconta`, `esquemas/`) | lo que una aplicación usa; cada nombre con su firma, congelados |
-| agentes | `agentes/` (`catalogo`, `despacho`, `del_motor`), provisional desde la 16.0 | qué operación va en qué herramienta, con qué modo, qué arriesga y a quién se publica; sin el SDK del protocolo |
+| agentes | `agentes/` (`catalogo`, `despacho`, `del_motor`, `vigilancia`), congelada con sus firmas desde la 16.2 | qué operación va en qué herramienta, con qué modo, qué arriesga y a quién se publica; sin el SDK del protocolo |
 | puertas | `puertas/` (`cli`, `servidor_mcp`, `servidor_http`, `comun`) | un protocolo; solo hablan con la api y con la base MCP |
 
 - **El pipeline** es el único dueño de la preparación: del documento al libro y los comprobantes, la configuración
@@ -650,7 +650,7 @@ peruanas.
 Esa es la forma en que crecerá esta capa: **cada pregunta de un agente se responde con reglas que ya
 tienen fuente**, nunca con una regla nueva escrita para el agente.
 
-### La base MCP: un catálogo que se proyecta (16.0, provisional)
+### La base MCP: un catálogo que se proyecta (16.0, congelada desde la 16.2)
 
 Hasta la 15.x el servidor MCP derivaba una herramienta por operación de la tabla, en una instancia única, y quien
 quería montar las suyas encima tenía que modificar esa instancia. Los servidores grandes convergen en otra forma: un

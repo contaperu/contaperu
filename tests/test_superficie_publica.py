@@ -7,9 +7,12 @@ Dos niveles (ver `contaperu/api/__init__.py`):
   doble, el PCGE, los lectores, el registro y el contrato de drivers, y cada driver de serie. De estos se congelan los
   nombres: su `__all__` si lo declaran, y si no, los nombres públicos que son del paquete.
 
-`pipeline`, `puertas` y `_datos` son internos y no entran. **`agentes`, la base MCP, tampoco todavía**: es pública pero
-provisional en la 16.0, y entra con sus firmas en una 16.x, cuando la haya adoptado su primer integrador
-(`PROVISIONALES`).
+`pipeline`, `puertas` y `_datos` son internos y no entran.
+
+- **Y la base MCP, `contaperu.agentes`**, con sus firmas como la api (`CON_FIRMAS`). Nació provisional en la 16.0 y se
+  congeló en la **16.2**, cuando su primer integrador la había adoptado entera: su catálogo, su servidor y su kit de
+  vigilantes. Lo que esa adopción enseñó —`Servidor.declarar` y los títulos aparte de las pistas— entró antes de
+  congelar. Un módulo nuevo que nazca provisional va en `PROVISIONALES`.
 
 **El archivo sigue llamándose `1.0.json` después de la 2.0, y a propósito.** La 2.0 retiró la compatibilidad con la
 0.x —cinco módulos que solo redirigían y su copia en `_compat`— sin tocar ni un nombre de esta superficie: que este
@@ -72,7 +75,9 @@ EXTENSION = (
 )
 # Lo público que aún no se promete: se usa, pero sus nombres pueden cambiar en una menor. Que no esté en la superficie
 # es una decisión escrita, no un olvido, y el test de abajo obliga a sacarlo de aquí al congelarlo.
-PROVISIONALES = ("contaperu.agentes", "contaperu.agentes.vigilancia", "contaperu.agentes.servidor")
+# La base MCP, congelada con sus firmas desde la 16.2, como `contaperu.api`: lo que un servidor montado encima usa.
+CON_FIRMAS = ("contaperu.agentes", "contaperu.agentes.vigilancia", "contaperu.agentes.servidor")
+PROVISIONALES: tuple[str, ...] = ()
 TIPOS_DE_CONSTANTE = {"builtins", "decimal", "datetime"}
 
 
@@ -109,6 +114,9 @@ def _firma(valor) -> str:
 def superficie() -> dict[str, dict[str, str]]:
     api = importlib.import_module(APLICACION)
     salida = {APLICACION: {nombre: _firma(getattr(api, nombre)) for nombre in sorted(api.__all__)}}
+    for nombre_modulo in CON_FIRMAS:
+        modulo = importlib.import_module(nombre_modulo)
+        salida[nombre_modulo] = {nombre: _firma(getattr(modulo, nombre)) for nombre in sorted(modulo.__all__)}
     for nombre_modulo in EXTENSION:
         modulo = importlib.import_module(nombre_modulo)
         salida[nombre_modulo] = {nombre: "" for nombre in _nombres(modulo)}
@@ -149,3 +157,13 @@ def test_lo_provisional_no_esta_congelado_y_declara_lo_que_ofrece():
         assert modulo.__all__, f"{nombre_modulo} no dice qué ofrece"
         faltan = [n for n in modulo.__all__ if not hasattr(modulo, n)]
         assert not faltan, f"{nombre_modulo} anuncia lo que no tiene: {faltan}"
+
+
+def test_la_base_mcp_esta_congelada_con_sus_firmas():
+    """Desde la 16.2 la base MCP promete lo que `contaperu.api`: sus nombres y sus firmas no cambian hasta la 17.0."""
+    congelado = json.loads(SUPERFICIE.read_text(encoding="utf-8"))
+    for nombre_modulo in CON_FIRMAS:
+        assert nombre_modulo in congelado and nombre_modulo not in PROVISIONALES, nombre_modulo
+        modulo = importlib.import_module(nombre_modulo)
+        assert set(congelado[nombre_modulo]) == set(modulo.__all__), f"{nombre_modulo}: lo congelado no es su __all__"
+    assert congelado["contaperu.agentes.servidor"]["crear_servidor"].startswith("función("), "con su firma"

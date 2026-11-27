@@ -781,6 +781,7 @@ def test_los_nombres_valen_para_claude_y_son_los_del_catalogo():
     publicadas = herramientas_publicadas()
     faltas = (vigilancia.nombres_invalidos(publicadas) + vigilancia.numero_distinto(publicadas, 18)
               + vigilancia.anotaciones_distintas(publicadas, DEL_MOTOR)
+              + vigilancia.titulos_distintos(publicadas, DEL_MOTOR)
               + vigilancia.que_distinto_de_la_tabla(publicadas, DEL_MOTOR)
               + vigilancia.huella_sin_confirmo(publicadas, DEL_MOTOR))
     assert not faltas, faltas
